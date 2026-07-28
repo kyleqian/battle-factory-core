@@ -15,6 +15,75 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 530 — [BOUNDED WORKER 2026-07-27 ~20:20] Three single-opcode census rows registered; +5 effects/+5 moves/+47 weighted (matches assigned prediction exactly)
+
+- **State:** tree green at **282 files / 3745 tests** (279/3704 → +3 files /
+  +41 tests: new `battleScriptRecoverbasedonsunlightOpcode.test.ts` (12),
+  `battleScriptJumpifnotfirstturnOpcode.test.ts` (6),
+  `battleScriptJumpifabilitypresentOpcode.test.ts` (11), plus pin updates in
+  `battleScriptJumpifhalfwordOpcode.test.ts` and `battleScriptRulesContext.test.ts`
+  for the 3 new opcode ids), `npm run build` clean. Census regenerated:
+  **126/214 effects, 249/355 moves, 201/276 Factory-L50 unweighted, 2548/2957
+  weighted (86.2%)** — up from 121/214/244/197/2501. **Actual flip matches
+  the assigned brief's predicted totals exactly** (+5/+5/+4/+47 across
+  effects/moves/Factory-L50-unweighted/weighted) and each individual row's
+  own predicted weighted share (16+15+16=47). `executableFrontierRatchet.test.ts`
+  unmoved (6/6, zero net new barriers).
+- **Did:** all three assigned rows, in order. **(1) `B_SCR_OP_RECOVERBASEDONSUNLIGHT`**
+  (new `battleScriptRecoverbasedonsunlightOpcode.ts`) — Morning Sun/Synthesis/
+  Moonlight share one identical script (`data/battle_scripts_1.s:1731-1738`),
+  so one registration flips all three. Weather-scaled heal fraction derived
+  source-exactly (2/3 sun via the source's own unreduced `20*maxHP/30`
+  literal, 1/2 no-weather-or-no-effect, 1/4 other), `WEATHER_HAS_EFFECT`
+  composed from the new ability-on-field scan (below) rather than
+  reimplemented. Zero barriers, zero `Random(` calls. **(2)
+  `B_SCR_OP_JUMPIFNOTFIRSTTURN`** (new `battleScriptJumpifnotfirstturnOpcode.ts`)
+  — the brief's own open question ("does the engine model isFirstTurn?")
+  resolved to **yes, already durable**
+  (`battleScriptRulesContext.ts`'s `isFirstTurn`, previously only read by
+  Speed Boost's `!= 2` exception) — no new engine field needed, just the
+  opcode itself. Zero barriers. **(3) `B_SCR_OP_JUMPIFABILITYPRESENT`** (new
+  `battleScriptJumpifabilitypresentOpcode.ts`) — the any-battler-on-field
+  ability scan (`ABILITYEFFECT_CHECK_ON_FIELD`), exported as
+  `abilityPresentOnField` and reused by row 1's own `WEATHER_HAS_EFFECT`.
+  Both concrete call sites (Cloud Nine, Air Lock) are fixed facts of the
+  compiled program, so the ability-operand domain is validated **eagerly at
+  registration** (mirroring `Cmd_clearstatusfromeffect`'s own exact-shape
+  check) rather than deferred to an unreachable runtime barrier — no ratchet
+  growth. **Verified and widened the scout-flagged gap**: `docs/semi-invulnerable-registration-scout.md`'s
+  named `gBattleWeather` `JUMPIFHALFWORD` gap on Solar Beam's own
+  sun-skips-charge check was real and is now closed (`gBattleWeather` ->
+  `rules.weather`, `B_WEATHER_SUN` added to the halfword value universe) —
+  the existing barrier test for this pointer was converted to a
+  no-longer-halts pass-through test, same pattern as the prior `gChosenMove`
+  widening.
+- **Tests:** full committed-script Tier-1 walks to genuine `{kind:"terminal",
+  opcodeName:"B_SCR_OP_END"}` halts for every flipped effect. Row 1: Morning
+  Sun under clear weather (heal=maxHP/2, 0 RNG), Synthesis under sun
+  (heal=floor(20*maxHP/30), 0 RNG), Moonlight under rain (heal=maxHP/4, 0
+  RNG), plus the shared full-HP fail tail and a Cloud-Nine-nullifies-sun
+  case. Row 2: Fake Out first-turn success (flinch composes through the real
+  `seteffectwithchance` certain-branch — **3 RNG draws, not 4**: `MOVE_EFFECT_CERTAIN`
+  takes `Cmd_seteffectwithchance`'s certain branch, which applies the effect
+  directly with no percent-chance roll at all, unlike the non-certain tail
+  every other hit-chain walk in this engine pins at 4) and the not-first-turn
+  fail tail (0 RNG). Row 3: Solar Beam's full two-turn cycle (charge turn 0
+  RNG, attack turn 4 RNG — same shape as Razor Wind/Dive), the sun-skip
+  single-turn walk (4 RNG, no separate charge turn at all), and a
+  Cloud-Nine-under-sun case proving the ability check runs before the
+  weather check. All RNG roll counts pinned directly against the real
+  handler composition, not assumed.
+- **Notes:** no PAPERCUT. One real correction found and fixed while writing
+  tests, not assumed from the brief: Fake Out's guaranteed flinch draws 3
+  RNG rolls, not 4 — `MOVE_EFFECT_CERTAIN` bypasses `Cmd_seteffectwithchance`'s
+  percent-chance roll entirely (source's own `if (certain) ... else { Random()
+  ... }` structure), distinct from the semi-invulnerable trio's own
+  moveEffectByte-0 case (not CERTAIN) which does still draw that roll
+  unconditionally. Five commits: one per opcode/row plus census regen. Next
+  ranked census rows (out of this step's scope): `EFFECT_CURSE` pair,
+  `EFFECT_FLAIL`, `EFFECT_RETURN`+`EFFECT_FRUSTRATION`.
+
+---
 ## 529 — [BOUNDED WORKER 2026-07-27 ~19:45] Semi-invulnerable trio registered end to end; +4 effects/+7 moves/+35 weighted (matches scout exactly)
 
 - **State:** tree green at **276 files / 3675 tests** (275/3639 → +1 file /
@@ -162,43 +231,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `EFFECT_SEMI_INVULNERABLE` (scouted, 4 moves/32 weighted, the census's
   new #1 row) is the next ranked set; `EFFECT_FLAIL`/`EFFECT_RETURN`+
   `EFFECT_FRUSTRATION`/`EFFECT_CURSE` follow close behind.
-
----
-## 527 — [BOUNDED WORKER 2026-07-27 ~18:35] turn11-featherdance ATK-floor text wired from kernel events (§14.3)
-
-- **State:** tree green at **274 files / 3632 tests** (unchanged — no new
-  test file; this step wires an already-tested staging-module export into
-  production code), `npm run build` clean. `executableFrontierRatchet.test.ts`
-  unmoved (6/6, zero new barriers).
-- **Did:** executed `docs/presentation-seam-scout.md` §14.3's plan exactly —
-  wired `drawTurn11FeatherDanceWindow`'s ATK-floor branch
-  (`battleScene.ts:11451`) to draw a new module-level const pair,
-  `TURN11_ATKFLOOR_KICKOFF_LINE1`/`LINE2`, resolved once at module load from
-  the already-committed, already-tested
-  `turn11FeatherDancePresentationStaging.ts`'s `resolveTurn11AtkFloorLines()`,
-  instead of the raw `TURN11_ATKFLOOR_LINE1`/`LINE2` literals. Zero bridge
-  edits (§14.2's finding held — the existing turn-6 bridge resolves this
-  floored branch unchanged). Kickoff-text branch and ROCK_SLIDE half
-  untouched, per plan scoping (`git diff` touches only the import line + one
-  const block + one call-site swap). All §14.3/§14.4 citations re-verified
-  against `HEAD` before editing — no drift, no design-doc slip this time.
-  Appended §14.5 completion note to the scout doc, mirroring §13.5's format.
-- **Verified:** `turn11-featherdance.json` 178/178 before AND after (twice
-  after, determinism check) — byte-identical to §14.4's pinned baseline. Full
-  §14.3 regression sweep (`turn11-menu.json` 56/56, `turn11-rockslide.json`
-  163/163, `turn6-featherdance.json` 90/90, `turn6-statfall.json` 127/127,
-  `turn2-endeavor.json` 77/77, `turn3-rockslide.json` 256/256,
-  `turn1-rockslide.json` 256/256, `turn5-rockslide.json` 256/256,
-  `turn4-doubleteam.json` 250/250) — every count matches its recorded value,
-  zero regressions. `TURN11_ATKFLOOR_LINE1`/`LINE2` stay defined (no literal
-  died) — confirmed by grep their only remaining readers are the two
-  pre-existing tests, not production code.
-- **Notes:** §14.4's own doc text cited `npm test` as 269/3570 (stale
-  against this worktree's `HEAD` — entries 524-526's Roar/multi-hit work
-  landed 274/3632 in between); noted in the §14.5 completion note so the
-  discrepancy doesn't read as this step's own regression. No PAPERCUT. One
-  commit (wiring), one commit (docs: §14.5 note + this entry).
-- **Next:** turn13-sandattack wiring is banked (§15) for a later step — out
-  of this step's scope, not started. EXPLOSION pair (25) / SEMI_INVULNERABLE
-  trio (32) remain the next ranked census rows.
 

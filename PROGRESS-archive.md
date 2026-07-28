@@ -1,3 +1,42 @@
+## 527 — [BOUNDED WORKER 2026-07-27 ~18:35] turn11-featherdance ATK-floor text wired from kernel events (§14.3)
+
+- **State:** tree green at **274 files / 3632 tests** (unchanged — no new
+  test file; this step wires an already-tested staging-module export into
+  production code), `npm run build` clean. `executableFrontierRatchet.test.ts`
+  unmoved (6/6, zero new barriers).
+- **Did:** executed `docs/presentation-seam-scout.md` §14.3's plan exactly —
+  wired `drawTurn11FeatherDanceWindow`'s ATK-floor branch
+  (`battleScene.ts:11451`) to draw a new module-level const pair,
+  `TURN11_ATKFLOOR_KICKOFF_LINE1`/`LINE2`, resolved once at module load from
+  the already-committed, already-tested
+  `turn11FeatherDancePresentationStaging.ts`'s `resolveTurn11AtkFloorLines()`,
+  instead of the raw `TURN11_ATKFLOOR_LINE1`/`LINE2` literals. Zero bridge
+  edits (§14.2's finding held — the existing turn-6 bridge resolves this
+  floored branch unchanged). Kickoff-text branch and ROCK_SLIDE half
+  untouched, per plan scoping (`git diff` touches only the import line + one
+  const block + one call-site swap). All §14.3/§14.4 citations re-verified
+  against `HEAD` before editing — no drift, no design-doc slip this time.
+  Appended §14.5 completion note to the scout doc, mirroring §13.5's format.
+- **Verified:** `turn11-featherdance.json` 178/178 before AND after (twice
+  after, determinism check) — byte-identical to §14.4's pinned baseline. Full
+  §14.3 regression sweep (`turn11-menu.json` 56/56, `turn11-rockslide.json`
+  163/163, `turn6-featherdance.json` 90/90, `turn6-statfall.json` 127/127,
+  `turn2-endeavor.json` 77/77, `turn3-rockslide.json` 256/256,
+  `turn1-rockslide.json` 256/256, `turn5-rockslide.json` 256/256,
+  `turn4-doubleteam.json` 250/250) — every count matches its recorded value,
+  zero regressions. `TURN11_ATKFLOOR_LINE1`/`LINE2` stay defined (no literal
+  died) — confirmed by grep their only remaining readers are the two
+  pre-existing tests, not production code.
+- **Notes:** §14.4's own doc text cited `npm test` as 269/3570 (stale
+  against this worktree's `HEAD` — entries 524-526's Roar/multi-hit work
+  landed 274/3632 in between); noted in the §14.5 completion note so the
+  discrepancy doesn't read as this step's own regression. No PAPERCUT. One
+  commit (wiring), one commit (docs: §14.5 note + this entry).
+- **Next:** turn13-sandattack wiring is banked (§15) for a later step — out
+  of this step's scope, not started. EXPLOSION pair (25) / SEMI_INVULNERABLE
+  trio (32) remain the next ranked census rows.
+
+
 ---
 ## 526 — [BOUNDED WORKER 2026-07-27 ~18:00] EFFECT_TRIPLE_KICK + EFFECT_ROAR registered end to end; roar-multihit cluster (5 effects/18 moves/63 weighted) complete
 

@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 121 | 214 | 56.5% |
-| Moves (unweighted, all 355) | 244 | 355 | 68.7% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 197 | 276 | 71.4% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2501 | 2957 | 84.6% |
+| Effect scripts | 126 | 214 | 58.9% |
+| Moves (unweighted, all 355) | 249 | 355 | 70.1% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 201 | 276 | 72.8% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2548 | 2957 | 86.2% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -26,9 +26,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_REMAININGHPTOPOWER` | 1 (EFFECT_FLAIL) | 2 | 2 | 20 |
 | `B_SCR_OP_FRIENDSHIPTODAMAGECALCULATION` | 2 (EFFECT_RETURN, EFFECT_FRUSTRATION) | 2 | 2 | 18 |
 | `B_SCR_OP_CURSETARGET`, `B_SCR_OP_JUMPIFTYPE2` | 1 (EFFECT_CURSE) | 1 | 1 | 18 |
-| `B_SCR_OP_RECOVERBASEDONSUNLIGHT` | 3 (EFFECT_MORNING_SUN, EFFECT_SYNTHESIS, EFFECT_MOONLIGHT) | 3 | 2 | 16 |
-| `B_SCR_OP_JUMPIFABILITYPRESENT` | 1 (EFFECT_SOLAR_BEAM) | 1 | 1 | 16 |
-| `B_SCR_OP_JUMPIFNOTFIRSTTURN` | 1 (EFFECT_FAKE_OUT) | 1 | 1 | 15 |
 | `B_SCR_OP_COPYFOESTATS` | 1 (EFFECT_PSYCH_UP) | 1 | 1 | 14 |
 | `B_SCR_OP_JUMPIFCANTSWITCH` | 1 (EFFECT_BATON_PASS) | 1 | 1 | 13 |
 | `B_SCR_OP_JUMPIFNODAMAGE` | 1 (EFFECT_FOCUS_PUNCH) | 1 | 1 | 11 |
@@ -48,6 +45,9 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_TRYSWAPABILITIES` | 1 (EFFECT_SKILL_SWAP) | 1 | 1 | 5 |
 | `B_SCR_OP_TRYSWAPITEMS` | 1 (EFFECT_TRICK) | 1 | 1 | 5 |
 | `B_SCR_OP_INCREMENTGAMESTAT` | 2 (EFFECT_RECOIL, EFFECT_SPLASH) | 4 | 2 | 4 |
+| `B_SCR_OP_HEALPARTYSTATUS` | 1 (EFFECT_HEAL_BELL) | 2 | 2 | 4 |
+| `B_SCR_OP_SETTORMENT` | 1 (EFFECT_TORMENT) | 1 | 1 | 4 |
+| `B_SCR_OP_TRYSETENCORE` | 1 (EFFECT_ENCORE) | 1 | 1 | 4 |
 
 ## Per-effect detail
 
@@ -185,9 +185,9 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_RAPID_SPIN | `BattleScript_EffectRapidSpin` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_RAPIDSPIN is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (1) |
 | EFFECT_SONICBOOM | `BattleScript_EffectSonicboom` | executable | - | - | 1 | 1 (1) |
 | EFFECT_UNUSED_83 | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
-| EFFECT_MORNING_SUN | `BattleScript_EffectMorningSun` | blocked-on-opcodes | `B_SCR_OP_RECOVERBASEDONSUNLIGHT` (main path) | - | 1 | 0 (0) |
-| EFFECT_SYNTHESIS | `BattleScript_EffectSynthesis` | blocked-on-opcodes | `B_SCR_OP_RECOVERBASEDONSUNLIGHT` (main path) | - | 1 | 1 (13) |
-| EFFECT_MOONLIGHT | `BattleScript_EffectMoonlight` | blocked-on-opcodes | `B_SCR_OP_RECOVERBASEDONSUNLIGHT` (main path) | - | 1 | 1 (3) |
+| EFFECT_MORNING_SUN | `BattleScript_EffectMorningSun` | executable | - | - | 1 | 0 (0) |
+| EFFECT_SYNTHESIS | `BattleScript_EffectSynthesis` | executable | - | - | 1 | 1 (13) |
+| EFFECT_MOONLIGHT | `BattleScript_EffectMoonlight` | executable | - | - | 1 | 1 (3) |
 | EFFECT_HIDDEN_POWER | `BattleScript_EffectHiddenPower` | blocked-on-opcodes | `B_SCR_OP_HIDDENPOWERCALC` (main path) | - | 1 | 1 (1) |
 | EFFECT_RAIN_DANCE | `BattleScript_EffectRainDance` | executable | - | - | 1 | 1 (28) |
 | EFFECT_SUNNY_DAY | `BattleScript_EffectSunnyDay` | executable | - | - | 1 | 1 (25) |
@@ -204,14 +204,14 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_FUTURE_SIGHT | `BattleScript_EffectFutureSight` | blocked-on-opcodes | `B_SCR_OP_TRYSETFUTUREATTACK` (main path) | - | 2 | 1 (5) |
 | EFFECT_GUST | `BattleScript_EffectGust` | executable | - | - | 1 | 0 (0) |
 | EFFECT_FLINCH_MINIMIZE_HIT | `BattleScript_EffectStomp` | executable | - | - | 4 | 4 (10) |
-| EFFECT_SOLAR_BEAM | `BattleScript_EffectSolarBeam` | blocked-on-opcodes | `B_SCR_OP_JUMPIFABILITYPRESENT` (main path) | - | 1 | 1 (16) |
+| EFFECT_SOLAR_BEAM | `BattleScript_EffectSolarBeam` | executable | - | - | 1 | 1 (16) |
 | EFFECT_THUNDER | `BattleScript_EffectThunder` | executable | - | - | 1 | 1 (15) |
 | EFFECT_TELEPORT | `BattleScript_EffectTeleport` | executable | - | - | 1 | 0 (0) |
 | EFFECT_BEAT_UP | `BattleScript_EffectBeatUp` | blocked-on-opcodes | `B_SCR_OP_TRYDOBEATUP` (edge branch only) | - | 1 | 0 (0) |
 | EFFECT_SEMI_INVULNERABLE | `BattleScript_EffectSemiInvulnerable` | executable | - | - | 4 | 4 (32) |
 | EFFECT_DEFENSE_CURL | `BattleScript_EffectDefenseCurl` | blocked-on-opcodes | `B_SCR_OP_SETDEFENSECURLBIT` (main path) | - | 1 | 1 (6) |
 | EFFECT_SOFTBOILED | `BattleScript_EffectSoftboiled` | executable | - | - | 2 | 2 (7) |
-| EFFECT_FAKE_OUT | `BattleScript_EffectFakeOut` | blocked-on-opcodes | `B_SCR_OP_JUMPIFNOTFIRSTTURN` (main path) | - | 1 | 1 (15) |
+| EFFECT_FAKE_OUT | `BattleScript_EffectFakeOut` | executable | - | - | 1 | 1 (15) |
 | EFFECT_UPROAR | `BattleScript_EffectUproar` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_UPROAR is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (1) |
 | EFFECT_STOCKPILE | `BattleScript_EffectStockpile` | blocked-on-opcodes | `B_SCR_OP_STOCKPILE` (main path) | - | 1 | 1 (2) |
 | EFFECT_SPIT_UP | `BattleScript_EffectSpitUp` | blocked-on-opcodes | `B_SCR_OP_STOCKPILETOBASEDAMAGE` (edge branch only) | - | 1 | 1 (1) |
