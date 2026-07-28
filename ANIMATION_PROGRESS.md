@@ -44,13 +44,285 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## MOVE_SPARK promoted partial; complete source body closed (2026-07-27)
+
+**Verdict:** `MOVE_SPARK` is partial. The legal set-187 MINUN fixtures match
+the complete move-owned source windows **115/115** at 79-193 player-back and
+83-197 opponent-front, twice fresh, with no excluded frames, plus the minimal
+cleanup tail at ages 115-116 **2/2 twice in both orientations**. The relative
+reducer and typed `sceneOnPresentation` seam cover literal creation identity,
+slot, creation order, subpriority, tile/priority, affine/hidden/flip state and
+matrix for all six affine sparks, eight flashing sprites, the invisible
+HorizontalLunge controller, impact, and all eight ElectricityEffect sprites.
+The comparator also pins the three exact BG/attacker palette ramps and resets,
+the exact target 0→6→0 ramp against unfaded/faded/hardware buffers, five full
+sound restart/continuity/stop intervals and pans, battler offsets, registers,
+one-display hardware OAM order/matrices from reducer-derived prior state, and
+asset/task/OAM teardown. The earlier tautological wait claim is removed.
+Coverage is now **49/276 exact, 4 partial, 223 unsupported**.
+
+**Remainder:** no render assets or draw case were added and `battleScene.ts`
+is untouched. Source-derived MINUN/SHUCKLE/SPARK_2/IMPACT assets, live
+composition through the existing renderer, and **115/115 raw-RGB/framebuffer
+equality in both orientations twice fresh** remain before exact. THUNDERBOLT,
+THUNDER_WAVE, ZAP_CANNON, and THUNDER_SHOCK remain unsupported.
+
+**Repair note:** the opponent-front fixture begins the flashing group with two
+extra source callbacks, one initial affine-slot advance, and persistent
+same-Y slot ordering. Those are explicit fixture/runtime scheduler/allocation
+inputs, not a MINUN or attacker-side rule. The cleanup probe proves age 114's
+last hardware arc, age 115's zero effect OAM/tasks/offsets with palettes still
+owned, and age 116's palette-tag release; later generic result audio is outside
+the tail.
+
+## MOVE_SPARK staging checkpoint; remains unsupported (2026-07-27)
+
+**Verdict:** `MOVE_SPARK` remains unsupported. Both complete legal
+Battle-Scene-ON `mechanicLab` parties stage the real challenge-0 Level-50
+`FRONTIER_MON_MINUN_1` set **187** (species 354, Docile, HP/Defense EVs,
+Salac Berry, source Spark/Charm/Encore/Helping Hand); the active carrier has
+four legal SPARK choices and slower SHUCKLE has four TACKLE choices. The
+fresh mGBA probe, run through `tools/run-mgba-probe.py`, reaches current move
+209 in both orientations: player-back MINUN current-move window **39-263
+(225 frames)** / visual body **79-193**, opponent-front MINUN **39-363
+(325)** / visual body **83-197**. Both outcomes are status-free. These are
+candidate dense windows only—there is no reducer, typed seam, source asset,
+OAM/register/audio comparator, renderer, or pixel claim.
+
+**Source boundary/inventory:** `src/battle_factory.c`'s Level-50 challenge-0
+range is 110-199; `battle_frontier_mons.h` set 187 is MINUN with SPARK;
+`data/battle_anim_scripts.s:1945-1989` owns three attacker color
+palette-cycle legs plus their three reset commands, six
+`gSparkElectricitySpriteTemplate` particles, eight flashing electricity
+sprites, HorizontalLunge, target hit-splat/ShakeMon, three attacker-pan
+Thunderbolt2 events, target Hyper Beam, wait gates, and the post-impact
+eight-sprite `ElectricityEffect` / target-pan Thunderbolt2
+(`:10137`). `src/battle_anim_electric.c:119-220,515-677` defines the affine
+spark, flashing/tile-cycle, target electricity callbacks and their
+side-relative X/X2/picture-offset-Y geometry. Future evidence must port all
+palette, movement/shake, flashing, sound, wait, geometry, lifetime and
+teardown details in both orientations; THUNDERBOLT, THUNDER_WAVE, ZAP_CANNON,
+and THUNDER_SHOCK remain independently unsupported.
+
+**Evidence:** committed scenarios, semantic mGBA probe, and no-pixel
+staging comparator are `mechanic-spark-*.json`, `sparkProbe.py`,
+`sparkEvidence.ts`, and `fixtures/spark-*.json`. `ANIM_TAG_SPARK_2` is now a
+non-exclusive component track, but no move coverage was promoted. Existing
+exact controls and renderer code were untouched.
+
 ## Current resumable state (2026-07-27)
 
-Coverage is **45/276 exact, 3 partial, 228 unsupported**. SELF DESTRUCT is exact
-through the shared Scene-ON seam at **113/113 player-back + 113/113
-opponent-front** complete-body component and raw-RGB framebuffer frames,
-reproduced twice fresh. DRAGON BREATH remains **85/85** in both orientations
-as the exact ShakeMon2/palette regression control.
+Coverage is **49/276 exact, 3 partial, 224 unsupported**. TAUNT is exact at
+**125/125 player-back + 125/125 opponent-front** complete source-component,
+typed-seam, software/hardware-OAM, affine-matrix, palette/register/audio,
+raw-RGB, and shared-seam framebuffer frames, reproduced twice fresh.
+
+## TAUNT promoted exact; thought-bubble/finger display path closed (2026-07-27)
+
+**Verdict:** `MOVE_TAUNT` is exact. Legal set-184 MURKROW fixtures remain
+unchanged in both orientations against constrained SHUCKLE. Complete windows
+76-200 player-back and 80-204 opponent-front match **125/125** source,
+typed-seam, hardware-transfer/matrix/palette/register/audio, raw-RGB, and
+framebuffer frames twice fresh.
+
+**Renderer/evidence:** MURKROW back/front plus THOUGHT_BUBBLE/FINGER_2 art and
+palettes regenerate byte-for-byte; the literal existing ANGER asset alone is
+reused. The narrow battleScene case ports one-display transfer, runtime
+subpriority/Y/slot painter order, field chrome/healthboxes/text, and teardown.
+The comparator now pins raw-RGB digests, software slots/subpriorities, reverse
+hardware-OAM order, hardware affine matrices, and palette-tag lifetime.
+
+**Controls/scope:** RAZOR LEAF remains **139/139** and SWAGGER **161/161**
+source-component plus framebuffer exact in both orientations. No absolute
+ticks, screenshots, canonical imports, unsupported barriers, state changes,
+or boundary widening were added.
+
+## TAUNT source/hardware body closed; framebuffer remainder bounded (2026-07-27)
+
+**Verdict:** `MOVE_TAUNT` is partial. Complete legal Scene-ON parties retain
+the real Level-50 set-184 MURKROW carrier in both orientations against slower
+constrained SHUCKLE. Complete move-owned windows 76-200 player-back and
+80-204 opponent-front match **125/125** source-component plus typed-seam
+frames twice fresh, including final software destruction, one-display
+hardware OAM, and cleared teardown.
+
+**Source reducer/evidence:** the relative reducer ports
+`gThoughtBubbleSpriteTemplate`'s forward/45-frame hold/reverse program,
+`gTauntFingerSpriteTemplate`'s side-selected point/wag/lifetime, both literal
+target-relative `gAngerMarkSpriteTemplate` argv programs, wait/delay
+sequencing, SE_M_METRONOME, both looped SE_M_TAIL_WHIP restarts, both
+SE_M_SWAGGER2 restarts/pans, software OAM, affine matrices, hardware OAM,
+OBJ palettes, zero blend registers, and teardown. Swagger code is reused
+only for the literal anger template semantics; TAUNT acceptance is independent.
+
+**Precise remainder:** raw RGB is **0/125 unattempted**. Reproducibly extract
+MURKROW back/front plus THOUGHT_BUBBLE/FINGER_2 art and palettes (ANGER may
+reuse its already-extracted literal asset), then add only a narrow TAUNT draw
+case in `src/engine/battleScene.ts` for source OAM order, one-display transfer,
+field chrome/healthboxes/text, and teardown; require 125/125 both orientations
+twice. This worker did not touch `battleScene.ts`. RAZOR LEAF remains 139/139
+component + framebuffer exact in both orientations as the fresh control. No
+absolute ticks, screenshots, canonical imports, unsupported barriers, battle
+state changes, or boundary widening were added.
+
+## TAUNT source-evidence checkpoint; remains unsupported (2026-07-27)
+
+**Verdict:** `MOVE_TAUNT` remains unsupported. Complete legal Scene-ON
+mechanicLab parties now stage the real Level-50 set-184 MURKROW carrier
+(Quirky; SpDef/Defense/HP EV spread; Lax Incense) against slower constrained
+SHUCKLE in both player-back and opponent-front orientations. Schedule IDs
+184-189 are valid in the source Level-50 range, all active MURKROW choices
+are TAUNT, and both validated runs reach `currentMove: 269` with the complete
+party builder enabled.
+
+**Source boundary:** `Move_TAUNT` owns THOUGHT_BUBBLE (45-frame hold then
+reverse), FINGER_2's side-dependent animation/lifetime, two target-relative
+ANGER instances, Metronome/Tail Whip/Swagger2 sound boundaries, delays and
+waits. The existing SWAGGER anger reducer can be reused only for the literal
+ANGER template and target argv semantics; it cannot establish the new bubble
+or finger body. No reducer, typed seam, probe/comparator, assets, renderer,
+or raw-RGB claim is present; the exact dense window remains deliberately
+unmeasured. RAZOR LEAF stays **139/139** in both orientations as the required
+typed/renderer control.
+
+## RAZOR LEAF promoted exact; leaf/cutter display path closed (2026-07-27)
+
+**Verdict:** `MOVE_RAZOR_LEAF` is exact. Legal challenge-0 parties retain real
+set-165 WEEPINBELL in both orientations with every active choice constrained
+to RAZOR LEAF and slower SHUCKLE constrained to TACKLE. Complete oracle
+windows 91-229 player-back and 95-233 opponent-front match **139/139**
+component, typed-seam, hardware-transfer, and raw-RGB frames twice fresh.
+
+**Renderer/evidence:** WEEPINBELL back/front plus LEAF/RAZOR_LEAF art and
+palettes regenerate byte-for-byte. The narrow battleScene case ports the
+one-display effect OAM latch, target ShakeMon2 latch, source subpriority/Y
+ordering including stable exact-Y slot ties, absent-partner singles monbg
+no-op, alpha 12/8 register lifetime, field chrome, and cleanup.
+
+**Controls/scope:** DYNAMIC PUNCH remains **75/75**, EXPLOSION **212/212**,
+and SELF DESTRUCT **113/113** component plus framebuffer exact in both
+orientations. SECRET POWER, MAGICAL LEAF, LEAF BLADE, and TWISTER remain
+unsupported. No absolute ticks, screenshots, canonical imports, unsupported
+barriers, controller/state changes, or boundary widening were added.
+
+## RAZOR LEAF source-component body closed; framebuffer remainder bounded (2026-07-27)
+
+**Verdict:** `MOVE_RAZOR_LEAF` is partial. Corrected challenge-0 mechanicLab
+parties use only legal set IDs 165-170 in the 110-199 source range. Species 70
+WEEPINBELL is the real set-165 carrier in both orientations, all active choices
+are RAZOR LEAF, and slower SHUCKLE is constrained to TACKLE. Complete windows
+91-229 player-back and 95-233 opponent-front match **139/139** twice fresh.
+
+**Source reducer/evidence:** all ten literal leaf callbacks, both
+`gRazorLeafCutterSpriteTemplate` instances (including `target_both=TRUE`
+singles behavior), target ShakeMon2 plus the immediately-aborted absent-partner
+task, monbg/alpha, three sound programs, software/hardware OAM, palette and
+register transfers, typed seam, and teardown are dense-equal. DYNAMIC PUNCH
+remains **75/75 component + framebuffer** exact in both orientations.
+
+**Precise remainder:** raw RGB is **0/139 unattempted**. Extract WEEPINBELL
+back/front and LEAF/RAZOR_LEAF art/palettes reproducibly; wire only the
+battleScene animation draw path; prove BG copy/alpha, source OAM ordering,
+palette/register latches, field chrome, cleanup, and 139/139 raw RGB twice.
+SECRET POWER, MAGICAL LEAF, LEAF BLADE, and TWISTER remain unsupported. No
+`battleScene.ts` edit, absolute ticks, screenshots, canonical imports,
+unsupported barriers, or boundary widening were added.
+
+## Previous current state (2026-07-27)
+
+Coverage was **47/276 exact, 3 partial, 226 unsupported**. DYNAMIC PUNCH was
+exact through the shared Scene-ON seam at **75/75 player-back + 75/75
+opponent-front** component, typed-seam, hardware-transfer, and raw-RGB frames,
+reproduced twice fresh.
+
+## DYNAMIC PUNCH promoted exact; monbg impact display path closed (2026-07-27)
+
+**Verdict:** `MOVE_DYNAMIC_PUNCH` is exact. Legal mechanicLab parties stage
+HITMONCHAN from real Level-50 Factory set 339 (species 107) in both
+orientations, constrain all choices to DYNAMIC PUNCH, and use slower SHUCKLE
+with TACKLE. Complete oracle frames 101-175 player-back and 105-179
+opponent-front match **75/75** source components, typed seam, hardware OAM/
+palette checks, and raw RGB, twice from fresh snapshots.
+
+**Renderer/evidence:** HITMONCHAN back/front plus fist/hitsplat art is
+reproducibly extracted and byte-for-byte tested. The narrow battleScene case
+ports the one-display target offset and effect-OAM transfer, target monbg copy
+as hitsplat alpha target-2, opaque fist/explosions, source explosion ordering,
+field chrome, and cleanup. Fixture HP now records the source-true pre-damage
+95/95 SHUCKLE display; damage remains outside this move-owned window.
+
+**Commands/controls:** `node --experimental-strip-types
+tools/compare/dynamicPunchPortable.ts <fixture>` → 75/75 component+seam and
+75/75 framebuffer for both fixtures twice; `explosionPortable.ts` → 212/212
+both orientations; `selfDestructPortable.ts` → 113/113 both orientations.
+No absolute ticks, screenshots, coordinate/RGB fitting, canonical imports,
+unsupported barriers, or boundary widening were added.
+
+## Previous current state (2026-07-27)
+
+Coverage was **46/276 exact, 4 partial, 226 unsupported**. DYNAMIC PUNCH was
+partial at 75/75 source-component + typed-seam frames in both orientations,
+with shared-seam raw RGB still unwired at 0/75.
+
+## DYNAMIC PUNCH component body closed; framebuffer remainder bounded (2026-07-27)
+
+**Verdict:** `MOVE_DYNAMIC_PUNCH` is partial. Legal mechanicLab parties stage
+HITMONCHAN from real Level-50 Factory set 339 (Emerald source species constant
+107) in both orientations, constrain all four choices to DYNAMIC PUNCH, and
+use slower SHUCKLE with TACKLE. Dense component plus typed-seam evidence is
+**75/75** at oracle 101-175 player-back and 105-179 opponent-front, twice fresh.
+
+**Source reducer/evidence:** the independent reducer ports target monbg and
+alpha 12/8, the fist duration/target picture-offset position, animation-0
+hitsplat and affine identity, `ShakeMon(5,0,7,1)`, the five literal
+target-relative explosion instances, `ShakeMon2(5,0,28,1)`, target-pan sound
+boundaries, and teardown. Literal `gExplosionSpriteTemplate` identity reuses
+the existing exact explosion reducer only where its argv/offset program agrees.
+PRESENT was audited and remains unsupported: its moving bag and conditional
+damage/heal branches require independent dense evidence.
+
+**Precise remainder:** extract HITMONCHAN/fist/hitsplat art; wire only the
+animation drawing path through battleScene; prove software/hardware OAM,
+palette/matrix/register latches, audio, cleanup, and raw RGB at 75/75 in both
+orientations twice. Until then framebuffer exact is **0/75**, not exact.
+EXPLOSION remains **212/212** and SELF DESTRUCT **113/113** component plus
+framebuffer exact in both orientations. No absolute ticks, screenshots,
+coordinate/RGB fitting, canonical imports, unsupported barriers, or boundary
+widening were added.
+
+## Previous current state (2026-07-27)
+
+Coverage is **46/276 exact, 3 partial, 227 unsupported**. EXPLOSION is exact
+through the shared Scene-ON seam at **212/212 player-back + 212/212
+opponent-front** complete-body component, typed relative-seam, and raw-RGB
+framebuffer frames, reproduced twice fresh. SELF DESTRUCT remains **113/113**
+and DRAGON BREATH **85/85** component + framebuffer exact in both orientations
+as fresh explosion/OAM/ShakeMon2/palette regression controls.
+
+## EXPLOSION promoted exact; legal set-495 fixture corrected (2026-07-27)
+
+**Verdict:** `MOVE_EXPLOSION` is exact. Complete legal mechanicLab parties
+stage GLALIE from real Level-50 Factory set 495 in both orientations, constrain
+all active choices to EXPLOSION, and use slower SHUCKLE with TACKLE. The
+strengthened comparator matches **212/212 component + typed seam + raw-RGB
+framebuffer** frames at oracle 76-287 player-back and 80-291 opponent-front,
+twice fresh.
+
+**Renderer/evidence:** the prior files labeled GLALIE injected internal species
+362 (DUSCLOPS); acceptance first corrected them to Emerald's source ID 347,
+which also source-shifted kickoff two frames and supplied the real 155 HP and
+back/front geometry. GLALIE art is reproducibly extracted; the renderer reuses
+the proven explosion/SHUCKLE assets and ports all ten explosion sprites, both
+visible battlers' ShakeMon2 latches, nine complex BG red/black alternations,
+cleanup gap, white hold, 15→0 fade, source OAM ordering, chrome, and teardown.
+
+**Controls/scope:** SELF DESTRUCT remains **113/113** and DRAGON BREATH
+**85/85** component + framebuffer exact in both orientations on fresh runs.
+PRESENT remains unsupported pending its moving bag and distinct damage/heal
+branches; DYNAMIC PUNCH remains unsupported pending its monbg/alpha/fist/
+hitsplat/ShakeMon prelude and target-pan explosion sequence. No absolute ticks,
+screenshots, coordinate/RGB fitting, exclusions, unsupported barriers,
+canonical imports, or boundary widening were added.
 
 ## SELF DESTRUCT promoted to exact; explosion sprite track established (2026-07-27)
 

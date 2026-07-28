@@ -101,7 +101,12 @@ export function swaggerBreathAtAge(
   };
 }
 
-function angerMarkAtAge(
+/**
+ * Literal `gAngerMarkSpriteTemplate` reducer. Exported for moves whose script
+ * uses the same three argv values and callback; it does not imply move-level
+ * acceptance for those callers.
+ */
+export function swaggerAngerMarkAtAge(
   age: number,
   spawnIndex: 0 | 1,
   creationAge: number,
@@ -146,10 +151,10 @@ export function swaggerAtAge(
     attackerY2: Math.trunc((battlerHeight - scaledHeight) / 2),
     breath: swaggerBreathAtAge(age, attackerSide, attackerCenter),
     angerMarks: [
-      angerMarkAtAge(
+      swaggerAngerMarkAtAge(
         age, 0, SWAGGER_FIRST_ANGER_CREATION_AGE, targetSide, targetCenter,
       ),
-      angerMarkAtAge(
+      swaggerAngerMarkAtAge(
         age, 1, SWAGGER_SECOND_ANGER_CREATION_AGE, targetSide, targetCenter,
       ),
     ].filter((mark): mark is SwaggerAngerMark => mark !== null),

@@ -179,9 +179,29 @@ import {
   type SwaggerState,
 } from "./swagger.ts";
 import {
+  tauntAtAge,
+  type TauntState,
+} from "./taunt.ts";
+import {
+  sparkAtAge,
+  type SparkState,
+} from "./spark.ts";
+import {
   selfDestructAtAge,
   type SelfDestructState,
 } from "./selfDestruct.ts";
+import {
+  explosionAtAge,
+  type ExplosionState,
+} from "./explosion.ts";
+import {
+  dynamicPunchAtAge,
+  type DynamicPunchState,
+} from "./dynamicPunch.ts";
+import {
+  razorLeafAtAge,
+  type RazorLeafState,
+} from "./razorLeaf.ts";
 import {
   poisonTailAtAge,
   type PoisonTailState,
@@ -351,7 +371,10 @@ export interface SceneOnPresentationBattler {
     | "CLAMPERL"
     | "SEVIPER"
     | "SUDOWOODO"
-    | "SHUCKLE";
+    | "SHUCKLE"
+    | "GLALIE"
+    | "HITMONCHAN"
+    | "WEEPINBELL";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -832,8 +855,54 @@ export interface SceneOnSwaggerConfig {
   readonly breathOrigin: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnTauntConfig {
+  readonly move: "TAUNT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source `SetSpriteNextToMonHead(attacker, sprite)` result. */
+  readonly attackerHead: Readonly<{ x: number; y: number }>;
+}
+
+export interface SceneOnSparkConfig {
+  readonly move: "SPARK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source X_2/Y_PIC_OFFSET coordinates, explicit because species pictures differ. */
+  readonly attackerPictureOffset: Readonly<{ x: number; y: number }>;
+  readonly targetPictureOffset: Readonly<{ x: number; y: number }>;
+  readonly attackerBgPriority: number;
+  readonly targetBgPriority: number;
+  readonly targetImpactPosition?: Readonly<{ x: number; y: number }>;
+  /** Explicit scheduler/allocation state at the flashing-sprite creation tick. */
+  readonly flashingInitialCallbackAdvances?: readonly number[];
+  readonly flashingInitialAffineAdvances?: readonly number[];
+}
+
 export interface SceneOnSelfDestructConfig {
   readonly move: "SELF_DESTRUCT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnExplosionConfig {
+  readonly move: "EXPLOSION";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnDynamicPunchConfig {
+  readonly move: "DYNAMIC_PUNCH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnRazorLeafConfig {
+  readonly move: "RAZOR_LEAF";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
@@ -976,7 +1045,11 @@ export type SceneOnMoveConfig =
   | SceneOnPoisonFangConfig
   | SceneOnHyperFangConfig
   | SceneOnSwaggerConfig
+  | SceneOnTauntConfig
   | SceneOnSelfDestructConfig
+  | SceneOnExplosionConfig
+  | SceneOnDynamicPunchConfig
+  | SceneOnRazorLeafConfig
   | SceneOnPoisonTailConfig
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
@@ -992,11 +1065,20 @@ export type SceneOnMoveConfig =
   | SceneOnKnockOffConfig;
 
 export interface SceneOnMovePresentationState<
-  TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
+  TConfig extends SceneOnMoveConfig | SceneOnSparkConfig = SceneOnMoveConfig,
 > {
   readonly age: number;
   readonly config: TConfig;
 }
+
+export type SceneOnDynamicPunchPresentationState =
+  SceneOnMovePresentationState<SceneOnDynamicPunchConfig>;
+export type SceneOnRazorLeafPresentationState =
+  SceneOnMovePresentationState<SceneOnRazorLeafConfig>;
+export type SceneOnTauntPresentationState =
+  SceneOnMovePresentationState<SceneOnTauntConfig>;
+export type SceneOnSparkPresentationState =
+  SceneOnMovePresentationState<SceneOnSparkConfig>;
 
 export interface SceneOnSupersonicView {
   readonly age: number;
@@ -1062,7 +1144,37 @@ export interface SceneOnSwaggerView extends SwaggerState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnTauntView extends TauntState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSparkView extends SparkState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnSelfDestructView extends SelfDestructState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnExplosionView extends ExplosionState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnDynamicPunchView extends DynamicPunchState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnRazorLeafView extends RazorLeafState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -1581,7 +1693,10 @@ function assertIntegerPoint(
  * geometry only: damage, RNG, move legality, turn order, and round state are
  * supplied as immutable inputs and never resolved or mutated here.
  */
-export function createSceneOnMovePresentation<TConfig extends SceneOnMoveConfig>(
+export function createSceneOnMovePresentation<
+  TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig | SceneOnTauntConfig
+    | SceneOnSparkConfig,
+>(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
   if (config.attacker.geometry.side === config.target.geometry.side) {
@@ -2147,6 +2262,61 @@ export function sceneOnSwaggerView(
   };
 }
 
+/** `age=0` is the first displayed thought-bubble software OAM. */
+export function sceneOnTauntView(
+  state: SceneOnMovePresentationState,
+): SceneOnTauntView {
+  if (state.config.move !== "TAUNT") {
+    throw new Error(`expected TAUNT presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...tauntAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attackerHead,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_SPARK's first displayed palette/sprite source tick. */
+export function sceneOnSparkView(
+  state: SceneOnSparkPresentationState,
+): SceneOnSparkView {
+  if (state.config.move !== "SPARK") {
+    throw new Error(`expected SPARK presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...sparkAtAge(
+      state.age,
+      {
+        side: state.config.attacker.geometry.side,
+        center: state.config.attacker.geometry.animationCenter,
+        pictureOffset: state.config.attackerPictureOffset,
+        bgPriority: state.config.attackerBgPriority,
+        flashingInitialCallbackAdvances:
+          state.config.flashingInitialCallbackAdvances,
+        flashingInitialAffineAdvances:
+          state.config.flashingInitialAffineAdvances,
+      },
+      {
+        side: state.config.target.geometry.side,
+        center: state.config.target.geometry.animationCenter,
+        pictureOffset: state.config.targetPictureOffset,
+        bgPriority: state.config.targetBgPriority,
+        impactPosition: state.config.targetImpactPosition,
+      },
+    ),
+  };
+}
+
 /** `age=0` is the first software-OAM explosion sprite. */
 export function sceneOnSelfDestructView(
   state: SceneOnMovePresentationState,
@@ -2164,6 +2334,69 @@ export function sceneOnSelfDestructView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first software-OAM explosion sprite and BG blend. */
+export function sceneOnExplosionView(
+  state: SceneOnMovePresentationState,
+): SceneOnExplosionView {
+  if (state.config.move !== "EXPLOSION") {
+    throw new Error(`expected EXPLOSION presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...explosionAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first software-OAM fist/hitsplat display. */
+export function sceneOnDynamicPunchView(
+  state: SceneOnMovePresentationState,
+): SceneOnDynamicPunchView {
+  if (state.config.move !== "DYNAMIC_PUNCH") {
+    throw new Error(
+      `expected DYNAMIC_PUNCH presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...dynamicPunchAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.animationCenter,
+      state.config.target.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first monbg/alpha display of the complete source body. */
+export function sceneOnRazorLeafView(
+  state: SceneOnMovePresentationState,
+): SceneOnRazorLeafView {
+  if (state.config.move !== "RAZOR_LEAF") {
+    throw new Error(
+      `expected RAZOR_LEAF presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...razorLeafAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
     ),
   };
 }

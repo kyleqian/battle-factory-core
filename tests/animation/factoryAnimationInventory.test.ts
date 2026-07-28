@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // SELF DESTRUCT closes both dense directions through the shared seam.
-        unsupported: 228,
+        // SPARK closes its source/hardware/typed seam; rendering remains.
+        unsupported: 223,
         staged: 0,
-        partial: 3,
-        exact: 45,
+        partial: 4,
+        exact: 49,
       },
       {
         tier: "openOnly",

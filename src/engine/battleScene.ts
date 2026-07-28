@@ -550,7 +550,11 @@ import sludgeBombAsset from "../animation/assets/sludgeBomb.json" with { type: "
 import poisonFangAsset from "../animation/assets/poisonFang.json" with { type: "json" };
 import hyperFangAsset from "../animation/assets/hyperFang.json" with { type: "json" };
 import swaggerAsset from "../animation/assets/swagger.json" with { type: "json" };
+import tauntAsset from "../animation/assets/taunt.json" with { type: "json" };
 import selfDestructAsset from "../animation/assets/selfDestruct.json" with { type: "json" };
+import explosionAsset from "../animation/assets/explosion.json" with { type: "json" };
+import dynamicPunchAsset from "../animation/assets/dynamicPunch.json" with { type: "json" };
+import razorLeafAsset from "../animation/assets/razorLeaf.json" with { type: "json" };
 import poisonTailAsset from "../animation/assets/poisonTail.json" with { type: "json" };
 import toxicAsset from "../animation/assets/toxic.json" with { type: "json" };
 import hardenAsset from "../animation/assets/harden.json" with { type: "json" };
@@ -667,7 +671,11 @@ import {
   sceneOnPoisonFangView,
   sceneOnHyperFangView,
   sceneOnSwaggerView,
+  sceneOnTauntView,
   sceneOnSelfDestructView,
+  sceneOnExplosionView,
+  sceneOnDynamicPunchView,
+  sceneOnRazorLeafView,
   sceneOnPoisonTailView,
   sceneOnToxicView,
   sceneOnEarthquakeView,
@@ -1013,12 +1021,34 @@ const swaggerArt = swaggerAsset as {
   rattataBack: { tileset: Tileset; palette: RgbColor[] };
   rattataFront: { tileset: Tileset; palette: RgbColor[] };
 };
+const tauntArt = tauntAsset as {
+  thoughtBubble: { tileset: Tileset; palette: RgbColor[] };
+  finger: { tileset: Tileset; palette: RgbColor[] };
+  murkrowBack: { tileset: Tileset; palette: RgbColor[] };
+  murkrowFront: { tileset: Tileset; palette: RgbColor[] };
+};
 const selfDestructArt = selfDestructAsset as {
   explosion: { tileset: Tileset; palette: RgbColor[] };
   sudowoodoBack: { tileset: Tileset; palette: RgbColor[] };
   sudowoodoFront: { tileset: Tileset; palette: RgbColor[] };
   shuckleBack: { tileset: Tileset; palette: RgbColor[] };
   shuckleFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const explosionArt = explosionAsset as {
+  glalieBack: { tileset: Tileset; palette: RgbColor[] };
+  glalieFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const dynamicPunchArt = dynamicPunchAsset as {
+  hitmonchanBack: { tileset: Tileset; palette: RgbColor[] };
+  hitmonchanFront: { tileset: Tileset; palette: RgbColor[] };
+  fist: { tileset: Tileset; palette: RgbColor[] };
+  hitsplat: { tileset: Tileset; palette: RgbColor[] };
+};
+const razorLeafArt = razorLeafAsset as {
+  weepinbellBack: { tileset: Tileset; palette: RgbColor[] };
+  weepinbellFront: { tileset: Tileset; palette: RgbColor[] };
+  leaf: { tileset: Tileset; palette: RgbColor[] };
+  cutter: { tileset: Tileset; palette: RgbColor[] };
 };
 const poisonTailArt = poisonTailAsset as {
   metal: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
@@ -2734,6 +2764,35 @@ function drawSpriteSheetHFlip(
       if (index === 0) continue;
       const color = palette[index];
       if (color) setPixel(fb, ox + sx, oy + sy, color);
+    }
+  }
+}
+
+function drawSpriteSheetFlipped(
+  fb: Uint8Array,
+  tileset: Tileset,
+  palette: RgbColor[],
+  ox: number,
+  oy: number,
+  hFlip: boolean,
+  vFlip: boolean,
+): void {
+  const width = tileset.columns * 8;
+  const height = tileset.rows * 8;
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const sourceX = hFlip ? width - 1 - x : x;
+      const sourceY = vFlip ? height - 1 - y : y;
+      const tile = tileset.tiles[
+        Math.floor(sourceY / 8) * tileset.columns
+        + Math.floor(sourceX / 8)
+      ];
+      const index = tile?.[
+        (sourceY % 8) * 8 + (sourceX % 8)
+      ] ?? 0;
+      if (index === 0) continue;
+      const color = palette[index];
+      if (color) setPixel(fb, ox + x, oy + y, color);
     }
   }
 }
@@ -15830,6 +15889,287 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
+  if (state.config.move === "RAZOR_LEAF") {
+    const view = sceneOnRazorLeafView(state);
+    // Effect callbacks update software OAM after the current buffer transfer.
+    // ShakeMon2 uses the same task-to-battler-OAM display latch as the exact
+    // DYNAMIC_PUNCH control immediately below.
+    const effectsDisplayed = sceneOnRazorLeafView({
+      ...state,
+      age: state.age - 1,
+    });
+    const targetDisplayed = sceneOnRazorLeafView({
+      ...state,
+      age: state.age === 0 ? 0 : state.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "WEEPINBELL"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "WEEPINBELL"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged RAZOR_LEAF pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const weepinbell = playerToOpponent
+      ? razorLeafArt.weepinbellBack
+      : {
+          ...razorLeafArt.weepinbellFront,
+          tileset: subTileset(razorLeafArt.weepinbellFront.tileset, 0, 8),
+        };
+    const shuckle = playerToOpponent
+      ? {
+          ...selfDestructArt.shuckleFront,
+          tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
+        }
+      : selfDestructArt.shuckleBack;
+    const leaves = [...effectsDisplayed.particles].sort(
+      (a, b) =>
+        (a.y + a.y2) - (b.y + b.y2)
+        // Stable exact-Y ties retain the inherited source slot order here:
+        // the earlier particle paints first and the later particle wins.
+        || a.spawnIndex - b.spawnIndex,
+    );
+    const cutters = [...effectsDisplayed.cutters].sort(
+      (a, b) =>
+        (a.y + a.y2) - (b.y + b.y2)
+        || b.index - a.index,
+    );
+    const drawWeepinbell = () => drawSpriteSheet(
+      fb,
+      weepinbell.tileset,
+      weepinbell.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawShuckle = () => drawSpriteSheet(
+      fb,
+      shuckle.tileset,
+      shuckle.palette,
+      view.target.geometry.spriteCorner.x + targetDisplayed.targetX2,
+      view.target.geometry.spriteCorner.y,
+    );
+    const drawLeaves = () => {
+      for (const leaf of leaves) {
+        drawSpriteSheet(
+          fb,
+          subTileset(
+            razorLeafArt.leaf.tileset,
+            leaf.tileOffset / razorLeafArt.leaf.tileset.columns,
+            2,
+          ),
+          razorLeafArt.leaf.palette,
+          leaf.x + leaf.x2 - 8,
+          leaf.y + leaf.y2 - 8,
+        );
+      }
+    };
+    const drawCutters = () => {
+      for (const cutter of cutters) {
+        drawSpriteSheetFlipped(
+          fb,
+          razorLeafArt.cutter.tileset,
+          razorLeafArt.cutter.palette,
+          cutter.x + cutter.x2 - 16,
+          cutter.y + cutter.y2 - 8,
+          cutter.hFlip,
+          cutter.vFlip,
+        );
+      }
+    };
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    // Source SortSprites painter order. The loaded `monbg ANIM_DEF_PARTNER`
+    // targets the absent partner in these legal singles fixtures, so no live
+    // battler is copied to BG; BLDALPHA 12/8 consequently has no visible
+    // semi-transparent OBJ consumer.
+    if (playerToOpponent) {
+      drawShuckle();
+      drawCutters();
+      drawWeepinbell();
+      drawLeaves();
+    } else {
+      drawWeepinbell();
+      drawLeaves();
+      drawShuckle();
+      drawCutters();
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "WEEPINBELL",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "WEEPINBELL" : "SHUCKLE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "WEEPINBELL used" : "Foe WEEPINBELL used",
+      "RAZOR LEAF!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "DYNAMIC_PUNCH") {
+    const view = sceneOnDynamicPunchView(state);
+    // Source sprite callbacks write software OAM after the current hardware
+    // buffer has been built. Effects transfer one display later; battler
+    // task offsets take the established two-display task/OAM path.
+    const effectsDisplayed = sceneOnDynamicPunchView({
+      ...state,
+      age: state.age - 1,
+    });
+    const targetDisplayed = sceneOnDynamicPunchView({
+      ...state,
+      age: state.age === 0 ? 0 : state.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "HITMONCHAN"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "HITMONCHAN"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged DYNAMIC_PUNCH pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const hitmonchan = playerToOpponent
+      ? dynamicPunchArt.hitmonchanBack
+      : {
+          ...dynamicPunchArt.hitmonchanFront,
+          tileset: subTileset(dynamicPunchArt.hitmonchanFront.tileset, 0, 8),
+        };
+    const shuckle = playerToOpponent
+      ? {
+          ...selfDestructArt.shuckleFront,
+          tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
+        }
+      : selfDestructArt.shuckleBack;
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb,
+      shuckle.tileset,
+      shuckle.palette,
+      view.target.geometry.spriteCorner.x + targetDisplayed.targetX2,
+      view.target.geometry.spriteCorner.y + targetDisplayed.targetY2,
+    );
+    // monbg moves the target to a BG layer. The selected OBJ layer is
+    // target-1, so each topmost effect samples this same pre-OBJ target/BG
+    // surface rather than cumulatively blending against older effect OBJs.
+    const effectBackdrop = fb.slice();
+    if (effectsDisplayed.hitsplatVisible) {
+      drawSpriteSheetAffineStretchBlendedOverFb(
+        fb,
+        dynamicPunchArt.hitsplat.tileset,
+        dynamicPunchArt.hitsplat.palette,
+        effectsDisplayed.hitsplatPosition.x - 16,
+        effectsDisplayed.hitsplatPosition.y - 16,
+        256,
+        256,
+        12,
+        8,
+        false,
+        effectBackdrop,
+      );
+    }
+    if (effectsDisplayed.fistVisible) {
+      drawSpriteSheet(
+        fb,
+        subTileset(dynamicPunchArt.fist.tileset, 0, 4),
+        dynamicPunchArt.fist.palette,
+        effectsDisplayed.fistPosition.x - 16,
+        effectsDisplayed.fistPosition.y - 16,
+      );
+    }
+    const explosionsInDrawOrder = [...effectsDisplayed.explosions].sort(
+      (a, b) => a.y - b.y || b.spawnIndex - a.spawnIndex,
+    );
+    for (const explosion of explosionsInDrawOrder) {
+      drawSpriteSheet(
+        fb,
+        subTileset(selfDestructArt.explosion.tileset, explosion.frame * 4, 4),
+        selfDestructArt.explosion.palette,
+        explosion.x - 16,
+        explosion.y - 16,
+      );
+    }
+    drawSpriteSheet(
+      fb,
+      hitmonchan.tileset,
+      hitmonchan.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "HITMONCHAN",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "HITMONCHAN" : "SHUCKLE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "HITMONCHAN used" : "Foe HITMONCHAN used",
+      "DYNAMICPUNCH!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "SELF_DESTRUCT") {
     const view = sceneOnSelfDestructView(state);
     // Age zero begins after the first transfer; later palette writes reach
@@ -15950,6 +16290,129 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "SUDOWOODO used" : "Foe SUDOWOODO used",
       "SELFDESTRUCT!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "EXPLOSION") {
+    const view = sceneOnExplosionView(state);
+    const paletteDisplayed = sceneOnExplosionView({
+      ...state,
+      age: state.age - 1,
+    }).backgroundBlend;
+    const shakeDisplayedX2 = state.age === 0
+      ? 0
+      : sceneOnExplosionView({ ...state, age: state.age - 2 }).battlerX2;
+    const explosionsDisplayed = sceneOnExplosionView({
+      ...state,
+      age: state.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "GLALIE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "GLALIE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged EXPLOSION pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const glalie = playerToOpponent
+      ? explosionArt.glalieBack
+      : {
+          ...explosionArt.glalieFront,
+          tileset: subTileset(explosionArt.glalieFront.tileset, 0, 8),
+        };
+    const shuckle = playerToOpponent
+      ? {
+          ...selfDestructArt.shuckleFront,
+          tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
+        }
+      : selfDestructArt.shuckleBack;
+    const blendTarget = paletteDisplayed.kind === "red"
+      ? { r: 214, g: 66, b: 66 }
+      : paletteDisplayed.kind === "white"
+        ? { r: 255, g: 255, b: 255 }
+        : { r: 0, g: 0, b: 0 };
+    const backgroundPalettes = blendPaletteBanksToward(
+      battleBg.palette,
+      blendTarget,
+      paletteDisplayed.coefficient,
+    );
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      backgroundPalettes,
+    );
+    const opponent = playerToOpponent ? shuckle : glalie;
+    const player = playerToOpponent ? glalie : shuckle;
+    drawSpriteSheet(
+      fb,
+      opponent.tileset,
+      opponent.palette,
+      (playerToOpponent ? view.target : view.attacker).geometry.spriteCorner.x
+        + shakeDisplayedX2,
+      (playerToOpponent ? view.target : view.attacker).geometry.spriteCorner.y,
+    );
+    drawSpriteSheet(
+      fb,
+      player.tileset,
+      player.palette,
+      (playerToOpponent ? view.attacker : view.target).geometry.spriteCorner.x
+        + shakeDisplayedX2,
+      (playerToOpponent ? view.attacker : view.target).geometry.spriteCorner.y,
+    );
+    const explosionsInDrawOrder = [...explosionsDisplayed.explosions].sort(
+      (a, b) => a.y - b.y || b.spawnIndex - a.spawnIndex,
+    );
+    for (const explosion of explosionsInDrawOrder) {
+      drawSpriteSheet(
+        fb,
+        subTileset(selfDestructArt.explosion.tileset, explosion.frame * 4, 4),
+        selfDestructArt.explosion.palette,
+        explosion.x - 16,
+        explosion.y - 16,
+      );
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "GLALIE",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "GLALIE" : "SHUCKLE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "GLALIE used" : "Foe GLALIE used",
+      "EXPLOSION!",
       99,
     );
     return;
@@ -16080,6 +16543,136 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "RATTATA used" : "Foe RATTATA used",
       "SWAGGER!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "TAUNT") {
+    const view = sceneOnTauntView(state);
+    // Sprite callbacks mutate software OAM after the current buffer transfer;
+    // the displayed effect list is therefore the preceding reducer frame.
+    const displayed = sceneOnTauntView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "MURKROW"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MURKROW"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged TAUNT pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const murkrow = playerToOpponent
+      ? tauntArt.murkrowBack
+      : {
+          ...tauntArt.murkrowFront,
+          tileset: subTileset(tauntArt.murkrowFront.tileset, 0, 8),
+        };
+    const shuckle = playerToOpponent
+      ? {
+          ...selfDestructArt.shuckleFront,
+          tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
+        }
+      : selfDestructArt.shuckleBack;
+    const player = playerToOpponent ? murkrow : shuckle;
+    const opponent = playerToOpponent ? shuckle : murkrow;
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    // Runtime subpriorities are opponent=40, anger=38, player=30,
+    // thought-bubble=19, finger=18. SortSprites emits descending
+    // subpriority into painter order, independent of attacker orientation.
+    drawSpriteSheet(
+      fb,
+      opponent.tileset,
+      opponent.palette,
+      (playerToOpponent ? view.target : view.attacker).geometry.spriteCorner.x,
+      (playerToOpponent ? view.target : view.attacker).geometry.spriteCorner.y,
+    );
+    for (const mark of displayed.angerMarks) {
+      const matrix = Math.trunc(0x10000 / mark.xScale);
+      drawSpriteSheetAffineRotate(
+        fb,
+        swaggerArt.anger.tileset,
+        swaggerArt.anger.palette,
+        mark.x,
+        mark.y,
+        matrix,
+        0,
+        0,
+        matrix,
+        undefined,
+        false,
+      );
+    }
+    drawSpriteSheet(
+      fb,
+      player.tileset,
+      player.palette,
+      (playerToOpponent ? view.attacker : view.target).geometry.spriteCorner.x,
+      (playerToOpponent ? view.attacker : view.target).geometry.spriteCorner.y,
+    );
+    if (displayed.thoughtBubble) {
+      const bubble = displayed.thoughtBubble;
+      drawSpriteSheetFlipped(
+        fb,
+        subTileset(tauntArt.thoughtBubble.tileset, bubble.frame * 4, 4),
+        tauntArt.thoughtBubble.palette,
+        bubble.x - 16,
+        bubble.y - 16,
+        bubble.hFlip,
+        false,
+      );
+    }
+    if (displayed.finger) {
+      const finger = displayed.finger;
+      drawSpriteSheetFlipped(
+        fb,
+        subTileset(tauntArt.finger.tileset, finger.frame * 4, 4),
+        tauntArt.finger.palette,
+        finger.x - 16,
+        finger.y - 16,
+        finger.hFlip,
+        false,
+      );
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "MURKROW",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "MURKROW" : "SHUCKLE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MURKROW used" : "Foe MURKROW used",
+      "TAUNT!",
       99,
     );
     return;

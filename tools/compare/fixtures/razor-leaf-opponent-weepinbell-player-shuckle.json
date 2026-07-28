@@ -1,0 +1,14 @@
+{
+  "schema": "scene-on-portable-component/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-razor-leaf-opponent-weepinbell-player-shuckle.json",
+  "probe": "tools/compare/razorLeafProbe.py",
+  "pair": "WEEPINBELL real challenge-0 Factory set-165 RAZOR LEAF carrier opponent-front -> slower SHUCKLE player-back",
+  "move": "RAZOR_LEAF",
+  "denseWindow": {"startFrame": 95, "endFrame": 233},
+  "appStage": {"presentationAge": 0},
+  "attackerSide": "opponent",
+  "attacker": {"species":"WEEPINBELL","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":19},"animationCenter":{"x":176,"y":51},"battlePositionCenter":{"x":176,"y":40}}},
+  "target": {"species":"SHUCKLE","geometry":{"side":"player","spriteCorner":{"x":40,"y":59},"animationCenter":{"x":72,"y":99},"battlePositionCenter":{"x":72,"y":80}}},
+  "fieldProfile": {"playerHp":127,"playerMaxHp":127,"opponentHp":172,"opponentMaxHp":172,"playerGender":"male","opponentGender":"male"}
+}
