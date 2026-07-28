@@ -1,4 +1,30 @@
 ---
+## 590 — [SUPERVISOR VERIFY 2026-07-28 ~04:45] Taunt accepted; Foresight evidence folded
+
+- **State:** reviewed union green at **348 files / 4130 tests** and focused
+  **85/85**; production build, both-oracle info, census regeneration,
+  freshness/ratchets **15/15**, and `git diff --check` pass. Census is exactly
+  **152/214 effects, 280/355 moves, 229/276 Factory-L50 distinct, 2744/2957
+  weighted**, all **42/42**.
+- **Did:** accepted global Taunt `0xd0`, functional-timer representation,
+  end-turn expiry, and generic Factory admission/canceler proof after
+  source/diff review. Folded Foresight source/OFF evidence and independently
+  replayed exact manifest `2c4a774e…05c181864`: Low Kick is immune before
+  Foresight, then reduces Haunter **152→141** after the exposed target bit is
+  set; repeat Foresight is source-confirmed idempotent success, not failure.
+- **Next:** register operand-free `B_SCR_OP_SETFORESIGHT` globally. Prove
+  unconditional target-owned `STATUS2_FORESIGHT`, repeat success, zero local
+  RNG/controller/message work, and the already-shared accuracy/type consumers
+  through a full-turn pre/post Ghost-immunity scenario. Expected census:
+  **153/214, 282/355, 230/276, 2747/2957**.
+- **Notes:** handler inventory is **160**; Foresight switch/faint/Baton-Pass
+  clearing remains source-bounded while the setter and public immunity window
+  are exact. No unsupported/import ratchet, recording import, private handler,
+  controller widening, animation/presentation/tick branch, issue removal,
+  DEFERRED item, or oracle lifecycle action. Animation branch advanced after
+  orient and remains intentionally unmerged until a future orient.
+
+---
 ## 589 — [BOUNDED MAIN WORKER 2026-07-28 ~04:42] Taunt executes and expires through shared mechanics
 
 - **State:** committed `22c5095` + `11c0d5a` + `18d50ec`; tree green at

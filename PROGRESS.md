@@ -15,6 +15,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 593 — [BOUNDED MAIN WORKER 2026-07-28 ~05:02] Revenge executes through shared receipts
+
+- **State:** committed `0255aba` + `25bd18b` + `f2be703`; tree green at
+  **353 files / 4150 tests**, focused opcode/full-turn/rules/ratchet coverage
+  **35/35**, and production build. Both oracle infos, census regeneration,
+  all **42/42** checks, ratchets **6/6**, and `git diff --check` pass. Census
+  is exactly **154/214 effects, 283/355 moves, 231/276 Factory-L50 distinct,
+  2750/2957 weighted**.
+- **Did:** globally registered operand-free one-byte `0xd6`. The attacker-
+  owned physical/special receipt predicate compares each nonzero receipt's
+  owner to the current target; success writes exactly `dmgMultiplier=2`,
+  failure preserves arbitrary incoming multipliers, and both paths advance
+  one byte with no local RNG, controller, or message work. The complete
+  matrix covers zero, mismatches, physical, special, both, mixed owners, and
+  opposite target.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not widen the generic
+  seven-battle controller or extend the retired canonical Battle-2 march.
+- **Notes:** handler inventory **161→162**. A generic Factory full-turn proof
+  has faster real Tackle produce the existing receipt, Revenge consume it
+  through the common doubled damage/PP/message path, shared turn cleanup zero
+  all four receipt fields, and a later Splash→Revenge action reset to
+  multiplier 1 with no leak. No unsupported/import ratchet change, recording
+  import, private handler, controller widening, animation/presentation/tick
+  branch, issue removal, DEFERRED item, or oracle lifecycle action.
+
+---
 ## 592 — [SUPERVISOR VERIFY 2026-07-28 ~04:56] Foresight accepted; Revenge evidence folded
 
 - **State:** reviewed union green at **351 files / 4139 tests** and focused
@@ -70,29 +97,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   No unsupported/import ratchet change, recording import, private handler,
   animation/presentation/tick branch, issue removal, DEFERRED item, or oracle
   lifecycle action.
-
----
-## 590 — [SUPERVISOR VERIFY 2026-07-28 ~04:45] Taunt accepted; Foresight evidence folded
-
-- **State:** reviewed union green at **348 files / 4130 tests** and focused
-  **85/85**; production build, both-oracle info, census regeneration,
-  freshness/ratchets **15/15**, and `git diff --check` pass. Census is exactly
-  **152/214 effects, 280/355 moves, 229/276 Factory-L50 distinct, 2744/2957
-  weighted**, all **42/42**.
-- **Did:** accepted global Taunt `0xd0`, functional-timer representation,
-  end-turn expiry, and generic Factory admission/canceler proof after
-  source/diff review. Folded Foresight source/OFF evidence and independently
-  replayed exact manifest `2c4a774e…05c181864`: Low Kick is immune before
-  Foresight, then reduces Haunter **152→141** after the exposed target bit is
-  set; repeat Foresight is source-confirmed idempotent success, not failure.
-- **Next:** register operand-free `B_SCR_OP_SETFORESIGHT` globally. Prove
-  unconditional target-owned `STATUS2_FORESIGHT`, repeat success, zero local
-  RNG/controller/message work, and the already-shared accuracy/type consumers
-  through a full-turn pre/post Ghost-immunity scenario. Expected census:
-  **153/214, 282/355, 230/276, 2747/2957**.
-- **Notes:** handler inventory is **160**; Foresight switch/faint/Baton-Pass
-  clearing remains source-bounded while the setter and public immunity window
-  are exact. No unsupported/import ratchet, recording import, private handler,
-  controller widening, animation/presentation/tick branch, issue removal,
-  DEFERRED item, or oracle lifecycle action. Animation branch advanced after
-  orient and remains intentionally unmerged until a future orient.
