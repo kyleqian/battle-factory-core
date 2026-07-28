@@ -1,5 +1,34 @@
 # Animation coverage
 
+## MOVE_DIZZY_PUNCH promoted exact; source compositor closes both orientations (2026-07-28)
+
+**Verdict:** `MOVE_DIZZY_PUNCH` is exact. Fresh complete legal set-145
+SPINDA/ONIX Scene-ON evidence passes the entire move-owned body at **69/69**
+frames **90-158** player-back and **69/69** frames **94-162**
+opponent-front through reducer/component state, typed seam, registers,
+hardware OAM/matrices/palettes, side-relative audio, raw RGB, and the shared
+framebuffer, twice fresh. The following clear tail is independently pinned.
+Coverage is now **60 exact / 1 partial / 215 unsupported**.
+
+**Renderer/evidence:** the committed dedicated mGBA probe and portable
+comparator cover both lunges, both ShakeMon2 tasks, both fists, both
+animation-1 IMPACT sprites, all twelve ducks including priority/visibility/
+translation, target monbg, 12:8 alpha, prior-software hardware transfer, and
+cleanup. The source-derived compositor extracts SPINDA front/back,
+ONIX/shared field art, HANDS_AND_FEET, IMPACT, DUCK, chrome, healthboxes, and
+text; its front-only personality spots port `DRAW_SPINDA_SPOTS`, including
+the source 1bpp bit order. Fresh evidence is byte-identical (player
+`5a69e0ff…976`, opponent `c475b845…64c`).
+
+**Source/siblings:** the source audit still proves exactly twelve literal
+ducks and **zero falling feathers** in DIZZY_PUNCH. `MOVE_TEETER_DANCE`
+remains unsupported with its distinct movement task, five fast music-note
+paths, and sounds. `MOVE_SIGNAL_BEAM` remains unsupported with its distinct
+red/green orb stream, sinus timer, shakes, pan sweep, and target palette
+cycle. Neither received an independent acceptance. No battle logic,
+RNG/controller/facility state, boundary list, unsupported barrier, or
+move-number/input-delay/absolute-tick/coordinate/RGB/pixel exception changed.
+
 ## ANIM_TAG_DUCK / MOVE_DIZZY_PUNCH source-and-seam checkpoint; remains unsupported (2026-07-28)
 
 **Verdict:** `MOVE_DIZZY_PUNCH` remains unsupported; coverage stays **59

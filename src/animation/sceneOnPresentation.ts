@@ -1021,6 +1021,8 @@ export interface SceneOnDizzyPunchConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Exact legal carrier personality used by Emerald's front-only spots. */
+  readonly attackerPersonality: number;
 }
 
 export interface SceneOnRazorLeafConfig {

@@ -67,6 +67,7 @@ def main() -> None:
     matrices = oracle.symbols["gOamMatrices"]
     tasks = oracle.symbols["gTasks"]
     battler_ids = oracle.symbols["gBattlerSpriteIds"]
+    battle_mons = oracle.symbols["gBattleMons"]
     faded = oracle.symbols["gPlttBufferFaded"]
     unfaded = oracle.symbols["gPlttBufferUnfaded"]
     visual_count = oracle.symbols["gAnimVisualTaskCount"]
@@ -161,6 +162,10 @@ def main() -> None:
                 "opponent": snapshot["battlers"]["opponent"],
                 "playerSprite": battler(0),
                 "opponentSprite": battler(1),
+                "playerPersonality": oracle.read_u32(battle_mons + 0x48),
+                "opponentPersonality": oracle.read_u32(
+                    battle_mons + 0x58 + 0x48
+                ),
                 "sprites": effects,
                 "tasks": active_tasks(),
                 "visualTaskCount": oracle.read_u8(visual_count),

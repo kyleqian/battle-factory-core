@@ -16,7 +16,7 @@ export interface DizzyPunchDuck {
   readonly x2: number;
   readonly y2: number;
   readonly phase: number;
-  readonly priority: 1 | 3;
+  readonly priority: 2;
   readonly invisible: boolean;
 }
 
@@ -34,7 +34,7 @@ export interface DizzyPunchState {
 }
 
 function sine(index: number, amplitude: number): number {
-  return Math.floor(GBA_SINE_TABLE_256[index & 0xff]! * amplitude / 256);
+  return Math.floor(GBA_SINE_TABLE_256[index & 0xff]! * amplitude / 256) || 0;
 }
 
 function duckWave(
@@ -46,6 +46,9 @@ function duckWave(
 ): readonly DizzyPunchDuck[] {
   const localAge = age - startAge;
   if (localAge < 0 || localAge >= 40) return [];
+  // The callback increments data[3] after sampling Sin(data[3]). The probe
+  // therefore observes phase=3 on the creation display while y2 still
+  // reflects phase zero.
   const phase = (localAge + 1) * 3;
   const scriptX = wave === 0 ? 16 : -16;
   const scriptY = wave === 0 ? 8 : -8;
@@ -56,9 +59,9 @@ function duckWave(
     x: targetCenter.x + signedX,
     y: targetCenter.y + scriptY,
     x2: Math.floor(velocity * (localAge + 1) / 256),
-    y2: sine(phase, DUCK_AMPLITUDES[index]!),
+    y2: sine(phase - 3, DUCK_AMPLITUDES[index]!),
     phase,
-    priority: phase < 128 ? 1 : 3,
+    priority: 2,
     invisible: phase > 100 && phase % 2 !== 0,
   }));
 }
@@ -89,8 +92,17 @@ export function dizzyPunchAtAge(
   const secondLunge = horizontalLungeX2AtTick(
     6, 4, attackerSide, age - 20 + 1,
   );
-  const firstShake = shakeMon2OffsetAtTick(3, 0, 7, 1, age - 6);
-  const secondShake = shakeMon2OffsetAtTick(3, 0, 7, 1, age - 26);
+  // As with the other live-probed animation-script task sites, the
+  // creation-time synchronous Step is not exposed as an independent
+  // display: the first observed age is reducer tick 1.
+  const firstShake = age < 8
+    ? { x2: 0, y2: 0 }
+    : shakeMon2OffsetAtTick(3, 0, 7, 1, age - 8 + 1);
+  const secondShake = age < DIZZY_PUNCH_SECOND_WAVE_AGE
+    ? { x2: 0, y2: 0 }
+    : shakeMon2OffsetAtTick(
+        3, 0, 7, 1, age - DIZZY_PUNCH_SECOND_WAVE_AGE + 1,
+      );
   const firstFistAge = age - 8;
   const secondFistAge = age - DIZZY_PUNCH_SECOND_WAVE_AGE;
   const fists = [

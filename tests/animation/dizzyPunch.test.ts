@@ -50,8 +50,9 @@ describe("MOVE_DIZZY_PUNCH source-relative checkpoint", () => {
     expect(player(67).ducks).toHaveLength(6);
     expect(player(68).ducks).toHaveLength(0);
     expect(player(8).ducks[0]).toMatchObject({
-      wave: 0, x: 192, y: 50, x2: 0, phase: 3, priority: 1,
+      wave: 0, x: 192, y: 50, x2: 0, y2: 0, phase: 3, priority: 2,
     });
+    expect(player(9).ducks[0]).toMatchObject({ y2: -3, phase: 6 });
     expect(player(45).ducks[0]).toMatchObject({
       phase: 114, invisible: false,
     });
@@ -84,7 +85,7 @@ describe("MOVE_DIZZY_PUNCH source-relative checkpoint", () => {
         species: "SPINDA",
         geometry: {
           side: "player",
-          spriteCorner: { x: 40, y: 56 },
+          spriteCorner: { x: 40, y: 52 },
           animationCenter: { x: 72, y: 88 },
           battlePositionCenter: { x: 72, y: 80 },
         },
@@ -104,6 +105,7 @@ describe("MOVE_DIZZY_PUNCH source-relative checkpoint", () => {
         opponentHp: 110,
         opponentMaxHp: 110,
       },
+      attackerPersonality: 0x8c033015,
     });
     expect(sceneOnDizzyPunchView({ ...stage, age: 28 })).toMatchObject({
       age: 28,
@@ -126,6 +128,14 @@ describe("MOVE_DIZZY_PUNCH source-relative checkpoint", () => {
       columns: 2,
       rows: 6,
     });
+    expect(dizzyPunchAsset.spindaSpots).toHaveLength(4);
+    expect(dizzyPunchAsset.spindaSpots.map(({ x, y }) => ({ x, y })))
+      .toEqual([
+        { x: 16, y: 7 },
+        { x: 40, y: 8 },
+        { x: 22, y: 25 },
+        { x: 34, y: 26 },
+      ]);
   });
 
   it("regenerates every owned asset byte-for-byte", () => {

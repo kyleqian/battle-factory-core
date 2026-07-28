@@ -25,6 +25,13 @@ function sprite(path: string, palettePath?: string) {
   };
 }
 
+function spot(index: number, x: number, y: number) {
+  const image = decodeIndexedPng(
+    join(ref, `graphics/pokemon/spinda/spots/spot_${index}.png`),
+  );
+  return { x, y, mask: [...image.indices] };
+}
+
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, `${JSON.stringify({
   source: {
@@ -47,6 +54,12 @@ writeFileSync(out, `${JSON.stringify({
     "graphics/pokemon/spinda/anim_front.png",
     "graphics/pokemon/spinda/normal.pal",
   ),
+  spindaSpots: [
+    spot(0, 16, 7),
+    spot(1, 40, 8),
+    spot(2, 22, 25),
+    spot(3, 34, 26),
+  ],
   duck: sprite("graphics/battle_anims/sprites/duck.png"),
   fist: sprite("graphics/battle_anims/sprites/hands_and_feet.png"),
   hitsplat: sprite("graphics/battle_anims/sprites/impact.png"),

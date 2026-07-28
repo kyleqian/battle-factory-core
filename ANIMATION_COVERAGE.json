@@ -2,6 +2,34 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_DIZZY_PUNCH",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal Factory-party Scene-ON evidence stages real set-145 SPINDA against ONIX in both orientations; the complete move-owned body passes 69/69 source/software, typed-seam, register, hardware OAM/matrix/palette-transfer, side-relative audio, raw-RGB, and shared-framebuffer checks twice fresh at frames 90-158 player-back and 94-162 opponent-front, followed by independently checked clear tails",
+        "the source-relative reducer ports both horizontal lunges, two AnimTask_ShakeMon2 tasks, both fist sprites, both animation-1 IMPACT sprites with 303 affine matrices, both literal six-duck waves including callback translation/visibility and priority 2, target monbg, 12/8 alpha, two target-pan sounds, and complete cleanup",
+        "source extraction byte-pins SPINDA front/back, ONIX/shared field art, ANIM_TAG_HANDS_AND_FEET, ANIM_TAG_IMPACT, and ANIM_TAG_DUCK; the narrow compositor ports prior-software hardware transfer and ordering, front-only personality-dependent DRAW_SPINDA_SPOTS with the source 1bpp bit order, target monbg, affine alpha IMPACT, field chrome, both healthboxes, move text, and teardown",
+        "dizzyPunchProbe.py records every currentMove=146 frame through tools/run-mgba-probe.py, and dizzyPunchPortable.ts proves every reducer/component, software sprite/task, hardware OAM/matrix/palette/register, audio, raw-RGB, and shared-framebuffer receipt twice fresh; independent outputs are byte-identical with player digest 5a69e0ff69f67fd13136174afc4d5ed7a102fb4160063e35cc2d0569c2486976 and opponent digest c475b845dcb0d300fc3a36866feed850943fe3b322e2aaf9fd95853307db064c",
+        "the committed source audit proves exactly twelve gDizzyPunchDuckSpriteTemplate instances and zero gFallingFeatherSpriteTemplate or ANIM_TAG_WHITE_FEATHER commands; falling feathers belong to MOVE_FEATHER_DANCE and were not invented for DIZZY_PUNCH",
+        "MOVE_TEETER_DANCE remains unsupported: it has AnimTask_TeeterDanceMovement, five distinct gFastFlyingMusicNotesSpriteTemplate paths, five sounds, and requires independent complete dense acceptance",
+        "MOVE_SIGNAL_BEAM remains unsupported: it has a distinct red/green orb stream, sinus timer, shakes, pan sweep, and target palette cycle and requires independent complete dense acceptance"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-dizzy-punch-player-spinda-opponent-onix.json",
+        "tools/battle-lab/mechanic-dizzy-punch-opponent-spinda-player-onix.json",
+        "tools/compare/fixtures/dizzy-punch-player-spinda-opponent-onix.json",
+        "tools/compare/fixtures/dizzy-punch-opponent-spinda-player-onix.json",
+        "tools/compare/dizzyPunchProbe.py",
+        "tools/compare/dizzyPunchPortable.ts",
+        "tools/compare/dizzyPunchSourceAudit.ts",
+        "tools/compare/extractDizzyPunchAssets.ts",
+        "src/animation/assets/dizzyPunch.json",
+        "src/animation/dizzyPunch.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/dizzyPunch.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_TAIL_GLOW",
       "status": "exact",
       "covered": [

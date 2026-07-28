@@ -545,6 +545,7 @@ import reflectAsset from "../animation/assets/reflect.json" with { type: "json" 
 import biteAsset from "../animation/assets/bite.json" with { type: "json" };
 import twineedleAsset from "../animation/assets/twineedle.json" with { type: "json" };
 import tailGlowAsset from "../animation/assets/tail-glow.json" with { type: "json" };
+import dizzyPunchAsset from "../animation/assets/dizzyPunch.json" with { type: "json" };
 import synthesisAsset from "../animation/assets/synthesis.json" with { type: "json" };
 import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
 import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
@@ -683,6 +684,7 @@ import {
   sceneOnBiteView,
   sceneOnTwineedleView,
   sceneOnTailGlowView,
+  sceneOnDizzyPunchView,
   sceneOnSwaggerView,
   sceneOnTauntView,
   sceneOnScaryFaceView,
@@ -715,6 +717,7 @@ import {
   type SceneOnBiteConfig,
   type SceneOnTwineedleConfig,
   type SceneOnTailGlowConfig,
+  type SceneOnDizzyPunchConfig,
 } from "../animation/sceneOnPresentation.ts";
 import {
   extremeSpeedBackgroundVariant,
@@ -1016,6 +1019,16 @@ const tailGlowArt = tailGlowAsset as {
   circleOfLight: { tileset: Tileset; palette: RgbColor[] };
   volbeatBack: { tileset: Tileset; palette: RgbColor[] };
   volbeatFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const dizzyPunchArt = dizzyPunchAsset as {
+  duck: { tileset: Tileset; palette: RgbColor[] };
+  fist: { tileset: Tileset; palette: RgbColor[] };
+  hitsplat: { tileset: Tileset; palette: RgbColor[] };
+  spindaBack: { tileset: Tileset; palette: RgbColor[] };
+  spindaFront: { tileset: Tileset; palette: RgbColor[] };
+  spindaSpots: readonly {
+    x: number; y: number; mask: readonly number[];
+  }[];
 };
 const synthesisArt = synthesisAsset as {
   sparkle2: { tileset: Tileset; palette: RgbColor[] };
@@ -2778,6 +2791,35 @@ function subTileset(tileset: Tileset, tileRowOffset: number, rows: number): Tile
     rows,
     tiles: tileset.tiles.slice(tileRowOffset * tileset.columns, (tileRowOffset + rows) * tileset.columns),
   };
+}
+
+/** Source port of `DRAW_SPINDA_SPOTS`, applied only to the front frame. */
+function spindaFrontTilesetAtPersonality(personality: number): Tileset {
+  const source = subTileset(dizzyPunchArt.spindaFront.tileset, 0, 8);
+  const tiles = source.tiles.map((tile) => tile.slice());
+  let bytes = personality >>> 0;
+  for (const spot of dizzyPunchArt.spindaSpots) {
+    const originX = spot.x + ((bytes & 0x0f) - 8);
+    const originY = spot.y + (((bytes >>> 4) & 0x0f) - 8);
+    for (let sy = 0; sy < 16; sy += 1) {
+      for (let sx = 0; sx < 16; sx += 1) {
+        // gfx's 1bpp words are consumed least-significant bit first, opposite
+        // the PNG's left-to-right indexed-pixel order.
+        if (!spot.mask[sy * 16 + (15 - sx)]) continue;
+        const x = originX + sx;
+        const y = originY + sy;
+        if (x < 0 || x >= 64 || y < 0 || y >= 64) continue;
+        const tileIndex = Math.floor(y / 8) * 8 + Math.floor(x / 8);
+        const pixelIndex = (y % 8) * 8 + (x % 8);
+        const color = tiles[tileIndex]![pixelIndex]!;
+        if (color >= 1 && color <= 3) {
+          tiles[tileIndex]![pixelIndex] = color + 4;
+        }
+      }
+    }
+    bytes >>>= 8;
+  }
+  return { ...source, tiles };
 }
 
 const BALL_CLOSED_TILESET = subTileset(summaryBall.tileset, 0, 2);
@@ -15081,6 +15123,167 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "DIZZY_PUNCH") {
+    const punchState =
+      state as SceneOnMovePresentationState<SceneOnDizzyPunchConfig>;
+    const view = sceneOnDizzyPunchView(punchState);
+    // BuildOamBuffer and the OBJ palette transfer precede the callbacks
+    // represented by the reducer. The framebuffer consumes the preceding
+    // software state while registers expose the current script command.
+    const displayed = sceneOnDizzyPunchView({
+      ...punchState,
+      age: punchState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "SPINDA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "SPINDA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged DIZZY_PUNCH pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const spinda = playerToOpponent
+      ? dizzyPunchArt.spindaBack
+      : {
+          ...dizzyPunchArt.spindaFront,
+          tileset: spindaFrontTilesetAtPersonality(state.config.attackerPersonality),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+
+    // `monbg ANIM_TARGET` makes ONIX the target-2 background sampled by
+    // animation-1 IMPACT. Its front idle x2 is cleared when the first
+    // ShakeMon2 task is created.
+    const targetBaselineX2 =
+      playerToOpponent && displayed.age < 8 ? 1 : 0;
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x
+        + targetBaselineX2 + displayed.targetX2,
+      view.target.geometry.spriteCorner.y + displayed.targetY2,
+    );
+    const target2Backdrop = fb.slice();
+
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      spinda.tileset,
+      spinda.palette,
+      view.attacker.geometry.spriteCorner.x + displayed.attackerX2,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawEffects = () => {
+      const duckFrame = subTileset(dizzyPunchArt.duck.tileset, 0, 2);
+      // Equal-priority ducks are sorted by final OAM Y. Paint low Y first
+      // so the larger-Y (lower hardware-OAM) source sprite wins overlap.
+      for (const duck of displayed.ducks.slice().sort(
+        (left, right) =>
+          left.y + left.y2 - (right.y + right.y2)
+          || left.wave - right.wave || left.index - right.index,
+      )) {
+        if (duck.invisible) continue;
+        drawSpriteSheet(
+          fb,
+          duckFrame,
+          dizzyPunchArt.duck.palette,
+          duck.x + duck.x2 - 8,
+          duck.y + duck.y2 - 8,
+        );
+      }
+      if (displayed.alpha) {
+        for (const hitsplat of displayed.hitsplats) {
+          drawSpriteSheetAffineRotateBlendedOverFb(
+            fb,
+            target2Backdrop,
+            dizzyPunchArt.hitsplat.tileset,
+            dizzyPunchArt.hitsplat.palette,
+            hitsplat.x,
+            hitsplat.y,
+            303,
+            0,
+            0,
+            303,
+            displayed.alpha.eva,
+            displayed.alpha.evb,
+            false,
+          );
+        }
+      }
+      const fistFrame = subTileset(dizzyPunchArt.fist.tileset, 0, 4);
+      for (const fist of displayed.fists) {
+        drawSpriteSheet(
+          fb,
+          fistFrame,
+          dizzyPunchArt.fist.palette,
+          fist.x - 16,
+          fist.y - 16,
+        );
+      }
+    };
+    // Source subpriorities put player-back SPINDA in front of effects and
+    // opponent-front SPINDA behind them.
+    if (playerToOpponent) {
+      drawEffects();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawEffects();
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "SPINDA",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "SPINDA" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "SPINDA used" : "Foe SPINDA used",
+      "DIZZY PUNCH!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "TAIL_GLOW") {
     const tailState =
       state as SceneOnMovePresentationState<SceneOnTailGlowConfig>;
