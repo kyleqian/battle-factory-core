@@ -134,6 +134,24 @@ describe("Codex launcher profiles", () => {
     expect(configFrom(lowered.stdout).worker_effort).toBe("high");
   });
 
+  it.each([["--read-only"], ["--audit"]])(
+    "%s selects the commit-free audit postflight",
+    (flag) => {
+      const result = runLauncher("tools/run-subagent.sh", [
+        "--provider",
+        "codex",
+        flag,
+        "--print-config",
+      ]);
+
+      expect(result.status).toBe(0);
+      expect(configFrom(result.stdout)).toMatchObject({
+        worker_provider: "codex",
+        worker_mode: "read-only",
+      });
+    },
+  );
+
   it("rejects Claude or Terra overrides in max mode", () => {
     const claudeSupervisor = runLauncher("run-supervisor.sh", [
       "--max-mode",

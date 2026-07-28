@@ -41,18 +41,6 @@ Per entry:
 - **Workaround:** use plain path text or a `--brief-file`; never place
   backticks or `$()` inside a shell-interpolated brief argument.
 
-## Explicitly read-only workers fail the commit-required postflight
-
-- **What:** a bounded supervisor audit was explicitly told to make no edits or
-  commits and returned a complete report from a clean tree, but
-  `run-subagent.sh` still exited 5 because the Codex worker produced no commit
-  (and misleadingly appended an authentication hint).
-- **Hits:** 1.
-- **Cost each:** ~1 min.
-- **Workaround:** treat the report as usable after independently confirming
-  the clean tree; use a normal execution session for future read-only audits
-  until the launcher distinguishes audit success from missing implementation.
-
 ## Concurrent shared-tree edits fail otherwise-clean worker postflight
 
 - **What:** unrelated S10 edits appeared in the main worktree while a bounded
