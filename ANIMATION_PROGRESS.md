@@ -1,5 +1,31 @@
 # Animation coverage
 
+## MOVE_TWINEEDLE typed seam checkpoint; remains partial (2026-07-28)
+
+**Verdict:** `MOVE_TWINEEDLE` is partial. Fresh complete legal Factory-party
+Scene-ON evidence passes the complete move-owned body and cleanup at **37/37**
+frames **95-131** player-back and **37/37** frames **99-135** opponent-front
+through software/component, typed-seam, hardware-transfer, audio, register, and
+raw-RGB checks, reproduced twice fresh. Coverage is now **57 exact / 2 partial
+/ 217 unsupported**.
+
+**Reusable model/evidence:** the relative-age reducer ports two parallel
+linear stingers, opponent-side inversion, two animation-3 IMPACT sprites,
+`AnimTask_ShakeMon2(target,2,0,5,1)`, monbg/12:8 alpha, both looped sound
+families, and cleanup. Source extraction byte-pins NEEDLE, both template
+contracts, and legal set-154 BEEDRILL art. Independent evidence is
+byte-identical (player `eb52b2a8…6ec1`, opponent `b7022f73…5771`).
+
+**Exact remainder/siblings:** exact remains unclaimed until the shared
+framebuffer path draws BEEDRILL/NEEDLE/IMPACT/chrome and proves all **37/37**
+frames twice fresh in both orientations. `MOVE_PIN_MISSILE` stays unsupported
+because it uses three arcing missile waves, basic hitsplats, and distinct short
+shakes/audio. `MOVE_SPIKE_CANNON` stays unsupported because it adds wind-up/
+return tasks, three attacker-relative stingers, three simultaneous hitsplats,
+and a distinct longer shake/audio body. Neither has independent dense
+acceptance. No battle logic/RNG/controller/facility state, boundary list,
+unsupported barrier, or absolute-tick/input-delay/pixel exception changed.
+
 ## MOVE_BITE promoted exact; SHARP_TEETH framebuffer closed (2026-07-28)
 
 **Verdict:** `MOVE_BITE` is exact. Fresh complete legal Factory-party

@@ -23334,6 +23334,12 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
+  if (state.config.move === "TWINEEDLE") {
+    throw new Error(
+      "TWINEEDLE component seam is staged without framebuffer acceptance",
+    );
+  }
+
   const view = sceneOnFirePunchView(state);
   const { attacker, target, resolution } = view;
   const player = attacker.geometry.side === "player" ? attacker : target;

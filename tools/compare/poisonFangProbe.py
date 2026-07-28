@@ -155,8 +155,8 @@ def main() -> None:
             oracle.advance(segment.get("buttons", [])); frame += 1; capture(frame)
     OUTPUT.write_text(json.dumps({"schema":"poison-fang-dense-evidence/v2","setup":setup,
       "templates":templates,"taskFuncs":{name:symbols[name] for name in task_names},
-      "songHeaders":{"SE_M_RAZOR_WIND2":oracle.read_u32(song_table+145*8),
-                     "SE_M_HORN_ATTACK":oracle.read_u32(song_table+143*8),
+      "songHeaders":{"SE_M_RAZOR_WIND2":oracle.read_u32(song_table+160*8),
+                     "SE_M_HORN_ATTACK":oracle.read_u32(song_table+166*8),
                      "SE_M_BITE":oracle.read_u32(song_table+161*8),
                      "SE_M_LEER":oracle.read_u32(song_table+192*8),
                      "SE_M_SWAGGER":oracle.read_u32(song_table+193*8),

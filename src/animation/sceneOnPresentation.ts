@@ -13,6 +13,10 @@ import {
   type BiteEffect,
 } from "./bite.ts";
 import {
+  twineedleEffectAtAge,
+  type TwineedleEffect,
+} from "./twineedle.ts";
+import {
   metallicShineAtAge,
   type MetallicShineState,
 } from "./metallicShine.ts";
@@ -404,7 +408,8 @@ export interface SceneOnPresentationBattler {
     | "GLALIE"
     | "HITMONCHAN"
     | "WEEPINBELL"
-    | "MEOWTH";
+    | "MEOWTH"
+    | "BEEDRILL";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -912,6 +917,13 @@ export interface SceneOnBiteConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnTwineedleConfig {
+  readonly move: "TWINEEDLE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnSwaggerConfig {
   readonly move: "SWAGGER";
   readonly attacker: SceneOnPresentationBattler;
@@ -1131,6 +1143,7 @@ export type SceneOnMoveConfig =
   | SceneOnPoisonFangConfig
   | SceneOnHyperFangConfig
   | SceneOnBiteConfig
+  | SceneOnTwineedleConfig
   | SceneOnSwaggerConfig
   | SceneOnTauntConfig
   | SceneOnScaryFaceConfig
@@ -1248,6 +1261,12 @@ export interface SceneOnHyperFangView extends HyperFangEffect {
 }
 
 export interface SceneOnBiteView extends BiteEffect {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnTwineedleView extends TwineedleEffect {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2458,6 +2477,28 @@ export function sceneOnBiteView(
     ...biteEffectAtAge(
       state.age,
       state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is TWINEEDLE's first displayed linear-stinger callback step. */
+export function sceneOnTwineedleView(
+  state: SceneOnMovePresentationState<SceneOnTwineedleConfig>,
+): SceneOnTwineedleView {
+  if (state.config.move !== "TWINEEDLE") {
+    throw new Error(
+      `expected TWINEEDLE presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...twineedleEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
       state.config.target.geometry.animationCenter,
     ),
   };
