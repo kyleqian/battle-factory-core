@@ -45,7 +45,7 @@
     "faint": "FaintClearSetData zeroes status2, statuses3, and the active DisableStruct, then resets gLastMoves."
   },
   "case": {
-    "id": "minun-encore-chansey-success-forced-duplicate-off",
+    "id": "minun-encore-chansey-success-tackle-window-duplicate-off",
     "scenario": "tools/battle-lab/mechanic-encore-minun-chansey-off.json",
     "scenarioSha256": "d35ca78f86033779aaa8b369f34b16e169a23d5e286720ad728ba41baa356024",
     "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "329676e3ac0cfb47f22254562dc910a2203d4531040d6392c0bb65030fe8bba2"},
@@ -54,9 +54,9 @@
       "initial": {"frame": 0, "sha256": "72f65b61f8c57085009cd1900186b1ac0bee9d17e7220ec470e86957beab806b", "rngValue": 919694434, "currentMove": 0, "playerPp": [35,40,5,40], "opponentPp": [35,35,35,35]},
       "lastMoveStaged": {"frame": 325, "sha256": "603330a07665add2b39ceacbc9788496947cc0512ec7490462cdbe14d2dceecd", "currentMove": 0, "opponentPp": [35,34,35,35]},
       "encoreSuccess": {"frame": 725, "sha256": "1d6420babbd6c74de9ecf1b50fddd6aafb4a2f7aa535d939b40be2651178fdb1", "rngValue": 2319805938, "currentMove": 227, "playerPp": [34,40,4,40], "opponentPp": [35,34,35,35]},
-      "firstForcedTackle": {"frame": 875, "sha256": "c17ee58ef355760555877b7a6308e7a6da80bf3a9ca57f40fa28e351add8e4ec", "currentMove": 33, "opponentPp": [34,34,35,35]},
+      "firstTackleDuringEncoreWindow": {"frame": 875, "sha256": "c17ee58ef355760555877b7a6308e7a6da80bf3a9ca57f40fa28e351add8e4ec", "currentMove": 33, "opponentPp": [34,34,35,35]},
       "duplicateEncoreFailureAfterPp": {"frame": 1350, "sha256": "566f8c87a072beb99e2dd129f0fee2af72f03eb8fe091d5158df629f5fc9c888", "rngValue": 1300148282, "currentMove": 227, "playerPp": [34,40,3,40], "opponentPp": [34,34,35,35]},
-      "repeatedForcedTackle": {"frame": 1500, "sha256": "38a74f600e8feca36c7c43c9da621e562f29743cbc8ad0edd4df62b921edfe12", "currentMove": 33, "opponentPp": [33,34,35,35]}
+      "repeatedTackleDuringEncoreWindow": {"frame": 1500, "sha256": "38a74f600e8feca36c7c43c9da621e562f29743cbc8ad0edd4df62b921edfe12", "currentMove": 33, "opponentPp": [33,34,35,35]}
     }
   },
   "boundedRemainder": "The public OFF manifest exposes active move id, PP, RNG, controller state, party checksums, and framebuffer hashes, but not gLastMoves, DisableStruct fields, script PC/result flags, controller buffers, AI chosen-slot state, or the expiry message ID. It proves a real prior Tackle, successful Encore PP spend, target-side Tackle PP spends while the effect is active, repeat Encore PP spend/failure, and deterministic output. The timer formula/draw ordering, exact failure predicates, forced-choice replacement, expiry, interactions with Disable/Torment, and switch/faint/Baton Pass cleanup are source-pinned; the identical four Chansey slots intentionally cannot distinguish a free post-expiry Tackle from a forced one. No production opcode is registered."

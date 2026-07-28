@@ -53,7 +53,7 @@ describe("Battle Scene OFF Encore / trysetencore evidence", () => {
     expect(messages).toContain('static const u8 sText_PkmnEncoreEnded[] = _("{B_ATK_NAME_WITH_PREFIX}\'s ENCORE\\nended!");');
   });
 
-  it("keeps the complete-party OFF success, forced-target-PP, and duplicate receipt reproducible", () => {
+  it("keeps the complete-party OFF success, Tackle-window PP, and duplicate receipt reproducible", () => {
     expect(evidence.schema).toBe("encore-off-evidence/v1");
     expect(sha256(evidence.case.scenario)).toBe(evidence.case.scenarioSha256);
     expect(evidence.case.repeatability).toEqual({ runs: 2, comparison: "byte-identical full manifest.json", manifestSha256: "329676e3ac0cfb47f22254562dc910a2203d4531040d6392c0bb65030fe8bba2" });
@@ -67,9 +67,9 @@ describe("Battle Scene OFF Encore / trysetencore evidence", () => {
     for (const observed of Object.values(evidence.case.observed)) expect(scenario.trace.captureFrames).toContain(observed.frame);
     const observed = evidence.case.observed;
     expect(observed.encoreSuccess).toMatchObject({ currentMove: 227, playerPp: [34, 40, 4, 40], opponentPp: [35, 34, 35, 35] });
-    expect(observed.firstForcedTackle).toMatchObject({ currentMove: 33, opponentPp: [34, 34, 35, 35] });
+    expect(observed.firstTackleDuringEncoreWindow).toMatchObject({ currentMove: 33, opponentPp: [34, 34, 35, 35] });
     expect(observed.duplicateEncoreFailureAfterPp).toMatchObject({ currentMove: 227, playerPp: [34, 40, 3, 40], opponentPp: [34, 34, 35, 35] });
-    expect(observed.repeatedForcedTackle).toMatchObject({ currentMove: 33, opponentPp: [33, 34, 35, 35] });
+    expect(observed.repeatedTackleDuringEncoreWindow).toMatchObject({ currentMove: 33, opponentPp: [33, 34, 35, 35] });
     expect(evidence.boundedRemainder).toContain("not gLastMoves");
   });
 });
