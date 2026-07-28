@@ -262,6 +262,22 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // finding, never actually set by any production code path). 2 total, both
   // reachability-tested in tests/battleScriptTryKOOpcode.test.ts.
   ["src/engine/battleScriptTryKOOpcode.ts", 2],
+  // B_SCR_OP_FORCERANDOMSWITCH/SWITCHOUTABILITIES/RETURNTOBALL/FINISHACTION
+  // registration (EFFECT_ROAR, docs/roar-multihit-registration-scout.md §4
+  // rungs 10-14): Cmd_forcerandomswitch/Cmd_switchoutabilities/
+  // Cmd_returntoball register with zero barriers (the trainer-battle branch
+  // is Factory's only reachable one, source-complete). B_SCR_OP_FINISHACTION
+  // is the one barrier -- registered as an unconditional (b) guard rather
+  // than a real implementation, per docs/script-terminal-gate3-evidence.md's
+  // own explicit deferral (a correct Cmd_finishaction needs a typed
+  // action-scheduler receipt this engine does not have yet). Doubly
+  // unreachable for Factory: BattleScript_SuccessForceOut's own
+  // jumpifbattletype BATTLE_TYPE_TRAINER fork always taken, and even the
+  // counterfactual non-trainer arm barriers first on the preceding
+  // setoutcomeonteleport/VARIOUS_SET_TELEPORT_OUTCOME (already-registered
+  // generic VARIOUS dispatcher). Reachability-tested directly in
+  // tests/battleScriptForceSwitchOpcode.test.ts.
+  ["src/engine/battleScriptForceSwitchOpcode.ts", 1],
 ]);
 
 function recordingImportsIn(file: string): string[] {
