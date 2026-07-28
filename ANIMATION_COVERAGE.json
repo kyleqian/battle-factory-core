@@ -179,8 +179,8 @@
         "MOVE_SECRET_POWER remains unsupported: Factory battles use BATTLE_ENVIRONMENT_BUILDING and dispatch to Move_STRENGTH, while only the cave branch dispatches to Move_BITE; its environment task and building body require independent complete dense evidence"
       ],
       "evidence": [
-        "tools/battle-lab/mechanic-poison-fang-player-zubat-opponent-onix.json",
-        "tools/battle-lab/mechanic-poison-fang-opponent-zubat-player-onix.json",
+        "tools/battle-lab/mechanic-spike-cannon-player-omastar-opponent-onix.json",
+        "tools/battle-lab/mechanic-spike-cannon-opponent-omastar-player-onix.json",
         "tools/compare/fixtures/bite-player-meowth-opponent-onix.json",
         "tools/compare/fixtures/bite-opponent-meowth-player-onix.json",
         "tools/compare/poisonFangProbe.py",

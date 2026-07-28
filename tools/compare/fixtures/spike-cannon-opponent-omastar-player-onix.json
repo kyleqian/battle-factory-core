@@ -1,7 +1,7 @@
 {
   "schema": "scene-on-spike-cannon-portable/v1",
   "oracleProfile": "battle-scene-on",
-  "scenario": "tools/battle-lab/mechanic-poison-fang-opponent-zubat-player-onix.json",
+  "scenario": "tools/battle-lab/mechanic-spike-cannon-opponent-omastar-player-onix.json",
   "probe": "tools/compare/spikeCannonProbe.py",
   "pair": "Factory set-260 OMASTAR opponent-front -> ONIX player-back",
   "orientation": "opponent-to-player",

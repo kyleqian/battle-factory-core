@@ -23,17 +23,7 @@ MOVE = 131
 
 
 def main() -> None:
-    # The fixture's otherwise complete parties are deliberately neutral.  Replace
-    # its active placeholder with the real Level-50 Factory set-260 carrier in
-    # either orientation, and constrain all four choices without injecting AI.
     request = json.loads(SCENARIO.read_text())
-    for side in ("player", "opponent"):
-        mon = request["overrides"]["parties"][side][0]
-        if mon["species"] == 41:
-            mon.update({"species": 139, "nature": 24, "moves": [MOVE] * 4,
-                        "item": 219, "abilitySlot": 0})
-            mon["evs"] = {"hp": 255, "attack": 0, "defense": 0,
-                          "speed": 0, "spAttack": 255, "spDefense": 0}
     request = validate_request(request, "battle-scene-on")
     reference = (ROOT / "reference" / "pokeemerald").resolve()
     oracle = EmeraldOracle(reference / "pokeemerald.gba", reference / "pokeemerald.map",

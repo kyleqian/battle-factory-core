@@ -18,7 +18,8 @@ linear NEEDLE stingers, three simultaneous animation-2 invert hitsplats,
 audio families, source OAM transfer ordering, and cleanup. The typed seam and
 shared compositor use source-extracted Omastar art plus the source-identical
 Twineedle NEEDLE, linear-stinger, invert-hitsplat, ShakeMon2, alpha, and
-cleanup primitives. The portable verifier records tasks/sprites, OAM,
+cleanup primitives. Dedicated complete legal mechanic-lab scenarios now
+materialize the set-260 Omastar directly. The portable verifier records tasks/sprites, OAM,
 matrices, palettes, registers, audio, raw RGB, and the application
 framebuffer on every frame. No battle logic, RNG, turn order, controller,
 facility state, boundary list, or unsupported barrier changed.
