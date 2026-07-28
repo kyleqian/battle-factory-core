@@ -4,6 +4,7 @@ import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import {
   applyAnimationDisplayIntervalWorkload,
+  produceAnimationDisplayIntervalWorkload,
   type AnimationGpuRegisterState,
 } from "../../src/animation/gpuRegisterQueue.ts";
 
@@ -12,12 +13,21 @@ const BEFORE_WRITE = 0x0e02;
 const AFTER_WRITE = 0x0d03;
 
 interface ProbeSnapshot {
+  readonly frame: number;
   readonly age: number;
   readonly kind: string;
   readonly vcount: number;
   readonly bufferedBldalpha: number;
   readonly hardwareBldalpha: number;
   readonly waitingIndex: number | null;
+  readonly audio: Readonly<{
+    readonly pcmDmaCounter: number;
+    readonly vblankPcmDmaCounter: number;
+    readonly c15: number;
+    readonly pcmDmaPeriod: number;
+    readonly maxLines: number;
+    readonly activeChannelFlags: readonly number[];
+  }>;
   readonly before?: Readonly<{
     readonly bufferedBldalpha: number;
   }>;
@@ -25,6 +35,7 @@ interface ProbeSnapshot {
 
 interface ProbeRun {
   readonly label: "canonical" | "delayed30";
+  readonly audioAnchor: ProbeSnapshot["audio"];
   readonly events: readonly ProbeSnapshot[];
 }
 
@@ -77,15 +88,38 @@ for (const run of evidence.runs) {
       previousSample.waitingIndex === null ? [] : [BLDALPHA],
   };
   const modeled = applyAnimationDisplayIntervalWorkload(beforeInterval, {
-    steps: [
-      { kind: "copy-buffered-registers", vcount: 166 },
-      {
-        kind: "run-tasks",
-        vcount: write.vcount,
-        gpuWrites: [{ offset: BLDALPHA, value: AFTER_WRITE }],
+    ...produceAnimationDisplayIntervalWorkload({
+      vblanksSinceAudioAnchor: previousSample.frame,
+      pcmDma: {
+        counterAtAnchor: run.audioAnchor.vblankPcmDmaCounter,
+        period: run.audioAnchor.pcmDmaPeriod,
+        cgbCounterAtAnchor: run.audioAnchor.c15,
+        cgbPeriod: 15,
+        mixerOverrunCgbPhases: [3],
       },
-    ],
+      gpuWrites: [{ offset: BLDALPHA, value: AFTER_WRITE }],
+    }),
   });
+  const producedRunTasks = produceAnimationDisplayIntervalWorkload({
+    vblanksSinceAudioAnchor: previousSample.frame,
+    pcmDma: {
+      counterAtAnchor: run.audioAnchor.vblankPcmDmaCounter,
+      period: run.audioAnchor.pcmDmaPeriod,
+      cgbCounterAtAnchor: run.audioAnchor.c15,
+      cgbPeriod: 15,
+      mixerOverrunCgbPhases: [3],
+    },
+    gpuWrites: [{ offset: BLDALPHA, value: AFTER_WRITE }],
+  }).steps[1];
+  if (
+    producedRunTasks?.kind !== "run-tasks"
+    || producedRunTasks.vcount !== write.vcount
+  ) {
+    throw new Error(
+      `${run.label}: audio workload produced VCOUNT `
+      + `${producedRunTasks?.vcount}, observed ${write.vcount}`,
+    );
+  }
   if (
     modeled.buffered[BLDALPHA] !== currentSample.bufferedBldalpha
     || modeled.hardware[BLDALPHA] !== currentSample.hardwareBldalpha
