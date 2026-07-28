@@ -68,10 +68,10 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // SHADOW_PUNCH closes its complete hardware/framebuffer seam as exact.
-        unsupported: 219,
+        // BITE now has a complete component seam but no framebuffer claim.
+        unsupported: 218,
         staged: 0,
-        partial: 1,
+        partial: 2,
         exact: 56,
       },
       {

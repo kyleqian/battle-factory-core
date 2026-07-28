@@ -1,5 +1,29 @@
 # Animation coverage
 
+## MOVE_BITE promoted partial; SHARP_TEETH typed seam checkpoint (2026-07-28)
+
+**Verdict:** `MOVE_BITE` is partial. Fresh complete legal Factory-party
+Scene-ON evidence passes the complete **26/26** sharp-teeth-through-cleanup
+component window at frames **80-105** player-back and **84-109**
+opponent-front. Coverage is now **56 exact / 2 partial / 218 unsupported**.
+
+**Reusable model/evidence:** the relative-age reducer and typed presentation
+seam port both `gSharpTeethSpriteTemplate` affine programs, signed 8.8
+translation, animation-2 IMPACT, `AnimTask_ShakeMon(target,0,4,7,1)`, monbg,
+12/8 alpha, side-relative `SE_M_BITE`, and teardown. The fresh portable probe
+passes both orientations; a second independent replay is byte-identical
+(player `3ad220d1…5a59`, opponent `db087980…f12`).
+
+**Exact remainder/siblings:** exact remains unclaimed until the shared
+framebuffer path draws SHARP_TEETH and proves complete hardware
+OAM/matrix/palette/register transfer, audio, raw RGB, and framebuffer equality
+twice fresh. `MOVE_CRUNCH` stays unsupported because it adds BG_DARK
+fade/restore and a second distinct diagonal bite/shake pass. `MOVE_SECRET_POWER`
+stays unsupported because the Factory building environment dispatches to
+`Move_STRENGTH`; only its cave branch reaches `Move_BITE`. Neither has its own
+complete dense acceptance. No battle state, RNG/controller/facility logic,
+boundary list, unsupported barrier, or absolute-tick branch changed.
+
 ## MOVE_FAINT_ATTACK typed workload seam checkpoint; remains partial (2026-07-28)
 
 **Verdict:** `MOVE_FAINT_ATTACK` remains the sole partial. Canonical

@@ -1,0 +1,12 @@
+{
+  "schema": "scene-on-portable-component/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-poison-fang-opponent-zubat-player-onix.json",
+  "probe": "tools/compare/poisonFangProbe.py",
+  "probeMoveId": 44,
+  "pair": "Factory set-56 MEOWTH opponent-front -> ONIX player-back",
+  "move": "BITE",
+  "denseWindow": { "startFrame": 84, "endFrame": 109 },
+  "targetSide": "player",
+  "targetCenter": { "x": 72, "y": 88 }
+}

@@ -2,6 +2,30 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_BITE",
+      "status": "partial",
+      "covered": [
+        "fresh complete legal Factory-party Scene-ON evidence stages real set-56 MEOWTH against ONIX in both orientations; the move-owned sharp-teeth-through-blendoff window is frames 80-105 player-back and 84-109 opponent-front",
+        "the source-relative reducer and typed presentation seam port both gSharpTeethSpriteTemplate affine programs, signed 8.8 inward/outward translation, animation-2 IMPACT, AnimTask_ShakeMon(target,0,4,7,1), target monbg, 12/8 alpha, side-relative SE_M_BITE pan, and clear teardown",
+        "bitePortable.ts proves all 26/26 source-component frames in both orientations; independent fresh probe replays are byte-identical with player digest 3ad220d18c7c50a49325e03ef4af578022adb713baceaf7eb0c4047aa55c5a59 and opponent digest db087980c29b02ac94aed957dcf1331de182d1da70cf6dae90deeab4bd655f12",
+        "exact remains unclaimed: the narrow shared framebuffer compositor does not yet draw SHARP_TEETH or prove complete hardware OAM/matrices/palette/register transfer, live raw RGB, and shared framebuffer equality across this body twice fresh",
+        "MOVE_CRUNCH remains unsupported: source adds BG_DARK fade/restore plus a second diagonal sharp-teeth/IMPACT/ShakeMon sequence with distinct animations, offsets, and shake arguments, requiring its own complete dense evidence",
+        "MOVE_SECRET_POWER remains unsupported: Factory battles use BATTLE_ENVIRONMENT_BUILDING and dispatch to Move_STRENGTH, while only the cave branch dispatches to Move_BITE; its environment task and building body require independent complete dense evidence"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-poison-fang-player-zubat-opponent-onix.json",
+        "tools/battle-lab/mechanic-poison-fang-opponent-zubat-player-onix.json",
+        "tools/compare/fixtures/bite-player-meowth-opponent-onix.json",
+        "tools/compare/fixtures/bite-opponent-meowth-player-onix.json",
+        "tools/compare/poisonFangProbe.py",
+        "tools/compare/bitePortable.ts",
+        "src/animation/bite.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "tests/animation/bite.test.ts"
+      ],
+      "remaining": "Keep MOVE_BITE partial. Extract and byte-pin SHARP_TEETH assets, port the narrow shared framebuffer compositor, and prove the complete 26-frame body plus cleanup through hardware OAM/matrices/palette/register transfer, live audio, raw RGB, and shared framebuffer equality twice fresh in both orientations."
+    },
+    {
       "move": "MOVE_REFLECT",
       "status": "exact",
       "covered": [
