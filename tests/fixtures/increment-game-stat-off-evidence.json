@@ -1,0 +1,52 @@
+{
+  "schema": "increment-game-stat-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "game_stat.h": "29bc568383055b24dfb42a5029bad2aa00f36b28186b5e67d20a1b1687f8fef8",
+    "overworld.c": "3d96ac7b912ef03073215f68c3117390407d93be697756d6d60c4dc91e302798",
+    "global.h": "92746f8d14e16020be235f5e88b901043e7a806613e9dedfabc21ca493631656",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle.h": "bba2f9d9b3d98fa01b5f0a8f7dede9f2f0be5617c735242b741a7e0c8e4a5d1e",
+    "mauville_old_man.c": "4330112555c7cdf2b3fd0f8ba98a0f17a91d8065dc4f3f3f21021692947e6b3c",
+    "battle_factory.c": "7762bf366045ed91a3c280a7e4d20ccc9df9bba305c529ad6b24df2250a072f6"
+  },
+  "instruction": {
+    "opcode": 96,
+    "opcodeHex": "0x60",
+    "length": 2,
+    "operand": {"width": 1, "encoding": "raw u8 game-stat index", "read": "gBattlescriptCurrInstr[1]"},
+    "pc": "gBattlescriptCurrInstr += 2",
+    "gate": "GetBattlerSide(gBattlerAttacker) == B_SIDE_PLAYER",
+    "sideEffects": {"rngCalls": 0, "controller": "none", "message": "none", "battleTypeGate": "none"}
+  },
+  "stats": {
+    "splash": {"symbol": "GAME_STAT_USED_SPLASH", "id": 26},
+    "struggle": {"symbol": "GAME_STAT_USED_STRUGGLE", "id": 27},
+    "validIndices": "0 <= index < NUM_USED_GAME_STATS (52)",
+    "storage": "gSaveBlock1Ptr->gameStats[64] encrypted with gSaveBlock2Ptr->encryptionKey",
+    "increment": "decode GetGameStat, saturate at 0xFFFFFF, encode SetGameStat; out-of-range indices do nothing",
+    "ownership": "save/meta state; not Battle Factory round state and not exposed by battle-lab manifests. Outside the Factory, Mauville's Storyteller has visible Splash and Struggle story entries at threshold 1."
+  },
+  "scripts": {
+    "recoil": "BattleScript_EffectRecoil: setmoveeffect recoil -> jumpifnotmove MOVE_STRUGGLE -> incrementgamestat GAME_STAT_USED_STRUGGLE -> goto BattleScript_EffectHit. Non-Struggle recoil skips the opcode; the shared hit route later owns attackcanceler, attackstring, ppreduce, damage/recoil, messages, and MoveEnd.",
+    "splash": "BattleScript_EffectSplash: attackcanceler -> attackstring -> ppreduce -> attackanimation -> waitanimation -> incrementgamestat GAME_STAT_USED_SPLASH -> printstring STRINGID_BUTNOTHINGHAPPENED -> waitmessage -> MoveEnd. PP is therefore deducted before the stat write; the nothing-happened message follows it."
+  },
+  "case": {
+    "scenario": "tools/battle-lab/mechanic-splash-magikarp-off.json",
+    "scenarioSha256": "eae7dcf0e490695f4c458b61609e25ef239bfd8cf9565c54a542b8f67ede552f",
+    "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "3a4f4af1b89c239e61d4f6d188cd56ba92b04077d9f7722d838c3c02001fc9ff"},
+    "builtPartyChecksumsValid": [true,true,true,true,true,true],
+    "captures": [
+      {"frame":0,"sha256":"da0f35fd3926493235fc9c320ef5d28547bd27bbbbb16ea20f55ee5b30fcb0f7","rngValue":919694434,"currentMove":0,"player":{"hp":95,"pp":[40,40,40,40]},"opponent":{"hp":127,"pp":[35,35,35,35]}},
+      {"frame":50,"sha256":"bb3ac31bcb3f625fd46fc620a48fd9155c43bb8573fd127141e2312542a2f0d2","rngValue":919694434,"currentMove":150,"player":{"hp":95,"pp":[40,40,40,40]},"opponent":{"hp":127,"pp":[35,35,35,35]}},
+      {"frame":75,"sha256":"11a23dd2b2957413e7326ecb4b854fbe0a33d868e5eda4ea24ddd35722df77ea","rngValue":919694434,"currentMove":150,"player":{"hp":95,"pp":[39,40,40,40]},"opponent":{"hp":127,"pp":[35,35,35,35]}},
+      {"frame":125,"sha256":"db8cb57d563e47d8804af266b27f2091e3a08c9935000909097c856e6926e72a","rngValue":919694434,"currentMove":150,"player":{"hp":95,"pp":[39,40,40,40]},"opponent":{"hp":127,"pp":[35,35,35,35]}},
+      {"frame":175,"sha256":"db8cb57d563e47d8804af266b27f2091e3a08c9935000909097c856e6926e72a","rngValue":919694434,"currentMove":150,"player":{"hp":95,"pp":[39,40,40,40]},"opponent":{"hp":127,"pp":[35,35,35,35]}}
+    ]
+  },
+  "boundedRemainder": "The real Scene-OFF carrier receipt establishes normal Splash selection and PP-before-message timing but manifests do not expose gSaveBlock1 gameStats, script PC, or the attacker-side gate. A legal forced-Struggle receipt would require exhausting all four move PP by ROM actions; the public staging contract forbids injecting zero PP or transient state, so that long route is deliberately not manufactured. Source pins both hidden writes, saturation/encryption, all battle-type independence, and opponent-side no-write behavior. Mauville Storyteller is an out-of-round visible consumer at threshold 1; no seven-battle Factory outcome, swap, round counter, battle state, RNG, controller synchronization, or presentation behavior reads these two game stats. A future faithful full-save port should own the optional counters in a save/meta layer invoked after the rules-machine opcode gate, not in facility round state."
+}
