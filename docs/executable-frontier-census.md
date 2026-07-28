@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 141 | 214 | 65.9% |
-| Moves (unweighted, all 355) | 267 | 355 | 75.2% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 218 | 276 | 79.0% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2701 | 2957 | 91.3% |
+| Effect scripts | 142 | 214 | 66.4% |
+| Moves (unweighted, all 355) | 268 | 355 | 75.5% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 219 | 276 | 79.3% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2706 | 2957 | 91.5% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -24,7 +24,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | Missing opcode(s) | Effects unlocked | Moves unlocked (unweighted) | Factory-L50 moves (unweighted) | Factory-L50 weighted |
 | --- | --- | --- | --- | --- |
 | `B_SCR_OP_GETSECRETPOWEREFFECT` | 1 (EFFECT_SECRET_POWER) | 1 | 1 | 6 |
-| `B_SCR_OP_FURYCUTTERCALC` | 1 (EFFECT_FURY_CUTTER) | 1 | 1 | 5 |
 | `B_SCR_OP_SETFORCEDTARGET` | 1 (EFFECT_FOLLOW_ME) | 1 | 1 | 5 |
 | `B_SCR_OP_SETMINIMIZE` | 1 (EFFECT_MINIMIZE) | 1 | 1 | 5 |
 | `B_SCR_OP_TRYSETHELPINGHAND` | 1 (EFFECT_HELPING_HAND) | 1 | 1 | 5 |
@@ -48,6 +47,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_PAINSPLITDMGCALC` | 1 (EFFECT_PAIN_SPLIT) | 1 | 1 | 2 |
 | `B_SCR_OP_SETFOCUSENERGY` | 1 (EFFECT_FOCUS_ENERGY) | 1 | 1 | 2 |
 | `B_SCR_OP_SETTAUNT` | 1 (EFFECT_TAUNT) | 1 | 1 | 2 |
+| `B_SCR_OP_STOCKPILE` | 1 (EFFECT_STOCKPILE) | 1 | 1 | 2 |
 
 ## Per-effect detail
 
@@ -172,7 +172,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_ENDURE | `BattleScript_EffectEndure` | executable | - | - | 1 | 1 (24) |
 | EFFECT_ROLLOUT | `BattleScript_EffectRollout` | executable | - | - | 2 | 2 (7) |
 | EFFECT_SWAGGER | `BattleScript_EffectSwagger` | executable | - | - | 1 | 1 (23) |
-| EFFECT_FURY_CUTTER | `BattleScript_EffectFuryCutter` | blocked-on-opcodes | `B_SCR_OP_FURYCUTTERCALC` (edge branch only) | - | 1 | 1 (5) |
+| EFFECT_FURY_CUTTER | `BattleScript_EffectFuryCutter` | executable | - | - | 1 | 1 (5) |
 | EFFECT_ATTRACT | `BattleScript_EffectAttract` | executable | - | - | 1 | 1 (45) |
 | EFFECT_RETURN | `BattleScript_EffectReturn` | executable | - | - | 1 | 1 (8) |
 | EFFECT_PRESENT | `BattleScript_EffectPresent` | blocked-on-opcodes | `B_SCR_OP_PRESENTDAMAGECALCULATION` (edge branch only) | - | 1 | 1 (1) |

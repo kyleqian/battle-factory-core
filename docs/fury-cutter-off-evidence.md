@@ -1,8 +1,11 @@
 # Fury Cutter — Battle Scene OFF evidence
 
-This is an evidence checkpoint for `B_SCR_OP_FURYCUTTERCALC` only; it does
-not register an opcode or change production battle code. The hermetic source,
-fixture, and scenario assertion is `tests/furyCutterOracleEvidence.test.ts`.
+This dossier began as the evidence checkpoint for
+`B_SCR_OP_FURYCUTTERCALC`. The source/oracle fixture remains pinned by
+`tests/furyCutterOracleEvidence.test.ts`; the globally registered production
+opcode and generic full-turn proof are pinned separately by
+`tests/battleScriptFuryCutterOpcode.test.ts` and
+`tests/factoryBattleScriptFuryCutterFullTurn.test.ts`.
 
 ## Source contract
 
@@ -80,4 +83,7 @@ party checksums, and controller state. They do not expose the Fury Cutter
 counter, dynamic power, move-result flags, battle-script PC, attacker/target
 indices, critical flag, or random-damage multiplier. `tests/fixtures/
 fury-cutter-off-evidence.json` source-pins those hidden semantics and all
-scenario/manifest hashes.
+scenario/manifest hashes. Tier 1 now executes both visits through
+`BattleScript_FuryCutterHit`, including its post-type no-effect loop, while
+the full-turn test proves repeated manual PP spend, ordinary-move
+persistence, the cap, and absence of a forced multi-turn lock.

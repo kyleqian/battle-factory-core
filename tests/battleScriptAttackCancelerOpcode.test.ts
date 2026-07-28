@@ -316,7 +316,16 @@ describe("production opcode 0 (Cmd_attackcanceler) dispatch", () => {
 
     it("applies the real DEFENDER_IS_PROTECTED effect and advances (Protect success)", () => {
       const result = stepOpcodeZero(
-        withSinglesAttacker(0, {}, {}, { protected: 1 }),
+        withSinglesAttacker(
+          0,
+          {
+            furyCutterCounter: 4,
+            rolloutTimer: 3,
+            status2: BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS,
+          },
+          {},
+          { protected: 1 },
+        ),
       );
       expect(result.kind).toBe("advanced");
       if (result.kind !== "advanced") throw new Error("expected advance");
@@ -324,6 +333,14 @@ describe("production opcode 0 (Cmd_attackcanceler) dispatch", () => {
       expect(next?.opcodeName).toBe("B_SCR_OP_ACCURACYCHECK");
       expect(result.state.rulesContext.moveResultFlags & 1).toBe(1); // MOVE_RESULT_MISSED
       expect(result.state.rulesContext.missType).toBe(1); // B_MSG_PROTECTED
+      expect(result.state.rulesContext.battlers[0]).toMatchObject({
+        furyCutterCounter: 0,
+        rolloutTimer: 0,
+      });
+      expect(
+        result.state.rulesContext.battlers[0].status2
+        & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS,
+      ).toBe(0);
     });
 
     it("does not trigger Protect for a move without FLAG_PROTECT_AFFECTED", () => {

@@ -22,15 +22,13 @@ import {
 } from "./battleScriptMachine.ts";
 import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
 import type {
-  BattleScriptRulesBattlerState,
-  BattleScriptRulesBattlers,
   BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
 import { isDefenderProtected } from "./battleScriptHitChainOpcode.ts";
+import { cancelBattleScriptMultiTurnMoves } from "./battleScriptMultiTurnCancellation.ts";
 import {
   BATTLE_SCRIPT_MOVE_RESULT_MISSED,
   BATTLE_SCRIPT_STATUS2_MASKS,
-  BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE,
 } from "./battleScriptSourceConstants.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
 
@@ -59,21 +57,6 @@ function isTwoTurnsMove(move: number): boolean {
     || effect === "EFFECT_SOLAR_BEAM"
     || effect === "EFFECT_SEMI_INVULNERABLE"
     || effect === "EFFECT_BIDE";
-}
-
-/** CancelMultiTurnMoves (battle_util.c:877-888). */
-function cancelMultiTurnMoves(battler: BattleScriptRulesBattlerState): BattleScriptRulesBattlerState {
-  return Object.freeze({
-    ...battler,
-    status2: (battler.status2
-      & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
-      & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_LOCK_CONFUSE
-      & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_UPROAR
-      & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_BIDE) >>> 0,
-    status3: (battler.status3 & ~BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE) >>> 0,
-    rolloutTimer: 0,
-    furyCutterCounter: 0,
-  });
 }
 
 function requireLabelProgramCounter(program: BattleScriptProgram, label: string): number {
@@ -256,14 +239,12 @@ function resolveTailBranches(
     return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext, rng });
   }
 
-  const battlers = rulesContext.battlers.map((candidate, index) =>
-    index === attacker ? cancelMultiTurnMoves(candidate) : candidate
-  ) as unknown as BattleScriptRulesBattlers;
+  const cancelled = cancelBattleScriptMultiTurnMoves(rulesContext, attacker);
   const clearAt = (halfwords: readonly number[]) =>
     Object.freeze(halfwords.map((value, index) => (index === target ? 0 : value)));
   const nextRulesContext = Object.freeze({
     ...rulesContext,
-    battlers: Object.freeze(battlers),
+    battlers: cancelled.rulesContext.battlers,
     moveResultFlags: (rulesContext.moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_MISSED) >>> 0,
     missType: 1, // B_MSG_PROTECTED (include/constants/battle_string_ids.h:410)
     moveHistory: Object.freeze({
