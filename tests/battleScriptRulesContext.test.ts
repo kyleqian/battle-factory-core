@@ -188,6 +188,7 @@ describe("source-shaped Battle Script rules context", () => {
       "changedItems",
       "choicedMove",
       "chosenMove",
+      "chosenMovePositions",
       "critMultiplier",
       "currentMove",
       "currentMoveEffect",
@@ -239,6 +240,7 @@ describe("source-shaped Battle Script rules context", () => {
     expect(Object.isFrozen(created.bideTarget)).toBe(true);
     expect(Object.isFrozen(created.choicedMove)).toBe(true);
     expect(Object.isFrozen(created.changedItems)).toBe(true);
+    expect(Object.isFrozen(created.chosenMovePositions)).toBe(true);
     expect(Object.isFrozen(created.lockedMoves)).toBe(true);
     expect(Object.isFrozen(created.rolloutTimerStartValues)).toBe(true);
     expect(Object.isFrozen(created.enigmaBerryHoldEffects)).toBe(true);

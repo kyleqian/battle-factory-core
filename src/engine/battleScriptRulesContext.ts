@@ -542,6 +542,8 @@ export type BattleScriptRulesContext = Readonly<
     calledMove: number;
     /** Source u16 gChosenMove, distinct from gCurrentMove. */
     chosenMove: number;
+    /** Source u8 gBattleStruct->chosenMovePositions[MAX_BATTLERS_COUNT]. */
+    chosenMovePositions: BattleScriptMoveEndBytes;
     /** Source u16 gLockedMoves[MAX_BATTLERS_COUNT]. */
     lockedMoves: BattleScriptMoveEndHalfwords;
     /** Source four-bit gDisableStructs[battler].rolloutTimerStartValue. */
@@ -673,6 +675,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   absentBattlerFlags?: number;
   calledMove?: number;
   chosenMove?: number;
+  chosenMovePositions?: readonly number[];
   lockedMoves?: readonly number[];
   rolloutTimerStartValues?: readonly number[];
   choicedMove?: readonly number[];
@@ -2004,6 +2007,11 @@ export function createBattleScriptRulesContext(
     0xffff,
     "changedItems",
   ) as BattleScriptMoveEndHalfwords;
+  const chosenMovePositions = createMoveEndArray(
+    input.chosenMovePositions,
+    3,
+    "chosenMovePositions",
+  ) as BattleScriptMoveEndBytes;
   const lockedMoves = createMoveEndArray(
     input.lockedMoves,
     0xffff,
@@ -2090,6 +2098,7 @@ export function createBattleScriptRulesContext(
     ),
     calledMove: requireUnsigned(input.calledMove ?? 0, 0xffff, "calledMove"),
     chosenMove: requireUnsigned(input.chosenMove ?? 0, 0xffff, "chosenMove"),
+    chosenMovePositions,
     lockedMoves,
     rolloutTimerStartValues,
     choicedMove,

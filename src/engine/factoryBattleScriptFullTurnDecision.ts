@@ -106,6 +106,7 @@ import {
   type BattleScriptRulesContext,
   type BattleScriptStatusRulesExternalPorts,
 } from "./battleScriptRulesContext.ts";
+import { BATTLE_SCRIPT_STATUS2_MASKS } from "./battleScriptSourceConstants.ts";
 import { mapFactoryBattleOutcome } from "./factoryBattleScriptTerminalDecision.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import topologyData from "../data/gen/battle-script-topology.json" with { type: "json" };
@@ -164,6 +165,8 @@ export type FactoryFullTurnBattlerConfig = Readonly<{
   hp: number;
   maxHp?: number;
   status1?: number;
+  status2?: number;
+  statStages?: readonly [number, number, number, number, number, number, number, number];
   types?: readonly [string, string];
 }>;
 
@@ -308,8 +311,9 @@ function activeBattler(
     types: config.types ?? (["TYPE_NORMAL", "TYPE_NORMAL"] as const),
     moves: Object.freeze(moves),
     pp: Object.freeze(pp),
-    statStages: NEUTRAL_STAT_STAGES,
+    statStages: config.statStages ?? NEUTRAL_STAT_STAGES,
     status1: config.status1 ?? 0,
+    status2: config.status2 ?? 0,
     maxHP: config.maxHp ?? config.hp,
     partyIndex: 0,
   });
@@ -605,6 +609,11 @@ function buildActionContext(
   moveSlot: BattleMoveSlot,
   target: BattleScriptBattlerId,
 ): BattleScriptRulesContext {
+  const chosenMovePositions = Object.freeze(
+    priorRulesContext.chosenMovePositions.map((position, battler) =>
+      battler === mover ? moveSlot : position
+    ),
+  ) as unknown as BattleScriptRulesContext["chosenMovePositions"];
   return createBattleScriptRulesContext({
     ...priorRulesContext,
     selectorRoles: { attacker: mover, target, effectBattler: target, fainted: null },
@@ -612,6 +621,7 @@ function buildActionContext(
     currentMove: moveId,
     currentMovePosition: moveSlot,
     chosenMove: moveId,
+    chosenMovePositions,
   });
 }
 
@@ -756,6 +766,8 @@ function legalMoveDecisions(
   rulesContext: BattleScriptRulesContext,
   battler: BattleSinglesBattler,
 ): readonly BattleMoveDecision[] {
+  const locked = lockedMoveDecision(rulesContext, battler);
+  if (locked !== null) return Object.freeze([locked]);
   const moves = rulesContext.battlers[battler]!.moves;
   const legal = moves.flatMap((moveId, slot) =>
     moveId !== 0
@@ -766,6 +778,39 @@ function legalMoveDecisions(
         })]
       : []);
   return Object.freeze(legal);
+}
+
+/**
+ * Source `HandleTurnActionSelectionState` + `HandleAction_UseMove`: a
+ * STATUS2_MULTIPLETURNS battler does not choose a fresh action; it uses its
+ * attacker-indexed gLockedMoves entry. This singles adapter recovers the
+ * still-selected slot from gBattleStruct->chosenMovePositions.
+ */
+function lockedMoveDecision(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
+): BattleMoveDecision | null {
+  const battlerState = rulesContext.battlers[battler]!;
+  if (
+    (
+      battlerState.status2
+      & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
+    ) === 0
+  ) {
+    return null;
+  }
+  const moveId = rulesContext.lockedMoves[battler]!;
+  const moveSlot = rulesContext.chosenMovePositions[battler]!;
+  if (moveId === 0 || battlerState.moves[moveSlot] !== moveId) {
+    throw new Error(
+      `factory full-turn battler ${battler} has an active multi-turn lock without a usable gLockedMoves entry`,
+    );
+  }
+  return Object.freeze({
+    kind: "use-move",
+    moveSlot: moveSlot as BattleMoveSlot,
+    targetBattler: sourceMoveTarget(moveId, battler),
+  });
 }
 
 function provenanceEvents(state: MachineState) {
@@ -848,6 +893,33 @@ function runEndTurnTail(
   }
 
   // "next-turn" or "resumed": the battle continues into a fresh decision-required boundary.
+  // HandleTurnActionSelectionState auto-confirms a multi-turn player's
+  // B_ACTION_USE_MOVE, so only the trainer command remains to collect.
+  const lockedPlayerDecision = lockedMoveDecision(endTurn.state.rulesContext, 0);
+  if (lockedPlayerDecision !== null) {
+    return finishFullTurn(
+      ctxRng, rngBeforeCalls, endTurn.state,
+      buildRules(
+        endTurn.state.rulesContext,
+        "awaiting-trainer-command",
+        Object.freeze({
+          moveSlot: lockedPlayerDecision.moveSlot,
+          targetBattler: lockedPlayerDecision.targetBattler,
+        }),
+      ),
+      Object.freeze({
+        kind: "decision-required",
+        request: Object.freeze({
+          kind: "command",
+          requestId: nextRequestId,
+          side: "trainer",
+          battler: 1 as const,
+          legalDecisions: legalMoveDecisions(endTurn.state.rulesContext, 1),
+        }),
+      }),
+    );
+  }
+
   return finishFullTurn(
     ctxRng, rngBeforeCalls, endTurn.state,
     buildRules(endTurn.state.rulesContext, "awaiting-player-command", null),
