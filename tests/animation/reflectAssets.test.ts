@@ -9,13 +9,12 @@ describe("MOVE_REFLECT source presentation assets", () => {
   it("pins the literal blue-wall and SPARKLE_4 sheets and their template geometry", () => {
     expect(reflectAsset.source).toMatchObject({
       script: expect.stringContaining("Move_REFLECT"),
-      carrier: expect.stringContaining("gMonFrontPic_Shuppet"),
+      carrier: expect.stringContaining("MINUN"),
       blueLightWall: expect.stringContaining("ANIM_TAG_BLUE_LIGHT_WALL"),
       sparkle4: expect.stringContaining("ANIM_TAG_SPARKLE_4"),
     });
     expect(reflectAsset.blueLightWall.tileset).toMatchObject({ columns: 8, rows: 8 });
     expect(reflectAsset.sparkle4.tileset).toMatchObject({ columns: 4, rows: 20 });
-    expect(reflectAsset.shuppetFront.tileset).toMatchObject({ columns: 8, rows: 8 });
     expect(reflectAsset.templates).toMatchObject({
       reflectWall: { oam: "gOamData_AffineOff_ObjBlend_64x64", subpriority: 1 },
       reflectSparkle: { oam: "gOamData_AffineOff_ObjNormal_32x32", frames: [0, 16, 32, 48, 64], subpriority: 2 },

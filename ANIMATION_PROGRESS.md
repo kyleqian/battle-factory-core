@@ -1,5 +1,35 @@
 # Animation coverage
 
+## MOVE_REFLECT promoted exact; blue-light-wall compositor closed (2026-07-27)
+
+**Verdict:** `MOVE_REFLECT` is exact. The complete legal MINUN/SHUCKLE
+Scene-ON envelopes match **208/208** frames 39-246 player-back and **211/211**
+frames 39-249 opponent-front through source/software, typed seam, hardware
+OAM/palette/register transfer, live audio, raw RGB, and the shared framebuffer
+in both orientations, reproduced twice fresh. Coverage is now **54 exact / 3
+partial / 219 unsupported**.
+
+**Renderer/evidence:** the narrow compositor ports GreenLightWall with the
+blue rotated OBJ palette, all three SPARKLE_4 lifecycles/cells and lower-OAM
+overlap order, side-relative wall geometry, 0→13→0 alpha, opponent battler
+BG-copy/OBJ visibility composition, one-display effect OAM/palette transfer,
+field chrome, side-specific menu/used-move/result text, audio header/pan, and
+clean teardown. The strengthened probe pins hardware OAM, hardware/faded/
+unfaded palettes and tags, registers, raw-RGB digests, and every shared output
+frame.
+
+**Correction/controls/siblings:** dense framebuffer work caught that the
+existing partial fixtures mislabeled species 354 as SHUPPET and carried
+estimated 126-HP geometry; their typed contents now correctly describe the
+actual legal **MINUN 167 HP / SHUCKLE 127 HP** parties and genders (legacy
+filenames retained). Exact CHARM remains **93/93 body + 4/4 clear** in both
+orientations twice fresh. Independent source audit keeps `MOVE_BRICK_BREAK`
+unsupported because its normal and separate gBrickBreakWall/shard branches are
+distinct, and `MOVE_CRUSH_CLAW` unsupported because it loads the tag but uses
+lunge/shake/four claw slashes without instantiating the wall. No battle logic,
+RNG, controller, outcome, facility state, boundary list, unsupported barrier,
+or canonical-recording import changed.
+
 ## MOVE_REFLECT promoted partial; complete software/typed seam (2026-07-27)
 
 **Verdict:** `MOVE_REFLECT` is partial. Legal complete-party SHUPPET/SHUCKLE

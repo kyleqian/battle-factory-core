@@ -15,11 +15,14 @@ def main() -> None:
   ref = ROOT / "reference" / "pokeemerald"; o = EmeraldOracle(ref/"pokeemerald.gba", ref/"pokeemerald.map", HARNESS/"oracle"/"bootstrap"/"factory.json")
   lab = BattleLab(o, "battle-scene-on"); setup = lab.prepare(req); S,T,M = o.symbols["gSprites"],o.symbols["gTasks"],o.symbols["gOamMatrices"]
   B,V,A,F,U = o.symbols["gBattlerSpriteIds"],o.symbols["gAnimVisualTaskCount"],o.symbols["gAnimSoundTaskCount"],o.symbols["gPlttBufferFaded"],o.symbols["gPlttBufferUnfaded"]
+  SE,TR,SONGS=o.symbols["gMPlayInfo_SE1"],o.symbols["gMPlayTrack_SE1"],o.symbols["gSongTable"]
   nm=subprocess.run(["arm-none-eabi-nm",str(ref/"pokeemerald.elf")],check=True,capture_output=True,text=True).stdout; names={p[2]:int(p[0],16)|1 for x in nm.splitlines() if len(p:=x.split())==3}
   wall, sparkle = o.symbols["gReflectWallSpriteTemplate"], o.symbols["gReflectSparkleSpriteTemplate"]
   tags=names["sSpritePaletteTags"]&~1
   def u16(a): return o.read_u8(a)|(o.read_u8(a+1)<<8)
   def s16(a): v=u16(a); return v-65536 if v>=32768 else v
+  def s8(a): v=o.read_u8(a); return v-256 if v>=128 else v
+  def player(): return {"songHeader":o.read_u32(SE),"status":o.read_u32(SE+4),"tracks":[{"flags":o.read_u8(TR+i*0x50),"panX":s8(TR+i*0x50+0x15)} for i in range(3)]}
   def spr(i):
     b=S+i*0x44; m=((u16(b+2)>>9)&31)*8
     return {"slot":i,"template":o.read_u32(b+0x14),"x":s16(b+0x20),"y":s16(b+0x22),"x2":s16(b+0x24),"y2":s16(b+0x26),"attr":[u16(b),u16(b+2),u16(b+4)],"subpriority":o.read_u8(b+0x43),"invisible":bool(o.read_u8(b+0x3e)&4),"data":[s16(b+0x2e+j*2) for j in range(8)],"matrix":[s16(M+m+j) for j in (0,2,4,6)]}
@@ -27,11 +30,11 @@ def main() -> None:
   def cap(frame):
     if lab.snapshot()["engine"]["currentMove"] != 115: return
     active=[spr(i) for i in range(64) if o.read_u8(S+i*0x44+0x3e)&1]; rgb=o.screen_rgb(); (RGB_DIR/f"{frame:05d}.rgb").write_bytes(rgb)
-    rows.append({"frame":frame,"sha256":hashlib.sha256(rgb).hexdigest(),"effectSprites":[x for x in active if x["template"] in (wall,sparkle)],"activeSpriteSlots":[x["slot"] for x in active],"activeTaskSlots":[i for i in range(16) if o.read_u8(T+i*0x28+4)],"visualTaskCount":o.read_u8(V),"soundTaskCount":o.read_u8(A),"battlers":[spr(o.read_u8(B+i)) for i in range(2)],"oam":[[u16(0x07000000+i*8+j) for j in (0,2,4)] for i in range(128)],"matrices":[[s16(0x07000006+i*0x20+j) for j in (0,8,16,24)] for i in range(32)],"registers":{"dispcnt":u16(0x04000000),"bldcnt":u16(0x04000050),"bldalpha":u16(0x04000052)},"fadedPalette":[u16(F+i*2) for i in range(512)],"unfadedPalette":[u16(U+i*2) for i in range(512)],"hardwarePalette":[u16(0x05000000+i*2) for i in range(512)],"paletteTags":[u16(tags+i*2) for i in range(16)]})
+    rows.append({"frame":frame,"sha256":hashlib.sha256(rgb).hexdigest(),"effectSprites":[x for x in active if x["template"] in (wall,sparkle)],"activeSpriteSlots":[x["slot"] for x in active],"activeTaskSlots":[i for i in range(16) if o.read_u8(T+i*0x28+4)],"visualTaskCount":o.read_u8(V),"soundTaskCount":o.read_u8(A),"battlers":[spr(o.read_u8(B+i)) for i in range(2)],"oam":[[u16(0x07000000+i*8+j) for j in (0,2,4)] for i in range(128)],"matrices":[[s16(0x07000006+i*0x20+j) for j in (0,8,16,24)] for i in range(32)],"registers":{"dispcnt":u16(0x04000000),"bldcnt":u16(0x04000050),"bldalpha":u16(0x04000052)},"fadedPalette":[u16(F+i*2) for i in range(512)],"unfadedPalette":[u16(U+i*2) for i in range(512)],"hardwarePalette":[u16(0x05000000+i*2) for i in range(512)],"paletteTags":[u16(tags+i*2) for i in range(16)],"se1":player()})
   frame=0; cap(frame)
   for seg in req["trace"]["segments"]:
     for _ in range(seg["frames"]): o.advance(seg.get("buttons",[])); frame+=1; cap(frame)
   if not rows or not any(x["effectSprites"] for x in rows): raise RuntimeError("MOVE_REFLECT body not reached")
-  OUTPUT.write_text(json.dumps({"schema":"reflect-dense-evidence/v1","setup":setup,"templates":{"wall":wall,"sparkle":sparkle},"frames":rows})+"\n")
+  OUTPUT.write_text(json.dumps({"schema":"reflect-dense-evidence/v2","setup":setup,"songHeader":o.read_u32(SONGS+207*8),"templates":{"wall":wall,"sparkle":sparkle},"frames":rows})+"\n")
   print(f"wrote {OUTPUT} ({len(rows)} move frames; {rows[0]['frame']}..{rows[-1]['frame']})")
 if __name__ == "__main__": main()

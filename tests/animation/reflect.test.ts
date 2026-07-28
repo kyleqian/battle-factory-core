@@ -6,11 +6,11 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 
 const player = {
-  species: "SHUPPET" as const,
+  species: "MINUN" as const,
   geometry: {
     side: "player" as const,
-    spriteCorner: { x: 40, y: 48 },
-    animationCenter: { x: 72, y: 80 },
+    spriteCorner: { x: 40, y: 56 },
+    animationCenter: { x: 72, y: 88 },
     battlePositionCenter: { x: 72, y: 80 },
   },
 };
@@ -18,8 +18,8 @@ const opponent = {
   species: "SHUCKLE" as const,
   geometry: {
     side: "opponent" as const,
-    spriteCorner: { x: 144, y: 8 },
-    animationCenter: { x: 176, y: 40 },
+    spriteCorner: { x: 144, y: 17 },
+    animationCenter: { x: 176, y: 49 },
     battlePositionCenter: { x: 176, y: 40 },
   },
 };
@@ -61,8 +61,9 @@ describe("MOVE_REFLECT source reducer", () => {
       move: "REFLECT", attacker: player, target: opponent,
       allocatorProfile: { wall: 3, sparkles: [4, 5, 4] },
       fieldProfile: {
-        playerHp: 126, playerMaxHp: 126,
+        playerHp: 167, playerMaxHp: 167,
         opponentHp: 127, opponentMaxHp: 127,
+        playerGender: "female", opponentGender: "male",
       },
     });
     expect(sceneOnReflectView({ ...stage, age: 0 }).wall)

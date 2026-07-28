@@ -541,6 +541,7 @@ import kadabraFrontSpriteAsset from "../animation/assets/kadabra-front.json" wit
 import knockOffAsset from "../animation/assets/knock-off.json" with { type: "json" };
 import recoverAsset from "../animation/assets/recover.json" with { type: "json" };
 import absorbAsset from "../animation/assets/absorb.json" with { type: "json" };
+import reflectAsset from "../animation/assets/reflect.json" with { type: "json" };
 import synthesisAsset from "../animation/assets/synthesis.json" with { type: "json" };
 import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
 import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
@@ -666,6 +667,7 @@ import {
   sceneOnGrowthView,
   sceneOnRecoverView,
   sceneOnAbsorbView,
+  sceneOnReflectView,
   sceneOnSynthesisView,
   sceneOnMilkDrinkView,
   sceneOnSupersonicView,
@@ -702,6 +704,7 @@ import {
   type SceneOnCharmPresentationState,
   type SceneOnScaryFacePresentationState,
   type SceneOnAbsorbPresentationState,
+  type SceneOnReflectPresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
   extremeSpeedBackgroundVariant,
@@ -980,6 +983,10 @@ const absorbArt = absorbAsset as {
   orbs: { tileset: Tileset; palette: RgbColor[] };
   impact: { tileset: Tileset; palette: RgbColor[] };
   blueStar: { tileset: Tileset; palette: RgbColor[] };
+};
+const reflectArt = reflectAsset as {
+  blueLightWall: { tileset: Tileset; palette: RgbColor[] };
+  sparkle4: { tileset: Tileset; palette: RgbColor[] };
 };
 const synthesisArt = synthesisAsset as {
   sparkle2: { tileset: Tileset; palette: RgbColor[] };
@@ -15039,7 +15046,149 @@ export function renderSceneOnMovePresentation(
   state: SceneOnMovePresentationState,
 ): void {
   if (state.config.move === "REFLECT") {
-    throw new Error("REFLECT software seam is staged; compositor remains unsupported");
+    const reflectState = state as SceneOnReflectPresentationState;
+    const view = sceneOnReflectView(reflectState);
+    // Sprite callbacks and OBJ palette writes reach the captured display
+    // through the ordinary one-frame OAM/palette transfer.
+    const displayed = sceneOnReflectView({
+      ...reflectState, age: reflectState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "MINUN"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MINUN"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged REFLECT pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const minunSource = playerToOpponent
+      ? encoreArt.minunBack : encoreArt.minunFront;
+    const minun = playerToOpponent
+      ? minunSource
+      : { ...minunSource, tileset: subTileset(minunSource.tileset, 0, 8) };
+    const shuckle = playerToOpponent
+      ? {
+          ...selfDestructArt.shuckleFront,
+          tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
+        }
+      : selfDestructArt.shuckleBack;
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+
+    // AnimDefensiveWall moves the opponent battler to a BG before hiding its
+    // OBJ. Drawing that copy first gives the semi-transparent wall its real
+    // target-2 composition; the player OBJ remains in front of the wall.
+    const opponent = playerToOpponent ? shuckle : minun;
+    const player = playerToOpponent ? minun : shuckle;
+    drawSpriteSheet(
+      fb, opponent.tileset, opponent.palette,
+      playerToOpponent ? view.target.geometry.spriteCorner.x
+        : view.attacker.geometry.spriteCorner.x,
+      playerToOpponent ? view.target.geometry.spriteCorner.y
+        : view.attacker.geometry.spriteCorner.y,
+    );
+    if (displayed.wall && view.alpha && view.alpha.eva > 0) {
+      const palette = reflectArt.blueLightWall.palette.slice();
+      const rotating = palette.slice(1, 9);
+      for (let step = 0; step < displayed.wall.paletteRotationSteps; step++) {
+        rotating.unshift(rotating.pop()!);
+      }
+      palette.splice(1, 8, ...rotating);
+      drawSpriteSheetBlendedOverFb(
+        fb,
+        reflectArt.blueLightWall.tileset,
+        palette,
+        displayed.wall.x - 32,
+        displayed.wall.y - 32,
+        view.alpha.eva,
+        view.alpha.evb,
+      );
+    }
+    drawSpriteSheet(
+      fb, player.tileset, player.palette,
+      playerToOpponent ? view.attacker.geometry.spriteCorner.x
+        : view.target.geometry.spriteCorner.x,
+      playerToOpponent ? view.attacker.geometry.spriteCorner.y
+        : view.target.geometry.spriteCorner.y,
+    );
+    // Lower hardware OAM index wins equal-priority overlaps. The allocator
+    // reuses slot 4 for sparkle three, so reverse source creation order is
+    // also the exact painter order for this legal fixture.
+    for (const sparkle of displayed.sparkles.slice().reverse()) {
+      const rows = sparkle.tileOffset / 4;
+      drawSpriteSheet(
+        fb,
+        subTileset(reflectArt.sparkle4.tileset, rows, 4),
+        reflectArt.sparkle4.palette,
+        sparkle.x - 16,
+        sparkle.y - 16,
+      );
+    }
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "MINUN",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "MINUN" : "SHUCKLE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    const menuLastAge = playerToOpponent ? -31 : -35;
+    if (reflectState.age <= menuLastAge) {
+      drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+      drawFightSubmenuChrome(
+        fb, 0, false, false,
+        playerToOpponent
+          ? { moveIds: [115, 115, 115, 115], maxPP: [20, 20, 20, 20] }
+          : { moveIds: [33, 33, 33, 33], maxPP: [35, 35, 35, 35] },
+      );
+      // The move-selection window is 231 px wide and intentionally leaves
+      // the persistent right-edge field chrome untouched.
+      for (let y = 113; y < 159; y++) {
+        for (let x = 232; x < 239; x++) {
+          const source = ((y - menuIdleBase.y) * menuIdleBase.width
+            + (x - menuIdleBase.x)) * 3;
+          setPixel(fb, x, y, {
+            r: menuIdleBase.pixels[source]!,
+            g: menuIdleBase.pixels[source + 1]!,
+            b: menuIdleBase.pixels[source + 2]!,
+          });
+        }
+      }
+      return;
+    }
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    const resultText = reflectState.age >= 75;
+    drawMessageTextLines(
+      fb,
+      resultText
+        ? (playerToOpponent ? "Ally’s REFLECT" : "Foe’s REFLECT")
+        : (playerToOpponent ? "MINUN used" : "Foe MINUN used"),
+      resultText ? "raised DEFENSE!" : "REFLECT!",
+      resultText
+        ? reflectState.age - 74
+        : Math.max(0, reflectState.age + (playerToOpponent ? 31 : 35)),
+    );
+    return;
   }
   if (state.config.move === "KNOCK_OFF") {
     // Task/sprite callbacks update RAM after this frame's OAM and palette
