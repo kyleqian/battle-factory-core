@@ -15,6 +15,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 569 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~02:17] Fury Cutter mirrors raw C integer widths
+
+- **State:** committed `0d638cb`; tree green at **328 files / 4031 tests**,
+  focused **84/84**, and ratchets **6/6**. Production build, both-oracle
+  freshness/info, census regeneration, and `git diff --check` pass. Census
+  remains **142/214 effects, 268/355 moves, 219/276 Factory-L50 distinct,
+  2706/2957 weighted**, all **42/42**.
+- **Did:** replaced the general JS clamp/exponentiation with exact source
+  widths: raw u8 counters increment modulo 256 unless exactly 5, and source
+  power plus every doubling stores through u16. Tests pin raw **5→5**,
+  **6→7**, **255→0**, and overflow **250×2⁹→62464**.
+- **Next:** supervisor verify this bounded correction and select the next
+  finite shared registration target; do not extend the retired canonical
+  Battle-2 march.
+- **Notes:** normal gameplay remains **1..5 / 10..160**; no-effect reset,
+  registration, zero RNG/lock, and generic full turns remain green. Entry
+  568's “cap” wording is narrowed below to that normal producer invariant.
+  No barrier/import ratchet, census, evidence, animation, issue, or PAPERCUT
+  change.
+
+---
 ## 568 — [BOUNDED MAIN WORKER 2026-07-28 ~02:10] Fury Cutter executes source-completely
 
 - **State:** committed `7b92344`; tree green at **327 files / 4025 tests**,
@@ -22,12 +43,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   freshness, census regeneration, and `git diff --check` pass. Census is
   exactly **142/214 effects, 268/355 moves, 219/276 Factory-L50 distinct,
   2706/2957 weighted**, all **42/42**.
-- **Did:** globally registered operandless `0xb5`: attacker-owned counter cap
-  five, powers **10/20/40/80/160**, exact no-effect jump/reset, both
+- **Did:** globally registered operandless `0xb5`: the normal attacker-owned
+  **0..5** producer sequence reaches and holds five with powers
+  **10/20/40/80/160**, plus exact no-effect jump/reset, both
   `BattleScript_FuryCutterHit` passes, and zero lock/RNG ownership. Generic
-  full turns prove six manual PP spends, Double Team persistence, and cap;
-  Protect now shares `CancelMultiTurnMoves`, while existing switch/faint clears
-  are pinned.
+  full turns prove six manual PP spends, Double Team persistence, and the
+  normal fixed point; Protect now shares `CancelMultiTurnMoves`, while
+  existing switch/faint clears are pinned.
 - **Next:** supervisor verify this finite executable-frontier increment and
   select the next shared registration target; do not extend the retired
   canonical Battle-2 march.
@@ -53,34 +75,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `B_SCR_OP_INCREMENTGAMESTAT`. Merged and independently replayed Fury Cutter,
   Minimize/Stomp, and Follow Me OFF evidence.
 - **Next:** register operandless `0xb5` `B_SCR_OP_FURYCUTTERCALC`: attacker
-  counter cap 5, powers **10/20/40/80/160**, normal-move persistence,
-  no-effect/Protect/switch/faint clears, and no lock/RNG ownership. Expected
-  census is **142/214, 268/355, 219/276, 2706/2957**.
+  normal **0..5** sequence fixed at 5 with powers **10/20/40/80/160**,
+  normal-move persistence, no-effect/Protect/switch/faint clears, and no
+  lock/RNG ownership. Expected census is **142/214, 268/355, 219/276,
+  2706/2957**.
 - **Notes:** Fury Cutter manifests `9ca031ee…2057c9` and
   `7a7a04d8…dbf9d3`, Minimize `67c617f7…c842977`, Follow Me
   `e150f267…889ece`. The latter two source-pin hidden status/timer semantics
   without claiming unavailable singles observations. No barrier/import
   ratchet change, recording import, animation edit, DEFERRED item, or oracle
   lifecycle action.
-
----
-## 566 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~01:56] Full-turn execution uses the shared opcode frontier
-
-- **State:** committed `31a2fd7`; tree green at **322 files / 4007 tests**,
-  focused **90/90**, and ratchets **6/6**. Production build, both-oracle
-  freshness, census regeneration, and `git diff --check` pass. Census remains
-  exactly **141/214 effects, 267/355 moves, 218/276 Factory-L50 distinct,
-  2701/2957 weighted**, all **42/42**.
-- **Did:** removed the full-turn controller's private `incrementgamestat` and
-  Struggle-recoil `seteffectwithchance` handlers; both execution sites now use
-  only `createBattleScriptStatusRulesHandlers`. Full-turn Disable still proves
-  duplicate filtering, direct selected-move cancellation, forced Struggle, and
-  zero Tackle PP spend, then stops honestly at `B_SCR_OP_INCREMENTGAMESTAT`.
-- **Next:** supervisor verify this correction and select the next finite shared
-  registration target. `incrementgamestat` and Struggle recoil remain separate
-  executable-frontier units; do not extend the retired Battle-2 march.
-- **Notes:** this supersedes entry 565's full-turn claims of Struggle history,
-  recoil, end-turn expiry, and same-state Tackle resumption past that barrier.
-  Isolated Disable opcode/end-turn/switch/faint coverage remains green. No
-  unsupported-branch barrier count, recording import, animation file, issue,
-  oracle lifecycle action, or PAPERCUT changed.

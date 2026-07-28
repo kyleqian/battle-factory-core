@@ -1,4 +1,26 @@
 ---
+## 566 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~01:56] Full-turn execution uses the shared opcode frontier
+
+- **State:** committed `31a2fd7`; tree green at **322 files / 4007 tests**,
+  focused **90/90**, and ratchets **6/6**. Production build, both-oracle
+  freshness, census regeneration, and `git diff --check` pass. Census remains
+  exactly **141/214 effects, 267/355 moves, 218/276 Factory-L50 distinct,
+  2701/2957 weighted**, all **42/42**.
+- **Did:** removed the full-turn controller's private `incrementgamestat` and
+  Struggle-recoil `seteffectwithchance` handlers; both execution sites now use
+  only `createBattleScriptStatusRulesHandlers`. Full-turn Disable still proves
+  duplicate filtering, direct selected-move cancellation, forced Struggle, and
+  zero Tackle PP spend, then stops honestly at `B_SCR_OP_INCREMENTGAMESTAT`.
+- **Next:** supervisor verify this correction and select the next finite shared
+  registration target. `incrementgamestat` and Struggle recoil remain separate
+  executable-frontier units; do not extend the retired Battle-2 march.
+- **Notes:** this supersedes entry 565's full-turn claims of Struggle history,
+  recoil, end-turn expiry, and same-state Tackle resumption past that barrier.
+  Isolated Disable opcode/end-turn/switch/faint coverage remains green. No
+  unsupported-branch barrier count, recording import, animation file, issue,
+  oracle lifecycle action, or PAPERCUT changed.
+
+---
 ## 565 — [BOUNDED MAIN WORKER 2026-07-28 ~01:49] Disable executes source-completely
 
 - **State:** committed `e566e53`; tree green at **322 files / 4007 tests**
