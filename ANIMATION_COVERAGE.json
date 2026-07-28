@@ -2,6 +2,34 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_REFLECT",
+      "status": "partial",
+      "covered": [
+        "complete legal SHUPPET/SHUCKLE Scene-ON currentMove envelopes match 208/208 frames 39-246 player-back and 211/211 frames 39-249 opponent-front through the source reducer and typed presentation seam",
+        "age zero is gReflectWallSpriteTemplate creation at frame 72 player-back and frame 76 opponent-front; all timing is relative to that source event, with explicit negative lead-in and post-blendoff clear-tail ages",
+        "the reducer ports side-relative wall and three SPARKLE_4 geometries, all five sparkle cells, allocator slot reuse, the 0-to-13-to-0 alpha lifecycle, all 16 palette rotations, opponent battler visibility, sound-task lifetime, and clean wall/alpha teardown",
+        "reflectPortable.ts invokes fresh local mGBA through tools/run-mgba-probe.py and densely proves both orientations; reflectProbe.py captures software sprites including visibility plus existing OAM/matrix/palette/register/raw-RGB evidence",
+        "exact remains bounded to the narrow shared-framebuffer compositor: BLUE_LIGHT_WALL and SPARKLE_4 raster/OAM display transfer, rotated hardware OBJ palette, opponent battler BG/visibility composition, field chrome and text must match every raw-RGB frame in both orientations twice fresh; renderSceneOnMovePresentation deliberately rejects REFLECT until that exists",
+        "MOVE_BRICK_BREAK and MOVE_CRUSH_CLAW remain unsupported independent acceptance units because their audited move bodies do not instantiate this same wall/sparkle sequence"
+      ],
+      "remaining": "Implement only the narrow REFLECT compositor through the shared Scene-ON renderer: source-relative one-display hardware OAM and OBJ-palette transfer, rotated BLUE_LIGHT_WALL palette, SPARKLE_4 painter order, opponent battler BG/visibility composition, field chrome/text, and clean teardown. Then require complete raw-RGB/shared-framebuffer equality for all 208 player-back and 211 opponent-front frames, reproduced twice fresh. No framebuffer frame is currently claimed; the renderer deliberately rejects REFLECT.",
+      "evidence": [
+        "tools/battle-lab/mechanic-reflect-player-shuppet-opponent-shuckle.json",
+        "tools/battle-lab/mechanic-reflect-opponent-shuppet-player-shuckle.json",
+        "tools/compare/fixtures/reflect-player-shuppet-opponent-shuckle.json",
+        "tools/compare/fixtures/reflect-opponent-shuppet-player-shuckle.json",
+        "tools/compare/reflectProbe.py",
+        "tools/compare/reflectPortable.ts",
+        "tools/compare/reflectSourceAudit.ts",
+        "tools/compare/extractReflectAssets.ts",
+        "src/animation/assets/reflect.json",
+        "src/animation/reflect.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "tests/animation/reflect.test.ts",
+        "tests/animation/reflectAssets.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_ABSORB",
       "status": "exact",
       "covered": [
@@ -1357,7 +1385,7 @@
         "MOVE_BRICK_BREAK",
         "MOVE_CRUSH_CLAW"
       ],
-      "goal": "Checkpoint only: legal complete-party Scene-ON probes capture MOVE_REFLECT frames 39-246 player-back and 39-249 opponent-front (wall begins 72/75; three SPARKLE_4 instances peak together) with source/software/OAM/matrix/palette/register/raw-RGB evidence. Literal BLUE_LIGHT_WALL (GreenLightWall tiles + blue palette) and SPARKLE_4 (its own tiles + Sparkle3 palette) regenerate byte-for-byte. No renderer or acceptance claim: REFLECT remains unsupported until a complete dense move-owned seam/framebuffer implementation and clean teardown are proved. BRICK BREAK remains unsupported because its normal and separate gBrickBreakWall/shard branch are distinct; CRUSH CLAW remains unsupported because it loads but never instantiates the wall and has lunge/shake/four claw-slash body."
+      "goal": "MOVE_REFLECT is partial after complete legal-party source/software/typed-seam closure: 208/208 frames 39-246 player-back and 211/211 frames 39-249 opponent-front, wall creation at 72/76, three SPARKLE_4 lifecycles, allocator reuse, palette rotation, alpha/audio/visibility, and teardown. Exact remains the narrow hardware-display/shared-framebuffer compositor and twice-fresh raw-RGB equality. BRICK BREAK remains unsupported because its normal and separate gBrickBreakWall/shard branch are distinct; CRUSH CLAW remains unsupported because it loads but never instantiates the wall and has lunge/shake/four claw-slash body."
     },
     {
       "id": "shake-target-in-pattern-scary-face",

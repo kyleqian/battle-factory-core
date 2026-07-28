@@ -1,5 +1,31 @@
 # Animation coverage
 
+## MOVE_REFLECT promoted partial; complete software/typed seam (2026-07-27)
+
+**Verdict:** `MOVE_REFLECT` is partial. Legal complete-party SHUPPET/SHUCKLE
+fixtures match the complete Scene-ON `currentMove=REFLECT` envelopes
+**208/208** at frames 39-246 player-back and **211/211** at frames 39-249
+opponent-front through the source-relative reducer and typed presentation
+seam. Coverage is **53 exact / 4 partial / 219 unsupported**.
+
+**Proof:** wall creation is relative age zero at oracle frame 72 player-back
+and 76 opponent-front. Fresh local-mGBA evidence invoked only through
+`tools/run-mgba-probe.py` proves the side-relative wall geometry, all three
+SPARKLE_4 lifecycles/cells, allocator slot reuse, 16 palette rotations,
+0→13→0 alpha, opponent visibility, sound-task lifetime, and clean wall and
+blend teardown over every frame. Focused reducer, asset, seam, and boundary
+tests pass.
+
+**Exact remainder/siblings:** the shared framebuffer path intentionally
+rejects REFLECT until a narrow compositor ports the one-display hardware OAM
+and palette transfer, rotated BLUE_LIGHT_WALL OBJ palette, SPARKLE_4 painter
+order, opponent battler BG/visibility composition, and field chrome/text.
+Thus no framebuffer frame is claimed yet; exact requires complete raw-RGB
+equality in both orientations twice fresh. `MOVE_BRICK_BREAK` and
+`MOVE_CRUSH_CLAW` remain unsupported because their audited bodies are
+independent. No damage, RNG, controller, outcome, facility state, boundary
+ratchet, or unsupported-barrier change.
+
 ## BLUE_LIGHT_WALL / MOVE_REFLECT evidence-and-assets checkpoint (2026-07-27)
 
 **Verdict:** Coverage stays **53 exact / 3 partial / 220 unsupported**.
