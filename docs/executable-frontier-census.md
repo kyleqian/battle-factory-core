@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 157 | 214 | 73.4% |
-| Moves (unweighted, all 355) | 286 | 355 | 80.6% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 234 | 276 | 84.8% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2758 | 2957 | 93.3% |
+| Effect scripts | 158 | 214 | 73.8% |
+| Moves (unweighted, all 355) | 287 | 355 | 80.8% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 235 | 276 | 85.1% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2760 | 2957 | 93.3% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -33,7 +33,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_MAXATTACKHALVEHP` | 1 (EFFECT_BELLY_DRUM) | 1 | 1 | 2 |
 | `B_SCR_OP_METRONOME` | 1 (EFFECT_METRONOME) | 1 | 1 | 2 |
 | `B_SCR_OP_PAINSPLITDMGCALC` | 1 (EFFECT_PAIN_SPLIT) | 1 | 1 | 2 |
-| `B_SCR_OP_SETFOCUSENERGY` | 1 (EFFECT_FOCUS_ENERGY) | 1 | 1 | 2 |
 | `B_SCR_OP_STOCKPILE` | 1 (EFFECT_STOCKPILE) | 1 | 1 | 2 |
 | `B_SCR_OP_STOCKPILETOHPHEAL` | 1 (EFFECT_SWALLOW) | 1 | 1 | 2 |
 | `B_SCR_OP_TRYSETGRUDGE` | 1 (EFFECT_GRUDGE) | 1 | 1 | 2 |
@@ -48,6 +47,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_TRYRECYCLEITEM` | 1 (EFFECT_RECYCLE) | 1 | 1 | 1 |
 | `B_SCR_OP_SETALWAYSHITFLAG` | 1 (EFFECT_LOCK_ON) | 2 | 0 | 0 |
 | `B_SCR_OP_SETTYPEBASEDHALVERS` | 2 (EFFECT_MUD_SPORT, EFFECT_WATER_SPORT) | 2 | 0 | 0 |
+| `B_SCR_OP_ASSISTATTACKSELECT` | 1 (EFFECT_ASSIST) | 1 | 0 | 0 |
 
 ## Per-effect detail
 
@@ -100,7 +100,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_DOUBLE_HIT | `BattleScript_EffectDoubleHit` | executable | - | - | 2 | 2 (12) |
 | EFFECT_RECOIL_IF_MISS | `BattleScript_EffectRecoilIfMiss` | executable | - | - | 2 | 1 (1) |
 | EFFECT_MIST | `BattleScript_EffectMist` | executable | - | - | 1 | 0 (0) |
-| EFFECT_FOCUS_ENERGY | `BattleScript_EffectFocusEnergy` | blocked-on-opcodes | `B_SCR_OP_SETFOCUSENERGY` (edge branch only) | - | 1 | 1 (2) |
+| EFFECT_FOCUS_ENERGY | `BattleScript_EffectFocusEnergy` | executable | - | - | 1 | 1 (2) |
 | EFFECT_RECOIL | `BattleScript_EffectRecoil` | executable | - | - | 3 | 2 (4) |
 | EFFECT_CONFUSE | `BattleScript_EffectConfuse` | executable | - | - | 3 | 3 (48) |
 | EFFECT_ATTACK_UP_2 | `BattleScript_EffectAttackUp2` | executable | - | - | 1 | 1 (15) |
