@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // REFLECT closes its complete software/typed seam as partial.
+        // REFLECT closes its complete hardware/framebuffer seam as exact.
         unsupported: 219,
         staged: 0,
-        partial: 4,
-        exact: 53,
+        partial: 3,
+        exact: 54,
       },
       {
         tier: "openOnly",
