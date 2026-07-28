@@ -73,9 +73,9 @@ Reproduce with:
 bin/oracle lab tools/battle-lab/mechanic-focus-energy-success-repeat-off.json -o "$(mktemp -d /tmp/focus-energy-off.XXXXXX)"
 ```
 
-Fixture SHA-256: `c97ac68ed3848781a9dbd7ceb4c55de555da1d6b805f31e8777f90a792b8eca3`.
+Fixture SHA-256: `e5dc33dc6ca9b62982ff7d2cac0f4d93dad1cff1025789979efddc47a09b5b87`.
 The matching 2026-07-28 OFF manifest SHA-256 is
-`5bff60bf27e705738b3c27fc06a417e64b8a9f28eb158b007439abf15e22ddec`
+`e96bcff2b5772a67db2dff838b85ff4e8429d3fc4eb90f19bc2b85d212d489c1`
 (247 requested captures, 1108 frames). It uses complete three-member,
 checksum-valid parties; player MACHOKE has `[FOCUS ENERGY, TACKLE, TACKLE,
 TACKLE]`, opponent CHANSEY has four Splash slots, so the AI remains real but
@@ -89,14 +89,14 @@ are raw-RGB framebuffer SHA-256):
 
 | frame | framebuffer SHA-256 | player PP0 / status2 / HP | opponent PP | RNG | observation |
 | ---: | --- | --- | --- | ---: | --- |
-| 0 | `86aaa00b…54bc48f9` | 30 / 0 / 145 | 40/40/40/40 | 3690816045 | pre-action |
-| 60 | `a927a9c6…24d08e61` | 30 / 0 / 145 | 40/40/40/40 | 983229340 | selected move 116 |
-| 99 | `d6f51132…51f84108a` | 29 / 1048576 / 145 | 40/40/40/40 | 983229340 | success: Getting pumped |
-| 300 | `1fc09670…bb439a9b7` | 29 / 1048576 / 145 | 40/39/40/40 | 983229340 | opponent real Splash turn |
-| 540 | `3cd2dab2…ebf755c6` | 29 / 1048576 / 145 | 40/39/40/40 | 2682491093 | next choice available |
-| 585 | `4bae90a8…c28d2810` | 29 / 1048576 / 145 | 40/39/40/40 | 2682491093 | repeat selection UI |
-| 1000 | `44952fbc…9a012e238` | 28 / 1048576 / 145 | 40/39/40/39 | 2184965245 | repeat failed; bit/HP unchanged |
-| 1105 | `44952fbc…9a012e238` | 28 / 1048576 / 145 | 40/39/40/39 | 2184965245 | settled result |
+| 0 | `48e113ed…eaa3e45` | 30 / 0 / 145 | 40/40/40/40 | 3690816045 | pre-action |
+| 60 | `3ea36dd5…bf96b4a` | 30 / 0 / 145 | 40/40/40/40 | 983229340 | selected move 116 |
+| 99 | `5e769603…ae8a092` | 29 / 1048576 / 145 | 40/40/40/40 | 983229340 | success: Getting pumped |
+| 300 | `c282f950…deddae0` | 29 / 1048576 / 145 | 40/39/40/40 | 983229340 | opponent real Splash turn |
+| 540 | `cc859f6d…4560c18` | 29 / 1048576 / 145 | 40/39/40/40 | 2682491093 | next choice available |
+| 585 | `24f655a3…37d1032` | 29 / 1048576 / 145 | 40/39/40/40 | 2682491093 | repeat selection UI |
+| 1000 | `6b6576fa…2dcf7ed` | 28 / 1048576 / 145 | 40/39/40/39 | 2184965245 | repeat failed; bit/HP unchanged |
+| 1105 | `6b6576fa…2dcf7ed` | 28 / 1048576 / 145 | 40/39/40/39 | 2184965245 | settled result |
 
 The RNG changes between turns belong to normal turn/AI scheduling, not this
 opcode: the success-side opcode window holds `983229340` through frames
