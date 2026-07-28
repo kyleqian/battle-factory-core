@@ -25,8 +25,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   with wrap saturation and the shared zero-HP exception; registered
   `givepaydaymoney` with multiplier, link/recorded-link/no-pot exclusions,
   payout message buffer, and the source 999999 save-money cap.
-- **Next:** finish full verification, commit rung (b), and hand back to the
-  supervisor. Cluster 4 has no remainder.
+- **Next:** supervisor verify commits `4bc6759b` and `510f602c`; Cluster 4 has
+  no remainder, so resume the supervisor's ranked order.
 - **Notes:** Pay Day is intentionally Tier-1/source-only because the census
   confirms zero Factory-L50 carriers. Tests pin player/opponent side, target
   faint, saturation, payout/cap, multiplier, exclusions, full script to END,
