@@ -229,6 +229,7 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
       restoredBattlerSprite: 0,
       physicalDmg: 0,
       specialDmg: 0,
+      shellBellDmg: 0,
     }),
     substituteHP: 0,
     rolloutTimer: 0,

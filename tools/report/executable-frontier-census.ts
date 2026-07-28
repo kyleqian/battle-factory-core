@@ -1110,10 +1110,10 @@ const validationChecks: Array<() => void> = [
     "Operand gate: B_SCR_OP_COPYARRAY(gBattlerTarget, sBATTLER, 0x1)",
   ]),
   () => requireExactMissingOpcodes("EFFECT_RAPID_SPIN", ["B_SCR_OP_RAPIDSPINFREE"]),
-  () => requireExactMechanicalBlockers("EFFECT_PAIN_SPLIT", [
-    "Operand gate: B_SCR_OP_COPYARRAY(gBattleMoveDamage, sPAINSPLIT_HP, 0x4)",
-  ]),
-  () => requireExactMissingOpcodes("EFFECT_PAIN_SPLIT", ["B_SCR_OP_PAINSPLITDMGCALC"]),
+  // Ranked Batch 3: the source scratch, Shell Bell suppression, exact copy
+  // tuple, and both HP controller writes are now represented end-to-end.
+  () => requireExecutable("EFFECT_PAIN_SPLIT"),
+  () => requireExactMechanicalBlockers("EFFECT_PAIN_SPLIT", []),
   () => requireExactMechanicalBlockers("EFFECT_STOCKPILE", [
     "Operand gate: B_SCR_OP_PRINTFROMTABLE(gStockpileUsedStringIds)",
   ]),

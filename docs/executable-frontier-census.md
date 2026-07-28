@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 181 | 214 | 84.6% |
-| Moves (unweighted, all 355) | 320 | 355 | 90.1% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 262 | 276 | 94.9% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2924 | 2957 | 98.9% |
+| Effect scripts | 182 | 214 | 85.0% |
+| Moves (unweighted, all 355) | 321 | 355 | 90.4% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 263 | 276 | 95.3% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2926 | 2957 | 99.0% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today and every use of the explicitly tracked narrowed operand surfaces is accepted. Other registered runtime barriers remain included per ROADMAP S10 §1's (a)/(b) policy. It is not a semantic-correctness claim -- see Caveats.
 
@@ -140,7 +140,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_PSYWAVE | `BattleScript_EffectPsywave` | executable | - | - | 1 | 1 (2) |
 | EFFECT_COUNTER | `BattleScript_EffectCounter` | executable | - | - | 1 | 1 (40) |
 | EFFECT_ENCORE | `BattleScript_EffectEncore` | executable | - | - | 1 | 1 (4) |
-| EFFECT_PAIN_SPLIT | `BattleScript_EffectPainSplit` | blocked-on-opcodes | `B_SCR_OP_PAINSPLITDMGCALC` (edge branch only) | Operand gate: B_SCR_OP_COPYARRAY(gBattleMoveDamage, sPAINSPLIT_HP, 0x4) -- (gBattleMoveDamage, sPAINSPLIT_HP, 0x4) is outside the engine's accepted pointer-tuple universe (src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts:155; battle_script_commands.c:3837) | 1 | 1 (2) |
+| EFFECT_PAIN_SPLIT | `BattleScript_EffectPainSplit` | executable | - | - | 1 | 1 (2) |
 | EFFECT_SNORE | `BattleScript_EffectSnore` | executable | - | - | 1 | 1 (1) |
 | EFFECT_CONVERSION_2 | `BattleScript_EffectConversion2` | blocked-on-opcodes | `B_SCR_OP_SETTYPETORANDOMRESISTANCE` (main path) | - | 1 | 0 (0) |
 | EFFECT_LOCK_ON | `BattleScript_EffectLockOn` | blocked-on-opcodes | `B_SCR_OP_SETALWAYSHITFLAG` (edge branch only) | - | 2 | 0 (0) |

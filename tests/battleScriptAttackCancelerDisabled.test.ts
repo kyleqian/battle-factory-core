@@ -36,6 +36,7 @@ function battler(
       restoredBattlerSprite: 0,
       physicalDmg: 0,
       specialDmg: 0,
+      shellBellDmg: 0,
     }),
     substituteHP: changes.substituteHP ?? 0,
     rolloutTimer: changes.rolloutTimer ?? 0,

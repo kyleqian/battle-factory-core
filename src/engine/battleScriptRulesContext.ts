@@ -87,6 +87,7 @@ import { createBattleScriptTrysetperishsongOpcodeHandlers } from "./battleScript
 import { createBattleScriptTrysetgrudgeOpcodeHandlers } from "./battleScriptTrysetgrudgeOpcode.ts";
 import { createBattleScriptTryspiteppreduceOpcodeHandlers } from "./battleScriptTryspiteppreduceOpcode.ts";
 import { createBattleScriptRankedBatch1OpcodeHandlers } from "./battleScriptRankedBatch1Opcode.ts";
+import { createBattleScriptPainSplitOpcodeHandlers } from "./battleScriptPainSplitOpcode.ts";
 import { createBattleScriptSettauntOpcodeHandlers } from "./battleScriptSettauntOpcode.ts";
 import { createBattleScriptSetforesightOpcodeHandlers } from "./battleScriptSetforesightOpcode.ts";
 import { createBattleScriptSetfocusenergyOpcodeHandlers } from "./battleScriptSetfocusenergyOpcode.ts";
@@ -182,6 +183,8 @@ export type BattleScriptSpecialStatus = Readonly<{
   restoredBattlerSprite: 0 | 1;
   physicalDmg: number;
   specialDmg: number;
+  /** Source s32 gSpecialStatuses[battler].shellBellDmg. */
+  shellBellDmg: number;
 }>;
 
 /** Modeled struct SideTimer fields, including Follow Me's timer/target (include/battle.h:149-174) -- see the field comment on BattleScriptRulesContext.sideTimers. */
@@ -423,6 +426,7 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
     restoredBattlerSprite?: 0 | 1;
     physicalDmg?: number;
     specialDmg?: number;
+    shellBellDmg?: number;
   }>;
   chargingTurn?: 0 | 1;
   /** ProtectStruct bits read by WasUnableToUseMove but not by admission yet. */
@@ -621,6 +625,8 @@ export type BattleScriptRulesContext = Readonly<
     /** Source u16 gBattleScripting.animArg1 -- the only field Cmd_playanimation's sB_ANIM_ARG1 operand dereferences (animArg2 is never read by playanimation). */
     animArg1: number;
     battleMoveDamage: number;
+    /** Source s32 gBattleScripting.painSplitHp scratch. */
+    painSplitHp: number;
     /** Source u16 gDynamicBasePower, read by Cmd_damagecalc as its power override. */
     dynamicBasePower: number;
     /** Source s32 gHpDealt -- Cmd_datahpupdate's real-damage-dealt bookkeeping. */
@@ -781,6 +787,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   multiHitCounter: number;
   multistringChooser?: number;
   battleMoveDamage?: number;
+  painSplitHp?: number;
   dynamicBasePower?: number;
   hpDealt?: number;
   bideDmg?: readonly number[];
@@ -917,6 +924,10 @@ function createBattleScriptSpecialStatus(
     specialDmg: requireSigned32(
       value?.specialDmg ?? 0,
       `battlers[${battler}].specialStatus.specialDmg`,
+    ),
+    shellBellDmg: requireSigned32(
+      value?.shellBellDmg ?? 0,
+      `battlers[${battler}].specialStatus.shellBellDmg`,
     ),
   });
 }
@@ -2320,6 +2331,7 @@ export function createBattleScriptRulesContext(
       input.battleMoveDamage ?? 0,
       "battleMoveDamage",
     ),
+    painSplitHp: requireSigned32(input.painSplitHp ?? 0, "painSplitHp"),
     dynamicBasePower: requireUnsigned(
       input.dynamicBasePower ?? 0,
       0xffff,
@@ -2675,6 +2687,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptTrysetgrudgeOpcodeHandlers(program),
     ...createBattleScriptTryspiteppreduceOpcodeHandlers(program),
     ...createBattleScriptRankedBatch1OpcodeHandlers(program),
+    ...createBattleScriptPainSplitOpcodeHandlers(program),
     ...createBattleScriptFuryCutterOpcodeHandlers(program),
     ...createBattleScriptSetminimizeOpcodeHandlers(program),
     ...createBattleScriptSetforcedtargetOpcodeHandlers(program),

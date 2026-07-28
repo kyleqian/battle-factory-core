@@ -170,7 +170,12 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     status1: 0,
     status2: 0,
     status3: 0,
-    specialStatus: Object.freeze({ restoredBattlerSprite: 0, physicalDmg: 0, specialDmg: 0 }),
+    specialStatus: Object.freeze({
+      restoredBattlerSprite: 0,
+      physicalDmg: 0,
+      specialDmg: 0,
+      shellBellDmg: 0,
+    }),
     substituteHP: 0,
     rolloutTimer: 0,
     furyCutterCounter: 0,

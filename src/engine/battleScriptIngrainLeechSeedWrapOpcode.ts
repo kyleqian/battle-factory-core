@@ -168,6 +168,17 @@ function createCopyarrayHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCo
       const nextRulesContext = Object.freeze({ ...rulesContext, hpDealt: rulesContext.battleMoveDamage });
       return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRulesContext });
     }
+    if (size === "0x4" && dst === "gBattleMoveDamage" && src === "sPAINSPLIT_HP") {
+      const nextRulesContext = Object.freeze({
+        ...rulesContext,
+        battleMoveDamage: rulesContext.painSplitHp,
+      });
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: nextRulesContext },
+      );
+    }
     if (size === "0x2" && dst === "gDynamicBasePower" && src === "sTRIPLE_KICK_POWER") {
       const nextRulesContext = Object.freeze({
         ...rulesContext,
