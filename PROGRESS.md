@@ -17,7 +17,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 604 — [BOUNDED MAIN WORKER 2026-07-28 ~06:22] Encore shared seams repaired and pinned
 
-- **State:** ready to commit; tree green at **366 files / 4229 tests**, focused
+- **State:** committed `6e6bd33`; tree green at **366 files / 4229 tests**, focused
   Encore/end-turn/switch/ratchet coverage **112/112**, production build, and
   `git diff --check`.
 - **Did:** added exact RNG value/ledger ownership and full-turn proofs for
