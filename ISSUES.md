@@ -24,20 +24,6 @@ and re-derive ability the source way; audit's suggested corroboration probe:
 one OFF mechanicLab trace — Role Play Levitate → switch to different-IV
 rental → RAM-check `gBattleMons` before a Ground move and Hidden Power.
 
-## #51 — Successful Sleep/Freeze omit CancelMultiTurnMoves
-
-Audit-confirmed. Source calls `CancelMultiTurnMoves(gEffectBattler)` on the
-Sleep (`battle_script_commands.c:2296`) and Freeze (`:2392`) success paths,
-clearing multi-turn/Thrash/Uproar/Bide/semi-invulnerable/Rollout/Fury Cutter
-state (`battle_util.c:877-888`). The engine's own comment at
-`battleScriptHitChainOpcode.ts:3009-3035` acknowledges omitting it for
-Sleep; Freeze (`:3070-3078`) likewise only sets `statusChanged`. Failures:
-Sleep Powder against a Rollout-locked target leaves `STATUS2_MULTIPLETURNS`
-+ `rolloutTimer` alive; Tri Attack's Freeze against a Thrash/Uproar user
-leaves the lock alive. Fix: invoke the existing cancel-multi-turn reducer
-(Uproar/Rapid Spin work landed its pieces) from the shared status write for
-these two statuses, with cross-state tests.
-
 ## #52 — Trick omits both PREPARE_ITEM_BUFFER message operands
 
 Audit-confirmed. Source prepares both item buffers before the switched-items

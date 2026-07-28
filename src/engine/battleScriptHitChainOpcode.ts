@@ -103,6 +103,7 @@ import {
   STAT_SPDEF,
   STAT_SPEED,
 } from "./battleScriptStatBuffs.ts";
+import { cancelBattleScriptMultiTurnMoves } from "./battleScriptMultiTurnCancellation.ts";
 
 type MoveRow = Readonly<{
   id: number;
@@ -3013,9 +3014,8 @@ function applySetMoveEffect(
       // scripts' own jumpifcantmakeasleep/jumpifstatus already filtered these
       // cases before seteffectprimary ever runs) -- ported anyway for
       // SetMoveEffect fidelity, matching every other family-A case's full
-      // port. CancelMultiTurnMoves(gEffectBattler) on the success path is not
-      // modeled, matching this same function's pre-existing MOVE_EFFECT_FREEZE
-      // case (also a CancelMultiTurnMoves call site) already omitting it.
+      // port. The success path shares source CancelMultiTurnMoves with Freeze;
+      // finishStatusWrite applies that full reducer before writing status1.
       let uproarActive = false;
       if (effectBattlerState.ability !== ABILITY_SOUNDPROOF) {
         const { battlersCount } = baseRulesContext.battleTopology;
@@ -3130,7 +3130,10 @@ function applySetMoveEffect(
     newStatus1: number,
     rng?: BattleScriptRngState,
   ): BattleScriptCommandTransition<BattleScriptRulesContext> {
-    const updatedContext = withBattler(baseRulesContext, effectBattler, { status1: newStatus1 });
+    const statusWriteBase = effectByte === MOVE_EFFECT_SLEEP || effectByte === MOVE_EFFECT_FREEZE
+      ? cancelBattleScriptMultiTurnMoves(baseRulesContext, effectBattler).rulesContext
+      : baseRulesContext;
+    const updatedContext = withBattler(statusWriteBase, effectBattler, { status1: newStatus1 });
     const finalRulesContext = Object.freeze({
       ...updatedContext,
       hitMarker: nextHitMarker,
@@ -3456,9 +3459,8 @@ function applyChargingMoveEffect(
  * .ts`'s `buildActionContext`/`runMoveAction`, every battle-lab/Tier-1 test)
  * takes the move id as a given external input, never derives it internally.
  * So `gLockedMoves` has no read-back consumer in this codebase at any layer
- * -- the same "state written but provably unobservable here" shape this
- * function's own MOVE_EFFECT_SLEEP/MOVE_EFFECT_FREEZE cases already use to
- * omit `CancelMultiTurnMoves(gEffectBattler)`, not a gap to fill later.
+ * -- an inert source field distinct from the observable status/counter state
+ * that Sleep and Freeze clear through `CancelMultiTurnMoves`.
  */
 function applyThrashMoveEffect(
   context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,

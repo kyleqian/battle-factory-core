@@ -2125,6 +2125,38 @@ describe("production seteffectwithchance (Cmd_seteffectwithchance) dispatch", ()
       expect(result.state.rulesContext.battlers[1]!.status1).toBe(STATUS1_FREEZE_BIT);
     });
 
+    it("SLEEP: landing on a Rollout-locked target cancels the lock and its timer", () => {
+      const rc = context(
+        0,
+        {},
+        { moveEffectByte: MOVE_EFFECT_SLEEP | MOVE_EFFECT_CERTAIN },
+        { status2: 0x1000, rolloutTimer: 3 },
+      );
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.battlers[1]).toMatchObject({
+        status2: 0,
+        rolloutTimer: 0,
+      });
+    });
+
+    it("SLEEP: a target with no multi-turn lock preserves unrelated status2/status3 state", () => {
+      const rc = context(
+        0,
+        {},
+        { moveEffectByte: MOVE_EFFECT_SLEEP | MOVE_EFFECT_CERTAIN },
+        { status2: 0x8000_0001, status3: 0x20 },
+      );
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.battlers[1]).toMatchObject({
+        status2: 0x8000_0001,
+        status3: 0x20,
+        rolloutTimer: 0,
+        furyCutterCounter: 0,
+      });
+    });
+
     it("FREEZE: sun weather blocks the freeze (WEATHER_HAS_EFFECT && B_WEATHER_SUN)", () => {
       const B_WEATHER_SUN = (1 << 5) | (1 << 6);
       const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_FREEZE | MOVE_EFFECT_CERTAIN, weather: B_WEATHER_SUN });
@@ -3875,6 +3907,27 @@ describe("SetMoveEffect family-B cluster 1", () => {
       expect(result.state.rulesContext.party.opponent[0]!.status1).toBe(status1);
     });
   }
+
+  it("Tri Attack Freeze cancels an Uproar/Thrash user's complete multi-turn state", () => {
+    const rc = context(
+      0,
+      {},
+      { currentMove: TRI_ATTACK, moveEffectByte: MOVE_EFFECT_TRI_ATTACK },
+      {
+        status2: 0x70 | 0xc00 | 0x1000,
+        status3: 0x0004_00c0,
+        furyCutterCounter: 2,
+      },
+    );
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc, 3);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.battlers[1]).toMatchObject({
+      status1: STATUS1_FREEZE_BIT,
+      status2: 0,
+      status3: 0,
+      furyCutterCounter: 0,
+    });
+  });
 
   it("Tri Attack chance failure consumes only the chance draw", () => {
     const rc = context(0, {}, { currentMove: TRI_ATTACK, moveEffectByte: MOVE_EFFECT_TRI_ATTACK });
