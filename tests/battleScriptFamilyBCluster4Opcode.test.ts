@@ -12,9 +12,13 @@ import {
   stepBattleScriptMachine,
   type BattleScriptMachineState,
 } from "../src/engine/battleScriptMachine.ts";
-import { loadBattleScriptProgram } from "../src/engine/battleScriptProgram.ts";
+import {
+  loadBattleScriptProgram,
+  resolveBattleScriptLabel,
+} from "../src/engine/battleScriptProgram.ts";
 
 const program = loadBattleScriptProgram();
+const MOVE_PAY_DAY = 6;
 const MOVE_COVET = 343;
 const MOVE_KNOCK_OFF = 282;
 const ITEM_NONE = 0;
@@ -303,5 +307,120 @@ describe("Family-B Cluster 4 Thief/Covet and Knock Off", () => {
     );
     expect(run("BattleScript_EffectThief", covet, 0x1234).rng.calls).toBe(4);
     expect(run("BattleScript_EffectKnockOff", knockOff, 0x1234).rng.calls).toBe(4);
+  });
+});
+
+describe("Family-B Cluster 4 Pay Day economy", () => {
+  it("walks the committed Pay Day move script to END and adds player level * 5", () => {
+    const result = run(
+      "BattleScript_EffectPayDay",
+      rules(MOVE_PAY_DAY, {}, {}, { level: 50 }),
+    );
+    expect(result.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
+    expect(result.rulesContext.paydayMoney).toBe(250);
+    expect(messages(result)).toContain("STRINGID_COINSSCATTERED");
+    expect(result.rng.calls).toBe(4);
+  });
+
+  it("does not add to the pot for an opponent-side attacker but still prints the effect message", () => {
+    const result = run(
+      "BattleScript_EffectPayDay",
+      rules(
+        MOVE_PAY_DAY,
+        { side: 0 },
+        { paydayMoney: 123 },
+        { side: 1, level: 50 },
+      ),
+    );
+    expect(result.rulesContext.paydayMoney).toBe(123);
+    expect(messages(result)).toContain("STRINGID_COINSSCATTERED");
+  });
+
+  it("saturates the u16 pot on wrap and applies after damage reduces the target to zero HP", () => {
+    const result = run(
+      "BattleScript_EffectPayDay",
+      rules(
+        MOVE_PAY_DAY,
+        { hp: 1, maxHP: 200 },
+        { paydayMoney: 65_400 },
+        { level: 100 },
+      ),
+    );
+    expect(result.rulesContext.battlers[1].hp).toBe(0);
+    expect(result.rulesContext.paydayMoney).toBe(0xffff);
+  });
+
+  it("givepaydaymoney multiplies, caps saved money, prepares the amount, and calls the payout message", () => {
+    const source = rules(MOVE_PAY_DAY, {}, {
+      paydayMoney: 600,
+      moneyMultiplier: 2,
+      playerMoney: 999_500,
+    });
+    const instruction = program.instructions.find(
+      ({ opcodeName }) => opcodeName === "B_SCR_OP_GIVEPAYDAYMONEY",
+    )!;
+    const execution = createBattleScriptStatusRulesExecution(
+      program,
+      "BattleScript_PayDayMoneyAndPickUpItems",
+      source,
+      7,
+      ports(),
+    );
+    const step = stepBattleScriptMachine(
+      program,
+      Object.freeze({ ...execution.state, programCounter: instruction.programCounter }),
+      execution.handlers,
+    );
+    if (step.kind !== "advanced") throw new Error(`expected advance, got ${step.kind}`);
+    expect(step.state.programCounter).toBe(
+      resolveBattleScriptLabel(program, "BattleScript_PrintPayDayMoneyString")!
+        .programCounter,
+    );
+    expect(step.state.rulesContext.playerMoney).toBe(999_999);
+    expect(step.state.rulesContext.battleTextBuff1PaydayMoney).toBe(1_200);
+    expect(step.state.rng.calls).toBe(0);
+  });
+
+  it.each([
+    ["zero pot", { paydayMoney: 0, flags: FACTORY_TRAINER }],
+    ["link battle", { paydayMoney: 500, flags: 1 << 1 }],
+    ["recorded link battle", { paydayMoney: 500, flags: 1 << 25 }],
+  ] as const)("givepaydaymoney %s advances without payout", (_name, fixture) => {
+    const source = rules(MOVE_PAY_DAY, {}, {
+      paydayMoney: fixture.paydayMoney,
+      playerMoney: 100,
+      battleTopology: {
+        battlersCount: 2,
+        battleTypeFlags: fixture.flags,
+        battlerPositions: [0, 1, 2, 3],
+      },
+    });
+    const instruction = program.instructions.find(
+      ({ opcodeName }) => opcodeName === "B_SCR_OP_GIVEPAYDAYMONEY",
+    )!;
+    const execution = createBattleScriptStatusRulesExecution(
+      program,
+      "BattleScript_PayDayMoneyAndPickUpItems",
+      source,
+      7,
+      ports(),
+    );
+    const step = stepBattleScriptMachine(
+      program,
+      Object.freeze({ ...execution.state, programCounter: instruction.programCounter }),
+      execution.handlers,
+    );
+    if (step.kind !== "advanced") throw new Error(`expected advance, got ${step.kind}`);
+    expect(step.state.programCounter).toBe(instruction.programCounter + 1);
+    expect(step.state.rulesContext).toBe(source);
+    expect(step.state.rng.calls).toBe(0);
+  });
+
+  it("replays Pay Day canonically with the exact standard four-draw ledger", () => {
+    const source = rules(MOVE_PAY_DAY, {}, {}, { level: 42 });
+    expect(run("BattleScript_EffectPayDay", source, 0x1234)).toEqual(
+      run("BattleScript_EffectPayDay", source, 0x1234),
+    );
+    expect(run("BattleScript_EffectPayDay", source, 0x1234).rng.calls).toBe(4);
   });
 });

@@ -2333,15 +2333,15 @@ describe("production seteffectwithchance (Cmd_seteffectwithchance) dispatch", ()
       expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
     });
 
-    it("halts on a still-unmodeled family-B byte (PAYDAY, > PRIMARY_STATUS_MOVE_EFFECT)", () => {
-      const rc = context(0, {}, { moveEffectByte: 11 | MOVE_EFFECT_CERTAIN });
+    it("halts on a still-unmodeled family-B byte (> PRIMARY_STATUS_MOVE_EFFECT)", () => {
+      const rc = context(0, {}, { moveEffectByte: 55 | MOVE_EFFECT_CERTAIN });
       const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
       expect(result.kind).toBe("halted");
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2522 });
     });
 
-    it("halts when the chance roll succeeds with a still-unmodeled family-B effect byte (PAYDAY)", () => {
-      const rc = context(0, {}, { currentMove: MUD_SLAP, moveEffectByte: 11 });
+    it("halts when the chance roll succeeds with a still-unmodeled family-B effect byte", () => {
+      const rc = context(0, {}, { currentMove: MUD_SLAP, moveEffectByte: 55 });
       const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
       expect(result.kind).toBe("halted");
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2522 });
@@ -3853,7 +3853,7 @@ describe("SetMoveEffect family-B cluster 1", () => {
     expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(35)).toBe(true); // Rapid Spin, Cluster 3
     expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(31)).toBe(true); // Steal Item, Cluster 4
     expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(54)).toBe(true); // Knock Off, Cluster 4
-    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(11)).toBe(false); // Pay Day, Cluster 4 rung (b)
+    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(11)).toBe(true); // Pay Day, Cluster 4 rung (b)
   });
 
   for (const [seed, status1, label] of [
@@ -4232,7 +4232,7 @@ describe("SetMoveEffect family-B cluster 2: recoil and Uproar dispatch", () => {
     expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(35)).toBe(true);
     expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(31)).toBe(true);
     expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(54)).toBe(true);
-    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(11)).toBe(false);
+    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(11)).toBe(true);
   });
 
   it("Double-Edge derives one-third recoil with C truncation and consumes no RNG", () => {

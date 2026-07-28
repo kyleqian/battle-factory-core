@@ -99,6 +99,7 @@ import { createBattleScriptTrysetspikesOpcodeHandlers } from "./battleScriptTrys
 import { createBattleScriptRefreshOpcodeHandlers } from "./battleScriptRefreshOpcode.ts";
 import { createBattleScriptHealpartystatusOpcodeHandlers } from "./battleScriptHealpartystatusOpcode.ts";
 import { createBattleScriptIncrementGameStatOpcodeHandlers } from "./battleScriptIncrementGameStatOpcode.ts";
+import { createBattleScriptGivepaydaymoneyOpcodeHandlers } from "./battleScriptGivepaydaymoneyOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -615,6 +616,12 @@ export type BattleScriptRulesContext = Readonly<
     lastUsedAbility: number;
     /** Source u16 gLastUsedItem, prepared by item-steal/knock-off messages. */
     lastUsedItem: number;
+    /** Source u16 gPaydayMoney. */
+    paydayMoney: number;
+    /** Source u8 gBattleStruct->moneyMultiplier. */
+    moneyMultiplier: number;
+    /** Decrypted source SaveBlock1 money value, capped by AddMoney. */
+    playerMoney: number;
     multiHitCounter: number;
     /**
      * Source u8 gBattleScripting.multihitString[4] (`sMULTIHIT_STRING + 4`,
@@ -737,6 +744,8 @@ export type BattleScriptRulesContext = Readonly<
     battleTextBuff1MonNick: BattleScriptPreparedMonNick | null;
     /** Typed form of PREPARE_BYTE_NUMBER_BUFFER(gBattleTextBuff1, 1, value). */
     battleTextBuff1ByteNumber: number | null;
+    /** Typed PREPARE_HWORD_NUMBER_BUFFER value from givepaydaymoney. */
+    battleTextBuff1PaydayMoney: number | null;
     /** Typed form of PREPARE_MOVE_BUFFER(gBattleTextBuff1, move). */
     battleTextBuff1Move: number | null;
     /** Typed form of PREPARE_BYTE_NUMBER_BUFFER(gBattleTextBuff2, 1, value). */
@@ -785,6 +794,9 @@ export type BattleScriptRulesContextInput = Readonly<{
   gBattleEnvironment?: number;
   lastUsedAbility?: number;
   lastUsedItem?: number;
+  paydayMoney?: number;
+  moneyMultiplier?: number;
+  playerMoney?: number;
   moveResultFlags: number;
   dmgMultiplier: number;
   critMultiplier: number;
@@ -862,6 +874,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   futureSightDmg?: readonly number[];
   battleTextBuff1MonNick?: BattleScriptPreparedMonNick | null;
   battleTextBuff1ByteNumber?: number | null;
+  battleTextBuff1PaydayMoney?: number | null;
   battleTextBuff1Move?: number | null;
   battleTextBuff2ByteNumber?: number | null;
   battlerByTurnOrder?: readonly number[];
@@ -2328,6 +2341,9 @@ export function createBattleScriptRulesContext(
       "lastUsedAbility",
     ),
     lastUsedItem: requireUnsigned(input.lastUsedItem ?? 0, 0xffff, "lastUsedItem"),
+    paydayMoney: requireUnsigned(input.paydayMoney ?? 0, 0xffff, "paydayMoney"),
+    moneyMultiplier: requireUnsigned(input.moneyMultiplier ?? 1, 0xff, "moneyMultiplier"),
+    playerMoney: requireUnsigned(input.playerMoney ?? 0, 999_999, "playerMoney"),
     moveResultFlags: requireUnsigned(input.moveResultFlags, 0xff, "moveResultFlags"),
     dmgMultiplier: requireUnsigned(input.dmgMultiplier, 0xff, "dmgMultiplier"),
     critMultiplier: requireUnsigned(input.critMultiplier, 0xff, "critMultiplier"),
@@ -2473,6 +2489,10 @@ export function createBattleScriptRulesContext(
       || input.battleTextBuff1ByteNumber === undefined
       ? null
       : requireUnsigned(input.battleTextBuff1ByteNumber, 0xff, "battleTextBuff1ByteNumber"),
+    battleTextBuff1PaydayMoney: input.battleTextBuff1PaydayMoney === null
+      || input.battleTextBuff1PaydayMoney === undefined
+      ? null
+      : requireUnsigned(input.battleTextBuff1PaydayMoney, 0xffff_ffff, "battleTextBuff1PaydayMoney"),
     battleTextBuff1Move: input.battleTextBuff1Move === null
       || input.battleTextBuff1Move === undefined
       ? null
@@ -2709,6 +2729,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptRefreshOpcodeHandlers(program),
     ...createBattleScriptHealpartystatusOpcodeHandlers(program),
     ...createBattleScriptIncrementGameStatOpcodeHandlers(program),
+    ...createBattleScriptGivepaydaymoneyOpcodeHandlers(program),
     ...createBattleScriptSettormentOpcodeHandlers(program),
     ...createBattleScriptSettauntOpcodeHandlers(program),
     ...createBattleScriptSetforesightOpcodeHandlers(program),

@@ -10,8 +10,8 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 188 | 214 | 87.9% |
-| Moves (unweighted, all 355) | 328 | 355 | 92.4% |
+| Effect scripts | 189 | 214 | 88.3% |
+| Moves (unweighted, all 355) | 329 | 355 | 92.7% |
 | Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 269 | 276 | 97.5% |
 | Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2940 | 2957 | 99.4% |
 
@@ -82,7 +82,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_FLINCH_HIT | `BattleScript_EffectFlinchHit` | executable | - | - | 6 | 5 (103) |
 | EFFECT_RESTORE_HP | `BattleScript_EffectRestoreHp` | executable | - | - | 2 | 1 (22) |
 | EFFECT_TOXIC | `BattleScript_EffectToxic` | executable | - | - | 1 | 1 (26) |
-| EFFECT_PAY_DAY | `BattleScript_EffectPayDay` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_PAYDAY is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 0 (0) |
+| EFFECT_PAY_DAY | `BattleScript_EffectPayDay` | executable | - | - | 1 | 0 (0) |
 | EFFECT_LIGHT_SCREEN | `BattleScript_EffectLightScreen` | executable | - | - | 1 | 1 (23) |
 | EFFECT_TRI_ATTACK | `BattleScript_EffectTriAttack` | executable | - | - | 1 | 1 (8) |
 | EFFECT_REST | `BattleScript_EffectRest` | executable | - | - | 1 | 1 (49) |

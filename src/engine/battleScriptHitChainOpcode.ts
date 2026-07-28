@@ -542,6 +542,7 @@ export const SET_MOVE_EFFECT_SUPPORTED_BYTES: ReadonlySet<number> = new Set<numb
   MOVE_EFFECT_FLINCH,
   MOVE_EFFECT_TRI_ATTACK,
   MOVE_EFFECT_UPROAR,
+  MOVE_EFFECT_PAYDAY,
   MOVE_EFFECT_STEAL_ITEM,
   MOVE_EFFECT_CHARGING,
   MOVE_EFFECT_WRAP,
@@ -2673,6 +2674,22 @@ function applySetMoveEffect(
         Object.freeze({ ...context, state: Object.freeze({ ...context.state, rng }) }),
         Object.freeze({ kind: "call", programCounter }),
         { rulesContext: Object.freeze({ ...withUproar, lockedMoves }) },
+      );
+    }
+    if (effectByte === MOVE_EFFECT_PAYDAY) {
+      let paydayMoney = baseRulesContext.paydayMoney;
+      if (baseRulesContext.battlers[attacker].side === 0) {
+        const next = (paydayMoney + (baseRulesContext.battlers[attacker].level * 5)) & 0xffff;
+        paydayMoney = paydayMoney > next ? 0xffff : next;
+      }
+      const programCounter = resolveRequiredLabelProgramCounter(
+        context.program,
+        "BattleScript_MoveEffectPayDay",
+      );
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call", programCounter }),
+        { rulesContext: Object.freeze({ ...baseRulesContext, paydayMoney }) },
       );
     }
     if (effectByte === MOVE_EFFECT_WRAP) {

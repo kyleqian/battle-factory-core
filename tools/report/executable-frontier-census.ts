@@ -550,6 +550,7 @@ const MOVE_EFFECT_ID_BY_NAME: Readonly<Record<string, number>> = Object.freeze({
   MOVE_EFFECT_FLINCH: 8,
   MOVE_EFFECT_TRI_ATTACK: 9,
   MOVE_EFFECT_UPROAR: 10,
+  MOVE_EFFECT_PAYDAY: 11,
   MOVE_EFFECT_CHARGING: 12,
   MOVE_EFFECT_WRAP: 13,
   MOVE_EFFECT_RECOIL_25: 14,
@@ -1107,6 +1108,7 @@ const validationChecks: Array<() => void> = [
   () => requireExactMechanicalBlockers("EFFECT_THIEF", []),
   () => requireExecutable("EFFECT_KNOCK_OFF"),
   () => requireExactMechanicalBlockers("EFFECT_KNOCK_OFF", []),
+  () => requireExecutable("EFFECT_PAY_DAY"),
   // Family-B Cluster 3's final rung: Cmd_rapidspinfree, its Wrap-return
   // copy tuple, and MOVE_EFFECT_RAPIDSPIN's C-selected callback are live.
   () => requireExecutable("EFFECT_RAPID_SPIN"),
