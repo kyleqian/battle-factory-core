@@ -62,6 +62,7 @@ const STATUS3_YAWN_TURN_2 = (2 << 11) & STATUS3_YAWN_MASK;
 /** include/constants/abilities.h -- same ids as Rung 1's `JUMPIFABILITY_VALUES` widening. */
 const ABILITY_VITAL_SPIRIT = 72;
 const ABILITY_INSOMNIA = 15;
+const ABILITY_SOUNDPROOF = 43;
 /** include/constants/abilities.h:24 -- Own Tempo, docs/yawn-thrash-endturn-design.md §4's confusion-onset blocker. */
 const ABILITY_OWN_TEMPO = 20;
 /** include/constants/battle.h:137-139 -- STATUS2_LOCK_CONFUSE's 2-bit turn counter (bits 10-11) plus STATUS2_MULTIPLETURNS (bit 12), docs/yawn-thrash-endturn-design.md §4. */
@@ -70,6 +71,10 @@ const STATUS2_LOCK_CONFUSE_TURN_1 = (1 << 10) & STATUS2_LOCK_CONFUSE_MASK;
 const STATUS2_LOCK_CONFUSE_TURN_2 = (2 << 10) & STATUS2_LOCK_CONFUSE_MASK;
 const STATUS2_LOCK_CONFUSE_TURN_3 = (3 << 10) & STATUS2_LOCK_CONFUSE_MASK;
 const STATUS2_MULTIPLETURNS = 1 << 12;
+const STATUS2_UPROAR_MASK = (1 << 4) | (1 << 5) | (1 << 6);
+const STATUS2_UPROAR_TURN_1 = 1 << 4;
+const STATUS2_UPROAR_TURN_2 = 2 << 4;
+const STATUS2_UPROAR_TURN_3 = 3 << 4;
 /** src/data/gen/moves.json -- gBattleMoves[].pp (base PP), doc §6 addendum's RESTORE_PP tests. */
 const MOVE_TACKLE = 33;
 const MOVE_HYDRO_PUMP = 56;
@@ -723,6 +728,124 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
     });
   });
 
+  describe("ENDTURN_UPROAR (battle_util.c:1625-1672)", () => {
+    it("continuation decrements the timer, preserves MULTIPLETURNS, and prints the continuing message", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0, status2: STATUS2_UPROAR_TURN_3 | STATUS2_MULTIPLETURNS }),
+          battler({ side: 1, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+      const initial = scratchState(rc, 0);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      const active = result.state.rulesContext.battlers[0]!;
+      expect(active.status2 & STATUS2_UPROAR_MASK).toBe(STATUS2_UPROAR_TURN_2);
+      expect(active.status2 & STATUS2_MULTIPLETURNS).not.toBe(0);
+      expect(result.state.events).toContainEqual(
+        expect.objectContaining({ kind: "message", messageId: "STRINGID_PKMNMAKINGUPROAR" }),
+      );
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+
+    it("expiry decrements to zero, cancels the lock, and prints the ended message", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0, status2: STATUS2_UPROAR_TURN_1 | STATUS2_MULTIPLETURNS }),
+          battler({ side: 1, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+      const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 0));
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[0]!.status2).toBe(0);
+      expect(result.state.events).toContainEqual(
+        expect.objectContaining({ kind: "message", messageId: "STRINGID_PKMNCALMEDDOWN" }),
+      );
+    });
+
+    it("unable-to-move cancellation wins after the decrement and clears the whole multi-turn lock", () => {
+      const rc = context({
+        battlers: [
+          battler({
+            side: 0,
+            status2: STATUS2_UPROAR_TURN_3 | STATUS2_MULTIPLETURNS,
+            flinchImmobility: 1,
+          }),
+          battler({ side: 1, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+      const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 0));
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[0]!.status2).toBe(0);
+      expect(result.state.events).toContainEqual(
+        expect.objectContaining({ kind: "message", messageId: "STRINGID_PKMNCALMEDDOWN" }),
+      );
+    });
+
+    it("wakes a sleeping non-Soundproof battler before decrement, clears Nightmare, and synchronizes party status", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0, status2: STATUS2_UPROAR_TURN_2 | STATUS2_MULTIPLETURNS }),
+          battler({
+            side: 1,
+            status1: STATUS1_SLEEP_3_TURNS,
+            status2: STATUS2_NIGHTMARE,
+            partyIndex: 2,
+          }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+        party: { player: sixSlots(100), opponent: sixSlots(0, 0, 100) },
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+      const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 0));
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+      expect(result.state.rulesContext.battlers[1]!.status2 & STATUS2_NIGHTMARE).toBe(0);
+      expect(result.state.rulesContext.party.opponent[2]!.status1).toBe(0);
+      expect(result.state.events).toContainEqual(
+        expect.objectContaining({ kind: "message", messageId: "STRINGID_PKMNWOKEUPINUPROAR" }),
+      );
+    });
+
+    it("Soundproof sleeper is not awakened by Uproar", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0, status2: STATUS2_UPROAR_TURN_2 | STATUS2_MULTIPLETURNS }),
+          battler({
+            side: 1,
+            ability: ABILITY_SOUNDPROOF,
+            status1: STATUS1_SLEEP_3_TURNS,
+            partyIndex: 2,
+          }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+      const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 0));
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(STATUS1_SLEEP_3_TURNS);
+      expect(result.state.events).not.toContainEqual(
+        expect.objectContaining({ kind: "message", messageId: "STRINGID_PKMNWOKEUPINUPROAR" }),
+      );
+    });
+  });
+
   describe("ENDTURN_YAWN (battle_util.c:1753-1771, docs/yawn-thrash-endturn-design.md §2)", () => {
     it("first end-turn pass only decrements the counter (TURN(2) -> TURN(1)), no sleep transition, zero RNG", () => {
       const rc = context({
@@ -818,6 +941,48 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
       expect(result.state.rulesContext.battlers[1]!.status3 & STATUS3_YAWN_MASK).toBe(0);
       expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
       expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+
+    it("active Uproar blocks Yawn's sleep transition after the counter expires", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0, status2: STATUS2_UPROAR_TURN_3 | STATUS2_MULTIPLETURNS }),
+          battler({ side: 1, status3: STATUS3_YAWN_TURN_1, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+      const initial = scratchState(rc, 0);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[1]!.status3 & STATUS3_YAWN_MASK).toBe(0);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+
+    it("Soundproof exempts the Yawn target from Uproar's sleep block", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0, status2: STATUS2_UPROAR_TURN_3 | STATUS2_MULTIPLETURNS }),
+          battler({
+            side: 1,
+            ability: ABILITY_SOUNDPROOF,
+            status3: STATUS3_YAWN_TURN_1,
+            partyIndex: 2,
+          }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+      const initial = scratchState(rc, 0);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[1]!.status1 & 0x7).not.toBe(0);
+      expect(result.state.rng.calls).toBe(initial.rng.calls + 1);
     });
 
     it("no yawn counter set at all: pure no-op, zero RNG", () => {

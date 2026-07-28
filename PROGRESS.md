@@ -15,30 +15,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
-## 613 — [BOUNDED MAIN WORKER 2026-07-28 ~10:00] Recoil 33 and shared Rock Head gate execute end to end
+## 613 — [BOUNDED MAIN WORKER 2026-07-28 ~10:08] Recoil/Rock Head and Uproar cluster execute end to end
 
-- **State:** rung (a) implementation green at **380 files / 4346 tests**,
-  production build, OFF oracle info, census regeneration, all **47/47**
-  validation checks, ratchets **6/6**, and `git diff --check`. Census is
-  exactly **169/214 effects, 305/355 moves, 247/276 Factory-L50 distinct,
-  2897/2957 weighted**.
-- **Did:** added `ABILITY_ROCK_HEAD` to the registered `jumpifability`
-  operands and implemented `MOVE_EFFECT_RECOIL_33` as source-exact
-  `max(1, trunc(gHpDealt / 3))` damage followed by the shared committed
-  recoil callback. Tests cover normal/minimum recoil, attacker self-faint
-  after target damage, Rock Head negation, zero case-local RNG, canonical
-  replay, and full terminal committed-script walks for both Double-Edge and
-  the collateral 25% Take Down class.
-- **Next:** supervisor verify this mandatory rung, then dispatch rung (b)
-  alone: Uproar fresh/duplicate dispatch, end-turn continuation/wake/
-  decrement/expiry/cancellation, and Yawn's live Uproar sleep block. Keep Pay
-  Day, Thief, Mean Look, Nightmare, Rapid Spin, and Knock Off barriered.
-- **Notes:** predicted and actual rung delta both **+1 effect/+2 moves/+1
-  distinct/+52 weighted**; the existing counted `EFFECT_RECOIL` row stays
-  count-neutral but is no longer a runtime false positive. No new barrier,
-  barrier-pin move, recording import, presentation/tick/round branch, issue
-  removal, oracle lifecycle action, or trace. Full-cluster remaining delta is
-  exactly **+1/+1/+1/+1** to **170/306/248/2898**.
+- **State:** rung (a) committed as `e2c3c149`; full cluster green at **380
+  files / 4356 tests**, production build, OFF oracle info, census
+  regeneration, all **47/47** validation checks, ratchets **6/6**, and `git
+  diff --check`. Census is exactly **170/214 effects, 306/355 moves, 248/276
+  Factory-L50 distinct, 2898/2957 weighted**.
+- **Did:** added `ABILITY_ROCK_HEAD` and source-exact 33% recoil through the
+  shared callback, including collateral full-script proof for the existing
+  25% recoil row. Added fresh/duplicate Uproar dispatch with its chance +
+  `(Random() & 3) + 2` duration draws, move lock, committed callback, and
+  complete end-turn owner: ordered sleeper wakes, Soundproof exemption,
+  decrement, continuation/expiry messages, unable-to-move cancellation, and
+  Yawn's now-live Uproar sleep block.
+- **Next:** supervisor verify both green commits. Keep Pay Day, Thief, Mean
+  Look, Nightmare, Rapid Spin, and Knock Off barriered for their separately
+  scoped downstream owners; census-generator hardening also remains a
+  separate step.
+- **Notes:** predicted and actual full-cluster delta both **+2 effects/+3
+  moves/+2 distinct/+53 weighted**. Rung (a) was **+1/+2/+1/+52**; Uproar
+  was **+1/+1/+1/+1**. The counted `EFFECT_RECOIL` row stayed count-neutral
+  and is no longer a runtime false positive. No new barrier, barrier-pin
+  move, recording import, presentation/tick/round branch, issue removal,
+  oracle lifecycle action, or trace.
 
 ---
 ## 612 — [BOUNDED MAIN WORKER 2026-07-28 ~09:53] Seven dispatch-ready family-B move effects execute end to end

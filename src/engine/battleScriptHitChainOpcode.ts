@@ -218,6 +218,8 @@ const PRIMARY_STATUS_MOVE_EFFECT = MOVE_EFFECT_TOXIC;
 const MOVE_EFFECT_CONFUSION = 7;
 const MOVE_EFFECT_FLINCH = 8;
 const MOVE_EFFECT_TRI_ATTACK = 9;
+/** include/constants/battle.h:256 -- Uproar's user-owned lock/timer effect. */
+const MOVE_EFFECT_UPROAR = 10;
 /** include/constants/battle.h:259 -- SetMoveEffect's two-turn-charge case (docs/semi-invulnerable-registration-scout.md §5 rung 2). */
 const MOVE_EFFECT_CHARGING = 12;
 /** include/constants/battle.h:260 -- SetMoveEffect's Wrap-family case (docs/ingrain-leechseed-wrap-ground-truth.md §1c/§5 slice 2). */
@@ -345,6 +347,11 @@ const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Objec
     "STRINGID_PKMNCANTSLEEPINUPROAR2",
     "STRINGID_UPROARKEPTPKMNAWAKE",
     "STRINGID_PKMNSTAYEDAWAKEUSING",
+  ]),
+  /** battle_message.c:975-979 -- ENDTURN_UPROAR continuation/expiry. */
+  gUproarOverTurnStringIds: Object.freeze([
+    "STRINGID_PKMNMAKINGUPROAR",
+    "STRINGID_PKMNCALMEDDOWN",
   ]),
   /** battle_message.c:1208-1212 -- BattleScript_BerryCureChosenStatusRet's own table, shared by HOLD_EFFECT_CURE_STATUS (Lum) and HOLD_EFFECT_CURE_ATTRACT (Mental Herb) (docs/endturn-abilities-items-ground-truth.md §1c). */
   gBerryEffectStringIds: Object.freeze([
@@ -511,6 +518,7 @@ export const SET_MOVE_EFFECT_SUPPORTED_BYTES: ReadonlySet<number> = new Set<numb
   MOVE_EFFECT_CONFUSION,
   MOVE_EFFECT_FLINCH,
   MOVE_EFFECT_TRI_ATTACK,
+  MOVE_EFFECT_UPROAR,
   MOVE_EFFECT_CHARGING,
   MOVE_EFFECT_WRAP,
   MOVE_EFFECT_RECOIL_25,
@@ -2522,6 +2530,38 @@ function applySetMoveEffect(
         (randomValue % 3) + MOVE_EFFECT_BURN,
         false,
         false,
+      );
+    }
+    if (effectByte === MOVE_EFFECT_UPROAR) {
+      if ((effectBattlerState.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_UPROAR) !== 0) {
+        return passThrough();
+      }
+      const { rng, randomValue } = drawBattleScriptRng(
+        context.state.rng,
+        context.instruction,
+        "SetMoveEffect Uproar duration ((Random() & 3) + 2)",
+      );
+      const uproarTurns = (randomValue & 3) + 2;
+      const lockedMoves = Object.freeze(
+        baseRulesContext.lockedMoves.map((move, index) =>
+          index === effectBattler ? baseRulesContext.currentMove : move
+        ),
+      ) as BattleScriptMoveEndHalfwords;
+      const withUproar = withBattler(baseRulesContext, effectBattler, {
+        status2: (
+          effectBattlerState.status2
+          | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
+          | (uproarTurns << 4)
+        ) >>> 0,
+      });
+      const programCounter = resolveRequiredLabelProgramCounter(
+        context.program,
+        "BattleScript_MoveEffectUproar",
+      );
+      return transitionBattleScriptCommand(
+        Object.freeze({ ...context, state: Object.freeze({ ...context.state, rng }) }),
+        Object.freeze({ kind: "call", programCounter }),
+        { rulesContext: Object.freeze({ ...withUproar, lockedMoves }) },
       );
     }
     if (effectByte === MOVE_EFFECT_WRAP) {

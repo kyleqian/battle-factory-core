@@ -66,6 +66,7 @@ import {
 } from "./battleScriptCallbackStack.ts";
 import { cancelBattleScriptMultiTurnMoves } from "./battleScriptMultiTurnCancellation.ts";
 import {
+  BATTLE_SCRIPT_ABILITY_SOUNDPROOF,
   BATTLE_SCRIPT_STATUS1_SLEEP,
   BATTLE_SCRIPT_STATUS2_LOCK_CONFUSE_TURN_1,
   BATTLE_SCRIPT_STATUS2_MASKS,
@@ -83,6 +84,8 @@ const INGRAIN_TURN_HEAL_LABEL = "BattleScript_IngrainTurnHeal";
 const LEECH_SEED_TURN_DRAIN_LABEL = "BattleScript_LeechSeedTurnDrain";
 const WRAP_TURN_DMG_LABEL = "BattleScript_WrapTurnDmg";
 const WRAP_ENDS_LABEL = "BattleScript_WrapEnds";
+const UPROAR_WAKE_LABEL = "BattleScript_MonWokeUpInUproar";
+const UPROAR_TURNS_LABEL = "BattleScript_PrintUproarOverTurns";
 /** `ENDTURN_YAWN`'s own sleep-transition script (`battle_scripts_1.s:3878-3885`, docs/yawn-thrash-endturn-design.md §2) -- `BattleScriptExecute`+`end2`, no `END3`. */
 const YAWN_MAKES_ASLEEP_LABEL = "BattleScript_YawnMakesAsleep";
 /** `ENDTURN_THRASH`'s own lock-expiry confusion script (`battle_scripts_1.s:3790-3794`, docs/yawn-thrash-endturn-design.md §4) -- `BattleScriptExecute`+`end2`, no `END3`. */
@@ -663,7 +666,8 @@ function runWrapTick(
 }
 
 /**
- * `ENDTURN_THRASH` (`battle_util.c:1674-1695`, docs/yawn-thrash-endturn-design.md
+ * Source notes for `runThrashTick` below: `ENDTURN_THRASH`
+ * (`battle_util.c:1674-1695`, docs/yawn-thrash-endturn-design.md
  * §4) -- wires the case-barrier `battleEndTurnOrchestration.ts` has carried
  * live since Rung 4 landed `STATUS2_LOCK_CONFUSE` (any battler whose lock-in
  * bit was ever set used to halt here; this rung is that barrier's own real
@@ -723,6 +727,80 @@ function runWrapTick(
  * silent-block precedent elsewhere in this codebase, e.g.
  * `applyFlinchMoveEffect`'s Inner Focus non-`certain` branch).
  */
+/**
+ * `ENDTURN_UPROAR` (`battle_util.c:1625-1672`). The resumable source case
+ * wakes one eligible sleeper and repeats without advancing its tracker; this
+ * monolithic orchestrator equivalently drains that ordered wake loop before
+ * performing the single timer decrement and continuation/expiry message.
+ */
+function runUproarTick(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  initialState: MachineState,
+  battler: BattleScriptBattlerId,
+): TickOutcome {
+  const source = initialState.rulesContext.battlers[battler];
+  if ((source.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_UPROAR) === 0) {
+    return Object.freeze({ kind: "advance", state: initialState });
+  }
+
+  let state = initialState;
+  const { battlersCount } = state.rulesContext.battleTopology;
+  for (let i = 0; i < battlersCount; i += 1) {
+    const sleeper = i as BattleScriptBattlerId;
+    const sleeperState = state.rulesContext.battlers[sleeper];
+    if (
+      (sleeperState.status1 & BATTLE_SCRIPT_STATUS1_SLEEP) === 0
+      || sleeperState.ability === BATTLE_SCRIPT_ABILITY_SOUNDPROOF
+    ) {
+      continue;
+    }
+    const status1 = (sleeperState.status1 & ~BATTLE_SCRIPT_STATUS1_SLEEP) >>> 0;
+    let rulesContext = withBattler(state.rulesContext, sleeper, {
+      status1,
+      status2: (
+        sleeperState.status2
+        & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE
+      ) >>> 0,
+    });
+    rulesContext = Object.freeze({
+      ...rulesContext,
+      party: withBattleScriptPartyMemberStatus1(
+        rulesContext.party,
+        sleeperState.side,
+        sleeperState.partyIndex,
+        status1,
+      ),
+    });
+    const wake = runTickScript(program, handlers, state, rulesContext, sleeper, UPROAR_WAKE_LABEL);
+    if (wake.kind === "opcode-barrier") return wake;
+    state = wake.state;
+  }
+
+  const active = state.rulesContext.battlers[battler];
+  const decrementedStatus2 = (active.status2 - (1 << 4)) >>> 0;
+  let rulesContext = withBattler(state.rulesContext, battler, { status2: decrementedStatus2 });
+  const unable = wasBattleScriptBattlerUnableToUseMove(rulesContext, battler);
+  const continues = !unable
+    && (decrementedStatus2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_UPROAR) !== 0;
+  if (continues) {
+    rulesContext = withBattler(rulesContext, battler, {
+      status2: (
+        rulesContext.battlers[battler].status2
+        | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
+      ) >>> 0,
+    });
+  } else {
+    rulesContext = cancelBattleScriptMultiTurnMoves(rulesContext, battler).rulesContext;
+  }
+  rulesContext = Object.freeze({
+    ...rulesContext,
+    multistringChooser: continues ? 0 : 1,
+  });
+  return runTickScript(program, handlers, state, rulesContext, battler, UPROAR_TURNS_LABEL);
+}
+
+/** Implements the Thrash reducer documented above the adjacent Uproar case. */
 function runThrashTick(
   program: BattleScriptProgram,
   handlers: Handlers,
@@ -780,11 +858,9 @@ function runThrashTick(
  * fall-asleep AND-chain only ever runs on the SAME pass the decrement empties
  * the counter. `ability !== VITAL_SPIRIT/INSOMNIA` reuses Rung 1's own
  * `JUMPIFABILITY_VALUES` ids as a plain equality check (a C-side `if`, not a
- * script opcode, here). `!UproarWakeUpCheck(gActiveBattler)` is provably
- * always `TRUE` in this engine's reachable state space -- `STATUS2_UPROAR` is
- * never set by any production code (confirmed by grep, doc §2) -- and is
- * omitted rather than modeled as a call that can never observe its `FALSE`
- * input. `CancelMultiTurnMoves` reuses the shared `cancelBattleScriptMulti
+ * script opcode, here). `!UproarWakeUpCheck(gActiveBattler)` scans active
+ * battlers for STATUS2_UPROAR and blocks sleep unless this battler has
+ * Soundproof. `CancelMultiTurnMoves` reuses the shared `cancelBattleScriptMulti
  * TurnMoves` helper (already landed for `battleScriptActionAdmission.ts`,
  * not new this rung). The sleep-turn draw
  * (`STATUS1_SLEEP_TURN((Random() & 3) + 2)`) is the ONLY `Random()` call in
@@ -817,7 +893,20 @@ function runYawnTick(
   const yawnExpired = (decrementedStatus3 & BATTLE_SCRIPT_STATUS3_YAWN) === 0;
   const noStatus1 = (b.status1 & STATUS1_ANY) === 0;
   const noBlockingAbility = b.ability !== ABILITY_VITAL_SPIRIT && b.ability !== ABILITY_INSOMNIA;
-  if (!yawnExpired || !noStatus1 || !noBlockingAbility) {
+  let blockedByUproar = false;
+  if (b.ability !== BATTLE_SCRIPT_ABILITY_SOUNDPROOF) {
+    const { battlersCount } = decrementedRc.battleTopology;
+    for (let i = 0; i < battlersCount; i += 1) {
+      if (
+        (decrementedRc.battlers[i as BattleScriptBattlerId].status2
+          & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_UPROAR) !== 0
+      ) {
+        blockedByUproar = true;
+        break;
+      }
+    }
+  }
+  if (!yawnExpired || !noStatus1 || !noBlockingAbility || blockedByUproar) {
     return Object.freeze({ kind: "advance", state: Object.freeze({ ...state, rulesContext: decrementedRc }) });
   }
 
@@ -1183,7 +1272,7 @@ type BattlerLoopResult =
  * this engine already tracks and barriers if it's ever actually set
  * (currently never, since no move/ability effect in this engine sets any of
  * them yet) -- a real, live check, not a blanket skip. Cases with no modeled
- * trigger state at all (Uproar, Encore, Charge) are documented,
+ * trigger state at all (Charge) are documented,
  * permanently-inert no-ops today; Lock-On is skipped per the doc's own
  * dead-for-Factory finding (B15); Abilities remains pure-C breadth
  * explicitly out of this doc's scope (B2).
@@ -1258,7 +1347,12 @@ function runDoBattlerEndTurnEffects(
     }
     if (wrap.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: wrap.state });
     state = wrap.state;
-    // ENDTURN_UPROAR: no modeled uproar timer -- permanently inert no-op today (doc B11).
+    const uproar = applyTickOutcome(runUproarTick(program, handlers, state, battler));
+    if (uproar.kind === "opcode-barrier") {
+      return Object.freeze({ kind: "opcode-barrier", state: uproar.state, instruction: uproar.instruction });
+    }
+    if (uproar.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: uproar.state });
+    state = uproar.state;
 
     const thrash = applyTickOutcome(runThrashTick(program, handlers, state, battler));
     if (thrash.kind === "opcode-barrier") {

@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 169 | 214 | 79.0% |
-| Moves (unweighted, all 355) | 305 | 355 | 85.9% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 247 | 276 | 89.5% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2897 | 2957 | 98.0% |
+| Effect scripts | 170 | 214 | 79.4% |
+| Moves (unweighted, all 355) | 306 | 355 | 86.2% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 248 | 276 | 89.9% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2898 | 2957 | 98.0% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -212,7 +212,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_DEFENSE_CURL | `BattleScript_EffectDefenseCurl` | executable | - | - | 1 | 1 (6) |
 | EFFECT_SOFTBOILED | `BattleScript_EffectSoftboiled` | executable | - | - | 2 | 2 (7) |
 | EFFECT_FAKE_OUT | `BattleScript_EffectFakeOut` | executable | - | - | 1 | 1 (15) |
-| EFFECT_UPROAR | `BattleScript_EffectUproar` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_UPROAR is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (1) |
+| EFFECT_UPROAR | `BattleScript_EffectUproar` | executable | - | - | 1 | 1 (1) |
 | EFFECT_STOCKPILE | `BattleScript_EffectStockpile` | blocked-on-opcodes | `B_SCR_OP_STOCKPILE` (main path) | - | 1 | 1 (2) |
 | EFFECT_SPIT_UP | `BattleScript_EffectSpitUp` | blocked-on-opcodes | `B_SCR_OP_STOCKPILETOBASEDAMAGE` (edge branch only) | - | 1 | 1 (1) |
 | EFFECT_SWALLOW | `BattleScript_EffectSwallow` | blocked-on-opcodes | `B_SCR_OP_STOCKPILETOHPHEAL` (main path) | - | 1 | 1 (2) |

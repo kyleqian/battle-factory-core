@@ -2335,15 +2335,15 @@ describe("production seteffectwithchance (Cmd_seteffectwithchance) dispatch", ()
       expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
     });
 
-    it("halts on a still-unmodeled family-B byte (UPROAR, > PRIMARY_STATUS_MOVE_EFFECT): status2/misc switch barrier remains for every byte but CONFUSION/FLINCH", () => {
-      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_UPROAR | MOVE_EFFECT_CERTAIN });
+    it("halts on a still-unmodeled family-B byte (PAYDAY, > PRIMARY_STATUS_MOVE_EFFECT)", () => {
+      const rc = context(0, {}, { moveEffectByte: 11 | MOVE_EFFECT_CERTAIN });
       const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
       expect(result.kind).toBe("halted");
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2522 });
     });
 
-    it("halts when the chance roll succeeds with a still-unmodeled family-B effect byte (UPROAR)", () => {
-      const rc = context(0, {}, { currentMove: MUD_SLAP, moveEffectByte: MOVE_EFFECT_UPROAR });
+    it("halts when the chance roll succeeds with a still-unmodeled family-B effect byte (PAYDAY)", () => {
+      const rc = context(0, {}, { currentMove: MUD_SLAP, moveEffectByte: 11 });
       const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
       expect(result.kind).toBe("halted");
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2522 });
@@ -3843,7 +3843,7 @@ describe("SetMoveEffect family-B cluster 1", () => {
     ]) {
       expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(effect)).toBe(true);
     }
-    for (const effect of [10, 11, 31, 32, 33, 35, 54]) {
+    for (const effect of [11, 31, 32, 33, 35, 54]) {
       expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(effect)).toBe(false);
     }
   });
@@ -4165,7 +4165,7 @@ describe("SetMoveEffect family-B cluster 1 committed-script integrations", () =>
   });
 });
 
-describe("SetMoveEffect family-B cluster 2 rung (a): damage-derived recoil", () => {
+describe("SetMoveEffect family-B cluster 2: recoil and Uproar dispatch", () => {
   const DOUBLE_EDGE = 38;
   const TAKE_DOWN = 36;
 
@@ -4358,5 +4358,71 @@ describe("SetMoveEffect family-B cluster 2 rung (a): damage-derived recoil", () 
     expect(finished.state.events).not.toContainEqual(
       expect.objectContaining({ kind: "hp-change", battler: 0 }),
     );
+  });
+
+  it("fresh Uproar consumes the standard chance draw then its source timer draw, locks the move for 2-5 turns, and calls its message script", () => {
+    const UPROAR = 253;
+    const rc = context(
+      0,
+      { moves: [UPROAR, 0, 0, 0], pp: [10, 0, 0, 0] },
+      {
+        currentMove: UPROAR,
+        moveEffectByte: MOVE_EFFECT_UPROAR | MOVE_EFFECT_AFFECTS_USER,
+        lockedMoves: [0, 0, 0, 0],
+      },
+    );
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc, 1);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rng.calls).toBe(2);
+    expect(result.state.rng.ledger.map((entry) => entry.reason)).toEqual([
+      "seteffectwithchance",
+      "SetMoveEffect Uproar duration ((Random() & 3) + 2)",
+    ]);
+    const turns = (result.state.rng.ledger[1]!.randomValue & 3) + 2;
+    expect(result.state.rulesContext.battlers[0]!.status2 & 0x70).toBe(turns << 4);
+    expect(result.state.rulesContext.battlers[0]!.status2 & (1 << 12)).not.toBe(0);
+    expect(result.state.rulesContext.lockedMoves[0]).toBe(UPROAR);
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_MoveEffectUproar"));
+  });
+
+  it("continuing Uproar still consumes its chance draw but neither rerolls duration nor rewrites the lock", () => {
+    const UPROAR = 253;
+    const status2 = (4 << 4) | (1 << 12);
+    const rc = context(
+      0,
+      { status2, moves: [UPROAR, 0, 0, 0], pp: [10, 0, 0, 0] },
+      {
+        currentMove: UPROAR,
+        moveEffectByte: MOVE_EFFECT_UPROAR | MOVE_EFFECT_AFFECTS_USER,
+        lockedMoves: [UPROAR, 2, 3, 4],
+      },
+    );
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc, 1);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rng.ledger.map((entry) => entry.reason)).toEqual(["seteffectwithchance"]);
+    expect(result.state.rulesContext.battlers[0]!.status2).toBe(status2);
+    expect(result.state.rulesContext.lockedMoves).toEqual([UPROAR, 2, 3, 4]);
+    expect(result.state.callStack).toEqual([]);
+  });
+
+  it("Uproar full committed script reaches MOVEEND and canonically replays", () => {
+    const UPROAR = 253;
+    const rc = context(
+      0,
+      { attack: 70, moves: [UPROAR, 0, 0, 0], pp: [10, 0, 0, 0] },
+      { currentMove: UPROAR },
+      { hp: 1000, maxHP: 1000, defense: 70 },
+    );
+    const finished = runEntryToEnd("BattleScript_EffectUproar", rc, 1);
+    expect(finished.state.rulesContext.battlers[0]!.status2 & 0x70).not.toBe(0);
+    expect(finished.state.rulesContext.lockedMoves[0]).toBe(UPROAR);
+    expect(finished.state.rng.ledger.map((entry) => entry.reason).slice(-2)).toEqual([
+      "seteffectwithchance",
+      "SetMoveEffect Uproar duration ((Random() & 3) + 2)",
+    ]);
+    const replay = runEntryToEnd("BattleScript_EffectUproar", rc, 1);
+    expect(replay.state.rulesContext).toEqual(finished.state.rulesContext);
+    expect(replay.state.rng.ledger).toEqual(finished.state.rng.ledger);
+    expect(replay.state.events).toEqual(finished.state.events);
   });
 });
