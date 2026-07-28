@@ -15,6 +15,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 565 — [BOUNDED MAIN WORKER 2026-07-28 ~01:49] Disable executes source-completely
+
+- **State:** committed `e566e53`; tree green at **322 files / 4007 tests**
+  and focused **324/324**. Production build, both-oracle freshness, census
+  regeneration, and `git diff --check` pass. Census is exactly **141/214
+  effects, 267/355 moves, 218/276 Factory-L50 distinct, 2701/2957
+  weighted**, all **42/42**.
+- **Did:** registered exact five-byte opcode `0xa3`, target-owned first-slot
+  match/PP predicate, one-draw 2–5 timer/start, zero-mutation failure jumps,
+  switch/faint clearing, and source-ordered `ENDTURN_DISABLE`. Generic legal
+  decisions intersect Disable with Encore, disable every duplicate-id slot,
+  force real Struggle, and preserve direct-attempt canceler ownership.
+- **Next:** supervisor verify this executable-frontier increment and select
+  the next finite source registration target; do not resume the retired
+  canonical Battle-2 march.
+- **Notes:** controlled seed 9 reproduces merged OFF PP **20→19→18**, prevents
+  selected disabled Tackle PP loss, forces all-Tackle Struggle, expires with
+  `BattleScript_DisabledNoMore`, and restores Tackle legality/PP. No new
+  unsupported barrier, recording import, animation/presentation/scenario
+  branch, issue removal, oracle lifecycle action, or PAPERCUT.
+
+---
 ## 564 — [SUPERVISOR VERIFY 2026-07-28 ~01:24] Corrected Future Sight accepted; Disable evidence merged
 
 - **State:** reviewed union green at **321 files / 3994 tests** and focused
@@ -59,25 +81,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   delayed last move. No barrier/import ratchet change, recording import,
   animation edit, scenario/tick/render branch, issue removal, oracle lifecycle
   action, or PAPERCUT.
-
----
-## 562 — [SUPERVISOR VERIFY 2026-07-28 ~00:51] Defense Curl accepted; Future Sight evidence merged
-
-- **State:** reviewed union green at **319 files / 3976 tests**; production
-  build, both-oracle freshness, census regeneration, and `git diff --check`
-  pass. Census is exactly **139/214 effects, 264/355 moves, 216/276
-  Factory-L50 distinct, 2691/2957 weighted**, with all **42/42** checks.
-- **Did:** accepted `7a96b10` / `7989330`: exact attacker-owned Defense Curl
-  bit, ordered stat change, and genuine generic Defense Curl→Rollout full-turn
-  continuation. Merged Future Sight evidence `b5d192e` after source review
-  and two byte-identical OFF replays.
-- **Next:** register exact five-byte `0xc3`
-  `B_SCR_OP_TRYSETFUTUREATTACK` and its positional delayed end-turn subsystem:
-  duplicate-pending branch, stored base damage/attacker/move/timer, switch and
-  faint semantics, delayed accuracy/random damage, Substitute handling, and
-  Protect/type/STAB exclusions. Expected census is **140/214, 266/355,
-  217/276, 2696/2957**.
-- **Notes:** Future Sight evidence observes PP **15→14→13**, setup and duplicate
-  target HP **140**, then delayed HP **140→103** with side bit 64 clearing;
-  manifest `ecd032fb…ee2448f`. No barrier/import ratchet increase, recording
-  import, animation edit, DEFERRED item, or oracle lifecycle action.

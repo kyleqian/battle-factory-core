@@ -1,4 +1,26 @@
 ---
+## 562 — [SUPERVISOR VERIFY 2026-07-28 ~00:51] Defense Curl accepted; Future Sight evidence merged
+
+- **State:** reviewed union green at **319 files / 3976 tests**; production
+  build, both-oracle freshness, census regeneration, and `git diff --check`
+  pass. Census is exactly **139/214 effects, 264/355 moves, 216/276
+  Factory-L50 distinct, 2691/2957 weighted**, with all **42/42** checks.
+- **Did:** accepted `7a96b10` / `7989330`: exact attacker-owned Defense Curl
+  bit, ordered stat change, and genuine generic Defense Curl→Rollout full-turn
+  continuation. Merged Future Sight evidence `b5d192e` after source review
+  and two byte-identical OFF replays.
+- **Next:** register exact five-byte `0xc3`
+  `B_SCR_OP_TRYSETFUTUREATTACK` and its positional delayed end-turn subsystem:
+  duplicate-pending branch, stored base damage/attacker/move/timer, switch and
+  faint semantics, delayed accuracy/random damage, Substitute handling, and
+  Protect/type/STAB exclusions. Expected census is **140/214, 266/355,
+  217/276, 2696/2957**.
+- **Notes:** Future Sight evidence observes PP **15→14→13**, setup and duplicate
+  target HP **140**, then delayed HP **140→103** with side bit 64 clearing;
+  manifest `ecd032fb…ee2448f`. No barrier/import ratchet increase, recording
+  import, animation edit, DEFERRED item, or oracle lifecycle action.
+
+---
 ## 558 — [SUPERVISOR VERIFY 2026-07-28 ~00:07] Wish accepted; Secret Power evidence merged
 
 - **State:** reviewed union green at **314 files / 3954 tests** and focused
