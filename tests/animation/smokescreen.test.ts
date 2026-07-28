@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { smokescreenEffectAtAge } from "../../src/animation/smokescreen.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnSmokescreenView,
+} from "../../src/animation/sceneOnPresentation.ts";
 
 describe("MOVE_SMOKESCREEN source-relative reducer", () => {
   const player = (age: number) => smokescreenEffectAtAge(
@@ -66,6 +70,43 @@ describe("MOVE_SMOKESCREEN source-relative reducer", () => {
       sprites: [],
       visualTaskCount: 0,
       dynamicImpactAssetsLoaded: false,
+    });
+  });
+
+  it("exposes only presentation geometry through the typed Scene-ON seam", () => {
+    const stage = createSceneOnMovePresentation({
+      move: "SMOKESCREEN",
+      attacker: {
+        species: "KOFFING",
+        geometry: {
+          side: "player",
+          spriteCorner: { x: 40, y: 57 },
+          animationCenter: { x: 72, y: 97 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "ONIX",
+        geometry: {
+          side: "opponent",
+          spriteCorner: { x: 144, y: 10 },
+          animationCenter: { x: 176, y: 42 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      fieldProfile: {
+        playerHp: 117,
+        playerMaxHp: 117,
+        opponentHp: 110,
+        opponentMaxHp: 110,
+      },
+    });
+    expect(sceneOnSmokescreenView({ ...stage, age: 47 })).toMatchObject({
+      age: 47,
+      attacker: { species: "KOFFING" },
+      target: { species: "ONIX" },
+      visualTaskCount: 12,
+      taskTopology: [],
     });
   });
 });
