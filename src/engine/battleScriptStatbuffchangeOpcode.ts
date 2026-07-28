@@ -203,6 +203,8 @@ const PLAYANIMATION_ANIM_TYPES: ReadonlyMap<
   ["B_ANIM_INGRAIN_HEAL", { argExpression: "NULL", animationId: "INGRAIN_HEAL", readsAnimArg1: false }],
   ["B_ANIM_LEECH_SEED_DRAIN", { argExpression: "sB_ANIM_ARG1", animationId: "LEECH_SEED_DRAIN", readsAnimArg1: true }],
   ["B_ANIM_TURN_TRAP", { argExpression: "sB_ANIM_ARG1", animationId: "TURN_TRAP", readsAnimArg1: true }],
+  /** BattleScript_WishComesTrue's delayed-heal presentation command. */
+  ["B_ANIM_WISH_HEAL", { argExpression: "NULL", animationId: "WISH_HEAL", readsAnimArg1: false }],
   /**
    * docs/endturn-abilities-items-ground-truth.md §1c/§5 slice 4 -- every
    * `ITEMEFFECT_NORMAL` end2 script (Leftovers/White Herb/all 8 cure

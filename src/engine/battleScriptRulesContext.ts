@@ -69,6 +69,7 @@ import { createBattleScriptCopyFoeStatsOpcodeHandlers } from "./battleScriptCopy
 import { createBattleScriptJumpifcantswitchOpcodeHandlers } from "./battleScriptJumpifcantswitchOpcode.ts";
 import { createBattleScriptJumpifnodamageOpcodeHandlers } from "./battleScriptJumpifnodamageOpcode.ts";
 import { createBattleScriptSleepTalkOpcodeHandlers } from "./battleScriptSleepTalkOpcode.ts";
+import { createBattleScriptTrywishOpcodeHandlers } from "./battleScriptTrywishOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -474,6 +475,11 @@ export type BattleScriptBattlerPositions = readonly [
 
 export type BattleScriptBattlersCount = 2 | 4;
 
+export type BattleScriptPreparedMonNick = Readonly<{
+  battler: BattleScriptBattlerId;
+  partyIndex: number;
+}>;
+
 /** Exact immutable globals used by source battler-position helpers. */
 export type BattleScriptBattleTopology = Readonly<{
   battlersCount: BattleScriptBattlersCount;
@@ -599,6 +605,12 @@ export type BattleScriptRulesContext = Readonly<
     weather: number;
     /** Source u8 gWishFutureKnock.weatherDuration -- the one shared weather timer every Cmd_set<weather> writes (include/battle.h:172, byte offset 0x28). */
     weatherTimer: number;
+    /** Source gWishFutureKnock.wishCounter[MAX_BATTLERS_COUNT], owned by positional battler slots. */
+    wishCounter: readonly [number, number, number, number];
+    /** Source gWishFutureKnock.wishMonId[MAX_BATTLERS_COUNT], the setup-time party index for each positional Wish. */
+    wishMonId: readonly [number, number, number, number];
+    /** Typed form of PREPARE_MON_NICK_WITH_PREFIX_BUFFER(gBattleTextBuff1, battler, partyIndex). */
+    battleTextBuff1MonNick: BattleScriptPreparedMonNick | null;
     /**
      * Source gBattlerByTurnOrder[MAX_BATTLERS_COUNT] -- populated by
      * `ENDTURN_ORDER`'s `GetWhoStrikesFirst` insertion sort
@@ -703,6 +715,9 @@ export type BattleScriptRulesContextInput = Readonly<{
   sideTimers?: readonly [BattleScriptSideTimerInput?, BattleScriptSideTimerInput?];
   weather?: number;
   weatherTimer?: number;
+  wishCounter?: readonly number[];
+  wishMonId?: readonly number[];
+  battleTextBuff1MonNick?: BattleScriptPreparedMonNick | null;
   battlerByTurnOrder?: readonly number[];
   currentTurnActionNumber?: number;
 }>;
@@ -2113,6 +2128,25 @@ export function createBattleScriptRulesContext(
     ]) as unknown as readonly [BattleScriptSideTimerState, BattleScriptSideTimerState],
     weather: requireUnsigned(input.weather ?? 0, 0xffff_ffff, "weather") >>> 0,
     weatherTimer: requireUnsigned(input.weatherTimer ?? 0, 0xff, "weatherTimer"),
+    wishCounter: Object.freeze([
+      requireUnsigned(input.wishCounter?.[0] ?? 0, 0xff, "wishCounter[0]"),
+      requireUnsigned(input.wishCounter?.[1] ?? 0, 0xff, "wishCounter[1]"),
+      requireUnsigned(input.wishCounter?.[2] ?? 0, 0xff, "wishCounter[2]"),
+      requireUnsigned(input.wishCounter?.[3] ?? 0, 0xff, "wishCounter[3]"),
+    ]) as unknown as readonly [number, number, number, number],
+    wishMonId: Object.freeze([
+      requireUnsigned(input.wishMonId?.[0] ?? 0, 5, "wishMonId[0]"),
+      requireUnsigned(input.wishMonId?.[1] ?? 0, 5, "wishMonId[1]"),
+      requireUnsigned(input.wishMonId?.[2] ?? 0, 5, "wishMonId[2]"),
+      requireUnsigned(input.wishMonId?.[3] ?? 0, 5, "wishMonId[3]"),
+    ]) as unknown as readonly [number, number, number, number],
+    battleTextBuff1MonNick: input.battleTextBuff1MonNick === null
+      || input.battleTextBuff1MonNick === undefined
+      ? null
+      : Object.freeze({
+        battler: requireUnsigned(input.battleTextBuff1MonNick.battler, 3, "battleTextBuff1MonNick.battler") as BattleScriptBattlerId,
+        partyIndex: requireUnsigned(input.battleTextBuff1MonNick.partyIndex, 5, "battleTextBuff1MonNick.partyIndex"),
+      }),
     battlerByTurnOrder: Object.freeze([
       requireUnsigned(input.battlerByTurnOrder?.[0] ?? 0, 3, "battlerByTurnOrder[0]"),
       requireUnsigned(input.battlerByTurnOrder?.[1] ?? 1, 3, "battlerByTurnOrder[1]"),
@@ -2322,6 +2356,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptJumpifcantswitchOpcodeHandlers(program),
     ...createBattleScriptJumpifnodamageOpcodeHandlers(program),
     ...createBattleScriptSleepTalkOpcodeHandlers(program),
+    ...createBattleScriptTrywishOpcodeHandlers(program),
   });
 }
 

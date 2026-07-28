@@ -178,6 +178,7 @@ describe("source-shaped Battle Script rules context", () => {
       "battleMoveDamage",
       "battleOutcome",
       "battleStructAbsentBattlerFlags",
+      "battleTextBuff1MonNick",
       "battleTopology",
       "battlerByTurnOrder",
       "battlers",
@@ -226,6 +227,8 @@ describe("source-shaped Battle Script rules context", () => {
       "twoTurnStringId",
       "weather",
       "weatherTimer",
+      "wishCounter",
+      "wishMonId",
     ]);
     expect(created.battlers).toHaveLength(4);
     expect(Object.isFrozen(created)).toBe(true);
@@ -238,6 +241,8 @@ describe("source-shaped Battle Script rules context", () => {
     expect(Object.isFrozen(created.moveHistory)).toBe(true);
     expect(Object.isFrozen(created.battleTopology)).toBe(true);
     expect(Object.isFrozen(created.battleTopology.battlerPositions)).toBe(true);
+    expect(Object.isFrozen(created.wishCounter)).toBe(true);
+    expect(Object.isFrozen(created.wishMonId)).toBe(true);
     expect(Object.isFrozen(created.selectorRoles)).toBe(true);
     expect(created.battlers.every(Object.isFrozen)).toBe(true);
     expect(created.battlers.every((value) => Object.isFrozen(value.pp))).toBe(true);
@@ -450,7 +455,7 @@ describe("source-shaped Battle Script rules context", () => {
 });
 
 describe("production status rules handler and execution seam", () => {
-  it("composes all 144 source-safe handlers, including the Sleep Talk pair, once", () => {
+  it("composes all 145 source-safe handlers, including Sleep Talk and Wish, once", () => {
     const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts());
     expect(Object.keys(handlers).map(Number).sort((a, b) => a - b)).toEqual([
       0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12,
@@ -460,7 +465,7 @@ describe("production status rules handler and execution seam", () => {
       61, 62, 63, 65, 66, 67, 69, 70, 71, 72, 73, 74, 76, 77, 78, 79, 80, 81,
       82, 83, 84, 85, 86, 88, 92, 97, 98, 99, 100, 101, 102, 104,
       105, 106, 111, 115, 118, 119, 120, 121, 122, 123, 125, 126, 127, 128, 129, 130, 131, 132, 136, 137, 140, 141, 142, 143, 146, 147,
-      149, 150, 151, 152, 153, 156, 159, 160, 161, 162, 169, 170, 171, 172, 175, 180, 182, 184, 187, 189, 192, 194, 197, 198, 200, 207, 213, 215, 216, 226, 227, 231, 238, 246, 248,
+      149, 150, 151, 152, 153, 156, 159, 160, 161, 162, 169, 170, 171, 172, 175, 180, 182, 184, 187, 189, 192, 194, 197, 198, 200, 207, 212, 213, 215, 216, 226, 227, 231, 238, 246, 248,
     ]);
   });
 

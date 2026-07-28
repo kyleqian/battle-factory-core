@@ -90,6 +90,8 @@ const WRAP_ENDS_LABEL = "BattleScript_WrapEnds";
 const YAWN_MAKES_ASLEEP_LABEL = "BattleScript_YawnMakesAsleep";
 /** `ENDTURN_THRASH`'s own lock-expiry confusion script (`battle_scripts_1.s:3790-3794`, docs/yawn-thrash-endturn-design.md §4) -- `BattleScriptExecute`+`end2`, no `END3`. */
 const THRASH_CONFUSES_LABEL = "BattleScript_ThrashConfuses";
+/** `ENDTURN_WISH`'s delayed-heal script (`battle_scripts_1.s:3589-3610`). */
+const WISH_COMES_TRUE_LABEL = "BattleScript_WishComesTrue";
 /** `ItemBattleEffects(ITEMEFFECT_NORMAL, ...)`'s ten `BattleScriptExecute`+`end2` labels this registration wires (docs/endturn-abilities-items-ground-truth.md §1c/§5 slice 4). */
 const ITEM_HEAL_HP_END2_LABEL = "BattleScript_ItemHealHP_End2";
 const WHITE_HERB_END2_LABEL = "BattleScript_WhiteHerbEnd2";
@@ -1441,13 +1443,11 @@ function runDamagingWeatherFieldCase(
 /**
  * `DoFieldEndTurnEffects`'s 9 non-ENDTURN_ORDER cases (`battle_util.c:1181
  * -1438`). REFLECT/LIGHT_SCREEN/MIST/SAFEGUARD (F2-F5), RAIN/SUN (F7/F9),
- * and SANDSTORM/HAIL (F8/F10) are all fully wired
+ * WISH (F6), and SANDSTORM/HAIL (F8/F10) are all fully wired
  * (docs/screens-weather-ground-truth.md §6 slices 1-3/4/5) -- RAIN/SUN's own
  * `playanimation BS_ATTACKER, B_ANIM_RAIN_CONTINUES`/`B_ANIM_SUN_CONTINUES`
  * calls are now covered by `battleScriptStatbuffchangeOpcode.ts`'s widened
- * PLAYANIMATION handler. `ENDTURN_WISH` has no modeled trigger state at all
- * (no `wishCounter` field) and is an explicit, documented no-op (this step's
- * brief names Wish as an allowed deferral alongside Uproar/Leech Seed).
+ * PLAYANIMATION handler.
  */
 function runDoFieldEndTurnEffects(
   program: BattleScriptProgram,
@@ -1487,7 +1487,36 @@ function runDoFieldEndTurnEffects(
     if (safeguard.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: safeguard.state, instruction: safeguard.instruction });
     state = safeguard.state;
     if (safeguard.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });
-    // ENDTURN_WISH: no modeled wishCounter field -- explicit deferred no-op (this step's brief).
+  }
+
+  // ENDTURN_WISH follows every side-screen case and precedes all weather
+  // cases. It walks positional slots through gBattlerByTurnOrder, decrements
+  // every live counter, and only dispatches the script when the decrement
+  // reaches zero on a currently living positional battler.
+  for (let orderIndex = 0; orderIndex < state.rulesContext.battleTopology.battlersCount; orderIndex += 1) {
+    const battler = state.rulesContext.battlerByTurnOrder[orderIndex] as BattleScriptBattlerId;
+    const counter = state.rulesContext.wishCounter[battler];
+    if (counter === 0) continue;
+    const wishCounter = [...state.rulesContext.wishCounter] as [number, number, number, number];
+    wishCounter[battler] = counter - 1;
+    const decremented = Object.freeze({
+      ...state.rulesContext,
+      wishCounter: Object.freeze(wishCounter),
+    });
+    state = Object.freeze({ ...state, rulesContext: decremented });
+    if (wishCounter[battler] !== 0 || decremented.battlers[battler].hp === 0) continue;
+    const targeted = Object.freeze({
+      ...decremented,
+      selectorRoles: Object.freeze({ ...decremented.selectorRoles, target: battler }),
+    });
+    const wish = runTickScript(program, handlers, state, targeted, battler, WISH_COMES_TRUE_LABEL);
+    if (wish.kind === "opcode-barrier") {
+      return Object.freeze({ kind: "opcode-barrier", state: wish.state, instruction: wish.instruction });
+    }
+    state = wish.state;
+    if (state.rulesContext.battleOutcome !== 0) {
+      return Object.freeze({ kind: "outcome-decided", state });
+    }
   }
 
   const rc = state.rulesContext;
@@ -1518,20 +1547,16 @@ function runDoFieldEndTurnEffects(
 
 /**
  * `ENDTURN_ORDER`'s `gBattlerByTurnOrder` recompute, narrowed to what this
- * engine can actually determine: `gBattleMons[].speed` has no home anywhere
- * in `BattleScriptRulesContext` (a wholly separate subsystem from
- * `turnOrder.ts`'s own speed model), so relative tick order between two
- * battlers that BOTH have a live end-turn condition is not resolvable here
- * yet -- this defaults to ascending battler id, documented, not silently
- * guessed. Both this doc's own live scenarios (§2a/§2b) and this rung's
- * integration proofs only ever give ONE battler a live end-turn condition,
- * so this simplification is not exercised by anything this rung asserts.
+ * engine receives from the full-turn seam. That seam has already run
+ * SetActionsAndBattlersTurnOrder and stores its positional order in the
+ * source-shaped `gBattlerByTurnOrder` field. Standalone contexts default the
+ * field to ascending battler id.
  */
 function computeBattlerOrder(rulesContext: BattleScriptRulesContext): readonly BattleScriptBattlerId[] {
   const count = rulesContext.battleTopology.battlersCount;
-  const order: BattleScriptBattlerId[] = [];
-  for (let i = 0; i < count; i += 1) order.push(i as BattleScriptBattlerId);
-  return Object.freeze(order);
+  return Object.freeze(
+    rulesContext.battlerByTurnOrder.slice(0, count) as BattleScriptBattlerId[],
+  );
 }
 
 /**
@@ -1659,5 +1684,6 @@ export function runBattleEndTurnOrchestration(
   // HandleFaintedMonActions() always runs, gBattleOutcome gate or not (doc §1) -- reuse the already-landed orchestration verbatim.
   const faintedResult = runBattleScriptFaintedActionsOrchestration(program, handlers, state);
   return mapFaintedActionsResult(faintedResult);
-  // HandleWishPerishSongOnTurnEnd: no modeled Wish/Perish Song/Future Sight state -- explicit deferred no-op (this step's brief).
+  // HandleWishPerishSongOnTurnEnd: Perish Song/Future Sight remain unmodeled;
+  // Wish itself is DoFieldEndTurnEffects' ENDTURN_WISH case above.
 }
