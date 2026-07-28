@@ -71,6 +71,7 @@ import { createBattleScriptJumpifnodamageOpcodeHandlers } from "./battleScriptJu
 import { createBattleScriptSleepTalkOpcodeHandlers } from "./battleScriptSleepTalkOpcode.ts";
 import { createBattleScriptTrywishOpcodeHandlers } from "./battleScriptTrywishOpcode.ts";
 import { createBattleScriptRolloutOpcodeHandlers } from "./battleScriptRolloutOpcode.ts";
+import { createBattleScriptSetDefenseCurlBitOpcodeHandlers } from "./battleScriptSetDefenseCurlBitOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -2386,6 +2387,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptSleepTalkOpcodeHandlers(program),
     ...createBattleScriptTrywishOpcodeHandlers(program),
     ...createBattleScriptRolloutOpcodeHandlers(program),
+    ...createBattleScriptSetDefenseCurlBitOpcodeHandlers(program),
   });
 }
 
