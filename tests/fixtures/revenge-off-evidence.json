@@ -1,0 +1,62 @@
+{
+  "schema": "revenge-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "battle_move_effects.h": "32192c0d0014b5a63edb5b34b8d8475739891eaee66dc610a45d30574879b00e",
+    "battle.h": "8ef0355f2345592094c82cfde6641644a6b7157012104736416f8c05f34f0685",
+    "battle_main.c": "ee79b86ff0f681ab783b363135fd84d050e7123bea2a77c5530f2c7ddc8b8408",
+    "battle_util.c": "2ba9ee4efe913effa119c8342281745f481910ca1b20cd76b470673062a45fd5",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "battle_frontier_mons.h.constants": "00fb47e144978d3a24a304047f5463217ac7b535ee6f8719e2adf47cc592387a",
+    "moves.h": "d32746c9ad3ed1bbfbb93712f13e01ab1c43f48a78f3605ef9db5095e8d19d27",
+    "pokemon.h": "e0153a94a2fc0f84e6de372494dfb01e88be4d9cf1cbbeca5e56b8a0b645f7e5"
+  },
+  "instruction": {
+    "opcode": 214,
+    "opcodeHex": "0xd6",
+    "length": 1,
+    "operands": [],
+    "owner": "gProtectStructs[gBattlerAttacker]",
+    "predicate": "(physicalDmg != 0 && physicalBattlerId == gBattlerTarget) || (specialDmg != 0 && specialBattlerId == gBattlerTarget)",
+    "success": "gBattleScripting.dmgMultiplier = 2",
+    "pc": "gBattlescriptCurrInstr++",
+    "localRngCalls": 0,
+    "controllerEmissions": 0
+  },
+  "history": {
+    "producer": "Cmd_datahpupdate records non-passive, non-Pain-Split physical damage or non-passive special damage on gProtectStructs[gActiveBattler]; BS_TARGET records gBattlerAttacker as the owner, any other selector records gBattlerTarget.",
+    "consumers": [
+      "Cmd_counterdamagecalculator reads physicalDmg/physicalBattlerId",
+      "Cmd_mirrorcoatdamagecalculator reads specialDmg/specialBattlerId",
+      "Cmd_jumpifnodamage reads physicalDmg || specialDmg",
+      "Cmd_doubledamagedealtifdamaged reads either matching damage/owner pair"
+    ],
+    "lifetime": "BattleTurnPassed calls TurnValuesCleanUp(FALSE) after field/battler end-turn effects, faint actions, and Wish/Perish handling; that byte-clears every active ProtectStruct. FaintClearSetData clears the ProtectStruct bitfields but does not write the four history fields."
+  },
+  "effect": {
+    "move": {"id": 279, "name": "MOVE_REVENGE", "effect": "EFFECT_REVENGE", "power": 60, "type": "TYPE_FIGHTING", "accuracy": 100, "pp": 10, "target": "MOVE_TARGET_SELECTED", "priority": -4},
+    "script": ["doubledamagedealtifdamaged", "goto BattleScript_EffectHit"],
+    "damageUse": "Cmd_damagecalc calculates base damage then multiplies by gCritMultiplier * gBattleScripting.dmgMultiplier; HandleAction_UseMove resets dmgMultiplier to 1 before each action.",
+    "rngAndControllerBoundary": "The opcode itself has no Random call, controller emission, or controller-exec mark. Normal EffectHit still owns its ordinary attack/accuracy/critical/random-damage/controller work."
+  },
+  "case": {
+    "scenario": "tools/battle-lab/mechanic-revenge-machop-chansey-off.json",
+    "scenarioSha256": "b113b7efd75538e41a0d911ca02680c49f1019cf86c93b8b32feb993d78857b6",
+    "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "a52074df126ff1d703c1761975688d59d81e0829a2f5b65bd01052b82597dd64"},
+    "builtPartyChecksumsValid": [true, true, true, true, true, true],
+    "observed": {
+      "initial": {"frame": 0, "sha256": "7d56b8a8117c6cce07a16a706a82da7d7c648d0bff24b2589c1cf5f40cbadff9", "rngValue": 919694434, "currentMove": 0, "player": {"hp": 145, "pp": [35,35,10,35]}, "opponent": {"hp": 325, "pp": [35,35,35,35]}},
+      "opponentTackleChosen": {"frame": 100, "sha256": "035e2257c108a68a118278d7cab9c523f4447c2ea43c291e64baab8659df8344", "rngValue": 3690816045, "currentMove": 33, "player": {"hp": 145, "pp": [35,35,10,35]}, "opponent": {"hp": 325, "pp": [35,34,35,35]}},
+      "playerDamaged": {"frame": 200, "sha256": "6a1b5350084268532477fefdfc397bbd24e3c4b01aa849430e23fced35be6853", "rngValue": 1621732966, "currentMove": 0, "player": {"hp": 136, "pp": [35,35,10,35]}, "opponent": {"hp": 325, "pp": [35,34,35,35]}},
+      "revengeAfterPp": {"frame": 250, "sha256": "99254cf8943364994294d35f0cbd14544ff468d07a357e8da6b1f7123a8fb6e0", "rngValue": 1850371763, "currentMove": 279, "player": {"hp": 136, "pp": [35,35,9,35]}, "opponent": {"hp": 325, "pp": [35,34,35,35]}},
+      "revengeDamageVisible": {"frame": 600, "sha256": "64b01ef038fcc53394f53927e78e9f1bc0f313bef43ba5ecae7e82c4bf7f5ba8", "rngValue": 1850371763, "currentMove": 279, "player": {"hp": 136, "pp": [35,35,9,35]}, "opponent": {"hp": 45, "pp": [35,34,35,35]}},
+      "settled": {"frame": 700, "sha256": "9de9728e00594034469bf5fa6306064f2c4798670963c89a0f396159740a849c", "rngValue": 1160559944, "currentMove": 0, "player": {"hp": 136, "pp": [35,35,9,35]}, "opponent": {"hp": 45, "pp": [35,34,35,35]}}
+    }
+  },
+  "boundedRemainder": "The public singles receipt shows the initial undamaged state, real opponent Tackle PP/HP change before Revenge, Revenge PP/use, and the later 280-HP public loss. It does not expose script PC, turn-order array, gProtectStructs damage fields, damage multiplier, random-damage intermediate, target global, or controller-command causality. The undamaged-Revenge no-double path and every hidden-history predicate are source-pinned; no public capture alone is represented as proving them."
+}
