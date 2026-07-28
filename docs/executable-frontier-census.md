@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 153 | 214 | 71.5% |
-| Moves (unweighted, all 355) | 282 | 355 | 79.4% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 230 | 276 | 83.3% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2747 | 2957 | 92.9% |
+| Effect scripts | 154 | 214 | 72.0% |
+| Moves (unweighted, all 355) | 283 | 355 | 79.7% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 231 | 276 | 83.7% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2750 | 2957 | 93.0% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -27,7 +27,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_HEALPARTYSTATUS` | 1 (EFFECT_HEAL_BELL) | 2 | 2 | 4 |
 | `B_SCR_OP_TRYSETENCORE` | 1 (EFFECT_ENCORE) | 1 | 1 | 4 |
 | `B_SCR_OP_TRYSETPERISHSONG` | 1 (EFFECT_PERISH_SONG) | 1 | 1 | 4 |
-| `B_SCR_OP_DOUBLEDAMAGEDEALTIFDAMAGED` | 1 (EFFECT_REVENGE) | 1 | 1 | 3 |
 | `B_SCR_OP_TRYSETMAGICCOAT` | 1 (EFFECT_MAGIC_COAT) | 1 | 1 | 3 |
 | `B_SCR_OP_TRYSETSPIKES` | 1 (EFFECT_SPIKES) | 1 | 1 | 3 |
 | `B_SCR_OP_SCALEDAMAGEBYHEALTHRATIO` | 1 (EFFECT_ERUPTION) | 2 | 2 | 2 |
@@ -48,6 +47,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_PRESENTDAMAGECALCULATION` | 1 (EFFECT_PRESENT) | 1 | 1 | 1 |
 | `B_SCR_OP_STOCKPILETOBASEDAMAGE` | 1 (EFFECT_SPIT_UP) | 1 | 1 | 1 |
 | `B_SCR_OP_TRYCOPYABILITY` | 1 (EFFECT_ROLE_PLAY) | 1 | 1 | 1 |
+| `B_SCR_OP_TRYMEMENTO` | 1 (EFFECT_MEMENTO) | 1 | 1 | 1 |
 
 ## Per-effect detail
 
@@ -238,7 +238,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_SUPERPOWER | `BattleScript_EffectSuperpower` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_ATK_DEF_DOWN is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (3) |
 | EFFECT_MAGIC_COAT | `BattleScript_EffectMagicCoat` | blocked-on-opcodes | `B_SCR_OP_TRYSETMAGICCOAT` (main path) | - | 1 | 1 (3) |
 | EFFECT_RECYCLE | `BattleScript_EffectRecycle` | blocked-on-opcodes | `B_SCR_OP_TRYRECYCLEITEM` (main path) | - | 1 | 1 (1) |
-| EFFECT_REVENGE | `BattleScript_EffectRevenge` | blocked-on-opcodes | `B_SCR_OP_DOUBLEDAMAGEDEALTIFDAMAGED` (main path) | - | 1 | 1 (3) |
+| EFFECT_REVENGE | `BattleScript_EffectRevenge` | executable | - | - | 1 | 1 (3) |
 | EFFECT_BRICK_BREAK | `BattleScript_EffectBrickBreak` | executable | - | - | 1 | 1 (46) |
 | EFFECT_YAWN | `BattleScript_EffectYawn` | executable | - | - | 1 | 1 (10) |
 | EFFECT_KNOCK_OFF | `BattleScript_EffectKnockOff` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_KNOCK_OFF is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (7) |
