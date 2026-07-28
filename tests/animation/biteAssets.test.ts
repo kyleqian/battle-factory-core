@@ -26,7 +26,7 @@ describe("MOVE_BITE source presentation assets", () => {
       rows: 16,
     });
     expect(biteAsset.template).toMatchObject({
-      oam: "gOamData_AffineDouble_ObjBlend_32x16",
+      oam: "gOamData_AffineNormal_ObjBlend_64x64",
       callback: "AnimSharpTeeth",
       tileBytes: 0x0800,
     });

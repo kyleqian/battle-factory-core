@@ -52,7 +52,7 @@ writeFileSync(out, `${JSON.stringify({
   ),
   template: {
     source: "src/battle_anim_dark.c:101-110,146-184",
-    oam: "gOamData_AffineDouble_ObjBlend_32x16",
+    oam: "gOamData_AffineNormal_ObjBlend_64x64",
     callback: "AnimSharpTeeth",
     affineAnimations: {
       top: "gAffineAnims_Bite1 (index 0)",
