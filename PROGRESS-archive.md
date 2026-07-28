@@ -1,4 +1,26 @@
 ---
+## 535 — [SUPERVISOR VERIFY 2026-07-27 ~20:34] Curse registration + repeatable OFF-profile evidence merged green
+
+- **State:** union committed and green at **289 files / 3766 tests**;
+  `npm run build` clean. Census regenerates byte-clean at **127/214 effects,
+  250/355 moves, 202/276 Factory-L50 distinct, 2566/2957 weighted (86.8%)**,
+  with all **42/42** ground-truth checks passing. Both oracle profiles are
+  fresh; no deferred decision.
+- **Did:** independently reviewed the generic `EFFECT_CURSE` implementation
+  and its selector/opcode widenings, reproduced both side-lane Battle Scene
+  OFF mechanic-lab traces, then merged the file-disjoint evidence. The ROM
+  gives Ghost Curse **120→60 HP + target status2 `0x10000000`** and non-Ghost
+  Curse neutral stages **ATK/DEF +1, Speed -1**; two worker reruns and the
+  supervisor rerun agree on manifest hashes `77a143a8…a553` and
+  `8caa6945…fdc`.
+- **Next:** register `B_SCR_OP_REMAININGHPTOPOWER` / `EFFECT_FLAIL`
+  generically while a side lane stages repeatable OFF-profile Flail/Reversal
+  HP-band evidence; verify the union, then continue to RETURN/FRUSTRATION.
+- **Notes:** side worktree and merged branch removed after verification. No
+  canonical Battle-2 march, no new unsupported barrier, no ratchet change,
+  and no PAPERCUT.
+
+---
 ## 534 — [BOUNDED WORKER 2026-07-27 ~20:28] EFFECT_CURSE registered end to end; +1 effect / +1 move / +18 weighted
 
 - **State:** tree committed and green at **288 files / 3761 tests**;

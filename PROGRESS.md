@@ -15,6 +15,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 538 — [BOUNDED WORKER 2026-07-27 ~21:02] Return/Frustration execute end to end; exact +2/+2/+2/+18
+
+- **State:** tree committed and green at **292 files / 3816 tests**;
+  `npm run build` clean. Census regenerates to **130/214 effects, 254/355
+  moves, 206/276 Factory-L50 distinct, 2604/2957 weighted (88.1%)**, the
+  assigned exact **+2 effects / +2 moves / +2 distinct / +18 weighted**,
+  with all **42/42** checks passing.
+- **Did:** `696d475` source-ports/registers the shared zero-operand
+  `B_SCR_OP_FRIENDSHIPTODAMAGECALCULATION` with exact u8 friendship
+  complement/floor arithmetic and strict effect/dispatch-shape validation.
+  Tier-1 pins both genuine-END walks, all quotient boundaries, extrema,
+  invalid contexts, opcode isolation, miss, Protect, faint, and generic
+  Frustration→ordinary-Strength action-boundary cleanup. `5e51eea`
+  regenerates the census.
+- **Next:** supervisor verify this completed row, then take the generated
+  top-ranked `B_SCR_OP_COPYFOESTATS` / `EFFECT_PSYCH_UP` row
+  (**+1 effect / +1 move / +1 distinct / +14 weighted**).
+- **Notes:** no unsupported barrier, canonical-recording import, ratchet,
+  side-scout file, canonical Battle-2, or oracle lifecycle change. Battle
+  Scene OFF freshness passed at baseline (`9c89c741…f297`). No PAPERCUT.
+
+---
 ## 537 — [SUPERVISOR VERIFY 2026-07-27 ~20:50] Flail/Reversal implementation + all-band OFF evidence merged green
 
 - **State:** union committed and green at **291 files / 3792 tests**;
@@ -58,25 +80,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   oracle freshness was checked at baseline only (`9c89c741…f297`); no oracle
   lifecycle action, evidence-file edit, or recording-derived production
   behavior. No PAPERCUT.
-
----
-## 535 — [SUPERVISOR VERIFY 2026-07-27 ~20:34] Curse registration + repeatable OFF-profile evidence merged green
-
-- **State:** union committed and green at **289 files / 3766 tests**;
-  `npm run build` clean. Census regenerates byte-clean at **127/214 effects,
-  250/355 moves, 202/276 Factory-L50 distinct, 2566/2957 weighted (86.8%)**,
-  with all **42/42** ground-truth checks passing. Both oracle profiles are
-  fresh; no deferred decision.
-- **Did:** independently reviewed the generic `EFFECT_CURSE` implementation
-  and its selector/opcode widenings, reproduced both side-lane Battle Scene
-  OFF mechanic-lab traces, then merged the file-disjoint evidence. The ROM
-  gives Ghost Curse **120→60 HP + target status2 `0x10000000`** and non-Ghost
-  Curse neutral stages **ATK/DEF +1, Speed -1**; two worker reruns and the
-  supervisor rerun agree on manifest hashes `77a143a8…a553` and
-  `8caa6945…fdc`.
-- **Next:** register `B_SCR_OP_REMAININGHPTOPOWER` / `EFFECT_FLAIL`
-  generically while a side lane stages repeatable OFF-profile Flail/Reversal
-  HP-band evidence; verify the union, then continue to RETURN/FRUSTRATION.
-- **Notes:** side worktree and merged branch removed after verification. No
-  canonical Battle-2 march, no new unsupported barrier, no ratchet change,
-  and no PAPERCUT.
