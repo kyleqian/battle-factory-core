@@ -1778,6 +1778,21 @@
         "MOVE_SWALLOW"
       ],
       "goal": "MOVE_RECOVER proves the complete three-wave RecoverAbsorbEffect plus attacker HealingEffect body in both orientations at 169/169 component/RAM and framebuffer frames, reproduced twice. MOVE_MILK_DRINK independently proves its complete bottle/thin-ring/target HealingEffect2 body in both orientations at 186/186 component/RAM and framebuffer frames, reproduced twice. MOVE_SYNTHESIS independently proves its complete GrantingStarsEffect/blend/load-boundary/attacker HealingEffect body in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. RECOVER remains 169/169, MILK DRINK 186/186, and BIND 45/45 in both orientations as regression controls. No other sibling is promoted: ABSORB needs its 8-orb sine drain/hitsplat/green field body; MEGA_DRAIN its paired 16-orb stronger-green body; DREAM_EATER its psychic-background/target-scale-and-shake/24-orb body; GIGA_DRAIN its 24-orb/high-green body; SOFT_BOILED has a distinct breaking-egg pair, attacker shake, two offset affine-program-0 thin rings, palette blend, and target HealingEffect2 body and needs its own dense move evidence; PRESENT has a distinct common moving item-bag body plus conditional five-explosion damage body or nine-green-particle healing body before target HealingEffect2, and needs dense evidence for both conditional outcomes; MOONLIGHT needs its blackout/moon/alpha/sparkle pipeline; and SWALLOW needs its move-turn-dependent deform/shake/blue-orb multiplicity. Each remains unsupported pending its own complete dense acceptance."
+    },
+    {
+      "id": "absorption-orb-drain",
+      "components": [
+        "visualCommand:create_absorption_orb_sprite",
+        "asset:ANIM_TAG_ORBS",
+        "subroutine:AbsorbEffect"
+      ],
+      "representatives": [
+        "MOVE_ABSORB",
+        "MOVE_MEGA_DRAIN",
+        "MOVE_DREAM_EATER",
+        "MOVE_GIGA_DRAIN"
+      ],
+      "goal": "MOVE_ABSORB has fresh legal Scene-ON oracle-only evidence in both orientations: real set-131 LOMBRE, complete visual window 223-416 plus clear frame 417, eight target-to-attacker absorption orbs issued at four-frame cadence (257-333, six live peak), source palette/register/audio lifetimes and HealingEffect teardown. This establishes the shared command/template/callback track only; ABSORB remains unsupported without a matching app seam/comparator. No sibling is promoted: MEGA DRAIN has 16 paired orbs, blend 8, hitsplat animation 1 and Bubble3; GIGA DRAIN has blend 12, 24 variable-amplitude orbs, three FireSpread sprites and Giga Drain audio; DREAM EATER adds psychic background/scale/shake, omits IMPACT, and has 24-orb Swagger body. LEECH LIFE is not Level-50 Factory scope."
     }
   ],
   "variantAudits": {

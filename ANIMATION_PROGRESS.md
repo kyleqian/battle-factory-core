@@ -1,5 +1,13 @@
 # Animation coverage
 
+## ABSORB absorption-orb evidence checkpoint; remains unsupported (2026-07-27)
+
+**Verdict:** `MOVE_ABSORB` remains unsupported. Fresh legal Scene-ON `mechanicLab` parties stage the real Level-50 set-131 LOMBRE carrier (Quirky, Attack/HP EV spread, source ABSORB slot) in player-back and opponent-front orientations against constrained ONIX; all active LOMBRE choices are ABSORB and all ONIX choices are TACKLE. The two scenarios capture every source-relative body/cleanup frame 223–417.
+
+**Proof:** dense mGBA evidence reaches the identical complete move-owned presentation window **223–416** both orientations, with cleanup at 417: green BG blend/`monbg`/`splitbgprio_foes` setup; target hitsplat/shake; eight `create_absorption_orb_sprite` starts at four-frame cadence (257–333, six live peak), `gAbsorptionOrbSpriteTemplate` / `AnimAbsorptionOrb` target-to-attacker arcs, source palette/register ownership, SE player lifetimes, HealingEffect stars, reset, and clear boundary. Geometry mirrors only by source battler centers: player LOMBRE 72,88 from ONIX 176,42; opponent LOMBRE 176,49 from ONIX 72,80. No renderer, engine, status, or app comparator was changed.
+
+**Sibling audit:** MEGA_DRAIN reuses the outer body and command/template/callback but has 16 paired orbs, stronger green blend (8), hitsplat animation 1, and `SE_M_BUBBLE3`; GIGA_DRAIN has blend 12, 24 variable-amplitude orbs plus three FireSpread sprites and `SE_M_GIGA_DRAIN`; DREAM_EATER shares the 24-orb tail family but adds psychic BG, target scale/shake, no IMPACT, and `SE_M_SWAGGER`. All remain unsupported; LEECH LIFE is outside Level-50 Factory scope and lower priority. The new non-exclusive component track records only the shared command proof.
+
 Living status for the Battle Scene ON lane. Source scope is generated in
 `factory-animation-inventory.json`; the script dependency graph is generated
 in `battle-animation-components.json`. Evidence, move acceptance, and
