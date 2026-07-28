@@ -15,6 +15,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 545 — [SUPERVISOR VERIFY 2026-07-27 ~21:58] Baton Pass OFF evidence merged reproducibly
+
+- **State:** union green at **298 files / 3840 tests**; `npm run build`,
+  freshness, and `git diff --check` pass. Psych Up's census remains
+  **131/214, 255/355, 207/276, 2618/2957**.
+- **Did:** independently replayed and merged `1830a9e`'s legal six-mon
+  `mechanicLab` evidence twice; both manifests hash exactly
+  `f9d042cc…a93`. Mean Look creates `STATUS2_ESCAPE_PREVENTION`, then Baton
+  Pass's encoded `0x81` selector correctly bypasses it, spends PP **40→39**,
+  switches LEDYBA slot 0→BULBASAUR slot 1, transfers the volatile, and keeps
+  RNG at **1621732966** through switch completion.
+- **Next:** register the generated top blocker
+  `B_SCR_OP_JUMPIFCANTSWITCH` / `EFFECT_BATON_PASS` from this source/oracle
+  contract. In ordinary singles, pin pointer-branch vs six-byte advance,
+  bit-7 volatile bypass, both sides, and eligible-party scanning; guard or
+  source-completely implement non-singles topology explicitly.
+- **Notes:** focused **5/5**, full **3840/3840**, build/freshness/diff green.
+  No fabricated no-bench trace, unsupported barrier, recording import,
+  ratchet change, oracle lifecycle action, animation edit, or PAPERCUT.
+
+---
 ## 544 — [SUPERVISOR SOURCE CORRECTION 2026-07-27 ~21:55] Psych Up executes source-completely
 
 - **State:** tree green at **297 files / 3835 tests**; `npm run build`,
@@ -52,24 +73,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the executable-frontier census for exact **+1/+1/+1/+14**.
 - **Notes:** focused **24/24**, full **3829/3829**, build/compare/diff green.
   No RNG target draw, unsupported barrier, recording import, ratchet change,
-  oracle lifecycle action, animation edit, or PAPERCUT.
-
----
-## 542 — [BOUNDED MAIN WORKER 2026-07-27 ~21:33] Full-turn singles requests are move-slot generic
-
-- **State:** tree green at **295 files / 3824 tests**; `npm run build` and
-  `git diff --check` clean. The unchanged Battle-2 OFF trace remains
-  **16/16 exact**.
-- **Did:** one shared singles legal-move helper now publishes every nonzero
-  configured slot, in order, with the opposing target for player/trainer and
-  at both initial/next-turn boundaries. Removed the player slot-0 reducer
-  guard; public legality still rejects empty slots. Tier-1 submits player
-  slot 3 and pins final `currentMovePosition=3`, slot-3 PP **20→19**, and
-  PP-event interpreter provenance. Added the scout’s historical-resolution
-  note pointing to `22ddfcd` / `f4427c0`.
-- **Next:** supervisor verify this correction, the preserved canonical
-  ONIX/KABUTO **650807554 / 4-call** result, exact nine-command projection,
-  and unchanged **16/16**, then resume the ranked S10 executable frontier.
-- **Notes:** focused **24/24**, full **3824/3824**, build/compare/diff green.
-  No unsupported barrier, canonical-recording import, ratchet change,
   oracle lifecycle action, animation edit, or PAPERCUT.
