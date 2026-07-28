@@ -70,6 +70,7 @@ import { createBattleScriptJumpifcantswitchOpcodeHandlers } from "./battleScript
 import { createBattleScriptJumpifnodamageOpcodeHandlers } from "./battleScriptJumpifnodamageOpcode.ts";
 import { createBattleScriptSleepTalkOpcodeHandlers } from "./battleScriptSleepTalkOpcode.ts";
 import { createBattleScriptTrywishOpcodeHandlers } from "./battleScriptTrywishOpcode.ts";
+import { createBattleScriptRolloutOpcodeHandlers } from "./battleScriptRolloutOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -541,6 +542,10 @@ export type BattleScriptRulesContext = Readonly<
     calledMove: number;
     /** Source u16 gChosenMove, distinct from gCurrentMove. */
     chosenMove: number;
+    /** Source u16 gLockedMoves[MAX_BATTLERS_COUNT]. */
+    lockedMoves: BattleScriptMoveEndHalfwords;
+    /** Source four-bit gDisableStructs[battler].rolloutTimerStartValue. */
+    rolloutTimerStartValues: BattleScriptMoveEndBytes;
     /** Source u16 gBattleStruct->choicedMove[MAX_BATTLERS_COUNT]. */
     choicedMove: BattleScriptMoveEndHalfwords;
     /** Source u16 gBattleStruct->changedItems[MAX_BATTLERS_COUNT]. */
@@ -668,6 +673,8 @@ export type BattleScriptRulesContextInput = Readonly<{
   absentBattlerFlags?: number;
   calledMove?: number;
   chosenMove?: number;
+  lockedMoves?: readonly number[];
+  rolloutTimerStartValues?: readonly number[];
   choicedMove?: readonly number[];
   changedItems?: readonly number[];
   monToSwitchIntoId?: readonly number[];
@@ -1997,6 +2004,16 @@ export function createBattleScriptRulesContext(
     0xffff,
     "changedItems",
   ) as BattleScriptMoveEndHalfwords;
+  const lockedMoves = createMoveEndArray(
+    input.lockedMoves,
+    0xffff,
+    "lockedMoves",
+  ) as BattleScriptMoveEndHalfwords;
+  const rolloutTimerStartValues = createMoveEndArray(
+    input.rolloutTimerStartValues,
+    0x0f,
+    "rolloutTimerStartValues",
+  ) as BattleScriptMoveEndBytes;
   const monToSwitchIntoId = createMoveEndArray(
     input.monToSwitchIntoId ?? [
       BATTLE_SCRIPT_PARTY_SIZE,
@@ -2073,6 +2090,8 @@ export function createBattleScriptRulesContext(
     ),
     calledMove: requireUnsigned(input.calledMove ?? 0, 0xffff, "calledMove"),
     chosenMove: requireUnsigned(input.chosenMove ?? 0, 0xffff, "chosenMove"),
+    lockedMoves,
+    rolloutTimerStartValues,
     choicedMove,
     changedItems,
     monToSwitchIntoId,
@@ -2357,6 +2376,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptJumpifnodamageOpcodeHandlers(program),
     ...createBattleScriptSleepTalkOpcodeHandlers(program),
     ...createBattleScriptTrywishOpcodeHandlers(program),
+    ...createBattleScriptRolloutOpcodeHandlers(program),
   });
 }
 

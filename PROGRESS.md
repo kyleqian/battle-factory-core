@@ -15,6 +15,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 559 — [BOUNDED MAIN WORKER 2026-07-28 ~00:20] Rollout opcode and source state execute
+
+- **State:** first green step ready to commit at **315 files / 3962 tests**;
+  production build, focused **42/42**, census regeneration, barrier ratchet,
+  and `git diff --check` pass. Census is exactly **138/214 effects, 263/355
+  moves, 215/276 Factory-L50 distinct, 2685/2957 weighted**, all **42/42**
+  checks.
+- **Did:** registered operandless `0xb3`
+  `B_SCR_OP_ROLLOUTDAMAGECALCULATION` with attacker-owned timer/start value,
+  `STATUS2_MULTIPLETURNS`, `gLockedMoves`, exact five-hit power ladder,
+  Defense Curl doubling, final unlock, and miss/no-effect
+  `CancelMultiTurnMoves` transfer to `BattleScript_MoveMissedPause`.
+- **Next:** wire locked action selection through the generic full-turn
+  boundary, then land the evidence-aligned Shuckle/Blissey multi-turn
+  damage/PP/terminal proof.
+- **Notes:** source state is durable and frozen; cancellation deliberately
+  preserves timer-start/locked-move just like source. No barrier/ratchet
+  increase, recording import, scenario/tick/render branch, animation edit,
+  or oracle lifecycle action.
+
+---
 ## 558 — [SUPERVISOR VERIFY 2026-07-28 ~00:07] Wish accepted; Secret Power evidence merged
 
 - **State:** reviewed union green at **314 files / 3954 tests** and focused
@@ -59,25 +80,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   capped heal. No barrier/ratchet increase, recording import, scenario/tick/
   render branch, animation-lane edit, DEFERRED item, oracle lifecycle action,
   or PAPERCUT.
-
----
-## 556 — [SUPERVISOR VERIFY 2026-07-27 ~23:49] Sleep Talk accepted; Wish and Rollout evidence merged
-
-- **State:** reviewed union green at **312 files / 3945 tests**; production
-  build, both-oracle freshness, census regeneration, and `git diff --check`
-  pass. Census is **136/214 effects, 260/355 moves, 212/276 Factory-L50
-  distinct, 2670/2957 weighted**, with all **42/42** checks.
-- **Did:** accepted `c7b9822`/`6e33331`: the paired Sleep Talk opcodes own
-  exact limitations, retry RNG, targeting, and no-stack called-effect
-  dispatch, including a generic full-turn Whiscash→Fissure terminal win.
-  Merged Wish evidence `e18ab8e` and Rollout evidence `f5dfb5d` after focused
-  verification and twice reproducing each OFF manifest.
-- **Next:** implement source-complete six-byte `B_SCR_OP_TRYWISH`, including
-  positional counter/party-index state, pending-Wish failure, `ENDTURN_WISH`
-  decrement/dispatch, delayed half-max heal, and full-HP route. Expected
-  census is **137/214, 261/355, 213/276, 2678/2957**.
-- **Notes:** Wish reproduces `b8f3eaea…40bf` (damage **140→123**, PP
-  **10→9→8**, capped heal **106→140**); Rollout reproduces
-  `4460104b…9677` (Defense Curl, PP **20→19**, locked HP
-  **362→327→170→12→0**). No barrier/ratchet increase, recording import,
-  animation edit, DEFERRED item, or oracle lifecycle action.
