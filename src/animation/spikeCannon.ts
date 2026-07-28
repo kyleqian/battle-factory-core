@@ -33,6 +33,7 @@ export interface SpikeCannonEffect {
   readonly targetMonbg: boolean;
   readonly attackerOffset: Readonly<{ x2: number; y2: number }>;
   readonly targetOffset: Readonly<{ x2: number; y2: number }>;
+  readonly battlerDisplayAge: number;
   readonly windUpTask: "step1" | "step2" | null;
   readonly returnTaskActive: boolean;
   readonly shakeTaskActive: boolean;
@@ -68,6 +69,16 @@ export function spikeCannonNeedleMatrix(
   return attackerSide === "player"
     ? { a: 131, b: 219, c: -219, d: 131 }
     : { a: -109, b: -231, c: 231, d: -109 };
+}
+
+/**
+ * Source OAM-transfer latch for the moving battler. WindUpLunge is created
+ * after the ordinary task pass, so its battler writes trail scanout by two
+ * reducer ages. The script's post-wait creation pass collapses back to the
+ * ordinary one-age transfer before SlideMonToOriginalPos begins.
+ */
+export function spikeCannonBattlerDisplayAge(age: number): number {
+  return age >= 10 && age <= 24 ? age - 2 : age - 1;
 }
 
 function stingerSprite(
@@ -173,6 +184,7 @@ export function spikeCannonEffectAtAge(
     targetOffset: age >= 46 && age <= 58
       ? shakeMon2OffsetAtTick(3, 0, 7, 1, age - 45)
       : { x2: 0, y2: 0 },
+    battlerDisplayAge: spikeCannonBattlerDisplayAge(age),
     windUpTask: age >= 10 && age <= 12
       ? "step1"
       : age >= 13 && age <= 22

@@ -23,7 +23,7 @@ for (let repeat = 0; repeat < 2; repeat += 1) for (const path of fixtures) {
   const rawHash = createHash("sha256");
   for (const frame of probe.frames) rawHash.update(readFileSync(join(rgb, `${String(frame.frame).padStart(5, "0")}.rgb`)));
   const evidence = createHash("sha256").update(bytes).digest("hex"), raw = rawHash.digest("hex");
-  if (probe.schema !== "spike-cannon-dense-evidence/v1" || JSON.stringify(probe.sourceWindow) !== JSON.stringify(fixture.sourceWindow)
+  if (probe.schema !== "spike-cannon-dense-evidence/v2" || JSON.stringify(probe.sourceWindow) !== JSON.stringify(fixture.sourceWindow)
     || probe.frames.length !== fixture.sourceWindow.frameCount || probe.frames.some((frame, index) => frame.frame !== fixture.sourceWindow.startFrame + index)
     || probe.frames[0]?.scriptOffset !== 0 || probe.frames.at(-1)?.gAnimScriptActive !== 0
     || !["AnimTask_WindUpLunge_Step1", "AnimTask_WindUpLunge_Step2", "AnimTask_ShakeMon2_Step"].every((name) => probe.topology.tasks.includes(name))

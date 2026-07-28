@@ -544,6 +544,7 @@ import absorbAsset from "../animation/assets/absorb.json" with { type: "json" };
 import reflectAsset from "../animation/assets/reflect.json" with { type: "json" };
 import biteAsset from "../animation/assets/bite.json" with { type: "json" };
 import twineedleAsset from "../animation/assets/twineedle.json" with { type: "json" };
+import spikeCannonAsset from "../animation/assets/spike-cannon.json" with { type: "json" };
 import tailGlowAsset from "../animation/assets/tail-glow.json" with { type: "json" };
 import dizzyPunchAsset from "../animation/assets/dizzyPunch.json" with { type: "json" };
 import covetAsset from "../animation/assets/covet.json" with { type: "json" };
@@ -692,6 +693,7 @@ import {
   sceneOnHeadbuttView,
   sceneOnBodySlamView,
   sceneOnTwineedleView,
+  sceneOnSpikeCannonView,
   sceneOnTailGlowView,
   sceneOnDizzyPunchView,
   sceneOnAstonishView,
@@ -736,6 +738,7 @@ import {
   type SceneOnHeadbuttConfig,
   type SceneOnBodySlamConfig,
   type SceneOnTwineedleConfig,
+  type SceneOnSpikeCannonConfig,
   type SceneOnTailGlowConfig,
   type SceneOnDizzyPunchConfig,
   type SceneOnAstonishConfig,
@@ -1040,6 +1043,10 @@ const twineedleArt = twineedleAsset as {
   needle: { tileset: Tileset; palette: RgbColor[] };
   beedrillBack: { tileset: Tileset; palette: RgbColor[] };
   beedrillFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const spikeCannonArt = spikeCannonAsset as {
+  omastarBack: { tileset: Tileset; palette: RgbColor[] };
+  omastarFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const tailGlowArt = tailGlowAsset as {
   circleOfLight: { tileset: Tileset; palette: RgbColor[] };
@@ -16445,6 +16452,157 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "BEEDRILL used" : "Foe BEEDRILL used",
       "TWINEEDLE!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SPIKE_CANNON") {
+    const spikeState =
+      state as SceneOnMovePresentationState<SceneOnSpikeCannonConfig>;
+    const view = sceneOnSpikeCannonView(spikeState);
+    // BuildOamBuffer and OBJ palette transfer precede the source callbacks
+    // represented by the reducer. The hardware-visible battlers/effects are
+    // therefore the immediately preceding software state.
+    const displayed = sceneOnSpikeCannonView({
+      ...spikeState,
+      age: view.battlerDisplayAge,
+    });
+    const playerToOpponent =
+      view.attacker.species === "OMASTAR"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "OMASTAR"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SPIKE_CANNON pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const omastarSource = playerToOpponent
+      ? spikeCannonArt.omastarBack : spikeCannonArt.omastarFront;
+    const omastar = playerToOpponent
+      ? omastarSource
+      : {
+          ...omastarSource,
+          tileset: subTileset(omastarSource.tileset, 0, 8),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const targetBaselineX2 =
+      playerToOpponent && displayed.age < 46 ? 1 : 0;
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x
+        + targetBaselineX2 + displayed.targetOffset.x2,
+      view.target.geometry.spriteCorner.y + displayed.targetOffset.y2,
+    );
+    const nonObjTarget2 = fb.slice();
+    const sortedEffects = displayed.sprites.slice().sort(
+      (left, right) => left.oamSlot - right.oamSlot,
+    );
+    const drawNeedles = () => {
+      for (const sprite of sortedEffects) {
+        if (sprite.kind !== "needle") continue;
+        drawSpriteSheetAffineRotate(
+          fb,
+          twineedleArt.needle.tileset,
+          twineedleArt.needle.palette,
+          sprite.x + sprite.x2,
+          sprite.y + sprite.y2,
+          sprite.matrix.a,
+          sprite.matrix.b,
+          sprite.matrix.c,
+          sprite.matrix.d,
+          undefined,
+          false,
+        );
+      }
+    };
+    // The set-260 Omastar receipts place the shared subpriority-2 stingers
+    // ahead of its battler OAM in both legal singles orientations.
+    drawSpriteSheet(
+      fb,
+      omastar.tileset,
+      omastar.palette,
+      view.attacker.geometry.spriteCorner.x
+        + displayed.attackerOffset.x2,
+      view.attacker.geometry.spriteCorner.y + displayed.attackerOffset.y2,
+    );
+    drawNeedles();
+    // SortSprites assigns the three equal-subpriority effects to hardware OAM
+    // in opposite slot order across the two battler sides: player-back maps
+    // software 5/4/3 to hardware 9/10/11, opponent-front maps 3/4/5. Paint
+    // back-to-front so the lower hardware OAM index wins in either branch.
+    const impactBackToFront = playerToOpponent
+      ? sortedEffects
+      : sortedEffects.slice().reverse();
+    for (const sprite of impactBackToFront) {
+      if (sprite.kind === "impact" && view.alpha) {
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          nonObjTarget2,
+          battleAnimHitsplat.tileset,
+          battleAnimHitsplat.palette,
+          sprite.x,
+          sprite.y,
+          sprite.matrix.a,
+          sprite.matrix.b,
+          sprite.matrix.c,
+          sprite.matrix.d,
+          view.alpha.eva,
+          view.alpha.evb,
+          false,
+        );
+      }
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "OMASTAR",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "OMASTAR" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "OMASTAR used" : "Foe OMASTAR used",
+      "SPIKE CANNON!",
       99,
     );
     return;

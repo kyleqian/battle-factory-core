@@ -153,10 +153,17 @@ def main() -> None:
                 "AnimTask_ShakeMon2_Step"}
     if not required <= set(topology["tasks"]):
         raise RuntimeError(f"missing WindUpLunge/ShakeMon2 source topology: {topology}")
-    OUTPUT.write_text(json.dumps({"schema": "spike-cannon-dense-evidence/v1", "setup": setup,
+    OUTPUT.write_text(json.dumps({"schema": "spike-cannon-dense-evidence/v2", "setup": setup,
         "captureWindow": {"startFrame": rows[0]["frame"], "endFrame": rows[-1]["frame"], "frameCount": len(rows)},
         "sourceWindow": {"startFrame": source[0]["frame"], "endFrame": source[-1]["frame"], "frameCount": len(source)},
         "sourceSymbols": {"Move_SPIKE_CANNON": start, "Move_SWORDS_DANCE": end},
+        "templates": {
+            "gSlideMonToOriginalPosSpriteTemplate": names["gSlideMonToOriginalPosSpriteTemplate"],
+            "gLinearStingerSpriteTemplate": names["gLinearStingerSpriteTemplate"],
+            "gHandleInvertHitSplatSpriteTemplate": names["gHandleInvertHitSplatSpriteTemplate"]},
+        "songHeaders": {
+            "SE_M_RAZOR_WIND2": names["se_m_razor_wind2"],
+            "SE_M_HORN_ATTACK": names["se_m_horn_attack"]},
         "topology": topology, "frames": source}, separators=(",", ":")) + "\n")
     print(f"wrote {OUTPUT}: source {source[0]['frame']}..{source[-1]['frame']} ({len(source)} frames)")
 

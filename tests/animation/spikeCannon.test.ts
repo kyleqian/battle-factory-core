@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  spikeCannonBattlerDisplayAge,
   spikeCannonEffectAtAge,
   spikeCannonNeedleMatrix,
 } from "../../src/animation/spikeCannon.ts";
@@ -53,6 +54,8 @@ describe("MOVE_SPIKE_CANNON source-relative reducer", () => {
     expect([10, 13, 19, 20, 23, 24, 25, 26, 27, 28, 29].map(
       (age) => opponent(age).attackerOffset.x2,
     )).toEqual([1, 4, 4, 2, -4, -4, -3, -2, -1, -1, 0]);
+    expect([10, 11, 24, 25].map(spikeCannonBattlerDisplayAge))
+      .toEqual([8, 9, 22, 24]);
   });
 
   it("ports all three source linear stingers and OAM slots", () => {
