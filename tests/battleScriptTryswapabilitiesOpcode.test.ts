@@ -356,6 +356,10 @@ describe("source-complete B_SCR_OP_TRYSWAPABILITIES registration", () => {
     expect(context.battlers[1].hp).toBe(127);
     expect(context.battlers[0].pp).toEqual([20, 20, 10, 9]);
     expect(context.battlers[1].pp).toEqual([35, 35, 34, 35]);
+    expect(result.state.rng).toMatchObject({
+      value: 3_031_698_222,
+      calls: 4,
+    });
     // The ordinary Tackle legitimately writes active+party HP. Every party
     // field this context currently models besides HP stays persistent; the
     // exact species/abilityNum-derived ability field is the bounded switch
