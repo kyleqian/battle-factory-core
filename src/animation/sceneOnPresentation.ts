@@ -29,6 +29,10 @@ import {
   type SpikeCannonEffect,
 } from "./spikeCannon.ts";
 import {
+  sonicBoomEffectAtAge,
+  type SonicBoomEffect,
+} from "./sonicBoom.ts";
+import {
   metallicShineAtAge,
   type MetallicShineState,
 } from "./metallicShine.ts";
@@ -411,6 +415,7 @@ export interface SceneOnBattlerGeometry {
 export interface SceneOnPresentationBattler {
   readonly species:
     | "ONIX"
+    | "MAGNETON"
     | "MAGBY"
     | "GROVYLE"
     | "PIDGEOTTO"
@@ -997,6 +1002,13 @@ export interface SceneOnSpikeCannonConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnSonicBoomConfig {
+  readonly move: "SONIC_BOOM";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnSwaggerConfig {
   readonly move: "SWAGGER";
   readonly attacker: SceneOnPresentationBattler;
@@ -1284,6 +1296,7 @@ export type SceneOnMoveConfig =
   | SceneOnBodySlamConfig
   | SceneOnTwineedleConfig
   | SceneOnSpikeCannonConfig
+  | SceneOnSonicBoomConfig
   | SceneOnSwaggerConfig
   | SceneOnTauntConfig
   | SceneOnScaryFaceConfig
@@ -1444,6 +1457,12 @@ export interface SceneOnTwineedleView extends TwineedleEffect {
 }
 
 export interface SceneOnSpikeCannonView extends SpikeCannonEffect {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSonicBoomView extends SonicBoomEffect {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2777,6 +2796,28 @@ export function sceneOnSpikeCannonView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...spikeCannonEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is SONIC BOOM's first source-script AIR_WAVE load display. */
+export function sceneOnSonicBoomView(
+  state: SceneOnMovePresentationState<SceneOnSonicBoomConfig>,
+): SceneOnSonicBoomView {
+  if (state.config.move !== "SONIC_BOOM") {
+    throw new Error(
+      `expected SONIC_BOOM presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...sonicBoomEffectAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
