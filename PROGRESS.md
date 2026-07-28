@@ -15,6 +15,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 554 — [SUPERVISOR VERIFY 2026-07-27 ~23:25] Substitute accepted; Sleep Talk evidence merged
+
+- **State:** reviewed union green at **309 files / 3911 tests**; production
+  build, both-oracle freshness, and `git diff --check` pass. Census is
+  **135/214 effects, 259/355 moves, 211/276 Factory-L50 distinct,
+  2662/2957 weighted**.
+- **Did:** accepted `b179bd5`/`2c84860`: source-complete
+  `B_SCR_OP_SETSUBSTITUTE` matches the strict quarter-HP branches and its
+  generic two-turn proof preserves HP **155→117**, PP **10→9→8**, and the
+  live substitute. Merged `6791d53` after independently replaying the OFF
+  Sleep Talk scenario twice at manifest `6cc123e5…c3b`.
+- **Next:** implement paired `B_SCR_OP_TRYCHOOSESLEEPTALKMOVE` /
+  `B_SCR_OP_JUMPTOCALLEDMOVE`, including exact exclusions, retry RNG,
+  called-move targeting, direct no-return effect dispatch, and awake/all-
+  unusable/asleep-call terminal routes. Expected census is
+  **136/214, 260/355, 212/276, 2670/2957**.
+- **Notes:** the replay observes awake PP **10→9**, real Spore sleep, asleep
+  Sleep Talk PP **9→8**, called Fissure with its PP still **5**, and the KO.
+  Hidden selection/PC fields are source-pinned. No new barrier, recording
+  import, animation edit, DEFERRED item, or oracle lifecycle action.
+
+---
 ## 553 — [BOUNDED MAIN WORKER 2026-07-27 ~23:21] Substitute executes and persists across real actions
 
 - **State:** tree green at **308 files / 3908 tests**; focused **277/277**,
@@ -56,26 +78,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   persist through a second real failed use. Low-HP internal fields are
   source-pinned but not oracle-exposed. No new barrier, recording import,
   animation edit, DEFERRED item, or oracle lifecycle action.
-
----
-## 551 — [BOUNDED MAIN WORKER 2026-07-27 ~23:04] Destiny Bond executes and avenges through the real faint stack
-
-- **State:** tree green at **306 files / 3895 tests**; focused **281/281**,
-  production build, oracle freshness, and `git diff --check` pass. Census is
-  **134/214 effects, 258/355 moves, 210/276 Factory-L50 distinct,
-  2652/2957 weighted**, exact **+1/+1/+1/+10**, with all **42/42** checks.
-- **Did:** committed `410c751` and `5eb6a0f`: registered source-complete
-  one-byte opcode `0xaa` / `Cmd_setdestinybond`; genuine
-  `BattleScript_EffectDestinyBond` reaches `END` with PP **5→4** and its live
-  attacker bit/message. `Cmd_tryfaintmon` now clears the marker, pushes the
-  original continuation then faint script, owns attacker-HP damage, executes
-  passive HP update + attacker faint, and returns through the target faint
-  exactly once. Generic Wobbuffet Destiny Bond → slower Snorlax Explosion
-  reaches the real terminal boundary.
-- **Next:** continue from the regenerated top blocker
-  `B_SCR_OP_SETSUBSTITUTE` / `EFFECT_SUBSTITUTE`.
-- **Notes:** retired the existing hit-chain barrier and ratchet exactly
-  **23→22**; added no barrier or recording import. The existing
-  `CANCELER_FLAGS` owner proves the bit clears before the user's next ordinary
-  action. Oracle OFF evidence remains manifest `12dc947d…e86d4`; no oracle
-  lifecycle action, animation edit, canonical Battle-2 work, or PAPERCUT.

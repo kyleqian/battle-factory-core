@@ -22975,3 +22975,25 @@ both verify scripts/census independently re-verified before this entry.)*
 - **Notes:** the killing API error hit mid-response during docs; no code
   was lost (all rungs committed). The launcher's "unauthenticated/
   sandboxed" postflight hint is again noise on this failure mode.
+---
+## 551 — [BOUNDED MAIN WORKER 2026-07-27 ~23:04] Destiny Bond executes and avenges through the real faint stack
+
+- **State:** tree green at **306 files / 3895 tests**; focused **281/281**,
+  production build, oracle freshness, and `git diff --check` pass. Census is
+  **134/214 effects, 258/355 moves, 210/276 Factory-L50 distinct,
+  2652/2957 weighted**, exact **+1/+1/+1/+10**, with all **42/42** checks.
+- **Did:** committed `410c751` and `5eb6a0f`: registered source-complete
+  one-byte opcode `0xaa` / `Cmd_setdestinybond`; genuine
+  `BattleScript_EffectDestinyBond` reaches `END` with PP **5→4** and its live
+  attacker bit/message. `Cmd_tryfaintmon` now clears the marker, pushes the
+  original continuation then faint script, owns attacker-HP damage, executes
+  passive HP update + attacker faint, and returns through the target faint
+  exactly once. Generic Wobbuffet Destiny Bond → slower Snorlax Explosion
+  reaches the real terminal boundary.
+- **Next:** continue from the regenerated top blocker
+  `B_SCR_OP_SETSUBSTITUTE` / `EFFECT_SUBSTITUTE`.
+- **Notes:** retired the existing hit-chain barrier and ratchet exactly
+  **23→22**; added no barrier or recording import. The existing
+  `CANCELER_FLAGS` owner proves the bit clears before the user's next ordinary
+  action. Oracle OFF evidence remains manifest `12dc947d…e86d4`; no oracle
+  lifecycle action, animation edit, canonical Battle-2 work, or PAPERCUT.
