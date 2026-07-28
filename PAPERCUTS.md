@@ -509,3 +509,19 @@ worker (PROGRESS entry 13).
   committed table in `tools/battle-lab/README.md` indexed by animation
   class would let new fixtures start from a sibling's number instead of
   zero.
+
+## Historical turn-N traces route to the Scene-ON oracle by design — scouts keep rediscovering it
+- **What:** the `turn*-*.json` presentation-trace family predates the
+  `oracleProfile` field, so `npm run compare` routes them to Battle Scene
+  ON (8012) per AGENTS.md's documented legacy contract ("historical traces
+  without that field remain ON-profile so their established frame contract
+  does not silently change"). Forcing 8014 drops e.g.
+  `turn13-sandattack.json` to 78/190 — structural, not drift. Every
+  established turn-N acceptance count is an ON-profile bar, intentionally.
+- **Hits:** 1 (§15 scout, 2026-07-27, ~10 min re-deriving this before
+  finding the AGENTS.md paragraph).
+- **Cost each:** ~10 min.
+- **Workaround:** briefs citing turn-N acceptance counts should say
+  "profile-routed (ON for this family)" instead of naming a port; a
+  one-line banner in docs/presentation-seam-scout.md's intro would stop
+  the rediscovery loop at the doc every scout reads first.
