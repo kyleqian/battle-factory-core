@@ -1,3 +1,24 @@
+## 639 — [BOUNDED MAIN WORKER 2026-07-28 ~15:59] Frontier-tail row 5a source-complete
+
+- **State:** committed `ee91c6f6`; tree green at **423 files / 4654 tests**,
+  production build, OFF oracle info, and `git diff --check`. Census is exactly
+  **208/214 effects, 349/355 moves, 275/276 distinct, 2955/2957 weighted**:
+  assigned-baseline delta **+1/+2/+0/+0**; all **70** validations pass.
+- **Did:** registered the shared Lock On/Mind Reader setter with replace-not-OR
+  packed counter and durable `battlerWithSureHit` ownership. Both accuracy
+  forms and OHKO consume the combined bit+owner predicate; expiry, ordinary
+  switch, Baton Pass preservation/refresh, and faint cleanup are source-complete.
+- **Next:** supervisor verify `ee91c6f6`; continue the ordered tail plan at row
+  5b (Imprison), not later rows.
+- **Notes:** receipt-shaped Tier-1 proof pins setter **1 accuracy draw** then
+  owned Zap Cannon **0 accuracy + 3 later hit-chain draws**; Substitute draws
+  zero. Both moves share EFFECT_LOCK_ON. Deliberate barrier pins:
+  HitChain **18→16**, Switchin **8→6**, TryKO **2→1**; handler exact-set
+  **200→201**. No new barrier, canonical import, presentation, round, tick,
+  roadmap, issue, or oracle-trace change.
+
+---
+
 ## 638 — [BOUNDED MAIN WORKER 2026-07-28 ~15:40] Fake Tears full controller window exact
 
 - **State:** committed `65ba2357`; Fake Tears is **322/322 shared-framebuffer
