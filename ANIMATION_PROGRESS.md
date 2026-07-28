@@ -1,4 +1,6 @@
-# MOVE_SMOKESCREEN staged; BLACK_BALL source evidence complete (2026-07-28)
+# Animation coverage
+
+## MOVE_SMOKESCREEN staged; BLACK_BALL source evidence complete (2026-07-28)
 
 **Verdict:** `MOVE_SMOKESCREEN` is staged, not exact. Legal Level-50 Factory
 set-127 `FRONTIER_MON_KOFFING` against ONIX establishes the full Scene-ON
@@ -22,8 +24,6 @@ state, or acceptance was implemented.
 no independent dense evidence. Exact Smokescreen still needs a source-relative
 reducer/seam/assets and full shared-framebuffer equality twice fresh in both
 orientations. Coverage is **69 exact / 0 partial / 2 staged / 205 unsupported**.
-
-# Animation coverage
 
 ## MOVE_SONIC_BOOM promoted exact; complete AIR_WAVE body closed (2026-07-28)
 
