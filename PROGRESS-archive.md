@@ -41,6 +41,29 @@
   scenario branch, oracle lifecycle action, issue removal, or PAPERCUT.
 
 ---
+## 572 — [SUPERVISOR VERIFY 2026-07-28 ~02:38] Corrected Minimize accepted; Skill Swap evidence folded
+
+- **State:** reviewed union green at **330 files / 4040 tests** and focused
+  **42/42**; production build, both-oracle freshness/info, census
+  regeneration, ratchets, and `git diff --check` pass. Census is exactly
+  **143/214 effects, 269/355 moves, 220/276 Factory-L50 distinct,
+  2711/2957 weighted**, all **42/42**.
+- **Did:** accepted Minimize only after `507fde7` unified the producer/consumer
+  status constant and replaced a transient multiplier snapshot with the
+  same-seed Stomp damage control (**25 vs 12**). Merged and independently
+  replayed the successful Skill Swap OFF checkpoint: active abilities
+  **39/5 → 5/39**, persistent party abilities unchanged, PP **10→9**, exact
+  manifest `1bb13425…54cd241a`.
+- **Next:** register operandless `0xca` `B_SCR_OP_SETFORCEDTARGET` globally:
+  attacker-side timer **1**, attacker target, one-byte advance, PP-before-write,
+  end-turn timer clear, zero RNG. Keep the generic controller honest in
+  singles; source-pin doubles retarget readers without inventing doubles.
+  Expected census: **144/214, 270/355, 221/276, 2716/2957**.
+- **Notes:** no private handler, recording import, barrier/import ratchet
+  change, animation/presentation/scenario branch, DEFERRED item, issue
+  removal, or oracle lifecycle action.
+
+---
 ## 569 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~02:17] Fury Cutter mirrors raw C integer widths
 
 - **State:** committed `0d638cb`; tree green at **328 files / 4031 tests**,
