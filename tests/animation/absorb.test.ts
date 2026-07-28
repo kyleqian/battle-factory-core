@@ -17,6 +17,7 @@ import {
   createSceneOnMovePresentation,
   sceneOnAbsorbView,
 } from "../../src/animation/sceneOnPresentation.ts";
+import { createInitialState, render } from "../../src/engine/core.ts";
 
 const playerAttacker = { x: 72, y: 88 };
 const opponentTarget = { x: 176, y: 42 };
@@ -159,5 +160,80 @@ describe("MOVE_ABSORB source-relative reducer", () => {
     expect(readFileSync(output)).toEqual(
       readFileSync(resolve("src/animation/assets/absorb.json")),
     );
+  });
+
+  it("renders palette, impact, orb, healing, and teardown boundaries through core", () => {
+    const stage = createSceneOnMovePresentation({
+      move: "ABSORB",
+      attacker: {
+        species: "LOMBRE",
+        geometry: {
+          side: "player", spriteCorner: { x: 40, y: 56 },
+          animationCenter: { x: 72, y: 88 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "ONIX",
+        geometry: {
+          side: "opponent", spriteCorner: { x: 144, y: 10 },
+          animationCenter: { x: 176, y: 42 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      healingCenter: { x: 72, y: 96 },
+      absorptionCenter: { x: 72, y: 96 },
+      allocatorProfile: {
+        hitsplat: 3, orbs: [3, 4, 5, 7, 9, 3, 4, 10],
+        stars: [3, 4, 5, 3], paletteController: 3,
+      },
+      fieldProfile: {
+        playerHp: 152, playerMaxHp: 167,
+        opponentHp: 110, opponentMaxHp: 110,
+        playerGender: "male", opponentGender: "male",
+      },
+    });
+    const frame = (age: number) => render({
+      ...createInitialState(),
+      rngMode: "frontierBattle",
+      sceneOnPresentation: { ...stage, age },
+    });
+    expect(frame(5)).not.toEqual(frame(6));
+    expect(frame(16)).not.toEqual(frame(17));
+    expect(frame(34)).not.toEqual(frame(35));
+    expect(frame(129)).not.toEqual(frame(130));
+    expect(frame(193)).toEqual(frame(194));
+
+    const mirrored = createSceneOnMovePresentation({
+      ...stage.config,
+      attacker: {
+        species: "LOMBRE",
+        geometry: {
+          side: "opponent" as const, spriteCorner: { x: 144, y: 17 },
+          animationCenter: { x: 176, y: 49 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      target: {
+        species: "ONIX",
+        geometry: {
+          side: "player" as const, spriteCorner: { x: 40, y: 48 },
+          animationCenter: { x: 72, y: 88 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      healingCenter: { x: 176, y: 49 },
+      absorptionCenter: { x: 176, y: 49 },
+      fieldProfile: {
+        playerHp: 110, playerMaxHp: 110,
+        opponentHp: 152, opponentMaxHp: 167,
+        playerGender: "male" as const, opponentGender: "male" as const,
+      },
+    });
+    expect(render({
+      ...createInitialState(),
+      rngMode: "frontierBattle",
+      sceneOnPresentation: { ...mirrored, age: ABSORB_ORB_FIRST_AGE },
+    })).not.toEqual(frame(ABSORB_ORB_FIRST_AGE));
   });
 });

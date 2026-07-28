@@ -1085,6 +1085,7 @@ export type SceneOnMoveConfig =
   | SceneOnShadowPunchConfig
   | SceneOnGrowthConfig
   | SceneOnRecoverConfig
+  | SceneOnAbsorbConfig
   | SceneOnSynthesisConfig
   | SceneOnMilkDrinkConfig
   | SceneOnSupersonicConfig
@@ -1133,6 +1134,8 @@ export type SceneOnTauntPresentationState =
   SceneOnMovePresentationState<SceneOnTauntConfig>;
 export type SceneOnScaryFacePresentationState =
   SceneOnMovePresentationState<SceneOnScaryFaceConfig>;
+export type SceneOnAbsorbPresentationState =
+  SceneOnMovePresentationState<SceneOnAbsorbConfig>;
 export type SceneOnSparkPresentationState =
   SceneOnMovePresentationState<SceneOnSparkConfig>;
 export type SceneOnCharmPresentationState =

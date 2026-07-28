@@ -540,6 +540,7 @@ import opponentFrontSpritesAsset from "../assets/gen/battle-opponent-front-sprit
 import kadabraFrontSpriteAsset from "../animation/assets/kadabra-front.json" with { type: "json" };
 import knockOffAsset from "../animation/assets/knock-off.json" with { type: "json" };
 import recoverAsset from "../animation/assets/recover.json" with { type: "json" };
+import absorbAsset from "../animation/assets/absorb.json" with { type: "json" };
 import synthesisAsset from "../animation/assets/synthesis.json" with { type: "json" };
 import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
 import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
@@ -664,6 +665,7 @@ import {
   sceneOnShadowPunchView,
   sceneOnGrowthView,
   sceneOnRecoverView,
+  sceneOnAbsorbView,
   sceneOnSynthesisView,
   sceneOnMilkDrinkView,
   sceneOnSupersonicView,
@@ -699,6 +701,7 @@ import {
   type SceneOnSparkPresentationState,
   type SceneOnCharmPresentationState,
   type SceneOnScaryFacePresentationState,
+  type SceneOnAbsorbPresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
   extremeSpeedBackgroundVariant,
@@ -969,6 +972,13 @@ const knockOffArt = knockOffAsset as {
 };
 const recoverArt = recoverAsset as {
   orbs: { tileset: Tileset; palette: RgbColor[] };
+  blueStar: { tileset: Tileset; palette: RgbColor[] };
+};
+const absorbArt = absorbAsset as {
+  lombreBack: { tileset: Tileset; palette: RgbColor[] };
+  lombreFront: { tileset: Tileset; palette: RgbColor[] };
+  orbs: { tileset: Tileset; palette: RgbColor[] };
+  impact: { tileset: Tileset; palette: RgbColor[] };
   blueStar: { tileset: Tileset; palette: RgbColor[] };
 };
 const synthesisArt = synthesisAsset as {
@@ -18763,6 +18773,173 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "MINUN used" : "Foe MINUN used",
       "ENCORE!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "ABSORB") {
+    const absorbState = state as SceneOnAbsorbPresentationState;
+    const view = sceneOnAbsorbView(absorbState);
+    // Effect callbacks update software OAM after the display transfer.
+    const displayed = sceneOnAbsorbView({
+      ...absorbState,
+      age: absorbState.age - 1,
+    });
+    // AnimTask_ShakeMon's battler offset reaches the display one pass after
+    // the reducer-visible write, like the effect-sprite OAM in this body.
+    const targetDisplayed = sceneOnAbsorbView({
+      ...absorbState,
+      age: absorbState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "LOMBRE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "LOMBRE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged ABSORB pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const lombreSource = playerToOpponent
+      ? absorbArt.lombreBack : absorbArt.lombreFront;
+    const lombre = playerToOpponent
+      ? lombreSource
+      : { ...lombreSource, tileset: subTileset(lombreSource.tileset, 0, 8) };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    // BlendColorCycle owns only BG palette banks 1-3. 0x33ED expands with
+    // mGBA's 5-to-8-bit replication to RGB(107,255,99).
+    const green = { r: 107, g: 255, b: 99 };
+    // `battleBg.palette[0..2]` are hardware BG banks 1..3.
+    const bgPalettes = battleBg.palette.map((palette) =>
+      blendPaletteToward(palette, green, displayed.bgPaletteBlendY));
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      bgPalettes,
+    );
+
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x
+        + (absorbState.age < 21 ? targetIdle.x2 : targetDisplayed.targetX2),
+      view.target.geometry.spriteCorner.y
+        + targetIdle.y2 + targetDisplayed.targetY2,
+    );
+    // The target is copied to BG1 by monbg and is therefore a valid
+    // target-2 layer for the semi-transparent IMPACT/ORBS objects.
+    const nonObjTarget2 = fb.slice();
+    drawSpriteSheet(
+      fb,
+      lombre.tileset,
+      lombre.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+
+    const orbTileset: Tileset = {
+      columns: 2,
+      rows: 2,
+      tiles: absorbArt.orbs.tileset.tiles.slice(8, 12),
+    };
+    for (const sprite of displayed.sprites) {
+      if (sprite.kind === "hitsplat") {
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          nonObjTarget2,
+          absorbArt.impact.tileset,
+          absorbArt.impact.palette,
+          sprite.x + sprite.x2,
+          sprite.y + sprite.y2,
+          sprite.xScale,
+          0,
+          0,
+          sprite.yScale,
+          12,
+          8,
+          false,
+        );
+      } else if (sprite.kind === "orb") {
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          nonObjTarget2,
+          orbTileset,
+          absorbArt.orbs.palette,
+          sprite.x + sprite.x2,
+          sprite.y + sprite.y2,
+          sprite.xScale,
+          0,
+          0,
+          sprite.yScale,
+          12,
+          8,
+          false,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          {
+            columns: 4,
+            rows: 4,
+            tiles: absorbArt.blueStar.tileset.tiles.slice(
+              sprite.frame * 16,
+              sprite.frame * 16 + 16,
+            ),
+          },
+          absorbArt.blueStar.palette,
+          sprite.x - 16,
+          sprite.y - 16,
+        );
+      }
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "LOMBRE",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "LOMBRE" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "LOMBRE used" : "Foe LOMBRE used",
+      "ABSORB!",
       99,
     );
     return;
