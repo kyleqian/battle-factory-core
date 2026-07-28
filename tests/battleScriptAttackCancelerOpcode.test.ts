@@ -273,16 +273,31 @@ describe("production opcode 0 (Cmd_attackcanceler) dispatch", () => {
       });
     });
 
-    it("halts on Magic Coat bounce before its unimplemented PressurePPLose", () => {
+    it("hands Magic Coat bounce to the shared script and clears the target-owned arm", () => {
       const result = stepOpcodeZero(
         withSinglesAttacker(0, {}, { currentMove: TAIL_WHIP }, { bounceMove: 1 }),
       );
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({
-        kind: "unsupported-branch",
-        sourceFile: "battle_script_commands.c",
-        sourceLine: 964,
+      expect(result.kind).toBe("advanced");
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_MagicCoatBounce"));
+      expect(result.state.callStack).toEqual([labelPc(ENTRY_LABEL)]);
+      expect(result.state.rulesContext.battlers[1].bounceMove).toBe(0);
+    });
+
+    it("delegates PressurePPLose to the Magic Coat owner's matching permanent slot", () => {
+      const result = stepOpcodeZero(
+        withSinglesAttacker(
+          0,
+          { ability: 46 },
+          { currentMove: TAIL_WHIP },
+          { bounceMove: 1, moves: [277, TACKLE, 0, 0], pp: [14, 35, 0, 0] },
+        ),
+      );
+      expect(result.kind).toBe("advanced");
+      expect(result.state.rulesContext.battlers[1].pp).toEqual([13, 35, 0, 0]);
+      expect(result.state.events.at(-1)).toMatchObject({
+        kind: "set-battler-pp-data", battler: 1, movePosition: 0, pp: 13,
       });
+      expect(result.state.scheduler.pendingControllerBattlers).toContain(1);
     });
 
     it("halts on the Snatch redirect loop (Tier-1-constructed; absent from every Factory set)", () => {

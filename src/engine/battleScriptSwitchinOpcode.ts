@@ -32,6 +32,7 @@ import {
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
+import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import type { BattleScriptControllerIdlePort } from "./battleScriptSourceCommands.ts";
 import {
   resolveRulesBattlerForBattleScript,
@@ -148,7 +149,9 @@ function controllerBusyBlock(
 const VARIOUS_RESET_PLAYER_FAINTED = 7;
 const VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT = 23;
 const VARIOUS_GET_MOVE_TARGET = 3;
+const VARIOUS_SET_MAGIC_COAT_TARGET = 1;
 const NAMED_BYTE_CONSTANTS = new Map<string, number>([
+  ["VARIOUS_SET_MAGIC_COAT_TARGET", VARIOUS_SET_MAGIC_COAT_TARGET],
   ["VARIOUS_GET_MOVE_TARGET", VARIOUS_GET_MOVE_TARGET],
   ["VARIOUS_RESET_PLAYER_FAINTED", VARIOUS_RESET_PLAYER_FAINTED],
   ["VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT", VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT],
@@ -523,6 +526,8 @@ function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRul
     const getMoveTargetSupported = id === VARIOUS_GET_MOVE_TARGET
       && rules.battleTopology.battlersCount === 2;
     if (
+      id !== VARIOUS_SET_MAGIC_COAT_TARGET
+      &&
       id !== VARIOUS_RESET_PLAYER_FAINTED
       && id !== VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT
       && !getMoveTargetSupported
@@ -560,6 +565,34 @@ function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRul
         context,
         Object.freeze({ kind: "advance" }),
         { rulesContext: nextRules, rng },
+      );
+    }
+
+    if (id === VARIOUS_SET_MAGIC_COAT_TARGET) {
+      const currentTarget = rules.selectorRoles.target;
+      if (currentTarget === null) {
+        throw new Error("Cmd_various VARIOUS_SET_MAGIC_COAT_TARGET requires a target role");
+      }
+      const attacker = currentTarget;
+      const oppositeSide = rules.battlers[attacker].side === 0 ? 1 : 0;
+      const sideTimer = rules.sideTimers[oppositeSide];
+      const target: BattleScriptBattlerId = sideTimer.followmeTimer !== 0
+        && rules.battlers[sideTimer.followmeTarget].hp !== 0
+        ? sideTimer.followmeTarget
+        : battler as BattleScriptBattlerId;
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        {
+          rulesContext: Object.freeze({
+            ...rules,
+            selectorRoles: Object.freeze({
+              ...rules.selectorRoles,
+              attacker,
+              target,
+            }),
+          }),
+        },
       );
     }
 

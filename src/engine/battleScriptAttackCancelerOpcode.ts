@@ -28,6 +28,7 @@ import { isDefenderProtected } from "./battleScriptHitChainOpcode.ts";
 import { cancelBattleScriptMultiTurnMoves } from "./battleScriptMultiTurnCancellation.ts";
 import {
   BATTLE_SCRIPT_MOVE_RESULT_MISSED,
+  BATTLE_SCRIPT_STATUS2_TRANSFORMED,
   BATTLE_SCRIPT_STATUS2_MASKS,
 } from "./battleScriptSourceConstants.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
@@ -47,6 +48,8 @@ function moveHasFlag(move: number, flag: string): boolean {
 }
 
 const BATTLE_SCRIPT_MOVE_CURSE = 174;
+const BATTLE_SCRIPT_MOVE_MAGIC_COAT = 277;
+const BATTLE_SCRIPT_ABILITY_PRESSURE = 46;
 
 /** IsTwoTurnsMove (battle_script_commands.c:8196-8206). */
 function isTwoTurnsMove(move: number): boolean {
@@ -352,13 +355,56 @@ export const attackCancelerOpcodeHandler: BattleScriptOpcodeHandler<BattleScript
     );
   }
   if (magicCoatResult.kind === "magic-coat") {
-    return unsupportedBranch(
+    const attacker = magicCoatResult.receipt.attacker;
+    const coatOwner = magicCoatResult.receipt.target;
+    let rulesContext = magicCoatResult.rulesContext;
+    let scheduler = context.state.scheduler;
+    const events: Array<Readonly<{
+      kind: "set-battler-pp-data";
+      battler: 0 | 1 | 2 | 3;
+      movePosition: number;
+      pp: number;
+    }>> = [];
+
+    if (rulesContext.battlers[attacker].ability === BATTLE_SCRIPT_ABILITY_PRESSURE) {
+      const owner = rulesContext.battlers[coatOwner];
+      const movePosition = owner.moves.indexOf(BATTLE_SCRIPT_MOVE_MAGIC_COAT);
+      if (movePosition !== -1) {
+        const nextPp = owner.pp[movePosition] === 0
+          ? 0
+          : owner.pp[movePosition]! - 1;
+        const pp = owner.pp.map((value, index) =>
+          index === movePosition ? nextPp : value
+        ) as unknown as typeof owner.pp;
+        const battlers = rulesContext.battlers.map((battler, index) =>
+          index === coatOwner ? Object.freeze({ ...owner, pp: Object.freeze(pp) }) : battler
+        ) as unknown as typeof rulesContext.battlers;
+        rulesContext = Object.freeze({
+          ...rulesContext,
+          battlers: Object.freeze(battlers),
+        });
+        if ((owner.status2 & BATTLE_SCRIPT_STATUS2_TRANSFORMED) === 0) {
+          events.push(Object.freeze({
+            kind: "set-battler-pp-data",
+            battler: coatOwner,
+            movePosition,
+            pp: nextPp,
+          }));
+          scheduler = markBattleScriptControllerPending(scheduler, coatOwner);
+        }
+      }
+    }
+
+    const target = requireLabelProgramCounter(context.program, "BattleScript_MagicCoatBounce");
+    return transitionBattleScriptCommand(
       context,
-      "PressurePPLose(gBattlerAttacker, gBattlerTarget, MOVE_MAGIC_COAT) is "
-        + "unimplemented, so the BattleScript_MagicCoatBounce handoff cannot "
-        + "complete source-completely",
-      "battle_script_commands.c",
-      964,
+      Object.freeze({ kind: "call-current", programCounter: target }),
+      {
+        rulesContext,
+        rng,
+        scheduler,
+        events: Object.freeze(events),
+      },
     );
   }
 
