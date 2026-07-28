@@ -1,4 +1,31 @@
 ---
+## 631 — [BOUNDED MAIN WORKER 2026-07-28 ~13:49] Last-move family source-complete
+
+- **State:** tree green at **401 files / 4556 tests**, production build, OFF
+  oracle info, and `git diff --check`. Census is exactly **199/214 effects,
+  339/355 moves, 275/276 distinct, 2955/2957 weighted**: assigned-baseline
+  delta **+3/+3/+0/+0**; all **70** census validations pass.
+- **Did:** registered source-exact Mirror Move, Mimic, and Sketch consumers of
+  the existing packed move-end histories. Mirror Move prefers its packed
+  last-taken cell, otherwise draws exactly once from the per-source list,
+  suppresses Pressure on empty failure, retargets, and dynamically jumps into
+  the selected effect. Mimic owns every forbidden/duplicate/Transform and
+  script-level Substitute gate, temporary slot/PP≤5 write, volatile bit, and
+  typed move message. Sketch owns its exact gates plus atomic active/controller/
+  durable-party moves, PP, and PP-bonus persistence and typed move message.
+- **Next:** supervisor verify commits `9850db3a`, `5a3bca4e`, and `96b310cf`;
+  resume the ranked tail plan. Do not expand this worker into Metronome,
+  Transform, type-change, or other tail rows.
+- **Notes:** Mirror Move's executable Splash selection reaches END; its blocked
+  Snatch selection honestly halts on `B_SCR_OP_TRYSETSNATCH`, confirming the
+  census keeps the selected universe in each selected effect's row. Fallback
+  candidate selection draws once (**16838**, seed 1); preferred/failure,
+  Mimic, and Sketch draw zero. Full success/failure walks and canonical
+  replays are exact. Deliberate handler exact-set pin **190→193**. Sketch adds
+  the source `REQUEST_MOVES_PP_BATTLE` semantic event and `ppBonuses` active/
+  party owner; no barriers, recording imports, presentation, round, tick,
+  roadmap, issue, or oracle-trace changes.
+---
 ## 630 — [BOUNDED MAIN WORKER 2026-07-28 ~13:32] Audit fixes #50–#52 plus plausible pair source-complete
 
 - **State:** all assigned rungs are green at **398 files / 4528 tests**, production
