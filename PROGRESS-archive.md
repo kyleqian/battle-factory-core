@@ -1,4 +1,32 @@
 ---
+## 598 — [SUPERVISOR VERIFY 2026-07-28 ~05:31] Low Kick accepted; Spikes evidence folded
+
+- **State:** reviewed union green at **360 files / 4186 tests** and focused
+  extraction/opcode/full-turn/evidence/ratchet coverage **60/60**;
+  production build, both-oracle info, census regeneration, ratchets **6/6**,
+  and `git diff --check` pass. Census is exactly **156/214 effects,
+  285/355 moves, 233/276 Factory-L50 distinct, 2755/2957 weighted**, all
+  **42/42**.
+- **Did:** accepted global Low Kick `0xdd`, source-derived species weights,
+  complete bracket/ownership matrix, and shared PP/accuracy/type/damage/
+  cleanup full-turn proof after source/diff/extractor review. Folded Spikes
+  source/OFF evidence and independently replayed exact manifest
+  `42ce4988…2604c742`: opponent Spikes, a real player switch, grounded
+  Rhyhorn **155→136** (`floor(155/8)`), then a second real set to layer 2.
+- **Next:** register five-byte `B_SCR_OP_TRYSETSPIKES` and remove the
+  matching switch-in barrier through a general side-condition seam. Prove
+  opposing-side ownership, all 0→1→2→3/failure branches, Pressure exemption,
+  persistent layers, Flying/Levitate immunity, one-switch guard, exact
+  1/8–1/6–1/4 damage, messages/HP events, Rapid Spin removal, and no leak.
+  Expected census: **157/214, 286/355, 234/276, 2758/2957**.
+- **Notes:** handler inventory is **164**. Spikes script PC/stack, all hidden
+  counters/flags, immunity cases, and non-public layer edges remain source-
+  pinned. No new unsupported/import ratchet, recording import, private
+  handler, presentation/tick branch, issue removal, DEFERRED item, or oracle
+  lifecycle action. Animation branch remains intentionally unmerged after
+  its post-orient advance.
+
+---
 ## 597 — [BOUNDED MAIN WORKER 2026-07-28 ~05:28] Low Kick executes through shared damage
 
 - **State:** committed `6e96b30` + `28d2294` + `103881c` + `ff8c8c6`;
