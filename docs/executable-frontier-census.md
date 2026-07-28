@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 151 | 214 | 70.6% |
-| Moves (unweighted, all 355) | 279 | 355 | 78.6% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 228 | 276 | 82.6% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2742 | 2957 | 92.7% |
+| Effect scripts | 152 | 214 | 71.0% |
+| Moves (unweighted, all 355) | 280 | 355 | 78.9% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 229 | 276 | 83.0% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2744 | 2957 | 92.8% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -38,7 +38,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_METRONOME` | 1 (EFFECT_METRONOME) | 1 | 1 | 2 |
 | `B_SCR_OP_PAINSPLITDMGCALC` | 1 (EFFECT_PAIN_SPLIT) | 1 | 1 | 2 |
 | `B_SCR_OP_SETFOCUSENERGY` | 1 (EFFECT_FOCUS_ENERGY) | 1 | 1 | 2 |
-| `B_SCR_OP_SETTAUNT` | 1 (EFFECT_TAUNT) | 1 | 1 | 2 |
 | `B_SCR_OP_STOCKPILE` | 1 (EFFECT_STOCKPILE) | 1 | 1 | 2 |
 | `B_SCR_OP_STOCKPILETOHPHEAL` | 1 (EFFECT_SWALLOW) | 1 | 1 | 2 |
 | `B_SCR_OP_TRYSETGRUDGE` | 1 (EFFECT_GRUDGE) | 1 | 1 | 2 |
@@ -48,6 +47,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_HIDDENPOWERCALC` | 1 (EFFECT_HIDDEN_POWER) | 1 | 1 | 1 |
 | `B_SCR_OP_NORMALISEBUFFS` | 1 (EFFECT_HAZE) | 1 | 1 | 1 |
 | `B_SCR_OP_PRESENTDAMAGECALCULATION` | 1 (EFFECT_PRESENT) | 1 | 1 | 1 |
+| `B_SCR_OP_STOCKPILETOBASEDAMAGE` | 1 (EFFECT_SPIT_UP) | 1 | 1 | 1 |
 
 ## Per-effect detail
 
@@ -228,7 +228,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_FOLLOW_ME | `BattleScript_EffectFollowMe` | executable | - | - | 1 | 1 (5) |
 | EFFECT_NATURE_POWER | `BattleScript_EffectNaturePower` | blocked-on-opcodes | `B_SCR_OP_CALLENVIRONMENTATTACK` (main path) | - | 1 | 0 (0) |
 | EFFECT_CHARGE | `BattleScript_EffectCharge` | blocked-on-opcodes | `B_SCR_OP_SETCHARGE` (main path) | - | 1 | 0 (0) |
-| EFFECT_TAUNT | `BattleScript_EffectTaunt` | blocked-on-opcodes | `B_SCR_OP_SETTAUNT` (edge branch only) | - | 1 | 1 (2) |
+| EFFECT_TAUNT | `BattleScript_EffectTaunt` | executable | - | - | 1 | 1 (2) |
 | EFFECT_HELPING_HAND | `BattleScript_EffectHelpingHand` | executable | - | - | 1 | 1 (5) |
 | EFFECT_TRICK | `BattleScript_EffectTrick` | blocked-on-opcodes | `B_SCR_OP_TRYSWAPITEMS` (edge branch only) | - | 1 | 1 (5) |
 | EFFECT_ROLE_PLAY | `BattleScript_EffectRolePlay` | blocked-on-opcodes | `B_SCR_OP_TRYCOPYABILITY` (edge branch only) | - | 1 | 1 (1) |

@@ -81,6 +81,7 @@ import { createBattleScriptGetSecretPowerEffectOpcodeHandlers } from "./battleSc
 import { createBattleScriptTryswapabilitiesOpcodeHandlers } from "./battleScriptTryswapabilitiesOpcode.ts";
 import { createBattleScriptTrysethelpinghandOpcodeHandlers } from "./battleScriptTrysethelpinghandOpcode.ts";
 import { createBattleScriptSettormentOpcodeHandlers } from "./battleScriptSettormentOpcode.ts";
+import { createBattleScriptSettauntOpcodeHandlers } from "./battleScriptSettauntOpcode.ts";
 import { createBattleScriptRefreshOpcodeHandlers } from "./battleScriptRefreshOpcode.ts";
 import { createBattleScriptIncrementGameStatOpcodeHandlers } from "./battleScriptIncrementGameStatOpcode.ts";
 import {
@@ -2469,6 +2470,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptRefreshOpcodeHandlers(program),
     ...createBattleScriptIncrementGameStatOpcodeHandlers(program),
     ...createBattleScriptSettormentOpcodeHandlers(program),
+    ...createBattleScriptSettauntOpcodeHandlers(program),
     ...createBattleScriptTrysethelpinghandOpcodeHandlers(program),
     ...createBattleScriptTryswapabilitiesOpcodeHandlers(program),
   });
