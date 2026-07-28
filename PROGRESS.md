@@ -15,21 +15,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
-## 599 — [BOUNDED MAIN WORKER 2026-07-28 ~05:40] Spikes setter registered
+## 599 — [BOUNDED MAIN WORKER 2026-07-28 ~05:58] Spikes executes across shared switch-in path
 
-- **State:** first commit-ready slice green: focused opcode/rules/ratchet
-  coverage **33/33** and production build pass.
+- **State:** committed `9b8473e` + `db739ac`; tree green at **361 files /
+  4202 tests**, focused opcode/switch/faint/full-turn/ratchet coverage
+  **308/308**, production build, both oracle infos, ratchets **6/6**, and
+  `git diff --check`. Census is exactly **157/214 effects, 286/355 moves,
+  234/276 Factory-L50 distinct, 2758/2957 weighted**, all **42/42** checks.
 - **Did:** globally registered five-byte `B_SCR_OP_TRYSETSPIKES` (`0xb0`)
-  with its exact failure pointer and attacker-opposite ownership. Added the
-  source `u8 spikesAmount` field on both side timers; Tier-1 pins 0→1→2→3,
-  exactly-3 Pressure-exempt failure, representable corrupt increments, PC,
-  and zero local RNG/events/controller work. Handler inventory **164→165**.
-- **Next:** replace the switch-in Spikes barrier with the shared source
-  scripts, damage/immunity/guard/cleanup/event path; prove persistence and a
-  public forced-switch receipt, then run full census/ratchets/build.
-- **Notes:** Rapid Spin remains blocked before `rapidspinfree` by the existing
-  source-backed `MOVE_EFFECT_RAPIDSPIN` SetMoveEffect barrier; do not widen it
-  as part of this setter slice. No new barrier/import/presentation branch.
+  with exact failure pointer/opposite ownership and both-side `spikesAmount`.
+  The shared switch-in scripts now execute layer **1/8, 1/6, 1/4** HP,
+  min-1, Flying/Levitate immunity, damaged-guard set/clear, HP/message/
+  controller order, and faint pop/jump topology. Public two-turn decision
+  proof persists one layer and switches grounded Rhyhorn **155→136**.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next source-complete target; do not widen Rapid Spin here.
+- **Notes:** handler inventory **164→165**; unsupported barriers deliberately
+  shrink switch-in **10→9** and hit-chain **22→21**, with none added. Rapid
+  Spin remains a named source-backed remainder: `EFFECT_RAPID_SPIN` stops at
+  the existing `MOVE_EFFECT_RAPIDSPIN` barrier before `rapidspinfree`, so its
+  bit/counter clear was not widened. No recording import, private handler,
+  generic controller/tick/presentation branch, issue removal, or RNG seam.
 
 ---
 ## 598 — [SUPERVISOR VERIFY 2026-07-28 ~05:31] Low Kick accepted; Spikes evidence folded
@@ -80,34 +86,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   ratchet change. Generic Machoke→Chansey Low Kick proves PP, shared
   accuracy/type/damage/HP and effectiveness messages, opponent Splash, and
   `dynamicBasePower` reset at the next decision.
-
----
-## 596 — [SUPERVISOR VERIFY 2026-07-28 ~05:20] Magic Coat accepted; Low Kick evidence folded
-
-- **State:** reviewed union green at **357 files / 4161 tests** and focused
-  **43/43**; production build, both-oracle info, census regeneration,
-  ratchets **6/6**, and `git diff --check` pass. Census is exactly
-  **155/214 effects, 284/355 moves, 232/276 Factory-L50 distinct,
-  2753/2957 weighted**, all **42/42**.
-- **Did:** accepted global Magic Coat `0xdf`, source Pressure delegation,
-  shared bounce script/retarget execution, and generic full-turn reflected
-  Tail Whip proof after source/diff review. Folded Low Kick `0xdd`
-  source/OFF evidence and independently replayed both exact manifests:
-  Chansey `d5b814ed…6d6649e5` proves the **60**-power tier and Snorlax
-  `037869eb…6604b94` the **120**-power tier, with real PP, HP, and message
-  outcomes.
-- **Next:** register operand-free
-  `B_SCR_OP_WEIGHTDAMAGECALCULATION` globally. Read target species weight
-  through source-derived data, set `gDynamicBasePower` to the exact six-
-  bracket value, advance one byte with no local RNG/controller work, and
-  prove all strict boundaries plus Low Kick's shared damage/reset full-turn
-  path. Expected census:
-  **156/214, 285/355, 233/276, 2755/2957**.
-- **Notes:** handler inventory is **163**. Low Kick PC, target selector,
-  dynamic-power intermediate/reset, and all six brackets remain source-
-  pinned; public receipts distinguish two tiers. Magic Coat deliberately
-  retired one attack-canceler barrier (**5→4**). No new unsupported/import
-  ratchet, recording import, private handler, controller widening,
-  animation/presentation/tick branch, issue removal, DEFERRED item, or
-  oracle lifecycle action. Animation branch remains intentionally unmerged
-  after its post-orient advance.
