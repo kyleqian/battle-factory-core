@@ -179,7 +179,6 @@ def run_one(label: str) -> dict[str, object]:
     max_frame_ends = LAST_STEPPED_AGE - FIRST_STEPPED_AGE + 1
     steps = 0
     while frame_ends < max_frame_ends:
-        nonlocal_last_pc_kind = last_pc_kind
         pc = int(oracle.core.cpu.pc)
         pc_kind = relevant_pc(pc)
         before = snapshot(oracle, frame, pc)
@@ -197,7 +196,7 @@ def run_one(label: str) -> dict[str, object]:
                 "hardwareBldalpha",
             )
         )
-        if (pc_kind is not None and pc_kind != nonlocal_last_pc_kind) or changed:
+        if (pc_kind is not None and pc_kind != last_pc_kind) or changed:
             after["kind"] = pc_kind or "state-change"
             after["before"] = {
                 key: before[key]

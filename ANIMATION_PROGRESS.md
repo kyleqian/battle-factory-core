@@ -1,5 +1,36 @@
 # Animation coverage
 
+## MOVE_FAINT_ATTACK register-queue checkpoint; remains partial (2026-07-27)
+
+**Verdict:** `MOVE_FAINT_ATTACK` remains partial. Canonical opponent-front
+and portable player-back complete bodies remain **221/221** exact; the
+portable orientation reproduced twice fresh with identical probe digest.
+The required +30 delayed-control surface reproduced **220/221** twice fresh,
+with only age 150 / frame 21006 differing by 789 pixels. Coverage remains
+**55 exact / 2 partial / 219 unsupported**.
+
+**Cycle/register evidence:** a new bounded mGBA probe single-steps both
+accepted prefixes across ages 148-153 and reproduced byte-identically twice.
+Canonical age 150 runs `AnimTask_AttackerFadeFromInvisible_Step` at VCOUNT 3:
+`SetGpuReg` changes the software buffer `0x0e02→0x0d03`, queues offset
+`0x52`, and leaves hardware at `0x0e02` through the displayed frame before
+`CopyBufferedValuesToGpuRegs` transfers it at VCOUNT 166. The +30 run executes
+the same task write between displayed frames at VCOUNT 224, so source
+`SetGpuReg` writes hardware `0x0d03` immediately and the next compositor
+sample exposes it. This distinguishes CPU task order, VBlank visibility, and
+frame sampling; the earlier same-task-data observation was correct but too
+coarse.
+
+**Reusable checkpoint/remainder:** `gpuRegisterQueue.ts` now ports the general
+source buffer, unique waiting-list, VBlank 161-225/forced-blank immediate
+write, and VBlank drain rules with focused Tier-1 coverage. It is deliberately
+not wired to FAINT ATTACK: the shared seam still needs a general CPU-work/
+VCOUNT scheduler to determine whether `RunTasks` lands at VCOUNT 3 or 224.
+Next, model that source scheduling boundary from per-frame work and feed its
+phase into the register queue; then require delayed **221/221** and rerun both
+orientations twice fresh. No absolute-tick, delay-specific, or pixel exception
+was added.
+
 ## MOVE_DRAGON_RAGE promoted exact; composed-OAM creation boundary closed (2026-07-27)
 
 **Verdict:** `MOVE_DRAGON_RAGE` is exact. Complete legal CHARMELEON/ONIX
