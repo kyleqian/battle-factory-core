@@ -15,12 +15,19 @@
  * `gCurrentMove` is the load-bearing memHword pointer this engine models.
  * `gChosenMove` (the multi-hit family's own Sleep-Talk gate,
  * `BattleScript_MultiHitLoop`/`BattleScript_TripleKickLoop`) is also modeled,
- * per docs/roar-multihit-registration-scout.md §4 rung 4. Every other
- * concrete jumpifhalfword call site in the committed program compares a
- * different, unmodeled pointer (`gBattleWeather`, `gTrainerBattleOpponent_A`)
- * and is a named (b) barrier -- those effects (EFFECT_SOLAR_BEAM,
- * EFFECT_SEMI_INVULNERABLE...) remain blocked on their own separate missing
- * opcodes regardless.
+ * per docs/roar-multihit-registration-scout.md §4 rung 4.
+ *
+ * Widened (semi-invulnerable-registration-scout.md's own named remainder) for
+ * `gBattleWeather` -- `BattleScript_EffectSolarBeam`'s
+ * `jumpifhalfword CMP_COMMON_BITS, gBattleWeather, B_WEATHER_SUN,
+ * BattleScript_SolarBeamOnFirstTurn` (`data/battle_scripts_1.s:1906`), the
+ * sun-skips-charge branch. `rules.weather` is the same durable field
+ * `battleScriptSetWeatherOpcode.ts`/`battleScriptDamagingWeatherOpcode.ts`
+ * already own; `B_WEATHER_SUN` is the only concrete halfword-value literal
+ * this pointer is ever compared against in the committed program.
+ *
+ * `gTrainerBattleOpponent_A` remains a named (b) barrier -- no concrete
+ * Level-50 singles effect in this census reaches it.
  */
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import {
@@ -53,6 +60,10 @@ const JUMPIFHALFWORD_COMPARATORS: ReadonlyMap<string, number> = new Map([
   ["CMP_NO_COMMON_BITS", CMP_NO_COMMON_BITS],
 ]);
 
+/** include/constants/battle.h:239-241 -- (1<<5)|(1<<6), the only concrete halfword-value literal gBattleWeather is ever compared against. */
+const B_WEATHER_SUN = (1 << 5) | (1 << 6);
+const WEATHER_VALUE_BY_NAME: ReadonlyMap<string, number> = new Map([["B_WEATHER_SUN", B_WEATHER_SUN]]);
+
 type GeneratedMoveIdRow = Readonly<{ move: string; id: number }>;
 /**
  * Every concrete jumpifhalfword call site whose memHword pointer this engine
@@ -84,12 +95,13 @@ function readJumpifhalfwordMemHword(
   switch (expression) {
     case "gCurrentMove": return rules.currentMove;
     case "gChosenMove": return rules.chosenMove;
+    case "gBattleWeather": return rules.weather;
     default: return null;
   }
 }
 
 function resolveJumpifhalfwordValue(expression: string): number | null {
-  return MOVE_ID_BY_NAME.get(expression) ?? null;
+  return MOVE_ID_BY_NAME.get(expression) ?? WEATHER_VALUE_BY_NAME.get(expression) ?? null;
 }
 
 function evaluateJumpifhalfwordComparison(caseId: number, memHword: number, value: number): boolean {
