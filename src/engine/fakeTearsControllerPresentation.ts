@@ -3,6 +3,11 @@ export interface ResolvedFakeTearsControllerPresentation {
   readonly kickoff: Readonly<{
     readonly messageId: "STRINGID_USEDMOVE";
     readonly firstAge: number;
+    readonly selection: Readonly<{
+      readonly moveIds: readonly [number, number, number, number];
+      readonly maxPP: readonly [number, number, number, number];
+      readonly cursor: 0 | 1 | 2 | 3;
+    }>;
   }>;
   readonly statChange: Readonly<{
     readonly battler: "target";
@@ -32,6 +37,7 @@ export interface FakeTearsControllerDisplay {
     | "result-message"
     | "move-end";
   readonly moveTextVisibleChars: number;
+  readonly fightMenuVisible: boolean;
   readonly banner: Readonly<{ eva: number; bg1Y: number }> | null;
   readonly resultTextVisibleChars: number;
   readonly moveEnded: boolean;
@@ -64,13 +70,21 @@ export function fakeTearsControllerDisplayAtAge(
   }
 
   const resultTextVisibleChars =
-    age >= input.result.firstAge && age < input.moveEnd.clearAge
+    age >= input.result.firstAge && age <= input.moveEnd.clearAge
       ? Math.min(resultTextLength, age - input.result.firstAge + 1)
       : 0;
-  const moveTextVisibleChars =
-    age < input.result.firstAge && age >= input.kickoff.firstAge
-      ? Math.min(moveTextLength, age - input.kickoff.firstAge + 1)
+  const kickoffElapsed = age - input.kickoff.firstAge;
+  const rawMoveTextVisibleChars =
+    age < input.result.firstAge && kickoffElapsed >= 0
+      ? Math.min(moveTextLength, kickoffElapsed + 1)
       : 0;
+  // The printer's software write is displayed one frame later, except its
+  // terminal write: the final glyph and controller handoff become visible
+  // together.
+  const moveTextVisibleChars =
+    rawMoveTextVisibleChars > 0 && kickoffElapsed < moveTextLength
+      ? rawMoveTextVisibleChars - 1
+      : rawMoveTextVisibleChars;
 
   let banner: FakeTearsControllerDisplay["banner"] = null;
   if (
@@ -108,6 +122,7 @@ export function fakeTearsControllerDisplayAtAge(
               ? "source-body"
               : "kickoff",
     moveTextVisibleChars,
+    fightMenuVisible: age <= input.kickoff.firstAge,
     banner,
     resultTextVisibleChars,
     moveEnded: age >= input.moveEnd.clearAge,

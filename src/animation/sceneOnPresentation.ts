@@ -1113,6 +1113,11 @@ export interface SceneOnFakeTearsConfig {
     readonly kickoff: Readonly<{
       readonly messageId: "STRINGID_USEDMOVE";
       readonly firstAge: number;
+      readonly selection: Readonly<{
+        readonly moveIds: readonly [number, number, number, number];
+        readonly maxPP: readonly [number, number, number, number];
+        readonly cursor: 0 | 1 | 2 | 3;
+      }>;
     }>;
     readonly statChange: Readonly<{
       readonly battler: "target";

@@ -6,7 +6,15 @@ import {
 
 const receipt = Object.freeze({
   kind: "resolved-stat-drop",
-  kickoff: { messageId: "STRINGID_USEDMOVE", firstAge: -31 },
+  kickoff: {
+    messageId: "STRINGID_USEDMOVE",
+    firstAge: -31,
+    selection: {
+      moveIds: [313, 313, 313, 313],
+      maxPP: [20, 20, 20, 20],
+      cursor: 0,
+    },
+  },
   statChange: {
     battler: "target",
     stat: "special-defense",
@@ -36,7 +44,21 @@ describe("Fake Tears resolved controller presentation", () => {
 
   it("advances kickoff, stat banner, result printer, and move-end by relative age", () => {
     expect(fakeTearsControllerDisplayAtAge(-31, receipt, 24, 34))
-      .toMatchObject({ phase: "kickoff", moveTextVisibleChars: 1 });
+      .toMatchObject({
+        phase: "kickoff",
+        fightMenuVisible: true,
+        moveTextVisibleChars: 0,
+      });
+    expect(fakeTearsControllerDisplayAtAge(-30, receipt, 24, 34))
+      .toMatchObject({ fightMenuVisible: false, moveTextVisibleChars: 1 });
+    expect(fakeTearsControllerDisplayAtAge(-18, receipt, 24, 34))
+      .toMatchObject({ moveTextVisibleChars: 13 });
+    expect(fakeTearsControllerDisplayAtAge(-17, receipt, 24, 34))
+      .toMatchObject({ moveTextVisibleChars: 14 });
+    expect(fakeTearsControllerDisplayAtAge(-8, receipt, 24, 34))
+      .toMatchObject({ moveTextVisibleChars: 23 });
+    expect(fakeTearsControllerDisplayAtAge(-7, receipt, 24, 34))
+      .toMatchObject({ moveTextVisibleChars: 24 });
     expect(fakeTearsControllerDisplayAtAge(94, receipt, 24, 34))
       .toMatchObject({
         phase: "stat-animation",
@@ -55,7 +77,7 @@ describe("Fake Tears resolved controller presentation", () => {
     expect(fakeTearsControllerDisplayAtAge(284, receipt, 24, 34))
       .toMatchObject({
         phase: "move-end",
-        resultTextVisibleChars: 0,
+        resultTextVisibleChars: 34,
         moveEnded: true,
       });
   });

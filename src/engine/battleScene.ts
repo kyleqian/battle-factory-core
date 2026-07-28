@@ -6242,6 +6242,27 @@ function drawFightSubmenuWindow(
  * fightSubmenuText.test.ts`, and §13c for the state-plumbing tests proving
  * this same path end-to-end.
  */
+function drawFightSubmenuOuterChrome(fb: Uint8Array): void {
+  const right = fightSubmenuWindow.x + fightSubmenuWindow.width;
+  const bottom = fightSubmenuWindow.y + fightSubmenuWindow.height;
+  for (let y = fightSubmenuWindow.y - 1; y <= bottom; y += 1) {
+    for (let x = 0; x < 240; x += 1) {
+      if (
+        y >= fightSubmenuWindow.y
+        && y < bottom
+        && x >= fightSubmenuWindow.x
+        && x < right
+      ) continue;
+      const offset = (y * menuIdleBase.width + x) * 3;
+      setPixel(fb, x, y, {
+        r: menuIdleBase.pixels[offset]!,
+        g: menuIdleBase.pixels[offset + 1]!,
+        b: menuIdleBase.pixels[offset + 2]!,
+      });
+    }
+  }
+}
+
 function drawFightSubmenuChrome(
   fb: Uint8Array,
   displayCursor: FightSubmenuSlot,
@@ -18610,6 +18631,17 @@ export function renderSceneOnMovePresentation(
         maxHp: state.config.fieldProfile.playerMaxHp,
       }),
     );
+    if (controllerDisplay.fightMenuVisible) {
+      drawFightSubmenuOuterChrome(fb);
+      drawFightSubmenuChrome(
+        fb,
+        fakeState.config.controllerPresentation.kickoff.selection.cursor,
+        false,
+        false,
+        fakeState.config.controllerPresentation.kickoff.selection,
+      );
+      return;
+    }
     if (controllerDisplay.banner) {
       drawStatDecreaseBannerForBattlerPalette(
         fb,

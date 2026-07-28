@@ -23,7 +23,7 @@
   "attackerPictureBounds": {"left":40,"right":104,"top":72},
   "controllerPresentation": {
     "kind":"resolved-stat-drop",
-    "kickoff":{"messageId":"STRINGID_USEDMOVE","firstAge":-31},
+    "kickoff":{"messageId":"STRINGID_USEDMOVE","firstAge":-31,"selection":{"moveIds":[313,313,313,313],"maxPP":[20,20,20,20],"cursor":0}},
     "statChange":{"battler":"target","stat":"special-defense","from":6,"to":4},
     "statAnimation":{"animationId":"STATS_CHANGE","argument":55,"firstAge":94},
     "result":{"messageId":"STRINGID_DEFENDERSSTATFELL","firstAge":179},
