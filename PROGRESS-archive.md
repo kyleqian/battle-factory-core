@@ -1,4 +1,26 @@
 ---
+## 625 — [BOUNDED MAIN WORKER 2026-07-28 ~12:23] Cluster 4 rung (a) item ownership implemented
+
+- **State:** tree green at **392 files / 4479 tests**, production build, and
+  `git diff --check`. Census is exactly **188/214 effects, 328/355 moves,
+  269/276 distinct, 2940/2957 weighted**: inherited-baseline delta
+  **+2/+3/+2/+8**; all **66** census validations pass.
+- **Did:** source-ported Thief/Covet's complete battle-type/knocked-off/
+  Sticky Hold/item gates, persistent held-item controller writes,
+  `changedItems`/`lastUsedItem`, and Choice clearing; source-ported Knock
+  Off's active-only clear, per-side party-slot mask, Sticky Hold branch, and
+  switch-in suppression. Both item-animation operands are semantic.
+- **Next:** finish full verification and commit rung (a), then implement Pay
+  Day's source pot plus `givepaydaymoney` consumer only if the time box remains
+  safe.
+- **Notes:** receipt pins cover Covet active+party transfer, damage/PP through
+  Sticky Hold, zero-HP steal, occupied/empty/Enigma/Mail no-ops, Knock Off's
+  active-clear/party-intact asymmetry, Choice clear, Sticky Hold/no-item,
+  switch persistence, full scripts to END, canonical replay, and exact
+  four-draw ledgers. No new barriers, recording imports, presentation,
+  round, tick, roadmap, issue, or oracle-trace changes.
+
+---
 ## 624 — [BOUNDED MAIN WORKER 2026-07-28 ~12:16] Rapid Spin cleanup source-complete
 
 - **State:** tree green at **391 files / 4466 tests**, production build, OFF

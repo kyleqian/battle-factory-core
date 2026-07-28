@@ -15,6 +15,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 628 — [BOUNDED MAIN WORKER 2026-07-28 ~13:01] Present + Memento + Role Play + Recycle source-complete
+
+- **State:** tree green at **397 files / 4519 tests**, production build, OFF
+  oracle info, and `git diff --check`. Census is exactly **195/214 effects,
+  335/355 moves, 275/276 distinct, 2955/2957 weighted**: assigned-baseline
+  delta **+4/+4/+4/+4**; all **70** census validations pass.
+- **Did:** source-ported Present's exact low-byte damage/heal bands; Memento's
+  minimized-stat/Protect/Substitute gates, self-faint ordering, and terminal
+  checkteamslost handoff; Role Play's exact NONE/Wonder Guard exclusions and
+  ability-name message substitution; Recycle's consumed-item ledger,
+  `removeitem` writer, active/party restore, and item-name message.
+- **Next:** supervisor verify commits `dd5fd24c`, `7eb51f0b`, `076990f4`,
+  and `40e742f2`; all four assigned flips are complete. Resume the ranked
+  order without expanding into Metronome or zero-Factory-weight rows.
+- **Notes:** predicted-vs-actual is **+1/+1/+1/+1 for every effect**, with
+  zero shortfall. Present damage/heal ledgers are 5/2 draws; the other three
+  effects draw zero. Memento exposed and closed one hidden registered-opcode
+  operand gap (`B_MSG_DEFENDER_STAT_FELL`). Deliberate exact-set move:
+  handler surface **185→189**; the regenerated per-effect blocker rows are
+  executable. No new barriers, recording imports, presentation, round, tick,
+  roadmap, issue, or oracle-trace changes.
+
+---
 ## 627 — [BOUNDED MAIN WORKER 2026-07-28 ~12:41] Will-O-Wisp + Haze source-complete
 
 - **State:** tree green at **393 files / 4494 tests**, production build, OFF
@@ -56,25 +79,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   canonical replay, and exact four-draw move / zero-draw payout ledgers. No
   new barriers, recording imports, presentation, round, tick, roadmap, issue,
   or oracle-trace changes.
-
----
-## 625 — [BOUNDED MAIN WORKER 2026-07-28 ~12:23] Cluster 4 rung (a) item ownership implemented
-
-- **State:** tree green at **392 files / 4479 tests**, production build, and
-  `git diff --check`. Census is exactly **188/214 effects, 328/355 moves,
-  269/276 distinct, 2940/2957 weighted**: inherited-baseline delta
-  **+2/+3/+2/+8**; all **66** census validations pass.
-- **Did:** source-ported Thief/Covet's complete battle-type/knocked-off/
-  Sticky Hold/item gates, persistent held-item controller writes,
-  `changedItems`/`lastUsedItem`, and Choice clearing; source-ported Knock
-  Off's active-only clear, per-side party-slot mask, Sticky Hold branch, and
-  switch-in suppression. Both item-animation operands are semantic.
-- **Next:** finish full verification and commit rung (a), then implement Pay
-  Day's source pot plus `givepaydaymoney` consumer only if the time box remains
-  safe.
-- **Notes:** receipt pins cover Covet active+party transfer, damage/PP through
-  Sticky Hold, zero-HP steal, occupied/empty/Enigma/Mail no-ops, Knock Off's
-  active-clear/party-intact asymmetry, Choice clear, Sticky Hold/no-item,
-  switch persistence, full scripts to END, canonical replay, and exact
-  four-draw ledgers. No new barriers, recording imports, presentation, round,
-  tick, roadmap, issue, or oracle-trace changes.
