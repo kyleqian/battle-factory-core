@@ -31,18 +31,6 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
-## Oracle freshness helper misresolves the harness from disposable side worktrees
-
-- **What:** `check-oracle-freshness.sh` reported both shared services stale
-  from a disposable `.worktrees/side-*` checkout, while the same PIDs and
-  harness HEAD passed immediately from the main run tree. This leaves a green
-  side worker unable to satisfy its nominal freshness postflight.
-- **Hits:** 1.
-- **Cost each:** ~1 min.
-- **Workaround:** side workers report the result without restarting shared
-  services; the supervisor reruns freshness from the main run root before
-  accepting the branch.
-
 ## Shell command substitution mutates inline worker briefs
 
 - **What:** Markdown backticks embedded in a double-quoted

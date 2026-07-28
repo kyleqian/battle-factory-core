@@ -9,13 +9,25 @@
 # *process* was stale. The oracle exposes no version endpoint, so the only
 # cheap signal is process start time vs. harness HEAD commit time.
 #
-# Run from the run root:  ./tools/check-oracle-freshness.sh
+# Run from any checkout of the run:  ./tools/check-oracle-freshness.sh
 # Exit 0 = both services are at or newer than harness HEAD. Exit 1 = restart
 # the stale one before staging anything. Exit 2 = a service is not listening.
 set -uo pipefail
 
 RUN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-HARNESS_ROOT="$(cd "${RUN_ROOT}/../.." && pwd)"
+source "${RUN_ROOT}/tools/resolve-harness-root.sh"
+if ! HARNESS_ROOT="$(cd "${RUN_ROOT}" && pokebench_resolve_harness_root)"; then
+  exit 1
+fi
+
+if [[ "${1:-}" == "--print-harness-root" ]]; then
+  printf '%s\n' "${HARNESS_ROOT}"
+  exit 0
+fi
+if [[ "$#" -ne 0 ]]; then
+  echo "usage: $0 [--print-harness-root]" >&2
+  exit 2
+fi
 
 if ! HARNESS_HEAD_EPOCH="$(git -C "${HARNESS_ROOT}" log -1 --format=%ct 2>/dev/null)"; then
   echo "FAIL: cannot read harness git history at ${HARNESS_ROOT}" >&2
