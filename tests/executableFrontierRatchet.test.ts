@@ -290,6 +290,14 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // selector (BS_ATTACKER) resolves for real on every reachable committed
   // script this registration drives.
   ["src/engine/battleScriptSemiInvulnerableOpcode.ts", 1],
+  // B_SCR_OP_JUMPIFCANTSWITCH / EFFECT_BATON_PASS registration: ordinary
+  // Level-50 singles resolves both assembled selectors, all three volatile
+  // gates, and the selected side's authoritative six-slot party scan. The
+  // one barrier is the source's in-game-partner/MULTI/two-opponents/ordinary-
+  // doubles scan family (battle_script_commands.c:4714-4848), whose party-
+  // half and second-active-slot identities the current context does not own.
+  // Reachability-tested in tests/battleScriptJumpifcantswitchOpcode.test.ts.
+  ["src/engine/battleScriptJumpifcantswitchOpcode.ts", 1],
 ]);
 
 function recordingImportsIn(file: string): string[] {

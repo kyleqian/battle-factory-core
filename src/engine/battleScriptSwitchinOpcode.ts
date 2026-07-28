@@ -38,6 +38,7 @@ import {
   BATTLE_SCRIPT_BATTLE_TYPE_ARENA,
   BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE,
   BATTLE_SCRIPT_BATTLE_TYPE_TRAINER,
+  BATTLE_SCRIPT_EFFECT_BATON_PASS,
   BATTLE_SCRIPT_PARTY_SIZE,
   type BattleScriptRulesBattlers,
   type BattleScriptRulesContext,
@@ -59,6 +60,13 @@ const SIDE_STATUS_SPIKES = 1 << 4;
 /** include/constants/battle.h:150/160 -- cross-battler identity (battlerPreventingEscape/battlerWithSureHit) this engine does not model. */
 const STATUS2_ESCAPE_PREVENTION = 1 << 26;
 const STATUS3_ALWAYS_HITS = (1 << 3) | (1 << 4);
+/** battle_main.c:3169-3170 -- the exact volatile masks SwitchInClearSetData carries through Baton Pass. */
+const BATON_PASS_STATUS2 =
+  ((1 << 0) | (1 << 1) | (1 << 2) | (1 << 20) | (1 << 24)
+    | STATUS2_ESCAPE_PREVENTION | (1 << 28)) >>> 0;
+const BATON_PASS_STATUS3 =
+  ((1 << 0) | (1 << 1) | (1 << 2) | STATUS3_ALWAYS_HITS | (1 << 5)
+    | (1 << 10) | (1 << 16) | (1 << 17)) >>> 0;
 /** include/constants/abilities.h -- battle_util.c:2488-2599's ABILITYEFFECT_ON_SWITCHIN switch cases. */
 const ABILITY_DRIZZLE = 2;
 const ABILITY_CLOUD_NINE = 13;
@@ -240,22 +248,39 @@ function createGetswitchedmondataOpcodeHandler(
           + "-- openpartyscreen must run first",
       );
     }
+    const fromPartyIndex = rules.battlers[battler as 0 | 1 | 2 | 3].partyIndex;
     const battlers = rules.battlers.map((candidate, index) =>
       index === battler ? Object.freeze({ ...candidate, partyIndex: decided }) : candidate
     ) as unknown as BattleScriptRulesBattlers;
     const scheduler = markBattleScriptControllerPending(context.state.scheduler, battler as 0 | 1 | 2 | 3);
+    const events = fromPartyIndex === decided
+      ? Object.freeze([])
+      : Object.freeze([Object.freeze({
+        kind: "switch" as const,
+        side: rules.battlers[battler as 0 | 1 | 2 | 3].side === 0
+          ? "player" as const
+          : "opponent" as const,
+        fromPartyIndex,
+        toPartyIndex: decided,
+      })]);
     return transitionBattleScriptCommand(
       context,
       Object.freeze({ kind: "advance" }),
-      { rulesContext: Object.freeze({ ...rules, battlers: Object.freeze(battlers) }), scheduler },
+      {
+        rulesContext: Object.freeze({ ...rules, battlers: Object.freeze(battlers) }),
+        scheduler,
+        events,
+      },
     );
   };
 }
 
 /**
  * `Cmd_switchindataupdate` (`battle_script_commands.c:4621-4671`) plus
- * `SwitchInClearSetData` (`battle_main.c:3152-3258`), the non-Baton-Pass
- * branch (Factory's forced switch never carries a Baton Pass in progress).
+ * `SwitchInClearSetData` (`battle_main.c:3152-3258`). The ordinary switch
+ * branch resets stages/status2/status3; Baton Pass instead preserves stages,
+ * masks status2/status3 to the source's transferable bits, and retains the
+ * carried Substitute HP.
  * Rebuilds species/hp/status1/types from the party record at the
  * already-updated `partyIndex`; resets stat stages/status2/status3/the
  * modeled DisableStruct-shaped fields to their neutral values; clears the
@@ -281,26 +306,30 @@ function createSwitchindataupdateOpcodeHandler(
     const rules = context.state.rulesContext;
     const active = rules.battlers[battler as 0 | 1 | 2 | 3];
     const { battlersCount } = rules.battleTopology;
+    const isBatonPass =
+      rules.currentMoveEffect === BATTLE_SCRIPT_EFFECT_BATON_PASS;
 
-    for (let i = 0; i < battlersCount; i += 1) {
-      if (i === battler) continue;
-      const otherStatus2 = rules.battlers[i as 0 | 1 | 2 | 3].status2;
-      const otherStatus3 = rules.battlers[i as 0 | 1 | 2 | 3].status3;
-      if ((otherStatus2 & STATUS2_ESCAPE_PREVENTION) !== 0) {
-        return unsupportedBranch(
-          context,
-          `SwitchInClearSetData's STATUS2_ESCAPE_PREVENTION cross-battler clear (battler ${i}) needs `
-            + "gDisableStructs[battler].battlerPreventingEscape identity, not modeled here",
-          3164,
-        );
-      }
-      if ((otherStatus3 & STATUS3_ALWAYS_HITS) !== 0) {
-        return unsupportedBranch(
-          context,
-          `SwitchInClearSetData's STATUS3_ALWAYS_HITS cross-battler clear (battler ${i}) needs `
-            + "gDisableStructs[battler].battlerWithSureHit identity, not modeled here",
-          3166,
-        );
+    if (!isBatonPass) {
+      for (let i = 0; i < battlersCount; i += 1) {
+        if (i === battler) continue;
+        const otherStatus2 = rules.battlers[i as 0 | 1 | 2 | 3].status2;
+        const otherStatus3 = rules.battlers[i as 0 | 1 | 2 | 3].status3;
+        if ((otherStatus2 & STATUS2_ESCAPE_PREVENTION) !== 0) {
+          return unsupportedBranch(
+            context,
+            `SwitchInClearSetData's STATUS2_ESCAPE_PREVENTION cross-battler clear (battler ${i}) needs `
+              + "gDisableStructs[battler].battlerPreventingEscape identity, not modeled here",
+            3164,
+          );
+        }
+        if ((otherStatus3 & STATUS3_ALWAYS_HITS) !== 0) {
+          return unsupportedBranch(
+            context,
+            `SwitchInClearSetData's STATUS3_ALWAYS_HITS cross-battler clear (battler ${i}) needs `
+              + "gDisableStructs[battler].battlerWithSureHit identity, not modeled here",
+            3166,
+          );
+        }
       }
     }
 
@@ -322,10 +351,10 @@ function createSwitchindataupdateOpcodeHandler(
           hp: partyMember.hp,
           status1: partyMember.status1,
           types,
-          statStages: DEFAULT_STAT_STAGES,
-          status2: 0,
-          status3: 0,
-          substituteHP: 0,
+          statStages: isBatonPass ? candidate.statStages : DEFAULT_STAT_STAGES,
+          status2: isBatonPass ? (candidate.status2 & BATON_PASS_STATUS2) >>> 0 : 0,
+          status3: isBatonPass ? (candidate.status3 & BATON_PASS_STATUS3) >>> 0 : 0,
+          substituteHP: isBatonPass ? candidate.substituteHP : 0,
           rolloutTimer: 0,
           furyCutterCounter: 0,
           truantCounter: 0 as const,
