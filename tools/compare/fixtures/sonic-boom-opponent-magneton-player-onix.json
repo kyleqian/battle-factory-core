@@ -1,0 +1,14 @@
+{
+  "schema": "scene-on-sonic-boom-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-sonic-boom-opponent-magneton-player-onix.json",
+  "probe": "tools/compare/sonicBoomProbe.py",
+  "pair": "Factory set-244 MAGNETON opponent-front -> ONIX player-back",
+  "orientation": "opponent-to-player",
+  "move": "SONIC_BOOM",
+  "captureWindow": { "startFrame": 39, "endFrame": 206, "frameCount": 168 },
+  "sourceWindow": { "startFrame": 82, "endFrame": 133, "frameCount": 52 },
+  "evidenceSha256": "e66adb5af38f4bddf6e242bb968a1ac9fa5ba5761dc04c85dab807113ab7ffe3",
+  "rawRgbSha256": "f9d02f74a3e0a1d72a88be324c64733b79045434957e01c2b8fa688b92cb576d",
+  "freshRuns": 2
+}

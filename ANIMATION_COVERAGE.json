@@ -2,6 +2,26 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_SONIC_BOOM",
+      "status": "staged",
+      "covered": [
+        "fresh complete legal Level-50 Factory set-244 MAGNETON/ONIX Scene-ON parties pass the complete source-owned display through first inactive cleanup at 52/52 frames 78-129 player-back and 82-133 opponent-front, twice fresh; raw source receipts are byte-identical with player evidence digest 9c3e744fd7b682580a96de4cbd52a718dcfc5424688c53415130c07ba215eff7 / RGB c98fa1b4c0aaacb57aa7db00eaa26026829188ea29932b92153100ecb8a7e38a and opponent evidence digest e66adb5af38f4bddf6e242bb968a1ac9fa5ba5761dc04c85dab807113ab7ffe3 / RGB f9d02f74a3e0a1d72a88be324c64733b79045434957e01c2b8fa688b92cb576d",
+        "the portable probe records every source script offset/wait, all three gSonicBoomSpriteTemplate lifecycles, the target animation-2 IMPACT, AIR_WAVE/IMPACT palette tags, ShakeMon, target/partner monbg split priority, alpha, OAM/matrices, registers, SE1/SE2+pans, raw RGB/framebuffer, and first inactive cleanup",
+        "Move_SONIC_BOOM source loads AIR_WAVE and IMPACT, opens ANIM_DEF_PARTNER monbg with target split priority and 12:8 alpha, calls a 16,0 to 0,0 duration-15 Razor-Wind-panned SonicBoomProjectile three times with four-frame waits, starts ShakeMon(target,3,0,10,1), creates one animation-2 target hitsplat, then clears monbg/blend",
+        "MOVE_AIR_CUTTER remains unsupported: its shared AIR_WAVE asset is not a reducer because it owns AnimTask_AirCutterProjectile, CUT/gAirCutterSliceSpriteTemplate, dual target and ANIM_DEF_PARTNER ShakeMon2(2,0,8,1), and distinct wait/audio timing without independent dense acceptance",
+        "no reducer, typed seam, compositor, battle logic, RNG, controller, turn order, facility state, boundary list, or unsupported barrier changed; exact requires a source-relative presentation implementation and complete shared-framebuffer equality twice fresh"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-sonic-boom-player-magneton-opponent-onix.json",
+        "tools/battle-lab/mechanic-sonic-boom-opponent-magneton-player-onix.json",
+        "tools/compare/fixtures/sonic-boom-player-magneton-opponent-onix.json",
+        "tools/compare/fixtures/sonic-boom-opponent-magneton-player-onix.json",
+        "tools/compare/sonicBoomProbe.py",
+        "tests/animation/sonicBoomEvidence.test.ts"
+      ],
+      "remaining": "Implement only behind the shared Scene-ON presentation seam: a source-relative Sonic Boom reducer/compositor for the three AIR_WAVE linear translations, target IMPACT, ShakeMon, monbg/split-priority/alpha, audio, and cleanup; then require 52/52 typed-seam and shared-framebuffer equality twice fresh in both orientations. Do not move damage, RNG, script advancement, or controller ownership into animation."
+    },
+    {
       "move": "MOVE_SURF",
       "status": "exact",
       "covered": [

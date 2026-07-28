@@ -1,5 +1,35 @@
 # Animation coverage
 
+## MOVE_SONIC_BOOM complete AIR_WAVE evidence staged; Air Cutter audited (2026-07-28)
+
+**Verdict:** `MOVE_SONIC_BOOM` is staged, not exact. Legal Level-50 Factory
+set-244 `FRONTIER_MON_MAGNETON_1` (Magneton) against ONIX establishes the
+complete source-owned Scene-ON window from its first sourced display through
+first inactive cleanup at **52/52** frames **78–129** player-back and
+**82–133** opponent-front, twice fresh and byte-identical. Full
+evidence/raw-RGB digests are player `9c3e744f…15eff7` /
+`c98fa1b4…a7e38a` and opponent `e66adb5a…ab7ffe3` /
+`f9d02f74…cb576d`.
+
+**Evidence/topology:** `Move_SONIC_BOOM` loads AIR_WAVE and IMPACT, opens
+`ANIM_DEF_PARTNER` monbg with target split priority and 12:8 alpha, calls the
+Razor-Wind-panned `gSonicBoomSpriteTemplate` body three times (each
+16,0→0,0/duration 15 with 4-frame script waits), starts
+`ShakeMon(target,3,0,10,1)`, then creates its animation-2 target IMPACT and
+cleans monbg/blend. Dense portable receipts retain every source offset/wait,
+template/callback/task instance, AIR_WAVE+IMPACT palette tags, target/partner
+OAM ordering, matrices, registers, SE1/SE2+pans, raw RGB/framebuffer, and
+first inactive frame in both orientations. No reducer, seam, renderer, or
+battle/controller state changed.
+
+**Boundary:** `MOVE_AIR_CUTTER` remains unsupported. It shares AIR_WAVE but
+also owns `AnimTask_AirCutterProjectile`, CUT/`gAirCutterSliceSpriteTemplate`,
+both target and `ANIM_DEF_PARTNER` `ShakeMon2(2,0,8,1)` calls, and distinct
+wait/audio timing; it has no independent dense acceptance. Exact Sonic Boom
+still requires a typed presentation seam, source-relative reducer/compositor,
+and complete shared-framebuffer equality twice fresh. Coverage is **68 exact
+/ 0 partial / 2 staged / 206 unsupported**.
+
 ## MOVE_FAKE_TEARS full-window ownership audited; remains staged (2026-07-28)
 
 **Verdict:** `MOVE_FAKE_TEARS` remains staged. Corrected legal set-267
