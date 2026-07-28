@@ -37,6 +37,11 @@ import {
   type SmokescreenEffect,
 } from "./smokescreen.ts";
 import {
+  reversalAtAge,
+  type ReversalResolvedShakeReceipt,
+  type ReversalState,
+} from "./reversal.ts";
+import {
   metallicShineAtAge,
   type MetallicShineState,
 } from "./metallicShine.ts";
@@ -466,6 +471,7 @@ export interface SceneOnPresentationBattler {
     | "SPINDA"
     | "LINOONE"
     | "DELCATTY"
+    | "VIGOROTH"
     | "LICKITUNG"
     | "WEEPINBELL"
     | "MEOWTH"
@@ -1021,6 +1027,22 @@ export interface SceneOnSmokescreenConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnReversalConfig {
+  readonly move: "REVERSAL";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source X_2/Y_PIC_OFFSET anchor for the legal VIGOROTH picture. */
+  readonly attackerPictureOffset: Readonly<{ x: number; y: number }>;
+  /** Source X_2/Y_PIC_OFFSET anchor used by fist and hitsplat commands. */
+  readonly targetPictureOffset: Readonly<{ x: number; y: number }>;
+  /**
+   * Presentation-only receipt resolved by the battle/controller owner.
+   * Reversal never derives power or damage and never advances battle state.
+   */
+  readonly resolvedShake: Readonly<ReversalResolvedShakeReceipt>;
+}
+
 export interface SceneOnSwaggerConfig {
   readonly move: "SWAGGER";
   readonly attacker: SceneOnPresentationBattler;
@@ -1343,6 +1365,7 @@ export type SceneOnMoveConfig =
   | SceneOnSpikeCannonConfig
   | SceneOnSonicBoomConfig
   | SceneOnSmokescreenConfig
+  | SceneOnReversalConfig
   | SceneOnSwaggerConfig
   | SceneOnTauntConfig
   | SceneOnScaryFaceConfig
@@ -1518,6 +1541,13 @@ export interface SceneOnSmokescreenView extends SmokescreenEffect {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnReversalView extends ReversalState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly resolvedShake: Readonly<ReversalResolvedShakeReceipt>;
 }
 
 export interface SceneOnSwaggerView extends SwaggerState {
@@ -2896,6 +2926,30 @@ export function sceneOnSmokescreenView(
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
       state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_REVERSAL's first BLUE_ORB load display. */
+export function sceneOnReversalView(
+  state: SceneOnMovePresentationState<SceneOnReversalConfig>,
+): SceneOnReversalView {
+  if (state.config.move !== "REVERSAL") {
+    throw new Error(
+      `expected REVERSAL presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    resolvedShake: state.config.resolvedShake,
+    ...reversalAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attackerPictureOffset,
+      state.config.targetPictureOffset,
+      state.config.resolvedShake,
     ),
   };
 }

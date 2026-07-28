@@ -547,6 +547,7 @@ import twineedleAsset from "../animation/assets/twineedle.json" with { type: "js
 import spikeCannonAsset from "../animation/assets/spike-cannon.json" with { type: "json" };
 import sonicBoomAsset from "../animation/assets/sonic-boom.json" with { type: "json" };
 import smokescreenAsset from "../animation/assets/smokescreen.json" with { type: "json" };
+import reversalAsset from "../animation/assets/reversal.json" with { type: "json" };
 import tailGlowAsset from "../animation/assets/tail-glow.json" with { type: "json" };
 import dizzyPunchAsset from "../animation/assets/dizzyPunch.json" with { type: "json" };
 import covetAsset from "../animation/assets/covet.json" with { type: "json" };
@@ -699,6 +700,7 @@ import {
   sceneOnSpikeCannonView,
   sceneOnSonicBoomView,
   sceneOnSmokescreenView,
+  sceneOnReversalView,
   sceneOnTailGlowView,
   sceneOnDizzyPunchView,
   sceneOnAstonishView,
@@ -746,6 +748,7 @@ import {
   type SceneOnSpikeCannonConfig,
   type SceneOnSonicBoomConfig,
   type SceneOnSmokescreenConfig,
+  type SceneOnReversalConfig,
   type SceneOnTailGlowConfig,
   type SceneOnDizzyPunchConfig,
   type SceneOnAstonishConfig,
@@ -1067,6 +1070,13 @@ const smokescreenArt = smokescreenAsset as {
   impact: { tileset: Tileset; palette: RgbColor[] };
   koffingBack: { tileset: Tileset; palette: RgbColor[] };
   koffingFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const reversalArt = reversalAsset as {
+  blueOrb: { tileset: Tileset; palette: RgbColor[] };
+  fist: { tileset: Tileset; palette: RgbColor[] };
+  hitsplat: { tileset: Tileset; palette: RgbColor[] };
+  vigorothBack: { tileset: Tileset; palette: RgbColor[] };
+  vigorothFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const tailGlowArt = tailGlowAsset as {
   circleOfLight: { tileset: Tileset; palette: RgbColor[] };
@@ -16493,6 +16503,197 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "BEEDRILL used" : "Foe BEEDRILL used",
       "TWINEEDLE!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "REVERSAL") {
+    const reversalState =
+      state as SceneOnMovePresentationState<SceneOnReversalConfig>;
+    const view = sceneOnReversalView(reversalState);
+    // Palette DMA and BuildOamBuffer consume the preceding software state.
+    const displayed = sceneOnReversalView({
+      ...reversalState,
+      age: view.battlerDisplayAge,
+    });
+    const backgroundPaletteDisplayed = sceneOnReversalView({
+      ...reversalState,
+      age: reversalState.age - 1,
+    });
+    const battlerPaletteDisplayed = sceneOnReversalView({
+      ...reversalState,
+      age: reversalState.age >= 58 && reversalState.age <= 115
+        ? reversalState.age - 2 : reversalState.age - 1,
+    });
+    const targetDisplayed = sceneOnReversalView({
+      ...reversalState,
+      age: reversalState.age - 2,
+    });
+    const playerToOpponent =
+      view.attacker.species === "VIGOROTH"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "DELCATTY"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "VIGOROTH"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "DELCATTY"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged REVERSAL pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const vigorothSource = playerToOpponent
+      ? reversalArt.vigorothBack : reversalArt.vigorothFront;
+    const vigoroth = playerToOpponent
+      ? vigorothSource
+      : {
+          ...vigorothSource,
+          tileset: subTileset(vigorothSource.tileset, 0, 8),
+        };
+    const delcattySource = playerToOpponent
+      ? fakeTearsArt.delcattyFront : fakeTearsArt.delcattyBack;
+    const delcatty = playerToOpponent
+      ? {
+          ...delcattySource,
+          tileset: subTileset(delcattySource.tileset, 0, 8),
+        }
+      : delcattySource;
+    const backgroundBlendTarget =
+      backgroundPaletteDisplayed.paletteBlend?.color === "white"
+      ? { r: 255, g: 255, b: 255 }
+      : { r: 0, g: 0, b: 0 };
+    const battlerBlendTarget =
+      battlerPaletteDisplayed.paletteBlend?.color === "white"
+        ? { r: 255, g: 255, b: 255 }
+        : { r: 0, g: 0, b: 0 };
+    const backgroundCoefficient =
+      backgroundPaletteDisplayed.paletteBlend?.coefficient ?? 0;
+    const battlerCoefficient =
+      battlerPaletteDisplayed.paletteBlend?.coefficient ?? 0;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(
+        battleBg.palette,
+        backgroundBlendTarget,
+        backgroundCoefficient,
+      ),
+    );
+    const battlerPalette = (palette: readonly RgbColor[]) =>
+      blendPaletteToward(palette, battlerBlendTarget, battlerCoefficient);
+    const orbitPainterOrder = (
+      orbs: readonly (typeof displayed.orbs)[number][],
+    ) => orbs.slice().sort(
+      (left, right) =>
+        left.y + left.y2 - (right.y + right.y2)
+        || right.index - left.index,
+    );
+    const behindOrbs = orbitPainterOrder(
+      displayed.orbs.filter((orb) => orb.behindAttacker),
+    );
+    const frontOrbs = orbitPainterOrder(
+      displayed.orbs.filter((orb) => !orb.behindAttacker),
+    );
+    const drawOrb = (orb: (typeof displayed.orbs)[number]) => drawSpriteSheet(
+      fb,
+      subTileset(reversalArt.blueOrb.tileset, 0, 1),
+      reversalArt.blueOrb.palette,
+      orb.x + orb.x2 - 4,
+      orb.y + orb.y2 - 4,
+    );
+    const drawVigoroth = () => drawSpriteSheet(
+      fb,
+      vigoroth.tileset,
+      battlerPalette(vigoroth.palette),
+      view.attacker.geometry.spriteCorner.x + displayed.attackerX2,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawDelcatty = () => drawSpriteSheet(
+      fb,
+      delcatty.tileset,
+      battlerPalette(delcatty.palette),
+      view.target.geometry.spriteCorner.x + targetDisplayed.targetX2,
+      view.target.geometry.spriteCorner.y,
+    );
+    const drawHitEffects = () => {
+      if (displayed.hitsplat) {
+        drawSpriteSheetAffineRotate(
+          fb,
+          reversalArt.hitsplat.tileset,
+          reversalArt.hitsplat.palette,
+          displayed.hitsplat.x,
+          displayed.hitsplat.y,
+          303,
+          0,
+          0,
+          303,
+          undefined,
+          false,
+        );
+      }
+      if (displayed.fist) {
+        drawSpriteSheet(
+          fb,
+          subTileset(reversalArt.fist.tileset, 0, 4),
+          reversalArt.fist.palette,
+          displayed.fist.x - 16,
+          displayed.fist.y - 16,
+        );
+      }
+    };
+    if (playerToOpponent) {
+      drawDelcatty();
+      for (const orb of behindOrbs) drawOrb(orb);
+      drawVigoroth();
+      for (const orb of frontOrbs) drawOrb(orb);
+      drawHitEffects();
+    } else {
+      for (const orb of behindOrbs) drawOrb(orb);
+      drawVigoroth();
+      for (const orb of frontOrbs) drawOrb(orb);
+      drawDelcatty();
+      drawHitEffects();
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "DELCATTY" : "VIGOROTH",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "VIGOROTH" : "DELCATTY",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "VIGOROTH used" : "Foe VIGOROTH used",
+      "REVERSAL!",
       99,
     );
     return;

@@ -1,5 +1,34 @@
 # Animation coverage
 
+## MOVE_REVERSAL promoted exact; complete BLUE_ORB body closed (2026-07-28)
+
+**Verdict:** `MOVE_REVERSAL` is exact. The legally corrected challenge-2
+Vigoroth→Delcatty parties pass the complete Scene-ON source body through first
+inactive cleanup at **174/174** source/component, typed-seam, hardware, audio,
+raw-RGB, and shared-framebuffer frames **451–624** player-back and **404–577**
+opponent-front, twice fresh. Evidence/raw-RGB digests are player
+`f4f3dce7…d5b3a0c` / `1a761bb0…4ccb621` and opponent
+`11937052…1d82877` / `0f284e09…b7623e1`.
+
+**Model/evidence:** the pure source-relative reducer ports BLUE_ORB,
+HANDS_AND_FEET, and IMPACT loads/frees; Detect/Reversal/Vital Throw audio;
+both complex-palette-blend lifecycles and BlendColorCycle; exactly six
+26-frame grow/shrink ReversalOrb callbacks; delays/waits, HorizontalLunge,
+fist, basic hitsplat, receipt-driven target shake, and cleanup. The typed seam
+accepts only an already-resolved shake amplitude and never reads power,
+damage, or battle state. Source extraction pins Vigoroth front/back and
+BLUE_ORB art; tests prove literal HANDS/IMPACT byte identity before reuse.
+The portable verifier proves source state, software/hardware OAM, affine
+matrices, tagged palettes, registers, both audio players/pans, raw RGB, typed
+seam, and application framebuffer on every frame.
+
+**Boundary:** `MOVE_SWALLOW` remains unsupported. Its BLUE_STAR,
+move-turn-dependent one/two/three five-orb waves, deform/shake, and
+HealingEffect require independent dense acceptance. No battle logic, damage
+calculation, RNG, controller, turn order, round/facility state, boundary list,
+unsupported barrier, or sibling status changed. Coverage is **72 exact / 0
+partial / 0 staged / 204 unsupported**.
+
 ## MOVE_FAKE_TEARS promoted exact; resolved stat-drop window closed (2026-07-28)
 
 **Verdict:** `MOVE_FAKE_TEARS` is exact. Corrected legal Level-50 Factory

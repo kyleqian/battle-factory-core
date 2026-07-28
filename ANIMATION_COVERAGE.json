@@ -2,6 +2,35 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_REVERSAL",
+      "status": "exact",
+      "covered": [
+        "fresh legally corrected challenge-2 VIGOROTH/DELCATTY Scene-ON parties pass the complete source body through first inactive cleanup at 174/174 source/component, typed-seam, software/hardware OAM, matrices, palettes, registers, both audio players and pans, raw-RGB, and shared-framebuffer frames 451-624 player-back and 404-577 opponent-front, twice fresh; stable player receipts are evidence f4f3dce725b38c7f857a76e6a8d890e983c680ca6032dcfaee5553f7cd5b3a0c / RGB 1a761bb08df97ee8b7732f58a46d6da5c249ea2a74495052e6ffabcd54ccb621 and opponent receipts are evidence 11937052c0e51f13725fbb42723c88d758979c38727e1deddf4a3686c1d82877 / RGB 0f284e09df395d32a63702ebe3ab349b5edec829345a87b6ca92990dbb7623e1",
+        "the pure source-relative reducer ports BLUE_ORB, HANDS_AND_FEET, and IMPACT load/free lifecycles, Detect/Reversal/Vital Throw audio, both complex palette-blend lifecycles, BlendColorCycle, exactly six 26-frame grow/shrink gReversalOrbSpriteTemplate callbacks, delays/waits, HorizontalLunge, fist, basic hitsplat, receipt-driven AnimTask_ShakeTargetBasedOnMovePowerOrDmg, and first inactive cleanup",
+        "the typed Scene-ON seam accepts only an already-resolved shake-amplitude receipt and never calculates power or damage; the shared compositor uses reproducibly extracted Vigoroth front/back and BLUE_ORB art plus byte-proved literal HANDS/IMPACT reuse and matches all 174 raw framebuffers without absolute ticks, input delays, coordinate/RGB fitting, pixel exceptions, or canonical recording imports",
+        "reversalPortable.ts runs the v2 probe through tools/run-mgba-probe.py and verifies reducer/component state, source activity, typed seam, software/hardware OAM, affine matrices, tagged palettes, registers, both audio players and pans, raw RGB, and application framebuffer twice fresh in both orientations",
+        "MOVE_SWALLOW remains unsupported because it adds BLUE_STAR, move-turn-dependent one/two/three five-orb waves, attacker deform/shake, and HealingEffect without independent dense acceptance",
+        "no battle logic, damage calculation, RNG, controller, turn order, round/facility state, boundary list, unsupported barrier, or sibling status changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-reversal-player-vigoroth-opponent-delcatty.json",
+        "tools/battle-lab/mechanic-reversal-player-delcatty-opponent-vigoroth.json",
+        "tools/compare/fixtures/reversal-player-vigoroth-opponent-delcatty.json",
+        "tools/compare/fixtures/reversal-player-delcatty-opponent-vigoroth.json",
+        "tools/compare/reversalProbe.py",
+        "tools/compare/reversalEvidence.ts",
+        "tools/compare/reversalPortable.ts",
+        "tools/compare/extractReversalAssets.ts",
+        "src/animation/assets/reversal.json",
+        "src/animation/reversal.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/blueOrbSourceAudit.test.ts",
+        "tests/animation/reversalAssets.test.ts",
+        "tests/animation/reversal.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_SONIC_BOOM",
       "status": "exact",
       "covered": [
@@ -1800,7 +1829,7 @@
         "MOVE_REVERSAL",
         "MOVE_SWALLOW"
       ],
-      "goal": "Evidence-only, with no coverage promotion: legally corrected challenge-2 complete parties [326,327,328] versus [267,268,269] and the reverse prove every currentMove=179 frame through first inactive cleanup twice fresh. Emerald internal set/species identities are VIGOROTH/LUNATONE/SOLROCK 365/348/349 and DELCATTY/SABLEYE/LICKITUNG 316/322/108; 302 is NINJASK and is rejected. Player Vigoroth receipts cover 211/211 current-move frames 414-624 and source frames 451-624; opponent Vigoroth covers 215/215 frames 363-577 and source frames 404-577. The portable v2 receipt proves source offsets/waits, both complex palette-blend lifecycles, BlendColorCycle, Detect/Reversal/Vital Throw audio, six ReversalOrb lifecycles/callbacks, lunge/fist/impact, power/damage shake, software+hardware OAM/matrices/palettes/registers, raw RGB, and cleanup. MOVE_REVERSAL remains unsupported until a genuine reducer/assets/typed-seam/shared-framebuffer contract passes the same complete window; MOVE_SWALLOW remains independently unsupported because it adds BLUE_STAR, move-turn-dependent five-orb waves, attacker deform/shake, and HealingEffect."
+      "goal": "MOVE_REVERSAL independently proves its complete 174-frame source body through first inactive cleanup at 174/174 source/component, typed-seam, software/hardware OAM, matrices, palettes, registers, both audio players and pans, raw-RGB, and shared-framebuffer frames 451-624 player-back and 404-577 opponent-front, twice fresh. Its pure reducer and shared compositor port the three load/free lifecycles, both complex palette blends, BlendColorCycle, exactly six ReversalOrb callbacks, delays/waits, lunge/fist/basic hitsplat, and the already-resolved receipt-driven shake without calculating damage or touching battle state. MOVE_SWALLOW remains independently unsupported because it adds BLUE_STAR, move-turn-dependent one/two/three five-orb waves, attacker deform/shake, and HealingEffect."
     },
     {
       "id": "blue-light-wall-reflect",
