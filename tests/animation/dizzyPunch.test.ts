@@ -8,6 +8,10 @@ import {
   DIZZY_PUNCH_LAST_BODY_AGE,
   dizzyPunchAtAge,
 } from "../../src/animation/dizzyPunch.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnDizzyPunchView,
+} from "../../src/animation/sceneOnPresentation.ts";
 
 describe("MOVE_DIZZY_PUNCH source-relative checkpoint", () => {
   const player = (age: number) =>
@@ -71,6 +75,45 @@ describe("MOVE_DIZZY_PUNCH source-relative checkpoint", () => {
     });
     expect(DIZZY_PUNCH_LAST_BODY_AGE).toBe(69);
     expect(player(70).active).toBe(false);
+  });
+
+  it("exposes only relative age and geometry through the typed seam", () => {
+    const stage = createSceneOnMovePresentation({
+      move: "DIZZY_PUNCH",
+      attacker: {
+        species: "SPINDA",
+        geometry: {
+          side: "player",
+          spriteCorner: { x: 40, y: 56 },
+          animationCenter: { x: 72, y: 88 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "ONIX",
+        geometry: {
+          side: "opponent",
+          spriteCorner: { x: 144, y: 10 },
+          animationCenter: { x: 176, y: 42 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      fieldProfile: {
+        playerHp: 167,
+        playerMaxHp: 167,
+        opponentHp: 110,
+        opponentMaxHp: 110,
+      },
+    });
+    expect(sceneOnDizzyPunchView({ ...stage, age: 28 })).toMatchObject({
+      age: 28,
+      attacker: { species: "SPINDA" },
+      target: { species: "ONIX" },
+      ducks: expect.arrayContaining([
+        expect.objectContaining({ wave: 1, x: 160, y: 34 }),
+      ]),
+      sound: "SE_M_VITAL_THROW2",
+    });
   });
 
   it("pins the legal set-145 carrier and source sprite art", () => {

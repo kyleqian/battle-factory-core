@@ -232,6 +232,10 @@ import {
   type DynamicPunchState,
 } from "./dynamicPunch.ts";
 import {
+  dizzyPunchAtAge,
+  type DizzyPunchState,
+} from "./dizzyPunch.ts";
+import {
   razorLeafAtAge,
   type RazorLeafState,
 } from "./razorLeaf.ts";
@@ -412,6 +416,7 @@ export interface SceneOnPresentationBattler {
     | "SHUCKLE"
     | "GLALIE"
     | "HITMONCHAN"
+    | "SPINDA"
     | "WEEPINBELL"
     | "MEOWTH"
     | "BEEDRILL";
@@ -1011,6 +1016,13 @@ export interface SceneOnDynamicPunchConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnDizzyPunchConfig {
+  readonly move: "DIZZY_PUNCH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnRazorLeafConfig {
   readonly move: "RAZOR_LEAF";
   readonly attacker: SceneOnPresentationBattler;
@@ -1167,6 +1179,7 @@ export type SceneOnMoveConfig =
   | SceneOnSelfDestructConfig
   | SceneOnExplosionConfig
   | SceneOnDynamicPunchConfig
+  | SceneOnDizzyPunchConfig
   | SceneOnRazorLeafConfig
   | SceneOnPoisonTailConfig
   | SceneOnToxicConfig
@@ -1202,6 +1215,8 @@ export interface SceneOnMovePresentationState<
 
 export type SceneOnDynamicPunchPresentationState =
   SceneOnMovePresentationState<SceneOnDynamicPunchConfig>;
+export type SceneOnDizzyPunchPresentationState =
+  SceneOnMovePresentationState<SceneOnDizzyPunchConfig>;
 export type SceneOnRazorLeafPresentationState =
   SceneOnMovePresentationState<SceneOnRazorLeafConfig>;
 export type SceneOnTauntPresentationState =
@@ -1338,6 +1353,12 @@ export interface SceneOnExplosionView extends ExplosionState {
 }
 
 export interface SceneOnDynamicPunchView extends DynamicPunchState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnDizzyPunchView extends DizzyPunchState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2720,6 +2741,27 @@ export function sceneOnDynamicPunchView(
       state.config.attacker.geometry.side,
       state.config.target.geometry.animationCenter,
       state.config.target.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first displayed callback of the first horizontal lunge. */
+export function sceneOnDizzyPunchView(
+  state: SceneOnMovePresentationState,
+): SceneOnDizzyPunchView {
+  if (state.config.move !== "DIZZY_PUNCH") {
+    throw new Error(
+      `expected DIZZY_PUNCH presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...dizzyPunchAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.animationCenter,
     ),
   };
 }
