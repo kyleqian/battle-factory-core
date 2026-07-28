@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // CHARM closes its full source/typed component seam as partial.
+        // CHARM closes its full shared compositor and teardown seam as exact.
         unsupported: 222,
         staged: 0,
-        partial: 4,
-        exact: 50,
+        partial: 3,
+        exact: 51,
       },
       {
         tier: "openOnly",

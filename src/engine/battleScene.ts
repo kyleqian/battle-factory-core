@@ -551,6 +551,7 @@ import poisonFangAsset from "../animation/assets/poisonFang.json" with { type: "
 import hyperFangAsset from "../animation/assets/hyperFang.json" with { type: "json" };
 import swaggerAsset from "../animation/assets/swagger.json" with { type: "json" };
 import tauntAsset from "../animation/assets/taunt.json" with { type: "json" };
+import charmAsset from "../animation/assets/charm.json" with { type: "json" };
 import selfDestructAsset from "../animation/assets/selfDestruct.json" with { type: "json" };
 import explosionAsset from "../animation/assets/explosion.json" with { type: "json" };
 import dynamicPunchAsset from "../animation/assets/dynamicPunch.json" with { type: "json" };
@@ -685,6 +686,7 @@ import {
   sceneOnShadowBallView,
   sceneOnEncoreView,
   sceneOnSparkView,
+  sceneOnCharmView,
   sceneOnDragonClawView,
   sceneOnSingView,
   sceneOnFutureSightView,
@@ -693,6 +695,7 @@ import {
   sceneOnKnockOffView,
   type SceneOnMovePresentationState,
   type SceneOnSparkPresentationState,
+  type SceneOnCharmPresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
   extremeSpeedBackgroundVariant,
@@ -1095,6 +1098,9 @@ const spark2Art = battleAnimSpark2Asset as {
     list: number[][][];
   };
   palette: RgbColor[];
+};
+const charmArt = charmAsset as {
+  magentaHeart: { tileset: Tileset; palette: RgbColor[] };
 };
 const dragonClawArt = dragonClawAsset as {
   smallEmber: { tileset: Tileset; palette: RgbColor[] };
@@ -16117,6 +16123,119 @@ export function renderSceneOnMovePresentation(
       playerToOpponent ? "MINUN used" : "Foe MINUN used",
       "SPARK!",
       99,
+    );
+    return;
+  }
+
+  if (state.config.move === "CHARM") {
+    const charmState = state as SceneOnCharmPresentationState;
+    const view = sceneOnCharmView(charmState);
+    const displayed = sceneOnCharmView({ ...charmState, age: charmState.age - 1 });
+    // Battler-task writes reach this captured framebuffer one display later
+    // than ordinary effect-sprite software OAM.
+    const displayedRock = sceneOnCharmView({
+      ...charmState, age: charmState.age - 2,
+    }).rock;
+    const playerToOpponent =
+      view.attacker.species === "MINUN"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MINUN"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged CHARM pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const minunSource = playerToOpponent
+      ? encoreArt.minunBack : encoreArt.minunFront;
+    const minun = playerToOpponent
+      ? minunSource
+      : { ...minunSource, tileset: subTileset(minunSource.tileset, 0, 8) };
+    const shuckle = playerToOpponent
+      ? {
+          ...selfDestructArt.shuckleFront,
+          tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
+        }
+      : selfDestructArt.shuckleBack;
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+
+    type CharmPainterItem = {
+      priority: number; subpriority: number; top: number; slot: number;
+      draw: () => void;
+    };
+    const items: CharmPainterItem[] = [];
+    const attackerSlot = playerToOpponent ? 13 : 15;
+    const targetSlot = playerToOpponent ? 15 : 10;
+    items.push({
+      priority: 2,
+      subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
+      top: view.attacker.geometry.spriteCorner.y + displayedRock.y2,
+      slot: attackerSlot,
+      draw: () => drawSpriteSheetAffineRotate(
+        fb, minun.tileset, minun.palette,
+        view.attacker.geometry.animationCenter.x + displayedRock.x2,
+        view.attacker.geometry.animationCenter.y + displayedRock.y2,
+        displayedRock.matrix.a, displayedRock.matrix.b,
+        displayedRock.matrix.c, displayedRock.matrix.d,
+        undefined, false,
+      ),
+    }, {
+      priority: 2,
+      subpriority: view.target.geometry.side === "player" ? 30 : 40,
+      top: view.target.geometry.spriteCorner.y,
+      slot: targetSlot,
+      draw: () => drawSpriteSheet(
+        fb, shuckle.tileset, shuckle.palette,
+        view.target.geometry.spriteCorner.x, view.target.geometry.spriteCorner.y,
+      ),
+    });
+    for (const heart of displayed.hearts) {
+      items.push({
+        priority: 1,
+        subpriority: view.attacker.geometry.side === "player" ? 31 : 41,
+        top: heart.y + heart.y2 - 8,
+        slot: heart.slot,
+        draw: () => drawSpriteSheet(
+          fb, charmArt.magentaHeart.tileset, charmArt.magentaHeart.palette,
+          heart.x + heart.x2 - 8, heart.y + heart.y2 - 8,
+        ),
+      });
+    }
+    items.sort((a, b) =>
+      b.priority - a.priority || b.subpriority - a.subpriority
+      || a.top - b.top || b.slot - a.slot);
+    for (const item of items) item.draw();
+
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "MINUN",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "MINUN" : "SHUCKLE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb, playerToOpponent ? "MINUN used" : "Foe MINUN used", "CHARM!", 99,
     );
     return;
   }

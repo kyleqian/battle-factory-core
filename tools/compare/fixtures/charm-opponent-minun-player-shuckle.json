@@ -1,7 +1,14 @@
 {
-  "schema": "charm-portable-fixture/v1",
+  "schema": "scene-on-portable-component/v1",
+  "oracleProfile": "battle-scene-on",
   "scenario": "tools/battle-lab/mechanic-charm-opponent-minun-player-shuckle.json",
   "probe": "tools/compare/charmProbe.py",
-  "attackerSide": "opponent",
-  "attackerCenter": {"x": 176, "y": 40}
+  "pair": "MINUN (opponent-front) -> SHUCKLE (player-back)",
+  "move": "CHARM",
+  "orientation": "opponent-to-player",
+  "sourceVisualWindow": {"startFrame": 76, "endFrame": 168},
+  "appStage": {"presentationAge": 0},
+  "attacker": {"species":"MINUN","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":20},"animationCenter":{"x":176,"y":52},"battlePositionCenter":{"x":176,"y":40}}},
+  "target": {"species":"SHUCKLE","geometry":{"side":"player","spriteCorner":{"x":40,"y":59},"animationCenter":{"x":72,"y":91},"battlePositionCenter":{"x":72,"y":80}}},
+  "fieldProfile": {"playerHp":127,"playerMaxHp":127,"opponentHp":167,"opponentMaxHp":167,"playerGender":"male","opponentGender":"female"}
 }

@@ -17,6 +17,7 @@ import {
   sceneOnCharmView,
   type SceneOnPresentationBattler,
 } from "../../src/animation/sceneOnPresentation.ts";
+import { createInitialState, render } from "../../src/engine/core.ts";
 
 const player = { x: 72, y: 80 };
 const opponent = { x: 176, y: 40 };
@@ -127,5 +128,36 @@ describe("MOVE_CHARM typed presentation seam", () => {
       ...stage,
       config: { ...stage.config, move: "SPARK" } as never,
     })).toThrow("expected CHARM presentation");
+  });
+
+  it("renders both exact MINUN/SHUCKLE orientations through the shared seam", () => {
+    for (const side of ["player", "opponent"] as const) {
+      const stage = createSceneOnMovePresentation({
+        move: "CHARM",
+        attacker: battler("MINUN", side),
+        target: battler("SHUCKLE", side === "player" ? "opponent" : "player"),
+        fieldProfile: side === "player"
+          ? {
+              playerHp: 167, playerMaxHp: 167,
+              opponentHp: 127, opponentMaxHp: 127,
+            }
+          : {
+              playerHp: 127, playerMaxHp: 127,
+              opponentHp: 167, opponentMaxHp: 167,
+            },
+      });
+      const first = render({
+        ...createInitialState(),
+        rngMode: "frontierBattle",
+        sceneOnPresentation: { ...stage, age: 0 },
+      });
+      const heart = render({
+        ...createInitialState(),
+        rngMode: "frontierBattle",
+        sceneOnPresentation: { ...stage, age: 34 },
+      });
+      expect(first).toHaveLength(240 * 160 * 4);
+      expect(heart).not.toEqual(first);
+    }
   });
 });

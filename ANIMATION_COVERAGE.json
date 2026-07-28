@@ -3,12 +3,14 @@
   "entries": [
     {
       "move": "MOVE_CHARM",
-      "status": "partial",
+      "status": "exact",
       "covered": [
         "complete legal Level-50 Scene-ON mechanicLab parties stage MINUN, the real challenge-0 Factory set-187 CHARM carrier, in both player-back and opponent-front orientations; every active MINUN choice is CHARM and slower SHUCKLE is constrained to TACKLE",
         "the stock ROM reaches current move 204 and cleanly separates the move-owned body from the later generic stat-stage presentation: player-back frames 72-164 and opponent-front 76-168 are 93/93 complete source-component and typed relative-seam frames, followed by four zero-task frames before the stat task starts",
         "the source reducer ports literal AnimTask_RockMonBackAndForth(attacker,2,0), including side-signed x2/rotation, affine matrix, pivot y2, two 32-callback cycles and reset; all three gMagentaHeartSpriteTemplate instances at script x 0/-20/+20 and y 20, their observed 17-display creation cadence, 60-callback lifetime, sine rise, software slot/order and teardown; and three attacker-pan SE_M_CHARM restart boundaries",
-        "ANIM_TAG_MAGENTA_HEART regenerates byte-for-byte from pinned source; exact SPARK MINUN and SHUCKLE field assets are cited for future display composition rather than duplicated",
+        "ANIM_TAG_MAGENTA_HEART regenerates byte-for-byte from pinned source; the narrow shared compositor reuses the already-exact SPARK MINUN/SHUCKLE field assets and matches all 93 body frames plus four clear teardown frames in both orientations twice fresh",
+        "every body frame pins software task/sprite identity, slot, order and callback state; hardware OAM/order/matrices/flags; palette buffers/tag lifetime; audio header/pan/terminal absence; raw RGB digest; and the shared framebuffer, with no excluded body frames",
+        "the move boundary proves zero visual/sound tasks, zero heart software/hardware OAM, reset attacker offsets/matrix, freed MAGENTA_HEART palette tag, and four clear frames before the separately-owned generic stat task",
         "COVET source audit confirms the complete CHARM prefix is literal and then adds a target ShakeMon2 plus Dizzy Punch loop, so COVET remains unsupported without independent complete dense move acceptance; FAKE TEARS and TICKLE use materially different RockMonBackAndForth arguments and distinct bodies and also remain unsupported"
       ],
       "evidence": [
@@ -22,9 +24,9 @@
         "src/animation/assets/charm.json",
         "src/animation/charm.ts",
         "src/animation/sceneOnPresentation.ts",
-        "tests/animation/charm.test.ts"
-      ],
-      "remaining": "Add the narrow CHARM compositor through battleScene.ts using the already-exact SPARK MINUN/SHUCKLE field assets and generated MagentaHeart art, then require all 93 body frames in both orientations twice fresh for hardware OAM/matrix/palette/audio, raw RGB, and the shared framebuffer with no exclusions. Preserve SPARK's 115/115 body plus 2/2 cleanup exact control in both orientations. The generic stat-stage animation begins only after four clear frames and remains outside CHARM acceptance."
+        "tests/animation/charm.test.ts",
+        "src/engine/battleScene.ts"
+      ]
     },
     {
       "move": "MOVE_SPARK",

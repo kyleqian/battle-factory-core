@@ -1060,6 +1060,7 @@ export type SceneOnMoveConfig =
   | SceneOnSwaggerConfig
   | SceneOnTauntConfig
   | SceneOnSparkConfig
+  | SceneOnCharmConfig
   | SceneOnSelfDestructConfig
   | SceneOnExplosionConfig
   | SceneOnDynamicPunchConfig
@@ -1079,7 +1080,7 @@ export type SceneOnMoveConfig =
   | SceneOnKnockOffConfig;
 
 export interface SceneOnMovePresentationState<
-  TConfig extends SceneOnMoveConfig | SceneOnCharmConfig = SceneOnMoveConfig,
+  TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
 > {
   readonly age: number;
   readonly config: TConfig;
