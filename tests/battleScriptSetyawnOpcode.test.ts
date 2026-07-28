@@ -11,7 +11,11 @@ import {
   loadBattleScriptProgram,
   resolveBattleScriptLabel,
 } from "../src/engine/battleScriptProgram.ts";
-import { stepBattleScriptMachine } from "../src/engine/battleScriptMachine.ts";
+import {
+  acknowledgeBattleScriptMachineController,
+  stepBattleScriptMachine,
+  type BattleScriptMachineState,
+} from "../src/engine/battleScriptMachine.ts";
 
 const program = loadBattleScriptProgram();
 
@@ -141,7 +145,69 @@ function runUntilLabel(
   return { execution, result, steps };
 }
 
+function ackAllPending(
+  state: BattleScriptMachineState<BattleScriptRulesContext>,
+): BattleScriptMachineState<BattleScriptRulesContext> {
+  let next = state;
+  for (const battlerId of state.scheduler.pendingControllerBattlers) {
+    next = acknowledgeBattleScriptMachineController(next, battlerId);
+  }
+  return next;
+}
+
+function runToTerminal(rulesContext: BattleScriptRulesContext) {
+  const execution = createBattleScriptStatusRulesExecution(
+    program,
+    "BattleScript_EffectYawn",
+    rulesContext,
+    1,
+    externalPorts(),
+  );
+  let result = stepBattleScriptMachine(program, execution.state, execution.handlers);
+  let steps = 1;
+  while (result.kind !== "halted" && steps < 1000) {
+    result = stepBattleScriptMachine(program, ackAllPending(result.state), execution.handlers);
+    steps++;
+  }
+  if (result.kind !== "halted") throw new Error(`Yawn did not reach END after ${steps} steps`);
+  expect(result.state.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
+  return result;
+}
+
 describe("Yawn setter (BattleScript_EffectYawn / Cmd_setyawn, docs/yawn-thrash-endturn-design.md §1a)", () => {
+  it("ordinary landing executes the complete first stage through its drowsy message and END; end-turn tests pin the second-stage countdown/sleep transition", () => {
+    const result = runToTerminal(context());
+    expect(result.state.rulesContext.battlers[1]!.status3).toBe(STATUS3_YAWN_TURN_2);
+    expect(result.state.events).toEqual(expect.arrayContaining([
+      expect.objectContaining({ kind: "message", messageId: "STRINGID_PKMNWASMADEDROWSY" }),
+    ]));
+    expect(result.state.rng.calls).toBe(0);
+  });
+
+  it("ability gate executes sBATTLER <- sBATTLER_WITH_ABILITY and emits the ability-holder message through END", () => {
+    const rc = context(
+      {},
+      { scriptingBattler: 3, battlerWithAbility: 2 },
+      { ability: ABILITY_INSOMNIA },
+    );
+    const result = runToTerminal(rc);
+    expect(result.state.rulesContext.battlerWithAbility).toBe(1);
+    expect(result.state.rulesContext.scriptingBattler).toBe(1);
+    expect(result.state.events).toEqual(expect.arrayContaining([
+      expect.objectContaining({ kind: "message", messageId: "STRINGID_PKMNSXMADEITINEFFECTIVE" }),
+    ]));
+    expect(result.state.rng.calls).toBe(0);
+  });
+
+  it("canonical replay preserves both Yawn stages' first-stage state/events and its zero-draw ledger", () => {
+    const rc = context();
+    const first = runToTerminal(rc).state;
+    const replay = runToTerminal(rc).state;
+    expect(replay.rulesContext).toEqual(first.rulesContext);
+    expect(replay.events).toEqual(first.events);
+    expect(replay.rng).toEqual(first.rng);
+  });
+
   it("ordinary landing: setyawn sets STATUS3_YAWN_TURN(2), reaches BattleScript_MoveEnd, zero RNG (Yawn's own accuracycheck uses NO_ACC_CALC_CHECK_LOCK_ON, which never rolls -- battle_script_commands.c:1103-1113)", () => {
     const rc = context();
     const { result } = runUntilLabel("BattleScript_EffectYawn", "BattleScript_MoveEnd", rc);

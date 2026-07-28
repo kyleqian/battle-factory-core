@@ -277,6 +277,11 @@ const B_MSG_STATUS_HAD_NO_EFFECT = 2;
 
 /** printfromtable's registered small constant tables, each indexed by MULTISTRING_CHOOSER. */
 const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Object.freeze({
+  /** battle_message.c:1084-1088 -- sleep's ordinary/ability-caused selectors. */
+  gFellAsleepStringIds: Object.freeze([
+    "STRINGID_PKMNFELLASLEEP",
+    "STRINGID_PKMNMADESLEEP",
+  ]),
   /** battle_message.c:1132-1139 -- Heal Bell's four Soundproof selectors plus Aromatherapy. */
   gPartyStatusHealStringIds: Object.freeze([
     "STRINGID_BELLCHIMED",

@@ -15,9 +15,9 @@
  * COPYARRAY/JUMPIFABILITY/MANIPULATEDAMAGE are generic multi-site opcodes
  * (16/18/4 concrete call sites across the whole committed program, one
  * shared opcodeId each) -- only the exact operand tuple this doc's own
- * scope needs is modeled; every other concrete call site (Triple Kick's
- * counter, Bide's damage store, Pain Split, the many other
- * jumpifability-gated ability preventions, Recoil/Beat Up's own damage
+ * scope needs is modeled; every other concrete call site (Bide's damage
+ * store, Pain Split, remaining jumpifability-gated ability preventions,
+ * Beat Up's own damage
  * manipulation, ...) is a single named (b) barrier, the same policy
  * `battleScriptDamagingWeatherOpcode.ts`'s ADDBYTE/BICWORD/
  * JUMPIFARRAYNOTEQUAL handlers already established.
@@ -148,8 +148,9 @@ function createSetseededHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCo
  * write/read it through Cmd_damagecalc.
  * Curse's `copybyte gBattlerTarget, gBattlerAttacker` is also a direct
  * selector-role assignment and is modeled without inventing a byte-address
- * layer. Every other concrete call site (Pain Split, Bide, ability-immunity
- * messages, ...) remains the single named barrier below.
+ * layer. The status-prevention and Yawn message-selector tuples are likewise
+ * direct role assignments. Every other concrete call site (Pain Split,
+ * Bide, ...) remains the single named barrier below.
  */
 function createCopyarrayHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
@@ -212,6 +213,42 @@ function createCopyarrayHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCo
       const nextRulesContext = Object.freeze({
         ...rulesContext,
         selectorRoles: Object.freeze({ ...rulesContext.selectorRoles, target: attacker }),
+      });
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: nextRulesContext },
+      );
+    }
+    /**
+     * The Poison/Toxic/Paralysis ability-prevention scripts assign their
+     * target to gEffectBattler before entering the shared status-prevention
+     * message callback (`battle_scripts_1.s:715,1035`).
+     */
+    if (size === "0x1" && dst === "gEffectBattler" && src === "gBattlerTarget") {
+      const target = rulesContext.selectorRoles.target;
+      if (target === null) {
+        throw new Error("Cmd_copyarray: gEffectBattler<-gBattlerTarget requires a target role");
+      }
+      const nextRulesContext = Object.freeze({
+        ...rulesContext,
+        selectorRoles: Object.freeze({ ...rulesContext.selectorRoles, effectBattler: target }),
+      });
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: nextRulesContext },
+      );
+    }
+    /**
+     * Yawn's Insomnia/Vital Spirit callback copies the battler recorded by
+     * Cmd_jumpifability into gBattleScripting.battler for its ability-holder
+     * message (`battle_scripts_1.s:2468-2472`).
+     */
+    if (size === "0x1" && dst === "sBATTLER" && src === "sBATTLER_WITH_ABILITY") {
+      const nextRulesContext = Object.freeze({
+        ...rulesContext,
+        scriptingBattler: rulesContext.battlerWithAbility,
       });
       return transitionBattleScriptCommand(
         context,
@@ -307,10 +344,10 @@ export const JUMPIFABILITY_SUPPORTED_ABILITY_NAMES: ReadonlySet<string> = new Se
  * Leech Seed, Immunity/Limber/Own Tempo for the primary status-move cluster,
  * Vital Spirit/Insomnia for Yawn, Suction Cups for Roar per
  * docs/roar-multihit-registration-scout.md §4 rung 1, and Rock Head for the
- * shared recoil script). `RecordAbilityBattle`/
- * `gBattleScripting.battlerWithAbility` are the same untracked AI-history
- * bookkeeping `Cmd_cleareffectsonfaint`'s own doc comment already established
- * has no reader in this engine's scope.
+ * shared recoil script). `RecordAbilityBattle` remains untracked AI-history
+ * bookkeeping. The source's `gBattleScripting.battlerWithAbility` write is
+ * materialized because Yawn's ability-message callback copies it to
+ * `sBATTLER`.
  */
 function createJumpifabilityHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
@@ -340,7 +377,11 @@ function createJumpifabilityHandler(): BattleScriptOpcodeHandler<BattleScriptRul
     }
     const target = resolveBattleScriptLabel(context.program, jumpOperand!.expression);
     if (!target) throw new Error(`Cmd_jumpifability: unresolved jump target ${jumpOperand!.expression}`);
-    const nextRulesContext = Object.freeze({ ...rulesContext, lastUsedAbility: abilityId });
+    const nextRulesContext = Object.freeze({
+      ...rulesContext,
+      lastUsedAbility: abilityId,
+      battlerWithAbility: battler,
+    });
     return transitionBattleScriptCommand(
       context,
       Object.freeze({ kind: "jump", programCounter: target.programCounter }),

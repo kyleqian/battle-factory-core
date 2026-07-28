@@ -88,6 +88,7 @@ function input(
     ],
     selectorRoles: changes.selectorRoles ?? { attacker: 3, effectBattler: 1 },
     scriptingBattler: changes.scriptingBattler ?? 0,
+    battlerWithAbility: changes.battlerWithAbility ?? 0,
     atkCancelerTracker: changes.atkCancelerTracker ?? 0,
     battleOutcome: changes.battleOutcome ?? 0,
     currentMove: changes.currentMove ?? 92,
@@ -183,6 +184,7 @@ describe("source-shaped Battle Script rules context", () => {
       "battleTextBuff1MonNick",
       "battleTopology",
       "battlerByTurnOrder",
+      "battlerWithAbility",
       "battlers",
       "bideDmg",
       "bideTarget",
@@ -262,6 +264,7 @@ describe("source-shaped Battle Script rules context", () => {
     expect(created.battlers.every(Object.isFrozen)).toBe(true);
     expect(created.battlers.every((value) => Object.isFrozen(value.pp))).toBe(true);
     expect(created.battlers[0]).not.toBe(source.battlers[0]);
+    expect(created.battlerWithAbility).toBe(0);
   });
 
   it("rejects malformed battler arrays, source widths, counters, and invalid roles", () => {
@@ -279,6 +282,7 @@ describe("source-shaped Battle Script rules context", () => {
       { gBattleEnvironment: -1 },
       { gBattleEnvironment: 256 },
       { lastUsedAbility: 256 },
+      { battlerWithAbility: 4 as BattleScriptBattlerId },
       { moveResultFlags: 256 },
       { dmgMultiplier: -1 },
       { critMultiplier: 256 },

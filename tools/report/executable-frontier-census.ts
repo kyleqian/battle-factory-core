@@ -1025,26 +1025,13 @@ const validationChecks: Array<() => void> = [
   () => requireExecutable("EFFECT_BURN_HIT"),
   () => requireExecutable("EFFECT_FREEZE_HIT"),
   () => requireExecutable("EFFECT_PARALYZE_HIT"),
-  // Primary status-move opcode cluster registration
-  // (docs/status-cluster-ground-truth.md): the opcodes are all registered,
-  // but the source-selected SetMoveEffect callbacks expose two further live
-  // operand barriers. Keep those exact mechanical findings pinned instead
-  // of preserving the former opcode-only false positives.
-  () => requireExactMechanicalBlockers("EFFECT_SLEEP", [
-    "Operand gate: B_SCR_OP_PRINTFROMTABLE(gFellAsleepStringIds)",
-  ]),
-  () => requireExactMechanicalBlockers("EFFECT_TOXIC", [
-    "Operand gate: B_SCR_OP_COPYARRAY(gEffectBattler, gBattlerTarget, 0x1)",
-  ]),
-  () => requireExactMechanicalBlockers("EFFECT_POISON", [
-    "Operand gate: B_SCR_OP_COPYARRAY(gEffectBattler, gBattlerTarget, 0x1)",
-  ]),
-  () => requireExactMechanicalBlockers("EFFECT_PARALYZE", [
-    "Operand gate: B_SCR_OP_COPYARRAY(gEffectBattler, gBattlerTarget, 0x1)",
-  ]),
-  () => requireExactMechanicalBlockers("EFFECT_YAWN", [
-    "Operand gate: B_SCR_OP_COPYARRAY(sBATTLER, sBATTLER_WITH_ABILITY, 0x1)",
-  ]),
+  // Primary status-move callback operand restoration: the sleep string table
+  // and the two source-exact copyarray tuples now execute semantically.
+  () => requireExecutable("EFFECT_SLEEP"),
+  () => requireExecutable("EFFECT_TOXIC"),
+  () => requireExecutable("EFFECT_POISON"),
+  () => requireExecutable("EFFECT_PARALYZE"),
+  () => requireExecutable("EFFECT_YAWN"),
   () => requireExecutable("EFFECT_CONFUSE"),
   // MOVE_EFFECT_CONFUSION/MOVE_EFFECT_FLINCH registration (this session):
   // zero new opcodes for either, so both flip straight to executable.
@@ -1447,9 +1434,9 @@ lines.push(
   + "shared-entry chokepoint that used to block all five on an unrelated instruction",
 );
 lines.push(
-  "- `EFFECT_SLEEP`, `EFFECT_TOXIC`, `EFFECT_POISON`, `EFFECT_PARALYZE`, and `EFFECT_YAWN` blocked on their "
-  + "exact `PRINTFROMTABLE`/`COPYARRAY` operand sets; these are source-selected callback or prevention-script "
-  + "barriers that the former opcode-only walk missed",
+  "- `EFFECT_SLEEP`, `EFFECT_TOXIC`, `EFFECT_POISON`, `EFFECT_PARALYZE`, and `EFFECT_YAWN` executable after "
+  + "semantic restoration of their exact `PRINTFROMTABLE`/`COPYARRAY` callback operands (2026-07-28); "
+  + "the hardened walk's former blocker pins now require all five to remain executable",
 );
 lines.push(
   "- `EFFECT_RECOIL` executable with its source-selected recoil callback walked: "

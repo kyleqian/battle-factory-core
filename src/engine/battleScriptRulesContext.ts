@@ -577,6 +577,8 @@ export type BattleScriptRulesContext = Readonly<
     battlers: BattleScriptRulesBattlers;
     selectorRoles: BattleScriptSelectorRoleBindings;
     scriptingBattler: BattleScriptBattlerId;
+    /** Source u8 gBattleScripting.battlerWithAbility, written by successful jumpifability checks. */
+    battlerWithAbility: BattleScriptBattlerId;
     atkCancelerTracker: number;
     battleOutcome: number;
     currentMove: number;
@@ -742,6 +744,7 @@ export type BattleScriptRulesContextInput = Readonly<{
     fainted?: BattleScriptBattlerId | null;
   }>;
   scriptingBattler: BattleScriptBattlerId;
+  battlerWithAbility?: BattleScriptBattlerId;
   atkCancelerTracker: number;
   battleOutcome: number;
   currentMove: number;
@@ -2140,6 +2143,13 @@ export function createBattleScriptRulesContext(
   if (scriptingBattler === null) {
     throw new Error("scriptingBattler must be a battler id 0..3");
   }
+  const battlerWithAbility = requireRole(
+    input.battlerWithAbility ?? 0,
+    "battlerWithAbility",
+  );
+  if (battlerWithAbility === null) {
+    throw new Error("battlerWithAbility must be a battler id 0..3");
+  }
   const currentMove = requireUnsigned(input.currentMove, 0xffff, "currentMove");
   const bideDmgInput = input.bideDmg ?? [0, 0, 0, 0];
   if (!Array.isArray(bideDmgInput) || bideDmgInput.length !== 4) {
@@ -2206,6 +2216,7 @@ export function createBattleScriptRulesContext(
     battlers: Object.freeze(battlers),
     selectorRoles,
     scriptingBattler,
+    battlerWithAbility,
     atkCancelerTracker: requireUnsigned(
       input.atkCancelerTracker,
       0xff,
