@@ -179,6 +179,10 @@ import {
   type SwaggerState,
 } from "./swagger.ts";
 import {
+  tauntAtAge,
+  type TauntState,
+} from "./taunt.ts";
+import {
   selfDestructAtAge,
   type SelfDestructState,
 } from "./selfDestruct.ts";
@@ -847,6 +851,15 @@ export interface SceneOnSwaggerConfig {
   readonly breathOrigin: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnTauntConfig {
+  readonly move: "TAUNT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source `SetSpriteNextToMonHead(attacker, sprite)` result. */
+  readonly attackerHead: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnSelfDestructConfig {
   readonly move: "SELF_DESTRUCT";
   readonly attacker: SceneOnPresentationBattler;
@@ -1031,7 +1044,8 @@ export type SceneOnMoveConfig =
   | SceneOnKnockOffConfig;
 
 export interface SceneOnMovePresentationState<
-  TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig = SceneOnMoveConfig,
+  TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig | SceneOnTauntConfig
+    = SceneOnMoveConfig,
 > {
   readonly age: number;
   readonly config: TConfig;
@@ -1041,6 +1055,8 @@ export type SceneOnDynamicPunchPresentationState =
   SceneOnMovePresentationState<SceneOnDynamicPunchConfig>;
 export type SceneOnRazorLeafPresentationState =
   SceneOnMovePresentationState<SceneOnRazorLeafConfig>;
+export type SceneOnTauntPresentationState =
+  SceneOnMovePresentationState<SceneOnTauntConfig>;
 
 export interface SceneOnSupersonicView {
   readonly age: number;
@@ -1101,6 +1117,12 @@ export interface SceneOnHyperFangView extends HyperFangEffect {
 }
 
 export interface SceneOnSwaggerView extends SwaggerState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnTauntView extends TauntState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -1644,7 +1666,7 @@ function assertIntegerPoint(
  * supplied as immutable inputs and never resolved or mutated here.
  */
 export function createSceneOnMovePresentation<
-  TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig,
+  TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig | SceneOnTauntConfig,
 >(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
@@ -2205,6 +2227,27 @@ export function sceneOnSwaggerView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.breathOrigin,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first displayed thought-bubble software OAM. */
+export function sceneOnTauntView(
+  state: SceneOnTauntPresentationState,
+): SceneOnTauntView {
+  if (state.config.move !== "TAUNT") {
+    throw new Error(`expected TAUNT presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...tauntAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attackerHead,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
     ),

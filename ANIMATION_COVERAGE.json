@@ -110,7 +110,7 @@
         "player-back RATTATA complete first move-animation body at oracle frames 76-236: source task/sprite/OAM/matrix/audio state and shared-seam raw-RGB framebuffer match 161/161, reproduced twice fresh",
         "opponent-front RATTATA complete first move-animation body at oracle frames 80-240: the same strengthened component and shared-seam framebuffer surface matches 161/161, reproduced twice fresh",
         "the reducer ports AnimTask_GrowAndShrink's 12/24/12 affine program, side/species Y anchoring and two-display hardware transfer; gBreathPuffSpriteTemplate's four source frames, hFlip, signed fixed-point translation, looping SE_M_SWAGGER panning, terminal callback, and cleanup; both gAngerMarkSpriteTemplate instances' target-side mirroring, affine-normal matrices, allocation/OAM transfer latches, SE_M_SWAGGER2 panning, overlap, and teardown",
-        "HYPER FANG remains 107/107 component and framebuffer exact in both orientations as a fresh sprite/task/shared-seam regression control; FRUSTRATION, TORMENT, TAUNT, METRONOME, FAKE TEARS, and every anger-tag sibling remain unsupported without their own complete dense move acceptance"
+        "HYPER FANG remains 107/107 component and framebuffer exact in both orientations as a fresh sprite/task/shared-seam regression control; TAUNT now has independent complete source/hardware/typed evidence and remains partial only for framebuffer rendering; FRUSTRATION, TORMENT, METRONOME, FAKE TEARS, and every other anger-tag sibling remain unsupported without their own complete dense move acceptance"
       ],
       "evidence": [
         "tools/compare/fixtures/swagger-player-rattata-opponent-onix.json",
@@ -124,6 +124,29 @@
         "src/engine/battleScene.ts",
         "tests/animation/swagger.test.ts"
       ]
+    },
+    {
+      "move": "MOVE_TAUNT",
+      "status": "partial",
+      "covered": [
+        "complete legal Level-50 Scene-ON mechanicLab parties stage MURKROW, the real Factory set-184 TAUNT carrier (Quirky, SpDef/Defense/HP, Lax Incense), against slower constrained SHUCKLE in both player-back and opponent-front orientations",
+        "complete move-owned oracle frames 76-200 player-back and 80-204 opponent-front match 125/125 source-component, typed-seam, software/hardware-OAM, matrix, palette/register, and audio frames twice fresh",
+        "the reducer ports gThoughtBubbleSpriteTemplate's forward animation, 45-frame hold, reverse and lifetime; gTauntFingerSpriteTemplate's side-selected point, seven-cell wag and linger; both target-relative gAngerMarkSpriteTemplate instances with literal argv semantics; wait/delay sequencing; SE_M_METRONOME, looped SE_M_TAIL_WHIP restarts at relative ages 14/30, both SE_M_SWAGGER2 boundaries/pans at ages 74/106; one-display hardware transfer and cleared teardown",
+        "Swagger anger behavior is reused only for literal matching template semantics while TAUNT retains independent fixtures, reducer, comparator, typed seam, tests, and twice-fresh acceptance; RAZOR LEAF remains 139/139 component plus framebuffer exact in both orientations as the fresh control"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-taunt-player-murkrow-opponent-shuckle.json",
+        "tools/battle-lab/mechanic-taunt-opponent-murkrow-player-shuckle.json",
+        "tools/compare/fixtures/taunt-player-murkrow-opponent-shuckle.json",
+        "tools/compare/fixtures/taunt-opponent-murkrow-player-shuckle.json",
+        "tools/compare/tauntPortable.ts",
+        "tools/compare/tauntProbe.py",
+        "src/animation/taunt.ts",
+        "src/animation/swagger.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "tests/animation/taunt.test.ts"
+      ],
+      "remaining": "Raw RGB is 0/125 unattempted. Reproducibly extract MURKROW back/front and THOUGHT_BUBBLE/FINGER_2 art/palettes (ANGER may reuse the literal existing asset), then add only a narrow TAUNT animation draw case in src/engine/battleScene.ts for source OAM ordering, one-display transfer, field chrome/healthboxes/text, and teardown; require 125/125 both orientations twice."
     },
     {
       "move": "MOVE_SING",
@@ -1262,7 +1285,7 @@
         "MOVE_TORMENT",
         "MOVE_TAUNT"
       ],
-      "goal": "MOVE_SWAGGER independently proves its complete GrowAndShrink, breath-puff, and paired target anger-mark body in both orientations at 161/161 strengthened source-component and shared-seam framebuffer frames, reproduced twice. HYPER FANG remains 107/107 in both orientations as a fresh sprite/task regression control. No sibling is promoted: FRUSTRATION uses strength-dependent anger templates/tasks and its own movement paths; TORMENT and TAUNT have distinct finger/affine/target motion and anger sequencing; METRONOME only shares audio and needs its finger/metronome palette body; FAKE TEARS needs SMALL_BUBBLES blending, RockMonBackAndForth, looped audio, and eight thought-bubble/music-note tear sprites. Each remains unsupported pending independent complete dense acceptance."
+      "goal": "MOVE_SWAGGER independently proves its complete GrowAndShrink, breath-puff, and paired target anger-mark body in both orientations at 161/161 strengthened source-component and shared-seam framebuffer frames, reproduced twice. MOVE_TAUNT independently proves its complete distinct thought-bubble/finger/two-anger/audio body at 125/125 source-component, typed-seam, software/hardware-OAM, palette/register, and audio frames in both orientations twice; it remains partial only for its explicitly unattempted 0/125 framebuffer renderer closure. HYPER FANG remains 107/107 in both orientations as a fresh sprite/task regression control. FRUSTRATION uses strength-dependent anger templates/tasks and its own movement paths; TORMENT has distinct finger/affine/target motion; METRONOME only shares audio and needs its finger/metronome palette body; FAKE TEARS needs SMALL_BUBBLES blending, RockMonBackAndForth, looped audio, and eight thought-bubble/music-note tear sprites. No sibling is promoted without independent complete dense acceptance."
     },
     {
       "id": "contest-target-side-impact-bg",

@@ -46,10 +46,38 @@ animation. A status caused by a move is not part of that move's animation.
 
 ## Current resumable state (2026-07-27)
 
-Coverage is **48/276 exact, 3 partial, 225 unsupported**. RAZOR LEAF is exact
-through the shared Scene-ON seam at **139/139 player-back + 139/139
-opponent-front** complete component, hardware-transfer, and raw-RGB frames,
-reproduced twice fresh.
+Coverage is **48/276 exact, 4 partial, 224 unsupported**. TAUNT is partial at
+**125/125 player-back + 125/125 opponent-front** complete source-component,
+typed-seam, software/hardware-OAM, palette/register, and audio frames,
+reproduced twice fresh. Raw RGB remains explicitly **0/125 unattempted**.
+
+## TAUNT source/hardware body closed; framebuffer remainder bounded (2026-07-27)
+
+**Verdict:** `MOVE_TAUNT` is partial. Complete legal Scene-ON parties retain
+the real Level-50 set-184 MURKROW carrier in both orientations against slower
+constrained SHUCKLE. Complete move-owned windows 76-200 player-back and
+80-204 opponent-front match **125/125** source-component plus typed-seam
+frames twice fresh, including final software destruction, one-display
+hardware OAM, and cleared teardown.
+
+**Source reducer/evidence:** the relative reducer ports
+`gThoughtBubbleSpriteTemplate`'s forward/45-frame hold/reverse program,
+`gTauntFingerSpriteTemplate`'s side-selected point/wag/lifetime, both literal
+target-relative `gAngerMarkSpriteTemplate` argv programs, wait/delay
+sequencing, SE_M_METRONOME, both looped SE_M_TAIL_WHIP restarts, both
+SE_M_SWAGGER2 restarts/pans, software OAM, affine matrices, hardware OAM,
+OBJ palettes, zero blend registers, and teardown. Swagger code is reused
+only for the literal anger template semantics; TAUNT acceptance is independent.
+
+**Precise remainder:** raw RGB is **0/125 unattempted**. Reproducibly extract
+MURKROW back/front plus THOUGHT_BUBBLE/FINGER_2 art and palettes (ANGER may
+reuse its already-extracted literal asset), then add only a narrow TAUNT draw
+case in `src/engine/battleScene.ts` for source OAM order, one-display transfer,
+field chrome/healthboxes/text, and teardown; require 125/125 both orientations
+twice. This worker did not touch `battleScene.ts`. RAZOR LEAF remains 139/139
+component + framebuffer exact in both orientations as the fresh control. No
+absolute ticks, screenshots, canonical imports, unsupported barriers, battle
+state changes, or boundary widening were added.
 
 ## TAUNT source-evidence checkpoint; remains unsupported (2026-07-27)
 

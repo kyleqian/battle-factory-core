@@ -68,10 +68,10 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // RAZOR LEAF closes its complete source and raw-RGB body.
-        unsupported: 225,
+        // TAUNT closes source/hardware/typed evidence; RGB remains partial.
+        unsupported: 224,
         staged: 0,
-        partial: 3,
+        partial: 4,
         exact: 48,
       },
       {
