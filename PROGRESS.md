@@ -15,6 +15,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 535 — [SUPERVISOR VERIFY 2026-07-27 ~20:34] Curse registration + repeatable OFF-profile evidence merged green
+
+- **State:** union committed and green at **289 files / 3766 tests**;
+  `npm run build` clean. Census regenerates byte-clean at **127/214 effects,
+  250/355 moves, 202/276 Factory-L50 distinct, 2566/2957 weighted (86.8%)**,
+  with all **42/42** ground-truth checks passing. Both oracle profiles are
+  fresh; no deferred decision.
+- **Did:** independently reviewed the generic `EFFECT_CURSE` implementation
+  and its selector/opcode widenings, reproduced both side-lane Battle Scene
+  OFF mechanic-lab traces, then merged the file-disjoint evidence. The ROM
+  gives Ghost Curse **120→60 HP + target status2 `0x10000000`** and non-Ghost
+  Curse neutral stages **ATK/DEF +1, Speed -1**; two worker reruns and the
+  supervisor rerun agree on manifest hashes `77a143a8…a553` and
+  `8caa6945…fdc`.
+- **Next:** register `B_SCR_OP_REMAININGHPTOPOWER` / `EFFECT_FLAIL`
+  generically while a side lane stages repeatable OFF-profile Flail/Reversal
+  HP-band evidence; verify the union, then continue to RETURN/FRUSTRATION.
+- **Notes:** side worktree and merged branch removed after verification. No
+  canonical Battle-2 march, no new unsupported barrier, no ratchet change,
+  and no PAPERCUT.
+
+---
 ## 534 — [BOUNDED WORKER 2026-07-27 ~20:28] EFFECT_CURSE registered end to end; +1 effect / +1 move / +18 weighted
 
 - **State:** tree committed and green at **288 files / 3761 tests**;
@@ -59,26 +81,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   presentation-seam evidence; verify/merge both, then continue with FLAIL and
   the banked §15 seam wiring.
 - **Notes:** no executable-frontier ratchet or barrier change. No PAPERCUT.
-
----
-## 532 — [USER-DIRECTED TOOLING 2026-07-27 ~20:10] Codex max mode added: Sol/ultra supervisor, all-Sol workers up to xhigh
-
-- **State:** tree green at **285 files / 3740 tests** (+1 file / +5
-  launcher-profile tests), `npm run build` clean; oracle Battle Scene OFF
-  profile healthy. Gameplay/census state is unchanged from entry 531.
-- **Did:** `run-supervisor.sh` now accepts `-M` / `--max-mode`, selects Codex
-  automatically, and fixes the supervisor at `gpt-5.6-sol` / `ultra`. The
-  profile propagates into `tools/run-subagent.sh`: every worker is locked to
-  `gpt-5.6-sol`, defaults to `xhigh`, may be explicitly lowered, and rejects
-  Claude/Terra or effort above xhigh. `-m` remains the existing model flag;
-  uppercase `-M` is the non-breaking max-mode shorthand. The ordinary Codex
-  Sol/high supervisor + tiered-worker profile remains unchanged.
-- **Next:** resume entry 531's ordered gameplay work: ranked census descent
-  (CURSE pair, FLAIL, RETURN/FRUSTRATION), then banked §15
-  turn13-sandattack wiring and §16 prep-scout.
-- **Notes:** hermetic launcher tests pin the long/short flags, resolved
-  supervisor/worker profiles, inherited mode, lower worker effort, and
-  Claude/Terra rejection. No executable-frontier ratchet or barrier changes.
-  No PAPERCUT.
 
 ---
