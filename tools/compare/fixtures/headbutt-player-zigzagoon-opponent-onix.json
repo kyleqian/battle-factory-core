@@ -1,0 +1,10 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-headbutt-player-zigzagoon-opponent-onix.json",
+  "probe": "tools/compare/headbuttProbe.py",
+  "pair": "Factory set-24 ZIGZAGOON player-back -> ONIX opponent-front",
+  "orientation": "player-to-opponent",
+  "denseWindow": { "startFrame": 77, "endFrame": 124 },
+  "attackerSide": "player"
+}
