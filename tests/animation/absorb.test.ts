@@ -1,4 +1,11 @@
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import absorbAsset from "../../src/animation/assets/absorb.json" with { type: "json" };
+import dynamicPunchAsset from "../../src/animation/assets/dynamicPunch.json" with { type: "json" };
+import recoverAsset from "../../src/animation/assets/recover.json" with { type: "json" };
 import {
   ABSORB_HEALING_FIRST_AGE,
   ABSORB_ORB_ARGS,
@@ -120,5 +127,37 @@ describe("MOVE_ABSORB source-relative reducer", () => {
       .sprites[0]).toMatchObject({ x: 176, y: 47, x2: -4, y2: 1 });
     expect(sceneOnAbsorbView({ ...stage, age: ABSORB_HEALING_FIRST_AGE })
       .sprites[0]).toMatchObject({ kind: "star", x: 72, y: 91 });
+  });
+
+  it("re-extracts LOMBRE and literal ORBS/IMPACT/BLUE_STAR byte-for-byte", () => {
+    expect(absorbAsset.source).toMatchObject({
+      lombreBack: expect.stringContaining("set 131"),
+      lombreFront: expect.stringContaining("SPECIES_LOMBRE 271"),
+      target: expect.stringContaining("ONIX"),
+      orbs: expect.stringContaining("ANIM_TAG_ORBS"),
+      impact: expect.stringContaining("ANIM_TAG_IMPACT"),
+      blueStar: expect.stringContaining("ANIM_TAG_BLUE_STAR"),
+    });
+    expect(absorbAsset.lombreBack.tileset).toMatchObject({
+      columns: 8, rows: 8,
+    });
+    expect(absorbAsset.lombreFront.tileset).toMatchObject({
+      columns: 8, rows: 16,
+    });
+    expect(absorbAsset.orbs).toEqual(recoverAsset.orbs);
+    expect(absorbAsset.impact).toEqual(dynamicPunchAsset.hitsplat);
+    expect(absorbAsset.blueStar).toEqual(recoverAsset.blueStar);
+
+    const scratch = mkdtempSync(join(tmpdir(), "pokebench-absorb-assets-"));
+    const output = join(scratch, "absorb.json");
+    execFileSync(process.execPath, [
+      "--experimental-strip-types",
+      resolve("tools/compare/extractAbsorbAssets.ts"),
+      "--out",
+      output,
+    ]);
+    expect(readFileSync(output)).toEqual(
+      readFileSync(resolve("src/animation/assets/absorb.json")),
+    );
   });
 });
