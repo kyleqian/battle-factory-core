@@ -15,6 +15,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 564 — [SUPERVISOR VERIFY 2026-07-28 ~01:24] Corrected Future Sight accepted; Disable evidence merged
+
+- **State:** reviewed union green at **321 files / 3994 tests** and focused
+  **276/276**; production build, both-oracle freshness, census regeneration,
+  and `git diff --check` pass. Census is exactly **140/214 effects, 266/355
+  moves, 217/276 Factory-L50 distinct, 2696/2957 weighted**, all **42/42**.
+- **Did:** accepted the Future Sight increment only after corrective `3e949d1`
+  made delayed ownership source-exact: prior move/effect/power and history
+  persist, while stored move drives explicit accuracy/message/animation and
+  `adjustnormaldamage2` alone omits False Swipe. Merged and independently
+  replayed Disable evidence `9cb0921`.
+- **Next:** register exact five-byte `0xa3`
+  `B_SCR_OP_DISABLELASTUSEDATTACK`, target-owned first move-id match against
+  `gLastMoves`, one-draw 2–5 timer/start value, all failure branches, ordinary
+  move admission, switch clearing, and `ENDTURN_DISABLE`. Expected census is
+  **141/214, 267/355, 218/276, 2701/2957**.
+- **Notes:** Future Sight retains Tackle **33 / effect 0 / power 35** and HP
+  **140→103**. Disable OFF evidence observes PP **20→19→18**, forced Struggle,
+  then Tackle resumption; manifest `ea9f5139…a1019`. No barrier/import ratchet
+  change, recording import, animation edit, DEFERRED item, or oracle lifecycle
+  action.
+
+---
 ## 563 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~01:23] Future Sight delayed ownership is source-exact
 
 - **State:** committed Future Sight increment plus corrective `3e949d1`; tree
@@ -58,26 +81,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   target HP **140**, then delayed HP **140→103** with side bit 64 clearing;
   manifest `ecd032fb…ee2448f`. No barrier/import ratchet increase, recording
   import, animation edit, DEFERRED item, or oracle lifecycle action.
-
----
-## 561 — [BOUNDED MAIN WORKER 2026-07-28 ~00:47] Defense Curl executes source-completely
-
-- **State:** committed `7a96b10` / `7989330` / `e02e90d` / `a854043`;
-  tree green at **318 files / 3973 tests** and focused **40/40**. Production
-  build, both-oracle freshness, census regeneration, and `git diff --check`
-  pass. Census is exactly **139/214 effects, 264/355 moves, 216/276
-  Factory-L50 distinct, 2691/2957 weighted**, all **42/42** checks.
-- **Did:** registered exact operandless `0xbf`
-  `B_SCR_OP_SETDEFENSECURLBIT`: unconditional attacker-only status2 bit-30
-  OR and one-byte advance. Tests pin both attacker identities and persistence
-  when the ordered later +1 Defense change is maxed/fails. The generic
-  full-turn proof now selects Defense Curl from untouched Shuckle state,
-  observes PP **40→39**, Defense **6→7**, and bit 30, then selects Rollout.
-- **Next:** supervisor verify this executable-frontier increment and select
-  the next finite source registration target; do not resume the retired
-  canonical Battle-2 march.
-- **Notes:** controlled seed 32731 preserves zero-call Defense Curl and
-  reproduces merged OFF evidence Rollout PP **20→19**, locked HP
-  **362→327→170→12→0**, and player-win. No barrier/import ratchet increase,
-  recording import, scenario/tick/render branch, animation edit, issue
-  removal, oracle lifecycle action, or PAPERCUT.
