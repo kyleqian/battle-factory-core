@@ -143,13 +143,9 @@ function createSetseededHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCo
  * "macro sugar: copyarray, registered", which was wrong; the tuple itself was
  * never in this dispatcher's accepted set): `BattleScript_DoTripleKickAttack`'s
  * own `copyhword gDynamicBasePower, sTRIPLE_KICK_POWER` (macro sugar for
- * `copyarray gDynamicBasePower, sTRIPLE_KICK_POWER, 2`). `gDynamicBasePower`
- * has no materialized field in this engine -- `damagecalcOpcodeHandler`
- * (`battleScriptHitChainOpcode.ts`, scout §4 rung 7) reads
- * `rules.tripleKickPower` directly rather than through a copied-to
- * intermediate, so this copy is a pure-advance no-op here, the same
- * "the destination has no reader in this engine's scope" boundary the
- * `gBattleTextBuff1<-sMULTIHIT_STRING` case below already establishes.
+ * `copyarray gDynamicBasePower, sTRIPLE_KICK_POWER, 2`). The source
+ * destination is materialized now that both Triple Kick and Flail/Reversal
+ * write/read it through Cmd_damagecalc.
  * Curse's `copybyte gBattlerTarget, gBattlerAttacker` is also a direct
  * selector-role assignment and is modeled without inventing a byte-address
  * layer. Every other concrete call site (Pain Split, Bide, ability-immunity
@@ -172,7 +168,15 @@ function createCopyarrayHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCo
       return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRulesContext });
     }
     if (size === "0x2" && dst === "gDynamicBasePower" && src === "sTRIPLE_KICK_POWER") {
-      return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
+      const nextRulesContext = Object.freeze({
+        ...rulesContext,
+        dynamicBasePower: rulesContext.tripleKickPower,
+      });
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: nextRulesContext },
+      );
     }
     if (size === "0x1" && dst === "cEFFECT_CHOOSER" && src === "sMULTIHIT_EFFECT") {
       const value = readBattleScriptRulesByte(rulesContext, "sMULTIHIT_EFFECT");
