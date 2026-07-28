@@ -15,6 +15,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 594 — [SUPERVISOR VERIFY 2026-07-28 ~05:06] Revenge accepted; Magic Coat evidence folded
+
+- **State:** reviewed union green at **354 files / 4153 tests** and focused
+  **35/35**; production build, both-oracle info, census regeneration,
+  freshness/ratchets **15/15**, and `git diff --check` pass. Census is exactly
+  **154/214 effects, 283/355 moves, 231/276 Factory-L50 distinct, 2750/2957
+  weighted**, all **42/42**.
+- **Did:** accepted global Revenge `0xd6`, complete predicate matrix, and
+  shared receipt/damage/cleanup full-turn proof after source/diff review.
+  Folded Magic Coat source/OFF evidence and independently replayed exact
+  manifest `5b737f68…0a303870`: Spoink spends Magic Coat PP, Onix spends Tail
+  Whip PP, and only Onix's public Defense falls **6→5**, distinguishing the
+  real bounce from a no-op.
+- **Next:** register five-byte `B_SCR_OP_TRYSETMAGICCOAT` globally through
+  the existing ProtectStruct `bounceMove` and attack-canceler retarget seam.
+  Prove last-action failure, non-last arm (without a duplicate guard),
+  Pressure exemption ownership, shared reflected Tail Whip behavior, and
+  turn cleanup. Expected census:
+  **155/214, 284/355, 232/276, 2753/2957**.
+- **Notes:** handler inventory is **162**; hidden bounce flags, PC/stack,
+  attacker-target swaps, and Pressure helper causality remain source-only.
+  No unsupported/import ratchet, recording import, private handler,
+  controller widening, animation/presentation/tick branch, issue removal,
+  DEFERRED item, or oracle lifecycle action. Animation branch remains
+  intentionally unmerged after its post-orient advance.
+
+---
 ## 593 — [BOUNDED MAIN WORKER 2026-07-28 ~05:02] Revenge executes through shared receipts
 
 - **State:** committed `0255aba` + `25bd18b` + `f2be703`; tree green at
@@ -67,33 +94,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   controller widening, animation/presentation/tick branch, issue removal,
   DEFERRED item, or oracle lifecycle action. Animation branch remains
   intentionally unmerged after its post-orient advance.
-
----
-## 591 — [BOUNDED MAIN WORKER 2026-07-28 ~04:53] Foresight executes globally; Low Kick entry remains source-bounded
-
-- **State:** committed `d2c651e` + `49da21b`; tree green at **350 files /
-  4136 tests**, focused Foresight/consumer/ratchet coverage **286/286**, and
-  production build. Both oracle infos, census regeneration/freshness, all
-  **42/42** checks, ratchets **6/6**, and `git diff --check` pass. Census is
-  exactly **153/214 effects, 282/355 moves, 230/276 Factory-L50 distinct,
-  2747/2957 weighted**.
-- **Did:** globally registered operand-free one-byte `0xb1`. It always ORs
-  target-owned `STATUS2_FORESIGHT`, advances one byte, and repeated use is
-  successful/idempotent with zero local RNG, controller, or message work;
-  non-target battlers and unrelated target fields stay immutable. Pinned the
-  existing shared accuracy/evasion and Ghost-immunity consumers. A generic
-  full-turn Factory scenario proves pre-Foresight immunity, PP→identified
-  message/status order, post-Foresight damage, and repeat success with no
-  private/controller path.
-- **Next:** supervisor verify this finite executable-frontier increment and
-  select the next shared registration target; do not widen the generic
-  seven-battle controller or extend the retired canonical Battle-2 march.
-- **Notes:** handler inventory **160→161**. The full-turn receipt uses the
-  already-executable common hit script; Low Kick itself is pinned at the
-  shared Fighting/Ghost type consumer but its full entry still honestly
-  barriers on separate unregistered `B_SCR_OP_WEIGHTDAMAGECALCULATION`.
-  Registering that opcode would exceed this one-opcode scope and change the
-  required census. Switch/faint/Baton-Pass clearing remains source-bounded.
-  No unsupported/import ratchet change, recording import, private handler,
-  animation/presentation/tick branch, issue removal, DEFERRED item, or oracle
-  lifecycle action.

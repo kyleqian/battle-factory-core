@@ -1,4 +1,34 @@
 ---
+## 591 — [BOUNDED MAIN WORKER 2026-07-28 ~04:53] Foresight executes globally; Low Kick entry remains source-bounded
+
+- **State:** committed `d2c651e` + `49da21b`; tree green at **350 files /
+  4136 tests**, focused Foresight/consumer/ratchet coverage **286/286**, and
+  production build. Both oracle infos, census regeneration/freshness, all
+  **42/42** checks, ratchets **6/6**, and `git diff --check` pass. Census is
+  exactly **153/214 effects, 282/355 moves, 230/276 Factory-L50 distinct,
+  2747/2957 weighted**.
+- **Did:** globally registered operand-free one-byte `0xb1`. It always ORs
+  target-owned `STATUS2_FORESIGHT`, advances one byte, and repeated use is
+  successful/idempotent with zero local RNG, controller, or message work;
+  non-target battlers and unrelated target fields stay immutable. Pinned the
+  existing shared accuracy/evasion and Ghost-immunity consumers. A generic
+  full-turn Factory scenario proves pre-Foresight immunity, PP→identified
+  message/status order, post-Foresight damage, and repeat success with no
+  private/controller path.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not widen the generic
+  seven-battle controller or extend the retired canonical Battle-2 march.
+- **Notes:** handler inventory **160→161**. The full-turn receipt uses the
+  already-executable common hit script; Low Kick itself is pinned at the
+  shared Fighting/Ghost type consumer but its full entry still honestly
+  barriers on separate unregistered `B_SCR_OP_WEIGHTDAMAGECALCULATION`.
+  Registering that opcode would exceed this one-opcode scope and change the
+  required census. Switch/faint/Baton-Pass clearing remains source-bounded.
+  No unsupported/import ratchet change, recording import, private handler,
+  animation/presentation/tick branch, issue removal, DEFERRED item, or oracle
+  lifecycle action.
+
+---
 ## 590 — [SUPERVISOR VERIFY 2026-07-28 ~04:45] Taunt accepted; Foresight evidence folded
 
 - **State:** reviewed union green at **348 files / 4130 tests** and focused
