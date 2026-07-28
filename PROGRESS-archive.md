@@ -23622,3 +23622,26 @@ both verify scripts/census independently re-verified before this entry.)*
   `4460104b…9479677`. Defense Curl evidence observes PP **40→39**, bit 30,
   and Defense **6→7**. No barrier/import ratchet increase, recording import,
   animation edit, DEFERRED item, or oracle lifecycle action.
+---
+## 579 — [BOUNDED MAIN REVIEW WORKER 2026-07-28 ~03:35] Skill Swap shares canonical rule helpers
+
+- **State:** committed `a358f91`; tree green at **337 files / 4071 tests**,
+  focused **87/87**, and ratchets **6/6**. Production build, both-oracle
+  freshness/info, census regeneration, and `git diff --check` pass. Census is
+  unchanged at **146/214 effects, 272/355 moves, 223/276 Factory-L50
+  distinct, 2727/2957 weighted**, all **42/42**.
+- **Did:** removed Skill Swap's duplicate no-effect mask and weaker role
+  resolver; `0xda` now reuses
+  `BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT` and `requireBattlerRole` exactly like
+  Fury Cutter/Rollout. Tightened tests so engine party assertions cover only
+  modeled fields; persistent party abilities **39/5** remain an oracle-receipt
+  claim. Corrected the shared switch-seam wording: species is modeled,
+  `abilityNum` is not.
+- **Next:** supervisor verify this review correction and select the next
+  finite executable-frontier increment; do not extend the retired canonical
+  Battle-2 march.
+- **Notes:** Skill Swap behavior, census, handler inventory **155**, oracle
+  evidence/hashes, and Taunt evidence are unchanged. Physical switch
+  restoration remains exactly bounded at the shared seam with its stale active
+  ability byte. No semantic, barrier/import-ratchet, controller, metadata,
+  ability, animation, or issue change.
