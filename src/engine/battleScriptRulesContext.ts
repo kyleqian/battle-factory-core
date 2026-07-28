@@ -72,6 +72,7 @@ import { createBattleScriptSleepTalkOpcodeHandlers } from "./battleScriptSleepTa
 import { createBattleScriptTrywishOpcodeHandlers } from "./battleScriptTrywishOpcode.ts";
 import { createBattleScriptRolloutOpcodeHandlers } from "./battleScriptRolloutOpcode.ts";
 import { createBattleScriptSetDefenseCurlBitOpcodeHandlers } from "./battleScriptSetDefenseCurlBitOpcode.ts";
+import { createBattleScriptTrysetfutureattackOpcodeHandlers } from "./battleScriptTrysetfutureattackOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -617,6 +618,11 @@ export type BattleScriptRulesContext = Readonly<
     wishCounter: readonly [number, number, number, number];
     /** Source gWishFutureKnock.wishMonId[MAX_BATTLERS_COUNT], the setup-time party index for each positional Wish. */
     wishMonId: readonly [number, number, number, number];
+    /** Source gWishFutureKnock delayed-attack arrays, keyed by positional battler slot. */
+    futureSightCounter: readonly [number, number, number, number];
+    futureSightMove: readonly [number, number, number, number];
+    futureSightAttacker: readonly [number, number, number, number];
+    futureSightDmg: readonly [number, number, number, number];
     /** Typed form of PREPARE_MON_NICK_WITH_PREFIX_BUFFER(gBattleTextBuff1, battler, partyIndex). */
     battleTextBuff1MonNick: BattleScriptPreparedMonNick | null;
     /**
@@ -728,6 +734,10 @@ export type BattleScriptRulesContextInput = Readonly<{
   weatherTimer?: number;
   wishCounter?: readonly number[];
   wishMonId?: readonly number[];
+  futureSightCounter?: readonly number[];
+  futureSightMove?: readonly number[];
+  futureSightAttacker?: readonly number[];
+  futureSightDmg?: readonly number[];
   battleTextBuff1MonNick?: BattleScriptPreparedMonNick | null;
   battlerByTurnOrder?: readonly number[];
   currentTurnActionNumber?: number;
@@ -2169,6 +2179,30 @@ export function createBattleScriptRulesContext(
       requireUnsigned(input.wishMonId?.[2] ?? 0, 5, "wishMonId[2]"),
       requireUnsigned(input.wishMonId?.[3] ?? 0, 5, "wishMonId[3]"),
     ]) as unknown as readonly [number, number, number, number],
+    futureSightCounter: Object.freeze([
+      requireUnsigned(input.futureSightCounter?.[0] ?? 0, 0xff, "futureSightCounter[0]"),
+      requireUnsigned(input.futureSightCounter?.[1] ?? 0, 0xff, "futureSightCounter[1]"),
+      requireUnsigned(input.futureSightCounter?.[2] ?? 0, 0xff, "futureSightCounter[2]"),
+      requireUnsigned(input.futureSightCounter?.[3] ?? 0, 0xff, "futureSightCounter[3]"),
+    ]) as unknown as readonly [number, number, number, number],
+    futureSightMove: Object.freeze([
+      requireUnsigned(input.futureSightMove?.[0] ?? 0, 0xffff, "futureSightMove[0]"),
+      requireUnsigned(input.futureSightMove?.[1] ?? 0, 0xffff, "futureSightMove[1]"),
+      requireUnsigned(input.futureSightMove?.[2] ?? 0, 0xffff, "futureSightMove[2]"),
+      requireUnsigned(input.futureSightMove?.[3] ?? 0, 0xffff, "futureSightMove[3]"),
+    ]) as unknown as readonly [number, number, number, number],
+    futureSightAttacker: Object.freeze([
+      requireUnsigned(input.futureSightAttacker?.[0] ?? 0, 3, "futureSightAttacker[0]"),
+      requireUnsigned(input.futureSightAttacker?.[1] ?? 0, 3, "futureSightAttacker[1]"),
+      requireUnsigned(input.futureSightAttacker?.[2] ?? 0, 3, "futureSightAttacker[2]"),
+      requireUnsigned(input.futureSightAttacker?.[3] ?? 0, 3, "futureSightAttacker[3]"),
+    ]) as unknown as readonly [number, number, number, number],
+    futureSightDmg: Object.freeze([
+      requireSigned32(input.futureSightDmg?.[0] ?? 0, "futureSightDmg[0]"),
+      requireSigned32(input.futureSightDmg?.[1] ?? 0, "futureSightDmg[1]"),
+      requireSigned32(input.futureSightDmg?.[2] ?? 0, "futureSightDmg[2]"),
+      requireSigned32(input.futureSightDmg?.[3] ?? 0, "futureSightDmg[3]"),
+    ]) as unknown as readonly [number, number, number, number],
     battleTextBuff1MonNick: input.battleTextBuff1MonNick === null
       || input.battleTextBuff1MonNick === undefined
       ? null
@@ -2388,6 +2422,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptTrywishOpcodeHandlers(program),
     ...createBattleScriptRolloutOpcodeHandlers(program),
     ...createBattleScriptSetDefenseCurlBitOpcodeHandlers(program),
+    ...createBattleScriptTrysetfutureattackOpcodeHandlers(program),
   });
 }
 

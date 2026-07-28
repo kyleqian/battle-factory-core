@@ -259,6 +259,10 @@ const B_MSG_STATUS_HAD_NO_EFFECT = 2;
 
 /** printfromtable's registered small constant tables, each indexed by MULTISTRING_CHOOSER. */
 const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Object.freeze({
+  gFutureMoveUsedStringIds: Object.freeze([
+    "STRINGID_PKMNFORESAWATTACK",
+    "STRINGID_PKMNCHOSEXASDESTINY",
+  ]),
   gSubstituteUsedStringIds: Object.freeze([
     "STRINGID_PKMNMADESUBSTITUTE",
     "STRINGID_TOOWEAKFORSUBSTITUTE",
@@ -714,12 +718,14 @@ function advancePastAccuracyCheck(
   attacker: BattleScriptBattlerId,
   target: BattleScriptBattlerId,
   rng: BattleScriptRngState,
+  move: number,
 ): BattleScriptCommandTransition<BattleScriptRulesContext> {
   const targetBattler = rulesContext.battlers[target];
+  const moveType = resolveMoveTypeName(rulesContext, move);
   if (
-    targetBattler.ability === ABILITY_VOLT_ABSORB
-    || targetBattler.ability === ABILITY_WATER_ABSORB
-    || targetBattler.ability === ABILITY_FLASH_FIRE
+    (targetBattler.ability === ABILITY_VOLT_ABSORB && moveType === "TYPE_ELECTRIC")
+    || (targetBattler.ability === ABILITY_WATER_ABSORB && moveType === "TYPE_WATER")
+    || (targetBattler.ability === ABILITY_FLASH_FIRE && moveType === "TYPE_FIRE")
   ) {
     return unsupportedBranch(
       context,
@@ -841,12 +847,13 @@ function accuracycheckNoAccCalcCheckLockOn(
 /**
  * Cmd_accuracycheck (battle_script_commands.c:1099-1189). Two argument forms
  * are source-complete: `ACC_CURR_MOVE` (`BattleScript_EffectHit` and 53 of
- * the program's other accuracycheck sites) and `NO_ACC_CALC_CHECK_LOCK_ON`
+ * the program's other accuracycheck sites), the two explicit delayed-attack
+ * literals (`MOVE_FUTURE_SIGHT`/`MOVE_DOOM_DESIRE`), and
+ * `NO_ACC_CALC_CHECK_LOCK_ON`
  * (`accuracycheckNoAccCalcCheckLockOn` above, `BattleScript_EffectYawn`'s own
  * site -- 1 of 8 sites using this literal, the rest still barriered behind
- * their own separate unregistered opcodes). Bare `NO_ACC_CALC` and any
- * explicit-deferred-move literal remain an explicit barrier: no committed
- * script this engine reaches uses them.
+ * their own separate unregistered opcodes). Bare `NO_ACC_CALC` remains an
+ * explicit barrier.
  */
 export const accuracycheckOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
   context,
@@ -855,12 +862,17 @@ export const accuracycheckOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptR
   if (moveOperand?.expression === "NO_ACC_CALC_CHECK_LOCK_ON") {
     return accuracycheckNoAccCalcCheckLockOn(context);
   }
-  if (!moveOperand || moveOperand.expression !== "ACC_CURR_MOVE") {
+  const explicitMove = moveOperand?.expression === "MOVE_FUTURE_SIGHT"
+    ? 248
+    : moveOperand?.expression === "MOVE_DOOM_DESIRE"
+      ? 353
+      : null;
+  if (!moveOperand || (moveOperand.expression !== "ACC_CURR_MOVE" && explicitMove === null)) {
     return unsupportedBranch(
       context,
       `Cmd_accuracycheck's non-ACC_CURR_MOVE move argument `
-        + `(${moveOperand?.expression ?? "<missing>"}) -- the NO_ACC_CALC/`
-        + "explicit-deferred-move top branch is not used by any committed script this engine reaches",
+        + `(${moveOperand?.expression ?? "<missing>"}) -- this registered path supports `
+        + "ACC_CURR_MOVE plus Future Sight/Doom Desire's explicit literals",
       "battle_script_commands.c",
       1103,
     );
@@ -871,7 +883,7 @@ export const accuracycheckOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptR
   const target = requireBattlerRole(rulesContext, "target");
   const attackerBattler = rulesContext.battlers[attacker];
   const targetBattler = rulesContext.battlers[target];
-  const move = rulesContext.currentMove;
+  const move = explicitMove ?? rulesContext.currentMove;
   const moveRow = requireMoveRow(move);
   const moveType = resolveMoveTypeName(rulesContext, move);
 
@@ -933,6 +945,7 @@ export const accuracycheckOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptR
       attacker,
       target,
       context.state.rng,
+      move,
     );
   }
 
@@ -977,6 +990,7 @@ export const accuracycheckOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptR
       attacker,
       target,
       rng,
+      move,
     );
   }
 
@@ -3581,6 +3595,10 @@ export function createBattleScriptHitChainOpcodeHandlers(
   install("B_SCR_OP_DMGTOLEVEL", dmgtolevelOpcodeHandler);
   install("B_SCR_OP_PSYWAVEDAMAGEEFFECT", psywavedamageeffectOpcodeHandler);
   install("B_SCR_OP_ADJUSTNORMALDAMAGE", adjustnormaldamageOpcodeHandler);
+  // Cmd_adjustnormaldamage2 differs only by omitting False Swipe's clamp.
+  // Future Sight/Doom Desire can never have EFFECT_FALSE_SWIPE, so the
+  // shared handler is behavior-identical for both concrete call sites.
+  install("B_SCR_OP_ADJUSTNORMALDAMAGE2", adjustnormaldamageOpcodeHandler);
   install("B_SCR_OP_SETDAMAGETOHEALTHDIFFERENCE", setdamagetohealthdifferenceOpcodeHandler);
   install("B_SCR_OP_ADJUSTSETDAMAGE", adjustsetdamageOpcodeHandler);
   install("B_SCR_OP_COUNTERDAMAGECALCULATOR", counterdamagecalculatorOpcodeHandler);

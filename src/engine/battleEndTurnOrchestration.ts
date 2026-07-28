@@ -51,6 +51,8 @@ import {
   resolveBattleScriptBattlerHoldEffect,
   resolveBattleScriptBattlerHoldEffectParam,
   resolveBattleScriptMoveBasePp,
+  resolveBattleScriptCurrentMoveEffect,
+  resolveBattleScriptCurrentMovePower,
   wasBattleScriptBattlerUnableToUseMove,
   withBattleScriptPartyMemberStatus1,
   type BattleScriptRulesBattlerState,
@@ -92,6 +94,10 @@ const YAWN_MAKES_ASLEEP_LABEL = "BattleScript_YawnMakesAsleep";
 const THRASH_CONFUSES_LABEL = "BattleScript_ThrashConfuses";
 /** `ENDTURN_WISH`'s delayed-heal script (`battle_scripts_1.s:3589-3610`). */
 const WISH_COMES_TRUE_LABEL = "BattleScript_WishComesTrue";
+/** `HandleWishPerishSongOnTurnEnd` state 0's delayed-attack script. */
+const MON_TOOK_FUTURE_ATTACK_LABEL = "BattleScript_MonTookFutureAttack";
+const SIDE_STATUS_FUTUREATTACK = 1 << 6;
+const MOVE_FUTURE_SIGHT = 248;
 /** `ItemBattleEffects(ITEMEFFECT_NORMAL, ...)`'s ten `BattleScriptExecute`+`end2` labels this registration wires (docs/endturn-abilities-items-ground-truth.md §1c/§5 slice 4). */
 const ITEM_HEAL_HP_END2_LABEL = "BattleScript_ItemHealHP_End2";
 const WHITE_HERB_END2_LABEL = "BattleScript_WhiteHerbEnd2";
@@ -1622,6 +1628,115 @@ function mapFaintedActionsResult(result: BattleScriptFaintedActionsResult): Batt
   return Object.freeze({ kind: "non-terminal-barrier", state: result.state, instruction: result.instruction });
 }
 
+type PostFaintKind = "next-turn" | "resumed" | "terminal";
+
+/**
+ * `HandleWishPerishSongOnTurnEnd` state 0. Unlike field/battler end-turn
+ * effects this is positional (0..gBattlersCount-1), runs after faint actions,
+ * and is not gated by battleOutcome.
+ */
+function runFutureAttacksAfterFaints(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  initialState: MachineState,
+  completionKind: PostFaintKind,
+): BattleEndTurnResult {
+  let state = initialState;
+  const count = state.rulesContext.battleTopology.battlersCount;
+  for (let index = 0; index < count; index += 1) {
+    const battler = index as BattleScriptBattlerId;
+    if ((state.rulesContext.absentBattlerFlags & (1 << battler)) !== 0) continue;
+    const oldCounter = state.rulesContext.futureSightCounter[battler];
+    if (oldCounter === 0) continue;
+
+    const counters = [...state.rulesContext.futureSightCounter] as [number, number, number, number];
+    counters[battler] = oldCounter - 1;
+    let rc: BattleScriptRulesContext = Object.freeze({
+      ...state.rulesContext,
+      futureSightCounter: Object.freeze(counters),
+    });
+    state = Object.freeze({ ...state, rulesContext: rc });
+    if (counters[battler] !== 0 || rc.battlers[battler].hp === 0) continue;
+
+    const storedMove = rc.futureSightMove[battler];
+    const storedAttacker = rc.futureSightAttacker[battler] as BattleScriptBattlerId;
+    const sideStatuses = [...rc.sideStatuses] as [number, number];
+    const partner = (battler ^ 2) as BattleScriptBattlerId;
+    if (counters[battler] === 0 && counters[partner] === 0) {
+      sideStatuses[rc.battlers[battler].side] &= ~SIDE_STATUS_FUTUREATTACK;
+    }
+    rc = Object.freeze({
+      ...rc,
+      currentMove: storedMove,
+      currentMoveEffect: resolveBattleScriptCurrentMoveEffect(storedMove),
+      currentMovePower: resolveBattleScriptCurrentMovePower(storedMove),
+      battleMoveDamage: rc.futureSightDmg[battler],
+      multistringChooser: storedMove === MOVE_FUTURE_SIGHT ? 0 : 1,
+      sideStatuses: Object.freeze(sideStatuses),
+      selectorRoles: Object.freeze({
+        ...rc.selectorRoles,
+        attacker: storedAttacker,
+        target: battler,
+      }),
+    });
+    const fired = runTickScript(
+      program,
+      handlers,
+      state,
+      rc,
+      storedAttacker,
+      MON_TOOK_FUTURE_ATTACK_LABEL,
+    );
+    if (fired.kind === "opcode-barrier") {
+      return Object.freeze({ kind: "non-terminal-barrier", state: fired.state, instruction: fired.instruction });
+    }
+    state = fired.state;
+
+    // A delayed KO re-enters BattleTurnPassed and therefore reaches
+    // HandleFaintedMonActions before this positional scan resumes.
+    if (state.rulesContext.battlers[battler].hp === 0) {
+      const fainted = runBattleScriptFaintedActionsOrchestration(program, handlers, state);
+      if (fainted.kind === "terminal") return Object.freeze({ kind: "terminal", state: fainted.state });
+      if (fainted.kind === "player-choice-required") {
+        return Object.freeze({
+          kind: "player-choice-required",
+          state: fainted.state,
+          battler: fainted.battler,
+          faintedPartyIndex: fainted.faintedPartyIndex,
+          legalPartyIndexes: fainted.legalPartyIndexes,
+        });
+      }
+      if (fainted.kind === "non-terminal-barrier") {
+        return Object.freeze({ kind: "non-terminal-barrier", state: fainted.state, instruction: fainted.instruction });
+      }
+      state = fainted.state;
+    }
+  }
+
+  if (completionKind === "terminal") return Object.freeze({ kind: "terminal", state });
+  return Object.freeze({
+    kind: completionKind,
+    state: Object.freeze({
+      ...state,
+      rulesContext: clearProtectStructsForNextTurn(state.rulesContext),
+    }),
+  });
+}
+
+function finishFaintedThenDelayed(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  result: BattleScriptFaintedActionsResult,
+): BattleEndTurnResult {
+  if (result.kind === "player-choice-required" || result.kind === "non-terminal-barrier") {
+    return mapFaintedActionsResult(result);
+  }
+  const completionKind: PostFaintKind = result.kind === "no-fainted-battlers"
+    ? "next-turn"
+    : result.kind;
+  return runFutureAttacksAfterFaints(program, handlers, result.state, completionKind);
+}
+
 /**
  * The C-side `BattleTurnPassed` loop equivalent. Call once both of a turn's
  * actions have finished (their own move scripts, and any mid-turn faints'
@@ -1667,7 +1782,7 @@ export function runBattleEndTurnOrchestration(
     }
     if (fieldResult.kind === "outcome-decided") {
       const faintedResult = runBattleScriptFaintedActionsOrchestration(program, handlers, fieldResult.state);
-      return mapFaintedActionsResult(faintedResult);
+      return finishFaintedThenDelayed(program, handlers, faintedResult);
     }
     state = fieldResult.state;
 
@@ -1683,7 +1798,5 @@ export function runBattleEndTurnOrchestration(
 
   // HandleFaintedMonActions() always runs, gBattleOutcome gate or not (doc §1) -- reuse the already-landed orchestration verbatim.
   const faintedResult = runBattleScriptFaintedActionsOrchestration(program, handlers, state);
-  return mapFaintedActionsResult(faintedResult);
-  // HandleWishPerishSongOnTurnEnd: Perish Song/Future Sight remain unmodeled;
-  // Wish itself is DoFieldEndTurnEffects' ENDTURN_WISH case above.
+  return finishFaintedThenDelayed(program, handlers, faintedResult);
 }

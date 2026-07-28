@@ -205,6 +205,9 @@ const PLAYANIMATION_ANIM_TYPES: ReadonlyMap<
   ["B_ANIM_TURN_TRAP", { argExpression: "sB_ANIM_ARG1", animationId: "TURN_TRAP", readsAnimArg1: true }],
   /** BattleScript_WishComesTrue's delayed-heal presentation command. */
   ["B_ANIM_WISH_HEAL", { argExpression: "NULL", animationId: "WISH_HEAL", readsAnimArg1: false }],
+  /** BattleScript_MonTookFutureAttack's two delayed-hit controller commands. */
+  ["B_ANIM_FUTURE_SIGHT_HIT", { argExpression: "NULL", animationId: "FUTURE_SIGHT_HIT", readsAnimArg1: false }],
+  ["B_ANIM_DOOM_DESIRE_HIT", { argExpression: "NULL", animationId: "DOOM_DESIRE_HIT", readsAnimArg1: false }],
   /**
    * docs/endturn-abilities-items-ground-truth.md §1c/§5 slice 4 -- every
    * `ITEMEFFECT_NORMAL` end2 script (Leftovers/White Herb/all 8 cure
