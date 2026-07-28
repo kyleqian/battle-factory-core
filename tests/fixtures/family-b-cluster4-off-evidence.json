@@ -1,0 +1,68 @@
+{
+  "schema": "family-b-cluster4-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "species_info.h": "1aac881bb02361339dc4dd33c7a5804a7127c0367426b77b982ee213a713e0af",
+    "constants_battle.h": "bba2f9d9b3d98fa01b5f0a8f7dede9f2f0be5617c735242b741a7e0c8e4a5d1e",
+    "moves.h": "d32746c9ad3ed1bbfbb93712f13e01ab1c43f48a78f3605ef9db5095e8d19d27",
+    "items.h": "8e9aacc0ffbd41ce0092176a89f624b59be300df60c996d718d61119e747dbd4",
+    "abilities.h": "1c1b93de5d5ff65d8b3066e9b40229b5d30e02842e587e3851a1d708ece1292b",
+    "battle-frontier-mons.json": "6f7e9b57201ca8d513dab853c53aa7e23d35329ea52df6a464e7fe311d9fe21c",
+    "species-stats.json": "8aacda31b0c8b92f1c8b3d8353d3e6352eb26455dd03a6eed5c80e22325e1d48"
+  },
+  "carriers": {
+    "covet": {"setId": 203, "name": "FRONTIER_MON_LINOONE_1", "species": 289, "moves": [290,28,343,321], "rentalItem": 180, "stagedItem": 0, "nature": 3, "ability": 53},
+    "knockOff": {"setId": 163, "name": "FRONTIER_MON_SABLEYE_1", "species": 322, "moves": [185,109,282,252], "item": 206, "nature": 1, "ability": 51}
+  },
+  "cases": {
+    "covetSuccessAndOccupiedAttacker": {
+      "scenario": "tools/battle-lab/mechanic-covet-linoone-shuckle-off.json",
+      "scenarioSha256": "c60f546165fff1a52dd326eaa811f8d21df43d3291e922507c018bf61f9a2a2a",
+      "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "4506ec467b1f2a80ada508bc6bbeb839cd5e1b8457c9ecd884f3177d5c5d6ced"},
+      "captureGrid": {"start": 0, "end": 1575, "step": 25, "count": 64},
+      "initialPartyChecksumsValid": [true,true,true,true,true,true],
+      "speeds": {"player": 120, "opponent": 10},
+      "observed": [
+        {"frame":0,"sha256":"a3ed5af94cae515c70ec2737a30ef370f1a14d813e122b04371d9addb28d6b88","rngValue":919694434,"currentMove":0,"controllerExecFlags":1,"covetPp":40,"opponentHp":127,"playerActiveItem":0,"playerPartyItem":0,"opponentActiveItem":200,"opponentPartyItem":200},
+        {"frame":275,"sha256":"e6d58322e858522bf2b828bf947fffa1e75a205cb6beea869260d79c121fcbfd","rngValue":1621732966,"currentMove":343,"controllerExecFlags":0,"covetPp":39,"opponentHp":120,"playerActiveItem":0,"playerPartyItem":200,"opponentActiveItem":0,"opponentPartyItem":0},
+        {"frame":425,"sha256":"9f85aba476a5c0dee4f4e22e3d8d121cccb9e191531d1302bedf97808eaa6627","rngValue":1621732966,"currentMove":150,"controllerExecFlags":2,"covetPp":39,"opponentHp":120,"playerActiveItem":200,"playerPartyItem":200,"opponentActiveItem":0,"opponentPartyItem":0},
+        {"frame":825,"sha256":"a4f884956b3f6df9375c37829604180088204a4789ad0a9d39622ffb27ec6601","rngValue":530917129,"currentMove":343,"controllerExecFlags":0,"covetPp":38,"opponentHp":120,"playerActiveItem":200,"playerPartyItem":200,"opponentActiveItem":0,"opponentPartyItem":0},
+        {"frame":900,"sha256":"a9bbeefe11d593f44835c8ebe816c7a5707b108d44d8967a325c63e492f35d60","rngValue":530917129,"currentMove":343,"controllerExecFlags":0,"covetPp":38,"opponentHp":113,"playerActiveItem":200,"playerPartyItem":200,"opponentActiveItem":0,"opponentPartyItem":0}
+      ]
+    },
+    "knockOffRemovalAndNoItem": {
+      "scenario": "tools/battle-lab/mechanic-knock-off-sableye-shuckle-off.json",
+      "scenarioSha256": "a625c18c8c58e3dc25cb602420cb1029a9efc8da596fd2cd0687ef9771d2db04",
+      "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "7b1ffb705775aad7dbdffee8d0586850866a1d99f9e85b86ee598e63c81a220e"},
+      "captureGrid": {"start": 0, "end": 1575, "step": 25, "count": 64},
+      "initialPartyChecksumsValid": [true,true,true,true,true,true],
+      "speeds": {"player": 70, "opponent": 10},
+      "observed": [
+        {"frame":0,"sha256":"9753efe7228f5f8553c2c06194885e763e53c6c5572e4c3ec187e6fbb10ce671","rngValue":919694434,"currentMove":0,"controllerExecFlags":1,"knockOffPp":20,"opponentHp":127,"playerActiveItem":206,"playerPartyItem":206,"opponentActiveItem":180,"opponentPartyItem":180},
+        {"frame":125,"sha256":"e733391f70ce556d078b16b1228f133bba987a51847f7854fea32fa10d701d38","rngValue":3421819359,"currentMove":282,"controllerExecFlags":0,"knockOffPp":19,"opponentHp":127,"playerActiveItem":206,"playerPartyItem":206,"opponentActiveItem":180,"opponentPartyItem":180},
+        {"frame":200,"sha256":"7b68d1c602c1e73138514c91f0afbaf80155850565b18d309aabc0ffa1cae254","rngValue":1621732966,"currentMove":282,"controllerExecFlags":0,"knockOffPp":19,"opponentHp":122,"playerActiveItem":206,"playerPartyItem":206,"opponentActiveItem":0,"opponentPartyItem":180},
+        {"frame":825,"sha256":"7b68d1c602c1e73138514c91f0afbaf80155850565b18d309aabc0ffa1cae254","rngValue":530917129,"currentMove":282,"controllerExecFlags":0,"knockOffPp":18,"opponentHp":122,"playerActiveItem":206,"playerPartyItem":206,"opponentActiveItem":0,"opponentPartyItem":180},
+        {"frame":900,"sha256":"87d4ca4ac0394e5bc1338feefd877f4ef8031d5fdfca28d0e78ea800e9caf221","rngValue":530917129,"currentMove":282,"controllerExecFlags":0,"knockOffPp":18,"opponentHp":117,"playerActiveItem":206,"playerPartyItem":206,"opponentActiveItem":0,"opponentPartyItem":180}
+      ]
+    },
+    "covetStickyHold": {
+      "scenario": "tools/battle-lab/mechanic-covet-sticky-hold-gulpin-off.json",
+      "scenarioSha256": "5cf4e686e68f2e94f72ebb1635c7204886f6bab9d14b6947cc7813b508d3aabe",
+      "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "a875b505f26ce40fa955132718373fd34df2584ae69a893a02f0377cee44277f"},
+      "captureGrid": {"start": 0, "end": 825, "step": 25, "count": 34},
+      "initialPartyChecksumsValid": [true,true,true,true,true,true],
+      "speeds": {"player": 120, "opponent": 50},
+      "observed": [
+        {"frame":0,"sha256":"6f7b3862d108d8aae6d36a23d08e7f8ea51b21a91e4d2260f908779f78fae526","rngValue":919694434,"currentMove":0,"controllerExecFlags":1,"covetPp":40,"opponentHp":177,"playerActiveItem":0,"playerPartyItem":0,"opponentActiveItem":186,"opponentPartyItem":186,"opponentAbility":60},
+        {"frame":125,"sha256":"3b5c65c016401306cb6b11e600b486fb880dbcec8664b3d3ca2ec112be4cfac6","rngValue":3421819359,"currentMove":343,"controllerExecFlags":0,"covetPp":39,"opponentHp":177,"playerActiveItem":0,"playerPartyItem":0,"opponentActiveItem":186,"opponentPartyItem":186,"opponentAbility":60},
+        {"frame":250,"sha256":"ad1724fc2fde6fe243cf7ea4b7454935d36c2cd0201ab23433603d7767439f87","rngValue":1621732966,"currentMove":343,"controllerExecFlags":0,"covetPp":39,"opponentHp":129,"playerActiveItem":0,"playerPartyItem":0,"opponentActiveItem":186,"opponentPartyItem":186,"opponentAbility":60},
+        {"frame":600,"sha256":"a28f7c0d45e2aae76547b2dd3d62440317df76984432c19507a858b40943962b","rngValue":1941898439,"currentMove":0,"controllerExecFlags":1,"covetPp":39,"opponentHp":129,"playerActiveItem":0,"playerPartyItem":0,"opponentActiveItem":186,"opponentPartyItem":186,"opponentAbility":60}
+      ]
+    }
+  },
+  "observedVsSourceOnly": "The manifests directly observe active and persisted party items, PP, HP, abilities, RNG snapshots, controller flags, checksums, and framebuffer hashes. They do not expose lastUsedItem, changedItems, knockedOffMons, choicedMove, script PC, message IDs, ability-history writes, or ownership of individual RNG draws. Knocked-off switch restoration and later Trick/Thief eligibility remain source-only."
+}
