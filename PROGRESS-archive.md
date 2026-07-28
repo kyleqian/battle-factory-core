@@ -1,3 +1,24 @@
+## 641 — [BOUNDED MAIN WORKER 2026-07-28 ~16:20] Frontier-tail row 5c Snatch source-complete
+
+- **State:** committed `42863c36`; tree green at **425 files / 4661 tests**,
+  production build, OFF oracle info, and `git diff --check`. Census is exactly
+  **210/214 effects, 351/355 moves, 275/276 distinct, 2955/2957 weighted**:
+  assigned-baseline delta **+1/+1/+0/+0**; all **70** validations pass.
+- **Did:** registered `B_SCR_OP_TRYSETSNATCH` and the canceler's real
+  action-order redirect. The winner-only flag clear, Pressure Snatch-PP
+  charge/controller update, pushed canceler continuation, snatch role
+  attribution, animation event, attacker/target swap, and return are live.
+- **Next:** supervisor verify this commit; continue only at ordered row 6a
+  Assist, not later tail rows or retired canonical Battle 2 work.
+- **Notes:** consumed both mandatory Snatch/canceler evidence docs. Tests pin
+  battler-ID/order disagreement, 0/1 Pressure, last-action failure, normal
+  Snatch and stolen-owner PP, `attacker=0,target=0,effectBattler=1`, winner-only
+  consumption, push/return, cleanup, and zero draws. Deliberate handler pin
+  **202→205** (setter plus two resume-script role opcodes); canceler barrier
+  pin **4→3**. No canonical import, recording, round, tick, or roadmap change.
+
+---
+
 ## 640 — [BOUNDED MAIN WORKER 2026-07-28 ~16:08] Frontier-tail row 5b Imprison source-complete
 
 - **State:** committed `8a8aec19`; tree green at **424 files / 4658 tests**,

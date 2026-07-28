@@ -13,6 +13,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 644 — [BOUNDED MAIN WORKER 2026-07-28 ~16:53] Frontier-tail row 7 Transform source-complete
+
+- **State:** committed `0577134c`; tree green at **430 files / 4687 tests**,
+  production build, OFF oracle info, and `git diff --check`. Census is exactly
+  **213/214 effects, 354/355 moves, 275/276 distinct, 2955/2957 weighted**:
+  assigned-baseline delta **+1/+1/+0/+0**; all **70** validations pass.
+- **Did:** registered `B_SCR_OP_TRANSFORMDATAEXECUTION` as the dossier's
+  indivisible step: exact `BattlePokemon [0x00,0x24)` copy, min-five PP,
+  Disable/Mimic clears, transformed-personality owner, typed species buffer,
+  `[54,2]` reset-selection event, and both `gTransformUsedStringIds` rows.
+- **Next:** supervisor verify `0577134c`; continue only at ordered row 8
+  Metronome, not presentation/animation or retired canonical Battle 2 work.
+- **Notes:** consumed mandatory `docs/transform-off-evidence.md`; receipt-shaped
+  tests pin every copied field and unchanged HP/maxHP/level/friendship/item/
+  PP bonuses/experience/personality/status, all failure predicates, zero RNG,
+  switch/faint lifetime clears, both messages, and move-end. Deliberate handler
+  exact-set pin **207→208**. No barrier, recording import, presentation,
+  round, tick, roadmap, or issue change.
+
+---
+
 ## 643 — [BOUNDED MAIN WORKER 2026-07-28 ~16:40] Frontier-tail row 6b Beat Up source-complete
 
 - **State:** committed `ebc331fb`; tree green at **429 files / 4681 tests**,
@@ -56,24 +77,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   and existing `jumptocalledmove TRUE` target/RNG/PP ownership. Deliberate
   handler exact-set pin **205→206**. No barrier, canonical import, recording,
   presentation, round, tick, roadmap, or issue change.
-
-
----
-## 641 — [BOUNDED MAIN WORKER 2026-07-28 ~16:20] Frontier-tail row 5c Snatch source-complete
-
-- **State:** committed `42863c36`; tree green at **425 files / 4661 tests**,
-  production build, OFF oracle info, and `git diff --check`. Census is exactly
-  **210/214 effects, 351/355 moves, 275/276 distinct, 2955/2957 weighted**:
-  assigned-baseline delta **+1/+1/+0/+0**; all **70** validations pass.
-- **Did:** registered `B_SCR_OP_TRYSETSNATCH` and the canceler's real
-  action-order redirect. The winner-only flag clear, Pressure Snatch-PP
-  charge/controller update, pushed canceler continuation, snatch role
-  attribution, animation event, attacker/target swap, and return are live.
-- **Next:** supervisor verify this commit; continue only at ordered row 6a
-  Assist, not later tail rows or retired canonical Battle 2 work.
-- **Notes:** consumed both mandatory Snatch/canceler evidence docs. Tests pin
-  battler-ID/order disagreement, 0/1 Pressure, last-action failure, normal
-  Snatch and stolen-owner PP, `attacker=0,target=0,effectBattler=1`, winner-only
-  consumption, push/return, cleanup, and zero draws. Deliberate handler pin
-  **202→205** (setter plus two resume-script role opcodes); canceler barrier
-  pin **4→3**. No canonical import, recording, round, tick, or roadmap change.
