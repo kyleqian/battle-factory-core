@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only OFF battle-lab evidence for Lock On, Imprison, and Snatch."""
+"""Read-only OFF battle-lab evidence for frontier-tail move receipts."""
 from __future__ import annotations
 import json, sys
 from pathlib import Path
@@ -23,9 +23,13 @@ def main() -> None:
     oracle=EmeraldOracle(ref/"pokeemerald.gba",ref/"pokeemerald.map",ORACLE_DIR/"bootstrap"/"factory-battle-scene-off.json")
     BattleLab(oracle,"battle-scene-off").prepare(req); s=oracle.symbols
     def u16(a:int)->int:return oracle.read_u8(a)|(oracle.read_u8(a+1)<<8)
+    def u32(a:int)->int:return sum(oracle.read_u8(a+i)<<(8*i) for i in range(4))
+    def battle_mon(base:int, i:int):
+        a=base+BATTLE_MON_SIZE*i
+        return {"species":u16(a),"stats":[u16(a+2+2*j) for j in range(5)],"moves":[u16(a+0x0c+2*j) for j in range(4)],"ivsAbilityBits":u32(a+0x14),"stages":[oracle.read_u8(a+0x18+j) for j in range(8)],"ability":oracle.read_u8(a+0x20),"types":[oracle.read_u8(a+0x21),oracle.read_u8(a+0x22)],"unknown":oracle.read_u8(a+0x23),"pp":[oracle.read_u8(a+0x24+j) for j in range(4)],"hp":u16(a+0x28),"level":oracle.read_u8(a+0x2a),"friendship":oracle.read_u8(a+0x2b),"maxHp":u16(a+0x2c),"item":u16(a+0x2e),"ppBonuses":oracle.read_u8(a+0x3b),"experience":u32(a+0x44),"personality":u32(a+0x48),"status1":u32(a+0x4c),"status2":u32(a+0x50),"otId":u32(a+0x54)}
     def snap():
         mons=s["gBattleMons"]; dis=s["gDisableStructs"]; prot=s["gProtectStructs"]; st3=s["gStatuses3"]
-        return {"randCount":oracle.read_u32(SRANDCOUNT_ADDR),"rngValue":oracle.read_u32(s["gRngValue"]),"currentMove":u16(s["gCurrentMove"]),"attacker":oracle.read_u8(s["gBattlerAttacker"]),"target":oracle.read_u8(s["gBattlerTarget"]),"effectBattler":oracle.read_u8(s["gEffectBattler"]),"scriptingBattler":oracle.read_u8(s["gBattleScripting"]),"turnOrder":[oracle.read_u8(s["gBattlerByTurnOrder"]+i) for i in range(2)],"status3":[oracle.read_u32(st3+4*i) for i in range(2)],"alwaysHits":[bool(oracle.read_u32(st3+4*i)&STATUS3_ALWAYS_HITS) for i in range(2)],"imprisoned":[bool(oracle.read_u32(st3+4*i)&STATUS3_IMPRISONED) for i in range(2)],"sureHitOwner":[oracle.read_u8(dis+DISABLE_SIZE*i+DISABLE_SURE_HIT) for i in range(2)],"stealMove":[bool(oracle.read_u32(prot+16*i)&PROTECT_STEAL) for i in range(2)],"pp":[[oracle.read_u8(mons+BATTLE_MON_SIZE*i+0x24+j) for j in range(4)] for i in range(2)],"hp":[u16(mons+BATTLE_MON_SIZE*i+0x28) for i in range(2)]}
+        return {"randCount":oracle.read_u32(SRANDCOUNT_ADDR),"rngValue":oracle.read_u32(s["gRngValue"]),"currentMove":u16(s["gCurrentMove"]),"calledMove":u16(s["gCalledMove"]),"chosenMove":u16(s["gChosenMove"]),"attacker":oracle.read_u8(s["gBattlerAttacker"]),"target":oracle.read_u8(s["gBattlerTarget"]),"effectBattler":oracle.read_u8(s["gEffectBattler"]),"scriptingBattler":oracle.read_u8(s["gBattleScripting"]),"turnOrder":[oracle.read_u8(s["gBattlerByTurnOrder"]+i) for i in range(2)],"beatUpIndex":oracle.read_u8(s["gBattleCommunication"]),"status3":[oracle.read_u32(st3+4*i) for i in range(2)],"alwaysHits":[bool(oracle.read_u32(st3+4*i)&STATUS3_ALWAYS_HITS) for i in range(2)],"imprisoned":[bool(oracle.read_u32(st3+4*i)&STATUS3_IMPRISONED) for i in range(2)],"sureHitOwner":[oracle.read_u8(dis+DISABLE_SIZE*i+DISABLE_SURE_HIT) for i in range(2)],"transformedPersonality":[u32(dis+DISABLE_SIZE*i) for i in range(2)],"mimickedMoves":[oracle.read_u8(dis+DISABLE_SIZE*i+0x17)>>4 for i in range(2)],"stealMove":[bool(oracle.read_u32(prot+16*i)&PROTECT_STEAL) for i in range(2)],"controllerA":[[oracle.read_u8(s["gBattleBufferA"]+0x200*i+j) for j in range(2)] for i in range(2)],"battleMons":[battle_mon(mons,i) for i in range(2)]}
     changes=[]; prior=None; tick=0
     def cap():
         nonlocal prior
