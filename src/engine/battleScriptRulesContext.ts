@@ -108,6 +108,7 @@ import { createBattleScriptNormalisebuffsOpcodeHandlers } from "./battleScriptNo
 import { createBattleScriptSetbideOpcodeHandlers } from "./battleScriptSetbideOpcode.ts";
 import { createBattleScriptLastMoveOpcodeHandlers } from "./battleScriptLastMoveOpcode.ts";
 import { createBattleScriptTypeChangeOpcodeHandlers } from "./battleScriptTypeChangeOpcode.ts";
+import { createBattleScriptEnvironmentAttackOpcodeHandlers } from "./battleScriptEnvironmentAttackOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -2846,6 +2847,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptSetbideOpcodeHandlers(program),
     ...createBattleScriptLastMoveOpcodeHandlers(program),
     ...createBattleScriptTypeChangeOpcodeHandlers(program),
+    ...createBattleScriptEnvironmentAttackOpcodeHandlers(program),
     ...createBattleScriptSettormentOpcodeHandlers(program),
     ...createBattleScriptSettauntOpcodeHandlers(program),
     ...createBattleScriptSetforesightOpcodeHandlers(program),

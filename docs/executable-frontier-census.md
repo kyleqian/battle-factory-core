@@ -10,8 +10,8 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 202 | 214 | 94.4% |
-| Moves (unweighted, all 355) | 342 | 355 | 96.3% |
+| Effect scripts | 203 | 214 | 94.9% |
+| Moves (unweighted, all 355) | 343 | 355 | 96.6% |
 | Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 275 | 276 | 99.6% |
 | Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2955 | 2957 | 99.9% |
 
@@ -27,7 +27,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_ASSISTATTACKSELECT` | 1 (EFFECT_ASSIST) | 1 | 0 | 0 |
 | `B_SCR_OP_CALLENVIRONMENTATTACK` | 1 (EFFECT_NATURE_POWER) | 1 | 0 | 0 |
 | `B_SCR_OP_SETCHARGE` | 1 (EFFECT_CHARGE) | 1 | 0 | 0 |
-| `B_SCR_OP_SETWEATHERBALLTYPE` | 1 (EFFECT_WEATHER_BALL) | 1 | 0 | 0 |
 | `B_SCR_OP_TRYDOBEATUP` | 1 (EFFECT_BEAT_UP) | 1 | 0 | 0 |
 | `B_SCR_OP_TRYIMPRISON` | 1 (EFFECT_IMPRISON) | 1 | 0 | 0 |
 | `B_SCR_OP_TRYSETSNATCH` | 1 (EFFECT_SNATCH) | 1 | 0 | 0 |
@@ -239,7 +238,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_BLAZE_KICK | `BattleScript_EffectBurnHit` | executable | - | - | 1 | 1 (1) |
 | EFFECT_MUD_SPORT | `BattleScript_EffectMudSport` | blocked-on-opcodes | `B_SCR_OP_SETTYPEBASEDHALVERS` (main path) | Operand gate: B_SCR_OP_PRINTFROMTABLE(gSportsUsedStringIds) -- gSportsUsedStringIds is outside the engine's accepted string-table pointer set (src/engine/battleScriptHitChainOpcode.ts:288; battle_script_commands.c:2184) | 1 | 0 (0) |
 | EFFECT_POISON_FANG | `BattleScript_EffectPoisonFang` | executable | - | - | 1 | 1 (2) |
-| EFFECT_WEATHER_BALL | `BattleScript_EffectWeatherBall` | blocked-on-opcodes | `B_SCR_OP_SETWEATHERBALLTYPE` (main path) | - | 1 | 0 (0) |
+| EFFECT_WEATHER_BALL | `BattleScript_EffectWeatherBall` | executable | - | - | 1 | 0 (0) |
 | EFFECT_OVERHEAT | `BattleScript_EffectOverheat` | executable | - | - | 2 | 1 (23) |
 | EFFECT_TICKLE | `BattleScript_EffectTickle` | executable | - | - | 1 | 1 (3) |
 | EFFECT_COSMIC_POWER | `BattleScript_EffectCosmicPower` | executable | - | - | 1 | 1 (7) |
