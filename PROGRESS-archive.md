@@ -1,4 +1,27 @@
 ---
+## 628 — [BOUNDED MAIN WORKER 2026-07-28 ~13:01] Present + Memento + Role Play + Recycle source-complete
+
+- **State:** tree green at **397 files / 4519 tests**, production build, OFF
+  oracle info, and `git diff --check`. Census is exactly **195/214 effects,
+  335/355 moves, 275/276 distinct, 2955/2957 weighted**: assigned-baseline
+  delta **+4/+4/+4/+4**; all **70** census validations pass.
+- **Did:** source-ported Present's exact low-byte damage/heal bands; Memento's
+  minimized-stat/Protect/Substitute gates, self-faint ordering, and terminal
+  checkteamslost handoff; Role Play's exact NONE/Wonder Guard exclusions and
+  ability-name message substitution; Recycle's consumed-item ledger,
+  `removeitem` writer, active/party restore, and item-name message.
+- **Next:** supervisor verify commits `dd5fd24c`, `7eb51f0b`, `076990f4`,
+  and `40e742f2`; all four assigned flips are complete. Resume the ranked
+  order without expanding into Metronome or zero-Factory-weight rows.
+- **Notes:** predicted-vs-actual is **+1/+1/+1/+1 for every effect**, with
+  zero shortfall. Present damage/heal ledgers are 5/2 draws; the other three
+  effects draw zero. Memento exposed and closed one hidden registered-opcode
+  operand gap (`B_MSG_DEFENDER_STAT_FELL`). Deliberate exact-set move:
+  handler surface **185→189**; the regenerated per-effect blocker rows are
+  executable. No new barriers, recording imports, presentation, round, tick,
+  roadmap, issue, or oracle-trace changes.
+
+---
 ## 627 — [BOUNDED MAIN WORKER 2026-07-28 ~12:41] Will-O-Wisp + Haze source-complete
 
 - **State:** tree green at **393 files / 4494 tests**, production build, OFF
