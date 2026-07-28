@@ -148,6 +148,42 @@ describe("calculateBaseDamage - RAM-pinned regression cases (turn-resolution-not
   });
 });
 
+describe("calculateBaseDamage - EFFECT_EXPLOSION defense halving (pokemon.c:3228-3230)", () => {
+  it("halves the defender's raw Defense (truncated) before the crit-adjusted-stat step when moveEffect is EFFECT_EXPLOSION", () => {
+    const withoutHalving = calculateBaseDamage({
+      attacker: GROVYLE,
+      defender: ONIX,
+      movePower: 200,
+      moveType: "TYPE_NORMAL",
+      isCriticalHit: false,
+    });
+    const withHalving = calculateBaseDamage({
+      attacker: GROVYLE,
+      defender: ONIX,
+      movePower: 200,
+      moveType: "TYPE_NORMAL",
+      isCriticalHit: false,
+      moveEffect: "EFFECT_EXPLOSION",
+    });
+    // ONIX.defense is 187 (odd) -- Math.trunc(187/2) = 93, not a clean halving,
+    // exercising the truncation rather than an evenly-divisible stat.
+    expect(withoutHalving).toBe(50);
+    expect(withHalving).toBe(99);
+  });
+
+  it("does not halve defense for any other move effect", () => {
+    const hit = calculateBaseDamage({
+      attacker: GROVYLE,
+      defender: ONIX,
+      movePower: 200,
+      moveType: "TYPE_NORMAL",
+      isCriticalHit: false,
+      moveEffect: "EFFECT_HIT",
+    });
+    expect(hit).toBe(50);
+  });
+});
+
 describe("calculateBaseDamage - burn and turn 17's RAM-pinned FAINT_ATTACK roll", () => {
   it("halves physical damage before the unconditional +2, unless the attacker has GUTS", () => {
     const input = {
