@@ -389,6 +389,7 @@ export interface SceneOnBattlerGeometry {
 export interface SceneOnPresentationBattler {
   readonly species:
     | "ONIX"
+    | "MAGBY"
     | "GROVYLE"
     | "PIDGEOTTO"
     | "MURKROW"

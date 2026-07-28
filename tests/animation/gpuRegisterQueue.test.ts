@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   applyAnimationDisplayIntervalWorkload,
+  animationCgbCounterAtVblank,
+  animationPcmDmaCounterAtVblank,
   animationGpuRegisterWriteIsImmediate,
   copyBufferedAnimationGpuRegisters,
   createAnimationGpuRegisterState,
+  produceAnimationDisplayIntervalWorkload,
   setAnimationGpuRegister,
 } from "../../src/animation/gpuRegisterQueue.ts";
 
@@ -110,6 +113,67 @@ describe("pokeemerald buffered animation GPU-register presentation", () => {
       buffered: { [BLDALPHA]: 0x0d03 },
       hardware: { [BLDALPHA]: 0x0d03 },
       waitingOffsets: [],
+    });
+  });
+
+  it("advances and reloads m4a's periodic PCM DMA counter", () => {
+    const schedule = {
+      counterAtAnchor: 7,
+      period: 7,
+      cgbCounterAtAnchor: 8,
+      cgbPeriod: 15,
+      mixerOverrunCgbPhases: [3],
+    };
+    expect(
+      Array.from(
+        { length: 9 },
+        (_, vblanks) => animationPcmDmaCounterAtVblank(schedule, vblanks),
+      ),
+    ).toEqual([7, 6, 5, 4, 3, 2, 1, 7, 6]);
+    expect(
+      Array.from(
+        { length: 10 },
+        (_, vblanks) => animationCgbCounterAtVblank(schedule, vblanks),
+      ),
+    ).toEqual([8, 7, 6, 5, 4, 3, 2, 1, 0, 14]);
+  });
+
+  it("produces ordinary and PCM-refill RunTasks workloads from the audio clock", () => {
+    const common = {
+      pcmDma: {
+        counterAtAnchor: 1,
+        period: 7,
+        cgbCounterAtAnchor: 3,
+        cgbPeriod: 15,
+        mixerOverrunCgbPhases: [3],
+      },
+      gpuWrites: [{ offset: BLDALPHA, value: 0x0d03 }],
+    } as const;
+    expect(produceAnimationDisplayIntervalWorkload({
+      ...common,
+      vblanksSinceAudioAnchor: 4,
+    })).toEqual({
+      steps: [
+        { kind: "copy-buffered-registers", vcount: 166 },
+        {
+          kind: "run-tasks",
+          vcount: 3,
+          gpuWrites: common.gpuWrites,
+        },
+      ],
+    });
+    expect(produceAnimationDisplayIntervalWorkload({
+      ...common,
+      vblanksSinceAudioAnchor: 0,
+    })).toEqual({
+      steps: [
+        { kind: "copy-buffered-registers", vcount: 166 },
+        {
+          kind: "run-tasks",
+          vcount: 224,
+          gpuWrites: common.gpuWrites,
+        },
+      ],
     });
   });
 

@@ -765,6 +765,7 @@ import {
 } from "../animation/aerialAce.ts";
 import {
   FIRE_PUNCH_REDUCER_EPOCH_AGE,
+  FAINT_ATTACK_ANIMATION_PROFILE,
   TURN17_FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE,
   FIRE_PUNCH_TEXT_AGE,
   faintAttackAttackerEva,
@@ -776,6 +777,10 @@ import {
   faintAttackTargetShakeX2,
   type FaintAttackResolutionHp,
 } from "../animation/faintAttack.ts";
+import {
+  createAnimationGpuRegisterState,
+  produceAnimationDisplayIntervalWorkload,
+} from "../animation/gpuRegisterQueue.ts";
 import {
   FIRE_PUNCH_BURN_MESSAGE_AGE,
   FIRE_PUNCH_BURN_MESSAGE_CLEAR_AGE,
@@ -14491,6 +14496,7 @@ function drawTurn16PostSwitchField(
   fb: Uint8Array,
   partyElapsed: number,
   bounceTick: number,
+  audioVblanksSinceAnchor: number,
   faintAttackAge: number | null = null,
   faintAttackTargetHp: FaintAttackResolutionHp = { startHp: 138, endHp: 79 },
   explicitOpponent: { hp: number; status: "none" | "burn" } | null = null,
@@ -14600,7 +14606,64 @@ function drawTurn16PostSwitchField(
       );
     }
   } else if (faintAttackAge !== null) {
-    const eva = faintAttackAttackerEva(faintAttackAge);
+    const sourceEva = faintAttackAttackerEva(faintAttackAge);
+    const nextEva = faintAttackAttackerEva(faintAttackAge + 1);
+    const bldalpha = (16 - sourceEva) << 8 | sourceEva;
+    const nextBldalpha = (16 - nextEva) << 8 | nextEva;
+    const workload = produceAnimationDisplayIntervalWorkload({
+      // The bootstrap's VBlank-captured sound state is
+      // pcmDmaCounter=6/c15=8. The display interval begins at the preceding
+      // frame's audio state, before VBlank decrements/reloads the counters.
+      vblanksSinceAudioAnchor: Math.max(0, audioVblanksSinceAnchor - 1),
+      pcmDma: {
+        counterAtAnchor: 6,
+        period: 7,
+        cgbCounterAtAnchor: 8,
+        cgbPeriod: 15,
+        mixerOverrunCgbPhases: [3],
+      },
+      gpuWrites:
+        nextBldalpha === bldalpha
+          ? []
+          : [{ offset: 0x52, value: nextBldalpha }],
+    });
+    const view = sceneOnFaintAttackView({
+      age: faintAttackAge,
+      config: {
+        move: "FAINT_ATTACK",
+        attacker: {
+          species: "MURKROW",
+          geometry: {
+            side: "opponent",
+            spriteCorner: MURKROW_CORNER,
+            animationCenter: { x: 176, y: 51 },
+            battlePositionCenter: { x: 176, y: 40 },
+          },
+        },
+        target: {
+          species: "MAGBY",
+          geometry: {
+            side: "player",
+            spriteCorner: FORCED_SWITCH_MAGBY_CORNER,
+            animationCenter: { x: 72, y: 91 },
+            battlePositionCenter: { x: 72, y: 80 },
+          },
+        },
+        animationProfile: FAINT_ATTACK_ANIMATION_PROFILE,
+        fieldProfile: {
+          playerHp: 138,
+          opponentHp: 110,
+          playerStatus: "none",
+        },
+      },
+      gpuRegisterPresentation: {
+        beforeInterval: createAnimationGpuRegisterState({
+          [0x52]: bldalpha,
+        }),
+        workload,
+      },
+    });
+    const eva = view.attackerEva;
     if (eva > 0) {
       const offset = faintAttackAttackerOffset(faintAttackAge);
       if (eva === 16) {
@@ -14685,7 +14748,13 @@ function drawTurn16FightSubmenuWindow(
     const redrawTick = TICK0 + turn17MenuRedrawElapsed;
     const settledBounceTick = 1748 + t - redrawTick;
     if (t < revealTick) {
-      drawTurn16PostSwitchField(fb, partyElapsed, settledBounceTick, TURN16_SETTLED_OWNED_AGE);
+      drawTurn16PostSwitchField(
+        fb,
+        partyElapsed,
+        settledBounceTick,
+        t,
+        TURN16_SETTLED_OWNED_AGE,
+      );
       drawTurn15MagbySettledMenuChrome(fb);
       return;
     }
@@ -14720,6 +14789,7 @@ function drawTurn16FightSubmenuWindow(
       fb,
       partyElapsed,
       bounceTick,
+      t,
       resolutionAge ?? TURN16_SETTLED_OWNED_AGE,
       resolutionAge === null ? undefined : targetHp,
       resolutionAge === null ? null : { hp: 58, status: "burn" },
@@ -14880,7 +14950,12 @@ function drawTurn16FightSubmenuWindow(
   }
 
   if (t < revealTick) {
-    drawTurn16PostSwitchField(fb, partyElapsed, partySendOutMenuBounceTick(openPartyElapsed));
+    drawTurn16PostSwitchField(
+      fb,
+      partyElapsed,
+      partySendOutMenuBounceTick(openPartyElapsed),
+      t,
+    );
     drawTurn15MagbySettledMenuChrome(fb);
     return;
   }
@@ -14907,6 +14982,7 @@ function drawTurn16FightSubmenuWindow(
     fb,
     partyElapsed,
     turn17BounceTick ?? partySendOutMenuBounceTick(bouncePartyElapsed),
+    t,
     ownedAnimationAge,
   );
 

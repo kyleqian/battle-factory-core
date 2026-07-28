@@ -54,6 +54,123 @@ export interface AnimationDisplayIntervalWorkload {
   readonly steps: readonly AnimationCpuWorkloadStep[];
 }
 
+export interface AnimationPcmDmaSchedule {
+  /** Source `gSoundInfo.pcmDmaCounter` at the scheduler anchor. */
+  readonly counterAtAnchor: number;
+  /** Source `gSoundInfo.pcmDmaPeriod`. */
+  readonly period: number;
+  /** Source `gSoundInfo.c15` at the same anchor. */
+  readonly cgbCounterAtAnchor: number;
+  /** CgbSound's fixed 15-state countdown. */
+  readonly cgbPeriod: number;
+  /**
+   * Audio phases whose active-channel mix reaches the measured VBlank
+   * overrun. This is soundtrack workload, independent of battle callbacks.
+   */
+  readonly mixerOverrunCgbPhases: readonly number[];
+}
+
+export interface AnimationSourceWorkloadInput {
+  /** Number of VBlanks advanced by the audio scheduler since its anchor. */
+  readonly vblanksSinceAudioAnchor: number;
+  readonly pcmDma: AnimationPcmDmaSchedule;
+  readonly gpuWrites: readonly AnimationGpuRegisterWrite[];
+}
+
+function positiveModulo(value: number, modulus: number): number {
+  return ((value % modulus) + modulus) % modulus;
+}
+
+/**
+ * Advances m4a's periodic PCM DMA counter without knowing any battle clock.
+ * `m4aSoundVSync` decrements it once per VBlank and reloads `pcmDmaPeriod`
+ * when it reaches zero.
+ *
+ * Source: `src/m4a_1.s:1071-1090`.
+ */
+export function animationPcmDmaCounterAtVblank(
+  schedule: AnimationPcmDmaSchedule,
+  vblanksSinceAnchor: number,
+): number {
+  if (
+    !Number.isInteger(schedule.period)
+    || schedule.period <= 0
+    || !Number.isInteger(schedule.counterAtAnchor)
+    || schedule.counterAtAnchor < 1
+    || schedule.counterAtAnchor > schedule.period
+  ) {
+    throw new RangeError("PCM DMA schedule requires 1 <= counterAtAnchor <= period");
+  }
+  if (!Number.isInteger(vblanksSinceAnchor) || vblanksSinceAnchor < 0) {
+    throw new RangeError("PCM DMA VBlank count must be a nonnegative integer");
+  }
+  return 1 + positiveModulo(
+    schedule.counterAtAnchor - 1 - vblanksSinceAnchor,
+    schedule.period,
+  );
+}
+
+export function animationCgbCounterAtVblank(
+  schedule: AnimationPcmDmaSchedule,
+  vblanksSinceAnchor: number,
+): number {
+  if (
+    !Number.isInteger(schedule.cgbPeriod)
+    || schedule.cgbPeriod <= 0
+    || !Number.isInteger(schedule.cgbCounterAtAnchor)
+    || schedule.cgbCounterAtAnchor < 0
+    || schedule.cgbCounterAtAnchor >= schedule.cgbPeriod
+  ) {
+    throw new RangeError("CGB schedule requires 0 <= counterAtAnchor < period");
+  }
+  if (!Number.isInteger(vblanksSinceAnchor) || vblanksSinceAnchor < 0) {
+    throw new RangeError("CGB VBlank count must be a nonnegative integer");
+  }
+  return positiveModulo(
+    schedule.cgbCounterAtAnchor - vblanksSinceAnchor,
+    schedule.cgbPeriod,
+  );
+}
+
+/**
+ * Produces the source-ordered work between displayed samples.
+ *
+ * The stock Scene-ON audio configuration has no SoundMain scanline cap
+ * (`maxLines=0`). When its PCM reload and active-channel CGB workload phases
+ * coincide, the mixer consumes the remaining blanking interval and
+ * `CB2_BattleMain` resumes at VCOUNT 224; ordinary intervals resume after
+ * `WaitForVBlank` at VCOUNT 3. These are component workload receipts, not
+ * animation or controller boundaries.
+ *
+ * Sources: `src/main.c:337-369`, `src/m4a_1.s:35-76,1071-1090`, and
+ * `src/battle_main.c:2247-2267`.
+ */
+export function produceAnimationDisplayIntervalWorkload(
+  input: AnimationSourceWorkloadInput,
+): AnimationDisplayIntervalWorkload {
+  const pcmCounter = animationPcmDmaCounterAtVblank(
+    input.pcmDma,
+    input.vblanksSinceAudioAnchor,
+  );
+  const cgbCounter = animationCgbCounterAtVblank(
+    input.pcmDma,
+    input.vblanksSinceAudioAnchor,
+  );
+  const audioMixerOverruns =
+    pcmCounter === 1
+    && input.pcmDma.mixerOverrunCgbPhases.includes(cgbCounter);
+  return {
+    steps: [
+      { kind: "copy-buffered-registers", vcount: 166 },
+      {
+        kind: "run-tasks",
+        vcount: audioMixerOverruns ? 224 : 3,
+        gpuWrites: input.gpuWrites,
+      },
+    ],
+  };
+}
+
 export function createAnimationGpuRegisterState(
   hardware: Readonly<Record<number, number>> = {},
 ): AnimationGpuRegisterState {

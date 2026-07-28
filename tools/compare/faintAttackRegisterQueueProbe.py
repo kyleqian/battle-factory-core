@@ -56,6 +56,10 @@ REG_VCOUNT = 0x04000006
 REG_BLDALPHA = 0x04000052
 TASKS = 0x03005E00
 TASK_SIZE = 0x28
+SOUND_INFO = 0x03006380
+PCM_DMA_COUNTER = 0x03002F50
+SOUND_CHANNELS_OFFSET = 80
+SOUND_CHANNEL_SIZE = 64
 FADE_STEP_THUMB = 0x0811381D
 FADE_STEP_START = 0x0811381C
 FADE_STEP_END = 0x08113884
@@ -117,6 +121,21 @@ def snapshot(oracle: EmeraldOracle, frame: int, pc: int | None = None) -> dict[s
         "waitingIndex": waiting_index(oracle),
         "bufferLocked": oracle.read_u8(GPU_BUFFER_LOCKED),
         "hardwareBldalpha": u16(oracle, REG_BLDALPHA),
+        "audio": {
+            "pcmDmaCounter": oracle.read_u8(SOUND_INFO + 4),
+            "vblankPcmDmaCounter": oracle.read_u8(PCM_DMA_COUNTER),
+            "reverb": oracle.read_u8(SOUND_INFO + 5),
+            "maxChannels": oracle.read_u8(SOUND_INFO + 6),
+            "c15": oracle.read_u8(SOUND_INFO + 10),
+            "pcmDmaPeriod": oracle.read_u8(SOUND_INFO + 11),
+            "maxLines": oracle.read_u8(SOUND_INFO + 12),
+            "activeChannelFlags": [
+                oracle.read_u8(
+                    SOUND_INFO + SOUND_CHANNELS_OFFSET + channel * SOUND_CHANNEL_SIZE
+                )
+                for channel in range(oracle.read_u8(SOUND_INFO + 6))
+            ],
+        },
     }
 
 
@@ -147,6 +166,7 @@ def run_one(label: str) -> dict[str, object]:
     current_run = label
     oracle = EmeraldOracle(ROM, MAP, BOOTSTRAP)
     oracle.new_session()
+    audio_anchor = snapshot(oracle, 0)["audio"]
     frame = replay_prefix(oracle, PREFIX_TRACE[label])
     expected_prefix_end = ANIMATION_START[label] - 1
     if frame != expected_prefix_end:
@@ -217,6 +237,7 @@ def run_one(label: str) -> dict[str, object]:
 
     return {
         "label": label,
+        "audioAnchor": audio_anchor,
         "animationStartFrame": ANIMATION_START[label],
         "firstSteppedAge": FIRST_STEPPED_AGE,
         "lastSteppedAge": LAST_STEPPED_AGE,
