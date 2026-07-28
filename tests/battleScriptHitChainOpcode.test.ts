@@ -299,6 +299,35 @@ describe("production accuracycheck (Cmd_accuracycheck) dispatch", () => {
     expect(result.state.rulesContext.missType).toBe(0); // B_MSG_MISSED
   });
 
+  it("the target Foresight bit makes the shared accuracy path ignore target evasion", () => {
+    const target = {
+      statStages: [6, 6, 6, 6, 6, 6, 6, 12] as const,
+    };
+    const without = stepFrom(
+      "BattleScript_HitFromAccCheck",
+      context(0, {}, {}, target),
+      1,
+    ).result;
+    expect(without.kind).toBe("advanced");
+    if (without.kind !== "advanced") throw new Error("expected advance");
+    expect(without.state.programCounter).toBe(labelPc("BattleScript_PrintMoveMissed"));
+
+    const withForesight = stepFrom(
+      "BattleScript_HitFromAccCheck",
+      context(0, {}, {}, {
+        ...target,
+        status2: 1 << 29,
+      }),
+      1,
+    ).result;
+    expect(withForesight.kind).toBe("advanced");
+    if (withForesight.kind !== "advanced") throw new Error("expected advance");
+    expect(withForesight.state.programCounter).toBe(
+      labelPc("BattleScript_HitFromAtkString"),
+    );
+    expect(withForesight.state.rng.calls).toBe(1);
+  });
+
   it("Protect: jumps to the miss target with zero RNG and B_MSG_PROTECTED", () => {
     const rc = context(0, {}, {}, { protected: 1 });
     const { result } = stepFrom("BattleScript_HitFromAccCheck", rc, 1);
@@ -782,11 +811,11 @@ describe("production typecalc (Cmd_typecalc) dispatch", () => {
     expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_LEVITATE);
   });
 
-  it("Foresight lets Normal hit a Ghost target (skips only the immunity table row)", () => {
+  it("Foresight lets Low Kick hit a Ghost target through the shared Fighting type consumer", () => {
     const rc = context(
       0,
       { types: ["TYPE_WATER", "TYPE_WATER"] }, // avoid STAB muddying the pinned 10
-      { battleMoveDamage: 10 },
+      { currentMove: 67 /* MOVE_LOW_KICK, TYPE_FIGHTING */, battleMoveDamage: 10 },
       { types: ["TYPE_GHOST", "TYPE_GHOST"], status2: 1 << 29 },
     );
     const { result } = stepAtOpcode("B_SCR_OP_TYPECALC", rc);
