@@ -149,13 +149,13 @@ describe("source-complete TRYMIRRORMOVE / EFFECT_MIRROR_MOVE", () => {
     expect(state.rng).toMatchObject({ calls: 0, ledger: [] });
   });
 
-  it("dynamically enters a selected blocked effect and returns its honest runtime unsupported receipt", () => {
+  it("dynamically enters the now-registered Snatch effect with zero selector or setter draws", () => {
     const state = run(rules(SNATCH));
     expect(state.rulesContext.currentMove).toBe(SNATCH);
-    expect(state.haltReason).toMatchObject({
-      kind: "unsupported-opcode",
-      opcodeName: "B_SCR_OP_TRYSETSNATCH",
-      dispatcher: "Cmd_trysetsnatch",
+    expect(state.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
+    expect(state.rulesContext.battlers[0]).toMatchObject({
+      stealMove: 1,
+      ppNotAffectedByPressure: 1,
     });
     expect(state.rng).toMatchObject({ calls: 0, ledger: [] });
   });

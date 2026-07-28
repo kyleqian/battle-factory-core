@@ -1,3 +1,26 @@
+## 638 — [BOUNDED MAIN WORKER 2026-07-28 ~15:40] Fake Tears full controller window exact
+
+- **State:** committed `65ba2357`; Fake Tears is **322/322 shared-framebuffer
+  exact twice fresh in both orientations**, with all five phase audits at
+  zero mismatches. Tree is green at **422 files / 4646 tests**, production
+  build, OFF oracle info, and `git diff --check`.
+- **Did:** added typed pre-kickoff move-selection receipts and reused the
+  generic live fight-menu renderer; pinned the message printer's displayed
+  one-frame lag/final catch-up and the move-end cleanup frame's retained
+  result text. RAM/OAM showed `SpriteCallbackDummy` and constant battler OAM:
+  the apparent Delcatty idle residual was region spill from menu/text pixels,
+  so no species idle program was added.
+- **Next:** supervisor may hand the exact typed seam to the animation lane;
+  main resumes its separately assigned frontier-tail row.
+- **Notes:** source **87/87**, pre **37/37 player + 41/41 opponent**,
+  stat/status **89/89**, message/post **108/108 + 104/104**, cleanup **1/1**
+  each; evidence/RGB digests identical twice. `fakeTearsPortable.ts` only
+  changed mechanically from expected-residual to exact acceptance/output.
+  No canonical import, baked frame, absolute tick, source-reducer idle,
+  RNG/kernel, boundary-list, coverage-ledger, or unsupported barrier change.
+
+---
+
 ## 637 — [BOUNDED MAIN WORKER 2026-07-28 ~15:25] Fake Tears resolved stat-drop seam; middle phases exact
 
 - **State:** tree green at **422 files / 4646 tests**, production build, and

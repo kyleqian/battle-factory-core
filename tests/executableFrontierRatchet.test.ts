@@ -120,7 +120,10 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // 18 -> 16 (Lock On / Mind Reader): both accuracy forms now apply the
   // source's packed-status + battlerWithSureHit ownership predicate.
   ["src/engine/battleScriptHitChainOpcode.ts", 16],
-  ["src/engine/battleScriptAttackCancelerOpcode.ts", 4],
+  // 4 -> 3 (Snatch row 5c): the action-order redirect, PressurePPLose,
+  // winner-only flag consumption, and pushed BattleScript_SnatchedMove
+  // continuation are now live; Lightning Rod remains the adjacent barrier.
+  ["src/engine/battleScriptAttackCancelerOpcode.ts", 3],
   ["src/engine/battleScriptMoveEndOpcode.ts", 7],
   ["src/engine/battleScriptJumpifbyteOpcode.ts", 1],
   // Forced-switch ground truth §4 slice 1: one operand-shape barrier, shared

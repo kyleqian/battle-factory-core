@@ -13,6 +13,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 641 — [BOUNDED MAIN WORKER 2026-07-28 ~16:20] Frontier-tail row 5c Snatch source-complete
+
+- **State:** ready to commit; tree green at **425 files / 4661 tests**,
+  production build, OFF oracle info, and `git diff --check`. Census is exactly
+  **210/214 effects, 351/355 moves, 275/276 distinct, 2955/2957 weighted**:
+  assigned-baseline delta **+1/+1/+0/+0**; all **70** validations pass.
+- **Did:** registered `B_SCR_OP_TRYSETSNATCH` and the canceler's real
+  action-order redirect. The winner-only flag clear, Pressure Snatch-PP
+  charge/controller update, pushed canceler continuation, snatch role
+  attribution, animation event, attacker/target swap, and return are live.
+- **Next:** supervisor verify this commit; continue only at ordered row 6a
+  Assist, not later tail rows or retired canonical Battle 2 work.
+- **Notes:** consumed both mandatory Snatch/canceler evidence docs. Tests pin
+  battler-ID/order disagreement, 0/1 Pressure, last-action failure, normal
+  Snatch and stolen-owner PP, `attacker=0,target=0,effectBattler=1`, winner-only
+  consumption, push/return, cleanup, and zero draws. Deliberate handler pin
+  **202→205** (setter plus two resume-script role opcodes); canceler barrier
+  pin **4→3**. No canonical import, recording, round, tick, or roadmap change.
+
+
+---
 ## 640 — [BOUNDED MAIN WORKER 2026-07-28 ~16:08] Frontier-tail row 5b Imprison source-complete
 
 - **State:** committed `8a8aec19`; tree green at **424 files / 4658 tests**,
@@ -52,30 +73,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   HitChain **18→16**, Switchin **8→6**, TryKO **2→1**; handler exact-set
   **200→201**. No new barrier, canonical import, presentation, round, tick,
   roadmap, issue, or oracle-trace change.
-
-
----
-
-## 638 — [BOUNDED MAIN WORKER 2026-07-28 ~15:40] Fake Tears full controller window exact
-
-- **State:** committed `65ba2357`; Fake Tears is **322/322 shared-framebuffer
-  exact twice fresh in both orientations**, with all five phase audits at
-  zero mismatches. Tree is green at **422 files / 4646 tests**, production
-  build, OFF oracle info, and `git diff --check`.
-- **Did:** added typed pre-kickoff move-selection receipts and reused the
-  generic live fight-menu renderer; pinned the message printer's displayed
-  one-frame lag/final catch-up and the move-end cleanup frame's retained
-  result text. RAM/OAM showed `SpriteCallbackDummy` and constant battler OAM:
-  the apparent Delcatty idle residual was region spill from menu/text pixels,
-  so no species idle program was added.
-- **Next:** supervisor may hand the exact typed seam to the animation lane;
-  main resumes its separately assigned frontier-tail row.
-- **Notes:** source **87/87**, pre **37/37 player + 41/41 opponent**,
-  stat/status **89/89**, message/post **108/108 + 104/104**, cleanup **1/1**
-  each; evidence/RGB digests identical twice. `fakeTearsPortable.ts` only
-  changed mechanically from expected-residual to exact acceptance/output.
-  No canonical import, baked frame, absolute tick, source-reducer idle,
-  RNG/kernel, boundary-list, coverage-ledger, or unsupported barrier change.
-
-
----

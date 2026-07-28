@@ -24,6 +24,7 @@ import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScri
 import type {
   BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
+import { withBattleScriptPartyMemberPp } from "./battleScriptRulesContext.ts";
 import { isDefenderProtected } from "./battleScriptHitChainOpcode.ts";
 import { cancelBattleScriptMultiTurnMoves } from "./battleScriptMultiTurnCancellation.ts";
 import {
@@ -49,6 +50,7 @@ function moveHasFlag(move: number, flag: string): boolean {
 
 const BATTLE_SCRIPT_MOVE_CURSE = 174;
 const BATTLE_SCRIPT_MOVE_MAGIC_COAT = 277;
+const BATTLE_SCRIPT_MOVE_SNATCH = 289;
 const BATTLE_SCRIPT_ABILITY_PRESSURE = 46;
 
 /** IsTwoTurnsMove (battle_script_commands.c:8196-8206). */
@@ -183,8 +185,7 @@ function applyCancelerEffectTransition(
 
 /**
  * The Cmd_attackcanceler tail after Magic Coat continues without bouncing:
- * the Snatch redirect loop (battle_script_commands.c:971-982, absent from
- * every Factory set), Lightning Rod redirection
+ * the Snatch redirect loop (battle_script_commands.c:971-982), Lightning Rod redirection
  * (battle_script_commands.c:984-990, unreachable in Level-50 singles), and
  * the final DEFENDER_IS_PROTECTED check (battle_script_commands.c:992-1006).
  * Snatch/Lightning Rod are evaluated against their real source fields so a
@@ -199,17 +200,59 @@ function resolveTailBranches(
 ): BattleScriptCommandTransition<BattleScriptRulesContext> {
   const { battlersCount } = rulesContext.battleTopology;
   if (moveHasFlag(rulesContext.currentMove, "FLAG_SNATCH_AFFECTED")) {
-    for (let battler = 0; battler < battlersCount; battler += 1) {
-      if ((rulesContext.battlers[battler]!.stealMove ?? 0) === 1) {
-        return unsupportedBranch(
-          context,
-          `Snatch redirect loop: gProtectStructs[battler ${battler}].stealMove is set `
-            + "for a FLAG_SNATCH_AFFECTED move (PressurePPLose, script push, and "
-            + "BattleScript_SnatchedMove handoff are unimplemented)",
-          "battle_script_commands.c",
-          973,
-        );
+    for (let index = 0; index < battlersCount; index += 1) {
+      const winner = rulesContext.battlerByTurnOrder[index] as 0 | 1 | 2 | 3;
+      if ((rulesContext.battlers[winner].stealMove ?? 0) !== 1) continue;
+
+      const attacker = rulesContext.selectorRoles.attacker;
+      if (attacker === null) throw new Error("Snatch redirect requires an attacker role");
+      const owner = rulesContext.battlers[winner];
+      const movePosition = owner.moves.indexOf(BATTLE_SCRIPT_MOVE_SNATCH);
+      const pressure = rulesContext.battlers[attacker].ability === BATTLE_SCRIPT_ABILITY_PRESSURE;
+      const nextPp = pressure && movePosition !== -1 && owner.pp[movePosition] !== 0
+        ? owner.pp[movePosition]! - 1
+        : null;
+      const battlers = Object.freeze(rulesContext.battlers.map((battler, battlerId) => {
+        if (battlerId !== winner) return battler;
+        const pp = nextPp === null
+          ? owner.pp
+          : Object.freeze(owner.pp.map((value, slot) => slot === movePosition ? nextPp : value));
+        return Object.freeze({ ...owner, pp, stealMove: 0 as const });
+      })) as unknown as typeof rulesContext.battlers;
+      let nextRules = Object.freeze({
+        ...rulesContext,
+        battlers,
+        scriptingBattler: winner,
+        ...(nextPp === null ? {} : {
+          party: withBattleScriptPartyMemberPp(
+            rulesContext.party,
+            owner.side,
+            owner.partyIndex,
+            movePosition,
+            nextPp,
+          ),
+        }),
+      });
+      let scheduler = context.state.scheduler;
+      const events = [];
+      if (
+        nextPp !== null
+        && (owner.status2 & BATTLE_SCRIPT_STATUS2_TRANSFORMED) === 0
+      ) {
+        events.push(Object.freeze({
+          kind: "set-battler-pp-data" as const,
+          battler: winner,
+          movePosition,
+          pp: nextPp,
+        }));
+        scheduler = markBattleScriptControllerPending(scheduler, winner);
       }
+      const targetPc = requireLabelProgramCounter(context.program, "BattleScript_SnatchedMove");
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call-current", programCounter: targetPc }),
+        { rulesContext: nextRules, rng, scheduler, events: Object.freeze(events) },
+      );
     }
   }
 
