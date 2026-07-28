@@ -16,15 +16,15 @@ import {
   type BattleScriptInstruction,
   type BattleScriptProgram,
 } from "./battleScriptProgram.ts";
-import type {
-  BattleScriptRulesBattlers,
-  BattleScriptRulesContext,
+import {
+  BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT,
+  type BattleScriptRulesBattlers,
+  type BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
+import { requireBattlerRole } from "./battleScriptHitChainOpcode.ts";
 
 export const BATTLE_SCRIPT_ABILITY_NONE = 0;
 export const BATTLE_SCRIPT_ABILITY_WONDER_GUARD = 25;
-/** include/constants/battle.h:306-310. Kept local to avoid a rules-context import cycle. */
-const MOVE_RESULT_NO_EFFECT = (1 << 0) | (1 << 3) | (1 << 5);
 
 function requireInstruction(
   instruction: BattleScriptInstruction,
@@ -44,25 +44,14 @@ function requireInstruction(
   return failure.expression;
 }
 
-function requireRole(
-  rules: BattleScriptRulesContext,
-  role: "attacker" | "target",
-): 0 | 1 | 2 | 3 {
-  const battler = rules.selectorRoles[role];
-  if (battler === null) {
-    throw new Error(`Cmd_tryswapabilities requires a ${role} role`);
-  }
-  return battler;
-}
-
 function createTryswapabilitiesHandler(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
     const failureExpression = requireInstruction(context.instruction);
     const rules = context.state.rulesContext;
-    const attacker = requireRole(rules, "attacker");
-    const target = requireRole(rules, "target");
+    const attacker = requireBattlerRole(rules, "attacker");
+    const target = requireBattlerRole(rules, "target");
     const attackerAbility = rules.battlers[attacker].ability;
     const targetAbility = rules.battlers[target].ability;
     const fails = (
@@ -72,7 +61,10 @@ function createTryswapabilitiesHandler(
       )
       || attackerAbility === BATTLE_SCRIPT_ABILITY_WONDER_GUARD
       || targetAbility === BATTLE_SCRIPT_ABILITY_WONDER_GUARD
-      || (rules.moveResultFlags & MOVE_RESULT_NO_EFFECT) !== 0
+      || (
+        rules.moveResultFlags
+        & BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT
+      ) !== 0
     );
     if (fails) {
       const failure = resolveBattleScriptLabel(program, failureExpression);

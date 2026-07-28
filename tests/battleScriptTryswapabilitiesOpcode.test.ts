@@ -209,7 +209,7 @@ function runFullTurn(
       types: ["TYPE_BUG", "TYPE_ROCK"],
     },
   });
-  const persistentPartyBefore = initial.rules.rulesContext.party;
+  const modeledPartyBefore = initial.rules.rulesContext.party;
   const afterPlayer = submitFactoryFullTurnDecision(initial, {
     requestId: 1,
     side: "player",
@@ -226,7 +226,7 @@ function runFullTurn(
   if (result.kind !== "decision-required") {
     throw new Error(`expected next-turn decision, got ${result.kind}`);
   }
-  return { initial, persistentPartyBefore, result };
+  return { initial, modeledPartyBefore, result };
 }
 
 describe("source-complete B_SCR_OP_TRYSWAPABILITIES registration", () => {
@@ -341,7 +341,7 @@ describe("source-complete B_SCR_OP_TRYSWAPABILITIES registration", () => {
   });
 
   it("runs the accepted Girafarig/Shuckle action-boundary seed through a generic Factory full turn", () => {
-    const { initial, persistentPartyBefore, result } = runFullTurn(
+    const { initial, modeledPartyBefore, result } = runFullTurn(
       INNER_FOCUS,
       STURDY,
     );
@@ -360,17 +360,17 @@ describe("source-complete B_SCR_OP_TRYSWAPABILITIES registration", () => {
       value: 3_031_698_222,
       calls: 4,
     });
-    // The ordinary Tackle legitimately writes active+party HP. Every party
-    // field this context currently models besides HP stays persistent; the
-    // exact species/abilityNum-derived ability field is the bounded switch
-    // seam remainder pinned in battleScriptSwitchinOpcode.test.ts.
+    // This engine party slice carries species/isEgg/hp/status1/moves, but no
+    // ability or abilityNum. Tackle writes its modeled player HP; these
+    // assertions claim only the carried fields' resulting values. Persistent
+    // abilities 39/5 belong solely to the accepted oracle receipt.
     expect(context.party.player[0]).toEqual({
-      ...persistentPartyBefore.player[0],
+      ...modeledPartyBefore.player[0],
       hp: 172,
     });
-    expect(context.party.opponent[0]).toEqual(persistentPartyBefore.opponent[0]);
-    expect(context.party.player.slice(1)).toEqual(persistentPartyBefore.player.slice(1));
-    expect(context.party.opponent.slice(1)).toEqual(persistentPartyBefore.opponent.slice(1));
+    expect(context.party.opponent[0]).toEqual(modeledPartyBefore.opponent[0]);
+    expect(context.party.player.slice(1)).toEqual(modeledPartyBefore.player.slice(1));
+    expect(context.party.opponent.slice(1)).toEqual(modeledPartyBefore.opponent.slice(1));
     expect(result.events.find(({ payload }) =>
       payload.kind === "set-battler-pp-data"
       && payload.battler === 0
