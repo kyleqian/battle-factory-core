@@ -15,6 +15,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 595 — [BOUNDED MAIN WORKER 2026-07-28 ~05:17] Magic Coat executes through shared reflection
+
+- **State:** committed `eea67d6` + `df318e2` + `ab50198`; tree green at
+  **356 files / 4158 tests**, focused opcode/canceler/full-turn/rules/ratchet
+  coverage **58/58**, and production build. OFF oracle info, census
+  regeneration, all **42/42** checks, ratchets **6/6**, and `git diff
+  --check` pass. Census is exactly **155/214 effects, 284/355 moves,
+  232/276 Factory-L50 distinct, 2753/2957 weighted**.
+- **Did:** globally registered five-byte `0xdf` with its exact failure
+  pointer. It retargets attacker→self and sets attacker-owned
+  `ppNotAffectedByPressure`; last action jumps without arming, otherwise it
+  sets the existing `bounceMove` bit, including repeated arms with no guard.
+  The shared attack canceler now performs the source Pressure PP delegation,
+  clears the target-owned arm, executes `BattleScript_MagicCoatBounce`, and
+  uses the existing `VARIOUS_SET_MAGIC_COAT_TARGET`/Follow Me retarget path.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not widen the generic
+  controller or resume the retired canonical Battle-2 march.
+- **Notes:** handler inventory **162→163**. Generic full-turn Spoink Magic
+  Coat→Onix Tail Whip proves exact PP/message/stat-event order, only Onix
+  Defense **6→5**, and shared action/end-turn cleanup with no active-battler
+  flag leak. The attack-canceler unsupported barrier count deliberately
+  shrank **5→4**; no unsupported barrier was added. No recording import,
+  controller widening, RNG, private handler, presentation/tick branch, issue
+  removal, or DEFERRED item.
+
+---
 ## 594 — [SUPERVISOR VERIFY 2026-07-28 ~05:06] Revenge accepted; Magic Coat evidence folded
 
 - **State:** reviewed union green at **354 files / 4153 tests** and focused
@@ -67,30 +94,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   multiplier 1 with no leak. No unsupported/import ratchet change, recording
   import, private handler, controller widening, animation/presentation/tick
   branch, issue removal, DEFERRED item, or oracle lifecycle action.
-
----
-## 592 — [SUPERVISOR VERIFY 2026-07-28 ~04:56] Foresight accepted; Revenge evidence folded
-
-- **State:** reviewed union green at **351 files / 4139 tests** and focused
-  **275/275**; production build, both-oracle info, census regeneration,
-  freshness/ratchets **15/15**, and `git diff --check` pass. Census is exactly
-  **153/214 effects, 282/355 moves, 230/276 Factory-L50 distinct, 2747/2957
-  weighted**, all **42/42**.
-- **Did:** accepted global Foresight `0xb1` and its shared accuracy/type/full-
-  turn proof after source/diff review, retaining Low Kick's independent weight
-  barrier. Folded Revenge source/OFF evidence and independently replayed exact
-  manifest `a52074df…597dd64`: real Tackle reduces Machop **145→136** before
-  Revenge spends PP, then Chansey visibly falls **325→45**; ProtectStruct
-  history and multiplier causality remain source-only.
-- **Next:** register operand-free
-  `B_SCR_OP_DOUBLEDAMAGEDEALTIFDAMAGED` globally. Reuse the modeled
-  per-turn physical/special ProtectStruct receipts, exact matching-target
-  predicate, per-action multiplier reset, shared damage consumer, and turn
-  cleanup. Expected census:
-  **154/214, 283/355, 231/276, 2750/2957**.
-- **Notes:** handler inventory is **161**; Revenge's undamaged no-double path
-  needs a Tier-1 matrix even though the public receipt stages only the damaged
-  path. No unsupported/import ratchet, recording import, private handler,
-  controller widening, animation/presentation/tick branch, issue removal,
-  DEFERRED item, or oracle lifecycle action. Animation branch remains
-  intentionally unmerged after its post-orient advance.

@@ -1,4 +1,31 @@
 ---
+## 592 — [SUPERVISOR VERIFY 2026-07-28 ~04:56] Foresight accepted; Revenge evidence folded
+
+- **State:** reviewed union green at **351 files / 4139 tests** and focused
+  **275/275**; production build, both-oracle info, census regeneration,
+  freshness/ratchets **15/15**, and `git diff --check` pass. Census is exactly
+  **153/214 effects, 282/355 moves, 230/276 Factory-L50 distinct, 2747/2957
+  weighted**, all **42/42**.
+- **Did:** accepted global Foresight `0xb1` and its shared accuracy/type/full-
+  turn proof after source/diff review, retaining Low Kick's independent weight
+  barrier. Folded Revenge source/OFF evidence and independently replayed exact
+  manifest `a52074df…597dd64`: real Tackle reduces Machop **145→136** before
+  Revenge spends PP, then Chansey visibly falls **325→45**; ProtectStruct
+  history and multiplier causality remain source-only.
+- **Next:** register operand-free
+  `B_SCR_OP_DOUBLEDAMAGEDEALTIFDAMAGED` globally. Reuse the modeled
+  per-turn physical/special ProtectStruct receipts, exact matching-target
+  predicate, per-action multiplier reset, shared damage consumer, and turn
+  cleanup. Expected census:
+  **154/214, 283/355, 231/276, 2750/2957**.
+- **Notes:** handler inventory is **161**; Revenge's undamaged no-double path
+  needs a Tier-1 matrix even though the public receipt stages only the damaged
+  path. No unsupported/import ratchet, recording import, private handler,
+  controller widening, animation/presentation/tick branch, issue removal,
+  DEFERRED item, or oracle lifecycle action. Animation branch remains
+  intentionally unmerged after its post-orient advance.
+
+---
 ## 591 — [BOUNDED MAIN WORKER 2026-07-28 ~04:53] Foresight executes globally; Low Kick entry remains source-bounded
 
 - **State:** committed `d2c651e` + `49da21b`; tree green at **350 files /
