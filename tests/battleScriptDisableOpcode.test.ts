@@ -25,6 +25,9 @@ const program = loadBattleScriptProgram();
 const instruction = program.instructions.find(
   (candidate) => candidate.opcodeName === "B_SCR_OP_DISABLELASTUSEDATTACK",
 )!;
+const incrementGameStatInstruction = program.instructions.find(
+  (candidate) => candidate.opcodeName === "B_SCR_OP_INCREMENTGAMESTAT",
+)!;
 
 function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptRulesBattler {
   return {
@@ -359,7 +362,7 @@ describe("ENDTURN_DISABLE", () => {
 });
 
 describe("Disable through the generic Factory full-turn seam", () => {
-  it("matches Kadabra's OFF PP ledger, forces real Struggle, expires, and restores all Tackle slots", () => {
+  it("filters every disabled duplicate, selects Struggle without Tackle PP loss, and stops at the shared handler frontier", () => {
     let state = createFactoryFullTurnBattleState({
       requestId: 1,
       rngSeed: 9,
@@ -433,8 +436,7 @@ describe("Disable through the generic Factory full-turn seam", () => {
     });
 
     // The next selection sees every duplicate-id slot disabled and exposes
-    // exactly one forced Struggle command. A second Disable spends PP before
-    // its already-disabled failure pointer, while Struggle spends no Tackle PP.
+    // exactly one forced Struggle command.
     const afterDuplicatePlayer = submit("player", 5, 3, 1);
     expect(afterDuplicatePlayer.kind).toBe("decision-required");
     if (afterDuplicatePlayer.kind !== "decision-required") {
@@ -446,34 +448,30 @@ describe("Disable through the generic Factory full-turn seam", () => {
     expect(afterDuplicatePlayer.nextRequest.legalDecisions).toEqual([
       { kind: "use-move", moveSlot: 0, targetBattler: 0 },
     ]);
-    submit("trainer", 6, 0, 0);
+    const struggleBarrier = submit("trainer", 6, 0, 0);
+    expect(struggleBarrier).toMatchObject({
+      kind: "machine-barrier",
+      barrier: {
+        kind: "battle-script",
+        entryLabel: incrementGameStatInstruction.source.label,
+        programCounter: incrementGameStatInstruction.programCounter,
+        opcodeId: 0x60,
+        opcodeName: "B_SCR_OP_INCREMENTGAMESTAT",
+        dispatcher: "Cmd_incrementgamestat",
+      },
+    });
+    if (struggleBarrier.kind !== "machine-barrier") {
+      throw new Error("expected the shared incrementgamestat machine barrier");
+    }
+    expect(struggleBarrier.state.boundary).toEqual({
+      kind: "machine-barrier",
+      barrier: struggleBarrier.barrier,
+    });
     expect(state.rules.rulesContext.battlers[0].pp).toEqual([24, 10, 15, 18]);
     expect(state.rules.rulesContext.battlers[1].pp).toEqual([35, 35, 34, 35]);
-    expect(state.rules.rulesContext.moveHistory.lastMoves[1]).toBe(STRUGGLE);
-    expect(state.rules.rulesContext.battlers[1]).toMatchObject({
-      disabledMove: 0,
-      disableTimer: 0,
-      disableTimerStartValue: 2,
-    });
-
-    // Expiry restores all four duplicate Tackle slots independently. The
-    // resumed slot genuinely executes and decrements its own PP.
-    const afterExpiryPlayer = submit("player", 7, 0, 1);
-    expect(afterExpiryPlayer.kind).toBe("decision-required");
-    if (afterExpiryPlayer.kind !== "decision-required") {
-      throw new Error("expected restored trainer decision");
-    }
-    if (afterExpiryPlayer.nextRequest.kind !== "command") {
-      throw new Error("expected restored Tackle command");
-    }
-    expect(afterExpiryPlayer.nextRequest.legalDecisions).toEqual([
-      { kind: "use-move", moveSlot: 0, targetBattler: 0 },
-      { kind: "use-move", moveSlot: 1, targetBattler: 0 },
-      { kind: "use-move", moveSlot: 2, targetBattler: 0 },
-      { kind: "use-move", moveSlot: 3, targetBattler: 0 },
-    ]);
-    submit("trainer", 8, 0, 0);
-    expect(state.rules.rulesContext.battlers[1].pp).toEqual([34, 35, 34, 35]);
-    expect(state.rules.rulesContext.moveHistory.lastMoves[1]).toBe(TACKLE);
+    expect(state.rules.rulesContext.currentMove).toBe(STRUGGLE);
+    // Cmd_incrementgamestat is intentionally absent from the shared
+    // executable census. Struggle history/recoil and this turn's end-turn
+    // expiry are beyond this boundary and are not claimed here.
   });
 });

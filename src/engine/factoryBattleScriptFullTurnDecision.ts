@@ -78,7 +78,6 @@ import {
   createBattleScriptRngState,
   createBattleScriptSchedulerState,
   stepBattleScriptMachine,
-  transitionBattleScriptCommand,
   type BattleScriptMachineState,
   type BattleScriptOpcodeHandlers,
   type BattleScriptSchedulerState,
@@ -144,68 +143,6 @@ const ZERO_STAT_STAGES = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0] as const);
 
 type MachineState = BattleScriptMachineState<BattleScriptRulesContext>;
 type Handlers = BattleScriptOpcodeHandlers<BattleScriptRulesContext>;
-
-/**
- * Full-turn controller ownership for Cmd_incrementgamestat. Its only source
- * side effect is a persistent save statistic for player-side attackers, not
- * battle state or RNG. Acknowledge its exact two-byte encoding locally so
- * genuine Struggle can traverse the generic full-turn controller without
- * broadening the global executable-move census to save-data ownership.
- */
-function createFullTurnHandlers(
-  ports: BattleScriptStatusRulesExternalPorts,
-): Handlers {
-  const shared = createBattleScriptStatusRulesHandlers(PROGRAM, ports);
-  const instruction = PROGRAM.instructions.find(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_INCREMENTGAMESTAT",
-  );
-  const setEffectInstruction = PROGRAM.instructions.find(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_SETEFFECTWITHCHANCE",
-  );
-  const recoilScript = resolveBattleScriptLabel(PROGRAM, "BattleScript_MoveEffectRecoil");
-  if (
-    !instruction
-    || instruction.opcodeId !== 0x60
-    || instruction.dispatcher !== "Cmd_incrementgamestat"
-    || instruction.operands.length !== 1
-    || instruction.operands[0]?.widthBytes !== 1
-    || !setEffectInstruction
-    || !recoilScript
-  ) {
-    throw new Error("committed Battle Script full-turn controller encoding drifted");
-  }
-  const sharedSetEffect = shared[setEffectInstruction.opcodeId]!;
-  return Object.freeze({
-    ...shared,
-    [instruction.opcodeId]: (context) =>
-      transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" })),
-    [setEffectInstruction.opcodeId]: (context) => {
-      const rules = context.state.rulesContext;
-      // SetMoveEffect's exact MOVE_EFFECT_RECOIL_25 branch for Struggle:
-      // certain + affects-user + effect 14, gHpDealt / 4 (minimum one), then
-      // BattleScriptPush(next) into BattleScript_MoveEffectRecoil.
-      if (
-        rules.currentMove === BATTLE_SCRIPT_MOVE_STRUGGLE
-        && rules.moveEffectByte === (0x80 | 0x40 | 14)
-      ) {
-        const recoilDamage = Math.max(1, Math.trunc(rules.hpDealt / 4));
-        return transitionBattleScriptCommand(
-          context,
-          Object.freeze({ kind: "call", programCounter: recoilScript.programCounter }),
-          {
-            rulesContext: Object.freeze({
-              ...rules,
-              battleMoveDamage: recoilDamage,
-              moveEffectByte: 0,
-              multiHitEffect: 0,
-            }),
-          },
-        );
-      }
-      return sharedSetEffect(context);
-    },
-  });
-}
 
 export type FactoryFullTurnBattlerConfig = Readonly<{
   species: number;
@@ -1152,7 +1089,7 @@ function resumeFullTurnForcedSwitch(
   });
 
   const ports = externalPorts();
-  const handlers = createFullTurnHandlers(ports);
+  const handlers = createBattleScriptStatusRulesHandlers(PROGRAM, ports);
   const orchestration = resumeBattleScriptFaintedActionsAfterPlayerChoice(
     PROGRAM,
     handlers,
@@ -1313,7 +1250,7 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
   const mover2Target: BattleScriptBattlerId = playerFirst ? trainerTarget : playerTarget;
 
   const ports = externalPorts();
-  const handlers = createFullTurnHandlers(ports);
+  const handlers = createBattleScriptStatusRulesHandlers(PROGRAM, ports);
   const rngBefore = ctx.rng.snapshot();
 
   const initialState: MachineState = Object.freeze({
