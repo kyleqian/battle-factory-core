@@ -15,7 +15,7 @@ describe("MOVE_REFLECT source presentation assets", () => {
     });
     expect(reflectAsset.blueLightWall.tileset).toMatchObject({ columns: 8, rows: 8 });
     expect(reflectAsset.sparkle4.tileset).toMatchObject({ columns: 4, rows: 20 });
-    expect(reflectAsset.shuppetFront.tileset).toMatchObject({ columns: 8, rows: 16 });
+    expect(reflectAsset.shuppetFront.tileset).toMatchObject({ columns: 8, rows: 8 });
     expect(reflectAsset.templates).toMatchObject({
       reflectWall: { oam: "gOamData_AffineOff_ObjBlend_64x64", subpriority: 1 },
       reflectSparkle: { oam: "gOamData_AffineOff_ObjNormal_32x32", frames: [0, 16, 32, 48, 64], subpriority: 2 },
