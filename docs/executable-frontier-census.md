@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 139 | 214 | 65.0% |
-| Moves (unweighted, all 355) | 264 | 355 | 74.4% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 216 | 276 | 78.3% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2691 | 2957 | 91.0% |
+| Effect scripts | 140 | 214 | 65.4% |
+| Moves (unweighted, all 355) | 266 | 355 | 74.9% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 217 | 276 | 78.6% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2696 | 2957 | 91.2% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -24,7 +24,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | Missing opcode(s) | Effects unlocked | Moves unlocked (unweighted) | Factory-L50 moves (unweighted) | Factory-L50 weighted |
 | --- | --- | --- | --- | --- |
 | `B_SCR_OP_GETSECRETPOWEREFFECT` | 1 (EFFECT_SECRET_POWER) | 1 | 1 | 6 |
-| `B_SCR_OP_TRYSETFUTUREATTACK` | 1 (EFFECT_FUTURE_SIGHT) | 2 | 1 | 5 |
 | `B_SCR_OP_DISABLELASTUSEDATTACK` | 1 (EFFECT_DISABLE) | 1 | 1 | 5 |
 | `B_SCR_OP_FURYCUTTERCALC` | 1 (EFFECT_FURY_CUTTER) | 1 | 1 | 5 |
 | `B_SCR_OP_SETFORCEDTARGET` | 1 (EFFECT_FOLLOW_ME) | 1 | 1 | 5 |
@@ -48,6 +47,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_MAXATTACKHALVEHP` | 1 (EFFECT_BELLY_DRUM) | 1 | 1 | 2 |
 | `B_SCR_OP_METRONOME` | 1 (EFFECT_METRONOME) | 1 | 1 | 2 |
 | `B_SCR_OP_PAINSPLITDMGCALC` | 1 (EFFECT_PAIN_SPLIT) | 1 | 1 | 2 |
+| `B_SCR_OP_SETFOCUSENERGY` | 1 (EFFECT_FOCUS_ENERGY) | 1 | 1 | 2 |
 
 ## Per-effect detail
 
@@ -201,7 +201,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_SKULL_BASH | `BattleScript_EffectSkullBash` | executable | - | - | 1 | 0 (0) |
 | EFFECT_TWISTER | `BattleScript_EffectTwister` | executable | - | - | 1 | 0 (0) |
 | EFFECT_EARTHQUAKE | `BattleScript_EffectEarthquake` | executable | - | - | 1 | 1 (147) |
-| EFFECT_FUTURE_SIGHT | `BattleScript_EffectFutureSight` | blocked-on-opcodes | `B_SCR_OP_TRYSETFUTUREATTACK` (main path) | - | 2 | 1 (5) |
+| EFFECT_FUTURE_SIGHT | `BattleScript_EffectFutureSight` | executable | - | - | 2 | 1 (5) |
 | EFFECT_GUST | `BattleScript_EffectGust` | executable | - | - | 1 | 0 (0) |
 | EFFECT_FLINCH_MINIMIZE_HIT | `BattleScript_EffectStomp` | executable | - | - | 4 | 4 (10) |
 | EFFECT_SOLAR_BEAM | `BattleScript_EffectSolarBeam` | executable | - | - | 1 | 1 (16) |
