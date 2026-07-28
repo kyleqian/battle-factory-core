@@ -15,6 +15,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 627 — [BOUNDED MAIN WORKER 2026-07-28 ~12:41] Will-O-Wisp + Haze source-complete
+
+- **State:** tree green at **393 files / 4494 tests**, production build, OFF
+  oracle info, and `git diff --check`. Census is exactly **191/214 effects,
+  331/355 moves, 271/276 distinct, 2951/2957 weighted**: inherited-baseline
+  delta **+2/+2/+2/+11**; all **70** census validations pass.
+- **Did:** widened `Cmd_jumpifability` to source value 41/Water Veil and
+  walked Will-O-Wisp success, immunity, and already-statused paths through
+  the existing burn callback to END. Registered `NORMALISEBUFFS` as the
+  source loop over every battler/all eight stage slots; Haze changes no
+  status or DisableStruct state.
+- **Next:** supervisor verify commits `6c2fdbbb` and `7fae3e10`; both assigned
+  flips are complete. Resume the supervisor's ranked order without expanding
+  into Present, Memento, Role Play, Recycle, Metronome, or zero-weight rows.
+- **Notes:** Will-O-Wisp success draws accuracy exactly once; Water Veil and
+  already-statused branches draw zero. Haze draws zero and is tested after
+  six real prior moves per side stage all seven relevant stats. Canonical
+  replays are exact. Deliberate exact-set moves: Will-O-Wisp's Water Veil
+  blocker and Haze's opcode blocker now require executable/empty; handler
+  surface **184→185**. No new barriers, recording imports, presentation,
+  round, tick, roadmap, issue, or oracle-trace changes.
+
+---
 ## 626 — [BOUNDED MAIN WORKER 2026-07-28 ~12:29] Family-B Cluster 4 source-complete
 
 - **State:** tree green at **392 files / 4487 tests**, production build, OFF
@@ -55,25 +78,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   switch persistence, full scripts to END, canonical replay, and exact
   four-draw ledgers. No new barriers, recording imports, presentation, round,
   tick, roadmap, issue, or oracle-trace changes.
-
----
-## 624 — [BOUNDED MAIN WORKER 2026-07-28 ~12:16] Rapid Spin cleanup source-complete
-
-- **State:** tree green at **391 files / 4466 tests**, production build, OFF
-  oracle info, and `git diff --check`. Census is exactly **186/214 effects,
-  325/355 moves, 267/276 distinct, 2932/2957 weighted**: inherited-baseline
-  delta **+1/+1/+1/+1**; all **64** census validations pass.
-- **Did:** registered source-order `RAPIDSPINFREE`: Wrap saves/restores the
-  original target, clears trapping plus `wrappedBy`, and prepares the typed
-  wrapped-move message; Leech Seed clears status plus owner bits; same-side
-  Spikes clears its status plus layer count. The exact
-  `gBattlerTarget <- sBATTLER` copy tuple and family-B byte are executable.
-- **Next:** supervisor verify this commit. Rapid Spin has no remainder; resume
-  the supervisor's ranked order without expanding into Thief/Knock Off/Pay
-  Day or Metronome from this worker.
-- **Notes:** all individual conditions, all-set priority, none-set no-op,
-  full committed script to END, deterministic replay, and cleanup-local zero
-  RNG are pinned. Deliberate exact-set moves: Rapid Spin's missing-opcode and
-  copy-tuple blockers now require executable; handler surface **182→183**.
-  No new barriers, recording imports, presentation, round, tick, roadmap,
-  issue, or oracle-trace changes.

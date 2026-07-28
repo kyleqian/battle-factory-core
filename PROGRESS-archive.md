@@ -1,4 +1,26 @@
 ---
+## 624 — [BOUNDED MAIN WORKER 2026-07-28 ~12:16] Rapid Spin cleanup source-complete
+
+- **State:** tree green at **391 files / 4466 tests**, production build, OFF
+  oracle info, and `git diff --check`. Census is exactly **186/214 effects,
+  325/355 moves, 267/276 distinct, 2932/2957 weighted**: inherited-baseline
+  delta **+1/+1/+1/+1**; all **64** census validations pass.
+- **Did:** registered source-order `RAPIDSPINFREE`: Wrap saves/restores the
+  original target, clears trapping plus `wrappedBy`, and prepares the typed
+  wrapped-move message; Leech Seed clears status plus owner bits; same-side
+  Spikes clears its status plus layer count. The exact
+  `gBattlerTarget <- sBATTLER` copy tuple and family-B byte are executable.
+- **Next:** supervisor verify this commit. Rapid Spin has no remainder; resume
+  the supervisor's ranked order without expanding into Thief/Knock Off/Pay
+  Day or Metronome from this worker.
+- **Notes:** all individual conditions, all-set priority, none-set no-op,
+  full committed script to END, deterministic replay, and cleanup-local zero
+  RNG are pinned. Deliberate exact-set moves: Rapid Spin's missing-opcode and
+  copy-tuple blockers now require executable; handler surface **182→183**.
+  No new barriers, recording imports, presentation, round, tick, roadmap,
+  issue, or oracle-trace changes.
+
+---
 ## 623 — [BOUNDED MAIN WORKER 2026-07-28 ~12:02] Ranked Batch 3 source-complete
 
 - **State:** tree green at **391 files / 4460 tests**, production build, OFF
