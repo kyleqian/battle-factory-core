@@ -54,5 +54,7 @@ The manifest exposes status2, HP, PP, controller state, RNG, and framebuffer
 hashes, but not the transient hit-marker word, script PC, or decoded dialogue
 text. The source is therefore the evidence for the precise hit-marker transfer
 and strings; the oracle route proves the live bit, real PP/RNG consequences,
-and actual dual faint without fabricating transient state. This is evidence
-only: no opcode or effect registration is implemented here.
+and actual dual faint without fabricating transient state. This evidence was
+banked before the executable implementation; `410c751` subsequently registered
+the opcode and pinned the genuine effect, nested avenging returns, passive HP
+update, both faint scripts, action-lifetime clear, and ordinary no-bond path.

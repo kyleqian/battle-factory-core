@@ -1,4 +1,31 @@
 ---
+## 548 — [SUPERVISOR WIND-DOWN 2026-07-27 ~22:20] Focus Punch OFF branch evidence merged reproducibly
+
+- **State:** final union green at **300 files / 3862 tests**; `npm run
+  build`, oracle freshness, and `git diff --check` pass. The unchanged
+  Battle-2 OFF seam remains **16/16 exact**; census remains **132/214
+  effects, 256/355 moves, 208/276 Factory-L50 distinct, 2631/2957 weighted**
+  with all **42/42** checks.
+- **Did:** independently replayed and merged `d880c5c`'s paired legal
+  Focus Punch scenarios. Physical damage **135→111** falls through to the
+  lost-focus route; Light Screen leaves Breloom **135/135**, so the same
+  opcode jumps into the hit chain and damages Starmie **135→66**. Both spend
+  Focus Punch PP **20→19** and reproduced byte-identical manifests:
+  damaged `380326f3…b19`, undamaged `6df18da0…c53`.
+- **Next:** register the source-complete five-byte
+  `B_SCR_OP_JUMPIFNODAMAGE` / `Cmd_jumpifnodamage`, carrying the attacker's
+  physical/special damage receipts through the generic turn state. Pin both
+  receipt fields, both branch polarities, the exact pointer, and genuine
+  Focus Punch lost-focus/hit-chain terminal walks.
+- **Notes:** `animation-main` advanced after this session's orient fold and
+  now has 13 commits absent from `master` (head `a158d9c`); leave its active
+  animation-supervisor worktree untouched and fold it at the next main
+  orient. Focus evidence's honest boundary is that the lab manifest does not
+  expose raw `ProtectStruct` receipt words; source pins their reset/write
+  sites. No production recording import, oracle lifecycle action, animation
+  edit, DEFERRED item, or PAPERCUT.
+
+---
 ## 547 — [SUPERVISOR SOURCE REVIEW 2026-07-27 ~22:18] Baton Pass registration tightened before acceptance
 
 - **State:** reviewed tree green at **299 files / 3857 tests**; `npm run
