@@ -300,6 +300,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
           types: ["TYPE_GRASS", "TYPE_GRASS"],
           partyIndex: 2,
           ability: ABILITY_GUTS,
+          status3: 1 << 8, // STATUS3_MINIMIZED is deliberately excluded from the Baton Pass mask.
         }),
         battler({ side: 0 }),
         battler({ side: 1 }),
@@ -339,6 +340,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(result.state.rulesContext.battlers[0].status3).toBe(
       STATUS3_ALWAYS_HITS_TURN_2,
     );
+    expect(result.state.rulesContext.battlers[1].status3 & (1 << 8)).toBe(0);
   });
 
   it("switchindataupdate: doubles wrap ownership stays behind a named identity barrier", () => {

@@ -2963,7 +2963,7 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
           hp: 0,
           status1: 0x40,
           status2: 0x1234,
-          status3: 0x8,
+          status3: 0x108, // includes STATUS3_MINIMIZED; FaintClearSetData owns the whole-slot clear.
           statStages: [2, 3, 4, 5, 6, 7, 8, 9],
           rolloutTimer: 3,
           furyCutterCounter: 2,

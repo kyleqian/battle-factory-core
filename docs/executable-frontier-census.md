@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 142 | 214 | 66.4% |
-| Moves (unweighted, all 355) | 268 | 355 | 75.5% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 219 | 276 | 79.3% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2706 | 2957 | 91.5% |
+| Effect scripts | 143 | 214 | 66.8% |
+| Moves (unweighted, all 355) | 269 | 355 | 75.8% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 220 | 276 | 79.7% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2711 | 2957 | 91.7% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -25,7 +25,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | --- | --- | --- | --- | --- |
 | `B_SCR_OP_GETSECRETPOWEREFFECT` | 1 (EFFECT_SECRET_POWER) | 1 | 1 | 6 |
 | `B_SCR_OP_SETFORCEDTARGET` | 1 (EFFECT_FOLLOW_ME) | 1 | 1 | 5 |
-| `B_SCR_OP_SETMINIMIZE` | 1 (EFFECT_MINIMIZE) | 1 | 1 | 5 |
 | `B_SCR_OP_TRYSETHELPINGHAND` | 1 (EFFECT_HELPING_HAND) | 1 | 1 | 5 |
 | `B_SCR_OP_TRYSWAPABILITIES` | 1 (EFFECT_SKILL_SWAP) | 1 | 1 | 5 |
 | `B_SCR_OP_TRYSWAPITEMS` | 1 (EFFECT_TRICK) | 1 | 1 | 5 |
@@ -48,6 +47,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_SETFOCUSENERGY` | 1 (EFFECT_FOCUS_ENERGY) | 1 | 1 | 2 |
 | `B_SCR_OP_SETTAUNT` | 1 (EFFECT_TAUNT) | 1 | 1 | 2 |
 | `B_SCR_OP_STOCKPILE` | 1 (EFFECT_STOCKPILE) | 1 | 1 | 2 |
+| `B_SCR_OP_STOCKPILETOHPHEAL` | 1 (EFFECT_SWALLOW) | 1 | 1 | 2 |
 
 ## Per-effect detail
 
@@ -161,7 +161,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_THIEF | `BattleScript_EffectThief` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_STEAL_ITEM is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 2 | 1 (1) |
 | EFFECT_MEAN_LOOK | `BattleScript_EffectMeanLook` | blocked-on-subsystem | - | Cmd_seteffectprimary dispatch: MOVE_EFFECT_PREVENT_ESCAPE is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 3 | 3 (6) |
 | EFFECT_NIGHTMARE | `BattleScript_EffectNightmare` | blocked-on-subsystem | - | Cmd_seteffectprimary dispatch: MOVE_EFFECT_NIGHTMARE is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (2) |
-| EFFECT_MINIMIZE | `BattleScript_EffectMinimize` | blocked-on-opcodes | `B_SCR_OP_SETMINIMIZE` (main path) | - | 1 | 1 (5) |
+| EFFECT_MINIMIZE | `BattleScript_EffectMinimize` | executable | - | - | 1 | 1 (5) |
 | EFFECT_CURSE | `BattleScript_EffectCurse` | executable | - | - | 1 | 1 (18) |
 | EFFECT_UNUSED_6E | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
 | EFFECT_PROTECT | `BattleScript_EffectProtect` | executable | - | - | 2 | 2 (37) |

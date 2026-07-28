@@ -75,6 +75,7 @@ import { createBattleScriptSetDefenseCurlBitOpcodeHandlers } from "./battleScrip
 import { createBattleScriptTrysetfutureattackOpcodeHandlers } from "./battleScriptTrysetfutureattackOpcode.ts";
 import { createBattleScriptDisablelastusedattackOpcodeHandlers } from "./battleScriptDisablelastusedattackOpcode.ts";
 import { createBattleScriptFuryCutterOpcodeHandlers } from "./battleScriptFuryCutterOpcode.ts";
+import { createBattleScriptSetminimizeOpcodeHandlers } from "./battleScriptSetminimizeOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -2442,6 +2443,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptTrysetfutureattackOpcodeHandlers(program),
     ...createBattleScriptDisablelastusedattackOpcodeHandlers(program),
     ...createBattleScriptFuryCutterOpcodeHandlers(program),
+    ...createBattleScriptSetminimizeOpcodeHandlers(program),
   });
 }
 

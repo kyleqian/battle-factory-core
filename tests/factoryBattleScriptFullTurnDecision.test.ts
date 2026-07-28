@@ -14,6 +14,8 @@ const STRENGTH = 70; // EFFECT_HIT, TYPE_NORMAL -- the banked KO-scenario move (
 const EMBER = 52; // EFFECT_BURN_HIT, TYPE_FIRE, 10% MOVE_EFFECT_BURN secondary proc.
 const FLAIL = 175; // EFFECT_FLAIL -- writes source gDynamicBasePower before the shared hit chain.
 const FRUSTRATION = 218; // EFFECT_FRUSTRATION -- friendship 0 writes source gDynamicBasePower 102.
+const MINIMIZE = 107;
+const STOMP = 23;
 /** The banked KO-scenario seed (factoryBattleScriptTerminalDecision.test.ts, docs/hit-chain-ground-truth.md). */
 const KO_SCENARIO_RNG_SEED = 919694434;
 /** Brute-force-found: Ember's 10% burn proc actually lands on turn 1 with this seed, per this move's own real hit-chain RNG order (accuracy, crit, damage, secondary-effect-chance). */
@@ -93,6 +95,40 @@ const PLAYER_ATTACKS = Object.freeze({ kind: "use-move" as const, moveSlot: 0 as
 const TRAINER_ATTACKS = Object.freeze({ kind: "use-move" as const, moveSlot: 0 as const, targetBattler: 0 as const });
 
 describe("factory full-turn decision -- decision -> both actions -> end-turn -> next decision boundary", () => {
+  it("runs manual Minimize before a later Stomp through the generic scripts, preserving PP/evasion/status3 and consuming the bit as 2x", () => {
+    const initial = createFactoryFullTurnBattleState(config({
+      player: {
+        species: 120, moveId: MINIMIZE, attack: 50, defense: 200,
+        pp: [20, 0, 0, 0], spAttack: 50, spDefense: 200, speed: 100, hp: 999,
+      },
+      trainer: {
+        species: 203, moveId: STOMP, attack: 50, defense: 200,
+        pp: [20, 0, 0, 0], spAttack: 50, spDefense: 200, speed: 50, hp: 999,
+      },
+    }));
+    expect(initial.rules.rulesContext.battlers[0]!.status3).toBe(0);
+    expect(initial.rules.rulesContext.battlers[1]!.status3).toBe(0);
+    const afterPlayer = submitFactoryFullTurnDecision(initial, {
+      requestId: 1,
+      side: "player",
+      decision: { kind: "use-move", moveSlot: 0, targetBattler: 0 },
+    });
+    if (afterPlayer.kind !== "decision-required") throw new Error("expected trainer decision");
+    const result = submitFactoryFullTurnDecision(afterPlayer.state, {
+      requestId: 2,
+      side: "trainer",
+      decision: TRAINER_ATTACKS,
+    });
+    if (result.kind !== "decision-required") throw new Error("expected next-turn decision");
+    const rulesContext = result.state.rules.rulesContext;
+    expect(rulesContext.battlers[0]!.pp[0]).toBe(19);
+    expect(rulesContext.battlers[0]!.statStages[7]).toBe(7);
+    expect(rulesContext.battlers[0]!.status3 & (1 << 8)).toBe(1 << 8);
+    expect(rulesContext.battlers[1]!.pp[0]).toBe(19);
+    expect(rulesContext.dmgMultiplier).toBe(2);
+    expect(rulesContext.lockedMoves).toEqual([0, 0, 0, 0]);
+  });
+
   it("asks the player, then the trainer, before resolving anything (both sides collected before turn order)", () => {
     const initial = createFactoryFullTurnBattleState(config());
     expect(initial.boundary).toEqual({
