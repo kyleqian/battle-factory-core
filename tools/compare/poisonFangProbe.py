@@ -16,7 +16,17 @@ from emerald_core import EmeraldOracle  # noqa: E402
 
 def main() -> None:
     raw_request = json.loads(SCENARIO.read_text())
-    if MOVE_ID == 158:
+    if MOVE_ID == 44:
+        parties = raw_request["overrides"]["parties"]
+        for side in ("player", "opponent"):
+            mon = parties[side][0]
+            if mon["species"] == 41:
+                # Real Level-50 Factory set 56 carrier: MEOWTH, Quirky,
+                # Attack/HP. Constrain all slots so either AI side selects BITE.
+                mon.update({"species": 52, "nature": 24, "moves": [44] * 4})
+                mon["evs"] = {"hp": 255, "attack": 255, "defense": 0,
+                              "speed": 0, "spAttack": 0, "spDefense": 0}
+    elif MOVE_ID == 158:
         parties = raw_request["overrides"]["parties"]
         for side in ("player", "opponent"):
             mon = parties[side][0]
@@ -48,6 +58,8 @@ def main() -> None:
     nm = subprocess.run(["arm-none-eabi-nm", str(reference / "pokeemerald.elf")], check=True, capture_output=True, text=True).stdout
     symbols = {line.split()[2]: int(line.split()[0], 16) | 1 for line in nm.splitlines() if len(line.split()) == 3}
     template_names = (
+        ("gSharpTeethSpriteTemplate", "gBasicHitSplatSpriteTemplate")
+        if MOVE_ID == 44 else
         ("gFangSpriteTemplate",) if MOVE_ID == 158 else
         ("gBreathPuffSpriteTemplate", "gAngerMarkSpriteTemplate") if MOVE_ID == 207 else
         ("gFangSpriteTemplate", "gPoisonBubbleSpriteTemplate"))

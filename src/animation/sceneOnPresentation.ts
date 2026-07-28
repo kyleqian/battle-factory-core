@@ -9,6 +9,10 @@ import {
   type FirePunchResolutionState,
 } from "./firePunch.ts";
 import {
+  biteEffectAtAge,
+  type BiteEffect,
+} from "./bite.ts";
+import {
   metallicShineAtAge,
   type MetallicShineState,
 } from "./metallicShine.ts";
@@ -900,6 +904,13 @@ export interface SceneOnHyperFangConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnBiteConfig {
+  readonly move: "BITE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnSwaggerConfig {
   readonly move: "SWAGGER";
   readonly attacker: SceneOnPresentationBattler;
@@ -1143,6 +1154,7 @@ export type SceneOnMoveConfig =
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig | SceneOnScaryFaceConfig | SceneOnAbsorbConfig
+    | SceneOnBiteConfig
     = SceneOnMoveConfig,
 > {
   readonly age: number;
@@ -1228,6 +1240,12 @@ export interface SceneOnPoisonFangView {
 }
 
 export interface SceneOnHyperFangView extends HyperFangEffect {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnBiteView extends BiteEffect {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -1811,7 +1829,7 @@ function assertIntegerPoint(
 export function createSceneOnMovePresentation<
   TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig | SceneOnTauntConfig
     | SceneOnSparkConfig | SceneOnCharmConfig | SceneOnScaryFaceConfig
-    | SceneOnAbsorbConfig | SceneOnReflectConfig,
+    | SceneOnAbsorbConfig | SceneOnReflectConfig | SceneOnBiteConfig,
 >(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
@@ -2417,6 +2435,25 @@ export function sceneOnHyperFangView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...hyperFangEffectAtAge(
+      state.age,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is Bite's first displayed sharp-teeth callback step. */
+export function sceneOnBiteView(
+  state: SceneOnMovePresentationState<SceneOnBiteConfig>,
+): SceneOnBiteView {
+  if (state.config.move !== "BITE") {
+    throw new Error(`expected BITE presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...biteEffectAtAge(
       state.age,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
