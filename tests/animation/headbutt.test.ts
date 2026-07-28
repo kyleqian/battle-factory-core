@@ -1,3 +1,7 @@
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { headbuttAtAge } from "../../src/animation/headbutt.ts";
 import {
@@ -89,5 +93,27 @@ describe("MOVE_HEADBUTT source reducer", () => {
       attackerOffset: { x2: -2, y2: 9 },
       impacts: [{ x: 176, y: 42, animation: 1, invisible: true }],
     });
+  });
+
+  it("regenerates ZIGZAGOON and the shared IMPACT receipt byte-for-byte", () => {
+    const scratch = mkdtempSync(join(tmpdir(), "pokebench-headbutt-assets-"));
+    const output = join(scratch, "headbutt.json");
+    execFileSync(process.execPath, [
+      "--experimental-strip-types",
+      "tools/compare/extractHeadbuttAssets.ts",
+      "--out",
+      output,
+    ]);
+    expect(readFileSync(output)).toEqual(
+      readFileSync("src/animation/assets/headbutt.json"),
+    );
+
+    const impact = JSON.parse(
+      readFileSync("src/assets/gen/battle-anim-hitsplat.json", "utf8"),
+    ) as { source: string };
+    expect(impact.source).toContain(
+      "graphics/battle_anims/sprites/impact.png",
+    );
+    expect(impact.source).toContain("ANIM_TAG_IMPACT");
   });
 });

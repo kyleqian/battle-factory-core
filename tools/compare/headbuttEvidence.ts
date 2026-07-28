@@ -8,6 +8,7 @@ import {
   createSceneOnMovePresentation,
   sceneOnHeadbuttView,
 } from "../../src/animation/sceneOnPresentation.ts";
+import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 
 interface Fixture {
   readonly scenario: string;
@@ -143,6 +144,7 @@ function verify(fixturePath: string, runNumber: number): void {
   });
   const errors: string[] = [];
   let matched = 0;
+  let framebufferMatched = 0;
   for (
     let frame = fixture.denseWindow.startFrame;
     frame <= fixture.denseWindow.endFrame;
@@ -233,24 +235,50 @@ function verify(fixturePath: string, runNumber: number): void {
       && same(seam.attackerMatrix, expected.attackerMatrix)
       && same(seam.targetOffset, expected.targetOffset)
       && same(seam.impacts, expected.impacts);
+    const engine: EngineState = {
+      ...createInitialState(),
+      rngMode: "frontierBattle",
+      sceneOnPresentation: { ...stage, age },
+    };
+    const app = render(engine);
+    let framebufferDiff = 0;
+    const samples: string[] = [];
+    for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+      if (app[pixel * 4] !== raw[pixel * 3]
+        || app[pixel * 4 + 1] !== raw[pixel * 3 + 1]
+        || app[pixel * 4 + 2] !== raw[pixel * 3 + 2]) {
+        framebufferDiff += 1;
+        if (samples.length < 4) {
+          samples.push(
+            `${pixel % 240},${Math.floor(pixel / 240)}:`
+            + `${app[pixel * 4]},${app[pixel * 4 + 1]},${app[pixel * 4 + 2]}`
+            + `!=${raw[pixel * 3]},${raw[pixel * 3 + 1]},${raw[pixel * 3 + 2]}`,
+          );
+        }
+      }
+    }
+    const framebuffer = framebufferDiff === 0;
+    if (framebuffer) framebufferMatched += 1;
     const shape = bow.length === (bowExpected ? 1 : 0)
       && impact.length === (impactExpected ? 1 : 0)
       && tasks && active && hardware && headbuttSound && impactSound
-      && registers && rawDigest === actual.sha256 && reducer;
+      && registers && rawDigest === actual.sha256 && reducer && framebuffer;
     if (shape) matched += 1;
     else errors.push(
       `frame ${frame}/age ${age}: bow=${bow.length} impact=${impact.length} `
       + `tasks=${tasks} active=${active} hardware=${hardware} `
       + `headbuttSound=${headbuttSound} impactSound=${impactSound} `
       + `registers=${registers} raw=${rawDigest === actual.sha256} `
-      + `reducer=${reducer}`,
+      + `reducer=${reducer} framebuffer=${framebuffer} `
+      + `diff=${framebufferDiff} ${samples.join(";")}`,
     );
   }
   const total =
     fixture.denseWindow.endFrame - fixture.denseWindow.startFrame + 1;
   console.log(
     `${fixture.orientation} run ${runNumber}: ${matched}/${total} `
-    + `dense source/hardware/audio/raw-RGB frames; digest ${digest}`,
+    + `dense source/hardware/audio/raw-RGB frames; framebuffer `
+    + `${framebufferMatched}/${total}; digest ${digest}`,
   );
   if (errors.length) {
     console.error(errors.slice(0, 40).join("\n"));

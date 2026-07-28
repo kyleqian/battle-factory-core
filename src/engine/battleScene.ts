@@ -547,6 +547,7 @@ import twineedleAsset from "../animation/assets/twineedle.json" with { type: "js
 import tailGlowAsset from "../animation/assets/tail-glow.json" with { type: "json" };
 import dizzyPunchAsset from "../animation/assets/dizzyPunch.json" with { type: "json" };
 import covetAsset from "../animation/assets/covet.json" with { type: "json" };
+import headbuttAsset from "../animation/assets/headbutt.json" with { type: "json" };
 import synthesisAsset from "../animation/assets/synthesis.json" with { type: "json" };
 import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
 import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
@@ -683,6 +684,7 @@ import {
   sceneOnPoisonFangView,
   sceneOnHyperFangView,
   sceneOnBiteView,
+  sceneOnHeadbuttView,
   sceneOnTwineedleView,
   sceneOnTailGlowView,
   sceneOnDizzyPunchView,
@@ -718,6 +720,7 @@ import {
   type SceneOnAbsorbPresentationState,
   type SceneOnReflectPresentationState,
   type SceneOnBiteConfig,
+  type SceneOnHeadbuttConfig,
   type SceneOnTwineedleConfig,
   type SceneOnTailGlowConfig,
   type SceneOnDizzyPunchConfig,
@@ -1037,6 +1040,10 @@ const covetArt = covetAsset as {
   linooneBack: { tileset: Tileset; palette: RgbColor[] };
   linooneFront: { tileset: Tileset; palette: RgbColor[] };
   itemBag: { tileset: Tileset; palette: RgbColor[] };
+};
+const headbuttArt = headbuttAsset as {
+  zigzagoonBack: { tileset: Tileset; palette: RgbColor[] };
+  zigzagoonFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const synthesisArt = synthesisAsset as {
   sparkle2: { tileset: Tileset; palette: RgbColor[] };
@@ -15131,6 +15138,146 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "HEADBUTT") {
+    const headbuttState =
+      state as SceneOnMovePresentationState<SceneOnHeadbuttConfig>;
+    const view = sceneOnHeadbuttView(headbuttState);
+    // BuildOamBuffer and palette transfer precede the callbacks represented
+    // by the reducer, so battler affine state, shake offsets, and flashing
+    // IMPACT visibility reach the framebuffer from the preceding age.
+    const displayed = sceneOnHeadbuttView({
+      ...headbuttState,
+      age: headbuttState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "ZIGZAGOON"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "ZIGZAGOON"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged HEADBUTT pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const zigzagoonSource = playerToOpponent
+      ? headbuttArt.zigzagoonBack
+      : headbuttArt.zigzagoonFront;
+    const zigzagoon = playerToOpponent
+      ? zigzagoonSource
+      : {
+          ...zigzagoonSource,
+          tileset: subTileset(zigzagoonSource.tileset, 0, 8),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const targetBaselineX2 =
+      playerToOpponent && displayed.age < 28 ? 1 : 0;
+    // AnimTask_ShakeMon initializes x2=5 and immediately invokes its step.
+    // RunTasks then alternates the one-frame-decrement cadence before the
+    // battler OAM builder snapshots it. This is the source-relative OAM
+    // display sequence for args (5,0,6,1): an initial single display,
+    // followed by three two-display pulses.
+    const targetShakeDisplayX2 =
+      state.age === 29
+      || (state.age >= 32 && state.age <= 37
+        && Math.floor((state.age - 32) / 2) % 2 === 0)
+        ? 5
+        : 0;
+    // The simultaneous ShakeMonInPlace task uses the same OAM-before-task
+    // latch: args (2,0,4,1) display three two-frame signed pulses.
+    const attackerShakeDisplayX2 = state.age >= 29 && state.age <= 34
+      ? (Math.floor((state.age - 29) / 2) % 2 === 0 ? -2 : 2)
+      : displayed.attackerOffset.x2;
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x
+        + targetBaselineX2 + targetShakeDisplayX2,
+      view.target.geometry.spriteCorner.y,
+    );
+    drawSpriteSheetAffineRotate(
+      fb,
+      zigzagoon.tileset,
+      zigzagoon.palette,
+      view.attacker.geometry.animationCenter.x
+        + attackerShakeDisplayX2,
+      view.attacker.geometry.animationCenter.y
+        + displayed.attackerOffset.y2,
+      displayed.attackerMatrix.a,
+      displayed.attackerMatrix.b,
+      displayed.attackerMatrix.c,
+      displayed.attackerMatrix.d,
+      undefined,
+      false,
+    );
+    for (const impact of displayed.impacts) {
+      if (impact.invisible) continue;
+      drawSpriteSheetAffineRotate(
+        fb,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        impact.x,
+        impact.y,
+        impact.matrix.a,
+        impact.matrix.b,
+        impact.matrix.c,
+        impact.matrix.d,
+        undefined,
+        false,
+      );
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "ZIGZAGOON",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "ZIGZAGOON" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "ZIGZAGOON used" : "Foe ZIGZAGOON used",
+      "HEADBUTT!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "DIZZY_PUNCH") {
     const punchState =
       state as SceneOnMovePresentationState<SceneOnDizzyPunchConfig>;
