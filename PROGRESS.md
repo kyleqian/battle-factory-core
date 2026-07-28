@@ -15,6 +15,35 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 589 — [BOUNDED MAIN WORKER 2026-07-28 ~04:42] Taunt executes and expires through shared mechanics
+
+- **State:** committed `22c5095` + `11c0d5a` + `18d50ec`; tree green at
+  **347 files / 4127 tests**, focused cross-layer Taunt coverage **96/96**,
+  ratchets **6/6**, and production build. Both oracle infos, census
+  regeneration/freshness, all **42/42** checks, and `git diff --check` pass.
+  Census is exactly **152/214 effects, 280/355 moves, 229/276 Factory-L50
+  distinct, 2744/2957 weighted**.
+- **Did:** globally registered five-byte pointer opcode `0xd0`; success writes
+  target-owned functional `tauntTimer=2` and falls through, while any nonzero
+  timer jumps to duplicate failure unchanged. Both paths own zero local RNG,
+  controller, or message work. Replaced `ENDTURN_TAUNT`'s case barrier with
+  one source-ordered nonzero decrement per present battler (**2→1→0**) and no
+  event/controller/RNG work. A shared full-turn Factory scenario proves
+  Taunt PP→success-message order, the target's already-collected Splash
+  rejected by the existing attack canceler without PP spend, next-boundary
+  Splash rejection by the existing limitation/admission mask at timer 1,
+  and restored admissibility after expiry.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not widen the generic
+  singles controller or extend the retired canonical Battle-2 march.
+- **Notes:** handler inventory **159→160**. Full pinned-tree usage inspection
+  found `tauntTimer2` written only by `Cmd_settaunt` and never read or
+  decremented; it is intentionally not represented, avoiding a fictitious
+  second functional lifetime. No unsupported/import ratchet change,
+  recording import, private handler, animation/presentation/tick branch,
+  issue removal, DEFERRED item, or oracle lifecycle action.
+
+---
 ## 588 — [SUPERVISOR VERIFY 2026-07-28 ~04:29] IncrementGameStat accepted; Perish Song evidence folded
 
 - **State:** reviewed union green at **345 files / 4118 tests** and focused
@@ -66,29 +95,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   semantic save metadata; no encrypted save counter or Mauville story state
   entered rules, Factory, controller, or presentation state. No
   unsupported/import ratchet change, recording import, private handler,
-  animation/presentation/tick branch, issue removal, DEFERRED item, or oracle
-  lifecycle action.
-
----
-## 586 — [SUPERVISOR VERIFY 2026-07-28 ~04:10] Refresh accepted; bounded Encore evidence folded
-
-- **State:** reviewed union green at **343 files / 4106 tests** and focused
-  **40/40**; production build, census regeneration, ratchets **6/6**, and
-  `git diff --check` pass. Census is exactly **149/214 effects, 275/355
-  moves, 226/276 Factory-L50 distinct, 2738/2957 weighted**, all **42/42**.
-- **Did:** accepted global Refresh `0xcd` after source/diff review: exact
-  status predicate, active/party zeroing, semantic status-data event, and
-  shared pending-controller acknowledgement are pinned. Folded Encore
-  source/OFF evidence after narrowing its public Tackle-window vocabulary;
-  independently replayed manifest `329676e3…8bba2`.
-- **Next:** register `B_SCR_OP_INCREMENTGAMESTAT` globally through a typed
-  save/meta event seam, not Factory round state. Prove player-side
-  gating, raw-u8 operand/range/saturation ownership, zero RNG/controller
-  work, Splash ordering, and Struggle continuation through the shared hit
-  route. Expected census:
-  **151/214, 279/355, 228/276, 2742/2957**.
-- **Notes:** handler inventory is **158**; Encore remains evidence only and
-  its timer/forced-choice/cleanup claims are source-pinned. Refresh receipt
-  remains `12571c44…a68012`. No unsupported/import ratchet, recording import,
   animation/presentation/tick branch, issue removal, DEFERRED item, or oracle
   lifecycle action.

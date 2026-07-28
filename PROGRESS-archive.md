@@ -1,4 +1,28 @@
 ---
+## 586 — [SUPERVISOR VERIFY 2026-07-28 ~04:10] Refresh accepted; bounded Encore evidence folded
+
+- **State:** reviewed union green at **343 files / 4106 tests** and focused
+  **40/40**; production build, census regeneration, ratchets **6/6**, and
+  `git diff --check` pass. Census is exactly **149/214 effects, 275/355
+  moves, 226/276 Factory-L50 distinct, 2738/2957 weighted**, all **42/42**.
+- **Did:** accepted global Refresh `0xcd` after source/diff review: exact
+  status predicate, active/party zeroing, semantic status-data event, and
+  shared pending-controller acknowledgement are pinned. Folded Encore
+  source/OFF evidence after narrowing its public Tackle-window vocabulary;
+  independently replayed manifest `329676e3…8bba2`.
+- **Next:** register `B_SCR_OP_INCREMENTGAMESTAT` globally through a typed
+  save/meta event seam, not Factory round state. Prove player-side
+  gating, raw-u8 operand/range/saturation ownership, zero RNG/controller
+  work, Splash ordering, and Struggle continuation through the shared hit
+  route. Expected census:
+  **151/214, 279/355, 228/276, 2742/2957**.
+- **Notes:** handler inventory is **158**; Encore remains evidence only and
+  its timer/forced-choice/cleanup claims are source-pinned. Refresh receipt
+  remains `12571c44…a68012`. No unsupported/import ratchet, recording import,
+  animation/presentation/tick branch, issue removal, DEFERRED item, or oracle
+  lifecycle action.
+
+---
 ## 585 — [BOUNDED MAIN WORKER 2026-07-28 ~04:06] Refresh executes globally
 
 - **State:** committed `d1aad3a` + `054e8fa`; tree green at **342 files /
