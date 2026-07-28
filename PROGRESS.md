@@ -15,6 +15,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 558 — [SUPERVISOR VERIFY 2026-07-28 ~00:07] Wish accepted; Secret Power evidence merged
+
+- **State:** reviewed union green at **314 files / 3954 tests** and focused
+  **105/105**; production build, both-oracle freshness, census regeneration,
+  and `git diff --check` pass. Census is exactly **137/214 effects, 261/355
+  moves, 213/276 Factory-L50 distinct, 2678/2957 weighted**, with all
+  **42/42** checks.
+- **Did:** accepted `a325a3f`/`4b88f14`: exact dual-mode Wish setup/heal,
+  positional counter + party-index state, ordered end-turn decrement, and
+  generic delayed heal reproduce the OFF two-turn outcome without a scenario
+  branch. Merged Secret Power evidence `d2d9653` after source review and two
+  byte-identical OFF replays.
+- **Next:** implement source-complete `B_SCR_OP_SETROLLOUTTIMER` and locked
+  multi-turn Rollout through the generic controller, including Defense Curl
+  power, one-time PP, escalating damage, miss cancellation, and terminal
+  outcome. Expected census is **138/214, 263/355, 215/276, 2685/2957**.
+- **Notes:** Wish matches HP **140→123→106→140**, PP **10→9→8**. Secret
+  Power replay hash is `dce99201…38474f`, with PP **20→19**, HP **362→311**,
+  and paralysis **0→64** in the Factory building environment. No barrier/
+  ratchet increase, recording import, animation edit, DEFERRED item, or
+  oracle lifecycle action.
+
+---
 ## 557 — [BOUNDED MAIN WORKER 2026-07-28 ~00:04] Wish executes delayed positional heal generically
 
 - **State:** committed `a325a3f`/`4b88f14`; tree green at **313 files / 3951
@@ -58,24 +81,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `4460104b…9677` (Defense Curl, PP **20→19**, locked HP
   **362→327→170→12→0**). No barrier/ratchet increase, recording import,
   animation edit, DEFERRED item, or oracle lifecycle action.
-
----
-## 555 — [BOUNDED MAIN WORKER 2026-07-27 ~23:46] Sleep Talk executes called moves generically
-
-- **State:** committed `c7b9822`/`6e33331`; tree green at **310 files / 3938
-  tests** and focused **322/322**. Production build, Battle Scene OFF oracle
-  freshness, census regeneration, and `git diff --check` pass. Census is
-  exactly **136/214 effects, 260/355 moves, 212/276 Factory-L50 distinct,
-  2670/2957 weighted**, with all **42/42** checks.
-- **Did:** registered source-complete `0xa9 + ptr`
-  `TRYCHOOSESLEEPTALKMOVE` and `0x63 + byte` `JUMPTOCALLEDMOVE`. The generic
-  VM now owns all exclusions/limitations except PP, slot+target retry RNG,
-  called/current/position/target fields, TRUE/FALSE chosen-move behavior,
-  and direct effect dispatch without a stack push. Awake, all-unusable, and
-  asleep→Fissure terminal walks pass; the full-turn seam reaches player-win.
-- **Next:** supervisor verify this executable-frontier increment and select
-  the next finite Stage 8 registration target.
-- **Notes:** full-turn Whiscash proof preserves Fissure PP **5**, spends Sleep
-  Talk **10→9**, leaves chosen move as Sleep Talk, and skips the slower
-  trainer action after the KO. No barrier/ratchet increase, recording import,
-  presentation/animation edit, canonical Battle-2 work, or PAPERCUT.
