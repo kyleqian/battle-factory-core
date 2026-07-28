@@ -15,6 +15,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 550 — [SUPERVISOR VERIFY 2026-07-27 ~22:51] Focus Punch executable; Destiny Bond evidence banked
+
+- **State:** reviewed union green at **305 files / 3889 tests**; focused
+  **42/42**, build, freshness, and `git diff --check` pass. Census is
+  **133/214 effects, 257/355 moves, 209/276 Factory-L50 distinct,
+  2642/2957 weighted**.
+- **Did:** folded `animation-main` through `06259d7` at orient and verified
+  the union, then accepted `769f538`'s source-complete
+  `B_SCR_OP_JUMPIFNODAMAGE`. Both genuine Focus Punch routes reach `END`;
+  the OFF manifests independently reproduce `380326f3…b19` damaged and
+  `6df18da0…c53` undamaged.
+- **Next:** register the one-byte `B_SCR_OP_SETDESTINYBOND` /
+  `EFFECT_DESTINY_BOND` from the merged source/OFF evidence, pin the
+  attacker-owned action-lifetime bit and genuine effect/avenging walks, then
+  regenerate the expected **+1/+1/+1/+10** census delta.
+- **Notes:** merged `2733778` after twice reproducing Wobbuffet Destiny Bond
+  → Snorlax Explosion at manifest `12dc947d…e86d4`; full parties, PP
+  **5→4**, live `STATUS2_DESTINY_BOND`, dual faint, and clear are observed.
+  No unsupported barrier/ratchet change, recording import, animation edit,
+  DEFERRED item, or oracle lifecycle action.
+
+---
 ## 549 — [BOUNDED MAIN WORKER 2026-07-27 ~22:48] Focus Punch executes both damage-receipt routes
 
 - **State:** tree green at **304 files / 3887 tests**; build, oracle
@@ -62,25 +84,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   expose raw `ProtectStruct` receipt words; source pins their reset/write
   sites. No production recording import, oracle lifecycle action, animation
   edit, DEFERRED item, or PAPERCUT.
-
----
-## 547 — [SUPERVISOR SOURCE REVIEW 2026-07-27 ~22:18] Baton Pass registration tightened before acceptance
-
-- **State:** reviewed tree green at **299 files / 3857 tests**; `npm run
-  build` and `git diff --check` pass. Executable-frontier census remains
-  **132/214 effects, 256/355 moves, 208/276 Factory-L50 distinct,
-  2631/2957 weighted**.
-- **Did:** rejected inactive `gBattlersCount` selector sentinels, corrected
-  the Baton Pass mask citation, and completed the source-exact singles
-  `SwitchInClearSetData` collateral: switching clears an opposing wrap and
-  Baton Pass refreshes an opposing sure-hit timer to two turns. The terminal
-  proof no longer asserts the deliberately stale active-slot PP/loadout that
-  this context cannot rebuild.
-- **Next:** merge the independently replayed Focus Punch OFF evidence, then
-  register `B_SCR_OP_JUMPIFNODAMAGE` / `EFFECT_FOCUS_PUNCH` from its paired
-  damage/no-damage routes.
-- **Notes:** deliberately raised `battleScriptSwitchinOpcode.ts`'s barrier
-  ratchet **8→10** for doubles-only wrapped-by and sure-hit-owner identities;
-  both are source-named and reachability-tested while singles remain exact.
-  Focused **60/60**, full **3857/3857**. No recording import, oracle
-  lifecycle action, animation edit, or PAPERCUT.

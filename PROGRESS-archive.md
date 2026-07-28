@@ -1,4 +1,26 @@
 ---
+## 547 — [SUPERVISOR SOURCE REVIEW 2026-07-27 ~22:18] Baton Pass registration tightened before acceptance
+
+- **State:** reviewed tree green at **299 files / 3857 tests**; `npm run
+  build` and `git diff --check` pass. Executable-frontier census remains
+  **132/214 effects, 256/355 moves, 208/276 Factory-L50 distinct,
+  2631/2957 weighted**.
+- **Did:** rejected inactive `gBattlersCount` selector sentinels, corrected
+  the Baton Pass mask citation, and completed the source-exact singles
+  `SwitchInClearSetData` collateral: switching clears an opposing wrap and
+  Baton Pass refreshes an opposing sure-hit timer to two turns. The terminal
+  proof no longer asserts the deliberately stale active-slot PP/loadout that
+  this context cannot rebuild.
+- **Next:** merge the independently replayed Focus Punch OFF evidence, then
+  register `B_SCR_OP_JUMPIFNODAMAGE` / `EFFECT_FOCUS_PUNCH` from its paired
+  damage/no-damage routes.
+- **Notes:** deliberately raised `battleScriptSwitchinOpcode.ts`'s barrier
+  ratchet **8→10** for doubles-only wrapped-by and sure-hit-owner identities;
+  both are source-named and reachability-tested while singles remain exact.
+  Focused **60/60**, full **3857/3857**. No recording import, oracle
+  lifecycle action, animation edit, or PAPERCUT.
+
+---
 ## 546 — [BOUNDED MAIN WORKER 2026-07-27 ~22:10] Baton Pass executes through source jumpifcantswitch
 
 - **State:** tree green at **299 files / 3852 tests**; build, freshness, and
