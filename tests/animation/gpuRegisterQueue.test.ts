@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyAnimationDisplayIntervalWorkload,
   animationGpuRegisterWriteIsImmediate,
   copyBufferedAnimationGpuRegisters,
   createAnimationGpuRegisterState,
@@ -66,5 +67,58 @@ describe("pokeemerald buffered animation GPU-register presentation", () => {
       hardware: { [BLDALPHA]: 0x0d03 },
       waitingOffsets: [],
     });
+  });
+
+  it("distinguishes source-identical task writes by their VCOUNT schedule", () => {
+    const beforeDisplayInterval = createAnimationGpuRegisterState({
+      [BLDALPHA]: 0x0e02,
+    });
+    const transfer = {
+      kind: "copy-buffered-registers",
+      vcount: 166,
+    } as const;
+    const write = {
+      offset: BLDALPHA,
+      value: 0x0d03,
+    } as const;
+
+    const canonical = applyAnimationDisplayIntervalWorkload(
+      beforeDisplayInterval,
+      {
+        steps: [
+          transfer,
+          { kind: "run-tasks", vcount: 3, gpuWrites: [write] },
+        ],
+      },
+    );
+    expect(canonical).toEqual({
+      buffered: { [BLDALPHA]: 0x0d03 },
+      hardware: { [BLDALPHA]: 0x0e02 },
+      waitingOffsets: [BLDALPHA],
+    });
+
+    const vblankOverrun = applyAnimationDisplayIntervalWorkload(
+      beforeDisplayInterval,
+      {
+        steps: [
+          transfer,
+          { kind: "run-tasks", vcount: 224, gpuWrites: [write] },
+        ],
+      },
+    );
+    expect(vblankOverrun).toEqual({
+      buffered: { [BLDALPHA]: 0x0d03 },
+      hardware: { [BLDALPHA]: 0x0d03 },
+      waitingOffsets: [],
+    });
+  });
+
+  it("rejects impossible VCOUNT scheduling input", () => {
+    expect(() => applyAnimationDisplayIntervalWorkload(
+      createAnimationGpuRegisterState(),
+      {
+        steps: [{ kind: "run-tasks", vcount: 228, gpuWrites: [] }],
+      },
+    )).toThrow("VCOUNT must be an integer in 0..227");
   });
 });

@@ -27,6 +27,11 @@ import {
   type FaintAttackBgState,
 } from "./faintAttack.ts";
 import {
+  applyAnimationDisplayIntervalWorkload,
+  type AnimationDisplayIntervalWorkload,
+  type AnimationGpuRegisterState,
+} from "./gpuRegisterQueue.ts";
+import {
   actionMenuDisplayAtAge,
   doubleTeamAnimationAtAge,
   genericHitReactionAtAge,
@@ -1142,6 +1147,15 @@ export interface SceneOnMovePresentationState<
 > {
   readonly age: number;
   readonly config: TConfig;
+  /**
+   * Optional CPU/VCOUNT interval supplied by the presentation scheduler.
+   * This is hardware timing only: it neither identifies a move nor owns task
+   * callbacks, battle state, input, or outcomes.
+   */
+  readonly gpuRegisterPresentation?: Readonly<{
+    readonly beforeInterval: AnimationGpuRegisterState;
+    readonly workload: AnimationDisplayIntervalWorkload;
+  }>;
 }
 
 export type SceneOnDynamicPunchPresentationState =
@@ -3299,6 +3313,17 @@ export function sceneOnFaintAttackView(
     throw new Error(`expected FAINT_ATTACK presentation, got ${state.config.move}`);
   }
   const { animationProfile, attacker, target } = state.config;
+  const sourceAttackerEva = faintAttackAttackerEva(
+    state.age,
+    animationProfile,
+  );
+  const scheduledRegisters = state.gpuRegisterPresentation === undefined
+    ? null
+    : applyAnimationDisplayIntervalWorkload(
+      state.gpuRegisterPresentation.beforeInterval,
+      state.gpuRegisterPresentation.workload,
+    );
+  const scheduledBldalpha = scheduledRegisters?.hardware[0x52];
   return {
     age: state.age,
     attacker,
@@ -3309,7 +3334,10 @@ export function sceneOnFaintAttackView(
       attacker.geometry.side,
       animationProfile,
     ),
-    attackerEva: faintAttackAttackerEva(state.age, animationProfile),
+    attackerEva:
+      scheduledBldalpha === undefined
+        ? sourceAttackerEva
+        : scheduledBldalpha & 0x1f,
     targetShakeX2: faintAttackTargetShakeX2(state.age, animationProfile),
     hitsplatVisible: faintAttackHitsplatVisible(state.age, animationProfile),
   };

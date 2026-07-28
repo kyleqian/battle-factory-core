@@ -30,6 +30,9 @@ import {
 import {
   CANONICAL_DRAGON_BREATH_FIRE_GEOMETRY,
 } from "../../src/animation/dragonBreath.ts";
+import {
+  createAnimationGpuRegisterState,
+} from "../../src/animation/gpuRegisterQueue.ts";
 import { actionMenuDisplayAtAge } from "../../src/engine/battleMenu.ts";
 
 function createPortableStage() {
@@ -250,6 +253,52 @@ describe("relative Battle Scene ON move presentation", () => {
       bldy: 1,
     });
     expect(stage.config).toEqual(profileBefore);
+  });
+
+  it("carries source RunTasks VCOUNT through FAINT ATTACK's shared register seam", () => {
+    const stage = createSceneOnMovePresentation({
+      move: "FAINT_ATTACK",
+      ...ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
+      ...ONIX_TO_GROVYLE_FAINT_ATTACK_PROFILE,
+    });
+    const beforeInterval = createAnimationGpuRegisterState({
+      [0x52]: 0x0e02,
+    });
+    const gpuWrite = { offset: 0x52, value: 0x0d03 };
+    const transfer = {
+      kind: "copy-buffered-registers",
+      vcount: 166,
+    } as const;
+
+    const canonical = sceneOnFaintAttackView({
+      ...stage,
+      age: 150,
+      gpuRegisterPresentation: {
+        beforeInterval,
+        workload: {
+          steps: [
+            transfer,
+            { kind: "run-tasks", vcount: 3, gpuWrites: [gpuWrite] },
+          ],
+        },
+      },
+    });
+    expect(canonical.attackerEva).toBe(2);
+
+    const vblankOverrun = sceneOnFaintAttackView({
+      ...stage,
+      age: 150,
+      gpuRegisterPresentation: {
+        beforeInterval,
+        workload: {
+          steps: [
+            transfer,
+            { kind: "run-tasks", vcount: 224, gpuWrites: [gpuWrite] },
+          ],
+        },
+      },
+    });
+    expect(vblankOverrun.attackerEva).toBe(3);
   });
 
   it("carries ONIX's frozen front-idle x2 into SHADOW_PUNCH's target shake, opponent-side (RAM-probed, mechanic-shadow-punch-haunter-onix-dense)", () => {
