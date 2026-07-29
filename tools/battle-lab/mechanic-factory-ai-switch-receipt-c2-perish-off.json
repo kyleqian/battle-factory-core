@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "mode": "mechanicLab",
+  "profile": "battle-scene-off",
+  "level": 50,
+  "challengeNum": 7,
+  "battleNum": 1,
+  "trainerId": 222,
+  "playerSetIds": [659, 675, 402],
+  "opponentSetIds": [460, 648, 540],
+  "seed": 1,
+  "overrides": {
+    "parties": {
+      "player": [
+        {"species": 129, "level": 50, "nature": 15, "ivs": {"hp": 31, "attack": 31, "defense": 31, "speed": 31, "spAttack": 31, "spDefense": 31}, "evs": {"hp": 0, "attack": 0, "defense": 0, "speed": 0, "spAttack": 0, "spDefense": 0}, "moves": [150, 150, 150, 150], "ppUps": [0, 0, 0, 0], "item": 0, "abilitySlot": 0, "friendship": 70, "gender": "male", "shiny": false},
+        {"species": 129, "level": 50, "nature": 15, "ivs": {"hp": 31, "attack": 31, "defense": 31, "speed": 31, "spAttack": 31, "spDefense": 31}, "evs": {"hp": 0, "attack": 0, "defense": 0, "speed": 0, "spAttack": 0, "spDefense": 0}, "moves": [150, 150, 150, 150], "ppUps": [0, 0, 0, 0], "item": 0, "abilitySlot": 0, "friendship": 70, "gender": "male", "shiny": false},
+        {"species": 129, "level": 50, "nature": 15, "ivs": {"hp": 31, "attack": 31, "defense": 31, "speed": 31, "spAttack": 31, "spDefense": 31}, "evs": {"hp": 0, "attack": 0, "defense": 0, "speed": 0, "spAttack": 0, "spDefense": 0}, "moves": [150, 150, 150, 150], "ppUps": [0, 0, 0, 0], "item": 0, "abilitySlot": 0, "friendship": 70, "gender": "male", "shiny": false}
+      ],
+      "opponent": [
+        {"species": 200, "level": 50, "nature": 15, "ivs": {"hp": 31, "attack": 31, "defense": 31, "speed": 31, "spAttack": 31, "spDefense": 31}, "evs": {"hp": 0, "attack": 0, "defense": 0, "speed": 0, "spAttack": 0, "spDefense": 0}, "moves": [195, 195, 195, 195], "ppUps": [0, 0, 0, 0], "item": 0, "abilitySlot": 0, "friendship": 70, "gender": "female", "shiny": false},
+        {"species": 135, "level": 50, "nature": 15, "ivs": {"hp": 31, "attack": 31, "defense": 31, "speed": 31, "spAttack": 31, "spDefense": 31}, "evs": {"hp": 0, "attack": 0, "defense": 0, "speed": 0, "spAttack": 0, "spDefense": 0}, "moves": [85, 85, 85, 85], "ppUps": [0, 0, 0, 0], "item": 0, "abilitySlot": 0, "friendship": 70, "gender": "male", "shiny": false},
+        {"species": 135, "level": 50, "nature": 15, "ivs": {"hp": 31, "attack": 31, "defense": 31, "speed": 31, "spAttack": 31, "spDefense": 31}, "evs": {"hp": 0, "attack": 0, "defense": 0, "speed": 0, "spAttack": 0, "spDefense": 0}, "moves": [85, 85, 85, 85], "ppUps": [0, 0, 0, 0], "item": 0, "abilitySlot": 0, "friendship": 70, "gender": "male", "shiny": false}
+      ]
+    }
+  },
+  "trace": {
+    "segments": [
+      {"frames": 1, "buttons": ["A"]}, {"frames": 1, "buttons": []}, {"frames": 1, "buttons": ["A"]}, {"frames": 1, "buttons": []}, {"frames": 1, "buttons": ["A"]}, {"frames": 1, "buttons": []}, {"frames": 1, "buttons": ["A"]}, {"frames": 1, "buttons": []}, {"frames": 1, "buttons": ["A"]}, {"frames": 570, "buttons": []},
+      {"frames": 1, "buttons": ["A"]}, {"frames": 1, "buttons": []}, {"frames": 1, "buttons": ["A"]}, {"frames": 1, "buttons": []}, {"frames": 1, "buttons": ["A"]}, {"frames": 1, "buttons": []}, {"frames": 1, "buttons": ["A"]}, {"frames": 1, "buttons": []}, {"frames": 1, "buttons": ["A"]}, {"frames": 1, "buttons": []}, {"frames": 1, "buttons": ["A"]}, {"frames": 1, "buttons": []}, {"frames": 1, "buttons": ["A"]}, {"frames": 1, "buttons": []}, {"frames": 1, "buttons": ["A"]}, {"frames": 530, "buttons": []},
+      {"frames": 1, "buttons": ["DOWN"]}, {"frames": 1, "buttons": []}, {"frames": 1, "buttons": ["DOWN"]}, {"frames": 1, "buttons": []}, {"frames": 1, "buttons": ["DOWN"]}, {"frames": 1, "buttons": []}, {"frames": 1, "buttons": ["DOWN"]}, {"frames": 38, "buttons": []},
+      {"frames": 1, "buttons": ["A"]}, {"frames": 1, "buttons": []}, {"frames": 1, "buttons": ["A"]}, {"frames": 1, "buttons": []}, {"frames": 1, "buttons": ["A"]}, {"frames": 1, "buttons": []}, {"frames": 1, "buttons": ["A"]}, {"frames": 118, "buttons": []},
+      {"frames": 1, "buttons": ["RIGHT"]}, {"frames": 38, "buttons": []},
+      {"frames": 1, "buttons": ["A"]}, {"frames": 38, "buttons": []},
+      {"frames": 1, "buttons": ["A"]}, {"frames": 800, "buttons": []}
+    ],
+    "captureFrames": [0, 579, 1123, 2160]
+  }
+}

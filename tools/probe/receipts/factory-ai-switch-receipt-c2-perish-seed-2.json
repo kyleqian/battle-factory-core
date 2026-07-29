@@ -1,0 +1,531 @@
+{
+  "fixture": "tools/battle-lab/mechanic-factory-ai-switch-receipt-c2-perish-off.json",
+  "profile": "battle-scene-off",
+  "seed": 2,
+  "fastPass": [
+    {
+      "frame": 577,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "playerPerishSongTimer": 2,
+        "opponentPerishSongTimer": 2,
+        "playerPerishStatus3": "0x00000020",
+        "opponentPerishStatus3": "0x00000020"
+      }
+    },
+    {
+      "frame": 583,
+      "delta": 4,
+      "state": {
+        "activeBattler": 1,
+        "chosenActions": [
+          255,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "playerPerishSongTimer": 2,
+        "opponentPerishSongTimer": 2,
+        "playerPerishStatus3": "0x00000020",
+        "opponentPerishStatus3": "0x00000020"
+      }
+    },
+    {
+      "frame": 584,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          255,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "playerPerishSongTimer": 2,
+        "opponentPerishSongTimer": 2,
+        "playerPerishStatus3": "0x00000020",
+        "opponentPerishStatus3": "0x00000020"
+      }
+    },
+    {
+      "frame": 1121,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "playerPerishSongTimer": 1,
+        "opponentPerishSongTimer": 1,
+        "playerPerishStatus3": "0x00000020",
+        "opponentPerishStatus3": "0x00000020"
+      }
+    },
+    {
+      "frame": 1127,
+      "delta": 4,
+      "state": {
+        "activeBattler": 1,
+        "chosenActions": [
+          255,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "playerPerishSongTimer": 1,
+        "opponentPerishSongTimer": 1,
+        "playerPerishStatus3": "0x00000020",
+        "opponentPerishStatus3": "0x00000020"
+      }
+    },
+    {
+      "frame": 1128,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          255,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "playerPerishSongTimer": 1,
+        "opponentPerishSongTimer": 1,
+        "playerPerishStatus3": "0x00000020",
+        "opponentPerishStatus3": "0x00000020"
+      }
+    },
+    {
+      "frame": 2089,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "playerPerishSongTimer": 2,
+        "opponentPerishSongTimer": 0,
+        "playerPerishStatus3": "0x00000020",
+        "opponentPerishStatus3": "0x00000020"
+      }
+    }
+  ],
+  "attributedDraws": [
+    {
+      "frame": 577,
+      "lr": "0x0803bb13",
+      "caller": "BattleTurnPassed+0x157",
+      "preRng": "0x8761d6d4",
+      "postRng": "0x701570b7",
+      "returnU16": 28693,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "playerPerishSongTimer": 2,
+        "opponentPerishSongTimer": 2,
+        "playerPerishStatus3": "0x00000020",
+        "opponentPerishStatus3": "0x00000020"
+      }
+    },
+    {
+      "frame": 583,
+      "lr": "0x081309d3",
+      "caller": "BattleAI_SetupAIData+0x83",
+      "preRng": "0x701570b7",
+      "postRng": "0xe603205e",
+      "returnU16": 58883,
+      "stateAfterFrame": {
+        "activeBattler": 1,
+        "chosenActions": [
+          255,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "playerPerishSongTimer": 2,
+        "opponentPerishSongTimer": 2,
+        "playerPerishStatus3": "0x00000020",
+        "opponentPerishStatus3": "0x00000020"
+      }
+    },
+    {
+      "frame": 583,
+      "lr": "0x081309d3",
+      "caller": "BattleAI_SetupAIData+0x83",
+      "preRng": "0xe603205e",
+      "postRng": "0xc9e5cc79",
+      "returnU16": 51685,
+      "stateAfterFrame": {
+        "activeBattler": 1,
+        "chosenActions": [
+          255,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "playerPerishSongTimer": 2,
+        "opponentPerishSongTimer": 2,
+        "playerPerishStatus3": "0x00000020",
+        "opponentPerishStatus3": "0x00000020"
+      }
+    },
+    {
+      "frame": 583,
+      "lr": "0x081309d3",
+      "caller": "BattleAI_SetupAIData+0x83",
+      "preRng": "0xc9e5cc79",
+      "postRng": "0xd9bb4df8",
+      "returnU16": 55739,
+      "stateAfterFrame": {
+        "activeBattler": 1,
+        "chosenActions": [
+          255,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "playerPerishSongTimer": 2,
+        "opponentPerishSongTimer": 2,
+        "playerPerishStatus3": "0x00000020",
+        "opponentPerishStatus3": "0x00000020"
+      }
+    },
+    {
+      "frame": 583,
+      "lr": "0x081309d3",
+      "caller": "BattleAI_SetupAIData+0x83",
+      "preRng": "0xd9bb4df8",
+      "postRng": "0x0c52230b",
+      "returnU16": 3154,
+      "stateAfterFrame": {
+        "activeBattler": 1,
+        "chosenActions": [
+          255,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "playerPerishSongTimer": 2,
+        "opponentPerishSongTimer": 2,
+        "playerPerishStatus3": "0x00000020",
+        "opponentPerishStatus3": "0x00000020"
+      }
+    },
+    {
+      "frame": 584,
+      "lr": "0x08130cd3",
+      "caller": "ChooseMoveOrAction_Singles+0xf7",
+      "preRng": "0x0c52230b",
+      "postRng": "0x2b28a622",
+      "returnU16": 11048,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          255,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "playerPerishSongTimer": 2,
+        "opponentPerishSongTimer": 2,
+        "playerPerishStatus3": "0x00000020",
+        "opponentPerishStatus3": "0x00000020"
+      }
+    },
+    {
+      "frame": 1121,
+      "lr": "0x0803bb13",
+      "caller": "BattleTurnPassed+0x157",
+      "preRng": "0x2b28a622",
+      "postRng": "0xe33978ed",
+      "returnU16": 58169,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "playerPerishSongTimer": 1,
+        "opponentPerishSongTimer": 1,
+        "playerPerishStatus3": "0x00000020",
+        "opponentPerishStatus3": "0x00000020"
+      }
+    },
+    {
+      "frame": 1127,
+      "lr": "0x081309d3",
+      "caller": "BattleAI_SetupAIData+0x83",
+      "preRng": "0xe33978ed",
+      "postRng": "0xf69f135c",
+      "returnU16": 63135,
+      "stateAfterFrame": {
+        "activeBattler": 1,
+        "chosenActions": [
+          255,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "playerPerishSongTimer": 1,
+        "opponentPerishSongTimer": 1,
+        "playerPerishStatus3": "0x00000020",
+        "opponentPerishStatus3": "0x00000020"
+      }
+    },
+    {
+      "frame": 1127,
+      "lr": "0x081309d3",
+      "caller": "BattleAI_SetupAIData+0x83",
+      "preRng": "0xf69f135c",
+      "postRng": "0xcec9a69f",
+      "returnU16": 52937,
+      "stateAfterFrame": {
+        "activeBattler": 1,
+        "chosenActions": [
+          255,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "playerPerishSongTimer": 1,
+        "opponentPerishSongTimer": 1,
+        "playerPerishStatus3": "0x00000020",
+        "opponentPerishStatus3": "0x00000020"
+      }
+    },
+    {
+      "frame": 1127,
+      "lr": "0x081309d3",
+      "caller": "BattleAI_SetupAIData+0x83",
+      "preRng": "0xcec9a69f",
+      "postRng": "0xba9ac426",
+      "returnU16": 47770,
+      "stateAfterFrame": {
+        "activeBattler": 1,
+        "chosenActions": [
+          255,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "playerPerishSongTimer": 1,
+        "opponentPerishSongTimer": 1,
+        "playerPerishStatus3": "0x00000020",
+        "opponentPerishStatus3": "0x00000020"
+      }
+    },
+    {
+      "frame": 1127,
+      "lr": "0x081309d3",
+      "caller": "BattleAI_SetupAIData+0x83",
+      "preRng": "0xba9ac426",
+      "postRng": "0xf70d78a1",
+      "returnU16": 63245,
+      "stateAfterFrame": {
+        "activeBattler": 1,
+        "chosenActions": [
+          255,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "playerPerishSongTimer": 1,
+        "opponentPerishSongTimer": 1,
+        "playerPerishStatus3": "0x00000020",
+        "opponentPerishStatus3": "0x00000020"
+      }
+    },
+    {
+      "frame": 1128,
+      "lr": "0x08130cd3",
+      "caller": "ChooseMoveOrAction_Singles+0xf7",
+      "preRng": "0xf70d78a1",
+      "postRng": "0x7903cb00",
+      "returnU16": 30979,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          255,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "playerPerishSongTimer": 1,
+        "opponentPerishSongTimer": 1,
+        "playerPerishStatus3": "0x00000020",
+        "opponentPerishStatus3": "0x00000020"
+      }
+    },
+    {
+      "frame": 2089,
+      "lr": "0x0803bb13",
+      "caller": "BattleTurnPassed+0x157",
+      "preRng": "0x7903cb00",
+      "postRng": "0xb077cf73",
+      "returnU16": 45175,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "playerPerishSongTimer": 2,
+        "opponentPerishSongTimer": 0,
+        "playerPerishStatus3": "0x00000020",
+        "opponentPerishStatus3": "0x00000020"
+      }
+    }
+  ],
+  "commandStates": [
+    {
+      "frame": 1,
+      "activeBattler": 2,
+      "chosenActions": [
+        255,
+        0,
+        255,
+        255
+      ],
+      "aiMonToSwitchIntoId": 6,
+      "monToSwitchIntoId": 6,
+      "playerPerishSongTimer": 0,
+      "opponentPerishSongTimer": 0,
+      "playerPerishStatus3": "0x00000000",
+      "opponentPerishStatus3": "0x00000000"
+    },
+    {
+      "frame": 583,
+      "activeBattler": 1,
+      "chosenActions": [
+        255,
+        0,
+        255,
+        255
+      ],
+      "aiMonToSwitchIntoId": 6,
+      "monToSwitchIntoId": 6,
+      "playerPerishSongTimer": 2,
+      "opponentPerishSongTimer": 2,
+      "playerPerishStatus3": "0x00000020",
+      "opponentPerishStatus3": "0x00000020"
+    },
+    {
+      "frame": 1127,
+      "activeBattler": 1,
+      "chosenActions": [
+        255,
+        0,
+        255,
+        255
+      ],
+      "aiMonToSwitchIntoId": 6,
+      "monToSwitchIntoId": 6,
+      "playerPerishSongTimer": 1,
+      "opponentPerishSongTimer": 1,
+      "playerPerishStatus3": "0x00000020",
+      "opponentPerishStatus3": "0x00000020"
+    },
+    {
+      "frame": 2095,
+      "activeBattler": 2,
+      "chosenActions": [
+        255,
+        2,
+        255,
+        255
+      ],
+      "aiMonToSwitchIntoId": 6,
+      "monToSwitchIntoId": 1,
+      "playerPerishSongTimer": 2,
+      "opponentPerishSongTimer": 0,
+      "playerPerishStatus3": "0x00000020",
+      "opponentPerishStatus3": "0x00000020"
+    }
+  ],
+  "perishReceipt": {
+    "zeroTimerCommand": {
+      "frame": 2095,
+      "activeBattler": 2,
+      "chosenActions": [
+        255,
+        2,
+        255,
+        255
+      ],
+      "aiMonToSwitchIntoId": 6,
+      "monToSwitchIntoId": 1,
+      "playerPerishSongTimer": 2,
+      "opponentPerishSongTimer": 0,
+      "playerPerishStatus3": "0x00000020",
+      "opponentPerishStatus3": "0x00000020"
+    },
+    "attributedDrawsAtCommand": []
+  },
+  "verdict": {
+    "liveZeroTimerAiCommandReached": true,
+    "perishHelperAndSuitableSelectorDrawDelta": 0,
+    "switchesToPartyIndex1": true
+  }
+}
