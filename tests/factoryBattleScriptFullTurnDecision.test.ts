@@ -195,6 +195,17 @@ describe("factory full-turn decision -- multi-hit controller resumption", () => 
     expect(rngValue).toBe(expectedCursor);
   });
 
+  it("resumes the maximum five-hit Spike Cannon loop without treating controller waits as runaway script work", () => {
+    const { reduced, reasons } = runMultiHitTurn(SPIKE_CANNON, 6);
+    expect(reduced.boundary.kind).toBe("decision-required");
+    expect(reduced.events.filter((event) => {
+      const payload = "payload" in event ? event.payload : event;
+      return payload.kind === "health-bar-update" && payload.battler === 1;
+    })).toHaveLength(5);
+    expect(reasons[1]).toBe("setmultihitcounter:initial");
+    expect(reasons[2]).toBe("setmultihitcounter:reroll");
+  });
+
   it.each([
     ["Double Kick", DOUBLE_KICK],
     ["Twineedle", TWINEEDLE],

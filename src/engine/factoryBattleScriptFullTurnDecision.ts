@@ -771,7 +771,8 @@ type RunToOwnEndResult =
 /** Runs one already-started BattleScriptExecute script to its own end/end2 halt (same shape as the fainted-actions/end-turn precedents' own helper). */
 function runScriptToOwnEnd(program: BattleScriptProgram, handlers: Handlers, initialState: MachineState): RunToOwnEndResult {
   let state = initialState;
-  for (let budget = 0; budget < SCRIPT_BUDGET; budget += 1) {
+  const instructionsAtStart = state.instructionsExecuted;
+  while (state.instructionsExecuted - instructionsAtStart < SCRIPT_BUDGET) {
     const instruction = program.instructions[state.programCounter];
     if (!instruction) {
       throw new Error(`full-turn reducer left the committed program at ${state.programCounter}`);
@@ -802,7 +803,12 @@ function runScriptToOwnEnd(program: BattleScriptProgram, handlers: Handlers, ini
     }
     state = stepped.state;
   }
-  throw new Error("full-turn reducer exceeded its per-script instruction budget");
+  throw new Error(
+    `full-turn reducer exceeded its per-script instruction budget at `
+      + `${program.instructions[state.programCounter]?.source.label}/`
+      + `${program.instructions[state.programCounter]?.opcodeName} after `
+      + `${state.instructionsExecuted} executed instructions`,
+  );
 }
 
 /** `BattleScriptExecute(script)`: a fresh top-level script, call stack reset, carrying the rules/RNG/event/scheduler state forward. */
