@@ -32,7 +32,9 @@ import {
   BATTLE_SCRIPT_STATUS1_TOXIC_POISON,
   BATTLE_SCRIPT_STATUS2_MASKS,
   BATTLE_SCRIPT_STATUS3_LEECHSEED,
+  BATTLE_SCRIPT_STATUS3_PERISH_SONG,
   BATTLE_SCRIPT_STATUS3_ROOTED,
+  BATTLE_SCRIPT_STATUS3_YAWN,
 } from "./battleScriptSourceConstants.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import {
@@ -64,6 +66,7 @@ import {
 const MOVE_NONE = 0;
 const SIDE_STATUS_REFLECT = 1 << 0;
 const SIDE_STATUS_LIGHTSCREEN = 1 << 1;
+const SIDE_STATUS_SAFEGUARD = 1 << 5;
 const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
 const B_WEATHER_SANDSTORM = (1 << 3) | (1 << 4);
 const B_WEATHER_SUN = (1 << 5) | (1 << 6);
@@ -295,6 +298,16 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       reflectUp: (input.rulesContext.sideStatuses[1] & SIDE_STATUS_REFLECT) !== 0,
       ...(weather === undefined ? {} : { currentWeather: weather }),
       isRooted: (attacker.status3 & BATTLE_SCRIPT_STATUS3_ROOTED) !== 0,
+      ...((attacker.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION) !== 0
+        ? { isInfatuated: true }
+        : {}),
+      ...((attacker.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED) !== 0
+        ? { isLeechSeeded: true }
+        : {}),
+      ...((attacker.status3 & BATTLE_SCRIPT_STATUS3_YAWN) !== 0
+        ? { hasYawn: true }
+        : {}),
+      ...(attacker.protectUses !== 0 ? { protectUses: attacker.protectUses } : {}),
     }),
     target: Object.freeze({
       species: target.species,
@@ -310,15 +323,31 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       hp: target.hp,
       maxHp: target.maxHP,
       lastUsedMoveId: input.rulesContext.moveHistory.lastMoves[0],
+      ...(target.status1 !== 0 ? { hasAnyStatus: true } : {}),
       isToxicPoisoned:
         (target.status1 & BATTLE_SCRIPT_STATUS1_TOXIC_POISON) !== 0,
       isLeechSeeded:
         (target.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED) !== 0,
       isCursed:
         (target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CURSED) !== 0,
+      ...((target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION) !== 0
+        ? { isInfatuated: true }
+        : {}),
+      ...((target.status3 & BATTLE_SCRIPT_STATUS3_YAWN) !== 0
+        ? { hasYawn: true }
+        : {}),
+      ...((target.status3 & BATTLE_SCRIPT_STATUS3_PERISH_SONG) !== 0
+        ? { hasPerishSong: true }
+        : {}),
       ability: abilityName(target.ability),
       knownAbility: input.history.knownAbilities[0],
       knownItemEffect: input.history.knownItemEffects[0],
+      ...(input.history.usedMoves[0].length > 0
+        ? { knownMoveIds: input.history.usedMoves[0] }
+        : {}),
+      ...((input.rulesContext.sideStatuses[0] & SIDE_STATUS_SAFEGUARD) !== 0
+        ? { safeguardUp: true }
+        : {}),
     }),
   });
 }

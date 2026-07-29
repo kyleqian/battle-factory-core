@@ -97,7 +97,10 @@
  * `AI_CV_Hail` (doc §25) -- the last of the twelve CBM-blocked pairs. The
  * 22nd and last reachable CV handler overall, `AI_CV_SpeedDownFromChance`
  * (doc §5's table), is CV-only-reachable and has no CBM counterpart, so it
- * has no entry in this file.
+ * has no entry in this file; and `EFFECT_TOXIC`/`EFFECT_POISON` ->
+ * `AI_CBM_Toxic` (`:341-352`, `runCbmToxic` below), whose source-ordered
+ * type, ability, primary-status, and Safeguard gates complete R13-D's
+ * ordinary-move control path.
  */
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
@@ -265,6 +268,16 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
    * same convention/rationale as `accStage` above.
    */
   evasionStage?: number;
+  /**
+   * Whether `gBattleMons[AI_TARGET].status1 & STATUS1_ANY` is nonzero --
+   * `AI_CBM_Toxic`'s primary-status gate. Optional, defaulting to false.
+   */
+  hasAnyStatus?: boolean;
+  /**
+   * Whether the target's side has `SIDE_STATUS_SAFEGUARD` --
+   * `AI_CBM_Toxic`'s final gate. Optional, defaulting to false.
+   */
+  safeguardUp?: boolean;
 }>;
 
 /**
@@ -398,6 +411,7 @@ const ABILITY_HYPER_CUTTER = "ABILITY_HYPER_CUTTER";
 const ABILITY_KEEN_EYE = "ABILITY_KEEN_EYE";
 const ABILITY_CLEAR_BODY = "ABILITY_CLEAR_BODY";
 const ABILITY_WHITE_SMOKE = "ABILITY_WHITE_SMOKE";
+const ABILITY_IMMUNITY = "ABILITY_IMMUNITY";
 
 /**
  * `check_ability AI_TARGET, ability` / `if_ability AI_TARGET, ability, ptr`
@@ -752,6 +766,48 @@ function runCbmEvasionDown(
   reason: string,
 ): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckBadMoveDraw[]; scoreDelta: number }> {
   return runCbmStatDownViaSharedTail(target.evasionStage ?? DEFAULT_STAT_STAGE, target, rng, ordinal, reason);
+}
+
+/**
+ * `AI_CBM_Toxic` (`data/battle_ai_scripts.s:341-352`), shared by
+ * `EFFECT_TOXIC` and `EFFECT_POISON`:
+ *
+ * ```
+ * get_target_type1; Steel/Poison -> -10
+ * get_target_type2; Steel/Poison -> -10
+ * get_ability AI_TARGET; Immunity -> -10
+ * if_status AI_TARGET, STATUS1_ANY -> -10
+ * if_side_affecting AI_TARGET, SIDE_STATUS_SAFEGUARD -> -10
+ * ```
+ *
+ * The type gates precede the handler's own uncached `get_ability` call, so
+ * they consume no handler draw. Status and Safeguard are checked only after
+ * that call and therefore do not suppress its draw for an ambiguous target.
+ */
+function runCbmToxic(
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckBadMoveDraw[]; scoreDelta: number }> {
+  if (
+    target.types[0] === "TYPE_STEEL"
+    || target.types[0] === "TYPE_POISON"
+    || target.types[1] === "TYPE_STEEL"
+    || target.types[1] === "TYPE_POISON"
+  ) {
+    return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
+  }
+  const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-immunity`, target);
+  const draws = ability.draw ? [ability.draw] : [];
+  const blocked = ability.ability === ABILITY_IMMUNITY
+    || (target.hasAnyStatus ?? false)
+    || (target.safeguardUp ?? false);
+  return Object.freeze({
+    rng: ability.rng,
+    draws: Object.freeze(draws),
+    scoreDelta: blocked ? -10 : 0,
+  });
 }
 
 /**
@@ -1113,6 +1169,19 @@ export function runCheckBadMovePreamble(input: Readonly<{
       rng: evasionDown.rng,
       draws: Object.freeze(draws),
       scoreDelta: evasionDown.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_TOXIC/EFFECT_POISON -> AI_CBM_Toxic,
+  // source-complete through its ordered type/ability/status/Safeguard gates.
+  if (move.effect === "EFFECT_TOXIC" || move.effect === "EFFECT_POISON") {
+    const toxic = runCbmToxic(target, rng, ordinal, `${input.reasonPrefix}-toxic`);
+    for (const draw of toxic.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: toxic.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: toxic.scoreDelta,
     });
   }
 

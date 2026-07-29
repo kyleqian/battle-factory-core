@@ -10,7 +10,7 @@
  * complete zero score / zero draws -- not a stub for that path. A move
  * whose effect DOES have an entry halts with a named
  * `"factory-ai-check-viability"` unsupported-branch barrier -- except the
- * following (all 22 reachable handlers per
+ * following (the 22 previously reachable handlers per
  * `docs/factory-ai-checkviability-ground-truth.md` §5's table, dispatched
  * before that barrier check): `EFFECT_SPEED_DOWN(_2)` (`AI_CV_SpeedDown`,
  * `runCvSpeedDown` below, `data/battle_ai_scripts.s:1142-1152`,
@@ -97,7 +97,12 @@
  * not reimplemented -- with the other 3 moves falling through to a genuine
  * zero). The other ~68 are not ported this round (a separate, much larger
  * phased body of work per the audit's §3), so a move that reaches one of
- * THOSE must not silently score zero.
+ * THOSE must not silently score zero. R13-D additionally ports
+ * `EFFECT_TOXIC`/`EFFECT_LEECH_SEED` (`AI_CV_Toxic`,
+ * `runCvToxic` below, `:1353-1371`) because the banked Wonder Guard control
+ * reaches that shared handler after its newly ported CheckBadMove Toxic arm,
+ * plus `EFFECT_PROTECT` (`AI_CV_Protect`, `runCvProtect` below,
+ * `:1894-1932`), the same receipt's following and final score-script draw.
  */
 import {
   ABILITY_ID_IN_WEATHER_RANGE,
@@ -310,6 +315,22 @@ export type FactoryAiCheckViabilityBattler = Readonly<{
    * matches any of the three handlers' own weather-chain gates.
    */
   currentWeather?: AiWeatherValue;
+  /**
+   * AI_USER's four live move IDs, read by `if_user_has_no_attacking_moves`
+   * and the two `if_has_move_with_effect` commands in `AI_CV_Toxic`.
+   * Required by that handler's source path; other handlers ignore it.
+   */
+  moves?: readonly [number, number, number, number];
+  /** BattleHistory-known moves for AI_TARGET move-effect scans. */
+  knownMoves?: readonly number[];
+  /** STATUS2_INFATUATION. */
+  isInfatuated?: boolean;
+  /** STATUS3_YAWN. */
+  hasYawn?: boolean;
+  /** STATUS3_PERISH_SONG. */
+  hasPerishSong?: boolean;
+  /** DisableStruct::protectUses, read by AI_CV_Protect. */
+  protectUses?: number;
 }>;
 
 export type FactoryAiCheckViabilityDraw =
@@ -519,6 +540,27 @@ export type FactoryAiCheckViabilityDraw =
   | Readonly<{
     ordinal: number;
     reason: string;
+    kind: "toxic-roll-1" | "toxic-roll-2" | "toxic-roll-3";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when `if_random_less_than` takes its jump (raw low byte < threshold). */
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "protect-roll-1" | "protect-roll-2";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
     kind:
       | "accuracy-down-roll-1"
       | "accuracy-down-roll-2"
@@ -598,6 +640,166 @@ function nextDraw(
     after,
     rawRngValue,
     randomValue: (rawRngValue >>> 16) & U16_MAX,
+  });
+}
+
+/**
+ * `AI_CV_Toxic` (`data/battle_ai_scripts.s:1353-1371`), shared by Toxic and
+ * Leech Seed. Every branch is ported in script order, including all three
+ * `%256` draws and the move-effect scans over AI_USER's complete four-move
+ * set. None of these commands writes `funcResult`, so the caller's carry is
+ * preserved unchanged.
+ */
+function runCvToxic(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckViabilityDraw[];
+  scoreDelta: number;
+}> {
+  const moves = input.attacker.moves;
+  if (!moves) {
+    throw new Error("factory-ai-check-viability: AI_CV_Toxic requires AI_USER moves");
+  }
+  const effects = moves.map((moveId) => MOVES_BY_ID.get(moveId)?.effect ?? null);
+  const hasAttackingMove = moves.some((moveId) => (MOVES_BY_ID.get(moveId)?.power ?? 0) !== 0);
+  const hasSetupPartner = effects.includes("EFFECT_SPECIAL_DEFENSE_UP")
+    || effects.includes("EFFECT_PROTECT");
+
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+  let score = 0;
+  const draw = (
+    kind: "toxic-roll-1" | "toxic-roll-2" | "toxic-roll-3",
+    threshold: number,
+  ): boolean => {
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-${kind}`);
+    rng = roll.after;
+    ordinal += 1;
+    const jumped = roll.randomValue % 256 < threshold;
+    draws.push(Object.freeze({ ...roll, kind, jumped }));
+    return jumped;
+  };
+
+  // AI_CV_Toxic -> AI_CV_Toxic3 when the user has no damaging move.
+  if (hasAttackingMove) {
+    const attackerHpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+    // HP > 50 jumps to Toxic2; otherwise roll < 50 jumps there. Falling
+    // through is the only route to Score_Minus3.
+    if (attackerHpPercent <= 50 && !draw("toxic-roll-1", 50)) {
+      score -= 3;
+    }
+
+    const targetHpPercent = Math.floor((100 * input.target.hp) / input.target.maxHp);
+    // HP > 50 jumps to Toxic3; otherwise roll < 50 jumps there. Falling
+    // through applies the second independent -3.
+    if (targetHpPercent <= 50 && !draw("toxic-roll-2", 50)) {
+      score -= 3;
+    }
+  }
+
+  // The paired SpDef-up/Protect move scan is zero-RNG. With either effect,
+  // roll < 60 ends; falling through adds +2.
+  if (hasSetupPartner && !draw("toxic-roll-3", 60)) {
+    score += 2;
+  }
+
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+}
+
+const EFFECT_ID_IN_WEATHER_RANGE: ReadonlyMap<string, AiWeatherValue> = new Map([
+  ["EFFECT_HIT", AI_WEATHER_SUN],
+  ["EFFECT_SLEEP", AI_WEATHER_RAIN],
+  ["EFFECT_POISON_HIT", AI_WEATHER_SANDSTORM],
+  ["EFFECT_ABSORB", AI_WEATHER_HAIL],
+]);
+
+/**
+ * `AI_CV_Protect` (`data/battle_ai_scripts.s:1894-1932`), including both
+ * status/move-history prologues, the source's usual +2 path, both `%256`
+ * rolls, and the consecutive-Protect penalty. Both paths execute
+ * `get_last_used_bank_move; get_move_effect_from_result`, so funcResult is
+ * always replaced by the target's last-move effect before return.
+ */
+function runCvProtect(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckViabilityDraw[];
+  scoreDelta: number;
+  funcResultAfter: AiWeatherValue | undefined;
+}> {
+  const lastMoveEffect = MOVES_BY_ID.get(input.target.lastUsedMoveId ?? 0)?.effect ?? "EFFECT_HIT";
+  const funcResultAfter = EFFECT_ID_IN_WEATHER_RANGE.get(lastMoveEffect);
+  const knownMoves = input.target.knownMoves ?? [];
+  const userMoves = input.attacker.moves ?? [0, 0, 0, 0];
+  // Cmd_if_has_move_with_effect's pinned-source AI_TARGET bug checks the AI
+  // user's move slot for nonzero before reading the target-history move at
+  // that same index. Preserve that positional gate instead of a plain
+  // history membership test.
+  const targetHistoryHasEffect = (effect: string): boolean =>
+    knownMoves.some((moveId, slot) =>
+      (userMoves[slot] ?? 0) !== 0
+      && MOVES_BY_ID.get(moveId)?.effect === effect
+    );
+  const earlyProtect3 = (input.attacker.isInfatuated ?? false)
+    || (input.attacker.isLeechSeeded ?? false)
+    || (input.attacker.hasYawn ?? false)
+    || targetHistoryHasEffect("EFFECT_RESTORE_HP")
+    || targetHistoryHasEffect("EFFECT_DEFENSE_CURL");
+
+  if (earlyProtect3) {
+    return Object.freeze({
+      rng: input.rng,
+      draws: Object.freeze([]),
+      scoreDelta: lastMoveEffect === "EFFECT_LOCK_ON" ? -2 : 0,
+      funcResultAfter,
+    });
+  }
+
+  let score = (input.target.isToxicPoisoned ?? false)
+    || (input.target.isCursed ?? false)
+    || (input.target.hasPerishSong ?? false)
+    || (input.target.isInfatuated ?? false)
+    || (input.target.isLeechSeeded ?? false)
+    || (input.target.hasYawn ?? false)
+    || lastMoveEffect !== "EFFECT_LOCK_ON"
+    ? 2
+    : 0;
+
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+  const roll1 = nextDraw(rng, ordinal, `${input.reasonPrefix}-protect-roll-1`);
+  rng = roll1.after;
+  ordinal += 1;
+  const jumped1 = roll1.randomValue % 256 < 128;
+  draws.push(Object.freeze({ ...roll1, kind: "protect-roll-1" as const, jumped: jumped1 }));
+  if (!jumped1) score -= 1;
+
+  if ((input.attacker.protectUses ?? 0) !== 0) {
+    score -= 1;
+    const roll2 = nextDraw(rng, ordinal, `${input.reasonPrefix}-protect-roll-2`);
+    rng = roll2.after;
+    const jumped2 = roll2.randomValue % 256 < 128;
+    draws.push(Object.freeze({ ...roll2, kind: "protect-roll-2" as const, jumped: jumped2 }));
+    if (!jumped2) score -= 1;
+  }
+
+  return Object.freeze({
+    rng,
+    draws: Object.freeze(draws),
+    scoreDelta: score,
+    funcResultAfter,
   });
 }
 
@@ -2722,6 +2924,40 @@ export function runCheckViability(input: Readonly<{
       draws: speedDownFromChance.draws,
       scoreDelta: speedDownFromChance.scoreDelta,
       funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_TOXIC" || move.effect === "EFFECT_LEECH_SEED") {
+    const toxic = runCvToxic({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: toxic.rng,
+      draws: toxic.draws,
+      scoreDelta: toxic.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
+  if (move.effect === "EFFECT_PROTECT") {
+    const protect = runCvProtect({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: protect.rng,
+      draws: protect.draws,
+      scoreDelta: protect.scoreDelta,
+      funcResultAfter: protect.funcResultAfter,
     });
   }
 
