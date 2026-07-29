@@ -4,6 +4,36 @@ Older dated sections moved out of `ANIMATION_PROGRESS.md` to keep that
 file lean (`AGENTS.md`'s ~3-most-recent convention). Git history has the
 full record regardless; this file is a read-only reference.
 
+## MOVE_HYPNOSIS promoted exact; GOLD_RING repair complete (2026-07-29)
+
+**Verdict:** `MOVE_HYPNOSIS` is exact. The Level-50 eligibility graph rejects
+source set 38 Hoothoot; challenge-1 set **265 POLITOED_1** is the lowest legal
+carrier. Complete legal Scene-ON parties pass the entire body through first
+inactive cleanup twice fresh in both orientations: player-back **74–242
+(169/169)**, evidence/raw
+`6b164293b9a3ad086504808422b0f95ab07ccd84595eb87b3ca908e34189b0c4` /
+`7c06a1b4825562841f65768ae6b9a97374dba4a727a0ecd59f28220deddf10a1`;
+opponent-front **78–245 (168/168)**,
+`8baa59de6a99008bebd74e72b4089c6146f5f98fefd03ca7805a84412b4f100b` /
+`69b6f767aef05462568e2229c129b620b2ebfa6da399d072507eaa438ee453ec`.
+
+**Repair/evidence:** the typed Scene-ON seam carries resolved POLITOED/ONIX
+geometry and immutable field state. The source-relative reducer and production
+compositor port the queued psychic palette rotation/BLDY, target
+RGB(31,18,31) 0↔12 tint, all six 27-tick GoldRing paths with source OAM order
+and display latches, Politoed/Onix idle and enemy-shadow latches, three
+side-panned Supersonic triggers, windows/text, and first inactive cleanup.
+`hypnosisPortable.ts` proves every dense source/component, seam,
+software/hardware OAM/matrix, palette/tag/register/audio/unchanged-state,
+raw-RGB, and production shared-framebuffer frame twice fresh.
+
+**Sibling / next:** `MOVE_PSYBEAM` remains unsupported/audit-only. Its lowest
+carrier is set **145 SPINDA**; eleven shorter rings, SwayMon, two-leg tint, and
+`LoopSEAdjustPanning 3/4/0/15` need independent complete dense both-orientation
+acceptance. Coverage is **96 exact / 0 partial / 0 staged / 180 unsupported**.
+No boundary list, barrier, canonical allowlist, sleep, damage, RNG, controller,
+turn, or facility state changed.
+
 ## MOVE_HYDRO_PUMP promoted exact; WATER_ORB repair complete (2026-07-29)
 
 **Verdict:** `MOVE_HYDRO_PUMP` is exact. Complete legal three-mon Scene-ON

@@ -16,10 +16,10 @@ from emerald_core import EmeraldOracle  # noqa: E402
 
 def main() -> None:
     raw_request = json.loads(SCENARIO.read_text())
-    if MOVE_ID == 27:
-        # Real challenge-1 Level-50 Factory set 233 carrier: HITMONLEE_1,
-        # Adamant, HP/Defense, Black Belt. Both legal scenarios already stage
-        # the full record; this branch documents the shared probe contract.
+    if MOVE_ID in (27, 67):
+        # The callers stage the complete source-legal carrier record.  Rolling
+        # Kick uses challenge-1 Hitmonlee_1; Low Kick uses the lower
+        # challenge-1 Machoke_1 rather than the later Sudowoodo_2.
         pass
     elif MOVE_ID == 41:
         parties = raw_request["overrides"]["parties"]
@@ -78,7 +78,7 @@ def main() -> None:
         ("gSlidingKickSpriteTemplate", "gBasicHitSplatSpriteTemplate",
          "gSlideMonToOffsetSpriteTemplate",
          "gSlideMonToOriginalPosSpriteTemplate")
-        if MOVE_ID == 27 else
+        if MOVE_ID in (27, 67) else
         ("gMegaPunchKickSpriteTemplate", "gBasicHitSplatSpriteTemplate")
         if MOVE_ID == 5 else
         ("gLinearStingerSpriteTemplate", "gHandleInvertHitSplatSpriteTemplate")
@@ -91,6 +91,8 @@ def main() -> None:
     templates = {name: oracle.symbols[name] for name in template_names}
     task_names = ("AnimTask_ShakeMon", "AnimTask_ShakeMon_Step",
                   "AnimTask_ShakeMon2", "AnimTask_ShakeMon2_Step",
+                  "AnimTask_RotateMonSpriteToSide",
+                  "AnimTask_RotateMonSpriteToSide_Step",
                   "AnimTask_TranslateMonEllipticalRespectSide",
                   "AnimTask_TranslateMonElliptical",
                   "AnimTask_TranslateMonElliptical_Step",

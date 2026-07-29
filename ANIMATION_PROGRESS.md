@@ -1,5 +1,33 @@
 # Animation coverage
 
+## MOVE_LOW_KICK source-evidence checkpoint; no production promotion (2026-07-29)
+
+**State:** `MOVE_LOW_KICK` is **partial only**, not exact. The generated
+inventory and source prove the two Level-50 carriers are set **178
+`FRONTIER_MON_MACHOKE_1`** and later set **298 `FRONTIER_MON_SUDOWOODO_2`**;
+Adamant HP+SpDefense Focus-Band Machoke is the sole lowest carrier.
+
+**Did:** complete legal Scene-ON Machoke/Onix three-mon parties and a reusable
+mGBA probe extension pass a complete dense **33/33** source window through
+first inactive cleanup twice fresh in each orientation: player-back **214–246**
+evidence/raw `f3b4b291ee90208d9f9dcf7e2ea91a355c6da0e270289e6a083cdae126782a74` /
+`40639ddccc47ad2f867891ce5daa4d6a5769ff22b85352095bac14ba5cc9d9e5`;
+opponent-front **214–246** `7264ca8cdc9335c80e375354c674322eb857f1c2a7d0ea253fe2e73cefd14e0a` /
+`4d657cf51c4c28805b20ed868890418aaf2ab03c7074ccce9757ea63bef75e20`.
+The receipts pin source-relative slide/restore offsets, target-relative foot
+and hitsplat, RotateMonSpriteToSide/matrix, tags, panning, OAM/matrices,
+palettes/registers, raw RGB, and immutable gameplay fields.
+
+**Next:** port a source-relative reducer, narrow typed seam, any Machoke art,
+and production compositor/display latches; then establish every-frame shared
+framebuffer equality twice per orientation. Do not promote Low Kick from its
+shared Rolling Kick template: its target-relative/rotation/timing body is
+independent. Coverage is **98 exact / 1 partial / 0 staged / 177 unsupported**.
+
+**Notes:** No production compositor/wiring, engine, gameplay, boundary,
+barrier, canonical-recording allowlist, damage, RNG, turn, controller, or
+facility state changed; no framebuffer equality is claimed.
+
 ## MOVE_ROLLING_KICK promoted exact; SlidingKick representative complete (2026-07-29)
 
 **Verdict:** `MOVE_ROLLING_KICK` is exact. Source and generated inventory prove
@@ -55,33 +83,3 @@ variant-1 art selection and `SE_M_MEGA_KICK2` require independent complete
 both-orientation dense acceptance. Coverage is **97 exact / 0 partial /
 0 staged / 179 unsupported**. No gameplay, boundary, barrier, or canonical
 allowlist ownership changed.
-
-## MOVE_HYPNOSIS promoted exact; GOLD_RING repair complete (2026-07-29)
-
-**Verdict:** `MOVE_HYPNOSIS` is exact. The Level-50 eligibility graph rejects
-source set 38 Hoothoot; challenge-1 set **265 POLITOED_1** is the lowest legal
-carrier. Complete legal Scene-ON parties pass the entire body through first
-inactive cleanup twice fresh in both orientations: player-back **74–242
-(169/169)**, evidence/raw
-`6b164293b9a3ad086504808422b0f95ab07ccd84595eb87b3ca908e34189b0c4` /
-`7c06a1b4825562841f65768ae6b9a97374dba4a727a0ecd59f28220deddf10a1`;
-opponent-front **78–245 (168/168)**,
-`8baa59de6a99008bebd74e72b4089c6146f5f98fefd03ca7805a84412b4f100b` /
-`69b6f767aef05462568e2229c129b620b2ebfa6da399d072507eaa438ee453ec`.
-
-**Repair/evidence:** the typed Scene-ON seam carries resolved POLITOED/ONIX
-geometry and immutable field state. The source-relative reducer and production
-compositor port the queued psychic palette rotation/BLDY, target
-RGB(31,18,31) 0↔12 tint, all six 27-tick GoldRing paths with source OAM order
-and display latches, Politoed/Onix idle and enemy-shadow latches, three
-side-panned Supersonic triggers, windows/text, and first inactive cleanup.
-`hypnosisPortable.ts` proves every dense source/component, seam,
-software/hardware OAM/matrix, palette/tag/register/audio/unchanged-state,
-raw-RGB, and production shared-framebuffer frame twice fresh.
-
-**Sibling / next:** `MOVE_PSYBEAM` remains unsupported/audit-only. Its lowest
-carrier is set **145 SPINDA**; eleven shorter rings, SwayMon, two-leg tint, and
-`LoopSEAdjustPanning 3/4/0/15` need independent complete dense both-orientation
-acceptance. Coverage is **96 exact / 0 partial / 0 staged / 180 unsupported**.
-No boundary list, barrier, canonical allowlist, sleep, damage, RNG, controller,
-turn, or facility state changed.
