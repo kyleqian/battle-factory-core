@@ -44,6 +44,7 @@ import {
   type BattleScriptStatStages,
 } from "./battleScriptRulesContext.ts";
 import { BATTLE_SCRIPT_STATUS2_WRAPPED_MASK } from "./battleScriptSourceConstants.ts";
+import { cancelBattleScriptMultiTurnMoves } from "./battleScriptMultiTurnCancellation.ts";
 import { computeCastformForm } from "./battleScriptTryCastformDataChangeOpcode.ts";
 import speciesTypesData from "../data/gen/species-types.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
@@ -191,7 +192,7 @@ function callSwitchinScript(
 }
 
 /**
- * include/constants/battle_script_commands.h -- the three `various` ids this
+ * include/constants/battle_script_commands.h -- the `various` ids this
  * file resolves; every other case name stays unrecognized (barriers).
  * VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT (23, battle_script_commands.c:
  * 6480-6482) widens this existing barrier's modeled operand set --
@@ -202,11 +203,13 @@ function callSwitchinScript(
  * tracked purely so this reachable script doesn't halt on an avoidable
  * barrier.
  */
+const VARIOUS_CANCEL_MULTI_TURN_MOVES = 0;
 const VARIOUS_RESET_PLAYER_FAINTED = 7;
 const VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT = 23;
 const VARIOUS_GET_MOVE_TARGET = 3;
 const VARIOUS_SET_MAGIC_COAT_TARGET = 1;
 const NAMED_BYTE_CONSTANTS = new Map<string, number>([
+  ["VARIOUS_CANCEL_MULTI_TURN_MOVES", VARIOUS_CANCEL_MULTI_TURN_MOVES],
   ["VARIOUS_SET_MAGIC_COAT_TARGET", VARIOUS_SET_MAGIC_COAT_TARGET],
   ["VARIOUS_GET_MOVE_TARGET", VARIOUS_GET_MOVE_TARGET],
   ["VARIOUS_RESET_PLAYER_FAINTED", VARIOUS_RESET_PLAYER_FAINTED],
@@ -590,14 +593,19 @@ function cancelallactionsOpcodeHandler(
 }
 
 /**
- * `Cmd_various` cases `VARIOUS_GET_MOVE_TARGET` (3),
+ * `Cmd_various` cases `VARIOUS_CANCEL_MULTI_TURN_MOVES` (0),
+ * `VARIOUS_GET_MOVE_TARGET` (3),
  * `VARIOUS_RESET_PLAYER_FAINTED` (7), and
  * `VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT` (23). GET_MOVE_TARGET's
  * `MOVE_TARGET_SELECTED` branch is source-complete for singles: it repeats
  * `Random() % gBattlersCount` until it finds a present opposing battler.
  * Doubles still use the handler's existing generic barrier because Follow
  * Me and Lightning Rod target redirection require state this context does
- * not own. Every other `id` is that same named barrier.
+ * not own. CANCEL_MULTI_TURN_MOVES is the direct
+ * `CancelMultiTurnMoves(gActiveBattler)` call at
+ * battle_script_commands.c:6327-6329; the shared helper ports its exact
+ * status2/status3/timer clears from battle_util.c:877-888. Every other `id`
+ * is that same named barrier.
  */
 function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
@@ -615,6 +623,8 @@ function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRul
       && rules.battleTopology.battlersCount === 2;
     if (
       id !== VARIOUS_SET_MAGIC_COAT_TARGET
+      &&
+      id !== VARIOUS_CANCEL_MULTI_TURN_MOVES
       &&
       id !== VARIOUS_RESET_PLAYER_FAINTED
       && id !== VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT
@@ -653,6 +663,18 @@ function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRul
         context,
         Object.freeze({ kind: "advance" }),
         { rulesContext: nextRules, rng },
+      );
+    }
+
+    if (id === VARIOUS_CANCEL_MULTI_TURN_MOVES) {
+      const cancelled = cancelBattleScriptMultiTurnMoves(
+        rules,
+        battler as BattleScriptBattlerId,
+      );
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: cancelled.rulesContext },
       );
     }
 
