@@ -14,6 +14,9 @@ import {
   createBattleScriptStatusRulesExecution,
   createBattleScriptStatusRulesHandlers,
   prepareRulesStatusAnimation,
+  BATTLE_SCRIPT_MOVE_FLAG_MAKES_CONTACT,
+  BATTLE_SCRIPT_MOVE_FLAG_MIRROR_MOVE_AFFECTED,
+  resolveBattleScriptMoveFlags,
   resolveRulesBattlerForBattleScript,
   type BattleScriptRulesContext,
   type BattleScriptRulesContextInput,
@@ -165,6 +168,12 @@ function selector(expression: string): BattleScriptOperand {
 }
 
 describe("source-shaped Battle Script rules context", () => {
+  it("resolves generated move flags through the shared numeric source bitset", () => {
+    expect(resolveBattleScriptMoveFlags(1) & BATTLE_SCRIPT_MOVE_FLAG_MAKES_CONTACT).not.toBe(0); // Pound
+    expect(resolveBattleScriptMoveFlags(129) & BATTLE_SCRIPT_MOVE_FLAG_MAKES_CONTACT).toBe(0); // Swift
+    expect(resolveBattleScriptMoveFlags(1) & BATTLE_SCRIPT_MOVE_FLAG_MIRROR_MOVE_AFFECTED).not.toBe(0);
+  });
+
   it("creates exactly four deeply frozen battlers and the proven non-presentation fields", () => {
     const source = input();
     const created = createBattleScriptRulesContext(source);

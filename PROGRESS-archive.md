@@ -1,5 +1,28 @@
 ---
 
+## 662 — [INTERACTIVE TOOLING FIX 2026-07-28 ~21:40] Claude supervisor cwd persistence mechanically disabled
+
+- **State:** tree green at **452 files / 4856 tests**, launcher profile
+  coverage **16/16**, production build, `bash -n`, `git diff --check`, and
+  Battle Scene OFF oracle info. Game state, census, oracle fixtures, and
+  animation coverage are unchanged.
+- **Did:** `run-supervisor.sh` now exports Claude Code's supported
+  `CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR=1` policy for every Claude
+  supervisor, including hybrid and animation-lane launches. Each Bash tool
+  call therefore starts from that supervisor's launch root after temporary
+  worktree inspection. `--print-config` exposes the resolved policy as
+  `project-root-reset`; Codex remains `per-command`. A launcher regression
+  test pins default Claude, hybrid, and Codex behavior. Deleted the resolved
+  10-hit supervisor-cwd entry from `PAPERCUTS.md`.
+- **Next:** resume entry 661's ordered ability/item work: falsify the
+  two-turn RNG-gap hypothesis, then wire speed ability/hold-effect/weather
+  inputs before Quick Claw.
+- **Notes:** this is launcher-only; no battle engine, renderer, trace,
+  barrier ratchet, or oracle-profile change. The existing “merge from the
+  owning tree” workflow remains useful defense in depth.
+
+---
+
 ## 661 — [SUPERVISOR WIND-DOWN 2026-07-28 ~21:20] Ability/item parity surge: census abilities 55/70 + hold effects 41/42; speed/turn-order scout pack landed; animation-main folded twice (Tickle exact)
 
 - **State:** master `2f5167a8`, union green at **452 files / 4855 tests**,
