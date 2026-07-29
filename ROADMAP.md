@@ -10,9 +10,9 @@ those battles need. Out of scope: the lobby/frontier overworld and every
 screen before the draft, Battle Points economy beyond a single round, double
 battles, and the open-level rule set (until the single-battle loop is solid).
 
-**Audio marker:** sound effects, cries, fanfares, and music are acknowledged
-as a future presentation concern; they are not yet assigned a stage or
-acceptance scope.
+**Audio marker:** sound effects, cries, fanfares, and music are a separate,
+later milestone — stage S11 below (user decision, 2026-07-28). No earlier
+stage's acceptance includes audio.
 
 ## Staged plan (authored by the run supervisor, iteration 0, 2026-07-17)
 
@@ -916,6 +916,23 @@ S10 explicitly owns the source-derived battle system, trainer/opponent corpus,
 and the parameterized oracle needed to develop them. Checking S9 must not be
 interpreted as claiming these mechanics complete.
 
+**User scope decision (2026-07-28):** with the move-effect census closed at
+100%, the next objective is **held-item and ability parity**, driven by a
+census-generator worklist mirroring the move census (hook tables + carrier
+weighting + named-barrier cross-reference). Clarified standing scope:
+
+- **Trainer AI in general — including the native switch decision module and
+  `battle_ai_switch_items.c`'s item branch — is IN scope.** It need not land
+  in the item/ability milestone, but Gate 5's AI acceptance (switch/item
+  selection, challenge-policy branches) is a real commitment, not a parked
+  remainder. (Factory trainers carry no usable Bag items, so the item-use
+  branch is expected to close as a source-faithful proof of its no-op shape
+  rather than deep behavior.)
+- **Doubles and the Open-level rule set remain OUT of scope.**
+- **Noland / Frontier Brain battles are OUT of scope for now** (Gate 2's
+  explicit schema rejection stands; not a blocker for Gates 3–6).
+- **Audio is its own later milestone — S11**; no S10 gate includes it.
+
 Build the rules engine from the pinned source's actual structure: generated
 tables plus a typed Battle Script IR/interpreter and source-mapped item,
 ability, end-turn, AI, and switching hooks. Do not grow a collection of
@@ -1497,6 +1514,18 @@ not. Acceptance therefore enumerates every trainer/set/move/hook and proves
 each shared semantic family plus interaction boundaries, rather than claiming
 quality from brute-forcing every possible three-mon team against every other
 team.
+
+### [ ] S11 — Audio (separate milestone, user-directed 2026-07-28)
+
+Sound effects, mon cries, fanfares, and background music across the draft,
+battle, swap, and ending flows. Deliberately unscheduled until S10's parity
+gates close; no earlier stage's acceptance may be reinterpreted to include
+audio. Acceptance criteria are authored when this stage is scheduled.
+Groundwork that already exists and should be reused, not rebuilt: the kernel
+emits `play-se`/`play-fanfare`/`play-faint-cry` semantic events, and the
+animation lane's evidence recipes already byte-pin both hardware audio
+players/pans through mGBA RAM probes — a state-parity acceptance channel
+that does not require waveform capture.
 
 Stages ship in order for the main functional lane. The animation lane may run
 in parallel behind the presentation seam, and later scenario/data groundwork

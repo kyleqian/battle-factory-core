@@ -13,6 +13,45 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 658 — [INTERACTIVE SESSION 2026-07-28 ~20:25] Ability/item parity setup landed: census generator + worklist live; scope decisions recorded (AI in scope, audio = S11)
+
+- **State:** master `275c415c`+docs, union green at **449 files / 4819
+  tests**, production build, `git diff --check`. New standing artifacts:
+  `npm run census:ability-item` →
+  `docs/ability-item-parity-census.md` (ranked worklists, 15 validations,
+  byte-idempotent); `npm run extract:ability-item-hooks` →
+  `src/data/gen/ability-item-hooks.json` (literal AbilityBattleEffects/
+  ItemBattleEffects segmentation + inline sites, exact-set pinned).
+  **Headline: abilities 43/70 engine-referenced (weighted 729/1103 L50
+  carriers), hold effects 22/42 (weighted 713/850).**
+- **Did:** built the move-census pattern for the last two enumerable
+  families. Ground truth: 20 ability caseID segments (+3 alias
+  pseudo-modes), 5 item segments, 187+54 inline sites across 6 rules + 2
+  AI files. Census: source hooks × L50 carriers (deterministic
+  single-ability split for fixture selection) × live engine surface
+  (identifier-only scan — the engine's universe-spelling ABILITY_SYMBOLS
+  name table made naive counting vacuous at 70/70; string literals
+  excluded, jumpifability live-set exports unioned, alias spellings
+  dealiased, unknown spellings hard-error). Tier-1: 6 new tests incl. two
+  regeneration ratchets — **the census doc is pinned to the tree; regen it
+  in the same commit as any engine change that moves it.** ROADMAP: S11
+  audio stage created (separate milestone, user-directed); 2026-07-28
+  scope block added under S10.
+- **Next:** supervisor sessions consume the worklists exactly like move
+  census rows: top unreferenced abilities Chlorophyll 38 / Thick Fat 36 /
+  Guts 36 / Swift Swim 34 (damage/speed-calc modifier class), contact
+  ON_DAMAGE family (Static 27 …), pinch boosts; top unreferenced hold
+  effects Quick Claw 75, type-power family (~40 sets), Choice Band is
+  referenced-partial. Scout-ahead prep packs + serial implementation rows
+  at exact predicted deltas is the proven cadence. Switch/item/trainer AI
+  is IN scope for a later milestone (user decision); doubles/Open/Noland
+  stay out; audio is S11.
+- **Notes:** "engine-referenced" = named surface, not semantic
+  completeness — rows close via fixtures + oracle evidence like move rows
+  (see the doc's Caveats). Animation program live to ~21:06 tonight;
+  its fold at next orient is expected.
+
+---
 ## 657 — [INTERACTIVE SESSION 2026-07-28 ~19:55] Pre-next-run cleanup: animation fold, 07-26 oracle-tooling branch landed, papercuts pruned; USER DIRECTIVE: held-item + ability parity is the next objective
 
 - **State:** master `b791ea88`, union green at **448 files / 4813 tests**,
@@ -76,45 +115,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   used the historical Battle-Scene-ON profile.
 
 ---
-## 655 — [SUPERVISOR WIND-DOWN 2026-07-28 ~19:15, amended ~19:25] Session close: census CLOSED at 100%; seam handoff consumed; 5 defects found+fixed; ISSUES #41 deleted; entry-hook/AI surfaces verified complete
-
-- **State:** union green at **441 files / 4792 tests**, production build,
-  `git diff --check`, census byte-idempotent at **214/214 effects, 355/355
-  moves, 276/276 distinct, 2957/2957 weighted (100%)**, all 72 validations.
-  Recording-import allowlist **0** (ISSUES #41 deleted). Switch-in barriers
-  6→4 (Intimidate/Trace/weather/Forecast hooks live); hit-chain 16→13
-  (Focus Band source-complete). Eight animation folds; final fold (Focus
-  Energy evidence) verified. DEFERRED.md empty.
-- **Did (24 workers over 2 lanes, 0 failures, 0 regressions):** see
-  checkpoint entry 651 for the census-closure surge (rows 4→8 at exact
-  predicted deltas; Fake Tears 322/322 both orientations consumed +
-  promoted by the live animation program; 4-finding interaction audit all
-  fixed; recording imports 4→0). After 651: end-turn abilities/items
-  acceptance closed (Rain Dish suppression pin, 9 named zero-carrier item
-  barriers proven against all 882 entries); switch-in ON_SWITCHIN dispatch
-  + Truant reset registered with scout receipts (Trace/Drizzle banked,
-  Intimidate later-switch staged in-step); follow-up pins exposed and fixed
-  a 5th real defect (duplicate synthetic Intimidate prevention messages —
-  source script is now sole owner); CheckViability step verified already
-  complete (22/22 reachable handlers, 11/11/13 ledgers reproduce) — two
-  stale-premise briefs this evening both became honest verify-no-ops.
-- **Next:** (1) ability/item census generator (turn the named-barrier set +
-  source hook tables into a ranked worklist like the move census); (2)
-  ISSUES #39 window-by-window retirement (pattern proven twice now); (3)
-  ANIMATION_PROGRESS.md's own backlog continues under its supervisor
-  (session to ~21:06 — an unfolded animation-main at next orient is
-  expected); (4) switch/item AI and doubles/Open-level remain out of scope
-  by mission.
-- **Amendment (~19:25):** one more prepped step landed after this entry was
-  first written: entry 656's turn13-sandattack seam conversion (§15 dossier
-  consumed; 190/190 + 8-trace regression sweep exact, supervisor-rerun;
-  four turn-keyed literals deleted; suite 441/4791). Final union verified
-  green; 25 workers total, 0 failures. No §16 prep-scout exists, so the
-  next #39 window needs a scout+wire pair — left for the next session.
-- **Notes:** no usage-limit events; both oracles fresh all session (OFF
-  restarted at orient). PAPERCUTS: added supervisor cwd-persistence trap,
-  bumped generated-JSON search entry. Ledger doc-drift lesson recorded in
-  supervisor memory: grep the tree before briefing any Next item older than
-  a few entries — entries 652/654 were the evening's two stale briefs.
 
 ---

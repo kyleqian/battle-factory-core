@@ -1,5 +1,48 @@
 ---
 
+## 655 — [SUPERVISOR WIND-DOWN 2026-07-28 ~19:15, amended ~19:25] Session close: census CLOSED at 100%; seam handoff consumed; 5 defects found+fixed; ISSUES #41 deleted; entry-hook/AI surfaces verified complete
+
+- **State:** union green at **441 files / 4792 tests**, production build,
+  `git diff --check`, census byte-idempotent at **214/214 effects, 355/355
+  moves, 276/276 distinct, 2957/2957 weighted (100%)**, all 72 validations.
+  Recording-import allowlist **0** (ISSUES #41 deleted). Switch-in barriers
+  6→4 (Intimidate/Trace/weather/Forecast hooks live); hit-chain 16→13
+  (Focus Band source-complete). Eight animation folds; final fold (Focus
+  Energy evidence) verified. DEFERRED.md empty.
+- **Did (24 workers over 2 lanes, 0 failures, 0 regressions):** see
+  checkpoint entry 651 for the census-closure surge (rows 4→8 at exact
+  predicted deltas; Fake Tears 322/322 both orientations consumed +
+  promoted by the live animation program; 4-finding interaction audit all
+  fixed; recording imports 4→0). After 651: end-turn abilities/items
+  acceptance closed (Rain Dish suppression pin, 9 named zero-carrier item
+  barriers proven against all 882 entries); switch-in ON_SWITCHIN dispatch
+  + Truant reset registered with scout receipts (Trace/Drizzle banked,
+  Intimidate later-switch staged in-step); follow-up pins exposed and fixed
+  a 5th real defect (duplicate synthetic Intimidate prevention messages —
+  source script is now sole owner); CheckViability step verified already
+  complete (22/22 reachable handlers, 11/11/13 ledgers reproduce) — two
+  stale-premise briefs this evening both became honest verify-no-ops.
+- **Next:** (1) ability/item census generator (turn the named-barrier set +
+  source hook tables into a ranked worklist like the move census); (2)
+  ISSUES #39 window-by-window retirement (pattern proven twice now); (3)
+  ANIMATION_PROGRESS.md's own backlog continues under its supervisor
+  (session to ~21:06 — an unfolded animation-main at next orient is
+  expected); (4) switch/item AI and doubles/Open-level remain out of scope
+  by mission.
+- **Amendment (~19:25):** one more prepped step landed after this entry was
+  first written: entry 656's turn13-sandattack seam conversion (§15 dossier
+  consumed; 190/190 + 8-trace regression sweep exact, supervisor-rerun;
+  four turn-keyed literals deleted; suite 441/4791). Final union verified
+  green; 25 workers total, 0 failures. No §16 prep-scout exists, so the
+  next #39 window needs a scout+wire pair — left for the next session.
+- **Notes:** no usage-limit events; both oracles fresh all session (OFF
+  restarted at orient). PAPERCUTS: added supervisor cwd-persistence trap,
+  bumped generated-JSON search entry. Ledger doc-drift lesson recorded in
+  supervisor memory: grep the tree before briefing any Next item older than
+  a few entries — entries 652/654 were the evening's two stale briefs.
+
+---
+
 ## 654 — [BOUNDED MAIN WORKER 2026-07-28 ~19:01] Assigned CheckViability phase-1 step already complete — verified, not redone
 
 - **State:** no implementation delta: the assigned phase-1 handler sequence
