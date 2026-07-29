@@ -181,27 +181,22 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // ESCAPE_PREVENTION/...) are a separate barrier (1).
   ["src/engine/battleScriptStatbuffchangeOpcode.ts", 3],
   // Screens/weather registration slice 5 (docs/screens-weather-ground-truth.md
-  // §1c/§6 item 5), widened this session (runtime weather-form loop, PROGRESS
-  // 460): Cmd_bicword still narrows to the one concrete operand pair
-  // BattleScript_DamagingWeatherContinuesEnd uses (HitsAllNoUndergroundBonus's
-  // single-bit clear / MoveUsedWokeUp's HITMARKER_WAKE_UP_CLEAR are its one
-  // barrier). Cmd_addbyte/Cmd_jumpifarraynotequal no longer special-case a
+  // §1c/§6 item 5), widened through the runtime weather-form loop (PROGRESS
+  // 460) and wake-up pass-through: Cmd_bicword now models all three concrete
+  // source operand pairs, including MoveUsedWokeUp's source-documented
+  // never-read HITMARKER_WAKE_UP_CLEAR. Its one generic unknown-pair guard
+  // remains a deliberate future-input barrier. Cmd_addbyte/
+  // Cmd_jumpifarraynotequal no longer special-case a
   // single tuple -- both now resolve any pointer/comparand through the same
   // shared byte-lvalue universe battleScriptSetByte.ts owns (plus the
   // gBattlersCount sentinel), so BattleScript_WeatherFormChangesLoop's own
   // sBATTLER pair runs for real, and so (as the same mechanism, not a special
   // case) do Perish Song's/Teeter Dance's/Palace's own loop counters. Still
-  // one shared barrier per opcode: Triple Kick's counter (delta 10 isn't a
-  // resolvable literal), Ghost Curse's compare, and the link-battle loop
-  // (both compare a selector role -- gBattlerAttacker/gBattlerFainted --
-  // this universe does not expose). None reachable by either committed
-  // sandstorm/safeguard/lightscreen fixture. +1 (docs/roar-multihit-
-  // registration-scout.md §4 rung 2 follow-up): `sMULTIHIT_STRING + 4` is
-  // now a dedicated special case (found live running the multi-hit family's
-  // committed script -- this counter is written on every iteration, not
-  // just Triple Kick's own as the scout dossier's §1d table claimed) with
-  // its own narrow (b) guard for an unresolvable delta, distinct from the
-  // shared-universe fallback's guard. 4 total.
+  // guards are the special `sMULTIHIT_STRING + 4` addbyte expression, the
+  // shared addbyte universe fallback, bicword's future unknown operand pair,
+  // and jumpifarraynotequal's unknown pointer/comparand pair. The call-site
+  // count therefore deliberately remains 4 even though the live wake-up
+  // operand is no longer blocked.
   ["src/engine/battleScriptDamagingWeatherOpcode.ts", 4],
   // TRYCASTFORMDATACHANGE registration (PROGRESS 458's supervisor-decided
   // (a)/(b) split): CastformDataTypeChange (battle_util.c:2396-2429) is

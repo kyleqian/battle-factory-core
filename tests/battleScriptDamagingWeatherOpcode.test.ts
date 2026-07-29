@@ -236,12 +236,13 @@ describe("production damaging-weather opcode dispatch (screens/weather registrat
     });
   });
 
-  describe("Cmd_bicword -- modeled sites vs. barrier", () => {
+  describe("Cmd_bicword -- all three source sites", () => {
     const pc = findPc("B_SCR_OP_BICWORD", "BattleScript_DamagingWeatherContinuesEnd");
     const undergroundPc = findPc("B_SCR_OP_BICWORD", "BattleScript_HitsAllNoUndergroundBonus");
-    const barrierPc = findPc("B_SCR_OP_BICWORD", "BattleScript_MoveUsedWokeUp");
+    const wokeUpPc = findPc("B_SCR_OP_BICWORD", "BattleScript_MoveUsedWokeUp");
     const BITS = (1 << 5) | (1 << 8) | (1 << 20) | (1 << 24); // IGNORE_BIDE | IGNORE_SUBSTITUTE | PASSIVE_HP_UPDATE | GRUDGE
     const HITMARKER_IGNORE_UNDERGROUND = 1 << 17;
+    const HITMARKER_WAKE_UP_CLEAR = 1 << 4;
 
     it("(pass-through) clears exactly the four named HITMARKER_* bits", () => {
       const rc = context({ hitMarker: BITS | (1 << 0) });
@@ -262,11 +263,13 @@ describe("production damaging-weather opcode dispatch (screens/weather registrat
       },
     );
 
-    it("(unsupported-branch) barriers on an unmodeled bicword value (BattleScript_MoveUsedWokeUp's HITMARKER_WAKE_UP_CLEAR)", () => {
-      const { result } = stepAtProgramCounter(barrierPc, context());
-      expect(result.kind).toBe("halted");
-      if (result.kind !== "halted") throw new Error("expected halted");
-      expect(result.state.haltReason?.kind).toBe("unsupported-branch");
+    it("(pass-through) clears BattleScript_MoveUsedWokeUp's source-documented never-read HITMARKER_WAKE_UP_CLEAR bit", () => {
+      const { result } = stepAtProgramCounter(
+        wokeUpPc,
+        context({ hitMarker: HITMARKER_WAKE_UP_CLEAR | (1 << 0) }),
+      );
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.hitMarker).toBe(1 << 0);
     });
   });
 

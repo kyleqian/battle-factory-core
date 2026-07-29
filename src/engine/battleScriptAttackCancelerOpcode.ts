@@ -24,7 +24,10 @@ import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScri
 import type {
   BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
-import { withBattleScriptPartyMemberPp } from "./battleScriptRulesContext.ts";
+import {
+  withBattleScriptPartyMemberPp,
+  withBattleScriptPartyMemberStatus1,
+} from "./battleScriptRulesContext.ts";
 import { isDefenderProtected } from "./battleScriptHitChainOpcode.ts";
 import { cancelBattleScriptMultiTurnMoves } from "./battleScriptMultiTurnCancellation.ts";
 import {
@@ -168,10 +171,20 @@ function applyCancelerEffectTransition(
   if (sync.kind !== "request-status1-write") {
     throw new Error("Battle Script attack canceler effect 2 requires a status1 controller sync");
   }
+  const syncedBattler = rulesContext.battlers[sync.battler];
+  const syncedRulesContext = Object.freeze({
+    ...rulesContext,
+    party: withBattleScriptPartyMemberStatus1(
+      rulesContext.party,
+      syncedBattler.side,
+      syncedBattler.partyIndex,
+      sync.value,
+    ),
+  });
   const scheduler = markBattleScriptControllerPending(context.state.scheduler, sync.battler);
   return transitionBattleScriptCommand(context, control, {
     scheduler,
-    rulesContext,
+    rulesContext: syncedRulesContext,
     rng,
     events: Object.freeze([
       Object.freeze({

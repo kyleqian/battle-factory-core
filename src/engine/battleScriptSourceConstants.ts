@@ -115,6 +115,8 @@ export const BATTLE_SCRIPT_STATUS2_WRAPPED_MASK = (1 << 13) | (1 << 14) | (1 << 
 export const BATTLE_SCRIPT_STATUS2_TRANSFORMED = 1 << 21;
 export const BATTLE_SCRIPT_STATUS2_FORESIGHT = 1 << 29;
 
+/** include/constants/battle.h:181 -- cleared on wake-up; never set or checked by the ROM. */
+export const BATTLE_SCRIPT_HITMARKER_WAKE_UP_CLEAR = 1 << 4;
 export const BATTLE_SCRIPT_HITMARKER_IGNORE_BIDE = 1 << 5;
 export const BATTLE_SCRIPT_HITMARKER_IGNORE_ON_AIR = 1 << 16;
 export const BATTLE_SCRIPT_HITMARKER_IGNORE_UNDERGROUND = 1 << 17;

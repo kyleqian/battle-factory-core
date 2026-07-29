@@ -15,8 +15,8 @@
  * `Cmd_bicword` are all generic array/scratch-field primitives with many
  * concrete call sites across the full committed program (most belonging to
  * OTHER move effects entirely, e.g. Triple Kick's own counter, Perish Song's
- * loop). `Cmd_copyarraywithindex`/`Cmd_bicword` model only the exact operand
- * triple `BattleScript_DamagingWeatherLoop`/`ContinuesEnd` use; every other
+ * loop). `Cmd_copyarraywithindex`/`Cmd_bicword` model only source-proven exact
+ * operands; every other
  * concrete call site's unmodeled pointer/value is a single named (b) barrier,
  * same policy as `battleScriptJumpifbyteOpcode.ts`.
  *
@@ -52,6 +52,7 @@ import {
   BATTLE_SCRIPT_HITMARKER_IGNORE_SUBSTITUTE,
   BATTLE_SCRIPT_HITMARKER_IGNORE_UNDERGROUND,
   BATTLE_SCRIPT_HITMARKER_PASSIVE_HP_UPDATE,
+  BATTLE_SCRIPT_HITMARKER_WAKE_UP_CLEAR,
   BATTLE_SCRIPT_STATUS3_UNDERGROUND,
   BATTLE_SCRIPT_STATUS3_UNDERWATER,
 } from "./battleScriptSourceConstants.ts";
@@ -288,16 +289,18 @@ function createAddbyteHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCont
 }
 
 /**
- * `Cmd_bicword` (`battle_script_commands.c:3905-3912`). Two of its three
- * concrete call sites are modeled: `BattleScript_DamagingWeatherContinuesEnd`'s
+ * `Cmd_bicword` (`battle_script_commands.c:3905-3912`). All three concrete
+ * call sites are modeled: `BattleScript_DamagingWeatherContinuesEnd`'s
  * `bicword gHitMarker, HITMARKER_IGNORE_BIDE | HITMARKER_IGNORE_SUBSTITUTE |
  * HITMARKER_PASSIVE_HP_UPDATE | HITMARKER_GRUDGE`, and (executable-frontier
  * census, EFFECT_EARTHQUAKE registration) `BattleScript_HitsAllNoUndergroundBonus`'s
  * `bicword gHitMarker, HITMARKER_IGNORE_UNDERGROUND` -- the exact sibling clear
  * to `Cmd_orword`'s already-registered set of the same bit
  * (`BattleScript_HitsAllWithUndergroundBonusLoop`'s underground branch,
- * `battleScriptOrwordOpcode.ts`). `MoveUsedWokeUp`'s
- * `HITMARKER_WAKE_UP_CLEAR` remains the single named barrier below.
+ * `battleScriptOrwordOpcode.ts`), and `BattleScript_MoveUsedWokeUp`'s
+ * `HITMARKER_WAKE_UP_CLEAR`. The last bit is documented as never set or
+ * checked (`include/constants/battle.h:181`), but the interpreter still
+ * performs the source-authentic clear before printing the wake-up message.
  */
 const BICWORD_DAMAGING_WEATHER_VALUE =
   "HITMARKER_IGNORE_BIDE | HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_HP_UPDATE | HITMARKER_GRUDGE";
@@ -310,6 +313,7 @@ const BICWORD_DAMAGING_WEATHER_MASK =
 const BICWORD_ACCEPTED_MASK_BY_VALUE: ReadonlyMap<string, number> = new Map([
   [BICWORD_DAMAGING_WEATHER_VALUE, BICWORD_DAMAGING_WEATHER_MASK],
   ["HITMARKER_IGNORE_UNDERGROUND", BATTLE_SCRIPT_HITMARKER_IGNORE_UNDERGROUND],
+  ["HITMARKER_WAKE_UP_CLEAR", BATTLE_SCRIPT_HITMARKER_WAKE_UP_CLEAR],
 ]);
 
 function createBicwordHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {

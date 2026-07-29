@@ -337,6 +337,11 @@ const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Objec
     "STRINGID_PKMNSTOCKPILED",
     "STRINGID_PKMNCANTSTOCKPILE",
   ]),
+  /** battle_message.c:987-991 -- ordinary expiry / Uproar wake-up. */
+  gWokeUpStringIds: Object.freeze([
+    "STRINGID_PKMNWOKEUP",
+    "STRINGID_PKMNWOKEUPINUPROAR",
+  ]),
   /** battle_message.c:991-996. */
   gSwallowFailStringIds: Object.freeze([
     "STRINGID_FAILEDTOSWALLOW",

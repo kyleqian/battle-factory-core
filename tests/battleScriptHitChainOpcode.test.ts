@@ -2969,6 +2969,21 @@ describe("production printfromtable (Cmd_printfromtable) dispatch", () => {
     expect(program.instructions.find((i) => i.opcodeName === "B_SCR_OP_PRINTFROMTABLE")).toBeDefined();
   });
 
+  it.each([
+    [0, "STRINGID_PKMNWOKEUP"],
+    [1, "STRINGID_PKMNWOKEUPINUPROAR"],
+  ])("BattleScript_MoveUsedWokeUp's gWokeUpStringIds selector %i resolves %s", (chooser, messageId) => {
+    const pc = program.instructions.find((i) =>
+      i.opcodeName === "B_SCR_OP_PRINTFROMTABLE" && i.operands[0]?.expression === "gWokeUpStringIds"
+    )!.programCounter;
+    const rc = context(0, {}, { multistringChooser: chooser });
+    const { result } = stepAtProgramCounter(pc, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.events).toEqual([
+      expect.objectContaining({ kind: "message", messageId }),
+    ]);
+  });
+
   it("BattleScript_MoveEffectParalysis's own printfromtable gGotParalyzedStringIds, MULTISTRING_CHOOSER 0: resolves STRINGID_PKMNWASPARALYZED", () => {
     const pc = program.instructions.find((i) =>
       i.opcodeName === "B_SCR_OP_PRINTFROMTABLE" && i.operands[0]?.expression === "gGotParalyzedStringIds"
