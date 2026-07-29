@@ -218,6 +218,10 @@ import {
   type AromatherapyState,
 } from "./aromatherapy.ts";
 import {
+  whirlwindAtAge,
+  type WhirlwindState,
+} from "./whirlwind.ts";
+import {
   wishAtAge,
   type WishState,
   type WishTwinkleVariant,
@@ -498,6 +502,7 @@ export interface SceneOnBattlerGeometry {
 export interface SceneOnPresentationBattler {
   readonly species:
     | "VILEPLUME"
+    | "BUTTERFREE"
     | "ONIX"
     | "KRABBY"
     | "SURSKIT"
@@ -1118,6 +1123,13 @@ export interface SceneOnHeadbuttConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnWhirlwindConfig {
+  readonly move: "WHIRLWIND";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnBodySlamConfig {
   readonly move: "BODY_SLAM";
   readonly attacker: SceneOnPresentationBattler;
@@ -1635,6 +1647,7 @@ export type SceneOnMoveConfig =
   | SceneOnHyperFangConfig
   | SceneOnBiteConfig
   | SceneOnHeadbuttConfig
+  | SceneOnWhirlwindConfig
   | SceneOnBodySlamConfig
   | SceneOnSlamConfig
   | SceneOnTwineedleConfig
@@ -1820,6 +1833,12 @@ export interface SceneOnBiteView extends BiteEffect {
 }
 
 export interface SceneOnHeadbuttView extends HeadbuttState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnWhirlwindView extends WhirlwindState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2586,7 +2605,8 @@ export function createSceneOnMovePresentation<
     | SceneOnSparkConfig | SceneOnCharmConfig | SceneOnTailGlowConfig
     | SceneOnScaryFaceConfig
     | SceneOnAbsorbConfig | SceneOnReflectConfig | SceneOnBiteConfig
-    | SceneOnHeadbuttConfig | SceneOnBodySlamConfig | SceneOnSlamConfig,
+    | SceneOnHeadbuttConfig | SceneOnBodySlamConfig | SceneOnSlamConfig
+    | SceneOnWhirlwindConfig,
 >(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
@@ -3296,6 +3316,26 @@ export function sceneOnHeadbuttView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is WHIRLWIND's source `loadspritegfx` display. */
+export function sceneOnWhirlwindView(
+  state: SceneOnMovePresentationState<SceneOnWhirlwindConfig>,
+): SceneOnWhirlwindView {
+  if (state.config.move !== "WHIRLWIND") {
+    throw new Error(`expected WHIRLWIND presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...whirlwindAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.side,
+      state.config.target.geometry.battlePositionCenter,
     ),
   };
 }
