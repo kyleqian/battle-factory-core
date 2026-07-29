@@ -41,6 +41,10 @@ import {
   type MudShotState,
 } from "./mudShot.ts";
 import {
+  bubbleBeamAtAge,
+  type BubbleBeamState,
+} from "./bubbleBeam.ts";
+import {
   reversalAtAge,
   type ReversalResolvedShakeReceipt,
   type ReversalState,
@@ -429,6 +433,7 @@ export interface SceneOnPresentationBattler {
   readonly species:
     | "ONIX"
     | "KRABBY"
+    | "SURSKIT"
     | "KOFFING"
     | "MAGNETON"
     | "MAGBY"
@@ -1043,6 +1048,17 @@ export interface SceneOnMudShotConfig {
   readonly targetPictureOffset: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnBubbleBeamConfig {
+  readonly move: "BUBBLE_BEAM";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source X_2/Y_PIC_OFFSET anchor used by AnimWaterBubbleProjectile. */
+  readonly attackerPictureOffset: Readonly<{ x: number; y: number }>;
+  /** Source X_2/Y_PIC_OFFSET target of both Bubble Beam sprite families. */
+  readonly targetPictureOffset: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnReversalConfig {
   readonly move: "REVERSAL";
   readonly attacker: SceneOnPresentationBattler;
@@ -1382,6 +1398,7 @@ export type SceneOnMoveConfig =
   | SceneOnSonicBoomConfig
   | SceneOnSmokescreenConfig
   | SceneOnMudShotConfig
+  | SceneOnBubbleBeamConfig
   | SceneOnReversalConfig
   | SceneOnSwaggerConfig
   | SceneOnTauntConfig
@@ -1561,6 +1578,12 @@ export interface SceneOnSmokescreenView extends SmokescreenEffect {
 }
 
 export interface SceneOnMudShotView extends MudShotState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnBubbleBeamView extends BubbleBeamState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2967,6 +2990,28 @@ export function sceneOnMudShotView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...mudShotAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attackerPictureOffset,
+      state.config.targetPictureOffset,
+    ),
+  };
+}
+
+/** `age=0` is Move_BUBBLE_BEAM's first BUBBLE load display. */
+export function sceneOnBubbleBeamView(
+  state: SceneOnMovePresentationState<SceneOnBubbleBeamConfig>,
+): SceneOnBubbleBeamView {
+  if (state.config.move !== "BUBBLE_BEAM") {
+    throw new Error(
+      `expected BUBBLE_BEAM presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...bubbleBeamAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attackerPictureOffset,
