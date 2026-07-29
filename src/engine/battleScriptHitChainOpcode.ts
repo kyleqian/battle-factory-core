@@ -41,6 +41,7 @@ import {
   BATTLE_SCRIPT_MOVE_TARGET_BOTH,
   BATTLE_SCRIPT_STATUS2_SUBSTITUTE,
   resolveBattleScriptBattlerHoldEffect,
+  resolveBattleScriptBattlerHoldEffectParam,
   resolveBattleScriptBattlerPartner,
   resolveBattleScriptMoveTarget,
   resolveBattleScriptMoveType,
@@ -1794,11 +1795,9 @@ export const mirrorcoatdamagecalculatorOpcodeHandler: BattleScriptOpcodeHandler<
  * Their sole source difference is whether EFFECT_FALSE_SWIPE participates in
  * the survival clamp.
  *
- * Focus Band's own roll (`Random() % 100 < param`, gated on the target
- * actually holding it) needs gSpecialStatuses[target].focusBanded, which this
- * engine does not model -- barriered, but ONLY when the target's resolved
- * holdEffect is actually Focus Band, never on the plain (no-item or
- * different-item) path, which is fully implemented per source.
+ * A Focus Band holder always draws its own percent roll after variance,
+ * including on non-lethal hits. A successful roll sets the action-lifetime
+ * SpecialStatus bit; the lethal clamp then records HUNG_ON and the item.
  */
 function adjustNormalDamageOpcodeHandler(
   context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
@@ -1807,45 +1806,64 @@ function adjustNormalDamageOpcodeHandler(
   const rulesContext = context.state.rulesContext;
   const target = requireBattlerRole(rulesContext, "target");
   const targetBattler = rulesContext.battlers[target];
-  const commandName = includeFalseSwipe ? "Cmd_adjustnormaldamage" : "Cmd_adjustnormaldamage2";
-
-  const { rng, randomValue } = drawBattleScriptRng(
+  const damageRollReason = includeFalseSwipe ? "adjustnormaldamage" : "adjustnormaldamage2";
+  const damageDraw = drawBattleScriptRng(
     context.state.rng,
     context.instruction,
-    includeFalseSwipe ? "adjustnormaldamage" : "adjustnormaldamage2",
+    damageRollReason,
   );
-  let damage = applyRandomDamageMultiplier(rulesContext.battleMoveDamage, randomValue);
+  let rng = damageDraw.rng;
+  let damage = applyRandomDamageMultiplier(rulesContext.battleMoveDamage, damageDraw.randomValue);
+  let focusBanded = targetBattler.specialStatus.focusBanded === 1;
+  let nextRulesContext = rulesContext;
 
   const holdEffectId = resolveBattleScriptBattlerHoldEffect(rulesContext, target);
   if (holdEffectId === HOLD_EFFECT_ID_FOCUS_BAND) {
-    return unsupportedBranch(
-      context,
-      `${commandName}'s HOLD_EFFECT_FOCUS_BAND roll needs gSpecialStatuses[target].focusBanded, `
-        + "which this engine does not model yet",
-      "battle_script_commands.c",
-      includeFalseSwipe ? 1677 : 1720,
+    const bandDraw = drawBattleScriptRng(
+      rng,
+      context.instruction,
+      `${damageRollReason}-focus-band`,
     );
+    rng = bandDraw.rng;
+    if ((bandDraw.randomValue % 100) < resolveBattleScriptBattlerHoldEffectParam(rulesContext, target)) {
+      focusBanded = true;
+      nextRulesContext = withBattler(rulesContext, target, {
+        specialStatus: Object.freeze({ ...targetBattler.specialStatus, focusBanded: 1 }),
+      });
+    }
   }
 
   const falseSwipeApplies = includeFalseSwipe
     && requireMoveRow(rulesContext.currentMove).effect === "EFFECT_FALSE_SWIPE";
   const hasSubstitute = (targetBattler.status2 & BATTLE_SCRIPT_STATUS2_SUBSTITUTE) !== 0;
   const shouldClamp = !hasSubstitute
-    && (falseSwipeApplies || targetBattler.endured === 1)
+    && (falseSwipeApplies || targetBattler.endured === 1 || focusBanded)
     && targetBattler.hp <= damage;
 
-  let moveResultFlags = rulesContext.moveResultFlags;
+  let moveResultFlags = nextRulesContext.moveResultFlags;
+  let lastUsedItem = nextRulesContext.lastUsedItem;
   if (shouldClamp) {
     damage = targetBattler.hp - 1;
     if (targetBattler.endured === 1) {
       moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_FOE_ENDURED) >>> 0;
+    } else if (focusBanded) {
+      moveResultFlags = (moveResultFlags | MOVE_RESULT_FOE_HUNG_ON) >>> 0;
+      lastUsedItem = targetBattler.item;
     }
   }
 
   return transitionBattleScriptCommand(
     context,
     Object.freeze({ kind: "advance" }),
-    { rulesContext: Object.freeze({ ...rulesContext, battleMoveDamage: damage, moveResultFlags }), rng },
+    {
+      rulesContext: Object.freeze({
+        ...nextRulesContext,
+        battleMoveDamage: damage,
+        moveResultFlags,
+        lastUsedItem,
+      }),
+      rng,
+    },
   );
 }
 
@@ -1896,50 +1914,64 @@ export const setdamagetohealthdifferenceOpcodeHandler: BattleScriptOpcodeHandler
  * Cmd_adjustsetdamage (battle_script_commands.c:5861-5899): "the same as
  * adjustnormaldamage, except there's no random damage multiplier" (the
  * source's own comment) -- the False Swipe/Endure HP clamp, ported exactly
- * like adjustnormaldamageOpcodeHandler above, minus its RNG roll. Focus Band
- * is the same named (b) barrier that function already carries: this engine
- * does not model `gSpecialStatuses[target].focusBanded`, so this halts
- * whenever the target's resolved holdEffect is Focus Band, before even
- * checking the clamp condition (matching source's own unconditional
- * `Random() % 100 < param` roll whenever that item is held) -- never on the
- * plain (no-item or different-item) path, which is fully implemented per
- * source.
+ * like adjustnormaldamageOpcodeHandler above, minus only the variance draw.
+ * Focus Band therefore remains an unconditional holder-only percent draw.
  */
 export const adjustsetdamageOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (context) => {
   const rulesContext = context.state.rulesContext;
   const target = requireBattlerRole(rulesContext, "target");
   const targetBattler = rulesContext.battlers[target];
 
+  let rng = context.state.rng;
+  let focusBanded = targetBattler.specialStatus.focusBanded === 1;
+  let nextRulesContext = rulesContext;
   const holdEffectId = resolveBattleScriptBattlerHoldEffect(rulesContext, target);
   if (holdEffectId === HOLD_EFFECT_ID_FOCUS_BAND) {
-    return unsupportedBranch(
-      context,
-      "Cmd_adjustsetdamage's HOLD_EFFECT_FOCUS_BAND roll needs gSpecialStatuses[target].focusBanded, "
-        + "which this engine does not model yet",
-      "battle_script_commands.c",
-      5878,
+    const bandDraw = drawBattleScriptRng(
+      rng,
+      context.instruction,
+      "adjustsetdamage-focus-band",
     );
+    rng = bandDraw.rng;
+    if ((bandDraw.randomValue % 100) < resolveBattleScriptBattlerHoldEffectParam(rulesContext, target)) {
+      focusBanded = true;
+      nextRulesContext = withBattler(rulesContext, target, {
+        specialStatus: Object.freeze({ ...targetBattler.specialStatus, focusBanded: 1 }),
+      });
+    }
   }
 
   const moveRow = requireMoveRow(rulesContext.currentMove);
   const hasSubstitute = (targetBattler.status2 & BATTLE_SCRIPT_STATUS2_SUBSTITUTE) !== 0;
   let damage = rulesContext.battleMoveDamage;
   const shouldClamp = !hasSubstitute
-    && (moveRow.effect === "EFFECT_FALSE_SWIPE" || targetBattler.endured === 1)
+    && (moveRow.effect === "EFFECT_FALSE_SWIPE" || targetBattler.endured === 1 || focusBanded)
     && targetBattler.hp <= damage;
 
-  let moveResultFlags = rulesContext.moveResultFlags;
+  let moveResultFlags = nextRulesContext.moveResultFlags;
+  let lastUsedItem = nextRulesContext.lastUsedItem;
   if (shouldClamp) {
     damage = targetBattler.hp - 1;
     if (targetBattler.endured === 1) {
       moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_FOE_ENDURED) >>> 0;
+    } else if (focusBanded) {
+      moveResultFlags = (moveResultFlags | MOVE_RESULT_FOE_HUNG_ON) >>> 0;
+      lastUsedItem = targetBattler.item;
     }
   }
 
   return transitionBattleScriptCommand(
     context,
     Object.freeze({ kind: "advance" }),
-    { rulesContext: Object.freeze({ ...rulesContext, battleMoveDamage: damage, moveResultFlags }) },
+    {
+      rulesContext: Object.freeze({
+        ...nextRulesContext,
+        battleMoveDamage: damage,
+        moveResultFlags,
+        lastUsedItem,
+      }),
+      rng,
+    },
   );
 };
 
@@ -2357,8 +2389,7 @@ function createCritmessageOpcodeHandler(
 
 type ResultMessageOutcome =
   | Readonly<{ kind: "string"; stringId: string }>
-  | Readonly<{ kind: "jump"; label: string; clearMask: number }>
-  | Readonly<{ kind: "barrier"; construct: string; sourceLine: number }>
+  | Readonly<{ kind: "jump"; label: string; clearMask: number; recordTargetItem?: boolean }>
   | Readonly<{ kind: "none" }>;
 
 /**
@@ -2369,12 +2400,8 @@ type ResultMessageOutcome =
  * MOVE_RESULT_ONE_HIT_KO case is a plain `STRINGID_ONEHITKO` print (source
  * never pushes a cursor here, unlike its combined-bits sibling below) --
  * now that Cmd_tryKO/EFFECT_OHKO are registered (this step), this is a real
- * reachable case, not a barrier. MOVE_RESULT_FOE_HUNG_ON stays barriered:
- * BattleScript_FocusBandActivates' gLastUsedItem/gPotentialItemEffectBattler
- * subsystem remains unmodeled anywhere in this engine (Cmd_tryKO's own
- * Focus Band branch is itself a named barrier, so no committed script can
- * make this flag combination true yet, but the case stays a named barrier
- * rather than silently omitted).
+ * reachable case. HUNG_ON records the target's held item, clears the two
+ * survival flags, and call-current transfers to BattleScript_FocusBandActivates.
  */
 function classifyResultMessage(resultBits: number): ResultMessageOutcome {
   switch (resultBits) {
@@ -2392,9 +2419,10 @@ function classifyResultMessage(resultBits: number): ResultMessageOutcome {
       return Object.freeze({ kind: "string", stringId: "STRINGID_ITDOESNTAFFECT" });
     case MOVE_RESULT_FOE_HUNG_ON:
       return Object.freeze({
-        kind: "barrier",
-        construct: "MOVE_RESULT_FOE_HUNG_ON (BattleScript_FocusBandActivates, Focus Band subsystem unmodeled)",
-        sourceLine: 2083,
+        kind: "jump",
+        label: "BattleScript_FocusBandActivates",
+        clearMask: (MOVE_RESULT_FOE_ENDURED | MOVE_RESULT_FOE_HUNG_ON) >>> 0,
+        recordTargetItem: true,
       });
     default:
       if ((resultBits & MOVE_RESULT_DOESNT_AFFECT_FOE) !== 0) {
@@ -2416,9 +2444,10 @@ function classifyResultMessage(resultBits: number): ResultMessageOutcome {
       }
       if ((resultBits & MOVE_RESULT_FOE_HUNG_ON) !== 0) {
         return Object.freeze({
-          kind: "barrier",
-          construct: "combined MOVE_RESULT_FOE_HUNG_ON (BattleScript_FocusBandActivates, Focus Band subsystem unmodeled)",
-          sourceLine: 2111,
+          kind: "jump",
+          label: "BattleScript_FocusBandActivates",
+          clearMask: (MOVE_RESULT_FOE_ENDURED | MOVE_RESULT_FOE_HUNG_ON) >>> 0,
+          recordTargetItem: true,
         });
       }
       if ((resultBits & BATTLE_SCRIPT_MOVE_RESULT_FAILED) !== 0) {
@@ -2464,16 +2493,22 @@ function createResultmessageOpcodeHandler(
     const resultBits = (flags & ~BATTLE_SCRIPT_MOVE_RESULT_MISSED) >>> 0;
     const outcome = classifyResultMessage(resultBits);
 
-    if (outcome.kind === "barrier") {
-      return unsupportedBranch(context, `Cmd_resultmessage's ${outcome.construct}`, "battle_script_commands.c", outcome.sourceLine);
-    }
     if (outcome.kind === "jump") {
       const target = resolveBattleScriptLabel(context.program, outcome.label);
       if (!target) throw new Error(`resultmessage: committed program has no label ${outcome.label}`);
+      const targetBattler = outcome.recordTargetItem
+        ? rulesContext.battlers[requireBattlerRole(rulesContext, "target")]
+        : null;
       return transitionBattleScriptCommand(
         context,
         Object.freeze({ kind: "call-current", programCounter: target.programCounter }),
-        { rulesContext: Object.freeze({ ...rulesContext, moveResultFlags: (flags & ~outcome.clearMask) >>> 0 }) },
+        {
+          rulesContext: Object.freeze({
+            ...rulesContext,
+            moveResultFlags: (flags & ~outcome.clearMask) >>> 0,
+            ...(targetBattler === null ? {} : { lastUsedItem: targetBattler.item }),
+          }),
+        },
       );
     }
     if (outcome.kind === "none") {

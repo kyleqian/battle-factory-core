@@ -282,6 +282,7 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     status3: 0,
     specialStatus: Object.freeze({
       restoredBattlerSprite: 0,
+      focusBanded: 0,
       physicalDmg: 0,
       specialDmg: 0,
       shellBellDmg: 0,

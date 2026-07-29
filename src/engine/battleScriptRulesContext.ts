@@ -199,6 +199,8 @@ export function uniformBattleScriptIvs(iv: number): BattleScriptIvs {
 
 export type BattleScriptSpecialStatus = Readonly<{
   restoredBattlerSprite: 0 | 1;
+  /** Source one-action Focus Band scratch bit. */
+  focusBanded: 0 | 1;
   physicalDmg: number;
   specialDmg: number;
   /** Source s32 gSpecialStatuses[battler].shellBellDmg. */
@@ -460,6 +462,7 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
   statStages?: readonly number[];
   specialStatus?: Readonly<{
     restoredBattlerSprite?: 0 | 1;
+    focusBanded?: 0 | 1;
     physicalDmg?: number;
     specialDmg?: number;
     shellBellDmg?: number;
@@ -1009,6 +1012,11 @@ function createBattleScriptSpecialStatus(
       value?.restoredBattlerSprite ?? 0,
       1,
       `battlers[${battler}].specialStatus.restoredBattlerSprite`,
+    ) as 0 | 1,
+    focusBanded: requireUnsigned(
+      value?.focusBanded ?? 0,
+      1,
+      `battlers[${battler}].specialStatus.focusBanded`,
     ) as 0 | 1,
     physicalDmg: requireSigned32(
       value?.physicalDmg ?? 0,

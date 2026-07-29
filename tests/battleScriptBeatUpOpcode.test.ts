@@ -53,6 +53,7 @@ function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptR
     usedTauntedMove: changes.usedTauntedMove ?? 0,
     usedImprisonedMove: changes.usedImprisonedMove ?? 0,
     item: changes.item ?? 0,
+    specialStatus: changes.specialStatus,
     statStages: changes.statStages ?? [6, 6, 6, 6, 6, 6, 6, 6],
     types: changes.types ?? (["TYPE_DARK", "TYPE_ICE"] as const),
     species: changes.species ?? SNEASEL,
@@ -308,5 +309,31 @@ describe("source-complete B_SCR_OP_TRYDOBEATUP / EFFECT_BEAT_UP", () => {
       ["adjustnormaldamage", 40048],
     ]);
     expect(state.rng.calls).toBe(5);
+  });
+
+  it("draws Focus Band independently after each Beat Up member's crit and variance", () => {
+    const source = rules(
+      [member(SNEASEL, { status1: 0x80 }), member(ONIX), member(ABRA), empty(), empty(), empty()],
+      {},
+      {},
+      { item: 196 },
+    );
+    let state = execution(source, 1).state;
+    for (let steps = 0; steps < 1000; steps += 1) {
+      const result = stepBattleScriptMachine(program, acknowledge(state), execution(source).handlers);
+      state = result.state;
+      if (result.kind === "halted") break;
+    }
+    expect(state.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
+    expect(state.rng.ledger.map(({ reason, randomValue }) => [reason, randomValue])).toEqual([
+      ["accuracycheck", 16838],
+      ["critcalc", 44065],
+      ["adjustnormaldamage", 53998],
+      ["adjustnormaldamage-focus-band", 8119],
+      ["critcalc", 31203],
+      ["adjustnormaldamage", 46760],
+      ["adjustnormaldamage-focus-band", 19194],
+    ]);
+    expect(state.rulesContext.battlers[1].specialStatus.focusBanded).toBe(0);
   });
 });

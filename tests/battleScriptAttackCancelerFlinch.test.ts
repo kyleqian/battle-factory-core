@@ -45,6 +45,7 @@ function battler(
     status3: changes.status3 ?? 0,
     specialStatus: changes.specialStatus ?? Object.freeze({
       restoredBattlerSprite: 0,
+      focusBanded: 0,
       physicalDmg: 0,
       specialDmg: 0,
       shellBellDmg: 0,

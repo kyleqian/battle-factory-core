@@ -13,7 +13,7 @@
  * - `gBattleCommunication[3]` and `[4]` (only slots 0/1 exist in the current
  *   context);
  * - `SpecialStatus::{statLowered,intimidatedMon,traced,
- *   faintedHasReplacement,focusBanded,physicalBattlerId,
+ *   faintedHasReplacement,physicalBattlerId,
  *   specialBattlerId}`. The represented `lightningRodRedirected`,
  *   `restoredBattlerSprite`, `ppNotAffectedByPressure`, `physicalDmg`, and
  *   `specialDmg` fields are cleared below.
@@ -77,6 +77,7 @@ function clearRepresentedSpecialStatus(
     ppNotAffectedByPressure: 0,
     specialStatus: Object.freeze({
       restoredBattlerSprite: 0,
+      focusBanded: 0,
       physicalDmg: 0,
       specialDmg: 0,
       shellBellDmg: 0,

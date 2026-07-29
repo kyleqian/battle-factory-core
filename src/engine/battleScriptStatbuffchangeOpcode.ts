@@ -216,6 +216,8 @@ const PLAYANIMATION_ANIM_TYPES: ReadonlyMap<
    * B_ANIM_INGRAIN_HEAL).
    */
   ["B_ANIM_HELD_ITEM_EFFECT", { argExpression: "NULL", animationId: "HELD_ITEM_EFFECT", readsAnimArg1: false }],
+  /** BattleScript_FocusBandActivates' hang-on semantic animation event. */
+  ["B_ANIM_FOCUS_BAND", { argExpression: "NULL", animationId: "FOCUS_BAND", readsAnimArg1: false }],
   ["B_ANIM_ITEM_STEAL", { argExpression: "NULL", animationId: "ITEM_STEAL", readsAnimArg1: false }],
   ["B_ANIM_ITEM_KNOCKOFF", { argExpression: "NULL", animationId: "ITEM_KNOCKOFF", readsAnimArg1: false }],
   /** BattleScript_SnatchedMove's unconditional controller animation. */

@@ -119,7 +119,11 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // Look release now reads battlerPreventingEscape instead of barriering.
   // 18 -> 16 (Lock On / Mind Reader): both accuracy forms now apply the
   // source's packed-status + battlerWithSureHit ownership predicate.
-  ["src/engine/battleScriptHitChainOpcode.ts", 16],
+  // 16 -> 13 (Focus Band): adjustnormaldamage/adjustnormaldamage2's shared
+  // barrier and adjustsetdamage's sibling barrier are retired by the live
+  // holder-only rolls, while resultmessage's generic barrier dispatch is
+  // removed now that HUNG_ON call-current transfers to the real hang-on script.
+  ["src/engine/battleScriptHitChainOpcode.ts", 13],
   // 4 -> 3 (Snatch row 5c): the action-order redirect, PressurePPLose,
   // winner-only flag consumption, and pushed BattleScript_SnatchedMove
   // continuation are now live; Lightning Rod remains the adjacent barrier.

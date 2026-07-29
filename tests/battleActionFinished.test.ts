@@ -51,6 +51,7 @@ describe("HandleAction_ActionFinished source boundary", () => {
       ppNotAffectedByPressure: 1 as const,
       specialStatus: {
         restoredBattlerSprite: 1 as const,
+        focusBanded: 1 as const,
         physicalDmg: 44,
         specialDmg: 55,
       },
@@ -135,6 +136,7 @@ describe("HandleAction_ActionFinished source boundary", () => {
         ppNotAffectedByPressure: 0,
         specialStatus: {
           restoredBattlerSprite: 0,
+          focusBanded: 0,
           physicalDmg: 0,
           specialDmg: 0,
         },
@@ -146,6 +148,7 @@ describe("HandleAction_ActionFinished source boundary", () => {
       ppNotAffectedByPressure: 1,
       specialStatus: {
         restoredBattlerSprite: 1,
+        focusBanded: 1,
         physicalDmg: 44,
         specialDmg: 55,
       },
