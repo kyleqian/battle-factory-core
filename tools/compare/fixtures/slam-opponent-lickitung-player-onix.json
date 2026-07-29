@@ -1,0 +1,39 @@
+{
+  "schema": "slam-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-slam-opponent-lickitung-player-onix.json",
+  "probe": "tools/compare/bodySlamProbe.py",
+  "orientation": "opponent-to-player",
+  "sourceWindow": {"startFrame": 211, "endFrame": 264, "frameCount": 54},
+  "evidenceSha256": "66a2b9d72b6dd0eb160faf6336a395fd036745d1fc09433fca7aea3641697401",
+  "rawRgbSha256": "66d4cdf1aed7f739b15a44eaccbb346268f5cc3b05112836b8717d31255f62fc",
+  "attacker": {
+    "species": "LICKITUNG",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": {"x": 144, "y": 16},
+      "animationCenter": {"x": 176, "y": 56},
+      "battlePositionCenter": {"x": 176, "y": 40}
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": {"x": 40, "y": 48},
+      "animationCenter": {"x": 72, "y": 88},
+      "battlePositionCenter": {"x": 72, "y": 80}
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 131, "playerMaxHp": 131,
+    "opponentHp": 186, "opponentMaxHp": 197
+  },
+  "battleState": {
+    "attackerSide": "opponent",
+    "species": 108,
+    "hp": 186,
+    "maxHp": 197,
+    "heldItem": 142
+  }
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dense Scene-ON software/hardware/audio/RGB evidence for legal BODY SLAM."""
+"""Dense Scene-ON software/hardware/audio/RGB evidence for legal SLAM bodies."""
 from __future__ import annotations
 import hashlib, json, subprocess, sys
 from pathlib import Path
@@ -17,6 +17,7 @@ from battle_lab import BattleLab, validate_request  # noqa: E402
 from emerald_core import EmeraldOracle  # noqa: E402
 
 MOVE_BODY_SLAM = 34
+MOVE_SLAM = 21
 
 
 def main() -> None:
@@ -52,11 +53,22 @@ def main() -> None:
         for line in nm.splitlines()
         if len(parts := line.split()) == 3
     }
+    names = {
+        parts[2]: int(parts[0], 16)
+        for line in nm.splitlines()
+        if len(parts := line.split()) == 3
+        and all(c in "0123456789abcdefABCDEF" for c in parts[0])
+    }
+    palette_tags = names["sSpritePaletteTags"]
+    tile_tags = names["sSpriteTileRangeTags"]
+    software_oam = names["gMain"] + 0x38
+    unfaded = names["gPlttBufferUnfaded"]
     templates = {
         name: oracle.symbols[name]
         for name in (
             "gVerticalDipSpriteTemplate", "gSlideMonToOffsetSpriteTemplate",
             "gSlideMonToOriginalPosSpriteTemplate", "gBasicHitSplatSpriteTemplate",
+            "gSlamHitSpriteTemplate",
         )
     }
     task_funcs = {
@@ -74,6 +86,9 @@ def main() -> None:
     def s8(address: int) -> int:
         value = oracle.read_u8(address)
         return value - 0x100 if value >= 0x80 else value
+
+    def raw(address: int, size: int) -> str:
+        return "".join(f"{oracle.read_u8(address + i):02x}" for i in range(size))
 
     def sound_player(info: int, tracks: int) -> dict:
         return {
@@ -120,11 +135,19 @@ def main() -> None:
 
     RGB_DIR.mkdir(parents=True)
     frames = []
+    observed_move = None
 
     def capture(frame: int) -> None:
+        nonlocal observed_move
         snapshot = lab.snapshot()
-        if snapshot["engine"]["currentMove"] != MOVE_BODY_SLAM:
+        current_move = snapshot["engine"]["currentMove"]
+        if current_move not in (MOVE_SLAM, MOVE_BODY_SLAM):
             return
+        if observed_move is not None and observed_move != current_move:
+            raise RuntimeError(
+                f"probe crossed move boundary {observed_move}->{current_move}"
+            )
+        observed_move = current_move
         effects = []
         for slot in range(64):
             if oracle.read_u8(sprites + slot * 0x44 + 0x3e) & 1:
@@ -145,7 +168,11 @@ def main() -> None:
             "soundTaskCount": oracle.read_u8(sound_count),
             "animScriptActive": bool(oracle.read_u8(script_active)),
             "fadedPalette": [u16(faded + i * 2) for i in range(512)],
+            "unfadedPalette": [u16(unfaded + i * 2) for i in range(512)],
             "hardwarePalette": [u16(0x05000000 + i * 2) for i in range(512)],
+            "softwareOam": [
+                raw(software_oam + i * 8, 8) for i in range(128)
+            ],
             "hardwareOam": [
                 [u16(0x07000000 + i * 8 + offset) for offset in (0, 2, 4)]
                 for i in range(128)
@@ -154,6 +181,8 @@ def main() -> None:
                 [s16(0x07000006 + i * 0x20 + offset) for offset in (0, 8, 16, 24)]
                 for i in range(32)
             ],
+            "paletteTags": [u16(palette_tags + i * 2) for i in range(16)],
+            "tileTags": [u16(tile_tags + i * 2) for i in range(128)],
             "se1": sound_player(se1_info, se1_tracks),
             "se2": sound_player(se2_info, se2_tracks),
             "dispcnt": u16(0x04000000), "bldcnt": u16(0x04000050),
@@ -168,11 +197,17 @@ def main() -> None:
             frame += 1
             capture(frame)
     if not frames:
-        raise RuntimeError("stock ROM did not reach MOVE_BODY_SLAM")
+        raise RuntimeError("stock ROM did not reach MOVE_SLAM/MOVE_BODY_SLAM")
+    schema = (
+        "slam-dense-evidence/v2"
+        if observed_move == MOVE_SLAM
+        else "body-slam-dense-evidence/v2"
+    )
     OUTPUT.write_text(json.dumps({
-        "schema": "body-slam-dense-evidence/v2", "setup": setup,
+        "schema": schema, "move": observed_move, "setup": setup,
         "templates": templates, "taskFuncs": task_funcs,
         "songHeaders": {
+            "SE_M_COMET_PUNCH": oracle.read_u32(song_table + 139 * 8),
             "SE_M_TAKE_DOWN": oracle.read_u32(song_table + 152 * 8),
             "SE_M_MEGA_KICK2": oracle.read_u32(song_table + 141 * 8),
         },

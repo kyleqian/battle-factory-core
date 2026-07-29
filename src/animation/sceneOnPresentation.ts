@@ -21,6 +21,10 @@ import {
   type BodySlamState,
 } from "./bodySlam.ts";
 import {
+  slamAtAge,
+  type SlamState,
+} from "./slam.ts";
+import {
   twineedleEffectAtAge,
   type TwineedleEffect,
 } from "./twineedle.ts";
@@ -1104,6 +1108,13 @@ export interface SceneOnBodySlamConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnSlamConfig {
+  readonly move: "SLAM";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnTwineedleConfig {
   readonly move: "TWINEEDLE";
   readonly attacker: SceneOnPresentationBattler;
@@ -1600,6 +1611,7 @@ export type SceneOnMoveConfig =
   | SceneOnBiteConfig
   | SceneOnHeadbuttConfig
   | SceneOnBodySlamConfig
+  | SceneOnSlamConfig
   | SceneOnTwineedleConfig
   | SceneOnSpikeCannonConfig
   | SceneOnSonicBoomConfig
@@ -1784,6 +1796,12 @@ export interface SceneOnHeadbuttView extends HeadbuttState {
 }
 
 export interface SceneOnBodySlamView extends BodySlamState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSlamView extends SlamState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2532,7 +2550,7 @@ export function createSceneOnMovePresentation<
     | SceneOnSparkConfig | SceneOnCharmConfig | SceneOnTailGlowConfig
     | SceneOnScaryFaceConfig
     | SceneOnAbsorbConfig | SceneOnReflectConfig | SceneOnBiteConfig
-    | SceneOnHeadbuttConfig | SceneOnBodySlamConfig,
+    | SceneOnHeadbuttConfig | SceneOnBodySlamConfig | SceneOnSlamConfig,
 >(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
@@ -3236,6 +3254,25 @@ export function sceneOnBodySlamView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...bodySlamAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is SLAM's first active source-script display. */
+export function sceneOnSlamView(
+  state: SceneOnMovePresentationState<SceneOnSlamConfig>,
+): SceneOnSlamView {
+  if (state.config.move !== "SLAM") {
+    throw new Error(`expected SLAM presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...slamAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.target.geometry.animationCenter,
