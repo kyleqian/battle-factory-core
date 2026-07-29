@@ -34,6 +34,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (the banked 376-species party-icon catalog is party-screen-only). No source,
   test, trace, census, asset, roadmap, issue, or animation file changed.
   PAPERCUT: none.
+- **Supervisor fold (post-step):** side-lane rung-14 draft generated-slots
+  adapter merged (`73543153`): `createDraftScreenStateFromRentalRecords`
+  converts six rental records via `createFactoryCorpusPartyMember`; the
+  canonical route now constructs through it from `ANCHOR_DRAFT_RENTAL_RECORDS`
+  (worker correctly found the pinned generated six 278/213/206/205/212/246
+  differ from the anchor pool 156/149/180/153/179/181, so equivalence anchors
+  on the recorded identities). Additive 376-species name/category extraction
+  in `draft-pool-header.json` (no visual assets). Union verified by
+  supervisor: **514 files / 5190 tests + 1 skip**, build, `git diff --check`;
+  draft traces **13/13, 38/38, 66/66** exact (66-frame rerun by supervisor).
 
 ---
 
