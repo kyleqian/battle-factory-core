@@ -168,12 +168,13 @@ import {
   TURN7_ROCKSLIDE_REOPEN_GATE_DELAY,
 } from "./battleMenu.ts";
 import { activeMonMoveset, createBattleSetup, rentalMoveset, type BattleSetupState } from "./battleSetup.ts";
+import { createFactoryCorpusParty } from "./factoryCorpusParty.ts";
 import {
   advancePostwin,
   acceptPostwinContinuation,
   acceptPostwinDialoguePage,
   acceptPostwinHealDismiss,
-  INITIAL_POSTWIN_STATE,
+  createPostwinState,
   POSTWIN_BATTLE_ROOM_FADE_OUT_AGE,
   POSTWIN_BATTLE_ROOM_FIRST_AGE,
   POSTWIN_COUNTER_ROOM_FIRST_AGE,
@@ -186,7 +187,6 @@ import {
   POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY,
   POSTWIN_DIALOGUE_OLD_TEXT_END_DELAY,
   POSTWIN_DIALOGUE_BLANK_DELAY,
-  POSTWIN_SCOUTING_LINES,
   POSTWIN_SWAP_MENU_VISIBLE_DELAY,
   POSTWIN_RIGHT_THIS_WAY,
   POSTWIN_IN_BATTLE_CLEAR_AGE,
@@ -724,7 +724,11 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         ...battleScene,
         turn17LossDismissElapsed: battleScene.elapsed + 1,
       };
-      postwin = INITIAL_POSTWIN_STATE;
+      const opponentRecords =
+        state.roundController?.rules.currentOpponent.rentalRecords;
+      postwin = opponentRecords === undefined
+        ? createPostwinState()
+        : createPostwinState(createFactoryCorpusParty(opponentRecords));
       battleScene = advanceBattleScene(battleScene);
       return {
         ...state,
@@ -1683,7 +1687,7 @@ function renderFactorySwapEntryFade(state: EngineState): Uint8Array {
   const objY = objFadeY(swap.elapsed, SWAP_ENTRY_FADE_OUT);
   renderPrebattleRoomScene(fb, bgY, objY);
   drawMessageBoxFrameFaded(fb, bgY);
-  const lines = POSTWIN_SCOUTING_LINES[3];
+  const lines = state.postwin!.scoutingLines[3];
   drawMessageBoxTextFaded(fb, lines[0], 16, 121, bgY);
   drawMessageBoxTextFaded(fb, lines[1], 16, 137, bgY);
   return fb;
@@ -1772,7 +1776,7 @@ function renderPostwinState(state: EngineState): Uint8Array {
     } else if (postwin.swapDeclineElapsed !== null) {
       const declineDelay = age - postwin.swapDeclineElapsed;
       if (declineDelay <= POSTWIN_DIALOGUE_OLD_TEXT_END_DELAY) {
-        const previous = POSTWIN_SCOUTING_LINES[3];
+        const previous = postwin.scoutingLines[3];
         drawLines(
           previous[0],
           previous[1],
@@ -1795,7 +1799,7 @@ function renderPostwinState(state: EngineState): Uint8Array {
             POSTWIN_NEXT_LINE1.length + POSTWIN_NEXT_LINE2.length,
           );
         } else {
-          const previous = POSTWIN_SCOUTING_LINES[postwin.dialoguePage - 2]!;
+          const previous = postwin.scoutingLines[postwin.dialoguePage - 2]!;
           drawLines(
             previous[0],
             previous[1],
@@ -1803,7 +1807,7 @@ function renderPostwinState(state: EngineState): Uint8Array {
           );
         }
       } else if (delay !== POSTWIN_DIALOGUE_BLANK_DELAY) {
-        const lines = POSTWIN_SCOUTING_LINES[postwin.dialoguePage - 1]!;
+        const lines = postwin.scoutingLines[postwin.dialoguePage - 1]!;
         drawLines(
           lines[0],
           lines[1],

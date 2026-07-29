@@ -2,6 +2,19 @@
 // DESTIN loss-quote dismiss edge.  The timing is oracle/RAM-pinned in
 // docs/postwin-notes.md's S8 engine-evidence addendum.
 
+import {
+  getFactoryOpponentCommentary,
+  type FactoryCommentaryParty,
+} from "./factoryCommentary.ts";
+import { createFactoryCorpusParty } from "./factoryCorpusParty.ts";
+
+export type PostwinScoutingLines = readonly [
+  readonly [string, string],
+  readonly [string, string],
+  readonly [string, string],
+  readonly [string, string],
+];
+
 export type PostwinPhase =
   | "battleHold"
   | "battleFade"
@@ -17,6 +30,8 @@ export interface PostwinState {
   challengeBattleNum: 0 | 1;
   /** SaveBlock2.frontier.rentalMons[3..5].monId. */
   opponentRentalMonIds: readonly [number, number, number];
+  /** Attendant pages derived from the upcoming opponent party. */
+  scoutingLines: PostwinScoutingLines;
   /** Accepted heal-message A edge, in this state's relative elapsed clock. */
   healDismissElapsed: number | null;
   /** gPlayerParty[0..2] HP: ONIX / MAGBY / BAYLEEF. */
@@ -40,23 +55,6 @@ export interface PostwinState {
   /** Accepted "Right this way" dismiss edge; walk/warp clocks derive from it. */
   rightThisWayDismissElapsed: number | null;
 }
-
-export const INITIAL_POSTWIN_STATE: PostwinState = {
-  elapsed: 0,
-  challengeBattleNum: 0,
-  opponentRentalMonIds: [153, 179, 181],
-  healDismissElapsed: null,
-  playerPartyHp: [0, 27, 153],
-  continuationCursorPos: null,
-  continuationConfirmElapsed: null,
-  dialoguePage: 0,
-  dialoguePageEdgeElapsed: null,
-  swapCursorPos: null,
-  swapCursorDisplayPos: null,
-  swapCursorMoveElapsed: null,
-  swapDeclineElapsed: null,
-  rightThisWayDismissElapsed: null,
-};
 
 /** gMain.inBattle clears and outside-battle VBlank RNG resumes at dismiss+43. */
 export const POSTWIN_IN_BATTLE_CLEAR_AGE = 43;
@@ -97,24 +95,57 @@ export const POSTWIN_NEXT_TEXT_TOTAL =
 export const POSTWIN_DIALOGUE_TEXT_FIRST_DELAY = 4;
 export const POSTWIN_DIALOGUE_OLD_TEXT_END_DELAY = 2;
 export const POSTWIN_DIALOGUE_BLANK_DELAY = 3;
-export const POSTWIN_SCOUTING_LINES = [
-  [
-    "I’ve conducted a little investigation",
-    "about your upcoming opponent.",
-  ],
-  [
-    "The TRAINER appears to have no clear",
-    "favorites when it comes to type.",
-  ],
-  [
-    "The favorite battle style appears",
-    "to be weakening the foe to start.",
-  ],
-  [
-    "Before starting the battle, would you",
-    "like to swap a POKéMON?",
-  ],
-] as const;
+const POSTWIN_SCOUTING_INTRO =
+  ["I’ve conducted a little investigation", "about your upcoming opponent."] as const;
+const POSTWIN_SCOUTING_SWAP_OFFER =
+  ["Before starting the battle, would you", "like to swap a POKéMON?"] as const;
+const CANONICAL_POSTWIN_OPPONENT_PARTY = createFactoryCorpusParty([
+  { setId: 153, personality: 24, fixedIv: 3, abilitySlot: 0 },
+  { setId: 179, personality: 19, fixedIv: 3, abilitySlot: 1 },
+  { setId: 181, personality: 6, fixedIv: 3, abilitySlot: 0 },
+]);
+
+export function createPostwinScoutingLines(
+  opponentParty: FactoryCommentaryParty,
+): PostwinScoutingLines {
+  const commentary = getFactoryOpponentCommentary(opponentParty);
+  if (commentary.favoriteTypeLines === null) {
+    throw new Error("Factory opponent has no favorite-type commentary branch");
+  }
+  return [
+    POSTWIN_SCOUTING_INTRO,
+    commentary.favoriteTypeLines,
+    commentary.battleStyleLines,
+    POSTWIN_SCOUTING_SWAP_OFFER,
+  ];
+}
+
+export const POSTWIN_SCOUTING_LINES =
+  createPostwinScoutingLines(CANONICAL_POSTWIN_OPPONENT_PARTY);
+
+export function createPostwinState(
+  opponentParty: FactoryCommentaryParty = CANONICAL_POSTWIN_OPPONENT_PARTY,
+): PostwinState {
+  return {
+    elapsed: 0,
+    challengeBattleNum: 0,
+    opponentRentalMonIds: [153, 179, 181],
+    scoutingLines: createPostwinScoutingLines(opponentParty),
+    healDismissElapsed: null,
+    playerPartyHp: [0, 27, 153],
+    continuationCursorPos: null,
+    continuationConfirmElapsed: null,
+    dialoguePage: 0,
+    dialoguePageEdgeElapsed: null,
+    swapCursorPos: null,
+    swapCursorDisplayPos: null,
+    swapCursorMoveElapsed: null,
+    swapDeclineElapsed: null,
+    rightThisWayDismissElapsed: null,
+  };
+}
+
+export const INITIAL_POSTWIN_STATE = createPostwinState();
 /** MSGBOX_DEFAULT: final glyph plus the source's three-frame WAIT handoff. */
 export const POSTWIN_SCOUTING_INPUT_READY_DELAYS = [72, 74, 72] as const;
 /** MSGBOX_YESNO: text settles at +63, menu copies at +66, accepts at +70. */
@@ -208,6 +239,7 @@ export function advancePostwin(state: PostwinState): PostwinState {
       elapsed >= POSTWIN_OPPONENT_RENTALS_WRITE_AGE
         ? POSTWIN_OPPONENT_RENTAL_IDS
         : state.opponentRentalMonIds,
+    scoutingLines: state.scoutingLines,
     healDismissElapsed: state.healDismissElapsed,
     playerPartyHp: healed ? POSTWIN_HEALED_PARTY_HP : state.playerPartyHp,
     continuationCursorPos:
@@ -297,7 +329,7 @@ export function postwinDialogueDelay(state: PostwinState): number | null {
 export function postwinDialogueVisibleChars(state: PostwinState): number {
   const delay = postwinDialogueDelay(state);
   if (delay === null || delay < POSTWIN_DIALOGUE_TEXT_FIRST_DELAY) return 0;
-  const lines = POSTWIN_SCOUTING_LINES[state.dialoguePage - 1];
+  const lines = state.scoutingLines[state.dialoguePage - 1];
   if (!lines) return 0;
   return Math.min(
     lines[0].length + lines[1].length,

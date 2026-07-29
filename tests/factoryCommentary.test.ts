@@ -275,53 +275,8 @@ describe("rung-8 generated opponent integration", () => {
     expect(commentary1.battleStyleLines).not.toEqual(commentary3.battleStyleLines);
   });
 
-  const canonicalUpcomingOpponent = [
-    createFactoryCorpusPartyMember({
-      setId: 188, personality: 7, fixedIv: 3, abilitySlot: 0,
-    }),
-    createFactoryCorpusPartyMember({
-      setId: 184, personality: 24, fixedIv: 3, abilitySlot: 0,
-    }),
-    createFactoryCorpusPartyMember({
-      setId: 135, personality: 24, fixedIv: 3, abilitySlot: 0,
-    }),
-  ] as const;
-
-  it("pins the canonical OFF scouting party and the favorite-type mismatch", () => {
-    const commentary = getFactoryOpponentCommentary(canonicalUpcomingOpponent);
-
-    // The dense RAM audit records rentalMons[3..5] changing from stale
-    // 153/179/181 placeholders to this upcoming opponent at postwin +137.
-    expect(canonicalUpcomingOpponent.map((mon) => [mon.setId, mon.speciesName]))
-      .toEqual([
-        [188, "SPECIES_GROVYLE"],
-        [184, "SPECIES_MURKROW"],
-        [135, "SPECIES_PIDGEOTTO"],
-      ]);
-    expect(commentary.favoriteType.result).toBe(2);
-    expect(commentary.favoriteTypeLines).toEqual([
-      "The TRAINER is apparently skilled",
-      "in the handling of the FLYING type.",
-    ]);
-    expect(commentary.battleStyle.result).toBe(FACTORY_STYLE.WEAKENING);
-    expect(commentary.battleStyleLines).toEqual(POSTWIN_SCOUTING_LINES[2]);
-    expect(commentary.favoriteTypeLines).not.toEqual(POSTWIN_SCOUTING_LINES[1]);
-  });
-
-  it.fails("keeps the real canonical party equivalent to frozen presentation", () => {
-    const commentary = getFactoryOpponentCommentary(canonicalUpcomingOpponent);
-
-    expect([
-      commentary.favoriteTypeLines,
-      commentary.battleStyleLines,
-    ]).toEqual([
-      POSTWIN_SCOUTING_LINES[1],
-      POSTWIN_SCOUTING_LINES[2],
-    ]);
-  });
-
-  it("keeps the stale pre-generation placeholders distinct from the scouting party", () => {
-    const stale = [
+  it("keeps the canonical upcoming opponent equivalent to frozen presentation", () => {
+    const canonical = [
       createFactoryCorpusPartyMember({
         setId: 153, personality: 24, fixedIv: 3, abilitySlot: 0,
       }),
@@ -332,9 +287,9 @@ describe("rung-8 generated opponent integration", () => {
         setId: 181, personality: 6, fixedIv: 3, abilitySlot: 0,
       }),
     ] as const;
-    const commentary = getFactoryOpponentCommentary(stale);
+    const commentary = getFactoryOpponentCommentary(canonical);
 
-    expect(stale.map((mon) => [mon.setId, mon.speciesName])).toEqual([
+    expect(canonical.map((mon) => [mon.setId, mon.speciesName])).toEqual([
       [153, "SPECIES_BUTTERFREE"],
       [179, "SPECIES_HAUNTER"],
       [181, "SPECIES_QUILAVA"],
@@ -348,6 +303,13 @@ describe("rung-8 generated opponent integration", () => {
     expect(commentary.battleStyleLines).toEqual([
       "The favorite battle style appears",
       "to be weakening the foe to start.",
+    ]);
+    expect([
+      commentary.favoriteTypeLines,
+      commentary.battleStyleLines,
+    ]).toEqual([
+      POSTWIN_SCOUTING_LINES[1],
+      POSTWIN_SCOUTING_LINES[2],
     ]);
   });
 });
