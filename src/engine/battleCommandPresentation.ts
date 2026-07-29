@@ -1,14 +1,25 @@
 import speciesNamesData from "../data/gen/species-names.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
+import type { GbaButton } from "../input.ts";
 import {
   createBattleCommandRequest,
+  submitBattleDecision,
   type BattleCommandDecision,
+  type BattleDecisionReducer,
+  type BattleDecisionTransitionResult,
+  type BattleJsonObject,
   type BattleCommandRequest,
   type BattleDecisionSide,
   type BattleMoveDecision,
   type BattlePartyIndex,
   type BattleSinglesBattler,
+  type BattleState,
 } from "./battleDecisionBoundary.ts";
+import {
+  FIGHT_SUBMENU_CLOSE_DELAY,
+  FIGHT_SUBMENU_OPEN_DELAY,
+  moveFightCursor,
+} from "./battleMenu.ts";
 import type {
   BattleScriptPartyMemberState,
   BattleScriptRulesBattlerState,
@@ -94,6 +105,32 @@ export type BattleCommandPresentationState = Readonly<{
 
 export class BattleCommandPresentationError extends Error {
   override readonly name = "BattleCommandPresentationError";
+}
+
+/** Six displayed blank-message frames precede the atomic action-menu draw. */
+export const BATTLE_COMMAND_ACTION_ENTER_DELAY = 6;
+
+function withLifecycle(
+  state: BattleCommandPresentationState,
+  phase: BattleCommandPresentationPhase,
+  phaseElapsed: number,
+  changes: Partial<BattleCommandPresentationState> = {},
+): BattleCommandPresentationState {
+  return Object.freeze({
+    ...state,
+    ...changes,
+    lifecycle: Object.freeze({ phase, phaseElapsed }),
+  });
+}
+
+function advancePhaseElapsed(
+  state: BattleCommandPresentationState,
+): BattleCommandPresentationState {
+  return withLifecycle(
+    state,
+    state.lifecycle.phase,
+    state.lifecycle.phaseElapsed + 1,
+  );
 }
 
 function uiStatusFromStatus1(status1: number): BattleCommandUiStatus {
@@ -253,4 +290,103 @@ export function createBattleCommandPresentation(
     legalSwitchPartyIndexes: Object.freeze(legalSwitchPartyIndexes),
     pendingDecision: null,
   });
+}
+
+/**
+ * Advances one JOY_NEW-owned command-controller tick. All delays are relative
+ * to the request's current phase; entering another phase resets its clock.
+ */
+export function advanceBattleCommandPresentation(
+  stateInput: BattleCommandPresentationState,
+  newKeys: ReadonlySet<GbaButton>,
+): BattleCommandPresentationState {
+  let state = stateInput;
+
+  switch (state.lifecycle.phase) {
+    case "action-enter": {
+      const elapsed = state.lifecycle.phaseElapsed + 1;
+      state = elapsed >= BATTLE_COMMAND_ACTION_ENTER_DELAY
+        ? withLifecycle(state, "action-menu", 0)
+        : withLifecycle(state, "action-enter", elapsed);
+      break;
+    }
+    case "fight-opening": {
+      const elapsed = state.lifecycle.phaseElapsed + 1;
+      state = elapsed >= FIGHT_SUBMENU_OPEN_DELAY
+        ? withLifecycle(state, "fight-menu", 0)
+        : withLifecycle(state, "fight-opening", elapsed);
+      break;
+    }
+    case "fight-closing": {
+      const elapsed = state.lifecycle.phaseElapsed + 1;
+      state = elapsed >= FIGHT_SUBMENU_CLOSE_DELAY
+        ? withLifecycle(state, "action-menu", 0)
+        : withLifecycle(state, "fight-closing", elapsed);
+      break;
+    }
+    case "fight-menu":
+      state = withLifecycle(
+        state,
+        "fight-menu",
+        state.lifecycle.phaseElapsed + 1,
+        { fightDisplayCursor: state.fightCursor },
+      );
+      break;
+    default:
+      state = advancePhaseElapsed(state);
+      break;
+  }
+
+  if (state.lifecycle.phase === "action-menu") {
+    if (newKeys.has("A") && state.actionCursor === 0) {
+      return withLifecycle(state, "fight-opening", 0);
+    }
+    return state;
+  }
+
+  if (state.lifecycle.phase !== "fight-menu") return state;
+
+  if (newKeys.has("A")) {
+    const decision = state.legalMoveBySlot[state.fightCursor];
+    return decision === null
+      ? state
+      : withLifecycle(state, "submitting", 0, { pendingDecision: decision });
+  }
+  if (newKeys.has("B")) {
+    return withLifecycle(state, "fight-closing", 0);
+  }
+
+  const direction = (["LEFT", "RIGHT", "UP", "DOWN"] as const)
+    .find((button) => newKeys.has(button));
+  if (direction === undefined) return state;
+  return Object.freeze({
+    ...state,
+    fightCursor: moveFightCursor(state.fightCursor, direction),
+  });
+}
+
+/**
+ * Submits only a completed presentation choice through the ordinary immutable
+ * battle boundary. Request identity and decision legality remain kernel-owned.
+ */
+export function submitBattleCommandPresentationDecision<
+  RulesState extends BattleJsonObject,
+>(
+  battleState: BattleState<RulesState>,
+  presentation: BattleCommandPresentationState,
+  reducer: BattleDecisionReducer<RulesState>,
+): BattleDecisionTransitionResult<RulesState> | null {
+  if (
+    presentation.lifecycle.phase !== "submitting"
+    || presentation.pendingDecision === null
+  ) return null;
+  return submitBattleDecision(
+    battleState,
+    {
+      requestId: presentation.request.requestId,
+      side: presentation.request.side,
+      decision: presentation.pendingDecision,
+    },
+    reducer,
+  );
 }

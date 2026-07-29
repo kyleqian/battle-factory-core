@@ -3,16 +3,23 @@ import {
   BATTLE2_ACTION_MENU_MODEL,
 } from "../src/engine/battle2ActionMenu.ts";
 import {
+  BATTLE_COMMAND_ACTION_ENTER_DELAY,
   BATTLE_COMMAND_ACTION_LABELS,
   BattleCommandPresentationError,
+  advanceBattleCommandPresentation,
   createBattleCommandPresentation,
+  submitBattleCommandPresentationDecision,
   type BattleCommandPresentationState,
 } from "../src/engine/battleCommandPresentation.ts";
 import type {
+  BattleDecisionReducer,
   BattleCommandRequest,
+  BattleState,
 } from "../src/engine/battleDecisionBoundary.ts";
 import {
   CLOSED_FIGHT_SUBMENU_STATE,
+  FIGHT_SUBMENU_CLOSE_DELAY,
+  FIGHT_SUBMENU_OPEN_DELAY,
 } from "../src/engine/battleMenu.ts";
 import {
   createBattleScriptRulesContext,
@@ -21,6 +28,7 @@ import {
 } from "../src/engine/battleScriptRulesContext.ts";
 import {
   createFactoryFullTurnBattleState,
+  type FactoryFullTurnDecisionRules,
 } from "../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
 
@@ -51,6 +59,7 @@ function bench(
 }
 
 function canonicalBoundary(): Readonly<{
+  battleState: BattleState<FactoryFullTurnDecisionRules>;
   request: BattleCommandRequest;
   rules: BattleScriptRulesContext;
 }> {
@@ -102,9 +111,22 @@ function canonicalBoundary(): Readonly<{
     throw new Error("canonical command fixture did not publish a command request");
   }
   return Object.freeze({
+    battleState: state,
     request: state.boundary.request,
     rules: state.rules.rulesContext,
   });
+}
+
+function advanceFrames(
+  state: BattleCommandPresentationState,
+  frames: number,
+  keys: ReadonlySet<"A" | "B" | "LEFT" | "RIGHT" | "UP" | "DOWN"> = new Set(),
+): BattleCommandPresentationState {
+  let next = state;
+  for (let frame = 0; frame < frames; frame += 1) {
+    next = advanceBattleCommandPresentation(next, keys);
+  }
+  return next;
 }
 
 function projectPresentation(state: BattleCommandPresentationState) {
@@ -284,5 +306,226 @@ describe("battle-command presentation state construction", () => {
         rules.battlers[3],
       ],
     })).toThrow(/does not match party identity/);
+  });
+});
+
+describe("battle-command phase-relative lifecycle", () => {
+  it("advances relative clocks, opens FIGHT, applies source 2x2 JOY_NEW navigation with display lag, and preserves the cursor across B-close/reopen", () => {
+    const { request, rules } = canonicalBoundary();
+    let state = createBattleCommandPresentation(request, rules);
+
+    state = advanceFrames(state, BATTLE_COMMAND_ACTION_ENTER_DELAY - 1);
+    expect(state.lifecycle).toEqual({
+      phase: "action-enter",
+      phaseElapsed: BATTLE_COMMAND_ACTION_ENTER_DELAY - 1,
+    });
+    state = advanceBattleCommandPresentation(state, new Set());
+    expect(state.lifecycle).toEqual({ phase: "action-menu", phaseElapsed: 0 });
+
+    state = advanceBattleCommandPresentation(state, new Set(["A"] as const));
+    expect(state.lifecycle).toEqual({ phase: "fight-opening", phaseElapsed: 0 });
+    state = advanceFrames(state, FIGHT_SUBMENU_OPEN_DELAY - 1);
+    expect(state.lifecycle).toEqual({
+      phase: "fight-opening",
+      phaseElapsed: FIGHT_SUBMENU_OPEN_DELAY - 1,
+    });
+    state = advanceBattleCommandPresentation(state, new Set(["RIGHT"] as const));
+    expect(state.lifecycle).toEqual({ phase: "fight-menu", phaseElapsed: 0 });
+    expect(state.fightCursor).toBe(1);
+    expect(state.fightDisplayCursor).toBe(0);
+
+    state = advanceBattleCommandPresentation(state, new Set());
+    expect(state.fightDisplayCursor).toBe(1);
+    state = advanceBattleCommandPresentation(state, new Set(["DOWN"] as const));
+    expect(state.fightCursor).toBe(3);
+    expect(state.fightDisplayCursor).toBe(1);
+    state = advanceBattleCommandPresentation(state, new Set(["DOWN"] as const));
+    expect(state.fightCursor).toBe(3);
+    expect(state.fightDisplayCursor).toBe(3);
+
+    state = advanceBattleCommandPresentation(state, new Set(["B"] as const));
+    expect(state.lifecycle).toEqual({ phase: "fight-closing", phaseElapsed: 0 });
+    state = advanceFrames(state, FIGHT_SUBMENU_CLOSE_DELAY - 1);
+    expect(state.lifecycle.phase).toBe("fight-closing");
+    state = advanceBattleCommandPresentation(state, new Set(["A"] as const));
+    expect(state.lifecycle).toEqual({ phase: "fight-opening", phaseElapsed: 0 });
+    expect(state.fightCursor).toBe(3);
+    expect(state.fightDisplayCursor).toBe(3);
+    expect(state.request).toEqual(request);
+
+    state = advanceFrames(state, FIGHT_SUBMENU_OPEN_DELAY);
+    expect(state.lifecycle).toEqual({ phase: "fight-menu", phaseElapsed: 0 });
+    expect(state.fightCursor).toBe(3);
+  });
+
+  it("ignores A on a request-illegal move slot and submits slot 3 when that exact slot is legal", () => {
+    const canonical = canonicalBoundary();
+    const request: BattleCommandRequest = {
+      ...canonical.request,
+      requestId: 91,
+      legalDecisions: [
+        { kind: "use-move", moveSlot: 1, targetBattler: 0 },
+        { kind: "use-move", moveSlot: 3, targetBattler: 1 },
+        { kind: "switch", partyIndex: 2 },
+      ],
+    };
+    let state = createBattleCommandPresentation(request, canonical.rules);
+    state = advanceFrames(state, BATTLE_COMMAND_ACTION_ENTER_DELAY);
+    state = advanceBattleCommandPresentation(state, new Set(["A"] as const));
+    state = advanceFrames(state, FIGHT_SUBMENU_OPEN_DELAY);
+
+    state = advanceBattleCommandPresentation(state, new Set(["A"] as const));
+    expect(state.lifecycle.phase).toBe("fight-menu");
+    expect(state.pendingDecision).toBeNull();
+
+    state = advanceBattleCommandPresentation(state, new Set(["RIGHT"] as const));
+    state = advanceBattleCommandPresentation(state, new Set(["DOWN"] as const));
+    expect(state.fightCursor).toBe(3);
+    state = advanceBattleCommandPresentation(state, new Set(["A"] as const));
+    expect(state.lifecycle).toEqual({ phase: "submitting", phaseElapsed: 0 });
+    expect(state.pendingDecision).toEqual({
+      kind: "use-move",
+      moveSlot: 3,
+      targetBattler: 1,
+    });
+  });
+});
+
+describe("battle-command ordinary submission bridge", () => {
+  function stateForRequest(
+    battleState: BattleState<FactoryFullTurnDecisionRules>,
+    request: BattleCommandRequest,
+  ): BattleState<FactoryFullTurnDecisionRules> {
+    return {
+      ...battleState,
+      boundary: { kind: "decision-required", request },
+    };
+  }
+
+  function terminalRecordingReducer(
+    received: { decision: unknown }[],
+  ): BattleDecisionReducer<FactoryFullTurnDecisionRules> {
+    return (context) => {
+      received.push({ decision: context.decision });
+      return {
+        rules: context.rules,
+        events: [],
+        boundary: { kind: "terminal", outcome: "player-win" },
+      };
+    };
+  }
+
+  it("returns null before submission, then passes the exact request-owned target through submitBattleDecision without mutating either input", () => {
+    const canonical = canonicalBoundary();
+    const request: BattleCommandRequest = {
+      ...canonical.request,
+      requestId: 91,
+      legalDecisions: [
+        { kind: "use-move", moveSlot: 1, targetBattler: 0 },
+        { kind: "use-move", moveSlot: 3, targetBattler: 1 },
+      ],
+    };
+    const battleState = stateForRequest(canonical.battleState, request);
+    let presentation = createBattleCommandPresentation(request, canonical.rules);
+    const received: { decision: unknown }[] = [];
+    const reducer = terminalRecordingReducer(received);
+
+    expect(submitBattleCommandPresentationDecision(
+      battleState,
+      presentation,
+      reducer,
+    )).toBeNull();
+
+    presentation = advanceFrames(presentation, BATTLE_COMMAND_ACTION_ENTER_DELAY);
+    presentation = advanceBattleCommandPresentation(
+      presentation,
+      new Set(["A"] as const),
+    );
+    presentation = advanceFrames(presentation, FIGHT_SUBMENU_OPEN_DELAY);
+    presentation = advanceBattleCommandPresentation(
+      presentation,
+      new Set(["RIGHT"] as const),
+    );
+    presentation = advanceBattleCommandPresentation(
+      presentation,
+      new Set(["A"] as const),
+    );
+    const stateBefore = JSON.stringify(battleState);
+    const presentationBefore = JSON.stringify(presentation);
+    const result = submitBattleCommandPresentationDecision(
+      battleState,
+      presentation,
+      reducer,
+    );
+
+    expect(received).toEqual([{
+      decision: { kind: "use-move", moveSlot: 1, targetBattler: 0 },
+    }]);
+    expect(result?.kind).toBe("terminal");
+    expect(JSON.stringify(battleState)).toBe(stateBefore);
+    expect(JSON.stringify(presentation)).toBe(presentationBefore);
+    expect(battleState.rng).toEqual(canonical.battleState.rng);
+  });
+
+  it("lets the kernel reject stale request identity and a forged illegal slot", () => {
+    const canonical = canonicalBoundary();
+    const request: BattleCommandRequest = {
+      ...canonical.request,
+      requestId: 91,
+      legalDecisions: [
+        { kind: "use-move", moveSlot: 3, targetBattler: 1 },
+      ],
+    };
+    const presentation = createBattleCommandPresentation(request, canonical.rules);
+    const submittingSlot3: BattleCommandPresentationState = {
+      ...presentation,
+      lifecycle: { phase: "submitting", phaseElapsed: 0 },
+      pendingDecision: presentation.legalMoveBySlot[3],
+    };
+    const reducer = terminalRecordingReducer([]);
+
+    expect(() => submitBattleCommandPresentationDecision(
+      canonical.battleState,
+      submittingSlot3,
+      reducer,
+    )).toThrow(/does not match current request/);
+
+    const forgedIllegal: BattleCommandPresentationState = {
+      ...submittingSlot3,
+      pendingDecision: { kind: "use-move", moveSlot: 0, targetBattler: 1 },
+    };
+    expect(() => submitBattleCommandPresentationDecision(
+      stateForRequest(canonical.battleState, request),
+      forgedIllegal,
+      reducer,
+    )).toThrow(/not legal for current command request/);
+  });
+
+  it("passes a legal slot-3 decision through the kernel with no recorded 0/1/2 allowlist", () => {
+    const canonical = canonicalBoundary();
+    const request: BattleCommandRequest = {
+      ...canonical.request,
+      requestId: 92,
+      legalDecisions: [
+        { kind: "use-move", moveSlot: 3, targetBattler: 1 },
+      ],
+    };
+    let presentation = createBattleCommandPresentation(request, canonical.rules);
+    presentation = {
+      ...presentation,
+      lifecycle: { phase: "submitting", phaseElapsed: 0 },
+      pendingDecision: presentation.legalMoveBySlot[3],
+    };
+    const received: { decision: unknown }[] = [];
+    const result = submitBattleCommandPresentationDecision(
+      stateForRequest(canonical.battleState, request),
+      presentation,
+      terminalRecordingReducer(received),
+    );
+
+    expect(result?.kind).toBe("terminal");
+    expect(received).toEqual([{
+      decision: { kind: "use-move", moveSlot: 3, targetBattler: 1 },
+    }]);
   });
 });
