@@ -39,6 +39,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   versus opponent `[0,0,126]`. The table saw no voluntary switch: divergence
   is from source-required precheck draws shifting downstream battle/generation
   RNG, not a contradictory switch/reducer outcome.
+- **Supervisor fold (post-step):** ROM receipt §7C Natural Cure merged
+  (`be762f2d`): odd 52937 → sentinel + switch (one
+  `ShouldSwitchIfNaturalCure+0x89` draw); even control falls through to the
+  final Natural Cure coin (30881) → two-draw switch; both twice-fresh
+  byte-identical. Perish variant precisely un-banked (shared countdown
+  faints both actives first); a follow-up staging attempt is running.
+  Supervisor verified union suite **496/5094**, build, and re-drove
+  18/20/21/23 = 2143/2326/1911/2114 matching the worker's table.
 - **Next / notes:** supervisor resumes R13-D or its ordered queue. No
   unsupported/import ratchet, census byte, generated artifact, issue,
   presentation, animation, canonical recording, or tick branch moved.
