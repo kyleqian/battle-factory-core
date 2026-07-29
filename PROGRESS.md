@@ -15,9 +15,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 703 — [BOUNDED MAIN WORKER 2026-07-29 ~15:31] Battle-command seam Slice 6 Part A landed
 
-- **State:** implementation `d995671d`; required targeted acceptance is
-  **386/386** and `git diff --check` is clean. Final full suite/build remain
-  to run once after this ledger checkpoint.
+- **State:** implementation `d995671d`; tree green at **518 files / 5254
+  tests + 1 deliberate animation-lane skip**, production build, required
+  targeted acceptance **386/386**, and `git diff --check`.
 - **Did:** live generated player command boundaries now own a
   `BattleCommandPresentation` built only from the published request and live
   `rulesContext`; action/FIGHT input uses the ordinary phase-relative reducer,
@@ -140,4 +140,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   parallel compare commands race over `tools/compare/out/latest`, ~1 min.
 
 ---
-
