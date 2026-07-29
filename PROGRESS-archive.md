@@ -1,3 +1,30 @@
+## 704 — [BOUNDED MAIN WORKER 2026-07-29 ~16:05] Battle-command seam Slice 6 Part B field-art route landed; breadth trace honestly open
+
+- **State:** implementation `216a7fab`; tree green at **518 files / 5254
+  tests + 1 deliberate animation-lane skip**, production build, required
+  targeted acceptance **148/148**, and `git diff --check`.
+- **Did:** the typed command render view now resolves both active battlers'
+  complete front/back art, palettes, source pic coordinates, and resting
+  origins from live species IDs through the banked 376-species catalogs.
+  Canonical Battle 2 consumes that same resolver pixel-neutrally. Added the
+  app-visible `battle-command-generated-off` stage: the live generated
+  orchestrator reaches a settled GRANBULL-vs-ARON action/FIGHT field with
+  live healthboxes/moves and advances through the ordinary request reducer.
+- **Next:** the explicit-OFF breadth proof remains **open (0/128 claimed; no
+  trace committed)**. The required final legal A-confirm immediately drives
+  the generated logical kernel/trainer and publishes the next player request,
+  while the ROM holds the confirmed FIGHT field through its Scene-OFF
+  action-resolution presentation. That typed resolution/next-command handoff
+  belongs to design §5's send-out/action-resolution lifecycle work; do not
+  hide it with a screenshot, delayed tick branch, or thinned capture window.
+- **Notes:** all fourteen immutable windows exact: Battle 2 **209/209**,
+  FIGHT **235/235**, reopen **90/90**; turns 3–13 **254/254, 44/44, 42/42,
+  44/44, 93/93, 88/88, 111/111, 83/83, 56/56, 46/46, 57/57**. No canonical
+  import, unsupported barrier, capture removal, battle/turn/absolute-tick
+  selector, damage/RNG/turn-order, party selector, or animation change.
+  PAPERCUT: `bin/oracle lab` default output flooded the session while only a
+  screenshot path was needed, ~1 min.
+
 ## 703 — [BOUNDED MAIN WORKER 2026-07-29 ~15:31] Battle-command seam Slice 6 Part A landed
 
 - **State:** implementation `d995671d`; tree green at **518 files / 5254
