@@ -300,6 +300,10 @@ import {
   type RestState,
 } from "./rest.ts";
 import {
+  howlAtAge,
+  type HowlState,
+} from "./howl.ts";
+import {
   needleArmAtAge,
   type NeedleArmState,
 } from "./needleArm.ts";
@@ -1323,6 +1327,18 @@ export interface SceneOnRestConfig {
   readonly fieldProfile: Readonly<SceneOnRestFieldProfile>;
 }
 
+export interface SceneOnHowlFieldProfile extends SceneOnDragonRageFieldProfile {
+  /** Immutable result of Howl's source stat-change opcode. */
+  readonly attackerAttackStage: 7;
+}
+
+export interface SceneOnHowlConfig {
+  readonly move: "HOWL";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnHowlFieldProfile>;
+}
+
 export interface SceneOnNeedleArmConfig {
   readonly move: "NEEDLE_ARM";
   readonly attacker: SceneOnPresentationBattler;
@@ -1562,6 +1578,7 @@ export type SceneOnMoveConfig =
   | SceneOnMetronomeConfig
   | SceneOnFollowMeConfig
   | SceneOnRestConfig
+  | SceneOnHowlConfig
   | SceneOnNeedleArmConfig
   | SceneOnSandstormConfig
   | SceneOnTailGlowConfig
@@ -1637,6 +1654,8 @@ export type SceneOnFollowMePresentationState =
   SceneOnMovePresentationState<SceneOnFollowMeConfig>;
 export type SceneOnRestPresentationState =
   SceneOnMovePresentationState<SceneOnRestConfig>;
+export type SceneOnHowlPresentationState =
+  SceneOnMovePresentationState<SceneOnHowlConfig>;
 export type SceneOnNeedleArmPresentationState =
   SceneOnMovePresentationState<SceneOnNeedleArmConfig>;
 export type SceneOnSandstormPresentationState =
@@ -1854,6 +1873,12 @@ export interface SceneOnFollowMeView extends FollowMeState {
 }
 
 export interface SceneOnRestView extends RestState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnHowlView extends HowlState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3618,6 +3643,25 @@ export function sceneOnRestView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_HOWL's first displayed source-script frame. */
+export function sceneOnHowlView(
+  state: SceneOnHowlPresentationState,
+): SceneOnHowlView {
+  if (state.config.move !== "HOWL") {
+    throw new Error(`expected HOWL presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...howlAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.battlePositionCenter,
     ),
   };
 }

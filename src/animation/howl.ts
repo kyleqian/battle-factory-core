@@ -10,6 +10,7 @@ export interface HowlMatrix {
 export interface HowlAttackerTransform {
   readonly active: boolean;
   readonly x2: -1 | 0 | 1;
+  readonly y2: number;
   readonly matrix: HowlMatrix;
 }
 
@@ -30,7 +31,7 @@ export interface HowlState {
   readonly active: boolean;
   readonly noiseLineLoaded: boolean;
   readonly scriptOffset: 0 | 3 | 14 | 30 | 33 | "RoarEffect";
-  readonly attacker: HowlAttackerTransform;
+  readonly attackerTransform: HowlAttackerTransform;
   readonly noiseLines: readonly HowlNoiseLine[];
   readonly cry:
     | Readonly<{
@@ -57,11 +58,15 @@ function scriptOffsetAtAge(age: number): HowlState["scriptOffset"] {
   return 33;
 }
 
-function attackerTransformAtAge(age: number): HowlAttackerTransform {
+function attackerTransformAtAge(
+  age: number,
+  side: HowlSide,
+): HowlAttackerTransform {
   if (age < HOWL_INHALE_FIRST_AGE || age > HOWL_INHALE_LAST_AGE) {
     return {
       active: false,
       x2: 0,
+      y2: 0,
       matrix: { a: 256, b: 0, c: 0, d: 256 },
     };
   }
@@ -88,7 +93,15 @@ function attackerTransformAtAge(age: number): HowlAttackerTransform {
   if (step >= 22 && step <= 43) {
     x2 = Math.floor((step - 20) / 2) % 2 === 1 ? 1 : -1;
   }
-  return { active: true, x2, matrix: { a, b: 0, c: 0, d } };
+  // Loudred's source picture y-offset is 9 back / 3 front. This is the exact
+  // `SetBattlerSpriteYOffsetFromYScale` integer program used by DeepInhale.
+  const pictureHeight = 64 - (side === "player" ? 9 : 3) * 2;
+  const inverseHeight = Math.min(
+    128,
+    Math.trunc((pictureHeight << 8) / d),
+  );
+  const y2 = Math.trunc((pictureHeight - inverseHeight) / 2);
+  return { active: true, x2, y2, matrix: { a, b: 0, c: 0, d } };
 }
 
 function noiseWaveAtAge(
@@ -138,7 +151,7 @@ export function howlAtAge(
     active: age >= 0 && age < HOWL_FRAME_COUNT - 1,
     noiseLineLoaded: age >= 1 && age < HOWL_FRAME_COUNT - 1,
     scriptOffset: scriptOffsetAtAge(age),
-    attacker: attackerTransformAtAge(age),
+    attackerTransform: attackerTransformAtAge(age, side),
     noiseLines: [
       ...noiseWaveAtAge(age, 0, side, attackerCoord),
       ...noiseWaveAtAge(age, 1, side, attackerCoord),

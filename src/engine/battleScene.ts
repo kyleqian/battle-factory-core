@@ -577,6 +577,7 @@ import fakeTearsAsset from "../animation/assets/fake-tears.json" with { type: "j
 import tickleAsset from "../animation/assets/tickle.json" with { type: "json" };
 import metronomeAsset from "../animation/assets/metronome.json" with { type: "json" };
 import restAsset from "../animation/assets/rest.json" with { type: "json" };
+import howlAsset from "../animation/assets/howl.json" with { type: "json" };
 import needleArmAsset from "../animation/assets/needle-arm.json" with { type: "json" };
 import sandstormAsset from "../animation/assets/sandstorm.json" with { type: "json" };
 import selfDestructAsset from "../animation/assets/selfDestruct.json" with { type: "json" };
@@ -750,6 +751,7 @@ import {
   sceneOnMetronomeView,
   sceneOnFollowMeView,
   sceneOnRestView,
+  sceneOnHowlView,
   sceneOnNeedleArmView,
   sceneOnSandstormView,
   sceneOnDragonClawView,
@@ -770,6 +772,7 @@ import {
   type SceneOnMetronomePresentationState,
   type SceneOnFollowMePresentationState,
   type SceneOnRestPresentationState,
+  type SceneOnHowlPresentationState,
   type SceneOnNeedleArmPresentationState,
   type SceneOnSandstormPresentationState,
   type SceneOnScaryFacePresentationState,
@@ -1362,6 +1365,11 @@ const restArt = restAsset as {
   teddiursaBack: { tileset: Tileset; palette: RgbColor[] };
   teddiursaFront: { tileset: Tileset; palette: RgbColor[] };
   letterZ: { tileset: Tileset; palette: RgbColor[] };
+};
+const howlArt = howlAsset as {
+  loudredBack: { tileset: Tileset; palette: RgbColor[] };
+  loudredFront: { tileset: Tileset; palette: RgbColor[] };
+  noiseLine: { tileset: Tileset; palette: RgbColor[] };
 };
 const needleArmArt = needleArmAsset as {
   cacneaBack: { tileset: Tileset; palette: RgbColor[] };
@@ -20060,6 +20068,136 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "TEDDIURSA went" : "Foe TEDDIURSA went",
       "to sleep!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "HOWL") {
+    const howlState = state as SceneOnHowlPresentationState;
+    const view = sceneOnHowlView(howlState);
+    // RunTasks writes software sprite state after BuildOamBuffer. Effect
+    // sprite attributes therefore lag by one age; battler affine matrices
+    // pass through the additional hardware-matrix VBlank latch.
+    const displayed = sceneOnHowlView({
+      ...howlState,
+      age: howlState.age - 1,
+    });
+    const affineDisplayed = sceneOnHowlView({
+      ...howlState,
+      age: howlState.age - 2,
+    });
+    const playerToOpponent =
+      view.attacker.species === "LOUDRED"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "LOUDRED"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged HOWL pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    if (howlState.config.fieldProfile.attackerAttackStage !== 7) {
+      throw new Error("HOWL presentation requires immutable Attack stage 7");
+    }
+    const loudredSource = playerToOpponent
+      ? howlArt.loudredBack : howlArt.loudredFront;
+    const loudred = playerToOpponent
+      ? loudredSource
+      : { ...loudredSource, tileset: subTileset(loudredSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const drawAttacker = () => {
+      if (displayed.attackerTransform.active) {
+        drawSpriteSheetAffineStretch(
+          fb,
+          loudred.tileset,
+          loudred.palette,
+          view.attacker.geometry.spriteCorner.x,
+          view.attacker.geometry.spriteCorner.y,
+          affineDisplayed.attackerTransform.matrix.a,
+          affineDisplayed.attackerTransform.matrix.d,
+          affineDisplayed.attackerTransform.y2,
+          { r: 0, g: 0, b: 0 },
+          0,
+          true,
+          affineDisplayed.attackerTransform.x2,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          loudred.tileset,
+          loudred.palette,
+          view.attacker.geometry.spriteCorner.x,
+          view.attacker.geometry.spriteCorner.y,
+        );
+      }
+    };
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+    // Equal-subpriority BuildOamBuffer traversal makes the newest allocation
+    // (line 2) the lowest hardware OBJ index, so paint it last.
+    for (const line of displayed.noiseLines) {
+      drawSpriteSheetFlipped(
+        fb,
+        subTileset(howlArt.noiseLine.tileset, line.frame * 4, 4),
+        howlArt.noiseLine.palette,
+        line.centerX - 16,
+        line.centerY - 16,
+        line.hFlip,
+        line.vFlip,
+      );
+    }
+    const profile = howlState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "LOUDRED",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "LOUDRED" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "LOUDRED used" : "Foe LOUDRED used",
+      "HOWL!",
       99,
     );
     return;
