@@ -69,6 +69,15 @@ describe("MOVE_FOCUS_ENERGY source-relative reducer", () => {
     }]);
     expect(focusEnergyAtAge(1, "opponent", { x: 176, y: 40 }).soundEvents[0])
       .toMatchObject({ pan: 63 });
+    expect(player(39)).toMatchObject({
+      attackerX2: -1,
+      attackerShakeDisplayAge: 37,
+      attackerDisplayX2: 1,
+    });
+    expect(player(40)).toMatchObject({
+      attackerShakeDisplayAge: 38,
+      attackerDisplayX2: -1,
+    });
     expect(player(121)).toMatchObject({
       active: false,
       assetLoaded: false,
