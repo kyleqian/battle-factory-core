@@ -9,6 +9,8 @@ Then:                     bin/oracle info
                           bin/oracle lab tools/battle-lab/factory-varied.json -o /tmp/lab
                           bin/oracle symbols gSaveBlock1Ptr gMain
                           bin/oracle symbols --prefix gPlayer
+
+Frame and input numbering is defined in docs/oracle-frame-semantics.md.
 """
 
 from __future__ import annotations
@@ -69,7 +71,7 @@ def read_json_file(filename: str, label: str) -> object:
         raise SystemExit(f"oracle: cannot read {label} {path}: {error}") from error
 
 
-def write_capture_result(result: object, output_name: str) -> None:
+def write_capture_result(result: object, output_name: str, *, quiet: bool = False) -> None:
     if not isinstance(result, dict) or not isinstance(result.get("captures"), list):
         raise SystemExit("oracle: response did not contain a captures array")
     output = Path(output_name)
@@ -83,17 +85,26 @@ def write_capture_result(result: object, output_name: str) -> None:
             {key: value for key, value in capture.items() if key != "pngBase64"} | {"file": filename}
         )
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
-    print(json.dumps(manifest, indent=2))
+    if not quiet:
+        print(json.dumps(manifest, indent=2))
 
 
 def command_run(args: argparse.Namespace) -> None:
     trace = read_json_file(args.trace, "trace")
-    write_capture_result(request("POST", "/v1/run", trace), args.output)
+    write_capture_result(
+        request("POST", "/v1/run", trace),
+        args.output,
+        quiet=args.quiet,
+    )
 
 
 def command_lab(args: argparse.Namespace) -> None:
     scenario = read_json_file(args.scenario, "battle-lab scenario")
-    write_capture_result(request("POST", "/v1/battle-lab/run", scenario), args.output)
+    write_capture_result(
+        request("POST", "/v1/battle-lab/run", scenario),
+        args.output,
+        quiet=args.quiet,
+    )
 
 
 def command_symbols(args: argparse.Namespace) -> None:
@@ -140,6 +151,12 @@ def main() -> None:
     run = commands.add_parser("run", help="run a JSON input trace from the canonical state")
     run.add_argument("trace", help="trace JSON file")
     run.add_argument("--output", "-o", default="oracle-output", help="directory for PNG captures")
+    run.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="write captures and manifest without printing the manifest",
+    )
     run.set_defaults(function=command_run)
     lab = commands.add_parser(
         "lab",
@@ -151,6 +168,12 @@ def main() -> None:
         "-o",
         default="battle-lab-output",
         help="directory for PNG captures and semantic manifest",
+    )
+    lab.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="write captures and manifest without printing the manifest",
     )
     lab.set_defaults(function=command_lab)
     symbols = commands.add_parser("symbols", help="look up linker-map symbol addresses")

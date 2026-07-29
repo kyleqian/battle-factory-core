@@ -3,11 +3,13 @@
 // Replays a trace against the real engine code (the same modules the Vite
 // build ships) and returns raw RGBA frames for each captured frame, so
 // tools/compare/run.ts can diff them against the oracle.
+// Frame/input numbering is shared with the oracle contract; see
+// docs/oracle-frame-semantics.md and traceReplay.ts.
 
 import type { Trace } from "./oracleClient.ts";
 import { createInitialState, render, tick } from "../../src/engine/core.ts";
-import { normalizeButtons } from "../../src/input.ts";
 import type { EngineState } from "../../src/engine/core.ts";
+import { traceAdvances } from "./traceReplay.ts";
 import { BATTLE2_OFF_TURN1_COMMAND_DURATIONS } from "../../src/engine/battle2OffScenario.ts";
 import { createFactoryFullTurnBattleState } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import { stageFactoryFullTurnBattle } from "../../src/engine/stagedBattleTurn.ts";
@@ -213,14 +215,11 @@ export async function renderAppTrace(trace: Trace): Promise<AppCapture[]> {
   applyStage();
   if (captureFrames.has(frame)) captures.push({ frame, rgba: render(state) });
 
-  for (const segment of trace.segments) {
-    const buttons = new Set(normalizeButtons(segment.buttons ?? []));
-    for (let i = 0; i < segment.frames; i += 1) {
-      state = tick(state, buttons);
-      frame += 1;
-      applyStage();
-      if (captureFrames.has(frame)) captures.push({ frame, rgba: render(state) });
-    }
+  for (const advance of traceAdvances(trace.segments)) {
+    state = tick(state, advance.buttons);
+    frame = advance.frame;
+    applyStage();
+    if (captureFrames.has(frame)) captures.push({ frame, rgba: render(state) });
   }
 
   return captures;

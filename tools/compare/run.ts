@@ -14,6 +14,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { PNG } from "pngjs";
 import { diffPngs } from "./diff.ts";
+import { formatPixelBounds } from "./diffBounds.ts";
 import { computeSSIM } from "./ssim.ts";
 import { renderAppTrace } from "./appTrace.ts";
 import {
@@ -117,9 +118,12 @@ for (const oracleCapture of oracleResult.captures) {
   const diff = diffPngs(oracleCapture.png, appPng);
   const ssim = computeSSIM(oracleCapture.png, appPng);
   const pct = ((100 * diff.diffPixels) / diff.totalPixels).toFixed(2);
+  const bounds = diff.bounds
+    ? ` bbox=${formatPixelBounds(diff.bounds)}`
+    : "";
   if (!summary || diff.diffPixels > 0) {
     console.log(
-      `frame ${oracleCapture.frame}: ${diff.diffPixels === 0 ? "match" : `DIFF ${diff.diffPixels}px (${pct}%)`} ` +
+      `frame ${oracleCapture.frame}: ${diff.diffPixels === 0 ? "match" : `DIFF ${diff.diffPixels}px (${pct}%)${bounds}`} ` +
         `ssimMean=${ssim.meanSSIM.toFixed(4)} ssimMin=${ssim.minSSIM.toFixed(4)}`,
     );
   }
@@ -127,7 +131,13 @@ for (const oracleCapture of oracleResult.captures) {
     mismatched += 1;
     writeFileSync(join(outDir, `diff-${pad(oracleCapture.frame)}.png`), diff.diffPng);
   }
-  manifest.push({ frame: oracleCapture.frame, diffPixels: diff.diffPixels, ssimMean: ssim.meanSSIM, ssimMin: ssim.minSSIM });
+  manifest.push({
+    frame: oracleCapture.frame,
+    diffPixels: diff.diffPixels,
+    bounds: diff.bounds,
+    ssimMean: ssim.meanSSIM,
+    ssimMin: ssim.minSSIM,
+  });
 }
 
 writeFileSync(
