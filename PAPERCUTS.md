@@ -448,3 +448,20 @@ Per entry:
 - **Workaround:** append to `PROGRESS-archive.md` by prepending after the
   header with a shell heredoc or targeted `sed` instead of whole-block
   patch matching; supervisors already rotate this way.
+
+## Side-lane worktrees base on a live main worker's intermediate commits
+
+- **What:** `run-subagent.sh --lane side` creates its worktree from current
+  `HEAD`, which during a live main-lane step is the main worker's latest
+  *intermediate* commit — a state the worker itself may fix two commits
+  later. A side worker then inherits transiently-red tests it must diagnose
+  as "pre-existing failures" (they are neither pre-existing nor its own).
+- **Hits:** 1 (receipts-B/C worker based on `1ddfc68` mid-reveals-step,
+  2026-07-29; two red suites later fixed by the same main step's
+  `beb383cf`).
+- **Cost each:** ~5 min worker diagnosis + supervisor cross-check.
+- **Workaround:** supervisors launching a side worker while main is
+  mid-step should name the last *supervisor-verified* green commit in the
+  brief ("failures beyond commit X are not yours"), or hold side launches
+  until the main step lands; a launcher `--base <ref>` option would fix it
+  mechanically.
