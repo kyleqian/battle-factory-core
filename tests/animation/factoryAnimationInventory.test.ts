@@ -68,10 +68,10 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        unsupported: 198,
+        unsupported: 189,
         staged: 0,
         partial: 0,
-        exact: 78,
+        exact: 87,
       },
       {
         tier: "openOnly",
@@ -109,6 +109,16 @@ describe("animation coverage ledger", () => {
   });
 
   it("uses the source dependency graph for non-exclusive work grouping", () => {
+    expect(
+      queuedAnimationComponentTracks().find(
+        (track) => track.id === "green-spike-needle-arm",
+      ),
+    ).toMatchObject({
+      representatives: [
+        "MOVE_NEEDLE_ARM",
+        "MOVE_SECRET_POWER",
+      ],
+    });
     expect(
       queuedAnimationComponentTracks().find(
         (track) => track.id === "focus-energy-endure-effect",

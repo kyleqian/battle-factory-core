@@ -2,6 +2,270 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_MOONLIGHT",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal challenge-0 Level-50 set-167 FRONTIER_MON_GLOOM_1 versus ONIX Scene-ON parties pass the entire 352-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 207-558 reproduce evidence 5486f398b5a29f20da4c97c6d67315973e01746b498250af3f5ea2aae116776b / raw RGB 433d0a9869f2ef60f0b68c812dce3ef9f2d1b8944bb54beba63a39f3c82e13bf and opponent-front frames 207-558 reproduce evidence fdf3da2cd3ea60d4be20f7d040f917cc302562da145e5a04fa9d750147e55b0d / raw RGB 83e6ccdfd48c9380fbead22b3b80af91202c3e04540d1e26798eaea60d1a6e1e",
+        "the source audit proves set 167 FRONTIER_MON_GLOOM_1 is the lowest suitable legal Level-50 carrier and pins species 44, move 236, Quirky nature, SpAttack/HP spread, Persim Berry, complete legal challenge-0 three-Pokemon parties, and the weather-none half-maximum healing payload",
+        "the pure relative reducer ports MOON, GREEN_SPARKLE, and shared BLUE_STAR tag/palette lifetimes, gMoonSpriteTemplate, all five staggered gMoonlightSparkleSpriteTemplate lifecycles, AnimTask_AlphaFadeIn, AnimTask_MoonlightEndFade, the black BG palette fill/fade, BLDCNT/BLDALPHA state, audio, HealingEffect's four blue stars with OAM-slot reuse, OAM/VBlank display order, and first inactive cleanup",
+        "the typed Scene-ON seam carries only resolved GLOOM/ONIX geometry plus immutable HP/weather/healing verification state; byte-identical source-extracted Gloom front/back, MOON, GREEN_SPARKLE, and BLUE_STAR art pass source/software tasks and sprites, hardware OAM/matrices, palette/tag buffers, registers, callbacks, both audio players, raw RGB, seam state, and every production framebuffer without applying healing or owning gameplay state",
+        "moonlightPortable.ts reruns both probes through tools/run-mgba-probe.py and proves all 352 immutable dense source/hardware/audio/reducer/seam/raw-RGB/framebuffer frames twice fresh in both orientations through first inactive cleanup; MOVE_RECOVER remains exact at 169/169 in both orientations as the independently rerun shared HealingEffect/BLUE_STAR control",
+        "MOVE_PRESENT remains unsupported: its distinct AnimTask_IsHealingMove dispatch and moving ITEM_BAG projectile branch to either five EXPLOSION damage sprites or nine GREEN_SPARKLE healing particles plus target HealingEffect2; it lacks complete legal both-orientation twice-fresh proof for both conditional bodies",
+        "healing amount/timing, HP, weather multiplier, gameplay RNG, controller selection, turn order, round/facility state, animation boundary list, canonical-recording allowlist, and unsupported barriers are unchanged"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-moonlight-player-gloom-opponent-onix.json",
+        "tools/battle-lab/mechanic-moonlight-opponent-gloom-player-onix.json",
+        "tools/compare/fixtures/moonlight-player-gloom-opponent-onix.json",
+        "tools/compare/fixtures/moonlight-opponent-gloom-player-onix.json",
+        "tools/compare/moonlightProbe.py",
+        "tools/compare/moonlightPortable.ts",
+        "tools/compare/moonlightSourceAudit.ts",
+        "tools/compare/extractMoonlightAssets.ts",
+        "src/animation/assets/moonlight.json",
+        "src/animation/moonlight.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/moonlightEvidence.test.ts",
+        "tests/animation/moonlightAssets.test.ts",
+        "tests/animation/moonlight.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_PERISH_SONG",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal challenge-2 Level-50 set-289 FRONTIER_MON_MURKROW_2 versus ONIX Scene-ON parties pass the entire 259-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 71-329 reproduce evidence 2127f8270310ceae01c00debfafdfb276ad80cfbb422b26672b27a21846b9250 / raw RGB 85d2c46b94112f9f5a30c076e58c5cf58a70e4f38fe9c3b6f008d6416e5edfc6 and opponent-front frames 75-333 reproduce evidence 0bd858e7ba1571ab2545d4d2e9d2ad0cff7562ae2c27ac7a71ae5968580d0597 / raw RGB b68c78f41dec5baa09ae444b312822d747c53af3e81e4cd598e6aa8b42482b6d",
+        "the source audit proves set 289 FRONTIER_MON_MURKROW_2 is the lowest suitable legal Level-50 carrier and pins species 198, move 195, Quirky nature, HP/Defense/SpDefense spread, BrightPowder, and complete legal challenge-2 three-Pokemon parties",
+        "the pure relative reducer ports MUSIC_NOTES_2 load/cleanup, all sixteen gPerishSongMusicNoteSpriteTemplate fixed-point cosine/sine paths, animation selection, affine half-turn, hold and four-bounce teardown, the invisible gPerishSongMusicNote2SpriteTemplate palette sentinel, side-relative panse, both simple BG-to-black palette fades, battler grayscale/original palette transitions, OAM/VBlank ordering, and first inactive cleanup",
+        "the typed Scene-ON seam carries only resolved MURKROW/ONIX presentation geometry and immutable HP/item/perish-timer state; source-extracted Murkrow front/back and MUSIC_NOTES_2 art plus shared ONIX/chrome pass software sprites, hardware OAM/matrices, palette/tag buffers, callbacks, registers, audio, raw RGB, and every production framebuffer without applying timers, consuming gameplay RNG, or changing battle/controller/turn/facility outcomes",
+        "perishSongPortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves all 259 immutable source/OAM/VBlank/register/audio/palette/seam/raw-RGB/framebuffer frames twice fresh in both orientations through first inactive cleanup; MOVE_SING remains the independently exact shared note/compositor control",
+        "MOVE_HEAL_BELL remains unsupported: its distinct BELL load/body, explicit MUSIC_NOTES_2 palette load/free, twelve HealBellMusicNote paths, three HealBellRing thin-ring/palette groups, healing particles, two star families, unload/reload boundaries, BlendBattleAnimPalExclude finale, and cleanup lack independent complete legal both-orientation twice-fresh dense acceptance",
+        "no damage, gameplay RNG, controller selection, turn order, round/facility state, animation boundary list, canonical-recording allowlist, or unsupported barrier changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-perish-song-player-murkrow-opponent-onix.json",
+        "tools/battle-lab/mechanic-perish-song-opponent-murkrow-player-onix.json",
+        "tools/compare/fixtures/perish-song-player-murkrow-opponent-onix.json",
+        "tools/compare/fixtures/perish-song-opponent-murkrow-player-onix.json",
+        "tools/compare/perishSongProbe.py",
+        "tools/compare/perishSongPortable.ts",
+        "tools/compare/perishSongSourceAudit.ts",
+        "tools/compare/extractPerishSongAssets.ts",
+        "src/animation/assets/perish-song.json",
+        "src/animation/perishSong.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/perishSongEvidence.test.ts",
+        "tests/animation/perishSong.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_HOWL",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal challenge-0 Level-50 set-144 LOUDRED versus ONIX Scene-ON parties pass the entire 102-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 209-310 reproduce evidence ac6bb4eebe0376d3441bc1e50ff4c33a4fe39f87dccb41483c440b9f167f93bb / raw RGB 1f19b38ed924b20fb4648adc24dea85a2be05460092df83d0d7991fa7a87a269 and opponent-front frames 209-310 reproduce evidence 1d08643804a400521689181b7d71431ad59a1c5a027498d7106e992d02b6e587 / raw RGB 83ad92a022ee5484e24c8e78b49996c5692443bc76e7aef430b2ae15cedf0eac",
+        "the source audit proves set 144 FRONTIER_MON_LOUDRED is the lowest suitable challenge-0 Level-50 carrier and pins species 371, move 336, Relaxed nature, Attack/HP spread, Focus Band, and complete legal three-Pokemon parties",
+        "the pure source-relative reducer ports ANIM_TAG_NOISE_LINE load/free, all six gRoarNoiseLineSpriteTemplate fixed-point lifecycles and frame/flip programs, AnimTask_DeepInhale's complete affine program, back/front y-offset variants, x2 shake, high-pitch cry task/audio, script waits, OAM/matrix/display latches, allocation order, and first inactive cleanup",
+        "the typed Scene-ON seam carries only resolved LOUDRED/ONIX presentation geometry and immutable Attack-stage/HP state; source-extracted Loudred front/back and NOISE_LINE art plus shared ONIX/chrome pass software task/sprite state, hardware OAM/matrices, tags/palettes/buffers, registers, audio, raw RGB, and every production framebuffer without applying Howl's stat outcome or consuming gameplay RNG",
+        "howlPortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves all 102 immutable dense source/hardware/audio/reducer/seam/framebuffer frames twice fresh in both orientations through first inactive cleanup",
+        "MOVE_ROAR remains unsupported: source audit proves its distinct ScaleMonAndRestore, SlideOffScreen, double-cry/wait tasks, monbg/splitbgprio/alpha choreography, and cleanup; it lacks independent complete legal both-orientation twice-fresh dense acceptance",
+        "no damage, stat-stage outcome, gameplay RNG, controller selection, turn order, round/facility state, animation boundary list, or unsupported barrier changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-howl-player-loudred-opponent-onix.json",
+        "tools/battle-lab/mechanic-howl-opponent-loudred-player-onix.json",
+        "tools/compare/fixtures/howl-player-loudred-opponent-onix.json",
+        "tools/compare/fixtures/howl-opponent-loudred-player-onix.json",
+        "tools/compare/howlProbe.py",
+        "tools/compare/howlPortable.ts",
+        "tools/compare/howlSourceAudit.ts",
+        "tools/compare/extractHowlAssets.ts",
+        "src/animation/assets/howl.json",
+        "src/animation/howl.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/howlEvidence.test.ts",
+        "tests/animation/howlAssets.test.ts",
+        "tests/animation/howl.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_REST",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal challenge-0 Level-50 set-117 TEDDIURSA versus ONIX Scene-ON parties pass the entire 110-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 334-443 reproduce evidence 8f482a75532d55a5518581b5cebe02b69741dbe913b87dafd4637dc79d68d9c6 / raw RGB 3a9f0a794e93bbb68b485748733866ed27477d59577b7a4905642dd7655f2d63 and opponent-front frames 338-447 reproduce evidence 24fd57122beb8e307e02bd6e9d427ece5c602c2188f0b47f847ba1593ea082d3 / raw RGB 6caad649f87c5bef7bc1098629addf19981c7ce4ed9d2db4dc0f1e8d25e86a67",
+        "the source audit proves set 117 FRONTIER_MON_TEDDIURSA is the lowest suitable challenge-0 Level-50 carrier and pins species 216, move 156, Relaxed nature, Attack/HP spread, Chesto Berry, and complete legal three-Pokemon parties",
+        "the pure source-relative reducer ports ANIM_TAG_LETTER_Z load/free, attacker-panned SE_M_SNORE, all three staggered gSleepLetterZSpriteTemplate spawns, AnimSleepLetterZ initialization, AnimSleepLetterZ_Step fixed-point ascent, side-dependent affine programs, OAM/VBlank display latches, 60-frame callbacks, waits, and first inactive cleanup",
+        "the typed Scene-ON seam carries only resolved TEDDIURSA/ONIX presentation geometry and immutable sleep/status/pending-heal field state; source-extracted Teddiursa front/back and LETTER_Z art plus shared ONIX/chrome pass source/software sprite state, hardware OAM and matrices, tags/palettes/buffers, registers, audio, raw RGB, and every production framebuffer without owning the Rest outcome",
+        "restPortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves all 110 immutable dense source/hardware/audio/reducer/seam/framebuffer frames twice fresh in both orientations through first inactive cleanup; the shared Metronome compositor control remains 127/127 exact twice fresh in both orientations",
+        "MOVE_SLEEP_TALK remains unsupported: source audit proves its distinct nine gLetterZSpriteTemplate/AnimLetterZ lifecycles plus AnimTask_SwayMon body; it lacks an independent complete legal both-orientation twice-fresh dense reducer, seam, and framebuffer acceptance",
+        "no Rest healing, sleep outcome or duration, damage, gameplay RNG, controller selection, turn order, round/facility state, animation boundary list, or unsupported barrier changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-rest-player-teddiursa-opponent-onix.json",
+        "tools/battle-lab/mechanic-rest-opponent-teddiursa-player-onix.json",
+        "tools/compare/fixtures/rest-player-teddiursa-opponent-onix.json",
+        "tools/compare/fixtures/rest-opponent-teddiursa-player-onix.json",
+        "tools/compare/metronomeProbe.py",
+        "tools/compare/restPortable.ts",
+        "tools/compare/restSourceAudit.ts",
+        "tools/compare/extractRestAssets.ts",
+        "src/animation/assets/rest.json",
+        "src/animation/rest.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/restEvidence.test.ts",
+        "tests/animation/restAssets.test.ts",
+        "tests/animation/rest.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_WISH",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal challenge-0 Level-50 set-173 ILLUMISE_1 versus ONIX Scene-ON parties pass the entire 271-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 65-335 reproduce evidence 9bd713db92f51208dba4faea9916549981545a864fd50bb7761b13ae00e7077b / raw RGB 2f82ec073d7f7e52b5a513733b991ef792b374d72c9b40c535f1e42438b86488 and opponent-front frames 69-339 reproduce evidence 8c223ec57b228721dd6df2137b8597388b44d4749cd501d898ec4c4da9be2669 / raw RGB f858c38f13030f4d3a173776ee2a1319835f2089b61f8b7ac6484f12a859315d",
+        "the source audit proves set 173 FRONTIER_MON_ILLUMISE_1 is the lowest suitable challenge-0 Level-50 carrier and pins species 387, move 273, Quirky nature, Attack/HP spread, Liechi Berry, and complete legal source-set parties",
+        "the pure source-relative reducer ports ANIM_TAG_GOLD_STARS and ANIM_TAG_SPARKLE_2 lifetime, both simple BG palette blends, gWishStarSpriteTemplate's cross-screen parabolic travel, exactly 21 gMiniTwinklingStarSpriteTemplate presentation-Random2 variants and blink programs, the literal 60-frame hold, and both GrantingStarsEffect fixed-point/frame-animation bodies",
+        "the typed Scene-ON seam carries only resolved ILLUMISE/ONIX geometry, field state, and the 21 presentation-only Random2 results without consuming or mutating gameplay RNG; source-extracted Illumise front/back, GOLD_STARS, SPARKLE_2, and shared ONIX/chrome pass software/hardware OAM, matrices, palettes/tags, registers, both audio players, raw RGB, and every production framebuffer",
+        "wishPortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves all 271 immutable dense source/hardware/audio/reducer/seam/framebuffer frames twice fresh in both orientations through first inactive cleanup; the shared Synthesis GrantingStarsEffect control remains 130/130 exact in both orientations",
+        "MOVE_METEOR_MASH remains unsupported: source audit proves its distinct BG_COSMIC fade/restore, three target-relative gMeteorMashStarSpriteTemplate bodies, spinning fist, IMPACT hit, target ShakeMon2, audio, and timing; it lacks independent complete legal both-orientation twice-fresh dense acceptance",
+        "no Wish battle state, delayed healing outcome/timing, damage, gameplay RNG, controller selection, turn order, round/facility state, animation boundary list, or unsupported barrier changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-wish-player-illumise-opponent-onix.json",
+        "tools/battle-lab/mechanic-wish-opponent-illumise-player-onix.json",
+        "tools/compare/fixtures/wish-player-illumise-opponent-onix.json",
+        "tools/compare/fixtures/wish-opponent-illumise-player-onix.json",
+        "tools/compare/wishProbe.py",
+        "tools/compare/wishPortable.ts",
+        "tools/compare/wishSourceAudit.ts",
+        "tools/compare/extractWishAssets.ts",
+        "src/animation/assets/wish.json",
+        "src/animation/wish.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/wishEvidence.test.ts",
+        "tests/animation/wishAssets.test.ts",
+        "tests/animation/wish.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_SANDSTORM",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal challenge-0 Level-50 set-120 PHANPY versus ONIX Scene-ON parties pass the entire 168-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 210-377 reproduce evidence 678cbc9073564cec54c76709704009d17586b45f1301dc129d13c840b0337b1e / raw RGB 2968b95f680be00e14cb3386487629b142eb0ac05910f1dad69da7dc885e9958 and opponent-front frames 305-472 reproduce evidence ba90eb87f3466644cf4e3c085231265bf7138fcd0e2d286a41574e35f9af12d2 / raw RGB 151561fae96ddc3d919e3f0254b987162cd9e078e92c5e414b4e0a9689edd2e4",
+        "the source audit proves set 120 FRONTIER_MON_PHANPY is the lowest challenge-0 legal carrier and pins species 231, move 201, Naughty nature, Attack/HP spread, Lax Incense, and complete legal three-Pokemon parties",
+        "the pure relative reducer ports ANIM_TAG_FLYING_DIRT and sandstorm BG load/free state, priority-1 BG1 tile/palette transfer, -6/-1 wrapped scroll, 0-to-7 alpha ramp, 101-count hold, fade and reset, plus all seven staggered gFlyingSandCrescentSpriteTemplate fixed-point translations and cleanup",
+        "the typed Scene-ON seam carries only resolved PHANPY/ONIX geometry and field state; source-extracted Phanpy front/back, FLYING_DIRT, sandstorm background art and shared ONIX/chrome pass software task/sprite state, OAM/matrices, palettes/tags, registers, both audio players, raw RGB, and every production framebuffer",
+        "sandstormPortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves all 168 immutable dense source/hardware/audio/reducer/seam/framebuffer frames twice fresh in both orientations through first inactive cleanup",
+        "MOVE_HEAT_WAVE remains unsupported: source audit proves it has distinct red BlendParticle and BlendBackground calls, mirrored sandstorm background, pan sweep, AnimTask_MoveHeatWaveTargets, and its own seven crescent calls; it lacks independent complete legal both-orientation twice-fresh dense acceptance",
+        "no damage, weather outcome, RNG, controller selection, turn order, round/facility state, animation boundary list, or unsupported barrier changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-sandstorm-player-phanpy-opponent-onix.json",
+        "tools/battle-lab/mechanic-sandstorm-opponent-phanpy-player-onix.json",
+        "tools/compare/fixtures/sandstorm-player-phanpy-opponent-onix.json",
+        "tools/compare/fixtures/sandstorm-opponent-phanpy-player-onix.json",
+        "tools/compare/sandstormProbe.py",
+        "tools/compare/sandstormPortable.ts",
+        "tools/compare/sandstormSourceAudit.ts",
+        "tools/compare/extractSandstormAssets.ts",
+        "src/animation/assets/sandstorm.json",
+        "src/animation/sandstorm.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/sandstormEvidence.test.ts",
+        "tests/animation/sandstormAssets.test.ts",
+        "tests/animation/sandstorm.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_NEEDLE_ARM",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal Level-50 Factory set-125 CACNEA versus ONIX Scene-ON parties pass the entire 108-frame source body through first inactive cleanup in both orientations twice fresh: frames 223-330 reproduce player-back evidence f6f26ca98a0aea08c1bd5c9fef4553443c93c260d829ed0609c41ef26935d10c / raw RGB bbb4ea8404fbde111de1c1dfe91d45d47033b2f0522754695d4d7ed5f21db0f6 and opponent-front evidence 75a2df84d96ea99f2cb2b584a67a338d419c565a14c7bc726f7bf7a8aaf20470 / raw RGB 291b07d72166df08330fd95741f84ea0d14918c57602114968143ca9bd48d1e1",
+        "the source audit proves set 125 FRONTIER_MON_CACNEA is the lowest Level-50 carrier and pins species 344, move 302, Quirky nature, Attack/HP spread, Sitrus Berry, complete source-set parties, and all twenty gNeedleArmSpikeSpriteTemplate lifecycles",
+        "the pure relative reducer ports the twelve staggered inward and eight simultaneous outward GREEN_SPIKE translations, fixed-point coordinates, ArcTan2-derived affine matrices, tagged load/free state, source interpreter seven-sprite pending tick, AnimTask_ShakeMon2, IMPACT hitsplat, HANDS_AND_FEET fist, waits, and cleanup",
+        "the typed Scene-ON seam carries only resolved CACNEA/ONIX geometry; source-extracted species-344 front/back and GREEN_SPIKE art plus shared IMPACT, HANDS_AND_FEET, ONIX, and chrome pass source offsets, software and hardware OAM with stable Y/crossing order, matrices, palettes/tags/buffers, registers, both audio players, raw RGB, and every production framebuffer",
+        "needleArmPortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves all 108 immutable dense source/hardware/audio/reducer/seam/framebuffer frames twice fresh in both orientations; MOVE_SPIKE_CANNON remains 84/84 exact twice fresh in both orientations as the shared spike/OAM control",
+        "MOVE_SECRET_POWER remains unsupported: the Factory building environment dispatches to Move_STRENGTH, so the grass-only Needle Arm body provides no Factory acceptance for it; no damage, RNG, controller selection, turn order, round/facility state, boundary list, or unsupported barrier changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-needle-arm-player-cacnea-opponent-onix.json",
+        "tools/battle-lab/mechanic-needle-arm-opponent-cacnea-player-onix.json",
+        "tools/compare/fixtures/needle-arm-player-cacnea-opponent-onix.json",
+        "tools/compare/fixtures/needle-arm-opponent-cacnea-player-onix.json",
+        "tools/compare/needleArmProbe.py",
+        "tools/compare/needleArmPortable.ts",
+        "tools/compare/needleArmSourceAudit.ts",
+        "tools/compare/extractNeedleArmAssets.ts",
+        "src/animation/assets/needle-arm.json",
+        "src/animation/needleArm.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/needleArmEvidence.test.ts",
+        "tests/animation/needleArmAssets.test.ts",
+        "tests/animation/needleArm.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_METRONOME",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal Level-50 Factory set-227 CHANSEY_1 versus ONIX Scene-ON parties pass the entire 127-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 245-371 reproduce evidence 01f259da1179263438c721865ce1e5e534652004336a887ea9d9b91f07666e02 / raw RGB 24940bca0b95034ff2e8b9b5b2e450996df581c70b6622fb72cb5ad360d176af and opponent-front frames 244-370 reproduce evidence cdae46f8d3b37b4603314f96fe268621df779aee72066a272b90d8f709be6881 / raw RGB 06e94878ed92007e98d7fe26e6f6e3404e8e76fb93273fc903a98a69b254f8f6",
+        "the pure source-relative reducer ports ANIM_TAG_FINGER and ANIM_TAG_THOUGHT_BUBBLE load/free, gThoughtBubbleSpriteTemplate's forward/hold/reverse lifecycle, gMetronomeFingerSpriteTemplate's grow/three-wag/shrink affine program and terminal matrix callbacks, attacker-panned METRONOME plus three looped TAIL_WHIP restarts, OAM display transfer, and inactive cleanup",
+        "the typed Scene-ON seam carries resolved CHANSEY/ONIX presentation geometry and the source SetSpriteNextToMonHead point; source-extracted legal species-113 front/back, FINGER, and THOUGHT_BUBBLE art plus shared ONIX/chrome feed the production compositor with tagged tile/palette state, software/hardware OAM order, matrices, registers, both audio players, raw RGB, and exact cleanup without damage, RNG, controller, turn, or facility ownership",
+        "metronomePortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves the immutable dense source/hardware/audio receipt, reducer and typed seam, raw RGB, and shared application framebuffer on all 127 frames twice fresh in both orientations; the nearby exact TAUNT source/seam/framebuffer control remains 125/125",
+        "MOVE_FOLLOW_ME now has its own independent complete dense acceptance; Metronome was rerun 127/127 twice fresh in both orientations through the strengthened shared comparator with its accepted digests unchanged",
+        "no damage, RNG, controller selection, turn order, round/facility state, boundary list, unsupported barrier, or non-FINGER sibling acceptance changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-metronome-player-chansey-opponent-onix.json",
+        "tools/battle-lab/mechanic-metronome-opponent-chansey-player-onix.json",
+        "tools/compare/fixtures/metronome-player-chansey-opponent-onix.json",
+        "tools/compare/fixtures/metronome-opponent-chansey-player-onix.json",
+        "tools/compare/metronomeProbe.py",
+        "tools/compare/metronomePortable.ts",
+        "tools/compare/metronomeSourceAudit.ts",
+        "tools/compare/extractMetronomeAssets.ts",
+        "src/animation/assets/metronome.json",
+        "src/animation/metronome.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/metronomeEvidence.test.ts",
+        "tests/animation/metronome.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_FOLLOW_ME",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal Level-50 Factory set-183 TOGETIC_1 versus set-156 ONIX Scene-ON parties pass the entire 185-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 69-253 reproduce evidence 5aefcc2e260438071df5776ec35ff02a9c4540e4913fcab8db5d4018892cb871 / raw RGB 99d4031b7dc1aa40e2f68ba177e7617283a9873603b3d962db0e4cc1c33ffd96 and opponent-front frames 73-257 reproduce evidence 74485aa1de9e13cc0721a99d78c2cacfd4bf2c456d91a0a844ae20cb1c7be0e0 / raw RGB 7518f7d53c9d83f9ee9e5711a6082b169d56026ce037575878d7092fd1bea1bf",
+        "the source audit proves set 183 is the lowest suitable Level-50 carrier and pins species 176, Relaxed nature, Defense/HP spread, Lax Incense, Factory IV/friendship fields, and the complete three-Pokemon source-set parties; repeating the legal active move only constrains controller/AI selection",
+        "the pure source-relative reducer ports ANIM_TAG_FINGER load/free, gFollowMeFingerSpriteTemplate's normal-affine grow, attacker BATTLER_COORD_X/top origin and clamp, 13-frame delay, horizontal GBA-sine traversal, both subpriority crossings, handoff to AnimMetronomeFinger_Step's three-wag/shrink terminal program, initial and looped TAIL_WHIP plus ATTRACT audio, display transfer, and cleanup",
+        "the typed Scene-ON seam carries only resolved TOGETIC/ONIX presentation geometry and the source top-center point; source-extracted legal species-176 front/back and byte-identical shared FINGER art plus shared ONIX/chrome pass tagged tile/palette lifetime, source waits/offsets, software/hardware OAM ordering, matrices, registers, both audio players, raw RGB, and every production framebuffer",
+        "metronomePortable.ts reruns both Follow Me probes through tools/run-mgba-probe.py and proves all 185 immutable dense source/hardware/audio/reducer/seam/framebuffer frames twice fresh in both orientations; MOVE_METRONOME remains the exact 127/127 twice-fresh nearby control with unchanged digests",
+        "no damage, RNG, controller selection, turn order, round/facility state, animation boundary list, unsupported barrier, or non-FINGER sibling acceptance changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-follow-me-player-togetic-opponent-onix.json",
+        "tools/battle-lab/mechanic-follow-me-opponent-togetic-player-onix.json",
+        "tools/compare/fixtures/follow-me-player-togetic-opponent-onix.json",
+        "tools/compare/fixtures/follow-me-opponent-togetic-player-onix.json",
+        "tools/compare/metronomeProbe.py",
+        "tools/compare/metronomePortable.ts",
+        "tools/compare/followMeSourceAudit.ts",
+        "tools/compare/extractMetronomeAssets.ts",
+        "src/animation/assets/metronome.json",
+        "src/animation/followMe.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/followMeEvidence.test.ts",
+        "tests/animation/followMe.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_TICKLE",
       "status": "exact",
       "covered": [
@@ -1895,7 +2159,7 @@
         "historical, now-disqualified species-301 NINCADA/SHUCKLE fixtures captured 321 currentMove=313 frames 39-359 and the BlendParticle creation/inactive latch at 2/2 frames 84-85 player-back and 88-89 opponent-front twice fresh; they are retained only as provenance and are not legal set-267 DELCATTY acceptance",
         "that historical mGBA probe records full source script identity/offset/wait, task and sprite bodies, OBJ palette tags plus faded/unfaded/hardware palettes, OAM/matrices, registers, both audio players, raw RGB, and framebuffer state; Fake Tears' args (tag SMALL_BUBBLES, delay 0, initial 4, target 4, RGB(12,11,31)) make the task latch/destroy in Cmd_createvisualtask before it can survive a post-frame gTasks snapshot",
         "the source-owned second frame is only the required first inactive/display latch. RockMonBackAndForth begins in that same batched next-source frame and is explicitly recorded as a boundary, not accepted or modeled by this checkpoint. No reducer, typed seam, app compositor, battle logic, RNG, turn order, facility state, boundary list, or unsupported barrier changed",
-        "MOVE_HEAT_WAVE remains unsupported: it selects FLYING_DIRT but also owns sandstorm/background blends, both-target movement, pan sweep, and four flying-sand crescents. MOVE_LUSTER_PURGE remains unsupported: its white-circle/IMPACT particle calls sit inside a psychic/white BG pipeline, luster circle, six random hitsplats/sounds, target shake, and restore. Neither has independent complete dense move evidence."
+        "MOVE_HEAT_WAVE remains unsupported: it selects FLYING_DIRT but also owns sandstorm/background blends, both-target movement, pan sweep, and seven flying-sand crescent calls. MOVE_LUSTER_PURGE remains unsupported: its white-circle/IMPACT particle calls sit inside a psychic/white BG pipeline, luster circle, six random hitsplats/sounds, target shake, and restore. Neither has independent complete dense move evidence."
       ],
       "evidence": [
         "tools/battle-lab/mechanic-fake-tears-player-delcatty-opponent-shuckle.json",
@@ -1981,6 +2245,97 @@
     "MOVE_BIND"
   ],
   "componentTracks": [
+    {
+      "id": "green-sparkle-moonlight",
+      "components": [
+        "asset:ANIM_TAG_GREEN_SPARKLE",
+        "sprite:gMoonlightSparkleSpriteTemplate",
+        "visualCommand:create_present_heal_particle_sprite",
+        "task:AnimTask_AlphaFadeIn",
+        "task:AnimTask_MoonlightEndFade",
+        "asset:ANIM_TAG_MOON",
+        "sprite:gMoonSpriteTemplate",
+        "subroutine:HealingEffect",
+        "asset:ANIM_TAG_BLUE_STAR"
+      ],
+      "representatives": [
+        "MOVE_MOONLIGHT",
+        "MOVE_PRESENT"
+      ],
+      "goal": "MOVE_MOONLIGHT independently proves its complete 352-frame blackout, fixed moon, alpha fade, five staggered descending GREEN_SPARKLE sprites, MoonlightEndFade palette choreography, shared HealingEffect BLUE_STAR tail, audio, hardware transfer, typed seam, raw RGB, and first inactive cleanup in both legal GLOOM orientations twice fresh. MOVE_PRESENT remains unsupported: sharing GREEN_SPARKLE does not accept its AnimTask_IsHealingMove dispatch, moving ITEM_BAG projectile, conditional five-EXPLOSION damage body, conditional nine-particle healing body, target HealingEffect2, or branch-specific timing without complete legal both-orientation twice-fresh acceptance of both outcomes."
+    },
+    {
+      "id": "noise-line-roar-effect",
+      "components": [
+        "asset:ANIM_TAG_NOISE_LINE",
+        "sprite:gRoarNoiseLineSpriteTemplate",
+        "subroutine:RoarEffect",
+        "task:AnimTask_DeepInhale",
+        "task:SoundTask_PlayCryHighPitch"
+      ],
+      "representatives": [
+        "MOVE_HOWL",
+        "MOVE_ROAR"
+      ],
+      "goal": "MOVE_HOWL independently proves its complete NOISE_LINE/RoarEffect, DeepInhale, high-pitch cry, waits and cleanup in both orientations at 102/102 source/task/sprite/OAM/matrix/tag/register/audio/raw-RGB and framebuffer frames, reproduced twice. MOVE_ROAR remains unsupported: it additionally needs ScaleMonAndRestore, SlideOffScreen, double-cry/wait tasks, monbg/splitbgprio/alpha choreography, and independent complete dense acceptance."
+    },
+    {
+      "id": "letter-z-rest",
+      "components": [
+        "asset:ANIM_TAG_LETTER_Z",
+        "sprite:gSleepLetterZSpriteTemplate",
+        "sprite:gLetterZSpriteTemplate",
+        "task:AnimTask_SwayMon"
+      ],
+      "representatives": [
+        "MOVE_REST",
+        "MOVE_SLEEP_TALK"
+      ],
+      "goal": "MOVE_REST independently proves its complete 110-frame source body through first inactive cleanup at 110/110 source/component, typed-seam, software/hardware OAM and matrix, tag/palette/buffer, register/audio, raw-RGB, and shared-framebuffer frames in both orientations twice fresh using legal challenge-0 set-117 TEDDIURSA parties. MOVE_SLEEP_TALK remains unsupported because its distinct nine gLetterZSpriteTemplate/AnimLetterZ lifecycles and AnimTask_SwayMon body lack an independent complete legal both-orientation twice-fresh dense reducer, seam, and framebuffer acceptance."
+    },
+    {
+      "id": "flying-dirt-sandstorm",
+      "components": [
+        "asset:ANIM_TAG_FLYING_DIRT",
+        "sprite:gFlyingSandCrescentSpriteTemplate",
+        "task:AnimTask_LoadSandstormBackground"
+      ],
+      "representatives": [
+        "MOVE_SANDSTORM",
+        "MOVE_HEAT_WAVE"
+      ],
+      "goal": "MOVE_SANDSTORM independently proves its complete 168-frame background-load/scroll/alpha and seven-crescent body through first inactive cleanup at 168/168 reducer/component, typed-seam, software/hardware state, registers/audio, raw-RGB, and shared-framebuffer frames in both orientations twice fresh using legal challenge-0 set-120 PHANPY parties. MOVE_HEAT_WAVE remains unsupported because its red BlendParticle/BlendBackground, mirrored background, pan sweep, AnimTask_MoveHeatWaveTargets, and independent seven-crescent schedule lack their own complete legal both-orientation twice-fresh dense acceptance."
+    },
+    {
+      "id": "green-spike-needle-arm",
+      "components": [
+        "asset:ANIM_TAG_GREEN_SPIKE",
+        "sprite:gNeedleArmSpikeSpriteTemplate",
+        "task:AnimTask_ShakeMon2",
+        "asset:ANIM_TAG_IMPACT",
+        "asset:ANIM_TAG_HANDS_AND_FEET"
+      ],
+      "representatives": [
+        "MOVE_NEEDLE_ARM",
+        "MOVE_SECRET_POWER"
+      ],
+      "goal": "MOVE_NEEDLE_ARM independently proves its complete 108-frame source body through first inactive cleanup at 108/108 reducer/component, typed-seam, software/hardware OAM, matrices, palettes/tags/buffers, registers, both audio players, raw-RGB, and shared-framebuffer frames 223-330 in both orientations twice fresh using legal Level-50 set-125 CACNEA parties. MOVE_SECRET_POWER remains unsupported because the Factory building environment dispatches Move_STRENGTH rather than its grass-only Needle Arm body and therefore lacks independent legal complete dense acceptance."
+    },
+    {
+      "id": "finger-metronome",
+      "components": [
+        "asset:ANIM_TAG_FINGER",
+        "asset:ANIM_TAG_THOUGHT_BUBBLE",
+        "sprite:gThoughtBubbleSpriteTemplate",
+        "sprite:gMetronomeFingerSpriteTemplate",
+        "sprite:gFollowMeFingerSpriteTemplate"
+      ],
+      "representatives": [
+        "MOVE_METRONOME",
+        "MOVE_FOLLOW_ME"
+      ],
+      "goal": "Track closed. MOVE_METRONOME independently remains exact at 127/127 complete source/software/typed-seam, tagged tile/palette, hardware OAM/matrix/order, register/audio, raw-RGB, and shared-framebuffer frames in both orientations twice fresh through first inactive cleanup. MOVE_FOLLOW_ME independently passes its distinct gFollowMeFingerSpriteTemplate/AnimFollowMeFinger top-center, normal-affine grow, 13-frame delay, sine/subpriority traversal, shared three-wag/shrink terminal callback, audio, cleanup, and production framebuffer at 185/185 twice fresh in both orientations."
+    },
     {
       "id": "focus-energy-endure-effect",
       "components": [
@@ -2191,6 +2546,19 @@
         "MOVE_GRASS_WHISTLE"
       ],
       "goal": "MOVE_SING is exact: its complete first animation-script block is 245/245 player-back and 248/248 opponent-front for strengthened component/OAM/matrix/palette/monbg and raw-RGB/shared-seam framebuffer evidence, reproduced twice. No sibling is promoted. BELLY DRUM has six alternating purple-hand hits, six ShakeMon tasks, six gSlowFlyingMusicNotesSpriteTemplate arcs with distinct animation/palette/phase argv, attacker-pan sounds, and rainbow cleanup. TEETER DANCE has AnimTask_TeeterDanceMovement, five gFastFlyingMusicNotesSpriteTemplate paths at three signed offsets, five attacker-pan sounds, and ANIM_TAG_DUCK. FAKE TEARS only loads MUSIC_NOTES for its distinct thought-bubble/music-note tear macro body and additionally needs SMALL_BUBBLES BlendParticle, RockMonBackAndForth, four looped tail-whip sounds, and eight type-varied tear sprites. GRASS WHISTLE shares the 12 wavy-note geometry but fixes every initial palette to index 1 with no cycling, uses a green whole-BG blend/restore instead of monbg, and has its distinct grass-whistle pan sweep. Every sibling remains unsupported pending its own complete dense evidence."
+    },
+    {
+      "id": "music-notes-2",
+      "components": [
+        "asset:ANIM_TAG_MUSIC_NOTES_2",
+        "sprite:gPerishSongMusicNoteSpriteTemplate",
+        "sprite:gPerishSongMusicNote2SpriteTemplate"
+      ],
+      "representatives": [
+        "MOVE_PERISH_SONG",
+        "MOVE_HEAL_BELL"
+      ],
+      "goal": "MOVE_PERISH_SONG independently proves MUSIC_NOTES_2 and its complete sixteen-note fixed-point/affine/bounce body, invisible grayscale-palette sentinel, side-relative panse, two BG black fades, four-battler grayscale/original transitions, and cleanup in both orientations at 259/259 complete source/OAM/VBlank/register/audio/palette/raw-RGB/shared-framebuffer frames, reproduced twice fresh. MOVE_SING remains an exact shared note/compositor control. MOVE_HEAL_BELL remains unsupported: it adds BELL, explicit MUSIC_NOTES_2 palette load/free, twelve distinct HealBellMusicNote paths, three HealBellRing thin-ring/palette groups, healing particles, sparkling and granting stars, asset unload/reload boundaries, BlendBattleAnimPalExclude, and independent timing; it needs its own complete legal both-orientation twice-fresh dense acceptance."
     },
     {
       "id": "play-se1-with-panning",
@@ -2551,7 +2919,7 @@
         "MOVE_MOONLIGHT",
         "MOVE_SWALLOW"
       ],
-      "goal": "MOVE_RECOVER proves the complete three-wave RecoverAbsorbEffect plus attacker HealingEffect body in both orientations at 169/169 component/RAM and framebuffer frames, reproduced twice. MOVE_ABSORB independently proves its eight-orb drain/hitsplat/green-field body plus attacker HealingEffect at 195/195 complete hardware/framebuffer frames in both orientations, reproduced twice. MOVE_MILK_DRINK independently proves its complete bottle/thin-ring/target HealingEffect2 body in both orientations at 186/186 component/RAM and framebuffer frames, reproduced twice. MOVE_SYNTHESIS independently proves its complete GrantingStarsEffect/blend/load-boundary/attacker HealingEffect body in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. RECOVER remains 169/169, SYNTHESIS 130/130, MILK DRINK 186/186, and BIND 45/45 in both orientations as regression controls. No other sibling is promoted: MEGA_DRAIN needs its paired 16-orb stronger-green body; DREAM_EATER its psychic-background/target-scale-and-shake/24-orb body; GIGA_DRAIN its 24-orb/high-green body; SOFT_BOILED has a distinct breaking-egg pair, attacker shake, two offset affine-program-0 thin rings, palette blend, and target HealingEffect2 body and needs its own dense move evidence; PRESENT has a distinct common moving item-bag body plus conditional five-explosion damage body or nine-green-particle healing body before target HealingEffect2, and needs dense evidence for both conditional outcomes; MOONLIGHT needs its blackout/moon/alpha/sparkle pipeline; and SWALLOW needs its move-turn-dependent deform/shake/blue-orb multiplicity. Each remains unsupported pending its own complete dense acceptance."
+      "goal": "MOVE_RECOVER proves the complete three-wave RecoverAbsorbEffect plus attacker HealingEffect body in both orientations at 169/169 component/RAM and framebuffer frames, reproduced twice. MOVE_ABSORB independently proves its eight-orb drain/hitsplat/green-field body plus attacker HealingEffect at 195/195 complete hardware/framebuffer frames in both orientations, reproduced twice. MOVE_MILK_DRINK independently proves its complete bottle/thin-ring/target HealingEffect2 body in both orientations at 186/186 component/RAM and framebuffer frames, reproduced twice. MOVE_SYNTHESIS independently proves its complete GrantingStarsEffect/blend/load-boundary/attacker HealingEffect body in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. MOVE_MOONLIGHT independently proves its complete blackout/moon/alpha/five-GREEN_SPARKLE pipeline plus attacker HealingEffect at 352/352 source/hardware/audio/seam/raw-RGB/framebuffer frames in both orientations twice fresh. RECOVER remains 169/169 in both orientations as the freshly rerun shared HealingEffect control. No other sibling is promoted: MEGA_DRAIN needs its paired 16-orb stronger-green body; DREAM_EATER its psychic-background/target-scale-and-shake/24-orb body; GIGA_DRAIN its 24-orb/high-green body; SOFT_BOILED has a distinct breaking-egg pair, attacker shake, two offset affine-program-0 thin rings, palette blend, and target HealingEffect2 body; PRESENT has a distinct moving item-bag body plus conditional five-explosion damage body or nine-green-particle healing body before target HealingEffect2 and needs dense evidence for both conditional outcomes; and SWALLOW needs its move-turn-dependent deform/shake/blue-orb multiplicity. Each remains unsupported pending its own complete dense acceptance."
     },
     {
       "id": "absorption-orb-drain",

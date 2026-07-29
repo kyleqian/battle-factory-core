@@ -1,0 +1,44 @@
+{
+  "schema": "howl-portable-evidence/v1",
+  "orientation": "opponent-front",
+  "scenario": "tools/battle-lab/mechanic-howl-opponent-loudred-player-onix.json",
+  "probe": "tools/compare/howlProbe.py",
+  "appStage": { "presentationAge": 0 },
+  "attacker": {
+    "species": "LOUDRED",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 11 },
+      "animationCenter": { "x": 176, "y": 43 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 80 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 117,
+    "playerMaxHp": 117,
+    "opponentHp": 164,
+    "opponentMaxHp": 177,
+    "playerGender": "male",
+    "opponentGender": "male",
+    "attackerAttackStage": 7
+  },
+  "sourceWindow": { "startFrame": 209, "endFrame": 310, "frameCount": 102 },
+  "evidenceSha256": "1d08643804a400521689181b7d71431ad59a1c5a027498d7106e992d02b6e587",
+  "rawRgbSha256": "83ad92a022ee5484e24c8e78b49996c5692443bc76e7aef430b2ae15cedf0eac",
+  "battleState": {
+    "attackerSide": "opponent",
+    "hp": 164,
+    "maxHp": 177,
+    "heldItem": 196,
+    "attackStage": 7
+  }
+}

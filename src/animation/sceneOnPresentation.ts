@@ -194,6 +194,10 @@ import {
   type RecoverEffectSprite,
 } from "./recover.ts";
 import {
+  moonlightAtAge,
+  type MoonlightState,
+} from "./moonlight.ts";
+import {
   absorbAtAge,
   type AbsorbState,
 } from "./absorb.ts";
@@ -205,6 +209,11 @@ import {
   synthesisEffectAtAge,
   type SynthesisSprite,
 } from "./synthesis.ts";
+import {
+  wishAtAge,
+  type WishState,
+  type WishTwinkleVariant,
+} from "./wish.ts";
 import {
   milkDrinkEffectAtAge,
   type MilkDrinkEffectSprite,
@@ -281,6 +290,35 @@ import {
   tickleAtAge,
   type TickleState,
 } from "./tickle.ts";
+import {
+  metronomeAtAge,
+  type MetronomePoint,
+  type MetronomeState,
+} from "./metronome.ts";
+import {
+  followMeAtAge,
+  type FollowMeState,
+} from "./followMe.ts";
+import {
+  restAtAge,
+  type RestState,
+} from "./rest.ts";
+import {
+  howlAtAge,
+  type HowlState,
+} from "./howl.ts";
+import {
+  perishSongAtAge,
+  type PerishSongState,
+} from "./perishSong.ts";
+import {
+  needleArmAtAge,
+  type NeedleArmState,
+} from "./needleArm.ts";
+import {
+  sandstormAtAge,
+  type SandstormState,
+} from "./sandstorm.ts";
 import {
   tailGlowAtAge,
   type TailGlowState,
@@ -483,6 +521,9 @@ export interface SceneOnPresentationBattler {
     | "MINUN"
     | "FLAAFFY"
     | "VOLBEAT"
+    | "ILLUMISE"
+    | "GLOOM"
+    | "TOGETIC"
     | "MACHOKE"
     | "TAILLOW"
     | "EEVEE"
@@ -507,6 +548,10 @@ export interface SceneOnPresentationBattler {
     | "BEEDRILL"
     | "OMASTAR"
     | "OMANYTE"
+    | "CHANSEY"
+    | "CACNEA"
+    | "PHANPY"
+    | "TEDDIURSA"
     | "WARTORTLE";
   readonly geometry: SceneOnBattlerGeometry;
 }
@@ -909,6 +954,27 @@ export interface SceneOnRecoverConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnMoonlightFieldProfile
+  extends SceneOnDragonRageFieldProfile {
+  readonly pendingHeal: Readonly<{
+    readonly battler: "attacker";
+    readonly fromHp: number;
+    readonly toHp: number;
+    readonly weather: "none";
+    readonly numerator: 1;
+    readonly denominator: 2;
+  }>;
+}
+
+export interface SceneOnMoonlightConfig {
+  readonly move: "MOONLIGHT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnMoonlightFieldProfile>;
+  /** Source `InitSpritePosToAnimAttacker(TRUE)` center for HealingEffect. */
+  readonly healingCenter: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnAbsorbConfig {
   readonly move: "ABSORB";
   readonly attacker: SceneOnPresentationBattler;
@@ -943,6 +1009,15 @@ export interface SceneOnSynthesisConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnWishConfig {
+  readonly move: "WISH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Presentation-only Random2 results for the 21 source mini stars. */
+  readonly twinkles: readonly WishTwinkleVariant[];
 }
 
 export interface SceneOnMilkDrinkConfig {
@@ -1246,6 +1321,82 @@ export interface SceneOnTickleConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnMetronomeConfig {
+  readonly move: "METRONOME";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** `SetSpriteNextToMonHead` result for the source-verified carrier. */
+  readonly attackerHead: Readonly<MetronomePoint>;
+}
+
+export interface SceneOnFollowMeConfig {
+  readonly move: "FOLLOW_ME";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source `BATTLER_COORD_X` and clamped `BATTLER_COORD_ATTR_TOP`. */
+  readonly attackerTop: Readonly<MetronomePoint>;
+}
+
+export interface SceneOnRestFieldProfile extends SceneOnDragonRageFieldProfile {
+  readonly playerStatus: "none" | "sleep";
+  readonly opponentStatus: "none" | "sleep";
+  /** Immutable `trysetrest` result; the animation never applies the heal. */
+  readonly pendingHeal: Readonly<{
+    readonly battler: "attacker";
+    readonly fromHp: number;
+    readonly toHp: number;
+  }>;
+}
+
+export interface SceneOnRestConfig {
+  readonly move: "REST";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnRestFieldProfile>;
+}
+
+export interface SceneOnHowlFieldProfile extends SceneOnDragonRageFieldProfile {
+  /** Immutable result of Howl's source stat-change opcode. */
+  readonly attackerAttackStage: 7;
+}
+
+export interface SceneOnHowlConfig {
+  readonly move: "HOWL";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnHowlFieldProfile>;
+}
+
+export interface SceneOnPerishSongFieldProfile
+  extends SceneOnDragonRageFieldProfile {
+  /** Immutable battle-engine result; presentation never advances these. */
+  readonly playerPerishSongTurns: 3;
+  readonly opponentPerishSongTurns: 3;
+}
+
+export interface SceneOnPerishSongConfig {
+  readonly move: "PERISH_SONG";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnPerishSongFieldProfile>;
+}
+
+export interface SceneOnNeedleArmConfig {
+  readonly move: "NEEDLE_ARM";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnSandstormConfig {
+  readonly move: "SANDSTORM";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnTailGlowConfig {
   readonly move: "TAIL_GLOW";
   readonly attacker: SceneOnPresentationBattler;
@@ -1433,9 +1584,11 @@ export type SceneOnMoveConfig =
   | SceneOnShadowPunchConfig
   | SceneOnGrowthConfig
   | SceneOnRecoverConfig
+  | SceneOnMoonlightConfig
   | SceneOnAbsorbConfig
   | SceneOnReflectConfig
   | SceneOnSynthesisConfig
+  | SceneOnWishConfig
   | SceneOnMilkDrinkConfig
   | SceneOnSupersonicConfig
   | SceneOnWaterGunConfig
@@ -1467,6 +1620,13 @@ export type SceneOnMoveConfig =
   | SceneOnCovetConfig
   | SceneOnFakeTearsConfig
   | SceneOnTickleConfig
+  | SceneOnMetronomeConfig
+  | SceneOnFollowMeConfig
+  | SceneOnRestConfig
+  | SceneOnHowlConfig
+  | SceneOnPerishSongConfig
+  | SceneOnNeedleArmConfig
+  | SceneOnSandstormConfig
   | SceneOnTailGlowConfig
   | SceneOnSelfDestructConfig
   | SceneOnExplosionConfig
@@ -1518,6 +1678,8 @@ export type SceneOnScaryFacePresentationState =
   SceneOnMovePresentationState<SceneOnScaryFaceConfig>;
 export type SceneOnAbsorbPresentationState =
   SceneOnMovePresentationState<SceneOnAbsorbConfig>;
+export type SceneOnMoonlightPresentationState =
+  SceneOnMovePresentationState<SceneOnMoonlightConfig>;
 export type SceneOnReflectPresentationState =
   SceneOnMovePresentationState<SceneOnReflectConfig>;
 export type SceneOnSparkPresentationState =
@@ -1534,6 +1696,20 @@ export type SceneOnFakeTearsPresentationState =
   SceneOnMovePresentationState<SceneOnFakeTearsConfig>;
 export type SceneOnTicklePresentationState =
   SceneOnMovePresentationState<SceneOnTickleConfig>;
+export type SceneOnMetronomePresentationState =
+  SceneOnMovePresentationState<SceneOnMetronomeConfig>;
+export type SceneOnFollowMePresentationState =
+  SceneOnMovePresentationState<SceneOnFollowMeConfig>;
+export type SceneOnRestPresentationState =
+  SceneOnMovePresentationState<SceneOnRestConfig>;
+export type SceneOnHowlPresentationState =
+  SceneOnMovePresentationState<SceneOnHowlConfig>;
+export type SceneOnPerishSongPresentationState =
+  SceneOnMovePresentationState<SceneOnPerishSongConfig>;
+export type SceneOnNeedleArmPresentationState =
+  SceneOnMovePresentationState<SceneOnNeedleArmConfig>;
+export type SceneOnSandstormPresentationState =
+  SceneOnMovePresentationState<SceneOnSandstormConfig>;
 export type SceneOnTailGlowPresentationState =
   SceneOnMovePresentationState<SceneOnTailGlowConfig>;
 
@@ -1729,6 +1905,48 @@ export interface SceneOnFakeTearsView extends FakeTearsState {
 }
 
 export interface SceneOnTickleView extends TickleState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnMetronomeView extends MetronomeState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnFollowMeView extends FollowMeState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnRestView extends RestState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnHowlView extends HowlState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnPerishSongView extends PerishSongState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnNeedleArmView extends NeedleArmState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSandstormView extends SandstormState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2132,6 +2350,12 @@ export interface SceneOnRecoverView {
   readonly sprites: readonly RecoverEffectSprite[];
 }
 
+export interface SceneOnMoonlightView extends MoonlightState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnAbsorbView extends AbsorbState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -2144,6 +2368,12 @@ export interface SceneOnSynthesisView {
   readonly target: SceneOnPresentationBattler;
   readonly attackerObjY: number;
   readonly sprites: readonly SynthesisSprite[];
+}
+
+export interface SceneOnWishView extends WishState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
 }
 
 export interface SceneOnMilkDrinkView {
@@ -2678,6 +2908,27 @@ export function sceneOnRecoverView(
   };
 }
 
+/** `age=0` is Move_MOONLIGHT's first active source-script frame. */
+export function sceneOnMoonlightView(
+  state: SceneOnMovePresentationState<SceneOnMoveConfig>,
+): SceneOnMoonlightView {
+  if (state.config.move !== "MOONLIGHT") {
+    throw new Error(`expected MOONLIGHT presentation, got ${state.config.move}`);
+  }
+  const config = state.config;
+  return {
+    age: state.age,
+    attacker: config.attacker,
+    target: config.target,
+    ...moonlightAtAge(
+      state.age,
+      config.attacker.geometry.side,
+      config.attacker.geometry.animationCenter.x,
+      config.healingCenter,
+    ),
+  };
+}
+
 /** `age` is relative to the source script's `monbg ANIM_DEF_PARTNER`. */
 export function sceneOnAbsorbView(
   state: SceneOnMovePresentationState<SceneOnAbsorbConfig>,
@@ -2739,6 +2990,26 @@ export function sceneOnSynthesisView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age` spans the complete Move_WISH script body through cleanup. */
+export function sceneOnWishView(
+  state: SceneOnMovePresentationState,
+): SceneOnWishView {
+  if (state.config.move !== "WISH") {
+    throw new Error(`expected WISH presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...wishAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.twinkles,
     ),
   };
 }
@@ -3399,6 +3670,130 @@ export function sceneOnTickleView(
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
     ),
+  };
+}
+
+/** `age=0` is Move_METRONOME's first displayed source-script frame. */
+export function sceneOnMetronomeView(
+  state: SceneOnMetronomePresentationState,
+): SceneOnMetronomeView {
+  if (state.config.move !== "METRONOME") {
+    throw new Error(`expected METRONOME presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...metronomeAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attackerHead,
+    ),
+  };
+}
+
+/** `age=0` is Move_FOLLOW_ME's first displayed source-script frame. */
+export function sceneOnFollowMeView(
+  state: SceneOnFollowMePresentationState,
+): SceneOnFollowMeView {
+  if (state.config.move !== "FOLLOW_ME") {
+    throw new Error(`expected FOLLOW_ME presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...followMeAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attackerTop,
+    ),
+  };
+}
+
+/** `age=0` is Move_REST's first displayed source-script frame. */
+export function sceneOnRestView(
+  state: SceneOnRestPresentationState,
+): SceneOnRestView {
+  if (state.config.move !== "REST") {
+    throw new Error(`expected REST presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...restAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_HOWL's first displayed source-script frame. */
+export function sceneOnHowlView(
+  state: SceneOnHowlPresentationState,
+): SceneOnHowlView {
+  if (state.config.move !== "HOWL") {
+    throw new Error(`expected HOWL presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...howlAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_PERISH_SONG's first displayed source-script frame. */
+export function sceneOnPerishSongView(
+  state: SceneOnPerishSongPresentationState,
+): SceneOnPerishSongView {
+  if (state.config.move !== "PERISH_SONG") {
+    throw new Error(`expected PERISH_SONG presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...perishSongAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+    ),
+  };
+}
+
+/** `age=0` is Move_NEEDLE_ARM's first displayed source-script frame. */
+export function sceneOnNeedleArmView(
+  state: SceneOnNeedleArmPresentationState,
+): SceneOnNeedleArmView {
+  if (state.config.move !== "NEEDLE_ARM") {
+    throw new Error(`expected NEEDLE_ARM presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...needleArmAtAge(state.age, state.config.target.geometry.animationCenter),
+  };
+}
+
+/** `age=0` is Move_SANDSTORM's first displayed source-script frame. */
+export function sceneOnSandstormView(
+  state: SceneOnSandstormPresentationState,
+): SceneOnSandstormView {
+  if (state.config.move !== "SANDSTORM") {
+    throw new Error(`expected SANDSTORM presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...sandstormAtAge(state.age),
   };
 }
 

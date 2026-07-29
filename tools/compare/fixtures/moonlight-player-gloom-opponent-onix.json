@@ -1,0 +1,22 @@
+{
+  "schema": "moonlight-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-moonlight-player-gloom-opponent-onix.json",
+  "probe": "tools/compare/moonlightProbe.py",
+  "pair": "GLOOM (player-back, challenge-0 Factory set 167) -> ONIX (opponent-front)",
+  "move": "MOONLIGHT",
+  "orientation": "player-to-opponent",
+  "appStage": {"oracleFrame":207,"presentationAge":0},
+  "denseWindow": {"startFrame":207,"endFrame":558,"frameCount":352},
+  "evidenceSha256":"5486f398b5a29f20da4c97c6d67315973e01746b498250af3f5ea2aae116776b",
+  "rawRgbSha256":"433d0a9869f2ef60f0b68c812dce3ef9f2d1b8944bb54beba63a39f3c82e13bf",
+  "lifecycleCounts":{"gMoonSpriteTemplate":1,"gMoonlightSparkleSpriteTemplate":5,"gHealingBlueStarSpriteTemplate":4},
+  "attacker": {"species":"GLOOM","geometry":{"side":"player","spriteCorner":{"x":40,"y":58},"animationCenter":{"x":72,"y":90},"battlePositionCenter":{"x":72,"y":80}}},
+  "target": {"species":"ONIX","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":10},"animationCenter":{"x":176,"y":42},"battlePositionCenter":{"x":176,"y":40}}},
+  "healingCenter": {"x":72,"y":98},
+  "fieldProfile": {
+    "playerHp":143,"playerMaxHp":153,"opponentHp":117,"opponentMaxHp":117,
+    "playerGender":"female","opponentGender":"male",
+    "pendingHeal":{"battler":"attacker","fromHp":143,"toHp":153,"weather":"none","numerator":1,"denominator":2}
+  }
+}

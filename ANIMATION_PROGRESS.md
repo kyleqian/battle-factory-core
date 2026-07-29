@@ -1,5 +1,261 @@
 # Animation coverage
 
+## MOVE_MOONLIGHT promoted exact; GREEN_SPARKLE track bounded (2026-07-29)
+
+**Verdict:** `MOVE_MOONLIGHT` is exact. The lowest suitable legal Level-50
+carrier is challenge-0 set **167** `FRONTIER_MON_GLOOM_1` (species **44**,
+Moonlight **236**, Quirky, SpAttack+HP, Persim Berry). Complete legal
+three-mon Scene-ON parties pass the entire body through first inactive cleanup
+at **352/352** frames **207–558** in both orientations, twice fresh.
+Player-back evidence/raw digests are
+`5486f398b5a29f20da4c97c6d67315973e01746b498250af3f5ea2aae116776b` /
+`433d0a9869f2ef60f0b68c812dce3ef9f2d1b8944bb54beba63a39f3c82e13bf`;
+opponent-front digests are
+`fdf3da2cd3ea60d4be20f7d040f917cc302562da145e5a04fa9d750147e55b0d` /
+`83e6ccdfd48c9380fbead22b3b80af91202c3e04540d1e26798eaea60d1a6e1e`.
+
+**Model/boundary:** the pure relative reducer, typed seam, and narrow
+compositor port MOON/GREEN_SPARKLE/BLUE_STAR tag and palette lifetimes, the
+fixed moon, all **five** staggered sparkle lifecycles, alpha registers,
+Moonlight's special black-to-near-white BG/battler/effect palette pipeline,
+audio, the complete four-star shared `HealingEffect` tail, OAM/VBlank order,
+and cleanup. Gloom and all effect art regenerate byte-for-byte from pinned
+source. Immutable HP **143/153**, weather-none, and half-maximum heal metadata
+cross only as verification inputs; healing outcome/timing, HP, weather
+calculation, RNG, controller/turn/facility state, boundaries, and barriers are
+unchanged.
+
+**Sibling/control:** `MOVE_PRESENT` remains **unsupported**. It has a distinct
+`AnimTask_IsHealingMove` dispatch and ITEM_BAG projectile, then either five
+EXPLOSION damage sprites or nine GREEN_SPARKLE heal particles followed by
+target `HealingEffect2`; both conditional bodies still need independent
+complete legal both-orientation twice-fresh proof. `MOVE_RECOVER` was rerun
+fresh as the shared BLUE_STAR/HealingEffect control and remains **169/169**
+exact in both orientations. Coverage is **87 exact / 0 partial / 0 staged /
+189 unsupported**.
+
+## MOVE_PERISH_SONG promoted exact; MUSIC_NOTES_2 track bounded (2026-07-29)
+
+**Verdict:** `MOVE_PERISH_SONG` is exact. The lowest suitable legal Level-50
+carrier is challenge-2 set **289** `FRONTIER_MON_MURKROW_2` (species **198**,
+Perish Song **195**, Quirky, HP+Defense+SpDefense, BrightPowder). Complete
+three-mon Scene-ON parties pass the entire body through first inactive cleanup
+at **259/259** frames in both orientations, twice fresh. Player-back frames
+**71–329** have evidence/raw digests
+`2127f8270310ceae01c00debfafdfb276ad80cfbb422b26672b27a21846b9250` /
+`85d2c46b94112f9f5a30c076e58c5cf58a70e4f38fe9c3b6f008d6416e5edfc6`;
+opponent-front frames **75–333** have
+`0bd858e7ba1571ab2545d4d2e9d2ad0cff7562ae2c27ac7a71ae5968580d0597` /
+`b68c78f41dec5baa09ae444b312822d747c53af3e81e4cd598e6aa8b42482b6d`.
+
+**Model/boundary:** the pure relative reducer, typed seam, and narrow
+compositor port all **16** `gPerishSongMusicNoteSpriteTemplate` fixed-point
+paths, tile animations, affine half-turn, hold/four-bounce cleanup, the
+invisible `gPerishSongMusicNote2SpriteTemplate` grayscale-palette sentinel,
+MUSIC_NOTES_2 tag/palette lifetime, side-relative panse, both BG-black fades,
+four battler grayscale/original transitions, OAM/VBlank order, display
+register/callback state, and cleanup. Source-extracted Murkrow front/back and
+MUSIC_NOTES_2 assets reproduce byte-for-byte. Immutable HP/items and both
+Perish timers (**3**) cross only as verification inputs; gameplay RNG,
+damage, timer advancement, controller/turn/facility state, import boundaries,
+and unsupported barriers are unchanged.
+
+**Sibling/control:** `MOVE_HEAL_BELL` remains **unsupported**. Its independent
+body adds BELL, explicit MUSIC_NOTES_2 palette load/free, twelve note paths,
+three ring/palette groups, healing particles, two star families, asset
+unload/reload boundaries, `BlendBattleAnimPalExclude`, and distinct timing;
+it has no complete legal both-orientation twice-fresh dense proof.
+`MOVE_SING` remains the independently exact note/compositor control. Coverage
+is **86 exact / 0 partial / 0 staged / 190 unsupported**.
+
+## MOVE_HOWL promoted exact; NOISE_LINE track bounded (2026-07-29)
+
+**Verdict:** `MOVE_HOWL` is exact. Lowest suitable challenge-0 Level-50
+carrier set **144** `FRONTIER_MON_LOUDRED` (species **371**, Howl **336**,
+Relaxed, Attack+HP, Focus Band) drives complete legal three-mon parties
+against ONIX. Both Scene-ON orientations pass the full source body through
+first inactive cleanup at **102/102** frames, twice fresh. Player-back frames
+**209–310** have evidence/raw digests
+`ac6bb4eebe0376d3441bc1e50ff4c33a4fe39f87dccb41483c440b9f167f93bb` /
+`1f19b38ed924b20fb4648adc24dea85a2be05460092df83d0d7991fa7a87a269`;
+opponent-front frames **209–310** have
+`1d08643804a400521689181b7d71431ad59a1c5a027498d7106e992d02b6e587` /
+`83ad92a022ee5484e24c8e78b49996c5692443bc76e7aef430b2ae15cedf0eac`.
+
+**Model/boundary:** the pure relative reducer, typed seam, and narrow
+compositor port NOISE_LINE load/free, all six `RoarEffect` sprites,
+`AnimTask_DeepInhale` affine/y-offset/shake behavior, high-pitch cry task and
+audio, script waits, OAM/matrix/display latches, allocation order, tagged
+source-extracted art, and cleanup. Immutable Attack stage **7** crosses the
+presentation seam only as verification input; Howl's outcome, gameplay RNG,
+damage, controller/turn/facility state, boundary list, and unsupported barriers
+are unchanged. `MOVE_ROAR` remains **unsupported** because its source body adds
+`ScaleMonAndRestore`, `SlideOffScreen`, double-cry/wait tasks,
+monbg/splitbgprio/alpha choreography, and lacks independent complete dense
+both-orientation evidence. Coverage is **85 exact / 0 partial / 0 staged /
+191 unsupported**.
+
+## MOVE_REST promoted exact; LETTER_Z track bounded (2026-07-29)
+
+**Verdict:** `MOVE_REST` is exact. Lowest suitable challenge-0 Level-50
+carrier set **117** `FRONTIER_MON_TEDDIURSA` (species **216**, Rest **156**,
+Relaxed, Attack+HP, Chesto Berry) drives complete legal three-mon parties
+against ONIX. Both Scene-ON orientations pass the complete source body through
+first inactive cleanup at **110/110** frames, twice fresh. Player-back frames
+**334–443** have evidence/raw digests
+`8f482a75532d55a5518581b5cebe02b69741dbe913b87dafd4637dc79d68d9c6` /
+`3a9f0a794e93bbb68b485748733866ed27477d59577b7a4905642dd7655f2d63`;
+opponent-front frames **338–447** have
+`24fd57122beb8e307e02bd6e9d427ece5c602c2188f0b47f847ba1593ea082d3` /
+`6caad649f87c5bef7bc1098629addf19981c7ce4ed9d2db4dc0f1e8d25e86a67`.
+
+**Model/boundary:** the pure relative reducer, typed seam, and narrow
+compositor port LETTER_Z load/free, attacker-panned Snore audio, all **three**
+staggered `gSleepLetterZSpriteTemplate` callbacks, fixed-point ascent,
+side-dependent affine programs, OAM/VBlank latches, tagged source-extracted
+art, 60-frame lifetimes, waits, and cleanup. Immutable Rest sleep/status/
+pending-heal state crosses the presentation seam only as verification input;
+the shared Metronome control remains **127/127** exact twice fresh in both
+orientations. Rest
+healing, sleep state/duration, RNG, controller/turn/facility state, the
+animation boundary list, and unsupported barriers are unchanged.
+`MOVE_SLEEP_TALK` remains **unsupported**: it has a distinct nine-sprite
+`gLetterZSpriteTemplate`/`AnimLetterZ` body plus `AnimTask_SwayMon`, without
+independent complete legal both-orientation twice-fresh dense acceptance.
+Coverage is **84 exact / 0 partial / 0 staged / 192 unsupported**.
+
+## MOVE_WISH promoted exact; GOLD_STARS track bounded (2026-07-28)
+
+**Verdict:** `MOVE_WISH` is exact. Lowest suitable challenge-0 Level-50
+carrier set **173** `FRONTIER_MON_ILLUMISE_1` (species **387**, Wish **273**,
+Quirky, Attack+HP, Liechi Berry) drives complete legal three-mon parties
+against ONIX. Both Scene-ON orientations pass the complete source body through
+first inactive cleanup at **271/271** frames, twice fresh. Player-back frames
+**65–335** have evidence/raw digests
+`9bd713db92f51208dba4faea9916549981545a864fd50bb7761b13ae00e7077b` /
+`2f82ec073d7f7e52b5a513733b991ef792b374d72c9b40c535f1e42438b86488`;
+opponent-front frames **69–339** have
+`8c223ec57b228721dd6df2137b8597388b44d4749cd501d898ec4c4da9be2669` /
+`f858c38f13030f4d3a173776ee2a1319835f2089b61f8b7ac6484f12a859315d`.
+
+**Model/boundary:** the pure relative reducer, typed seam, and narrow
+compositor port both black BG palette ramps, the cross-screen GOLD_STARS Wish
+star, all **21** presentation-`Random2` mini-star variants/blinks, the
+60-frame hold, both SPARKLE_2 GrantingStarsEffect translations, pan-adjusted
+Reflect and looped Heal Bell audio tasks, OAM/display order, tagged assets,
+and cleanup using byte-identical source-extracted Illumise/GOLD_STARS/
+SPARKLE_2 art. The already-exact Synthesis granting-star control remains
+**130/130** in both orientations. `MOVE_METEOR_MASH` remains **unsupported**:
+it adds `BG_COSMIC`, three target-relative spinning stars, a spinning fist,
+IMPACT, target `ShakeMon2`, background restoration, and distinct audio/timing,
+without independent complete legal both-orientation twice-fresh acceptance.
+Coverage is **83 exact / 0 partial / 0 staged / 193 unsupported**; Wish battle
+state/healing timing and outcome, damage, gameplay RNG, controller/turn/
+facility state, boundary list, and unsupported barrier are unchanged.
+
+## MOVE_SANDSTORM promoted exact; FLYING_DIRT track bounded (2026-07-28)
+
+**Verdict:** `MOVE_SANDSTORM` is exact. Lowest challenge-0 legal Level-50
+carrier set **120** `FRONTIER_MON_PHANPY` (species **231**, Sandstorm **201**,
+Naughty, Attack+HP, Lax Incense) drives complete legal three-mon parties
+against ONIX. Both Scene-ON orientations pass the full source body through
+first inactive cleanup at **168/168** frames, twice fresh. Player-back frames
+**210–377** have evidence/raw digests
+`678cbc9073564cec54c76709704009d17586b45f1301dc129d13c840b0337b1e` /
+`2968b95f680be00e14cb3386487629b142eb0ac05910f1dad69da7dc885e9958`;
+opponent-front frames **305–472** have
+`ba90eb87f3466644cf4e3c085231265bf7138fcd0e2d286a41574e35f9af12d2` /
+`151561fae96ddc3d919e3f0254b987162cd9e078e92c5e414b4e0a9689edd2e4`.
+
+**Model/boundary:** the pure relative reducer, typed seam, and narrow
+compositor port FLYING_DIRT load/free, source sandstorm BG tile/palette load,
+wrapped **-6/-1** BG1 scroll, **0→7 / 101-count hold / 7→0** alpha, all
+**seven** staggered fixed-point flying-sand crescents, and cleanup using
+byte-identical source-extracted Phanpy/front-back/background/particle assets.
+Software tasks/sprites, OAM/matrices, tags/palettes/registers, both audio
+players, raw RGB, and the shared framebuffer are dense-exact. The previously
+exact Needle Arm compositor control remains **108/108** twice fresh in both
+orientations. `MOVE_HEAT_WAVE` remains **unsupported**: source audit proves
+distinct red particle/background blends, mirrored BG, pan sweep, target
+motion, and its own seven-crescent schedule; it has no independent complete
+legal both-orientation twice-fresh evidence. Coverage is **82 exact / 0
+partial / 0 staged / 194 unsupported**; no damage/weather outcome, RNG,
+controller/turn/facility state, boundary list, or unsupported barrier changed.
+
+## MOVE_NEEDLE_ARM promoted exact; GREEN_SPIKE track bounded (2026-07-28)
+
+**Verdict:** `MOVE_NEEDLE_ARM` is exact. Lowest legal Level-50 carrier set
+**125** `FRONTIER_MON_CACNEA` (species **344**, Needle Arm **302**, Quirky,
+Attack+HP, Sitrus Berry) drives complete source-catalog parties against ONIX.
+Both Scene-ON orientations pass the full source body through first inactive
+cleanup at **108/108** frames **223–330**, twice fresh. Player-back
+evidence/raw digests are `f6f26ca98a0aea08c1bd5c9fef4553443c93c260d829ed0609c41ef26935d10c`
+/ `bbb4ea8404fbde111de1c1dfe91d45d47033b2f0522754695d4d7ed5f21db0f6`;
+opponent-front digests are
+`75a2df84d96ea99f2cb2b584a67a338d419c565a14c7bc726f7bf7a8aaf20470`
+/ `291b07d72166df08330fd95741f84ea0d14918c57602114968143ca9bd48d1e1`.
+
+**Model/boundary:** the pure relative reducer, typed seam, and narrow
+compositor port all **20** GREEN_SPIKE lifecycles (twelve staggered inward,
+eight outward), fixed-point translation/affine rotation, the source
+interpreter's seven-sprite pending tick, target ShakeMon2, IMPACT hitsplat,
+HANDS_AND_FEET fist, tagged loads, OAM/VBlank latches, Y/crossing painter
+order, audio, and cleanup using source-extracted Cacnea/GREEN_SPIKE art.
+`MOVE_SPIKE_CANNON` remains **84/84** twice-fresh in both orientations as the
+nearby exact control. `MOVE_SECRET_POWER` remains **unsupported**: Factory's
+building environment dispatches to Strength, not its grass-only Needle Arm
+body. Coverage is **81 exact / 0 partial / 0 staged / 195 unsupported**; no
+battle/controller/RNG/facility state, boundary list, or unsupported barrier
+changed.
+
+## MOVE_FOLLOW_ME promoted exact; finger-metronome track closed (2026-07-28)
+
+**Verdict:** `MOVE_FOLLOW_ME` is exact. The lowest suitable Level-50 carrier
+is set **183** `FRONTIER_MON_TOGETIC_1` (species **176**), with its pinned
+Relaxed/Defense+HP/Lax Incense identity and complete source-set parties.
+Both Scene-ON orientations pass the full body through first inactive cleanup
+at **185/185** twice fresh. Player-back frames **69–253** have evidence/raw
+digests `5aefcc2e…2cb871` / `99d4031b…3ffd96`; opponent-front frames
+**73–257** have `74485aa1…be0e0` / `7518f7d5…ea1bf`.
+
+**Model/boundary:** the relative reducer, typed seam, and narrow compositor
+port the FINGER load/palette/tile lifetime, attacker top-center/clamp,
+normal-affine grow, 13-frame delay, sine traversal and both subpriority
+crossings, handoff to Metronome's three-wag/shrink terminal callback,
+TAIL_WHIP/ATTRACT/looped TAIL_WHIP audio, OAM/matrices/registers, raw RGB,
+and cleanup using source-extracted Togetic plus byte-identical shared FINGER
+art. `MOVE_METRONOME` remains **127/127** twice-fresh in both orientations
+with unchanged digests as the control. Coverage is **80 exact / 0 partial /
+0 staged / 196 unsupported**; no battle/controller/RNG/facility state,
+animation boundary list, unsupported barrier, or non-FINGER sibling changed.
+
+## MOVE_METRONOME promoted exact; ANIM_TAG_FINGER track established (2026-07-28)
+
+**Verdict:** `MOVE_METRONOME` is exact. The lowest suitable Level-50 carrier
+is set **227** `FRONTIER_MON_CHANSEY_1` (species **113**), not the lower-tier
+Cleffa set. Complete legal challenge-1 CHANSEY→ONIX Scene-ON parties pass the
+source body through first inactive cleanup at **127/127** reducer/seam,
+tagged tile/palette, hardware OAM/matrix/order, register/audio, raw-RGB, and
+shared-framebuffer frames in both orientations twice fresh. Player frames
+**245–371** have evidence/raw digests `01f259da…66e02` /
+`24940bca…176af`; opponent frames **244–370** have
+`cdae46f8…e6881` / `06e94878…4f8f6`.
+
+**Model/boundary:** the pure relative reducer and typed seam port both tagged
+loads, the thought bubble's forward/hold/reverse lifecycle, the finger's
+grow/three-wag/shrink affine program and terminal callbacks, OAM display
+transfer, METRONOME plus three TAIL_WHIP restarts, and cleanup using
+source-extracted Chansey/FINGER/THOUGHT_BUBBLE assets plus shared ONIX/chrome.
+TAUNT remains a fresh **125/125** nearby exact control.
+`MOVE_FOLLOW_ME` stays unsupported: its distinct
+`gFollowMeFingerSpriteTemplate`/`AnimFollowMeFinger` uses attacker top-center
+geometry, normal affine OAM, a 13-frame delay, horizontal sine traversal with
+subpriority crossings, then the terminal Metronome shrink callback, plus
+distinct METRONOME/ATTRACT/looped TAIL_WHIP timing. It still needs its own
+complete legal both-orientation twice-fresh acceptance. Coverage is **79
+exact / 0 partial / 0 staged / 197 unsupported**; no battle/controller/RNG/
+facility state, boundary list, unsupported barrier, or sibling status changed.
+
 ## MOVE_TICKLE promoted exact; RockMon/EYE_SPARKLE track complete (2026-07-28)
 
 **Verdict:** `MOVE_TICKLE` is exact. Corrected legal Level-50 set-138

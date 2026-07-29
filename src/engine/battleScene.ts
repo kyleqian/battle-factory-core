@@ -560,6 +560,8 @@ import headbuttAsset from "../animation/assets/headbutt.json" with { type: "json
 import bodySlamAsset from "../animation/assets/body-slam.json" with { type: "json" };
 import astonishAsset from "../animation/assets/astonish.json" with { type: "json" };
 import synthesisAsset from "../animation/assets/synthesis.json" with { type: "json" };
+import moonlightAsset from "../animation/assets/moonlight.json" with { type: "json" };
+import wishAsset from "../animation/assets/wish.json" with { type: "json" };
 import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
 import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
 import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
@@ -574,6 +576,12 @@ import scaryFaceAsset from "../animation/assets/scary-face.json" with { type: "j
 import charmAsset from "../animation/assets/charm.json" with { type: "json" };
 import fakeTearsAsset from "../animation/assets/fake-tears.json" with { type: "json" };
 import tickleAsset from "../animation/assets/tickle.json" with { type: "json" };
+import metronomeAsset from "../animation/assets/metronome.json" with { type: "json" };
+import restAsset from "../animation/assets/rest.json" with { type: "json" };
+import howlAsset from "../animation/assets/howl.json" with { type: "json" };
+import perishSongAsset from "../animation/assets/perish-song.json" with { type: "json" };
+import needleArmAsset from "../animation/assets/needle-arm.json" with { type: "json" };
+import sandstormAsset from "../animation/assets/sandstorm.json" with { type: "json" };
 import selfDestructAsset from "../animation/assets/selfDestruct.json" with { type: "json" };
 import explosionAsset from "../animation/assets/explosion.json" with { type: "json" };
 import dynamicPunchAsset from "../animation/assets/dynamicPunch.json" with { type: "json" };
@@ -693,9 +701,11 @@ import {
   sceneOnShadowPunchView,
   sceneOnGrowthView,
   sceneOnRecoverView,
+  sceneOnMoonlightView,
   sceneOnAbsorbView,
   sceneOnReflectView,
   sceneOnSynthesisView,
+  sceneOnWishView,
   sceneOnMilkDrinkView,
   sceneOnSupersonicView,
   sceneOnWaterGunView,
@@ -741,6 +751,13 @@ import {
   sceneOnCovetView,
   sceneOnFakeTearsView,
   sceneOnTickleView,
+  sceneOnMetronomeView,
+  sceneOnFollowMeView,
+  sceneOnRestView,
+  sceneOnHowlView,
+  sceneOnPerishSongView,
+  sceneOnNeedleArmView,
+  sceneOnSandstormView,
   sceneOnDragonClawView,
   sceneOnSingView,
   sceneOnFutureSightView,
@@ -756,6 +773,13 @@ import {
   type SceneOnCovetPresentationState,
   type SceneOnFakeTearsPresentationState,
   type SceneOnTicklePresentationState,
+  type SceneOnMetronomePresentationState,
+  type SceneOnFollowMePresentationState,
+  type SceneOnRestPresentationState,
+  type SceneOnHowlPresentationState,
+  type SceneOnPerishSongPresentationState,
+  type SceneOnNeedleArmPresentationState,
+  type SceneOnSandstormPresentationState,
   type SceneOnScaryFacePresentationState,
   type SceneOnAbsorbPresentationState,
   type SceneOnReflectPresentationState,
@@ -1163,6 +1187,19 @@ const synthesisArt = synthesisAsset as {
   skiploomBack: { tileset: Tileset; palette: RgbColor[] };
   skiploomFront: { tileset: Tileset; palette: RgbColor[] };
 };
+const moonlightArt = moonlightAsset as {
+  moon: { tileset: Tileset; palette: RgbColor[] };
+  greenSparkle: { tileset: Tileset; palette: RgbColor[] };
+  blueStar: { tileset: Tileset; palette: RgbColor[] };
+  gloomBack: { tileset: Tileset; palette: RgbColor[] };
+  gloomFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const wishArt = wishAsset as {
+  goldStars: { tileset: Tileset; palette: RgbColor[] };
+  sparkle2: { tileset: Tileset; palette: RgbColor[] };
+  illumiseBack: { tileset: Tileset; palette: RgbColor[] };
+  illumiseFront: { tileset: Tileset; palette: RgbColor[] };
+};
 const milkDrinkArt = milkDrinkAsset as {
   milkBottle: { tileset: Tileset; palette: RgbColor[] };
   thinRing: { tileset: Tileset; palette: RgbColor[] };
@@ -1327,6 +1364,44 @@ const tickleArt = tickleAsset as {
   omanyteBack: { tileset: Tileset; palette: RgbColor[] };
   omanyteFront: { tileset: Tileset; palette: RgbColor[] };
   eyeSparkle: { tileset: Tileset; palette: RgbColor[] };
+};
+const metronomeArt = metronomeAsset as {
+  chanseyBack: { tileset: Tileset; palette: RgbColor[] };
+  chanseyFront: { tileset: Tileset; palette: RgbColor[] };
+  togeticBack: { tileset: Tileset; palette: RgbColor[] };
+  togeticFront: { tileset: Tileset; palette: RgbColor[] };
+  finger: { tileset: Tileset; palette: RgbColor[] };
+  thoughtBubble: { tileset: Tileset; palette: RgbColor[] };
+};
+const restArt = restAsset as {
+  teddiursaBack: { tileset: Tileset; palette: RgbColor[] };
+  teddiursaFront: { tileset: Tileset; palette: RgbColor[] };
+  letterZ: { tileset: Tileset; palette: RgbColor[] };
+};
+const howlArt = howlAsset as {
+  loudredBack: { tileset: Tileset; palette: RgbColor[] };
+  loudredFront: { tileset: Tileset; palette: RgbColor[] };
+  noiseLine: { tileset: Tileset; palette: RgbColor[] };
+};
+const perishSongArt = perishSongAsset as {
+  murkrowBack: { tileset: Tileset; palette: RgbColor[] };
+  murkrowFront: { tileset: Tileset; palette: RgbColor[] };
+  musicNotes2: { tileset: Tileset; palette: RgbColor[] };
+};
+const needleArmArt = needleArmAsset as {
+  cacneaBack: { tileset: Tileset; palette: RgbColor[] };
+  cacneaFront: { tileset: Tileset; palette: RgbColor[] };
+  greenSpike: { tileset: Tileset; palette: RgbColor[] };
+};
+const sandstormArt = sandstormAsset as {
+  phanpyBack: { tileset: Tileset; palette: RgbColor[] };
+  phanpyFront: { tileset: Tileset; palette: RgbColor[] };
+  flyingDirt: { tileset: Tileset; palette: RgbColor[] };
+  background: {
+    tileset: Tileset;
+    tilemap: Tilemap;
+    palette: RgbColor[];
+  };
 };
 const dragonClawArt = dragonClawAsset as {
   smallEmber: { tileset: Tileset; palette: RgbColor[] };
@@ -15340,6 +15415,181 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "SANDSTORM") {
+    const sandState = state as SceneOnSandstormPresentationState;
+    const view = sceneOnSandstormView(sandState);
+    const displayedSprites = sceneOnSandstormView({
+      ...sandState,
+      age: sandState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "PHANPY"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "PHANPY"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SANDSTORM pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const phanpySource = playerToOpponent
+      ? sandstormArt.phanpyBack : sandstormArt.phanpyFront;
+    const phanpy = playerToOpponent
+      ? phanpySource
+      : {
+          ...phanpySource,
+          tileset: subTileset(phanpySource.tileset, 0, 8),
+        };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const opponent = playerToOpponent ? onix : phanpy;
+    const player = playerToOpponent ? phanpy : onix;
+    const opponentBattler = playerToOpponent ? view.target : view.attacker;
+    const playerBattler = playerToOpponent ? view.attacker : view.target;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    drawSpriteSheet(
+      fb,
+      opponent.tileset,
+      opponent.palette,
+      opponentBattler.geometry.spriteCorner.x
+        + (playerToOpponent ? onixIdle.x2 : 0),
+      opponentBattler.geometry.spriteCorner.y
+        + (playerToOpponent ? onixIdle.y2 : 0),
+    );
+    drawSpriteSheet(
+      fb,
+      player.tileset,
+      player.palette,
+      playerBattler.geometry.spriteCorner.x,
+      playerBattler.geometry.spriteCorner.y,
+    );
+
+    // BG1 is priority 1 and alpha-composites over the priority-2 field and
+    // battlers. Its palette is deliberately the FLYING_DIRT OBJ palette.
+    if (view.backgroundLoaded && view.blend.eva > 0) {
+      const mapWidth = sandstormArt.background.tilemap.width * 8;
+      const mapHeight = sandstormArt.background.tilemap.height * 8;
+      for (let y = 0; y < 160; y += 1) {
+        const mapY = (y + view.bgScroll.y) % mapHeight;
+        for (let x = 0; x < 240; x += 1) {
+          const mapX = (x + view.bgScroll.x) % mapWidth;
+          const entry = sandstormArt.background.tilemap.entries[
+            Math.floor(mapY / 8) * sandstormArt.background.tilemap.width
+              + Math.floor(mapX / 8)
+          ];
+          if (!entry) continue;
+          const tile = sandstormArt.background.tileset.tiles[entry.tile];
+          if (!tile) continue;
+          const sx = entry.hFlip ? 7 - (mapX % 8) : mapX % 8;
+          const sy = entry.vFlip ? 7 - (mapY % 8) : mapY % 8;
+          const index = tile[sy * 8 + sx]!;
+          if (index === 0) continue;
+          const color = sandstormArt.background.palette[index];
+          if (!color) continue;
+          const offset = (y * 240 + x) * 4;
+          fb[offset] = blendChannel(
+            color.r,
+            fb[offset]!,
+            view.blend.eva,
+            view.blend.evb,
+          );
+          fb[offset + 1] = blendChannel(
+            color.g,
+            fb[offset + 1]!,
+            view.blend.eva,
+            view.blend.evb,
+          );
+          fb[offset + 2] = blendChannel(
+            color.b,
+            fb[offset + 2]!,
+            view.blend.eva,
+            view.blend.evb,
+          );
+        }
+      }
+    }
+
+    // The two priority-1 subsprites sort in front of the priority-1 BG layer.
+    // Their source positions are relative to the parent OAM centre, while
+    // drawSpriteSheet receives each 32x16 subsprite's top-left corner.
+    const dirtLeft = subTileset(sandstormArt.flyingDirt.tileset, 0, 2);
+    const dirtRight = subTileset(sandstormArt.flyingDirt.tileset, 2, 2);
+    for (const crescent of displayedSprites.crescents) {
+      drawSpriteSheet(
+        fb,
+        dirtLeft,
+        sandstormArt.flyingDirt.palette,
+        crescent.x + crescent.x2 - 16,
+        crescent.y + crescent.y2,
+      );
+      drawSpriteSheet(
+        fb,
+        dirtRight,
+        sandstormArt.flyingDirt.palette,
+        crescent.x + crescent.x2 + 16,
+        crescent.y + crescent.y2,
+      );
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "PHANPY",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "PHANPY" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "PHANPY used" : "Foe PHANPY used",
+      "SANDSTORM!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "SURF") {
     const surfState = state as SceneOnSurfPresentationState;
     const view = sceneOnSurfView(surfState);
@@ -19496,6 +19746,771 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
+  if (state.config.move === "METRONOME") {
+    const metronomeState = state as SceneOnMetronomePresentationState;
+    const view = sceneOnMetronomeView(metronomeState);
+    const displayed = sceneOnMetronomeView({
+      ...metronomeState,
+      age: metronomeState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "CHANSEY"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "CHANSEY"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged METRONOME pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const chanseySource = playerToOpponent
+      ? metronomeArt.chanseyBack : metronomeArt.chanseyFront;
+    const chansey = playerToOpponent
+      ? chanseySource
+      : { ...chanseySource, tileset: subTileset(chanseySource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb, chansey.tileset, chansey.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    drawSpriteSheet(
+      fb, onix.tileset, onix.palette,
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    if (displayed.thoughtBubble) {
+      const bubble = subTileset(
+        metronomeArt.thoughtBubble.tileset,
+        displayed.thoughtBubble.frame * 4,
+        4,
+      );
+      drawSpriteSheetFlipped(
+        fb,
+        bubble,
+        metronomeArt.thoughtBubble.palette,
+        displayed.thoughtBubble.x - 16,
+        displayed.thoughtBubble.y - 16,
+        displayed.thoughtBubble.hFlip,
+        false,
+      );
+    }
+    if (displayed.finger) {
+      drawSpriteSheetAffineRotate(
+        fb,
+        metronomeArt.finger.tileset,
+        metronomeArt.finger.palette,
+        displayed.finger.x,
+        displayed.finger.y,
+        displayed.finger.matrix.a,
+        displayed.finger.matrix.b,
+        displayed.finger.matrix.c,
+        displayed.finger.matrix.d,
+        undefined,
+        true,
+      );
+    }
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "CHANSEY",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "female",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "CHANSEY" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "CHANSEY used" : "Foe CHANSEY used",
+      "METRONOME!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "FOLLOW_ME") {
+    const followMeState = state as SceneOnFollowMePresentationState;
+    const view = sceneOnFollowMeView(followMeState);
+    const displayed = sceneOnFollowMeView({
+      ...followMeState,
+      age: followMeState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "TOGETIC"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "TOGETIC"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged FOLLOW_ME pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const togeticSource = playerToOpponent
+      ? metronomeArt.togeticBack : metronomeArt.togeticFront;
+    const togetic = playerToOpponent
+      ? togeticSource
+      : { ...togeticSource, tileset: subTileset(togeticSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const togeticIdle = opponentToPlayer
+      ? speciesFrontIdleRestOffset("TOGETIC") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      togetic.tileset,
+      togetic.palette,
+      view.attacker.geometry.spriteCorner.x + togeticIdle.x2,
+      view.attacker.geometry.spriteCorner.y + togeticIdle.y2,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    const drawFinger = () => {
+      if (!displayed.finger) return;
+      drawSpriteSheetAffineRotate(
+        fb,
+        metronomeArt.finger.tileset,
+        metronomeArt.finger.palette,
+        displayed.finger.x + displayed.finger.x2,
+        displayed.finger.y,
+        displayed.finger.matrix.a,
+        displayed.finger.matrix.b,
+        displayed.finger.matrix.c,
+        displayed.finger.matrix.d,
+        undefined,
+        false,
+      );
+    };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawTarget();
+    const fingerBehind = displayed.finger?.subpriority
+      === (view.attacker.geometry.side === "player" ? 32 : 42);
+    if (fingerBehind) {
+      drawFinger();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawFinger();
+    }
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "TOGETIC",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "TOGETIC" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "TOGETIC used" : "Foe TOGETIC used",
+      "FOLLOW ME!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "REST") {
+    const restState = state as SceneOnRestPresentationState;
+    const view = sceneOnRestView(restState);
+    // Sprite callbacks update gSprites before the following VBlank copies
+    // software OAM and matrices to hardware.
+    const displayed = sceneOnRestView({
+      ...restState,
+      age: restState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "TEDDIURSA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "TEDDIURSA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged REST pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const profile = restState.config.fieldProfile;
+    const attackerHp = playerToOpponent
+      ? profile.playerHp : profile.opponentHp;
+    const attackerMaxHp = playerToOpponent
+      ? profile.playerMaxHp : profile.opponentMaxHp;
+    const attackerStatus = playerToOpponent
+      ? profile.playerStatus : profile.opponentStatus;
+    if (
+      attackerStatus !== "sleep"
+      || profile.pendingHeal.battler !== "attacker"
+      || profile.pendingHeal.fromHp !== attackerHp
+      || profile.pendingHeal.toHp !== attackerMaxHp
+    ) {
+      throw new Error("REST presentation requires the immutable trysetrest result");
+    }
+    const teddiursaSource = playerToOpponent
+      ? restArt.teddiursaBack : restArt.teddiursaFront;
+    const teddiursa = playerToOpponent
+      ? teddiursaSource
+      : {
+          ...teddiursaSource,
+          tileset: subTileset(teddiursaSource.tileset, 0, 8),
+        };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      teddiursa.tileset,
+      teddiursa.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+    // Equal-subpriority sprites are transferred newest-first by
+    // BuildOamBuffer, so later Letter-Z allocations win overlap pixels.
+    for (const letter of displayed.letters) {
+      drawSpriteSheetAffineRotate(
+        fb,
+        restArt.letterZ.tileset,
+        restArt.letterZ.palette,
+        letter.x + letter.x2,
+        letter.y + letter.y2 + letter.screenCenterYOffset,
+        letter.matrix.a,
+        letter.matrix.b,
+        letter.matrix.c,
+        letter.matrix.d,
+        undefined,
+        false,
+      );
+    }
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "TEDDIURSA",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: profile.opponentStatus,
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "TEDDIURSA" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: profile.playerStatus,
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "TEDDIURSA went" : "Foe TEDDIURSA went",
+      "to sleep!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "PERISH_SONG") {
+    const perishState = state as SceneOnPerishSongPresentationState;
+    const view = sceneOnPerishSongView(perishState);
+    const displayed = sceneOnPerishSongView({
+      ...perishState,
+      age: perishState.age - 1,
+    });
+    const affineDisplayed = sceneOnPerishSongView({
+      ...perishState,
+      age: perishState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "MURKROW"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MURKROW"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged PERISH_SONG pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const profile = perishState.config.fieldProfile;
+    if (
+      profile.playerPerishSongTurns !== 3
+      || profile.opponentPerishSongTurns !== 3
+    ) {
+      throw new Error("PERISH_SONG presentation requires immutable timers 3/3");
+    }
+    const black = { r: 0, g: 0, b: 0 };
+    const bgPalette = blendPaletteBanksToward(
+      battleBg.palette,
+      black,
+      displayed.backgroundBlackCoefficient,
+    );
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, bgPalette);
+
+    const murkrowSource = playerToOpponent
+      ? perishSongArt.murkrowBack : perishSongArt.murkrowFront;
+    const murkrow = playerToOpponent
+      ? murkrowSource
+      : { ...murkrowSource, tileset: subTileset(murkrowSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const battlerPalette = (palette: readonly RgbColor[]) =>
+      displayed.battlersGrayscale ? grayscalePalette(palette) : palette.slice();
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const murkrowIdle = opponentToPlayer
+      ? speciesFrontIdleRestOffset("MURKROW") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const drawMurkrow = () => drawSpriteSheet(
+      fb,
+      murkrow.tileset,
+      battlerPalette(murkrow.palette),
+      view.attacker.geometry.spriteCorner.x + murkrowIdle.x2,
+      view.attacker.geometry.spriteCorner.y + murkrowIdle.y2,
+    );
+    const drawOnix = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      battlerPalette(onix.palette),
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    if (playerToOpponent) {
+      drawOnix();
+      drawMurkrow();
+    } else {
+      drawMurkrow();
+    }
+    const affineByIndex = new Map(
+      affineDisplayed.notes.map((note) => [note.index, note.matrix] as const),
+    );
+    // The first create batch misses the already-built hardware OAM buffer;
+    // all sixteen become visible together on the following VBlank.
+    const displayNotes = perishState.age === 5 ? [] : displayed.notes;
+    const sortedNotes = displayNotes.slice().sort(
+      (left, right) =>
+        left.centerY - right.centerY || right.oamSlot - left.oamSlot,
+    );
+    const drawNotes = (notes: typeof sortedNotes) => {
+      for (const note of notes) {
+        const matrix = affineByIndex.get(note.index) ?? note.matrix;
+        drawSpriteSheetAffineRotate(
+          fb,
+          subTileset(
+            perishSongArt.musicNotes2.tileset,
+            note.tileOffset / perishSongArt.musicNotes2.tileset.columns,
+            2,
+          ),
+          displayed.musicNotes2PaletteGrayscale
+            ? grayscalePalette(perishSongArt.musicNotes2.palette)
+            : perishSongArt.musicNotes2.palette,
+          note.centerX,
+          note.centerY,
+          matrix.a,
+          matrix.b,
+          matrix.c,
+          matrix.d,
+          undefined,
+          false,
+        );
+      }
+    };
+    drawNotes(sortedNotes);
+    if (opponentToPlayer) drawOnix();
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "MURKROW",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "MURKROW" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MURKROW used" : "Foe MURKROW used",
+      "PERISH SONG!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "HOWL") {
+    const howlState = state as SceneOnHowlPresentationState;
+    const view = sceneOnHowlView(howlState);
+    // RunTasks writes software sprite state after BuildOamBuffer. Effect
+    // sprite attributes therefore lag by one age; battler affine matrices
+    // pass through the additional hardware-matrix VBlank latch.
+    const displayed = sceneOnHowlView({
+      ...howlState,
+      age: howlState.age - 1,
+    });
+    const affineDisplayed = sceneOnHowlView({
+      ...howlState,
+      age: howlState.age - 2,
+    });
+    const playerToOpponent =
+      view.attacker.species === "LOUDRED"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "LOUDRED"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged HOWL pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    if (howlState.config.fieldProfile.attackerAttackStage !== 7) {
+      throw new Error("HOWL presentation requires immutable Attack stage 7");
+    }
+    const loudredSource = playerToOpponent
+      ? howlArt.loudredBack : howlArt.loudredFront;
+    const loudred = playerToOpponent
+      ? loudredSource
+      : { ...loudredSource, tileset: subTileset(loudredSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const drawAttacker = () => {
+      if (displayed.attackerTransform.active) {
+        drawSpriteSheetAffineStretch(
+          fb,
+          loudred.tileset,
+          loudred.palette,
+          view.attacker.geometry.spriteCorner.x,
+          view.attacker.geometry.spriteCorner.y,
+          affineDisplayed.attackerTransform.matrix.a,
+          affineDisplayed.attackerTransform.matrix.d,
+          affineDisplayed.attackerTransform.y2,
+          { r: 0, g: 0, b: 0 },
+          0,
+          true,
+          affineDisplayed.attackerTransform.x2,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          loudred.tileset,
+          loudred.palette,
+          view.attacker.geometry.spriteCorner.x,
+          view.attacker.geometry.spriteCorner.y,
+        );
+      }
+    };
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+    // Equal-subpriority BuildOamBuffer traversal makes the newest allocation
+    // (line 2) the lowest hardware OBJ index, so paint it last.
+    for (const line of displayed.noiseLines) {
+      drawSpriteSheetFlipped(
+        fb,
+        subTileset(howlArt.noiseLine.tileset, line.frame * 4, 4),
+        howlArt.noiseLine.palette,
+        line.centerX - 16,
+        line.centerY - 16,
+        line.hFlip,
+        line.vFlip,
+      );
+    }
+    const profile = howlState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "LOUDRED",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "LOUDRED" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "LOUDRED used" : "Foe LOUDRED used",
+      "HOWL!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "NEEDLE_ARM") {
+    const needleState = state as SceneOnNeedleArmPresentationState;
+    const view = sceneOnNeedleArmView(needleState);
+    // Effect callbacks reach software OAM before the following VBlank;
+    // battler task writes traverse one additional BuildOamBuffer latch.
+    const displayed = sceneOnNeedleArmView({
+      ...needleState,
+      age: needleState.age - 1,
+    });
+    const displayedTarget = sceneOnNeedleArmView({
+      ...needleState,
+      age: needleState.age - 2,
+    });
+    const playerToOpponent =
+      view.attacker.species === "CACNEA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "CACNEA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged NEEDLE_ARM pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const cacneaSource = playerToOpponent
+      ? needleArmArt.cacneaBack : needleArmArt.cacneaFront;
+    const cacnea = playerToOpponent
+      ? cacneaSource
+      : { ...cacneaSource, tileset: subTileset(cacneaSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const targetDisplayOffset = needleState.age - 2 >= 71
+      ? displayedTarget.targetOffset
+      : onixIdle;
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x
+        + targetDisplayOffset.x2,
+      view.target.geometry.spriteCorner.y
+        + targetDisplayOffset.y2,
+    );
+    drawSpriteSheet(
+      fb,
+      cacnea.tileset,
+      cacnea.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const priorSpikeY = new Map(
+      sceneOnNeedleArmView({ ...needleState, age: needleState.age - 2 }).spikes
+        .map((spike) => [spike.spawnIndex, spike.y] as const),
+    );
+    const displaySpikes = needleState.age === 72 ? [] : displayed.spikes;
+    for (const spike of displaySpikes.slice().sort(
+      (left, right) =>
+        left.y - right.y
+        || (priorSpikeY.get(left.spawnIndex) ?? left.y)
+          - (priorSpikeY.get(right.spawnIndex) ?? right.y)
+        || right.oamSlot - left.oamSlot,
+    )) {
+      drawSpriteSheetAffineRotate(
+        fb,
+        needleArmArt.greenSpike.tileset,
+        needleArmArt.greenSpike.palette,
+        spike.x,
+        spike.y,
+        spike.matrix.a,
+        spike.matrix.b,
+        spike.matrix.c,
+        spike.matrix.d,
+        undefined,
+        false,
+      );
+    }
+    // These helpers are created together after waitforvisualfinish. Their
+    // first software-OAM state needs the same two-display latch as the
+    // battler task, and descending source sprite slots win OAM ties.
+    if (needleState.age >= 73 && needleState.age <= 82) {
+      drawSpriteSheetAffineRotate(
+        fb,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        view.target.geometry.animationCenter.x,
+        view.target.geometry.animationCenter.y,
+        303,
+        0,
+        0,
+        303,
+        undefined,
+        false,
+      );
+    }
+    if (needleState.age >= 73 && needleState.age <= 81) {
+      drawSpriteSheet(
+        fb,
+        subTileset(battleAnimHandsAndFeet.tileset, 0, 4),
+        battleAnimHandsAndFeet.palette,
+        view.target.geometry.animationCenter.x - 16,
+        view.target.geometry.animationCenter.y - 16,
+      );
+    }
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "CACNEA",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "CACNEA" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "CACNEA used" : "Foe CACNEA used",
+      "NEEDLE ARM!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "TICKLE") {
     const tickleState = state as SceneOnTicklePresentationState;
     const view = sceneOnTickleView(tickleState);
@@ -22413,6 +23428,352 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "SKIPLOOM used" : "Foe SKIPLOOM used",
       "SYNTHESIS!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "MOONLIGHT") {
+    const view = sceneOnMoonlightView(state);
+    const displayed = sceneOnMoonlightView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "GLOOM"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "GLOOM"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged MOONLIGHT pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const pendingHeal = state.config.fieldProfile.pendingHeal;
+    const attackerHp = playerToOpponent
+      ? state.config.fieldProfile.playerHp
+      : state.config.fieldProfile.opponentHp;
+    const attackerMaxHp = playerToOpponent
+      ? state.config.fieldProfile.playerMaxHp
+      : state.config.fieldProfile.opponentMaxHp;
+    if (
+      pendingHeal.battler !== "attacker"
+      || pendingHeal.fromHp !== attackerHp
+      || pendingHeal.toHp !== attackerMaxHp
+      || pendingHeal.weather !== "none"
+      || pendingHeal.numerator !== 1
+      || pendingHeal.denominator !== 2
+    ) {
+      throw new Error("unsupported staged MOONLIGHT healing payload");
+    }
+
+    const attackerSource = playerToOpponent
+      ? moonlightArt.gloomBack : moonlightArt.gloomFront;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const moonWhite = { r: 222, g: 239, b: 255 };
+    let backgroundPalette: RgbColor[][];
+    if (displayed.background.mode === "blend") {
+      backgroundPalette = blendPaletteBanksToward(
+          battleBg.palette,
+          displayed.background.target === "black"
+            ? { r: 0, g: 0, b: 0 }
+            : moonWhite,
+          displayed.background.coefficient,
+        );
+    } else {
+      const solidColor = displayed.background.color;
+      backgroundPalette = battleBg.palette.map((palette) =>
+          palette.map((_, index) =>
+            index === 0 ? { r: 0, g: 0, b: 0 } : solidColor
+          )
+        );
+    }
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      backgroundPalette,
+    );
+    // OBJ mode 1 blends against the background target, not another OBJ.
+    const nonObjTarget2 = fb.slice();
+    const battlerCoefficient = displayed.battlerPaletteCoefficient;
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      blendPaletteToward(targetSprite.palette, moonWhite, battlerCoefficient),
+      view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
+      view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+    );
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      blendPaletteToward(attackerSprite.palette, moonWhite, battlerCoefficient),
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+
+    const effectCoefficient = displayed.effectPaletteCoefficient;
+    const sparklePalette = blendPaletteToward(
+      moonlightArt.greenSparkle.palette,
+      moonWhite,
+      effectCoefficient,
+    );
+    for (const sparkle of displayed.sparkles.slice().reverse()) {
+      drawSpriteSheet(
+        fb,
+        {
+          columns: 2,
+          rows: 2,
+          tiles: moonlightArt.greenSparkle.tileset.tiles.slice(
+            sparkle.frame * 4,
+            sparkle.frame * 4 + 4,
+          ),
+        },
+        sparklePalette,
+        sparkle.x - 8,
+        sparkle.y - 8,
+      );
+    }
+    if (displayed.moonVisible) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        nonObjTarget2,
+        moonlightArt.moon.tileset,
+        blendPaletteToward(
+          moonlightArt.moon.palette,
+          moonWhite,
+          effectCoefficient,
+        ),
+        120,
+        56,
+        256,
+        0,
+        0,
+        256,
+        displayed.alpha.eva,
+        displayed.alpha.evb,
+        false,
+      );
+    }
+    for (const star of displayed.stars.slice().sort(
+      (left, right) => right.oamSlot - left.oamSlot,
+    )) {
+      drawSpriteSheet(
+        fb,
+        {
+          columns: 4,
+          rows: 4,
+          tiles: moonlightArt.blueStar.tileset.tiles.slice(
+            star.frame * 16,
+            star.frame * 16 + 16,
+          ),
+        },
+        moonlightArt.blueStar.palette,
+        star.x - 16,
+        star.y - 16,
+      );
+    }
+
+    const opponentSpecies = playerToOpponent ? "ONIX" : "GLOOM";
+    const playerSpecies = playerToOpponent ? "GLOOM" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "GLOOM used" : "Foe GLOOM used",
+      "MOONLIGHT!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "WISH") {
+    const view = sceneOnWishView(state);
+    const displayed = sceneOnWishView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "ILLUMISE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "ILLUMISE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged WISH pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent
+      ? wishArt.illumiseBack : wishArt.illumiseFront;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(
+        battleBg.palette,
+        { r: 0, g: 0, b: 0 },
+        displayed.backgroundBlackCoeff,
+      ),
+    );
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
+      view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+    );
+    const attackerIdle = view.attacker.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.attacker.species)
+      : null;
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x + (attackerIdle?.x2 ?? 0),
+      view.attacker.geometry.spriteCorner.y + (attackerIdle?.y2 ?? 0),
+    );
+    for (const sprite of displayed.sprites
+      .filter((candidate) => !candidate.invisible)
+      .slice()
+      .sort((left, right) => right.oamSlot - left.oamSlot)) {
+      if (sprite.kind === "grantingStar") {
+        drawSpriteSheet(
+          fb,
+          {
+            columns: 4,
+            rows: 4,
+            tiles: wishArt.sparkle2.tileset.tiles.slice(
+              sprite.frame * 16,
+              sprite.frame * 16 + 16,
+            ),
+          },
+          wishArt.sparkle2.palette,
+          sprite.x - 16,
+          sprite.y - 16,
+        );
+      } else if (sprite.kind === "wishStar") {
+        drawSpriteSheet(
+          fb,
+          {
+            columns: 2,
+            rows: 2,
+            tiles: wishArt.goldStars.tileset.tiles.slice(0, 4),
+          },
+          wishArt.goldStars.palette,
+          sprite.x - 8,
+          sprite.y - 8,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          {
+            columns: 1,
+            rows: 1,
+            tiles: [wishArt.goldStars.tileset.tiles[sprite.frame]!],
+          },
+          wishArt.goldStars.palette,
+          sprite.x - 4,
+          sprite.y - 4,
+        );
+      }
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "ILLUMISE";
+    const playerSpecies = playerToOpponent ? "ILLUMISE" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "ILLUMISE used" : "Foe ILLUMISE used",
+      "WISH!",
       99,
     );
     return;
