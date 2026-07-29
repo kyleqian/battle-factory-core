@@ -1,0 +1,20 @@
+{
+  "schema": "metronome-portable-evidence/v1",
+  "orientation": "player-back Chansey -> opponent-front Onix",
+  "scenario": "tools/battle-lab/mechanic-metronome-player-chansey-opponent-onix.json",
+  "probe": "tools/compare/metronomeProbe.py",
+  "appStage": {"presentationAge":0},
+  "attacker": {"species":"CHANSEY","geometry":{"side":"player","spriteCorner":{"x":40,"y":59},"animationCenter":{"x":72,"y":91},"battlePositionCenter":{"x":72,"y":80}}},
+  "target": {"species":"ONIX","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":10},"animationCenter":{"x":176,"y":42},"battlePositionCenter":{"x":176,"y":40}}},
+  "attackerHead": {"x":112,"y":87},
+  "fieldProfile": {"playerHp":308,"playerMaxHp":325,"opponentHp":142,"opponentMaxHp":142,"playerGender":"female","opponentGender":"male"},
+  "sourceWindow": {"startFrame":245,"endFrame":371,"frameCount":127},
+  "evidenceSha256": "01f259da1179263438c721865ce1e5e534652004336a887ea9d9b91f07666e02",
+  "rawRgbSha256": "24940bca0b95034ff2e8b9b5b2e450996df581c70b6622fb72cb5ad360d176af",
+  "lifecycleCounts": {"gThoughtBubbleSpriteTemplate":1,"gMetronomeFingerSpriteTemplate":1},
+  "topology": {
+    "tasks":["Task_LoopAndPlaySE"],
+    "templates":["gMetronomeFingerSpriteTemplate","gMultiuseSpriteTemplate","gSpriteTemplate_EnemyShadow","gThoughtBubbleSpriteTemplate","sHealthbarSpriteTemplates","sHealthboxOpponentSpriteTemplates","sHealthboxPlayerSpriteTemplates"],
+    "callbacks":["AnimMetronomeFinger_Step","AnimThoughtBubble_Step","DestroyAnimSprite","DestroySpriteAndMatrix","RunStoredCallbackWhenAffineAnimEnds","RunStoredCallbackWhenAnimEnds","SpriteCB_HealthBar","SpriteCB_HealthBoxOther","SpriteCB_SetInvisible","SpriteCallbackDummy"]
+  }
+}

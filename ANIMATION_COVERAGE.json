@@ -2,6 +2,34 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_METRONOME",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal Level-50 Factory set-227 CHANSEY_1 versus ONIX Scene-ON parties pass the entire 127-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 245-371 reproduce evidence 01f259da1179263438c721865ce1e5e534652004336a887ea9d9b91f07666e02 / raw RGB 24940bca0b95034ff2e8b9b5b2e450996df581c70b6622fb72cb5ad360d176af and opponent-front frames 244-370 reproduce evidence cdae46f8d3b37b4603314f96fe268621df779aee72066a272b90d8f709be6881 / raw RGB 06e94878ed92007e98d7fe26e6f6e3404e8e76fb93273fc903a98a69b254f8f6",
+        "the pure source-relative reducer ports ANIM_TAG_FINGER and ANIM_TAG_THOUGHT_BUBBLE load/free, gThoughtBubbleSpriteTemplate's forward/hold/reverse lifecycle, gMetronomeFingerSpriteTemplate's grow/three-wag/shrink affine program and terminal matrix callbacks, attacker-panned METRONOME plus three looped TAIL_WHIP restarts, OAM display transfer, and inactive cleanup",
+        "the typed Scene-ON seam carries resolved CHANSEY/ONIX presentation geometry and the source SetSpriteNextToMonHead point; source-extracted legal species-113 front/back, FINGER, and THOUGHT_BUBBLE art plus shared ONIX/chrome feed the production compositor with tagged tile/palette state, software/hardware OAM order, matrices, registers, both audio players, raw RGB, and exact cleanup without damage, RNG, controller, turn, or facility ownership",
+        "metronomePortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves the immutable dense source/hardware/audio receipt, reducer and typed seam, raw RGB, and shared application framebuffer on all 127 frames twice fresh in both orientations; the nearby exact TAUNT source/seam/framebuffer control remains 125/125",
+        "MOVE_FOLLOW_ME remains unsupported: it reuses ANIM_TAG_FINGER but has the distinct gFollowMeFingerSpriteTemplate/AnimFollowMeFinger callback, attacker top-center origin, normal-size affine OAM, 13-frame pre-sine delay, horizontal sine traversal with subpriority crossings, handoff to the terminal Metronome shrink callback, and METRONOME/ATTRACT/looped TAIL_WHIP audio timing; it lacks its own complete legal both-orientation twice-fresh dense acceptance",
+        "no damage, RNG, controller selection, turn order, round/facility state, boundary list, unsupported barrier, or sibling acceptance changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-metronome-player-chansey-opponent-onix.json",
+        "tools/battle-lab/mechanic-metronome-opponent-chansey-player-onix.json",
+        "tools/compare/fixtures/metronome-player-chansey-opponent-onix.json",
+        "tools/compare/fixtures/metronome-opponent-chansey-player-onix.json",
+        "tools/compare/metronomeProbe.py",
+        "tools/compare/metronomePortable.ts",
+        "tools/compare/metronomeSourceAudit.ts",
+        "tools/compare/extractMetronomeAssets.ts",
+        "src/animation/assets/metronome.json",
+        "src/animation/metronome.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/metronomeEvidence.test.ts",
+        "tests/animation/metronome.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_TICKLE",
       "status": "exact",
       "covered": [
@@ -1981,6 +2009,21 @@
     "MOVE_BIND"
   ],
   "componentTracks": [
+    {
+      "id": "finger-metronome",
+      "components": [
+        "asset:ANIM_TAG_FINGER",
+        "asset:ANIM_TAG_THOUGHT_BUBBLE",
+        "sprite:gThoughtBubbleSpriteTemplate",
+        "sprite:gMetronomeFingerSpriteTemplate",
+        "sprite:gFollowMeFingerSpriteTemplate"
+      ],
+      "representatives": [
+        "MOVE_METRONOME",
+        "MOVE_FOLLOW_ME"
+      ],
+      "goal": "MOVE_METRONOME is independently exact at 127/127 complete source/software/typed-seam, tagged tile/palette, hardware OAM/matrix/order, register/audio, raw-RGB, and shared-framebuffer frames in both orientations twice fresh through first inactive cleanup. MOVE_FOLLOW_ME remains unsupported: its gFollowMeFingerSpriteTemplate uses AnimFollowMeFinger, attacker top-center geometry, normal affine OAM, a 13-frame delay, sine traversal with subpriority crossings, then the shared terminal shrink callback; its METRONOME/ATTRACT/looped TAIL_WHIP timing and complete legal both-orientation twice-fresh body still need independent dense acceptance."
+    },
     {
       "id": "focus-energy-endure-effect",
       "components": [

@@ -282,6 +282,11 @@ import {
   type TickleState,
 } from "./tickle.ts";
 import {
+  metronomeAtAge,
+  type MetronomePoint,
+  type MetronomeState,
+} from "./metronome.ts";
+import {
   tailGlowAtAge,
   type TailGlowState,
 } from "./tailGlow.ts";
@@ -507,6 +512,7 @@ export interface SceneOnPresentationBattler {
     | "BEEDRILL"
     | "OMASTAR"
     | "OMANYTE"
+    | "CHANSEY"
     | "WARTORTLE";
   readonly geometry: SceneOnBattlerGeometry;
 }
@@ -1246,6 +1252,15 @@ export interface SceneOnTickleConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnMetronomeConfig {
+  readonly move: "METRONOME";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** `SetSpriteNextToMonHead` result for the source-verified carrier. */
+  readonly attackerHead: Readonly<MetronomePoint>;
+}
+
 export interface SceneOnTailGlowConfig {
   readonly move: "TAIL_GLOW";
   readonly attacker: SceneOnPresentationBattler;
@@ -1467,6 +1482,7 @@ export type SceneOnMoveConfig =
   | SceneOnCovetConfig
   | SceneOnFakeTearsConfig
   | SceneOnTickleConfig
+  | SceneOnMetronomeConfig
   | SceneOnTailGlowConfig
   | SceneOnSelfDestructConfig
   | SceneOnExplosionConfig
@@ -1534,6 +1550,8 @@ export type SceneOnFakeTearsPresentationState =
   SceneOnMovePresentationState<SceneOnFakeTearsConfig>;
 export type SceneOnTicklePresentationState =
   SceneOnMovePresentationState<SceneOnTickleConfig>;
+export type SceneOnMetronomePresentationState =
+  SceneOnMovePresentationState<SceneOnMetronomeConfig>;
 export type SceneOnTailGlowPresentationState =
   SceneOnMovePresentationState<SceneOnTailGlowConfig>;
 
@@ -1729,6 +1747,12 @@ export interface SceneOnFakeTearsView extends FakeTearsState {
 }
 
 export interface SceneOnTickleView extends TickleState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnMetronomeView extends MetronomeState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3398,6 +3422,25 @@ export function sceneOnTickleView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_METRONOME's first displayed source-script frame. */
+export function sceneOnMetronomeView(
+  state: SceneOnMetronomePresentationState,
+): SceneOnMetronomeView {
+  if (state.config.move !== "METRONOME") {
+    throw new Error(`expected METRONOME presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...metronomeAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attackerHead,
     ),
   };
 }

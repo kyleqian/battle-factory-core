@@ -1,5 +1,32 @@
 # Animation coverage
 
+## MOVE_METRONOME promoted exact; ANIM_TAG_FINGER track established (2026-07-28)
+
+**Verdict:** `MOVE_METRONOME` is exact. The lowest suitable Level-50 carrier
+is set **227** `FRONTIER_MON_CHANSEY_1` (species **113**), not the lower-tier
+Cleffa set. Complete legal challenge-1 CHANSEY→ONIX Scene-ON parties pass the
+source body through first inactive cleanup at **127/127** reducer/seam,
+tagged tile/palette, hardware OAM/matrix/order, register/audio, raw-RGB, and
+shared-framebuffer frames in both orientations twice fresh. Player frames
+**245–371** have evidence/raw digests `01f259da…66e02` /
+`24940bca…176af`; opponent frames **244–370** have
+`cdae46f8…e6881` / `06e94878…4f8f6`.
+
+**Model/boundary:** the pure relative reducer and typed seam port both tagged
+loads, the thought bubble's forward/hold/reverse lifecycle, the finger's
+grow/three-wag/shrink affine program and terminal callbacks, OAM display
+transfer, METRONOME plus three TAIL_WHIP restarts, and cleanup using
+source-extracted Chansey/FINGER/THOUGHT_BUBBLE assets plus shared ONIX/chrome.
+TAUNT remains a fresh **125/125** nearby exact control.
+`MOVE_FOLLOW_ME` stays unsupported: its distinct
+`gFollowMeFingerSpriteTemplate`/`AnimFollowMeFinger` uses attacker top-center
+geometry, normal affine OAM, a 13-frame delay, horizontal sine traversal with
+subpriority crossings, then the terminal Metronome shrink callback, plus
+distinct METRONOME/ATTRACT/looped TAIL_WHIP timing. It still needs its own
+complete legal both-orientation twice-fresh acceptance. Coverage is **79
+exact / 0 partial / 0 staged / 197 unsupported**; no battle/controller/RNG/
+facility state, boundary list, unsupported barrier, or sibling status changed.
+
 ## MOVE_TICKLE promoted exact; RockMon/EYE_SPARKLE track complete (2026-07-28)
 
 **Verdict:** `MOVE_TICKLE` is exact. Corrected legal Level-50 set-138

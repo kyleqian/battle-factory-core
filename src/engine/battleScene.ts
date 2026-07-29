@@ -574,6 +574,7 @@ import scaryFaceAsset from "../animation/assets/scary-face.json" with { type: "j
 import charmAsset from "../animation/assets/charm.json" with { type: "json" };
 import fakeTearsAsset from "../animation/assets/fake-tears.json" with { type: "json" };
 import tickleAsset from "../animation/assets/tickle.json" with { type: "json" };
+import metronomeAsset from "../animation/assets/metronome.json" with { type: "json" };
 import selfDestructAsset from "../animation/assets/selfDestruct.json" with { type: "json" };
 import explosionAsset from "../animation/assets/explosion.json" with { type: "json" };
 import dynamicPunchAsset from "../animation/assets/dynamicPunch.json" with { type: "json" };
@@ -741,6 +742,7 @@ import {
   sceneOnCovetView,
   sceneOnFakeTearsView,
   sceneOnTickleView,
+  sceneOnMetronomeView,
   sceneOnDragonClawView,
   sceneOnSingView,
   sceneOnFutureSightView,
@@ -756,6 +758,7 @@ import {
   type SceneOnCovetPresentationState,
   type SceneOnFakeTearsPresentationState,
   type SceneOnTicklePresentationState,
+  type SceneOnMetronomePresentationState,
   type SceneOnScaryFacePresentationState,
   type SceneOnAbsorbPresentationState,
   type SceneOnReflectPresentationState,
@@ -1327,6 +1330,12 @@ const tickleArt = tickleAsset as {
   omanyteBack: { tileset: Tileset; palette: RgbColor[] };
   omanyteFront: { tileset: Tileset; palette: RgbColor[] };
   eyeSparkle: { tileset: Tileset; palette: RgbColor[] };
+};
+const metronomeArt = metronomeAsset as {
+  chanseyBack: { tileset: Tileset; palette: RgbColor[] };
+  chanseyFront: { tileset: Tileset; palette: RgbColor[] };
+  finger: { tileset: Tileset; palette: RgbColor[] };
+  thoughtBubble: { tileset: Tileset; palette: RgbColor[] };
 };
 const dragonClawArt = dragonClawAsset as {
   smallEmber: { tileset: Tileset; palette: RgbColor[] };
@@ -19493,6 +19502,115 @@ export function renderSceneOnMovePresentation(
         controllerDisplay.moveTextVisibleChars,
       );
     }
+    return;
+  }
+
+  if (state.config.move === "METRONOME") {
+    const metronomeState = state as SceneOnMetronomePresentationState;
+    const view = sceneOnMetronomeView(metronomeState);
+    const displayed = sceneOnMetronomeView({
+      ...metronomeState,
+      age: metronomeState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "CHANSEY"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "CHANSEY"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged METRONOME pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const chanseySource = playerToOpponent
+      ? metronomeArt.chanseyBack : metronomeArt.chanseyFront;
+    const chansey = playerToOpponent
+      ? chanseySource
+      : { ...chanseySource, tileset: subTileset(chanseySource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb, chansey.tileset, chansey.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    drawSpriteSheet(
+      fb, onix.tileset, onix.palette,
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    if (displayed.thoughtBubble) {
+      const bubble = subTileset(
+        metronomeArt.thoughtBubble.tileset,
+        displayed.thoughtBubble.frame * 4,
+        4,
+      );
+      drawSpriteSheetFlipped(
+        fb,
+        bubble,
+        metronomeArt.thoughtBubble.palette,
+        displayed.thoughtBubble.x - 16,
+        displayed.thoughtBubble.y - 16,
+        displayed.thoughtBubble.hFlip,
+        false,
+      );
+    }
+    if (displayed.finger) {
+      drawSpriteSheetAffineRotate(
+        fb,
+        metronomeArt.finger.tileset,
+        metronomeArt.finger.palette,
+        displayed.finger.x,
+        displayed.finger.y,
+        displayed.finger.matrix.a,
+        displayed.finger.matrix.b,
+        displayed.finger.matrix.c,
+        displayed.finger.matrix.d,
+        undefined,
+        true,
+      );
+    }
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "CHANSEY",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "female",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "CHANSEY" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "CHANSEY used" : "Foe CHANSEY used",
+      "METRONOME!",
+      99,
+    );
     return;
   }
 
