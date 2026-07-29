@@ -13,6 +13,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 648 — [BOUNDED MAIN WORKER 2026-07-28 ~17:47] Focus Band damage survival source-complete
+
+- **State:** committed `ecfb08d2`; tree green at **434 files / 4756 tests**,
+  production build, OFF oracle info, and `git diff --check`. Census remains
+  byte-idempotent at **214/214 effects, 355/355 moves, 276/276 distinct,
+  2957/2957 weighted** with all **72** validations passing.
+- **Did:** ported Focus Band's holder-only post-variance roll in both normal
+  adjustment commands and its no-variance `adjustsetdamage` sibling. Successful
+  lethal hits clamp to 1 HP, set HUNG_ON/item attribution, and run the real
+  Focus Band animation/message call-current path; action finish clears the new
+  source-shaped `focusBanded` scratch bit.
+- **Next:** supervisor verify `ecfb08d2`; audit finding 4 is complete. Do not
+  resume retired canonical Battle 2 or presentation work.
+- **Notes:** Tier-1 pins nonlethal/success/failure rolls, Endure precedence,
+  no-band ledger stability, set 178 `FRONTIER_MON_MACHOKE_1`, and Beat Up's
+  exact accuracy→(crit, variance, band)×2 ledger. Source
+  `MoveValuesCleanUp` clears per-member result flags but not `focusBanded`;
+  every member re-rolls it, while the bit itself has the source action lifetime.
+  Deliberate hit-chain barrier pin **16→13**. No census, recording import,
+  handler-set, issue, roadmap, round, tick, or pixel change.
+
+---
+
 ## 647 — [BOUNDED MAIN WORKER 2026-07-28 ~17:33] Weather base-damage block source-complete
 
 - **State:** committed `540d3ff7`; tree green at **434 files / 4752 tests**,
@@ -52,27 +75,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Beam as chosen/current during admission before source action-finished clears
   current. No barrier-count, handler-pin, census, recording-import,
   presentation, roadmap, or issue change.
-
----
-
-## 645 — [BOUNDED MAIN WORKER 2026-07-28 ~17:02] Frontier-tail row 8 Metronome closes census
-
-- **State:** committed `529b48ec`; tree green at **431 files / 4712 tests**,
-  production build, OFF oracle info, and `git diff --check`. The executable
-  census is CLOSED exactly at **214/214 effects, 355/355 moves, 276/276
-  distinct, 2957/2957 weighted**: assigned-baseline delta **+1/+1/+1/+2**;
-  all **72** validations pass.
-- **Did:** registered `B_SCR_OP_METRONOME` with the exact sentinel-bearing
-  forbidden table, unbounded one-draw retry loop, source target selection,
-  and direct selected-effect tail jump. It writes `gCurrentMove` without
-  `gCalledMove`, preserves Metronome as chosen move/PP slot owner, and closes
-  the dynamic selectable-universe gate with a live census ratchet.
-- **Next:** supervisor verify `529b48ec`; the ordered frontier-tail census plan
-  is complete. Do not resume retired canonical Battle 2 or presentation work.
-- **Notes:** consumed mandatory `docs/metronome-off-evidence.md`; 25 focused
-  tests cover every forbidden move, out-of-range candidates, one/two/N-draw
-  streams including both seeds, target/direct-jump state, selected-effect END,
-  Metronome-slot PP, and the four history owners. Deliberate handler exact-set
-  pin **208→209**. Evidence prose calls candidate 55 Mist, while pinned source
-  names 55 Water Gun (Mist is 54); the numeric ROM receipt is pinned exactly.
-  No barrier, recording import, presentation, round, tick, roadmap, or issue change.

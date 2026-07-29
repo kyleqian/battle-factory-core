@@ -1,3 +1,27 @@
+## 645 — [BOUNDED MAIN WORKER 2026-07-28 ~17:02] Frontier-tail row 8 Metronome closes census
+
+- **State:** committed `529b48ec`; tree green at **431 files / 4712 tests**,
+  production build, OFF oracle info, and `git diff --check`. The executable
+  census is CLOSED exactly at **214/214 effects, 355/355 moves, 276/276
+  distinct, 2957/2957 weighted**: assigned-baseline delta **+1/+1/+1/+2**;
+  all **72** validations pass.
+- **Did:** registered `B_SCR_OP_METRONOME` with the exact sentinel-bearing
+  forbidden table, unbounded one-draw retry loop, source target selection,
+  and direct selected-effect tail jump. It writes `gCurrentMove` without
+  `gCalledMove`, preserves Metronome as chosen move/PP slot owner, and closes
+  the dynamic selectable-universe gate with a live census ratchet.
+- **Next:** supervisor verify `529b48ec`; the ordered frontier-tail census plan
+  is complete. Do not resume retired canonical Battle 2 or presentation work.
+- **Notes:** consumed mandatory `docs/metronome-off-evidence.md`; 25 focused
+  tests cover every forbidden move, out-of-range candidates, one/two/N-draw
+  streams including both seeds, target/direct-jump state, selected-effect END,
+  Metronome-slot PP, and the four history owners. Deliberate handler exact-set
+  pin **208→209**. Evidence prose calls candidate 55 Mist, while pinned source
+  names 55 Water Gun (Mist is 54); the numeric ROM receipt is pinned exactly.
+  No barrier, recording import, presentation, round, tick, roadmap, or issue change.
+
+---
+
 ## 644 — [BOUNDED MAIN WORKER 2026-07-28 ~16:53] Frontier-tail row 7 Transform source-complete
 
 - **State:** committed `0577134c`; tree green at **430 files / 4687 tests**,
