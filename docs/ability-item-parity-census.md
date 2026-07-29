@@ -6,7 +6,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 
 ## Headline
 
-- **Abilities: 57/70 members engine-referenced** (weighted by L50 set-carriers: 977/1103); 4 zero-carrier, 3 without battle hooks (out-of-battle only).
+- **Abilities: 64/70 members engine-referenced** (weighted by L50 set-carriers: 1056/1103); 4 zero-carrier, 3 without battle hooks (out-of-battle only).
 - **Hold effects: 42/42 members engine-referenced** (weighted by L50 set-carriers: 850/850); 21 zero-carrier, 3 without battle hooks.
 - All 15 ground-truth validation checks passed.
 
@@ -14,19 +14,12 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 
 | Ability | Status | L50 carriers (det.) | All | Delegate cases | Inline rules | AI | Engine refs |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| ABILITY_STATIC | unreferenced | 27 (17) | 27 | ON_DAMAGE | 0 | 0 | 0 |
 | ABILITY_RUN_AWAY | unreferenced | 23 (2) | 23 | — | 4 | 0 | 0 |
-| ABILITY_POISON_POINT | unreferenced | 18 (14) | 18 | ON_DAMAGE | 0 | 0 | 0 |
-| ABILITY_CUTE_CHARM | unreferenced | 13 (13) | 13 | ON_DAMAGE | 0 | 0 | 0 |
-| ABILITY_EFFECT_SPORE | unreferenced | 8 (8) | 8 | ON_DAMAGE | 0 | 0 | 0 |
-| ABILITY_FLAME_BODY | unreferenced | 8 (5) | 8 | ON_DAMAGE | 0 | 0 | 0 |
 | ABILITY_PICKUP | unreferenced | 7 (6) | 7 | — | 2 | 0 | 0 |
 | ABILITY_ARENA_TRAP | unreferenced | 6 (0) | 6 | — | 2 | 3 | 0 |
 | ABILITY_COMPOUND_EYES | unreferenced | 4 (3) | 4 | — | 2 | 0 | 0 |
 | ABILITY_MAGNET_PULL | unreferenced | 4 (0) | 4 | — | 2 | 3 | 0 |
 | ABILITY_SHADOW_TAG | unreferenced | 3 (3) | 3 | — | 2 | 3 | 0 |
-| ABILITY_ROUGH_SKIN | unreferenced | 3 (3) | 3 | ON_DAMAGE | 0 | 0 | 0 |
-| ABILITY_COLOR_CHANGE | unreferenced | 2 (2) | 2 | ON_DAMAGE | 0 | 0 | 0 |
 | ABILITY_LEVITATE | engine-referenced | 54 (54) | 54 | — | 10 | 0 | 9 |
 | ABILITY_STURDY | engine-referenced | 42 (13) | 42 | — | 3 | 0 | 3 |
 | ABILITY_ROCK_HEAD | engine-referenced | 40 (3) | 40 | — | 1 | 0 | 3 |
@@ -37,10 +30,11 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_CLEAR_BODY | engine-referenced | 34 (29) | 34 | — | 3 | 0 | 12 |
 | ABILITY_SWIFT_SWIM | engine-referenced | 34 (13) | 34 | — | 2 | 0 | 2 |
 | ABILITY_PRESSURE | engine-referenced | 34 (30) | 46 | — | 6 | 0 | 11 |
-| ABILITY_OBLIVIOUS | engine-referenced | 33 (16) | 33 | ON_DAMAGE, IMMUNITY | 3 | 0 | 3 |
+| ABILITY_OBLIVIOUS | engine-referenced | 33 (16) | 33 | ON_DAMAGE, IMMUNITY | 3 | 0 | 5 |
 | ABILITY_SYNCHRONIZE | engine-referenced | 30 (8) | 30 | SYNCHRONIZE, ATK_SYNCHRONIZE | 0 | 0 | 2 |
 | ABILITY_EARLY_BIRD | engine-referenced | 29 (4) | 29 | — | 2 | 0 | 3 |
 | ABILITY_KEEN_EYE | engine-referenced | 29 (16) | 29 | — | 2 | 0 | 6 |
+| ABILITY_STATIC | engine-referenced | 27 (17) | 27 | ON_DAMAGE | 0 | 0 | 4 |
 | ABILITY_WATER_ABSORB | engine-referenced | 25 (4) | 25 | ABSORBING | 0 | 1 | 2 |
 | ABILITY_FLASH_FIRE | engine-referenced | 25 (9) | 25 | ABSORBING | 0 | 1 | 2 |
 | ABILITY_INNER_FOCUS | engine-referenced | 24 (12) | 34 | — | 3 | 0 | 3 |
@@ -49,6 +43,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_BLAZE | engine-referenced | 21 (21) | 21 | — | 1 | 0 | 2 |
 | ABILITY_TORRENT | engine-referenced | 21 (21) | 21 | — | 1 | 0 | 2 |
 | ABILITY_SHELL_ARMOR | engine-referenced | 21 (4) | 21 | — | 1 | 0 | 2 |
+| ABILITY_POISON_POINT | engine-referenced | 18 (14) | 18 | ON_DAMAGE | 0 | 0 | 4 |
 | ABILITY_SWARM | engine-referenced | 18 (8) | 18 | — | 1 | 0 | 2 |
 | ABILITY_DAMP | engine-referenced | 16 (0) | 16 | — | 2 | 0 | 3 |
 | ABILITY_OWN_TEMPO | engine-referenced | 16 (2) | 16 | IMMUNITY | 5 | 0 | 5 |
@@ -58,12 +53,15 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_SOUNDPROOF | engine-referenced | 15 (10) | 15 | MOVES_BLOCK | 8 | 0 | 22 |
 | ABILITY_SHED_SKIN | engine-referenced | 14 (11) | 14 | ENDTURN | 0 | 0 | 2 |
 | ABILITY_SAND_VEIL | engine-referenced | 13 (6) | 13 | — | 2 | 0 | 2 |
+| ABILITY_CUTE_CHARM | engine-referenced | 13 (13) | 13 | ON_DAMAGE | 0 | 0 | 4 |
 | ABILITY_HYPER_CUTTER | engine-referenced | 12 (2) | 12 | — | 3 | 0 | 9 |
 | ABILITY_SERENE_GRACE | engine-referenced | 11 (0) | 11 | — | 1 | 0 | 2 |
 | ABILITY_IMMUNITY | engine-referenced | 10 (2) | 10 | IMMUNITY | 10 | 0 | 10 |
 | ABILITY_VOLT_ABSORB | engine-referenced | 9 (4) | 9 | ABSORBING | 0 | 1 | 2 |
 | ABILITY_WATER_VEIL | engine-referenced | 9 (0) | 9 | IMMUNITY | 5 | 0 | 7 |
 | ABILITY_BATTLE_ARMOR | engine-referenced | 8 (5) | 8 | — | 1 | 0 | 2 |
+| ABILITY_EFFECT_SPORE | engine-referenced | 8 (8) | 8 | ON_DAMAGE | 0 | 0 | 5 |
+| ABILITY_FLAME_BODY | engine-referenced | 8 (5) | 8 | ON_DAMAGE | 0 | 0 | 3 |
 | ABILITY_STICKY_HOLD | engine-referenced | 8 (0) | 8 | — | 5 | 0 | 8 |
 | ABILITY_LIQUID_OOZE | engine-referenced | 8 (0) | 8 | — | 2 | 0 | 3 |
 | ABILITY_SUCTION_CUPS | engine-referenced | 7 (7) | 7 | — | 1 | 0 | 3 |
@@ -79,6 +77,8 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_HUGE_POWER | engine-referenced | 4 (0) | 4 | — | 1 | 0 | 2 |
 | ABILITY_MARVEL_SCALE | engine-referenced | 4 (4) | 4 | — | 1 | 0 | 2 |
 | ABILITY_SPEED_BOOST | engine-referenced | 3 (2) | 3 | ENDTURN | 0 | 0 | 4 |
+| ABILITY_ROUGH_SKIN | engine-referenced | 3 (3) | 3 | ON_DAMAGE | 0 | 0 | 2 |
+| ABILITY_COLOR_CHANGE | engine-referenced | 2 (2) | 2 | ON_DAMAGE | 0 | 0 | 2 |
 | ABILITY_PLUS | engine-referenced | 2 (2) | 2 | — | 2 | 0 | 3 |
 | ABILITY_MINUS | engine-referenced | 2 (2) | 2 | — | 2 | 0 | 3 |
 | ABILITY_FORECAST | engine-referenced | 2 (2) | 2 | ON_SWITCHIN, FORECAST | 1 | 0 | 5 |
@@ -171,7 +171,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITYEFFECT_ENDTURN | RAIN_DISH, SHED_SKIN, SPEED_BOOST, TRUANT | 4/4 |
 | ABILITYEFFECT_MOVES_BLOCK | SOUNDPROOF | 1/1 |
 | ABILITYEFFECT_ABSORBING | FLASH_FIRE, VOLT_ABSORB, WATER_ABSORB | 3/3 |
-| ABILITYEFFECT_ON_DAMAGE | COLOR_CHANGE, CUTE_CHARM, EFFECT_SPORE, FLAME_BODY, OBLIVIOUS, POISON_POINT, ROUGH_SKIN, STATIC | 1/8 |
+| ABILITYEFFECT_ON_DAMAGE | COLOR_CHANGE, CUTE_CHARM, EFFECT_SPORE, FLAME_BODY, OBLIVIOUS, POISON_POINT, ROUGH_SKIN, STATIC | 8/8 |
 | ABILITYEFFECT_IMMUNITY | IMMUNITY, INSOMNIA, LIMBER, MAGMA_ARMOR, OBLIVIOUS, OWN_TEMPO, VITAL_SPIRIT, WATER_VEIL | 8/8 |
 | ABILITYEFFECT_FORECAST | FORECAST | 1/1 |
 | ABILITYEFFECT_SYNCHRONIZE | SYNCHRONIZE | 1/1 |

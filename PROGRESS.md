@@ -13,22 +13,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
-## 665 — [BOUNDED MAIN WORKER 2026-07-28 ~22:25] ON_DAMAGE prerequisite: shared contact flag exposed
+## 665 — [BOUNDED MAIN WORKER 2026-07-28 ~22:35] ON_DAMAGE contact-ability family implemented
 
-- **State:** first ordered rung green: focused suite **25/25** and production
-  build. Baseline was green at **452 files / 4867 tests**; Battle Scene OFF
-  oracle info and the static evidence verifier both PASS.
-- **Did:** generalized the shared numeric `gBattleMoves[].flags` resolver to
-  preserve source `FLAG_MAKES_CONTACT` bit 0 alongside Mirror Move bit 4,
-  directly from the existing generated string flags. Pound resolves contact;
-  Swift does not. No generated field or private second loader was added.
-- **Next:** implement state 3's shared real-damage gate and seven target
-  abilities, register `seteffectsecondary`, then add committed-script and
-  per-member/RNG tests before retiring the barrier.
-- **Notes:** confirmed `datahpupdate` already faithfully writes target
-  `physicalDmg`/`specialDmg` only on real positive HP damage; its Substitute
-  branch touches substitute HP only, so no tracker change is needed. No
-  census/generator, scout/probe/fixture, issue, or ratchet change yet.
+- **State:** implementation focused suite green at **68/68** and production
+  build. Census regenerated twice byte-identically: abilities exactly
+  **64/70 (weighted 1056/1103)**, hold effects **42/42 (850/850)**,
+  `ABILITYEFFECT_ON_DAMAGE` **8/8**; all 15 validations pass.
+- **Did:** exposed source contact bit 0 through the shared move-flags resolver;
+  confirmed the existing real-HP-only `datahpupdate` trackers already make
+  Substitute suppress the family; implemented Color Change, Rough Skin,
+  Effect Spore, Poison Point, Static, Flame Body, and Cute Charm in moveend
+  state 3 with exact gates, RNG, mutations, and callback transfers. Registered
+  `seteffectsecondary`; factored the pre-existing gender calculation into one
+  shared source helper. The state-3 barrier retired **7→6** for the module.
+- **Next:** run the full Tier-1 suite/build, record final test totals, and
+  commit the verified ledger state.
+- **Notes:** full-script tests run every callback shape through its `return`
+  and `BattleScript_MoveEnd`'s own `END`; Pound→Static pins the proc as draw 5
+  after accuracy/crit/damage/effect chance, with success and failure both +1.
+  Effect Spore pins zero-retry and sleep-duration draws; status routing pins
+  affects-user, Shield Dust/Safeguard bypass, and ordinary eligibility. No
+  census generator, scout/probe/battle-lab fixture, issue, or oracle asset
+  changed. PAPERCUT: none.
 
 ---
 

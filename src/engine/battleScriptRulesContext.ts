@@ -1091,6 +1091,12 @@ const BATTLE_SCRIPT_MOVE_TYPE_IDS = new Map<string, number>([
   "TYPE_DARK",
 ].map((name, id) => [name, id]));
 
+const BATTLE_SCRIPT_MOVE_TYPE_NAMES = Object.freeze(
+  [...BATTLE_SCRIPT_MOVE_TYPE_IDS.entries()]
+    .sort((left, right) => left[1] - right[1])
+    .map(([name]) => name),
+);
+
 const GENERATED_MOVE_EFFECTS = new Map<number, number>(
   (topologyData.moves as readonly GeneratedMoveEffectRow[]).map(
     ({ id, effectId }) => [id, effectId],
@@ -1204,6 +1210,16 @@ export function resolveBattleScriptMoveType(
   if (type === undefined) {
     throw new Error(`currentMove ${currentMove} has no source-derived gBattleMoves type`);
   }
+  return type;
+}
+
+/** Resolves GET_MOVE_TYPE to the source TYPE_* identity used by battler state. */
+export function resolveBattleScriptMoveTypeName(
+  currentMove: number,
+  dynamicMoveType: number,
+): string {
+  const type = BATTLE_SCRIPT_MOVE_TYPE_NAMES[resolveBattleScriptMoveType(currentMove, dynamicMoveType)];
+  if (type === undefined) throw new Error("resolved move type is outside the source TYPE_* domain");
   return type;
 }
 

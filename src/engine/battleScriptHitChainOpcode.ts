@@ -3785,6 +3785,23 @@ function createSeteffectprimaryOpcodeHandler(): BattleScriptOpcodeHandler<Battle
   };
 }
 
+/** Cmd_seteffectsecondary: `SetMoveEffect(FALSE, 0)`, then clear MOVE_EFFECT_BYTE. */
+function createSeteffectsecondaryOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
+  return (context) => {
+    const transition = applySetMoveEffect(
+      context,
+      context.state.rulesContext,
+      context.state.rulesContext.moveEffectByte,
+      false,
+      false,
+    );
+    return Object.freeze({
+      ...transition,
+      rulesContext: Object.freeze({ ...transition.rulesContext, moveEffectByte: 0 }),
+    });
+  };
+}
+
 /**
  * Cmd_printfromtable (battle_script_commands.c:2180-2192). Resolves
  * table[MULTISTRING_CHOOSER] to a literal STRINGID_* and feeds it to the
@@ -4409,6 +4426,7 @@ export function createBattleScriptHitChainOpcodeHandlers(
   install("B_SCR_OP_RESULTMESSAGE", createResultmessageOpcodeHandler(ports.isControllerIdle, ports.prepareMessage));
   install("B_SCR_OP_SETEFFECTWITHCHANCE", createSeteffectwithchanceOpcodeHandler());
   install("B_SCR_OP_SETEFFECTPRIMARY", createSeteffectprimaryOpcodeHandler());
+  install("B_SCR_OP_SETEFFECTSECONDARY", createSeteffectsecondaryOpcodeHandler());
   install("B_SCR_OP_PRINTFROMTABLE", createPrintfromtableOpcodeHandler(ports.isControllerIdle, ports.prepareMessage));
   install(
     "B_SCR_OP_UPDATESTATUSICON",

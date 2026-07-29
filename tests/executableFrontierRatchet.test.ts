@@ -121,7 +121,10 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // winner-only flag consumption, and pushed BattleScript_SnatchedMove
   // continuation are now live; Lightning Rod remains the adjacent barrier.
   ["src/engine/battleScriptAttackCancelerOpcode.ts", 3],
-  ["src/engine/battleScriptMoveEndOpcode.ts", 7],
+  // 7 -> 6 (ON_DAMAGE contact abilities): state 3's seven-case barrier
+  // retires as one call site; Color Change/Rough Skin/status/Cute Charm
+  // callbacks and their RNG/status mutations now execute source-completely.
+  ["src/engine/battleScriptMoveEndOpcode.ts", 6],
   ["src/engine/battleScriptJumpifbyteOpcode.ts", 1],
   // Forced-switch ground truth §4 slice 1: one operand-shape barrier, shared
   // by both the unmodeled-memWord and unmodeled-value cases (e.g.
