@@ -24,11 +24,14 @@ import {
   createFactoryCorpusPartyMember,
   type FactoryCorpusPartyMemberState,
 } from "../src/engine/factoryCorpusParty.ts";
+import {
+  createFactoryAiBattleHistory,
+  FACTORY_AI_RUNG6_ACTION_GATE,
+  submitLiveFactoryAiDecision,
+} from "../src/engine/factoryAiLiveDriver.ts";
 import { randomU16 } from "../src/engine/opponentGen.ts";
 
 const RNG_SEED = 0x1234_5678;
-const STATUS2_MULTIPLETURNS = 0x1000;
-const STATUS2_RECHARGE = 0x400000;
 const natureByName = new Map(naturesData.natures.map((row) => [row.name, row.index]));
 
 const EMPTY_PARTY_MEMBER: BattleScriptPartyMemberState = Object.freeze({
@@ -99,14 +102,15 @@ function expectedRngValue(calls: number): number {
   return value;
 }
 
-describe("fresh Factory whole-battle integration (Gate-5 rung 4)", () => {
-  it("runs one legal 3v3 battle from draw A through a real player-win terminal", () => {
+describe("fresh Factory whole-battle integration (Gate-5 rungs 4/6)", () => {
+  it("runs one legal 3v3 battle with every trainer command chosen by the live Factory AI", () => {
     // All six are real, distinct Level-50 corpus sets. Azurill is weak enough
-    // for Aerodactyl's real Hyper Beam to force a player replacement.
-    // Hariyama then wins with Cross Chop; the final Spheal's Ice Ball lock
-    // exercises HandleTurnActionSelectionState's reducer-owned trainer path.
+    // for Granbull's real attacks to force a player replacement. Granbull
+    // then loses to Hariyama's Cross Chop. Pidgeotto gives the source trainer
+    // replacement selector a super-effective first-pass candidate, while all
+    // three trainer movesets remain inside the ported mask-7 scoring families.
     const playerKernelParty = corpusParty([1, 678, 527]);
-    const opponentKernelParty = corpusParty([531, 59, 196]);
+    const opponentKernelParty = corpusParty([664, 135, 59]);
     const preBattlePlayerParty = resolutionParty("player", playerKernelParty);
     const preBattleOpponentParty = resolutionParty("opponent", opponentKernelParty);
     let state = requireStarted(createFreshFactoryBattle({
@@ -115,15 +119,17 @@ describe("fresh Factory whole-battle integration (Gate-5 rung 4)", () => {
       playerParty: playerKernelParty,
       opponentParty: opponentKernelParty,
     }));
+    let aiHistory = createFactoryAiBattleHistory(state.rules.rulesContext);
 
     const cursorCheckpoints = [state.rng.calls];
+    const aiDecisionDrawRanges: Array<readonly [number, number]> = [];
+    const aiChosenSubmissions: BattleDecisionSubmission[] = [];
     let forcedSwitches = 0;
-    let lockedTrainerTurns = 0;
     let sawNonterminalOpponentFaint = false;
 
     expect(state.rng).toEqual({ value: expectedRngValue(2), calls: 2 });
 
-    for (let budget = 0; budget < 20 && state.boundary.kind === "decision-required"; budget += 1) {
+    for (let budget = 0; budget < 50 && state.boundary.kind === "decision-required"; budget += 1) {
       const request = state.boundary.request;
       const rules = state.rules.rulesContext;
       const faintedOpponents = rules.party.opponent.slice(0, 3)
@@ -141,22 +147,52 @@ describe("fresh Factory whole-battle integration (Gate-5 rung 4)", () => {
           decision: { kind: "switch", partyIndex },
         };
         forcedSwitches += 1;
-      } else {
-        // Slot 0 is intentionally the deterministic move for every selected
-        // corpus member: Water Pulse, Hyper Beam, Cross Chop, or Ice Ball.
-        const decision = request.legalDecisions.find(
-          (candidate) => candidate.kind === "use-move" && candidate.moveSlot === 0,
+      } else if (request.side === "trainer") {
+        const previousCalls = state.rng.calls;
+        const liveLegalDecisions = request.legalDecisions;
+        const ai = submitLiveFactoryAiDecision(
+          state,
+          aiHistory,
+          { factoryWinStreak: 28, trainerOpponentId: 222 },
+          reduceFactoryFullTurnDecision,
         );
-        if (decision === undefined) throw new Error("published request has no legal slot-0 move");
+        expect(ai.actionGate).toBe(FACTORY_AI_RUNG6_ACTION_GATE);
+        expect(liveLegalDecisions).toContainEqual(ai.submission.decision);
+        expect(ai.trace.mask).toBe(7);
+        expect(ai.trace.draws.length).toBeGreaterThan(0);
+        expect(ai.trace.draws[0]!.before.calls).toBe(previousCalls);
+        expect(ai.trace.draws.at(-1)!.after.calls).toBe(ai.rng.calls);
+        for (let draw = 1; draw < ai.trace.draws.length; draw += 1) {
+          expect(ai.trace.draws[draw]!.before).toEqual(ai.trace.draws[draw - 1]!.after);
+        }
+        aiDecisionDrawRanges.push([previousCalls, ai.rng.calls]);
+        aiChosenSubmissions.push(ai.submission);
+        aiHistory = ai.history;
+        state = ai.transition.state;
+        expect(state.rng.calls).toBeGreaterThanOrEqual(ai.rng.calls);
+        expect(state.rng.value).toBe(expectedRngValue(state.rng.calls));
+        cursorCheckpoints.push(state.rng.calls);
+        continue;
+      } else {
+        // Player choices remain deterministic and test-authored. Hariyama
+        // opens its switch-in turn with real Fake Out; subsequent turns and
+        // the other player members use slot 0.
+        const moveSlot = rules.battlers[0].partyIndex === 1
+          ? rules.battlers[0].isFirstTurn === 2
+            ? 3
+            : rules.battlers[1].partyIndex === 1
+              ? 2
+              : 0
+          : 0;
+        const preferredDecision = request.legalDecisions.find(
+          (candidate) => candidate.kind === "use-move" && candidate.moveSlot === moveSlot,
+        );
+        const decision = preferredDecision ?? request.legalDecisions.find(
+          (candidate) => candidate.kind === "use-move",
+        );
+        if (decision === undefined) throw new Error("published player request has no legal move");
         expect(request.legalDecisions).toContainEqual(decision);
         submission = { requestId: request.requestId, side: request.side, decision };
-
-        if (
-          request.side === "player"
-          && (rules.battlers[1].status2 & (STATUS2_MULTIPLETURNS | STATUS2_RECHARGE)) !== 0
-        ) {
-          lockedTrainerTurns += 1;
-        }
       }
 
       const previousCalls = state.rng.calls;
@@ -174,14 +210,24 @@ describe("fresh Factory whole-battle integration (Gate-5 rung 4)", () => {
     expect(state.boundary).toEqual({ kind: "terminal", outcome: "player-win" });
     if (state.boundary.kind !== "terminal") throw new Error("expected terminal boundary");
     expect(forcedSwitches).toBe(1);
-    expect(lockedTrainerTurns).toBe(2);
+    expect(aiChosenSubmissions.length).toBeGreaterThan(0);
+    expect(aiChosenSubmissions.every((entry) => entry.side === "trainer")).toBe(true);
+    expect(aiDecisionDrawRanges.every(([before, after]) => after > before)).toBe(true);
+    for (let decision = 1; decision < aiDecisionDrawRanges.length; decision += 1) {
+      expect(aiDecisionDrawRanges[decision]![0])
+        .toBeGreaterThanOrEqual(aiDecisionDrawRanges[decision - 1]![1]);
+    }
     expect(sawNonterminalOpponentFaint).toBe(true);
     expect(state.rules.rulesContext.party.opponent.slice(0, 3).map((member) => member.hp))
       .toEqual([0, 0, 0]);
-    // Draws A/B, command-only submissions, hit chains, forced-switch tail,
-    // every continuing-turn boundary draw, and the locked trainer turns all
-    // share this one monotonic cursor. No transition resets or splices it.
-    expect(cursorCheckpoints).toEqual([2, 2, 8, 8, 11, 12, 17, 17, 22, 22, 28, 32]);
+    // Draws A/B, every AI policy ledger, hit chains, forced-switch tail, and
+    // continuing-turn boundary draws share one cursor. Repeated entries are
+    // player/forced-switch submissions (zero draws); no transition resets or
+    // splices the stream.
+    expect(cursorCheckpoints).toEqual([
+      2, 2, 17, 18, 18, 29, 29, 40, 40, 51, 51, 62, 62,
+      81, 81, 100, 100, 120, 120, 140, 140, 156, 156, 172, 172, 188,
+    ]);
 
     const resolution = deriveBattleResolutionFromTerminalBoundary({
       rngValue: state.rng.value,
@@ -192,9 +238,9 @@ describe("fresh Factory whole-battle integration (Gate-5 rung 4)", () => {
     });
     expect(resolution).toMatchObject({
       outcome: "win",
-      rngValue: expectedRngValue(32),
+      rngValue: expectedRngValue(188),
     });
-    expect(resolution.playerParty.map((member) => member.hp)).toEqual([0, 224, 186]);
+    expect(resolution.playerParty.map((member) => member.hp)).toEqual([0, 251, 186]);
     expect(resolution.opponentParty.map((member) => member.hp)).toEqual([0, 0, 0]);
   });
 });
