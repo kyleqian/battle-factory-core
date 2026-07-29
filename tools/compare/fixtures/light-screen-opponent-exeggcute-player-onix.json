@@ -1,0 +1,42 @@
+{
+  "schema": "light-screen-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-light-screen-opponent-exeggcute-player-onix.json",
+  "probe": "tools/compare/lightScreenProbe.py",
+  "orientation": "opponent-front",
+  "sourceWindow": {
+    "startFrame": 176,
+    "endFrame": 294,
+    "frameCount": 119,
+    "wallFrame": 220
+  },
+  "evidenceSha256": "51ffe743621c2745f8a59cd6786bb5d0fa9b12b844ee452d2e7ca729587e20db",
+  "rawRgbSha256": "654a49bafe3470e81c34dfa1d127d67a78d59eb6d0b6af3c983d36008a8dbf6b",
+  "attacker": {
+    "species": "EXEGGCUTE",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": {"x": 144, "y": 15},
+      "animationCenter": {"x": 176, "y": 47},
+      "battlePositionCenter": {"x": 176, "y": 40}
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": {"x": 40, "y": 48},
+      "animationCenter": {"x": 72, "y": 80},
+      "battlePositionCenter": {"x": 72, "y": 80}
+    }
+  },
+  "allocatorProfile": {"wall": 3, "sparkles": [4, 5, 7, 4, 5, 7]},
+  "fieldProfile": {
+    "playerHp": 117,
+    "playerMaxHp": 117,
+    "opponentHp": 144,
+    "opponentMaxHp": 153,
+    "playerGender": "male",
+    "opponentGender": "female"
+  }
+}

@@ -210,6 +210,10 @@ import {
   type ReflectState,
 } from "./reflect.ts";
 import {
+  lightScreenAtAge,
+  type LightScreenState,
+} from "./lightScreen.ts";
+import {
   synthesisEffectAtAge,
   type SynthesisSprite,
 } from "./synthesis.ts";
@@ -217,6 +221,14 @@ import {
   aromatherapyAtAge,
   type AromatherapyState,
 } from "./aromatherapy.ts";
+import {
+  whirlwindAtAge,
+  type WhirlwindState,
+} from "./whirlwind.ts";
+import {
+  blockAtAge,
+  type BlockState,
+} from "./block.ts";
 import {
   wishAtAge,
   type WishState,
@@ -482,6 +494,10 @@ import {
   sweetKissAtAge,
   type SweetKissState,
 } from "./sweetKiss.ts";
+import {
+  sporeAtAge,
+  type SporeState,
+} from "./spore.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -498,6 +514,7 @@ export interface SceneOnBattlerGeometry {
 export interface SceneOnPresentationBattler {
   readonly species:
     | "VILEPLUME"
+    | "BUTTERFREE"
     | "ONIX"
     | "KRABBY"
     | "SURSKIT"
@@ -535,6 +552,7 @@ export interface SceneOnPresentationBattler {
     | "FLAAFFY"
     | "VOLBEAT"
     | "ILLUMISE"
+    | "EXEGGCUTE"
     | "GLOOM"
     | "TOGETIC"
     | "MACHOKE"
@@ -566,7 +584,8 @@ export interface SceneOnPresentationBattler {
     | "PHANPY"
     | "TEDDIURSA"
     | "WARTORTLE"
-    | "LUVDISC";
+    | "LUVDISC"
+    | "PARASECT";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -1018,6 +1037,17 @@ export interface SceneOnReflectConfig {
   }>;
 }
 
+export interface SceneOnLightScreenConfig {
+  readonly move: "LIGHT_SCREEN";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly allocatorProfile: Readonly<{
+    readonly wall: number;
+    readonly sparkles: readonly number[];
+  }>;
+}
+
 export interface SceneOnSynthesisConfig {
   readonly move: "SYNTHESIS";
   readonly attacker: SceneOnPresentationBattler;
@@ -1113,6 +1143,20 @@ export interface SceneOnBiteConfig {
 
 export interface SceneOnHeadbuttConfig {
   readonly move: "HEADBUTT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnWhirlwindConfig {
+  readonly move: "WHIRLWIND";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnBlockConfig {
+  readonly move: "BLOCK";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
@@ -1404,6 +1448,13 @@ export interface SceneOnSweetKissConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnSporeConfig {
+  readonly move: "SPORE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnPerishSongFieldProfile
   extends SceneOnDragonRageFieldProfile {
   /** Immutable battle-engine result; presentation never advances these. */
@@ -1622,6 +1673,7 @@ export type SceneOnMoveConfig =
   | SceneOnMoonlightConfig
   | SceneOnAbsorbConfig
   | SceneOnReflectConfig
+  | SceneOnLightScreenConfig
   | SceneOnSynthesisConfig
   | SceneOnAromatherapyConfig
   | SceneOnWishConfig
@@ -1635,6 +1687,8 @@ export type SceneOnMoveConfig =
   | SceneOnHyperFangConfig
   | SceneOnBiteConfig
   | SceneOnHeadbuttConfig
+  | SceneOnWhirlwindConfig
+  | SceneOnBlockConfig
   | SceneOnBodySlamConfig
   | SceneOnSlamConfig
   | SceneOnTwineedleConfig
@@ -1662,6 +1716,7 @@ export type SceneOnMoveConfig =
   | SceneOnRestConfig
   | SceneOnHowlConfig
   | SceneOnSweetKissConfig
+  | SceneOnSporeConfig
   | SceneOnPerishSongConfig
   | SceneOnNeedleArmConfig
   | SceneOnSandstormConfig
@@ -1722,6 +1777,8 @@ export type SceneOnAromatherapyPresentationState =
   SceneOnMovePresentationState<SceneOnAromatherapyConfig>;
 export type SceneOnReflectPresentationState =
   SceneOnMovePresentationState<SceneOnReflectConfig>;
+export type SceneOnLightScreenPresentationState =
+  SceneOnMovePresentationState<SceneOnLightScreenConfig>;
 export type SceneOnSparkPresentationState =
   SceneOnMovePresentationState<SceneOnSparkConfig>;
 export type SceneOnThunderWavePresentationState =
@@ -1746,6 +1803,10 @@ export type SceneOnHowlPresentationState =
   SceneOnMovePresentationState<SceneOnHowlConfig>;
 export type SceneOnSweetKissPresentationState =
   SceneOnMovePresentationState<SceneOnSweetKissConfig>;
+export type SceneOnSporePresentationState =
+  SceneOnMovePresentationState<SceneOnSporeConfig>;
+export type SceneOnBlockPresentationState =
+  SceneOnMovePresentationState<SceneOnBlockConfig>;
 export type SceneOnPerishSongPresentationState =
   SceneOnMovePresentationState<SceneOnPerishSongConfig>;
 export type SceneOnNeedleArmPresentationState =
@@ -1820,6 +1881,12 @@ export interface SceneOnBiteView extends BiteEffect {
 }
 
 export interface SceneOnHeadbuttView extends HeadbuttState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnWhirlwindView extends WhirlwindState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2585,8 +2652,10 @@ export function createSceneOnMovePresentation<
   TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig | SceneOnTauntConfig
     | SceneOnSparkConfig | SceneOnCharmConfig | SceneOnTailGlowConfig
     | SceneOnScaryFaceConfig
-    | SceneOnAbsorbConfig | SceneOnReflectConfig | SceneOnBiteConfig
-    | SceneOnHeadbuttConfig | SceneOnBodySlamConfig | SceneOnSlamConfig,
+    | SceneOnAbsorbConfig | SceneOnReflectConfig | SceneOnLightScreenConfig
+    | SceneOnBiteConfig
+    | SceneOnHeadbuttConfig | SceneOnBodySlamConfig | SceneOnSlamConfig
+    | SceneOnWhirlwindConfig | SceneOnBlockConfig,
 >(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
@@ -3029,6 +3098,33 @@ export function sceneOnReflectView(
   };
 }
 
+export interface SceneOnLightScreenView extends LightScreenState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age` is relative to gLightScreenWallSpriteTemplate's creation pass. */
+export function sceneOnLightScreenView(
+  state: SceneOnMovePresentationState<SceneOnLightScreenConfig>,
+): SceneOnLightScreenView {
+  if (state.config.move !== "LIGHT_SCREEN") {
+    throw new Error(
+      `expected LIGHT_SCREEN presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...lightScreenAtAge(
+      state.age,
+      state.config.attacker.geometry.battlePositionCenter,
+      state.config.attacker.geometry.side,
+    ),
+  };
+}
+
 /** `age` is ticks since the first GrantingStarsEffect sprite creation. */
 export function sceneOnSynthesisView(
   state: SceneOnMovePresentationState,
@@ -3295,6 +3391,51 @@ export function sceneOnHeadbuttView(
     ...headbuttAtAge(
       state.age,
       state.config.attacker.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is WHIRLWIND's source `loadspritegfx` display. */
+export function sceneOnWhirlwindView(
+  state: SceneOnMovePresentationState<SceneOnWhirlwindConfig>,
+): SceneOnWhirlwindView {
+  if (state.config.move !== "WHIRLWIND") {
+    throw new Error(`expected WHIRLWIND presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...whirlwindAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.side,
+      state.config.target.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+export interface SceneOnBlockView extends BlockState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age=0` is BLOCK's source `loadspritegfx` display. */
+export function sceneOnBlockView(
+  state: SceneOnMovePresentationState<SceneOnBlockConfig>,
+): SceneOnBlockView {
+  if (state.config.move !== "BLOCK") {
+    throw new Error(`expected BLOCK presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...blockAtAge(
+      state.age,
+      state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
     ),
   };
@@ -3864,6 +4005,31 @@ export function sceneOnSweetKissView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...sweetKissAtAge(
+      state.age,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+export interface SceneOnSporeView extends SporeState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age=0` is Move_SPORE's first active source-script frame. */
+export function sceneOnSporeView(
+  state: SceneOnSporePresentationState,
+): SceneOnSporeView {
+  if (state.config.move !== "SPORE") {
+    throw new Error(`expected SPORE presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...sporeAtAge(
       state.age,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,

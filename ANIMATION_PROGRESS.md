@@ -1,5 +1,161 @@
 # Animation coverage
 
+## WATER_ORB checkpoint landed; Hydro Pump partial, Whirlpool unsupported (2026-07-29)
+
+**Verdict:** `MOVE_HYDRO_PUMP` is a bounded **partial**, not exact. The
+lowest suitable legal Level-50 carrier is challenge-2 set **303**
+`FRONTIER_MON_MASQUERAIN_2` (species **312**, Quiet, SpAttack+Defense, Lax
+Incense). Complete legal three-mon Scene-ON parties successfully stage Hydro
+Pump against ONIX in both orientations. Reproducible extraction pins
+Masquerain front/back, WATER_ORB with its source WaterImpact palette, and the
+already-exact WATER_IMPACT art.
+
+**Source/reuse:** the pinned graph is **44** sine WATER_ORBs (11 calls × 4),
+**12** Water Impact splats (6 × 2), StartSinAnimTimer, attacker/target
+ShakeMon, monbg/split priority/12:8 alpha, audio, waits, and cleanup.
+`MOVE_MUD_SHOT` already proves the sine/timer/shake/compositor primitives and
+`MOVE_WATER_GUN` proves the splat/art primitive. Exact still requires the
+Hydro Pump relative reducer, typed seam, production compositor, and every
+body frame through first inactive cleanup across source/OAM/matrices/palettes/
+registers/audio/immutable state/raw RGB/shared framebuffer twice fresh in
+both orientations.
+
+**Sibling / next:** `MOVE_WHIRLPOOL` stays unsupported after an independent
+source, asset, and legal-party both-orientation audit. Its lowest carrier is
+challenge-0 set **170** `FRONTIER_MON_WAILMER_1`; its distinct **18** affine
+vortex orbs, target palette blend/shake/audio, trap outcome, later repetition/
+status-animation variants, and cleanup need independent dense proof. Coverage
+is **94 exact / 1 partial / 0 staged / 181 unsupported**. No animation
+boundary, unsupported barrier, canonical recording allowlist, or gameplay
+ownership changed. Next: implement and densely prove Hydro Pump before
+independently accepting Whirlpool.
+
+## MOVE_SPORE promoted exact; ANIM_TAG_SPORE track bounded (2026-07-29)
+
+**Verdict:** `MOVE_SPORE` is exact. The lowest suitable legal Level-50
+carrier is challenge-2 set **282** `FRONTIER_MON_PARASECT_2` (species **47**,
+Spore **147**, Calm, HP+Defense+SpDefense, Leftovers). Complete legal
+three-mon Scene-ON parties pass the whole move-owned body through first
+inactive cleanup twice fresh in both orientations: player-back frames
+**366–572 (207/207)**, evidence/raw
+`5b275a53b8339e818fa56c158a04df729d1316fee0005ab11cc1ad1b9c446d40` /
+`9730e4ea34ffdaab25796ea069be7270eb36eb9ea05d13cb32c834cb8ea9d0a7`;
+opponent-front **370–576 (207/207)**,
+`7d723ded7813648cb6a29b9a5aaa651b1d677d9698f35f0aff9005f0410e687b` /
+`59a82fde62ce4c89b2a73f0053186df940bd51b39340339ef8fff92282f64e51`.
+
+**Model/evidence:** extraction pins Parasect front/back and both Spore cells.
+The relative reducer and typed seam port tag/mon-BG/alpha lifetimes, all nine
+staggered `gSporeParticleSpriteTemplate`/`AnimSporeParticle_Step` lifecycles,
+OBJ priorities and blending, looped audio, waits, blendoff, and cleanup.
+`sporePortable.ts` proves every dense source/component, seam, OAM/matrix,
+palette/tag/register/audio/unchanged-state/raw-RGB/production-framebuffer
+frame twice fresh; presentation owns no sleep, damage, RNG, turn, controller,
+or facility state.
+
+**Sibling / next:** `MOVE_COTTON_SPORE` remains unsupported. Its independent
+source audit pins shared art/callback but distinct `splitbgprio`, unblended
+particles, audio, and no-alpha/no-`SporeDoubleBattle` body; give it complete
+dense both-orientation acceptance before promotion. Coverage is **94 exact /
+0 partial / 0 staged / 182 unsupported**; no boundary, barrier, or canonical
+recording ratchet moved.
+
+## MOVE_LIGHT_SCREEN promoted exact; SPARKLE_3 track bounded (2026-07-29)
+
+**Verdict:** `MOVE_LIGHT_SCREEN` is exact. The lowest suitable legal
+Level-50 carrier is challenge-0 set **112** `FRONTIER_MON_EXEGGCUTE`
+(species **102**, Light Screen **113**, Naughty, SpAttack+HP, Persim Berry).
+Complete legal three-mon Scene-ON parties pass the full move-owned body
+through first inactive cleanup twice fresh in both orientations: player-back
+frames **270–384 (115/115)**, evidence/raw
+`7c1c3b39e53c00ee0174232a0c05a02ac7f14b6d2aa7478bc2ae372c5d2500a2` /
+`b135e9fbf2c70ea860f0ee126959bbb0eaf0c4603566067dd5405c9698a74837`;
+opponent-front **176–294 (119/119)**,
+`51ffe743621c2745f8a59cd6786bb5d0fa9b12b844ee452d2e7ca729587e20db` /
+`654a49bafe3470e81c34dfa1d127d67a78d59eb6d0b6af3c983d36008a8dbf6b`.
+
+**Model/evidence:** reproducible extraction pins Exeggcute front/back,
+GREEN_LIGHT_WALL, and SPARKLE_3. The pure relative reducer and typed seam port
+`gLightScreenWallSpriteTemplate`/`AnimDefensiveWall`, all six
+`gSpecialScreenSparkleSpriteTemplate`/`AnimWallSparkle` lifecycles from
+`SpecialScreenSparkle`, alpha, rotating palette, delayed audio, opponent BG
+transfer, OAM/VBlank latches, blendoff tail, and first inactive age 74.
+`lightScreenEvidence.ts` proves every dense source/component, seam,
+software+hardware OAM/matrix/palette/register/audio/immutable-state/raw-RGB/
+production-framebuffer frame twice fresh; presentation owns no side
+condition, damage, RNG, turn, controller, or facility state.
+
+**Sibling:** `MOVE_MIRROR_COAT` remains unsupported. Its source batch-check
+pins lowest carrier set **151** `FRONTIER_MON_CORSOLA` and the independent
+RED_LIGHT_WALL/`gMirrorCoatWallSpriteTemplate`, wall-before-audio delay-10
+then immediate-playse timing, real prior-special-damage counter staging/result,
+and separate palette/audio/register/cleanup acceptance still required twice
+fresh in both orientations. Coverage is **93 exact / 0 partial / 0 staged /
+183 unsupported**; no boundary or barrier ratchet moved.
+
+## MOVE_BLOCK promoted exact; X_SIGN track bounded (2026-07-29)
+
+**Verdict:** `MOVE_BLOCK` is exact. The lowest suitable legal Level-50
+carrier is challenge-0 set **193** `FRONTIER_MON_SUDOWOODO_1` (species
+**185**, Block **335**, Hardy, SpDefense+HP, Hard Stone). Complete legal
+three-mon Scene-ON parties cover the whole body through first inactive cleanup
+twice fresh in both orientations: player-back **373–513 (141/141)**,
+evidence/raw
+`417c0585860b8396efa41bd2c3e5b2f3b1b90ac55dff7386928a3f6d727707f4` /
+`3837aa0b60c7a1f8decf1cae22947e27cd16935f39b562dc430e572ef8432b6c`;
+opponent-front **290–435 (146/146)**,
+`e7b64ee034e9716237bf376395c329b2d859b66ec469761b4f80311fe982391c` /
+`2e66e6ac4aaeaac809890797273f68b37d8f62f107446b9067721695d3eac276`.
+
+**Model/evidence:** reproducible extraction pins Sudowoodo front/back and
+X_SIGN with its source-shared HollowOrb palette. The typed reducer ports the
+single `gBlockXSpriteTemplate` fall, both sine bounces, side-relative OAM
+ordering, all three audio callbacks, seven flickers, wait, destruction, tag
+cleanup, and first inactive frame. `blockEvidence.ts` passes every dense
+source/component/typed-seam/software+hardware OAM/matrix/palette/register/
+audio/state/raw-RGB/production-framebuffer frame in both orientations twice
+fresh. Presentation exposes no trapped flag and owns no trap/gameplay effect,
+damage, RNG, turn, controller, or facility state.
+
+**Sibling:** `MOVE_ROCK_TOMB` remains unsupported. It independently adds
+ROCKS load/free, four `gRockTombRockSpriteTemplate` falls,
+`gRedXSpriteTemplate`, `AnimTask_ShakeMon`, platform shakes, audio/waits,
+damage/stat/controller presentation and cleanup, and has no complete dense
+both-orientation acceptance. Coverage is **92 exact / 0 partial / 0 staged /
+184 unsupported**; no boundary or barrier ratchet moved.
+
+## MOVE_WHIRLWIND promoted exact; WHIRLWIND_LINES repair complete (2026-07-29)
+
+**Verdict:** `MOVE_WHIRLWIND` is exact. The lowest suitable legal
+Level-50 carrier is challenge-0 set **153** `FRONTIER_MON_BUTTERFREE`
+(species **12**, Whirlwind **18**, Quirky, SpAttack+HP, Pecha Berry).
+Complete legal three-mon Scene-ON parties cover the body through first
+inactive cleanup twice fresh in both orientations: player-back **222–304
+(83 frames)**, evidence/raw
+`173be41493206cf4b974d0bed0f799c9f6a13d727295421e4262f69f470fd5bc` /
+`12653c28b7dd04790d0f2a8fed53b01f672d7da58d0a226a2957ca786aefb59c`;
+opponent-front **316–398 (83 frames)**,
+`ebf51bc3ffe9f65bc28e5e6e53ca72a92a01c1aaa51a844eb4c80fd5475d014f` /
+`ec7f5084e7ba307ef23b567770f1271d48b3449140f9ef1bde357abc1c34d434`.
+
+**Model/evidence:** reproducible extraction pins Butterfree front/back and
+WHIRLWIND_LINES. The typed source-relative reducer ports all six
+`gWhirlwindLineSpriteTemplate` lifecycles and flip cells,
+`AnimTask_ShakeMon2`, `AnimTask_TranslateMonEllipticalRespectSide`,
+`AnimTask_SlideOffScreen`, side-relative audio, waits, and cleanup. It owns
+no forced switch, damage, RNG, turn, controller, or facility state. The
+production compositor ports prior-callback OAM latches, side-relative
+SortSprites order, and the established one-frame enemy-shadow latch.
+
+**Acceptance / sibling:** `whirlwindEvidence.ts` passes **83/83** source,
+component, typed-seam, software/hardware OAM/matrix, palette/tag, register,
+audio, unchanged-state, raw-RGB, and production shared-framebuffer checks in
+both orientations, twice fresh. `MOVE_DRILL_PECK` remains unsupported: it adds BowMon phases,
+`AnimTask_DrillPeckHitSplats`, repeated IMPACT sprites, looped sound,
+ShakeMon2, return slide, and damage/controller presentation, and lacks its
+own dense both-orientation acceptance. Coverage is **91 exact / 0 partial /
+0 staged / 185 unsupported**; no boundary or barrier ratchet moved.
+
 ## MOVE_AROMATHERAPY promoted exact; FLOWER/SPARKLE_2 track bounded (2026-07-29)
 
 **Verdict:** `MOVE_AROMATHERAPY` is exact. The sole legal Level-50 carrier is
