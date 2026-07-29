@@ -27171,3 +27171,26 @@ both verify scripts/census independently re-verified before this entry.)*
 - **Notes:** the cwd-reset launcher policy held all session (zero cwd
   bites in 17 rounds). PAPERCUTS observed by workers: compare-out race
   (~2 min), probe log volume (~4 min) — both minor, not filed.
+
+---
+
+## 701 — [BOUNDED MAIN WORKER 2026-07-29 ~14:32] Battle-command seam Slice 5 landed
+
+- **State:** implementation `c9353673`; tree green at **516 files / 5229
+  tests + 1 deliberate animation-lane skip**, production build, and
+  `git diff --check`.
+- **Did:** action chrome now redraws the active battler prompt, all four
+  labels, and the typed 2x2 cursor from source battle-window tiles/font.
+  Source no-wrap action navigation keeps BAG/RUN inert; POKéMON enters a
+  request-owned `party-handoff`, and only an exact returned legal party index
+  proceeds to ordinary submission. FIGHT B preserves the request/action
+  cursor. Tier 1 pins all 16 cursor transitions and the switch handoff.
+- **Next:** design §4 Slice 6: connect the generated command boundary and
+  complete battle-pic catalogs to this lifecycle, then add the explicit-OFF
+  128-frame breadth proof.
+- **Notes:** all fourteen windows exact: Battle 2 **209/209**, FIGHT
+  **235/235**, reopen **90/90**; turns 3–13 **254/254, 44/44, 42/42, 44/44,
+  93/93, 88/88, 111/111, 83/83, 56/56, 46/46, 57/57**. No core, party-screen,
+  icon consumer, trace/capture list, issue, census, roadmap, animation,
+  battle/turn/tick selector, PP/HP/RNG, or turn-order change. PAPERCUT:
+  parallel compare commands race over `tools/compare/out/latest`, ~1 min.

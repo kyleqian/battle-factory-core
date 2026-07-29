@@ -13,6 +13,35 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 704 — [BOUNDED MAIN WORKER 2026-07-29 ~16:05] Battle-command seam Slice 6 Part B field-art route landed; breadth trace honestly open
+
+- **State:** implementation `216a7fab`; tree green at **518 files / 5254
+  tests + 1 deliberate animation-lane skip**, production build, required
+  targeted acceptance **148/148**, and `git diff --check`.
+- **Did:** the typed command render view now resolves both active battlers'
+  complete front/back art, palettes, source pic coordinates, and resting
+  origins from live species IDs through the banked 376-species catalogs.
+  Canonical Battle 2 consumes that same resolver pixel-neutrally. Added the
+  app-visible `battle-command-generated-off` stage: the live generated
+  orchestrator reaches a settled GRANBULL-vs-ARON action/FIGHT field with
+  live healthboxes/moves and advances through the ordinary request reducer.
+- **Next:** the explicit-OFF breadth proof remains **open (0/128 claimed; no
+  trace committed)**. The required final legal A-confirm immediately drives
+  the generated logical kernel/trainer and publishes the next player request,
+  while the ROM holds the confirmed FIGHT field through its Scene-OFF
+  action-resolution presentation. That typed resolution/next-command handoff
+  belongs to design §5's send-out/action-resolution lifecycle work; do not
+  hide it with a screenshot, delayed tick branch, or thinned capture window.
+- **Notes:** all fourteen immutable windows exact: Battle 2 **209/209**,
+  FIGHT **235/235**, reopen **90/90**; turns 3–13 **254/254, 44/44, 42/42,
+  44/44, 93/93, 88/88, 111/111, 83/83, 56/56, 46/46, 57/57**. No canonical
+  import, unsupported barrier, capture removal, battle/turn/absolute-tick
+  selector, damage/RNG/turn-order, party selector, or animation change.
+  PAPERCUT: `bin/oracle lab` default output flooded the session while only a
+  screenshot path was needed, ~1 min.
+
+---
+
 ## 703 — [BOUNDED MAIN WORKER 2026-07-29 ~15:31] Battle-command seam Slice 6 Part A landed
 
 - **State:** implementation `d995671d`; tree green at **518 files / 5254
@@ -115,28 +144,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   existing asset must rerun that asset's consumer traces, not just
   `npm test` — the fourteen-window battle-command set never covered the
   party-select windows.
-
----
-
-## 701 — [BOUNDED MAIN WORKER 2026-07-29 ~14:32] Battle-command seam Slice 5 landed
-
-- **State:** implementation `c9353673`; tree green at **516 files / 5229
-  tests + 1 deliberate animation-lane skip**, production build, and
-  `git diff --check`.
-- **Did:** action chrome now redraws the active battler prompt, all four
-  labels, and the typed 2x2 cursor from source battle-window tiles/font.
-  Source no-wrap action navigation keeps BAG/RUN inert; POKéMON enters a
-  request-owned `party-handoff`, and only an exact returned legal party index
-  proceeds to ordinary submission. FIGHT B preserves the request/action
-  cursor. Tier 1 pins all 16 cursor transitions and the switch handoff.
-- **Next:** design §4 Slice 6: connect the generated command boundary and
-  complete battle-pic catalogs to this lifecycle, then add the explicit-OFF
-  128-frame breadth proof.
-- **Notes:** all fourteen windows exact: Battle 2 **209/209**, FIGHT
-  **235/235**, reopen **90/90**; turns 3–13 **254/254, 44/44, 42/42, 44/44,
-  93/93, 88/88, 111/111, 83/83, 56/56, 46/46, 57/57**. No core, party-screen,
-  icon consumer, trace/capture list, issue, census, roadmap, animation,
-  battle/turn/tick selector, PP/HP/RNG, or turn-order change. PAPERCUT:
-  parallel compare commands race over `tools/compare/out/latest`, ~1 min.
 
 ---
