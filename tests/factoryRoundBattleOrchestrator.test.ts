@@ -5,6 +5,7 @@ import type { FactoryRentalRecord } from "../src/engine/battleScenario.ts";
 import type { BattleSubmittedDecision } from "../src/engine/battleDecisionBoundary.ts";
 import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
 import {
+  advanceFactoryRoundBattleCommand,
   advanceFactoryRoundPresentation,
   chooseFactoryRoundSwap,
   completeFactoryRoundPresentation,
@@ -42,6 +43,44 @@ function acknowledgeAndAdvance(
   return advanceFactoryRoundPresentation(
     completeFactoryRoundPresentation(state, { commandId }),
   );
+}
+
+function createStartedGeneratedBattle(
+  seed: number,
+): FactoryRoundBattleOrchestratorState {
+  const playerRecords = [record(664), record(678), record(527)] as const;
+  const state = createFactoryRoundBattleOrchestrator({
+    id: `generated-command-seam-${seed}`,
+    rngValue: seed,
+    factoryWinStreak: 0,
+    playerTrainerId: PLAYER_TRAINER_ID,
+    battleTowerLevel50WinStreak: 0,
+    facilityState: { rentsCount: 0 },
+    rentals: {
+      type: "currentRecords",
+      playerRentalRecords: playerRecords,
+      savedRentalRecords: [...playerRecords, record(1), record(2), record(3)],
+    },
+  });
+  return acknowledgeAndAdvance(state);
+}
+
+function advanceCommandToPhase(
+  state: FactoryRoundBattleOrchestratorState,
+  phase: NonNullable<
+    FactoryRoundBattleOrchestratorState["battleCommandPresentation"]
+  >["lifecycle"]["phase"],
+): FactoryRoundBattleOrchestratorState {
+  let next = state;
+  for (
+    let budget = 0;
+    budget < 32 && next.battleCommandPresentation?.lifecycle.phase !== phase;
+    budget += 1
+  ) {
+    next = advanceFactoryRoundBattleCommand(next, new Set());
+  }
+  expect(next.battleCommandPresentation?.lifecycle.phase).toBe(phase);
+  return next;
 }
 
 function choosePlayerDecision(
@@ -119,6 +158,57 @@ function driveGeneratedRoundToCompletion(
 }
 
 describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
+  it("routes a live request through FIGHT slot 3 and seeds the next request from the controller-owned cursor", () => {
+    let state = createStartedGeneratedBattle(RNG_SEED);
+    const firstBoundary = state.battle?.boundary;
+    if (
+      firstBoundary?.kind !== "decision-required"
+      || firstBoundary.request.kind !== "command"
+    ) {
+      throw new Error("expected a live player command boundary");
+    }
+    expect(state.battleCommandPresentation?.request).toEqual(firstBoundary.request);
+    expect(state.battleCommandPresentation?.field.player.moveIds)
+      .toEqual(state.battle?.rules.rulesContext.battlers[0].moves);
+
+    state = advanceCommandToPhase(state, "action-menu");
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"] as const));
+    state = advanceCommandToPhase(state, "fight-menu");
+    state = advanceFactoryRoundBattleCommand(state, new Set(["RIGHT"] as const));
+    state = advanceFactoryRoundBattleCommand(state, new Set(["DOWN"] as const));
+    expect(state.battleCommandPresentation?.fightCursor).toBe(3);
+
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"] as const));
+    expect(state.battleCommandPresentation?.request.requestId)
+      .not.toBe(firstBoundary.request.requestId);
+    expect(state.moveSelectionCursors[0]).toBe(3);
+    expect(state.battleCommandPresentation?.fightCursor).toBe(3);
+    expect(state.battleCommandPresentation?.fightDisplayCursor).toBe(3);
+  });
+
+  it("resets the persistent cursor when a live player switch-in changes the active party slot", () => {
+    let state = createStartedGeneratedBattle(RNG_SEED);
+    state = advanceCommandToPhase(state, "action-menu");
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"] as const));
+    state = advanceCommandToPhase(state, "fight-menu");
+    state = advanceFactoryRoundBattleCommand(state, new Set(["RIGHT"] as const));
+    state = advanceFactoryRoundBattleCommand(state, new Set(["DOWN"] as const));
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"] as const));
+    expect(state.battleCommandPresentation?.fightCursor).toBe(3);
+
+    const beforePartyIndex = state.battle?.rules.rulesContext.battlers[0].partyIndex;
+    const switchDecision = state.battleCommandPresentation?.request.legalDecisions.find(
+      (decision) => decision.kind === "switch",
+    );
+    if (switchDecision?.kind !== "switch") throw new Error("expected a legal switch");
+    state = submitFactoryRoundPlayerDecision(state, switchDecision);
+
+    expect(state.battle?.rules.rulesContext.battlers[0].partyIndex).not.toBe(beforePartyIndex);
+    expect(state.moveSelectionCursors[0]).toBe(0);
+    expect(state.battleCommandPresentation?.fightCursor).toBe(0);
+    expect(state.battleCommandPresentation?.fightDisplayCursor).toBe(0);
+  });
+
   it("persists any accepted swaps once into the next challenge's rental rank", () => {
     const accepted = driveGeneratedRoundToCompletion(
       17,

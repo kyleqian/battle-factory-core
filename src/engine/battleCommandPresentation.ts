@@ -222,6 +222,7 @@ function fieldBattler(
 export function createBattleCommandPresentation(
   requestInput: BattleCommandRequest,
   rules: BattleScriptRulesContext,
+  initialFightCursor: 0 | 1 | 2 | 3 = 0,
 ): BattleCommandPresentationState {
   const request = createBattleCommandRequest(requestInput);
   if (request.side !== "player" || request.battler !== 0) {
@@ -291,8 +292,8 @@ export function createBattleCommandPresentation(
       ),
     }),
     actionCursor: 0,
-    fightCursor: 0,
-    fightDisplayCursor: 0,
+    fightCursor: initialFightCursor,
+    fightDisplayCursor: initialFightCursor,
     legalMoveBySlot: Object.freeze(legalMoveBySlot),
     legalSwitchPartyIndexes: Object.freeze(legalSwitchPartyIndexes),
     pendingDecision: null,

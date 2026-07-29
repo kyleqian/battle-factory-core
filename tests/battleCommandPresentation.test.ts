@@ -214,6 +214,16 @@ describe("battle-command presentation state construction", () => {
     expect(Object.isFrozen(state.legalSwitchPartyIndexes)).toBe(true);
   });
 
+  it("keeps fresh canonical-window construction identical through the zero-cursor seeding path", () => {
+    const { request, rules } = canonicalBoundary();
+    const freshLifecycle = createBattleCommandPresentation(request, rules);
+    const explicitlyResetLifecycle = createBattleCommandPresentation(request, rules, 0);
+
+    expect(explicitlyResetLifecycle).toEqual(freshLifecycle);
+    expect(projectPresentation(explicitlyResetLifecycle))
+      .toEqual(projectPresentation(freshLifecycle));
+  });
+
   it("adapts a noncanonical live field, party indexes, statuses, PP, and sparse exact legal decisions", () => {
     const canonical = canonicalBoundary();
     const player = canonical.rules.battlers[0];
@@ -603,6 +613,21 @@ describe("battle-command presentation renderer", () => {
           status: opponentStatus,
         },
       });
+      expect(view.fieldArt.player).toMatchObject({
+        species: 240,
+        speciesSymbol: "MAGBY",
+        coords: { width: 48, height: 48, yOffset: 11 },
+        origin: { x: 40, y: 59 },
+      });
+      expect(view.fieldArt.opponent).toMatchObject({
+        species: 25,
+        speciesSymbol: "PIKACHU",
+        origin: { x: 144, y: 17 },
+      });
+      expect(view.fieldArt.player.pic.tileset.tiles).toHaveLength(64);
+      expect(view.fieldArt.player.pic.palette).toHaveLength(16);
+      expect(view.fieldArt.opponent.pic.tileset.tiles).toHaveLength(64);
+      expect(view.fieldArt.opponent.pic.palette).toHaveLength(16);
       expect(view.actionMenu).toEqual({
         prompt: "What will MAGBY do?",
         options: ["FIGHT", "BAG", "POKéMON", "RUN"],

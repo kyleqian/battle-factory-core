@@ -888,7 +888,7 @@ export function typeMultiplierTenths(attackingType: string, defendingTypes: read
 export function runCheckBadMovePreamble(input: Readonly<{
   rng: BattleRngState;
   moveId: number;
-  target: FactoryAiCheckBadMoveTarget;
+  target: FactoryAiCheckBadMoveRoarTarget;
   attacker: FactoryAiCheckBadMoveAttacker;
   drawOrdinalStart: number;
   reasonPrefix: string;
@@ -1230,6 +1230,19 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_ROAR -> AI_CBM_Roar
+  // (`data/battle_ai_scripts.s:124,334-339`, doc §30).
+  if (move.effect === "EFFECT_ROAR") {
+    const roar = runCbmRoar(target, rng, ordinal, `${input.reasonPrefix}-roar`);
+    for (const draw of roar.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: roar.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: roar.scoreDelta,
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: EFFECT_SLEEP -> AI_CBM_Sleep
   // (`data/battle_ai_scripts.s:104,216-222`, doc §29).
   if (move.effect === "EFFECT_SLEEP") {
@@ -1280,6 +1293,11 @@ function runCbmSpDefUp(attackerSpDefStage: number): number {
   return attackerSpDefStage === MAX_STAT_STAGE ? -10 : 0;
 }
 
+export type FactoryAiCheckBadMoveRoarTarget = FactoryAiCheckBadMoveTarget & Readonly<{
+  /** Alive, non-empty, non-Egg target-side bench count, excluding the active singles party index. */
+  usablePartyMons?: number;
+}>;
+
 /**
  * `AI_CBM_Sleep` (`data/battle_ai_scripts.s:216-222`, doc §29): one fresh
  * target ability read, then Insomnia, Vital Spirit, primary-status, and
@@ -1308,5 +1326,34 @@ function runCbmSleep(
     rng: ability.rng,
     draws: Object.freeze(ability.draw === null ? [] : [ability.draw]),
     scoreDelta: blocked ? -10 : 0,
+  });
+}
+
+/**
+ * `AI_CBM_Roar` (`data/battle_ai_scripts.s:334-339`, doc §30): count usable
+ * target-side party members first; zero JUMPs to -10 without an ability
+ * read. A positive count FALLS THROUGH to one fresh target `get_ability`;
+ * Suction Cups then JUMPs to -10, every other result FALLS THROUGH to end.
+ */
+const ABILITY_SUCTION_CUPS = "ABILITY_SUCTION_CUPS";
+
+function runCbmRoar(
+  target: FactoryAiCheckBadMoveRoarTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckBadMoveDraw[];
+  scoreDelta: number;
+}> {
+  if ((target.usablePartyMons ?? 0) === 0) {
+    return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
+  }
+  const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
+  return Object.freeze({
+    rng: ability.rng,
+    draws: Object.freeze(ability.draw === null ? [] : [ability.draw]),
+    scoreDelta: ability.ability === ABILITY_SUCTION_CUPS ? -10 : 0,
   });
 }

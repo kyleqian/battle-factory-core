@@ -5912,6 +5912,7 @@ function drawBattle2ActionMenuWindow(
   bounceOverride?: { onixY2: number; healthboxY2: number },
   revealedOverride?: boolean,
   healthboxes?: BattleCommandPresentationRenderView["healthboxes"],
+  fieldArt?: BattleCommandPresentationRenderView["fieldArt"],
 ): void {
   const age = actionMenuAge(t, handoffTick);
   const playerVisualT = playerTrainerSendOutClock(t, handoffTick, "jenson");
@@ -5921,15 +5922,35 @@ function drawBattle2ActionMenuWindow(
     : { onixY2: 0, healthboxY2: 0 });
 
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
-  drawKabutoHSlideWobble(fb, t, handoffTick);
-  if (revealed) {
+  if (fieldArt) {
     drawSpriteSheet(
       fb,
-      onixBackSprite.tileset,
-      onixBackSprite.palette,
-      ONIX_MATERIALIZE_CORNER.x,
-      ONIX_MATERIALIZE_CORNER.y + bounce.onixY2,
+      fieldArt.opponent.pic.tileset as Tileset,
+      fieldArt.opponent.pic.palette as RgbColor[],
+      fieldArt.opponent.origin.x,
+      fieldArt.opponent.origin.y,
     );
+  } else {
+    drawKabutoHSlideWobble(fb, t, handoffTick);
+  }
+  if (revealed) {
+    if (fieldArt) {
+      drawSpriteSheet(
+        fb,
+        fieldArt.player.pic.tileset as Tileset,
+        fieldArt.player.pic.palette as RgbColor[],
+        fieldArt.player.origin.x,
+        fieldArt.player.origin.y + bounce.onixY2,
+      );
+    } else {
+      drawSpriteSheet(
+        fb,
+        onixBackSprite.tileset,
+        onixBackSprite.palette,
+        ONIX_MATERIALIZE_CORNER.x,
+        ONIX_MATERIALIZE_CORNER.y + bounce.onixY2,
+      );
+    }
   } else {
     drawPlayerMaterializeSettle(fb, playerVisualT);
   }
@@ -6094,6 +6115,7 @@ function drawBattle2FightSubmenuWindow(
         undefined,
         revealed,
         view.healthboxes,
+        view.fieldArt,
       );
       if (revealed) drawBattleCommandActionChrome(framebuffer, view.actionMenu);
     },
@@ -6106,6 +6128,7 @@ function drawBattle2FightSubmenuWindow(
         undefined,
         true,
         view.healthboxes,
+        view.fieldArt,
       );
       drawFightSubmenuChromeFromLiveState(
         framebuffer,
@@ -15928,6 +15951,53 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
     state.encounter,
     state.trainerPresentation,
   );
+}
+
+/**
+ * App-visible renderer for a live generated command boundary. The complete
+ * field comes from the request-owned typed presentation; only source-derived
+ * battle background/window/healthbox mechanisms are shared with the legacy
+ * scene. This route deliberately begins at the command window and owns no
+ * send-out or turn-resolution lifecycle.
+ */
+export function renderGeneratedBattleCommandPresentation(
+  fb: Uint8Array,
+  presentation: BattleCommandPresentationState,
+): void {
+  const bounceTick = presentation.lifecycle.phaseElapsed;
+  const bounce = menuIdleBounce(bounceTick);
+  renderBattleCommandPresentation(fb, presentation, {
+    drawActionMenu(framebuffer, view, revealed) {
+      drawBattle2ActionMenuWindow(
+        framebuffer,
+        bounceTick,
+        0,
+        0,
+        bounce,
+        revealed,
+        view.healthboxes,
+        view.fieldArt,
+      );
+      if (revealed) drawBattleCommandActionChrome(framebuffer, view.actionMenu);
+    },
+    drawFightMenu(framebuffer, view) {
+      drawBattle2ActionMenuWindow(
+        framebuffer,
+        bounceTick,
+        0,
+        0,
+        bounce,
+        true,
+        view.healthboxes,
+        view.fieldArt,
+      );
+      drawFightSubmenuChromeFromLiveState(
+        framebuffer,
+        view.fightMenu.displayCursor,
+        view.fightMenu.moveset,
+      );
+    },
+  });
 }
 
 /**

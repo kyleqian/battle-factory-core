@@ -26,6 +26,15 @@ import {
   createPostwinStateFromOpponentRentalRecords,
   type FactoryPostwinOpponentRentalRecords,
 } from "../../src/engine/postwin.ts";
+import frontierMonsData from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
+import naturesData from "../../src/data/gen/natures.json" with { type: "json" };
+import { createFactoryCorpusPartyMember } from "../../src/engine/factoryCorpusParty.ts";
+import {
+  advanceFactoryRoundPresentation,
+  completeFactoryRoundPresentation,
+  createFactoryRoundBattleOrchestrator,
+} from "../../src/engine/factoryRoundBattleOrchestrator.ts";
+import type { FactoryRentalRecord } from "../../src/engine/battleScenario.ts";
 
 export interface AppCapture {
   frame: number;
@@ -60,12 +69,72 @@ const GENERATED_POSTWIN_ROCK_UNRESTRAINED_RECORDS = [
   { setId: 122, personality: 3471709106, fixedIv: 3, abilitySlot: 0 },
 ] as const;
 
+const generatedNatureByName = new Map(
+  naturesData.natures.map((row) => [row.name, row.index]),
+);
+
+function generatedCommandRecord(setId: number): FactoryRentalRecord {
+  const set = frontierMonsData.entries[setId]!;
+  const personality = generatedNatureByName.get(set.nature)!;
+  const input = {
+    setId,
+    personality,
+    fixedIv: 31,
+    abilitySlot: (personality & 1) as 0 | 1,
+    otId: 0x89ab_cdef,
+  };
+  return Object.freeze({
+    ...input,
+    abilitySlot: createFactoryCorpusPartyMember(input).abilitySlot,
+  });
+}
+
+function generatedBattleCommandStage(state: EngineState): EngineState {
+  const playerRentalRecords = [
+    generatedCommandRecord(664),
+    generatedCommandRecord(678),
+    generatedCommandRecord(527),
+  ] as const;
+  let orchestrator = createFactoryRoundBattleOrchestrator({
+    id: "battle-command-generated-off",
+    rngValue: 4,
+    factoryWinStreak: 0,
+    playerTrainerId: 0x89ab_cdef,
+    battleTowerLevel50WinStreak: 0,
+    facilityState: { rentsCount: 0 },
+    rentals: {
+      type: "currentRecords",
+      playerRentalRecords,
+      savedRentalRecords: [
+        ...playerRentalRecords,
+        generatedCommandRecord(1),
+        generatedCommandRecord(2),
+        generatedCommandRecord(3),
+      ],
+    },
+  });
+  const commandId = orchestrator.round.presentation?.command.commandId;
+  if (commandId === undefined) {
+    throw new Error("generated command stage requires the battle-start command");
+  }
+  orchestrator = advanceFactoryRoundPresentation(
+    completeFactoryRoundPresentation(orchestrator, { commandId }),
+  );
+  return {
+    ...state,
+    factoryRoundBattleOrchestrator: orchestrator,
+    rngMode: "frontierBattle",
+    rngValue: orchestrator.battle?.rng.value ?? state.rngValue,
+  };
+}
+
 /**
  * Named, dev-time-only staging registry. A stage may replace logical state at
  * a target boundary while the oracle still replays the untouched anchor
  * trace. Production code never imports this registry.
  */
 const APP_STAGES: Readonly<Record<string, AppStage>> = {
+  "battle-command-generated-off": generatedBattleCommandStage,
   "factory-postwin-canonical-opponent-party":
     createFactoryPostwinStage(CANONICAL_POSTWIN_OPPONENT_RECORDS),
   "factory-postwin-generated-rock-unrestrained-opponent-party":

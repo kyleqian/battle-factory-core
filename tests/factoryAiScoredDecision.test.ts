@@ -157,6 +157,73 @@ describe("Factory AI mask 1 (CheckBadMove only) via direct construction", () => 
   });
 });
 
+describe("Roar zero-usable-bench live receipt (doc §30)", () => {
+  it.each([
+    [1, 609_957_550, 1, 1_920_291_958],
+    [2, 2_385_371_400, 2, 1_857_269_776],
+  ])("seed %i matches the OFF PP-selected Light Screen slot and exact RNG endpoint", (
+    _seed,
+    rngStart,
+    expectedSlot,
+    expectedRng,
+  ) => {
+    const stages = NEUTRAL_STAGES;
+    const view: FactoryAiScoredView = Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1, targetBattler: 0 }),
+      factory: Object.freeze({
+        levelMode: 0,
+        battleMode: 0,
+        factoryWinStreak: 28,
+        trainerOpponentId: 222,
+      }),
+      moves: [46, 113, 113, 113] as const,
+      attacker: Object.freeze({
+        types: ["TYPE_GHOST", "TYPE_GHOST"] as const,
+        attack: 90, defense: 150, spAttack: 80, spDefense: 150, speed: 45, level: 50,
+        statStages: stages, isFirstTurn: 2, hp: 115, maxHp: 115,
+        lightScreenUp: false, ability: "ABILITY_PRESSURE",
+      }),
+      target: Object.freeze({
+        species: 200,
+        types: ["TYPE_GHOST", "TYPE_GHOST"] as const,
+        attack: 80, defense: 80, spAttack: 105, spDefense: 105, speed: 105, level: 50,
+        statStages: stages, isFirstTurn: 0, hp: 135, maxHp: 135,
+        ability: "ABILITY_LEVITATE", knownAbility: null, usablePartyMons: 0,
+      }),
+    });
+    const result = chooseFactoryAiScoredDecision({
+      view,
+      request: fourSlotRequest,
+      rng: { value: rngStart, calls: 0 },
+    });
+    expect(result.trace.slotScores.map((slot) => [
+      slot.checkBadMoveDelta,
+      slot.checkViabilityDelta,
+      slot.finalScore,
+    ])).toEqual([
+      [-10, -3, 87],
+      [0, -2, 98],
+      [0, -2, 98],
+      [0, -2, 98],
+    ]);
+    expect(result.trace.draws).toHaveLength(8);
+    expect(result.trace.draws.map((draw) => draw.kind)).toEqual([
+      "setup-simulated-rng",
+      "setup-simulated-rng",
+      "setup-simulated-rng",
+      "setup-simulated-rng",
+      "light-screen-roll",
+      "light-screen-roll",
+      "light-screen-roll",
+      "best-move-tie",
+    ]);
+    expect(result.trace.tie.chosenDecision).toMatchObject({ kind: "use-move", moveSlot: expectedSlot });
+    expect(result.rng.value).toBe(expectedRng);
+  });
+});
+
 describe("Factory AI mask 7 (CheckBadMove + TryToFaint + CheckViability), scenario reproduction", () => {
   it("unambiguous (Surf/RockSlide/BodySlam/Thunderbolt vs pure-Ground Marowak at 5/135 HP): 11 draws, Thunderbolt loses", () => {
     const rng = advanceToDecisionStart(249_678_687); // frame-100 rngValue, seed 1
