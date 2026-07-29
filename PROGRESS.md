@@ -42,7 +42,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   used the historical Battle-Scene-ON profile.
 
 ---
-## 655 — [SUPERVISOR WIND-DOWN 2026-07-28 ~19:15] Session close: census CLOSED at 100%; seam handoff consumed; 5 defects found+fixed; ISSUES #41 deleted; entry-hook/AI surfaces verified complete
+## 655 — [SUPERVISOR WIND-DOWN 2026-07-28 ~19:15, amended ~19:25] Session close: census CLOSED at 100%; seam handoff consumed; 5 defects found+fixed; ISSUES #41 deleted; entry-hook/AI surfaces verified complete
 
 - **State:** union green at **441 files / 4792 tests**, production build,
   `git diff --check`, census byte-idempotent at **214/214 effects, 355/355
@@ -71,6 +71,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (session to ~21:06 — an unfolded animation-main at next orient is
   expected); (4) switch/item AI and doubles/Open-level remain out of scope
   by mission.
+- **Amendment (~19:25):** one more prepped step landed after this entry was
+  first written: entry 656's turn13-sandattack seam conversion (§15 dossier
+  consumed; 190/190 + 8-trace regression sweep exact, supervisor-rerun;
+  four turn-keyed literals deleted; suite 441/4791). Final union verified
+  green; 25 workers total, 0 failures. No §16 prep-scout exists, so the
+  next #39 window needs a scout+wire pair — left for the next session.
 - **Notes:** no usage-limit events; both oracles fresh all session (OFF
   restarted at orient). PAPERCUTS: added supervisor cwd-persistence trap,
   bumped generated-JSON search entry. Ledger doc-drift lesson recorded in
