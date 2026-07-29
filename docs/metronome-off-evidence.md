@@ -99,10 +99,12 @@ PP slots, and all four move-history arrays.  Run either with:
 - `mechanic-metronome-clefable-off.json` (seed `305419897`) arms Metronome at
   frame 39 with `sRandCount=9419`, `gRngValue=0xa1600022`.  At frame 135 the
   selector's one candidate draw returns 45622 and yields candidate 55,
-  **Mist**, accepted.  (`sRandCount` reaches 9423 in that frame because the
-  selected Mist route also performs its own later work; the probe's selector
+  **Water Gun** (pinned Emerald data: 54 is Mist, 55 is Water Gun; corrected
+  by the consuming row-8 worker), accepted.  (`sRandCount` reaches 9423 in
+  that frame because the selected Water Gun route also performs its own
+  later work; the probe's selector
   ledger stops exactly at the accepted candidate.)  At frame 164 slot 0 PP is
-  10→9: that is Metronome's slot; no PP exists or changes for the called Mist.
+  10→9: that is Metronome's slot; no PP exists or changes for the called Water Gun.
   At frame 448 the ROM has `currentMove=55`, `chosenMove=118`,
   `calledMove=0`, `lastPrintedMoves=[118,0]`, `lastMoves=[118,0]`,
   `lastResultingMoves=[55,0]`, and `lastLandedMoves=[0,55]`.
@@ -118,7 +120,7 @@ PP slots, and all four move-history arrays.  Run either with:
   `lastPrintedMoves=[118,33]`, `lastMoves=[118,33]`,
   `lastResultingMoves=[125,33]`, and `lastLandedMoves=[33,125]`.
 
-The called moves in these two stock-ROM receipts are executable today (Mist
+The called moves in these two stock-ROM receipts are executable today (Water Gun
 and Bone Club), which makes the ownership observation easy to read.  A
 future Metronome implementation still must retain its gate until *all* legal
 destinations are executable; a stock-ROM receipt would remain valid even if a
