@@ -576,6 +576,7 @@ import charmAsset from "../animation/assets/charm.json" with { type: "json" };
 import fakeTearsAsset from "../animation/assets/fake-tears.json" with { type: "json" };
 import tickleAsset from "../animation/assets/tickle.json" with { type: "json" };
 import metronomeAsset from "../animation/assets/metronome.json" with { type: "json" };
+import restAsset from "../animation/assets/rest.json" with { type: "json" };
 import needleArmAsset from "../animation/assets/needle-arm.json" with { type: "json" };
 import sandstormAsset from "../animation/assets/sandstorm.json" with { type: "json" };
 import selfDestructAsset from "../animation/assets/selfDestruct.json" with { type: "json" };
@@ -748,6 +749,7 @@ import {
   sceneOnTickleView,
   sceneOnMetronomeView,
   sceneOnFollowMeView,
+  sceneOnRestView,
   sceneOnNeedleArmView,
   sceneOnSandstormView,
   sceneOnDragonClawView,
@@ -767,6 +769,7 @@ import {
   type SceneOnTicklePresentationState,
   type SceneOnMetronomePresentationState,
   type SceneOnFollowMePresentationState,
+  type SceneOnRestPresentationState,
   type SceneOnNeedleArmPresentationState,
   type SceneOnSandstormPresentationState,
   type SceneOnScaryFacePresentationState,
@@ -1354,6 +1357,11 @@ const metronomeArt = metronomeAsset as {
   togeticFront: { tileset: Tileset; palette: RgbColor[] };
   finger: { tileset: Tileset; palette: RgbColor[] };
   thoughtBubble: { tileset: Tileset; palette: RgbColor[] };
+};
+const restArt = restAsset as {
+  teddiursaBack: { tileset: Tileset; palette: RgbColor[] };
+  teddiursaFront: { tileset: Tileset; palette: RgbColor[] };
+  letterZ: { tileset: Tileset; palette: RgbColor[] };
 };
 const needleArmArt = needleArmAsset as {
   cacneaBack: { tileset: Tileset; palette: RgbColor[] };
@@ -19928,6 +19936,130 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "TOGETIC used" : "Foe TOGETIC used",
       "FOLLOW ME!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "REST") {
+    const restState = state as SceneOnRestPresentationState;
+    const view = sceneOnRestView(restState);
+    // Sprite callbacks update gSprites before the following VBlank copies
+    // software OAM and matrices to hardware.
+    const displayed = sceneOnRestView({
+      ...restState,
+      age: restState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "TEDDIURSA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "TEDDIURSA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged REST pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const profile = restState.config.fieldProfile;
+    const attackerHp = playerToOpponent
+      ? profile.playerHp : profile.opponentHp;
+    const attackerMaxHp = playerToOpponent
+      ? profile.playerMaxHp : profile.opponentMaxHp;
+    const attackerStatus = playerToOpponent
+      ? profile.playerStatus : profile.opponentStatus;
+    if (
+      attackerStatus !== "sleep"
+      || profile.pendingHeal.battler !== "attacker"
+      || profile.pendingHeal.fromHp !== attackerHp
+      || profile.pendingHeal.toHp !== attackerMaxHp
+    ) {
+      throw new Error("REST presentation requires the immutable trysetrest result");
+    }
+    const teddiursaSource = playerToOpponent
+      ? restArt.teddiursaBack : restArt.teddiursaFront;
+    const teddiursa = playerToOpponent
+      ? teddiursaSource
+      : {
+          ...teddiursaSource,
+          tileset: subTileset(teddiursaSource.tileset, 0, 8),
+        };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      teddiursa.tileset,
+      teddiursa.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+    // Equal-subpriority sprites are transferred newest-first by
+    // BuildOamBuffer, so later Letter-Z allocations win overlap pixels.
+    for (const letter of displayed.letters) {
+      drawSpriteSheetAffineRotate(
+        fb,
+        restArt.letterZ.tileset,
+        restArt.letterZ.palette,
+        letter.x + letter.x2,
+        letter.y + letter.y2 + letter.screenCenterYOffset,
+        letter.matrix.a,
+        letter.matrix.b,
+        letter.matrix.c,
+        letter.matrix.d,
+        undefined,
+        false,
+      );
+    }
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "TEDDIURSA",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: profile.opponentStatus,
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "TEDDIURSA" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: profile.playerStatus,
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "TEDDIURSA went" : "Foe TEDDIURSA went",
+      "to sleep!",
       99,
     );
     return;

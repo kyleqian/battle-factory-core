@@ -296,6 +296,10 @@ import {
   type FollowMeState,
 } from "./followMe.ts";
 import {
+  restAtAge,
+  type RestState,
+} from "./rest.ts";
+import {
   needleArmAtAge,
   type NeedleArmState,
 } from "./needleArm.ts";
@@ -534,6 +538,7 @@ export interface SceneOnPresentationBattler {
     | "CHANSEY"
     | "CACNEA"
     | "PHANPY"
+    | "TEDDIURSA"
     | "WARTORTLE";
   readonly geometry: SceneOnBattlerGeometry;
 }
@@ -1300,6 +1305,24 @@ export interface SceneOnFollowMeConfig {
   readonly attackerTop: Readonly<MetronomePoint>;
 }
 
+export interface SceneOnRestFieldProfile extends SceneOnDragonRageFieldProfile {
+  readonly playerStatus: "none" | "sleep";
+  readonly opponentStatus: "none" | "sleep";
+  /** Immutable `trysetrest` result; the animation never applies the heal. */
+  readonly pendingHeal: Readonly<{
+    readonly battler: "attacker";
+    readonly fromHp: number;
+    readonly toHp: number;
+  }>;
+}
+
+export interface SceneOnRestConfig {
+  readonly move: "REST";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnRestFieldProfile>;
+}
+
 export interface SceneOnNeedleArmConfig {
   readonly move: "NEEDLE_ARM";
   readonly attacker: SceneOnPresentationBattler;
@@ -1538,6 +1561,7 @@ export type SceneOnMoveConfig =
   | SceneOnTickleConfig
   | SceneOnMetronomeConfig
   | SceneOnFollowMeConfig
+  | SceneOnRestConfig
   | SceneOnNeedleArmConfig
   | SceneOnSandstormConfig
   | SceneOnTailGlowConfig
@@ -1611,6 +1635,8 @@ export type SceneOnMetronomePresentationState =
   SceneOnMovePresentationState<SceneOnMetronomeConfig>;
 export type SceneOnFollowMePresentationState =
   SceneOnMovePresentationState<SceneOnFollowMeConfig>;
+export type SceneOnRestPresentationState =
+  SceneOnMovePresentationState<SceneOnRestConfig>;
 export type SceneOnNeedleArmPresentationState =
   SceneOnMovePresentationState<SceneOnNeedleArmConfig>;
 export type SceneOnSandstormPresentationState =
@@ -1822,6 +1848,12 @@ export interface SceneOnMetronomeView extends MetronomeState {
 }
 
 export interface SceneOnFollowMeView extends FollowMeState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnRestView extends RestState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3567,6 +3599,25 @@ export function sceneOnFollowMeView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attackerTop,
+    ),
+  };
+}
+
+/** `age=0` is Move_REST's first displayed source-script frame. */
+export function sceneOnRestView(
+  state: SceneOnRestPresentationState,
+): SceneOnRestView {
+  if (state.config.move !== "REST") {
+    throw new Error(`expected REST presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...restAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
     ),
   };
 }

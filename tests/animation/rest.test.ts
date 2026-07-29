@@ -11,6 +11,7 @@ describe("MOVE_REST source reducer", () => {
     const player = { x: 72, y: 80 };
     expect(restAtAge(4, "player", player).letters).toEqual([{
       index: 0, slot: 3, x: 76, y: 70, x2: 0, y2: 0,
+      screenCenterYOffset: 16,
       matrix: { a: 1771, b: 1528, c: -1528, d: 1771 },
       callback: "AnimSleepLetterZ_Step",
     }]);
@@ -39,7 +40,7 @@ describe("MOVE_REST source reducer", () => {
       soundPanSide: "opponent",
     });
     expect(restAtAge(4, "opponent", opponent).letters[0])
-      .toMatchObject({ x: 172, y: 43 });
+      .toMatchObject({ x: 172, y: 43, screenCenterYOffset: 0 });
     expect(restAtAge(109, "opponent", opponent)).toMatchObject({
       active: false, letterZLoaded: false, scriptOffset: 63, letters: [],
     });

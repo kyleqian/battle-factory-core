@@ -14,6 +14,8 @@ export interface RestLetterZ {
   readonly y: number;
   readonly x2: number;
   readonly y2: number;
+  /** Side-specific affine-normal OBJ center correction from BuildOamBuffer. */
+  readonly screenCenterYOffset: 0 | 16;
   readonly matrix: RestMatrix;
   readonly callback: "AnimSleepLetterZ_Step";
 }
@@ -95,6 +97,7 @@ export function restAtAge(
       y: attackerCenter.y - 10,
       x2: direction * Math.trunc(localAge * 2 / 10),
       y2: -Math.trunc(priorData0 / 40),
+      screenCenterYOffset: side === "player" ? 16 : 0,
       matrix,
       callback: "AnimSleepLetterZ_Step",
     });
