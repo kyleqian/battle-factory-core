@@ -1,10 +1,16 @@
 import { PNG } from "pngjs";
+import {
+  boundsForPixelIndices,
+  type PixelBounds,
+} from "./diffBounds.ts";
 
 export interface FrameDiff {
   width: number;
   height: number;
   diffPixels: number;
   totalPixels: number;
+  /** Inclusive bounds of all differing pixels, or null for an exact match. */
+  bounds: PixelBounds | null;
   /** Oracle frame with mismatching pixels highlighted in red. */
   diffPng: Buffer;
 }
@@ -21,7 +27,7 @@ export function diffPngs(oraclePng: Buffer, appPng: Buffer): FrameDiff {
   }
   const { width, height } = oracle;
   const out = new PNG({ width, height });
-  let diffPixels = 0;
+  const mismatchedPixels: number[] = [];
   for (let i = 0; i < width * height; i += 1) {
     const o = i * 4;
     const matches =
@@ -34,12 +40,19 @@ export function diffPngs(oraclePng: Buffer, appPng: Buffer): FrameDiff {
       out.data[o + 2] = oracle.data[o + 2];
       out.data[o + 3] = 255;
     } else {
-      diffPixels += 1;
+      mismatchedPixels.push(i);
       out.data[o] = 255;
       out.data[o + 1] = 0;
       out.data[o + 2] = 0;
       out.data[o + 3] = 255;
     }
   }
-  return { width, height, diffPixels, totalPixels: width * height, diffPng: PNG.sync.write(out) };
+  return {
+    width,
+    height,
+    diffPixels: mismatchedPixels.length,
+    totalPixels: width * height,
+    bounds: boundsForPixelIndices(mismatchedPixels, width),
+    diffPng: PNG.sync.write(out),
+  };
 }
