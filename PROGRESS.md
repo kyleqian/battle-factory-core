@@ -13,6 +13,42 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 655 — [SUPERVISOR WIND-DOWN 2026-07-28 ~19:15] Session close: census CLOSED at 100%; seam handoff consumed; 5 defects found+fixed; ISSUES #41 deleted; entry-hook/AI surfaces verified complete
+
+- **State:** union green at **441 files / 4792 tests**, production build,
+  `git diff --check`, census byte-idempotent at **214/214 effects, 355/355
+  moves, 276/276 distinct, 2957/2957 weighted (100%)**, all 72 validations.
+  Recording-import allowlist **0** (ISSUES #41 deleted). Switch-in barriers
+  6→4 (Intimidate/Trace/weather/Forecast hooks live); hit-chain 16→13
+  (Focus Band source-complete). Eight animation folds; final fold (Focus
+  Energy evidence) verified. DEFERRED.md empty.
+- **Did (24 workers over 2 lanes, 0 failures, 0 regressions):** see
+  checkpoint entry 651 for the census-closure surge (rows 4→8 at exact
+  predicted deltas; Fake Tears 322/322 both orientations consumed +
+  promoted by the live animation program; 4-finding interaction audit all
+  fixed; recording imports 4→0). After 651: end-turn abilities/items
+  acceptance closed (Rain Dish suppression pin, 9 named zero-carrier item
+  barriers proven against all 882 entries); switch-in ON_SWITCHIN dispatch
+  + Truant reset registered with scout receipts (Trace/Drizzle banked,
+  Intimidate later-switch staged in-step); follow-up pins exposed and fixed
+  a 5th real defect (duplicate synthetic Intimidate prevention messages —
+  source script is now sole owner); CheckViability step verified already
+  complete (22/22 reachable handlers, 11/11/13 ledgers reproduce) — two
+  stale-premise briefs this evening both became honest verify-no-ops.
+- **Next:** (1) ability/item census generator (turn the named-barrier set +
+  source hook tables into a ranked worklist like the move census); (2)
+  ISSUES #39 window-by-window retirement (pattern proven twice now); (3)
+  ANIMATION_PROGRESS.md's own backlog continues under its supervisor
+  (session to ~21:06 — an unfolded animation-main at next orient is
+  expected); (4) switch/item AI and doubles/Open-level remain out of scope
+  by mission.
+- **Notes:** no usage-limit events; both oracles fresh all session (OFF
+  restarted at orient). PAPERCUTS: added supervisor cwd-persistence trap,
+  bumped generated-JSON search entry. Ledger doc-drift lesson recorded in
+  supervisor memory: grep the tree before briefing any Next item older than
+  a few entries — entries 652/654 were the evening's two stale briefs.
+
+---
 ## 654 — [BOUNDED MAIN WORKER 2026-07-28 ~19:01] Assigned CheckViability phase-1 step already complete — verified, not redone
 
 - **State:** no implementation delta: the assigned phase-1 handler sequence
@@ -65,27 +101,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   cross-clear, Arena init, and other `various` ids. The named Castform form
   barrier remains. No census, issue, roadmap, presentation, animation, round,
   tick, or pixel change.
-
----
-
-## 652 — [BOUNDED MAIN WORKER 2026-07-28 ~18:27] ENDTURN abilities/items acceptance closed
-
-- **State:** implementation commits `733042df` / `f424fd3b`; tree green at
-  **439 files / 4781 tests**, production build, OFF oracle info, banked
-  ability/item verifier **17/17**, and `git diff --check`. Census remains
-  byte-idempotent at **214/214 effects, 355/355 moves, 276/276 distinct,
-  2957/2957 weighted**, all **72** validations.
-- **Did:** reconciled the already-landed source-complete
-  `ENDTURN_ABILITIES` / `ENDTURN_ITEMS1` / `ENDTURN_ITEMS2` bodies and their
-  three OFF item receipts against the mandatory ground-truth doc. Added the
-  missing Cloud Nine suppression pin for Rain Dish. Replaced the shared
-  zero-carrier item bucket with nine source-named (b) barriers and proved
-  each has zero carriers in the generated 882-entry Factory L50 catalog.
-- **Next:** supervisor verify these two commits and the ledger commit. Then
-  continue entry 651's ranked ability/item census or CheckViability breadth;
-  switch-in hooks and presentation remain separate.
-- **Notes:** named barriers are `CONFUSE_SPICY`, `CONFUSE_DRY`,
-  `CONFUSE_SWEET`, `CONFUSE_BITTER`, `CONFUSE_SOUR`, `DEFENSE_UP`,
-  `SP_DEFENSE_UP`, `CRITICAL_UP`, `RANDOM_STAT_UP`. Unsupported-branch
-  ratchet pins unchanged; no census, handler-set, issue, roadmap, round,
-  tick, pixel, animation, or reachable Factory behavior change.

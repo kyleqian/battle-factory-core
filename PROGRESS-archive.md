@@ -1,5 +1,29 @@
 ---
 
+## 652 — [BOUNDED MAIN WORKER 2026-07-28 ~18:27] ENDTURN abilities/items acceptance closed
+
+- **State:** implementation commits `733042df` / `f424fd3b`; tree green at
+  **439 files / 4781 tests**, production build, OFF oracle info, banked
+  ability/item verifier **17/17**, and `git diff --check`. Census remains
+  byte-idempotent at **214/214 effects, 355/355 moves, 276/276 distinct,
+  2957/2957 weighted**, all **72** validations.
+- **Did:** reconciled the already-landed source-complete
+  `ENDTURN_ABILITIES` / `ENDTURN_ITEMS1` / `ENDTURN_ITEMS2` bodies and their
+  three OFF item receipts against the mandatory ground-truth doc. Added the
+  missing Cloud Nine suppression pin for Rain Dish. Replaced the shared
+  zero-carrier item bucket with nine source-named (b) barriers and proved
+  each has zero carriers in the generated 882-entry Factory L50 catalog.
+- **Next:** supervisor verify these two commits and the ledger commit. Then
+  continue entry 651's ranked ability/item census or CheckViability breadth;
+  switch-in hooks and presentation remain separate.
+- **Notes:** named barriers are `CONFUSE_SPICY`, `CONFUSE_DRY`,
+  `CONFUSE_SWEET`, `CONFUSE_BITTER`, `CONFUSE_SOUR`, `DEFENSE_UP`,
+  `SP_DEFENSE_UP`, `CRITICAL_UP`, `RANDOM_STAT_UP`. Unsupported-branch
+  ratchet pins unchanged; no census, handler-set, issue, roadmap, round,
+  tick, pixel, animation, or reachable Factory behavior change.
+
+---
+
 ## 651 — [SUPERVISOR CHECKPOINT 2026-07-28 ~18:15] Census CLOSED 214/214 (100% all four metrics); Fake Tears seam 322/322 consumed cross-program; audit 4/4 fixed; ISSUES #41 deleted
 
 - **State:** union green at **439 files / 4770 tests**, production build,
