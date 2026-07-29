@@ -40,6 +40,7 @@ import {
   resolveBattleScriptBattlerAtPosition,
   resolveBattleScriptBattlerPosition,
   resolveRulesBattlerForBattleScript,
+  resolveBattleScriptMoveTypeName,
   BATTLE_SCRIPT_PARTY_SIZE,
   type BattleScriptPartyState,
   type BattleScriptRulesContext,
@@ -49,6 +50,7 @@ import {
   type BattleAiSwitchBench,
   type BattleAiSwitchTypes,
 } from "./battleAiSwitchInto.ts";
+import { calculateBattleScriptBaseDamageForCurrentMove } from "./battleScriptHitChainOpcode.ts";
 
 /** include/constants/battle.h:55 -- BATTLE_OPPOSITE(id) = id ^ BIT_SIDE. */
 const BIT_SIDE = 1;
@@ -186,7 +188,8 @@ function createOpenPartyScreenOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
     if (opposingBattler >= rules.battleTopology.battlersCount) {
       throw new Error(`Cmd_openpartyscreen: no battler occupies opposing position ${opposingPosition}`);
     }
-    const opposingTypes = rules.battlers[opposingBattler as 0 | 1 | 2 | 3].types;
+    const opposingBattlerId = opposingBattler as 0 | 1 | 2 | 3;
+    const opposingTypes = rules.battlers[opposingBattlerId].types;
 
     // side is narrowed to SIDE_OPPONENT (1) here -- the player branch already returned above.
     const bench = partyStateToBench(rules.party.opponent);
@@ -197,16 +200,46 @@ function createOpenPartyScreenOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
     }
 
     const legalBenchIndexes = legalSwitchPartyIndexes(rules.party.opponent, activePartyIndex);
-    const scored = legalBenchIndexes.length === 1
-      ? Object.freeze({ kind: "selected" as const, partyIndex: legalBenchIndexes[0]! })
+    const damageRules = Object.freeze({
+      ...rules,
+      selectorRoles: Object.freeze({
+        ...rules.selectorRoles,
+        attacker: battler,
+        target: opposingBattlerId,
+      }),
+      dynamicBasePower: 0,
+      dynamicMoveType: 0,
+      critMultiplier: 1,
+      dmgMultiplier: 1,
+    });
+    let scored = legalBenchIndexes.length === 1
+      ? Object.freeze({ kind: "resolved" as const, partyIndex: legalBenchIndexes[0]! })
       : getMostSuitableMonToSwitchInto(bench, activePartyIndex, opposingTypes);
     if (scored.kind === "damage-fallback-needed") {
-      return unsupportedBranch(
-        context,
-        "GetMostSuitableMonToSwitchInto's pass-2 AI_CalcDmg raw-damage fallback "
-          + "(battle_ai_switch_items.c:748-789) is not modeled -- no fixture on this rung reaches it",
-        748,
+      let baseDamage = calculateBattleScriptBaseDamageForCurrentMove(damageRules);
+      const active = rules.battlers[battler];
+      if (
+        (active.status3 & (1 << 9)) !== 0
+        && resolveBattleScriptMoveTypeName(rules.currentMove, 0) === "TYPE_ELECTRIC"
+      ) {
+        baseDamage *= 2;
+      }
+      if (active.helpingHand === 1) baseDamage = Math.trunc((baseDamage * 15) / 10);
+      scored = getMostSuitableMonToSwitchInto(
+        bench,
+        activePartyIndex,
+        opposingTypes,
+        Object.freeze({
+          baseDamage,
+          activeTypes: active.types,
+          opposingTypes,
+          opposingAbility: rules.battlers[opposingBattlerId].ability,
+          opposingStatus2: rules.battlers[opposingBattlerId].status2,
+        }),
       );
+    }
+    if (scored.kind === "damage-fallback-needed") {
+      throw new Error("Cmd_openpartyscreen: damage fallback context was supplied but selector did not resolve");
     }
 
     const monToSwitchIntoId = Object.freeze(

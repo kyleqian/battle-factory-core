@@ -186,4 +186,92 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expect(state.battle!.rng).toEqual({ calls: 2, value: 1174811135 });
     expect(state.facilityRngCalls).toBe(441);
   });
+
+  it("seed 17 completes seven generated wins with multi-candidate trainer replacements on one cursor", () => {
+    const playerRecords = [record(664), record(678), record(527)] as const;
+    const savedRentalRecords = [...playerRecords, record(1), record(2), record(3)] as const;
+    let state = createFactoryRoundBattleOrchestrator({
+      id: "generated-round-rung-12-seed-17",
+      rngValue: 17,
+      factoryWinStreak: 0,
+      playerTrainerId: PLAYER_TRAINER_ID,
+      battleTowerLevel50WinStreak: 0,
+      rentals: {
+        type: "currentRecords",
+        playerRentalRecords: playerRecords,
+        savedRentalRecords,
+      },
+    });
+    let firstReplacement: {
+      callsBefore: number;
+      callsAfter: number;
+      rngBefore: number;
+      rngAfter: number;
+      nextSide: string;
+    } | null = null;
+
+    for (let budget = 0; budget < 1_000 && state.round.rules.phase !== "roundComplete"; budget += 1) {
+      if (state.battle !== null) {
+        const partyIndexBefore = state.battle.rules.rulesContext.battlers[1].partyIndex;
+        const callsBefore = state.battle.rng.calls;
+        const rngBefore = state.battle.rng.value;
+        state = submitFactoryRoundPlayerDecision(state, choosePlayerDecision(state));
+        if (
+          firstReplacement === null
+          && state.battle !== null
+          && state.battle.rules.rulesContext.battlers[1].partyIndex !== partyIndexBefore
+        ) {
+          firstReplacement = {
+            callsBefore,
+            callsAfter: state.battle.rng.calls,
+            rngBefore,
+            rngAfter: state.battle.rng.value,
+            nextSide: state.battle.boundary.kind === "decision-required"
+              ? state.battle.boundary.request.side
+              : state.battle.boundary.kind,
+          };
+        }
+        continue;
+      }
+      if (
+        state.round.rules.phase === "presentingBattleStart"
+        || state.round.rules.phase === "presentingBattleWin"
+        || state.round.rules.phase === "presentingSwapResult"
+      ) {
+        state = acknowledgeAndAdvance(state);
+        continue;
+      }
+      if (state.round.rules.phase === "awaitingSwapDecision") {
+        const commandId = state.round.presentation?.command.commandId;
+        if (commandId === undefined) throw new Error("expected swap-offer presentation command");
+        state = completeFactoryRoundPresentation(state, { commandId });
+        state = chooseFactoryRoundSwap(state, { type: "decline" });
+        continue;
+      }
+      throw new Error(`unexpected rung-12 phase ${state.round.rules.phase}`);
+    }
+
+    expect(state.round.rules.phase).toBe("roundComplete");
+    expect(state.round.rules.battleIndex).toBe(6);
+    expect(state.round.rules.lastBattle?.outcome).toBe("win");
+    expect(state.opponentGenerations).toHaveLength(7);
+    expect(state.rngSegments.filter((segment) => segment.kind === "battle")).toHaveLength(7);
+    expect(state.facilityRngCalls).toBe(1787);
+    expect(firstReplacement).toEqual({
+      callsBefore: 2,
+      callsAfter: 16,
+      rngBefore: 312997333,
+      rngAfter: 713294723,
+      nextSide: "player",
+    });
+    let cursor = firstReplacement!.rngBefore;
+    for (let call = firstReplacement!.callsBefore; call < firstReplacement!.callsAfter; call += 1) {
+      cursor = advanceRngValue(cursor);
+    }
+    expect(cursor).toBe(firstReplacement!.rngAfter);
+    for (let index = 1; index < state.rngSegments.length; index += 1) {
+      expect(state.rngSegments[index]!.callStart).toBe(state.rngSegments[index - 1]!.callEnd);
+      expect(state.rngSegments[index]!.rngBefore).toBe(state.rngSegments[index - 1]!.rngAfter);
+    }
+  });
 });
