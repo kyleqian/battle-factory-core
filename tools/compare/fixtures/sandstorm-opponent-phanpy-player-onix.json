@@ -1,0 +1,42 @@
+{
+  "schema": "sandstorm-portable-evidence/v1",
+  "orientation": "opponent-front Phanpy -> player-back Onix",
+  "scenario": "tools/battle-lab/mechanic-sandstorm-opponent-phanpy-player-onix.json",
+  "probe": "tools/compare/sandstormProbe.py",
+  "appStage": {"presentationAge": 0},
+  "attacker": {
+    "species": "PHANPY",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": {"x": 144, "y": 24},
+      "animationCenter": {"x": 176, "y": 56},
+      "battlePositionCenter": {"x": 176, "y": 40}
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": {"x": 40, "y": 48},
+      "animationCenter": {"x": 72, "y": 80},
+      "battlePositionCenter": {"x": 72, "y": 80}
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 131,
+    "playerMaxHp": 131,
+    "opponentHp": 169,
+    "opponentMaxHp": 197,
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
+  "sourceWindow": {"startFrame": 305, "endFrame": 472, "frameCount": 168},
+  "evidenceSha256": "ba90eb87f3466644cf4e3c085231265bf7138fcd0e2d286a41574e35f9af12d2",
+  "rawRgbSha256": "151561fae96ddc3d919e3f0254b987162cd9e078e92c5e414b4e0a9689edd2e4",
+  "lifecycleCounts": {"gFlyingSandCrescentSpriteTemplate": 7},
+  "topology": {
+    "tasks": ["AnimTask_LoadSandstormBackground", "AnimTask_LoadSandstormBackground_Step"],
+    "templates": ["gFlyingSandCrescentSpriteTemplate", "gMultiuseSpriteTemplate", "gSpriteTemplate_EnemyShadow", "sHealthbarSpriteTemplates", "sHealthboxOpponentSpriteTemplates", "sHealthboxPlayerSpriteTemplates"],
+    "callbacks": ["AnimFlyingSandCrescent", "DestroyAnimSprite", "SpriteCB_HealthBar", "SpriteCB_HealthBoxOther", "SpriteCB_SetInvisible", "SpriteCallbackDummy"]
+  }
+}

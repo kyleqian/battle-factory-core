@@ -295,6 +295,10 @@ import {
   type NeedleArmState,
 } from "./needleArm.ts";
 import {
+  sandstormAtAge,
+  type SandstormState,
+} from "./sandstorm.ts";
+import {
   tailGlowAtAge,
   type TailGlowState,
 } from "./tailGlow.ts";
@@ -1287,6 +1291,13 @@ export interface SceneOnNeedleArmConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnSandstormConfig {
+  readonly move: "SANDSTORM";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnTailGlowConfig {
   readonly move: "TAIL_GLOW";
   readonly attacker: SceneOnPresentationBattler;
@@ -1511,6 +1522,7 @@ export type SceneOnMoveConfig =
   | SceneOnMetronomeConfig
   | SceneOnFollowMeConfig
   | SceneOnNeedleArmConfig
+  | SceneOnSandstormConfig
   | SceneOnTailGlowConfig
   | SceneOnSelfDestructConfig
   | SceneOnExplosionConfig
@@ -1584,6 +1596,8 @@ export type SceneOnFollowMePresentationState =
   SceneOnMovePresentationState<SceneOnFollowMeConfig>;
 export type SceneOnNeedleArmPresentationState =
   SceneOnMovePresentationState<SceneOnNeedleArmConfig>;
+export type SceneOnSandstormPresentationState =
+  SceneOnMovePresentationState<SceneOnSandstormConfig>;
 export type SceneOnTailGlowPresentationState =
   SceneOnMovePresentationState<SceneOnTailGlowConfig>;
 
@@ -1797,6 +1811,12 @@ export interface SceneOnFollowMeView extends FollowMeState {
 }
 
 export interface SceneOnNeedleArmView extends NeedleArmState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSandstormView extends SandstormState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3520,6 +3540,21 @@ export function sceneOnNeedleArmView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...needleArmAtAge(state.age, state.config.target.geometry.animationCenter),
+  };
+}
+
+/** `age=0` is Move_SANDSTORM's first displayed source-script frame. */
+export function sceneOnSandstormView(
+  state: SceneOnSandstormPresentationState,
+): SceneOnSandstormView {
+  if (state.config.move !== "SANDSTORM") {
+    throw new Error(`expected SANDSTORM presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...sandstormAtAge(state.age),
   };
 }
 

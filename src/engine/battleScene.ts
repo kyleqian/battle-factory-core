@@ -576,6 +576,7 @@ import fakeTearsAsset from "../animation/assets/fake-tears.json" with { type: "j
 import tickleAsset from "../animation/assets/tickle.json" with { type: "json" };
 import metronomeAsset from "../animation/assets/metronome.json" with { type: "json" };
 import needleArmAsset from "../animation/assets/needle-arm.json" with { type: "json" };
+import sandstormAsset from "../animation/assets/sandstorm.json" with { type: "json" };
 import selfDestructAsset from "../animation/assets/selfDestruct.json" with { type: "json" };
 import explosionAsset from "../animation/assets/explosion.json" with { type: "json" };
 import dynamicPunchAsset from "../animation/assets/dynamicPunch.json" with { type: "json" };
@@ -746,6 +747,7 @@ import {
   sceneOnMetronomeView,
   sceneOnFollowMeView,
   sceneOnNeedleArmView,
+  sceneOnSandstormView,
   sceneOnDragonClawView,
   sceneOnSingView,
   sceneOnFutureSightView,
@@ -764,6 +766,7 @@ import {
   type SceneOnMetronomePresentationState,
   type SceneOnFollowMePresentationState,
   type SceneOnNeedleArmPresentationState,
+  type SceneOnSandstormPresentationState,
   type SceneOnScaryFacePresentationState,
   type SceneOnAbsorbPresentationState,
   type SceneOnReflectPresentationState,
@@ -1348,6 +1351,16 @@ const needleArmArt = needleArmAsset as {
   cacneaBack: { tileset: Tileset; palette: RgbColor[] };
   cacneaFront: { tileset: Tileset; palette: RgbColor[] };
   greenSpike: { tileset: Tileset; palette: RgbColor[] };
+};
+const sandstormArt = sandstormAsset as {
+  phanpyBack: { tileset: Tileset; palette: RgbColor[] };
+  phanpyFront: { tileset: Tileset; palette: RgbColor[] };
+  flyingDirt: { tileset: Tileset; palette: RgbColor[] };
+  background: {
+    tileset: Tileset;
+    tilemap: Tilemap;
+    palette: RgbColor[];
+  };
 };
 const dragonClawArt = dragonClawAsset as {
   smallEmber: { tileset: Tileset; palette: RgbColor[] };
@@ -15361,6 +15374,181 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "SANDSTORM") {
+    const sandState = state as SceneOnSandstormPresentationState;
+    const view = sceneOnSandstormView(sandState);
+    const displayedSprites = sceneOnSandstormView({
+      ...sandState,
+      age: sandState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "PHANPY"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "PHANPY"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SANDSTORM pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const phanpySource = playerToOpponent
+      ? sandstormArt.phanpyBack : sandstormArt.phanpyFront;
+    const phanpy = playerToOpponent
+      ? phanpySource
+      : {
+          ...phanpySource,
+          tileset: subTileset(phanpySource.tileset, 0, 8),
+        };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const opponent = playerToOpponent ? onix : phanpy;
+    const player = playerToOpponent ? phanpy : onix;
+    const opponentBattler = playerToOpponent ? view.target : view.attacker;
+    const playerBattler = playerToOpponent ? view.attacker : view.target;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    drawSpriteSheet(
+      fb,
+      opponent.tileset,
+      opponent.palette,
+      opponentBattler.geometry.spriteCorner.x
+        + (playerToOpponent ? onixIdle.x2 : 0),
+      opponentBattler.geometry.spriteCorner.y
+        + (playerToOpponent ? onixIdle.y2 : 0),
+    );
+    drawSpriteSheet(
+      fb,
+      player.tileset,
+      player.palette,
+      playerBattler.geometry.spriteCorner.x,
+      playerBattler.geometry.spriteCorner.y,
+    );
+
+    // BG1 is priority 1 and alpha-composites over the priority-2 field and
+    // battlers. Its palette is deliberately the FLYING_DIRT OBJ palette.
+    if (view.backgroundLoaded && view.blend.eva > 0) {
+      const mapWidth = sandstormArt.background.tilemap.width * 8;
+      const mapHeight = sandstormArt.background.tilemap.height * 8;
+      for (let y = 0; y < 160; y += 1) {
+        const mapY = (y + view.bgScroll.y) % mapHeight;
+        for (let x = 0; x < 240; x += 1) {
+          const mapX = (x + view.bgScroll.x) % mapWidth;
+          const entry = sandstormArt.background.tilemap.entries[
+            Math.floor(mapY / 8) * sandstormArt.background.tilemap.width
+              + Math.floor(mapX / 8)
+          ];
+          if (!entry) continue;
+          const tile = sandstormArt.background.tileset.tiles[entry.tile];
+          if (!tile) continue;
+          const sx = entry.hFlip ? 7 - (mapX % 8) : mapX % 8;
+          const sy = entry.vFlip ? 7 - (mapY % 8) : mapY % 8;
+          const index = tile[sy * 8 + sx]!;
+          if (index === 0) continue;
+          const color = sandstormArt.background.palette[index];
+          if (!color) continue;
+          const offset = (y * 240 + x) * 4;
+          fb[offset] = blendChannel(
+            color.r,
+            fb[offset]!,
+            view.blend.eva,
+            view.blend.evb,
+          );
+          fb[offset + 1] = blendChannel(
+            color.g,
+            fb[offset + 1]!,
+            view.blend.eva,
+            view.blend.evb,
+          );
+          fb[offset + 2] = blendChannel(
+            color.b,
+            fb[offset + 2]!,
+            view.blend.eva,
+            view.blend.evb,
+          );
+        }
+      }
+    }
+
+    // The two priority-1 subsprites sort in front of the priority-1 BG layer.
+    // Their source positions are relative to the parent OAM centre, while
+    // drawSpriteSheet receives each 32x16 subsprite's top-left corner.
+    const dirtLeft = subTileset(sandstormArt.flyingDirt.tileset, 0, 2);
+    const dirtRight = subTileset(sandstormArt.flyingDirt.tileset, 2, 2);
+    for (const crescent of displayedSprites.crescents) {
+      drawSpriteSheet(
+        fb,
+        dirtLeft,
+        sandstormArt.flyingDirt.palette,
+        crescent.x + crescent.x2 - 16,
+        crescent.y + crescent.y2,
+      );
+      drawSpriteSheet(
+        fb,
+        dirtRight,
+        sandstormArt.flyingDirt.palette,
+        crescent.x + crescent.x2 + 16,
+        crescent.y + crescent.y2,
+      );
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "PHANPY",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "PHANPY" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "PHANPY used" : "Foe PHANPY used",
+      "SANDSTORM!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "SURF") {
     const surfState = state as SceneOnSurfPresentationState;
     const view = sceneOnSurfView(surfState);
