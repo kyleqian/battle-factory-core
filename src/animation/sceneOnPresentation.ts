@@ -278,6 +278,10 @@ import {
   type FakeTearsState,
 } from "./fakeTears.ts";
 import {
+  tickleAtAge,
+  type TickleState,
+} from "./tickle.ts";
+import {
   tailGlowAtAge,
   type TailGlowState,
 } from "./tailGlow.ts";
@@ -502,6 +506,7 @@ export interface SceneOnPresentationBattler {
     | "MEOWTH"
     | "BEEDRILL"
     | "OMASTAR"
+    | "OMANYTE"
     | "WARTORTLE";
   readonly geometry: SceneOnBattlerGeometry;
 }
@@ -1234,6 +1239,13 @@ export interface SceneOnFakeTearsConfig {
   }>;
 }
 
+export interface SceneOnTickleConfig {
+  readonly move: "TICKLE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnTailGlowConfig {
   readonly move: "TAIL_GLOW";
   readonly attacker: SceneOnPresentationBattler;
@@ -1454,6 +1466,7 @@ export type SceneOnMoveConfig =
   | SceneOnCharmConfig
   | SceneOnCovetConfig
   | SceneOnFakeTearsConfig
+  | SceneOnTickleConfig
   | SceneOnTailGlowConfig
   | SceneOnSelfDestructConfig
   | SceneOnExplosionConfig
@@ -1519,6 +1532,8 @@ export type SceneOnCovetPresentationState =
   SceneOnMovePresentationState<SceneOnCovetConfig>;
 export type SceneOnFakeTearsPresentationState =
   SceneOnMovePresentationState<SceneOnFakeTearsConfig>;
+export type SceneOnTicklePresentationState =
+  SceneOnMovePresentationState<SceneOnTickleConfig>;
 export type SceneOnTailGlowPresentationState =
   SceneOnMovePresentationState<SceneOnTailGlowConfig>;
 
@@ -1708,6 +1723,12 @@ export interface SceneOnCovetView extends CovetState {
 }
 
 export interface SceneOnFakeTearsView extends FakeTearsState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnTickleView extends TickleState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3358,6 +3379,25 @@ export function sceneOnFakeTearsView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attackerPictureBounds,
+    ),
+  };
+}
+
+/** `age=0` is Move_TICKLE's first displayed source-script frame. */
+export function sceneOnTickleView(
+  state: SceneOnTicklePresentationState,
+): SceneOnTickleView {
+  if (state.config.move !== "TICKLE") {
+    throw new Error(`expected TICKLE presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...tickleAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
     ),
   };
 }

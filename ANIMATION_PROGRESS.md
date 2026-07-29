@@ -1,5 +1,24 @@
 # Animation coverage
 
+## MOVE_TICKLE promoted exact; RockMon/EYE_SPARKLE track complete (2026-07-28)
+
+**Verdict:** `MOVE_TICKLE` is exact. Corrected legal Level-50 set-138
+OMANYTE→ONIX Scene-ON parties pass the complete source body through first
+inactive cleanup at **205/205** reducer/seam, immutable source/hardware/audio,
+raw-RGB, and shared-framebuffer frames **288–492** in both orientations,
+twice fresh. Player evidence/raw digests remain `509f6618…7e41c4` /
+`5b6253ce…12da8c`; opponent digests remain `c4327c31…3e5447` /
+`b06ea14f…9323a5`.
+
+**Model/boundary:** the typed relative seam and narrow compositor port both
+eye lifecycles, black palette ramps, DETECT, SwayMon, target
+RockMonBackAndForth, the Tail Whip loop, front-idle offset, palette/OAM
+latches, affine-double clipping, and cleanup using source-extracted species
+138 assets plus shared ONIX/chrome. The corrected eye-coordinate test now
+pins the source `GetBattlerSpriteCoord` center. Coverage is **78 exact / 0
+partial / 0 staged / 198 unsupported**; no battle/controller/RNG/facility
+state, boundary list, unsupported barrier, or sibling acceptance changed.
+
 ## MOVE_TICKLE corrected legal-Omanyte dense-ROM evidence checkpoint; production remains unsupported (2026-07-28)
 
 **Verdict:** Evidence-only checkpoint. `MOVE_TICKLE` remains unsupported;

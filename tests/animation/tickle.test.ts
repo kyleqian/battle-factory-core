@@ -17,8 +17,8 @@ describe("MOVE_TICKLE source reducer", () => {
       .toEqual([0, 2, 16, 16, 14, 0]);
     expect(tickleEyesAtAge(27, "player", { x: 72, y: 96 }))
       .toEqual([
-        { slot: 3, x: 56, y: 88, frame: 0 },
-        { slot: 4, x: 88, y: 88, frame: 0 },
+        { slot: 3, x: 56, y: 96, frame: 0 },
+        { slot: 4, x: 88, y: 96, frame: 0 },
       ]);
     expect(tickleEyesAtAge(34, "player", { x: 72, y: 96 })[0]?.frame).toBe(2);
     expect(tickleEyesAtAge(47, "player", { x: 72, y: 96 })).toEqual([]);

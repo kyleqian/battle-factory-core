@@ -1,11 +1,173 @@
+// Fresh dense source/component/hardware/framebuffer comparator for MOVE_TICKLE.
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-type Fixture = { schema: string; orientation: string; scenario: string; probe: string; sourceWindow: { startFrame: number; endFrame: number; frameCount: number }; evidenceSha256: string; rawRgbSha256: string; lifecycleCounts: { eyeSparkle: number }; topology: Record<string, readonly string[]> };
-type Frame = { frame: number; sha256: string; scriptOffset: number | null; tasks: readonly unknown[]; sprites: readonly unknown[]; softwareOam: readonly string[]; hardwareOam: readonly string[]; hardwareMatrices: readonly (readonly number[])[]; fadedPalette: readonly number[]; unfadedPalette: readonly number[]; hardwarePalette: readonly number[]; paletteTags: readonly number[]; registers: Record<string, number>; se1: unknown; se2: unknown };
-type Probe = { schema: string; sourceWindow: Fixture["sourceWindow"]; lifecycleCounts: Fixture["lifecycleCounts"]; topology: Fixture["topology"]; frames: readonly Frame[] };
-const root = resolve(dirname(new URL(import.meta.url).pathname), "../.."); const fixtures = process.argv.slice(2); if (fixtures.length !== 2) throw new Error("usage: ticklePortable.ts <player fixture> <opponent fixture>"); const same = (a: unknown,b: unknown) => JSON.stringify(a) === JSON.stringify(b); const fresh = new Map<string,{evidence:string;raw:string}>();
-function verify(path:string):void { const fixture=JSON.parse(readFileSync(resolve(path),"utf8")) as Fixture; const scratch=mkdtempSync(join(tmpdir(),"pokebench-tickle-")); const output=join(scratch,"probe.json"),rgb=join(scratch,"rgb"); const vendor=dirname(realpathSync(join(root,"reference/pokeemerald"))); const run=spawnSync("python3",[join(root,"tools/run-mgba-probe.py"),output,"--",join(vendor,"mgba-venv/bin/python"),resolve(root,fixture.probe),resolve(root,fixture.scenario),output,rgb],{cwd:root,encoding:"utf8"}); if(run.stdout)process.stdout.write(run.stdout);if(run.stderr)process.stderr.write(run.stderr);if(run.status!==0)process.exit(run.status??1); const bytes=readFileSync(output),probe=JSON.parse(bytes.toString()) as Probe,evidence=createHash("sha256").update(bytes).digest("hex"),raw=createHash("sha256");for(const frame of probe.frames){const b=readFileSync(join(rgb,`${String(frame.frame).padStart(5,"0")}.rgb`));raw.update(b);if(createHash("sha256").update(b).digest("hex")!==frame.sha256)throw new Error(`${fixture.orientation}: raw RGB changed at ${frame.frame}`)}const rawDigest=raw.digest("hex");const fields=probe.frames.every(f=>(f.scriptOffset===null||typeof f.scriptOffset==="number")&&f.softwareOam.length===128&&f.hardwareOam.length===128&&f.hardwareMatrices.length===32&&f.hardwareMatrices.every(m=>m.length===4)&&f.fadedPalette.length===512&&f.unfadedPalette.length===512&&f.hardwarePalette.length===512&&f.paletteTags.length===16&&Object.keys(f.registers).length===8&&Array.isArray(f.tasks)&&Array.isArray(f.sprites)&&f.se1!==null&&f.se2!==null);if(fixture.schema!=="tickle-portable-evidence/v1"||probe.schema!=="tickle-dense-evidence/v1"||!same(probe.sourceWindow,fixture.sourceWindow)||!same(probe.lifecycleCounts,fixture.lifecycleCounts)||!same(probe.topology,fixture.topology)||evidence!==fixture.evidenceSha256||rawDigest!==fixture.rawRgbSha256||probe.frames.length!==fixture.sourceWindow.frameCount||!fields)throw new Error(`${fixture.orientation}: immutable dense receipt changed`);const prior=fresh.get(fixture.orientation);if(prior&&!same(prior,{evidence,raw:rawDigest}))throw new Error(`${fixture.orientation}: fresh proof diverged`);fresh.set(fixture.orientation,{evidence,raw:rawDigest});console.log(`${fixture.orientation}: receipt ${probe.frames.length}/${fixture.sourceWindow.frameCount}; evidence ${evidence}; raw ${rawDigest}`) }
-for(let repeat=0;repeat<2;repeat+=1)for(const fixture of fixtures)verify(fixture);
+import {
+  TICKLE_FRAME_COUNT,
+  tickleAtAge,
+} from "../../src/animation/tickle.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnTickleView,
+  type SceneOnPresentationBattler,
+} from "../../src/animation/sceneOnPresentation.ts";
+import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+
+type Window = { startFrame: number; endFrame: number; frameCount: number };
+type Fixture = {
+  schema: "tickle-portable-evidence/v1";
+  orientation: string;
+  scenario: string;
+  probe: string;
+  appStage: { presentationAge: number };
+  attacker: SceneOnPresentationBattler;
+  target: SceneOnPresentationBattler;
+  fieldProfile: {
+    playerHp: number; playerMaxHp: number;
+    opponentHp: number; opponentMaxHp: number;
+    playerGender?: "male" | "female"; opponentGender?: "male" | "female";
+  };
+  sourceWindow: Window;
+  evidenceSha256: string;
+  rawRgbSha256: string;
+  lifecycleCounts: { eyeSparkle: number };
+  topology: unknown;
+};
+type Frame = {
+  frame: number; sha256: string; scriptOffset: number | null;
+  softwareOam: string[]; hardwareOam: string[];
+  hardwareMatrices: number[][]; fadedPalette: number[];
+  unfadedPalette: number[]; hardwarePalette: number[];
+  paletteTags: number[]; registers: Record<string, number>;
+  tasks: unknown[]; sprites: unknown[];
+  se1: unknown; se2: unknown; gAnimScriptActive: number; visualTaskCount: number;
+};
+type Probe = {
+  schema: "tickle-dense-evidence/v1";
+  sourceWindow: Window; lifecycleCounts: { eyeSparkle: number };
+  topology: unknown; frames: Frame[];
+};
+
+const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
+const fixturePaths = process.argv.slice(2);
+if (fixturePaths.length !== 2) {
+  throw new Error("usage: ticklePortable.ts <player fixture> <opponent fixture>");
+}
+const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+const fresh = new Map<string, { evidence: string; raw: string }>();
+
+function verify(fixturePath: string, runNumber: number): void {
+  const fixture = JSON.parse(readFileSync(resolve(fixturePath), "utf8")) as Fixture;
+  const scratch = mkdtempSync(join(tmpdir(), "pokebench-tickle-portable-"));
+  const output = join(scratch, "probe.json");
+  const rgbDir = join(scratch, "rgb");
+  const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
+  const run = spawnSync("python3", [
+    join(root, "tools/run-mgba-probe.py"), output, "--",
+    join(vendor, "mgba-venv/bin/python"), resolve(root, fixture.probe),
+    resolve(root, fixture.scenario), output, rgbDir,
+  ], { cwd: root, encoding: "utf8" });
+  if (run.stdout) process.stdout.write(run.stdout);
+  if (run.stderr) process.stderr.write(run.stderr);
+  if (run.status !== 0) process.exit(run.status ?? 1);
+
+  const bytes = readFileSync(output);
+  const probe = JSON.parse(bytes.toString()) as Probe;
+  const evidence = createHash("sha256").update(bytes).digest("hex");
+  const raw = createHash("sha256");
+  const fields = probe.frames.every((frame) =>
+    (frame.scriptOffset === null || typeof frame.scriptOffset === "number")
+    && frame.softwareOam.length === 128
+    && frame.hardwareOam.length === 128
+    && frame.hardwareMatrices.length === 32
+    && frame.hardwareMatrices.every((matrix) => matrix.length === 4)
+    && frame.fadedPalette.length === 512
+    && frame.unfadedPalette.length === 512
+    && frame.hardwarePalette.length === 512
+    && frame.paletteTags.length === 16
+    && Object.keys(frame.registers).length === 8
+    && Array.isArray(frame.tasks) && Array.isArray(frame.sprites)
+    && frame.se1 !== null && frame.se2 !== null);
+  if (
+    probe.schema !== "tickle-dense-evidence/v1"
+    || !same(probe.sourceWindow, fixture.sourceWindow)
+    || !same(probe.lifecycleCounts, fixture.lifecycleCounts)
+    || !same(probe.topology, fixture.topology)
+    || evidence !== fixture.evidenceSha256
+    || probe.frames.length !== TICKLE_FRAME_COUNT
+    || !fields
+  ) throw new Error(`${fixture.orientation}: immutable dense receipt changed`);
+
+  const stage = createSceneOnMovePresentation({
+    move: "TICKLE",
+    attacker: fixture.attacker,
+    target: fixture.target,
+    fieldProfile: fixture.fieldProfile,
+  });
+  const failures: string[] = [];
+  for (const [index, oracle] of probe.frames.entries()) {
+    const rgb = readFileSync(
+      join(rgbDir, `${String(oracle.frame).padStart(5, "0")}.rgb`),
+    );
+    raw.update(rgb);
+    if (createHash("sha256").update(rgb).digest("hex") !== oracle.sha256) {
+      failures.push(`frame ${oracle.frame}: raw RGB digest changed`);
+      continue;
+    }
+    const age = fixture.appStage.presentationAge + index;
+    const component = tickleAtAge(
+      age,
+      fixture.attacker.geometry.side,
+      fixture.attacker.geometry.animationCenter,
+    );
+    const seam = sceneOnTickleView({ ...stage, age });
+    const seamMatch = same(
+      { ...seam, age: undefined, attacker: undefined, target: undefined },
+      component,
+    );
+    const engine: EngineState = {
+      ...createInitialState(),
+      rngMode: "frontierBattle",
+      sceneOnPresentation: { ...stage, age },
+    };
+    const app = render(engine);
+    let diff = 0;
+    for (let pixel = 0; pixel < 240 * 160; pixel++) {
+      if (
+        app[pixel * 4] !== rgb[pixel * 3]
+        || app[pixel * 4 + 1] !== rgb[pixel * 3 + 1]
+        || app[pixel * 4 + 2] !== rgb[pixel * 3 + 2]
+      ) diff++;
+    }
+    const cleanup = index !== TICKLE_FRAME_COUNT - 1
+      || (!component.active && !oracle.gAnimScriptActive
+        && oracle.visualTaskCount === 0);
+    if (!seamMatch || diff !== 0 || !cleanup) {
+      failures.push(
+        `frame ${oracle.frame}/age ${age}: seam=${seamMatch} `
+        + `framebuffer=${diff === 0} diff=${diff} cleanup=${cleanup}`,
+      );
+    }
+  }
+  const rawDigest = raw.digest("hex");
+  if (rawDigest !== fixture.rawRgbSha256) {
+    failures.push(`raw RGB window digest ${rawDigest} changed`);
+  }
+  if (failures.length) throw new Error(failures.slice(0, 40).join("\n"));
+  const prior = fresh.get(fixture.orientation);
+  if (prior && !same(prior, { evidence, raw: rawDigest })) {
+    throw new Error(`${fixture.orientation}: fresh proof diverged`);
+  }
+  fresh.set(fixture.orientation, { evidence, raw: rawDigest });
+  console.log(
+    `${fixture.orientation} run ${runNumber}: `
+    + `${probe.frames.length}/${TICKLE_FRAME_COUNT} component/seam/framebuffer exact`,
+  );
+}
+
+for (const fixturePath of fixturePaths) {
+  verify(fixturePath, 1);
+  verify(fixturePath, 2);
+}

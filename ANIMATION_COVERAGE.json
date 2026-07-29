@@ -2,6 +2,34 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_TICKLE",
+      "status": "exact",
+      "covered": [
+        "fresh corrected legal Level-50 set-138 OMANYTE versus ONIX Scene-ON parties pass the complete 205-frame source body through first inactive cleanup in both orientations twice fresh: frames 288-492 reproduce player evidence 509f6618b019cb189b602d56100209797b1c9fa798bea3d7e5ec1472007e41c4 / raw RGB 5b6253ce26a3db3c078c5c9b175c28bc51d5ff7687f797828b04b3440b12da8c and opponent evidence c4327c31510a8673b215646204184b6346c84323790815d0f80eff26b93e5447 / raw RGB b06ea14f4dc50dd8750f01611d3dcc9dc83ad4748dee5484e122176f689323a5",
+        "the pure source-relative reducer ports EYE_SPARKLE load/free, both eye lifecycles, attacker black palette ramps, DETECT, SwayMon(0,6,1280,3), target RockMonBackAndForth(6,2), the eight target-panned TAIL_WHIP restarts, display latches, affine-double OAM, and inactive cleanup",
+        "the typed Scene-ON seam carries only resolved OMANYTE/ONIX presentation geometry; the shared compositor uses source-extracted legal species-138 front/back and EYE_SPARKLE art plus shared ONIX/chrome, preserving front-idle offset, palette/OAM latches, painter order, matrices, palettes, registers, and audio without damage, RNG, controller, turn, or facility ownership",
+        "ticklePortable.ts reruns the committed probe through tools/run-mgba-probe.py and proves the immutable dense source/hardware/audio receipt, reducer and typed seam, raw RGB, and shared application framebuffer on all 205 frames twice fresh in both orientations, including cleanup",
+        "the superseded species-139 Omastar receipts make no claim; MOVE_CHARM, MOVE_COVET, and MOVE_FAKE_TEARS retain their independent exact acceptance",
+        "no damage, RNG, controller selection, turn order, round/facility state, boundary list, unsupported barrier, or sibling acceptance changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-tickle-player-omanyte-opponent-onix.json",
+        "tools/battle-lab/mechanic-tickle-opponent-omanyte-player-onix.json",
+        "tools/compare/fixtures/tickle-player-omanyte-opponent-onix.json",
+        "tools/compare/fixtures/tickle-opponent-omanyte-player-onix.json",
+        "tools/compare/tickleProbe.py",
+        "tools/compare/ticklePortable.ts",
+        "tools/compare/tickleSourceAudit.ts",
+        "tools/compare/extractTickleAssets.ts",
+        "src/animation/assets/tickle.json",
+        "src/animation/tickle.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/tickleEvidence.test.ts",
+        "tests/animation/tickle.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_ENDURE",
       "status": "exact",
       "covered": [
@@ -2071,7 +2099,7 @@
         "MOVE_TICKLE",
         "MOVE_COVET"
       ],
-      "goal": "MOVE_CHARM is exact for its complete 93-frame source component and typed relative seam in both MINUN orientations. MOVE_COVET is independently exact for 114/114 frames in both set-203 LINOONE orientations, reusing CHARM honestly and adding target ShakeMon2, ITEM_BAG load/transfer, and its Dizzy Punch audio loop. MOVE_FAKE_TEARS is independently exact for its complete corrected legal set-267 DELCATTY windows in both orientations; it uses RockMonBackAndForth(attacker,2,1) after particle blending and adds eight tear sprites. Corrected legal set-138 FRONTIER_MON_OMANYTE -> SPECIES_OMANYTE 138 evidence gives MOVE_TICKLE a 205/205-frame ROM receipt at 288-492 in both orientations: EYE_SPARKLE, attacker black palette fades, SwayMon(0,6,1280,3), RockMonBackAndForth(target,6,2), DETECT and target-panned Tail Whip loop, hardware/audio/raw RGB, and first inactive cleanup twice fresh. The superseded species-139 Omastar receipts make no claim; Tickle remains unsupported pending independent reducer/seam/compositor acceptance."
+      "goal": "MOVE_CHARM is exact for its complete 93-frame source component and typed relative seam in both MINUN orientations. MOVE_COVET is independently exact for 114/114 frames in both set-203 LINOONE orientations, reusing CHARM honestly and adding target ShakeMon2, ITEM_BAG load/transfer, and its Dizzy Punch audio loop. MOVE_FAKE_TEARS is independently exact for its complete corrected legal set-267 DELCATTY windows in both orientations; it uses RockMonBackAndForth(attacker,2,1) after particle blending and adds eight tear sprites. MOVE_TICKLE is independently exact for the complete corrected legal set-138 OMANYTE windows at 205/205 frames 288-492 twice fresh in both orientations through EYE_SPARKLE, attacker black palette fades, SwayMon(0,6,1280,3), target RockMonBackAndForth(6,2), DETECT, the Tail Whip loop, hardware/audio/raw RGB, and shared framebuffer cleanup. The superseded species-139 Omastar receipts make no claim."
     },
     {
       "id": "razor-leaf-particle-cutter",
