@@ -163,6 +163,66 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     );
   });
 
+  it("starts challenge 2 generation from challenge 1's uninterrupted orchestrator cursor", () => {
+    const completed = driveGeneratedRoundToCompletion(
+      17,
+      undefined,
+      (state) => state.round.rules.battleIndex < 2
+        ? { type: "accept", playerPartyIndex: 2, opponentPartyIndex: 0 }
+        : { type: "decline" },
+      14,
+    );
+    const next = createFactoryRoundBattleOrchestrator({
+      id: "continuous-cursor-next-challenge",
+      rngValue: completed.round.rules.rngValue,
+      factoryWinStreak: 7,
+      playerTrainerId: PLAYER_TRAINER_ID,
+      battleTowerLevel50WinStreak: 0,
+      facilityState: completed.facilityState,
+      rentals: {
+        type: "generateInitial",
+        selectedRentalIndexes: [0, 1, 2],
+      },
+    });
+
+    // The ROM's Random() cursor is one continuous global. This orchestrator
+    // does not model inter-challenge frame advances, so these are exact
+    // orchestrator-contract cursors, not a claim about a frame-exact ROM
+    // cursor between the two challenges.
+    expect(completed.round.rules.rngValue).toBe(514721516);
+    expect(next.initialRentalGeneration?.rentalRank).toBe(1);
+    expect(next.rngSegments).toEqual([
+      {
+        kind: "initial-rentals",
+        battleIndex: 0,
+        callStart: 0,
+        callEnd: 204,
+        rngBefore: 514721516,
+        rngAfter: 2855210072,
+      },
+      {
+        kind: "opponent-generation",
+        battleIndex: 0,
+        callStart: 204,
+        callEnd: 487,
+        rngBefore: 2855210072,
+        rngAfter: 782337733,
+      },
+    ]);
+    expect(next.initialRentalGeneration?.rentals.map((rental) => rental.setId))
+      .toEqual([278, 213, 206, 205, 212, 246]);
+    expect(next.opponentGenerations[0]).toMatchObject({
+      trainerId: 99,
+      opponents: [
+        { setId: 224 },
+        { setId: 243 },
+        { setId: 236 },
+      ],
+    });
+    expect(next.facilityRngCalls).toBe(487);
+    expect(next.round.rules.rngValue).toBe(782337733);
+  });
+
   it("owns battle 0 win through decline and battle 1's fresh command on one RNG cursor", () => {
     // This is the rung-11 "current full rental records" entry path. The three
     // selected Level-50 records are intentionally strong against challenge-0
