@@ -1,5 +1,45 @@
 ---
 
+## 677 — [BOUNDED MAIN WORKER 2026-07-29 ~02:37] interaction audit: double faint + deferred entry hooks + AI reveals
+
+- **Supervisor fold (post-step, `d057f085`):** `animation-main` folded at
+  02:40 with 21 overnight commits — Moonlight/Perish Song/Howl/Rest/Wish/
+  Sandstorm/Needle Arm/Follow Me/Metronome promoted exact with coverage
+  ratchets. Union green **485 files / 5019 tests**, production build. The
+  ledger's "For the main program" asks are historical (stat-drop seam
+  already fulfilled via Fake Tears). Also filed **ISSUES #48**
+  (cross-challenge rentsCount persistence, the audit's PLAUSIBLE finding).
+- **State:** committed `91857570`, `234b5405`, and `9c0eca68`; tree green at
+  **461 files / 4975 tests** pre-fold (**485/5019 post-fold**), production
+  build, `git diff --check`, and Battle Scene OFF oracle info. All six
+  seven-win carriers retain exact facility cursors: seeds
+  **4/6/8/13/17/26 = 1517/1563/2089/2224/1787/1556**.
+- **Did:** fainted-actions resume now carries the source's ascending battler
+  cursor past a player replacement, so simultaneous contact-ability
+  double-faints resolve the opponent replacement before leaving the pass
+  (or source `checkteamslost` terminates immediately when the opponent has no
+  surviving party HP). Mid-battle `Cmd_switchineffects` now only marks
+  Intimidate/Trace pending; faint state 6 resolves Intimidate → Trace → item,
+  including White Herb stage restoration/consumption. Voluntary and forced
+  switch callers share the same pass; battle-start's already-correct split
+  stays green.
+- **AI / acceptance:** successful Static (failed proc excluded), state-6
+  Intimidate/Trace, and Leftovers now publish source reveal handoffs; the live
+  Factory AI consumes them through the existing record functions and projects
+  both `knownAbility` and `knownItemEffect`. Focused coverage is **79/79**;
+  executable and ability/item censuses regenerate byte-identically; no import
+  or unsupported-branch ratchet moved.
+- **Next / bounded remainder:** finish the still-unwired source reveal calls:
+  `battle_util.c:216,3859`, the other successful `:3195` ability branches,
+  and `battle_script_commands.c:990,1382,1418,1441,1496,1679,1722,2304,2346,
+  2401,2431,2553,2774,2874,3118,3133,3148,4512,4587,5880,6229,6572,6842,
+  7003,7018,7031,7509,7518,7680,8394,8410,9233`. These opcode-owned
+  absorption/prevention/item sites need their own semantic pins; do not infer
+  them from `lastUsedAbility/Item`. No issue, probe, presentation, animation,
+  canonical recording, or tick branch changed. PAPERCUT: none.
+
+---
+
 ## 676 — [BOUNDED MAIN WORKER 2026-07-29 ~02:15] multi-hit/Earthquake resumptions retired; six seeds win seven
 
 - **State:** committed `a04a26c1`, `c104d8f8`, `bc2a65a0`, `027e5aa0`,
