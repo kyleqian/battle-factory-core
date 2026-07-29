@@ -210,7 +210,7 @@ describe("fresh Factory whole-battle integration (Gate-5 rungs 4/6)", () => {
     expect(state.boundary).toEqual({ kind: "terminal", outcome: "player-win" });
     if (state.boundary.kind !== "terminal") throw new Error("expected terminal boundary");
     expect(forcedSwitches).toBe(1);
-    expect(aiChosenSubmissions.length).toBeGreaterThan(0);
+    expect(aiChosenSubmissions).toHaveLength(12);
     expect(aiChosenSubmissions.every((entry) => entry.side === "trainer")).toBe(true);
     expect(aiDecisionDrawRanges.every(([before, after]) => after > before)).toBe(true);
     for (let decision = 1; decision < aiDecisionDrawRanges.length; decision += 1) {
