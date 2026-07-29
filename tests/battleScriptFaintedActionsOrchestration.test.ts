@@ -262,4 +262,69 @@ describe("runBattleScriptFaintedActionsOrchestration (HandleFaintedMonActions eq
         .not.toThrow();
     },
   );
+
+  it(
+    "simultaneous Rough Skin double faint: player replacement resumes the persisted cursor before the opponent replacement",
+    () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0, hp: 0, partyIndex: 0, species: 261 }),
+          battler({ side: 1, hp: 0, partyIndex: 0, species: 261 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+        selectorRoles: { attacker: 0, target: 1, effectBattler: 1 },
+        party: {
+          player: sixSlots(0, 100, 90),
+          opponent: sixSlots(0, 90),
+        },
+      });
+      const initial = haltedAtOwnEnd(rc);
+      const halted = runBattleScriptFaintedActionsOrchestration(program, handlers, initial);
+      expect(halted.kind).toBe("player-choice-required");
+      if (halted.kind !== "player-choice-required") throw new Error("expected player choice");
+
+      const resumed = resumeBattleScriptFaintedActionsAfterPlayerChoice(
+        program,
+        handlers,
+        halted.state,
+        2,
+      );
+      expect(resumed.kind).toBe("resumed");
+      expect(resumed.state.rulesContext.battlers[0]).toMatchObject({
+        hp: 90,
+        partyIndex: 2,
+      });
+      expect(resumed.state.rulesContext.battlers[1]).toMatchObject({
+        hp: 90,
+        partyIndex: 1,
+      });
+      expect(resumed.state.rulesContext.battleOutcome).toBe(0);
+      expect(resumed.state.rulesContext.selectorRoles.fainted).toBe(1);
+      expect(resumed.state.rulesContext.selectorRoles.target).toBe(1);
+      expect(resumed.state.rng.calls).toBe(initial.rng.calls);
+    },
+  );
+
+  it("simultaneous Rough Skin double faint: the opponent's last mon produces the source terminal outcome", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, hp: 0, partyIndex: 0, species: 261 }),
+        battler({ side: 1, hp: 0, partyIndex: 0, species: 261 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      selectorRoles: { attacker: 0, target: 1, effectBattler: 1 },
+      party: {
+        player: sixSlots(0, 100),
+        opponent: sixSlots(0),
+      },
+    });
+    const initial = haltedAtOwnEnd(rc);
+    const result = runBattleScriptFaintedActionsOrchestration(program, handlers, initial);
+    expect(result.kind).toBe("terminal");
+    expect(result.state.rulesContext.battleOutcome).toBe(1);
+    expect(result.state.rulesContext.battlers[1]!.hp).toBe(0);
+    expect(result.state.rng.calls).toBe(initial.rng.calls);
+  });
 });

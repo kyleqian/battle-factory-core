@@ -43,12 +43,11 @@
  * (multiple real invocations resume the loop via its persisted
  * `faintedActionsState`). This module instead drives each queued script all
  * the way to ITS OWN halt before considering the next fainted battler --
- * behaviorally identical for every scenario this engine can construct today
- * (`battlersCount === 2`, so at most one battler can be newly fainted per
- * action; simultaneous multi-battler faints are a doubles-only case
- * `docs/faint-outcome-ground-truth.md` §4 already marks unreachable in
- * singles), since none of `BattleScript_GiveExp`/`BattleScript_HandleFaintedMon`
- * ever block on a controller mid-script on the modeled path.
+ * behaviorally identical while preserving the source loop's battler cursor:
+ * a contact ability such as Rough Skin can faint the singles attacker after
+ * the target already reached zero HP. If the player-side handler pauses for
+ * a replacement, the resume path finishes that script and then continues the
+ * still-pending higher battler indexes before leaving fainted actions.
  */
 import {
   acknowledgeBattleScriptMachineController,
@@ -332,6 +331,16 @@ export function runBattleScriptFaintedActionsOrchestration(
     state = run.state;
   }
 
+  return runFaintedBattlerHandlers(program, handlers, state, faintedBattlers);
+}
+
+function runFaintedBattlerHandlers(
+  program: BattleScriptProgram,
+  handlers: BattleScriptOpcodeHandlers<BattleScriptRulesContext>,
+  initialState: BattleScriptMachineState<BattleScriptRulesContext>,
+  faintedBattlers: readonly BattleScriptBattlerId[],
+): BattleScriptFaintedActionsResult {
+  let state = initialState;
   for (const faintedBattler of faintedBattlers) {
     state = enterFaintedBattlerContext(state, faintedBattler);
     const started = startBattleScriptExecute(program, HANDLE_FAINTED_MON_LABEL, state);
@@ -390,6 +399,7 @@ export function resumeBattleScriptFaintedActionsAfterPlayerChoice(
     );
   }
   const rules = haltedState.rulesContext;
+  const resumedBattler = reason.battler;
   const monToSwitchIntoId = Object.freeze(
     rules.monToSwitchIntoId.map((value, index) => (index === reason.battler ? chosenPartyIndex : value)),
   ) as unknown as BattleScriptRulesContext["monToSwitchIntoId"];
@@ -407,6 +417,16 @@ export function resumeBattleScriptFaintedActionsAfterPlayerChoice(
     return Object.freeze({ kind: "non-terminal-barrier", state: run.state, instruction: run.instruction });
   }
   const state = run.state;
+  const remainingFaintedBattlers = collectFaintedBattlers(state.rulesContext)
+    .filter((battler) => battler > resumedBattler);
+  if (remainingFaintedBattlers.length !== 0) {
+    return runFaintedBattlerHandlers(
+      program,
+      handlers,
+      state,
+      Object.freeze(remainingFaintedBattlers),
+    );
+  }
   return state.rulesContext.battleOutcome !== 0
     ? Object.freeze({ kind: "terminal", state })
     : Object.freeze({ kind: "resumed", state });
