@@ -14,6 +14,7 @@ import {
   type FactoryCommentaryPartyMember,
   type FactoryTypeId,
 } from "../src/engine/factoryCommentary.ts";
+import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
 import { generateFactoryOpponent } from "../src/engine/factoryOpponentGeneration.ts";
 
 type MoveRow = Readonly<{ move: string; id: number }>;
@@ -271,5 +272,36 @@ describe("rung-8 generated opponent integration", () => {
     expect(commentary3.battleStyle.result).toBe(FACTORY_STYLE.NONE);
     expect(commentary1.favoriteTypeLines).not.toEqual(commentary3.favoriteTypeLines);
     expect(commentary1.battleStyleLines).not.toEqual(commentary3.battleStyleLines);
+  });
+
+  it("predicts the canonical OFF scouting trace's generated set trio", () => {
+    const canonical = [
+      createFactoryCorpusPartyMember({
+        setId: 153, personality: 24, fixedIv: 3, abilitySlot: 0,
+      }),
+      createFactoryCorpusPartyMember({
+        setId: 179, personality: 19, fixedIv: 3, abilitySlot: 1,
+      }),
+      createFactoryCorpusPartyMember({
+        setId: 181, personality: 6, fixedIv: 3, abilitySlot: 0,
+      }),
+    ] as const;
+    const commentary = getFactoryOpponentCommentary(canonical);
+
+    expect(canonical.map((mon) => [mon.setId, mon.speciesName])).toEqual([
+      [153, "SPECIES_BUTTERFREE"],
+      [179, "SPECIES_HAUNTER"],
+      [181, "SPECIES_QUILAVA"],
+    ]);
+    expect(commentary.favoriteType.result).toBe(FACTORY_NO_FAVORITE_TYPE);
+    expect(commentary.battleStyle.result).toBe(FACTORY_STYLE.WEAKENING);
+    expect(commentary.favoriteTypeLines).toEqual([
+      "The TRAINER appears to have no clear",
+      "favorites when it comes to type.",
+    ]);
+    expect(commentary.battleStyleLines).toEqual([
+      "The favorite battle style appears",
+      "to be weakening the foe to start.",
+    ]);
   });
 });
