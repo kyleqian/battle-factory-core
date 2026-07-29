@@ -66,6 +66,10 @@ function choosePlayerDecision(
 function driveGeneratedRoundToCompletion(
   seed: number,
   onDecisionSubmitted?: (state: FactoryRoundBattleOrchestratorState) => void,
+  chooseSwap: (
+    state: FactoryRoundBattleOrchestratorState,
+  ) => Parameters<typeof chooseFactoryRoundSwap>[1] = () => ({ type: "decline" }),
+  rentsCount = 0,
 ): FactoryRoundBattleOrchestratorState {
   const playerRecords = [record(664), record(678), record(527)] as const;
   const savedRentalRecords = [...playerRecords, record(1), record(2), record(3)] as const;
@@ -75,6 +79,7 @@ function driveGeneratedRoundToCompletion(
     factoryWinStreak: 0,
     playerTrainerId: PLAYER_TRAINER_ID,
     battleTowerLevel50WinStreak: 0,
+    facilityState: { rentsCount },
     rentals: {
       type: "currentRecords",
       playerRentalRecords: playerRecords,
@@ -105,7 +110,7 @@ function driveGeneratedRoundToCompletion(
       const commandId = state.round.presentation?.command.commandId;
       if (commandId === undefined) throw new Error("expected swap-offer presentation command");
       state = completeFactoryRoundPresentation(state, { commandId });
-      state = chooseFactoryRoundSwap(state, { type: "decline" });
+      state = chooseFactoryRoundSwap(state, chooseSwap(state));
       continue;
     }
     throw new Error(`unexpected carrier phase ${state.round.rules.phase}`);
@@ -114,6 +119,50 @@ function driveGeneratedRoundToCompletion(
 }
 
 describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
+  it("persists any accepted swaps once into the next challenge's rental rank", () => {
+    const accepted = driveGeneratedRoundToCompletion(
+      17,
+      undefined,
+      (state) => state.round.rules.battleIndex < 2
+        ? { type: "accept", playerPartyIndex: 2, opponentPartyIndex: 0 }
+        : { type: "decline" },
+      14,
+    );
+    expect(accepted.round.rules.phase).toBe("roundComplete");
+    expect(accepted.facilityState.rentsCount).toBe(15);
+    expect(accepted.performedRentalSwap).toBe(false);
+
+    const declined = driveGeneratedRoundToCompletion(17, undefined, undefined, 14);
+    expect(declined.round.rules.phase).toBe("roundComplete");
+    expect(declined.facilityState.rentsCount).toBe(14);
+
+    const createNextChallenge = (
+      previous: FactoryRoundBattleOrchestratorState,
+      id: string,
+    ) => createFactoryRoundBattleOrchestrator({
+      id,
+      rngValue: 0x1234_5678,
+      factoryWinStreak: 7,
+      playerTrainerId: PLAYER_TRAINER_ID,
+      battleTowerLevel50WinStreak: 0,
+      facilityState: previous.facilityState,
+      rentals: {
+        type: "generateInitial",
+        selectedRentalIndexes: [0, 1, 2],
+      },
+    });
+    const acceptedNext = createNextChallenge(accepted, "accepted-next-challenge");
+    const declinedNext = createNextChallenge(declined, "declined-next-challenge");
+
+    // GetNumPastRentalsRank's first band is <15. Crossing 14 -> 15 makes
+    // exactly rental slot 0 use the next-better source range.
+    expect(acceptedNext.initialRentalGeneration?.rentalRank).toBe(1);
+    expect(declinedNext.initialRentalGeneration?.rentalRank).toBe(0);
+    expect(acceptedNext.initialRentalGeneration?.rentals[0]?.setId).not.toBe(
+      declinedNext.initialRentalGeneration?.rentals[0]?.setId,
+    );
+  });
+
   it("owns battle 0 win through decline and battle 1's fresh command on one RNG cursor", () => {
     // This is the rung-11 "current full rental records" entry path. The three
     // selected Level-50 records are intentionally strong against challenge-0
@@ -132,6 +181,7 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       factoryWinStreak: 0,
       playerTrainerId: PLAYER_TRAINER_ID,
       battleTowerLevel50WinStreak: 0,
+      facilityState: { rentsCount: 0 },
       rentals: {
         type: "currentRecords",
         playerRentalRecords: playerRecords,
@@ -246,6 +296,7 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       factoryWinStreak: 0,
       playerTrainerId: PLAYER_TRAINER_ID,
       battleTowerLevel50WinStreak: 0,
+      facilityState: { rentsCount: 0 },
       rentals: {
         type: "currentRecords",
         playerRentalRecords: playerRecords,

@@ -86,7 +86,6 @@ const EMPTY_PARTY_MEMBER: BattleScriptPartyMemberState = Object.freeze({
 export type FactoryRoundRentalSource =
   | Readonly<{
     type: "generateInitial";
-    rentsCount: number;
     selectedRentalIndexes: readonly [number, number, number];
   }>
   | Readonly<{
@@ -103,12 +102,18 @@ export type FactoryRoundRentalSource =
     ];
   }>;
 
+export type FactoryFacilityState = Readonly<{
+  /** Source factoryRentsCount for the selected battle/level mode. */
+  rentsCount: number;
+}>;
+
 export type FactoryRoundBattleOrchestratorConfig = Readonly<{
   id: string;
   rngValue: number;
   factoryWinStreak: number;
   playerTrainerId: number;
   battleTowerLevel50WinStreak: number;
+  facilityState: FactoryFacilityState;
   rentals: FactoryRoundRentalSource;
 }>;
 
@@ -123,6 +128,9 @@ export type FactoryFacilityRngSegment = Readonly<{
 
 export type FactoryRoundBattleOrchestratorState = Readonly<{
   config: FactoryRoundBattleOrchestratorConfig;
+  facilityState: FactoryFacilityState;
+  /** Source sPerformedRentalSwap: challenge-scoped, persisted once on win 7. */
+  performedRentalSwap: boolean;
   round: RoundControllerState;
   battle: BattleState<FactoryFullTurnDecisionRules> | null;
   aiHistory: FactoryAiBattleHistory | null;
@@ -247,6 +255,13 @@ function generateOpponentFor(
 export function createFactoryRoundBattleOrchestrator(
   config: FactoryRoundBattleOrchestratorConfig,
 ): FactoryRoundBattleOrchestratorState {
+  if (
+    !Number.isSafeInteger(config.facilityState.rentsCount)
+    || config.facilityState.rentsCount < 0
+    || config.facilityState.rentsCount > 9_999
+  ) {
+    return fail("facilityState.rentsCount must be an integer in [0, 9999]");
+  }
   let rngValue = config.rngValue >>> 0;
   let facilityRngCalls = 0;
   let initialRentalGeneration: FactoryInitialRentalGenerationResult | null = null;
@@ -258,7 +273,7 @@ export function createFactoryRoundBattleOrchestrator(
     initialRentalGeneration = generateInitialFactoryRentals({
       rngValue,
       factoryWinStreak: config.factoryWinStreak,
-      rentsCount: config.rentals.rentsCount,
+      rentsCount: config.facilityState.rentsCount,
       playerTrainerId: config.playerTrainerId,
     });
     rngSegments.push(generationSegment(
@@ -302,6 +317,8 @@ export function createFactoryRoundBattleOrchestrator(
 
   return Object.freeze({
     config,
+    facilityState: Object.freeze({ ...config.facilityState }),
+    performedRentalSwap: false,
     round,
     battle: null,
     aiHistory: null,
@@ -409,6 +426,7 @@ export function chooseFactoryRoundSwap(
   return Object.freeze({
     ...state,
     round: chooseRoundSwap(state.round, decision),
+    performedRentalSwap: state.performedRentalSwap || decision.type === "accept",
   });
 }
 
@@ -448,13 +466,22 @@ function finishBattle(
     rngBefore: state.round.rules.rngValue,
     rngAfter: battle.rng.value,
   });
+  const round = resolveRoundBattle(state.round, {
+    ...adapted,
+    playerKernelParty,
+    opponentKernelParty,
+  });
+  const persistRentalSwap = round.rules.phase === "roundComplete"
+    && state.performedRentalSwap;
   return Object.freeze({
     ...state,
-    round: resolveRoundBattle(state.round, {
-      ...adapted,
-      playerKernelParty,
-      opponentKernelParty,
-    }),
+    facilityState: persistRentalSwap
+      ? Object.freeze({
+        rentsCount: Math.min(9_999, state.facilityState.rentsCount + 1),
+      })
+      : state.facilityState,
+    performedRentalSwap: persistRentalSwap ? false : state.performedRentalSwap,
+    round,
     battle: null,
     aiHistory,
     rngSegments: Object.freeze([...state.rngSegments, segment]),
