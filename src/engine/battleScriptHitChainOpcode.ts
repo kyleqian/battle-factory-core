@@ -165,6 +165,39 @@ const HOLD_EFFECT_ID_SCOPE_LENS = 41;
 const HOLD_EFFECT_ID_LUCKY_PUNCH = 63;
 const HOLD_EFFECT_ID_STICK = 66;
 
+/**
+ * hold_effects.h ids -> damageCalc.ts's HOLD_EFFECT_* spellings, for the
+ * CalculateBaseDamage hold-item block (sHoldEffectToType's 17 type-power
+ * rows, Choice Band, and the 6 species-locked items) - every id that block
+ * reads, mapped once here rather than as another per-effect ternary chain.
+ */
+const HOLD_EFFECT_NAME_BY_ID: Readonly<Record<number, string>> = Object.freeze({
+  29: "HOLD_EFFECT_CHOICE_BAND",
+  31: "HOLD_EFFECT_BUG_POWER",
+  34: "HOLD_EFFECT_SOUL_DEW",
+  35: "HOLD_EFFECT_DEEP_SEA_TOOTH",
+  36: "HOLD_EFFECT_DEEP_SEA_SCALE",
+  42: "HOLD_EFFECT_STEEL_POWER",
+  45: "HOLD_EFFECT_LIGHT_BALL",
+  46: "HOLD_EFFECT_GROUND_POWER",
+  47: "HOLD_EFFECT_ROCK_POWER",
+  48: "HOLD_EFFECT_GRASS_POWER",
+  49: "HOLD_EFFECT_DARK_POWER",
+  50: "HOLD_EFFECT_FIGHTING_POWER",
+  51: "HOLD_EFFECT_ELECTRIC_POWER",
+  52: "HOLD_EFFECT_WATER_POWER",
+  53: "HOLD_EFFECT_FLYING_POWER",
+  54: "HOLD_EFFECT_POISON_POWER",
+  55: "HOLD_EFFECT_ICE_POWER",
+  56: "HOLD_EFFECT_GHOST_POWER",
+  57: "HOLD_EFFECT_PSYCHIC_POWER",
+  58: "HOLD_EFFECT_FIRE_POWER",
+  59: "HOLD_EFFECT_DRAGON_POWER",
+  60: "HOLD_EFFECT_NORMAL_POWER",
+  64: "HOLD_EFFECT_METAL_POWDER",
+  65: "HOLD_EFFECT_THICK_CLUB",
+});
+
 /** STATUS3_CHARGED_UP (include/constants/battle.h:166) - Charge's next-hit Electric ×2. */
 const STATUS3_CHARGED_UP = 1 << 9;
 /** STATUS1_BURN (include/constants/battle.h:118). */
@@ -1352,6 +1385,9 @@ export function calculateBattleScriptBaseDamageForCurrentMove(
   ) {
     movePower = Math.trunc(movePower / 2);
   }
+  const attackerHoldEffectId = resolveBattleScriptBattlerHoldEffect(rulesContext, attacker);
+  const defenderHoldEffectId = resolveBattleScriptBattlerHoldEffect(rulesContext, target);
+
   return calculateBaseDamage({
     attacker: {
       attack: attackerBattler.attack,
@@ -1366,6 +1402,9 @@ export function calculateBattleScriptBaseDamageForCurrentMove(
       hp: attackerBattler.hp,
       maxHP: attackerBattler.maxHP,
       ability: ABILITY_NAME_BY_ID[attackerBattler.ability] ?? null,
+      species: attackerBattler.species,
+      holdEffect: HOLD_EFFECT_NAME_BY_ID[attackerHoldEffectId] ?? null,
+      holdEffectParam: resolveBattleScriptBattlerHoldEffectParam(rulesContext, attacker),
     },
     defender: {
       attack: targetBattler.attack,
@@ -1377,6 +1416,8 @@ export function calculateBattleScriptBaseDamageForCurrentMove(
       statStages: toDamageCalcStatStages(targetBattler),
       hasStatus1: targetBattler.status1 !== 0,
       ability: ABILITY_NAME_BY_ID[targetBattler.ability] ?? null,
+      species: targetBattler.species,
+      holdEffect: HOLD_EFFECT_NAME_BY_ID[defenderHoldEffectId] ?? null,
     },
     movePower,
     moveType,
@@ -1386,6 +1427,7 @@ export function calculateBattleScriptBaseDamageForCurrentMove(
     weatherHasEffect: weatherHasEffectForBaseDamage(rulesContext),
     currentMove: rulesContext.currentMove,
     activeBattlerAbilities: activeBattlers.map((b) => ABILITY_NAME_BY_ID[b.ability] ?? null),
+    isFrontierBattle: (rulesContext.battleTopology.battleTypeFlags & BATTLE_TYPE_FRONTIER) !== 0,
   });
 }
 

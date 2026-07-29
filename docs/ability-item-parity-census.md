@@ -7,7 +7,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 ## Headline
 
 - **Abilities: 55/70 members engine-referenced** (weighted by L50 set-carriers: 905/1103); 4 zero-carrier, 3 without battle hooks (out-of-battle only).
-- **Hold effects: 22/42 members engine-referenced** (weighted by L50 set-carriers: 713/850); 21 zero-carrier, 3 without battle hooks.
+- **Hold effects: 41/42 members engine-referenced** (weighted by L50 set-carriers: 775/850); 21 zero-carrier, 3 without battle hooks.
 - All 15 ground-truth validation checks passed.
 
 ## Ability worklist (ranked: unreferenced first, then by L50 carriers)
@@ -97,25 +97,6 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | Hold effect | Status | L50 carriers | All | Frontier items | Delegate cases | Inline rules | AI | Engine refs |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | HOLD_EFFECT_QUICK_CLAW | unreferenced | 75 | 80 | QUICK_CLAW | — | 2 | 0 | 0 |
-| HOLD_EFFECT_PSYCHIC_POWER | unreferenced | 10 | 10 | TWISTED_SPOON | — | 1 | 0 | 0 |
-| HOLD_EFFECT_WATER_POWER | unreferenced | 7 | 7 | MYSTIC_WATER, SEA_INCENSE | — | 1 | 0 | 0 |
-| HOLD_EFFECT_NORMAL_POWER | unreferenced | 6 | 6 | SILK_SCARF | — | 1 | 0 | 0 |
-| HOLD_EFFECT_GROUND_POWER | unreferenced | 5 | 5 | SOFT_SAND | — | 1 | 0 | 0 |
-| HOLD_EFFECT_FIGHTING_POWER | unreferenced | 4 | 4 | BLACK_BELT | — | 1 | 0 | 0 |
-| HOLD_EFFECT_FLYING_POWER | unreferenced | 4 | 4 | SHARP_BEAK | — | 1 | 0 | 0 |
-| HOLD_EFFECT_ICE_POWER | unreferenced | 4 | 4 | NEVER_MELT_ICE | — | 1 | 0 | 0 |
-| HOLD_EFFECT_THICK_CLUB | unreferenced | 4 | 4 | THICK_CLUB | — | 1 | 0 | 0 |
-| HOLD_EFFECT_ELECTRIC_POWER | unreferenced | 3 | 3 | MAGNET | — | 1 | 0 | 0 |
-| HOLD_EFFECT_POISON_POWER | unreferenced | 3 | 3 | POISON_BARB | — | 1 | 0 | 0 |
-| HOLD_EFFECT_ROCK_POWER | unreferenced | 2 | 2 | HARD_STONE | — | 1 | 0 | 0 |
-| HOLD_EFFECT_GRASS_POWER | unreferenced | 2 | 2 | MIRACLE_SEED | — | 1 | 0 | 0 |
-| HOLD_EFFECT_FIRE_POWER | unreferenced | 2 | 2 | CHARCOAL | — | 1 | 0 | 0 |
-| HOLD_EFFECT_BUG_POWER | unreferenced | 1 | 1 | SILVER_POWDER | — | 1 | 0 | 0 |
-| HOLD_EFFECT_DEEP_SEA_SCALE | unreferenced | 1 | 1 | DEEP_SEA_SCALE | — | 1 | 0 | 0 |
-| HOLD_EFFECT_STEEL_POWER | unreferenced | 1 | 1 | METAL_COAT | — | 1 | 0 | 0 |
-| HOLD_EFFECT_LIGHT_BALL | unreferenced | 1 | 1 | LIGHT_BALL | — | 1 | 0 | 0 |
-| HOLD_EFFECT_DARK_POWER | unreferenced | 1 | 1 | BLACK_GLASSES | — | 1 | 0 | 0 |
-| HOLD_EFFECT_METAL_POWDER | unreferenced | 1 | 1 | METAL_POWDER | — | 1 | 0 | 0 |
 | HOLD_EFFECT_EVASION_UP | engine-referenced | 120 | 125 | BRIGHT_POWDER, LAX_INCENSE | — | 1 | 0 | 2 |
 | HOLD_EFFECT_FOCUS_BAND | engine-referenced | 78 | 80 | FOCUS_BAND | — | 5 | 0 | 5 |
 | HOLD_EFFECT_CURE_STATUS | engine-referenced | 75 | 80 | LUM_BERRY | NORMAL, MOVE_END | 0 | 0 | 2 |
@@ -131,12 +112,31 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | HOLD_EFFECT_SPEED_UP | engine-referenced | 21 | 22 | SALAC_BERRY | NORMAL | 0 | 0 | 2 |
 | HOLD_EFFECT_SP_ATTACK_UP | engine-referenced | 16 | 16 | PETAYA_BERRY | NORMAL | 0 | 0 | 2 |
 | HOLD_EFFECT_ATTACK_UP | engine-referenced | 12 | 12 | LIECHI_BERRY | NORMAL | 0 | 0 | 2 |
-| HOLD_EFFECT_CHOICE_BAND | engine-referenced | 12 | 12 | CHOICE_BAND | — | 4 | 0 | 6 |
+| HOLD_EFFECT_CHOICE_BAND | engine-referenced | 12 | 12 | CHOICE_BAND | — | 4 | 0 | 8 |
+| HOLD_EFFECT_PSYCHIC_POWER | engine-referenced | 10 | 10 | TWISTED_SPOON | — | 1 | 0 | 2 |
 | HOLD_EFFECT_CURE_BRN | engine-referenced | 8 | 8 | RAWST_BERRY | NORMAL, MOVE_END | 0 | 0 | 2 |
 | HOLD_EFFECT_CURE_PSN | engine-referenced | 7 | 7 | PECHA_BERRY | NORMAL, MOVE_END | 0 | 0 | 2 |
+| HOLD_EFFECT_WATER_POWER | engine-referenced | 7 | 7 | MYSTIC_WATER, SEA_INCENSE | — | 1 | 0 | 2 |
+| HOLD_EFFECT_NORMAL_POWER | engine-referenced | 6 | 6 | SILK_SCARF | — | 1 | 0 | 2 |
+| HOLD_EFFECT_GROUND_POWER | engine-referenced | 5 | 5 | SOFT_SAND | — | 1 | 0 | 2 |
 | HOLD_EFFECT_CURE_ATTRACT | engine-referenced | 4 | 4 | MENTAL_HERB | NORMAL, MOVE_END | 0 | 0 | 2 |
+| HOLD_EFFECT_FIGHTING_POWER | engine-referenced | 4 | 4 | BLACK_BELT | — | 1 | 0 | 2 |
+| HOLD_EFFECT_FLYING_POWER | engine-referenced | 4 | 4 | SHARP_BEAK | — | 1 | 0 | 2 |
+| HOLD_EFFECT_ICE_POWER | engine-referenced | 4 | 4 | NEVER_MELT_ICE | — | 1 | 0 | 2 |
+| HOLD_EFFECT_THICK_CLUB | engine-referenced | 4 | 4 | THICK_CLUB | — | 1 | 0 | 2 |
+| HOLD_EFFECT_ELECTRIC_POWER | engine-referenced | 3 | 3 | MAGNET | — | 1 | 0 | 2 |
+| HOLD_EFFECT_POISON_POWER | engine-referenced | 3 | 3 | POISON_BARB | — | 1 | 0 | 2 |
 | HOLD_EFFECT_RESTORE_PP | engine-referenced | 2 | 2 | LEPPA_BERRY | NORMAL | 0 | 0 | 2 |
+| HOLD_EFFECT_ROCK_POWER | engine-referenced | 2 | 2 | HARD_STONE | — | 1 | 0 | 2 |
+| HOLD_EFFECT_GRASS_POWER | engine-referenced | 2 | 2 | MIRACLE_SEED | — | 1 | 0 | 2 |
+| HOLD_EFFECT_FIRE_POWER | engine-referenced | 2 | 2 | CHARCOAL | — | 1 | 0 | 2 |
 | HOLD_EFFECT_CURE_FRZ | engine-referenced | 1 | 1 | ASPEAR_BERRY | NORMAL, MOVE_END | 0 | 0 | 2 |
+| HOLD_EFFECT_BUG_POWER | engine-referenced | 1 | 1 | SILVER_POWDER | — | 1 | 0 | 2 |
+| HOLD_EFFECT_DEEP_SEA_SCALE | engine-referenced | 1 | 1 | DEEP_SEA_SCALE | — | 1 | 0 | 2 |
+| HOLD_EFFECT_STEEL_POWER | engine-referenced | 1 | 1 | METAL_COAT | — | 1 | 0 | 2 |
+| HOLD_EFFECT_LIGHT_BALL | engine-referenced | 1 | 1 | LIGHT_BALL | — | 1 | 0 | 2 |
+| HOLD_EFFECT_DARK_POWER | engine-referenced | 1 | 1 | BLACK_GLASSES | — | 1 | 0 | 2 |
+| HOLD_EFFECT_METAL_POWDER | engine-referenced | 1 | 1 | METAL_POWDER | — | 1 | 0 | 2 |
 | HOLD_EFFECT_STICK | engine-referenced | 1 | 1 | STICK | — | 1 | 0 | 2 |
 | HOLD_EFFECT_CONFUSE_SPICY | zero-carrier | 0 | 0 | FIGY_BERRY | NORMAL | 0 | 0 | 2 |
 | HOLD_EFFECT_CONFUSE_DRY | zero-carrier | 0 | 0 | WIKI_BERRY | NORMAL | 0 | 0 | 2 |
@@ -151,13 +151,13 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | HOLD_EFFECT_EXP_SHARE | zero-carrier | 0 | 0 | — | — | 3 | 0 | 0 |
 | HOLD_EFFECT_FRIENDSHIP_UP | zero-carrier | 0 | 0 | — | — | 2 | 0 | 0 |
 | HOLD_EFFECT_DOUBLE_PRIZE | zero-carrier | 0 | 0 | — | ON_SWITCH_IN | 0 | 0 | 0 |
-| HOLD_EFFECT_SOUL_DEW | zero-carrier | 0 | 0 | SOUL_DEW | — | 2 | 0 | 0 |
-| HOLD_EFFECT_DEEP_SEA_TOOTH | zero-carrier | 0 | 0 | DEEP_SEA_TOOTH | — | 1 | 0 | 0 |
+| HOLD_EFFECT_SOUL_DEW | zero-carrier | 0 | 0 | SOUL_DEW | — | 2 | 0 | 3 |
+| HOLD_EFFECT_DEEP_SEA_TOOTH | zero-carrier | 0 | 0 | DEEP_SEA_TOOTH | — | 1 | 0 | 2 |
 | HOLD_EFFECT_CAN_ALWAYS_RUN | zero-carrier | 0 | 0 | — | — | 2 | 0 | 0 |
 | HOLD_EFFECT_PREVENT_EVOLVE | zero-carrier | 0 | 0 | — | — | 1 | 0 | 0 |
 | HOLD_EFFECT_LUCKY_EGG | zero-carrier | 0 | 0 | — | — | 1 | 0 | 0 |
-| HOLD_EFFECT_GHOST_POWER | zero-carrier | 0 | 0 | SPELL_TAG | — | 1 | 0 | 0 |
-| HOLD_EFFECT_DRAGON_POWER | zero-carrier | 0 | 0 | DRAGON_FANG | — | 1 | 0 | 0 |
+| HOLD_EFFECT_GHOST_POWER | zero-carrier | 0 | 0 | SPELL_TAG | — | 1 | 0 | 2 |
+| HOLD_EFFECT_DRAGON_POWER | zero-carrier | 0 | 0 | DRAGON_FANG | — | 1 | 0 | 2 |
 | HOLD_EFFECT_LUCKY_PUNCH | zero-carrier | 0 | 0 | LUCKY_PUNCH | — | 1 | 0 | 2 |
 | HOLD_EFFECT_REPEL | no-battle-hooks | 0 | 0 | — | — | 0 | 0 | 0 |
 | HOLD_EFFECT_DRAGON_SCALE | no-battle-hooks | 0 | 0 | DRAGON_SCALE | — | 0 | 0 | 0 |

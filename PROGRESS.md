@@ -13,6 +13,56 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 660 — [BOUNDED MAIN WORKER 2026-07-28 ~21:05] damageCalc hold-item block ported bit-exact; census hold effects 22/42 -> 41/42
+
+- **State:** union green at **452 files / 4855 tests**, production build,
+  `git diff --check` clean. Census regenerated in-commit: **hold effects
+  41/42 engine-referenced (weighted 775/850)**, abilities unchanged 55/70
+  (weighted 905/1103), all 15 validations pass. Headline matched the
+  supervisor's prediction exactly.
+- **Did:** ported `pokemon.c` CalculateBaseDamage's hold-item block
+  (:3171-3201) into `damageCalc.ts`, inserted at the exact source position
+  (after Huge/Pure Power, before entry 659's ability block, so truncation
+  order matches): the `sHoldEffectToType` attacker-only type-power loop
+  (all 17 rows, first-match-break, `(param+100)/100` on attack for
+  physical types / spAttack for special), Choice Band (1.5x attack — the
+  choice-lock logic already referenced the hold effect, but the damage
+  boost itself was missing), and the 6 species-locked items (Soul Dew
+  spAttack/spDefense 1.5x gated on `!BATTLE_TYPE_FRONTIER` + Latias/Latios,
+  Deep Sea Tooth/Scale, Light Ball, Metal Powder, Thick Club, all flat 2x
+  on the correct stat/species pair). Added a local `spDefense` variable
+  (previously read straight off `defender.spDefense`) since Soul Dew/Deep
+  Sea Scale now mutate it before the special branch reads it. Wired the
+  real call site (`battleScriptHitChainOpcode.ts`'s
+  `calculateBattleScriptBaseDamageForCurrentMove`) with both battlers'
+  resolved hold effect (via the existing `resolveBattleScriptBattlerHoldEffect`
+  / `...HoldEffectParam` — no second item table invented), species, and
+  `isFrontierBattle` computed from the real `battleTypeFlags` (a genuine
+  structural no-op in this engine: every battle sets `BATTLE_TYPE_FACTORY`,
+  a `BATTLE_TYPE_FRONTIER` member). 17 new Tier-1 tests: type-boost
+  physical/special routing + truncation, species gating positive *and*
+  negative for all 6 items, Soul Dew's frontier gate proven both ways, and
+  a 4-stage combined-order test (Huge Power -> Choice Band -> Marvel Scale
+  -> Explosion) using odd numbers so a wrong stage order would visibly
+  produce a different result. Two new census infra spellings classified
+  (`HOLD_EFFECT_NAME_BY_ID`, `HOLD_EFFECT_TO_TYPE`) in the census script's
+  `ENGINE_INFRA_SPELLINGS` allowlist.
+- **Next:** supervisor pick the next row — `HOLD_EFFECT_QUICK_CLAW` (75 L50
+  carriers, the single remaining unreferenced hold effect; turn-order work,
+  a side-lane scout owns `GetWhoStrikesFirst`) or an ability row
+  (Chlorophyll 38 / Swift Swim 34 speed-calc class, or the ON_DAMAGE
+  contact family).
+- **Notes:** all 19 target hold-effect rows closed exactly as predicted
+  (15 named type-power rows + Thick Club, Deep Sea Scale, Light Ball,
+  Metal Powder). Soul Dew and Deep Sea Tooth stay `zero-carrier` (no L50
+  set carries them) despite being fully ported — expected, not a gap.
+  Ghost/Dragon Power also flipped to engine-referenced as a side effect of
+  porting the real table (still zero-carrier). No abilities, badge boosts,
+  field sports, AI, Enigma Berry, or new `unsupported-branch` barrier
+  touched (ratchet unchanged). PAPERCUT: none this session.
+
+---
+
 ## 659 — [BOUNDED MAIN WORKER 2026-07-28 ~20:45] damageCalc ability stat/power modifier block ported bit-exact; census abilities 43/70 -> 55/70
 
 - **State:** commit `1f8d7727`; union green at **452 files / 4841 tests**,
@@ -87,39 +137,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   completeness — rows close via fixtures + oracle evidence like move rows
   (see the doc's Caveats). Animation program live to ~21:06 tonight;
   its fold at next orient is expected.
-
----
-## 657 — [INTERACTIVE SESSION 2026-07-28 ~19:55] Pre-next-run cleanup: animation fold, 07-26 oracle-tooling branch landed, papercuts pruned; USER DIRECTIVE: held-item + ability parity is the next objective
-
-- **State:** master `b791ea88`, union green at **448 files / 4813 tests**,
-  production build, `git diff --check`, both oracle profiles answering. The
-  animation supervisor session is live until ~21:06 (LEAF_BLADE evidence
-  worker in flight); expect another animation-main fold at next orient.
-- **Did:** (1) folded `animation-main` (ff) — MOVE_ENDURE promoted exact,
-  Level-50 animation coverage **77/276 exact**. (2) Found and landed the
-  orphaned 4-commit `codex/oracle-tooling-papercuts` branch (sat unmerged
-  since 2026-07-26 22:04): `bin/oracle --quiet`, mGBA-venv auto-routing in
-  `run-mgba-probe.py`, resumable `npm run compare:batch`, per-frame diff
-  `bbox=` in `npm run compare`, `docs/oracle-frame-semantics.md`. One
-  mechanical conflict in `appTrace.ts` (kept master's full-turn staging,
-  took the branch's `traceAdvances` loop); `--quiet` live-smoked. (3)
-  Deleted 5 retired PAPERCUTS entries (~14 recorded hits), trimmed the
-  per-frame-bbox entry to its portable-comparator remainder. (4) Pruned the
-  fully-merged `codex/hybrid-cloud-supervisor` + landed `oracle-tooling`
-  worktrees/branches.
-- **Next (user directive this session):** with the move census closed at
-  100%, drive **held-item and ability parity** — entry 655's Next #1
-  (ability/item census generator: turn the named-barrier set + source hook
-  tables into a ranked worklist like the move census) is now the confirmed
-  next objective. ISSUES #39 window-by-window retirement continues as the
-  secondary lane. Remaining enumerable families after items+abilities:
-  none new — statuses/volatiles/weather ride the closed effect census;
-  species/natures/trainers/sets closed at Gate 1; switch/item AI,
-  doubles, Open level, Noland stay out of scope by mission.
-- **Notes:** open ISSUES: #39 (active retirement path), #38/#18/#5 (all
-  parked/settled by user policy — no action). DEFERRED.md empty. Remaining
-  papercut worth a future harness window: Scene-ON battle-lab HTTP route
-  404 (3 hits, shared-oracle change, needs coordination). Did not touch
-  the animation lane's worktrees.
 
 ---

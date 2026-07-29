@@ -6,21 +6,21 @@
 // singles, no weather/screens/double-battle) are fully exercised by
 // Tier-1 tests, as is the ability stat/power modifier block (pokemon.c:3158,
 // 3203-3226 - Huge/Pure Power, Thick Fat, Hustle, Plus/Minus, Guts, Marvel
-// Scale, the Overgrow/Blaze/Torrent/Swarm pinch-power boosts), ported in
-// exact source order (truncation order is load-bearing); the surrounding
-// modifier chain (held items, badge boosts,
-// Reflect/Light Screen, double-battle target-split) is ported structurally
-// so later S7 slices can enable those paths, but is untested this step —
-// see docs/battle-turn-notes.md §10 for the exact inventory.
+// Scale, the Overgrow/Blaze/Torrent/Swarm pinch-power boosts) and the
+// hold-item block (pokemon.c:3171-3201 - the sHoldEffectToType type-power
+// loop, plus Choice Band and the 6 species-locked items: Soul Dew, Deep Sea
+// Tooth/Scale, Light Ball, Metal Powder, Thick Club), ported in exact
+// source order (truncation order is load-bearing); the surrounding
+// modifier chain (badge boosts, Reflect/Light Screen, double-battle
+// target-split) is ported structurally so later S7 slices can enable those
+// paths, but is untested this step — see docs/battle-turn-notes.md §10 for
+// the exact inventory.
 //
 // NOT ported (out of scope this step, no battle-1 turn exercises them):
-// Flash Fire's triggered damage modifier, the 6 species-locked hold items
-// (Soul Dew, Deep Sea Tooth/Scale,
-// Light Ball, Metal Powder, Thick Club - none of battle 1's 6 mons are
-// eligible species), Wonder Guard/Levitate immunity side-effects beyond the
-// raw multiplier, badge boosts (always off - ShouldGetStatBadgeBoost
-// returns FALSE unconditionally for BATTLE_TYPE_FRONTIER, which every
-// battle this engine models is).
+// Flash Fire's triggered damage modifier, Wonder Guard/Levitate immunity
+// side-effects beyond the raw multiplier, badge boosts (always off -
+// ShouldGetStatBadgeBoost returns FALSE unconditionally for
+// BATTLE_TYPE_FRONTIER, which every battle this engine models is).
 
 /** include/constants/pokemon.h TYPE_* numeric ids - physical/special split. */
 const TYPE_IDS: Record<string, number> = {
@@ -114,6 +114,10 @@ export interface DamageBattler {
   /** ABILITY_* id, structurally present - see the modifier-chain notes above for what's wired. */
   ability?: string | null;
   species?: number;
+  /** GetItemHoldEffect(...)'s result (Enigma Berry's per-battler override already folded in by the caller) - pokemon.c:3132-3150. */
+  holdEffect?: string | null;
+  /** GetItemHoldEffectParam(...) - pokemon.c:3132-3150; only the attacker's is read (the sHoldEffectToType loop's magnitude). */
+  holdEffectParam?: number;
 }
 
 export interface DamageCalcInput {
@@ -153,6 +157,14 @@ export interface DamageCalcInput {
    * which IS the full field in singles (gBattlersCount == 2).
    */
   activeBattlerAbilities?: ReadonlyArray<string | null | undefined>;
+  /**
+   * `!(gBattleTypeFlags & BATTLE_TYPE_FRONTIER)` (pokemon.c:3187,3189) -
+   * gates Soul Dew's spAttack/spDefense boost off. Every real battle this
+   * engine drives sets BATTLE_TYPE_FACTORY (a BATTLE_TYPE_FRONTIER member),
+   * so this is a structural no-op in practice - wired so the gate itself is
+   * provable (see damageCalc.test.ts's Soul Dew frontier case).
+   */
+  isFrontierBattle?: boolean;
 }
 
 /**
@@ -205,13 +217,71 @@ const PINCH_BOOST_OWNER_BY_TYPE: Readonly<Record<string, string>> = {
   TYPE_BUG: ABILITY_SWARM,
 };
 
+/** Same identity-alias idiom as the ABILITY_* consts above, for this module's hold-item block. */
+const HOLD_EFFECT_BUG_POWER = "HOLD_EFFECT_BUG_POWER";
+const HOLD_EFFECT_STEEL_POWER = "HOLD_EFFECT_STEEL_POWER";
+const HOLD_EFFECT_GROUND_POWER = "HOLD_EFFECT_GROUND_POWER";
+const HOLD_EFFECT_ROCK_POWER = "HOLD_EFFECT_ROCK_POWER";
+const HOLD_EFFECT_GRASS_POWER = "HOLD_EFFECT_GRASS_POWER";
+const HOLD_EFFECT_DARK_POWER = "HOLD_EFFECT_DARK_POWER";
+const HOLD_EFFECT_FIGHTING_POWER = "HOLD_EFFECT_FIGHTING_POWER";
+const HOLD_EFFECT_ELECTRIC_POWER = "HOLD_EFFECT_ELECTRIC_POWER";
+const HOLD_EFFECT_WATER_POWER = "HOLD_EFFECT_WATER_POWER";
+const HOLD_EFFECT_FLYING_POWER = "HOLD_EFFECT_FLYING_POWER";
+const HOLD_EFFECT_POISON_POWER = "HOLD_EFFECT_POISON_POWER";
+const HOLD_EFFECT_ICE_POWER = "HOLD_EFFECT_ICE_POWER";
+const HOLD_EFFECT_GHOST_POWER = "HOLD_EFFECT_GHOST_POWER";
+const HOLD_EFFECT_PSYCHIC_POWER = "HOLD_EFFECT_PSYCHIC_POWER";
+const HOLD_EFFECT_FIRE_POWER = "HOLD_EFFECT_FIRE_POWER";
+const HOLD_EFFECT_DRAGON_POWER = "HOLD_EFFECT_DRAGON_POWER";
+const HOLD_EFFECT_NORMAL_POWER = "HOLD_EFFECT_NORMAL_POWER";
+const HOLD_EFFECT_CHOICE_BAND = "HOLD_EFFECT_CHOICE_BAND";
+const HOLD_EFFECT_SOUL_DEW = "HOLD_EFFECT_SOUL_DEW";
+const HOLD_EFFECT_DEEP_SEA_TOOTH = "HOLD_EFFECT_DEEP_SEA_TOOTH";
+const HOLD_EFFECT_DEEP_SEA_SCALE = "HOLD_EFFECT_DEEP_SEA_SCALE";
+const HOLD_EFFECT_LIGHT_BALL = "HOLD_EFFECT_LIGHT_BALL";
+const HOLD_EFFECT_METAL_POWDER = "HOLD_EFFECT_METAL_POWDER";
+const HOLD_EFFECT_THICK_CLUB = "HOLD_EFFECT_THICK_CLUB";
+
+/** include/constants/species.h ids - the species-locked hold items' gates. */
+const SPECIES_PIKACHU = 25;
+const SPECIES_CUBONE = 104;
+const SPECIES_MAROWAK = 105;
+const SPECIES_DITTO = 132;
+const SPECIES_CLAMPERL = 373;
+const SPECIES_LATIAS = 407;
+const SPECIES_LATIOS = 408;
+
+/**
+ * sHoldEffectToType (pokemon.c:1919-1938): attacker hold effect -> the move
+ * type it boosts, first-match-break (source iterates in this exact array
+ * order, though no two rows can ever share a hold effect so match order is
+ * moot in practice).
+ */
+const HOLD_EFFECT_TO_TYPE: ReadonlyArray<readonly [string, string]> = [
+  [HOLD_EFFECT_BUG_POWER, "TYPE_BUG"],
+  [HOLD_EFFECT_STEEL_POWER, "TYPE_STEEL"],
+  [HOLD_EFFECT_GROUND_POWER, "TYPE_GROUND"],
+  [HOLD_EFFECT_ROCK_POWER, "TYPE_ROCK"],
+  [HOLD_EFFECT_GRASS_POWER, "TYPE_GRASS"],
+  [HOLD_EFFECT_DARK_POWER, "TYPE_DARK"],
+  [HOLD_EFFECT_FIGHTING_POWER, "TYPE_FIGHTING"],
+  [HOLD_EFFECT_ELECTRIC_POWER, "TYPE_ELECTRIC"],
+  [HOLD_EFFECT_WATER_POWER, "TYPE_WATER"],
+  [HOLD_EFFECT_FLYING_POWER, "TYPE_FLYING"],
+  [HOLD_EFFECT_POISON_POWER, "TYPE_POISON"],
+  [HOLD_EFFECT_ICE_POWER, "TYPE_ICE"],
+  [HOLD_EFFECT_GHOST_POWER, "TYPE_GHOST"],
+  [HOLD_EFFECT_PSYCHIC_POWER, "TYPE_PSYCHIC"],
+  [HOLD_EFFECT_FIRE_POWER, "TYPE_FIRE"],
+  [HOLD_EFFECT_DRAGON_POWER, "TYPE_DRAGON"],
+  [HOLD_EFFECT_NORMAL_POWER, "TYPE_NORMAL"],
+];
+
 /**
  * CalculateBaseDamage (pokemon.c:3106-3371), physical/special branches only
- * (TYPE_MYSTERY's "damage = 0" branch is also ported). Item type-boosts,
- * badge boosts and the 6 species-locked hold items are NOT applied (see
- * module doc comment) - battle 1 turn 1 needs none of them
- * (src/data/gen/item-hold-effects.json + docs/battle-turn-notes.md §7
- * confirm battle 1's held items don't touch this function).
+ * (TYPE_MYSTERY's "damage = 0" branch is also ported). Badge boosts are NOT
+ * applied (see module doc comment) - always off in this engine.
  */
 export function calculateBaseDamage(input: DamageCalcInput): number {
   const { attacker, defender, moveType, isCriticalHit } = input;
@@ -226,6 +296,63 @@ export function calculateBaseDamage(input: DamageCalcInput): number {
   }
   let spAttack = attacker.spAttack;
   let defense = defender.defense;
+  let spDefense = defender.spDefense;
+
+  // pokemon.c:3171-3183 - sHoldEffectToType, attacker-only, first-match-
+  // break: physical types boost attack, special types boost spAttack, by
+  // (holdEffectParam + 100) / 100.
+  const attackerHoldEffect = attacker.holdEffect ?? null;
+  const attackerHoldEffectParam = attacker.holdEffectParam ?? 0;
+  const defenderHoldEffect = defender.holdEffect ?? null;
+  for (const [holdEffect, boostedType] of HOLD_EFFECT_TO_TYPE) {
+    if (attackerHoldEffect === holdEffect && moveType === boostedType) {
+      if (isTypePhysical(moveType)) {
+        attack = Math.trunc((attack * (attackerHoldEffectParam + 100)) / 100);
+      } else {
+        spAttack = Math.trunc((spAttack * (attackerHoldEffectParam + 100)) / 100);
+      }
+      break;
+    }
+  }
+
+  // pokemon.c:3185-3201 - Choice Band and the 6 species-locked hold items
+  // (the badge-boost block between the type-boost loop above and here is
+  // link/badge-gated and out of scope for Factory - see module doc comment).
+  if (attackerHoldEffect === HOLD_EFFECT_CHOICE_BAND) {
+    attack = Math.trunc((150 * attack) / 100);
+  }
+  if (
+    attackerHoldEffect === HOLD_EFFECT_SOUL_DEW
+    && !input.isFrontierBattle
+    && (attacker.species === SPECIES_LATIAS || attacker.species === SPECIES_LATIOS)
+  ) {
+    spAttack = Math.trunc((150 * spAttack) / 100);
+  }
+  if (
+    defenderHoldEffect === HOLD_EFFECT_SOUL_DEW
+    && !input.isFrontierBattle
+    && (defender.species === SPECIES_LATIAS || defender.species === SPECIES_LATIOS)
+  ) {
+    spDefense = Math.trunc((150 * spDefense) / 100);
+  }
+  if (attackerHoldEffect === HOLD_EFFECT_DEEP_SEA_TOOTH && attacker.species === SPECIES_CLAMPERL) {
+    spAttack *= 2;
+  }
+  if (defenderHoldEffect === HOLD_EFFECT_DEEP_SEA_SCALE && defender.species === SPECIES_CLAMPERL) {
+    spDefense *= 2;
+  }
+  if (attackerHoldEffect === HOLD_EFFECT_LIGHT_BALL && attacker.species === SPECIES_PIKACHU) {
+    spAttack *= 2;
+  }
+  if (defenderHoldEffect === HOLD_EFFECT_METAL_POWDER && defender.species === SPECIES_DITTO) {
+    defense *= 2;
+  }
+  if (
+    attackerHoldEffect === HOLD_EFFECT_THICK_CLUB
+    && (attacker.species === SPECIES_CUBONE || attacker.species === SPECIES_MAROWAK)
+  ) {
+    attack *= 2;
+  }
 
   // pokemon.c:3203-3213 ability block, exact source order.
   if (defender.ability === ABILITY_THICK_FAT && (moveType === "TYPE_FIRE" || moveType === "TYPE_ICE")) {
@@ -294,7 +421,7 @@ export function calculateBaseDamage(input: DamageCalcInput): number {
     damage = damage * movePower;
     damage *= Math.trunc((2 * attacker.level) / 5) + 2;
 
-    const damageHelper = critAdjustedDefenseStat(defender.spDefense, defender.statStages.spDef, isCriticalHit);
+    const damageHelper = critAdjustedDefenseStat(spDefense, defender.statStages.spDef, isCriticalHit);
 
     damage = Math.trunc(damage / damageHelper);
     damage = Math.trunc(damage / 50);

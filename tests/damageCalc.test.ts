@@ -497,6 +497,163 @@ describe("calculateBaseDamage - ability stat/power modifier block (pokemon.c:315
   });
 });
 
+describe("calculateBaseDamage - hold-item block (pokemon.c:3171-3201)", () => {
+  it("sHoldEffectToType boosts Attack for a matching physical type", () => {
+    const damage = calculateBaseDamage({
+      attacker: { ...MOD_ATTACKER, holdEffect: "HOLD_EFFECT_FIGHTING_POWER", holdEffectParam: 100 },
+      defender: MOD_DEFENDER,
+      movePower: 50,
+      moveType: "TYPE_FIGHTING",
+      isCriticalHit: false,
+    });
+    // attack 100 -> (100 + 100)/100 -> 200, same shape as the Huge Power case.
+    expect(damage).toBe(46);
+  });
+
+  it("sHoldEffectToType boosts Special Attack for a matching special type", () => {
+    const damage = calculateBaseDamage({
+      attacker: { ...MOD_ATTACKER, holdEffect: "HOLD_EFFECT_PSYCHIC_POWER", holdEffectParam: 100 },
+      defender: MOD_DEFENDER,
+      movePower: 50,
+      moveType: "TYPE_PSYCHIC",
+      isCriticalHit: false,
+    });
+    expect(damage).toBe(46);
+  });
+
+  it("sHoldEffectToType requires the exact boosted type - no boost for a mismatched move type", () => {
+    const damage = calculateBaseDamage({
+      attacker: { ...MOD_ATTACKER, holdEffect: "HOLD_EFFECT_FIGHTING_POWER", holdEffectParam: 100 },
+      defender: MOD_DEFENDER,
+      movePower: 50,
+      moveType: "TYPE_NORMAL",
+      isCriticalHit: false,
+    });
+    expect(damage).toBe(24);
+  });
+
+  it("sHoldEffectToType's (param + 100) / 100 truncates rather than rounds", () => {
+    const damage = calculateBaseDamage({
+      attacker: { ...MOD_ATTACKER, attack: 17, holdEffect: "HOLD_EFFECT_NORMAL_POWER", holdEffectParam: 33 },
+      defender: MOD_DEFENDER,
+      movePower: 50,
+      moveType: "TYPE_NORMAL",
+      isCriticalHit: false,
+    });
+    // attack: trunc(17 * 133 / 100) = trunc(22.61) = 22 (not 23).
+    // damage: 22*50*22=24200; /100=242; /50=4.84->4; +2=6.
+    expect(damage).toBe(6);
+  });
+
+  it("Choice Band boosts the attacker's Attack by 1.5x", () => {
+    const damage = calculateBaseDamage({
+      attacker: { ...MOD_ATTACKER, holdEffect: "HOLD_EFFECT_CHOICE_BAND" },
+      defender: MOD_DEFENDER,
+      movePower: 50,
+      moveType: "TYPE_NORMAL",
+      isCriticalHit: false,
+    });
+    expect(damage).toBe(35);
+  });
+
+  it.each([
+    ["Thick Club", "HOLD_EFFECT_THICK_CLUB", "attacker", 104 /* SPECIES_CUBONE */, "TYPE_NORMAL"],
+    ["Thick Club (Marowak)", "HOLD_EFFECT_THICK_CLUB", "attacker", 105 /* SPECIES_MAROWAK */, "TYPE_NORMAL"],
+    ["Light Ball", "HOLD_EFFECT_LIGHT_BALL", "attacker", 25 /* SPECIES_PIKACHU */, "TYPE_PSYCHIC"],
+    ["Deep Sea Tooth", "HOLD_EFFECT_DEEP_SEA_TOOTH", "attacker", 373 /* SPECIES_CLAMPERL */, "TYPE_PSYCHIC"],
+  ] as const)("%s doubles the eligible species' stat, and does nothing for any other species", (
+    _label, holdEffect, side, eligibleSpecies, moveType,
+  ) => {
+    const damageWith = (species: number | undefined) => calculateBaseDamage({
+      attacker: side === "attacker" ? { ...MOD_ATTACKER, holdEffect, species } : MOD_ATTACKER,
+      defender: MOD_DEFENDER,
+      movePower: 50,
+      moveType,
+      isCriticalHit: false,
+    });
+    expect(damageWith(eligibleSpecies)).toBe(46);
+    expect(damageWith(1 /* unrelated species */)).toBe(24);
+    expect(damageWith(undefined)).toBe(24);
+  });
+
+  it.each([
+    ["Deep Sea Scale", "HOLD_EFFECT_DEEP_SEA_SCALE", 373 /* SPECIES_CLAMPERL */, "TYPE_PSYCHIC"],
+    ["Metal Powder", "HOLD_EFFECT_METAL_POWDER", 132 /* SPECIES_DITTO */, "TYPE_NORMAL"],
+  ] as const)("%s doubles the defender's eligible-species stat, and does nothing for any other species", (
+    _label, holdEffect, eligibleSpecies, moveType,
+  ) => {
+    const damageWith = (species: number | undefined) => calculateBaseDamage({
+      attacker: MOD_ATTACKER,
+      defender: { ...MOD_DEFENDER, holdEffect, species },
+      movePower: 50,
+      moveType,
+      isCriticalHit: false,
+    });
+    // defender's stat 100 -> 200 halves the damage's denominator vs. baseline 24: 13.
+    expect(damageWith(eligibleSpecies)).toBe(13);
+    expect(damageWith(1 /* unrelated species */)).toBe(24);
+  });
+
+  it("Soul Dew boosts the attacker's Special Attack by 1.5x for Latias/Latios, but is a structural no-op under BATTLE_TYPE_FRONTIER", () => {
+    const damageOf = (isFrontierBattle: boolean, species: number) => calculateBaseDamage({
+      attacker: { ...MOD_ATTACKER, holdEffect: "HOLD_EFFECT_SOUL_DEW", species },
+      defender: MOD_DEFENDER,
+      movePower: 50,
+      moveType: "TYPE_PSYCHIC",
+      isCriticalHit: false,
+      isFrontierBattle,
+    });
+    expect(damageOf(false, 407 /* SPECIES_LATIAS */)).toBe(35);
+    expect(damageOf(false, 408 /* SPECIES_LATIOS */)).toBe(35);
+    // Factory battles always set BATTLE_TYPE_FACTORY (a BATTLE_TYPE_FRONTIER
+    // member) - this is the structural no-op this engine actually exercises.
+    expect(damageOf(true, 407 /* SPECIES_LATIAS */)).toBe(24);
+    // Species gate still applies even outside a frontier battle.
+    expect(damageOf(false, 1 /* unrelated species */)).toBe(24);
+  });
+
+  it("Soul Dew boosts the defender's Special Defense by 1.5x for Latias/Latios, gated the same way", () => {
+    const damageOf = (isFrontierBattle: boolean, species: number) => calculateBaseDamage({
+      attacker: MOD_ATTACKER,
+      defender: { ...MOD_DEFENDER, holdEffect: "HOLD_EFFECT_SOUL_DEW", species },
+      movePower: 50,
+      moveType: "TYPE_PSYCHIC",
+      isCriticalHit: false,
+      isFrontierBattle,
+    });
+    // spDefense 100 -> 150: 100*50*22=110000; /150=733; /50=14; +2=16.
+    expect(damageOf(false, 407 /* SPECIES_LATIAS */)).toBe(16);
+    expect(damageOf(true, 407 /* SPECIES_LATIAS */)).toBe(24);
+  });
+
+  it("combined order: Huge Power (:3158) -> Choice Band (item block, :3185) -> Marvel Scale (ability block, :3213) -> Explosion (:3228) all compose in exact source order", () => {
+    const damage = calculateBaseDamage({
+      attacker: {
+        ...MOD_ATTACKER,
+        attack: 19,
+        ability: "ABILITY_HUGE_POWER",
+        holdEffect: "HOLD_EFFECT_CHOICE_BAND",
+      },
+      defender: {
+        ...MOD_DEFENDER,
+        defense: 10,
+        ability: "ABILITY_MARVEL_SCALE",
+        hasStatus1: true,
+      },
+      movePower: 50,
+      moveType: "TYPE_NORMAL",
+      isCriticalHit: false,
+      moveEffect: "EFFECT_EXPLOSION",
+    });
+    // attack: Huge Power 19*2=38, then Choice Band trunc(150*38/100)=57
+    // (applying Choice Band BEFORE Huge Power would instead give
+    // trunc(150*19/100)=28, *2=56 - a different, wrong number).
+    // defense: Marvel Scale trunc(150*10/100)=15, then Explosion trunc(15/2)=7.
+    // damage: 57*50*22=62700; /7=8957; /50=179; +2=181.
+    expect(damage).toBe(181);
+  });
+});
+
 describe("calculateBaseDamage - crit determination (turn 1, no crit)", () => {
   it("critChance stage 0 (no focus energy/high-crit move/scope lens) -> 1-in-16", () => {
     const stage = getCriticalHitChanceStage({});
