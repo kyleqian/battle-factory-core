@@ -749,9 +749,10 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
     resolveHalfwordOperand: (_context: unknown, operand: Readonly<{ expression: string }>) => {
       if (operand.expression === "B_WAIT_TIME_LONG") return B_WAIT_TIME_LONG;
       if (operand.expression === "B_WAIT_TIME_SHORT") return B_WAIT_TIME_SHORT;
-      return null;
+      return /^[0-9]+$/.test(operand.expression) ? Number(operand.expression) : null;
     },
-    resolveByteOperand: () => null,
+    resolveByteOperand: (_context: unknown, operand: Readonly<{ expression: string }>) =>
+      /^[0-9]+$/.test(operand.expression) ? Number(operand.expression) : null,
   });
 }
 
@@ -782,7 +783,10 @@ function runScriptToOwnEnd(program: BattleScriptProgram, handlers: Handlers, ini
     if (stepped.kind === "blocked") {
       const acknowledged = acknowledgeAllPendingControllers(stepped.state);
       if (acknowledged === stepped.state) {
-        throw new Error(`full-turn reducer blocked inside ${instruction.source.label} without a safe controller acknowledgement`);
+        throw new Error(
+          `full-turn reducer blocked inside ${instruction.source.label}/${instruction.opcodeName} `
+            + `without a safe controller acknowledgement: ${JSON.stringify(stepped.reason)}`,
+        );
       }
       state = acknowledged;
       continue;

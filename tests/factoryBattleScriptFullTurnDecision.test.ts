@@ -14,6 +14,9 @@ import { BATTLE_SCRIPT_STATUS3_MINIMIZED } from "../src/engine/battleScriptSourc
 import { advanceRngValue } from "../src/engine/rng.ts";
 
 const STRENGTH = 70; // EFFECT_HIT, TYPE_NORMAL -- the banked KO-scenario move (factoryBattleScriptTerminalDecision.test.ts).
+const SPIKE_CANNON = 131; // EFFECT_MULTI_HIT, TYPE_NORMAL, 2-5 hits.
+const DOUBLE_KICK = 24; // EFFECT_DOUBLE_HIT, fixed 2 hits.
+const TWINEEDLE = 41; // EFFECT_TWINEEDLE, fixed 2 hits.
 const EMBER = 52; // EFFECT_BURN_HIT, TYPE_FIRE, 10% MOVE_EFFECT_BURN secondary proc.
 const FLAIL = 175; // EFFECT_FLAIL -- writes source gDynamicBasePower before the shared hit chain.
 const FRUSTRATION = 218; // EFFECT_FRUSTRATION -- friendship 0 writes source gDynamicBasePower 102.
@@ -113,6 +116,108 @@ function config(overrides: Partial<FactoryFullTurnConfig> = {}): FactoryFullTurn
 
 const PLAYER_ATTACKS = Object.freeze({ kind: "use-move" as const, moveSlot: 0 as const, targetBattler: 1 as const });
 const TRAINER_ATTACKS = Object.freeze({ kind: "use-move" as const, moveSlot: 0 as const, targetBattler: 0 as const });
+
+describe("factory full-turn decision -- multi-hit controller resumption", () => {
+  function runMultiHitTurn(moveId: number, rngSeed: number) {
+    const initial = createFactoryFullTurnBattleState(config({
+      rngSeed,
+      player: {
+        species: 1,
+        moveId,
+        attack: 50,
+        defense: 200,
+        spAttack: 50,
+        spDefense: 200,
+        speed: 100,
+        hp: 999,
+      },
+      trainer: {
+        species: 43,
+        moveId: STRENGTH,
+        attack: 50,
+        defense: 200,
+        spAttack: 50,
+        spDefense: 200,
+        speed: 50,
+        hp: 999,
+      },
+    }));
+    const afterPlayer = submitFactoryFullTurnDecision(initial, {
+      requestId: 1,
+      side: "player",
+      decision: PLAYER_ATTACKS,
+    });
+    if (afterPlayer.kind !== "decision-required") throw new Error("expected trainer decision");
+    const reasons: string[] = [];
+    let rngValue = afterPlayer.state.rng.value;
+    let rngCalls = afterPlayer.state.rng.calls;
+    const reduced = reduceFactoryFullTurnDecision({
+      rules: afterPlayer.state.rules,
+      request: afterPlayer.nextRequest,
+      decision: TRAINER_ATTACKS,
+      rng: {
+        draw(reason) {
+          reasons.push(reason);
+          rngValue = advanceRngValue(rngValue);
+          rngCalls += 1;
+          return rngValue >>> 16;
+        },
+        snapshot: () => ({ value: rngValue, calls: rngCalls }),
+      },
+    });
+    return { reduced, reasons, rngValue, rngCalls };
+  }
+
+  it("resumes every controller yield inside Spike Cannon's hit splice and keeps the hit-count roll at draw 2", () => {
+    const { reduced, reasons, rngValue, rngCalls } = runMultiHitTurn(SPIKE_CANNON, 1);
+    expect(reduced.boundary.kind).toBe("decision-required");
+    expect(reduced.rules.rulesContext.battlers[1].hp).toBe(984);
+    expect(reduced.rules.rulesContext.battlers[0].pp[0]).toBe(15);
+    expect(reasons.slice(0, 9)).toEqual([
+      "accuracycheck",
+      "setmultihitcounter:initial",
+      "critcalc",
+      "adjustnormaldamage",
+      "critcalc",
+      "adjustnormaldamage",
+      "critcalc",
+      "adjustnormaldamage",
+      "seteffectwithchance",
+    ]);
+    expect(reduced.events.filter((event) => {
+      const payload = "payload" in event ? event.payload : event;
+      return payload.kind === "health-bar-update" && payload.battler === 1;
+    })).toHaveLength(3);
+    expect(rngCalls).toBe(14);
+    let expectedCursor = 1;
+    for (let call = 0; call < rngCalls; call += 1) expectedCursor = advanceRngValue(expectedCursor);
+    expect(rngValue).toBe(expectedCursor);
+  });
+
+  it.each([
+    ["Double Kick", DOUBLE_KICK],
+    ["Twineedle", TWINEEDLE],
+  ])("%s resumes its fixed two-hit loop through the next command boundary", (_name, moveId) => {
+    const { reduced, reasons, rngValue, rngCalls } = runMultiHitTurn(moveId, 1);
+    expect(reduced.boundary.kind).toBe("decision-required");
+    expect(reduced.events.filter((event) => {
+      const payload = "payload" in event ? event.payload : event;
+      return payload.kind === "health-bar-update" && payload.battler === 1;
+    })).toHaveLength(2);
+    expect(reasons.slice(0, 6)).toEqual([
+      "accuracycheck",
+      "critcalc",
+      "adjustnormaldamage",
+      "critcalc",
+      "adjustnormaldamage",
+      "seteffectwithchance",
+    ]);
+    expect(rngCalls).toBe(11);
+    let expectedCursor = 1;
+    for (let call = 0; call < rngCalls; call += 1) expectedCursor = advanceRngValue(expectedCursor);
+    expect(rngValue).toBe(expectedCursor);
+  });
+});
 
 function initialPlayerSwitchIndexes(turnConfig: FactoryFullTurnConfig): readonly number[] {
   const initial = createFactoryFullTurnBattleState(turnConfig);
