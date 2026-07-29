@@ -12,7 +12,7 @@ step; the wired arms are pinned in the focused suites named there.
 | `battle_util.c:3195` | switch-in Drizzle/Sand Stream/Drought; successful Forecast/Cloud Nine/Air Lock form change | A | wired at `Cmd_switchineffects`; failed/no-change arms pinned quiet |
 | `battle_util.c:3195` | end-turn Rain Dish, Shed Skin, Speed Boost | A | wired; dry/full-HP, failed Shed Skin proc, capped/first-turn arms pinned quiet |
 | `battle_util.c:3195` | Soundproof move block | A | wired only when a sound move is actually blocked |
-| `battle_util.c:3195` | Volt Absorb, Water Absorb, Flash Fire absorption/boost | B | `JumpIfMoveFailed` / `ABILITYEFFECT_ABSORBING` unsupported branch at `battle_script_commands.c:1020` |
+| `battle_util.c:3195` | Volt Absorb, Water Absorb, Flash Fire absorption/boost | A | wired at `JumpIfMoveFailed`; matching/non-matching, damaging/full-HP, frozen/repeat-boost, reveal, PP-loss, HP/party sync, and later Flash Fire damage consumption pinned in `tests/battleScriptHitChainOpcode.test.ts` + `tests/damageCalc.test.ts`; two-seed OFF receipt: `docs/absorbing-abilities-ground-truth.md` |
 | `battle_util.c:3195` | Color Change, Rough Skin, Effect Spore, Poison Point, Flame Body, Cute Charm; Static | A | wired successful arms; failed proc/no-change quiet; Static already done in entry 677 and retained |
 | `battle_util.c:3195` | status-curing ability pass | B | `Cmd_moveend` `MOVEEND_IMMUNITY_ABILITIES` barrier (`battle_util.c:2876`) |
 | `battle_util.c:3195` | Synchronize target / attacker | B | `Cmd_moveend` `MOVEEND_SYNCHRONIZE_TARGET` / `MOVEEND_SYNCHRONIZE_ATTACKER` barriers (`battle_util.c:2971/2987`) |

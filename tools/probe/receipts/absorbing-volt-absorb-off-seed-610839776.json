@@ -1,0 +1,1187 @@
+{
+  "fixture": "tools/battle-lab/mechanic-absorbing-volt-absorb-off.json",
+  "profile": "battle-scene-off",
+  "seed": 610839776,
+  "initial": {
+    "frame": 2,
+    "rngValue": 3872647298,
+    "battleHp": {
+      "player": 110,
+      "opponent": 172
+    },
+    "battleSpecies": {
+      "player": 95,
+      "opponent": 135
+    },
+    "partyHp": {
+      "player": [
+        110,
+        120,
+        120
+      ],
+      "opponent": [
+        172,
+        120,
+        120
+      ]
+    },
+    "opponentMaxHp": 172,
+    "opponentPp": [
+      20,
+      20,
+      20,
+      20
+    ],
+    "currentMove": 0,
+    "chosenMoveByBattler": [
+      0,
+      36
+    ],
+    "moveResultFlags": 0,
+    "lastUsedAbility": 69,
+    "displayedString": "SPARK"
+  },
+  "randomFrames": [
+    {
+      "frame": 44,
+      "randomCalls": 1,
+      "rngBefore": 3872647298,
+      "rngAfter": 2946366413,
+      "currentMove": 36,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "sourceAttribution": "Factory AI equal-slot choice (all four slots are TAKE_DOWN)"
+    },
+    {
+      "frame": 74,
+      "randomCalls": 1,
+      "rngBefore": 2946366413,
+      "rngAfter": 3062566076,
+      "currentMove": 36,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "sourceAttribution": "Cmd_critcalc for TAKE_DOWN"
+    },
+    {
+      "frame": 77,
+      "randomCalls": 1,
+      "rngBefore": 3062566076,
+      "rngAfter": 2893943935,
+      "currentMove": 36,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "sourceAttribution": "ApplyRandomDmgMultiplier for TAKE_DOWN"
+    },
+    {
+      "frame": 375,
+      "randomCalls": 1,
+      "rngBefore": 2893943935,
+      "rngAfter": 4113026182,
+      "currentMove": 209,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "sourceAttribution": "Cmd_accuracycheck for SPARK; absorption exits before crit/damage draws"
+    }
+  ],
+  "transitions": [
+    {
+      "frame": 2,
+      "rngValue": 3872647298,
+      "battleHp": {
+        "player": 110,
+        "opponent": 172
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          110,
+          120,
+          120
+        ],
+        "opponent": [
+          172,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        20
+      ],
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        0,
+        36
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 69,
+      "displayedString": "SPARK"
+    },
+    {
+      "frame": 3,
+      "rngValue": 3872647298,
+      "battleHp": {
+        "player": 110,
+        "opponent": 172
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          110,
+          120,
+          120
+        ],
+        "opponent": [
+          172,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        20
+      ],
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        0,
+        36
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 69,
+      "displayedString": "TYPE/<FC><06><01>ELECTR"
+    },
+    {
+      "frame": 34,
+      "rngValue": 3872647298,
+      "battleHp": {
+        "player": 110,
+        "opponent": 172
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          110,
+          120,
+          120
+        ],
+        "opponent": [
+          172,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        20
+      ],
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 69,
+      "displayedString": "TYPE/<FC><06><01>ELECTR"
+    },
+    {
+      "frame": 39,
+      "rngValue": 3872647298,
+      "battleHp": {
+        "player": 110,
+        "opponent": 172
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          110,
+          120,
+          120
+        ],
+        "opponent": [
+          172,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        20
+      ],
+      "currentMove": 36,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 69,
+      "displayedString": "TYPE/<FC><06><01>ELECTR"
+    },
+    {
+      "frame": 44,
+      "rngValue": 2946366413,
+      "battleHp": {
+        "player": 110,
+        "opponent": 172
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          110,
+          120,
+          120
+        ],
+        "opponent": [
+          172,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        20
+      ],
+      "currentMove": 36,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 69,
+      "displayedString": "TYPE/<FC><06><01>ELECTR"
+    },
+    {
+      "frame": 45,
+      "rngValue": 2946366413,
+      "battleHp": {
+        "player": 110,
+        "opponent": 172
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          110,
+          120,
+          120
+        ],
+        "opponent": [
+          172,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        20
+      ],
+      "currentMove": 36,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 69,
+      "displayedString": "Foe JOLTEON used\nTAKE DOWN!"
+    },
+    {
+      "frame": 73,
+      "rngValue": 2946366413,
+      "battleHp": {
+        "player": 110,
+        "opponent": 172
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          110,
+          120,
+          120
+        ],
+        "opponent": [
+          172,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        19
+      ],
+      "currentMove": 36,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 69,
+      "displayedString": "Foe JOLTEON used\nTAKE DOWN!"
+    },
+    {
+      "frame": 74,
+      "rngValue": 3062566076,
+      "battleHp": {
+        "player": 110,
+        "opponent": 172
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          110,
+          120,
+          120
+        ],
+        "opponent": [
+          172,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        19
+      ],
+      "currentMove": 36,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 69,
+      "displayedString": "Foe JOLTEON used\nTAKE DOWN!"
+    },
+    {
+      "frame": 76,
+      "rngValue": 3062566076,
+      "battleHp": {
+        "player": 110,
+        "opponent": 172
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          110,
+          120,
+          120
+        ],
+        "opponent": [
+          172,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        19
+      ],
+      "currentMove": 36,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 4,
+      "lastUsedAbility": 69,
+      "displayedString": "Foe JOLTEON used\nTAKE DOWN!"
+    },
+    {
+      "frame": 77,
+      "rngValue": 2893943935,
+      "battleHp": {
+        "player": 110,
+        "opponent": 172
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          110,
+          120,
+          120
+        ],
+        "opponent": [
+          172,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        19
+      ],
+      "currentMove": 36,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 4,
+      "lastUsedAbility": 69,
+      "displayedString": "Foe JOLTEON used\nTAKE DOWN!"
+    },
+    {
+      "frame": 162,
+      "rngValue": 2893943935,
+      "battleHp": {
+        "player": 99,
+        "opponent": 172
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          99,
+          120,
+          120
+        ],
+        "opponent": [
+          172,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        19
+      ],
+      "currentMove": 36,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 4,
+      "lastUsedAbility": 69,
+      "displayedString": "Foe JOLTEON used\nTAKE DOWN!"
+    },
+    {
+      "frame": 165,
+      "rngValue": 2893943935,
+      "battleHp": {
+        "player": 99,
+        "opponent": 172
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          99,
+          120,
+          120
+        ],
+        "opponent": [
+          172,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        19
+      ],
+      "currentMove": 36,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 4,
+      "lastUsedAbility": 69,
+      "displayedString": "It<B4>s not very effective<B0>"
+    },
+    {
+      "frame": 263,
+      "rngValue": 2893943935,
+      "battleHp": {
+        "player": 99,
+        "opponent": 170
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          99,
+          120,
+          120
+        ],
+        "opponent": [
+          170,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        19
+      ],
+      "currentMove": 36,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 4,
+      "lastUsedAbility": 69,
+      "displayedString": "It<B4>s not very effective<B0>"
+    },
+    {
+      "frame": 264,
+      "rngValue": 2893943935,
+      "battleHp": {
+        "player": 99,
+        "opponent": 170
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          99,
+          120,
+          120
+        ],
+        "opponent": [
+          170,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        19
+      ],
+      "currentMove": 36,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 4,
+      "lastUsedAbility": 69,
+      "displayedString": "Foe JOLTEON is hit\nwith recoil!"
+    },
+    {
+      "frame": 364,
+      "rngValue": 2893943935,
+      "battleHp": {
+        "player": 99,
+        "opponent": 170
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          99,
+          120,
+          120
+        ],
+        "opponent": [
+          170,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        19
+      ],
+      "currentMove": 36,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 4,
+      "lastUsedAbility": 10,
+      "displayedString": "Foe JOLTEON is hit\nwith recoil!"
+    },
+    {
+      "frame": 367,
+      "rngValue": 2893943935,
+      "battleHp": {
+        "player": 99,
+        "opponent": 170
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          99,
+          120,
+          120
+        ],
+        "opponent": [
+          170,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        19
+      ],
+      "currentMove": 36,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 10,
+      "displayedString": "Foe JOLTEON is hit\nwith recoil!"
+    },
+    {
+      "frame": 368,
+      "rngValue": 2893943935,
+      "battleHp": {
+        "player": 99,
+        "opponent": 170
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          99,
+          120,
+          120
+        ],
+        "opponent": [
+          170,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        19
+      ],
+      "currentMove": 36,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 69,
+      "displayedString": "Foe JOLTEON is hit\nwith recoil!"
+    },
+    {
+      "frame": 369,
+      "rngValue": 2893943935,
+      "battleHp": {
+        "player": 99,
+        "opponent": 170
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          99,
+          120,
+          120
+        ],
+        "opponent": [
+          170,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        19
+      ],
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 69,
+      "displayedString": "Foe JOLTEON is hit\nwith recoil!"
+    },
+    {
+      "frame": 370,
+      "rngValue": 2893943935,
+      "battleHp": {
+        "player": 99,
+        "opponent": 170
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          99,
+          120,
+          120
+        ],
+        "opponent": [
+          170,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        19
+      ],
+      "currentMove": 209,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 69,
+      "displayedString": "Foe JOLTEON is hit\nwith recoil!"
+    },
+    {
+      "frame": 374,
+      "rngValue": 2893943935,
+      "battleHp": {
+        "player": 99,
+        "opponent": 170
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          99,
+          120,
+          120
+        ],
+        "opponent": [
+          170,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        19
+      ],
+      "currentMove": 209,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 10,
+      "displayedString": "Foe JOLTEON is hit\nwith recoil!"
+    },
+    {
+      "frame": 375,
+      "rngValue": 4113026182,
+      "battleHp": {
+        "player": 99,
+        "opponent": 170
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          99,
+          120,
+          120
+        ],
+        "opponent": [
+          170,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        19
+      ],
+      "currentMove": 209,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 10,
+      "displayedString": "Foe JOLTEON is hit\nwith recoil!"
+    },
+    {
+      "frame": 377,
+      "rngValue": 4113026182,
+      "battleHp": {
+        "player": 99,
+        "opponent": 170
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          99,
+          120,
+          120
+        ],
+        "opponent": [
+          170,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        19
+      ],
+      "currentMove": 209,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 10,
+      "displayedString": "ONIX used\nSPARK!"
+    },
+    {
+      "frame": 431,
+      "rngValue": 4113026182,
+      "battleHp": {
+        "player": 99,
+        "opponent": 172
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          99,
+          120,
+          120
+        ],
+        "opponent": [
+          172,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        19
+      ],
+      "currentMove": 209,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 10,
+      "displayedString": "ONIX used\nSPARK!"
+    },
+    {
+      "frame": 432,
+      "rngValue": 4113026182,
+      "battleHp": {
+        "player": 99,
+        "opponent": 172
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          99,
+          120,
+          120
+        ],
+        "opponent": [
+          172,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        19
+      ],
+      "currentMove": 209,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 10,
+      "displayedString": "Foe JOLTEON restored HP\nusing its VOLT ABSORB!"
+    },
+    {
+      "frame": 543,
+      "rngValue": 4113026182,
+      "battleHp": {
+        "player": 99,
+        "opponent": 172
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          99,
+          120,
+          120
+        ],
+        "opponent": [
+          172,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        19
+      ],
+      "currentMove": 209,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 8,
+      "lastUsedAbility": 10,
+      "displayedString": "Foe JOLTEON restored HP\nusing its VOLT ABSORB!"
+    },
+    {
+      "frame": 546,
+      "rngValue": 4113026182,
+      "battleHp": {
+        "player": 99,
+        "opponent": 172
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          99,
+          120,
+          120
+        ],
+        "opponent": [
+          172,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        19
+      ],
+      "currentMove": 209,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 8,
+      "lastUsedAbility": 69,
+      "displayedString": "Foe JOLTEON restored HP\nusing its VOLT ABSORB!"
+    },
+    {
+      "frame": 549,
+      "rngValue": 4113026182,
+      "battleHp": {
+        "player": 99,
+        "opponent": 172
+      },
+      "battleSpecies": {
+        "player": 95,
+        "opponent": 135
+      },
+      "partyHp": {
+        "player": [
+          99,
+          120,
+          120
+        ],
+        "opponent": [
+          172,
+          120,
+          120
+        ]
+      },
+      "opponentMaxHp": 172,
+      "opponentPp": [
+        20,
+        20,
+        20,
+        19
+      ],
+      "currentMove": 209,
+      "chosenMoveByBattler": [
+        209,
+        36
+      ],
+      "moveResultFlags": 0,
+      "lastUsedAbility": 69,
+      "displayedString": "Foe JOLTEON restored HP\nusing its VOLT ABSORB!"
+    }
+  ],
+  "final": {
+    "rngValue": 4113026182,
+    "battleHp": {
+      "player": 99,
+      "opponent": 172
+    },
+    "battleSpecies": {
+      "player": 95,
+      "opponent": 135
+    },
+    "partyHp": {
+      "player": [
+        99,
+        120,
+        120
+      ],
+      "opponent": [
+        172,
+        120,
+        120
+      ]
+    },
+    "opponentMaxHp": 172,
+    "opponentPp": [
+      20,
+      20,
+      20,
+      19
+    ],
+    "currentMove": 209,
+    "chosenMoveByBattler": [
+      209,
+      36
+    ],
+    "moveResultFlags": 0,
+    "lastUsedAbility": 69,
+    "displayedString": "Foe JOLTEON restored HP\nusing its VOLT ABSORB!"
+  }
+}
