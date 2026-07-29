@@ -16,6 +16,7 @@ import {
 } from "../src/engine/factoryCommentary.ts";
 import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
 import { generateFactoryOpponent } from "../src/engine/factoryOpponentGeneration.ts";
+import { POSTWIN_SCOUTING_LINES } from "../src/engine/postwin.ts";
 
 type MoveRow = Readonly<{ move: string; id: number }>;
 const MOVE_ID = new Map(
@@ -274,7 +275,7 @@ describe("rung-8 generated opponent integration", () => {
     expect(commentary1.battleStyleLines).not.toEqual(commentary3.battleStyleLines);
   });
 
-  it("predicts the canonical OFF scouting trace's generated set trio", () => {
+  it("keeps the canonical upcoming opponent equivalent to frozen presentation", () => {
     const canonical = [
       createFactoryCorpusPartyMember({
         setId: 153, personality: 24, fixedIv: 3, abilitySlot: 0,
@@ -302,6 +303,13 @@ describe("rung-8 generated opponent integration", () => {
     expect(commentary.battleStyleLines).toEqual([
       "The favorite battle style appears",
       "to be weakening the foe to start.",
+    ]);
+    expect([
+      commentary.favoriteTypeLines,
+      commentary.battleStyleLines,
+    ]).toEqual([
+      POSTWIN_SCOUTING_LINES[1],
+      POSTWIN_SCOUTING_LINES[2],
     ]);
   });
 });
