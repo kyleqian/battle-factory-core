@@ -51,7 +51,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_CUTE_CHARM | engine-referenced | 13 (13) | 13 | ON_DAMAGE | 0 | 0 | 5 |
 | ABILITY_HYPER_CUTTER | engine-referenced | 12 (2) | 12 | — | 3 | 0 | 9 |
 | ABILITY_SERENE_GRACE | engine-referenced | 11 (0) | 11 | — | 1 | 0 | 2 |
-| ABILITY_IMMUNITY | engine-referenced | 10 (2) | 10 | IMMUNITY | 10 | 0 | 10 |
+| ABILITY_IMMUNITY | engine-referenced | 10 (2) | 10 | IMMUNITY | 10 | 0 | 12 |
 | ABILITY_VOLT_ABSORB | engine-referenced | 9 (4) | 9 | ABSORBING | 0 | 1 | 2 |
 | ABILITY_WATER_VEIL | engine-referenced | 9 (0) | 9 | IMMUNITY | 5 | 0 | 7 |
 | ABILITY_BATTLE_ARMOR | engine-referenced | 8 (5) | 8 | — | 1 | 0 | 2 |
