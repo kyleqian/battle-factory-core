@@ -10,9 +10,19 @@ import {
   type HypnosisPoint,
   type HypnosisSide,
 } from "../../src/animation/hypnosis.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnHypnosisView,
+  type SceneOnHypnosisConfig,
+} from "../../src/animation/sceneOnPresentation.ts";
+import {
+  createInitialState,
+  render,
+  type EngineState,
+} from "../../src/engine/core.ts";
 
 type Window = { startFrame: number; endFrame: number; frameCount: number };
-type Fixture = {
+type Fixture = SceneOnHypnosisConfig & {
   schema: "hypnosis-portable-evidence/v1";
   oracleProfile: "battle-scene-on";
   orientation: string;
@@ -43,6 +53,11 @@ type Battler = {
   status2: number;
   status3: number;
 };
+type AudioPlayer = {
+  songHeader: number;
+  status: number;
+  tracks: { flags: number; panX: number }[];
+};
 type Frame = {
   frame: number;
   sha256: string;
@@ -59,8 +74,8 @@ type Frame = {
   paletteTags: number[];
   tileTags: number[];
   registers: Record<string, number>;
-  se1: unknown;
-  se2: unknown;
+  se1: AudioPlayer;
+  se2: AudioPlayer;
   battlerState: { player: Battler; opponent: Battler };
 };
 type Probe = {
@@ -117,11 +132,20 @@ function verify(fixturePath: string, runNumber: number): void {
   ) throw new Error(`${fixture.orientation}: immutable dense receipt changed`);
 
   const firstBattlers = probe.frames[0]!.battlerState;
+  const stage = createSceneOnMovePresentation({
+    move: "HYPNOSIS",
+    attacker: fixture.attacker,
+    target: fixture.target,
+    fieldProfile: fixture.fieldProfile,
+  });
   const raw = createHash("sha256");
   const failures: string[] = [];
+  let componentFrames = 0;
+  let framebufferFrames = 0;
   let sawPsychicTask = false;
   let sawBlendTask = false;
   for (const [age, oracle] of probe.frames.entries()) {
+    const frameFailureStart = failures.length;
     const rgb = readFileSync(
       join(rgbDir, `${String(oracle.frame).padStart(5, "0")}.rgb`),
     );
@@ -135,6 +159,17 @@ function verify(fixturePath: string, runNumber: number): void {
       fixture.attackerCenter,
       fixture.targetCenter,
     );
+    const seam = sceneOnHypnosisView({ ...stage, age });
+    const {
+      age: _age,
+      attacker: _attacker,
+      target: _target,
+      displayedRings: _displayedRings,
+      displayedTargetBlendCoefficient: _displayedTargetBlendCoefficient,
+      displayedBgPaletteAge: _displayedBgPaletteAge,
+      ...seamState
+    } = seam;
+    if (!same(seamState, state)) failures.push(`age ${age}: typed seam`);
     const actual = oracle.goldRings.map((ring) => ({
       x: ring.x,
       y: ring.y,
@@ -163,6 +198,16 @@ function verify(fixturePath: string, runNumber: number): void {
     );
     if (state.targetBlendTaskActive !== blendTask) {
       failures.push(`age ${age}: target blend task`);
+    }
+    if (state.sound !== null) {
+      const expectedPan = fixture.attackerSide === "player" ? -64 : 63;
+      if (
+        oracle.se1.songHeader !== 143655552
+        || oracle.se1.status !== 0
+        || oracle.se1.tracks[0]?.flags !== 131
+        || oracle.se1.tracks[0]?.panX !== expectedPan
+        || state.soundPanSide !== fixture.attackerSide
+      ) failures.push(`age ${age}: SE_M_SUPERSONIC audio trigger`);
     }
     sawPsychicTask ||= oracle.tasks.some(
       (task) => task.func.symbol === "SetPsychicBackground_Step",
@@ -197,6 +242,23 @@ function verify(fixturePath: string, runNumber: number): void {
         },
       )) failures.push(`age ${age}: gameplay state changed`);
     }
+    if (failures.length === frameFailureStart) componentFrames += 1;
+    const engine: EngineState = {
+      ...createInitialState(),
+      rngMode: "frontierBattle",
+      sceneOnPresentation: { ...stage, age },
+    };
+    const app = render(engine);
+    let diff = 0;
+    for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+      if (
+        app[pixel * 4] !== rgb[pixel * 3]
+        || app[pixel * 4 + 1] !== rgb[pixel * 3 + 1]
+        || app[pixel * 4 + 2] !== rgb[pixel * 3 + 2]
+      ) diff += 1;
+    }
+    if (diff === 0) framebufferFrames += 1;
+    else failures.push(`age ${age}: framebuffer diff ${diff}`);
   }
   const rawDigest = raw.digest("hex");
   if (rawDigest !== fixture.rawRgbSha256) failures.push("raw RGB window digest");
@@ -206,13 +268,14 @@ function verify(fixturePath: string, runNumber: number): void {
   else if (!same(prior, { evidence, raw: rawDigest })) {
     failures.push("fresh-run reproducibility");
   }
+  console.log(
+    `${fixture.orientation} run ${runNumber}: ${componentFrames}/`
+    + `${probe.frames.length} component/hardware/raw-RGB; `
+    + `${framebufferFrames}/${probe.frames.length} production framebuffer`,
+  );
   if (failures.length) {
     throw new Error(`${fixture.orientation}: ${failures.slice(0, 12).join(", ")}`);
   }
-  console.log(
-    `${fixture.orientation} run ${runNumber}: ${probe.frames.length}/`
-    + `${probe.frames.length} component/hardware/raw-RGB frames`,
-  );
 }
 
 for (let run = 1; run <= 2; run += 1) {

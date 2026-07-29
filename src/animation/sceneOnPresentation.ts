@@ -503,7 +503,9 @@ import {
   type SporeState,
 } from "./spore.ts";
 import {
+  hypnosisDisplayedRingsAtAge,
   hypnosisAtAge,
+  type HypnosisRing,
   type HypnosisState,
 } from "./hypnosis.ts";
 
@@ -4099,6 +4101,9 @@ export interface SceneOnHypnosisView extends HypnosisState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+  readonly displayedRings: readonly HypnosisRing[];
+  readonly displayedTargetBlendCoefficient: number;
+  readonly displayedBgPaletteAge: number;
 }
 
 /** `age=0` is Move_HYPNOSIS's first active source-script frame. */
@@ -4108,16 +4113,33 @@ export function sceneOnHypnosisView(
   if (state.config.move !== "HYPNOSIS") {
     throw new Error(`expected HYPNOSIS presentation, got ${state.config.move}`);
   }
+  const component = hypnosisAtAge(
+    state.age,
+    state.config.attacker.geometry.side,
+    state.config.attacker.geometry.animationCenter,
+    state.config.target.geometry.animationCenter,
+  );
   return {
     age: state.age,
     attacker: state.config.attacker,
     target: state.config.target,
-    ...hypnosisAtAge(
+    ...component,
+    displayedRings: hypnosisDisplayedRingsAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
       state.config.target.geometry.animationCenter,
     ),
+    displayedTargetBlendCoefficient: hypnosisAtAge(
+      state.age - 1,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
+    ).targetBlendCoefficient,
+    // SetPsychicBackground's four-tick rotate task passes through the
+    // palette-transfer queue; UnsetPsychicBackground's setup pause absorbs
+    // two of those display ticks at the second fade boundary.
+    displayedBgPaletteAge: state.age - (state.age < 129 ? 6 : 4),
   };
 }
 

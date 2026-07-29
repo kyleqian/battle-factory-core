@@ -45,8 +45,12 @@ describe("MOVE_HYPNOSIS source-relative reducer", () => {
       .toBe(true);
     expect(hypnosisAtAge(66, "player", player, opponent).targetBlendCoefficient)
       .toBe(0);
-    expect(hypnosisAtAge(68, "player", player, opponent).targetBlendCoefficient)
-      .toBe(1);
+    expect(hypnosisAtAge(70, "player", player, opponent).targetBlendCoefficient)
+      .toBe(2);
+    expect(hypnosisAtAge(90, "player", player, opponent).targetBlendCoefficient)
+      .toBe(12);
+    expect(hypnosisAtAge(120, "player", player, opponent).targetBlendCoefficient)
+      .toBe(0);
     expect(hypnosisAtAge(125, "player", player, opponent).targetBlendTaskActive)
       .toBe(false);
     expect(hypnosisAtAge(168, "player", player, opponent).active).toBe(false);
@@ -81,12 +85,18 @@ describe("MOVE_HYPNOSIS source-relative reducer", () => {
         opponentMaxHp: 142,
       },
     });
-    expect(sceneOnHypnosisView({ ...state, age: 42 })).toMatchObject({
+    const view = sceneOnHypnosisView({ ...state, age: 42 });
+    expect(view).toMatchObject({
       age: 42,
       active: true,
       attacker: { species: "POLITOED" },
       target: { species: "ONIX" },
       rings: [{ x: 72, y: 105 }, { x: 88, y: 89 }],
+      displayedRings: [],
+      displayedTargetBlendCoefficient: 0,
+      displayedBgPaletteAge: 36,
     });
+    expect(sceneOnHypnosisView({ ...state, age: 43 }).displayedRings)
+      .toMatchObject([{ x2: 3, y2: -2 }, { x2: 3, y2: -2 }]);
   });
 });

@@ -592,6 +592,7 @@ import restAsset from "../animation/assets/rest.json" with { type: "json" };
 import howlAsset from "../animation/assets/howl.json" with { type: "json" };
 import sweetKissAsset from "../animation/assets/sweet-kiss.json" with { type: "json" };
 import sporeAsset from "../animation/assets/spore.json" with { type: "json" };
+import hypnosisAsset from "../animation/assets/hypnosis.json" with { type: "json" };
 import perishSongAsset from "../animation/assets/perish-song.json" with { type: "json" };
 import needleArmAsset from "../animation/assets/needle-arm.json" with { type: "json" };
 import sandstormAsset from "../animation/assets/sandstorm.json" with { type: "json" };
@@ -776,6 +777,7 @@ import {
   sceneOnHowlView,
   sceneOnSweetKissView,
   sceneOnSporeView,
+  sceneOnHypnosisView,
   sceneOnPerishSongView,
   sceneOnNeedleArmView,
   sceneOnSandstormView,
@@ -800,6 +802,7 @@ import {
   type SceneOnHowlPresentationState,
   type SceneOnSweetKissPresentationState,
   type SceneOnSporePresentationState,
+  type SceneOnHypnosisPresentationState,
   type SceneOnPerishSongPresentationState,
   type SceneOnNeedleArmPresentationState,
   type SceneOnSandstormPresentationState,
@@ -835,6 +838,10 @@ import {
 import { futureSightBgPaletteRowAtAge } from "../animation/futureSight.ts";
 import { confusionBgPaletteRowAtAge, CONFUSION_WINDOW2_START_AGE, confusionTargetEffectAtAge } from "../animation/confusion.ts";
 import { psychicBgPaletteRowAtAge, PSYCHIC_WINDOW2_START_AGE, psychicTargetEffectAtAge, PSYCHIC_BLEND_TINT_COLOR } from "../animation/psychic.ts";
+import {
+  hypnosisBgPaletteRowAtAge,
+  HYPNOSIS_TARGET_BLEND_COLOR,
+} from "../animation/hypnosis.ts";
 import {
   shadowPunchAlphaActive,
   SHADOW_PUNCH_CLONE_DISPLAY_LAG,
@@ -1459,6 +1466,11 @@ const sporeArt = sporeAsset as {
   parasectBack: { tileset: Tileset; palette: RgbColor[] };
   parasectFront: { tileset: Tileset; palette: RgbColor[] };
   spore: { tileset: Tileset; palette: RgbColor[] };
+};
+const hypnosisArt = hypnosisAsset as {
+  goldRing: { tileset: Tileset; palette: RgbColor[] };
+  politoedBack: { tileset: Tileset; palette: RgbColor[] };
+  politoedFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const perishSongArt = perishSongAsset as {
   murkrowBack: { tileset: Tileset; palette: RgbColor[] };
@@ -21562,6 +21574,159 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "PARASECT used" : "Foe PARASECT used",
       "SPORE!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "HYPNOSIS") {
+    const hypnosisState = state as SceneOnHypnosisPresentationState;
+    const view = sceneOnHypnosisView(hypnosisState);
+    // Animation callbacks and palette writes occur after the current
+    // hardware OAM/palette transfer. The displayed rings and target tint
+    // therefore consume the preceding reducer age.
+    const playerToOpponent =
+      view.attacker.species === "POLITOED"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "POLITOED"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged HYPNOSIS pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const politoedSource = playerToOpponent
+      ? hypnosisArt.politoedBack
+      : hypnosisArt.politoedFront;
+    const politoed = playerToOpponent
+      ? politoedSource
+      : {
+          ...politoedSource,
+          tileset: subTileset(politoedSource.tileset, 0, 8),
+        };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const gpuDarken = (palette: readonly RgbColor[]) =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(
+          color.r | (color.g << 8) | (color.b << 16),
+          view.bgBldy,
+        );
+        return {
+          r: packed & 0xff,
+          g: (packed >>> 8) & 0xff,
+          b: (packed >>> 16) & 0xff,
+        };
+      });
+    if (view.bgIsPsychic) {
+      drawExtractedTileBg(fb, {
+        tileset: battleAnimPsychicBg.tileset,
+        tilemap: battleAnimPsychicBg.tilemap,
+        subpalettes: [gpuDarken(
+          hypnosisBgPaletteRowAtAge(
+            battleAnimPsychicBg.palette,
+            view.displayedBgPaletteAge,
+          ),
+        )],
+      });
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: battleBg.palette.map(gpuDarken),
+      });
+    }
+    // The opponent front sprite retains its settled send-out residual until
+    // a battler task owns it. Hypnosis never moves either battler.
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const targetPalette = blendPaletteToward(
+      onix.palette,
+      HYPNOSIS_TARGET_BLEND_COLOR,
+      view.displayedTargetBlendCoefficient,
+    );
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      politoed.tileset,
+      politoed.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      targetPalette,
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    // Retain the source OAM priorities by painting back-to-front. The player
+    // orientation places Politoed before GoldRing and Onix in OAM; the
+    // mirrored orientation creates the rings before both battlers.
+    const rings = view.displayedRings.slice().sort((left, right) =>
+      (left.y + left.y2) - (right.y + right.y2)
+      || left.index - right.index
+    );
+    if (playerToOpponent) {
+      drawTarget();
+    } else {
+      // In this orientation both battlers sort behind the GoldRing OAM;
+      // the player target's lower OAM index still wins their own overlap.
+      drawAttacker();
+      drawTarget();
+    }
+    for (const ring of rings) {
+      drawSpriteSheet(
+        fb,
+        hypnosisArt.goldRing.tileset,
+        hypnosisArt.goldRing.palette,
+        ring.x + ring.x2 - 8,
+        ring.y + ring.y2 - 16,
+      );
+    }
+    if (playerToOpponent) drawAttacker();
+    const profile = hypnosisState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "POLITOED",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "POLITOED" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "POLITOED used" : "Foe POLITOED used",
+      "HYPNOSIS!",
       99,
     );
     return;
