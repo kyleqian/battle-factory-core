@@ -217,6 +217,61 @@ function legalAvailableMember(
     && partyIndex !== reservedPartyIndex;
 }
 
+function factoryAiSwitchHardGates(
+  rules: BattleScriptRulesContext,
+): readonly Readonly<{
+  name: Extract<
+    FactoryAiSwitchBranch["branch"],
+    | "wrapped-or-escape-prevented"
+    | "rooted"
+    | "shadow-tag"
+    | "arena-trap"
+    | "magnet-pull-steel"
+    | "battle-arena"
+  >;
+  blocked: boolean;
+}>[] {
+  const active = rules.battlers[1];
+  const target = rules.battlers[0];
+  return Object.freeze([
+    {
+      name: "wrapped-or-escape-prevented",
+      blocked: (active.status2
+        & (BATTLE_SCRIPT_STATUS2_WRAPPED_MASK | STATUS2_ESCAPE_PREVENTION)) !== 0,
+    },
+    {
+      name: "rooted",
+      blocked: (active.status3 & BATTLE_SCRIPT_STATUS3_ROOTED) !== 0,
+    },
+    { name: "shadow-tag", blocked: target.ability === SHADOW_TAG },
+    // Source AI quirk: no Flying/Levitate escape exception here.
+    { name: "arena-trap", blocked: target.ability === ARENA_TRAP },
+    {
+      name: "magnet-pull-steel",
+      blocked: rules.battlers.slice(0, 2).some(
+        (battler, index) =>
+          (rules.absentBattlerFlags & (1 << index)) === 0
+          && battler.ability === MAGNET_PULL,
+      ) && active.types.includes("TYPE_STEEL"),
+    },
+    {
+      name: "battle-arena",
+      blocked: (rules.battleTopology.battleTypeFlags & BATTLE_SCRIPT_BATTLE_TYPE_ARENA) !== 0,
+    },
+  ]);
+}
+
+/**
+ * The RNG-free hard-gate prefix of `ShouldSwitch`
+ * (`battle_ai_switch_items.c:439-453`). Command publication uses this exact
+ * precheck without evaluating the later probabilistic policy.
+ */
+export function isFactoryAiSwitchPrecheckBlocked(
+  rules: BattleScriptRulesContext,
+): boolean {
+  return factoryAiSwitchHardGates(rules).some(({ blocked }) => blocked);
+}
+
 export function evaluateFactoryAiSwitchPolicy(
   input: FactoryAiSwitchPolicyInput,
 ): FactoryAiSwitchPolicyResult {
@@ -294,35 +349,7 @@ export function evaluateFactoryAiSwitchPolicy(
     branches: Object.freeze(branches),
   });
 
-  const hardGates: readonly Readonly<{
-    name: FactoryAiSwitchBranch["branch"];
-    blocked: boolean;
-  }>[] = [
-    {
-      name: "wrapped-or-escape-prevented",
-      blocked: (active.status2
-        & (BATTLE_SCRIPT_STATUS2_WRAPPED_MASK | STATUS2_ESCAPE_PREVENTION)) !== 0,
-    },
-    {
-      name: "rooted",
-      blocked: (active.status3 & BATTLE_SCRIPT_STATUS3_ROOTED) !== 0,
-    },
-    { name: "shadow-tag", blocked: target.ability === SHADOW_TAG },
-    // Source AI quirk: no Flying/Levitate escape exception here.
-    { name: "arena-trap", blocked: target.ability === ARENA_TRAP },
-    {
-      name: "magnet-pull-steel",
-      blocked: rules.battlers.slice(0, 2).some(
-        (battler, index) =>
-          (rules.absentBattlerFlags & (1 << index)) === 0
-          && battler.ability === MAGNET_PULL,
-      ) && active.types.includes("TYPE_STEEL"),
-    },
-    {
-      name: "battle-arena",
-      blocked: (rules.battleTopology.battleTypeFlags & BATTLE_SCRIPT_BATTLE_TYPE_ARENA) !== 0,
-    },
-  ];
+  const hardGates = factoryAiSwitchHardGates(rules);
   for (const gate of hardGates) {
     branch(gate.name, gate.blocked ? "blocked" : "pass");
     if (gate.blocked) return noSwitch();

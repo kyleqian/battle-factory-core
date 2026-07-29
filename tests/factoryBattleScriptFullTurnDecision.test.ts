@@ -10,7 +10,10 @@ import {
   submitFactoryAiDecision,
   type FactoryAiScoredView,
 } from "../src/engine/factoryAiDecisionPolicy.ts";
-import { BATTLE_SCRIPT_STATUS3_MINIMIZED } from "../src/engine/battleScriptSourceConstants.ts";
+import {
+  BATTLE_SCRIPT_STATUS2_MASKS,
+  BATTLE_SCRIPT_STATUS3_MINIMIZED,
+} from "../src/engine/battleScriptSourceConstants.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
 
 const STRENGTH = 70; // EFFECT_HIT, TYPE_NORMAL -- the banked KO-scenario move (factoryBattleScriptTerminalDecision.test.ts).
@@ -325,6 +328,25 @@ describe("factory full-turn decision -- voluntary-switch enumeration and trappin
     });
   }
 
+  function trainerSwitchIndexes(turnConfig: FactoryFullTurnConfig): readonly number[] {
+    const initial = createFactoryFullTurnBattleState(turnConfig);
+    const afterPlayer = submitFactoryFullTurnDecision(initial, {
+      requestId: 1,
+      side: "player",
+      decision: PLAYER_ATTACKS,
+    });
+    if (
+      afterPlayer.kind !== "decision-required"
+      || afterPlayer.nextRequest.kind !== "command"
+      || afterPlayer.nextRequest.side !== "trainer"
+    ) {
+      throw new Error("expected trainer command request");
+    }
+    return afterPlayer.nextRequest.legalDecisions.flatMap((decision) =>
+      decision.kind === "switch" ? [decision.partyIndex] : []
+    );
+  }
+
   it("enumerates only benched, alive, non-egg members (battle_main.c:4240-4267 party-menu path)", () => {
     expect(initialPlayerSwitchIndexes(trappingConfig(0))).toEqual([1]);
     expect(initialPlayerSwitchIndexes(trappingConfig(0, {}, {
@@ -402,6 +424,78 @@ describe("factory full-turn decision -- voluntary-switch enumeration and trappin
       ABILITY_SHADOW_TAG,
       { ability: ABILITY_RUN_AWAY },
     ))).toEqual([]);
+  });
+
+  it("publishes legal trainer bench switches after moves, but applies ShouldSwitch's Arena Trap hard gate without the player exemption", () => {
+    const trainerBench = {
+      trainerBenchHp: [100, 0] as const,
+      trainerBenchOverride: [
+        { species: 66, moves: [2, 0, 0, 0] as const },
+        undefined,
+      ] as const,
+    };
+    const untrapped = config({
+      ...trainerBench,
+      trainer: {
+        species: 43, moveId: STRENGTH, ability: ABILITY_LEVITATE,
+        attack: 50, defense: 50, spAttack: 50, spDefense: 50,
+        speed: 50, hp: 999, types: ["TYPE_FLYING", "TYPE_FLYING"],
+      },
+    });
+    expect(trainerSwitchIndexes(untrapped)).toEqual([1]);
+    expect(trainerSwitchIndexes(config({
+      ...trainerBench,
+      player: {
+        species: 1, moveId: STRENGTH, ability: ABILITY_ARENA_TRAP,
+        attack: 200, defense: 50, spAttack: 50, spDefense: 50,
+        speed: 100, hp: 999,
+      },
+      trainer: untrapped.trainer,
+    }))).toEqual([]);
+
+    const initial = createFactoryFullTurnBattleState(untrapped);
+    const afterPlayer = submitFactoryFullTurnDecision(initial, {
+      requestId: 1,
+      side: "player",
+      decision: PLAYER_ATTACKS,
+    });
+    if (
+      afterPlayer.kind !== "decision-required"
+      || afterPlayer.nextRequest.kind !== "command"
+    ) throw new Error("expected trainer command request");
+    expect(afterPlayer.nextRequest.legalDecisions).toEqual([
+      TRAINER_ATTACKS,
+      { kind: "switch", partyIndex: 1 },
+    ]);
+  });
+
+  it("auto-confirms a trainer locked move instead of publishing its otherwise-live bench switch", () => {
+    const initial = createFactoryFullTurnBattleState(config({
+      trainer: {
+        species: 43, moveId: STRENGTH,
+        attack: 50, defense: 500, spAttack: 50, spDefense: 500,
+        speed: 50, hp: 999,
+        status2: BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS,
+        lockedMove: STRENGTH,
+        chosenMovePosition: 0,
+      },
+      trainerBenchHp: [100, 0],
+      trainerBenchOverride: [
+        { species: 66, moves: [2, 0, 0, 0] },
+        undefined,
+      ],
+    }));
+    const result = submitFactoryFullTurnDecision(initial, {
+      requestId: 1,
+      side: "player",
+      decision: PLAYER_ATTACKS,
+    });
+    if (result.kind !== "decision-required") throw new Error("expected next command");
+    expect(result.nextRequest).toMatchObject({
+      kind: "command",
+      side: "player",
+      battler: 0,
+    });
   });
 });
 

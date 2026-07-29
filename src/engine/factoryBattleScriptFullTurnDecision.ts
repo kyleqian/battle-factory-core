@@ -135,6 +135,7 @@ import {
   BATTLE_SCRIPT_STATUS2_WRAPPED_MASK,
   BATTLE_SCRIPT_STATUS3_ROOTED,
 } from "./battleScriptSourceConstants.ts";
+import { isFactoryAiSwitchPrecheckBlocked } from "./factoryAiSwitchPolicy.ts";
 import { mapFactoryBattleOutcome } from "./factoryBattleScriptTerminalDecision.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import topologyData from "../data/gen/battle-script-topology.json" with { type: "json" };
@@ -619,7 +620,7 @@ export function createFactoryFullTurnBattleStateFromRulesContext(
       requestId: input.requestId,
       side: "player",
       battler: 0,
-      legalDecisions: legalPlayerDecisions(rules.rulesContext),
+      legalDecisions: legalCommandDecisions(rules.rulesContext, 0),
     },
   }) as BattleState<FactoryFullTurnDecisionRules>;
   return input.nextEventSequence === undefined
@@ -1279,19 +1280,32 @@ function isVoluntarySwitchTrapped(
     && active.types.includes("TYPE_STEEL");
 }
 
-/** Player-only command enumeration; trainer voluntary switching is deliberately out of scope. */
-function legalPlayerDecisions(
+/**
+ * Publishes the legal Factory-singles command surface for either battler.
+ * Locked actions remain move-only. Trainer switching uses ShouldSwitch's
+ * source-specific hard precheck (not the player party-menu gate: notably,
+ * the AI's Arena Trap check has no Flying/Levitate exception).
+ */
+function legalCommandDecisions(
   rulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
 ): readonly BattleCommandDecision[] {
-  const moves = legalMoveDecisions(rulesContext, 0);
+  const moves = legalMoveDecisions(rulesContext, battler);
   if (
-    lockedMoveDecision(rulesContext, 0) !== null
-    || isVoluntarySwitchTrapped(rulesContext, 0)
+    lockedMoveDecision(rulesContext, battler) !== null
+    || (
+      battler === 0
+        ? isVoluntarySwitchTrapped(rulesContext, battler)
+        : isFactoryAiSwitchPrecheckBlocked(rulesContext)
+    )
   ) {
     return moves;
   }
-  const activePartyIndex = rulesContext.battlers[0]!.partyIndex;
-  const switches = rulesContext.party.player.flatMap((member, partyIndex) =>
+  const activePartyIndex = rulesContext.battlers[battler]!.partyIndex;
+  const party = battler === 0
+    ? rulesContext.party.player
+    : rulesContext.party.opponent;
+  const switches = party.flatMap((member, partyIndex) =>
     partyIndex !== activePartyIndex
       && member.species !== 0
       && !member.isEgg
@@ -1594,7 +1608,7 @@ function runEndTurnTail(
           requestId: nextRequestId,
           side: "trainer",
           battler: 1 as const,
-          legalDecisions: legalMoveDecisions(continuingState.rulesContext, 1),
+          legalDecisions: legalCommandDecisions(continuingState.rulesContext, 1),
         }),
       }),
     );
@@ -1610,7 +1624,7 @@ function runEndTurnTail(
         requestId: nextRequestId,
         side: "player",
         battler: 0 as const,
-        legalDecisions: legalPlayerDecisions(continuingState.rulesContext),
+        legalDecisions: legalCommandDecisions(continuingState.rulesContext, 0),
       }),
     }),
   );
@@ -1791,7 +1805,7 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
           requestId: ctx.request.requestId + 1,
           side: "trainer",
           battler: 1 as const,
-          legalDecisions: legalMoveDecisions(rules.rulesContext, 1),
+          legalDecisions: legalCommandDecisions(rules.rulesContext, 1),
         }),
       }),
     });
