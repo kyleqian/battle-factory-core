@@ -1,5 +1,46 @@
 ---
 
+## 666 — [BOUNDED MAIN WORKER 2026-07-28 ~23:05] voluntary switch action + trapping trio complete
+
+- **State:** tree green at **452 files / 4885 tests**, production build,
+  `git diff --check`, and Battle Scene OFF oracle info. Census regenerated
+  twice byte-identically at exactly **68/70 abilities (weighted 1073/1103)**
+  and **42/42 hold effects (850/850)**; all 16 validations pass.
+- **Did:** player command requests now enumerate every alive, non-egg bench
+  slot and preserve the wrap/escape-prevention/Ingrain menu gates. Shadow
+  Tag, grounded Arena Trap, and Steel-only Magnet Pull remove voluntary
+  switch entries; Flying/Levitate, fainted, and absent-holder controls pass.
+  Trainer requests remain move-only and forced-switch indexes ignore trapping.
+  A voluntary switch runs before moves through the shared source switch
+  handlers, rebuilds the incoming battler, fires entry hooks, and makes the
+  opponent's move hit that incoming mon; an Intimidate receipt pins hook
+  timing. The switch draws zero RNG; the switch-turn ledger pins the next
+  boundary at position 15 after five staged AI draws.
+- **Supervisor fold (same round, side merge):** the paired side-lane worker
+  oracle-corroborated the boundary-draw + Quick Claw model (`ad1953db`,
+  §B6 of the speed scout): five ROM turns with per-turn `gRandomTurnNumber`
+  RAM reads (25804/44835/15553/45723/10727), exactly one attributed
+  `BattleTurnPassed+0x157` draw per transition, the 1/5 proc turn
+  (10727 < 13107) flipping order exactly as modeled, zero Quick Claw or
+  tie draws, and the ENGINE reproducing four boundary values + raw LCG
+  states exactly (`verify-quick-claw-turn-boundary.py` +
+  `verify-quick-claw-engine.ts`, supervisor re-ran both: PASS). Continuous
+  cross-turn replay is non-alignable by design (submitted-decision windows
+  omit the ROM AI's intervening draws — documented, not a defect). Also
+  refreshed `verify-on-damage-static.py` to the post-implementation guard.
+- **Next:** close Run Away/Pickup honestly (documented no-op or
+  reclassification, with source proof) to end the ability census; side
+  design scout for Gate-5/whole-battle integration (incl. the turn-1
+  `gRandomTurnNumber` writes).
+- **Notes:** Pursuit's pre-switch double-power interception is deliberately
+  deferred behind one trigger-narrow `unsupported-branch` in
+  `factoryBattleScriptFullTurnDecision.ts`; its barrier ratchet moves **0→1**
+  with a reachability test. No presentation, trainer-switch AI, Baton Pass,
+  issue, probe/scout, oracle fixture, or canonical trace changed. Identity
+  constants were used for all three new ability comparisons. PAPERCUT: none.
+
+---
+
 ## 665 — [BOUNDED MAIN WORKER 2026-07-28 ~22:35] ON_DAMAGE contact-ability family implemented
 
 - **State:** tree green at **452 files / 4877 tests**, production build, and
