@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Mechanically re-check the BattleTurnPassed RNG-gap verdict.
+"""Mechanically re-check the fixed BattleTurnPassed random-turn model.
 
 Fast, hermetic check:
     python3 tools/probe/verify-turn-boundary-rng-gap.py
@@ -45,9 +45,43 @@ def static_checks() -> dict:
         "runBattleEndTurnOrchestration(PROGRAM, handlers, preEndTurnState)" in full_turn,
         "production full-turn reducer no longer enters end-turn orchestration",
     )
+    tail = full_turn[full_turn.index("function runEndTurnTail("):]
+    tail = tail[:tail.index("\n}\n", tail.index("function runEndTurnTail("))]
     require(
-        "gRandomTurnNumber" not in full_turn and "gRandomTurnNumber" not in end_turn,
-        "production path acquired an explicit random-turn-number model; revisit verdict",
+        tail.index("runBattleEndTurnOrchestration(PROGRAM, handlers, preEndTurnState)")
+        < tail.index("reconcileFullTurnRng(ctxRng, rngBeforeCalls, endTurn.state)")
+        < tail.index('ctxRng.draw(\n    "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)"')
+        < tail.index("lockedMoveDecision(continuingState.rulesContext, 0)")
+        < tail.index('kind: "decision-required"'),
+        "production boundary draw is not between end-turn completion and next locked/request computation",
+    )
+    require(
+        "rulesContext: Object.freeze({\n      ...endTurn.state.rulesContext,\n      randomTurnNumber,"
+        in tail,
+        "production boundary draw is not persisted in rulesContext.randomTurnNumber",
+    )
+
+    rules_context = text("src/engine/battleScriptRulesContext.ts")
+    require(
+        "randomTurnNumber: requireUnsigned(input.randomTurnNumber ?? 0xffff, 0xffff, \"randomTurnNumber\")"
+        in rules_context
+        and "randomTurnNumber: config.initialRandomTurnNumber ?? 0xffff" in full_turn,
+        "staged random-turn-number defaults no longer use the 0xffff non-proc sentinel",
+    )
+
+    turn_order = text("src/engine/turnOrder.ts")
+    require(
+        'battler.holdEffect === HOLD_EFFECT_QUICK_CLAW' in turn_order
+        and "randomTurnNumber < Math.trunc((0xffff * (battler.holdEffectParam ?? 0)) / 100)"
+        in turn_order
+        and ".draw(" not in turn_order,
+        "Quick Claw no longer consumes only the stored random-turn value",
+    )
+    require(
+        full_turn.count("effectiveSpeed(playerTOB, weather, rc0.randomTurnNumber)") == 1
+        and full_turn.count("effectiveSpeed(trainerTOB, weather, rc0.randomTurnNumber)") == 1
+        and "weather,\n    rc0.randomTurnNumber,\n  );" in full_turn,
+        "production turn-order call no longer supplies the stored random-turn value",
     )
     require(
         "kind: \"next-turn\"" in end_turn
@@ -70,13 +104,14 @@ def static_checks() -> dict:
 
     full_turn_test = text("tests/factoryBattleScriptFullTurnDecision.test.ts")
     end_turn_test = text("tests/battleEndTurnOrchestration.test.ts")
-    for assertion in (
-        "expect(t1t.state.rng.calls).toBe(8)",
-        "expect(t2t.state.rng.calls).toBe(16)",
-        "expect(t1.state.rng.calls).toBe(19)",
-        "expect(t2.state.rng.calls).toBe(38)",
-    ):
-        require(assertion in full_turn_test, f"missing staged RNG assertion: {assertion}")
+    require(
+        "places BattleTurnPassed's stored draw at ROM ledger positions 5 and 19" in full_turn_test
+        and 'expect(expectedPositions[4]).toBe("turn-2 boundary")' in full_turn_test
+        and 'expect(expectedPositions[18]).toBe("turn-3 boundary")' in full_turn_test
+        and "expect(afterTurn1.state.rng.calls).toBe(5)" in full_turn_test
+        and "expect(afterTurn2.state.rng.calls).toBe(expectedPositions.length)" in full_turn_test,
+        "typed production ledger no longer pins the ROM positions 5/19 attribution",
+    )
     require(
         "expect(turn2.state.rng.calls).toBe(turn1.state.rng.calls)" in end_turn_test
         and "expect(turn2.state.rng.value).toBe(turn1.state.rng.value)" in end_turn_test,
@@ -84,11 +119,12 @@ def static_checks() -> dict:
     )
 
     return {
-        "verdict": "REFUTED",
+        "verdict": "FIXED",
         "rom": "one unconditional Random() after assigning the next action-selection callback, before that callback executes",
-        "production": "no equivalent boundary draw",
+        "production": "full-turn reducer draws once after end-turn completion, persists rulesContext.randomTurnNumber, then computes locked/request state",
+        "quickClaw": "turnOrder.ts consumes the stored value without drawing",
         "legacy": "battleTurn.ts injects opaque fixture-owned whole-window groups only",
-        "stagedAssertions": [8, 16, 19, 38],
+        "romLedgerBoundaryPositions": [5, 19],
     }
 
 
@@ -187,7 +223,7 @@ def main() -> None:
     static = static_checks()
     if len(sys.argv) == 1:
         print(json.dumps(static, indent=2))
-        print("PASS: REFUTED — production is one draw short at every clean turn boundary")
+        print("PASS: FIXED — production persists one boundary draw and Quick Claw consumes it without redrawing")
         return
     if len(sys.argv) != 2:
         raise SystemExit(f"usage: {sys.argv[0]} [oracle-output.json]")
