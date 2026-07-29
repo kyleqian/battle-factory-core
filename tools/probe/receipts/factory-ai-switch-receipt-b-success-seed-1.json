@@ -1,0 +1,207 @@
+{
+  "fixture": "tools/battle-lab/mechanic-factory-ai-switch-receipt-b-off.json",
+  "profile": "battle-scene-off",
+  "seed": 1,
+  "fastPass": [
+    {
+      "frame": 55,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 358,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 364,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 741,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          2,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    }
+  ],
+  "attributedDraws": [
+    {
+      "frame": 55,
+      "lr": "0x0804fde5",
+      "caller": "Cmd_setprotectlike+0x59",
+      "preRng": "0xdc28bd77",
+      "postRng": "0xe81d4e1e",
+      "returnU16": 59421,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 358,
+      "lr": "0x0803bb13",
+      "caller": "BattleTurnPassed+0x157",
+      "preRng": "0xe81d4e1e",
+      "postRng": "0xcb7bc739",
+      "returnU16": 52091,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 364,
+      "lr": "0x08062e0d",
+      "caller": "ShouldSwitchIfWonderGuard+0x1b5",
+      "preRng": "0xcb7bc739",
+      "postRng": "0xe97d91b8",
+      "returnU16": 59773,
+      "expression": "Random() % 3",
+      "expressionResult": 1,
+      "aiMonToSwitchIntoIdWhenWritten": 1,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 741,
+      "lr": "0x0804fde5",
+      "caller": "Cmd_setprotectlike+0x59",
+      "preRng": "0xe97d91b8",
+      "postRng": "0x192d7bcb",
+      "returnU16": 6445,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          2,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    }
+  ],
+  "wonderGuardReceipt": {
+    "frame": 364,
+    "lr": "0x08062e0d",
+    "caller": "ShouldSwitchIfWonderGuard+0x1b5",
+    "preRng": "0xcb7bc739",
+    "postRng": "0xe97d91b8",
+    "returnU16": 59773,
+    "expression": "Random() % 3",
+    "expressionResult": 1,
+    "aiMonToSwitchIntoIdWhenWritten": 1,
+    "stateAfterFrame": {
+      "activeBattler": 2,
+      "chosenActions": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "aiMonToSwitchIntoId": 6,
+      "monToSwitchIntoId": 6
+    }
+  },
+  "command": {
+    "firstChosenAction": {
+      "frame": 365,
+      "chosenAction": 2,
+      "aiMonToSwitchIntoId": 6
+    },
+    "drawDelta": 1,
+    "attributedDraws": [
+      {
+        "frame": 364,
+        "lr": "0x08062e0d",
+        "caller": "ShouldSwitchIfWonderGuard+0x1b5",
+        "preRng": "0xcb7bc739",
+        "postRng": "0xe97d91b8",
+        "returnU16": 59773,
+        "expression": "Random() % 3",
+        "expressionResult": 1,
+        "aiMonToSwitchIntoIdWhenWritten": 1,
+        "stateAfterFrame": {
+          "activeBattler": 2,
+          "chosenActions": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "aiMonToSwitchIntoId": 6,
+          "monToSwitchIntoId": 6
+        }
+      }
+    ]
+  },
+  "verdict": {
+    "selectorResultSwitchesToPartyIndex1": true,
+    "expectedCommandDelta": 1,
+    "result2ContinuesToMoveChooser": false
+  }
+}
