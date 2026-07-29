@@ -13,6 +13,44 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 651 — [SUPERVISOR WIND-DOWN 2026-07-28 ~19:30] Census CLOSED 214/214 (100% all four metrics); Fake Tears seam 322/322 consumed cross-program; audit 4/4 fixed; ISSUES #41 deleted
+
+- **State:** union green at **439 files / 4770 tests**, production build,
+  `git diff --check`, census byte-idempotent at **214/214 effects, 355/355
+  moves, 276/276 distinct, 2957/2957 weighted (100%)** with all **72**
+  validations. Production recording-import allowlist **0**; **60** named
+  barriers remain across 22 kernel modules (the enumerated ability/item/
+  doubles remainder). Six animation folds this session; final fold verified.
+- **Did (19 workers over 2 lanes, 0 failures, 0 regressions):** frontier
+  tail closed — rows 4 (Charge+Sports), 5a-c (Lock On/Imprison/Snatch incl.
+  turn-order steal arbitration), 6a-b (Assist/Beat Up), 7 (Transform), 8
+  (Metronome gate-closure) — each at its exact predicted census delta, each
+  consuming a side-lane falsification/OFF-receipt pack (3 scout packs banked;
+  5 dossier corrections). Stat-drop seam handoff: Fake Tears **322/322 twice
+  fresh both orientations** (middle phases via typed controller receipts;
+  residual closed by fight-menu handoff + text-printer display lag, NOT the
+  hypothesized Delcatty idle); the live animation supervisor consumed it and
+  promoted Fake Tears exact same-session. Read-only interaction audit over
+  the new effects: **4 CONFIRMED defects, all 4 fixed + verified** (called
+  charging/rampage/Bide continuation; recharge lock restore; rain/sun/Solar
+  Beam damage block ported into damageCalc; Focus Band source-complete,
+  barriers 16→13). ISSUES #41 closed and deleted (allowlist 4→0; 19 swap
+  traces + rockslide/faint traces exact). OFF oracle restarted at orient
+  (freshness FAIL); both profiles fresh since.
+- **Next (recommended order):** (1) ability/item census generator — turn the
+  60 barriers + source hook tables into a ranked worklist like the move
+  census; (2) register ENDTURN_ABILITIES/ITEMS1/2 bodies (ground truth +
+  receipts already banked in docs/endturn-abilities-items-ground-truth.md);
+  (3) CheckViability handler bodies (ground truth banked); (4) switch-in
+  entry-hook breadth (6 switchin barriers); (5) ISSUES #39 window-by-window
+  retirement (pattern proven again by Fake Tears).
+- **Notes:** DEFERRED.md empty — no open questions. No usage-limit events.
+  The animation supervisor session (started 15:06, deadline ~21:06) may
+  commit after this wind-down; an unfolded animation-main at next orient is
+  expected and fine. PAPERCUTS: bumped the generated-JSON broad-search entry
+  (2 new hits).
+
+---
 ## 650 — [BOUNDED MAIN WORKER 2026-07-28 ~18:10] Production recording-import allowlist reaches zero
 
 - **State:** implementation committed `9ab6985d`; tree green at **437 files /
