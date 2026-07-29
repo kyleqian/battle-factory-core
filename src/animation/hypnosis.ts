@@ -33,6 +33,7 @@ export interface HypnosisState {
   readonly bgIsPsychic: boolean;
   readonly rings: readonly HypnosisRing[];
   readonly targetBlendTaskActive: boolean;
+  readonly targetBlendCoefficient: number;
   readonly sound: "SE_M_SUPERSONIC" | null;
   readonly soundPanSide: HypnosisSide | null;
 }
@@ -43,6 +44,18 @@ export const HYPNOSIS_RING_FIRST_AGE = 42;
 export const HYPNOSIS_RING_DURATION = 27;
 const RING_PAIR_PERIOD = 8;
 const FADE_2_START_AGE = 129;
+const TARGET_BLEND_START_AGE = 66;
+
+export const HYPNOSIS_TARGET_BLEND_COLOR: Readonly<RgbColor> =
+  Object.freeze({ r: 255, g: 148, b: 255 });
+
+function hypnosisTargetBlendCoefficientAtAge(age: number): number {
+  const local = age - TARGET_BLEND_START_AGE;
+  if (local < 4) return 0;
+  if (local < 24) return 2 * Math.floor(local / 4);
+  if (local < 34) return 12;
+  return Math.max(0, 10 - 2 * Math.floor((local - 34) / 4));
+}
 
 function ringAtAge(
   age: number,
@@ -87,6 +100,24 @@ function ringAtAge(
         ? "DestroyAnimSprite"
         : "AnimTranslateLinear_WithFollowup",
   };
+}
+
+/**
+ * Hardware-OAM latch for GoldRing. The displayed coordinates consume the
+ * preceding reducer age because animation callbacks run after OAM transfer.
+ */
+export function hypnosisDisplayedRingsAtAge(
+  displayAge: number,
+  attackerSide: HypnosisSide,
+  attackerCenter: HypnosisPoint,
+  targetCenter: HypnosisPoint,
+): readonly HypnosisRing[] {
+  return hypnosisAtAge(
+    displayAge - 1,
+    attackerSide,
+    attackerCenter,
+    targetCenter,
+  ).rings;
 }
 
 export function hypnosisBgPaletteRowAtAge(
@@ -135,7 +166,8 @@ export function hypnosisAtAge(
       (_, index) =>
         ringAtAge(age, index, attackerSide, attackerCenter, targetCenter),
     ).filter((ring): ring is HypnosisRing => ring !== null),
-    targetBlendTaskActive: age >= 66 && age < 125,
+    targetBlendTaskActive: age >= TARGET_BLEND_START_AGE && age < 125,
+    targetBlendCoefficient: hypnosisTargetBlendCoefficientAtAge(age),
     sound,
     soundPanSide: sound ? attackerSide : null,
   };

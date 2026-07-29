@@ -4,6 +4,30 @@
   "orientation": "opponent-front",
   "scenario": "tools/battle-lab/mechanic-hypnosis-opponent-politoed-player-onix.json",
   "probe": "tools/compare/hypnosisProbe.py",
+  "move": "HYPNOSIS",
+  "attacker": {
+    "species": "POLITOED",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": {"x":144,"y":14},
+      "animationCenter": {"x":176,"y":46},
+      "battlePositionCenter": {"x":176,"y":40}
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": {"x":40,"y":48},
+      "animationCenter": {"x":72,"y":88},
+      "battlePositionCenter": {"x":72,"y":80}
+    }
+  },
+  "fieldProfile": {
+    "playerHp":142,"playerMaxHp":142,
+    "opponentHp":165,"opponentMaxHp":165,
+    "playerGender":"male","opponentGender":"male"
+  },
   "attackerSide": "opponent",
   "attackerCenter": {"x":176,"y":46},
   "targetCenter": {"x":72,"y":88},

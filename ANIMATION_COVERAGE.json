@@ -2,15 +2,41 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_MEGA_PUNCH",
+      "status": "exact",
+      "covered": [
+        "source and generated-inventory audits prove challenge-1 FRONTIER_MON_CACTURNE_1 set 254 is the sole and therefore lowest legal Level-50 carrier (species 345, Mega Punch 5, Hasty, HP+Speed, Scope Lens); complete legal three-Pokemon Scene-ON parties stage Cacturne against Onix in both orientations",
+        "fresh dense probes cover the complete 160-frame Move_MEGA_PUNCH body through first inactive cleanup twice reproducibly in both orientations: player-back frames 76-235 pass 160/160 reducer/seam/cleanup, MegaPunchKick software-sprite+matrix, ShakeMon2 task/offset, blend-register, and side-panned SE-trigger checks; each full probe record/raw-RGB window and every production framebuffer frame is receipt-pinned with evidence 9a324ee534928083d1f41dea0c2366ef2b47392c7869fb7aee81a7bf5641cd2f and raw RGB 7bab206057ef1ae1e99eb24bb9879a8052b73cfae92ccf90a51202cc851c5a36; opponent-front frames 80-239 pass 160/160 with evidence d8f787f50acb0d43013b904de76a0f22543a348e56cf36a403b715eb233b701f and raw RGB c05a36ec1e051de5783282bda799cbde791ee4613b4405ab3874094b33f80a55",
+        "the pure source-relative reducer and narrow typed Scene-ON seam port variant-0 gMegaPunchKickSpriteTemplate affine rotation/scale and pause, IMPACT hitsplat, target monbg and 12:8 alpha, initial field black blend, target white/black blends, target-side impact background, ShakeMon2, complex palette blend, both side-panned sounds, waits, restore, and cleanup; the complete raw probe record is receipt-pinned rather than individually decoded for every unrelated OAM/palette/tag field",
+        "the production shared-framebuffer compositor uses reproducibly extracted Cacturne art plus shared HANDS_AND_FEET, IMPACT background/hitsplat, Onix, field chrome, healthboxes, and text; it preserves prior-software hardware transfer and palette/display latches without absolute battle ticks, captured frames, fitted pixels, or gameplay ownership",
+        "MOVE_MEGA_KICK remains unsupported: its distinct variant-1 gMegaPunchKickSpriteTemplate art selection and SE_M_MEGA_KICK2 script lack independent complete both-orientation dense acceptance; shared callback/art never promotes it",
+        "presentation owns no damage, RNG, move outcome, turn order, controller, facility state, or shared battle state; no animation-boundary list, unsupported barrier, or canonical-recording allowlist changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-mega-punch-player-cacturne-opponent-onix.json",
+        "tools/battle-lab/mechanic-mega-punch-opponent-cacturne-player-onix.json",
+        "tools/compare/fixtures/mega-punch-player-cacturne-opponent-onix.json",
+        "tools/compare/fixtures/mega-punch-opponent-cacturne-player-onix.json",
+        "tools/compare/megaPunchSourceAudit.ts",
+        "tools/compare/poisonFangProbe.py",
+        "tools/compare/megaPunchPortable.ts",
+        "tools/compare/extractMegaPunchAssets.ts",
+        "src/animation/assets/megaPunch.json",
+        "src/animation/megaPunch.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/megaPunch.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_HYPNOSIS",
-      "status": "partial",
-      "remaining": "Wire the typed Scene-ON seam and production battleScene.ts compositor, then make every existing 169/168 dense frame pass shared-framebuffer comparison in both orientations, including psychic palette rotation, target tint, GoldRing ordering/display latches, Politoed idle latches, audio semantics, and first inactive cleanup.",
+      "status": "exact",
       "covered": [
         "the generated Level-50 eligibility graph rejects source set 38 HOOTHOOT and proves challenge-1 set 265 FRONTIER_MON_POLITOED_1 is the lowest legal Level-50 carrier (species 186, Hypnosis 95, Relaxed, Defense+SpDefense, Shell Bell); complete legal three-Pokemon Scene-ON parties stage it against ONIX in both orientations",
-        "fresh dense probes cover the complete source body through first inactive cleanup twice reproducibly in both orientations: player-back frames 74-242 pass 169/169 source/component/hardware/raw-RGB checks with evidence 6b164293b9a3ad086504808422b0f95ab07ccd84595eb87b3ca908e34189b0c4 and raw RGB 7c06a1b4825562841f65768ae6b9a97374dba4a727a0ecd59f28220deddf10a1; opponent-front frames 78-245 pass 168/168 with evidence 8baa59de6a99008bebd74e72b4089c6146f5f98fefd03ca7805a84412b4f100b and raw RGB 69b6f767aef05462568e2229c129b620b2ebfa6da399d072507eaa438ee453ec",
-        "the pure source-relative reducer ports ANIM_TAG_GOLD_RING lifetime, all six staggered gGoldRingSpriteTemplate/TranslateAnimSpriteToTargetMonLocation 27-tick paths including DestroyAnimSprite handoff, side-relative geometry, both psychic-background BLDY programs, blend-task lifetime, three Supersonic sound triggers, script wait, and first inactive cleanup",
-        "reproducible extraction regenerates Politoed front/back and GoldRing assets byte-for-byte; hypnosisPortable.ts reruns both complete legal probes twice fresh and pins software/hardware OAM and matrices, palette buffers/tags, registers, audio players, unchanged HP/items/status, raw RGB, reducer state, and cleanup",
-        "this remains partial because no typed Scene-ON seam or production shared-framebuffer compositor is wired or compared; the precise promotion gate is every one of the same 169/168 frames matching through battleScene.ts in both orientations, including psychic BG palette rotation, target 0<->12 RGB(31,18,31) blend, GoldRing OAM ordering/display latches, Politoed idle latches, audio semantics, and first inactive cleanup",
+        "fresh dense probes cover the complete source body through first inactive cleanup twice reproducibly in both orientations: player-back frames 74-242 pass 169/169 source/component/hardware/raw-RGB/production-framebuffer checks with evidence 6b164293b9a3ad086504808422b0f95ab07ccd84595eb87b3ca908e34189b0c4 and raw RGB 7c06a1b4825562841f65768ae6b9a97374dba4a727a0ecd59f28220deddf10a1; opponent-front frames 78-245 pass 168/168 with evidence 8baa59de6a99008bebd74e72b4089c6146f5f98fefd03ca7805a84412b4f100b and raw RGB 69b6f767aef05462568e2229c129b620b2ebfa6da399d072507eaa438ee453ec",
+        "the pure source-relative reducer and typed Scene-ON seam port ANIM_TAG_GOLD_RING lifetime, all six staggered gGoldRingSpriteTemplate/TranslateAnimSpriteToTargetMonLocation 27-tick paths including DestroyAnimSprite handoff, side-relative geometry, both queued psychic-background palette/BLDY programs, RGB(31,18,31) target blend-task lifetime and 0-to-12-to-0 coefficients, three side-panned Supersonic sound triggers, script wait, and first inactive cleanup",
+        "the production compositor ports GoldRing source OAM ordering and display latches in both orientations, Politoed and Onix idle/enemy-shadow latches, target palette tint, background palette rotation and darkening, immutable healthboxes, move windows/text, and cleanup without owning gameplay state",
+        "reproducible extraction regenerates Politoed front/back and GoldRing assets byte-for-byte; hypnosisPortable.ts reruns both complete legal probes twice fresh and pins every source/component, typed-seam, software/hardware OAM and matrix, palette buffer/tag, register, audio trigger, unchanged HP/item/status, raw-RGB, and production shared-framebuffer frame",
         "MOVE_PSYBEAM remains unsupported after an independent source/legal-carrier batch audit: its lowest carrier is set 145 FRONTIER_MON_SPINDA, and its distinct body adds eleven 13-tick GoldRing groups, Set/UnsetPsychicBackground, target SwayMon, a two-leg target blend_color_cycle, initial Psybeam audio, and SoundTask_LoopSEAdjustPanning 3/4/0/15; it has no complete dense both-orientation evidence",
         "presentation owns no sleep, damage, confusion, gameplay RNG, turn order, controller decision, or facility state; no animation-boundary list, unsupported barrier, or canonical-recording allowlist changed"
       ],
@@ -25,6 +51,8 @@
         "tools/compare/extractHypnosisAssets.ts",
         "src/animation/assets/hypnosis.json",
         "src/animation/hypnosis.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
         "tests/animation/goldRingSourceCheckpoint.test.ts",
         "tests/animation/hypnosis.test.ts",
         "tests/animation/hypnosisAssets.test.ts",
@@ -2881,7 +2909,7 @@
         "MOVE_SOLAR_BEAM",
         "MOVE_FOCUS_PUNCH"
       ],
-      "goal": "MOVE_HYPER_FANG is the exact representative at 107/107 source-component and framebuffer frames in both orientations, reproduced twice. Its battle route honestly proves AnimTask_IsContest=false and both AnimTask_IsTargetPlayerSide outcomes through BG_IMPACT_OPPONENT/BG_IMPACT_PLAYER, complete fades, fang, shake, audio, restore, and teardown. Contest state was not fabricated. Mega Punch, Mega Kick, Solar Beam, Focus Punch, and all other users retain distinct move bodies and remain unsupported pending their own complete dense evidence."
+      "goal": "MOVE_HYPER_FANG remains exact at 107/107 source-component and framebuffer frames in both orientations, reproduced twice. MOVE_MEGA_PUNCH independently proves its complete target-side BG_IMPACT_OPPONENT/BG_IMPACT_PLAYER route, variant-0 MegaPunchKick fist, hitsplat, monbg/alpha, palette blends, ShakeMon2, side-panned audio triggers, restore, and teardown at 160/160 direct semantic, receipt-pinned-probe/raw-RGB, and shared-framebuffer frames twice fresh in both orientations. Contest state was not fabricated. Mega Kick, Solar Beam, Focus Punch, and all other users retain distinct move bodies and remain unsupported pending their own complete dense evidence."
     },
     {
       "id": "music-notes",
@@ -2990,7 +3018,7 @@
         "MOVE_ERUPTION",
         "MOVE_LUSTER_PURGE"
       ],
-      "goal": "MOVE_EARTHQUAKE independently proves its complete dual literal (10,50) platform/all-battler HorizontalShake body and two delay-3/count-1 BG-only black14-to-white14 palette pulses in both orientations at 197/197 task/RAM/palette and framebuffer frames, reproduced twice. No sibling is promoted. HorizontalShake audit: FISSURE additionally needs three dirt-plume groups plus the fissure BG/position/restore pipeline and shakes only the target; SKY ATTACK needs both two-turn charge/strike bodies, attacker-only (2,16) shakes, bird/projectile/hitsplat components; MAGNITUDE uses move-power-derived intensity (literal zero), two sequential platform/all-battler shake pairs, and its own magnitude result choreography; ERUPTION uses distinct (8,60) shakes plus its eruption launch/rain/fire body; LUSTER PURGE uses target-only (5,14) shake plus psychic-background, luster-orb, sparkle, and palette bodies. Complex-palette Level-50 audit: the already-exact KNOCK OFF, BLAZE KICK, and AERIAL ACE retain independent acceptance; MEGA PUNCH and MEGA KICK still need their impact-background/fist/hitsplat bodies; GUILLOTINE its cutter/background body; TAKE DOWN and DOUBLE-EDGE their distinct contact/recoil choreography; FISSURE and MAGNITUDE retain the remainders above; CRABHAMMER needs slide/shake/eight bubble pairs; EXPLOSION its orb/explosion pipeline; SUPER FANG its fang sprite and BlendMonInAndOut; REVERSAL its power branch; FURY CUTTER its hit-count branch; MEGAHORN and CROSS CHOP their distinct strike sprites/tasks; MIST BALL its fog BG/projectile pipeline; SIGNAL BEAM its beam sprites and target palette cycle; IRON DEFENSE its complete defense-up visual body. Source also shows SKULL BASH uses the same BG-only black14-to-white14 pulse inside a distinct two-turn body, but the generated Level-50 component graph does not currently attribute that command edge. Every named unsupported move remains unsupported pending independent complete dense evidence."
+      "goal": "MOVE_EARTHQUAKE independently proves its complete dual literal (10,50) platform/all-battler HorizontalShake body and two delay-3/count-1 BG-only black14-to-white14 palette pulses in both orientations at 197/197 task/RAM/palette and framebuffer frames, reproduced twice. MOVE_MEGA_PUNCH independently proves its delay-3/count-1 BG+battler black8-to-normal complex blend inside a complete 160-frame exact both-orientation body. HorizontalShake audit: FISSURE additionally needs three dirt-plume groups plus the fissure BG/position/restore pipeline and shakes only the target; SKY ATTACK needs both two-turn charge/strike bodies, attacker-only (2,16) shakes, bird/projectile/hitsplat components; MAGNITUDE uses move-power-derived intensity (literal zero), two sequential platform/all-battler shake pairs, and its own magnitude result choreography; ERUPTION uses distinct (8,60) shakes plus its eruption launch/rain/fire body; LUSTER PURGE uses target-only (5,14) shake plus psychic-background, luster-orb, sparkle, and palette bodies. Complex-palette Level-50 audit: the already-exact KNOCK OFF, BLAZE KICK, AERIAL ACE, and MEGA PUNCH retain independent acceptance; MEGA KICK still needs its variant-1/audio body; GUILLOTINE its cutter/background body; TAKE DOWN and DOUBLE-EDGE their distinct contact/recoil choreography; FISSURE and MAGNITUDE retain the remainders above; CRABHAMMER needs slide/shake/eight bubble pairs; EXPLOSION its orb/explosion pipeline; SUPER FANG its fang sprite and BlendMonInAndOut; REVERSAL its power branch; FURY CUTTER its hit-count branch; MEGAHORN and CROSS CHOP their distinct strike sprites/tasks; MIST BALL its fog BG/projectile pipeline; SIGNAL BEAM its beam sprites and target palette cycle; IRON DEFENSE its complete defense-up visual body. Source also shows SKULL BASH uses the same BG-only black14-to-white14 pulse inside a distinct two-turn body, but the generated Level-50 component graph does not currently attribute that command edge. Every named unsupported move remains unsupported pending independent complete dense evidence."
     },
     {
       "id": "elemental-punch",

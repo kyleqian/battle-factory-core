@@ -274,6 +274,10 @@ import {
   type HyperFangEffect,
 } from "./hyperFang.ts";
 import {
+  megaPunchAtAge,
+  type MegaPunchState,
+} from "./megaPunch.ts";
+import {
   swaggerAtAge,
   type SwaggerState,
 } from "./swagger.ts";
@@ -502,6 +506,12 @@ import {
   sporeAtAge,
   type SporeState,
 } from "./spore.ts";
+import {
+  hypnosisDisplayedRingsAtAge,
+  hypnosisAtAge,
+  type HypnosisRing,
+  type HypnosisState,
+} from "./hypnosis.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -546,6 +556,7 @@ export interface SceneOnPresentationBattler {
     | "GRIMER"
     | "ZUBAT"
     | "RATICATE"
+    | "CACTURNE"
     | "RATTATA"
     | "SKIPLOOM"
     | "RELICANTH"
@@ -557,6 +568,7 @@ export interface SceneOnPresentationBattler {
     | "VOLBEAT"
     | "ILLUMISE"
     | "MASQUERAIN"
+    | "POLITOED"
     | "EXEGGCUTE"
     | "GLOOM"
     | "TOGETIC"
@@ -1139,6 +1151,13 @@ export interface SceneOnHyperFangConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnMegaPunchConfig {
+  readonly move: "MEGA_PUNCH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnBiteConfig {
   readonly move: "BITE";
   readonly attacker: SceneOnPresentationBattler;
@@ -1469,6 +1488,13 @@ export interface SceneOnSporeConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnHypnosisConfig {
+  readonly move: "HYPNOSIS";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnPerishSongFieldProfile
   extends SceneOnDragonRageFieldProfile {
   /** Immutable battle-engine result; presentation never advances these. */
@@ -1699,6 +1725,7 @@ export type SceneOnMoveConfig =
   | SceneOnSludgeBombConfig
   | SceneOnPoisonFangConfig
   | SceneOnHyperFangConfig
+  | SceneOnMegaPunchConfig
   | SceneOnBiteConfig
   | SceneOnHeadbuttConfig
   | SceneOnWhirlwindConfig
@@ -1732,6 +1759,7 @@ export type SceneOnMoveConfig =
   | SceneOnHowlConfig
   | SceneOnSweetKissConfig
   | SceneOnSporeConfig
+  | SceneOnHypnosisConfig
   | SceneOnPerishSongConfig
   | SceneOnNeedleArmConfig
   | SceneOnSandstormConfig
@@ -1820,6 +1848,8 @@ export type SceneOnSweetKissPresentationState =
   SceneOnMovePresentationState<SceneOnSweetKissConfig>;
 export type SceneOnSporePresentationState =
   SceneOnMovePresentationState<SceneOnSporeConfig>;
+export type SceneOnHypnosisPresentationState =
+  SceneOnMovePresentationState<SceneOnHypnosisConfig>;
 export type SceneOnBlockPresentationState =
   SceneOnMovePresentationState<SceneOnBlockConfig>;
 export type SceneOnPerishSongPresentationState =
@@ -1884,6 +1914,12 @@ export interface SceneOnPoisonFangView {
 }
 
 export interface SceneOnHyperFangView extends HyperFangEffect {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnMegaPunchView extends MegaPunchState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3379,6 +3415,25 @@ export function sceneOnHyperFangView(
   };
 }
 
+/** `age=0` is the first active `Move_MEGA_PUNCH` source display. */
+export function sceneOnMegaPunchView(
+  state: SceneOnMovePresentationState,
+): SceneOnMegaPunchView {
+  if (state.config.move !== "MEGA_PUNCH") {
+    throw new Error(`expected MEGA_PUNCH presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...megaPunchAtAge(
+      state.age,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
 /** `age=0` is Bite's first displayed sharp-teeth callback step. */
 export function sceneOnBiteView(
   state: SceneOnMovePresentationState<SceneOnBiteConfig>,
@@ -4077,6 +4132,52 @@ export function sceneOnSporeView(
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
     ),
+  };
+}
+
+export interface SceneOnHypnosisView extends HypnosisState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly displayedRings: readonly HypnosisRing[];
+  readonly displayedTargetBlendCoefficient: number;
+  readonly displayedBgPaletteAge: number;
+}
+
+/** `age=0` is Move_HYPNOSIS's first active source-script frame. */
+export function sceneOnHypnosisView(
+  state: SceneOnHypnosisPresentationState,
+): SceneOnHypnosisView {
+  if (state.config.move !== "HYPNOSIS") {
+    throw new Error(`expected HYPNOSIS presentation, got ${state.config.move}`);
+  }
+  const component = hypnosisAtAge(
+    state.age,
+    state.config.attacker.geometry.side,
+    state.config.attacker.geometry.animationCenter,
+    state.config.target.geometry.animationCenter,
+  );
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...component,
+    displayedRings: hypnosisDisplayedRingsAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
+    ),
+    displayedTargetBlendCoefficient: hypnosisAtAge(
+      state.age - 1,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
+    ).targetBlendCoefficient,
+    // SetPsychicBackground's four-tick rotate task passes through the
+    // palette-transfer queue; UnsetPsychicBackground's setup pause absorbs
+    // two of those display ticks at the second fade boundary.
+    displayedBgPaletteAge: state.age - (state.age < 129 ? 6 : 4),
   };
 }
 
