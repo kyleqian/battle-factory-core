@@ -157,6 +157,8 @@ export type Turn2EndeavorHitChainResult = Readonly<{
   events: readonly BattleScriptSemanticEvent[];
   /** Final staged Onix HP -- ENDEAVOR's own real hp-difference formula (117 - 101 = 16 damage), settling at 101, matching battleScene.ts's anchorPlayerAfterTurnHp for real. */
   targetHpAfter: number;
+  /** Stable max-HP field carried by the normalized kernel battler. */
+  player: Readonly<{ maxHP: number }>;
 }>;
 
 /**
@@ -215,9 +217,11 @@ export function stageTurn2EndeavorHitChain(): Turn2EndeavorHitChainResult {
   for (let budget = 0; budget < 512; budget += 1) {
     const stepped = stepBattleScriptMachine(PROGRAM, state, execution.handlers);
     if (stepped.kind === "halted" && stepped.state.haltReason?.kind === "terminal") {
+      const player = stepped.state.rulesContext.battlers[0];
       return {
         events: stepped.state.events,
-        targetHpAfter: stepped.state.rulesContext.battlers[0].hp,
+        targetHpAfter: player.hp,
+        player: Object.freeze({ maxHP: player.maxHP }),
       };
     }
     if (stepped.kind === "blocked") {

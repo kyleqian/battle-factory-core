@@ -44,9 +44,6 @@ const RECORDING_IMPORT = /^\s*import\s[^;]*?\sfrom\s+"([^"]*(?:-dump|-probe|-wat
  */
 const ALLOWED_RECORDING_IMPORTS: ReadonlySet<string> = new Set([
   "src/engine/factorySwapPresentation.ts::../data/gen/battle1-swap-rentalmons-dump.json",
-  "src/engine/battleScene.ts::../data/gen/battle1-turn1-ram-dump.json",
-  "src/engine/battleScene.ts::../data/gen/battle1-turn2-ram-dump.json",
-  "src/engine/battleScene.ts::../data/gen/battle1-grovyle-faint-ram-dump.json",
 ]);
 
 /**
@@ -357,14 +354,13 @@ describe("overfit containment ratchet (ROADMAP S10 §4, ISSUES #41)", () => {
     ).toEqual([]);
   });
 
-  it("pins the debt at four imports across two modules", () => {
+  it("pins the remaining debt at one import in factorySwapPresentation", () => {
     const byFile = new Map<string, number>();
     for (const entry of ALLOWED_RECORDING_IMPORTS) {
       const file = entry.split("::")[0]!;
       byFile.set(file, (byFile.get(file) ?? 0) + 1);
     }
     expect([...byFile.entries()].sort()).toEqual([
-      ["src/engine/battleScene.ts", 3],
       ["src/engine/factorySwapPresentation.ts", 1],
     ]);
   });

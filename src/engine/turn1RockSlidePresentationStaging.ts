@@ -142,6 +142,8 @@ export type Turn1RockSlideHitChainResult = Readonly<{
   events: readonly BattleScriptSemanticEvent[];
   /** Final staged Grovyle HP -- confirms the survive-not-faint shape this window's own real turn 1 has (143 -> 101, never 0). */
   targetHpAfter: number;
+  /** Stable battle identity/max-HP fields carried by the normalized kernel battler. */
+  opponent: Readonly<{ species: number; level: number; maxHP: number }>;
 }>;
 
 /**
@@ -200,9 +202,15 @@ export function stageTurn1RockSlideHitChain(): Turn1RockSlideHitChainResult {
   for (let budget = 0; budget < 512; budget += 1) {
     const stepped = stepBattleScriptMachine(PROGRAM, state, execution.handlers);
     if (stepped.kind === "halted" && stepped.state.haltReason?.kind === "terminal") {
+      const opponent = stepped.state.rulesContext.battlers[1];
       return {
         events: stepped.state.events,
-        targetHpAfter: stepped.state.rulesContext.battlers[1].hp,
+        targetHpAfter: opponent.hp,
+        opponent: Object.freeze({
+          species: opponent.species,
+          level: opponent.level,
+          maxHP: opponent.maxHP,
+        }),
       };
     }
     if (stepped.kind === "blocked") {
