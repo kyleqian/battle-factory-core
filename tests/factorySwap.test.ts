@@ -4,6 +4,7 @@ import type { BattleMon } from "../src/engine/battleScenario.ts";
 import {
   acknowledgeFactorySwapPresentation,
   applyFactorySwapMutation,
+  commitFactorySwapMutation,
   copyFactorySwapCursor,
   createFactorySwapState,
   factorySwapRoundDecision,
@@ -111,6 +112,26 @@ describe("Factory swap state/input contract", () => {
       .toBe(0);
     expect(state.rentalMons.slice(0, 3)).toEqual(accepted.slice(0, 3));
     expect(state.rentalMons.slice(3)).toEqual(rentals.slice(3));
+  });
+
+  it("publishes the selected round indexes only at the source copy boundary", () => {
+    const beforeCopy: FactorySwapState = {
+      ...createFactorySwapState(player, enemy, rentals),
+      phase: "acceptExit",
+      playerMonId: 2,
+      enemyMonId: 1,
+      inputReady: false,
+      scriptResult: false,
+    };
+    expect(factorySwapRoundDecision(beforeCopy)).toBeNull();
+
+    const copied = commitFactorySwapMutation(beforeCopy);
+    expect(copied.phase).toBe("acceptExit");
+    expect(factorySwapRoundDecision(copied)).toEqual({
+      type: "accept",
+      playerPartyIndex: 2,
+      opponentPartyIndex: 1,
+    });
   });
 
   it("accept-NO enters the no-mutation return seam", () => {

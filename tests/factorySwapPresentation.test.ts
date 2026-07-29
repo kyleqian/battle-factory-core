@@ -3,10 +3,14 @@ import { createInitialState, tick } from "../src/engine/core.ts";
 import rentalFixture from "../src/data/gen/battle1-swap-rentalmons-dump.json" with { type: "json" };
 import {
   CANONICAL_FACTORY_RENTAL_ROSTER,
+  CANONICAL_SWAP_ENEMY_PARTY,
+  CANONICAL_SWAP_PLAYER_PARTY,
   FACTORY_SWAP_ENTRY_READY_DELAY,
   advanceFactorySwapPresentation,
   beginFactorySwapSummaryReturn,
   createCanonicalFactorySwapPresentation,
+  createFactorySwapPresentation,
+  createPendingFactorySwapPresentation,
   factorySwapActionFadeY,
   factorySwapAcceptCancelButtonX,
   factorySwapAcceptExitBgFadeY,
@@ -48,10 +52,19 @@ import {
   factorySwapPlayerSwitchMechanism,
   factorySwapSummaryReturnBallTile,
   handleFactorySwapPresentationInput,
+  submitFactorySwapRoundDecision,
   type FactorySwapPresentationState,
 } from "../src/engine/factorySwapPresentation.ts";
+import type { FactoryRentalParty } from "../src/engine/battleScenario.ts";
 import { factorySwapRoundDecision } from "../src/engine/factorySwap.ts";
 import { INITIAL_POSTWIN_STATE } from "../src/engine/postwin.ts";
+import {
+  advanceRoundController,
+  completeBattlePresentation,
+  createGeneratedFactoryRoundController,
+  resolveRoundBattle,
+  type RoundControllerState,
+} from "../src/engine/roundController.ts";
 import {
   activateSpeciesNameFade,
   advanceSpeciesNameFade,
@@ -121,7 +134,136 @@ function offerState(cursor: 0 | 1) {
   };
 }
 
+function canonicalRentalParties(): {
+  playerRentalRecords: FactoryRentalParty;
+  opponentRentalRecords: FactoryRentalParty;
+} {
+  const records = CANONICAL_FACTORY_RENTAL_ROSTER.map((record) => ({
+    setId: record.monId,
+    personality: record.personality,
+    fixedIv: record.ivs,
+    abilitySlot: record.abilityNum as 0 | 1,
+  }));
+  return {
+    playerRentalRecords: records.slice(0, 3) as unknown as FactoryRentalParty,
+    opponentRentalRecords: records.slice(3) as unknown as FactoryRentalParty,
+  };
+}
+
+function pendingCanonicalRoundSwap(): RoundControllerState {
+  const records = canonicalRentalParties();
+  let round = createGeneratedFactoryRoundController({
+    id: "canonical-swap-presentation",
+    playerParty: CANONICAL_SWAP_PLAYER_PARTY,
+    playerRentalRecords: records.playerRentalRecords,
+    opponent: {
+      id: "canonical-battle-1-opponent",
+      trainerName: "SABRINA",
+      party: CANONICAL_SWAP_ENEMY_PARTY,
+      rentalRecords: records.opponentRentalRecords,
+    },
+    rngValue: 0x1234_5678,
+  });
+  round = completeBattlePresentation(round, {
+    commandId: round.presentation!.command.commandId,
+  });
+  round = advanceRoundController(round);
+  round = resolveRoundBattle(round, {
+    outcome: "win",
+    playerParty: round.rules.playerParty,
+    opponentParty: round.rules.currentOpponent.party,
+    rngValue: round.rules.rngValue,
+  });
+  round = completeBattlePresentation(round, {
+    commandId: round.presentation!.command.commandId,
+  });
+  return advanceRoundController(round);
+}
+
 describe("live Factory swap presentation adapter", () => {
+  it("constructs the canonical six full records through the generic entry point exactly", () => {
+    const records = canonicalRentalParties();
+    expect(createFactorySwapPresentation({
+      ...records,
+      playerParty: CANONICAL_SWAP_PLAYER_PARTY,
+      opponentParty: CANONICAL_SWAP_ENEMY_PARTY,
+    })).toEqual(createCanonicalFactorySwapPresentation());
+  });
+
+  it("consumes a pending generated swapOffer and submits only at CopySwappedMonData", () => {
+    const round = pendingCanonicalRoundSwap();
+    const initialRng = round.rules.rngValue;
+    const initialRecords = structuredClone(round.rules.playerRentalRecords);
+    let presentation = createPendingFactorySwapPresentation(round)!;
+
+    expect(presentation).toEqual(createFactorySwapPresentation({
+      playerRentalRecords: round.rules.playerRentalRecords!,
+      playerParty: round.rules.playerParty,
+      opponentRentalRecords: round.rules.currentOpponent.rentalRecords!,
+      opponentParty: round.rules.currentOpponent.party,
+    }));
+    expect(round).toMatchObject({
+      rules: { phase: "awaitingSwapDecision" },
+      presentation: {
+        completed: false,
+        command: { type: "swapOffer" },
+      },
+    });
+
+    presentation = advance(presentation, FACTORY_SWAP_ENTRY_READY_DELAY);
+    presentation = handleFactorySwapPresentationInput(presentation, "A");
+    presentation = advance(presentation, 58);
+    presentation = handleFactorySwapPresentationInput(presentation, "DOWN");
+    presentation = handleFactorySwapPresentationInput(presentation, "A");
+    presentation = advance(presentation, 133);
+    presentation = handleFactorySwapPresentationInput(presentation, "A");
+    presentation = advance(presentation, 64);
+    presentation = handleFactorySwapPresentationInput(presentation, "A");
+    presentation = advance(presentation, 20);
+
+    expect(factorySwapRoundDecision(presentation.controller)).toBeNull();
+    expect(submitFactorySwapRoundDecision(round, presentation)).toBe(round);
+    expect(round.rules.rngValue).toBe(initialRng);
+    expect(round.rules.playerRentalRecords).toEqual(initialRecords);
+
+    presentation = advance(presentation, 1);
+    const submitted = submitFactorySwapRoundDecision(round, presentation);
+    expect(submitted).toMatchObject({
+      rules: {
+        phase: "presentingSwapResult",
+        rngValue: initialRng,
+        lastSwap: {
+          type: "accept",
+          playerPartyIndex: 0,
+          opponentPartyIndex: 0,
+        },
+      },
+      presentation: {
+        completed: false,
+        command: {
+          type: "swapResolved",
+          accepted: true,
+        },
+      },
+    });
+    expect(submitted.rules.playerRentalRecords![0]).toEqual(
+      round.rules.currentOpponent.rentalRecords![0],
+    );
+    expect(submitFactorySwapRoundDecision(submitted, presentation))
+      .toBe(submitted);
+  });
+
+  it("routes the live postwin YES edge through pending generated records", () => {
+    const round = pendingCanonicalRoundSwap();
+    const state = {
+      ...offerState(0),
+      roundController: round,
+    };
+    const next = tick(state, new Set(["A"]));
+    expect(next.factorySwap).toEqual(createPendingFactorySwapPresentation(round));
+    expect(next.roundController).toBe(round);
+  });
+
   it("derives every canonical rental-roster field exactly from engine state and generated data", () => {
     const recorded = (
       rentalFixture as unknown as {
