@@ -1159,7 +1159,15 @@ function runItemsTick(
   if (holdEffect === HOLD_EFFECT_LEFTOVERS) {
     if (moveTurn || b.hp >= b.maxHP) return Object.freeze({ kind: "advance", state });
     const heal = Math.min(floorDivAtLeastOne(b.maxHP, 16), b.maxHP - b.hp);
-    const rc = Object.freeze({ ...state.rulesContext, battleMoveDamage: -heal });
+    const rc = Object.freeze({
+      ...state.rulesContext,
+      battleMoveDamage: -heal,
+      aiObservedItemEffects: Object.freeze(
+        state.rulesContext.aiObservedItemEffects.map((value, index) =>
+          index === battler ? holdEffect : value
+        ),
+      ) as BattleScriptRulesContext["aiObservedItemEffects"],
+    });
     return runTickScript(program, handlers, state, rc, battler, ITEM_HEAL_HP_END2_LABEL);
   }
 

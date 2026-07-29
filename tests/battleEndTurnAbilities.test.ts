@@ -401,6 +401,7 @@ describe("runBattleEndTurnOrchestration -- ENDTURN_ABILITIES slice 1 (Speed Boos
       if (result.kind !== "next-turn") throw new Error("expected next-turn");
       expect(result.state.rulesContext.battlers[0]!.truantCounter).toBe(1);
       expect(result.state.rulesContext.battlers[0]!.hp).toBe(110); // 100 + floor(160/16), same tick as the Truant toggle
+      expect(result.state.rulesContext.aiObservedItemEffects[0]).toBe(43); // HOLD_EFFECT_LEFTOVERS
     });
   });
 });

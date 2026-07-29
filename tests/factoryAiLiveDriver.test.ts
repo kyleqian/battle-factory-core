@@ -62,7 +62,14 @@ function battler(input: Readonly<{
   };
 }
 
-function liveRules(lastPlayerMove = 0, playerPartyIndex = 0): BattleScriptRulesContext {
+function liveRules(
+  lastPlayerMove = 0,
+  playerPartyIndex = 0,
+  observations: Readonly<{
+    abilityIds?: readonly number[];
+    itemEffects?: readonly number[];
+  }> = {},
+): BattleScriptRulesContext {
   const empty = battler({
     side: 0,
     species: 0,
@@ -123,6 +130,8 @@ function liveRules(lastPlayerMove = 0, playerPartyIndex = 0): BattleScriptRulesC
     missType: 0,
     hitMarker: 0,
     multiHitCounter: 0,
+    aiObservedAbilityIds: observations.abilityIds,
+    aiObservedItemEffects: observations.itemEffects,
     moveHistory: { lastMoves: [lastPlayerMove, 0, 0, 0] },
   });
 }
@@ -196,6 +205,7 @@ describe("live Factory AI rules adapter (Gate-5 rung 6)", () => {
         isCursed: false,
         ability: "ABILITY_ROCK_HEAD",
         knownAbility: null,
+        knownItemEffect: 0,
       },
     };
 
@@ -237,5 +247,22 @@ describe("live Factory AI rules adapter (Gate-5 rung 6)", () => {
     expect(history.knownAbilities[0]).toBeNull();
     // Source switch/faint setup clears move+ability history, not itemEffects.
     expect(history.knownItemEffects[0]).toBe(29);
+  });
+
+  it("sync consumes production reveal handoffs and projects known ability/item facts into the trainer view", () => {
+    const rules = liveRules(0, 0, {
+      abilityIds: [9, 0, 0, 0],
+      itemEffects: [29, 0, 0, 0],
+    });
+    const history = syncFactoryAiBattleHistory(createFactoryAiBattleHistory(rules), rules);
+    expect(history.knownAbilities[0]).toBe("ABILITY_STATIC");
+    expect(history.knownItemEffects[0]).toBe(29);
+    const view = createFactoryAiViewFromLiveRules({
+      rulesContext: rules,
+      history,
+      challenge: { factoryWinStreak: 28, trainerOpponentId: 222 },
+    });
+    expect(view.target.knownAbility).toBe("ABILITY_STATIC");
+    expect(view.target.knownItemEffect).toBe(29);
   });
 });

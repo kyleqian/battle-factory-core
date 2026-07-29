@@ -392,6 +392,11 @@ function runPendingSwitchinEffects(
       haltReason: null,
       rulesContext: Object.freeze({
         ...rules,
+        aiObservedAbilityIds: Object.freeze(
+          rules.aiObservedAbilityIds.map((value, index) =>
+            index === id ? PENDING_ENTRY_ABILITY.intimidate : value
+          ),
+        ) as BattleScriptRulesContext["aiObservedAbilityIds"],
         scriptingBattler: id,
         lastUsedAbility: PENDING_ENTRY_ABILITY.intimidate,
       }),
@@ -419,6 +424,11 @@ function runPendingSwitchinEffects(
       haltReason: null,
       rulesContext: Object.freeze({
         ...rules,
+        aiObservedAbilityIds: Object.freeze(
+          rules.aiObservedAbilityIds.map((value, index) =>
+            index === id ? copiedAbility : value
+          ),
+        ) as BattleScriptRulesContext["aiObservedAbilityIds"],
         scriptingBattler: id,
         lastUsedAbility: copiedAbility,
         battleTextBuff1MonNick: Object.freeze({

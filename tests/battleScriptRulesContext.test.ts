@@ -179,6 +179,8 @@ describe("source-shaped Battle Script rules context", () => {
     const created = createBattleScriptRulesContext(source);
     expect(Object.keys(created).sort()).toEqual([
       "absentBattlerFlags",
+      "aiObservedAbilityIds",
+      "aiObservedItemEffects",
       "alreadyStatusedMoveAttempt",
       "animArg1",
       "animTargetsHit",

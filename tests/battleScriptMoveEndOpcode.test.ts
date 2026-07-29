@@ -608,11 +608,13 @@ describe("production moveend (Cmd_moveend) registration", () => {
         "Static contact proc",
       ]);
       expect(proc.state.rulesContext.battlers[0]!.status1).toBe(1 << 6);
+      expect(proc.state.rulesContext.aiObservedAbilityIds[1]).toBe(9);
 
       const failed = runCommittedScriptToTerminal("BattleScript_EffectHit", staged, 0);
       expect(failed.state.rng.calls).toBe(5);
       expect(failed.state.rng.ledger.at(-1)?.reason).toBe("Static contact proc");
       expect(failed.state.rulesContext.battlers[0]!.status1).toBe(0);
+      expect(failed.state.rulesContext.aiObservedAbilityIds[1]).toBe(0);
     });
   });
 

@@ -479,6 +479,9 @@ function executeOnDamageAbilities(
   }
   const statusRules = Object.freeze({
     ...baseRules,
+    aiObservedAbilityIds: Object.freeze(
+      baseRules.aiObservedAbilityIds.map((value, index) => index === target ? ability : value),
+    ) as BattleScriptRulesContext["aiObservedAbilityIds"],
     moveEffectByte: MOVE_EFFECT_AFFECTS_USER | moveEffect,
     hitMarker: (baseRules.hitMarker | HITMARKER_STATUS_ABILITY_EFFECT) >>> 0,
   });

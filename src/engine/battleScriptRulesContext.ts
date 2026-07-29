@@ -666,6 +666,10 @@ export type BattleScriptRulesContext = Readonly<
     lastUsedAbility: number;
     /** Source u16 gLastUsedItem, prepared by item-steal/knock-off messages. */
     lastUsedItem: number;
+    /** BattleHistory reveal handoff populated only at source RecordAbilityBattle-equivalent activation sites. */
+    aiObservedAbilityIds: BattleScriptMoveEndBytes;
+    /** BattleHistory reveal handoff populated only at source RecordItemEffectBattle-equivalent activation sites. */
+    aiObservedItemEffects: BattleScriptMoveEndBytes;
     /** Source u16 gPaydayMoney. */
     paydayMoney: number;
     /** Source u8 gBattleStruct->moneyMultiplier. */
@@ -860,6 +864,8 @@ export type BattleScriptRulesContextInput = Readonly<{
   gBattleEnvironment?: number;
   lastUsedAbility?: number;
   lastUsedItem?: number;
+  aiObservedAbilityIds?: readonly number[];
+  aiObservedItemEffects?: readonly number[];
   paydayMoney?: number;
   moneyMultiplier?: number;
   playerMoney?: number;
@@ -2493,6 +2499,16 @@ export function createBattleScriptRulesContext(
     "enigmaBerryHoldEffects",
   ) as BattleScriptMoveEndBytes;
   const moveHistory = createBattleScriptMoveHistory(input.moveHistory);
+  const aiObservedAbilityIds = createMoveEndArray(
+    input.aiObservedAbilityIds,
+    0xff,
+    "aiObservedAbilityIds",
+  ) as BattleScriptMoveEndBytes;
+  const aiObservedItemEffects = createMoveEndArray(
+    input.aiObservedItemEffects,
+    0xff,
+    "aiObservedItemEffects",
+  ) as BattleScriptMoveEndBytes;
   const battleTopology = createBattleScriptBattleTopology(input.battleTopology);
   const party = createBattleScriptPartyBySide(input.party);
   return Object.freeze({
@@ -2525,6 +2541,8 @@ export function createBattleScriptRulesContext(
       "lastUsedAbility",
     ),
     lastUsedItem: requireUnsigned(input.lastUsedItem ?? 0, 0xffff, "lastUsedItem"),
+    aiObservedAbilityIds,
+    aiObservedItemEffects,
     paydayMoney: requireUnsigned(input.paydayMoney ?? 0, 0xffff, "paydayMoney"),
     moneyMultiplier: requireUnsigned(input.moneyMultiplier ?? 1, 0xff, "moneyMultiplier"),
     playerMoney: requireUnsigned(input.playerMoney ?? 0, 999_999, "playerMoney"),

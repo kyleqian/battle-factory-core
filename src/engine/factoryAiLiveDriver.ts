@@ -204,12 +204,31 @@ export function syncFactoryAiBattleHistory(
     ) as FactoryAiBattleHistory["usedMoves"];
   }
 
-  return Object.freeze({
+  let synced = Object.freeze({
     usedMoves,
     knownAbilities,
     knownItemEffects,
     partyIndexes,
   });
+  for (let battler = 0; battler < 4; battler += 1) {
+    const abilityId = rulesContext.aiObservedAbilityIds[battler]!;
+    if (abilityId !== 0) {
+      synced = recordFactoryAiKnownAbility(
+        synced,
+        battler as 0 | 1 | 2 | 3,
+        abilityName(abilityId),
+      );
+    }
+    const itemEffect = rulesContext.aiObservedItemEffects[battler]!;
+    if (itemEffect !== 0) {
+      synced = recordFactoryAiKnownItemEffect(
+        synced,
+        battler as 0 | 1 | 2 | 3,
+        itemEffect,
+      );
+    }
+  }
+  return synced;
 }
 
 function abilityName(ability: number): string {
@@ -299,6 +318,7 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
         (target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CURSED) !== 0,
       ability: abilityName(target.ability),
       knownAbility: input.history.knownAbilities[0],
+      knownItemEffect: input.history.knownItemEffects[0],
     }),
   });
 }

@@ -532,6 +532,8 @@ export type FactoryAiScoredTargetView = FactoryAiScoredBattlerView & Readonly<{
   ability: string;
   /** BattleHistory-style known ability for CheckBadMove's get_ability guess cache. */
   knownAbility: string | null;
+  /** Source BattleHistory itemEffects cell (0 means no observed effect). */
+  knownItemEffect?: number;
 }>;
 
 export type FactoryAiScoredView = Readonly<{
