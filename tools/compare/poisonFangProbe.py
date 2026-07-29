@@ -70,6 +70,8 @@ def main() -> None:
     nm = subprocess.run(["arm-none-eabi-nm", str(reference / "pokeemerald.elf")], check=True, capture_output=True, text=True).stdout
     symbols = {line.split()[2]: int(line.split()[0], 16) | 1 for line in nm.splitlines() if len(line.split()) == 3}
     template_names = (
+        ("gMegaPunchKickSpriteTemplate", "gBasicHitSplatSpriteTemplate")
+        if MOVE_ID == 5 else
         ("gLinearStingerSpriteTemplate", "gHandleInvertHitSplatSpriteTemplate")
         if MOVE_ID == 41 else
         ("gSharpTeethSpriteTemplate", "gBasicHitSplatSpriteTemplate")
@@ -80,11 +82,14 @@ def main() -> None:
     templates = {name: oracle.symbols[name] for name in template_names}
     task_names = ("AnimTask_ShakeMon", "AnimTask_ShakeMon_Step",
                   "AnimTask_ShakeMon2", "AnimTask_ShakeMon2_Step",
+                  "AnimTask_BlendBattleAnimPal",
                   "AnimTask_BlendColorCycle", "AnimTask_BlendColorCycleLoop",
                   "Task_FadeToBg", "AnimTask_GrowAndShrink",
                   "AnimTask_GrowAndShrink_Step")
     task_funcs = {symbols[name] for name in task_names}
     palette_tags = symbols["sSpritePaletteTags"] & ~1
+    tile_tags = symbols["sSpriteTileRangeTags"] & ~1
+    software_oam = symbols["gMain"] + 0x38
     visual_task_count = oracle.symbols["gAnimVisualTaskCount"]
     sound_task_count = oracle.symbols["gAnimSoundTaskCount"]
     anim_script_active = oracle.symbols["gAnimScriptActive"]
@@ -95,6 +100,8 @@ def main() -> None:
     def s8(a: int) -> int:
         v = oracle.read_u8(a)
         return v - 0x100 if v >= 0x80 else v
+    def raw(a: int, n: int) -> str:
+        return bytes(oracle.read_u8(a + i) for i in range(n)).hex()
     def sprite(slot: int) -> dict:
         base = sprites + slot * 0x44
         matrix_num = (u16(base + 2) >> 9) & 0x1f
@@ -136,6 +143,8 @@ def main() -> None:
           "unfadedPalette":[u16(unfaded+i*2) for i in range(512)],
           "hardwarePalette":[u16(0x05000000+i*2) for i in range(512)],
           "paletteTags":[u16(palette_tags+i*2) for i in range(16)],
+          "tileTags":[u16(tile_tags+i*2) for i in range(128)],
+          "softwareOam":[raw(software_oam+i*8,8) for i in range(128)],
           "hardwareOam":[[u16(0x07000000+i*8+j) for j in (0,2,4)] for i in range(128)],
           "hardwareMatrices":[[s16(0x07000006+i*0x20+j)
                                for j in (0,8,16,24)] for i in range(32)],
@@ -161,6 +170,8 @@ def main() -> None:
                      "SE_M_LEER":oracle.read_u32(song_table+192*8),
                      "SE_M_SWAGGER":oracle.read_u32(song_table+193*8),
                      "SE_M_SWAGGER2":oracle.read_u32(song_table+194*8),
-                     "SE_M_TOXIC":oracle.read_u32(song_table+148*8)},"frames":rows}) + "\n")
+                     "SE_M_TOXIC":oracle.read_u32(song_table+148*8),
+                     "SE_M_MEGA_KICK":oracle.read_u32(song_table+140*8),
+                     "SE_M_VITAL_THROW2":oracle.read_u32(song_table+123*8)},"frames":rows}) + "\n")
     print(f"wrote {OUTPUT} ({len(rows)} frames; {rows[0]['frame'] if rows else '-'}..{rows[-1]['frame'] if rows else '-'})")
 main()

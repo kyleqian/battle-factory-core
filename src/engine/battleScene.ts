@@ -581,6 +581,7 @@ import sludgeAsset from "../animation/assets/sludge.json" with { type: "json" };
 import sludgeBombAsset from "../animation/assets/sludgeBomb.json" with { type: "json" };
 import poisonFangAsset from "../animation/assets/poisonFang.json" with { type: "json" };
 import hyperFangAsset from "../animation/assets/hyperFang.json" with { type: "json" };
+import megaPunchAsset from "../animation/assets/megaPunch.json" with { type: "json" };
 import swaggerAsset from "../animation/assets/swagger.json" with { type: "json" };
 import tauntAsset from "../animation/assets/taunt.json" with { type: "json" };
 import scaryFaceAsset from "../animation/assets/scary-face.json" with { type: "json" };
@@ -730,6 +731,7 @@ import {
   sceneOnSludgeBombView,
   sceneOnPoisonFangView,
   sceneOnHyperFangView,
+  sceneOnMegaPunchView,
   sceneOnBiteView,
   sceneOnHeadbuttView,
   sceneOnWhirlwindView,
@@ -1320,6 +1322,10 @@ const hyperFangArt = hyperFangAsset as {
   };
   raticateBack: { tileset: Tileset; palette: RgbColor[] };
   raticateFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const megaPunchArt = megaPunchAsset as {
+  cacturneBack: { tileset: Tileset; palette: RgbColor[] };
+  cacturneFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const swaggerArt = swaggerAsset as {
   breath: { tileset: Tileset; palette: RgbColor[] };
@@ -20285,6 +20291,166 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "RATICATE used" : "Foe RATICATE used",
       "HYPER FANG!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "MEGA_PUNCH") {
+    const view = sceneOnMegaPunchView(state);
+    // gSprites and the OBJ affine matrix are copied to hardware after the
+    // callback display on the following VBlank.
+    const displayed = sceneOnMegaPunchView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "CACTURNE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "CACTURNE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged MEGA_PUNCH pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const black = { r: 0, g: 0, b: 0 };
+    const white = { r: 255, g: 255, b: 255 };
+    const darken = (palette: readonly RgbColor[]) => {
+      const blended = blendPaletteToward(
+        palette,
+        black,
+        view.background.blackCoefficient,
+      );
+      return blended.map((color) => {
+        const packed = mgbaDarkenColor(
+          color.r | (color.g << 8) | (color.b << 16),
+          view.background.restoreBldy,
+        );
+        return {
+          r: packed & 0xff,
+          g: (packed >>> 8) & 0xff,
+          b: (packed >>> 16) & 0xff,
+        };
+      });
+    };
+    if (view.background.impact) {
+      const palette = darken(hyperFangArt.impact.palette);
+      const base = palette[0]!;
+      fillFramebuffer(fb, base.r, base.g, base.b);
+      drawExtractedTileBg(fb, {
+        tileset: hyperFangArt.impact.tileset,
+        tilemap: view.background.variant === "player"
+          ? hyperFangArt.impact.playerTilemap
+          : hyperFangArt.impact.opponentTilemap,
+        subpalettes: [palette],
+      });
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: battleBg.palette.map(darken),
+      });
+    }
+
+    const cacturne = playerToOpponent
+      ? megaPunchArt.cacturneBack
+      : megaPunchArt.cacturneFront;
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetPalette = state.age === 72 || state.age === 73
+      ? blendPaletteToward(onix.palette, black, 8)
+      : displayed.targetWhiteCoefficient > 0
+        ? blendPaletteToward(onix.palette, white, displayed.targetWhiteCoefficient)
+        : onix.palette;
+    const attackerPalette = blendPaletteToward(
+      cacturne.palette,
+      black,
+      view.battlerBlackCoefficient,
+    );
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const targetOffset = state.age <= 71
+      ? targetIdle
+      : view.targetOnMonBg
+        ? sceneOnMegaPunchView({ ...state, age: state.age - 1 }).targetOffset
+        : { x2: 0, y2: 0 };
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      targetPalette,
+      view.target.geometry.spriteCorner.x + targetOffset.x2,
+      view.target.geometry.spriteCorner.y + targetOffset.y2,
+    );
+    drawSpriteSheet(
+      fb,
+      cacturne.tileset,
+      attackerPalette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (displayed.hitsplatVisible && view.alpha) {
+      drawSpriteSheetAffineStretchBlendedOverFb(
+        fb,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        view.target.geometry.animationCenter.x - 16,
+        view.target.geometry.animationCenter.y - 16,
+        256,
+        256,
+        view.alpha.eva,
+        view.alpha.evb,
+        true,
+        "live",
+      );
+    }
+    if (displayed.fist) {
+      drawSpriteSheetAffineRotate(
+        fb,
+        subTileset(battleAnimHandsAndFeet.tileset, 0, 4),
+        battleAnimHandsAndFeet.palette,
+        displayed.fist.x,
+        displayed.fist.y,
+        displayed.fist.matrix.pa,
+        displayed.fist.matrix.pb,
+        displayed.fist.matrix.pc,
+        displayed.fist.matrix.pd,
+      );
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "CACTURNE";
+    const playerSpecies = playerToOpponent ? "CACTURNE" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "CACTURNE used" : "Foe CACTURNE used",
+      "MEGA PUNCH!",
       99,
     );
     return;

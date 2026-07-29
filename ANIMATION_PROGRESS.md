@@ -1,5 +1,32 @@
 # Animation coverage
 
+## MOVE_MEGA_PUNCH promoted exact; MegaPunchKick track established (2026-07-29)
+
+**Verdict:** `MOVE_MEGA_PUNCH` is exact. Generated inventory and source audit
+prove challenge-1 set **254 `FRONTIER_MON_CACTURNE_1`** is the sole/lowest
+legal Level-50 carrier. Complete legal Scene-ON parties pass the entire
+160-frame source body through first inactive cleanup twice fresh in both
+orientations: player-back **76–235**, receipt/raw
+`9a324ee534928083d1f41dea0c2366ef2b47392c7869fb7aee81a7bf5641cd2f` /
+`7bab206057ef1ae1e99eb24bb9879a8052b73cfae92ccf90a51202cc851c5a36`;
+opponent-front **80–239**,
+`d8f787f50acb0d43013b904de76a0f22543a348e56cf36a403b715eb233b701f` /
+`c05a36ec1e051de5783282bda799cbde791ee4613b4405ab3874094b33f80a55`.
+
+**Model/evidence:** the source-relative reducer, typed seam, and production
+compositor port variant-0 `gMegaPunchKickSpriteTemplate`, HANDS_AND_FEET,
+IMPACT/hitsplat, target monbg/alpha, both palette-blend programs, side-specific
+impact background, ShakeMon2, audio, Cacturne/Onix/chrome, display latches,
+and cleanup. `megaPunchPortable.ts` proves **160/160** source/component,
+software/hardware OAM/matrix, palette/tag/register/audio/unchanged-state,
+raw-RGB, and every production framebuffer pixel twice fresh per orientation.
+
+**Sibling / next:** `MOVE_MEGA_KICK` remains unsupported: its distinct
+variant-1 art selection and `SE_M_MEGA_KICK2` require independent complete
+both-orientation dense acceptance. Coverage is **97 exact / 0 partial /
+0 staged / 179 unsupported**. No gameplay, boundary, barrier, or canonical
+allowlist ownership changed.
+
 ## MOVE_HYPNOSIS promoted exact; GOLD_RING repair complete (2026-07-29)
 
 **Verdict:** `MOVE_HYPNOSIS` is exact. The Level-50 eligibility graph rejects
@@ -59,33 +86,3 @@ status-animation variants, and cleanup need independent complete dense
 both-orientation acceptance. Coverage is **95 exact / 0 partial / 0 staged /
 181 unsupported**. No animation boundary, unsupported barrier, canonical
 recording allowlist, or gameplay ownership changed.
-
-## MOVE_SPORE promoted exact; ANIM_TAG_SPORE track bounded (2026-07-29)
-
-**Verdict:** `MOVE_SPORE` is exact. The lowest suitable legal Level-50
-carrier is challenge-2 set **282** `FRONTIER_MON_PARASECT_2` (species **47**,
-Spore **147**, Calm, HP+Defense+SpDefense, Leftovers). Complete legal
-three-mon Scene-ON parties pass the whole move-owned body through first
-inactive cleanup twice fresh in both orientations: player-back frames
-**366–572 (207/207)**, evidence/raw
-`5b275a53b8339e818fa56c158a04df729d1316fee0005ab11cc1ad1b9c446d40` /
-`9730e4ea34ffdaab25796ea069be7270eb36eb9ea05d13cb32c834cb8ea9d0a7`;
-opponent-front **370–576 (207/207)**,
-`7d723ded7813648cb6a29b9a5aaa651b1d677d9698f35f0aff9005f0410e687b` /
-`59a82fde62ce4c89b2a73f0053186df940bd51b39340339ef8fff92282f64e51`.
-
-**Model/evidence:** extraction pins Parasect front/back and both Spore cells.
-The relative reducer and typed seam port tag/mon-BG/alpha lifetimes, all nine
-staggered `gSporeParticleSpriteTemplate`/`AnimSporeParticle_Step` lifecycles,
-OBJ priorities and blending, looped audio, waits, blendoff, and cleanup.
-`sporePortable.ts` proves every dense source/component, seam, OAM/matrix,
-palette/tag/register/audio/unchanged-state/raw-RGB/production-framebuffer
-frame twice fresh; presentation owns no sleep, damage, RNG, turn, controller,
-or facility state.
-
-**Sibling / next:** `MOVE_COTTON_SPORE` remains unsupported. Its independent
-source audit pins shared art/callback but distinct `splitbgprio`, unblended
-particles, audio, and no-alpha/no-`SporeDoubleBattle` body; give it complete
-dense both-orientation acceptance before promotion. Coverage is **94 exact /
-0 partial / 0 staged / 182 unsupported**; no boundary, barrier, or canonical
-recording ratchet moved.

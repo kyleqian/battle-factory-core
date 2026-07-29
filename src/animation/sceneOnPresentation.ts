@@ -274,6 +274,10 @@ import {
   type HyperFangEffect,
 } from "./hyperFang.ts";
 import {
+  megaPunchAtAge,
+  type MegaPunchState,
+} from "./megaPunch.ts";
+import {
   swaggerAtAge,
   type SwaggerState,
 } from "./swagger.ts";
@@ -552,6 +556,7 @@ export interface SceneOnPresentationBattler {
     | "GRIMER"
     | "ZUBAT"
     | "RATICATE"
+    | "CACTURNE"
     | "RATTATA"
     | "SKIPLOOM"
     | "RELICANTH"
@@ -1146,6 +1151,13 @@ export interface SceneOnHyperFangConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnMegaPunchConfig {
+  readonly move: "MEGA_PUNCH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnBiteConfig {
   readonly move: "BITE";
   readonly attacker: SceneOnPresentationBattler;
@@ -1713,6 +1725,7 @@ export type SceneOnMoveConfig =
   | SceneOnSludgeBombConfig
   | SceneOnPoisonFangConfig
   | SceneOnHyperFangConfig
+  | SceneOnMegaPunchConfig
   | SceneOnBiteConfig
   | SceneOnHeadbuttConfig
   | SceneOnWhirlwindConfig
@@ -1901,6 +1914,12 @@ export interface SceneOnPoisonFangView {
 }
 
 export interface SceneOnHyperFangView extends HyperFangEffect {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnMegaPunchView extends MegaPunchState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3389,6 +3408,25 @@ export function sceneOnHyperFangView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...hyperFangEffectAtAge(
+      state.age,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first active `Move_MEGA_PUNCH` source display. */
+export function sceneOnMegaPunchView(
+  state: SceneOnMovePresentationState,
+): SceneOnMegaPunchView {
+  if (state.config.move !== "MEGA_PUNCH") {
+    throw new Error(`expected MEGA_PUNCH presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...megaPunchAtAge(
       state.age,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,

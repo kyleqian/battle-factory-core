@@ -4,6 +4,36 @@ Older dated sections moved out of `ANIMATION_PROGRESS.md` to keep that
 file lean (`AGENTS.md`'s ~3-most-recent convention). Git history has the
 full record regardless; this file is a read-only reference.
 
+## MOVE_SPORE promoted exact; ANIM_TAG_SPORE track bounded (2026-07-29)
+
+**Verdict:** `MOVE_SPORE` is exact. The lowest suitable legal Level-50
+carrier is challenge-2 set **282** `FRONTIER_MON_PARASECT_2` (species **47**,
+Spore **147**, Calm, HP+Defense+SpDefense, Leftovers). Complete legal
+three-mon Scene-ON parties pass the whole move-owned body through first
+inactive cleanup twice fresh in both orientations: player-back frames
+**366–572 (207/207)**, evidence/raw
+`5b275a53b8339e818fa56c158a04df729d1316fee0005ab11cc1ad1b9c446d40` /
+`9730e4ea34ffdaab25796ea069be7270eb36eb9ea05d13cb32c834cb8ea9d0a7`;
+opponent-front **370–576 (207/207)**,
+`7d723ded7813648cb6a29b9a5aaa651b1d677d9698f35f0aff9005f0410e687b` /
+`59a82fde62ce4c89b2a73f0053186df940bd51b39340339ef8fff92282f64e51`.
+
+**Model/evidence:** extraction pins Parasect front/back and both Spore cells.
+The relative reducer and typed seam port tag/mon-BG/alpha lifetimes, all nine
+staggered `gSporeParticleSpriteTemplate`/`AnimSporeParticle_Step` lifecycles,
+OBJ priorities and blending, looped audio, waits, blendoff, and cleanup.
+`sporePortable.ts` proves every dense source/component, seam, OAM/matrix,
+palette/tag/register/audio/unchanged-state/raw-RGB/production-framebuffer
+frame twice fresh; presentation owns no sleep, damage, RNG, turn, controller,
+or facility state.
+
+**Sibling / next:** `MOVE_COTTON_SPORE` remains unsupported. Its independent
+source audit pins shared art/callback but distinct `splitbgprio`, unblended
+particles, audio, and no-alpha/no-`SporeDoubleBattle` body; give it complete
+dense both-orientation acceptance before promotion. Coverage is **94 exact /
+0 partial / 0 staged / 182 unsupported**; no boundary, barrier, or canonical
+recording ratchet moved.
+
 ## MOVE_LIGHT_SCREEN promoted exact; SPARKLE_3 track bounded (2026-07-29)
 
 **Verdict:** `MOVE_LIGHT_SCREEN` is exact. The lowest suitable legal

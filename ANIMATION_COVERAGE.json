@@ -2,6 +2,33 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_MEGA_PUNCH",
+      "status": "exact",
+      "covered": [
+        "source and generated-inventory audits prove challenge-1 FRONTIER_MON_CACTURNE_1 set 254 is the sole and therefore lowest legal Level-50 carrier (species 345, Mega Punch 5, Hasty, HP+Speed, Scope Lens); complete legal three-Pokemon Scene-ON parties stage Cacturne against Onix in both orientations",
+        "fresh dense probes cover the complete 160-frame Move_MEGA_PUNCH body through first inactive cleanup twice reproducibly in both orientations: player-back frames 76-235 pass 160/160 source/component/software+hardware-OAM/matrix/palette/tag/register/audio/raw-RGB/production-framebuffer checks with receipt 9a324ee534928083d1f41dea0c2366ef2b47392c7869fb7aee81a7bf5641cd2f and raw RGB 7bab206057ef1ae1e99eb24bb9879a8052b73cfae92ccf90a51202cc851c5a36; opponent-front frames 80-239 pass 160/160 with receipt d8f787f50acb0d43013b904de76a0f22543a348e56cf36a403b715eb233b701f and raw RGB c05a36ec1e051de5783282bda799cbde791ee4613b4405ab3874094b33f80a55",
+        "the pure source-relative reducer and narrow typed Scene-ON seam port variant-0 gMegaPunchKickSpriteTemplate affine rotation/scale and pause, IMPACT hitsplat, target monbg and 12:8 alpha, initial field black blend, target white/black blends, target-side impact background, ShakeMon2, complex palette blend, both side-panned sounds, tag/task lifetimes, waits, restore, and cleanup",
+        "the production shared-framebuffer compositor uses reproducibly extracted Cacturne art plus shared HANDS_AND_FEET, IMPACT background/hitsplat, Onix, field chrome, healthboxes, and text; it preserves prior-software hardware transfer and palette/display latches without absolute battle ticks, captured frames, fitted pixels, or gameplay ownership",
+        "MOVE_MEGA_KICK remains unsupported: its distinct variant-1 gMegaPunchKickSpriteTemplate art selection and SE_M_MEGA_KICK2 script lack independent complete both-orientation dense acceptance; shared callback/art never promotes it",
+        "presentation owns no damage, RNG, move outcome, turn order, controller, facility state, or shared battle state; no animation-boundary list, unsupported barrier, or canonical-recording allowlist changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-mega-punch-player-cacturne-opponent-onix.json",
+        "tools/battle-lab/mechanic-mega-punch-opponent-cacturne-player-onix.json",
+        "tools/compare/fixtures/mega-punch-player-cacturne-opponent-onix.json",
+        "tools/compare/fixtures/mega-punch-opponent-cacturne-player-onix.json",
+        "tools/compare/megaPunchSourceAudit.ts",
+        "tools/compare/poisonFangProbe.py",
+        "tools/compare/megaPunchPortable.ts",
+        "tools/compare/extractMegaPunchAssets.ts",
+        "src/animation/assets/megaPunch.json",
+        "src/animation/megaPunch.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/megaPunch.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_HYPNOSIS",
       "status": "exact",
       "covered": [
@@ -2882,7 +2909,7 @@
         "MOVE_SOLAR_BEAM",
         "MOVE_FOCUS_PUNCH"
       ],
-      "goal": "MOVE_HYPER_FANG is the exact representative at 107/107 source-component and framebuffer frames in both orientations, reproduced twice. Its battle route honestly proves AnimTask_IsContest=false and both AnimTask_IsTargetPlayerSide outcomes through BG_IMPACT_OPPONENT/BG_IMPACT_PLAYER, complete fades, fang, shake, audio, restore, and teardown. Contest state was not fabricated. Mega Punch, Mega Kick, Solar Beam, Focus Punch, and all other users retain distinct move bodies and remain unsupported pending their own complete dense evidence."
+      "goal": "MOVE_HYPER_FANG remains exact at 107/107 source-component and framebuffer frames in both orientations, reproduced twice. MOVE_MEGA_PUNCH independently proves its complete target-side BG_IMPACT_OPPONENT/BG_IMPACT_PLAYER route, variant-0 MegaPunchKick fist, hitsplat, monbg/alpha, palette blends, ShakeMon2, audio, restore, and teardown at 160/160 source/component/hardware/raw-RGB/shared-framebuffer frames twice fresh in both orientations. Contest state was not fabricated. Mega Kick, Solar Beam, Focus Punch, and all other users retain distinct move bodies and remain unsupported pending their own complete dense evidence."
     },
     {
       "id": "music-notes",
@@ -2991,7 +3018,7 @@
         "MOVE_ERUPTION",
         "MOVE_LUSTER_PURGE"
       ],
-      "goal": "MOVE_EARTHQUAKE independently proves its complete dual literal (10,50) platform/all-battler HorizontalShake body and two delay-3/count-1 BG-only black14-to-white14 palette pulses in both orientations at 197/197 task/RAM/palette and framebuffer frames, reproduced twice. No sibling is promoted. HorizontalShake audit: FISSURE additionally needs three dirt-plume groups plus the fissure BG/position/restore pipeline and shakes only the target; SKY ATTACK needs both two-turn charge/strike bodies, attacker-only (2,16) shakes, bird/projectile/hitsplat components; MAGNITUDE uses move-power-derived intensity (literal zero), two sequential platform/all-battler shake pairs, and its own magnitude result choreography; ERUPTION uses distinct (8,60) shakes plus its eruption launch/rain/fire body; LUSTER PURGE uses target-only (5,14) shake plus psychic-background, luster-orb, sparkle, and palette bodies. Complex-palette Level-50 audit: the already-exact KNOCK OFF, BLAZE KICK, and AERIAL ACE retain independent acceptance; MEGA PUNCH and MEGA KICK still need their impact-background/fist/hitsplat bodies; GUILLOTINE its cutter/background body; TAKE DOWN and DOUBLE-EDGE their distinct contact/recoil choreography; FISSURE and MAGNITUDE retain the remainders above; CRABHAMMER needs slide/shake/eight bubble pairs; EXPLOSION its orb/explosion pipeline; SUPER FANG its fang sprite and BlendMonInAndOut; REVERSAL its power branch; FURY CUTTER its hit-count branch; MEGAHORN and CROSS CHOP their distinct strike sprites/tasks; MIST BALL its fog BG/projectile pipeline; SIGNAL BEAM its beam sprites and target palette cycle; IRON DEFENSE its complete defense-up visual body. Source also shows SKULL BASH uses the same BG-only black14-to-white14 pulse inside a distinct two-turn body, but the generated Level-50 component graph does not currently attribute that command edge. Every named unsupported move remains unsupported pending independent complete dense evidence."
+      "goal": "MOVE_EARTHQUAKE independently proves its complete dual literal (10,50) platform/all-battler HorizontalShake body and two delay-3/count-1 BG-only black14-to-white14 palette pulses in both orientations at 197/197 task/RAM/palette and framebuffer frames, reproduced twice. MOVE_MEGA_PUNCH independently proves its delay-3/count-1 BG+battler black8-to-normal complex blend inside a complete 160-frame exact both-orientation body. HorizontalShake audit: FISSURE additionally needs three dirt-plume groups plus the fissure BG/position/restore pipeline and shakes only the target; SKY ATTACK needs both two-turn charge/strike bodies, attacker-only (2,16) shakes, bird/projectile/hitsplat components; MAGNITUDE uses move-power-derived intensity (literal zero), two sequential platform/all-battler shake pairs, and its own magnitude result choreography; ERUPTION uses distinct (8,60) shakes plus its eruption launch/rain/fire body; LUSTER PURGE uses target-only (5,14) shake plus psychic-background, luster-orb, sparkle, and palette bodies. Complex-palette Level-50 audit: the already-exact KNOCK OFF, BLAZE KICK, AERIAL ACE, and MEGA PUNCH retain independent acceptance; MEGA KICK still needs its variant-1/audio body; GUILLOTINE its cutter/background body; TAKE DOWN and DOUBLE-EDGE their distinct contact/recoil choreography; FISSURE and MAGNITUDE retain the remainders above; CRABHAMMER needs slide/shake/eight bubble pairs; EXPLOSION its orb/explosion pipeline; SUPER FANG its fang sprite and BlendMonInAndOut; REVERSAL its power branch; FURY CUTTER its hit-count branch; MEGAHORN and CROSS CHOP their distinct strike sprites/tasks; MIST BALL its fog BG/projectile pipeline; SIGNAL BEAM its beam sprites and target palette cycle; IRON DEFENSE its complete defense-up visual body. Source also shows SKULL BASH uses the same BG-only black14-to-white14 pulse inside a distinct two-turn body, but the generated Level-50 component graph does not currently attribute that command edge. Every named unsupported move remains unsupported pending independent complete dense evidence."
     },
     {
       "id": "elemental-punch",
