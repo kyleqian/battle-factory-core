@@ -13,6 +13,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 668 — [BOUNDED MAIN WORKER 2026-07-28 ~23:31] corpus-to-kernel party adapter implemented
+
+- **State:** focused rung-5 suite green at **4 tests** and production build
+  green; full suite/census idempotence remain to run before handoff.
+- **Did:** added a pure generated-corpus adapter from set id + personality/
+  fixed IV/ability slot/OT id to a field-complete Level-50
+  `BattleScriptPartyMemberState` structural subtype: source nature check,
+  uniform IVs, split EVs, shared stat formulas, moves/base PP, experience,
+  item/hold effect, single/dual ability, friendship, gender and shiny. A
+  focused Tier-1 test constructs every Level-50 set **0–849** and exactly
+  reproduces all six OFF bootstrap RAM-dumped rental literals.
+- **Next:** run census no-op, executable ratchets, full `npm test`/build,
+  finalize this entry, and commit.
+- **Notes:** scout §2.2/§2.3/rung-5 citations proved. Battle-lab has no cheap
+  generic derived-party read-back command; using its permitted known-good
+  literal fallback (the OFF bootstrap RAM dump). No battle-start/controller,
+  side-owned, issue, census-generator, or ratchet file changed. PAPERCUT: none.
+
+---
+
 ## 667 — [BOUNDED MAIN WORKER 2026-07-28 ~23:14] Run Away/Pickup close the ability-item parity worklist
 
 - **State:** tree green at **452 files / 4887 tests**, production build,
@@ -90,41 +110,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   with a reachability test. No presentation, trainer-switch AI, Baton Pass,
   issue, probe/scout, oracle fixture, or canonical trace changed. Identity
   constants were used for all three new ability comparisons. PAPERCUT: none.
-
----
-
-## 665 — [BOUNDED MAIN WORKER 2026-07-28 ~22:35] ON_DAMAGE contact-ability family implemented
-
-- **State:** tree green at **452 files / 4877 tests**, production build, and
-  `git diff --check`. Census regenerated twice byte-identically: abilities exactly
-  **64/70 (weighted 1056/1103)**, hold effects **42/42 (850/850)**,
-  `ABILITYEFFECT_ON_DAMAGE` **8/8**; all 15 validations pass.
-- **Did:** exposed source contact bit 0 through the shared move-flags resolver;
-  confirmed the existing real-HP-only `datahpupdate` trackers already make
-  Substitute suppress the family; implemented Color Change, Rough Skin,
-  Effect Spore, Poison Point, Static, Flame Body, and Cute Charm in moveend
-  state 3 with exact gates, RNG, mutations, and callback transfers. Registered
-  `seteffectsecondary`; factored the pre-existing gender calculation into one
-  shared source helper. The state-3 barrier retired **7→6** for the module.
-- **Supervisor fold (same round, `230d776f`):** the paired side-lane worker
-  landed scout §A3's census-generator fix (`eef441e4`) — the blanket
-  string-literal exclusion now has a narrow comparison-adjacency recovery
-  pass, 20 recovered sites exact-pinned (validations 15→16), and refreshed
-  `verify-turn-boundary-rng-gap.py` to assert the FIXED state (PASS). Union
-  census regenerated at the compound prediction exactly: **abilities 65/70
-  (weighted 1060/1103)** (+COMPOUND_EYES via the generator fix), hold
-  effects 42/42 (850/850). Remaining unreferenced rows: trapping trio
-  (ARENA_TRAP 6, MAGNET_PULL 4, SHADOW_TAG 3) + RUN_AWAY 23 + PICKUP 7.
-- **Next:** voluntary switch turn action + trapping-trio legality gate
-  (main, in flight); Quick Claw oracle corroboration + stale
-  `verify-on-damage-static.py` guard refresh (side, in flight); then
-  Run Away/Pickup documented no-op closures and the whole-battle turn-1
-  `gRandomTurnNumber` writes.
-- **Notes:** full-script tests run every callback shape through its `return`
-  and `BattleScript_MoveEnd`'s own `END`; Pound→Static pins the proc as draw 5
-  after accuracy/crit/damage/effect chance, with success and failure both +1.
-  Effect Spore pins zero-retry and sleep-duration draws; status routing pins
-  affects-user, Shield Dust/Safeguard bypass, and ordinary eligibility. No
-  census generator, scout/probe/battle-lab fixture, issue, or oracle asset
-  changed. Commits: prerequisite `030441c0`, implementation `193fd961`,
-  final integration/census fix follows this entry. PAPERCUT: none.
