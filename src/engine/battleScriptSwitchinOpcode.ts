@@ -44,6 +44,7 @@ import {
   type BattleScriptStatStages,
 } from "./battleScriptRulesContext.ts";
 import { BATTLE_SCRIPT_STATUS2_WRAPPED_MASK } from "./battleScriptSourceConstants.ts";
+import { computeCastformForm } from "./battleScriptTryCastformDataChangeOpcode.ts";
 import speciesTypesData from "../data/gen/species-types.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
 
@@ -855,7 +856,14 @@ function createSwitchineffectsOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
       || nextActive.ability === ABILITY_CLOUD_NINE
       || nextActive.ability === ABILITY_AIR_LOCK
     ) {
-      return callSwitchinScript(context, "BattleScript_WeatherFormChanges", abilityRules);
+      const wouldChange = nextActive.ability === ABILITY_FORECAST
+        ? computeCastformForm(nextRules, nextActive) !== 0
+        : nextRules.battlers
+          .slice(0, nextRules.battleTopology.battlersCount)
+          .some((candidate) => computeCastformForm(nextRules, candidate) !== 0);
+      if (wouldChange) {
+        return callSwitchinScript(context, "BattleScript_WeatherFormChanges", abilityRules);
+      }
     }
     const sideStatuses = [...nextRules.sideStatuses] as [number, number];
     sideStatuses[side] = (sideStatuses[side] & ~SIDE_STATUS_SPIKES_DAMAGED) >>> 0;

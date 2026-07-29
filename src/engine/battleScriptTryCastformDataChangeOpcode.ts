@@ -95,7 +95,7 @@ function weatherIsNullified(rules: BattleScriptRulesContext): boolean {
 }
 
 /** Pure port of CastformDataTypeChange (battle_util.c:2396-2429) -- no mutation, see module doc comment. */
-function computeCastformForm(rules: BattleScriptRulesContext, battler: BattleScriptRulesBattlerState): number {
+export function computeCastformForm(rules: BattleScriptRulesContext, battler: BattleScriptRulesBattlerState): number {
   if (battler.species !== SPECIES_CASTFORM || battler.ability !== ABILITY_FORECAST || battler.hp === 0) {
     return 0; // :2399-2400
   }
