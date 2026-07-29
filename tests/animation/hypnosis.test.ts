@@ -4,6 +4,10 @@ import {
   HYPNOSIS_PLAYER_FRAME_COUNT,
   hypnosisAtAge,
 } from "../../src/animation/hypnosis.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnHypnosisView,
+} from "../../src/animation/sceneOnPresentation.ts";
 
 const player = { x: 72, y: 97 };
 const opponent = { x: 176, y: 42 };
@@ -39,9 +43,50 @@ describe("MOVE_HYPNOSIS source-relative reducer", () => {
       .toBe("SE_M_SUPERSONIC");
     expect(hypnosisAtAge(66, "player", player, opponent).targetBlendTaskActive)
       .toBe(true);
+    expect(hypnosisAtAge(66, "player", player, opponent).targetBlendCoefficient)
+      .toBe(0);
+    expect(hypnosisAtAge(68, "player", player, opponent).targetBlendCoefficient)
+      .toBe(1);
     expect(hypnosisAtAge(125, "player", player, opponent).targetBlendTaskActive)
       .toBe(false);
     expect(hypnosisAtAge(168, "player", player, opponent).active).toBe(false);
     expect(hypnosisAtAge(167, "opponent", opponent, player).active).toBe(false);
+  });
+
+  it("exposes Hypnosis through the typed Scene-ON presentation seam", () => {
+    const state = createSceneOnMovePresentation({
+      move: "HYPNOSIS",
+      attacker: {
+        species: "POLITOED",
+        geometry: {
+          side: "player",
+          spriteCorner: { x: 40, y: 65 },
+          animationCenter: player,
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "ONIX",
+        geometry: {
+          side: "opponent",
+          spriteCorner: { x: 144, y: 10 },
+          animationCenter: opponent,
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      fieldProfile: {
+        playerHp: 165,
+        playerMaxHp: 165,
+        opponentHp: 142,
+        opponentMaxHp: 142,
+      },
+    });
+    expect(sceneOnHypnosisView({ ...state, age: 42 })).toMatchObject({
+      age: 42,
+      active: true,
+      attacker: { species: "POLITOED" },
+      target: { species: "ONIX" },
+      rings: [{ x: 72, y: 105 }, { x: 88, y: 89 }],
+    });
   });
 });

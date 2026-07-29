@@ -7,6 +7,10 @@ import {
   psychicBgPaletteRowAtAge,
   psychicBgRotationCountAtAge,
 } from "./psychicBackground.ts";
+import {
+  blendColorCycleObjYAtAge,
+  type BlendColorCycleTiming,
+} from "./blendColorCycle.ts";
 import type { RgbColor } from "../engine/bg.ts";
 
 export type HypnosisSide = "player" | "opponent";
@@ -33,6 +37,7 @@ export interface HypnosisState {
   readonly bgIsPsychic: boolean;
   readonly rings: readonly HypnosisRing[];
   readonly targetBlendTaskActive: boolean;
+  readonly targetBlendCoefficient: number;
   readonly sound: "SE_M_SUPERSONIC" | null;
   readonly soundPanSide: HypnosisSide | null;
 }
@@ -43,6 +48,20 @@ export const HYPNOSIS_RING_FIRST_AGE = 42;
 export const HYPNOSIS_RING_DURATION = 27;
 const RING_PAIR_PERIOD = 8;
 const FADE_2_START_AGE = 129;
+const TARGET_BLEND_START_AGE = 66;
+
+export const HYPNOSIS_TARGET_BLEND_COLOR: Readonly<RgbColor> =
+  Object.freeze({ r: 255, g: 148, b: 255 });
+export const HYPNOSIS_TARGET_BLEND_TIMING: Readonly<BlendColorCycleTiming> =
+  Object.freeze({
+    legs: Object.freeze([
+      Object.freeze({ startY: 0, targetY: 12 }),
+      Object.freeze({ startY: 12, targetY: 0 }),
+    ]),
+    // `blend_color_cycle` delay=2 advances the selected OBJ coefficient by
+    // one at each source palette-fade step.
+    deltaY: 1,
+  });
 
 function ringAtAge(
   age: number,
@@ -135,7 +154,11 @@ export function hypnosisAtAge(
       (_, index) =>
         ringAtAge(age, index, attackerSide, attackerCenter, targetCenter),
     ).filter((ring): ring is HypnosisRing => ring !== null),
-    targetBlendTaskActive: age >= 66 && age < 125,
+    targetBlendTaskActive: age >= TARGET_BLEND_START_AGE && age < 125,
+    targetBlendCoefficient: blendColorCycleObjYAtAge(
+      age - TARGET_BLEND_START_AGE,
+      HYPNOSIS_TARGET_BLEND_TIMING,
+    ),
     sound,
     soundPanSide: sound ? attackerSide : null,
   };

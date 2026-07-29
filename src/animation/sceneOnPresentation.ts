@@ -502,6 +502,10 @@ import {
   sporeAtAge,
   type SporeState,
 } from "./spore.ts";
+import {
+  hypnosisAtAge,
+  type HypnosisState,
+} from "./hypnosis.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -557,6 +561,7 @@ export interface SceneOnPresentationBattler {
     | "VOLBEAT"
     | "ILLUMISE"
     | "MASQUERAIN"
+    | "POLITOED"
     | "EXEGGCUTE"
     | "GLOOM"
     | "TOGETIC"
@@ -1469,6 +1474,13 @@ export interface SceneOnSporeConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnHypnosisConfig {
+  readonly move: "HYPNOSIS";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnPerishSongFieldProfile
   extends SceneOnDragonRageFieldProfile {
   /** Immutable battle-engine result; presentation never advances these. */
@@ -1732,6 +1744,7 @@ export type SceneOnMoveConfig =
   | SceneOnHowlConfig
   | SceneOnSweetKissConfig
   | SceneOnSporeConfig
+  | SceneOnHypnosisConfig
   | SceneOnPerishSongConfig
   | SceneOnNeedleArmConfig
   | SceneOnSandstormConfig
@@ -1820,6 +1833,8 @@ export type SceneOnSweetKissPresentationState =
   SceneOnMovePresentationState<SceneOnSweetKissConfig>;
 export type SceneOnSporePresentationState =
   SceneOnMovePresentationState<SceneOnSporeConfig>;
+export type SceneOnHypnosisPresentationState =
+  SceneOnMovePresentationState<SceneOnHypnosisConfig>;
 export type SceneOnBlockPresentationState =
   SceneOnMovePresentationState<SceneOnBlockConfig>;
 export type SceneOnPerishSongPresentationState =
@@ -4075,6 +4090,32 @@ export function sceneOnSporeView(
     ...sporeAtAge(
       state.age,
       state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+export interface SceneOnHypnosisView extends HypnosisState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age=0` is Move_HYPNOSIS's first active source-script frame. */
+export function sceneOnHypnosisView(
+  state: SceneOnHypnosisPresentationState,
+): SceneOnHypnosisView {
+  if (state.config.move !== "HYPNOSIS") {
+    throw new Error(`expected HYPNOSIS presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...hypnosisAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
       state.config.target.geometry.animationCenter,
     ),
   };
