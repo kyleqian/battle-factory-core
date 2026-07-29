@@ -2,6 +2,36 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_WISH",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal challenge-0 Level-50 set-173 ILLUMISE_1 versus ONIX Scene-ON parties pass the entire 271-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 65-335 reproduce evidence 9bd713db92f51208dba4faea9916549981545a864fd50bb7761b13ae00e7077b / raw RGB 2f82ec073d7f7e52b5a513733b991ef792b374d72c9b40c535f1e42438b86488 and opponent-front frames 69-339 reproduce evidence 8c223ec57b228721dd6df2137b8597388b44d4749cd501d898ec4c4da9be2669 / raw RGB f858c38f13030f4d3a173776ee2a1319835f2089b61f8b7ac6484f12a859315d",
+        "the source audit proves set 173 FRONTIER_MON_ILLUMISE_1 is the lowest suitable challenge-0 Level-50 carrier and pins species 387, move 273, Quirky nature, Attack/HP spread, Liechi Berry, and complete legal source-set parties",
+        "the pure source-relative reducer ports ANIM_TAG_GOLD_STARS and ANIM_TAG_SPARKLE_2 lifetime, both simple BG palette blends, gWishStarSpriteTemplate's cross-screen parabolic travel, exactly 21 gMiniTwinklingStarSpriteTemplate presentation-Random2 variants and blink programs, the literal 60-frame hold, and both GrantingStarsEffect fixed-point/frame-animation bodies",
+        "the typed Scene-ON seam carries only resolved ILLUMISE/ONIX geometry, field state, and the 21 presentation-only Random2 results without consuming or mutating gameplay RNG; source-extracted Illumise front/back, GOLD_STARS, SPARKLE_2, and shared ONIX/chrome pass software/hardware OAM, matrices, palettes/tags, registers, both audio players, raw RGB, and every production framebuffer",
+        "wishPortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves all 271 immutable dense source/hardware/audio/reducer/seam/framebuffer frames twice fresh in both orientations through first inactive cleanup; the shared Synthesis GrantingStarsEffect control remains 130/130 exact in both orientations",
+        "MOVE_METEOR_MASH remains unsupported: source audit proves its distinct BG_COSMIC fade/restore, three target-relative gMeteorMashStarSpriteTemplate bodies, spinning fist, IMPACT hit, target ShakeMon2, audio, and timing; it lacks independent complete legal both-orientation twice-fresh dense acceptance",
+        "no Wish battle state, delayed healing outcome/timing, damage, gameplay RNG, controller selection, turn order, round/facility state, animation boundary list, or unsupported barrier changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-wish-player-illumise-opponent-onix.json",
+        "tools/battle-lab/mechanic-wish-opponent-illumise-player-onix.json",
+        "tools/compare/fixtures/wish-player-illumise-opponent-onix.json",
+        "tools/compare/fixtures/wish-opponent-illumise-player-onix.json",
+        "tools/compare/wishProbe.py",
+        "tools/compare/wishPortable.ts",
+        "tools/compare/wishSourceAudit.ts",
+        "tools/compare/extractWishAssets.ts",
+        "src/animation/assets/wish.json",
+        "src/animation/wish.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/wishEvidence.test.ts",
+        "tests/animation/wishAssets.test.ts",
+        "tests/animation/wish.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_SANDSTORM",
       "status": "exact",
       "covered": [

@@ -1,5 +1,34 @@
 # Animation coverage
 
+## MOVE_WISH promoted exact; GOLD_STARS track bounded (2026-07-28)
+
+**Verdict:** `MOVE_WISH` is exact. Lowest suitable challenge-0 Level-50
+carrier set **173** `FRONTIER_MON_ILLUMISE_1` (species **387**, Wish **273**,
+Quirky, Attack+HP, Liechi Berry) drives complete legal three-mon parties
+against ONIX. Both Scene-ON orientations pass the complete source body through
+first inactive cleanup at **271/271** frames, twice fresh. Player-back frames
+**65–335** have evidence/raw digests
+`9bd713db92f51208dba4faea9916549981545a864fd50bb7761b13ae00e7077b` /
+`2f82ec073d7f7e52b5a513733b991ef792b374d72c9b40c535f1e42438b86488`;
+opponent-front frames **69–339** have
+`8c223ec57b228721dd6df2137b8597388b44d4749cd501d898ec4c4da9be2669` /
+`f858c38f13030f4d3a173776ee2a1319835f2089b61f8b7ac6484f12a859315d`.
+
+**Model/boundary:** the pure relative reducer, typed seam, and narrow
+compositor port both black BG palette ramps, the cross-screen GOLD_STARS Wish
+star, all **21** presentation-`Random2` mini-star variants/blinks, the
+60-frame hold, both SPARKLE_2 GrantingStarsEffect translations, pan-adjusted
+Reflect and looped Heal Bell audio tasks, OAM/display order, tagged assets,
+and cleanup using byte-identical source-extracted Illumise/GOLD_STARS/
+SPARKLE_2 art. The already-exact Synthesis granting-star control remains
+**130/130** in both orientations. `MOVE_METEOR_MASH` remains **unsupported**:
+it adds `BG_COSMIC`, three target-relative spinning stars, a spinning fist,
+IMPACT, target `ShakeMon2`, background restoration, and distinct audio/timing,
+without independent complete legal both-orientation twice-fresh acceptance.
+Coverage is **83 exact / 0 partial / 0 staged / 193 unsupported**; Wish battle
+state/healing timing and outcome, damage, gameplay RNG, controller/turn/
+facility state, boundary list, and unsupported barrier are unchanged.
+
 ## MOVE_SANDSTORM promoted exact; FLYING_DIRT track bounded (2026-07-28)
 
 **Verdict:** `MOVE_SANDSTORM` is exact. Lowest challenge-0 legal Level-50
