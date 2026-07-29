@@ -11,6 +11,10 @@ import {
   type FactoryAiScoredView,
 } from "../src/engine/factoryAiDecisionPolicy.ts";
 import {
+  createFactoryAiBattleHistory,
+  syncFactoryAiBattleHistory,
+} from "../src/engine/factoryAiLiveDriver.ts";
+import {
   BATTLE_SCRIPT_STATUS2_MASKS,
   BATTLE_SCRIPT_STATUS3_MINIMIZED,
 } from "../src/engine/battleScriptSourceConstants.ts";
@@ -45,6 +49,7 @@ const ABILITY_CLOUD_NINE = 13;
 const ABILITY_INTIMIDATE = 22;
 const ABILITY_SHADOW_TAG = 23;
 const ABILITY_LEVITATE = 26;
+const ABILITY_OVERGROW = 65;
 const ABILITY_SWIFT_SWIM = 33;
 const ABILITY_CHLOROPHYLL = 34;
 const ABILITY_MAGNET_PULL = 42;
@@ -126,6 +131,37 @@ function config(overrides: Partial<FactoryFullTurnConfig> = {}): FactoryFullTurn
 
 const PLAYER_ATTACKS = Object.freeze({ kind: "use-move" as const, moveSlot: 0 as const, targetBattler: 1 as const });
 const TRAINER_ATTACKS = Object.freeze({ kind: "use-move" as const, moveSlot: 0 as const, targetBattler: 0 as const });
+
+function stageSwitchHistory(
+  state: ReturnType<typeof createFactoryFullTurnBattleState>,
+  battler: 0 | 1,
+  ability: number,
+  move: number,
+): ReturnType<typeof createFactoryFullTurnBattleState> {
+  const rulesContext = state.rules.rulesContext;
+  return Object.freeze({
+    ...state,
+    rules: Object.freeze({
+      ...state.rules,
+      rulesContext: Object.freeze({
+        ...rulesContext,
+        aiObservedAbilityIds: Object.freeze(
+          rulesContext.aiObservedAbilityIds.map((value, index) =>
+            index === battler ? ability : value
+          ),
+        ),
+        moveHistory: Object.freeze({
+          ...rulesContext.moveHistory,
+          lastMoves: Object.freeze(
+            rulesContext.moveHistory.lastMoves.map((value, index) =>
+              index === battler ? move : value
+            ),
+          ),
+        }),
+      }),
+    }),
+  }) as ReturnType<typeof createFactoryFullTurnBattleState>;
+}
 
 describe("factory full-turn decision -- multi-hit controller resumption", () => {
   function runMultiHitTurn(moveId: number, rngSeed: number) {
@@ -557,6 +593,59 @@ describe("factory full-turn decision -- voluntary-switch action", () => {
     expect(result.state.rng.calls).toBe(5);
   });
 
+  it("player voluntary switch clears the outgoing mon's revealed ability and used moves before the next AI sync", () => {
+    const initial = stageSwitchHistory(
+      createFactoryFullTurnBattleState(config({
+        player: {
+          species: 1, moveId: STRENGTH, lastMove: STRENGTH,
+          attack: 80, defense: 200, spAttack: 80, spDefense: 200,
+          speed: 200, hp: 300,
+        },
+        trainer: {
+          species: 43, moveId: STRENGTH,
+          attack: 20, defense: 200, spAttack: 20, spDefense: 200,
+          speed: 1, hp: 300,
+        },
+        playerBenchHp: [200, 0],
+        playerBenchOverride: [{
+          species: 95, abilityNum: 0, moves: [EARTHQUAKE, 0, 0, 0],
+          maxHP: 200, attack: 100, defense: 200, speed: 50,
+          spAttack: 40, spDefense: 100,
+        }, undefined],
+      })),
+      0,
+      ABILITY_OVERGROW,
+      STRENGTH,
+    );
+    let history = syncFactoryAiBattleHistory(
+      createFactoryAiBattleHistory(initial.rules.rulesContext),
+      initial.rules.rulesContext,
+    );
+    expect(history.knownAbilities[0]).toBe("ABILITY_OVERGROW");
+    expect(history.usedMoves[0]).toEqual([STRENGTH]);
+
+    const afterPlayer = submitFactoryFullTurnDecision(initial, {
+      requestId: 1,
+      side: "player",
+      decision: { kind: "switch", partyIndex: 1 },
+    });
+    if (afterPlayer.kind !== "decision-required") throw new Error("expected trainer command");
+    const result = submitFactoryFullTurnDecision(afterPlayer.state, {
+      requestId: 2,
+      side: "trainer",
+      decision: TRAINER_ATTACKS,
+    });
+    if (result.kind !== "decision-required") throw new Error("expected next player command");
+
+    const rules = result.state.rules.rulesContext;
+    expect(rules.battlers[0]).toMatchObject({ species: 95, partyIndex: 1 });
+    expect(rules.aiObservedAbilityIds[0]).toBe(0);
+    expect(rules.moveHistory.lastMoves[0]).toBe(0);
+    history = syncFactoryAiBattleHistory(history, rules);
+    expect(history.knownAbilities[0]).toBeNull();
+    expect(history.usedMoves[0]).toEqual([]);
+  });
+
   it("reaches the named Pursuit-interception unsupported-branch instead of mis-ordering an ordinary hit", () => {
     const initial = createFactoryFullTurnBattleState(switchTurnConfig(228));
     const afterPlayer = submitFactoryFullTurnDecision(initial, {
@@ -626,6 +715,39 @@ describe("factory full-turn decision -- voluntary-switch action", () => {
     // The player hit chain owns four draws and BattleTurnPassed owns one.
     // The already-selected trainer switch and the bypassed speed tie own zero.
     expect(result.state.rng.calls).toBe(5);
+  });
+
+  it("trainer voluntary switch clears only the trainer battler's revealed ability and last move", () => {
+    const initial = stageSwitchHistory(
+      stageSwitchHistory(
+        createFactoryFullTurnBattleState(trainerSwitchTurnConfig()),
+        0,
+        ABILITY_OVERGROW,
+        EARTHQUAKE,
+      ),
+      1,
+      ABILITY_INTIMIDATE,
+      STRENGTH,
+    );
+    const afterPlayer = submitFactoryFullTurnDecision(initial, {
+      requestId: 1,
+      side: "player",
+      decision: PLAYER_ATTACKS,
+    });
+    if (afterPlayer.kind !== "decision-required") throw new Error("expected trainer command");
+    const result = submitFactoryFullTurnDecision(afterPlayer.state, {
+      requestId: 2,
+      side: "trainer",
+      decision: { kind: "switch", partyIndex: 1 },
+    });
+    if (result.kind !== "decision-required") throw new Error("expected next player command");
+    const rules = result.state.rules.rulesContext;
+    expect(rules.battlers[1]).toMatchObject({ species: 66, partyIndex: 1 });
+    expect(rules.aiObservedAbilityIds).toEqual([ABILITY_OVERGROW, 0, 0, 0]);
+    expect(rules.moveHistory.lastMoves[1]).toBe(0);
+    // The player's selected attack ran after the switch; its own durable
+    // history is not part of the trainer battler's source clear.
+    expect(rules.moveHistory.lastMoves[0]).toBe(STRENGTH);
   });
 
   it("symmetrically barriers when a player's selected Pursuit intercepts the trainer switch", () => {
@@ -1729,7 +1851,18 @@ describe(
         + "(species/hp/partyIndex/neutral stat stages/clean status) and resumes straight into "
         + "runBattleEndTurnOrchestration -> a genuine next command boundary, zero further Random() calls",
       () => {
-        const initial = createFactoryFullTurnBattleState(playerForcedSwitchConfig());
+        const initial = stageSwitchHistory(
+          createFactoryFullTurnBattleState(playerForcedSwitchConfig()),
+          0,
+          ABILITY_OVERGROW,
+          STRENGTH,
+        );
+        let history = syncFactoryAiBattleHistory(
+          createFactoryAiBattleHistory(initial.rules.rulesContext),
+          initial.rules.rulesContext,
+        );
+        expect(history.knownAbilities[0]).toBe("ABILITY_OVERGROW");
+        expect(history.usedMoves[0]).toEqual([STRENGTH]);
         const afterPlayer = submitFactoryFullTurnDecision(initial, {
           requestId: 1, side: "player", decision: PLAYER_ATTACKS,
         });
@@ -1776,6 +1909,13 @@ describe(
         expect(switchedIn.status2).toBe(0);
         expect(switchedIn.status3).toBe(0);
         expect(switchedIn.statStages).toEqual([6, 6, 6, 6, 6, 6, 6, 6]); // SwitchInClearSetData's neutral reset
+
+        const liveRulesContext = result.state.rules.rulesContext;
+        expect(liveRulesContext.aiObservedAbilityIds[0]).toBe(0);
+        expect(liveRulesContext.moveHistory.lastMoves[0]).toBe(0);
+        history = syncFactoryAiBattleHistory(history, liveRulesContext);
+        expect(history.knownAbilities[0]).toBeNull();
+        expect(history.usedMoves[0]).toEqual([]);
 
         // PP proof the killing blow (mover1, the trainer) actually dispatched, but the player's own
         // second action never did: the trainer's Strength shows its one real use.

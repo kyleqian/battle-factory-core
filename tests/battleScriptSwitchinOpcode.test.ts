@@ -329,6 +329,64 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(updated.tauntTimer).toBe(0);
   });
 
+  it("switchindataupdate literally clears only the incoming battler's move/result and AI move/ability history", () => {
+    const lastTakenMove = Array.from({ length: 16 }, (_, index) => 101 + index);
+    const lastTakenMoveFrom = Array.from({ length: 32 }, (_, index) => index + 1);
+    const rc = context({
+      battlers: [
+        battler({ side: 0, species: URSARING }),
+        battler({ side: 1, species: SUNKERN, partyIndex: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      currentMove: TACKLE,
+      moveResultFlags: 0xff,
+      choicedMove: [70, 71, 72, 73],
+      aiObservedAbilityIds: [ABILITY_INTIMIDATE, ABILITY_GUTS, ABILITY_TRACE, ABILITY_DRIZZLE],
+      aiObservedItemEffects: [10, 20, 30, 40],
+      moveHistory: {
+        lastMoves: [70, 71, 72, 73],
+        lastLandedMoves: [80, 81, 82, 83],
+        lastHitByType: [90, 91, 92, 93],
+        lastResultingMoves: [100, 101, 102, 103],
+        lastPrintedMoves: [110, 111, 112, 113],
+        lastHitBy: [0, 1, 2, 3],
+        lastTakenMove,
+        lastTakenMoveFrom,
+      },
+    });
+    const { result } = stepAtProgramCounter(SWITCHINDATAUPDATE_PC, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    const rules = result.state.rulesContext;
+
+    expect(rules.currentMove).toBe(0);
+    expect(rules.moveResultFlags).toBe(0);
+    expect(rules.choicedMove).toEqual([70, 0, 72, 73]);
+    expect(rules.aiObservedAbilityIds).toEqual([ABILITY_INTIMIDATE, 0, ABILITY_TRACE, ABILITY_DRIZZLE]);
+    // SwitchInClearSetData does not call ClearBattlerItemEffectHistory.
+    expect(rules.aiObservedItemEffects).toEqual([10, 20, 30, 40]);
+    expect(rules.moveHistory).toMatchObject({
+      lastMoves: [70, 0, 72, 73],
+      lastLandedMoves: [80, 0, 82, 83],
+      lastHitByType: [90, 0, 92, 93],
+      lastResultingMoves: [100, 0, 102, 103],
+      lastPrintedMoves: [110, 0, 112, 113],
+      lastHitBy: [0, 0xff, 2, 3],
+      // Active battler 1 and its opposing battler 0 are the only
+      // lastTakenMove rows the source clears in this singles fixture.
+      lastTakenMove: [
+        0, 0, 0, 0, 105, 106, 107, 108,
+        109, 110, 111, 112, 113, 114, 115, 116,
+      ],
+    });
+    expect(rules.moveHistory.lastTakenMoveFrom).toEqual([
+      1, 2, 0, 0, 5, 6, 7, 8,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      17, 18, 19, 20, 21, 22, 23, 24,
+      25, 26, 27, 28, 29, 30, 31, 32,
+    ]);
+  });
+
   it("Hidden Power and maxHP-reading effects consume the incoming member's reconstructed values", () => {
     const switched = stepAtProgramCounter(
       SWITCHINDATAUPDATE_PC,

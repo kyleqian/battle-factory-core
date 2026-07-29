@@ -14,7 +14,9 @@
  * level, friendship, max HP, and every battle stat replace the outgoing
  * values. Types resolve from the species table; stat stages/status2/status3/the modeled
  * DisableStruct-shaped fields reset to `SwitchInClearSetData`'s neutral
- * values (`battle_main.c:3152-3258`). Party moves/PP and held item are now
+ * values (`battle_main.c:3152-3262`). The same source routine clears the
+ * incoming battler's last-move/result fields and Battle History move/ability
+ * records while preserving item-effect history. Party moves/PP and held item are now
  * rebuilt too; the item is forced to NONE when the side/party-slot bit in
  * `knockedOffMons` is set.
  */
@@ -364,6 +366,9 @@ function createGetswitchedmondataOpcodeHandler(
  * and refreshes an opposing lock owned by the departing battler.
  * The party item is restored unless this party slot's durable Knock Off bit
  * suppresses it; moves/PP are rebuilt from the same controller payload.
+ * The source's final reset clears only this battler's AI move/ability history
+ * (not item-effect history or any opposing battler's history), along with its
+ * last-move/result cells and the cross-indexed last-taken-move buffers.
  */
 function createSwitchindataupdateOpcodeHandler(
   isControllerIdle: BattleScriptControllerIdlePort<BattleScriptRulesContext>,
@@ -518,10 +523,75 @@ function createSwitchindataupdateOpcodeHandler(
           });
     }) as unknown as BattleScriptRulesBattlers;
 
+    let {
+      lastMoves, lastLandedMoves, lastHitByType, lastResultingMoves,
+      lastPrintedMoves, lastHitBy, lastTakenMove, lastTakenMoveFrom,
+    } = rules.moveHistory;
+    const replaceBattlerValue = <T>(
+      values: readonly T[],
+      value: T,
+    ): readonly T[] => Object.freeze(
+      values.map((candidate, index) => index === battler ? value : candidate),
+    );
+    lastMoves = replaceBattlerValue(lastMoves, 0) as typeof lastMoves;
+    lastLandedMoves = replaceBattlerValue(lastLandedMoves, 0) as typeof lastLandedMoves;
+    lastHitByType = replaceBattlerValue(lastHitByType, 0) as typeof lastHitByType;
+    lastResultingMoves = replaceBattlerValue(lastResultingMoves, 0) as typeof lastResultingMoves;
+    lastPrintedMoves = replaceBattlerValue(lastPrintedMoves, 0) as typeof lastPrintedMoves;
+    lastHitBy = replaceBattlerValue(lastHitBy, 0xff) as typeof lastHitBy;
+
+    const nextLastTakenMove = [...lastTakenMove];
+    nextLastTakenMove[battler * 2] = 0;
+    nextLastTakenMove[battler * 2 + 1] = 0;
+    for (let i = 0; i < battlersCount; i += 1) {
+      if (i !== battler && rules.battlers[i as BattleScriptBattlerId].side !== active.side) {
+        nextLastTakenMove[i * 2] = 0;
+        nextLastTakenMove[i * 2 + 1] = 0;
+      }
+    }
+
+    const nextLastTakenMoveFrom = [...lastTakenMoveFrom];
+    for (let sourceBattler = 0; sourceBattler < 4; sourceBattler += 1) {
+      nextLastTakenMoveFrom[battler * 8 + sourceBattler * 2] = 0;
+      nextLastTakenMoveFrom[battler * 8 + sourceBattler * 2 + 1] = 0;
+    }
+    for (let destinationBattler = 0; destinationBattler < battlersCount; destinationBattler += 1) {
+      nextLastTakenMoveFrom[destinationBattler * 8 + battler * 2] = 0;
+      nextLastTakenMoveFrom[destinationBattler * 8 + battler * 2 + 1] = 0;
+    }
+
+    const aiObservedAbilityIds = Object.freeze(
+      rules.aiObservedAbilityIds.map((abilityId, index) =>
+        index === battler ? 0 : abilityId
+      ),
+    ) as BattleScriptRulesContext["aiObservedAbilityIds"];
+    const choicedMove = Object.freeze(
+      rules.choicedMove.map((move, index) => index === battler ? 0 : move),
+    ) as BattleScriptRulesContext["choicedMove"];
+    const nextRules = Object.freeze({
+      ...rules,
+      battlers: Object.freeze(battlers),
+      moveResultFlags: 0,
+      currentMove: 0,
+      choicedMove,
+      aiObservedAbilityIds,
+      moveHistory: Object.freeze({
+        ...rules.moveHistory,
+        lastMoves,
+        lastLandedMoves,
+        lastHitByType,
+        lastResultingMoves,
+        lastPrintedMoves,
+        lastHitBy,
+        lastTakenMove: Object.freeze(nextLastTakenMove),
+        lastTakenMoveFrom: Object.freeze(nextLastTakenMoveFrom),
+      }),
+    }) as BattleScriptRulesContext;
+
     return transitionBattleScriptCommand(
       context,
       Object.freeze({ kind: "advance" }),
-      { rulesContext: Object.freeze({ ...rules, battlers: Object.freeze(battlers) }) },
+      { rulesContext: nextRules },
     );
   };
 }
