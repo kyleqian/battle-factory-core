@@ -1,11 +1,18 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
+import { mkdtempSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
+import { lowKickAtAge } from "../../src/animation/lowKick.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnLowKickView,
+  type SceneOnLowKickConfig,
+} from "../../src/animation/sceneOnPresentation.ts";
+import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 
 type Side = "player" | "opponent";
-type Fixture = {
+type Fixture = SceneOnLowKickConfig & {
   schema: "low-kick-source-evidence/v1";
   oracleProfile: "battle-scene-on";
   orientation: string;
@@ -17,8 +24,6 @@ type Fixture = {
   sourceWindow: { startFrame: number; endFrame: number; frameCount: 33 };
   evidenceSha256: string;
   rawRgbSha256: string;
-  attacker: { species: "MACHOKE"; geometry: { animationCenter: { x: number; y: number } } };
-  target: { species: "ONIX"; geometry: { animationCenter: { x: number; y: number } } };
 };
 type Sprite = { slot: number; template: number; x: number; y: number; x2: number; y2: number };
 type BattlerSprite = {
@@ -80,11 +85,17 @@ function verify(path: string, runNumber: number): void {
   const rawWindow = createHash("sha256");
   const failures: string[] = [];
   const first = source[0]!;
-  const sideSign = fixture.targetSide === "opponent" ? -1 : 1;
-  const attackerSign = fixture.attackerSide === "player" ? 1 : -1;
   const targetPan = fixture.targetSide === "player" ? -63 : 63;
-  let checks = 0;
+  const stage = createSceneOnMovePresentation({
+    move: "LOW_KICK",
+    attacker: fixture.attacker,
+    target: fixture.target,
+    fieldProfile: fixture.fieldProfile,
+  });
+  let componentMatches = 0;
+  let framebufferMatches = 0;
   for (const [age, frame] of source.entries()) {
+    const frameFailureStart = failures.length;
     const oracle = frame!;
     const rgb = readFileSync(join(rgbDir, `${String(oracle.frame).padStart(5, "0")}.rgb`));
     receipt.update(JSON.stringify(oracle));
@@ -93,7 +104,16 @@ function verify(path: string, runNumber: number): void {
     if (createHash("sha256").update(rgb).digest("hex") !== oracle.sha256) {
       failures.push(`age ${age}: raw RGB hash`);
     }
-    if (oracle.animScriptActive !== (age < 32)) failures.push(`age ${age}: cleanup`);
+    const predicted = lowKickAtAge(
+      age,
+      fixture.attackerSide,
+      fixture.targetSide,
+      fixture.target.geometry.animationCenter,
+    );
+    const seam = sceneOnLowKickView({ ...stage, age });
+    const { age: _age, attacker: _attacker, target: _target, ...seamState } = seam;
+    if (!same(predicted, seamState)) failures.push(`age ${age}: typed seam`);
+    if (oracle.animScriptActive !== predicted.active) failures.push(`age ${age}: cleanup`);
     const named = (name: string) => oracle.sprites.filter((sprite) =>
       sprite.template === probe.templates[name]);
     const count = (name: string, start: number, end: number) => {
@@ -107,23 +127,20 @@ function verify(path: string, runNumber: number): void {
     count("gSlideMonToOriginalPosSpriteTemplate", 25, 28);
     const attacker = fixture.attackerSide === "player" ? oracle.playerSprite : oracle.opponentSprite;
     const target = fixture.targetSide === "player" ? oracle.playerSprite : oracle.opponentSprite;
-    const expectedOffset = age < 7 ? 0
-      : age <= 10 ? attackerSign * 5 * (age - 6)
-      : age <= 24 ? attackerSign * 20
-      : age <= 28 ? attackerSign * (20 - 5 * (age - 24)) : 0;
-    if (attacker.x2 !== expectedOffset || attacker.y2 !== 0) {
+    if (!same(
+      { x2: attacker.x2, y2: attacker.y2 },
+      predicted.attackerOffset,
+    )) {
       failures.push(`age ${age}: SlideMon offset`);
     }
     const foot = named("gSlidingKickSpriteTemplate")[0];
     if (foot && !same(
       { x: foot.x, y: foot.y, x2: foot.x2, y2: foot.y2 },
-      { x: fixture.target.geometry.animationCenter.x + sideSign * 24,
-        y: fixture.target.geometry.animationCenter.y + 28,
-        x2: -sideSign * 5 * (age - 6), y2: 0 },
+      predicted.slidingFoot,
     )) failures.push(`age ${age}: target-relative SlidingKick callback`);
     const splat = named("gBasicHitSplatSpriteTemplate")[0];
-    if (splat && (splat.x !== fixture.target.geometry.animationCenter.x + sideSign * 8
-      || splat.y !== fixture.target.geometry.animationCenter.y + 8)) {
+    if (splat && (splat.x !== predicted.hitsplat?.x
+      || splat.y !== predicted.hitsplat?.y)) {
       failures.push(`age ${age}: target-relative hit splat`);
     }
     const rotate = oracle.tasks.some((task) =>
@@ -133,6 +150,19 @@ function verify(path: string, runNumber: number): void {
     const rotated = target.matrix.b !== 0 || target.matrix.c !== 0;
     if (rotated !== (age >= 13 && age <= 23)) {
       failures.push(`age ${age}: RotateMon matrix/OAM transfer`);
+    }
+    if (!same(target.matrix, predicted.targetTransform.matrix)
+      || target.y2 !== predicted.targetTransform.y2) {
+      failures.push(`age ${age}: RotateMon software matrix/position`);
+    }
+    const hardware = lowKickAtAge(
+      age - 2,
+      fixture.attackerSide,
+      fixture.targetSide,
+      fixture.target.geometry.animationCenter,
+    ).targetTransform.matrix;
+    if (!same(target.hardwareMatrix, hardware)) {
+      failures.push(`age ${age}: RotateMon hardware matrix latch`);
     }
     const impactLoaded = age >= 4 && age < 32;
     const handsLoaded = age >= 1 && age < 32;
@@ -160,7 +190,34 @@ function verify(path: string, runNumber: number): void {
         if (oracle[side][key] !== first[side][key]) failures.push(`age ${age}: gameplay ${side}.${key}`);
       }
     }
-    checks += 1;
+    if (failures.length === frameFailureStart) componentMatches += 1;
+    const engine: EngineState = {
+      ...createInitialState(),
+      rngMode: "frontierBattle",
+      sceneOnPresentation: { ...stage, age },
+    };
+    const app = render(engine);
+    let diff = 0;
+    for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+      if (
+        app[pixel * 4] !== rgb[pixel * 3]
+        || app[pixel * 4 + 1] !== rgb[pixel * 3 + 1]
+        || app[pixel * 4 + 2] !== rgb[pixel * 3 + 2]
+      ) diff += 1;
+    }
+    if (diff === 0) framebufferMatches += 1;
+    else {
+      failures.push(`age ${age}: framebuffer diff ${diff}`);
+      if (runNumber === 1 && age === 0) {
+        const appRgb = Buffer.alloc(240 * 160 * 3);
+        for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+          appRgb[pixel * 3] = app[pixel * 4]!;
+          appRgb[pixel * 3 + 1] = app[pixel * 4 + 1]!;
+          appRgb[pixel * 3 + 2] = app[pixel * 4 + 2]!;
+        }
+        writeFileSync(join(scratch, "app-age-0.rgb"), appRgb);
+      }
+    }
   }
   const digest = receipt.digest("hex");
   const rawDigest = rawWindow.digest("hex");
@@ -168,7 +225,11 @@ function verify(path: string, runNumber: number): void {
   if (rawDigest !== fixture.rawRgbSha256) failures.push(`raw RGB receipt ${rawDigest}`);
   if (runNumber === 1) receipts.set(fixture.orientation, digest);
   else if (receipts.get(fixture.orientation) !== digest) failures.push("fresh-run receipt");
-  console.log(`${fixture.orientation} run ${runNumber}: ${checks}/33 dense source frames; evidence/raw-RGB ${digest}/${rawDigest}`);
+  console.log(
+    `${fixture.orientation} run ${runNumber}: ${componentMatches}/33 semantic checks; `
+    + `${framebufferMatches}/33 production framebuffer; `
+    + `evidence/raw-RGB ${digest}/${rawDigest}`,
+  );
   if (failures.length) {
     console.error(failures.slice(0, 40).join("\n"));
     console.error(`scratch: ${scratch}`);

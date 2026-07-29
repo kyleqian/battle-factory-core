@@ -1,32 +1,35 @@
 # Animation coverage
 
-## MOVE_LOW_KICK source-evidence checkpoint; no production promotion (2026-07-29)
+## MOVE_LOW_KICK promoted exact; target-rotation track complete (2026-07-29)
 
-**State:** `MOVE_LOW_KICK` is **partial only**, not exact. The generated
-inventory and source prove the two Level-50 carriers are set **178
-`FRONTIER_MON_MACHOKE_1`** and later set **298 `FRONTIER_MON_SUDOWOODO_2`**;
-Adamant HP+SpDefense Focus-Band Machoke is the sole lowest carrier.
-
-**Did:** complete legal Scene-ON Machoke/Onix three-mon parties and a reusable
-mGBA probe extension pass a complete dense **33/33** source window through
-first inactive cleanup twice fresh in each orientation: player-back **214–246**
-evidence/raw `f3b4b291ee90208d9f9dcf7e2ea91a355c6da0e270289e6a083cdae126782a74` /
+**Verdict:** `MOVE_LOW_KICK` is exact. Source and inventory prove set **178
+`FRONTIER_MON_MACHOKE_1`** is the lowest legal Level-50 carrier (before set
+298 Sudowoodo_2). Complete legal Scene-ON Machoke/Onix parties pass the full
+body through first inactive cleanup twice fresh per orientation: player-back
+**214–246 (33/33)** evidence/raw
+`f3b4b291ee90208d9f9dcf7e2ea91a355c6da0e270289e6a083cdae126782a74` /
 `40639ddccc47ad2f867891ce5daa4d6a5769ff22b85352095bac14ba5cc9d9e5`;
-opponent-front **214–246** `7264ca8cdc9335c80e375354c674322eb857f1c2a7d0ea253fe2e73cefd14e0a` /
+opponent-front **214–246 (33/33)**
+`7264ca8cdc9335c80e375354c674322eb857f1c2a7d0ea253fe2e73cefd14e0a` /
 `4d657cf51c4c28805b20ed868890418aaf2ab03c7074ccce9757ea63bef75e20`.
-The receipts pin source-relative slide/restore offsets, target-relative foot
-and hitsplat, RotateMonSpriteToSide/matrix, tags, panning, OAM/matrices,
-palettes/registers, raw RGB, and immutable gameplay fields.
 
-**Next:** port a source-relative reducer, narrow typed seam, any Machoke art,
-and production compositor/display latches; then establish every-frame shared
-framebuffer equality twice per orientation. Do not promote Low Kick from its
-shared Rolling Kick template: its target-relative/rotation/timing body is
-independent. Coverage is **98 exact / 1 partial / 0 staged / 177 unsupported**.
+**Model/evidence:** the pure source-relative reducer, narrow typed seam,
+reproducible Machoke art, and production compositor port both slide callbacks,
+target-relative SlidingKick/hitsplat, RotateMonSpriteToSide's ObjAffineSet
+matrix plus target position/OAM transfer, Vital Throw target panning, field
+chrome/text, sprite/task display latches, tag cleanup, and first inactive
+cleanup. `lowKickPortable.ts` proves **33/33** reducer/component/seam/cleanup
+and **33/33** shared-framebuffer equality twice per orientation.
 
-**Notes:** No production compositor/wiring, engine, gameplay, boundary,
-barrier, canonical-recording allowlist, damage, RNG, turn, controller, or
-facility state changed; no framebuffer equality is claimed.
+**Sibling / next:** `MOVE_ROLLING_KICK` remains independently exact under its
+own 55-frame portable verifier. Next independent component track:
+`water-orb-hydro-pump-whirlpool`, with `MOVE_WHIRLPOOL` requiring its own dense
+both-orientation proof despite Hydro Pump's exact shared components. Coverage
+is **99 exact / 0 partial / 0 staged / 177 unsupported**.
+
+**Ownership:** no damage, Low Kick weight calculation, RNG, turn order,
+controller, round advancement, facility state, animation-boundary list,
+unsupported barrier, or canonical-recording allowlist changed.
 
 ## MOVE_ROLLING_KICK promoted exact; SlidingKick representative complete (2026-07-29)
 
@@ -49,11 +52,10 @@ two-interval versus sprite one-interval OAM latches, and cleanup.
 `rollingKickPortable.ts` proves **55/55** reducer/component/seam/cleanup and
 production shared-framebuffer equality twice per orientation.
 
-**Sibling / next:** `MOVE_LOW_KICK` remains unsupported: target-relative
-geometry, `AnimTask_RotateMonSpriteToSide`, and its distinct timing/body need
-independent complete dense both-orientation acceptance. Coverage is **98 exact
-/ 0 partial / 0 staged / 178 unsupported**. No gameplay, boundary, barrier,
-canonical allowlist, damage, RNG, turn, controller, or facility state changed.
+**Sibling / next:** `MOVE_LOW_KICK` is now exact independently through its own
+target-relative geometry, `AnimTask_RotateMonSpriteToSide`, 33-frame body, and
+portable verifier. No gameplay, boundary, barrier, canonical allowlist,
+damage, RNG, turn, controller, or facility state changed.
 
 ## MOVE_MEGA_PUNCH promoted exact; MegaPunchKick track established (2026-07-29)
 

@@ -582,6 +582,7 @@ import poisonFangAsset from "../animation/assets/poisonFang.json" with { type: "
 import hyperFangAsset from "../animation/assets/hyperFang.json" with { type: "json" };
 import megaPunchAsset from "../animation/assets/megaPunch.json" with { type: "json" };
 import rollingKickAsset from "../animation/assets/rollingKick.json" with { type: "json" };
+import lowKickAsset from "../animation/assets/lowKick.json" with { type: "json" };
 import swaggerAsset from "../animation/assets/swagger.json" with { type: "json" };
 import tauntAsset from "../animation/assets/taunt.json" with { type: "json" };
 import scaryFaceAsset from "../animation/assets/scary-face.json" with { type: "json" };
@@ -742,6 +743,7 @@ import {
   sceneOnHyperFangView,
   sceneOnMegaPunchView,
   sceneOnRollingKickView,
+  sceneOnLowKickView,
   sceneOnBiteView,
   sceneOnHeadbuttView,
   sceneOnWhirlwindView,
@@ -1349,6 +1351,10 @@ const megaPunchArt = megaPunchAsset as {
 const rollingKickArt = rollingKickAsset as {
   hitmonleeBack: { tileset: Tileset; palette: RgbColor[] };
   hitmonleeFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const lowKickArt = lowKickAsset as {
+  machokeBack: { tileset: Tileset; palette: RgbColor[] };
+  machokeFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const swaggerArt = swaggerAsset as {
   breath: { tileset: Tileset; palette: RgbColor[] };
@@ -20830,6 +20836,127 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "HITMONLEE used" : "Foe HITMONLEE used",
       "ROLLING KICK!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "LOW_KICK") {
+    const view = sceneOnLowKickView(state);
+    const displayed = sceneOnLowKickView({ ...state, age: state.age - 1 });
+    const affineDisplayed = sceneOnLowKickView({ ...state, age: state.age - 2 });
+    const playerToOpponent =
+      view.attacker.species === "MACHOKE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MACHOKE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged LOW_KICK pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    drawExtractedTileBg(fb, {
+      tileset: battleBg.static.tileset,
+      tilemap: battleBg.static.tilemap,
+      subpalettes: battleBg.palette,
+    });
+    const machoke = playerToOpponent
+      ? lowKickArt.machokeBack
+      : lowKickArt.machokeFront;
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdleX2 = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX")?.x2 ?? 0)
+      : 0;
+    if (affineDisplayed.targetTransform.active) {
+      const matrix = affineDisplayed.targetTransform.matrix;
+      drawSpriteSheetAffineRotate(
+        fb,
+        onix.tileset,
+        onix.palette,
+        view.target.geometry.spriteCorner.x + 32 + targetIdleX2,
+        view.target.geometry.spriteCorner.y + 32
+          + affineDisplayed.targetTransform.y2,
+        matrix.a,
+        matrix.b,
+        matrix.c,
+        matrix.d,
+      );
+    } else {
+      drawSpriteSheet(
+        fb,
+        onix.tileset,
+        onix.palette,
+        view.target.geometry.spriteCorner.x + targetIdleX2,
+        view.target.geometry.spriteCorner.y,
+      );
+    }
+    drawSpriteSheet(
+      fb,
+      machoke.tileset,
+      machoke.palette,
+      view.attacker.geometry.spriteCorner.x + displayed.attackerOffset.x2,
+      view.attacker.geometry.spriteCorner.y + displayed.attackerOffset.y2,
+    );
+    if (displayed.slidingFoot) {
+      drawSpriteSheet(
+        fb,
+        subTileset(battleAnimHandsAndFeet.tileset, 4, 4),
+        battleAnimHandsAndFeet.palette,
+        displayed.slidingFoot.x + displayed.slidingFoot.x2 - 16,
+        displayed.slidingFoot.y + displayed.slidingFoot.y2 - 16,
+      );
+    }
+    if (displayed.hitsplat) {
+      drawSpriteSheetAffineRotate(
+        fb,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        displayed.hitsplat.x,
+        displayed.hitsplat.y,
+        372,
+        0,
+        0,
+        372,
+        undefined,
+        false,
+      );
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "MACHOKE",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "MACHOKE" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MACHOKE used" : "Foe MACHOKE used",
+      "LOW KICK!",
       99,
     );
     return;

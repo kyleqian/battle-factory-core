@@ -282,6 +282,10 @@ import {
   type RollingKickState,
 } from "./rollingKick.ts";
 import {
+  lowKickAtAge,
+  type LowKickState,
+} from "./lowKick.ts";
+import {
   swaggerAtAge,
   type SwaggerState,
 } from "./swagger.ts";
@@ -1170,6 +1174,13 @@ export interface SceneOnRollingKickConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnLowKickConfig {
+  readonly move: "LOW_KICK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnBiteConfig {
   readonly move: "BITE";
   readonly attacker: SceneOnPresentationBattler;
@@ -1739,6 +1750,7 @@ export type SceneOnMoveConfig =
   | SceneOnHyperFangConfig
   | SceneOnMegaPunchConfig
   | SceneOnRollingKickConfig
+  | SceneOnLowKickConfig
   | SceneOnBiteConfig
   | SceneOnHeadbuttConfig
   | SceneOnWhirlwindConfig
@@ -1939,6 +1951,12 @@ export interface SceneOnMegaPunchView extends MegaPunchState {
 }
 
 export interface SceneOnRollingKickView extends RollingKickState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnLowKickView extends LowKickState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3469,6 +3487,26 @@ export function sceneOnRollingKickView(
     ...rollingKickAtAge(
       state.age,
       state.config.attacker.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first active `Move_LOW_KICK` source display. */
+export function sceneOnLowKickView(
+  state: SceneOnMovePresentationState,
+): SceneOnLowKickView {
+  if (state.config.move !== "LOW_KICK") {
+    throw new Error(`expected LOW_KICK presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...lowKickAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
     ),
   };

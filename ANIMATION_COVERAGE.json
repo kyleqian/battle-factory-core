@@ -9,7 +9,7 @@
         "fresh dense probes cover the complete 55-frame Move_ROLLING_KICK body through first inactive cleanup twice reproducibly in both orientations: player-back frames 81-135 pass 55/55 reducer/component/seam/cleanup and production-framebuffer equality with evidence 3f35463979c0971b6432ed8695caa1130e21890d07ea4edb80b6685271932f92 and raw RGB 76c1741106018ee425f40505c56af234d7d033562dc8bd3c84386e465d9d7ef3; opponent-front frames 85-139 pass 55/55 with evidence 4fb8c542ab55e346e4f22129cfa10f028d1a43ff8be0ee6e1e1d8b4160849690 and raw RGB 237e0cd3062b05c1ffa91a1ecc2e03a60ba1f195012ad079f0980933ea12d5a1",
         "the pure source-relative reducer and narrow typed Scene-ON seam port attacker TranslateMonEllipticalRespectSide, SlideMonToOffset and SlideMonToOriginalPos, attacker-relative gSlidingKickSpriteTemplate, IMPACT hitsplat, target AnimTask_ShakeMon, target monbg and 12:8 alpha, both side-panned Double Team triggers, target-panned impact audio, waits, blendoff, and first inactive cleanup",
         "the production shared-framebuffer compositor uses reproducibly extracted Hitmonlee art plus shared HANDS_AND_FEET foot, affine IMPACT, Onix, field chrome, healthboxes, and text; it preserves the source task two-interval OAM latch, sprite one-interval OAM latch, target idle/shake, monbg/alpha, and cleanup without absolute battle ticks, recorded screenshots, fitted pixels, or gameplay ownership",
-        "MOVE_LOW_KICK has only its own source-evidence partial checkpoint: target-relative geometry, RotateMonSpriteToSide, and distinct timing receive no exact credit from Rolling Kick's shared template",
+        "MOVE_LOW_KICK is exact independently through its own target-relative geometry, RotateMonSpriteToSide, distinct timing, complete dense receipts, and portable production-framebuffer proof; it receives no credit merely from Rolling Kick's shared template",
         "presentation owns no damage, RNG, move outcome, turn order, controller, facility state, or shared battle state; no animation-boundary list, unsupported barrier, or canonical-recording allowlist changed"
       ],
       "evidence": [
@@ -31,24 +31,29 @@
     },
     {
       "move": "MOVE_LOW_KICK",
-      "status": "partial",
+      "status": "exact",
       "covered": [
         "source and generated Level-50 inventory audits prove the only legal carriers are challenge-1 FRONTIER_MON_MACHOKE_1 set 178 and later set 298 FRONTIER_MON_SUDOWOODO_2; set 178 MACHOKE is the sole lowest carrier (Adamant, HP+SpDefense, Focus Band)",
-        "complete legal three-Pokemon Scene-ON Machoke-versus-Onix parties run twice fresh in player-back and opponent-front orientations; the full Move_LOW_KICK source body is captured every frame from first active display through first inactive cleanup, frames 214-246 (33/33) in each orientation",
-        "receipt-pinned source/component evidence records and verifies SlideMonToOffset/SlideMonToOriginalPos attacker offsets, target-relative gSlidingKickSpriteTemplate and gBasicHitSplatSpriteTemplate geometry/lifetimes, RotateMonSpriteToSide task and software matrix rotation, HANDS_AND_FEET/IMPACT tag lifetimes, SE_M_VITAL_THROW2 target panning, palette/register state, software/hardware OAM and matrices, raw RGB, and unchanged gameplay fields: player evidence/raw f3b4b291ee90208d9f9dcf7e2ea91a355c6da0e270289e6a083cdae126782a74/40639ddccc47ad2f867891ce5daa4d6a5769ff22b85352095bac14ba5cc9d9e5; opponent evidence/raw 7264ca8cdc9335c80e375354c674322eb857f1c2a7d0ea253fe2e73cefd14e0a/4d657cf51c4c28805b20ed868890418aaf2ab03c7074ccce9757ea63bef75e20",
-        "bounded remaining obligation only: port a source-relative reducer and typed Scene-ON seam, extract Machoke art if needed, add production compositor/display latches, then prove every production framebuffer frame equal twice fresh per orientation; no exact or framebuffer-equality credit is claimed",
-        "MOVE_ROLLING_KICK remains exact but is a distinct sibling: it has attacker-relative SlidingKick geometry, TranslateMonEllipticalRespectSide, ShakeMon/alpha, Double Team timing, and a different 55-frame body; its shared template does not promote Low Kick"
+        "fresh complete legal three-Pokemon Scene-ON Machoke-versus-Onix probes pass the full source body through first inactive cleanup twice per orientation: player-back frames 214-246 pass 33/33 reducer/component/seam/cleanup and 33/33 production-framebuffer equality with evidence/raw f3b4b291ee90208d9f9dcf7e2ea91a355c6da0e270289e6a083cdae126782a74/40639ddccc47ad2f867891ce5daa4d6a5769ff22b85352095bac14ba5cc9d9e5; opponent-front frames 214-246 pass 33/33 with evidence/raw 7264ca8cdc9335c80e375354c674322eb857f1c2a7d0ea253fe2e73cefd14e0a/4d657cf51c4c28805b20ed868890418aaf2ab03c7074ccce9757ea63bef75e20",
+        "the pure source-relative reducer and narrow typed Scene-ON seam port HANDS_AND_FEET and IMPACT loads, attacker SlideMonToOffset/SlideMonToOriginalPos, target-relative gSlidingKickSpriteTemplate and affine gBasicHitSplatSpriteTemplate, target AnimTask_RotateMonSpriteToSide with ObjAffineSet matrices and player-side y displacement, SE_M_VITAL_THROW2 target panning, waits, tag cleanup, and first inactive cleanup",
+        "the production shared-framebuffer compositor uses reproducibly extracted Machoke front/back art plus shared foot, hitsplat, Onix, field chrome, healthboxes, windows, and text; it preserves sprite/task/OAM display latches, front/back OAM centers, target affine-double matrix and position transfer, tag cleanup, and immutable gameplay state without absolute ticks, captured screenshots, fitted pixels, or per-frame exceptions",
+        "MOVE_ROLLING_KICK remains exact independently: its attacker-relative SlidingKick geometry, TranslateMonEllipticalRespectSide, ShakeMon/alpha, Double Team timing, and distinct 55-frame body retain their focused reducer and portable-verifier acceptance",
+        "presentation owns no damage, Low Kick weight calculation, RNG, outcome, turn order, controller, round advancement, facility state, or shared battle state; no animation boundary list, unsupported barrier, or canonical-recording allowlist changed"
       ],
-      "remaining": "Port Low Kick's source-relative reducer and typed Scene-ON seam, extract Machoke art if needed, add production compositor/display latches, and prove every shared framebuffer frame equal twice fresh in both orientations.",
       "evidence": [
         "tools/battle-lab/mechanic-low-kick-player-machoke-opponent-onix.json",
         "tools/battle-lab/mechanic-low-kick-opponent-machoke-player-onix.json",
         "tools/compare/fixtures/low-kick-player-machoke-opponent-onix.json",
         "tools/compare/fixtures/low-kick-opponent-machoke-player-onix.json",
         "tools/compare/lowKickSourceAudit.ts",
-        "tools/compare/lowKickEvidence.ts",
+        "tools/compare/lowKickPortable.ts",
+        "tools/compare/extractLowKickAssets.ts",
         "tools/compare/poisonFangProbe.py",
-        "tests/animation/lowKickSourceCheckpoint.test.ts"
+        "src/animation/assets/lowKick.json",
+        "src/animation/lowKick.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/lowKick.test.ts"
       ]
     },
     {
