@@ -15,11 +15,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 682 — [BOUNDED MAIN WORKER 2026-07-29 ~08:36] wake-up path retired; seeds 18/20 seven-win exact
 
-- **State:** committed `20ad5cce`; tree green at **494 files / 5064 tests**,
-  production build, `git diff --check`, Battle Scene OFF oracle info, and
-  byte-identical executable + ability/item census documents. Seeds **18/20**
-  now win all seven generated battles at exact **2478/2140** facility calls;
-  the permanent 17-carrier table remains unchanged and exact.
+- **State:** committed `20ad5cce` + stretch `b2afcc38`; tree green at **495
+  files / 5065 tests**, production build, `git diff --check`, Battle Scene OFF
+  oracle info, and byte-identical executable + ability/item census documents.
+  Seeds **18/20/23** now win all seven generated battles at exact
+  **2478/2140/1436** facility calls; the permanent 17-carrier table remains
+  unchanged and exact.
 - **Did:** registered `Cmd_bicword`'s third and final source operand,
   `HITMARKER_WAKE_UP_CLEAR` (bit 4, source says never set/checked), plus
   `gWokeUpStringIds`. The attack-canceler controller status write now also
@@ -30,19 +31,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   message, status-icon update, return to `Cmd_attackcanceler`, PP use, real
   Tackle damage, and the next command. The former bicword barrier test is now
   a pass-through clear; normal/Uproar table selectors are both pinned.
-- **Sweep / Next:** seeds 4–30 pass battles 0/1/2 at **26/25/25**; **24/27**
-  win seven, seed 12 legitimately loses battle 7. Remaining blockers are
-  end-turn instruction budget (**seed 21**, untouched/out of scope) and
-  `BattleScript_HitFromAtkCanceler: Cmd_attackcanceler` (**seed 23**). Next:
-  seed 23 is the authorized stretch if time remains; otherwise return to the
-  supervisor with this green wake-up checkpoint.
+- **Stretch / sweep:** seed 23's faster opponent used Attract; the player then
+  took CANCELER_IN_LOVE's immobilized arm. Its explicit
+  `BattleScriptPush(BattleScript_MoveUsedIsInLoveCantAttack)` now uses the
+  machine's existing `call-explicit`, runs the in-love prelude, returns to the
+  cant-attack string, and completes MoveEnd without PP/damage. Seeds 4–30 now
+  pass battles 0/1/2 at **26/26/26**; **25/27** win seven, seed 12
+  legitimately loses battle 7. The sole blocker is seed 21's end-turn
+  instruction budget, explicitly untouched/out of scope.
 - **Notes:** no new carrier, canonical recording, presentation, animation,
   tick branch, or SCRIPT_BUDGET change. Unsupported-branch call-site pin stays
   **4** for `battleScriptDamagingWeatherOpcode.ts`; its comment now names that
   the live wake-up operand is retired while the generic future-pair guard
   remains. Ability/item census's exact live-source pin moved only
   `battleScriptHitChainOpcode.ts:1091→1096` after the two-entry wake-up table
-  added five lines; both generated docs remain byte-identical. PAPERCUT: none.
+  added five lines. Stretch deliberately shrank
+  `battleScriptAttackCancelerOpcode.ts`'s unsupported-branch pin **3→2**.
+  Both generated docs remain byte-identical. PAPERCUT: none.
 
 ---
 
