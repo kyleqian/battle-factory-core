@@ -13,6 +13,41 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 670 — [BOUNDED MAIN WORKER 2026-07-29 ~00:10] pre-first-turn entry hooks implemented
+
+- **State:** committed `a5358114`; tree green at **455 files / 4907 tests**,
+  production build, `git diff --check`, and Battle Scene OFF oracle info.
+  Required lifecycle/switch-in focus is **48/48**; expanded lifecycle/shared-
+  selector/ratchet focus is **73/73**. Ability/item extraction + census
+  regenerate byte-identically at **69/69 abilities (1096/1096)** and **42/42
+  hold effects (850/850)** with all 17 validations.
+- **Did:** `TryDoEventsBeforeFirstTurn` now stable-orders the two actives from
+  draw A, documents the Factory battle room's `WEATHER_NONE` overworld no-op,
+  runs shared weather/form ON_SWITCHIN dispatch fastest-to-slowest, then
+  resolves pending Intimidate, pending Trace, and speed-ordered switch-in
+  items before draw B. Lifecycle events are returned in exact kernel order
+  and seed the first boundary's next event sequence. White Herb restores
+  Intimidate-lowered stages and consumes through its shared Battle Script.
+  The shared switch-in port also now source-correctly sets both temporary and
+  permanent Sand Stream/Drought weather bits and resolves literal
+  `BS_BATTLER_0` for weather animations.
+- **Next:** Gate-5 rung 4: drive one complete fresh 3v3 battle through only
+  published decisions/forced switches to a real terminal boundary. Keep the
+  equal-speed pre-hook tie receipt as a separate evidence task; do not widen
+  or remove its barrier from rung 4.
+- **Notes:** citations in scout §3.2/§3.3/§4.1 were re-derived from
+  `battle_main.c:3841-3929`, `battle_util.c:2485-2600,3003-3073,3303-3329`,
+  and the Factory room map's `WEATHER_NONE`. Real L50 carriers pin
+  Intimidate (Ekans 53), Trace (Porygon2 436), and White Herb (Kirlia 48);
+  Drought uses a complete adapter-shaped Groudon because no L50 corpus set
+  carries it. Hook scripts draw zero RNG; hook and no-hook cases remain
+  exactly A/B-only. The hook-loop `unsupported-branch` is retired and the
+  module ratchet moves **2→1**; the equal-speed receipt-gated barrier is the
+  sole remainder. No canonical recording, scout/probe/battle-lab, issue,
+  generation, presentation, or opponent-owned file changed. PAPERCUT: none.
+
+---
+
 ## 669 — [BOUNDED MAIN WORKER 2026-07-28 ~23:49] fresh no-hook Factory battle initializer landed
 
 - **State:** tree green at **454 files / 4895 tests**, production build,
@@ -82,42 +117,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `b75b663f`; the census initially caught and forced removal of a quoted
   ability comparison before final validation. No battle-start/controller,
   side-owned, issue, census-generator, or ratchet file changed. PAPERCUT: none.
-
----
-
-## 667 — [BOUNDED MAIN WORKER 2026-07-28 ~23:14] Run Away/Pickup close the ability-item parity worklist
-
-- **State:** tree green at **452 files / 4887 tests**, production build,
-  `git diff --check`, and Battle Scene OFF oracle info. Hook artifact and
-  census each regenerated twice byte-identically. Final census is exactly
-  **69/69 Factory-battle abilities (weighted 1096/1096)** plus **4 without
-  Factory battle hooks**, and **42/42 hold effects (850/850)**; all 17
-  validations pass and the unreferenced worklist is empty.
-- **Did:** source order disproved the proposed generic trainer-block proof:
-  Factory RUN first opens the forfeit confirmation (`battle_main.c:4322-4339`);
-  confirmed RUN reaches Run Away before the generic Frontier-trainer success
-  (`battle_util.c:427-448`), then every Factory RUN becomes forfeiture before
-  `fleeType` is read (`battle_main.c:5058-5062`). A production invariant and
-  Tier-1 test pin that this kernel exposes only use-move/switch commands and
-  Run Away cannot bypass the distinct trapping gate. Pickup's only two source
-  checks are now exact-classified Factory-unreachable: the Frontier victory
-  script calls `pickup` only under `BATTLE_TYPE_PYRAMID`
-  (`battle_scripts_1.s:3045-3047`), never Factory.
-- **Supervisor fold (same round, side merge):** the paired side-lane scout
-  banked `docs/facility-round-loop-scout.md` (`1c87f22e`) — Gate-5/whole-
-  battle current-state map (full-turn kernel starts post-init; no production
-  caller feeds `resolveRoundBattle`; no rental/opponent generators yet; the
-  real Factory fully restores HP/PP/status/items between battles; turn-1
-  Quick Claw reads `battle_main.c:3923`'s write, which overwrites `:3140`),
-  battle-start ground truth §3, a precise rung-1 probe brief §4, and a
-  14-rung ordered plan §5 (each ≤45-min with acceptance commands).
-- **Next:** rung 1 (fresh-start RNG receipt, side) + rung 5 (corpus-to-
-  kernel party adapter, main) launch this round; then rung 2 (fresh battle
-  initializer) consumes the receipt. Do not reopen Pickup/Run Away without
-  new source reachability.
-- **Notes:** predicted closure was 70/70 weighted 1103/1103 only if Pickup
-  remained battle-reachable; actual source-supported reclassification removes
-  its 7 carriers: `(1073 + 23)/(1103 - 7) = 1096/1096`, and categories move
-  from 3 to 4 without Factory battle hooks. Commit `c50a726f`. No
-  `unsupported-branch` or canonical-recording ratchet, issue, scout/probe,
-  battle-lab, presentation, AI, or oracle fixture changed. PAPERCUT: none.

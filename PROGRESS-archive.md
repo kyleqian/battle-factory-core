@@ -1,5 +1,44 @@
 ---
 
+## 667 — [BOUNDED MAIN WORKER 2026-07-28 ~23:14] Run Away/Pickup close the ability-item parity worklist
+
+- **State:** tree green at **452 files / 4887 tests**, production build,
+  `git diff --check`, and Battle Scene OFF oracle info. Hook artifact and
+  census each regenerated twice byte-identically. Final census is exactly
+  **69/69 Factory-battle abilities (weighted 1096/1096)** plus **4 without
+  Factory battle hooks**, and **42/42 hold effects (850/850)**; all 17
+  validations pass and the unreferenced worklist is empty.
+- **Did:** source order disproved the proposed generic trainer-block proof:
+  Factory RUN first opens the forfeit confirmation (`battle_main.c:4322-4339`);
+  confirmed RUN reaches Run Away before the generic Frontier-trainer success
+  (`battle_util.c:427-448`), then every Factory RUN becomes forfeiture before
+  `fleeType` is read (`battle_main.c:5058-5062`). A production invariant and
+  Tier-1 test pin that this kernel exposes only use-move/switch commands and
+  Run Away cannot bypass the distinct trapping gate. Pickup's only two source
+  checks are now exact-classified Factory-unreachable: the Frontier victory
+  script calls `pickup` only under `BATTLE_TYPE_PYRAMID`
+  (`battle_scripts_1.s:3045-3047`), never Factory.
+- **Supervisor fold (same round, side merge):** the paired side-lane scout
+  banked `docs/facility-round-loop-scout.md` (`1c87f22e`) — Gate-5/whole-
+  battle current-state map (full-turn kernel starts post-init; no production
+  caller feeds `resolveRoundBattle`; no rental/opponent generators yet; the
+  real Factory fully restores HP/PP/status/items between battles; turn-1
+  Quick Claw reads `battle_main.c:3923`'s write, which overwrites `:3140`),
+  battle-start ground truth §3, a precise rung-1 probe brief §4, and a
+  14-rung ordered plan §5 (each ≤45-min with acceptance commands).
+- **Next:** rung 1 (fresh-start RNG receipt, side) + rung 5 (corpus-to-
+  kernel party adapter, main) launch this round; then rung 2 (fresh battle
+  initializer) consumes the receipt. Do not reopen Pickup/Run Away without
+  new source reachability.
+- **Notes:** predicted closure was 70/70 weighted 1103/1103 only if Pickup
+  remained battle-reachable; actual source-supported reclassification removes
+  its 7 carriers: `(1073 + 23)/(1103 - 7) = 1096/1096`, and categories move
+  from 3 to 4 without Factory battle hooks. Commit `c50a726f`. No
+  `unsupported-branch` or canonical-recording ratchet, issue, scout/probe,
+  battle-lab, presentation, AI, or oracle fixture changed. PAPERCUT: none.
+
+---
+
 ## 666 — [BOUNDED MAIN WORKER 2026-07-28 ~23:05] voluntary switch action + trapping trio complete
 
 - **State:** tree green at **452 files / 4885 tests**, production build,
