@@ -103,7 +103,12 @@ import {
   resumeBattleScriptFaintedActionsAfterPlayerChoice,
   runBattleScriptFaintedActionsOrchestration,
 } from "./battleScriptFaintedActionsOrchestration.ts";
-import { runBattleEndTurnOrchestration, weatherHasEffect } from "./battleEndTurnOrchestration.ts";
+import {
+  resumeBattleEndTurnAfterFaintedActions,
+  runBattleEndTurnOrchestration,
+  weatherHasEffect,
+  type BattleEndTurnResult,
+} from "./battleEndTurnOrchestration.ts";
 import { effectiveSpeed, getWhoStrikesFirst, type TurnOrderBattler, type WeatherState } from "./turnOrder.ts";
 import { ABILITY_SYMBOLS } from "./battleScriptSwitchinOpcode.ts";
 import {
@@ -319,6 +324,13 @@ type PendingForcedSwitchScript = Readonly<{
   programCounter: number;
   callStack: readonly number[];
   scheduler: BattleScriptSchedulerState;
+  /**
+   * Source continuation owned by the caller of HandleFaintedMonActions.
+   * Action KOs still enter BattleTurnPassed from its start; an end-turn KO
+   * has already completed DoField/DoBattler and resumes at the delayed-
+   * attack/Perish tail (`battle_main.c:3963-3974`).
+   */
+  resumeAt: "run-end-turn" | "finish-end-turn-after-faints";
 }>;
 
 export function createFactoryEmptyBattlerState(side: 0 | 1): BattleScriptRulesBattlerState {
@@ -661,7 +673,7 @@ function buildForcedSwitchPendingRules(
 
 function pendingScriptAt(value: unknown): PendingForcedSwitchScript {
   const record = value as
-    | Readonly<{ programCounter?: unknown; callStack?: unknown; scheduler?: unknown }>
+    | Readonly<{ programCounter?: unknown; callStack?: unknown; scheduler?: unknown; resumeAt?: unknown }>
     | null
     | undefined;
   if (
@@ -671,6 +683,10 @@ function pendingScriptAt(value: unknown): PendingForcedSwitchScript {
     || !Number.isSafeInteger(record.programCounter)
     || !Array.isArray(record.callStack)
     || !record.callStack.every((entry) => Number.isSafeInteger(entry))
+    || (
+      record.resumeAt !== "run-end-turn"
+      && record.resumeAt !== "finish-end-turn-after-faints"
+    )
   ) {
     throw new Error("factory full-turn decision pendingScript must be a valid halted-script bundle");
   }
@@ -681,6 +697,7 @@ function pendingScriptAt(value: unknown): PendingForcedSwitchScript {
     programCounter: record.programCounter as number,
     callStack: Object.freeze([...(record.callStack as readonly number[])]),
     scheduler,
+    resumeAt: record.resumeAt,
   });
 }
 
@@ -1452,8 +1469,10 @@ function runEndTurnTail(
   handlers: Handlers,
   preEndTurnState: MachineState,
   nextRequestId: number,
+  resumedResult?: BattleEndTurnResult,
 ): BattleDecisionReducerOutput<FactoryFullTurnDecisionRules> {
-  const endTurn = runBattleEndTurnOrchestration(PROGRAM, handlers, preEndTurnState);
+  const endTurn = resumedResult
+    ?? runBattleEndTurnOrchestration(PROGRAM, handlers, preEndTurnState);
   if (endTurn.kind === "terminal") {
     return finishFullTurn(
       ctxRng, rngBeforeCalls, endTurn.state,
@@ -1475,10 +1494,27 @@ function runEndTurnTail(
     );
   }
   if (endTurn.kind === "player-choice-required") {
-    throw new Error(
-      "full-turn reducer's end-turn orchestration produced a player-choice-required forced-switch request "
-        + "-- outside this reducer's modeled domain (factoryBattleScriptTerminalDecision.ts's own "
-        + "forced-switch resume support is the single-action sibling that models this)",
+    return finishFullTurn(
+      ctxRng,
+      rngBeforeCalls,
+      endTurn.state,
+      buildForcedSwitchPendingRules(endTurn.state.rulesContext, {
+        programCounter: endTurn.state.programCounter,
+        callStack: endTurn.state.callStack,
+        scheduler: endTurn.state.scheduler,
+        resumeAt: "finish-end-turn-after-faints",
+      }),
+      Object.freeze({
+        kind: "decision-required",
+        request: Object.freeze({
+          kind: "forced-switch",
+          requestId: nextRequestId,
+          side: endTurn.battler === 0 ? "player" as const : "trainer" as const,
+          battler: endTurn.battler as BattleSinglesBattler,
+          faintedPartyIndex: endTurn.faintedPartyIndex as BattlePartyIndex,
+          legalPartyIndexes: endTurn.legalPartyIndexes as readonly BattlePartyIndex[],
+        }),
+      }),
     );
   }
 
@@ -1601,12 +1637,15 @@ function resumeFullTurnForcedSwitch(
   }
   const pending = pendingForcedSwitchAt(ctx.rules);
   const rngBefore = ctx.rng.snapshot();
-  const actingBattler = pending.rulesContext.battlerByTurnOrder[
-    pending.rulesContext.currentTurnActionNumber
-  ];
+  const actingBattler = pending.pendingScript.resumeAt === "run-end-turn"
+    ? pending.rulesContext.battlerByTurnOrder[pending.rulesContext.currentTurnActionNumber]
+    : ctx.request.battler;
   if (
-    actingBattler === undefined
-    || actingBattler >= pending.rulesContext.battleTopology.battlersCount
+    pending.pendingScript.resumeAt === "run-end-turn"
+    && (
+      actingBattler === undefined
+      || actingBattler >= pending.rulesContext.battleTopology.battlersCount
+    )
   ) {
     throw new Error(
       "factory full-turn decision forced-switch resume cannot resolve the acting battler at the current turn position",
@@ -1652,10 +1691,12 @@ function resumeFullTurnForcedSwitch(
   }
 
   if (orchestration.kind === "terminal") {
-    const finished = handleBattleActionFinished(
-      orchestration.state,
-      actingBattler as BattleScriptBattlerId,
-    );
+    const finished = pending.pendingScript.resumeAt === "run-end-turn"
+      ? handleBattleActionFinished(
+        orchestration.state,
+        actingBattler as BattleScriptBattlerId,
+      )
+      : orchestration.state;
     return finishFullTurn(
       ctx.rng, rngBefore.calls, finished,
       buildRules(finished.rulesContext, "awaiting-player-command", null),
@@ -1674,6 +1715,21 @@ function resumeFullTurnForcedSwitch(
   }
 
   // orchestration.kind === "resumed"
+  if (pending.pendingScript.resumeAt === "finish-end-turn-after-faints") {
+    const endTurn = resumeBattleEndTurnAfterFaintedActions(
+      PROGRAM,
+      handlers,
+      orchestration.state,
+    );
+    return runEndTurnTail(
+      ctx.rng,
+      rngBefore.calls,
+      handlers,
+      orchestration.state,
+      ctx.request.requestId + 1,
+      endTurn,
+    );
+  }
   return runEndTurnTail(
     ctx.rng,
     rngBefore.calls,
@@ -1892,6 +1948,7 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
         programCounter: faint1.state.programCounter,
         callStack: faint1.state.callStack,
         scheduler: faint1.state.scheduler,
+        resumeAt: "run-end-turn",
       }),
       Object.freeze({
         kind: "decision-required",
@@ -1974,6 +2031,7 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
           programCounter: faint2.state.programCounter,
           callStack: faint2.state.callStack,
           scheduler: faint2.state.scheduler,
+          resumeAt: "run-end-turn",
         }),
         Object.freeze({
           kind: "decision-required",

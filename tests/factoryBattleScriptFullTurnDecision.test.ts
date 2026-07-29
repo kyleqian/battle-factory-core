@@ -30,6 +30,7 @@ const RAIN_DANCE = 240;
 const KO_SCENARIO_RNG_SEED = 919694434;
 /** Brute-force-found: Ember's 10% burn proc actually lands on turn 1 with this seed, per this move's own real hit-chain RNG order (accuracy, crit, damage, secondary-effect-chance). */
 const BURN_PROC_RNG_SEED = 61;
+const STATUS1_POISON = 1 << 3;
 const STATUS1_BURN = 1 << 4;
 const STATUS1_PARALYSIS = 1 << 6;
 const ABILITY_CLOUD_NINE = 13;
@@ -1607,3 +1608,126 @@ describe(
     });
   },
 );
+
+describe("factory full-turn decision -- end-turn faint replacement resumes after the completed effect loops", () => {
+  const MACHOP = 66;
+  const KARATE_CHOP = 2;
+
+  function quietStatusConfig(
+    player: Partial<FactoryFullTurnConfig["player"]>,
+    trainer: Partial<FactoryFullTurnConfig["trainer"]>,
+    extras: Partial<FactoryFullTurnConfig> = {},
+  ): FactoryFullTurnConfig {
+    return config({
+      rngSeed: 1,
+      player: {
+        species: 1, moveId: STRENGTH,
+        attack: 10, defense: 255, spAttack: 10, spDefense: 255,
+        speed: 100, hp: 200, maxHp: 200,
+        ...player,
+      },
+      trainer: {
+        species: 43, moveId: STRENGTH,
+        attack: 10, defense: 255, spAttack: 10, spDefense: 255,
+        speed: 50, hp: 200, maxHp: 200,
+        ...trainer,
+      },
+      ...extras,
+    });
+  }
+
+  function runTurn(configValue: FactoryFullTurnConfig) {
+    const initial = createFactoryFullTurnBattleState(configValue);
+    const afterPlayer = submitFactoryFullTurnDecision(initial, {
+      requestId: 1, side: "player", decision: PLAYER_ATTACKS,
+    });
+    if (afterPlayer.kind !== "decision-required") throw new Error("expected trainer decision");
+    return submitFactoryFullTurnDecision(afterPlayer.state, {
+      requestId: 2, side: "trainer", decision: TRAINER_ATTACKS,
+    });
+  }
+
+  it(
+    "player poison KO -> forced choice -> replacement -> remaining tail reaches the next command; "
+      + "the trainer's already-completed burn tick fires exactly once and RNG stays 8 hit-chain draws + 1 boundary draw",
+    () => {
+      const paused = runTurn(quietStatusConfig(
+        { hp: 22, maxHp: 160, status1: STATUS1_POISON },
+        { hp: 100, maxHp: 160, status1: STATUS1_BURN },
+        {
+          playerBenchHp: [145, 0],
+          playerBenchOverride: [{
+            species: MACHOP,
+            moves: [KARATE_CHOP, 0, 0, 0],
+          }, undefined],
+        },
+      ));
+      expect(paused.kind).toBe("decision-required");
+      if (paused.kind !== "decision-required") throw new Error("expected forced switch");
+      expect(paused.nextRequest).toMatchObject({
+        kind: "forced-switch",
+        requestId: 3,
+        side: "player",
+        battler: 0,
+        faintedPartyIndex: 0,
+        legalPartyIndexes: [1],
+      });
+      expect(paused.state.rules.rulesContext.battlers[0].hp).toBe(0);
+      const trainerHpAfterOneBurnTick = paused.state.rules.rulesContext.battlers[1].hp;
+      expect(trainerHpAfterOneBurnTick).toBeLessThan(100);
+      expect(paused.state.rng.calls).toBe(8);
+
+      const resumed = submitFactoryFullTurnDecision(paused.state, {
+        requestId: 3,
+        side: "player",
+        decision: { kind: "switch", partyIndex: 1 },
+      });
+      expect(resumed.kind).toBe("decision-required");
+      if (resumed.kind !== "decision-required") throw new Error("expected next command");
+      expect(resumed.nextRequest).toMatchObject({
+        kind: "command", requestId: 4, side: "player", battler: 0,
+      });
+      expect(resumed.state.rules.rulesContext.battlers[0]).toMatchObject({
+        species: MACHOP, partyIndex: 1, hp: 145, status1: 0,
+      });
+      expect(resumed.state.rules.rulesContext.battlers[1].hp).toBe(trainerHpAfterOneBurnTick);
+      expect(resumed.state.rng.calls).toBe(9);
+    },
+  );
+
+  it("trainer poison KO selects its healthy replacement and reaches the next player command", () => {
+    const result = runTurn(quietStatusConfig(
+      { hp: 100, maxHp: 160, status1: STATUS1_BURN },
+      { hp: 22, maxHp: 160, status1: STATUS1_POISON },
+      {
+        trainerBenchHp: [145, 0],
+        trainerBenchOverride: [{
+          species: MACHOP,
+          moves: [KARATE_CHOP, 0, 0, 0],
+        }, undefined],
+      },
+    ));
+    expect(result.kind).toBe("decision-required");
+    if (result.kind !== "decision-required") throw new Error("expected next command");
+    expect(result.nextRequest).toMatchObject({
+      kind: "command", requestId: 3, side: "player", battler: 0,
+    });
+    expect(result.state.rules.rulesContext.battlers[1]).toMatchObject({
+      species: MACHOP, partyIndex: 1, hp: 145, status1: 0,
+    });
+    expect(result.state.rng.calls).toBe(9);
+  });
+
+  it("trainer poison KO with no surviving party member reports the real player-win outcome", () => {
+    const result = runTurn(quietStatusConfig(
+      {},
+      { hp: 22, maxHp: 160, status1: STATUS1_POISON },
+    ));
+    expect(result.kind).toBe("terminal");
+    if (result.kind !== "terminal") throw new Error("expected terminal");
+    expect(result.outcome).toBe("player-win");
+    expect(result.state.rules.rulesContext.battleOutcome).toBe(1);
+    expect(result.state.rules.rulesContext.battlers[1].hp).toBe(0);
+    expect(result.state.rng.calls).toBe(8);
+  });
+});

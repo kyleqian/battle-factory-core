@@ -2168,6 +2168,31 @@ function finishFaintedThenDelayed(
 }
 
 /**
+ * Resumes `BattleTurnPassed` immediately after a player-selected faint
+ * replacement finishes `HandleFaintedMonActions`.
+ *
+ * The C main loop keeps the completed field/battler cursors in
+ * `gBattleStruct` while `HandleFaintedMonActions` blocks for the party
+ * choice (`battle_main.c:3963-3972`). Once the replacement script returns,
+ * it does not call `DoFieldEndTurnEffects` or `DoBattlerEndTurnEffects`
+ * again; it continues with `HandleWishPerishSongOnTurnEnd`, whose own
+ * positional cursors then lead into the final cleanup
+ * (`battle_main.c:3970-3974`, `battle_util.c:1779-1892`).
+ *
+ * The reducer has already collapsed those completed loops into `state`, so
+ * this is the source-equivalent continuation seam. Re-entering
+ * `runBattleEndTurnOrchestration` here would incorrectly apply poison,
+ * burn, Leftovers, weather, and every other completed end-turn effect twice.
+ */
+export function resumeBattleEndTurnAfterFaintedActions(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+): BattleEndTurnResult {
+  return runFutureAttacksAfterFaints(program, handlers, state, "resumed");
+}
+
+/**
  * The C-side `BattleTurnPassed` loop equivalent. Call once both of a turn's
  * actions have finished (their own move scripts, and any mid-turn faints'
  * own `HandleFaintedMonActions`, already resolved to a real continuation
