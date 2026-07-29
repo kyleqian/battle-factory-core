@@ -18,4 +18,4 @@ if (!move || move.id !== 348 || move.frontierMonCount !== 4
   || !body.includes("SE_M_LEER") || !body.includes("clearmonbg ANIM_TARGET") || !body.includes("blendoff")
   || !effects.includes("void AnimTask_LeafBlade(u8 taskId)") || !effects.includes("AnimTask_LeafBlade_Step2_Callback")
   || !effects.includes("gLeafBladeSpriteTemplate")) throw new Error("Leaf Blade source contract changed");
-console.log("set 453/species 254/move 348; LEAF + CROSS_IMPACT; LeafBlade task/trails; 4 ShakeMon2; 3 CUT + LEER; cleanup");
+console.log("set 453/species 279/move 348; LEAF + CROSS_IMPACT; LeafBlade task/trails; 4 ShakeMon2; 3 CUT + LEER; cleanup");

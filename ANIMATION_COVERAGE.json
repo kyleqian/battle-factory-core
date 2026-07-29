@@ -1986,7 +1986,7 @@
         "MOVE_CROSS_CHOP",
         "MOVE_LEAF_BLADE"
       ],
-      "goal": "MOVE_CROSS_CHOP independently proves its complete 88-frame source body through first inactive cleanup at 88/88 reducer/component, typed-seam, software/hardware OAM, matrices, palettes, registers, both audio players and pans, raw-RGB, and shared-framebuffer frames 216-303 player-back and 217-304 opponent-front, twice fresh. MOVE_LEAF_BLADE remains unsupported because it adds the distinct LEAF asset, create_leaf_blade_task body, ShakeMon2 task, timing, and audio without independent complete dense acceptance."
+      "goal": "MOVE_CROSS_CHOP independently proves its complete 88-frame source body through first inactive cleanup at 88/88 reducer/component, typed-seam, software/hardware OAM, matrices, palettes, registers, both audio players and pans, raw-RGB, and shared-framebuffer frames 216-303 player-back and 217-304 opponent-front, twice fresh. MOVE_LEAF_BLADE now has independent dense Scene-ON ROM evidence only: legal set-453 Sceptile bodies are 224/224 frames 76-299 player-back and 80-303 opponent-front, twice fresh, byte-pinning LEAF/CROSS_IMPACT assets, 45 LeafBlade and one cross-impact lifecycle, task/template/callback state, software/hardware OAM, matrices, palettes/tags/buffers, registers, both audio players/pans, raw RGB, and first inactive cleanup. It remains unsupported pending an independent source-relative reducer and typed presentation seam; sharing CROSS_IMPACT never promotes it."
     },
     {
       "id": "brown-orb-mud-shot",

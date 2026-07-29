@@ -1,5 +1,32 @@
 # Animation coverage
 
+## MOVE_LEAF_BLADE independent dense-ROM evidence checkpoint; production remains unsupported (2026-07-28)
+
+**Verdict:** Evidence-only checkpoint. `MOVE_LEAF_BLADE` remains unsupported;
+it is not staged, partial, or exact, and the coverage census is unchanged.
+Source-verified Level-50 Factory set **453** `FRONTIER_MON_SCEPTILE_1`
+(species **279**, Leaf Blade **348**) drives complete legal Scene-ON
+mechanicLab parties against ONIX in both orientations. The complete
+move-owned body through first inactive cleanup is **224/224** frames
+**76–299** player-back and **80–303** opponent-front, twice fresh. Evidence
+/ raw-RGB digests are player `e3fea9bd…5c4095` / `6ba2d80f…e74f4ad` and
+opponent `ae787ec4…9c5b86` / `b85563f6…285bed`.
+
+**Evidence/source:** `Move_LEAF_BLADE` loads LEAF and CROSS_IMPACT, starts
+`create_leaf_blade_task` (45 observed LEAF lifecycles), executes three
+target-panned CUT + `ShakeMon2(2,0,8,1)` passes, then target monbg/12:8
+alpha, a fourth `ShakeMon2(8,0,18,1)`, one 36-frame CROSS_IMPACT, LEER,
+waits, and cleanup. The portable comparator reruns both orientations twice
+through `run-mgba-probe.py`, byte-pinning every source offset,
+task/template/callback state, lifecycle, software/hardware OAM, matrices,
+palettes/tags/buffers, registers, SE1/SE2/pans, raw RGB, and inactive cleanup.
+Known mGBA teardown SIGSEGVs are accepted only after wrapper JSON validation.
+
+**Boundary:** CROSS_CHOP remains the exact shared CROSS_IMPACT control; it
+does not promote Leaf Blade. No reducer, seam, renderer, battle/controller,
+RNG/facility state, boundary list, unsupported barrier, or sibling status
+changed.
+
 ## MOVE_ENDURE promoted exact; shared EndureEffect track closed (2026-07-28)
 
 **Verdict:** `MOVE_ENDURE` is exact. Legal Level-50 set-113 EEVEE→ONIX
