@@ -89,6 +89,9 @@ def stage(harness: Path, request: dict, step_frames: set[int] | None = None, tab
         def _advance(self, count, buttons, after_frame=None):
             for _ in range(count):
                 before = self.oracle.read_u32(SRANDCOUNT_ADDR)
+                previous_random_turn_number = self.oracle.read_u16(
+                    self.oracle.symbols["gRandomTurnNumber"]
+                )
                 next_frame = self.absolute_frame + 1
                 if step_frames is not None and next_frame in step_frames:
                     step_frame(self.oracle, next_frame, list(buttons), table, self.calls)
@@ -98,7 +101,9 @@ def stage(harness: Path, request: dict, step_frames: set[int] | None = None, tab
                     after_frame()
                 self.absolute_frame = next_frame
                 after = self.oracle.read_u32(SRANDCOUNT_ADDR)
-                self.samples.append({"frame": next_frame, "sRandCount": after,
+                self.samples.append({"frame": next_frame,
+                    "previousRandomTurnNumber": previous_random_turn_number,
+                    "sRandCount": after,
                     "sRandDelta": (after - before) & 0xFFFFFFFF,
                     "mainCallback2": f"0x{self.oracle.read_u32(self.oracle.symbols['gMain'] + 4):08x}",
                     **globals_now(self.oracle)})
@@ -195,39 +200,126 @@ def run_case(harness: Path, table: list[tuple[int, str]], equal_speed: bool) -> 
     for _frame, buttons in frames(validated["trace"]):
         lab._advance(1, tuple(buttons))
     per_frame = lab.samples
-    # The bootstrap has an intentional per-VBlank Random stream.  The only
-    # narrow post-CB2 frames before command selection are the intro frame and
-    # its first-turn cleanup successor; do not single-step that broad route.
-    flagged = {row["frame"] for row in per_frame
-               if row["sRandDelta"] and row["gRandomTurnNumber"] != 0}
+    # The bootstrap has an intentional per-VBlank Random stream.  Draws A/B
+    # are the only fresh-start draws that mutate gRandomTurnNumber: use that
+    # fact to retain precisely their two frames, not later action-order ties.
+    turn_number_writes = [row for row in per_frame if row["sRandDelta"]
+                          and row["previousRandomTurnNumber"] != row["gRandomTurnNumber"]]
+    # The trace later executes a move, and so can legitimately reach a later
+    # turn's gRandomTurnNumber update.  The first two mutations are A/B; the
+    # first's zero predecessor makes that boundary mechanically explicit.
+    start_frames = turn_number_writes[:2]
+    require(len(start_frames) == 2 and start_frames[0]["previousRandomTurnNumber"] == 0,
+            f"expected A/B as the first two turn-number writes, got {turn_number_writes}")
+    flagged = {row["frame"] for row in start_frames}
     print("fast-pass", flush=True)
     _oracle2, validated2, _setup2, lab2 = stage(harness, request, flagged, table)
     for _frame, buttons in frames(validated2["trace"]):
         lab2._advance(1, tuple(buttons))
     calls = lab2.calls
-    require(sum(row["sRandDelta"] for row in per_frame if row["frame"] in flagged) == len(calls), "narrow sRandCount and calls disagree")
-    start_calls = [row for row in calls if row["caller"].startswith(("BattleStartClearSetData", "TryDoEventsBeforeFirstTurn", "GetWhoStrikesFirst"))]
+    expected_draws = 3 if equal_speed else 2
+    require(sum(row["sRandDelta"] for row in start_frames) == expected_draws,
+            f"expected {expected_draws} A/tie/B draws, got {start_frames}")
+    require(len(calls) == expected_draws,
+            f"narrow sRandCount and calls disagree: {calls}")
     expected = (["BattleStartClearSetData+0x29b", "TryDoEventsBeforeFirstTurn+0x26f"]
-                if not equal_speed else ["BattleStartClearSetData+0x29b", "GetWhoStrikesFirst+0x31f", "TryDoEventsBeforeFirstTurn+0x26f"])
-    require([row["caller"] for row in start_calls] == expected, f"unexpected A/tie/B callers: {start_calls}")
-    require(start_calls[-1]["post"]["returnedU16"] == per_frame[[row["frame"] for row in per_frame].index(start_calls[-1]["frame"])]["gRandomTurnNumber"], "B did not persist")
+                if not equal_speed else ["BattleStartClearSetData+0x29b", "GetWhoStrikesFirst+0x3b1", "TryDoEventsBeforeFirstTurn+0x26f"])
+    require([row["caller"] for row in calls] == expected,
+            f"unexpected A/tie/B callers: {calls}")
+    b_frame = start_frames[-1]
+    require(calls[-1]["post"]["returnedU16"] == b_frame["gRandomTurnNumber"],
+            "B did not persist")
+    receipt = {
+        "aFrame": start_frames[0]["frame"],
+        "bFrame": b_frame["frame"],
+        "aToBRandomDraws": expected_draws,
+        "callers": [row["caller"] for row in calls],
+        "resultingBattlerOrder": b_frame["gBattlerByTurnOrder"][:2],
+    }
+    if equal_speed:
+        receipt["tie"] = {
+            "frame": calls[1]["frame"],
+            "caller": calls[1]["caller"],
+            "lr": calls[1]["lr"],
+            "returnedU16": calls[1]["post"]["returnedU16"],
+            "randomAndOne": calls[1]["post"]["returnedU16"] & 1,
+        }
     return {
         "case": "equal-active-speed" if equal_speed else "distinct-active-speed-no-hooks",
         "setupSpecies": {"player": [row["species"] for row in setup["player"]], "opponent": [row["species"] for row in setup["opponent"]]},
         "perFrame": per_frame,
-        "randomCalls": calls, "startReceipt": start_calls,
+        "randomCalls": calls, "startReceipt": calls, "receipt": receipt,
         "verdict": "PASS",
     }
 
 
-def main() -> None:
-    require(len(sys.argv) == 2, f"usage: {sys.argv[0]} <fresh-output.json>")
-    output = Path(sys.argv[1])
+def assert_equal_speed_receipt(no_hook: dict, equal_speed: dict) -> None:
+    """Prove the tie is one ordered draw inside the already-landed A/B seam."""
+    base = no_hook["receipt"]
+    tied = equal_speed["receipt"]
+    require(base["callers"] == [
+        "BattleStartClearSetData+0x29b",
+        "TryDoEventsBeforeFirstTurn+0x26f",
+    ], f"no-hook A/B receipt moved: {base}")
+    require(tied["callers"][0] == base["callers"][0]
+            and tied["callers"][-1] == base["callers"][-1],
+            f"equal-speed changed A/B caller positions: {tied}")
+    require(tied["aFrame"] == base["aFrame"],
+            f"equal-speed changed A's frame: {base}, {tied}")
+    require(tied["aToBRandomDraws"] == base["aToBRandomDraws"] + 1,
+            f"equal-speed did not add exactly one A-to-B draw: {base}, {tied}")
+    tie = tied.get("tie")
+    require(tie is not None and tied["callers"][1] == tie["caller"],
+            f"missing ordered tie receipt: {tied}")
+    require(tied["aFrame"] < tie["frame"] <= tied["bFrame"],
+            f"tie was not strictly between A and B instructions: {tied}")
+    require(tied["resultingBattlerOrder"] == [1, 0],
+            f"tie result did not produce the recorded battler order: {tied}")
+
+
+def single_case(output: Path, equal_speed: bool) -> None:
     harness = find_harness_root()
     table = symbols((harness / "reference/pokeemerald/pokeemerald.elf").resolve())
-    result = {"verdict": "PASS", "profile": PROFILE, "fixture": str(FIXTURE.relative_to(ROOT)), "cases": [
-        run_case(harness, table, False),
-    ]}
+    output.write_text(json.dumps(run_case(harness, table, equal_speed), indent=2) + "\n")
+
+
+def subprocess_case(output: Path, equal_speed: bool) -> dict:
+    label = "equal" if equal_speed else "distinct"
+    child_output = output.with_name(f"{output.name}.{label}.json")
+    child = subprocess.run(
+        [sys.executable, str(Path(__file__).resolve()), str(child_output), "--case", label],
+        stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+    )
+    valid = False
+    try:
+        result = json.loads(child_output.read_text())
+        valid = result.get("verdict") == "PASS"
+    except (OSError, json.JSONDecodeError):
+        result = None
+    # This is the same teardown allowance as tools/run-mgba-probe.py, but at
+    # the case boundary: libmgba can SIGSEGV only after the child wrote its
+    # complete receipt.  Separate processes keep that teardown from making a
+    # second case's fresh emulator unstable.
+    require(valid and child.returncode in (0, -11, 139),
+            f"{label} child did not write a valid PASS receipt (exit {child.returncode})")
+    return result
+
+
+def main() -> None:
+    require(len(sys.argv) in (2, 4),
+            f"usage: {sys.argv[0]} <fresh-output.json> [--case distinct|equal]")
+    output = Path(sys.argv[1])
+    if len(sys.argv) == 4:
+        require(sys.argv[2] == "--case" and sys.argv[3] in ("distinct", "equal"),
+                f"invalid case selector: {sys.argv[2:]}")
+        single_case(output, sys.argv[3] == "equal")
+        return
+    no_hook = subprocess_case(output, False)
+    equal_speed = subprocess_case(output, True)
+    assert_equal_speed_receipt(no_hook, equal_speed)
+    result = {"verdict": "PASS", "profile": PROFILE,
+              "fixture": str(FIXTURE.relative_to(ROOT)),
+              "cases": [no_hook, equal_speed]}
     output.write_text(json.dumps(result, indent=2) + "\n")
     print(f"wrote {output}", flush=True)
 
