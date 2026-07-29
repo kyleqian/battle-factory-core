@@ -13,11 +13,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
-## 653 — [BOUNDED MAIN WORKER 2026-07-28 ~18:40] Switch-in entry hooks registered
+## 653 — [BOUNDED MAIN WORKER 2026-07-28 ~18:51] Switch-in entry hooks registered and follow-up pins closed
 
-- **State:** implementation commit `2ec8ef8a` (+ final Forecast guard/docs
-  commit); tree green at **439 files /
-  4784 tests**, production build, and `git diff --check`. Handler inventory
+- **State:** implementation commits `2ec8ef8a` / `38da44ab` (+ final Forecast
+  guard/docs commit); tree green at **440 files / 4791 tests**, production
+  build, OFF oracle info, and `git diff --check`. Handler inventory
   pin updated **209→210** for the newly registered target opcode. Census
   byte-idempotent at **214/214 effects, 355/355 moves, 276/276 distinct,
   2957/2957 weighted**, all **72** validations.
@@ -26,11 +26,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   weather, Intimidate, Trace, Forecast, Cloud Nine, and Air Lock. Weather
   callbacks/no-ops, Trace's live opposing ability copy/message buffers, and
   Intimidate's STATUS3 marker, shared statbuffchange path, Substitute and
-  Clear Body prevention branches are Tier-1 pinned with zero RNG draws.
-- **Next:** supervisor verify `2ec8ef8a` and this ledger commit. A follow-up
-  should pin Hyper Cutter/White Smoke alongside Clear Body and add an
-  orchestration-level two-battler weather→Intimidate ordering test; on-switch
-  item breadth remains separate.
+  all three source prevention abilities are Tier-1 pinned with exact messages
+  and zero RNG draws. Battle-start ordering now pins faster Drizzle's weather
+  message before slower Intimidate's stat drop. The new full-script pins
+  exposed and fixed one real defect: removed a duplicate synthetic prevention
+  event so the source script is the sole message owner.
+- **Next:** supervisor verify `38da44ab` and this ledger commit; on-switch item
+  breadth remains separate.
 - **Notes:** switch-in unsupported-branch ratchet **6→4**; the retained
   barriers are unchanged: switchhandleorder cases 0/1, non-singles wrapped
   cross-clear, Arena init, and other `various` ids. The named Castform form
