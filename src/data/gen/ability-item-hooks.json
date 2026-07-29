@@ -1,0 +1,2894 @@
+{
+  "schema": "ability-item-hooks/v1",
+  "rerunCommand": "node --experimental-strip-types tools/extract/extract-ability-item-hooks.ts",
+  "source": {
+    "battleUtil": {
+      "file": "src/battle_util.c",
+      "sha256": "2ba9ee4efe913effa119c8342281745f481910ca1b20cd76b470673062a45fd5",
+      "abilityBattleEffects": {
+        "startLine": 2431,
+        "endLine": 3199
+      },
+      "itemBattleEffects": {
+        "startLine": 3257,
+        "endLine": 3813
+      }
+    },
+    "scannedFiles": [
+      {
+        "file": "src/battle_util.c",
+        "tag": "rules",
+        "sha256": "2ba9ee4efe913effa119c8342281745f481910ca1b20cd76b470673062a45fd5",
+        "lines": 4039
+      },
+      {
+        "file": "src/battle_util2.c",
+        "tag": "rules",
+        "sha256": "0c2e5a959500571fc6263a5e97db88fc89d8d07ef5273cd8ae502858b34f3c2b",
+        "lines": 216
+      },
+      {
+        "file": "src/battle_script_commands.c",
+        "tag": "rules",
+        "sha256": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+        "lines": 10327
+      },
+      {
+        "file": "src/battle_main.c",
+        "tag": "rules",
+        "sha256": "ee79b86ff0f681ab783b363135fd84d050e7123bea2a77c5530f2c7ddc8b8408",
+        "lines": 5271
+      },
+      {
+        "file": "src/pokemon.c",
+        "tag": "rules",
+        "sha256": "6f474bb05a55e421504f442910ea2faf4e328cce0d0b451879c907e24bdbd797",
+        "lines": 7186
+      },
+      {
+        "file": "data/battle_scripts_1.s",
+        "tag": "rules",
+        "sha256": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+        "lines": 4563
+      },
+      {
+        "file": "src/battle_ai_script_commands.c",
+        "tag": "ai",
+        "sha256": "c75ed7f1a1dc775eb4b4cee3ff05e74451a34e239cffb6a37be0d766f38f66e6",
+        "lines": 2309
+      },
+      {
+        "file": "src/battle_ai_switch_items.c",
+        "tag": "ai",
+        "sha256": "4dca4671aebc2eac82792279a49a0913613145b4f94cee852964665e5b70039f",
+        "lines": 945
+      }
+    ]
+  },
+  "universes": {
+    "abilities": [
+      {
+        "name": "ABILITY_NONE",
+        "id": 0
+      },
+      {
+        "name": "ABILITY_STENCH",
+        "id": 1
+      },
+      {
+        "name": "ABILITY_DRIZZLE",
+        "id": 2
+      },
+      {
+        "name": "ABILITY_SPEED_BOOST",
+        "id": 3
+      },
+      {
+        "name": "ABILITY_BATTLE_ARMOR",
+        "id": 4
+      },
+      {
+        "name": "ABILITY_STURDY",
+        "id": 5
+      },
+      {
+        "name": "ABILITY_DAMP",
+        "id": 6
+      },
+      {
+        "name": "ABILITY_LIMBER",
+        "id": 7
+      },
+      {
+        "name": "ABILITY_SAND_VEIL",
+        "id": 8
+      },
+      {
+        "name": "ABILITY_STATIC",
+        "id": 9
+      },
+      {
+        "name": "ABILITY_VOLT_ABSORB",
+        "id": 10
+      },
+      {
+        "name": "ABILITY_WATER_ABSORB",
+        "id": 11
+      },
+      {
+        "name": "ABILITY_OBLIVIOUS",
+        "id": 12
+      },
+      {
+        "name": "ABILITY_CLOUD_NINE",
+        "id": 13
+      },
+      {
+        "name": "ABILITY_COMPOUND_EYES",
+        "id": 14
+      },
+      {
+        "name": "ABILITY_INSOMNIA",
+        "id": 15
+      },
+      {
+        "name": "ABILITY_COLOR_CHANGE",
+        "id": 16
+      },
+      {
+        "name": "ABILITY_IMMUNITY",
+        "id": 17
+      },
+      {
+        "name": "ABILITY_FLASH_FIRE",
+        "id": 18
+      },
+      {
+        "name": "ABILITY_SHIELD_DUST",
+        "id": 19
+      },
+      {
+        "name": "ABILITY_OWN_TEMPO",
+        "id": 20
+      },
+      {
+        "name": "ABILITY_SUCTION_CUPS",
+        "id": 21
+      },
+      {
+        "name": "ABILITY_INTIMIDATE",
+        "id": 22
+      },
+      {
+        "name": "ABILITY_SHADOW_TAG",
+        "id": 23
+      },
+      {
+        "name": "ABILITY_ROUGH_SKIN",
+        "id": 24
+      },
+      {
+        "name": "ABILITY_WONDER_GUARD",
+        "id": 25
+      },
+      {
+        "name": "ABILITY_LEVITATE",
+        "id": 26
+      },
+      {
+        "name": "ABILITY_EFFECT_SPORE",
+        "id": 27
+      },
+      {
+        "name": "ABILITY_SYNCHRONIZE",
+        "id": 28
+      },
+      {
+        "name": "ABILITY_CLEAR_BODY",
+        "id": 29
+      },
+      {
+        "name": "ABILITY_NATURAL_CURE",
+        "id": 30
+      },
+      {
+        "name": "ABILITY_LIGHTNING_ROD",
+        "id": 31
+      },
+      {
+        "name": "ABILITY_SERENE_GRACE",
+        "id": 32
+      },
+      {
+        "name": "ABILITY_SWIFT_SWIM",
+        "id": 33
+      },
+      {
+        "name": "ABILITY_CHLOROPHYLL",
+        "id": 34
+      },
+      {
+        "name": "ABILITY_ILLUMINATE",
+        "id": 35
+      },
+      {
+        "name": "ABILITY_TRACE",
+        "id": 36
+      },
+      {
+        "name": "ABILITY_HUGE_POWER",
+        "id": 37
+      },
+      {
+        "name": "ABILITY_POISON_POINT",
+        "id": 38
+      },
+      {
+        "name": "ABILITY_INNER_FOCUS",
+        "id": 39
+      },
+      {
+        "name": "ABILITY_MAGMA_ARMOR",
+        "id": 40
+      },
+      {
+        "name": "ABILITY_WATER_VEIL",
+        "id": 41
+      },
+      {
+        "name": "ABILITY_MAGNET_PULL",
+        "id": 42
+      },
+      {
+        "name": "ABILITY_SOUNDPROOF",
+        "id": 43
+      },
+      {
+        "name": "ABILITY_RAIN_DISH",
+        "id": 44
+      },
+      {
+        "name": "ABILITY_SAND_STREAM",
+        "id": 45
+      },
+      {
+        "name": "ABILITY_PRESSURE",
+        "id": 46
+      },
+      {
+        "name": "ABILITY_THICK_FAT",
+        "id": 47
+      },
+      {
+        "name": "ABILITY_EARLY_BIRD",
+        "id": 48
+      },
+      {
+        "name": "ABILITY_FLAME_BODY",
+        "id": 49
+      },
+      {
+        "name": "ABILITY_RUN_AWAY",
+        "id": 50
+      },
+      {
+        "name": "ABILITY_KEEN_EYE",
+        "id": 51
+      },
+      {
+        "name": "ABILITY_HYPER_CUTTER",
+        "id": 52
+      },
+      {
+        "name": "ABILITY_PICKUP",
+        "id": 53
+      },
+      {
+        "name": "ABILITY_TRUANT",
+        "id": 54
+      },
+      {
+        "name": "ABILITY_HUSTLE",
+        "id": 55
+      },
+      {
+        "name": "ABILITY_CUTE_CHARM",
+        "id": 56
+      },
+      {
+        "name": "ABILITY_PLUS",
+        "id": 57
+      },
+      {
+        "name": "ABILITY_MINUS",
+        "id": 58
+      },
+      {
+        "name": "ABILITY_FORECAST",
+        "id": 59
+      },
+      {
+        "name": "ABILITY_STICKY_HOLD",
+        "id": 60
+      },
+      {
+        "name": "ABILITY_SHED_SKIN",
+        "id": 61
+      },
+      {
+        "name": "ABILITY_GUTS",
+        "id": 62
+      },
+      {
+        "name": "ABILITY_MARVEL_SCALE",
+        "id": 63
+      },
+      {
+        "name": "ABILITY_LIQUID_OOZE",
+        "id": 64
+      },
+      {
+        "name": "ABILITY_OVERGROW",
+        "id": 65
+      },
+      {
+        "name": "ABILITY_BLAZE",
+        "id": 66
+      },
+      {
+        "name": "ABILITY_TORRENT",
+        "id": 67
+      },
+      {
+        "name": "ABILITY_SWARM",
+        "id": 68
+      },
+      {
+        "name": "ABILITY_ROCK_HEAD",
+        "id": 69
+      },
+      {
+        "name": "ABILITY_DROUGHT",
+        "id": 70
+      },
+      {
+        "name": "ABILITY_ARENA_TRAP",
+        "id": 71
+      },
+      {
+        "name": "ABILITY_VITAL_SPIRIT",
+        "id": 72
+      },
+      {
+        "name": "ABILITY_WHITE_SMOKE",
+        "id": 73
+      },
+      {
+        "name": "ABILITY_PURE_POWER",
+        "id": 74
+      },
+      {
+        "name": "ABILITY_SHELL_ARMOR",
+        "id": 75
+      },
+      {
+        "name": "ABILITY_CACOPHONY",
+        "id": 76
+      },
+      {
+        "name": "ABILITY_AIR_LOCK",
+        "id": 77
+      }
+    ],
+    "holdEffects": [
+      {
+        "name": "HOLD_EFFECT_NONE",
+        "id": 0
+      },
+      {
+        "name": "HOLD_EFFECT_RESTORE_HP",
+        "id": 1
+      },
+      {
+        "name": "HOLD_EFFECT_CURE_PAR",
+        "id": 2
+      },
+      {
+        "name": "HOLD_EFFECT_CURE_SLP",
+        "id": 3
+      },
+      {
+        "name": "HOLD_EFFECT_CURE_PSN",
+        "id": 4
+      },
+      {
+        "name": "HOLD_EFFECT_CURE_BRN",
+        "id": 5
+      },
+      {
+        "name": "HOLD_EFFECT_CURE_FRZ",
+        "id": 6
+      },
+      {
+        "name": "HOLD_EFFECT_RESTORE_PP",
+        "id": 7
+      },
+      {
+        "name": "HOLD_EFFECT_CURE_CONFUSION",
+        "id": 8
+      },
+      {
+        "name": "HOLD_EFFECT_CURE_STATUS",
+        "id": 9
+      },
+      {
+        "name": "HOLD_EFFECT_CONFUSE_SPICY",
+        "id": 10
+      },
+      {
+        "name": "HOLD_EFFECT_CONFUSE_DRY",
+        "id": 11
+      },
+      {
+        "name": "HOLD_EFFECT_CONFUSE_SWEET",
+        "id": 12
+      },
+      {
+        "name": "HOLD_EFFECT_CONFUSE_BITTER",
+        "id": 13
+      },
+      {
+        "name": "HOLD_EFFECT_CONFUSE_SOUR",
+        "id": 14
+      },
+      {
+        "name": "HOLD_EFFECT_ATTACK_UP",
+        "id": 15
+      },
+      {
+        "name": "HOLD_EFFECT_DEFENSE_UP",
+        "id": 16
+      },
+      {
+        "name": "HOLD_EFFECT_SPEED_UP",
+        "id": 17
+      },
+      {
+        "name": "HOLD_EFFECT_SP_ATTACK_UP",
+        "id": 18
+      },
+      {
+        "name": "HOLD_EFFECT_SP_DEFENSE_UP",
+        "id": 19
+      },
+      {
+        "name": "HOLD_EFFECT_CRITICAL_UP",
+        "id": 20
+      },
+      {
+        "name": "HOLD_EFFECT_RANDOM_STAT_UP",
+        "id": 21
+      },
+      {
+        "name": "HOLD_EFFECT_EVASION_UP",
+        "id": 22
+      },
+      {
+        "name": "HOLD_EFFECT_RESTORE_STATS",
+        "id": 23
+      },
+      {
+        "name": "HOLD_EFFECT_MACHO_BRACE",
+        "id": 24
+      },
+      {
+        "name": "HOLD_EFFECT_EXP_SHARE",
+        "id": 25
+      },
+      {
+        "name": "HOLD_EFFECT_QUICK_CLAW",
+        "id": 26
+      },
+      {
+        "name": "HOLD_EFFECT_FRIENDSHIP_UP",
+        "id": 27
+      },
+      {
+        "name": "HOLD_EFFECT_CURE_ATTRACT",
+        "id": 28
+      },
+      {
+        "name": "HOLD_EFFECT_CHOICE_BAND",
+        "id": 29
+      },
+      {
+        "name": "HOLD_EFFECT_FLINCH",
+        "id": 30
+      },
+      {
+        "name": "HOLD_EFFECT_BUG_POWER",
+        "id": 31
+      },
+      {
+        "name": "HOLD_EFFECT_DOUBLE_PRIZE",
+        "id": 32
+      },
+      {
+        "name": "HOLD_EFFECT_REPEL",
+        "id": 33
+      },
+      {
+        "name": "HOLD_EFFECT_SOUL_DEW",
+        "id": 34
+      },
+      {
+        "name": "HOLD_EFFECT_DEEP_SEA_TOOTH",
+        "id": 35
+      },
+      {
+        "name": "HOLD_EFFECT_DEEP_SEA_SCALE",
+        "id": 36
+      },
+      {
+        "name": "HOLD_EFFECT_CAN_ALWAYS_RUN",
+        "id": 37
+      },
+      {
+        "name": "HOLD_EFFECT_PREVENT_EVOLVE",
+        "id": 38
+      },
+      {
+        "name": "HOLD_EFFECT_FOCUS_BAND",
+        "id": 39
+      },
+      {
+        "name": "HOLD_EFFECT_LUCKY_EGG",
+        "id": 40
+      },
+      {
+        "name": "HOLD_EFFECT_SCOPE_LENS",
+        "id": 41
+      },
+      {
+        "name": "HOLD_EFFECT_STEEL_POWER",
+        "id": 42
+      },
+      {
+        "name": "HOLD_EFFECT_LEFTOVERS",
+        "id": 43
+      },
+      {
+        "name": "HOLD_EFFECT_DRAGON_SCALE",
+        "id": 44
+      },
+      {
+        "name": "HOLD_EFFECT_LIGHT_BALL",
+        "id": 45
+      },
+      {
+        "name": "HOLD_EFFECT_GROUND_POWER",
+        "id": 46
+      },
+      {
+        "name": "HOLD_EFFECT_ROCK_POWER",
+        "id": 47
+      },
+      {
+        "name": "HOLD_EFFECT_GRASS_POWER",
+        "id": 48
+      },
+      {
+        "name": "HOLD_EFFECT_DARK_POWER",
+        "id": 49
+      },
+      {
+        "name": "HOLD_EFFECT_FIGHTING_POWER",
+        "id": 50
+      },
+      {
+        "name": "HOLD_EFFECT_ELECTRIC_POWER",
+        "id": 51
+      },
+      {
+        "name": "HOLD_EFFECT_WATER_POWER",
+        "id": 52
+      },
+      {
+        "name": "HOLD_EFFECT_FLYING_POWER",
+        "id": 53
+      },
+      {
+        "name": "HOLD_EFFECT_POISON_POWER",
+        "id": 54
+      },
+      {
+        "name": "HOLD_EFFECT_ICE_POWER",
+        "id": 55
+      },
+      {
+        "name": "HOLD_EFFECT_GHOST_POWER",
+        "id": 56
+      },
+      {
+        "name": "HOLD_EFFECT_PSYCHIC_POWER",
+        "id": 57
+      },
+      {
+        "name": "HOLD_EFFECT_FIRE_POWER",
+        "id": 58
+      },
+      {
+        "name": "HOLD_EFFECT_DRAGON_POWER",
+        "id": 59
+      },
+      {
+        "name": "HOLD_EFFECT_NORMAL_POWER",
+        "id": 60
+      },
+      {
+        "name": "HOLD_EFFECT_UP_GRADE",
+        "id": 61
+      },
+      {
+        "name": "HOLD_EFFECT_SHELL_BELL",
+        "id": 62
+      },
+      {
+        "name": "HOLD_EFFECT_LUCKY_PUNCH",
+        "id": 63
+      },
+      {
+        "name": "HOLD_EFFECT_METAL_POWDER",
+        "id": 64
+      },
+      {
+        "name": "HOLD_EFFECT_THICK_CLUB",
+        "id": 65
+      },
+      {
+        "name": "HOLD_EFFECT_STICK",
+        "id": 66
+      }
+    ]
+  },
+  "abilityBattleEffects": {
+    "cases": [
+      {
+        "caseName": "ABILITYEFFECT_ON_SWITCHIN",
+        "caseId": 0,
+        "startLine": 2485,
+        "endLine": 2600,
+        "aliasLabels": [
+          {
+            "name": "ABILITYEFFECT_SWITCH_IN_WEATHER",
+            "id": 255,
+            "line": 2490
+          }
+        ],
+        "dispatchLabels": [
+          {
+            "token": "ABILITY_DRIZZLE",
+            "line": 2532
+          },
+          {
+            "token": "ABILITY_SAND_STREAM",
+            "line": 2541
+          },
+          {
+            "token": "ABILITY_DROUGHT",
+            "line": 2550
+          },
+          {
+            "token": "ABILITY_INTIMIDATE",
+            "line": 2559
+          },
+          {
+            "token": "ABILITY_FORECAST",
+            "line": 2566
+          },
+          {
+            "token": "ABILITY_TRACE",
+            "line": 2575
+          },
+          {
+            "token": "ABILITY_CLOUD_NINE",
+            "line": 2582
+          },
+          {
+            "token": "ABILITY_AIR_LOCK",
+            "line": 2583
+          }
+        ],
+        "tokenMentions": []
+      },
+      {
+        "caseName": "ABILITYEFFECT_ENDTURN",
+        "caseId": 1,
+        "startLine": 2601,
+        "endLine": 2658,
+        "aliasLabels": [],
+        "dispatchLabels": [
+          {
+            "token": "ABILITY_RAIN_DISH",
+            "line": 2607
+          },
+          {
+            "token": "ABILITY_SHED_SKIN",
+            "line": 2620
+          },
+          {
+            "token": "ABILITY_SPEED_BOOST",
+            "line": 2642
+          },
+          {
+            "token": "ABILITY_TRUANT",
+            "line": 2653
+          }
+        ],
+        "tokenMentions": [
+          {
+            "token": "ABILITY_RAIN_DISH",
+            "line": 2611
+          }
+        ]
+      },
+      {
+        "caseName": "ABILITYEFFECT_MOVES_BLOCK",
+        "caseId": 2,
+        "startLine": 2659,
+        "endLine": 2675,
+        "aliasLabels": [],
+        "dispatchLabels": [],
+        "tokenMentions": [
+          {
+            "token": "ABILITY_SOUNDPROOF",
+            "line": 2660
+          }
+        ]
+      },
+      {
+        "caseName": "ABILITYEFFECT_ABSORBING",
+        "caseId": 3,
+        "startLine": 2676,
+        "endLine": 2748,
+        "aliasLabels": [],
+        "dispatchLabels": [
+          {
+            "token": "ABILITY_VOLT_ABSORB",
+            "line": 2681
+          },
+          {
+            "token": "ABILITY_WATER_ABSORB",
+            "line": 2692
+          },
+          {
+            "token": "ABILITY_FLASH_FIRE",
+            "line": 2703
+          }
+        ],
+        "tokenMentions": []
+      },
+      {
+        "caseName": "ABILITYEFFECT_ON_DAMAGE",
+        "caseId": 4,
+        "startLine": 2749,
+        "endLine": 2872,
+        "aliasLabels": [],
+        "dispatchLabels": [
+          {
+            "token": "ABILITY_COLOR_CHANGE",
+            "line": 2752
+          },
+          {
+            "token": "ABILITY_ROUGH_SKIN",
+            "line": 2767
+          },
+          {
+            "token": "ABILITY_EFFECT_SPORE",
+            "line": 2782
+          },
+          {
+            "token": "ABILITY_POISON_POINT",
+            "line": 2806
+          },
+          {
+            "token": "ABILITY_STATIC",
+            "line": 2821
+          },
+          {
+            "token": "ABILITY_FLAME_BODY",
+            "line": 2836
+          },
+          {
+            "token": "ABILITY_CUTE_CHARM",
+            "line": 2851
+          }
+        ],
+        "tokenMentions": [
+          {
+            "token": "ABILITY_OBLIVIOUS",
+            "line": 2859
+          }
+        ]
+      },
+      {
+        "caseName": "ABILITYEFFECT_IMMUNITY",
+        "caseId": 5,
+        "startLine": 2873,
+        "endLine": 2954,
+        "aliasLabels": [],
+        "dispatchLabels": [
+          {
+            "token": "ABILITY_IMMUNITY",
+            "line": 2878
+          },
+          {
+            "token": "ABILITY_OWN_TEMPO",
+            "line": 2885
+          },
+          {
+            "token": "ABILITY_LIMBER",
+            "line": 2892
+          },
+          {
+            "token": "ABILITY_INSOMNIA",
+            "line": 2899
+          },
+          {
+            "token": "ABILITY_VITAL_SPIRIT",
+            "line": 2900
+          },
+          {
+            "token": "ABILITY_WATER_VEIL",
+            "line": 2908
+          },
+          {
+            "token": "ABILITY_MAGMA_ARMOR",
+            "line": 2915
+          },
+          {
+            "token": "ABILITY_OBLIVIOUS",
+            "line": 2922
+          }
+        ],
+        "tokenMentions": []
+      },
+      {
+        "caseName": "ABILITYEFFECT_FORECAST",
+        "caseId": 6,
+        "startLine": 2955,
+        "endLine": 2970,
+        "aliasLabels": [],
+        "dispatchLabels": [],
+        "tokenMentions": [
+          {
+            "token": "ABILITY_FORECAST",
+            "line": 2958
+          }
+        ]
+      },
+      {
+        "caseName": "ABILITYEFFECT_SYNCHRONIZE",
+        "caseId": 7,
+        "startLine": 2971,
+        "endLine": 2986,
+        "aliasLabels": [],
+        "dispatchLabels": [],
+        "tokenMentions": [
+          {
+            "token": "ABILITY_SYNCHRONIZE",
+            "line": 2972
+          }
+        ]
+      },
+      {
+        "caseName": "ABILITYEFFECT_ATK_SYNCHRONIZE",
+        "caseId": 8,
+        "startLine": 2987,
+        "endLine": 3002,
+        "aliasLabels": [],
+        "dispatchLabels": [],
+        "tokenMentions": [
+          {
+            "token": "ABILITY_SYNCHRONIZE",
+            "line": 2988
+          }
+        ]
+      },
+      {
+        "caseName": "ABILITYEFFECT_INTIMIDATE1",
+        "caseId": 9,
+        "startLine": 3003,
+        "endLine": 3016,
+        "aliasLabels": [],
+        "dispatchLabels": [],
+        "tokenMentions": [
+          {
+            "token": "ABILITY_INTIMIDATE",
+            "line": 3006
+          },
+          {
+            "token": "ABILITY_INTIMIDATE",
+            "line": 3008
+          }
+        ]
+      },
+      {
+        "caseName": "ABILITYEFFECT_TRACE",
+        "caseId": 11,
+        "startLine": 3017,
+        "endLine": 3073,
+        "aliasLabels": [],
+        "dispatchLabels": [],
+        "tokenMentions": [
+          {
+            "token": "ABILITY_TRACE",
+            "line": 3020
+          },
+          {
+            "token": "ABILITY_NONE",
+            "line": 3028
+          },
+          {
+            "token": "ABILITY_NONE",
+            "line": 3029
+          },
+          {
+            "token": "ABILITY_NONE",
+            "line": 3036
+          },
+          {
+            "token": "ABILITY_NONE",
+            "line": 3043
+          }
+        ]
+      },
+      {
+        "caseName": "ABILITYEFFECT_INTIMIDATE2",
+        "caseId": 10,
+        "startLine": 3074,
+        "endLine": 3088,
+        "aliasLabels": [],
+        "dispatchLabels": [],
+        "tokenMentions": [
+          {
+            "token": "ABILITY_INTIMIDATE",
+            "line": 3077
+          },
+          {
+            "token": "ABILITY_INTIMIDATE",
+            "line": 3079
+          }
+        ]
+      },
+      {
+        "caseName": "ABILITYEFFECT_CHECK_OTHER_SIDE",
+        "caseId": 12,
+        "startLine": 3089,
+        "endLine": 3099,
+        "aliasLabels": [],
+        "dispatchLabels": [],
+        "tokenMentions": []
+      },
+      {
+        "caseName": "ABILITYEFFECT_CHECK_BATTLER_SIDE",
+        "caseId": 13,
+        "startLine": 3100,
+        "endLine": 3110,
+        "aliasLabels": [],
+        "dispatchLabels": [],
+        "tokenMentions": []
+      },
+      {
+        "caseName": "ABILITYEFFECT_FIELD_SPORT",
+        "caseId": 14,
+        "startLine": 3111,
+        "endLine": 3139,
+        "aliasLabels": [
+          {
+            "name": "ABILITYEFFECT_MUD_SPORT",
+            "id": 253,
+            "line": 3114
+          },
+          {
+            "name": "ABILITYEFFECT_WATER_SPORT",
+            "id": 254,
+            "line": 3121
+          }
+        ],
+        "dispatchLabels": [],
+        "tokenMentions": []
+      },
+      {
+        "caseName": "ABILITYEFFECT_CHECK_ON_FIELD",
+        "caseId": 19,
+        "startLine": 3140,
+        "endLine": 3149,
+        "aliasLabels": [],
+        "dispatchLabels": [],
+        "tokenMentions": []
+      },
+      {
+        "caseName": "ABILITYEFFECT_CHECK_FIELD_EXCEPT_BATTLER",
+        "caseId": 15,
+        "startLine": 3150,
+        "endLine": 3159,
+        "aliasLabels": [],
+        "dispatchLabels": [],
+        "tokenMentions": []
+      },
+      {
+        "caseName": "ABILITYEFFECT_COUNT_OTHER_SIDE",
+        "caseId": 16,
+        "startLine": 3160,
+        "endLine": 3170,
+        "aliasLabels": [],
+        "dispatchLabels": [],
+        "tokenMentions": []
+      },
+      {
+        "caseName": "ABILITYEFFECT_COUNT_BATTLER_SIDE",
+        "caseId": 17,
+        "startLine": 3171,
+        "endLine": 3181,
+        "aliasLabels": [],
+        "dispatchLabels": [],
+        "tokenMentions": []
+      },
+      {
+        "caseName": "ABILITYEFFECT_COUNT_ON_FIELD",
+        "caseId": 18,
+        "startLine": 3182,
+        "endLine": 3199,
+        "aliasLabels": [],
+        "dispatchLabels": [],
+        "tokenMentions": []
+      }
+    ]
+  },
+  "itemBattleEffects": {
+    "cases": [
+      {
+        "caseName": "ITEMEFFECT_ON_SWITCH_IN",
+        "caseId": 0,
+        "startLine": 3305,
+        "endLine": 3330,
+        "aliasLabels": [],
+        "dispatchLabels": [
+          {
+            "token": "HOLD_EFFECT_DOUBLE_PRIZE",
+            "line": 3308
+          },
+          {
+            "token": "HOLD_EFFECT_RESTORE_STATS",
+            "line": 3312
+          }
+        ],
+        "tokenMentions": []
+      },
+      {
+        "caseName": "ITEMEFFECT_NORMAL",
+        "caseId": 1,
+        "startLine": 3331,
+        "endLine": 3622,
+        "aliasLabels": [],
+        "dispatchLabels": [
+          {
+            "token": "HOLD_EFFECT_RESTORE_HP",
+            "line": 3336
+          },
+          {
+            "token": "HOLD_EFFECT_RESTORE_PP",
+            "line": 3347
+          },
+          {
+            "token": "HOLD_EFFECT_RESTORE_STATS",
+            "line": 3383
+          },
+          {
+            "token": "HOLD_EFFECT_LEFTOVERS",
+            "line": 3400
+          },
+          {
+            "token": "HOLD_EFFECT_CONFUSE_SPICY",
+            "line": 3414
+          },
+          {
+            "token": "HOLD_EFFECT_CONFUSE_DRY",
+            "line": 3417
+          },
+          {
+            "token": "HOLD_EFFECT_CONFUSE_SWEET",
+            "line": 3420
+          },
+          {
+            "token": "HOLD_EFFECT_CONFUSE_BITTER",
+            "line": 3423
+          },
+          {
+            "token": "HOLD_EFFECT_CONFUSE_SOUR",
+            "line": 3426
+          },
+          {
+            "token": "HOLD_EFFECT_ATTACK_UP",
+            "line": 3429
+          },
+          {
+            "token": "HOLD_EFFECT_DEFENSE_UP",
+            "line": 3443
+          },
+          {
+            "token": "HOLD_EFFECT_SPEED_UP",
+            "line": 3446
+          },
+          {
+            "token": "HOLD_EFFECT_SP_ATTACK_UP",
+            "line": 3449
+          },
+          {
+            "token": "HOLD_EFFECT_SP_DEFENSE_UP",
+            "line": 3452
+          },
+          {
+            "token": "HOLD_EFFECT_CRITICAL_UP",
+            "line": 3455
+          },
+          {
+            "token": "HOLD_EFFECT_RANDOM_STAT_UP",
+            "line": 3464
+          },
+          {
+            "token": "HOLD_EFFECT_CURE_PAR",
+            "line": 3499
+          },
+          {
+            "token": "HOLD_EFFECT_CURE_PSN",
+            "line": 3507
+          },
+          {
+            "token": "HOLD_EFFECT_CURE_BRN",
+            "line": 3515
+          },
+          {
+            "token": "HOLD_EFFECT_CURE_FRZ",
+            "line": 3523
+          },
+          {
+            "token": "HOLD_EFFECT_CURE_SLP",
+            "line": 3531
+          },
+          {
+            "token": "HOLD_EFFECT_CURE_CONFUSION",
+            "line": 3540
+          },
+          {
+            "token": "HOLD_EFFECT_CURE_STATUS",
+            "line": 3548
+          },
+          {
+            "token": "HOLD_EFFECT_CURE_ATTRACT",
+            "line": 3593
+          }
+        ],
+        "tokenMentions": []
+      },
+      {
+        "caseName": "ITEMEFFECT_DUMMY",
+        "caseId": 2,
+        "startLine": 3623,
+        "endLine": 3624,
+        "aliasLabels": [],
+        "dispatchLabels": [],
+        "tokenMentions": []
+      },
+      {
+        "caseName": "ITEMEFFECT_MOVE_END",
+        "caseId": 3,
+        "startLine": 3625,
+        "endLine": 3768,
+        "aliasLabels": [],
+        "dispatchLabels": [
+          {
+            "token": "HOLD_EFFECT_CURE_PAR",
+            "line": 3641
+          },
+          {
+            "token": "HOLD_EFFECT_CURE_PSN",
+            "line": 3650
+          },
+          {
+            "token": "HOLD_EFFECT_CURE_BRN",
+            "line": 3659
+          },
+          {
+            "token": "HOLD_EFFECT_CURE_FRZ",
+            "line": 3668
+          },
+          {
+            "token": "HOLD_EFFECT_CURE_SLP",
+            "line": 3677
+          },
+          {
+            "token": "HOLD_EFFECT_CURE_CONFUSION",
+            "line": 3687
+          },
+          {
+            "token": "HOLD_EFFECT_CURE_ATTRACT",
+            "line": 3696
+          },
+          {
+            "token": "HOLD_EFFECT_CURE_STATUS",
+            "line": 3707
+          },
+          {
+            "token": "HOLD_EFFECT_RESTORE_STATS",
+            "line": 3739
+          }
+        ],
+        "tokenMentions": []
+      },
+      {
+        "caseName": "ITEMEFFECT_KINGSROCK_SHELLBELL",
+        "caseId": 4,
+        "startLine": 3769,
+        "endLine": 3813,
+        "aliasLabels": [],
+        "dispatchLabels": [
+          {
+            "token": "HOLD_EFFECT_FLINCH",
+            "line": 3774
+          },
+          {
+            "token": "HOLD_EFFECT_SHELL_BELL",
+            "line": 3787
+          }
+        ],
+        "tokenMentions": []
+      }
+    ]
+  },
+  "inlineSites": {
+    "abilities": {
+      "ABILITY_AIR_LOCK": [
+        {
+          "file": "data/battle_scripts_1.s",
+          "tag": "rules",
+          "line": 1905,
+          "enclosingGuess": "BattleScript_EffectSolarBeam"
+        }
+      ],
+      "ABILITY_ARENA_TRAP": [
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 4056,
+          "enclosingGuess": "IsRunningFromBattleImpossible"
+        },
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 4249,
+          "enclosingGuess": "HandleTurnActionSelectionState"
+        },
+        {
+          "file": "src/battle_ai_script_commands.c",
+          "tag": "ai",
+          "line": 1371,
+          "enclosingGuess": "Cmd_get_ability"
+        },
+        {
+          "file": "src/battle_ai_script_commands.c",
+          "tag": "ai",
+          "line": 1422,
+          "enclosingGuess": "Cmd_check_ability"
+        },
+        {
+          "file": "src/battle_ai_switch_items.c",
+          "tag": "ai",
+          "line": 445,
+          "enclosingGuess": "ShouldSwitch"
+        }
+      ],
+      "ABILITY_BATTLE_ARMOR": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1279,
+          "enclosingGuess": "Cmd_critcalc"
+        }
+      ],
+      "ABILITY_BLAZE": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3221,
+          "enclosingGuess": "CalculateBaseDamage"
+        }
+      ],
+      "ABILITY_CHLOROPHYLL": [
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 4607,
+          "enclosingGuess": "GetWhoStrikesFirst"
+        },
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 4613,
+          "enclosingGuess": "GetWhoStrikesFirst"
+        }
+      ],
+      "ABILITY_CLEAR_BODY": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 4142,
+          "enclosingGuess": "Cmd_playstatchangeanimation"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 6987,
+          "enclosingGuess": "ChangeStatBuffs"
+        },
+        {
+          "file": "data/battle_scripts_1.s",
+          "tag": "rules",
+          "line": 4030,
+          "enclosingGuess": "BattleScript_IntimidateActivatesLoop"
+        }
+      ],
+      "ABILITY_CLOUD_NINE": [
+        {
+          "file": "data/battle_scripts_1.s",
+          "tag": "rules",
+          "line": 1904,
+          "enclosingGuess": "BattleScript_EffectSolarBeam"
+        }
+      ],
+      "ABILITY_COMPOUND_EYES": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1152,
+          "enclosingGuess": "Cmd_accuracycheck"
+        },
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 6687,
+          "enclosingGuess": "SetWildMonHeldItem"
+        }
+      ],
+      "ABILITY_DAMP": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 6546,
+          "enclosingGuess": "Cmd_tryexplosion"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 6571,
+          "enclosingGuess": "Cmd_tryexplosion"
+        }
+      ],
+      "ABILITY_EARLY_BIRD": [
+        {
+          "file": "src/battle_util.c",
+          "tag": "rules",
+          "line": 2030,
+          "enclosingGuess": "AtkCanceler_UnableToUseMove"
+        },
+        {
+          "file": "src/battle_util2.c",
+          "tag": "rules",
+          "line": 151,
+          "enclosingGuess": "BattlePalace_TryEscapeStatus"
+        }
+      ],
+      "ABILITY_FLASH_FIRE": [
+        {
+          "file": "src/battle_ai_switch_items.c",
+          "tag": "ai",
+          "line": 152,
+          "enclosingGuess": "FindMonThatAbsorbsOpponentsMove"
+        }
+      ],
+      "ABILITY_FORECAST": [
+        {
+          "file": "src/battle_util.c",
+          "tag": "rules",
+          "line": 2399,
+          "enclosingGuess": "CastformDataTypeChange"
+        }
+      ],
+      "ABILITY_GUTS": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3211,
+          "enclosingGuess": "CalculateBaseDamage"
+        },
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3263,
+          "enclosingGuess": "CalculateBaseDamage"
+        }
+      ],
+      "ABILITY_HUGE_POWER": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3158,
+          "enclosingGuess": "CalculateBaseDamage"
+        }
+      ],
+      "ABILITY_HUSTLE": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1156,
+          "enclosingGuess": "Cmd_accuracycheck"
+        },
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3205,
+          "enclosingGuess": "CalculateBaseDamage"
+        }
+      ],
+      "ABILITY_HYPER_CUTTER": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 4145,
+          "enclosingGuess": "Cmd_playstatchangeanimation"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 7022,
+          "enclosingGuess": "ChangeStatBuffs"
+        },
+        {
+          "file": "data/battle_scripts_1.s",
+          "tag": "rules",
+          "line": 4031,
+          "enclosingGuess": "BattleScript_IntimidateActivatesLoop"
+        }
+      ],
+      "ABILITY_IMMUNITY": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2300,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2303,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2304,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2336,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2428,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2430,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2431,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2461,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "data/battle_scripts_1.s",
+          "tag": "rules",
+          "line": 690,
+          "enclosingGuess": "BattleScript_EffectToxic"
+        },
+        {
+          "file": "data/battle_scripts_1.s",
+          "tag": "rules",
+          "line": 990,
+          "enclosingGuess": "BattleScript_EffectPoison"
+        }
+      ],
+      "ABILITY_INNER_FOCUS": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2548,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2552,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2553,
+          "enclosingGuess": "SetMoveEffect"
+        }
+      ],
+      "ABILITY_INSOMNIA": [
+        {
+          "file": "src/battle_util.c",
+          "tag": "rules",
+          "line": 1759,
+          "enclosingGuess": "DoBattlerEndTurnEffects"
+        },
+        {
+          "file": "src/battle_util.c",
+          "tag": "rules",
+          "line": 4005,
+          "enclosingGuess": "IsMonDisobedient"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2293,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 6836,
+          "enclosingGuess": "Cmd_jumpifcantmakeasleep"
+        },
+        {
+          "file": "data/battle_scripts_1.s",
+          "tag": "rules",
+          "line": 2456,
+          "enclosingGuess": "BattleScript_EffectYawn"
+        }
+      ],
+      "ABILITY_KEEN_EYE": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 4144,
+          "enclosingGuess": "Cmd_playstatchangeanimation"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 7009,
+          "enclosingGuess": "ChangeStatBuffs"
+        }
+      ],
+      "ABILITY_LEVITATE": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1375,
+          "enclosingGuess": "Cmd_typecalc"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1437,
+          "enclosingGuess": "CheckWonderGuardAndLevitate"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1439,
+          "enclosingGuess": "CheckWonderGuardAndLevitate"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1441,
+          "enclosingGuess": "CheckWonderGuardAndLevitate"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1554,
+          "enclosingGuess": "TypeCalc"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1606,
+          "enclosingGuess": "AI_TypeCalc"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 4506,
+          "enclosingGuess": "Cmd_typecalc2"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 5232,
+          "enclosingGuess": "Cmd_switchineffects"
+        },
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 4054,
+          "enclosingGuess": "IsRunningFromBattleImpossible"
+        },
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 4251,
+          "enclosingGuess": "HandleTurnActionSelectionState"
+        }
+      ],
+      "ABILITY_LIGHTNING_ROD": [
+        {
+          "file": "src/battle_util.c",
+          "tag": "rules",
+          "line": 161,
+          "enclosingGuess": "HandleAction_UseMove"
+        },
+        {
+          "file": "src/battle_util.c",
+          "tag": "rules",
+          "line": 169,
+          "enclosingGuess": "HandleAction_UseMove"
+        },
+        {
+          "file": "src/battle_util.c",
+          "tag": "rules",
+          "line": 3855,
+          "enclosingGuess": "GetMoveTarget"
+        },
+        {
+          "file": "src/battle_util.c",
+          "tag": "rules",
+          "line": 3856,
+          "enclosingGuess": "GetMoveTarget"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 987,
+          "enclosingGuess": "Cmd_attackcanceler"
+        }
+      ],
+      "ABILITY_LIMBER": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2396,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2400,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2401,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "data/battle_scripts_1.s",
+          "tag": "rules",
+          "line": 1011,
+          "enclosingGuess": "BattleScript_EffectParalyze"
+        }
+      ],
+      "ABILITY_LIQUID_OOZE": [
+        {
+          "file": "data/battle_scripts_1.s",
+          "tag": "rules",
+          "line": 345,
+          "enclosingGuess": "BattleScript_EffectAbsorb"
+        },
+        {
+          "file": "data/battle_scripts_1.s",
+          "tag": "rules",
+          "line": 3271,
+          "enclosingGuess": "BattleScript_LeechSeedTurnDrain"
+        }
+      ],
+      "ABILITY_MAGMA_ARMOR": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2389,
+          "enclosingGuess": "SetMoveEffect"
+        }
+      ],
+      "ABILITY_MAGNET_PULL": [
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 4064,
+          "enclosingGuess": "IsRunningFromBattleImpossible"
+        },
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 4252,
+          "enclosingGuess": "HandleTurnActionSelectionState"
+        },
+        {
+          "file": "src/battle_ai_script_commands.c",
+          "tag": "ai",
+          "line": 1370,
+          "enclosingGuess": "Cmd_get_ability"
+        },
+        {
+          "file": "src/battle_ai_script_commands.c",
+          "tag": "ai",
+          "line": 1421,
+          "enclosingGuess": "Cmd_check_ability"
+        },
+        {
+          "file": "src/battle_ai_switch_items.c",
+          "tag": "ai",
+          "line": 447,
+          "enclosingGuess": "ShouldSwitch"
+        }
+      ],
+      "ABILITY_MARVEL_SCALE": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3213,
+          "enclosingGuess": "CalculateBaseDamage"
+        }
+      ],
+      "ABILITY_MINUS": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3207,
+          "enclosingGuess": "CalculateBaseDamage"
+        },
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3209,
+          "enclosingGuess": "CalculateBaseDamage"
+        }
+      ],
+      "ABILITY_NATURAL_CURE": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 9596,
+          "enclosingGuess": "Cmd_switchoutabilities"
+        },
+        {
+          "file": "src/battle_ai_switch_items.c",
+          "tag": "ai",
+          "line": 222,
+          "enclosingGuess": "ShouldSwitchIfNaturalCure"
+        }
+      ],
+      "ABILITY_NONE": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 3524,
+          "enclosingGuess": "Cmd_getexp"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 4861,
+          "enclosingGuess": "ChooseMonToSendOut"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 5120,
+          "enclosingGuess": "Cmd_openpartyscreen"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 9279,
+          "enclosingGuess": "Cmd_trycopyability"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 9394,
+          "enclosingGuess": "Cmd_tryswapabilities"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 9395,
+          "enclosingGuess": "Cmd_tryswapabilities"
+        },
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 4246,
+          "enclosingGuess": "HandleTurnActionSelectionState"
+        },
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 4260,
+          "enclosingGuess": "HandleTurnActionSelectionState"
+        },
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 4262,
+          "enclosingGuess": "HandleTurnActionSelectionState"
+        },
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 4264,
+          "enclosingGuess": "HandleTurnActionSelectionState"
+        },
+        {
+          "file": "src/battle_ai_script_commands.c",
+          "tag": "ai",
+          "line": 650,
+          "enclosingGuess": "ClearBattlerAbilityHistory"
+        },
+        {
+          "file": "src/battle_ai_script_commands.c",
+          "tag": "ai",
+          "line": 1378,
+          "enclosingGuess": "Cmd_get_ability"
+        },
+        {
+          "file": "src/battle_ai_script_commands.c",
+          "tag": "ai",
+          "line": 1380,
+          "enclosingGuess": "Cmd_get_ability"
+        },
+        {
+          "file": "src/battle_ai_script_commands.c",
+          "tag": "ai",
+          "line": 1414,
+          "enclosingGuess": "Cmd_check_ability"
+        },
+        {
+          "file": "src/battle_ai_script_commands.c",
+          "tag": "ai",
+          "line": 1426,
+          "enclosingGuess": "Cmd_check_ability"
+        },
+        {
+          "file": "src/battle_ai_script_commands.c",
+          "tag": "ai",
+          "line": 1428,
+          "enclosingGuess": "Cmd_check_ability"
+        },
+        {
+          "file": "src/battle_ai_script_commands.c",
+          "tag": "ai",
+          "line": 1438,
+          "enclosingGuess": "Cmd_check_ability"
+        }
+      ],
+      "ABILITY_OBLIVIOUS": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 7676,
+          "enclosingGuess": "Cmd_tryinfatuating"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 7679,
+          "enclosingGuess": "Cmd_tryinfatuating"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 7680,
+          "enclosingGuess": "Cmd_tryinfatuating"
+        }
+      ],
+      "ABILITY_OVERGROW": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3219,
+          "enclosingGuess": "CalculateBaseDamage"
+        }
+      ],
+      "ABILITY_OWN_TEMPO": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2534,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "data/battle_scripts_1.s",
+          "tag": "rules",
+          "line": 907,
+          "enclosingGuess": "BattleScript_EffectConfuse"
+        },
+        {
+          "file": "data/battle_scripts_1.s",
+          "tag": "rules",
+          "line": 1625,
+          "enclosingGuess": "BattleScript_SwaggerTryConfuse"
+        },
+        {
+          "file": "data/battle_scripts_1.s",
+          "tag": "rules",
+          "line": 2168,
+          "enclosingGuess": "BattleScript_FlatterTryConfuse"
+        },
+        {
+          "file": "data/battle_scripts_1.s",
+          "tag": "rules",
+          "line": 2580,
+          "enclosingGuess": "BattleScript_TeeterDanceLoop"
+        }
+      ],
+      "ABILITY_PICKUP": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 9676,
+          "enclosingGuess": "Cmd_pickup"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 9699,
+          "enclosingGuess": "Cmd_pickup"
+        }
+      ],
+      "ABILITY_PLUS": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3207,
+          "enclosingGuess": "CalculateBaseDamage"
+        },
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3209,
+          "enclosingGuess": "CalculateBaseDamage"
+        }
+      ],
+      "ABILITY_PRESSURE": [
+        {
+          "file": "src/battle_util.c",
+          "tag": "rules",
+          "line": 744,
+          "enclosingGuess": "PressurePPLose"
+        },
+        {
+          "file": "src/battle_util.c",
+          "tag": "rules",
+          "line": 775,
+          "enclosingGuess": "PressurePPLoseOnUsingImprison"
+        },
+        {
+          "file": "src/battle_util.c",
+          "tag": "rules",
+          "line": 806,
+          "enclosingGuess": "PressurePPLoseOnUsingPerishSong"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1217,
+          "enclosingGuess": "Cmd_ppreduce"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1221,
+          "enclosingGuess": "Cmd_ppreduce"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1224,
+          "enclosingGuess": "Cmd_ppreduce"
+        }
+      ],
+      "ABILITY_PURE_POWER": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3158,
+          "enclosingGuess": "CalculateBaseDamage"
+        }
+      ],
+      "ABILITY_ROCK_HEAD": [
+        {
+          "file": "data/battle_scripts_1.s",
+          "tag": "rules",
+          "line": 3940,
+          "enclosingGuess": "BattleScript_MoveEffectRecoil"
+        }
+      ],
+      "ABILITY_RUN_AWAY": [
+        {
+          "file": "src/battle_util.c",
+          "tag": "rules",
+          "line": 427,
+          "enclosingGuess": "TryRunFromBattle"
+        },
+        {
+          "file": "src/battle_util.c",
+          "tag": "rules",
+          "line": 436,
+          "enclosingGuess": "TryRunFromBattle"
+        },
+        {
+          "file": "src/battle_util.c",
+          "tag": "rules",
+          "line": 443,
+          "enclosingGuess": "TryRunFromBattle"
+        },
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 4038,
+          "enclosingGuess": "IsRunningFromBattleImpossible"
+        }
+      ],
+      "ABILITY_SAND_VEIL": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1154,
+          "enclosingGuess": "Cmd_accuracycheck"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 7614,
+          "enclosingGuess": "Cmd_weatherdamage"
+        }
+      ],
+      "ABILITY_SERENE_GRACE": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2912,
+          "enclosingGuess": "Cmd_seteffectwithchance"
+        }
+      ],
+      "ABILITY_SHADOW_TAG": [
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 4046,
+          "enclosingGuess": "IsRunningFromBattleImpossible"
+        },
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 4248,
+          "enclosingGuess": "HandleTurnActionSelectionState"
+        },
+        {
+          "file": "src/battle_ai_script_commands.c",
+          "tag": "ai",
+          "line": 1369,
+          "enclosingGuess": "Cmd_get_ability"
+        },
+        {
+          "file": "src/battle_ai_script_commands.c",
+          "tag": "ai",
+          "line": 1420,
+          "enclosingGuess": "Cmd_check_ability"
+        },
+        {
+          "file": "src/battle_ai_switch_items.c",
+          "tag": "ai",
+          "line": 443,
+          "enclosingGuess": "ShouldSwitch"
+        }
+      ],
+      "ABILITY_SHELL_ARMOR": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1279,
+          "enclosingGuess": "Cmd_critcalc"
+        }
+      ],
+      "ABILITY_SHIELD_DUST": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2253,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 7035,
+          "enclosingGuess": "ChangeStatBuffs"
+        }
+      ],
+      "ABILITY_SOUNDPROOF": [
+        {
+          "file": "src/battle_util.c",
+          "tag": "rules",
+          "line": 1631,
+          "enclosingGuess": "DoBattlerEndTurnEffects"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2275,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 6807,
+          "enclosingGuess": "UproarWakeUpCheck"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 8387,
+          "enclosingGuess": "Cmd_healpartystatus"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 8403,
+          "enclosingGuess": "Cmd_healpartystatus"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 8435,
+          "enclosingGuess": "Cmd_healpartystatus"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 8516,
+          "enclosingGuess": "Cmd_trysetperishsong"
+        },
+        {
+          "file": "data/battle_scripts_1.s",
+          "tag": "rules",
+          "line": 1578,
+          "enclosingGuess": "BattleScript_PerishSongLoop"
+        }
+      ],
+      "ABILITY_STICKY_HOLD": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2768,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2864,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2872,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2874,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 9229,
+          "enclosingGuess": "Cmd_tryswapitems"
+        }
+      ],
+      "ABILITY_STURDY": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 7513,
+          "enclosingGuess": "Cmd_tryKO"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 7516,
+          "enclosingGuess": "Cmd_tryKO"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 7518,
+          "enclosingGuess": "Cmd_tryKO"
+        }
+      ],
+      "ABILITY_SUCTION_CUPS": [
+        {
+          "file": "data/battle_scripts_1.s",
+          "tag": "rules",
+          "line": 597,
+          "enclosingGuess": "BattleScript_EffectRoar"
+        }
+      ],
+      "ABILITY_SWARM": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3225,
+          "enclosingGuess": "CalculateBaseDamage"
+        }
+      ],
+      "ABILITY_SWIFT_SWIM": [
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 4606,
+          "enclosingGuess": "GetWhoStrikesFirst"
+        },
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 4612,
+          "enclosingGuess": "GetWhoStrikesFirst"
+        }
+      ],
+      "ABILITY_THICK_FAT": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3203,
+          "enclosingGuess": "CalculateBaseDamage"
+        }
+      ],
+      "ABILITY_TORRENT": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3223,
+          "enclosingGuess": "CalculateBaseDamage"
+        }
+      ],
+      "ABILITY_TRUANT": [
+        {
+          "file": "src/battle_util.c",
+          "tag": "rules",
+          "line": 2087,
+          "enclosingGuess": "AtkCanceler_UnableToUseMove"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 5260,
+          "enclosingGuess": "Cmd_switchineffects"
+        }
+      ],
+      "ABILITY_VITAL_SPIRIT": [
+        {
+          "file": "src/battle_util.c",
+          "tag": "rules",
+          "line": 1758,
+          "enclosingGuess": "DoBattlerEndTurnEffects"
+        },
+        {
+          "file": "src/battle_util.c",
+          "tag": "rules",
+          "line": 4005,
+          "enclosingGuess": "IsMonDisobedient"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2291,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 6837,
+          "enclosingGuess": "Cmd_jumpifcantmakeasleep"
+        },
+        {
+          "file": "data/battle_scripts_1.s",
+          "tag": "rules",
+          "line": 2455,
+          "enclosingGuess": "BattleScript_EffectYawn"
+        }
+      ],
+      "ABILITY_VOLT_ABSORB": [
+        {
+          "file": "src/battle_ai_switch_items.c",
+          "tag": "ai",
+          "line": 156,
+          "enclosingGuess": "FindMonThatAbsorbsOpponentsMove"
+        }
+      ],
+      "ABILITY_WATER_ABSORB": [
+        {
+          "file": "src/battle_ai_switch_items.c",
+          "tag": "ai",
+          "line": 154,
+          "enclosingGuess": "FindMonThatAbsorbsOpponentsMove"
+        }
+      ],
+      "ABILITY_WATER_VEIL": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2342,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2345,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2346,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 2373,
+          "enclosingGuess": "SetMoveEffect"
+        },
+        {
+          "file": "data/battle_scripts_1.s",
+          "tag": "rules",
+          "line": 2181,
+          "enclosingGuess": "BattleScript_EffectWillOWisp"
+        }
+      ],
+      "ABILITY_WHITE_SMOKE": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 4143,
+          "enclosingGuess": "Cmd_playstatchangeanimation"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 6988,
+          "enclosingGuess": "ChangeStatBuffs"
+        },
+        {
+          "file": "data/battle_scripts_1.s",
+          "tag": "rules",
+          "line": 4032,
+          "enclosingGuess": "BattleScript_IntimidateActivatesLoop"
+        }
+      ],
+      "ABILITY_WONDER_GUARD": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1409,
+          "enclosingGuess": "Cmd_typecalc"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1413,
+          "enclosingGuess": "Cmd_typecalc"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1490,
+          "enclosingGuess": "CheckWonderGuardAndLevitate"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1494,
+          "enclosingGuess": "CheckWonderGuardAndLevitate"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1496,
+          "enclosingGuess": "CheckWonderGuardAndLevitate"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1584,
+          "enclosingGuess": "TypeCalc"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1631,
+          "enclosingGuess": "AI_TypeCalc"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 4577,
+          "enclosingGuess": "Cmd_typecalc2"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 4583,
+          "enclosingGuess": "Cmd_typecalc2"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 9280,
+          "enclosingGuess": "Cmd_trycopyability"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 9396,
+          "enclosingGuess": "Cmd_tryswapabilities"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 9397,
+          "enclosingGuess": "Cmd_tryswapabilities"
+        },
+        {
+          "file": "src/battle_ai_switch_items.c",
+          "tag": "ai",
+          "line": 51,
+          "enclosingGuess": "ShouldSwitchIfWonderGuard"
+        }
+      ]
+    },
+    "holdEffects": {
+      "HOLD_EFFECT_BUG_POWER": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 1921,
+          "enclosingGuess": null
+        }
+      ],
+      "HOLD_EFFECT_CAN_ALWAYS_RUN": [
+        {
+          "file": "src/battle_util.c",
+          "tag": "rules",
+          "line": 421,
+          "enclosingGuess": "TryRunFromBattle"
+        },
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 4034,
+          "enclosingGuess": "IsRunningFromBattleImpossible"
+        }
+      ],
+      "HOLD_EFFECT_CHOICE_BAND": [
+        {
+          "file": "src/battle_util.c",
+          "tag": "rules",
+          "line": 1051,
+          "enclosingGuess": "TrySetCantSelectMoveBattleScript"
+        },
+        {
+          "file": "src/battle_util.c",
+          "tag": "rules",
+          "line": 1119,
+          "enclosingGuess": "CheckMoveLimitations"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 4298,
+          "enclosingGuess": "Cmd_moveend"
+        },
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3185,
+          "enclosingGuess": "CalculateBaseDamage"
+        }
+      ],
+      "HOLD_EFFECT_DARK_POWER": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 1926,
+          "enclosingGuess": null
+        }
+      ],
+      "HOLD_EFFECT_DEEP_SEA_SCALE": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3193,
+          "enclosingGuess": "CalculateBaseDamage"
+        }
+      ],
+      "HOLD_EFFECT_DEEP_SEA_TOOTH": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3191,
+          "enclosingGuess": "CalculateBaseDamage"
+        }
+      ],
+      "HOLD_EFFECT_DRAGON_POWER": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 1936,
+          "enclosingGuess": null
+        }
+      ],
+      "HOLD_EFFECT_ELECTRIC_POWER": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 1928,
+          "enclosingGuess": null
+        }
+      ],
+      "HOLD_EFFECT_EVASION_UP": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1172,
+          "enclosingGuess": "Cmd_accuracycheck"
+        }
+      ],
+      "HOLD_EFFECT_EXP_SHARE": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 3306,
+          "enclosingGuess": "Cmd_getexp"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 3345,
+          "enclosingGuess": "Cmd_getexp"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 3374,
+          "enclosingGuess": "Cmd_getexp"
+        }
+      ],
+      "HOLD_EFFECT_FIGHTING_POWER": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 1927,
+          "enclosingGuess": null
+        }
+      ],
+      "HOLD_EFFECT_FIRE_POWER": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 1935,
+          "enclosingGuess": null
+        }
+      ],
+      "HOLD_EFFECT_FLYING_POWER": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 1930,
+          "enclosingGuess": null
+        }
+      ],
+      "HOLD_EFFECT_FOCUS_BAND": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1677,
+          "enclosingGuess": "Cmd_adjustnormaldamage"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1720,
+          "enclosingGuess": "Cmd_adjustnormaldamage2"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 5878,
+          "enclosingGuess": "Cmd_adjustsetdamage"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 7507,
+          "enclosingGuess": "Cmd_tryKO"
+        },
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 7509,
+          "enclosingGuess": "Cmd_tryKO"
+        }
+      ],
+      "HOLD_EFFECT_FRIENDSHIP_UP": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 4734,
+          "enclosingGuess": "ExecuteTableBasedItemEffect"
+        },
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 5966,
+          "enclosingGuess": "AdjustFriendship"
+        }
+      ],
+      "HOLD_EFFECT_GHOST_POWER": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 1933,
+          "enclosingGuess": null
+        }
+      ],
+      "HOLD_EFFECT_GRASS_POWER": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 1925,
+          "enclosingGuess": null
+        }
+      ],
+      "HOLD_EFFECT_GROUND_POWER": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 1923,
+          "enclosingGuess": null
+        }
+      ],
+      "HOLD_EFFECT_ICE_POWER": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 1932,
+          "enclosingGuess": null
+        }
+      ],
+      "HOLD_EFFECT_LIGHT_BALL": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3195,
+          "enclosingGuess": "CalculateBaseDamage"
+        }
+      ],
+      "HOLD_EFFECT_LUCKY_EGG": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 3376,
+          "enclosingGuess": "Cmd_getexp"
+        }
+      ],
+      "HOLD_EFFECT_LUCKY_PUNCH": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1273,
+          "enclosingGuess": "Cmd_critcalc"
+        }
+      ],
+      "HOLD_EFFECT_MACHO_BRACE": [
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 4647,
+          "enclosingGuess": "GetWhoStrikesFirst"
+        },
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 4681,
+          "enclosingGuess": "GetWhoStrikesFirst"
+        },
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 6048,
+          "enclosingGuess": "MonGainEVs"
+        }
+      ],
+      "HOLD_EFFECT_METAL_POWDER": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3197,
+          "enclosingGuess": "CalculateBaseDamage"
+        }
+      ],
+      "HOLD_EFFECT_NONE": [
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 782,
+          "enclosingGuess": "SetPlayerBerryDataInBattleStruct"
+        },
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 832,
+          "enclosingGuess": "SetAllPlayersBerryData"
+        },
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 833,
+          "enclosingGuess": "SetAllPlayersBerryData"
+        }
+      ],
+      "HOLD_EFFECT_NORMAL_POWER": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 1937,
+          "enclosingGuess": null
+        }
+      ],
+      "HOLD_EFFECT_POISON_POWER": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 1931,
+          "enclosingGuess": null
+        }
+      ],
+      "HOLD_EFFECT_PREVENT_EVOLVE": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 5522,
+          "enclosingGuess": "GetEvolutionTargetSpecies"
+        }
+      ],
+      "HOLD_EFFECT_PSYCHIC_POWER": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 1934,
+          "enclosingGuess": null
+        }
+      ],
+      "HOLD_EFFECT_QUICK_CLAW": [
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 4653,
+          "enclosingGuess": "GetWhoStrikesFirst"
+        },
+        {
+          "file": "src/battle_main.c",
+          "tag": "rules",
+          "line": 4687,
+          "enclosingGuess": "GetWhoStrikesFirst"
+        }
+      ],
+      "HOLD_EFFECT_ROCK_POWER": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 1924,
+          "enclosingGuess": null
+        }
+      ],
+      "HOLD_EFFECT_SCOPE_LENS": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1272,
+          "enclosingGuess": "Cmd_critcalc"
+        }
+      ],
+      "HOLD_EFFECT_SOUL_DEW": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3187,
+          "enclosingGuess": "CalculateBaseDamage"
+        },
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3189,
+          "enclosingGuess": "CalculateBaseDamage"
+        }
+      ],
+      "HOLD_EFFECT_STEEL_POWER": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 1922,
+          "enclosingGuess": null
+        }
+      ],
+      "HOLD_EFFECT_STICK": [
+        {
+          "file": "src/battle_script_commands.c",
+          "tag": "rules",
+          "line": 1274,
+          "enclosingGuess": "Cmd_critcalc"
+        }
+      ],
+      "HOLD_EFFECT_THICK_CLUB": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 3199,
+          "enclosingGuess": "CalculateBaseDamage"
+        }
+      ],
+      "HOLD_EFFECT_WATER_POWER": [
+        {
+          "file": "src/pokemon.c",
+          "tag": "rules",
+          "line": 1929,
+          "enclosingGuess": null
+        }
+      ]
+    }
+  }
+}
