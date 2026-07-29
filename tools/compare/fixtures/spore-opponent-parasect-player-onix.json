@@ -1,0 +1,43 @@
+{
+  "schema": "spore-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "orientation": "opponent-front",
+  "scenario": "tools/battle-lab/mechanic-spore-opponent-parasect-player-onix.json",
+  "probe": "tools/compare/sporeProbe.py",
+  "appStage": {"presentationAge": 0},
+  "attacker": {
+    "species": "PARASECT",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": {"x": 144, "y": 16},
+      "animationCenter": {"x": 176, "y": 48},
+      "battlePositionCenter": {"x": 176, "y": 40}
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": {"x": 40, "y": 48},
+      "animationCenter": {"x": 72, "y": 88},
+      "battlePositionCenter": {"x": 72, "y": 80}
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 142,
+    "playerMaxHp": 142,
+    "opponentHp": 120,
+    "opponentMaxHp": 156,
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
+  "sourceWindow": {"startFrame": 370, "endFrame": 576, "frameCount": 207},
+  "evidenceSha256": "7d723ded7813648cb6a29b9a5aaa651b1d677d9698f35f0aff9005f0410e687b",
+  "rawRgbSha256": "59a82fde62ce4c89b2a73f0053186df940bd51b39340339ef8fff92282f64e51",
+  "battleState": {
+    "attackerSide": "opponent",
+    "targetSide": "player",
+    "attackerItem": 200,
+    "targetStatus1": 0
+  }
+}

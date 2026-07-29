@@ -2,6 +2,35 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_SPORE",
+      "status": "exact",
+      "covered": [
+        "the pinned source audit identifies challenge-2 set 282 FRONTIER_MON_PARASECT_2 as the lowest suitable legal Level-50 carrier (species 47, Spore 147, Calm, HP+Defense+SpDefense, Leftovers); complete legal three-Pokemon Battle Scene ON parties stage Parasect against ONIX in both orientations",
+        "fresh dense probes cover the complete Spore-owned presentation through first inactive cleanup twice reproducibly in both orientations: player-back frames 366-572 pass 207/207 source/component/hardware/raw-RGB/shared-framebuffer checks with evidence 5b275a53b8339e818fa56c158a04df729d1316fee0005ab11cc1ad1b9c446d40 and raw RGB 9730e4ea34ffdaab25796ea069be7270eb36eb9ea05d13cb32c834cb8ea9d0a7; opponent-front frames 370-576 pass 207/207 with evidence 7d723ded7813648cb6a29b9a5aaa651b1d677d9698f35f0aff9005f0410e687b and raw RGB 59a82fde62ce4c89b2a73f0053186df940bd51b39340339ef8fff92282f64e51",
+        "the pure source-relative reducer ports ANIM_TAG_SPORE load/free, target mon-BG and 12/8 alpha lifetimes, all nine staggered gSporeParticleSpriteTemplate/AnimSporeParticle_Step sine-and-rise lifecycles, priority transitions, looped poison-powder audio, script waits, blendoff, and first inactive age 206",
+        "the typed seam carries only resolved PARASECT/ONIX geometry and immutable HP/gender state; source extraction regenerates Parasect front/back and both Spore animation cells byte-for-byte, and the production compositor respects source OBJ priority and semi-transparent OBJ-to-non-OBJ blending without owning sleep, damage, RNG, turn, controller, or facility state",
+        "sporePortable.ts reruns both probes only through tools/run-mgba-probe.py and proves every dense source/component, typed-seam, software/hardware OAM and matrices, palettes/tags, blend registers, audio task, immutable battler, raw-RGB, and production-framebuffer frame twice fresh",
+        "MOVE_COTTON_SPORE remains unsupported after an independent source batch-check: although it shares ANIM_TAG_SPORE and AnimSporeParticle, it uses splitbgprio, unblended particles, different looped audio, no setalpha/SporeDoubleBattle task, and still requires its own complete dense both-orientation acceptance",
+        "no animation-boundary list, unsupported barrier, canonical-recording allowlist, gameplay outcome, or sibling coverage changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-spore-player-parasect-opponent-onix.json",
+        "tools/battle-lab/mechanic-spore-opponent-parasect-player-onix.json",
+        "tools/compare/fixtures/spore-player-parasect-opponent-onix.json",
+        "tools/compare/fixtures/spore-opponent-parasect-player-onix.json",
+        "tools/compare/sporeProbe.py",
+        "tools/compare/sporePortable.ts",
+        "tools/compare/sporeSourceAudit.ts",
+        "tools/compare/extractSporeAssets.ts",
+        "src/animation/assets/spore.json",
+        "src/animation/spore.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/spore.test.ts",
+        "tests/animation/sporeEvidence.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_LIGHT_SCREEN",
       "status": "exact",
       "covered": [
@@ -2417,6 +2446,24 @@
     "MOVE_BIND"
   ],
   "componentTracks": [
+    {
+      "id": "spore-particles",
+      "components": [
+        "asset:ANIM_TAG_SPORE",
+        "subroutine:CreateSpore",
+        "subroutine:CreateCottonSpores",
+        "task:AnimTask_SporeDoubleBattle",
+        "visualCommand:create_spore_particle_sprite",
+        "visualCommand:setalpha",
+        "visualCommand:blendoff",
+        "visualCommand:splitbgprio"
+      ],
+      "representatives": [
+        "MOVE_SPORE",
+        "MOVE_COTTON_SPORE"
+      ],
+      "goal": "MOVE_SPORE independently proves its complete nine-particle blended body through cleanup at 207/207 dense source/seam/framebuffer frames in both orientations twice fresh. MOVE_COTTON_SPORE remains unsupported because its splitbgprio, unblended particle mode, distinct audio and no-alpha/no-SporeDoubleBattle body require separate complete both-orientation acceptance."
+    },
     {
       "id": "sparkle-3-special-screen",
       "components": [

@@ -494,6 +494,10 @@ import {
   sweetKissAtAge,
   type SweetKissState,
 } from "./sweetKiss.ts";
+import {
+  sporeAtAge,
+  type SporeState,
+} from "./spore.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -580,7 +584,8 @@ export interface SceneOnPresentationBattler {
     | "PHANPY"
     | "TEDDIURSA"
     | "WARTORTLE"
-    | "LUVDISC";
+    | "LUVDISC"
+    | "PARASECT";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -1443,6 +1448,13 @@ export interface SceneOnSweetKissConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnSporeConfig {
+  readonly move: "SPORE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnPerishSongFieldProfile
   extends SceneOnDragonRageFieldProfile {
   /** Immutable battle-engine result; presentation never advances these. */
@@ -1704,6 +1716,7 @@ export type SceneOnMoveConfig =
   | SceneOnRestConfig
   | SceneOnHowlConfig
   | SceneOnSweetKissConfig
+  | SceneOnSporeConfig
   | SceneOnPerishSongConfig
   | SceneOnNeedleArmConfig
   | SceneOnSandstormConfig
@@ -1790,6 +1803,8 @@ export type SceneOnHowlPresentationState =
   SceneOnMovePresentationState<SceneOnHowlConfig>;
 export type SceneOnSweetKissPresentationState =
   SceneOnMovePresentationState<SceneOnSweetKissConfig>;
+export type SceneOnSporePresentationState =
+  SceneOnMovePresentationState<SceneOnSporeConfig>;
 export type SceneOnBlockPresentationState =
   SceneOnMovePresentationState<SceneOnBlockConfig>;
 export type SceneOnPerishSongPresentationState =
@@ -3990,6 +4005,31 @@ export function sceneOnSweetKissView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...sweetKissAtAge(
+      state.age,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+export interface SceneOnSporeView extends SporeState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age=0` is Move_SPORE's first active source-script frame. */
+export function sceneOnSporeView(
+  state: SceneOnSporePresentationState,
+): SceneOnSporeView {
+  if (state.config.move !== "SPORE") {
+    throw new Error(`expected SPORE presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...sporeAtAge(
       state.age,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,

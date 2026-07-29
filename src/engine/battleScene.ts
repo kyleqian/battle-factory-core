@@ -590,6 +590,7 @@ import metronomeAsset from "../animation/assets/metronome.json" with { type: "js
 import restAsset from "../animation/assets/rest.json" with { type: "json" };
 import howlAsset from "../animation/assets/howl.json" with { type: "json" };
 import sweetKissAsset from "../animation/assets/sweet-kiss.json" with { type: "json" };
+import sporeAsset from "../animation/assets/spore.json" with { type: "json" };
 import perishSongAsset from "../animation/assets/perish-song.json" with { type: "json" };
 import needleArmAsset from "../animation/assets/needle-arm.json" with { type: "json" };
 import sandstormAsset from "../animation/assets/sandstorm.json" with { type: "json" };
@@ -772,6 +773,7 @@ import {
   sceneOnRestView,
   sceneOnHowlView,
   sceneOnSweetKissView,
+  sceneOnSporeView,
   sceneOnPerishSongView,
   sceneOnNeedleArmView,
   sceneOnSandstormView,
@@ -795,6 +797,7 @@ import {
   type SceneOnRestPresentationState,
   type SceneOnHowlPresentationState,
   type SceneOnSweetKissPresentationState,
+  type SceneOnSporePresentationState,
   type SceneOnPerishSongPresentationState,
   type SceneOnNeedleArmPresentationState,
   type SceneOnSandstormPresentationState,
@@ -1442,6 +1445,11 @@ const sweetKissArt = sweetKissAsset as {
   luvdiscFront: { tileset: Tileset; palette: RgbColor[] };
   redHeart: { tileset: Tileset; palette: RgbColor[] };
   angel: { tileset: Tileset; palette: RgbColor[] };
+};
+const sporeArt = sporeAsset as {
+  parasectBack: { tileset: Tileset; palette: RgbColor[] };
+  parasectFront: { tileset: Tileset; palette: RgbColor[] };
+  spore: { tileset: Tileset; palette: RgbColor[] };
 };
 const perishSongArt = perishSongAsset as {
   murkrowBack: { tileset: Tileset; palette: RgbColor[] };
@@ -21235,6 +21243,147 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "LUVDISC used" : "Foe LUVDISC used",
       "SWEET KISS!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SPORE") {
+    const sporeState = state as SceneOnSporePresentationState;
+    const view = sceneOnSporeView(sporeState);
+    // Script callbacks update software sprites after BuildOamBuffer; paint
+    // the prior relative age to reproduce the displayed OAM latch.
+    const displayed = sceneOnSporeView({
+      ...sporeState,
+      age: sporeState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "PARASECT"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "PARASECT"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SPORE pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const parasectSource = playerToOpponent
+      ? sporeArt.parasectBack : sporeArt.parasectFront;
+    const parasect = playerToOpponent
+      ? parasectSource
+      : {
+          ...parasectSource,
+          tileset: subTileset(parasectSource.tileset, 0, 8),
+        };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const drawAttacker = (buffer = fb) => drawSpriteSheet(
+      buffer,
+      parasect.tileset,
+      parasect.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawTarget = (buffer = fb) => drawSpriteSheet(
+      buffer,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    const sporeTiles = subTileset(sporeArt.spore.tileset, 2, 2);
+    const particles = displayed.particles.slice().sort((a, b) =>
+      a.priority - b.priority
+      || (a.y + a.y2) - (b.y + b.y2)
+      || b.slot - a.slot
+    );
+    const drawParticles = (priority: 2 | 3, nonObjTarget2: Uint8Array) => {
+      for (const particle of particles.filter((value) =>
+        value.priority === priority
+      )) {
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          nonObjTarget2,
+          sporeTiles,
+          sporeArt.spore.palette,
+          particle.x + particle.x2,
+          particle.y + particle.y2,
+          256,
+          0,
+          0,
+          256,
+          12,
+          8,
+          false,
+        );
+      }
+    };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const fieldOnly = fb.slice();
+    drawParticles(3, fieldOnly);
+    if (playerToOpponent) {
+      drawTarget();
+      const targetBg = fieldOnly.slice();
+      drawTarget(targetBg);
+      drawParticles(2, targetBg);
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+      const targetBg = fieldOnly.slice();
+      drawTarget(targetBg);
+      drawParticles(2, targetBg);
+    }
+    const profile = sporeState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "PARASECT",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "PARASECT" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "PARASECT used" : "Foe PARASECT used",
+      "SPORE!",
       99,
     );
     return;
