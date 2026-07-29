@@ -13,6 +13,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 696 — [BOUNDED MAIN WORKER 2026-07-29 ~12:22] Rung-14 battle-command seam design complete
+
+- **State:** docs-only design step complete; inherited tree remains green at
+  **513 files / 5187 tests + 1 deliberate animation-lane skip**, production
+  build, and `git diff --check`. No oracle lifecycle or freshness action.
+- **Did:** added `docs/battle-command-seam-design.md`: current action/FIGHT
+  render inventory with file/line evidence; request-ID-owned, phase-relative
+  adapter/lifecycle and ordinary `submitBattleDecision` bridge; canonical
+  structural-equivalence contract; immutable 14-trace regression table; six
+  <=45-minute implementation slices; explicit asset and out-of-scope bounds.
+- **Next:** dispatch Slice 1, the equivalence state-construction swap:
+  `BattleCommandRequest + BattleScriptRulesContext` → immutable presentation
+  state, proving canonical Battle-2 deep equality before any core/render
+  behavior changes.
+- **Notes:** canonical minimum stays `battle2-action-menu-dense` **209/209**,
+  `fight-submenu` **235/235**, and reopen **90/90**; renderer slices retain all
+  fourteen named exact windows. Healthbox/text mechanisms are generic;
+  arbitrary field species still need complete front/back battle-pic assets
+  (the banked 376-species party-icon catalog is party-screen-only). No source,
+  test, trace, census, asset, roadmap, issue, or animation file changed.
+  PAPERCUT: none.
+
+---
+
 ## 695 — [SUPERVISOR WIND-DOWN 2026-07-29 ~12:05] 14-round session: rung 13 complete, sweep census empty through seed 60, six rung-14 slices live, day-audit defect fixed same-day
 
 - **State:** master green at **513 files / 5187 tests + 1 deliberate
