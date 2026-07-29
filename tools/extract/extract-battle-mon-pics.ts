@@ -1,13 +1,8 @@
-// Dev-time extractor: reads reference/pokeemerald's mon-pic art battle 1's
-// bring-up needs that isn't already covered by extract-front-sprites.ts
-// (which only holds FRONT pics of the 6 anchor rental species, used by the
-// draft/summary screens - never shown in battle). A battle shows:
-//   - the player's own party from BEHIND (back.png), for whichever of the 6
-//     anchors got rented - this run's pinned S5 trace rents ONIX/MAGBY/
-//     BAYLEEF (docs/battle-bringup-notes.md S5), so those 3 back pics.
-//   - the opponent's active party from the FRONT (front.png) - battle 1's
-//     opponent (Bug Catcher DESTIN, docs/battle-bringup-notes.md S5) fields
-//     GROVYLE/MURKROW/PIDGEOTTO, none of which are anchor-pool species.
+// Dev-time extractor: reads reference/pokeemerald's battle-mon art for every
+// species reachable from the generated Battle Factory set catalog. It is
+// deliberately separate from extract-front-sprites.ts: that catalog is for
+// draft/summary presentation, whereas a battle needs both the player's BACK
+// pic and the opponent's FRONT pic for any generated active battler.
 // Also extracts gMonBackPicCoords/gMonFrontPicCoords in full: both are
 // naturally all-species tables (one struct literal per SPECIES_* constant,
 // not per-species art), so extracting only a handful of entries would just
@@ -20,7 +15,7 @@
 // Never imported at runtime - the production build only reads its JSON output.
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, isAbsolute, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { decodeIndexedPng } from "./indexedPng.ts";
 import { sliceTiles } from "./tiles.ts";
@@ -29,8 +24,12 @@ import { loadJascPal } from "./jascPal.ts";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const RUN_ROOT = join(HERE, "..", "..");
 const REF = join(RUN_ROOT, "reference", "pokeemerald");
-const ASSETS_GEN = join(RUN_ROOT, "src", "assets", "gen");
-const DATA_GEN = join(RUN_ROOT, "src", "data", "gen");
+const outDirIndex = process.argv.indexOf("--out-dir");
+const outDir = outDirIndex < 0 ? undefined : process.argv[outDirIndex + 1];
+if (outDirIndex >= 0 && !outDir) throw new Error("--out-dir requires a directory");
+const OUTPUT_ROOT = outDir === undefined ? RUN_ROOT : isAbsolute(outDir) ? outDir : join(RUN_ROOT, outDir);
+const ASSETS_GEN = join(OUTPUT_ROOT, "src", "assets", "gen");
+const DATA_GEN = join(OUTPUT_ROOT, "src", "data", "gen");
 
 mkdirSync(ASSETS_GEN, { recursive: true });
 mkdirSync(DATA_GEN, { recursive: true });
@@ -45,40 +44,62 @@ interface Sprite {
   palette: { r: number; g: number; b: number }[];
 }
 
-function loadPic(speciesDir: string, picFile: "front.png" | "back.png"): Sprite {
+interface PicSource {
+  spriteDir: string;
+  paletteDir: string;
+}
+
+function loadPic(source: PicSource, picFile: "front.png" | "back.png"): Sprite {
+  const speciesDir = source.spriteDir;
   const image = decodeIndexedPng(join(speciesDir, picFile));
   if (image.width !== 64 || image.height !== 64) {
     throw new Error(`${speciesDir}/${picFile}: expected a 64x64 pic, got ${image.width}x${image.height}`);
   }
   const { columns, rows, tiles } = sliceTiles(image);
-  const palette = loadJascPal(join(speciesDir, "normal.pal"));
+  const palette = loadJascPal(join(source.paletteDir, "normal.pal"));
   return { tileset: { columns, rows, tiles: tiles.map((t) => [...t.pixels]) }, palette };
 }
 
-// Mechanism 5 (docs/battle-scene-notes.md §7.11/§7.16): species with
-// `HasTwoFramesAnimation` (all but CASTFORM/DEOXYS/SPINDA/UNOWN) store their
-// front-sprite entrance-animation 2nd frame as the BOTTOM half of a stacked
-// 64x128 `anim_front.png` (top half is frame 0, pixel-identical to
-// front.png - verified below, not assumed). Only GROVYLE's frame 2 is
-// consumed by this run's engine so far (`SPRITE_ANIM_TAG`-less battle front
-// sprites swap to it via `StartSpriteAnim(sprite, 1)`), but all three
-// FRONT_SPECIES have the file, so all three are extracted while here.
-function loadAnimFrame2(speciesDir: string, frame0: Sprite): { columns: number; rows: number; tiles: number[][] } {
+// `HasTwoFramesAnimation` in pokemon.c:6988 excludes these four species.
+// The catalog's established per-species schema nevertheless has a frame2
+// field. Its entry is a duplicate of source frame 0 for these species; the
+// real HasTwoFramesAnimation gate means it is never selected as an animation
+// frame. CASTFORM and UNOWN also use source-default
+// subdirectories (normal and a respectively), rather than the ordinary
+// graphics/pokemon/<species>/ front/back files.
+const ONE_FRAME_ANIMATION_SPECIES = new Set(["CASTFORM", "DEOXYS", "SPINDA", "UNOWN"]);
+
+// The battle gMonFrontPicTable itself points at anim_front, not front. For the
+// two-frame species it is a 64x128 stack; some ordinary front.png files differ
+// by a few pixels from that source top frame, so treating front.png as canonical
+// would silently produce the wrong battlefield pic. The established entries
+// below were all previously self-verified equal and therefore remain byte-for-
+// byte unchanged when regenerated.
+function loadBattleFrontPic(source: PicSource, hasTwoFrames: boolean): Sprite & { frame2: { columns: number; rows: number; tiles: number[][] } } {
+  const speciesDir = source.spriteDir;
   const image = decodeIndexedPng(join(speciesDir, "anim_front.png"));
-  if (image.width !== 64 || image.height !== 128) {
-    throw new Error(`${speciesDir}/anim_front.png: expected a 64x128 stacked 2-frame pic, got ${image.width}x${image.height}`);
+  // UNOWN/SPINDA/DEOXYS still provide a stacked source bitmap, but the battle
+  // code does not expose its lower half because HasTwoFramesAnimation is false.
+  if (image.width !== 64 || (hasTwoFrames ? image.height !== 128 : image.height !== 64 && image.height !== 128)) {
+    throw new Error(`${speciesDir}/anim_front.png: unexpected ${image.width}x${image.height} battle pic`);
   }
   const { columns, rows, tiles } = sliceTiles(image);
-  const frameRows = rows / 2;
-  const frame0Tiles = tiles.slice(0, frameRows * columns);
-  const frame0Match = frame0Tiles.every((t, i) => t.pixels.every((p, j) => p === frame0.tileset.tiles[i]![j]));
-  if (!frame0Match) throw new Error(`${speciesDir}/anim_front.png: top half doesn't match front.png - frame ordering assumption is wrong`);
-  const frame1Tiles = tiles.slice(frameRows * columns);
-  return { columns, rows: frameRows, tiles: frame1Tiles.map((t) => [...t.pixels]) };
+  const frameRows = image.height === 128 ? rows / 2 : rows;
+  const frame0: Sprite = {
+    tileset: { columns, rows: frameRows, tiles: tiles.slice(0, frameRows * columns).map((tile) => [...tile.pixels]) },
+    palette: loadJascPal(join(source.paletteDir, "normal.pal")),
+  };
+  if (!hasTwoFrames) return { ...frame0, frame2: { ...frame0.tileset, tiles: frame0.tileset.tiles.map((tile) => [...tile]) } };
+  return {
+    ...frame0,
+    frame2: { columns, rows: frameRows, tiles: tiles.slice(frameRows * columns).map((tile) => [...tile.pixels]) },
+  };
 }
 
-// species display name -> reference/pokeemerald's graphics/pokemon/<dir>/ name.
-const BACK_SPECIES: Record<string, string> = {
+// Preserve current object-key order as an append-only compatibility prefix.
+// Coverage itself is derived below from battle-frontier-mons.json, never from
+// this historical ordering list.
+const ESTABLISHED_BACK_ORDER: Record<string, string> = {
   ONIX: "onix",
   MAGBY: "magby",
   BAYLEEF: "bayleef",
@@ -104,7 +125,7 @@ const BACK_SPECIES: Record<string, string> = {
   // needs its own back pic for the player-side staged orientation.
   KADABRA: "kadabra",
 };
-const FRONT_SPECIES: Record<string, string> = {
+const ESTABLISHED_FRONT_ORDER = {
   GROVYLE: "grovyle",
   MURKROW: "murkrow",
   PIDGEOTTO: "pidgeotto",
@@ -127,18 +148,44 @@ const FRONT_SPECIES: Record<string, string> = {
   IVYSAUR: "ivysaur",
 };
 
+type FrontierMonCatalog = { entries: Array<{ index: number; species: string }> };
+const frontierMons = JSON.parse(readFileSync(join(RUN_ROOT, "src", "data", "gen", "battle-frontier-mons.json"), "utf8")) as FrontierMonCatalog;
+if (frontierMons.entries.length !== 882) throw new Error(`expected 882 generated Factory sets, got ${frontierMons.entries.length}`);
+for (const [index, mon] of frontierMons.entries.entries()) {
+  if (mon.index !== index || !/^SPECIES_[A-Z0-9_]+$/.test(mon.species)) {
+    throw new Error(`invalid generated Factory set at index ${index}`);
+  }
+}
+
+const catalogSpecies = [...new Set(frontierMons.entries.map((mon) => mon.species.replace(/^SPECIES_/, "")))];
+if (catalogSpecies.length !== 376) throw new Error(`expected 376 distinct Factory species, got ${catalogSpecies.length}`);
+
+function sourceForSpecies(species: string): PicSource {
+  const speciesDir = join(REF, "graphics", "pokemon", species.toLowerCase());
+  switch (species) {
+    case "CASTFORM":
+      return { spriteDir: join(speciesDir, "normal"), paletteDir: join(speciesDir, "normal") };
+    case "UNOWN":
+      return { spriteDir: join(speciesDir, "a"), paletteDir: speciesDir };
+    default:
+      return { spriteDir: speciesDir, paletteDir: speciesDir };
+  }
+}
+
+function appendCatalogSpecies(established: Record<string, string>): string[] {
+  return [...Object.keys(established), ...catalogSpecies.filter((species) => !(species in established))];
+}
+
 const backSprites: Record<string, Sprite> = {};
-for (const [species, dir] of Object.entries(BACK_SPECIES)) {
-  backSprites[species] = loadPic(join(REF, "graphics", "pokemon", dir), "back.png");
+for (const species of appendCatalogSpecies(ESTABLISHED_BACK_ORDER)) {
+  backSprites[species] = loadPic(sourceForSpecies(species), "back.png");
 }
 writeJson(join(ASSETS_GEN, "battle-back-sprites.json"), backSprites);
 
-const opponentFrontSprites: Record<string, Sprite & { frame2: { columns: number; rows: number; tiles: number[][] } }> = {};
-for (const [species, dir] of Object.entries(FRONT_SPECIES)) {
-  const speciesDir = join(REF, "graphics", "pokemon", dir);
-  const frame0 = loadPic(speciesDir, "front.png");
-  const frame2 = loadAnimFrame2(speciesDir, frame0);
-  opponentFrontSprites[species] = { ...frame0, frame2 };
+const opponentFrontSprites: Record<string, Sprite & { frame2?: { columns: number; rows: number; tiles: number[][] } }> = {};
+for (const species of appendCatalogSpecies(ESTABLISHED_FRONT_ORDER)) {
+  const source = sourceForSpecies(species);
+  opponentFrontSprites[species] = loadBattleFrontPic(source, !ONE_FRAME_ANIMATION_SPECIES.has(species));
 }
 writeJson(join(ASSETS_GEN, "battle-opponent-front-sprites.json"), opponentFrontSprites);
 
@@ -163,10 +210,10 @@ function parseCoordsTable(path: string): Record<string, { width: number; height:
 const backCoords = parseCoordsTable(join(REF, "src", "data", "pokemon_graphics", "back_pic_coordinates.h"));
 const frontCoords = parseCoordsTable(join(REF, "src", "data", "pokemon_graphics", "front_pic_coordinates.h"));
 
-for (const species of Object.keys(BACK_SPECIES)) {
+for (const species of Object.keys(backSprites)) {
   if (!backCoords[species]) throw new Error(`gMonBackPicCoords missing SPECIES_${species}`);
 }
-for (const species of Object.keys(FRONT_SPECIES)) {
+for (const species of Object.keys(opponentFrontSprites)) {
   if (!frontCoords[species]) throw new Error(`gMonFrontPicCoords missing SPECIES_${species}`);
 }
 
