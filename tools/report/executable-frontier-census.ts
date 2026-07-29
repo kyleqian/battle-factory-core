@@ -845,14 +845,6 @@ function walk(entryLabel: string, allowConditionalForks: boolean): WalkResult {
           );
         }
       }
-      if (statement.opcodeBindings?.includes("B_SCR_OP_METRONOME")) {
-        subsystemBlockers.add(
-          `${DYNAMIC_UNIVERSE_BLOCKER_PREFIX} B_SCR_OP_METRONOME(selectable-effect-universe) -- `
-          + "the selected runtime effect is not statically enumerable here, so this row remains blocked "
-          + "until every legal Metronome destination is executable (docs/ranked-single-opcodes-notes.md "
-          + "§ Metronome gate)",
-        );
-      }
     }
 
     const outgoing = edgesFromKey.get(nodeKey(node.label, node.line)) ?? [];
@@ -1016,6 +1008,27 @@ function requireExactMechanicalBlockers(effectName: string, expectedBlockers: st
   }
 }
 
+const METRONOME_FORBIDDEN_MOVE_NAMES = new Set([
+  "MOVE_METRONOME", "MOVE_STRUGGLE", "MOVE_SKETCH", "MOVE_MIMIC",
+  "MOVE_COUNTER", "MOVE_MIRROR_COAT", "MOVE_PROTECT", "MOVE_DETECT",
+  "MOVE_ENDURE", "MOVE_DESTINY_BOND", "MOVE_SLEEP_TALK", "MOVE_THIEF",
+  "MOVE_FOLLOW_ME", "MOVE_SNATCH", "MOVE_HELPING_HAND", "MOVE_COVET",
+  "MOVE_TRICK", "MOVE_FOCUS_PUNCH",
+]);
+
+function requireMetronomeSelectableGateClosed(): void {
+  const blocked = topology.moves.filter((move) => {
+    if (move.id === 0 || METRONOME_FORBIDDEN_MOVE_NAMES.has(move.move)) return false;
+    return reportByEffectId.get(move.effectId)?.classification.kind !== "executable";
+  });
+  if (blocked.length !== 0) {
+    throw new Error(
+      "Metronome selectable-effect gate reopened: "
+      + blocked.map(({ move, effect }) => `${move}/${effect}`).join(", "),
+    );
+  }
+}
+
 const validationChecks: Array<() => void> = [
   // Registration checkpoint (2026-07-25): B_SCR_OP_JUMPIFHALFWORD,
   // B_SCR_OP_JUMPIFSTATUS3CONDITION, and B_SCR_OP_ORWORD are now registered,
@@ -1128,9 +1141,9 @@ const validationChecks: Array<() => void> = [
   () => requireExactMechanicalBlockers("EFFECT_STOCKPILE", []),
   () => requireExactMechanicalBlockers("EFFECT_SWALLOW", []),
   () => requireExactMechanicalBlockers("EFFECT_SPIT_UP", []),
-  () => requireExactMechanicalBlockers("EFFECT_METRONOME", [
-    "Dynamic effect-universe gate: B_SCR_OP_METRONOME(selectable-effect-universe)",
-  ]),
+  () => requireExecutable("EFFECT_METRONOME"),
+  () => requireExactMechanicalBlockers("EFFECT_METRONOME", []),
+  () => requireMetronomeSelectableGateClosed(),
   // Registration checkpoint (2026-07-27, docs/roar-multihit-registration-
   // scout.md §4 rungs 2-6): B_SCR_OP_INITMULTIHITSTRING/B_SCR_OP_JUMPIFHASNOHP
   // registered, plus the JUMPIFHALFWORD (gChosenMove) and JUMPIFBYTE
@@ -1448,7 +1461,7 @@ lines.push(
 );
 lines.push(
   "- Mean Look/Nightmare, Thief/Knock Off, Rapid Spin, Pain Split, Stockpile/Swallow, and Metronome each "
-  + "have an exact operand/dynamic-universe blocker-set ratchet; Rapid Spin and Pain Split also retain their "
+  + "have an exact operand/dynamic-universe gate ratchet; Rapid Spin and Pain Split also retain their "
   + "exact missing-opcode sets",
 );
 lines.push("- `EFFECT_RECOIL_IF_MISS` executable (a real positive: it enters via `BattleScript_HitFromAtkString`, skipping the chokepoint entirely, and reaches moveend/checkteamslost)");
@@ -1541,8 +1554,8 @@ lines.push(
   + "\"run another move's effect script\") has a runtime-computed target with no static label operand. The "
   + "called script is not walked from that call site; once the dynamic opcode itself is registered, the caller "
   + "is executable and each possible called effect remains accountable in its own census row. Metronome is the "
-  + "explicit exception: its legal selectable universe is the move's entire contract, so its own row retains a "
-  + "named dynamic-universe blocker even after opcode registration and cannot appear as a one-opcode win. Separately, "
+  + "explicit exception: its legal selectable universe is the move's entire contract, and a validation ratchet "
+  + "requires every non-forbidden destination effect to remain executable now that the final gate is closed. Separately, "
   + "`B_SCR_OP_FORCERANDOMSWITCH`'s success target (`BattleScript_SuccessForceOut`) is fixed at compile time but "
   + "never spelled as a bytecode operand -- `Cmd_forcerandomswitch` writes `gBattlescriptCurrInstr` directly "
   + "(`battle_script_commands.c:7181`) instead of reading one. Since that target IS statically known, it is "

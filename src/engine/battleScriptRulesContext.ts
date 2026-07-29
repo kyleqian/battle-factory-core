@@ -86,6 +86,8 @@ import { createBattleScriptTryrecycleitemOpcodeHandlers } from "./battleScriptTr
 import { createBattleScriptTryimprisonOpcodeHandlers } from "./battleScriptTryimprisonOpcode.ts";
 import { createBattleScriptSnatchOpcodeHandlers } from "./battleScriptSnatchOpcode.ts";
 import { createBattleScriptBeatUpOpcodeHandlers } from "./battleScriptBeatUpOpcode.ts";
+import { createBattleScriptTransformOpcodeHandlers } from "./battleScriptTransformOpcode.ts";
+import { createBattleScriptMetronomeOpcodeHandlers } from "./battleScriptMetronomeOpcode.ts";
 import { createBattleScriptTrysethelpinghandOpcodeHandlers } from "./battleScriptTrysethelpinghandOpcode.ts";
 import { createBattleScriptTryswapitemsOpcodeHandlers } from "./battleScriptTryswapitemsOpcode.ts";
 import { createBattleScriptSettormentOpcodeHandlers } from "./battleScriptSettormentOpcode.ts";
@@ -290,6 +292,15 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
   chargeTimerStartValue: number;
   /** Source gBattleMons[battler] IV bitfields, consumed by Hidden Power. */
   ivs: BattleScriptIvs;
+  /** Remaining fields in BattlePokemon's packed IV/egg/ability-number word. */
+  isEgg: boolean;
+  abilityNum: 0 | 1;
+  /** BattlePokemon::unknown, byte 0x23 and therefore part of Transform's raw copy. */
+  unknown: number;
+  /** BattlePokemon::experience, after Transform's [0x00,0x24) copy boundary. */
+  experience: number;
+  /** DisableStruct::transformedMonPersonality, cleared by switch/faint setup. */
+  transformedMonPersonality: number;
   /** Source four-bit DisableStruct::mimickedMoves mask. */
   mimickedMoves: number;
   /** Source gBattleMons[battler].ppBonuses packed two-bit PP Up fields. */
@@ -334,16 +345,7 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
   types: readonly [string, string];
   /** Source gBattleMons[battler].species - Lucky Punch/Stick's species-gated crit stage boost. */
   species: number;
-  /**
-   * Source gBattleMons[battler].personality. Cmd_tryinfatuating rereads
-   * species/personality from the party mon via GetMonData rather than
-   * gBattleMons directly (battle_script_commands.c:7656-7671), but this
-   * engine has no Transform species/personality divergence yet
-   * (B_SCR_OP_TRANSFORMDATAEXECUTION is unregistered), so the party value
-   * and gBattleMons[battler].personality are always identical -- reading it
-   * off the already-modeled per-battler state is exact, matching the
-   * `species` field above's own precedent.
-   */
+  /** Source gBattleMons[battler].personality; Transform deliberately leaves it unchanged. */
   personality: number;
   /** Source gBattleMons[battler].{attack,defense,spAttack,spDefense,level} - CalculateBaseDamage's raw stat inputs. */
   attack: number;
@@ -439,6 +441,11 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
   chargeTimerStartValue?: number;
   /** Legacy focused fixtures default to six zero IVs at the construction boundary. */
   ivs?: BattleScriptIvs;
+  isEgg?: boolean;
+  abilityNum?: 0 | 1;
+  unknown?: number;
+  experience?: number;
+  transformedMonPersonality?: number;
   mimickedMoves?: number;
   ppBonuses?: number;
   stockpileCounter?: number;
@@ -528,6 +535,7 @@ export type BattleScriptPartyMemberState = Readonly<{
   /** Serialized BattlePokemon derivation inputs and controller-computed battle stats. */
   ivs: BattleScriptIvs;
   personality: number;
+  experience: number;
   level: number;
   friendship: number;
   maxHP: number;
@@ -792,6 +800,8 @@ export type BattleScriptRulesContext = Readonly<
     battleTextBuff1Item: number | null;
     /** Typed form of PREPARE_TYPE_BUFFER(gBattleTextBuff1, type). */
     battleTextBuff1Type: string | null;
+    /** Typed form of PREPARE_SPECIES_BUFFER(gBattleTextBuff1, species). */
+    battleTextBuff1Species: number | null;
     /** Typed form of PREPARE_BYTE_NUMBER_BUFFER(gBattleTextBuff2, 1, value). */
     battleTextBuff2ByteNumber: number | null;
     /** Typed form of PREPARE_ITEM_BUFFER(gBattleTextBuff2, item). */
@@ -925,6 +935,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   battleTextBuff1Move?: number | null;
   battleTextBuff1Item?: number | null;
   battleTextBuff1Type?: string | null;
+  battleTextBuff1Species?: number | null;
   battleTextBuff2ByteNumber?: number | null;
   battleTextBuff2Item?: number | null;
   battlerByTurnOrder?: readonly number[];
@@ -937,6 +948,7 @@ export type BattleScriptPartyMemberInput = Readonly<{
   abilityNum?: number;
   ivs?: BattleScriptIvs;
   personality?: number;
+  experience?: number;
   level?: number;
   friendship?: number;
   maxHP?: number;
@@ -1766,6 +1778,7 @@ const BATTLE_SCRIPT_EMPTY_PARTY_MEMBER: BattleScriptPartyMemberState = Object.fr
   abilityNum: 0,
   ivs: uniformBattleScriptIvs(0),
   personality: 0,
+  experience: 0,
   level: 0,
   friendship: 0,
   maxHP: 0,
@@ -1821,6 +1834,7 @@ function createBattleScriptPartyState(
         spDefense: requireUnsigned(member.ivs?.spDefense ?? 0, 31, `${field}[${index}].ivs.spDefense`),
       }),
       personality: requireUnsigned(member.personality ?? 0, 0xffff_ffff, `${field}[${index}].personality`) >>> 0,
+      experience: requireUnsigned(member.experience ?? 0, 0xffff_ffff, `${field}[${index}].experience`) >>> 0,
       level: requireUnsigned(member.level ?? 0, 0xff, `${field}[${index}].level`),
       friendship: requireUnsigned(member.friendship ?? 0, 0xff, `${field}[${index}].friendship`),
       hp: requireUnsigned(member.hp ?? 0, 0xffff, `${field}[${index}].hp`),
@@ -2280,6 +2294,15 @@ export function createBattleScriptRulesContext(
       spAttack: requireUnsigned(battler.ivs?.spAttack ?? 0, 31, `battlers[${index}].ivs.spAttack`),
       spDefense: requireUnsigned(battler.ivs?.spDefense ?? 0, 31, `battlers[${index}].ivs.spDefense`),
     }),
+    isEgg: Boolean(battler.isEgg),
+    abilityNum: requireUnsigned(battler.abilityNum ?? 0, 1, `battlers[${index}].abilityNum`) as 0 | 1,
+    unknown: requireUnsigned(battler.unknown ?? 0, 0xff, `battlers[${index}].unknown`),
+    experience: requireUnsigned(battler.experience ?? 0, 0xffff_ffff, `battlers[${index}].experience`) >>> 0,
+    transformedMonPersonality: requireUnsigned(
+      battler.transformedMonPersonality ?? 0,
+      0xffff_ffff,
+      `battlers[${index}].transformedMonPersonality`,
+    ) >>> 0,
     mimickedMoves: requireUnsigned(
       battler.mimickedMoves ?? 0,
       0x0f,
@@ -2633,6 +2656,10 @@ export function createBattleScriptRulesContext(
       ? null
       : requireUnsigned(input.battleTextBuff1Item, 0xffff, "battleTextBuff1Item"),
     battleTextBuff1Type: input.battleTextBuff1Type ?? null,
+    battleTextBuff1Species: input.battleTextBuff1Species === null
+      || input.battleTextBuff1Species === undefined
+      ? null
+      : requireUnsigned(input.battleTextBuff1Species, 0xffff, "battleTextBuff1Species"),
     battleTextBuff2ByteNumber: input.battleTextBuff2ByteNumber === null
       || input.battleTextBuff2ByteNumber === undefined
       ? null
@@ -2895,6 +2922,8 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptTryimprisonOpcodeHandlers(program),
     ...createBattleScriptSnatchOpcodeHandlers(program),
     ...createBattleScriptBeatUpOpcodeHandlers(program),
+    ...createBattleScriptTransformOpcodeHandlers(program),
+    ...createBattleScriptMetronomeOpcodeHandlers(program),
   });
 }
 

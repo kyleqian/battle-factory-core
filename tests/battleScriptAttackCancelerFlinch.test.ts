@@ -29,6 +29,11 @@ function battler(
     ivs: changes.ivs ?? Object.freeze({
       hp: 0, attack: 0, defense: 0, speed: 0, spAttack: 0, spDefense: 0,
     }),
+    isEgg: changes.isEgg ?? false,
+    abilityNum: changes.abilityNum ?? 0,
+    unknown: changes.unknown ?? 0,
+    experience: changes.experience ?? 0,
+    transformedMonPersonality: changes.transformedMonPersonality ?? 0,
     mimickedMoves: changes.mimickedMoves ?? 0,
     ppBonuses: changes.ppBonuses ?? 0,
     stockpileCounter: changes.stockpileCounter ?? 0,
