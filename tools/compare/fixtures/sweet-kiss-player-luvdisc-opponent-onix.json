@@ -1,0 +1,43 @@
+{
+  "schema": "sweet-kiss-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "orientation": "player-back",
+  "scenario": "tools/battle-lab/mechanic-sweet-kiss-player-luvdisc-opponent-onix.json",
+  "probe": "tools/compare/sweetKissProbe.py",
+  "appStage": {"presentationAge": 0},
+  "attacker": {
+    "species": "LUVDISC",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": {"x": 40, "y": 58},
+      "animationCenter": {"x": 72, "y": 90},
+      "battlePositionCenter": {"x": 72, "y": 80}
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": {"x": 144, "y": 10},
+      "animationCenter": {"x": 176, "y": 42},
+      "battlePositionCenter": {"x": 176, "y": 40}
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 136,
+    "playerMaxHp": 136,
+    "opponentHp": 117,
+    "opponentMaxHp": 117,
+    "playerGender": "female",
+    "opponentGender": "male"
+  },
+  "sourceWindow": {"startFrame": 74, "endFrame": 232, "frameCount": 159},
+  "evidenceSha256": "5117db12992b65aadfc65a448ea2260dfd5848be19fc3d6e2df733d90604af21",
+  "rawRgbSha256": "61870ad0f56694de71f2d492c51fbe208216ef88b8550eca8a3a17fca8f73f11",
+  "battleState": {
+    "attackerSide": "player",
+    "targetSide": "opponent",
+    "attackerItem": 183,
+    "targetConfusionTurns": 0
+  }
+}

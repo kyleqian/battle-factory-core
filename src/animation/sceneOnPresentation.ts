@@ -474,6 +474,10 @@ import {
   type SingNote,
   type SingPanTask,
 } from "./sing.ts";
+import {
+  sweetKissAtAge,
+  type SweetKissState,
+} from "./sweetKiss.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -556,7 +560,8 @@ export interface SceneOnPresentationBattler {
     | "CACNEA"
     | "PHANPY"
     | "TEDDIURSA"
-    | "WARTORTLE";
+    | "WARTORTLE"
+    | "LUVDISC";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -1380,6 +1385,13 @@ export interface SceneOnHowlConfig {
   readonly fieldProfile: Readonly<SceneOnHowlFieldProfile>;
 }
 
+export interface SceneOnSweetKissConfig {
+  readonly move: "SWEET_KISS";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnPerishSongFieldProfile
   extends SceneOnDragonRageFieldProfile {
   /** Immutable battle-engine result; presentation never advances these. */
@@ -1636,6 +1648,7 @@ export type SceneOnMoveConfig =
   | SceneOnFollowMeConfig
   | SceneOnRestConfig
   | SceneOnHowlConfig
+  | SceneOnSweetKissConfig
   | SceneOnPerishSongConfig
   | SceneOnNeedleArmConfig
   | SceneOnSandstormConfig
@@ -1716,6 +1729,8 @@ export type SceneOnRestPresentationState =
   SceneOnMovePresentationState<SceneOnRestConfig>;
 export type SceneOnHowlPresentationState =
   SceneOnMovePresentationState<SceneOnHowlConfig>;
+export type SceneOnSweetKissPresentationState =
+  SceneOnMovePresentationState<SceneOnSweetKissConfig>;
 export type SceneOnPerishSongPresentationState =
   SceneOnMovePresentationState<SceneOnPerishSongConfig>;
 export type SceneOnNeedleArmPresentationState =
@@ -3782,6 +3797,33 @@ export function sceneOnHowlView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+export interface SceneOnSweetKissView extends SweetKissState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age=0` is Move_SWEET_KISS's first active source-script frame. */
+export function sceneOnSweetKissView(
+  state: SceneOnSweetKissPresentationState,
+): SceneOnSweetKissView {
+  if (state.config.move !== "SWEET_KISS") {
+    throw new Error(
+      `expected SWEET_KISS presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...sweetKissAtAge(
+      state.age,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
     ),
   };
 }

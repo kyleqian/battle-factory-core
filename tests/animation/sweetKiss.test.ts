@@ -10,6 +10,11 @@ import {
   SWEET_KISS_FRAME_COUNT,
   sweetKissAtAge,
 } from "../../src/animation/sweetKiss.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnSweetKissView,
+  type SceneOnSweetKissConfig,
+} from "../../src/animation/sceneOnPresentation.ts";
 
 const opponent = { x: 176, y: 42 };
 const player = { x: 72, y: 88 };
@@ -91,6 +96,59 @@ describe("MOVE_SWEET_KISS source-relative reducer", () => {
     });
     expect(sweetKissAtAge(146, "player", player).hearts).toHaveLength(6);
     expect(sweetKissAtAge(147, "player", player).hearts).toEqual([]);
+  });
+
+  it("exposes relative age, immutable geometry, and no status outcome through the seam", () => {
+    const config: SceneOnSweetKissConfig = {
+      move: "SWEET_KISS",
+      attacker: {
+        species: "LUVDISC",
+        geometry: {
+          side: "player",
+          spriteCorner: { x: 40, y: 58 },
+          animationCenter: { x: 72, y: 90 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "ONIX",
+        geometry: {
+          side: "opponent",
+          spriteCorner: { x: 144, y: 10 },
+          animationCenter: { x: 176, y: 42 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      fieldProfile: {
+        playerHp: 136,
+        playerMaxHp: 136,
+        opponentHp: 117,
+        opponentMaxHp: 117,
+      },
+    };
+    const state = createSceneOnMovePresentation(config);
+    const view = sceneOnSweetKissView({ ...state, age: 107 });
+    expect(view).toMatchObject({
+      age: 107,
+      attacker: { species: "LUVDISC" },
+      target: { species: "ONIX" },
+      sound: "SE_M_ATTRACT",
+      redHeartLoaded: true,
+      angelLoaded: true,
+    });
+    expect(view.hearts).toHaveLength(6);
+    expect("confusion" in view).toBe(false);
+  });
+
+  it("pins the lowest carrier and keeps Attract independent", () => {
+    const output = execFileSync(process.execPath, [
+      "--experimental-strip-types",
+      "tools/compare/sweetKissSourceAudit.ts",
+    ], { encoding: "utf8" });
+    expect(output).toContain("set 123/FRONTIER_MON_LUVDISC");
+    expect(output).toContain("MOVE_SWEET_KISS 186");
+    expect(output).toContain("six gRedHeartBurstSpriteTemplate lifecycles");
+    expect(output).toContain("MOVE_ATTRACT remains distinct");
   });
 
   it("re-extracts Luvdisc, RED_HEART, and ANGEL art byte-for-byte", () => {

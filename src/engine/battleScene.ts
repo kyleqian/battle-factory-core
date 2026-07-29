@@ -580,6 +580,7 @@ import tickleAsset from "../animation/assets/tickle.json" with { type: "json" };
 import metronomeAsset from "../animation/assets/metronome.json" with { type: "json" };
 import restAsset from "../animation/assets/rest.json" with { type: "json" };
 import howlAsset from "../animation/assets/howl.json" with { type: "json" };
+import sweetKissAsset from "../animation/assets/sweet-kiss.json" with { type: "json" };
 import perishSongAsset from "../animation/assets/perish-song.json" with { type: "json" };
 import needleArmAsset from "../animation/assets/needle-arm.json" with { type: "json" };
 import sandstormAsset from "../animation/assets/sandstorm.json" with { type: "json" };
@@ -757,6 +758,7 @@ import {
   sceneOnFollowMeView,
   sceneOnRestView,
   sceneOnHowlView,
+  sceneOnSweetKissView,
   sceneOnPerishSongView,
   sceneOnNeedleArmView,
   sceneOnSandstormView,
@@ -779,6 +781,7 @@ import {
   type SceneOnFollowMePresentationState,
   type SceneOnRestPresentationState,
   type SceneOnHowlPresentationState,
+  type SceneOnSweetKissPresentationState,
   type SceneOnPerishSongPresentationState,
   type SceneOnNeedleArmPresentationState,
   type SceneOnSandstormPresentationState,
@@ -1390,6 +1393,12 @@ const howlArt = howlAsset as {
   loudredBack: { tileset: Tileset; palette: RgbColor[] };
   loudredFront: { tileset: Tileset; palette: RgbColor[] };
   noiseLine: { tileset: Tileset; palette: RgbColor[] };
+};
+const sweetKissArt = sweetKissAsset as {
+  luvdiscBack: { tileset: Tileset; palette: RgbColor[] };
+  luvdiscFront: { tileset: Tileset; palette: RgbColor[] };
+  redHeart: { tileset: Tileset; palette: RgbColor[] };
+  angel: { tileset: Tileset; palette: RgbColor[] };
 };
 const perishSongArt = perishSongAsset as {
   murkrowBack: { tileset: Tileset; palette: RgbColor[] };
@@ -20386,6 +20395,126 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "MURKROW used" : "Foe MURKROW used",
       "PERISH SONG!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SWEET_KISS") {
+    const sweetKissState = state as SceneOnSweetKissPresentationState;
+    const view = sceneOnSweetKissView(sweetKissState);
+    // Effect callbacks run after BuildOamBuffer, so their coordinates,
+    // visibility, creation, and destruction reach the framebuffer one
+    // display after the pure software-sprite state.
+    const displayed = sceneOnSweetKissView({
+      ...sweetKissState,
+      age: sweetKissState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "LUVDISC"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "LUVDISC"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SWEET_KISS pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const luvdiscSource = playerToOpponent
+      ? sweetKissArt.luvdiscBack : sweetKissArt.luvdiscFront;
+    const luvdisc = playerToOpponent
+      ? luvdiscSource
+      : {
+          ...luvdiscSource,
+          tileset: subTileset(luvdiscSource.tileset, 0, 8),
+        };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      luvdisc.tileset,
+      luvdisc.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+    const heartTieBackToFront = [7, 10, 4, 3, 9, 5] as const;
+    const hearts = [...displayed.hearts].sort((a, b) =>
+      (a.y + a.y2) - (b.y + b.y2)
+      || heartTieBackToFront.indexOf(a.slot)
+        - heartTieBackToFront.indexOf(b.slot)
+    );
+    for (const heart of hearts) {
+      if (heart.invisible) continue;
+      drawSpriteSheet(
+        fb,
+        sweetKissArt.redHeart.tileset,
+        sweetKissArt.redHeart.palette,
+        heart.x + heart.x2 - 8,
+        heart.y + heart.y2 - 8,
+      );
+    }
+    // Both target-relative effect templates paint in front of the target.
+    if (displayed.angel) {
+      drawSpriteSheet(
+        fb,
+        sweetKissArt.angel.tileset,
+        sweetKissArt.angel.palette,
+        displayed.angel.x + displayed.angel.x2 - 16,
+        displayed.angel.y + displayed.angel.y2 - 16,
+      );
+    }
+    const profile = sweetKissState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "LUVDISC",
+        level: 50,
+        gender: profile.opponentGender ?? (playerToOpponent ? "male" : "female"),
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "LUVDISC" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? (playerToOpponent ? "female" : "male"),
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "LUVDISC used" : "Foe LUVDISC used",
+      "SWEET KISS!",
       99,
     );
     return;
