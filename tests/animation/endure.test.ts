@@ -4,6 +4,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { endureAtAge } from "../../src/animation/endure.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnEndureView,
+  type SceneOnEndureConfig,
+} from "../../src/animation/sceneOnPresentation.ts";
 
 describe("MOVE_ENDURE source-relative reducer", () => {
   const player = (age: number) =>
@@ -70,5 +75,48 @@ describe("MOVE_ENDURE source-relative reducer", () => {
     expect(readFileSync(output)).toEqual(
       readFileSync("src/animation/assets/endure.json"),
     );
+  });
+
+  it("exposes only typed resolved presentation geometry", () => {
+    const stage = createSceneOnMovePresentation<SceneOnEndureConfig>({
+      move: "ENDURE",
+      attacker: {
+        species: "EEVEE",
+        geometry: {
+          side: "player",
+          spriteCorner: { x: 40, y: 58 },
+          animationCenter: { x: 72, y: 90 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "ONIX",
+        geometry: {
+          side: "opponent",
+          spriteCorner: { x: 144, y: 10 },
+          animationCenter: { x: 176, y: 42 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      attackerCoord: { x: 72, y: 80 },
+      fieldProfile: {
+        playerHp: 141,
+        playerMaxHp: 141,
+        opponentHp: 110,
+        opponentMaxHp: 110,
+      },
+    });
+    expect(sceneOnEndureView({ ...stage, age: 62 })).toMatchObject({
+      age: 62,
+      attacker: { species: "EEVEE" },
+      target: { species: "ONIX" },
+      attackerPaletteY: 11,
+      attackerPaletteTarget: "red",
+    });
+    expect(() => sceneOnEndureView({
+      ...stage,
+      config: { ...stage.config, move: "FOCUS_ENERGY" },
+      age: 0,
+    } as never)).toThrow("expected ENDURE");
   });
 });

@@ -3,8 +3,19 @@ import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
+import { endureAtAge } from "../../src/animation/endure.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnEndureView,
+  type SceneOnEndureConfig,
+} from "../../src/animation/sceneOnPresentation.ts";
+import {
+  createInitialState,
+  render,
+  type EngineState,
+} from "../../src/engine/core.ts";
 
-interface Fixture {
+interface Fixture extends SceneOnEndureConfig {
   readonly schema: string;
   readonly orientation: string;
   readonly scenario: string;
@@ -13,7 +24,21 @@ interface Fixture {
   readonly evidenceSha256: string;
   readonly rawRgbSha256: string;
   readonly soundPan: number;
+  readonly soundStartAge: number;
   readonly topology: Record<string, readonly string[]>;
+}
+interface Sprite {
+  readonly slot: number;
+  readonly raw: string;
+  readonly template: { readonly address: number; readonly symbol: string | null };
+  readonly callback: { readonly symbol: string | null };
+  readonly attr: readonly number[];
+  readonly matrixNum: number;
+  readonly matrix: readonly number[];
+  readonly data: readonly number[];
+}
+interface Task {
+  readonly func: { readonly symbol: string | null };
 }
 interface AudioPlayer {
   readonly songHeader: number;
@@ -26,8 +51,8 @@ interface Frame {
   readonly scriptOffset: number | null;
   readonly visualTaskCount: number;
   readonly soundTaskCount: number;
-  readonly tasks: readonly unknown[];
-  readonly sprites: readonly unknown[];
+  readonly tasks: readonly Task[];
+  readonly sprites: readonly Sprite[];
   readonly softwareOam: readonly string[];
   readonly hardwareOam: readonly string[];
   readonly hardwareMatrices: readonly (readonly number[])[];
@@ -42,6 +67,7 @@ interface Frame {
 interface Probe {
   readonly schema: string;
   readonly sourceWindow: Fixture["sourceWindow"];
+  readonly templates: { readonly gEndureEnergySpriteTemplate: number };
   readonly songHeaders: { readonly SE_M_DRAGON_RAGE: number };
   readonly topology: Fixture["topology"];
   readonly lifecycleCounts: { readonly endureEnergy: number };
@@ -53,6 +79,21 @@ const paths = process.argv.slice(2);
 if (paths.length !== 2) throw new Error("usage: endurePortable.ts <player fixture> <opponent fixture>");
 const same = (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right);
 const fresh = new Map<string, { readonly evidence: string; readonly raw: string }>();
+const i16 = (raw: string, offset: number): number => {
+  const value = Number.parseInt(
+    raw.slice(offset * 2 + 2, offset * 2 + 4)
+      + raw.slice(offset * 2, offset * 2 + 2),
+    16,
+  );
+  return value >= 0x8000 ? value - 0x10000 : value;
+};
+const blend5ToRed = (color: number, coefficient: number) => {
+  const blend = (component: number, target: number) =>
+    component + (((target - component) * coefficient) >> 4);
+  return blend(color & 31, 31)
+    | (blend((color >> 5) & 31, 0) << 5)
+    | (blend((color >> 10) & 31, 0) << 10);
+};
 
 function verify(path: string): void {
   const fixture = JSON.parse(readFileSync(resolve(path), "utf8")) as Fixture;
@@ -73,54 +114,200 @@ function verify(path: string): void {
   const probe = JSON.parse(bytes.toString()) as Probe;
   const evidence = createHash("sha256").update(bytes).digest("hex");
   const rawHash = createHash("sha256");
-  let completeReceipts = 0;
-  let redCycleFrames = 0;
-  let firstSound = false;
-  for (const [age, frame] of probe.frames.entries()) {
+  for (const frame of probe.frames) {
     const raw = readFileSync(join(rgbDir, `${String(frame.frame).padStart(5, "0")}.rgb`));
     rawHash.update(raw);
     if (createHash("sha256").update(raw).digest("hex") !== frame.sha256) {
       throw new Error(`${fixture.orientation}: raw RGB changed at ${frame.frame}`);
     }
-    const receipt = frame.softwareOam.length === 128
-      && frame.hardwareOam.length === 128
-      && frame.hardwareMatrices.length === 32
-      && frame.hardwareMatrices.every((matrix) => matrix.length === 4)
-      && frame.fadedPalette.length === 512
-      && frame.unfadedPalette.length === 512
-      && frame.hardwarePalette.length === 512
-      && frame.paletteTags.length === 16
-      && Object.keys(frame.registers).length === 8
-      && frame.se1.tracks.length === 3 && frame.se2.tracks.length === 3;
-    if (receipt) completeReceipts += 1;
-    if (frame.tasks.length > 0 && frame.fadedPalette.some((color, index) => color !== frame.unfadedPalette[index])) redCycleFrames += 1;
-    if (age === 4) {
-      firstSound = frame.se1.songHeader === probe.songHeaders.SE_M_DRAGON_RAGE
-        && frame.se1.tracks[0]?.flags === 131
-        && frame.se1.tracks[0]?.panX === fixture.soundPan
-        && frame.se2.tracks[0]?.flags === 0;
-    }
   }
-  const raw = rawHash.digest("hex");
+  const rawDigest = rawHash.digest("hex");
   if (
-    fixture.schema !== "endure-portable-evidence/v1"
+    fixture.schema !== "endure-portable-evidence/v2"
     || probe.schema !== "endure-dense-evidence/v1"
     || !same(probe.sourceWindow, fixture.sourceWindow)
     || !same(probe.topology, fixture.topology)
-    || evidence !== fixture.evidenceSha256 || raw !== fixture.rawRgbSha256
+    || evidence !== fixture.evidenceSha256
+    || rawDigest !== fixture.rawRgbSha256
     || probe.frames.length !== fixture.sourceWindow.frameCount
     || probe.lifecycleCounts.endureEnergy !== 15
     || probe.frames[0]?.gAnimScriptActive !== 1
     || probe.frames[0]?.scriptOffset !== 0
     || probe.frames.at(-1)?.gAnimScriptActive !== 0
     || probe.frames.at(-1)?.visualTaskCount !== 0
-    || completeReceipts !== fixture.sourceWindow.frameCount
-    || redCycleFrames === 0 || !firstSound
   ) throw new Error(`${fixture.orientation}: immutable dense receipt changed`);
   const prior = fresh.get(fixture.orientation);
-  if (prior && !same(prior, { evidence, raw })) throw new Error(`${fixture.orientation}: fresh proof diverged`);
-  fresh.set(fixture.orientation, { evidence, raw });
-  console.log(`${fixture.orientation}: receipts ${completeReceipts}/${fixture.sourceWindow.frameCount}; evidence ${evidence}; raw ${raw}`);
+  if (prior && !same(prior, { evidence, raw: rawDigest })) {
+    throw new Error(`${fixture.orientation}: fresh proof diverged`);
+  }
+  fresh.set(fixture.orientation, { evidence, raw: rawDigest });
+
+  const stage = createSceneOnMovePresentation<SceneOnEndureConfig>({
+    move: "ENDURE",
+    attacker: fixture.attacker,
+    target: fixture.target,
+    attackerCoord: fixture.attackerCoord,
+    fieldProfile: fixture.fieldProfile,
+  });
+  const byFrame = new Map(probe.frames.map((frame) => [frame.frame, frame]));
+  const componentMismatches: string[] = [];
+  const framebufferMismatches: string[] = [];
+  let components = 0;
+  let framebuffers = 0;
+  for (
+    let frame = fixture.sourceWindow.startFrame;
+    frame <= fixture.sourceWindow.endFrame;
+    frame += 1
+  ) {
+    const age = frame - fixture.sourceWindow.startFrame;
+    const actual = byFrame.get(frame);
+    if (!actual) throw new Error(`probe omitted frame ${frame}`);
+    const expected = endureAtAge(
+      age,
+      fixture.attacker.geometry.side,
+      fixture.attackerCoord,
+    );
+    const seam = sceneOnEndureView({ ...stage, age });
+    const actualSprites = actual.sprites.filter((sprite) =>
+      sprite.template.address === probe.templates.gEndureEnergySpriteTemplate
+    ).map((sprite) => ({
+      oamSlot: sprite.slot,
+      x: i16(sprite.raw, 0x20),
+      y: i16(sprite.raw, 0x22),
+      frame: Math.floor(((sprite.attr[2]! & 1023) - 305) / 8),
+      data0: sprite.data[0],
+      data1: sprite.data[1],
+      callback: sprite.callback.symbol,
+    })).sort((left, right) => left.oamSlot - right.oamSlot);
+    const expectedSprites = expected.sprites.map((sprite) => ({
+      oamSlot: sprite.oamSlot,
+      x: sprite.x,
+      y: sprite.y,
+      frame: sprite.frame,
+      data0: sprite.data0,
+      data1: sprite.data1,
+      callback: sprite.callback,
+    }));
+    const taskNames = actual.tasks.map((task) => task.func.symbol);
+    const attackerSlot =
+      fixture.attacker.geometry.side === "player" ? 6 : 8;
+    const attackerSprite = actual.sprites.find((sprite) =>
+      sprite.slot === attackerSlot
+      && sprite.template.symbol === "gMultiuseSpriteTemplate"
+    );
+    const software = same(actualSprites, expectedSprites)
+      && i16(attackerSprite?.raw ?? "", 0x24) === expected.attackerX2
+      && taskNames.includes("AnimTask_BlendColorCycleLoop")
+        === expected.paletteTaskActive
+      && taskNames.includes("AnimTask_ShakeMon2_Step")
+        === expected.shakeTaskActive;
+    const source = actual.scriptOffset === expected.scriptOffset
+      && Boolean(actual.gAnimScriptActive) === expected.active
+      && actual.visualTaskCount === expected.visualTaskCount
+      && actual.soundTaskCount === expected.soundTaskCount;
+    const paletteStart =
+      fixture.attacker.geometry.side === "player" ? 256 : 272;
+    const palette = Array.from({ length: 16 }, (_, index) =>
+      actual.fadedPalette[paletteStart + index]
+        === blend5ToRed(
+          actual.unfadedPalette[paletteStart + index]!,
+          expected.attackerPaletteY,
+        )
+    ).every(Boolean);
+    const tags = actual.paletteTags.includes(10184)
+      === expected.assetLoaded;
+    const audioStarts = age === fixture.soundStartAge;
+    const audio = actual.se1.tracks.length === 3
+      && actual.se2.tracks.length === 3
+      && actual.se2.songHeader !== probe.songHeaders.SE_M_DRAGON_RAGE
+      && (!audioStarts || (
+        actual.se1.songHeader === probe.songHeaders.SE_M_DRAGON_RAGE
+        && actual.se1.tracks[0]?.flags === 131
+        && actual.se1.tracks[0]?.panX === fixture.soundPan
+      ));
+    const previous = byFrame.get(frame - 1);
+    const transfers = !previous || (
+      same(actual.hardwareOam, previous.softwareOam)
+      && (
+        same(actual.hardwarePalette, previous.fadedPalette)
+        || same(actual.hardwarePalette, actual.fadedPalette)
+      )
+    );
+    const receipts = actual.softwareOam.length === 128
+      && actual.hardwareOam.length === 128
+      && actual.hardwareMatrices.length === 32
+      && actual.hardwareMatrices.every((matrix) => matrix.length === 4)
+      && actual.fadedPalette.length === 512
+      && actual.unfadedPalette.length === 512
+      && actual.hardwarePalette.length === 512
+      && actual.paletteTags.length === 16
+      && actual.sprites.every((sprite) =>
+        sprite.matrixNum >= 0 && sprite.matrixNum < 32
+        && sprite.matrix.length === 4
+      )
+      && Object.keys(actual.registers).length === 8
+      && actual.registers.bldcnt === 0
+      && actual.registers.bldalpha === 0
+      && actual.registers.bldy === 0;
+    const seamShape = seam.active === expected.active
+      && seam.assetLoaded === expected.assetLoaded
+      && seam.scriptOffset === expected.scriptOffset
+      && seam.visualTaskCount === expected.visualTaskCount
+      && same(seam.sprites, expected.sprites)
+      && seam.paletteTaskActive === expected.paletteTaskActive
+      && seam.attackerPaletteY === expected.attackerPaletteY
+      && seam.attackerPaletteTarget === "red"
+      && seam.shakeTaskActive === expected.shakeTaskActive
+      && seam.attackerX2 === expected.attackerX2
+      && seam.attackerShakeDisplayAge === expected.attackerShakeDisplayAge
+      && seam.attackerDisplayX2 === expected.attackerDisplayX2
+      && same(seam.soundEvents, expected.soundEvents);
+
+    const raw = readFileSync(
+      join(rgbDir, `${String(frame).padStart(5, "0")}.rgb`),
+    );
+    const engine: EngineState = {
+      ...createInitialState(),
+      rngMode: "frontierBattle",
+      sceneOnPresentation: { ...stage, age },
+    };
+    const app = render(engine);
+    let diff = 0;
+    for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+      if (
+        app[pixel * 4] !== raw[pixel * 3]
+        || app[pixel * 4 + 1] !== raw[pixel * 3 + 1]
+        || app[pixel * 4 + 2] !== raw[pixel * 3 + 2]
+      ) diff += 1;
+    }
+    if (diff === 0) framebuffers += 1;
+    if (
+      software && source && palette && tags && audio && transfers
+      && receipts && seamShape
+    ) components += 1;
+    else if (componentMismatches.length < 20) {
+      componentMismatches.push(
+        `frame ${frame}/age ${age}: software=${software} source=${source} `
+        + `palette=${palette} tags=${tags} audio=${audio} `
+        + `transfers=${transfers} receipts=${receipts} seam=${seamShape}`,
+      );
+    }
+    if (diff !== 0 && framebufferMismatches.length < 20) {
+      framebufferMismatches.push(
+        `frame ${frame}/age ${age}: framebufferDiff=${diff}`,
+      );
+    }
+  }
+  console.log(
+    `${fixture.orientation}: components ${components}/${fixture.sourceWindow.frameCount}; `
+    + `framebuffer ${framebuffers}/${fixture.sourceWindow.frameCount}; `
+    + `evidence ${evidence}; raw ${rawDigest}`,
+  );
+  if (componentMismatches.length || framebufferMismatches.length) {
+    throw new Error(
+      [...componentMismatches, ...framebufferMismatches].join("\n"),
+    );
+  }
 }
 
 for (let repeat = 0; repeat < 2; repeat += 1) for (const path of paths) verify(path);

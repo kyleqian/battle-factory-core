@@ -53,6 +53,10 @@ import {
   type FocusEnergyState,
 } from "./focusEnergy.ts";
 import {
+  endureAtAge,
+  type EndureState,
+} from "./endure.ts";
+import {
   reversalAtAge,
   type ReversalResolvedShakeReceipt,
   type ReversalState,
@@ -477,6 +481,7 @@ export interface SceneOnPresentationBattler {
     | "VOLBEAT"
     | "MACHOKE"
     | "TAILLOW"
+    | "EEVEE"
     | "ZIGZAGOON"
     | "SABLEYE"
     | "ALTARIA"
@@ -1087,6 +1092,15 @@ export interface SceneOnFocusEnergyConfig {
   readonly attackerCoord: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnEndureConfig {
+  readonly move: "ENDURE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source GetBattlerSpriteCoord(attacker, BATTLER_COORD_X/Y) anchor. */
+  readonly attackerCoord: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnReversalConfig {
   readonly move: "REVERSAL";
   readonly attacker: SceneOnPresentationBattler;
@@ -1429,6 +1443,7 @@ export type SceneOnMoveConfig =
   | SceneOnBubbleBeamConfig
   | SceneOnCrossChopConfig
   | SceneOnFocusEnergyConfig
+  | SceneOnEndureConfig
   | SceneOnReversalConfig
   | SceneOnSwaggerConfig
   | SceneOnTauntConfig
@@ -1626,6 +1641,12 @@ export interface SceneOnCrossChopView extends CrossChopState {
 }
 
 export interface SceneOnFocusEnergyView extends FocusEnergyState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnEndureView extends EndureState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3097,6 +3118,27 @@ export function sceneOnFocusEnergyView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...focusEnergyAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attackerCoord,
+    ),
+  };
+}
+
+/** `age=0` is Move_ENDURE's first FOCUS_ENERGY load display. */
+export function sceneOnEndureView(
+  state: SceneOnMovePresentationState<SceneOnEndureConfig>,
+): SceneOnEndureView {
+  if (state.config.move !== "ENDURE") {
+    throw new Error(
+      `expected ENDURE presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...endureAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attackerCoord,

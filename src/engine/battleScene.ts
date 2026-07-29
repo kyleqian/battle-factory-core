@@ -551,6 +551,7 @@ import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json"
 import bubbleBeamAsset from "../animation/assets/bubble-beam.json" with { type: "json" };
 import crossChopAsset from "../animation/assets/cross-chop.json" with { type: "json" };
 import focusEnergyAsset from "../animation/assets/focus-energy.json" with { type: "json" };
+import endureAsset from "../animation/assets/endure.json" with { type: "json" };
 import reversalAsset from "../animation/assets/reversal.json" with { type: "json" };
 import tailGlowAsset from "../animation/assets/tail-glow.json" with { type: "json" };
 import dizzyPunchAsset from "../animation/assets/dizzyPunch.json" with { type: "json" };
@@ -713,6 +714,7 @@ import {
   sceneOnBubbleBeamView,
   sceneOnCrossChopView,
   sceneOnFocusEnergyView,
+  sceneOnEndureView,
   sceneOnReversalView,
   sceneOnTailGlowView,
   sceneOnDizzyPunchView,
@@ -765,6 +767,7 @@ import {
   type SceneOnBubbleBeamConfig,
   type SceneOnCrossChopConfig,
   type SceneOnFocusEnergyConfig,
+  type SceneOnEndureConfig,
   type SceneOnReversalConfig,
   type SceneOnTailGlowConfig,
   type SceneOnDizzyPunchConfig,
@@ -1106,6 +1109,10 @@ const focusEnergyArt = focusEnergyAsset as {
   focusEnergy: { tileset: Tileset; palette: RgbColor[] };
   taillowBack: { tileset: Tileset; palette: RgbColor[] };
   taillowFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const endureArt = endureAsset as {
+  eeveeBack: { tileset: Tileset; palette: RgbColor[] };
+  eeveeFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const reversalArt = reversalAsset as {
   blueOrb: { tileset: Tileset; palette: RgbColor[] };
@@ -17141,40 +17148,65 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
-  if (state.config.move === "FOCUS_ENERGY") {
-    const focusState =
-      state as SceneOnMovePresentationState<SceneOnFocusEnergyConfig>;
-    const view = sceneOnFocusEnergyView(focusState);
+  if (
+    state.config.move === "FOCUS_ENERGY"
+    || state.config.move === "ENDURE"
+  ) {
+    const isEndure = state.config.move === "ENDURE";
+    const effectState = isEndure
+      ? state as SceneOnMovePresentationState<SceneOnEndureConfig>
+      : state as SceneOnMovePresentationState<SceneOnFocusEnergyConfig>;
+    const view = isEndure
+      ? sceneOnEndureView(
+          effectState as SceneOnMovePresentationState<SceneOnEndureConfig>,
+        )
+      : sceneOnFocusEnergyView(
+          effectState as SceneOnMovePresentationState<
+            SceneOnFocusEnergyConfig
+          >,
+        );
     // GBA scanout consumes the preceding BuildOamBuffer/TransferPlttBuffer
     // state. Reducer age stays source-relative; only this display view lags.
-    const displayed = sceneOnFocusEnergyView({
-      ...focusState,
-      age: view.battlerDisplayAge,
-    });
+    const displayed = isEndure
+      ? sceneOnEndureView({
+          ...(effectState as SceneOnMovePresentationState<
+            SceneOnEndureConfig
+          >),
+          age: view.battlerDisplayAge,
+        })
+      : sceneOnFocusEnergyView({
+          ...(effectState as SceneOnMovePresentationState<
+            SceneOnFocusEnergyConfig
+          >),
+          age: view.battlerDisplayAge,
+        });
+    const attackerSpecies = isEndure ? "EEVEE" : "TAILLOW";
     const playerToOpponent =
-      view.attacker.species === "TAILLOW"
+      view.attacker.species === attackerSpecies
       && view.attacker.geometry.side === "player"
       && view.target.species === "ONIX"
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "TAILLOW"
+      view.attacker.species === attackerSpecies
       && view.attacker.geometry.side === "opponent"
       && view.target.species === "ONIX"
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
-        `unsupported staged FOCUS_ENERGY pair `
+        `unsupported staged ${state.config.move} pair `
         + `${view.attacker.species}->${view.target.species}`,
       );
     }
-    const taillowSource = playerToOpponent
-      ? focusEnergyArt.taillowBack
-      : focusEnergyArt.taillowFront;
-    const taillow = playerToOpponent
-      ? taillowSource
+    const attackerSource = isEndure
+      ? (playerToOpponent ? endureArt.eeveeBack : endureArt.eeveeFront)
+      : (playerToOpponent
+          ? focusEnergyArt.taillowBack
+          : focusEnergyArt.taillowFront);
+    const attacker = playerToOpponent
+      ? attackerSource
       : {
-          ...taillowSource,
-          tileset: subTileset(taillowSource.tileset, 0, 8),
+          ...attackerSource,
+          tileset: subTileset(attackerSource.tileset, 0, 8),
         };
     const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
     drawTileBg(
@@ -17200,12 +17232,14 @@ export function renderSceneOnMovePresentation(
         sprite.y - 16,
       );
     };
-    const drawTaillow = () => drawSpriteSheet(
+    const drawAttacker = () => drawSpriteSheet(
       fb,
-      taillow.tileset,
+      attacker.tileset,
       blendPaletteToward(
-        taillow.palette,
-        { r: 255, g: 255, b: 255 },
+        attacker.palette,
+        displayed.attackerPaletteTarget === "red"
+          ? { r: 255, g: 0, b: 0 }
+          : { r: 255, g: 255, b: 255 },
         displayed.attackerPaletteY,
       ),
       view.attacker.geometry.spriteCorner.x + view.attackerDisplayX2,
@@ -17223,11 +17257,11 @@ export function renderSceneOnMovePresentation(
     // indices. Within the equal-subpriority particles, later OAM wins are
     // reproduced by descending allocation slot.
     if (opponentToPlayer) {
-      drawTaillow();
+      drawAttacker();
       drawOnix();
     } else {
       drawOnix();
-      drawTaillow();
+      drawAttacker();
     }
     drawEffect(9);
     drawEffect(7);
@@ -17238,7 +17272,7 @@ export function renderSceneOnMovePresentation(
       fb,
       0,
       composeOpponentHealthbox(healthboxAssemblyAssets, {
-        name: playerToOpponent ? "ONIX" : "TAILLOW",
+        name: playerToOpponent ? "ONIX" : attackerSpecies,
         level: 50,
         gender: state.config.fieldProfile.opponentGender ?? "male",
         hpFraction: state.config.fieldProfile.opponentHp
@@ -17249,7 +17283,7 @@ export function renderSceneOnMovePresentation(
     drawComposedPlayerHealthbox(
       fb,
       composePlayerHealthbox(playerHealthboxAssets, {
-        name: playerToOpponent ? "TAILLOW" : "ONIX",
+        name: playerToOpponent ? attackerSpecies : "ONIX",
         level: 50,
         gender: state.config.fieldProfile.playerGender ?? "male",
         hpFraction: state.config.fieldProfile.playerHp
@@ -17267,8 +17301,10 @@ export function renderSceneOnMovePresentation(
     );
     drawMessageTextLines(
       fb,
-      playerToOpponent ? "TAILLOW used" : "Foe TAILLOW used",
-      "FOCUS ENERGY!",
+      playerToOpponent
+        ? `${attackerSpecies} used`
+        : `Foe ${attackerSpecies} used`,
+      isEndure ? "ENDURE!" : "FOCUS ENERGY!",
       99,
     );
     return;
