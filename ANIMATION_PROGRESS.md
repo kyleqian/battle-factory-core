@@ -1,5 +1,30 @@
 # Animation coverage
 
+## MOVE_MUD_SHOT promoted exact; complete BROWN_ORB body closed (2026-07-28)
+
+**Verdict:** `MOVE_MUD_SHOT` is exact. Legal set-111 KRABBY→ONIX Scene-ON
+parties pass the complete source body through first inactive cleanup at
+**145/145** frames **212–356** player-back and **144/144** frames **302–445**
+opponent-front, twice fresh. Evidence/raw-RGB digests are player
+`cef2f455…034c6` / `a9dcc157…c0b3f` and opponent `85fe40b0…840` /
+`52bd4b4b…a443`.
+
+**Model/evidence:** the pure source-relative reducer and typed seam port
+BROWN_ORB load/free; 11 calls creating exactly 22 sinus orbs;
+StartSinAnimTimer; both ShakeMon tasks; target monbg/split priority/12:8
+alpha; the Whirlpool pan sweep; waits and cleanup. Source-extracted KRABBY
+front/back and BROWN_ORB plus shared ONIX/chrome pass software→hardware OAM,
+matrices, tagged palettes, registers, both audio players/pans, raw RGB, and
+the production framebuffer on every frame. No absolute tick/input delay,
+move/battle number, fitting, pixel exception, canonical recording import, or
+battle/controller state was added.
+
+**Boundary/next:** the new `brown-orb-mud-shot` track keeps
+`MOVE_SECRET_POWER` unsupported because Factory building dispatches Strength.
+Coverage is **73 exact / 0 partial / 0 staged / 203 unsupported**. Next
+bounded target: select the next supervisor-ranked component track; no sibling
+earned acceptance from shared code alone.
+
 ## MOVE_REVERSAL promoted exact; complete BLUE_ORB body closed (2026-07-28)
 
 **Verdict:** `MOVE_REVERSAL` is exact. The legally corrected challenge-2

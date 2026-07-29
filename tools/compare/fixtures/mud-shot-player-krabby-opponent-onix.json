@@ -7,5 +7,11 @@
   "probe":"tools/compare/mudShotProbe.py",
   "sourceWindow":{"startFrame":212,"endFrame":356,"frameCount":145},
   "evidenceSha256":"cef2f4555ed31b7a945d3a04878d2b4e7364fd03fae4b017146a4c58763034c6",
-  "rawRgbSha256":"a9dcc157dbb3018a70deae84a0522bb650074ba451c5c038c2e47b347dbc0b3f"
+  "rawRgbSha256":"a9dcc157dbb3018a70deae84a0522bb650074ba451c5c038c2e47b347dbc0b3f",
+  "move":"MUD_SHOT",
+  "attacker":{"species":"KRABBY","geometry":{"side":"player","spriteCorner":{"x":40,"y":58},"animationCenter":{"x":72,"y":98},"battlePositionCenter":{"x":72,"y":80}}},
+  "target":{"species":"ONIX","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":10},"animationCenter":{"x":176,"y":42},"battlePositionCenter":{"x":176,"y":40}}},
+  "attackerPictureOffset":{"x":72,"y":98},
+  "targetPictureOffset":{"x":176,"y":42},
+  "fieldProfile":{"playerHp":128,"playerMaxHp":137,"opponentHp":142,"opponentMaxHp":142,"playerGender":"male","opponentGender":"male"}
 }

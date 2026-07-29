@@ -2,6 +2,35 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_MUD_SHOT",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal set-111 KRABBY versus ONIX Scene-ON evidence passes the complete source body through first inactive cleanup at 145/145 source/component, typed-seam, hardware, audio, raw-RGB, and shared-framebuffer frames 212-356 player-back and 144/144 frames 302-445 opponent-front, twice fresh; stable evidence/raw-RGB digests are player cef2f4555ed31b7a945d3a04878d2b4e7364fd03fae4b017146a4c58763034c6 / a9dcc157dbb3018a70deae84a0522bb650074ba451c5c038c2e47b347dbc0b3f and opponent 85fe40b0e1f3dbc600ed00740f3a8b9a1fa910cc589a27462dabbffd1c901840 / 52bd4b4b7e590260e7dc06e8ee1726ca690534f7382f28afa3f177ad3549a443",
+        "the pure source-relative reducer ports BROWN_ORB load/free, all 11 MudShotOrbs calls and exactly 22 gMudShotOrbSpriteTemplate lifecycles, AnimToTargetInSinWave with StartSinAnimTimer, attacker and target AnimTask_ShakeMon lifetimes, target monbg/split priority/12:8 alpha, the SE_M_WHIRLPOOL pan sweep, waits, and first inactive cleanup",
+        "the typed Scene-ON seam exposes only presentation geometry; source-extracted KRABBY front/back and BROWN_ORB art plus shared ONIX/chrome feed the production compositor, including software-to-hardware OAM, tagged palette, register, affine-matrix, two-audio-player, and source-relative BG/OAM display latches without absolute ticks, move numbers, input delays, coordinate/RGB fitting, pixel exceptions, or canonical recording imports",
+        "mudShotPortableEvidence.ts runs the committed probe through tools/run-mgba-probe.py and proves reducer/component state, typed seam, software/hardware OAM, matrices, tagged palettes, registers, both audio players/pans, raw RGB, and application framebuffer on every accepted frame twice fresh in both orientations",
+        "MOVE_SECRET_POWER remains unsupported: Factory BATTLE_ENVIRONMENT_BUILDING dispatches Move_STRENGTH, so the BROWN_ORB component does not accept its distinct building body",
+        "no battle calculation, damage, RNG, controller, turn order, round/facility state, boundary list, unsupported barrier, or sibling acceptance changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-mud-shot-player-krabby-opponent-onix.json",
+        "tools/battle-lab/mechanic-mud-shot-opponent-krabby-player-onix.json",
+        "tools/compare/fixtures/mud-shot-player-krabby-opponent-onix.json",
+        "tools/compare/fixtures/mud-shot-opponent-krabby-player-onix.json",
+        "tools/compare/mudShotProbe.py",
+        "tools/compare/mudShotPortableEvidence.ts",
+        "tools/compare/mudShotSourceAudit.ts",
+        "tools/compare/extractMudShotAssets.ts",
+        "src/animation/assets/mud-shot.json",
+        "src/animation/mudShot.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/mudShotAssets.test.ts",
+        "tests/animation/mudShotEvidence.test.ts",
+        "tests/animation/mudShot.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_REVERSAL",
       "status": "exact",
       "covered": [
@@ -1811,6 +1840,25 @@
     "MOVE_BIND"
   ],
   "componentTracks": [
+    {
+      "id": "brown-orb-mud-shot",
+      "components": [
+        "asset:ANIM_TAG_BROWN_ORB",
+        "sprite:gMudShotOrbSpriteTemplate",
+        "task:AnimTask_StartSinAnimTimer",
+        "task:AnimTask_ShakeMon",
+        "visualCommand:monbg",
+        "visualCommand:splitbgprio",
+        "visualCommand:setalpha",
+        "visualCommand:clearmonbg",
+        "visualCommand:blendoff"
+      ],
+      "representatives": [
+        "MOVE_MUD_SHOT",
+        "MOVE_SECRET_POWER"
+      ],
+      "goal": "MOVE_MUD_SHOT independently proves the complete BROWN_ORB body through first inactive cleanup at 145/145 player-back and 144/144 opponent-front source/component, typed-seam, hardware, audio, raw-RGB, and shared-framebuffer frames twice fresh. MOVE_SECRET_POWER remains unsupported because Factory BATTLE_ENVIRONMENT_BUILDING dispatches Move_STRENGTH and its building body lacks independent complete dense acceptance."
+    },
     {
       "id": "blue-orb-reversal-evidence",
       "components": [
