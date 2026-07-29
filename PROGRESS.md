@@ -31,10 +31,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   checks are now exact-classified Factory-unreachable: the Frontier victory
   script calls `pickup` only under `BATTLE_TYPE_PYRAMID`
   (`battle_scripts_1.s:3045-3047`), never Factory.
-- **Next:** ability/item parity worklist objective is complete. Resume the
-  supervisor's whole-battle integration/Gate-5 plan, including the separately
-  scouted turn-1 `gRandomTurnNumber` writes; do not reopen Pickup/Run Away
-  without new source reachability.
+- **Supervisor fold (same round, side merge):** the paired side-lane scout
+  banked `docs/facility-round-loop-scout.md` (`1c87f22e`) — Gate-5/whole-
+  battle current-state map (full-turn kernel starts post-init; no production
+  caller feeds `resolveRoundBattle`; no rental/opponent generators yet; the
+  real Factory fully restores HP/PP/status/items between battles; turn-1
+  Quick Claw reads `battle_main.c:3923`'s write, which overwrites `:3140`),
+  battle-start ground truth §3, a precise rung-1 probe brief §4, and a
+  14-rung ordered plan §5 (each ≤45-min with acceptance commands).
+- **Next:** rung 1 (fresh-start RNG receipt, side) + rung 5 (corpus-to-
+  kernel party adapter, main) launch this round; then rung 2 (fresh battle
+  initializer) consumes the receipt. Do not reopen Pickup/Run Away without
+  new source reachability.
 - **Notes:** predicted closure was 70/70 weighted 1103/1103 only if Pickup
   remained battle-reachable; actual source-supported reclassification removes
   its 7 carriers: `(1073 + 23)/(1103 - 7) = 1096/1096`, and categories move
