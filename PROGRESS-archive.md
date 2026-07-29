@@ -1,4 +1,35 @@
 ---
+## 687 — [BOUNDED MAIN WORKER 2026-07-29 ~10:10] R13-D breadth landed; B-control scorer remainder bounded
+
+- **State:** evidence commit `c6d1648f`; tree green at **497 files / 5104
+  tests**, production build, `git diff --check`, and Battle Scene OFF oracle
+  info. Both censuses regenerate byte-identically at SHA-256
+  **8b18f754…5261 / 52687085…257c**.
+- **Did:** live-driver tests now run the same switch/no-switch fixtures at
+  streaks 0/14/28 (masks 0/1/7) and the Brain override. They pin identical
+  successful ledgers and failed prefixes, legal-slot filtering, mask-0 score
+  ties, party/move-major helper ties, player-switch history clearing, and the
+  subsequent scoring command. Receipt A success/control, B success, and both
+  Natural Cure C variants reproduce their exact action, u16 ledger, cursor,
+  and selected index from the cited OFF receipt docs.
+- **Bounded remainder:** B control's exact `%3=2` precheck is reproduced
+  (**4280**, cursor `5457c42e→10b8ec09`, no switch), then the honest four-move
+  live fixture reaches the pre-existing `factory-ai-check-bad-move` barrier
+  for Toxic (slot 2, move 92, `EFFECT_TOXIC`). Completing its 8-draw/action
+  equivalence requires a dedicated Toxic scorer port and ratchet decrease,
+  contrary to this step's no-new-production-barrier/no-ratchet scope; the
+  test pins that exact boundary rather than narrowing legal moves.
+- **Acceptance:** focused **168/168**; whole-battle + round sweep **24/24**;
+  full **5104/5104**. Seeds **18/20/21/23** remain seven wins at exact
+  **2143/2326/1911/2114** calls; the permanent carrier table remains green.
+  **Next:** supervisor decides whether to schedule the Toxic CheckBadMove
+  prerequisite, then upgrades B control to full receipt equivalence. No
+  production, generated artifact, issue, presentation, animation, import/
+  unsupported ratchet, canonical recording, or tick branch moved.
+  PAPERCUT: none.
+
+---
+
 ## 686 — [BOUNDED MAIN WORKER 2026-07-29 ~09:55] R13-C live ShouldSwitch driver integration landed
 
 - **State:** tree green at **496 files / 5094 tests**, production build,

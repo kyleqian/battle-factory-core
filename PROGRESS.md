@@ -13,6 +13,37 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 690 — [BOUNDED MAIN WORKER 2026-07-29 ~10:58] Rung-14 commentary app stage landed; OFF route checkpoint bounded
+
+- **State:** implementation committed `77a6ab47`; current union (including
+  concurrent trainer-pic extraction `22f1911d`) is green at **498 files /
+  5135 tests**, production build, `git diff --check`, and Battle Scene OFF
+  oracle info. Both censuses regenerate byte-identically at SHA-256
+  **8b18f754…5261 / 3ff4c7f3…c6c**; no ratchet moved.
+- **Did / equivalence:** `createPostwinStateFromOpponentRentalRecords` is now
+  the shared core/app-stage adapter. The named canonical stage installs the
+  exact **153/179/181** set/personality/IV/ability tuple at the real 23602
+  dismiss edge; unchanged dense captures remain **171/171 + 164/164 exact**.
+  A second app-visible stage pins generated seed-3 **156/180/122**
+  (ONIX/BAYLEEF/ARON), whose commentary is **ROCK + unrestrained** versus the
+  canonical **no favorite + weakening**. Classification rules did not move.
+- **Bounded OFF remainder:** no new trace was claimed. Canonical `/v1/run`
+  accepts only controller input, while Battle Lab's first semantic checkpoint
+  is explicitly *after* scouting (`../../oracle/BATTLE_LAB.md:228-230`);
+  therefore it cannot stage the generated party for these pre-battle pages.
+  Acceptance needs either a new earlier source-valid field checkpoint or an
+  honest complete alternate Factory battle route producing that tuple. No
+  mechanic-lab substitute, fake oracle route, or capture thinning was added.
+- **Sweep / next:** generated-round sweep is **24/24**; cursors remain
+  **4:2415, 5:2156, 6:791 loss, 7:1337, 8:1922, 11:2012, 13:2415,
+  14:1946, 15:1602, 16:1878, 17:2013, 18:2143, 19:1691, 20:2326,
+  21:1911, 22:1389, 23:2114, 24:1751, 26:1680, 29:1869, 30:1825**.
+  Supervisor resumes its ordered queue; no issue, census byte, canonical
+  capture list/profile, animation, unsupported/import ratchet, or tick branch
+  moved. PAPERCUT: none.
+
+---
+
 ## 689 — [BOUNDED MAIN WORKER 2026-07-29 ~10:38] Issue #48 rental-count persistence landed
 
 - **State:** implementation committed `4c9d38b0`; tree green at **497 files /
@@ -73,34 +104,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   ratchet intentionally drops **6→5**, leaving states 0/2/4/5/11. Next:
   supervisor resumes its ordered queue; no issue, canonical recording,
   presentation, animation, or tick branch moved. PAPERCUT: none.
-
----
-
-## 687 — [BOUNDED MAIN WORKER 2026-07-29 ~10:10] R13-D breadth landed; B-control scorer remainder bounded
-
-- **State:** evidence commit `c6d1648f`; tree green at **497 files / 5104
-  tests**, production build, `git diff --check`, and Battle Scene OFF oracle
-  info. Both censuses regenerate byte-identically at SHA-256
-  **8b18f754…5261 / 52687085…257c**.
-- **Did:** live-driver tests now run the same switch/no-switch fixtures at
-  streaks 0/14/28 (masks 0/1/7) and the Brain override. They pin identical
-  successful ledgers and failed prefixes, legal-slot filtering, mask-0 score
-  ties, party/move-major helper ties, player-switch history clearing, and the
-  subsequent scoring command. Receipt A success/control, B success, and both
-  Natural Cure C variants reproduce their exact action, u16 ledger, cursor,
-  and selected index from the cited OFF receipt docs.
-- **Bounded remainder:** B control's exact `%3=2` precheck is reproduced
-  (**4280**, cursor `5457c42e→10b8ec09`, no switch), then the honest four-move
-  live fixture reaches the pre-existing `factory-ai-check-bad-move` barrier
-  for Toxic (slot 2, move 92, `EFFECT_TOXIC`). Completing its 8-draw/action
-  equivalence requires a dedicated Toxic scorer port and ratchet decrease,
-  contrary to this step's no-new-production-barrier/no-ratchet scope; the
-  test pins that exact boundary rather than narrowing legal moves.
-- **Acceptance:** focused **168/168**; whole-battle + round sweep **24/24**;
-  full **5104/5104**. Seeds **18/20/21/23** remain seven wins at exact
-  **2143/2326/1911/2114** calls; the permanent carrier table remains green.
-  **Next:** supervisor decides whether to schedule the Toxic CheckBadMove
-  prerequisite, then upgrades B control to full receipt equivalence. No
-  production, generated artifact, issue, presentation, animation, import/
-  unsupported ratchet, canonical recording, or tick branch moved.
-  PAPERCUT: none.
