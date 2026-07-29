@@ -1,3 +1,31 @@
+## 703 — [BOUNDED MAIN WORKER 2026-07-29 ~15:31] Battle-command seam Slice 6 Part A landed
+
+- **State:** implementation `d995671d`; tree green at **518 files / 5254
+  tests + 1 deliberate animation-lane skip**, production build, required
+  targeted acceptance **386/386**, and `git diff --check`.
+- **Did:** live generated player command boundaries now own a
+  `BattleCommandPresentation` built only from the published request and live
+  `rulesContext`; action/FIGHT input uses the ordinary phase-relative reducer,
+  completed moves cross the existing `submitBattleDecision` bridge with
+  `reduceFactoryFullTurnDecision`, trainer commands remain AI-driven, and each
+  next player command replaces the request-owned presentation. Added
+  controller-owned per-battler move cursors: new requests seed from persistent
+  state, switch-ins and fresh battle controller starts reset the affected
+  cursor. Tier 1 pins slot-3 persistence, switch-in reset, and zero-seed
+  identity for fresh canonical lifecycles. Deleted resolved ISSUES #50.
+- **Next:** Slice 6 Part B only: wire the already-banked arbitrary-species
+  battle-pic catalogs into the generated presentation renderer, then (only
+  after it visibly reaches the window) add the explicit-OFF 128-frame breadth
+  trace. Do not redo Part A or alter cursor ownership.
+- **Notes:** all fourteen immutable windows exact: Battle 2 **209/209**,
+  FIGHT **235/235**, reopen **90/90**; turns 3–13 **254/254, 44/44, 42/42,
+  44/44, 93/93, 88/88, 111/111, 83/83, 56/56, 46/46, 57/57**. No battle-pic
+  consumer, trace/capture list, party-row/selector renderer, canonical import,
+  unsupported barrier, battle/turn/absolute-tick selector, damage, RNG,
+  turn-order, or animation change. PAPERCUT: none.
+
+---
+
 ## 702 — [SUPERVISOR WIND-DOWN 2026-07-29 ~14:45] 6-round session: battle-command seam Slices 1-5 same-day, draft adapter, battle-pic catalogs, two CBM/CV pairs
 
 - **State:** master green at **518 files / 5250 tests + 1 deliberate

@@ -13,6 +13,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 706 — [BOUNDED MAIN WORKER 2026-07-29 ~16:28] Live voluntary party selector + source refusal landed
+
+- **State:** implementation `558fb93d`; tree green at **519 files / 5271
+  tests + 1 deliberate animation-lane skip**, production build, targeted
+  selector/seam acceptance **88/88**, and `git diff --check`. Both forced
+  party windows remain **200/200**; the complete fourteen command-menu
+  windows remain exact (**209/235/90 +
+  254/44/42/44/93/88/111/83/56/46/57**).
+- **Did:** the generated battle command's typed `party-handoff` now constructs
+  a voluntary three-row selector from live rules state, renders source-extracted
+  party tiles/font plus arbitrary `SPECIES_*` icons, implements source
+  single-layout cursor edges/submenu, restores the same request/action cursor
+  on B, and submits the exact legal selected index. Both voluntary and forced
+  SEND OUT now print Emerald's exact two-line `<mon> has no energy / left to
+  battle!` refusal and stay in the party menu. Deleted resolved ISSUES #49.
+- **Next:** supervisor should proceed to ISSUES #51 (generated draft summary
+  data), trainer-pic OFF window, or Gate-6 work. The explicit-OFF 128-frame
+  command breadth proof remains bounded by entry 704's action-resolution
+  lifecycle gap; this step recorded no trace.
+- **Notes:** no canonical-recording import, unsupported barrier, trace/capture
+  change, battle/turn/absolute-tick selector, damage/RNG/turn-order, swaps,
+  summary, or animation change. PAPERCUT: none.
+
+---
+
 ## 705 — [SUPERVISOR 2026-07-29 ~16:25] Roar CBM/CV pair merged with census-evasion correction; union green
 
 - **State:** master `6ac336b9` green at **518 files / 5266 tests + 1
@@ -75,32 +100,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   selector, damage/RNG/turn-order, party selector, or animation change.
   PAPERCUT: `bin/oracle lab` default output flooded the session while only a
   screenshot path was needed, ~1 min.
-
----
-
-## 703 — [BOUNDED MAIN WORKER 2026-07-29 ~15:31] Battle-command seam Slice 6 Part A landed
-
-- **State:** implementation `d995671d`; tree green at **518 files / 5254
-  tests + 1 deliberate animation-lane skip**, production build, required
-  targeted acceptance **386/386**, and `git diff --check`.
-- **Did:** live generated player command boundaries now own a
-  `BattleCommandPresentation` built only from the published request and live
-  `rulesContext`; action/FIGHT input uses the ordinary phase-relative reducer,
-  completed moves cross the existing `submitBattleDecision` bridge with
-  `reduceFactoryFullTurnDecision`, trainer commands remain AI-driven, and each
-  next player command replaces the request-owned presentation. Added
-  controller-owned per-battler move cursors: new requests seed from persistent
-  state, switch-ins and fresh battle controller starts reset the affected
-  cursor. Tier 1 pins slot-3 persistence, switch-in reset, and zero-seed
-  identity for fresh canonical lifecycles. Deleted resolved ISSUES #50.
-- **Next:** Slice 6 Part B only: wire the already-banked arbitrary-species
-  battle-pic catalogs into the generated presentation renderer, then (only
-  after it visibly reaches the window) add the explicit-OFF 128-frame breadth
-  trace. Do not redo Part A or alter cursor ownership.
-- **Notes:** all fourteen immutable windows exact: Battle 2 **209/209**,
-  FIGHT **235/235**, reopen **90/90**; turns 3–13 **254/254, 44/44, 42/42,
-  44/44, 93/93, 88/88, 111/111, 83/83, 56/56, 46/46, 57/57**. No battle-pic
-  consumer, trace/capture list, party-row/selector renderer, canonical import,
-  unsupported barrier, battle/turn/absolute-tick selector, damage, RNG,
-  turn-order, or animation change. PAPERCUT: none.
-
