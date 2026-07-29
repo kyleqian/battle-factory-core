@@ -1,5 +1,43 @@
 ---
 
+## 659 — [BOUNDED MAIN WORKER 2026-07-28 ~20:45] damageCalc ability stat/power modifier block ported bit-exact; census abilities 43/70 -> 55/70
+
+- **State:** commit `1f8d7727`; union green at **452 files / 4841 tests**,
+  production build, `git diff --check`. Census regenerated in-commit:
+  **abilities 55/70 engine-referenced (weighted 905/1103)**, hold effects
+  unchanged 22/42 (weighted 713/850), all 15 validations pass.
+- **Did:** ported `pokemon.c` CalculateBaseDamage's ability block
+  (:3158,3203-3226) into `src/engine/damageCalc.ts` in exact source order
+  (truncation order is load-bearing): Huge/Pure Power attack doubling
+  (before the stat-stage mod), Thick Fat, Hustle, Plus/Minus (real
+  `ABILITY_ON_FIELD2` battler-field scan via new `activeBattlerAbilities`,
+  not a doubles stub), Guts (reconciled with the pre-existing burn-halving
+  exception — a burned Guts attacker now gets both no-halving and the 1.5x),
+  Marvel Scale (now correctly ordered *before* Explosion's defense halving,
+  so they stack), and the Overgrow/Blaze/Torrent/Swarm pinch power boosts.
+  Wired the one real call site (`battleScriptHitChainOpcode.ts`'s
+  `calculateBattleScriptBaseDamageForCurrentMove`) with defender ability,
+  `hasStatus1`, attacker hp/maxHP, and the active-battler ability scan so
+  none of this is dormant in real battles. 20 new Tier-1 tests (synthetic
+  round-number fixtures for legibility + one updated RAM-pinned burn/Guts
+  case) cover every modifier incl. the pinch-boost `hp <= maxHP/3` boundary
+  and the Huge Power/stat-stage truncation-order case. Used the project's
+  existing "local identity const" idiom (`const ABILITY_GUTS =
+  "ABILITY_GUTS"`) so the census's identifier-only scan counts these refs.
+- **Next:** supervisor pick the next ability/item parity worklist row —
+  Chlorophyll/Swift Swim (speed-calc modifier class, same shape as this
+  step), the ON_DAMAGE contact family (Static et al.), or hold-item rows
+  (Quick Claw, the type-power family). This row's dense-oracle-evidence
+  follow-up is intentionally deferred to the side-lane scout pack per the
+  supervisor's plan.
+- **Notes:** all 12 target rows closed (ABILITY_HUGE_POWER, PURE_POWER,
+  THICK_FAT, HUSTLE, PLUS, MINUS, GUTS, MARVEL_SCALE, OVERGROW, BLAZE,
+  TORRENT, SWARM) — none blocked. No hold items, badge boosts, field
+  sports, AI, or new `unsupported-branch` barrier touched (ratchet
+  unchanged). PAPERCUT: none this session.
+
+---
+
 ## 658 — [INTERACTIVE SESSION 2026-07-28 ~20:25] Ability/item parity setup landed: census generator + worklist live; scope decisions recorded (AI in scope, audio = S11)
 
 - **State:** master `275c415c`+docs, union green at **449 files / 4819

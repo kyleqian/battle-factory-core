@@ -242,6 +242,18 @@ case "$PROVIDER" in
     command -v codex >/dev/null 2>&1 || { echo "run-supervisor: codex CLI not found on PATH" >&2; exit 127; }
     ;;
 esac
+
+# Claude Code normally carries `cd` changes across Bash tool calls. Supervisors
+# deliberately enter disposable worker worktrees while verifying them, so make
+# every later Bash call start from this supervisor's launch directory again.
+# For the animation lane that launch directory is animation-main; for the main
+# lane it is this run root.
+SUPERVISOR_SHELL_CWD_POLICY=per-command
+if [[ "$PROVIDER" == "claude" ]]; then
+  export CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR=1
+  SUPERVISOR_SHELL_CWD_POLICY=project-root-reset
+fi
+
 if [[ "$WORKER_PROVIDER" != "$PROVIDER" ]]; then
   command -v "$WORKER_PROVIDER" >/dev/null 2>&1 \
     || { echo "run-supervisor: $WORKER_PROVIDER worker CLI not found on PATH" >&2; exit 127; }
@@ -297,6 +309,7 @@ if [[ "$PRINT_CONFIG" == "1" ]]; then
   echo "supervisor_provider=$PROVIDER"
   echo "supervisor_model=$MODEL"
   echo "supervisor_effort=${REASONING_EFFORT:-n/a}"
+  echo "supervisor_shell_cwd=$SUPERVISOR_SHELL_CWD_POLICY"
   echo "hybrid=$HYBRID"
   echo "max_mode=$MAX_MODE"
   echo "worker_provider=$WORKER_PROVIDER"

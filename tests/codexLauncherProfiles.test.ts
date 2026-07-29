@@ -82,6 +82,7 @@ describe("Supervisor and worker launcher profiles", () => {
       supervisor_provider: "claude",
       supervisor_model: "claude-fable-5",
       supervisor_effort: "n/a",
+      supervisor_shell_cwd: "project-root-reset",
       hybrid: "0",
       max_mode: "0",
       worker_provider: "claude",
@@ -104,6 +105,7 @@ describe("Supervisor and worker launcher profiles", () => {
       supervisor_provider: "codex",
       supervisor_model: "gpt-5.6-sol",
       supervisor_effort: "high",
+      supervisor_shell_cwd: "per-command",
       hybrid: "0",
       max_mode: "0",
       worker_provider: "codex",
@@ -134,6 +136,7 @@ describe("Supervisor and worker launcher profiles", () => {
         supervisor_provider: "claude",
         supervisor_model: "claude-fable-5",
         supervisor_effort: "n/a",
+        supervisor_shell_cwd: "project-root-reset",
         hybrid: "1",
         max_mode: "0",
         worker_provider: "codex",
@@ -155,11 +158,25 @@ describe("Supervisor and worker launcher profiles", () => {
     expect(result.status).toBe(0);
     expect(configFrom(result.stdout)).toMatchObject({
       supervisor_provider: "claude",
+      supervisor_shell_cwd: "project-root-reset",
       hybrid: "1",
       worker_provider: "codex",
       worker_launch_mode: "background",
       worker_routing: "tiered",
     });
+  });
+
+  it("forces Claude's Bash tool back to the supervisor root between calls", () => {
+    const result = runLauncher(
+      "run-supervisor.sh",
+      ["--print-config"],
+      { CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR: "0" },
+    );
+
+    expect(result.status).toBe(0);
+    expect(configFrom(result.stdout).supervisor_shell_cwd).toBe(
+      "project-root-reset",
+    );
   });
 
   it.each([["--max-mode"], ["-M"]])(

@@ -448,21 +448,3 @@ Per entry:
 - **Workaround:** append to `PROGRESS-archive.md` by prepending after the
   header with a shell heredoc or targeted `sed` instead of whole-block
   patch matching; supervisors already rotate this way.
-
-## Supervisor shell cwd persists into removed/wrong worktrees
-
-- **What:** the supervisor's execution shell keeps its working directory
-  across command blocks. After `cd`-ing into a side worktree to inspect a
-  scout's output, later blocks silently run there: `git log`/`npm test`
-  report the side branch's HEAD and stale counts (plausible wrong answers,
-  no error), `git merge worker/X` from inside X's worktree is a silent
-  self-merge no-op ("Already up to date"), and `git worktree remove` can
-  delete the shell's own cwd, failing the rest of the chain with "Unable to
-  read current working directory".
-- **Hits:** 10 across supervisor sessions (2 on 2026-07-28 evening).
-- **Cost each:** ~2-5 min (re-running suites, re-merging), plus one
-  near-miss orphaned branch.
-- **Workaround:** every block after a worktree `cd` — including pure-read
-  verification blocks — starts with `cd <absolute main tree> &&`. Treat
-  "Already up to date" from a worker-branch merge as a symptom, not a
-  success.
