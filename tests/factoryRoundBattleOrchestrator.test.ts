@@ -63,6 +63,46 @@ function choosePlayerDecision(
   )!;
 }
 
+function driveGeneratedRoundToCompletion(seed: number): FactoryRoundBattleOrchestratorState {
+  const playerRecords = [record(664), record(678), record(527)] as const;
+  const savedRentalRecords = [...playerRecords, record(1), record(2), record(3)] as const;
+  let state = createFactoryRoundBattleOrchestrator({
+    id: `generated-round-carrier-seed-${seed}`,
+    rngValue: seed,
+    factoryWinStreak: 0,
+    playerTrainerId: PLAYER_TRAINER_ID,
+    battleTowerLevel50WinStreak: 0,
+    rentals: {
+      type: "currentRecords",
+      playerRentalRecords: playerRecords,
+      savedRentalRecords,
+    },
+  });
+  for (let budget = 0; budget < 1_000 && state.round.rules.phase !== "roundComplete"; budget += 1) {
+    if (state.battle !== null) {
+      state = submitFactoryRoundPlayerDecision(state, choosePlayerDecision(state));
+      continue;
+    }
+    if (
+      state.round.rules.phase === "presentingBattleStart"
+      || state.round.rules.phase === "presentingBattleWin"
+      || state.round.rules.phase === "presentingSwapResult"
+    ) {
+      state = acknowledgeAndAdvance(state);
+      continue;
+    }
+    if (state.round.rules.phase === "awaitingSwapDecision") {
+      const commandId = state.round.presentation?.command.commandId;
+      if (commandId === undefined) throw new Error("expected swap-offer presentation command");
+      state = completeFactoryRoundPresentation(state, { commandId });
+      state = chooseFactoryRoundSwap(state, { type: "decline" });
+      continue;
+    }
+    throw new Error(`unexpected carrier phase ${state.round.rules.phase}`);
+  }
+  return state;
+}
+
 describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
   it("owns battle 0 win through decline and battle 1's fresh command on one RNG cursor", () => {
     // This is the rung-11 "current full rental records" entry path. The three
@@ -273,5 +313,20 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       expect(state.rngSegments[index]!.callStart).toBe(state.rngSegments[index - 1]!.callEnd);
       expect(state.rngSegments[index]!.rngBefore).toBe(state.rngSegments[index - 1]!.rngAfter);
     }
+  });
+
+  it.each([
+    [4, 1517],
+    [6, 1563],
+    [8, 2089],
+    [13, 2224],
+    [26, 1556],
+  ])("seed %i is a permanent seven-win carrier at an exact %i-call cursor", (seed, calls) => {
+    const state = driveGeneratedRoundToCompletion(seed);
+    expect(state.round.rules.phase).toBe("roundComplete");
+    expect(state.round.rules.battleIndex).toBe(6);
+    expect(state.round.rules.lastBattle?.outcome).toBe("win");
+    expect(state.rngSegments.filter((segment) => segment.kind === "battle")).toHaveLength(7);
+    expect(state.facilityRngCalls).toBe(calls);
   });
 });
