@@ -557,6 +557,83 @@ python3 tools/probe/verify-turn-boundary-rng-gap.py
 The same verifier accepts a fresh output path under `tools/run-mgba-probe.py`
 to restage the OFF fixture and assert the four-action order.
 
+### B6. Quick Claw turn-boundary corroboration (2026-07-28, Battle Scene OFF)
+
+`tools/battle-lab/mechanic-quick-claw-turn-boundary-off.json` stages the B4
+recipe with complete legal L50 parties. The active player is the real Frontier
+index-299 Magcargo shape: Quiet, IV31/EV0, its corpus
+Overheat/Earthquake/Rock Slide/Body Slam moveset, and the corpus Quick Claw
+(item 183, hold effect parameter 20). The active opponent is index-32
+Smeargle, Hardy IV31/EV0, forced itemless and constrained to Recover in all
+four slots. Recover safely extends the stress window without changing
+priority. The bench species were chosen so all six base Speeds are distinct
+(`30,45,5,75,70,91`); the live active stats read back as **45 versus 95**.
+
+The deterministic five-complete-turn window produced:
+
+| Turn | Boundary source/frame | `gRandomTurnNumber` | `< 13107` | Observed order |
+| ---: | --- | ---: | --- | --- |
+| 1 | pre-window first-turn value | 25804 | no proc | Smeargle → Magcargo |
+| 2 | `BattleTurnPassed+0x157`, 1214 | 44835 | no proc | Smeargle → Magcargo |
+| 3 | `BattleTurnPassed+0x157`, 2556 | 15553 | no proc | Smeargle → Magcargo |
+| 4 | `BattleTurnPassed+0x157`, 3480 | 45723 | no proc | Smeargle → Magcargo |
+| 5 | `BattleTurnPassed+0x157`, 4222 | **10727** | **proc** | **Magcargo → Smeargle** |
+
+Observed frequency was **1/5**; this small-n ratio is only descriptive. The
+acceptance is the exact value-to-order mapping on both sides of the threshold.
+The fifth completed turn also transitioned cleanly to turn 6 at frame 5155
+(value 41836), though no turn-6 actions were requested.
+
+The fast pass read `sRandCount` every frame. A fresh targeted single-step pass
+then stepped only the five continuing boundary frames (hardware exec
+breakpoints remain unusable on this libmgba-py build). Each frame had
+`sRandCount delta == 1`, and every sole `Random()` entry resolved by LR to
+**`BattleTurnPassed+0x157`**. There was therefore exactly one boundary draw
+per transition. Source plus production execution also pins **zero** Quick
+Claw-check draws: `turnOrder.ts` only reads the stored value, and the staged
+proc/non-proc engine runs each consume the same nine calls (eight ordinary
+Strength hit-chain calls plus one continuing boundary call). Effective Speeds
+are always 45/95 or `UINT_MAX`/95, so the tie branch is unreachable; no
+speed-tie draw fires.
+
+#### Engine reconciliation
+
+The RNG representation aligns directly: `FactoryFullTurnConfig.rngSeed` is
+the same raw 32-bit state as ROM `gRngValue` at a chosen ledger anchor.
+`verify-quick-claw-engine.ts` seeded the production reducer from each raw
+pre-boundary state and used a zero-RNG Splash turn so its sole draw was the
+boundary draw. Position by position, the engine reproduced the ROM's raw
+post-draw state and stored u16:
+
+| ROM pre-draw `gRngValue` / engine `rngSeed` | ROM + engine post-draw state | ROM + engine stored u16 |
+| ---: | ---: | ---: |
+| 1780301801 | 2938344616 | 44835 |
+| 3656179860 | 1019287415 | 15553 |
+| 1154923059 | 2996515370 | 45723 |
+| 3795871350 | 703067313 | 10727 |
+
+That proves the LCG and boundary storage are bit-exact at the same ledger
+position. A single uninterrupted semantic engine replay is **not** alignable
+through this fixture as currently exposed: the full-turn reducer deliberately
+accepts already-chosen trainer decisions and does not itself consume the ROM
+Factory AI's five draws between a boundary and the following actions. This is
+the same decision-source seam B5's typed ledger models by explicit cursor
+advancement, not an RNG-port discrepancy. Under the required fallback,
+production was directly staged with two values observed above: 10727 gives
+Magcargo → Smeargle, while 44835 gives Smeargle → Magcargo, and both have the
+identical nine-call ledger.
+
+Mechanical recheck:
+
+```sh
+python3 tools/probe/verify-quick-claw-turn-boundary.py
+
+out_dir="$(mktemp -d /tmp/quick-claw-verify.XXXXXX)"
+python3 tools/run-mgba-probe.py "$out_dir/result.json" -- \
+  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+  tools/probe/verify-quick-claw-turn-boundary.py "$out_dir/result.json"
+```
+
 ## Self-check summary
 
 - All Part A file:line citations: **verified by grep + Read this session**
