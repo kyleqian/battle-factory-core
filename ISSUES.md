@@ -5,25 +5,6 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #41 — Production engine modules import canonical RAM recordings
-
-**Symptom:** shipped `src/engine/` code reads recorded state from the single
-canonical playthrough instead of computing it, so it is correct only for that
-playthrough.
-
-**Open remainder:**
-- `factorySwapPresentation.ts:2` imports `battle1-swap-rentalmons-dump.json`.
-- The generated-data recording corpus remains separately tracked: 57 of 114
-  `src/data/gen/` files were `*-dump`/`*-probe`/`*-watch`/`*-boundaries`
-  recordings at the issue's 2026-07-24 census (`856b3b4`). Retire each only
-  as its owning mechanism gains a real source; keep fixtures needed for
-  Tier-1 assertions and extractors. ROADMAP S10 §4 forbids new production
-  imports.
-
-The three `battleScene.ts` HP imports were retired by `78a3bfbc`: production
-now reads kernel-staged semantic values while Tier-1 retains the dumps only as
-regression ground truth.
-
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** the production battle presentation is keyed to *which turn of the

@@ -13,6 +13,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 650 — [BOUNDED MAIN WORKER 2026-07-28 ~18:10] Production recording-import allowlist reaches zero
+
+- **State:** implementation committed `9ab6985d`; tree green at **437 files /
+  4763 tests**, production build, OFF oracle info, and `git diff --check`.
+  Census remains byte-idempotent at **214/214 effects, 355/355 moves, 276/276
+  distinct, 2957/2957 weighted** with all **72** validations passing.
+- **Did:** retired `factorySwapPresentation.ts`'s final canonical recording
+  import. The six rental records now derive from drafted anchor state,
+  generated Frontier/species corpora, Factory fixed IVs, and the existing
+  source-ported opponent personality generator. The production recording
+  allowlist shrank **1→0**; the dump remains test-only field parity evidence.
+  ISSUES #41 is complete and deleted.
+- **Next:** supervisor verify `9ab6985d` and this docs commit. ISSUES #39's
+  battle-presentation turn-keying remains separate and explicitly out of
+  scope.
+- **Notes:** all **19** committed OFF swap traces remain exact at their
+  recorded counts; primary windows: picker **101/101**, options **58/58**,
+  popup **44/44**, B-close **59/59**, enemy picker **130/130**, accept prompt
+  **66/66**, accept exit **43/43**, summary return **147/147**. No behavior,
+  barrier-count, handler-set, census, round, tick, roadmap, or animation
+  change.
+
+---
+
 ## 649 — [BOUNDED MAIN WORKER 2026-07-28 ~17:57] Battle 1 HP recording imports retired
 
 - **State:** implementation committed `78a3bfbc`; tree green at **437 files /
@@ -54,23 +78,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   every member re-rolls it, while the bit itself has the source action lifetime.
   Deliberate hit-chain barrier pin **16→13**. No census, recording import,
   handler-set, issue, roadmap, round, tick, or pixel change.
-
----
-
-## 647 — [BOUNDED MAIN WORKER 2026-07-28 ~17:33] Weather base-damage block source-complete
-
-- **State:** committed `540d3ff7`; tree green at **434 files / 4752 tests**,
-  production build, OFF oracle info, and `git diff --check`. Census remains
-  byte-idempotent at **214/214 effects, 355/355 moves, 276/276 distinct,
-  2957/2957 weighted** with all **72** validations passing.
-- **Did:** ported `CalculateBaseDamage`'s rain/sun Fire/Water modifiers and
-  rain/sand/hail Solar Beam halving at the exact pre-`+2` truncation point.
-  The hit chain passes live weather, resolved dynamic move type, current move,
-  and source-exact `WEATHER_HAS_EFFECT2` Cloud Nine/Air Lock suppression.
-- **Next:** supervisor verify `540d3ff7`; audit finding 4 (Focus Band) remains
-  separate and explicitly out of scope.
-- **Notes:** Tier-1 pins all four Fire/Water weather combinations under normal,
-  Cloud Nine, and Air Lock state; Weather Ball under sun + Water Sport; Solar
-  Beam's non-sun exception; and clear-weather values. Beat Up's separate
-  formula is unchanged and its suite stays green. No barrier-count, handler
-  pin, census, recording-import, presentation, roadmap, or issue change.
