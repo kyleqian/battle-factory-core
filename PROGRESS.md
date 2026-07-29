@@ -78,6 +78,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   faints both actives first); a follow-up staging attempt is running.
   Supervisor verified union suite **496/5094**, build, and re-drove
   18/20/21/23 = 2143/2326/1911/2114 matching the worker's table.
+- **Supervisor fold (post-step):** ROM receipt §7C2 Perish Song merged
+  (`e23eb685`): a legal player-switch schedule reaches a live AI timer-zero
+  command; seeds 1/2 draw ZERO RNG, switch, deterministically select party
+  index 1 — §7C's zero-draw sentinel/scoring prediction fully verified,
+  twice-fresh byte-identical. All four §7 receipt variants are now
+  ROM-pinned. Supervisor verified union **497/5104** + build. Rung 13
+  (R13-A/B/C/D) is complete; the sole named remainder is B-control
+  equivalence behind the pre-existing `EFFECT_TOXIC` CheckBadMove barrier.
 - **Next / notes:** supervisor resumes R13-D or its ordered queue. No
   unsupported/import ratchet, census byte, generated artifact, issue,
   presentation, animation, canonical recording, or tick branch moved.
