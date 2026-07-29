@@ -13,6 +13,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 693 — [BOUNDED MAIN WORKER 2026-07-29 ~11:31] switch-in history defect fixed; audit continuation in progress
+
+- **State:** source-literal switch clear committed at `0df6ce0d`; full suite
+  green at **507 files / 5172 tests**, production build and
+  `git diff --check` green.
+- **Did:** `Cmd_switchindataupdate` now clears the active battler's exact
+  last-move/result/choiced-move buffers plus Battle History move/ability
+  facts while preserving item-effect and opposing-battler history. Tier-1
+  pins cover the Bulbasaur→Onix-style player voluntary repro through the
+  next AI sync, player forced switch, trainer voluntary switch, and the
+  literal cross-indexed buffer clear.
+- **Next:** add #48's continuous-cursor challenge-2 pin, then run/re-pin
+  seeds 4–30 and spot-check 31–60, verify R13-D receipts, censuses,
+  ratchets, full acceptance, and commit the final receipt.
+
+---
+
 ## 692 — [BOUNDED MAIN WORKER 2026-07-29 ~11:10] Rung-14 generic Frontier trainer-picture selection landed
 
 - **State:** implementation commit `51438230`; current union green at **507
