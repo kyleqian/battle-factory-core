@@ -120,14 +120,14 @@ const BERRY_CURE_CHOSEN_STATUS_END2_LABEL = "BattleScript_BerryCureChosenStatusE
 const ITEM_HEAL_HP_REMOVE_ITEM_LABEL = "BattleScript_ItemHealHP_RemoveItem";
 /** `battle_util.c:3347-3373` (Leppa). */
 const BERRY_PP_HEAL_END2_LABEL = "BattleScript_BerryPPHealEnd2";
-/**
- * Higher than battleScriptFaintedActionsOrchestration.ts's own per-script
- * ceiling (64): the DoTurnDmg-family scripts' printstring/waitmessage pair
- * (STRINGID_PKMNHURTBYPOISON/BURN, B_WAIT_TIME_LONG) resolves via a run of
- * "scheduler-progressed" steps rather than a single controller round trip,
- * so a longer, still-bounded budget is needed to reach the script's own end.
- */
+/** Source instructions only; scheduler/controller yields have their own ceiling below. */
 const SCRIPT_BUDGET = 256;
+/**
+ * Matches the full-turn reducer's independent scheduler/controller ceiling.
+ * Legal end-turn scripts can contain several B_WAIT_TIME_LONG waits without
+ * consuming extra source instructions (docs/end-turn-budget-scout.md).
+ */
+const SCRIPT_YIELD_BUDGET = 4_096;
 
 /** include/constants/battle.h:117-123. */
 const STATUS1_POISON = 1 << 3;
@@ -343,7 +343,9 @@ type RunToOwnEndResult =
 /** Runs one already-started BattleScriptExecute script to its own end/end2 halt (same shape as the fainted-actions precedent's own helper). */
 function runScriptToOwnEnd(program: BattleScriptProgram, handlers: Handlers, initialState: MachineState): RunToOwnEndResult {
   let state = initialState;
-  for (let budget = 0; budget < SCRIPT_BUDGET; budget += 1) {
+  let sourceInstructions = 0;
+  let yieldSteps = 0;
+  while (sourceInstructions < SCRIPT_BUDGET && yieldSteps < SCRIPT_YIELD_BUDGET) {
     const instruction = program.instructions[state.programCounter];
     if (!instruction) {
       throw new Error(`end-turn orchestration left the committed program at ${state.programCounter}`);
@@ -357,6 +359,7 @@ function runScriptToOwnEnd(program: BattleScriptProgram, handlers: Handlers, ini
       if (acknowledged === stepped.state) {
         throw new Error(`end-turn orchestration blocked inside ${instruction.source.label} without a safe controller acknowledgement`);
       }
+      yieldSteps += 1;
       state = acknowledged;
       continue;
     }
@@ -369,10 +372,36 @@ function runScriptToOwnEnd(program: BattleScriptProgram, handlers: Handlers, ini
     if (stepped.kind === "unsupported") {
       return Object.freeze({ kind: "barrier", state: stepped.state, instruction });
     }
-    // "advanced" and "scheduler-progressed" both carry a legitimately-updated state to keep looping from.
+    if (stepped.kind === "scheduler-progressed") {
+      yieldSteps += 1;
+      state = stepped.state;
+      continue;
+    }
+    const controllerYield = (
+      stepped.state.programCounter === state.programCounter
+      && stepped.state.scheduler.pendingControllerBattlers.length
+        > state.scheduler.pendingControllerBattlers.length
+    );
+    if (controllerYield) {
+      yieldSteps += 1;
+    } else {
+      sourceInstructions += 1;
+    }
     state = stepped.state;
   }
-  throw new Error("end-turn orchestration exceeded its per-script instruction budget");
+  if (yieldSteps >= SCRIPT_YIELD_BUDGET) {
+    throw new Error(
+      `end-turn orchestration exceeded its controller/message yield budget at `
+        + `${program.instructions[state.programCounter]?.source.label}/`
+        + `${program.instructions[state.programCounter]?.opcodeName}`,
+    );
+  }
+  throw new Error(
+    `end-turn orchestration exceeded its per-script instruction budget at `
+      + `${program.instructions[state.programCounter]?.source.label}/`
+      + `${program.instructions[state.programCounter]?.opcodeName} after `
+      + `${sourceInstructions} source instructions`,
+  );
 }
 
 /** `gBattlerFainted`-style role reassignment, narrowed to `attacker` -- every DoTurnDmg-family script only ever reads BS_ATTACKER (doc §1c). */
@@ -464,7 +493,9 @@ type RunToEnd3Result =
 /** Same shape as `runScriptToOwnEnd`, but its stopping condition is the new `"end3"` halt kind instead of `"terminal"` -- `BattleScript_SpeedBoostActivates`/`RainDishActivates` (docs/end3-design.md) never reach end/end2. */
 function runScriptToEnd3(program: BattleScriptProgram, handlers: Handlers, initialState: MachineState): RunToEnd3Result {
   let state = initialState;
-  for (let budget = 0; budget < SCRIPT_BUDGET; budget += 1) {
+  let sourceInstructions = 0;
+  let yieldSteps = 0;
+  while (sourceInstructions < SCRIPT_BUDGET && yieldSteps < SCRIPT_YIELD_BUDGET) {
     const instruction = program.instructions[state.programCounter];
     if (!instruction) {
       throw new Error(`end-turn orchestration left the committed program at ${state.programCounter}`);
@@ -478,6 +509,7 @@ function runScriptToEnd3(program: BattleScriptProgram, handlers: Handlers, initi
       if (acknowledged === stepped.state) {
         throw new Error(`end-turn orchestration blocked inside ${instruction.source.label} without a safe controller acknowledgement`);
       }
+      yieldSteps += 1;
       state = acknowledged;
       continue;
     }
@@ -490,9 +522,36 @@ function runScriptToEnd3(program: BattleScriptProgram, handlers: Handlers, initi
     if (stepped.kind === "unsupported") {
       return Object.freeze({ kind: "barrier", state: stepped.state, instruction });
     }
+    if (stepped.kind === "scheduler-progressed") {
+      yieldSteps += 1;
+      state = stepped.state;
+      continue;
+    }
+    const controllerYield = (
+      stepped.state.programCounter === state.programCounter
+      && stepped.state.scheduler.pendingControllerBattlers.length
+        > state.scheduler.pendingControllerBattlers.length
+    );
+    if (controllerYield) {
+      yieldSteps += 1;
+    } else {
+      sourceInstructions += 1;
+    }
     state = stepped.state;
   }
-  throw new Error("end-turn orchestration exceeded its per-script instruction budget");
+  if (yieldSteps >= SCRIPT_YIELD_BUDGET) {
+    throw new Error(
+      `end-turn orchestration exceeded its controller/message yield budget at `
+        + `${program.instructions[state.programCounter]?.source.label}/`
+        + `${program.instructions[state.programCounter]?.opcodeName}`,
+    );
+  }
+  throw new Error(
+    `end-turn orchestration exceeded its per-script instruction budget at `
+      + `${program.instructions[state.programCounter]?.source.label}/`
+      + `${program.instructions[state.programCounter]?.opcodeName} after `
+      + `${sourceInstructions} source instructions`,
+  );
 }
 
 /**

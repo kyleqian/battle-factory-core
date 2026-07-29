@@ -63,7 +63,10 @@ function choosePlayerDecision(
   )!;
 }
 
-function driveGeneratedRoundToCompletion(seed: number): FactoryRoundBattleOrchestratorState {
+function driveGeneratedRoundToCompletion(
+  seed: number,
+  onDecisionSubmitted?: (state: FactoryRoundBattleOrchestratorState) => void,
+): FactoryRoundBattleOrchestratorState {
   const playerRecords = [record(664), record(678), record(527)] as const;
   const savedRentalRecords = [...playerRecords, record(1), record(2), record(3)] as const;
   let state = createFactoryRoundBattleOrchestrator({
@@ -81,6 +84,7 @@ function driveGeneratedRoundToCompletion(seed: number): FactoryRoundBattleOrches
   for (let budget = 0; budget < 1_000 && state.round.rules.phase !== "roundComplete"; budget += 1) {
     if (state.battle !== null) {
       state = submitFactoryRoundPlayerDecision(state, choosePlayerDecision(state));
+      onDecisionSubmitted?.(state);
       continue;
     }
     if (
@@ -313,6 +317,35 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       expect(state.rngSegments[index]!.callStart).toBe(state.rngSegments[index - 1]!.callEnd);
       expect(state.rngSegments[index]!.rngBefore).toBe(state.rngSegments[index - 1]!.rngAfter);
     }
+  });
+
+  it("seed 21's ordinary generated Sandstorm turn reaches forced replacement and completes seven wins", () => {
+    let sandstormForcedSwitch: FactoryRoundBattleOrchestratorState | null = null;
+    const state = driveGeneratedRoundToCompletion(21, (next) => {
+      const boundary = next.battle?.boundary;
+      const player = next.battle?.rules.rulesContext.battlers[0];
+      const opponent = next.battle?.rules.rulesContext.battlers[1];
+      if (
+        sandstormForcedSwitch === null
+        && next.round.rules.battleIndex === 0
+        && boundary?.kind === "decision-required"
+        && boundary.request.side === "player"
+        && boundary.request.kind === "forced-switch"
+        && player?.species === 210
+        && opponent?.species === 98
+      ) {
+        sandstormForcedSwitch = next;
+      }
+    });
+
+    expect(sandstormForcedSwitch).not.toBeNull();
+    expect(sandstormForcedSwitch!.battle!.rules.rulesContext.battlers[0].hp).toBe(0);
+    expect(sandstormForcedSwitch!.battle!.rules.rulesContext.battlers[1].hp).toBe(116);
+    expect(state.round.rules.phase).toBe("roundComplete");
+    expect(state.round.rules.battleIndex).toBe(6);
+    expect(state.round.rules.lastBattle?.outcome).toBe("win");
+    expect(state.rngSegments.filter((segment) => segment.kind === "battle")).toHaveLength(7);
+    expect(state.facilityRngCalls).toBe(1911);
   });
 
   it.each([
