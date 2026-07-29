@@ -1,6 +1,23 @@
 // Forced player-switch party menu state.  Rendering is intentionally kept
 // separate: this reducer only owns the button-gated cursor/action sequence.
+import anchorStateData from "../data/gen/anchor-state.json" with { type: "json" };
 import type { GbaButton } from "../input.ts";
+import type {
+  BattleParty,
+  BattleStatus,
+  FactoryRentalParty,
+} from "./battleScenario.ts";
+import {
+  createBattleForcedSwitchRequest,
+  submitBattleDecision,
+  type BattleDecisionReducer,
+  type BattleDecisionTransitionResult,
+  type BattleForcedSwitchRequest,
+  type BattleJsonObject,
+  type BattlePartyIndex,
+  type BattleState,
+} from "./battleDecisionBoundary.ts";
+import { createFactoryCorpusPartyMember } from "./factoryCorpusParty.ts";
 
 export type PartySelectCursor = "onix" | "magby";
 export type PartyMenuChromeKey = "listOnix" | "listOnixFrame1" | "listOnixMidHop" | "listMagby" | "listMagbyMidHop" | "submenu" | "sendOutExit" | "sendOutExitFrame0";
@@ -17,6 +34,21 @@ export interface PartyMenuLayers {
   /** The selected MAGBY position needs its distinct extracted status OBJ. */
   status: "normal" | "magby";
 }
+
+export interface PartySelectMember {
+  readonly partyIndex: 0 | 1 | 2;
+  readonly id: string;
+  readonly species: string;
+  readonly hp: number;
+  readonly maxHp: number;
+  readonly status: BattleStatus;
+  readonly personality: number;
+  readonly abilitySlot: 0 | 1;
+  readonly friendship: number;
+  readonly fainted: boolean;
+  readonly legal: boolean;
+}
+
 export interface PartySelectState {
   /** Frames since the actual faint-message dismiss edge. */
   elapsed: number;
@@ -24,6 +56,10 @@ export interface PartySelectState {
   submenuOpen: boolean;
   /** Null until SEND OUT is confirmed; then frames since that input edge. */
   sendOutElapsed: number | null;
+  /** Immutable kernel request whose selection this presentation owns. */
+  request: BattleForcedSwitchRequest;
+  /** Full round identities/live HP used to construct the three visible rows. */
+  party: readonly [PartySelectMember, PartySelectMember, PartySelectMember];
 }
 
 /**
@@ -54,11 +90,169 @@ export function partySelectEntryPhase(elapsed: number): PartySelectEntryPhase {
   return "settled";
 }
 
+type AnchorRental = Readonly<{
+  species: string;
+  frontierMonIndex: number;
+  personality: number;
+  ivs: Readonly<Record<"hp" | "attack" | "defense" | "speed" | "spAttack" | "spDefense", number>>;
+  abilityNum: 0 | 1;
+  stats: Readonly<{ maxHp: number }>;
+}>;
+
+const anchorRentals = (anchorStateData as { rentals: AnchorRental[] }).rentals;
+
+function canonicalRentalRecord(index: 0 | 1 | 2) {
+  const rental = anchorRentals[index]!;
+  const ivs = Object.values(rental.ivs);
+  if (!ivs.every((iv) => iv === ivs[0])) {
+    throw new Error(`canonical forced-switch rental ${index} does not have uniform IVs`);
+  }
+  return {
+    setId: rental.frontierMonIndex,
+    personality: rental.personality,
+    fixedIv: ivs[0]!,
+    abilitySlot: rental.abilityNum,
+  };
+}
+
+export const CANONICAL_FORCED_SWITCH_REQUEST =
+  createBattleForcedSwitchRequest({
+    kind: "forced-switch",
+    requestId: 0,
+    side: "player",
+    battler: 0,
+    faintedPartyIndex: 0,
+    legalPartyIndexes: [1, 2],
+  });
+
+export const CANONICAL_FORCED_SWITCH_RENTAL_RECORDS = Object.freeze([
+  canonicalRentalRecord(0),
+  canonicalRentalRecord(1),
+  canonicalRentalRecord(2),
+]) as unknown as FactoryRentalParty;
+
+export const CANONICAL_FORCED_SWITCH_PARTY = Object.freeze(
+  ([0, 1, 2] as const).map((index) => {
+    const rental = anchorRentals[index]!;
+    return Object.freeze({
+      id: rental.species.replace(/^SPECIES_/, "").toLowerCase(),
+      species: rental.species.replace(/^SPECIES_/, ""),
+      maxHp: rental.stats.maxHp,
+      hp: index === 0 ? 0 : rental.stats.maxHp,
+      status: "none" as const,
+    });
+  }),
+) as unknown as BattleParty;
+
+function partySpeciesName(species: string): string {
+  return species.replace(/^SPECIES_/, "");
+}
+
+/**
+ * Request-driven forced-switch entry. This slice constructs arbitrary round
+ * identities and live row state, but deliberately does not claim arbitrary
+ * icon/chrome rendering; `partyMenuLayers` retains the canonical asset guard.
+ */
+export function createPartySelectStateFromForcedSwitch(
+  requestInput: BattleForcedSwitchRequest,
+  playerRentalRecords: FactoryRentalParty,
+  playerParty: BattleParty,
+): PartySelectState {
+  const request = createBattleForcedSwitchRequest(requestInput);
+  if (request.side !== "player") {
+    throw new Error("party-select presentation only accepts a player forced-switch request");
+  }
+  if (request.faintedPartyIndex > 2) {
+    throw new Error("party-select presentation requires a fainted index in the three-mon Factory party");
+  }
+  if (request.legalPartyIndexes.length === 0) {
+    throw new Error("party-select presentation requires at least one legal replacement");
+  }
+
+  const legalIndexes = new Set(request.legalPartyIndexes);
+  const party = playerRentalRecords.map((record, index): PartySelectMember => {
+    const partyIndex = index as 0 | 1 | 2;
+    const corpusMember = createFactoryCorpusPartyMember(record);
+    const battleMember = playerParty[partyIndex]!;
+    const species = partySpeciesName(corpusMember.speciesName);
+    if (partySpeciesName(battleMember.species) !== species) {
+      throw new Error(
+        `playerParty[${partyIndex}] species ${battleMember.species} does not match rental record species ${species}`,
+      );
+    }
+    if (battleMember.maxHp !== corpusMember.maxHP) {
+      throw new Error(
+        `playerParty[${partyIndex}] max HP ${battleMember.maxHp} does not match rental record max HP ${corpusMember.maxHP}`,
+      );
+    }
+    return Object.freeze({
+      partyIndex,
+      id: battleMember.id,
+      species,
+      hp: battleMember.hp,
+      maxHp: battleMember.maxHp,
+      status: battleMember.status,
+      personality: corpusMember.personality,
+      abilitySlot: corpusMember.abilitySlot,
+      friendship: corpusMember.friendship,
+      fainted: partyIndex === request.faintedPartyIndex,
+      legal: legalIndexes.has(partyIndex),
+    });
+  }) as unknown as readonly [PartySelectMember, PartySelectMember, PartySelectMember];
+
+  const faintedPartyIndex = request.faintedPartyIndex as 0 | 1 | 2;
+  if (party[faintedPartyIndex].hp !== 0) {
+    throw new Error("party-select presentation requires the requested fainted member to have zero HP");
+  }
+  for (const legalPartyIndex of request.legalPartyIndexes) {
+    if (
+      legalPartyIndex > 2
+      || party[legalPartyIndex as 0 | 1 | 2].hp === 0
+    ) {
+      throw new Error(
+        `party-select presentation legal replacement ${legalPartyIndex} must be a living member of the three-mon Factory party`,
+      );
+    }
+  }
+
+  return {
+    elapsed: 0,
+    cursor: "onix",
+    submenuOpen: false,
+    sendOutElapsed: null,
+    request,
+    party,
+  };
+}
+
+/**
+ * The pre-seam canonical state remains an independent equivalence baseline.
+ * The live route in core.ts constructs the same value through the generic
+ * request/round-record entry point above.
+ */
 export const INITIAL_PARTY_SELECT_STATE: PartySelectState = {
   elapsed: 0,
   cursor: "onix",
   submenuOpen: false,
   sendOutElapsed: null,
+  request: CANONICAL_FORCED_SWITCH_REQUEST,
+  party: [
+    {
+      partyIndex: 0, id: "onix", species: "ONIX", hp: 0, maxHp: 117,
+      status: "none", personality: 1205102525, abilitySlot: 1,
+      friendship: 0, fainted: true, legal: false,
+    },
+    {
+      partyIndex: 1, id: "magby", species: "MAGBY", hp: 138, maxHp: 138,
+      status: "none", personality: 1534575931, abilitySlot: 0,
+      friendship: 0, fainted: false, legal: true,
+    },
+    {
+      partyIndex: 2, id: "bayleef", species: "BAYLEEF", hp: 153, maxHp: 153,
+      status: "none", personality: 1550278706, abilitySlot: 0,
+      friendship: 0, fainted: false, legal: true,
+    },
+  ],
 };
 
 /**
@@ -206,6 +400,12 @@ export function onixSelectedHopY2(elapsed: number): -3 | 1 {
  * text/palette snapshots; every OBJ texel is drawn below from ROM extraction.
  */
 export function partyMenuLayers(state: PartySelectState): PartyMenuLayers {
+  const species = state.party.map((member) => member.species).join("/");
+  if (species !== "ONIX/MAGBY/BAYLEEF") {
+    throw new Error(
+      `party-select visual assets do not yet cover ${species}; arbitrary-species chrome is a later slice`,
+    );
+  }
   const fullFrame = fullPartyIconFrame(state.elapsed);
   // `Task_HandleChooseMonInput` removes the SEND OUT window on the first
   // fade VBlank but leaves the party rows and their live OBJ icons in place.
@@ -276,4 +476,37 @@ export function advancePartySelect(state: PartySelectState, newKeys: ReadonlySet
     return next.submenuOpen ? { ...next, sendOutElapsed: 0 } : { ...next, submenuOpen: true };
   }
   return next;
+}
+
+function selectedPartyIndex(state: PartySelectState): BattlePartyIndex {
+  return state.cursor === "onix"
+    ? state.request.faintedPartyIndex
+    : state.request.legalPartyIndexes[0]!;
+}
+
+/**
+ * Bridges a confirmed SEND OUT choice through the ordinary immutable battle
+ * boundary. Before confirmation presentation owns the interaction and this
+ * returns null; no separate semantic-event acknowledgement is introduced.
+ */
+export function submitPartySelectBattleDecision<
+  RulesState extends BattleJsonObject,
+>(
+  battleState: BattleState<RulesState>,
+  presentation: PartySelectState,
+  reducer: BattleDecisionReducer<RulesState>,
+): BattleDecisionTransitionResult<RulesState> | null {
+  if (presentation.sendOutElapsed === null) return null;
+  return submitBattleDecision(
+    battleState,
+    {
+      requestId: presentation.request.requestId,
+      side: presentation.request.side,
+      decision: {
+        kind: "switch",
+        partyIndex: selectedPartyIndex(presentation),
+      },
+    },
+    reducer,
+  );
 }

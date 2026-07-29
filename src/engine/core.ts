@@ -152,7 +152,14 @@ import {
   battle2Turn1State,
   type Battle2Turn1State,
 } from "./battle2Turn1.ts";
-import { advancePartySelect, INITIAL_PARTY_SELECT_STATE, partySendOutBattleMenuReady } from "./partySelect.ts";
+import {
+  advancePartySelect,
+  CANONICAL_FORCED_SWITCH_PARTY,
+  CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
+  CANONICAL_FORCED_SWITCH_REQUEST,
+  createPartySelectStateFromForcedSwitch,
+  partySendOutBattleMenuReady,
+} from "./partySelect.ts";
 import {
   advanceFightSubmenuDisplay,
   closeFightSubmenu,
@@ -674,7 +681,14 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       newKeys.has("A") &&
       turn15KoDismissEligible(SCENE_TICK0 + battleScene.elapsed + 1)
     ) {
-      battleScene = { ...battleScene, turn15PartySelect: INITIAL_PARTY_SELECT_STATE };
+      battleScene = {
+        ...battleScene,
+        turn15PartySelect: createPartySelectStateFromForcedSwitch(
+          CANONICAL_FORCED_SWITCH_REQUEST,
+          CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
+          CANONICAL_FORCED_SWITCH_PARTY,
+        ),
+      };
     } else if (battleScene.turn15PartySelect) {
       const previousParty = battleScene.turn15PartySelect;
       const nextParty = advancePartySelect(previousParty, newKeys);

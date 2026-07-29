@@ -42,6 +42,7 @@ import { menuIdleBounce } from "../src/engine/battleMenu.ts";
 import { createInitialState, render, tick, type EngineState } from "../src/engine/core.ts";
 import { rockSlideOpponentHp, currentPPForActiveMon } from "../src/engine/battleMenu.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
+import { INITIAL_PARTY_SELECT_STATE } from "../src/engine/partySelect.ts";
 import type { GbaButton } from "../src/input.ts";
 
 /** Onix's real moveset (`battleSetup.ts`'s own rental-pool lookup) - every `openFightSubmenu` call below needs this now that it threads the S8 `activeMonMoveset` plumbing (docs/battle-menu-notes.md §13c) through explicitly, rather than each test re-deriving it from a fully-played draft screen. */
@@ -157,6 +158,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
         fightSubmenu: staleTurn15Choice,
         turn14Resolved: true,
         turn15PartySelect: {
+          ...INITIAL_PARTY_SELECT_STATE,
           elapsed: 500,
           cursor: "magby",
           submenuOpen: true,

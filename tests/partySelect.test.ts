@@ -1,8 +1,64 @@
 import { describe, expect, it } from "vitest";
-import { advancePartySelect, fullPartyIconFrame, INITIAL_PARTY_SELECT_STATE, onixSelectedHopY2, partyMenuLayers, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutBattleMenuReady, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_BLACK_START, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_ENTRY_SETTLED_START, PARTY_LIST_INPUT_ELAPSED, PARTY_SENDOUT_ACTION_MENU_START, PARTY_SENDOUT_BALL_LAST_VISIBLE, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_BATTLE_FADE_IN_START, PARTY_SENDOUT_BLACK_START, PARTY_SENDOUT_BLANK_MESSAGE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, PARTY_SENDOUT_GO_TEXT_START, PARTY_SENDOUT_RELEASE_VISIBLE_START, partySelectEntryPhase } from "../src/engine/partySelect.ts";
+import { advancePartySelect, CANONICAL_FORCED_SWITCH_PARTY, CANONICAL_FORCED_SWITCH_RENTAL_RECORDS, CANONICAL_FORCED_SWITCH_REQUEST, createPartySelectStateFromForcedSwitch, fullPartyIconFrame, INITIAL_PARTY_SELECT_STATE, onixSelectedHopY2, partyMenuLayers, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutBattleMenuReady, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_BLACK_START, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_ENTRY_SETTLED_START, PARTY_LIST_INPUT_ELAPSED, PARTY_SENDOUT_ACTION_MENU_START, PARTY_SENDOUT_BALL_LAST_VISIBLE, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_BATTLE_FADE_IN_START, PARTY_SENDOUT_BLACK_START, PARTY_SENDOUT_BLANK_MESSAGE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, PARTY_SENDOUT_GO_TEXT_START, PARTY_SENDOUT_RELEASE_VISIBLE_START, partySelectEntryPhase, submitPartySelectBattleDecision } from "../src/engine/partySelect.ts";
 import { bgFadeY, objFadeY } from "../src/engine/paletteFade.ts";
+import { createBattleState, type BattleDecisionReducer } from "../src/engine/battleDecisionBoundary.ts";
 
 describe("forced turn-15 party select", () => {
+  it("constructs the canonical three-rental state through the request-driven entry point exactly", () => {
+    expect(createPartySelectStateFromForcedSwitch(
+      CANONICAL_FORCED_SWITCH_REQUEST,
+      CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
+      CANONICAL_FORCED_SWITCH_PARTY,
+    )).toEqual(INITIAL_PARTY_SELECT_STATE);
+  });
+
+  it("submits the confirmed selection as an ordinary forced-switch boundary decision", () => {
+    const battle = createBattleState({
+      rules: { resumed: false },
+      rngSeed: 0x12345678,
+      request: CANONICAL_FORCED_SWITCH_REQUEST,
+    });
+    const reducer: BattleDecisionReducer<{ readonly resumed: boolean }> = ({
+      rules,
+      request,
+      decision,
+    }) => {
+      expect(request).toEqual(CANONICAL_FORCED_SWITCH_REQUEST);
+      expect(decision).toEqual({ kind: "switch", partyIndex: 1 });
+      return {
+        rules: { ...rules, resumed: true },
+        events: [],
+        boundary: { kind: "terminal", outcome: "player-win" },
+      };
+    };
+    const presentation = {
+      ...INITIAL_PARTY_SELECT_STATE,
+      cursor: "magby" as const,
+      submenuOpen: true,
+    };
+
+    expect(submitPartySelectBattleDecision(
+      battle,
+      presentation,
+      reducer,
+    )).toBeNull();
+
+    const submitted = submitPartySelectBattleDecision(
+      battle,
+      { ...presentation, sendOutElapsed: 0 },
+      reducer,
+    );
+    expect(submitted).toMatchObject({
+      kind: "terminal",
+      state: {
+        revision: 1,
+        rules: { resumed: true },
+        rng: { value: 0x12345678, calls: 0 },
+        boundary: { kind: "terminal", outcome: "player-win" },
+      },
+    });
+  });
+
   it("ignores list navigation during the fade and defaults to fainted ONIX", () => {
     expect(advancePartySelect({ ...INITIAL_PARTY_SELECT_STATE, elapsed: PARTY_LIST_INPUT_ELAPSED - 2 }, new Set(["DOWN"]))).toMatchObject({ cursor: "onix" });
   });
@@ -37,9 +93,18 @@ describe("forced turn-15 party select", () => {
 
   it("moves DOWN to MAGBY, opens SEND OUT, then confirms it", () => {
     const magby = advancePartySelect({ ...INITIAL_PARTY_SELECT_STATE, elapsed: PARTY_LIST_INPUT_ELAPSED - 1 }, new Set(["DOWN"]));
-    expect(magby).toEqual({ elapsed: PARTY_LIST_INPUT_ELAPSED, cursor: "magby", submenuOpen: false, sendOutElapsed: null });
+    expect(magby).toEqual({
+      ...INITIAL_PARTY_SELECT_STATE,
+      elapsed: PARTY_LIST_INPUT_ELAPSED,
+      cursor: "magby",
+    });
     const submenu = advancePartySelect(magby, new Set(["A"]));
-    expect(submenu).toEqual({ elapsed: PARTY_LIST_INPUT_ELAPSED + 1, cursor: "magby", submenuOpen: true, sendOutElapsed: null });
+    expect(submenu).toEqual({
+      ...INITIAL_PARTY_SELECT_STATE,
+      elapsed: PARTY_LIST_INPUT_ELAPSED + 1,
+      cursor: "magby",
+      submenuOpen: true,
+    });
     expect(advancePartySelect(submenu, new Set(["A"])).sendOutElapsed).toBe(0);
   });
 
