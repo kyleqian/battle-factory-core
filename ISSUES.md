@@ -207,3 +207,21 @@ need explicit sign-off since they lean away from "model the real mechanism"):**
   RAM-verified via `tests/rentSelect.test.ts`/`tests/ballAnim.test.ts`, so
   the uncovered pixels are 100% attributable to this pre-existing,
   RENT-independent close-animation jitter, not to unverified S5 logic).
+
+## #48 — Accepted swaps don't persist into the next challenge's rental rank
+
+**Filed 2026-07-29 (read-only interaction audit, PLAUSIBLE — design-boundary
+gap, not yet a live defect).** Source: accepting a rental swap sets a
+persistent flag (`battle_factory.c:298`); the battle-room victory script
+increments the rents count gated on that flag
+(`BattleFrontier_BattleFactoryBattleRoom/scripts.inc:92`,
+`battle_factory.c:259`); future initial rentals use the count to select the
+better-rental rank (`battle_factory.c:551`). Engine: `rentsCount` is an
+immutable creation input (`factoryRoundBattleOrchestrator.ts:86`); accepting
+a swap updates only the round controller (`:405`). No multi-challenge
+consumer exists yet, so nothing observable diverges today — this becomes a
+confirmed defect the moment a second challenge is seeded from the
+orchestrator's returned facility state. Confirmation/fix criterion: a
+two-challenge lifecycle test — accept swaps in challenge 1, create challenge
+2 from the returned state, assert the incremented rents count changes
+`rentalRank`.
