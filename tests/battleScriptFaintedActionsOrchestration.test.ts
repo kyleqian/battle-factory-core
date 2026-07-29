@@ -181,22 +181,26 @@ describe("runBattleScriptFaintedActionsOrchestration (HandleFaintedMonActions eq
   );
 
   it(
-    "non-terminal barrier: opponent still has a healthy bench slot -- checkteamslost's jumpifbyte does NOT "
+    "non-terminal sole replacement: opponent still has one healthy bench slot -- checkteamslost's jumpifbyte does NOT "
       + "take the FaintedMonEnd branch; jumpifbattletype (a jumpifword macro expansion, "
       + "asm/macros/battle_script.inc:1434-1436) is now registered (docs/forced-switch-ground-truth.md §4 "
       + "slice 1) and takes Factory's real BATTLE_TYPE_TRAINER-taken jump straight to "
-      + "BattleScript_FaintedMonTryChoose, so the barrier now surfaces one opcode deeper, at the genuinely "
-      + "unregistered openpartyscreen -- a named machine boundary instead of a fake terminal or silent fallthrough",
+      + "BattleScript_FaintedMonTryChoose; the only legal candidate is selected without entering the "
+      + "irrelevant pass-2 damage fallback, and the battle genuinely resumes",
     () => {
       const rc = context({
         party: { player: sixSlots(100), opponent: sixSlots(90, 0, 0) },
       });
       const initial = haltedAtOwnEnd(rc);
       const result = runBattleScriptFaintedActionsOrchestration(program, handlers, initial);
-      expect(result.kind).toBe("non-terminal-barrier");
-      if (result.kind !== "non-terminal-barrier") throw new Error("expected non-terminal-barrier");
+      expect(result.kind).toBe("resumed");
+      if (result.kind !== "resumed") throw new Error("expected resumed");
       expect(result.state.rulesContext.battleOutcome).toBe(0); // genuinely undecided, not fabricated
-      expect(result.instruction.opcodeName).toBe("B_SCR_OP_OPENPARTYSCREEN"); // openpartyscreen BS_FAINTED
+      expect(result.state.rulesContext.battlers[1]).toMatchObject({
+        species: 261,
+        hp: 90,
+        partyIndex: 0,
+      });
       expect(result.state.rng.calls).toBe(initial.rng.calls);
     },
   );

@@ -145,6 +145,41 @@ const ITEM_MOVE_END_HOLD_EFFECTS: ReadonlySet<number> = new Set([
 const HOLD_EFFECT_FLINCH = 30;
 const HOLD_EFFECT_SHELL_BELL = 62;
 
+function moveEndItemEffectApplies(
+  holdEffect: number,
+  battlerState: BattleScriptRulesBattlerState,
+): boolean {
+  switch (holdEffect) {
+    case 2: // HOLD_EFFECT_CURE_PAR
+      return (battlerState.status1 & STATUS1_PARALYSIS) !== 0;
+    case 3: // HOLD_EFFECT_CURE_SLP
+      return (battlerState.status1 & STATUS1_SLEEP) !== 0;
+    case 4: // HOLD_EFFECT_CURE_PSN
+      return (battlerState.status1 & (STATUS1_POISON | STATUS1_TOXIC_POISON)) !== 0;
+    case 5: // HOLD_EFFECT_CURE_BRN
+      return (battlerState.status1 & STATUS1_BURN) !== 0;
+    case 6: // HOLD_EFFECT_CURE_FRZ
+      return (battlerState.status1 & STATUS1_FREEZE) !== 0;
+    case 8: // HOLD_EFFECT_CURE_CONFUSION
+      return (battlerState.status2 & STATUS2_CONFUSION) !== 0;
+    case 9: // HOLD_EFFECT_CURE_STATUS
+      return (battlerState.status1 & (
+        STATUS1_SLEEP
+        | STATUS1_POISON
+        | STATUS1_BURN
+        | STATUS1_FREEZE
+        | STATUS1_PARALYSIS
+        | STATUS1_TOXIC_POISON
+      )) !== 0;
+    case 23: // HOLD_EFFECT_RESTORE_STATS
+      return battlerState.statStages.some((stage) => stage < 6);
+    case 28: // HOLD_EFFECT_CURE_ATTRACT
+      return (battlerState.status2 & STATUS2_INFATUATION) !== 0;
+    default:
+      return false;
+  }
+}
+
 const MOVEEND_STATE_NAME_TO_VALUE: Readonly<Record<string, number>> = Object.freeze({
   MOVEEND_RAGE,
   MOVEEND_DEFROST,
@@ -538,8 +573,12 @@ function executeMoveendState(
     case MOVEEND_ITEM_EFFECTS_ALL: {
       const count = rules.battleTopology.battlersCount;
       for (let battler = 0; battler < count; battler += 1) {
+        const battlerState = rules.battlers[battler as BattleScriptBattlerId];
         const holdEffect = resolveBattleScriptBattlerHoldEffect(rules, battler as BattleScriptBattlerId);
-        if (ITEM_MOVE_END_HOLD_EFFECTS.has(holdEffect)) {
+        if (
+          ITEM_MOVE_END_HOLD_EFFECTS.has(holdEffect)
+          && moveEndItemEffectApplies(holdEffect, battlerState)
+        ) {
           return transferState(unsupportedBranch(
             context,
             `ItemBattleEffects(ITEMEFFECT_MOVE_END)'s status/stat-restoring branch (battler ${battler}, `

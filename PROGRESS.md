@@ -13,6 +13,36 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 671 — [BOUNDED MAIN WORKER 2026-07-29 ~00:33] fresh 3v3 whole battle reaches real terminal
+
+- **State:** Gate-5 plan rung 4 is green at **457 files / 4915 tests** plus
+  production build, `git diff --check`, Battle Scene OFF oracle info, and
+  focused whole-battle/lifecycle/ratchet coverage **62/62**. Executable
+  (**214/214 effects, 355/355 moves**) and ability/item (**69/69 abilities,
+  42/42 hold effects**) censuses regenerate byte-identically.
+- **Did:** `factoryWholeBattle.test.ts` builds two complete three-mon parties
+  only from real corpus set ids, enters through the fresh initializer, and
+  loops solely over published command/forced-switch requests through
+  `submitBattleDecision`. Real moves faint all three opponents; Azurill's real
+  faint publishes and resumes one player forced switch; Hyper Beam recharge
+  and Ice Ball exercise two reducer-owned locked trainer turns; the terminal
+  adapts to a real win. Every submission is request-legal and the entire
+  battle pins one monotonic **32-call** LCG cursor from draws A/B through the
+  terminal hit chain.
+- **Next:** rung 6 (production-shaped Factory AI view/driver) can extend this
+  whole-battle driver; rung 11 controller ownership remains later. Keep the
+  equal-speed pre-hook receipt barrier intact.
+- **Notes:** whole-battle reachability exposed and fixed two narrow over-
+  barriers: inactive move-end cure items now pass unless their matching
+  status/stat condition exists; trainer faint replacement selects the sole
+  legal bench mon without entering outcome-irrelevant pass-2 damage scoring.
+  Competitive multi-candidate damage fallback remains explicitly barriered.
+  No barrier count/ratchet moved; no canonical recording, issue, round/swap,
+  generation, scout/probe/battle-lab, or presentation file changed.
+  PAPERCUT: none.
+
+---
+
 ## 670 — [BOUNDED MAIN WORKER 2026-07-29 ~00:10] pre-first-turn entry hooks implemented
 
 - **State:** committed `a5358114`; tree green at **455 files / 4907 tests**,
@@ -91,38 +121,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `FactoryFullTurnConfig` field, issue/scout/probe/battle-lab/census artifact,
   rental-generation file, or canonical recording changed. Commit
   `764d7f6a`. PAPERCUT: none.
-
----
-
-## 668 — [BOUNDED MAIN WORKER 2026-07-28 ~23:31] corpus-to-kernel party adapter implemented
-
-- **State:** tree green at **453 files / 4891 tests**, production build,
-  `git diff --check`, and Battle Scene OFF oracle info. Census regenerated
-  twice as a byte-identical no-op at **69/69 abilities (1096/1096)** and
-  **42/42 hold effects (850/850)**; all 17 validations and both executable
-  ratchets pass unchanged.
-- **Did:** added a pure generated-corpus adapter from set id + personality/
-  fixed IV/ability slot/OT id to a field-complete Level-50
-  `BattleScriptPartyMemberState` structural subtype: source nature check,
-  uniform IVs, split EVs, shared stat formulas, moves/base PP, experience,
-  item/hold effect, single/dual ability, friendship, gender and shiny. A
-  focused Tier-1 test constructs every Level-50 set **0–849** and exactly
-  reproduces all six OFF bootstrap RAM-dumped rental literals.
-- **Supervisor fold (same round, side merge):** rung 1 landed (`eb441047`,
-  Terra worker) — fresh-start A/B receipt banked in scout §4.1: draw A
-  `BattleStartClearSetData+0x29b` → 62606, draw B
-  `TryDoEventsBeforeFirstTurn+0x26f` → 997 overwriting A before action
-  selection; wrapper PASS (supervisor re-ran fresh: PASS). Honest bounded
-  remainder: the equal-speed tie case is scaffolded, not claimed (unstable
-  targeted stepping over the broad pre-battle VBlank span) — rung 3 must
-  either finish it or derive the tie position from source with a narrower
-  instrument.
-- **Next:** rung 2 (pure fresh battle initializer, main) + rung 7 (initial
-  rental generator, side) launch this round; then rung 3 (entry-hook
-  orchestrator) and rung 4 (whole battle fresh-start→terminal).
-- **Notes:** scout §2.2/§2.3/rung-5 citations proved. Battle-lab has no cheap
-  generic derived-party read-back command; using its permitted known-good
-  literal fallback (the OFF bootstrap RAM dump). Commits `449f6365`,
-  `b75b663f`; the census initially caught and forced removal of a quoted
-  ability comparison before final validation. No battle-start/controller,
-  side-owned, issue, census-generator, or ratchet file changed. PAPERCUT: none.

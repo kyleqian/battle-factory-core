@@ -302,13 +302,26 @@ describe("production moveend (Cmd_moveend) registration", () => {
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2987 });
     });
 
-    it("halts on MOVEEND_ITEM_EFFECTS_ALL's status/stat-restoring branch (HOLD_EFFECT_CURE_PAR)", () => {
+    it("halts on MOVEEND_ITEM_EFFECTS_ALL's status/stat-restoring branch only when the held item can activate", () => {
       const CHERI_BERRY = 133; // GetItemHoldEffect -> HOLD_EFFECT_CURE_PAR
-      const rc = context(0, {}, { moveendState: 11 }, { item: CHERI_BERRY });
+      const STATUS1_PARALYSIS = 1 << 6;
+      const rc = context(
+        0,
+        {},
+        { moveendState: 11 },
+        { item: CHERI_BERRY, status1: STATUS1_PARALYSIS },
+      );
       const { result } = stepAtMoveend(rc);
       expect(result.kind).toBe("halted");
       if (result.kind !== "halted") throw new Error("expected halted");
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 3639 });
+
+      const noStatus = context(0, {}, { moveendState: 11 }, { item: CHERI_BERRY });
+      const { result: passThrough } = stepAtMoveend(noStatus);
+      if (passThrough.kind !== "advanced") {
+        throw new Error(`expected advanced, got ${passThrough.kind}`);
+      }
+      expect(passThrough.state.rulesContext.moveendState).toBe(17);
     });
 
     it("MOVEEND_ITEM_EFFECTS_ALL passes through when no battler holds a matching item", () => {

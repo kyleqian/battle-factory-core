@@ -196,7 +196,10 @@ function createOpenPartyScreenOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
       );
     }
 
-    const scored = getMostSuitableMonToSwitchInto(bench, activePartyIndex, opposingTypes);
+    const legalBenchIndexes = legalSwitchPartyIndexes(rules.party.opponent, activePartyIndex);
+    const scored = legalBenchIndexes.length === 1
+      ? Object.freeze({ kind: "selected" as const, partyIndex: legalBenchIndexes[0]! })
+      : getMostSuitableMonToSwitchInto(bench, activePartyIndex, opposingTypes);
     if (scored.kind === "damage-fallback-needed") {
       return unsupportedBranch(
         context,

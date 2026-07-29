@@ -1,5 +1,40 @@
 ---
 
+## 668 — [BOUNDED MAIN WORKER 2026-07-28 ~23:31] corpus-to-kernel party adapter implemented
+
+- **State:** tree green at **453 files / 4891 tests**, production build,
+  `git diff --check`, and Battle Scene OFF oracle info. Census regenerated
+  twice as a byte-identical no-op at **69/69 abilities (1096/1096)** and
+  **42/42 hold effects (850/850)**; all 17 validations and both executable
+  ratchets pass unchanged.
+- **Did:** added a pure generated-corpus adapter from set id + personality/
+  fixed IV/ability slot/OT id to a field-complete Level-50
+  `BattleScriptPartyMemberState` structural subtype: source nature check,
+  uniform IVs, split EVs, shared stat formulas, moves/base PP, experience,
+  item/hold effect, single/dual ability, friendship, gender and shiny. A
+  focused Tier-1 test constructs every Level-50 set **0–849** and exactly
+  reproduces all six OFF bootstrap RAM-dumped rental literals.
+- **Supervisor fold (same round, side merge):** rung 1 landed (`eb441047`,
+  Terra worker) — fresh-start A/B receipt banked in scout §4.1: draw A
+  `BattleStartClearSetData+0x29b` → 62606, draw B
+  `TryDoEventsBeforeFirstTurn+0x26f` → 997 overwriting A before action
+  selection; wrapper PASS (supervisor re-ran fresh: PASS). Honest bounded
+  remainder: the equal-speed tie case is scaffolded, not claimed (unstable
+  targeted stepping over the broad pre-battle VBlank span) — rung 3 must
+  either finish it or derive the tie position from source with a narrower
+  instrument.
+- **Next:** rung 2 (pure fresh battle initializer, main) + rung 7 (initial
+  rental generator, side) launch this round; then rung 3 (entry-hook
+  orchestrator) and rung 4 (whole battle fresh-start→terminal).
+- **Notes:** scout §2.2/§2.3/rung-5 citations proved. Battle-lab has no cheap
+  generic derived-party read-back command; using its permitted known-good
+  literal fallback (the OFF bootstrap RAM dump). Commits `449f6365`,
+  `b75b663f`; the census initially caught and forced removal of a quoted
+  ability comparison before final validation. No battle-start/controller,
+  side-owned, issue, census-generator, or ratchet file changed. PAPERCUT: none.
+
+---
+
 ## 667 — [BOUNDED MAIN WORKER 2026-07-28 ~23:14] Run Away/Pickup close the ability-item parity worklist
 
 - **State:** tree green at **452 files / 4887 tests**, production build,

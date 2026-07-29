@@ -225,6 +225,26 @@ describe("production openpartyscreen (Cmd_openpartyscreen) dispatch, BS_FAINTED 
   });
 
   describe("(b) unsupported-branch barriers", () => {
+    it("selects the sole legal trainer replacement without entering the irrelevant damage fallback", () => {
+      const rc = context({
+        party: {
+          player: [EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT],
+          opponent: [
+            { species: SUNKERN, hp: 0, moves: [TACKLE, 0, 0, 0] },
+            { species: PIDGEY, hp: 100, moves: [TACKLE, 0, 0, 0] },
+            EMPTY_SLOT,
+            EMPTY_SLOT,
+            EMPTY_SLOT,
+            EMPTY_SLOT,
+          ],
+        },
+      });
+      const { result } = stepAtProgramCounter(OPEN_PARTY_SCREEN_PC, rc);
+      if (result.kind !== "advanced") throw new Error(`expected advanced, got ${result.kind}`);
+      expect(result.state.rulesContext.monToSwitchIntoId[1]).toBe(1);
+      expect(result.state.rng.calls).toBe(0);
+    });
+
     it("doubles topology: not modeled (Factory singles only)", () => {
       const rc = context({
         battlers: [
@@ -251,7 +271,7 @@ describe("production openpartyscreen (Cmd_openpartyscreen) dispatch, BS_FAINTED 
           opponent: [
             { species: SUNKERN, hp: 0, moves: [TACKLE, 0, 0, 0] },
             { species: PIDGEY, hp: 100, moves: [TACKLE, 0, 0, 0] },
-            EMPTY_SLOT,
+            { species: URSARING, hp: 100, moves: [TACKLE, 0, 0, 0] },
             EMPTY_SLOT,
             EMPTY_SLOT,
             EMPTY_SLOT,
