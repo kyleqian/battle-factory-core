@@ -31,7 +31,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_STATIC | engine-referenced | 27 (17) | 27 | ON_DAMAGE | 0 | 0 | 5 |
 | ABILITY_WATER_ABSORB | engine-referenced | 25 (4) | 25 | ABSORBING | 0 | 1 | 2 |
 | ABILITY_FLASH_FIRE | engine-referenced | 25 (9) | 25 | ABSORBING | 0 | 1 | 2 |
-| ABILITY_INNER_FOCUS | engine-referenced | 24 (12) | 34 | — | 3 | 0 | 3 |
+| ABILITY_INNER_FOCUS | engine-referenced | 24 (12) | 34 | — | 3 | 0 | 4 |
 | ABILITY_NATURAL_CURE | engine-referenced | 23 (5) | 23 | — | 1 | 1 | 2 |
 | ABILITY_RUN_AWAY | engine-referenced | 23 (2) | 23 | — | 4 | 0 | 2 |
 | ABILITY_OVERGROW | engine-referenced | 21 (21) | 21 | — | 1 | 0 | 2 |
@@ -60,7 +60,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_STICKY_HOLD | engine-referenced | 8 (0) | 8 | — | 5 | 0 | 8 |
 | ABILITY_LIQUID_OOZE | engine-referenced | 8 (0) | 8 | — | 2 | 0 | 3 |
 | ABILITY_SUCTION_CUPS | engine-referenced | 7 (7) | 7 | — | 1 | 0 | 3 |
-| ABILITY_SHIELD_DUST | engine-referenced | 6 (6) | 6 | — | 2 | 0 | 4 |
+| ABILITY_SHIELD_DUST | engine-referenced | 6 (6) | 6 | — | 2 | 0 | 5 |
 | ABILITY_RAIN_DISH | engine-referenced | 6 (0) | 6 | ENDTURN | 0 | 0 | 3 |
 | ABILITY_HUSTLE | engine-referenced | 6 (1) | 6 | — | 2 | 0 | 3 |
 | ABILITY_ARENA_TRAP | engine-referenced | 6 (0) | 6 | — | 2 | 3 | 2 |
@@ -106,7 +106,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | HOLD_EFFECT_CURE_SLP | engine-referenced | 43 | 50 | CHESTO_BERRY | NORMAL, MOVE_END | 0 | 0 | 2 |
 | HOLD_EFFECT_SHELL_BELL | engine-referenced | 43 | 46 | SHELL_BELL | KINGSROCK_SHELLBELL | 0 | 0 | 2 |
 | HOLD_EFFECT_CURE_CONFUSION | engine-referenced | 31 | 31 | PERSIM_BERRY | NORMAL, MOVE_END | 0 | 0 | 2 |
-| HOLD_EFFECT_FLINCH | engine-referenced | 27 | 27 | KINGS_ROCK | KINGSROCK_SHELLBELL | 0 | 0 | 3 |
+| HOLD_EFFECT_FLINCH | engine-referenced | 27 | 27 | KINGS_ROCK | KINGSROCK_SHELLBELL | 0 | 0 | 2 |
 | HOLD_EFFECT_RESTORE_STATS | engine-referenced | 23 | 25 | WHITE_HERB | ON_SWITCH_IN, NORMAL, MOVE_END | 0 | 0 | 2 |
 | HOLD_EFFECT_CURE_PAR | engine-referenced | 21 | 21 | CHERI_BERRY | NORMAL, MOVE_END | 0 | 0 | 2 |
 | HOLD_EFFECT_SPEED_UP | engine-referenced | 21 | 22 | SALAC_BERRY | NORMAL | 0 | 0 | 2 |

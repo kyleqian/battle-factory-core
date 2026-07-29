@@ -15,9 +15,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 688 — [BOUNDED MAIN WORKER 2026-07-29 ~10:25] King's Rock state-12 mechanics live; final sweep pending
 
-- **State:** mechanics checkpoint green at focused **419/419**, production
-  build, and `git diff --check`; Battle Scene OFF oracle healthy. Full suite,
-  censuses, and seeds 4–30 sweep remain pending.
+- **State:** mechanics committed `5a69d4e4`; focused **419/419**, production
+  build, `git diff --check`, and Battle Scene OFF oracle green. Both censuses
+  regenerate cleanly; full suite/final build remain pending.
 - **Did:** move-end state 12 now ports `HOLD_EFFECT_FLINCH` literally:
   holder/damage gates, the source-ordered `%100` draw, Gen-3
   `FLAG_KINGS_ROCK_AFFECTED`, surviving target, and synchronous non-certain
@@ -25,12 +25,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Seed 1 pins the qualifying Strength proc at ledger call **5 = 3%** and the
   existing admission arm skips the slower action (**6 total calls**); seed 0
   pins **18%** failure and both actions (**10 calls**).
+- **Census / sweep:** executable census is byte-identical
+  (**8b18f754…5261**). Ability/item changes only FLINCH refs **3→2** (barrier
+  removed), INNER_FOCUS **3→4**, and SHIELD_DUST **4→5** (live prevention
+  gates), now **76ec7ed2…c563**. Seeds 4–30 match the checked-in post-R13
+  baseline exactly: **25/27** seven-win; 6 loses battle 2 at 791 and 12 loses
+  battle 7 at 1846. The brief's older 2478/2140/1911/1436 cursors were already
+  2143/2326/1911/2114 at entry 687; this patch leaves the latter unchanged.
 - **Notes / next:** non-damaging Double Team draws zero; damaging but Gen-3
   excluded Hyper Voice deliberately draws once before flag rejection, matching
   `battle_util.c:3776-3779`. State 12 has no remaining barrier; the module's
   ratchet intentionally drops **6→5**, leaving states 0/2/4/5/11. Next:
-  regenerate both censuses, run the unchanged-cursor sweep, full suite/build,
-  and finalize this entry. PAPERCUT: none.
+  full suite/build, final diff check, and finalize. PAPERCUT: none.
 
 ---
 
