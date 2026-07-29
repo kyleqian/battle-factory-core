@@ -7,7 +7,7 @@ const MOVE_ROCK_SLIDE = 157; // EFFECT_FLINCH_HIT -- no entry
 const MOVE_BODY_SLAM = 34; // EFFECT_PARALYZE_HIT -- no entry
 const MOVE_THUNDERBOLT = 85; // EFFECT_PARALYZE_HIT -- no entry
 const MOVE_HAZE = 114; // EFFECT_HAZE -- has an entry (AI_CV_Haze, not ported)
-const MOVE_TOXIC = 92; // EFFECT_TOXIC -- has an entry (AI_CV_Toxic, not ported)
+const MOVE_TOXIC = 92; // EFFECT_TOXIC -> AI_CV_Toxic
 
 // Neutral speed/stage battlers for the tests above that don't exercise
 // AI_CV_SpeedDown -- the describe block below owns that handler's own battlers.
@@ -27,6 +27,7 @@ const NEUTRAL_BATTLER = Object.freeze({
   spDefStage: 6,
   hp: 100,
   maxHp: 100,
+  moves: [MOVE_SURF, MOVE_ROCK_SLIDE, MOVE_BODY_SLAM, MOVE_THUNDERBOLT] as const,
 });
 
 function run(rng: { value: number; calls: number }, moveId: number) {
@@ -62,14 +63,108 @@ describe("AI_CheckViability dispatch shell (docs/factory-ai-ground-truth.md §4 
     });
   });
 
-  it("barriers a second, unrelated effect too (table is source-complete, not a single hardcoded case)", () => {
+  it("ports Toxic instead of treating every table effect as a barrier", () => {
     const result = run({ value: 1, calls: 0 }, MOVE_TOXIC);
-    expect(result).toEqual({
-      kind: "unsupported-branch",
-      barrier: "factory-ai-check-viability",
-      effect: "EFFECT_TOXIC",
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+});
+
+describe("AI_CV_Toxic (data/battle_ai_scripts.s:1353-1371)", () => {
+  function toxicRun(input: Readonly<{
+    rngValue?: number;
+    attackerHp?: number;
+    targetHp?: number;
+    moves: readonly [number, number, number, number];
+  }>) {
+    return runCheckViability({
+      rng: { value: input.rngValue ?? 1, calls: 0 },
       moveId: MOVE_TOXIC,
+      attacker: { ...NEUTRAL_BATTLER, hp: input.attackerHp ?? 100, moves: input.moves },
+      target: { ...NEUTRAL_BATTLER, hp: input.targetHp ?? 100 },
+      drawOrdinalStart: 1,
+      reasonPrefix: "toxic",
     });
+  }
+
+  it("jumps directly to Toxic3 with no attacking moves, then ends with no partner effect", () => {
+    const result = toxicRun({ moves: [MOVE_TOXIC, MOVE_TOXIC, MOVE_TOXIC, MOVE_TOXIC] });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("applies the first -3 only after a low-HP user roll falls through", () => {
+    const result = toxicRun({
+      attackerHp: 50,
+      targetHp: 100,
+      moves: [MOVE_SURF, MOVE_TOXIC, MOVE_TOXIC, MOVE_TOXIC],
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -3 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([
+      expect.objectContaining({ kind: "toxic-roll-1", randomValue: 16838, jumped: false }),
+    ]);
+  });
+
+  it("applies both -3 gates in order, then Protect's +2 when all three rolls fall through", () => {
+    const result = toxicRun({
+      rngValue: 5,
+      attackerHp: 50,
+      targetHp: 50,
+      moves: [MOVE_SURF, 182 /* Protect */, MOVE_TOXIC, MOVE_TOXIC],
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -4 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map(({ kind, randomValue }) => ({ kind, lowByte: randomValue % 256 })))
+      .toEqual([
+        { kind: "toxic-roll-1", lowByte: 223 },
+        { kind: "toxic-roll-2", lowByte: 171 },
+        { kind: "toxic-roll-3", lowByte: 229 },
+      ]);
+  });
+});
+
+describe("AI_CV_Protect (data/battle_ai_scripts.s:1894-1932)", () => {
+  const MOVE_PROTECT = 182;
+  const MOVE_LOCK_ON = 199;
+
+  function protectRun(
+    attackerPatch: Record<string, unknown> = {},
+    targetPatch: Record<string, unknown> = {},
+    rngValue = 1,
+  ) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_PROTECT,
+      attacker: { ...NEUTRAL_BATTLER, ...attackerPatch },
+      target: { ...NEUTRAL_BATTLER, lastUsedMoveId: MOVE_PROTECT, ...targetPatch },
+      drawOrdinalStart: 1,
+      reasonPrefix: "protect",
+    });
+  }
+
+  it("takes the ordinary +2 path and exactly one roll when protectUses is zero", () => {
+    const result = protectRun();
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toEqual([
+      expect.objectContaining({ kind: "protect-roll-1", randomValue: 16838, jumped: false }),
+    ]);
+  });
+
+  it("applies both consecutive-Protect penalties and both source-ordered rolls", () => {
+    const result = protectRun({ protectUses: 1 }, {}, 1);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map(({ kind }) => kind)).toEqual(["protect-roll-1", "protect-roll-2"]);
+  });
+
+  it("takes Protect3 and scores -2 only when the target's last move was Lock-On", () => {
+    const result = protectRun({ isInfatuated: true }, { lastUsedMoveId: MOVE_LOCK_ON });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -2, draws: [] });
+  });
+
+  it("uses BattleHistory-known target moves for the Restore HP / Defense Curl early branch", () => {
+    const result = protectRun({}, { knownMoves: [105 /* Recover */] });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
   });
 });
 
@@ -285,8 +380,8 @@ describe("AI_CV_Pursuit (docs/factory-ai-checkviability-ground-truth.md §11.1)"
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_TOXIC);
-    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_TOXIC" });
+    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
   });
 });
 
@@ -682,8 +777,8 @@ describe("AI_CV_AlwaysHit (docs/factory-ai-checkviability-ground-truth.md §11.3
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_TOXIC);
-    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_TOXIC" });
+    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
   });
 });
 

@@ -500,8 +500,18 @@ export type FactoryAiScoredBattlerView = Readonly<{
   lastUsedMoveId?: number;
   /** `gBattleMons[].status1 & STATUS1_TOXIC_POISON` -- source-required for `AI_CV_AccuracyDown`'s Gate D (target only, doc §19.1). Optional, defaulting to `false`. */
   isToxicPoisoned?: boolean;
+  /** `gBattleMons[].status1 & STATUS1_ANY` -- source-required for `AI_CBM_Toxic`'s target-status gate. Optional, defaulting to `false`. */
+  hasAnyStatus?: boolean;
   /** `gStatuses3[] & STATUS3_LEECHSEED` -- source-required for `AI_CV_AccuracyDown`'s Gate E (target only, doc §19.1). Optional, defaulting to `false`. */
   isLeechSeeded?: boolean;
+  /** STATUS2_INFATUATION, read by AI_CV_Protect. */
+  isInfatuated?: boolean;
+  /** STATUS3_YAWN, read by AI_CV_Protect. */
+  hasYawn?: boolean;
+  /** STATUS3_PERISH_SONG, read by AI_CV_Protect. */
+  hasPerishSong?: boolean;
+  /** DisableStruct::protectUses, read by AI_CV_Protect. */
+  protectUses?: number;
   /** `gStatuses3[] & STATUS3_ROOTED` (Ingrain) -- source-required for `AI_CV_AccuracyDown`'s Gate F (AI_USER's own copy only, doc §19.1). Optional, defaulting to `false`. */
   isRooted?: boolean;
   /** `gBattleMons[].status2 & STATUS2_CURSED` -- source-required for `AI_CV_AccuracyDown`'s Gate G (target only, doc §19.1). Optional, defaulting to `false`. */
@@ -510,6 +520,8 @@ export type FactoryAiScoredBattlerView = Readonly<{
   lightScreenUp?: boolean;
   /** `gSideStatuses[] & SIDE_STATUS_REFLECT` -- source-required for `AI_CBM_Reflect`'s own gate (AI_USER's OWN side only, doc §23.1). Optional, defaulting to `false`. */
   reflectUp?: boolean;
+  /** `gSideStatuses[] & SIDE_STATUS_SAFEGUARD` -- source-required for `AI_CBM_Toxic`'s target-side gate. Optional, defaulting to `false`. */
+  safeguardUp?: boolean;
   /**
    * The battler's own real ability (`get_ability AI_USER`, a direct field
    * read, never the target-guessing heuristic) -- source-required for
@@ -534,6 +546,8 @@ export type FactoryAiScoredTargetView = FactoryAiScoredBattlerView & Readonly<{
   knownAbility: string | null;
   /** Source BattleHistory itemEffects cell (0 means no observed effect). */
   knownItemEffect?: number;
+  /** BattleHistory-known move IDs, read by AI_CV_Protect's target move-effect scan. */
+  knownMoveIds?: readonly number[];
 }>;
 
 export type FactoryAiScoredView = Readonly<{
@@ -768,6 +782,8 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     spDefStage: view.target.statStages.spDef,
     accStage: view.target.statStages.acc,
     evasionStage: view.target.statStages.evasion,
+    hasAnyStatus: view.target.hasAnyStatus,
+    safeguardUp: view.target.safeguardUp,
   });
   const attackerForCbm: FactoryAiCheckBadMoveAttacker = Object.freeze({
     atkStage: view.attacker.statStages.atk,
@@ -904,6 +920,11 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           isRooted: view.attacker.isRooted,
           ability: view.attacker.ability,
           currentWeather: view.attacker.currentWeather,
+          moves: view.moves,
+          isInfatuated: view.attacker.isInfatuated,
+          isLeechSeeded: view.attacker.isLeechSeeded,
+          hasYawn: view.attacker.hasYawn,
+          protectUses: view.attacker.protectUses,
         },
         target: {
           speed: view.target.speed,
@@ -921,6 +942,10 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           isToxicPoisoned: view.target.isToxicPoisoned,
           isLeechSeeded: view.target.isLeechSeeded,
           isCursed: view.target.isCursed,
+          isInfatuated: view.target.isInfatuated,
+          hasYawn: view.target.hasYawn,
+          hasPerishSong: view.target.hasPerishSong,
+          knownMoves: view.target.knownMoveIds,
         },
         staleFuncResultFallback,
         drawOrdinalStart: draws.length + 1,

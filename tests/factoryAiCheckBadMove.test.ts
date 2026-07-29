@@ -27,6 +27,8 @@ const MOVE_BODY_SLAM = 34;
 const MOVE_THUNDERBOLT = 85;
 const MOVE_HAZE = 114; // EFFECT_HAZE -- has an if_effect table entry (AI_CBM_Haze, not ported)
 const MOVE_SNORE = 173;
+const MOVE_POISON_POWDER = 77; // EFFECT_POISON -> AI_CBM_Toxic
+const MOVE_TOXIC = 92; // EFFECT_TOXIC -> AI_CBM_Toxic
 const MOVE_STRING_SHOT = 81; // EFFECT_SPEED_DOWN
 const MOVE_COTTON_SPORE = 178; // EFFECT_SPEED_DOWN_2 -- same handler, different table entry
 
@@ -207,6 +209,65 @@ describe("AI_CheckBadMove universal preamble (docs/factory-ai-ground-truth.md §
     // neither matches Rock Head/Lightning Rod); Thunderbolt: 0 (x0 short-circuit).
     expect(totalDraws).toBe(6);
     expect(scores).toEqual([0, 0, 0, -10]);
+  });
+});
+
+describe("AI_CBM_Toxic (data/battle_ai_scripts.s:341-352)", () => {
+  const CLEAN_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213, // Shuckle: single known-by-species Sturdy keeps all handler draws at zero.
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  it.each([
+    [["TYPE_STEEL", "TYPE_FLYING"] as const, "type 1 Steel"],
+    [["TYPE_NORMAL", "TYPE_POISON"] as const, "type 2 Poison"],
+  ])("scores -10 at the source-ordered type gates with no handler draw: %s", (types, _label) => {
+    const result = run(MOVE_TOXIC, { ...MAROWAK, types, knownAbility: "ABILITY_ROCK_HEAD" });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("scores -10 for Immunity after the type gates", () => {
+    const result = run(MOVE_TOXIC, {
+      ...CLEAN_TARGET,
+      knownAbility: "ABILITY_IMMUNITY",
+      realAbility: "ABILITY_IMMUNITY",
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it.each([
+    [{ hasAnyStatus: true }, "STATUS1_ANY"],
+    [{ safeguardUp: true }, "SIDE_STATUS_SAFEGUARD"],
+  ])("scores -10 at the final source gates: %s", (patch, _label) => {
+    const result = run(MOVE_TOXIC, { ...CLEAN_TARGET, ...patch });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it.each([
+    [MOVE_TOXIC, "EFFECT_TOXIC"],
+    [MOVE_POISON_POWDER, "EFFECT_POISON"],
+  ])("ports both table entries sharing the clean AI_CBM_Toxic end: move %i %s", (moveId) => {
+    const result = run(moveId, CLEAN_TARGET);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("keeps the handler get_ability after Soundproof and before the status gate", () => {
+    const result = run(MOVE_TOXIC, { ...MAROWAK, hasAnyStatus: true });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map(({ reason }) => reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-toxic-immunity",
+    ]);
+    expect(result.rng.calls).toBe(2);
   });
 });
 

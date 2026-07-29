@@ -482,7 +482,7 @@ describe("R13-D banked OFF receipt equivalence through the live driver", () => {
     expect(result.rng).toEqual({ value: 0xe97d_91b8, calls: 1 });
   });
 
-  it("bounds receipt B result-2 control at the existing Toxic scoring barrier (docs/factory-ai-switch-receipts-bc.md)", () => {
+  it("matches receipt B result-2 control through the ordinary move path (docs/factory-ai-switch-receipts-bc.md §Result-2 control)", () => {
     const staged = wonderGuardFixture();
     const precheck = evaluateFactoryAiSwitchPolicy({
       rules: staged.rules,
@@ -496,8 +496,25 @@ describe("R13-D banked OFF receipt equivalence through the live driver", () => {
       remainder: 2,
     }]);
     expect(precheck.rng).toEqual({ value: 0x10b8_ec09, calls: 1 });
-    expect(() => drive(staged, 0x5457_c42e, POLICIES[2].challenge))
-      .toThrow("Factory AI check-bad-move barrier: slot 2 move 92 effect EFFECT_TOXIC");
+    const result = drive(staged, 0x5457_c42e, POLICIES[2].challenge);
+    expect(result.phase).toBe("move");
+    if (result.phase !== "move") throw new Error("expected move");
+    expect(result.submission.decision).toEqual({
+      kind: "use-move",
+      moveSlot: 2,
+      targetBattler: 0,
+    });
+    expect(commandDraws(result).map(({ randomValue }) => randomValue)).toEqual([
+      4280,
+      20125,
+      13062,
+      45803,
+      61767,
+      16734,
+      16797,
+      18630,
+    ]);
+    expect(result.rng).toEqual({ value: 0x48c6_11f6, calls: 8 });
   });
 
   it("matches receipt C Natural Cure success (docs/factory-ai-switch-receipts-c.md)", () => {
