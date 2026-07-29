@@ -21,4 +21,36 @@ describe("MOVE_AROMATHERAPY FLOWER checkpoint", () => {
     ]);
     expect(readFileSync(output)).toEqual(readFileSync("src/animation/assets/aromatherapy.json"));
   });
+
+  it("pins complete legal Scene-ON receipts in both orientations without promoting coverage", () => {
+    for (const path of [
+      "tools/compare/fixtures/aromatherapy-player-vileplume-opponent-onix.json",
+      "tools/compare/fixtures/aromatherapy-opponent-vileplume-player-onix.json",
+    ]) {
+      const receipt = JSON.parse(readFileSync(path, "utf8"));
+      const scenario = JSON.parse(readFileSync(receipt.scenario, "utf8"));
+      expect(receipt.schema).toBe("aromatherapy-evidence-checkpoint/v1");
+      expect(receipt.denseWindow.frameCount).toBe(
+        receipt.denseWindow.endFrame - receipt.denseWindow.startFrame + 1,
+      );
+      expect(receipt.evidenceSha256).toMatch(/^[0-9a-f]{64}$/);
+      expect(receipt.rawRgbSha256).toMatch(/^[0-9a-f]{64}$/);
+      expect(receipt.lifecycleCounts).toEqual({
+        gAromatherapySmallFlowerSpriteTemplate: 7,
+        gAromatherapyBigFlowerSpriteTemplate: 2,
+        gSparklingStarsSpriteTemplate: 2,
+        gBlendThinRingExpandingSpriteTemplate: 1,
+      });
+      expect(scenario).toMatchObject({ profile: "battle-scene-on", level: 50, challengeNum: 3 });
+      for (const party of Object.values(scenario.overrides.parties) as any[][]) {
+        expect(party).toHaveLength(3);
+        expect(new Set(party.map((mon) => mon.item)).size).toBe(3);
+        for (const mon of party) {
+          expect(mon.moves).toHaveLength(4);
+          expect(mon.ivs).toEqual({ hp: 31, attack: 31, defense: 31, speed: mon.ivs.speed, spAttack: 31, spDefense: 31 });
+          expect(mon.friendship).toBe(0);
+        }
+      }
+    }
+  });
 });
