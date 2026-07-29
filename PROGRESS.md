@@ -13,27 +13,37 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
-## 674 — [BOUNDED MAIN WORKER 2026-07-29 ~01:27] fresh-start equal-speed barrier retired
+## 674 — [BOUNDED MAIN WORKER 2026-07-29 ~01:35] tie retired; seven-battle rung hit honest stop
 
-- **State:** assigned rung (a) is green and ready to commit at **461 files /
-  4956 tests**, production build, `git diff --check`, and focused lifecycle/
-  orchestrator/ratchet coverage **14/14**. Executable (**214/214 effects,
-  355/355 moves**) and ability/item (**69/69 abilities, 42/42 hold effects**)
-  censuses regenerate byte-identically.
+- **State:** assigned rung (a) is committed at `bd36b615` and green at **461
+  files / 4956 tests**, production build, `git diff --check`, and focused
+  lifecycle/orchestrator/ratchet coverage **14/14**. Rung (b) hit its
+  mandated honest stop: seeds **4–30** with generated parties produced no
+  seven-win carrier; only 22/23 passed battle 0, then halted in battles 1/2.
+  The red exploratory test was removed; the landed tree remains green.
 - **Did:** consumed scout §4.1's landed Scene-OFF receipt. Equal effective
   speeds now add exactly one `Random()` strictly after draw A and before draw
   B; `tie & 1` stable-orders `[0,1]` or `[1,0]`, and the post-tie cursor feeds
   every entry hook before B overwrites `randomTurnNumber`. The Tier-1 receipt
   pin reproduces **62606 → 997 → 8088**, exactly **3 calls**, `997 & 1 = 1`,
   and observes resulting hook order **[1,0]**.
-- **Next:** Gate-5 rung 12 proper: loop the rung-11 carrier through seven real
-  generated terminal battles for three deterministic win seeds, include an
-  accepted swap that is actually fielded, assert round terminal counters and
-  ledgers, and add one immediate real-loss seed.
+- **Next:** unblock the real whole-battle breadth exposed by the sweep, led by
+  trainer faint replacement with two legal benches
+  (`BattleScript_FaintedMonTryChoose` → `Cmd_openpartyscreen`), then rerun
+  rung 12. Secondary blockers are `Cmd_various` paralysis, confusion self-hit
+  context, multi-hit/Twineedle controller resumption, Earthquake's
+  `DoHitAllWithUndergroundBonus`, and player forced-switch end-turn resumption.
 - **Notes:** `factoryBattleStart.ts`'s last `unsupported-branch` and union
   return path are gone; its module ratchet moves exactly **1→0**. No census
   artifact, canonical recording, issue, scout/probe/battle-lab,
-  commentary/presentation, or AI-switch-breadth file changed. PAPERCUT: none.
+  commentary/presentation, or AI-switch-breadth file changed. Sweep evidence:
+  seed 4 battle 1 sets **199/178/148** hit paralysis `Cmd_various`; seed 5
+  battle 0 **163/161/189** hit Earthquake controller handling; seed 6 battle
+  1 **181/199/127** and most seeds 8–21/26–29 hit multi-choice trainer
+  replacement; seed 22 battle 1 **144/173/192** hit confusion self-damage;
+  seed 23 battle 2 **141/185/114** hit Earthquake; seed 7 hit Twineedle and
+  seed 25 multi-hit. This satisfies the rung row's STOP-and-report clause,
+  not its seven-win acceptance. PAPERCUT: none.
 
 ---
 
