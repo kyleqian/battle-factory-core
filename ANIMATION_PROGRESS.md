@@ -1,5 +1,31 @@
 # Animation coverage
 
+## MOVE_TICKLE reducer checkpoint; legal-carrier evidence defect blocks exact promotion (2026-07-28)
+
+**Verdict:** Reusable source-derived component only. `MOVE_TICKLE` remains
+unsupported; `ANIMATION_COVERAGE.json` is unchanged. The pure relative-age
+reducer ports the two black attacker-palette ramps, both EYE_SPARKLE
+lifecycles, `SwayMon(0,6,1280,3)`, target
+`RockMonBackAndForth(target,6,2)`, DETECT/TAIL_WHIP sound cadence, and first
+inactive cleanup. OMANYTE front/back and EYE_SPARKLE art regenerate from the
+pinned source, and focused hermetic tests cover both side geometries.
+
+**Blocker found:** the committed evidence scenarios named
+`mechanic-tickle-*-omanyte-*.json` inject species **139**, but pinned Emerald
+defines `SPECIES_OMANYTE` as **138** and species 139 as `SPECIES_OMASTAR`.
+The dense receipt confirms the mismatch independently: its attacker OBJ
+palette is byte-identical to `graphics/pokemon/omastar/normal.pal` (16/16
+colors) and its framebuffer prints `OMASTAR used`, not OMANYTE. Therefore the
+existing 205-frame receipts are complete Omastar Tickle evidence, not legal
+Factory set-138 OMANYTE acceptance, and cannot justify a Tickle seam,
+compositor, or exact promotion.
+
+**Next:** correct both complete legal party scenarios to species 138,
+regenerate and twice-fresh-pin the two dense receipts, then implement the
+typed seam/compositor against those corrected 205-frame windows. No
+controller, battle/RNG/facility state, boundary list, unsupported barrier, or
+sibling status changed.
+
 ## MOVE_TICKLE independent dense-ROM evidence checkpoint; production remains unsupported (2026-07-28)
 
 **Verdict:** Evidence-only checkpoint. `MOVE_TICKLE` remains unsupported; it
