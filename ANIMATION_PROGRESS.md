@@ -1,5 +1,36 @@
 # Animation coverage
 
+## MOVE_CROSS_CHOP evidence checkpoint; CROSS_IMPACT remains unsupported (2026-07-28)
+
+**Verdict:** Evidence-only checkpoint. `MOVE_CROSS_CHOP` and
+`MOVE_LEAF_BLADE` remain unsupported; no move is staged, partial, or exact
+and `ANIMATION_COVERAGE.json` is unchanged. Legal Level-50 Factory
+`FRONTIER_MON_MACHOKE_2` (set **283**, species **67**, Adamant, Scope Lens,
+Attack/HP spread, Cross Chop **238**) drives complete Scene-ON mechanicLab
+parties against ONIX in both player-back and opponent-front orientations.
+The source-owned body through first inactive cleanup is **88/88** frames
+**216–303** player-back and **217–304** opponent-front, twice fresh. Evidence
+/ raw-RGB digests are player
+`7be7a5bb…4888bc7` / `9d38ec15…5cd3d04` and opponent
+`a5561990…010d23f` / `528e9ed1…76f900f`.
+
+**Evidence/source:** the audit pins `Move_CROSS_CHOP`, HANDS_AND_FEET and
+CROSS_IMPACT loads, target monbg/12:8 alpha, two
+`gCrossChopHandSpriteTemplate` lifecycles and their two-stage translation,
+the 40-frame delay, target-panned MEGA_KICK then RAZOR_WIND, one
+`gCrossImpactSpriteTemplate` 20-frame `WaitAnimForDuration`, complex
+palette blend, target `ShakeMon(7,0,9,1)`, and cleanup. The portable
+comparator reruns both orientations twice via `run-mgba-probe.py`, byte-pins
+the dense source/task/template/callback topology, software→hardware OAM,
+affine matrices, palettes/tags, registers, SE1/SE2, and each raw RGB frame.
+It source-extracts only MACHOKE front/back, HANDS_AND_FEET, and CROSS_IMPACT.
+
+**Boundary:** no renderer, reducer, presentation seam, application frame,
+battle/controller/RNG state, boundary list, unsupported barrier, or sibling
+status changed. `MOVE_LEAF_BLADE` shares CROSS_IMPACT but adds LEAF,
+`create_leaf_blade_task`, and ShakeMon2, so requires independent dense
+acceptance.
+
 ## MOVE_BUBBLE_BEAM promoted exact; complete water-bubble body closed (2026-07-28)
 
 **Verdict:** `MOVE_BUBBLE_BEAM` is exact. Legal set-42 SURSKIT→ONIX
