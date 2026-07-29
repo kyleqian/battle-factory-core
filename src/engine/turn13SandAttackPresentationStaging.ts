@@ -90,10 +90,9 @@
  * same resulting messageId family (`STRINGID_DEFENDERSSTATFELL`, confirmed
  * live by this module's own test below) -- the only genuine differences are
  * the `stat` value (`STAT_ACC` vs `STAT_ATK`) and the magnitude (1 vs 2,
- * hence `statFellBuff2`'s own "fell!" not "harshly fell!" tail, matching
- * `battleScene.ts:11908`'s own already-committed `TURN13_ACCFELL_LINE2`
- * literal). This module's own dedicated test proves the claim rather than
- * merely asserting it.
+ * hence `statFellBuff2`'s own "fell!" not "harshly fell!" tail). This
+ * module's own dedicated test proves the claim rather than merely asserting
+ * it.
  */
 import {
   createBattleScriptRulesContext,
@@ -355,8 +354,8 @@ export function resolveTurn13SandAttackWindowContent(): FeatherDanceKickoffPrese
 }
 
 /**
- * `TURN13_SANDATTACK_LINE1`/`LINE2`'s real content ("Foe PIDGEOTTO used
- * \nSAND-ATTACK!") -- mechanically identical mapping to every sibling
+ * The turn-13 SAND_ATTACK window's real kickoff content ("Foe PIDGEOTTO
+ * used\nSAND-ATTACK!") -- mechanically identical mapping to every sibling
  * module's own attackstring row (`Cmd_attackstring` emits the fixed
  * `STRINGID_USEDMOVE` regardless of which move is used), re-derived here
  * from THIS staged run's own real event stream via
@@ -373,13 +372,13 @@ export function resolveTurn13SandAttackKickoffLines(): readonly string[] {
 }
 
 /**
- * `TURN13_ACCFELL_LINE1`/`LINE2`'s real content ("ONIX’s accuracy\nfell!")
- * -- `STRINGID_DEFENDERSSTATFELL`'s own template
+ * The turn-13 SAND_ATTACK window's real result content ("ONIX’s
+ * accuracy\nfell!") -- `STRINGID_DEFENDERSSTATFELL`'s own template
  * (`{B_DEF_NAME_WITH_PREFIX}'s {B_BUFF1}\n{B_BUFF2}`) resolved against this
  * staged run's own real `stat-stage-change` event (battler 0/ONIX, ACC,
  * 6 -> 5): `B_DEF_NAME_WITH_PREFIX` is ONIX's own player-side name (no "Foe "
- * prefix, matching this window's own already-committed literal), `B_BUFF1`
- * is `statNames`'s own "accuracy" entry (already lowercase in the committed
+ * prefix, matching this window's presentation), `B_BUFF1` is `statNames`'s
+ * own "accuracy" entry (already lowercase in the committed
  * asset, no new extraction needed), `B_BUFF2` is `statFellBuff2`'s own
  * magnitude-1 "fell!" case (not "harshly fell!" -- SAND_ATTACK drops only 1
  * stage, unlike FEATHER_DANCE's 2).

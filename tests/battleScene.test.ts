@@ -96,8 +96,6 @@ import {
   turn12MissTextStartTick,
   turn12MissTextVisibleChars,
   turn12RockSlideResettledBounceTick,
-  TURN13_SANDATTACK_LINE1,
-  TURN13_SANDATTACK_LINE2,
   TURN13_MURKROW_FRAME_FLIP_TICK,
   TURN13_MURKROW_STRETCH_TICK,
   turn13MurkrowFrame,
@@ -105,8 +103,6 @@ import {
   turn13SandAttackTextVisibleChars,
   turn13SandAttackAccEva,
   turn13SandAttackAccBg1Y,
-  TURN13_ACCFELL_LINE1,
-  TURN13_ACCFELL_LINE2,
   turn13AccFellTextStartTick,
   turn13AccFellTextVisibleChars,
   TURN13_DRAGONBREATH_PRESS_TICK,
@@ -2594,10 +2590,6 @@ describe("S7/S8: turn13SandAttackTextStartTick/turn13SandAttackTextVisibleChars 
     expect(turn13SandAttackTextVisibleChars(15461, pressTick)).toBe(30);
     expect(turn13SandAttackTextVisibleChars(15470, pressTick)).toBe(30);
   });
-  it("LINE1/LINE2 match AERIAL_ACE's own opponent-kickoff line1 shape (same Pidgeotto, same 'Foe ... used' convention) plus the move's own display name", () => {
-    expect(TURN13_SANDATTACK_LINE1).toBe("Foe PIDGEOTTO used");
-    expect(TURN13_SANDATTACK_LINE2).toBe("SAND-ATTACK!");
-  });
 });
 
 describe("S7/S8: turn13SandAttackAccEva/Bg1Y - the accuracy-drop banner on ONIX, a non-sharply(10/20)+decrease+accuracy parameter combo of the generic StatsChangeAnimation banner - null outside its own RAM-active window, ramps 0->10->0 matching docs/turn13-notes.md's own RAM register table", () => {
@@ -2630,10 +2622,6 @@ describe("S7/S8: turn13AccFellTextStartTick/turn13AccFellTextVisibleChars - 'ONI
     expect(turn13AccFellTextVisibleChars(15608, pressTick)).toBe(1);
     expect(turn13AccFellTextVisibleChars(15627, pressTick)).toBe(20);
     expect(turn13AccFellTextVisibleChars(15699, pressTick)).toBe(20);
-  });
-  it("LINE1 uses the curly apostrophe (U+2019), same glyph TURN6_ATKFELL_LINE1 already established for this font/charmap", () => {
-    expect(TURN13_ACCFELL_LINE1).toBe("ONIX’s accuracy");
-    expect(TURN13_ACCFELL_LINE2).toBe("fell!");
   });
 });
 

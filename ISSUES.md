@@ -7,9 +7,10 @@ symptom, what's confirmed from the reference/oracle, and any leads.
 
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
-**Symptom:** the production battle presentation is keyed to *which turn of the
-recorded Battle 1/2 we are in*, not to what happened. It cannot consume kernel
-semantic events, so the battle kernel currently has no possible consumer.
+**Symptom:** most production battle presentation is still keyed to *which turn
+of the recorded Battle 1/2 we are in*, not to what happened. Individual exact
+windows now consume kernel semantic events, but the surrounding dispatcher and
+most content remain turn-keyed.
 
 **Confirmed** (2026-07-24, `856b3b4`): 17,056 lines — **30% of all
 `src/engine`**. 74 `BattleSceneState` declaration lines name a specific turn
@@ -21,6 +22,12 @@ a turn number; per-species render entry points are hardcoded
 `turn5GrantingStarPlacement`, `dragonBreathGrovyleHp`). Sibling files
 `battle2Turn1.ts`, `battle2ActionMenu.ts`, `battle2OffScenario.ts`,
 `turn17.ts` share the shape.
+
+**Retirement progress:** `turn13-sandattack.json`'s complete captured
+SAND_ATTACK content now resolves its kickoff and opponent-target accuracy-fall
+text from the staged real kernel event stream through the generic stat-down
+bridge (`e50bf210`, **190/190**); all four raw turn-13 text literals were
+deleted. Its later DRAGON_BREATH half is a separate, still-unwired window.
 
 **Not a request to rewrite it.** The windows it renders are individually
 oracle-exact and that evidence is worth keeping. The debt is the *keying*.

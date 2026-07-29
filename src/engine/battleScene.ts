@@ -663,6 +663,10 @@ import {
 import { resolveBattle1PresentationHpValues } from "./battle1PresentationHpStaging.ts";
 import { resolveTurn11AtkFloorLines } from "./turn11FeatherDancePresentationStaging.ts";
 import {
+  resolveTurn13AccFellLines,
+  resolveTurn13SandAttackKickoffLines,
+} from "./turn13SandAttackPresentationStaging.ts";
+import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
   sceneOnDragonBreathView,
@@ -12168,9 +12172,8 @@ function drawTurn13FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmen
  * drawn), so the text is fully typed one tick later (15461) and holds flat
  * through 15470 (oracle-confirmed, `turn13-sandattack.json` 185/185).
  */
-export const TURN13_SANDATTACK_LINE1 = "Foe PIDGEOTTO used";
-export const TURN13_SANDATTACK_LINE2 = "SAND-ATTACK!";
-const TURN13_SANDATTACK_TEXT_TOTAL = TURN13_SANDATTACK_LINE1.length + TURN13_SANDATTACK_LINE2.length;
+const [TURN13_SANDATTACK_EVENT_LINE1, TURN13_SANDATTACK_EVENT_LINE2] = resolveTurn13SandAttackKickoffLines();
+const TURN13_SANDATTACK_TEXT_TOTAL = TURN13_SANDATTACK_EVENT_LINE1.length + TURN13_SANDATTACK_EVENT_LINE2.length;
 const TURN13_SANDATTACK_TEXT_DELAY = 13; // pressTick+13 = 15432 (first glyph) - pressTick=15419 at runtime (TICK0+sm.confirmElapsed), oracle-pixel-bisected (app was 1 tick late vs a fresh compare run before this fit)
 export function turn13SandAttackTextStartTick(pressTick: number): number {
   return pressTick + TURN13_SANDATTACK_TEXT_DELAY;
@@ -12262,9 +12265,8 @@ function drawTurn13SandAttackAccBanner(fb: Uint8Array, t: number, pressTick: num
  * sha DRAGON_BREATH's own kickoff starts from - rung 3's concern, not
  * drawn here).
  */
-export const TURN13_ACCFELL_LINE1 = "ONIX’s accuracy";
-export const TURN13_ACCFELL_LINE2 = "fell!";
-const TURN13_ACCFELL_TEXT_TOTAL = TURN13_ACCFELL_LINE1.length + TURN13_ACCFELL_LINE2.length;
+const [TURN13_ACCFELL_EVENT_LINE1, TURN13_ACCFELL_EVENT_LINE2] = resolveTurn13AccFellLines();
+const TURN13_ACCFELL_TEXT_TOTAL = TURN13_ACCFELL_EVENT_LINE1.length + TURN13_ACCFELL_EVENT_LINE2.length;
 const TURN13_ACCFELL_TEXT_DELAY = 189; // pressTick+189 = 15608 (pressTick=15419 at runtime)
 export function turn13AccFellTextStartTick(pressTick: number): number {
   return pressTick + TURN13_ACCFELL_TEXT_DELAY;
@@ -12433,10 +12435,10 @@ function drawTurn13SandAttackWindow(fb: Uint8Array, t: number, pressTick: number
   if (accEva !== null) drawTurn13SandAttackAccBanner(fb, t, pressTick, accEva);
   const accFellStart = turn13AccFellTextStartTick(pressTick);
   if (t >= accFellStart) {
-    drawMessageTextLines(fb, TURN13_ACCFELL_LINE1, TURN13_ACCFELL_LINE2, turn13AccFellTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, TURN13_ACCFELL_EVENT_LINE1, TURN13_ACCFELL_EVENT_LINE2, turn13AccFellTextVisibleChars(t, pressTick));
     return;
   }
-  drawMessageTextLines(fb, TURN13_SANDATTACK_LINE1, TURN13_SANDATTACK_LINE2, turn13SandAttackTextVisibleChars(t, pressTick));
+  drawMessageTextLines(fb, TURN13_SANDATTACK_EVENT_LINE1, TURN13_SANDATTACK_EVENT_LINE2, turn13SandAttackTextVisibleChars(t, pressTick));
 }
 
 /**
