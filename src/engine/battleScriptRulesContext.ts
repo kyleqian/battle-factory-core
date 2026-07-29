@@ -87,6 +87,7 @@ import { createBattleScriptTryimprisonOpcodeHandlers } from "./battleScriptTryim
 import { createBattleScriptSnatchOpcodeHandlers } from "./battleScriptSnatchOpcode.ts";
 import { createBattleScriptBeatUpOpcodeHandlers } from "./battleScriptBeatUpOpcode.ts";
 import { createBattleScriptTransformOpcodeHandlers } from "./battleScriptTransformOpcode.ts";
+import { createBattleScriptMetronomeOpcodeHandlers } from "./battleScriptMetronomeOpcode.ts";
 import { createBattleScriptTrysethelpinghandOpcodeHandlers } from "./battleScriptTrysethelpinghandOpcode.ts";
 import { createBattleScriptTryswapitemsOpcodeHandlers } from "./battleScriptTryswapitemsOpcode.ts";
 import { createBattleScriptSettormentOpcodeHandlers } from "./battleScriptSettormentOpcode.ts";
@@ -2922,6 +2923,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptSnatchOpcodeHandlers(program),
     ...createBattleScriptBeatUpOpcodeHandlers(program),
     ...createBattleScriptTransformOpcodeHandlers(program),
+    ...createBattleScriptMetronomeOpcodeHandlers(program),
   });
 }
 
