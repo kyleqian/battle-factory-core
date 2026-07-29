@@ -158,6 +158,7 @@ describe("runBattleEndTurnOrchestration -- ENDTURN_ABILITIES slice 1 (Speed Boos
     expect(result.kind).toBe("next-turn");
     if (result.kind !== "next-turn") throw new Error("expected next-turn");
     expect(result.state.rulesContext.battlers[0]!.statStages[STAT_SPEED]).toBe(NEUTRAL_STAT_STAGE + 1);
+    expect(result.state.rulesContext.aiObservedAbilityIds[0]).toBe(ABILITY_SPEED_BOOST);
     expect(result.state.events.some((event) => event.kind === "message" && event.messageId === "STRINGID_PKMNRAISEDSPEED")).toBe(true);
     expect(result.state.haltReason).toBeNull();
     expect(result.state.rng.calls).toBe(initial.rng.calls);
@@ -181,6 +182,7 @@ describe("runBattleEndTurnOrchestration -- ENDTURN_ABILITIES slice 1 (Speed Boos
     expect(result.kind).toBe("next-turn");
     if (result.kind !== "next-turn") throw new Error("expected next-turn");
     expect(result.state.rulesContext.battlers[0]!.hp).toBe(107); // 100 + floor(115/16) = 100 + 7
+    expect(result.state.rulesContext.aiObservedAbilityIds[0]).toBe(ABILITY_RAIN_DISH);
     expect(result.state.rng.calls).toBe(initial.rng.calls);
     expect(result.state.rng.value).toBe(initial.rng.value);
   });
@@ -201,6 +203,7 @@ describe("runBattleEndTurnOrchestration -- ENDTURN_ABILITIES slice 1 (Speed Boos
     expect(result.kind).toBe("next-turn");
     if (result.kind !== "next-turn") throw new Error("expected next-turn");
     expect(result.state.rulesContext.battlers[0]!.hp).toBe(100);
+    expect(result.state.rulesContext.aiObservedAbilityIds[0]).toBe(0);
   });
 
   it("Rain Dish does not fire in rain while a present Cloud Nine battler suppresses weather", () => {
@@ -242,6 +245,7 @@ describe("runBattleEndTurnOrchestration -- ENDTURN_ABILITIES slice 1 (Speed Boos
     expect(result.kind).toBe("next-turn");
     if (result.kind !== "next-turn") throw new Error("expected next-turn");
     expect(result.state.rulesContext.battlers[0]!.statStages[STAT_SPEED]).toBe(MAX_STAT_STAGE);
+    expect(result.state.rulesContext.aiObservedAbilityIds[0]).toBe(0);
   });
 
   it("Speed Boost does not fire on isFirstTurn == 2 (battle_util.c:2643's own exception)", () => {
@@ -320,6 +324,7 @@ describe("runBattleEndTurnOrchestration -- ENDTURN_ABILITIES slice 1 (Speed Boos
       expect(result.kind).toBe("next-turn");
       if (result.kind !== "next-turn") throw new Error("expected next-turn");
       expect(result.state.rulesContext.battlers[0]!.status1).toBe(STATUS1_BURN);
+      expect(result.state.rulesContext.aiObservedAbilityIds[0]).toBe(0);
       expect(result.state.rng.calls).toBe(initial.rng.calls + 1);
     });
 
@@ -345,6 +350,7 @@ describe("runBattleEndTurnOrchestration -- ENDTURN_ABILITIES slice 1 (Speed Boos
       expect(result.state.rulesContext.battlers[0]!.status1).toBe(0);
       expect(result.state.rulesContext.battlers[0]!.status2 & STATUS2_NIGHTMARE).toBe(0);
       expect(result.state.rulesContext.party.player[0]!.status1).toBe(0);
+      expect(result.state.rulesContext.aiObservedAbilityIds[0]).toBe(ABILITY_SHED_SKIN);
       expect(result.state.haltReason).toBeNull();
       expect(result.state.rng.calls).toBe(initial.rng.calls + 1);
     });

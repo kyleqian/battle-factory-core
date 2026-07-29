@@ -194,6 +194,7 @@ describe("EFFECT_EXPLOSION: full committed script walk, genuine terminal halt", 
     expect(result.state.rulesContext.battlers[0]!.hp).toBe(400); // attacker's HP untouched -- setatkhptozero never ran
     expect(result.state.rulesContext.battlers[1]!.hp).toBe(900); // target untouched -- damage chain never ran
     expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_DAMP);
+    expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(ABILITY_DAMP);
   });
 
   it("Damp on a battler that is neither attacker nor target still blocks the explosion (ALL active battlers, not just the target -- Cmd_tryexplosion's own scan has no absent/role filter). This only has a live third battler slot in a doubles topology -- in singles (battlersCount 2, this main lane's exclusive scope) slots 2/3 are correctly excluded from the scan because gBattlersCount itself is 2, matching source exactly, not a special case this port carves out", () => {

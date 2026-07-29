@@ -26,6 +26,7 @@ import {
   type BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
 import { requireBattlerRole, withBattler } from "./battleScriptHitChainOpcode.ts";
+import { recordBattleScriptAbilityReveal } from "./battleScriptAiReveal.ts";
 
 const ITEM_NONE = 0;
 const ITEM_ORANGE_MAIL = 121;
@@ -163,10 +164,14 @@ function createTryswapitemsHandler(
           programCounter: stickyHold.programCounter,
         }),
         {
-          rulesContext: Object.freeze({
-            ...rules,
-            lastUsedAbility: ABILITY_STICKY_HOLD,
-          }),
+          rulesContext: recordBattleScriptAbilityReveal(
+            Object.freeze({
+              ...rules,
+              lastUsedAbility: ABILITY_STICKY_HOLD,
+            }),
+            target,
+            ABILITY_STICKY_HOLD,
+          ),
         },
       );
     }

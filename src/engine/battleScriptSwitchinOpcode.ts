@@ -31,6 +31,7 @@ import {
 } from "./battleScriptMachine.ts";
 import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
 import type { BattleScriptBattlerId, BattleScriptSemanticEventPayload } from "./battleScriptEvents.ts";
+import { recordBattleScriptAbilityReveal } from "./battleScriptAiReveal.ts";
 import type { BattleScriptControllerIdlePort } from "./battleScriptSourceCommands.ts";
 import {
   resolveRulesBattlerForBattleScript,
@@ -817,22 +818,34 @@ function createSwitchineffectsOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
       lastUsedAbility: nextActive.ability,
     });
     if (nextActive.ability === ABILITY_DRIZZLE && !(nextRules.weather & B_WEATHER_RAIN_PERMANENT)) {
-      return callSwitchinScript(context, "BattleScript_DrizzleActivates", Object.freeze({
-        ...abilityRules,
-        weather: B_WEATHER_RAIN_TEMPORARY | B_WEATHER_RAIN_PERMANENT,
-      }));
+      return callSwitchinScript(
+        context,
+        "BattleScript_DrizzleActivates",
+        recordBattleScriptAbilityReveal(Object.freeze({
+          ...abilityRules,
+          weather: B_WEATHER_RAIN_TEMPORARY | B_WEATHER_RAIN_PERMANENT,
+        }), battler as BattleScriptBattlerId, nextActive.ability),
+      );
     }
     if (nextActive.ability === ABILITY_SAND_STREAM && !(nextRules.weather & B_WEATHER_SANDSTORM_PERMANENT)) {
-      return callSwitchinScript(context, "BattleScript_SandstreamActivates", Object.freeze({
-        ...abilityRules,
-        weather: B_WEATHER_SANDSTORM_TEMPORARY | B_WEATHER_SANDSTORM_PERMANENT,
-      }));
+      return callSwitchinScript(
+        context,
+        "BattleScript_SandstreamActivates",
+        recordBattleScriptAbilityReveal(Object.freeze({
+          ...abilityRules,
+          weather: B_WEATHER_SANDSTORM_TEMPORARY | B_WEATHER_SANDSTORM_PERMANENT,
+        }), battler as BattleScriptBattlerId, nextActive.ability),
+      );
     }
     if (nextActive.ability === ABILITY_DROUGHT && !(nextRules.weather & B_WEATHER_SUN_PERMANENT)) {
-      return callSwitchinScript(context, "BattleScript_DroughtActivates", Object.freeze({
-        ...abilityRules,
-        weather: B_WEATHER_SUN_TEMPORARY | B_WEATHER_SUN_PERMANENT,
-      }));
+      return callSwitchinScript(
+        context,
+        "BattleScript_DroughtActivates",
+        recordBattleScriptAbilityReveal(Object.freeze({
+          ...abilityRules,
+          weather: B_WEATHER_SUN_TEMPORARY | B_WEATHER_SUN_PERMANENT,
+        }), battler as BattleScriptBattlerId, nextActive.ability),
+      );
     }
     if (nextActive.ability === ABILITY_INTIMIDATE && !(nextActive.status3 & STATUS3_INTIMIDATE_POKES)) {
       const battlers = nextRules.battlers.map((candidate, index) =>
@@ -869,7 +882,15 @@ function createSwitchineffectsOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
           .slice(0, nextRules.battleTopology.battlersCount)
           .some((candidate) => computeCastformForm(nextRules, candidate) !== 0);
       if (wouldChange) {
-        return callSwitchinScript(context, "BattleScript_WeatherFormChanges", abilityRules);
+        return callSwitchinScript(
+          context,
+          "BattleScript_WeatherFormChanges",
+          recordBattleScriptAbilityReveal(
+            abilityRules,
+            battler as BattleScriptBattlerId,
+            nextActive.ability,
+          ),
+        );
       }
     }
     const sideStatuses = [...nextRules.sideStatuses] as [number, number];

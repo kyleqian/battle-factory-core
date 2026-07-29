@@ -254,6 +254,7 @@ describe("primary-effect stat-change route (Cmd_statbuffchange + SETGRAPHICALSTA
     if (result.kind !== "advanced") throw new Error("expected advance");
     expect(result.state.rulesContext.battlers[1]!.statStages[2]).toBe(6); // unchanged
     expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_CLEAR_BODY);
+    expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(ABILITY_CLEAR_BODY);
     // The block is NOT free: it runs the real BattleScript_AbilityNoStatLoss sub-script
     // (pause/printstring/waitmessage/return), landing back via the pushed BS_ptr
     // (BattleScript_StatDownEnd) rather than a bare silent advance.

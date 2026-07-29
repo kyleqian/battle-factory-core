@@ -172,6 +172,7 @@ describe("production tryKO (Cmd_tryKO) dispatch", () => {
     expect(result.state.programCounter).toBe(labelPc("BattleScript_SturdyPreventsOHKO"));
     expect(result.state.rulesContext.moveResultFlags & 1).toBe(1); // MOVE_RESULT_MISSED
     expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_STURDY);
+    expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(ABILITY_STURDY);
     expect(result.state.rng.calls).toBe(0);
   });
 

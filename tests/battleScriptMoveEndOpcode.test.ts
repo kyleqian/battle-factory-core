@@ -406,6 +406,7 @@ describe("production moveend (Cmd_moveend) registration", () => {
         7,
       );
       expect(proc.state.rulesContext.battlers[0]!.status1).toBe(statusBit);
+      expect(proc.state.rulesContext.aiObservedAbilityIds[1]).toBe(ability);
       expect(proc.state.rng.calls).toBe(1);
 
       const miss = runMoveendScriptToTerminal(
@@ -413,6 +414,7 @@ describe("production moveend (Cmd_moveend) registration", () => {
         1,
       );
       expect(miss.state.rulesContext.battlers[0]!.status1).toBe(0);
+      expect(miss.state.rulesContext.aiObservedAbilityIds[1]).toBe(0);
       expect(miss.state.rng.calls).toBe(1);
 
       const blocked = runMoveendScriptToTerminal(
@@ -429,6 +431,7 @@ describe("production moveend (Cmd_moveend) registration", () => {
         41,
       );
       expect(proc.state.rulesContext.battlers[0]!.status1 & 0x7).toBeGreaterThanOrEqual(2);
+      expect(proc.state.rulesContext.aiObservedAbilityIds[1]).toBe(27);
       expect(proc.state.rng.calls).toBe(3); // proc + nonzero selector + sleep duration
 
       const noProc = runMoveendScriptToTerminal(
@@ -436,6 +439,7 @@ describe("production moveend (Cmd_moveend) registration", () => {
         1,
       );
       expect(noProc.state.rulesContext.battlers[0]!.status1).toBe(0);
+      expect(noProc.state.rulesContext.aiObservedAbilityIds[1]).toBe(0);
       expect(noProc.state.rng.calls).toBe(1);
 
       const blocked = runMoveendScriptToTerminal(
@@ -468,6 +472,7 @@ describe("production moveend (Cmd_moveend) registration", () => {
         7,
       );
       expect(proc.state.rulesContext.battlers[0]!.status2 & (1 << 17)).not.toBe(0);
+      expect(proc.state.rulesContext.aiObservedAbilityIds[1]).toBe(56);
       expect(proc.state.rng.calls).toBe(1);
 
       const noProc = runMoveendScriptToTerminal(
@@ -475,6 +480,7 @@ describe("production moveend (Cmd_moveend) registration", () => {
         1,
       );
       expect(noProc.state.rulesContext.battlers[0]!.status2).toBe(0);
+      expect(noProc.state.rulesContext.aiObservedAbilityIds[1]).toBe(0);
 
       const oblivious = runMoveendScriptToTerminal(
         context(0, { species: 32, ability: 12 }, { currentMove: POUND, moveendState: 3 }, { ability: 56, species: 29, specialStatus: damaged }),
@@ -505,6 +511,7 @@ describe("production moveend (Cmd_moveend) registration", () => {
       );
       expect(changed.state.rulesContext.battlers[1]!.types).toEqual(["TYPE_FIGHTING", "TYPE_FIGHTING"]);
       expect(changed.state.rulesContext.battleTextBuff1Type).toBe("TYPE_FIGHTING");
+      expect(changed.state.rulesContext.aiObservedAbilityIds[1]).toBe(16);
       expect(changed.state.rng.calls).toBe(0);
 
       const alreadyType = runMoveendScriptToTerminal(
@@ -515,6 +522,7 @@ describe("production moveend (Cmd_moveend) registration", () => {
         }),
       );
       expect(alreadyType.state.rulesContext.battlers[1]!.types).toEqual(["TYPE_FIGHTING", "TYPE_NORMAL"]);
+      expect(alreadyType.state.rulesContext.aiObservedAbilityIds[1]).toBe(0);
     });
 
     it("Rough Skin uses max(1,maxHP/16), can faint the attacker, does not require target survival, and runs its full script", () => {
@@ -526,6 +534,7 @@ describe("production moveend (Cmd_moveend) registration", () => {
         }),
       );
       expect(fainted.state.rulesContext.battlers[0]!.hp).toBe(0);
+      expect(fainted.state.rulesContext.aiObservedAbilityIds[1]).toBe(24);
       expect(fainted.state.rng.calls).toBe(0);
 
       const scaled = runMoveendScriptToTerminal(

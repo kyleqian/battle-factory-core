@@ -1,4 +1,5 @@
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
+import { recordBattleScriptAbilityReveal } from "./battleScriptAiReveal.ts";
 import type {
   BattleScriptAttackCancelerLoopResult,
 } from "./battleScriptAttackCanceler.ts";
@@ -473,7 +474,7 @@ export function advanceBattleScriptMovesBlockAbility(
   const nextHitMarker = isMultiTurn
     ? (rules.hitMarker | BATTLE_SCRIPT_HITMARKER_NO_PPDEDUCT) >>> 0
     : rules.hitMarker;
-  const nextRules = (
+  const checkedRules = (
     rules.lastUsedAbility === targetAbility
     && nextHitMarker === rules.hitMarker
   )
@@ -483,6 +484,13 @@ export function advanceBattleScriptMovesBlockAbility(
       lastUsedAbility: targetAbility,
       hitMarker: nextHitMarker,
     });
+  const nextRules = blocked
+    ? recordBattleScriptAbilityReveal(
+      checkedRules,
+      target,
+      targetAbility,
+    )
+    : checkedRules;
   const programCounter: BattleScriptMovesBlockProgramCounter = blocked
     ? Object.freeze({
       kind: "handoff",

@@ -65,6 +65,7 @@ import {
   BATTLE_SCRIPT_MOVE_RESULT_ONE_HIT_KO,
   BATTLE_SCRIPT_STATUS3_ALWAYS_HITS,
 } from "./battleScriptSourceConstants.ts";
+import { recordBattleScriptAbilityReveal } from "./battleScriptAiReveal.ts";
 import { HOLD_EFFECT_ID_FOCUS_BAND, unsupportedBranch } from "./battleScriptHitChainOpcode.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
 
@@ -116,11 +117,15 @@ function createTryKOHandler(program: BattleScriptProgram): BattleScriptOpcodeHan
     if (targetBattler.ability === ABILITY_STURDY) {
       const label = resolveBattleScriptLabel(program, "BattleScript_SturdyPreventsOHKO");
       if (!label) throw new Error("Cmd_tryKO: committed program has no label BattleScript_SturdyPreventsOHKO");
-      const nextRulesContext = Object.freeze({
-        ...rulesContext,
-        moveResultFlags: (rulesContext.moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_MISSED) >>> 0,
-        lastUsedAbility: ABILITY_STURDY,
-      });
+      const nextRulesContext = recordBattleScriptAbilityReveal(
+        Object.freeze({
+          ...rulesContext,
+          moveResultFlags: (rulesContext.moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_MISSED) >>> 0,
+          lastUsedAbility: ABILITY_STURDY,
+        }),
+        target,
+        ABILITY_STURDY,
+      );
       return transitionBattleScriptCommand(
         context,
         Object.freeze({ kind: "jump", programCounter: label.programCounter }),

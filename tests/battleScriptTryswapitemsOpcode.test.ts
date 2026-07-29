@@ -269,6 +269,7 @@ describe("source-complete B_SCR_OP_TRYSWAPITEMS registration", () => {
     expect(after.rulesContext).toEqual({
       ...source,
       lastUsedAbility: ABILITY_STICKY_HOLD,
+      aiObservedAbilityIds: [0, ABILITY_STICKY_HOLD, 0, 0],
     });
     expect(after.rulesContext.battlers).toBe(source.battlers);
     expect(after.rulesContext.party).toBe(source.party);

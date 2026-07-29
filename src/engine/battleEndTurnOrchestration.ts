@@ -45,6 +45,7 @@ import {
   type BattleScriptProgram,
 } from "./battleScriptProgram.ts";
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
+import { recordBattleScriptAbilityReveal } from "./battleScriptAiReveal.ts";
 import {
   resolveBattleScriptBattlerHoldEffect,
   resolveBattleScriptBattlerHoldEffectParam,
@@ -1101,11 +1102,11 @@ function runShedSkinTick(
 
   const clearedStatus2 = (b.status2 & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE) >>> 0;
   const withStatus = withBattler(drawnState.rulesContext, battler, { status1: 0, status2: clearedStatus2 });
-  const synced = Object.freeze({
+  const synced = recordBattleScriptAbilityReveal(Object.freeze({
     ...withStatus,
     party: withBattleScriptPartyMemberStatus1(withStatus.party, b.side, b.partyIndex, 0),
     scriptingBattler: battler,
-  });
+  }), battler, ABILITY_SHED_SKIN);
   return runPushCursorAndCallbackTickScript(program, handlers, drawnState, synced, battler, SHED_SKIN_ACTIVATES_LABEL);
 }
 
@@ -1139,7 +1140,11 @@ function runAbilitiesTick(
     const rainActive = (state.rulesContext.weather & B_WEATHER_RAIN) !== 0;
     if (weatherHasEffect(state.rulesContext) && rainActive && b.maxHP > b.hp) {
       const heal = floorDivAtLeastOne(b.maxHP, 16);
-      const rc = Object.freeze({ ...state.rulesContext, battleMoveDamage: -heal });
+      const rc = recordBattleScriptAbilityReveal(
+        Object.freeze({ ...state.rulesContext, battleMoveDamage: -heal }),
+        battler,
+        ABILITY_RAIN_DISH,
+      );
       return runPushCursorAndCallbackTickScript(program, handlers, state, rc, battler, RAIN_DISH_ACTIVATES_LABEL);
     }
     return Object.freeze({ kind: "advance", state });
@@ -1148,7 +1153,11 @@ function runAbilitiesTick(
   if (b.ability === ABILITY_SPEED_BOOST) {
     if (b.statStages[STAT_SPEED]! < MAX_STAT_STAGE && b.isFirstTurn !== 2) {
       const stages = b.statStages.map((stage, stat) => (stat === STAT_SPEED ? stage + 1 : stage));
-      const withStage = withBattler(state.rulesContext, battler, { statStages: stages as never });
+      const withStage = recordBattleScriptAbilityReveal(
+        withBattler(state.rulesContext, battler, { statStages: stages as never }),
+        battler,
+        ABILITY_SPEED_BOOST,
+      );
       return runPushCursorAndCallbackTickScript(program, handlers, state, withStage, battler, SPEED_BOOST_ACTIVATES_LABEL);
     }
     return Object.freeze({ kind: "advance", state });

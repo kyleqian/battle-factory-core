@@ -221,6 +221,8 @@ describe("post-canceler AbilityBattleEffects moves-block gate", () => {
           sourceSymbol: selector.move,
           matches: true,
         });
+        expect(result.rulesContext.aiObservedAbilityIds[target])
+          .toBe(BATTLE_SCRIPT_ABILITY_SOUNDPROOF);
       }
     }
 
@@ -308,6 +310,7 @@ describe("post-canceler AbilityBattleEffects moves-block gate", () => {
     });
     expect(result.rulesContext).not.toBe(sourceRules);
     expect(result.rulesContext.battlers).toBe(sourceRules.battlers);
+    expect(result.rulesContext.aiObservedAbilityIds[1]).toBe(0);
 
     const alreadyResolved = rules(
       1,

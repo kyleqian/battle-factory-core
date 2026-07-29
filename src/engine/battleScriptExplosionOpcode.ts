@@ -52,6 +52,7 @@
  * registration, not deferred.
  */
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
+import { recordBattleScriptAbilityReveal } from "./battleScriptAiReveal.ts";
 import {
   markBattleScriptControllerPending,
   transitionBattleScriptCommand,
@@ -152,11 +153,15 @@ function createTryexplosionHandler(
       context,
       Object.freeze({ kind: "jump", programCounter: failTarget.programCounter }),
       {
-        rulesContext: Object.freeze({
-          ...rules,
-          lastUsedAbility: ABILITY_DAMP,
-          selectorRoles: Object.freeze({ ...rules.selectorRoles, target: dampBattler }),
-        }),
+        rulesContext: recordBattleScriptAbilityReveal(
+          Object.freeze({
+            ...rules,
+            lastUsedAbility: ABILITY_DAMP,
+            selectorRoles: Object.freeze({ ...rules.selectorRoles, target: dampBattler }),
+          }),
+          dampBattler,
+          ABILITY_DAMP,
+        ),
       },
     );
   };

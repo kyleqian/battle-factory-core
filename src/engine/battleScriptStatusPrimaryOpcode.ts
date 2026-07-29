@@ -13,6 +13,7 @@
  * All four are pure state reads -- no RNG, no controller interaction.
  */
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
+import { recordBattleScriptAbilityReveal } from "./battleScriptAiReveal.ts";
 import {
   transitionBattleScriptCommand,
   type BattleScriptOpcodeHandler,
@@ -233,11 +234,15 @@ export function createJumpifcantmakeasleepOpcodeHandler(): BattleScriptOpcodeHan
       );
     }
     if (targetState.ability === ABILITY_INSOMNIA || targetState.ability === ABILITY_VITAL_SPIRIT) {
-      const nextRulesContext = Object.freeze({
-        ...rulesContext,
-        multistringChooser: B_MSG_STAYED_AWAKE_USING,
-        lastUsedAbility: targetState.ability,
-      });
+      const nextRulesContext = recordBattleScriptAbilityReveal(
+        Object.freeze({
+          ...rulesContext,
+          multistringChooser: B_MSG_STAYED_AWAKE_USING,
+          lastUsedAbility: targetState.ability,
+        }),
+        target,
+        targetState.ability,
+      );
       return transitionBattleScriptCommand(
         context,
         Object.freeze({ kind: "jump", programCounter: resolveJumpProgramCounter() }),

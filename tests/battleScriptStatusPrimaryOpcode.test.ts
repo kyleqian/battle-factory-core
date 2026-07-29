@@ -259,6 +259,7 @@ describe("production jumpifstatus (Cmd_jumpifstatus) dispatch", () => {
     ]);
     const transition = handler({ program, instruction: instr, state });
     expect(transition.control).toMatchObject({ kind: "advance" });
+    expect(transition.rulesContext.aiObservedAbilityIds[1]).toBe(0);
   });
 
   it("resolves a |-combined mask (the real STATUS1_POISON | STATUS1_BURN | STATUS1_PARALYSIS | STATUS1_TOXIC_POISON call site)", () => {
@@ -394,6 +395,7 @@ describe("production jumpifcantmakeasleep (Cmd_jumpifcantmakeasleep) dispatch", 
     const transition = handler({ program, instruction: instr, state });
     expect(transition.control).toMatchObject({ kind: "jump" });
     expect(transition.rulesContext.lastUsedAbility).toBe(ABILITY_INSOMNIA);
+    expect(transition.rulesContext.aiObservedAbilityIds[1]).toBe(ABILITY_INSOMNIA);
   });
 
   it("jumps for Vital Spirit", () => {
@@ -401,6 +403,7 @@ describe("production jumpifcantmakeasleep (Cmd_jumpifcantmakeasleep) dispatch", 
     const state = Object.freeze({ ...BASE_STATE, rulesContext });
     const transition = handler({ program, instruction: instr, state });
     expect(transition.control).toMatchObject({ kind: "jump" });
+    expect(transition.rulesContext.aiObservedAbilityIds[1]).toBe(ABILITY_VITAL_SPIRIT);
   });
 });
 
@@ -613,6 +616,7 @@ describe("primary status-move opcode cluster: full committed scripts (docs/statu
     expect(result.state.programCounter).toBe(labelPc("BattleScript_LimberProtected"));
     expect(result.state.rulesContext.battlers[1].status1).toBe(0);
     expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_LIMBER);
+    expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(ABILITY_LIMBER);
   });
 
   it("BattleScript_EffectParalyze: already-paralyzed early-out (BattleScript_AlreadyParalyzed), zero RNG", () => {
@@ -670,6 +674,7 @@ describe("primary status-move opcode cluster: full committed scripts (docs/statu
     if (result.kind !== "advanced") throw new Error("expected advance");
     expect(result.state.rulesContext.battlers[1].status1).toBe(0);
     expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_IMMUNITY);
+    expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(ABILITY_IMMUNITY);
   });
 
   it("BattleScript_EffectToxic vs a Poison-type target: jumpiftype redirects to BattleScript_NotAffected before any status write", () => {

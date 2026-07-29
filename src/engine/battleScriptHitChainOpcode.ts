@@ -7,6 +7,10 @@
  */
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import {
+  recordBattleScriptAbilityReveal,
+  recordBattleScriptItemEffectReveal,
+} from "./battleScriptAiReveal.ts";
+import {
   drawBattleScriptRng,
   markBattleScriptControllerPending,
   transitionBattleScriptCommand,
@@ -897,6 +901,8 @@ function checkWonderGuardAndLevitate(
   const distinctTypes = targetBattler.types[0] === targetBattler.types[1]
     ? [targetBattler.types[0]]
     : targetBattler.types;
+  let hasSuperEffective = false;
+  let hasNotVeryEffective = false;
   for (const defendingType of distinctTypes) {
     if (
       hasForesight
@@ -908,7 +914,18 @@ function checkWonderGuardAndLevitate(
     const entry = TYPE_EFFECTIVENESS.find(
       (candidate) => candidate.attackingType === moveType && candidate.defendingType === defendingType,
     );
-    if (entry && entry.multiplierTenths === 0) return Object.freeze({ targetNotAffected: true });
+    if (entry?.multiplierTenths === 0) return Object.freeze({ targetNotAffected: true });
+    if (entry?.multiplierTenths === 20) hasSuperEffective = true;
+    if (entry?.multiplierTenths === 5) hasNotVeryEffective = true;
+  }
+  if (
+    targetBattler.ability === ABILITY_WONDER_GUARD
+    && (!hasSuperEffective || (hasSuperEffective && hasNotVeryEffective))
+  ) {
+    return Object.freeze({
+      lastUsedAbility: ABILITY_WONDER_GUARD,
+      missType: B_MSG_AVOIDED_DMG,
+    });
   }
   return Object.freeze({});
 }
@@ -1144,6 +1161,13 @@ export const accuracycheckOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptR
   });
   if (Object.keys(attackerChanges).length > 0) {
     withFlags = withBattler(withFlags, attacker, attackerChanges);
+  }
+  if (wonderGuard.lastUsedAbility !== undefined) {
+    withFlags = recordBattleScriptAbilityReveal(
+      withFlags,
+      target,
+      wonderGuard.lastUsedAbility,
+    );
   }
   return jumpToMissTarget(context, withFlags, attacker, target, rng);
 };
@@ -1595,6 +1619,9 @@ export const typecalcOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesC
   if ((moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_DOESNT_AFFECT_FOE) !== 0) {
     nextRulesContext = withBattler(nextRulesContext, attacker, { targetNotAffected: 1 });
   }
+  if (lastUsedAbility === ABILITY_LEVITATE || lastUsedAbility === ABILITY_WONDER_GUARD) {
+    nextRulesContext = recordBattleScriptAbilityReveal(nextRulesContext, target, lastUsedAbility);
+  }
 
   return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRulesContext });
 };
@@ -1733,6 +1760,9 @@ export const typecalc2OpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRules
   });
   if ((moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_DOESNT_AFFECT_FOE) !== 0) {
     nextRulesContext = withBattler(nextRulesContext, attacker, { targetNotAffected: 1 });
+  }
+  if (lastUsedAbility === ABILITY_LEVITATE || lastUsedAbility === ABILITY_WONDER_GUARD) {
+    nextRulesContext = recordBattleScriptAbilityReveal(nextRulesContext, target, lastUsedAbility);
   }
 
   return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRulesContext });
@@ -1885,6 +1915,11 @@ function adjustNormalDamageOpcodeHandler(
       nextRulesContext = withBattler(rulesContext, target, {
         specialStatus: Object.freeze({ ...targetBattler.specialStatus, focusBanded: 1 }),
       });
+      nextRulesContext = recordBattleScriptItemEffectReveal(
+        nextRulesContext,
+        target,
+        HOLD_EFFECT_ID_FOCUS_BAND,
+      );
     }
   }
 
@@ -1993,6 +2028,11 @@ export const adjustsetdamageOpcodeHandler: BattleScriptOpcodeHandler<BattleScrip
       nextRulesContext = withBattler(rulesContext, target, {
         specialStatus: Object.freeze({ ...targetBattler.specialStatus, focusBanded: 1 }),
       });
+      nextRulesContext = recordBattleScriptItemEffectReveal(
+        nextRulesContext,
+        target,
+        HOLD_EFFECT_ID_FOCUS_BAND,
+      );
     }
   }
 
@@ -2930,14 +2970,19 @@ function applySetMoveEffect(
       }
       if (targetState.item !== ITEM_NONE && targetState.ability === ABILITY_STICKY_HOLD) {
         const programCounter = resolveRequiredLabelProgramCounter(context.program, "BattleScript_NoItemSteal");
+        const revealedRules = recordBattleScriptAbilityReveal(
+          Object.freeze({
+            ...baseRulesContext,
+            lastUsedAbility: ABILITY_STICKY_HOLD,
+          }),
+          target,
+          ABILITY_STICKY_HOLD,
+        );
         return transitionBattleScriptCommand(
           context,
           Object.freeze({ kind: "call", programCounter }),
           {
-            rulesContext: Object.freeze({
-              ...baseRulesContext,
-              lastUsedAbility: ABILITY_STICKY_HOLD,
-            }),
+            rulesContext: revealedRules,
           },
         );
       }
@@ -3077,14 +3122,19 @@ function applySetMoveEffect(
           context.program,
           "BattleScript_StickyHoldActivates",
         );
+        const revealedRules = recordBattleScriptAbilityReveal(
+          Object.freeze({
+            ...baseRulesContext,
+            lastUsedAbility: ABILITY_STICKY_HOLD,
+          }),
+          effectBattler,
+          ABILITY_STICKY_HOLD,
+        );
         return transitionBattleScriptCommand(
           context,
           Object.freeze({ kind: "jump", programCounter }),
           {
-            rulesContext: Object.freeze({
-              ...baseRulesContext,
-              lastUsedAbility: ABILITY_STICKY_HOLD,
-            }),
+            rulesContext: revealedRules,
           },
         );
       }
@@ -3139,12 +3189,19 @@ function applySetMoveEffect(
     const nextHitMarker = withMessageChoice && abilityEffectHitmarkerSet
       ? (hitMarker & ~HITMARKER_STATUS_ABILITY_EFFECT) >>> 0
       : hitMarker;
-    const nextRulesContext = Object.freeze({
+    let nextRulesContext: BattleScriptRulesContext = Object.freeze({
       ...baseRulesContext,
       hitMarker: nextHitMarker,
       multistringChooser,
       ...(abilityId === undefined ? {} : { lastUsedAbility: abilityId }),
     });
+    if (abilityId !== undefined) {
+      nextRulesContext = recordBattleScriptAbilityReveal(
+        nextRulesContext,
+        effectBattler,
+        abilityId,
+      );
+    }
     const programCounter = resolveRequiredLabelProgramCounter(context.program, label);
     return transitionBattleScriptCommand(
       context,
@@ -3448,7 +3505,11 @@ function applyFlinchMoveEffect(
         { rulesContext: baseRulesContext },
       );
     }
-    const nextRulesContext = Object.freeze({ ...baseRulesContext, lastUsedAbility: ABILITY_INNER_FOCUS });
+    const nextRulesContext = recordBattleScriptAbilityReveal(
+      Object.freeze({ ...baseRulesContext, lastUsedAbility: ABILITY_INNER_FOCUS }),
+      effectBattler,
+      ABILITY_INNER_FOCUS,
+    );
     const programCounter = resolveRequiredLabelProgramCounter(context.program, "BattleScript_FlinchPrevention");
     return transitionBattleScriptCommand(
       context,

@@ -1013,11 +1013,13 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     ] });
     const first = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc).result;
     expect(first.state.rulesContext.weather).toBe((1 << 0) | (1 << 2));
+    expect(first.state.rulesContext.aiObservedAbilityIds[1]).toBe(ABILITY_DRIZZLE);
     expect(first.state.programCounter).toBe(resolveBattleScriptLabel(program, "BattleScript_DrizzleActivates")!.programCounter);
     const same = context({ battlers: rc.battlers, weather: (1 << 0) | (1 << 2) });
     const second = stepAtProgramCounter(SWITCHINEFFECTS_PC, same).result;
     expect(second.state.programCounter).toBe(SWITCHINEFFECTS_PC + 1);
     expect(second.state.events).toEqual([]);
+    expect(second.state.rulesContext.aiObservedAbilityIds[1]).toBe(0);
     expect(second.state.rng.calls).toBe(0);
   });
 
@@ -1035,6 +1037,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
       ] });
       const result = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc).result;
       expect(result.state.rulesContext.weather).toBe(weather);
+      expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(ability);
       expect(result.state.programCounter).toBe(resolveBattleScriptLabel(program, scriptLabel)!.programCounter);
       expect(result.state.rng.calls).toBe(0);
     },

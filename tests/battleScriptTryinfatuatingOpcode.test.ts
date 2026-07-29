@@ -184,6 +184,7 @@ describe("production tryinfatuating (Cmd_tryinfatuating) dispatch", () => {
     if (result.kind !== "advanced") throw new Error(`did not advance: ${result.kind}`);
     expect(result.state.programCounter).toBe(labelPc("BattleScript_ObliviousPreventsAttraction"));
     expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_OBLIVIOUS);
+    expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(ABILITY_OBLIVIOUS);
     expect(result.state.rulesContext.battlers[1]!.status2).toBe(0);
     expect(result.state.rng.calls).toBe(0);
   });
@@ -194,6 +195,7 @@ describe("production tryinfatuating (Cmd_tryinfatuating) dispatch", () => {
     if (result.kind !== "advanced") throw new Error(`did not advance: ${result.kind}`);
     expect(result.state.programCounter).toBe(labelPc("BattleScript_ButItFailed"));
     expect(result.state.rulesContext.battlers[1]!.status2).toBe(0);
+    expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(0);
   });
 
   it("attacker genderless (Magnemite): fails via BattleScript_ButItFailed even though the target has a distinct gender", () => {

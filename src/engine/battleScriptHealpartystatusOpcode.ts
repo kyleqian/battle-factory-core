@@ -7,6 +7,7 @@
  * carried by one REQUEST_STATUS_BATTLE semantic controller event.
  */
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
+import { recordBattleScriptAbilityReveal } from "./battleScriptAiReveal.ts";
 import {
   markBattleScriptControllerPending,
   transitionBattleScriptCommand,
@@ -132,8 +133,11 @@ const healpartystatusHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext
     let chooser = BATTLE_SCRIPT_B_MSG_BELL;
     if (attackerState.ability === BATTLE_SCRIPT_ABILITY_SOUNDPROOF) {
       chooser |= BATTLE_SCRIPT_B_MSG_BELL_SOUNDPROOF_ATTACKER;
-      // Source calls RecordAbilityBattle with the battler's ability. That
-      // records AI history only; it does not write gLastUsedAbility.
+      rules = recordBattleScriptAbilityReveal(
+        rules,
+        attacker,
+        BATTLE_SCRIPT_ABILITY_SOUNDPROOF,
+      );
     } else {
       rules = clearLiveStatus(rules, attacker);
     }

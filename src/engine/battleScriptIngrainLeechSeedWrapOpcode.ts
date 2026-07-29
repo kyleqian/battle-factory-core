@@ -28,6 +28,7 @@ import {
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
 import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import { recordBattleScriptAbilityReveal } from "./battleScriptAiReveal.ts";
 import { isBattlerOfType, unsupportedBranch, withBattler } from "./battleScriptHitChainOpcode.ts";
 import { readBattleScriptRulesByte, writeBattleScriptRulesByte } from "./battleScriptSetByte.ts";
 import {
@@ -439,11 +440,15 @@ function createJumpifabilityHandler(): BattleScriptOpcodeHandler<BattleScriptRul
     }
     const target = resolveBattleScriptLabel(context.program, jumpOperand!.expression);
     if (!target) throw new Error(`Cmd_jumpifability: unresolved jump target ${jumpOperand!.expression}`);
-    const nextRulesContext = Object.freeze({
-      ...rulesContext,
-      lastUsedAbility: abilityId,
-      battlerWithAbility: battler,
-    });
+    const nextRulesContext = recordBattleScriptAbilityReveal(
+      Object.freeze({
+        ...rulesContext,
+        lastUsedAbility: abilityId,
+        battlerWithAbility: battler,
+      }),
+      battler,
+      abilityId,
+    );
     return transitionBattleScriptCommand(
       context,
       Object.freeze({ kind: "jump", programCounter: target.programCounter }),

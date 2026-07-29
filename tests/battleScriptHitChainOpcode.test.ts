@@ -18,6 +18,7 @@ import {
   type BattleScriptMachineState,
 } from "../src/engine/battleScriptMachine.ts";
 import {
+  HOLD_EFFECT_ID_FOCUS_BAND,
   SET_MOVE_EFFECT_SUPPORTED_BYTES,
   calculateBattleScriptBaseDamageForCurrentMove,
 } from "../src/engine/battleScriptHitChainOpcode.ts";
@@ -309,6 +310,37 @@ describe("production accuracycheck (Cmd_accuracycheck) dispatch", () => {
     expect(result.state.rng.calls).toBe(1);
     expect(result.state.rulesContext.moveResultFlags & 1).toBe(1);
     expect(result.state.rulesContext.missType).toBe(0); // B_MSG_MISSED
+  });
+
+  it("an accuracy miss still reveals Levitate/Wonder Guard at CheckWonderGuardAndLevitate's real miss-time call", () => {
+    const levitate = stepFrom(
+      "BattleScript_HitFromAccCheck",
+      context(0, {}, { currentMove: 328 /* MOVE_SAND_TOMB, Ground/70 */ }, {
+        ability: ABILITY_LEVITATE,
+      }),
+      2,
+    ).result;
+    expect(levitate.kind).toBe("advanced");
+    if (levitate.kind !== "advanced") throw new Error("expected advance");
+    expect(levitate.state.rulesContext.aiObservedAbilityIds[1]).toBe(ABILITY_LEVITATE);
+
+    const wonderGuard = stepFrom(
+      "BattleScript_HitFromAccCheck",
+      context(0, {}, { currentMove: SLAM }, { ability: ABILITY_WONDER_GUARD }),
+      2,
+    ).result;
+    expect(wonderGuard.kind).toBe("advanced");
+    if (wonderGuard.kind !== "advanced") throw new Error("expected advance");
+    expect(wonderGuard.state.rulesContext.aiObservedAbilityIds[1]).toBe(ABILITY_WONDER_GUARD);
+
+    const plainMiss = stepFrom(
+      "BattleScript_HitFromAccCheck",
+      context(0, {}, { currentMove: SLAM }),
+      2,
+    ).result;
+    expect(plainMiss.kind).toBe("advanced");
+    if (plainMiss.kind !== "advanced") throw new Error("expected advance");
+    expect(plainMiss.state.rulesContext.aiObservedAbilityIds[1]).toBe(0);
   });
 
   it("the target Foresight bit makes the shared accuracy path ignore target evasion", () => {
@@ -886,6 +918,7 @@ describe("production typecalc (Cmd_typecalc) dispatch", () => {
     expect(result.state.rulesContext.moveResultFlags & (1 << 3)).toBe(1 << 3); // DOESNT_AFFECT_FOE
     expect(result.state.rulesContext.missType).toBe(4); // B_MSG_GROUND_MISS
     expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_LEVITATE);
+    expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(ABILITY_LEVITATE);
   });
 
   it("Foresight lets Low Kick hit a Ghost target through the shared Fighting type consumer", () => {
@@ -918,6 +951,7 @@ describe("production typecalc (Cmd_typecalc) dispatch", () => {
     if (result.kind !== "advanced") throw new Error("expected advance");
     expect(result.state.rulesContext.moveResultFlags & 1).toBe(1); // MOVE_RESULT_MISSED
     expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_WONDER_GUARD);
+    expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(ABILITY_WONDER_GUARD);
   });
 
   it("Wonder Guard lets a super-effective hit through", () => {
@@ -929,6 +963,7 @@ describe("production typecalc (Cmd_typecalc) dispatch", () => {
     expect(result.kind).toBe("advanced");
     if (result.kind !== "advanced") throw new Error("expected advance");
     expect(result.state.rulesContext.moveResultFlags & 1).toBe(0);
+    expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(0);
     expect(result.state.rulesContext.battleMoveDamage).toBe(20); // trunc(10*20/10), super effective
   });
 
@@ -1083,6 +1118,7 @@ describe("production typecalc2 (Cmd_typecalc2) dispatch -- Counter/Mirror Coat/B
     expect(result.state.rulesContext.moveResultFlags & (1 << 3)).toBe(1 << 3); // DOESNT_AFFECT_FOE
     expect(result.state.rulesContext.missType).toBe(4); // B_MSG_GROUND_MISS
     expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_LEVITATE);
+    expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(ABILITY_LEVITATE);
     expect(result.state.rulesContext.battleMoveDamage).toBe(50); // still untouched
   });
 
@@ -1116,6 +1152,7 @@ describe("production typecalc2 (Cmd_typecalc2) dispatch -- Counter/Mirror Coat/B
     if (result.kind !== "advanced") throw new Error("expected advance");
     expect(result.state.rulesContext.moveResultFlags & 1).toBe(1); // MOVE_RESULT_MISSED
     expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_WONDER_GUARD);
+    expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(ABILITY_WONDER_GUARD);
   });
 
   it("Wonder Guard lets this call's own super-effective hit through", () => {
@@ -1128,6 +1165,8 @@ describe("production typecalc2 (Cmd_typecalc2) dispatch -- Counter/Mirror Coat/B
     expect(result.kind).toBe("advanced");
     if (result.kind !== "advanced") throw new Error("expected advance");
     expect(result.state.rulesContext.moveResultFlags & 1).toBe(0); // not MISSED
+    expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(0);
+    expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(0);
     expect(result.state.rulesContext.battleMoveDamage).toBe(42); // still never scaled
   });
 });
@@ -1199,6 +1238,7 @@ describe("production adjustnormaldamage (Cmd_adjustnormaldamage) dispatch", () =
       expect(result.state.rulesContext.battlers[1].specialStatus.focusBanded).toBe(1);
       expect(result.state.rulesContext.moveResultFlags & (1 << 7)).toBe(0);
       expect(result.state.rulesContext.lastUsedItem).toBe(0);
+      expect(result.state.rulesContext.aiObservedItemEffects[1]).toBe(HOLD_EFFECT_ID_FOCUS_BAND);
       expect(result.state.rng.ledger.map(({ reason, randomValue }) => [reason, randomValue])).toEqual([
         ["adjustnormaldamage", 40462],
         ["adjustnormaldamage-focus-band", 13608],
@@ -1245,6 +1285,7 @@ describe("production adjustnormaldamage (Cmd_adjustnormaldamage) dispatch", () =
       expect(result.kind).toBe("advanced");
       expect(result.state.rulesContext.battleMoveDamage).toBe(939);
       expect(result.state.rulesContext.battlers[1].specialStatus.focusBanded).toBe(0);
+      expect(result.state.rulesContext.aiObservedItemEffects[1]).toBe(0);
       expect(result.state.rulesContext.moveResultFlags & (1 << 7)).toBe(0);
       expect(result.state.rng.ledger.map(({ reason, randomValue }) => [reason, randomValue])).toEqual([
         ["adjustnormaldamage", 16838],
@@ -1331,6 +1372,7 @@ describe("production adjustnormaldamage2 (Cmd_adjustnormaldamage2) dispatch", ()
     expect(result.kind).toBe("advanced");
     expect(result.state.rulesContext.battleMoveDamage).toBe(9);
     expect(result.state.rulesContext.moveResultFlags & (1 << 7)).toBe(1 << 7);
+    expect(result.state.rulesContext.aiObservedItemEffects[1]).toBe(HOLD_EFFECT_ID_FOCUS_BAND);
     expect(result.state.rng.ledger.map((entry) => entry.reason)).toEqual([
       "adjustnormaldamage2",
       "adjustnormaldamage2-focus-band",
@@ -1432,6 +1474,7 @@ describe("production adjustsetdamage (Cmd_adjustsetdamage) dispatch", () => {
       expect(result.kind).toBe("advanced");
       expect(result.state.rulesContext.battleMoveDamage).toBe(9);
       expect(result.state.rulesContext.moveResultFlags & (1 << 7)).toBe(1 << 7);
+      expect(result.state.rulesContext.aiObservedItemEffects[1]).toBe(HOLD_EFFECT_ID_FOCUS_BAND);
       expect(result.state.rng.ledger.map((entry) => entry.reason)).toEqual(["adjustsetdamage-focus-band"]);
     });
 
@@ -2369,6 +2412,7 @@ describe("production seteffectwithchance (Cmd_seteffectwithchance) dispatch", ()
       expect(result.state.rulesContext.multistringChooser).toBe(B_MSG_ABILITY_PREVENTS_ABILITY_STATUS);
       expect(result.state.rulesContext.hitMarker & HITMARKER_STATUS_ABILITY_EFFECT).toBe(0);
       expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_IMMUNITY);
+      expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(ABILITY_IMMUNITY);
     });
 
     it("Immunity ability, certain, no ability-effect hitmarker: ability-prevents-move-status message", () => {
@@ -2410,6 +2454,7 @@ describe("production seteffectwithchance (Cmd_seteffectwithchance) dispatch", ()
       expect(result.state.programCounter).toBe(labelPc("BattleScript_BRNPrevention"));
       expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
       expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_WATER_VEIL);
+      expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(ABILITY_WATER_VEIL);
     });
 
     it("Magma Armor ability: silently blocks FREEZE, no message sub-script (source has none for this ability)", () => {
@@ -2437,6 +2482,7 @@ describe("production seteffectwithchance (Cmd_seteffectwithchance) dispatch", ()
       expect(result.state.programCounter).toBe(labelPc("BattleScript_PRLZPrevention"));
       expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
       expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_LIMBER);
+      expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(ABILITY_LIMBER);
     });
 
     it("Limber ability, not certain (chance-roll dispatch, percentChance < 100): silently blocks with no message, no prevention call", () => {
@@ -2451,6 +2497,7 @@ describe("production seteffectwithchance (Cmd_seteffectwithchance) dispatch", ()
       if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
       expect(result.state.programCounter).not.toBe(labelPc("BattleScript_PRLZPrevention"));
       expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+      expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(0);
       expect(result.state.rng.calls).toBe(1);
     });
 
@@ -2685,6 +2732,7 @@ describe("SetMoveEffect confusion/flinch family (registered)", () => {
       expect(result.state.programCounter).toBe(labelPc("BattleScript_FlinchPrevention"));
       expect(result.state.callStack.length).toBe(0); // a plain jump, not a call -- BattleScript_FlinchPrevention's own goto ends the move
       expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_INNER_FOCUS);
+      expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(ABILITY_INNER_FOCUS);
       expect(result.state.rulesContext.battlers[1]!.status2).toBe(0);
     });
 
@@ -2701,6 +2749,7 @@ describe("SetMoveEffect confusion/flinch family (registered)", () => {
       expect(result.state.programCounter).not.toBe(labelPc("BattleScript_FlinchPrevention"));
       expect(result.state.callStack.length).toBe(0);
       expect(result.state.rulesContext.battlers[1]!.status2).toBe(0);
+      expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(0);
     });
 
     it("already flinched: the shared status2-already-set early-out skips silently", () => {

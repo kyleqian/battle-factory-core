@@ -59,6 +59,7 @@
  * lands in the exact bit the in-love admission phase consults.
  */
 import { resolveBattleScriptMonGender } from "./battleScriptGender.ts";
+import { recordBattleScriptAbilityReveal } from "./battleScriptAiReveal.ts";
 import {
   transitionBattleScriptCommand,
   type BattleScriptOpcodeHandler,
@@ -93,7 +94,13 @@ function createTryinfatuatingHandler(): BattleScriptOpcodeHandler<BattleScriptRu
       return transitionBattleScriptCommand(
         context,
         Object.freeze({ kind: "jump", programCounter: label.programCounter }),
-        { rulesContext: Object.freeze({ ...rulesContext, lastUsedAbility: ABILITY_OBLIVIOUS }) },
+        {
+          rulesContext: recordBattleScriptAbilityReveal(
+            Object.freeze({ ...rulesContext, lastUsedAbility: ABILITY_OBLIVIOUS }),
+            target,
+            ABILITY_OBLIVIOUS,
+          ),
+        },
       );
     }
 

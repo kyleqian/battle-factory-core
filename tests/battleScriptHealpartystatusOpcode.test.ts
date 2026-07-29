@@ -348,6 +348,8 @@ describe("source-complete B_SCR_OP_HEALPARTYSTATUS registration", () => {
       .toBe(BATTLE_SCRIPT_B_MSG_BELL_SOUNDPROOF_ATTACKER);
     expect(after.rulesContext.lastUsedAbility)
       .toBe(17);
+    expect(after.rulesContext.aiObservedAbilityIds[0])
+      .toBe(BATTLE_SCRIPT_ABILITY_SOUNDPROOF);
     expect(after.events.at(-1)).toMatchObject({ partyMask: 0b000010 });
   });
 

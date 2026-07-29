@@ -46,6 +46,7 @@
  */
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import type { BattleScriptSemanticEventPayload } from "./battleScriptEvents.ts";
+import { recordBattleScriptAbilityReveal } from "./battleScriptAiReveal.ts";
 import {
   resolveBattleScriptLabel,
   type BattleScriptProgram,
@@ -203,6 +204,18 @@ export function changeStatBuffs(
       throw new Error(`ChangeStatBuffs: ${targetLabel} block requires a resolved jumpProgramCounter`);
     }
     const programCounter = resolveRequiredLabel(context.program, targetLabel);
+    const messageRules = Object.freeze({
+      ...rulesContext,
+      scriptingBattler: activeBattler,
+      lastUsedAbility: activeBattlerState.ability,
+    });
+    const nextRulesContext = targetLabel.startsWith("BattleScript_Ability")
+      ? recordBattleScriptAbilityReveal(
+        messageRules,
+        activeBattler,
+        activeBattlerState.ability,
+      )
+      : messageRules;
     return Object.freeze({
       kind: "resolved" as const,
       transition: transitionBattleScriptCommand(
@@ -213,11 +226,7 @@ export function changeStatBuffs(
           returnProgramCounter: input.jumpProgramCounter,
         }),
         {
-          rulesContext: Object.freeze({
-            ...rulesContext,
-            scriptingBattler: activeBattler,
-            lastUsedAbility: activeBattlerState.ability,
-          }),
+          rulesContext: nextRulesContext,
         },
       ),
     });

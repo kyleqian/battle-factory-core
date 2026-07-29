@@ -13,6 +13,7 @@
  * docs/battle-script-move-end-state-ownership.md).
  */
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
+import { recordBattleScriptAbilityReveal } from "./battleScriptAiReveal.ts";
 import {
   drawBattleScriptRng,
   transitionBattleScriptCommand,
@@ -389,7 +390,11 @@ function executeOnDamageAbilities(
       }));
       return callCurrentMoveendScript(
         context,
-        Object.freeze({ ...baseRules, battlers: changed, battleTextBuff1Type: moveType }),
+        recordBattleScriptAbilityReveal(
+          Object.freeze({ ...baseRules, battlers: changed, battleTextBuff1Type: moveType }),
+          target,
+          ability,
+        ),
         "BattleScript_ColorChangeActivates",
       );
     }
@@ -400,10 +405,14 @@ function executeOnDamageAbilities(
     if (!ordinaryContactGate) return continueState(advanceMoveend(baseRules));
     return callCurrentMoveendScript(
       context,
-      Object.freeze({
-        ...baseRules,
-        battleMoveDamage: Math.max(1, Math.floor(attackerState.maxHP / 16)),
-      }),
+      recordBattleScriptAbilityReveal(
+        Object.freeze({
+          ...baseRules,
+          battleMoveDamage: Math.max(1, Math.floor(attackerState.maxHP / 16)),
+        }),
+        target,
+        ability,
+      ),
       "BattleScript_RoughSkinActivates",
     );
   }
@@ -465,7 +474,11 @@ function executeOnDamageAbilities(
     }));
     return callCurrentMoveendScript(
       contextAfterProc,
-      Object.freeze({ ...baseRules, battlers: infatuated }),
+      recordBattleScriptAbilityReveal(
+        Object.freeze({ ...baseRules, battlers: infatuated }),
+        target,
+        ability,
+      ),
       "BattleScript_CuteCharmActivates",
     );
   }
@@ -485,14 +498,11 @@ function executeOnDamageAbilities(
         ? MOVE_EFFECT_PARALYSIS
         : MOVE_EFFECT_BURN;
   }
-  const statusRules = Object.freeze({
+  const statusRules = recordBattleScriptAbilityReveal(Object.freeze({
     ...baseRules,
-    aiObservedAbilityIds: Object.freeze(
-      baseRules.aiObservedAbilityIds.map((value, index) => index === target ? ability : value),
-    ) as BattleScriptRulesContext["aiObservedAbilityIds"],
     moveEffectByte: MOVE_EFFECT_AFFECTS_USER | moveEffect,
     hitMarker: (baseRules.hitMarker | HITMARKER_STATUS_ABILITY_EFFECT) >>> 0,
-  });
+  }), target, ability);
   const statusContext = Object.freeze({
     ...context,
     state: Object.freeze({ ...context.state, rng }),
