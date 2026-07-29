@@ -1,4 +1,31 @@
+---## 688 — [BOUNDED MAIN WORKER 2026-07-29 ~10:30] King's Rock state-12 mechanics landed
+
+- **State:** committed `5a69d4e4` + census `9093d895`; tree green at **497
+  files / 5111 tests**, production build, `git diff --check`, and Battle Scene
+  OFF oracle info. Both censuses regenerate cleanly.
+- **Did:** move-end state 12 now ports `HOLD_EFFECT_FLINCH` literally:
+  holder/damage gates, the source-ordered `%100` draw, Gen-3
+  `FLAG_KINGS_ROCK_AFFECTED`, surviving target, and synchronous non-certain
+  `SetMoveEffect` (Shield Dust/Substitute/Inner Focus/turn-order included).
+  Seed 1 pins the qualifying Strength proc at ledger call **5 = 3%** and the
+  existing admission arm skips the slower action (**6 total calls**); seed 0
+  pins **18%** failure and both actions (**10 calls**).
+- **Census / sweep:** executable census is byte-identical
+  (**8b18f754…5261**). Ability/item changes only FLINCH refs **3→2** (barrier
+  removed), INNER_FOCUS **3→4**, and SHIELD_DUST **4→5** (live prevention
+  gates), now **76ec7ed2…c563**. Seeds 4–30 match the checked-in post-R13
+  baseline exactly: **25/27** seven-win; 6 loses battle 2 at 791 and 12 loses
+  battle 7 at 1846. The brief's older 2478/2140/1911/1436 cursors were already
+  2143/2326/1911/2114 at entry 687; this patch leaves the latter unchanged.
+- **Notes / next:** non-damaging Double Team draws zero; damaging but Gen-3
+  excluded Hyper Voice deliberately draws once before flag rejection, matching
+  `battle_util.c:3776-3779`. State 12 has no remaining barrier; the module's
+  ratchet intentionally drops **6→5**, leaving states 0/2/4/5/11. Next:
+  supervisor resumes its ordered queue; no issue, canonical recording,
+  presentation, animation, or tick branch moved. PAPERCUT: none.
+
 ---
+
 ## 687 — [BOUNDED MAIN WORKER 2026-07-29 ~10:10] R13-D breadth landed; B-control scorer remainder bounded
 
 - **State:** evidence commit `c6d1648f`; tree green at **497 files / 5104

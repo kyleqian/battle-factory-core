@@ -13,6 +13,55 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 691 — [SUPERVISOR WIND-DOWN 2026-07-29 ~11:05] rung 13 complete; sweep blocker-free; four §7 receipts ROM-pinned; rung-14 swap+commentary seams live
+
+- **State:** master green at **507 files / 5164 tests**, production build,
+  `git diff --check` clean, both censuses idempotent (ability/item at the
+  post-Toxic pin, sole session delta ABILITY_IMMUNITY refs 10→12).
+  DEFERRED.md **empty all session**. No orphan worktrees or worker
+  branches. `animation-main` folded twice (ff at orient `d166f9cf`; 9 more
+  commits at wind-down — Whirlwind/Block X/Light Screen/Spore exact, water
+  orb partial ratchet); the animation supervisor may land more before its
+  own 14:21 wind-down — an unfolded tail there is fine to fold at next
+  orient.
+- **Session (11 rounds / 13 workers, 0 failed steps):** (1) sweep blockers
+  emptied — wake-up `Cmd_bicword` (18/20 exact), Attract/in-love canceler
+  (23), end-turn two-budget split (21, from a side-scout dossier
+  docs/end-turn-budget-scout.md); **the generated-seed blocker census is
+  now empty** (25/27 win seven; 6 and 12 legitimate losses). (2) Rung 13
+  complete: R13-A pure ShouldSwitch policy → R13-B trainer switch kernel
+  surface → R13-C live driver (headline constraint retired; cursors
+  re-pinned source-faithfully, seed 6 honest loss) → R13-D breadth +
+  engine-vs-receipt equivalence; four §7 receipts ROM-pinned by
+  process-isolated attribution probes (absorber, Wonder Guard, Natural
+  Cure, Perish Song zero-draw). Toxic CBM/CV port closed the last
+  B-control carve-out. (3) Entry-677 reveal remainder classified and
+  wired: 27 class-A sites live with quiet-arm pins, 11 class-B sites
+  named to their barriers (docs/ai-reveal-sites.md). (4) King's Rock
+  retired state 12 (ratchet 6→5). (5) ISSUES #48 fixed with a
+  two-challenge lifecycle proof (rents count 14→15 once, rank 0→1;
+  declined control pinned). (6) Rung-14: seam map
+  (docs/rung14-presentation-seam-scout.md), generic swap entry (8 OFF
+  windows exact at recorded counts), commentary app stage (171/171 +
+  164/164 canonical equivalence; explicit-OFF generated trace honestly
+  bounded on a missing pre-battle checkpoint), and 50 Frontier
+  trainer-pic assets extracted for the identity-visual slice.
+- **Next (ordered):** (i) rung-14 remaining windows per the seam map's
+  ranking — trainer-pic renderer selection (assets banked), then
+  forced-switch and battle-command generic seams; (ii) the commentary
+  explicit-OFF route needs a source-valid pre-battle checkpoint (named in
+  entry 690); (iii) reveal class-B sites unlock with their named barriers
+  (docs/ai-reveal-sites.md); (iv) remaining CBM/CV effect arms behind the
+  generic barrier (Toxic pattern established); (v) Gate-6 interaction
+  matrix. Oracle freshness FAIL at orient was a docs-only false positive
+  (recorded in entry 681) — check service start times before restarting.
+- **Notes:** the mid-step side-worktree base papercut was filed in
+  PAPERCUTS.md and mitigated in later briefs by naming the last
+  supervisor-verified green commit; it still cost two workers ~5 min each
+  (receipts-BC, Toxic). PAPERCUT: none new otherwise.
+
+---
+
 ## 690 — [BOUNDED MAIN WORKER 2026-07-29 ~10:58] Rung-14 commentary app stage landed; OFF route checkpoint bounded
 
 - **State:** implementation committed `77a6ab47`; current union (including
@@ -76,31 +125,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (`a9d171e0`): sole delta ABILITY_IMMUNITY engine refs 10→12 plus
   generator pin line drift. Union green **497/5131**, build, sweep
   cursors re-driven unchanged (18/20/21/23 = 2143/2326/1911/2114).
-
----
-
-## 688 — [BOUNDED MAIN WORKER 2026-07-29 ~10:30] King's Rock state-12 mechanics landed
-
-- **State:** committed `5a69d4e4` + census `9093d895`; tree green at **497
-  files / 5111 tests**, production build, `git diff --check`, and Battle Scene
-  OFF oracle info. Both censuses regenerate cleanly.
-- **Did:** move-end state 12 now ports `HOLD_EFFECT_FLINCH` literally:
-  holder/damage gates, the source-ordered `%100` draw, Gen-3
-  `FLAG_KINGS_ROCK_AFFECTED`, surviving target, and synchronous non-certain
-  `SetMoveEffect` (Shield Dust/Substitute/Inner Focus/turn-order included).
-  Seed 1 pins the qualifying Strength proc at ledger call **5 = 3%** and the
-  existing admission arm skips the slower action (**6 total calls**); seed 0
-  pins **18%** failure and both actions (**10 calls**).
-- **Census / sweep:** executable census is byte-identical
-  (**8b18f754…5261**). Ability/item changes only FLINCH refs **3→2** (barrier
-  removed), INNER_FOCUS **3→4**, and SHIELD_DUST **4→5** (live prevention
-  gates), now **76ec7ed2…c563**. Seeds 4–30 match the checked-in post-R13
-  baseline exactly: **25/27** seven-win; 6 loses battle 2 at 791 and 12 loses
-  battle 7 at 1846. The brief's older 2478/2140/1911/1436 cursors were already
-  2143/2326/1911/2114 at entry 687; this patch leaves the latter unchanged.
-- **Notes / next:** non-damaging Double Team draws zero; damaging but Gen-3
-  excluded Hyper Voice deliberately draws once before flag rejection, matching
-  `battle_util.c:3776-3779`. State 12 has no remaining barrier; the module's
-  ratchet intentionally drops **6→5**, leaving states 0/2/4/5/11. Next:
-  supervisor resumes its ordered queue; no issue, canonical recording,
-  presentation, animation, or tick branch moved. PAPERCUT: none.
