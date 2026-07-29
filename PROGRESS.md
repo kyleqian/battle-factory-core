@@ -13,11 +13,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
-## 688 — [BOUNDED MAIN WORKER 2026-07-29 ~10:25] King's Rock state-12 mechanics live; final sweep pending
+## 688 — [BOUNDED MAIN WORKER 2026-07-29 ~10:30] King's Rock state-12 mechanics landed
 
-- **State:** mechanics committed `5a69d4e4`; focused **419/419**, production
-  build, `git diff --check`, and Battle Scene OFF oracle green. Both censuses
-  regenerate cleanly; full suite/final build remain pending.
+- **State:** committed `5a69d4e4` + census `9093d895`; tree green at **497
+  files / 5111 tests**, production build, `git diff --check`, and Battle Scene
+  OFF oracle info. Both censuses regenerate cleanly.
 - **Did:** move-end state 12 now ports `HOLD_EFFECT_FLINCH` literally:
   holder/damage gates, the source-ordered `%100` draw, Gen-3
   `FLAG_KINGS_ROCK_AFFECTED`, surviving target, and synchronous non-certain
@@ -36,7 +36,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   excluded Hyper Voice deliberately draws once before flag rejection, matching
   `battle_util.c:3776-3779`. State 12 has no remaining barrier; the module's
   ratchet intentionally drops **6→5**, leaving states 0/2/4/5/11. Next:
-  full suite/build, final diff check, and finalize. PAPERCUT: none.
+  supervisor resumes its ordered queue; no issue, canonical recording,
+  presentation, animation, or tick branch moved. PAPERCUT: none.
 
 ---
 
