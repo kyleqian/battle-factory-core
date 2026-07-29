@@ -228,15 +228,15 @@ function resolveSwitchBattler(
 }
 
 /**
- * `Cmd_switchhandleorder` (`battle_script_commands.c:5152-5217`), cases 2/3
- * only (the reachable script always emits `switchhandleorder BS_FAINTED, 2`,
+ * `Cmd_switchhandleorder` (`battle_script_commands.c:5152-5217`), cases 1/2/3
+ * (the forced-switch script emits `switchhandleorder BS_FAINTED, 2`,
  * which falls through into case 3's body; case 3 alone is the same body
  * minus the untracked `RecordedBattle`/`field_93` bookkeeping, so both are
- * handled identically). Cases 0 (multi-battler collection loop) and 1
- * (`SwitchPartyOrder` with no assignment) are named barriers -- unreached by
- * this script. Per §5c, `SwitchPartyOrder` itself is proven presentation-only
- * and is not modeled: the only mechanically-relevant effect is the
- * `gBattleCommunication[0] = monToSwitchIntoId[battler]` transcription.
+ * handled identically). Voluntary `BattleScript_ActionSwitch` emits case 1:
+ * its sole `SwitchPartyOrder` call is presentation/order-only by the same
+ * docs/forced-switch-ground-truth.md §5c proof, while the already-selected
+ * `monToSwitchIntoId` remains authoritative. Case 0 (multi-battler collection
+ * loop) retains the named barrier.
  */
 function createSwitchhandleorderOpcodeHandler(
   isControllerIdle: BattleScriptControllerIdlePort<BattleScriptRulesContext>,
@@ -260,7 +260,7 @@ function createSwitchhandleorderOpcodeHandler(
       );
     }
     const caseValue = resolveByteLiteral(caseOperand.expression);
-    if (caseValue !== 2 && caseValue !== 3) {
+    if (caseValue !== 1 && caseValue !== 2 && caseValue !== 3) {
       return unsupportedBranch(
         context,
         `Cmd_switchhandleorder case ${caseOperand.expression} (multi-battler collection/order-only) is not modeled`,
@@ -273,6 +273,12 @@ function createSwitchhandleorderOpcodeHandler(
       throw new Error(
         `Cmd_switchhandleorder: battler ${battler} has no decided monToSwitchIntoId `
           + "-- openpartyscreen must run first",
+      );
+    }
+    if (caseValue === 1) {
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
       );
     }
     return transitionBattleScriptCommand(

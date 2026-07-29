@@ -6,7 +6,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 
 ## Headline
 
-- **Abilities: 65/70 members engine-referenced** (weighted by L50 set-carriers: 1060/1103); 4 zero-carrier, 3 without battle hooks (out-of-battle only).
+- **Abilities: 68/70 members engine-referenced** (weighted by L50 set-carriers: 1073/1103); 4 zero-carrier, 3 without battle hooks (out-of-battle only).
 - **Hold effects: 42/42 members engine-referenced** (weighted by L50 set-carriers: 850/850); 21 zero-carrier, 3 without battle hooks.
 - All 16 ground-truth validation checks passed.
 
@@ -16,10 +16,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | ABILITY_RUN_AWAY | unreferenced | 23 (2) | 23 | — | 4 | 0 | 0 |
 | ABILITY_PICKUP | unreferenced | 7 (6) | 7 | — | 2 | 0 | 0 |
-| ABILITY_ARENA_TRAP | unreferenced | 6 (0) | 6 | — | 2 | 3 | 0 |
-| ABILITY_MAGNET_PULL | unreferenced | 4 (0) | 4 | — | 2 | 3 | 0 |
-| ABILITY_SHADOW_TAG | unreferenced | 3 (3) | 3 | — | 2 | 3 | 0 |
-| ABILITY_LEVITATE | engine-referenced | 54 (54) | 54 | — | 10 | 0 | 11 |
+| ABILITY_LEVITATE | engine-referenced | 54 (54) | 54 | — | 10 | 0 | 13 |
 | ABILITY_STURDY | engine-referenced | 42 (13) | 42 | — | 3 | 0 | 3 |
 | ABILITY_ROCK_HEAD | engine-referenced | 40 (3) | 40 | — | 1 | 0 | 3 |
 | ABILITY_INTIMIDATE | engine-referenced | 38 (28) | 38 | ON_SWITCHIN, INTIMIDATE1, INTIMIDATE2 | 0 | 0 | 2 |
@@ -67,6 +64,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_SHIELD_DUST | engine-referenced | 6 (6) | 6 | — | 2 | 0 | 4 |
 | ABILITY_RAIN_DISH | engine-referenced | 6 (0) | 6 | ENDTURN | 0 | 0 | 3 |
 | ABILITY_HUSTLE | engine-referenced | 6 (1) | 6 | — | 2 | 0 | 3 |
+| ABILITY_ARENA_TRAP | engine-referenced | 6 (0) | 6 | — | 2 | 3 | 2 |
 | ABILITY_VITAL_SPIRIT | engine-referenced | 6 (5) | 6 | IMMUNITY | 5 | 0 | 9 |
 | ABILITY_LIMBER | engine-referenced | 5 (5) | 5 | IMMUNITY | 4 | 0 | 6 |
 | ABILITY_CLOUD_NINE | engine-referenced | 5 (0) | 5 | ON_SWITCHIN | 1 | 0 | 18 |
@@ -75,8 +73,10 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_PURE_POWER | engine-referenced | 5 (5) | 5 | — | 1 | 0 | 2 |
 | ABILITY_COMPOUND_EYES | engine-referenced | 4 (3) | 4 | — | 2 | 0 | 1 |
 | ABILITY_HUGE_POWER | engine-referenced | 4 (0) | 4 | — | 1 | 0 | 2 |
+| ABILITY_MAGNET_PULL | engine-referenced | 4 (0) | 4 | — | 2 | 3 | 2 |
 | ABILITY_MARVEL_SCALE | engine-referenced | 4 (4) | 4 | — | 1 | 0 | 2 |
 | ABILITY_SPEED_BOOST | engine-referenced | 3 (2) | 3 | ENDTURN | 0 | 0 | 4 |
+| ABILITY_SHADOW_TAG | engine-referenced | 3 (3) | 3 | — | 2 | 3 | 2 |
 | ABILITY_ROUGH_SKIN | engine-referenced | 3 (3) | 3 | ON_DAMAGE | 0 | 0 | 3 |
 | ABILITY_COLOR_CHANGE | engine-referenced | 2 (2) | 2 | ON_DAMAGE | 0 | 0 | 3 |
 | ABILITY_PLUS | engine-referenced | 2 (2) | 2 | — | 2 | 0 | 3 |

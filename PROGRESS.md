@@ -13,6 +13,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 666 — [BOUNDED MAIN WORKER 2026-07-28 ~23:05] voluntary switch action + trapping trio complete
+
+- **State:** tree green at **452 files / 4885 tests**, production build,
+  `git diff --check`, and Battle Scene OFF oracle info. Census regenerated
+  twice byte-identically at exactly **68/70 abilities (weighted 1073/1103)**
+  and **42/42 hold effects (850/850)**; all 16 validations pass.
+- **Did:** player command requests now enumerate every alive, non-egg bench
+  slot and preserve the wrap/escape-prevention/Ingrain menu gates. Shadow
+  Tag, grounded Arena Trap, and Steel-only Magnet Pull remove voluntary
+  switch entries; Flying/Levitate, fainted, and absent-holder controls pass.
+  Trainer requests remain move-only and forced-switch indexes ignore trapping.
+  A voluntary switch runs before moves through the shared source switch
+  handlers, rebuilds the incoming battler, fires entry hooks, and makes the
+  opponent's move hit that incoming mon; an Intimidate receipt pins hook
+  timing. The switch draws zero RNG; the switch-turn ledger pins the next
+  boundary at position 15 after five staged AI draws.
+- **Next:** close Run Away/Pickup as documented no-op rows, then model the
+  whole-battle turn-1 `gRandomTurnNumber` writes.
+- **Notes:** Pursuit's pre-switch double-power interception is deliberately
+  deferred behind one trigger-narrow `unsupported-branch` in
+  `factoryBattleScriptFullTurnDecision.ts`; its barrier ratchet moves **0→1**
+  with a reachability test. No presentation, trainer-switch AI, Baton Pass,
+  issue, probe/scout, oracle fixture, or canonical trace changed. Identity
+  constants were used for all three new ability comparisons. PAPERCUT: none.
+
+---
+
 ## 665 — [BOUNDED MAIN WORKER 2026-07-28 ~22:35] ON_DAMAGE contact-ability family implemented
 
 - **State:** tree green at **452 files / 4877 tests**, production build, and
@@ -87,44 +114,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   No `unsupported-branch` or canonical-recording ratchet changed.
   `verify-turn-boundary-rng-gap.py` now intentionally stops at its stale
   “explicit model acquired; revisit verdict” guard. PAPERCUT: none.
-
----
-
-## 663 — [BOUNDED MAIN WORKER 2026-07-28 ~21:55] production turn-order inputs live; Swift Swim + Chlorophyll census rows closed
-
-- **State:** tree green at **452 files / 4862 tests**, production build,
-  `git diff --check`, and Battle Scene OFF oracle info. Census regenerated
-  byte-idempotently: **abilities 57/70 engine-referenced (weighted
-  977/1103)**, hold effects unchanged **41/42 (775/850)**; all 15
-  validations pass. This matches the assigned prediction exactly.
-- **Did:** wired `factoryBattleScriptFullTurnDecision.ts`'s sole production
-  `GetWhoStrikesFirst` call with both battlers' numeric ability → shared
-  `ABILITY_SYMBOLS` name, existing hold-effect/param resolvers → the shared
-  hold-effect name map (extended with Macho Brace id 24), real STATUS1
-  paralysis, and `rulesContext.weather`. Rain/sun decoding is suppressed by
-  the already-established end-turn `weatherHasEffect` Cloud Nine gate; no
-  duplicate ability/item/weather table was added. Six real full-turn tests
-  pin Swift Swim, Chlorophyll, opposing Cloud Nine, paralysis, Macho Brace,
-  and the existing one-draw-only speed-tie contract. Census identity aliases
-  close exactly the two assigned ability rows.
-- **Supervisor fold (same round, `ece08e49`):** the paired side-lane probe
-  REFUTED the RNG-gap hypothesis — the production engine is genuinely one
-  draw short at every clean turn boundary (`BattleTurnPassed`'s
-  unconditional `gRandomTurnNumber = Random()`, attributed at positions
-  5/19 of a 24-draw two-turn ROM ledger, before each turn's AI draws;
-  `turnEndRngGroups` is legacy fixture-only). Full evidence + fix shape:
-  `docs/ability-item-speed-scout.md` §B5; mechanical recheck
-  `tools/probe/verify-turn-boundary-rng-gap.py` (supervisor re-ran: PASS).
-  The probe's OFF fixture also corroborated this entry's wiring on real
-  hardware: turn-2 order flips under rain exactly as predicted.
-- **Next:** model the boundary draw + persist it as the rules-context
-  `gRandomTurnNumber` equivalent, then Quick Claw reads it (closes hold
-  effects at 42/42); then the ON_DAMAGE contact family (scout in flight).
-- **Notes:** source citations were re-read. ROM `WEATHER_HAS_EFFECT` also
-  requires `hp != 0`; this is vacuous at action selection because the
-  full-turn reducer resumes only after fainted-actions installs live singles
-  actives. The paralysis call-site path has 9 draws by design: 8 ordinary hit
-  draws plus its existing attack-admission paralysis roll, and no turn-order
-  draw (an erroneous tie would make 10). No generator semantics, canonical
-  replay, oracle fixture, Quick Claw, AI, or `unsupported-branch` ratchet
-  changed. Scout/probe files untouched. PAPERCUT: none this session.

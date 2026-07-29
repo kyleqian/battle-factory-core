@@ -66,21 +66,29 @@ import {
   type BattleDecisionSubmission,
   type BattleDecisionTransitionResult,
   type BattleJsonObject,
+  type BattleCommandDecision,
   type BattleMoveDecision,
   type BattleMoveSlot,
   type BattlePartyIndex,
   type BattleSinglesBattler,
+  type BattleSwitchDecision,
   type BattleState,
 } from "./battleDecisionBoundary.ts";
 import { handleBattleActionFinished } from "./battleActionFinished.ts";
 import { checkBattleScriptMoveLimitations } from "./battleScriptActionAdmission.ts";
-import { HOLD_EFFECT_NAME_BY_ID, withBattler } from "./battleScriptHitChainOpcode.ts";
+import {
+  HOLD_EFFECT_NAME_BY_ID,
+  unsupportedBranch,
+  withBattler,
+} from "./battleScriptHitChainOpcode.ts";
 import {
   acknowledgeBattleScriptMachineController,
   createBattleScriptRngState,
   createBattleScriptSchedulerState,
   stepBattleScriptMachine,
+  transitionBattleScriptCommand,
   type BattleScriptMachineState,
+  type BattleScriptOpcodeHandler,
   type BattleScriptOpcodeHandlers,
   type BattleScriptSchedulerState,
 } from "./battleScriptMachine.ts";
@@ -119,6 +127,8 @@ import {
   BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE,
   BATTLE_SCRIPT_MOVE_STRUGGLE,
   BATTLE_SCRIPT_STATUS2_MASKS,
+  BATTLE_SCRIPT_STATUS2_WRAPPED_MASK,
+  BATTLE_SCRIPT_STATUS3_ROOTED,
 } from "./battleScriptSourceConstants.ts";
 import { mapFactoryBattleOutcome } from "./factoryBattleScriptTerminalDecision.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
@@ -161,6 +171,15 @@ const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
 const B_WEATHER_SUN = (1 << 5) | (1 << 6);
 /** include/constants/battle.h:120. */
 const STATUS1_PARALYSIS = 1 << 6;
+/** include/constants/abilities.h: exact identity constants used by battle_main.c:4248-4256. */
+const ABILITY_SHADOW_TAG = 23;
+const ABILITY_LEVITATE = 26;
+const ABILITY_MAGNET_PULL = 42;
+const ABILITY_ARENA_TRAP = 71;
+/** include/constants/battle.h: STATUS2_ESCAPE_PREVENTION. */
+const STATUS2_ESCAPE_PREVENTION = 1 << 26;
+/** include/constants/moves.h. */
+const MOVE_PURSUIT = 228;
 
 type MachineState = BattleScriptMachineState<BattleScriptRulesContext>;
 type Handlers = BattleScriptOpcodeHandlers<BattleScriptRulesContext>;
@@ -213,6 +232,8 @@ export type FactoryFullTurnBattlerConfig = Readonly<{
 export type FactoryFullTurnConfig = Readonly<{
   requestId: number;
   rngSeed: number;
+  /** Optional staged source gAbsentBattlerFlags for legality fixtures. */
+  absentBattlerFlags?: number;
   /** Optional source gBattleWeather staging for finite full-turn fixtures. */
   weather?: number;
   /**
@@ -256,10 +277,7 @@ export type FactoryFullTurnConfig = Readonly<{
 export type FactoryFullTurnDecisionRules = BattleJsonObject & Readonly<{
   adapter: typeof ADAPTER;
   phase: "awaiting-player-command" | "awaiting-trainer-command" | "forced-switch-pending";
-  pendingPlayerDecision: null | Readonly<{
-    moveSlot: BattleMoveSlot;
-    targetBattler: BattleSinglesBattler;
-  }>;
+  pendingPlayerDecision: null | BattleCommandDecision;
   rulesContext: BattleScriptRulesContext;
   /**
    * Only present in phase "forced-switch-pending": the halted
@@ -510,6 +528,7 @@ function createInitialRules(config: FactoryFullTurnConfig): FactoryFullTurnDecis
       battleTypeFlags: BATTLE_SCRIPT_BATTLE_TYPE_TRAINER | BATTLE_SCRIPT_BATTLE_TYPE_FACTORY,
       battlerPositions: [0, 1, 0xff, 0xff],
     },
+    absentBattlerFlags: config.absentBattlerFlags ?? 0,
     weather: config.weather ?? 0,
     randomTurnNumber: config.initialRandomTurnNumber ?? 0xffff,
   });
@@ -533,7 +552,7 @@ export function createFactoryFullTurnBattleState(
       requestId: config.requestId,
       side: "player",
       battler: 0,
-      legalDecisions: legalMoveDecisions(rules.rulesContext, 0),
+      legalDecisions: legalPlayerDecisions(rules.rulesContext),
     },
   }) as BattleState<FactoryFullTurnDecisionRules>;
 }
@@ -555,10 +574,7 @@ function rulesAt(input: FactoryFullTurnDecisionRules): FactoryFullTurnDecisionRu
     adapter: ADAPTER,
     phase: phase as "awaiting-player-command" | "awaiting-trainer-command",
     pendingPlayerDecision: (input as {
-      pendingPlayerDecision: null | Readonly<{
-        moveSlot: BattleMoveSlot;
-        targetBattler: BattleSinglesBattler;
-      }>;
+      pendingPlayerDecision: null | BattleCommandDecision;
     }).pendingPlayerDecision,
     rulesContext,
   });
@@ -820,6 +836,138 @@ function runMoveAction(
   return Object.freeze({ kind: "complete", state: run.state });
 }
 
+/**
+ * Voluntary-switch-only registration for Cmd_jumpifnopursuitswitchdmg
+ * (`battle_script_commands.c:8723-8759`). The non-Pursuit arm is the literal
+ * jump to BattleScript_DoSwitchOut. Pursuit interception remains an honest,
+ * trigger-narrow barrier: silently running the ordinary move after installing
+ * the incoming mon would reverse the ROM's target and double-power order.
+ */
+function voluntarySwitchHandlers(
+  base: Handlers,
+  trainerMoveId: number,
+): Handlers {
+  const instruction = PROGRAM.instructions.find(
+    (candidate) =>
+      candidate.opcodeName === "B_SCR_OP_JUMPIFNOPURSUITSWITCHDMG",
+  );
+  if (!instruction) {
+    throw new Error("assembled program has no jumpifnopursuitswitchdmg instruction");
+  }
+  const returnToBallInstruction = PROGRAM.instructions.find(
+    (candidate) =>
+      candidate.source.label === "BattleScript_DoSwitchOut"
+      && candidate.opcodeName === "B_SCR_OP_RETURNATKTOBALL",
+  );
+  if (!returnToBallInstruction) {
+    throw new Error("assembled program has no voluntary-switch returnatktoball instruction");
+  }
+  const handler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (context) => {
+    if (trainerMoveId === MOVE_PURSUIT) {
+      return unsupportedBranch(
+        context,
+        "voluntary player switch while the opponent's selected move is MOVE_PURSUIT "
+          + "(pre-switch interception/double-power path)",
+        "battle_script_commands.c",
+        8723,
+      );
+    }
+    const [targetOperand] = context.instruction.operands;
+    if (
+      context.instruction.operands.length !== 1
+      || targetOperand?.widthBytes !== 4
+    ) {
+      throw new Error("invalid B_SCR_OP_JUMPIFNOPURSUITSWITCHDMG shape");
+    }
+    const target = resolveBattleScriptLabel(context.program, targetOperand.expression);
+    if (!target) {
+      throw new Error(
+        `unresolved jumpifnopursuitswitchdmg target ${targetOperand.expression}`,
+      );
+    }
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "jump", programCounter: target.programCounter }),
+    );
+  };
+  // Cmd_returnatktoball (`battle_script_commands.c:5354-5360`) is the
+  // voluntary-switch sibling of the already-modeled Cmd_returntoball:
+  // controller presentation only, with zero rules/RNG mutation.
+  const returnToBallHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
+    context,
+  ) => transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "advance" }),
+  );
+  return Object.freeze({
+    ...base,
+    [instruction.opcodeId]: handler,
+    [returnToBallInstruction.opcodeId]: returnToBallHandler,
+  });
+}
+
+/**
+ * HandleAction_Switch + BattleScript_ActionSwitch
+ * (`battle_util.c:294-311`, `data/battle_scripts_1.s:3088-3121`). The party
+ * choice is already validated by the command boundary, so this stages
+ * monToSwitchIntoId exactly where the controller path would have left it and
+ * then reuses the existing source-script switch-out/in handlers and entry
+ * hooks. The action itself draws no RNG.
+ */
+function runVoluntarySwitchAction(
+  priorState: MachineState,
+  partyIndex: BattlePartyIndex,
+  trainerMoveId: number,
+  baseHandlers: Handlers,
+): ActionResult {
+  const monToSwitchIntoId = Object.freeze(
+    priorState.rulesContext.monToSwitchIntoId.map((value, battler) =>
+      battler === 0 ? partyIndex : value
+    ),
+  ) as unknown as BattleScriptRulesContext["monToSwitchIntoId"];
+  const rulesContext = createBattleScriptRulesContext({
+    ...priorState.rulesContext,
+    selectorRoles: {
+      attacker: 0,
+      target: 1,
+      effectBattler: 1,
+      fainted: null,
+    },
+    scriptingBattler: 0,
+    currentMove: 0,
+    currentMovePosition: 0,
+    monToSwitchIntoId,
+    atkCancelerTracker: 0,
+    critMultiplier: 1,
+    dmgMultiplier: 1,
+    moveResultFlags: 0,
+    // BattleScript_ActionSwitch's singles prelude writes one before entering
+    // BattleScript_PursuitSwitchDmgLoop (battle_scripts_1.s:3093-3098).
+    multiHitCounter: 1,
+    missType: 0,
+  });
+  // The skipped ActionSwitch prelude is presentation bookkeeping
+  // (hpthresholds2/RETURNMON text) plus the singles counter/setbyte writes
+  // staged above; begin at its first logical branch.
+  const started = startBattleScriptExecute(PROGRAM, "BattleScript_PursuitSwitchDmgLoop", {
+    ...priorState,
+    rulesContext,
+  });
+  const run = runScriptToOwnEnd(
+    PROGRAM,
+    voluntarySwitchHandlers(baseHandlers, trainerMoveId),
+    started,
+  );
+  if (run.kind === "barrier") {
+    return Object.freeze({
+      kind: "barrier",
+      state: run.state,
+      instruction: run.instruction,
+    });
+  }
+  return Object.freeze({ kind: "complete", state: run.state });
+}
+
 function movePriority(moveId: number): number {
   const row = MOVES_BY_ID.get(moveId);
   if (!row) throw new Error(`move ${moveId} has no source move data row`);
@@ -981,6 +1129,71 @@ function legalMoveDecisions(
         })]
       : []);
   return Object.freeze(legal);
+}
+
+/**
+ * `HandleTurnActionSelectionState`'s B_ACTION_SWITCH party-menu gate
+ * (`battle_main.c:4240-4267`), projected to Factory singles. The source's
+ * CHECK_OTHER_SIDE / CHECK_FIELD_EXCEPT_BATTLER scans do not themselves test
+ * HP, but action selection only exposes a command while both singles actives
+ * are live; retaining that invariant explicitly also keeps absent/fainted
+ * synthetic states from inventing a trap.
+ */
+function isVoluntarySwitchTrapped(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
+): boolean {
+  const active = rulesContext.battlers[battler]!;
+  if (
+    (active.status2 & (BATTLE_SCRIPT_STATUS2_WRAPPED_MASK | STATUS2_ESCAPE_PREVENTION)) !== 0
+    || (active.status3 & BATTLE_SCRIPT_STATUS3_ROOTED) !== 0
+  ) {
+    return true;
+  }
+  const opponent = (battler === 0 ? 1 : 0) as BattleSinglesBattler;
+  const holder = rulesContext.battlers[opponent]!;
+  if (
+    holder.hp === 0
+    || (rulesContext.absentBattlerFlags & (1 << opponent)) !== 0
+  ) {
+    return false;
+  }
+  if (holder.ability === ABILITY_SHADOW_TAG) return true;
+  if (
+    holder.ability === ABILITY_ARENA_TRAP
+    && !active.types.includes("TYPE_FLYING")
+    && active.ability !== ABILITY_LEVITATE
+  ) {
+    return true;
+  }
+  return holder.ability === ABILITY_MAGNET_PULL
+    && active.types.includes("TYPE_STEEL");
+}
+
+/** Player-only command enumeration; trainer voluntary switching is deliberately out of scope. */
+function legalPlayerDecisions(
+  rulesContext: BattleScriptRulesContext,
+): readonly BattleCommandDecision[] {
+  const moves = legalMoveDecisions(rulesContext, 0);
+  if (
+    lockedMoveDecision(rulesContext, 0) !== null
+    || isVoluntarySwitchTrapped(rulesContext, 0)
+  ) {
+    return moves;
+  }
+  const activePartyIndex = rulesContext.battlers[0]!.partyIndex;
+  const switches = rulesContext.party.player.flatMap((member, partyIndex) =>
+    partyIndex !== activePartyIndex
+      && member.species !== 0
+      && !member.isEgg
+      && member.hp !== 0
+      ? [Object.freeze({
+          kind: "switch" as const,
+          partyIndex: partyIndex as BattlePartyIndex,
+        }) satisfies BattleSwitchDecision]
+      : []
+  );
+  return Object.freeze([...moves, ...switches]);
 }
 
 function usesForcedStruggle(
@@ -1211,6 +1424,7 @@ function runEndTurnTail(
         continuingState.rulesContext,
         "awaiting-trainer-command",
         Object.freeze({
+          kind: "use-move" as const,
           moveSlot: lockedPlayerDecision.moveSlot,
           targetBattler: lockedPlayerDecision.targetBattler,
         }),
@@ -1240,6 +1454,7 @@ function runEndTurnTail(
         continuingState.rulesContext,
         "awaiting-trainer-command",
         Object.freeze({
+          kind: "use-move" as const,
           moveSlot: lockedPlayerDecision.moveSlot,
           targetBattler: lockedPlayerDecision.targetBattler,
         }),
@@ -1267,7 +1482,7 @@ function runEndTurnTail(
         requestId: nextRequestId,
         side: "player",
         battler: 0 as const,
-        legalDecisions: legalMoveDecisions(continuingState.rulesContext, 0),
+        legalDecisions: legalPlayerDecisions(continuingState.rulesContext),
       }),
     }),
   );
@@ -1392,17 +1607,13 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
       ctx.request.kind !== "command"
       || ctx.request.side !== "player"
       || ctx.request.battler !== 0
-      || ctx.decision.kind !== "use-move"
     ) {
-      throw new Error("factory full-turn decision requires the player's staged singles use-move command");
+      throw new Error("factory full-turn decision requires the player's staged singles command");
     }
     const pendingRules = buildRules(
       rules.rulesContext,
       "awaiting-trainer-command",
-      Object.freeze({
-        moveSlot: ctx.decision.moveSlot,
-        targetBattler: ctx.decision.targetBattler,
-      }),
+      ctx.decision,
     );
     const lockedTrainerDecision = lockedMoveDecision(rules.rulesContext, 1);
     if (lockedTrainerDecision !== null) {
@@ -1453,23 +1664,28 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     clearOverwrittenEncoreAtAction(rules.rulesContext, 0),
     1,
   );
-  const playerMoveSlot = rules.pendingPlayerDecision.moveSlot;
+  const playerSwitch = rules.pendingPlayerDecision.kind === "switch";
+  const playerMoveSlot = playerSwitch
+    ? 0 as BattleMoveSlot
+    : rules.pendingPlayerDecision.moveSlot;
   const trainerMoveSlot = ctx.decision.moveSlot;
-  const playerForcedStruggle = usesForcedStruggle(rc0, 0);
+  const playerForcedStruggle = !playerSwitch && usesForcedStruggle(rc0, 0);
   const trainerForcedStruggle = usesForcedStruggle(rc0, 1);
-  const playerMoveId = actionMoveId(
-    rc0,
-    0,
-    playerMoveSlot,
-    playerForcedStruggle,
-  );
+  const playerMoveId = playerSwitch
+    ? 0
+    : actionMoveId(
+      rc0,
+      0,
+      playerMoveSlot,
+      playerForcedStruggle,
+    );
   const trainerMoveId = actionMoveId(
     rc0,
     1,
     trainerMoveSlot,
     trainerForcedStruggle,
   );
-  if (playerMoveId === 0) {
+  if (!playerSwitch && playerMoveId === 0) {
     throw new Error(
       `factory full-turn decision player move slot ${playerMoveSlot} is not usable`,
     );
@@ -1477,27 +1693,32 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
   if (trainerMoveId === 0) {
     throw new Error(`factory full-turn decision trainer move slot ${ctx.decision.moveSlot} is not usable`);
   }
-  const playerTarget = rules.pendingPlayerDecision.targetBattler;
+  const playerTarget = playerSwitch
+    ? 1 as BattleSinglesBattler
+    : rules.pendingPlayerDecision.targetBattler;
   const trainerTarget = ctx.decision.targetBattler;
 
-  const playerTOB = turnOrderBattler(rc0, 0, playerMoveId);
-  const trainerTOB = turnOrderBattler(rc0, 1, trainerMoveId);
-  const weather = turnOrderWeather(rc0);
-  const bothPriorityZero = playerTOB.movePriority === 0 && trainerTOB.movePriority === 0;
-  const priorityEqual = playerTOB.movePriority === trainerTOB.movePriority;
-  const isSpeedTie = (bothPriorityZero || priorityEqual)
-    && effectiveSpeed(playerTOB, weather, rc0.randomTurnNumber)
-      === effectiveSpeed(trainerTOB, weather, rc0.randomTurnNumber);
-  // battle_main.c:4728/4745 -- Random() & 1, drawn ONLY on a genuine speed tie.
-  const speedTieRngRoll = isSpeedTie ? ctx.rng.draw("turn order speed tie (Random() & 1)") : 0;
-  const strikesFirst = getWhoStrikesFirst(
-    playerTOB,
-    trainerTOB,
-    speedTieRngRoll,
-    weather,
-    rc0.randomTurnNumber,
-  );
-  const playerFirst = strikesFirst === 0;
+  let playerFirst = true;
+  if (!playerSwitch) {
+    const playerTOB = turnOrderBattler(rc0, 0, playerMoveId);
+    const trainerTOB = turnOrderBattler(rc0, 1, trainerMoveId);
+    const weather = turnOrderWeather(rc0);
+    const bothPriorityZero = playerTOB.movePriority === 0 && trainerTOB.movePriority === 0;
+    const priorityEqual = playerTOB.movePriority === trainerTOB.movePriority;
+    const isSpeedTie = (bothPriorityZero || priorityEqual)
+      && effectiveSpeed(playerTOB, weather, rc0.randomTurnNumber)
+        === effectiveSpeed(trainerTOB, weather, rc0.randomTurnNumber);
+    // battle_main.c:4728/4745 -- Random() & 1, drawn ONLY on a genuine speed tie.
+    const speedTieRngRoll = isSpeedTie ? ctx.rng.draw("turn order speed tie (Random() & 1)") : 0;
+    const strikesFirst = getWhoStrikesFirst(
+      playerTOB,
+      trainerTOB,
+      speedTieRngRoll,
+      weather,
+      rc0.randomTurnNumber,
+    );
+    playerFirst = strikesFirst === 0;
+  }
 
   const mover1: BattleScriptBattlerId = playerFirst ? 0 : 1;
   const mover1MoveId = playerFirst ? playerMoveId : trainerMoveId;
@@ -1523,16 +1744,23 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     events: Object.freeze([]),
   });
 
-  const action1 = runMoveAction(
-    PROGRAM,
-    handlers,
-    initialState,
-    mover1,
-    mover1MoveId,
-    mover1MoveSlot,
-    mover1Target,
-    mover1 === 0 ? playerForcedStruggle : trainerForcedStruggle,
-  );
+  const action1 = playerSwitch
+    ? runVoluntarySwitchAction(
+      initialState,
+      rules.pendingPlayerDecision.partyIndex,
+      trainerMoveId,
+      handlers,
+    )
+    : runMoveAction(
+      PROGRAM,
+      handlers,
+      initialState,
+      mover1,
+      mover1MoveId,
+      mover1MoveSlot,
+      mover1Target,
+      mover1 === 0 ? playerForcedStruggle : trainerForcedStruggle,
+    );
   if (action1.kind === "barrier") {
     return finishFullTurn(
       ctx.rng, rngBefore.calls, action1.state,

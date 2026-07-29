@@ -28,8 +28,13 @@ const BURN_PROC_RNG_SEED = 61;
 const STATUS1_BURN = 1 << 4;
 const STATUS1_PARALYSIS = 1 << 6;
 const ABILITY_CLOUD_NINE = 13;
+const ABILITY_INTIMIDATE = 22;
+const ABILITY_SHADOW_TAG = 23;
+const ABILITY_LEVITATE = 26;
 const ABILITY_SWIFT_SWIM = 33;
 const ABILITY_CHLOROPHYLL = 34;
+const ABILITY_MAGNET_PULL = 42;
+const ABILITY_ARENA_TRAP = 71;
 const ITEM_MACHO_BRACE = 181;
 const ITEM_QUICK_CLAW = 183;
 const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
@@ -106,6 +111,182 @@ function config(overrides: Partial<FactoryFullTurnConfig> = {}): FactoryFullTurn
 
 const PLAYER_ATTACKS = Object.freeze({ kind: "use-move" as const, moveSlot: 0 as const, targetBattler: 1 as const });
 const TRAINER_ATTACKS = Object.freeze({ kind: "use-move" as const, moveSlot: 0 as const, targetBattler: 0 as const });
+
+function initialPlayerSwitchIndexes(turnConfig: FactoryFullTurnConfig): readonly number[] {
+  const initial = createFactoryFullTurnBattleState(turnConfig);
+  if (
+    initial.boundary.kind !== "decision-required"
+    || initial.boundary.request.kind !== "command"
+  ) {
+    throw new Error("expected initial player command request");
+  }
+  return initial.boundary.request.legalDecisions.flatMap((decision) =>
+    decision.kind === "switch" ? [decision.partyIndex] : []
+  );
+}
+
+describe("factory full-turn decision -- voluntary-switch enumeration and trapping trio", () => {
+  const BENCH = Object.freeze([
+    { species: 66, moves: [2, 0, 0, 0] as const },
+    { species: 74, isEgg: true, moves: [33, 0, 0, 0] as const },
+  ] as const);
+
+  function trappingConfig(
+    trainerAbility: number,
+    player: Partial<FactoryFullTurnConfig["player"]> = {},
+    extras: Partial<FactoryFullTurnConfig> = {},
+  ): FactoryFullTurnConfig {
+    return config({
+      player: {
+        species: 1, moveId: STRENGTH, attack: 100, defense: 100,
+        spAttack: 100, spDefense: 100, speed: 100, hp: 999,
+        ...player,
+      },
+      trainer: {
+        species: 360, moveId: STRENGTH, ability: trainerAbility,
+        attack: 100, defense: 100, spAttack: 100, spDefense: 100,
+        speed: 50, hp: 999,
+      },
+      playerBenchHp: [100, 100],
+      playerBenchOverride: BENCH,
+      ...extras,
+    });
+  }
+
+  it("enumerates only benched, alive, non-egg members (battle_main.c:4240-4267 party-menu path)", () => {
+    expect(initialPlayerSwitchIndexes(trappingConfig(0))).toEqual([1]);
+    expect(initialPlayerSwitchIndexes(trappingConfig(0, {}, {
+      playerBenchHp: [0, 100],
+      playerBenchOverride: [
+        { species: 66, moves: [2, 0, 0, 0] },
+        { species: 74, isEgg: false, moves: [33, 0, 0, 0] },
+      ],
+    }))).toEqual([2]);
+  });
+
+  it("Shadow Tag removes every voluntary switch unconditionally while its opposing holder is live", () => {
+    expect(initialPlayerSwitchIndexes(trappingConfig(ABILITY_SHADOW_TAG))).toEqual([]);
+    expect(initialPlayerSwitchIndexes(trappingConfig(0))).toEqual([1]);
+  });
+
+  it("Arena Trap catches a grounded target but exempts either Flying type or Levitate (battle_main.c:4249-4252)", () => {
+    expect(initialPlayerSwitchIndexes(trappingConfig(ABILITY_ARENA_TRAP))).toEqual([]);
+    expect(initialPlayerSwitchIndexes(trappingConfig(
+      ABILITY_ARENA_TRAP,
+      { types: ["TYPE_FLYING", "TYPE_NORMAL"] },
+    ))).toEqual([1]);
+    expect(initialPlayerSwitchIndexes(trappingConfig(
+      ABILITY_ARENA_TRAP,
+      { ability: ABILITY_LEVITATE },
+    ))).toEqual([1]);
+  });
+
+  it("Magnet Pull catches Steel targets only (battle_main.c:4252-4256)", () => {
+    expect(initialPlayerSwitchIndexes(trappingConfig(
+      ABILITY_MAGNET_PULL,
+      { types: ["TYPE_STEEL", "TYPE_ROCK"] },
+    ))).toEqual([]);
+    expect(initialPlayerSwitchIndexes(trappingConfig(
+      ABILITY_MAGNET_PULL,
+      { types: ["TYPE_ROCK", "TYPE_GROUND"] },
+    ))).toEqual([1]);
+  });
+
+  it("a fainted or absent holder does not trap at a command boundary", () => {
+    const fainted = trappingConfig(ABILITY_SHADOW_TAG, {}, {
+      trainer: {
+        species: 360, moveId: STRENGTH, ability: ABILITY_SHADOW_TAG,
+        attack: 100, defense: 100, spAttack: 100, spDefense: 100,
+        speed: 50, hp: 0,
+      },
+    });
+    expect(initialPlayerSwitchIndexes(fainted)).toEqual([1]);
+    expect(initialPlayerSwitchIndexes(trappingConfig(
+      ABILITY_SHADOW_TAG,
+      {},
+      { absentBattlerFlags: 1 << 1 },
+    ))).toEqual([1]);
+  });
+});
+
+describe("factory full-turn decision -- voluntary-switch action", () => {
+  function switchTurnConfig(trainerMoveId = STRENGTH): FactoryFullTurnConfig {
+    return config({
+      player: {
+        species: 1, moveId: STRENGTH, attack: 80, defense: 20,
+        spAttack: 80, spDefense: 20, speed: 200, hp: 300,
+      },
+      trainer: {
+        species: 43, moveId: trainerMoveId, attack: 100, defense: 100,
+        spAttack: 100, spDefense: 100, speed: 1, hp: 300,
+      },
+      playerBenchHp: [200, 0],
+      playerBenchOverride: [{
+        species: 23, abilityNum: 0, moves: [35, 0, 0, 0],
+        maxHP: 200, attack: 80, defense: 200, speed: 50,
+        spAttack: 40, spDefense: 100,
+      }, undefined],
+    });
+  }
+
+  it("switches before the opposing move, fires incoming Intimidate, and makes that move damage the incoming mon", () => {
+    const initial = createFactoryFullTurnBattleState(switchTurnConfig());
+    const afterPlayer = submitFactoryFullTurnDecision(initial, {
+      requestId: 1,
+      side: "player",
+      decision: { kind: "switch", partyIndex: 1 },
+    });
+    if (afterPlayer.kind !== "decision-required") throw new Error("expected trainer command");
+    if (afterPlayer.nextRequest.kind !== "command") throw new Error("expected trainer command");
+    expect(afterPlayer.nextRequest.legalDecisions).toEqual([TRAINER_ATTACKS]);
+
+    const result = submitFactoryFullTurnDecision(afterPlayer.state, {
+      requestId: 2,
+      side: "trainer",
+      decision: TRAINER_ATTACKS,
+    });
+    if (result.kind !== "decision-required") throw new Error("expected next player command");
+    const rc = result.state.rules.rulesContext;
+    expect(rc.battlers[0]).toMatchObject({
+      species: 23,
+      partyIndex: 1,
+      ability: ABILITY_INTIMIDATE,
+    });
+    expect(rc.battlers[0]!.hp).toBeLessThan(200);
+    expect(rc.party.player[1]!.hp).toBe(rc.battlers[0]!.hp);
+    expect(rc.party.player[0]!.hp).toBe(300);
+    expect(rc.battlers[1]!.statStages[1]).toBe(5);
+    expect(result.events).toContainEqual(expect.objectContaining({
+      payload: { kind: "switch", side: "player", fromPartyIndex: 0, toPartyIndex: 1 },
+    }));
+    // HandleAction_Switch/BattleScript_ActionSwitch draw zero; only the
+    // trainer hit chain's four draws plus BattleTurnPassed's one boundary
+    // draw remain (battle_util.c:294-311; battle_main.c:4013).
+    expect(result.state.rng.calls).toBe(5);
+  });
+
+  it("reaches the named Pursuit-interception unsupported-branch instead of mis-ordering an ordinary hit", () => {
+    const initial = createFactoryFullTurnBattleState(switchTurnConfig(228));
+    const afterPlayer = submitFactoryFullTurnDecision(initial, {
+      requestId: 1,
+      side: "player",
+      decision: { kind: "switch", partyIndex: 1 },
+    });
+    if (afterPlayer.kind !== "decision-required") throw new Error("expected trainer command");
+    const result = submitFactoryFullTurnDecision(afterPlayer.state, {
+      requestId: 2,
+      side: "trainer",
+      decision: TRAINER_ATTACKS,
+    });
+    expect(result.kind).toBe("machine-barrier");
+    if (result.kind !== "machine-barrier") throw new Error("expected pursuit barrier");
+    expect(result.barrier).toMatchObject({
+      opcodeName: "B_SCR_OP_JUMPIFNOPURSUITSWITCHDMG",
+      dispatcher: "Cmd_jumpifnopursuitswitchdmg",
+    });
+    expect(result.state.rng.calls).toBe(0);
+  });
+});
 
 function speedOrderConfig({
   playerSpeed,
@@ -362,6 +543,57 @@ describe("factory full-turn decision -- decision -> both actions -> end-turn -> 
     });
     if (afterTurn2.kind !== "decision-required") throw new Error("expected turn-3 player decision");
     expect(afterTurn2.state.rng.calls).toBe(expectedPositions.length);
+    expect(afterTurn2.state.rules.rulesContext.randomTurnNumber)
+      .toBe((afterTurn2.state.rng.value >>> 16) & 0xffff);
+  });
+
+  it("keeps the second boundary at position 15 when turn 2 is a voluntary switch (the switch action adds no draw)", () => {
+    const initial = createFactoryFullTurnBattleState(config({
+      player: {
+        species: 1, moveId: RAIN_DANCE, attack: 50, defense: 200,
+        spAttack: 50, spDefense: 200, speed: 100, hp: 999,
+      },
+      trainer: {
+        species: 43, moveId: STRENGTH, attack: 50, defense: 200,
+        spAttack: 50, spDefense: 200, speed: 50, hp: 999,
+      },
+      playerBenchHp: [999, 0],
+      playerBenchOverride: [{
+        species: 66, moves: [2, 0, 0, 0], maxHP: 999,
+        attack: 100, defense: 200, speed: 50, spAttack: 50, spDefense: 200,
+      }, undefined],
+    }));
+    const afterPlayer1 = submitFactoryFullTurnDecision(initial, {
+      requestId: 1, side: "player",
+      decision: { kind: "use-move", moveSlot: 0, targetBattler: 0 },
+    });
+    if (afterPlayer1.kind !== "decision-required") throw new Error("expected trainer decision");
+    const afterTurn1 = submitFactoryFullTurnDecision(afterPlayer1.state, {
+      requestId: 2, side: "trainer", decision: TRAINER_ATTACKS,
+    });
+    if (afterTurn1.kind !== "decision-required") throw new Error("expected turn-2 player decision");
+    expect(afterTurn1.state.rng.calls).toBe(5);
+
+    let afterAiValue = afterTurn1.state.rng.value;
+    for (let position = 6; position <= 10; position++) {
+      afterAiValue = advanceRngValue(afterAiValue);
+    }
+    const afterAiState = Object.freeze({
+      ...afterTurn1.state,
+      rng: Object.freeze({ value: afterAiValue, calls: 10 }),
+    });
+    const afterPlayer2 = submitFactoryFullTurnDecision(afterAiState, {
+      requestId: 3, side: "player",
+      decision: { kind: "switch", partyIndex: 1 },
+    });
+    if (afterPlayer2.kind !== "decision-required") throw new Error("expected trainer decision");
+    const afterTurn2 = submitFactoryFullTurnDecision(afterPlayer2.state, {
+      requestId: 4, side: "trainer", decision: TRAINER_ATTACKS,
+    });
+    if (afterTurn2.kind !== "decision-required") throw new Error("expected turn-3 player decision");
+    // positions 11-14 are the trainer's accuracy/crit/damage/effect rolls;
+    // position 15 is the one continuing-turn boundary draw.
+    expect(afterTurn2.state.rng.calls).toBe(15);
     expect(afterTurn2.state.rules.rulesContext.randomTurnNumber)
       .toBe((afterTurn2.state.rng.value >>> 16) & 0xffff);
   });
@@ -1056,7 +1288,8 @@ describe(
           species: 43, moveId: STRENGTH, attack: 50, defense: 50, spAttack: 50, spDefense: 50, speed: 50, hp: 90,
         },
         trainer: {
-          species: 1, moveId: STRENGTH, attack: 200, defense: 50, spAttack: 50, spDefense: 50, speed: 100, hp: 100,
+          species: 1, moveId: STRENGTH, ability: ABILITY_SHADOW_TAG,
+          attack: 200, defense: 50, spAttack: 50, spDefense: 50, speed: 100, hp: 100,
         },
         playerBenchHp: [145, 0],
         playerBenchOverride: [{ species: MACHOP, moves: [KARATE_CHOP, 0, 0, 0] }, undefined],
@@ -1085,6 +1318,8 @@ describe(
           side: "player",
           battler: 0,
           faintedPartyIndex: 0,
+          // Shadow Tag gates only voluntary B_ACTION_SWITCH selection
+          // (battle_main.c:4240-4267), never forced faint replacement.
           legalPartyIndexes: [1], // MACHOP only -- bench slot 2 is empty (species 0)
         });
         expect(result.state.boundary).toEqual({ kind: "decision-required", request: result.nextRequest });

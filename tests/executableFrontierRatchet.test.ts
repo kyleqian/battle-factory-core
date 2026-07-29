@@ -291,6 +291,13 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // generic VARIOUS dispatcher). Reachability-tested directly in
   // tests/battleScriptForceSwitchOpcode.test.ts.
   ["src/engine/battleScriptForceSwitchOpcode.ts", 1],
+  // Voluntary switching executes before ordinary moves through the real
+  // BattleScript_ActionSwitch tail. Its Pursuit-interception arm remains a
+  // trigger-narrow barrier until the pre-switch double-power hit path is
+  // modeled; ordinary non-Pursuit switches execute the source jump and full
+  // switch-in machinery. Reachability-pinned in
+  // tests/factoryBattleScriptFullTurnDecision.test.ts.
+  ["src/engine/factoryBattleScriptFullTurnDecision.ts", 1],
   // B_SCR_OP_CLEARSTATUSFROMEFFECT/SETSEMIINVULNERABLEBIT/CLEARSEMIINVULNERABLEBIT
   // registration (EFFECT_SEMI_INVULNERABLE + collateral EFFECT_RAZOR_WIND/
   // SKY_ATTACK/SKULL_BASH, docs/semi-invulnerable-registration-scout.md §5

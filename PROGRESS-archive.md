@@ -1,5 +1,46 @@
 ---
 
+## 663 — [BOUNDED MAIN WORKER 2026-07-28 ~21:55] production turn-order inputs live; Swift Swim + Chlorophyll census rows closed
+
+- **State:** tree green at **452 files / 4862 tests**, production build,
+  `git diff --check`, and Battle Scene OFF oracle info. Census regenerated
+  byte-idempotently: **abilities 57/70 engine-referenced (weighted
+  977/1103)**, hold effects unchanged **41/42 (775/850)**; all 15
+  validations pass. This matches the assigned prediction exactly.
+- **Did:** wired `factoryBattleScriptFullTurnDecision.ts`'s sole production
+  `GetWhoStrikesFirst` call with both battlers' numeric ability → shared
+  `ABILITY_SYMBOLS` name, existing hold-effect/param resolvers → the shared
+  hold-effect name map (extended with Macho Brace id 24), real STATUS1
+  paralysis, and `rulesContext.weather`. Rain/sun decoding is suppressed by
+  the already-established end-turn `weatherHasEffect` Cloud Nine gate; no
+  duplicate ability/item/weather table was added. Six real full-turn tests
+  pin Swift Swim, Chlorophyll, opposing Cloud Nine, paralysis, Macho Brace,
+  and the existing one-draw-only speed-tie contract. Census identity aliases
+  close exactly the two assigned ability rows.
+- **Supervisor fold (same round, `ece08e49`):** the paired side-lane probe
+  REFUTED the RNG-gap hypothesis — the production engine is genuinely one
+  draw short at every clean turn boundary (`BattleTurnPassed`'s
+  unconditional `gRandomTurnNumber = Random()`, attributed at positions
+  5/19 of a 24-draw two-turn ROM ledger, before each turn's AI draws;
+  `turnEndRngGroups` is legacy fixture-only). Full evidence + fix shape:
+  `docs/ability-item-speed-scout.md` §B5; mechanical recheck
+  `tools/probe/verify-turn-boundary-rng-gap.py` (supervisor re-ran: PASS).
+  The probe's OFF fixture also corroborated this entry's wiring on real
+  hardware: turn-2 order flips under rain exactly as predicted.
+- **Next:** model the boundary draw + persist it as the rules-context
+  `gRandomTurnNumber` equivalent, then Quick Claw reads it (closes hold
+  effects at 42/42); then the ON_DAMAGE contact family (scout in flight).
+- **Notes:** source citations were re-read. ROM `WEATHER_HAS_EFFECT` also
+  requires `hp != 0`; this is vacuous at action selection because the
+  full-turn reducer resumes only after fainted-actions installs live singles
+  actives. The paralysis call-site path has 9 draws by design: 8 ordinary hit
+  draws plus its existing attack-admission paralysis roll, and no turn-order
+  draw (an erroneous tie would make 10). No generator semantics, canonical
+  replay, oracle fixture, Quick Claw, AI, or `unsupported-branch` ratchet
+  changed. Scout/probe files untouched. PAPERCUT: none this session.
+
+---
+
 ## 662 — [INTERACTIVE TOOLING FIX 2026-07-28 ~21:40] Claude supervisor cwd persistence mechanically disabled
 
 - **State:** tree green at **452 files / 4856 tests**, launcher profile
