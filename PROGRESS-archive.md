@@ -1,4 +1,61 @@
 ---
+## 686 — [BOUNDED MAIN WORKER 2026-07-29 ~09:55] R13-C live ShouldSwitch driver integration landed
+
+- **State:** tree green at **496 files / 5094 tests**, production build,
+  `git diff --check`, and Battle Scene OFF oracle info. Both censuses
+  regenerate byte-identically at SHA-256 **8b18f754…5261 /
+  52687085…257c**.
+- **Did:** the live trainer driver now runs R13-A `ShouldSwitch` first on the
+  original kernel request/cursor. A selected switch replays only its precheck
+  ledger and submits through the original R13-B reducer; no-switch threads the
+  advanced cursor into the unchanged mask chooser, then replays the combined
+  ledger through that same original request. The switch filter/substitute
+  policy-state path and `factory-ai-switch-precheck-unimplemented` retired;
+  `frontier-trainer-items-source-unreachable` remains.
+- **Receipts:** absorber success is **N=1** draw and switches to party 1;
+  failed Alakazam/Marowak precheck is **N=2**, followed by exact old-policy
+  suffixes of **11** and all-Surf **13** draws from the post-precheck seed.
+  Whole-battle cursor moves **188→196** (four later 2-draw prechecks), same
+  win/HP outcome.
+- **Sweep:** seed 17 **1787→2013**. Permanent table plus required extras:
+  **4:2415, 5:2156, 7:1337, 8:1922, 11:2012, 13:2415, 14:1946,
+  15:1602, 16:1878, 18:2143, 19:1691, 20:2326, 21:1911,
+  22:1389, 23:2114, 24:1751, 26:1680, 29:1869, 30:1825**; all win seven.
+  Seed **6** now honestly loses battle 2 at **791**, player HP `[0,0,0]`
+  versus opponent `[0,0,126]`. The table saw no voluntary switch: divergence
+  is from source-required precheck draws shifting downstream battle/generation
+  RNG, not a contradictory switch/reducer outcome.
+- **Supervisor fold (post-step):** ROM receipt §7C Natural Cure merged
+  (`be762f2d`): odd 52937 → sentinel + switch (one
+  `ShouldSwitchIfNaturalCure+0x89` draw); even control falls through to the
+  final Natural Cure coin (30881) → two-draw switch; both twice-fresh
+  byte-identical. Perish variant precisely un-banked (shared countdown
+  faints both actives first); a follow-up staging attempt is running.
+  Supervisor verified union suite **496/5094**, build, and re-drove
+  18/20/21/23 = 2143/2326/1911/2114 matching the worker's table.
+- **Supervisor fold (post-step):** ROM receipt §7C2 Perish Song merged
+  (`e23eb685`): a legal player-switch schedule reaches a live AI timer-zero
+  command; seeds 1/2 draw ZERO RNG, switch, deterministically select party
+  index 1 — §7C's zero-draw sentinel/scoring prediction fully verified,
+  twice-fresh byte-identical. All four §7 receipt variants are now
+  ROM-pinned. Supervisor verified union **497/5104** + build. Rung 13
+  (R13-A/B/C/D) is complete; the sole named remainder is B-control
+  equivalence behind the pre-existing `EFFECT_TOXIC` CheckBadMove barrier.
+- **Supervisor fold (post-step):** rung-14's cheapest window landed from
+  the side lane (`d67656c4`+`9e40b10f`): generic swap entry — record-derived
+  swap construction beside the canonical constructor (equal-state
+  equivalence pinned), pending `swapOffer` adapter, +21 copy-boundary
+  submission through `chooseRoundSwap`; canonical route now calls the
+  generic constructor. All eight committed OFF swap windows re-verified at
+  recorded counts (supervisor re-ran picker 101/101 independently). Union
+  green **497/5115**, build, censuses byte-identical, no ratchet movement.
+- **Next / notes:** supervisor resumes R13-D or its ordered queue. No
+  unsupported/import ratchet, census byte, generated artifact, issue,
+  presentation, animation, canonical recording, or tick branch moved.
+  PAPERCUT: none.
+
+---
+
 ## 685 — [BOUNDED MAIN WORKER 2026-07-29 ~09:40] R13-B trainer switch kernel surface landed
 
 - **State:** committed `bbc26849` + `ac76ea29`; tree green at **496 files /
