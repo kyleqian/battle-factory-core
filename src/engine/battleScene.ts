@@ -549,6 +549,7 @@ import sonicBoomAsset from "../animation/assets/sonic-boom.json" with { type: "j
 import smokescreenAsset from "../animation/assets/smokescreen.json" with { type: "json" };
 import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json" };
 import bubbleBeamAsset from "../animation/assets/bubble-beam.json" with { type: "json" };
+import crossChopAsset from "../animation/assets/cross-chop.json" with { type: "json" };
 import reversalAsset from "../animation/assets/reversal.json" with { type: "json" };
 import tailGlowAsset from "../animation/assets/tail-glow.json" with { type: "json" };
 import dizzyPunchAsset from "../animation/assets/dizzyPunch.json" with { type: "json" };
@@ -705,6 +706,7 @@ import {
   sceneOnSmokescreenView,
   sceneOnMudShotView,
   sceneOnBubbleBeamView,
+  sceneOnCrossChopView,
   sceneOnReversalView,
   sceneOnTailGlowView,
   sceneOnDizzyPunchView,
@@ -755,6 +757,7 @@ import {
   type SceneOnSmokescreenConfig,
   type SceneOnMudShotConfig,
   type SceneOnBubbleBeamConfig,
+  type SceneOnCrossChopConfig,
   type SceneOnReversalConfig,
   type SceneOnTailGlowConfig,
   type SceneOnDizzyPunchConfig,
@@ -1085,6 +1088,12 @@ const bubbleBeamArt = bubbleBeamAsset as {
   smallBubbles: { tileset: Tileset; palette: RgbColor[] };
   surskitBack: { tileset: Tileset; palette: RgbColor[] };
   surskitFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const crossChopArt = crossChopAsset as {
+  machokeBack: { tileset: Tileset; palette: RgbColor[] };
+  machokeFront: { tileset: Tileset; palette: RgbColor[] };
+  handsAndFeet: { tileset: Tileset; palette: RgbColor[] };
+  crossImpact: { tileset: Tileset; palette: RgbColor[] };
 };
 const reversalArt = reversalAsset as {
   blueOrb: { tileset: Tileset; palette: RgbColor[] };
@@ -16972,6 +16981,151 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "SURSKIT used" : "Foe SURSKIT used",
       "BUBBLEBEAM!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "CROSS_CHOP") {
+    const chopState =
+      state as SceneOnMovePresentationState<SceneOnCrossChopConfig>;
+    const view = sceneOnCrossChopView(chopState);
+    // BuildOamBuffer and TransferPlttBuffer precede animation callbacks.
+    // Scanout therefore consumes the immediately preceding reducer state.
+    const displayed = sceneOnCrossChopView({
+      ...chopState,
+      age: view.battlerDisplayAge,
+    });
+    const playerToOpponent =
+      view.attacker.species === "MACHOKE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MACHOKE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged CROSS_CHOP pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const machokeSource = playerToOpponent
+      ? crossChopArt.machokeBack
+      : crossChopArt.machokeFront;
+    const machoke = playerToOpponent
+      ? machokeSource
+      : {
+          ...machokeSource,
+          tileset: subTileset(machokeSource.tileset, 0, 8),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const blendTarget = displayed.paletteBlend?.color === "white"
+      ? { r: 255, g: 255, b: 255 }
+      : { r: 0, g: 0, b: 0 };
+    const blendCoefficient = displayed.paletteBlend?.coefficient ?? 0;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(
+        battleBg.palette,
+        blendTarget,
+        blendCoefficient,
+      ),
+    );
+    const battlerPalette = (palette: readonly RgbColor[]) =>
+      blendPaletteToward(palette, blendTarget, blendCoefficient);
+    const targetX2 =
+      displayed.targetBaselineX2 + displayed.targetOffset.x2;
+    const drawOnix = (targetFb: Uint8Array) => drawSpriteSheet(
+      targetFb,
+      onix.tileset,
+      battlerPalette(onix.palette),
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y,
+    );
+    const drawMachoke = () => drawSpriteSheet(
+      fb,
+      machoke.tileset,
+      battlerPalette(machoke.palette),
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    drawOnix(fb);
+    const target2Backdrop = fb.slice();
+    drawMachoke();
+    const handTileset = subTileset(
+      crossChopArt.handsAndFeet.tileset,
+      12,
+      4,
+    );
+    for (const hand of displayed.hands.slice().sort(
+      (left, right) => right.oamSlot - left.oamSlot,
+    )) {
+      const draw = hand.hFlip ? drawSpriteSheetHFlip : drawSpriteSheet;
+      draw(
+        fb,
+        handTileset,
+        crossChopArt.handsAndFeet.palette,
+        hand.x + hand.x2 - 16,
+        hand.y + hand.y2 - 16,
+      );
+    }
+    if (displayed.impact && displayed.alpha) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        target2Backdrop,
+        crossChopArt.crossImpact.tileset,
+        crossChopArt.crossImpact.palette,
+        displayed.impact.x,
+        displayed.impact.y,
+        256,
+        0,
+        0,
+        256,
+        displayed.alpha.eva,
+        displayed.alpha.evb,
+        false,
+      );
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "MACHOKE",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "MACHOKE" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MACHOKE used" : "Foe MACHOKE used",
+      "CROSS CHOP!",
       99,
     );
     return;
