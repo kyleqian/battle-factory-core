@@ -1,0 +1,499 @@
+{
+  "fixture": "tools/battle-lab/mechanic-factory-ai-switch-receipt-c-natural-off.json",
+  "profile": "battle-scene-off",
+  "seed": 2,
+  "fastPass": [
+    {
+      "frame": 32,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "statuses3": "0x00000000",
+        "perishSongTimer": 0,
+        "opponentAiMonToSwitchIntoId": 6,
+        "opponentMonToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 58,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "statuses3": "0x00000000",
+        "perishSongTimer": 0,
+        "opponentAiMonToSwitchIntoId": 6,
+        "opponentMonToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 61,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "statuses3": "0x00000000",
+        "perishSongTimer": 0,
+        "opponentAiMonToSwitchIntoId": 6,
+        "opponentMonToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 154,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "statuses3": "0x00000000",
+        "perishSongTimer": 0,
+        "opponentAiMonToSwitchIntoId": 6,
+        "opponentMonToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 157,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "statuses3": "0x00000000",
+        "perishSongTimer": 0,
+        "opponentAiMonToSwitchIntoId": 6,
+        "opponentMonToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 191,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "statuses3": "0x00000000",
+        "perishSongTimer": 0,
+        "opponentAiMonToSwitchIntoId": 6,
+        "opponentMonToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 229,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "statuses3": "0x00000000",
+        "perishSongTimer": 0,
+        "opponentAiMonToSwitchIntoId": 6,
+        "opponentMonToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 332,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "statuses3": "0x00000000",
+        "perishSongTimer": 0,
+        "opponentAiMonToSwitchIntoId": 6,
+        "opponentMonToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 337,
+      "delta": 1,
+      "state": {
+        "activeBattler": 1,
+        "chosenActions": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "statuses3": "0x00000000",
+        "perishSongTimer": 0,
+        "opponentAiMonToSwitchIntoId": 6,
+        "opponentMonToSwitchIntoId": 6
+      }
+    }
+  ],
+  "attributedDraws": [
+    {
+      "frame": 32,
+      "lr": "0x08046965",
+      "caller": "Cmd_accuracycheck+0x305",
+      "preRng": "0x8761d6d4",
+      "postRng": "0x701570b7",
+      "returnU16": 28693,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "statuses3": "0x00000000",
+        "perishSongTimer": 0,
+        "opponentAiMonToSwitchIntoId": 6,
+        "opponentMonToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 58,
+      "lr": "0x08046d3f",
+      "caller": "Cmd_critcalc+0x127",
+      "preRng": "0x701570b7",
+      "postRng": "0xe603205e",
+      "returnU16": 58883,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "statuses3": "0x00000000",
+        "perishSongTimer": 0,
+        "opponentAiMonToSwitchIntoId": 6,
+        "opponentMonToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 61,
+      "lr": "0x080478fb",
+      "caller": "Cmd_adjustnormaldamage+0x7",
+      "preRng": "0xe603205e",
+      "postRng": "0xc9e5cc79",
+      "returnU16": 51685,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "statuses3": "0x00000000",
+        "perishSongTimer": 0,
+        "opponentAiMonToSwitchIntoId": 6,
+        "opponentMonToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 154,
+      "lr": "0x08049a55",
+      "caller": "Cmd_seteffectwithchance+0x81",
+      "preRng": "0xc9e5cc79",
+      "postRng": "0xd9bb4df8",
+      "returnU16": 55739,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "statuses3": "0x00000000",
+        "perishSongTimer": 0,
+        "opponentAiMonToSwitchIntoId": 6,
+        "opponentMonToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 157,
+      "lr": "0x0804348d",
+      "caller": "AbilityBattleEffects+0xc65",
+      "preRng": "0xd9bb4df8",
+      "postRng": "0x0c52230b",
+      "returnU16": 3154,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "statuses3": "0x00000000",
+        "perishSongTimer": 0,
+        "opponentAiMonToSwitchIntoId": 6,
+        "opponentMonToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 191,
+      "lr": "0x08046965",
+      "caller": "Cmd_accuracycheck+0x305",
+      "preRng": "0x0c52230b",
+      "postRng": "0x2b28a622",
+      "returnU16": 11048,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "statuses3": "0x00000000",
+        "perishSongTimer": 0,
+        "opponentAiMonToSwitchIntoId": 6,
+        "opponentMonToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 229,
+      "lr": "0x08048e1b",
+      "caller": "SetMoveEffect+0x6bb",
+      "preRng": "0x2b28a622",
+      "postRng": "0xe33978ed",
+      "returnU16": 58169,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "statuses3": "0x00000000",
+        "perishSongTimer": 0,
+        "opponentAiMonToSwitchIntoId": 6,
+        "opponentMonToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 332,
+      "lr": "0x0803bb13",
+      "caller": "BattleTurnPassed+0x157",
+      "preRng": "0xe33978ed",
+      "postRng": "0xf69f135c",
+      "returnU16": 63135,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "statuses3": "0x00000000",
+        "perishSongTimer": 0,
+        "opponentAiMonToSwitchIntoId": 6,
+        "opponentMonToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 337,
+      "lr": "0x08063149",
+      "caller": "ShouldSwitchIfNaturalCure+0x89",
+      "preRng": "0xf69f135c",
+      "postRng": "0xcec9a69f",
+      "returnU16": 52937,
+      "expression": "Random() & 1",
+      "expressionResult": 1,
+      "stateAfterFrame": {
+        "activeBattler": 1,
+        "chosenActions": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6,
+        "statuses3": "0x00000000",
+        "perishSongTimer": 0,
+        "opponentAiMonToSwitchIntoId": 6,
+        "opponentMonToSwitchIntoId": 6
+      }
+    }
+  ],
+  "commandStates": [
+    {
+      "frame": 1,
+      "activeBattler": 2,
+      "chosenActions": [
+        255,
+        0,
+        255,
+        255
+      ],
+      "aiMonToSwitchIntoId": 6,
+      "monToSwitchIntoId": 6,
+      "statuses3": "0x00000000",
+      "perishSongTimer": 0,
+      "opponentAiMonToSwitchIntoId": 6,
+      "opponentMonToSwitchIntoId": 6
+    },
+    {
+      "frame": 341,
+      "activeBattler": 2,
+      "chosenActions": [
+        255,
+        2,
+        255,
+        255
+      ],
+      "aiMonToSwitchIntoId": 6,
+      "monToSwitchIntoId": 6,
+      "statuses3": "0x00000000",
+      "perishSongTimer": 0,
+      "opponentAiMonToSwitchIntoId": 6,
+      "opponentMonToSwitchIntoId": 1
+    }
+  ],
+  "naturalCureReceipt": {
+    "frame": 337,
+    "lr": "0x08063149",
+    "caller": "ShouldSwitchIfNaturalCure+0x89",
+    "preRng": "0xf69f135c",
+    "postRng": "0xcec9a69f",
+    "returnU16": 52937,
+    "expression": "Random() & 1",
+    "expressionResult": 1,
+    "stateAfterFrame": {
+      "activeBattler": 1,
+      "chosenActions": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "aiMonToSwitchIntoId": 6,
+      "monToSwitchIntoId": 6,
+      "statuses3": "0x00000000",
+      "perishSongTimer": 0,
+      "opponentAiMonToSwitchIntoId": 6,
+      "opponentMonToSwitchIntoId": 6
+    }
+  },
+  "command": {
+    "firstChosenAction": {
+      "frame": 341,
+      "activeBattler": 2,
+      "chosenActions": [
+        255,
+        2,
+        255,
+        255
+      ],
+      "aiMonToSwitchIntoId": 6,
+      "monToSwitchIntoId": 6,
+      "statuses3": "0x00000000",
+      "perishSongTimer": 0,
+      "opponentAiMonToSwitchIntoId": 6,
+      "opponentMonToSwitchIntoId": 1
+    },
+    "drawDelta": 1,
+    "attributedDraws": [
+      {
+        "frame": 337,
+        "lr": "0x08063149",
+        "caller": "ShouldSwitchIfNaturalCure+0x89",
+        "preRng": "0xf69f135c",
+        "postRng": "0xcec9a69f",
+        "returnU16": 52937,
+        "expression": "Random() & 1",
+        "expressionResult": 1,
+        "stateAfterFrame": {
+          "activeBattler": 1,
+          "chosenActions": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "aiMonToSwitchIntoId": 6,
+          "monToSwitchIntoId": 6,
+          "statuses3": "0x00000000",
+          "perishSongTimer": 0,
+          "opponentAiMonToSwitchIntoId": 6,
+          "opponentMonToSwitchIntoId": 6
+        }
+      }
+    ]
+  },
+  "verdict": {
+    "oddStatusMoveArmWritesSentinel": true,
+    "evenControlContinuesToFinalNaturalCureCoin": false,
+    "switchAction": true
+  }
+}
