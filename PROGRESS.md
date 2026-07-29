@@ -44,6 +44,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   pinned alongside the originals. Dominant blocker is now forced-switch
   end-turn resumption (**4** seeds), then move-end barriers (**3**), then one
   each wake-up `Cmd_bicword`, end-turn budget, and attack-canceler stop.
+- **Supervisor fold (same round, side merge):** the trainer-identity seam
+  landed (`cb57045d` + `1c78886d`, `factoryTrainerPresentation.ts`) —
+  pre-battle trainer name/class/speech presentation now derives from the
+  round's generated trainer record, with the canonical trainer proven
+  byte-identical first and 12 committed traces re-verified at their
+  recorded counts (incl. the permanently-parked 255/256 and 224/228).
+  Union green **487 files / 5037 tests**, census no-op.
 - **Notes:** retired named barrier `Cmd_various:
   VARIOUS_CANCEL_MULTI_TURN_MOVES`; no unsupported-branch/import ratchet
   moved because the generic `Cmd_various` barrier remains for other cases.
