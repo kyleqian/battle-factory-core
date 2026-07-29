@@ -18,23 +18,6 @@ confirmation on the fainted row"); canonical/delayed windows remain 200/200.
 rendering when the voluntary party-selector renderer slice (battle-command
 design §4 Slice 5 handoff dependency) is built — same screen family.
 
-## #50 — new battle-command presentations reset the FIGHT cursor; source persists it per battler
-
-**Symptom:** every `createBattleCommandPresentation` starts `fightCursor`/
-`fightDisplayCursor` at 0. Emerald seeds the move menu from the persistent
-`gMoveSelectionCursor[battler]` (`battle_controller_player.c:2643`), which
-resets on switch-in (`:2185`) or explicit controller reset (`:3101`) — not
-per command request. Cross-request cursor persistence is therefore wrong the
-moment Slice 6 chains two live requests (canonical windows can't see it:
-each recorded window is a fresh lifecycle).
-**Confirmed:** day-audit 2026-07-29 with source citations above; repro shape:
-navigate to slot 3, submit, construct the next request's presentation → slot
-0 instead of 3.
-**Lead:** keep a per-battler source cursor OUTSIDE the request-owned
-lifecycle (the design's §2.2 identity note already permits this); seed each
-new presentation from it and reset only on source-equivalent switch/reset
-events. Belongs in Slice 6's boundary-ownership work.
-
 ## #51 — summary screen ignores generated draft state; renders anchor identity for every slot
 
 **Symptom:** the draft generated-slots adapter (`73543153`) carries only

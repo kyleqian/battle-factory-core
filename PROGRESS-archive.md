@@ -1,3 +1,26 @@
+## 700 — [BOUNDED MAIN WORKER 2026-07-29 ~14:06] Battle-command seam Slice 4 landed
+
+- **State:** implementation `1b72c15c`; tree green at **516 files / 5211
+  tests + 1 deliberate animation-lane skip**, production build,
+  `git diff --check`, and import/barrier ratchet **6/6**.
+- **Did:** the generic command render view now derives both composed
+  healthboxes exclusively from `BattleCommandFieldBattler`, and derives the
+  FIGHT rows from live active `moveIds`/`currentPP`/packed PP bonuses. The
+  Battle-2 seam consumes that view directly; its generic path no longer calls
+  the fourteen-turn PP reconstruction. Tier 1 covers non-full HP and
+  poison/burn/paralysis on each side plus MAGBY's non-ONIX four-move set.
+- **Next:** dispatch design §4 Slice 5: build generic action-cursor chrome and
+  the typed POKéMON handoff; retain the complete fourteen-window regression
+  set and do not begin Slice 6's generated route or battle-pic wiring.
+- **Notes:** all fourteen windows exact: Battle 2 **209/209**, FIGHT
+  **235/235**, reopen **90/90**; turns 3–13 **254/254, 44/44, 42/42, 44/44,
+  93/93, 88/88, 111/111, 83/83, 56/56, 46/46, 57/57**. No battler art,
+  generated route, action cursor, party screen, trace/capture list, core,
+  issue, census, roadmap, animation, or battle/turn/absolute-tick selector
+  changed. PAPERCUT: none.
+
+---
+
 ## 699 — [BOUNDED MAIN WORKER 2026-07-29 ~13:42] Battle-command seam Slice 3 landed
 
 - **State:** implementation `4d27ff46` + scope cleanup `0a14c6ad`; tree green
