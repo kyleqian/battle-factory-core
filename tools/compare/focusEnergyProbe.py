@@ -110,8 +110,9 @@ def main() -> None:
         return count
 
     lifecycle_counts = {"endureEnergy": starts("gEndureEnergySpriteTemplate")}
-    # The source emits nine sprites; their 16x32 animation frees and reuses
-    # OAM slots within each three-sprite wave, producing fifteen live-slot starts.
+    # Three literal EndureEffect calls emit five sprites each. Their 16x32
+    # animations retire between calls, so the allocator reuses the observed
+    # 3/4/5/7/9 slots and still produces fifteen distinct live-slot starts.
     if lifecycle_counts["endureEnergy"] != 15:
         raise RuntimeError(f"Focus Energy lifecycle count changed: {lifecycle_counts}")
     if "AnimEndureEnergy_Step" not in topology["callbacks"] or "AnimTask_ShakeMon2_Step" not in topology["tasks"]:

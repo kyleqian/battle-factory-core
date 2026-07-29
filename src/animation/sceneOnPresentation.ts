@@ -49,6 +49,10 @@ import {
   type CrossChopState,
 } from "./crossChop.ts";
 import {
+  focusEnergyAtAge,
+  type FocusEnergyState,
+} from "./focusEnergy.ts";
+import {
   reversalAtAge,
   type ReversalResolvedShakeReceipt,
   type ReversalState,
@@ -472,6 +476,7 @@ export interface SceneOnPresentationBattler {
     | "FLAAFFY"
     | "VOLBEAT"
     | "MACHOKE"
+    | "TAILLOW"
     | "ZIGZAGOON"
     | "SABLEYE"
     | "ALTARIA"
@@ -1073,6 +1078,15 @@ export interface SceneOnCrossChopConfig {
   readonly targetPictureOffset: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnFocusEnergyConfig {
+  readonly move: "FOCUS_ENERGY";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source GetBattlerSpriteCoord(attacker, BATTLER_COORD_X/Y) anchor. */
+  readonly attackerCoord: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnReversalConfig {
   readonly move: "REVERSAL";
   readonly attacker: SceneOnPresentationBattler;
@@ -1414,6 +1428,7 @@ export type SceneOnMoveConfig =
   | SceneOnMudShotConfig
   | SceneOnBubbleBeamConfig
   | SceneOnCrossChopConfig
+  | SceneOnFocusEnergyConfig
   | SceneOnReversalConfig
   | SceneOnSwaggerConfig
   | SceneOnTauntConfig
@@ -1605,6 +1620,12 @@ export interface SceneOnBubbleBeamView extends BubbleBeamState {
 }
 
 export interface SceneOnCrossChopView extends CrossChopState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnFocusEnergyView extends FocusEnergyState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3058,6 +3079,27 @@ export function sceneOnCrossChopView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.targetPictureOffset,
+    ),
+  };
+}
+
+/** `age=0` is Move_FOCUS_ENERGY's first FOCUS_ENERGY load display. */
+export function sceneOnFocusEnergyView(
+  state: SceneOnMovePresentationState<SceneOnFocusEnergyConfig>,
+): SceneOnFocusEnergyView {
+  if (state.config.move !== "FOCUS_ENERGY") {
+    throw new Error(
+      `expected FOCUS_ENERGY presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...focusEnergyAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attackerCoord,
     ),
   };
 }

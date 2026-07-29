@@ -550,6 +550,7 @@ import smokescreenAsset from "../animation/assets/smokescreen.json" with { type:
 import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json" };
 import bubbleBeamAsset from "../animation/assets/bubble-beam.json" with { type: "json" };
 import crossChopAsset from "../animation/assets/cross-chop.json" with { type: "json" };
+import focusEnergyAsset from "../animation/assets/focus-energy.json" with { type: "json" };
 import reversalAsset from "../animation/assets/reversal.json" with { type: "json" };
 import tailGlowAsset from "../animation/assets/tail-glow.json" with { type: "json" };
 import dizzyPunchAsset from "../animation/assets/dizzyPunch.json" with { type: "json" };
@@ -711,6 +712,7 @@ import {
   sceneOnMudShotView,
   sceneOnBubbleBeamView,
   sceneOnCrossChopView,
+  sceneOnFocusEnergyView,
   sceneOnReversalView,
   sceneOnTailGlowView,
   sceneOnDizzyPunchView,
@@ -762,6 +764,7 @@ import {
   type SceneOnMudShotConfig,
   type SceneOnBubbleBeamConfig,
   type SceneOnCrossChopConfig,
+  type SceneOnFocusEnergyConfig,
   type SceneOnReversalConfig,
   type SceneOnTailGlowConfig,
   type SceneOnDizzyPunchConfig,
@@ -1098,6 +1101,11 @@ const crossChopArt = crossChopAsset as {
   machokeFront: { tileset: Tileset; palette: RgbColor[] };
   handsAndFeet: { tileset: Tileset; palette: RgbColor[] };
   crossImpact: { tileset: Tileset; palette: RgbColor[] };
+};
+const focusEnergyArt = focusEnergyAsset as {
+  focusEnergy: { tileset: Tileset; palette: RgbColor[] };
+  taillowBack: { tileset: Tileset; palette: RgbColor[] };
+  taillowFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const reversalArt = reversalAsset as {
   blueOrb: { tileset: Tileset; palette: RgbColor[] };
@@ -17128,6 +17136,139 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "MACHOKE used" : "Foe MACHOKE used",
       "CROSS CHOP!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "FOCUS_ENERGY") {
+    const focusState =
+      state as SceneOnMovePresentationState<SceneOnFocusEnergyConfig>;
+    const view = sceneOnFocusEnergyView(focusState);
+    // GBA scanout consumes the preceding BuildOamBuffer/TransferPlttBuffer
+    // state. Reducer age stays source-relative; only this display view lags.
+    const displayed = sceneOnFocusEnergyView({
+      ...focusState,
+      age: view.battlerDisplayAge,
+    });
+    const playerToOpponent =
+      view.attacker.species === "TAILLOW"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "TAILLOW"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged FOCUS_ENERGY pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const taillowSource = playerToOpponent
+      ? focusEnergyArt.taillowBack
+      : focusEnergyArt.taillowFront;
+    const taillow = playerToOpponent
+      ? taillowSource
+      : {
+          ...taillowSource,
+          tileset: subTileset(taillowSource.tileset, 0, 8),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const drawEffect = (oamSlot: number) => {
+      const sprite = displayed.sprites.find((item) =>
+        item.oamSlot === oamSlot
+      );
+      if (!sprite) return;
+      drawSpriteSheet(
+        fb,
+        subTileset(
+          focusEnergyArt.focusEnergy.tileset,
+          sprite.frame * 4,
+          4,
+        ),
+        focusEnergyArt.focusEnergy.palette,
+        sprite.x - 8,
+        sprite.y - 16,
+      );
+    };
+    const drawTaillow = () => drawSpriteSheet(
+      fb,
+      taillow.tileset,
+      blendPaletteToward(
+        taillow.palette,
+        { r: 255, g: 255, b: 255 },
+        displayed.attackerPaletteY,
+      ),
+      view.attacker.geometry.spriteCorner.x + view.attackerDisplayX2,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawOnix = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + (playerToOpponent ? 1 : 0),
+      view.target.geometry.spriteCorner.y,
+    );
+    // BuildOamBuffer sorts the Endure sprites' source subpriority ahead of
+    // both battlers; gSprites allocation slots (3/4/5/7/9) are not painter
+    // indices. Within the equal-subpriority particles, later OAM wins are
+    // reproduced by descending allocation slot.
+    if (opponentToPlayer) {
+      drawTaillow();
+      drawOnix();
+    } else {
+      drawOnix();
+      drawTaillow();
+    }
+    drawEffect(9);
+    drawEffect(7);
+    drawEffect(5);
+    drawEffect(4);
+    drawEffect(3);
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "TAILLOW",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "TAILLOW" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "TAILLOW used" : "Foe TAILLOW used",
+      "FOCUS ENERGY!",
       99,
     );
     return;
