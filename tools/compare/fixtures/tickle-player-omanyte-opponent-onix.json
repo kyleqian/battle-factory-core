@@ -1,1 +1,34 @@
-{"schema":"tickle-portable-evidence/v1","orientation":"player-back Omanyte -> opponent-front Onix","scenario":"tools/battle-lab/mechanic-tickle-player-omanyte-opponent-onix.json","probe":"tools/compare/tickleProbe.py","sourceWindow":{"startFrame":67,"endFrame":271,"frameCount":205},"evidenceSha256":"a502cee39859fcf38d26ea4b2e470f482b90930fbe44d3df4383b1eb9e228621","rawRgbSha256":"5f7feebf20d8b3360f02464086912378298ee6959867d2305667d61b0b44c216","lifecycleCounts":{"eyeSparkle":2},"topology":{"tasks":["AnimTask_RockMonBackAndForth_Step","AnimTask_SwayMonStep","Task_LoopAndPlaySE"],"templates":["gEyeSparkleSpriteTemplate","gMultiuseSpriteTemplate","gSimplePaletteBlendSpriteTemplate","gSpriteTemplate_EnemyShadow","sHealthbarSpriteTemplates","sHealthboxOpponentSpriteTemplates","sHealthboxPlayerSpriteTemplates"],"callbacks":["AnimEyeSparkle_Step","AnimSimplePaletteBlend_Step","SpriteCB_HealthBar","SpriteCB_HealthBoxOther","SpriteCB_SetInvisible","SpriteCallbackDummy"]}}
+{
+  "schema": "tickle-portable-evidence/v1",
+  "orientation": "player-back Omanyte -> opponent-front Onix",
+  "scenario": "tools/battle-lab/mechanic-tickle-player-omanyte-opponent-onix.json",
+  "probe": "tools/compare/tickleProbe.py",
+  "sourceWindow": { "startFrame": 288, "endFrame": 492, "frameCount": 205 },
+  "evidenceSha256": "509f6618b019cb189b602d56100209797b1c9fa798bea3d7e5ec1472007e41c4",
+  "rawRgbSha256": "5b6253ce26a3db3c078c5c9b175c28bc51d5ff7687f797828b04b3440b12da8c",
+  "lifecycleCounts": { "eyeSparkle": 2 },
+  "topology": {
+    "tasks": [
+      "AnimTask_RockMonBackAndForth_Step",
+      "AnimTask_SwayMonStep",
+      "Task_LoopAndPlaySE"
+    ],
+    "templates": [
+      "gEyeSparkleSpriteTemplate",
+      "gMultiuseSpriteTemplate",
+      "gSimplePaletteBlendSpriteTemplate",
+      "gSpriteTemplate_EnemyShadow",
+      "sHealthbarSpriteTemplates",
+      "sHealthboxOpponentSpriteTemplates",
+      "sHealthboxPlayerSpriteTemplates"
+    ],
+    "callbacks": [
+      "AnimEyeSparkle_Step",
+      "AnimSimplePaletteBlend_Step",
+      "SpriteCB_HealthBar",
+      "SpriteCB_HealthBoxOther",
+      "SpriteCB_SetInvisible",
+      "SpriteCallbackDummy"
+    ]
+  }
+}
