@@ -9,8 +9,8 @@
         "the pure source-relative reducer ports ANIM_TAG_FINGER and ANIM_TAG_THOUGHT_BUBBLE load/free, gThoughtBubbleSpriteTemplate's forward/hold/reverse lifecycle, gMetronomeFingerSpriteTemplate's grow/three-wag/shrink affine program and terminal matrix callbacks, attacker-panned METRONOME plus three looped TAIL_WHIP restarts, OAM display transfer, and inactive cleanup",
         "the typed Scene-ON seam carries resolved CHANSEY/ONIX presentation geometry and the source SetSpriteNextToMonHead point; source-extracted legal species-113 front/back, FINGER, and THOUGHT_BUBBLE art plus shared ONIX/chrome feed the production compositor with tagged tile/palette state, software/hardware OAM order, matrices, registers, both audio players, raw RGB, and exact cleanup without damage, RNG, controller, turn, or facility ownership",
         "metronomePortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves the immutable dense source/hardware/audio receipt, reducer and typed seam, raw RGB, and shared application framebuffer on all 127 frames twice fresh in both orientations; the nearby exact TAUNT source/seam/framebuffer control remains 125/125",
-        "MOVE_FOLLOW_ME remains unsupported: it reuses ANIM_TAG_FINGER but has the distinct gFollowMeFingerSpriteTemplate/AnimFollowMeFinger callback, attacker top-center origin, normal-size affine OAM, 13-frame pre-sine delay, horizontal sine traversal with subpriority crossings, handoff to the terminal Metronome shrink callback, and METRONOME/ATTRACT/looped TAIL_WHIP audio timing; it lacks its own complete legal both-orientation twice-fresh dense acceptance",
-        "no damage, RNG, controller selection, turn order, round/facility state, boundary list, unsupported barrier, or sibling acceptance changed"
+        "MOVE_FOLLOW_ME now has its own independent complete dense acceptance; Metronome was rerun 127/127 twice fresh in both orientations through the strengthened shared comparator with its accepted digests unchanged",
+        "no damage, RNG, controller selection, turn order, round/facility state, boundary list, unsupported barrier, or non-FINGER sibling acceptance changed"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-metronome-player-chansey-opponent-onix.json",
@@ -27,6 +27,34 @@
         "src/engine/battleScene.ts",
         "tests/animation/metronomeEvidence.test.ts",
         "tests/animation/metronome.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_FOLLOW_ME",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal Level-50 Factory set-183 TOGETIC_1 versus set-156 ONIX Scene-ON parties pass the entire 185-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 69-253 reproduce evidence 5aefcc2e260438071df5776ec35ff02a9c4540e4913fcab8db5d4018892cb871 / raw RGB 99d4031b7dc1aa40e2f68ba177e7617283a9873603b3d962db0e4cc1c33ffd96 and opponent-front frames 73-257 reproduce evidence 74485aa1de9e13cc0721a99d78c2cacfd4bf2c456d91a0a844ae20cb1c7be0e0 / raw RGB 7518f7d53c9d83f9ee9e5711a6082b169d56026ce037575878d7092fd1bea1bf",
+        "the source audit proves set 183 is the lowest suitable Level-50 carrier and pins species 176, Relaxed nature, Defense/HP spread, Lax Incense, Factory IV/friendship fields, and the complete three-Pokemon source-set parties; repeating the legal active move only constrains controller/AI selection",
+        "the pure source-relative reducer ports ANIM_TAG_FINGER load/free, gFollowMeFingerSpriteTemplate's normal-affine grow, attacker BATTLER_COORD_X/top origin and clamp, 13-frame delay, horizontal GBA-sine traversal, both subpriority crossings, handoff to AnimMetronomeFinger_Step's three-wag/shrink terminal program, initial and looped TAIL_WHIP plus ATTRACT audio, display transfer, and cleanup",
+        "the typed Scene-ON seam carries only resolved TOGETIC/ONIX presentation geometry and the source top-center point; source-extracted legal species-176 front/back and byte-identical shared FINGER art plus shared ONIX/chrome pass tagged tile/palette lifetime, source waits/offsets, software/hardware OAM ordering, matrices, registers, both audio players, raw RGB, and every production framebuffer",
+        "metronomePortable.ts reruns both Follow Me probes through tools/run-mgba-probe.py and proves all 185 immutable dense source/hardware/audio/reducer/seam/framebuffer frames twice fresh in both orientations; MOVE_METRONOME remains the exact 127/127 twice-fresh nearby control with unchanged digests",
+        "no damage, RNG, controller selection, turn order, round/facility state, animation boundary list, unsupported barrier, or non-FINGER sibling acceptance changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-follow-me-player-togetic-opponent-onix.json",
+        "tools/battle-lab/mechanic-follow-me-opponent-togetic-player-onix.json",
+        "tools/compare/fixtures/follow-me-player-togetic-opponent-onix.json",
+        "tools/compare/fixtures/follow-me-opponent-togetic-player-onix.json",
+        "tools/compare/metronomeProbe.py",
+        "tools/compare/metronomePortable.ts",
+        "tools/compare/followMeSourceAudit.ts",
+        "tools/compare/extractMetronomeAssets.ts",
+        "src/animation/assets/metronome.json",
+        "src/animation/followMe.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/followMeEvidence.test.ts",
+        "tests/animation/followMe.test.ts"
       ]
     },
     {
@@ -2022,7 +2050,7 @@
         "MOVE_METRONOME",
         "MOVE_FOLLOW_ME"
       ],
-      "goal": "MOVE_METRONOME is independently exact at 127/127 complete source/software/typed-seam, tagged tile/palette, hardware OAM/matrix/order, register/audio, raw-RGB, and shared-framebuffer frames in both orientations twice fresh through first inactive cleanup. MOVE_FOLLOW_ME remains unsupported: its gFollowMeFingerSpriteTemplate uses AnimFollowMeFinger, attacker top-center geometry, normal affine OAM, a 13-frame delay, sine traversal with subpriority crossings, then the shared terminal shrink callback; its METRONOME/ATTRACT/looped TAIL_WHIP timing and complete legal both-orientation twice-fresh body still need independent dense acceptance."
+      "goal": "Track closed. MOVE_METRONOME independently remains exact at 127/127 complete source/software/typed-seam, tagged tile/palette, hardware OAM/matrix/order, register/audio, raw-RGB, and shared-framebuffer frames in both orientations twice fresh through first inactive cleanup. MOVE_FOLLOW_ME independently passes its distinct gFollowMeFingerSpriteTemplate/AnimFollowMeFinger top-center, normal-affine grow, 13-frame delay, sine/subpriority traversal, shared three-wag/shrink terminal callback, audio, cleanup, and production framebuffer at 185/185 twice fresh in both orientations."
     },
     {
       "id": "focus-energy-endure-effect",

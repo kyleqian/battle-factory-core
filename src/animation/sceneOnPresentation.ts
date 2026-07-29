@@ -287,6 +287,10 @@ import {
   type MetronomeState,
 } from "./metronome.ts";
 import {
+  followMeAtAge,
+  type FollowMeState,
+} from "./followMe.ts";
+import {
   tailGlowAtAge,
   type TailGlowState,
 } from "./tailGlow.ts";
@@ -488,6 +492,7 @@ export interface SceneOnPresentationBattler {
     | "MINUN"
     | "FLAAFFY"
     | "VOLBEAT"
+    | "TOGETIC"
     | "MACHOKE"
     | "TAILLOW"
     | "EEVEE"
@@ -1261,6 +1266,15 @@ export interface SceneOnMetronomeConfig {
   readonly attackerHead: Readonly<MetronomePoint>;
 }
 
+export interface SceneOnFollowMeConfig {
+  readonly move: "FOLLOW_ME";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source `BATTLER_COORD_X` and clamped `BATTLER_COORD_ATTR_TOP`. */
+  readonly attackerTop: Readonly<MetronomePoint>;
+}
+
 export interface SceneOnTailGlowConfig {
   readonly move: "TAIL_GLOW";
   readonly attacker: SceneOnPresentationBattler;
@@ -1483,6 +1497,7 @@ export type SceneOnMoveConfig =
   | SceneOnFakeTearsConfig
   | SceneOnTickleConfig
   | SceneOnMetronomeConfig
+  | SceneOnFollowMeConfig
   | SceneOnTailGlowConfig
   | SceneOnSelfDestructConfig
   | SceneOnExplosionConfig
@@ -1552,6 +1567,8 @@ export type SceneOnTicklePresentationState =
   SceneOnMovePresentationState<SceneOnTickleConfig>;
 export type SceneOnMetronomePresentationState =
   SceneOnMovePresentationState<SceneOnMetronomeConfig>;
+export type SceneOnFollowMePresentationState =
+  SceneOnMovePresentationState<SceneOnFollowMeConfig>;
 export type SceneOnTailGlowPresentationState =
   SceneOnMovePresentationState<SceneOnTailGlowConfig>;
 
@@ -1753,6 +1770,12 @@ export interface SceneOnTickleView extends TickleState {
 }
 
 export interface SceneOnMetronomeView extends MetronomeState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnFollowMeView extends FollowMeState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3441,6 +3464,25 @@ export function sceneOnMetronomeView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attackerHead,
+    ),
+  };
+}
+
+/** `age=0` is Move_FOLLOW_ME's first displayed source-script frame. */
+export function sceneOnFollowMeView(
+  state: SceneOnFollowMePresentationState,
+): SceneOnFollowMeView {
+  if (state.config.move !== "FOLLOW_ME") {
+    throw new Error(`expected FOLLOW_ME presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...followMeAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attackerTop,
     ),
   };
 }

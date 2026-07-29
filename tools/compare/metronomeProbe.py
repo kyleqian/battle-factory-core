@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Complete Scene-ON MOVE_METRONOME source/hardware/audio/RGB receipt."""
+"""Complete Scene-ON FINGER-track source/hardware/audio/RGB receipt."""
 from __future__ import annotations
 import hashlib, json, subprocess, sys
 from pathlib import Path
@@ -11,7 +11,26 @@ HARNESS = next(p for p in (ROOT, *ROOT.parents) if (p / "oracle" / "emerald_core
 sys.path.insert(0, str(HARNESS / "oracle"))
 from battle_lab import BattleLab, validate_request # noqa: E402
 from emerald_core import EmeraldOracle # noqa: E402
-MOVE = 118
+IS_FOLLOW_ME = "follow-me" in SCENARIO.name
+MOVE = 266 if IS_FOLLOW_ME else 118
+MOVE_NAME = "Move_FOLLOW_ME" if IS_FOLLOW_ME else "Move_METRONOME"
+END_NAME = "Move_CHARGE" if IS_FOLLOW_ME else "Move_SKULL_BASH"
+EVIDENCE_SCHEMA = "follow-me-dense-evidence/v1" if IS_FOLLOW_ME else "metronome-dense-evidence/v1"
+TEMPLATES = (
+    ("gFollowMeFingerSpriteTemplate",)
+    if IS_FOLLOW_ME
+    else ("gThoughtBubbleSpriteTemplate", "gMetronomeFingerSpriteTemplate")
+)
+CALLBACKS = (
+    ("AnimFollowMeFinger", "AnimFollowMeFinger_Step1", "AnimFollowMeFinger_Step2", "AnimMetronomeFinger_Step")
+    if IS_FOLLOW_ME
+    else ("AnimThoughtBubble", "AnimThoughtBubble_Step", "AnimMetronomeFinger", "AnimMetronomeFinger_Step")
+)
+SONGS = (
+    ("se_m_metronome", "se_m_attract", "se_m_tail_whip")
+    if IS_FOLLOW_ME
+    else ("se_m_metronome", "se_m_tail_whip")
+)
 
 def main() -> None:
     request = validate_request(json.loads(SCENARIO.read_text()), "battle-scene-on")
@@ -23,7 +42,7 @@ def main() -> None:
     names = {n: a for a, n in pairs}; by_address = {a: n for a, n in pairs}; sy = oracle.symbols
     sprites, matrices, tasks = sy["gSprites"], sy["gOamMatrices"], sy["gTasks"]
     active, ptr, wait = names["gAnimScriptActive"], names["sBattleAnimScriptPtr"], names["sAnimFramesToWait"]
-    start, end, tags, tile_tags, software = names["Move_METRONOME"], names["Move_SKULL_BASH"], names["sSpritePaletteTags"], names["sSpriteTileRangeTags"], names["gMain"] + 0x38
+    start, end, tags, tile_tags, software = names[MOVE_NAME], names[END_NAME], names["sSpritePaletteTags"], names["sSpriteTileRangeTags"], names["gMain"] + 0x38
     RGB.mkdir(parents=True, exist_ok=True)
     def u16(a): return oracle.read_u8(a) | oracle.read_u8(a + 1) << 8
     def u32(a): return u16(a) | u16(a + 2) << 16
@@ -61,19 +80,19 @@ def main() -> None:
     for segment in request["trace"]["segments"]:
         for _ in range(segment["frames"]): oracle.advance(segment.get("buttons", [])); frame += 1; take()
     first=next((i for i,r in enumerate(rows) if r["gAnimScriptActive"] and r["scriptOffset"] is not None),None)
-    if first is None: raise RuntimeError(f"Metronome source pointer not observed; saw moves {sorted(seen_moves)}, pointers {[hex(v) for v in sorted(seen_ptrs)]}")
+    if first is None: raise RuntimeError(f"{MOVE_NAME} source pointer not observed; saw moves {sorted(seen_moves)}, pointers {[hex(v) for v in sorted(seen_ptrs)]}")
     last=next((i for i in range(first+1,len(rows)) if not rows[i]["gAnimScriptActive"]),None)
-    if last is None: raise RuntimeError("Metronome inactive cleanup not observed")
+    if last is None: raise RuntimeError(f"{MOVE_NAME} inactive cleanup not observed")
     source=rows[first:last+1]
     topology={"tasks":sorted({x["func"]["symbol"] for r in source for x in r["tasks"] if x["func"]["symbol"]}),"templates":sorted({x["template"]["symbol"] for r in source for x in r["sprites"] if x["template"]["symbol"]}),"callbacks":sorted({x["callback"]["symbol"] for r in source for x in r["sprites"] if x["callback"]["symbol"]})}
     counts={}
-    for template in ("gThoughtBubbleSpriteTemplate","gMetronomeFingerSpriteTemplate"):
+    for template in TEMPLATES:
         starts=0; prior=set()
         for row in source:
             current={x["slot"] for x in row["sprites"] if x["template"]["symbol"] == template}; starts += len(current-prior); prior=current
         counts[template]=starts
-    if counts != {"gThoughtBubbleSpriteTemplate":1,"gMetronomeFingerSpriteTemplate":1}: raise RuntimeError(f"Metronome lifecycle changed: {counts}")
-    if source[-1]["gAnimScriptActive"] or source[-1]["visualTaskCount"]: raise RuntimeError("Metronome first cleanup retained animation")
-    result={"schema":"metronome-dense-evidence/v1","setup":setup,"sourceWindow":{"startFrame":source[0]["frame"],"endFrame":source[-1]["frame"],"frameCount":len(source)},"sourceSymbols":{"Move_METRONOME":start,"Move_SKULL_BASH":end},"templates":{n:names[n] for n in counts},"callbackSymbols":{n:names[n] for n in ("AnimThoughtBubble","AnimThoughtBubble_Step","AnimMetronomeFinger","AnimMetronomeFinger_Step")},"songHeaders":{n:names[n] for n in ("se_m_metronome","se_m_tail_whip")},"topology":topology,"lifecycleCounts":counts,"frames":source}
+    if counts != {template: 1 for template in TEMPLATES}: raise RuntimeError(f"{MOVE_NAME} lifecycle changed: {counts}")
+    if source[-1]["gAnimScriptActive"] or source[-1]["visualTaskCount"]: raise RuntimeError(f"{MOVE_NAME} first cleanup retained animation")
+    result={"schema":EVIDENCE_SCHEMA,"setup":setup,"sourceWindow":{"startFrame":source[0]["frame"],"endFrame":source[-1]["frame"],"frameCount":len(source)},"sourceSymbols":{MOVE_NAME:start,END_NAME:end},"templates":{n:names[n] for n in counts},"callbackSymbols":{n:names[n] for n in CALLBACKS},"songHeaders":{n:names[n] for n in SONGS},"topology":topology,"lifecycleCounts":counts,"frames":source}
     OUTPUT.write_text(json.dumps(result,separators=(",",":"))+"\n"); print(f"wrote {OUTPUT}: source {source[0]['frame']}..{source[-1]['frame']} ({len(source)} frames), lifecycles {counts}")
 if __name__ == "__main__": main()

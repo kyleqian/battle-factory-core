@@ -1,5 +1,26 @@
 # Animation coverage
 
+## MOVE_FOLLOW_ME promoted exact; finger-metronome track closed (2026-07-28)
+
+**Verdict:** `MOVE_FOLLOW_ME` is exact. The lowest suitable Level-50 carrier
+is set **183** `FRONTIER_MON_TOGETIC_1` (species **176**), with its pinned
+Relaxed/Defense+HP/Lax Incense identity and complete source-set parties.
+Both Scene-ON orientations pass the full body through first inactive cleanup
+at **185/185** twice fresh. Player-back frames **69–253** have evidence/raw
+digests `5aefcc2e…2cb871` / `99d4031b…3ffd96`; opponent-front frames
+**73–257** have `74485aa1…be0e0` / `7518f7d5…ea1bf`.
+
+**Model/boundary:** the relative reducer, typed seam, and narrow compositor
+port the FINGER load/palette/tile lifetime, attacker top-center/clamp,
+normal-affine grow, 13-frame delay, sine traversal and both subpriority
+crossings, handoff to Metronome's three-wag/shrink terminal callback,
+TAIL_WHIP/ATTRACT/looped TAIL_WHIP audio, OAM/matrices/registers, raw RGB,
+and cleanup using source-extracted Togetic plus byte-identical shared FINGER
+art. `MOVE_METRONOME` remains **127/127** twice-fresh in both orientations
+with unchanged digests as the control. Coverage is **80 exact / 0 partial /
+0 staged / 196 unsupported**; no battle/controller/RNG/facility state,
+animation boundary list, unsupported barrier, or non-FINGER sibling changed.
+
 ## MOVE_METRONOME promoted exact; ANIM_TAG_FINGER track established (2026-07-28)
 
 **Verdict:** `MOVE_METRONOME` is exact. The lowest suitable Level-50 carrier

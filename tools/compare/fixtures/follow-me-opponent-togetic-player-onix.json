@@ -1,0 +1,20 @@
+{
+  "schema": "follow-me-portable-evidence/v1",
+  "orientation": "opponent-front Togetic -> player-back Onix",
+  "scenario": "tools/battle-lab/mechanic-follow-me-opponent-togetic-player-onix.json",
+  "probe": "tools/compare/metronomeProbe.py",
+  "appStage": {"presentationAge": 0},
+  "attacker": {"species": "TOGETIC", "geometry": {"side": "opponent", "spriteCorner": {"x": 144, "y": 17}, "animationCenter": {"x": 176, "y": 49}, "battlePositionCenter": {"x": 176, "y": 40}}},
+  "target": {"species": "ONIX", "geometry": {"side": "player", "spriteCorner": {"x": 40, "y": 48}, "animationCenter": {"x": 72, "y": 80}, "battlePositionCenter": {"x": 72, "y": 80}}},
+  "attackerTop": {"x": 176, "y": 25},
+  "fieldProfile": {"playerHp": 117, "playerMaxHp": 117, "opponentHp": 148, "opponentMaxHp": 148, "playerGender": "male", "opponentGender": "male"},
+  "sourceWindow": {"startFrame": 73, "endFrame": 257, "frameCount": 185},
+  "evidenceSha256": "74485aa1de9e13cc0721a99d78c2cacfd4bf2c456d91a0a844ae20cb1c7be0e0",
+  "rawRgbSha256": "7518f7d53c9d83f9ee9e5711a6082b169d56026ce037575878d7092fd1bea1bf",
+  "lifecycleCounts": {"gFollowMeFingerSpriteTemplate": 1},
+  "topology": {
+    "tasks": ["Task_LoopAndPlaySE"],
+    "templates": ["gFollowMeFingerSpriteTemplate", "gMultiuseSpriteTemplate", "gSpriteTemplate_EnemyShadow", "sHealthbarSpriteTemplates", "sHealthboxOpponentSpriteTemplates", "sHealthboxPlayerSpriteTemplates"],
+    "callbacks": ["AnimFollowMeFinger_Step1", "AnimFollowMeFinger_Step2", "AnimMetronomeFinger_Step", "DestroySpriteAndMatrix", "RunStoredCallbackWhenAffineAnimEnds", "SpriteCB_HealthBar", "SpriteCB_HealthBoxOther", "SpriteCB_SetInvisible", "SpriteCallbackDummy"]
+  }
+}

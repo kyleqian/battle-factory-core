@@ -743,6 +743,7 @@ import {
   sceneOnFakeTearsView,
   sceneOnTickleView,
   sceneOnMetronomeView,
+  sceneOnFollowMeView,
   sceneOnDragonClawView,
   sceneOnSingView,
   sceneOnFutureSightView,
@@ -759,6 +760,7 @@ import {
   type SceneOnFakeTearsPresentationState,
   type SceneOnTicklePresentationState,
   type SceneOnMetronomePresentationState,
+  type SceneOnFollowMePresentationState,
   type SceneOnScaryFacePresentationState,
   type SceneOnAbsorbPresentationState,
   type SceneOnReflectPresentationState,
@@ -1334,6 +1336,8 @@ const tickleArt = tickleAsset as {
 const metronomeArt = metronomeAsset as {
   chanseyBack: { tileset: Tileset; palette: RgbColor[] };
   chanseyFront: { tileset: Tileset; palette: RgbColor[] };
+  togeticBack: { tileset: Tileset; palette: RgbColor[] };
+  togeticFront: { tileset: Tileset; palette: RgbColor[] };
   finger: { tileset: Tileset; palette: RgbColor[] };
   thoughtBubble: { tileset: Tileset; palette: RgbColor[] };
 };
@@ -19609,6 +19613,117 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "CHANSEY used" : "Foe CHANSEY used",
       "METRONOME!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "FOLLOW_ME") {
+    const followMeState = state as SceneOnFollowMePresentationState;
+    const view = sceneOnFollowMeView(followMeState);
+    const displayed = sceneOnFollowMeView({
+      ...followMeState,
+      age: followMeState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "TOGETIC"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "TOGETIC"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged FOLLOW_ME pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const togeticSource = playerToOpponent
+      ? metronomeArt.togeticBack : metronomeArt.togeticFront;
+    const togetic = playerToOpponent
+      ? togeticSource
+      : { ...togeticSource, tileset: subTileset(togeticSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const togeticIdle = opponentToPlayer
+      ? speciesFrontIdleRestOffset("TOGETIC") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      togetic.tileset,
+      togetic.palette,
+      view.attacker.geometry.spriteCorner.x + togeticIdle.x2,
+      view.attacker.geometry.spriteCorner.y + togeticIdle.y2,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    const drawFinger = () => {
+      if (!displayed.finger) return;
+      drawSpriteSheetAffineRotate(
+        fb,
+        metronomeArt.finger.tileset,
+        metronomeArt.finger.palette,
+        displayed.finger.x + displayed.finger.x2,
+        displayed.finger.y,
+        displayed.finger.matrix.a,
+        displayed.finger.matrix.b,
+        displayed.finger.matrix.c,
+        displayed.finger.matrix.d,
+        undefined,
+        false,
+      );
+    };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawTarget();
+    const fingerBehind = displayed.finger?.subpriority
+      === (view.attacker.geometry.side === "player" ? 32 : 42);
+    if (fingerBehind) {
+      drawFinger();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawFinger();
+    }
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "TOGETIC",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "TOGETIC" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "TOGETIC used" : "Foe TOGETIC used",
+      "FOLLOW ME!",
       99,
     );
     return;

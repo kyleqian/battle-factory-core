@@ -1,5 +1,5 @@
-// Reproducible source extraction for legal Level-50 Factory set-227 Chansey
-// plus ANIM_TAG_FINGER and ANIM_TAG_THOUGHT_BUBBLE.
+// Reproducible source extraction for legal Level-50 Factory set-227 Chansey,
+// set-183 Togetic, plus ANIM_TAG_FINGER and ANIM_TAG_THOUGHT_BUBBLE.
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -34,6 +34,10 @@ writeFileSync(out, `${JSON.stringify({
       "graphics/pokemon/chansey/back.png; FRONTIER_MON_CHANSEY_1 set 227; SPECIES_CHANSEY 113",
     chanseyFront:
       "graphics/pokemon/chansey/anim_front.png frame 0; FRONTIER_MON_CHANSEY_1 set 227; SPECIES_CHANSEY 113",
+    togeticBack:
+      "graphics/pokemon/togetic/back.png; FRONTIER_MON_TOGETIC_1 set 183; SPECIES_TOGETIC 176",
+    togeticFront:
+      "graphics/pokemon/togetic/anim_front.png frame 0; FRONTIER_MON_TOGETIC_1 set 183; SPECIES_TOGETIC 176",
     finger:
       "graphics/battle_anims/sprites/finger.png; ANIM_TAG_FINGER; gMetronomeFingerSpriteTemplate",
     thoughtBubble:
@@ -46,6 +50,14 @@ writeFileSync(out, `${JSON.stringify({
   chanseyFront: sprite(
     "graphics/pokemon/chansey/anim_front.png",
     "graphics/pokemon/chansey/normal.pal",
+  ),
+  togeticBack: sprite(
+    "graphics/pokemon/togetic/back.png",
+    "graphics/pokemon/togetic/normal.pal",
+  ),
+  togeticFront: sprite(
+    "graphics/pokemon/togetic/anim_front.png",
+    "graphics/pokemon/togetic/normal.pal",
   ),
   finger: sprite("graphics/battle_anims/sprites/finger.png"),
   thoughtBubble: sprite("graphics/battle_anims/sprites/thought_bubble.png"),

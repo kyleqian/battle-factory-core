@@ -9,7 +9,12 @@ import {
   metronomeAtAge,
 } from "../../src/animation/metronome.ts";
 import {
+  FOLLOW_ME_FRAME_COUNT,
+  followMeAtAge,
+} from "../../src/animation/followMe.ts";
+import {
   createSceneOnMovePresentation,
+  sceneOnFollowMeView,
   sceneOnMetronomeView,
   type SceneOnPresentationBattler,
 } from "../../src/animation/sceneOnPresentation.ts";
@@ -17,11 +22,12 @@ import { createInitialState, render, type EngineState } from "../../src/engine/c
 
 type Window = { startFrame: number; endFrame: number; frameCount: number };
 type Fixture = {
-  schema: "metronome-portable-evidence/v1";
+  schema: "metronome-portable-evidence/v1" | "follow-me-portable-evidence/v1";
   orientation: string; scenario: string; probe: string;
   appStage: { presentationAge: number };
   attacker: SceneOnPresentationBattler; target: SceneOnPresentationBattler;
-  attackerHead: { x: number; y: number };
+  attackerHead?: { x: number; y: number };
+  attackerTop?: { x: number; y: number };
   fieldProfile: {
     playerHp: number; playerMaxHp: number;
     opponentHp: number; opponentMaxHp: number;
@@ -39,7 +45,8 @@ type Frame = {
   gAnimScriptActive: number; visualTaskCount: number;
 };
 type Probe = {
-  schema: "metronome-dense-evidence/v1"; sourceWindow: Window;
+  schema: "metronome-dense-evidence/v1" | "follow-me-dense-evidence/v1";
+  sourceWindow: Window;
   lifecycleCounts: Record<string, number>; topology: unknown; frames: Frame[];
 };
 
@@ -53,6 +60,11 @@ const fresh = new Map<string, { evidence: string; raw: string }>();
 
 function verify(fixturePath: string, runNumber: number): void {
   const fixture = JSON.parse(readFileSync(resolve(fixturePath), "utf8")) as Fixture;
+  const isFollowMe = fixture.schema === "follow-me-portable-evidence/v1";
+  const expectedProbeSchema = isFollowMe
+    ? "follow-me-dense-evidence/v1" : "metronome-dense-evidence/v1";
+  const expectedFrameCount = isFollowMe
+    ? FOLLOW_ME_FRAME_COUNT : METRONOME_FRAME_COUNT;
   const scratch = mkdtempSync(join(tmpdir(), "pokebench-metronome-portable-"));
   const output = join(scratch, "probe.json");
   const rgbDir = join(scratch, "rgb");
@@ -81,22 +93,31 @@ function verify(fixturePath: string, runNumber: number): void {
     && Array.isArray(frame.tasks) && Array.isArray(frame.sprites)
     && frame.se1 !== null && frame.se2 !== null);
   if (
-    fixture.schema !== "metronome-portable-evidence/v1"
-    || probe.schema !== "metronome-dense-evidence/v1"
+    !["metronome-portable-evidence/v1", "follow-me-portable-evidence/v1"]
+      .includes(fixture.schema)
+    || probe.schema !== expectedProbeSchema
     || !same(probe.sourceWindow, fixture.sourceWindow)
     || !same(probe.lifecycleCounts, fixture.lifecycleCounts)
     || !same(probe.topology, fixture.topology)
     || evidence !== fixture.evidenceSha256
-    || probe.frames.length !== METRONOME_FRAME_COUNT || !fields
+    || probe.frames.length !== expectedFrameCount || !fields
   ) throw new Error(`${fixture.orientation}: immutable dense receipt changed`);
 
-  const stage = createSceneOnMovePresentation({
-    move: "METRONOME",
-    attacker: fixture.attacker,
-    target: fixture.target,
-    attackerHead: fixture.attackerHead,
-    fieldProfile: fixture.fieldProfile,
-  });
+  const stage = isFollowMe
+    ? createSceneOnMovePresentation({
+      move: "FOLLOW_ME",
+      attacker: fixture.attacker,
+      target: fixture.target,
+      attackerTop: fixture.attackerTop!,
+      fieldProfile: fixture.fieldProfile,
+    })
+    : createSceneOnMovePresentation({
+      move: "METRONOME",
+      attacker: fixture.attacker,
+      target: fixture.target,
+      attackerHead: fixture.attackerHead!,
+      fieldProfile: fixture.fieldProfile,
+    });
   const failures: string[] = [];
   for (const [index, oracle] of probe.frames.entries()) {
     const rgb = readFileSync(
@@ -108,10 +129,32 @@ function verify(fixturePath: string, runNumber: number): void {
       continue;
     }
     const age = fixture.appStage.presentationAge + index;
-    const component = metronomeAtAge(
-      age, fixture.attacker.geometry.side, fixture.attackerHead,
-    );
-    const seam = sceneOnMetronomeView({ ...stage, age });
+    const component = isFollowMe
+      ? followMeAtAge(
+        age, fixture.attacker.geometry.side, fixture.attackerTop!,
+      )
+      : metronomeAtAge(
+        age, fixture.attacker.geometry.side, fixture.attackerHead!,
+      );
+    const seam = isFollowMe
+      ? sceneOnFollowMeView({
+        ...stage,
+        config: {
+          ...stage.config,
+          move: "FOLLOW_ME",
+          attackerTop: fixture.attackerTop!,
+        },
+        age,
+      })
+      : sceneOnMetronomeView({
+        ...stage,
+        config: {
+          ...stage.config,
+          move: "METRONOME",
+          attackerHead: fixture.attackerHead!,
+        },
+        age,
+      });
     const seamMatch = same(
       { ...seam, age: undefined, attacker: undefined, target: undefined },
       component,
@@ -130,7 +173,7 @@ function verify(fixturePath: string, runNumber: number): void {
         || app[pixel * 4 + 2] !== rgb[pixel * 3 + 2]
       ) diff++;
     }
-    const cleanup = index !== METRONOME_FRAME_COUNT - 1
+    const cleanup = index !== expectedFrameCount - 1
       || (!component.active && !oracle.gAnimScriptActive
         && oracle.visualTaskCount === 0);
     if (!seamMatch || diff !== 0 || !cleanup) {
@@ -152,7 +195,7 @@ function verify(fixturePath: string, runNumber: number): void {
   fresh.set(fixture.orientation, { evidence, raw: rawDigest });
   console.log(
     `${fixture.orientation} run ${runNumber}: `
-    + `${probe.frames.length}/${METRONOME_FRAME_COUNT} component/seam/framebuffer exact`,
+    + `${probe.frames.length}/${expectedFrameCount} component/seam/framebuffer exact`,
   );
 }
 
