@@ -3,14 +3,13 @@
   "entries": [
     {
       "move": "MOVE_HYPNOSIS",
-      "status": "partial",
-      "remaining": "Wire the typed Scene-ON seam and production battleScene.ts compositor, then make every existing 169/168 dense frame pass shared-framebuffer comparison in both orientations, including psychic palette rotation, target tint, GoldRing ordering/display latches, Politoed idle latches, audio semantics, and first inactive cleanup.",
+      "status": "exact",
       "covered": [
         "the generated Level-50 eligibility graph rejects source set 38 HOOTHOOT and proves challenge-1 set 265 FRONTIER_MON_POLITOED_1 is the lowest legal Level-50 carrier (species 186, Hypnosis 95, Relaxed, Defense+SpDefense, Shell Bell); complete legal three-Pokemon Scene-ON parties stage it against ONIX in both orientations",
-        "fresh dense probes cover the complete source body through first inactive cleanup twice reproducibly in both orientations: player-back frames 74-242 pass 169/169 source/component/hardware/raw-RGB checks with evidence 6b164293b9a3ad086504808422b0f95ab07ccd84595eb87b3ca908e34189b0c4 and raw RGB 7c06a1b4825562841f65768ae6b9a97374dba4a727a0ecd59f28220deddf10a1; opponent-front frames 78-245 pass 168/168 with evidence 8baa59de6a99008bebd74e72b4089c6146f5f98fefd03ca7805a84412b4f100b and raw RGB 69b6f767aef05462568e2229c129b620b2ebfa6da399d072507eaa438ee453ec",
-        "the pure source-relative reducer ports ANIM_TAG_GOLD_RING lifetime, all six staggered gGoldRingSpriteTemplate/TranslateAnimSpriteToTargetMonLocation 27-tick paths including DestroyAnimSprite handoff, side-relative geometry, both psychic-background BLDY programs, blend-task lifetime, three Supersonic sound triggers, script wait, and first inactive cleanup",
-        "reproducible extraction regenerates Politoed front/back and GoldRing assets byte-for-byte; hypnosisPortable.ts reruns both complete legal probes twice fresh and pins software/hardware OAM and matrices, palette buffers/tags, registers, audio players, unchanged HP/items/status, raw RGB, reducer state, and cleanup",
-        "this remains partial because no typed Scene-ON seam or production shared-framebuffer compositor is wired or compared; the precise promotion gate is every one of the same 169/168 frames matching through battleScene.ts in both orientations, including psychic BG palette rotation, target 0<->12 RGB(31,18,31) blend, GoldRing OAM ordering/display latches, Politoed idle latches, audio semantics, and first inactive cleanup",
+        "fresh dense probes cover the complete source body through first inactive cleanup twice reproducibly in both orientations: player-back frames 74-242 pass 169/169 source/component/hardware/raw-RGB/production-framebuffer checks with evidence 6b164293b9a3ad086504808422b0f95ab07ccd84595eb87b3ca908e34189b0c4 and raw RGB 7c06a1b4825562841f65768ae6b9a97374dba4a727a0ecd59f28220deddf10a1; opponent-front frames 78-245 pass 168/168 with evidence 8baa59de6a99008bebd74e72b4089c6146f5f98fefd03ca7805a84412b4f100b and raw RGB 69b6f767aef05462568e2229c129b620b2ebfa6da399d072507eaa438ee453ec",
+        "the pure source-relative reducer and typed Scene-ON seam port ANIM_TAG_GOLD_RING lifetime, all six staggered gGoldRingSpriteTemplate/TranslateAnimSpriteToTargetMonLocation 27-tick paths including DestroyAnimSprite handoff, side-relative geometry, both queued psychic-background palette/BLDY programs, RGB(31,18,31) target blend-task lifetime and 0-to-12-to-0 coefficients, three side-panned Supersonic sound triggers, script wait, and first inactive cleanup",
+        "the production compositor ports GoldRing source OAM ordering and display latches in both orientations, Politoed and Onix idle/enemy-shadow latches, target palette tint, background palette rotation and darkening, immutable healthboxes, move windows/text, and cleanup without owning gameplay state",
+        "reproducible extraction regenerates Politoed front/back and GoldRing assets byte-for-byte; hypnosisPortable.ts reruns both complete legal probes twice fresh and pins every source/component, typed-seam, software/hardware OAM and matrix, palette buffer/tag, register, audio trigger, unchanged HP/item/status, raw-RGB, and production shared-framebuffer frame",
         "MOVE_PSYBEAM remains unsupported after an independent source/legal-carrier batch audit: its lowest carrier is set 145 FRONTIER_MON_SPINDA, and its distinct body adds eleven 13-tick GoldRing groups, Set/UnsetPsychicBackground, target SwayMon, a two-leg target blend_color_cycle, initial Psybeam audio, and SoundTask_LoopSEAdjustPanning 3/4/0/15; it has no complete dense both-orientation evidence",
         "presentation owns no sleep, damage, confusion, gameplay RNG, turn order, controller decision, or facility state; no animation-boundary list, unsupported barrier, or canonical-recording allowlist changed"
       ],
@@ -25,6 +24,8 @@
         "tools/compare/extractHypnosisAssets.ts",
         "src/animation/assets/hypnosis.json",
         "src/animation/hypnosis.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
         "tests/animation/goldRingSourceCheckpoint.test.ts",
         "tests/animation/hypnosis.test.ts",
         "tests/animation/hypnosisAssets.test.ts",
