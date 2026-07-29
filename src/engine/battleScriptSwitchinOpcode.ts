@@ -818,33 +818,23 @@ function createSwitchineffectsOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
           ? Object.freeze({ ...candidate, status3: (candidate.status3 | STATUS3_INTIMIDATE_POKES) >>> 0 })
           : candidate
       ) as unknown as BattleScriptRulesBattlers;
-      return callSwitchinScript(context, "BattleScript_IntimidateActivates", Object.freeze({
-        ...abilityRules,
-        battlers: Object.freeze(battlers),
-      }));
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: Object.freeze({ ...nextRules, battlers: Object.freeze(battlers) }) },
+      );
     }
     if (nextActive.ability === ABILITY_TRACE && !(nextActive.status3 & STATUS3_TRACE)) {
-      const target = nextRules.battlers.findIndex((candidate, index) =>
-        index < nextRules.battleTopology.battlersCount
-        && candidate.side !== nextActive.side
-        && candidate.hp !== 0
-        && candidate.ability !== 0
+      const battlers = nextRules.battlers.map((candidate, index) =>
+        index === battler
+          ? Object.freeze({ ...candidate, status3: (candidate.status3 | STATUS3_TRACE) >>> 0 })
+          : candidate
+      ) as unknown as BattleScriptRulesBattlers;
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: Object.freeze({ ...nextRules, battlers: Object.freeze(battlers) }) },
       );
-      if (target >= 0) {
-        const copiedAbility = nextRules.battlers[target as BattleScriptBattlerId].ability;
-        const battlers = nextRules.battlers.map((candidate, index) =>
-          index === battler ? Object.freeze({ ...candidate, ability: copiedAbility }) : candidate
-        ) as unknown as BattleScriptRulesBattlers;
-        return callSwitchinScript(context, "BattleScript_TraceActivates", Object.freeze({
-          ...abilityRules,
-          battlers: Object.freeze(battlers),
-          lastUsedAbility: copiedAbility,
-          battleTextBuff1MonNick: Object.freeze({
-            battler: target as BattleScriptBattlerId,
-            partyIndex: nextRules.battlers[target as BattleScriptBattlerId].partyIndex,
-          }),
-        }));
-      }
     }
     if (
       nextActive.ability === ABILITY_FORECAST

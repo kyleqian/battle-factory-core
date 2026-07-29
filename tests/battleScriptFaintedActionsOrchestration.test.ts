@@ -107,7 +107,10 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
     prepareSelectionMessageFromTable: () => null,
     resolveAttackerBattler: () => null,
     resolveBattlerAtPosition: () => null,
-    resolveHalfwordOperand: () => null,
+    resolveHalfwordOperand: (_context, operand) =>
+      operand.expression === "B_WAIT_TIME_LONG"
+        ? 64
+        : operand.expression === "B_WAIT_TIME_SHORT" ? 32 : null,
     resolveByteOperand: () => null,
   });
 }
@@ -325,6 +328,30 @@ describe("runBattleScriptFaintedActionsOrchestration (HandleFaintedMonActions eq
     expect(result.kind).toBe("terminal");
     expect(result.state.rulesContext.battleOutcome).toBe(1);
     expect(result.state.rulesContext.battlers[1]!.hp).toBe(0);
+    expect(result.state.rng.calls).toBe(initial.rng.calls);
+  });
+
+  it("state 6 resolves pending replacement Intimidate before White Herb and clears the pending bit", () => {
+    const rc = context({
+      battlers: [
+        battler({
+          side: 0,
+          item: 180,
+          statStages: [6, 5, 6, 6, 6, 6, 6, 6],
+        }),
+        battler({ side: 1, ability: 22, status3: 1 << 19 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+    });
+    const initial = haltedAtOwnEnd(rc);
+    const result = runBattleScriptFaintedActionsOrchestration(program, handlers, initial);
+    expect(result.kind).toBe("no-fainted-battlers");
+    expect(result.state.rulesContext.battlers[0].statStages[1]).toBe(6);
+    expect(result.state.rulesContext.battlers[0].item).toBe(0);
+    expect(result.state.rulesContext.battlers[1].status3 & (1 << 19)).toBe(0);
+    expect(result.state.events.filter((event) => event.kind === "message").map((event) => event.messageId))
+      .toEqual(["STRINGID_PKMNCUTSATTACKWITH", "STRINGID_PKMNSITEMRESTOREDSTATUS"]);
     expect(result.state.rng.calls).toBe(initial.rng.calls);
   });
 });
