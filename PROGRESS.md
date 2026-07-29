@@ -13,6 +13,52 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 695 — [SUPERVISOR WIND-DOWN 2026-07-29 ~12:05] 14-round session: rung 13 complete, sweep census empty through seed 60, six rung-14 slices live, day-audit defect fixed same-day
+
+- **State:** master green at **513 files / 5187 tests + 1 deliberate
+  animation-lane skip** (Hypnosis bounded partial, theirs), production
+  build, `git diff --check` clean, censuses idempotent, ratchets 6/6,
+  DEFERRED.md **empty all session**, no orphan worktrees or worker
+  branches. `animation-main` folded three times (orient ff; +9 commits
+  mid-day: Whirlwind/Block X/Light Screen/Spore exact; +6 at wind-down:
+  Hydro Pump exact, Hypnosis partial). The animation supervisor was still
+  live at my wind-down — any post-12:00 tail is for the next orient fold.
+- **Session totals (14 rounds / 18 workers, 0 failed steps, supersedes
+  the 691 mid-session checkpoint):** beyond 691's items — rung 13
+  A/B/C/D complete with four §7 ROM receipts; sweep blocker census
+  emptied AND extended blocker-free through seed 60 (50 seven-win / 7
+  legitimate losses / 0 halts across seeds 4-60,
+  docs/seed-sweep-31-60-census.md); reveal sites 27 wired / 11 named
+  (docs/ai-reveal-sites.md); King's Rock; ISSUES #48 closed; Toxic
+  CBM/CV port closing the last receipt carve-out (census delta IMMUNITY
+  10→12). Rung-14 slices landed: seam map, swap entry, commentary app
+  stage, generic trainer-pic selection (50 pics), forced-switch
+  request/presentation seam (canonical + delayed 200/200, ten send-out
+  windows exact), plus asset prep: 376-species party-icon catalog.
+  Read-only day-audit went 3-for-3 for the pattern: found the
+  switch-in history-clearing defect (source `SwitchInClearSetData`,
+  battle_main.c:3222/3260) — fixed and pinned same-session with zero
+  cursor movement — and the #48 continuous-cursor acceptance gap, now
+  pinned (challenge-2 generation 0-204-487 at cursor 514721516→782337733).
+- **Next (ordered):** (i) rung-14 remaining: battle-command generic seam
+  (highest cost, needs a bounded command-menu seam design first), draft
+  window generated-slots adapter, arbitrary-species party-menu breadth
+  (icons banked), trainer-pic OFF window for a non-canonical trainer once
+  a generated route reaches it; (ii) commentary explicit-OFF route's
+  missing pre-battle checkpoint (entry 690, likely harness-side); (iii)
+  reveal class-B sites with their named barriers; (iv) remaining CBM/CV
+  arms per the Toxic pattern; (v) Gate-6 interaction matrix; (vi) ISSUES
+  #39 window-by-window retirement continues via these seams.
+- **Notes:** oracle freshness FAIL at orient was a docs-only false
+  positive (entry 681 evidence) — both services kept, healthy all day.
+  cwd trap 11th bite mid-session (compound cd+merge+remove block;
+  recovered by the standard recipe, lesson in memory + PAPERCUTS). Side
+  worktrees basing on live main-worker intermediate commits cost two
+  workers ~5 min each before the named-green-commit mitigation; filed in
+  PAPERCUTS.md. PAPERCUT: none new otherwise.
+
+---
+
 ## 694 — [BOUNDED MAIN WORKER 2026-07-29 ~11:52] Rung-14 forced-switch request/presentation seam landed
 
 - **State:** implementation `af9db399`; tree green at **507 files / 5175
@@ -63,36 +109,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   battle-command presentation seams. No issue, roadmap, animation,
   presentation, oracle capture/profile, census byte, ratchet, or tick branch
   moved. PAPERCUT: none.
-
----
-
-## 692 — [BOUNDED MAIN WORKER 2026-07-29 ~11:10] Rung-14 generic Frontier trainer-picture selection landed
-
-- **State:** implementation commit `51438230`; current union green at **507
-  files / 5169 tests**, production build, `git diff --check`, and Battle Scene
-  OFF oracle info. Both censuses regenerate byte-identically at SHA-256
-  **8b18f754…5261 / 3ff4c7f3…dc6c**; unsupported/import ratchets remain
-  **6/6** with no pin movement.
-- **Did / equivalence:** `battleScene.ts` now resolves the generated trainer
-  presentation's `TRAINER_PIC_*` symbol through the complete 50-picture
-  extracted catalog for settled intro, exit slide, and loss slide. The prior
-  Bug Catcher/Fisherman assets are each byte-identical to the generic result;
-  canonical settled DESTIN framebuffer SHA-256 remains
-  **8d92751a…2346**. All 50 source-exact 64×64 assets decode/resolve, and a
-  missing symbol throws loudly; no fallback or battle/turn/tick branch remains.
-- **OFF evidence:** the sole acceptance trace under `tools/compare/traces`
-  whose recorded window shows a trainer picture,
-  `battle2-off-turn1-staged.json`, remains **16/16 exact** (canonical JENSON).
-  No committed explicit-OFF window shows a third/non-canonical trainer, so no
-  trace was invented. The separate non-acceptance ground-truth diagnostic
-  `battle2-off-turn1.json` remains **38/179** and was not thinned or claimed.
-- **Sweep / next:** generated-round sweep **24/24**, cursors unchanged:
-  **4:2415, 5:2156, 6:791 loss, 7:1337, 8:1922, 11:2012, 13:2415,
-  14:1946, 15:1602, 16:1878, 17:2013, 18:2143, 19:1691, 20:2326,
-  21:1911, 22:1389, 23:2114, 24:1751, 26:1680, 29:1869, 30:1825**.
-  Supervisor resumes rung-14 forced-switch then battle-command seams; the
-  commentary OFF checkpoint remains separately bounded by entry 690. No issue,
-  roadmap, census byte, capture list/profile, animation, or tick branch moved.
-  PAPERCUT: none.
-
----

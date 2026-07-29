@@ -1,3 +1,36 @@
+## 692 — [BOUNDED MAIN WORKER 2026-07-29 ~11:10] Rung-14 generic Frontier trainer-picture selection landed
+
+- **State:** implementation commit `51438230`; current union green at **507
+  files / 5169 tests**, production build, `git diff --check`, and Battle Scene
+  OFF oracle info. Both censuses regenerate byte-identically at SHA-256
+  **8b18f754…5261 / 3ff4c7f3…dc6c**; unsupported/import ratchets remain
+  **6/6** with no pin movement.
+- **Did / equivalence:** `battleScene.ts` now resolves the generated trainer
+  presentation's `TRAINER_PIC_*` symbol through the complete 50-picture
+  extracted catalog for settled intro, exit slide, and loss slide. The prior
+  Bug Catcher/Fisherman assets are each byte-identical to the generic result;
+  canonical settled DESTIN framebuffer SHA-256 remains
+  **8d92751a…2346**. All 50 source-exact 64×64 assets decode/resolve, and a
+  missing symbol throws loudly; no fallback or battle/turn/tick branch remains.
+- **OFF evidence:** the sole acceptance trace under `tools/compare/traces`
+  whose recorded window shows a trainer picture,
+  `battle2-off-turn1-staged.json`, remains **16/16 exact** (canonical JENSON).
+  No committed explicit-OFF window shows a third/non-canonical trainer, so no
+  trace was invented. The separate non-acceptance ground-truth diagnostic
+  `battle2-off-turn1.json` remains **38/179** and was not thinned or claimed.
+- **Sweep / next:** generated-round sweep **24/24**, cursors unchanged:
+  **4:2415, 5:2156, 6:791 loss, 7:1337, 8:1922, 11:2012, 13:2415,
+  14:1946, 15:1602, 16:1878, 17:2013, 18:2143, 19:1691, 20:2326,
+  21:1911, 22:1389, 23:2114, 24:1751, 26:1680, 29:1869, 30:1825**.
+  Supervisor resumes rung-14 forced-switch then battle-command seams; the
+  commentary OFF checkpoint remains separately bounded by entry 690. No issue,
+  roadmap, census byte, capture list/profile, animation, or tick branch moved.
+  PAPERCUT: none.
+
+---
+
+---
+
 ## 691 — [SUPERVISOR WIND-DOWN 2026-07-29 ~11:05] rung 13 complete; sweep blocker-free; four §7 receipts ROM-pinned; rung-14 swap+commentary seams live
 
 - **State:** master green at **507 files / 5164 tests**, production build,
