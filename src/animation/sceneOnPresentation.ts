@@ -194,6 +194,10 @@ import {
   type RecoverEffectSprite,
 } from "./recover.ts";
 import {
+  moonlightAtAge,
+  type MoonlightState,
+} from "./moonlight.ts";
+import {
   absorbAtAge,
   type AbsorbState,
 } from "./absorb.ts";
@@ -518,6 +522,7 @@ export interface SceneOnPresentationBattler {
     | "FLAAFFY"
     | "VOLBEAT"
     | "ILLUMISE"
+    | "GLOOM"
     | "TOGETIC"
     | "MACHOKE"
     | "TAILLOW"
@@ -947,6 +952,27 @@ export interface SceneOnRecoverConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnMoonlightFieldProfile
+  extends SceneOnDragonRageFieldProfile {
+  readonly pendingHeal: Readonly<{
+    readonly battler: "attacker";
+    readonly fromHp: number;
+    readonly toHp: number;
+    readonly weather: "none";
+    readonly numerator: 1;
+    readonly denominator: 2;
+  }>;
+}
+
+export interface SceneOnMoonlightConfig {
+  readonly move: "MOONLIGHT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnMoonlightFieldProfile>;
+  /** Source `InitSpritePosToAnimAttacker(TRUE)` center for HealingEffect. */
+  readonly healingCenter: Readonly<{ x: number; y: number }>;
 }
 
 export interface SceneOnAbsorbConfig {
@@ -1558,6 +1584,7 @@ export type SceneOnMoveConfig =
   | SceneOnShadowPunchConfig
   | SceneOnGrowthConfig
   | SceneOnRecoverConfig
+  | SceneOnMoonlightConfig
   | SceneOnAbsorbConfig
   | SceneOnReflectConfig
   | SceneOnSynthesisConfig
@@ -1651,6 +1678,8 @@ export type SceneOnScaryFacePresentationState =
   SceneOnMovePresentationState<SceneOnScaryFaceConfig>;
 export type SceneOnAbsorbPresentationState =
   SceneOnMovePresentationState<SceneOnAbsorbConfig>;
+export type SceneOnMoonlightPresentationState =
+  SceneOnMovePresentationState<SceneOnMoonlightConfig>;
 export type SceneOnReflectPresentationState =
   SceneOnMovePresentationState<SceneOnReflectConfig>;
 export type SceneOnSparkPresentationState =
@@ -2321,6 +2350,12 @@ export interface SceneOnRecoverView {
   readonly sprites: readonly RecoverEffectSprite[];
 }
 
+export interface SceneOnMoonlightView extends MoonlightState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnAbsorbView extends AbsorbState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -2870,6 +2905,27 @@ export function sceneOnRecoverView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...effect,
+  };
+}
+
+/** `age=0` is Move_MOONLIGHT's first active source-script frame. */
+export function sceneOnMoonlightView(
+  state: SceneOnMovePresentationState<SceneOnMoveConfig>,
+): SceneOnMoonlightView {
+  if (state.config.move !== "MOONLIGHT") {
+    throw new Error(`expected MOONLIGHT presentation, got ${state.config.move}`);
+  }
+  const config = state.config;
+  return {
+    age: state.age,
+    attacker: config.attacker,
+    target: config.target,
+    ...moonlightAtAge(
+      state.age,
+      config.attacker.geometry.side,
+      config.attacker.geometry.animationCenter.x,
+      config.healingCenter,
+    ),
   };
 }
 

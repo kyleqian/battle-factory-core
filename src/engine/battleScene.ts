@@ -560,6 +560,7 @@ import headbuttAsset from "../animation/assets/headbutt.json" with { type: "json
 import bodySlamAsset from "../animation/assets/body-slam.json" with { type: "json" };
 import astonishAsset from "../animation/assets/astonish.json" with { type: "json" };
 import synthesisAsset from "../animation/assets/synthesis.json" with { type: "json" };
+import moonlightAsset from "../animation/assets/moonlight.json" with { type: "json" };
 import wishAsset from "../animation/assets/wish.json" with { type: "json" };
 import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
 import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
@@ -700,6 +701,7 @@ import {
   sceneOnShadowPunchView,
   sceneOnGrowthView,
   sceneOnRecoverView,
+  sceneOnMoonlightView,
   sceneOnAbsorbView,
   sceneOnReflectView,
   sceneOnSynthesisView,
@@ -1184,6 +1186,13 @@ const synthesisArt = synthesisAsset as {
   blueStar: { tileset: Tileset; palette: RgbColor[] };
   skiploomBack: { tileset: Tileset; palette: RgbColor[] };
   skiploomFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const moonlightArt = moonlightAsset as {
+  moon: { tileset: Tileset; palette: RgbColor[] };
+  greenSparkle: { tileset: Tileset; palette: RgbColor[] };
+  blueStar: { tileset: Tileset; palette: RgbColor[] };
+  gloomBack: { tileset: Tileset; palette: RgbColor[] };
+  gloomFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const wishArt = wishAsset as {
   goldStars: { tileset: Tileset; palette: RgbColor[] };
@@ -23419,6 +23428,204 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "SKIPLOOM used" : "Foe SKIPLOOM used",
       "SYNTHESIS!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "MOONLIGHT") {
+    const view = sceneOnMoonlightView(state);
+    const displayed = sceneOnMoonlightView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "GLOOM"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "GLOOM"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged MOONLIGHT pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const pendingHeal = state.config.fieldProfile.pendingHeal;
+    const attackerHp = playerToOpponent
+      ? state.config.fieldProfile.playerHp
+      : state.config.fieldProfile.opponentHp;
+    const attackerMaxHp = playerToOpponent
+      ? state.config.fieldProfile.playerMaxHp
+      : state.config.fieldProfile.opponentMaxHp;
+    if (
+      pendingHeal.battler !== "attacker"
+      || pendingHeal.fromHp !== attackerHp
+      || pendingHeal.toHp !== attackerMaxHp
+      || pendingHeal.weather !== "none"
+      || pendingHeal.numerator !== 1
+      || pendingHeal.denominator !== 2
+    ) {
+      throw new Error("unsupported staged MOONLIGHT healing payload");
+    }
+
+    const attackerSource = playerToOpponent
+      ? moonlightArt.gloomBack : moonlightArt.gloomFront;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const moonWhite = { r: 222, g: 239, b: 255 };
+    let backgroundPalette: RgbColor[][];
+    if (displayed.background.mode === "blend") {
+      backgroundPalette = blendPaletteBanksToward(
+          battleBg.palette,
+          displayed.background.target === "black"
+            ? { r: 0, g: 0, b: 0 }
+            : moonWhite,
+          displayed.background.coefficient,
+        );
+    } else {
+      const solidColor = displayed.background.color;
+      backgroundPalette = battleBg.palette.map((palette) =>
+          palette.map((_, index) =>
+            index === 0 ? { r: 0, g: 0, b: 0 } : solidColor
+          )
+        );
+    }
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      backgroundPalette,
+    );
+    // OBJ mode 1 blends against the background target, not another OBJ.
+    const nonObjTarget2 = fb.slice();
+    const battlerCoefficient = displayed.battlerPaletteCoefficient;
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      blendPaletteToward(targetSprite.palette, moonWhite, battlerCoefficient),
+      view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
+      view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+    );
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      blendPaletteToward(attackerSprite.palette, moonWhite, battlerCoefficient),
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+
+    const effectCoefficient = displayed.effectPaletteCoefficient;
+    const sparklePalette = blendPaletteToward(
+      moonlightArt.greenSparkle.palette,
+      moonWhite,
+      effectCoefficient,
+    );
+    for (const sparkle of displayed.sparkles.slice().reverse()) {
+      drawSpriteSheet(
+        fb,
+        {
+          columns: 2,
+          rows: 2,
+          tiles: moonlightArt.greenSparkle.tileset.tiles.slice(
+            sparkle.frame * 4,
+            sparkle.frame * 4 + 4,
+          ),
+        },
+        sparklePalette,
+        sparkle.x - 8,
+        sparkle.y - 8,
+      );
+    }
+    if (displayed.moonVisible) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        nonObjTarget2,
+        moonlightArt.moon.tileset,
+        blendPaletteToward(
+          moonlightArt.moon.palette,
+          moonWhite,
+          effectCoefficient,
+        ),
+        120,
+        56,
+        256,
+        0,
+        0,
+        256,
+        displayed.alpha.eva,
+        displayed.alpha.evb,
+        false,
+      );
+    }
+    for (const star of displayed.stars.slice().sort(
+      (left, right) => right.oamSlot - left.oamSlot,
+    )) {
+      drawSpriteSheet(
+        fb,
+        {
+          columns: 4,
+          rows: 4,
+          tiles: moonlightArt.blueStar.tileset.tiles.slice(
+            star.frame * 16,
+            star.frame * 16 + 16,
+          ),
+        },
+        moonlightArt.blueStar.palette,
+        star.x - 16,
+        star.y - 16,
+      );
+    }
+
+    const opponentSpecies = playerToOpponent ? "ONIX" : "GLOOM";
+    const playerSpecies = playerToOpponent ? "GLOOM" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "GLOOM used" : "Foe GLOOM used",
+      "MOONLIGHT!",
       99,
     );
     return;
