@@ -13,6 +13,37 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 667 — [BOUNDED MAIN WORKER 2026-07-28 ~23:14] Run Away/Pickup close the ability-item parity worklist
+
+- **State:** tree green at **452 files / 4887 tests**, production build,
+  `git diff --check`, and Battle Scene OFF oracle info. Hook artifact and
+  census each regenerated twice byte-identically. Final census is exactly
+  **69/69 Factory-battle abilities (weighted 1096/1096)** plus **4 without
+  Factory battle hooks**, and **42/42 hold effects (850/850)**; all 17
+  validations pass and the unreferenced worklist is empty.
+- **Did:** source order disproved the proposed generic trainer-block proof:
+  Factory RUN first opens the forfeit confirmation (`battle_main.c:4322-4339`);
+  confirmed RUN reaches Run Away before the generic Frontier-trainer success
+  (`battle_util.c:427-448`), then every Factory RUN becomes forfeiture before
+  `fleeType` is read (`battle_main.c:5058-5062`). A production invariant and
+  Tier-1 test pin that this kernel exposes only use-move/switch commands and
+  Run Away cannot bypass the distinct trapping gate. Pickup's only two source
+  checks are now exact-classified Factory-unreachable: the Frontier victory
+  script calls `pickup` only under `BATTLE_TYPE_PYRAMID`
+  (`battle_scripts_1.s:3045-3047`), never Factory.
+- **Next:** ability/item parity worklist objective is complete. Resume the
+  supervisor's whole-battle integration/Gate-5 plan, including the separately
+  scouted turn-1 `gRandomTurnNumber` writes; do not reopen Pickup/Run Away
+  without new source reachability.
+- **Notes:** predicted closure was 70/70 weighted 1103/1103 only if Pickup
+  remained battle-reachable; actual source-supported reclassification removes
+  its 7 carriers: `(1073 + 23)/(1103 - 7) = 1096/1096`, and categories move
+  from 3 to 4 without Factory battle hooks. Commit `c50a726f`. No
+  `unsupported-branch` or canonical-recording ratchet, issue, scout/probe,
+  battle-lab, presentation, AI, or oracle fixture changed. PAPERCUT: none.
+
+---
+
 ## 666 — [BOUNDED MAIN WORKER 2026-07-28 ~23:05] voluntary switch action + trapping trio complete
 
 - **State:** tree green at **452 files / 4885 tests**, production build,
@@ -89,42 +120,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   census generator, scout/probe/battle-lab fixture, issue, or oracle asset
   changed. Commits: prerequisite `030441c0`, implementation `193fd961`,
   final integration/census fix follows this entry. PAPERCUT: none.
-
----
-
-## 664 — [BOUNDED MAIN WORKER 2026-07-28 ~22:16] turn-boundary RNG modeled; Quick Claw closes hold-effect census
-
-- **State:** tree green at **452 files / 4867 tests**, production build,
-  `git diff --check`, and Battle Scene OFF oracle info. Census regenerated
-  byte-idempotently: abilities unchanged **57/70 (weighted 977/1103)**;
-  hold effects now **42/42 (weighted 850/850)**, all 15 validations pass.
-- **Did:** added `BattleTurnPassed`'s unconditional continuing-boundary draw
-  at the production full-turn seam, after end-turn cleanup and before the
-  next request/locked-decision recursion; persisted its u16 as the
-  `gRandomTurnNumber` equivalent. Staged windows accept an explicit initial
-  value (default `0xffff`); whole-battle turn-1 sites `battle_main.c:3140`
-  and `:3923` remain the named follow-up. A typed two-turn ledger pins the
-  ROM positions 5/19. Quick Claw now applies `UINT_MAX` effective speed for
-  stored values `< floor(0xffff*param/100)` (param 20 threshold 13107),
-  below priority and with the ordinary tie roll when both holders proc.
-- **Supervisor fold (same round, `f828a714`):** the paired side-lane scout
-  banked `docs/on-damage-contact-scout.md` — the ON_DAMAGE family is the
-  body of the already-registered `MOVEEND_ON_DAMAGE_ABILITIES` state 3
-  (its seven-ability barrier retires); the shared rules resolver currently
-  drops `FLAG_MAKES_CONTACT` (prerequisite); Oblivious is Cute Charm's
-  eligibility check, not an eighth case; live Static receipt attributed the
-  proc roll at position 5 right after the four hit-chain rolls
-  (`tools/probe/verify-on-damage-static.py`, supervisor re-ran: PASS).
-  Predicted implementation delta: abilities 57→64/70, weighted
-  977→1056/1103, dispatcher 1/8→8/8.
-- **Next:** implement the ON_DAMAGE family from the scout pack (main);
-  census generator §A3 string-literal fix (side); then battle-start
-  random-turn writes when whole-battle integration owns turn 1.
-- **Notes:** boundary commit `c7944fac`; Quick Claw commit follows this
-  entry. Existing direct `runBattleEndTurnOrchestration` zero-RNG pin stays
-  correct because ownership is in the full-turn reducer. Multi-turn HP,
-  Disable-duration, Wish/Future Sight, Focus Energy, and Rollout assertions
-  were re-derived after later rolls shifted to their ROM-faithful positions.
-  No `unsupported-branch` or canonical-recording ratchet changed.
-  `verify-turn-boundary-rng-gap.py` now intentionally stops at its stale
-  “explicit model acquired; revisit verdict” guard. PAPERCUT: none.

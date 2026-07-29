@@ -1,5 +1,44 @@
 ---
 
+## 664 — [BOUNDED MAIN WORKER 2026-07-28 ~22:16] turn-boundary RNG modeled; Quick Claw closes hold-effect census
+
+- **State:** tree green at **452 files / 4867 tests**, production build,
+  `git diff --check`, and Battle Scene OFF oracle info. Census regenerated
+  byte-idempotently: abilities unchanged **57/70 (weighted 977/1103)**;
+  hold effects now **42/42 (weighted 850/850)**, all 15 validations pass.
+- **Did:** added `BattleTurnPassed`'s unconditional continuing-boundary draw
+  at the production full-turn seam, after end-turn cleanup and before the
+  next request/locked-decision recursion; persisted its u16 as the
+  `gRandomTurnNumber` equivalent. Staged windows accept an explicit initial
+  value (default `0xffff`); whole-battle turn-1 sites `battle_main.c:3140`
+  and `:3923` remain the named follow-up. A typed two-turn ledger pins the
+  ROM positions 5/19. Quick Claw now applies `UINT_MAX` effective speed for
+  stored values `< floor(0xffff*param/100)` (param 20 threshold 13107),
+  below priority and with the ordinary tie roll when both holders proc.
+- **Supervisor fold (same round, `f828a714`):** the paired side-lane scout
+  banked `docs/on-damage-contact-scout.md` — the ON_DAMAGE family is the
+  body of the already-registered `MOVEEND_ON_DAMAGE_ABILITIES` state 3
+  (its seven-ability barrier retires); the shared rules resolver currently
+  drops `FLAG_MAKES_CONTACT` (prerequisite); Oblivious is Cute Charm's
+  eligibility check, not an eighth case; live Static receipt attributed the
+  proc roll at position 5 right after the four hit-chain rolls
+  (`tools/probe/verify-on-damage-static.py`, supervisor re-ran: PASS).
+  Predicted implementation delta: abilities 57→64/70, weighted
+  977→1056/1103, dispatcher 1/8→8/8.
+- **Next:** implement the ON_DAMAGE family from the scout pack (main);
+  census generator §A3 string-literal fix (side); then battle-start
+  random-turn writes when whole-battle integration owns turn 1.
+- **Notes:** boundary commit `c7944fac`; Quick Claw commit follows this
+  entry. Existing direct `runBattleEndTurnOrchestration` zero-RNG pin stays
+  correct because ownership is in the full-turn reducer. Multi-turn HP,
+  Disable-duration, Wish/Future Sight, Focus Energy, and Rollout assertions
+  were re-derived after later rolls shifted to their ROM-faithful positions.
+  No `unsupported-branch` or canonical-recording ratchet changed.
+  `verify-turn-boundary-rng-gap.py` now intentionally stops at its stale
+  “explicit model acquired; revisit verdict” guard. PAPERCUT: none.
+
+---
+
 ## 663 — [BOUNDED MAIN WORKER 2026-07-28 ~21:55] production turn-order inputs live; Swift Swim + Chlorophyll census rows closed
 
 - **State:** tree green at **452 files / 4862 tests**, production build,
