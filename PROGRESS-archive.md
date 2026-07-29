@@ -1,5 +1,50 @@
 ---
 
+## 675 — [BOUNDED MAIN WORKER 2026-07-29 ~01:53] multi-candidate trainer replacement retired; seed 17 wins seven
+
+- **State:** committed `30d9a3e5`; tree green at **461 files / 4960 tests**,
+  production build, `git diff --check`, focused selector/opcode/orchestrator/
+  ratchet coverage **25/25**, and Battle Scene OFF oracle info. The ability/
+  item census regenerates byte-identically at **69/69 abilities, 42/42 hold
+  effects**.
+- **Did:** verified the scout's `GetMostSuitableMonToSwitchInto` citations
+  against pinned `battle_ai_switch_items.c:629-789` and ported the complete
+  Factory-singles faint selector. Pass 1 retains ascending scans, strict ties,
+  and the source's highest-type-damage quirk. Pass 2 retains global
+  `gCurrentMove`/fainted-active `AI_CalcDmg`, candidate-only `TypeCalc`,
+  Levitate/Foresight behavior, reset dynamic/crit/damage scratch,
+  Charge/Helping Hand modifiers, and the retail non-`BUGFIX` u8 `bestDmg`
+  wrap. Singles selection draws exactly **0 RNG**.
+- **Acceptance:** staged tests pin a competitive choice, exact tie, u8-wrap
+  reversal, and sole-legal regression. Seed **17** is now a permanent real
+  rung-12 carrier: seven generated wins, **14** trainer replacements, seven
+  battle segments, and one exact **1787-call** facility cursor; its first
+  replacement resumes at the next player boundary with
+  **2→16 calls / 312997333→713294723**.
+- **Sweep / Next:** seeds **4–30** now pass battle 0/1/2 at **14/9/7**;
+  **1/27** (seed 17) completes seven wins. Every former multi-choice
+  replacement stop is gone. Updated dominant blocker is multi-hit/Double Hit/
+  Twineedle resumption (**6** seeds), then Earthquake
+  `DoHitAllWithUndergroundBonus` (**5**), confusion self-hit context (**4**),
+  forced-switch end-turn resumption and paralysis `Cmd_various` (**3** each);
+  five seeds expose narrower existing budget/moveend/Trace/attack-canceler
+  stops. Chase those named secondary blockers only in later steps.
+- **Supervisor fold (same round, side merge):** the commentary seam landed
+  (`8ec1cd81` + the equivalence/attribution pins) — presentation commentary
+  now derives from the actual opponent party via
+  `getFactoryOpponentCommentary()`; canonical text proven byte-identical
+  (with the true upcoming-party attribution 188/184/135 pinned, correcting
+  the earlier 153/179/181 placeholder attribution); generated seed-3 round
+  varies correctly; `battle1-postwin-scout-a/b.json` re-verified 171/171 +
+  164/164. Union green **461 files / 4961 tests**, census no-op.
+- **Notes:** retired exact barrier
+  `GetMostSuitableMonToSwitchInto's pass-2 AI_CalcDmg raw-damage fallback`
+  at `B_SCR_OP_OPENPARTYSCREEN`; its module ratchet moves exactly **2→1**.
+  No other ratchet, census artifact, canonical recording, issue, scout/probe,
+  presentation, or commentary file changed. PAPERCUT: none.
+
+---
+
 ## 674 — [BOUNDED MAIN WORKER 2026-07-29 ~01:35] tie retired; seven-battle rung hit honest stop
 
 - **State:** assigned rung (a) is committed at `bd36b615` and green at **461
