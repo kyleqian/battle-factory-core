@@ -527,6 +527,7 @@ export interface SceneOnPresentationBattler {
     | "OMANYTE"
     | "CHANSEY"
     | "CACNEA"
+    | "PHANPY"
     | "WARTORTLE";
   readonly geometry: SceneOnBattlerGeometry;
 }

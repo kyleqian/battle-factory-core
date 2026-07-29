@@ -2,6 +2,36 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_SANDSTORM",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal challenge-0 Level-50 set-120 PHANPY versus ONIX Scene-ON parties pass the entire 168-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 210-377 reproduce evidence 678cbc9073564cec54c76709704009d17586b45f1301dc129d13c840b0337b1e / raw RGB 2968b95f680be00e14cb3386487629b142eb0ac05910f1dad69da7dc885e9958 and opponent-front frames 305-472 reproduce evidence ba90eb87f3466644cf4e3c085231265bf7138fcd0e2d286a41574e35f9af12d2 / raw RGB 151561fae96ddc3d919e3f0254b987162cd9e078e92c5e414b4e0a9689edd2e4",
+        "the source audit proves set 120 FRONTIER_MON_PHANPY is the lowest challenge-0 legal carrier and pins species 231, move 201, Naughty nature, Attack/HP spread, Lax Incense, and complete legal three-Pokemon parties",
+        "the pure relative reducer ports ANIM_TAG_FLYING_DIRT and sandstorm BG load/free state, priority-1 BG1 tile/palette transfer, -6/-1 wrapped scroll, 0-to-7 alpha ramp, 101-count hold, fade and reset, plus all seven staggered gFlyingSandCrescentSpriteTemplate fixed-point translations and cleanup",
+        "the typed Scene-ON seam carries only resolved PHANPY/ONIX geometry and field state; source-extracted Phanpy front/back, FLYING_DIRT, sandstorm background art and shared ONIX/chrome pass software task/sprite state, OAM/matrices, palettes/tags, registers, both audio players, raw RGB, and every production framebuffer",
+        "sandstormPortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves all 168 immutable dense source/hardware/audio/reducer/seam/framebuffer frames twice fresh in both orientations through first inactive cleanup",
+        "MOVE_HEAT_WAVE remains unsupported: source audit proves it has distinct red BlendParticle and BlendBackground calls, mirrored sandstorm background, pan sweep, AnimTask_MoveHeatWaveTargets, and its own seven crescent calls; it lacks independent complete legal both-orientation twice-fresh dense acceptance",
+        "no damage, weather outcome, RNG, controller selection, turn order, round/facility state, animation boundary list, or unsupported barrier changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-sandstorm-player-phanpy-opponent-onix.json",
+        "tools/battle-lab/mechanic-sandstorm-opponent-phanpy-player-onix.json",
+        "tools/compare/fixtures/sandstorm-player-phanpy-opponent-onix.json",
+        "tools/compare/fixtures/sandstorm-opponent-phanpy-player-onix.json",
+        "tools/compare/sandstormProbe.py",
+        "tools/compare/sandstormPortable.ts",
+        "tools/compare/sandstormSourceAudit.ts",
+        "tools/compare/extractSandstormAssets.ts",
+        "src/animation/assets/sandstorm.json",
+        "src/animation/sandstorm.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/sandstormEvidence.test.ts",
+        "tests/animation/sandstormAssets.test.ts",
+        "tests/animation/sandstorm.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_NEEDLE_ARM",
       "status": "exact",
       "covered": [
@@ -1980,7 +2010,7 @@
         "historical, now-disqualified species-301 NINCADA/SHUCKLE fixtures captured 321 currentMove=313 frames 39-359 and the BlendParticle creation/inactive latch at 2/2 frames 84-85 player-back and 88-89 opponent-front twice fresh; they are retained only as provenance and are not legal set-267 DELCATTY acceptance",
         "that historical mGBA probe records full source script identity/offset/wait, task and sprite bodies, OBJ palette tags plus faded/unfaded/hardware palettes, OAM/matrices, registers, both audio players, raw RGB, and framebuffer state; Fake Tears' args (tag SMALL_BUBBLES, delay 0, initial 4, target 4, RGB(12,11,31)) make the task latch/destroy in Cmd_createvisualtask before it can survive a post-frame gTasks snapshot",
         "the source-owned second frame is only the required first inactive/display latch. RockMonBackAndForth begins in that same batched next-source frame and is explicitly recorded as a boundary, not accepted or modeled by this checkpoint. No reducer, typed seam, app compositor, battle logic, RNG, turn order, facility state, boundary list, or unsupported barrier changed",
-        "MOVE_HEAT_WAVE remains unsupported: it selects FLYING_DIRT but also owns sandstorm/background blends, both-target movement, pan sweep, and four flying-sand crescents. MOVE_LUSTER_PURGE remains unsupported: its white-circle/IMPACT particle calls sit inside a psychic/white BG pipeline, luster circle, six random hitsplats/sounds, target shake, and restore. Neither has independent complete dense move evidence."
+        "MOVE_HEAT_WAVE remains unsupported: it selects FLYING_DIRT but also owns sandstorm/background blends, both-target movement, pan sweep, and seven flying-sand crescent calls. MOVE_LUSTER_PURGE remains unsupported: its white-circle/IMPACT particle calls sit inside a psychic/white BG pipeline, luster circle, six random hitsplats/sounds, target shake, and restore. Neither has independent complete dense move evidence."
       ],
       "evidence": [
         "tools/battle-lab/mechanic-fake-tears-player-delcatty-opponent-shuckle.json",
@@ -2066,6 +2096,19 @@
     "MOVE_BIND"
   ],
   "componentTracks": [
+    {
+      "id": "flying-dirt-sandstorm",
+      "components": [
+        "asset:ANIM_TAG_FLYING_DIRT",
+        "sprite:gFlyingSandCrescentSpriteTemplate",
+        "task:AnimTask_LoadSandstormBackground"
+      ],
+      "representatives": [
+        "MOVE_SANDSTORM",
+        "MOVE_HEAT_WAVE"
+      ],
+      "goal": "MOVE_SANDSTORM independently proves its complete 168-frame background-load/scroll/alpha and seven-crescent body through first inactive cleanup at 168/168 reducer/component, typed-seam, software/hardware state, registers/audio, raw-RGB, and shared-framebuffer frames in both orientations twice fresh using legal challenge-0 set-120 PHANPY parties. MOVE_HEAT_WAVE remains unsupported because its red BlendParticle/BlendBackground, mirrored background, pan sweep, AnimTask_MoveHeatWaveTargets, and independent seven-crescent schedule lack their own complete legal both-orientation twice-fresh dense acceptance."
+    },
     {
       "id": "green-spike-needle-arm",
       "components": [

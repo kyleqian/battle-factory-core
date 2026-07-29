@@ -1,5 +1,34 @@
 # Animation coverage
 
+## MOVE_SANDSTORM promoted exact; FLYING_DIRT track bounded (2026-07-28)
+
+**Verdict:** `MOVE_SANDSTORM` is exact. Lowest challenge-0 legal Level-50
+carrier set **120** `FRONTIER_MON_PHANPY` (species **231**, Sandstorm **201**,
+Naughty, Attack+HP, Lax Incense) drives complete legal three-mon parties
+against ONIX. Both Scene-ON orientations pass the full source body through
+first inactive cleanup at **168/168** frames, twice fresh. Player-back frames
+**210–377** have evidence/raw digests
+`678cbc9073564cec54c76709704009d17586b45f1301dc129d13c840b0337b1e` /
+`2968b95f680be00e14cb3386487629b142eb0ac05910f1dad69da7dc885e9958`;
+opponent-front frames **305–472** have
+`ba90eb87f3466644cf4e3c085231265bf7138fcd0e2d286a41574e35f9af12d2` /
+`151561fae96ddc3d919e3f0254b987162cd9e078e92c5e414b4e0a9689edd2e4`.
+
+**Model/boundary:** the pure relative reducer, typed seam, and narrow
+compositor port FLYING_DIRT load/free, source sandstorm BG tile/palette load,
+wrapped **-6/-1** BG1 scroll, **0→7 / 101-count hold / 7→0** alpha, all
+**seven** staggered fixed-point flying-sand crescents, and cleanup using
+byte-identical source-extracted Phanpy/front-back/background/particle assets.
+Software tasks/sprites, OAM/matrices, tags/palettes/registers, both audio
+players, raw RGB, and the shared framebuffer are dense-exact. The previously
+exact Needle Arm compositor control remains **108/108** twice fresh in both
+orientations. `MOVE_HEAT_WAVE` remains **unsupported**: source audit proves
+distinct red particle/background blends, mirrored BG, pan sweep, target
+motion, and its own seven-crescent schedule; it has no independent complete
+legal both-orientation twice-fresh evidence. Coverage is **82 exact / 0
+partial / 0 staged / 194 unsupported**; no damage/weather outcome, RNG,
+controller/turn/facility state, boundary list, or unsupported barrier changed.
+
 ## MOVE_NEEDLE_ARM promoted exact; GREEN_SPIKE track bounded (2026-07-28)
 
 **Verdict:** `MOVE_NEEDLE_ARM` is exact. Lowest legal Level-50 carrier set
