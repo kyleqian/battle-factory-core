@@ -32,6 +32,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **90/90**. No core, renderer, trace, issue, census, roadmap, animation,
   PP/HP/RNG/turn-order, pseudo-decision, or absolute-tick branch changed.
   PAPERCUT: none.
+- **Supervisor fold (post-step):** side-lane `AI_CBM_SpDefUp` port merged
+  (`a9509b76`+`222b7a79`+`7b321fa7`): the single-stat CBM handler
+  (-10 at maxed SPDEF stage, `battle_ai_scripts.s:265-267`) closes the pair
+  with the already-ported shared `AI_CV_SpDefUp`; Amnesia reachable in 13
+  Level-50 sets; live OFF-oracle receipts on seeds 1 and 99 (SPDEF 12 after
+  three Amnesia uses → CBM −10 makes Light Screen slot 3 win; 10 AI draws,
+  identical ending RNG); runner-up AccUp rejected (zero Emerald moves use
+  either accuracy-up effect) — doc §28. Union verified by supervisor:
+  **515 files / 5204 tests + 1 skip**, build, `git diff --check`, focused
+  suites 260/260, ability/item census idempotent (69/69, 42/42, 17/17
+  checks). Worker PAPERCUT (census pin forced a behavior-neutral helper
+  relocation, ~3 min) noted; no PAPERCUTS.md bump — one-off placement cost,
+  not recurring friction.
 
 ---
 
