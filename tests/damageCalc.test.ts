@@ -72,6 +72,29 @@ const MAGBY = {
   statStages: { ...NEUTRAL_STAT_STAGES },
 };
 
+// Round, symmetric synthetic battlers for the ability stat/power modifier
+// block (pokemon.c:3158,3203-3226) - chosen so physical and special baseline
+// damage are identical (24) and every 1.5x boost lands on a clean 35, making
+// the modifier's effect legible independent of the RAM-pinned fixtures above.
+const MOD_ATTACKER = {
+  attack: 100,
+  defense: 100,
+  spAttack: 100,
+  spDefense: 100,
+  level: 50,
+  types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+  statStages: { ...NEUTRAL_STAT_STAGES },
+};
+const MOD_DEFENDER = {
+  attack: 100,
+  defense: 100,
+  spAttack: 100,
+  spDefense: 100,
+  level: 50,
+  types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+  statStages: { ...NEUTRAL_STAT_STAGES },
+};
+
 describe("calculateBaseDamage - RAM-pinned regression cases (turn-resolution-notes.md §6 item 1)", () => {
   it("Rock Slide: atk51/def56/pow75/lvl50/no-crit/STAB/neutral - base (pre-STAB) locks to 32", () => {
     // gBattleMoveDamage RAM-read as 32 at tick 2335 of battle1-turn1-ram-dump.json,
@@ -266,7 +289,14 @@ describe("calculateBaseDamage - burn and turn 17's RAM-pinned FAINT_ATTACK roll"
     } as const;
     expect(calculateBaseDamage({ ...input, attacker: { ...MURKROW, isBurned: false } })).toBe(57);
     expect(calculateBaseDamage(input)).toBe(29);
-    expect(calculateBaseDamage({ ...input, attacker: { ...MURKROW, ability: "ABILITY_GUTS" } })).toBe(57);
+    // Burned Guts attacker (pokemon.c:3211 gates Guts' 1.5x Attack on ANY
+    // status1, so a burned Guts attacker gets both: no burn halving (already
+    // pinned above) AND the 1.5x boost - 91 -> 136 (trunc) rather than the
+    // unboosted 91 the pre-existing partial produced.
+    expect(calculateBaseDamage({
+      ...input,
+      attacker: { ...MURKROW, ability: "ABILITY_GUTS", hasStatus1: true },
+    })).toBe(85);
   });
 
   it("turn 17 FAINT_ATTACK is DARK/special in gen 3, so burn does not halve it; the RAM RNG roll resolves 61 -> 52", () => {
@@ -284,6 +314,186 @@ describe("calculateBaseDamage - burn and turn 17's RAM-pinned FAINT_ATTACK roll"
     const roll = rng.next();
     expect(rng.rngValue).toBe(1115590820);
     expect(applyRandomDamageMultiplier(stabbed, roll)).toBe(52);
+  });
+});
+
+describe("calculateBaseDamage - ability stat/power modifier block (pokemon.c:3158,3203-3226)", () => {
+  it("Huge Power / Pure Power double the attacker's Attack", () => {
+    for (const ability of ["ABILITY_HUGE_POWER", "ABILITY_PURE_POWER"]) {
+      const damage = calculateBaseDamage({
+        attacker: { ...MOD_ATTACKER, ability },
+        defender: MOD_DEFENDER,
+        movePower: 50,
+        moveType: "TYPE_NORMAL",
+        isCriticalHit: false,
+      });
+      expect(damage).toBe(46);
+    }
+  });
+
+  it("Huge Power's doubling happens before the stat-stage modifier (pokemon.c:3158, ahead of APPLY_STAT_MOD) - order changes the truncated result", () => {
+    const attacker = {
+      ...MOD_ATTACKER,
+      attack: 15,
+      statStages: { ...NEUTRAL_STAT_STAGES, atk: 0 },
+      ability: "ABILITY_HUGE_POWER",
+    };
+    const defender = { ...MOD_DEFENDER, defense: 10 };
+    const damage = calculateBaseDamage({
+      attacker,
+      defender,
+      movePower: 50,
+      moveType: "TYPE_NORMAL",
+      isCriticalHit: false,
+    });
+    // Correct (double 15->30, then stage-0 ratio 10/40): trunc(30*10/40)=7 -> 17.
+    // Doubling after the stage mod would give trunc(15*10/40)=3, *2=6 -> 15.
+    expect(damage).toBe(17);
+  });
+
+  it("Thick Fat halves the attacker's Special Attack for Fire and Ice moves, not other types", () => {
+    const thickFatDefender = { ...MOD_DEFENDER, ability: "ABILITY_THICK_FAT" };
+    const damageOf = (moveType: string) => calculateBaseDamage({
+      attacker: MOD_ATTACKER,
+      defender: thickFatDefender,
+      movePower: 50,
+      moveType,
+      isCriticalHit: false,
+    });
+    expect(damageOf("TYPE_FIRE")).toBe(13);
+    expect(damageOf("TYPE_ICE")).toBe(13);
+    expect(damageOf("TYPE_PSYCHIC")).toBe(24);
+  });
+
+  it("Hustle boosts the attacker's Attack by 1.5x for physical moves", () => {
+    const damage = calculateBaseDamage({
+      attacker: { ...MOD_ATTACKER, ability: "ABILITY_HUSTLE" },
+      defender: MOD_DEFENDER,
+      movePower: 50,
+      moveType: "TYPE_NORMAL",
+      isCriticalHit: false,
+    });
+    expect(damage).toBe(35);
+  });
+
+  it("Guts boosts Attack by 1.5x only when the attacker has any status1 (not gated on burn specifically)", () => {
+    const gutsAttacker = { ...MOD_ATTACKER, ability: "ABILITY_GUTS" };
+    const damageOf = (hasStatus1: boolean) => calculateBaseDamage({
+      attacker: { ...gutsAttacker, hasStatus1 },
+      defender: MOD_DEFENDER,
+      movePower: 50,
+      moveType: "TYPE_NORMAL",
+      isCriticalHit: false,
+    });
+    expect(damageOf(false)).toBe(24);
+    expect(damageOf(true)).toBe(35);
+  });
+
+  it("Marvel Scale boosts the defender's Defense by 1.5x only when it has any status1", () => {
+    const marvelDefender = { ...MOD_DEFENDER, ability: "ABILITY_MARVEL_SCALE" };
+    const damageOf = (hasStatus1: boolean) => calculateBaseDamage({
+      attacker: MOD_ATTACKER,
+      defender: { ...marvelDefender, hasStatus1 },
+      movePower: 50,
+      moveType: "TYPE_NORMAL",
+      isCriticalHit: false,
+    });
+    expect(damageOf(false)).toBe(24);
+    expect(damageOf(true)).toBe(16);
+  });
+
+  it("Marvel Scale's Defense boost applies before Explosion's halving (pokemon.c:3213 precedes :3228 - they stack, not replace)", () => {
+    const damage = calculateBaseDamage({
+      attacker: MOD_ATTACKER,
+      defender: { ...MOD_DEFENDER, ability: "ABILITY_MARVEL_SCALE", hasStatus1: true },
+      movePower: 50,
+      moveType: "TYPE_NORMAL",
+      isCriticalHit: false,
+      moveEffect: "EFFECT_EXPLOSION",
+    });
+    // defense 100 -> Marvel Scale 150 -> Explosion halved (trunc) to 75.
+    expect(damage).toBe(31);
+  });
+
+  it("Plus alone (no Minus active) gives no Special Attack boost", () => {
+    const damage = calculateBaseDamage({
+      attacker: { ...MOD_ATTACKER, ability: "ABILITY_PLUS" },
+      defender: MOD_DEFENDER,
+      movePower: 50,
+      moveType: "TYPE_PSYCHIC",
+      isCriticalHit: false,
+    });
+    expect(damage).toBe(24);
+  });
+
+  it("Plus with an opposing Minus active boosts Special Attack by 1.5x, symmetrically for Minus with Plus active", () => {
+    const plusVsMinus = calculateBaseDamage({
+      attacker: { ...MOD_ATTACKER, ability: "ABILITY_PLUS" },
+      defender: { ...MOD_DEFENDER, ability: "ABILITY_MINUS" },
+      movePower: 50,
+      moveType: "TYPE_PSYCHIC",
+      isCriticalHit: false,
+    });
+    const minusVsPlus = calculateBaseDamage({
+      attacker: { ...MOD_ATTACKER, ability: "ABILITY_MINUS" },
+      defender: { ...MOD_DEFENDER, ability: "ABILITY_PLUS" },
+      movePower: 50,
+      moveType: "TYPE_PSYCHIC",
+      isCriticalHit: false,
+    });
+    expect(plusVsMinus).toBe(35);
+    expect(minusVsPlus).toBe(35);
+  });
+
+  it("Plus/Minus reads the full active-battler field scan (ABILITY_ON_FIELD2), not just the defender", () => {
+    const damage = calculateBaseDamage({
+      attacker: { ...MOD_ATTACKER, ability: "ABILITY_PLUS" },
+      defender: MOD_DEFENDER, // the defender itself does not have Minus
+      movePower: 50,
+      moveType: "TYPE_PSYCHIC",
+      isCriticalHit: false,
+      activeBattlerAbilities: ["ABILITY_PLUS", "ABILITY_NONE", "ABILITY_MINUS", "ABILITY_NONE"],
+    });
+    expect(damage).toBe(35);
+  });
+
+  it.each([
+    ["Overgrow", "ABILITY_OVERGROW", "TYPE_GRASS"],
+    ["Blaze", "ABILITY_BLAZE", "TYPE_FIRE"],
+    ["Torrent", "ABILITY_TORRENT", "TYPE_WATER"],
+    ["Swarm", "ABILITY_SWARM", "TYPE_BUG"],
+  ] as const)("%s boosts move power by 1.5x at hp <= maxHP/3", (_label, ability, moveType) => {
+    const damage = calculateBaseDamage({
+      attacker: { ...MOD_ATTACKER, ability, hp: 100, maxHP: 300 },
+      defender: MOD_DEFENDER,
+      movePower: 50,
+      moveType,
+      isCriticalHit: false,
+    });
+    expect(damage).toBe(35);
+  });
+
+  it("pinch boost triggers exactly at the hp == maxHP/3 boundary (<=, source-exact) but not just above it", () => {
+    const damageAt = (hp: number) => calculateBaseDamage({
+      attacker: { ...MOD_ATTACKER, ability: "ABILITY_OVERGROW", hp, maxHP: 300 },
+      defender: MOD_DEFENDER,
+      movePower: 50,
+      moveType: "TYPE_GRASS",
+      isCriticalHit: false,
+    });
+    expect(damageAt(100)).toBe(35);
+    expect(damageAt(101)).toBe(24);
+  });
+
+  it("pinch boost requires the matching move type - Overgrow does nothing for a Fire move", () => {
+    const damage = calculateBaseDamage({
+      attacker: { ...MOD_ATTACKER, ability: "ABILITY_OVERGROW", hp: 100, maxHP: 300 },
+      defender: MOD_DEFENDER,
+      movePower: 50,
+      moveType: "TYPE_FIRE",
+      isCriticalHit: false,
+    });
+    expect(damage).toBe(24);
   });
 });
 

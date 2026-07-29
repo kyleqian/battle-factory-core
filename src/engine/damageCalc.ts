@@ -4,7 +4,11 @@
 // Cmd_typecalc :1355, Cmd_accuracycheck :1099, ApplyRandomDmgMultiplier
 // :1639). Scope: the branches battle 1's turn 1 exercises (level-50
 // singles, no weather/screens/double-battle) are fully exercised by
-// Tier-1 tests; the surrounding modifier chain (held items, abilities,
+// Tier-1 tests, as is the ability stat/power modifier block (pokemon.c:3158,
+// 3203-3226 - Huge/Pure Power, Thick Fat, Hustle, Plus/Minus, Guts, Marvel
+// Scale, the Overgrow/Blaze/Torrent/Swarm pinch-power boosts), ported in
+// exact source order (truncation order is load-bearing); the surrounding
+// modifier chain (held items, badge boosts,
 // Reflect/Light Screen, double-battle target-split) is ported structurally
 // so later S7 slices can enable those paths, but is untested this step —
 // see docs/battle-turn-notes.md §10 for the exact inventory.
@@ -102,6 +106,11 @@ export interface DamageBattler {
   statStages: StatStages;
   /** STATUS1_BURN set (pokemon.c:3263); halves physical damage unless GUTS. */
   isBurned?: boolean;
+  /** status1 != 0 (pokemon.c:3211/3213 Guts/Marvel Scale gate - ANY status, not just burn). */
+  hasStatus1?: boolean;
+  /** Current/max HP (pokemon.c:3219-3226 pinch-boost gate: hp <= maxHP/3). Only the attacker's is read. */
+  hp?: number;
+  maxHP?: number;
   /** ABILITY_* id, structurally present - see the modifier-chain notes above for what's wired. */
   ability?: string | null;
   species?: number;
@@ -136,6 +145,14 @@ export interface DamageCalcInput {
   weatherHasEffect?: boolean;
   /** Source gCurrentMove, used by the weather block's Solar Beam exception. */
   currentMove?: number;
+  /**
+   * ABILITY_ON_FIELD2's battler scan (battle_util.c ABILITYEFFECT_FIELD_SPORT
+   * case, :3111-3135): every active battler's ability, gBattlersCount-wide -
+   * the real field scan Plus/Minus read (pokemon.c:3207-3210), not a
+   * doubles-shaped stub. Defaults to `[attacker.ability, defender.ability]`,
+   * which IS the full field in singles (gBattlersCount == 2).
+   */
+  activeBattlerAbilities?: ReadonlyArray<string | null | undefined>;
 }
 
 /**
@@ -159,6 +176,36 @@ function critAdjustedDefenseStat(rawStat: number, stage: number, isCriticalHit: 
 }
 
 /**
+ * Local identity aliases for the ability spellings this module's stat/power
+ * block implements. `attacker.ability === "ABILITY_HUGE_POWER"` would work
+ * identically at runtime, but the ability/item parity census only counts
+ * identifier-form references (tools/report/ability-item-parity-census.ts's
+ * `insideStringLiteral` gate excludes quoted literals - see that file's
+ * comment for why: the engine's id<->name tables spell the entire ability
+ * universe as strings, which would make every ability trivially "referenced").
+ */
+const ABILITY_HUGE_POWER = "ABILITY_HUGE_POWER";
+const ABILITY_PURE_POWER = "ABILITY_PURE_POWER";
+const ABILITY_THICK_FAT = "ABILITY_THICK_FAT";
+const ABILITY_HUSTLE = "ABILITY_HUSTLE";
+const ABILITY_PLUS = "ABILITY_PLUS";
+const ABILITY_MINUS = "ABILITY_MINUS";
+const ABILITY_GUTS = "ABILITY_GUTS";
+const ABILITY_MARVEL_SCALE = "ABILITY_MARVEL_SCALE";
+const ABILITY_OVERGROW = "ABILITY_OVERGROW";
+const ABILITY_BLAZE = "ABILITY_BLAZE";
+const ABILITY_TORRENT = "ABILITY_TORRENT";
+const ABILITY_SWARM = "ABILITY_SWARM";
+
+/** pokemon.c:3219-3226 - the pinch-power ability keyed by the boosted type. */
+const PINCH_BOOST_OWNER_BY_TYPE: Readonly<Record<string, string>> = {
+  TYPE_GRASS: ABILITY_OVERGROW,
+  TYPE_FIRE: ABILITY_BLAZE,
+  TYPE_WATER: ABILITY_TORRENT,
+  TYPE_BUG: ABILITY_SWARM,
+};
+
+/**
  * CalculateBaseDamage (pokemon.c:3106-3371), physical/special branches only
  * (TYPE_MYSTERY's "damage = 0" branch is also ported). Item type-boosts,
  * badge boosts and the 6 species-locked hold items are NOT applied (see
@@ -167,14 +214,60 @@ function critAdjustedDefenseStat(rawStat: number, stage: number, isCriticalHit: 
  * confirm battle 1's held items don't touch this function).
  */
 export function calculateBaseDamage(input: DamageCalcInput): number {
-  const { attacker, defender, movePower, moveType, isCriticalHit } = input;
+  const { attacker, defender, moveType, isCriticalHit } = input;
   let damage: number;
-  const defenderDefense = input.moveEffect === "EFFECT_EXPLOSION"
-    ? Math.trunc(defender.defense / 2)
-    : defender.defense;
+
+  // pokemon.c:3158 - Huge/Pure Power double the attacker's raw Attack
+  // before every later stat modifier (hold-item/badge boosts between here
+  // and the ability block below are out of scope - see module doc comment).
+  let attack = attacker.attack;
+  if (attacker.ability === ABILITY_HUGE_POWER || attacker.ability === ABILITY_PURE_POWER) {
+    attack *= 2;
+  }
+  let spAttack = attacker.spAttack;
+  let defense = defender.defense;
+
+  // pokemon.c:3203-3213 ability block, exact source order.
+  if (defender.ability === ABILITY_THICK_FAT && (moveType === "TYPE_FIRE" || moveType === "TYPE_ICE")) {
+    spAttack = Math.trunc(spAttack / 2);
+  }
+  if (attacker.ability === ABILITY_HUSTLE) {
+    attack = Math.trunc((150 * attack) / 100);
+  }
+  const activeBattlerAbilities = input.activeBattlerAbilities ?? [attacker.ability, defender.ability];
+  if (attacker.ability === ABILITY_PLUS && activeBattlerAbilities.some((a) => a === ABILITY_MINUS)) {
+    spAttack = Math.trunc((150 * spAttack) / 100);
+  }
+  if (attacker.ability === ABILITY_MINUS && activeBattlerAbilities.some((a) => a === ABILITY_PLUS)) {
+    spAttack = Math.trunc((150 * spAttack) / 100);
+  }
+  if (attacker.ability === ABILITY_GUTS && attacker.hasStatus1) {
+    attack = Math.trunc((150 * attack) / 100);
+  }
+  if (defender.ability === ABILITY_MARVEL_SCALE && defender.hasStatus1) {
+    defense = Math.trunc((150 * defense) / 100);
+  }
+
+  // pokemon.c:3219-3226 pinch-power boosts (the Mud Sport/Water Sport
+  // field-power halving between Marvel Scale and here is out of scope).
+  let movePower = input.movePower;
+  const pinchAbility = PINCH_BOOST_OWNER_BY_TYPE[moveType];
+  if (
+    pinchAbility !== undefined
+    && attacker.ability === pinchAbility
+    && attacker.hp !== undefined
+    && attacker.maxHP !== undefined
+    && attacker.hp <= Math.trunc(attacker.maxHP / 3)
+  ) {
+    movePower = Math.trunc((150 * movePower) / 100);
+  }
+
+  // pokemon.c:3228-3230 - Explosion/Self-Destruct halve Defense AFTER the
+  // ability block, so it stacks with (not replaces) a Marvel Scale boost.
+  const defenderDefense = input.moveEffect === "EFFECT_EXPLOSION" ? Math.trunc(defense / 2) : defense;
 
   if (isTypePhysical(moveType)) {
-    damage = critAdjustedAttackStat(attacker.attack, attacker.statStages.atk, isCriticalHit);
+    damage = critAdjustedAttackStat(attack, attacker.statStages.atk, isCriticalHit);
 
     damage = damage * movePower;
     damage *= Math.trunc((2 * attacker.level) / 5) + 2;
@@ -184,7 +277,7 @@ export function calculateBaseDamage(input: DamageCalcInput): number {
     damage = Math.trunc(damage / damageHelper);
     damage = Math.trunc(damage / 50);
 
-    if (attacker.isBurned && attacker.ability !== "ABILITY_GUTS") damage = Math.trunc(damage / 2);
+    if (attacker.isBurned && attacker.ability !== ABILITY_GUTS) damage = Math.trunc(damage / 2);
 
     if (input.sideStatusReflect && !isCriticalHit) {
       damage = input.isDoubleBattleSpreadMove ? 2 * Math.trunc(damage / 3) : Math.trunc(damage / 2);
@@ -196,7 +289,7 @@ export function calculateBaseDamage(input: DamageCalcInput): number {
   } else {
     // Special branch (pokemon.c:3287-3368); Flash Fire remains outside the
     // ported modifier inventory described in the module comment.
-    damage = critAdjustedAttackStat(attacker.spAttack, attacker.statStages.spAtk, isCriticalHit);
+    damage = critAdjustedAttackStat(spAttack, attacker.statStages.spAtk, isCriticalHit);
 
     damage = damage * movePower;
     damage *= Math.trunc((2 * attacker.level) / 5) + 2;
