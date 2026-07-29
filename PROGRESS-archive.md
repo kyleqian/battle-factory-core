@@ -1,3 +1,26 @@
+---
+
+## 648 — [BOUNDED MAIN WORKER 2026-07-28 ~17:47] Focus Band damage survival source-complete
+
+- **State:** committed `ecfb08d2`; tree green at **434 files / 4756 tests**,
+  production build, OFF oracle info, and `git diff --check`. Census remains
+  byte-idempotent at **214/214 effects, 355/355 moves, 276/276 distinct,
+  2957/2957 weighted** with all **72** validations passing.
+- **Did:** ported Focus Band's holder-only post-variance roll in both normal
+  adjustment commands and its no-variance `adjustsetdamage` sibling. Successful
+  lethal hits clamp to 1 HP, set HUNG_ON/item attribution, and run the real
+  Focus Band animation/message call-current path; action finish clears the new
+  source-shaped `focusBanded` scratch bit.
+- **Next:** supervisor verify `ecfb08d2`; audit finding 4 is complete. Do not
+  resume retired canonical Battle 2 or presentation work.
+- **Notes:** Tier-1 pins nonlethal/success/failure rolls, Endure precedence,
+  no-band ledger stability, set 178 `FRONTIER_MON_MACHOKE_1`, and Beat Up's
+  exact accuracy→(crit, variance, band)×2 ledger. Source
+  `MoveValuesCleanUp` clears per-member result flags but not `focusBanded`;
+  every member re-rolls it, while the bit itself has the source action lifetime.
+  Deliberate hit-chain barrier pin **16→13**. No census, recording import,
+  handler-set, issue, roadmap, round, tick, or pixel change.
+
 ## 647 — [BOUNDED MAIN WORKER 2026-07-28 ~17:33] Weather base-damage block source-complete
 
 - **State:** committed `540d3ff7`; tree green at **434 files / 4752 tests**,
