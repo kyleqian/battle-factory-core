@@ -29,7 +29,7 @@
  * that path, not a stub (none of the three banked ledgers' four moves reach
  * a table entry; confirmed by direct grep of `data/battle_ai_scripts.s`).
  *
- * Four table entries ARE ported: `EFFECT_SPEED_DOWN(_2)` -> `AI_CBM_SpeedDown`
+ * Ported table entries include `EFFECT_SLEEP` and `EFFECT_SPEED_DOWN(_2)` -> `AI_CBM_SpeedDown`
  * (`data/battle_ai_scripts.s:287-312`, `runCbmSpeedDown` below), the
  * proven CBM+CV pair with `factoryAiCheckViability.ts`'s `AI_CV_SpeedDown`
  * (`docs/factory-ai-checkviability-ground-truth.md` §6); `EFFECT_ATTACK_DOWN(_2)`
@@ -1230,6 +1230,19 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_SLEEP -> AI_CBM_Sleep
+  // (`data/battle_ai_scripts.s:104,216-222`, doc §29).
+  if (move.effect === "EFFECT_SLEEP") {
+    const sleep = runCbmSleep(target, rng, ordinal, `${input.reasonPrefix}-sleep`);
+    for (const draw of sleep.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: sleep.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: sleep.scoreDelta,
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -1265,4 +1278,35 @@ export function runCheckBadMovePreamble(input: Readonly<{
  */
 function runCbmSpDefUp(attackerSpDefStage: number): number {
   return attackerSpDefStage === MAX_STAT_STAGE ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_Sleep` (`data/battle_ai_scripts.s:216-222`, doc §29): one fresh
+ * target ability read, then Insomnia, Vital Spirit, primary-status, and
+ * Safeguard rejection gates in source order. Kept after the dispatcher for
+ * the same census-site stability reason as `runCbmSpDefUp`.
+ */
+const ABILITY_INSOMNIA = "ABILITY_INSOMNIA";
+const ABILITY_VITAL_SPIRIT = "ABILITY_VITAL_SPIRIT";
+
+function runCbmSleep(
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckBadMoveDraw[];
+  scoreDelta: number;
+}> {
+  const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
+  const blocked = ability.ability === ABILITY_INSOMNIA
+    || ability.ability === ABILITY_VITAL_SPIRIT
+    || (target.hasAnyStatus ?? false)
+    || (target.safeguardUp ?? false);
+  return Object.freeze({
+    rng: ability.rng,
+    draws: Object.freeze(ability.draw === null ? [] : [ability.draw]),
+    scoreDelta: blocked ? -10 : 0,
+  });
 }

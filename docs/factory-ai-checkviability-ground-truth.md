@@ -6183,3 +6183,116 @@ replaces one runtime effect-table halt with a handler behind the same single
 generic barrier statement, so neither static census count legitimately
 moves. The executable-frontier ratchet likewise gains no canonical recording
 import and no new unsupported-branch barrier.
+
+## 29. 2026-07-29 addendum #19: `AI_CBM_Sleep` + `AI_CV_Sleep`
+
+Bounded side-lane implementation session, Battle Scene OFF oracle. Both
+halves of the next Factory-reachable pair behind the generic barriers are
+now source-complete and live-verified.
+
+### 29.1 Selection and Level-50 reachability
+
+Moves with `EFFECT_SLEEP` occur in **54 Level-50 Frontier set slots** across
+Sing, Sleep Powder, Hypnosis, Lovely Kiss, Grass Whistle, and Spore. This was
+the best remaining reachability/staging ratio: the CBM body has four
+deterministic rejection gates after one ability read, while the CV body has
+two known-move scans and one random site.
+
+The runner-up was `AI_CBM_Roar` + `AI_CV_Roar`, with **45** Level-50
+carriers. It was passed over because its source body requires party-count
+and switchability staging; Sleep admits a clean single-ability
+Insomnia/control twin whose choice is visible directly in PP.
+
+### 29.2 Source-exact bodies, gates, and polarity
+
+CBM dispatch is `EFFECT_SLEEP -> AI_CBM_Sleep`
+(`data/battle_ai_scripts.s:104,216-222`):
+
+```asm
+AI_CBM_Sleep:
+	get_ability AI_TARGET
+	if_equal ABILITY_INSOMNIA, Score_Minus10
+	if_equal ABILITY_VITAL_SPIRIT, Score_Minus10
+	if_status AI_TARGET, STATUS1_ANY, Score_Minus10
+	if_side_affecting AI_TARGET, SIDE_STATUS_SAFEGUARD, Score_Minus10
+	end
+```
+
+The ability command is a fresh, uncached read with the already-proven
+two-ability guessing draw (`battle_ai_script_commands.c:1350-1400`). Gates
+then execute in source order. A JUMP at any gate applies `-10`; only all four
+FALLTHROUGH results reach `end` at `0`. Status and side-status reads are the
+real `Cmd_if_status`/`Cmd_if_side_affecting` bodies (`:773-788`, `:881-898`).
+
+CV dispatch and body are `data/battle_ai_scripts.s:654,778-787`:
+
+```asm
+AI_CV_Sleep:
+	if_has_move_with_effect AI_TARGET, EFFECT_DREAM_EATER, AI_CV_SleepEncourageSlpDamage
+	if_has_move_with_effect AI_TARGET, EFFECT_NIGHTMARE, AI_CV_SleepEncourageSlpDamage
+	goto AI_CV_Sleep_End
+AI_CV_SleepEncourageSlpDamage:
+	if_random_less_than 128, AI_CV_Sleep_End
+	score +1
+```
+
+Each scan consults the target's BattleHistory-known moves, not its hidden
+full moveset (`Cmd_if_has_move_with_effect`, `battle_ai_script_commands.c:
+1901-1927`). With neither effect known, there is no draw. Either effect
+reaches the single draw site: low byte `<128` JUMPs and skips the bonus;
+`>=128` FALLS THROUGH and applies `+1`. Neither body writes `funcResult`, so
+the incoming carry is preserved.
+
+Tier 1 covers both abilities, any primary status, Safeguard, the all-clear
+fallthrough, the CBM handler's own fresh ability draw, both CV move-effect
+scan sites, both random polarities, and continued reachability of the Haze
+barrier.
+
+### 29.3 Live fixture design and ledger
+
+The reproducible pair is:
+
+- `mechanic-factory-ai-sleep-control-off.json`;
+- `mechanic-factory-ai-sleep-reach-off.json`;
+- generator: `tools/probe/generate-factory-ai-sleep-fixtures.ts`;
+- verifier: `tools/probe/verify-factory-ai-sleep-live.ts`.
+
+Both use complete `mechanicLab overrides.parties`. A level-5 Magikarp first
+sets Light Screen, then the player's four-slot Vital Throw KOs it. Dusclops
+switches in with `[Sing, Light Screen, Light Screen, Light Screen]`. Vital
+Throw is Ghost-immune thereafter, holding HP and score inputs fixed. The
+control player is single-ability Levitate Misdreavus; reach is single-ability
+Insomnia Banette.
+
+The carried Light Screen makes each screen slot `CBM -8, CV -2`. In control,
+Sing is `CBM 0, CV 0` and wins. In reach, Insomnia makes Sing `CBM -10`,
+allowing a Light Screen slot to win. The choice flip is therefore caused by
+the newly ported gate, not inferred from a total draw count.
+
+| Seed | Fixture | First Dusclops PP delta | Sleep CBM | Engine choice | Engine RNG receipt |
+| --- | --- | --- | ---: | ---: | --- |
+| 1 | control | `[15,30,30,30] -> [14,30,30,30]` | 0 | slot 0 | 8 draws, `3726110690 -> 3070328874` |
+| 1 | reach | `[15,30,30,30] -> [15,29,30,30]` | -10 | slot 1 | 8 draws, `3726110690 -> 3070328874` |
+| 99 | control | `[15,30,30,30] -> [14,30,30,30]` | 0 | slot 0 | 8 draws, `1329715331 -> 3507076075` |
+| 99 | reach | `[15,30,30,30] -> [15,30,29,30]` | -10 | slot 2 | 8 draws, `1329715331 -> 3507076075` |
+
+Every row was rerun byte-identically. The immediately preceding ordinary
+battle call is isolated as one LCG step; the following engine receipt is
+exactly setup simulated-RNG x4, the three Light Screen CV rolls, and final
+tie selection x1. The engine matches both the ROM endpoint RNG and the exact
+PP-selected slot.
+
+### 29.4 Verification
+
+```sh
+node --experimental-strip-types tools/probe/generate-factory-ai-sleep-fixtures.ts
+node --experimental-strip-types tools/probe/verify-factory-ai-sleep-live.ts
+npx vitest run tests/factoryAiCheckBadMove.test.ts tests/factoryAiCheckViability.test.ts tests/factoryAiScoredDecision.test.ts
+```
+
+The executable-frontier census remains byte-identical (SHA-256
+`8b18f754…5261`). The ability/item census legitimately changes only two
+cells: `ABILITY_INSOMNIA` and `ABILITY_VITAL_SPIRIT` engine-reference counts
+each move **9 -> 11**, reflecting the new named constant and live comparison;
+all 69 abilities, 42 hold effects, and 17 validation checks remain complete.
+No canonical recording import or new unsupported-branch barrier was added.

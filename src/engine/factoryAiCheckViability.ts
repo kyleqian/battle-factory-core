@@ -10,9 +10,9 @@
  * complete zero score / zero draws -- not a stub for that path. A move
  * whose effect DOES have an entry halts with a named
  * `"factory-ai-check-viability"` unsupported-branch barrier -- except the
- * following (the 22 previously reachable handlers per
+ * following (the ported handlers per
  * `docs/factory-ai-checkviability-ground-truth.md` §5's table, dispatched
- * before that barrier check): `EFFECT_SPEED_DOWN(_2)` (`AI_CV_SpeedDown`,
+ * before that barrier check): `EFFECT_SLEEP` (`AI_CV_Sleep`, doc §29), `EFFECT_SPEED_DOWN(_2)` (`AI_CV_SpeedDown`,
  * `runCvSpeedDown` below, `data/battle_ai_scripts.s:1142-1152`,
  * `docs/factory-ai-checkviability-ground-truth.md` §6), `EFFECT_PURSUIT`
  * (`AI_CV_Pursuit`, `runCvPursuit` below, `:2018-2036`, doc §11.1),
@@ -368,7 +368,7 @@ export type FactoryAiCheckViabilityDraw =
   | Readonly<{
     ordinal: number;
     reason: string;
-    kind: "pursuit-roll";
+    kind: "pursuit-roll" | "sleep-roll";
     before: BattleRngState;
     after: BattleRngState;
     rawRngValue: number;
@@ -2892,6 +2892,22 @@ export function runCheckViability(input: Readonly<{
   // writes-always + 7 writes-conditionally handlers).
   const funcResultCarry = input.staleFuncResultFallback;
 
+  if (move.effect === "EFFECT_SLEEP") {
+    const sleep = runCvSleep({
+      rng: input.rng,
+      targetKnownMoves: input.target.knownMoves ?? [],
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: sleep.rng,
+      draws: sleep.draws,
+      scoreDelta: sleep.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
   if (move.effect === "EFFECT_SPEED_DOWN" || move.effect === "EFFECT_SPEED_DOWN_2") {
     const speedDown = runCvSpeedDown({
       rng: input.rng,
@@ -3398,5 +3414,40 @@ export function runCheckViability(input: Readonly<{
     draws: Object.freeze([]) as readonly FactoryAiCheckViabilityDraw[],
     scoreDelta: 0,
     funcResultAfter: funcResultCarry,
+  });
+}
+
+/**
+ * `AI_CV_Sleep` (`data/battle_ai_scripts.s:778-787`, doc §29). Kept after
+ * the dispatcher so the ability/item census's exact source-site pins remain
+ * byte-stable.
+ */
+function runCvSleep(input: Readonly<{
+  rng: BattleRngState;
+  targetKnownMoves: readonly number[];
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckViabilityDraw[];
+  scoreDelta: number;
+}> {
+  const knownEffects = input.targetKnownMoves.map((moveId) => MOVES_BY_ID.get(moveId)?.effect);
+  const encouragesSleepDamage = knownEffects.includes("EFFECT_DREAM_EATER")
+    || knownEffects.includes("EFFECT_NIGHTMARE");
+  if (!encouragesSleepDamage) {
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 0 });
+  }
+
+  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-sleep-roll`);
+  const jumpedToEnd = roll.randomValue % 256 < 128;
+  return Object.freeze({
+    rng: roll.after,
+    draws: Object.freeze([Object.freeze({
+      ...roll,
+      kind: "sleep-roll" as const,
+      succeeded: !jumpedToEnd,
+    })]),
+    scoreDelta: jumpedToEnd ? 0 : 1,
   });
 }

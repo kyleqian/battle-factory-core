@@ -212,6 +212,58 @@ describe("AI_CheckBadMove universal preamble (docs/factory-ai-ground-truth.md §
   });
 });
 
+describe("AI_CBM_Sleep (docs/factory-ai-checkviability-ground-truth.md §29)", () => {
+  const MOVE_SING = 47;
+
+  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  it.each([
+    ["Insomnia", { knownAbility: "ABILITY_INSOMNIA", realAbility: "ABILITY_INSOMNIA" }],
+    ["Vital Spirit", { knownAbility: "ABILITY_VITAL_SPIRIT", realAbility: "ABILITY_VITAL_SPIRIT" }],
+    ["any primary status", { hasAnyStatus: true }],
+    ["Safeguard", { safeguardUp: true }],
+  ])("%s gate JUMPs to Score_Minus10", (_label, overrides) => {
+    const result = run(MOVE_SING, target(overrides));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("all four gates FALL THROUGH to end for an eligible target", () => {
+    const result = run(MOVE_SING, target());
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  it("executes the handler's own fresh get_ability after the universal preamble", () => {
+    const result = run(MOVE_SING, { ...MAROWAK, hasAnyStatus: true });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-sleep-ability",
+    ]);
+  });
+
+  it("leaves the next unported CBM table effect behind the generic barrier", () => {
+    expect(run(MOVE_HAZE, target())).toEqual({
+      kind: "unsupported-branch",
+      barrier: "factory-ai-check-bad-move",
+      effect: "EFFECT_HAZE",
+      moveId: MOVE_HAZE,
+    });
+  });
+});
+
 describe("AI_CBM_Toxic (data/battle_ai_scripts.s:341-352)", () => {
   const CLEAN_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
     species: 213, // Shuckle: single known-by-species Sturdy keeps all handler draws at zero.
