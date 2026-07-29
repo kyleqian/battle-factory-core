@@ -558,6 +558,7 @@ import dizzyPunchAsset from "../animation/assets/dizzyPunch.json" with { type: "
 import covetAsset from "../animation/assets/covet.json" with { type: "json" };
 import headbuttAsset from "../animation/assets/headbutt.json" with { type: "json" };
 import bodySlamAsset from "../animation/assets/body-slam.json" with { type: "json" };
+import slamAsset from "../animation/assets/slam.json" with { type: "json" };
 import astonishAsset from "../animation/assets/astonish.json" with { type: "json" };
 import synthesisAsset from "../animation/assets/synthesis.json" with { type: "json" };
 import moonlightAsset from "../animation/assets/moonlight.json" with { type: "json" };
@@ -717,6 +718,7 @@ import {
   sceneOnBiteView,
   sceneOnHeadbuttView,
   sceneOnBodySlamView,
+  sceneOnSlamView,
   sceneOnTwineedleView,
   sceneOnSpikeCannonView,
   sceneOnSonicBoomView,
@@ -786,6 +788,7 @@ import {
   type SceneOnBiteConfig,
   type SceneOnHeadbuttConfig,
   type SceneOnBodySlamConfig,
+  type SceneOnSlamConfig,
   type SceneOnTwineedleConfig,
   type SceneOnSpikeCannonConfig,
   type SceneOnSonicBoomConfig,
@@ -1175,6 +1178,11 @@ const headbuttArt = headbuttAsset as {
 const bodySlamArt = bodySlamAsset as {
   lickitungBack: { tileset: Tileset; palette: RgbColor[] };
   lickitungFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const slamArt = slamAsset as {
+  lickitungBack: { tileset: Tileset; palette: RgbColor[] };
+  lickitungFront: { tileset: Tileset; palette: RgbColor[] };
+  slamHit: { tileset: Tileset; palette: RgbColor[] };
 };
 const astonishArt = astonishAsset as {
   loudredBack: { tileset: Tileset; palette: RgbColor[] };
@@ -16067,6 +16075,154 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "LOUDRED used" : "Foe LOUDRED used",
       "ASTONISH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SLAM") {
+    const slamState =
+      state as SceneOnMovePresentationState<SceneOnSlamConfig>;
+    const view = sceneOnSlamView(slamState);
+    // BuildOamBuffer and OBJ palette transfer precede sprite/task callbacks.
+    const displayed = sceneOnSlamView({
+      ...slamState,
+      age: slamState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "LICKITUNG"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "LICKITUNG"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SLAM pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const lickitungSource = playerToOpponent
+      ? slamArt.lickitungBack
+      : slamArt.lickitungFront;
+    const lickitung = playerToOpponent
+      ? lickitungSource
+      : {
+          ...lickitungSource,
+          tileset: subTileset(lickitungSource.tileset, 0, 8),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+
+    const targetIdle = playerToOpponent && slamState.age < 18
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      lickitung.tileset,
+      lickitung.palette,
+      view.attacker.geometry.spriteCorner.x + displayed.attackerOffset.x2,
+      view.attacker.geometry.spriteCorner.y + displayed.attackerOffset.y2,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x
+        + targetIdle.x2 + displayed.targetOffset.x2,
+      view.target.geometry.spriteCorner.y
+        + targetIdle.y2 + displayed.targetOffset.y2,
+    );
+
+    // Before monbg reaches scanout, the player-back target is the front OBJ.
+    // During the body it becomes target-2 BG beneath attacker and effects.
+    let target2Backdrop: Uint8Array;
+    if (opponentToPlayer && slamState.age < 10) {
+      drawAttacker();
+      drawTarget();
+      target2Backdrop = fb.slice();
+    } else {
+      drawTarget();
+      target2Backdrop = fb.slice();
+      drawAttacker();
+    }
+    if (displayed.slamHit) {
+      const slamFrame = subTileset(
+        slamArt.slamHit.tileset,
+        displayed.slamHit.sheetFrame * 4,
+        4,
+      );
+      const draw = displayed.slamHit.hFlip
+        ? drawSpriteSheetHFlip : drawSpriteSheet;
+      draw(
+        fb,
+        slamFrame,
+        slamArt.slamHit.palette,
+        displayed.slamHit.x - 16,
+        displayed.slamHit.y - 16,
+      );
+    }
+    if (displayed.hitsplat) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        target2Backdrop,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        displayed.hitsplat.x,
+        displayed.hitsplat.y,
+        303,
+        0,
+        0,
+        303,
+        12,
+        8,
+        false,
+      );
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "LICKITUNG",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "LICKITUNG" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "LICKITUNG used" : "Foe LICKITUNG used",
+      "SLAM!",
       99,
     );
     return;
