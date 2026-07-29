@@ -127,6 +127,16 @@ function advanceSteps(rngValue: number, steps: number): number {
  */
 export const BATTLE_1_FRONTIER_MON_INDICES = [188, 184, 135] as const; // Grovyle / Murkrow / Pidgeotto
 
+/**
+ * Canonical battle-1 staging checkpoint and the observed ambient VBlank gaps
+ * around FillFactoryFrontierTrainerParty. The values are independently
+ * derived and source-executed in tests/opponentGen.test.ts; consumers use
+ * these inputs to regenerate the opponent party rather than copying its
+ * recorded personalities.
+ */
+export const BATTLE_1_CANONICAL_OPPONENT_RNG_START = 0x7b9fce20;
+export const BATTLE_1_CANONICAL_AMBIENT_GAP_STEPS = [0, 11, 7, 8] as const;
+
 export interface Battle1OpponentGenResult {
   /** One result per BATTLE_1_FRONTIER_MON_INDICES slot, in order. */
   mons: readonly RejectionLoopResult[];

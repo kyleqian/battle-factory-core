@@ -1,5 +1,6 @@
 import anchorState from "../data/gen/anchor-state.json" with { type: "json" };
-import rentalFixture from "../data/gen/battle1-swap-rentalmons-dump.json" with { type: "json" };
+import frontierMonsData from "../data/gen/battle-frontier-mons.json" with { type: "json" };
+import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
 import {
   acknowledgeFactorySwapPresentation,
   commitFactorySwapMutation,
@@ -13,6 +14,12 @@ import {
   type FactorySwapPhase,
   type FactorySwapState,
 } from "./factorySwap.ts";
+import {
+  BATTLE_1_CANONICAL_AMBIENT_GAP_STEPS,
+  BATTLE_1_CANONICAL_OPPONENT_RNG_START,
+  BATTLE_1_FRONTIER_MON_INDICES,
+  generateBattle1OpponentTeam,
+} from "./opponentGen.ts";
 import {
   getMonPicVisual,
   type MonPicVisual,
@@ -79,16 +86,71 @@ export interface FactorySwapBallCycleVisual {
 const anchor = anchorState as {
   rentals: Array<{
     species: string;
+    frontierMonIndex: number;
     personality: number;
+    ivs: Record<"hp" | "attack" | "defense" | "speed" | "spAttack" | "spDefense", number>;
     abilityNum: number;
     stats: { hp: number; maxHp: number };
   }>;
 };
-const rentalMons = (
-  rentalFixture as unknown as {
-    yesBranch: { ticks: Record<string, { rentalMons: FactoryRentalRoster }> };
+const frontierMons = (frontierMonsData as {
+  entries: Array<{ index: number; species: string }>;
+}).entries;
+const speciesStats = (speciesStatsData as {
+  species: Array<{ name: string; abilities: readonly string[] }>;
+}).species;
+const FACTORY_CHALLENGE_0_FIXED_IV = 3;
+
+function uniformRentalIv(rental: (typeof anchor.rentals)[number]): number {
+  const values = Object.values(rental.ivs);
+  if (!values.every((iv) => iv === values[0])) {
+    throw new Error(`Factory rental ${rental.species} does not have uniform IVs`);
   }
-).yesBranch.ticks["29601"]!.rentalMons;
+  return values[0]!;
+}
+
+function generatedAbilityNum(species: string, personality: number): number {
+  const stats = speciesStats.find((entry) => entry.name === species);
+  if (!stats) throw new Error(`Factory swap: missing generated species ${species}`);
+  // CreateBoxMon: only species with a real second ability use personality bit 0.
+  return stats.abilities[1] === "ABILITY_NONE" ? 0 : personality & 1;
+}
+
+/**
+ * Rebuilds gSaveBlock2Ptr->frontier.rentalMons for the canonical post-battle-1
+ * swap screen. Player records come from the drafted rental state; opponent
+ * records come from the generated Frontier set corpus and the source-ported
+ * CreateMonWithEVSpreadNatureOTID rejection loops.
+ */
+export function deriveCanonicalFactoryRentalRoster(): FactoryRentalRoster {
+  const drafted = anchor.rentals.slice(0, 3).map((rental) => ({
+    monId: rental.frontierMonIndex,
+    personality: rental.personality,
+    ivs: uniformRentalIv(rental),
+    abilityNum: rental.abilityNum,
+  }));
+  const generatedOpponent = generateBattle1OpponentTeam(
+    BATTLE_1_CANONICAL_OPPONENT_RNG_START,
+    BATTLE_1_CANONICAL_AMBIENT_GAP_STEPS,
+  );
+  const offered = BATTLE_1_FRONTIER_MON_INDICES.map((monId, index) => {
+    const set = frontierMons[monId];
+    if (!set || set.index !== monId) {
+      throw new Error(`Factory swap: missing generated Frontier set ${monId}`);
+    }
+    const personality = generatedOpponent.mons[index]!.personality;
+    return {
+      monId,
+      personality,
+      ivs: FACTORY_CHALLENGE_0_FIXED_IV,
+      abilityNum: generatedAbilityNum(set.species, personality),
+    };
+  });
+  return [...drafted, ...offered] as unknown as FactoryRentalRoster;
+}
+
+export const CANONICAL_FACTORY_RENTAL_ROSTER =
+  deriveCanonicalFactoryRentalRoster();
 
 function playerMon(index: number): FactorySwapMon {
   const source = anchor.rentals[index]!;
@@ -109,7 +171,7 @@ function offeredMon(
   species: string,
   rentalIndex: 3 | 4 | 5,
 ): FactorySwapMon {
-  const rental = rentalMons[rentalIndex];
+  const rental = CANONICAL_FACTORY_RENTAL_ROSTER[rentalIndex];
   return {
     id,
     species,
@@ -169,7 +231,7 @@ export function createCanonicalFactorySwapPresentation(): FactorySwapPresentatio
     controller: createFactorySwapState(
       CANONICAL_SWAP_PLAYER_PARTY,
       CANONICAL_SWAP_ENEMY_PARTY,
-      rentalMons,
+      CANONICAL_FACTORY_RENTAL_ROSTER,
     ),
     elapsed: 0,
     phaseElapsed: 0,

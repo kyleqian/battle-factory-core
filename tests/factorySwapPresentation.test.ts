@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { createInitialState, tick } from "../src/engine/core.ts";
+import rentalFixture from "../src/data/gen/battle1-swap-rentalmons-dump.json" with { type: "json" };
 import {
+  CANONICAL_FACTORY_RENTAL_ROSTER,
   FACTORY_SWAP_ENTRY_READY_DELAY,
   advanceFactorySwapPresentation,
   beginFactorySwapSummaryReturn,
@@ -120,6 +122,21 @@ function offerState(cursor: 0 | 1) {
 }
 
 describe("live Factory swap presentation adapter", () => {
+  it("derives every canonical rental-roster field exactly from engine state and generated data", () => {
+    const recorded = (
+      rentalFixture as unknown as {
+        yesBranch: {
+          ticks: Record<string, { rentalMons: typeof CANONICAL_FACTORY_RENTAL_ROSTER }>;
+        };
+      }
+    ).yesBranch.ticks["29601"]!.rentalMons;
+
+    expect(CANONICAL_FACTORY_RENTAL_ROSTER).toHaveLength(recorded.length);
+    for (const [index, rental] of CANONICAL_FACTORY_RENTAL_ROSTER.entries()) {
+      expect(rental, `rentalMons[${index}]`).toEqual(recorded[index]);
+    }
+  });
+
   it("round-trips SUMMARY_MODE_NORMAL through CB2_InitSwapScreen to the same selected popup without mutation", () => {
     let state = createCanonicalFactorySwapPresentation();
     state = advance(state, FACTORY_SWAP_ENTRY_READY_DELAY);

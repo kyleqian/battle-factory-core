@@ -35,16 +35,12 @@ const RECORDING_IMPORT = /^\s*import\s[^;]*?\sfrom\s+"([^"]*(?:-dump|-probe|-wat
 /**
  * Every production import of a canonical recording that exists today.
  *
- * This list may shrink, never grow. Each entry is real debt tracked in
- * ISSUES.md #41 (`battleScene.ts`) and #39 (its turn-keyed structure); the
- * 2026-07-24 supervisor session already retired three entries by porting
- * `featherDance.ts` off its recorded per-tick table onto the real animation
- * script. New engine work must derive behaviour from ported source, not from
- * a replayed capture of the one battle we happen to have on disk.
+ * This list may shrink, never grow. It is empty now that ISSUES #41's last
+ * production import has retired. New engine work must derive behaviour from
+ * ported source, not from a replayed capture of the one battle we happen to
+ * have on disk.
  */
-const ALLOWED_RECORDING_IMPORTS: ReadonlySet<string> = new Set([
-  "src/engine/factorySwapPresentation.ts::../data/gen/battle1-swap-rentalmons-dump.json",
-]);
+const ALLOWED_RECORDING_IMPORTS: ReadonlySet<string> = new Set();
 
 /**
  * `unsupportedBranch(...)` call sites per production module, excluding each
@@ -354,15 +350,13 @@ describe("overfit containment ratchet (ROADMAP S10 §4, ISSUES #41)", () => {
     ).toEqual([]);
   });
 
-  it("pins the remaining debt at one import in factorySwapPresentation", () => {
+  it("pins the production recording-import debt at zero", () => {
     const byFile = new Map<string, number>();
     for (const entry of ALLOWED_RECORDING_IMPORTS) {
       const file = entry.split("::")[0]!;
       byFile.set(file, (byFile.get(file) ?? 0) + 1);
     }
-    expect([...byFile.entries()].sort()).toEqual([
-      ["src/engine/factorySwapPresentation.ts", 1],
-    ]);
+    expect([...byFile.entries()].sort()).toEqual([]);
   });
 });
 
