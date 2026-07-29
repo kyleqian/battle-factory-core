@@ -222,6 +222,10 @@ import {
   type WhirlwindState,
 } from "./whirlwind.ts";
 import {
+  blockAtAge,
+  type BlockState,
+} from "./block.ts";
+import {
   wishAtAge,
   type WishState,
   type WishTwinkleVariant,
@@ -1130,6 +1134,13 @@ export interface SceneOnWhirlwindConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnBlockConfig {
+  readonly move: "BLOCK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnBodySlamConfig {
   readonly move: "BODY_SLAM";
   readonly attacker: SceneOnPresentationBattler;
@@ -1648,6 +1659,7 @@ export type SceneOnMoveConfig =
   | SceneOnBiteConfig
   | SceneOnHeadbuttConfig
   | SceneOnWhirlwindConfig
+  | SceneOnBlockConfig
   | SceneOnBodySlamConfig
   | SceneOnSlamConfig
   | SceneOnTwineedleConfig
@@ -1759,6 +1771,8 @@ export type SceneOnHowlPresentationState =
   SceneOnMovePresentationState<SceneOnHowlConfig>;
 export type SceneOnSweetKissPresentationState =
   SceneOnMovePresentationState<SceneOnSweetKissConfig>;
+export type SceneOnBlockPresentationState =
+  SceneOnMovePresentationState<SceneOnBlockConfig>;
 export type SceneOnPerishSongPresentationState =
   SceneOnMovePresentationState<SceneOnPerishSongConfig>;
 export type SceneOnNeedleArmPresentationState =
@@ -2606,7 +2620,7 @@ export function createSceneOnMovePresentation<
     | SceneOnScaryFaceConfig
     | SceneOnAbsorbConfig | SceneOnReflectConfig | SceneOnBiteConfig
     | SceneOnHeadbuttConfig | SceneOnBodySlamConfig | SceneOnSlamConfig
-    | SceneOnWhirlwindConfig,
+    | SceneOnWhirlwindConfig | SceneOnBlockConfig,
 >(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
@@ -3336,6 +3350,31 @@ export function sceneOnWhirlwindView(
       state.config.attacker.geometry.side,
       state.config.target.geometry.side,
       state.config.target.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+export interface SceneOnBlockView extends BlockState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age=0` is BLOCK's source `loadspritegfx` display. */
+export function sceneOnBlockView(
+  state: SceneOnMovePresentationState<SceneOnBlockConfig>,
+): SceneOnBlockView {
+  if (state.config.move !== "BLOCK") {
+    throw new Error(`expected BLOCK presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...blockAtAge(
+      state.age,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
     ),
   };
 }

@@ -1,5 +1,36 @@
 # Animation coverage
 
+## MOVE_BLOCK promoted exact; X_SIGN track bounded (2026-07-29)
+
+**Verdict:** `MOVE_BLOCK` is exact. The lowest suitable legal Level-50
+carrier is challenge-0 set **193** `FRONTIER_MON_SUDOWOODO_1` (species
+**185**, Block **335**, Hardy, SpDefense+HP, Hard Stone). Complete legal
+three-mon Scene-ON parties cover the whole body through first inactive cleanup
+twice fresh in both orientations: player-back **373–513 (141/141)**,
+evidence/raw
+`417c0585860b8396efa41bd2c3e5b2f3b1b90ac55dff7386928a3f6d727707f4` /
+`3837aa0b60c7a1f8decf1cae22947e27cd16935f39b562dc430e572ef8432b6c`;
+opponent-front **290–435 (146/146)**,
+`e7b64ee034e9716237bf376395c329b2d859b66ec469761b4f80311fe982391c` /
+`2e66e6ac4aaeaac809890797273f68b37d8f62f107446b9067721695d3eac276`.
+
+**Model/evidence:** reproducible extraction pins Sudowoodo front/back and
+X_SIGN with its source-shared HollowOrb palette. The typed reducer ports the
+single `gBlockXSpriteTemplate` fall, both sine bounces, side-relative OAM
+ordering, all three audio callbacks, seven flickers, wait, destruction, tag
+cleanup, and first inactive frame. `blockEvidence.ts` passes every dense
+source/component/typed-seam/software+hardware OAM/matrix/palette/register/
+audio/state/raw-RGB/production-framebuffer frame in both orientations twice
+fresh. Presentation exposes no trapped flag and owns no trap/gameplay effect,
+damage, RNG, turn, controller, or facility state.
+
+**Sibling:** `MOVE_ROCK_TOMB` remains unsupported. It independently adds
+ROCKS load/free, four `gRockTombRockSpriteTemplate` falls,
+`gRedXSpriteTemplate`, `AnimTask_ShakeMon`, platform shakes, audio/waits,
+damage/stat/controller presentation and cleanup, and has no complete dense
+both-orientation acceptance. Coverage is **92 exact / 0 partial / 0 staged /
+184 unsupported**; no boundary or barrier ratchet moved.
+
 ## MOVE_WHIRLWIND promoted exact; WHIRLWIND_LINES repair complete (2026-07-29)
 
 **Verdict:** `MOVE_WHIRLWIND` is exact. The lowest suitable legal

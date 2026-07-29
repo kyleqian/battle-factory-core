@@ -563,6 +563,7 @@ import dizzyPunchAsset from "../animation/assets/dizzyPunch.json" with { type: "
 import covetAsset from "../animation/assets/covet.json" with { type: "json" };
 import headbuttAsset from "../animation/assets/headbutt.json" with { type: "json" };
 import whirlwindAsset from "../animation/assets/whirlwind.json" with { type: "json" };
+import blockAsset from "../animation/assets/block.json" with { type: "json" };
 import bodySlamAsset from "../animation/assets/body-slam.json" with { type: "json" };
 import slamAsset from "../animation/assets/slam.json" with { type: "json" };
 import astonishAsset from "../animation/assets/astonish.json" with { type: "json" };
@@ -727,6 +728,7 @@ import {
   sceneOnBiteView,
   sceneOnHeadbuttView,
   sceneOnWhirlwindView,
+  sceneOnBlockView,
   sceneOnBodySlamView,
   sceneOnSlamView,
   sceneOnTwineedleView,
@@ -800,6 +802,7 @@ import {
   type SceneOnBiteConfig,
   type SceneOnHeadbuttConfig,
   type SceneOnWhirlwindConfig,
+  type SceneOnBlockConfig,
   type SceneOnBodySlamConfig,
   type SceneOnSlamConfig,
   type SceneOnTwineedleConfig,
@@ -1195,6 +1198,11 @@ const whirlwindArt = whirlwindAsset as {
   butterfreeBack: { tileset: Tileset; palette: RgbColor[] };
   butterfreeFront: { tileset: Tileset; palette: RgbColor[] };
   whirlwindLines: { tileset: Tileset; palette: RgbColor[] };
+};
+const blockArt = blockAsset as {
+  sudowoodoBack: { tileset: Tileset; palette: RgbColor[] };
+  sudowoodoFront: { tileset: Tileset; palette: RgbColor[] };
+  xSign: { tileset: Tileset; palette: RgbColor[] };
 };
 const bodySlamArt = bodySlamAsset as {
   lickitungBack: { tileset: Tileset; palette: RgbColor[] };
@@ -16649,6 +16657,113 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "BUTTERFREE used" : "Foe BUTTERFREE used",
       "WHIRLWIND!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "BLOCK") {
+    const blockState =
+      state as SceneOnMovePresentationState<SceneOnBlockConfig>;
+    const view = sceneOnBlockView(blockState);
+    // BuildOamBuffer precedes AnimBlockX, including its creation callback.
+    const displayed = sceneOnBlockView({
+      ...blockState,
+      age: blockState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "SUDOWOODO"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "SUDOWOODO"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged BLOCK pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const sudowoodoSource = playerToOpponent
+      ? blockArt.sudowoodoBack : blockArt.sudowoodoFront;
+    const sudowoodo = playerToOpponent
+      ? sudowoodoSource
+      : {
+          ...sudowoodoSource,
+          tileset: subTileset(sudowoodoSource.tileset, 0, 8),
+        };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      sudowoodo.tileset,
+      sudowoodo.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    const drawXSign = () => {
+      if (!displayed.xSign || displayed.xSign.invisible) return;
+      drawSpriteSheet(
+        fb,
+        blockArt.xSign.tileset,
+        blockArt.xSign.palette,
+        displayed.xSign.x - 32,
+        displayed.xSign.y + displayed.xSign.y2 - 32,
+      );
+    };
+    if (playerToOpponent) {
+      drawXSign();
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+      drawXSign();
+    }
+
+    const profile = blockState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "SUDOWOODO",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "SUDOWOODO" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "SUDOWOODO used" : "Foe SUDOWOODO used",
+      "BLOCK!",
       99,
     );
     return;

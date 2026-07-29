@@ -1,0 +1,31 @@
+{
+  "schema": "block-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-block-player-sudowoodo-opponent-onix.json",
+  "probe": "tools/compare/blockProbe.py",
+  "orientation": "player-back",
+  "sourceWindow": { "startFrame": 373, "endFrame": 513, "frameCount": 141 },
+  "evidenceSha256": "417c0585860b8396efa41bd2c3e5b2f3b1b90ac55dff7386928a3f6d727707f4",
+  "rawRgbSha256": "3837aa0b60c7a1f8decf1cae22947e27cd16935f39b562dc430e572ef8432b6c",
+  "attacker": {
+    "species": "SUDOWOODO",
+    "geometry": {
+      "side": "player", "spriteCorner": { "x": 40, "y": 56 },
+      "animationCenter": { "x": 72, "y": 88 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent", "spriteCorner": { "x": 144, "y": 10 },
+      "animationCenter": { "x": 176, "y": 42 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 169, "playerMaxHp": 177,
+    "opponentHp": 110, "opponentMaxHp": 110,
+    "playerGender": "male", "opponentGender": "male"
+  }
+}

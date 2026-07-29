@@ -2,6 +2,35 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_BLOCK",
+      "status": "exact",
+      "covered": [
+        "the lowest suitable legal Level-50 Factory carrier is challenge-0 set 193 FRONTIER_MON_SUDOWOODO_1 (species 185, Block 335, Hardy, SpDefense+HP, Hard Stone); complete legal three-mon Battle Scene ON parties stage it against ONIX in both orientations",
+        "fresh dense oracle probes cover the complete body through first inactive cleanup twice reproducibly in each orientation: player-back frames 373-513 pass 141/141 source/component/hardware/raw-RGB/shared-framebuffer checks with evidence 417c0585860b8396efa41bd2c3e5b2f3b1b90ac55dff7386928a3f6d727707f4 and raw RGB 3837aa0b60c7a1f8decf1cae22947e27cd16935f39b562dc430e572ef8432b6c; opponent-front frames 290-435 pass 146/146 with evidence e7b64ee034e9716237bf376395c329b2d859b66ec469761b4f80311fe982391c and raw RGB 2e66e6ac4aaeaac809890797273f68b37d8f62f107446b9067721695d3eac276",
+        "the pure source-relative reducer ports ANIM_TAG_X_SIGN load/free, the single gBlockXSpriteTemplate/AnimBlockX fall, both sine bounces, side-relative subpriority/display order, three sound callbacks, seven flicker phases, destruction, script wait, and first inactive cleanup",
+        "the typed seam carries only resolved Sudowoodo/Onix geometry and immutable HP/gender state; presentation exposes no trapped flag and owns no trap effect, damage, RNG, turn order, controller, or facility state",
+        "source extraction regenerates Sudowoodo front/back and X_SIGN art with its source-shared HollowOrb palette byte-for-byte; the production compositor uses the shared battle framebuffer and source OAM latch/order without absolute ticks, baked frames, coordinate/RGB fitting, or screenshots",
+        "blockEvidence.ts proves every source/component/typed-seam/software+hardware OAM/matrix/palette/register/audio/state/raw-RGB/production-framebuffer frame twice fresh in both orientations",
+        "MOVE_ROCK_TOMB remains unsupported: it independently adds ROCKS load/free, four gRockTombRockSpriteTemplate falls, gRedXSpriteTemplate, AnimTask_ShakeMon, platform shakes, audio/waits, damage/stat/controller presentation and cleanup, and lacks its own dense both-orientation acceptance"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-block-player-sudowoodo-opponent-onix.json",
+        "tools/battle-lab/mechanic-block-opponent-sudowoodo-player-onix.json",
+        "tools/compare/fixtures/block-player-sudowoodo-opponent-onix.json",
+        "tools/compare/fixtures/block-opponent-sudowoodo-player-onix.json",
+        "tools/compare/blockProbe.py",
+        "tools/compare/blockEvidence.ts",
+        "tools/compare/blockSourceAudit.ts",
+        "tools/compare/extractBlockAssets.ts",
+        "src/animation/assets/block.json",
+        "src/animation/block.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/block.test.ts",
+        "tests/animation/blockEvidence.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_WHIRLWIND",
       "status": "exact",
       "covered": [
