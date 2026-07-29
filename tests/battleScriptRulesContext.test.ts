@@ -15,6 +15,7 @@ import {
   createBattleScriptStatusRulesHandlers,
   prepareRulesStatusAnimation,
   BATTLE_SCRIPT_MOVE_FLAG_MAKES_CONTACT,
+  BATTLE_SCRIPT_MOVE_FLAG_KINGS_ROCK_AFFECTED,
   BATTLE_SCRIPT_MOVE_FLAG_MIRROR_MOVE_AFFECTED,
   resolveBattleScriptMoveFlags,
   resolveRulesBattlerForBattleScript,
@@ -172,6 +173,8 @@ describe("source-shaped Battle Script rules context", () => {
     expect(resolveBattleScriptMoveFlags(1) & BATTLE_SCRIPT_MOVE_FLAG_MAKES_CONTACT).not.toBe(0); // Pound
     expect(resolveBattleScriptMoveFlags(129) & BATTLE_SCRIPT_MOVE_FLAG_MAKES_CONTACT).toBe(0); // Swift
     expect(resolveBattleScriptMoveFlags(1) & BATTLE_SCRIPT_MOVE_FLAG_MIRROR_MOVE_AFFECTED).not.toBe(0);
+    expect(resolveBattleScriptMoveFlags(70) & BATTLE_SCRIPT_MOVE_FLAG_KINGS_ROCK_AFFECTED).not.toBe(0); // Strength
+    expect(resolveBattleScriptMoveFlags(304) & BATTLE_SCRIPT_MOVE_FLAG_KINGS_ROCK_AFFECTED).toBe(0); // Hyper Voice
   });
 
   it("creates exactly four deeply frozen battlers and the proven non-presentation fields", () => {

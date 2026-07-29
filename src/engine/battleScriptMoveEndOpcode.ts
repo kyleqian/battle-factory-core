@@ -25,12 +25,14 @@ import {
   type BattleScriptRngState,
 } from "./battleScriptMachine.ts";
 import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import { applyBattleScriptNonCertainFlinchMoveEffect } from "./battleScriptHitChainOpcode.ts";
 import {
   applyBattleScriptMoveEndChangedItemOwnership,
   applyBattleScriptMoveEndChoiceOwnership,
   applyBattleScriptMoveEndMirrorMoveOwnership,
   applyBattleScriptMoveEndSubstituteOwnership,
   applyBattleScriptMoveEndUpdateLastMovesOwnership,
+  BATTLE_SCRIPT_MOVE_FLAG_KINGS_ROCK_AFFECTED,
   BATTLE_SCRIPT_MOVE_FLAG_MAKES_CONTACT,
   resolveBattleScriptBattlerHoldEffect,
   resolveBattleScriptBattlerHoldEffectParam,
@@ -150,10 +152,6 @@ const HOLD_EFFECT_FLINCH = 30;
 const HOLD_EFFECT_SHELL_BELL = 62;
 /** include/battle.h:61. */
 const IGNORE_SHELL_BELL = 0xffff;
-const MOVEEND_KINGSROCK_BARRIER_HOLD_EFFECTS = Object.freeze([
-  HOLD_EFFECT_FLINCH,
-]);
-
 function moveEndItemEffectApplies(
   holdEffect: number,
   battlerState: BattleScriptRulesBattlerState,
@@ -645,6 +643,52 @@ function executeMoveendState(
       const attacker = requireBattlerRole(rules, "attacker");
       if (rules.battleMoveDamage !== 0) {
         const atkHoldEffect = resolveBattleScriptBattlerHoldEffect(rules, attacker);
+        if (atkHoldEffect === HOLD_EFFECT_FLINCH) {
+          const target = requireBattlerRole(rules, "target");
+          const targetState = rules.battlers[target];
+          const targetTurnDamaged =
+            targetState.specialStatus.physicalDmg !== 0
+            || targetState.specialStatus.specialDmg !== 0;
+          if (
+            (rules.moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT) === 0
+            && targetTurnDamaged
+          ) {
+            // battle_util.c:3776-3779 deliberately draws before testing the
+            // move flag and surviving-target gates. A damaging Hyper Voice
+            // therefore consumes this draw even though Gen 3 excludes it
+            // from King's Rock; preserving that source order is observable.
+            const { rng, randomValue } = drawBattleScriptRng(
+              context.state.rng,
+              context.instruction,
+              "ItemBattleEffects King's Rock flinch chance (Random() % 100)",
+            );
+            let nextRules = rules;
+            if (
+              (randomValue % 100) < resolveBattleScriptBattlerHoldEffectParam(rules, attacker)
+              && (resolveBattleScriptMoveFlags(rules.currentMove)
+                & BATTLE_SCRIPT_MOVE_FLAG_KINGS_ROCK_AFFECTED) !== 0
+              && targetState.hp !== 0
+            ) {
+              // Source writes MOVE_EFFECT_FLINCH, synchronously calls
+              // SetMoveEffect(FALSE, 0), then restores the script cursor.
+              // That call always targets gBattlerTarget here.
+              const setMoveEffectRules = Object.freeze({
+                ...rules,
+                selectorRoles: Object.freeze({
+                  ...rules.selectorRoles,
+                  effectBattler: target,
+                }),
+                scriptingBattler: attacker,
+              });
+              nextRules = applyBattleScriptNonCertainFlinchMoveEffect(
+                setMoveEffectRules,
+                target,
+              );
+            }
+            return continueState(advanceMoveend(nextRules), rng);
+          }
+          return continueState(advanceMoveend(rules));
+        }
         if (atkHoldEffect === HOLD_EFFECT_SHELL_BELL) {
           const target = requireBattlerRole(rules, "target");
           const attackerState = rules.battlers[attacker];
@@ -680,18 +724,6 @@ function executeMoveendState(
             );
           }
           return continueState(advanceMoveend(rules));
-        }
-        // HOLD_EFFECT_FLINCH remains the sole state-12 barrier: unlike Shell
-        // Bell, King's Rock owns a Random()%100 proc plus SetMoveEffect.
-        if (atkHoldEffect === HOLD_EFFECT_FLINCH) {
-          return transferState(unsupportedBranch(
-            context,
-            "ItemBattleEffects(ITEMEFFECT_KINGSROCK_SHELLBELL)'s King's Rock flinch "
-              + `branch (hold effects ${MOVEEND_KINGSROCK_BARRIER_HOLD_EFFECTS.join(",")}) `
-              + "needs RNG/script-transfer subsystems not modeled here",
-            "battle_util.c",
-            3772,
-          ));
         }
       }
       // Source increments moveendState unconditionally here, unlike state 11.

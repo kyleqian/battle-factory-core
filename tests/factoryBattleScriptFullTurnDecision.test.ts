@@ -30,7 +30,9 @@ const STOMP = 23;
 const SPIKES = 191;
 const RAIN_DANCE = 240;
 const REST = 156;
+const HYPER_VOICE = 304; // Gen 3 omits FLAG_KINGS_ROCK_AFFECTED despite dealing damage.
 const ITEM_CHESTO_BERRY = 134;
+const ITEM_KINGS_ROCK = 187;
 const ITEM_SHELL_BELL = 219;
 /** The banked KO-scenario seed (factoryBattleScriptTerminalDecision.test.ts, docs/hit-chain-ground-truth.md). */
 const KO_SCENARIO_RNG_SEED = 919694434;
@@ -1944,6 +1946,179 @@ describe("factory full-turn decision -- live move-end item transfers", () => {
       requestId: 2, side: "trainer", decision: TRAINER_ATTACKS,
     });
   }
+
+  it(
+    "King's Rock qualifying hit owns ledger call 5, flinches below 10%, and the existing "
+      + "admission arm makes the slower target skip its action",
+    () => {
+      const rngSeed = 1;
+      const result = completeTurn(config({
+        rngSeed,
+        player: {
+          species: 1, moveId: STRENGTH, item: ITEM_KINGS_ROCK,
+          attack: 100, defense: 255, spAttack: 10, spDefense: 255,
+          speed: 100, hp: 100, maxHp: 200,
+        },
+        trainer: {
+          species: 43, moveId: STRENGTH,
+          attack: 10, defense: 255, spAttack: 10, spDefense: 255,
+          speed: 50, hp: 200, maxHp: 200,
+        },
+      }));
+      expect(result.kind).toBe("decision-required");
+      if (result.kind !== "decision-required") throw new Error("expected next command");
+      let cursor = rngSeed;
+      const randomValues: number[] = [];
+      for (let call = 1; call <= 6; call += 1) {
+        cursor = advanceRngValue(cursor);
+        randomValues.push((cursor >>> 16) & 0xffff);
+      }
+      // Calls 1-4 are Strength's hit chain; King's Rock is call 5 and the
+      // continuing-turn boundary is call 6 because the second action skips.
+      expect(randomValues[4]! % 100).toBe(3);
+      expect(result.state.rng).toEqual({ value: cursor, calls: 6 });
+      expect(result.state.rules.rulesContext.battlers[0].hp).toBe(100);
+      expect(result.events.some((event) => {
+        const payload = "payload" in event ? event.payload : event;
+        return payload.kind === "message"
+          && payload.messageId === "STRINGID_PKMNFLINCHED";
+      })).toBe(true);
+    },
+  );
+
+  it(
+    "King's Rock over-threshold result consumes only ledger call 5, does not flinch, "
+      + "and lets the slower action run",
+    () => {
+      const rngSeed = 0;
+      const withRock = completeTurn(config({
+        rngSeed,
+        player: {
+          species: 1, moveId: STRENGTH, item: ITEM_KINGS_ROCK,
+          attack: 100, defense: 255, spAttack: 10, spDefense: 255,
+          speed: 100, hp: 100, maxHp: 200,
+        },
+        trainer: {
+          species: 43, moveId: STRENGTH,
+          attack: 10, defense: 255, spAttack: 10, spDefense: 255,
+          speed: 50, hp: 200, maxHp: 200,
+        },
+      }));
+      const control = completeTurn(config({
+        rngSeed,
+        player: {
+          species: 1, moveId: STRENGTH,
+          attack: 100, defense: 255, spAttack: 10, spDefense: 255,
+          speed: 100, hp: 100, maxHp: 200,
+        },
+        trainer: {
+          species: 43, moveId: STRENGTH,
+          attack: 10, defense: 255, spAttack: 10, spDefense: 255,
+          speed: 50, hp: 200, maxHp: 200,
+        },
+      }));
+      expect(withRock.kind).toBe("decision-required");
+      expect(control.kind).toBe("decision-required");
+      if (withRock.kind !== "decision-required" || control.kind !== "decision-required") {
+        throw new Error("expected next commands");
+      }
+      let fifthCursor = rngSeed;
+      for (let call = 1; call <= 5; call += 1) fifthCursor = advanceRngValue(fifthCursor);
+      expect(((fifthCursor >>> 16) & 0xffff) % 100).toBe(18);
+      expect(withRock.state.rng.calls).toBe(control.state.rng.calls + 1);
+      expect(withRock.state.rng.calls).toBe(10);
+      expect(withRock.state.rules.rulesContext.battlers[0].hp).toBeLessThan(100);
+      expect(withRock.events.some((event) => {
+        const payload = "payload" in event ? event.payload : event;
+        return payload.kind === "message"
+          && payload.messageId === "STRINGID_PKMNFLINCHED";
+      })).toBe(false);
+    },
+  );
+
+  it(
+    "non-damaging Double Team consumes zero King's Rock draws; damaging Gen-3-excluded "
+      + "Hyper Voice consumes the source-ordered draw but cannot flinch",
+    () => {
+      const shared = {
+        rngSeed: 1,
+        player: {
+          species: 1,
+          attack: 100, defense: 255, spAttack: 100, spDefense: 255,
+          speed: 100, hp: 100, maxHp: 200,
+        },
+        trainer: {
+          species: 43, moveId: STRENGTH,
+          attack: 10, defense: 255, spAttack: 10, spDefense: 255,
+          speed: 50, hp: 200, maxHp: 200,
+        },
+      };
+      const doubleTeamRock = completeTurn(config({
+        ...shared,
+        player: { ...shared.player, moveId: DOUBLE_TEAM, item: ITEM_KINGS_ROCK },
+      }), { kind: "use-move", moveSlot: 0, targetBattler: 0 });
+      const doubleTeamControl = completeTurn(config({
+        ...shared,
+        player: { ...shared.player, moveId: DOUBLE_TEAM },
+      }), { kind: "use-move", moveSlot: 0, targetBattler: 0 });
+      const hyperVoiceRock = completeTurn(config({
+        ...shared,
+        player: { ...shared.player, moveId: HYPER_VOICE, item: ITEM_KINGS_ROCK },
+      }));
+      const hyperVoiceControl = completeTurn(config({
+        ...shared,
+        player: { ...shared.player, moveId: HYPER_VOICE },
+      }));
+      for (const result of [doubleTeamRock, doubleTeamControl, hyperVoiceRock, hyperVoiceControl]) {
+        expect(result.kind).toBe("decision-required");
+      }
+      if (
+        doubleTeamRock.kind !== "decision-required"
+        || doubleTeamControl.kind !== "decision-required"
+        || hyperVoiceRock.kind !== "decision-required"
+        || hyperVoiceControl.kind !== "decision-required"
+      ) {
+        throw new Error("expected next commands");
+      }
+      expect(doubleTeamRock.state.rng).toEqual(doubleTeamControl.state.rng);
+      expect(hyperVoiceRock.state.rng.calls).toBe(hyperVoiceControl.state.rng.calls + 1);
+      expect(hyperVoiceRock.events.some((event) => {
+        const payload = "payload" in event ? event.payload : event;
+        return payload.kind === "message"
+          && payload.messageId === "STRINGID_PKMNFLINCHED";
+      })).toBe(false);
+    },
+  );
+
+  it(
+    "state-12 action order is King's Rock first, then the slower battler's Shell Bell heal",
+    () => {
+      const result = completeTurn(config({
+        rngSeed: 0, // King's Rock call 5 is 18%, so the Shell Bell holder acts.
+        player: {
+          species: 1, moveId: STRENGTH, item: ITEM_KINGS_ROCK,
+          attack: 100, defense: 255, spAttack: 10, spDefense: 255,
+          speed: 100, hp: 200, maxHp: 200,
+        },
+        trainer: {
+          species: 43, moveId: STRENGTH, item: ITEM_SHELL_BELL,
+          attack: 10, defense: 255, spAttack: 10, spDefense: 255,
+          speed: 50, hp: 100, maxHp: 200,
+        },
+      }));
+      expect(result.kind).toBe("decision-required");
+      if (result.kind !== "decision-required") throw new Error("expected next command");
+      expect(result.state.rng.calls).toBe(10);
+      expect(result.state.rules.rulesContext.battlers[1].hp).toBeGreaterThan(100 - 30);
+      const messages = result.events.flatMap((event) => {
+        const payload = "payload" in event ? event.payload : event;
+        return payload.kind === "message" ? [payload.messageId] : [];
+      });
+      expect(messages.filter((message) => message === "STRINGID_PKMNSITEMRESTOREDHPALITTLE"))
+        .toEqual(["STRINGID_PKMNSITEMRESTOREDHPALITTLE"]);
+      expect(messages).not.toContain("STRINGID_PKMNFLINCHED");
+    },
+  );
 
   it(
     "MOVEEND_ITEM_EFFECTS_ALL consumes Chesto Berry after Rest, clears Sleep/Nightmare through "

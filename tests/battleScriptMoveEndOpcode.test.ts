@@ -15,9 +15,13 @@ import {
   acknowledgeBattleScriptMachineController,
   stepBattleScriptMachine,
 } from "../src/engine/battleScriptMachine.ts";
+import { BATTLE_SCRIPT_STATUS2_MASKS } from "../src/engine/battleScriptSourceConstants.ts";
 
 const program = loadBattleScriptProgram();
 const TACKLE = 33; // EFFECT_HIT, power 35, TYPE_NORMAL
+const DOUBLE_TEAM = 104; // non-damaging and not FLAG_KINGS_ROCK_AFFECTED
+const HYPER_VOICE = 304; // damaging but excluded from FLAG_KINGS_ROCK_AFFECTED in Gen 3
+const KINGS_ROCK = 187; // GetItemHoldEffect -> HOLD_EFFECT_FLINCH, parameter 10
 
 function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -347,20 +351,73 @@ describe("production moveend (Cmd_moveend) registration", () => {
       expect(result.state.rulesContext.moveendState).toBe(17);
     });
 
-    it("halts on MOVEEND_KINGSROCK_SHELLBELL's King's Rock flinch branch when battleMoveDamage is nonzero", () => {
-      const KINGS_ROCK = 187; // GetItemHoldEffect -> HOLD_EFFECT_FLINCH
-      const rc = context(0, { item: KINGS_ROCK }, { moveendState: 12, battleMoveDamage: 10 });
-      const { result } = stepAtMoveend(rc);
-      expect(result.kind).toBe("halted");
-      if (result.kind !== "halted") throw new Error("expected halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 3772 });
+    it("MOVEEND_KINGSROCK_SHELLBELL draws exactly once and applies non-certain flinch for a qualifying landed hit", () => {
+      const rc = context(
+        0,
+        { item: KINGS_ROCK },
+        { moveendState: 12, battleMoveDamage: 10 },
+        { specialStatus: { physicalDmg: 10 } },
+      );
+      const { result } = stepAtMoveend(rc, 0); // first Random() is 0, below King's Rock's 10%
+      if (result.kind !== "advanced") throw new Error(`expected advanced, got ${result.kind}`);
+      expect(result.state.rng.calls).toBe(1);
+      expect(result.state.rng.ledger).toMatchObject([{
+        call: 1,
+        randomValue: 0,
+        reason: "ItemBattleEffects King's Rock flinch chance (Random() % 100)",
+      }]);
+      expect(result.state.rulesContext.battlers[1].status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_FLINCHED)
+        .toBe(BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_FLINCHED);
+      expect(result.state.rulesContext.moveendState).toBe(17);
+    });
+
+    it("MOVEEND_KINGSROCK_SHELLBELL consumes one over-threshold draw without flinching or drawing again", () => {
+      const rc = context(
+        0,
+        { item: KINGS_ROCK },
+        { moveendState: 12, battleMoveDamage: 10 },
+        { specialStatus: { physicalDmg: 10 } },
+      );
+      const { result } = stepAtMoveend(rc, 1); // first Random() is 16838, 38% >= 10%
+      if (result.kind !== "advanced") throw new Error(`expected advanced, got ${result.kind}`);
+      expect(result.state.rng.calls).toBe(1);
+      expect(result.state.rng.ledger[0]).toMatchObject({ call: 1, randomValue: 16838 });
+      expect(result.state.rulesContext.battlers[1].status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_FLINCHED)
+        .toBe(0);
+    });
+
+    it("MOVEEND_KINGSROCK_SHELLBELL draws zero for a non-damaging, non-qualifying move", () => {
+      const rc = context(
+        0,
+        { item: KINGS_ROCK },
+        { currentMove: DOUBLE_TEAM, moveendState: 12, battleMoveDamage: 10 },
+      );
+      const { result } = stepAtMoveend(rc, 0);
+      if (result.kind !== "advanced") throw new Error(`expected advanced, got ${result.kind}`);
+      expect(result.state.rng.calls).toBe(0);
+      expect(result.state.rulesContext.battlers[1].status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_FLINCHED)
+        .toBe(0);
+    });
+
+    it("pins source expression order: damaging Gen-3-excluded Hyper Voice draws before its flag rejection", () => {
+      const rc = context(
+        0,
+        { item: KINGS_ROCK },
+        { currentMove: HYPER_VOICE, moveendState: 12, battleMoveDamage: 10 },
+        { specialStatus: { specialDmg: 10 } },
+      );
+      const { result } = stepAtMoveend(rc, 0);
+      if (result.kind !== "advanced") throw new Error(`expected advanced, got ${result.kind}`);
+      expect(result.state.rng.calls).toBe(1);
+      expect(result.state.rulesContext.battlers[1].status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_FLINCHED)
+        .toBe(0);
     });
 
     it("MOVEEND_KINGSROCK_SHELLBELL does not barrier when battleMoveDamage is zero, even holding King's Rock", () => {
-      const KINGS_ROCK = 187;
       const rc = context(0, { item: KINGS_ROCK }, { moveendState: 12, battleMoveDamage: 0 });
       const { result } = stepAtMoveend(rc);
       if (result.kind !== "advanced") throw new Error(`expected advanced, got ${result.kind}`);
+      expect(result.state.rng.calls).toBe(0);
       expect(result.state.rulesContext.moveendState).toBe(17);
     });
 

@@ -3528,6 +3528,19 @@ function applyFlinchMoveEffect(
     );
   }
 
+  if (!certain) {
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "advance" }),
+      {
+        rulesContext: applyBattleScriptNonCertainFlinchMoveEffect(
+          baseRulesContext,
+          effectBattler,
+        ),
+      },
+    );
+  }
+
   const hasNotActedYet = effectBattlerState.turnOrderNum > baseRulesContext.currentTurnActionNumber;
   const nextRulesContext = hasNotActedYet
     ? withBattler(baseRulesContext, effectBattler, {
@@ -3539,6 +3552,52 @@ function applyFlinchMoveEffect(
     Object.freeze({ kind: "advance" }),
     { rulesContext: nextRulesContext },
   );
+}
+
+/**
+ * SetMoveEffect(FALSE, 0)'s complete MOVE_EFFECT_FLINCH mutation surface.
+ * King's Rock invokes exactly this form synchronously from
+ * ItemBattleEffects(ITEMEFFECT_KINGSROCK_SHELLBELL): no script call is
+ * retained after BattleScriptPushCursor/SetMoveEffect/BattleScriptPop, and
+ * Inner Focus is therefore the silent, non-certain arm.
+ *
+ * The caller supplies SetMoveEffect's already-resolved gEffectBattler and
+ * already-stamped selector/scripting roles. Keeping the common early-outs
+ * here is intentional: the ordinary seteffectwithchance path reaches this
+ * helper after its shared guards, while King's Rock calls it directly and
+ * must still honor Shield Dust, zero HP, Substitute, existing flinch,
+ * Inner Focus, and the target-has-not-acted turn-order gate.
+ */
+export function applyBattleScriptNonCertainFlinchMoveEffect(
+  baseRulesContext: BattleScriptRulesContext,
+  effectBattler: BattleScriptBattlerId,
+): BattleScriptRulesContext {
+  const effectBattlerState = baseRulesContext.battlers[effectBattler];
+  const abilityEffectHitmarkerSet =
+    (baseRulesContext.hitMarker & HITMARKER_STATUS_ABILITY_EFFECT) !== 0;
+  if (
+    effectBattlerState.ability === ABILITY_SHIELD_DUST
+    && !abilityEffectHitmarkerSet
+  ) {
+    return baseRulesContext;
+  }
+  if (effectBattlerState.hp === 0) return baseRulesContext;
+  if ((effectBattlerState.status2 & BATTLE_SCRIPT_STATUS2_SUBSTITUTE) !== 0) {
+    return baseRulesContext;
+  }
+  if (
+    (effectBattlerState.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_FLINCHED) !== 0
+    || effectBattlerState.ability === ABILITY_INNER_FOCUS
+    || effectBattlerState.turnOrderNum <= baseRulesContext.currentTurnActionNumber
+  ) {
+    return baseRulesContext;
+  }
+  return withBattler(baseRulesContext, effectBattler, {
+    status2: (
+      effectBattlerState.status2
+      | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_FLINCHED
+    ) >>> 0,
+  });
 }
 
 /**

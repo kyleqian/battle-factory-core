@@ -150,6 +150,7 @@ export const BATTLE_SCRIPT_MOVE_RESULT_FAILED = 1 << 5;
 export const BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT = (1 << 0) | (1 << 3) | (1 << 5);
 export const BATTLE_SCRIPT_MOVE_FLAG_MAKES_CONTACT = 1 << 0;
 export const BATTLE_SCRIPT_MOVE_FLAG_MIRROR_MOVE_AFFECTED = 1 << 4;
+export const BATTLE_SCRIPT_MOVE_FLAG_KINGS_ROCK_AFFECTED = 1 << 5;
 export const BATTLE_SCRIPT_EFFECT_BATON_PASS = 127;
 export const BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE = 1 << 0;
 export const BATTLE_SCRIPT_BATTLE_TYPE_TRAINER = 1 << 3;
@@ -1127,7 +1128,8 @@ const GENERATED_MOVE_FLAGS = new Map<number, number>(
   (movesData.moves as readonly GeneratedMoveTypeRow[]).map(({ id, flags }) => [
     id,
     (flags.includes("FLAG_MAKES_CONTACT") ? BATTLE_SCRIPT_MOVE_FLAG_MAKES_CONTACT : 0)
-      | (flags.includes("FLAG_MIRROR_MOVE_AFFECTED") ? BATTLE_SCRIPT_MOVE_FLAG_MIRROR_MOVE_AFFECTED : 0),
+      | (flags.includes("FLAG_MIRROR_MOVE_AFFECTED") ? BATTLE_SCRIPT_MOVE_FLAG_MIRROR_MOVE_AFFECTED : 0)
+      | (flags.includes("FLAG_KINGS_ROCK_AFFECTED") ? BATTLE_SCRIPT_MOVE_FLAG_KINGS_ROCK_AFFECTED : 0),
   ]),
 );
 
@@ -1229,7 +1231,7 @@ export function resolveBattleScriptMoveTypeName(
   return type;
 }
 
-/** Resolves the source gBattleMoves[move].flags bits needed by moveend states 3 and 15. */
+/** Resolves the source gBattleMoves[move].flags bits needed by moveend states 3, 12, and 15. */
 export function resolveBattleScriptMoveFlags(move: number): number {
   const flags = GENERATED_MOVE_FLAGS.get(move);
   if (flags === undefined) {

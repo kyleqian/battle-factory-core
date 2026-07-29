@@ -128,7 +128,12 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // 7 -> 6 (ON_DAMAGE contact abilities): state 3's seven-case barrier
   // retires as one call site; Color Change/Rough Skin/status/Cute Charm
   // callbacks and their RNG/status mutations now execute source-completely.
-  ["src/engine/battleScriptMoveEndOpcode.ts", 6],
+  // 6 -> 5 (move-end state 12 King's Rock): HOLD_EFFECT_FLINCH now runs its
+  // source-ordered holder/damage gates, %100 draw, Gen-3 move-flag check,
+  // and synchronous non-certain SetMoveEffect flinch mutation. The five
+  // remaining barriers belong to states 0, 2, 4, 5, and 11; state 12 has
+  // none.
+  ["src/engine/battleScriptMoveEndOpcode.ts", 5],
   ["src/engine/battleScriptJumpifbyteOpcode.ts", 1],
   // Forced-switch ground truth §4 slice 1: one operand-shape barrier, shared
   // by both the unmodeled-memWord and unmodeled-value cases (e.g.
