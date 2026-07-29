@@ -26,6 +26,9 @@ const MINIMIZE = 107;
 const STOMP = 23;
 const SPIKES = 191;
 const RAIN_DANCE = 240;
+const REST = 156;
+const ITEM_CHESTO_BERRY = 134;
+const ITEM_SHELL_BELL = 219;
 /** The banked KO-scenario seed (factoryBattleScriptTerminalDecision.test.ts, docs/hit-chain-ground-truth.md). */
 const KO_SCENARIO_RNG_SEED = 919694434;
 /** Brute-force-found: Ember's 10% burn proc actually lands on turn 1 with this seed, per this move's own real hit-chain RNG order (accuracy, crit, damage, secondary-effect-chance). */
@@ -1730,4 +1733,95 @@ describe("factory full-turn decision -- end-turn faint replacement resumes after
     expect(result.state.rules.rulesContext.battlers[1].hp).toBe(0);
     expect(result.state.rng.calls).toBe(8);
   });
+});
+
+describe("factory full-turn decision -- live move-end item transfers", () => {
+  function completeTurn(
+    configValue: FactoryFullTurnConfig,
+    playerDecision: Parameters<typeof submitFactoryFullTurnDecision>[1]["decision"] = PLAYER_ATTACKS,
+  ) {
+    const initial = createFactoryFullTurnBattleState(configValue);
+    const player = submitFactoryFullTurnDecision(initial, {
+      requestId: 1, side: "player", decision: playerDecision,
+    });
+    if (player.kind !== "decision-required") throw new Error("expected trainer decision");
+    return submitFactoryFullTurnDecision(player.state, {
+      requestId: 2, side: "trainer", decision: TRAINER_ATTACKS,
+    });
+  }
+
+  it(
+    "MOVEEND_ITEM_EFFECTS_ALL consumes Chesto Berry after Rest, clears Sleep/Nightmare through "
+      + "BattleScript_BerryCureSlpRet, and reaches the next command",
+    () => {
+      const result = completeTurn(config({
+        rngSeed: 1,
+        player: {
+          species: 1, moveId: REST, item: ITEM_CHESTO_BERRY,
+          attack: 10, defense: 255, spAttack: 10, spDefense: 255,
+          speed: 100, hp: 100, maxHp: 200,
+        },
+        trainer: {
+          species: 43, moveId: STRENGTH,
+          attack: 10, defense: 255, spAttack: 10, spDefense: 255,
+          speed: 50, hp: 200, maxHp: 200,
+        },
+      }), { kind: "use-move", moveSlot: 0, targetBattler: 0 });
+      expect(result.kind).toBe("decision-required");
+      if (result.kind !== "decision-required") throw new Error("expected next command");
+      expect(result.state.rules.rulesContext.battlers[0]).toMatchObject({
+        item: 0,
+        status1: 0,
+        status2: 0,
+      });
+      expect(result.events.some((event) => {
+        const payload = "payload" in event ? event.payload : event;
+        return payload.kind === "message"
+          && payload.messageId === "STRINGID_PKMNSITEMWOKEIT";
+      })).toBe(true);
+    },
+  );
+
+  it(
+    "MOVEEND_KINGSROCK_SHELLBELL heals floor(first non-passive target damage / 8), "
+      + "clears the one-action receipt, preserves the item, and draws no RNG",
+    () => {
+      const shared = {
+        rngSeed: 1,
+        player: {
+          species: 1, moveId: STRENGTH,
+          attack: 100, defense: 255, spAttack: 10, spDefense: 255,
+          speed: 100, hp: 100, maxHp: 200,
+        },
+        trainer: {
+          species: 43, moveId: STRENGTH,
+          attack: 10, defense: 255, spAttack: 10, spDefense: 255,
+          speed: 50, hp: 200, maxHp: 200,
+        },
+      } satisfies Partial<FactoryFullTurnConfig>;
+      const shell = completeTurn(config({
+        ...shared,
+        player: { ...shared.player, item: ITEM_SHELL_BELL },
+      }));
+      const control = completeTurn(config({
+        ...shared,
+        player: { ...shared.player, item: 0 },
+      }));
+      expect(shell.kind).toBe("decision-required");
+      expect(control.kind).toBe("decision-required");
+      if (shell.kind !== "decision-required" || control.kind !== "decision-required") {
+        throw new Error("expected next commands");
+      }
+      const dealt = 200 - shell.state.rules.rulesContext.battlers[1].hp;
+      expect(shell.state.rules.rulesContext.battlers[0].hp
+        - control.state.rules.rulesContext.battlers[0].hp).toBe(Math.max(1, Math.floor(dealt / 8)));
+      expect(shell.state.rules.rulesContext.battlers[0].item).toBe(ITEM_SHELL_BELL);
+      expect(shell.state.rng).toEqual(control.state.rng);
+      expect(shell.events.some((event) => {
+        const payload = "payload" in event ? event.payload : event;
+        return payload.kind === "message"
+          && payload.messageId === "STRINGID_PKMNSITEMRESTOREDHPALITTLE";
+      })).toBe(true);
+    },
+  );
 });

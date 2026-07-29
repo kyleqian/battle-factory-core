@@ -32,12 +32,14 @@ import {
   applyBattleScriptMoveEndUpdateLastMovesOwnership,
   BATTLE_SCRIPT_MOVE_FLAG_MAKES_CONTACT,
   resolveBattleScriptBattlerHoldEffect,
+  resolveBattleScriptBattlerHoldEffectParam,
   resolveBattleScriptMoveFlags,
   resolveBattleScriptMoveTypeName,
   resolveBattleScriptMoveEndNextTarget,
   BATTLE_SCRIPT_MOVE_STRUGGLE,
   BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT,
   BATTLE_SCRIPT_NUM_BATTLE_STATS,
+  withBattleScriptPartyMemberStatus1,
   type BattleScriptRulesBattlerState,
   type BattleScriptRulesBattlers,
   type BattleScriptRulesContext,
@@ -105,6 +107,7 @@ const STATUS1_TOXIC_POISON = 1 << 7;
 const STATUS1_TOXIC_COUNTER = (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11);
 const STATUS1_SLEEP = (1 << 0) | (1 << 1) | (1 << 2);
 const STATUS2_CONFUSION = (1 << 0) | (1 << 1) | (1 << 2);
+const STATUS2_NIGHTMARE = 1 << 27;
 const STATUS2_INFATUATION = (1 << 16) | (1 << 17) | (1 << 18) | (1 << 19);
 
 function immunityAbilityCuresStatus(ability: number, battlerState: BattleScriptRulesBattlerState): boolean {
@@ -144,6 +147,11 @@ const ITEM_MOVE_END_HOLD_EFFECTS: ReadonlySet<number> = new Set([
 
 const HOLD_EFFECT_FLINCH = 30;
 const HOLD_EFFECT_SHELL_BELL = 62;
+/** include/battle.h:61. */
+const IGNORE_SHELL_BELL = 0xffff;
+const MOVEEND_KINGSROCK_BARRIER_HOLD_EFFECTS = Object.freeze([
+  HOLD_EFFECT_FLINCH,
+]);
 
 function moveEndItemEffectApplies(
   holdEffect: number,
@@ -576,8 +584,36 @@ function executeMoveendState(
     case MOVEEND_ITEM_EFFECTS_ALL: {
       const count = rules.battleTopology.battlersCount;
       for (let battler = 0; battler < count; battler += 1) {
-        const battlerState = rules.battlers[battler as BattleScriptBattlerId];
-        const holdEffect = resolveBattleScriptBattlerHoldEffect(rules, battler as BattleScriptBattlerId);
+        const battlerId = battler as BattleScriptBattlerId;
+        const battlerState = rules.battlers[battlerId];
+        const holdEffect = resolveBattleScriptBattlerHoldEffect(rules, battlerId);
+        if (
+          holdEffect === 3
+          && (battlerState.status1 & STATUS1_SLEEP) !== 0
+        ) {
+          const status1 = (battlerState.status1 & ~STATUS1_SLEEP) >>> 0;
+          const cured = replaceBattlerAt(rules.battlers, battlerId, Object.freeze({
+            ...battlerState,
+            status1,
+            status2: (battlerState.status2 & ~STATUS2_NIGHTMARE) >>> 0,
+          }));
+          return callCurrentMoveendScript(
+            context,
+            Object.freeze({
+              ...rules,
+              battlers: cured,
+              party: withBattleScriptPartyMemberStatus1(
+                rules.party,
+                battlerState.side,
+                battlerState.partyIndex,
+                status1,
+              ),
+              scriptingBattler: battlerId,
+              lastUsedItem: battlerState.item,
+            }),
+            "BattleScript_BerryCureSlpRet",
+          );
+        }
         if (
           ITEM_MOVE_END_HOLD_EFFECTS.has(holdEffect)
           && moveEndItemEffectApplies(holdEffect, battlerState)
@@ -599,12 +635,50 @@ function executeMoveendState(
       const attacker = requireBattlerRole(rules, "attacker");
       if (rules.battleMoveDamage !== 0) {
         const atkHoldEffect = resolveBattleScriptBattlerHoldEffect(rules, attacker);
-        if (atkHoldEffect === HOLD_EFFECT_FLINCH || atkHoldEffect === HOLD_EFFECT_SHELL_BELL) {
+        if (atkHoldEffect === HOLD_EFFECT_SHELL_BELL) {
+          const target = requireBattlerRole(rules, "target");
+          const attackerState = rules.battlers[attacker];
+          const targetState = rules.battlers[target];
+          const shellBellDmg = targetState.specialStatus.shellBellDmg;
+          if (
+            (rules.moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT) === 0
+            && shellBellDmg !== 0
+            && shellBellDmg !== IGNORE_SHELL_BELL
+            && attacker !== target
+            && attackerState.hp !== attackerState.maxHP
+            && attackerState.hp !== 0
+          ) {
+            const divisor = resolveBattleScriptBattlerHoldEffectParam(rules, attacker);
+            const heal = Math.max(1, Math.floor(shellBellDmg / divisor));
+            const clearedTarget = Object.freeze({
+              ...targetState,
+              specialStatus: Object.freeze({
+                ...targetState.specialStatus,
+                shellBellDmg: 0,
+              }),
+            });
+            return callCurrentMoveendScript(
+              context,
+              Object.freeze({
+                ...rules,
+                battlers: replaceBattlerAt(rules.battlers, target, clearedTarget),
+                battleMoveDamage: -heal,
+                lastUsedItem: attackerState.item,
+                scriptingBattler: attacker,
+              }),
+              "BattleScript_ItemHealHP_Ret",
+            );
+          }
+          return continueState(advanceMoveend(rules));
+        }
+        // HOLD_EFFECT_FLINCH remains the sole state-12 barrier: unlike Shell
+        // Bell, King's Rock owns a Random()%100 proc plus SetMoveEffect.
+        if (atkHoldEffect === HOLD_EFFECT_FLINCH) {
           return transferState(unsupportedBranch(
             context,
-            `ItemBattleEffects(ITEMEFFECT_KINGSROCK_SHELLBELL)'s ${
-              atkHoldEffect === HOLD_EFFECT_FLINCH ? "King's Rock flinch" : "Shell Bell heal"
-            } branch needs RNG/script-transfer subsystems not modeled here`,
+            "ItemBattleEffects(ITEMEFFECT_KINGSROCK_SHELLBELL)'s King's Rock flinch "
+              + `branch (hold effects ${MOVEEND_KINGSROCK_BARRIER_HOLD_EFFECTS.join(",")}) `
+              + "needs RNG/script-transfer subsystems not modeled here",
             "battle_util.c",
             3772,
           ));

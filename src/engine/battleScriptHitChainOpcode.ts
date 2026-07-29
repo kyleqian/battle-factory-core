@@ -2259,8 +2259,9 @@ function createHealthbarupdateOpcodeHandler(
  * protectPhysicalBattlerId/protectSpecialDmg/protectSpecialBattlerId,
  * cleared once per turn -- docs/counter-retaliation-design.md §1.2/§2.3
  * explains why these cannot share a field despite the identical value),
- * matching the shellBellDmg/gBideDmg-via-gBattleScripting omissions
- * elsewhere in this rung. The real (non-substitute, non-negative-damage) HP
+ * Shell Bell's first non-passive damage receipt is stored in parallel with
+ * those damage trackers (`battle_script_commands.c:1932-1933`). The real
+ * (non-substitute, non-negative-damage) HP
  * write also lands in the party slice at this battler's own side/partyIndex
  * (docs/faint-outcome-ground-truth.md §3.2's sync point), keeping
  * Cmd_checkteamslost's party-wide sum consistent with the hit chain's own
@@ -2299,7 +2300,15 @@ function createDatahpupdateOpcodeHandler(
     if (substituteActive) {
       const remaining = battlerState.substituteHP;
       if (remaining >= damage) {
-        const nextRulesContext = withBattler(rulesContext, battler, { substituteHP: remaining - damage });
+        const nextRulesContext = withBattler(rulesContext, battler, {
+          substituteHP: remaining - damage,
+          specialStatus: Object.freeze({
+            ...battlerState.specialStatus,
+            shellBellDmg: battlerState.specialStatus.shellBellDmg === 0
+              ? damage
+              : battlerState.specialStatus.shellBellDmg,
+          }),
+        });
         return transitionBattleScriptCommand(
           context,
           Object.freeze({ kind: "advance" }),
@@ -2374,8 +2383,20 @@ function createDatahpupdateOpcodeHandler(
       battlerChanges = {
         ...battlerChanges,
         specialStatus: physical
-          ? Object.freeze({ ...battlerState.specialStatus, physicalDmg: dealt })
-          : Object.freeze({ ...battlerState.specialStatus, specialDmg: dealt }),
+          ? Object.freeze({
+            ...battlerState.specialStatus,
+            physicalDmg: dealt,
+            shellBellDmg: battlerState.specialStatus.shellBellDmg === 0
+              ? dealt
+              : battlerState.specialStatus.shellBellDmg,
+          })
+          : Object.freeze({
+            ...battlerState.specialStatus,
+            specialDmg: dealt,
+            shellBellDmg: battlerState.specialStatus.shellBellDmg === 0
+              ? dealt
+              : battlerState.specialStatus.shellBellDmg,
+          }),
         ...(physical
           ? { protectPhysicalDmg: dealt, protectPhysicalBattlerId: retaliationBattlerId }
           : { protectSpecialDmg: dealt, protectSpecialBattlerId: retaliationBattlerId }),
