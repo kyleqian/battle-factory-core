@@ -12,13 +12,15 @@ describe("MOVE_WHIRLWIND source reducer", () => {
     whirlwindAtAge(age, "opponent", "player", { x: 72, y: 80 });
 
   it("ports all six staggered gWhirlwindLineSpriteTemplate callbacks", () => {
+    expect(player(0).linesLoaded).toBe(false);
+    expect(player(1).linesLoaded).toBe(true);
     expect(player(3).lines).toEqual([]);
     expect(player(4).lines).toEqual([
       expect.objectContaining({ x: 144, y: 32, x2: 12, sheetFrame: 2, hFlip: false, data0: 1, remaining: 59 }),
       expect.objectContaining({ x: 144, y: 40, x2: 24, sheetFrame: 1, hFlip: true, data0: 2, remaining: 59 }),
       expect.objectContaining({ x: 144, y: 48, x2: 36, sheetFrame: 0, hFlip: true, data0: 3, remaining: 59 }),
-      expect.objectContaining({ x: 144, y: 56, x2: 48, sheetFrame: 0, hFlip: false, data0: 4, remaining: 59 }),
-      expect.objectContaining({ x: 144, y: 64, x2: 60, sheetFrame: 1, hFlip: false, data0: 5, remaining: 59 }),
+      expect.objectContaining({ x: 144, y: 56, x2: 48, sheetFrame: 0, hFlip: true, data0: 4, remaining: 59 }),
+      expect.objectContaining({ x: 144, y: 64, x2: 60, sheetFrame: 0, hFlip: true, data0: 5, remaining: 59 }),
       expect.objectContaining({ x: 144, y: 72, x2: 12, sheetFrame: 2, hFlip: false, data0: 1, remaining: 59 }),
     ]);
     expect(opponent(4).lines.map(({ x, y }) => ({ x, y }))).toEqual([

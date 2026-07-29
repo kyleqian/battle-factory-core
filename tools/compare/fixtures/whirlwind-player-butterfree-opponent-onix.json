@@ -1,1 +1,44 @@
-{"schema":"whirlwind-portable-fixture/v1","scenario":"tools/battle-lab/mechanic-whirlwind-player-butterfree-opponent-onix.json","probe":"tools/compare/whirlwindProbe.py","orientation":"player-back","attackerSide":"player","denseWindow":{"startFrame":222,"endFrame":304,"frameCount":83},"evidenceSha256":"ccb52a723df2e1ab41c8f2b96bc9dec070b8e25c224e0d3a6a9fc6f3b911c9c0","rawRgbSha256":"12653c28b7dd04790d0f2a8fed53b01f672d7da58d0a226a2957ca786aefb59c"}
+{
+  "schema": "whirlwind-portable-evidence/v2",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-whirlwind-player-butterfree-opponent-onix.json",
+  "probe": "tools/compare/whirlwindProbe.py",
+  "orientation": "player-back",
+  "sourceWindow": {
+    "startFrame": 222,
+    "endFrame": 304,
+    "frameCount": 83
+  },
+  "evidenceSha256": "173be41493206cf4b974d0bed0f799c9f6a13d727295421e4262f69f470fd5bc",
+  "rawRgbSha256": "12653c28b7dd04790d0f2a8fed53b01f672d7da58d0a226a2957ca786aefb59c",
+  "attacker": {
+    "species": "BUTTERFREE",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 54 },
+      "animationCenter": { "x": 72, "y": 86 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 10 },
+      "animationCenter": { "x": 176, "y": 42 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 151,
+    "playerMaxHp": 167,
+    "opponentHp": 110,
+    "opponentMaxHp": 110,
+    "playerGender": "female",
+    "opponentGender": "male"
+  },
+  "battleState": {
+    "player": { "species": 12, "hp": 151, "maxHp": 167, "item": 135 },
+    "opponent": { "species": 95, "hp": 110, "maxHp": 110, "item": 4 }
+  }
+}

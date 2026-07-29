@@ -1,4 +1,5 @@
 import { GBA_SINE_TABLE_256 } from "../engine/battleMenu.ts";
+import { shakeMon2OffsetAtTick } from "./shakeMon2.ts";
 
 export type WhirlwindSide = "player" | "opponent";
 
@@ -49,8 +50,15 @@ function lineAtAge(
   if (age < 4 || age > 63) return null;
   const local = age - 4;
   const seek = LINE_SEEKS[index]!;
-  const phase = (seek + local + 1) % 6;
-  const animation = LINE_FRAMES[(seek + local + 2) % 5]!;
+  const progress = seek + local + 1;
+  const phase = progress % 6;
+  // SeekSpriteAnim has already consumed two cells by the first observed
+  // callback and holds on the final cell when the seek reaches ANIMCMD_END.
+  // AnimWhirlwindLine_Step restarts animation 0 only when data[0] wraps.
+  const animationCell = progress < 6
+    ? Math.min(progress + 1, 4)
+    : Math.min(phase, 4);
+  const animation = LINE_FRAMES[animationCell]!;
   return {
     spawnIndex: index,
     x: targetCenter.x - 32 + (targetSide === "player" ? 8 : 0),
@@ -93,6 +101,34 @@ function targetOffsetAtAge(
   return { x2: 0, y2: 0 };
 }
 
+/**
+ * Hardware-OAM pose shown by the shared framebuffer.
+ *
+ * `AnimTask_ShakeMon2` initializes its first +4 cell after the OAM build and
+ * displays it on the following frame. The later ellipse and slide tasks are
+ * created during script processing after that build and first reach hardware
+ * OAM two ages after their software task state. These are source-pipeline
+ * latches, independent of any absolute battle tick.
+ */
+export function whirlwindDisplayedTargetOffsetAtAge(
+  age: number,
+  attackerSide: WhirlwindSide,
+  targetSide: WhirlwindSide,
+  initialOffset: Readonly<{ x2: number; y2: number }>,
+): Readonly<{ x2: number; y2: number }> {
+  if (age < 12) return initialOffset;
+  if (age <= 40) {
+    return shakeMon2OffsetAtTick(4, 0, 15, 1, age - 12);
+  }
+  if (age >= 44 && age <= 49) {
+    return targetOffsetAtAge(age - 2, attackerSide, targetSide);
+  }
+  if (age >= 53) {
+    return targetOffsetAtAge(age - 2, attackerSide, targetSide);
+  }
+  return { x2: 0, y2: 0 };
+}
+
 /** Complete source-relative `Move_WHIRLWIND` body through first cleanup. */
 export function whirlwindAtAge(
   age: number,
@@ -103,7 +139,9 @@ export function whirlwindAtAge(
   const pan = attackerSide === "player" ? 63 : -63;
   return {
     active: age >= 0 && age < 82,
-    linesLoaded: age >= 4 && age < 82,
+    // `loadspritegfx` completes three display frames before the six line
+    // sprites are created.
+    linesLoaded: age >= 1 && age < 82,
     lines: LINE_SEEKS.flatMap((_, index) => {
       const line = lineAtAge(age, index, targetSide, targetCenter);
       return line ? [line] : [];

@@ -53,6 +53,14 @@ def main() -> None:
     matrices = sy["gOamMatrices"]
     active = names["gAnimScriptActive"]
     script_ptr = names["sBattleAnimScriptPtr"]
+    faded = sy["gPlttBufferFaded"]
+    unfaded = names["gPlttBufferUnfaded"]
+    palette_tags = names["sSpritePaletteTags"]
+    tile_tags = names["sSpriteTileRangeTags"]
+    software_oam = names["gMain"] + 0x38
+    se1_info, se2_info = sy["gMPlayInfo_SE1"], sy["gMPlayInfo_SE2"]
+    se1_tracks, se2_tracks = sy["gMPlayTrack_SE1"], sy["gMPlayTrack_SE2"]
+    song_table = sy["gSongTable"]
     template = names["gWhirlwindLineSpriteTemplate"]
     start, end = names["Move_WHIRLWIND"], names["Move_CONFUSE_RAY"]
 
@@ -65,6 +73,23 @@ def main() -> None:
 
     def raw(address: int, size: int) -> list[int]:
         return [oracle.read_u8(address + offset) for offset in range(size)]
+
+    def hexraw(address: int, size: int) -> str:
+        return "".join(f"{oracle.read_u8(address + offset):02x}" for offset in range(size))
+
+    def s8(address: int) -> int:
+        value = oracle.read_u8(address)
+        return value - 0x100 if value >= 0x80 else value
+
+    def sound_player(info: int, tracks: int) -> dict:
+        return {
+            "songHeader": oracle.read_u32(info),
+            "status": oracle.read_u32(info + 4),
+            "tracks": [{
+                "flags": oracle.read_u8(tracks + index * 0x50),
+                "panX": s8(tracks + index * 0x50 + 0x15),
+            } for index in range(3)],
+        }
 
     def ident(address: int) -> dict:
         address &= ~1
@@ -132,6 +157,8 @@ def main() -> None:
         rows.append({
             "frame": frame, "sha256": hashlib.sha256(rgb).hexdigest(),
             "gAnimScriptActive": script_active,
+            "battleAnimAttacker": oracle.read_u8(sy["gBattleAnimAttacker"]),
+            "battleAnimTarget": oracle.read_u8(sy["gBattleAnimTarget"]),
             "script": ident(ptr), "scriptOffset": ptr - start if in_body else None,
             "visualTaskCount": oracle.read_u8(sy["gAnimVisualTaskCount"]),
             "soundTaskCount": oracle.read_u8(sy["gAnimSoundTaskCount"]),
@@ -147,7 +174,22 @@ def main() -> None:
                  for offset in (0, 8, 16, 24)]
                 for index in range(32)
             ],
+            "softwareOam": [
+                hexraw(software_oam + index * 8, 8) for index in range(128)
+            ],
+            "fadedPalette": [u16(faded + index * 2) for index in range(512)],
+            "unfadedPalette": [u16(unfaded + index * 2) for index in range(512)],
             "hardwarePalette": [u16(0x05000000 + index * 2) for index in range(512)],
+            "paletteTags": [u16(palette_tags + index * 2) for index in range(16)],
+            "tileTags": [u16(tile_tags + index * 2) for index in range(128)],
+            "se1": sound_player(se1_info, se1_tracks),
+            "se2": sound_player(se2_info, se2_tracks),
+            "registers": {
+                "dispcnt": u16(0x04000000),
+                "bldcnt": u16(0x04000050),
+                "bldalpha": u16(0x04000052),
+                "bldy": u16(0x04000054),
+            },
             "battlerState": snapshot["battlers"],
         })
         if saw_active and not script_active:
@@ -170,12 +212,16 @@ def main() -> None:
     if starts != 6:
         raise RuntimeError(f"expected six WhirlwindLine lifecycles, got {starts}")
     OUTPUT.write_text(json.dumps({
-        "schema": "whirlwind-dense-evidence/v1", "setup": setup,
+        "schema": "whirlwind-dense-evidence/v2", "move": MOVE, "setup": setup,
         "sourceWindow": {
             "startFrame": rows[0]["frame"], "endFrame": rows[-1]["frame"],
             "frameCount": len(rows),
         },
         "sourceSymbols": {"Move_WHIRLWIND": start, "Move_CONFUSE_RAY": end},
+        "songHeaders": {
+            "SE_M_DOUBLE_TEAM": oracle.read_u32(song_table + 135 * 8),
+            "SE_M_STRING_SHOT": oracle.read_u32(song_table + 129 * 8),
+        },
         "lifecycleCounts": {"gWhirlwindLineSpriteTemplate": starts},
         "frames": rows,
     }, separators=(",", ":")) + "\n")

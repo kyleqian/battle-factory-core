@@ -18,23 +18,33 @@ describe("MOVE_WHIRLWIND source evidence", () => {
     ];
     expect(fixtures.map((fixture) => ({
       orientation: fixture.orientation,
-      window: fixture.denseWindow,
+      window: fixture.sourceWindow,
       evidence: fixture.evidenceSha256,
       raw: fixture.rawRgbSha256,
     }))).toEqual([
       {
         orientation: "player-back",
         window: { startFrame: 222, endFrame: 304, frameCount: 83 },
-        evidence: "ccb52a723df2e1ab41c8f2b96bc9dec070b8e25c224e0d3a6a9fc6f3b911c9c0",
+        evidence: "173be41493206cf4b974d0bed0f799c9f6a13d727295421e4262f69f470fd5bc",
         raw: "12653c28b7dd04790d0f2a8fed53b01f672d7da58d0a226a2957ca786aefb59c",
       },
       {
         orientation: "opponent-front",
         window: { startFrame: 316, endFrame: 398, frameCount: 83 },
-        evidence: "938c953ccde6193f9c2e1249b5a0749bebf003f87cc4989ba86a325c973a82d9",
+        evidence: "ebf51bc3ffe9f65bc28e5e6e53ca72a92a01c1aaa51a844eb4c80fd5475d014f",
         raw: "ec7f5084e7ba307ef23b567770f1271d48b3449140f9ef1bde357abc1c34d434",
       },
     ]);
+  });
+
+  it("keeps the portable audit on both complete fixtures", () => {
+    const audit = readFileSync(
+      "tools/compare/whirlwindEvidence.ts",
+      "utf8",
+    );
+    expect(audit).toContain("whirlwind-portable-evidence/v2");
+    expect(audit).toContain("framebufferDiff === 0");
+    expect(audit).toContain("for (let run = 1; run <= 2; run += 1)");
   });
 
   it("pins the legal carrier, complete component body, and sibling remainder", () => {

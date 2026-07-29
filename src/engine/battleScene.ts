@@ -562,6 +562,7 @@ import tailGlowAsset from "../animation/assets/tail-glow.json" with { type: "jso
 import dizzyPunchAsset from "../animation/assets/dizzyPunch.json" with { type: "json" };
 import covetAsset from "../animation/assets/covet.json" with { type: "json" };
 import headbuttAsset from "../animation/assets/headbutt.json" with { type: "json" };
+import whirlwindAsset from "../animation/assets/whirlwind.json" with { type: "json" };
 import bodySlamAsset from "../animation/assets/body-slam.json" with { type: "json" };
 import slamAsset from "../animation/assets/slam.json" with { type: "json" };
 import astonishAsset from "../animation/assets/astonish.json" with { type: "json" };
@@ -725,6 +726,7 @@ import {
   sceneOnHyperFangView,
   sceneOnBiteView,
   sceneOnHeadbuttView,
+  sceneOnWhirlwindView,
   sceneOnBodySlamView,
   sceneOnSlamView,
   sceneOnTwineedleView,
@@ -797,6 +799,7 @@ import {
   type SceneOnReflectPresentationState,
   type SceneOnBiteConfig,
   type SceneOnHeadbuttConfig,
+  type SceneOnWhirlwindConfig,
   type SceneOnBodySlamConfig,
   type SceneOnSlamConfig,
   type SceneOnTwineedleConfig,
@@ -834,6 +837,9 @@ import { shakeMonOffsetAtTick } from "../animation/shakeMon.ts";
 import { encoreTargetX2AtAge } from "../animation/encore.ts";
 import { dragonClawDisplayedAttackerShakeY } from "../animation/dragonClaw.ts";
 import { sludgeDisplayedTargetOffsetAtAge } from "../animation/sludge.ts";
+import {
+  whirlwindDisplayedTargetOffsetAtAge,
+} from "../animation/whirlwind.ts";
 import {
   SITRUS_ITEM_HEAL_TEXT_FIRST_AGE,
   SITRUS_ITEM_TEXT_CLEAR_AGE,
@@ -1184,6 +1190,11 @@ const covetArt = covetAsset as {
 const headbuttArt = headbuttAsset as {
   zigzagoonBack: { tileset: Tileset; palette: RgbColor[] };
   zigzagoonFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const whirlwindArt = whirlwindAsset as {
+  butterfreeBack: { tileset: Tileset; palette: RgbColor[] };
+  butterfreeFront: { tileset: Tileset; palette: RgbColor[] };
+  whirlwindLines: { tileset: Tileset; palette: RgbColor[] };
 };
 const bodySlamArt = bodySlamAsset as {
   lickitungBack: { tileset: Tileset; palette: RgbColor[] };
@@ -16484,6 +16495,160 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "LICKITUNG used" : "Foe LICKITUNG used",
       "SLAM!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "WHIRLWIND") {
+    const whirlwindState =
+      state as SceneOnMovePresentationState<SceneOnWhirlwindConfig>;
+    const view = sceneOnWhirlwindView(whirlwindState);
+    // BuildOamBuffer precedes the line callbacks and movement tasks, so the
+    // production framebuffer shows the preceding source-relative state.
+    const displayed = sceneOnWhirlwindView({
+      ...whirlwindState,
+      age: whirlwindState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "BUTTERFREE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "BUTTERFREE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged WHIRLWIND pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const butterfreeSource = playerToOpponent
+      ? whirlwindArt.butterfreeBack
+      : whirlwindArt.butterfreeFront;
+    const butterfree = playerToOpponent
+      ? butterfreeSource
+      : {
+          ...butterfreeSource,
+          tileset: subTileset(butterfreeSource.tileset, 0, 8),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const initialOnixOffset = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const displayedTargetOffset = whirlwindDisplayedTargetOffsetAtAge(
+      whirlwindState.age,
+      view.attacker.geometry.side,
+      view.target.geometry.side,
+      initialOnixOffset,
+    );
+
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    // SpriteCB_EnemyShadow observes gAnimScriptActive after the first source
+    // display has already reached scanout. Butterfree's nonzero elevation
+    // therefore leaves one source-relative shadow display.
+    if (opponentToPlayer && view.age === 0) {
+      drawSpriteSheet(
+        fb,
+        sonicBoomArt.enemyShadow.tileset,
+        sonicBoomArt.enemyShadow.palette,
+        view.attacker.geometry.animationCenter.x - 16,
+        view.attacker.geometry.battlePositionCenter.y + 25,
+      );
+    }
+    const drawButterfree = (): void => drawSpriteSheet(
+      fb,
+      butterfree.tileset,
+      butterfree.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawOnix = (): void => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x
+        + displayedTargetOffset.x2,
+      view.target.geometry.spriteCorner.y
+        + displayedTargetOffset.y2,
+    );
+    const drawLines = (): void => {
+      // SortSprites keeps the six effect sprites ordered from their top row
+      // to their bottom row. The target's battler side determines whether
+      // its OAM entry sorts before or after that effect group.
+      for (const line of displayed.lines) {
+        const frame = subTileset(
+          whirlwindArt.whirlwindLines.tileset,
+          line.sheetFrame * 2,
+          2,
+        );
+        const draw = line.hFlip ? drawSpriteSheetHFlip : drawSpriteSheet;
+        draw(
+          fb,
+          frame,
+          whirlwindArt.whirlwindLines.palette,
+          line.x + line.x2 - 16,
+          line.y - 8,
+        );
+      }
+    };
+    if (playerToOpponent) {
+      drawOnix();
+      drawButterfree();
+      drawLines();
+    } else {
+      drawButterfree();
+      drawLines();
+      drawOnix();
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "BUTTERFREE",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender
+          ?? (playerToOpponent ? "male" : "female"),
+        hpFraction:
+          state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "BUTTERFREE" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender
+          ?? (playerToOpponent ? "female" : "male"),
+        hpFraction:
+          state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "BUTTERFREE used" : "Foe BUTTERFREE used",
+      "WHIRLWIND!",
       99,
     );
     return;

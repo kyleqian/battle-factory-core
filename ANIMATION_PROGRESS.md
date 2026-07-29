@@ -1,17 +1,17 @@
 # Animation coverage
 
-## MOVE_WHIRLWIND partial; WHIRLWIND_LINES evidence complete (2026-07-29)
+## MOVE_WHIRLWIND promoted exact; WHIRLWIND_LINES repair complete (2026-07-29)
 
-**Verdict:** `MOVE_WHIRLWIND` is an honest partial. The lowest suitable legal
+**Verdict:** `MOVE_WHIRLWIND` is exact. The lowest suitable legal
 Level-50 carrier is challenge-0 set **153** `FRONTIER_MON_BUTTERFREE`
 (species **12**, Whirlwind **18**, Quirky, SpAttack+HP, Pecha Berry).
 Complete legal three-mon Scene-ON parties cover the body through first
 inactive cleanup twice fresh in both orientations: player-back **222–304
 (83 frames)**, evidence/raw
-`ccb52a723df2e1ab41c8f2b96bc9dec070b8e25c224e0d3a6a9fc6f3b911c9c0` /
+`173be41493206cf4b974d0bed0f799c9f6a13d727295421e4262f69f470fd5bc` /
 `12653c28b7dd04790d0f2a8fed53b01f672d7da58d0a226a2957ca786aefb59c`;
 opponent-front **316–398 (83 frames)**,
-`938c953ccde6193f9c2e1249b5a0749bebf003f87cc4989ba86a325c973a82d9` /
+`ebf51bc3ffe9f65bc28e5e6e53ca72a92a01c1aaa51a844eb4c80fd5475d014f` /
 `ec7f5084e7ba307ef23b567770f1271d48b3449140f9ef1bde357abc1c34d434`.
 
 **Model/evidence:** reproducible extraction pins Butterfree front/back and
@@ -19,15 +19,17 @@ WHIRLWIND_LINES. The typed source-relative reducer ports all six
 `gWhirlwindLineSpriteTemplate` lifecycles and flip cells,
 `AnimTask_ShakeMon2`, `AnimTask_TranslateMonEllipticalRespectSide`,
 `AnimTask_SlideOffScreen`, side-relative audio, waits, and cleanup. It owns
-no forced switch, damage, RNG, turn, controller, or facility state.
+no forced switch, damage, RNG, turn, controller, or facility state. The
+production compositor ports prior-callback OAM latches, side-relative
+SortSprites order, and the established one-frame enemy-shadow latch.
 
-**Bounded remainder / sibling:** exact is withheld because the shared
-framebuffer compositor and portable per-frame comparator are not yet wired;
-the complete source/component/hardware/raw-RGB receipts alone do not satisfy
-the exact bar. `MOVE_DRILL_PECK` remains unsupported: it adds BowMon phases,
+**Acceptance / sibling:** `whirlwindEvidence.ts` passes **83/83** source,
+component, typed-seam, software/hardware OAM/matrix, palette/tag, register,
+audio, unchanged-state, raw-RGB, and production shared-framebuffer checks in
+both orientations, twice fresh. `MOVE_DRILL_PECK` remains unsupported: it adds BowMon phases,
 `AnimTask_DrillPeckHitSplats`, repeated IMPACT sprites, looped sound,
 ShakeMon2, return slide, and damage/controller presentation, and lacks its
-own dense both-orientation acceptance. Coverage is **90 exact / 1 partial /
+own dense both-orientation acceptance. Coverage is **91 exact / 0 partial /
 0 staged / 185 unsupported**; no boundary or barrier ratchet moved.
 
 ## MOVE_AROMATHERAPY promoted exact; FLOWER/SPARKLE_2 track bounded (2026-07-29)

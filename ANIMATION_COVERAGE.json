@@ -3,27 +3,29 @@
   "entries": [
     {
       "move": "MOVE_WHIRLWIND",
-      "status": "partial",
+      "status": "exact",
       "covered": [
         "the lowest suitable legal Level-50 Factory carrier is challenge-0 set 153 FRONTIER_MON_BUTTERFREE (species 12, Whirlwind 18, Quirky, SpAttack+HP, Pecha Berry); complete legal three-mon Battle Scene ON parties stage it against ONIX in both orientations",
-        "fresh dense oracle probes cover the complete 83-frame source body through first inactive cleanup twice reproducibly in each orientation: player-back frames 222-304 have evidence digest ccb52a723df2e1ab41c8f2b96bc9dec070b8e25c224e0d3a6a9fc6f3b911c9c0 and concatenated raw-RGB digest 12653c28b7dd04790d0f2a8fed53b01f672d7da58d0a226a2957ca786aefb59c; opponent-front frames 316-398 have evidence 938c953ccde6193f9c2e1249b5a0749bebf003f87cc4989ba86a325c973a82d9 and raw RGB ec7f5084e7ba307ef23b567770f1271d48b3449140f9ef1bde357abc1c34d434",
+        "fresh dense oracle probes cover the complete 83-frame source body through first inactive cleanup twice reproducibly in each orientation: player-back frames 222-304 pass 83/83 source/component/hardware/raw-RGB/shared-framebuffer checks with evidence digest 173be41493206cf4b974d0bed0f799c9f6a13d727295421e4262f69f470fd5bc and concatenated raw-RGB digest 12653c28b7dd04790d0f2a8fed53b01f672d7da58d0a226a2957ca786aefb59c; opponent-front frames 316-398 pass 83/83 with evidence ebf51bc3ffe9f65bc28e5e6e53ca72a92a01c1aaa51a844eb4c80fd5475d014f and raw RGB ec7f5084e7ba307ef23b567770f1271d48b3449140f9ef1bde357abc1c34d434",
         "the source-relative typed reducer ports ANIM_TAG_WHIRLWIND_LINES load/lifetime, all six gWhirlwindLineSpriteTemplate callbacks and five-cell flip animation, target AnimTask_ShakeMon2, AnimTask_TranslateMonEllipticalRespectSide, AnimTask_SlideOffScreen, both side-relative sound programs, the source wait tail, and first inactive cleanup without forced-switch gameplay ownership",
         "source extraction regenerates Butterfree front/back and WHIRLWIND_LINES art byte-for-byte; the source audit pins all five assigned components and the legal carrier while hermetic tests pin both orientations, component schedules, side geometry, cleanup, and the narrow typed seam",
-        "exact is deliberately withheld: the source/component/hardware/raw-RGB evidence is complete, but the production shared-framebuffer compositor and a portable per-frame comparator have not yet been wired, so zero shared-framebuffer equality has not been established",
+        "the production shared-framebuffer compositor reuses battle background, battler, healthbox, window, text, and enemy-shadow primitives; it ports prior-callback OAM display latches and side-relative SortSprites ordering without absolute ticks, fitted colors/coordinates, baked frames, or gameplay ownership",
+        "whirlwindEvidence.ts reruns both complete legal probes twice fresh and proves every reducer/seam/component frame plus software/hardware OAM and matrices, palette buffers/transfers and tags, registers, side-relative audio, unchanged battle state, raw RGB, and 83/83 production shared framebuffers",
         "MOVE_DRILL_PECK remains unsupported: although it shares ANIM_TAG_WHIRLWIND_LINES, its independent body adds three gBowMonSpriteTemplate phases, AnimTask_DrillPeckHitSplats with repeated flashing IMPACT sprites, looped HORN_ATTACK sound, target ShakeMon2, slide restoration, damage/controller presentation, and lacks its own complete dense both-orientation acceptance"
       ],
-      "remaining": "Wire the WHIRLWIND source reducer through battleScene.ts's production shared-framebuffer compositor and add a portable 83/83 per-frame source/hardware/raw-RGB/seam/framebuffer comparator in both orientations twice fresh; exact remains forbidden until every frame is zero-diff.",
       "evidence": [
         "tools/battle-lab/mechanic-whirlwind-player-butterfree-opponent-onix.json",
         "tools/battle-lab/mechanic-whirlwind-opponent-butterfree-player-onix.json",
         "tools/compare/fixtures/whirlwind-player-butterfree-opponent-onix.json",
         "tools/compare/fixtures/whirlwind-opponent-butterfree-player-onix.json",
         "tools/compare/whirlwindProbe.py",
+        "tools/compare/whirlwindEvidence.ts",
         "tools/compare/whirlwindSourceAudit.ts",
         "tools/compare/extractWhirlwindAssets.ts",
         "src/animation/assets/whirlwind.json",
         "src/animation/whirlwind.ts",
         "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
         "tests/animation/whirlwindEvidence.test.ts",
         "tests/animation/whirlwind.test.ts"
       ]
