@@ -2,6 +2,35 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_LIGHT_SCREEN",
+      "status": "exact",
+      "covered": [
+        "the source audit proves challenge-0 set 112 FRONTIER_MON_EXEGGCUTE is the lowest suitable legal Level-50 carrier (species 102, Light Screen 113, Naughty, SpAttack+HP, Persim Berry); complete legal three-Pokemon Battle Scene ON parties stage Exeggcute against ONIX in both orientations",
+        "fresh dense probes cover the complete Light Screen-owned presentation through first inactive cleanup twice reproducibly in both orientations: player-back frames 270-384 pass 115/115 source/component/hardware/raw-RGB/shared-framebuffer checks with evidence 7c1c3b39e53c00ee0174232a0c05a02ac7f14b6d2aa7478bc2ae372c5d2500a2 and raw RGB b135e9fbf2c70ea860f0ee126959bbb0eaf0c4603566067dd5405c9698a74837; opponent-front frames 176-294 pass 119/119 with evidence 51ffe743621c2745f8a59cd6786bb5d0fa9b12b844ee452d2e7ca729587e20db and raw RGB 654a49bafe3470e81c34dfa1d127d67a78d59eb6d0b6af3c983d36008a8dbf6b",
+        "the pure source-relative reducer ports GREEN_LIGHT_WALL and SPARKLE_3 load/display lifetimes; gLightScreenWallSpriteTemplate/AnimDefensiveWall alpha, palette rotation, opponent-BG transfer, visibility and cleanup; all six gSpecialScreenSparkleSpriteTemplate/AnimWallSparkle instances from SpecialScreenSparkle; setalpha, delayed Reflect audio, blendoff register tail, OAM/VBlank display latches, and first inactive age 74",
+        "the typed seam carries only resolved EXEGGCUTE/ONIX geometry, allocator slots, HP and gender; source-extracted Exeggcute front/back, GREEN_LIGHT_WALL, and SPARKLE_3 art pass software/hardware OAM and matrices, palettes/tags/buffers, registers, audio, immutable battler fields, raw RGB, and every production framebuffer without owning Light Screen side-condition state, damage, RNG, turn order, controllers, or facility state",
+        "lightScreenEvidence.ts reruns both probes only through tools/run-mgba-probe.py and proves all 115/119 dense move-owned frames twice fresh; the three immediately preceding frames in each trace are the prior Tackle's critical-hit message and are deliberately outside the Light Screen acceptance window rather than thinned from its body",
+        "MOVE_MIRROR_COAT remains unsupported after its independent source batch-check: its lowest suitable carrier is set 151 FRONTIER_MON_CORSOLA, and it requires RED_LIGHT_WALL palette/tag plus gMirrorCoatWallSpriteTemplate, wall-before-audio delay-10/immediate-playse timing, a real prior-special-damage counter setup/result, and its own complete both-orientation audio/palette/register/cleanup/raw-RGB/framebuffer acceptance twice fresh",
+        "no animation-boundary list, unsupported barrier, canonical-recording allowlist, gameplay outcome, or sibling coverage changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-light-screen-player-exeggcute-opponent-onix.json",
+        "tools/battle-lab/mechanic-light-screen-opponent-exeggcute-player-onix.json",
+        "tools/compare/fixtures/light-screen-player-exeggcute-opponent-onix.json",
+        "tools/compare/fixtures/light-screen-opponent-exeggcute-player-onix.json",
+        "tools/compare/lightScreenProbe.py",
+        "tools/compare/lightScreenEvidence.ts",
+        "tools/compare/lightScreenSourceAudit.ts",
+        "tools/compare/extractLightScreenAssets.ts",
+        "src/animation/assets/light-screen.json",
+        "src/animation/lightScreen.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/lightScreen.test.ts",
+        "tests/animation/lightScreenEvidence.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_BLOCK",
       "status": "exact",
       "covered": [
@@ -2388,6 +2417,23 @@
     "MOVE_BIND"
   ],
   "componentTracks": [
+    {
+      "id": "sparkle-3-special-screen",
+      "components": [
+        "asset:ANIM_TAG_GREEN_LIGHT_WALL",
+        "asset:ANIM_TAG_SPARKLE_3",
+        "sprite:gLightScreenWallSpriteTemplate",
+        "sprite:gSpecialScreenSparkleSpriteTemplate",
+        "subroutine:SpecialScreenSparkle",
+        "visualCommand:setalpha",
+        "visualCommand:blendoff"
+      ],
+      "representatives": [
+        "MOVE_LIGHT_SCREEN",
+        "MOVE_MIRROR_COAT"
+      ],
+      "goal": "MOVE_LIGHT_SCREEN independently proves its complete wall, six-SPARKLE_3, alpha/palette/audio, OAM/display, and cleanup body at 115/115 player-back and 119/119 opponent-front dense source/seam/framebuffer frames twice fresh. MOVE_MIRROR_COAT remains unsupported: it independently needs RED_LIGHT_WALL/gMirrorCoatWallSpriteTemplate, wall-before-audio delay-10/immediate-playse timing, real counter staging/result state, and complete dense both-orientation audio/palette/register/cleanup/raw-RGB/framebuffer acceptance."
+    },
     {
       "id": "red-heart-sweet-kiss",
       "components": [

@@ -1,5 +1,38 @@
 # Animation coverage
 
+## MOVE_LIGHT_SCREEN promoted exact; SPARKLE_3 track bounded (2026-07-29)
+
+**Verdict:** `MOVE_LIGHT_SCREEN` is exact. The lowest suitable legal
+Level-50 carrier is challenge-0 set **112** `FRONTIER_MON_EXEGGCUTE`
+(species **102**, Light Screen **113**, Naughty, SpAttack+HP, Persim Berry).
+Complete legal three-mon Scene-ON parties pass the full move-owned body
+through first inactive cleanup twice fresh in both orientations: player-back
+frames **270–384 (115/115)**, evidence/raw
+`7c1c3b39e53c00ee0174232a0c05a02ac7f14b6d2aa7478bc2ae372c5d2500a2` /
+`b135e9fbf2c70ea860f0ee126959bbb0eaf0c4603566067dd5405c9698a74837`;
+opponent-front **176–294 (119/119)**,
+`51ffe743621c2745f8a59cd6786bb5d0fa9b12b844ee452d2e7ca729587e20db` /
+`654a49bafe3470e81c34dfa1d127d67a78d59eb6d0b6af3c983d36008a8dbf6b`.
+
+**Model/evidence:** reproducible extraction pins Exeggcute front/back,
+GREEN_LIGHT_WALL, and SPARKLE_3. The pure relative reducer and typed seam port
+`gLightScreenWallSpriteTemplate`/`AnimDefensiveWall`, all six
+`gSpecialScreenSparkleSpriteTemplate`/`AnimWallSparkle` lifecycles from
+`SpecialScreenSparkle`, alpha, rotating palette, delayed audio, opponent BG
+transfer, OAM/VBlank latches, blendoff tail, and first inactive age 74.
+`lightScreenEvidence.ts` proves every dense source/component, seam,
+software+hardware OAM/matrix/palette/register/audio/immutable-state/raw-RGB/
+production-framebuffer frame twice fresh; presentation owns no side
+condition, damage, RNG, turn, controller, or facility state.
+
+**Sibling:** `MOVE_MIRROR_COAT` remains unsupported. Its source batch-check
+pins lowest carrier set **151** `FRONTIER_MON_CORSOLA` and the independent
+RED_LIGHT_WALL/`gMirrorCoatWallSpriteTemplate`, wall-before-audio delay-10
+then immediate-playse timing, real prior-special-damage counter staging/result,
+and separate palette/audio/register/cleanup acceptance still required twice
+fresh in both orientations. Coverage is **93 exact / 0 partial / 0 staged /
+183 unsupported**; no boundary or barrier ratchet moved.
+
 ## MOVE_BLOCK promoted exact; X_SIGN track bounded (2026-07-29)
 
 **Verdict:** `MOVE_BLOCK` is exact. The lowest suitable legal Level-50
