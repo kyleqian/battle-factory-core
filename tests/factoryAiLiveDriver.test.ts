@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { createBattleCommandRequest } from "../src/engine/battleDecisionBoundary.ts";
 import {
+  createBattleCommandRequest,
+  createBattleState,
+  type BattleDecisionReducer,
+  type BattleState,
+} from "../src/engine/battleDecisionBoundary.ts";
+import {
+  BATTLE_SCRIPT_BATTLE_TYPE_FACTORY,
+  BATTLE_SCRIPT_BATTLE_TYPE_TRAINER,
   createBattleScriptRulesContext,
   type BattleScriptRulesBattler,
   type BattleScriptRulesContext,
@@ -12,9 +19,12 @@ import {
 import {
   createFactoryAiBattleHistory,
   createFactoryAiViewFromLiveRules,
+  FACTORY_AI_ACTION_GATE,
   recordFactoryAiKnownAbility,
   recordFactoryAiKnownItemEffect,
+  submitLiveFactoryAiDecision,
   syncFactoryAiBattleHistory,
+  type FactoryAiLiveRules,
 } from "../src/engine/factoryAiLiveDriver.ts";
 
 const SURF = 57;
@@ -69,6 +79,16 @@ function liveRules(
     abilityIds?: readonly number[];
     itemEffects?: readonly number[];
   }> = {},
+  scenario: Readonly<{
+    trainerMoves?: readonly [number, number, number, number];
+    lastLandedMove?: number;
+    lastHitBy?: number;
+    opponentBench?: readonly Readonly<{
+      species: number;
+      abilityNum?: 0 | 1;
+      moves: readonly [number, number, number, number];
+    }>[];
+  }> = {},
 ): BattleScriptRulesContext {
   const empty = battler({
     side: 0,
@@ -105,7 +125,7 @@ function liveRules(
         side: 1,
         species: 65,
         ability: 0,
-        moves: [SURF, ROCK_SLIDE, BODY_SLAM, THUNDERBOLT],
+        moves: scenario.trainerMoves ?? [SURF, ROCK_SLIDE, BODY_SLAM, THUNDERBOLT],
         types: ["TYPE_PSYCHIC", "TYPE_PSYCHIC"],
         attack: 55,
         defense: 65,
@@ -130,9 +150,43 @@ function liveRules(
     missType: 0,
     hitMarker: 0,
     multiHitCounter: 0,
+    battleTopology: {
+      battlersCount: 2,
+      battleTypeFlags:
+        BATTLE_SCRIPT_BATTLE_TYPE_TRAINER | BATTLE_SCRIPT_BATTLE_TYPE_FACTORY,
+      battlerPositions: [0, 1, 0xff, 0xff],
+    },
     aiObservedAbilityIds: observations.abilityIds,
     aiObservedItemEffects: observations.itemEffects,
-    moveHistory: { lastMoves: [lastPlayerMove, 0, 0, 0] },
+    moveHistory: {
+      lastMoves: [lastPlayerMove, 0, 0, 0],
+      lastLandedMoves: [0, scenario.lastLandedMove ?? 0, 0, 0],
+      lastHitBy: [0xff, scenario.lastHitBy ?? 0xff, 0xff, 0xff],
+    },
+    ...(scenario.opponentBench === undefined
+      ? {}
+      : {
+        party: {
+          player: [
+            { species: 105, hp: 135, maxHP: 135, moves: [70, 0, 0, 0] },
+            {}, {}, {}, {}, {},
+          ],
+          opponent: [
+            {
+              species: 65,
+              hp: 135,
+              maxHP: 135,
+              moves: scenario.trainerMoves ?? [SURF, ROCK_SLIDE, BODY_SLAM, THUNDERBOLT],
+            },
+            ...scenario.opponentBench.map((member) => ({
+              ...member,
+              hp: 100,
+              maxHP: 100,
+            })),
+            ...new Array(5 - scenario.opponentBench.length).fill({}),
+          ],
+        },
+      }),
   });
 }
 
@@ -149,7 +203,123 @@ const request = createBattleCommandRequest({
   ],
 });
 
+const requestWithSwitch = createBattleCommandRequest({
+  ...request,
+  legalDecisions: [...request.legalDecisions, { kind: "switch", partyIndex: 1 }],
+});
+
+function liveState(
+  rulesContext: BattleScriptRulesContext,
+  rngSeed: number,
+): BattleState<FactoryAiLiveRules> {
+  return createBattleState({
+    rules: { rulesContext } as FactoryAiLiveRules,
+    rngSeed,
+    request: requestWithSwitch,
+  });
+}
+
+function terminalReducer(
+  observedRequests: Array<unknown> = [],
+): BattleDecisionReducer<FactoryAiLiveRules> {
+  return (context) => {
+    observedRequests.push(context.request);
+    return {
+      rules: context.rules,
+      events: [],
+      boundary: { kind: "terminal", outcome: "player-win" },
+    };
+  };
+}
+
 describe("live Factory AI rules adapter (Gate-5 rung 6)", () => {
+  it("runs ShouldSwitch first and submits its successful switch through the original request/reducer", () => {
+    const rulesContext = liveRules(0, 0, {}, {
+      trainerMoves: [BODY_SLAM, 0, 0, 0],
+      lastLandedMove: SURF,
+      lastHitBy: 0,
+      opponentBench: [{ species: 134, moves: [SURF, 0, 0, 0] }],
+    });
+    const observedRequests: unknown[] = [];
+    const result = submitLiveFactoryAiDecision(
+      liveState(rulesContext, 3),
+      createFactoryAiBattleHistory(rulesContext),
+      { factoryWinStreak: 28, trainerOpponentId: 222 },
+      terminalReducer(observedRequests),
+    );
+
+    expect(result.phase).toBe("switch");
+    expect(result.submission.decision).toEqual({ kind: "switch", partyIndex: 1 });
+    expect(result.switchPolicy.draws.map(({ reason }) => reason))
+      .toEqual(["absorber-party-1"]);
+    expect(result.rng.calls).toBe(1);
+    expect(result.transition.state.rng).toEqual(result.rng);
+    expect(observedRequests).toEqual([requestWithSwitch]);
+    expect(result.actionGate).toBe(FACTORY_AI_ACTION_GATE);
+  });
+
+  it("passes the failed precheck cursor into the unchanged 11-draw move policy", () => {
+    const rulesContext = liveRules(0, 0, {}, {
+      opponentBench: [{ species: 132, moves: [BODY_SLAM, 0, 0, 0] }],
+    });
+    const history = createFactoryAiBattleHistory(rulesContext);
+    const state = liveState(rulesContext, 919694434);
+    const result = submitLiveFactoryAiDecision(
+      state,
+      history,
+      { factoryWinStreak: 28, trainerOpponentId: 222 },
+      terminalReducer(),
+    );
+    expect(result.phase).toBe("move");
+    if (result.phase !== "move") throw new Error("expected move phase");
+
+    const expectedSuffix = chooseFactoryAiScoredDecision({
+      view: result.view,
+      request,
+      rng: result.switchPolicy.rng,
+    });
+    expect(result.switchPolicy.draws.map(({ reason }) => reason)).toEqual([
+      "absorber-active-super-effective-reluctance",
+      "active-super-effective-move-0",
+    ]);
+    expect(result.trace.draws).toEqual(expectedSuffix.trace.draws);
+    expect(result.trace.draws).toHaveLength(11);
+    expect(result.rng).toEqual(expectedSuffix.rng);
+    expect(result.rng.calls).toBe(result.switchPolicy.draws.length + 11);
+    expect(result.transition.state.rng).toEqual(result.rng);
+  });
+
+  it("preserves the 13-draw all-Surf scoring carrier after the failed precheck prefix", () => {
+    const rulesContext = liveRules(0, 0, {}, {
+      trainerMoves: [SURF, SURF, SURF, SURF],
+      opponentBench: [{ species: 132, moves: [BODY_SLAM, 0, 0, 0] }],
+    });
+    const result = submitLiveFactoryAiDecision(
+      liveState(rulesContext, 919694434),
+      createFactoryAiBattleHistory(rulesContext),
+      { factoryWinStreak: 28, trainerOpponentId: 222 },
+      terminalReducer(),
+    );
+    expect(result.phase).toBe("move");
+    if (result.phase !== "move") throw new Error("expected move phase");
+
+    const allSurfRequest = createBattleCommandRequest({
+      ...request,
+      legalDecisions: request.legalDecisions.map((decision) => ({
+        ...decision,
+      })),
+    });
+    const expectedSuffix = chooseFactoryAiScoredDecision({
+      view: result.view,
+      request: allSurfRequest,
+      rng: result.switchPolicy.rng,
+    });
+    expect(result.trace.draws).toEqual(expectedSuffix.trace.draws);
+    expect(result.trace.draws).toHaveLength(13);
+    expect(result.rng.calls).toBe(result.switchPolicy.draws.length + 13);
+    expect(result.rng).toEqual(expectedSuffix.rng);
+  });
+
   it("reproduces the banked Alakazam-vs-Marowak mask-7 decision and 11-draw ledger", () => {
     const rulesContext = liveRules();
     const history = createFactoryAiBattleHistory(rulesContext);

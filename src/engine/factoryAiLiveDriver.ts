@@ -20,9 +20,12 @@
 import abilityItemHooksData from "../data/gen/ability-item-hooks.json" with { type: "json" };
 import {
   createBattleCommandRequest,
+  submitBattleDecision,
   type BattleCommandRequest,
+  type BattleDecisionSubmission,
   type BattleDecisionReducer,
   type BattleJsonObject,
+  type BattleRngState,
   type BattleState,
 } from "./battleDecisionBoundary.ts";
 import {
@@ -33,8 +36,11 @@ import {
 } from "./battleScriptSourceConstants.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import {
-  submitFactoryAiDecision,
-  type FactoryAiScoredTransition,
+  chooseFactoryAiMaskZeroDecision,
+  chooseFactoryAiScoredDecision,
+  type FactoryAiDecisionChoice,
+  type FactoryAiMaskZeroView,
+  type FactoryAiScoredChoice,
   type FactoryAiScoredView,
 } from "./factoryAiDecisionPolicy.ts";
 import {
@@ -47,8 +53,13 @@ import {
 import {
   FACTORY_BATTLE_MODE_SINGLES,
   FACTORY_LEVEL_MODE_50,
+  selectFactoryAiMask,
   type FactoryAiMaskSelectionInput,
 } from "./factoryAiMaskSelection.ts";
+import {
+  evaluateFactoryAiSwitchPolicy,
+  type FactoryAiSwitchPolicyResult,
+} from "./factoryAiSwitchPolicy.ts";
 
 const MOVE_NONE = 0;
 const SIDE_STATUS_REFLECT = 1 << 0;
@@ -86,19 +97,8 @@ export type FactoryAiChallengePolicy = Readonly<{
   trainerOpponentId: number;
 }>;
 
-/**
- * Rung-6's explicit action-precheck constraint. Factory trainer items are
- * source-unreachable because `BattleAI_HandleItemUseBeforeAISetup` excludes
- * `BATTLE_TYPE_FRONTIER` while populating `trainerItems`
- * (`battle_ai_script_commands.c:292-306`). Voluntary switching is not
- * generally unreachable: `AI_TrySwitchOrUseItem` calls `ShouldSwitch` first
- * (`battle_ai_switch_items.c:528-545`). Until rung 13 ports that precheck,
- * callers must opt into this named, visible constraint; the driver filters
- * only switch alternatives from the policy view and still submits the chosen
- * move through the original reducer request.
- */
-export const FACTORY_AI_RUNG6_ACTION_GATE = Object.freeze({
-  switch: "factory-ai-switch-precheck-unimplemented",
+/** Factory items remain source-unreachable in Frontier trainer battles. */
+export const FACTORY_AI_ACTION_GATE = Object.freeze({
   item: "frontier-trainer-items-source-unreachable",
 } as const);
 
@@ -323,12 +323,60 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
   });
 }
 
-export type FactoryAiLiveTransition<RulesState extends FactoryAiLiveRules> =
-  FactoryAiScoredTransition<RulesState> & Readonly<{
+type FactoryAiMoveChoice = FactoryAiDecisionChoice | FactoryAiScoredChoice;
+
+type FactoryAiLiveCommon = Readonly<{
     history: FactoryAiBattleHistory;
     view: FactoryAiScoredView;
-    actionGate: typeof FACTORY_AI_RUNG6_ACTION_GATE;
+    actionGate: typeof FACTORY_AI_ACTION_GATE;
+    switchPolicy: FactoryAiSwitchPolicyResult;
   }>;
+
+export type FactoryAiLiveTransition<RulesState extends FactoryAiLiveRules> =
+  FactoryAiLiveCommon & (
+    | (FactoryAiMoveChoice & Readonly<{
+      phase: "move";
+      transition: ReturnType<typeof submitBattleDecision<RulesState>>;
+    }>)
+    | Readonly<{
+      phase: "switch";
+      submission: BattleDecisionSubmission;
+      rng: BattleRngState;
+      transition: ReturnType<typeof submitBattleDecision<RulesState>>;
+    }>
+  );
+
+type RecordedAiDraw = Readonly<{
+  ordinal: number;
+  reason: string;
+  before: BattleRngState;
+  after: BattleRngState;
+  randomValue: number;
+}>;
+
+function replayAiDraws<RulesState extends FactoryAiLiveRules>(
+  draws: readonly RecordedAiDraw[],
+  reducer: BattleDecisionReducer<RulesState>,
+): BattleDecisionReducer<RulesState> {
+  return (context) => {
+    for (const [index, draw] of draws.entries()) {
+      const before = context.rng.snapshot();
+      if (before.value !== draw.before.value || before.calls !== draw.before.calls) {
+        throw new Error(`Factory AI RNG diverged before live draw ${index}/${draw.ordinal}`);
+      }
+      const randomValue = context.rng.draw(draw.reason);
+      const after = context.rng.snapshot();
+      if (
+        randomValue !== draw.randomValue
+        || after.value !== draw.after.value
+        || after.calls !== draw.after.calls
+      ) {
+        throw new Error(`Factory AI RNG diverged after live draw ${index}/${draw.ordinal}`);
+      }
+    }
+    return reducer(context);
+  };
+}
 
 export function submitLiveFactoryAiDecision<
   RulesState extends FactoryAiLiveRules,
@@ -352,35 +400,80 @@ export function submitLiveFactoryAiDecision<
     history: syncedHistory,
     challenge,
   });
-  const moveDecisions = state.boundary.request.legalDecisions.filter(
-    (decision) => decision.kind === "use-move",
-  );
-  if (moveDecisions.length === 0) {
-    throw new Error(`${FACTORY_AI_RUNG6_ACTION_GATE.switch}: no legal move remains`);
+  const switchPolicy = evaluateFactoryAiSwitchPolicy({
+    rules: state.rules.rulesContext,
+    rng: state.rng,
+  });
+  if (switchPolicy.selectedPartyIndex !== null) {
+    const submission = Object.freeze({
+      requestId: state.boundary.request.requestId,
+      side: state.boundary.request.side,
+      decision: Object.freeze({
+        kind: "switch" as const,
+        partyIndex: switchPolicy.selectedPartyIndex as 0 | 1 | 2 | 3 | 4 | 5,
+      }),
+    });
+    const transition = submitBattleDecision(
+      state,
+      submission,
+      replayAiDraws(switchPolicy.draws, reducer),
+    );
+    return Object.freeze({
+      phase: "switch",
+      submission,
+      rng: switchPolicy.rng,
+      transition,
+      history: syncedHistory,
+      view,
+      switchPolicy,
+      actionGate: FACTORY_AI_ACTION_GATE,
+    }) as FactoryAiLiveTransition<RulesState>;
   }
 
-  // `submitFactoryAiDecision`'s move policy sees the post-action-precheck
-  // request. The chosen submission is then reduced against the original
-  // request below, preserving the kernel as the authority on legality.
+  // AI_TrySwitchOrUseItem has returned B_ACTION_USE_MOVE. Project that
+  // completed phase into the unchanged move chooser, but submit its result
+  // through the original request so the kernel remains the legality owner.
+  const moveDecisions = state.boundary.request.legalDecisions.flatMap(
+    (decision) => decision.kind === "use-move" ? [decision] : [],
+  );
+  if (moveDecisions.length === 0) {
+    throw new Error("Factory AI switch precheck declined but no legal move remains");
+  }
   const policyRequest: BattleCommandRequest = createBattleCommandRequest({
     ...state.boundary.request,
     legalDecisions: moveDecisions,
   });
-  const policyState: BattleState<RulesState> = Object.freeze({
-    ...state,
-    boundary: Object.freeze({ kind: "decision-required", request: policyRequest }),
-  });
-  const policyResult = submitFactoryAiDecision(policyState, view, reducer);
-  const originalLegal = state.boundary.request.legalDecisions.some(
-    (decision) =>
-      JSON.stringify(decision) === JSON.stringify(policyResult.submission.decision),
+  const mask = selectFactoryAiMask(view.factory).mask;
+  const policyResult: FactoryAiMoveChoice = mask === 0
+    ? chooseFactoryAiMaskZeroDecision({
+      view: Object.freeze({
+        schema: "factory-ai-view/v1",
+        mode: "factory-level-50-singles",
+        active: view.active,
+        factory: view.factory,
+        moves: view.moves,
+      }) satisfies FactoryAiMaskZeroView,
+      request: policyRequest,
+      rng: switchPolicy.rng,
+    })
+    : chooseFactoryAiScoredDecision({
+      view,
+      request: policyRequest,
+      rng: switchPolicy.rng,
+    });
+  const transition = submitBattleDecision(
+    state,
+    policyResult.submission,
+    replayAiDraws([...switchPolicy.draws, ...policyResult.trace.draws], reducer),
   );
-  if (!originalLegal) throw new Error("Factory AI chose a decision outside the live kernel request");
 
   return Object.freeze({
+    phase: "move",
     ...policyResult,
+    transition,
     history: syncedHistory,
     view,
-    actionGate: FACTORY_AI_RUNG6_ACTION_GATE,
+    switchPolicy,
+    actionGate: FACTORY_AI_ACTION_GATE,
   }) as FactoryAiLiveTransition<RulesState>;
 }

@@ -81,7 +81,13 @@ function driveGeneratedRoundToCompletion(
       savedRentalRecords,
     },
   });
-  for (let budget = 0; budget < 1_000 && state.round.rules.phase !== "roundComplete"; budget += 1) {
+  for (
+    let budget = 0;
+    budget < 1_000
+      && state.round.rules.phase !== "roundComplete"
+      && state.round.rules.phase !== "roundLost";
+    budget += 1
+  ) {
     if (state.battle !== null) {
       state = submitFactoryRoundPlayerDecision(state, choosePlayerDecision(state));
       onDecisionSubmitted?.(state);
@@ -195,17 +201,17 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
         kind: "battle",
         battleIndex: 0,
         callStart: 152,
-        callEnd: 327,
+        callEnd: 311,
         rngBefore: 2423399196,
-        rngAfter: 3960941853,
+        rngAfter: 4032903885,
       },
       {
         kind: "opponent-generation",
         battleIndex: 1,
-        callStart: 327,
-        callEnd: 439,
-        rngBefore: 3960941853,
-        rngAfter: 2133491021,
+        callStart: 311,
+        callEnd: 525,
+        rngBefore: 4032903885,
+        rngAfter: 3788765155,
       },
     ]);
     expect(state.opponentGenerations.map((generation) => ({
@@ -214,7 +220,7 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       draws: generation.drawLedger.length,
     }))).toEqual([
       { trainerId: 17, setIds: [122, 118, 110], draws: 152 },
-      { trainerId: 51, setIds: [199, 178, 148], draws: 112 },
+      { trainerId: 90, setIds: [132, 187, 127], draws: 214 },
     ]);
     for (let index = 1; index < state.rngSegments.length; index += 1) {
       expect(state.rngSegments[index]!.callStart).toBe(state.rngSegments[index - 1]!.callEnd);
@@ -227,8 +233,8 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
         if (index > 0) expect(draw.rngBefore).toBe(generation.drawLedger[index - 1]!.rngAfter);
       });
     }
-    expect(state.battle!.rng).toEqual({ calls: 2, value: 1174811135 });
-    expect(state.facilityRngCalls).toBe(441);
+    expect(state.battle!.rng).toEqual({ calls: 2, value: 4029920645 });
+    expect(state.facilityRngCalls).toBe(527);
   });
 
   it("seed 17 completes seven generated wins with multi-candidate trainer replacements on one cursor", () => {
@@ -300,7 +306,9 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expect(state.round.rules.lastBattle?.outcome).toBe("win");
     expect(state.opponentGenerations).toHaveLength(7);
     expect(state.rngSegments.filter((segment) => segment.kind === "battle")).toHaveLength(7);
-    expect(state.facilityRngCalls).toBe(1787);
+    // ShouldSwitch's new draws shift later battle/generation streams:
+    // entry-685 cursor 1787 + 226 = 2013.
+    expect(state.facilityRngCalls).toBe(2013);
     expect(firstReplacement).toEqual({
       callsBefore: 2,
       callsAfter: 16,
@@ -349,28 +357,53 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
   });
 
   it.each([
-    [4, 1517],
-    [5, 1688],
-    [6, 1563],
-    [7, 1827],
-    [8, 2089],
-    [11, 1970],
-    [13, 2224],
-    [14, 2325],
-    [15, 2036],
-    [16, 1660],
-    [19, 1842],
-    [22, 1377],
-    [24, 1690],
-    [26, 1556],
-    [29, 1543],
-    [30, 1558],
-  ])("seed %i is a permanent seven-win carrier at an exact %i-call cursor", (seed, calls) => {
+    // Each comment is the entry-685 cursor plus its complete downstream
+    // ShouldSwitch-induced trajectory delta, not merely the direct precheck
+    // draw count: later generation, move, damage, and turn lengths may change.
+    [4, 2415, "roundComplete", 6, "win"], // 1517 + 898
+    [5, 2156, "roundComplete", 6, "win"], // 1688 + 468
+    [6, 791, "roundLost", 1, "loss"],
+    [7, 1337, "roundComplete", 6, "win"], // 1827 - 490
+    [8, 1922, "roundComplete", 6, "win"], // 2089 - 167
+    [11, 2012, "roundComplete", 6, "win"], // 1970 + 42
+    [13, 2415, "roundComplete", 6, "win"], // 2224 + 191
+    [14, 1946, "roundComplete", 6, "win"], // 2325 - 379
+    [15, 1602, "roundComplete", 6, "win"], // 2036 - 434
+    [16, 1878, "roundComplete", 6, "win"], // 1660 + 218
+    [18, 2143, "roundComplete", 6, "win"], // 2478 - 335
+    [19, 1691, "roundComplete", 6, "win"], // 1842 - 151
+    [20, 2326, "roundComplete", 6, "win"], // 2140 + 186
+    [21, 1911, "roundComplete", 6, "win"], // unchanged after divergence reconverges
+    [22, 1389, "roundComplete", 6, "win"], // 1377 + 12
+    [23, 2114, "roundComplete", 6, "win"], // 1436 + 678
+    [24, 1751, "roundComplete", 6, "win"], // 1690 + 61
+    [26, 1680, "roundComplete", 6, "win"], // 1556 + 124
+    [29, 1869, "roundComplete", 6, "win"], // 1543 + 326
+    [30, 1825, "roundComplete", 6, "win"], // 1558 + 267
+  ])("seed %i pins the post-ShouldSwitch round census", (
+    seed,
+    calls,
+    phase,
+    battleIndex,
+    outcome,
+  ) => {
     const state = driveGeneratedRoundToCompletion(seed);
-    expect(state.round.rules.phase).toBe("roundComplete");
-    expect(state.round.rules.battleIndex).toBe(6);
-    expect(state.round.rules.lastBattle?.outcome).toBe("win");
-    expect(state.rngSegments.filter((segment) => segment.kind === "battle")).toHaveLength(7);
-    expect(state.facilityRngCalls).toBe(calls);
+    expect({
+      phase: state.round.rules.phase,
+      battleIndex: state.round.rules.battleIndex,
+      outcome: state.round.rules.lastBattle?.outcome,
+      battles: state.rngSegments.filter((segment) => segment.kind === "battle").length,
+      calls: state.facilityRngCalls,
+      playerHp: state.round.rules.lastBattle?.playerParty.map((member) => member.hp),
+      opponentHp: state.round.rules.lastBattle?.opponentParty.map((member) => member.hp),
+    }).toEqual({
+      phase,
+      battleIndex,
+      outcome,
+      battles: battleIndex + 1,
+      calls,
+      playerHp: seed === 6 ? [0, 0, 0] : expect.any(Array),
+      opponentHp: seed === 6 ? [0, 0, 126] : expect.any(Array),
+    });
   });
 });

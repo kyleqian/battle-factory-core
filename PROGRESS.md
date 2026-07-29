@@ -13,6 +13,39 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 686 — [BOUNDED MAIN WORKER 2026-07-29 ~09:55] R13-C live ShouldSwitch driver integration landed
+
+- **State:** tree green at **496 files / 5094 tests**, production build,
+  `git diff --check`, and Battle Scene OFF oracle info. Both censuses
+  regenerate byte-identically at SHA-256 **8b18f754…5261 /
+  52687085…257c**.
+- **Did:** the live trainer driver now runs R13-A `ShouldSwitch` first on the
+  original kernel request/cursor. A selected switch replays only its precheck
+  ledger and submits through the original R13-B reducer; no-switch threads the
+  advanced cursor into the unchanged mask chooser, then replays the combined
+  ledger through that same original request. The switch filter/substitute
+  policy-state path and `factory-ai-switch-precheck-unimplemented` retired;
+  `frontier-trainer-items-source-unreachable` remains.
+- **Receipts:** absorber success is **N=1** draw and switches to party 1;
+  failed Alakazam/Marowak precheck is **N=2**, followed by exact old-policy
+  suffixes of **11** and all-Surf **13** draws from the post-precheck seed.
+  Whole-battle cursor moves **188→196** (four later 2-draw prechecks), same
+  win/HP outcome.
+- **Sweep:** seed 17 **1787→2013**. Permanent table plus required extras:
+  **4:2415, 5:2156, 7:1337, 8:1922, 11:2012, 13:2415, 14:1946,
+  15:1602, 16:1878, 18:2143, 19:1691, 20:2326, 21:1911,
+  22:1389, 23:2114, 24:1751, 26:1680, 29:1869, 30:1825**; all win seven.
+  Seed **6** now honestly loses battle 2 at **791**, player HP `[0,0,0]`
+  versus opponent `[0,0,126]`. The table saw no voluntary switch: divergence
+  is from source-required precheck draws shifting downstream battle/generation
+  RNG, not a contradictory switch/reducer outcome.
+- **Next / notes:** supervisor resumes R13-D or its ordered queue. No
+  unsupported/import ratchet, census byte, generated artifact, issue,
+  presentation, animation, canonical recording, or tick branch moved.
+  PAPERCUT: none.
+
+---
+
 ## 685 — [BOUNDED MAIN WORKER 2026-07-29 ~09:40] R13-B trainer switch kernel surface landed
 
 - **State:** committed `bbc26849` + `ac76ea29`; tree green at **496 files /
@@ -77,32 +110,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   presentation queue. No unsupported/import ratchet, generated census byte,
   hook universe, issue, presentation, animation, canonical recording, or tick
   branch moved. PAPERCUT: none.
-
----
-
-## 683 — [BOUNDED MAIN WORKER 2026-07-29 ~09:00] seed 21 end-turn budget halt retired; sweep blocker-free
-
-- **State:** implementation committed `39b4dceb`; tree green at **495 files /
-  5066 tests**, production build, `git diff --check`, Battle Scene OFF oracle
-  info, and byte-identical executable + ability/item census documents.
-- **Did / acceptance:** both end-turn script runners retain the **256
-  PC-advancing source-instruction** ceiling and now independently allow
-  **4096 scheduler/controller yields**, with distinct yield/source exhaustion
-  diagnostics and the blocked-without-ack throw preserved. Ordinary generated
-  seed 21 reaches Battle 0 turn 7's player forced-switch boundary with
-  **GRANBULL 0 HP / SEAKING 116 HP**, then legitimately wins seven at exact
-  facility cursor **1911**.
-- **Sweep:** seeds 4–30 pass battles 0/1/2 at **27/27/27**; **26/27** win
-  seven. Seed 12 remains the sole legitimate battle-7 loss (**1846** calls);
-  blocker census is empty. The permanent **17-carrier** entry-678 table stays
-  capped and every cursor remains exact.
-- **Supervisor fold (post-step):** side-lane R13-A merged (`6961530a`) —
-  pure `factoryAiSwitchPolicy.ts` port of `ShouldSwitch` +
-  suitable-mon resolution with 15 receipt tests, not yet wired to the live
-  driver; union green **496 files / 5081 tests**, production build,
-  worktree/branch cleaned.
-- **Next / notes:** supervisor resumes entry 681's ordered queue at the AI
-  reveal-site remainder, then lane-owned R13/King's Rock/presentation work.
-  No opcode/operand census byte, unsupported-branch/import ratchet, issue,
-  presentation, animation, AI switching, canonical recording, or tick branch
-  moved. PAPERCUT: none.

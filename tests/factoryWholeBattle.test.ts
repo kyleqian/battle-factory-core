@@ -26,7 +26,7 @@ import {
 } from "../src/engine/factoryCorpusParty.ts";
 import {
   createFactoryAiBattleHistory,
-  FACTORY_AI_RUNG6_ACTION_GATE,
+  FACTORY_AI_ACTION_GATE,
   submitLiveFactoryAiDecision,
 } from "../src/engine/factoryAiLiveDriver.ts";
 import { randomU16 } from "../src/engine/opponentGen.ts";
@@ -155,14 +155,17 @@ describe("fresh Factory whole-battle integration (Gate-5 rungs 4/6)", () => {
           { factoryWinStreak: 28, trainerOpponentId: 222 },
           reduceFactoryFullTurnDecision,
         );
-        expect(ai.actionGate).toBe(FACTORY_AI_RUNG6_ACTION_GATE);
+        expect(ai.actionGate).toBe(FACTORY_AI_ACTION_GATE);
         expect(liveLegalDecisions).toContainEqual(ai.submission.decision);
-        expect(ai.trace.mask).toBe(7);
-        expect(ai.trace.draws.length).toBeGreaterThan(0);
-        expect(ai.trace.draws[0]!.before.calls).toBe(previousCalls);
-        expect(ai.trace.draws.at(-1)!.after.calls).toBe(ai.rng.calls);
-        for (let draw = 1; draw < ai.trace.draws.length; draw += 1) {
-          expect(ai.trace.draws[draw]!.before).toEqual(ai.trace.draws[draw - 1]!.after);
+        const policyDraws = ai.phase === "move"
+          ? [...ai.switchPolicy.draws, ...ai.trace.draws]
+          : [...ai.switchPolicy.draws];
+        if (ai.phase === "move") expect(ai.trace.mask).toBe(7);
+        expect(policyDraws.length).toBeGreaterThan(0);
+        expect(policyDraws[0]!.before.calls).toBe(previousCalls);
+        expect(policyDraws.at(-1)!.after.calls).toBe(ai.rng.calls);
+        for (let draw = 1; draw < policyDraws.length; draw += 1) {
+          expect(policyDraws[draw]!.before).toEqual(policyDraws[draw - 1]!.after);
         }
         aiDecisionDrawRanges.push([previousCalls, ai.rng.calls]);
         aiChosenSubmissions.push(ai.submission);
@@ -225,7 +228,9 @@ describe("fresh Factory whole-battle integration (Gate-5 rungs 4/6)", () => {
     // splices the stream.
     expect(cursorCheckpoints).toEqual([
       2, 2, 17, 18, 18, 29, 29, 40, 40, 51, 51, 62, 62,
-      81, 81, 100, 100, 120, 120, 140, 140, 156, 156, 172, 172, 188,
+      // Four later trainer decisions each add absorber reluctance +
+      // active-super-effective suppression before the unchanged move policy.
+      83, 83, 104, 104, 126, 126, 148, 148, 164, 164, 180, 180, 196,
     ]);
 
     const resolution = deriveBattleResolutionFromTerminalBoundary({
@@ -237,7 +242,7 @@ describe("fresh Factory whole-battle integration (Gate-5 rungs 4/6)", () => {
     });
     expect(resolution).toMatchObject({
       outcome: "win",
-      rngValue: expectedRngValue(188),
+      rngValue: expectedRngValue(196),
     });
     expect(resolution.playerParty.map((member) => member.hp)).toEqual([0, 251, 186]);
     expect(resolution.opponentParty.map((member) => member.hp)).toEqual([0, 0, 0]);

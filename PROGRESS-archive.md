@@ -1,4 +1,32 @@
 ---
+## 683 — [BOUNDED MAIN WORKER 2026-07-29 ~09:00] seed 21 end-turn budget halt retired; sweep blocker-free
+
+- **State:** implementation committed `39b4dceb`; tree green at **495 files /
+  5066 tests**, production build, `git diff --check`, Battle Scene OFF oracle
+  info, and byte-identical executable + ability/item census documents.
+- **Did / acceptance:** both end-turn script runners retain the **256
+  PC-advancing source-instruction** ceiling and now independently allow
+  **4096 scheduler/controller yields**, with distinct yield/source exhaustion
+  diagnostics and the blocked-without-ack throw preserved. Ordinary generated
+  seed 21 reaches Battle 0 turn 7's player forced-switch boundary with
+  **GRANBULL 0 HP / SEAKING 116 HP**, then legitimately wins seven at exact
+  facility cursor **1911**.
+- **Sweep:** seeds 4–30 pass battles 0/1/2 at **27/27/27**; **26/27** win
+  seven. Seed 12 remains the sole legitimate battle-7 loss (**1846** calls);
+  blocker census is empty. The permanent **17-carrier** entry-678 table stays
+  capped and every cursor remains exact.
+- **Supervisor fold (post-step):** side-lane R13-A merged (`6961530a`) —
+  pure `factoryAiSwitchPolicy.ts` port of `ShouldSwitch` +
+  suitable-mon resolution with 15 receipt tests, not yet wired to the live
+  driver; union green **496 files / 5081 tests**, production build,
+  worktree/branch cleaned.
+- **Next / notes:** supervisor resumes entry 681's ordered queue at the AI
+  reveal-site remainder, then lane-owned R13/King's Rock/presentation work.
+  No opcode/operand census byte, unsupported-branch/import ratchet, issue,
+  presentation, animation, AI switching, canonical recording, or tick branch
+  moved. PAPERCUT: none.
+
+---
 ## 682 — [BOUNDED MAIN WORKER 2026-07-29 ~08:36] wake-up path retired; seeds 18/20 seven-win exact
 
 - **State:** committed `20ad5cce` + stretch `b2afcc38`; tree green at **495
