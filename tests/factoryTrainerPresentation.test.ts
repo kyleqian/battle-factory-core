@@ -4,6 +4,7 @@ import {
   MSGBOX_LINE2,
   JENSON_MSGBOX_LINE1,
   JENSON_MSGBOX_LINE2,
+  battleRoomQuote,
 } from "../src/engine/battleRoom.ts";
 import {
   TURN17_LOSS_LINE1,
@@ -15,6 +16,7 @@ import {
 import {
   CANONICAL_DESTIN_PRESENTATION,
   CANONICAL_JENSON_PRESENTATION,
+  factoryTrainerPresentationForOpponent,
   getFactoryTrainerPresentation,
 } from "../src/engine/factoryTrainerPresentation.ts";
 
@@ -65,5 +67,34 @@ describe("generated Factory trainer presentation identity", () => {
     expect(jenson.speechBefore).not.toEqual(destin.speechBefore);
     expect(jenson.speechWin).not.toEqual(destin.speechWin);
     expect(jenson.speechLose).not.toEqual(destin.speechLose);
+  });
+
+  it("drives the room quote and both battle-intro identity printers from generated semantic state", () => {
+    const brady = factoryTrainerPresentationForOpponent({
+      id: "factory-trainer-0",
+      trainerName: "BRADY",
+    });
+    const destin = factoryTrainerPresentationForOpponent({
+      id: "factory-trainer-50",
+      trainerName: "DESTIN",
+    });
+    expect(brady).not.toBeNull();
+    expect(destin).not.toBeNull();
+
+    const consume = (trainer: NonNullable<typeof brady>) => ({
+      roomQuote: battleRoomQuote({
+        phase: "msgboxIdle",
+        elapsed: 0,
+        trainerPresentation: trainer,
+      }),
+      intro: battleIntroEncounterParams("destin", trainer).line1,
+      sendOut: battleSendOutEncounterParams("destin", trainer).line1,
+    });
+    expect(consume(brady!)).toEqual({
+      roomQuote: brady!.speechBefore,
+      intro: `${brady!.className} ${brady!.name}`,
+      sendOut: `${brady!.className} ${brady!.name} sent`,
+    });
+    expect(consume(brady!)).not.toEqual(consume(destin!));
   });
 });

@@ -403,6 +403,11 @@
 //    module-level STATUS note above.
 
 import type { RgbColor } from "./bg.ts";
+import {
+  CANONICAL_DESTIN_PRESENTATION,
+  CANONICAL_JENSON_PRESENTATION,
+  type FactoryTrainerPresentation,
+} from "./factoryTrainerPresentation.ts";
 import { fillFramebuffer } from "./framebuffer.ts";
 import { drawText, measureText, type FontData } from "./font.ts";
 import { blendComponentToWhite } from "./paletteFade.ts";
@@ -2064,6 +2069,8 @@ export interface BattleSceneState {
   /** Encounter identity survives the room/setup handoff; render
    * parameterization consumes this instead of consulting trace time. */
   encounter?: "destin" | "jenson";
+  /** Generated round identity; absent only on the legacy canonical fixture. */
+  trainerPresentation?: FactoryTrainerPresentation;
   /**
    * `elapsed` value of the A-PRESS-#3 tick (docs/battle-scene-notes.md §7.2)
    * once registered (`TICK0 + sendOutPressElapsed` is the actual trace
@@ -2514,6 +2521,16 @@ function blendChannel(tgt1: number, tgt2: number, eva: number, evb: number): num
 
 const LINE1 = "BUG CATCHER DESTIN";
 const LINE2 = "would like to battle!";
+
+function presentationForEncounter(
+  encounter: BattleSceneState["encounter"],
+  trainerPresentation?: FactoryTrainerPresentation,
+): FactoryTrainerPresentation {
+  return trainerPresentation
+    ?? (encounter === "jenson"
+      ? CANONICAL_JENSON_PRESENTATION
+      : CANONICAL_DESTIN_PRESENTATION);
+}
 export interface BattleIntroEncounterParams {
   readonly trainer: "bugCatcher" | "fisherman";
   readonly line1: string;
@@ -2526,10 +2543,14 @@ export interface BattleIntroEncounterParams {
 /** Encounter-selected inputs to the shared BattleIntroSlide3/text/cursor renderer. */
 export function battleIntroEncounterParams(
   encounter: BattleSceneState["encounter"] = "destin",
+  trainerPresentation?: FactoryTrainerPresentation,
 ): BattleIntroEncounterParams {
-  const line1 = encounter === "jenson" ? "FISHERMAN JENSON" : LINE1;
+  const presentation = presentationForEncounter(encounter, trainerPresentation);
+  const line1 = `${presentation.className} ${presentation.name}`;
   return {
-    trainer: encounter === "jenson" ? "fisherman" : "bugCatcher",
+    trainer: presentation.trainerPic === "TRAINER_PIC_FISHERMAN"
+      ? "fisherman"
+      : "bugCatcher",
     line1,
     line2: LINE2,
     textStartTick: TEXT_START_TICK,
@@ -2546,8 +2567,12 @@ export const TEXT_TOTAL_CHARS = LINE1.length + LINE2.length;
 export const TEXT_START_TICK = 1234;
 
 /** Visible character count (0..TEXT_TOTAL_CHARS) across both lines combined at trace tick `t`. */
-export function textVisibleChars(t: number, encounter: BattleSceneState["encounter"] = "destin"): number {
-  const params = battleIntroEncounterParams(encounter);
+export function textVisibleChars(
+  t: number,
+  encounter: BattleSceneState["encounter"] = "destin",
+  trainerPresentation?: FactoryTrainerPresentation,
+): number {
+  const params = battleIntroEncounterParams(encounter, trainerPresentation);
   const total = params.line1.length + params.line2.length;
   if (t < params.textStartTick) return 0;
   return Math.min(total, t - params.textStartTick + 1);
@@ -2759,10 +2784,10 @@ export interface BattleSendOutEncounterParams {
 /** BattleSetup-backed encounter identity expressed for the shared send-out printer. */
 export function battleSendOutEncounterParams(
   encounter: BattleSceneState["encounter"] = "destin",
+  trainerPresentation?: FactoryTrainerPresentation,
 ): BattleSendOutEncounterParams {
-  const line1 = encounter === "jenson"
-    ? "FISHERMAN JENSON sent"
-    : "BUG CATCHER DESTIN sent";
+  const presentation = presentationForEncounter(encounter, trainerPresentation);
+  const line1 = `${presentation.className} ${presentation.name} sent`;
   const line2 = encounter === "jenson" ? "out KABUTO!" : "out GROVYLE!";
   return { line1, line2, textTotal: line1.length + line2.length };
 }
@@ -2775,9 +2800,10 @@ function sendOutTextStartTick(pressTick: number): number {
 export function sendOutHandoffTick(
   pressTick: number,
   encounter: BattleSceneState["encounter"] = "destin",
+  trainerPresentation?: FactoryTrainerPresentation,
 ): number {
   return sendOutTextStartTick(pressTick)
-    + battleSendOutEncounterParams(encounter).textTotal - 1
+    + battleSendOutEncounterParams(encounter, trainerPresentation).textTotal - 1
     + SENDOUT_HANDOFF_LAG;
 }
 
@@ -2817,10 +2843,14 @@ export function sendOutTextVisibleChars(
   t: number,
   pressTick: number,
   encounter: BattleSceneState["encounter"] = "destin",
+  trainerPresentation?: FactoryTrainerPresentation,
 ): number {
   const start = sendOutTextStartTick(pressTick);
   if (t < start) return 0;
-  return Math.min(battleSendOutEncounterParams(encounter).textTotal, t - start + 1);
+  return Math.min(
+    battleSendOutEncounterParams(encounter, trainerPresentation).textTotal,
+    t - start + 1,
+  );
 }
 
 /**
@@ -3458,8 +3488,13 @@ function drawMessageTextLines(fb: Uint8Array, line1: string, line2: string, char
   }
 }
 
-function drawMessageText(fb: Uint8Array, chars: number, encounter: BattleSceneState["encounter"] = "destin"): void {
-  const params = battleIntroEncounterParams(encounter);
+function drawMessageText(
+  fb: Uint8Array,
+  chars: number,
+  encounter: BattleSceneState["encounter"] = "destin",
+  trainerPresentation?: FactoryTrainerPresentation,
+): void {
+  const params = battleIntroEncounterParams(encounter, trainerPresentation);
   drawMessageTextLines(fb, params.line1, params.line2, chars);
 }
 
@@ -6092,6 +6127,7 @@ function drawFightSubmenuWindow(
   turn13Resolved: boolean = false,
   turn13KoDismissTick: number | null = null,
   turn14Resolved: boolean = false,
+  trainerPresentation?: FactoryTrainerPresentation,
 ): void {
   if (turn14Resolved) {
     // S7/S8 (docs/turn15-notes.md): turn 15 is Murkrow's own FLY strike
@@ -6116,7 +6152,13 @@ function drawFightSubmenuWindow(
     // its own dedicated dispatcher, same "genuinely different PP/text"
     // reason `turn11Resolved`'s own branch below already established for
     // turn 12.
-    drawTurn13FightSubmenuWindow(fb, t, sm, turn13KoDismissTick);
+    drawTurn13FightSubmenuWindow(
+      fb,
+      t,
+      sm,
+      turn13KoDismissTick,
+      trainerPresentation,
+    );
     return;
   }
   if (turn11Resolved) {
@@ -6227,7 +6269,7 @@ function drawFightSubmenuWindow(
         // confirm (cursor 0, ROCK_SLIDE again) kicks off Grovyle's ENDEAVOR
         // once more - distinguished from turn 3's own ENDEAVOR confirm by
         // `turn4Resolved` (true only once turn 5's reopen has fired).
-        drawTurn5EndeavorText(fb, t, pressTick);
+        drawTurn5EndeavorText(fb, t, pressTick, trainerPresentation);
         return;
       }
       if (turn3Resolved) {
@@ -7931,9 +7973,14 @@ const TURN5_ENDEAVOR_HP = resolveTurn5EndeavorHpEndpoints();
  * (`rockSlideTextStartTick(TURN5_ROCKSLIDE_PRESS_TICK)`) - the same shape
  * slice H's own `drawTurn3EndeavorText` handoff established a turn earlier.
  */
-function drawTurn5EndeavorText(fb: Uint8Array, t: number, pressTick: number): void {
+function drawTurn5EndeavorText(
+  fb: Uint8Array,
+  t: number,
+  pressTick: number,
+  trainerPresentation?: FactoryTrainerPresentation,
+): void {
   if (t >= rockSlideTextStartTick(TURN5_ROCKSLIDE_PRESS_TICK)) {
-    drawTurn5RockSlideWindow(fb, t);
+    drawTurn5RockSlideWindow(fb, t, trainerPresentation);
     return;
   }
   const bounceTick = turn5KickoffBounceTick(t, pressTick);
@@ -8694,9 +8741,22 @@ const SWITCHIN_SENTOUT_LINE2 = "out PIDGEOTTO!";
 export const SWITCHIN_SENTOUT_TEXT_TOTAL = SWITCHIN_SENTOUT_LINE1.length + SWITCHIN_SENTOUT_LINE2.length;
 export const SWITCHIN_SENTOUT_TEXT_START_TICK = 6687;
 
-export function switchinSentOutTextVisibleChars(t: number): number {
+function switchinSentOutLine1(
+  trainerPresentation?: FactoryTrainerPresentation,
+): string {
+  const trainer = presentationForEncounter("destin", trainerPresentation);
+  return `${trainer.className} ${trainer.name} sent`;
+}
+
+export function switchinSentOutTextVisibleChars(
+  t: number,
+  trainerPresentation?: FactoryTrainerPresentation,
+): number {
   if (t < SWITCHIN_SENTOUT_TEXT_START_TICK) return 0;
-  return Math.min(SWITCHIN_SENTOUT_TEXT_TOTAL, t - SWITCHIN_SENTOUT_TEXT_START_TICK + 1);
+  return Math.min(
+    switchinSentOutLine1(trainerPresentation).length + SWITCHIN_SENTOUT_LINE2.length,
+    t - SWITCHIN_SENTOUT_TEXT_START_TICK + 1,
+  );
 }
 
 /**
@@ -9222,11 +9282,16 @@ function murkrowHealthboxContentForHp(
 
 /** "BUG CATCHER DESTIN sent\nout MURKROW!" - same line 1 as `SWITCHIN_SENTOUT_LINE1`/`SENDOUT_LINE1` (`sText_Trainer1SentOutPkmn` family), oracle-pixel-bisected start tick: flat at the icon-bar-retrigger's own settled sha through render 16946, first distinct glyph at 16947. */
 const TURN13_SWITCHIN_SENTOUT_LINE2 = "out MURKROW!";
-const TURN13_SWITCHIN_SENTOUT_TEXT_TOTAL = SWITCHIN_SENTOUT_LINE1.length + TURN13_SWITCHIN_SENTOUT_LINE2.length;
 export const TURN13_SWITCHIN_SENTOUT_TEXT_START_TICK = 16947;
-export function turn13SwitchinSentOutTextVisibleChars(t: number): number {
+export function turn13SwitchinSentOutTextVisibleChars(
+  t: number,
+  trainerPresentation?: FactoryTrainerPresentation,
+): number {
   if (t < TURN13_SWITCHIN_SENTOUT_TEXT_START_TICK) return 0;
-  return Math.min(TURN13_SWITCHIN_SENTOUT_TEXT_TOTAL, t - TURN13_SWITCHIN_SENTOUT_TEXT_START_TICK + 1);
+  return Math.min(
+    switchinSentOutLine1(trainerPresentation).length + TURN13_SWITCHIN_SENTOUT_LINE2.length,
+    t - TURN13_SWITCHIN_SENTOUT_TEXT_START_TICK + 1,
+  );
 }
 
 /**
@@ -9314,7 +9379,14 @@ const TURN13_SWITCHIN_MENU_REDRAW_TICK = 17112;
  */
 const TURN13_SWITCHIN_RESET_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - TURN13_SWITCHIN_MENU_REDRAW_TICK;
 
-function drawTurn13SwitchinWindow(fb: Uint8Array, t: number, frozenBounceTick: number, cursorStart: number, koDismissTick: number): void {
+function drawTurn13SwitchinWindow(
+  fb: Uint8Array,
+  t: number,
+  frozenBounceTick: number,
+  cursorStart: number,
+  koDismissTick: number,
+  trainerPresentation?: FactoryTrainerPresentation,
+): void {
   const settled = t >= TURN13_SWITCHIN_MENU_REDRAW_TICK;
   const shiftedBounceTick = settled ? t + TURN13_SWITCHIN_RESET_SHIFT : frozenBounceTick + TURN13_REGIME8_TO_REGIME1_SHIFT;
   drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick);
@@ -9337,7 +9409,12 @@ function drawTurn13SwitchinWindow(fb: Uint8Array, t: number, frozenBounceTick: n
     return;
   }
   if (t < TURN13_SWITCHIN_TEXT_CLEAR_TICK) {
-    drawMessageTextLines(fb, SWITCHIN_SENTOUT_LINE1, TURN13_SWITCHIN_SENTOUT_LINE2, turn13SwitchinSentOutTextVisibleChars(t));
+    drawMessageTextLines(
+      fb,
+      switchinSentOutLine1(trainerPresentation),
+      TURN13_SWITCHIN_SENTOUT_LINE2,
+      turn13SwitchinSentOutTextVisibleChars(t, trainerPresentation),
+    );
     return;
   }
   // TEXT_CLEAR_TICK <= t < MENU_REDRAW_TICK: blank hold, mirrors
@@ -12210,7 +12287,13 @@ function turn13KickoffBounceTick(t: number, pressTick: number): number {
  * oracle-confirmed safe boundary" convention `drawTurn3EndeavorText`'s own
  * doc already established.
  */
-function drawTurn13FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState, koDismissTick: number | null): void {
+function drawTurn13FightSubmenuWindow(
+  fb: Uint8Array,
+  t: number,
+  sm: FightSubmenuState,
+  koDismissTick: number | null,
+  trainerPresentation?: FactoryTrainerPresentation,
+): void {
   if (sm.openElapsed === null) {
     drawTurn12TurnEndSettledMenu(fb, t);
     return;
@@ -12234,7 +12317,13 @@ function drawTurn13FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmen
     const pressTick = TICK0 + sm.confirmElapsed;
     const textStart = turn13SandAttackTextStartTick(pressTick);
     if (t >= textStart) {
-      drawTurn13SandAttackWindow(fb, t, pressTick, koDismissTick);
+      drawTurn13SandAttackWindow(
+        fb,
+        t,
+        pressTick,
+        koDismissTick,
+        trainerPresentation,
+      );
       return;
     }
   }
@@ -12512,9 +12601,21 @@ function drawTurn13SandAttackDirt(fb: Uint8Array, t: number, pressTick: number):
  * `null` there, so the settled kickoff-text baseline already renders it
  * correctly by construction.
  */
-function drawTurn13SandAttackWindow(fb: Uint8Array, t: number, pressTick: number, koDismissTick: number | null): void {
+function drawTurn13SandAttackWindow(
+  fb: Uint8Array,
+  t: number,
+  pressTick: number,
+  koDismissTick: number | null,
+  trainerPresentation?: FactoryTrainerPresentation,
+): void {
   if (t >= dragonBreathTextStartTick(TURN13_DRAGONBREATH_PRESS_TICK)) {
-    drawTurn13DragonBreathWindow(fb, t, pressTick, koDismissTick);
+    drawTurn13DragonBreathWindow(
+      fb,
+      t,
+      pressTick,
+      koDismissTick,
+      trainerPresentation,
+    );
     return;
   }
   const frozenBounceTick = turn13KickoffBounceTick(t, pressTick);
@@ -12581,10 +12682,23 @@ export const TURN13_HEALTHBOX_VANISH_TICK = faintHealthboxVanishTick(TURN13_FAIN
 /** Same `pressTick+318`-relative anchor `drawDragonBreathScene` (turn 2's own DRAGON_BREATH) uses for Grovyle's own target hit-flash (`rockSlideMonBlinkInvisible`/`rockSlideHealthboxWobbleY2`, both already generic, reused verbatim - see `DRAGONBREATH_HIT_FLASH_OFFSET`'s own module doc) - re-anchored to `TURN13_DRAGONBREATH_PRESS_TICK`. Oracle-pixel-confirmed this session: omitting this (drawing Pidgeotto solid throughout) regressed a ~1085px diff at 15855-15863, isolated by `npm run compare` to exactly Pidgeotto's own on-field sprite - the SAME blink window turn 2's own target already exercises, not a new mechanism. */
 const TURN13_HIT_FLASH_PRESS_TICK = TURN13_DRAGONBREATH_PRESS_TICK + DRAGONBREATH_HIT_FLASH_OFFSET;
 
-function drawTurn13DragonBreathWindow(fb: Uint8Array, t: number, sandAttackPressTick: number, koDismissTick: number | null): void {
+function drawTurn13DragonBreathWindow(
+  fb: Uint8Array,
+  t: number,
+  sandAttackPressTick: number,
+  koDismissTick: number | null,
+  trainerPresentation?: FactoryTrainerPresentation,
+): void {
   const dbPressTick = TURN13_DRAGONBREATH_PRESS_TICK;
   if (t >= turn13FaintedTextStartTick(dbPressTick)) {
-    drawTurn13FaintedWindow(fb, t, dbPressTick, sandAttackPressTick, koDismissTick);
+    drawTurn13FaintedWindow(
+      fb,
+      t,
+      dbPressTick,
+      sandAttackPressTick,
+      koDismissTick,
+      trainerPresentation,
+    );
     return;
   }
   const frozenBounceTick = turn13KickoffBounceTick(t, sandAttackPressTick);
@@ -12681,10 +12795,24 @@ export function turn13KoDismissEligible(t: number): boolean {
  * "committed trace's own button always lands at the right real-world tick"
  * convention every other post-press window in this file already relies on.
  */
-function drawTurn13FaintedWindow(fb: Uint8Array, t: number, pressTick: number, sandAttackPressTick: number, koDismissTick: number | null = null): void {
+function drawTurn13FaintedWindow(
+  fb: Uint8Array,
+  t: number,
+  pressTick: number,
+  sandAttackPressTick: number,
+  koDismissTick: number | null = null,
+  trainerPresentation?: FactoryTrainerPresentation,
+): void {
   const frozenBounceTick = turn13KickoffBounceTick(t, sandAttackPressTick);
   if (koDismissTick !== null && t >= TURN13_ICONBAR_CREATE_TICK) {
-    drawTurn13SwitchinWindow(fb, t, frozenBounceTick, pressTick + TURN13_FAINTED_CURSOR_START_DELAY, koDismissTick);
+    drawTurn13SwitchinWindow(
+      fb,
+      t,
+      frozenBounceTick,
+      pressTick + TURN13_FAINTED_CURSOR_START_DELAY,
+      koDismissTick,
+      trainerPresentation,
+    );
     return;
   }
   drawTurn13FieldBase(fb, t, frozenBounceTick, undefined, undefined, 0, false, 0, TURN13_PIDGEOTTO_FAINT_HP, { keptRows: 0, y2: TURN13_FAINT_SINK_STEPS * 8 }, false);
@@ -12779,7 +12907,11 @@ function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, b
  * literals (`ROCK_SLIDE_LINE1`/`LINE2` themselves stay defined and in use by
  * every OTHER turn's own ROCK_SLIDE window elsewhere in this file).
  */
-function drawTurn5RockSlideWindow(fb: Uint8Array, t: number): void {
+function drawTurn5RockSlideWindow(
+  fb: Uint8Array,
+  t: number,
+  trainerPresentation?: FactoryTrainerPresentation,
+): void {
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
   drawTurn6FieldBase(fb, t);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
@@ -12790,7 +12922,12 @@ function drawTurn5RockSlideWindow(fb: Uint8Array, t: number): void {
   }
   if (t < TURN5_SITRUS_HEAL_TEXT_START_TICK) {
     if (t >= SWITCHIN_SENTOUT_TEXT_START_TICK) {
-      drawMessageTextLines(fb, SWITCHIN_SENTOUT_LINE1, SWITCHIN_SENTOUT_LINE2, switchinSentOutTextVisibleChars(t));
+      drawMessageTextLines(
+        fb,
+        switchinSentOutLine1(trainerPresentation),
+        SWITCHIN_SENTOUT_LINE2,
+        switchinSentOutTextVisibleChars(t, trainerPresentation),
+      );
       return;
     }
     drawMessageTextLines(fb, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, turn5FaintedTextVisibleChars(t, pressTick));
@@ -13020,14 +13157,21 @@ function drawRockSprite(fb: Uint8Array, animNum: 0 | 1 | 2, centerX: number, cen
 }
 
 /** The settled (post-tick-1227) composite: static bg + both trainer pics + the window frame - byte-exact against the oracle (see module doc point 1). */
-function introTrainer(encounter: BattleSceneState["encounter"]): TrainerPicAsset {
-  return battleIntroEncounterParams(encounter).trainer === "fisherman"
+function introTrainer(
+  encounter: BattleSceneState["encounter"],
+  trainerPresentation?: FactoryTrainerPresentation,
+): TrainerPicAsset {
+  return battleIntroEncounterParams(encounter, trainerPresentation).trainer === "fisherman"
     ? fisherman
     : bugCatcher;
 }
 
-function drawSettledScene(fb: Uint8Array, encounter: BattleSceneState["encounter"] = "destin"): void {
-  const trainer = introTrainer(encounter);
+function drawSettledScene(
+  fb: Uint8Array,
+  encounter: BattleSceneState["encounter"] = "destin",
+  trainerPresentation?: FactoryTrainerPresentation,
+): void {
+  const trainer = introTrainer(encounter, trainerPresentation);
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
   drawSpriteSheet(fb, trainer.tileset, trainer.palette, OPPONENT_CORNER.x, OPPONENT_CORNER.y);
   drawSpriteSheet(fb, brendanSettledTileset, brendan.palette, PLAYER_CORNER.x, PLAYER_CORNER.y);
@@ -13222,8 +13366,9 @@ function drawSlideScene(
   t: number,
   win: { top: number; bottom: number },
   encounter: BattleSceneState["encounter"] = "destin",
+  trainerPresentation?: FactoryTrainerPresentation,
 ): void {
-  const trainer = introTrainer(encounter);
+  const trainer = introTrainer(encounter, trainerPresentation);
   const { eva, evb } = evaEvb(t);
   const bg1Shift = bg1X(t);
   const objShift = scanlineShiftMagnitude(t);
@@ -14139,12 +14284,14 @@ export function applyTurn17PostwinFastFade(
   const trainerLoss = turn17TrainerLossState(
     state.elapsed,
     outcomeDismissElapsed,
+    state.trainerPresentation,
   );
   if (trainerLoss !== null) {
+    const trainerPic = introTrainer("destin", state.trainerPresentation);
     drawSpriteSheet(
       objMask,
-      bugCatcher.tileset,
-      bugCatcher.palette,
+      trainerPic.tileset,
+      trainerPic.palette,
       trainerLoss.trainerX,
       OPPONENT_CORNER.y,
     );
@@ -14450,6 +14597,19 @@ export const TURN17_LOSS_TEXT_TOTAL =
 /** Final glyph is visible at +78; PAUSE_UNTIL_PRESS enters WAIT one callback later. */
 export const TURN17_LOSS_INPUT_READY_DELAY = 79;
 
+function turn17OutcomeLine2(
+  trainerPresentation?: FactoryTrainerPresentation,
+): string {
+  const trainer = presentationForEncounter("destin", trainerPresentation);
+  return `${trainer.className} ${trainer.name}!`;
+}
+
+function turn17LossLines(
+  trainerPresentation?: FactoryTrainerPresentation,
+): readonly [string, string] {
+  return presentationForEncounter("destin", trainerPresentation).speechLose;
+}
+
 export interface Turn17PostDismissState {
   age: number;
   battleOutcome: 0 | 1;
@@ -14492,6 +14652,7 @@ export function turn17OutcomeMessageState(
   sceneElapsed: number,
   faintDismissElapsed: number | null,
   outcomeDismissElapsed: number | null,
+  trainerPresentation?: FactoryTrainerPresentation,
 ): Turn17OutcomeMessageState | null {
   const postDismiss = turn17PostDismissState(sceneElapsed, faintDismissElapsed);
   if (postDismiss === null || !postDismiss.firstOutcomeRender) return null;
@@ -14500,14 +14661,17 @@ export function turn17OutcomeMessageState(
   const displayAge = dismissAge === null
     ? postDismiss.age
     : Math.min(postDismiss.age, dismissAge);
+  const textTotal =
+    TURN17_OUTCOME_LINE1.length + turn17OutcomeLine2(trainerPresentation).length;
+  const inputReadyDelay = TURN17_FIRST_OUTCOME_RENDER_DELAY + textTotal - 1;
   return {
     age: postDismiss.age,
     displayAge,
     visibleChars: Math.min(
-      TURN17_OUTCOME_TEXT_TOTAL,
+      textTotal,
       displayAge - TURN17_FIRST_OUTCOME_RENDER_DELAY + 1,
     ),
-    inputReady: displayAge >= TURN17_OUTCOME_INPUT_READY_DELAY,
+    inputReady: displayAge >= inputReadyDelay,
     trainerTransitionReady:
       outcomeDismissElapsed !== null
       && sceneElapsed - outcomeDismissElapsed >= TURN17_FIRST_TRAINER_RENDER_DELAY,
@@ -14518,11 +14682,13 @@ export function turn17OutcomeMessageState(
 export function turn17OutcomeDismissEligible(
   sceneElapsed: number,
   faintDismissElapsed: number | null,
+  trainerPresentation?: FactoryTrainerPresentation,
 ): boolean {
   return turn17OutcomeMessageState(
     sceneElapsed,
     faintDismissElapsed,
     null,
+    trainerPresentation,
   )?.inputReady ?? false;
 }
 
@@ -14545,13 +14711,16 @@ export interface Turn17TrainerLossState {
 export function turn17TrainerLossState(
   sceneElapsed: number,
   outcomeDismissElapsed: number | null,
+  trainerPresentation?: FactoryTrainerPresentation,
 ): Turn17TrainerLossState | null {
   if (outcomeDismissElapsed === null) return null;
   const age = sceneElapsed - outcomeDismissElapsed;
   if (age < TURN17_FIRST_TRAINER_RENDER_DELAY) return null;
   const slideAge = Math.min(age, TURN17_TRAINER_SLIDE_SETTLE_DELAY);
+  const [line1, line2] = turn17LossLines(trainerPresentation);
+  const textTotal = line1.length + line2.length;
   const visibleChars = Math.max(0, Math.min(
-    TURN17_LOSS_TEXT_TOTAL,
+    textTotal,
     age - TURN17_LOSS_TEXT_START_DELAY + 1,
   ));
   return {
@@ -14559,7 +14728,7 @@ export function turn17TrainerLossState(
     trainerX:
       176 + 2 * (TURN17_TRAINER_SLIDE_SETTLE_DELAY - slideAge),
     visibleChars,
-    inputReady: age >= TURN17_LOSS_INPUT_READY_DELAY,
+    inputReady: age >= TURN17_LOSS_TEXT_START_DELAY + textTotal,
     cursorVisible: false,
   };
 }
@@ -14568,10 +14737,12 @@ export function turn17TrainerLossState(
 export function turn17LossDismissEligible(
   sceneElapsed: number,
   outcomeDismissElapsed: number | null,
+  trainerPresentation?: FactoryTrainerPresentation,
 ): boolean {
   return turn17TrainerLossState(
     sceneElapsed,
     outcomeDismissElapsed,
+    trainerPresentation,
   )?.inputReady ?? false;
 }
 
@@ -14932,6 +15103,7 @@ function drawTurn16FightSubmenuWindow(
   turn17MenuRedrawElapsed: number | null,
   turn17KoDismissElapsed: number | null,
   turn17OutcomeDismissElapsed: number | null,
+  trainerPresentation?: FactoryTrainerPresentation,
 ): void {
   if (sm.openElapsed === null) return;
   const openTick = TICK0 + sm.openElapsed;
@@ -15006,17 +15178,27 @@ function drawTurn16FightSubmenuWindow(
         t - TICK0 + 1,
         turn17KoDismissElapsed,
         turn17OutcomeDismissElapsed,
+        trainerPresentation,
       );
       if (outcome !== null) {
+        const outcomeLine2 = turn17OutcomeLine2(trainerPresentation);
+        const outcomeCursorStart =
+          TURN17_FIRST_OUTCOME_RENDER_DELAY
+          + TURN17_OUTCOME_LINE1.length
+          + outcomeLine2.length
+          + 1;
+        const [lossLine1, lossLine2] = turn17LossLines(trainerPresentation);
         const trainerLoss = turn17TrainerLossState(
           t - TICK0 + 1,
           turn17OutcomeDismissElapsed,
+          trainerPresentation,
         );
         if (trainerLoss !== null) {
+          const trainerPic = introTrainer("destin", trainerPresentation);
           drawSpriteSheet(
             fb,
-            bugCatcher.tileset,
-            bugCatcher.palette,
+            trainerPic.tileset,
+            trainerPic.palette,
             trainerLoss.trainerX,
             OPPONENT_CORNER.y,
           );
@@ -15027,24 +15209,24 @@ function drawTurn16FightSubmenuWindow(
             drawMessageTextLines(
               fb,
               TURN17_OUTCOME_LINE1,
-              TURN17_OUTCOME_LINE2,
+              outcomeLine2,
               outcome.visibleChars,
             );
             const cursor = cursorState(
               outcome.displayAge,
-              TURN17_OUTCOME_CURSOR_START_DELAY,
+              outcomeCursorStart,
             );
             drawCursor(
               fb,
               cursor.yOffset,
-              LINE2_ORIGIN.x + measureText(font, charmap, TURN17_OUTCOME_LINE2),
+              LINE2_ORIGIN.x + measureText(font, charmap, outcomeLine2),
             );
             return;
           }
           drawMessageTextLines(
             fb,
-            TURN17_LOSS_LINE1,
-            TURN17_LOSS_LINE2,
+            lossLine1,
+            lossLine2,
             trainerLoss.visibleChars,
           );
           return;
@@ -15052,18 +15234,18 @@ function drawTurn16FightSubmenuWindow(
         drawMessageTextLines(
           fb,
           TURN17_OUTCOME_LINE1,
-          TURN17_OUTCOME_LINE2,
+          outcomeLine2,
           outcome.visibleChars,
         );
-        if (outcome.displayAge >= TURN17_OUTCOME_CURSOR_START_DELAY) {
+        if (outcome.displayAge >= outcomeCursorStart) {
           const cursor = cursorState(
             outcome.displayAge,
-            TURN17_OUTCOME_CURSOR_START_DELAY,
+            outcomeCursorStart,
           );
           drawCursor(
             fb,
             cursor.yOffset,
-            LINE2_ORIGIN.x + measureText(font, charmap, TURN17_OUTCOME_LINE2),
+            LINE2_ORIGIN.x + measureText(font, charmap, outcomeLine2),
           );
         }
         return;
@@ -15266,6 +15448,7 @@ function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, pa
         state.turn17MenuRedrawElapsed ?? null,
         state.turn17KoDismissElapsed ?? null,
         state.turn17OutcomeDismissElapsed ?? null,
+        state.trainerPresentation,
       );
       return true;
     }
@@ -15330,7 +15513,7 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
   const win = windowRange(t);
   if (!win) return; // solid black
   if (t < SLIDE_END_TICK) {
-    drawSlideScene(fb, t, win, state.encounter);
+    drawSlideScene(fb, t, win, state.encounter, state.trainerPresentation);
     return;
   }
   const pressTick = state.sendOutPressElapsed === null ? null : TICK0 + state.sendOutPressElapsed;
@@ -15338,26 +15521,46 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
     // Idle "would like to battle!♥" hold - unaffected by the press until its
     // own registration lag elapses (§7.2: screen stays frozen on whatever
     // the idle cycle shows through pressTick+4, oracle-confirmed unbroken).
-    const params = battleIntroEncounterParams(state.encounter);
-    drawSettledScene(fb, state.encounter);
+    const params = battleIntroEncounterParams(
+      state.encounter,
+      state.trainerPresentation,
+    );
+    drawSettledScene(fb, state.encounter, state.trainerPresentation);
     drawBallIcons(fb, t);
-    drawMessageText(fb, textVisibleChars(t, state.encounter), state.encounter);
+    drawMessageText(
+      fb,
+      textVisibleChars(t, state.encounter, state.trainerPresentation),
+      state.encounter,
+      state.trainerPresentation,
+    );
     const cursor = cursorState(t, params.cursorStartTick);
     if (cursor.visible) drawCursor(fb, cursor.yOffset, params.cursorX);
     return;
   }
-  const handoffTick = sendOutHandoffTick(pressTick, state.encounter);
+  const handoffTick = sendOutHandoffTick(
+    pressTick,
+    state.encounter,
+    state.trainerPresentation,
+  );
   if (t < handoffTick) {
     // §7.3: message box cleared, "BUG CATCHER DESTIN sent\nout GROVYLE!"
     // printing - ball icons still at their settled position, no cursor.
-    const params = battleSendOutEncounterParams(state.encounter);
-    drawSettledScene(fb, state.encounter);
+    const params = battleSendOutEncounterParams(
+      state.encounter,
+      state.trainerPresentation,
+    );
+    drawSettledScene(fb, state.encounter, state.trainerPresentation);
     drawBallIcons(fb, t);
     drawMessageTextLines(
       fb,
       params.line1,
       params.line2,
-      sendOutTextVisibleChars(t, pressTick, state.encounter),
+      sendOutTextVisibleChars(
+        t,
+        pressTick,
+        state.encounter,
+        state.trainerPresentation,
+      ),
     );
     return;
   }
@@ -15400,6 +15603,7 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
       state.turn13Resolved,
       state.turn13KoDismissElapsed === null ? null : TICK0 + state.turn13KoDismissElapsed,
       state.turn14Resolved,
+      state.trainerPresentation,
     );
     return;
   }

@@ -99,5 +99,25 @@ export function getFactoryTrainerPresentationByName(
   return getFactoryTrainerPresentation(trainer.id);
 }
 
+/**
+ * Generated round opponents carry their source trainer id in their stable
+ * `factory-trainer-N` identity. Simplified fixture opponents deliberately
+ * return null rather than being mistaken for generated semantic state.
+ */
+export function factoryTrainerPresentationForOpponent(
+  opponent: Readonly<{ id: string; trainerName: string }> | undefined,
+): FactoryTrainerPresentation | null {
+  if (opponent === undefined) return null;
+  const match = /^factory-trainer-(\d+)$/.exec(opponent.id);
+  if (match === null) return null;
+  const presentation = getFactoryTrainerPresentation(Number(match[1]));
+  if (presentation.name !== opponent.trainerName) {
+    throw new Error(
+      `generated trainer identity mismatch: ${opponent.id} is ${presentation.name}, got ${opponent.trainerName}`,
+    );
+  }
+  return presentation;
+}
+
 export const CANONICAL_DESTIN_PRESENTATION = getFactoryTrainerPresentation(50);
 export const CANONICAL_JENSON_PRESENTATION = getFactoryTrainerPresentation(58);
