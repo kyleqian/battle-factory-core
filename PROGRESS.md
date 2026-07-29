@@ -28,9 +28,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   durable full-turn rules/request constructor as staged fixtures. A
   Magcargo-299 Quick Claw test pins A=50515 misses, B=12646 procs, and the
   slower holder acts first; RNG cursor is exactly two calls at publication.
-- **Next:** rung 3 owns the pre-first-turn hook orchestrator and equal-speed
-  tie receipt/implementation; then rung 4 drives one fresh 3v3 battle to a
-  real terminal boundary.
+- **Supervisor fold (same round, side merge):** rung 7 landed (`2c7091e0`)
+  — `factoryRentalGeneration.ts` ports GenerateInitialRentalMons
+  (range/rank selection, duplicate set/species/item retries with exact draw
+  consumption, instance-parameter derivation) over the generated catalog
+  with an explicit draw ledger, feeding the rung-5 adapter; 7 focused
+  tests. Union green **455 files / 4902 tests**, census byte-identical
+  no-op.
+- **Next:** rung 3 (entry-hook orchestrator, main — retires the hook-loop
+  barrier; the equal-speed tie barrier stays receipt-gated) + rung 8
+  (opponent party generator, side) launch this round; then rung 4 (fresh
+  3v3 battle to real terminal) and rung 6 (production AI turn driver).
 - **Notes:** source citations in scout §3.1/§3.3 and receipt §4.1 were
   re-read and agree with the implementation. Two deliberate, reachable
   `unsupported-branch` additions are pinned in `factoryBattleStart.ts`:
