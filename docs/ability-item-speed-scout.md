@@ -156,6 +156,33 @@ this session — none pulled from memory)
 - **Bonus, outside the literal audit's scope:** 3 numeric-ID sites
   (MINUS, GUTS-again, MARVEL_SCALE) with zero string trace at all.
 
+### A5. Current-tree prediction before the recovery-pass regeneration
+
+Re-derived on 2026-07-28 after the damage and turn-order identifier-constant
+changes. The §A3 predicate should recover exactly these comment-stripped
+string-literal occurrences:
+
+- **Rules scope (11):** `battleScriptActionAdmission.ts` GUTS (1);
+  `battleScriptHealpartystatusOpcode.ts` SOUNDPROOF (1);
+  `battleScriptHitChainOpcode.ts` EVASION_UP (1);
+  `battleScriptTrysetfutureattackOpcode.ts` GUTS (1); and `damageCalc.ts`
+  COMPOUND_EYES, SAND_VEIL, HUSTLE, EVASION_UP, SCOPE_LENS, LUCKY_PUNCH,
+  and STICK (7).
+- **AI scope (8):** `factoryAiTryToFaint.ts` LEVITATE (2);
+  `factoryAiCheckBadMove.ts` ABILITY_NONE (2) and SOUNDPROOF (1); and
+  `factoryAiCheckViability.ts` SWIFT_SWIM (2) and RAIN_DISH (1).
+- **Structural/presentation, out-of-scope member (1):**
+  `factorySwapPresentation.ts` ABILITY_NONE (1). No table or fixture literal
+  satisfies the narrow predicate.
+
+Thus the exact reference-column prediction is LEVITATE +2, ABILITY_NONE +3,
+SOUNDPROOF +2, GUTS +2, SWIFT_SWIM +2, RAIN_DISH +1, COMPOUND_EYES +1,
+SAND_VEIL +1, HUSTLE +1; EVASION_UP +2, SCOPE_LENS +1, LUCKY_PUNCH +1,
+and STICK +1. Only COMPOUND_EYES should change status:
+abilities **57/70, 977/1103 → 58/70, 981/1103** (`977 + 4 = 981`);
+hold effects remain **42/42, 850/850**. Any other recovered site or headline
+change is a stop-and-explain discrepancy.
+
 ## Part B — speed/turn-order prep pack
 
 ### B1. Ground truth: `GetWhoStrikesFirst` (`reference/pokeemerald/src/

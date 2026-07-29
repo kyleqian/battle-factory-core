@@ -6,9 +6,9 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 
 ## Headline
 
-- **Abilities: 57/70 members engine-referenced** (weighted by L50 set-carriers: 977/1103); 4 zero-carrier, 3 without battle hooks (out-of-battle only).
+- **Abilities: 58/70 members engine-referenced** (weighted by L50 set-carriers: 981/1103); 4 zero-carrier, 3 without battle hooks (out-of-battle only).
 - **Hold effects: 42/42 members engine-referenced** (weighted by L50 set-carriers: 850/850); 21 zero-carrier, 3 without battle hooks.
-- All 15 ground-truth validation checks passed.
+- All 16 ground-truth validation checks passed.
 
 ## Ability worklist (ranked: unreferenced first, then by L50 carriers)
 
@@ -22,20 +22,19 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_FLAME_BODY | unreferenced | 8 (5) | 8 | ON_DAMAGE | 0 | 0 | 0 |
 | ABILITY_PICKUP | unreferenced | 7 (6) | 7 | — | 2 | 0 | 0 |
 | ABILITY_ARENA_TRAP | unreferenced | 6 (0) | 6 | — | 2 | 3 | 0 |
-| ABILITY_COMPOUND_EYES | unreferenced | 4 (3) | 4 | — | 2 | 0 | 0 |
 | ABILITY_MAGNET_PULL | unreferenced | 4 (0) | 4 | — | 2 | 3 | 0 |
 | ABILITY_SHADOW_TAG | unreferenced | 3 (3) | 3 | — | 2 | 3 | 0 |
 | ABILITY_ROUGH_SKIN | unreferenced | 3 (3) | 3 | ON_DAMAGE | 0 | 0 | 0 |
 | ABILITY_COLOR_CHANGE | unreferenced | 2 (2) | 2 | ON_DAMAGE | 0 | 0 | 0 |
-| ABILITY_LEVITATE | engine-referenced | 54 (54) | 54 | — | 10 | 0 | 9 |
+| ABILITY_LEVITATE | engine-referenced | 54 (54) | 54 | — | 10 | 0 | 11 |
 | ABILITY_STURDY | engine-referenced | 42 (13) | 42 | — | 3 | 0 | 3 |
 | ABILITY_ROCK_HEAD | engine-referenced | 40 (3) | 40 | — | 1 | 0 | 3 |
 | ABILITY_INTIMIDATE | engine-referenced | 38 (28) | 38 | ON_SWITCHIN, INTIMIDATE1, INTIMIDATE2 | 0 | 0 | 2 |
 | ABILITY_CHLOROPHYLL | engine-referenced | 38 (32) | 38 | — | 2 | 0 | 2 |
 | ABILITY_THICK_FAT | engine-referenced | 36 (16) | 36 | — | 1 | 0 | 2 |
-| ABILITY_GUTS | engine-referenced | 36 (24) | 36 | — | 2 | 0 | 3 |
+| ABILITY_GUTS | engine-referenced | 36 (24) | 36 | — | 2 | 0 | 5 |
 | ABILITY_CLEAR_BODY | engine-referenced | 34 (29) | 34 | — | 3 | 0 | 12 |
-| ABILITY_SWIFT_SWIM | engine-referenced | 34 (13) | 34 | — | 2 | 0 | 2 |
+| ABILITY_SWIFT_SWIM | engine-referenced | 34 (13) | 34 | — | 2 | 0 | 4 |
 | ABILITY_PRESSURE | engine-referenced | 34 (30) | 46 | — | 6 | 0 | 11 |
 | ABILITY_OBLIVIOUS | engine-referenced | 33 (16) | 33 | ON_DAMAGE, IMMUNITY | 3 | 0 | 3 |
 | ABILITY_SYNCHRONIZE | engine-referenced | 30 (8) | 30 | SYNCHRONIZE, ATK_SYNCHRONIZE | 0 | 0 | 2 |
@@ -55,9 +54,9 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_TRACE | engine-referenced | 16 (6) | 16 | ON_SWITCHIN, TRACE | 0 | 0 | 2 |
 | ABILITY_INSOMNIA | engine-referenced | 15 (10) | 15 | IMMUNITY | 5 | 0 | 9 |
 | ABILITY_LIGHTNING_ROD | engine-referenced | 15 (0) | 15 | — | 5 | 0 | 3 |
-| ABILITY_SOUNDPROOF | engine-referenced | 15 (10) | 15 | MOVES_BLOCK | 8 | 0 | 22 |
+| ABILITY_SOUNDPROOF | engine-referenced | 15 (10) | 15 | MOVES_BLOCK | 8 | 0 | 24 |
 | ABILITY_SHED_SKIN | engine-referenced | 14 (11) | 14 | ENDTURN | 0 | 0 | 2 |
-| ABILITY_SAND_VEIL | engine-referenced | 13 (6) | 13 | — | 2 | 0 | 2 |
+| ABILITY_SAND_VEIL | engine-referenced | 13 (6) | 13 | — | 2 | 0 | 3 |
 | ABILITY_HYPER_CUTTER | engine-referenced | 12 (2) | 12 | — | 3 | 0 | 9 |
 | ABILITY_SERENE_GRACE | engine-referenced | 11 (0) | 11 | — | 1 | 0 | 2 |
 | ABILITY_IMMUNITY | engine-referenced | 10 (2) | 10 | IMMUNITY | 10 | 0 | 10 |
@@ -68,14 +67,15 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_LIQUID_OOZE | engine-referenced | 8 (0) | 8 | — | 2 | 0 | 3 |
 | ABILITY_SUCTION_CUPS | engine-referenced | 7 (7) | 7 | — | 1 | 0 | 3 |
 | ABILITY_SHIELD_DUST | engine-referenced | 6 (6) | 6 | — | 2 | 0 | 4 |
-| ABILITY_RAIN_DISH | engine-referenced | 6 (0) | 6 | ENDTURN | 0 | 0 | 2 |
-| ABILITY_HUSTLE | engine-referenced | 6 (1) | 6 | — | 2 | 0 | 2 |
+| ABILITY_RAIN_DISH | engine-referenced | 6 (0) | 6 | ENDTURN | 0 | 0 | 3 |
+| ABILITY_HUSTLE | engine-referenced | 6 (1) | 6 | — | 2 | 0 | 3 |
 | ABILITY_VITAL_SPIRIT | engine-referenced | 6 (5) | 6 | IMMUNITY | 5 | 0 | 9 |
 | ABILITY_LIMBER | engine-referenced | 5 (5) | 5 | IMMUNITY | 4 | 0 | 6 |
 | ABILITY_CLOUD_NINE | engine-referenced | 5 (0) | 5 | ON_SWITCHIN | 1 | 0 | 18 |
 | ABILITY_MAGMA_ARMOR | engine-referenced | 5 (2) | 5 | IMMUNITY | 1 | 0 | 2 |
 | ABILITY_TRUANT | engine-referenced | 5 (5) | 5 | ENDTURN | 2 | 0 | 7 |
 | ABILITY_PURE_POWER | engine-referenced | 5 (5) | 5 | — | 1 | 0 | 2 |
+| ABILITY_COMPOUND_EYES | engine-referenced | 4 (3) | 4 | — | 2 | 0 | 1 |
 | ABILITY_HUGE_POWER | engine-referenced | 4 (0) | 4 | — | 1 | 0 | 2 |
 | ABILITY_MARVEL_SCALE | engine-referenced | 4 (4) | 4 | — | 1 | 0 | 2 |
 | ABILITY_SPEED_BOOST | engine-referenced | 3 (2) | 3 | ENDTURN | 0 | 0 | 4 |
@@ -96,12 +96,12 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 
 | Hold effect | Status | L50 carriers | All | Frontier items | Delegate cases | Inline rules | AI | Engine refs |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| HOLD_EFFECT_EVASION_UP | engine-referenced | 120 | 125 | BRIGHT_POWDER, LAX_INCENSE | — | 1 | 0 | 2 |
+| HOLD_EFFECT_EVASION_UP | engine-referenced | 120 | 125 | BRIGHT_POWDER, LAX_INCENSE | — | 1 | 0 | 4 |
 | HOLD_EFFECT_FOCUS_BAND | engine-referenced | 78 | 80 | FOCUS_BAND | — | 5 | 0 | 5 |
 | HOLD_EFFECT_CURE_STATUS | engine-referenced | 75 | 80 | LUM_BERRY | NORMAL, MOVE_END | 0 | 0 | 2 |
 | HOLD_EFFECT_QUICK_CLAW | engine-referenced | 75 | 80 | QUICK_CLAW | — | 2 | 0 | 2 |
 | HOLD_EFFECT_LEFTOVERS | engine-referenced | 69 | 70 | LEFTOVERS | NORMAL | 0 | 0 | 2 |
-| HOLD_EFFECT_SCOPE_LENS | engine-referenced | 54 | 55 | SCOPE_LENS | — | 1 | 0 | 2 |
+| HOLD_EFFECT_SCOPE_LENS | engine-referenced | 54 | 55 | SCOPE_LENS | — | 1 | 0 | 3 |
 | HOLD_EFFECT_RESTORE_HP | engine-referenced | 45 | 45 | SITRUS_BERRY, ORAN_BERRY, BERRY_JUICE | NORMAL | 0 | 0 | 2 |
 | HOLD_EFFECT_CURE_SLP | engine-referenced | 43 | 50 | CHESTO_BERRY | NORMAL, MOVE_END | 0 | 0 | 2 |
 | HOLD_EFFECT_SHELL_BELL | engine-referenced | 43 | 46 | SHELL_BELL | KINGSROCK_SHELLBELL | 0 | 0 | 2 |
@@ -137,7 +137,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | HOLD_EFFECT_LIGHT_BALL | engine-referenced | 1 | 1 | LIGHT_BALL | — | 1 | 0 | 2 |
 | HOLD_EFFECT_DARK_POWER | engine-referenced | 1 | 1 | BLACK_GLASSES | — | 1 | 0 | 2 |
 | HOLD_EFFECT_METAL_POWDER | engine-referenced | 1 | 1 | METAL_POWDER | — | 1 | 0 | 2 |
-| HOLD_EFFECT_STICK | engine-referenced | 1 | 1 | STICK | — | 1 | 0 | 2 |
+| HOLD_EFFECT_STICK | engine-referenced | 1 | 1 | STICK | — | 1 | 0 | 3 |
 | HOLD_EFFECT_CONFUSE_SPICY | zero-carrier | 0 | 0 | FIGY_BERRY | NORMAL | 0 | 0 | 2 |
 | HOLD_EFFECT_CONFUSE_DRY | zero-carrier | 0 | 0 | WIKI_BERRY | NORMAL | 0 | 0 | 2 |
 | HOLD_EFFECT_CONFUSE_SWEET | zero-carrier | 0 | 0 | MAGO_BERRY | NORMAL | 0 | 0 | 2 |
@@ -158,7 +158,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | HOLD_EFFECT_LUCKY_EGG | zero-carrier | 0 | 0 | — | — | 1 | 0 | 0 |
 | HOLD_EFFECT_GHOST_POWER | zero-carrier | 0 | 0 | SPELL_TAG | — | 1 | 0 | 2 |
 | HOLD_EFFECT_DRAGON_POWER | zero-carrier | 0 | 0 | DRAGON_FANG | — | 1 | 0 | 2 |
-| HOLD_EFFECT_LUCKY_PUNCH | zero-carrier | 0 | 0 | LUCKY_PUNCH | — | 1 | 0 | 2 |
+| HOLD_EFFECT_LUCKY_PUNCH | zero-carrier | 0 | 0 | LUCKY_PUNCH | — | 1 | 0 | 3 |
 | HOLD_EFFECT_REPEL | no-battle-hooks | 0 | 0 | — | — | 0 | 0 | 0 |
 | HOLD_EFFECT_DRAGON_SCALE | no-battle-hooks | 0 | 0 | DRAGON_SCALE | — | 0 | 0 | 0 |
 | HOLD_EFFECT_UP_GRADE | no-battle-hooks | 0 | 0 | — | — | 0 | 0 | 0 |
@@ -197,6 +197,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 - species-stats has 411 real species
 - every set joins to a species (2 in-universe ability slots, slot 0 real) and a held-item row
 - every held-item row's holdEffect is in the universe
+- quoted live comparison/branch recovery sites match the pinned exact set
 - engine jumpifability live-dispatch sets resolve entirely inside the ability universe
 - every engine ABILITY_/HOLD_EFFECT_ spelling resolves to a member, an alias, or pinned infra
 - hold-effect L50 carrier counts partition the 850 sets (with HOLD_EFFECT_NONE's share)
@@ -204,8 +205,8 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 
 ## Caveats (read before trusting a number here)
 
-- **Reference presence, not semantic verification.** A member counts as engine-referenced if any production `src/engine` module names its constant as a code identifier (aliases dealiased, comments stripped, string-literal occurrences excluded — the engine's complete id<->name tables would otherwise make every ability trivially "referenced"), or if it appears in an exported quoted live-dispatch set (jumpifability/jumpifabilitypresent — the same exports the move census trusts). Rows become *done* the way move rows did: a bounded brief with staged fixtures and oracle evidence, not by this census's count moving.
-- **One-sided error direction.** The engine can implement a member through generated data, a differently-prefixed constant (`BATTLE_SCRIPT_ABILITY_*`, `ROLE_PLAY_ABILITY_*`), or a quoted-string surface this scan excludes — all undercounts (a member can look missing while partially present, never the reverse beyond "some surface exists"). The worklist's zero-reference rows are reliable; treat reference counts as leads, not verdicts.
+- **Reference presence, not semantic verification.** A member counts as engine-referenced if any production `src/engine` module names its constant as a code identifier (aliases dealiased, comments stripped, string literals excluded except for the pinned narrow same-line comparison/branch recovery pass — the engine's complete id<->name tables would otherwise make every ability trivially "referenced"), or if it appears in an exported quoted live-dispatch set (jumpifability/jumpifabilitypresent — the same exports the move census trusts). Rows become *done* the way move rows did: a bounded brief with staged fixtures and oracle evidence, not by this census's count moving.
+- **One-sided error direction.** The engine can implement a member through generated data, a differently-prefixed constant (`BATTLE_SCRIPT_ABILITY_*`, `ROLE_PLAY_ABILITY_*`), or a quoted-string surface outside the narrow recovery shape — all undercounts (a member can look missing while partially present, never the reverse beyond "some surface exists"). The worklist's zero-reference rows are reliable; treat reference counts as leads, not verdicts.
 - **Ability carriers count both slots.** A dual-ability species' set carries either slot depending on rental personality; the deterministic column counts single-ability species only (the fixture rule prefers those carriers for briefs). Carrier arithmetic is validated against the 850-set partition above.
 - **AI sites are informational for rules parity.** `battle_ai_script_commands.c` /`battle_ai_switch_items.c` sites mark where the native AI reads a member (in scope per the 2026-07-28 user decision, later milestone OK); they do not gate rules-parity rows.
 - **Out-of-battle hooks are out of census scope.** `no-battle-hooks` members (and inline sites in e.g. `src/pokemon.c` whose enclosing function is not battle-reachable) may still matter for non-battle features; this census only tracks the Level-50 singles battle surface.
