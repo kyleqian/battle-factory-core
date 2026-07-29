@@ -2,6 +2,36 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_HOWL",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal challenge-0 Level-50 set-144 LOUDRED versus ONIX Scene-ON parties pass the entire 102-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 209-310 reproduce evidence ac6bb4eebe0376d3441bc1e50ff4c33a4fe39f87dccb41483c440b9f167f93bb / raw RGB 1f19b38ed924b20fb4648adc24dea85a2be05460092df83d0d7991fa7a87a269 and opponent-front frames 209-310 reproduce evidence 1d08643804a400521689181b7d71431ad59a1c5a027498d7106e992d02b6e587 / raw RGB 83ad92a022ee5484e24c8e78b49996c5692443bc76e7aef430b2ae15cedf0eac",
+        "the source audit proves set 144 FRONTIER_MON_LOUDRED is the lowest suitable challenge-0 Level-50 carrier and pins species 371, move 336, Relaxed nature, Attack/HP spread, Focus Band, and complete legal three-Pokemon parties",
+        "the pure source-relative reducer ports ANIM_TAG_NOISE_LINE load/free, all six gRoarNoiseLineSpriteTemplate fixed-point lifecycles and frame/flip programs, AnimTask_DeepInhale's complete affine program, back/front y-offset variants, x2 shake, high-pitch cry task/audio, script waits, OAM/matrix/display latches, allocation order, and first inactive cleanup",
+        "the typed Scene-ON seam carries only resolved LOUDRED/ONIX presentation geometry and immutable Attack-stage/HP state; source-extracted Loudred front/back and NOISE_LINE art plus shared ONIX/chrome pass software task/sprite state, hardware OAM/matrices, tags/palettes/buffers, registers, audio, raw RGB, and every production framebuffer without applying Howl's stat outcome or consuming gameplay RNG",
+        "howlPortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves all 102 immutable dense source/hardware/audio/reducer/seam/framebuffer frames twice fresh in both orientations through first inactive cleanup",
+        "MOVE_ROAR remains unsupported: source audit proves its distinct ScaleMonAndRestore, SlideOffScreen, double-cry/wait tasks, monbg/splitbgprio/alpha choreography, and cleanup; it lacks independent complete legal both-orientation twice-fresh dense acceptance",
+        "no damage, stat-stage outcome, gameplay RNG, controller selection, turn order, round/facility state, animation boundary list, or unsupported barrier changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-howl-player-loudred-opponent-onix.json",
+        "tools/battle-lab/mechanic-howl-opponent-loudred-player-onix.json",
+        "tools/compare/fixtures/howl-player-loudred-opponent-onix.json",
+        "tools/compare/fixtures/howl-opponent-loudred-player-onix.json",
+        "tools/compare/howlProbe.py",
+        "tools/compare/howlPortable.ts",
+        "tools/compare/howlSourceAudit.ts",
+        "tools/compare/extractHowlAssets.ts",
+        "src/animation/assets/howl.json",
+        "src/animation/howl.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/howlEvidence.test.ts",
+        "tests/animation/howlAssets.test.ts",
+        "tests/animation/howl.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_REST",
       "status": "exact",
       "covered": [
@@ -2156,6 +2186,21 @@
     "MOVE_BIND"
   ],
   "componentTracks": [
+    {
+      "id": "noise-line-roar-effect",
+      "components": [
+        "asset:ANIM_TAG_NOISE_LINE",
+        "sprite:gRoarNoiseLineSpriteTemplate",
+        "subroutine:RoarEffect",
+        "task:AnimTask_DeepInhale",
+        "task:SoundTask_PlayCryHighPitch"
+      ],
+      "representatives": [
+        "MOVE_HOWL",
+        "MOVE_ROAR"
+      ],
+      "goal": "MOVE_HOWL independently proves its complete NOISE_LINE/RoarEffect, DeepInhale, high-pitch cry, waits and cleanup in both orientations at 102/102 source/task/sprite/OAM/matrix/tag/register/audio/raw-RGB and framebuffer frames, reproduced twice. MOVE_ROAR remains unsupported: it additionally needs ScaleMonAndRestore, SlideOffScreen, double-cry/wait tasks, monbg/splitbgprio/alpha choreography, and independent complete dense acceptance."
+    },
     {
       "id": "letter-z-rest",
       "components": [

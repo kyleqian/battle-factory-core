@@ -1,5 +1,32 @@
 # Animation coverage
 
+## MOVE_HOWL promoted exact; NOISE_LINE track bounded (2026-07-29)
+
+**Verdict:** `MOVE_HOWL` is exact. Lowest suitable challenge-0 Level-50
+carrier set **144** `FRONTIER_MON_LOUDRED` (species **371**, Howl **336**,
+Relaxed, Attack+HP, Focus Band) drives complete legal three-mon parties
+against ONIX. Both Scene-ON orientations pass the full source body through
+first inactive cleanup at **102/102** frames, twice fresh. Player-back frames
+**209–310** have evidence/raw digests
+`ac6bb4eebe0376d3441bc1e50ff4c33a4fe39f87dccb41483c440b9f167f93bb` /
+`1f19b38ed924b20fb4648adc24dea85a2be05460092df83d0d7991fa7a87a269`;
+opponent-front frames **209–310** have
+`1d08643804a400521689181b7d71431ad59a1c5a027498d7106e992d02b6e587` /
+`83ad92a022ee5484e24c8e78b49996c5692443bc76e7aef430b2ae15cedf0eac`.
+
+**Model/boundary:** the pure relative reducer, typed seam, and narrow
+compositor port NOISE_LINE load/free, all six `RoarEffect` sprites,
+`AnimTask_DeepInhale` affine/y-offset/shake behavior, high-pitch cry task and
+audio, script waits, OAM/matrix/display latches, allocation order, tagged
+source-extracted art, and cleanup. Immutable Attack stage **7** crosses the
+presentation seam only as verification input; Howl's outcome, gameplay RNG,
+damage, controller/turn/facility state, boundary list, and unsupported barriers
+are unchanged. `MOVE_ROAR` remains **unsupported** because its source body adds
+`ScaleMonAndRestore`, `SlideOffScreen`, double-cry/wait tasks,
+monbg/splitbgprio/alpha choreography, and lacks independent complete dense
+both-orientation evidence. Coverage is **85 exact / 0 partial / 0 staged /
+191 unsupported**.
+
 ## MOVE_REST promoted exact; LETTER_Z track bounded (2026-07-29)
 
 **Verdict:** `MOVE_REST` is exact. Lowest suitable challenge-0 Level-50
