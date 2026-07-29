@@ -111,11 +111,14 @@ Per entry:
 
 - **What:** an Uproar ownership audit searched broadly enough to enter a
   generated minified index, producing noisy output and obscuring the relevant
-  source call sites.
-- **Hits:** 1.
-- **Cost each:** ~1 min.
+  source call sites. Same class 2026-07-28 afternoon: broad `rg` matched
+  one-line generated topology/census JSON, flooding two workers' terminals
+  (row-4 implementation ~1 min; interaction audit ~2 min).
+- **Hits:** 3.
+- **Cost each:** ~1-2 min.
 - **Workaround:** scope `rg` to `src/`, `tests/`, and the exact reference
-  source directories, or add generated/bundle globs to the exclusion list.
+  source directories, or add generated/bundle globs to the exclusion list
+  (`-g '!*.min.*' -g '!src/data/gen/*.json'` covers both shapes).
 
 ## Foreground oracle restart floods the execution transcript
 

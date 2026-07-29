@@ -206,6 +206,23 @@ const STAT_UP_BERRIES: ReadonlyMap<number, number> = new Map([
   [HOLD_EFFECT_SPEED_UP, STAT_SPEED], // Salac
   [HOLD_EFFECT_SP_ATTACK_UP, STAT_SPATK], // Petaya
 ]);
+/**
+ * Source-real `ItemBattleEffects(ITEMEFFECT_NORMAL)` cases with zero carriers
+ * in the complete 882-entry Factory L50 catalog (ground-truth doc §2b).
+ * Keep each barrier named: expanding the facility catalog must make the
+ * newly-reachable case obvious rather than hiding it behind a shared bucket.
+ */
+const ZERO_CARRIER_ITEM_BARRIERS: ReadonlyMap<number, string> = new Map([
+  [HOLD_EFFECT_CONFUSE_SPICY, "HOLD_EFFECT_CONFUSE_SPICY"],
+  [HOLD_EFFECT_CONFUSE_DRY, "HOLD_EFFECT_CONFUSE_DRY"],
+  [HOLD_EFFECT_CONFUSE_SWEET, "HOLD_EFFECT_CONFUSE_SWEET"],
+  [HOLD_EFFECT_CONFUSE_BITTER, "HOLD_EFFECT_CONFUSE_BITTER"],
+  [HOLD_EFFECT_CONFUSE_SOUR, "HOLD_EFFECT_CONFUSE_SOUR"],
+  [HOLD_EFFECT_DEFENSE_UP, "HOLD_EFFECT_DEFENSE_UP"],
+  [HOLD_EFFECT_SP_DEFENSE_UP, "HOLD_EFFECT_SP_DEFENSE_UP"],
+  [HOLD_EFFECT_CRITICAL_UP, "HOLD_EFFECT_CRITICAL_UP"],
+  [HOLD_EFFECT_RANDOM_STAT_UP, "HOLD_EFFECT_RANDOM_STAT_UP"],
+]);
 const SPEED_BOOST_ACTIVATES_LABEL = "BattleScript_SpeedBoostActivates";
 const RAIN_DISH_ACTIVATES_LABEL = "BattleScript_RainDishActivates";
 const SHED_SKIN_ACTIVATES_LABEL = "BattleScript_ShedSkinActivates";
@@ -1118,10 +1135,9 @@ function runStatus1CureTick(
  * 8 zero-RNG cure berries, White Herb, Liechi/Salac/Petaya, and now
  * RESTORE_HP/RESTORE_PP (Sitrus/Oran/Berry Juice, Leppa -- doc §6 addendum)
  * -- every reachable Factory-legal case this doc names. The only real switch
- * cases this function does not implement barrier on mere possession (the 4
- * zero-carrier stat/crit berries + 5 confuse berries, doc §2b -- their own
- * HP-threshold gate needs an unmodeled per-item `battlerHoldEffectParam`
- * table no live Factory carrier will ever exercise). `moveTurn` gates five
+ * cases this function does not implement are named possession barriers (the
+ * 4 zero-carrier stat/crit berries + 5 confuse berries, doc §2b); the complete
+ * 882-entry catalog proves no Factory L50 battle can reach them. `moveTurn` gates five
  * rows per §5's table -- Leftovers, the stat-up berries, RESTORE_HP,
  * RESTORE_PP, and the unreachable case-barriers all short-circuit to
  * `"advance"` (source's own case does nothing at all when `moveTurn` is
@@ -1257,16 +1273,12 @@ function runItemsTick(
     });
     return runTickScript(program, handlers, state, rc, battler, BERRY_STAT_RAISE_END2_LABEL);
   }
-  const UNREACHABLE_AT_FACTORY_L50 = new Set([
-    HOLD_EFFECT_CONFUSE_SPICY, HOLD_EFFECT_CONFUSE_DRY, HOLD_EFFECT_CONFUSE_SWEET,
-    HOLD_EFFECT_CONFUSE_BITTER, HOLD_EFFECT_CONFUSE_SOUR,
-    HOLD_EFFECT_DEFENSE_UP, HOLD_EFFECT_SP_DEFENSE_UP, HOLD_EFFECT_CRITICAL_UP, HOLD_EFFECT_RANDOM_STAT_UP,
-  ]);
-  if (!moveTurn && UNREACHABLE_AT_FACTORY_L50.has(holdEffect)) {
+  const zeroCarrierBarrier = ZERO_CARRIER_ITEM_BARRIERS.get(holdEffect);
+  if (!moveTurn && zeroCarrierBarrier !== undefined) {
     return Object.freeze({
       kind: "case-barrier", state,
-      detail: `HOLD_EFFECT ${holdEffect}: zero Factory L50 carriers (doc §2b) -- not wired, barriered on mere `
-        + "possession since its own HP-threshold gate needs an unmodeled holdEffectParam table",
+      detail: `${zeroCarrierBarrier} (${holdEffect}): zero Factory L50 carriers in the complete 882-entry catalog `
+        + "(docs/endturn-abilities-items-ground-truth.md §2b); source-real behavior intentionally barriered",
     });
   }
   return Object.freeze({ kind: "advance", state });
