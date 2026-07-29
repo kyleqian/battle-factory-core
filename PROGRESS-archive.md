@@ -1,4 +1,25 @@
 ---
+## 681 — [SUPERVISOR SESSION OPEN 2026-07-29 ~08:25] animation-main folded (Sweet Kiss + Aromatherapy exact); union green; freshness FAIL judged false positive
+
+- **State:** master fast-forwarded to `d166f9cf` (= animation-main union:
+  the concurrent animation supervisor had already merged master in, so the
+  fold was a clean ff bringing 9 animation commits — MOVE_SWEET_KISS and
+  MOVE_AROMATHERAPY promoted exact). Union green at **493 files / 5061
+  tests**, production build passes, tree clean.
+- **Oracle freshness:** `check-oracle-freshness.sh` exits 1 for both ports
+  (services started 2026-07-28 21:42, harness HEAD 807b449 22:08). Verified
+  the sole intervening harness commit is docs-only (`NOTES.md`, +54 lines,
+  no oracle/schema change), and the animation supervisor is live on port
+  8012 — decision: **no restart**, false positive recorded here; both
+  profiles answer `info` healthily.
+- **Session plan (entry 680's ordered Next):** (i) sweep blockers — wake-up
+  `Cmd_bicword` (seeds 18/20), end-turn instruction budget (seed 21),
+  attack-canceler stop (seed 23); (ii) entry 677 AI reveal-site remainder;
+  (iii) rung-13 mid-turn ShouldSwitch; (iv) King's Rock flinch; (v) rung 14
+  presentation windows + Gate-6 matrix; (vi) ISSUES #48.
+
+---
+
 ## 679 — [FINAL BOUNDED MAIN WORKER 2026-07-29] end-turn forced-switch + move-end blockers retired
 
 - **State:** committed `9fdc4a26` and `70012fc6`; tree green at **487 files /

@@ -13,6 +13,75 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 684 — [BOUNDED MAIN WORKER 2026-07-29 ~09:20] entry-677 AI reveal-site remainder classified and wired
+
+- **State:** implementation commits `0488e6e4`, `1ddfc68e`, `beb383cf`;
+  tree green at **496 files / 5082 tests**, production build,
+  `git diff --check`, Battle Scene OFF oracle info, and both censuses exact at
+  pre-step SHA-256 **8b18f754…5261 / 52687085…257c**.
+  All **17** entry-678 carriers remain exact; seeds **18/20/23** remain seven
+  wins at **2478/2140/1436** calls. Final full-suite rerun is pending.
+- **Did:** source owners now publish BattleHistory ability/item observations
+  only on their successful activation arm; misses, failed procs, no-op weather/
+  form/status branches, secondary/non-certain prevention, and absent abilities
+  remain unrevealed. The live driver consumes the existing handoff unchanged;
+  no RNG, outcome, controller, opcode registration, or switching path changed.
+  Final full-suite diagnosis caught and fixed one stale-`lastUsedAbility`
+  typecalc false reveal; fresh per-opcode activation flags restore the
+  whole-battle fixture's original 12 AI turns/cursor and failed-Static silence.
+
+| Source reveal site | Construct | Class | Result / exact class-B dependency |
+| --- | --- | --- | --- |
+| `battle_util.c:216` | Lightning Rod action-target redirect | B | Factory-doubles `HandleAction_UseMove` target-redirection path |
+| `battle_util.c:3859` | Lightning Rod random-target redirect | B | Factory-doubles `GetMoveTarget(MOVE_TARGET_RANDOM)` path |
+| `battle_util.c:3195` | switch-in Drizzle/Sand Stream/Drought; successful Forecast/Cloud Nine/Air Lock form change | A | wired at `Cmd_switchineffects`; failed/no-change arms pinned quiet |
+| `battle_util.c:3195` | end-turn Rain Dish, Shed Skin, Speed Boost | A | wired; dry/full-HP, failed Shed Skin proc, capped/first-turn arms pinned quiet |
+| `battle_util.c:3195` | Soundproof move block | A | wired only when a sound move is actually blocked |
+| `battle_util.c:3195` | Volt Absorb, Water Absorb, Flash Fire absorption/boost | B | `JumpIfMoveFailed` / `ABILITYEFFECT_ABSORBING` unsupported branch at `battle_script_commands.c:1020` |
+| `battle_util.c:3195` | Color Change, Rough Skin, Effect Spore, Poison Point, Flame Body, Cute Charm; Static | A | wired successful arms; failed proc/no-change quiet; Static already done in entry 677 and retained |
+| `battle_util.c:3195` | status-curing ability pass | B | `Cmd_moveend` `MOVEEND_IMMUNITY_ABILITIES` barrier (`battle_util.c:2876`) |
+| `battle_util.c:3195` | Synchronize target / attacker | B | `Cmd_moveend` `MOVEEND_SYNCHRONIZE_TARGET` / `MOVEEND_SYNCHRONIZE_ATTACKER` barriers (`battle_util.c:2971/2987`) |
+| `battle_util.c:3195` | Intimidate / Trace | A | already done and pinned in entry 677; not reimplemented |
+| `battle_script_commands.c:990` | Lightning Rod took-attack reveal | B | `Cmd_attackcanceler` `lightningRodRedirected` unsupported branch; waits on doubles redirect handoff above |
+| `:1382` | `Cmd_typecalc` Levitate | A | wired/pinned |
+| `:1418` | `Cmd_typecalc` Wonder Guard | A | wired/pinned |
+| `:1441` | miss-time Levitate | A | wired/pinned |
+| `:1496` | miss-time Wonder Guard | A | wired/pinned |
+| `:1679` | `Cmd_adjustnormaldamage` Focus Band successful roll | A | wired; failed roll pinned quiet |
+| `:1722` | `Cmd_adjustnormaldamage2` Focus Band successful roll | A | wired; failed roll pinned quiet |
+| `:2304` | poison prevention: Immunity | A | wired; non-certain secondary arm quiet |
+| `:2346` | burn prevention: Water Veil | A | wired; non-certain secondary arm quiet |
+| `:2401` | paralysis prevention: Limber | A | wired; non-certain secondary arm quiet |
+| `:2431` | toxic prevention: Immunity | A | wired; non-certain secondary arm quiet |
+| `:2553` | certain flinch prevention: Inner Focus | A | wired; ordinary secondary arm quiet |
+| `:2774` | Thief/Covet item-steal prevention: Sticky Hold | A | wired/pinned |
+| `:2874` | Knock Off prevention: Sticky Hold | A | wired/pinned |
+| `:3118` | `Cmd_jumpifability`, `BS_ATTACKER_SIDE` | B | exact `Cmd_jumpifability` unsupported-operand barrier at `battle_script_commands.c:3105` |
+| `:3133` | `Cmd_jumpifability`, `BS_NOT_ATTACKER_SIDE` | B | same unsupported-operand barrier |
+| `:3148` | direct-selector `Cmd_jumpifability` success | A | wired; not-taken branch pinned quiet |
+| `:4512` | `Cmd_typecalc2` Levitate | A | wired/pinned |
+| `:4587` | `Cmd_typecalc2` Wonder Guard | A | wired/pinned |
+| `:5880` | `Cmd_adjustsetdamage` Focus Band successful roll | A | wired; failed roll pinned quiet |
+| `:6229` | `Cmd_recordlastability` | B | unregistered/unreferenced `B_SCR_OP_RECORDLASTABILITY` |
+| `:6572` | `Cmd_tryexplosion` Damp prevention | A | wired; no-Damp arm quiet |
+| `:6842` | sleep prevention: Insomnia/Vital Spirit | A | wired; ordinary/Uproar arms quiet |
+| `:7003` | Clear Body/White Smoke stat-loss message arm | A | wired only on `STAT_CHANGE_ALLOW_PTR` activation |
+| `:7018` | Keen Eye accuracy-loss message arm | A | wired only on `STAT_CHANGE_ALLOW_PTR` activation |
+| `:7031` | Hyper Cutter attack-loss message arm | A | wired only on `STAT_CHANGE_ALLOW_PTR` activation |
+| `:7509` | `Cmd_tryKO` Focus Band successful roll | B | existing `Cmd_tryKO` `focusBanded` unsupported branch at `battle_script_commands.c:7507` |
+| `:7518` | `Cmd_tryKO` Sturdy prevention | A | wired; ordinary target quiet |
+| `:7680` | Attract prevention: Oblivious | A | wired; non-Oblivious arm quiet |
+| `:8394` | Heal Bell attacker Soundproof | A | wired/pinned |
+| `:8410` | Heal Bell partner Soundproof | B | `Cmd_healpartystatus` `BATTLE_TYPE_DOUBLE` partner branch; waits on Factory-doubles topology |
+| `:9233` | Trick prevention: Sticky Hold | A | wired; normal swap arm quiet |
+
+- **Next / notes:** supervisor resumes R13 live switching / King's Rock /
+  presentation queue. No unsupported/import ratchet, generated census byte,
+  hook universe, issue, presentation, animation, canonical recording, or tick
+  branch moved. PAPERCUT: none.
+
+---
+
 ## 683 — [BOUNDED MAIN WORKER 2026-07-29 ~09:00] seed 21 end-turn budget halt retired; sweep blocker-free
 
 - **State:** implementation committed `39b4dceb`; tree green at **495 files /
@@ -77,24 +146,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   added five lines. Stretch deliberately shrank
   `battleScriptAttackCancelerOpcode.ts`'s unsupported-branch pin **3→2**.
   Both generated docs remain byte-identical. PAPERCUT: none.
-
----
-
-## 681 — [SUPERVISOR SESSION OPEN 2026-07-29 ~08:25] animation-main folded (Sweet Kiss + Aromatherapy exact); union green; freshness FAIL judged false positive
-
-- **State:** master fast-forwarded to `d166f9cf` (= animation-main union:
-  the concurrent animation supervisor had already merged master in, so the
-  fold was a clean ff bringing 9 animation commits — MOVE_SWEET_KISS and
-  MOVE_AROMATHERAPY promoted exact). Union green at **493 files / 5061
-  tests**, production build passes, tree clean.
-- **Oracle freshness:** `check-oracle-freshness.sh` exits 1 for both ports
-  (services started 2026-07-28 21:42, harness HEAD 807b449 22:08). Verified
-  the sole intervening harness commit is docs-only (`NOTES.md`, +54 lines,
-  no oracle/schema change), and the animation supervisor is live on port
-  8012 — decision: **no restart**, false positive recorded here; both
-  profiles answer `info` healthily.
-- **Session plan (entry 680's ordered Next):** (i) sweep blockers — wake-up
-  `Cmd_bicword` (seeds 18/20), end-turn instruction budget (seed 21),
-  attack-canceler stop (seed 23); (ii) entry 677 AI reveal-site remainder;
-  (iii) rung-13 mid-turn ShouldSwitch; (iv) King's Rock flinch; (v) rung 14
-  presentation windows + Gate-6 matrix; (vi) ISSUES #48.
