@@ -27,12 +27,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   every entry hook before B overwrites `randomTurnNumber`. The Tier-1 receipt
   pin reproduces **62606 → 997 → 8088**, exactly **3 calls**, `997 & 1 = 1`,
   and observes resulting hook order **[1,0]**.
-- **Next:** unblock the real whole-battle breadth exposed by the sweep, led by
-  trainer faint replacement with two legal benches
-  (`BattleScript_FaintedMonTryChoose` → `Cmd_openpartyscreen`), then rerun
-  rung 12. Secondary blockers are `Cmd_various` paralysis, confusion self-hit
-  context, multi-hit/Twineedle controller resumption, Earthquake's
-  `DoHitAllWithUndergroundBonus`, and player forced-switch end-turn resumption.
+- **Supervisor fold (same round, side merge):** the rung-13 scout landed
+  (`f9788112`) — `docs/factory-ai-switch-scout.md`, a 557-line frozen
+  dossier: complete `ShouldSwitch` + `GetMostSuitableMonToSwitchInto`
+  derivation (incl. source quirks), Factory L50 reachability per helper,
+  draw ordering vs the 11/13-draw ledgers, masks 0/1/7 by streak, exact
+  kernel changes for trainer-originated switches, 3 staged OFF recipes
+  (predictions, not receipts), and 4 bounded implementation rungs. The
+  sweep's dominant blocker (multi-choice trainer faint replacement) is the
+  same mechanism — the dossier's scoring section unblocks it.
+- **Next:** implement multi-candidate trainer faint replacement from the
+  dossier's `GetMostSuitableMonToSwitchInto` derivation (main), wire
+  generated commentary into its identified presentation seam (side); then
+  the remaining sweep blockers (`Cmd_various` paralysis, confusion
+  self-hit context, multi-hit/Twineedle resumption, Earthquake
+  `DoHitAllWithUndergroundBonus`, player forced-switch end-turn
+  resumption) and the rung-12 rerun.
 - **Notes:** `factoryBattleStart.ts`'s last `unsupported-branch` and union
   return path are gone; its module ratchet moves exactly **1→0**. No census
   artifact, canonical recording, issue, scout/probe/battle-lab,
