@@ -13,6 +13,41 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 676 — [BOUNDED MAIN WORKER 2026-07-29 ~02:15] multi-hit/Earthquake resumptions retired; six seeds win seven
+
+- **State:** committed `a04a26c1`, `c104d8f8`, `bc2a65a0`, `027e5aa0`,
+  and `59ab42f2`; tree green at **461 files / 4971 tests**, production build,
+  `git diff --check`, and Battle Scene OFF oracle info. Executable
+  (**214/214 effects, 355/355 moves**) and ability/item (**69/69 abilities,
+  42/42 hold effects**) censuses regenerate byte-identically.
+- **Did:** the full-turn adapter now resolves only literal decimal u8/u16
+  operands in addition to its named wait constants, so
+  `setmultihitcounter 0/2` and `waitmessage 1` resume instead of being
+  mistaken for unavailable external context. Its 256-opcode runaway guard
+  now counts source-instruction completion separately from bounded
+  controller/message yield steps; five-hit loops no longer spend the guard
+  on acknowledgements or wait ticks.
+- **Acceptance:** full-turn Spike Cannon pins three hits, its hit-count draw
+  at position 2, and exact 14-call cursor continuity; the maximum five-hit
+  reroll path, fixed two-hit Double Kick, and Twineedle all reach the next
+  command with every target controller update. Earthquake reaches the same
+  boundary with one hit sourced from
+  `BattleScript_DoHitAllWithUndergroundBonus`; the existing shared-script
+  fixture retains the underground 2× multiplier proof.
+- **Sweep / Next:** seeds **4–30** now pass battle 0/1/2 at **19/15/13**;
+  **6/27** complete seven wins: seeds **4/6/8/13/17/26**, permanently pinned
+  at **1517/1563/2089/2224/1787/1556** facility calls. Seed 17 remains exactly
+  **1787**. Dominant blocker is now confusion self-hit context (**9** seeds),
+  then forced-switch end-turn resumption (**4**) and paralysis `Cmd_various`
+  (**3**); move-end barriers (**2**) and one each Trace/end-turn-budget/
+  attack-canceler stop are narrower follow-ups.
+- **Notes:** no unsupported-branch/import ratchet moved, no census artifact
+  changed, and no canonical recording, issue, probe, presentation, animation,
+  or tick branch changed. Earthquake's doubles-only next-target barrier
+  remains unchanged and unreachable in Factory singles. PAPERCUT: none.
+
+---
+
 ## 675 — [BOUNDED MAIN WORKER 2026-07-29 ~01:53] multi-candidate trainer replacement retired; seed 17 wins seven
 
 - **State:** committed `30d9a3e5`; tree green at **461 files / 4960 tests**,
@@ -99,50 +134,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   seed 23 battle 2 **141/185/114** hit Earthquake; seed 7 hit Twineedle and
   seed 25 multi-hit. This satisfies the rung row's STOP-and-report clause,
   not its seven-win acceptance. PAPERCUT: none.
-
----
-
-## 673 — [BOUNDED MAIN WORKER 2026-07-29 ~01:15] controller owns one generated battle lifecycle
-
-- **State:** Gate-5 plan rung 11 is committed at `9a741230` and green at
-  **461 files / 4956 tests**, production build, `git diff --check`, Battle
-  Scene OFF oracle info, and focused round/whole-battle compatibility
-  **34/34**. Executable (**214/214 effects, 355/355 moves**) and ability/item
-  (**69/69 abilities, 42/42 hold effects**) censuses regenerate
-  byte-identically.
-- **Did:** added a production-shaped round/battle orchestrator with generated-
-  initial-rental or current-full-record entry modes. It admits a complete
-  rung-8 trainer/party only at the controller's existing `battleStart`
-  transition, starts the fresh kernel after presentation acknowledgement,
-  routes player decisions through its published boundary, routes every
-  trainer command through the rung-6 live AI, overlays terminal mutable state
-  onto the full rental identities, adapts the real terminal, and calls
-  `resolveRoundBattle`. The fixture scenario/resolution ABI remains intact.
-- **Acceptance:** seed 4 pins battle 0 trainer 17/sets 122,118,110 → real
-  3v3 win → swap offer → DECLINE → battle 1 trainer 51/sets 199,178,148 →
-  fresh player command. The single facility cursor is exact:
-  **152 generation + 175 battle + 112 next-generation + 2 fresh-start =
-  441 calls**; segment endpoints are pinned as
-  `4→2423399196→3960941853→2133491021→1174811135`. No fixture resolution
-  occurs anywhere in the carrier.
-- **Supervisor fold (same round, side merge):** the equal-speed tie receipt
-  landed (`9eec0e10`, Terra) — one added draw between A and B from
-  `GetWhoStrikesFirst+0x3b1`, tie `&1=1`, order `[1,0]`; per-case process
-  isolation fixed the prior instability; wrapper re-run fresh by the
-  supervisor: both cases PASS. The fresh-start barrier may now retire in a
-  main-lane step that consumes the receipt.
-- **Next:** rung 12 (seven-battle loop, accepted swap, streak/terminal
-  facility state, multiple seeds, loss control, main — rung (a): retire the
-  equal-speed barrier against the receipt) + rung-13 ground-truth scout
-  (AI switch/history breadth — mission-scope-checked: opponent switch AI is
-  NOT excluded by the mission brief, side). Rung 14 remains
-  commentary/presentation wiring.
-- **Notes:** scout §2.1's frozen claim that Factory selection still required
-  fixture parties was proved at the live seam; the minimal adapter now accepts
-  a complete generated opponent while reusing the controller's index/heal/
-  presentation transition unchanged. Rung-10 compatibility exposed that the
-  normalized kernel party drops corpus-only identity metadata; terminal HP/
-  PP/status/item are therefore overlaid onto the controller's full identity
-  records before healing (no controller rule moved). No ratchet/barrier,
-  census artifact, issue, scout/probe/battle-lab, commentary/presentation, or
-  canonical-recording file changed. PAPERCUT: none.
