@@ -136,7 +136,7 @@ const healpartystatusHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext
       rules = recordBattleScriptAbilityReveal(
         rules,
         attacker,
-        BATTLE_SCRIPT_ABILITY_SOUNDPROOF,
+        rules.battlers[attacker].ability,
       );
     } else {
       rules = clearLiveStatus(rules, attacker);

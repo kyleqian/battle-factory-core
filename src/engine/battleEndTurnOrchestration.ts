@@ -1106,7 +1106,7 @@ function runShedSkinTick(
     ...withStatus,
     party: withBattleScriptPartyMemberStatus1(withStatus.party, b.side, b.partyIndex, 0),
     scriptingBattler: battler,
-  }), battler, ABILITY_SHED_SKIN);
+  }), battler, b.ability);
   return runPushCursorAndCallbackTickScript(program, handlers, drawnState, synced, battler, SHED_SKIN_ACTIVATES_LABEL);
 }
 
@@ -1143,7 +1143,7 @@ function runAbilitiesTick(
       const rc = recordBattleScriptAbilityReveal(
         Object.freeze({ ...state.rulesContext, battleMoveDamage: -heal }),
         battler,
-        ABILITY_RAIN_DISH,
+        b.ability,
       );
       return runPushCursorAndCallbackTickScript(program, handlers, state, rc, battler, RAIN_DISH_ACTIVATES_LABEL);
     }
@@ -1156,7 +1156,7 @@ function runAbilitiesTick(
       const withStage = recordBattleScriptAbilityReveal(
         withBattler(state.rulesContext, battler, { statStages: stages as never }),
         battler,
-        ABILITY_SPEED_BOOST,
+        b.ability,
       );
       return runPushCursorAndCallbackTickScript(program, handlers, state, withStage, battler, SPEED_BOOST_ACTIVATES_LABEL);
     }

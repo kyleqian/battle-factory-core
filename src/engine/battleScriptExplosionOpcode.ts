@@ -160,7 +160,7 @@ function createTryexplosionHandler(
             selectorRoles: Object.freeze({ ...rules.selectorRoles, target: dampBattler }),
           }),
           dampBattler,
-          ABILITY_DAMP,
+          rules.battlers[dampBattler].ability,
         ),
       },
     );

@@ -392,8 +392,8 @@ for (const hit of droppedStringHits) {
 }
 const EXPECTED_RECOVERED_STRING_SITES = [
   "src/engine/battleScriptActionAdmission.ts:2764 ABILITY_GUTS",
-  "src/engine/battleScriptHealpartystatusOpcode.ts:75 ABILITY_SOUNDPROOF",
-  "src/engine/battleScriptHitChainOpcode.ts:1096 HOLD_EFFECT_EVASION_UP",
+  "src/engine/battleScriptHealpartystatusOpcode.ts:76 ABILITY_SOUNDPROOF",
+  "src/engine/battleScriptHitChainOpcode.ts:1117 HOLD_EFFECT_EVASION_UP",
   "src/engine/battleScriptTrysetfutureattackOpcode.ts:111 ABILITY_GUTS",
   "src/engine/damageCalc.ts:496 HOLD_EFFECT_SCOPE_LENS",
   "src/engine/damageCalc.ts:497 HOLD_EFFECT_LUCKY_PUNCH",

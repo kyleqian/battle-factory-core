@@ -124,7 +124,7 @@ function createTryKOHandler(program: BattleScriptProgram): BattleScriptOpcodeHan
           lastUsedAbility: ABILITY_STURDY,
         }),
         target,
-        ABILITY_STURDY,
+        targetBattler.ability,
       );
       return transitionBattleScriptCommand(
         context,

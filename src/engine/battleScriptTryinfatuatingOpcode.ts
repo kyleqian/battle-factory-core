@@ -98,7 +98,7 @@ function createTryinfatuatingHandler(): BattleScriptOpcodeHandler<BattleScriptRu
           rulesContext: recordBattleScriptAbilityReveal(
             Object.freeze({ ...rulesContext, lastUsedAbility: ABILITY_OBLIVIOUS }),
             target,
-            ABILITY_OBLIVIOUS,
+            targetState.ability,
           ),
         },
       );

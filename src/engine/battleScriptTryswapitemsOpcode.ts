@@ -170,7 +170,7 @@ function createTryswapitemsHandler(
               lastUsedAbility: ABILITY_STICKY_HOLD,
             }),
             target,
-            ABILITY_STICKY_HOLD,
+            rules.battlers[target].ability,
           ),
         },
       );
