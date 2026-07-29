@@ -13,6 +13,39 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 682 — [BOUNDED MAIN WORKER 2026-07-29 ~08:36] wake-up path retired; seeds 18/20 seven-win exact
+
+- **State:** committed `20ad5cce`; tree green at **494 files / 5064 tests**,
+  production build, `git diff --check`, Battle Scene OFF oracle info, and
+  byte-identical executable + ability/item census documents. Seeds **18/20**
+  now win all seven generated battles at exact **2478/2140** facility calls;
+  the permanent 17-carrier table remains unchanged and exact.
+- **Did:** registered `Cmd_bicword`'s third and final source operand,
+  `HITMARKER_WAKE_UP_CLEAR` (bit 4, source says never set/checked), plus
+  `gWokeUpStringIds`. The attack-canceler controller status write now also
+  syncs the active mon's persistent party status, matching
+  `REQUEST_STATUS_BATTLE`.
+- **Acceptance:** Tier-1 drives sleep counter **1→0** through
+  `BattleScript_MoveUsedWokeUp`, proving battler+party wake, ordinary woke-up
+  message, status-icon update, return to `Cmd_attackcanceler`, PP use, real
+  Tackle damage, and the next command. The former bicword barrier test is now
+  a pass-through clear; normal/Uproar table selectors are both pinned.
+- **Sweep / Next:** seeds 4–30 pass battles 0/1/2 at **26/25/25**; **24/27**
+  win seven, seed 12 legitimately loses battle 7. Remaining blockers are
+  end-turn instruction budget (**seed 21**, untouched/out of scope) and
+  `BattleScript_HitFromAtkCanceler: Cmd_attackcanceler` (**seed 23**). Next:
+  seed 23 is the authorized stretch if time remains; otherwise return to the
+  supervisor with this green wake-up checkpoint.
+- **Notes:** no new carrier, canonical recording, presentation, animation,
+  tick branch, or SCRIPT_BUDGET change. Unsupported-branch call-site pin stays
+  **4** for `battleScriptDamagingWeatherOpcode.ts`; its comment now names that
+  the live wake-up operand is retired while the generic future-pair guard
+  remains. Ability/item census's exact live-source pin moved only
+  `battleScriptHitChainOpcode.ts:1091→1096` after the two-entry wake-up table
+  added five lines; both generated docs remain byte-identical. PAPERCUT: none.
+
+---
+
 ## 681 — [SUPERVISOR SESSION OPEN 2026-07-29 ~08:25] animation-main folded (Sweet Kiss + Aromatherapy exact); union green; freshness FAIL judged false positive
 
 - **State:** master fast-forwarded to `d166f9cf` (= animation-main union:
@@ -73,52 +106,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** the cwd-reset launcher policy held all session (zero cwd
   bites in 17 rounds). PAPERCUTS observed by workers: compare-out race
   (~2 min), probe log volume (~4 min) — both minor, not filed.
-
----
-
-## 679 — [FINAL BOUNDED MAIN WORKER 2026-07-29] end-turn forced-switch + move-end blockers retired
-
-- **State:** committed `9fdc4a26` and `70012fc6`; tree green at **487 files /
-  5042 tests**, production build, `git diff --check`, Battle Scene OFF oracle
-  info, and byte-identical executable + ability/item census regeneration. All
-  **17 pinned carriers remain exact** at their entry-678 cursors; the pinned
-  set stays capped there to keep the orchestrator suite fast.
-- **Diagnosis / source fix:** seed 9 battle 3 hit the generic throw at
-  `factoryBattleScriptFullTurnDecision.ts:1478` after Double-Edge recoil took
-  the player **38→24**, Toxic advanced **0x280→0x380**, and its **30 HP**
-  end-turn tick fainted the active. The ROM preserves
-  `turnEffectsTracker/turnEffectsBattlerId` across each effect script
-  (`battle_util.c:1464-1478,1770-1778`), then calls field effects → battler
-  effects → `HandleFaintedMonActions` → Wish/Perish → cleanup
-  (`battle_main.c:3956-3974`). The reducer now tags this forced request and,
-  after entry 677's existing fainted-actions cursor completes replacement,
-  resumes at Wish/Perish instead of rerunning the field/battler loops.
-- **Acceptance / RNG:** full-turn pins cover player poison KO → forced choice
-  → replacement → the remaining trainer burn fires once → next command
-  (**8 calls paused, 9 at the next boundary**); trainer poison KO selects its
-  healthy replacement with **9 calls**; last-mon poison KO reaches the real
-  outcome with **8 calls**. Seeds **9/10/25/27** now win seven at
-  **1521/1930/1497/1691** calls.
-- **Bonus move-end family:** seed 18's state-11 Chesto/Sleep branch now clears
-  Sleep + Nightmare, syncs party status, consumes the berry, and transfers to
-  `BattleScript_BerryCureSlpRet` (`battle_util.c:3639,3677-3685`). Seeds
-  12/28's state-12 Shell Bell branch now records first non-passive target
-  damage, applies the exact gate/divisor/minimum-one heal, clears the receipt,
-  preserves the item, and draws no RNG
-  (`battle_script_commands.c:1870,1878,1932-1933`;
-  `battle_util.c:3769-3804`). The sole named state-12 remainder is **King's
-  Rock flinch** (`HOLD_EFFECT_FLINCH`, `battle_util.c:3774-3785`); other
-  state-11 cure branches remain behind their pre-existing generic barrier.
-- **Final sweep / Next:** seeds **4–30** pass battles 0/1/2 at
-  **26/24/24**; **22/27** win seven, seed 12 reaches battle 7 and loses
-  legitimately, and the remaining blocker census is wake-up
-  `BattleScript_MoveUsedWokeUp: Cmd_bicword` (**2**, seeds 18/20), end-turn
-  instruction budget (**1**, seed 21), and
-  `BattleScript_HitFromAtkCanceler: Cmd_attackcanceler` (**1**, seed 23).
-  Next main step should retire those in that order.
-- **Notes:** retired the exact forced-switch throw plus move-end states 11
-  (Chesto) and 12 (Shell Bell). No unsupported/import ratchet or census
-  artifact moved; no issue, probe, presentation, animation, canonical
-  recording, or tick branch changed. This is the session's last worker entry.
-  PAPERCUT: none.
-
