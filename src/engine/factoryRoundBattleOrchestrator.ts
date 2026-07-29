@@ -331,11 +331,6 @@ function startCurrentBattle(
     playerParty: asBattleScriptParty(player),
     opponentParty: asBattleScriptParty(asKernelParty(opponentRecords)),
   });
-  if ("kind" in started) {
-    return fail(
-      `fresh battle blocked at ${started.sourceFile}:${started.sourceLine}: ${started.sourceConstruct}`,
-    );
-  }
   const callStart = state.facilityRngCalls;
   return Object.freeze({
     ...state,

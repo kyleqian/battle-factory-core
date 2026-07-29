@@ -1,5 +1,45 @@
 ---
 
+## 671 — [BOUNDED MAIN WORKER 2026-07-29 ~00:33] fresh 3v3 whole battle reaches real terminal
+
+- **State:** Gate-5 plan rung 4 is green at **457 files / 4915 tests** plus
+  production build, `git diff --check`, Battle Scene OFF oracle info, and
+  focused whole-battle/lifecycle/ratchet coverage **62/62**. Executable
+  (**214/214 effects, 355/355 moves**) and ability/item (**69/69 abilities,
+  42/42 hold effects**) censuses regenerate byte-identically.
+- **Did:** `factoryWholeBattle.test.ts` builds two complete three-mon parties
+  only from real corpus set ids, enters through the fresh initializer, and
+  loops solely over published command/forced-switch requests through
+  `submitBattleDecision`. Real moves faint all three opponents; Azurill's real
+  faint publishes and resumes one player forced switch; Hyper Beam recharge
+  and Ice Ball exercise two reducer-owned locked trainer turns; the terminal
+  adapts to a real win. Every submission is request-legal and the entire
+  battle pins one monotonic **32-call** LCG cursor from draws A/B through the
+  terminal hit chain.
+- **Supervisor fold (same round, side merge):** rung 10 landed (`af959d79`)
+  — round swap mutation unified with the full rental record (identity copy
+  `battle_factory_screen.c:2350-2360`, party reconstruction
+  `battle_factory.c:433-464`, item restore `:714-728`, heal
+  `script_pokemon_util.c:30-58`, PP-Up formula `pokemon.c:4650-4653`);
+  accept/decline both feed the next kernel party exactly; between-battle
+  full restore proven. Union green **458 files / 4918 tests**, census
+  no-op.
+- **Next:** rung 6 (production AI view/driver extending the whole-battle
+  test, main) + rung 9 (commentary favorite-type/battle-style rules with
+  OFF compare, side) launch this round; then rung 11 (controller owns one
+  real battle lifecycle) and rung 12 (seven battles). Equal-speed pre-hook
+  receipt barrier stays intact.
+- **Notes:** whole-battle reachability exposed and fixed two narrow over-
+  barriers: inactive move-end cure items now pass unless their matching
+  status/stat condition exists; trainer faint replacement selects the sole
+  legal bench mon without entering outcome-irrelevant pass-2 damage scoring.
+  Competitive multi-candidate damage fallback remains explicitly barriered.
+  No barrier count/ratchet moved; no canonical recording, issue, round/swap,
+  generation, scout/probe/battle-lab, or presentation file changed.
+  PAPERCUT: none.
+
+---
+
 ## 670 — [BOUNDED MAIN WORKER 2026-07-29 ~00:10] pre-first-turn entry hooks implemented
 
 - **State:** committed `a5358114`; tree green at **455 files / 4907 tests**,

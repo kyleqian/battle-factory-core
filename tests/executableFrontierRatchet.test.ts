@@ -52,10 +52,6 @@ const ALLOWED_RECORDING_IMPORTS: ReadonlySet<string> = new Set();
  * is not on the path the step claims to make executable.
  */
 const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
-  // Gate-5 rung 3 retired the switch-in ability/item loop. The equal-speed
-  // pre-hook tie draw remains receipt-gated: source position is known, but
-  // the live tie receipt has not landed.
-  ["src/engine/factoryBattleStart.ts", 1],
   // 19 -> 25 (SetMoveEffect status-write quartet registration, PROGRESS 444):
   // Cmd_seteffectwithchance's own two barriers were retired (real dispatch via
   // applySetMoveEffect), but that function adds 3 of its own -- MOVE_EFFECT_SLEEP

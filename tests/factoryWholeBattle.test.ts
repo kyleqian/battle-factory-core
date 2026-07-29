@@ -92,7 +92,6 @@ function resolutionParty(
 function requireStarted(
   result: ReturnType<typeof createFreshFactoryBattle>,
 ): BattleState<FactoryFullTurnDecisionRules> {
-  if ("kind" in result) throw new Error(`unexpected fresh-start barrier: ${result.sourceConstruct}`);
   return result;
 }
 

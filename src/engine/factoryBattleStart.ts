@@ -82,36 +82,13 @@ export type FactoryFreshBattleConfig = Readonly<{
   opponentParty: BattleScriptPartyState;
 }>;
 
-export type FactoryBattleStartUnsupportedBranch = Readonly<{
-  kind: "unsupported-branch";
-  sourceConstruct: string;
-  sourceFile: "battle_main.c";
-  sourceLine: number;
+export type FactoryFreshBattleStart = BattleState<FactoryFullTurnDecisionRules>;
+
+export type FactoryFreshBattleInitialization = Readonly<{
+  kind: "started";
+  state: BattleState<FactoryFullTurnDecisionRules>;
+  events: readonly BattleKernelSemanticEvent[];
 }>;
-
-export type FactoryFreshBattleStart =
-  | BattleState<FactoryFullTurnDecisionRules>
-  | FactoryBattleStartUnsupportedBranch;
-
-export type FactoryFreshBattleInitialization =
-  | Readonly<{
-    kind: "started";
-    state: BattleState<FactoryFullTurnDecisionRules>;
-    events: readonly BattleKernelSemanticEvent[];
-  }>
-  | FactoryBattleStartUnsupportedBranch;
-
-function unsupportedBranch(
-  sourceConstruct: string,
-  sourceLine: number,
-): FactoryBattleStartUnsupportedBranch {
-  return Object.freeze({
-    kind: "unsupported-branch",
-    sourceConstruct,
-    sourceFile: "battle_main.c",
-    sourceLine,
-  });
-}
 
 function activeFromParty(
   side: 0 | 1,
@@ -359,18 +336,17 @@ export function initializeFreshFactoryBattle(
   const drawA = randomU16(config.rngSeed);
   const player = activeFromParty(0, config.playerParty[0]);
   const opponent = activeFromParty(1, config.opponentParty[0]);
-
-  if (
-    preHookEffectiveSpeed(player, drawA.value)
-    === preHookEffectiveSpeed(opponent, drawA.value)
-  ) {
-    // Source-derived position: GetWhoStrikesFirst(TRUE), battle_main.c
-    // :3850-3861/:4722-4749. Live receipt remains pending (§4.1).
-    return unsupportedBranch(
-      "TryDoEventsBeforeFirstTurn equal-speed pre-hook GetWhoStrikesFirst tie draw (source-derived, pending live receipt)",
-      3856,
-    );
-  }
+  const playerSpeed = preHookEffectiveSpeed(player, drawA.value);
+  const opponentSpeed = preHookEffectiveSpeed(opponent, drawA.value);
+  // TryDoEventsBeforeFirstTurn:3850-3861 stable-sorts fastest first through
+  // GetWhoStrikesFirst(TRUE). The Scene-OFF receipt in scout §4.1 proves an
+  // equal-speed comparison consumes exactly one Random() strictly between A
+  // and B; low bit 1 swaps the identity order to [1, 0].
+  const tieDraw = playerSpeed === opponentSpeed ? randomU16(drawA.rngValue) : null;
+  const rngBeforeB = tieDraw?.rngValue ?? drawA.rngValue;
+  const turnOrder = playerSpeed === opponentSpeed
+    ? (tieDraw!.value & 1) === 0 ? [0, 1] as const : [1, 0] as const
+    : playerSpeed > opponentSpeed ? [0, 1] as const : [1, 0] as const;
 
   // The context materializes BattleStartClearSetData's tracked clears and the
   // :3895-3921 pre-selection cleanup. Hook mutations are applied to this
@@ -419,9 +395,6 @@ export function initializeFreshFactoryBattle(
     randomTurnNumber: drawA.value,
   });
 
-  const playerSpeed = preHookEffectiveSpeed(player, drawA.value);
-  const opponentSpeed = preHookEffectiveSpeed(opponent, drawA.value);
-  const turnOrder = playerSpeed > opponentSpeed ? [0, 1] as const : [1, 0] as const;
   const lifecycleEvents: BattleScriptSemanticEvent[] = [];
 
   // battle_main.c:3863-3868 calls ABILITYEFFECT_SWITCH_IN_WEATHER once.
@@ -450,7 +423,7 @@ export function initializeFreshFactoryBattle(
       continue;
     }
     if (BATTLE_START_HOOK_ABILITIES.has(ability)) {
-      const dispatched = runSharedOnSwitchinDispatch(rulesContextBeforeB, drawA.rngValue, battler);
+      const dispatched = runSharedOnSwitchinDispatch(rulesContextBeforeB, rngBeforeB, battler);
       rulesContextBeforeB = dispatched.rulesContext;
       lifecycleEvents.push(...dispatched.events);
     }
@@ -473,7 +446,7 @@ export function initializeFreshFactoryBattle(
     const resolved = runEntryScript(
       "BattleScript_IntimidateActivatesEnd3",
       rulesContextBeforeB,
-      drawA.rngValue,
+      rngBeforeB,
     );
     rulesContextBeforeB = resolved.rulesContext;
     lifecycleEvents.push(...resolved.events);
@@ -501,7 +474,7 @@ export function initializeFreshFactoryBattle(
         partyIndex: rulesContextBeforeB.battlers[opposing].partyIndex,
       }),
     });
-    const resolved = runEntryScript("BattleScript_TraceActivates", rulesContextBeforeB, drawA.rngValue);
+    const resolved = runEntryScript("BattleScript_TraceActivates", rulesContextBeforeB, rngBeforeB);
     rulesContextBeforeB = resolved.rulesContext;
     lifecycleEvents.push(...resolved.events);
   }
@@ -526,13 +499,13 @@ export function initializeFreshFactoryBattle(
       battlers: Object.freeze(battlers),
       scriptingBattler: battler,
     });
-    const resolved = runEntryScript("BattleScript_WhiteHerbEnd2", rulesContextBeforeB, drawA.rngValue);
+    const resolved = runEntryScript("BattleScript_WhiteHerbEnd2", rulesContextBeforeB, rngBeforeB);
     rulesContextBeforeB = resolved.rulesContext;
     lifecycleEvents.push(...resolved.events);
   }
 
   // TryDoEventsBeforeFirstTurn:3923; this is turn 1's readable global.
-  const drawB = randomU16(drawA.rngValue);
+  const drawB = randomU16(rngBeforeB);
   const rulesContext = Object.freeze({
     ...rulesContextBeforeB,
     randomTurnNumber: drawB.value,
@@ -541,7 +514,7 @@ export function initializeFreshFactoryBattle(
   const state = createFactoryFullTurnBattleStateFromRulesContext({
     requestId: config.requestId,
     rngSeed: drawB.rngValue,
-    rngCalls: 2,
+    rngCalls: tieDraw === null ? 2 : 3,
     nextEventSequence: events.length,
     rulesContext,
   });
@@ -553,5 +526,5 @@ export function createFreshFactoryBattle(
   config: FactoryFreshBattleConfig,
 ): FactoryFreshBattleStart {
   const result = initializeFreshFactoryBattle(config);
-  return result.kind === "started" ? result.state : result;
+  return result.state;
 }

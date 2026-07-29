@@ -40,12 +40,10 @@ function party(activeSetId: number, abilitySlot: 0 | 1 = 0): BattleScriptPartySt
 }
 
 function requireStarted(result: ReturnType<typeof createFreshFactoryBattle>) {
-  if ("kind" in result) throw new Error(`unexpected fresh-start barrier: ${result.sourceConstruct}`);
   return result;
 }
 
 function requireInitialized(result: ReturnType<typeof initializeFreshFactoryBattle>) {
-  if (result.kind !== "started") throw new Error(`unexpected fresh-start barrier: ${result.sourceConstruct}`);
   return result;
 }
 
@@ -235,16 +233,35 @@ describe("fresh Factory battle initializer (Gate-5 rungs 2-3)", () => {
     expect(result.state.rng.calls).toBe(2);
   });
 
-  it("reaches the named equal-speed unsupported-branch pending the live tie receipt", () => {
-    const result = createFreshFactoryBattle({
+  it("matches the equal-speed receipt's exact A/tie/B draws, &1 order, and single added call", () => {
+    const receiptSeed = 2_279_919_941;
+    const drawA = randomU16(receiptSeed);
+    const tie = randomU16(drawA.rngValue);
+    const drawB = randomU16(tie.rngValue);
+    expect([drawA.value, tie.value, drawB.value]).toEqual([62606, 997, 8088]);
+    expect(tie.value & 1).toBe(1);
+
+    const equalSpeedWhiteHerbLead = (): BattleScriptPartyState => {
+      const base = party(53); // Ekans / Intimidate
+      return Object.freeze([
+        Object.freeze({
+          ...base[0],
+          speed: 111,
+          item: 180, // White Herb exposes the speed-ordered item pass.
+        }),
+        ...base.slice(1),
+      ]) as unknown as BattleScriptPartyState;
+    };
+    const result = initializeFreshFactoryBattle({
       requestId: 1,
-      rngSeed: 3,
-      playerParty: party(300),
-      opponentParty: party(300),
+      rngSeed: receiptSeed,
+      playerParty: equalSpeedWhiteHerbLead(),
+      opponentParty: equalSpeedWhiteHerbLead(),
     });
-    expect(result).toMatchObject({
-      kind: "unsupported-branch",
-      sourceConstruct: expect.stringContaining("equal-speed"),
-    });
+    expect(result.state.rng).toEqual({ calls: 3, value: drawB.rngValue });
+    expect(result.state.rules.rulesContext.randomTurnNumber).toBe(8088);
+    expect(result.events.flatMap(({ payload }) =>
+      payload.kind === "set-battler-item" ? [payload.battler] : []
+    )).toEqual([1, 0]);
   });
 });

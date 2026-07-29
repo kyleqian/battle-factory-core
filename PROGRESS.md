@@ -13,6 +13,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 674 — [BOUNDED MAIN WORKER 2026-07-29 ~01:27] fresh-start equal-speed barrier retired
+
+- **State:** assigned rung (a) is green and ready to commit at **461 files /
+  4956 tests**, production build, `git diff --check`, and focused lifecycle/
+  orchestrator/ratchet coverage **14/14**. Executable (**214/214 effects,
+  355/355 moves**) and ability/item (**69/69 abilities, 42/42 hold effects**)
+  censuses regenerate byte-identically.
+- **Did:** consumed scout §4.1's landed Scene-OFF receipt. Equal effective
+  speeds now add exactly one `Random()` strictly after draw A and before draw
+  B; `tie & 1` stable-orders `[0,1]` or `[1,0]`, and the post-tie cursor feeds
+  every entry hook before B overwrites `randomTurnNumber`. The Tier-1 receipt
+  pin reproduces **62606 → 997 → 8088**, exactly **3 calls**, `997 & 1 = 1`,
+  and observes resulting hook order **[1,0]**.
+- **Next:** Gate-5 rung 12 proper: loop the rung-11 carrier through seven real
+  generated terminal battles for three deterministic win seeds, include an
+  accepted swap that is actually fielded, assert round terminal counters and
+  ledgers, and add one immediate real-loss seed.
+- **Notes:** `factoryBattleStart.ts`'s last `unsupported-branch` and union
+  return path are gone; its module ratchet moves exactly **1→0**. No census
+  artifact, canonical recording, issue, scout/probe/battle-lab,
+  commentary/presentation, or AI-switch-breadth file changed. PAPERCUT: none.
+
+---
+
 ## 673 — [BOUNDED MAIN WORKER 2026-07-29 ~01:15] controller owns one generated battle lifecycle
 
 - **State:** Gate-5 plan rung 11 is committed at `9a741230` and green at
@@ -99,43 +123,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   in Frontier battles (`battle_ai_script_commands.c:292-306`). No barrier/
   ratchet, census artifact, round/controller, generation, doc, issue,
   presentation, or canonical-recording file changed. PAPERCUT: none.
-
----
-
-## 671 — [BOUNDED MAIN WORKER 2026-07-29 ~00:33] fresh 3v3 whole battle reaches real terminal
-
-- **State:** Gate-5 plan rung 4 is green at **457 files / 4915 tests** plus
-  production build, `git diff --check`, Battle Scene OFF oracle info, and
-  focused whole-battle/lifecycle/ratchet coverage **62/62**. Executable
-  (**214/214 effects, 355/355 moves**) and ability/item (**69/69 abilities,
-  42/42 hold effects**) censuses regenerate byte-identically.
-- **Did:** `factoryWholeBattle.test.ts` builds two complete three-mon parties
-  only from real corpus set ids, enters through the fresh initializer, and
-  loops solely over published command/forced-switch requests through
-  `submitBattleDecision`. Real moves faint all three opponents; Azurill's real
-  faint publishes and resumes one player forced switch; Hyper Beam recharge
-  and Ice Ball exercise two reducer-owned locked trainer turns; the terminal
-  adapts to a real win. Every submission is request-legal and the entire
-  battle pins one monotonic **32-call** LCG cursor from draws A/B through the
-  terminal hit chain.
-- **Supervisor fold (same round, side merge):** rung 10 landed (`af959d79`)
-  — round swap mutation unified with the full rental record (identity copy
-  `battle_factory_screen.c:2350-2360`, party reconstruction
-  `battle_factory.c:433-464`, item restore `:714-728`, heal
-  `script_pokemon_util.c:30-58`, PP-Up formula `pokemon.c:4650-4653`);
-  accept/decline both feed the next kernel party exactly; between-battle
-  full restore proven. Union green **458 files / 4918 tests**, census
-  no-op.
-- **Next:** rung 6 (production AI view/driver extending the whole-battle
-  test, main) + rung 9 (commentary favorite-type/battle-style rules with
-  OFF compare, side) launch this round; then rung 11 (controller owns one
-  real battle lifecycle) and rung 12 (seven battles). Equal-speed pre-hook
-  receipt barrier stays intact.
-- **Notes:** whole-battle reachability exposed and fixed two narrow over-
-  barriers: inactive move-end cure items now pass unless their matching
-  status/stat condition exists; trainer faint replacement selects the sole
-  legal bench mon without entering outcome-irrelevant pass-2 damage scoring.
-  Competitive multi-candidate damage fallback remains explicitly barriered.
-  No barrier count/ratchet moved; no canonical recording, issue, round/swap,
-  generation, scout/probe/battle-lab, or presentation file changed.
-  PAPERCUT: none.
