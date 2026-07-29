@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { advanceRngValue } from "../src/engine/rng.ts";
 import {
+  BATTLE_1_CANONICAL_AMBIENT_GAP_STEPS,
+  BATTLE_1_CANONICAL_OPPONENT_RNG_START,
   BATTLE_1_FRONTIER_MON_INDICES,
   generateBattle1OpponentTeam,
   natureFromPersonality,
@@ -65,8 +67,8 @@ import {
 // opponent personalities are "session-input-dependent, not anchor-fixed
 // constants." generateBattle1OpponentTeam takes them as an explicit
 // parameter rather than baking them in as if they were universal constants.
-const STARTING_RNG_VALUE = 0x7b9fce20; // 2074070560 - see derivation above
-const AMBIENT_GAP_STEPS = [0, 11, 7, 8] as const;
+const STARTING_RNG_VALUE = BATTLE_1_CANONICAL_OPPONENT_RNG_START;
+const AMBIENT_GAP_STEPS = BATTLE_1_CANONICAL_AMBIENT_GAP_STEPS;
 
 const RELAXED_NATURE = 7;
 const QUIRKY_NATURE = 24;

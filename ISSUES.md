@@ -5,26 +5,6 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #41 — Production engine modules import canonical RAM recordings
-
-**Symptom:** shipped `src/engine/` code reads recorded state from the single
-canonical playthrough instead of computing it, so it is correct only for that
-playthrough.
-
-**Confirmed** (grep, 2026-07-24, `856b3b4`):
-- `battleScene.ts:651-653` imports `battle1-turn1-ram-dump.json`,
-  `battle1-turn2-ram-dump.json`, `battle1-grovyle-faint-ram-dump.json` and
-  reads battler HP/maxHP out of them (`:916-1267`).
-- `factorySwapPresentation.ts:2` imports `battle1-swap-rentalmons-dump.json`.
-- 57 of the 114 files in `src/data/gen/` are `*-dump`/`*-probe`/`*-watch`/
-  `*-boundaries` recordings. (`featherDance.ts`'s probe imports were retired
-  2026-07-24 by the anim-script interpreter, ex-#40.)
-
-**Leads:** the HP reads are the cheapest to retire — they become kernel
-semantic events once ROADMAP S10 step (ii) lands `datahpupdate`. Retire each
-import as its owning mechanism gains a real source, and keep the dump files
-for Tier-1 assertions and extractors. ROADMAP S10 §4 forbids new ones.
-
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** the production battle presentation is keyed to *which turn of the
