@@ -6,7 +6,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 
 ## Headline
 
-- **Abilities: 43/70 members engine-referenced** (weighted by L50 set-carriers: 729/1103); 4 zero-carrier, 3 without battle hooks (out-of-battle only).
+- **Abilities: 55/70 members engine-referenced** (weighted by L50 set-carriers: 905/1103); 4 zero-carrier, 3 without battle hooks (out-of-battle only).
 - **Hold effects: 22/42 members engine-referenced** (weighted by L50 set-carriers: 713/850); 21 zero-carrier, 3 without battle hooks.
 - All 15 ground-truth validation checks passed.
 
@@ -15,36 +15,26 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | Ability | Status | L50 carriers (det.) | All | Delegate cases | Inline rules | AI | Engine refs |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | ABILITY_CHLOROPHYLL | unreferenced | 38 (32) | 38 | — | 2 | 0 | 0 |
-| ABILITY_THICK_FAT | unreferenced | 36 (16) | 36 | — | 1 | 0 | 0 |
-| ABILITY_GUTS | unreferenced | 36 (24) | 36 | — | 2 | 0 | 0 |
 | ABILITY_SWIFT_SWIM | unreferenced | 34 (13) | 34 | — | 2 | 0 | 0 |
 | ABILITY_STATIC | unreferenced | 27 (17) | 27 | ON_DAMAGE | 0 | 0 | 0 |
 | ABILITY_RUN_AWAY | unreferenced | 23 (2) | 23 | — | 4 | 0 | 0 |
-| ABILITY_OVERGROW | unreferenced | 21 (21) | 21 | — | 1 | 0 | 0 |
-| ABILITY_BLAZE | unreferenced | 21 (21) | 21 | — | 1 | 0 | 0 |
-| ABILITY_TORRENT | unreferenced | 21 (21) | 21 | — | 1 | 0 | 0 |
 | ABILITY_POISON_POINT | unreferenced | 18 (14) | 18 | ON_DAMAGE | 0 | 0 | 0 |
-| ABILITY_SWARM | unreferenced | 18 (8) | 18 | — | 1 | 0 | 0 |
 | ABILITY_CUTE_CHARM | unreferenced | 13 (13) | 13 | ON_DAMAGE | 0 | 0 | 0 |
 | ABILITY_EFFECT_SPORE | unreferenced | 8 (8) | 8 | ON_DAMAGE | 0 | 0 | 0 |
 | ABILITY_FLAME_BODY | unreferenced | 8 (5) | 8 | ON_DAMAGE | 0 | 0 | 0 |
 | ABILITY_PICKUP | unreferenced | 7 (6) | 7 | — | 2 | 0 | 0 |
-| ABILITY_HUSTLE | unreferenced | 6 (1) | 6 | — | 2 | 0 | 0 |
 | ABILITY_ARENA_TRAP | unreferenced | 6 (0) | 6 | — | 2 | 3 | 0 |
-| ABILITY_PURE_POWER | unreferenced | 5 (5) | 5 | — | 1 | 0 | 0 |
 | ABILITY_COMPOUND_EYES | unreferenced | 4 (3) | 4 | — | 2 | 0 | 0 |
-| ABILITY_HUGE_POWER | unreferenced | 4 (0) | 4 | — | 1 | 0 | 0 |
 | ABILITY_MAGNET_PULL | unreferenced | 4 (0) | 4 | — | 2 | 3 | 0 |
-| ABILITY_MARVEL_SCALE | unreferenced | 4 (4) | 4 | — | 1 | 0 | 0 |
 | ABILITY_SHADOW_TAG | unreferenced | 3 (3) | 3 | — | 2 | 3 | 0 |
 | ABILITY_ROUGH_SKIN | unreferenced | 3 (3) | 3 | ON_DAMAGE | 0 | 0 | 0 |
 | ABILITY_COLOR_CHANGE | unreferenced | 2 (2) | 2 | ON_DAMAGE | 0 | 0 | 0 |
-| ABILITY_PLUS | unreferenced | 2 (2) | 2 | — | 2 | 0 | 0 |
-| ABILITY_MINUS | unreferenced | 2 (2) | 2 | — | 2 | 0 | 0 |
 | ABILITY_LEVITATE | engine-referenced | 54 (54) | 54 | — | 10 | 0 | 9 |
 | ABILITY_STURDY | engine-referenced | 42 (13) | 42 | — | 3 | 0 | 3 |
 | ABILITY_ROCK_HEAD | engine-referenced | 40 (3) | 40 | — | 1 | 0 | 3 |
 | ABILITY_INTIMIDATE | engine-referenced | 38 (28) | 38 | ON_SWITCHIN, INTIMIDATE1, INTIMIDATE2 | 0 | 0 | 2 |
+| ABILITY_THICK_FAT | engine-referenced | 36 (16) | 36 | — | 1 | 0 | 2 |
+| ABILITY_GUTS | engine-referenced | 36 (24) | 36 | — | 2 | 0 | 3 |
 | ABILITY_CLEAR_BODY | engine-referenced | 34 (29) | 34 | — | 3 | 0 | 12 |
 | ABILITY_PRESSURE | engine-referenced | 34 (30) | 46 | — | 6 | 0 | 11 |
 | ABILITY_OBLIVIOUS | engine-referenced | 33 (16) | 33 | ON_DAMAGE, IMMUNITY | 3 | 0 | 3 |
@@ -55,7 +45,11 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_FLASH_FIRE | engine-referenced | 25 (9) | 25 | ABSORBING | 0 | 1 | 2 |
 | ABILITY_INNER_FOCUS | engine-referenced | 24 (12) | 34 | — | 3 | 0 | 3 |
 | ABILITY_NATURAL_CURE | engine-referenced | 23 (5) | 23 | — | 1 | 1 | 2 |
+| ABILITY_OVERGROW | engine-referenced | 21 (21) | 21 | — | 1 | 0 | 2 |
+| ABILITY_BLAZE | engine-referenced | 21 (21) | 21 | — | 1 | 0 | 2 |
+| ABILITY_TORRENT | engine-referenced | 21 (21) | 21 | — | 1 | 0 | 2 |
 | ABILITY_SHELL_ARMOR | engine-referenced | 21 (4) | 21 | — | 1 | 0 | 2 |
+| ABILITY_SWARM | engine-referenced | 18 (8) | 18 | — | 1 | 0 | 2 |
 | ABILITY_DAMP | engine-referenced | 16 (0) | 16 | — | 2 | 0 | 3 |
 | ABILITY_OWN_TEMPO | engine-referenced | 16 (2) | 16 | IMMUNITY | 5 | 0 | 5 |
 | ABILITY_TRACE | engine-referenced | 16 (6) | 16 | ON_SWITCHIN, TRACE | 0 | 0 | 2 |
@@ -75,12 +69,18 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_SUCTION_CUPS | engine-referenced | 7 (7) | 7 | — | 1 | 0 | 3 |
 | ABILITY_SHIELD_DUST | engine-referenced | 6 (6) | 6 | — | 2 | 0 | 4 |
 | ABILITY_RAIN_DISH | engine-referenced | 6 (0) | 6 | ENDTURN | 0 | 0 | 2 |
+| ABILITY_HUSTLE | engine-referenced | 6 (1) | 6 | — | 2 | 0 | 2 |
 | ABILITY_VITAL_SPIRIT | engine-referenced | 6 (5) | 6 | IMMUNITY | 5 | 0 | 9 |
 | ABILITY_LIMBER | engine-referenced | 5 (5) | 5 | IMMUNITY | 4 | 0 | 6 |
 | ABILITY_CLOUD_NINE | engine-referenced | 5 (0) | 5 | ON_SWITCHIN | 1 | 0 | 18 |
 | ABILITY_MAGMA_ARMOR | engine-referenced | 5 (2) | 5 | IMMUNITY | 1 | 0 | 2 |
 | ABILITY_TRUANT | engine-referenced | 5 (5) | 5 | ENDTURN | 2 | 0 | 7 |
+| ABILITY_PURE_POWER | engine-referenced | 5 (5) | 5 | — | 1 | 0 | 2 |
+| ABILITY_HUGE_POWER | engine-referenced | 4 (0) | 4 | — | 1 | 0 | 2 |
+| ABILITY_MARVEL_SCALE | engine-referenced | 4 (4) | 4 | — | 1 | 0 | 2 |
 | ABILITY_SPEED_BOOST | engine-referenced | 3 (2) | 3 | ENDTURN | 0 | 0 | 4 |
+| ABILITY_PLUS | engine-referenced | 2 (2) | 2 | — | 2 | 0 | 3 |
+| ABILITY_MINUS | engine-referenced | 2 (2) | 2 | — | 2 | 0 | 3 |
 | ABILITY_FORECAST | engine-referenced | 2 (2) | 2 | ON_SWITCHIN, FORECAST | 1 | 0 | 5 |
 | ABILITY_WHITE_SMOKE | engine-referenced | 2 (2) | 2 | — | 3 | 0 | 12 |
 | ABILITY_WONDER_GUARD | engine-referenced | 1 (1) | 1 | — | 12 | 1 | 10 |

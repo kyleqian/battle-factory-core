@@ -1362,6 +1362,9 @@ export function calculateBattleScriptBaseDamageForCurrentMove(
       types: attackerBattler.types,
       statStages: toDamageCalcStatStages(attackerBattler),
       isBurned: (attackerBattler.status1 & STATUS1_BURN) !== 0,
+      hasStatus1: attackerBattler.status1 !== 0,
+      hp: attackerBattler.hp,
+      maxHP: attackerBattler.maxHP,
       ability: ABILITY_NAME_BY_ID[attackerBattler.ability] ?? null,
     },
     defender: {
@@ -1372,6 +1375,8 @@ export function calculateBattleScriptBaseDamageForCurrentMove(
       level: targetBattler.level,
       types: targetBattler.types,
       statStages: toDamageCalcStatStages(targetBattler),
+      hasStatus1: targetBattler.status1 !== 0,
+      ability: ABILITY_NAME_BY_ID[targetBattler.ability] ?? null,
     },
     movePower,
     moveType,
@@ -1380,6 +1385,7 @@ export function calculateBattleScriptBaseDamageForCurrentMove(
     weather: rulesContext.weather,
     weatherHasEffect: weatherHasEffectForBaseDamage(rulesContext),
     currentMove: rulesContext.currentMove,
+    activeBattlerAbilities: activeBattlers.map((b) => ABILITY_NAME_BY_ID[b.ability] ?? null),
   });
 }
 
