@@ -5,7 +5,7 @@
 
 import type { GbaButton } from "../input.ts";
 import {
-  ANCHOR_DRAFT_SCREEN_STATE,
+  ANCHOR_DRAFT_RENTAL_RECORDS,
   MENU_OPTION_OTHERS,
   MENU_OPTION_RENT,
   MENU_OPTION_SUMMARY,
@@ -15,6 +15,7 @@ import {
   applyDeselect,
   applySelect,
   chosenMonSpecies,
+  createDraftScreenStateFromRentalRecords,
   cursorMoveStallsBalls,
   isMonsConfirmed,
   moveCursor,
@@ -307,7 +308,7 @@ export function createInitialState(
 ): EngineState {
   return {
     frame: 0,
-    draftScreen: ANCHOR_DRAFT_SCREEN_STATE,
+    draftScreen: createDraftScreenStateFromRentalRecords(ANCHOR_DRAFT_RENTAL_RECORDS),
     keyRepeat: INITIAL_KEY_REPEAT_STATE,
     summaryScreen: CLOSED_SUMMARY_SCREEN_STATE,
     prebattleRoom: null,

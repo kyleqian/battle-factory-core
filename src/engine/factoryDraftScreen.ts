@@ -27,6 +27,10 @@ import {
 } from "./confirmReveal.ts";
 import { bg3ColorWide, blend8, FLASH_BLENDED_COLOR, target2Color } from "./monPicRender.ts";
 import { ANCHOR_SPECIES_NAME_FADE_STATE, speciesNameColor, type SpeciesNameFadeState } from "./speciesNameFade.ts";
+import {
+  createFactoryCorpusPartyMember,
+  type FactoryCorpusPartyInstance,
+} from "./factoryCorpusParty.ts";
 
 import menuBgData from "../assets/gen/menu-bg.json" with { type: "json" };
 import pokeballData from "../assets/gen/pokeball.json" with { type: "json" };
@@ -35,6 +39,7 @@ import textPaletteData from "../assets/gen/text-palette.json" with { type: "json
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
 import draftPoolHeaderData from "../data/gen/draft-pool-header.json" with { type: "json" };
+import anchorStateData from "../data/gen/anchor-state.json" with { type: "json" };
 import menuHighlightData from "../assets/gen/menu-highlight.json" with { type: "json" };
 
 const menuBg = menuBgData as unknown as TileBg;
@@ -73,6 +78,17 @@ export interface RentalSlot {
   category: string;
   species: string;
 }
+
+type FactorySpeciesHeader = Readonly<{
+  species: string;
+  name: string;
+  category: string;
+}>;
+
+const FACTORY_SPECIES_HEADERS = new Map(
+  (draftPoolHeaderData as { speciesHeaders: FactorySpeciesHeader[] }).speciesHeaders
+    .map((header) => [header.species, header]),
+);
 
 export type DraftScreenMode = "cursor" | "menu";
 
@@ -685,27 +701,78 @@ export function renderFactoryDraftScreenFaded(state: DraftScreenState, bgY: numb
   return fb;
 }
 
-const draftPool = (draftPoolHeaderData as { pool: RentalSlot[] }).pool;
+type AnchorRental = Readonly<{
+  frontierMonIndex: number;
+  personality: number;
+  otId: number;
+  ivs: Readonly<Record<"hp" | "attack" | "defense" | "speed" | "spAttack" | "spDefense", number>>;
+  abilityNum: 0 | 1;
+}>;
 
-export const ANCHOR_DRAFT_SCREEN_STATE: DraftScreenState = {
-  mode: "cursor",
-  cursorPos: 0,
-  menuCursorPos: 0,
-  slots: draftPool,
-  message: "Select the first POKéMON.",
-  monPic: INITIAL_MON_PIC_STATE,
-  hasActed: false,
-  hasOpenedMonPic: false,
-  cursorRedraw: null,
-  menuHighlightRedraw: null,
-  selectedIds: [0, 0, 0, 0, 0, 0],
-  selectingMonsState: 1,
-  ballAnims: [null, null, null, null, null, null],
-  rentConfirmRedraw: null,
-  ballAnimStall: [],
-  confirmReveal: null,
-  yesNoCursorPos: INITIAL_YES_NO_CURSOR_POS,
-  yesNoCursorRedraw: null,
-  speciesNameFade: ANCHOR_SPECIES_NAME_FADE_STATE,
-  closingFlashResidual: false,
-};
+const anchorRentals = (anchorStateData as { rentals: AnchorRental[] }).rentals;
+
+/** The six source rental identities behind the recorded draft anchor. */
+export const ANCHOR_DRAFT_RENTAL_RECORDS: readonly FactoryCorpusPartyInstance[] =
+  Object.freeze(anchorRentals.map((rental, index) => {
+    const ivs = Object.values(rental.ivs);
+    if (!ivs.every((iv) => iv === ivs[0])) {
+      throw new Error(`canonical draft rental ${index} does not have uniform IVs`);
+    }
+    return Object.freeze({
+      setId: rental.frontierMonIndex,
+      personality: rental.personality,
+      fixedIv: ivs[0]!,
+      abilitySlot: rental.abilityNum,
+      otId: rental.otId,
+    });
+  }));
+
+/**
+ * Presentation-boundary adapter for GenerateInitialRentalMons output.
+ *
+ * This constructs state only. The renderer's arbitrary-species sprite/art
+ * breadth remains a separate asset slice.
+ */
+export function createDraftScreenStateFromRentalRecords(
+  rentalRecords: readonly FactoryCorpusPartyInstance[],
+): DraftScreenState {
+  if (rentalRecords.length !== 6) {
+    throw new Error(`Factory draft screen requires exactly 6 rental records, got ${rentalRecords.length}`);
+  }
+  const slots = rentalRecords.map((record, index): RentalSlot => {
+    const member = createFactoryCorpusPartyMember(record);
+    const header = FACTORY_SPECIES_HEADERS.get(member.speciesName);
+    if (header === undefined) {
+      throw new Error(
+        `Factory draft rental ${index} has no extracted species header for ${member.speciesName}`,
+      );
+    }
+    return Object.freeze({ species: header.name, category: header.category });
+  });
+
+  return {
+    mode: "cursor",
+    cursorPos: 0,
+    menuCursorPos: 0,
+    slots,
+    message: "Select the first POKéMON.",
+    monPic: INITIAL_MON_PIC_STATE,
+    hasActed: false,
+    hasOpenedMonPic: false,
+    cursorRedraw: null,
+    menuHighlightRedraw: null,
+    selectedIds: [0, 0, 0, 0, 0, 0],
+    selectingMonsState: 1,
+    ballAnims: [null, null, null, null, null, null],
+    rentConfirmRedraw: null,
+    ballAnimStall: [],
+    confirmReveal: null,
+    yesNoCursorPos: INITIAL_YES_NO_CURSOR_POS,
+    yesNoCursorRedraw: null,
+    speciesNameFade: ANCHOR_SPECIES_NAME_FADE_STATE,
+    closingFlashResidual: false,
+  };
+}
+
+export const ANCHOR_DRAFT_SCREEN_STATE =
+  createDraftScreenStateFromRentalRecords(ANCHOR_DRAFT_RENTAL_RECORDS);
