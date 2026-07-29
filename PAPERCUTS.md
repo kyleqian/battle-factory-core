@@ -481,3 +481,16 @@ Per entry:
   launching two workers whose acceptance both requires a full-suite run at
   the same wall-clock window, and treat a contended full-suite claim as
   unverified until rerun serially.
+
+## Parallel `npm run compare` invocations race over `tools/compare/out/latest` (2026-07-29)
+
+- **What:** every compare run writes its artifacts to
+  `tools/compare/out/latest`; a worker running two comparisons in parallel
+  (or a supervisor spot-checking while a worker compares) has the second
+  run clobber the first's output mid-read, producing confusing artifact
+  mismatches.
+- **Hits:** 1 (Slice-5 worker, 2026-07-29).
+- **Cost each:** ~1-5 min.
+- **Workaround:** run compares serially within a step; treat
+  `out/latest` as valid only immediately after its own run. A per-run
+  output dir (timestamp/PID suffix) would fix it mechanically.

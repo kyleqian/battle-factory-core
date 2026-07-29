@@ -13,6 +13,60 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 702 — [SUPERVISOR WIND-DOWN 2026-07-29 ~14:45] 6-round session: battle-command seam Slices 1-5 same-day, draft adapter, battle-pic catalogs, two CBM/CV pairs
+
+- **State:** master green at **518 files / 5250 tests + 1 deliberate
+  animation-lane skip**, production build, `git diff --check` clean, both
+  censuses idempotent (69/69 abilities weighted 1096, 42/42 hold effects
+  weighted 850, 17/17 checks), import/barrier ratchet 6/6 (in-suite),
+  DEFERRED.md **empty all session**, no orphan worktrees or worker
+  branches. `animation-main` folded at wind-down (+7 commits: Hypnosis
+  exact through the production compositor, Mega Punch exact, Rolling Kick
+  evidence handoff); no "For the main program" ledger asks. The animation
+  supervisor may still be live — any tail is for the next orient fold.
+- **Session totals (6 rounds / 9 workers, 0 failed steps):** the
+  battle-command generic seam went from design to five landed slices
+  same-day. (1) `docs/battle-command-seam-design.md` (`243f2e64`): render
+  inventory, request-ID-owned phase-relative lifecycle, equivalence-first
+  plan, immutable 14-trace regression table, six ≤45-min slices. (2)
+  Slices 1-5 landed in order (`9e5799bf`, `a4a2a9dc`, `4d27ff46`+
+  `0a14c6ad`, `1b72c15c`, `c9353673`; entries 697-701): state constructor
+  with canonical deep equality → lifecycle reducer + ordinary
+  `submitBattleDecision` bridge → canonical Battle-2 renderer swap →
+  live-PP/arbitrary healthboxes (no turn-resolved parameter left in the
+  generic path) → de-baked action chrome + typed POKéMON party-handoff.
+  All fourteen canonical menu windows exact after every slice (209/235/90
+  + turns 3-13). (3) Rung-14 draft generated-slots adapter (`73543153`):
+  `createDraftScreenStateFromRentalRecords` + additive 376-species
+  name/category extraction; draft traces 13/38/66 exact. (4) 376-species
+  front/back battle-pic catalogs banked (`3e0737f3`, back 3.5 MB front
+  6.8 MB, existing entries byte-identical) — Slice 6's asset dependency.
+  (5) Two CBM/CV ports with live OFF receipts on seeds 1+99:
+  `AI_CBM_SpDefUp` (doc §28, closes the pair with the shared CV half) and
+  the Sleep pair `AI_CBM_Sleep`+`AI_CV_Sleep` (doc §29; ability census
+  delta Insomnia/Vital Spirit 9→11, runner-up Roar deferred on staging
+  cost).
+- **Next (ordered):** (i) design §4 Slice 6 — connect the generated
+  command boundary + battle-pic catalogs to the lifecycle, then the
+  explicit-OFF 128-frame breadth trace (only after the generated route
+  visibly reaches the window); (ii) arbitrary-species party-menu breadth
+  (icons banked; the voluntary party-selector renderer is the named
+  remaining dependency of the POKéMON handoff); (iii) trainer-pic OFF
+  window for a non-canonical trainer once a generated route reaches it;
+  (iv) commentary explicit-OFF pre-battle checkpoint (entry 690, likely
+  harness-side); (v) remaining CBM/CV arms (Roar next candidate, needs
+  party staging); (vi) reveal class-B sites with their named barriers;
+  (vii) Gate-6 interaction matrix.
+- **Notes:** oracle freshness FAIL at orient was again the docs-only
+  false positive (807b449 NOTES.md-only; services kept, healthy all day).
+  Two papercuts recorded: cross-lane full-suite contention (new entry,
+  workaround now in briefs: full suite once at end, staggered) and
+  parallel compares racing over `tools/compare/out/latest` (bumped
+  below). Side-lane briefs naming the last supervisor-verified green
+  commit worked cleanly all session (zero base-drift bites).
+
+---
+
 ## 701 — [BOUNDED MAIN WORKER 2026-07-29 ~14:32] Battle-command seam Slice 5 landed
 
 - **State:** implementation `c9353673`; tree green at **516 files / 5229
@@ -59,38 +113,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 699 — [BOUNDED MAIN WORKER 2026-07-29 ~13:42] Battle-command seam Slice 3 landed
-
-- **State:** implementation `4d27ff46` + scope cleanup `0a14c6ad`; tree green
-  at **515 files / 5205 tests + 1 deliberate animation-lane skip**,
-  production build, `git diff --check`, and import/barrier ratchet **6/6**.
-- **Did:** added the phase-only
-  `renderBattleCommandPresentation(framebuffer, presentation, assets)` seam
-  and swapped only the canonical Battle-2 blank/action/FIGHT path onto it.
-  The legacy handoff now projects action age and open/close deltas into typed
-  phase-relative clocks; render selection and the lagged FIGHT cursor consume
-  `BattleCommandPresentationState`. A-confirm/turn resolution remains on its
-  unchanged predecessor.
-- **Next:** dispatch design §4 Slice 4: feed live presentation PP and both
-  arbitrary healthboxes through the generic render path; retain the complete
-  fourteen-window regression set.
-- **Notes:** all fourteen windows exact: Battle 2 **209/209**, FIGHT
-  **235/235**, reopen **90/90**; turns 3–13 **254/254, 44/44, 42/42, 44/44,
-  93/93, 88/88, 111/111, 83/83, 56/56, 46/46, 57/57**. No core, trace,
-  recording import, turn-resolution renderer, new battle/turn/tick selector,
-  issue, census, roadmap, animation, PP/HP/RNG, or capture list changed.
-  PAPERCUT: concurrent lane builds caused host memory pressure and one
-  signal-143 retry, ~10 min.
-- **Supervisor fold (post-step):** side-lane battle-pic extraction merged
-  (`3e0737f3`): both battle-pic catalogs now cover all **376** Factory
-  species (374 Level-50 + 2 Open-only; back 3.5 MB, front 6.8 MB), existing
-  11 front/12 back entries byte-identical, deterministic double-run proven,
-  generated-data coverage test added. Slice 6's arbitrary-field asset
-  dependency is banked; no consumer wiring yet. The Terra worker could not
-  finish `npm test` under cross-lane contention and honestly said so —
-  supervisor ran the full suite in the worktree (**516/5206** green) before
-  merging; union after merge **516 files / 5207 tests + 1 skip**, build,
-  `git diff --check` clean. Cross-lane full-suite contention papercut
-  (both lanes, ~30 min combined) bumped in PAPERCUTS.md.
-
----

@@ -1,3 +1,38 @@
+## 699 — [BOUNDED MAIN WORKER 2026-07-29 ~13:42] Battle-command seam Slice 3 landed
+
+- **State:** implementation `4d27ff46` + scope cleanup `0a14c6ad`; tree green
+  at **515 files / 5205 tests + 1 deliberate animation-lane skip**,
+  production build, `git diff --check`, and import/barrier ratchet **6/6**.
+- **Did:** added the phase-only
+  `renderBattleCommandPresentation(framebuffer, presentation, assets)` seam
+  and swapped only the canonical Battle-2 blank/action/FIGHT path onto it.
+  The legacy handoff now projects action age and open/close deltas into typed
+  phase-relative clocks; render selection and the lagged FIGHT cursor consume
+  `BattleCommandPresentationState`. A-confirm/turn resolution remains on its
+  unchanged predecessor.
+- **Next:** dispatch design §4 Slice 4: feed live presentation PP and both
+  arbitrary healthboxes through the generic render path; retain the complete
+  fourteen-window regression set.
+- **Notes:** all fourteen windows exact: Battle 2 **209/209**, FIGHT
+  **235/235**, reopen **90/90**; turns 3–13 **254/254, 44/44, 42/42, 44/44,
+  93/93, 88/88, 111/111, 83/83, 56/56, 46/46, 57/57**. No core, trace,
+  recording import, turn-resolution renderer, new battle/turn/tick selector,
+  issue, census, roadmap, animation, PP/HP/RNG, or capture list changed.
+  PAPERCUT: concurrent lane builds caused host memory pressure and one
+  signal-143 retry, ~10 min.
+- **Supervisor fold (post-step):** side-lane battle-pic extraction merged
+  (`3e0737f3`): both battle-pic catalogs now cover all **376** Factory
+  species (374 Level-50 + 2 Open-only; back 3.5 MB, front 6.8 MB), existing
+  11 front/12 back entries byte-identical, deterministic double-run proven,
+  generated-data coverage test added. Slice 6's arbitrary-field asset
+  dependency is banked; no consumer wiring yet. The Terra worker could not
+  finish `npm test` under cross-lane contention and honestly said so —
+  supervisor ran the full suite in the worktree (**516/5206** green) before
+  merging; union after merge **516 files / 5207 tests + 1 skip**, build,
+  `git diff --check` clean. Cross-lane full-suite contention papercut
+  (both lanes, ~30 min combined) bumped in PAPERCUTS.md.
+
+---
 ## 698 — [BOUNDED MAIN WORKER 2026-07-29 ~12:47] Battle-command seam Slice 2 landed
 
 - **State:** implementation `a4a2a9dc`; tree green at **515 files / 5198
