@@ -6048,3 +6048,138 @@ this angle at all once real weather exists (every weather handler reads
 the same ground truth, independent of any predecessor's own write). ISSUES
 #47's own residual should be trimmed to name exactly this remainder, not
 left implying all 7 are equally untested.
+
+## 28. 2026-07-29 addendum #18: `AI_CBM_SpDefUp` closes the already-ported shared `AI_CV_SpDefUp` pair
+
+Bounded side-lane implementation session, Battle Scene OFF oracle. This is
+the next unported CBM/CV pair behind the generic barrier, but only its CBM
+half needed new production code: §22 already ported the source-complete
+`AI_CV_SpDefUp` body shared by `EFFECT_SPECIAL_DEFENSE_UP(_2)`,
+`EFFECT_COSMIC_POWER`, and `EFFECT_CALM_MIND`.
+
+### 28.1 Selection and reachability
+
+`MOVE_AMNESIA` (`EFFECT_SPECIAL_DEFENSE_UP_2`) occurs in **13 distinct
+Level-50 Frontier sets** (catalog indexes 252, 258, 259, 321, 364, 384, 410,
+525, 563, 676, 763, 764, 786). That makes this pair both genuinely
+Factory-reachable and the lowest-cost remaining close: its CV half was
+already live-verified through Cosmic Power and Calm Mind in §22.
+
+The runner-up was `AI_CBM_AccUp` + `AI_CV_AccuracyUp`. It was passed over
+because both `EFFECT_ACCURACY_UP` and `_2` have **zero moves anywhere in
+Emerald's 355-move catalog**, hence zero Level-50 carriers and no possible
+live decision fixture (§2 already identified this vacuous reachability).
+
+### 28.2 Source-exact body and branch polarity
+
+CBM dispatch is separate for both effect constants
+(`data/battle_ai_scripts.s:112,137`), but both route to one two-instruction
+body (`:265-267`):
+
+```asm
+AI_CBM_SpDefUp:
+	if_stat_level_equal AI_USER, STAT_SPDEF, MAX_STAT_STAGE, Score_Minus10
+	end
+```
+
+`Cmd_if_stat_level_equal`
+(`src/battle_ai_script_commands.c:1713-1725`) reads the AI battler
+(`sBattler_AI`) for `AI_USER` and compares its live
+`gBattleMons[].statStages[STAT_SPDEF]`. Therefore:
+
+- **equal to 12**: JUMP to `Score_Minus10`, applying exactly `-10`;
+- **every non-max value**: FALLTHROUGH to `end`, applying `0`;
+- both paths make zero `Random()` calls and no ability/status reads.
+
+Tier-1 covers stage 12, non-max stages 11/6/0, the optional-state neutral
+default, Amnesia's real `_2` dispatch, and continued reachability of the
+generic CBM barrier via unported `EFFECT_HAZE`. The CV dispatch remains the
+four-effect convergence at `battle_ai_scripts.s:663,692,770,774`, entering
+the already-source-complete `AI_CV_SpDefUp` body at `:986-1025`; no CV gate
+or roll polarity changed in this addendum.
+
+### 28.3 Live fixture design: build the max stage with real moves, then read the score through PP
+
+The pair uses:
+
+- `mechanic-factory-ai-cbm-spdefup-control-off.json`;
+- `mechanic-factory-ai-cbm-spdefup-reach-off.json`.
+
+Both are generated reproducibly by
+`tools/probe/generate-factory-ai-spdefup-fixtures.ts` and use complete
+`overrides.parties` records. Opponent slot 0 is a level-5 Magikarp carrying
+Light Screen in all four slots. Player Miltank uses Vital Throw in all four
+slots: its negative priority lets Magikarp set Light Screen first, then the
+hit KOs Magikarp. Opponent slot 1 is Dusclops with
+`[Amnesia, Light Screen, Light Screen, Light Screen]`.
+
+This relay makes the pick causal and safe:
+
+1. Dusclops switches in at 115/115 with its side's Light Screen already
+   active.
+2. Below max SPDEF, Amnesia's CBM score is `0`, strictly above each
+   already-active Light Screen slot's `-8`; the ROM chooses Amnesia three
+   consecutive times, raising SPDEF `6→8→10→12`.
+3. Vital Throw cannot affect Ghost-type Dusclops, so it remains 115/115;
+   no damage roll or HP-band drift enters the decision.
+4. At SPDEF 12, the newly ported CBM gate makes Amnesia `-10` while the
+   active-screen slots start at `-8`. The next executed decision chooses
+   **Light Screen slot 3**, visible as its own PP decrement.
+
+Control ends after the first two real Dusclops turns, before the max-stage
+gate can fire. Reach continues through the third Amnesia and the first
+max-stage decision.
+
+### 28.4 Live ledger and exact engine receipt
+
+`tools/probe/verify-factory-ai-spdefup-live.ts` runs both fixtures twice at
+both banked seeds and checks the ROM endpoints, LCG draw totals, and the
+engine decision receipt:
+
+| Fixture | Seed | Dusclops PP (start→end) | SPDEF | HP | Total `Random()` frame 0→end |
+| --- | -: | --- | ---: | --- | ---: |
+| Control | 1 | `[20,30,30,30]→[18,30,30,30]` | `6→10` | `115→115` | **28** |
+| Control | 99 | `[20,30,30,30]→[18,30,30,30]` | `6→10` | `115→115` | **28** |
+| Reach | 1 | `[20,30,30,30]→[17,30,30,29]` | `6→12` | `115→115` | **58** |
+| Reach | 99 | `[20,30,30,30]→[17,30,30,29]` | `6→12` | `115→115` | **56** |
+
+All four rows are byte-identical across their two full reruns. Exact PP
+closure matters: only Amnesia loses PP in control; reach loses exactly three
+Amnesia PP and one slot-3 Light Screen PP.
+
+The process-isolated caller probe, run through `tools/run-mgba-probe.py`,
+attributes the seed-1 max-stage window `(2200,2300]` as exactly **12**
+draws: `Cmd_seteffectwithchance` 1, `BattleTurnPassed` 1,
+`BattleAI_SetupAIData` 4, `Cmd_if_random_less_than` 5, and
+`ChooseMoveOrAction_Singles` 1. Removing the first two ordinary battle
+calls leaves the engine's exact **10-draw** receipt:
+
+- setup simulated-RNG: 4;
+- `AI_CV_SpDefUp`: 2;
+- three `AI_CV_LightScreen` slots: 3;
+- best-move tie selection: 1.
+
+Starting from the ROM's post-two-call RNG `2489327812`, the engine scores
+Amnesia `87` (`CBM -10`, CV -3) and the three Light Screen slots `90`
+(`CBM -8`, CV -2), chooses slot 3, consumes exactly 10 draws, and lands on
+the ROM's exact endpoint RNG **873887126**. Seed 99 independently chooses
+slot 3 and lands on its exact endpoint **3027100167** with the same
+10-draw engine receipt. This is a direct chosen-move match, not a draw-count
+proxy.
+
+### 28.5 Verification and census status
+
+Reproduce:
+
+```sh
+node --experimental-strip-types tools/probe/generate-factory-ai-spdefup-fixtures.ts
+node --experimental-strip-types tools/probe/verify-factory-ai-spdefup-live.ts
+npx vitest run tests/factoryAiCheckBadMove.test.ts tests/factoryAiCheckViability.test.ts tests/factoryAiScoredDecision.test.ts
+```
+
+The executable-frontier and ability/item parity censuses regenerate
+byte-identically (SHA-256 `8b18f754…5261` / `3ff4c7f3…dc6c`): this port
+replaces one runtime effect-table halt with a handler behind the same single
+generic barrier statement, so neither static census count legitimately
+moves. The executable-frontier ratchet likewise gains no canonical recording
+import and no new unsupported-branch barrier.

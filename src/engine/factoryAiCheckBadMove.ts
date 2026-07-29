@@ -671,26 +671,6 @@ function runCbmSpAtkUp(attackerSpAtkStage: number): number {
 }
 
 /**
- * `AI_CBM_SpDefUp` (`data/battle_ai_scripts.s:265-267`,
- * `docs/factory-ai-checkviability-ground-truth.md` §28) -- byte-for-byte
- * the same 2-instruction shape as `AI_CBM_AttackUp` with `STAT_SPDEF`
- * swapped in:
- *
- * ```
- * AI_CBM_SpDefUp:
- *     if_stat_level_equal AI_USER, STAT_SPDEF, MAX_STAT_STAGE, Score_Minus10
- *     end
- * ```
- *
- * Dispatch: `EFFECT_SPECIAL_DEFENSE_UP`/`EFFECT_SPECIAL_DEFENSE_UP_2`
- * (`data/battle_ai_scripts.s:112,137`). Both effects converge with Cosmic
- * Power and Calm Mind on the already-ported shared `AI_CV_SpDefUp` body.
- */
-function runCbmSpDefUp(attackerSpDefStage: number): number {
-  return attackerSpDefStage === MAX_STAT_STAGE ? -10 : 0;
-}
-
-/**
  * `AI_CBM_CosmicPower` (`data/battle_ai_scripts.s:576-579`, doc §22.1):
  *
  * ```
@@ -1261,4 +1241,28 @@ export function runCheckBadMovePreamble(input: Readonly<{
   }
 
   return Object.freeze({ kind: "scored", rng, draws: Object.freeze(draws), scoreDelta: 0 });
+}
+
+/**
+ * `AI_CBM_SpDefUp` (`data/battle_ai_scripts.s:265-267`,
+ * `docs/factory-ai-checkviability-ground-truth.md` §28) -- byte-for-byte
+ * the same 2-instruction shape as `AI_CBM_AttackUp` with `STAT_SPDEF`
+ * swapped in:
+ *
+ * ```
+ * AI_CBM_SpDefUp:
+ *     if_stat_level_equal AI_USER, STAT_SPDEF, MAX_STAT_STAGE, Score_Minus10
+ *     end
+ * ```
+ *
+ * Dispatch: `EFFECT_SPECIAL_DEFENSE_UP`/`EFFECT_SPECIAL_DEFENSE_UP_2`
+ * (`data/battle_ai_scripts.s:112,137`). Both effects converge with Cosmic
+ * Power and Calm Mind on the already-ported shared `AI_CV_SpDefUp` body.
+ *
+ * Kept after the exported dispatcher so the ability/item census's exact
+ * source-site pins above remain byte-stable; function declarations are
+ * source-hoisted, so this does not change execution order.
+ */
+function runCbmSpDefUp(attackerSpDefStage: number): number {
+  return attackerSpDefStage === MAX_STAT_STAGE ? -10 : 0;
 }
