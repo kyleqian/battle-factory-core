@@ -1,5 +1,35 @@
 # Animation coverage
 
+## WATER_ORB checkpoint landed; Hydro Pump partial, Whirlpool unsupported (2026-07-29)
+
+**Verdict:** `MOVE_HYDRO_PUMP` is a bounded **partial**, not exact. The
+lowest suitable legal Level-50 carrier is challenge-2 set **303**
+`FRONTIER_MON_MASQUERAIN_2` (species **312**, Quiet, SpAttack+Defense, Lax
+Incense). Complete legal three-mon Scene-ON parties successfully stage Hydro
+Pump against ONIX in both orientations. Reproducible extraction pins
+Masquerain front/back, WATER_ORB with its source WaterImpact palette, and the
+already-exact WATER_IMPACT art.
+
+**Source/reuse:** the pinned graph is **44** sine WATER_ORBs (11 calls × 4),
+**12** Water Impact splats (6 × 2), StartSinAnimTimer, attacker/target
+ShakeMon, monbg/split priority/12:8 alpha, audio, waits, and cleanup.
+`MOVE_MUD_SHOT` already proves the sine/timer/shake/compositor primitives and
+`MOVE_WATER_GUN` proves the splat/art primitive. Exact still requires the
+Hydro Pump relative reducer, typed seam, production compositor, and every
+body frame through first inactive cleanup across source/OAM/matrices/palettes/
+registers/audio/immutable state/raw RGB/shared framebuffer twice fresh in
+both orientations.
+
+**Sibling / next:** `MOVE_WHIRLPOOL` stays unsupported after an independent
+source, asset, and legal-party both-orientation audit. Its lowest carrier is
+challenge-0 set **170** `FRONTIER_MON_WAILMER_1`; its distinct **18** affine
+vortex orbs, target palette blend/shake/audio, trap outcome, later repetition/
+status-animation variants, and cleanup need independent dense proof. Coverage
+is **94 exact / 1 partial / 0 staged / 181 unsupported**. No animation
+boundary, unsupported barrier, canonical recording allowlist, or gameplay
+ownership changed. Next: implement and densely prove Hydro Pump before
+independently accepting Whirlpool.
+
 ## MOVE_SPORE promoted exact; ANIM_TAG_SPORE track bounded (2026-07-29)
 
 **Verdict:** `MOVE_SPORE` is exact. The lowest suitable legal Level-50

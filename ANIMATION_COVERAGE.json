@@ -2,6 +2,29 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_HYDRO_PUMP",
+      "status": "partial",
+      "remaining": "Implement and prove every Hydro Pump-owned body frame through first inactive cleanup with a source-relative reducer, typed seam, deterministic production compositor, and portable dense source/software+hardware OAM/matrix/palette/register/audio/immutable-state/raw-RGB/shared-framebuffer comparison twice fresh in both orientations.",
+      "covered": [
+        "the pinned source audit identifies challenge-2 set 303 FRONTIER_MON_MASQUERAIN_2 as the lowest suitable legal Level-50 Hydro Pump carrier (species 312, Quiet, SpAttack+Defense, Lax Incense); complete three-Pokemon Battle Scene ON parties successfully stage it against ONIX in both orientations",
+        "the generated source component graph is pinned at 14 components: 44 gHydroPumpOrbSpriteTemplate/AnimToTargetInSinWave WATER_ORB lifecycles from 11 four-orb beam calls, 12 gWaterHitSplatSpriteTemplate WATER_IMPACT lifecycles from six paired calls, StartSinAnimTimer, attacker and target ShakeMon, target monbg/split priority/12:8 alpha, Hydro Pump audio, waits, blendoff, and cleanup",
+        "reproducible extraction regenerates WATER_ORB with its source-shared WaterImpact palette, WATER_IMPACT, Masquerain front/back, and independently audited Wailmer front/back; MOVE_WATER_GUN proves WATER_IMPACT and hitsplats while MOVE_MUD_SHOT proves AnimToTargetInSinWave, StartSinAnimTimer, ShakeMon, monbg/alpha, and shared compositor primitives",
+        "exact remains gated on a Hydro Pump source-relative reducer, typed seam, deterministic production compositor, and portable complete dense source/software+hardware OAM/matrix/palette/register/audio/immutable-state/raw-RGB/shared-framebuffer proof through first inactive cleanup twice fresh in both orientations; no frame window or exact verdict is claimed",
+        "MOVE_WHIRLPOOL remains unsupported after an independent source and legal-party batch audit: the lowest suitable carrier is challenge-0 set 170 FRONTIER_MON_WAILMER_1, and its distinct body has 18 affine gWhirlpoolSpriteTemplate/AnimParticleInVortex lifecycles, target palette blend, target ShakeMon, audio, trapping outcome and later repetition/status-animation differences; it requires its own complete dense both-orientation evidence before promotion",
+        "no animation boundary, unsupported barrier, canonical recording allowlist, gameplay outcome, damage, status, RNG, controller, turn, or facility state changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-hydro-pump-player-masquerain-opponent-onix.json",
+        "tools/battle-lab/mechanic-hydro-pump-opponent-masquerain-player-onix.json",
+        "tools/battle-lab/mechanic-whirlpool-player-wailmer-opponent-onix.json",
+        "tools/battle-lab/mechanic-whirlpool-opponent-wailmer-player-onix.json",
+        "tools/compare/waterOrbSourceAudit.ts",
+        "tools/compare/extractWaterOrbAssets.ts",
+        "src/animation/assets/water-orb.json",
+        "tests/animation/waterOrbSourceCheckpoint.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_SPORE",
       "status": "exact",
       "covered": [
@@ -2446,6 +2469,29 @@
     "MOVE_BIND"
   ],
   "componentTracks": [
+    {
+      "id": "water-orb-hydro-pump-whirlpool",
+      "components": [
+        "asset:ANIM_TAG_WATER_ORB",
+        "asset:ANIM_TAG_WATER_IMPACT",
+        "sprite:gHydroPumpOrbSpriteTemplate",
+        "sprite:gWaterHitSplatSpriteTemplate",
+        "subroutine:HydroPumpBeams",
+        "subroutine:HydroPumpHitSplats",
+        "sprite:gWhirlpoolSpriteTemplate",
+        "subroutine:WhirlpoolEffect",
+        "task:AnimTask_ShakeMon",
+        "task:AnimTask_StartSinAnimTimer",
+        "visualCommand:simple_palette_blend",
+        "visualCommand:setalpha",
+        "visualCommand:blendoff"
+      ],
+      "representatives": [
+        "MOVE_HYDRO_PUMP",
+        "MOVE_WHIRLPOOL"
+      ],
+      "goal": "MOVE_HYDRO_PUMP is a bounded source/asset/legal-party partial: its 44 sine WATER_ORBs and 12 already-proved WATER_IMPACT splats still need a complete relative reducer, typed seam, production compositor, and twice-fresh dense both-orientation acceptance through first inactive cleanup. MOVE_WHIRLPOOL remains unsupported because its independent 18 affine vortex orbs, target blend/shake/audio, trapping outcome, repetition/status-animation variants, cleanup, and both orientations have no complete dense proof."
+    },
     {
       "id": "spore-particles",
       "components": [
