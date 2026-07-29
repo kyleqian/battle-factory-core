@@ -2,6 +2,35 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_NEEDLE_ARM",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal Level-50 Factory set-125 CACNEA versus ONIX Scene-ON parties pass the entire 108-frame source body through first inactive cleanup in both orientations twice fresh: frames 223-330 reproduce player-back evidence f6f26ca98a0aea08c1bd5c9fef4553443c93c260d829ed0609c41ef26935d10c / raw RGB bbb4ea8404fbde111de1c1dfe91d45d47033b2f0522754695d4d7ed5f21db0f6 and opponent-front evidence 75a2df84d96ea99f2cb2b584a67a338d419c565a14c7bc726f7bf7a8aaf20470 / raw RGB 291b07d72166df08330fd95741f84ea0d14918c57602114968143ca9bd48d1e1",
+        "the source audit proves set 125 FRONTIER_MON_CACNEA is the lowest Level-50 carrier and pins species 344, move 302, Quirky nature, Attack/HP spread, Sitrus Berry, complete source-set parties, and all twenty gNeedleArmSpikeSpriteTemplate lifecycles",
+        "the pure relative reducer ports the twelve staggered inward and eight simultaneous outward GREEN_SPIKE translations, fixed-point coordinates, ArcTan2-derived affine matrices, tagged load/free state, source interpreter seven-sprite pending tick, AnimTask_ShakeMon2, IMPACT hitsplat, HANDS_AND_FEET fist, waits, and cleanup",
+        "the typed Scene-ON seam carries only resolved CACNEA/ONIX geometry; source-extracted species-344 front/back and GREEN_SPIKE art plus shared IMPACT, HANDS_AND_FEET, ONIX, and chrome pass source offsets, software and hardware OAM with stable Y/crossing order, matrices, palettes/tags/buffers, registers, both audio players, raw RGB, and every production framebuffer",
+        "needleArmPortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves all 108 immutable dense source/hardware/audio/reducer/seam/framebuffer frames twice fresh in both orientations; MOVE_SPIKE_CANNON remains 84/84 exact twice fresh in both orientations as the shared spike/OAM control",
+        "MOVE_SECRET_POWER remains unsupported: the Factory building environment dispatches to Move_STRENGTH, so the grass-only Needle Arm body provides no Factory acceptance for it; no damage, RNG, controller selection, turn order, round/facility state, boundary list, or unsupported barrier changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-needle-arm-player-cacnea-opponent-onix.json",
+        "tools/battle-lab/mechanic-needle-arm-opponent-cacnea-player-onix.json",
+        "tools/compare/fixtures/needle-arm-player-cacnea-opponent-onix.json",
+        "tools/compare/fixtures/needle-arm-opponent-cacnea-player-onix.json",
+        "tools/compare/needleArmProbe.py",
+        "tools/compare/needleArmPortable.ts",
+        "tools/compare/needleArmSourceAudit.ts",
+        "tools/compare/extractNeedleArmAssets.ts",
+        "src/animation/assets/needle-arm.json",
+        "src/animation/needleArm.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/needleArmEvidence.test.ts",
+        "tests/animation/needleArmAssets.test.ts",
+        "tests/animation/needleArm.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_METRONOME",
       "status": "exact",
       "covered": [
@@ -2037,6 +2066,21 @@
     "MOVE_BIND"
   ],
   "componentTracks": [
+    {
+      "id": "green-spike-needle-arm",
+      "components": [
+        "asset:ANIM_TAG_GREEN_SPIKE",
+        "sprite:gNeedleArmSpikeSpriteTemplate",
+        "task:AnimTask_ShakeMon2",
+        "asset:ANIM_TAG_IMPACT",
+        "asset:ANIM_TAG_HANDS_AND_FEET"
+      ],
+      "representatives": [
+        "MOVE_NEEDLE_ARM",
+        "MOVE_SECRET_POWER"
+      ],
+      "goal": "MOVE_NEEDLE_ARM independently proves its complete 108-frame source body through first inactive cleanup at 108/108 reducer/component, typed-seam, software/hardware OAM, matrices, palettes/tags/buffers, registers, both audio players, raw-RGB, and shared-framebuffer frames 223-330 in both orientations twice fresh using legal Level-50 set-125 CACNEA parties. MOVE_SECRET_POWER remains unsupported because the Factory building environment dispatches Move_STRENGTH rather than its grass-only Needle Arm body and therefore lacks independent legal complete dense acceptance."
+    },
     {
       "id": "finger-metronome",
       "components": [

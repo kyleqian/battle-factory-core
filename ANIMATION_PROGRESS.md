@@ -1,5 +1,31 @@
 # Animation coverage
 
+## MOVE_NEEDLE_ARM promoted exact; GREEN_SPIKE track bounded (2026-07-28)
+
+**Verdict:** `MOVE_NEEDLE_ARM` is exact. Lowest legal Level-50 carrier set
+**125** `FRONTIER_MON_CACNEA` (species **344**, Needle Arm **302**, Quirky,
+Attack+HP, Sitrus Berry) drives complete source-catalog parties against ONIX.
+Both Scene-ON orientations pass the full source body through first inactive
+cleanup at **108/108** frames **223–330**, twice fresh. Player-back
+evidence/raw digests are `f6f26ca98a0aea08c1bd5c9fef4553443c93c260d829ed0609c41ef26935d10c`
+/ `bbb4ea8404fbde111de1c1dfe91d45d47033b2f0522754695d4d7ed5f21db0f6`;
+opponent-front digests are
+`75a2df84d96ea99f2cb2b584a67a338d419c565a14c7bc726f7bf7a8aaf20470`
+/ `291b07d72166df08330fd95741f84ea0d14918c57602114968143ca9bd48d1e1`.
+
+**Model/boundary:** the pure relative reducer, typed seam, and narrow
+compositor port all **20** GREEN_SPIKE lifecycles (twelve staggered inward,
+eight outward), fixed-point translation/affine rotation, the source
+interpreter's seven-sprite pending tick, target ShakeMon2, IMPACT hitsplat,
+HANDS_AND_FEET fist, tagged loads, OAM/VBlank latches, Y/crossing painter
+order, audio, and cleanup using source-extracted Cacnea/GREEN_SPIKE art.
+`MOVE_SPIKE_CANNON` remains **84/84** twice-fresh in both orientations as the
+nearby exact control. `MOVE_SECRET_POWER` remains **unsupported**: Factory's
+building environment dispatches to Strength, not its grass-only Needle Arm
+body. Coverage is **81 exact / 0 partial / 0 staged / 195 unsupported**; no
+battle/controller/RNG/facility state, boundary list, or unsupported barrier
+changed.
+
 ## MOVE_FOLLOW_ME promoted exact; finger-metronome track closed (2026-07-28)
 
 **Verdict:** `MOVE_FOLLOW_ME` is exact. The lowest suitable Level-50 carrier

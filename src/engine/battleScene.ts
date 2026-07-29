@@ -575,6 +575,7 @@ import charmAsset from "../animation/assets/charm.json" with { type: "json" };
 import fakeTearsAsset from "../animation/assets/fake-tears.json" with { type: "json" };
 import tickleAsset from "../animation/assets/tickle.json" with { type: "json" };
 import metronomeAsset from "../animation/assets/metronome.json" with { type: "json" };
+import needleArmAsset from "../animation/assets/needle-arm.json" with { type: "json" };
 import selfDestructAsset from "../animation/assets/selfDestruct.json" with { type: "json" };
 import explosionAsset from "../animation/assets/explosion.json" with { type: "json" };
 import dynamicPunchAsset from "../animation/assets/dynamicPunch.json" with { type: "json" };
@@ -744,6 +745,7 @@ import {
   sceneOnTickleView,
   sceneOnMetronomeView,
   sceneOnFollowMeView,
+  sceneOnNeedleArmView,
   sceneOnDragonClawView,
   sceneOnSingView,
   sceneOnFutureSightView,
@@ -761,6 +763,7 @@ import {
   type SceneOnTicklePresentationState,
   type SceneOnMetronomePresentationState,
   type SceneOnFollowMePresentationState,
+  type SceneOnNeedleArmPresentationState,
   type SceneOnScaryFacePresentationState,
   type SceneOnAbsorbPresentationState,
   type SceneOnReflectPresentationState,
@@ -1340,6 +1343,11 @@ const metronomeArt = metronomeAsset as {
   togeticFront: { tileset: Tileset; palette: RgbColor[] };
   finger: { tileset: Tileset; palette: RgbColor[] };
   thoughtBubble: { tileset: Tileset; palette: RgbColor[] };
+};
+const needleArmArt = needleArmAsset as {
+  cacneaBack: { tileset: Tileset; palette: RgbColor[] };
+  cacneaFront: { tileset: Tileset; palette: RgbColor[] };
+  greenSpike: { tileset: Tileset; palette: RgbColor[] };
 };
 const dragonClawArt = dragonClawAsset as {
   smallEmber: { tileset: Tileset; palette: RgbColor[] };
@@ -19724,6 +19732,152 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "TOGETIC used" : "Foe TOGETIC used",
       "FOLLOW ME!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "NEEDLE_ARM") {
+    const needleState = state as SceneOnNeedleArmPresentationState;
+    const view = sceneOnNeedleArmView(needleState);
+    // Effect callbacks reach software OAM before the following VBlank;
+    // battler task writes traverse one additional BuildOamBuffer latch.
+    const displayed = sceneOnNeedleArmView({
+      ...needleState,
+      age: needleState.age - 1,
+    });
+    const displayedTarget = sceneOnNeedleArmView({
+      ...needleState,
+      age: needleState.age - 2,
+    });
+    const playerToOpponent =
+      view.attacker.species === "CACNEA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "CACNEA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged NEEDLE_ARM pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const cacneaSource = playerToOpponent
+      ? needleArmArt.cacneaBack : needleArmArt.cacneaFront;
+    const cacnea = playerToOpponent
+      ? cacneaSource
+      : { ...cacneaSource, tileset: subTileset(cacneaSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const targetDisplayOffset = needleState.age - 2 >= 71
+      ? displayedTarget.targetOffset
+      : onixIdle;
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x
+        + targetDisplayOffset.x2,
+      view.target.geometry.spriteCorner.y
+        + targetDisplayOffset.y2,
+    );
+    drawSpriteSheet(
+      fb,
+      cacnea.tileset,
+      cacnea.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const priorSpikeY = new Map(
+      sceneOnNeedleArmView({ ...needleState, age: needleState.age - 2 }).spikes
+        .map((spike) => [spike.spawnIndex, spike.y] as const),
+    );
+    const displaySpikes = needleState.age === 72 ? [] : displayed.spikes;
+    for (const spike of displaySpikes.slice().sort(
+      (left, right) =>
+        left.y - right.y
+        || (priorSpikeY.get(left.spawnIndex) ?? left.y)
+          - (priorSpikeY.get(right.spawnIndex) ?? right.y)
+        || right.oamSlot - left.oamSlot,
+    )) {
+      drawSpriteSheetAffineRotate(
+        fb,
+        needleArmArt.greenSpike.tileset,
+        needleArmArt.greenSpike.palette,
+        spike.x,
+        spike.y,
+        spike.matrix.a,
+        spike.matrix.b,
+        spike.matrix.c,
+        spike.matrix.d,
+        undefined,
+        false,
+      );
+    }
+    // These helpers are created together after waitforvisualfinish. Their
+    // first software-OAM state needs the same two-display latch as the
+    // battler task, and descending source sprite slots win OAM ties.
+    if (needleState.age >= 73 && needleState.age <= 82) {
+      drawSpriteSheetAffineRotate(
+        fb,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        view.target.geometry.animationCenter.x,
+        view.target.geometry.animationCenter.y,
+        303,
+        0,
+        0,
+        303,
+        undefined,
+        false,
+      );
+    }
+    if (needleState.age >= 73 && needleState.age <= 81) {
+      drawSpriteSheet(
+        fb,
+        subTileset(battleAnimHandsAndFeet.tileset, 0, 4),
+        battleAnimHandsAndFeet.palette,
+        view.target.geometry.animationCenter.x - 16,
+        view.target.geometry.animationCenter.y - 16,
+      );
+    }
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "CACNEA",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "CACNEA" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "CACNEA used" : "Foe CACNEA used",
+      "NEEDLE ARM!",
       99,
     );
     return;

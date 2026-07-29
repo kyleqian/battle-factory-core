@@ -291,6 +291,10 @@ import {
   type FollowMeState,
 } from "./followMe.ts";
 import {
+  needleArmAtAge,
+  type NeedleArmState,
+} from "./needleArm.ts";
+import {
   tailGlowAtAge,
   type TailGlowState,
 } from "./tailGlow.ts";
@@ -518,6 +522,7 @@ export interface SceneOnPresentationBattler {
     | "OMASTAR"
     | "OMANYTE"
     | "CHANSEY"
+    | "CACNEA"
     | "WARTORTLE";
   readonly geometry: SceneOnBattlerGeometry;
 }
@@ -1275,6 +1280,13 @@ export interface SceneOnFollowMeConfig {
   readonly attackerTop: Readonly<MetronomePoint>;
 }
 
+export interface SceneOnNeedleArmConfig {
+  readonly move: "NEEDLE_ARM";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnTailGlowConfig {
   readonly move: "TAIL_GLOW";
   readonly attacker: SceneOnPresentationBattler;
@@ -1498,6 +1510,7 @@ export type SceneOnMoveConfig =
   | SceneOnTickleConfig
   | SceneOnMetronomeConfig
   | SceneOnFollowMeConfig
+  | SceneOnNeedleArmConfig
   | SceneOnTailGlowConfig
   | SceneOnSelfDestructConfig
   | SceneOnExplosionConfig
@@ -1569,6 +1582,8 @@ export type SceneOnMetronomePresentationState =
   SceneOnMovePresentationState<SceneOnMetronomeConfig>;
 export type SceneOnFollowMePresentationState =
   SceneOnMovePresentationState<SceneOnFollowMeConfig>;
+export type SceneOnNeedleArmPresentationState =
+  SceneOnMovePresentationState<SceneOnNeedleArmConfig>;
 export type SceneOnTailGlowPresentationState =
   SceneOnMovePresentationState<SceneOnTailGlowConfig>;
 
@@ -1776,6 +1791,12 @@ export interface SceneOnMetronomeView extends MetronomeState {
 }
 
 export interface SceneOnFollowMeView extends FollowMeState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnNeedleArmView extends NeedleArmState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3484,6 +3505,21 @@ export function sceneOnFollowMeView(
       state.config.attacker.geometry.side,
       state.config.attackerTop,
     ),
+  };
+}
+
+/** `age=0` is Move_NEEDLE_ARM's first displayed source-script frame. */
+export function sceneOnNeedleArmView(
+  state: SceneOnNeedleArmPresentationState,
+): SceneOnNeedleArmView {
+  if (state.config.move !== "NEEDLE_ARM") {
+    throw new Error(`expected NEEDLE_ARM presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...needleArmAtAge(state.age, state.config.target.geometry.animationCenter),
   };
 }
 
