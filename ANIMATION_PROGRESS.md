@@ -1,5 +1,34 @@
 # Animation coverage
 
+## MOVE_REST promoted exact; LETTER_Z track bounded (2026-07-29)
+
+**Verdict:** `MOVE_REST` is exact. Lowest suitable challenge-0 Level-50
+carrier set **117** `FRONTIER_MON_TEDDIURSA` (species **216**, Rest **156**,
+Relaxed, Attack+HP, Chesto Berry) drives complete legal three-mon parties
+against ONIX. Both Scene-ON orientations pass the complete source body through
+first inactive cleanup at **110/110** frames, twice fresh. Player-back frames
+**334–443** have evidence/raw digests
+`8f482a75532d55a5518581b5cebe02b69741dbe913b87dafd4637dc79d68d9c6` /
+`3a9f0a794e93bbb68b485748733866ed27477d59577b7a4905642dd7655f2d63`;
+opponent-front frames **338–447** have
+`24fd57122beb8e307e02bd6e9d427ece5c602c2188f0b47f847ba1593ea082d3` /
+`6caad649f87c5bef7bc1098629addf19981c7ce4ed9d2db4dc0f1e8d25e86a67`.
+
+**Model/boundary:** the pure relative reducer, typed seam, and narrow
+compositor port LETTER_Z load/free, attacker-panned Snore audio, all **three**
+staggered `gSleepLetterZSpriteTemplate` callbacks, fixed-point ascent,
+side-dependent affine programs, OAM/VBlank latches, tagged source-extracted
+art, 60-frame lifetimes, waits, and cleanup. Immutable Rest sleep/status/
+pending-heal state crosses the presentation seam only as verification input;
+the shared Metronome control remains **127/127** exact twice fresh in both
+orientations. Rest
+healing, sleep state/duration, RNG, controller/turn/facility state, the
+animation boundary list, and unsupported barriers are unchanged.
+`MOVE_SLEEP_TALK` remains **unsupported**: it has a distinct nine-sprite
+`gLetterZSpriteTemplate`/`AnimLetterZ` body plus `AnimTask_SwayMon`, without
+independent complete legal both-orientation twice-fresh dense acceptance.
+Coverage is **84 exact / 0 partial / 0 staged / 192 unsupported**.
+
 ## MOVE_WISH promoted exact; GOLD_STARS track bounded (2026-07-28)
 
 **Verdict:** `MOVE_WISH` is exact. Lowest suitable challenge-0 Level-50

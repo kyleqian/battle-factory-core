@@ -2,6 +2,36 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_REST",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal challenge-0 Level-50 set-117 TEDDIURSA versus ONIX Scene-ON parties pass the entire 110-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 334-443 reproduce evidence 8f482a75532d55a5518581b5cebe02b69741dbe913b87dafd4637dc79d68d9c6 / raw RGB 3a9f0a794e93bbb68b485748733866ed27477d59577b7a4905642dd7655f2d63 and opponent-front frames 338-447 reproduce evidence 24fd57122beb8e307e02bd6e9d427ece5c602c2188f0b47f847ba1593ea082d3 / raw RGB 6caad649f87c5bef7bc1098629addf19981c7ce4ed9d2db4dc0f1e8d25e86a67",
+        "the source audit proves set 117 FRONTIER_MON_TEDDIURSA is the lowest suitable challenge-0 Level-50 carrier and pins species 216, move 156, Relaxed nature, Attack/HP spread, Chesto Berry, and complete legal three-Pokemon parties",
+        "the pure source-relative reducer ports ANIM_TAG_LETTER_Z load/free, attacker-panned SE_M_SNORE, all three staggered gSleepLetterZSpriteTemplate spawns, AnimSleepLetterZ initialization, AnimSleepLetterZ_Step fixed-point ascent, side-dependent affine programs, OAM/VBlank display latches, 60-frame callbacks, waits, and first inactive cleanup",
+        "the typed Scene-ON seam carries only resolved TEDDIURSA/ONIX presentation geometry and immutable sleep/status/pending-heal field state; source-extracted Teddiursa front/back and LETTER_Z art plus shared ONIX/chrome pass source/software sprite state, hardware OAM and matrices, tags/palettes/buffers, registers, audio, raw RGB, and every production framebuffer without owning the Rest outcome",
+        "restPortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves all 110 immutable dense source/hardware/audio/reducer/seam/framebuffer frames twice fresh in both orientations through first inactive cleanup; the shared Metronome compositor control remains 127/127 exact twice fresh in both orientations",
+        "MOVE_SLEEP_TALK remains unsupported: source audit proves its distinct nine gLetterZSpriteTemplate/AnimLetterZ lifecycles plus AnimTask_SwayMon body; it lacks an independent complete legal both-orientation twice-fresh dense reducer, seam, and framebuffer acceptance",
+        "no Rest healing, sleep outcome or duration, damage, gameplay RNG, controller selection, turn order, round/facility state, animation boundary list, or unsupported barrier changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-rest-player-teddiursa-opponent-onix.json",
+        "tools/battle-lab/mechanic-rest-opponent-teddiursa-player-onix.json",
+        "tools/compare/fixtures/rest-player-teddiursa-opponent-onix.json",
+        "tools/compare/fixtures/rest-opponent-teddiursa-player-onix.json",
+        "tools/compare/metronomeProbe.py",
+        "tools/compare/restPortable.ts",
+        "tools/compare/restSourceAudit.ts",
+        "tools/compare/extractRestAssets.ts",
+        "src/animation/assets/rest.json",
+        "src/animation/rest.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/restEvidence.test.ts",
+        "tests/animation/restAssets.test.ts",
+        "tests/animation/rest.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_WISH",
       "status": "exact",
       "covered": [
@@ -2126,6 +2156,20 @@
     "MOVE_BIND"
   ],
   "componentTracks": [
+    {
+      "id": "letter-z-rest",
+      "components": [
+        "asset:ANIM_TAG_LETTER_Z",
+        "sprite:gSleepLetterZSpriteTemplate",
+        "sprite:gLetterZSpriteTemplate",
+        "task:AnimTask_SwayMon"
+      ],
+      "representatives": [
+        "MOVE_REST",
+        "MOVE_SLEEP_TALK"
+      ],
+      "goal": "MOVE_REST independently proves its complete 110-frame source body through first inactive cleanup at 110/110 source/component, typed-seam, software/hardware OAM and matrix, tag/palette/buffer, register/audio, raw-RGB, and shared-framebuffer frames in both orientations twice fresh using legal challenge-0 set-117 TEDDIURSA parties. MOVE_SLEEP_TALK remains unsupported because its distinct nine gLetterZSpriteTemplate/AnimLetterZ lifecycles and AnimTask_SwayMon body lack an independent complete legal both-orientation twice-fresh dense reducer, seam, and framebuffer acceptance."
+    },
     {
       "id": "flying-dirt-sandstorm",
       "components": [
