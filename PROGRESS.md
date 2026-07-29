@@ -28,8 +28,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   ROM positions 5/19. Quick Claw now applies `UINT_MAX` effective speed for
   stored values `< floor(0xffff*param/100)` (param 20 threshold 13107),
   below priority and with the ordinary tie roll when both holders proc.
-- **Next:** supervisor continue the ability census roadmap, likely the
-  ON_DAMAGE contact family; separately model the two named battle-start
+- **Supervisor fold (same round, `f828a714`):** the paired side-lane scout
+  banked `docs/on-damage-contact-scout.md` — the ON_DAMAGE family is the
+  body of the already-registered `MOVEEND_ON_DAMAGE_ABILITIES` state 3
+  (its seven-ability barrier retires); the shared rules resolver currently
+  drops `FLAG_MAKES_CONTACT` (prerequisite); Oblivious is Cute Charm's
+  eligibility check, not an eighth case; live Static receipt attributed the
+  proc roll at position 5 right after the four hit-chain rolls
+  (`tools/probe/verify-on-damage-static.py`, supervisor re-ran: PASS).
+  Predicted implementation delta: abilities 57→64/70, weighted
+  977→1056/1103, dispatcher 1/8→8/8.
+- **Next:** implement the ON_DAMAGE family from the scout pack (main);
+  census generator §A3 string-literal fix (side); then battle-start
   random-turn writes when whole-battle integration owns turn 1.
 - **Notes:** boundary commit `c7944fac`; Quick Claw commit follows this
   entry. Existing direct `runBattleEndTurnOrchestration` zero-RNG pin stays
