@@ -1,5 +1,28 @@
 # Animation coverage
 
+## ANIM_TAG_FOCUS_ENERGY evidence checkpoint; siblings remain unsupported (2026-07-28)
+
+**Verdict:** Evidence-only checkpoint. `MOVE_FOCUS_ENERGY` remains
+unsupported; no move status or `ANIMATION_COVERAGE.json` entry changed.
+Legal Level-50 source set **44** `FRONTIER_MON_TAILLOW` (species **304**,
+Focus Energy **116**) anchors complete Scene-ON mechanicLab parties against
+ONIX in both orientations. The first move-owned script body through inactive
+cleanup is **122/122** frames **73–194** player-back and **77–198**
+opponent-front, twice fresh. Evidence/raw-RGB digests are player
+`949eb218…d80ae4` / `45e75715…7049c5` and opponent
+`67990c21…782cc7` / `a0e387e6…0c9ad5`.
+
+**Evidence/source:** `Move_FOCUS_ENERGY` loads FOCUS_ENERGY, starts
+attacker-panned Dragon Rage, calls `EndureEffect` three times (five sprites
+per call; **15** observed OAM-slot starts), runs white
+`BlendColorCycle(2,2,0,11)`, attacker `ShakeMon2(1,0,32,1)`, and cleans up.
+The portable receipt reruns both orientations twice through
+`run-mgba-probe.py`, pinning source offsets, task/template/callback topology,
+software/hardware OAM, matrices, palettes/tags, registers, SE1/SE2 and raw
+RGB. No renderer, reducer, seam, application framebuffer, battle state,
+boundary list, or barrier changed. `MOVE_ENDURE` and `MOVE_FOCUS_PUNCH`
+remain unsupported pending independent dense move acceptance.
+
 ## MOVE_CROSS_CHOP promoted exact; CROSS_IMPACT track established (2026-07-28)
 
 **Verdict:** `MOVE_CROSS_CHOP` is exact. Legal Level-50 Factory set-283
