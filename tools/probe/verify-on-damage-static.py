@@ -52,15 +52,32 @@ def source_and_fixture_checks() -> dict:
         "AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE, gBattlerTarget, 0, 0, 0)" in commands,
         "Cmd_moveend no longer calls the target ON_DAMAGE dispatcher",
     )
+    state3 = engine[
+        engine.index("case MOVEEND_ON_DAMAGE_ABILITIES:")
+        :engine.index("case MOVEEND_IMMUNITY_ABILITIES:")
+    ]
+    on_damage_engine = engine[
+        engine.index("function executeOnDamageAbilities(")
+        :engine.index("function executeMoveendState(")
+    ]
     require(
-        "case MOVEEND_ON_DAMAGE_ABILITIES" in engine
-        and "unsupportedBranch(" in engine[engine.index("case MOVEEND_ON_DAMAGE_ABILITIES"):],
-        "engine state-3 barrier changed; refresh the frozen scout status",
+        "return executeOnDamageAbilities(context, rules);" in state3
+        and "unsupportedBranch(" not in state3,
+        "MOVEEND_ON_DAMAGE_ABILITIES state 3 is no longer implemented",
+    )
+    engine_members = (
+        "ABILITY_COLOR_CHANGE", "ABILITY_ROUGH_SKIN", "ABILITY_EFFECT_SPORE",
+        "ABILITY_POISON_POINT", "ABILITY_STATIC", "ABILITY_FLAME_BODY", "ABILITY_CUTE_CHARM",
     )
     require(
-        'flags.includes("FLAG_MIRROR_MOVE_AFFECTED")' in rules
-        and 'flags.includes("FLAG_MAKES_CONTACT")' not in rules,
-        "shared numeric move-flag resolver changed; refresh contact-field finding",
+        all(spelling in on_damage_engine for spelling in engine_members),
+        "engine ON_DAMAGE dispatcher no longer has all seven live members",
+    )
+    require(
+        'flags.includes("FLAG_MAKES_CONTACT") ? BATTLE_SCRIPT_MOVE_FLAG_MAKES_CONTACT : 0'
+        in rules
+        and "export const BATTLE_SCRIPT_MOVE_FLAG_MAKES_CONTACT = 1 << 0;" in rules,
+        "shared numeric move-flag resolver no longer preserves source contact bit 0",
     )
 
     move_by_id = {row["id"]: row for row in moves}
@@ -83,7 +100,8 @@ def source_and_fixture_checks() -> dict:
 
     return {
         "sourceDispatcher": "7 cases plus Oblivious only as Cute Charm dependency",
-        "engine": "MOVEEND_ON_DAMAGE_ABILITIES registered and barriered",
+        "engine": "MOVEEND_ON_DAMAGE_ABILITIES state 3 implemented; seven members live",
+        "moveFlags": "shared resolver preserves FLAG_MAKES_CONTACT as bit 0",
         "stimulus": "Swellow Pound -> Pikachu Static; opponent slots all Swift",
         "baseSpeeds": base_speeds,
     }
@@ -158,7 +176,7 @@ def main() -> None:
     static = source_and_fixture_checks()
     if len(sys.argv) == 1:
         print(json.dumps(static, indent=2))
-        print("PASS: ON_DAMAGE Static source, consumer barrier, and fixture are unchanged")
+        print("PASS: ON_DAMAGE state 3 has seven live members and contact bit 0 is preserved")
         return
     if len(sys.argv) != 2:
         raise SystemExit(f"usage: {sys.argv[0]} [oracle-output.json]")
