@@ -13,7 +13,7 @@ describe("MOVE_AROMATHERAPY FLOWER checkpoint", () => {
     expect(output).toContain("7 small + 2 big");
   });
 
-  it("regenerates Vileplume and ANIM_TAG_FLOWER art byte-for-byte", () => {
+  it("regenerates every source sprite and scrolling mask byte-for-byte", () => {
     const directory = mkdtempSync(join(tmpdir(), "pokebench-aromatherapy-assets-"));
     const output = join(directory, "aromatherapy.json");
     execFileSync(process.execPath, [
@@ -22,14 +22,20 @@ describe("MOVE_AROMATHERAPY FLOWER checkpoint", () => {
     expect(readFileSync(output)).toEqual(readFileSync("src/animation/assets/aromatherapy.json"));
   });
 
-  it("pins complete legal Scene-ON receipts in both orientations without promoting coverage", () => {
+  it("pins portable complete legal Scene-ON receipts in both orientations", () => {
     for (const path of [
       "tools/compare/fixtures/aromatherapy-player-vileplume-opponent-onix.json",
       "tools/compare/fixtures/aromatherapy-opponent-vileplume-player-onix.json",
     ]) {
       const receipt = JSON.parse(readFileSync(path, "utf8"));
       const scenario = JSON.parse(readFileSync(receipt.scenario, "utf8"));
-      expect(receipt.schema).toBe("aromatherapy-evidence-checkpoint/v1");
+      expect(receipt.schema).toBe("scene-on-portable-evidence/v1");
+      expect(receipt.appStage).toEqual({
+        oracleFrame: receipt.denseWindow.startFrame,
+        presentationAge: 0,
+      });
+      expect(receipt.attacker.species).toBe("VILEPLUME");
+      expect(receipt.target.species).toBe("ONIX");
       expect(receipt.denseWindow.frameCount).toBe(
         receipt.denseWindow.endFrame - receipt.denseWindow.startFrame + 1,
       );

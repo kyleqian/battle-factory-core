@@ -560,6 +560,7 @@ import headbuttAsset from "../animation/assets/headbutt.json" with { type: "json
 import bodySlamAsset from "../animation/assets/body-slam.json" with { type: "json" };
 import slamAsset from "../animation/assets/slam.json" with { type: "json" };
 import astonishAsset from "../animation/assets/astonish.json" with { type: "json" };
+import aromatherapyAsset from "../animation/assets/aromatherapy.json" with { type: "json" };
 import synthesisAsset from "../animation/assets/synthesis.json" with { type: "json" };
 import moonlightAsset from "../animation/assets/moonlight.json" with { type: "json" };
 import wishAsset from "../animation/assets/wish.json" with { type: "json" };
@@ -706,6 +707,7 @@ import {
   sceneOnMoonlightView,
   sceneOnAbsorbView,
   sceneOnReflectView,
+  sceneOnAromatherapyView,
   sceneOnSynthesisView,
   sceneOnWishView,
   sceneOnMilkDrinkView,
@@ -1191,6 +1193,14 @@ const astonishArt = astonishAsset as {
   loudredBack: { tileset: Tileset; palette: RgbColor[] };
   loudredFront: { tileset: Tileset; palette: RgbColor[] };
   sweatBead: { tileset: Tileset; palette: RgbColor[] };
+};
+const aromatherapyArt = aromatherapyAsset as {
+  vileplumeBack: { tileset: Tileset; palette: RgbColor[] };
+  vileplumeFront: { tileset: Tileset; palette: RgbColor[] };
+  flower: { tileset: Tileset; palette: RgbColor[] };
+  sparkle2: { tileset: Tileset; palette: RgbColor[] };
+  thinRing: { tileset: Tileset; palette: RgbColor[] };
+  cureBubbles: { tileset: Tileset; palette: RgbColor[]; tilemap: Tilemap };
 };
 const synthesisArt = synthesisAsset as {
   sparkle2: { tileset: Tileset; palette: RgbColor[] };
@@ -4097,6 +4107,44 @@ function blendPaletteBanksToward(
   coeff: number,
 ): RgbColor[][] {
   return palettes.map((palette) => blendPaletteToward(palette, target, coeff));
+}
+
+function drawAromatherapyCureMask(
+  fb: Uint8Array,
+  attacker: { tileset: Tileset; palette: RgbColor[] },
+  corner: Readonly<{ x: number; y: number }>,
+  scrollY: number,
+  eva: number,
+  evb: number,
+): void {
+  if (eva === 0) return;
+  const layer = new Uint8Array(fb.length);
+  drawExtractedTileBg(layer, {
+    tileset: aromatherapyArt.cureBubbles.tileset,
+    tilemap: aromatherapyArt.cureBubbles.tilemap,
+    subpalettes: [aromatherapyArt.cureBubbles.palette],
+  }, 0, scrollY);
+  const { columns, rows, tiles } = attacker.tileset;
+  for (let sy = 0; sy < rows * 8; sy += 1) {
+    for (let sx = 0; sx < columns * 8; sx += 1) {
+      const tile = tiles[
+        Math.floor(sy / 8) * columns + Math.floor(sx / 8)
+      ];
+      if (!tile || tile[(sy % 8) * 8 + (sx % 8)] === 0) continue;
+      const x = corner.x + sx;
+      const y = corner.y + sy;
+      if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
+      const offset = (y * 240 + x) * 4;
+      if (layer[offset + 3] === 0) continue;
+      fb[offset] = blendChannel(layer[offset]!, fb[offset]!, eva, evb);
+      fb[offset + 1] = blendChannel(
+        layer[offset + 1]!, fb[offset + 1]!, eva, evb,
+      );
+      fb[offset + 2] = blendChannel(
+        layer[offset + 2]!, fb[offset + 2]!, eva, evb,
+      );
+    }
+  }
 }
 
 /** Source BG1 Scary Face layer, alpha-composited over the already-sorted field. */
@@ -23587,6 +23635,193 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "LOMBRE used" : "Foe LOMBRE used",
       "ABSORB!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "AROMATHERAPY") {
+    const view = sceneOnAromatherapyView(state);
+    const playerToOpponent =
+      view.attacker.species === "VILEPLUME"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "VILEPLUME"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged AROMATHERAPY pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const green = { r: 222, g: 255, b: 148 };
+    const bgY = Math.max(view.backgroundBlendY, view.finalAnim1BlendY);
+    const backgroundPalette = blendPaletteBanksToward(
+      battleBg.palette,
+      green,
+      bgY,
+    );
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      backgroundPalette,
+    );
+
+    const vileplumeSource = playerToOpponent
+      ? aromatherapyArt.vileplumeBack
+      : aromatherapyArt.vileplumeFront;
+    const vileplumeSprite = playerToOpponent
+      ? vileplumeSource
+      : {
+          ...vileplumeSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: vileplumeSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    drawSpriteSheet(
+      fb,
+      onixSprite.tileset,
+      onixSprite.palette,
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+
+    const drawFlower = (
+      flower: typeof view.flowers[number],
+    ): void => {
+      if (flower.kind === "smallFlower") {
+        drawSpriteSheet(
+          fb,
+          { columns: 1, rows: 1, tiles: [aromatherapyArt.flower.tileset.tiles[4]!] },
+          aromatherapyArt.flower.palette,
+          flower.x + flower.x2 - 4,
+          flower.y + flower.y2 - 4,
+        );
+      } else {
+        drawSpriteSheetAffineRotate(
+          fb,
+          {
+            columns: 2,
+            rows: 2,
+            tiles: aromatherapyArt.flower.tileset.tiles.slice(0, 4),
+          },
+          aromatherapyArt.flower.palette,
+          flower.x + flower.x2,
+          flower.y + flower.y2,
+          ...flower.matrix,
+          undefined,
+          false,
+        );
+      }
+    };
+    for (const flower of view.flowers) {
+      if (flower.behindAttacker) drawFlower(flower);
+    }
+    drawSpriteSheet(
+      fb,
+      vileplumeSprite.tileset,
+      blendPaletteToward(
+        vileplumeSprite.palette,
+        green,
+        view.finalAttackerBlendY,
+      ),
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (view.mask.active) {
+      drawAromatherapyCureMask(
+        fb,
+        vileplumeSprite,
+        view.attacker.geometry.spriteCorner,
+        view.mask.scrollY,
+        view.mask.eva,
+        view.mask.evb,
+      );
+    }
+    for (const flower of view.flowers) {
+      if (!flower.behindAttacker) drawFlower(flower);
+    }
+    for (const star of view.stars.slice().reverse()) {
+      drawSpriteSheet(
+        fb,
+        {
+          columns: 4,
+          rows: 4,
+          tiles: aromatherapyArt.sparkle2.tileset.tiles.slice(
+            star.frame * 16,
+            star.frame * 16 + 16,
+          ),
+        },
+        aromatherapyArt.sparkle2.palette,
+        star.x - 16,
+        star.y - 16,
+      );
+    }
+    if (view.ring) {
+      drawSpriteSheetAffineRotate(
+        fb,
+        aromatherapyArt.thinRing.tileset,
+        blendPaletteToward(
+          aromatherapyArt.thinRing.palette,
+          green,
+          view.finalAnim1BlendY,
+        ),
+        view.ring.x,
+        view.ring.y,
+        view.ring.matrixScale,
+        0,
+        0,
+        view.ring.matrixScale,
+        undefined,
+        true,
+      );
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "VILEPLUME",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "VILEPLUME" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      backgroundPalette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "VILEPLUME used" : "Foe VILEPLUME used",
+      "AROMATHERAPY!",
       99,
     );
     return;

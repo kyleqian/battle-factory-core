@@ -1,1 +1,45 @@
-{"schema":"aromatherapy-evidence-checkpoint/v1","oracleProfile":"battle-scene-on","scenario":"tools/battle-lab/mechanic-aromatherapy-player-vileplume-opponent-onix.json","probe":"tools/compare/aromatherapyProbe.py","pair":"VILEPLUME (player-back, Factory set 394) -> ONIX (opponent-front)","orientation":"player-to-opponent","move":"AROMATHERAPY","denseWindow":{"startFrame":75,"endFrame":474,"frameCount":400},"evidenceSha256":"51540e9940a3d4730640d58ede6b4ff5dcd90af646ed2d91065ccca9c56a2d82","rawRgbSha256":"dc02bff98836fbeb9481c3ce01686d0f7e11b7ad15f529224b48278617deaf84","lifecycleCounts":{"gAromatherapySmallFlowerSpriteTemplate":7,"gAromatherapyBigFlowerSpriteTemplate":2,"gSparklingStarsSpriteTemplate":2,"gBlendThinRingExpandingSpriteTemplate":1}}
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-aromatherapy-player-vileplume-opponent-onix.json",
+  "probe": "tools/compare/aromatherapyProbe.py",
+  "pair": "VILEPLUME (player-back, Factory set 394) -> ONIX (opponent-front)",
+  "orientation": "player-to-opponent",
+  "move": "AROMATHERAPY",
+  "appStage": { "oracleFrame": 75, "presentationAge": 0 },
+  "denseWindow": { "startFrame": 75, "endFrame": 474, "frameCount": 400 },
+  "attacker": {
+    "species": "VILEPLUME",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 55 },
+      "animationCenter": { "x": 72, "y": 95 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 10 },
+      "animationCenter": { "x": 176, "y": 42 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 182,
+    "playerMaxHp": 182,
+    "opponentHp": 110,
+    "opponentMaxHp": 110,
+    "playerGender": "female",
+    "opponentGender": "male"
+  },
+  "evidenceSha256": "51540e9940a3d4730640d58ede6b4ff5dcd90af646ed2d91065ccca9c56a2d82",
+  "rawRgbSha256": "dc02bff98836fbeb9481c3ce01686d0f7e11b7ad15f529224b48278617deaf84",
+  "lifecycleCounts": {
+    "gAromatherapySmallFlowerSpriteTemplate": 7,
+    "gAromatherapyBigFlowerSpriteTemplate": 2,
+    "gSparklingStarsSpriteTemplate": 2,
+    "gBlendThinRingExpandingSpriteTemplate": 1
+  }
+}

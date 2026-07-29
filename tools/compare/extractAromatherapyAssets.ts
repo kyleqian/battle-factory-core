@@ -28,6 +28,27 @@ function sprite(path: string, palettePath?: string) {
   };
 }
 
+function flowerSheet() {
+  const big = sprite(
+    "graphics/battle_anims/sprites/flower_0.png",
+    "graphics/battle_anims/sprites/flower.pal",
+  );
+  const small = sprite(
+    "graphics/battle_anims/sprites/flower_1.png",
+    "graphics/battle_anims/sprites/flower.pal",
+  );
+  // graphics_file_rules.mk concatenates flower_0.4bpp (four tiles) and
+  // flower_1.4bpp (one tile); ANIMCMD_FRAME(4) selects the fifth tile.
+  return {
+    tileset: {
+      columns: 5,
+      rows: 1,
+      tiles: [...big.tileset.tiles, ...small.tileset.tiles],
+    },
+    palette: big.palette,
+  };
+}
+
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, `${JSON.stringify({
   source: {
@@ -36,7 +57,7 @@ writeFileSync(out, `${JSON.stringify({
     vileplumeFront:
       "graphics/pokemon/vileplume/anim_front.png frame 0 + normal.pal; FRONTIER_MON_VILEPLUME_1 set 394",
     flower:
-      "graphics/battle_anims/sprites/flower_0.png + flower.pal; ANIM_TAG_FLOWER; gAromatherapySmallFlowerSpriteTemplate/gAromatherapyBigFlowerSpriteTemplate",
+      "graphics/battle_anims/sprites/flower_{0,1}.png concatenated by graphics_file_rules.mk + flower.pal; ANIM_TAG_FLOWER",
     sparkle2:
       "graphics/battle_anims/sprites/sparkle_1.png + sparkle_2.pal; ANIM_TAG_SPARKLE_2; gSparklingStarsSpriteTemplate",
     thinRing:
@@ -52,10 +73,7 @@ writeFileSync(out, `${JSON.stringify({
     "graphics/pokemon/vileplume/anim_front.png",
     "graphics/pokemon/vileplume/normal.pal",
   ),
-  flower: sprite(
-    "graphics/battle_anims/sprites/flower_0.png",
-    "graphics/battle_anims/sprites/flower.pal",
-  ),
+  flower: flowerSheet(),
   sparkle2: sprite(
     "graphics/battle_anims/sprites/sparkle_1.png",
     "graphics/battle_anims/sprites/sparkle_2.pal",
