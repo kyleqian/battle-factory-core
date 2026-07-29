@@ -1,5 +1,30 @@
 # Animation coverage
 
+## MOVE_TICKLE independent dense-ROM evidence checkpoint; production remains unsupported (2026-07-28)
+
+**Verdict:** Evidence-only checkpoint. `MOVE_TICKLE` remains unsupported; it
+is not staged, partial, or exact, and the coverage census is unchanged. Legal
+Level-50 Factory set **138** `FRONTIER_MON_OMANYTE` (species **139**, Quirky,
+Tickle **321**) drives complete legal Scene-ON mechanicLab parties against
+ONIX in both orientations. The full move-owned source body through first
+inactive cleanup is **205/205** frames **67–271** player-back and **288–492**
+opponent-front, reproduced twice fresh. Evidence/raw-RGB digests are player
+`a502cee3…228621` / `5f7feebf…44c216` and opponent `6ea16e18…1fca5e` /
+`6aa776d5…5811e3`.
+
+**Evidence/source:** `Move_TICKLE` loads EYE_SPARKLE, fades attacker palette
+black and back, creates two eye sparkle lifecycles, plays attacker-panned
+DETECT, then runs `SwayMon(0,6,1280,3,attacker)` and
+`RockMonBackAndForth(target,6,2)` with target-panned 8×8 TAIL_WHIP loop. The
+portable comparator reruns both orientations twice through
+`run-mgba-probe.py`, byte-pinning source offsets, task/template/callback
+topology, software/hardware OAM, matrices, palettes/tags/buffers, registers,
+SE1/SE2/pans, every raw RGB frame, and inactive cleanup.
+
+**Boundary:** CHARM/COVET remain exact shared controls, but do not promote
+Tickle. No reducer, seam, renderer, battle/controller/RNG/facility state,
+boundary list, unsupported barrier, or sibling status changed.
+
 ## MOVE_LEAF_BLADE independent dense-ROM evidence checkpoint; production remains unsupported (2026-07-28)
 
 **Verdict:** Evidence-only checkpoint. `MOVE_LEAF_BLADE` remains unsupported;

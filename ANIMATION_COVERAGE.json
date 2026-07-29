@@ -2071,7 +2071,7 @@
         "MOVE_TICKLE",
         "MOVE_COVET"
       ],
-      "goal": "MOVE_CHARM is exact for its complete 93-frame source component and typed relative seam in both MINUN orientations. MOVE_COVET is independently exact for 114/114 frames in both set-203 LINOONE orientations, reusing CHARM honestly and adding target ShakeMon2, ITEM_BAG load/transfer, and its Dizzy Punch audio loop. FAKE TEARS uses RockMonBackAndForth(attacker,2,1) after particle blending and adds eight tear sprites; TICKLE uses RockMonBackAndForth(target,6,2) after eye-sparkle/palette/SwayMon work. Both remain unsupported pending independent complete dense evidence."
+      "goal": "MOVE_CHARM is exact for its complete 93-frame source component and typed relative seam in both MINUN orientations. MOVE_COVET is independently exact for 114/114 frames in both set-203 LINOONE orientations, reusing CHARM honestly and adding target ShakeMon2, ITEM_BAG load/transfer, and its Dizzy Punch audio loop. FAKE TEARS uses RockMonBackAndForth(attacker,2,1) after particle blending and adds eight tear sprites. TICKLE has a committed evidence-only complete 205-frame ROM receipt with real set-138 OMANYTE: EYE_SPARKLE, attacker black palette fades, SwayMon(0,6,1280,3), RockMonBackAndForth(target,6,2), DETECT and target-panned Tail Whip loop, hardware/audio/raw RGB, first inactive cleanup, both orientations twice fresh; it remains unsupported pending an independent reducer/seam/compositor acceptance. FAKE TEARS remains unsupported pending independent complete dense evidence."
     },
     {
       "id": "razor-leaf-particle-cutter",
