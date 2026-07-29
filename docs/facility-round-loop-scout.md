@@ -437,6 +437,29 @@ attribution and exact A/tie/B order; `npm test`, `npm run build`, and
 `git diff --check` pass. Expected census/ratchet effect: **none** (evidence
 only; no production imports of the receipt).
 
+### 4.1 Receipt (landed)
+
+`tools/battle-lab/mechanic-factory-battle-start-rng-off.json` is a complete
+L50 Scene-OFF no-hook fixture (Murkrow 111 Speed vs Onix 90; no held items;
+the opponent has four Tackle slots).  The wrapper command above runs
+`tools/probe/verify-factory-battle-start-rng.py`, which instruments the real
+route beginning before `CB2_InitBattle`, samples every route/trace frame, and
+single-steps only the two `sRandCount`-moving fresh-start spans.  Its PASS
+receipt is:
+
+| draw | frame | caller | pre `gRandomTurnNumber` | returned/stored |
+| --- | ---: | --- | ---: | ---: |
+| A | 1194 | `BattleStartClearSetData+0x29b` | 0 | 62606 |
+| B | 1850 | `TryDoEventsBeforeFirstTurn+0x26f` | 62606 | 997 |
+
+Thus B overwrites A before first action ordering; the receipt records LR,
+pre/post RNG state, battle-main pointer, controller flags, turn order, chosen
+actions/moves, and current move for each attributed call.  The equal-Speed
+case is scaffolded in the probe but intentionally not claimed as landed: its
+second-pass whole-route mGBA run is unstable in this libmgba build after the
+large pre-battle VBlank random stream, so rung 2 must not consume a tie claim
+from this receipt.
+
 ## 5. Ordered bounded rung plan
 
 Every rung below is scoped to one ≤45-minute worker. If its acceptance cannot
