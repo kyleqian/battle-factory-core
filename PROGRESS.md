@@ -27,9 +27,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   item/hold effect, single/dual ability, friendship, gender and shiny. A
   focused Tier-1 test constructs every Level-50 set **0–849** and exactly
   reproduces all six OFF bootstrap RAM-dumped rental literals.
-- **Next:** supervisor verify rung 5. Rung 2's pure fresh-battle initializer
-  can consume the side-owned rung-1 RNG receipt when that checkpoint lands;
-  do not wire this adapter into battle-start/controller state in this rung.
+- **Supervisor fold (same round, side merge):** rung 1 landed (`eb441047`,
+  Terra worker) — fresh-start A/B receipt banked in scout §4.1: draw A
+  `BattleStartClearSetData+0x29b` → 62606, draw B
+  `TryDoEventsBeforeFirstTurn+0x26f` → 997 overwriting A before action
+  selection; wrapper PASS (supervisor re-ran fresh: PASS). Honest bounded
+  remainder: the equal-speed tie case is scaffolded, not claimed (unstable
+  targeted stepping over the broad pre-battle VBlank span) — rung 3 must
+  either finish it or derive the tie position from source with a narrower
+  instrument.
+- **Next:** rung 2 (pure fresh battle initializer, main) + rung 7 (initial
+  rental generator, side) launch this round; then rung 3 (entry-hook
+  orchestrator) and rung 4 (whole battle fresh-start→terminal).
 - **Notes:** scout §2.2/§2.3/rung-5 citations proved. Battle-lab has no cheap
   generic derived-party read-back command; using its permitted known-good
   literal fallback (the OFF bootstrap RAM dump). Commits `449f6365`,
