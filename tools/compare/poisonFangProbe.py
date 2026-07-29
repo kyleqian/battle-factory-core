@@ -16,7 +16,12 @@ from emerald_core import EmeraldOracle  # noqa: E402
 
 def main() -> None:
     raw_request = json.loads(SCENARIO.read_text())
-    if MOVE_ID == 41:
+    if MOVE_ID == 27:
+        # Real challenge-1 Level-50 Factory set 233 carrier: HITMONLEE_1,
+        # Adamant, HP/Defense, Black Belt. Both legal scenarios already stage
+        # the full record; this branch documents the shared probe contract.
+        pass
+    elif MOVE_ID == 41:
         parties = raw_request["overrides"]["parties"]
         for side in ("player", "opponent"):
             mon = parties[side][0]
@@ -70,6 +75,10 @@ def main() -> None:
     nm = subprocess.run(["arm-none-eabi-nm", str(reference / "pokeemerald.elf")], check=True, capture_output=True, text=True).stdout
     symbols = {line.split()[2]: int(line.split()[0], 16) | 1 for line in nm.splitlines() if len(line.split()) == 3}
     template_names = (
+        ("gSlidingKickSpriteTemplate", "gBasicHitSplatSpriteTemplate",
+         "gSlideMonToOffsetSpriteTemplate",
+         "gSlideMonToOriginalPosSpriteTemplate")
+        if MOVE_ID == 27 else
         ("gMegaPunchKickSpriteTemplate", "gBasicHitSplatSpriteTemplate")
         if MOVE_ID == 5 else
         ("gLinearStingerSpriteTemplate", "gHandleInvertHitSplatSpriteTemplate")
@@ -82,6 +91,9 @@ def main() -> None:
     templates = {name: oracle.symbols[name] for name in template_names}
     task_names = ("AnimTask_ShakeMon", "AnimTask_ShakeMon_Step",
                   "AnimTask_ShakeMon2", "AnimTask_ShakeMon2_Step",
+                  "AnimTask_TranslateMonEllipticalRespectSide",
+                  "AnimTask_TranslateMonElliptical",
+                  "AnimTask_TranslateMonElliptical_Step",
                   "AnimTask_BlendBattleAnimPal",
                   "AnimTask_BlendColorCycle", "AnimTask_BlendColorCycleLoop",
                   "Task_FadeToBg", "AnimTask_GrowAndShrink",
@@ -165,6 +177,7 @@ def main() -> None:
     OUTPUT.write_text(json.dumps({"schema":"poison-fang-dense-evidence/v2","setup":setup,
       "templates":templates,"taskFuncs":{name:symbols[name] for name in task_names},
       "songHeaders":{"SE_M_RAZOR_WIND2":oracle.read_u32(song_table+160*8),
+                     "SE_M_DOUBLE_TEAM":oracle.read_u32(song_table+135*8),
                      "SE_M_HORN_ATTACK":oracle.read_u32(song_table+166*8),
                      "SE_M_BITE":oracle.read_u32(song_table+161*8),
                      "SE_M_LEER":oracle.read_u32(song_table+192*8),

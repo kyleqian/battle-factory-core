@@ -1,0 +1,13 @@
+{
+  "schema": "rolling-kick-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "orientation": "player-back",
+  "scenario": "tools/battle-lab/mechanic-rolling-kick-player-hitmonlee-opponent-onix.json",
+  "probe": "tools/compare/poisonFangProbe.py",
+  "probeMoveId": 27,
+  "attackerSide": "player",
+  "targetSide": "opponent",
+  "sourceWindow": {"startFrame": 81, "endFrame": 135, "frameCount": 55},
+  "evidenceSha256": "3f35463979c0971b6432ed8695caa1130e21890d07ea4edb80b6685271932f92",
+  "rawRgbSha256": "76c1741106018ee425f40505c56af234d7d033562dc8bd3c84386e465d9d7ef3"
+}
