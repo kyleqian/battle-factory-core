@@ -1,19 +1,11 @@
 import anchorState from "../data/gen/anchor-state.json" with { type: "json" };
 import frontierMonsData from "../data/gen/battle-frontier-mons.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
-import type {
-  BattleParty,
-  FactoryRentalParty,
-} from "./battleScenario.ts";
-import {
-  createFactoryCorpusPartyMember,
-} from "./factoryCorpusParty.ts";
 import {
   acknowledgeFactorySwapPresentation,
   commitFactorySwapMutation,
   copyFactorySwapCursor,
   createFactorySwapState,
-  factorySwapRoundDecision,
   handleFactorySwapInput,
   type FactoryRentalRoster,
   type FactorySwapInput,
@@ -39,11 +31,6 @@ import {
   type SpeciesNameFadeState,
 } from "./speciesNameFade.ts";
 import { bgFadeY, objFadeY } from "./paletteFade.ts";
-import {
-  chooseRoundSwap,
-  completeBattlePresentation,
-  type RoundControllerState,
-} from "./roundController.ts";
 
 export interface FactorySwapPresentationState {
   readonly controller: FactorySwapState;
@@ -96,13 +83,6 @@ export interface FactorySwapBallCycleVisual {
   readonly cycledToEnemy: boolean;
 }
 
-export interface FactorySwapPresentationParties {
-  readonly playerRentalRecords: FactoryRentalParty;
-  readonly playerParty: BattleParty;
-  readonly opponentRentalRecords: FactoryRentalParty;
-  readonly opponentParty: BattleParty;
-}
-
 const anchor = anchorState as {
   rentals: Array<{
     species: string;
@@ -134,6 +114,27 @@ function generatedAbilityNum(species: string, personality: number): number {
   if (!stats) throw new Error(`Factory swap: missing generated species ${species}`);
   // CreateBoxMon: only species with a real second ability use personality bit 0.
   return stats.abilities[1] === "ABILITY_NONE" ? 0 : personality & 1;
+}
+
+import type {
+  BattleParty,
+  FactoryRentalParty,
+} from "./battleScenario.ts";
+import {
+  createFactoryCorpusPartyMember,
+} from "./factoryCorpusParty.ts";
+import { factorySwapRoundDecision } from "./factorySwap.ts";
+import {
+  chooseRoundSwap,
+  completeBattlePresentation,
+  type RoundControllerState,
+} from "./roundController.ts";
+
+export interface FactorySwapPresentationParties {
+  readonly playerRentalRecords: FactoryRentalParty;
+  readonly playerParty: BattleParty;
+  readonly opponentRentalRecords: FactoryRentalParty;
+  readonly opponentParty: BattleParty;
 }
 
 /**
