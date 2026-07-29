@@ -15,10 +15,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 677 — [BOUNDED MAIN WORKER 2026-07-29 ~02:37] interaction audit: double faint + deferred entry hooks + AI reveals
 
+- **Supervisor fold (post-step, `d057f085`):** `animation-main` folded at
+  02:40 with 21 overnight commits — Moonlight/Perish Song/Howl/Rest/Wish/
+  Sandstorm/Needle Arm/Follow Me/Metronome promoted exact with coverage
+  ratchets. Union green **485 files / 5019 tests**, production build. The
+  ledger's "For the main program" asks are historical (stat-drop seam
+  already fulfilled via Fake Tears). Also filed **ISSUES #48**
+  (cross-challenge rentsCount persistence, the audit's PLAUSIBLE finding).
 - **State:** committed `91857570`, `234b5405`, and `9c0eca68`; tree green at
-  **461 files / 4975 tests**, production build, `git diff --check`, and Battle
-  Scene OFF oracle info. All six seven-win carriers retain exact facility
-  cursors: seeds **4/6/8/13/17/26 = 1517/1563/2089/2224/1787/1556**.
+  **461 files / 4975 tests** pre-fold (**485/5019 post-fold**), production
+  build, `git diff --check`, and Battle Scene OFF oracle info. All six
+  seven-win carriers retain exact facility cursors: seeds
+  **4/6/8/13/17/26 = 1517/1563/2089/2224/1787/1556**.
 - **Did:** fainted-actions resume now carries the source's ascending battler
   cursor past a player replacement, so simultaneous contact-ability
   double-faints resolve the opponent replacement before leaving the pass
