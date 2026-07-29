@@ -2,8 +2,11 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import trainerPicsData from "../src/assets/gen/frontier-trainer-pics.json" with { type: "json" };
+import legacyBugCatcherData from "../src/assets/gen/trainer-pic-bug-catcher.json" with { type: "json" };
+import legacyFishermanData from "../src/assets/gen/trainer-pic-fisherman.json" with { type: "json" };
 import trainersData from "../src/data/gen/battle-frontier-trainers.json" with { type: "json" };
 import facilityLookupsData from "../src/data/gen/facility-class-lookups.json" with { type: "json" };
+import { resolveFrontierTrainerPic } from "../src/engine/battleScene.ts";
 
 type TrainerPic = {
   id: number;
@@ -59,5 +62,31 @@ describe("frontier-trainer-pics.json (ordinary 300-trainer front-picture surface
       expect(picture, `trainer ${trainer.id} (${trainer.name}) pic ${facility!.trainerPic.id} is extracted`).toBeDefined();
       expect(picture!.symbol).toBe(facility!.trainerPic.symbol);
     }
+  });
+
+  it("resolves all 50 source-exact pictures through the production selector", () => {
+    for (const expected of catalog.entries) {
+      const resolved = resolveFrontierTrainerPic(expected.symbol);
+      expect(resolved).toEqual(expected);
+      expect(resolved.width).toBe(64);
+      expect(resolved.height).toBe(64);
+      expect(resolved.tileset.tiles).toHaveLength(
+        resolved.tileset.columns * resolved.tileset.rows,
+      );
+    }
+  });
+
+  it.each([
+    ["TRAINER_PIC_BUG_CATCHER", legacyBugCatcherData],
+    ["TRAINER_PIC_FISHERMAN", legacyFishermanData],
+  ])("keeps canonical %s pixels and palette byte-identical to the previous render asset", (symbol, legacy) => {
+    const resolved = resolveFrontierTrainerPic(symbol);
+    expect({ tileset: resolved.tileset, palette: resolved.palette, yOffsetPx: resolved.yOffsetPx })
+      .toEqual(legacy);
+  });
+
+  it("throws loudly instead of falling back when an extracted picture is missing", () => {
+    expect(() => resolveFrontierTrainerPic("TRAINER_PIC_NOT_EXTRACTED"))
+      .toThrowError("missing extracted Frontier trainer picture TRAINER_PIC_NOT_EXTRACTED");
   });
 });

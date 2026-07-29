@@ -535,8 +535,7 @@ import battleAnimWhiteFeatherAsset from "../assets/gen/battle-anim-white-feather
 import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
 import statAnimBannerAsset from "../assets/gen/stat-anim-banner.json" with { type: "json" };
 import battleWindowAsset from "../assets/gen/battle-window.json" with { type: "json" };
-import bugCatcherAsset from "../assets/gen/trainer-pic-bug-catcher.json" with { type: "json" };
-import fishermanAsset from "../assets/gen/trainer-pic-fisherman.json" with { type: "json" };
+import frontierTrainerPicsAsset from "../assets/gen/frontier-trainer-pics.json" with { type: "json" };
 import brendanAsset from "../assets/gen/trainer-pic-brendan-back.json" with { type: "json" };
 import ballDisplayAsset from "../assets/gen/battle-interface-ball-display.json" with { type: "json" };
 import battleHealthboxAsset from "../assets/gen/battle-healthbox.json" with { type: "json" };
@@ -935,6 +934,12 @@ interface TrainerPicAsset {
   palette: RgbColor[];
   yOffsetPx: number;
 }
+interface FrontierTrainerPicAsset extends TrainerPicAsset {
+  id: number;
+  symbol: string;
+  width: number;
+  height: number;
+}
 interface BrendanAsset {
   frameCount: number;
   tileset: Tileset;
@@ -1073,8 +1078,11 @@ interface BattleAnimCuttingSliceAsset {
 const battleBg = battleBgAsset as BattleBgAsset;
 const statAnimBanner = statAnimBannerAsset as StatAnimBannerAsset;
 const battleWindow = battleWindowAsset as BattleWindowAsset;
-const bugCatcher = bugCatcherAsset as TrainerPicAsset;
-const fisherman = fishermanAsset as TrainerPicAsset;
+const frontierTrainerPics =
+  (frontierTrainerPicsAsset as { entries: FrontierTrainerPicAsset[] }).entries;
+const frontierTrainerPicBySymbol = new Map(
+  frontierTrainerPics.map((asset) => [asset.symbol, asset]),
+);
 const brendan = brendanAsset as BrendanAsset;
 const ballDisplay = ballDisplayAsset as BallDisplayAsset;
 const downArrow = downArrowAsset as DownArrowAsset;
@@ -2595,7 +2603,7 @@ function presentationForEncounter(
       : CANONICAL_DESTIN_PRESENTATION);
 }
 export interface BattleIntroEncounterParams {
-  readonly trainer: "bugCatcher" | "fisherman";
+  readonly trainerPic: string;
   readonly line1: string;
   readonly line2: string;
   readonly textStartTick: number;
@@ -2611,9 +2619,7 @@ export function battleIntroEncounterParams(
   const presentation = presentationForEncounter(encounter, trainerPresentation);
   const line1 = `${presentation.className} ${presentation.name}`;
   return {
-    trainer: presentation.trainerPic === "TRAINER_PIC_FISHERMAN"
-      ? "fisherman"
-      : "bugCatcher",
+    trainerPic: presentation.trainerPic,
     line1,
     line2: LINE2,
     textStartTick: TEXT_START_TICK,
@@ -13262,9 +13268,22 @@ function introTrainer(
   encounter: BattleSceneState["encounter"],
   trainerPresentation?: FactoryTrainerPresentation,
 ): TrainerPicAsset {
-  return battleIntroEncounterParams(encounter, trainerPresentation).trainer === "fisherman"
-    ? fisherman
-    : bugCatcher;
+  return resolveFrontierTrainerPic(
+    battleIntroEncounterParams(encounter, trainerPresentation).trainerPic,
+  );
+}
+
+/** Resolve the generated trainer record's picture symbol through the complete
+ * ordinary Frontier asset catalog. Missing corpus coverage is a build/test
+ * defect and must never silently substitute another trainer's art. */
+export function resolveFrontierTrainerPic(
+  trainerPicSymbol: string,
+): Readonly<FrontierTrainerPicAsset> {
+  const asset = frontierTrainerPicBySymbol.get(trainerPicSymbol);
+  if (asset === undefined) {
+    throw new Error(`missing extracted Frontier trainer picture ${trainerPicSymbol}`);
+  }
+  return asset;
 }
 
 function drawSettledScene(
@@ -13300,7 +13319,13 @@ function drawSettledScene(
  * every remaining tick in this window needs ALL of these simultaneously
  * correct, so none of the fixes above alone flips a full-frame match yet.
  */
-function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number, encounter: BattleSceneState["encounter"] = "destin"): void {
+function drawSendOutHandoff(
+  fb: Uint8Array,
+  t: number,
+  handoffTick: number,
+  encounter: BattleSceneState["encounter"] = "destin",
+  trainerPresentation?: FactoryTrainerPresentation,
+): void {
   const isJenson = encounter === "jenson";
   // PlayerHandleIntroTrainerBallThrow is scheduled from the opponent
   // send-out handoff, not from the battle scene's absolute clock.  Battle 1
@@ -13350,7 +13375,7 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number, enco
   }
   const trainerX = trainerExitX(t, handoffTick);
   if (trainerX !== null) {
-    const trainer = isJenson ? fisherman : bugCatcher;
+    const trainer = introTrainer(encounter, trainerPresentation);
     drawSpriteSheet(fb, trainer.tileset, trainer.palette, trainerX, OPPONENT_CORNER.y);
   }
   if (isJenson) {
@@ -15708,7 +15733,13 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
     );
     return;
   }
-  drawSendOutHandoff(fb, t, handoffTick, state.encounter);
+  drawSendOutHandoff(
+    fb,
+    t,
+    handoffTick,
+    state.encounter,
+    state.trainerPresentation,
+  );
 }
 
 /**

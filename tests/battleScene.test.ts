@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import {
   advanceBattleScene,
@@ -327,7 +328,7 @@ describe("battleScene: per-scanline shift (RAM-confirmed: gTasks[0].data[2], doc
 describe("battleScene: intro text cadence (docs/battle-scene-notes.md §3.2, 1 tick/char incl. spaces)", () => {
   it("selects JENSON's source-backed trainer line and two-tick-earlier cursor without changing DESTIN defaults", () => {
     expect(battleIntroEncounterParams("destin")).toEqual({
-      trainer: "bugCatcher",
+      trainerPic: "TRAINER_PIC_BUG_CATCHER",
       line1: "BUG CATCHER DESTIN",
       line2: "would like to battle!",
       textStartTick: 1234,
@@ -335,13 +336,24 @@ describe("battleScene: intro text cadence (docs/battle-scene-notes.md §3.2, 1 t
       cursorX: 123,
     });
     expect(battleIntroEncounterParams("jenson")).toEqual({
-      trainer: "fisherman",
+      trainerPic: "TRAINER_PIC_FISHERMAN",
       line1: "FISHERMAN JENSON",
       line2: "would like to battle!",
       textStartTick: 1234,
       cursorStartTick: 1272,
       cursorX: 123,
     });
+  });
+
+  it("keeps the canonical settled trainer-intro framebuffer byte-identical through generic picture selection", () => {
+    const fb = new Uint8Array(240 * 160 * 4);
+    renderBattleScene(fb, {
+      ...INITIAL_BATTLE_SCENE_STATE,
+      elapsed: 1300 - TICK0,
+    });
+    expect(createHash("sha256").update(fb).digest("hex")).toBe(
+      "8d92751ae2c7fd1524226faba98105702be7e5448819a27f6d027036b97f2346",
+    );
   });
 
   it("uses the encounter-selected printable count while preserving DESTIN's 39-character cadence", () => {
