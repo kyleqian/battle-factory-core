@@ -221,6 +221,7 @@ import {
   advanceFactorySwapPresentation,
   beginFactorySwapSummaryReturn,
   createCanonicalFactorySwapPresentation,
+  createPendingFactorySwapPresentation,
   factorySwapBallTile,
   factorySwapAcceptExitBgFadeY,
   factorySwapAcceptExitObjFadeY,
@@ -229,6 +230,7 @@ import {
   factorySwapPlayerOptionBallTile,
   factorySwapSummaryReturnBallTile,
   handleFactorySwapPresentationInput,
+  submitFactorySwapRoundDecision,
   type FactorySwapPresentationState,
 } from "./factorySwapPresentation.ts";
 import { renderFactorySwapPicker } from "./factorySwapRender.ts";
@@ -347,6 +349,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   let battleSetup: BattleSetupState | null = state.battleSetup;
   let battleControllerExecFlags = state.battleControllerExecFlags ?? 0;
   let battle2Turn1 = state.battle2Turn1 ?? null;
+  let roundController = state.roundController;
   let factorySwap = state.factorySwap ?? null;
   let factoryTerminal = state.factoryTerminal;
   const currentTrainerPresentation = factoryTrainerPresentationForOpponent(
@@ -431,6 +434,12 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let nextPostwin = advancePostwin(postwin);
     if (factorySwap) {
       let nextFactorySwap = advanceFactorySwapPresentation(factorySwap);
+      if (roundController !== null) {
+        roundController = submitFactorySwapRoundDecision(
+          roundController,
+          nextFactorySwap,
+        );
+      }
       if (nextFactorySwap.controller.phase === "summaryFade") {
         if (
           summaryScreen.onInfoPage &&
@@ -474,6 +483,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         keyRepeat,
         postwin: nextPostwin,
         factorySwap: nextFactorySwap,
+        roundController,
         summaryScreen,
         rngMode,
         rngValue,
@@ -569,7 +579,11 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         nextPostwin = movePostwinSwapCursor(nextPostwin, -1);
       } else if (newKeys.has("A")) {
         if (nextPostwin.swapCursorPos === 0) {
-          factorySwap = createCanonicalFactorySwapPresentation();
+          factorySwap = (
+            roundController === null
+              ? null
+              : createPendingFactorySwapPresentation(roundController)
+          ) ?? createCanonicalFactorySwapPresentation();
         } else {
           nextPostwin = acceptPostwinSwapDecline(nextPostwin);
         }

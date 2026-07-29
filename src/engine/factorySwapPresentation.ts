@@ -1,11 +1,19 @@
 import anchorState from "../data/gen/anchor-state.json" with { type: "json" };
 import frontierMonsData from "../data/gen/battle-frontier-mons.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
+import type {
+  BattleParty,
+  FactoryRentalParty,
+} from "./battleScenario.ts";
+import {
+  createFactoryCorpusPartyMember,
+} from "./factoryCorpusParty.ts";
 import {
   acknowledgeFactorySwapPresentation,
   commitFactorySwapMutation,
   copyFactorySwapCursor,
   createFactorySwapState,
+  factorySwapRoundDecision,
   handleFactorySwapInput,
   type FactoryRentalRoster,
   type FactorySwapInput,
@@ -31,6 +39,11 @@ import {
   type SpeciesNameFadeState,
 } from "./speciesNameFade.ts";
 import { bgFadeY, objFadeY } from "./paletteFade.ts";
+import {
+  chooseRoundSwap,
+  completeBattlePresentation,
+  type RoundControllerState,
+} from "./roundController.ts";
 
 export interface FactorySwapPresentationState {
   readonly controller: FactorySwapState;
@@ -81,6 +94,13 @@ export interface FactorySwapPresentationState {
 export interface FactorySwapBallCycleVisual {
   readonly centerX: number;
   readonly cycledToEnemy: boolean;
+}
+
+export interface FactorySwapPresentationParties {
+  readonly playerRentalRecords: FactoryRentalParty;
+  readonly playerParty: BattleParty;
+  readonly opponentRentalRecords: FactoryRentalParty;
+  readonly opponentParty: BattleParty;
 }
 
 const anchor = anchorState as {
@@ -226,13 +246,75 @@ export const FACTORY_SWAP_PHASE_READY_DELAYS: Readonly<
   duplicateSpecies: 24,
 };
 
-export function createCanonicalFactorySwapPresentation(): FactorySwapPresentationState {
-  return {
-    controller: createFactorySwapState(
-      CANONICAL_SWAP_PLAYER_PARTY,
-      CANONICAL_SWAP_ENEMY_PARTY,
-      CANONICAL_FACTORY_RENTAL_ROSTER,
+function factorySwapSpeciesName(speciesName: string): string {
+  return speciesName.replace(/^SPECIES_/, "");
+}
+
+function factorySwapParty(
+  records: FactoryRentalParty,
+  battleParty: BattleParty,
+  label: string,
+): FactorySwapParty {
+  return records.map((record, index): FactorySwapMon => {
+    const member = createFactoryCorpusPartyMember(record);
+    const battleMon = battleParty[index]!;
+    const species = factorySwapSpeciesName(member.speciesName);
+    if (factorySwapSpeciesName(battleMon.species) !== species) {
+      throw new Error(
+        `${label}[${index}] record species ${species} does not match battle party species ${battleMon.species}`,
+      );
+    }
+    return {
+      id: battleMon.id,
+      species,
+      hp: battleMon.hp,
+      maxHp: battleMon.maxHp,
+      status: battleMon.status,
+      personality: member.personality,
+      abilityNum: member.abilitySlot,
+      friendship: member.friendship,
+    };
+  }) as unknown as FactorySwapParty;
+}
+
+function factorySwapRentalRoster(
+  playerRentalRecords: FactoryRentalParty,
+  opponentRentalRecords: FactoryRentalParty,
+): FactoryRentalRoster {
+  return [...playerRentalRecords, ...opponentRentalRecords].map((record) => ({
+    monId: record.setId,
+    personality: record.personality,
+    ivs: record.fixedIv,
+    abilityNum: record.abilitySlot,
+  })) as unknown as FactoryRentalRoster;
+}
+
+/**
+ * Generic generated-round entry point. The two BattleParty values retain the
+ * round's live identity/HP/status, while the saved RentalMon records remain
+ * the source of species, personality, ability, and swap-copy persistence.
+ */
+export function createFactorySwapPresentation(
+  parties: FactorySwapPresentationParties,
+): FactorySwapPresentationState {
+  const controller = createFactorySwapState(
+    factorySwapParty(
+      parties.playerRentalRecords,
+      parties.playerParty,
+      "playerParty",
     ),
+    factorySwapParty(
+      parties.opponentRentalRecords,
+      parties.opponentParty,
+      "opponentParty",
+    ),
+    factorySwapRentalRoster(
+      parties.playerRentalRecords,
+      parties.opponentRentalRecords,
+    ),
+  );
+  return {
+    controller,
     elapsed: 0,
     phaseElapsed: 0,
     selectedBallClock: null,
@@ -248,6 +330,64 @@ export function createCanonicalFactorySwapPresentation(): FactorySwapPresentatio
     loadedDisplaySpecies: null,
     summaryReturnClock: null,
   };
+}
+
+export function createCanonicalFactorySwapPresentation(): FactorySwapPresentationState {
+  const records = CANONICAL_FACTORY_RENTAL_ROSTER.map((record) => ({
+    setId: record.monId,
+    personality: record.personality,
+    fixedIv: record.ivs,
+    abilitySlot: record.abilityNum as 0 | 1,
+  }));
+  return createFactorySwapPresentation({
+    playerRentalRecords: records.slice(0, 3) as unknown as FactoryRentalParty,
+    playerParty: CANONICAL_SWAP_PLAYER_PARTY,
+    opponentRentalRecords: records.slice(3) as unknown as FactoryRentalParty,
+    opponentParty: CANONICAL_SWAP_ENEMY_PARTY,
+  });
+}
+
+/**
+ * Consumes the round controller's pending swapOffer without acknowledging it.
+ * Completion remains tied to the source copy boundary below.
+ */
+export function createPendingFactorySwapPresentation(
+  round: RoundControllerState,
+): FactorySwapPresentationState | null {
+  const pending = round.presentation;
+  if (pending === null || pending.command.type !== "swapOffer") return null;
+  const playerRentalRecords = round.rules.playerRentalRecords;
+  const opponentRentalRecords = round.rules.currentOpponent.rentalRecords;
+  if (playerRentalRecords === null || opponentRentalRecords === undefined) {
+    throw new Error(
+      "a generated Factory swap presentation requires both full rental record parties",
+    );
+  }
+  return createFactorySwapPresentation({
+    playerRentalRecords,
+    playerParty: round.rules.playerParty,
+    opponentRentalRecords,
+    opponentParty: round.rules.currentOpponent.party,
+  });
+}
+
+/**
+ * Source `CopySwappedMonData` -> round decision bridge. Calls before +21 are
+ * no-ops; after the first submission the pending command is `swapResolved`,
+ * making subsequent presentation ticks idempotent.
+ */
+export function submitFactorySwapRoundDecision(
+  round: RoundControllerState,
+  presentation: FactorySwapPresentationState,
+): RoundControllerState {
+  const pending = round.presentation;
+  if (pending === null || pending.command.type !== "swapOffer") return round;
+  const decision = factorySwapRoundDecision(presentation.controller);
+  if (decision === null) return round;
+  const acknowledged = completeBattlePresentation(round, {
+    commandId: pending.command.commandId,
+  });
+  return chooseRoundSwap(acknowledged, decision);
 }
 
 function readyDelay(state: FactorySwapPresentationState): number | null {
