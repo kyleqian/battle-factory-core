@@ -29,8 +29,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   opponent's move hit that incoming mon; an Intimidate receipt pins hook
   timing. The switch draws zero RNG; the switch-turn ledger pins the next
   boundary at position 15 after five staged AI draws.
-- **Next:** close Run Away/Pickup as documented no-op rows, then model the
-  whole-battle turn-1 `gRandomTurnNumber` writes.
+- **Supervisor fold (same round, side merge):** the paired side-lane worker
+  oracle-corroborated the boundary-draw + Quick Claw model (`ad1953db`,
+  §B6 of the speed scout): five ROM turns with per-turn `gRandomTurnNumber`
+  RAM reads (25804/44835/15553/45723/10727), exactly one attributed
+  `BattleTurnPassed+0x157` draw per transition, the 1/5 proc turn
+  (10727 < 13107) flipping order exactly as modeled, zero Quick Claw or
+  tie draws, and the ENGINE reproducing four boundary values + raw LCG
+  states exactly (`verify-quick-claw-turn-boundary.py` +
+  `verify-quick-claw-engine.ts`, supervisor re-ran both: PASS). Continuous
+  cross-turn replay is non-alignable by design (submitted-decision windows
+  omit the ROM AI's intervening draws — documented, not a defect). Also
+  refreshed `verify-on-damage-static.py` to the post-implementation guard.
+- **Next:** close Run Away/Pickup honestly (documented no-op or
+  reclassification, with source proof) to end the ability census; side
+  design scout for Gate-5/whole-battle integration (incl. the turn-1
+  `gRandomTurnNumber` writes).
 - **Notes:** Pursuit's pre-switch double-power interception is deliberately
   deferred behind one trigger-narrow `unsupported-branch` in
   `factoryBattleScriptFullTurnDecision.ts`; its barrier ratchet moves **0→1**
