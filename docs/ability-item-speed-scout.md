@@ -402,6 +402,134 @@ needed a correction once the actual numbers were computed, which is exactly
 the kind of mistake running-without-computing-first would have baked into a
 "confirmed" result instead of a caught-and-flagged one.
 
+### B5. Turn-boundary RNG gap — **REFUTED** (2026-07-28 side-lane instrument)
+
+**Verdict: REFUTED — the production engine is one draw short at every
+continuing turn boundary.** The ROM draw is real and unconditional; the
+production full-turn path does not absorb it under another name.
+
+#### Engine-side mechanism
+
+The production reducer enters `runBattleEndTurnOrchestration` at
+`factoryBattleScriptFullTurnDecision.ts:1101-1108`. A clean result becomes
+`kind: "next-turn"` by applying only `finishTurnValuesCleanUp` at
+`battleEndTurnOrchestration.ts:1910-1918`; the public orchestration entry at
+`:2181-2229` performs field, battler, faint, delayed-attack, and cleanup work,
+but has no unconditional RNG draw at its continuing tail. The reducer then
+immediately computes locked decisions or publishes the next request at
+`factoryBattleScriptFullTurnDecision.ts:1137-1209`. `battleScriptCallbackStack
+.ts:1-10` is explicitly an unwired prototype and therefore cannot close the
+gap either.
+
+`battleTurn.ts` is not that path. Its `turnEndRngGroups` field (`:39-45`) is
+an older scenario-owned opaque draw-count list, consumed at `:172-179`.
+Only `battle2OffScenario.ts:44` supplies it (`[1,2,5]`). The already-banked
+kernel seam audit explains the endpoint mask precisely
+(`docs/battle2-off-kernel-seam-scout.md:171-201`): the old fixture
+hand-injects the ROM's boundary + switch-AI + setup/tie totals, while the real
+full-turn reducer stops at its four move draws.
+
+The multi-turn staged assertions are per-engine-stream counts, not oracle
+position comparisons:
+
+| Existing test | What it pins | What it omits |
+| --- | --- | --- |
+| `factoryBattleScriptFullTurnDecision.test.ts:303-346` | 8 then 16 cumulative: two four-draw hit chains per turn | boundary draw and AI selection |
+| same file `:526-600` | 19 then 38 cumulative: 11 policy + 8 hit-chain draws per turn | boundary draw |
+| `battleEndTurnOrchestration.test.ts:483-513` | RNG value and calls remain identical across two clean Burn boundaries | this positively pins the missing unconditional draw |
+
+Thus “single and continuous” is true only of the engine's own shorter stream;
+none of those assertions compares the same position against the ROM.
+
+#### Battle Scene OFF fixture and observed order
+
+`tools/battle-lab/mechanic-swift-swim-turn-boundary-off.json` stages three
+complete legal L50 mons per side. The active pair is the requested Surskit
+(species 311 / Frontier index 42, Relaxed, IV31/EV0, real four-move corpus,
+Mystic Water item 209, Swift Swim slot 0) versus Smeargle (species 235 /
+index 32, Hardy, IV31/EV0, item none, all four move slots Pound). The staged
+stats read back as 76 versus 95 Speed.
+
+The observed action transitions were:
+
+| Turn | Frame | Attacker | Move | Result |
+| ---: | ---: | --- | --- | --- |
+| 1 | 71 | Smeargle | Pound | 95 > 76, acts first |
+| 1 | 210 | Surskit | Rain Dance | rain established |
+| 2 | 1037 | Surskit | Bubble Beam | Swift Swim gives 152 > 95, acts first |
+| 2 | 1230 | Smeargle | Pound | acts second |
+
+So the concurrent speed-wiring premise is corroborated by the ROM: the
+predicted order flip is observed exactly.
+
+#### Full ROM attribution, turn-1 resolution through turn-3 selection
+
+`attribute-factory-ai-random-callers.py` was run through
+`tools/run-mgba-probe.py` over frames 0..1932. Its fast `sRandCount` pass and
+targeted LR single-step pass both found **24**, with exact reconciliation:
+
+| Position(s) | Frame(s) | Caller | Count | Attribution |
+| ---: | ---: | --- | ---: | --- |
+| 1 | 74 | `Cmd_accuracycheck+0x305` | 1 | turn-1 Smeargle Pound |
+| 2 | 101 | `Cmd_critcalc+0x127` | 1 | turn-1 Pound |
+| 3 | 104 | `Cmd_adjustnormaldamage+0x7` | 1 | turn-1 Pound |
+| 4 | 201 | `Cmd_seteffectwithchance+0x81` | 1 | turn-1 Pound |
+| **5** | **503** | **`BattleTurnPassed+0x157`** | **1** | **unconditional turn-2 `gRandomTurnNumber`** |
+| 6-9 | 509 | `BattleAI_SetupAIData+0x83` | 4 | turn-2 simulated RNG slots |
+| 10 | 509 | `ChooseMoveOrAction_Singles+0xf7` | 1 | turn-2 identical-move tie selection |
+| 11 | 1042 | `Cmd_accuracycheck+0x305` | 1 | turn-2 Surskit Bubble Beam |
+| 12 | 1069 | `Cmd_critcalc+0x127` | 1 | turn-2 Bubble Beam |
+| 13 | 1072 | `Cmd_adjustnormaldamage+0x7` | 1 | turn-2 Bubble Beam |
+| 14 | 1221 | `Cmd_seteffectwithchance+0x81` | 1 | turn-2 Bubble Beam |
+| 15 | 1233 | `Cmd_accuracycheck+0x305` | 1 | turn-2 Smeargle Pound |
+| 16 | 1260 | `Cmd_critcalc+0x127` | 1 | turn-2 Pound |
+| 17 | 1263 | `Cmd_adjustnormaldamage+0x7` | 1 | turn-2 Pound |
+| 18 | 1362 | `Cmd_seteffectwithchance+0x81` | 1 | turn-2 Pound |
+| **19** | **1499** | **`BattleTurnPassed+0x157`** | **1** | **unconditional turn-3 `gRandomTurnNumber`** |
+| 20-23 | 1505 | `BattleAI_SetupAIData+0x83` | 4 | turn-3 simulated RNG slots |
+| 24 | 1505 | `ChooseMoveOrAction_Singles+0xf7` | 1 | turn-3 identical-move tie selection |
+
+Rain Dance itself draws zero. There were no switch-AI draws in this fixture.
+The instrument also read `gRandomTurnNumber`: 25804 before the first
+transition, 2913 after frame 503, and 1052 after frame 1499.
+
+The closest production staged ledger is therefore positionally:
+turn-1 move draws 1-4, then turn-2 AI begins at engine position 5 instead of
+ROM position 6; after turn 2's eight move draws, turn-3 AI begins at engine
+position 18 instead of ROM position 20. It is one draw short from turn 2
+selection onward and two draws short from turn 3 selection onward. The
+current branch cannot run a semantically identical engine weather fixture:
+as B2 records, the production call site does not yet thread ability or
+weather, so its turn-2 order would itself differ. That limitation does not
+mask this verdict—the clean orchestration tests explicitly pin zero boundary
+draws, while the ROM instrument identifies one.
+
+#### Required fix shape (not implemented here)
+
+Add one unconditional `ctx.rng.draw(...)` for every nonterminal transition,
+persist its u16 result as the rules-context equivalent of
+`gRandomTurnNumber`, and have all Quick Claw/`GetWhoStrikesFirst` consumers
+read that stored value without redrawing. It belongs after the full
+`runBattleEndTurnOrchestration` continuing cleanup has completed and before
+`runEndTurnTail` computes locked decisions or publishes the next player/
+trainer request (`factoryBattleScriptFullTurnDecision.ts:1137` onward).
+
+Source assigns `gBattleMainFunc = HandleTurnActionSelectionState` at
+`battle_main.c:4012`, then draws at `:4013`; the callback executes later.
+The instrument confirms the practical ordering: boundary draw frame 503,
+then AI decision draws frame 509 (and 1499 then 1505). Therefore the fix must
+advance and store the random-turn value **before any next-turn AI decision
+draw**, not inside turn ordering and not after decision collection.
+
+Mechanical recheck:
+
+```sh
+python3 tools/probe/verify-turn-boundary-rng-gap.py
+```
+
+The same verifier accepts a fresh output path under `tools/run-mgba-probe.py`
+to restage the OFF fixture and assert the four-action order.
+
 ## Self-check summary
 
 - All Part A file:line citations: **verified by grep + Read this session**
