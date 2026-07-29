@@ -28,7 +28,7 @@ import {
   type AiWeatherValue,
   type FactoryAiCheckBadMoveAttacker,
   type FactoryAiCheckBadMoveDraw,
-  type FactoryAiCheckBadMoveTarget,
+  type FactoryAiCheckBadMoveRoarTarget,
 } from "./factoryAiCheckBadMove.ts";
 import {
   runTryToFaint,
@@ -548,6 +548,13 @@ export type FactoryAiScoredTargetView = FactoryAiScoredBattlerView & Readonly<{
   knownItemEffect?: number;
   /** BattleHistory-known move IDs, read by AI_CV_Protect's target move-effect scan. */
   knownMoveIds?: readonly number[];
+  /**
+   * Alive, non-empty, non-Egg target-side bench count produced by
+   * `count_usable_party_mons AI_TARGET`, excluding the active party index.
+   * Source-required by `AI_CBM_Roar`; optional with the CBM layer's
+   * conservative zero-member default.
+   */
+  usablePartyMons?: number;
 }>;
 
 export type FactoryAiScoredView = Readonly<{
@@ -771,7 +778,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     }));
   }
 
-  const targetForCbm: FactoryAiCheckBadMoveTarget = Object.freeze({
+  const targetForCbm: FactoryAiCheckBadMoveRoarTarget = Object.freeze({
     species: view.target.species,
     types: view.target.types,
     knownAbility: view.target.knownAbility,
@@ -784,6 +791,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     evasionStage: view.target.statStages.evasion,
     hasAnyStatus: view.target.hasAnyStatus,
     safeguardUp: view.target.safeguardUp,
+    usablePartyMons: view.target.usablePartyMons,
   });
   const attackerForCbm: FactoryAiCheckBadMoveAttacker = Object.freeze({
     atkStage: view.attacker.statStages.atk,

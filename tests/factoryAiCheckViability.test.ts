@@ -123,6 +123,69 @@ describe("AI_CV_Sleep (docs/factory-ai-checkviability-ground-truth.md §29)", ()
   });
 });
 
+describe("AI_CV_Roar (docs/factory-ai-checkviability-ground-truth.md §30)", () => {
+  const MOVE_ROAR = 46;
+
+  function roarRun(rngValue: number, targetOverrides: Record<string, number> = {}) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_ROAR,
+      attacker: NEUTRAL_BATTLER,
+      target: { ...NEUTRAL_BATTLER, ...targetOverrides },
+      drawOrdinalStart: 1,
+      reasonPrefix: "roar",
+    });
+  }
+
+  it("ATK/DEF/SPATK/SPDEF/EVASION gates each JUMP when that target stage is >8", () => {
+    for (const field of ["atkStage", "defStage", "spAtkStage", "spDefStage", "evasionStage"] as const) {
+      const result = roarRun(3, { [field]: 9 });
+      expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "roar-roll", succeeded: false });
+    }
+  });
+
+  it("all five stage gates FALL THROUGH at the exact threshold 8, applying -3 with no draw", () => {
+    expect(roarRun(1, {
+      atkStage: 8,
+      defStage: 8,
+      spAtkStage: 8,
+      spDefStage: 8,
+      evasionStage: 8,
+    })).toMatchObject({
+      kind: "scored",
+      scoreDelta: -3,
+      draws: [],
+    });
+  });
+
+  it("raised-stage roll <128 JUMPs to End and skips +2", () => {
+    // seed 3 -> high-half 50515, low byte 83.
+    const result = roarRun(3, { atkStage: 9 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws[0]).toMatchObject({ kind: "roar-roll", succeeded: false });
+  });
+
+  it("raised-stage roll >=128 FALLS THROUGH and applies +2", () => {
+    // seed 1 -> high-half 16838, low byte 198.
+    const result = roarRun(1, { evasionStage: 9 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 2 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws[0]).toMatchObject({ kind: "roar-roll", succeeded: true });
+  });
+
+  it("leaves Haze behind the same generic CV barrier", () => {
+    expect(run({ value: 1, calls: 0 }, MOVE_HAZE)).toMatchObject({
+      kind: "unsupported-branch",
+      barrier: "factory-ai-check-viability",
+      effect: "EFFECT_HAZE",
+    });
+  });
+});
+
 describe("AI_CV_Toxic (data/battle_ai_scripts.s:1353-1371)", () => {
   function toxicRun(input: Readonly<{
     rngValue?: number;
