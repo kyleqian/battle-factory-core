@@ -214,6 +214,10 @@ import {
   type SynthesisSprite,
 } from "./synthesis.ts";
 import {
+  aromatherapyAtAge,
+  type AromatherapyState,
+} from "./aromatherapy.ts";
+import {
   wishAtAge,
   type WishState,
   type WishTwinkleVariant,
@@ -493,6 +497,7 @@ export interface SceneOnBattlerGeometry {
 
 export interface SceneOnPresentationBattler {
   readonly species:
+    | "VILEPLUME"
     | "ONIX"
     | "KRABBY"
     | "SURSKIT"
@@ -1015,6 +1020,13 @@ export interface SceneOnReflectConfig {
 
 export interface SceneOnSynthesisConfig {
   readonly move: "SYNTHESIS";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnAromatherapyConfig {
+  readonly move: "AROMATHERAPY";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
@@ -1611,6 +1623,7 @@ export type SceneOnMoveConfig =
   | SceneOnAbsorbConfig
   | SceneOnReflectConfig
   | SceneOnSynthesisConfig
+  | SceneOnAromatherapyConfig
   | SceneOnWishConfig
   | SceneOnMilkDrinkConfig
   | SceneOnSupersonicConfig
@@ -1705,6 +1718,8 @@ export type SceneOnAbsorbPresentationState =
   SceneOnMovePresentationState<SceneOnAbsorbConfig>;
 export type SceneOnMoonlightPresentationState =
   SceneOnMovePresentationState<SceneOnMoonlightConfig>;
+export type SceneOnAromatherapyPresentationState =
+  SceneOnMovePresentationState<SceneOnAromatherapyConfig>;
 export type SceneOnReflectPresentationState =
   SceneOnMovePresentationState<SceneOnReflectConfig>;
 export type SceneOnSparkPresentationState =
@@ -2403,6 +2418,12 @@ export interface SceneOnSynthesisView {
   readonly sprites: readonly SynthesisSprite[];
 }
 
+export interface SceneOnAromatherapyView extends AromatherapyState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnWishView extends WishState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -3023,6 +3044,28 @@ export function sceneOnSynthesisView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age` spans the complete Move_AROMATHERAPY script body through cleanup. */
+export function sceneOnAromatherapyView(
+  state: SceneOnMovePresentationState,
+): SceneOnAromatherapyView {
+  if (state.config.move !== "AROMATHERAPY") {
+    throw new Error(
+      `expected AROMATHERAPY presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...aromatherapyAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.attacker.geometry.battlePositionCenter,
     ),
   };
 }
