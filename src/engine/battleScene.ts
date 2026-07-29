@@ -669,6 +669,10 @@ import {
   type BattleCommandPresentationRenderView,
 } from "./battleCommandPresentationRender.ts";
 import {
+  drawStandardWindowFrame,
+  drawStandardWindowText,
+} from "./prebattleRoomRender.ts";
+import {
   battle2RockSlideMechanismPressTick,
   battle2Turn1State,
 } from "./battle2Turn1.ts";
@@ -14521,6 +14525,12 @@ function drawTurn15PartySelectList(fb: Uint8Array, state: import("./partySelect.
     drawTurn15ExitObjSubset(fb, partyExitObj.oam.status);
   } else {
     drawTurn15PartyStatus(fb, layers.status === "magby" ? partyMenuStatusOverlayMagby : partyMenuStatusOverlay);
+  }
+  if (state.message !== null) {
+    drawStandardWindowFrame(fb, 0, 112, 28, 4);
+    const [line1, line2] = state.message.split("\n");
+    drawStandardWindowText(fb, line1!, 8, 121);
+    if (line2) drawStandardWindowText(fb, line2, 8, 137);
   }
 }
 

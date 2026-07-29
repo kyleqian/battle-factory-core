@@ -406,6 +406,15 @@ export function returnBattleCommandPartySelection(
     : withLifecycle(state, "submitting", 0, { pendingDecision: decision });
 }
 
+/** Returns a cancelled voluntary selector to its same request and cursor. */
+export function cancelBattleCommandPartySelection(
+  state: BattleCommandPresentationState,
+): BattleCommandPresentationState {
+  return state.lifecycle.phase === "party-handoff"
+    ? withLifecycle(state, "action-menu", 0)
+    : state;
+}
+
 /**
  * Submits only a completed presentation choice through the ordinary immutable
  * battle boundary. Request identity and decision legality remain kernel-owned.

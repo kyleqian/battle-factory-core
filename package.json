@@ -19,6 +19,7 @@
     "extract:facility-class-lookups": "node --experimental-strip-types tools/extract/extract-facility-class-lookups.ts",
     "extract:frontier-trainer-pics": "node --experimental-strip-types tools/extract/extract-frontier-trainer-pics.ts",
     "extract:party-mon-icons": "node --experimental-strip-types tools/extract/extract-party-mon-icons.ts",
+    "extract:party-menu-source": "node --experimental-strip-types tools/extract/extract-party-menu-source.ts",
     "compare:fire-punch-portable": "node --experimental-strip-types tools/compare/firePunchPortable.ts",
     "compare:ice-punch-portable": "node --experimental-strip-types tools/compare/firePunchPortable.ts tools/compare/fixtures/ice-punch-onix-grovyle.json",
     "compare:ice-punch-opposite": "node --experimental-strip-types tools/compare/firePunchPortable.ts tools/compare/fixtures/ice-punch-grovyle-onix.json",

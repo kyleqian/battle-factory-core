@@ -251,6 +251,9 @@ import {
 } from "./factoryTerminalPresentation.ts";
 import { renderFactoryTerminalPresentation } from "./factoryTerminalRender.ts";
 import {
+  renderBattlePartySelect,
+} from "./battlePartySelect.ts";
+import {
   advanceFactoryRoundBattleCommand,
   type FactoryRoundBattleOrchestratorState,
 } from "./factoryRoundBattleOrchestrator.ts";
@@ -1933,10 +1936,14 @@ function renderPostwinState(state: EngineState): Uint8Array {
 function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
   if (state.factoryRoundBattleOrchestrator?.battleCommandPresentation) {
     const fb = createFramebuffer();
-    renderGeneratedBattleCommandPresentation(
-      fb,
-      state.factoryRoundBattleOrchestrator.battleCommandPresentation,
-    );
+    const selector = state.factoryRoundBattleOrchestrator.battlePartySelect;
+    if (selector) renderBattlePartySelect(fb, selector);
+    else {
+      renderGeneratedBattleCommandPresentation(
+        fb,
+        state.factoryRoundBattleOrchestrator.battleCommandPresentation,
+      );
+    }
     return fb;
   }
   if (state.factorySwap) {
