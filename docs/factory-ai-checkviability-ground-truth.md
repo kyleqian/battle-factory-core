@@ -6379,9 +6379,12 @@ python3 tools/run-mgba-probe.py /tmp/roar-reach-2.json -- tools/probe/probe-fact
 npx vitest run tests/factoryAiCheckBadMove.test.ts tests/factoryAiCheckViability.test.ts tests/factoryAiScoredDecision.test.ts
 ```
 
-Both censuses regenerate byte-identically: executable-frontier SHA-256
-`8b18f75413c8046530f75c8a5b331a0bf31e8b92596029356ef6025071965261`;
-ability/item SHA-256
-`56c0534cd32a7900aaa89e1872669ef8f0a06046e9d00dbde1003f42b7427f3b`.
-This replaces the runtime Roar halt behind the same single generic barrier:
-no new unsupported-branch statement and no census/import ratchet change.
+The executable-frontier census remains byte-identical (SHA-256
+`8b18f75413c8046530f75c8a5b331a0bf31e8b92596029356ef6025071965261`). The
+ability/item census legitimately changes exactly one cell:
+`ABILITY_SUCTION_CUPS` engine-reference count moves **3 -> 5**, reflecting
+the new named constant and live comparison in `AI_CBM_Roar` — the same
+shape as §29's Insomnia/Vital Spirit delta. All 69 abilities, 42 hold
+effects, and 17 validation checks remain complete. This replaces the
+runtime Roar halt behind the same single generic barrier: no new
+unsupported-branch statement and no import ratchet change.

@@ -1334,12 +1334,9 @@ function runCbmSleep(
  * target-side party members first; zero JUMPs to -10 without an ability
  * read. A positive count FALLS THROUGH to one fresh target `get_ability`;
  * Suction Cups then JUMPs to -10, every other result FALLS THROUGH to end.
- *
- * The ability spelling is split deliberately: the static ability/item
- * census already counts the battle-command implementation of this ability,
- * and this AI port is required to leave that coarse reference census
- * byte-identical.
  */
+const ABILITY_SUCTION_CUPS = "ABILITY_SUCTION_CUPS";
+
 function runCbmRoar(
   target: FactoryAiCheckBadMoveRoarTarget,
   rng: BattleRngState,
@@ -1354,10 +1351,9 @@ function runCbmRoar(
     return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
   }
   const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
-  const suctionCups = "ABILITY_" + "SUCTION_CUPS";
   return Object.freeze({
     rng: ability.rng,
     draws: Object.freeze(ability.draw === null ? [] : [ability.draw]),
-    scoreDelta: ability.ability === suctionCups ? -10 : 0,
+    scoreDelta: ability.ability === ABILITY_SUCTION_CUPS ? -10 : 0,
   });
 }
