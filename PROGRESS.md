@@ -31,10 +31,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   The shared switch-in port also now source-correctly sets both temporary and
   permanent Sand Stream/Drought weather bits and resolves literal
   `BS_BATTLER_0` for weather animations.
-- **Next:** Gate-5 rung 4: drive one complete fresh 3v3 battle through only
-  published decisions/forced switches to a real terminal boundary. Keep the
-  equal-speed pre-hook tie receipt as a separate evidence task; do not widen
-  or remove its barrier from rung 4.
+- **Supervisor fold (same round, side merge):** rung 8 landed (`244cce0f`)
+  — `factoryOpponentGeneration.ts` ports trainer selection +
+  GenerateOpponentMons (set retries, duplicate species/item exclusions with
+  cited lines, the retail fixed-IV bug preserved: opponent IVs use the
+  Battle Tower L50 streak per `battle_tower.c:1832-1847`) with a unified
+  position-by-position draw ledger; includes a reachability proof that the
+  high-tier rejection has no valid L50 seed. Union green **456 files /
+  4913 tests**, census no-op. Scenario-fixture replacement honestly
+  deferred (would edit the roundController seam — rung 10/11 territory).
+- **Next:** rung 4 (fresh 3v3 battle → real terminal, main) + rung 10
+  (swap/heal + full rental record unification, side) launch this round;
+  the equal-speed tie receipt stays a separate evidence task — do not
+  widen or remove its barrier.
 - **Notes:** citations in scout §3.2/§3.3/§4.1 were re-derived from
   `battle_main.c:3841-3929`, `battle_util.c:2485-2600,3003-3073,3303-3329`,
   and the Factory room map's `WEATHER_NONE`. Real L50 carriers pin
