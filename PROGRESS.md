@@ -42,6 +42,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   forced-switch end-turn resumption and paralysis `Cmd_various` (**3** each);
   five seeds expose narrower existing budget/moveend/Trace/attack-canceler
   stops. Chase those named secondary blockers only in later steps.
+- **Supervisor fold (same round, side merge):** the commentary seam landed
+  (`8ec1cd81` + the equivalence/attribution pins) — presentation commentary
+  now derives from the actual opponent party via
+  `getFactoryOpponentCommentary()`; canonical text proven byte-identical
+  (with the true upcoming-party attribution 188/184/135 pinned, correcting
+  the earlier 153/179/181 placeholder attribution); generated seed-3 round
+  varies correctly; `battle1-postwin-scout-a/b.json` re-verified 171/171 +
+  164/164. Union green **461 files / 4961 tests**, census no-op.
 - **Notes:** retired exact barrier
   `GetMostSuitableMonToSwitchInto's pass-2 AI_CalcDmg raw-damage fallback`
   at `B_SCR_OP_OPENPARTYSCREEN`; its module ratchet moves exactly **2→1**.
