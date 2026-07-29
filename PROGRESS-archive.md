@@ -1,4 +1,39 @@
----## 688 — [BOUNDED MAIN WORKER 2026-07-29 ~10:30] King's Rock state-12 mechanics landed
+## 689 — [BOUNDED MAIN WORKER 2026-07-29 ~10:38] Issue #48 rental-count persistence landed
+
+- **State:** implementation committed `4c9d38b0`; tree green at **497 files /
+  5116 tests**, production build, `git diff --check`, and Battle Scene OFF
+  oracle info. Both censuses are byte-identical at SHA-256
+  **8b18f754…5261 / 76ec7ed2…c563**; no ratchet moved.
+- **Did:** the generated-round orchestrator now owns returned
+  `facilityState.rentsCount` plus source-shaped `performedRentalSwap`.
+  Accepting any swap sets the challenge flag; only win 7 persists the capped
+  count once and clears the flag. The next challenge's initial-rental
+  generator consumes that returned count.
+- **Lifecycle proof:** seed 17 deliberately accepts swaps after battles 1 and
+  2; challenge 1 still completes and moves count **14→15 exactly once**.
+  Challenge 2 crosses `GetNumPastRentalsRank`'s first band **rank 0→1**.
+  The all-declined control remains **14 / rank 0**.
+- **Sweep / next:** focused generated-round sweep is **24/24**. Existing
+  cursors remain exact: **4:2415, 5:2156, 6:791 loss, 7:1337, 8:1922,
+  11:2012, 13:2415, 14:1946, 15:1602, 16:1878, 17:2013, 18:2143,
+  19:1691, 20:2326, 21:1911, 22:1389, 23:2114, 24:1751, 26:1680,
+  29:1869, 30:1825**. Issue #48 is removed; supervisor resumes its ordered
+  queue. No RNG, single-challenge outcome, presentation, animation, census,
+  canonical recording, unsupported/import ratchet, or tick branch moved.
+  PAPERCUT: none.
+- **Supervisor fold (post-step):** side-lane Toxic scorer port merged
+  (`337d9d9c`+`1b93cff2`): source-complete `AI_CBM_Toxic` for
+  EFFECT_TOXIC/EFFECT_POISON plus sequentially-required `AI_CV_Toxic` and
+  `AI_CV_Protect`; R13-D §7B-control equivalence now reproduces the banked
+  8-call ledger exactly (…4280 → RNG 0x48c611f6), no bounded carve-out
+  left. Supervisor completed the deferred census regen on the union
+  (`a9d171e0`): sole delta ABILITY_IMMUNITY engine refs 10→12 plus
+  generator pin line drift. Union green **497/5131**, build, sweep
+  cursors re-driven unchanged (18/20/21/23 = 2143/2326/1911/2114).
+
+---
+
+## 688 — [BOUNDED MAIN WORKER 2026-07-29 ~10:30] King's Rock state-12 mechanics landed
 
 - **State:** committed `5a69d4e4` + census `9093d895`; tree green at **497
   files / 5111 tests**, production build, `git diff --check`, and Battle Scene

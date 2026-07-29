@@ -13,6 +13,37 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 692 — [BOUNDED MAIN WORKER 2026-07-29 ~11:10] Rung-14 generic Frontier trainer-picture selection landed
+
+- **State:** implementation commit `51438230`; current union green at **507
+  files / 5169 tests**, production build, `git diff --check`, and Battle Scene
+  OFF oracle info. Both censuses regenerate byte-identically at SHA-256
+  **8b18f754…5261 / 3ff4c7f3…dc6c**; unsupported/import ratchets remain
+  **6/6** with no pin movement.
+- **Did / equivalence:** `battleScene.ts` now resolves the generated trainer
+  presentation's `TRAINER_PIC_*` symbol through the complete 50-picture
+  extracted catalog for settled intro, exit slide, and loss slide. The prior
+  Bug Catcher/Fisherman assets are each byte-identical to the generic result;
+  canonical settled DESTIN framebuffer SHA-256 remains
+  **8d92751a…2346**. All 50 source-exact 64×64 assets decode/resolve, and a
+  missing symbol throws loudly; no fallback or battle/turn/tick branch remains.
+- **OFF evidence:** the sole acceptance trace under `tools/compare/traces`
+  whose recorded window shows a trainer picture,
+  `battle2-off-turn1-staged.json`, remains **16/16 exact** (canonical JENSON).
+  No committed explicit-OFF window shows a third/non-canonical trainer, so no
+  trace was invented. The separate non-acceptance ground-truth diagnostic
+  `battle2-off-turn1.json` remains **38/179** and was not thinned or claimed.
+- **Sweep / next:** generated-round sweep **24/24**, cursors unchanged:
+  **4:2415, 5:2156, 6:791 loss, 7:1337, 8:1922, 11:2012, 13:2415,
+  14:1946, 15:1602, 16:1878, 17:2013, 18:2143, 19:1691, 20:2326,
+  21:1911, 22:1389, 23:2114, 24:1751, 26:1680, 29:1869, 30:1825**.
+  Supervisor resumes rung-14 forced-switch then battle-command seams; the
+  commentary OFF checkpoint remains separately bounded by entry 690. No issue,
+  roadmap, census byte, capture list/profile, animation, or tick branch moved.
+  PAPERCUT: none.
+
+---
+
 ## 691 — [SUPERVISOR WIND-DOWN 2026-07-29 ~11:05] rung 13 complete; sweep blocker-free; four §7 receipts ROM-pinned; rung-14 swap+commentary seams live
 
 - **State:** master green at **507 files / 5164 tests**, production build,
@@ -90,38 +121,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Supervisor resumes its ordered queue; no issue, census byte, canonical
   capture list/profile, animation, unsupported/import ratchet, or tick branch
   moved. PAPERCUT: none.
-
----
-
-## 689 — [BOUNDED MAIN WORKER 2026-07-29 ~10:38] Issue #48 rental-count persistence landed
-
-- **State:** implementation committed `4c9d38b0`; tree green at **497 files /
-  5116 tests**, production build, `git diff --check`, and Battle Scene OFF
-  oracle info. Both censuses are byte-identical at SHA-256
-  **8b18f754…5261 / 76ec7ed2…c563**; no ratchet moved.
-- **Did:** the generated-round orchestrator now owns returned
-  `facilityState.rentsCount` plus source-shaped `performedRentalSwap`.
-  Accepting any swap sets the challenge flag; only win 7 persists the capped
-  count once and clears the flag. The next challenge's initial-rental
-  generator consumes that returned count.
-- **Lifecycle proof:** seed 17 deliberately accepts swaps after battles 1 and
-  2; challenge 1 still completes and moves count **14→15 exactly once**.
-  Challenge 2 crosses `GetNumPastRentalsRank`'s first band **rank 0→1**.
-  The all-declined control remains **14 / rank 0**.
-- **Sweep / next:** focused generated-round sweep is **24/24**. Existing
-  cursors remain exact: **4:2415, 5:2156, 6:791 loss, 7:1337, 8:1922,
-  11:2012, 13:2415, 14:1946, 15:1602, 16:1878, 17:2013, 18:2143,
-  19:1691, 20:2326, 21:1911, 22:1389, 23:2114, 24:1751, 26:1680,
-  29:1869, 30:1825**. Issue #48 is removed; supervisor resumes its ordered
-  queue. No RNG, single-challenge outcome, presentation, animation, census,
-  canonical recording, unsupported/import ratchet, or tick branch moved.
-  PAPERCUT: none.
-- **Supervisor fold (post-step):** side-lane Toxic scorer port merged
-  (`337d9d9c`+`1b93cff2`): source-complete `AI_CBM_Toxic` for
-  EFFECT_TOXIC/EFFECT_POISON plus sequentially-required `AI_CV_Toxic` and
-  `AI_CV_Protect`; R13-D §7B-control equivalence now reproduces the banked
-  8-call ledger exactly (…4280 → RNG 0x48c611f6), no bounded carve-out
-  left. Supervisor completed the deferred census regen on the union
-  (`a9d171e0`): sole delta ABILITY_IMMUNITY engine refs 10→12 plus
-  generator pin line drift. Union green **497/5131**, build, sweep
-  cursors re-driven unchanged (18/20/21/23 = 2143/2326/1911/2114).
