@@ -17,6 +17,7 @@ const STRENGTH = 70; // EFFECT_HIT, TYPE_NORMAL -- the banked KO-scenario move (
 const SPIKE_CANNON = 131; // EFFECT_MULTI_HIT, TYPE_NORMAL, 2-5 hits.
 const DOUBLE_KICK = 24; // EFFECT_DOUBLE_HIT, fixed 2 hits.
 const TWINEEDLE = 41; // EFFECT_TWINEEDLE, fixed 2 hits.
+const EARTHQUAKE = 89; // EFFECT_EARTHQUAKE.
 const EMBER = 52; // EFFECT_BURN_HIT, TYPE_FIRE, 10% MOVE_EFFECT_BURN secondary proc.
 const FLAIL = 175; // EFFECT_FLAIL -- writes source gDynamicBasePower before the shared hit chain.
 const FRUSTRATION = 218; // EFFECT_FRUSTRATION -- friendship 0 writes source gDynamicBasePower 102.
@@ -216,6 +217,55 @@ describe("factory full-turn decision -- multi-hit controller resumption", () => 
     let expectedCursor = 1;
     for (let call = 0; call < rngCalls; call += 1) expectedCursor = advanceRngValue(expectedCursor);
     expect(rngValue).toBe(expectedCursor);
+  });
+});
+
+describe("factory full-turn decision -- Earthquake singles target iteration", () => {
+  it("runs Earthquake through the next command boundary", () => {
+    const initial = createFactoryFullTurnBattleState(config({
+      rngSeed: 1,
+      player: {
+        species: 1,
+        moveId: EARTHQUAKE,
+        attack: 50,
+        defense: 200,
+        spAttack: 50,
+        spDefense: 200,
+        speed: 100,
+        hp: 999,
+      },
+      trainer: {
+        species: 43,
+        moveId: STRENGTH,
+        attack: 50,
+        defense: 200,
+        spAttack: 50,
+        spDefense: 200,
+        speed: 50,
+        hp: 999,
+      },
+    }));
+    const afterPlayer = submitFactoryFullTurnDecision(initial, {
+      requestId: 1,
+      side: "player",
+      decision: PLAYER_ATTACKS,
+    });
+    if (afterPlayer.kind !== "decision-required") throw new Error("expected trainer decision");
+    const result = submitFactoryFullTurnDecision(afterPlayer.state, {
+      requestId: 2,
+      side: "trainer",
+      decision: TRAINER_ATTACKS,
+    });
+    if (result.kind !== "decision-required") {
+      throw new Error(`expected next command after Earthquake, got ${result.kind}`);
+    }
+    expect(result.state.rules.rulesContext.battlers[1].hp).toBeLessThan(999);
+    expect(result.state.rng.calls).toBe(8);
+    expect(result.events.filter(({ payload, provenance }) =>
+      payload.kind === "health-bar-update"
+      && payload.battler === 1
+      && provenance?.sourceLabel === "BattleScript_DoHitAllWithUndergroundBonus"
+    )).toHaveLength(1);
   });
 });
 
