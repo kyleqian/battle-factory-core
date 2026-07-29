@@ -120,7 +120,11 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // 4 -> 3 (Snatch row 5c): the action-order redirect, PressurePPLose,
   // winner-only flag consumption, and pushed BattleScript_SnatchedMove
   // continuation are now live; Lightning Rod remains the adjacent barrier.
-  ["src/engine/battleScriptAttackCancelerOpcode.ts", 3],
+  // 3 -> 2 (seed-23 stretch): CANCELER_IN_LOVE's explicit
+  // BattleScriptPush(BattleScript_MoveUsedIsInLoveCantAttack) now uses the
+  // machine's existing call-explicit directive. The two remaining sites are
+  // Lightning Rod redirection and battle-outcome handoff.
+  ["src/engine/battleScriptAttackCancelerOpcode.ts", 2],
   // 7 -> 6 (ON_DAMAGE contact abilities): state 3's seven-case barrier
   // retires as one call site; Color Change/Rough Skin/status/Cute Charm
   // callbacks and their RNG/status mutations now execute source-completely.

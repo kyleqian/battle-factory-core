@@ -14,6 +14,7 @@ import {
 import { stepBattleScriptMachine } from "../src/engine/battleScriptMachine.ts";
 import {
   BATTLE_SCRIPT_ABILITY_TRUANT,
+  BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE,
   BATTLE_SCRIPT_STATUS1_FREEZE,
   BATTLE_SCRIPT_STATUS1_PARALYSIS,
   BATTLE_SCRIPT_STATUS2_MASKS,
@@ -250,7 +251,7 @@ describe("production opcode 0 (Cmd_attackcanceler) dispatch", () => {
     expect(next?.opcodeName).toBe("B_SCR_OP_ACCURACYCHECK");
   });
 
-  describe("(b) unsupported-branch barriers", () => {
+  describe("source branches and remaining (b) unsupported barriers", () => {
     it("halts on gBattleOutcome != 0 (round controller, out of scope)", () => {
       const result = stepOpcodeZero(
         withSinglesAttacker(0, {}, { battleOutcome: 1 }),
@@ -263,14 +264,19 @@ describe("production opcode 0 (Cmd_attackcanceler) dispatch", () => {
       });
     });
 
-    it("halts on CANCELER_IN_LOVE's immobilized-by-love explicit-label push", () => {
+    it("models CANCELER_IN_LOVE's immobilized-by-love explicit-label push", () => {
       const result = stepOpcodeZero(withSinglesAttacker(0, { status2: 0x0008_0000 }), 0);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({
-        kind: "unsupported-branch",
-        sourceFile: "battle_util.c",
-        sourceLine: 2210,
-      });
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_MoveUsedIsInLove"));
+      expect(result.state.callStack).toEqual([
+        labelPc("BattleScript_MoveUsedIsInLoveCantAttack"),
+      ]);
+      expect(result.state.rulesContext.battlers[0].loveImmobility).toBe(1);
+      expect(
+        result.state.rulesContext.hitMarker
+        & BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE
+      ).toBe(BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE);
     });
 
     it("hands Magic Coat bounce to the shared script and clears the target-owned arm", () => {

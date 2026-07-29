@@ -99,14 +99,15 @@ function unsupportedBranch(
 type CancelerCursorResolution =
   | Readonly<{ kind: "jump" }>
   | Readonly<{ kind: "call-current" }>
-  | Readonly<{ kind: "unsupported-push"; targetLabel: string }>;
+  | Readonly<{ kind: "call-explicit"; returnLabel: string }>;
 
 /**
  * Resolves whether the loop's terminating phase performed a source
  * BattleScriptPushCursor (resume at this same opcode-0 instruction) or the
  * CANCELER_IN_LOVE immobilized-by-love BattleScriptPush(explicit label),
- * which pushes a *different* resume address the machine's call stack cannot
- * express (it only models "resume at PC" / "resume at PC+1").
+ * which pushes a distinct script label as the return address. The machine's
+ * `call-explicit` directive models the latter without rewriting either
+ * source script.
  */
 function resolveCancelerCursor(
   result: BattleScriptAttackCancelerLoopResult,
@@ -125,8 +126,8 @@ function resolveCancelerCursor(
     case "CANCELER_IN_LOVE":
       if (receipt.scriptStack.kind === "push-script") {
         return Object.freeze({
-          kind: "unsupported-push" as const,
-          targetLabel: receipt.scriptStack.targetLabel,
+          kind: "call-explicit" as const,
+          returnLabel: receipt.scriptStack.targetLabel,
         });
       }
       return receipt.scriptStack.kind === "push-cursor"
@@ -148,20 +149,16 @@ function applyCancelerEffectTransition(
     throw new Error("Battle Script attack canceler nonzero effect requires a script handoff");
   }
   const cursor = resolveCancelerCursor(cancelerResult);
-  if (cursor.kind === "unsupported-push") {
-    return unsupportedBranch(
-      context,
-      `BattleScriptPush(${cursor.targetLabel}) explicit-return-address stack push `
-        + "(CANCELER_IN_LOVE immobilized-by-love: the machine's call stack only "
-        + "models resume-at-this-instruction, not an arbitrary explicit label)",
-      "battle_util.c",
-      2210,
-    );
-  }
   const target = requireLabelProgramCounter(context.program, scriptEffect.targetLabel);
   const control = cursor.kind === "call-current"
     ? Object.freeze({ kind: "call-current" as const, programCounter: target })
-    : Object.freeze({ kind: "jump" as const, programCounter: target });
+    : cursor.kind === "call-explicit"
+      ? Object.freeze({
+        kind: "call-explicit" as const,
+        programCounter: target,
+        returnProgramCounter: requireLabelProgramCounter(context.program, cursor.returnLabel),
+      })
+      : Object.freeze({ kind: "jump" as const, programCounter: target });
 
   if (cancelerResult.effect !== 2) {
     return transitionBattleScriptCommand(context, control, { rulesContext, rng });
