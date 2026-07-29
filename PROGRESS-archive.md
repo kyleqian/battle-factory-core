@@ -1,3 +1,24 @@
+## 644 — [BOUNDED MAIN WORKER 2026-07-28 ~16:53] Frontier-tail row 7 Transform source-complete
+
+- **State:** committed `0577134c`; tree green at **430 files / 4687 tests**,
+  production build, OFF oracle info, and `git diff --check`. Census is exactly
+  **213/214 effects, 354/355 moves, 275/276 distinct, 2955/2957 weighted**:
+  assigned-baseline delta **+1/+1/+0/+0**; all **70** validations pass.
+- **Did:** registered `B_SCR_OP_TRANSFORMDATAEXECUTION` as the dossier's
+  indivisible step: exact `BattlePokemon [0x00,0x24)` copy, min-five PP,
+  Disable/Mimic clears, transformed-personality owner, typed species buffer,
+  `[54,2]` reset-selection event, and both `gTransformUsedStringIds` rows.
+- **Next:** supervisor verify `0577134c`; continue only at ordered row 8
+  Metronome, not presentation/animation or retired canonical Battle 2 work.
+- **Notes:** consumed mandatory `docs/transform-off-evidence.md`; receipt-shaped
+  tests pin every copied field and unchanged HP/maxHP/level/friendship/item/
+  PP bonuses/experience/personality/status, all failure predicates, zero RNG,
+  switch/faint lifetime clears, both messages, and move-end. Deliberate handler
+  exact-set pin **207→208**. No barrier, recording import, presentation,
+  round, tick, roadmap, or issue change.
+
+---
+
 ## 643 — [BOUNDED MAIN WORKER 2026-07-28 ~16:40] Frontier-tail row 6b Beat Up source-complete
 
 - **State:** committed `ebc331fb`; tree green at **429 files / 4681 tests**,
