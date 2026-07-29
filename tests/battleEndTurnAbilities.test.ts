@@ -25,6 +25,7 @@ const BATTLE_TYPE_FACTORY = 1 << 19;
 const B_WAIT_TIME_LONG = 64;
 /** include/constants/abilities.h. */
 const ABILITY_SPEED_BOOST = 3;
+const ABILITY_CLOUD_NINE = 13;
 const ABILITY_RAIN_DISH = 44;
 const ABILITY_TRUANT = 54;
 const ABILITY_SHED_SKIN = 61;
@@ -200,6 +201,27 @@ describe("runBattleEndTurnOrchestration -- ENDTURN_ABILITIES slice 1 (Speed Boos
     expect(result.kind).toBe("next-turn");
     if (result.kind !== "next-turn") throw new Error("expected next-turn");
     expect(result.state.rulesContext.battlers[0]!.hp).toBe(100);
+  });
+
+  it("Rain Dish does not fire in rain while a present Cloud Nine battler suppresses weather", () => {
+    const rc = context({
+      weather: B_WEATHER_RAIN,
+      battlers: [
+        battler({ side: 0, ability: ABILITY_RAIN_DISH, hp: 100, maxHP: 115 }),
+        battler({ side: 1, ability: ABILITY_CLOUD_NINE, partyIndex: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+    const initial = scratchState(rc, 0);
+    const result = runBattleEndTurnOrchestration(program, handlers, initial);
+
+    expect(result.kind).toBe("next-turn");
+    if (result.kind !== "next-turn") throw new Error("expected next-turn");
+    expect(result.state.rulesContext.battlers[0]!.hp).toBe(100);
+    expect(result.state.rng.calls).toBe(initial.rng.calls);
+    expect(result.state.rng.value).toBe(initial.rng.value);
   });
 
   it("Speed Boost does not fire at MAX_STAT_STAGE (12)", () => {
