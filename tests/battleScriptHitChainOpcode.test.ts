@@ -26,7 +26,6 @@ import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { 
 
 const program = loadBattleScriptProgram();
 const TACKLE = 33; // EFFECT_HIT, power 35, accuracy 95, TYPE_NORMAL
-const FUTURE_SIGHT = 248;
 const MOVE_SURF = 57; // EFFECT_HIT, MOVE_TARGET_BOTH -- BattleScript_EffectHit's own underwater-guard move
 /** include/constants/battle.h:175. */
 const STATUS3_UNDERWATER = 1 << 18;
@@ -546,7 +545,7 @@ describe("production accuracycheck (Cmd_accuracycheck) dispatch", () => {
         Object.freeze({
           ...first.state.rulesContext,
           hitMarker: 0,
-          aiObservedAbilityIds: Object.freeze([0, 0, 0, 0]),
+          aiObservedAbilityIds: Object.freeze([0, 0, 0, 0] as const),
         }),
         1,
       ).result;
