@@ -36,6 +36,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   queue. No RNG, single-challenge outcome, presentation, animation, census,
   canonical recording, unsupported/import ratchet, or tick branch moved.
   PAPERCUT: none.
+- **Supervisor fold (post-step):** side-lane Toxic scorer port merged
+  (`337d9d9c`+`1b93cff2`): source-complete `AI_CBM_Toxic` for
+  EFFECT_TOXIC/EFFECT_POISON plus sequentially-required `AI_CV_Toxic` and
+  `AI_CV_Protect`; R13-D §7B-control equivalence now reproduces the banked
+  8-call ledger exactly (…4280 → RNG 0x48c611f6), no bounded carve-out
+  left. Supervisor completed the deferred census regen on the union
+  (`a9d171e0`): sole delta ABILITY_IMMUNITY engine refs 10→12 plus
+  generator pin line drift. Union green **497/5131**, build, sweep
+  cursors re-driven unchanged (18/20/21/23 = 2143/2326/1911/2114).
 
 ---
 
