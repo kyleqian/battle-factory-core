@@ -49,6 +49,7 @@ export interface HydroPumpState {
   readonly tasks: readonly HydroPumpTask[];
   readonly orbs: readonly HydroPumpOrb[];
   readonly splats: readonly HydroPumpSplat[];
+  readonly particleOamSlotsBackToFront: readonly number[];
   readonly hydroPumpAudio:
     Readonly<{ pan: number; flags: 0 | 128 | 131 }> | null;
   readonly battlerDisplayAge: number;
@@ -152,6 +153,54 @@ function orbAtAge(
   };
 }
 
+function particleOamSlotsBackToFrontAtAge(
+  age: number,
+  side: HydroPumpSide,
+  attackerPictureOffset: Readonly<{ x: number; y: number }>,
+  targetPictureOffset: Readonly<{ x: number; y: number }>,
+): readonly number[] {
+  const slotOrder = Array.from({ length: 64 }, (_, slot) => slot);
+  let active = new Map<number, { priority: number; y: number }>();
+  for (let currentAge = 0; currentAge <= age; currentAge += 1) {
+    const orbs = Array.from({ length: 44 }, (_, spawnIndex) =>
+      orbAtAge(
+        currentAge,
+        spawnIndex,
+        side,
+        attackerPictureOffset,
+        targetPictureOffset,
+      )
+    ).filter((orb): orb is HydroPumpOrb => orb !== null);
+    active = new Map<number, { priority: number; y: number }>([
+      ...orbs.map((orb) => [
+        orb.oamSlot,
+        // createsprite's relative priority 3 resolves to subpriority 27.
+        { priority: 4, y: orb.y + orb.y2 },
+      ] as const),
+      ...SPLAT_START_AGES.flatMap((startAge, group) => {
+        const localAge = currentAge - startAge;
+        if (localAge < 0 || localAge > 9) return [];
+        return [-15, 15].map((offset, pairIndex) => [
+          SPLAT_OAM_SLOTS[group]![pairIndex]!,
+          // The splat's relative priority 4 resolves in front at 26.
+          { priority: 3, y: targetPictureOffset.y - offset },
+        ] as const);
+      }),
+    ]);
+    // sprite.c SortSprites is stable for an equal priority/Y pair and keeps
+    // its prior-frame sSpriteOrder, including across reused sprite slots.
+    slotOrder.sort((leftSlot, rightSlot) => {
+      const left = active.get(leftSlot);
+      const right = active.get(rightSlot);
+      if (!left && !right) return 0;
+      if (!left) return 1;
+      if (!right) return -1;
+      return left.priority - right.priority || right.y - left.y;
+    });
+  }
+  return slotOrder.filter((slot) => active.has(slot)).reverse();
+}
+
 /**
  * Complete source-relative `Move_HYDRO_PUMP` presentation through the first
  * inactive cleanup. All timing is relative to the first WATER_ORB load.
@@ -195,17 +244,21 @@ export function hydroPumpAtAge(
   if (age >= 36 && age <= 107) {
     tasks.push({ kind: "target-shake", slot: 4 });
   }
-  const movingAudioLastAge = side === "player" ? 80 : 79;
+  const movingAudioLastAge = side === "player" ? 81 : 80;
+  const soundTaskLastAge = side === "player" ? 80 : 79;
   let hydroPumpAudio: HydroPumpState["hydroPumpAudio"] = null;
   if (age >= 18 && age <= 138) {
     const direction = side === "player" ? 1 : -1;
     const startPan = side === "player" ? -64 : 63;
     const pan = age <= movingAudioLastAge
-      ? startPan + direction * (age - 17) * 2
+      ? Math.max(-63, Math.min(
+          63,
+          startPan + direction * (age - 17) * 2,
+        ))
       : side === "player" ? 63 : -63;
     hydroPumpAudio = {
       pan,
-      flags: age <= movingAudioLastAge ? 131 : age === 81 ? 128 : 0,
+      flags: age <= movingAudioLastAge ? 131 : age <= 138 ? 128 : 0,
     };
   }
   return {
@@ -219,10 +272,16 @@ export function hydroPumpAtAge(
     targetBaselineX2: side === "player" && age < 36 ? 1 : 0,
     scriptOffset: scriptOffsetAtAge(age),
     visualTaskCount: tasks.length + orbs.length + splats.length,
-    soundTaskCount: age >= 18 && age <= movingAudioLastAge ? 1 : 0,
+    soundTaskCount: age >= 18 && age <= soundTaskLastAge ? 1 : 0,
     tasks,
     orbs,
     splats,
+    particleOamSlotsBackToFront: particleOamSlotsBackToFrontAtAge(
+      age,
+      side,
+      attackerPictureOffset,
+      targetPictureOffset,
+    ),
     hydroPumpAudio,
     battlerDisplayAge: age - 1,
   };

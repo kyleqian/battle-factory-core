@@ -33,6 +33,9 @@ describe("MOVE_HYDRO_PUMP source-relative reducer", () => {
     });
     expect(player(110).orbs).toEqual([]);
     expect(player(100).splats).toEqual([]);
+    expect(player(35).particleOamSlotsBackToFront.slice(-4)).toEqual([
+      9, 11, 13, 15,
+    ]);
   });
 
   it("ports tasks, blend, audio, tags, and first inactive cleanup", () => {
@@ -45,7 +48,9 @@ describe("MOVE_HYDRO_PUMP source-relative reducer", () => {
       "attacker-shake", "sin-timer", "target-shake",
     ]);
     expect(player(18).hydroPumpAudio).toEqual({ pan: -62, flags: 131 });
-    expect(player(81).hydroPumpAudio).toEqual({ pan: 63, flags: 128 });
+    expect(player(81).hydroPumpAudio).toEqual({ pan: 63, flags: 131 });
+    expect(player(82).hydroPumpAudio).toEqual({ pan: 63, flags: 128 });
+    expect(player(138).hydroPumpAudio).toEqual({ pan: 63, flags: 128 });
     expect(player(118)).toMatchObject({ alpha: null, targetMonbg: false });
     expect(player(140)).toMatchObject({
       active: false,

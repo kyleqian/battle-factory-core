@@ -134,7 +134,8 @@ function verify(fixturePath: string): void {
     battlers: probe.frames[0]!.battlers,
     currentMove: probe.frames[0]!.engine.currentMove,
   };
-  const mismatches: string[] = [];
+  const componentMismatches: string[] = [];
+  const framebufferMismatches: string[] = [];
   let components = 0, framebuffers = 0;
   for (
     let frame = fixture.sourceWindow.startFrame;
@@ -215,7 +216,7 @@ function verify(fixturePath: string): void {
       && splatMatch && taskMatch
       && source && tags && registers && audio && transfers && immutable && seamShape;
     if (component) components += 1;
-    else mismatches.push(
+    else componentMismatches.push(
       `frame ${frame}/age ${age}: orbs=${orbMatch} splats=${splatMatch} `
       + `tasks=${taskMatch} source=${source} tags=${tags} registers=${registers} `
       + `audio=${audio} transfers=${transfers} immutable=${immutable} seam=${seamShape}`,
@@ -233,14 +234,20 @@ function verify(fixturePath: string): void {
         || app[pixel * 4 + 2] !== raw[pixel * 3 + 2]) diff += 1;
     }
     if (diff === 0) framebuffers += 1;
-    else mismatches.push(`frame ${frame}/age ${age}: framebufferDiff=${diff}`);
+    else framebufferMismatches.push(
+      `frame ${frame}/age ${age}: framebufferDiff=${diff}`,
+    );
   }
   console.log(
     `${fixture.orientation}: components ${components}/${fixture.sourceWindow.frameCount}; `
     + `framebuffer ${framebuffers}/${fixture.sourceWindow.frameCount}; `
     + `evidence ${evidence}; raw ${rawDigest}`,
   );
-  if (mismatches.length) throw new Error(mismatches.slice(0, 20).join("\n"));
+  const mismatches = [
+    ...componentMismatches.slice(0, 12),
+    ...framebufferMismatches.slice(0, 12),
+  ];
+  if (mismatches.length) throw new Error(mismatches.join("\n"));
 }
 
 for (let repeat = 0; repeat < 2; repeat += 1) {

@@ -17871,14 +17871,25 @@ export function renderSceneOnMovePresentation(
       battleBg.static.tilemap,
       battleBg.palette,
     );
+    // SpriteCB_EnemyShadow observes the newly active animation only after
+    // this first source display has reached scanout.
+    if (opponentToPlayer && view.age === 0) {
+      drawSpriteSheet(
+        fb,
+        sonicBoomArt.enemyShadow.tileset,
+        sonicBoomArt.enemyShadow.palette,
+        view.attacker.geometry.animationCenter.x - 16,
+        view.attacker.geometry.battlePositionCenter.y + 25,
+      );
+    }
     const nonObjTarget2 = fb.slice();
     const attackerHardwareOffset =
-      view.age >= 12 && view.age <= 87 && (view.age - 12) % 4 < 2
+      view.age >= 11 && view.age <= 88 && (view.age - 10) % 4 < 2
         ? { x2: 0, y2: 2 } : { x2: 0, y2: 0 };
     const targetHardwareOffset =
-      view.age >= 38 && view.age <= 107 && (view.age - 38) % 4 < 2
+      view.age >= 39 && view.age <= 108 && (view.age - 39) % 4 < 2
         ? { x2: 3, y2: 0 } : { x2: 0, y2: 0 };
-    const targetHardwareBaseline = playerToOpponent && view.age < 36 ? 1 : 0;
+    const targetHardwareBaseline = playerToOpponent && view.age < 37 ? 1 : 0;
     drawSpriteSheet(
       nonObjTarget2,
       onix.tileset,
@@ -17908,7 +17919,10 @@ export function renderSceneOnMovePresentation(
         kind: "splat" as const,
         item: splat,
       })),
-    ].sort((left, right) => right.item.oamSlot - left.item.oamSlot);
+    ].sort((left, right) =>
+      displayed.particleOamSlotsBackToFront.indexOf(left.item.oamSlot)
+      - displayed.particleOamSlotsBackToFront.indexOf(right.item.oamSlot)
+    );
     for (const particle of particles) {
       if (!displayed.alpha) continue;
       if (particle.kind === "orb") {
