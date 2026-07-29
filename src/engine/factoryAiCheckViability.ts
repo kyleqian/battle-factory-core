@@ -3208,9 +3208,9 @@ export function runCheckViability(input: Readonly<{
     || move.effect === "EFFECT_COSMIC_POWER"
     || move.effect === "EFFECT_CALM_MIND"
   ) {
-    // All four effects dispatch to the identical AI_CV_SpDefUp (doc §22.1) --
+    // All four effects dispatch to the identical AI_CV_SpDefUp (doc §22.1/§28) --
     // AI_CBM_CosmicPower/AI_CBM_CalmMind (two separate handlers) and
-    // AI_CBM_SpDefUp (not ported, still an unsupported branch) are the
+    // AI_CBM_SpDefUp (the single-stat handler ported in §28) are the
     // CBM-side-only dispatch split for this same shared CV target.
     const spDefUp = runCvSpDefUp({
       rng: input.rng,

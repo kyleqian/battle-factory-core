@@ -63,11 +63,11 @@
  * half -- unlike every stat-UP handler above, these are TWO SEPARATE
  * dual-stat handlers (the `AI_CBM_BulkUp`/`AI_CBM_DragonDance` shape, §18.1),
  * each checking both stats the move raises (`-10` first stat, `-8` second),
- * not aliases of each other or of the also-dispatched-but-not-ported-here
- * single-stat `AI_CBM_SpDefUp` (`EFFECT_SPECIAL_DEFENSE_UP(_2)`'s own CBM
- * target, doc §22.1 -- out of this pair's scope, still an unsupported
- * branch). Both converge with `EFFECT_SPECIAL_DEFENSE_UP(_2)` on the single
- * shared `AI_CV_SpDefUp` CV handler (doc §22); and `EFFECT_LIGHT_SCREEN`/
+ * not aliases of each other or of the separately dispatched single-stat
+ * `AI_CBM_SpDefUp` (`EFFECT_SPECIAL_DEFENSE_UP(_2)`'s own CBM target,
+ * `runCbmSpDefUp` below, doc §28). All three converge with
+ * `EFFECT_SPECIAL_DEFENSE_UP(_2)` on the single shared `AI_CV_SpDefUp` CV
+ * handler (doc §22/§28); and `EFFECT_LIGHT_SCREEN`/
  * `EFFECT_REFLECT` -> `AI_CBM_LightScreen`/`AI_CBM_Reflect` (`:354-356`/
  * `:393-395`, `runCbmLightScreen`/`runCbmReflect` below, doc §23.1), the
  * tenth CBM-blocked pair's own CBM half and the smallest CBM handler shape
@@ -1089,6 +1089,18 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_SPECIAL_DEFENSE_UP(_2) ->
+  // AI_CBM_SpDefUp, closing the pair with the already-ported shared
+  // AI_CV_SpDefUp body (doc §28).
+  if (move.effect === "EFFECT_SPECIAL_DEFENSE_UP" || move.effect === "EFFECT_SPECIAL_DEFENSE_UP_2") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmSpDefUp(input.attacker.spDefStage ?? DEFAULT_STAT_STAGE),
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: EFFECT_COSMIC_POWER -> AI_CBM_CosmicPower,
   // the ninth CBM-blocked pair's own CBM half (doc §22) -- a separate
   // dual-stat handler (DEF then SPDEF), not an alias of AI_CBM_DefenseUp.
@@ -1229,4 +1241,28 @@ export function runCheckBadMovePreamble(input: Readonly<{
   }
 
   return Object.freeze({ kind: "scored", rng, draws: Object.freeze(draws), scoreDelta: 0 });
+}
+
+/**
+ * `AI_CBM_SpDefUp` (`data/battle_ai_scripts.s:265-267`,
+ * `docs/factory-ai-checkviability-ground-truth.md` §28) -- byte-for-byte
+ * the same 2-instruction shape as `AI_CBM_AttackUp` with `STAT_SPDEF`
+ * swapped in:
+ *
+ * ```
+ * AI_CBM_SpDefUp:
+ *     if_stat_level_equal AI_USER, STAT_SPDEF, MAX_STAT_STAGE, Score_Minus10
+ *     end
+ * ```
+ *
+ * Dispatch: `EFFECT_SPECIAL_DEFENSE_UP`/`EFFECT_SPECIAL_DEFENSE_UP_2`
+ * (`data/battle_ai_scripts.s:112,137`). Both effects converge with Cosmic
+ * Power and Calm Mind on the already-ported shared `AI_CV_SpDefUp` body.
+ *
+ * Kept after the exported dispatcher so the ability/item census's exact
+ * source-site pins above remain byte-stable; function declarations are
+ * source-hoisted, so this does not change execution order.
+ */
+function runCbmSpDefUp(attackerSpDefStage: number): number {
+  return attackerSpDefStage === MAX_STAT_STAGE ? -10 : 0;
 }

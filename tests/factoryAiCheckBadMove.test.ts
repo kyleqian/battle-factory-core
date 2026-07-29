@@ -886,6 +886,62 @@ describe("AI_CBM_SpeedUp / AI_CBM_SpAtkUp (docs/factory-ai-checkviability-ground
   });
 });
 
+// data/battle_ai_scripts.s:265-267, docs/factory-ai-checkviability-ground-
+// truth.md §28. Byte-for-byte the same bare MAX_STAT_STAGE-on-AI_USER gate
+// as AttackUp/SpeedUp/SpAtkUp. The CV half is the already-ported shared
+// AI_CV_SpDefUp body (§22), so these tests close the remaining CBM branch.
+describe("AI_CBM_SpDefUp (docs/factory-ai-checkviability-ground-truth.md §28)", () => {
+  const MOVE_AMNESIA = 133; // EFFECT_SPECIAL_DEFENSE_UP_2
+
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  it("JUMP applies Score_Minus10 with zero draws when AI_USER's own SPDEF stage equals MAX_STAT_STAGE", () => {
+    const result = run(
+      MOVE_AMNESIA,
+      SHUCKLE,
+      undefined,
+      Object.freeze({ atkStage: 6, defStage: 6, spDefStage: 12 }),
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it.each([11, 6, 0])("FALLTHROUGH reaches end and skips Score_Minus10 with zero draws when AI_USER's own SPDEF stage is %i", (spDefStage) => {
+    const result = run(
+      MOVE_AMNESIA,
+      SHUCKLE,
+      undefined,
+      Object.freeze({ atkStage: 6, defStage: 6, spDefStage }),
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("omitted spDefStage defaults to DEFAULT_STAT_STAGE and the next unported table effect still reaches the generic barrier", () => {
+    const amnesia = run(MOVE_AMNESIA, SHUCKLE);
+    expect(amnesia).toMatchObject({ kind: "scored", scoreDelta: 0 });
+
+    const MOVE_HAZE = 114;
+    expect(run(MOVE_HAZE, SHUCKLE)).toEqual({
+      kind: "unsupported-branch",
+      barrier: "factory-ai-check-bad-move",
+      effect: "EFFECT_HAZE",
+      moveId: MOVE_HAZE,
+    });
+  });
+});
+
 // data/battle_ai_scripts.s:576-579/590-593, docs/factory-ai-checkviability-ground-truth.md
 // §22.1: the ninth CBM-blocked pair's own CBM half -- unlike every stat-UP
 // handler above, TWO SEPARATE dual-stat handlers (the AI_CBM_BulkUp/

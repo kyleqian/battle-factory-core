@@ -1845,6 +1845,77 @@ describe("AI_CV_SpDefUp mask-7 fixture reproduction (docs/factory-ai-checkviabil
     expect(reachCalm.trace.draws).toHaveLength(reachCosmic.trace.draws.length);
     expect(phaseDraws(reachCalm, "check-viability")).toHaveLength(phaseDraws(reachCosmic, "check-viability").length);
   });
+
+  it("AI_CBM_SpDefUp live receipt: at max SPDEF the -10 makes Light Screen slot 3 win with the oracle's exact 10-draw decision ledger (doc §28)", () => {
+    const result = chooseFactoryAiScoredDecision({
+      view: Object.freeze({
+        schema: "factory-ai-scored-view/v1" as const,
+        mode: "factory-level-50-singles" as const,
+        active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+        factory: Object.freeze({
+          levelMode: 0 as const,
+          battleMode: 0 as const,
+          factoryWinStreak: 28,
+          trainerOpponentId: 222,
+        }),
+        moves: [133, 113, 113, 113] as const,
+        attacker: Object.freeze({
+          types: ["TYPE_GHOST", "TYPE_GHOST"] as const,
+          attack: 90, defense: 150, spAttack: 80, spDefense: 150, speed: 45, level: 50,
+          statStages: Object.freeze({ ...NEUTRAL_STAGES, spDef: MAX_STAT_STAGE }),
+          isFirstTurn: 0,
+          hp: 115, maxHp: 115,
+          lightScreenUp: true,
+          ability: "ABILITY_PRESSURE",
+        }),
+        target: Object.freeze({
+          species: 241,
+          types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+          attack: 100, defense: 125, spAttack: 60, spDefense: 90, speed: 120, level: 50,
+          statStages: NEUTRAL_STAGES,
+          isFirstTurn: 0,
+          hp: 170, maxHp: 170,
+          ability: "ABILITY_THICK_FAT",
+          knownAbility: null,
+          lastUsedMoveId: 233,
+        }),
+      }),
+      request: fourSlotRequest,
+      // OFF oracle seed-1 reach fixture: frame 2200 RNG is 1215990602;
+      // Cmd_seteffectwithchance + BattleTurnPassed consume two draws before
+      // BattleAI_SetupAIData starts this exact receipt.
+      rng: { value: 2_489_327_812, calls: 0 },
+    });
+
+    expect(result.trace.slotScores.map((slot) => ({
+      cbm: slot.checkBadMoveDelta,
+      cv: slot.checkViabilityDelta,
+      final: slot.finalScore,
+    }))).toEqual([
+      { cbm: -10, cv: -3, final: 87 },
+      { cbm: -8, cv: -2, final: 90 },
+      { cbm: -8, cv: -2, final: 90 },
+      { cbm: -8, cv: -2, final: 90 },
+    ]);
+    expect(result.trace.draws.map((draw) => draw.kind)).toEqual([
+      "setup-simulated-rng",
+      "setup-simulated-rng",
+      "setup-simulated-rng",
+      "setup-simulated-rng",
+      "sp-def-up-roll-1",
+      "sp-def-up-roll-3",
+      "light-screen-roll",
+      "light-screen-roll",
+      "light-screen-roll",
+      "best-move-tie",
+    ]);
+    expect(result.trace.tie.chosenDecision).toEqual({
+      kind: "use-move",
+      moveSlot: 3,
+      targetBattler: 0,
+    });
+    expect(result.rng).toEqual({ value: 873_887_126, calls: 10 });
+  });
 });
 
 const MOVE_LIGHT_SCREEN_MASK7 = 113; // EFFECT_LIGHT_SCREEN
