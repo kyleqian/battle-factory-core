@@ -373,6 +373,9 @@ const ABILITY_SOUNDPROOF = 43;
  * script when present (`battle_scripts_1.s:2174-2195`).
  */
 const ABILITY_WATER_VEIL = 41;
+const ABILITY_CLEAR_BODY = 29;
+const ABILITY_HYPER_CUTTER = 52;
+const ABILITY_WHITE_SMOKE = 73;
 const JUMPIFABILITY_VALUES: ReadonlyMap<string, number> = new Map([
   ["ABILITY_LIQUID_OOZE", ABILITY_LIQUID_OOZE],
   ["ABILITY_LIMBER", ABILITY_LIMBER],
@@ -384,6 +387,9 @@ const JUMPIFABILITY_VALUES: ReadonlyMap<string, number> = new Map([
   ["ABILITY_ROCK_HEAD", ABILITY_ROCK_HEAD],
   ["ABILITY_SOUNDPROOF", ABILITY_SOUNDPROOF],
   ["ABILITY_WATER_VEIL", ABILITY_WATER_VEIL],
+  ["ABILITY_CLEAR_BODY", ABILITY_CLEAR_BODY],
+  ["ABILITY_HYPER_CUTTER", ABILITY_HYPER_CUTTER],
+  ["ABILITY_WHITE_SMOKE", ABILITY_WHITE_SMOKE],
 ]);
 /** Exported so tools/report/executable-frontier-census.ts's jumpifability value-coverage check never drifts from what this opcode actually dispatches (same live-import precedent as SET_MOVE_EFFECT_SUPPORTED_BYTES). */
 export const JUMPIFABILITY_SUPPORTED_ABILITY_NAMES: ReadonlySet<string> = new Set(JUMPIFABILITY_VALUES.keys());

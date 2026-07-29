@@ -39,6 +39,9 @@ const URSARING = 217;
 const ABILITY_GUTS = 62;
 const ABILITY_LEVITATE = 26;
 const ABILITY_INTIMIDATE = 22;
+const ABILITY_TRACE = 36;
+const ABILITY_DRIZZLE = 2;
+const ABILITY_CLEAR_BODY = 29;
 const ABILITY_TRUANT = 54;
 const ITEM_LEFTOVERS = 200;
 
@@ -838,7 +841,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(result.state.events).toEqual([]);
   });
 
-  it("switchineffects: Truant switch-in-hack is a named barrier", () => {
+  it("switchineffects: Truant switch-in hack writes counter 1 before the tail and draws no RNG", () => {
     const rc = context({
       battlers: [
         battler({ side: 0, species: URSARING, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
@@ -848,11 +851,13 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
       ],
     });
     const { result } = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc);
-    expect(result.kind).toBe("halted");
-    expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.programCounter).toBe(SWITCHINEFFECTS_PC + 1);
+    expect(result.state.rulesContext.battlers[1].truantCounter).toBe(1);
+    expect(result.state.rng.calls).toBe(0);
   });
 
-  it("switchineffects: AbilityBattleEffects(ABILITYEFFECT_ON_SWITCHIN) is a named barrier for a trigger ability (e.g. Intimidate)", () => {
+  it("switchineffects: Intimidate marks STATUS3, runs shared statbuffchange, then prints the Attack-cut message", () => {
     const rc = context({
       battlers: [
         battler({ side: 0, species: URSARING, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
@@ -861,8 +866,85 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
         battler({ side: 1 }),
       ],
     });
+    const { execution, result } = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc);
+    if (result.kind !== "advanced") throw new Error(`expected callback, got ${result.kind}`);
+    expect(result.state.programCounter).toBe(resolveBattleScriptLabel(program, "BattleScript_IntimidateActivates")!.programCounter);
+    expect(result.state.rulesContext.battlers[1].status3 & (1 << 19)).toBe(1 << 19);
+    let state = result.state;
+    for (let guard = 0; guard < 300 && state.programCounter !== SWITCHINEFFECTS_PC + 1; guard += 1) {
+      for (const pending of state.scheduler.pendingControllerBattlers) {
+        state = acknowledgeBattleScriptMachineController(state, pending);
+      }
+      const next = stepBattleScriptMachine(program, state, execution.handlers);
+      if (next.kind === "halted" || next.kind === "unsupported") {
+        throw new Error(`Intimidate script stopped at ${next.kind}: ${JSON.stringify(next.state.haltReason)}`);
+      }
+      state = next.state;
+    }
+    expect(state.programCounter).toBe(SWITCHINEFFECTS_PC + 1);
+    expect(state.rulesContext.battlers[0].statStages[1]).toBe(5);
+    expect(state.events.filter((event) => event.kind === "message").map((event) => event.messageId))
+      .toEqual(["STRINGID_PKMNCUTSATTACKWITH"]);
+    expect(state.rng.calls).toBe(0);
+  });
+
+  it("switchineffects: Intimidate skips Substitute and prints prevention for Clear Body", () => {
+    for (const target of [
+      battler({ side: 0, status2: 1 << 24, statStages: [6, 6, 6, 6, 6, 6, 6, 6] }),
+      battler({ side: 0, ability: ABILITY_CLEAR_BODY, statStages: [6, 6, 6, 6, 6, 6, 6, 6] }),
+    ]) {
+      const rc = context({ battlers: [
+        target,
+        battler({ side: 1, ability: ABILITY_INTIMIDATE }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ] });
+      const { execution, result } = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc);
+      let state = result.state;
+      for (let guard = 0; guard < 300 && state.programCounter !== SWITCHINEFFECTS_PC + 1; guard += 1) {
+        const next = stepBattleScriptMachine(program, state, execution.handlers);
+        if (next.kind === "scheduler-progressed" || next.kind === "advanced") state = next.state;
+        else if (next.kind === "blocked") {
+          state = next.state;
+          for (const pending of state.scheduler.pendingControllerBattlers) state = acknowledgeBattleScriptMachineController(state, pending);
+        } else throw new Error(`unexpected ${next.kind}`);
+      }
+      expect(state.rulesContext.battlers[0].statStages[1]).toBe(6);
+      const messages = state.events.filter((event) => event.kind === "message").map((event) => event.messageId);
+      if (!target.status2) expect(state.rulesContext.lastUsedAbility).toBe(ABILITY_CLEAR_BODY);
+      expect(messages).toEqual(target.status2 ? [] : ["STRINGID_PREVENTEDFROMWORKING"]);
+    }
+  });
+
+  it("switchineffects: Trace copies the live opposing ability and announces it with zero draws", () => {
+    const rc = context({ battlers: [
+      battler({ side: 0, ability: 5, hp: 100, partyIndex: 0 }),
+      battler({ side: 1, ability: ABILITY_TRACE, hp: 100, partyIndex: 2 }),
+      battler({ side: 0 }),
+      battler({ side: 1 }),
+    ] });
     const { result } = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc);
-    expect(result.kind).toBe("halted");
-    expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
+    expect(result.state.rulesContext.battlers[1].ability).toBe(5);
+    expect(result.state.rulesContext.lastUsedAbility).toBe(5);
+    expect(result.state.rulesContext.battleTextBuff1MonNick).toEqual({ battler: 0, partyIndex: 0 });
+    expect(result.state.programCounter).toBe(resolveBattleScriptLabel(program, "BattleScript_TraceActivates")!.programCounter);
+    expect(result.state.rng.calls).toBe(0);
+  });
+
+  it("switchineffects: Drizzle sets permanent rain once and same-weather re-entry is a no-op", () => {
+    const rc = context({ battlers: [
+      battler({ side: 0 }),
+      battler({ side: 1, ability: ABILITY_DRIZZLE }),
+      battler({ side: 0 }),
+      battler({ side: 1 }),
+    ] });
+    const first = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc).result;
+    expect(first.state.rulesContext.weather).toBe((1 << 0) | (1 << 2));
+    expect(first.state.programCounter).toBe(resolveBattleScriptLabel(program, "BattleScript_DrizzleActivates")!.programCounter);
+    const same = context({ battlers: rc.battlers, weather: (1 << 0) | (1 << 2) });
+    const second = stepAtProgramCounter(SWITCHINEFFECTS_PC, same).result;
+    expect(second.state.programCounter).toBe(SWITCHINEFFECTS_PC + 1);
+    expect(second.state.events).toEqual([]);
+    expect(second.state.rng.calls).toBe(0);
   });
 });
