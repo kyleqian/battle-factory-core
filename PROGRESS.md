@@ -26,9 +26,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   state 3 with exact gates, RNG, mutations, and callback transfers. Registered
   `seteffectsecondary`; factored the pre-existing gender calculation into one
   shared source helper. The state-3 barrier retired **7→6** for the module.
-- **Next:** supervisor selects the next bounded ability/item parity row; the
-  previously noted whole-battle turn-1 `gRandomTurnNumber` writes remain a
-  separate integration follow-up.
+- **Supervisor fold (same round, `230d776f`):** the paired side-lane worker
+  landed scout §A3's census-generator fix (`eef441e4`) — the blanket
+  string-literal exclusion now has a narrow comparison-adjacency recovery
+  pass, 20 recovered sites exact-pinned (validations 15→16), and refreshed
+  `verify-turn-boundary-rng-gap.py` to assert the FIXED state (PASS). Union
+  census regenerated at the compound prediction exactly: **abilities 65/70
+  (weighted 1060/1103)** (+COMPOUND_EYES via the generator fix), hold
+  effects 42/42 (850/850). Remaining unreferenced rows: trapping trio
+  (ARENA_TRAP 6, MAGNET_PULL 4, SHADOW_TAG 3) + RUN_AWAY 23 + PICKUP 7.
+- **Next:** voluntary switch turn action + trapping-trio legality gate
+  (main, in flight); Quick Claw oracle corroboration + stale
+  `verify-on-damage-static.py` guard refresh (side, in flight); then
+  Run Away/Pickup documented no-op closures and the whole-battle turn-1
+  `gRandomTurnNumber` writes.
 - **Notes:** full-script tests run every callback shape through its `return`
   and `BattleScript_MoveEnd`'s own `END`; Pound→Static pins the proc as draw 5
   after accuracy/crit/damage/effect chance, with success and failure both +1.
