@@ -955,7 +955,8 @@ function runMoveAction(
  */
 function voluntarySwitchHandlers(
   base: Handlers,
-  trainerMoveId: number,
+  switchingBattler: BattleSinglesBattler,
+  opposingMoveId: number,
 ): Handlers {
   const instruction = PROGRAM.instructions.find(
     (candidate) =>
@@ -973,10 +974,10 @@ function voluntarySwitchHandlers(
     throw new Error("assembled program has no voluntary-switch returnatktoball instruction");
   }
   const handler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (context) => {
-    if (trainerMoveId === MOVE_PURSUIT) {
+    if (opposingMoveId === MOVE_PURSUIT) {
       return unsupportedBranch(
         context,
-        "voluntary player switch while the opponent's selected move is MOVE_PURSUIT "
+        `voluntary ${switchingBattler === 0 ? "player" : "trainer"} switch while the opponent's selected move is MOVE_PURSUIT `
           + "(pre-switch interception/double-power path)",
         "battle_script_commands.c",
         8723,
@@ -1026,24 +1027,26 @@ function voluntarySwitchHandlers(
  */
 function runVoluntarySwitchAction(
   priorState: MachineState,
+  switchingBattler: BattleSinglesBattler,
   partyIndex: BattlePartyIndex,
-  trainerMoveId: number,
+  opposingMoveId: number,
   baseHandlers: Handlers,
 ): ActionResult {
+  const opposingBattler = (switchingBattler === 0 ? 1 : 0) as BattleSinglesBattler;
   const monToSwitchIntoId = Object.freeze(
     priorState.rulesContext.monToSwitchIntoId.map((value, battler) =>
-      battler === 0 ? partyIndex : value
+      battler === switchingBattler ? partyIndex : value
     ),
   ) as unknown as BattleScriptRulesContext["monToSwitchIntoId"];
   const rulesContext = createBattleScriptRulesContext({
     ...priorState.rulesContext,
     selectorRoles: {
-      attacker: 0,
-      target: 1,
-      effectBattler: 1,
+      attacker: switchingBattler,
+      target: opposingBattler,
+      effectBattler: opposingBattler,
       fainted: null,
     },
-    scriptingBattler: 0,
+    scriptingBattler: switchingBattler,
     currentMove: 0,
     currentMovePosition: 0,
     monToSwitchIntoId,
@@ -1065,7 +1068,7 @@ function runVoluntarySwitchAction(
   });
   const run = runScriptToOwnEnd(
     PROGRAM,
-    voluntarySwitchHandlers(baseHandlers, trainerMoveId),
+    voluntarySwitchHandlers(baseHandlers, switchingBattler, opposingMoveId),
     started,
   );
   if (run.kind === "barrier") {
@@ -1816,10 +1819,9 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     ctx.request.kind !== "command"
     || ctx.request.side !== "trainer"
     || ctx.request.battler !== 1
-    || ctx.decision.kind !== "use-move"
     || rules.pendingPlayerDecision === null
   ) {
-    throw new Error("factory full-turn decision requires the trainer's staged singles use-move command");
+    throw new Error("factory full-turn decision requires the trainer's staged singles command");
   }
 
   const rc0 = clearOverwrittenEncoreAtAction(
@@ -1827,12 +1829,21 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     1,
   );
   const playerSwitch = rules.pendingPlayerDecision.kind === "switch";
+  const trainerSwitch = ctx.decision.kind === "switch";
+  const playerSwitchPartyIndex = playerSwitch
+    ? rules.pendingPlayerDecision.partyIndex
+    : null;
+  const trainerSwitchPartyIndex = trainerSwitch
+    ? ctx.decision.partyIndex
+    : null;
   const playerMoveSlot = playerSwitch
     ? 0 as BattleMoveSlot
     : rules.pendingPlayerDecision.moveSlot;
-  const trainerMoveSlot = ctx.decision.moveSlot;
+  const trainerMoveSlot = trainerSwitch
+    ? 0 as BattleMoveSlot
+    : ctx.decision.moveSlot;
   const playerForcedStruggle = !playerSwitch && usesForcedStruggle(rc0, 0);
-  const trainerForcedStruggle = usesForcedStruggle(rc0, 1);
+  const trainerForcedStruggle = !trainerSwitch && usesForcedStruggle(rc0, 1);
   const playerMoveId = playerSwitch
     ? 0
     : actionMoveId(
@@ -1841,27 +1852,37 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
       playerMoveSlot,
       playerForcedStruggle,
     );
-  const trainerMoveId = actionMoveId(
-    rc0,
-    1,
-    trainerMoveSlot,
-    trainerForcedStruggle,
-  );
+  const trainerMoveId = trainerSwitch
+    ? 0
+    : actionMoveId(
+      rc0,
+      1,
+      trainerMoveSlot,
+      trainerForcedStruggle,
+    );
   if (!playerSwitch && playerMoveId === 0) {
     throw new Error(
       `factory full-turn decision player move slot ${playerMoveSlot} is not usable`,
     );
   }
-  if (trainerMoveId === 0) {
+  if (!trainerSwitch && trainerMoveId === 0) {
     throw new Error(`factory full-turn decision trainer move slot ${ctx.decision.moveSlot} is not usable`);
   }
   const playerTarget = playerSwitch
     ? 1 as BattleSinglesBattler
     : rules.pendingPlayerDecision.targetBattler;
-  const trainerTarget = ctx.decision.targetBattler;
+  const trainerTarget = trainerSwitch
+    ? 0 as BattleSinglesBattler
+    : ctx.decision.targetBattler;
 
   let playerFirst = true;
-  if (!playerSwitch) {
+  if (playerSwitch || trainerSwitch) {
+    // SetActionsAndBattlersTurnOrder (battle_main.c:4817-4850): item/switch
+    // actions are inserted first in ascending battler order. Speed comparison
+    // (and therefore its tie draw) is skipped whenever either action is a
+    // switch.
+    playerFirst = playerSwitch;
+  } else {
     const playerTOB = turnOrderBattler(rc0, 0, playerMoveId);
     const trainerTOB = turnOrderBattler(rc0, 1, trainerMoveId);
     const weather = turnOrderWeather(rc0);
@@ -1890,6 +1911,12 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
   const mover2MoveId = playerFirst ? trainerMoveId : playerMoveId;
   const mover2MoveSlot = playerFirst ? trainerMoveSlot : playerMoveSlot;
   const mover2Target: BattleScriptBattlerId = playerFirst ? trainerTarget : playerTarget;
+  const mover1SwitchPartyIndex = mover1 === 0
+    ? playerSwitchPartyIndex
+    : trainerSwitchPartyIndex;
+  const mover2SwitchPartyIndex = mover2 === 0
+    ? playerSwitchPartyIndex
+    : trainerSwitchPartyIndex;
 
   const ports = externalPorts();
   const handlers = createBattleScriptStatusRulesHandlers(PROGRAM, ports);
@@ -1906,11 +1933,12 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     events: Object.freeze([]),
   });
 
-  const action1 = playerSwitch
+  const action1 = mover1SwitchPartyIndex !== null
     ? runVoluntarySwitchAction(
       initialState,
-      rules.pendingPlayerDecision.partyIndex,
-      trainerMoveId,
+      mover1 as BattleSinglesBattler,
+      mover1SwitchPartyIndex,
+      mover1 === 0 ? trainerMoveId : playerMoveId,
       handlers,
     )
     : runMoveAction(
@@ -2001,16 +2029,24 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
         mover2,
       ),
     });
-    const action2 = runMoveAction(
-      PROGRAM,
-      handlers,
-      preAction2State,
-      mover2,
-      mover2MoveId,
-      mover2MoveSlot,
-      mover2Target,
-      mover2 === 0 ? playerForcedStruggle : trainerForcedStruggle,
-    );
+    const action2 = mover2SwitchPartyIndex !== null
+      ? runVoluntarySwitchAction(
+        preAction2State,
+        mover2 as BattleSinglesBattler,
+        mover2SwitchPartyIndex,
+        mover2 === 0 ? trainerMoveId : playerMoveId,
+        handlers,
+      )
+      : runMoveAction(
+        PROGRAM,
+        handlers,
+        preAction2State,
+        mover2,
+        mover2MoveId,
+        mover2MoveSlot,
+        mover2Target,
+        mover2 === 0 ? playerForcedStruggle : trainerForcedStruggle,
+      );
     if (action2.kind === "barrier") {
       return finishFullTurn(
         ctx.rng, rngBefore.calls, action2.state,

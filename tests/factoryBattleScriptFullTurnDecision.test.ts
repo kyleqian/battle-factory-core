@@ -576,6 +576,107 @@ describe("factory full-turn decision -- voluntary-switch action", () => {
     });
     expect(result.state.rng.calls).toBe(0);
   });
+
+  function trainerSwitchTurnConfig(playerMoveId = STRENGTH): FactoryFullTurnConfig {
+    return config({
+      player: {
+        species: 1, moveId: playerMoveId, attack: 100, defense: 100,
+        spAttack: 100, spDefense: 100, speed: 50, hp: 300,
+      },
+      trainer: {
+        species: 43, moveId: STRENGTH, attack: 100, defense: 100,
+        spAttack: 100, spDefense: 100, speed: 50, hp: 300,
+      },
+      trainerBenchHp: [200, 0],
+      trainerBenchOverride: [{
+        species: 66, moves: [2, 0, 0, 0],
+        maxHP: 200, attack: 100, defense: 200, speed: 50,
+        spAttack: 100, spDefense: 100,
+      }, undefined],
+    });
+  }
+
+  it("runs a trainer switch before an equal-speed player move, draws no switch/tie RNG, and redirects the hit to the incoming mon", () => {
+    const initial = createFactoryFullTurnBattleState(trainerSwitchTurnConfig());
+    const afterPlayer = submitFactoryFullTurnDecision(initial, {
+      requestId: 1,
+      side: "player",
+      decision: PLAYER_ATTACKS,
+    });
+    if (afterPlayer.kind !== "decision-required") throw new Error("expected trainer command");
+    const result = submitFactoryFullTurnDecision(afterPlayer.state, {
+      requestId: 2,
+      side: "trainer",
+      decision: { kind: "switch", partyIndex: 1 },
+    });
+    if (result.kind !== "decision-required") throw new Error("expected next player command");
+    const rc = result.state.rules.rulesContext;
+    expect(rc.battlers[1]).toMatchObject({
+      species: 66,
+      partyIndex: 1,
+    });
+    expect(rc.battlers[1]!.hp).toBeLessThan(200);
+    expect(rc.party.opponent[1]!.hp).toBe(rc.battlers[1]!.hp);
+    expect(rc.party.opponent[0]!.hp).toBe(300);
+    expect(result.events).toContainEqual(expect.objectContaining({
+      payload: { kind: "switch", side: "opponent", fromPartyIndex: 0, toPartyIndex: 1 },
+    }));
+    // The player hit chain owns four draws and BattleTurnPassed owns one.
+    // The already-selected trainer switch and the bypassed speed tie own zero.
+    expect(result.state.rng.calls).toBe(5);
+  });
+
+  it("symmetrically barriers when a player's selected Pursuit intercepts the trainer switch", () => {
+    const initial = createFactoryFullTurnBattleState(trainerSwitchTurnConfig(228));
+    const afterPlayer = submitFactoryFullTurnDecision(initial, {
+      requestId: 1,
+      side: "player",
+      decision: PLAYER_ATTACKS,
+    });
+    if (afterPlayer.kind !== "decision-required") throw new Error("expected trainer command");
+    const result = submitFactoryFullTurnDecision(afterPlayer.state, {
+      requestId: 2,
+      side: "trainer",
+      decision: { kind: "switch", partyIndex: 1 },
+    });
+    expect(result.kind).toBe("machine-barrier");
+    if (result.kind !== "machine-barrier") throw new Error("expected pursuit barrier");
+    expect(result.barrier).toMatchObject({
+      opcodeName: "B_SCR_OP_JUMPIFNOPURSUITSWITCHDMG",
+      dispatcher: "Cmd_jumpifnopursuitswitchdmg",
+    });
+    expect(result.state.rng.calls).toBe(0);
+  });
+
+  it("orders dual switches by battler and draws only the continuing-turn boundary RNG", () => {
+    const initial = createFactoryFullTurnBattleState({
+      ...trainerSwitchTurnConfig(),
+      playerBenchHp: [200, 0],
+      playerBenchOverride: [{
+        species: 66, moves: [2, 0, 0, 0],
+        maxHP: 200, attack: 100, defense: 200, speed: 50,
+        spAttack: 100, spDefense: 100,
+      }, undefined],
+    });
+    const afterPlayer = submitFactoryFullTurnDecision(initial, {
+      requestId: 1,
+      side: "player",
+      decision: { kind: "switch", partyIndex: 1 },
+    });
+    if (afterPlayer.kind !== "decision-required") throw new Error("expected trainer command");
+    const result = submitFactoryFullTurnDecision(afterPlayer.state, {
+      requestId: 2,
+      side: "trainer",
+      decision: { kind: "switch", partyIndex: 1 },
+    });
+    if (result.kind !== "decision-required") throw new Error("expected next player command");
+    expect(result.events.flatMap(({ payload }) =>
+      payload.kind === "switch" ? [payload.side] : []
+    )).toEqual(["player", "opponent"]);
+    expect(result.state.rules.rulesContext.battlers[0]!.partyIndex).toBe(1);
+    expect(result.state.rules.rulesContext.battlers[1]!.partyIndex).toBe(1);
+    expect(result.state.rng.calls).toBe(1);
+  });
 });
 
 function speedOrderConfig({
