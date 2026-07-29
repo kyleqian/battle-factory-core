@@ -13,7 +13,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
-## 651 — [SUPERVISOR WIND-DOWN 2026-07-28 ~19:30] Census CLOSED 214/214 (100% all four metrics); Fake Tears seam 322/322 consumed cross-program; audit 4/4 fixed; ISSUES #41 deleted
+## 651 — [SUPERVISOR CHECKPOINT 2026-07-28 ~18:15] Census CLOSED 214/214 (100% all four metrics); Fake Tears seam 322/322 consumed cross-program; audit 4/4 fixed; ISSUES #41 deleted
 
 - **State:** union green at **439 files / 4770 tests**, production build,
   `git diff --check`, census byte-idempotent at **214/214 effects, 355/355
