@@ -1,3 +1,34 @@
+## 690 — [BOUNDED MAIN WORKER 2026-07-29 ~10:58] Rung-14 commentary app stage landed; OFF route checkpoint bounded
+
+- **State:** implementation committed `77a6ab47`; current union (including
+  concurrent trainer-pic extraction `22f1911d`) is green at **498 files /
+  5135 tests**, production build, `git diff --check`, and Battle Scene OFF
+  oracle info. Both censuses regenerate byte-identically at SHA-256
+  **8b18f754…5261 / 3ff4c7f3…c6c**; no ratchet moved.
+- **Did / equivalence:** `createPostwinStateFromOpponentRentalRecords` is now
+  the shared core/app-stage adapter. The named canonical stage installs the
+  exact **153/179/181** set/personality/IV/ability tuple at the real 23602
+  dismiss edge; unchanged dense captures remain **171/171 + 164/164 exact**.
+  A second app-visible stage pins generated seed-3 **156/180/122**
+  (ONIX/BAYLEEF/ARON), whose commentary is **ROCK + unrestrained** versus the
+  canonical **no favorite + weakening**. Classification rules did not move.
+- **Bounded OFF remainder:** no new trace was claimed. Canonical `/v1/run`
+  accepts only controller input, while Battle Lab's first semantic checkpoint
+  is explicitly *after* scouting (`../../oracle/BATTLE_LAB.md:228-230`);
+  therefore it cannot stage the generated party for these pre-battle pages.
+  Acceptance needs either a new earlier source-valid field checkpoint or an
+  honest complete alternate Factory battle route producing that tuple. No
+  mechanic-lab substitute, fake oracle route, or capture thinning was added.
+- **Sweep / next:** generated-round sweep is **24/24**; cursors remain
+  **4:2415, 5:2156, 6:791 loss, 7:1337, 8:1922, 11:2012, 13:2415,
+  14:1946, 15:1602, 16:1878, 17:2013, 18:2143, 19:1691, 20:2326,
+  21:1911, 22:1389, 23:2114, 24:1751, 26:1680, 29:1869, 30:1825**.
+  Supervisor resumes its ordered queue; no issue, census byte, canonical
+  capture list/profile, animation, unsupported/import ratchet, or tick branch
+  moved. PAPERCUT: none.
+
+---
+
 ## 689 — [BOUNDED MAIN WORKER 2026-07-29 ~10:38] Issue #48 rental-count persistence landed
 
 - **State:** implementation committed `4c9d38b0`; tree green at **497 files /
