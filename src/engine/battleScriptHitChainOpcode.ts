@@ -173,6 +173,7 @@ const HOLD_EFFECT_ID_STICK = 66;
  */
 export const HOLD_EFFECT_NAME_BY_ID: Readonly<Record<number, string>> = Object.freeze({
   24: "HOLD_EFFECT_MACHO_BRACE",
+  26: "HOLD_EFFECT_QUICK_CLAW",
   29: "HOLD_EFFECT_CHOICE_BAND",
   31: "HOLD_EFFECT_BUG_POWER",
   34: "HOLD_EFFECT_SOUL_DEW",

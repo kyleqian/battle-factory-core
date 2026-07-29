@@ -7,7 +7,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 ## Headline
 
 - **Abilities: 57/70 members engine-referenced** (weighted by L50 set-carriers: 977/1103); 4 zero-carrier, 3 without battle hooks (out-of-battle only).
-- **Hold effects: 41/42 members engine-referenced** (weighted by L50 set-carriers: 775/850); 21 zero-carrier, 3 without battle hooks.
+- **Hold effects: 42/42 members engine-referenced** (weighted by L50 set-carriers: 850/850); 21 zero-carrier, 3 without battle hooks.
 - All 15 ground-truth validation checks passed.
 
 ## Ability worklist (ranked: unreferenced first, then by L50 carriers)
@@ -96,10 +96,10 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 
 | Hold effect | Status | L50 carriers | All | Frontier items | Delegate cases | Inline rules | AI | Engine refs |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| HOLD_EFFECT_QUICK_CLAW | unreferenced | 75 | 80 | QUICK_CLAW | — | 2 | 0 | 0 |
 | HOLD_EFFECT_EVASION_UP | engine-referenced | 120 | 125 | BRIGHT_POWDER, LAX_INCENSE | — | 1 | 0 | 2 |
 | HOLD_EFFECT_FOCUS_BAND | engine-referenced | 78 | 80 | FOCUS_BAND | — | 5 | 0 | 5 |
 | HOLD_EFFECT_CURE_STATUS | engine-referenced | 75 | 80 | LUM_BERRY | NORMAL, MOVE_END | 0 | 0 | 2 |
+| HOLD_EFFECT_QUICK_CLAW | engine-referenced | 75 | 80 | QUICK_CLAW | — | 2 | 0 | 2 |
 | HOLD_EFFECT_LEFTOVERS | engine-referenced | 69 | 70 | LEFTOVERS | NORMAL | 0 | 0 | 2 |
 | HOLD_EFFECT_SCOPE_LENS | engine-referenced | 54 | 55 | SCOPE_LENS | — | 1 | 0 | 2 |
 | HOLD_EFFECT_RESTORE_HP | engine-referenced | 45 | 45 | SITRUS_BERRY, ORAN_BERRY, BERRY_JUICE | NORMAL | 0 | 0 | 2 |

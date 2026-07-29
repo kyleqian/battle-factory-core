@@ -13,6 +13,34 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 664 — [BOUNDED MAIN WORKER 2026-07-28 ~22:16] turn-boundary RNG modeled; Quick Claw closes hold-effect census
+
+- **State:** tree green at **452 files / 4867 tests**, production build,
+  `git diff --check`, and Battle Scene OFF oracle info. Census regenerated
+  byte-idempotently: abilities unchanged **57/70 (weighted 977/1103)**;
+  hold effects now **42/42 (weighted 850/850)**, all 15 validations pass.
+- **Did:** added `BattleTurnPassed`'s unconditional continuing-boundary draw
+  at the production full-turn seam, after end-turn cleanup and before the
+  next request/locked-decision recursion; persisted its u16 as the
+  `gRandomTurnNumber` equivalent. Staged windows accept an explicit initial
+  value (default `0xffff`); whole-battle turn-1 sites `battle_main.c:3140`
+  and `:3923` remain the named follow-up. A typed two-turn ledger pins the
+  ROM positions 5/19. Quick Claw now applies `UINT_MAX` effective speed for
+  stored values `< floor(0xffff*param/100)` (param 20 threshold 13107),
+  below priority and with the ordinary tie roll when both holders proc.
+- **Next:** supervisor continue the ability census roadmap, likely the
+  ON_DAMAGE contact family; separately model the two named battle-start
+  random-turn writes when whole-battle integration owns turn 1.
+- **Notes:** boundary commit `c7944fac`; Quick Claw commit follows this
+  entry. Existing direct `runBattleEndTurnOrchestration` zero-RNG pin stays
+  correct because ownership is in the full-turn reducer. Multi-turn HP,
+  Disable-duration, Wish/Future Sight, Focus Energy, and Rollout assertions
+  were re-derived after later rolls shifted to their ROM-faithful positions.
+  No `unsupported-branch` or canonical-recording ratchet changed.
+  `verify-turn-boundary-rng-gap.py` now intentionally stops at its stale
+  “explicit model acquired; revisit verdict” guard. PAPERCUT: none.
+
+---
 
 ## 663 — [BOUNDED MAIN WORKER 2026-07-28 ~21:55] production turn-order inputs live; Swift Swim + Chlorophyll census rows closed
 
@@ -75,45 +103,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** this is launcher-only; no battle engine, renderer, trace,
   barrier ratchet, or oracle-profile change. The existing “merge from the
   owning tree” workflow remains useful defense in depth.
-
----
-
-## 661 — [SUPERVISOR WIND-DOWN 2026-07-28 ~21:20] Ability/item parity surge: census abilities 55/70 + hold effects 41/42; speed/turn-order scout pack landed; animation-main folded twice (Tickle exact)
-
-- **State:** master `2f5167a8`, union green at **452 files / 4855 tests**,
-  production build, `git diff --check` clean, census byte-idempotent
-  (**abilities 55/70 engine-referenced, weighted 905/1103; hold effects
-  41/42, weighted 775/850; QUICK_CLAW is the only unreferenced hold-effect
-  row**). DEFERRED.md empty; no orphan worktrees or branches; both oracle
-  profiles fresh (checked at orient).
-- **Did:** (1) folded `animation-main` at orient (`1aefbdf8`, Tickle/Leaf
-  Blade evidence + the Omanyte-vs-Omastar carrier-mismatch catch) and again
-  at wind-down (`2f5167a8`) — **MOVE_TICKLE promoted exact; L50 animation
-  coverage 78/276**; animation session ended ~21:06, lane fully folded.
-  (2) Main worker: CalculateBaseDamage ability block bit-exact
-  (`1f8d7727`, entry 659) — 12 rows flipped at the exact predicted delta.
-  (3) Main worker: hold-item block bit-exact (`a4673f25`, entry 660) — 19
-  rows flipped at the exact predicted delta; its 2-line
-  `ENGINE_INFRA_SPELLINGS` addition is benign infra-name registration, not
-  a counting-semantics change. (4) Side scout landed
-  `docs/ability-item-speed-scout.md` (`f8aabadd`): census string-literal
-  false-negative audit (10 members classified; generator fix described,
-  deliberately NOT applied) + GetWhoStrikesFirst ground truth, consumer
-  map, L50 fixtures with computed speeds, and 3 staged recipes.
-- **Next (ordered):** (i) **Falsify the scout's RNG-gap hypothesis first**:
-  `gRandomTurnNumber` (drawn once per turn in `BattleTurnPassed`,
-  battle_main.c:4013) has zero engine footprint — but multi-turn staged
-  windows pass RNG-exact, so `battleTurn.ts`'s `turnEndRngGroups` likely
-  absorbs the draw unnamed. Run the scout's 2-turn no-Quick-Claw probe
-  before trusting any Quick Claw fixture. (ii) Wire `turnOrder.ts`'s dead
-  inputs (call site `factoryBattleScriptFullTurnDecision.ts:810` never
-  threads ability/holdEffect/weather; weather already sits in
-  `rulesContext.weather`) — closes Chlorophyll/Swift Swim semantically.
-  (iii) Quick Claw row after (i). (iv) ON_DAMAGE contact family (Static 27
-  et al.). (v) Census generator string-literal counting fix per scout §A3.
-- **Notes:** ability rows still unreferenced are the speed pair (closes
-  with ii), the ON_DAMAGE family, Run Away/Pickup (battle no-ops to prove),
-  and trapping/AI-scoped rows. "Engine-referenced" still ≠ semantically
-  complete — dense oracle evidence for the two damage blocks remains the
-  standing follow-up; the scout pack's recipes are the template. No
-  deferred questions this session.

@@ -1,5 +1,47 @@
 ---
 
+## 661 — [SUPERVISOR WIND-DOWN 2026-07-28 ~21:20] Ability/item parity surge: census abilities 55/70 + hold effects 41/42; speed/turn-order scout pack landed; animation-main folded twice (Tickle exact)
+
+- **State:** master `2f5167a8`, union green at **452 files / 4855 tests**,
+  production build, `git diff --check` clean, census byte-idempotent
+  (**abilities 55/70 engine-referenced, weighted 905/1103; hold effects
+  41/42, weighted 775/850; QUICK_CLAW is the only unreferenced hold-effect
+  row**). DEFERRED.md empty; no orphan worktrees or branches; both oracle
+  profiles fresh (checked at orient).
+- **Did:** (1) folded `animation-main` at orient (`1aefbdf8`, Tickle/Leaf
+  Blade evidence + the Omanyte-vs-Omastar carrier-mismatch catch) and again
+  at wind-down (`2f5167a8`) — **MOVE_TICKLE promoted exact; L50 animation
+  coverage 78/276**; animation session ended ~21:06, lane fully folded.
+  (2) Main worker: CalculateBaseDamage ability block bit-exact
+  (`1f8d7727`, entry 659) — 12 rows flipped at the exact predicted delta.
+  (3) Main worker: hold-item block bit-exact (`a4673f25`, entry 660) — 19
+  rows flipped at the exact predicted delta; its 2-line
+  `ENGINE_INFRA_SPELLINGS` addition is benign infra-name registration, not
+  a counting-semantics change. (4) Side scout landed
+  `docs/ability-item-speed-scout.md` (`f8aabadd`): census string-literal
+  false-negative audit (10 members classified; generator fix described,
+  deliberately NOT applied) + GetWhoStrikesFirst ground truth, consumer
+  map, L50 fixtures with computed speeds, and 3 staged recipes.
+- **Next (ordered):** (i) **Falsify the scout's RNG-gap hypothesis first**:
+  `gRandomTurnNumber` (drawn once per turn in `BattleTurnPassed`,
+  battle_main.c:4013) has zero engine footprint — but multi-turn staged
+  windows pass RNG-exact, so `battleTurn.ts`'s `turnEndRngGroups` likely
+  absorbs the draw unnamed. Run the scout's 2-turn no-Quick-Claw probe
+  before trusting any Quick Claw fixture. (ii) Wire `turnOrder.ts`'s dead
+  inputs (call site `factoryBattleScriptFullTurnDecision.ts:810` never
+  threads ability/holdEffect/weather; weather already sits in
+  `rulesContext.weather`) — closes Chlorophyll/Swift Swim semantically.
+  (iii) Quick Claw row after (i). (iv) ON_DAMAGE contact family (Static 27
+  et al.). (v) Census generator string-literal counting fix per scout §A3.
+- **Notes:** ability rows still unreferenced are the speed pair (closes
+  with ii), the ON_DAMAGE family, Run Away/Pickup (battle no-ops to prove),
+  and trapping/AI-scoped rows. "Engine-referenced" still ≠ semantically
+  complete — dense oracle evidence for the two damage blocks remains the
+  standing follow-up; the scout pack's recipes are the template. No
+  deferred questions this session.
+
+---
+
 ## 660 — [BOUNDED MAIN WORKER 2026-07-28 ~21:05] damageCalc hold-item block ported bit-exact; census hold effects 22/42 -> 41/42
 
 - **State:** union green at **452 files / 4855 tests**, production build,

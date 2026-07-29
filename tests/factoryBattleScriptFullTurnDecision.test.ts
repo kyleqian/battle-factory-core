@@ -31,6 +31,7 @@ const ABILITY_CLOUD_NINE = 13;
 const ABILITY_SWIFT_SWIM = 33;
 const ABILITY_CHLOROPHYLL = 34;
 const ITEM_MACHO_BRACE = 181;
+const ITEM_QUICK_CLAW = 183;
 const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
 const B_WEATHER_SUN = (1 << 5) | (1 << 6);
 
@@ -254,6 +255,30 @@ describe("factory full-turn decision -- GetWhoStrikesFirst production inputs", (
     expect(unheld.ppOrder.slice(0, 2)).toEqual([0, 1]);
     expect(braced.ppOrder.slice(0, 2)).toEqual([1, 0]);
     expect([unheld.rngCalls, braced.rngCalls]).toEqual([9, 9]);
+  });
+
+  it("reads the staged gRandomTurnNumber for Quick Claw without a turn-order redraw", () => {
+    const proc = runSpeedOrderTurn({
+      ...speedOrderConfig({
+        playerSpeed: 45,
+        trainerSpeed: 95,
+        playerItem: ITEM_QUICK_CLAW,
+      }),
+      initialRandomTurnNumber: 13106,
+    });
+    const noProc = runSpeedOrderTurn({
+      ...speedOrderConfig({
+        playerSpeed: 45,
+        trainerSpeed: 95,
+        playerItem: ITEM_QUICK_CLAW,
+      }),
+      initialRandomTurnNumber: 13107,
+    });
+    expect(proc.ppOrder.slice(0, 2)).toEqual([0, 1]);
+    expect(noProc.ppOrder.slice(0, 2)).toEqual([1, 0]);
+    // Eight ordinary hit-chain draws plus the one unconditional boundary
+    // draw in both cases: Quick Claw only reads the stored turn value.
+    expect([proc.rngCalls, noProc.rngCalls]).toEqual([9, 9]);
   });
 
   it("preserves the existing speed-tie contract: exactly one turn-order draw, and none for a one-point non-tie", () => {

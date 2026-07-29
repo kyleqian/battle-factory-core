@@ -1486,10 +1486,17 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
   const bothPriorityZero = playerTOB.movePriority === 0 && trainerTOB.movePriority === 0;
   const priorityEqual = playerTOB.movePriority === trainerTOB.movePriority;
   const isSpeedTie = (bothPriorityZero || priorityEqual)
-    && effectiveSpeed(playerTOB, weather) === effectiveSpeed(trainerTOB, weather);
+    && effectiveSpeed(playerTOB, weather, rc0.randomTurnNumber)
+      === effectiveSpeed(trainerTOB, weather, rc0.randomTurnNumber);
   // battle_main.c:4728/4745 -- Random() & 1, drawn ONLY on a genuine speed tie.
   const speedTieRngRoll = isSpeedTie ? ctx.rng.draw("turn order speed tie (Random() & 1)") : 0;
-  const strikesFirst = getWhoStrikesFirst(playerTOB, trainerTOB, speedTieRngRoll, weather);
+  const strikesFirst = getWhoStrikesFirst(
+    playerTOB,
+    trainerTOB,
+    speedTieRngRoll,
+    weather,
+    rc0.randomTurnNumber,
+  );
   const playerFirst = strikesFirst === 0;
 
   const mover1: BattleScriptBattlerId = playerFirst ? 0 : 1;

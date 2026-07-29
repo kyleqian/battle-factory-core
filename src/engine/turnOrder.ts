@@ -16,6 +16,8 @@ import { STAT_STAGE_RATIOS } from "./damageCalc.ts";
 const ABILITY_SWIFT_SWIM = "ABILITY_SWIFT_SWIM";
 const ABILITY_CHLOROPHYLL = "ABILITY_CHLOROPHYLL";
 const HOLD_EFFECT_MACHO_BRACE = "HOLD_EFFECT_MACHO_BRACE";
+const HOLD_EFFECT_QUICK_CLAW = "HOLD_EFFECT_QUICK_CLAW";
+const UINT_MAX = 0xffff_ffff;
 
 export interface TurnOrderBattler {
   speed: number;
@@ -40,7 +42,11 @@ export interface WeatherState {
  * battlers' halves are identical code, factored here instead of
  * duplicated).
  */
-export function effectiveSpeed(battler: TurnOrderBattler, weather: WeatherState = {}): number {
+export function effectiveSpeed(
+  battler: TurnOrderBattler,
+  weather: WeatherState = {},
+  randomTurnNumber = 0xffff,
+): number {
   const swiftBoost =
     (battler.ability === ABILITY_SWIFT_SWIM && weather.isRaining) ||
     (battler.ability === ABILITY_CHLOROPHYLL && weather.isSunny);
@@ -51,6 +57,12 @@ export function effectiveSpeed(battler: TurnOrderBattler, weather: WeatherState 
 
   if (battler.holdEffect === HOLD_EFFECT_MACHO_BRACE) speed = Math.trunc(speed / 2);
   if (battler.isParalyzed) speed = Math.trunc(speed / 4);
+  if (
+    battler.holdEffect === HOLD_EFFECT_QUICK_CLAW
+    && randomTurnNumber < Math.trunc((0xffff * (battler.holdEffectParam ?? 0)) / 100)
+  ) {
+    speed = UINT_MAX;
+  }
   return speed;
 }
 
@@ -68,9 +80,10 @@ export function getWhoStrikesFirst(
   battler2: TurnOrderBattler,
   speedTieRngRoll: number,
   weather: WeatherState = {},
+  randomTurnNumber = 0xffff,
 ): StrikesFirstResult {
-  const speed1 = effectiveSpeed(battler1, weather);
-  const speed2 = effectiveSpeed(battler2, weather);
+  const speed1 = effectiveSpeed(battler1, weather, randomTurnNumber);
+  const speed2 = effectiveSpeed(battler2, weather, randomTurnNumber);
 
   const bothPriorityZero = battler1.movePriority === 0 && battler2.movePriority === 0;
   const priorityEqual = battler1.movePriority === battler2.movePriority;
@@ -97,6 +110,7 @@ export function sortBattlersByTurnOrder(
   battlers: ReadonlyMap<number, TurnOrderBattler>,
   speedTieRngRolls: readonly number[] = [],
   weather: WeatherState = {},
+  randomTurnNumber = 0xffff,
 ): number[] {
   const order = [...battlerIds];
   let rollIndex = 0;
@@ -106,9 +120,10 @@ export function sortBattlersByTurnOrder(
       const b2 = battlers.get(order[j]!)!;
       const priorityBracketsTie =
         (b1.movePriority === 0 && b2.movePriority === 0) || b1.movePriority === b2.movePriority;
-      const isSpeedTie = priorityBracketsTie && effectiveSpeed(b1, weather) === effectiveSpeed(b2, weather);
+      const isSpeedTie = priorityBracketsTie
+        && effectiveSpeed(b1, weather, randomTurnNumber) === effectiveSpeed(b2, weather, randomTurnNumber);
       const roll = isSpeedTie ? (speedTieRngRolls[rollIndex++] ?? 0) : 0;
-      const result = getWhoStrikesFirst(b1, b2, roll, weather);
+      const result = getWhoStrikesFirst(b1, b2, roll, weather, randomTurnNumber);
       if (result !== 0) {
         const tmp = order[i]!;
         order[i] = order[j]!;
