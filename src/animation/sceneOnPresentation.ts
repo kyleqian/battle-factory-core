@@ -45,6 +45,10 @@ import {
   type BubbleBeamState,
 } from "./bubbleBeam.ts";
 import {
+  crossChopAtAge,
+  type CrossChopState,
+} from "./crossChop.ts";
+import {
   reversalAtAge,
   type ReversalResolvedShakeReceipt,
   type ReversalState,
@@ -467,6 +471,7 @@ export interface SceneOnPresentationBattler {
     | "MINUN"
     | "FLAAFFY"
     | "VOLBEAT"
+    | "MACHOKE"
     | "ZIGZAGOON"
     | "SABLEYE"
     | "ALTARIA"
@@ -1059,6 +1064,15 @@ export interface SceneOnBubbleBeamConfig {
   readonly targetPictureOffset: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnCrossChopConfig {
+  readonly move: "CROSS_CHOP";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source X_2/Y_PIC_OFFSET anchor used by both hand and impact commands. */
+  readonly targetPictureOffset: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnReversalConfig {
   readonly move: "REVERSAL";
   readonly attacker: SceneOnPresentationBattler;
@@ -1399,6 +1413,7 @@ export type SceneOnMoveConfig =
   | SceneOnSmokescreenConfig
   | SceneOnMudShotConfig
   | SceneOnBubbleBeamConfig
+  | SceneOnCrossChopConfig
   | SceneOnReversalConfig
   | SceneOnSwaggerConfig
   | SceneOnTauntConfig
@@ -1584,6 +1599,12 @@ export interface SceneOnMudShotView extends MudShotState {
 }
 
 export interface SceneOnBubbleBeamView extends BubbleBeamState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnCrossChopView extends CrossChopState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3015,6 +3036,27 @@ export function sceneOnBubbleBeamView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attackerPictureOffset,
+      state.config.targetPictureOffset,
+    ),
+  };
+}
+
+/** `age=0` is Move_CROSS_CHOP's first HANDS_AND_FEET load display. */
+export function sceneOnCrossChopView(
+  state: SceneOnMovePresentationState<SceneOnCrossChopConfig>,
+): SceneOnCrossChopView {
+  if (state.config.move !== "CROSS_CHOP") {
+    throw new Error(
+      `expected CROSS_CHOP presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...crossChopAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
       state.config.targetPictureOffset,
     ),
   };
