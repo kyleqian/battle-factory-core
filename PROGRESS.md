@@ -75,6 +75,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 | `:8410` | Heal Bell partner Soundproof | B | `Cmd_healpartystatus` `BATTLE_TYPE_DOUBLE` partner branch; waits on Factory-doubles topology |
 | `:9233` | Trick prevention: Sticky Hold | A | wired; normal swap arm quiet |
 
+- **Supervisor folds (post-step):** rung-14 presentation-seam map merged
+  (`3fc5ee40`, docs-only — swap is the cheapest genuine gap; seventh-win
+  terminal already generic). ROM ground-truth receipt §7A banked and merged
+  (`055fc60e`): absorber switch draw attributed to
+  `FindMonThatAbsorbsOpponentsMove+0x249`, odd 52937 → switch index 1
+  delta 1; even 50708 control → ordinary ledger +1; both byte-identical
+  across fresh processes. Supervisor reran full suite (**496/5082**),
+  build, and re-drove seeds 18/20/21/23 = **2478/2140/1911/1436** unchanged.
 - **Next / notes:** supervisor resumes R13 live switching / King's Rock /
   presentation queue. No unsupported/import ratchet, generated census byte,
   hook universe, issue, presentation, animation, canonical recording, or tick
