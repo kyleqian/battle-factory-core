@@ -13,6 +13,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 649 — [BOUNDED MAIN WORKER 2026-07-28 ~17:57] Battle 1 HP recording imports retired
+
+- **State:** implementation committed `78a3bfbc`; tree green at **437 files /
+  4762 tests**, production build, OFF oracle info, and `git diff --check`.
+  Census remains byte-idempotent at **214/214 effects, 355/355 moves, 276/276
+  distinct, 2957/2957 weighted** with all **72** validations passing.
+- **Did:** replaced `battleScene.ts`'s three Battle 1 RAM-dump imports with a
+  compact staging aggregate over the existing turn-1/2/3/5 kernel hit chains.
+  The executable-frontier recording allowlist shrank **4→1**; the three JSON
+  recordings remain test-only ground truth for every formerly consumed field.
+- **Next:** supervisor verify `78a3bfbc`; ISSUES #41 now contains only
+  `factorySwapPresentation.ts`'s swap-rentalmons import and the separately
+  tracked generated-recording corpus. Do not expand into #39's turn-keying.
+- **Notes:** dense OFF compares remain exact: `turn1-rockslide.json`
+  **256/256**, `turn5-faint.json` **110/110**. Tier-1 pins staged
+  species/level/maxHP plus HP anchors 143→101, 117→101, 88→41, and Onix 88.
+  No barrier-count, handler-set, census, round, tick, pixel, roadmap, or
+  animation change.
+
+---
+
 ## 648 — [BOUNDED MAIN WORKER 2026-07-28 ~17:47] Focus Band damage survival source-complete
 
 - **State:** committed `ecfb08d2`; tree green at **434 files / 4756 tests**,
@@ -53,25 +74,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Beam's non-sun exception; and clear-weather values. Beat Up's separate
   formula is unchanged and its suite stays green. No barrier-count, handler
   pin, census, recording-import, presentation, roadmap, or issue change.
-
----
-
-## 646 — [BOUNDED MAIN WORKER 2026-07-28 ~17:23] Called locked-move and recharge seams fixed
-
-- **State:** committed `cc6c0b1f`; tree green at **434 files / 4722 tests**,
-  production build, OFF oracle info, and `git diff --check`. Census remains
-  byte-idempotent at **214/214 effects, 355/355 moves, 276/276 distinct,
-  2957/2957 weighted** with all **72** validations passing.
-- **Did:** charging and rampage now store executed `gCurrentMove` in the
-  attacker lock. The full-turn action consumer accepts a lock independent of
-  the caller's physical moveslot, overrides current/chosen from it for both
-  multi-turn and recharge actions, and preserves the original slot solely as
-  PP owner.
-- **Next:** supervisor verify `cc6c0b1f`; audit findings 3 (weather damage
-  block) and 4 (Focus Band) remain separate, explicitly out-of-scope steps.
-- **Notes:** eight full-turn scenarios pin Assist→Fly, Metronome→Thrash,
-  Assist→Bide, Metronome→Hyper Beam, and all four plain paths. Called moves
-  resume while only Assist/Metronome's slot spends PP; recharge exposes Hyper
-  Beam as chosen/current during admission before source action-finished clears
-  current. No barrier-count, handler-pin, census, recording-import,
-  presentation, roadmap, or issue change.

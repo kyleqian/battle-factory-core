@@ -11,19 +11,18 @@ symptom, what's confirmed from the reference/oracle, and any leads.
 canonical playthrough instead of computing it, so it is correct only for that
 playthrough.
 
-**Confirmed** (grep, 2026-07-24, `856b3b4`):
-- `battleScene.ts:651-653` imports `battle1-turn1-ram-dump.json`,
-  `battle1-turn2-ram-dump.json`, `battle1-grovyle-faint-ram-dump.json` and
-  reads battler HP/maxHP out of them (`:916-1267`).
+**Open remainder:**
 - `factorySwapPresentation.ts:2` imports `battle1-swap-rentalmons-dump.json`.
-- 57 of the 114 files in `src/data/gen/` are `*-dump`/`*-probe`/`*-watch`/
-  `*-boundaries` recordings. (`featherDance.ts`'s probe imports were retired
-  2026-07-24 by the anim-script interpreter, ex-#40.)
+- The generated-data recording corpus remains separately tracked: 57 of 114
+  `src/data/gen/` files were `*-dump`/`*-probe`/`*-watch`/`*-boundaries`
+  recordings at the issue's 2026-07-24 census (`856b3b4`). Retire each only
+  as its owning mechanism gains a real source; keep fixtures needed for
+  Tier-1 assertions and extractors. ROADMAP S10 §4 forbids new production
+  imports.
 
-**Leads:** the HP reads are the cheapest to retire — they become kernel
-semantic events once ROADMAP S10 step (ii) lands `datahpupdate`. Retire each
-import as its owning mechanism gains a real source, and keep the dump files
-for Tier-1 assertions and extractors. ROADMAP S10 §4 forbids new ones.
+The three `battleScene.ts` HP imports were retired by `78a3bfbc`: production
+now reads kernel-staged semantic values while Tier-1 retains the dumps only as
+regression ground truth.
 
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
