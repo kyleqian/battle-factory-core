@@ -560,6 +560,7 @@ import headbuttAsset from "../animation/assets/headbutt.json" with { type: "json
 import bodySlamAsset from "../animation/assets/body-slam.json" with { type: "json" };
 import astonishAsset from "../animation/assets/astonish.json" with { type: "json" };
 import synthesisAsset from "../animation/assets/synthesis.json" with { type: "json" };
+import wishAsset from "../animation/assets/wish.json" with { type: "json" };
 import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
 import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
 import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
@@ -699,6 +700,7 @@ import {
   sceneOnAbsorbView,
   sceneOnReflectView,
   sceneOnSynthesisView,
+  sceneOnWishView,
   sceneOnMilkDrinkView,
   sceneOnSupersonicView,
   sceneOnWaterGunView,
@@ -1173,6 +1175,12 @@ const synthesisArt = synthesisAsset as {
   blueStar: { tileset: Tileset; palette: RgbColor[] };
   skiploomBack: { tileset: Tileset; palette: RgbColor[] };
   skiploomFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const wishArt = wishAsset as {
+  goldStars: { tileset: Tileset; palette: RgbColor[] };
+  sparkle2: { tileset: Tileset; palette: RgbColor[] };
+  illumiseBack: { tileset: Tileset; palette: RgbColor[] };
+  illumiseFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const milkDrinkArt = milkDrinkAsset as {
   milkBottle: { tileset: Tileset; palette: RgbColor[] };
@@ -22988,6 +22996,154 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "SKIPLOOM used" : "Foe SKIPLOOM used",
       "SYNTHESIS!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "WISH") {
+    const view = sceneOnWishView(state);
+    const displayed = sceneOnWishView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "ILLUMISE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "ILLUMISE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged WISH pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent
+      ? wishArt.illumiseBack : wishArt.illumiseFront;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(
+        battleBg.palette,
+        { r: 0, g: 0, b: 0 },
+        displayed.backgroundBlackCoeff,
+      ),
+    );
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
+      view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+    );
+    const attackerIdle = view.attacker.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.attacker.species)
+      : null;
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x + (attackerIdle?.x2 ?? 0),
+      view.attacker.geometry.spriteCorner.y + (attackerIdle?.y2 ?? 0),
+    );
+    for (const sprite of displayed.sprites
+      .filter((candidate) => !candidate.invisible)
+      .slice()
+      .sort((left, right) => right.oamSlot - left.oamSlot)) {
+      if (sprite.kind === "grantingStar") {
+        drawSpriteSheet(
+          fb,
+          {
+            columns: 4,
+            rows: 4,
+            tiles: wishArt.sparkle2.tileset.tiles.slice(
+              sprite.frame * 16,
+              sprite.frame * 16 + 16,
+            ),
+          },
+          wishArt.sparkle2.palette,
+          sprite.x - 16,
+          sprite.y - 16,
+        );
+      } else if (sprite.kind === "wishStar") {
+        drawSpriteSheet(
+          fb,
+          {
+            columns: 2,
+            rows: 2,
+            tiles: wishArt.goldStars.tileset.tiles.slice(0, 4),
+          },
+          wishArt.goldStars.palette,
+          sprite.x - 8,
+          sprite.y - 8,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          {
+            columns: 1,
+            rows: 1,
+            tiles: [wishArt.goldStars.tileset.tiles[sprite.frame]!],
+          },
+          wishArt.goldStars.palette,
+          sprite.x - 4,
+          sprite.y - 4,
+        );
+      }
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "ILLUMISE";
+    const playerSpecies = playerToOpponent ? "ILLUMISE" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "ILLUMISE used" : "Foe ILLUMISE used",
+      "WISH!",
       99,
     );
     return;

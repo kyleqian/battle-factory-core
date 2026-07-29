@@ -1,0 +1,57 @@
+{
+  "schema": "wish-portable-evidence/v1",
+  "orientation": "player-back Illumise -> opponent-front Onix",
+  "move": "WISH",
+  "scenario": "tools/battle-lab/mechanic-wish-player-illumise-opponent-onix.json",
+  "probe": "tools/compare/wishProbe.py",
+  "appStage": {"presentationAge": 0},
+  "attacker": {
+    "species": "ILLUMISE",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": {"x": 40, "y": 54},
+      "animationCenter": {"x": 72, "y": 94},
+      "battlePositionCenter": {"x": 72, "y": 80}
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": {"x": 144, "y": 10},
+      "animationCenter": {"x": 176, "y": 42},
+      "battlePositionCenter": {"x": 176, "y": 40}
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 158, "playerMaxHp": 158,
+    "opponentHp": 117, "opponentMaxHp": 117,
+    "playerGender": "female", "opponentGender": "male"
+  },
+  "twinkles": [
+    {"tileOffset":4,"yOffset":-4},{"tileOffset":5,"yOffset":2},
+    {"tileOffset":5,"yOffset":1},{"tileOffset":5,"yOffset":-4},
+    {"tileOffset":5,"yOffset":-6},{"tileOffset":5,"yOffset":3},
+    {"tileOffset":5,"yOffset":0},{"tileOffset":5,"yOffset":2},
+    {"tileOffset":5,"yOffset":-5},{"tileOffset":5,"yOffset":-5},
+    {"tileOffset":5,"yOffset":1},{"tileOffset":5,"yOffset":3},
+    {"tileOffset":5,"yOffset":-4},{"tileOffset":5,"yOffset":1},
+    {"tileOffset":5,"yOffset":1},{"tileOffset":4,"yOffset":2},
+    {"tileOffset":5,"yOffset":0},{"tileOffset":5,"yOffset":-4},
+    {"tileOffset":5,"yOffset":1},{"tileOffset":5,"yOffset":-6},
+    {"tileOffset":5,"yOffset":0}
+  ],
+  "sourceWindow": {"startFrame":65,"endFrame":335,"frameCount":271},
+  "evidenceSha256": "9bd713db92f51208dba4faea9916549981545a864fd50bb7761b13ae00e7077b",
+  "rawRgbSha256": "2f82ec073d7f7e52b5a513733b991ef792b374d72c9b40c535f1e42438b86488",
+  "lifecycleCounts": {
+    "gWishStarSpriteTemplate":1,
+    "gMiniTwinklingStarSpriteTemplate":21,
+    "gGrantingStarsSpriteTemplate":2
+  },
+  "topology": {
+    "tasks":["Task_LoopAndPlaySE","Task_PanFromInitialToTarget"],
+    "templates":["gGrantingStarsSpriteTemplate","gMiniTwinklingStarSpriteTemplate","gMultiuseSpriteTemplate","gSimplePaletteBlendSpriteTemplate","gSpriteTemplate_EnemyShadow","gWishStarSpriteTemplate","sHealthbarSpriteTemplates","sHealthboxOpponentSpriteTemplates","sHealthboxPlayerSpriteTemplates"],
+    "callbacks":["AnimMiniTwinklingStar_Step","AnimSimplePaletteBlend_Step","AnimWishStar_Step","DestroyAnimSprite","SpriteCB_HealthBar","SpriteCB_HealthBoxOther","SpriteCB_SetInvisible","SpriteCallbackDummy","TranslateSpriteLinearFixedPoint"]
+  }
+}

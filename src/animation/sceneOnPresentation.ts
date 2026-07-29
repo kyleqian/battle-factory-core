@@ -206,6 +206,11 @@ import {
   type SynthesisSprite,
 } from "./synthesis.ts";
 import {
+  wishAtAge,
+  type WishState,
+  type WishTwinkleVariant,
+} from "./wish.ts";
+import {
   milkDrinkEffectAtAge,
   type MilkDrinkEffectSprite,
 } from "./milkDrink.ts";
@@ -500,6 +505,7 @@ export interface SceneOnPresentationBattler {
     | "MINUN"
     | "FLAAFFY"
     | "VOLBEAT"
+    | "ILLUMISE"
     | "TOGETIC"
     | "MACHOKE"
     | "TAILLOW"
@@ -964,6 +970,15 @@ export interface SceneOnSynthesisConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnWishConfig {
+  readonly move: "WISH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Presentation-only Random2 results for the 21 source mini stars. */
+  readonly twinkles: readonly WishTwinkleVariant[];
 }
 
 export interface SceneOnMilkDrinkConfig {
@@ -1489,6 +1504,7 @@ export type SceneOnMoveConfig =
   | SceneOnAbsorbConfig
   | SceneOnReflectConfig
   | SceneOnSynthesisConfig
+  | SceneOnWishConfig
   | SceneOnMilkDrinkConfig
   | SceneOnSupersonicConfig
   | SceneOnWaterGunConfig
@@ -2235,6 +2251,12 @@ export interface SceneOnSynthesisView {
   readonly sprites: readonly SynthesisSprite[];
 }
 
+export interface SceneOnWishView extends WishState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnMilkDrinkView {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -2828,6 +2850,26 @@ export function sceneOnSynthesisView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age` spans the complete Move_WISH script body through cleanup. */
+export function sceneOnWishView(
+  state: SceneOnMovePresentationState,
+): SceneOnWishView {
+  if (state.config.move !== "WISH") {
+    throw new Error(`expected WISH presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...wishAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.twinkles,
     ),
   };
 }
