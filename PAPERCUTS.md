@@ -465,3 +465,19 @@ Per entry:
   brief ("failures beyond commit X are not yours"), or hold side launches
   until the main step lands; a launcher `--base <ref>` option would fix it
   mechanically.
+
+## Concurrent per-lane full-suite/build runs starve host memory (2026-07-29)
+
+- **What:** two lanes running `npm test`/`npm run build` simultaneously
+  (main Slice-3 worker + side battle-pic Terra worker, each ~500-file
+  vitest suites) drove host memory pressure: one signal-143 kill/retry in
+  the main lane and a side worker that could not complete its full-suite
+  validation inside its cap at all (honestly reported "not claiming it
+  passed"; supervisor reran it green post-contention).
+- **Hits:** 1 (both lanes of the same round, 2026-07-29 ~13:40).
+- **Cost each:** ~10 min (main retry) + ~20 min (side validation stall).
+- **Workaround:** stagger full-suite runs — workers run focused suites
+  during the step and the full suite once near the end; supervisors avoid
+  launching two workers whose acceptance both requires a full-suite run at
+  the same wall-clock window, and treat a contended full-suite claim as
+  unverified until rerun serially.

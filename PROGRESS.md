@@ -35,6 +35,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   issue, census, roadmap, animation, PP/HP/RNG, or capture list changed.
   PAPERCUT: concurrent lane builds caused host memory pressure and one
   signal-143 retry, ~10 min.
+- **Supervisor fold (post-step):** side-lane battle-pic extraction merged
+  (`3e0737f3`): both battle-pic catalogs now cover all **376** Factory
+  species (374 Level-50 + 2 Open-only; back 3.5 MB, front 6.8 MB), existing
+  11 front/12 back entries byte-identical, deterministic double-run proven,
+  generated-data coverage test added. Slice 6's arbitrary-field asset
+  dependency is banked; no consumer wiring yet. The Terra worker could not
+  finish `npm test` under cross-lane contention and honestly said so —
+  supervisor ran the full suite in the worktree (**516/5206** green) before
+  merging; union after merge **516 files / 5207 tests + 1 skip**, build,
+  `git diff --check` clean. Cross-lane full-suite contention papercut
+  (both lanes, ~30 min combined) bumped in PAPERCUTS.md.
 
 ---
 
