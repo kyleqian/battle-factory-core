@@ -88,11 +88,11 @@ const MOVES_BY_NAME = new Map(
 const ITEMS_BY_TABLE_ID = new Map(
   (frontierHeldItemsData as { entries: HeldItemRow[] }).entries.map((row) => [row.itemTableId, row]),
 );
-const ABILITY_ID_BY_NAME = new Map(
+const abilityIdsByName = new Map(
   (abilityItemHooksData as { universes: { abilities: SymbolIdRow[] } }).universes.abilities
     .map((row) => [row.name, row.id]),
 );
-const HOLD_EFFECT_ID_BY_NAME = new Map(
+const holdEffectIdsByName = new Map(
   (abilityItemHooksData as { universes: { holdEffects: SymbolIdRow[] } }).universes.holdEffects
     .map((row) => [row.name, row.id]),
 );
@@ -214,14 +214,18 @@ export function createFactoryCorpusPartyMember(
   ];
   const item = ITEMS_BY_TABLE_ID.get(set.itemTableId);
   if (item === undefined) throw new Error(`Frontier set ${set.index} has unknown item table id ${set.itemTableId}`);
-  const holdEffect = HOLD_EFFECT_ID_BY_NAME.get(item.holdEffect);
+  const holdEffect = holdEffectIdsByName.get(item.holdEffect);
   if (holdEffect === undefined) throw new Error(`Frontier item ${item.item} has unknown hold effect ${item.holdEffect}`);
 
   // CreateBoxMon only uses personality bit 0 for a genuine second ability
   // (pokemon.c:2296-2300). Single-ability species always serialize slot 0.
-  const abilitySlot: 0 | 1 = species.abilities[1] === "ABILITY_NONE" ? 0 : instance.abilitySlot;
+  const secondAbility = abilityIdsByName.get(species.abilities[1]!);
+  if (secondAbility === undefined) {
+    throw new Error(`Species ${species.name} has unknown second ability ${species.abilities[1]}`);
+  }
+  const abilitySlot: 0 | 1 = secondAbility === 0 ? 0 : instance.abilitySlot;
   const abilityName = species.abilities[abilitySlot]!;
-  const ability = ABILITY_ID_BY_NAME.get(abilityName);
+  const ability = abilityIdsByName.get(abilityName);
   if (ability === undefined) throw new Error(`Species ${species.name} has unknown ability ${abilityName}`);
 
   const growthRate = EXP_DATA.speciesGrowthRate[species.name];
