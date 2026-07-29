@@ -15,8 +15,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 665 — [BOUNDED MAIN WORKER 2026-07-28 ~22:35] ON_DAMAGE contact-ability family implemented
 
-- **State:** implementation focused suite green at **68/68** and production
-  build. Census regenerated twice byte-identically: abilities exactly
+- **State:** tree green at **452 files / 4877 tests**, production build, and
+  `git diff --check`. Census regenerated twice byte-identically: abilities exactly
   **64/70 (weighted 1056/1103)**, hold effects **42/42 (850/850)**,
   `ABILITYEFFECT_ON_DAMAGE` **8/8**; all 15 validations pass.
 - **Did:** exposed source contact bit 0 through the shared move-flags resolver;
@@ -26,15 +26,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   state 3 with exact gates, RNG, mutations, and callback transfers. Registered
   `seteffectsecondary`; factored the pre-existing gender calculation into one
   shared source helper. The state-3 barrier retired **7→6** for the module.
-- **Next:** run the full Tier-1 suite/build, record final test totals, and
-  commit the verified ledger state.
+- **Next:** supervisor selects the next bounded ability/item parity row; the
+  previously noted whole-battle turn-1 `gRandomTurnNumber` writes remain a
+  separate integration follow-up.
 - **Notes:** full-script tests run every callback shape through its `return`
   and `BattleScript_MoveEnd`'s own `END`; Pound→Static pins the proc as draw 5
   after accuracy/crit/damage/effect chance, with success and failure both +1.
   Effect Spore pins zero-retry and sleep-duration draws; status routing pins
   affects-user, Shield Dust/Safeguard bypass, and ordinary eligibility. No
   census generator, scout/probe/battle-lab fixture, issue, or oracle asset
-  changed. PAPERCUT: none.
+  changed. Commits: prerequisite `030441c0`, implementation `193fd961`,
+  final integration/census fix follows this entry. PAPERCUT: none.
 
 ---
 

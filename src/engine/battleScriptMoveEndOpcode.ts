@@ -306,7 +306,18 @@ function executeOnDamageAbilities(
   const attackerState = rules.battlers[attacker];
   const targetState = rules.battlers[target];
   const ability = targetState.ability;
-  const baseRules = Object.freeze({ ...rules, lastUsedAbility: ability });
+  const isOnDamageAbility = ability === ABILITY_COLOR_CHANGE
+    || ability === ABILITY_ROUGH_SKIN
+    || ability === ABILITY_EFFECT_SPORE
+    || ability === ABILITY_POISON_POINT
+    || ability === ABILITY_STATIC
+    || ability === ABILITY_FLAME_BODY
+    || ability === ABILITY_CUTE_CHARM;
+  // Preserve the existing moveend seam's scope for unrelated abilities; the
+  // seven implemented cases all expose their actual gLastUsedAbility value.
+  const baseRules = isOnDamageAbility
+    ? Object.freeze({ ...rules, lastUsedAbility: ability })
+    : rules;
   const targetTurnDamaged =
     targetState.specialStatus.physicalDmg !== 0 || targetState.specialStatus.specialDmg !== 0;
   if (
