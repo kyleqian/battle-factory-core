@@ -1,5 +1,47 @@
 ---
 
+## 672 — [BOUNDED MAIN WORKER 2026-07-29 ~00:57] production Factory AI turn driver landed
+
+- **State:** Gate-5 plan rung 6 is green at **459 files / 4920 tests** plus
+  production build, `git diff --check`, Battle Scene OFF oracle info, and
+  focused live-AI/whole-battle/policy/ratchet coverage **25/25**. Executable
+  (**214/214 effects, 355/355 moves**) and ability/item (**69/69 abilities,
+  42/42 hold effects**) censuses regenerate byte-identically.
+- **Did:** added the live rules→mask-7 view adapter (active stats/types/stages,
+  status/screens/weather, generated ability names, current moves and Factory
+  streak/opponent policy) plus persistent source-shaped used-move/known-
+  ability/known-item history. A focused test exactly reproduces the banked
+  Alakazam-vs-Marowak decision and **11-draw** ledger from both staged and
+  live shapes. The fresh 3v3 loop now sends all **12 trainer commands**
+  through `submitFactoryAiDecision`; every choice is live-request-legal and
+  all policy/hit/boundary draws share the exact **188-call** cursor through a
+  real player-win terminal. Commits `7d93cf8c`, `ad888ce7`.
+- **Supervisor fold (same round, side merge):** rung 9 landed (`a9f22553`
+  + `833b61ee`) — `factoryCommentary.ts` ports favorite-type and
+  battle-style rules (every branch incl. TYPE_MYSTERY's tally-only
+  exclusion and no-singular-style; 35 focused tests; two rung-8 seeds
+  produce different commentary) with an OFF canonical scouting compare
+  **164/164 exact**. Wiring point identified (postwin.ts:100/:300,
+  core.ts:1806), deferred to rung 11/14; the two-party pre-scout fixture
+  (`opponentSetIds`) is the named follow-up. Union green **460 files /
+  4955 tests**, census no-op.
+- **Next:** rung 11 (controller owns one real generated battle lifecycle,
+  main) + the equal-speed tie receipt via the narrower instrument (side)
+  launch this round; then rung 12 (seven battles). Rung 13 remains the
+  Factory AI switch/item/history breadth closure.
+- **Notes:** source `ChooseMoveOrAction_Singles` move recording and switch/
+  faint clears are modeled (`battle_ai_script_commands.c:396-403,618-660`;
+  `battle_main.c:3259-3261,3352-3354`). Ability/item record APIs are durable;
+  this carrier executes no player-target record site. Rung 6 uses a named
+  `factory-ai-switch-precheck-unimplemented` constraint because source
+  `AI_TrySwitchOrUseItem` calls `ShouldSwitch` first
+  (`battle_ai_switch_items.c:528-545`); trainer items are source-unreachable
+  in Frontier battles (`battle_ai_script_commands.c:292-306`). No barrier/
+  ratchet, census artifact, round/controller, generation, doc, issue,
+  presentation, or canonical-recording file changed. PAPERCUT: none.
+
+---
+
 ## 671 — [BOUNDED MAIN WORKER 2026-07-29 ~00:33] fresh 3v3 whole battle reaches real terminal
 
 - **State:** Gate-5 plan rung 4 is green at **457 files / 4915 tests** plus

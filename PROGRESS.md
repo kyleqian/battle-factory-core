@@ -13,6 +13,43 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 675 — [BOUNDED MAIN WORKER 2026-07-29 ~01:53] multi-candidate trainer replacement retired; seed 17 wins seven
+
+- **State:** committed `30d9a3e5`; tree green at **461 files / 4960 tests**,
+  production build, `git diff --check`, focused selector/opcode/orchestrator/
+  ratchet coverage **25/25**, and Battle Scene OFF oracle info. The ability/
+  item census regenerates byte-identically at **69/69 abilities, 42/42 hold
+  effects**.
+- **Did:** verified the scout's `GetMostSuitableMonToSwitchInto` citations
+  against pinned `battle_ai_switch_items.c:629-789` and ported the complete
+  Factory-singles faint selector. Pass 1 retains ascending scans, strict ties,
+  and the source's highest-type-damage quirk. Pass 2 retains global
+  `gCurrentMove`/fainted-active `AI_CalcDmg`, candidate-only `TypeCalc`,
+  Levitate/Foresight behavior, reset dynamic/crit/damage scratch,
+  Charge/Helping Hand modifiers, and the retail non-`BUGFIX` u8 `bestDmg`
+  wrap. Singles selection draws exactly **0 RNG**.
+- **Acceptance:** staged tests pin a competitive choice, exact tie, u8-wrap
+  reversal, and sole-legal regression. Seed **17** is now a permanent real
+  rung-12 carrier: seven generated wins, **14** trainer replacements, seven
+  battle segments, and one exact **1787-call** facility cursor; its first
+  replacement resumes at the next player boundary with
+  **2→16 calls / 312997333→713294723**.
+- **Sweep / Next:** seeds **4–30** now pass battle 0/1/2 at **14/9/7**;
+  **1/27** (seed 17) completes seven wins. Every former multi-choice
+  replacement stop is gone. Updated dominant blocker is multi-hit/Double Hit/
+  Twineedle resumption (**6** seeds), then Earthquake
+  `DoHitAllWithUndergroundBonus` (**5**), confusion self-hit context (**4**),
+  forced-switch end-turn resumption and paralysis `Cmd_various` (**3** each);
+  five seeds expose narrower existing budget/moveend/Trace/attack-canceler
+  stops. Chase those named secondary blockers only in later steps.
+- **Notes:** retired exact barrier
+  `GetMostSuitableMonToSwitchInto's pass-2 AI_CalcDmg raw-damage fallback`
+  at `B_SCR_OP_OPENPARTYSCREEN`; its module ratchet moves exactly **2→1**.
+  No other ratchet, census artifact, canonical recording, issue, scout/probe,
+  presentation, or commentary file changed. PAPERCUT: none.
+
+---
+
 ## 674 — [BOUNDED MAIN WORKER 2026-07-29 ~01:35] tie retired; seven-battle rung hit honest stop
 
 - **State:** assigned rung (a) is committed at `bd36b615` and green at **461
@@ -101,45 +138,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   records before healing (no controller rule moved). No ratchet/barrier,
   census artifact, issue, scout/probe/battle-lab, commentary/presentation, or
   canonical-recording file changed. PAPERCUT: none.
-
----
-
-## 672 — [BOUNDED MAIN WORKER 2026-07-29 ~00:57] production Factory AI turn driver landed
-
-- **State:** Gate-5 plan rung 6 is green at **459 files / 4920 tests** plus
-  production build, `git diff --check`, Battle Scene OFF oracle info, and
-  focused live-AI/whole-battle/policy/ratchet coverage **25/25**. Executable
-  (**214/214 effects, 355/355 moves**) and ability/item (**69/69 abilities,
-  42/42 hold effects**) censuses regenerate byte-identically.
-- **Did:** added the live rules→mask-7 view adapter (active stats/types/stages,
-  status/screens/weather, generated ability names, current moves and Factory
-  streak/opponent policy) plus persistent source-shaped used-move/known-
-  ability/known-item history. A focused test exactly reproduces the banked
-  Alakazam-vs-Marowak decision and **11-draw** ledger from both staged and
-  live shapes. The fresh 3v3 loop now sends all **12 trainer commands**
-  through `submitFactoryAiDecision`; every choice is live-request-legal and
-  all policy/hit/boundary draws share the exact **188-call** cursor through a
-  real player-win terminal. Commits `7d93cf8c`, `ad888ce7`.
-- **Supervisor fold (same round, side merge):** rung 9 landed (`a9f22553`
-  + `833b61ee`) — `factoryCommentary.ts` ports favorite-type and
-  battle-style rules (every branch incl. TYPE_MYSTERY's tally-only
-  exclusion and no-singular-style; 35 focused tests; two rung-8 seeds
-  produce different commentary) with an OFF canonical scouting compare
-  **164/164 exact**. Wiring point identified (postwin.ts:100/:300,
-  core.ts:1806), deferred to rung 11/14; the two-party pre-scout fixture
-  (`opponentSetIds`) is the named follow-up. Union green **460 files /
-  4955 tests**, census no-op.
-- **Next:** rung 11 (controller owns one real generated battle lifecycle,
-  main) + the equal-speed tie receipt via the narrower instrument (side)
-  launch this round; then rung 12 (seven battles). Rung 13 remains the
-  Factory AI switch/item/history breadth closure.
-- **Notes:** source `ChooseMoveOrAction_Singles` move recording and switch/
-  faint clears are modeled (`battle_ai_script_commands.c:396-403,618-660`;
-  `battle_main.c:3259-3261,3352-3354`). Ability/item record APIs are durable;
-  this carrier executes no player-target record site. Rung 6 uses a named
-  `factory-ai-switch-precheck-unimplemented` constraint because source
-  `AI_TrySwitchOrUseItem` calls `ShouldSwitch` first
-  (`battle_ai_switch_items.c:528-545`); trainer items are source-unreachable
-  in Frontier battles (`battle_ai_script_commands.c:292-306`). No barrier/
-  ratchet, census artifact, round/controller, generation, doc, issue,
-  presentation, or canonical-recording file changed. PAPERCUT: none.
