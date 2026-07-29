@@ -1376,6 +1376,9 @@ export function calculateBattleScriptBaseDamageForCurrentMove(
     moveType,
     isCriticalHit: rulesContext.critMultiplier === 2,
     moveEffect: moveRow.effect,
+    weather: rulesContext.weather,
+    weatherHasEffect: weatherHasEffectForBaseDamage(rulesContext),
+    currentMove: rulesContext.currentMove,
   });
 }
 
@@ -2507,6 +2510,21 @@ function weatherHasEffect(rulesContext: BattleScriptRulesContext): boolean {
     if (candidate.hp !== 0 && (candidate.ability === ABILITY_CLOUD_NINE || candidate.ability === ABILITY_AIR_LOCK)) {
       return false;
     }
+  }
+  return true;
+}
+
+/**
+ * WEATHER_HAS_EFFECT2 (include/battle_util.h:48) deliberately uses
+ * ABILITYEFFECT_FIELD_SPORT rather than ABILITYEFFECT_CHECK_ON_FIELD.
+ * battle_util.c:3111-3138's default ability scan checks every gBattleMons
+ * slot below gBattlersCount without the latter case's hp != 0 predicate.
+ */
+function weatherHasEffectForBaseDamage(rulesContext: BattleScriptRulesContext): boolean {
+  const { battlersCount } = rulesContext.battleTopology;
+  for (let i = 0; i < battlersCount; i += 1) {
+    const ability = rulesContext.battlers[i as BattleScriptBattlerId].ability;
+    if (ability === ABILITY_CLOUD_NINE || ability === ABILITY_AIR_LOCK) return false;
   }
   return true;
 }

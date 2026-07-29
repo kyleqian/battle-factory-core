@@ -17,7 +17,10 @@ import {
   stepBattleScriptMachine,
   type BattleScriptMachineState,
 } from "../src/engine/battleScriptMachine.ts";
-import { SET_MOVE_EFFECT_SUPPORTED_BYTES } from "../src/engine/battleScriptHitChainOpcode.ts";
+import {
+  SET_MOVE_EFFECT_SUPPORTED_BYTES,
+  calculateBattleScriptBaseDamageForCurrentMove,
+} from "../src/engine/battleScriptHitChainOpcode.ts";
 
 const program = loadBattleScriptProgram();
 const TACKLE = 33; // EFFECT_HIT, power 35, accuracy 95, TYPE_NORMAL
@@ -31,6 +34,11 @@ const EARTHQUAKE = 89; // EFFECT_EARTHQUAKE, power 100, accuracy 100, MOVE_TARGE
 const ABILITY_PRESSURE = 46;
 const COUNTER = 68; // EFFECT_COUNTER, power 1, accuracy 100, TYPE_FIGHTING
 const MIRROR_COAT = 243; // EFFECT_MIRROR_COAT, power 1, accuracy 100, TYPE_PSYCHIC
+const FIRE_PUNCH = 7;
+const WATER_GUN = 55;
+const WEATHER_BALL = 311;
+const ABILITY_CLOUD_NINE = 13;
+const ABILITY_AIR_LOCK = 77;
 
 function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number } = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -724,9 +732,65 @@ describe("production critcalc (Cmd_critcalc) dispatch", () => {
 });
 
 describe("production damagecalc (Cmd_damagecalc) dispatch", () => {
+  const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
+  const B_WEATHER_SUN = (1 << 5) | (1 << 6);
+
   it("registers B_SCR_OP_DAMAGECALC", () => {
     const instruction = program.instructions.find((i) => i.opcodeName === "B_SCR_OP_DAMAGECALC")!;
     expect(instruction).toBeDefined();
+  });
+
+  it.each([
+    ["Fire Punch in rain", FIRE_PUNCH, B_WEATHER_RAIN, 18],
+    ["Fire Punch in sun", FIRE_PUNCH, B_WEATHER_SUN, 51],
+    ["Water Gun in rain", WATER_GUN, B_WEATHER_RAIN, 27],
+    ["Water Gun in sun", WATER_GUN, B_WEATHER_SUN, 10],
+  ])("%s carries gBattleWeather into CalculateBaseDamage before +2", (_label, move, weather, expected) => {
+    const rc = context(
+      0,
+      { spAttack: 100, moves: [move, 0, 0, 0] },
+      { currentMove: move, weather },
+      { spDefense: 100 },
+    );
+    expect(calculateBattleScriptBaseDamageForCurrentMove(rc)).toBe(expected);
+  });
+
+  it.each([
+    ["Cloud Nine", ABILITY_CLOUD_NINE, FIRE_PUNCH, B_WEATHER_RAIN, 35],
+    ["Cloud Nine", ABILITY_CLOUD_NINE, FIRE_PUNCH, B_WEATHER_SUN, 35],
+    ["Cloud Nine", ABILITY_CLOUD_NINE, WATER_GUN, B_WEATHER_RAIN, 19],
+    ["Cloud Nine", ABILITY_CLOUD_NINE, WATER_GUN, B_WEATHER_SUN, 19],
+    ["Air Lock", ABILITY_AIR_LOCK, FIRE_PUNCH, B_WEATHER_RAIN, 35],
+    ["Air Lock", ABILITY_AIR_LOCK, FIRE_PUNCH, B_WEATHER_SUN, 35],
+    ["Air Lock", ABILITY_AIR_LOCK, WATER_GUN, B_WEATHER_RAIN, 19],
+    ["Air Lock", ABILITY_AIR_LOCK, WATER_GUN, B_WEATHER_SUN, 19],
+  ])("%s suppresses weather damage for move %i under weather %#i", (_abilityName, ability, move, weather, expected) => {
+    const rc = context(
+      0,
+      { spAttack: 100, moves: [move, 0, 0, 0] },
+      { currentMove: move, weather },
+      { spDefense: 100, ability },
+    );
+    expect(calculateBattleScriptBaseDamageForCurrentMove(rc)).toBe(expected);
+  });
+
+  it("uses Weather Ball's resolved Fire type after Water Sport power halving, then applies sun damage before +2", () => {
+    const rc = context(
+      0,
+      {
+        spAttack: 100,
+        moves: [WEATHER_BALL, 0, 0, 0],
+        status3: 1 << 17,
+      },
+      {
+        currentMove: WEATHER_BALL,
+        dynamicMoveType: 0x80 | 10,
+        weather: B_WEATHER_SUN,
+      },
+      { spDefense: 100 },
+    );
+    // Power 50 -> Water Sport 25; raw 11 -> sun floor(11*1.5)=16 -> +2.
+    expect(calculateBattleScriptBaseDamageForCurrentMove(rc)).toBe(18);
   });
 
   it("a fresh crit (roll 3760) doubles the crit scenario's base damage (39 Atk -> 104 Def, Tackle: 7 -> 14)", () => {

@@ -184,6 +184,77 @@ describe("calculateBaseDamage - EFFECT_EXPLOSION defense halving (pokemon.c:3228
   });
 });
 
+describe("calculateBaseDamage - WEATHER_HAS_EFFECT2 damage block (pokemon.c:3331-3363)", () => {
+  const neutralSpecialAttacker = {
+    ...GROVYLE,
+    spAttack: 100,
+  };
+  const neutralSpecialDefender = {
+    ...ONIX,
+    spDefense: 100,
+  };
+  const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
+  const B_WEATHER_SANDSTORM = (1 << 3) | (1 << 4);
+  const B_WEATHER_SUN = (1 << 5) | (1 << 6);
+  const B_WEATHER_HAIL = 1 << 7;
+
+  function weatherDamage(moveType: "TYPE_FIRE" | "TYPE_WATER", weather: number, weatherHasEffect = true) {
+    return calculateBaseDamage({
+      attacker: neutralSpecialAttacker,
+      defender: neutralSpecialDefender,
+      movePower: 53,
+      moveType,
+      isCriticalHit: false,
+      weather,
+      weatherHasEffect,
+    });
+  }
+
+  it.each([
+    ["Fire in rain", "TYPE_FIRE", B_WEATHER_RAIN, 13],
+    ["Fire in sun", "TYPE_FIRE", B_WEATHER_SUN, 36],
+    ["Water in rain", "TYPE_WATER", B_WEATHER_RAIN, 36],
+    ["Water in sun", "TYPE_WATER", B_WEATHER_SUN, 13],
+  ] as const)("%s applies the modifier to raw 23 before the unconditional +2", (_label, moveType, weather, expected) => {
+    expect(weatherDamage(moveType, weather)).toBe(expected);
+  });
+
+  it.each([
+    ["Cloud Nine: Fire in rain", "TYPE_FIRE", B_WEATHER_RAIN],
+    ["Cloud Nine: Fire in sun", "TYPE_FIRE", B_WEATHER_SUN],
+    ["Cloud Nine: Water in rain", "TYPE_WATER", B_WEATHER_RAIN],
+    ["Cloud Nine: Water in sun", "TYPE_WATER", B_WEATHER_SUN],
+    ["Air Lock: Fire in rain", "TYPE_FIRE", B_WEATHER_RAIN],
+    ["Air Lock: Fire in sun", "TYPE_FIRE", B_WEATHER_SUN],
+    ["Air Lock: Water in rain", "TYPE_WATER", B_WEATHER_RAIN],
+    ["Air Lock: Water in sun", "TYPE_WATER", B_WEATHER_SUN],
+  ] as const)("%s leaves the clear-weather result unchanged when the caller suppresses weather", (_label, moveType, weather) => {
+    expect(weatherDamage(moveType, weather, false)).toBe(25);
+  });
+
+  it("keeps the clear-weather truncation and +2 result unchanged", () => {
+    expect(weatherDamage("TYPE_FIRE", 0)).toBe(25);
+    expect(weatherDamage("TYPE_WATER", 0)).toBe(25);
+  });
+
+  it.each([
+    ["rain", B_WEATHER_RAIN, 13],
+    ["sandstorm", B_WEATHER_SANDSTORM, 13],
+    ["hail", B_WEATHER_HAIL, 13],
+    ["sun", B_WEATHER_SUN, 25],
+  ])("Solar Beam under %s follows the move-id-specific non-sun weakening", (_label, weather, expected) => {
+    expect(calculateBaseDamage({
+      attacker: neutralSpecialAttacker,
+      defender: neutralSpecialDefender,
+      movePower: 53,
+      moveType: "TYPE_GRASS",
+      isCriticalHit: false,
+      currentMove: 76,
+      weather,
+    })).toBe(expected);
+  });
+});
+
 describe("calculateBaseDamage - burn and turn 17's RAM-pinned FAINT_ATTACK roll", () => {
   it("halves physical damage before the unconditional +2, unless the attacker has GUTS", () => {
     const input = {
