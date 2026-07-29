@@ -494,3 +494,24 @@ Per entry:
 - **Workaround:** run compares serially within a step; treat
   `out/latest` as valid only immediately after its own run. A per-run
   output dir (timestamp/PID suffix) would fix it mechanically.
+
+## `bin/oracle lab` floods the session when only an artifact path is needed
+
+- **What:** the default `bin/oracle lab` output prints the full run detail
+  even when the caller only needs the output screenshot/manifest path,
+  drowning a worker transcript.
+- **Hits:** 1 (2026-07-29, Slice 6 Part B worker).
+- **Cost each:** ~1 min.
+- **Workaround:** redirect stdout and read the manifest from the `-o` dir;
+  a `--quiet`/path-only flag would be the real fix (harness-side).
+
+## mGBA probe wrapper leaves multi-MB logs beside committed receipts
+
+- **What:** `tools/run-mgba-probe.py` writes `<output>.log` next to the
+  probe output; when receipts are banked under `tools/probe/receipts/`,
+  ~2 MB untracked logs pile up beside them and need manual relocation
+  before committing.
+- **Hits:** 1 (2026-07-29, absorption-reveal worker).
+- **Cost each:** ~1 min.
+- **Workaround:** point probe outputs at scratch space and copy only the
+  JSON into the repo; or teach the wrapper a `--log-dir`.
