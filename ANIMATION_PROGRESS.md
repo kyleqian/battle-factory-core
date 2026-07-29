@@ -1,5 +1,36 @@
 # Animation coverage
 
+## MOVE_SWEET_KISS promoted exact; RED_HEART track bounded (2026-07-29)
+
+**Verdict:** `MOVE_SWEET_KISS` is exact. The lowest suitable Level-50
+Factory carrier is challenge-0 set **123** `FRONTIER_MON_LUVDISC` (species
+**325**, Sweet Kiss **186**, Relaxed, SpAttack+HP, Quick Claw). Complete legal
+three-mon Scene-ON parties pass the whole body through first inactive cleanup
+at **159/159** source/component, typed-seam, hardware, audio, raw-RGB, and
+shared-framebuffer frames in both orientations, twice fresh. Player-back
+frames **74–232** reproduce evidence/raw digests
+`5117db12992b65aadfc65a448ea2260dfd5848be19fc3d6e2df733d90604af21` /
+`61870ad0f56694de71f2d492c51fbe208216ef88b8550eca8a3a17fca8f73f11`;
+opponent-front frames **78–236** reproduce
+`db45d09de25efa0d267f53c0337017c98094b0d174e8b99babfaa7dabf496821` /
+`76f32756df4d9bbdbfee5daf5d5ecf5b72bcdbacc3c4eab909c44cd7a8759876`.
+
+**Model/boundary:** the source-relative reducer and typed seam port RED_HEART
+and ANGEL load/free, `gAngelSpriteTemplate` path/affine/display timing, all
+six parameterized `gRedHeartBurstSpriteTemplate` `AnimParticleBurst`
+lifecycles, target-relative geometry, source sprite ordering, audio, waits,
+and cleanup. Extraction regenerates Luvdisc front/back, RED_HEART, and ANGEL
+assets byte-for-byte. The evidence pins unchanged HP/item state and zero
+presentation-owned confusion; no damage, RNG, status, turn, controller,
+facility, import-boundary, or unsupported-barrier behavior changed.
+
+**Sibling/control:** `MOVE_ATTRACT` remains **unsupported** because its body
+adds a projectile heart, rising hearts, HeartsBackground, SwayMon, blend
+color cycling, and independent cleanup. The existing `MOVE_CHARM`
+magenta-heart control remains exact at **93/93** body plus **4/4** teardown
+frames in both orientations twice fresh. Coverage is **89 exact / 0 partial /
+0 staged / 187 unsupported**.
+
 ## MOVE_SLAM promoted exact; SLAM_HIT track bounded (2026-07-29)
 
 **Verdict:** `MOVE_SLAM` is exact. The lowest suitable Level-50 Factory

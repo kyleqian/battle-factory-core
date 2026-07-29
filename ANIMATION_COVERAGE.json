@@ -2266,6 +2266,35 @@
         "tests/animation/slam.test.ts",
         "tests/animation/slamEvidence.test.ts"
       ]
+    },
+    {
+      "move": "MOVE_SWEET_KISS",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal challenge-0 Level-50 Factory parties stage the lowest suitable carrier set-123 FRONTIER_MON_LUVDISC against ONIX in both Scene-ON orientations; all active choices are constrained to SWEET_KISS",
+        "the complete move-owned source interval through first inactive cleanup passes 159/159 source-component, typed-seam, software/hardware OAM, affine matrix, palette/tag, register, audio, immutable battle-state, raw-RGB, and shared-framebuffer frames 74-232 player-back and 78-236 opponent-front, twice fresh",
+        "the pure source-relative reducer ports RED_HEART and ANGEL load/free, gAngelSpriteTemplate's target-relative path, affine/display timing and terminal drift, three HEAL_BELL cues, all six parameterized gRedHeartBurstSpriteTemplate AnimParticleBurst lifecycles, ATTRACT audio, waits, sprite-order cadence, and cleanup",
+        "source extraction regenerates legal LUVDISC front/back, RED_HEART, and ANGEL art byte-for-byte; the narrow compositor uses source OAM order and the existing exact field primitives without battle clocks, coordinate/RGB fitting, or pixel exceptions",
+        "sweetKissPortable.ts proves both committed receipts twice fresh with stable player evidence/raw digests 5117db12992b65aadfc65a448ea2260dfd5848be19fc3d6e2df733d90604af21 / 61870ad0f56694de71f2d492c51fbe208216ef88b8550eca8a3a17fca8f73f11 and opponent digests db45d09de25efa0d267f53c0337017c98094b0d174e8b99babfaa7dabf496821 / 76f32756df4d9bbdbfee5daf5d5ecf5b72bcdbacc3c4eab909c44cd7a8759876",
+        "the existing MOVE_CHARM magenta-heart compositor control remains exact at 93/93 body plus 4/4 teardown frames in both orientations twice fresh",
+        "MOVE_ATTRACT remains unsupported: its distinct body adds a projectile heart, rising hearts, HeartsBackground, SwayMon, blend color cycling, and independent cleanup; shared RED_HEART art does not promote it"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-sweet-kiss-player-luvdisc-opponent-onix.json",
+        "tools/battle-lab/mechanic-sweet-kiss-opponent-luvdisc-player-onix.json",
+        "tools/compare/fixtures/sweet-kiss-player-luvdisc-opponent-onix.json",
+        "tools/compare/fixtures/sweet-kiss-opponent-luvdisc-player-onix.json",
+        "tools/compare/sweetKissProbe.py",
+        "tools/compare/sweetKissPortable.ts",
+        "tools/compare/sweetKissSourceAudit.ts",
+        "tools/compare/extractSweetKissAssets.ts",
+        "src/animation/assets/sweet-kiss.json",
+        "src/animation/sweetKiss.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/sweetKiss.test.ts",
+        "tests/animation/sweetKissEvidence.test.ts"
+      ]
     }
   ],
   "queue": [
@@ -2273,6 +2302,20 @@
     "MOVE_BIND"
   ],
   "componentTracks": [
+    {
+      "id": "red-heart-sweet-kiss",
+      "components": [
+        "asset:ANIM_TAG_RED_HEART",
+        "sprite:gRedHeartBurstSpriteTemplate",
+        "asset:ANIM_TAG_ANGEL",
+        "sprite:gAngelSpriteTemplate"
+      ],
+      "representatives": [
+        "MOVE_SWEET_KISS",
+        "MOVE_ATTRACT"
+      ],
+      "goal": "MOVE_SWEET_KISS independently proves its complete ANGEL and six-RED_HEART-burst body, three Heal Bell cues, Attract cue, target-relative geometry, OAM/affine/display cadence, tagged resource lifetimes, and cleanup at 159/159 dense source/seam/framebuffer frames in both orientations twice fresh. MOVE_ATTRACT remains unsupported because it adds a projectile heart, rising hearts, HeartsBackground, SwayMon, blend color cycling, and distinct cleanup; RED_HEART reuse does not waive independent move acceptance."
+    },
     {
       "id": "slam-hit-slide-shake",
       "components": [
