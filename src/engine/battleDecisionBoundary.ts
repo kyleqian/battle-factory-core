@@ -599,6 +599,8 @@ export function createBattleState<
   input: Readonly<{
     rules: RulesState;
     rngSeed: number;
+    /** Calls already consumed by a lifecycle initializer before this boundary. */
+    rngCalls?: number;
     request: BattleDecisionRequest;
   }>,
 ): BattleState<RulesState> {
@@ -609,7 +611,7 @@ export function createBattleState<
     rules: input.rules,
     rng: {
       value: integerAt(input.rngSeed, 0, U32_MAX, "Battle RNG seed"),
-      calls: 0,
+      calls: integerAt(input.rngCalls ?? 0, 0, Number.MAX_SAFE_INTEGER, "Battle RNG calls"),
     },
     boundary: {
       kind: "decision-required",

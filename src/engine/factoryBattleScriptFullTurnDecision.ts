@@ -319,7 +319,7 @@ type PendingForcedSwitchScript = Readonly<{
   scheduler: BattleScriptSchedulerState;
 }>;
 
-function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
+export function createFactoryEmptyBattlerState(side: 0 | 1): BattleScriptRulesBattlerState {
   return Object.freeze({
     side,
     ability: 0,
@@ -413,7 +413,7 @@ function activeBattler(
     ]
   );
   return Object.freeze({
-    ...emptyBattler(side),
+    ...createFactoryEmptyBattlerState(side),
     ivs: FACTORY_FIRST_CHALLENGE_IVS,
     ability: config.ability ?? 0,
     abilityNum: (config.abilityNum ?? 0) as 0 | 1,
@@ -520,8 +520,8 @@ function createInitialRules(config: FactoryFullTurnConfig): FactoryFullTurnDecis
     battlers: [
       activeBattler(0, config.player),
       activeBattler(1, config.trainer),
-      emptyBattler(0),
-      emptyBattler(1),
+      createFactoryEmptyBattlerState(0),
+      createFactoryEmptyBattlerState(1),
     ],
     selectorRoles: { attacker: null, target: null, effectBattler: null, fainted: null },
     scriptingBattler: 0,
@@ -569,12 +569,38 @@ export function createFactoryFullTurnBattleState(
   config: FactoryFullTurnConfig,
 ): BattleState<FactoryFullTurnDecisionRules> {
   const rules = createInitialRules(config);
+  return createFactoryFullTurnBattleStateFromRulesContext({
+    requestId: config.requestId,
+    rngSeed: config.rngSeed,
+    rulesContext: rules.rulesContext,
+  });
+}
+
+/**
+ * Shared durable full-turn construction seam. Staged fixtures and the fresh
+ * lifecycle both publish the same reducer-owned rules/request shape here.
+ */
+export function createFactoryFullTurnBattleStateFromRulesContext(
+  input: Readonly<{
+    requestId: number;
+    rngSeed: number;
+    rngCalls?: number;
+    rulesContext: BattleScriptRulesContext;
+  }>,
+): BattleState<FactoryFullTurnDecisionRules> {
+  const rules = Object.freeze({
+    adapter: ADAPTER,
+    phase: "awaiting-player-command",
+    pendingPlayerDecision: null,
+    rulesContext: input.rulesContext,
+  }) as FactoryFullTurnDecisionRules;
   return createBattleState({
     rules,
-    rngSeed: config.rngSeed,
+    rngSeed: input.rngSeed,
+    rngCalls: input.rngCalls,
     request: {
       kind: "command",
-      requestId: config.requestId,
+      requestId: input.requestId,
       side: "player",
       battler: 0,
       legalDecisions: legalPlayerDecisions(rules.rulesContext),
