@@ -1,5 +1,33 @@
 ---
 
+## 653 — [BOUNDED MAIN WORKER 2026-07-28 ~18:51] Switch-in entry hooks registered and follow-up pins closed
+
+- **State:** implementation commits `2ec8ef8a` / `38da44ab` (+ final Forecast
+  guard/docs commit); tree green at **440 files / 4791 tests**, production
+  build, OFF oracle info, and `git diff --check`. Handler inventory
+  pin updated **209→210** for the newly registered target opcode. Census
+  byte-idempotent at **214/214 effects, 355/355 moves, 276/276 distinct,
+  2957/2957 weighted**, all **72** validations.
+- **Did:** consumed `docs/switchin-entryhooks-off-evidence.md`; ported the
+  exact Truant counter write and grouped ON_SWITCHIN dispatch for permanent
+  weather, Intimidate, Trace, Forecast, Cloud Nine, and Air Lock. Weather
+  callbacks/no-ops, Trace's live opposing ability copy/message buffers, and
+  Intimidate's STATUS3 marker, shared statbuffchange path, Substitute and
+  all three source prevention abilities are Tier-1 pinned with exact messages
+  and zero RNG draws. Battle-start ordering now pins faster Drizzle's weather
+  message before slower Intimidate's stat drop. The new full-script pins
+  exposed and fixed one real defect: removed a duplicate synthetic prevention
+  event so the source script is the sole message owner.
+- **Next:** supervisor verify `38da44ab` and this ledger commit; on-switch item
+  breadth remains separate.
+- **Notes:** switch-in unsupported-branch ratchet **6→4**; the retained
+  barriers are unchanged: switchhandleorder cases 0/1, non-singles wrapped
+  cross-clear, Arena init, and other `various` ids. The named Castform form
+  barrier remains. No census, issue, roadmap, presentation, animation, round,
+  tick, or pixel change.
+
+---
+
 ## 652 — [BOUNDED MAIN WORKER 2026-07-28 ~18:27] ENDTURN abilities/items acceptance closed
 
 - **State:** implementation commits `733042df` / `f424fd3b`; tree green at
