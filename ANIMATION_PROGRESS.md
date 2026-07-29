@@ -1,5 +1,25 @@
 # Animation coverage
 
+## MOVE_CROSS_CHOP promoted exact; CROSS_IMPACT track established (2026-07-28)
+
+**Verdict:** `MOVE_CROSS_CHOP` is exact. Legal Level-50 Factory set-283
+MACHOKE→ONIX Scene-ON parties pass the complete source body through first
+inactive cleanup at **88/88** reducer/component, typed-seam, hardware, audio,
+raw-RGB, and shared-framebuffer frames **216–303** player-back and **217–304**
+opponent-front, twice fresh. Player evidence/raw digests are
+`7be7a5bb…4888bc7` / `9d38ec15…5cd3d04`; opponent digests are
+`a5561990…010d23f` / `528e9ed1…76f900f`.
+
+**Model/boundary:** the pure relative-age reducer and typed seam port both
+two-stage hands, CROSS_IMPACT, complex palette blend, target ShakeMon,
+monbg/alpha, audio, tasks, display lag, and cleanup; source-extracted
+Machoke/HANDS/CROSS_IMPACT plus shared Onix/chrome match every production
+frame without battle clocks or fitted pixels. `MOVE_LEAF_BLADE` remains
+unsupported because it adds distinct LEAF, `create_leaf_blade_task`, and
+ShakeMon2 dependencies. Coverage is **75 exact / 0 partial / 0 staged / 201
+unsupported**; no boundary list, unsupported barrier, battle/controller, or
+sibling status changed.
+
 ## MOVE_CROSS_CHOP evidence checkpoint; CROSS_IMPACT remains unsupported (2026-07-28)
 
 **Verdict:** Evidence-only checkpoint. `MOVE_CROSS_CHOP` and

@@ -2,6 +2,34 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_CROSS_CHOP",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal Level-50 Factory set-283 MACHOKE versus ONIX Scene-ON parties pass the entire 88-frame source body through first inactive cleanup in both orientations, twice fresh: player-back frames 216-303 reproduce evidence 7be7a5bb02c477873c77bec6162f0c9dc0f92e3f1ec3ec8572037c4a44888bc7 / raw RGB 9d38ec1582d17fea8c5103c90f904fbf983793b0e3aa26e2cf1df2cec5cd3d04 and opponent-front frames 217-304 reproduce evidence a556199025d17c28ddc9429216daff80afad1f29d92f15324dd563092010d23f / raw RGB 528e9ed15d9e9926f92e5e6e4ce8bbc0d157f34c8e6a05372561d004b76f900f",
+        "the pure source-relative reducer ports HANDS_AND_FEET and CROSS_IMPACT load/free, target monbg and 12:8 alpha, both gCrossChopHandSpriteTemplate two-stage linear translations, the 40-frame delay, target-panned MEGA_KICK and RAZOR_WIND, complex white/black palette blend, the 20-frame gCrossImpactSpriteTemplate, target AnimTask_ShakeMon(7,0,9,1), clear-monbg tasks, and first inactive cleanup",
+        "the typed Scene-ON seam exposes only resolved target presentation geometry; source-extracted MACHOKE front/back, HANDS_AND_FEET, and CROSS_IMPACT plus shared ONIX/chrome feed the production compositor with source OAM/palette display lag, task/sprite order, tagged palettes, registers, both audio players, and no absolute ticks, battle clocks, move/input/battle numbers, coordinate/RGB fitting, pixel exceptions, canonical recordings, or battle calculation",
+        "crossChopPortable.ts runs the committed probe through tools/run-mgba-probe.py and proves every reducer/component state, typed seam, task/sprite callback, software/hardware OAM, matrices, tagged palettes, registers, both audio players and pans, raw RGB, and application framebuffer frame twice fresh in both orientations",
+        "MOVE_LEAF_BLADE remains unsupported: sharing CROSS_IMPACT does not accept its distinct LEAF asset, create_leaf_blade_task body, ShakeMon2 task, timing, and audio without independent complete dense move evidence",
+        "no damage, RNG, controller selection, turn order, round/facility state, boundary list, unsupported barrier, or sibling acceptance changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-cross-chop-player-machoke-opponent-onix.json",
+        "tools/battle-lab/mechanic-cross-chop-opponent-machoke-player-onix.json",
+        "tools/compare/fixtures/cross-chop-player-machoke-opponent-onix.json",
+        "tools/compare/fixtures/cross-chop-opponent-machoke-player-onix.json",
+        "tools/compare/crossChopProbe.py",
+        "tools/compare/crossChopPortable.ts",
+        "tools/compare/crossChopSourceAudit.ts",
+        "tools/compare/extractCrossChopAssets.ts",
+        "src/animation/assets/cross-chop.json",
+        "src/animation/crossChop.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/crossChopEvidence.test.ts",
+        "tests/animation/crossChop.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_BUBBLE_BEAM",
       "status": "exact",
       "covered": [
@@ -1868,6 +1896,26 @@
     "MOVE_BIND"
   ],
   "componentTracks": [
+    {
+      "id": "cross-impact-cross-chop",
+      "components": [
+        "asset:ANIM_TAG_HANDS_AND_FEET",
+        "asset:ANIM_TAG_CROSS_IMPACT",
+        "sprite:gCrossChopHandSpriteTemplate",
+        "task:AnimTask_ShakeMon",
+        "visualCommand:complex_palette_blend",
+        "visualCommand:create_cross_impact_sprite",
+        "visualCommand:monbg",
+        "visualCommand:setalpha",
+        "visualCommand:clearmonbg",
+        "visualCommand:blendoff"
+      ],
+      "representatives": [
+        "MOVE_CROSS_CHOP",
+        "MOVE_LEAF_BLADE"
+      ],
+      "goal": "MOVE_CROSS_CHOP independently proves its complete 88-frame source body through first inactive cleanup at 88/88 reducer/component, typed-seam, software/hardware OAM, matrices, palettes, registers, both audio players and pans, raw-RGB, and shared-framebuffer frames 216-303 player-back and 217-304 opponent-front, twice fresh. MOVE_LEAF_BLADE remains unsupported because it adds the distinct LEAF asset, create_leaf_blade_task body, ShakeMon2 task, timing, and audio without independent complete dense acceptance."
+    },
     {
       "id": "brown-orb-mud-shot",
       "components": [
