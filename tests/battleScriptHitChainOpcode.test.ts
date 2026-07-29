@@ -38,6 +38,12 @@ const COUNTER = 68; // EFFECT_COUNTER, power 1, accuracy 100, TYPE_FIGHTING
 const MIRROR_COAT = 243; // EFFECT_MIRROR_COAT, power 1, accuracy 100, TYPE_PSYCHIC
 const FIRE_PUNCH = 7;
 const WATER_GUN = 55;
+const SPARK = 209;
+const FLAMETHROWER = 53;
+const THUNDER_WAVE = 86; // TYPE_ELECTRIC, power 0
+const ABILITY_VOLT_ABSORB = 10;
+const ABILITY_WATER_ABSORB = 11;
+const ABILITY_FLASH_FIRE = 18;
 const WEATHER_BALL = 311;
 const ABILITY_CLOUD_NINE = 13;
 const ABILITY_AIR_LOCK = 77;
@@ -84,6 +90,8 @@ function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number }
     partyIndex: changes.partyIndex ?? 0,
     endured: changes.endured,
     helpingHand: changes.helpingHand,
+    notFirstStrike: changes.notFirstStrike,
+    flashFireBoosted: changes.flashFireBoosted,
     turnOrderNum: changes.turnOrderNum,
     wrappedMove: changes.wrappedMove,
     wrappedBy: changes.wrappedBy,
@@ -391,6 +399,193 @@ describe("production accuracycheck (Cmd_accuracycheck) dispatch", () => {
     expect(result.state.rng.calls).toBe(0);
   });
 
+  describe("AbilityBattleEffects(ABILITYEFFECT_ABSORBING)", () => {
+    it.each([
+      [ABILITY_VOLT_ABSORB, SPARK, "BattleScript_MoveHPDrain_PPLoss"],
+      [ABILITY_WATER_ABSORB, WATER_GUN, "BattleScript_MoveHPDrain_PPLoss"],
+      [ABILITY_FLASH_FIRE, FLAMETHROWER, "BattleScript_FlashFireBoost_PPLoss"],
+    ] as const)(
+      "ability %i redirects a matching move %i to its source script and records the AI reveal",
+      (ability, move, label) => {
+        const rc = context(0, {}, { currentMove: move }, { ability, hp: 75, maxHP: 100 });
+        const { result } = stepFrom("BattleScript_HitFromAccCheck", rc, 1);
+        expect(result.kind).toBe("advanced");
+        if (result.kind !== "advanced") throw new Error("expected advance");
+        expect(result.state.programCounter).toBe(labelPc(label));
+        expect(result.state.rulesContext.lastUsedAbility).toBe(ability);
+        expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(ability);
+        expect(result.state.rng.calls).toBe(1); // ordinary accuracy draw only
+      },
+    );
+
+    it.each([
+      [ABILITY_VOLT_ABSORB, WATER_GUN],
+      [ABILITY_WATER_ABSORB, SPARK],
+      [ABILITY_FLASH_FIRE, SPARK],
+    ] as const)(
+      "ability %i ignores a non-matching move %i and continues the ordinary hit chain",
+      (ability, move) => {
+        const rc = context(0, {}, { currentMove: move }, { ability });
+        const { result } = stepFrom("BattleScript_HitFromAccCheck", rc, 1);
+        expect(result.kind).toBe("advanced");
+        if (result.kind !== "advanced") throw new Error("expected advance");
+        expect(result.state.programCounter).toBe(labelPc("BattleScript_HitFromAtkString"));
+        expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(0);
+      },
+    );
+
+    it.each([
+      [ABILITY_VOLT_ABSORB, SPARK],
+      [ABILITY_WATER_ABSORB, WATER_GUN],
+    ] as const)(
+      "full HP: ability %i takes MonMadeMoveUseless, does not prepare healing damage, and still reveals",
+      (ability, move) => {
+        const rc = context(
+          0,
+          {},
+          { currentMove: move, battleMoveDamage: 777 },
+          { ability, hp: 100, maxHP: 100 },
+        );
+        const { result } = stepFrom("BattleScript_HitFromAccCheck", rc, 1);
+        expect(result.kind).toBe("advanced");
+        if (result.kind !== "advanced") throw new Error("expected advance");
+        expect(result.state.programCounter).toBe(labelPc("BattleScript_MonMadeMoveUseless_PPLoss"));
+        expect(result.state.rulesContext.battleMoveDamage).toBe(777);
+        expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(ability);
+      },
+    );
+
+    it("Volt/Water Absorb prepare -max(1, floor(maxHP/4)); the existing HP opcodes cap the actual heal and set DOESNT_AFFECT_FOE", () => {
+      const rc = context(
+        0,
+        { moves: [SPARK, 0, 0, 0], pp: [20, 0, 0, 0] },
+        { currentMove: SPARK },
+        { ability: ABILITY_VOLT_ABSORB, hp: 90, maxHP: 101 },
+      );
+      const execution = createBattleScriptStatusRulesExecution(
+        program,
+        "BattleScript_HitFromAccCheck",
+        rc,
+        1,
+        externalPorts(),
+      );
+      let result = stepBattleScriptMachine(program, execution.state, execution.handlers); // accuracycheck -> drain
+      if (result.kind !== "advanced") throw new Error("accuracycheck did not advance");
+      expect(result.state.rulesContext.battleMoveDamage).toBe(-25);
+      result = stepBattleScriptMachine(program, result.state, execution.handlers); // ppreduce
+      if (result.kind !== "advanced") throw new Error("ppreduce did not advance");
+      const healthbar = program.instructions.find(
+        (instruction) =>
+          instruction.source.label === "BattleScript_MoveHPDrain"
+          && instruction.opcodeName === "B_SCR_OP_HEALTHBARUPDATE",
+      );
+      expect(healthbar).toBeDefined();
+      result = stepBattleScriptMachine(
+        program,
+        Object.freeze({ ...result.state, programCounter: healthbar!.programCounter }),
+        execution.handlers,
+      );
+      if (result.kind !== "advanced") throw new Error("healthbarupdate did not advance");
+      result = stepBattleScriptMachine(program, result.state, execution.handlers); // datahpupdate
+      if (result.kind !== "advanced") throw new Error("datahpupdate did not advance");
+      expect(result.state.rulesContext.battlers[1].hp).toBe(101);
+      expect(result.state.rulesContext.party.opponent[0].hp).toBe(101);
+      expect(result.state.rulesContext.battlers[0].pp[0]).toBe(19);
+
+      const orbyte = program.instructions.find(
+        (instruction) =>
+          instruction.source.label === "BattleScript_MoveHPDrain"
+          && instruction.opcodeName === "B_SCR_OP_ORBYTE",
+      );
+      expect(orbyte).toBeDefined();
+      const patched = Object.freeze({ ...result.state, programCounter: orbyte!.programCounter });
+      const failed = stepBattleScriptMachine(program, patched, execution.handlers);
+      expect(failed.kind).toBe("advanced");
+      if (failed.kind !== "advanced") throw new Error("orbyte did not advance");
+      expect(failed.state.rulesContext.moveResultFlags & (1 << 3)).toBe(1 << 3);
+    });
+
+    it("one-max-HP edge uses the source minimum heal of 1", () => {
+      const rc = context(
+        0,
+        {},
+        { currentMove: SPARK },
+        { ability: ABILITY_VOLT_ABSORB, hp: 0, maxHP: 1 },
+      );
+      const { result } = stepFrom("BattleScript_HitFromAccCheck", rc, 1);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.battleMoveDamage).toBe(-1);
+    });
+
+    it("a matching zero-power Electric move does not activate Volt Absorb", () => {
+      const rc = context(0, {}, { currentMove: THUNDER_WAVE }, { ability: ABILITY_VOLT_ABSORB });
+      const { result } = stepFrom("BattleScript_HitFromAccCheck", rc, 1);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_HitFromAtkString"));
+      expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(0);
+    });
+
+    it("Flash Fire sets the persistent boost/message selector once; repeat activation reports no boost", () => {
+      const first = stepFrom(
+        "BattleScript_HitFromAccCheck",
+        context(0, {}, { currentMove: FLAMETHROWER }, {
+          ability: ABILITY_FLASH_FIRE,
+          flashFireBoosted: 0,
+        }),
+        1,
+      ).result;
+      expect(first.kind).toBe("advanced");
+      if (first.kind !== "advanced") throw new Error("expected advance");
+      expect(first.state.rulesContext.battlers[1].flashFireBoosted).toBe(1);
+      expect(first.state.rulesContext.multistringChooser).toBe(0);
+
+      const repeated = stepFrom(
+        "BattleScript_HitFromAccCheck",
+        Object.freeze({
+          ...first.state.rulesContext,
+          hitMarker: 0,
+          aiObservedAbilityIds: Object.freeze([0, 0, 0, 0]),
+        }),
+        1,
+      ).result;
+      expect(repeated.kind).toBe("advanced");
+      if (repeated.kind !== "advanced") throw new Error("expected advance");
+      expect(repeated.state.rulesContext.battlers[1].flashFireBoosted).toBe(1);
+      expect(repeated.state.rulesContext.multistringChooser).toBe(1);
+      expect(repeated.state.rulesContext.aiObservedAbilityIds[1]).toBe(ABILITY_FLASH_FIRE);
+    });
+
+    it("a frozen Flash Fire target does not activate or reveal", () => {
+      const rc = context(
+        0,
+        {},
+        { currentMove: FLAMETHROWER },
+        { ability: ABILITY_FLASH_FIRE, status1: 1 << 5 },
+      );
+      const { result } = stepFrom("BattleScript_HitFromAccCheck", rc, 1);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_HitFromAtkString"));
+      expect(result.state.rulesContext.battlers[1].flashFireBoosted).toBeUndefined();
+      expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(0);
+    });
+
+    it("notFirstStrike selects the no-PP-loss script on a later target", () => {
+      const rc = context(
+        0,
+        { notFirstStrike: 1 },
+        { currentMove: SPARK },
+        { ability: ABILITY_VOLT_ABSORB, hp: 75, maxHP: 100 },
+      );
+      const { result } = stepFrom("BattleScript_HitFromAccCheck", rc, 1);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_MoveHPDrain"));
+    });
+  });
+
   describe("(b) unsupported-branch barriers", () => {
     it("bare NO_ACC_CALC (Mean Look) advances without RNG and skips the Lock-On identity check", () => {
       const bareNoAccuracy = program.instructions.find(
@@ -415,21 +610,6 @@ describe("production accuracycheck (Cmd_accuracycheck) dispatch", () => {
       expect(result.state.rng.calls).toBe(1);
     });
 
-    it("halts when the target holds one of AbilityBattleEffects(ABILITYEFFECT_ABSORBING)'s three real switch cases on a hit (Volt Absorb/Water Absorb/Flash Fire unmodeled) but not any other ability (falls through that switch with no effect, per source)", () => {
-      for (const [ability, move] of [[10, 209], [11, 55], [18, 53]] as const) {
-        // Volt Absorb/Spark, Water Absorb/Water Gun, Flash Fire/Flamethrower.
-        const rc = context(0, {}, { currentMove: move }, { ability });
-        const { result } = stepFrom("BattleScript_HitFromAccCheck", rc, 1);
-        expect(result.kind).toBe("halted");
-        expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 1020 });
-      }
-      // The source switch only activates on its matching move type.
-      const mismatched = context(0, {}, { currentMove: FUTURE_SIGHT }, { ability: 10 });
-      expect(stepFrom("BattleScript_HitFromAccCheck", mismatched, 1).result.kind).toBe("advanced");
-      const rcOtherAbility = context(0, {}, {}, { ability: 3 }); // ABILITY_KEEN_EYE, not one of the three switch cases
-      const { result: otherResult } = stepFrom("BattleScript_HitFromAccCheck", rcOtherAbility, 1);
-      expect(otherResult.kind).toBe("advanced");
-    });
   });
 });
 

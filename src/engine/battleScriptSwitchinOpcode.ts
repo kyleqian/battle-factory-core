@@ -480,6 +480,8 @@ function createSwitchindataupdateOpcodeHandler(
           battlerPreventingEscape: isBatonPass ? candidate.battlerPreventingEscape : 0,
           battlerWithSureHit: isBatonPass ? candidate.battlerWithSureHit : 0,
           isFirstTurn: 2,
+          notFirstStrike: 0,
+          flashFireBoosted: 0,
         });
       }
       const clearsWrapped =

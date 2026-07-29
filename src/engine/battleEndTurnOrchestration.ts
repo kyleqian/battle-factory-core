@@ -1932,6 +1932,7 @@ const PROTECT_STRUCT_CLEAR: Partial<BattleScriptRulesBattlerState> = Object.free
   loveImmobility: 0,
   bounceMove: 0,
   stealMove: 0,
+  notFirstStrike: 0,
   helpingHand: 0,
   usedDisabledMove: 0,
   usedTauntedMove: 0,

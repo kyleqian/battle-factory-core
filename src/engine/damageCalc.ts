@@ -17,8 +17,8 @@
 // the exact inventory.
 //
 // NOT ported (out of scope this step, no battle-1 turn exercises them):
-// Flash Fire's triggered damage modifier, Wonder Guard/Levitate immunity
-// side-effects beyond the raw multiplier, badge boosts (always off -
+// Wonder Guard/Levitate immunity side-effects beyond the raw multiplier,
+// badge boosts (always off -
 // ShouldGetStatBadgeBoost returns FALSE unconditionally for
 // BATTLE_TYPE_FRONTIER, which every battle this engine models is).
 
@@ -165,6 +165,12 @@ export interface DamageCalcInput {
    * provable (see damageCalc.test.ts's Soul Dew frontier case).
    */
   isFrontierBattle?: boolean;
+  /**
+   * gBattleResources->flags->flags[battlerIdAtk] &
+   * RESOURCE_FLAG_FLASH_FIRE. The caller owns the per-battler resource flag;
+   * this function owns its source-ordered 1.5x modifier before the final +2.
+   */
+  flashFireBoosted?: boolean;
 }
 
 /**
@@ -414,8 +420,7 @@ export function calculateBaseDamage(input: DamageCalcInput): number {
   } else if (moveType === "TYPE_MYSTERY") {
     damage = 0;
   } else {
-    // Special branch (pokemon.c:3287-3368); Flash Fire remains outside the
-    // ported modifier inventory described in the module comment.
+    // Special branch (pokemon.c:3287-3368).
     damage = critAdjustedAttackStat(spAttack, attacker.statStages.spAtk, isCriticalHit);
 
     damage = damage * movePower;
@@ -459,6 +464,11 @@ export function calculateBaseDamage(input: DamageCalcInput): number {
         if (moveType === "TYPE_FIRE") damage = Math.trunc((15 * damage) / 10);
         else if (moveType === "TYPE_WATER") damage = Math.trunc(damage / 2);
       }
+    }
+
+    // pokemon.c:3367-3368 -- after weather and before the unconditional +2.
+    if (input.flashFireBoosted && moveType === "TYPE_FIRE") {
+      damage = Math.trunc((15 * damage) / 10);
     }
   }
 

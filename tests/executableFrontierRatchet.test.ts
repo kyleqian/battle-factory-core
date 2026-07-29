@@ -116,7 +116,10 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // barrier and adjustsetdamage's sibling barrier are retired by the live
   // holder-only rolls, while resultmessage's generic barrier dispatch is
   // removed now that HUNG_ON call-current transfers to the real hang-on script.
-  ["src/engine/battleScriptHitChainOpcode.ts", 13],
+  // 13 -> 12 (Ability absorption): JumpIfMoveFailed now source-completely
+  // redirects Volt Absorb, Water Absorb, and Flash Fire to their real
+  // healing/full-HP/boost scripts instead of stopping at one shared barrier.
+  ["src/engine/battleScriptHitChainOpcode.ts", 12],
   // 4 -> 3 (Snatch row 5c): the action-order redirect, PressurePPLose,
   // winner-only flag consumption, and pushed BattleScript_SnatchedMove
   // continuation are now live; Lightning Rod remains the adjacent barrier.
