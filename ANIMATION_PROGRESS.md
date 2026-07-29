@@ -30,7 +30,7 @@ source; SMALL_BUBBLES is byte-equal to the already-proved Water Gun asset.
 **Exact implementation remainder:** port the complete source-relative reducer,
 typed Scene-ON seam, asset compositor, and every-frame shared framebuffer
 contract—no pixel fitting or recordings—then independently accept it. Bubble
-Beam outside Factory remains unsupported, and Secret Power's pond dispatch to
+`MOVE_BUBBLE` outside Factory remains unsupported, and Secret Power's pond dispatch to
 Bubble Beam remains unsupported without independent acceptance. No battle
 logic, controller/RNG/turn/facility state, unsupported barrier, boundary list,
 or sibling status changed.
