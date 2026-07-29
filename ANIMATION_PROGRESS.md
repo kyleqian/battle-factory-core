@@ -1,5 +1,39 @@
 # Animation coverage
 
+## MOVE_MOONLIGHT promoted exact; GREEN_SPARKLE track bounded (2026-07-29)
+
+**Verdict:** `MOVE_MOONLIGHT` is exact. The lowest suitable legal Level-50
+carrier is challenge-0 set **167** `FRONTIER_MON_GLOOM_1` (species **44**,
+Moonlight **236**, Quirky, SpAttack+HP, Persim Berry). Complete legal
+three-mon Scene-ON parties pass the entire body through first inactive cleanup
+at **352/352** frames **207–558** in both orientations, twice fresh.
+Player-back evidence/raw digests are
+`5486f398b5a29f20da4c97c6d67315973e01746b498250af3f5ea2aae116776b` /
+`433d0a9869f2ef60f0b68c812dce3ef9f2d1b8944bb54beba63a39f3c82e13bf`;
+opponent-front digests are
+`fdf3da2cd3ea60d4be20f7d040f917cc302562da145e5a04fa9d750147e55b0d` /
+`83e6ccdfd48c9380fbead22b3b80af91202c3e04540d1e26798eaea60d1a6e1e`.
+
+**Model/boundary:** the pure relative reducer, typed seam, and narrow
+compositor port MOON/GREEN_SPARKLE/BLUE_STAR tag and palette lifetimes, the
+fixed moon, all **five** staggered sparkle lifecycles, alpha registers,
+Moonlight's special black-to-near-white BG/battler/effect palette pipeline,
+audio, the complete four-star shared `HealingEffect` tail, OAM/VBlank order,
+and cleanup. Gloom and all effect art regenerate byte-for-byte from pinned
+source. Immutable HP **143/153**, weather-none, and half-maximum heal metadata
+cross only as verification inputs; healing outcome/timing, HP, weather
+calculation, RNG, controller/turn/facility state, boundaries, and barriers are
+unchanged.
+
+**Sibling/control:** `MOVE_PRESENT` remains **unsupported**. It has a distinct
+`AnimTask_IsHealingMove` dispatch and ITEM_BAG projectile, then either five
+EXPLOSION damage sprites or nine GREEN_SPARKLE heal particles followed by
+target `HealingEffect2`; both conditional bodies still need independent
+complete legal both-orientation twice-fresh proof. `MOVE_RECOVER` was rerun
+fresh as the shared BLUE_STAR/HealingEffect control and remains **169/169**
+exact in both orientations. Coverage is **87 exact / 0 partial / 0 staged /
+189 unsupported**.
+
 ## MOVE_PERISH_SONG promoted exact; MUSIC_NOTES_2 track bounded (2026-07-29)
 
 **Verdict:** `MOVE_PERISH_SONG` is exact. The lowest suitable legal Level-50

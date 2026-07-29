@@ -2,6 +2,36 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_MOONLIGHT",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal challenge-0 Level-50 set-167 FRONTIER_MON_GLOOM_1 versus ONIX Scene-ON parties pass the entire 352-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 207-558 reproduce evidence 5486f398b5a29f20da4c97c6d67315973e01746b498250af3f5ea2aae116776b / raw RGB 433d0a9869f2ef60f0b68c812dce3ef9f2d1b8944bb54beba63a39f3c82e13bf and opponent-front frames 207-558 reproduce evidence fdf3da2cd3ea60d4be20f7d040f917cc302562da145e5a04fa9d750147e55b0d / raw RGB 83e6ccdfd48c9380fbead22b3b80af91202c3e04540d1e26798eaea60d1a6e1e",
+        "the source audit proves set 167 FRONTIER_MON_GLOOM_1 is the lowest suitable legal Level-50 carrier and pins species 44, move 236, Quirky nature, SpAttack/HP spread, Persim Berry, complete legal challenge-0 three-Pokemon parties, and the weather-none half-maximum healing payload",
+        "the pure relative reducer ports MOON, GREEN_SPARKLE, and shared BLUE_STAR tag/palette lifetimes, gMoonSpriteTemplate, all five staggered gMoonlightSparkleSpriteTemplate lifecycles, AnimTask_AlphaFadeIn, AnimTask_MoonlightEndFade, the black BG palette fill/fade, BLDCNT/BLDALPHA state, audio, HealingEffect's four blue stars with OAM-slot reuse, OAM/VBlank display order, and first inactive cleanup",
+        "the typed Scene-ON seam carries only resolved GLOOM/ONIX geometry plus immutable HP/weather/healing verification state; byte-identical source-extracted Gloom front/back, MOON, GREEN_SPARKLE, and BLUE_STAR art pass source/software tasks and sprites, hardware OAM/matrices, palette/tag buffers, registers, callbacks, both audio players, raw RGB, seam state, and every production framebuffer without applying healing or owning gameplay state",
+        "moonlightPortable.ts reruns both probes through tools/run-mgba-probe.py and proves all 352 immutable dense source/hardware/audio/reducer/seam/raw-RGB/framebuffer frames twice fresh in both orientations through first inactive cleanup; MOVE_RECOVER remains exact at 169/169 in both orientations as the independently rerun shared HealingEffect/BLUE_STAR control",
+        "MOVE_PRESENT remains unsupported: its distinct AnimTask_IsHealingMove dispatch and moving ITEM_BAG projectile branch to either five EXPLOSION damage sprites or nine GREEN_SPARKLE healing particles plus target HealingEffect2; it lacks complete legal both-orientation twice-fresh proof for both conditional bodies",
+        "healing amount/timing, HP, weather multiplier, gameplay RNG, controller selection, turn order, round/facility state, animation boundary list, canonical-recording allowlist, and unsupported barriers are unchanged"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-moonlight-player-gloom-opponent-onix.json",
+        "tools/battle-lab/mechanic-moonlight-opponent-gloom-player-onix.json",
+        "tools/compare/fixtures/moonlight-player-gloom-opponent-onix.json",
+        "tools/compare/fixtures/moonlight-opponent-gloom-player-onix.json",
+        "tools/compare/moonlightProbe.py",
+        "tools/compare/moonlightPortable.ts",
+        "tools/compare/moonlightSourceAudit.ts",
+        "tools/compare/extractMoonlightAssets.ts",
+        "src/animation/assets/moonlight.json",
+        "src/animation/moonlight.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/moonlightEvidence.test.ts",
+        "tests/animation/moonlightAssets.test.ts",
+        "tests/animation/moonlight.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_PERISH_SONG",
       "status": "exact",
       "covered": [
@@ -2216,6 +2246,25 @@
   ],
   "componentTracks": [
     {
+      "id": "green-sparkle-moonlight",
+      "components": [
+        "asset:ANIM_TAG_GREEN_SPARKLE",
+        "sprite:gMoonlightSparkleSpriteTemplate",
+        "visualCommand:create_present_heal_particle_sprite",
+        "task:AnimTask_AlphaFadeIn",
+        "task:AnimTask_MoonlightEndFade",
+        "asset:ANIM_TAG_MOON",
+        "sprite:gMoonSpriteTemplate",
+        "subroutine:HealingEffect",
+        "asset:ANIM_TAG_BLUE_STAR"
+      ],
+      "representatives": [
+        "MOVE_MOONLIGHT",
+        "MOVE_PRESENT"
+      ],
+      "goal": "MOVE_MOONLIGHT independently proves its complete 352-frame blackout, fixed moon, alpha fade, five staggered descending GREEN_SPARKLE sprites, MoonlightEndFade palette choreography, shared HealingEffect BLUE_STAR tail, audio, hardware transfer, typed seam, raw RGB, and first inactive cleanup in both legal GLOOM orientations twice fresh. MOVE_PRESENT remains unsupported: sharing GREEN_SPARKLE does not accept its AnimTask_IsHealingMove dispatch, moving ITEM_BAG projectile, conditional five-EXPLOSION damage body, conditional nine-particle healing body, target HealingEffect2, or branch-specific timing without complete legal both-orientation twice-fresh acceptance of both outcomes."
+    },
+    {
       "id": "noise-line-roar-effect",
       "components": [
         "asset:ANIM_TAG_NOISE_LINE",
@@ -2870,7 +2919,7 @@
         "MOVE_MOONLIGHT",
         "MOVE_SWALLOW"
       ],
-      "goal": "MOVE_RECOVER proves the complete three-wave RecoverAbsorbEffect plus attacker HealingEffect body in both orientations at 169/169 component/RAM and framebuffer frames, reproduced twice. MOVE_ABSORB independently proves its eight-orb drain/hitsplat/green-field body plus attacker HealingEffect at 195/195 complete hardware/framebuffer frames in both orientations, reproduced twice. MOVE_MILK_DRINK independently proves its complete bottle/thin-ring/target HealingEffect2 body in both orientations at 186/186 component/RAM and framebuffer frames, reproduced twice. MOVE_SYNTHESIS independently proves its complete GrantingStarsEffect/blend/load-boundary/attacker HealingEffect body in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. RECOVER remains 169/169, SYNTHESIS 130/130, MILK DRINK 186/186, and BIND 45/45 in both orientations as regression controls. No other sibling is promoted: MEGA_DRAIN needs its paired 16-orb stronger-green body; DREAM_EATER its psychic-background/target-scale-and-shake/24-orb body; GIGA_DRAIN its 24-orb/high-green body; SOFT_BOILED has a distinct breaking-egg pair, attacker shake, two offset affine-program-0 thin rings, palette blend, and target HealingEffect2 body and needs its own dense move evidence; PRESENT has a distinct common moving item-bag body plus conditional five-explosion damage body or nine-green-particle healing body before target HealingEffect2, and needs dense evidence for both conditional outcomes; MOONLIGHT needs its blackout/moon/alpha/sparkle pipeline; and SWALLOW needs its move-turn-dependent deform/shake/blue-orb multiplicity. Each remains unsupported pending its own complete dense acceptance."
+      "goal": "MOVE_RECOVER proves the complete three-wave RecoverAbsorbEffect plus attacker HealingEffect body in both orientations at 169/169 component/RAM and framebuffer frames, reproduced twice. MOVE_ABSORB independently proves its eight-orb drain/hitsplat/green-field body plus attacker HealingEffect at 195/195 complete hardware/framebuffer frames in both orientations, reproduced twice. MOVE_MILK_DRINK independently proves its complete bottle/thin-ring/target HealingEffect2 body in both orientations at 186/186 component/RAM and framebuffer frames, reproduced twice. MOVE_SYNTHESIS independently proves its complete GrantingStarsEffect/blend/load-boundary/attacker HealingEffect body in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. MOVE_MOONLIGHT independently proves its complete blackout/moon/alpha/five-GREEN_SPARKLE pipeline plus attacker HealingEffect at 352/352 source/hardware/audio/seam/raw-RGB/framebuffer frames in both orientations twice fresh. RECOVER remains 169/169 in both orientations as the freshly rerun shared HealingEffect control. No other sibling is promoted: MEGA_DRAIN needs its paired 16-orb stronger-green body; DREAM_EATER its psychic-background/target-scale-and-shake/24-orb body; GIGA_DRAIN its 24-orb/high-green body; SOFT_BOILED has a distinct breaking-egg pair, attacker shake, two offset affine-program-0 thin rings, palette blend, and target HealingEffect2 body; PRESENT has a distinct moving item-bag body plus conditional five-explosion damage body or nine-green-particle healing body before target HealingEffect2 and needs dense evidence for both conditional outcomes; and SWALLOW needs its move-turn-dependent deform/shake/blue-orb multiplicity. Each remains unsupported pending its own complete dense acceptance."
     },
     {
       "id": "absorption-orb-drain",
