@@ -282,6 +282,7 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     status3: 0,
     specialStatus: Object.freeze({
       restoredBattlerSprite: 0,
+      focusBanded: 0,
       physicalDmg: 0,
       specialDmg: 0,
       shellBellDmg: 0,
@@ -951,21 +952,22 @@ function usesForcedStruggle(
 
 /**
  * Source `HandleTurnActionSelectionState` + `HandleAction_UseMove`: a
- * STATUS2_MULTIPLETURNS battler does not choose a fresh action; it uses its
- * attacker-indexed gLockedMoves entry. This singles adapter recovers the
- * still-selected slot from gBattleStruct->chosenMovePositions.
+ * STATUS2_MULTIPLETURNS or STATUS2_RECHARGE battler does not choose a fresh
+ * action; it uses its attacker-indexed gLockedMoves entry. This singles
+ * adapter recovers the original PP-owning slot from
+ * gBattleStruct->chosenMovePositions, without requiring the locked move to
+ * occupy that slot (called moves do not).
  */
 function lockedMoveDecision(
   rulesContext: BattleScriptRulesContext,
   battler: BattleSinglesBattler,
 ): BattleMoveDecision | null {
   const battlerState = rulesContext.battlers[battler]!;
-  if (
-    (
-      battlerState.status2
-      & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
-    ) === 0
-  ) {
+  const statusLock = battlerState.status2 & (
+    BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
+    | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_RECHARGE
+  );
+  if (statusLock === 0) {
     if (battlerState.encoreTimer !== 0 && battlerState.encoredMove !== 0) {
       // battle_util.c:95-112: action selection remains tied to the stored
       // position. If that slot was overwritten, HandleAction_UseMove clears
@@ -981,9 +983,9 @@ function lockedMoveDecision(
   }
   const moveId = rulesContext.lockedMoves[battler]!;
   const moveSlot = rulesContext.chosenMovePositions[battler]!;
-  if (moveId === 0 || battlerState.moves[moveSlot] !== moveId) {
+  if (moveId === 0) {
     throw new Error(
-      `factory full-turn battler ${battler} has an active multi-turn lock without a usable gLockedMoves entry`,
+      `factory full-turn battler ${battler} has an active move lock without a usable gLockedMoves entry`,
     );
   }
   return Object.freeze({
@@ -991,6 +993,39 @@ function lockedMoveDecision(
     moveSlot: moveSlot as BattleMoveSlot,
     targetBattler: sourceMoveTarget(moveId, battler),
   });
+}
+
+/**
+ * `HandleAction_UseMove`'s execution-time move override. The selected
+ * position remains the caller's PP slot, but both gCurrentMove and
+ * gChosenMove come from gLockedMoves for multi-turn and recharge actions.
+ */
+function actionMoveId(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
+  moveSlot: BattleMoveSlot,
+  forcedStruggle: boolean,
+): number {
+  if (forcedStruggle) return BATTLE_SCRIPT_MOVE_STRUGGLE;
+  const battlerState = rulesContext.battlers[battler]!;
+  if (
+    (
+      battlerState.status2
+      & (
+        BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
+        | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_RECHARGE
+      )
+    ) !== 0
+  ) {
+    const lockedMove = rulesContext.lockedMoves[battler]!;
+    if (lockedMove === 0) {
+      throw new Error(
+        `factory full-turn battler ${battler} has an active move lock without a usable gLockedMoves entry`,
+      );
+    }
+    return lockedMove;
+  }
+  return battlerState.moves[moveSlot]!;
 }
 
 /** battle_util.c:95-112's execution-time overwritten-slot cleanup. */
@@ -1361,12 +1396,18 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
   const trainerMoveSlot = ctx.decision.moveSlot;
   const playerForcedStruggle = usesForcedStruggle(rc0, 0);
   const trainerForcedStruggle = usesForcedStruggle(rc0, 1);
-  const playerMoveId = playerForcedStruggle
-    ? BATTLE_SCRIPT_MOVE_STRUGGLE
-    : rc0.battlers[0]!.moves[playerMoveSlot];
-  const trainerMoveId = trainerForcedStruggle
-    ? BATTLE_SCRIPT_MOVE_STRUGGLE
-    : rc0.battlers[1]!.moves[ctx.decision.moveSlot];
+  const playerMoveId = actionMoveId(
+    rc0,
+    0,
+    playerMoveSlot,
+    playerForcedStruggle,
+  );
+  const trainerMoveId = actionMoveId(
+    rc0,
+    1,
+    trainerMoveSlot,
+    trainerForcedStruggle,
+  );
   if (playerMoveId === 0) {
     throw new Error(
       `factory full-turn decision player move slot ${playerMoveSlot} is not usable`,

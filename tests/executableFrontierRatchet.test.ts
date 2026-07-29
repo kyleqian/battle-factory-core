@@ -44,9 +44,6 @@ const RECORDING_IMPORT = /^\s*import\s[^;]*?\sfrom\s+"([^"]*(?:-dump|-probe|-wat
  */
 const ALLOWED_RECORDING_IMPORTS: ReadonlySet<string> = new Set([
   "src/engine/factorySwapPresentation.ts::../data/gen/battle1-swap-rentalmons-dump.json",
-  "src/engine/battleScene.ts::../data/gen/battle1-turn1-ram-dump.json",
-  "src/engine/battleScene.ts::../data/gen/battle1-turn2-ram-dump.json",
-  "src/engine/battleScene.ts::../data/gen/battle1-grovyle-faint-ram-dump.json",
 ]);
 
 /**
@@ -119,7 +116,11 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // Look release now reads battlerPreventingEscape instead of barriering.
   // 18 -> 16 (Lock On / Mind Reader): both accuracy forms now apply the
   // source's packed-status + battlerWithSureHit ownership predicate.
-  ["src/engine/battleScriptHitChainOpcode.ts", 16],
+  // 16 -> 13 (Focus Band): adjustnormaldamage/adjustnormaldamage2's shared
+  // barrier and adjustsetdamage's sibling barrier are retired by the live
+  // holder-only rolls, while resultmessage's generic barrier dispatch is
+  // removed now that HUNG_ON call-current transfers to the real hang-on script.
+  ["src/engine/battleScriptHitChainOpcode.ts", 13],
   // 4 -> 3 (Snatch row 5c): the action-order redirect, PressurePPLose,
   // winner-only flag consumption, and pushed BattleScript_SnatchedMove
   // continuation are now live; Lightning Rod remains the adjacent barrier.
@@ -353,14 +354,13 @@ describe("overfit containment ratchet (ROADMAP S10 §4, ISSUES #41)", () => {
     ).toEqual([]);
   });
 
-  it("pins the debt at four imports across two modules", () => {
+  it("pins the remaining debt at one import in factorySwapPresentation", () => {
     const byFile = new Map<string, number>();
     for (const entry of ALLOWED_RECORDING_IMPORTS) {
       const file = entry.split("::")[0]!;
       byFile.set(file, (byFile.get(file) ?? 0) + 1);
     }
     expect([...byFile.entries()].sort()).toEqual([
-      ["src/engine/battleScene.ts", 3],
       ["src/engine/factorySwapPresentation.ts", 1],
     ]);
   });

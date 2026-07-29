@@ -10,8 +10,8 @@
 // see docs/battle-turn-notes.md §10 for the exact inventory.
 //
 // NOT ported (out of scope this step, no battle-1 turn exercises them):
-// weather-based power/damage modifiers (rain/sun/sandstorm/hail, Flash
-// Fire), the 6 species-locked hold items (Soul Dew, Deep Sea Tooth/Scale,
+// Flash Fire's triggered damage modifier, the 6 species-locked hold items
+// (Soul Dew, Deep Sea Tooth/Scale,
 // Light Ball, Metal Powder, Thick Club - none of battle 1's 6 mons are
 // eligible species), Wonder Guard/Levitate immunity side-effects beyond the
 // raw multiplier, badge boosts (always off - ShouldGetStatBadgeBoost
@@ -126,6 +126,16 @@ export interface DamageCalcInput {
    * site this engine drives CalculateBaseDamage from.
    */
   moveEffect?: string;
+  /** Source u32 gBattleWeather bitfield (include/constants/battle.h:232-244). */
+  weather?: number;
+  /**
+   * WEATHER_HAS_EFFECT2 result (battle_util.h:48). The caller owns the
+   * source-shaped Cloud Nine/Air Lock field scan; false suppresses every
+   * weather modifier without clearing the weather bits themselves.
+   */
+  weatherHasEffect?: boolean;
+  /** Source gCurrentMove, used by the weather block's Solar Beam exception. */
+  currentMove?: number;
 }
 
 /**
@@ -151,8 +161,8 @@ function critAdjustedDefenseStat(rawStat: number, stage: number, isCriticalHit: 
 /**
  * CalculateBaseDamage (pokemon.c:3106-3371), physical/special branches only
  * (TYPE_MYSTERY's "damage = 0" branch is also ported). Item type-boosts,
- * badge boosts, weather, and the 6 species-locked hold items are NOT
- * applied (see module doc comment) - battle 1 turn 1 needs none of them
+ * badge boosts and the 6 species-locked hold items are NOT applied (see
+ * module doc comment) - battle 1 turn 1 needs none of them
  * (src/data/gen/item-hold-effects.json + docs/battle-turn-notes.md §7
  * confirm battle 1's held items don't touch this function).
  */
@@ -184,8 +194,8 @@ export function calculateBaseDamage(input: DamageCalcInput): number {
   } else if (moveType === "TYPE_MYSTERY") {
     damage = 0;
   } else {
-    // Special branch (pokemon.c:3287-3315); weather/Flash-Fire terms
-    // (:3316-3368) are not ported, see module doc comment.
+    // Special branch (pokemon.c:3287-3368); Flash Fire remains outside the
+    // ported modifier inventory described in the module comment.
     damage = critAdjustedAttackStat(attacker.spAttack, attacker.statStages.spAtk, isCriticalHit);
 
     damage = damage * movePower;
@@ -200,6 +210,36 @@ export function calculateBaseDamage(input: DamageCalcInput): number {
       damage = input.isDoubleBattleSpreadMove ? 2 * Math.trunc(damage / 3) : Math.trunc(damage / 2);
     }
     if (input.isDoubleBattleSpreadMove) damage = Math.trunc(damage / 2);
+
+    // WEATHER_HAS_EFFECT2-gated block (pokemon.c:3331-3363), after the main
+    // special arithmetic/screens/spread and before Flash Fire and the
+    // unconditional +2. Each operation truncates independently in source.
+    if (input.weatherHasEffect !== false) {
+      const weather = input.weather ?? 0;
+      const rain = (1 << 0) | (1 << 1) | (1 << 2);
+      const sandstorm = (1 << 3) | (1 << 4);
+      const sun = (1 << 5) | (1 << 6);
+      const hail = 1 << 7;
+
+      if ((weather & rain) !== 0) {
+        if (moveType === "TYPE_FIRE") damage = Math.trunc(damage / 2);
+        else if (moveType === "TYPE_WATER") damage = Math.trunc((15 * damage) / 10);
+      }
+
+      // MOVE_SOLAR_BEAM (include/constants/moves.h:80) is weakened by every
+      // modeled weather except sun. This is move-id-gated, not type-gated.
+      if (
+        (weather & (rain | sandstorm | hail)) !== 0
+        && input.currentMove === 76
+      ) {
+        damage = Math.trunc(damage / 2);
+      }
+
+      if ((weather & sun) !== 0) {
+        if (moveType === "TYPE_FIRE") damage = Math.trunc((15 * damage) / 10);
+        else if (moveType === "TYPE_WATER") damage = Math.trunc(damage / 2);
+      }
+    }
   }
 
   // Unconditional +2 (pokemon.c:3371) - every CalculateBaseDamage return

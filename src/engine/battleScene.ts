@@ -658,6 +658,7 @@ import {
   resolveTurn2EndeavorAttackLines,
   resolveTurn2EndeavorHpEndpoints,
 } from "./turn2EndeavorPresentationStaging.ts";
+import { resolveBattle1PresentationHpValues } from "./battle1PresentationHpStaging.ts";
 import { resolveTurn11AtkFloorLines } from "./turn11FeatherDancePresentationStaging.ts";
 import {
   sceneOnDoubleTeamView,
@@ -832,9 +833,6 @@ import {
   firePunchTargetBlendCoeff,
   firePunchTurn17MenuBounceTick,
 } from "../animation/firePunch.ts";
-import battle1TurnRamDumpAsset from "../data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
-import battle1Turn2RamDumpAsset from "../data/gen/battle1-turn2-ram-dump.json" with { type: "json" };
-import battle1GrovyleFaintRamDumpAsset from "../data/gen/battle1-grovyle-faint-ram-dump.json" with { type: "json" };
 import speciesNamesAsset from "../data/gen/species-names.json" with { type: "json" };
 
 interface Tileset {
@@ -1377,26 +1375,21 @@ const battleAnimIceCrystalSmall: Tileset = {
 };
 
 /**
- * ISSUES #16: the anchor battle's real opponent battler (GROVYLE), sourced
- * from committed battle data rather than hardcoded - `battle1-turn1-ram-dump
- * .json`'s `before_turn.battler1` (species/level/hp/maxHP, RAM-probed) and
- * `species-names.json` (species id -> display name), both already-committed
- * data files (also used by `tests/turnRng.test.ts`/`tests/
- * battleMessageTemplates.test.ts`). `hp === maxHP` here (143/143) confirms
- * the full-HP case this window actually renders. Gender has no committed
+ * ISSUES #16: the anchor battle's real opponent battler (GROVYLE), now
+ * resolved through `battle1PresentationHpStaging.ts`'s kernel hit chains.
+ * `species-names.json` maps the staged species id to its display name.
+ * `hp === maxHP` here (143/143) confirms the full-HP case this window
+ * actually renders. Gender has no committed
  * data file yet (frontier-trainer opponents' `personality` isn't extracted
  * anywhere - only the player's own rentals carry it, `anchor-state.json`) -
  * "male" is the oracle-pixel-confirmed value for GROVYLE's harvested gender
  * glyph (docs/healthbox-assembly-notes.md), kept as a literal for that
  * reason alone.
  */
-const anchorOpponentBattler = (
-  battle1TurnRamDumpAsset as { battlerSnapshots: { before_turn: { battler1: { species: number; level: number; hp: number; maxHP: number } } } }
-).battlerSnapshots.before_turn.battler1;
-/** S7 slice D: Grovyle's own post-ROCK_SLIDE HP (`battle1-turn1-ram-dump.json`'s `after_turn.battler1.hp`, 101) - the HP-bar drain's own settled endpoint (`rockSlideOpponentHp`, `battleMenu.ts`). */
-const anchorOpponentAfterTurnHp = (
-  battle1TurnRamDumpAsset as { battlerSnapshots: { after_turn: { battler1: { hp: number } } } }
-).battlerSnapshots.after_turn.battler1.hp;
+const BATTLE1_PRESENTATION_HP = resolveBattle1PresentationHpValues();
+const anchorOpponentBattler = BATTLE1_PRESENTATION_HP.opponent;
+/** S7 slice D: Grovyle's kernel-derived post-ROCK_SLIDE HP (101), the HP-bar drain's settled endpoint. */
+const anchorOpponentAfterTurnHp = BATTLE1_PRESENTATION_HP.opponentAfterTurn1Hp;
 const anchorOpponentName = (speciesNamesAsset as { species: { name: string }[] }).species[anchorOpponentBattler.species]!.name;
 const ANCHOR_OPPONENT_GENDER = "male";
 
@@ -1720,20 +1713,12 @@ function opponentHealthboxContentForHp(hp: number): ReturnType<typeof composeOpp
 }
 
 /**
- * S7 slice E1b: Onix's own before/after-turn-2 HP (`battle1-turn2-ram-dump
- * .json`'s `before_turn2.battler0`/`after_turn2.battler0`, RAM-probed) -
- * ENDEAVOR's drain start/settle endpoints (`endeavorOnixHp`, `battleMenu
- * .ts`). Unlike `anchorOpponentBattler` (turn 1's own dump), this needs
- * turn 2's dump specifically - Onix's HP is unchanged (117, full) the whole
- * of turn 1, so no turn-1 fixture ever recorded a different value.
+ * S7 slice E1b: Onix's kernel-derived turn-2 ENDEAVOR start/settle anchors.
+ * Onix is unchanged at 117/full throughout turn 1.
  */
-const anchorPlayerBattler = (
-  battle1Turn2RamDumpAsset as { battlerSnapshots: { before_turn2: { battler0: { hp: number; maxHP: number } } } }
-).battlerSnapshots.before_turn2.battler0;
+const anchorPlayerBattler = BATTLE1_PRESENTATION_HP.player;
 /** Onix's own post-ENDEAVOR HP (`after_turn2.battler0.hp`, 101) - `endeavorOnixHp`'s own settled endpoint. */
-const anchorPlayerAfterTurnHp = (
-  battle1Turn2RamDumpAsset as { battlerSnapshots: { after_turn2: { battler0: { hp: number } } } }
-).battlerSnapshots.after_turn2.battler0.hp;
+const anchorPlayerAfterTurnHp = BATTLE1_PRESENTATION_HP.playerAfterTurn2Hp;
 
 /**
  * S7 slice E2b: Grovyle's own post-DRAGON_BREATH HP (`battle1-turn2-ram-
@@ -1745,38 +1730,23 @@ const anchorPlayerAfterTurnHp = (
  * verbatim (101-88=13, matching the damage-spread roll locked at RAM 3164,
  * `docs/dragon-breath-notes.md`'s phase table).
  */
-const anchorOpponentAfterTurn2Hp = (
-  battle1Turn2RamDumpAsset as { battlerSnapshots: { after_turn2: { battler1: { hp: number } } } }
-).battlerSnapshots.after_turn2.battler1.hp;
+const anchorOpponentAfterTurn2Hp = BATTLE1_PRESENTATION_HP.opponentAfterTurn2Hp;
 
 /**
- * S7 slice G (docs/battle-turn-notes.md §13/§20): Onix's own post-turn-3-
- * ENDEAVOR hp (`battle1-grovyle-faint-ram-dump.json`'s `battlerSnapshots["4892"]
- * .battler0.hp`, 88 - the tick-4892 snapshot is turn 3's own end/turn 4's
- * reopen boundary, taken AFTER both halves of turn 3 resolve, but Onix isn't
- * touched again by ROCK_SLIDE - which hits Grovyle - so this is exactly
- * ENDEAVOR's own settled endpoint, independently RAM-confirmed this session
- * at tick 4059 too). `endeavorOnixHp`'s own `endHp` for turn 3's instance -
+ * S7 slice G (docs/battle-turn-notes.md §13/§20): Onix's post-turn-3
+ * ENDEAVOR hp (88), re-derived as the staged turn-5 ENDEAVOR start (Onix is
+ * untouched between those uses). `endeavorOnixHp`'s `endHp` for turn 3 -
  * turn 2's `anchorPlayerAfterTurnHp` (101) doubles as turn 3's own `startHp`
  * (Onix carries no chip damage between turns 2 and 3, same reasoning
  * `anchorOpponentAfterTurn2Hp`'s own doc already gives for Grovyle).
  */
-const anchorPlayerAfterTurn3Hp = (
-  battle1GrovyleFaintRamDumpAsset as { battlerSnapshots: { "4892": { battler0: { hp: number } } } }
-).battlerSnapshots["4892"].battler0.hp;
+const anchorPlayerAfterTurn3Hp = BATTLE1_PRESENTATION_HP.playerAfterTurn3Hp;
 
 /**
- * S7 slice H (docs/battle-turn-notes.md §13/§21): Grovyle's own post-turn-3-
- * ROCK_SLIDE hp (`battle1-grovyle-faint-ram-dump.json`'s `battlerSnapshots
- * ["4892"].battler1.hp`, 41) - the same tick-4892 boundary snapshot
- * `anchorPlayerAfterTurn3Hp` already sources, this time the OTHER battler
- * (Grovyle is ROCK_SLIDE's own target, not Onix). Independently RAM-
- * confirmed this session via a fresh `tools/probe/ram-probe.py` run:
- * `gBattleMons[1].hp` updates 88->41 at tick 4333.
+ * S7 slice H (docs/battle-turn-notes.md §13/§21): Grovyle's kernel-derived
+ * post-turn-3 ROCK_SLIDE hp (41), from that staged hit's `hp-change`.
  */
-const anchorOpponentAfterTurn3Hp = (
-  battle1GrovyleFaintRamDumpAsset as { battlerSnapshots: { "4892": { battler1: { hp: number } } } }
-).battlerSnapshots["4892"].battler1.hp;
+const anchorOpponentAfterTurn3Hp = BATTLE1_PRESENTATION_HP.opponentAfterTurn3Hp;
 
 /**
  * S7 slice I (docs/battle-turn-notes.md §13/§22): Grovyle's own post-turn-4-

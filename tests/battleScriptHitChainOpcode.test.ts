@@ -17,7 +17,11 @@ import {
   stepBattleScriptMachine,
   type BattleScriptMachineState,
 } from "../src/engine/battleScriptMachine.ts";
-import { SET_MOVE_EFFECT_SUPPORTED_BYTES } from "../src/engine/battleScriptHitChainOpcode.ts";
+import {
+  SET_MOVE_EFFECT_SUPPORTED_BYTES,
+  calculateBattleScriptBaseDamageForCurrentMove,
+} from "../src/engine/battleScriptHitChainOpcode.ts";
+import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 
 const program = loadBattleScriptProgram();
 const TACKLE = 33; // EFFECT_HIT, power 35, accuracy 95, TYPE_NORMAL
@@ -31,6 +35,11 @@ const EARTHQUAKE = 89; // EFFECT_EARTHQUAKE, power 100, accuracy 100, MOVE_TARGE
 const ABILITY_PRESSURE = 46;
 const COUNTER = 68; // EFFECT_COUNTER, power 1, accuracy 100, TYPE_FIGHTING
 const MIRROR_COAT = 243; // EFFECT_MIRROR_COAT, power 1, accuracy 100, TYPE_PSYCHIC
+const FIRE_PUNCH = 7;
+const WATER_GUN = 55;
+const WEATHER_BALL = 311;
+const ABILITY_CLOUD_NINE = 13;
+const ABILITY_AIR_LOCK = 77;
 
 function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number } = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -55,6 +64,7 @@ function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number }
     usedTauntedMove: changes.usedTauntedMove ?? 0,
     usedImprisonedMove: changes.usedImprisonedMove ?? 0,
     item: changes.item ?? 0,
+    specialStatus: changes.specialStatus,
     statStages: changes.statStages ?? [6, 6, 6, 6, 6, 6, 6, 6],
     protected: changes.protected,
     ppNotAffectedByPressure: changes.ppNotAffectedByPressure,
@@ -685,6 +695,13 @@ const ABILITY_LEVITATE = 26;
 const ABILITY_WONDER_GUARD = 25;
 const HOLD_EFFECT_ITEM_FOCUS_BAND = 196; // ITEM_FOCUS_BAND
 const HOLD_EFFECT_ITEM_LEFTOVERS = 200; // ITEM_LEFTOVERS -- a real held item, not Focus Band
+const MACHOKE_1_FOCUS_BAND_CARRIER = (frontierMonsData.entries as readonly {
+  index: number;
+  label: string;
+  species: string;
+  moves: readonly string[];
+  itemName: string;
+}[]).find(({ index }) => index === 178)!;
 
 describe("production critcalc (Cmd_critcalc) dispatch", () => {
   it("registers B_SCR_OP_CRITCALC", () => {
@@ -724,9 +741,65 @@ describe("production critcalc (Cmd_critcalc) dispatch", () => {
 });
 
 describe("production damagecalc (Cmd_damagecalc) dispatch", () => {
+  const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
+  const B_WEATHER_SUN = (1 << 5) | (1 << 6);
+
   it("registers B_SCR_OP_DAMAGECALC", () => {
     const instruction = program.instructions.find((i) => i.opcodeName === "B_SCR_OP_DAMAGECALC")!;
     expect(instruction).toBeDefined();
+  });
+
+  it.each([
+    ["Fire Punch in rain", FIRE_PUNCH, B_WEATHER_RAIN, 18],
+    ["Fire Punch in sun", FIRE_PUNCH, B_WEATHER_SUN, 51],
+    ["Water Gun in rain", WATER_GUN, B_WEATHER_RAIN, 27],
+    ["Water Gun in sun", WATER_GUN, B_WEATHER_SUN, 10],
+  ])("%s carries gBattleWeather into CalculateBaseDamage before +2", (_label, move, weather, expected) => {
+    const rc = context(
+      0,
+      { spAttack: 100, moves: [move, 0, 0, 0] },
+      { currentMove: move, weather },
+      { spDefense: 100 },
+    );
+    expect(calculateBattleScriptBaseDamageForCurrentMove(rc)).toBe(expected);
+  });
+
+  it.each([
+    ["Cloud Nine", ABILITY_CLOUD_NINE, FIRE_PUNCH, B_WEATHER_RAIN, 35],
+    ["Cloud Nine", ABILITY_CLOUD_NINE, FIRE_PUNCH, B_WEATHER_SUN, 35],
+    ["Cloud Nine", ABILITY_CLOUD_NINE, WATER_GUN, B_WEATHER_RAIN, 19],
+    ["Cloud Nine", ABILITY_CLOUD_NINE, WATER_GUN, B_WEATHER_SUN, 19],
+    ["Air Lock", ABILITY_AIR_LOCK, FIRE_PUNCH, B_WEATHER_RAIN, 35],
+    ["Air Lock", ABILITY_AIR_LOCK, FIRE_PUNCH, B_WEATHER_SUN, 35],
+    ["Air Lock", ABILITY_AIR_LOCK, WATER_GUN, B_WEATHER_RAIN, 19],
+    ["Air Lock", ABILITY_AIR_LOCK, WATER_GUN, B_WEATHER_SUN, 19],
+  ])("%s suppresses weather damage for move %i under weather %#i", (_abilityName, ability, move, weather, expected) => {
+    const rc = context(
+      0,
+      { spAttack: 100, moves: [move, 0, 0, 0] },
+      { currentMove: move, weather },
+      { spDefense: 100, ability },
+    );
+    expect(calculateBattleScriptBaseDamageForCurrentMove(rc)).toBe(expected);
+  });
+
+  it("uses Weather Ball's resolved Fire type after Water Sport power halving, then applies sun damage before +2", () => {
+    const rc = context(
+      0,
+      {
+        spAttack: 100,
+        moves: [WEATHER_BALL, 0, 0, 0],
+        status3: 1 << 17,
+      },
+      {
+        currentMove: WEATHER_BALL,
+        dynamicMoveType: 0x80 | 10,
+        weather: B_WEATHER_SUN,
+      },
+      { spDefense: 100 },
+    );
+    // Power 50 -> Water Sport 25; raw 11 -> sun floor(11*1.5)=16 -> +2.
+    expect(calculateBattleScriptBaseDamageForCurrentMove(rc)).toBe(18);
   });
 
   it("a fresh crit (roll 3760) doubles the crit scenario's base damage (39 Atk -> 104 Def, Tackle: 7 -> 14)", () => {
@@ -1117,24 +1190,85 @@ describe("production adjustnormaldamage (Cmd_adjustnormaldamage) dispatch", () =
     expect(result.state.rulesContext.moveResultFlags & (1 << 6)).toBe(0);
   });
 
-  describe("(b) unsupported-branch barrier: Focus Band, only when actually held", () => {
-    it("halts when the target holds Focus Band (its roll is unmodeled)", () => {
-      const rc = context(0, {}, { battleMoveDamage: 999 }, { hp: 10, item: HOLD_EFFECT_ITEM_FOCUS_BAND });
-      const { result } = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE", rc, rngValueBeforeU16(52212));
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({
-        kind: "unsupported-branch",
-        sourceFile: "battle_script_commands.c",
-        sourceLine: 1677,
-      });
+  describe("Focus Band's holder-only post-variance roll", () => {
+    it("draws and records a successful roll on a non-lethal hit without clamping or attributing the message item", () => {
+      const rc = context(0, {}, { battleMoveDamage: 5 }, { hp: 100, item: HOLD_EFFECT_ITEM_FOCUS_BAND });
+      const { result } = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE", rc, 53);
+      expect(result.kind).toBe("advanced");
+      expect(result.state.rulesContext.battleMoveDamage).toBe(4);
+      expect(result.state.rulesContext.battlers[1].specialStatus.focusBanded).toBe(1);
+      expect(result.state.rulesContext.moveResultFlags & (1 << 7)).toBe(0);
+      expect(result.state.rulesContext.lastUsedItem).toBe(0);
+      expect(result.state.rng.ledger.map(({ reason, randomValue }) => [reason, randomValue])).toEqual([
+        ["adjustnormaldamage", 40462],
+        ["adjustnormaldamage-focus-band", 13608],
+      ]);
     });
 
-    it("does not barrier a different held item on the same lethal-hit shape", () => {
-      const rc = context(0, {}, { battleMoveDamage: 999 }, { hp: 10, endured: 1, item: HOLD_EFFECT_ITEM_LEFTOVERS });
+    it("successful lethal roll clamps to 1 HP and attributes HUNG_ON to Focus Band", () => {
+      expect(MACHOKE_1_FOCUS_BAND_CARRIER).toEqual({
+        index: 178,
+        label: "FRONTIER_MON_MACHOKE_1",
+        species: "SPECIES_MACHOKE",
+        moves: ["MOVE_LOW_KICK", "MOVE_ROCK_TOMB", "MOVE_FORESIGHT", "MOVE_SCARY_FACE"],
+        itemTableId: 6,
+        itemName: "BATTLE_FRONTIER_ITEM_FOCUS_BAND",
+        evSpread: 33,
+        evSpreadStats: ["F_EV_SPREAD_SP_DEFENSE", "F_EV_SPREAD_HP"],
+        nature: "NATURE_ADAMANT",
+      });
+      const rc = context(
+        0,
+        {},
+        { battleMoveDamage: 999 },
+        {
+          hp: 10,
+          species: 67,
+          moves: [67, 317, 193, 184],
+          item: HOLD_EFFECT_ITEM_FOCUS_BAND,
+        },
+      );
+      const { result } = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE", rc, 53);
+      expect(result.kind).toBe("advanced");
+      expect(result.state.rulesContext.battleMoveDamage).toBe(9);
+      expect(result.state.rulesContext.moveResultFlags & (1 << 7)).toBe(1 << 7);
+      expect(result.state.rulesContext.lastUsedItem).toBe(HOLD_EFFECT_ITEM_FOCUS_BAND);
+      expect(result.state.rng.ledger.map((entry) => entry.reason)).toEqual([
+        "adjustnormaldamage",
+        "adjustnormaldamage-focus-band",
+      ]);
+    });
+
+    it("failed lethal roll still consumes the band draw and leaves the hit lethal", () => {
+      const rc = context(0, {}, { battleMoveDamage: 999 }, { hp: 10, item: HOLD_EFFECT_ITEM_FOCUS_BAND });
+      const { result } = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE", rc, 1);
+      expect(result.kind).toBe("advanced");
+      expect(result.state.rulesContext.battleMoveDamage).toBe(939);
+      expect(result.state.rulesContext.battlers[1].specialStatus.focusBanded).toBe(0);
+      expect(result.state.rulesContext.moveResultFlags & (1 << 7)).toBe(0);
+      expect(result.state.rng.ledger.map(({ reason, randomValue }) => [reason, randomValue])).toEqual([
+        ["adjustnormaldamage", 16838],
+        ["adjustnormaldamage-focus-band", 44065],
+      ]);
+    });
+
+    it("does not shift the canonical no-band hit ledger", () => {
+      const rc = context(0, {}, { battleMoveDamage: 999 }, { hp: 10, item: HOLD_EFFECT_ITEM_LEFTOVERS });
       const { result } = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE", rc, rngValueBeforeU16(52212));
       expect(result.kind).toBe("advanced");
+      expect(result.state.rng.ledger.map((entry) => entry.reason)).toEqual(["adjustnormaldamage"]);
+      expect(result.state.rng.ledger[0]!.randomValue).toBe(52212);
+    });
+
+    it("keeps Endure's source precedence over a successful Focus Band roll", () => {
+      const rc = context(0, {}, { battleMoveDamage: 999 }, { hp: 10, endured: 1, item: HOLD_EFFECT_ITEM_FOCUS_BAND });
+      const { result } = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE", rc, 53);
+      expect(result.kind).toBe("advanced");
       if (result.kind !== "advanced") throw new Error("expected advance");
-      expect(result.state.rulesContext.battleMoveDamage).toBe(9); // hp - 1, clamped via Endure, item ignored
+      expect(result.state.rulesContext.battleMoveDamage).toBe(9);
+      expect(result.state.rulesContext.moveResultFlags & (1 << 6)).toBe(1 << 6);
+      expect(result.state.rulesContext.moveResultFlags & (1 << 7)).toBe(0);
+      expect(result.state.rulesContext.lastUsedItem).toBe(0);
     });
   });
 });
@@ -1186,21 +1320,21 @@ describe("production adjustnormaldamage2 (Cmd_adjustnormaldamage2) dispatch", ()
     expect(result.state.rng.calls).toBe(1);
   });
 
-  it("preserves the Focus Band barrier at Cmd_adjustnormaldamage2's own source line", () => {
+  it("runs the same variance-then-Focus-Band order in Cmd_adjustnormaldamage2", () => {
     const rc = context(
       0,
       {},
       { currentMove: FALSE_SWIPE, battleMoveDamage: 999 },
       { hp: 10, item: HOLD_EFFECT_ITEM_FOCUS_BAND },
     );
-    const { result } = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE2", rc, rngValueBeforeU16(52212));
-    expect(result.kind).toBe("halted");
-    expect(result.state.haltReason).toMatchObject({
-      kind: "unsupported-branch",
-      sourceFile: "battle_script_commands.c",
-      sourceLine: 1720,
-    });
-    expect(result.state.rng.calls).toBe(0);
+    const { result } = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE2", rc, 53);
+    expect(result.kind).toBe("advanced");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(9);
+    expect(result.state.rulesContext.moveResultFlags & (1 << 7)).toBe(1 << 7);
+    expect(result.state.rng.ledger.map((entry) => entry.reason)).toEqual([
+      "adjustnormaldamage2",
+      "adjustnormaldamage2-focus-band",
+    ]);
   });
 });
 
@@ -1291,16 +1425,14 @@ describe("production adjustsetdamage (Cmd_adjustsetdamage) dispatch", () => {
     expect(result.state.rulesContext.moveResultFlags & (1 << 6)).toBe(0);
   });
 
-  describe("(b) unsupported-branch barrier: Focus Band, only when actually held", () => {
-    it("halts when the target holds Focus Band (its roll is unmodeled, same gap as adjustnormaldamage's own)", () => {
+  describe("Focus Band's no-variance adjustsetdamage form", () => {
+    it("draws once and clamps a successful lethal hit", () => {
       const rc = context(0, {}, { currentMove: ENDEAVOR, battleMoveDamage: 999 }, { hp: 10, item: HOLD_EFFECT_ITEM_FOCUS_BAND });
-      const { result } = stepAtOpcode("B_SCR_OP_ADJUSTSETDAMAGE", rc);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({
-        kind: "unsupported-branch",
-        sourceFile: "battle_script_commands.c",
-        sourceLine: 5878,
-      });
+      const { result } = stepAtOpcode("B_SCR_OP_ADJUSTSETDAMAGE", rc, rngValueBeforeU16(13608));
+      expect(result.kind).toBe("advanced");
+      expect(result.state.rulesContext.battleMoveDamage).toBe(9);
+      expect(result.state.rulesContext.moveResultFlags & (1 << 7)).toBe(1 << 7);
+      expect(result.state.rng.ledger.map((entry) => entry.reason)).toEqual(["adjustsetdamage-focus-band"]);
     });
 
     it("does not barrier a different held item on the same lethal-hit shape", () => {
@@ -2010,12 +2142,30 @@ describe("production resultmessage (Cmd_resultmessage) dispatch", () => {
     expect(result.state.callStack.length).toBe(1);
   });
 
-  describe("(b) unsupported-branch barriers", () => {
-    it("halts on MOVE_RESULT_FOE_HUNG_ON (Focus Band subsystem unmodeled)", () => {
-      const rc = context(0, {}, { moveResultFlags: 1 << 7 });
-      const { result } = stepAtOpcode("B_SCR_OP_RESULTMESSAGE", rc);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2083 });
+  describe("Focus Band result-message consumption", () => {
+    it("records the target item, clears survival flags, and call-current jumps to the hang-on script", () => {
+      const rc = context(
+        0,
+        {},
+        { moveResultFlags: 1 << 7, lastUsedItem: 77 },
+        { item: HOLD_EFFECT_ITEM_FOCUS_BAND },
+      );
+      const { execution, result } = stepAtOpcode("B_SCR_OP_RESULTMESSAGE", rc);
+      expect(result.kind).toBe("advanced");
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_FocusBandActivates"));
+      expect(result.state.rulesContext.moveResultFlags).toBe(0);
+      expect(result.state.rulesContext.lastUsedItem).toBe(HOLD_EFFECT_ITEM_FOCUS_BAND);
+      expect(result.state.callStack.length).toBe(1);
+
+      const animation = stepBattleScriptMachine(program, result.state, execution.handlers);
+      expect(animation.kind).toBe("advanced");
+      const printed = stepBattleScriptMachine(program, animation.state, execution.handlers);
+      expect(printed.kind).toBe("advanced");
+      expect(printed.state.events.at(-1)).toMatchObject({
+        kind: "message",
+        messageId: "STRINGID_PKMNHUNGONWITHX",
+      });
+      expect(printed.state.rulesContext.lastUsedItem).toBe(HOLD_EFFECT_ITEM_FOCUS_BAND);
     });
   });
 });
@@ -2619,13 +2769,18 @@ describe("SetMoveEffect two-turn-charge family (registered) -- MOVE_EFFECT_CHARG
     return { execution, result: stepBattleScriptMachine(program, patched, execution.handlers) };
   }
 
-  it("turn 1 (not yet charging): sets STATUS2_MULTIPLETURNS + chargingTurn on the attacker, zero RNG, advances (SetMoveEffect just breaks, not a call)", () => {
-    const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_CHARGING | MOVE_EFFECT_AFFECTS_USER });
+  it("turn 1 (not yet charging): sets STATUS2_MULTIPLETURNS + chargingTurn + gLockedMoves on the attacker, zero RNG, advances (SetMoveEffect just breaks, not a call)", () => {
+    const rc = context(0, {}, {
+      currentMove: 19,
+      lockedMoves: [7, 8, 9, 10],
+      moveEffectByte: MOVE_EFFECT_CHARGING | MOVE_EFFECT_AFFECTS_USER,
+    });
     const { execution, result } = stepAtChargingSetEffectPrimary(rc);
     if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
     expect(result.state.rng.calls).toBe(execution.state.rng.calls);
     expect(result.state.rulesContext.battlers[0]!.status2 & STATUS2_MULTIPLETURNS).toBe(STATUS2_MULTIPLETURNS);
     expect(result.state.rulesContext.battlers[0]!.chargingTurn).toBe(1);
+    expect(result.state.rulesContext.lockedMoves).toEqual([19, 8, 9, 10]);
     expect(result.state.programCounter).toBe(setEffectPrimaryPc + 1);
   });
 
@@ -2641,13 +2796,18 @@ describe("SetMoveEffect two-turn-charge family (registered) -- MOVE_EFFECT_CHARG
     const rc = context(
       0,
       { status2: STATUS2_MULTIPLETURNS, chargingTurn: 0 },
-      { moveEffectByte: MOVE_EFFECT_CHARGING | MOVE_EFFECT_AFFECTS_USER },
+      {
+        currentMove: 19,
+        lockedMoves: [7, 8, 9, 10],
+        moveEffectByte: MOVE_EFFECT_CHARGING | MOVE_EFFECT_AFFECTS_USER,
+      },
     );
     const { execution, result } = stepAtChargingSetEffectPrimary(rc);
     if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
     expect(result.state.rng.calls).toBe(execution.state.rng.calls);
     expect(result.state.rulesContext.battlers[0]!.status2).toBe(STATUS2_MULTIPLETURNS);
     expect(result.state.rulesContext.battlers[0]!.chargingTurn).toBe(0);
+    expect(result.state.rulesContext.lockedMoves).toEqual([7, 8, 9, 10]);
     expect(result.state.programCounter).toBe(setEffectPrimaryPc + 1);
   });
 
