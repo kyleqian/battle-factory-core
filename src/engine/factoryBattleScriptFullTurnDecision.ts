@@ -74,7 +74,7 @@ import {
 } from "./battleDecisionBoundary.ts";
 import { handleBattleActionFinished } from "./battleActionFinished.ts";
 import { checkBattleScriptMoveLimitations } from "./battleScriptActionAdmission.ts";
-import { withBattler } from "./battleScriptHitChainOpcode.ts";
+import { HOLD_EFFECT_NAME_BY_ID, withBattler } from "./battleScriptHitChainOpcode.ts";
 import {
   acknowledgeBattleScriptMachineController,
   createBattleScriptRngState,
@@ -95,14 +95,17 @@ import {
   resumeBattleScriptFaintedActionsAfterPlayerChoice,
   runBattleScriptFaintedActionsOrchestration,
 } from "./battleScriptFaintedActionsOrchestration.ts";
-import { runBattleEndTurnOrchestration } from "./battleEndTurnOrchestration.ts";
-import { effectiveSpeed, getWhoStrikesFirst, type TurnOrderBattler } from "./turnOrder.ts";
+import { runBattleEndTurnOrchestration, weatherHasEffect } from "./battleEndTurnOrchestration.ts";
+import { effectiveSpeed, getWhoStrikesFirst, type TurnOrderBattler, type WeatherState } from "./turnOrder.ts";
+import { ABILITY_SYMBOLS } from "./battleScriptSwitchinOpcode.ts";
 import {
   BATTLE_SCRIPT_BATTLE_ENVIRONMENT_BUILDING,
   BATTLE_SCRIPT_BATTLE_TYPE_FACTORY,
   BATTLE_SCRIPT_BATTLE_TYPE_TRAINER,
   BATTLE_SCRIPT_PARTY_SIZE,
   createBattleScriptRulesContext,
+  resolveBattleScriptBattlerHoldEffect,
+  resolveBattleScriptBattlerHoldEffectParam,
   uniformBattleScriptIvs,
   createBattleScriptStatusRulesHandlers,
   type BattleScriptPartyMemberInput,
@@ -153,6 +156,11 @@ const ZERO_STAT_STAGES = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0] as const);
 const ZERO_IVS = uniformBattleScriptIvs(0);
 /** GetFactoryMonFixedIV(challenge 0, non-final) => sFixedIVTable[0][0] = 3. */
 const FACTORY_FIRST_CHALLENGE_IVS = uniformBattleScriptIvs(3);
+/** include/constants/battle.h:232-239 -- all active rain/sun variants. */
+const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
+const B_WEATHER_SUN = (1 << 5) | (1 << 6);
+/** include/constants/battle.h:120. */
+const STATUS1_PARALYSIS = 1 << 6;
 
 type MachineState = BattleScriptMachineState<BattleScriptRulesContext>;
 type Handlers = BattleScriptOpcodeHandlers<BattleScriptRulesContext>;
@@ -205,6 +213,8 @@ export type FactoryFullTurnBattlerConfig = Readonly<{
 export type FactoryFullTurnConfig = Readonly<{
   requestId: number;
   rngSeed: number;
+  /** Optional source gBattleWeather staging for finite full-turn fixtures. */
+  weather?: number;
   player: FactoryFullTurnBattlerConfig;
   trainer: FactoryFullTurnBattlerConfig;
   /**
@@ -493,6 +503,7 @@ function createInitialRules(config: FactoryFullTurnConfig): FactoryFullTurnDecis
       battleTypeFlags: BATTLE_SCRIPT_BATTLE_TYPE_TRAINER | BATTLE_SCRIPT_BATTLE_TYPE_FACTORY,
       battlerPositions: [0, 1, 0xff, 0xff],
     },
+    weather: config.weather ?? 0,
   });
   return Object.freeze({
     adapter: ADAPTER,
@@ -809,7 +820,31 @@ function movePriority(moveId: number): number {
 
 function turnOrderBattler(rulesContext: BattleScriptRulesContext, battler: BattleScriptBattlerId, moveId: number): TurnOrderBattler {
   const b = rulesContext.battlers[battler];
-  return { speed: b.speed, speedStage: b.statStages[STAT_SPEED]!, movePriority: movePriority(moveId) };
+  const holdEffect = resolveBattleScriptBattlerHoldEffect(rulesContext, battler);
+  return {
+    speed: b.speed,
+    speedStage: b.statStages[STAT_SPEED]!,
+    movePriority: movePriority(moveId),
+    ability: ABILITY_SYMBOLS[b.ability] ?? null,
+    holdEffect: HOLD_EFFECT_NAME_BY_ID[holdEffect] ?? null,
+    holdEffectParam: resolveBattleScriptBattlerHoldEffectParam(rulesContext, battler),
+    isParalyzed: (b.status1 & STATUS1_PARALYSIS) !== 0,
+  };
+}
+
+/**
+ * GetWhoStrikesFirst's WEATHER_HAS_EFFECT branch. The shared Frontier
+ * precedent suppresses weather for Cloud Nine; Air Lock has no legal
+ * Frontier carrier. The ROM scan also requires hp != 0
+ * (battle_util.c:3140-3148), which is vacuous here: action selection only
+ * resumes after fainted-actions installs two live singles actives.
+ */
+function turnOrderWeather(rulesContext: BattleScriptRulesContext): WeatherState {
+  if (!weatherHasEffect(rulesContext)) return {};
+  return {
+    isRaining: (rulesContext.weather & B_WEATHER_RAIN) !== 0,
+    isSunny: (rulesContext.weather & B_WEATHER_SUN) !== 0,
+  };
 }
 
 /**
@@ -1421,13 +1456,14 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
 
   const playerTOB = turnOrderBattler(rc0, 0, playerMoveId);
   const trainerTOB = turnOrderBattler(rc0, 1, trainerMoveId);
+  const weather = turnOrderWeather(rc0);
   const bothPriorityZero = playerTOB.movePriority === 0 && trainerTOB.movePriority === 0;
   const priorityEqual = playerTOB.movePriority === trainerTOB.movePriority;
   const isSpeedTie = (bothPriorityZero || priorityEqual)
-    && effectiveSpeed(playerTOB) === effectiveSpeed(trainerTOB);
+    && effectiveSpeed(playerTOB, weather) === effectiveSpeed(trainerTOB, weather);
   // battle_main.c:4728/4745 -- Random() & 1, drawn ONLY on a genuine speed tie.
   const speedTieRngRoll = isSpeedTie ? ctx.rng.draw("turn order speed tie (Random() & 1)") : 0;
-  const strikesFirst = getWhoStrikesFirst(playerTOB, trainerTOB, speedTieRngRoll);
+  const strikesFirst = getWhoStrikesFirst(playerTOB, trainerTOB, speedTieRngRoll, weather);
   const playerFirst = strikesFirst === 0;
 
   const mover1: BattleScriptBattlerId = playerFirst ? 0 : 1;

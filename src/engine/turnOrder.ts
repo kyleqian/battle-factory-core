@@ -11,6 +11,12 @@
 
 import { STAT_STAGE_RATIOS } from "./damageCalc.ts";
 
+// Identity aliases keep the source symbols visible to the identifier-based
+// ability/item census while preserving TurnOrderBattler's string ABI.
+const ABILITY_SWIFT_SWIM = "ABILITY_SWIFT_SWIM";
+const ABILITY_CHLOROPHYLL = "ABILITY_CHLOROPHYLL";
+const HOLD_EFFECT_MACHO_BRACE = "HOLD_EFFECT_MACHO_BRACE";
+
 export interface TurnOrderBattler {
   speed: number;
   speedStage: number;
@@ -36,14 +42,14 @@ export interface WeatherState {
  */
 export function effectiveSpeed(battler: TurnOrderBattler, weather: WeatherState = {}): number {
   const swiftBoost =
-    (battler.ability === "ABILITY_SWIFT_SWIM" && weather.isRaining) ||
-    (battler.ability === "ABILITY_CHLOROPHYLL" && weather.isSunny);
+    (battler.ability === ABILITY_SWIFT_SWIM && weather.isRaining) ||
+    (battler.ability === ABILITY_CHLOROPHYLL && weather.isSunny);
   const speedMultiplier = swiftBoost ? 2 : 1;
 
   const [num, den] = STAT_STAGE_RATIOS[battler.speedStage]!;
   let speed = Math.trunc((battler.speed * speedMultiplier * num) / den);
 
-  if (battler.holdEffect === "HOLD_EFFECT_MACHO_BRACE") speed = Math.trunc(speed / 2);
+  if (battler.holdEffect === HOLD_EFFECT_MACHO_BRACE) speed = Math.trunc(speed / 2);
   if (battler.isParalyzed) speed = Math.trunc(speed / 4);
   return speed;
 }

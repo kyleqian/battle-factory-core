@@ -6,7 +6,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 
 ## Headline
 
-- **Abilities: 55/70 members engine-referenced** (weighted by L50 set-carriers: 905/1103); 4 zero-carrier, 3 without battle hooks (out-of-battle only).
+- **Abilities: 57/70 members engine-referenced** (weighted by L50 set-carriers: 977/1103); 4 zero-carrier, 3 without battle hooks (out-of-battle only).
 - **Hold effects: 41/42 members engine-referenced** (weighted by L50 set-carriers: 775/850); 21 zero-carrier, 3 without battle hooks.
 - All 15 ground-truth validation checks passed.
 
@@ -14,8 +14,6 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 
 | Ability | Status | L50 carriers (det.) | All | Delegate cases | Inline rules | AI | Engine refs |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| ABILITY_CHLOROPHYLL | unreferenced | 38 (32) | 38 | — | 2 | 0 | 0 |
-| ABILITY_SWIFT_SWIM | unreferenced | 34 (13) | 34 | — | 2 | 0 | 0 |
 | ABILITY_STATIC | unreferenced | 27 (17) | 27 | ON_DAMAGE | 0 | 0 | 0 |
 | ABILITY_RUN_AWAY | unreferenced | 23 (2) | 23 | — | 4 | 0 | 0 |
 | ABILITY_POISON_POINT | unreferenced | 18 (14) | 18 | ON_DAMAGE | 0 | 0 | 0 |
@@ -33,9 +31,11 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_STURDY | engine-referenced | 42 (13) | 42 | — | 3 | 0 | 3 |
 | ABILITY_ROCK_HEAD | engine-referenced | 40 (3) | 40 | — | 1 | 0 | 3 |
 | ABILITY_INTIMIDATE | engine-referenced | 38 (28) | 38 | ON_SWITCHIN, INTIMIDATE1, INTIMIDATE2 | 0 | 0 | 2 |
+| ABILITY_CHLOROPHYLL | engine-referenced | 38 (32) | 38 | — | 2 | 0 | 2 |
 | ABILITY_THICK_FAT | engine-referenced | 36 (16) | 36 | — | 1 | 0 | 2 |
 | ABILITY_GUTS | engine-referenced | 36 (24) | 36 | — | 2 | 0 | 3 |
 | ABILITY_CLEAR_BODY | engine-referenced | 34 (29) | 34 | — | 3 | 0 | 12 |
+| ABILITY_SWIFT_SWIM | engine-referenced | 34 (13) | 34 | — | 2 | 0 | 2 |
 | ABILITY_PRESSURE | engine-referenced | 34 (30) | 46 | — | 6 | 0 | 11 |
 | ABILITY_OBLIVIOUS | engine-referenced | 33 (16) | 33 | ON_DAMAGE, IMMUNITY | 3 | 0 | 3 |
 | ABILITY_SYNCHRONIZE | engine-referenced | 30 (8) | 30 | SYNCHRONIZE, ATK_SYNCHRONIZE | 0 | 0 | 2 |
@@ -147,7 +147,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | HOLD_EFFECT_SP_DEFENSE_UP | zero-carrier | 0 | 0 | APICOT_BERRY | NORMAL | 0 | 0 | 2 |
 | HOLD_EFFECT_CRITICAL_UP | zero-carrier | 0 | 0 | LANSAT_BERRY | NORMAL | 0 | 0 | 2 |
 | HOLD_EFFECT_RANDOM_STAT_UP | zero-carrier | 0 | 0 | STARF_BERRY | NORMAL | 0 | 0 | 2 |
-| HOLD_EFFECT_MACHO_BRACE | zero-carrier | 0 | 0 | MACHO_BRACE | — | 3 | 0 | 0 |
+| HOLD_EFFECT_MACHO_BRACE | zero-carrier | 0 | 0 | MACHO_BRACE | — | 3 | 0 | 2 |
 | HOLD_EFFECT_EXP_SHARE | zero-carrier | 0 | 0 | — | — | 3 | 0 | 0 |
 | HOLD_EFFECT_FRIENDSHIP_UP | zero-carrier | 0 | 0 | — | — | 2 | 0 | 0 |
 | HOLD_EFFECT_DOUBLE_PRIZE | zero-carrier | 0 | 0 | — | ON_SWITCH_IN | 0 | 0 | 0 |

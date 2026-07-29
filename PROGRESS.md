@@ -14,6 +14,37 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > entry 468's animation items are the animation supervisor's backlog now.
 
 
+## 663 — [BOUNDED MAIN WORKER 2026-07-28 ~21:55] production turn-order inputs live; Swift Swim + Chlorophyll census rows closed
+
+- **State:** tree green at **452 files / 4862 tests**, production build,
+  `git diff --check`, and Battle Scene OFF oracle info. Census regenerated
+  byte-idempotently: **abilities 57/70 engine-referenced (weighted
+  977/1103)**, hold effects unchanged **41/42 (775/850)**; all 15
+  validations pass. This matches the assigned prediction exactly.
+- **Did:** wired `factoryBattleScriptFullTurnDecision.ts`'s sole production
+  `GetWhoStrikesFirst` call with both battlers' numeric ability → shared
+  `ABILITY_SYMBOLS` name, existing hold-effect/param resolvers → the shared
+  hold-effect name map (extended with Macho Brace id 24), real STATUS1
+  paralysis, and `rulesContext.weather`. Rain/sun decoding is suppressed by
+  the already-established end-turn `weatherHasEffect` Cloud Nine gate; no
+  duplicate ability/item/weather table was added. Six real full-turn tests
+  pin Swift Swim, Chlorophyll, opposing Cloud Nine, paralysis, Macho Brace,
+  and the existing one-draw-only speed-tie contract. Census identity aliases
+  close exactly the two assigned ability rows.
+- **Next:** keep the supervisor's order: falsify the scout's two-turn
+  `gRandomTurnNumber` gap before implementing Quick Claw; then choose Quick
+  Claw or the ON_DAMAGE contact family.
+- **Notes:** source citations were re-read. ROM `WEATHER_HAS_EFFECT` also
+  requires `hp != 0`; this is vacuous at action selection because the
+  full-turn reducer resumes only after fainted-actions installs live singles
+  actives. The paralysis call-site path has 9 draws by design: 8 ordinary hit
+  draws plus its existing attack-admission paralysis roll, and no turn-order
+  draw (an erroneous tie would make 10). No generator semantics, canonical
+  replay, oracle fixture, Quick Claw, AI, or `unsupported-branch` ratchet
+  changed. Scout/probe files untouched. PAPERCUT: none this session.
+
+---
+
 ## 662 — [INTERACTIVE TOOLING FIX 2026-07-28 ~21:40] Claude supervisor cwd persistence mechanically disabled
 
 - **State:** tree green at **452 files / 4856 tests**, launcher profile
@@ -76,55 +107,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   complete — dense oracle evidence for the two damage blocks remains the
   standing follow-up; the scout pack's recipes are the template. No
   deferred questions this session.
-
----
-
-## 660 — [BOUNDED MAIN WORKER 2026-07-28 ~21:05] damageCalc hold-item block ported bit-exact; census hold effects 22/42 -> 41/42
-
-- **State:** union green at **452 files / 4855 tests**, production build,
-  `git diff --check` clean. Census regenerated in-commit: **hold effects
-  41/42 engine-referenced (weighted 775/850)**, abilities unchanged 55/70
-  (weighted 905/1103), all 15 validations pass. Headline matched the
-  supervisor's prediction exactly.
-- **Did:** ported `pokemon.c` CalculateBaseDamage's hold-item block
-  (:3171-3201) into `damageCalc.ts`, inserted at the exact source position
-  (after Huge/Pure Power, before entry 659's ability block, so truncation
-  order matches): the `sHoldEffectToType` attacker-only type-power loop
-  (all 17 rows, first-match-break, `(param+100)/100` on attack for
-  physical types / spAttack for special), Choice Band (1.5x attack — the
-  choice-lock logic already referenced the hold effect, but the damage
-  boost itself was missing), and the 6 species-locked items (Soul Dew
-  spAttack/spDefense 1.5x gated on `!BATTLE_TYPE_FRONTIER` + Latias/Latios,
-  Deep Sea Tooth/Scale, Light Ball, Metal Powder, Thick Club, all flat 2x
-  on the correct stat/species pair). Added a local `spDefense` variable
-  (previously read straight off `defender.spDefense`) since Soul Dew/Deep
-  Sea Scale now mutate it before the special branch reads it. Wired the
-  real call site (`battleScriptHitChainOpcode.ts`'s
-  `calculateBattleScriptBaseDamageForCurrentMove`) with both battlers'
-  resolved hold effect (via the existing `resolveBattleScriptBattlerHoldEffect`
-  / `...HoldEffectParam` — no second item table invented), species, and
-  `isFrontierBattle` computed from the real `battleTypeFlags` (a genuine
-  structural no-op in this engine: every battle sets `BATTLE_TYPE_FACTORY`,
-  a `BATTLE_TYPE_FRONTIER` member). 17 new Tier-1 tests: type-boost
-  physical/special routing + truncation, species gating positive *and*
-  negative for all 6 items, Soul Dew's frontier gate proven both ways, and
-  a 4-stage combined-order test (Huge Power -> Choice Band -> Marvel Scale
-  -> Explosion) using odd numbers so a wrong stage order would visibly
-  produce a different result. Two new census infra spellings classified
-  (`HOLD_EFFECT_NAME_BY_ID`, `HOLD_EFFECT_TO_TYPE`) in the census script's
-  `ENGINE_INFRA_SPELLINGS` allowlist.
-- **Next:** supervisor pick the next row — `HOLD_EFFECT_QUICK_CLAW` (75 L50
-  carriers, the single remaining unreferenced hold effect; turn-order work,
-  a side-lane scout owns `GetWhoStrikesFirst`) or an ability row
-  (Chlorophyll 38 / Swift Swim 34 speed-calc class, or the ON_DAMAGE
-  contact family).
-- **Notes:** all 19 target hold-effect rows closed exactly as predicted
-  (15 named type-power rows + Thick Club, Deep Sea Scale, Light Ball,
-  Metal Powder). Soul Dew and Deep Sea Tooth stay `zero-carrier` (no L50
-  set carries them) despite being fully ported — expected, not a gap.
-  Ghost/Dragon Power also flipped to engine-referenced as a side effect of
-  porting the real table (still zero-carrier). No abilities, badge boosts,
-  field sports, AI, Enigma Berry, or new `unsupported-branch` barrier
-  touched (ratchet unchanged). PAPERCUT: none this session.
-
----

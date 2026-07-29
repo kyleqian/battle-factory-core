@@ -24,6 +24,13 @@ const KO_SCENARIO_RNG_SEED = 919694434;
 /** Brute-force-found: Ember's 10% burn proc actually lands on turn 1 with this seed, per this move's own real hit-chain RNG order (accuracy, crit, damage, secondary-effect-chance). */
 const BURN_PROC_RNG_SEED = 61;
 const STATUS1_BURN = 1 << 4;
+const STATUS1_PARALYSIS = 1 << 6;
+const ABILITY_CLOUD_NINE = 13;
+const ABILITY_SWIFT_SWIM = 33;
+const ABILITY_CHLOROPHYLL = 34;
+const ITEM_MACHO_BRACE = 181;
+const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
+const B_WEATHER_SUN = (1 << 5) | (1 << 6);
 
 // docs/factory-ai-ground-truth.md's own banked mask-7 fixture moveset/stat shape
 // (factoryAiScoredDecision.test.ts) -- Alakazam-shaped attacker vs Marowak-shaped
@@ -96,6 +103,171 @@ function config(overrides: Partial<FactoryFullTurnConfig> = {}): FactoryFullTurn
 
 const PLAYER_ATTACKS = Object.freeze({ kind: "use-move" as const, moveSlot: 0 as const, targetBattler: 1 as const });
 const TRAINER_ATTACKS = Object.freeze({ kind: "use-move" as const, moveSlot: 0 as const, targetBattler: 0 as const });
+
+function speedOrderConfig({
+  playerSpeed,
+  trainerSpeed,
+  playerAbility = 0,
+  trainerAbility = 0,
+  playerStatus1 = 0,
+  playerItem = 0,
+  weather = 0,
+}: Readonly<{
+  playerSpeed: number;
+  trainerSpeed: number;
+  playerAbility?: number;
+  trainerAbility?: number;
+  playerStatus1?: number;
+  playerItem?: number;
+  weather?: number;
+}>): FactoryFullTurnConfig {
+  return config({
+    weather,
+    player: {
+      species: 283,
+      moveId: STRENGTH,
+      ability: playerAbility,
+      item: playerItem,
+      status1: playerStatus1,
+      attack: 50,
+      defense: 200,
+      spAttack: 50,
+      spDefense: 200,
+      speed: playerSpeed,
+      hp: 999,
+    },
+    trainer: {
+      species: 235,
+      moveId: STRENGTH,
+      ability: trainerAbility,
+      attack: 50,
+      defense: 200,
+      spAttack: 50,
+      spDefense: 200,
+      speed: trainerSpeed,
+      hp: 999,
+    },
+  });
+}
+
+function runSpeedOrderTurn(turnConfig: FactoryFullTurnConfig): Readonly<{
+  ppOrder: readonly number[];
+  rngCalls: number;
+}> {
+  const initial = createFactoryFullTurnBattleState(turnConfig);
+  const afterPlayer = submitFactoryFullTurnDecision(initial, {
+    requestId: 1,
+    side: "player",
+    decision: PLAYER_ATTACKS,
+  });
+  if (afterPlayer.kind !== "decision-required") throw new Error("expected trainer decision");
+  const result = submitFactoryFullTurnDecision(afterPlayer.state, {
+    requestId: 2,
+    side: "trainer",
+    decision: TRAINER_ATTACKS,
+  });
+  if (result.kind !== "decision-required") throw new Error("expected next-turn decision");
+  const ppOrder = result.events.flatMap(({ payload }) =>
+    payload.kind === "set-battler-pp-data" ? [payload.battler] : []
+  );
+  return Object.freeze({ ppOrder, rngCalls: result.state.rng.calls });
+}
+
+describe("factory full-turn decision -- GetWhoStrikesFirst production inputs", () => {
+  it("threads Swift Swim and live rain so Surskit-shaped speed 76 flips a Smeargle-shaped speed 95 matchup", () => {
+    const dry = runSpeedOrderTurn(speedOrderConfig({
+      playerSpeed: 76,
+      trainerSpeed: 95,
+      playerAbility: ABILITY_SWIFT_SWIM,
+    }));
+    const rain = runSpeedOrderTurn(speedOrderConfig({
+      playerSpeed: 76,
+      trainerSpeed: 95,
+      playerAbility: ABILITY_SWIFT_SWIM,
+      weather: B_WEATHER_RAIN,
+    }));
+    expect(dry.ppOrder.slice(0, 2)).toEqual([1, 0]);
+    expect(rain.ppOrder.slice(0, 2)).toEqual([0, 1]);
+    expect([dry.rngCalls, rain.rngCalls]).toEqual([8, 8]);
+  });
+
+  it("threads Chlorophyll and live sun through the equivalent 76 -> 152 effective-speed flip", () => {
+    const noSun = runSpeedOrderTurn(speedOrderConfig({
+      playerSpeed: 76,
+      trainerSpeed: 95,
+      playerAbility: ABILITY_CHLOROPHYLL,
+    }));
+    const sun = runSpeedOrderTurn(speedOrderConfig({
+      playerSpeed: 76,
+      trainerSpeed: 95,
+      playerAbility: ABILITY_CHLOROPHYLL,
+      weather: B_WEATHER_SUN,
+    }));
+    expect(noSun.ppOrder.slice(0, 2)).toEqual([1, 0]);
+    expect(sun.ppOrder.slice(0, 2)).toEqual([0, 1]);
+    expect([noSun.rngCalls, sun.rngCalls]).toEqual([8, 8]);
+  });
+
+  it("reuses WEATHER_HAS_EFFECT: opposing Cloud Nine suppresses Swift Swim's rain doubling", () => {
+    const suppressed = runSpeedOrderTurn(speedOrderConfig({
+      playerSpeed: 76,
+      trainerSpeed: 95,
+      playerAbility: ABILITY_SWIFT_SWIM,
+      trainerAbility: ABILITY_CLOUD_NINE,
+      weather: B_WEATHER_RAIN,
+    }));
+    expect(suppressed.ppOrder.slice(0, 2)).toEqual([1, 0]);
+    expect(suppressed.rngCalls).toBe(8);
+  });
+
+  it("threads the real STATUS1_PARALYSIS bit and quarters speed after weather/stages", () => {
+    const healthy = runSpeedOrderTurn(speedOrderConfig({
+      playerSpeed: 152,
+      trainerSpeed: 95,
+    }));
+    const paralyzed = runSpeedOrderTurn(speedOrderConfig({
+      playerSpeed: 152,
+      trainerSpeed: 95,
+      playerStatus1: STATUS1_PARALYSIS,
+    }));
+    expect(healthy.ppOrder.slice(0, 2)).toEqual([0, 1]);
+    expect(paralyzed.ppOrder.slice(0, 2)).toEqual([1, 0]);
+    expect(healthy.rngCalls).toBe(8);
+    // The ninth draw is the existing AtkCanceler_UnableToUseMove paralysis
+    // admission roll. A mistaken turn-order tie would add another (10).
+    expect(paralyzed.rngCalls).toBe(9);
+  });
+
+  it("resolves Macho Brace's real item hold effect and halves speed through the call site", () => {
+    const unheld = runSpeedOrderTurn(speedOrderConfig({
+      playerSpeed: 152,
+      trainerSpeed: 95,
+    }));
+    const braced = runSpeedOrderTurn(speedOrderConfig({
+      playerSpeed: 152,
+      trainerSpeed: 95,
+      playerItem: ITEM_MACHO_BRACE,
+    }));
+    expect(unheld.ppOrder.slice(0, 2)).toEqual([0, 1]);
+    expect(braced.ppOrder.slice(0, 2)).toEqual([1, 0]);
+    expect([unheld.rngCalls, braced.rngCalls]).toEqual([8, 8]);
+  });
+
+  it("preserves the existing speed-tie contract: exactly one turn-order draw, and none for a one-point non-tie", () => {
+    const tie = runSpeedOrderTurn(speedOrderConfig({
+      playerSpeed: 95,
+      trainerSpeed: 95,
+    }));
+    const nonTie = runSpeedOrderTurn(speedOrderConfig({
+      playerSpeed: 96,
+      trainerSpeed: 95,
+    }));
+    expect(tie.ppOrder.slice(0, 2)).toHaveLength(2);
+    expect(nonTie.ppOrder.slice(0, 2)).toEqual([0, 1]);
+    expect(tie.rngCalls).toBe(9);
+    expect(nonTie.rngCalls).toBe(8);
+  });
+});
 
 describe("factory full-turn decision -- decision -> both actions -> end-turn -> next decision boundary", () => {
   it("excludes and rejects a party-switch command while Mean Look's 0x04000000 trap is active", () => {

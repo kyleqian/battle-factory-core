@@ -995,7 +995,7 @@ type ItemsTickOutcome =
   | Readonly<{ kind: "case-barrier"; state: MachineState; detail: string }>;
 
 /** `WEATHER_HAS_EFFECT` (include/battle_util.h:47), modeled the same as `battleScriptDamagingWeatherOpcode.ts`'s own `battlerCarriesCloudNine` precedent. */
-function weatherHasEffect(rulesContext: BattleScriptRulesContext): boolean {
+export function weatherHasEffect(rulesContext: BattleScriptRulesContext): boolean {
   const count = rulesContext.battleTopology.battlersCount;
   for (let i = 0; i < count; i += 1) {
     if (rulesContext.battlers[i]!.ability === ABILITY_CLOUD_NINE) return false;

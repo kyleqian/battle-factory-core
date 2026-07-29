@@ -166,12 +166,13 @@ const HOLD_EFFECT_ID_LUCKY_PUNCH = 63;
 const HOLD_EFFECT_ID_STICK = 66;
 
 /**
- * hold_effects.h ids -> damageCalc.ts's HOLD_EFFECT_* spellings, for the
- * CalculateBaseDamage hold-item block (sHoldEffectToType's 17 type-power
- * rows, Choice Band, and the 6 species-locked items) - every id that block
- * reads, mapped once here rather than as another per-effect ternary chain.
+ * hold_effects.h ids -> engine HOLD_EFFECT_* spellings. This is the shared
+ * numeric-id resolver for consumers whose pure helpers retain a string ABI:
+ * CalculateBaseDamage's item block and GetWhoStrikesFirst's Macho Brace
+ * check. Keep each source id here rather than creating consumer-local tables.
  */
-const HOLD_EFFECT_NAME_BY_ID: Readonly<Record<number, string>> = Object.freeze({
+export const HOLD_EFFECT_NAME_BY_ID: Readonly<Record<number, string>> = Object.freeze({
+  24: "HOLD_EFFECT_MACHO_BRACE",
   29: "HOLD_EFFECT_CHOICE_BAND",
   31: "HOLD_EFFECT_BUG_POWER",
   34: "HOLD_EFFECT_SOUL_DEW",

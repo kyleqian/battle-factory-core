@@ -99,7 +99,7 @@ const SPECIES_STATS_BY_ID = new Map(
   (speciesStatsData.species as unknown as readonly SpeciesStatsRow[]).map((row) => [row.id, row]),
 );
 /** include/constants/abilities.h: source symbols in exact numeric-id order. */
-const ABILITY_SYMBOLS = Object.freeze([
+export const ABILITY_SYMBOLS = Object.freeze([
   "ABILITY_NONE", "ABILITY_STENCH", "ABILITY_DRIZZLE", "ABILITY_SPEED_BOOST",
   "ABILITY_BATTLE_ARMOR", "ABILITY_STURDY", "ABILITY_DAMP", "ABILITY_LIMBER",
   "ABILITY_SAND_VEIL", "ABILITY_STATIC", "ABILITY_VOLT_ABSORB", "ABILITY_WATER_ABSORB",
