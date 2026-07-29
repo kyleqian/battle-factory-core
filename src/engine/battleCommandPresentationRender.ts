@@ -5,6 +5,10 @@ import type {
   BattleCommandFieldBattler,
   BattleCommandPresentationState,
 } from "./battleCommandPresentation.ts";
+import {
+  createBattleCommandFieldArtView,
+  type BattleCommandFieldArtView,
+} from "./battleCommandFieldArt.ts";
 import type { RgbColor } from "./bg.ts";
 import {
   buildFightMoveset,
@@ -55,6 +59,7 @@ export type BattleCommandPlayerHealthboxRenderParams =
 
 export type BattleCommandPresentationRenderView = Readonly<{
   field: BattleCommandPresentationState["field"];
+  fieldArt: BattleCommandFieldArtView;
   healthboxes: Readonly<{
     player: BattleCommandPlayerHealthboxRenderParams;
     opponent: HealthboxContentParams;
@@ -87,6 +92,7 @@ export function createBattleCommandPresentationRenderView(
 ): BattleCommandPresentationRenderView {
   return Object.freeze({
     field: presentation.field,
+    fieldArt: createBattleCommandFieldArtView(presentation.field),
     healthboxes: Object.freeze({
       player: Object.freeze({
         ...healthboxParams(presentation.field.player),

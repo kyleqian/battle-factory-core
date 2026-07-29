@@ -613,6 +613,21 @@ describe("battle-command presentation renderer", () => {
           status: opponentStatus,
         },
       });
+      expect(view.fieldArt.player).toMatchObject({
+        species: 240,
+        speciesSymbol: "MAGBY",
+        coords: { width: 48, height: 48, yOffset: 11 },
+        origin: { x: 40, y: 59 },
+      });
+      expect(view.fieldArt.opponent).toMatchObject({
+        species: 25,
+        speciesSymbol: "PIKACHU",
+        origin: { x: 144, y: 17 },
+      });
+      expect(view.fieldArt.player.pic.tileset.tiles).toHaveLength(64);
+      expect(view.fieldArt.player.pic.palette).toHaveLength(16);
+      expect(view.fieldArt.opponent.pic.tileset.tiles).toHaveLength(64);
+      expect(view.fieldArt.opponent.pic.palette).toHaveLength(16);
       expect(view.actionMenu).toEqual({
         prompt: "What will MAGBY do?",
         options: ["FIGHT", "BAG", "POKéMON", "RUN"],
