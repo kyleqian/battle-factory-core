@@ -15,8 +15,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 668 — [BOUNDED MAIN WORKER 2026-07-28 ~23:31] corpus-to-kernel party adapter implemented
 
-- **State:** focused rung-5 suite green at **4 tests** and production build
-  green; full suite/census idempotence remain to run before handoff.
+- **State:** tree green at **453 files / 4891 tests**, production build,
+  `git diff --check`, and Battle Scene OFF oracle info. Census regenerated
+  twice as a byte-identical no-op at **69/69 abilities (1096/1096)** and
+  **42/42 hold effects (850/850)**; all 17 validations and both executable
+  ratchets pass unchanged.
 - **Did:** added a pure generated-corpus adapter from set id + personality/
   fixed IV/ability slot/OT id to a field-complete Level-50
   `BattleScriptPartyMemberState` structural subtype: source nature check,
@@ -24,11 +27,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   item/hold effect, single/dual ability, friendship, gender and shiny. A
   focused Tier-1 test constructs every Level-50 set **0–849** and exactly
   reproduces all six OFF bootstrap RAM-dumped rental literals.
-- **Next:** run census no-op, executable ratchets, full `npm test`/build,
-  finalize this entry, and commit.
+- **Next:** supervisor verify rung 5. Rung 2's pure fresh-battle initializer
+  can consume the side-owned rung-1 RNG receipt when that checkpoint lands;
+  do not wire this adapter into battle-start/controller state in this rung.
 - **Notes:** scout §2.2/§2.3/rung-5 citations proved. Battle-lab has no cheap
   generic derived-party read-back command; using its permitted known-good
-  literal fallback (the OFF bootstrap RAM dump). No battle-start/controller,
+  literal fallback (the OFF bootstrap RAM dump). Commits `449f6365`,
+  `b75b663f`; the census initially caught and forced removal of a quoted
+  ability comparison before final validation. No battle-start/controller,
   side-owned, issue, census-generator, or ratchet file changed. PAPERCUT: none.
 
 ---
