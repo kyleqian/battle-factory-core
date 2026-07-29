@@ -13,6 +13,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 646 — [BOUNDED MAIN WORKER 2026-07-28 ~17:23] Called locked-move and recharge seams fixed
+
+- **State:** committed `cc6c0b1f`; tree green at **434 files / 4722 tests**,
+  production build, OFF oracle info, and `git diff --check`. Census remains
+  byte-idempotent at **214/214 effects, 355/355 moves, 276/276 distinct,
+  2957/2957 weighted** with all **72** validations passing.
+- **Did:** charging and rampage now store executed `gCurrentMove` in the
+  attacker lock. The full-turn action consumer accepts a lock independent of
+  the caller's physical moveslot, overrides current/chosen from it for both
+  multi-turn and recharge actions, and preserves the original slot solely as
+  PP owner.
+- **Next:** supervisor verify `cc6c0b1f`; audit findings 3 (weather damage
+  block) and 4 (Focus Band) remain separate, explicitly out-of-scope steps.
+- **Notes:** eight full-turn scenarios pin Assist→Fly, Metronome→Thrash,
+  Assist→Bide, Metronome→Hyper Beam, and all four plain paths. Called moves
+  resume while only Assist/Metronome's slot spends PP; recharge exposes Hyper
+  Beam as chosen/current during admission before source action-finished clears
+  current. No barrier-count, handler-pin, census, recording-import,
+  presentation, roadmap, or issue change.
+
+---
+
 ## 645 — [BOUNDED MAIN WORKER 2026-07-28 ~17:02] Frontier-tail row 8 Metronome closes census
 
 - **State:** committed `529b48ec`; tree green at **431 files / 4712 tests**,
@@ -55,26 +77,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   switch/faint lifetime clears, both messages, and move-end. Deliberate handler
   exact-set pin **207→208**. No barrier, recording import, presentation,
   round, tick, roadmap, or issue change.
-
----
-
-## 643 — [BOUNDED MAIN WORKER 2026-07-28 ~16:40] Frontier-tail row 6b Beat Up source-complete
-
-- **State:** committed `ebc331fb`; tree green at **429 files / 4681 tests**,
-  production build, OFF oracle info, and `git diff --check`. Census is exactly
-  **212/214 effects, 353/355 moves, 275/276 distinct, 2955/2957 weighted**:
-  assigned-baseline delta **+1/+1/+0/+0**; all **70** validations pass.
-- **Did:** registered `B_SCR_OP_TRYDOBEATUP` with the source six-slot
-  HP/species/Egg/status scan, active-slot inclusion, per-member nickname, and
-  exact ordered integer base-Attack/base-Defense formula. The Level-50
-  constant is an explicit S10 mission bound; Helping Hand is the sole
-  post-formula multiplier.
-- **Next:** supervisor verify `ebc331fb`; continue only at ordered row 7
-  Transform, not Metronome or retired canonical Battle 2 work.
-- **Notes:** consumed mandatory `docs/beatup-off-evidence.md`; receipt-shaped
-  Tier-1 pins `gBattleCommunication[0]` **0→2→3→6**, target **160→154**,
-  and exactly accuracy + two crit/variance pairs (**5 draws**). Tests cover
-  every invalid-member filter, zero/one/three hitters, active hitter,
-  slot-specific damage/nickname, Helping Hand, and end-vs-initial-failure.
-  Deliberate handler exact-set pin **206→207**. No barrier, canonical import,
-  recording, presentation, round, tick, roadmap, or issue change.
