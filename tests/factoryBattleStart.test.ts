@@ -3,6 +3,7 @@ import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { 
 import naturesData from "../src/data/gen/natures.json" with { type: "json" };
 import {
   createFreshFactoryBattle,
+  initializeFreshFactoryBattle,
 } from "../src/engine/factoryBattleStart.ts";
 import {
   createFactoryCorpusPartyMember,
@@ -43,7 +44,12 @@ function requireStarted(result: ReturnType<typeof createFreshFactoryBattle>) {
   return result;
 }
 
-describe("fresh Factory battle initializer (Gate-5 rung 2)", () => {
+function requireInitialized(result: ReturnType<typeof initializeFreshFactoryBattle>) {
+  if (result.kind !== "started") throw new Error(`unexpected fresh-start barrier: ${result.sourceConstruct}`);
+  return result;
+}
+
+describe("fresh Factory battle initializer (Gate-5 rungs 2-3)", () => {
   it("publishes the first player command with source-fresh tracked state and exactly draws A then B", () => {
     const seed = 3;
     const drawA = randomU16(seed);
@@ -132,17 +138,101 @@ describe("fresh Factory battle initializer (Gate-5 rung 2)", () => {
     expect(ppOrder.slice(0, 2)).toEqual([0, 1]);
   });
 
-  it("reaches the named entry-hook unsupported-branch only for an active hook carrier", () => {
-    const result = createFreshFactoryBattle({
+  it("defers Intimidate until after the ordered ON_SWITCHIN scan, publishes its visible script events, and draws no hook RNG", () => {
+    const result = requireInitialized(initializeFreshFactoryBattle({
       requestId: 1,
       rngSeed: 3,
       playerParty: party(53, 0), // Ekans, ability slot 0 = Intimidate.
       opponentParty: party(300),
+    }));
+    expect(result.state.rng.calls).toBe(2);
+    expect(result.state.rules.rulesContext.battlers[1].statStages[1]).toBe(5);
+    expect(result.events.map(({ payload }) => payload.kind)).toEqual([
+      "stat-stage-change", "animation", "message",
+    ]);
+    expect(result.events[0]?.payload).toMatchObject({
+      kind: "stat-stage-change", battler: 1, stat: "attack", from: 6, to: 5,
     });
-    expect(result).toMatchObject({
-      kind: "unsupported-branch",
-      sourceConstruct: "TryDoEventsBeforeFirstTurn switch-in ability/item hook loop",
+    expect(result.events[2]?.payload).toMatchObject({
+      kind: "message", messageId: "STRINGID_PKMNCUTSATTACKWITH",
     });
+    expect(result.state.nextEventSequence).toBe(result.events.length);
+  });
+
+  it("runs faster Drought before deferred Intimidate and reaches the same final command state after every controller-yielding hook script", () => {
+    const groudonParty = Object.freeze([
+      Object.freeze({
+        ...member(300),
+        // Groudon is not in the Level-50 Factory corpus. This complete
+        // adapter-shaped member supplies its real single ability for the
+        // lifecycle-only hook representative.
+        species: 405,
+        abilityNum: 0 as const,
+        speed: 120,
+      }),
+      ...party(300).slice(1),
+    ]) as unknown as BattleScriptPartyState;
+    const first = requireInitialized(initializeFreshFactoryBattle({
+      requestId: 1,
+      rngSeed: 3,
+      playerParty: groudonParty,
+      opponentParty: party(53, 0), // Ekans: Intimidate, slower than the constructed Groudon.
+    }));
+    const replay = requireInitialized(initializeFreshFactoryBattle({
+      requestId: 1,
+      rngSeed: 3,
+      playerParty: groudonParty,
+      opponentParty: party(53, 0),
+    }));
+    expect(first.state).toEqual(replay.state);
+    expect(first.state.rules.rulesContext.weather).toBe((1 << 5) | (1 << 6));
+    expect(first.state.rules.rulesContext.battlers[0].statStages[1]).toBe(5);
+    expect(first.events.filter(({ payload }) =>
+      payload.kind === "message"
+    ).map(({ payload }) => payload.kind === "message" ? payload.messageId : null)).toEqual([
+      "STRINGID_PKMNSXINTENSIFIEDSUN",
+      "STRINGID_PKMNCUTSATTACKWITH",
+    ]);
+    expect(first.state.rng.calls).toBe(2);
+  });
+
+  it("resolves a real Level-50 Porygon2 Trace carrier after ON_SWITCHIN hooks without extra draws", () => {
+    const result = requireInitialized(initializeFreshFactoryBattle({
+      requestId: 1,
+      rngSeed: 3,
+      playerParty: party(436, 0), // Porygon2 set 1, ability slot 0 = Trace.
+      opponentParty: party(53, 0), // copies Intimidate only after pending Intimidate resolves.
+    }));
+    expect(result.state.rules.rulesContext.battlers[0].ability).toBe(22);
+    expect(result.events.filter(({ payload }) =>
+      payload.kind === "message"
+    ).map(({ payload }) => payload.kind === "message" ? payload.messageId : null)).toEqual([
+      "STRINGID_PKMNCUTSATTACKWITH",
+      "STRINGID_PKMNTRACED",
+    ]);
+    expect(result.state.rng.calls).toBe(2);
+  });
+
+  it("runs speed-ordered switch-in items after Intimidate: White Herb restores the lowered stage and is consumed", () => {
+    const result = requireInitialized(initializeFreshFactoryBattle({
+      requestId: 1,
+      rngSeed: 3,
+      playerParty: party(48, 0), // Kirlia carries White Herb; slot 0 is Synchronize.
+      opponentParty: party(53, 0), // Ekans Intimidate lowers Kirlia before the item pass.
+    }));
+    const player = result.state.rules.rulesContext.battlers[0];
+    expect(player.statStages[1]).toBe(6);
+    expect(player.item).toBe(0);
+    expect(result.events.filter(({ payload }) =>
+      payload.kind === "message"
+    ).map(({ payload }) => payload.kind === "message" ? payload.messageId : null)).toEqual([
+      "STRINGID_PKMNCUTSATTACKWITH",
+      "STRINGID_PKMNSITEMRESTOREDSTATUS",
+    ]);
+    expect(result.events.at(-1)?.payload).toMatchObject({
+      kind: "set-battler-item", battler: 0, item: 0,
+    });
+    expect(result.state.rng.calls).toBe(2);
   });
 
   it("reaches the named equal-speed unsupported-branch pending the live tie receipt", () => {

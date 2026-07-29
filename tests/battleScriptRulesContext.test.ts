@@ -333,6 +333,7 @@ describe("source-shaped Battle Script rules context", () => {
       BS_ATTACKER: 1,
       BS_EFFECT_BATTLER: 2,
       BS_FAINTED: 3,
+      BS_BATTLER_0: 7,
       BS_SCRIPTING: 10,
     });
     expect(resolveRulesBattlerForBattleScript(context, selector("BS_TARGET"))).toBe(2);
@@ -343,6 +344,8 @@ describe("source-shaped Battle Script rules context", () => {
     expect(resolveRulesBattlerForBattleScript(context, selector("0x1"))).toBe(3);
     expect(resolveRulesBattlerForBattleScript(context, selector("BS_EFFECT_BATTLER"))).toBe(1);
     expect(resolveRulesBattlerForBattleScript(context, selector("2"))).toBe(1);
+    expect(resolveRulesBattlerForBattleScript(context, selector("BS_BATTLER_0"))).toBe(0);
+    expect(resolveRulesBattlerForBattleScript(context, selector("7"))).toBe(0);
     // BS_FAINTED (battle_util.c:713-715): a role distinct from BS_TARGET, only
     // ever written by the fainted-actions orchestration -- proven here as a
     // pure selector mapping, independent of that orchestration's own tests.
@@ -364,7 +367,8 @@ describe("source-shaped Battle Script rules context", () => {
     expect(resolveRulesBattlerForBattleScript(missing, selector("BS_ATTACKER"))).toBeNull();
     expect(resolveRulesBattlerForBattleScript(missing, selector("BS_EFFECT_BATTLER"))).toBeNull();
     expect(resolveRulesBattlerForBattleScript(missing, selector("BS_FAINTED"))).toBeNull();
-    for (const expression of ["7", "255", "-1", "bogus"]) {
+    expect(resolveRulesBattlerForBattleScript(missing, selector("7"))).toBe(0);
+    for (const expression of ["255", "-1", "bogus"]) {
       expect(resolveRulesBattlerForBattleScript(missing, selector(expression))).toBeNull();
     }
   });

@@ -16,6 +16,8 @@ export const BATTLE_SCRIPT_BATTLER_SELECTORS = Object.freeze({
   BS_ATTACKER: 1,
   BS_EFFECT_BATTLER: 2,
   BS_FAINTED: 3,
+  /** battle_script_commands.h:311 / battle_util.c:708-710 -- literal battler id 0. */
+  BS_BATTLER_0: 7,
   /** battle_script_commands.h:314 -- gBattleScripting.battler, the ItemBattleEffects/AbilityBattleEffects end-turn scripts' own selector (docs/endturn-abilities-items-ground-truth.md §1c/§5 slice 4). */
   BS_SCRIPTING: 10,
 } as const);

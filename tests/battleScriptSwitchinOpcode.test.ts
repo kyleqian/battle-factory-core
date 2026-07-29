@@ -41,6 +41,8 @@ const ABILITY_LEVITATE = 26;
 const ABILITY_INTIMIDATE = 22;
 const ABILITY_TRACE = 36;
 const ABILITY_DRIZZLE = 2;
+const ABILITY_SAND_STREAM = 45;
+const ABILITY_DROUGHT = 70;
 const ABILITY_CLEAR_BODY = 29;
 const ABILITY_HYPER_CUTTER = 52;
 const ABILITY_WHITE_SMOKE = 73;
@@ -975,6 +977,11 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
         for (const pending of state.scheduler.pendingControllerBattlers) {
           state = acknowledgeBattleScriptMachineController(state, pending);
         }
+      } else if (next.kind === "halted" && next.state.haltReason?.kind === "end3") {
+        // Weather ON_SWITCHIN uses PushCursorAndCallback + end3. The
+        // TryDoEventsBeforeFirstTurn owner resumes its C loop externally.
+        state = next.state;
+        break;
       } else {
         throw new Error(`Drizzle entry script stopped at ${next.kind}: ${JSON.stringify(next.state.haltReason)}`);
       }
@@ -1045,4 +1052,23 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(second.state.events).toEqual([]);
     expect(second.state.rng.calls).toBe(0);
   });
+
+  it.each([
+    ["Sand Stream", ABILITY_SAND_STREAM, (1 << 3) | (1 << 4), "BattleScript_SandstreamActivates"],
+    ["Drought", ABILITY_DROUGHT, (1 << 5) | (1 << 6), "BattleScript_DroughtActivates"],
+  ] as const)(
+    "switchineffects: %s sets both source temporary+permanent weather bits and draws zero RNG",
+    (_name, ability, weather, scriptLabel) => {
+      const rc = context({ battlers: [
+        battler({ side: 0 }),
+        battler({ side: 1, ability }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ] });
+      const result = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc).result;
+      expect(result.state.rulesContext.weather).toBe(weather);
+      expect(result.state.programCounter).toBe(resolveBattleScriptLabel(program, scriptLabel)!.programCounter);
+      expect(result.state.rng.calls).toBe(0);
+    },
+  );
 });

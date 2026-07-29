@@ -585,6 +585,8 @@ export function createFactoryFullTurnBattleStateFromRulesContext(
     requestId: number;
     rngSeed: number;
     rngCalls?: number;
+    /** Semantic events emitted by lifecycle hooks before this first request. */
+    nextEventSequence?: number;
     rulesContext: BattleScriptRulesContext;
   }>,
 ): BattleState<FactoryFullTurnDecisionRules> {
@@ -594,7 +596,7 @@ export function createFactoryFullTurnBattleStateFromRulesContext(
     pendingPlayerDecision: null,
     rulesContext: input.rulesContext,
   }) as FactoryFullTurnDecisionRules;
-  return createBattleState({
+  const state = createBattleState({
     rules,
     rngSeed: input.rngSeed,
     rngCalls: input.rngCalls,
@@ -606,6 +608,9 @@ export function createFactoryFullTurnBattleStateFromRulesContext(
       legalDecisions: legalPlayerDecisions(rules.rulesContext),
     },
   }) as BattleState<FactoryFullTurnDecisionRules>;
+  return input.nextEventSequence === undefined
+    ? state
+    : Object.freeze({ ...state, nextEventSequence: input.nextEventSequence });
 }
 
 function rulesAt(input: FactoryFullTurnDecisionRules): FactoryFullTurnDecisionRules {

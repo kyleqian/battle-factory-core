@@ -89,7 +89,9 @@ const STATUS3_INTIMIDATE_POKES = 1 << 19;
 const STATUS3_TRACE = 1 << 20;
 const B_WEATHER_RAIN_TEMPORARY = 1 << 0;
 const B_WEATHER_RAIN_PERMANENT = 1 << 2;
+const B_WEATHER_SANDSTORM_TEMPORARY = 1 << 3;
 const B_WEATHER_SANDSTORM_PERMANENT = 1 << 4;
+const B_WEATHER_SUN_TEMPORARY = 1 << 5;
 const B_WEATHER_SUN_PERMANENT = 1 << 6;
 
 type SpeciesTypesRow = Readonly<{ name: string; types: readonly [string, string] }>;
@@ -801,13 +803,13 @@ function createSwitchineffectsOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
     if (nextActive.ability === ABILITY_SAND_STREAM && !(nextRules.weather & B_WEATHER_SANDSTORM_PERMANENT)) {
       return callSwitchinScript(context, "BattleScript_SandstreamActivates", Object.freeze({
         ...abilityRules,
-        weather: B_WEATHER_SANDSTORM_PERMANENT,
+        weather: B_WEATHER_SANDSTORM_TEMPORARY | B_WEATHER_SANDSTORM_PERMANENT,
       }));
     }
     if (nextActive.ability === ABILITY_DROUGHT && !(nextRules.weather & B_WEATHER_SUN_PERMANENT)) {
       return callSwitchinScript(context, "BattleScript_DroughtActivates", Object.freeze({
         ...abilityRules,
-        weather: B_WEATHER_SUN_PERMANENT,
+        weather: B_WEATHER_SUN_TEMPORARY | B_WEATHER_SUN_PERMANENT,
       }));
     }
     if (nextActive.ability === ABILITY_INTIMIDATE && !(nextActive.status3 & STATUS3_INTIMIDATE_POKES)) {

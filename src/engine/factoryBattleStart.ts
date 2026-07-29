@@ -10,13 +10,24 @@
 import frontierHeldItemsData from "../data/gen/battle-frontier-held-items.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
 import speciesTypesData from "../data/gen/species-types.json" with { type: "json" };
-import type { BattleState } from "./battleDecisionBoundary.ts";
+import type { BattleKernelSemanticEvent, BattleState } from "./battleDecisionBoundary.ts";
+import type { BattleScriptSemanticEvent } from "./battleScriptEvents.ts";
+import {
+  acknowledgeBattleScriptMachineController,
+  stepBattleScriptMachine,
+  type BattleScriptMachineState,
+} from "./battleScriptMachine.ts";
+import { loadBattleScriptProgram } from "./battleScriptProgram.ts";
 import {
   BATTLE_SCRIPT_BATTLE_ENVIRONMENT_BUILDING,
+  createBattleScriptStatusRulesExecution,
   createBattleScriptRulesContext,
+  type BattleScriptRulesContext,
+  type BattleScriptStatusRulesExternalPorts,
   type BattleScriptPartyMemberState,
   type BattleScriptPartyState,
   type BattleScriptRulesBattlerState,
+  type BattleScriptRulesBattlers,
 } from "./battleScriptRulesContext.ts";
 import {
   ABILITY_SYMBOLS,
@@ -34,6 +45,18 @@ const NEUTRAL_STAT_STAGES = Object.freeze([6, 6, 6, 6, 6, 6, 6, 6] as const);
 const BATTLE_START_HOOK_ABILITIES = new Set([2, 13, 22, 36, 45, 59, 70, 77]);
 /** ITEM_WHITE_HERB; ItemBattleEffects(ITEMEFFECT_ON_SWITCH_IN). */
 const ITEM_WHITE_HERB = 180;
+const INTIMIDATE_ID = 22;
+const TRACE_ID = 36;
+const STATUS3_INTIMIDATE_POKES = 1 << 19;
+const STATUS3_TRACE = 1 << 20;
+const program = loadBattleScriptProgram();
+const switchineffectsProgramCounter = program.instructions.find(
+  (instruction) => instruction.opcodeName === "B_SCR_OP_SWITCHINEFFECTS",
+)?.programCounter;
+if (switchineffectsProgramCounter === undefined) {
+  throw new Error("committed Battle Script program has no B_SCR_OP_SWITCHINEFFECTS");
+}
+const SWITCHINEFFECTS_PC: number = switchineffectsProgramCounter;
 
 type SpeciesStatsRow = Readonly<{ id: number; abilities: readonly [string, string] }>;
 type SpeciesTypesRow = Readonly<{ types: readonly [string, string] }>;
@@ -68,6 +91,14 @@ export type FactoryBattleStartUnsupportedBranch = Readonly<{
 
 export type FactoryFreshBattleStart =
   | BattleState<FactoryFullTurnDecisionRules>
+  | FactoryBattleStartUnsupportedBranch;
+
+export type FactoryFreshBattleInitialization =
+  | Readonly<{
+    kind: "started";
+    state: BattleState<FactoryFullTurnDecisionRules>;
+    events: readonly BattleKernelSemanticEvent[];
+  }>
   | FactoryBattleStartUnsupportedBranch;
 
 function unsupportedBranch(
@@ -145,13 +176,184 @@ function preHookEffectiveSpeed(
   }, {}, randomTurnNumber);
 }
 
+function lifecycleExternalPorts(): BattleScriptStatusRulesExternalPorts {
+  return Object.freeze({
+    isControllerIdle: (context: Readonly<{ state: BattleScriptMachineState<BattleScriptRulesContext> }>) =>
+      context.state.scheduler.pendingControllerBattlers.length === 0,
+    prepareMessage: (_context, operand) => operand.expression.startsWith("STRINGID_")
+      ? Object.freeze({
+        kind: "message" as const,
+        messageId: operand.expression,
+        substitutions: Object.freeze([]),
+      })
+      : null,
+    prepareSelectionMessage: () => null,
+    prepareSelectionMessageFromTable: () => null,
+    resolveAttackerBattler: (context) => context.state.rulesContext.selectorRoles.attacker,
+    resolveBattlerAtPosition: () => null,
+    resolveHalfwordOperand: (_context, operand) =>
+      operand.expression === "B_WAIT_TIME_LONG"
+        ? 64
+        : operand.expression === "B_WAIT_TIME_SHORT" ? 32 : null,
+    resolveByteOperand: () => null,
+  });
+}
+
+function acknowledgeControllers(
+  state: BattleScriptMachineState<BattleScriptRulesContext>,
+): BattleScriptMachineState<BattleScriptRulesContext> {
+  let next = state;
+  for (const battler of state.scheduler.pendingControllerBattlers) {
+    next = acknowledgeBattleScriptMachineController(next, battler);
+  }
+  return next;
+}
+
+function runEntryScript(
+  entryLabel: string,
+  rulesContext: BattleScriptRulesContext,
+  rngSeed: number,
+): Readonly<{
+  rulesContext: BattleScriptRulesContext;
+  events: readonly BattleScriptSemanticEvent[];
+}> {
+  const execution = createBattleScriptStatusRulesExecution(
+    program,
+    entryLabel,
+    rulesContext,
+    rngSeed,
+    lifecycleExternalPorts(),
+  );
+  let state = execution.state;
+  for (let budget = 0; budget < 2_000; budget += 1) {
+    const result = stepBattleScriptMachine(program, state, execution.handlers);
+    if (result.kind === "blocked") {
+      const acknowledged = acknowledgeControllers(result.state);
+      if (acknowledged === result.state) {
+        throw new Error(`${entryLabel} blocked without a controller acknowledgement`);
+      }
+      state = acknowledged;
+      continue;
+    }
+    if (result.kind === "halted") {
+      if (
+        result.state.haltReason?.kind !== "terminal"
+        && result.state.haltReason?.kind !== "end3"
+      ) {
+        throw new Error(`${entryLabel} halted at ${JSON.stringify(result.state.haltReason)}`);
+      }
+      if (result.state.rng.calls !== 0) {
+        throw new Error(`${entryLabel} unexpectedly consumed battle RNG`);
+      }
+      return Object.freeze({
+        rulesContext: result.state.rulesContext,
+        events: result.state.events,
+      });
+    }
+    if (result.kind === "unsupported") {
+      throw new Error(`${entryLabel} reached unsupported opcode ${result.state.haltReason?.kind}`);
+    }
+    state = result.state;
+  }
+  throw new Error(`${entryLabel} exceeded its lifecycle instruction budget`);
+}
+
 /**
- * Initializes a fresh, hook-free Factory battle. Equal pre-hook speed and
- * entry hooks remain explicit lifecycle barriers until rung 3.
+ * Reuses Cmd_switchineffects' already-source-ported ON_SWITCHIN dispatch for
+ * weather/Forecast/Cloud Nine/Air Lock, whose ordinary-switch semantics match
+ * TryDoEventsBeforeFirstTurn. Intimidate and Trace deliberately do not enter
+ * here: battle_main.c:3869-3883 marks both during the ordered scan and resolves
+ * them only after every battler's ON_SWITCHIN pass.
  */
-export function createFreshFactoryBattle(
+function runSharedOnSwitchinDispatch(
+  rulesContext: BattleScriptRulesContext,
+  rngSeed: number,
+  battler: 0 | 1,
+): Readonly<{
+  rulesContext: BattleScriptRulesContext;
+  events: readonly BattleScriptSemanticEvent[];
+}> {
+  const selectedRules = Object.freeze({
+    ...rulesContext,
+    selectorRoles: Object.freeze({ ...rulesContext.selectorRoles, fainted: battler }),
+  });
+  const execution = createBattleScriptStatusRulesExecution(
+    program,
+    "BattleScript_HandleFaintedMon",
+    selectedRules,
+    rngSeed,
+    lifecycleExternalPorts(),
+  );
+  let state: BattleScriptMachineState<BattleScriptRulesContext> = Object.freeze({
+    ...execution.state,
+    programCounter: SWITCHINEFFECTS_PC,
+  });
+  for (let budget = 0; budget < 2_000; budget += 1) {
+    const result = stepBattleScriptMachine(program, state, execution.handlers);
+    if (result.kind === "blocked") {
+      const acknowledged = acknowledgeControllers(result.state);
+      if (acknowledged === result.state) {
+        throw new Error(
+          `battle-start ON_SWITCHIN dispatch blocked without acknowledgement: ${
+            JSON.stringify({
+              instruction: program.instructions[result.state.programCounter]?.opcodeName,
+              haltReason: result.state.haltReason,
+              scheduler: result.state.scheduler,
+            })
+          }`,
+        );
+      }
+      state = acknowledged;
+      continue;
+    }
+    if (result.kind === "halted" && result.state.haltReason?.kind === "end3") {
+      if (result.state.rng.calls !== 0) {
+        throw new Error("battle-start ON_SWITCHIN callback unexpectedly consumed battle RNG");
+      }
+      return Object.freeze({
+        rulesContext: result.state.rulesContext,
+        events: result.state.events,
+      });
+    }
+    if (result.kind === "halted" || result.kind === "unsupported") {
+      throw new Error(`battle-start ON_SWITCHIN dispatch stopped at ${JSON.stringify(result.state.haltReason)}`);
+    }
+    state = result.state;
+    if (state.programCounter === SWITCHINEFFECTS_PC + 1 && state.callStack.length === 0) {
+      if (state.rng.calls !== 0) {
+        throw new Error("battle-start ON_SWITCHIN dispatch unexpectedly consumed battle RNG");
+      }
+      return Object.freeze({ rulesContext: state.rulesContext, events: state.events });
+    }
+  }
+  throw new Error("battle-start ON_SWITCHIN dispatch exceeded its instruction budget");
+}
+
+function withStatus3(
+  rules: BattleScriptRulesContext,
+  battler: 0 | 1,
+  status3: number,
+): BattleScriptRulesContext {
+  const battlers = rules.battlers.map((candidate, index) =>
+    index === battler ? Object.freeze({ ...candidate, status3: status3 >>> 0 }) : candidate
+  ) as unknown as BattleScriptRulesBattlers;
+  return Object.freeze({ ...rules, battlers: Object.freeze(battlers) });
+}
+
+function kernelEvents(events: readonly BattleScriptSemanticEvent[]): readonly BattleKernelSemanticEvent[] {
+  return Object.freeze(events.map((event, sequence) => {
+    const { sequence: _machineSequence, provenance, ...payload } = event;
+    return Object.freeze({ sequence, payload: Object.freeze(payload), provenance });
+  }));
+}
+
+/**
+ * Initializes a fresh Factory battle and returns both the durable first
+ * command state and the entry scripts' ordered semantic events.
+ */
+export function initializeFreshFactoryBattle(
   config: FactoryFreshBattleConfig,
-): FactoryFreshBattleStart {
+): FactoryFreshBattleInitialization {
   // BattleStartClearSetData:3140. The receipt proves this value is overwritten
   // before turn-1 selection but consumed by the pre-hook order sort.
   const drawA = randomU16(config.rngSeed);
@@ -170,28 +372,19 @@ export function createFreshFactoryBattle(
     );
   }
 
-  if (
-    BATTLE_START_HOOK_ABILITIES.has(player.ability)
-    || BATTLE_START_HOOK_ABILITIES.has(opponent.ability)
-    || player.item === ITEM_WHITE_HERB
-    || opponent.item === ITEM_WHITE_HERB
-  ) {
-    return unsupportedBranch(
-      "TryDoEventsBeforeFirstTurn switch-in ability/item hook loop",
-      3869,
-    );
-  }
-
   // The context materializes BattleStartClearSetData's tracked clears and the
-  // :3895-3921 pre-selection cleanup between draw A and draw B.
-  const rulesContextBeforeB = createBattleScriptRulesContext({
+  // :3895-3921 pre-selection cleanup. Hook mutations are applied to this
+  // source-fresh state before draw B.
+  let rulesContextBeforeB = createBattleScriptRulesContext({
     battlers: [
       player,
       opponent,
       createFactoryEmptyBattlerState(0),
       createFactoryEmptyBattlerState(1),
     ],
-    selectorRoles: { attacker: null, target: null, effectBattler: null, fainted: null },
+    // BattleStartClearSetData:3073-3074 initializes attacker and target to 0.
+    // The effect battler is likewise zero in source-fresh EWRAM here.
+    selectorRoles: { attacker: 0, target: 0, effectBattler: 0, fainted: null },
     scriptingBattler: 0,
     atkCancelerTracker: 0,
     battleOutcome: 0,
@@ -226,16 +419,139 @@ export function createFreshFactoryBattle(
     randomTurnNumber: drawA.value,
   });
 
+  const playerSpeed = preHookEffectiveSpeed(player, drawA.value);
+  const opponentSpeed = preHookEffectiveSpeed(opponent, drawA.value);
+  const turnOrder = playerSpeed > opponentSpeed ? [0, 1] as const : [1, 0] as const;
+  const lifecycleEvents: BattleScriptSemanticEvent[] = [];
+
+  // battle_main.c:3863-3868 calls ABILITYEFFECT_SWITCH_IN_WEATHER once.
+  // The Factory battle room map declares WEATHER_NONE and MAP_TYPE_INDOOR
+  // (data/maps/BattleFrontier_BattleFactoryBattleRoom/map.json:8-9), which
+  // reaches battle_util.c:2493-2524's switch default: no weather, no script.
+
+  // battle_main.c:3869-3879: fastest-to-slowest ON_SWITCHIN scan. Weather and
+  // form hooks can yield here; Intimidate/Trace only set completion flags.
+  for (const battler of turnOrder) {
+    const ability = rulesContextBeforeB.battlers[battler].ability;
+    if (ability === INTIMIDATE_ID) {
+      rulesContextBeforeB = withStatus3(
+        rulesContextBeforeB,
+        battler,
+        rulesContextBeforeB.battlers[battler].status3 | STATUS3_INTIMIDATE_POKES,
+      );
+      continue;
+    }
+    if (ability === TRACE_ID) {
+      rulesContextBeforeB = withStatus3(
+        rulesContextBeforeB,
+        battler,
+        rulesContextBeforeB.battlers[battler].status3 | STATUS3_TRACE,
+      );
+      continue;
+    }
+    if (BATTLE_START_HOOK_ABILITIES.has(ability)) {
+      const dispatched = runSharedOnSwitchinDispatch(rulesContextBeforeB, drawA.rngValue, battler);
+      rulesContextBeforeB = dispatched.rulesContext;
+      lifecycleEvents.push(...dispatched.events);
+    }
+  }
+
+  // battle_main.c:3880-3883 / battle_util.c:3003-3073: pending Intimidate is
+  // battler-index ordered, then pending Trace is battler-index ordered.
+  for (const battler of [0, 1] as const) {
+    if ((rulesContextBeforeB.battlers[battler].status3 & STATUS3_INTIMIDATE_POKES) === 0) continue;
+    rulesContextBeforeB = withStatus3(
+      rulesContextBeforeB,
+      battler,
+      rulesContextBeforeB.battlers[battler].status3 & ~STATUS3_INTIMIDATE_POKES,
+    );
+    rulesContextBeforeB = Object.freeze({
+      ...rulesContextBeforeB,
+      scriptingBattler: battler,
+      lastUsedAbility: INTIMIDATE_ID,
+    });
+    const resolved = runEntryScript(
+      "BattleScript_IntimidateActivatesEnd3",
+      rulesContextBeforeB,
+      drawA.rngValue,
+    );
+    rulesContextBeforeB = resolved.rulesContext;
+    lifecycleEvents.push(...resolved.events);
+  }
+  for (const battler of [0, 1] as const) {
+    if ((rulesContextBeforeB.battlers[battler].status3 & STATUS3_TRACE) === 0) continue;
+    const opposing = battler === 0 ? 1 : 0;
+    rulesContextBeforeB = withStatus3(
+      rulesContextBeforeB,
+      battler,
+      rulesContextBeforeB.battlers[battler].status3 & ~STATUS3_TRACE,
+    );
+    const copiedAbility = rulesContextBeforeB.battlers[opposing].ability;
+    if (copiedAbility === 0 || rulesContextBeforeB.battlers[opposing].hp === 0) continue;
+    const battlers = rulesContextBeforeB.battlers.map((candidate, index) =>
+      index === battler ? Object.freeze({ ...candidate, ability: copiedAbility }) : candidate
+    ) as unknown as BattleScriptRulesBattlers;
+    rulesContextBeforeB = Object.freeze({
+      ...rulesContextBeforeB,
+      battlers: Object.freeze(battlers),
+      scriptingBattler: battler,
+      lastUsedAbility: copiedAbility,
+      battleTextBuff1MonNick: Object.freeze({
+        battler: opposing,
+        partyIndex: rulesContextBeforeB.battlers[opposing].partyIndex,
+      }),
+    });
+    const resolved = runEntryScript("BattleScript_TraceActivates", rulesContextBeforeB, drawA.rngValue);
+    rulesContextBeforeB = resolved.rulesContext;
+    lifecycleEvents.push(...resolved.events);
+  }
+
+  // battle_main.c:3884-3894 / battle_util.c:3303-3329: items use the same
+  // speed order. Double Prize only writes unread prize bookkeeping. White
+  // Herb resets every lowered stage and consumes itself through the shared
+  // BattleScript_WhiteHerbEnd2 opcode machinery.
+  for (const battler of turnOrder) {
+    const active = rulesContextBeforeB.battlers[battler];
+    if (active.item !== ITEM_WHITE_HERB || !active.statStages.some((stage) => stage < 6)) continue;
+    const battlers = rulesContextBeforeB.battlers.map((candidate, index) =>
+      index === battler
+        ? Object.freeze({
+          ...candidate,
+          statStages: Object.freeze(candidate.statStages.map((stage) => stage < 6 ? 6 : stage)),
+        })
+        : candidate
+    ) as unknown as BattleScriptRulesBattlers;
+    rulesContextBeforeB = Object.freeze({
+      ...rulesContextBeforeB,
+      battlers: Object.freeze(battlers),
+      scriptingBattler: battler,
+    });
+    const resolved = runEntryScript("BattleScript_WhiteHerbEnd2", rulesContextBeforeB, drawA.rngValue);
+    rulesContextBeforeB = resolved.rulesContext;
+    lifecycleEvents.push(...resolved.events);
+  }
+
   // TryDoEventsBeforeFirstTurn:3923; this is turn 1's readable global.
   const drawB = randomU16(drawA.rngValue);
   const rulesContext = Object.freeze({
     ...rulesContextBeforeB,
     randomTurnNumber: drawB.value,
   });
-  return createFactoryFullTurnBattleStateFromRulesContext({
+  const events = kernelEvents(lifecycleEvents);
+  const state = createFactoryFullTurnBattleStateFromRulesContext({
     requestId: config.requestId,
     rngSeed: drawB.rngValue,
     rngCalls: 2,
+    nextEventSequence: events.length,
     rulesContext,
   });
+  return Object.freeze({ kind: "started", state, events });
+}
+
+/** Backward-compatible state-only seam used by rung 2 and future battle drivers. */
+export function createFreshFactoryBattle(
+  config: FactoryFreshBattleConfig,
+): FactoryFreshBattleStart {
+  const result = initializeFreshFactoryBattle(config);
+  return result.kind === "started" ? result.state : result;
 }

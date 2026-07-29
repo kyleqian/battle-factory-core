@@ -2749,6 +2749,12 @@ export const resolveRulesBattlerForBattleScript: NonNullable<
   if (selector === BATTLE_SCRIPT_BATTLER_SELECTORS.BS_EFFECT_BATTLER) {
     return context.state.rulesContext.selectorRoles.effectBattler;
   }
+  // battle_util.c:708-710: unlike the position-derived selectors below it,
+  // BS_BATTLER_0 is the literal battler id 0. Weather-ability scripts use
+  // this for the field animation during pre-first-turn entry hooks.
+  if (selector === BATTLE_SCRIPT_BATTLER_SELECTORS.BS_BATTLER_0) {
+    return 0;
+  }
   if (selector === BATTLE_SCRIPT_BATTLER_SELECTORS.BS_FAINTED) {
     return context.state.rulesContext.selectorRoles.fainted;
   }
