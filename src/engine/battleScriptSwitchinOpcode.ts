@@ -810,23 +810,10 @@ function createSwitchineffectsOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
           ? Object.freeze({ ...candidate, status3: (candidate.status3 | STATUS3_INTIMIDATE_POKES) >>> 0 })
           : candidate
       ) as unknown as BattleScriptRulesBattlers;
-      const target = nextRules.battlers.find((candidate, index) =>
-        index < nextRules.battleTopology.battlersCount
-        && candidate.side !== nextActive.side
-        && (nextRules.absentBattlerFlags & (1 << index)) === 0
-      );
-      const prevention = target
-        && (target.ability === 29 || target.ability === 52 || target.ability === 73)
-        ? Object.freeze([Object.freeze({
-            kind: "message" as const,
-            messageId: "STRINGID_PREVENTEDFROMWORKING",
-            substitutions: Object.freeze([]),
-          })])
-        : Object.freeze([]);
       return callSwitchinScript(context, "BattleScript_IntimidateActivates", Object.freeze({
         ...abilityRules,
         battlers: Object.freeze(battlers),
-      }), prevention);
+      }));
     }
     if (nextActive.ability === ABILITY_TRACE && !(nextActive.status3 & STATUS3_TRACE)) {
       const target = nextRules.battlers.findIndex((candidate, index) =>

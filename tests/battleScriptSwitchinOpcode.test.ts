@@ -42,6 +42,8 @@ const ABILITY_INTIMIDATE = 22;
 const ABILITY_TRACE = 36;
 const ABILITY_DRIZZLE = 2;
 const ABILITY_CLEAR_BODY = 29;
+const ABILITY_HYPER_CUTTER = 52;
+const ABILITY_WHITE_SMOKE = 73;
 const ABILITY_TRUANT = 54;
 const ITEM_LEFTOVERS = 200;
 
@@ -170,7 +172,9 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
     resolveAttackerBattler: () => null,
     resolveBattlerAtPosition: () => null,
     resolveHalfwordOperand: (_ctx, operand) =>
-      operand.expression === "B_WAIT_TIME_LONG" ? 64 : null,
+      operand.expression === "B_WAIT_TIME_LONG"
+        ? 64
+        : operand.expression === "B_WAIT_TIME_SHORT" ? 32 : null,
     resolveByteOperand: () => null,
   });
 }
@@ -901,7 +905,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
       ] });
       const { execution, result } = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc);
       let state = result.state;
-      for (let guard = 0; guard < 300 && state.programCounter !== SWITCHINEFFECTS_PC + 1; guard += 1) {
+      for (let guard = 0; guard < 1_000 && state.programCounter !== SWITCHINEFFECTS_PC + 1; guard += 1) {
         const next = stepBattleScriptMachine(program, state, execution.handlers);
         if (next.kind === "scheduler-progressed" || next.kind === "advanced") state = next.state;
         else if (next.kind === "blocked") {
@@ -914,6 +918,100 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
       if (!target.status2) expect(state.rulesContext.lastUsedAbility).toBe(ABILITY_CLEAR_BODY);
       expect(messages).toEqual(target.status2 ? [] : ["STRINGID_PREVENTEDFROMWORKING"]);
     }
+  });
+
+  it.each([
+    ["Hyper Cutter", 127, ABILITY_HYPER_CUTTER], // Pinsir: Hyper Cutter / NONE
+    ["White Smoke", 321, ABILITY_WHITE_SMOKE], // Torkoal: White Smoke / NONE
+  ] as const)(
+    "switchineffects: a real later-switch Intimidate against single-ability %s prints exact prevention, changes no stage, and draws zero RNG",
+    (_abilityName, species, ability) => {
+      const rc = context({ battlers: [
+        battler({ side: 0, species, ability, statStages: [6, 6, 6, 6, 6, 6, 6, 6] }),
+        battler({ side: 1, species: 397, ability: ABILITY_INTIMIDATE }), // Salamence: Intimidate / NONE
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ] });
+      const { execution, result } = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc);
+      let state = result.state;
+      for (let guard = 0; guard < 300 && state.programCounter !== SWITCHINEFFECTS_PC + 1; guard += 1) {
+        const next = stepBattleScriptMachine(program, state, execution.handlers);
+        if (next.kind === "scheduler-progressed" || next.kind === "advanced") state = next.state;
+        else if (next.kind === "blocked") {
+          state = next.state;
+          for (const pending of state.scheduler.pendingControllerBattlers) {
+            state = acknowledgeBattleScriptMachineController(state, pending);
+          }
+        } else {
+          throw new Error(`later-switch Intimidate stopped at ${next.kind}: ${JSON.stringify(next.state.haltReason)}`);
+        }
+      }
+      expect(state.programCounter).toBe(SWITCHINEFFECTS_PC + 1);
+      expect(state.rulesContext.battlers[0].statStages).toEqual([6, 6, 6, 6, 6, 6, 6, 6]);
+      expect(state.rulesContext.lastUsedAbility).toBe(ability);
+      expect(state.events.filter((event) => event.kind === "message").map((event) => event.messageId))
+        .toEqual(["STRINGID_PREVENTEDFROMWORKING"]);
+      expect(state.rng.calls).toBe(0);
+    },
+  );
+
+  it("battle-start orchestration: faster Drizzle completes its weather message before the slower Intimidate stat drop", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, species: 404, ability: ABILITY_DRIZZLE }), // Kyogre, base Speed 90
+        battler({ side: 1, species: 210, ability: ABILITY_INTIMIDATE }), // Granbull, base Speed 45
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      selectorRoles: { attacker: 0, target: 0, effectBattler: 0, fainted: 0 },
+    });
+    const first = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc);
+    let state = first.result.state;
+    for (let guard = 0; guard < 1_000 && state.programCounter !== SWITCHINEFFECTS_PC + 1; guard += 1) {
+      const next = stepBattleScriptMachine(program, state, first.execution.handlers);
+      if (next.kind === "scheduler-progressed" || next.kind === "advanced") state = next.state;
+      else if (next.kind === "blocked") {
+        state = next.state;
+        for (const pending of state.scheduler.pendingControllerBattlers) {
+          state = acknowledgeBattleScriptMachineController(state, pending);
+        }
+      } else {
+        throw new Error(`Drizzle entry script stopped at ${next.kind}: ${JSON.stringify(next.state.haltReason)}`);
+      }
+    }
+    expect(state.rulesContext.battlers[0].statStages[1]).toBe(6);
+    expect(state.rulesContext.weather).toBe((1 << 0) | (1 << 2));
+    expect(state.events.filter((event) => event.kind === "message").map((event) => event.messageId))
+      .toEqual(["STRINGID_PKMNMADEITRAIN"]);
+
+    // TryDoEventsBeforeFirstTurn's gBattlerByTurnOrder scan now advances to
+    // the slower battler. Re-enter the same opcode with all machine-global
+    // state/events preserved, as the source main loop does after Drizzle's end3.
+    state = Object.freeze({
+      ...state,
+      programCounter: SWITCHINEFFECTS_PC,
+      haltReason: null,
+      rulesContext: Object.freeze({
+        ...state.rulesContext,
+        selectorRoles: Object.freeze({ ...state.rulesContext.selectorRoles, fainted: 1 }),
+      }),
+    });
+    for (let guard = 0; guard < 1_000 && state.programCounter !== SWITCHINEFFECTS_PC + 1; guard += 1) {
+      const next = stepBattleScriptMachine(program, state, first.execution.handlers);
+      if (next.kind === "scheduler-progressed" || next.kind === "advanced") state = next.state;
+      else if (next.kind === "blocked") {
+        state = next.state;
+        for (const pending of state.scheduler.pendingControllerBattlers) {
+          state = acknowledgeBattleScriptMachineController(state, pending);
+        }
+      } else {
+        throw new Error(`Intimidate entry script stopped at ${next.kind}: ${JSON.stringify(next.state.haltReason)}`);
+      }
+    }
+    expect(state.rulesContext.battlers[0].statStages[1]).toBe(5);
+    expect(state.events.filter((event) => event.kind === "message").map((event) => event.messageId))
+      .toEqual(["STRINGID_PKMNMADEITRAIN", "STRINGID_PKMNCUTSATTACKWITH"]);
+    expect(state.rng.calls).toBe(0);
   });
 
   it("switchineffects: Trace copies the live opposing ability and announces it with zero draws", () => {
