@@ -28,7 +28,7 @@ import {
   type AiWeatherValue,
   type FactoryAiCheckBadMoveAttacker,
   type FactoryAiCheckBadMoveDraw,
-  type FactoryAiCheckBadMoveTarget,
+  type FactoryAiCheckBadMoveRoarTarget,
 } from "./factoryAiCheckBadMove.ts";
 import {
   runTryToFaint,
@@ -778,7 +778,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     }));
   }
 
-  const targetForCbm: FactoryAiCheckBadMoveTarget = Object.freeze({
+  const targetForCbm: FactoryAiCheckBadMoveRoarTarget = Object.freeze({
     species: view.target.species,
     types: view.target.types,
     knownAbility: view.target.knownAbility,

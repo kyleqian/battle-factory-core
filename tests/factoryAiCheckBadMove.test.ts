@@ -3,6 +3,7 @@ import {
   MOVES_BY_ID,
   runCheckBadMovePreamble,
   type FactoryAiCheckBadMoveAttacker,
+  type FactoryAiCheckBadMoveRoarTarget,
   type FactoryAiCheckBadMoveTarget,
 } from "../src/engine/factoryAiCheckBadMove.ts";
 
@@ -267,7 +268,7 @@ describe("AI_CBM_Sleep (docs/factory-ai-checkviability-ground-truth.md §29)", (
 describe("AI_CBM_Roar (docs/factory-ai-checkviability-ground-truth.md §30)", () => {
   const MOVE_ROAR = 46;
 
-  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+  function target(overrides: Partial<FactoryAiCheckBadMoveRoarTarget> = {}): FactoryAiCheckBadMoveRoarTarget {
     return Object.freeze({
       species: 213,
       types: ["TYPE_BUG", "TYPE_ROCK"] as const,

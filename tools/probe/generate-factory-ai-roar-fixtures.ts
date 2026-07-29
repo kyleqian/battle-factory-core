@@ -12,7 +12,7 @@ function mash(repetitions: number): Segment[] {
   ]).flat();
 }
 
-function scenario(tailRepetitions: number) {
+function scenario(role: "control" | "reach") {
   const segments: Segment[] = [
     { frames: 2, buttons: ["A"] },
     { frames: 30, buttons: [] },
@@ -26,7 +26,12 @@ function scenario(tailRepetitions: number) {
     { frames: 2, buttons: ["A"] },
     { frames: 30, buttons: [] },
     { frames: 2, buttons: ["A"] },
-    ...mash(30),
+  ];
+  if (role === "control") {
+    segments.push(...mash(8));
+  } else {
+    segments.push(
+      ...mash(30),
     { frames: 2, buttons: ["DOWN"] },
     { frames: 10, buttons: [] },
     { frames: 2, buttons: ["DOWN"] },
@@ -38,8 +43,9 @@ function scenario(tailRepetitions: number) {
     { frames: 2, buttons: ["A"] },
     { frames: 30, buttons: [] },
     { frames: 2, buttons: ["A"] },
-    ...mash(tailRepetitions),
-  ];
+      ...mash(20),
+    );
+  }
   const totalFrames = segments.reduce((sum, segment) => sum + segment.frames, 0);
   const captureFrames = Array.from(
     { length: Math.floor(totalFrames / 20) + 1 },
@@ -77,8 +83,8 @@ function scenario(tailRepetitions: number) {
 }
 
 mkdirSync(outputDir, { recursive: true });
-for (const [role, repetitions] of [["control", 20], ["reach", 60]] as const) {
+for (const role of ["control", "reach"] as const) {
   const path = join(outputDir, `mechanic-factory-ai-roar-${role}-off.json`);
-  writeFileSync(path, `${JSON.stringify(scenario(repetitions), null, 2)}\n`);
+  writeFileSync(path, `${JSON.stringify(scenario(role), null, 2)}\n`);
   console.log(path);
 }

@@ -278,14 +278,6 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
    * `AI_CBM_Toxic`'s final gate. Optional, defaulting to false.
    */
   safeguardUp?: boolean;
-  /**
-   * Number produced by `count_usable_party_mons AI_TARGET`: alive,
-   * non-empty, non-Egg target-side party records excluding the active
-   * battler (and its partner in doubles). This engine surface is singles,
-   * so only the active party index is excluded. Optional, defaulting to 0
-   * for callers that have not staged party state.
-   */
-  usablePartyMons?: number;
 }>;
 
 /**
@@ -896,7 +888,7 @@ export function typeMultiplierTenths(attackingType: string, defendingTypes: read
 export function runCheckBadMovePreamble(input: Readonly<{
   rng: BattleRngState;
   moveId: number;
-  target: FactoryAiCheckBadMoveTarget;
+  target: FactoryAiCheckBadMoveRoarTarget;
   attacker: FactoryAiCheckBadMoveAttacker;
   drawOrdinalStart: number;
   reasonPrefix: string;
@@ -1301,6 +1293,11 @@ function runCbmSpDefUp(attackerSpDefStage: number): number {
   return attackerSpDefStage === MAX_STAT_STAGE ? -10 : 0;
 }
 
+export type FactoryAiCheckBadMoveRoarTarget = FactoryAiCheckBadMoveTarget & Readonly<{
+  /** Alive, non-empty, non-Egg target-side bench count, excluding the active singles party index. */
+  usablePartyMons?: number;
+}>;
+
 /**
  * `AI_CBM_Sleep` (`data/battle_ai_scripts.s:216-222`, doc §29): one fresh
  * target ability read, then Insomnia, Vital Spirit, primary-status, and
@@ -1344,7 +1341,7 @@ function runCbmSleep(
  * byte-identical.
  */
 function runCbmRoar(
-  target: FactoryAiCheckBadMoveTarget,
+  target: FactoryAiCheckBadMoveRoarTarget,
   rng: BattleRngState,
   ordinal: number,
   reason: string,
