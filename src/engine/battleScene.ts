@@ -548,6 +548,7 @@ import spikeCannonAsset from "../animation/assets/spike-cannon.json" with { type
 import sonicBoomAsset from "../animation/assets/sonic-boom.json" with { type: "json" };
 import smokescreenAsset from "../animation/assets/smokescreen.json" with { type: "json" };
 import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json" };
+import bubbleBeamAsset from "../animation/assets/bubble-beam.json" with { type: "json" };
 import reversalAsset from "../animation/assets/reversal.json" with { type: "json" };
 import tailGlowAsset from "../animation/assets/tail-glow.json" with { type: "json" };
 import dizzyPunchAsset from "../animation/assets/dizzyPunch.json" with { type: "json" };
@@ -702,6 +703,7 @@ import {
   sceneOnSonicBoomView,
   sceneOnSmokescreenView,
   sceneOnMudShotView,
+  sceneOnBubbleBeamView,
   sceneOnReversalView,
   sceneOnTailGlowView,
   sceneOnDizzyPunchView,
@@ -751,6 +753,7 @@ import {
   type SceneOnSonicBoomConfig,
   type SceneOnSmokescreenConfig,
   type SceneOnMudShotConfig,
+  type SceneOnBubbleBeamConfig,
   type SceneOnReversalConfig,
   type SceneOnTailGlowConfig,
   type SceneOnDizzyPunchConfig,
@@ -1078,6 +1081,12 @@ const mudShotArt = mudShotAsset as {
   brownOrb: { tileset: Tileset; palette: RgbColor[] };
   krabbyBack: { tileset: Tileset; palette: RgbColor[] };
   krabbyFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const bubbleBeamArt = bubbleBeamAsset as {
+  bubble: { tileset: Tileset; palette: RgbColor[] };
+  smallBubbles: { tileset: Tileset; palette: RgbColor[] };
+  surskitBack: { tileset: Tileset; palette: RgbColor[] };
+  surskitFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const reversalArt = reversalAsset as {
   blueOrb: { tileset: Tileset; palette: RgbColor[] };
@@ -16841,6 +16850,158 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "KRABBY used" : "Foe KRABBY used",
       "MUD SHOT!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "BUBBLE_BEAM") {
+    const beamState =
+      state as SceneOnMovePresentationState<SceneOnBubbleBeamConfig>;
+    const view = sceneOnBubbleBeamView(beamState);
+    // BuildOamBuffer precedes animation callbacks. Hardware scanout consumes
+    // the immediately preceding software sprite/matrix and battler state.
+    const displayed = sceneOnBubbleBeamView({
+      ...beamState,
+      age: view.battlerDisplayAge,
+    });
+    const playerToOpponent =
+      view.attacker.species === "SURSKIT"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "SURSKIT"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged BUBBLE_BEAM pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const surskitSource = playerToOpponent
+      ? bubbleBeamArt.surskitBack : bubbleBeamArt.surskitFront;
+    const surskit = playerToOpponent
+      ? surskitSource
+      : {
+          ...surskitSource,
+          tileset: subTileset(surskitSource.tileset, 0, 8),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const targetX2 = displayed.targetOffset.x2
+      + displayed.targetBaselineX2;
+    const nonObjTarget2 = fb.slice();
+    drawSpriteSheet(
+      nonObjTarget2,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y,
+    );
+    const drawSurskit = () => drawSpriteSheet(
+      fb,
+      surskit.tileset,
+      surskit.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawOnix = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y,
+    );
+    const unorderedEffects = [
+      ...displayed.projectiles,
+      ...displayed.afterEffects,
+    ];
+    const effects = displayed.painterOrder.flatMap((identity) => {
+      const sprite = unorderedEffects.find((item) =>
+        item.kind === identity.kind
+        && item.spawnIndex === identity.spawnIndex
+      );
+      return sprite ? [sprite] : [];
+    });
+    const drawEffect = (sprite: (typeof effects)[number]) => {
+      if (!displayed.alpha) return;
+      const art = sprite.kind === "projectile"
+        ? {
+            tileset: subTileset(
+              bubbleBeamArt.bubble.tileset,
+              sprite.frame * 2,
+              2,
+            ),
+            palette: bubbleBeamArt.bubble.palette,
+          }
+        : {
+            tileset: subTileset(bubbleBeamArt.smallBubbles.tileset, 0, 2),
+            palette: bubbleBeamArt.smallBubbles.palette,
+          };
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        nonObjTarget2,
+        art.tileset,
+        art.palette,
+        sprite.x + sprite.x2,
+        sprite.y + sprite.y2,
+        sprite.matrix,
+        0,
+        0,
+        sprite.matrix,
+        displayed.alpha.eva,
+        displayed.alpha.evb,
+        false,
+      );
+    };
+    // monbg supplies the alpha target-2 copy. Both battlers are established
+    // before the source's subpriority-sorted Bubble Beam particles.
+    drawOnix();
+    drawSurskit();
+    for (const sprite of effects) drawEffect(sprite);
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "SURSKIT",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "SURSKIT" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "SURSKIT used" : "Foe SURSKIT used",
+      "BUBBLEBEAM!",
       99,
     );
     return;

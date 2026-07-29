@@ -62,6 +62,10 @@ export interface BubbleBeamState {
   readonly swayTaskActive: boolean;
   readonly projectiles: readonly BubbleBeamProjectile[];
   readonly afterEffects: readonly BubbleBeamAfterEffect[];
+  readonly painterOrder: readonly Readonly<{
+    kind: "projectile" | "after-effect";
+    spawnIndex: number;
+  }>[];
   readonly soundEvents: readonly BubbleBeamSoundEvent[];
   readonly battlerDisplayAge: number;
 }
@@ -87,6 +91,9 @@ const AFTER_EFFECT_ARGS = [
 const AFTER_EFFECT_SPAWN_AGES = [172, 180, 188, 196, 204, 212] as const;
 const AFTER_EFFECT_OAM_SLOTS = [3, 4, 5, 3, 4, 5] as const;
 const CALL_OFFSETS = [85, 112, 139, 166, 193, 220] as const;
+const EFFECT_ORDER_POOL = [
+  4, 3, 21, 5, 19, 17, 15, 14, 13, 12, 11, 10, 9, 7, 23,
+] as const;
 
 function sine(index: number, amplitude: number): number {
   return Math.floor(GBA_SINE_TABLE_256[index & 0xff]! * amplitude / 256);
@@ -164,6 +171,7 @@ function projectileAtAge(
 function afterEffectAtAge(
   age: number,
   spawnIndex: number,
+  side: BubbleBeamSide,
   targetPictureOffset: Readonly<{ x: number; y: number }>,
 ): BubbleBeamAfterEffect | null {
   const localAge = age - AFTER_EFFECT_SPAWN_AGES[spawnIndex]!;
@@ -174,14 +182,102 @@ function afterEffectAtAge(
     kind: "after-effect",
     spawnIndex,
     oamSlot: AFTER_EFFECT_OAM_SLOTS[spawnIndex]!,
-    x: targetPictureOffset.x + xOffset,
+    x: targetPictureOffset.x + xOffset * (side === "player" ? 1 : -1),
     y: targetPictureOffset.y + yOffset,
     x2: sine(callbacks * 11, 4),
     y2: callbacks < 6 ? 0 : -((callbacks * 0x30) >> 8),
     frame: 0,
-    matrix: inverseScale(156 + callbacks * 5),
+    matrix: inverseScale(156 + Math.min(callbacks, 20) * 5),
     callback: "AnimBubbleEffect_Step",
   };
+}
+
+type OrderedEffect = BubbleBeamProjectile | BubbleBeamAfterEffect;
+
+function effectsAtAge(
+  age: number,
+  side: BubbleBeamSide,
+  attackerPictureOffset: Readonly<{ x: number; y: number }>,
+  targetPictureOffset: Readonly<{ x: number; y: number }>,
+): readonly OrderedEffect[] {
+  return [
+    ...PROJECTILE_SPAWN_AGES.flatMap((_, spawnIndex) => {
+      const sprite = projectileAtAge(
+        age,
+        spawnIndex,
+        side,
+        attackerPictureOffset,
+        targetPictureOffset,
+      );
+      return sprite ? [sprite] : [];
+    }),
+    ...AFTER_EFFECT_SPAWN_AGES.flatMap((_, spawnIndex) => {
+      const sprite = afterEffectAtAge(
+        age,
+        spawnIndex,
+        side,
+        targetPictureOffset,
+      );
+      return sprite ? [sprite] : [];
+    }),
+  ];
+}
+
+/**
+ * Reduced persistent `sSpriteOrder` port for Bubble Beam's effect slots.
+ * The seed is the source Scene-ON singles order immediately before the first
+ * BUBBLE allocation, filtered to the slots this component can occupy.
+ */
+function painterOrderAtAge(
+  age: number,
+  side: BubbleBeamSide,
+  attackerPictureOffset: Readonly<{ x: number; y: number }>,
+  targetPictureOffset: Readonly<{ x: number; y: number }>,
+): BubbleBeamState["painterOrder"] {
+  const order = [...EFFECT_ORDER_POOL];
+  let current = new Map<number, OrderedEffect>();
+  for (let displayAge = 0; displayAge <= age; displayAge += 1) {
+    current = new Map(effectsAtAge(
+      displayAge,
+      side,
+      attackerPictureOffset,
+      targetPictureOffset,
+    ).map((sprite) => [sprite.oamSlot, sprite]));
+    const wrappedY = (slot: number): number => {
+      const sprite = current.get(slot);
+      if (!sprite) return 160;
+      const oamY = (sprite.y + sprite.y2 - 8) & 0xff;
+      return oamY >= 160 ? oamY - 256 : oamY;
+    };
+    const packedPriority = (slot: number): number =>
+      current.has(slot) ? 2 << 8 : (3 << 8) | 0xff;
+    for (let index = 1; index < order.length; index += 1) {
+      let cursor = index;
+      while (cursor > 0) {
+        const prior = order[cursor - 1]!;
+        const next = order[cursor]!;
+        if (
+          packedPriority(prior) > packedPriority(next)
+          || (
+            packedPriority(prior) === packedPriority(next)
+            && wrappedY(prior) < wrappedY(next)
+          )
+        ) {
+          order[cursor - 1] = next;
+          order[cursor] = prior;
+          cursor -= 1;
+        } else {
+          break;
+        }
+      }
+    }
+  }
+  return order.slice().reverse().flatMap((slot) => {
+    const sprite = current.get(slot);
+    return sprite
+      ? [{ kind: sprite.kind, spawnIndex: sprite.spawnIndex }]
+      : [];
+  });
 }
 
 function scriptOffsetAtAge(age: number): BubbleBeamState["scriptOffset"] {
@@ -219,9 +315,22 @@ export function bubbleBeamAtAge(
     return sprite ? [sprite] : [];
   });
   const afterEffects = AFTER_EFFECT_SPAWN_AGES.flatMap((_, spawnIndex) => {
-    const sprite = afterEffectAtAge(age, spawnIndex, targetPictureOffset);
+    const sprite = afterEffectAtAge(
+      age,
+      spawnIndex,
+      side,
+      targetPictureOffset,
+    );
     return sprite ? [sprite] : [];
   });
+  const painterOrder = age < 0
+    ? []
+    : painterOrderAtAge(
+        age,
+        side,
+        attackerPictureOffset,
+        targetPictureOffset,
+      );
   const swayTaskActive = age >= 43 && age <= 127;
   const swayCallbacks = age - 42;
   const swayAmplitude = side === "player" ? 3 : -3;
@@ -229,7 +338,7 @@ export function bubbleBeamAtAge(
     ? { x2: sine(swayCallbacks * 12, swayAmplitude), y2: 0 }
     : { x2: 0, y2: 0 };
   const attackerPan = side === "player" ? -64 : 63;
-  const targetPan = side === "player" ? 63 : -64;
+  const targetPan = side === "player" ? 63 : -63;
   const soundEvents: BubbleBeamSoundEvent[] = [
     ...PROJECTILE_SPAWN_AGES.map((eventAge) => ({
       age: eventAge,
@@ -259,6 +368,7 @@ export function bubbleBeamAtAge(
     swayTaskActive,
     projectiles,
     afterEffects,
+    painterOrder,
     soundEvents,
     battlerDisplayAge: age - 1,
   };

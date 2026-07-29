@@ -1,5 +1,28 @@
 # Animation coverage
 
+## MOVE_BUBBLE_BEAM promoted exact; complete water-bubble body closed (2026-07-28)
+
+**Verdict:** `MOVE_BUBBLE_BEAM` is exact. Legal set-42 SURSKIT→ONIX
+Scene-ON parties pass the complete source body through first inactive cleanup
+at **239/239** frames **77–315** player-back and **81–319** opponent-front,
+twice fresh. Evidence/raw-RGB digests are player `bbdd5e47…76e7e0` /
+`ebdcf7ed…090baa` and opponent `c56465ad…e36662` /
+`776ffc9f…d8a8bd`.
+
+**Model/evidence:** the pure source-relative reducer and typed seam port both
+asset lifecycles, all 18 parameterized projectiles, SwayMon, six short-bubble
+lifecycles, monbg/alpha, both sound families, waits, and cleanup. The
+source-extracted Surskit/BUBBLE assets, byte-proved SMALL_BUBBLES, and shared
+Onix/chrome pass source component state, persistent OAM painter order,
+software→hardware OAM, matrices, palettes, registers, both audio players,
+raw RGB, and the production framebuffer on every frame.
+
+**Boundary/next:** the `bubble-beam-water-bubbles` track keeps outside-Factory
+`MOVE_BUBBLE` and Secret Power's pond dispatch unsupported pending independent
+dense acceptance. Coverage is **74 exact / 0 partial / 0 staged / 202
+unsupported**. No battle/controller state, boundary list, unsupported barrier,
+or sibling status changed.
+
 ## MOVE_BUBBLE_BEAM evidence checkpoint; production remains unsupported (2026-07-28)
 
 **Verdict:** Evidence-only checkpoint. `MOVE_BUBBLE_BEAM` remains unsupported;

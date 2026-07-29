@@ -2,6 +2,34 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_BUBBLE_BEAM",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal set-42 SURSKIT versus ONIX Scene-ON parties pass the full 239-frame source body through first inactive cleanup in both orientations, twice fresh: player-back frames 77-315 reproduce evidence bbdd5e473bfcb76a8df04b023a2bd4fad26ec1609e1d44413bbb4410a276e7e0 / raw RGB ebdcf7ed7013e7fcb20c07bfb0452bc6c857091baa3cfe408add109902090baa and opponent-front frames 81-319 reproduce evidence c56465ad0203eb9c47676b77e33c6f744f4e03238a89d751831abc0676e36662 / raw RGB 776ffc9fa6bde3aa420dd1cd20ed9261ca2368baf8a6af40820876405dd8a8bd",
+        "the pure source-relative reducer ports BUBBLE and SMALL_BUBBLES load/free, target monbg/split priority/12:8 alpha, three BubblebeamCreateBubbles calls creating exactly 18 gWaterBubbleProjectileSpriteTemplate lifecycles with all six argv, AnimWaterBubbleProjectile animation/affine/Step1-3 translation callbacks, AnimTask_SwayMon(0,3,3072,8,target), waits, WaterBubblesEffectShort with exactly six gWaterBubbleSpriteTemplate/AnimBubbleEffect lifecycles, both Bubble sound families and pans, and cleanup",
+        "the typed Scene-ON seam exposes only resolved presentation geometry; source-extracted SURSKIT front/back and BUBBLE art plus byte-proved SMALL_BUBBLES and shared ONIX/chrome feed the production compositor, including persistent source OAM painter order, software-to-hardware OAM transfer, matrices, both tagged palettes, registers, and both audio players without absolute ticks, move/input/battle numbers, fitting, pixel exceptions, canonical recordings, or battle calculation",
+        "bubbleBeamPortable.ts runs the committed probe through tools/run-mgba-probe.py and proves reducer/component state, typed seam, software and hardware OAM, affine matrices, tagged palettes, registers, both audio players and pans, raw RGB, and application framebuffer on every frame twice fresh in both orientations",
+        "MOVE_BUBBLE remains unsupported outside Factory, and MOVE_SECRET_POWER's pond dispatch remains unsupported; shared Bubble Beam components do not promote either move without independent complete dense acceptance",
+        "no damage, RNG, controller selection, turn order, round/facility state, boundary list, unsupported barrier, or sibling acceptance changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-bubble-beam-player-surskit-opponent-onix.json",
+        "tools/battle-lab/mechanic-bubble-beam-opponent-surskit-player-onix.json",
+        "tools/compare/fixtures/bubble-beam-player-surskit-opponent-onix.json",
+        "tools/compare/fixtures/bubble-beam-opponent-surskit-player-onix.json",
+        "tools/compare/bubbleBeamProbe.py",
+        "tools/compare/bubbleBeamPortable.ts",
+        "tools/compare/bubbleBeamSourceAudit.ts",
+        "tools/compare/extractBubbleBeamAssets.ts",
+        "src/animation/assets/bubble-beam.json",
+        "src/animation/bubbleBeam.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/bubbleBeamEvidence.test.ts",
+        "tests/animation/bubbleBeam.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_MUD_SHOT",
       "status": "exact",
       "covered": [
@@ -2255,6 +2283,28 @@
         "MOVE_POISON_TAIL"
       ],
       "goal": "MOVE_ACID, MOVE_TOXIC, MOVE_SLUDGE, MOVE_SLUDGE_BOMB, MOVE_POISON_FANG, and MOVE_POISON_TAIL are exact representatives. POISON TAIL independently proves its permanent custom MetallicShine, mirrored lunge, impact, ShakeMon, palette/monbg/alpha teardown, player-back target geometry, caller-relative first-bubble cleanup stall, all six shared poison bubbles, SE1 restarts, software/hardware OAM and affine latches, raw RGB, and shared-seam framebuffer at 187/187 in both orientations, reproduced twice. SLUDGE BOMB remains 160/160 in both orientations after the shared reducer/renderer changes. Shared poison reducers alone do not promote any other move."
+    },
+    {
+      "id": "bubble-beam-water-bubbles",
+      "components": [
+        "asset:ANIM_TAG_BUBBLE",
+        "asset:ANIM_TAG_SMALL_BUBBLES",
+        "sprite:gWaterBubbleProjectileSpriteTemplate",
+        "sprite:gWaterBubbleSpriteTemplate",
+        "task:AnimTask_SwayMon",
+        "subroutine:BubblebeamCreateBubbles",
+        "subroutine:WaterBubblesEffectShort",
+        "visualCommand:splitbgprio",
+        "visualCommand:monbg",
+        "visualCommand:setalpha",
+        "visualCommand:blendoff",
+        "visualCommand:clearmonbg"
+      ],
+      "representatives": [
+        "MOVE_BUBBLE_BEAM",
+        "MOVE_SECRET_POWER"
+      ],
+      "goal": "MOVE_BUBBLE_BEAM independently proves its complete 18-projectile, SwayMon, six-short-bubble, monbg/alpha, sound, and cleanup body at 239/239 source/component and shared-framebuffer frames in both orientations, twice fresh. MOVE_BUBBLE remains unsupported outside Factory, and MOVE_SECRET_POWER's pond dispatch remains unsupported; component reuse alone does not promote either sibling without its own complete dense acceptance."
     },
     {
       "id": "water-gun-small-bubbles-water-impact",

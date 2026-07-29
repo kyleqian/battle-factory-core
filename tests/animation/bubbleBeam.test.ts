@@ -61,6 +61,23 @@ describe("MOVE_BUBBLE_BEAM source-relative reducer", () => {
     });
   });
 
+  it("mirrors opponent-side short bubbles and uses the adjusted left pan", () => {
+    const state = bubbleBeamAtAge(
+      172,
+      "opponent",
+      { x: 176, y: 55 },
+      { x: 72, y: 88 },
+    );
+
+    expect(state.afterEffects[0]).toMatchObject({ x: 62, y: 98 });
+    expect(state.soundEvents).toContainEqual({
+      age: 172,
+      song: "SE_M_BUBBLE3",
+      pan: -63,
+      player: "SE1",
+    });
+  });
+
   it("pins loads, alpha/monbg, sounds, and first inactive cleanup", () => {
     expect(player(0)).toMatchObject({
       active: true,

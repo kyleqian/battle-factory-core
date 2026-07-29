@@ -68,10 +68,10 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        unsupported: 203,
+        unsupported: 202,
         staged: 0,
         partial: 0,
-        exact: 73,
+        exact: 74,
       },
       {
         tier: "openOnly",
@@ -109,6 +109,16 @@ describe("animation coverage ledger", () => {
   });
 
   it("uses the source dependency graph for non-exclusive work grouping", () => {
+    expect(
+      queuedAnimationComponentTracks().find(
+        (track) => track.id === "bubble-beam-water-bubbles",
+      ),
+    ).toMatchObject({
+      representatives: [
+        "MOVE_BUBBLE_BEAM",
+        "MOVE_SECRET_POWER",
+      ],
+    });
     expect(
       queuedAnimationComponentTracks().find(
         (track) => track.id === "anger-mark-grow-breath",
