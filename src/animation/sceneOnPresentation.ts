@@ -210,6 +210,10 @@ import {
   type ReflectState,
 } from "./reflect.ts";
 import {
+  lightScreenAtAge,
+  type LightScreenState,
+} from "./lightScreen.ts";
+import {
   synthesisEffectAtAge,
   type SynthesisSprite,
 } from "./synthesis.ts";
@@ -544,6 +548,7 @@ export interface SceneOnPresentationBattler {
     | "FLAAFFY"
     | "VOLBEAT"
     | "ILLUMISE"
+    | "EXEGGCUTE"
     | "GLOOM"
     | "TOGETIC"
     | "MACHOKE"
@@ -1018,6 +1023,17 @@ export interface SceneOnAbsorbConfig {
 
 export interface SceneOnReflectConfig {
   readonly move: "REFLECT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly allocatorProfile: Readonly<{
+    readonly wall: number;
+    readonly sparkles: readonly number[];
+  }>;
+}
+
+export interface SceneOnLightScreenConfig {
+  readonly move: "LIGHT_SCREEN";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
@@ -1645,6 +1661,7 @@ export type SceneOnMoveConfig =
   | SceneOnMoonlightConfig
   | SceneOnAbsorbConfig
   | SceneOnReflectConfig
+  | SceneOnLightScreenConfig
   | SceneOnSynthesisConfig
   | SceneOnAromatherapyConfig
   | SceneOnWishConfig
@@ -1747,6 +1764,8 @@ export type SceneOnAromatherapyPresentationState =
   SceneOnMovePresentationState<SceneOnAromatherapyConfig>;
 export type SceneOnReflectPresentationState =
   SceneOnMovePresentationState<SceneOnReflectConfig>;
+export type SceneOnLightScreenPresentationState =
+  SceneOnMovePresentationState<SceneOnLightScreenConfig>;
 export type SceneOnSparkPresentationState =
   SceneOnMovePresentationState<SceneOnSparkConfig>;
 export type SceneOnThunderWavePresentationState =
@@ -2618,7 +2637,8 @@ export function createSceneOnMovePresentation<
   TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig | SceneOnTauntConfig
     | SceneOnSparkConfig | SceneOnCharmConfig | SceneOnTailGlowConfig
     | SceneOnScaryFaceConfig
-    | SceneOnAbsorbConfig | SceneOnReflectConfig | SceneOnBiteConfig
+    | SceneOnAbsorbConfig | SceneOnReflectConfig | SceneOnLightScreenConfig
+    | SceneOnBiteConfig
     | SceneOnHeadbuttConfig | SceneOnBodySlamConfig | SceneOnSlamConfig
     | SceneOnWhirlwindConfig | SceneOnBlockConfig,
 >(
@@ -3056,6 +3076,33 @@ export function sceneOnReflectView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...reflectAtAge(
+      state.age,
+      state.config.attacker.geometry.battlePositionCenter,
+      state.config.attacker.geometry.side,
+    ),
+  };
+}
+
+export interface SceneOnLightScreenView extends LightScreenState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age` is relative to gLightScreenWallSpriteTemplate's creation pass. */
+export function sceneOnLightScreenView(
+  state: SceneOnMovePresentationState<SceneOnLightScreenConfig>,
+): SceneOnLightScreenView {
+  if (state.config.move !== "LIGHT_SCREEN") {
+    throw new Error(
+      `expected LIGHT_SCREEN presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...lightScreenAtAge(
       state.age,
       state.config.attacker.geometry.battlePositionCenter,
       state.config.attacker.geometry.side,

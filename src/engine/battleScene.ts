@@ -547,6 +547,7 @@ import knockOffAsset from "../animation/assets/knock-off.json" with { type: "jso
 import recoverAsset from "../animation/assets/recover.json" with { type: "json" };
 import absorbAsset from "../animation/assets/absorb.json" with { type: "json" };
 import reflectAsset from "../animation/assets/reflect.json" with { type: "json" };
+import lightScreenAsset from "../animation/assets/light-screen.json" with { type: "json" };
 import biteAsset from "../animation/assets/bite.json" with { type: "json" };
 import twineedleAsset from "../animation/assets/twineedle.json" with { type: "json" };
 import spikeCannonAsset from "../animation/assets/spike-cannon.json" with { type: "json" };
@@ -714,6 +715,7 @@ import {
   sceneOnMoonlightView,
   sceneOnAbsorbView,
   sceneOnReflectView,
+  sceneOnLightScreenView,
   sceneOnAromatherapyView,
   sceneOnSynthesisView,
   sceneOnWishView,
@@ -799,6 +801,7 @@ import {
   type SceneOnScaryFacePresentationState,
   type SceneOnAbsorbPresentationState,
   type SceneOnReflectPresentationState,
+  type SceneOnLightScreenPresentationState,
   type SceneOnBiteConfig,
   type SceneOnHeadbuttConfig,
   type SceneOnWhirlwindConfig,
@@ -1109,6 +1112,12 @@ const absorbArt = absorbAsset as {
 const reflectArt = reflectAsset as {
   blueLightWall: { tileset: Tileset; palette: RgbColor[] };
   sparkle4: { tileset: Tileset; palette: RgbColor[] };
+};
+const lightScreenArt = lightScreenAsset as {
+  exeggcuteBack: { tileset: Tileset; palette: RgbColor[] };
+  exeggcuteFront: { tileset: Tileset; palette: RgbColor[] };
+  greenLightWall: { tileset: Tileset; palette: RgbColor[] };
+  sparkle3: { tileset: Tileset; palette: RgbColor[] };
 };
 const biteArt = biteAsset as {
   sharpTeeth: { tileset: Tileset; palette: RgbColor[] };
@@ -18979,6 +18988,185 @@ export function renderSceneOnMovePresentation(
       resultText
         ? reflectState.age - 74
         : Math.max(0, reflectState.age + (playerToOpponent ? 31 : 35)),
+    );
+    return;
+  }
+  if (state.config.move === "LIGHT_SCREEN") {
+    const lightScreenState = state as SceneOnLightScreenPresentationState;
+    const view = sceneOnLightScreenView(lightScreenState);
+    // Source callbacks become visible through the ordinary next OAM/palette
+    // transfer, matching the shared production compositor contract.
+    const displayed = sceneOnLightScreenView({
+      ...lightScreenState, age: lightScreenState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "EXEGGCUTE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "EXEGGCUTE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged LIGHT_SCREEN pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const exeggcuteSource = playerToOpponent
+      ? lightScreenArt.exeggcuteBack : lightScreenArt.exeggcuteFront;
+    const exeggcute = playerToOpponent
+      ? exeggcuteSource
+      : {
+          ...exeggcuteSource,
+          tileset: subTileset(exeggcuteSource.tileset, 0, 8),
+        };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? {
+          ...onixSource,
+          tileset: subTileset(onixSource.tileset, 0, 8),
+        }
+      : onixSource;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+
+    // AnimDefensiveWall moves the opponent battler to a BG before hiding its
+    // OBJ. The player OBJ remains in front of the semi-transparent wall.
+    const opponent = playerToOpponent ? onix : exeggcute;
+    const player = playerToOpponent ? exeggcute : onix;
+    drawSpriteSheet(
+      fb,
+      opponent.tileset,
+      opponent.palette,
+      playerToOpponent
+        ? view.target.geometry.spriteCorner.x + onixIdle.x2
+        : view.attacker.geometry.spriteCorner.x,
+      playerToOpponent
+        ? view.target.geometry.spriteCorner.y + onixIdle.y2
+        : view.attacker.geometry.spriteCorner.y,
+    );
+    if (displayed.wall && view.alpha && view.alpha.eva > 0) {
+      const palette = lightScreenArt.greenLightWall.palette.slice();
+      const rotating = palette.slice(1, 9);
+      for (let step = 0; step < displayed.wall.paletteRotationSteps; step++) {
+        rotating.unshift(rotating.pop()!);
+      }
+      palette.splice(1, 8, ...rotating);
+      drawSpriteSheetBlendedOverFb(
+        fb,
+        lightScreenArt.greenLightWall.tileset,
+        palette,
+        displayed.wall.x - 32,
+        displayed.wall.y - 32,
+        view.alpha.eva,
+        view.alpha.evb,
+      );
+    }
+    drawSpriteSheet(
+      fb,
+      player.tileset,
+      player.palette,
+      playerToOpponent
+        ? view.attacker.geometry.spriteCorner.x
+        : view.target.geometry.spriteCorner.x,
+      playerToOpponent
+        ? view.attacker.geometry.spriteCorner.y
+        : view.target.geometry.spriteCorner.y,
+    );
+    // Lower OAM indexes win equal-priority overlaps. The three allocator
+    // slots are reused by the second half of SpecialScreenSparkle.
+    for (const sparkle of displayed.sparkles.slice().reverse()) {
+      drawSpriteSheet(
+        fb,
+        subTileset(
+          lightScreenArt.sparkle3.tileset,
+          sparkle.tileOffset / 2,
+          2,
+        ),
+        lightScreenArt.sparkle3.palette,
+        sparkle.x - 8,
+        sparkle.y - 8,
+      );
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "EXEGGCUTE",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "EXEGGCUTE" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    const menuLastAge = playerToOpponent ? -41 : -45;
+    if (lightScreenState.age <= menuLastAge) {
+      drawTileBg(
+        fb,
+        battleWindow.tileset,
+        battleWindow.tilemap,
+        battleWindow.palette,
+      );
+      drawFightSubmenuChrome(
+        fb,
+        0,
+        false,
+        false,
+        playerToOpponent
+          ? { moveIds: [113, 113, 113, 113], maxPP: [30, 30, 30, 30] }
+          : { moveIds: [33, 33, 33, 33], maxPP: [35, 35, 35, 35] },
+      );
+      for (let y = 113; y < 159; y++) {
+        for (let x = 232; x < 239; x++) {
+          const source = ((y - menuIdleBase.y) * menuIdleBase.width
+            + (x - menuIdleBase.x)) * 3;
+          setPixel(fb, x, y, {
+            r: menuIdleBase.pixels[source]!,
+            g: menuIdleBase.pixels[source + 1]!,
+            b: menuIdleBase.pixels[source + 2]!,
+          });
+        }
+      }
+      return;
+    }
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "EXEGGCUTE used" : "Foe EXEGGCUTE used",
+      "LIGHT SCREEN!",
+      Math.max(
+        0,
+        lightScreenState.age + (playerToOpponent ? 41 : 45),
+      ),
     );
     return;
   }
