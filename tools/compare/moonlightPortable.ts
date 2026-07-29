@@ -26,6 +26,9 @@ interface Fixture extends SceneOnMoonlightConfig {
     readonly endFrame: number;
     readonly frameCount: number;
   };
+  readonly evidenceSha256: string;
+  readonly rawRgbSha256: string;
+  readonly lifecycleCounts: Record<string, number>;
 }
 
 interface ProbeSprite {
@@ -192,6 +195,7 @@ function verifyRun(output: string, rgbDir: string, label: string): string {
   const frames = new Map(probe.frames.map((frame) => [frame.frame, frame]));
   const first = probe.frames[0]!;
   const stableBattle = JSON.stringify(first.battlers);
+  const rawWindow = createHash("sha256");
   let componentMatches = 0;
   let framebufferMatches = 0;
   const componentDiffs: string[] = [];
@@ -265,6 +269,7 @@ function verifyRun(output: string, rgbDir: string, label: string): string {
     };
     const app = render(engine);
     const rgb = readFileSync(join(rgbDir, `${String(oracleFrame).padStart(5, "0")}.rgb`));
+    rawWindow.update(rgb);
     if (sha256(rgb) !== oracle.sha256) {
       throw new Error(`${label}: raw RGB receipt drift at frame ${oracleFrame}`);
     }
@@ -291,6 +296,8 @@ function verifyRun(output: string, rgbDir: string, label: string): string {
     );
   }
   const total = fixture.denseWindow.frameCount;
+  const evidence = sha256(bytes);
+  const rawRgb = rawWindow.digest("hex");
   const last = probe.frames[probe.frames.length - 1]!;
   if (
     last.gAnimScriptActive !== 0
@@ -303,16 +310,27 @@ function verifyRun(output: string, rgbDir: string, label: string): string {
     throw new Error(`${label}: final cleanup is not inactive`);
   }
   console.log(
-    `${label}: component/seam/state ${componentMatches}/${total}; framebuffer ${framebufferMatches}/${total}; receipt ${sha256(bytes)}`,
+    `${label}: component/seam/state ${componentMatches}/${total}; framebuffer ${framebufferMatches}/${total}; receipt ${evidence}; raw ${rawRgb}`,
   );
-  if (componentMatches !== total || framebufferMatches !== total) {
+  if (
+    componentMatches !== total
+    || framebufferMatches !== total
+    || evidence !== fixture.evidenceSha256
+    || rawRgb !== fixture.rawRgbSha256
+  ) {
     if (componentDiffs.length) console.error(componentDiffs.slice(0, 12).join("\n"));
     if (framebufferDiffs.length) {
       console.error(`framebuffer ${framebufferDiffs.slice(0, 40).join(" ")}`);
     }
+    if (evidence !== fixture.evidenceSha256) {
+      console.error(`evidence ${evidence} != ${fixture.evidenceSha256}`);
+    }
+    if (rawRgb !== fixture.rawRgbSha256) {
+      console.error(`raw RGB ${rawRgb} != ${fixture.rawRgbSha256}`);
+    }
     return "";
   }
-  return sha256(bytes);
+  return evidence;
 }
 
 if (existing) {

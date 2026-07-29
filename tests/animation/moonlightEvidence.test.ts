@@ -13,6 +13,13 @@ describe("MOVE_MOONLIGHT complete dense evidence", () => {
       expect(fixture.denseWindow).toEqual({
         startFrame: 207, endFrame: 558, frameCount: 352,
       });
+      expect(fixture.evidenceSha256).toMatch(/^[0-9a-f]{64}$/);
+      expect(fixture.rawRgbSha256).toMatch(/^[0-9a-f]{64}$/);
+      expect(fixture.lifecycleCounts).toEqual({
+        gMoonSpriteTemplate: 1,
+        gMoonlightSparkleSpriteTemplate: 5,
+        gHealingBlueStarSpriteTemplate: 4,
+      });
       expect(fixture.attacker.species).toBe("GLOOM");
       expect(fixture.target.species).toBe("ONIX");
       expect(fixture.fieldProfile.pendingHeal).toEqual({
