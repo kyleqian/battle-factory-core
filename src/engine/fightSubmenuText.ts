@@ -79,19 +79,22 @@ export const TYPE_DISPLAY_NAMES: Record<string, string> = {
  * Builds a `FightMoveset` from `gBattleMons[].moves`-style numeric move ids
  * (the RAM-native representation - see e.g.
  * `src/data/gen/battle2-turn1-battler-dump.json`'s own `moves`/`pp` fields)
- * plus the battler's live per-slot current PP. `maxPP` is always the move's
- * own base `pp` from `moves.json` (no PP-Up modeling anywhere in this run -
- * every known RAM dump's `pp` field already equals the move's base PP
- * exactly, Onix's and KABUTO's alike).
+ * plus the battler's live per-slot current PP. `maxPP` applies the active
+ * battler's packed two-bit PP Up fields with `CalculatePPWithBonus`'s source
+ * formula. Existing callers omit `ppBonuses` because Factory rentals have
+ * none; the live command adapter supplies it explicitly.
  */
 export function buildFightMoveset(
   moveIds: readonly [number, number, number, number],
   currentPPs: readonly [number, number, number, number],
+  ppBonuses = 0,
 ): FightMoveset {
   return moveIds.map((id, i) => {
     const m = MOVES_BY_ID.get(id);
     if (!m) throw new Error(`buildFightMoveset: unknown move id ${id}`);
-    return { name: m.name, type: m.type, currentPP: currentPPs[i]!, maxPP: m.pp };
+    const ppUps = (ppBonuses >>> (i * 2)) & 3;
+    const maxPP = m.pp + Math.floor((m.pp * 20 * ppUps) / 100);
+    return { name: m.name, type: m.type, currentPP: currentPPs[i]!, maxPP };
   }) as unknown as FightMoveset;
 }
 

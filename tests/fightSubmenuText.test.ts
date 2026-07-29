@@ -157,6 +157,15 @@ describe("drawFightSubmenuText: KABUTO's moveset (S8 battle 2, non-battle-1) ren
     expect(moveset.map((m) => m.type)).toEqual(["TYPE_GRASS", "TYPE_ROCK", "TYPE_GROUND", "TYPE_NORMAL"]);
   });
 
+  it("applies each packed PP Up field with CalculatePPWithBonus's source formula", () => {
+    const moveset = buildFightMoveset(
+      KABUTO_MOVE_IDS,
+      KABUTO_MAX_PP,
+      0b11_10_01_00,
+    );
+    expect(moveset.map((move) => move.maxPP)).toEqual([10, 6, 21, 16]);
+  });
+
   // Four synthetic PP levels, one per GetCurrentPPToMaxPPState band, against
   // ANCIENTPOWER's real maxPP (5) - band boundaries independently re-derived
   // in tests/battleMenu.test.ts already; this pins that drawFightSubmenuText

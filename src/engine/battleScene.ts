@@ -663,6 +663,7 @@ import type {
 } from "./battleCommandPresentation.ts";
 import {
   renderBattleCommandPresentation,
+  type BattleCommandPresentationRenderView,
 } from "./battleCommandPresentationRender.ts";
 import {
   battle2RockSlideMechanismPressTick,
@@ -5885,6 +5886,7 @@ function drawBattle2ActionMenuWindow(
   bounceShift = 0,
   bounceOverride?: { onixY2: number; healthboxY2: number },
   revealedOverride?: boolean,
+  healthboxes?: BattleCommandPresentationRenderView["healthboxes"],
 ): void {
   const age = actionMenuAge(t, handoffTick);
   const playerVisualT = playerTrainerSendOutClock(t, handoffTick, "jenson");
@@ -5906,8 +5908,22 @@ function drawBattle2ActionMenuWindow(
   } else {
     drawPlayerMaterializeSettle(fb, playerVisualT);
   }
-  drawSendOutHealthbox(fb, 0, kabutoHealthboxContent);
-  drawComposedPlayerHealthbox(fb, onixPlayerHealthboxContent, 0, bounce.healthboxY2);
+  if (healthboxes) {
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, healthboxes.opponent),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, healthboxes.player),
+      0,
+      bounce.healthboxY2,
+    );
+  } else {
+    drawSendOutHealthbox(fb, 0, kabutoHealthboxContent);
+    drawComposedPlayerHealthbox(fb, onixPlayerHealthboxContent, 0, bounce.healthboxY2);
+  }
   // Reuse only the accepted shared y>=112 action-window chrome. The
   // encounter field, mons, and both healthboxes above it are all composed
   // live; no Grovyle/full-frame Battle-1 base participates.
@@ -6044,7 +6060,7 @@ function drawBattle2FightSubmenuWindow(
     : FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
 
   renderBattleCommandPresentation(fb, presentation, {
-    drawActionMenu(framebuffer, _state, revealed) {
+    drawActionMenu(framebuffer, view, revealed) {
       drawBattle2ActionMenuWindow(
         framebuffer,
         t,
@@ -6052,9 +6068,10 @@ function drawBattle2FightSubmenuWindow(
         actionBounceShift,
         undefined,
         revealed,
+        view.healthboxes,
       );
     },
-    drawFightMenu(framebuffer, state) {
+    drawFightMenu(framebuffer, view) {
       drawBattle2ActionMenuWindow(
         framebuffer,
         t,
@@ -6062,13 +6079,12 @@ function drawBattle2FightSubmenuWindow(
         fightBounceShift,
         undefined,
         true,
+        view.healthboxes,
       );
-      drawFightSubmenuChrome(
+      drawFightSubmenuChromeFromLiveState(
         framebuffer,
-        state.fightDisplayCursor,
-        false,
-        false,
-        sm.activeMonMoveset,
+        view.fightMenu.displayCursor,
+        view.fightMenu.moveset,
       );
     },
   });
@@ -6672,11 +6688,23 @@ function drawFightSubmenuChrome(
   turn14Resolved: boolean = false,
   turn16Resolved: boolean = false,
 ): void {
+  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved, turn7Resolved, turn8Resolved, turn9Resolved, turn10Resolved, turn11Resolved, turn12Resolved, turn13Resolved, turn14Resolved, turn16Resolved);
+  drawFightSubmenuChromeFromLiveState(
+    fb,
+    displayCursor,
+    buildFightMoveset(moveset.moveIds, currentPP),
+  );
+}
+
+function drawFightSubmenuChromeFromLiveState(
+  fb: Uint8Array,
+  displayCursor: FightSubmenuSlot,
+  moveset: ReturnType<typeof buildFightMoveset>,
+): void {
   const slotName = FIGHT_SUBMENU_SLOT_NAMES[displayCursor];
   const patch = fightSubmenuWindow.slots[slotName]!;
   drawRect(fb, { x: fightSubmenuWindow.x, y: fightSubmenuWindow.y, width: fightSubmenuWindow.width, height: fightSubmenuWindow.height, pixels: patch });
-  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved, turn7Resolved, turn8Resolved, turn9Resolved, turn10Resolved, turn11Resolved, turn12Resolved, turn13Resolved, turn14Resolved, turn16Resolved);
-  drawFightSubmenuText(fb, fightSubmenuWindow.x, fightSubmenuWindow.y, buildFightMoveset(moveset.moveIds, currentPP), displayCursor);
+  drawFightSubmenuText(fb, fightSubmenuWindow.x, fightSubmenuWindow.y, moveset, displayCursor);
 }
 
 /** The onix/healthbox bounce overlay alone (`drawActionMenuIdleContent`'s own second half, factored out so `drawFightSubmenuWindow`'s frozen-bounce branch can reuse it without redrawing `menuIdleBase`). */

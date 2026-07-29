@@ -12,7 +12,9 @@ import {
   type BattleCommandPresentationState,
 } from "../src/engine/battleCommandPresentation.ts";
 import {
+  createBattleCommandPresentationRenderView,
   renderBattleCommandPresentation,
+  type BattleCommandPresentationRenderView,
 } from "../src/engine/battleCommandPresentationRender.ts";
 import type {
   BattleDecisionReducer,
@@ -403,19 +405,19 @@ describe("battle-command presentation renderer", () => {
     const assets = {
       drawActionMenu(
         receivedFramebuffer: Uint8Array,
-        presentation: BattleCommandPresentationState,
+        view: BattleCommandPresentationRenderView,
         revealed: boolean,
       ) {
         expect(receivedFramebuffer).toBe(framebuffer);
-        calls.push(`action:${revealed}:${presentation.lifecycle.phaseElapsed}`);
+        calls.push(`action:${revealed}:${view.field.player.name}`);
       },
       drawFightMenu(
         receivedFramebuffer: Uint8Array,
-        presentation: BattleCommandPresentationState,
+        view: BattleCommandPresentationRenderView,
       ) {
         expect(receivedFramebuffer).toBe(framebuffer);
         calls.push(
-          `fight:${presentation.fightCursor}:${presentation.fightDisplayCursor}:${presentation.lifecycle.phaseElapsed}`,
+          `fight:${view.fightMenu.displayCursor}:${view.field.player.name}`,
         );
       },
     };
@@ -437,13 +439,95 @@ describe("battle-command presentation renderer", () => {
     renderBattleCommandPresentation(framebuffer, at("fight-closing", 5, [3, 3]), assets);
 
     expect(calls).toEqual([
-      "action:false:5",
-      "action:true:17",
-      "action:true:4",
-      "fight:3:1:8",
-      "fight:3:3:5",
+      "action:false:ONIX",
+      "action:true:ONIX",
+      "action:true:ONIX",
+      "fight:1:ONIX",
+      "fight:3:ONIX",
     ]);
   });
+
+  it.each([
+    ["poison", "burn"],
+    ["burn", "paralysis"],
+    ["paralysis", "poison"],
+  ] as const)(
+    "renders live non-full player %s and opponent %s healthboxes from the field snapshot",
+    (playerStatus, opponentStatus) => {
+      const canonical = canonicalBoundary();
+      const presentation: BattleCommandPresentationState = Object.freeze({
+        ...createBattleCommandPresentation(canonical.request, canonical.rules),
+        lifecycle: Object.freeze({ phase: "fight-menu", phaseElapsed: 4 }),
+        field: Object.freeze({
+          player: Object.freeze({
+            ...createBattleCommandPresentation(canonical.request, canonical.rules).field.player,
+            species: 240,
+            name: "MAGBY",
+            gender: "female",
+            hp: 37,
+            maxHP: 138,
+            status: playerStatus,
+            moveIds: Object.freeze([52, 109, 123, 7] as const),
+            currentPP: Object.freeze([8, 7, 6, 5] as const),
+            ppBonuses: 0b11_10_01_00,
+          }),
+          opponent: Object.freeze({
+            ...createBattleCommandPresentation(canonical.request, canonical.rules).field.opponent,
+            species: 25,
+            name: "PIKACHU",
+            gender: "male",
+            hp: 19,
+            maxHP: 60,
+            status: opponentStatus,
+          }),
+        }),
+        fightDisplayCursor: 1,
+      });
+      const calls: BattleCommandPresentationRenderView[] = [];
+
+      renderBattleCommandPresentation(new Uint8Array(4), presentation, {
+        drawActionMenu() {
+          throw new Error("fight-menu must not dispatch action chrome");
+        },
+        drawFightMenu(_framebuffer, received) {
+          calls.push(received);
+        },
+      });
+
+      expect(calls).toHaveLength(1);
+      const view = calls[0]!;
+      expect(view).toEqual(createBattleCommandPresentationRenderView(presentation));
+      expect(view.healthboxes).toEqual({
+        player: {
+          name: "MAGBY",
+          level: 50,
+          gender: "female",
+          hpFraction: 37 / 138,
+          status: playerStatus,
+          currentHp: 37,
+          maxHp: 138,
+        },
+        opponent: {
+          name: "PIKACHU",
+          level: 50,
+          gender: "male",
+          hpFraction: 19 / 60,
+          status: opponentStatus,
+        },
+      });
+      expect(view.fightMenu.displayCursor).toBe(1);
+      expect(view.fightMenu.moveset.map((move) => [
+        move.name,
+        move.currentPP,
+        move.maxPP,
+      ])).toEqual([
+        ["EMBER", 8, 25],
+        ["CONFUSE RAY", 7, 12],
+        ["SMOG", 6, 28],
+        ["FIRE PUNCH", 5, 24],
+      ]);
+    },
+  );
 });
 
 describe("battle-command ordinary submission bridge", () => {

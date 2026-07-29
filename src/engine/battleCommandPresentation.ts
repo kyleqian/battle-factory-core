@@ -203,7 +203,7 @@ function fieldBattler(
     status: uiStatusFromStatus1(active.status1),
     moveIds: Object.freeze([...active.moves]) as BattleCommandMoveIds,
     currentPP: Object.freeze([...active.pp]) as BattleCommandMovePp,
-    ppBonuses: partyMember.ppBonuses,
+    ppBonuses: active.ppBonuses,
   });
 }
 
