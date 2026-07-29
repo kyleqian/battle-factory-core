@@ -26465,3 +26465,44 @@ both verify scripts/census independently re-verified before this entry.)*
   lifecycle action, or trace.
 
 ---
+## 680 — [SUPERVISOR WIND-DOWN 2026-07-29 ~03:35] ability/item parity closed; Gate-5 plan executed to 22/27 seven-win seeds in one session
+
+- **State:** master `15c549e2`, union green at **489 files / 5048 tests**,
+  production build, `git diff --check` clean, both censuses byte-idempotent
+  (**moves 214/214; hold effects 42/42 = 850/850; abilities 69/69 =
+  1096/1096 + 4 without Factory battle hooks**). DEFERRED.md **empty** —
+  no deferred questions all session. No orphan worktrees/branches;
+  `animation-main` fully folded (twice at wind-down: `d057f085`,
+  `15c549e2` — 25 commits, 10 moves promoted exact overnight).
+- **Session (17 rounds / ~33 workers, 0 failed steps):** (1) closed the
+  user-confirmed ability/item parity objective — turn-order input wiring,
+  the systemic **turn-boundary RNG gap** found/fixed/oracle-corroborated to
+  exact LCG equality, Quick Claw, ON_DAMAGE family, trapping trio +
+  voluntary switching, Run Away/Pickup source-proven closures, census
+  generator §A3 fix. (2) Executed the Gate-5 facility-round-loop plan
+  (docs/facility-round-loop-scout.md) rungs 1-12 same-day: battle-start
+  receipts (A/tie/B), fresh initializer + entry hooks (barrier-free),
+  party adapter (850 sets), rental+opponent generators, live AI driver,
+  controller-owned generated battles, swap/heal + commentary +
+  trainer-identity seams (canonical pixels proven unchanged). (3) The
+  seed-sweep instrument (seeds 4-30) drove breadth: blockers retired
+  serially (faint-replacement scoring, multi-hit/EQ resumption, confusion
+  self-hit, end-turn forced-switch resumption, Chesto/Shell Bell) —
+  **22/27 seeds win seven battles** at exact pinned cursors; seed 12 loses
+  legitimately in battle 7. (4) Two read-only audits: 3 interaction
+  defects found and fixed same-session (double-faint cursor, deferred
+  switch-in hooks + White Herb, AI reveal wiring); ISSUES #48 filed.
+- **Next (ordered):** (i) remaining sweep blockers: wake-up
+  `Cmd_bicword` (seeds 18/20), end-turn instruction budget (21),
+  attack-canceler stop (23); (ii) entry 677's AI reveal-site remainder
+  (listed line-by-line there); (iii) rung-13 implementation from
+  docs/factory-ai-switch-scout.md (mid-turn ShouldSwitch); (iv) King's
+  Rock flinch (state-12 named remainder); (v) rung 14 remaining
+  presentation windows + Gate-6 interaction matrix; (vi) ISSUES #48
+  two-challenge lifecycle. Oracle services are fresh (restarted this
+  session); both profiles healthy.
+- **Notes:** the cwd-reset launcher policy held all session (zero cwd
+  bites in 17 rounds). PAPERCUTS observed by workers: compare-out race
+  (~2 min), probe log volume (~4 min) — both minor, not filed.
+
+---
