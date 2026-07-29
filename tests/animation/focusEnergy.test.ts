@@ -4,6 +4,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { focusEnergyAtAge } from "../../src/animation/focusEnergy.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnFocusEnergyView,
+  type SceneOnFocusEnergyConfig,
+} from "../../src/animation/sceneOnPresentation.ts";
 
 describe("MOVE_FOCUS_ENERGY source-relative reducer", () => {
   const player = (age: number) =>
@@ -84,5 +89,48 @@ describe("MOVE_FOCUS_ENERGY source-relative reducer", () => {
     expect(readFileSync(output)).toEqual(
       readFileSync("src/animation/assets/focus-energy.json"),
     );
+  });
+
+  it("exposes only typed resolved presentation geometry", () => {
+    const stage = createSceneOnMovePresentation<SceneOnFocusEnergyConfig>({
+      move: "FOCUS_ENERGY",
+      attacker: {
+        species: "TAILLOW",
+        geometry: {
+          side: "player",
+          spriteCorner: { x: 40, y: 65 },
+          animationCenter: { x: 72, y: 89 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "ONIX",
+        geometry: {
+          side: "opponent",
+          spriteCorner: { x: 144, y: 10 },
+          animationCenter: { x: 176, y: 42 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      attackerCoord: { x: 72, y: 80 },
+      fieldProfile: {
+        playerHp: 126,
+        playerMaxHp: 126,
+        opponentHp: 110,
+        opponentMaxHp: 110,
+      },
+    });
+    expect(sceneOnFocusEnergyView({ ...stage, age: 38 })).toMatchObject({
+      age: 38,
+      attacker: { species: "TAILLOW" },
+      target: { species: "ONIX" },
+      visualTaskCount: 6,
+      attackerX2: -1,
+    });
+    expect(() => sceneOnFocusEnergyView({
+      ...stage,
+      config: { ...stage.config, move: "CROSS_CHOP" },
+      age: 0,
+    } as never)).toThrow("expected FOCUS_ENERGY");
   });
 });

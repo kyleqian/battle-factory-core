@@ -32,6 +32,8 @@ export interface FocusEnergyState {
   readonly attackerX2: number;
   readonly soundEvents: readonly FocusEnergySoundEvent[];
   readonly battlerDisplayAge: number;
+  readonly attackerShakeDisplayAge: number;
+  readonly attackerDisplayX2: number;
 }
 
 const SPAWN_OFFSETS = [4, 10, 16, 22, 28] as const;
@@ -162,5 +164,13 @@ export function focusEnergyAtAge(
         }]
       : [],
     battlerDisplayAge: age - 1,
+    // BuildOamBuffer precedes this task's callback, then hardware OAM
+    // receives that software buffer on the following display.
+    attackerShakeDisplayAge: age - 2,
+    // AnimTask_ShakeMon2 initializes x2=+1 before its immediate first step.
+    // BuildOamBuffer exposes that initializer for one display at task start.
+    attackerDisplayX2: age === 39
+      ? 1
+      : attackerShakeX2AtAge(age - 2),
   };
 }
