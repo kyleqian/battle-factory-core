@@ -1,31 +1,30 @@
 # Animation coverage
 
-## MOVE_AROMATHERAPY FLOWER evidence/extraction checkpoint; production remains unsupported (2026-07-29)
+## MOVE_AROMATHERAPY promoted exact; FLOWER/SPARKLE_2 track bounded (2026-07-29)
 
-**Did:** audited the complete `Move_AROMATHERAPY` source body and sole legal
-Level-50 Factory carrier: challenge-3 set **394**
-`FRONTIER_MON_VILEPLUME_1` (species **45**, Aromatherapy **312**, Impish,
-Attack+HP, Persim Berry). Deterministically extracted Vileplume front/back
-and `ANIM_TAG_FLOWER` from pinned source, with a byte-for-byte regeneration
-test. The body loads FLOWER/THIN_RING/SPARKLE_2, has seven small and two big
-`AnimFlyingParticle` flower lifecycles (big affine +4), green BG blend and
-monbg, `AnimTask_StatusClearedEffect`, two SparklingStars, then the blended
-thin-ring cleanup. Petal Dance remains the closest FLOWER-bearing but
-independent sibling (`gPetalDance*` callbacks/macros).
+**Verdict:** `MOVE_AROMATHERAPY` is exact. The sole legal Level-50 carrier is
+challenge-3 set **394** `FRONTIER_MON_VILEPLUME_1`. Complete legal Scene-ON
+parties pass the body through first inactive cleanup twice fresh in both
+orientations: player-back **75–474 (400/400)**, evidence/raw
+`83f9f2d03fb0cd19a05394a29dfa0e5ecfe8d142ca1dc3711a0cbf6586db0728` /
+`dc02bff98836fbeb9481c3ce01686d0f7e11b7ad15f529224b48278617deaf84`;
+opponent-front **79–474 (396/396)**,
+`323ccf6d2752af1f726823e7925fcb4b91db586f56493c878e1a532d1974c686` /
+`43d736b2d9f70f771a24566e3958a845381b7f3b51a69411c64e3a088b8e359b`.
 
-**Verify:** fresh complete legal three-mon Scene-ON receipts run through the
-first inactive cleanup frame in both orientations: player-back **75–474
-(400)** / opponent-front **79–474 (396)**. Lifecycle counts are **7** small
-flowers, **2** big flowers, **2** stars, **1** ring in each. Evidence/raw-RGB
-digests: player `51540e9940a3d4730640d58ede6b4ff5dcd90af646ed2d91065ccca9c56a2d82`
-/ `dc02bff98836fbeb9481c3ce01686d0f7e11b7ad15f529224b48278617deaf84`;
-opponent `62348e83e242f603322064913d3a30b11827520d6df7dbe1303f68b7bda3d784`
-/ `43d736b2d9f70f771a24566e3958a845381b7f3b51a69411c64e3a088b8e359b`.
+**Model:** the typed presentation seam ports all **7** small + **2** affine
+big FLOWER particles, source OAM-Y/tie order, green blends/monbg,
+`AnimTask_StatusClearedEffect` scrolling OBJ-window mask, both SPARKLE_2
+stars, thin-ring expansion, audio, waits, hardware latches, tag cleanup, and
+first inactive frame. Extraction now follows the source make rule that
+concatenates `flower_1.png` as small-flower tile 4. Presentation owns no
+status cure, gameplay RNG, damage, turn, controller, or facility outcome.
 
-**Next:** port only a source-relative Aromatherapy reducer/compositor behind
-the established presentation seam, then prove the dense receipts before any
-coverage promotion. **Notes:** `MOVE_AROMATHERAPY` remains unsupported; no
-production, gameplay, RNG, damage, turn, facility, or coverage-state change.
+**Sibling/control:** `MOVE_PETAL_DANCE` remains unsupported despite shared
+FLOWER art/particle callbacks; its repeated groups, shake, affine program,
+waits, and cleanup need independent dense acceptance. Heal Bell, Refresh,
+Wish, and Cosmic Power retain distinct bodies. Coverage is **90 exact / 0
+partial / 0 staged / 186 unsupported**; no boundary or barrier ratchet moved.
 
 ## MOVE_SWEET_KISS promoted exact; RED_HEART track bounded (2026-07-29)
 

@@ -2,6 +2,34 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_AROMATHERAPY",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal challenge-3 Level-50 set-394 FRONTIER_MON_VILEPLUME_1 versus ONIX Scene-ON parties pass the entire source body through first inactive cleanup in both orientations twice fresh: player-back frames 75-474 pass 400/400 component/hardware and raw-RGB/shared-framebuffer frames with evidence 83f9f2d03fb0cd19a05394a29dfa0e5ecfe8d142ca1dc3711a0cbf6586db0728 / raw RGB dc02bff98836fbeb9481c3ce01686d0f7e11b7ad15f529224b48278617deaf84; opponent-front frames 79-474 pass 396/396 with evidence 323ccf6d2752af1f726823e7925fcb4b91db586f56493c878e1a532d1974c686 / raw RGB 43d736b2d9f70f771a24566e3958a845381b7f3b51a69411c64e3a088b8e359b",
+        "the pure source-relative reducer ports FLOWER, THIN_RING, and SPARKLE_2 load/free timing; all seven small and two affine big AnimFlyingParticle lifecycles; side-relative sine translation; green BG palette blends; monbg; AnimTask_StatusClearedEffect scrolling OBJ-window mask and alpha phases; both SparklingStars; thin-ring expansion; audio; waits; OAM/VBlank display latches; source SortSprites Y/tie ordering; and first inactive cleanup",
+        "the typed Scene-ON seam carries only resolved VILEPLUME/ONIX presentation geometry and immutable HP/gender field state; reproducibly extracted Vileplume front/back, the source-concatenated five-tile FLOWER sheet, SPARKLE_2, THIN_RING, and cure-bubbles mask pass source sprites/tasks, software and hardware OAM/matrices, palette/tag buffers, registers, both audio players, raw RGB, and every production framebuffer",
+        "aromatherapyPortable.ts reruns both committed probes through tools/run-mgba-probe.py and pins the v2 evidence plus concatenated raw-RGB receipts while proving every reducer/seam/component/hardware/framebuffer frame; the presentation never cures status or owns damage, RNG, turn order, controller decisions, or facility state",
+        "MOVE_PETAL_DANCE remains unsupported: sharing FLOWER art and AnimFlyingParticle does not prove its distinct repeated petal groups, attacker shake, PetalDanceBigFlower affine program, waits, and cleanup. MOVE_HEAL_BELL, MOVE_REFRESH, and MOVE_COSMIC_POWER retain their independent bodies and acceptance requirements",
+        "no animation-boundary list, unsupported barrier, canonical-recording allowlist, gameplay outcome, or sibling coverage changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-aromatherapy-player-vileplume-opponent-onix.json",
+        "tools/battle-lab/mechanic-aromatherapy-opponent-vileplume-player-onix.json",
+        "tools/compare/fixtures/aromatherapy-player-vileplume-opponent-onix.json",
+        "tools/compare/fixtures/aromatherapy-opponent-vileplume-player-onix.json",
+        "tools/compare/aromatherapyProbe.py",
+        "tools/compare/aromatherapyPortable.ts",
+        "tools/compare/aromatherapySourceAudit.ts",
+        "tools/compare/extractAromatherapyAssets.ts",
+        "src/animation/assets/aromatherapy.json",
+        "src/animation/aromatherapy.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/aromatherapyEvidence.test.ts",
+        "tests/animation/aromatherapy.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_MOONLIGHT",
       "status": "exact",
       "covered": [
@@ -2980,7 +3008,7 @@
         "MOVE_AROMATHERAPY",
         "MOVE_COSMIC_POWER"
       ],
-      "goal": "MOVE_SYNTHESIS independently proves its complete delay-2 attacker blend, two GrantingStarsEffect stars, unload/delay/load boundary, and shared HealingEffect in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. No sibling is promoted. HEAL BELL needs its bell, twelve music-note sprites with palette allocation/free, three HealBellRing thin-ring/palette tasks, gSparklingStarsSpriteTemplate's distinct callback/geometry, and its blended thin-ring/palette finale. WISH needs ANIM_TAG_GOLD_STARS, the black-BG fade pipeline, panning, gWishStarSpriteTemplate, and its delay before GrantingStarsEffect. REFRESH needs AnimTask_StatusClearedEffect, field/battler palette restoration, and its thin-ring body around GrantingStarsEffect. AROMATHERAPY loads SPARKLE_2 but needs nine small/big flower sprites, green BG blend and monbg lifecycle, thin ring, and HealingEffect2 rather than GrantingStarsEffect. COSMIC POWER needs non-attacker palette fades, the BG_COSMIC load/slide/restore pipeline, sound tasks, delay, and two GrantingStarsEffect calls. Each sibling remains unsupported pending independent complete dense evidence."
+      "goal": "MOVE_SYNTHESIS independently proves its complete delay-2 attacker blend, two GrantingStarsEffect stars, unload/delay/load boundary, and shared HealingEffect in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. MOVE_AROMATHERAPY independently proves its complete nine-FLOWER, green blend/monbg, StatusClearedEffect, two SparklingStars, thin-ring, and cleanup body at 400/400 player-back and 396/396 opponent-front source/hardware/raw-RGB/framebuffer frames, reproduced twice. No sibling is promoted. HEAL BELL needs its bell, twelve music-note sprites with palette allocation/free, three HealBellRing thin-ring/palette tasks, and its own blended finale. WISH needs ANIM_TAG_GOLD_STARS, black-BG fade, panning, gWishStarSpriteTemplate, and delay before GrantingStarsEffect. REFRESH has distinct field/battler palette restoration and thin-ring sequencing around StatusClearedEffect. COSMIC POWER needs non-attacker palette fades, BG_COSMIC load/slide/restore, sound tasks, and two GrantingStarsEffect calls. Each remains unsupported pending independent complete dense evidence."
     },
     {
       "id": "healing-blue-star",
