@@ -2,6 +2,11 @@ import {
   selectFactoryTrainer,
   type FactoryTrainerDrawLedgerEntry,
 } from "./factoryTrainerSchedule.ts";
+import {
+  createFactoryCorpusParty,
+  type FactoryCorpusPartyInstance,
+  type FactoryCorpusPartyMemberState,
+} from "./factoryCorpusParty.ts";
 
 export const BATTLES_PER_ROUND = 7;
 
@@ -27,10 +32,31 @@ export interface BattleMon {
 
 export type BattleParty = readonly [BattleMon, BattleMon, BattleMon];
 
+/**
+ * Source `RentalMon` persistence record, expressed in the names shared by
+ * the corpus/rental/opponent generators. Extra generator metadata is retained
+ * structurally when records are cloned.
+ */
+export type FactoryRentalRecord = FactoryCorpusPartyInstance;
+
+export type FactoryRentalParty = readonly [
+  FactoryRentalRecord,
+  FactoryRentalRecord,
+  FactoryRentalRecord,
+];
+
+export type FactoryKernelParty = readonly [
+  FactoryCorpusPartyMemberState,
+  FactoryCorpusPartyMemberState,
+  FactoryCorpusPartyMemberState,
+];
+
 export interface BattleOpponent {
   readonly id: string;
   readonly trainerName: string;
   readonly party: BattleParty;
+  /** Present for generated Factory opponents; absent on simplified fixtures. */
+  readonly rentalRecords?: FactoryRentalParty;
 }
 
 /**
@@ -41,6 +67,8 @@ export interface BattleOpponent {
 export interface FixtureBattleScenario {
   readonly id: string;
   readonly playerParty: BattleParty;
+  /** Optional full-record seam used by generated Factory scenarios. */
+  readonly playerRentalRecords?: FactoryRentalParty;
   readonly opponentPool: readonly BattleOpponent[];
   readonly opponentSelectionInputs: readonly number[];
   readonly initialRngValue: number;
@@ -60,6 +88,8 @@ export interface FactoryTrainerOpponent extends BattleOpponent {
 export interface FactoryTrainerBattleScenario {
   readonly id: string;
   readonly playerParty: BattleParty;
+  /** Optional full-record seam used by generated Factory scenarios. */
+  readonly playerRentalRecords?: FactoryRentalParty;
   readonly opponentPool: readonly FactoryTrainerOpponent[];
   readonly initialRngValue: number;
   readonly opponentSelectionStrategy: {
@@ -104,8 +134,84 @@ export function cloneBattleParty(party: BattleParty): BattleParty {
   return [cloneMon(party[0]), cloneMon(party[1]), cloneMon(party[2])];
 }
 
+export function cloneFactoryRentalParty(records: FactoryRentalParty): FactoryRentalParty {
+  return records.map((record) => ({ ...record })) as unknown as FactoryRentalParty;
+}
+
+function ppUpsFromPackedBonuses(ppBonuses: number): readonly [number, number, number, number] {
+  return [0, 1, 2, 3].map(
+    (moveIndex) => (ppBonuses >>> (moveIndex * 2)) & 3,
+  ) as unknown as readonly [number, number, number, number];
+}
+
+/**
+ * Rebuilds the source party payload from saved rental identity, then applies
+ * `HealPlayerParty` and `RestorePlayerPartyHeldItems`.
+ *
+ * Real Factory records start with zero PP Ups, but preserving a staged
+ * member's packed PP-bonus byte makes the source `CalculatePPWithBonus`
+ * arithmetic explicit instead of accidentally treating current PP as max PP.
+ */
+export function healFactoryKernelParty(
+  records: FactoryRentalParty,
+  current?: FactoryKernelParty,
+): FactoryKernelParty {
+  const canonical = createFactoryCorpusParty(records);
+  return canonical.map((member, index) => {
+    const currentMember = current?.[index];
+    if (
+      currentMember !== undefined
+      && (
+        currentMember.setId !== member.setId
+        || currentMember.personality !== member.personality
+        || currentMember.ivs.attack !== records[index]!.fixedIv
+        || currentMember.abilitySlot !== member.abilitySlot
+      )
+    ) {
+      throw new Error(
+        `current Factory kernel party slot ${index} does not match its rental record: ${
+          JSON.stringify({
+            current: {
+              setId: currentMember.setId,
+              personality: currentMember.personality,
+              fixedIv: currentMember.ivs.attack,
+              abilitySlot: currentMember.abilitySlot,
+            },
+            rebuilt: {
+              setId: member.setId,
+              personality: member.personality,
+              fixedIv: records[index]!.fixedIv,
+              abilitySlot: member.abilitySlot,
+            },
+          })
+        }`,
+      );
+    }
+    const ppBonuses = currentMember?.ppBonuses ?? member.ppBonuses;
+    const ppUps = ppUpsFromPackedBonuses(ppBonuses);
+    const pp = member.pp.map((basePp, moveIndex) => (
+      basePp + Math.floor(basePp * 20 * ppUps[moveIndex]! / 100)
+    )) as unknown as readonly [number, number, number, number];
+    return Object.freeze({
+      ...member,
+      hp: member.maxHP,
+      status1: 0,
+      item: member.item,
+      pp,
+      ppBonuses,
+      ppUps,
+    });
+  }) as unknown as FactoryKernelParty;
+}
+
 export function cloneOpponent(opponent: BattleOpponent): BattleOpponent {
-  return { ...opponent, party: cloneBattleParty(opponent.party) };
+  return {
+    ...opponent,
+    party: cloneBattleParty(opponent.party),
+    rentalRecords: opponent.rentalRecords === undefined
+      ? undefined
+      : cloneFactoryRentalParty(opponent.rentalRecords),
+  };
 }
 
 function assertOpponentPool(opponentPool: readonly BattleOpponent[]): void {
@@ -180,13 +286,23 @@ export interface PreparedFactoryTrainerSelection {
   readonly ledger: readonly FactoryTrainerDrawLedgerEntry[];
 }
 
+/**
+ * The production round orchestrator owns complete trainer+party generation.
+ * The controller still owns when that generated opponent may enter the round.
+ */
+export interface PreparedGeneratedFactorySelection {
+  readonly type: "factoryGenerated";
+}
+
 export type PreparedOpponentSelection =
   | PreparedFixtureSelection
-  | PreparedFactoryTrainerSelection;
+  | PreparedFactoryTrainerSelection
+  | PreparedGeneratedFactorySelection;
 
 export function prepareBattleScenario(scenario: BattleScenario): {
   readonly id: string;
   readonly playerParty: BattleParty;
+  readonly playerRentalRecords: FactoryRentalParty | null;
   readonly opponents: readonly BattleOpponent[];
   readonly initialRngValue: number;
   readonly opponentSelection: PreparedOpponentSelection;
@@ -200,6 +316,9 @@ export function prepareBattleScenario(scenario: BattleScenario): {
     return {
       id: scenario.id,
       playerParty: cloneBattleParty(scenario.playerParty),
+      playerRentalRecords: scenario.playerRentalRecords === undefined
+        ? null
+        : cloneFactoryRentalParty(scenario.playerRentalRecords),
       opponents: selectRoundOpponents(
         scenario.opponentPool,
         scenario.opponentSelectionInputs,
@@ -238,6 +357,9 @@ export function prepareBattleScenario(scenario: BattleScenario): {
   return {
     id: scenario.id,
     playerParty: cloneBattleParty(scenario.playerParty),
+    playerRentalRecords: scenario.playerRentalRecords === undefined
+      ? null
+      : cloneFactoryRentalParty(scenario.playerRentalRecords),
     opponents: [firstOpponent],
     initialRngValue: firstSelection.rngValue,
     opponentSelection: {

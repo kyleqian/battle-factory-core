@@ -16,6 +16,7 @@ import {
 } from "../src/engine/battleScriptMachine.ts";
 import { resolveBattleScriptLabel } from "../src/engine/battleScriptProgram.ts";
 import { hiddenPowerFromIvs } from "../src/engine/battleScriptRankedBatch1Opcode.ts";
+import { runBattleScriptFaintedActionsOrchestration } from "../src/engine/battleScriptFaintedActionsOrchestration.ts";
 
 const program = loadBattleScriptProgram();
 const TACKLE = 33;
@@ -41,6 +42,8 @@ const ABILITY_LEVITATE = 26;
 const ABILITY_INTIMIDATE = 22;
 const ABILITY_TRACE = 36;
 const ABILITY_DRIZZLE = 2;
+const ABILITY_SAND_STREAM = 45;
+const ABILITY_DROUGHT = 70;
 const ABILITY_CLEAR_BODY = 29;
 const ABILITY_HYPER_CUTTER = 52;
 const ABILITY_WHITE_SMOKE = 73;
@@ -861,31 +864,21 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(result.state.rng.calls).toBe(0);
   });
 
-  it("switchineffects: Intimidate marks STATUS3, runs shared statbuffchange, then prints the Attack-cut message", () => {
+  it("switchineffects: Intimidate marks STATUS3, then state 6 runs shared statbuffchange and prints the Attack-cut message", () => {
     const rc = context({
       battlers: [
         battler({ side: 0, species: URSARING, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
-        battler({ side: 1, species: SUNKERN, hp: 0, types: ["TYPE_GRASS", "TYPE_GRASS"], partyIndex: 0, ability: ABILITY_INTIMIDATE }),
+        battler({ side: 1, species: SUNKERN, hp: 100, types: ["TYPE_GRASS", "TYPE_GRASS"], partyIndex: 0, ability: ABILITY_INTIMIDATE }),
         battler({ side: 0 }),
         battler({ side: 1 }),
       ],
     });
     const { execution, result } = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc);
-    if (result.kind !== "advanced") throw new Error(`expected callback, got ${result.kind}`);
-    expect(result.state.programCounter).toBe(resolveBattleScriptLabel(program, "BattleScript_IntimidateActivates")!.programCounter);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.programCounter).toBe(SWITCHINEFFECTS_PC + 1);
     expect(result.state.rulesContext.battlers[1].status3 & (1 << 19)).toBe(1 << 19);
-    let state = result.state;
-    for (let guard = 0; guard < 300 && state.programCounter !== SWITCHINEFFECTS_PC + 1; guard += 1) {
-      for (const pending of state.scheduler.pendingControllerBattlers) {
-        state = acknowledgeBattleScriptMachineController(state, pending);
-      }
-      const next = stepBattleScriptMachine(program, state, execution.handlers);
-      if (next.kind === "halted" || next.kind === "unsupported") {
-        throw new Error(`Intimidate script stopped at ${next.kind}: ${JSON.stringify(next.state.haltReason)}`);
-      }
-      state = next.state;
-    }
-    expect(state.programCounter).toBe(SWITCHINEFFECTS_PC + 1);
+    const state = runBattleScriptFaintedActionsOrchestration(program, execution.handlers, result.state).state;
+    expect(state.rulesContext.battlers[1].status3 & (1 << 19)).toBe(0);
     expect(state.rulesContext.battlers[0].statStages[1]).toBe(5);
     expect(state.events.filter((event) => event.kind === "message").map((event) => event.messageId))
       .toEqual(["STRINGID_PKMNCUTSATTACKWITH"]);
@@ -904,15 +897,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
         battler({ side: 1 }),
       ] });
       const { execution, result } = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc);
-      let state = result.state;
-      for (let guard = 0; guard < 1_000 && state.programCounter !== SWITCHINEFFECTS_PC + 1; guard += 1) {
-        const next = stepBattleScriptMachine(program, state, execution.handlers);
-        if (next.kind === "scheduler-progressed" || next.kind === "advanced") state = next.state;
-        else if (next.kind === "blocked") {
-          state = next.state;
-          for (const pending of state.scheduler.pendingControllerBattlers) state = acknowledgeBattleScriptMachineController(state, pending);
-        } else throw new Error(`unexpected ${next.kind}`);
-      }
+      const state = runBattleScriptFaintedActionsOrchestration(program, execution.handlers, result.state).state;
       expect(state.rulesContext.battlers[0].statStages[1]).toBe(6);
       const messages = state.events.filter((event) => event.kind === "message").map((event) => event.messageId);
       if (!target.status2) expect(state.rulesContext.lastUsedAbility).toBe(ABILITY_CLEAR_BODY);
@@ -933,20 +918,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
         battler({ side: 1 }),
       ] });
       const { execution, result } = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc);
-      let state = result.state;
-      for (let guard = 0; guard < 300 && state.programCounter !== SWITCHINEFFECTS_PC + 1; guard += 1) {
-        const next = stepBattleScriptMachine(program, state, execution.handlers);
-        if (next.kind === "scheduler-progressed" || next.kind === "advanced") state = next.state;
-        else if (next.kind === "blocked") {
-          state = next.state;
-          for (const pending of state.scheduler.pendingControllerBattlers) {
-            state = acknowledgeBattleScriptMachineController(state, pending);
-          }
-        } else {
-          throw new Error(`later-switch Intimidate stopped at ${next.kind}: ${JSON.stringify(next.state.haltReason)}`);
-        }
-      }
-      expect(state.programCounter).toBe(SWITCHINEFFECTS_PC + 1);
+      const state = runBattleScriptFaintedActionsOrchestration(program, execution.handlers, result.state).state;
       expect(state.rulesContext.battlers[0].statStages).toEqual([6, 6, 6, 6, 6, 6, 6, 6]);
       expect(state.rulesContext.lastUsedAbility).toBe(ability);
       expect(state.events.filter((event) => event.kind === "message").map((event) => event.messageId))
@@ -975,6 +947,11 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
         for (const pending of state.scheduler.pendingControllerBattlers) {
           state = acknowledgeBattleScriptMachineController(state, pending);
         }
+      } else if (next.kind === "halted" && next.state.haltReason?.kind === "end3") {
+        // Weather ON_SWITCHIN uses PushCursorAndCallback + end3. The
+        // TryDoEventsBeforeFirstTurn owner resumes its C loop externally.
+        state = next.state;
+        break;
       } else {
         throw new Error(`Drizzle entry script stopped at ${next.kind}: ${JSON.stringify(next.state.haltReason)}`);
       }
@@ -999,34 +976,32 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     for (let guard = 0; guard < 1_000 && state.programCounter !== SWITCHINEFFECTS_PC + 1; guard += 1) {
       const next = stepBattleScriptMachine(program, state, first.execution.handlers);
       if (next.kind === "scheduler-progressed" || next.kind === "advanced") state = next.state;
-      else if (next.kind === "blocked") {
-        state = next.state;
-        for (const pending of state.scheduler.pendingControllerBattlers) {
-          state = acknowledgeBattleScriptMachineController(state, pending);
-        }
-      } else {
-        throw new Error(`Intimidate entry script stopped at ${next.kind}: ${JSON.stringify(next.state.haltReason)}`);
-      }
+      else throw new Error(`Intimidate mark stopped at ${next.kind}: ${JSON.stringify(next.state.haltReason)}`);
     }
+    state = runBattleScriptFaintedActionsOrchestration(program, first.execution.handlers, state).state;
     expect(state.rulesContext.battlers[0].statStages[1]).toBe(5);
     expect(state.events.filter((event) => event.kind === "message").map((event) => event.messageId))
       .toEqual(["STRINGID_PKMNMADEITRAIN", "STRINGID_PKMNCUTSATTACKWITH"]);
     expect(state.rng.calls).toBe(0);
   });
 
-  it("switchineffects: Trace copies the live opposing ability and announces it with zero draws", () => {
+  it("switchineffects: Trace marks pending, then state 6 copies the live opposing ability and announces it", () => {
     const rc = context({ battlers: [
       battler({ side: 0, ability: 5, hp: 100, partyIndex: 0 }),
       battler({ side: 1, ability: ABILITY_TRACE, hp: 100, partyIndex: 2 }),
       battler({ side: 0 }),
       battler({ side: 1 }),
     ] });
-    const { result } = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc);
-    expect(result.state.rulesContext.battlers[1].ability).toBe(5);
-    expect(result.state.rulesContext.lastUsedAbility).toBe(5);
-    expect(result.state.rulesContext.battleTextBuff1MonNick).toEqual({ battler: 0, partyIndex: 0 });
-    expect(result.state.programCounter).toBe(resolveBattleScriptLabel(program, "BattleScript_TraceActivates")!.programCounter);
-    expect(result.state.rng.calls).toBe(0);
+    const { execution, result } = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc);
+    expect(result.state.rulesContext.battlers[1].ability).toBe(ABILITY_TRACE);
+    expect(result.state.rulesContext.battlers[1].status3 & (1 << 20)).toBe(1 << 20);
+    expect(result.state.programCounter).toBe(SWITCHINEFFECTS_PC + 1);
+    const state = runBattleScriptFaintedActionsOrchestration(program, execution.handlers, result.state).state;
+    expect(state.rulesContext.battlers[1].ability).toBe(5);
+    expect(state.rulesContext.battlers[1].status3 & (1 << 20)).toBe(0);
+    expect(state.rulesContext.lastUsedAbility).toBe(5);
+    expect(state.rulesContext.battleTextBuff1MonNick).toEqual({ battler: 0, partyIndex: 0 });
+    expect(state.rng.calls).toBe(0);
   });
 
   it("switchineffects: Drizzle sets permanent rain once and same-weather re-entry is a no-op", () => {
@@ -1045,4 +1020,23 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(second.state.events).toEqual([]);
     expect(second.state.rng.calls).toBe(0);
   });
+
+  it.each([
+    ["Sand Stream", ABILITY_SAND_STREAM, (1 << 3) | (1 << 4), "BattleScript_SandstreamActivates"],
+    ["Drought", ABILITY_DROUGHT, (1 << 5) | (1 << 6), "BattleScript_DroughtActivates"],
+  ] as const)(
+    "switchineffects: %s sets both source temporary+permanent weather bits and draws zero RNG",
+    (_name, ability, weather, scriptLabel) => {
+      const rc = context({ battlers: [
+        battler({ side: 0 }),
+        battler({ side: 1, ability }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ] });
+      const result = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc).result;
+      expect(result.state.rulesContext.weather).toBe(weather);
+      expect(result.state.programCounter).toBe(resolveBattleScriptLabel(program, scriptLabel)!.programCounter);
+      expect(result.state.rng.calls).toBe(0);
+    },
+  );
 });

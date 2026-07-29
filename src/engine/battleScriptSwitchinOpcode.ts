@@ -44,6 +44,7 @@ import {
   type BattleScriptStatStages,
 } from "./battleScriptRulesContext.ts";
 import { BATTLE_SCRIPT_STATUS2_WRAPPED_MASK } from "./battleScriptSourceConstants.ts";
+import { cancelBattleScriptMultiTurnMoves } from "./battleScriptMultiTurnCancellation.ts";
 import { computeCastformForm } from "./battleScriptTryCastformDataChangeOpcode.ts";
 import speciesTypesData from "../data/gen/species-types.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
@@ -89,7 +90,9 @@ const STATUS3_INTIMIDATE_POKES = 1 << 19;
 const STATUS3_TRACE = 1 << 20;
 const B_WEATHER_RAIN_TEMPORARY = 1 << 0;
 const B_WEATHER_RAIN_PERMANENT = 1 << 2;
+const B_WEATHER_SANDSTORM_TEMPORARY = 1 << 3;
 const B_WEATHER_SANDSTORM_PERMANENT = 1 << 4;
+const B_WEATHER_SUN_TEMPORARY = 1 << 5;
 const B_WEATHER_SUN_PERMANENT = 1 << 6;
 
 type SpeciesTypesRow = Readonly<{ name: string; types: readonly [string, string] }>;
@@ -99,7 +102,7 @@ const SPECIES_STATS_BY_ID = new Map(
   (speciesStatsData.species as unknown as readonly SpeciesStatsRow[]).map((row) => [row.id, row]),
 );
 /** include/constants/abilities.h: source symbols in exact numeric-id order. */
-const ABILITY_SYMBOLS = Object.freeze([
+export const ABILITY_SYMBOLS = Object.freeze([
   "ABILITY_NONE", "ABILITY_STENCH", "ABILITY_DRIZZLE", "ABILITY_SPEED_BOOST",
   "ABILITY_BATTLE_ARMOR", "ABILITY_STURDY", "ABILITY_DAMP", "ABILITY_LIMBER",
   "ABILITY_SAND_VEIL", "ABILITY_STATIC", "ABILITY_VOLT_ABSORB", "ABILITY_WATER_ABSORB",
@@ -189,7 +192,7 @@ function callSwitchinScript(
 }
 
 /**
- * include/constants/battle_script_commands.h -- the three `various` ids this
+ * include/constants/battle_script_commands.h -- the `various` ids this
  * file resolves; every other case name stays unrecognized (barriers).
  * VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT (23, battle_script_commands.c:
  * 6480-6482) widens this existing barrier's modeled operand set --
@@ -200,11 +203,13 @@ function callSwitchinScript(
  * tracked purely so this reachable script doesn't halt on an avoidable
  * barrier.
  */
+const VARIOUS_CANCEL_MULTI_TURN_MOVES = 0;
 const VARIOUS_RESET_PLAYER_FAINTED = 7;
 const VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT = 23;
 const VARIOUS_GET_MOVE_TARGET = 3;
 const VARIOUS_SET_MAGIC_COAT_TARGET = 1;
 const NAMED_BYTE_CONSTANTS = new Map<string, number>([
+  ["VARIOUS_CANCEL_MULTI_TURN_MOVES", VARIOUS_CANCEL_MULTI_TURN_MOVES],
   ["VARIOUS_SET_MAGIC_COAT_TARGET", VARIOUS_SET_MAGIC_COAT_TARGET],
   ["VARIOUS_GET_MOVE_TARGET", VARIOUS_GET_MOVE_TARGET],
   ["VARIOUS_RESET_PLAYER_FAINTED", VARIOUS_RESET_PLAYER_FAINTED],
@@ -228,15 +233,15 @@ function resolveSwitchBattler(
 }
 
 /**
- * `Cmd_switchhandleorder` (`battle_script_commands.c:5152-5217`), cases 2/3
- * only (the reachable script always emits `switchhandleorder BS_FAINTED, 2`,
+ * `Cmd_switchhandleorder` (`battle_script_commands.c:5152-5217`), cases 1/2/3
+ * (the forced-switch script emits `switchhandleorder BS_FAINTED, 2`,
  * which falls through into case 3's body; case 3 alone is the same body
  * minus the untracked `RecordedBattle`/`field_93` bookkeeping, so both are
- * handled identically). Cases 0 (multi-battler collection loop) and 1
- * (`SwitchPartyOrder` with no assignment) are named barriers -- unreached by
- * this script. Per §5c, `SwitchPartyOrder` itself is proven presentation-only
- * and is not modeled: the only mechanically-relevant effect is the
- * `gBattleCommunication[0] = monToSwitchIntoId[battler]` transcription.
+ * handled identically). Voluntary `BattleScript_ActionSwitch` emits case 1:
+ * its sole `SwitchPartyOrder` call is presentation/order-only by the same
+ * docs/forced-switch-ground-truth.md §5c proof, while the already-selected
+ * `monToSwitchIntoId` remains authoritative. Case 0 (multi-battler collection
+ * loop) retains the named barrier.
  */
 function createSwitchhandleorderOpcodeHandler(
   isControllerIdle: BattleScriptControllerIdlePort<BattleScriptRulesContext>,
@@ -260,7 +265,7 @@ function createSwitchhandleorderOpcodeHandler(
       );
     }
     const caseValue = resolveByteLiteral(caseOperand.expression);
-    if (caseValue !== 2 && caseValue !== 3) {
+    if (caseValue !== 1 && caseValue !== 2 && caseValue !== 3) {
       return unsupportedBranch(
         context,
         `Cmd_switchhandleorder case ${caseOperand.expression} (multi-battler collection/order-only) is not modeled`,
@@ -273,6 +278,12 @@ function createSwitchhandleorderOpcodeHandler(
       throw new Error(
         `Cmd_switchhandleorder: battler ${battler} has no decided monToSwitchIntoId `
           + "-- openpartyscreen must run first",
+      );
+    }
+    if (caseValue === 1) {
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
       );
     }
     return transitionBattleScriptCommand(
@@ -582,14 +593,19 @@ function cancelallactionsOpcodeHandler(
 }
 
 /**
- * `Cmd_various` cases `VARIOUS_GET_MOVE_TARGET` (3),
+ * `Cmd_various` cases `VARIOUS_CANCEL_MULTI_TURN_MOVES` (0),
+ * `VARIOUS_GET_MOVE_TARGET` (3),
  * `VARIOUS_RESET_PLAYER_FAINTED` (7), and
  * `VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT` (23). GET_MOVE_TARGET's
  * `MOVE_TARGET_SELECTED` branch is source-complete for singles: it repeats
  * `Random() % gBattlersCount` until it finds a present opposing battler.
  * Doubles still use the handler's existing generic barrier because Follow
  * Me and Lightning Rod target redirection require state this context does
- * not own. Every other `id` is that same named barrier.
+ * not own. CANCEL_MULTI_TURN_MOVES is the direct
+ * `CancelMultiTurnMoves(gActiveBattler)` call at
+ * battle_script_commands.c:6327-6329; the shared helper ports its exact
+ * status2/status3/timer clears from battle_util.c:877-888. Every other `id`
+ * is that same named barrier.
  */
 function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
@@ -607,6 +623,8 @@ function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRul
       && rules.battleTopology.battlersCount === 2;
     if (
       id !== VARIOUS_SET_MAGIC_COAT_TARGET
+      &&
+      id !== VARIOUS_CANCEL_MULTI_TURN_MOVES
       &&
       id !== VARIOUS_RESET_PLAYER_FAINTED
       && id !== VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT
@@ -645,6 +663,18 @@ function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRul
         context,
         Object.freeze({ kind: "advance" }),
         { rulesContext: nextRules, rng },
+      );
+    }
+
+    if (id === VARIOUS_CANCEL_MULTI_TURN_MOVES) {
+      const cancelled = cancelBattleScriptMultiTurnMoves(
+        rules,
+        battler as BattleScriptBattlerId,
+      );
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: cancelled.rulesContext },
       );
     }
 
@@ -795,13 +825,13 @@ function createSwitchineffectsOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
     if (nextActive.ability === ABILITY_SAND_STREAM && !(nextRules.weather & B_WEATHER_SANDSTORM_PERMANENT)) {
       return callSwitchinScript(context, "BattleScript_SandstreamActivates", Object.freeze({
         ...abilityRules,
-        weather: B_WEATHER_SANDSTORM_PERMANENT,
+        weather: B_WEATHER_SANDSTORM_TEMPORARY | B_WEATHER_SANDSTORM_PERMANENT,
       }));
     }
     if (nextActive.ability === ABILITY_DROUGHT && !(nextRules.weather & B_WEATHER_SUN_PERMANENT)) {
       return callSwitchinScript(context, "BattleScript_DroughtActivates", Object.freeze({
         ...abilityRules,
-        weather: B_WEATHER_SUN_PERMANENT,
+        weather: B_WEATHER_SUN_TEMPORARY | B_WEATHER_SUN_PERMANENT,
       }));
     }
     if (nextActive.ability === ABILITY_INTIMIDATE && !(nextActive.status3 & STATUS3_INTIMIDATE_POKES)) {
@@ -810,33 +840,23 @@ function createSwitchineffectsOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
           ? Object.freeze({ ...candidate, status3: (candidate.status3 | STATUS3_INTIMIDATE_POKES) >>> 0 })
           : candidate
       ) as unknown as BattleScriptRulesBattlers;
-      return callSwitchinScript(context, "BattleScript_IntimidateActivates", Object.freeze({
-        ...abilityRules,
-        battlers: Object.freeze(battlers),
-      }));
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: Object.freeze({ ...nextRules, battlers: Object.freeze(battlers) }) },
+      );
     }
     if (nextActive.ability === ABILITY_TRACE && !(nextActive.status3 & STATUS3_TRACE)) {
-      const target = nextRules.battlers.findIndex((candidate, index) =>
-        index < nextRules.battleTopology.battlersCount
-        && candidate.side !== nextActive.side
-        && candidate.hp !== 0
-        && candidate.ability !== 0
+      const battlers = nextRules.battlers.map((candidate, index) =>
+        index === battler
+          ? Object.freeze({ ...candidate, status3: (candidate.status3 | STATUS3_TRACE) >>> 0 })
+          : candidate
+      ) as unknown as BattleScriptRulesBattlers;
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: Object.freeze({ ...nextRules, battlers: Object.freeze(battlers) }) },
       );
-      if (target >= 0) {
-        const copiedAbility = nextRules.battlers[target as BattleScriptBattlerId].ability;
-        const battlers = nextRules.battlers.map((candidate, index) =>
-          index === battler ? Object.freeze({ ...candidate, ability: copiedAbility }) : candidate
-        ) as unknown as BattleScriptRulesBattlers;
-        return callSwitchinScript(context, "BattleScript_TraceActivates", Object.freeze({
-          ...abilityRules,
-          battlers: Object.freeze(battlers),
-          lastUsedAbility: copiedAbility,
-          battleTextBuff1MonNick: Object.freeze({
-            battler: target as BattleScriptBattlerId,
-            partyIndex: nextRules.battlers[target as BattleScriptBattlerId].partyIndex,
-          }),
-        }));
-      }
     }
     if (
       nextActive.ability === ABILITY_FORECAST

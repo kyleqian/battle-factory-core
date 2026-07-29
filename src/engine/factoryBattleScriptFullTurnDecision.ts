@@ -66,21 +66,29 @@ import {
   type BattleDecisionSubmission,
   type BattleDecisionTransitionResult,
   type BattleJsonObject,
+  type BattleCommandDecision,
   type BattleMoveDecision,
   type BattleMoveSlot,
   type BattlePartyIndex,
   type BattleSinglesBattler,
+  type BattleSwitchDecision,
   type BattleState,
 } from "./battleDecisionBoundary.ts";
 import { handleBattleActionFinished } from "./battleActionFinished.ts";
 import { checkBattleScriptMoveLimitations } from "./battleScriptActionAdmission.ts";
-import { withBattler } from "./battleScriptHitChainOpcode.ts";
+import {
+  HOLD_EFFECT_NAME_BY_ID,
+  unsupportedBranch,
+  withBattler,
+} from "./battleScriptHitChainOpcode.ts";
 import {
   acknowledgeBattleScriptMachineController,
   createBattleScriptRngState,
   createBattleScriptSchedulerState,
   stepBattleScriptMachine,
+  transitionBattleScriptCommand,
   type BattleScriptMachineState,
+  type BattleScriptOpcodeHandler,
   type BattleScriptOpcodeHandlers,
   type BattleScriptSchedulerState,
 } from "./battleScriptMachine.ts";
@@ -95,14 +103,22 @@ import {
   resumeBattleScriptFaintedActionsAfterPlayerChoice,
   runBattleScriptFaintedActionsOrchestration,
 } from "./battleScriptFaintedActionsOrchestration.ts";
-import { runBattleEndTurnOrchestration } from "./battleEndTurnOrchestration.ts";
-import { effectiveSpeed, getWhoStrikesFirst, type TurnOrderBattler } from "./turnOrder.ts";
+import {
+  resumeBattleEndTurnAfterFaintedActions,
+  runBattleEndTurnOrchestration,
+  weatherHasEffect,
+  type BattleEndTurnResult,
+} from "./battleEndTurnOrchestration.ts";
+import { effectiveSpeed, getWhoStrikesFirst, type TurnOrderBattler, type WeatherState } from "./turnOrder.ts";
+import { ABILITY_SYMBOLS } from "./battleScriptSwitchinOpcode.ts";
 import {
   BATTLE_SCRIPT_BATTLE_ENVIRONMENT_BUILDING,
   BATTLE_SCRIPT_BATTLE_TYPE_FACTORY,
   BATTLE_SCRIPT_BATTLE_TYPE_TRAINER,
   BATTLE_SCRIPT_PARTY_SIZE,
   createBattleScriptRulesContext,
+  resolveBattleScriptBattlerHoldEffect,
+  resolveBattleScriptBattlerHoldEffectParam,
   uniformBattleScriptIvs,
   createBattleScriptStatusRulesHandlers,
   type BattleScriptPartyMemberInput,
@@ -116,6 +132,8 @@ import {
   BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE,
   BATTLE_SCRIPT_MOVE_STRUGGLE,
   BATTLE_SCRIPT_STATUS2_MASKS,
+  BATTLE_SCRIPT_STATUS2_WRAPPED_MASK,
+  BATTLE_SCRIPT_STATUS3_ROOTED,
 } from "./battleScriptSourceConstants.ts";
 import { mapFactoryBattleOutcome } from "./factoryBattleScriptTerminalDecision.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
@@ -128,6 +146,8 @@ const B_WAIT_TIME_SHORT = 32;
 const STAT_SPEED = 3;
 /** Real per-script instruction ceiling, matching battleEndTurnOrchestration.ts's own bump for the DoTurnDmg-family scripts' controller round trips. */
 const SCRIPT_BUDGET = 256;
+/** Controller/message waits are resumptions of one source opcode, not new opcodes. */
+const SCRIPT_YIELD_BUDGET = 4_096;
 
 type MoveRow = Readonly<{
   id: number;
@@ -153,6 +173,45 @@ const ZERO_STAT_STAGES = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0] as const);
 const ZERO_IVS = uniformBattleScriptIvs(0);
 /** GetFactoryMonFixedIV(challenge 0, non-final) => sFixedIVTable[0][0] = 3. */
 const FACTORY_FIRST_CHALLENGE_IVS = uniformBattleScriptIvs(3);
+/** include/constants/battle.h:232-239 -- all active rain/sun variants. */
+const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
+const B_WEATHER_SUN = (1 << 5) | (1 << 6);
+/** include/constants/battle.h:120. */
+const STATUS1_PARALYSIS = 1 << 6;
+/** include/constants/abilities.h: exact identity constants used by the cited source gates below. */
+const ABILITY_SHADOW_TAG = 23;
+const ABILITY_LEVITATE = 26;
+const ABILITY_MAGNET_PULL = 42;
+const ABILITY_RUN_AWAY = 50;
+const ABILITY_ARENA_TRAP = 71;
+/** include/constants/battle.h: STATUS2_ESCAPE_PREVENTION. */
+const STATUS2_ESCAPE_PREVENTION = 1 << 26;
+/** include/constants/moves.h. */
+const MOVE_PURSUIT = 228;
+
+/**
+ * Run Away is an honest Factory no-op at this adapter's decision boundary.
+ *
+ * Source order matters:
+ * - `battle_main.c:4322-4339` intercepts a Factory trainer RUN as a forfeit
+ *   confirmation before calling `IsRunningFromBattleImpossible`; therefore
+ *   its `ABILITY_RUN_AWAY` check at `battle_main.c:4038` is not RUN-menu
+ *   legality for this mode.
+ * - After confirmation, `battle_util.c:427-448` does reach the Run Away
+ *   branch before its generic Frontier-trainer success branch. However,
+ *   `battle_main.c:5058-5062` maps every such Factory RUN to
+ *   `B_OUTCOME_FORFEITED` before consulting `fleeType`.
+ *
+ * This kernel models the battle command surface, not the surrounding forfeit
+ * UI: `BattleCommandDecision` intentionally contains only use-move/switch.
+ * Keeping the identity here pins why Run Away must neither add a flee command
+ * nor bypass the separate voluntary-switch trapping gate below.
+ */
+export const FACTORY_RUN_AWAY_NOOP_INVARIANT = Object.freeze({
+  abilityId: ABILITY_RUN_AWAY,
+  battleTypeFlags: BATTLE_SCRIPT_BATTLE_TYPE_TRAINER | BATTLE_SCRIPT_BATTLE_TYPE_FACTORY,
+  legalDecisionKinds: Object.freeze(["use-move", "switch"] as const),
+});
 
 type MachineState = BattleScriptMachineState<BattleScriptRulesContext>;
 type Handlers = BattleScriptOpcodeHandlers<BattleScriptRulesContext>;
@@ -205,6 +264,17 @@ export type FactoryFullTurnBattlerConfig = Readonly<{
 export type FactoryFullTurnConfig = Readonly<{
   requestId: number;
   rngSeed: number;
+  /** Optional staged source gAbsentBattlerFlags for legality fixtures. */
+  absentBattlerFlags?: number;
+  /** Optional source gBattleWeather staging for finite full-turn fixtures. */
+  weather?: number;
+  /**
+   * Source gRandomTurnNumber already drawn before this staged mid-battle
+   * window. Defaults to 0xffff (Quick Claw does not proc). Whole-battle
+   * integration must model battle_main.c:3140/:3923 for turn 1; this reducer
+   * owns only BattleTurnPassed's continuing-turn draw at :4013.
+   */
+  initialRandomTurnNumber?: number;
   player: FactoryFullTurnBattlerConfig;
   trainer: FactoryFullTurnBattlerConfig;
   /**
@@ -239,10 +309,7 @@ export type FactoryFullTurnConfig = Readonly<{
 export type FactoryFullTurnDecisionRules = BattleJsonObject & Readonly<{
   adapter: typeof ADAPTER;
   phase: "awaiting-player-command" | "awaiting-trainer-command" | "forced-switch-pending";
-  pendingPlayerDecision: null | Readonly<{
-    moveSlot: BattleMoveSlot;
-    targetBattler: BattleSinglesBattler;
-  }>;
+  pendingPlayerDecision: null | BattleCommandDecision;
   rulesContext: BattleScriptRulesContext;
   /**
    * Only present in phase "forced-switch-pending": the halted
@@ -257,9 +324,16 @@ type PendingForcedSwitchScript = Readonly<{
   programCounter: number;
   callStack: readonly number[];
   scheduler: BattleScriptSchedulerState;
+  /**
+   * Source continuation owned by the caller of HandleFaintedMonActions.
+   * Action KOs still enter BattleTurnPassed from its start; an end-turn KO
+   * has already completed DoField/DoBattler and resumes at the delayed-
+   * attack/Perish tail (`battle_main.c:3963-3974`).
+   */
+  resumeAt: "run-end-turn" | "finish-end-turn-after-faints";
 }>;
 
-function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
+export function createFactoryEmptyBattlerState(side: 0 | 1): BattleScriptRulesBattlerState {
   return Object.freeze({
     side,
     ability: 0,
@@ -353,7 +427,7 @@ function activeBattler(
     ]
   );
   return Object.freeze({
-    ...emptyBattler(side),
+    ...createFactoryEmptyBattlerState(side),
     ivs: FACTORY_FIRST_CHALLENGE_IVS,
     ability: config.ability ?? 0,
     abilityNum: (config.abilityNum ?? 0) as 0 | 1,
@@ -460,8 +534,8 @@ function createInitialRules(config: FactoryFullTurnConfig): FactoryFullTurnDecis
     battlers: [
       activeBattler(0, config.player),
       activeBattler(1, config.trainer),
-      emptyBattler(0),
-      emptyBattler(1),
+      createFactoryEmptyBattlerState(0),
+      createFactoryEmptyBattlerState(1),
     ],
     selectorRoles: { attacker: null, target: null, effectBattler: null, fainted: null },
     scriptingBattler: 0,
@@ -490,9 +564,12 @@ function createInitialRules(config: FactoryFullTurnConfig): FactoryFullTurnDecis
     party: { player: playerParty, opponent: opponentParty },
     battleTopology: {
       battlersCount: 2,
-      battleTypeFlags: BATTLE_SCRIPT_BATTLE_TYPE_TRAINER | BATTLE_SCRIPT_BATTLE_TYPE_FACTORY,
+      battleTypeFlags: FACTORY_RUN_AWAY_NOOP_INVARIANT.battleTypeFlags,
       battlerPositions: [0, 1, 0xff, 0xff],
     },
+    absentBattlerFlags: config.absentBattlerFlags ?? 0,
+    weather: config.weather ?? 0,
+    randomTurnNumber: config.initialRandomTurnNumber ?? 0xffff,
   });
   return Object.freeze({
     adapter: ADAPTER,
@@ -506,17 +583,48 @@ export function createFactoryFullTurnBattleState(
   config: FactoryFullTurnConfig,
 ): BattleState<FactoryFullTurnDecisionRules> {
   const rules = createInitialRules(config);
-  return createBattleState({
-    rules,
+  return createFactoryFullTurnBattleStateFromRulesContext({
+    requestId: config.requestId,
     rngSeed: config.rngSeed,
+    rulesContext: rules.rulesContext,
+  });
+}
+
+/**
+ * Shared durable full-turn construction seam. Staged fixtures and the fresh
+ * lifecycle both publish the same reducer-owned rules/request shape here.
+ */
+export function createFactoryFullTurnBattleStateFromRulesContext(
+  input: Readonly<{
+    requestId: number;
+    rngSeed: number;
+    rngCalls?: number;
+    /** Semantic events emitted by lifecycle hooks before this first request. */
+    nextEventSequence?: number;
+    rulesContext: BattleScriptRulesContext;
+  }>,
+): BattleState<FactoryFullTurnDecisionRules> {
+  const rules = Object.freeze({
+    adapter: ADAPTER,
+    phase: "awaiting-player-command",
+    pendingPlayerDecision: null,
+    rulesContext: input.rulesContext,
+  }) as FactoryFullTurnDecisionRules;
+  const state = createBattleState({
+    rules,
+    rngSeed: input.rngSeed,
+    rngCalls: input.rngCalls,
     request: {
       kind: "command",
-      requestId: config.requestId,
+      requestId: input.requestId,
       side: "player",
       battler: 0,
-      legalDecisions: legalMoveDecisions(rules.rulesContext, 0),
+      legalDecisions: legalPlayerDecisions(rules.rulesContext),
     },
   }) as BattleState<FactoryFullTurnDecisionRules>;
+  return input.nextEventSequence === undefined
+    ? state
+    : Object.freeze({ ...state, nextEventSequence: input.nextEventSequence });
 }
 
 function rulesAt(input: FactoryFullTurnDecisionRules): FactoryFullTurnDecisionRules {
@@ -536,10 +644,7 @@ function rulesAt(input: FactoryFullTurnDecisionRules): FactoryFullTurnDecisionRu
     adapter: ADAPTER,
     phase: phase as "awaiting-player-command" | "awaiting-trainer-command",
     pendingPlayerDecision: (input as {
-      pendingPlayerDecision: null | Readonly<{
-        moveSlot: BattleMoveSlot;
-        targetBattler: BattleSinglesBattler;
-      }>;
+      pendingPlayerDecision: null | BattleCommandDecision;
     }).pendingPlayerDecision,
     rulesContext,
   });
@@ -568,7 +673,7 @@ function buildForcedSwitchPendingRules(
 
 function pendingScriptAt(value: unknown): PendingForcedSwitchScript {
   const record = value as
-    | Readonly<{ programCounter?: unknown; callStack?: unknown; scheduler?: unknown }>
+    | Readonly<{ programCounter?: unknown; callStack?: unknown; scheduler?: unknown; resumeAt?: unknown }>
     | null
     | undefined;
   if (
@@ -578,6 +683,10 @@ function pendingScriptAt(value: unknown): PendingForcedSwitchScript {
     || !Number.isSafeInteger(record.programCounter)
     || !Array.isArray(record.callStack)
     || !record.callStack.every((entry) => Number.isSafeInteger(entry))
+    || (
+      record.resumeAt !== "run-end-turn"
+      && record.resumeAt !== "finish-end-turn-after-faints"
+    )
   ) {
     throw new Error("factory full-turn decision pendingScript must be a valid halted-script bundle");
   }
@@ -588,6 +697,7 @@ function pendingScriptAt(value: unknown): PendingForcedSwitchScript {
     programCounter: record.programCounter as number,
     callStack: Object.freeze([...(record.callStack as readonly number[])]),
     scheduler,
+    resumeAt: record.resumeAt,
   });
 }
 
@@ -658,9 +768,10 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
     resolveHalfwordOperand: (_context: unknown, operand: Readonly<{ expression: string }>) => {
       if (operand.expression === "B_WAIT_TIME_LONG") return B_WAIT_TIME_LONG;
       if (operand.expression === "B_WAIT_TIME_SHORT") return B_WAIT_TIME_SHORT;
-      return null;
+      return /^[0-9]+$/.test(operand.expression) ? Number(operand.expression) : null;
     },
-    resolveByteOperand: () => null,
+    resolveByteOperand: (_context: unknown, operand: Readonly<{ expression: string }>) =>
+      /^[0-9]+$/.test(operand.expression) ? Number(operand.expression) : null,
   });
 }
 
@@ -679,7 +790,9 @@ type RunToOwnEndResult =
 /** Runs one already-started BattleScriptExecute script to its own end/end2 halt (same shape as the fainted-actions/end-turn precedents' own helper). */
 function runScriptToOwnEnd(program: BattleScriptProgram, handlers: Handlers, initialState: MachineState): RunToOwnEndResult {
   let state = initialState;
-  for (let budget = 0; budget < SCRIPT_BUDGET; budget += 1) {
+  let sourceInstructions = 0;
+  let yieldSteps = 0;
+  while (sourceInstructions < SCRIPT_BUDGET && yieldSteps < SCRIPT_YIELD_BUDGET) {
     const instruction = program.instructions[state.programCounter];
     if (!instruction) {
       throw new Error(`full-turn reducer left the committed program at ${state.programCounter}`);
@@ -691,8 +804,12 @@ function runScriptToOwnEnd(program: BattleScriptProgram, handlers: Handlers, ini
     if (stepped.kind === "blocked") {
       const acknowledged = acknowledgeAllPendingControllers(stepped.state);
       if (acknowledged === stepped.state) {
-        throw new Error(`full-turn reducer blocked inside ${instruction.source.label} without a safe controller acknowledgement`);
+        throw new Error(
+          `full-turn reducer blocked inside ${instruction.source.label}/${instruction.opcodeName} `
+            + `without a safe controller acknowledgement: ${JSON.stringify(stepped.reason)}`,
+        );
       }
+      yieldSteps += 1;
       state = acknowledged;
       continue;
     }
@@ -705,9 +822,36 @@ function runScriptToOwnEnd(program: BattleScriptProgram, handlers: Handlers, ini
     if (stepped.kind === "unsupported") {
       return Object.freeze({ kind: "barrier", state: stepped.state, instruction });
     }
+    if (stepped.kind === "scheduler-progressed") {
+      yieldSteps += 1;
+      state = stepped.state;
+      continue;
+    }
+    const controllerYield = (
+      stepped.state.programCounter === state.programCounter
+      && stepped.state.scheduler.pendingControllerBattlers.length
+        > state.scheduler.pendingControllerBattlers.length
+    );
+    if (controllerYield) {
+      yieldSteps += 1;
+    } else {
+      sourceInstructions += 1;
+    }
     state = stepped.state;
   }
-  throw new Error("full-turn reducer exceeded its per-script instruction budget");
+  if (yieldSteps >= SCRIPT_YIELD_BUDGET) {
+    throw new Error(
+      `full-turn reducer exceeded its controller/message yield budget at `
+        + `${program.instructions[state.programCounter]?.source.label}/`
+        + `${program.instructions[state.programCounter]?.opcodeName}`,
+    );
+  }
+  throw new Error(
+    `full-turn reducer exceeded its per-script instruction budget at `
+      + `${program.instructions[state.programCounter]?.source.label}/`
+      + `${program.instructions[state.programCounter]?.opcodeName} after `
+      + `${sourceInstructions} source instructions`,
+  );
 }
 
 /** `BattleScriptExecute(script)`: a fresh top-level script, call stack reset, carrying the rules/RNG/event/scheduler state forward. */
@@ -801,6 +945,138 @@ function runMoveAction(
   return Object.freeze({ kind: "complete", state: run.state });
 }
 
+/**
+ * Voluntary-switch-only registration for Cmd_jumpifnopursuitswitchdmg
+ * (`battle_script_commands.c:8723-8759`). The non-Pursuit arm is the literal
+ * jump to BattleScript_DoSwitchOut. Pursuit interception remains an honest,
+ * trigger-narrow barrier: silently running the ordinary move after installing
+ * the incoming mon would reverse the ROM's target and double-power order.
+ */
+function voluntarySwitchHandlers(
+  base: Handlers,
+  trainerMoveId: number,
+): Handlers {
+  const instruction = PROGRAM.instructions.find(
+    (candidate) =>
+      candidate.opcodeName === "B_SCR_OP_JUMPIFNOPURSUITSWITCHDMG",
+  );
+  if (!instruction) {
+    throw new Error("assembled program has no jumpifnopursuitswitchdmg instruction");
+  }
+  const returnToBallInstruction = PROGRAM.instructions.find(
+    (candidate) =>
+      candidate.source.label === "BattleScript_DoSwitchOut"
+      && candidate.opcodeName === "B_SCR_OP_RETURNATKTOBALL",
+  );
+  if (!returnToBallInstruction) {
+    throw new Error("assembled program has no voluntary-switch returnatktoball instruction");
+  }
+  const handler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (context) => {
+    if (trainerMoveId === MOVE_PURSUIT) {
+      return unsupportedBranch(
+        context,
+        "voluntary player switch while the opponent's selected move is MOVE_PURSUIT "
+          + "(pre-switch interception/double-power path)",
+        "battle_script_commands.c",
+        8723,
+      );
+    }
+    const [targetOperand] = context.instruction.operands;
+    if (
+      context.instruction.operands.length !== 1
+      || targetOperand?.widthBytes !== 4
+    ) {
+      throw new Error("invalid B_SCR_OP_JUMPIFNOPURSUITSWITCHDMG shape");
+    }
+    const target = resolveBattleScriptLabel(context.program, targetOperand.expression);
+    if (!target) {
+      throw new Error(
+        `unresolved jumpifnopursuitswitchdmg target ${targetOperand.expression}`,
+      );
+    }
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "jump", programCounter: target.programCounter }),
+    );
+  };
+  // Cmd_returnatktoball (`battle_script_commands.c:5354-5360`) is the
+  // voluntary-switch sibling of the already-modeled Cmd_returntoball:
+  // controller presentation only, with zero rules/RNG mutation.
+  const returnToBallHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
+    context,
+  ) => transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "advance" }),
+  );
+  return Object.freeze({
+    ...base,
+    [instruction.opcodeId]: handler,
+    [returnToBallInstruction.opcodeId]: returnToBallHandler,
+  });
+}
+
+/**
+ * HandleAction_Switch + BattleScript_ActionSwitch
+ * (`battle_util.c:294-311`, `data/battle_scripts_1.s:3088-3121`). The party
+ * choice is already validated by the command boundary, so this stages
+ * monToSwitchIntoId exactly where the controller path would have left it and
+ * then reuses the existing source-script switch-out/in handlers and entry
+ * hooks. The action itself draws no RNG.
+ */
+function runVoluntarySwitchAction(
+  priorState: MachineState,
+  partyIndex: BattlePartyIndex,
+  trainerMoveId: number,
+  baseHandlers: Handlers,
+): ActionResult {
+  const monToSwitchIntoId = Object.freeze(
+    priorState.rulesContext.monToSwitchIntoId.map((value, battler) =>
+      battler === 0 ? partyIndex : value
+    ),
+  ) as unknown as BattleScriptRulesContext["monToSwitchIntoId"];
+  const rulesContext = createBattleScriptRulesContext({
+    ...priorState.rulesContext,
+    selectorRoles: {
+      attacker: 0,
+      target: 1,
+      effectBattler: 1,
+      fainted: null,
+    },
+    scriptingBattler: 0,
+    currentMove: 0,
+    currentMovePosition: 0,
+    monToSwitchIntoId,
+    atkCancelerTracker: 0,
+    critMultiplier: 1,
+    dmgMultiplier: 1,
+    moveResultFlags: 0,
+    // BattleScript_ActionSwitch's singles prelude writes one before entering
+    // BattleScript_PursuitSwitchDmgLoop (battle_scripts_1.s:3093-3098).
+    multiHitCounter: 1,
+    missType: 0,
+  });
+  // The skipped ActionSwitch prelude is presentation bookkeeping
+  // (hpthresholds2/RETURNMON text) plus the singles counter/setbyte writes
+  // staged above; begin at its first logical branch.
+  const started = startBattleScriptExecute(PROGRAM, "BattleScript_PursuitSwitchDmgLoop", {
+    ...priorState,
+    rulesContext,
+  });
+  const run = runScriptToOwnEnd(
+    PROGRAM,
+    voluntarySwitchHandlers(baseHandlers, trainerMoveId),
+    started,
+  );
+  if (run.kind === "barrier") {
+    return Object.freeze({
+      kind: "barrier",
+      state: run.state,
+      instruction: run.instruction,
+    });
+  }
+  return Object.freeze({ kind: "complete", state: run.state });
+}
+
 function movePriority(moveId: number): number {
   const row = MOVES_BY_ID.get(moveId);
   if (!row) throw new Error(`move ${moveId} has no source move data row`);
@@ -809,7 +1085,31 @@ function movePriority(moveId: number): number {
 
 function turnOrderBattler(rulesContext: BattleScriptRulesContext, battler: BattleScriptBattlerId, moveId: number): TurnOrderBattler {
   const b = rulesContext.battlers[battler];
-  return { speed: b.speed, speedStage: b.statStages[STAT_SPEED]!, movePriority: movePriority(moveId) };
+  const holdEffect = resolveBattleScriptBattlerHoldEffect(rulesContext, battler);
+  return {
+    speed: b.speed,
+    speedStage: b.statStages[STAT_SPEED]!,
+    movePriority: movePriority(moveId),
+    ability: ABILITY_SYMBOLS[b.ability] ?? null,
+    holdEffect: HOLD_EFFECT_NAME_BY_ID[holdEffect] ?? null,
+    holdEffectParam: resolveBattleScriptBattlerHoldEffectParam(rulesContext, battler),
+    isParalyzed: (b.status1 & STATUS1_PARALYSIS) !== 0,
+  };
+}
+
+/**
+ * GetWhoStrikesFirst's WEATHER_HAS_EFFECT branch. The shared Frontier
+ * precedent suppresses weather for Cloud Nine; Air Lock has no legal
+ * Frontier carrier. The ROM scan also requires hp != 0
+ * (battle_util.c:3140-3148), which is vacuous here: action selection only
+ * resumes after fainted-actions installs two live singles actives.
+ */
+function turnOrderWeather(rulesContext: BattleScriptRulesContext): WeatherState {
+  if (!weatherHasEffect(rulesContext)) return {};
+  return {
+    isRaining: (rulesContext.weather & B_WEATHER_RAIN) !== 0,
+    isSunny: (rulesContext.weather & B_WEATHER_SUN) !== 0,
+  };
 }
 
 /**
@@ -938,6 +1238,71 @@ function legalMoveDecisions(
         })]
       : []);
   return Object.freeze(legal);
+}
+
+/**
+ * `HandleTurnActionSelectionState`'s B_ACTION_SWITCH party-menu gate
+ * (`battle_main.c:4240-4267`), projected to Factory singles. The source's
+ * CHECK_OTHER_SIDE / CHECK_FIELD_EXCEPT_BATTLER scans do not themselves test
+ * HP, but action selection only exposes a command while both singles actives
+ * are live; retaining that invariant explicitly also keeps absent/fainted
+ * synthetic states from inventing a trap.
+ */
+function isVoluntarySwitchTrapped(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
+): boolean {
+  const active = rulesContext.battlers[battler]!;
+  if (
+    (active.status2 & (BATTLE_SCRIPT_STATUS2_WRAPPED_MASK | STATUS2_ESCAPE_PREVENTION)) !== 0
+    || (active.status3 & BATTLE_SCRIPT_STATUS3_ROOTED) !== 0
+  ) {
+    return true;
+  }
+  const opponent = (battler === 0 ? 1 : 0) as BattleSinglesBattler;
+  const holder = rulesContext.battlers[opponent]!;
+  if (
+    holder.hp === 0
+    || (rulesContext.absentBattlerFlags & (1 << opponent)) !== 0
+  ) {
+    return false;
+  }
+  if (holder.ability === ABILITY_SHADOW_TAG) return true;
+  if (
+    holder.ability === ABILITY_ARENA_TRAP
+    && !active.types.includes("TYPE_FLYING")
+    && active.ability !== ABILITY_LEVITATE
+  ) {
+    return true;
+  }
+  return holder.ability === ABILITY_MAGNET_PULL
+    && active.types.includes("TYPE_STEEL");
+}
+
+/** Player-only command enumeration; trainer voluntary switching is deliberately out of scope. */
+function legalPlayerDecisions(
+  rulesContext: BattleScriptRulesContext,
+): readonly BattleCommandDecision[] {
+  const moves = legalMoveDecisions(rulesContext, 0);
+  if (
+    lockedMoveDecision(rulesContext, 0) !== null
+    || isVoluntarySwitchTrapped(rulesContext, 0)
+  ) {
+    return moves;
+  }
+  const activePartyIndex = rulesContext.battlers[0]!.partyIndex;
+  const switches = rulesContext.party.player.flatMap((member, partyIndex) =>
+    partyIndex !== activePartyIndex
+      && member.species !== 0
+      && !member.isEgg
+      && member.hp !== 0
+      ? [Object.freeze({
+          kind: "switch" as const,
+          partyIndex: partyIndex as BattlePartyIndex,
+        }) satisfies BattleSwitchDecision]
+      : []
+  );
+  return Object.freeze([...moves, ...switches]);
 }
 
 function usesForcedStruggle(
@@ -1104,8 +1469,10 @@ function runEndTurnTail(
   handlers: Handlers,
   preEndTurnState: MachineState,
   nextRequestId: number,
+  resumedResult?: BattleEndTurnResult,
 ): BattleDecisionReducerOutput<FactoryFullTurnDecisionRules> {
-  const endTurn = runBattleEndTurnOrchestration(PROGRAM, handlers, preEndTurnState);
+  const endTurn = resumedResult
+    ?? runBattleEndTurnOrchestration(PROGRAM, handlers, preEndTurnState);
   if (endTurn.kind === "terminal") {
     return finishFullTurn(
       ctxRng, rngBeforeCalls, endTurn.state,
@@ -1127,29 +1494,65 @@ function runEndTurnTail(
     );
   }
   if (endTurn.kind === "player-choice-required") {
-    throw new Error(
-      "full-turn reducer's end-turn orchestration produced a player-choice-required forced-switch request "
-        + "-- outside this reducer's modeled domain (factoryBattleScriptTerminalDecision.ts's own "
-        + "forced-switch resume support is the single-action sibling that models this)",
+    return finishFullTurn(
+      ctxRng,
+      rngBeforeCalls,
+      endTurn.state,
+      buildForcedSwitchPendingRules(endTurn.state.rulesContext, {
+        programCounter: endTurn.state.programCounter,
+        callStack: endTurn.state.callStack,
+        scheduler: endTurn.state.scheduler,
+        resumeAt: "finish-end-turn-after-faints",
+      }),
+      Object.freeze({
+        kind: "decision-required",
+        request: Object.freeze({
+          kind: "forced-switch",
+          requestId: nextRequestId,
+          side: endTurn.battler === 0 ? "player" as const : "trainer" as const,
+          battler: endTurn.battler as BattleSinglesBattler,
+          faintedPartyIndex: endTurn.faintedPartyIndex as BattlePartyIndex,
+          legalPartyIndexes: endTurn.legalPartyIndexes as readonly BattlePartyIndex[],
+        }),
+      }),
     );
   }
 
   // "next-turn" or "resumed": the battle continues into a fresh decision-required boundary.
+  // BattleTurnPassed (battle_main.c:4013) draws gRandomTurnNumber after its
+  // continuing cleanup and before HandleTurnActionSelectionState runs. First
+  // reconcile the completed interpreter ledger, then perform that one
+  // unconditional boundary draw on the durable cursor and reset the local
+  // ledger at the new cursor so finishFullTurn cannot replay prior draws.
+  reconcileFullTurnRng(ctxRng, rngBeforeCalls, endTurn.state);
+  const randomTurnNumber = ctxRng.draw(
+    "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+  );
+  const boundaryCursor = ctxRng.snapshot();
+  const continuingState: MachineState = Object.freeze({
+    ...endTurn.state,
+    rulesContext: Object.freeze({
+      ...endTurn.state.rulesContext,
+      randomTurnNumber,
+    }),
+    rng: createBattleScriptRngState(boundaryCursor.value),
+  });
+
   // HandleTurnActionSelectionState auto-confirms a multi-turn player's
   // B_ACTION_USE_MOVE, so only the trainer command remains to collect.
-  const lockedPlayerDecision = lockedMoveDecision(endTurn.state.rulesContext, 0);
-  const lockedTrainerDecision = lockedMoveDecision(endTurn.state.rulesContext, 1);
+  const lockedPlayerDecision = lockedMoveDecision(continuingState.rulesContext, 0);
+  const lockedTrainerDecision = lockedMoveDecision(continuingState.rulesContext, 1);
   if (lockedPlayerDecision !== null && lockedTrainerDecision !== null) {
     // Source auto-confirms both locked B_ACTION_USE_MOVE entries without
     // exposing either controller command. Resolve the next turn inside this
     // same decision transition, preserving the single RNG cursor and
     // prepending this turn's machine events to the recursively resolved tail.
-    reconcileFullTurnRng(ctxRng, rngBeforeCalls, endTurn.state);
     const nested = reduceFactoryFullTurnDecision(Object.freeze({
       rules: buildRules(
-        endTurn.state.rulesContext,
+        continuingState.rulesContext,
         "awaiting-trainer-command",
         Object.freeze({
+          kind: "use-move" as const,
           moveSlot: lockedPlayerDecision.moveSlot,
           targetBattler: lockedPlayerDecision.targetBattler,
         }),
@@ -1167,18 +1570,19 @@ function runEndTurnTail(
     return Object.freeze({
       ...nested,
       events: Object.freeze([
-        ...provenanceEvents(endTurn.state),
+        ...provenanceEvents(continuingState),
         ...nested.events,
       ]),
     });
   }
   if (lockedPlayerDecision !== null) {
     return finishFullTurn(
-      ctxRng, rngBeforeCalls, endTurn.state,
+      ctxRng, boundaryCursor.calls, continuingState,
       buildRules(
-        endTurn.state.rulesContext,
+        continuingState.rulesContext,
         "awaiting-trainer-command",
         Object.freeze({
+          kind: "use-move" as const,
           moveSlot: lockedPlayerDecision.moveSlot,
           targetBattler: lockedPlayerDecision.targetBattler,
         }),
@@ -1190,15 +1594,15 @@ function runEndTurnTail(
           requestId: nextRequestId,
           side: "trainer",
           battler: 1 as const,
-          legalDecisions: legalMoveDecisions(endTurn.state.rulesContext, 1),
+          legalDecisions: legalMoveDecisions(continuingState.rulesContext, 1),
         }),
       }),
     );
   }
 
   return finishFullTurn(
-    ctxRng, rngBeforeCalls, endTurn.state,
-    buildRules(endTurn.state.rulesContext, "awaiting-player-command", null),
+    ctxRng, boundaryCursor.calls, continuingState,
+    buildRules(continuingState.rulesContext, "awaiting-player-command", null),
     Object.freeze({
       kind: "decision-required",
       request: Object.freeze({
@@ -1206,7 +1610,7 @@ function runEndTurnTail(
         requestId: nextRequestId,
         side: "player",
         battler: 0 as const,
-        legalDecisions: legalMoveDecisions(endTurn.state.rulesContext, 0),
+        legalDecisions: legalPlayerDecisions(continuingState.rulesContext),
       }),
     }),
   );
@@ -1233,12 +1637,15 @@ function resumeFullTurnForcedSwitch(
   }
   const pending = pendingForcedSwitchAt(ctx.rules);
   const rngBefore = ctx.rng.snapshot();
-  const actingBattler = pending.rulesContext.battlerByTurnOrder[
-    pending.rulesContext.currentTurnActionNumber
-  ];
+  const actingBattler = pending.pendingScript.resumeAt === "run-end-turn"
+    ? pending.rulesContext.battlerByTurnOrder[pending.rulesContext.currentTurnActionNumber]
+    : ctx.request.battler;
   if (
-    actingBattler === undefined
-    || actingBattler >= pending.rulesContext.battleTopology.battlersCount
+    pending.pendingScript.resumeAt === "run-end-turn"
+    && (
+      actingBattler === undefined
+      || actingBattler >= pending.rulesContext.battleTopology.battlersCount
+    )
   ) {
     throw new Error(
       "factory full-turn decision forced-switch resume cannot resolve the acting battler at the current turn position",
@@ -1284,10 +1691,12 @@ function resumeFullTurnForcedSwitch(
   }
 
   if (orchestration.kind === "terminal") {
-    const finished = handleBattleActionFinished(
-      orchestration.state,
-      actingBattler as BattleScriptBattlerId,
-    );
+    const finished = pending.pendingScript.resumeAt === "run-end-turn"
+      ? handleBattleActionFinished(
+        orchestration.state,
+        actingBattler as BattleScriptBattlerId,
+      )
+      : orchestration.state;
     return finishFullTurn(
       ctx.rng, rngBefore.calls, finished,
       buildRules(finished.rulesContext, "awaiting-player-command", null),
@@ -1306,6 +1715,21 @@ function resumeFullTurnForcedSwitch(
   }
 
   // orchestration.kind === "resumed"
+  if (pending.pendingScript.resumeAt === "finish-end-turn-after-faints") {
+    const endTurn = resumeBattleEndTurnAfterFaintedActions(
+      PROGRAM,
+      handlers,
+      orchestration.state,
+    );
+    return runEndTurnTail(
+      ctx.rng,
+      rngBefore.calls,
+      handlers,
+      orchestration.state,
+      ctx.request.requestId + 1,
+      endTurn,
+    );
+  }
   return runEndTurnTail(
     ctx.rng,
     rngBefore.calls,
@@ -1331,17 +1755,13 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
       ctx.request.kind !== "command"
       || ctx.request.side !== "player"
       || ctx.request.battler !== 0
-      || ctx.decision.kind !== "use-move"
     ) {
-      throw new Error("factory full-turn decision requires the player's staged singles use-move command");
+      throw new Error("factory full-turn decision requires the player's staged singles command");
     }
     const pendingRules = buildRules(
       rules.rulesContext,
       "awaiting-trainer-command",
-      Object.freeze({
-        moveSlot: ctx.decision.moveSlot,
-        targetBattler: ctx.decision.targetBattler,
-      }),
+      ctx.decision,
     );
     const lockedTrainerDecision = lockedMoveDecision(rules.rulesContext, 1);
     if (lockedTrainerDecision !== null) {
@@ -1392,23 +1812,28 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     clearOverwrittenEncoreAtAction(rules.rulesContext, 0),
     1,
   );
-  const playerMoveSlot = rules.pendingPlayerDecision.moveSlot;
+  const playerSwitch = rules.pendingPlayerDecision.kind === "switch";
+  const playerMoveSlot = playerSwitch
+    ? 0 as BattleMoveSlot
+    : rules.pendingPlayerDecision.moveSlot;
   const trainerMoveSlot = ctx.decision.moveSlot;
-  const playerForcedStruggle = usesForcedStruggle(rc0, 0);
+  const playerForcedStruggle = !playerSwitch && usesForcedStruggle(rc0, 0);
   const trainerForcedStruggle = usesForcedStruggle(rc0, 1);
-  const playerMoveId = actionMoveId(
-    rc0,
-    0,
-    playerMoveSlot,
-    playerForcedStruggle,
-  );
+  const playerMoveId = playerSwitch
+    ? 0
+    : actionMoveId(
+      rc0,
+      0,
+      playerMoveSlot,
+      playerForcedStruggle,
+    );
   const trainerMoveId = actionMoveId(
     rc0,
     1,
     trainerMoveSlot,
     trainerForcedStruggle,
   );
-  if (playerMoveId === 0) {
+  if (!playerSwitch && playerMoveId === 0) {
     throw new Error(
       `factory full-turn decision player move slot ${playerMoveSlot} is not usable`,
     );
@@ -1416,19 +1841,32 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
   if (trainerMoveId === 0) {
     throw new Error(`factory full-turn decision trainer move slot ${ctx.decision.moveSlot} is not usable`);
   }
-  const playerTarget = rules.pendingPlayerDecision.targetBattler;
+  const playerTarget = playerSwitch
+    ? 1 as BattleSinglesBattler
+    : rules.pendingPlayerDecision.targetBattler;
   const trainerTarget = ctx.decision.targetBattler;
 
-  const playerTOB = turnOrderBattler(rc0, 0, playerMoveId);
-  const trainerTOB = turnOrderBattler(rc0, 1, trainerMoveId);
-  const bothPriorityZero = playerTOB.movePriority === 0 && trainerTOB.movePriority === 0;
-  const priorityEqual = playerTOB.movePriority === trainerTOB.movePriority;
-  const isSpeedTie = (bothPriorityZero || priorityEqual)
-    && effectiveSpeed(playerTOB) === effectiveSpeed(trainerTOB);
-  // battle_main.c:4728/4745 -- Random() & 1, drawn ONLY on a genuine speed tie.
-  const speedTieRngRoll = isSpeedTie ? ctx.rng.draw("turn order speed tie (Random() & 1)") : 0;
-  const strikesFirst = getWhoStrikesFirst(playerTOB, trainerTOB, speedTieRngRoll);
-  const playerFirst = strikesFirst === 0;
+  let playerFirst = true;
+  if (!playerSwitch) {
+    const playerTOB = turnOrderBattler(rc0, 0, playerMoveId);
+    const trainerTOB = turnOrderBattler(rc0, 1, trainerMoveId);
+    const weather = turnOrderWeather(rc0);
+    const bothPriorityZero = playerTOB.movePriority === 0 && trainerTOB.movePriority === 0;
+    const priorityEqual = playerTOB.movePriority === trainerTOB.movePriority;
+    const isSpeedTie = (bothPriorityZero || priorityEqual)
+      && effectiveSpeed(playerTOB, weather, rc0.randomTurnNumber)
+        === effectiveSpeed(trainerTOB, weather, rc0.randomTurnNumber);
+    // battle_main.c:4728/4745 -- Random() & 1, drawn ONLY on a genuine speed tie.
+    const speedTieRngRoll = isSpeedTie ? ctx.rng.draw("turn order speed tie (Random() & 1)") : 0;
+    const strikesFirst = getWhoStrikesFirst(
+      playerTOB,
+      trainerTOB,
+      speedTieRngRoll,
+      weather,
+      rc0.randomTurnNumber,
+    );
+    playerFirst = strikesFirst === 0;
+  }
 
   const mover1: BattleScriptBattlerId = playerFirst ? 0 : 1;
   const mover1MoveId = playerFirst ? playerMoveId : trainerMoveId;
@@ -1454,16 +1892,23 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     events: Object.freeze([]),
   });
 
-  const action1 = runMoveAction(
-    PROGRAM,
-    handlers,
-    initialState,
-    mover1,
-    mover1MoveId,
-    mover1MoveSlot,
-    mover1Target,
-    mover1 === 0 ? playerForcedStruggle : trainerForcedStruggle,
-  );
+  const action1 = playerSwitch
+    ? runVoluntarySwitchAction(
+      initialState,
+      rules.pendingPlayerDecision.partyIndex,
+      trainerMoveId,
+      handlers,
+    )
+    : runMoveAction(
+      PROGRAM,
+      handlers,
+      initialState,
+      mover1,
+      mover1MoveId,
+      mover1MoveSlot,
+      mover1Target,
+      mover1 === 0 ? playerForcedStruggle : trainerForcedStruggle,
+    );
   if (action1.kind === "barrier") {
     return finishFullTurn(
       ctx.rng, rngBefore.calls, action1.state,
@@ -1503,6 +1948,7 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
         programCounter: faint1.state.programCounter,
         callStack: faint1.state.callStack,
         scheduler: faint1.state.scheduler,
+        resumeAt: "run-end-turn",
       }),
       Object.freeze({
         kind: "decision-required",
@@ -1585,6 +2031,7 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
           programCounter: faint2.state.programCounter,
           callStack: faint2.state.callStack,
           scheduler: faint2.state.scheduler,
+          resumeAt: "run-end-turn",
         }),
         Object.freeze({
           kind: "decision-required",

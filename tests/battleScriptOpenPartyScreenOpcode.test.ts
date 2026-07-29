@@ -50,10 +50,10 @@ function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptR
     statStages: changes.statStages ?? [6, 6, 6, 6, 6, 6, 6, 6],
     types: changes.types ?? (["TYPE_NORMAL", "TYPE_NORMAL"] as const),
     species: changes.species ?? 0,
-    attack: changes.attack ?? 0,
-    defense: changes.defense ?? 0,
-    spAttack: changes.spAttack ?? 0,
-    spDefense: changes.spDefense ?? 0,
+    attack: changes.attack ?? 100,
+    defense: changes.defense ?? 100,
+    spAttack: changes.spAttack ?? 100,
+    spDefense: changes.spDefense ?? 100,
     level: changes.level ?? 50,
     friendship: changes.friendship ?? 0,
     partyIndex: changes.partyIndex ?? 0,
@@ -225,6 +225,26 @@ describe("production openpartyscreen (Cmd_openpartyscreen) dispatch, BS_FAINTED 
   });
 
   describe("(b) unsupported-branch barriers", () => {
+    it("selects the sole legal trainer replacement without entering the irrelevant damage fallback", () => {
+      const rc = context({
+        party: {
+          player: [EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT],
+          opponent: [
+            { species: SUNKERN, hp: 0, moves: [TACKLE, 0, 0, 0] },
+            { species: PIDGEY, hp: 100, moves: [TACKLE, 0, 0, 0] },
+            EMPTY_SLOT,
+            EMPTY_SLOT,
+            EMPTY_SLOT,
+            EMPTY_SLOT,
+          ],
+        },
+      });
+      const { result } = stepAtProgramCounter(OPEN_PARTY_SCREEN_PC, rc);
+      if (result.kind !== "advanced") throw new Error(`expected advanced, got ${result.kind}`);
+      expect(result.state.rulesContext.monToSwitchIntoId[1]).toBe(1);
+      expect(result.state.rng.calls).toBe(0);
+    });
+
     it("doubles topology: not modeled (Factory singles only)", () => {
       const rc = context({
         battlers: [
@@ -244,14 +264,14 @@ describe("production openpartyscreen (Cmd_openpartyscreen) dispatch, BS_FAINTED 
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
     });
 
-    it("pass-2 damage fallback needed: no bench mon has a super-effective move", () => {
+    it("multi-candidate pass-2 damage fallback selects the earliest exact tie with zero draws", () => {
       const rc = context({
         party: {
           player: [EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT],
           opponent: [
             { species: SUNKERN, hp: 0, moves: [TACKLE, 0, 0, 0] },
             { species: PIDGEY, hp: 100, moves: [TACKLE, 0, 0, 0] },
-            EMPTY_SLOT,
+            { species: URSARING, hp: 100, moves: [TACKLE, 0, 0, 0] },
             EMPTY_SLOT,
             EMPTY_SLOT,
             EMPTY_SLOT,
@@ -259,8 +279,9 @@ describe("production openpartyscreen (Cmd_openpartyscreen) dispatch, BS_FAINTED 
         },
       });
       const { result } = stepAtProgramCounter(OPEN_PARTY_SCREEN_PC, rc);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.monToSwitchIntoId[1]).toBe(1);
+      expect(result.state.rng.calls).toBe(0);
     });
 
     it("pass-through: the AI/singles/pass-1-resolved happy path never trips a barrier", () => {

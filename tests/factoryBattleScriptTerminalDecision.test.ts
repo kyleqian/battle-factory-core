@@ -88,24 +88,26 @@ describe("factory terminal move decision -- staged Level-50 Factory KO-of-the-la
   );
 
   it(
-    "non-terminal fork: opponent still has a healthy bench slot -- surfaces as a named machine-barrier "
-      + "boundary (jumpifbattletype is now registered per docs/forced-switch-ground-truth.md §4 slice 1 and "
-      + "takes Factory's real BATTLE_TYPE_TRAINER-taken jump, so the barrier now sits one opcode deeper, at "
-      + "the genuinely unregistered openpartyscreen forced-switch gate), never a fake terminal",
+    "non-terminal fork: opponent still has exactly one healthy bench slot -- selects that sole legal "
+      + "replacement without entering the irrelevant raw-damage fallback and publishes the next real command",
     () => {
       const initial = createFactoryTerminalMoveBattleState(config({ opponentBenchHp: [90, 0] }));
       const result = submitFactoryTerminalMoveDecision(initial, USE_STRENGTH_ON_TARGET);
-      expect(result.kind).toBe("machine-barrier");
-      if (result.kind !== "machine-barrier") throw new Error("expected machine-barrier");
-      expect(result.barrier).toMatchObject({
-        kind: "battle-script",
-        entryLabel: "BattleScript_HandleFaintedMon",
-        opcodeName: "B_SCR_OP_OPENPARTYSCREEN",
+      expect(result.kind).toBe("decision-required");
+      if (result.kind !== "decision-required") throw new Error("expected decision-required");
+      expect(result.nextRequest).toMatchObject({
+        kind: "command",
+        requestId: 2,
+        side: "player",
+        battler: 0,
       });
-      expect(result.state.boundary.kind).toBe("machine-barrier");
+      expect(result.state.boundary).toEqual({
+        kind: "decision-required",
+        request: result.nextRequest,
+      });
       const rulesContext = (result.state.rules as { rulesContext: Record<string, unknown> }).rulesContext;
       expect(rulesContext.battleOutcome).toBe(0); // genuinely undecided
-      expect(result.state.rng.calls).toBe(4); // the barrier itself draws no additional RNG
+      expect(result.state.rng.calls).toBe(4); // replacement orchestration draws no additional RNG
     },
   );
 

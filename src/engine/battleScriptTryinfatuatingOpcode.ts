@@ -58,8 +58,7 @@
  * (`battleScriptActionAdmission.ts`) already key off, so this opcode's write
  * lands in the exact bit the in-love admission phase consults.
  */
-import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
-import { getMonGender, type MonGender } from "./monGender.ts";
+import { resolveBattleScriptMonGender } from "./battleScriptGender.ts";
 import {
   transitionBattleScriptCommand,
   type BattleScriptOpcodeHandler,
@@ -71,22 +70,8 @@ import { statusInfatuatedWithBit, withBattler } from "./battleScriptHitChainOpco
 import { BATTLE_SCRIPT_STATUS2_MASKS } from "./battleScriptSourceConstants.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 
-type SpeciesStatsRow = Readonly<{ id: number; genderRatio: number }>;
-const SPECIES_GENDER_RATIO_BY_ID: ReadonlyMap<number, number> = new Map(
-  (speciesStatsData.species as readonly SpeciesStatsRow[]).map((row) => [row.id, row.genderRatio]),
-);
-
 /** include/constants/abilities.h:16. */
 const ABILITY_OBLIVIOUS = 12;
-
-/** `GetGenderFromSpeciesAndPersonality` (`src/pokemon.c:3471-3485`) -- species_info.h's per-species genderRatio compared against the personality low byte. */
-function genderFromSpeciesAndPersonality(species: number, personality: number): MonGender {
-  const genderRatio = SPECIES_GENDER_RATIO_BY_ID.get(species);
-  if (genderRatio === undefined) {
-    throw new Error(`Cmd_tryinfatuating: no genderRatio data for species id ${species}`);
-  }
-  return getMonGender(genderRatio, personality);
-}
 
 function createTryinfatuatingHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
@@ -112,8 +97,8 @@ function createTryinfatuatingHandler(): BattleScriptOpcodeHandler<BattleScriptRu
       );
     }
 
-    const attackerGender = genderFromSpeciesAndPersonality(attackerState.species, attackerState.personality);
-    const targetGender = genderFromSpeciesAndPersonality(targetState.species, targetState.personality);
+    const attackerGender = resolveBattleScriptMonGender(attackerState.species, attackerState.personality);
+    const targetGender = resolveBattleScriptMonGender(targetState.species, targetState.personality);
     const alreadyInfatuated = (targetState.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION) !== 0;
     const fails = attackerGender === targetGender
       || alreadyInfatuated

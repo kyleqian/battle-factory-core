@@ -288,8 +288,8 @@ describe("Splash through the shared Factory full-turn seam", () => {
 
     expect(resolved.kind).toBe("decision-required");
     expect(resolved.state.rng).toEqual({
-      value: 0x1234_5678,
-      calls: 0,
+      value: 192_004_491,
+      calls: 1,
     });
     expect(resolved.state.rules.rulesContext.battlers[0]).toMatchObject({
       hp: 95,

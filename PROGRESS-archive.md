@@ -1,5 +1,727 @@
 ---
 
+## 677 — [BOUNDED MAIN WORKER 2026-07-29 ~02:37] interaction audit: double faint + deferred entry hooks + AI reveals
+
+- **Supervisor fold (post-step, `d057f085`):** `animation-main` folded at
+  02:40 with 21 overnight commits — Moonlight/Perish Song/Howl/Rest/Wish/
+  Sandstorm/Needle Arm/Follow Me/Metronome promoted exact with coverage
+  ratchets. Union green **485 files / 5019 tests**, production build. The
+  ledger's "For the main program" asks are historical (stat-drop seam
+  already fulfilled via Fake Tears). Also filed **ISSUES #48**
+  (cross-challenge rentsCount persistence, the audit's PLAUSIBLE finding).
+- **State:** committed `91857570`, `234b5405`, and `9c0eca68`; tree green at
+  **461 files / 4975 tests** pre-fold (**485/5019 post-fold**), production
+  build, `git diff --check`, and Battle Scene OFF oracle info. All six
+  seven-win carriers retain exact facility cursors: seeds
+  **4/6/8/13/17/26 = 1517/1563/2089/2224/1787/1556**.
+- **Did:** fainted-actions resume now carries the source's ascending battler
+  cursor past a player replacement, so simultaneous contact-ability
+  double-faints resolve the opponent replacement before leaving the pass
+  (or source `checkteamslost` terminates immediately when the opponent has no
+  surviving party HP). Mid-battle `Cmd_switchineffects` now only marks
+  Intimidate/Trace pending; faint state 6 resolves Intimidate → Trace → item,
+  including White Herb stage restoration/consumption. Voluntary and forced
+  switch callers share the same pass; battle-start's already-correct split
+  stays green.
+- **AI / acceptance:** successful Static (failed proc excluded), state-6
+  Intimidate/Trace, and Leftovers now publish source reveal handoffs; the live
+  Factory AI consumes them through the existing record functions and projects
+  both `knownAbility` and `knownItemEffect`. Focused coverage is **79/79**;
+  executable and ability/item censuses regenerate byte-identically; no import
+  or unsupported-branch ratchet moved.
+- **Next / bounded remainder:** finish the still-unwired source reveal calls:
+  `battle_util.c:216,3859`, the other successful `:3195` ability branches,
+  and `battle_script_commands.c:990,1382,1418,1441,1496,1679,1722,2304,2346,
+  2401,2431,2553,2774,2874,3118,3133,3148,4512,4587,5880,6229,6572,6842,
+  7003,7018,7031,7509,7518,7680,8394,8410,9233`. These opcode-owned
+  absorption/prevention/item sites need their own semantic pins; do not infer
+  them from `lastUsedAbility/Item`. No issue, probe, presentation, animation,
+  canonical recording, or tick branch changed. PAPERCUT: none.
+
+---
+
+## 676 — [BOUNDED MAIN WORKER 2026-07-29 ~02:15] multi-hit/Earthquake resumptions retired; six seeds win seven
+
+- **State:** committed `a04a26c1`, `c104d8f8`, `bc2a65a0`, `027e5aa0`,
+  and `59ab42f2`; tree green at **461 files / 4971 tests**, production build,
+  `git diff --check`, and Battle Scene OFF oracle info. Executable
+  (**214/214 effects, 355/355 moves**) and ability/item (**69/69 abilities,
+  42/42 hold effects**) censuses regenerate byte-identically.
+- **Did:** the full-turn adapter now resolves only literal decimal u8/u16
+  operands in addition to its named wait constants, so
+  `setmultihitcounter 0/2` and `waitmessage 1` resume instead of being
+  mistaken for unavailable external context. Its 256-opcode runaway guard
+  now counts source-instruction completion separately from bounded
+  controller/message yield steps; five-hit loops no longer spend the guard
+  on acknowledgements or wait ticks.
+- **Acceptance:** full-turn Spike Cannon pins three hits, its hit-count draw
+  at position 2, and exact 14-call cursor continuity; the maximum five-hit
+  reroll path, fixed two-hit Double Kick, and Twineedle all reach the next
+  command with every target controller update. Earthquake reaches the same
+  boundary with one hit sourced from
+  `BattleScript_DoHitAllWithUndergroundBonus`; the existing shared-script
+  fixture retains the underground 2× multiplier proof.
+- **Sweep / Next:** seeds **4–30** now pass battle 0/1/2 at **19/15/13**;
+  **6/27** complete seven wins: seeds **4/6/8/13/17/26**, permanently pinned
+  at **1517/1563/2089/2224/1787/1556** facility calls. Seed 17 remains exactly
+  **1787**. Dominant blocker is now confusion self-hit context (**9** seeds),
+  then forced-switch end-turn resumption (**4**) and paralysis `Cmd_various`
+  (**3**); move-end barriers (**2**) and one each Trace/end-turn-budget/
+  attack-canceler stop are narrower follow-ups.
+- **Notes:** no unsupported-branch/import ratchet moved, no census artifact
+  changed, and no canonical recording, issue, probe, presentation, animation,
+  or tick branch changed. Earthquake's doubles-only next-target barrier
+  remains unchanged and unreachable in Factory singles. PAPERCUT: none.
+
+---
+
+## 675 — [BOUNDED MAIN WORKER 2026-07-29 ~01:53] multi-candidate trainer replacement retired; seed 17 wins seven
+
+- **State:** committed `30d9a3e5`; tree green at **461 files / 4960 tests**,
+  production build, `git diff --check`, focused selector/opcode/orchestrator/
+  ratchet coverage **25/25**, and Battle Scene OFF oracle info. The ability/
+  item census regenerates byte-identically at **69/69 abilities, 42/42 hold
+  effects**.
+- **Did:** verified the scout's `GetMostSuitableMonToSwitchInto` citations
+  against pinned `battle_ai_switch_items.c:629-789` and ported the complete
+  Factory-singles faint selector. Pass 1 retains ascending scans, strict ties,
+  and the source's highest-type-damage quirk. Pass 2 retains global
+  `gCurrentMove`/fainted-active `AI_CalcDmg`, candidate-only `TypeCalc`,
+  Levitate/Foresight behavior, reset dynamic/crit/damage scratch,
+  Charge/Helping Hand modifiers, and the retail non-`BUGFIX` u8 `bestDmg`
+  wrap. Singles selection draws exactly **0 RNG**.
+- **Acceptance:** staged tests pin a competitive choice, exact tie, u8-wrap
+  reversal, and sole-legal regression. Seed **17** is now a permanent real
+  rung-12 carrier: seven generated wins, **14** trainer replacements, seven
+  battle segments, and one exact **1787-call** facility cursor; its first
+  replacement resumes at the next player boundary with
+  **2→16 calls / 312997333→713294723**.
+- **Sweep / Next:** seeds **4–30** now pass battle 0/1/2 at **14/9/7**;
+  **1/27** (seed 17) completes seven wins. Every former multi-choice
+  replacement stop is gone. Updated dominant blocker is multi-hit/Double Hit/
+  Twineedle resumption (**6** seeds), then Earthquake
+  `DoHitAllWithUndergroundBonus` (**5**), confusion self-hit context (**4**),
+  forced-switch end-turn resumption and paralysis `Cmd_various` (**3** each);
+  five seeds expose narrower existing budget/moveend/Trace/attack-canceler
+  stops. Chase those named secondary blockers only in later steps.
+- **Supervisor fold (same round, side merge):** the commentary seam landed
+  (`8ec1cd81` + the equivalence/attribution pins) — presentation commentary
+  now derives from the actual opponent party via
+  `getFactoryOpponentCommentary()`; canonical text proven byte-identical
+  (with the true upcoming-party attribution 188/184/135 pinned, correcting
+  the earlier 153/179/181 placeholder attribution); generated seed-3 round
+  varies correctly; `battle1-postwin-scout-a/b.json` re-verified 171/171 +
+  164/164. Union green **461 files / 4961 tests**, census no-op.
+- **Notes:** retired exact barrier
+  `GetMostSuitableMonToSwitchInto's pass-2 AI_CalcDmg raw-damage fallback`
+  at `B_SCR_OP_OPENPARTYSCREEN`; its module ratchet moves exactly **2→1**.
+  No other ratchet, census artifact, canonical recording, issue, scout/probe,
+  presentation, or commentary file changed. PAPERCUT: none.
+
+---
+
+## 674 — [BOUNDED MAIN WORKER 2026-07-29 ~01:35] tie retired; seven-battle rung hit honest stop
+
+- **State:** assigned rung (a) is committed at `bd36b615` and green at **461
+  files / 4956 tests**, production build, `git diff --check`, and focused
+  lifecycle/orchestrator/ratchet coverage **14/14**. Rung (b) hit its
+  mandated honest stop: seeds **4–30** with generated parties produced no
+  seven-win carrier; only 22/23 passed battle 0, then halted in battles 1/2.
+  The red exploratory test was removed; the landed tree remains green.
+- **Did:** consumed scout §4.1's landed Scene-OFF receipt. Equal effective
+  speeds now add exactly one `Random()` strictly after draw A and before draw
+  B; `tie & 1` stable-orders `[0,1]` or `[1,0]`, and the post-tie cursor feeds
+  every entry hook before B overwrites `randomTurnNumber`. The Tier-1 receipt
+  pin reproduces **62606 → 997 → 8088**, exactly **3 calls**, `997 & 1 = 1`,
+  and observes resulting hook order **[1,0]**.
+- **Supervisor fold (same round, side merge):** the rung-13 scout landed
+  (`f9788112`) — `docs/factory-ai-switch-scout.md`, a 557-line frozen
+  dossier: complete `ShouldSwitch` + `GetMostSuitableMonToSwitchInto`
+  derivation (incl. source quirks), Factory L50 reachability per helper,
+  draw ordering vs the 11/13-draw ledgers, masks 0/1/7 by streak, exact
+  kernel changes for trainer-originated switches, 3 staged OFF recipes
+  (predictions, not receipts), and 4 bounded implementation rungs. The
+  sweep's dominant blocker (multi-choice trainer faint replacement) is the
+  same mechanism — the dossier's scoring section unblocks it.
+- **Next:** implement multi-candidate trainer faint replacement from the
+  dossier's `GetMostSuitableMonToSwitchInto` derivation (main), wire
+  generated commentary into its identified presentation seam (side); then
+  the remaining sweep blockers (`Cmd_various` paralysis, confusion
+  self-hit context, multi-hit/Twineedle resumption, Earthquake
+  `DoHitAllWithUndergroundBonus`, player forced-switch end-turn
+  resumption) and the rung-12 rerun.
+- **Notes:** `factoryBattleStart.ts`'s last `unsupported-branch` and union
+  return path are gone; its module ratchet moves exactly **1→0**. No census
+  artifact, canonical recording, issue, scout/probe/battle-lab,
+  commentary/presentation, or AI-switch-breadth file changed. Sweep evidence:
+  seed 4 battle 1 sets **199/178/148** hit paralysis `Cmd_various`; seed 5
+  battle 0 **163/161/189** hit Earthquake controller handling; seed 6 battle
+  1 **181/199/127** and most seeds 8–21/26–29 hit multi-choice trainer
+  replacement; seed 22 battle 1 **144/173/192** hit confusion self-damage;
+  seed 23 battle 2 **141/185/114** hit Earthquake; seed 7 hit Twineedle and
+  seed 25 multi-hit. This satisfies the rung row's STOP-and-report clause,
+  not its seven-win acceptance. PAPERCUT: none.
+
+---
+
+## 673 — [BOUNDED MAIN WORKER 2026-07-29 ~01:15] controller owns one generated battle lifecycle
+
+- **State:** Gate-5 plan rung 11 is committed at `9a741230` and green at
+  **461 files / 4956 tests**, production build, `git diff --check`, Battle
+  Scene OFF oracle info, and focused round/whole-battle compatibility
+  **34/34**. Executable (**214/214 effects, 355/355 moves**) and ability/item
+  (**69/69 abilities, 42/42 hold effects**) censuses regenerate
+  byte-identically.
+- **Did:** added a production-shaped round/battle orchestrator with generated-
+  initial-rental or current-full-record entry modes. It admits a complete
+  rung-8 trainer/party only at the controller's existing `battleStart`
+  transition, starts the fresh kernel after presentation acknowledgement,
+  routes player decisions through its published boundary, routes every
+  trainer command through the rung-6 live AI, overlays terminal mutable state
+  onto the full rental identities, adapts the real terminal, and calls
+  `resolveRoundBattle`. The fixture scenario/resolution ABI remains intact.
+- **Acceptance:** seed 4 pins battle 0 trainer 17/sets 122,118,110 → real
+  3v3 win → swap offer → DECLINE → battle 1 trainer 51/sets 199,178,148 →
+  fresh player command. The single facility cursor is exact:
+  **152 generation + 175 battle + 112 next-generation + 2 fresh-start =
+  441 calls**; segment endpoints are pinned as
+  `4→2423399196→3960941853→2133491021→1174811135`. No fixture resolution
+  occurs anywhere in the carrier.
+- **Supervisor fold (same round, side merge):** the equal-speed tie receipt
+  landed (`9eec0e10`, Terra) — one added draw between A and B from
+  `GetWhoStrikesFirst+0x3b1`, tie `&1=1`, order `[1,0]`; per-case process
+  isolation fixed the prior instability; wrapper re-run fresh by the
+  supervisor: both cases PASS. The fresh-start barrier may now retire in a
+  main-lane step that consumes the receipt.
+- **Next:** rung 12 (seven-battle loop, accepted swap, streak/terminal
+  facility state, multiple seeds, loss control, main — rung (a): retire the
+  equal-speed barrier against the receipt) + rung-13 ground-truth scout
+  (AI switch/history breadth — mission-scope-checked: opponent switch AI is
+  NOT excluded by the mission brief, side). Rung 14 remains
+  commentary/presentation wiring.
+- **Notes:** scout §2.1's frozen claim that Factory selection still required
+  fixture parties was proved at the live seam; the minimal adapter now accepts
+  a complete generated opponent while reusing the controller's index/heal/
+  presentation transition unchanged. Rung-10 compatibility exposed that the
+  normalized kernel party drops corpus-only identity metadata; terminal HP/
+  PP/status/item are therefore overlaid onto the controller's full identity
+  records before healing (no controller rule moved). No ratchet/barrier,
+  census artifact, issue, scout/probe/battle-lab, commentary/presentation, or
+  canonical-recording file changed. PAPERCUT: none.
+
+---
+
+## 672 — [BOUNDED MAIN WORKER 2026-07-29 ~00:57] production Factory AI turn driver landed
+
+- **State:** Gate-5 plan rung 6 is green at **459 files / 4920 tests** plus
+  production build, `git diff --check`, Battle Scene OFF oracle info, and
+  focused live-AI/whole-battle/policy/ratchet coverage **25/25**. Executable
+  (**214/214 effects, 355/355 moves**) and ability/item (**69/69 abilities,
+  42/42 hold effects**) censuses regenerate byte-identically.
+- **Did:** added the live rules→mask-7 view adapter (active stats/types/stages,
+  status/screens/weather, generated ability names, current moves and Factory
+  streak/opponent policy) plus persistent source-shaped used-move/known-
+  ability/known-item history. A focused test exactly reproduces the banked
+  Alakazam-vs-Marowak decision and **11-draw** ledger from both staged and
+  live shapes. The fresh 3v3 loop now sends all **12 trainer commands**
+  through `submitFactoryAiDecision`; every choice is live-request-legal and
+  all policy/hit/boundary draws share the exact **188-call** cursor through a
+  real player-win terminal. Commits `7d93cf8c`, `ad888ce7`.
+- **Supervisor fold (same round, side merge):** rung 9 landed (`a9f22553`
+  + `833b61ee`) — `factoryCommentary.ts` ports favorite-type and
+  battle-style rules (every branch incl. TYPE_MYSTERY's tally-only
+  exclusion and no-singular-style; 35 focused tests; two rung-8 seeds
+  produce different commentary) with an OFF canonical scouting compare
+  **164/164 exact**. Wiring point identified (postwin.ts:100/:300,
+  core.ts:1806), deferred to rung 11/14; the two-party pre-scout fixture
+  (`opponentSetIds`) is the named follow-up. Union green **460 files /
+  4955 tests**, census no-op.
+- **Next:** rung 11 (controller owns one real generated battle lifecycle,
+  main) + the equal-speed tie receipt via the narrower instrument (side)
+  launch this round; then rung 12 (seven battles). Rung 13 remains the
+  Factory AI switch/item/history breadth closure.
+- **Notes:** source `ChooseMoveOrAction_Singles` move recording and switch/
+  faint clears are modeled (`battle_ai_script_commands.c:396-403,618-660`;
+  `battle_main.c:3259-3261,3352-3354`). Ability/item record APIs are durable;
+  this carrier executes no player-target record site. Rung 6 uses a named
+  `factory-ai-switch-precheck-unimplemented` constraint because source
+  `AI_TrySwitchOrUseItem` calls `ShouldSwitch` first
+  (`battle_ai_switch_items.c:528-545`); trainer items are source-unreachable
+  in Frontier battles (`battle_ai_script_commands.c:292-306`). No barrier/
+  ratchet, census artifact, round/controller, generation, doc, issue,
+  presentation, or canonical-recording file changed. PAPERCUT: none.
+
+---
+
+## 671 — [BOUNDED MAIN WORKER 2026-07-29 ~00:33] fresh 3v3 whole battle reaches real terminal
+
+- **State:** Gate-5 plan rung 4 is green at **457 files / 4915 tests** plus
+  production build, `git diff --check`, Battle Scene OFF oracle info, and
+  focused whole-battle/lifecycle/ratchet coverage **62/62**. Executable
+  (**214/214 effects, 355/355 moves**) and ability/item (**69/69 abilities,
+  42/42 hold effects**) censuses regenerate byte-identically.
+- **Did:** `factoryWholeBattle.test.ts` builds two complete three-mon parties
+  only from real corpus set ids, enters through the fresh initializer, and
+  loops solely over published command/forced-switch requests through
+  `submitBattleDecision`. Real moves faint all three opponents; Azurill's real
+  faint publishes and resumes one player forced switch; Hyper Beam recharge
+  and Ice Ball exercise two reducer-owned locked trainer turns; the terminal
+  adapts to a real win. Every submission is request-legal and the entire
+  battle pins one monotonic **32-call** LCG cursor from draws A/B through the
+  terminal hit chain.
+- **Supervisor fold (same round, side merge):** rung 10 landed (`af959d79`)
+  — round swap mutation unified with the full rental record (identity copy
+  `battle_factory_screen.c:2350-2360`, party reconstruction
+  `battle_factory.c:433-464`, item restore `:714-728`, heal
+  `script_pokemon_util.c:30-58`, PP-Up formula `pokemon.c:4650-4653`);
+  accept/decline both feed the next kernel party exactly; between-battle
+  full restore proven. Union green **458 files / 4918 tests**, census
+  no-op.
+- **Next:** rung 6 (production AI view/driver extending the whole-battle
+  test, main) + rung 9 (commentary favorite-type/battle-style rules with
+  OFF compare, side) launch this round; then rung 11 (controller owns one
+  real battle lifecycle) and rung 12 (seven battles). Equal-speed pre-hook
+  receipt barrier stays intact.
+- **Notes:** whole-battle reachability exposed and fixed two narrow over-
+  barriers: inactive move-end cure items now pass unless their matching
+  status/stat condition exists; trainer faint replacement selects the sole
+  legal bench mon without entering outcome-irrelevant pass-2 damage scoring.
+  Competitive multi-candidate damage fallback remains explicitly barriered.
+  No barrier count/ratchet moved; no canonical recording, issue, round/swap,
+  generation, scout/probe/battle-lab, or presentation file changed.
+  PAPERCUT: none.
+
+---
+
+## 670 — [BOUNDED MAIN WORKER 2026-07-29 ~00:10] pre-first-turn entry hooks implemented
+
+- **State:** committed `a5358114`; tree green at **455 files / 4907 tests**,
+  production build, `git diff --check`, and Battle Scene OFF oracle info.
+  Required lifecycle/switch-in focus is **48/48**; expanded lifecycle/shared-
+  selector/ratchet focus is **73/73**. Ability/item extraction + census
+  regenerate byte-identically at **69/69 abilities (1096/1096)** and **42/42
+  hold effects (850/850)** with all 17 validations.
+- **Did:** `TryDoEventsBeforeFirstTurn` now stable-orders the two actives from
+  draw A, documents the Factory battle room's `WEATHER_NONE` overworld no-op,
+  runs shared weather/form ON_SWITCHIN dispatch fastest-to-slowest, then
+  resolves pending Intimidate, pending Trace, and speed-ordered switch-in
+  items before draw B. Lifecycle events are returned in exact kernel order
+  and seed the first boundary's next event sequence. White Herb restores
+  Intimidate-lowered stages and consumes through its shared Battle Script.
+  The shared switch-in port also now source-correctly sets both temporary and
+  permanent Sand Stream/Drought weather bits and resolves literal
+  `BS_BATTLER_0` for weather animations.
+- **Supervisor fold (same round, side merge):** rung 8 landed (`244cce0f`)
+  — `factoryOpponentGeneration.ts` ports trainer selection +
+  GenerateOpponentMons (set retries, duplicate species/item exclusions with
+  cited lines, the retail fixed-IV bug preserved: opponent IVs use the
+  Battle Tower L50 streak per `battle_tower.c:1832-1847`) with a unified
+  position-by-position draw ledger; includes a reachability proof that the
+  high-tier rejection has no valid L50 seed. Union green **456 files /
+  4913 tests**, census no-op. Scenario-fixture replacement honestly
+  deferred (would edit the roundController seam — rung 10/11 territory).
+- **Next:** rung 4 (fresh 3v3 battle → real terminal, main) + rung 10
+  (swap/heal + full rental record unification, side) launch this round;
+  the equal-speed tie receipt stays a separate evidence task — do not
+  widen or remove its barrier.
+- **Notes:** citations in scout §3.2/§3.3/§4.1 were re-derived from
+  `battle_main.c:3841-3929`, `battle_util.c:2485-2600,3003-3073,3303-3329`,
+  and the Factory room map's `WEATHER_NONE`. Real L50 carriers pin
+  Intimidate (Ekans 53), Trace (Porygon2 436), and White Herb (Kirlia 48);
+  Drought uses a complete adapter-shaped Groudon because no L50 corpus set
+  carries it. Hook scripts draw zero RNG; hook and no-hook cases remain
+  exactly A/B-only. The hook-loop `unsupported-branch` is retired and the
+  module ratchet moves **2→1**; the equal-speed receipt-gated barrier is the
+  sole remainder. No canonical recording, scout/probe/battle-lab, issue,
+  generation, presentation, or opponent-owned file changed. PAPERCUT: none.
+
+---
+
+## 669 — [BOUNDED MAIN WORKER 2026-07-28 ~23:49] fresh no-hook Factory battle initializer landed
+
+- **State:** tree green at **454 files / 4895 tests**, production build,
+  `git diff --check`, and Battle Scene OFF oracle info. Both censuses
+  regenerated byte-identically: executable **214/214 effects, 355/355
+  moves**; ability/item **69/69 abilities (1096/1096), 42/42 hold effects
+  (850/850)**. Focused lifecycle + ratchet suite is **10/10**.
+- **Did:** added a pure lifecycle API from two complete six-slot
+  `BattleScriptPartyState`s plus request metadata/RNG to the first player
+  command. It derives slot-0 actives, initializes source-fresh tracked state,
+  performs receipt-proved draw A, materializes the intervening cleanup,
+  performs draw B, stores B for turn 1, and publishes through the same
+  durable full-turn rules/request constructor as staged fixtures. A
+  Magcargo-299 Quick Claw test pins A=50515 misses, B=12646 procs, and the
+  slower holder acts first; RNG cursor is exactly two calls at publication.
+- **Supervisor fold (same round, side merge):** rung 7 landed (`2c7091e0`)
+  — `factoryRentalGeneration.ts` ports GenerateInitialRentalMons
+  (range/rank selection, duplicate set/species/item retries with exact draw
+  consumption, instance-parameter derivation) over the generated catalog
+  with an explicit draw ledger, feeding the rung-5 adapter; 7 focused
+  tests. Union green **455 files / 4902 tests**, census byte-identical
+  no-op.
+- **Next:** rung 3 (entry-hook orchestrator, main — retires the hook-loop
+  barrier; the equal-speed tie barrier stays receipt-gated) + rung 8
+  (opponent party generator, side) launch this round; then rung 4 (fresh
+  3v3 battle to real terminal) and rung 6 (production AI turn driver).
+- **Notes:** source citations in scout §3.1/§3.3 and receipt §4.1 were
+  re-read and agree with the implementation. Two deliberate, reachable
+  `unsupported-branch` additions are pinned in `factoryBattleStart.ts`:
+  **switch-in ability/item hook loop** and **equal-speed pre-hook tie draw
+  (source-derived, live receipt pending)**; module ratchet **0→2**. No
+  `FactoryFullTurnConfig` field, issue/scout/probe/battle-lab/census artifact,
+  rental-generation file, or canonical recording changed. Commit
+  `764d7f6a`. PAPERCUT: none.
+
+---
+
+## 668 — [BOUNDED MAIN WORKER 2026-07-28 ~23:31] corpus-to-kernel party adapter implemented
+
+- **State:** tree green at **453 files / 4891 tests**, production build,
+  `git diff --check`, and Battle Scene OFF oracle info. Census regenerated
+  twice as a byte-identical no-op at **69/69 abilities (1096/1096)** and
+  **42/42 hold effects (850/850)**; all 17 validations and both executable
+  ratchets pass unchanged.
+- **Did:** added a pure generated-corpus adapter from set id + personality/
+  fixed IV/ability slot/OT id to a field-complete Level-50
+  `BattleScriptPartyMemberState` structural subtype: source nature check,
+  uniform IVs, split EVs, shared stat formulas, moves/base PP, experience,
+  item/hold effect, single/dual ability, friendship, gender and shiny. A
+  focused Tier-1 test constructs every Level-50 set **0–849** and exactly
+  reproduces all six OFF bootstrap RAM-dumped rental literals.
+- **Supervisor fold (same round, side merge):** rung 1 landed (`eb441047`,
+  Terra worker) — fresh-start A/B receipt banked in scout §4.1: draw A
+  `BattleStartClearSetData+0x29b` → 62606, draw B
+  `TryDoEventsBeforeFirstTurn+0x26f` → 997 overwriting A before action
+  selection; wrapper PASS (supervisor re-ran fresh: PASS). Honest bounded
+  remainder: the equal-speed tie case is scaffolded, not claimed (unstable
+  targeted stepping over the broad pre-battle VBlank span) — rung 3 must
+  either finish it or derive the tie position from source with a narrower
+  instrument.
+- **Next:** rung 2 (pure fresh battle initializer, main) + rung 7 (initial
+  rental generator, side) launch this round; then rung 3 (entry-hook
+  orchestrator) and rung 4 (whole battle fresh-start→terminal).
+- **Notes:** scout §2.2/§2.3/rung-5 citations proved. Battle-lab has no cheap
+  generic derived-party read-back command; using its permitted known-good
+  literal fallback (the OFF bootstrap RAM dump). Commits `449f6365`,
+  `b75b663f`; the census initially caught and forced removal of a quoted
+  ability comparison before final validation. No battle-start/controller,
+  side-owned, issue, census-generator, or ratchet file changed. PAPERCUT: none.
+
+---
+
+## 667 — [BOUNDED MAIN WORKER 2026-07-28 ~23:14] Run Away/Pickup close the ability-item parity worklist
+
+- **State:** tree green at **452 files / 4887 tests**, production build,
+  `git diff --check`, and Battle Scene OFF oracle info. Hook artifact and
+  census each regenerated twice byte-identically. Final census is exactly
+  **69/69 Factory-battle abilities (weighted 1096/1096)** plus **4 without
+  Factory battle hooks**, and **42/42 hold effects (850/850)**; all 17
+  validations pass and the unreferenced worklist is empty.
+- **Did:** source order disproved the proposed generic trainer-block proof:
+  Factory RUN first opens the forfeit confirmation (`battle_main.c:4322-4339`);
+  confirmed RUN reaches Run Away before the generic Frontier-trainer success
+  (`battle_util.c:427-448`), then every Factory RUN becomes forfeiture before
+  `fleeType` is read (`battle_main.c:5058-5062`). A production invariant and
+  Tier-1 test pin that this kernel exposes only use-move/switch commands and
+  Run Away cannot bypass the distinct trapping gate. Pickup's only two source
+  checks are now exact-classified Factory-unreachable: the Frontier victory
+  script calls `pickup` only under `BATTLE_TYPE_PYRAMID`
+  (`battle_scripts_1.s:3045-3047`), never Factory.
+- **Supervisor fold (same round, side merge):** the paired side-lane scout
+  banked `docs/facility-round-loop-scout.md` (`1c87f22e`) — Gate-5/whole-
+  battle current-state map (full-turn kernel starts post-init; no production
+  caller feeds `resolveRoundBattle`; no rental/opponent generators yet; the
+  real Factory fully restores HP/PP/status/items between battles; turn-1
+  Quick Claw reads `battle_main.c:3923`'s write, which overwrites `:3140`),
+  battle-start ground truth §3, a precise rung-1 probe brief §4, and a
+  14-rung ordered plan §5 (each ≤45-min with acceptance commands).
+- **Next:** rung 1 (fresh-start RNG receipt, side) + rung 5 (corpus-to-
+  kernel party adapter, main) launch this round; then rung 2 (fresh battle
+  initializer) consumes the receipt. Do not reopen Pickup/Run Away without
+  new source reachability.
+- **Notes:** predicted closure was 70/70 weighted 1103/1103 only if Pickup
+  remained battle-reachable; actual source-supported reclassification removes
+  its 7 carriers: `(1073 + 23)/(1103 - 7) = 1096/1096`, and categories move
+  from 3 to 4 without Factory battle hooks. Commit `c50a726f`. No
+  `unsupported-branch` or canonical-recording ratchet, issue, scout/probe,
+  battle-lab, presentation, AI, or oracle fixture changed. PAPERCUT: none.
+
+---
+
+## 666 — [BOUNDED MAIN WORKER 2026-07-28 ~23:05] voluntary switch action + trapping trio complete
+
+- **State:** tree green at **452 files / 4885 tests**, production build,
+  `git diff --check`, and Battle Scene OFF oracle info. Census regenerated
+  twice byte-identically at exactly **68/70 abilities (weighted 1073/1103)**
+  and **42/42 hold effects (850/850)**; all 16 validations pass.
+- **Did:** player command requests now enumerate every alive, non-egg bench
+  slot and preserve the wrap/escape-prevention/Ingrain menu gates. Shadow
+  Tag, grounded Arena Trap, and Steel-only Magnet Pull remove voluntary
+  switch entries; Flying/Levitate, fainted, and absent-holder controls pass.
+  Trainer requests remain move-only and forced-switch indexes ignore trapping.
+  A voluntary switch runs before moves through the shared source switch
+  handlers, rebuilds the incoming battler, fires entry hooks, and makes the
+  opponent's move hit that incoming mon; an Intimidate receipt pins hook
+  timing. The switch draws zero RNG; the switch-turn ledger pins the next
+  boundary at position 15 after five staged AI draws.
+- **Supervisor fold (same round, side merge):** the paired side-lane worker
+  oracle-corroborated the boundary-draw + Quick Claw model (`ad1953db`,
+  §B6 of the speed scout): five ROM turns with per-turn `gRandomTurnNumber`
+  RAM reads (25804/44835/15553/45723/10727), exactly one attributed
+  `BattleTurnPassed+0x157` draw per transition, the 1/5 proc turn
+  (10727 < 13107) flipping order exactly as modeled, zero Quick Claw or
+  tie draws, and the ENGINE reproducing four boundary values + raw LCG
+  states exactly (`verify-quick-claw-turn-boundary.py` +
+  `verify-quick-claw-engine.ts`, supervisor re-ran both: PASS). Continuous
+  cross-turn replay is non-alignable by design (submitted-decision windows
+  omit the ROM AI's intervening draws — documented, not a defect). Also
+  refreshed `verify-on-damage-static.py` to the post-implementation guard.
+- **Next:** close Run Away/Pickup honestly (documented no-op or
+  reclassification, with source proof) to end the ability census; side
+  design scout for Gate-5/whole-battle integration (incl. the turn-1
+  `gRandomTurnNumber` writes).
+- **Notes:** Pursuit's pre-switch double-power interception is deliberately
+  deferred behind one trigger-narrow `unsupported-branch` in
+  `factoryBattleScriptFullTurnDecision.ts`; its barrier ratchet moves **0→1**
+  with a reachability test. No presentation, trainer-switch AI, Baton Pass,
+  issue, probe/scout, oracle fixture, or canonical trace changed. Identity
+  constants were used for all three new ability comparisons. PAPERCUT: none.
+
+---
+
+## 665 — [BOUNDED MAIN WORKER 2026-07-28 ~22:35] ON_DAMAGE contact-ability family implemented
+
+- **State:** tree green at **452 files / 4877 tests**, production build, and
+  `git diff --check`. Census regenerated twice byte-identically: abilities exactly
+  **64/70 (weighted 1056/1103)**, hold effects **42/42 (850/850)**,
+  `ABILITYEFFECT_ON_DAMAGE` **8/8**; all 15 validations pass.
+- **Did:** exposed source contact bit 0 through the shared move-flags resolver;
+  confirmed the existing real-HP-only `datahpupdate` trackers already make
+  Substitute suppress the family; implemented Color Change, Rough Skin,
+  Effect Spore, Poison Point, Static, Flame Body, and Cute Charm in moveend
+  state 3 with exact gates, RNG, mutations, and callback transfers. Registered
+  `seteffectsecondary`; factored the pre-existing gender calculation into one
+  shared source helper. The state-3 barrier retired **7→6** for the module.
+- **Supervisor fold (same round, `230d776f`):** the paired side-lane worker
+  landed scout §A3's census-generator fix (`eef441e4`) — the blanket
+  string-literal exclusion now has a narrow comparison-adjacency recovery
+  pass, 20 recovered sites exact-pinned (validations 15→16), and refreshed
+  `verify-turn-boundary-rng-gap.py` to assert the FIXED state (PASS). Union
+  census regenerated at the compound prediction exactly: **abilities 65/70
+  (weighted 1060/1103)** (+COMPOUND_EYES via the generator fix), hold
+  effects 42/42 (850/850). Remaining unreferenced rows: trapping trio
+  (ARENA_TRAP 6, MAGNET_PULL 4, SHADOW_TAG 3) + RUN_AWAY 23 + PICKUP 7.
+- **Next:** voluntary switch turn action + trapping-trio legality gate
+  (main, in flight); Quick Claw oracle corroboration + stale
+  `verify-on-damage-static.py` guard refresh (side, in flight); then
+  Run Away/Pickup documented no-op closures and the whole-battle turn-1
+  `gRandomTurnNumber` writes.
+- **Notes:** full-script tests run every callback shape through its `return`
+  and `BattleScript_MoveEnd`'s own `END`; Pound→Static pins the proc as draw 5
+  after accuracy/crit/damage/effect chance, with success and failure both +1.
+  Effect Spore pins zero-retry and sleep-duration draws; status routing pins
+  affects-user, Shield Dust/Safeguard bypass, and ordinary eligibility. No
+  census generator, scout/probe/battle-lab fixture, issue, or oracle asset
+  changed. Commits: prerequisite `030441c0`, implementation `193fd961`,
+  final integration/census fix follows this entry. PAPERCUT: none.
+
+---
+
+## 664 — [BOUNDED MAIN WORKER 2026-07-28 ~22:16] turn-boundary RNG modeled; Quick Claw closes hold-effect census
+
+- **State:** tree green at **452 files / 4867 tests**, production build,
+  `git diff --check`, and Battle Scene OFF oracle info. Census regenerated
+  byte-idempotently: abilities unchanged **57/70 (weighted 977/1103)**;
+  hold effects now **42/42 (weighted 850/850)**, all 15 validations pass.
+- **Did:** added `BattleTurnPassed`'s unconditional continuing-boundary draw
+  at the production full-turn seam, after end-turn cleanup and before the
+  next request/locked-decision recursion; persisted its u16 as the
+  `gRandomTurnNumber` equivalent. Staged windows accept an explicit initial
+  value (default `0xffff`); whole-battle turn-1 sites `battle_main.c:3140`
+  and `:3923` remain the named follow-up. A typed two-turn ledger pins the
+  ROM positions 5/19. Quick Claw now applies `UINT_MAX` effective speed for
+  stored values `< floor(0xffff*param/100)` (param 20 threshold 13107),
+  below priority and with the ordinary tie roll when both holders proc.
+- **Supervisor fold (same round, `f828a714`):** the paired side-lane scout
+  banked `docs/on-damage-contact-scout.md` — the ON_DAMAGE family is the
+  body of the already-registered `MOVEEND_ON_DAMAGE_ABILITIES` state 3
+  (its seven-ability barrier retires); the shared rules resolver currently
+  drops `FLAG_MAKES_CONTACT` (prerequisite); Oblivious is Cute Charm's
+  eligibility check, not an eighth case; live Static receipt attributed the
+  proc roll at position 5 right after the four hit-chain rolls
+  (`tools/probe/verify-on-damage-static.py`, supervisor re-ran: PASS).
+  Predicted implementation delta: abilities 57→64/70, weighted
+  977→1056/1103, dispatcher 1/8→8/8.
+- **Next:** implement the ON_DAMAGE family from the scout pack (main);
+  census generator §A3 string-literal fix (side); then battle-start
+  random-turn writes when whole-battle integration owns turn 1.
+- **Notes:** boundary commit `c7944fac`; Quick Claw commit follows this
+  entry. Existing direct `runBattleEndTurnOrchestration` zero-RNG pin stays
+  correct because ownership is in the full-turn reducer. Multi-turn HP,
+  Disable-duration, Wish/Future Sight, Focus Energy, and Rollout assertions
+  were re-derived after later rolls shifted to their ROM-faithful positions.
+  No `unsupported-branch` or canonical-recording ratchet changed.
+  `verify-turn-boundary-rng-gap.py` now intentionally stops at its stale
+  “explicit model acquired; revisit verdict” guard. PAPERCUT: none.
+
+---
+
+## 663 — [BOUNDED MAIN WORKER 2026-07-28 ~21:55] production turn-order inputs live; Swift Swim + Chlorophyll census rows closed
+
+- **State:** tree green at **452 files / 4862 tests**, production build,
+  `git diff --check`, and Battle Scene OFF oracle info. Census regenerated
+  byte-idempotently: **abilities 57/70 engine-referenced (weighted
+  977/1103)**, hold effects unchanged **41/42 (775/850)**; all 15
+  validations pass. This matches the assigned prediction exactly.
+- **Did:** wired `factoryBattleScriptFullTurnDecision.ts`'s sole production
+  `GetWhoStrikesFirst` call with both battlers' numeric ability → shared
+  `ABILITY_SYMBOLS` name, existing hold-effect/param resolvers → the shared
+  hold-effect name map (extended with Macho Brace id 24), real STATUS1
+  paralysis, and `rulesContext.weather`. Rain/sun decoding is suppressed by
+  the already-established end-turn `weatherHasEffect` Cloud Nine gate; no
+  duplicate ability/item/weather table was added. Six real full-turn tests
+  pin Swift Swim, Chlorophyll, opposing Cloud Nine, paralysis, Macho Brace,
+  and the existing one-draw-only speed-tie contract. Census identity aliases
+  close exactly the two assigned ability rows.
+- **Supervisor fold (same round, `ece08e49`):** the paired side-lane probe
+  REFUTED the RNG-gap hypothesis — the production engine is genuinely one
+  draw short at every clean turn boundary (`BattleTurnPassed`'s
+  unconditional `gRandomTurnNumber = Random()`, attributed at positions
+  5/19 of a 24-draw two-turn ROM ledger, before each turn's AI draws;
+  `turnEndRngGroups` is legacy fixture-only). Full evidence + fix shape:
+  `docs/ability-item-speed-scout.md` §B5; mechanical recheck
+  `tools/probe/verify-turn-boundary-rng-gap.py` (supervisor re-ran: PASS).
+  The probe's OFF fixture also corroborated this entry's wiring on real
+  hardware: turn-2 order flips under rain exactly as predicted.
+- **Next:** model the boundary draw + persist it as the rules-context
+  `gRandomTurnNumber` equivalent, then Quick Claw reads it (closes hold
+  effects at 42/42); then the ON_DAMAGE contact family (scout in flight).
+- **Notes:** source citations were re-read. ROM `WEATHER_HAS_EFFECT` also
+  requires `hp != 0`; this is vacuous at action selection because the
+  full-turn reducer resumes only after fainted-actions installs live singles
+  actives. The paralysis call-site path has 9 draws by design: 8 ordinary hit
+  draws plus its existing attack-admission paralysis roll, and no turn-order
+  draw (an erroneous tie would make 10). No generator semantics, canonical
+  replay, oracle fixture, Quick Claw, AI, or `unsupported-branch` ratchet
+  changed. Scout/probe files untouched. PAPERCUT: none this session.
+
+---
+
+## 662 — [INTERACTIVE TOOLING FIX 2026-07-28 ~21:40] Claude supervisor cwd persistence mechanically disabled
+
+- **State:** tree green at **452 files / 4856 tests**, launcher profile
+  coverage **16/16**, production build, `bash -n`, `git diff --check`, and
+  Battle Scene OFF oracle info. Game state, census, oracle fixtures, and
+  animation coverage are unchanged.
+- **Did:** `run-supervisor.sh` now exports Claude Code's supported
+  `CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR=1` policy for every Claude
+  supervisor, including hybrid and animation-lane launches. Each Bash tool
+  call therefore starts from that supervisor's launch root after temporary
+  worktree inspection. `--print-config` exposes the resolved policy as
+  `project-root-reset`; Codex remains `per-command`. A launcher regression
+  test pins default Claude, hybrid, and Codex behavior. Deleted the resolved
+  10-hit supervisor-cwd entry from `PAPERCUTS.md`.
+- **Next:** resume entry 661's ordered ability/item work: falsify the
+  two-turn RNG-gap hypothesis, then wire speed ability/hold-effect/weather
+  inputs before Quick Claw.
+- **Notes:** this is launcher-only; no battle engine, renderer, trace,
+  barrier ratchet, or oracle-profile change. The existing “merge from the
+  owning tree” workflow remains useful defense in depth.
+
+---
+
+## 661 — [SUPERVISOR WIND-DOWN 2026-07-28 ~21:20] Ability/item parity surge: census abilities 55/70 + hold effects 41/42; speed/turn-order scout pack landed; animation-main folded twice (Tickle exact)
+
+- **State:** master `2f5167a8`, union green at **452 files / 4855 tests**,
+  production build, `git diff --check` clean, census byte-idempotent
+  (**abilities 55/70 engine-referenced, weighted 905/1103; hold effects
+  41/42, weighted 775/850; QUICK_CLAW is the only unreferenced hold-effect
+  row**). DEFERRED.md empty; no orphan worktrees or branches; both oracle
+  profiles fresh (checked at orient).
+- **Did:** (1) folded `animation-main` at orient (`1aefbdf8`, Tickle/Leaf
+  Blade evidence + the Omanyte-vs-Omastar carrier-mismatch catch) and again
+  at wind-down (`2f5167a8`) — **MOVE_TICKLE promoted exact; L50 animation
+  coverage 78/276**; animation session ended ~21:06, lane fully folded.
+  (2) Main worker: CalculateBaseDamage ability block bit-exact
+  (`1f8d7727`, entry 659) — 12 rows flipped at the exact predicted delta.
+  (3) Main worker: hold-item block bit-exact (`a4673f25`, entry 660) — 19
+  rows flipped at the exact predicted delta; its 2-line
+  `ENGINE_INFRA_SPELLINGS` addition is benign infra-name registration, not
+  a counting-semantics change. (4) Side scout landed
+  `docs/ability-item-speed-scout.md` (`f8aabadd`): census string-literal
+  false-negative audit (10 members classified; generator fix described,
+  deliberately NOT applied) + GetWhoStrikesFirst ground truth, consumer
+  map, L50 fixtures with computed speeds, and 3 staged recipes.
+- **Next (ordered):** (i) **Falsify the scout's RNG-gap hypothesis first**:
+  `gRandomTurnNumber` (drawn once per turn in `BattleTurnPassed`,
+  battle_main.c:4013) has zero engine footprint — but multi-turn staged
+  windows pass RNG-exact, so `battleTurn.ts`'s `turnEndRngGroups` likely
+  absorbs the draw unnamed. Run the scout's 2-turn no-Quick-Claw probe
+  before trusting any Quick Claw fixture. (ii) Wire `turnOrder.ts`'s dead
+  inputs (call site `factoryBattleScriptFullTurnDecision.ts:810` never
+  threads ability/holdEffect/weather; weather already sits in
+  `rulesContext.weather`) — closes Chlorophyll/Swift Swim semantically.
+  (iii) Quick Claw row after (i). (iv) ON_DAMAGE contact family (Static 27
+  et al.). (v) Census generator string-literal counting fix per scout §A3.
+- **Notes:** ability rows still unreferenced are the speed pair (closes
+  with ii), the ON_DAMAGE family, Run Away/Pickup (battle no-ops to prove),
+  and trapping/AI-scoped rows. "Engine-referenced" still ≠ semantically
+  complete — dense oracle evidence for the two damage blocks remains the
+  standing follow-up; the scout pack's recipes are the template. No
+  deferred questions this session.
+
+---
+
+## 660 — [BOUNDED MAIN WORKER 2026-07-28 ~21:05] damageCalc hold-item block ported bit-exact; census hold effects 22/42 -> 41/42
+
+- **State:** union green at **452 files / 4855 tests**, production build,
+  `git diff --check` clean. Census regenerated in-commit: **hold effects
+  41/42 engine-referenced (weighted 775/850)**, abilities unchanged 55/70
+  (weighted 905/1103), all 15 validations pass. Headline matched the
+  supervisor's prediction exactly.
+- **Did:** ported `pokemon.c` CalculateBaseDamage's hold-item block
+  (:3171-3201) into `damageCalc.ts`, inserted at the exact source position
+  (after Huge/Pure Power, before entry 659's ability block, so truncation
+  order matches): the `sHoldEffectToType` attacker-only type-power loop
+  (all 17 rows, first-match-break, `(param+100)/100` on attack for
+  physical types / spAttack for special), Choice Band (1.5x attack — the
+  choice-lock logic already referenced the hold effect, but the damage
+  boost itself was missing), and the 6 species-locked items (Soul Dew
+  spAttack/spDefense 1.5x gated on `!BATTLE_TYPE_FRONTIER` + Latias/Latios,
+  Deep Sea Tooth/Scale, Light Ball, Metal Powder, Thick Club, all flat 2x
+  on the correct stat/species pair). Added a local `spDefense` variable
+  (previously read straight off `defender.spDefense`) since Soul Dew/Deep
+  Sea Scale now mutate it before the special branch reads it. Wired the
+  real call site (`battleScriptHitChainOpcode.ts`'s
+  `calculateBattleScriptBaseDamageForCurrentMove`) with both battlers'
+  resolved hold effect (via the existing `resolveBattleScriptBattlerHoldEffect`
+  / `...HoldEffectParam` — no second item table invented), species, and
+  `isFrontierBattle` computed from the real `battleTypeFlags` (a genuine
+  structural no-op in this engine: every battle sets `BATTLE_TYPE_FACTORY`,
+  a `BATTLE_TYPE_FRONTIER` member). 17 new Tier-1 tests: type-boost
+  physical/special routing + truncation, species gating positive *and*
+  negative for all 6 items, Soul Dew's frontier gate proven both ways, and
+  a 4-stage combined-order test (Huge Power -> Choice Band -> Marvel Scale
+  -> Explosion) using odd numbers so a wrong stage order would visibly
+  produce a different result. Two new census infra spellings classified
+  (`HOLD_EFFECT_NAME_BY_ID`, `HOLD_EFFECT_TO_TYPE`) in the census script's
+  `ENGINE_INFRA_SPELLINGS` allowlist.
+- **Next:** supervisor pick the next row — `HOLD_EFFECT_QUICK_CLAW` (75 L50
+  carriers, the single remaining unreferenced hold effect; turn-order work,
+  a side-lane scout owns `GetWhoStrikesFirst`) or an ability row
+  (Chlorophyll 38 / Swift Swim 34 speed-calc class, or the ON_DAMAGE
+  contact family).
+- **Notes:** all 19 target hold-effect rows closed exactly as predicted
+  (15 named type-power rows + Thick Club, Deep Sea Scale, Light Ball,
+  Metal Powder). Soul Dew and Deep Sea Tooth stay `zero-carrier` (no L50
+  set carries them) despite being fully ported — expected, not a gap.
+  Ghost/Dragon Power also flipped to engine-referenced as a side effect of
+  porting the real table (still zero-carrier). No abilities, badge boosts,
+  field sports, AI, Enigma Berry, or new `unsupported-branch` barrier
+  touched (ratchet unchanged). PAPERCUT: none this session.
+
+---
+
 ## 659 — [BOUNDED MAIN WORKER 2026-07-28 ~20:45] damageCalc ability stat/power modifier block ported bit-exact; census abilities 43/70 -> 55/70
 
 - **State:** commit `1f8d7727`; union green at **452 files / 4841 tests**,

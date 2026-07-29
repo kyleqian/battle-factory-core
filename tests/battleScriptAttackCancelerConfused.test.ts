@@ -181,7 +181,7 @@ describe("source-shaped attack-canceler confused phase", () => {
     }
   });
 
-  it("rejects unreachable counters and missing/invalid self-hit damage context", () => {
+  it("rejects unreachable counters and invalid self-hit damage context", () => {
     for (const counter of [6, 7]) {
       expect(() => advanceBattleScriptAttackCancelerConfused(
         rules({ battlers: [battler({ status2: counter }), battler(), battler(), battler()] }),
@@ -193,7 +193,7 @@ describe("source-shaped attack-canceler confused phase", () => {
       rules({ battlers: [battler({ status2: 2 }), battler(), battler(), battler()] }),
       PC,
       0,
-    )).toThrow(/requires attacker confusionDamage context/);
+    )).toThrow(/level, attack, and defense must be nonzero/);
     expect(() => rules({ battlers: [
       battler({ confusionDamage: { level: 256, attack: 1, defense: 1, attackStage: 6, defenseStage: 6, isBurned: false, hasGuts: false } }),
       battler(), battler(), battler(),

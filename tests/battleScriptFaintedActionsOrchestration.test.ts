@@ -107,7 +107,10 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
     prepareSelectionMessageFromTable: () => null,
     resolveAttackerBattler: () => null,
     resolveBattlerAtPosition: () => null,
-    resolveHalfwordOperand: () => null,
+    resolveHalfwordOperand: (_context, operand) =>
+      operand.expression === "B_WAIT_TIME_LONG"
+        ? 64
+        : operand.expression === "B_WAIT_TIME_SHORT" ? 32 : null,
     resolveByteOperand: () => null,
   });
 }
@@ -181,22 +184,26 @@ describe("runBattleScriptFaintedActionsOrchestration (HandleFaintedMonActions eq
   );
 
   it(
-    "non-terminal barrier: opponent still has a healthy bench slot -- checkteamslost's jumpifbyte does NOT "
+    "non-terminal sole replacement: opponent still has one healthy bench slot -- checkteamslost's jumpifbyte does NOT "
       + "take the FaintedMonEnd branch; jumpifbattletype (a jumpifword macro expansion, "
       + "asm/macros/battle_script.inc:1434-1436) is now registered (docs/forced-switch-ground-truth.md §4 "
       + "slice 1) and takes Factory's real BATTLE_TYPE_TRAINER-taken jump straight to "
-      + "BattleScript_FaintedMonTryChoose, so the barrier now surfaces one opcode deeper, at the genuinely "
-      + "unregistered openpartyscreen -- a named machine boundary instead of a fake terminal or silent fallthrough",
+      + "BattleScript_FaintedMonTryChoose; the only legal candidate is selected without entering the "
+      + "irrelevant pass-2 damage fallback, and the battle genuinely resumes",
     () => {
       const rc = context({
         party: { player: sixSlots(100), opponent: sixSlots(90, 0, 0) },
       });
       const initial = haltedAtOwnEnd(rc);
       const result = runBattleScriptFaintedActionsOrchestration(program, handlers, initial);
-      expect(result.kind).toBe("non-terminal-barrier");
-      if (result.kind !== "non-terminal-barrier") throw new Error("expected non-terminal-barrier");
+      expect(result.kind).toBe("resumed");
+      if (result.kind !== "resumed") throw new Error("expected resumed");
       expect(result.state.rulesContext.battleOutcome).toBe(0); // genuinely undecided, not fabricated
-      expect(result.instruction.opcodeName).toBe("B_SCR_OP_OPENPARTYSCREEN"); // openpartyscreen BS_FAINTED
+      expect(result.state.rulesContext.battlers[1]).toMatchObject({
+        species: 261,
+        hp: 90,
+        partyIndex: 0,
+      });
       expect(result.state.rng.calls).toBe(initial.rng.calls);
     },
   );
@@ -258,4 +265,93 @@ describe("runBattleScriptFaintedActionsOrchestration (HandleFaintedMonActions eq
         .not.toThrow();
     },
   );
+
+  it(
+    "simultaneous Rough Skin double faint: player replacement resumes the persisted cursor before the opponent replacement",
+    () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0, hp: 0, partyIndex: 0, species: 261 }),
+          battler({ side: 1, hp: 0, partyIndex: 0, species: 261 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+        selectorRoles: { attacker: 0, target: 1, effectBattler: 1 },
+        party: {
+          player: sixSlots(0, 100, 90),
+          opponent: sixSlots(0, 90),
+        },
+      });
+      const initial = haltedAtOwnEnd(rc);
+      const halted = runBattleScriptFaintedActionsOrchestration(program, handlers, initial);
+      expect(halted.kind).toBe("player-choice-required");
+      if (halted.kind !== "player-choice-required") throw new Error("expected player choice");
+
+      const resumed = resumeBattleScriptFaintedActionsAfterPlayerChoice(
+        program,
+        handlers,
+        halted.state,
+        2,
+      );
+      expect(resumed.kind).toBe("resumed");
+      expect(resumed.state.rulesContext.battlers[0]).toMatchObject({
+        hp: 90,
+        partyIndex: 2,
+      });
+      expect(resumed.state.rulesContext.battlers[1]).toMatchObject({
+        hp: 90,
+        partyIndex: 1,
+      });
+      expect(resumed.state.rulesContext.battleOutcome).toBe(0);
+      expect(resumed.state.rulesContext.selectorRoles.fainted).toBe(1);
+      expect(resumed.state.rulesContext.selectorRoles.target).toBe(1);
+      expect(resumed.state.rng.calls).toBe(initial.rng.calls);
+    },
+  );
+
+  it("simultaneous Rough Skin double faint: the opponent's last mon produces the source terminal outcome", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, hp: 0, partyIndex: 0, species: 261 }),
+        battler({ side: 1, hp: 0, partyIndex: 0, species: 261 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      selectorRoles: { attacker: 0, target: 1, effectBattler: 1 },
+      party: {
+        player: sixSlots(0, 100),
+        opponent: sixSlots(0),
+      },
+    });
+    const initial = haltedAtOwnEnd(rc);
+    const result = runBattleScriptFaintedActionsOrchestration(program, handlers, initial);
+    expect(result.kind).toBe("terminal");
+    expect(result.state.rulesContext.battleOutcome).toBe(1);
+    expect(result.state.rulesContext.battlers[1]!.hp).toBe(0);
+    expect(result.state.rng.calls).toBe(initial.rng.calls);
+  });
+
+  it("state 6 resolves pending replacement Intimidate before White Herb and clears the pending bit", () => {
+    const rc = context({
+      battlers: [
+        battler({
+          side: 0,
+          item: 180,
+          statStages: [6, 5, 6, 6, 6, 6, 6, 6],
+        }),
+        battler({ side: 1, ability: 22, status3: 1 << 19 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+    });
+    const initial = haltedAtOwnEnd(rc);
+    const result = runBattleScriptFaintedActionsOrchestration(program, handlers, initial);
+    expect(result.kind).toBe("no-fainted-battlers");
+    expect(result.state.rulesContext.battlers[0].statStages[1]).toBe(6);
+    expect(result.state.rulesContext.battlers[0].item).toBe(0);
+    expect(result.state.rulesContext.battlers[1].status3 & (1 << 19)).toBe(0);
+    expect(result.state.events.filter((event) => event.kind === "message").map((event) => event.messageId))
+      .toEqual(["STRINGID_PKMNCUTSATTACKWITH", "STRINGID_PKMNSITEMRESTOREDSTATUS"]);
+    expect(result.state.rng.calls).toBe(initial.rng.calls);
+  });
 });

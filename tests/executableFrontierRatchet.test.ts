@@ -121,7 +121,10 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // winner-only flag consumption, and pushed BattleScript_SnatchedMove
   // continuation are now live; Lightning Rod remains the adjacent barrier.
   ["src/engine/battleScriptAttackCancelerOpcode.ts", 3],
-  ["src/engine/battleScriptMoveEndOpcode.ts", 7],
+  // 7 -> 6 (ON_DAMAGE contact abilities): state 3's seven-case barrier
+  // retires as one call site; Color Change/Rough Skin/status/Cute Charm
+  // callbacks and their RNG/status mutations now execute source-completely.
+  ["src/engine/battleScriptMoveEndOpcode.ts", 6],
   ["src/engine/battleScriptJumpifbyteOpcode.ts", 1],
   // Forced-switch ground truth §4 slice 1: one operand-shape barrier, shared
   // by both the unmodeled-memWord and unmodeled-value cases (e.g.
@@ -137,14 +140,16 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // point.
   ["src/engine/battleScriptJumpifhalfwordOpcode.ts", 1],
   // Forced-switch ground truth §4 slice 2: doubles/multi topology (not
-  // Factory singles) and GetMostSuitableMonToSwitchInto's pass-2 AI_CalcDmg
-  // raw-damage fallback (no fixture on this rung reaches it). 3 -> 2 (§4
+  // Factory singles). 3 -> 2 (§4
   // slice 10, this session): the player-side interactive party-menu branch
   // is no longer an unsupported-branch placeholder -- it is now a genuine,
   // named `"player-choice-required"` halt (battleScriptMachine.ts) that
   // resumes through the same slice-1-9 machinery, so it retires from this
   // barrier count entirely (it isn't a barrier of any kind anymore).
-  ["src/engine/battleScriptOpenPartyScreenOpcode.ts", 2],
+  // 2 -> 1 (rung-12 trainer faint replacement): pass-2 AI_CalcDmg selection
+  // now preserves the global-current-move/candidate-TypeCalc and u8-bestDmg
+  // source quirks, so competitive multi-candidate replacements execute.
+  ["src/engine/battleScriptOpenPartyScreenOpcode.ts", 1],
   ["src/engine/battleScriptGetexpOpcode.ts", 2],
   ["src/engine/battleScriptCheckteamslostOpcode.ts", 3],
   // Forced-switch ground truth §4 slices 1/2/3 tail (SWITCHHANDLEORDER,
@@ -288,6 +293,13 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // generic VARIOUS dispatcher). Reachability-tested directly in
   // tests/battleScriptForceSwitchOpcode.test.ts.
   ["src/engine/battleScriptForceSwitchOpcode.ts", 1],
+  // Voluntary switching executes before ordinary moves through the real
+  // BattleScript_ActionSwitch tail. Its Pursuit-interception arm remains a
+  // trigger-narrow barrier until the pre-switch double-power hit path is
+  // modeled; ordinary non-Pursuit switches execute the source jump and full
+  // switch-in machinery. Reachability-pinned in
+  // tests/factoryBattleScriptFullTurnDecision.test.ts.
+  ["src/engine/factoryBattleScriptFullTurnDecision.ts", 1],
   // B_SCR_OP_CLEARSTATUSFROMEFFECT/SETSEMIINVULNERABLEBIT/CLEARSEMIINVULNERABLEBIT
   // registration (EFFECT_SEMI_INVULNERABLE + collateral EFFECT_RAZOR_WIND/
   // SKY_ATTACK/SKULL_BASH, docs/semi-invulnerable-registration-scout.md §5

@@ -7,6 +7,7 @@ import {
 
 const MOVE_KARATE_CHOP = 2;
 const MOVE_TACKLE = 33;
+const MOVE_WATER_GUN = 55;
 const MOVE_NONE = 0;
 
 const URSARING_TYPES = ["TYPE_NORMAL", "TYPE_NORMAL"] as const;
@@ -92,5 +93,71 @@ describe("GetMostSuitableMonToSwitchInto pass 1 (type matchup + super-effective-
       URSARING_TYPES,
     );
     expect(result).toEqual({ kind: "damage-fallback-needed" });
+  });
+});
+
+describe("GetMostSuitableMonToSwitchInto pass 2 (source-quirked damage fallback)", () => {
+  it("chooses the strongest candidate TypeCalc scaling with zero RNG: active-type STAB on Water Gun", () => {
+    const result = getMostSuitableMonToSwitchInto(
+      bench([
+        { species: 191, hp: 0, types: ["TYPE_GRASS", "TYPE_GRASS"] },
+        { species: 16, hp: 100, types: ["TYPE_NORMAL", "TYPE_FLYING"], moves: [MOVE_TACKLE, 0, 0, 0] },
+        { species: 66, hp: 100, types: ["TYPE_FIGHTING", "TYPE_FIGHTING"], moves: [MOVE_WATER_GUN, 0, 0, 0] },
+      ]),
+      0,
+      URSARING_TYPES,
+      {
+        baseDamage: 100,
+        // Source uses the fainted active's types for candidate-move STAB.
+        activeTypes: ["TYPE_WATER", "TYPE_WATER"],
+        opposingTypes: URSARING_TYPES,
+        opposingAbility: 0,
+        opposingStatus2: 0,
+      },
+    );
+    expect(result).toEqual({ kind: "resolved", partyIndex: 2 });
+  });
+
+  it("strict greater-than keeps the earliest party/move on an exact damage tie", () => {
+    const result = getMostSuitableMonToSwitchInto(
+      bench([
+        { species: 191, hp: 0 },
+        { species: 16, hp: 100, moves: [MOVE_TACKLE, 0, 0, 0] },
+        { species: 66, hp: 100, moves: [MOVE_TACKLE, 0, 0, 0] },
+      ]),
+      0,
+      URSARING_TYPES,
+      {
+        baseDamage: 80,
+        activeTypes: ["TYPE_GRASS", "TYPE_GRASS"],
+        opposingTypes: URSARING_TYPES,
+        opposingAbility: 0,
+        opposingStatus2: 0,
+      },
+    );
+    expect(result).toEqual({ kind: "resolved", partyIndex: 1 });
+  });
+
+  it("preserves the pinned non-BUGFIX u8 bestDmg assignment wrap", () => {
+    const result = getMostSuitableMonToSwitchInto(
+      bench([
+        { species: 191, hp: 0 },
+        { species: 16, hp: 100, moves: [MOVE_WATER_GUN, 0, 0, 0] },
+        { species: 66, hp: 100, moves: [MOVE_TACKLE, 0, 0, 0] },
+      ]),
+      0,
+      URSARING_TYPES,
+      {
+        baseDamage: 200,
+        activeTypes: ["TYPE_WATER", "TYPE_WATER"],
+        opposingTypes: URSARING_TYPES,
+        opposingAbility: 0,
+        opposingStatus2: 0,
+      },
+    );
+    // Water Gun scores 300 through the fainted active's STAB, but bestDmg
+    // becomes u8(300)=44; the later
+    // neutral Tackle's 200 then wins the strict comparison.
+    expect(result).toEqual({ kind: "resolved", partyIndex: 2 });
   });
 });

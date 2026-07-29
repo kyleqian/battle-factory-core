@@ -2739,10 +2739,10 @@ export function advanceBattleScriptAttackCancelerConfused(
         cursor = Object.freeze({ kind: "push", sourceProgramCounter: sourcePc });
       } else {
         reason = "confusion-self-hit";
-        const damage = sourceBattler.confusionDamage;
-        if (damage === undefined) {
-          throw new Error("confusion self-hit requires attacker confusionDamage context");
-        }
+        const damage = sourceBattler.confusionDamage
+          ?? confusionDamageFromLiveBattler(
+            sourceBattler,
+          );
         if (damage.level === 0 || damage.attack === 0 || damage.defense === 0) {
           throw new Error("confusionDamage level, attack, and defense must be nonzero");
         }
@@ -3826,4 +3826,28 @@ export function preflightBattleScriptSelectedMovePp(
       & ~BATTLE_SCRIPT_HITMARKER_ALLOW_NO_PP
     ) >>> 0,
   );
+}
+
+/**
+ * battle_util.c:2157-2175 reads the active gBattleMons record directly:
+ * after the sole `Random() & 1` draw selects self-damage, it targets the
+ * attacker and calls CalculateBaseDamage with that same record as both
+ * operands, MOVE_POUND, sideStatus=0, powerOverride=40, typeOverride=0.
+ * Generated battles therefore need no separate staged operand object; the
+ * optional object remains only as a focused-fixture override.
+ */
+function confusionDamageFromLiveBattler(
+  battler: BattleScriptRulesContext["battlers"][number],
+) {
+  return Object.freeze({
+    level: battler.level,
+    attack: battler.attack,
+    defense: battler.defense,
+    attackStage: battler.statStages[1]!,
+    defenseStage: battler.statStages[2]!,
+    // include/constants/battle.h:118 -- STATUS1_BURN = 1 << 4.
+    isBurned: (battler.status1 & (1 << 4)) !== 0,
+    // include/constants/abilities.h:69 -- ABILITY_GUTS = 62.
+    hasGuts: battler.ability === 62,
+  });
 }

@@ -90,3 +90,43 @@ describe("getWhoStrikesFirst - speed-tie Random()&1 tie-break (synthetic, unreac
     expect(getWhoStrikesFirst(priority1, tiedB, 1)).toBe(0); // battler1's higher-priority move goes first regardless of the coin flip
   });
 });
+
+describe("getWhoStrikesFirst - Quick Claw stored turn random", () => {
+  const slowHolder: TurnOrderBattler = {
+    speed: 45,
+    speedStage: DEFAULT_STAT_STAGE,
+    movePriority: 0,
+    holdEffect: "HOLD_EFFECT_QUICK_CLAW",
+    holdEffectParam: 20,
+  };
+  const fastOpponent: TurnOrderBattler = {
+    speed: 95,
+    speedStage: DEFAULT_STAT_STAGE,
+    movePriority: 0,
+  };
+
+  it("uses the exact param-20 threshold: 13106 procs, while 13107 does not", () => {
+    expect(getWhoStrikesFirst(slowHolder, fastOpponent, 0, {}, 13106)).toBe(0);
+    expect(getWhoStrikesFirst(slowHolder, fastOpponent, 0, {}, 13107)).toBe(1);
+  });
+
+  it("keeps priority above Quick Claw's UINT_MAX speed sentinel", () => {
+    expect(getWhoStrikesFirst(
+      slowHolder,
+      { ...fastOpponent, movePriority: 1 },
+      0,
+      {},
+      0,
+    )).toBe(1);
+  });
+
+  it("makes two holders read the same stored value; when both proc, their equal UINT_MAX speeds use the ordinary tie roll", () => {
+    const fastHolder: TurnOrderBattler = {
+      ...fastOpponent,
+      holdEffect: "HOLD_EFFECT_QUICK_CLAW",
+      holdEffectParam: 20,
+    };
+    expect(getWhoStrikesFirst(slowHolder, fastHolder, 0, {}, 0)).toBe(0);
+    expect(getWhoStrikesFirst(slowHolder, fastHolder, 1, {}, 0)).toBe(2);
+  });
+});

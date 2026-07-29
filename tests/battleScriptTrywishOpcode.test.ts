@@ -407,7 +407,7 @@ describe("Wish through the generic full-turn seam", () => {
     expect(rc2.battlers[0].hp).toBe(140);
     expect(t2.events.filter(({ payload }) => payload.kind === "hp-change").map(({ payload }) =>
       payload.kind === "hp-change" ? [payload.from, payload.to] : []
-    )).toEqual([[123, 106], [106, 140]]);
+    )).toEqual([[123, 107], [107, 140]]);
     expect(t2.events.filter(({ payload }) =>
       payload.kind === "message" && payload.messageId === "STRINGID_BUTITFAILED"
     )).toHaveLength(1);

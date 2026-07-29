@@ -15,6 +15,13 @@ import speciesStatsData from "../src/data/gen/species-stats.json" with { type: "
 // trustworthy while it reproduces the known source structure exactly.
 
 type TokenMention = { token: string; line: number };
+type InlineSite = {
+  file: string;
+  line: number;
+  enclosingGuess: string | null;
+  factoryBattleReachability: "candidate" | "proven-unreachable";
+  factoryBattleGate?: string;
+};
 type HookCase = {
   caseName: string;
   dispatchLabels: TokenMention[];
@@ -33,7 +40,7 @@ function dispatchSet(cases: HookCase[], caseName: string): string[] {
 
 describe("ability-item-hooks ground-truth artifact", () => {
   it("pins the universes and case structure", () => {
-    expect(hooksData.schema).toBe("ability-item-hooks/v1");
+    expect(hooksData.schema).toBe("ability-item-hooks/v2");
     expect(hooksData.universes.abilities).toHaveLength(78);
     expect(hooksData.universes.holdEffects).toHaveLength(67);
     expect(abilityCases).toHaveLength(20);
@@ -101,6 +108,32 @@ describe("ability-item-hooks ground-truth artifact", () => {
   it("keeps condition-form members visible as token mentions", () => {
     const movesBlock = abilityCases.find((hookCase) => hookCase.caseName === "ABILITYEFFECT_MOVES_BLOCK")!;
     expect(new Set(movesBlock.tokenMentions.map((mention) => mention.token))).toContain("ABILITY_SOUNDPROOF");
+  });
+
+  it("classifies Pickup's only two hook sites as Factory-unreachable behind the Pyramid victory gate", () => {
+    const pickupSites = hooksData.inlineSites.abilities.ABILITY_PICKUP as InlineSite[];
+    expect(pickupSites.map(({ file, line, enclosingGuess, factoryBattleReachability }) => ({
+      file,
+      line,
+      enclosingGuess,
+      factoryBattleReachability,
+    }))).toEqual([
+      {
+        file: "src/battle_script_commands.c",
+        line: 9676,
+        enclosingGuess: "Cmd_pickup",
+        factoryBattleReachability: "proven-unreachable",
+      },
+      {
+        file: "src/battle_script_commands.c",
+        line: 9699,
+        enclosingGuess: "Cmd_pickup",
+        factoryBattleReachability: "proven-unreachable",
+      },
+    ]);
+    expect(new Set(pickupSites.map((site) => site.factoryBattleGate))).toEqual(new Set([
+      "BattleScript_FrontierTrainerBattleWon: battle_scripts_1.s:3045-3047 executes pickup only for BATTLE_TYPE_PYRAMID",
+    ]));
   });
 });
 

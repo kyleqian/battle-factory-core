@@ -14,12 +14,14 @@
  */
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import {
+  drawBattleScriptRng,
   transitionBattleScriptCommand,
   type BattleScriptBlockReason,
   type BattleScriptCommandTransition,
   type BattleScriptOpcodeHandler,
   type BattleScriptOpcodeHandlerContext,
   type BattleScriptOpcodeHandlers,
+  type BattleScriptRngState,
 } from "./battleScriptMachine.ts";
 import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
 import {
@@ -28,16 +30,23 @@ import {
   applyBattleScriptMoveEndMirrorMoveOwnership,
   applyBattleScriptMoveEndSubstituteOwnership,
   applyBattleScriptMoveEndUpdateLastMovesOwnership,
+  BATTLE_SCRIPT_MOVE_FLAG_MAKES_CONTACT,
   resolveBattleScriptBattlerHoldEffect,
+  resolveBattleScriptBattlerHoldEffectParam,
+  resolveBattleScriptMoveFlags,
+  resolveBattleScriptMoveTypeName,
   resolveBattleScriptMoveEndNextTarget,
+  BATTLE_SCRIPT_MOVE_STRUGGLE,
   BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT,
   BATTLE_SCRIPT_NUM_BATTLE_STATS,
+  withBattleScriptPartyMemberStatus1,
   type BattleScriptRulesBattlerState,
   type BattleScriptRulesBattlers,
   type BattleScriptRulesContext,
   type BattleScriptStatStages,
 } from "./battleScriptRulesContext.ts";
 import { executeBattleScriptMoveEndControllerCase } from "./battleScriptMoveEndControllers.ts";
+import { resolveBattleScriptMonGender } from "./battleScriptGender.ts";
 
 const MOVEEND_RAGE = 0;
 const MOVEEND_DEFROST = 1;
@@ -62,18 +71,22 @@ const STATUS2_RAGE = 1 << 23;
 const STAT_ATK = 1;
 const MAX_STAT_STAGE = 12;
 const HITMARKER_SYNCHRONIZE_EFFECT = 1 << 14;
+const HITMARKER_STATUS_ABILITY_EFFECT = 1 << 13;
 const ABILITY_SYNCHRONIZE = 28;
 
 /** include/constants/abilities.h -- AbilityBattleEffects' ON_DAMAGE case (battle_util.c:2749-2871). */
-const ON_DAMAGE_ABILITIES: ReadonlySet<number> = new Set([
-  16, // ABILITY_COLOR_CHANGE
-  24, // ABILITY_ROUGH_SKIN
-  27, // ABILITY_EFFECT_SPORE
-  38, // ABILITY_POISON_POINT
-  9, // ABILITY_STATIC
-  49, // ABILITY_FLAME_BODY
-  56, // ABILITY_CUTE_CHARM
-]);
+const ABILITY_COLOR_CHANGE = 16;
+const ABILITY_ROUGH_SKIN = 24;
+const ABILITY_EFFECT_SPORE = 27;
+const ABILITY_POISON_POINT = 38;
+const ABILITY_STATIC = 9;
+const ABILITY_FLAME_BODY = 49;
+const ABILITY_CUTE_CHARM = 56;
+const ABILITY_OBLIVIOUS = 12;
+const MOVE_EFFECT_AFFECTS_USER = 1 << 6;
+const MOVE_EFFECT_POISON = 2;
+const MOVE_EFFECT_BURN = 3;
+const MOVE_EFFECT_PARALYSIS = 5;
 
 /**
  * AbilityBattleEffects' ABILITYEFFECT_IMMUNITY case (battle_util.c:2873-
@@ -94,6 +107,7 @@ const STATUS1_TOXIC_POISON = 1 << 7;
 const STATUS1_TOXIC_COUNTER = (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11);
 const STATUS1_SLEEP = (1 << 0) | (1 << 1) | (1 << 2);
 const STATUS2_CONFUSION = (1 << 0) | (1 << 1) | (1 << 2);
+const STATUS2_NIGHTMARE = 1 << 27;
 const STATUS2_INFATUATION = (1 << 16) | (1 << 17) | (1 << 18) | (1 << 19);
 
 function immunityAbilityCuresStatus(ability: number, battlerState: BattleScriptRulesBattlerState): boolean {
@@ -133,6 +147,46 @@ const ITEM_MOVE_END_HOLD_EFFECTS: ReadonlySet<number> = new Set([
 
 const HOLD_EFFECT_FLINCH = 30;
 const HOLD_EFFECT_SHELL_BELL = 62;
+/** include/battle.h:61. */
+const IGNORE_SHELL_BELL = 0xffff;
+const MOVEEND_KINGSROCK_BARRIER_HOLD_EFFECTS = Object.freeze([
+  HOLD_EFFECT_FLINCH,
+]);
+
+function moveEndItemEffectApplies(
+  holdEffect: number,
+  battlerState: BattleScriptRulesBattlerState,
+): boolean {
+  switch (holdEffect) {
+    case 2: // HOLD_EFFECT_CURE_PAR
+      return (battlerState.status1 & STATUS1_PARALYSIS) !== 0;
+    case 3: // HOLD_EFFECT_CURE_SLP
+      return (battlerState.status1 & STATUS1_SLEEP) !== 0;
+    case 4: // HOLD_EFFECT_CURE_PSN
+      return (battlerState.status1 & (STATUS1_POISON | STATUS1_TOXIC_POISON)) !== 0;
+    case 5: // HOLD_EFFECT_CURE_BRN
+      return (battlerState.status1 & STATUS1_BURN) !== 0;
+    case 6: // HOLD_EFFECT_CURE_FRZ
+      return (battlerState.status1 & STATUS1_FREEZE) !== 0;
+    case 8: // HOLD_EFFECT_CURE_CONFUSION
+      return (battlerState.status2 & STATUS2_CONFUSION) !== 0;
+    case 9: // HOLD_EFFECT_CURE_STATUS
+      return (battlerState.status1 & (
+        STATUS1_SLEEP
+        | STATUS1_POISON
+        | STATUS1_BURN
+        | STATUS1_FREEZE
+        | STATUS1_PARALYSIS
+        | STATUS1_TOXIC_POISON
+      )) !== 0 || (battlerState.status2 & STATUS2_CONFUSION) !== 0;
+    case 23: // HOLD_EFFECT_RESTORE_STATS
+      return battlerState.statStages.some((stage) => stage < 6);
+    case 28: // HOLD_EFFECT_CURE_ATTRACT
+      return (battlerState.status2 & STATUS2_INFATUATION) !== 0;
+    default:
+      return false;
+  }
+}
 
 const MOVEEND_STATE_NAME_TO_VALUE: Readonly<Record<string, number>> = Object.freeze({
   MOVEEND_RAGE,
@@ -212,11 +266,14 @@ function replaceStatStage(
 
 /** One pass through Cmd_moveend's do-while body for the current moveendState. */
 type MoveendStateOutcome =
-  | Readonly<{ kind: "continue"; rules: BattleScriptRulesContext }>
+  | Readonly<{ kind: "continue"; rules: BattleScriptRulesContext; rng?: BattleScriptRngState }>
   | Readonly<{ kind: "transfer"; transition: BattleScriptCommandTransition<BattleScriptRulesContext> }>;
 
-function continueState(rules: BattleScriptRulesContext): MoveendStateOutcome {
-  return Object.freeze({ kind: "continue", rules });
+function continueState(
+  rules: BattleScriptRulesContext,
+  rng?: BattleScriptRngState,
+): MoveendStateOutcome {
+  return Object.freeze({ kind: "continue", rules, ...(rng === undefined ? {} : { rng }) });
 }
 
 function transferState(
@@ -266,6 +323,183 @@ function executeRage(
   );
 }
 
+function callCurrentMoveendScript(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  rules: BattleScriptRulesContext,
+  labelName: string,
+): MoveendStateOutcome {
+  const label = resolveBattleScriptLabel(context.program, labelName);
+  if (!label) throw new Error(`committed Battle Script program lacks ${labelName}`);
+  return transferState(
+    transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "call-current", programCounter: label.programCounter }),
+      { rulesContext: advanceMoveend(rules) },
+    ),
+  );
+}
+
+/** AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE), battle_util.c:2749-2872. */
+function executeOnDamageAbilities(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  rules: BattleScriptRulesContext,
+): MoveendStateOutcome {
+  const attacker = requireBattlerRole(rules, "attacker");
+  const target = requireBattlerRole(rules, "target");
+  const attackerState = rules.battlers[attacker];
+  const targetState = rules.battlers[target];
+  const ability = targetState.ability;
+  const isOnDamageAbility = ability === ABILITY_COLOR_CHANGE
+    || ability === ABILITY_ROUGH_SKIN
+    || ability === ABILITY_EFFECT_SPORE
+    || ability === ABILITY_POISON_POINT
+    || ability === ABILITY_STATIC
+    || ability === ABILITY_FLAME_BODY
+    || ability === ABILITY_CUTE_CHARM;
+  // Preserve the existing moveend seam's scope for unrelated abilities; the
+  // seven implemented cases all expose their actual gLastUsedAbility value.
+  const baseRules = isOnDamageAbility
+    ? Object.freeze({ ...rules, lastUsedAbility: ability })
+    : rules;
+  const targetTurnDamaged =
+    targetState.specialStatus.physicalDmg !== 0 || targetState.specialStatus.specialDmg !== 0;
+  if (
+    (rules.moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT) !== 0
+    || !targetTurnDamaged
+  ) {
+    return continueState(advanceMoveend(baseRules));
+  }
+
+  const makesContact =
+    (resolveBattleScriptMoveFlags(rules.currentMove) & BATTLE_SCRIPT_MOVE_FLAG_MAKES_CONTACT) !== 0;
+  const ordinaryContactGate =
+    attackerState.hp !== 0 && attackerState.confusionSelfDmg !== 1 && makesContact;
+
+  if (ability === ABILITY_COLOR_CHANGE) {
+    const moveType = resolveBattleScriptMoveTypeName(rules.currentMove, rules.dynamicMoveType);
+    if (
+      rules.currentMove !== BATTLE_SCRIPT_MOVE_STRUGGLE
+      && rules.currentMovePower !== 0
+      && !targetState.types.includes(moveType)
+      && targetState.hp !== 0
+    ) {
+      const changed = replaceBattlerAt(baseRules.battlers, target, Object.freeze({
+        ...targetState,
+        types: Object.freeze([moveType, moveType] as const),
+      }));
+      return callCurrentMoveendScript(
+        context,
+        Object.freeze({ ...baseRules, battlers: changed, battleTextBuff1Type: moveType }),
+        "BattleScript_ColorChangeActivates",
+      );
+    }
+    return continueState(advanceMoveend(baseRules));
+  }
+
+  if (ability === ABILITY_ROUGH_SKIN) {
+    if (!ordinaryContactGate) return continueState(advanceMoveend(baseRules));
+    return callCurrentMoveendScript(
+      context,
+      Object.freeze({
+        ...baseRules,
+        battleMoveDamage: Math.max(1, Math.floor(attackerState.maxHP / 16)),
+      }),
+      "BattleScript_RoughSkinActivates",
+    );
+  }
+
+  if (
+    ability !== ABILITY_EFFECT_SPORE
+    && ability !== ABILITY_POISON_POINT
+    && ability !== ABILITY_STATIC
+    && ability !== ABILITY_FLAME_BODY
+    && ability !== ABILITY_CUTE_CHARM
+  ) {
+    return continueState(advanceMoveend(baseRules));
+  }
+  if (!ordinaryContactGate) return continueState(advanceMoveend(baseRules));
+  if (ability === ABILITY_CUTE_CHARM && targetState.hp === 0) {
+    return continueState(advanceMoveend(baseRules));
+  }
+
+  let rng = context.state.rng;
+  const abilityName = ability === ABILITY_EFFECT_SPORE
+    ? "Effect Spore"
+    : ability === ABILITY_POISON_POINT
+      ? "Poison Point"
+      : ability === ABILITY_STATIC
+        ? "Static"
+        : ability === ABILITY_FLAME_BODY
+          ? "Flame Body"
+          : "Cute Charm";
+  const proc = drawBattleScriptRng(
+    rng,
+    context.instruction,
+    `${abilityName} contact proc`,
+  );
+  rng = proc.rng;
+  const contextAfterProc = Object.freeze({
+    ...context,
+    state: Object.freeze({ ...context.state, rng }),
+  });
+  const procDivisor = ability === ABILITY_EFFECT_SPORE ? 10 : 3;
+  if ((proc.randomValue % procDivisor) !== 0) {
+    return continueState(advanceMoveend(baseRules), rng);
+  }
+
+  if (ability === ABILITY_CUTE_CHARM) {
+    const attackerGender = resolveBattleScriptMonGender(attackerState.species, attackerState.personality);
+    const targetGender = resolveBattleScriptMonGender(targetState.species, targetState.personality);
+    const eligible = targetState.hp !== 0
+      && attackerState.ability !== ABILITY_OBLIVIOUS
+      && attackerGender !== targetGender
+      && (attackerState.status2 & STATUS2_INFATUATION) === 0
+      && attackerGender !== "genderless"
+      && targetGender !== "genderless";
+    if (!eligible) {
+      return continueState(advanceMoveend(baseRules), rng);
+    }
+    const infatuated = replaceBattlerAt(baseRules.battlers, attacker, Object.freeze({
+      ...attackerState,
+      status2: (attackerState.status2 | ((1 << target) << 16)) >>> 0,
+    }));
+    return callCurrentMoveendScript(
+      contextAfterProc,
+      Object.freeze({ ...baseRules, battlers: infatuated }),
+      "BattleScript_CuteCharmActivates",
+    );
+  }
+
+  let moveEffect: number;
+  if (ability === ABILITY_EFFECT_SPORE) {
+    do {
+      const selection = drawBattleScriptRng(rng, context.instruction, "Effect Spore status selector");
+      rng = selection.rng;
+      moveEffect = selection.randomValue & 3;
+    } while (moveEffect === 0);
+    if (moveEffect === MOVE_EFFECT_BURN) moveEffect = MOVE_EFFECT_PARALYSIS;
+  } else {
+    moveEffect = ability === ABILITY_POISON_POINT
+      ? MOVE_EFFECT_POISON
+      : ability === ABILITY_STATIC
+        ? MOVE_EFFECT_PARALYSIS
+        : MOVE_EFFECT_BURN;
+  }
+  const statusRules = Object.freeze({
+    ...baseRules,
+    aiObservedAbilityIds: Object.freeze(
+      baseRules.aiObservedAbilityIds.map((value, index) => index === target ? ability : value),
+    ) as BattleScriptRulesContext["aiObservedAbilityIds"],
+    moveEffectByte: MOVE_EFFECT_AFFECTS_USER | moveEffect,
+    hitMarker: (baseRules.hitMarker | HITMARKER_STATUS_ABILITY_EFFECT) >>> 0,
+  });
+  const statusContext = Object.freeze({
+    ...context,
+    state: Object.freeze({ ...context.state, rng }),
+  });
+  return callCurrentMoveendScript(statusContext, statusRules, "BattleScript_ApplySecondaryEffect");
+}
+
 function executeControllerDelegatedState(
   context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
   rules: BattleScriptRulesContext,
@@ -309,21 +543,8 @@ function executeMoveendState(
       }
       return continueState(advanceMoveend(rules));
     }
-    case MOVEEND_ON_DAMAGE_ABILITIES: {
-      const target = requireBattlerRole(rules, "target");
-      const ability = rules.battlers[target].ability;
-      if (ON_DAMAGE_ABILITIES.has(ability)) {
-        return transferState(unsupportedBranch(
-          context,
-          `AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)'s target-ability branch (ability ${ability}: `
-            + "Color Change/Rough Skin/Effect Spore/Poison Point/Static/Flame Body/Cute Charm) needs contact/"
-            + "RNG/script-transfer subsystems not modeled here",
-          "battle_util.c",
-          2750,
-        ));
-      }
-      return continueState(advanceMoveend(rules));
-    }
+    case MOVEEND_ON_DAMAGE_ABILITIES:
+      return executeOnDamageAbilities(context, rules);
     case MOVEEND_IMMUNITY_ABILITIES: {
       const count = rules.battleTopology.battlersCount;
       for (let battler = 0; battler < count; battler += 1) {
@@ -363,8 +584,40 @@ function executeMoveendState(
     case MOVEEND_ITEM_EFFECTS_ALL: {
       const count = rules.battleTopology.battlersCount;
       for (let battler = 0; battler < count; battler += 1) {
-        const holdEffect = resolveBattleScriptBattlerHoldEffect(rules, battler as BattleScriptBattlerId);
-        if (ITEM_MOVE_END_HOLD_EFFECTS.has(holdEffect)) {
+        const battlerId = battler as BattleScriptBattlerId;
+        const battlerState = rules.battlers[battlerId];
+        const holdEffect = resolveBattleScriptBattlerHoldEffect(rules, battlerId);
+        if (
+          holdEffect === 3
+          && (battlerState.status1 & STATUS1_SLEEP) !== 0
+        ) {
+          const status1 = (battlerState.status1 & ~STATUS1_SLEEP) >>> 0;
+          const cured = replaceBattlerAt(rules.battlers, battlerId, Object.freeze({
+            ...battlerState,
+            status1,
+            status2: (battlerState.status2 & ~STATUS2_NIGHTMARE) >>> 0,
+          }));
+          return callCurrentMoveendScript(
+            context,
+            Object.freeze({
+              ...rules,
+              battlers: cured,
+              party: withBattleScriptPartyMemberStatus1(
+                rules.party,
+                battlerState.side,
+                battlerState.partyIndex,
+                status1,
+              ),
+              scriptingBattler: battlerId,
+              lastUsedItem: battlerState.item,
+            }),
+            "BattleScript_BerryCureSlpRet",
+          );
+        }
+        if (
+          ITEM_MOVE_END_HOLD_EFFECTS.has(holdEffect)
+          && moveEndItemEffectApplies(holdEffect, battlerState)
+        ) {
           return transferState(unsupportedBranch(
             context,
             `ItemBattleEffects(ITEMEFFECT_MOVE_END)'s status/stat-restoring branch (battler ${battler}, `
@@ -382,12 +635,50 @@ function executeMoveendState(
       const attacker = requireBattlerRole(rules, "attacker");
       if (rules.battleMoveDamage !== 0) {
         const atkHoldEffect = resolveBattleScriptBattlerHoldEffect(rules, attacker);
-        if (atkHoldEffect === HOLD_EFFECT_FLINCH || atkHoldEffect === HOLD_EFFECT_SHELL_BELL) {
+        if (atkHoldEffect === HOLD_EFFECT_SHELL_BELL) {
+          const target = requireBattlerRole(rules, "target");
+          const attackerState = rules.battlers[attacker];
+          const targetState = rules.battlers[target];
+          const shellBellDmg = targetState.specialStatus.shellBellDmg;
+          if (
+            (rules.moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT) === 0
+            && shellBellDmg !== 0
+            && shellBellDmg !== IGNORE_SHELL_BELL
+            && attacker !== target
+            && attackerState.hp !== attackerState.maxHP
+            && attackerState.hp !== 0
+          ) {
+            const divisor = resolveBattleScriptBattlerHoldEffectParam(rules, attacker);
+            const heal = Math.max(1, Math.floor(shellBellDmg / divisor));
+            const clearedTarget = Object.freeze({
+              ...targetState,
+              specialStatus: Object.freeze({
+                ...targetState.specialStatus,
+                shellBellDmg: 0,
+              }),
+            });
+            return callCurrentMoveendScript(
+              context,
+              Object.freeze({
+                ...rules,
+                battlers: replaceBattlerAt(rules.battlers, target, clearedTarget),
+                battleMoveDamage: -heal,
+                lastUsedItem: attackerState.item,
+                scriptingBattler: attacker,
+              }),
+              "BattleScript_ItemHealHP_Ret",
+            );
+          }
+          return continueState(advanceMoveend(rules));
+        }
+        // HOLD_EFFECT_FLINCH remains the sole state-12 barrier: unlike Shell
+        // Bell, King's Rock owns a Random()%100 proc plus SetMoveEffect.
+        if (atkHoldEffect === HOLD_EFFECT_FLINCH) {
           return transferState(unsupportedBranch(
             context,
-            `ItemBattleEffects(ITEMEFFECT_KINGSROCK_SHELLBELL)'s ${
-              atkHoldEffect === HOLD_EFFECT_FLINCH ? "King's Rock flinch" : "Shell Bell heal"
-            } branch needs RNG/script-transfer subsystems not modeled here`,
+            "ItemBattleEffects(ITEMEFFECT_KINGSROCK_SHELLBELL)'s King's Rock flinch "
+              + `branch (hold effects ${MOVEEND_KINGSROCK_BARRIER_HOLD_EFFECTS.join(",")}) `
+              + "needs RNG/script-transfer subsystems not modeled here",
             "battle_util.c",
             3772,
           ));
@@ -480,15 +771,25 @@ function createMoveendOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRul
     }
 
     let rules = context.state.rulesContext;
+    let rng = context.state.rng;
     for (;;) {
       if (rules.moveendState === MOVEEND_COUNT) {
-        return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: rules });
+        return transitionBattleScriptCommand(
+          context,
+          Object.freeze({ kind: "advance" }),
+          { rulesContext: rules, rng },
+        );
       }
-      const outcome = executeMoveendState(context, rules);
+      const currentContext = Object.freeze({
+        ...context,
+        state: Object.freeze({ ...context.state, rulesContext: rules, rng }),
+      });
+      const outcome = executeMoveendState(currentContext, rules);
       if (outcome.kind === "transfer") {
         return outcome.transition;
       }
       rules = outcome.rules;
+      rng = outcome.rng ?? rng;
       if (endMode === 1) {
         rules = Object.freeze({ ...rules, moveendState: MOVEEND_COUNT });
       } else if (endMode === 2 && rules.moveendState === endState) {

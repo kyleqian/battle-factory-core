@@ -14,6 +14,9 @@ import {
   createBattleScriptStatusRulesExecution,
   createBattleScriptStatusRulesHandlers,
   prepareRulesStatusAnimation,
+  BATTLE_SCRIPT_MOVE_FLAG_MAKES_CONTACT,
+  BATTLE_SCRIPT_MOVE_FLAG_MIRROR_MOVE_AFFECTED,
+  resolveBattleScriptMoveFlags,
   resolveRulesBattlerForBattleScript,
   type BattleScriptRulesContext,
   type BattleScriptRulesContextInput,
@@ -165,11 +168,19 @@ function selector(expression: string): BattleScriptOperand {
 }
 
 describe("source-shaped Battle Script rules context", () => {
+  it("resolves generated move flags through the shared numeric source bitset", () => {
+    expect(resolveBattleScriptMoveFlags(1) & BATTLE_SCRIPT_MOVE_FLAG_MAKES_CONTACT).not.toBe(0); // Pound
+    expect(resolveBattleScriptMoveFlags(129) & BATTLE_SCRIPT_MOVE_FLAG_MAKES_CONTACT).toBe(0); // Swift
+    expect(resolveBattleScriptMoveFlags(1) & BATTLE_SCRIPT_MOVE_FLAG_MIRROR_MOVE_AFFECTED).not.toBe(0);
+  });
+
   it("creates exactly four deeply frozen battlers and the proven non-presentation fields", () => {
     const source = input();
     const created = createBattleScriptRulesContext(source);
     expect(Object.keys(created).sort()).toEqual([
       "absentBattlerFlags",
+      "aiObservedAbilityIds",
+      "aiObservedItemEffects",
       "alreadyStatusedMoveAttempt",
       "animArg1",
       "animTargetsHit",
@@ -240,6 +251,7 @@ describe("source-shaped Battle Script rules context", () => {
       "party",
       "paydayMoney",
       "playerMoney",
+      "randomTurnNumber",
       "rolloutTimerStartValues",
       "scriptingBattler",
       "scriptingBideDmg",
@@ -323,6 +335,7 @@ describe("source-shaped Battle Script rules context", () => {
       BS_ATTACKER: 1,
       BS_EFFECT_BATTLER: 2,
       BS_FAINTED: 3,
+      BS_BATTLER_0: 7,
       BS_SCRIPTING: 10,
     });
     expect(resolveRulesBattlerForBattleScript(context, selector("BS_TARGET"))).toBe(2);
@@ -333,6 +346,8 @@ describe("source-shaped Battle Script rules context", () => {
     expect(resolveRulesBattlerForBattleScript(context, selector("0x1"))).toBe(3);
     expect(resolveRulesBattlerForBattleScript(context, selector("BS_EFFECT_BATTLER"))).toBe(1);
     expect(resolveRulesBattlerForBattleScript(context, selector("2"))).toBe(1);
+    expect(resolveRulesBattlerForBattleScript(context, selector("BS_BATTLER_0"))).toBe(0);
+    expect(resolveRulesBattlerForBattleScript(context, selector("7"))).toBe(0);
     // BS_FAINTED (battle_util.c:713-715): a role distinct from BS_TARGET, only
     // ever written by the fainted-actions orchestration -- proven here as a
     // pure selector mapping, independent of that orchestration's own tests.
@@ -354,7 +369,8 @@ describe("source-shaped Battle Script rules context", () => {
     expect(resolveRulesBattlerForBattleScript(missing, selector("BS_ATTACKER"))).toBeNull();
     expect(resolveRulesBattlerForBattleScript(missing, selector("BS_EFFECT_BATTLER"))).toBeNull();
     expect(resolveRulesBattlerForBattleScript(missing, selector("BS_FAINTED"))).toBeNull();
-    for (const expression of ["7", "255", "-1", "bogus"]) {
+    expect(resolveRulesBattlerForBattleScript(missing, selector("7"))).toBe(0);
+    for (const expression of ["255", "-1", "bogus"]) {
       expect(resolveRulesBattlerForBattleScript(missing, selector(expression))).toBeNull();
     }
   });
@@ -490,11 +506,11 @@ describe("source-shaped Battle Script rules context", () => {
 });
 
 describe("production status rules handler and execution seam", () => {
-  it("composes all 210 source-safe handlers, including switch-in Intimidate targeting, Metronome, Transform, Beat Up, Assist, Snatch, Imprison, Lock On, Charge, Sports, Nature Power, Weather Ball, type changes, Mirror Move, Sketch, Mimic, Bide, Present, Memento, Role Play, Recycle, Pay Day payout, and Haze normalization, once", () => {
+  it("composes all 211 source-safe handlers, including seteffectsecondary and the existing switch-in/move families, once", () => {
     const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts());
     expect(Object.keys(handlers).map(Number).sort((a, b) => a - b)).toEqual([
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
-      13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 28,
+      13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
       29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44,
       45, 46, 47, 49, 50, 51, 53, 54, 56, 57, 58, 60,
       61, 62, 63, 65, 66, 67, 69, 70, 71, 72, 73, 74, 76, 77, 78, 79, 80, 81,

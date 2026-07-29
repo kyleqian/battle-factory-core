@@ -66,6 +66,7 @@
 //    RAM-sampled values.
 
 import { FADE_IN } from "./paletteFade.ts";
+import type { FactoryTrainerPresentation } from "./factoryTrainerPresentation.ts";
 
 export type BattleRoomPhase = "entering" | "msgboxIdle" | "msgboxClosing" | "settled";
 
@@ -75,6 +76,8 @@ export interface BattleRoomState {
   elapsed: number;
   /** Encounter-selected overworld gfx and Easy Chat opening quote. */
   encounter?: "destin" | "jenson";
+  /** Generated round identity; absent only on the legacy canonical fixture. */
+  trainerPresentation?: FactoryTrainerPresentation;
 }
 
 /** core.ts creates this the tick prebattleRoom's "warpFade" phase reaches the fixed elapsed count matching trace tick 520 (see core.ts's handoff). */
@@ -510,6 +513,9 @@ export interface MsgboxVisual {
 }
 
 export function battleRoomQuote(state: BattleRoomState): readonly [string, string] {
+  if (state.trainerPresentation !== undefined) {
+    return state.trainerPresentation.speechBefore;
+  }
   return state.encounter === "jenson"
     ? [JENSON_MSGBOX_LINE1, JENSON_MSGBOX_LINE2]
     : [MSGBOX_LINE1, MSGBOX_LINE2];

@@ -81,7 +81,14 @@ type HookCase = {
   dispatchLabels: TokenMention[];
   tokenMentions: TokenMention[];
 };
-type InlineSite = { file: string; tag: "rules" | "ai"; line: number; enclosingGuess: string | null };
+type InlineSite = {
+  file: string;
+  tag: "rules" | "ai";
+  line: number;
+  enclosingGuess: string | null;
+  factoryBattleReachability: "candidate" | "proven-unreachable";
+  factoryBattleGate?: string;
+};
 type HooksArtifact = {
   schema: string;
   universes: {
@@ -97,7 +104,7 @@ type HooksArtifact = {
 };
 
 const hooks = JSON.parse(readFileSync(HOOKS_PATH, "utf8")) as HooksArtifact;
-check(hooks.schema === "ability-item-hooks/v1", "hooks artifact schema is ability-item-hooks/v1");
+check(hooks.schema === "ability-item-hooks/v2", "hooks artifact schema is ability-item-hooks/v2");
 check(hooks.universes.abilities.length === 78, "ability universe has 78 members");
 check(hooks.universes.holdEffects.length === 67, "hold-effect universe has 67 members");
 check(hooks.abilityBattleEffects.cases.length === 20, "AbilityBattleEffects has 20 caseID segments");
@@ -105,6 +112,21 @@ check(hooks.itemBattleEffects.cases.length === 5, "ItemBattleEffects has 5 caseI
 check(
   hooks.abilityBattleEffects.cases.flatMap((c) => c.aliasLabels).length === 3,
   "AbilityBattleEffects carries exactly 3 nested pseudo-mode aliases",
+);
+const provenUnreachableInlineSites = [
+  ...Object.entries(hooks.inlineSites.abilities),
+  ...Object.entries(hooks.inlineSites.holdEffects),
+].flatMap(([token, sites]) =>
+  sites
+    .filter((site) => site.factoryBattleReachability === "proven-unreachable")
+    .map((site) => `${site.file}:${site.line}:${token}`)
+).sort();
+check(
+  JSON.stringify(provenUnreachableInlineSites) === JSON.stringify([
+    "src/battle_script_commands.c:9676:ABILITY_PICKUP",
+    "src/battle_script_commands.c:9699:ABILITY_PICKUP",
+  ]),
+  "Factory-unreachable inline sites are exactly Pickup's two Pyramid-gated Cmd_pickup checks",
 );
 
 type FrontierMon = {
@@ -197,6 +219,45 @@ function insideStringLiteral(line: string, index: number): boolean {
   return open !== null;
 }
 
+function containingStringLiteral(line: string, index: number): { start: number; end: number } | null {
+  let open: string | null = null;
+  let start = -1;
+  for (let i = 0; i < line.length; i += 1) {
+    const ch = line[i]!;
+    if (ch === "\\") {
+      i += 1;
+    } else if (open === null && (ch === '"' || ch === "'" || ch === "`")) {
+      open = ch;
+      start = i;
+    } else if (ch === open) {
+      if (start < index && index < i) return { start, end: i };
+      open = null;
+      start = -1;
+    }
+  }
+  return null;
+}
+
+function hasAdjacentLiveBranchShape(line: string, literal: { start: number; end: number }): boolean {
+  const before = line.slice(0, literal.start);
+  const after = line.slice(literal.end + 1);
+  const branchShape = /(?:===|!==|==|!=|\.has\(|\.includes\()\s*$/;
+  const reverseBranchShape = /^\s*(?:===|!==|==|!=|\.has\(|\.includes\()/;
+  if (branchShape.test(before) || reverseBranchShape.test(after)) return true;
+
+  // A ternary arm only counts when its condition starts on this same line.
+  if (/(^|[^?])\?\s*$/.test(before)) {
+    const question = before.lastIndexOf("?");
+    if (before.slice(0, question).trim().length > 0) return true;
+  }
+  if (/:\s*$/.test(before)) {
+    const colon = before.lastIndexOf(":");
+    const question = before.lastIndexOf("?", colon);
+    if (question >= 0 && before.slice(0, question).trim().length > 0) return true;
+  }
+  return false;
+}
+
 /** Engine-local constant spellings that are infrastructure, not members. */
 const ENGINE_INFRA_SPELLINGS = new Set([
   "ABILITY_ID_BY_SYMBOL",
@@ -250,9 +311,18 @@ function dealias(token: string, prefix: string, universe: ReadonlyMap<string, nu
 }
 
 type EngineRef = { file: string; line: number };
+type DroppedStringHit = {
+  token: string;
+  family: "ability" | "hold-effect";
+  file: string;
+  line: number;
+  sourceLine: string;
+  literal: { start: number; end: number };
+};
 const engineAbilityRefs = new Map<string, EngineRef[]>();
 const engineHoldEffectRefs = new Map<string, EngineRef[]>();
 const unknownEngineSpellings = new Set<string>();
+const droppedStringHits: DroppedStringHit[] = [];
 
 for (const filePath of collectTsFiles(ENGINE_DIR).sort()) {
   const relPath = relative(REPO_ROOT, filePath);
@@ -266,7 +336,19 @@ for (const filePath of collectTsFiles(ENGINE_DIR).sort()) {
         const token = match[1]!;
         if (!hasFamilyMarker(token, prefix)) continue;
         if (ENGINE_INFRA_SPELLINGS.has(token)) continue;
-        if (insideStringLiteral(lines[i]!, match.index!)) continue;
+        if (insideStringLiteral(lines[i]!, match.index!)) {
+          const literal = containingStringLiteral(lines[i]!, match.index!);
+          if (literal === null) throw new Error(`could not bound quoted token ${token} at ${relPath}:${i + 1}`);
+          droppedStringHits.push({
+            token,
+            family: prefix === "ABILITY_" ? "ability" : "hold-effect",
+            file: relPath,
+            line: i + 1,
+            sourceLine: lines[i]!,
+            literal,
+          });
+          continue;
+        }
         const member = dealias(token, prefix, universe);
         if (member === null) {
           unknownEngineSpellings.add(token);
@@ -279,6 +361,61 @@ for (const filePath of collectTsFiles(ENGINE_DIR).sort()) {
     }
   }
 }
+
+// Recover only quoted members that participate directly in a same-line live
+// comparison/branch. The blanket exclusion above remains the first pass so
+// exhaustive symbol/name tables cannot make the census vacuous.
+const literalCountsByLine = new Map<string, Set<string>>();
+for (const hit of droppedStringHits) {
+  const key = `${hit.file}:${hit.line}`;
+  const literals = literalCountsByLine.get(key) ?? new Set<string>();
+  literals.add(`${hit.literal.start}:${hit.literal.end}`);
+  literalCountsByLine.set(key, literals);
+}
+const recoveredStringSites: string[] = [];
+for (const hit of droppedStringHits) {
+  const lineKey = `${hit.file}:${hit.line}`;
+  if (literalCountsByLine.get(lineKey)!.size > 1) continue;
+  if (!hasAdjacentLiveBranchShape(hit.sourceLine, hit.literal)) continue;
+  const prefix = hit.family === "ability" ? "ABILITY_" : "HOLD_EFFECT_";
+  const universe = hit.family === "ability" ? abilityUniverse : holdEffectUniverse;
+  const sink = hit.family === "ability" ? engineAbilityRefs : engineHoldEffectRefs;
+  const member = dealias(hit.token, prefix, universe);
+  if (member === null) {
+    unknownEngineSpellings.add(hit.token);
+    continue;
+  }
+  const refs = sink.get(member) ?? [];
+  refs.push({ file: hit.file, line: hit.line });
+  sink.set(member, refs);
+  recoveredStringSites.push(`${hit.file}:${hit.line} ${member}`);
+}
+const EXPECTED_RECOVERED_STRING_SITES = [
+  "src/engine/battleScriptActionAdmission.ts:2764 ABILITY_GUTS",
+  "src/engine/battleScriptHealpartystatusOpcode.ts:75 ABILITY_SOUNDPROOF",
+  "src/engine/battleScriptHitChainOpcode.ts:1091 HOLD_EFFECT_EVASION_UP",
+  "src/engine/battleScriptTrysetfutureattackOpcode.ts:111 ABILITY_GUTS",
+  "src/engine/damageCalc.ts:496 HOLD_EFFECT_SCOPE_LENS",
+  "src/engine/damageCalc.ts:497 HOLD_EFFECT_LUCKY_PUNCH",
+  "src/engine/damageCalc.ts:498 HOLD_EFFECT_STICK",
+  "src/engine/damageCalc.ts:647 ABILITY_COMPOUND_EYES",
+  "src/engine/damageCalc.ts:648 ABILITY_SAND_VEIL",
+  "src/engine/damageCalc.ts:649 ABILITY_HUSTLE",
+  "src/engine/damageCalc.ts:652 HOLD_EFFECT_EVASION_UP",
+  "src/engine/factoryAiCheckBadMove.ts:376 ABILITY_NONE",
+  "src/engine/factoryAiCheckBadMove.ts:425 ABILITY_NONE",
+  "src/engine/factoryAiCheckBadMove.ts:903 ABILITY_SOUNDPROOF",
+  "src/engine/factoryAiCheckViability.ts:2579 ABILITY_SWIFT_SWIM",
+  "src/engine/factoryAiCheckViability.ts:2636 ABILITY_SWIFT_SWIM",
+  "src/engine/factoryAiCheckViability.ts:2661 ABILITY_RAIN_DISH",
+  "src/engine/factoryAiTryToFaint.ts:132 ABILITY_LEVITATE",
+  "src/engine/factoryAiTryToFaint.ts:160 ABILITY_LEVITATE",
+  "src/engine/factorySwapPresentation.ts:116 ABILITY_NONE",
+].sort();
+check(
+  JSON.stringify(recoveredStringSites.sort()) === JSON.stringify(EXPECTED_RECOVERED_STRING_SITES),
+  "quoted live comparison/branch recovery sites match the pinned exact set",
+);
 
 // Quoted live-dispatch sets the string-literal exclusion above would hide,
 // re-added from the engine's own exports (the move census reads these same
@@ -366,8 +503,9 @@ for (const { name, id } of hooks.universes.abilities) {
   if (name === "ABILITY_NONE") continue;
   const inline = hooks.inlineSites.abilities[name] ?? [];
   const delegateCases = delegateCasesFor(hooks.abilityBattleEffects.cases, name);
-  const inlineRules = inline.filter((site) => site.tag === "rules");
-  const inlineAi = inline.filter((site) => site.tag === "ai");
+  const reachableInline = inline.filter((site) => site.factoryBattleReachability !== "proven-unreachable");
+  const inlineRules = reachableInline.filter((site) => site.tag === "rules");
+  const inlineAi = reachableInline.filter((site) => site.tag === "ai");
   const carrierSets = mons.entries.filter((mon) => {
     const species = speciesByName.get(mon.species)!;
     return species.abilities[0] === name || species.abilities[1] === name;
@@ -401,8 +539,9 @@ for (const { name, id } of hooks.universes.holdEffects) {
   if (name === "HOLD_EFFECT_NONE") continue;
   const inline = hooks.inlineSites.holdEffects[name] ?? [];
   const delegateCases = delegateCasesFor(hooks.itemBattleEffects.cases, name);
-  const inlineRules = inline.filter((site) => site.tag === "rules");
-  const inlineAi = inline.filter((site) => site.tag === "ai");
+  const reachableInline = inline.filter((site) => site.factoryBattleReachability !== "proven-unreachable");
+  const inlineRules = reachableInline.filter((site) => site.tag === "rules");
+  const inlineAi = reachableInline.filter((site) => site.tag === "ai");
   const rows = heldItems.entries.filter((row) => row.holdEffect === name);
   const tableIds = new Set(rows.map((row) => row.itemTableId));
   const carrierSets = mons.entries.filter((mon) => tableIds.has(mon.itemTableId));
@@ -493,13 +632,13 @@ lines.push("");
 lines.push(
   `- **Abilities: ${abilityHeadline.referenced}/${abilityHeadline.inScope} members engine-referenced** `
     + `(weighted by L50 set-carriers: ${abilityHeadline.weightedReferenced}/${abilityHeadline.weightedTotal}); `
-    + `${abilityHeadline.zeroCarrier} zero-carrier, ${abilityHeadline.noBattleHooks} without battle hooks `
-    + "(out-of-battle only).",
+    + `${abilityHeadline.zeroCarrier} zero-carrier, ${abilityHeadline.noBattleHooks} without Factory battle hooks `
+    + "(out-of-battle or source-proven Factory-gated only).",
 );
 lines.push(
   `- **Hold effects: ${holdEffectHeadline.referenced}/${holdEffectHeadline.inScope} members engine-referenced** `
     + `(weighted by L50 set-carriers: ${holdEffectHeadline.weightedReferenced}/${holdEffectHeadline.weightedTotal}); `
-    + `${holdEffectHeadline.zeroCarrier} zero-carrier, ${holdEffectHeadline.noBattleHooks} without battle hooks.`,
+    + `${holdEffectHeadline.zeroCarrier} zero-carrier, ${holdEffectHeadline.noBattleHooks} without Factory battle hooks.`,
 );
 lines.push(`- All ${validationChecks.length} ground-truth validation checks passed.`);
 lines.push("");
@@ -588,7 +727,8 @@ lines.push("");
 lines.push(
   "- **Reference presence, not semantic verification.** A member counts as engine-referenced if any "
     + "production `src/engine` module names its constant as a code identifier (aliases dealiased, "
-    + "comments stripped, string-literal occurrences excluded — the engine's complete id<->name tables "
+    + "comments stripped, string literals excluded except for the pinned narrow same-line comparison/"
+    + "branch recovery pass — the engine's complete id<->name tables "
     + "would otherwise make every ability trivially \"referenced\"), or if it appears in an exported "
     + "quoted live-dispatch set (jumpifability/jumpifabilitypresent — the same exports the move census "
     + "trusts). Rows become *done* the way move rows did: a bounded brief with staged fixtures and "
@@ -597,7 +737,7 @@ lines.push(
 lines.push(
   "- **One-sided error direction.** The engine can implement a member through generated data, a "
     + "differently-prefixed constant (`BATTLE_SCRIPT_ABILITY_*`, `ROLE_PLAY_ABILITY_*`), or a "
-    + "quoted-string surface this scan excludes — all undercounts (a member can look missing while "
+    + "quoted-string surface outside the narrow recovery shape — all undercounts (a member can look missing while "
     + "partially present, never the reverse beyond \"some surface exists\"). The worklist's "
     + "zero-reference rows are reliable; treat reference counts as leads, not verdicts.",
 );
@@ -613,9 +753,11 @@ lines.push(
     + "2026-07-28 user decision, later milestone OK); they do not gate rules-parity rows.",
 );
 lines.push(
-  "- **Out-of-battle hooks are out of census scope.** `no-battle-hooks` members (and inline sites in "
-    + "e.g. `src/pokemon.c` whose enclosing function is not battle-reachable) may still matter for "
-    + "non-battle features; this census only tracks the Level-50 singles battle surface.",
+  "- **Out-of-battle and Factory-gated hooks are out of census scope.** `no-battle-hooks` members "
+    + "may still matter for non-battle features. Exact-pinned `proven-unreachable` inline sites are "
+    + "also excluded: Pickup's two `Cmd_pickup` checks are reached from the Frontier victory script "
+    + "only when `BATTLE_TYPE_PYRAMID` is set (`battle_scripts_1.s:3045-3047`), which Battle Factory "
+    + "does not set. This census tracks only the Level-50 Factory singles battle surface.",
 );
 lines.push("");
 

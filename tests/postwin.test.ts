@@ -10,7 +10,11 @@ import {
   tick,
   type EngineState,
 } from "../src/engine/core.ts";
+import type { BattleParty } from "../src/engine/battleScenario.ts";
+import { getFactoryOpponentCommentary } from "../src/engine/factoryCommentary.ts";
+import { generateFactoryOpponent } from "../src/engine/factoryOpponentGeneration.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
+import { createGeneratedFactoryRoundController } from "../src/engine/roundController.ts";
 import {
   BATTLE_2_SCENE_HANDOFF_ELAPSED,
   INITIAL_BATTLE_2_ROOM_STATE,
@@ -128,6 +132,51 @@ describe("S8 Battle-1 postwin transition", () => {
     expect(accepted.postwin).toEqual(INITIAL_POSTWIN_STATE);
     accepted = tick(accepted, new Set(["A"]));
     expect(accepted.battleScene!.turn17LossDismissElapsed).toBe(edge);
+  });
+
+  it("uses the generated opponent held by the round controller for scouting", () => {
+    const generated = generateFactoryOpponent({
+      rngValue: 3,
+      factoryWinStreak: 0,
+      battleIndex: 0,
+      storedTrainerIds: [],
+      savedRentalSetIds: [110, 155, 140, 168, 197, 147],
+      playerTrainerId: 0x1234_5678,
+      battleTowerLevel50WinStreak: 0,
+    });
+    const battleParty = (prefix: string): BattleParty =>
+      generated.party.map((member, index) => ({
+        id: `${prefix}-${index}`,
+        species: member.speciesName,
+        maxHp: member.maxHP,
+        hp: member.hp,
+        status: "none" as const,
+      })) as unknown as BattleParty;
+    const roundController = createGeneratedFactoryRoundController({
+      id: "generated-commentary-presentation",
+      playerParty: battleParty("player"),
+      playerRentalRecords: generated.opponents,
+      opponent: {
+        id: "generated-opponent",
+        trainerName: generated.trainerName,
+        party: battleParty("opponent"),
+        rentalRecords: generated.opponents,
+      },
+      rngValue: generated.rngValue,
+    });
+    const accepted = tick({
+      ...lossQuoteState(outcomeDismiss + TURN17_LOSS_INPUT_READY_DELAY - 1),
+      roundController,
+    }, new Set(["A"]));
+    const expected = getFactoryOpponentCommentary(generated.party);
+
+    expect(accepted.postwin?.scoutingLines.slice(1, 3)).toEqual([
+      expected.favoriteTypeLines,
+      expected.battleStyleLines,
+    ]);
+    expect(accepted.postwin?.scoutingLines.slice(1, 3)).not.toEqual(
+      INITIAL_POSTWIN_STATE.scoutingLines.slice(1, 3),
+    );
   });
 
   it("keeps every visual ownership boundary relative to the stored edge", () => {

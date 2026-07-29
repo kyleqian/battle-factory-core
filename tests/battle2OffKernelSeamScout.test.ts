@@ -119,7 +119,7 @@ describe("Battle 2 OFF real-kernel seam scout", () => {
     expect(parsed).toEqual(initial);
   });
 
-  it("reaches request 3 with exact HP, selected-slot PP, stat, events, and four-call RNG", () => {
+  it("reaches request 3 with exact HP, selected-slot PP, stat, four hit-chain draws, and one boundary draw", () => {
     const { afterPlayer, result } = runCanonicalBattle2Turn();
     expect(afterPlayer.events).toEqual([]);
     expect(afterPlayer.state.rng).toEqual({ value: 3530724670, calls: 0 });
@@ -186,7 +186,7 @@ describe("Battle 2 OFF real-kernel seam scout", () => {
       575948139,
       650807554,
     ]);
-    expect(result.state.rng).toEqual({ value: 650807554, calls: 4 });
+    expect(result.state.rng).toEqual({ value: 3011990093, calls: 5 });
 
     const usedMoveMessages = result.events.filter(({ payload }) =>
       payload.kind === "message" && payload.messageId === "STRINGID_USEDMOVE"

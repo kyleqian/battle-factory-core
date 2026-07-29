@@ -3,8 +3,11 @@ import {
   cloneBattleParty,
   cloneOpponent,
   healBattleParty,
+  healFactoryKernelParty,
   prepareBattleScenario,
   type BattleIndex,
+  type FactoryKernelParty,
+  type FactoryRentalParty,
   type BattleOpponent,
   type BattleParty,
   type BattleScenario,
@@ -30,6 +33,8 @@ export interface CompletedBattle {
   readonly outcome: "win" | "loss";
   readonly playerParty: BattleParty;
   readonly opponentParty: BattleParty;
+  readonly playerKernelParty: FactoryKernelParty | null;
+  readonly opponentKernelParty: FactoryKernelParty | null;
 }
 
 export interface SwapDecision {
@@ -42,6 +47,10 @@ export interface RoundRulesState {
   readonly phase: RoundPhase;
   readonly battleIndex: BattleIndex;
   readonly playerParty: BattleParty;
+  /** Saved `RentalMon[0..2]` records; null preserves simplified fixtures. */
+  readonly playerRentalRecords: FactoryRentalParty | null;
+  /** Full three-member build consumed by the next battle kernel. */
+  readonly playerKernelParty: FactoryKernelParty | null;
   readonly currentOpponent: BattleOpponent;
   readonly opponentHistory: readonly string[];
   readonly rngValue: number;
@@ -63,7 +72,25 @@ export interface BattleResolution {
   readonly outcome: "win" | "loss";
   readonly playerParty: BattleParty;
   readonly opponentParty: BattleParty;
+  /** Optional full kernel snapshots; omitted by legacy fixture adapters. */
+  readonly playerKernelParty?: FactoryKernelParty;
+  readonly opponentKernelParty?: FactoryKernelParty;
   /** Explicit battle-core output; presentation never consumes or changes it. */
+  readonly rngValue: number;
+}
+
+export interface GeneratedFactoryRoundStart {
+  readonly id: string;
+  readonly playerParty: BattleParty;
+  readonly playerRentalRecords: FactoryRentalParty;
+  readonly opponent: BattleOpponent;
+  /** Cursor after complete opponent construction. */
+  readonly rngValue: number;
+}
+
+export interface GeneratedFactoryRoundOpponent {
+  readonly opponent: BattleOpponent;
+  /** Cursor after complete opponent construction. */
   readonly rngValue: number;
 }
 
@@ -102,6 +129,7 @@ function issueCommand(
 export function createRoundController(scenario: BattleScenario): RoundControllerState {
   const prepared = prepareBattleScenario(scenario);
   const firstOpponent = prepared.opponents[0];
+  const playerRentalRecords = prepared.playerRentalRecords;
   const base = {
     scenarioId: prepared.id,
     opponentSchedule: prepared.opponents,
@@ -110,6 +138,10 @@ export function createRoundController(scenario: BattleScenario): RoundController
       phase: "presentingBattleStart" as const,
       battleIndex: 0 as const,
       playerParty: prepared.playerParty,
+      playerRentalRecords,
+      playerKernelParty: playerRentalRecords === null
+        ? null
+        : healFactoryKernelParty(playerRentalRecords),
       currentOpponent: firstOpponent,
       opponentHistory: [firstOpponent.id],
       rngValue: prepared.initialRngValue,
@@ -123,6 +155,54 @@ export function createRoundController(scenario: BattleScenario): RoundController
     battleIndex: 0,
     playerParty: prepared.playerParty,
     opponent: firstOpponent,
+  });
+}
+
+/**
+ * Production-shaped constructor used after rental/opponent generation. It
+ * preserves `createRoundController`'s fixture ABI while making the generator
+ * seam explicit instead of disguising generated parties as a seven-opponent
+ * fixture pool.
+ */
+export function createGeneratedFactoryRoundController(
+  input: GeneratedFactoryRoundStart,
+): RoundControllerState {
+  assertBattleParty(input.playerParty, "playerParty");
+  assertBattleParty(input.opponent.party, "opponent.party");
+  if (input.opponent.rentalRecords === undefined) {
+    return fail("a generated Factory opponent requires full rental records");
+  }
+  if (!Number.isSafeInteger(input.rngValue) || input.rngValue < 0) {
+    return fail("rngValue must be a non-negative safe integer");
+  }
+  const playerParty = cloneBattleParty(input.playerParty);
+  const opponent = cloneOpponent(input.opponent);
+  const playerRentalRecords = input.playerRentalRecords.map(
+    (record) => ({ ...record }),
+  ) as unknown as FactoryRentalParty;
+  const base = {
+    scenarioId: input.id,
+    opponentSchedule: [opponent],
+    opponentSelection: { type: "factoryGenerated" as const },
+    rules: {
+      phase: "presentingBattleStart" as const,
+      battleIndex: 0 as const,
+      playerParty,
+      playerRentalRecords,
+      playerKernelParty: healFactoryKernelParty(playerRentalRecords),
+      currentOpponent: opponent,
+      opponentHistory: [opponent.id],
+      rngValue: input.rngValue >>> 0,
+      lastBattle: null,
+      lastSwap: null,
+    },
+    nextPresentationCommandId: 1,
+  };
+  return issueCommand(base, {
+    type: "battleStart",
+    battleIndex: 0,
+    playerParty,
+    opponent,
   });
 }
 
@@ -185,6 +265,9 @@ function selectNextOpponent(
       rngValue: state.rules.rngValue,
     };
   }
+  if (state.opponentSelection.type === "factoryGenerated") {
+    return fail("generated Factory rounds require a complete generated opponent");
+  }
 
   const strategy = state.opponentSelection;
   const selection = selectFactoryTrainer(
@@ -212,6 +295,53 @@ function selectNextOpponent(
     },
     rngValue: selection.rngValue,
   };
+}
+
+function advanceAfterSwapResult(
+  state: RoundControllerState,
+  selection: {
+    readonly opponent: BattleOpponent;
+    readonly opponentSchedule: readonly BattleOpponent[];
+    readonly opponentSelection: PreparedOpponentSelection;
+    readonly rngValue: number;
+  },
+): RoundControllerState {
+  const battleIndex = nextBattleIndex(state.rules.battleIndex);
+  const opponent = selection.opponent;
+  if (state.rules.opponentHistory.includes(opponent.id)) {
+    return fail(`opponent ${opponent.id} would repeat`);
+  }
+  const playerParty = healBattleParty(state.rules.playerParty);
+  const playerKernelParty = state.rules.playerRentalRecords === null
+    ? null
+    : healFactoryKernelParty(
+      state.rules.playerRentalRecords,
+      state.rules.playerKernelParty ?? undefined,
+    );
+  return issueCommand(
+    {
+      ...state,
+      opponentSchedule: selection.opponentSchedule,
+      opponentSelection: selection.opponentSelection,
+      rules: {
+        ...state.rules,
+        phase: "presentingBattleStart",
+        battleIndex,
+        playerParty,
+        playerKernelParty,
+        currentOpponent: opponent,
+        opponentHistory: [...state.rules.opponentHistory, opponent.id],
+        rngValue: selection.rngValue,
+        lastBattle: null,
+      },
+    },
+    {
+      type: "battleStart",
+      battleIndex,
+      playerParty,
+      opponent,
+    },
+  );
 }
 
 /**
@@ -252,34 +382,7 @@ export function advanceRoundController(state: RoundControllerState): RoundContro
       requireCompletedPresentation(state, "swapResolved");
       const battleIndex = nextBattleIndex(state.rules.battleIndex);
       const selection = selectNextOpponent(state, battleIndex);
-      const opponent = selection.opponent;
-      if (state.rules.opponentHistory.includes(opponent.id)) {
-        return fail(`opponent ${opponent.id} would repeat`);
-      }
-      const playerParty = healBattleParty(state.rules.playerParty);
-      return issueCommand(
-        {
-          ...state,
-          opponentSchedule: selection.opponentSchedule,
-          opponentSelection: selection.opponentSelection,
-          rules: {
-            ...state.rules,
-            phase: "presentingBattleStart",
-            battleIndex,
-            playerParty,
-            currentOpponent: opponent,
-            opponentHistory: [...state.rules.opponentHistory, opponent.id],
-            rngValue: selection.rngValue,
-            lastBattle: null,
-          },
-        },
-        {
-          type: "battleStart",
-          battleIndex,
-          playerParty,
-          opponent,
-        },
-      );
+      return advanceAfterSwapResult(state, selection);
     }
     case "battleActive":
     case "awaitingSwapDecision":
@@ -287,6 +390,37 @@ export function advanceRoundController(state: RoundControllerState): RoundContro
     case "roundComplete":
       return fail(`cannot advance round while phase is ${state.rules.phase}`);
   }
+}
+
+/**
+ * Adapts rung-8's complete trainer+party result at the exact point where the
+ * existing controller admits its next opponent. All index/heal/presentation
+ * rules remain in the same controller-owned transition above.
+ */
+export function advanceRoundControllerWithGeneratedOpponent(
+  state: RoundControllerState,
+  generated: GeneratedFactoryRoundOpponent,
+): RoundControllerState {
+  if (state.rules.phase !== "presentingSwapResult") {
+    return fail("a generated opponent can only advance presentingSwapResult");
+  }
+  requireCompletedPresentation(state, "swapResolved");
+  if (state.opponentSelection.type !== "factoryGenerated") {
+    return fail("generated opponent advance requires a generated Factory round");
+  }
+  if (generated.opponent.rentalRecords === undefined) {
+    return fail("a generated Factory opponent requires full rental records");
+  }
+  if (!Number.isSafeInteger(generated.rngValue) || generated.rngValue < 0) {
+    return fail("generated opponent rngValue must be a non-negative safe integer");
+  }
+  const opponent = cloneOpponent(generated.opponent);
+  return advanceAfterSwapResult(state, {
+    opponent,
+    opponentSchedule: [...state.opponentSchedule, opponent],
+    opponentSelection: state.opponentSelection,
+    rngValue: generated.rngValue >>> 0,
+  });
 }
 
 function assertSamePartyIdentity(
@@ -329,14 +463,25 @@ export function resolveRoundBattle(
 
   const playerParty = cloneBattleParty(resolution.playerParty);
   const opponentParty = cloneBattleParty(resolution.opponentParty);
+  const playerKernelParty = resolution.playerKernelParty
+    ?? state.rules.playerKernelParty;
+  const opponentKernelParty = resolution.opponentKernelParty
+    ?? (
+      state.rules.currentOpponent.rentalRecords === undefined
+        ? null
+        : healFactoryKernelParty(state.rules.currentOpponent.rentalRecords)
+    );
   const lastBattle: CompletedBattle = {
     outcome: resolution.outcome,
     playerParty,
     opponentParty,
+    playerKernelParty,
+    opponentKernelParty,
   };
   const rules = {
     ...state.rules,
     playerParty,
+    playerKernelParty,
     rngValue: resolution.rngValue >>> 0,
     lastBattle,
     lastSwap: null,
@@ -395,6 +540,8 @@ export function chooseRoundSwap(
   }
 
   let playerParty = state.rules.playerParty;
+  let playerRentalRecords = state.rules.playerRentalRecords;
+  let playerKernelParty = state.rules.playerKernelParty;
   let storedDecision: SwapDecision = { type: "decline" };
   if (decision.type === "accept") {
     const playerPartyIndex = assertPartyIndex(
@@ -409,6 +556,39 @@ export function chooseRoundSwap(
     const replaced = [...playerParty] as [typeof replacement, typeof replacement, typeof replacement];
     replaced[playerPartyIndex] = replacement;
     playerParty = replaced;
+    const opponentRentalRecords = state.rules.currentOpponent.rentalRecords ?? null;
+    if ((playerRentalRecords === null) !== (opponentRentalRecords === null)) {
+      return fail("a full-record Factory swap requires both player and opponent rental records");
+    }
+    if (playerRentalRecords !== null && opponentRentalRecords !== null) {
+      // CopySwappedMonData persists exactly monId/IVs/personality/abilityNum
+      // from the chosen defeated mon (`battle_factory_screen.c:2350-2360`).
+      // The generator-facing names are setId/fixedIv/abilitySlot.
+      const replacedRecords = [...playerRentalRecords] as [
+        FactoryRentalParty[number],
+        FactoryRentalParty[number],
+        FactoryRentalParty[number],
+      ];
+      replacedRecords[playerPartyIndex] = {
+        ...opponentRentalRecords[opponentPartyIndex]!,
+      };
+      playerRentalRecords = replacedRecords;
+
+      const opponentKernelParty = lastBattle.opponentKernelParty
+        ?? healFactoryKernelParty(opponentRentalRecords);
+      const replacementKernelMember = {
+        ...opponentKernelParty[opponentPartyIndex]!,
+        friendship: 0,
+      };
+      const replacedKernelParty = [...(playerKernelParty
+        ?? healFactoryKernelParty(state.rules.playerRentalRecords!))] as [
+          FactoryKernelParty[number],
+          FactoryKernelParty[number],
+          FactoryKernelParty[number],
+        ];
+      replacedKernelParty[playerPartyIndex] = replacementKernelMember;
+      playerKernelParty = replacedKernelParty;
+    }
     storedDecision = { type: "accept", playerPartyIndex, opponentPartyIndex };
   }
 
@@ -419,6 +599,8 @@ export function chooseRoundSwap(
         ...state.rules,
         phase: "presentingSwapResult",
         playerParty,
+        playerRentalRecords,
+        playerKernelParty,
         lastSwap: storedDecision,
       },
     },

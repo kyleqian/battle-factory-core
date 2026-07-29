@@ -525,7 +525,7 @@ describe("Follow Me lifetime through the generic end-turn seam", () => {
 });
 
 describe("Follow Me through the generic Factory singles full-turn seam", () => {
-  it("spends each user's PP, reaches the next decision with both timers cleared, and owns no HP/stat/RNG/forced-lock change", () => {
+  it("spends each user's PP, reaches the next decision with both timers cleared, and adds only the turn-boundary RNG draw", () => {
     const initial = createFactoryFullTurnBattleState({
       requestId: 1,
       rngSeed: 0x1234_5678,
@@ -610,6 +610,6 @@ describe("Follow Me through the generic Factory singles full-turn seam", () => {
     expect(next.battlers[0].status2).toBe(0);
     expect(next.battlers[1].status2).toBe(0);
     expect(next.lockedMoves).toEqual([0, 0, 0, 0]);
-    expect(afterTurn.state.rng.calls).toBe(0);
+    expect(afterTurn.state.rng.calls).toBe(1);
   });
 });

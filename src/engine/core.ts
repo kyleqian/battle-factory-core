@@ -168,12 +168,14 @@ import {
   TURN7_ROCKSLIDE_REOPEN_GATE_DELAY,
 } from "./battleMenu.ts";
 import { activeMonMoveset, createBattleSetup, rentalMoveset, type BattleSetupState } from "./battleSetup.ts";
+import { createFactoryCorpusParty } from "./factoryCorpusParty.ts";
+import { factoryTrainerPresentationForOpponent } from "./factoryTrainerPresentation.ts";
 import {
   advancePostwin,
   acceptPostwinContinuation,
   acceptPostwinDialoguePage,
   acceptPostwinHealDismiss,
-  INITIAL_POSTWIN_STATE,
+  createPostwinState,
   POSTWIN_BATTLE_ROOM_FADE_OUT_AGE,
   POSTWIN_BATTLE_ROOM_FIRST_AGE,
   POSTWIN_COUNTER_ROOM_FIRST_AGE,
@@ -186,7 +188,6 @@ import {
   POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY,
   POSTWIN_DIALOGUE_OLD_TEXT_END_DELAY,
   POSTWIN_DIALOGUE_BLANK_DELAY,
-  POSTWIN_SCOUTING_LINES,
   POSTWIN_SWAP_MENU_VISIBLE_DELAY,
   POSTWIN_RIGHT_THIS_WAY,
   POSTWIN_IN_BATTLE_CLEAR_AGE,
@@ -348,6 +349,9 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   let battle2Turn1 = state.battle2Turn1 ?? null;
   let factorySwap = state.factorySwap ?? null;
   let factoryTerminal = state.factoryTerminal;
+  const currentTrainerPresentation = factoryTrainerPresentationForOpponent(
+    state.roundController?.rules.currentOpponent,
+  ) ?? undefined;
   const pendingTerminalCommand = state.roundController?.presentation?.command;
   if (
     factoryTerminal === null &&
@@ -483,7 +487,10 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         advancedPrebattleRoom.elapsed === WARP_FADE_TO_ROOM_ELAPSED
       ) {
         prebattleRoom = null;
-        battleRoom = INITIAL_BATTLE_2_ROOM_STATE;
+        battleRoom = {
+          ...INITIAL_BATTLE_2_ROOM_STATE,
+          trainerPresentation: currentTrainerPresentation,
+        };
       }
     } else if (battleRoom) {
       if (battleRoomQuoteInputReady(battleRoom) && newKeys.has("A")) {
@@ -507,10 +514,12 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
             "jenson",
             nextPostwin.playerPartyHp,
           );
+          const trainerPresentation = battleRoom.trainerPresentation;
           battleRoom = null;
           battleScene = {
             ...INITIAL_BATTLE_SCENE_STATE,
             encounter: "jenson",
+            trainerPresentation,
             fightSubmenu: {
               ...CLOSED_FIGHT_SUBMENU_STATE,
               activeMonMoveset: battleSetup.activeMonMoveset,
@@ -701,6 +710,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn17OutcomeDismissEligible(
         battleScene.elapsed + 1,
         battleScene.turn17KoDismissElapsed ?? null,
+        battleScene.trainerPresentation,
       )
     ) {
       battleScene = {
@@ -718,13 +728,18 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn17LossDismissEligible(
         battleScene.elapsed + 1,
         battleScene.turn17OutcomeDismissElapsed ?? null,
+        battleScene.trainerPresentation,
       )
     ) {
       battleScene = {
         ...battleScene,
         turn17LossDismissElapsed: battleScene.elapsed + 1,
       };
-      postwin = INITIAL_POSTWIN_STATE;
+      const opponentRecords =
+        state.roundController?.rules.currentOpponent.rentalRecords;
+      postwin = opponentRecords === undefined
+        ? createPostwinState()
+        : createPostwinState(createFactoryCorpusParty(opponentRecords));
       battleScene = advanceBattleScene(battleScene);
       return {
         ...state,
@@ -766,6 +781,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         ? sendOutHandoffTick(
             SCENE_TICK0 + battleScene.sendOutPressElapsed,
             battleScene.encounter,
+            battleScene.trainerPresentation,
           )
         : null;
     const partySendOutElapsed = battleScene.turn15PartySelect?.sendOutElapsed;
@@ -1217,10 +1233,12 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // the ground-truth trace's own window start (trace tick 1040).
       if (battleRoom?.phase === "settled" && battleRoom.elapsed === BATTLE_SCENE_HANDOFF_ELAPSED) {
         battleSetup = createBattleSetup(draftScreen, battleRoom.encounter ?? "destin");
+        const trainerPresentation = battleRoom.trainerPresentation;
         battleRoom = null;
         battleScene = {
           ...INITIAL_BATTLE_SCENE_STATE,
           encounter: battleSetup.encounter,
+          trainerPresentation,
           fightSubmenu: {
             ...CLOSED_FIGHT_SUBMENU_STATE,
             activeMonMoveset: battleSetup.activeMonMoveset,
@@ -1268,7 +1286,10 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // ground-truth trace's room actually becomes visible again.
       if (prebattleRoom?.phase === "warpFade" && prebattleRoom.elapsed === WARP_FADE_TO_ROOM_ELAPSED) {
         prebattleRoom = null;
-        battleRoom = INITIAL_BATTLE_ROOM_STATE;
+        battleRoom = {
+          ...INITIAL_BATTLE_ROOM_STATE,
+          trainerPresentation: currentTrainerPresentation,
+        };
       }
     }
     return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, rngValue };
@@ -1683,7 +1704,7 @@ function renderFactorySwapEntryFade(state: EngineState): Uint8Array {
   const objY = objFadeY(swap.elapsed, SWAP_ENTRY_FADE_OUT);
   renderPrebattleRoomScene(fb, bgY, objY);
   drawMessageBoxFrameFaded(fb, bgY);
-  const lines = POSTWIN_SCOUTING_LINES[3];
+  const lines = state.postwin!.scoutingLines[3];
   drawMessageBoxTextFaded(fb, lines[0], 16, 121, bgY);
   drawMessageBoxTextFaded(fb, lines[1], 16, 137, bgY);
   return fb;
@@ -1772,7 +1793,7 @@ function renderPostwinState(state: EngineState): Uint8Array {
     } else if (postwin.swapDeclineElapsed !== null) {
       const declineDelay = age - postwin.swapDeclineElapsed;
       if (declineDelay <= POSTWIN_DIALOGUE_OLD_TEXT_END_DELAY) {
-        const previous = POSTWIN_SCOUTING_LINES[3];
+        const previous = postwin.scoutingLines[3];
         drawLines(
           previous[0],
           previous[1],
@@ -1795,7 +1816,7 @@ function renderPostwinState(state: EngineState): Uint8Array {
             POSTWIN_NEXT_LINE1.length + POSTWIN_NEXT_LINE2.length,
           );
         } else {
-          const previous = POSTWIN_SCOUTING_LINES[postwin.dialoguePage - 2]!;
+          const previous = postwin.scoutingLines[postwin.dialoguePage - 2]!;
           drawLines(
             previous[0],
             previous[1],
@@ -1803,7 +1824,7 @@ function renderPostwinState(state: EngineState): Uint8Array {
           );
         }
       } else if (delay !== POSTWIN_DIALOGUE_BLANK_DELAY) {
-        const lines = POSTWIN_SCOUTING_LINES[postwin.dialoguePage - 1]!;
+        const lines = postwin.scoutingLines[postwin.dialoguePage - 1]!;
         drawLines(
           lines[0],
           lines[1],

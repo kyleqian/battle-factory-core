@@ -1,5 +1,5 @@
 {
-  "schema": "ability-item-hooks/v1",
+  "schema": "ability-item-hooks/v2",
   "rerunCommand": "node --experimental-strip-types tools/extract/extract-ability-item-hooks.ts",
   "source": {
     "battleUtil": {
@@ -1254,7 +1254,8 @@
           "file": "data/battle_scripts_1.s",
           "tag": "rules",
           "line": 1905,
-          "enclosingGuess": "BattleScript_EffectSolarBeam"
+          "enclosingGuess": "BattleScript_EffectSolarBeam",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_ARENA_TRAP": [
@@ -1262,31 +1263,36 @@
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 4056,
-          "enclosingGuess": "IsRunningFromBattleImpossible"
+          "enclosingGuess": "IsRunningFromBattleImpossible",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 4249,
-          "enclosingGuess": "HandleTurnActionSelectionState"
+          "enclosingGuess": "HandleTurnActionSelectionState",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_ai_script_commands.c",
           "tag": "ai",
           "line": 1371,
-          "enclosingGuess": "Cmd_get_ability"
+          "enclosingGuess": "Cmd_get_ability",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_ai_script_commands.c",
           "tag": "ai",
           "line": 1422,
-          "enclosingGuess": "Cmd_check_ability"
+          "enclosingGuess": "Cmd_check_ability",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_ai_switch_items.c",
           "tag": "ai",
           "line": 445,
-          "enclosingGuess": "ShouldSwitch"
+          "enclosingGuess": "ShouldSwitch",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_BATTLE_ARMOR": [
@@ -1294,7 +1300,8 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1279,
-          "enclosingGuess": "Cmd_critcalc"
+          "enclosingGuess": "Cmd_critcalc",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_BLAZE": [
@@ -1302,7 +1309,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3221,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_CHLOROPHYLL": [
@@ -1310,13 +1318,15 @@
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 4607,
-          "enclosingGuess": "GetWhoStrikesFirst"
+          "enclosingGuess": "GetWhoStrikesFirst",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 4613,
-          "enclosingGuess": "GetWhoStrikesFirst"
+          "enclosingGuess": "GetWhoStrikesFirst",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_CLEAR_BODY": [
@@ -1324,19 +1334,22 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 4142,
-          "enclosingGuess": "Cmd_playstatchangeanimation"
+          "enclosingGuess": "Cmd_playstatchangeanimation",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 6987,
-          "enclosingGuess": "ChangeStatBuffs"
+          "enclosingGuess": "ChangeStatBuffs",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "data/battle_scripts_1.s",
           "tag": "rules",
           "line": 4030,
-          "enclosingGuess": "BattleScript_IntimidateActivatesLoop"
+          "enclosingGuess": "BattleScript_IntimidateActivatesLoop",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_CLOUD_NINE": [
@@ -1344,7 +1357,8 @@
           "file": "data/battle_scripts_1.s",
           "tag": "rules",
           "line": 1904,
-          "enclosingGuess": "BattleScript_EffectSolarBeam"
+          "enclosingGuess": "BattleScript_EffectSolarBeam",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_COMPOUND_EYES": [
@@ -1352,13 +1366,15 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1152,
-          "enclosingGuess": "Cmd_accuracycheck"
+          "enclosingGuess": "Cmd_accuracycheck",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 6687,
-          "enclosingGuess": "SetWildMonHeldItem"
+          "enclosingGuess": "SetWildMonHeldItem",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_DAMP": [
@@ -1366,13 +1382,15 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 6546,
-          "enclosingGuess": "Cmd_tryexplosion"
+          "enclosingGuess": "Cmd_tryexplosion",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 6571,
-          "enclosingGuess": "Cmd_tryexplosion"
+          "enclosingGuess": "Cmd_tryexplosion",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_EARLY_BIRD": [
@@ -1380,13 +1398,15 @@
           "file": "src/battle_util.c",
           "tag": "rules",
           "line": 2030,
-          "enclosingGuess": "AtkCanceler_UnableToUseMove"
+          "enclosingGuess": "AtkCanceler_UnableToUseMove",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_util2.c",
           "tag": "rules",
           "line": 151,
-          "enclosingGuess": "BattlePalace_TryEscapeStatus"
+          "enclosingGuess": "BattlePalace_TryEscapeStatus",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_FLASH_FIRE": [
@@ -1394,7 +1414,8 @@
           "file": "src/battle_ai_switch_items.c",
           "tag": "ai",
           "line": 152,
-          "enclosingGuess": "FindMonThatAbsorbsOpponentsMove"
+          "enclosingGuess": "FindMonThatAbsorbsOpponentsMove",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_FORECAST": [
@@ -1402,7 +1423,8 @@
           "file": "src/battle_util.c",
           "tag": "rules",
           "line": 2399,
-          "enclosingGuess": "CastformDataTypeChange"
+          "enclosingGuess": "CastformDataTypeChange",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_GUTS": [
@@ -1410,13 +1432,15 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3211,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3263,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_HUGE_POWER": [
@@ -1424,7 +1448,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3158,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_HUSTLE": [
@@ -1432,13 +1457,15 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1156,
-          "enclosingGuess": "Cmd_accuracycheck"
+          "enclosingGuess": "Cmd_accuracycheck",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3205,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_HYPER_CUTTER": [
@@ -1446,19 +1473,22 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 4145,
-          "enclosingGuess": "Cmd_playstatchangeanimation"
+          "enclosingGuess": "Cmd_playstatchangeanimation",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 7022,
-          "enclosingGuess": "ChangeStatBuffs"
+          "enclosingGuess": "ChangeStatBuffs",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "data/battle_scripts_1.s",
           "tag": "rules",
           "line": 4031,
-          "enclosingGuess": "BattleScript_IntimidateActivatesLoop"
+          "enclosingGuess": "BattleScript_IntimidateActivatesLoop",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_IMMUNITY": [
@@ -1466,61 +1496,71 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2300,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2303,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2304,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2336,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2428,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2430,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2431,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2461,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "data/battle_scripts_1.s",
           "tag": "rules",
           "line": 690,
-          "enclosingGuess": "BattleScript_EffectToxic"
+          "enclosingGuess": "BattleScript_EffectToxic",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "data/battle_scripts_1.s",
           "tag": "rules",
           "line": 990,
-          "enclosingGuess": "BattleScript_EffectPoison"
+          "enclosingGuess": "BattleScript_EffectPoison",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_INNER_FOCUS": [
@@ -1528,19 +1568,22 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2548,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2552,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2553,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_INSOMNIA": [
@@ -1548,31 +1591,36 @@
           "file": "src/battle_util.c",
           "tag": "rules",
           "line": 1759,
-          "enclosingGuess": "DoBattlerEndTurnEffects"
+          "enclosingGuess": "DoBattlerEndTurnEffects",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_util.c",
           "tag": "rules",
           "line": 4005,
-          "enclosingGuess": "IsMonDisobedient"
+          "enclosingGuess": "IsMonDisobedient",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2293,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 6836,
-          "enclosingGuess": "Cmd_jumpifcantmakeasleep"
+          "enclosingGuess": "Cmd_jumpifcantmakeasleep",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "data/battle_scripts_1.s",
           "tag": "rules",
           "line": 2456,
-          "enclosingGuess": "BattleScript_EffectYawn"
+          "enclosingGuess": "BattleScript_EffectYawn",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_KEEN_EYE": [
@@ -1580,13 +1628,15 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 4144,
-          "enclosingGuess": "Cmd_playstatchangeanimation"
+          "enclosingGuess": "Cmd_playstatchangeanimation",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 7009,
-          "enclosingGuess": "ChangeStatBuffs"
+          "enclosingGuess": "ChangeStatBuffs",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_LEVITATE": [
@@ -1594,61 +1644,71 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1375,
-          "enclosingGuess": "Cmd_typecalc"
+          "enclosingGuess": "Cmd_typecalc",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1437,
-          "enclosingGuess": "CheckWonderGuardAndLevitate"
+          "enclosingGuess": "CheckWonderGuardAndLevitate",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1439,
-          "enclosingGuess": "CheckWonderGuardAndLevitate"
+          "enclosingGuess": "CheckWonderGuardAndLevitate",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1441,
-          "enclosingGuess": "CheckWonderGuardAndLevitate"
+          "enclosingGuess": "CheckWonderGuardAndLevitate",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1554,
-          "enclosingGuess": "TypeCalc"
+          "enclosingGuess": "TypeCalc",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1606,
-          "enclosingGuess": "AI_TypeCalc"
+          "enclosingGuess": "AI_TypeCalc",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 4506,
-          "enclosingGuess": "Cmd_typecalc2"
+          "enclosingGuess": "Cmd_typecalc2",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 5232,
-          "enclosingGuess": "Cmd_switchineffects"
+          "enclosingGuess": "Cmd_switchineffects",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 4054,
-          "enclosingGuess": "IsRunningFromBattleImpossible"
+          "enclosingGuess": "IsRunningFromBattleImpossible",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 4251,
-          "enclosingGuess": "HandleTurnActionSelectionState"
+          "enclosingGuess": "HandleTurnActionSelectionState",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_LIGHTNING_ROD": [
@@ -1656,31 +1716,36 @@
           "file": "src/battle_util.c",
           "tag": "rules",
           "line": 161,
-          "enclosingGuess": "HandleAction_UseMove"
+          "enclosingGuess": "HandleAction_UseMove",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_util.c",
           "tag": "rules",
           "line": 169,
-          "enclosingGuess": "HandleAction_UseMove"
+          "enclosingGuess": "HandleAction_UseMove",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_util.c",
           "tag": "rules",
           "line": 3855,
-          "enclosingGuess": "GetMoveTarget"
+          "enclosingGuess": "GetMoveTarget",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_util.c",
           "tag": "rules",
           "line": 3856,
-          "enclosingGuess": "GetMoveTarget"
+          "enclosingGuess": "GetMoveTarget",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 987,
-          "enclosingGuess": "Cmd_attackcanceler"
+          "enclosingGuess": "Cmd_attackcanceler",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_LIMBER": [
@@ -1688,25 +1753,29 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2396,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2400,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2401,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "data/battle_scripts_1.s",
           "tag": "rules",
           "line": 1011,
-          "enclosingGuess": "BattleScript_EffectParalyze"
+          "enclosingGuess": "BattleScript_EffectParalyze",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_LIQUID_OOZE": [
@@ -1714,13 +1783,15 @@
           "file": "data/battle_scripts_1.s",
           "tag": "rules",
           "line": 345,
-          "enclosingGuess": "BattleScript_EffectAbsorb"
+          "enclosingGuess": "BattleScript_EffectAbsorb",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "data/battle_scripts_1.s",
           "tag": "rules",
           "line": 3271,
-          "enclosingGuess": "BattleScript_LeechSeedTurnDrain"
+          "enclosingGuess": "BattleScript_LeechSeedTurnDrain",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_MAGMA_ARMOR": [
@@ -1728,7 +1799,8 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2389,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_MAGNET_PULL": [
@@ -1736,31 +1808,36 @@
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 4064,
-          "enclosingGuess": "IsRunningFromBattleImpossible"
+          "enclosingGuess": "IsRunningFromBattleImpossible",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 4252,
-          "enclosingGuess": "HandleTurnActionSelectionState"
+          "enclosingGuess": "HandleTurnActionSelectionState",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_ai_script_commands.c",
           "tag": "ai",
           "line": 1370,
-          "enclosingGuess": "Cmd_get_ability"
+          "enclosingGuess": "Cmd_get_ability",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_ai_script_commands.c",
           "tag": "ai",
           "line": 1421,
-          "enclosingGuess": "Cmd_check_ability"
+          "enclosingGuess": "Cmd_check_ability",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_ai_switch_items.c",
           "tag": "ai",
           "line": 447,
-          "enclosingGuess": "ShouldSwitch"
+          "enclosingGuess": "ShouldSwitch",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_MARVEL_SCALE": [
@@ -1768,7 +1845,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3213,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_MINUS": [
@@ -1776,13 +1854,15 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3207,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3209,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_NATURAL_CURE": [
@@ -1790,13 +1870,15 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 9596,
-          "enclosingGuess": "Cmd_switchoutabilities"
+          "enclosingGuess": "Cmd_switchoutabilities",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_ai_switch_items.c",
           "tag": "ai",
           "line": 222,
-          "enclosingGuess": "ShouldSwitchIfNaturalCure"
+          "enclosingGuess": "ShouldSwitchIfNaturalCure",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_NONE": [
@@ -1804,103 +1886,120 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 3524,
-          "enclosingGuess": "Cmd_getexp"
+          "enclosingGuess": "Cmd_getexp",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 4861,
-          "enclosingGuess": "ChooseMonToSendOut"
+          "enclosingGuess": "ChooseMonToSendOut",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 5120,
-          "enclosingGuess": "Cmd_openpartyscreen"
+          "enclosingGuess": "Cmd_openpartyscreen",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 9279,
-          "enclosingGuess": "Cmd_trycopyability"
+          "enclosingGuess": "Cmd_trycopyability",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 9394,
-          "enclosingGuess": "Cmd_tryswapabilities"
+          "enclosingGuess": "Cmd_tryswapabilities",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 9395,
-          "enclosingGuess": "Cmd_tryswapabilities"
+          "enclosingGuess": "Cmd_tryswapabilities",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 4246,
-          "enclosingGuess": "HandleTurnActionSelectionState"
+          "enclosingGuess": "HandleTurnActionSelectionState",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 4260,
-          "enclosingGuess": "HandleTurnActionSelectionState"
+          "enclosingGuess": "HandleTurnActionSelectionState",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 4262,
-          "enclosingGuess": "HandleTurnActionSelectionState"
+          "enclosingGuess": "HandleTurnActionSelectionState",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 4264,
-          "enclosingGuess": "HandleTurnActionSelectionState"
+          "enclosingGuess": "HandleTurnActionSelectionState",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_ai_script_commands.c",
           "tag": "ai",
           "line": 650,
-          "enclosingGuess": "ClearBattlerAbilityHistory"
+          "enclosingGuess": "ClearBattlerAbilityHistory",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_ai_script_commands.c",
           "tag": "ai",
           "line": 1378,
-          "enclosingGuess": "Cmd_get_ability"
+          "enclosingGuess": "Cmd_get_ability",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_ai_script_commands.c",
           "tag": "ai",
           "line": 1380,
-          "enclosingGuess": "Cmd_get_ability"
+          "enclosingGuess": "Cmd_get_ability",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_ai_script_commands.c",
           "tag": "ai",
           "line": 1414,
-          "enclosingGuess": "Cmd_check_ability"
+          "enclosingGuess": "Cmd_check_ability",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_ai_script_commands.c",
           "tag": "ai",
           "line": 1426,
-          "enclosingGuess": "Cmd_check_ability"
+          "enclosingGuess": "Cmd_check_ability",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_ai_script_commands.c",
           "tag": "ai",
           "line": 1428,
-          "enclosingGuess": "Cmd_check_ability"
+          "enclosingGuess": "Cmd_check_ability",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_ai_script_commands.c",
           "tag": "ai",
           "line": 1438,
-          "enclosingGuess": "Cmd_check_ability"
+          "enclosingGuess": "Cmd_check_ability",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_OBLIVIOUS": [
@@ -1908,19 +2007,22 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 7676,
-          "enclosingGuess": "Cmd_tryinfatuating"
+          "enclosingGuess": "Cmd_tryinfatuating",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 7679,
-          "enclosingGuess": "Cmd_tryinfatuating"
+          "enclosingGuess": "Cmd_tryinfatuating",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 7680,
-          "enclosingGuess": "Cmd_tryinfatuating"
+          "enclosingGuess": "Cmd_tryinfatuating",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_OVERGROW": [
@@ -1928,7 +2030,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3219,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_OWN_TEMPO": [
@@ -1936,31 +2039,36 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2534,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "data/battle_scripts_1.s",
           "tag": "rules",
           "line": 907,
-          "enclosingGuess": "BattleScript_EffectConfuse"
+          "enclosingGuess": "BattleScript_EffectConfuse",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "data/battle_scripts_1.s",
           "tag": "rules",
           "line": 1625,
-          "enclosingGuess": "BattleScript_SwaggerTryConfuse"
+          "enclosingGuess": "BattleScript_SwaggerTryConfuse",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "data/battle_scripts_1.s",
           "tag": "rules",
           "line": 2168,
-          "enclosingGuess": "BattleScript_FlatterTryConfuse"
+          "enclosingGuess": "BattleScript_FlatterTryConfuse",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "data/battle_scripts_1.s",
           "tag": "rules",
           "line": 2580,
-          "enclosingGuess": "BattleScript_TeeterDanceLoop"
+          "enclosingGuess": "BattleScript_TeeterDanceLoop",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_PICKUP": [
@@ -1968,13 +2076,17 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 9676,
-          "enclosingGuess": "Cmd_pickup"
+          "enclosingGuess": "Cmd_pickup",
+          "factoryBattleReachability": "proven-unreachable",
+          "factoryBattleGate": "BattleScript_FrontierTrainerBattleWon: battle_scripts_1.s:3045-3047 executes pickup only for BATTLE_TYPE_PYRAMID"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 9699,
-          "enclosingGuess": "Cmd_pickup"
+          "enclosingGuess": "Cmd_pickup",
+          "factoryBattleReachability": "proven-unreachable",
+          "factoryBattleGate": "BattleScript_FrontierTrainerBattleWon: battle_scripts_1.s:3045-3047 executes pickup only for BATTLE_TYPE_PYRAMID"
         }
       ],
       "ABILITY_PLUS": [
@@ -1982,13 +2094,15 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3207,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3209,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_PRESSURE": [
@@ -1996,37 +2110,43 @@
           "file": "src/battle_util.c",
           "tag": "rules",
           "line": 744,
-          "enclosingGuess": "PressurePPLose"
+          "enclosingGuess": "PressurePPLose",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_util.c",
           "tag": "rules",
           "line": 775,
-          "enclosingGuess": "PressurePPLoseOnUsingImprison"
+          "enclosingGuess": "PressurePPLoseOnUsingImprison",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_util.c",
           "tag": "rules",
           "line": 806,
-          "enclosingGuess": "PressurePPLoseOnUsingPerishSong"
+          "enclosingGuess": "PressurePPLoseOnUsingPerishSong",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1217,
-          "enclosingGuess": "Cmd_ppreduce"
+          "enclosingGuess": "Cmd_ppreduce",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1221,
-          "enclosingGuess": "Cmd_ppreduce"
+          "enclosingGuess": "Cmd_ppreduce",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1224,
-          "enclosingGuess": "Cmd_ppreduce"
+          "enclosingGuess": "Cmd_ppreduce",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_PURE_POWER": [
@@ -2034,7 +2154,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3158,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_ROCK_HEAD": [
@@ -2042,7 +2163,8 @@
           "file": "data/battle_scripts_1.s",
           "tag": "rules",
           "line": 3940,
-          "enclosingGuess": "BattleScript_MoveEffectRecoil"
+          "enclosingGuess": "BattleScript_MoveEffectRecoil",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_RUN_AWAY": [
@@ -2050,25 +2172,29 @@
           "file": "src/battle_util.c",
           "tag": "rules",
           "line": 427,
-          "enclosingGuess": "TryRunFromBattle"
+          "enclosingGuess": "TryRunFromBattle",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_util.c",
           "tag": "rules",
           "line": 436,
-          "enclosingGuess": "TryRunFromBattle"
+          "enclosingGuess": "TryRunFromBattle",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_util.c",
           "tag": "rules",
           "line": 443,
-          "enclosingGuess": "TryRunFromBattle"
+          "enclosingGuess": "TryRunFromBattle",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 4038,
-          "enclosingGuess": "IsRunningFromBattleImpossible"
+          "enclosingGuess": "IsRunningFromBattleImpossible",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_SAND_VEIL": [
@@ -2076,13 +2202,15 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1154,
-          "enclosingGuess": "Cmd_accuracycheck"
+          "enclosingGuess": "Cmd_accuracycheck",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 7614,
-          "enclosingGuess": "Cmd_weatherdamage"
+          "enclosingGuess": "Cmd_weatherdamage",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_SERENE_GRACE": [
@@ -2090,7 +2218,8 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2912,
-          "enclosingGuess": "Cmd_seteffectwithchance"
+          "enclosingGuess": "Cmd_seteffectwithchance",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_SHADOW_TAG": [
@@ -2098,31 +2227,36 @@
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 4046,
-          "enclosingGuess": "IsRunningFromBattleImpossible"
+          "enclosingGuess": "IsRunningFromBattleImpossible",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 4248,
-          "enclosingGuess": "HandleTurnActionSelectionState"
+          "enclosingGuess": "HandleTurnActionSelectionState",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_ai_script_commands.c",
           "tag": "ai",
           "line": 1369,
-          "enclosingGuess": "Cmd_get_ability"
+          "enclosingGuess": "Cmd_get_ability",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_ai_script_commands.c",
           "tag": "ai",
           "line": 1420,
-          "enclosingGuess": "Cmd_check_ability"
+          "enclosingGuess": "Cmd_check_ability",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_ai_switch_items.c",
           "tag": "ai",
           "line": 443,
-          "enclosingGuess": "ShouldSwitch"
+          "enclosingGuess": "ShouldSwitch",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_SHELL_ARMOR": [
@@ -2130,7 +2264,8 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1279,
-          "enclosingGuess": "Cmd_critcalc"
+          "enclosingGuess": "Cmd_critcalc",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_SHIELD_DUST": [
@@ -2138,13 +2273,15 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2253,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 7035,
-          "enclosingGuess": "ChangeStatBuffs"
+          "enclosingGuess": "ChangeStatBuffs",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_SOUNDPROOF": [
@@ -2152,49 +2289,57 @@
           "file": "src/battle_util.c",
           "tag": "rules",
           "line": 1631,
-          "enclosingGuess": "DoBattlerEndTurnEffects"
+          "enclosingGuess": "DoBattlerEndTurnEffects",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2275,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 6807,
-          "enclosingGuess": "UproarWakeUpCheck"
+          "enclosingGuess": "UproarWakeUpCheck",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 8387,
-          "enclosingGuess": "Cmd_healpartystatus"
+          "enclosingGuess": "Cmd_healpartystatus",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 8403,
-          "enclosingGuess": "Cmd_healpartystatus"
+          "enclosingGuess": "Cmd_healpartystatus",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 8435,
-          "enclosingGuess": "Cmd_healpartystatus"
+          "enclosingGuess": "Cmd_healpartystatus",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 8516,
-          "enclosingGuess": "Cmd_trysetperishsong"
+          "enclosingGuess": "Cmd_trysetperishsong",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "data/battle_scripts_1.s",
           "tag": "rules",
           "line": 1578,
-          "enclosingGuess": "BattleScript_PerishSongLoop"
+          "enclosingGuess": "BattleScript_PerishSongLoop",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_STICKY_HOLD": [
@@ -2202,31 +2347,36 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2768,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2864,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2872,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2874,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 9229,
-          "enclosingGuess": "Cmd_tryswapitems"
+          "enclosingGuess": "Cmd_tryswapitems",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_STURDY": [
@@ -2234,19 +2384,22 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 7513,
-          "enclosingGuess": "Cmd_tryKO"
+          "enclosingGuess": "Cmd_tryKO",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 7516,
-          "enclosingGuess": "Cmd_tryKO"
+          "enclosingGuess": "Cmd_tryKO",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 7518,
-          "enclosingGuess": "Cmd_tryKO"
+          "enclosingGuess": "Cmd_tryKO",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_SUCTION_CUPS": [
@@ -2254,7 +2407,8 @@
           "file": "data/battle_scripts_1.s",
           "tag": "rules",
           "line": 597,
-          "enclosingGuess": "BattleScript_EffectRoar"
+          "enclosingGuess": "BattleScript_EffectRoar",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_SWARM": [
@@ -2262,7 +2416,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3225,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_SWIFT_SWIM": [
@@ -2270,13 +2425,15 @@
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 4606,
-          "enclosingGuess": "GetWhoStrikesFirst"
+          "enclosingGuess": "GetWhoStrikesFirst",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 4612,
-          "enclosingGuess": "GetWhoStrikesFirst"
+          "enclosingGuess": "GetWhoStrikesFirst",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_THICK_FAT": [
@@ -2284,7 +2441,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3203,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_TORRENT": [
@@ -2292,7 +2450,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3223,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_TRUANT": [
@@ -2300,13 +2459,15 @@
           "file": "src/battle_util.c",
           "tag": "rules",
           "line": 2087,
-          "enclosingGuess": "AtkCanceler_UnableToUseMove"
+          "enclosingGuess": "AtkCanceler_UnableToUseMove",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 5260,
-          "enclosingGuess": "Cmd_switchineffects"
+          "enclosingGuess": "Cmd_switchineffects",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_VITAL_SPIRIT": [
@@ -2314,31 +2475,36 @@
           "file": "src/battle_util.c",
           "tag": "rules",
           "line": 1758,
-          "enclosingGuess": "DoBattlerEndTurnEffects"
+          "enclosingGuess": "DoBattlerEndTurnEffects",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_util.c",
           "tag": "rules",
           "line": 4005,
-          "enclosingGuess": "IsMonDisobedient"
+          "enclosingGuess": "IsMonDisobedient",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2291,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 6837,
-          "enclosingGuess": "Cmd_jumpifcantmakeasleep"
+          "enclosingGuess": "Cmd_jumpifcantmakeasleep",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "data/battle_scripts_1.s",
           "tag": "rules",
           "line": 2455,
-          "enclosingGuess": "BattleScript_EffectYawn"
+          "enclosingGuess": "BattleScript_EffectYawn",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_VOLT_ABSORB": [
@@ -2346,7 +2512,8 @@
           "file": "src/battle_ai_switch_items.c",
           "tag": "ai",
           "line": 156,
-          "enclosingGuess": "FindMonThatAbsorbsOpponentsMove"
+          "enclosingGuess": "FindMonThatAbsorbsOpponentsMove",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_WATER_ABSORB": [
@@ -2354,7 +2521,8 @@
           "file": "src/battle_ai_switch_items.c",
           "tag": "ai",
           "line": 154,
-          "enclosingGuess": "FindMonThatAbsorbsOpponentsMove"
+          "enclosingGuess": "FindMonThatAbsorbsOpponentsMove",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_WATER_VEIL": [
@@ -2362,31 +2530,36 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2342,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2345,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2346,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 2373,
-          "enclosingGuess": "SetMoveEffect"
+          "enclosingGuess": "SetMoveEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "data/battle_scripts_1.s",
           "tag": "rules",
           "line": 2181,
-          "enclosingGuess": "BattleScript_EffectWillOWisp"
+          "enclosingGuess": "BattleScript_EffectWillOWisp",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_WHITE_SMOKE": [
@@ -2394,19 +2567,22 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 4143,
-          "enclosingGuess": "Cmd_playstatchangeanimation"
+          "enclosingGuess": "Cmd_playstatchangeanimation",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 6988,
-          "enclosingGuess": "ChangeStatBuffs"
+          "enclosingGuess": "ChangeStatBuffs",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "data/battle_scripts_1.s",
           "tag": "rules",
           "line": 4032,
-          "enclosingGuess": "BattleScript_IntimidateActivatesLoop"
+          "enclosingGuess": "BattleScript_IntimidateActivatesLoop",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "ABILITY_WONDER_GUARD": [
@@ -2414,79 +2590,92 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1409,
-          "enclosingGuess": "Cmd_typecalc"
+          "enclosingGuess": "Cmd_typecalc",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1413,
-          "enclosingGuess": "Cmd_typecalc"
+          "enclosingGuess": "Cmd_typecalc",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1490,
-          "enclosingGuess": "CheckWonderGuardAndLevitate"
+          "enclosingGuess": "CheckWonderGuardAndLevitate",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1494,
-          "enclosingGuess": "CheckWonderGuardAndLevitate"
+          "enclosingGuess": "CheckWonderGuardAndLevitate",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1496,
-          "enclosingGuess": "CheckWonderGuardAndLevitate"
+          "enclosingGuess": "CheckWonderGuardAndLevitate",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1584,
-          "enclosingGuess": "TypeCalc"
+          "enclosingGuess": "TypeCalc",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1631,
-          "enclosingGuess": "AI_TypeCalc"
+          "enclosingGuess": "AI_TypeCalc",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 4577,
-          "enclosingGuess": "Cmd_typecalc2"
+          "enclosingGuess": "Cmd_typecalc2",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 4583,
-          "enclosingGuess": "Cmd_typecalc2"
+          "enclosingGuess": "Cmd_typecalc2",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 9280,
-          "enclosingGuess": "Cmd_trycopyability"
+          "enclosingGuess": "Cmd_trycopyability",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 9396,
-          "enclosingGuess": "Cmd_tryswapabilities"
+          "enclosingGuess": "Cmd_tryswapabilities",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 9397,
-          "enclosingGuess": "Cmd_tryswapabilities"
+          "enclosingGuess": "Cmd_tryswapabilities",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_ai_switch_items.c",
           "tag": "ai",
           "line": 51,
-          "enclosingGuess": "ShouldSwitchIfWonderGuard"
+          "enclosingGuess": "ShouldSwitchIfWonderGuard",
+          "factoryBattleReachability": "candidate"
         }
       ]
     },
@@ -2496,7 +2685,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 1921,
-          "enclosingGuess": null
+          "enclosingGuess": null,
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_CAN_ALWAYS_RUN": [
@@ -2504,13 +2694,15 @@
           "file": "src/battle_util.c",
           "tag": "rules",
           "line": 421,
-          "enclosingGuess": "TryRunFromBattle"
+          "enclosingGuess": "TryRunFromBattle",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 4034,
-          "enclosingGuess": "IsRunningFromBattleImpossible"
+          "enclosingGuess": "IsRunningFromBattleImpossible",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_CHOICE_BAND": [
@@ -2518,25 +2710,29 @@
           "file": "src/battle_util.c",
           "tag": "rules",
           "line": 1051,
-          "enclosingGuess": "TrySetCantSelectMoveBattleScript"
+          "enclosingGuess": "TrySetCantSelectMoveBattleScript",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_util.c",
           "tag": "rules",
           "line": 1119,
-          "enclosingGuess": "CheckMoveLimitations"
+          "enclosingGuess": "CheckMoveLimitations",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 4298,
-          "enclosingGuess": "Cmd_moveend"
+          "enclosingGuess": "Cmd_moveend",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3185,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_DARK_POWER": [
@@ -2544,7 +2740,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 1926,
-          "enclosingGuess": null
+          "enclosingGuess": null,
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_DEEP_SEA_SCALE": [
@@ -2552,7 +2749,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3193,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_DEEP_SEA_TOOTH": [
@@ -2560,7 +2758,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3191,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_DRAGON_POWER": [
@@ -2568,7 +2767,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 1936,
-          "enclosingGuess": null
+          "enclosingGuess": null,
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_ELECTRIC_POWER": [
@@ -2576,7 +2776,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 1928,
-          "enclosingGuess": null
+          "enclosingGuess": null,
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_EVASION_UP": [
@@ -2584,7 +2785,8 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1172,
-          "enclosingGuess": "Cmd_accuracycheck"
+          "enclosingGuess": "Cmd_accuracycheck",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_EXP_SHARE": [
@@ -2592,19 +2794,22 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 3306,
-          "enclosingGuess": "Cmd_getexp"
+          "enclosingGuess": "Cmd_getexp",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 3345,
-          "enclosingGuess": "Cmd_getexp"
+          "enclosingGuess": "Cmd_getexp",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 3374,
-          "enclosingGuess": "Cmd_getexp"
+          "enclosingGuess": "Cmd_getexp",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_FIGHTING_POWER": [
@@ -2612,7 +2817,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 1927,
-          "enclosingGuess": null
+          "enclosingGuess": null,
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_FIRE_POWER": [
@@ -2620,7 +2826,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 1935,
-          "enclosingGuess": null
+          "enclosingGuess": null,
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_FLYING_POWER": [
@@ -2628,7 +2835,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 1930,
-          "enclosingGuess": null
+          "enclosingGuess": null,
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_FOCUS_BAND": [
@@ -2636,31 +2844,36 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1677,
-          "enclosingGuess": "Cmd_adjustnormaldamage"
+          "enclosingGuess": "Cmd_adjustnormaldamage",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1720,
-          "enclosingGuess": "Cmd_adjustnormaldamage2"
+          "enclosingGuess": "Cmd_adjustnormaldamage2",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 5878,
-          "enclosingGuess": "Cmd_adjustsetdamage"
+          "enclosingGuess": "Cmd_adjustsetdamage",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 7507,
-          "enclosingGuess": "Cmd_tryKO"
+          "enclosingGuess": "Cmd_tryKO",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 7509,
-          "enclosingGuess": "Cmd_tryKO"
+          "enclosingGuess": "Cmd_tryKO",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_FRIENDSHIP_UP": [
@@ -2668,13 +2881,15 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 4734,
-          "enclosingGuess": "ExecuteTableBasedItemEffect"
+          "enclosingGuess": "ExecuteTableBasedItemEffect",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 5966,
-          "enclosingGuess": "AdjustFriendship"
+          "enclosingGuess": "AdjustFriendship",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_GHOST_POWER": [
@@ -2682,7 +2897,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 1933,
-          "enclosingGuess": null
+          "enclosingGuess": null,
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_GRASS_POWER": [
@@ -2690,7 +2906,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 1925,
-          "enclosingGuess": null
+          "enclosingGuess": null,
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_GROUND_POWER": [
@@ -2698,7 +2915,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 1923,
-          "enclosingGuess": null
+          "enclosingGuess": null,
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_ICE_POWER": [
@@ -2706,7 +2924,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 1932,
-          "enclosingGuess": null
+          "enclosingGuess": null,
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_LIGHT_BALL": [
@@ -2714,7 +2933,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3195,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_LUCKY_EGG": [
@@ -2722,7 +2942,8 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 3376,
-          "enclosingGuess": "Cmd_getexp"
+          "enclosingGuess": "Cmd_getexp",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_LUCKY_PUNCH": [
@@ -2730,7 +2951,8 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1273,
-          "enclosingGuess": "Cmd_critcalc"
+          "enclosingGuess": "Cmd_critcalc",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_MACHO_BRACE": [
@@ -2738,19 +2960,22 @@
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 4647,
-          "enclosingGuess": "GetWhoStrikesFirst"
+          "enclosingGuess": "GetWhoStrikesFirst",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 4681,
-          "enclosingGuess": "GetWhoStrikesFirst"
+          "enclosingGuess": "GetWhoStrikesFirst",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 6048,
-          "enclosingGuess": "MonGainEVs"
+          "enclosingGuess": "MonGainEVs",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_METAL_POWDER": [
@@ -2758,7 +2983,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3197,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_NONE": [
@@ -2766,19 +2992,22 @@
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 782,
-          "enclosingGuess": "SetPlayerBerryDataInBattleStruct"
+          "enclosingGuess": "SetPlayerBerryDataInBattleStruct",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 832,
-          "enclosingGuess": "SetAllPlayersBerryData"
+          "enclosingGuess": "SetAllPlayersBerryData",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 833,
-          "enclosingGuess": "SetAllPlayersBerryData"
+          "enclosingGuess": "SetAllPlayersBerryData",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_NORMAL_POWER": [
@@ -2786,7 +3015,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 1937,
-          "enclosingGuess": null
+          "enclosingGuess": null,
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_POISON_POWER": [
@@ -2794,7 +3024,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 1931,
-          "enclosingGuess": null
+          "enclosingGuess": null,
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_PREVENT_EVOLVE": [
@@ -2802,7 +3033,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 5522,
-          "enclosingGuess": "GetEvolutionTargetSpecies"
+          "enclosingGuess": "GetEvolutionTargetSpecies",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_PSYCHIC_POWER": [
@@ -2810,7 +3042,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 1934,
-          "enclosingGuess": null
+          "enclosingGuess": null,
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_QUICK_CLAW": [
@@ -2818,13 +3051,15 @@
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 4653,
-          "enclosingGuess": "GetWhoStrikesFirst"
+          "enclosingGuess": "GetWhoStrikesFirst",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/battle_main.c",
           "tag": "rules",
           "line": 4687,
-          "enclosingGuess": "GetWhoStrikesFirst"
+          "enclosingGuess": "GetWhoStrikesFirst",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_ROCK_POWER": [
@@ -2832,7 +3067,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 1924,
-          "enclosingGuess": null
+          "enclosingGuess": null,
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_SCOPE_LENS": [
@@ -2840,7 +3076,8 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1272,
-          "enclosingGuess": "Cmd_critcalc"
+          "enclosingGuess": "Cmd_critcalc",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_SOUL_DEW": [
@@ -2848,13 +3085,15 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3187,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         },
         {
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3189,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_STEEL_POWER": [
@@ -2862,7 +3101,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 1922,
-          "enclosingGuess": null
+          "enclosingGuess": null,
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_STICK": [
@@ -2870,7 +3110,8 @@
           "file": "src/battle_script_commands.c",
           "tag": "rules",
           "line": 1274,
-          "enclosingGuess": "Cmd_critcalc"
+          "enclosingGuess": "Cmd_critcalc",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_THICK_CLUB": [
@@ -2878,7 +3119,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 3199,
-          "enclosingGuess": "CalculateBaseDamage"
+          "enclosingGuess": "CalculateBaseDamage",
+          "factoryBattleReachability": "candidate"
         }
       ],
       "HOLD_EFFECT_WATER_POWER": [
@@ -2886,7 +3128,8 @@
           "file": "src/pokemon.c",
           "tag": "rules",
           "line": 1929,
-          "enclosingGuess": null
+          "enclosingGuess": null,
+          "factoryBattleReachability": "candidate"
         }
       ]
     }

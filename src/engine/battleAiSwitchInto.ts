@@ -4,13 +4,12 @@
  * `OpponentHandleChoosePokemon` calls synchronously to pick the AI's
  * replacement mon (`docs/forced-switch-ground-truth.md` §1b/§2).
  *
- * Scope: pass 1 only (`:690-746`, the type-matchup + super-effective-move
- * gate) -- the live-proven MACHOP-over-PIDGEY ledger (§2a) resolves entirely
- * within pass 1. Pass 2 (`:748-789`, the `AI_CalcDmg` raw-damage fallback
- * used only when NO bench mon clears pass 1's gate) is a deliberate, named
- * (b) barrier: it needs a materially larger port (stat stages, full damage
- * calc under AI's fixed-roll convention) that no fixture on this rung
- * exercises. `BATTLE_TYPE_ARENA`/`BATTLE_TYPE_DOUBLE`/multi-battle branches
+ * Both singles passes are modeled. Pass 2 (`:748-789`) deliberately preserves
+ * the source quirks: `AI_CalcDmg` uses the current active battler and global
+ * `gCurrentMove` for every candidate, while `TypeCalc` applies the candidate
+ * move only for STAB/type scaling; the non-BUGFIX build's `bestDmg` assignment
+ * wraps to u8 after each strict-greater comparison. `BATTLE_TYPE_ARENA`/
+ * `BATTLE_TYPE_DOUBLE`/multi-battle branches
  * (`:634-660`) are singles-Factory-unreachable and likewise out of scope --
  * this module only models the plain-singles branch (`opposingBattler =
  * BATTLE_OPPOSITE(...)`, `battlerIn1 == battlerIn2 == gActiveBattler`).
@@ -20,7 +19,7 @@ import typeEffectivenessData from "../data/gen/type-effectiveness.json" with { t
 import type { TypeEffectivenessEntry } from "./damageCalc.ts";
 import type { BattleScriptPartyMemberMoves } from "./battleScriptRulesContext.ts";
 
-type MoveTypeRow = Readonly<{ id: number; type: string }>;
+type MoveTypeRow = Readonly<{ id: number; type: string; power: number }>;
 
 const MOVES_BY_ID: ReadonlyMap<number, MoveTypeRow> = new Map(
   (movesData.moves as readonly MoveTypeRow[]).map((row) => [row.id, row]),
@@ -55,6 +54,22 @@ export type BattleAiSwitchBench = readonly [
 export type BattleAiSwitchIntoResult =
   | Readonly<{ kind: "resolved"; partyIndex: number }>
   | Readonly<{ kind: "damage-fallback-needed" }>;
+
+export type BattleAiSwitchDamageFallback = Readonly<{
+  /** `AI_CalcDmg(gActiveBattler, opposingBattler)` before candidate `TypeCalc`. */
+  baseDamage: number;
+  activeTypes: BattleAiSwitchTypes;
+  opposingTypes: BattleAiSwitchTypes;
+  /** Numeric ABILITY_* value on the opposing active battler. */
+  opposingAbility: number;
+  /** Source gBattleMons[opposingBattler].status2, for Foresight's immunity skip. */
+  opposingStatus2: number;
+}>;
+
+const MOVE_STRUGGLE = 165;
+const LEVITATE_ID = 26;
+/** include/constants/battle.h STATUS2_FORESIGHT. */
+const STATUS2_FORESIGHT = 1 << 29;
 
 function typeMultiplierTenths(attackingType: string, defendingType: string): number {
   const entry = TYPE_EFFECTIVENESS.find(
@@ -100,12 +115,67 @@ function computeTypeMatchupScore(
 }
 
 /** `TypeCalc(move, gActiveBattler, opposingBattler) & MOVE_RESULT_SUPER_EFFECTIVE` (`:723`). */
-function moveIsSuperEffectiveAgainst(moveId: number, opposingTypes: BattleAiSwitchTypes): boolean {
+function moveIsSuperEffectiveAgainst(
+  moveId: number,
+  opposingTypes: BattleAiSwitchTypes,
+  opposingAbility?: number,
+  opposingStatus2 = 0,
+): boolean {
   if (moveId === MOVE_NONE) return false;
   const move = MOVES_BY_ID.get(moveId);
   if (!move) return false;
-  const multiplier = modulateByTypeEffectiveness(move.type, opposingTypes, TYPE_MUL_NORMAL);
+  if (opposingAbility === LEVITATE_ID && move.type === "TYPE_GROUND") return false;
+  let multiplier = TYPE_MUL_NORMAL;
+  const distinctTypes = opposingTypes[0] === opposingTypes[1] ? [opposingTypes[0]] : opposingTypes;
+  for (const defendingType of distinctTypes) {
+    if (
+      (opposingStatus2 & STATUS2_FORESIGHT) !== 0
+      && defendingType === "TYPE_GHOST"
+      && (move.type === "TYPE_NORMAL" || move.type === "TYPE_FIGHTING")
+    ) {
+      continue;
+    }
+    multiplier = Math.trunc((multiplier * typeMultiplierTenths(move.type, defendingType)) / 10);
+  }
   return multiplier > TYPE_MUL_NORMAL;
+}
+
+/**
+ * `TypeCalc(move, gActiveBattler, opposingBattler)`'s damage mutations for
+ * pass 2. Levitate sets miss/no-effect flags but intentionally leaves damage
+ * at its post-STAB value; Wonder Guard likewise changes flags only, which the
+ * selector never reads. Foresight skips only Normal/Fighting -> Ghost
+ * immunity entries.
+ */
+function typeCalcCandidateDamage(
+  moveId: number,
+  fallback: BattleAiSwitchDamageFallback,
+): number {
+  const move = MOVES_BY_ID.get(moveId);
+  if (!move || moveId === MOVE_STRUGGLE) return fallback.baseDamage;
+
+  let damage = fallback.baseDamage;
+  if (fallback.activeTypes[0] === move.type || fallback.activeTypes[1] === move.type) {
+    damage = Math.trunc((damage * 15) / 10);
+  }
+  if (fallback.opposingAbility === LEVITATE_ID && move.type === "TYPE_GROUND") {
+    return damage;
+  }
+
+  const distinctDefendingTypes = fallback.opposingTypes[0] === fallback.opposingTypes[1]
+    ? [fallback.opposingTypes[0]]
+    : fallback.opposingTypes;
+  for (const defendingType of distinctDefendingTypes) {
+    const foresightSkipsImmunity =
+      (fallback.opposingStatus2 & STATUS2_FORESIGHT) !== 0
+      && defendingType === "TYPE_GHOST"
+      && (move.type === "TYPE_NORMAL" || move.type === "TYPE_FIGHTING");
+    if (foresightSkipsImmunity) continue;
+    const multiplier = typeMultiplierTenths(move.type, defendingType);
+    damage = Math.trunc((damage * multiplier) / 10);
+    if (damage === 0 && multiplier !== 0) damage = 1;
+  }
+  return damage;
 }
 
 /**
@@ -120,6 +190,7 @@ export function getMostSuitableMonToSwitchInto(
   bench: BattleAiSwitchBench,
   activePartyIndex: number,
   opposingTypes: BattleAiSwitchTypes,
+  damageFallback?: BattleAiSwitchDamageFallback,
 ): BattleAiSwitchIntoResult {
   const invalid = new Set<number>();
   while (invalid.size !== PARTY_SIZE) {
@@ -151,10 +222,37 @@ export function getMostSuitableMonToSwitchInto(
     }
 
     const bestMon = bench[bestMonId]!;
-    if (bestMon.moves.some((moveId) => moveIsSuperEffectiveAgainst(moveId, opposingTypes))) {
+    if (bestMon.moves.some((moveId) => moveIsSuperEffectiveAgainst(
+      moveId,
+      opposingTypes,
+      damageFallback?.opposingAbility,
+      damageFallback?.opposingStatus2,
+    ))) {
       return Object.freeze({ kind: "resolved", partyIndex: bestMonId });
     }
     invalid.add(bestMonId);
   }
-  return Object.freeze({ kind: "damage-fallback-needed" });
+  if (!damageFallback) return Object.freeze({ kind: "damage-fallback-needed" });
+
+  // Pinned non-BUGFIX source declares bestDmg as u8. The comparison promotes
+  // it, but a successful assignment truncates the signed damage back to u8.
+  let bestDmg = 0;
+  let bestMonId = PARTY_SIZE;
+  for (let i = 0; i < PARTY_SIZE; i += 1) {
+    const member = bench[i]!;
+    if (member.species === 0 || member.hp === 0 || i === activePartyIndex) continue;
+    for (let j = 0; j < member.moves.length; j += 1) {
+      const moveId = member.moves[j]!;
+      const move = MOVES_BY_ID.get(moveId);
+      let damage = 0;
+      if (moveId !== MOVE_NONE && move?.power !== 1) {
+        damage = typeCalcCandidateDamage(moveId, damageFallback);
+      }
+      if (bestDmg < damage) {
+        bestDmg = damage & 0xff;
+        bestMonId = i;
+      }
+    }
+  }
+  return Object.freeze({ kind: "resolved", partyIndex: bestMonId });
 }

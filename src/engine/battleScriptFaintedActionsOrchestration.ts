@@ -43,12 +43,11 @@
  * (multiple real invocations resume the loop via its persisted
  * `faintedActionsState`). This module instead drives each queued script all
  * the way to ITS OWN halt before considering the next fainted battler --
- * behaviorally identical for every scenario this engine can construct today
- * (`battlersCount === 2`, so at most one battler can be newly fainted per
- * action; simultaneous multi-battler faints are a doubles-only case
- * `docs/faint-outcome-ground-truth.md` §4 already marks unreachable in
- * singles), since none of `BattleScript_GiveExp`/`BattleScript_HandleFaintedMon`
- * ever block on a controller mid-script on the modeled path.
+ * behaviorally identical while preserving the source loop's battler cursor:
+ * a contact ability such as Rough Skin can faint the singles attacker after
+ * the target already reached zero HP. If the player-side handler pauses for
+ * a replacement, the resume path finishes that script and then continues the
+ * still-pending higher battler indexes before leaving fainted actions.
  */
 import {
   acknowledgeBattleScriptMachineController,
@@ -62,10 +61,21 @@ import {
   type BattleScriptProgram,
 } from "./battleScriptProgram.ts";
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
-import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import {
+  type BattleScriptRulesBattlers,
+  type BattleScriptRulesContext,
+} from "./battleScriptRulesContext.ts";
 
 const GIVE_EXP_LABEL = "BattleScript_GiveExp";
 const HANDLE_FAINTED_MON_LABEL = "BattleScript_HandleFaintedMon";
+const INTIMIDATE_LABEL = "BattleScript_IntimidateActivatesEnd3";
+const TRACE_LABEL = "BattleScript_TraceActivates";
+const WHITE_HERB_END2_LABEL = "BattleScript_WhiteHerbEnd2";
+/** include/constants/abilities.h: source ids for state-6's two pending ability passes. */
+const PENDING_ENTRY_ABILITY = Object.freeze({ intimidate: 22, trace: 36 });
+const ITEM_WHITE_HERB = 180;
+const STATUS3_INTIMIDATE_POKES = 1 << 19;
+const STATUS3_TRACE = 1 << 20;
 /**
  * Real per-script instruction ceiling; both scripts complete in single
  * digits. Doubled from the pre-forced-switch pin (32) because the forced-
@@ -74,7 +84,7 @@ const HANDLE_FAINTED_MON_LABEL = "BattleScript_HandleFaintedMon";
  * blocked-then-acknowledged budget tick per opcode, per the auto-
  * acknowledgement loop below.
  */
-const SCRIPT_BUDGET = 128;
+const SCRIPT_BUDGET = 2_000;
 
 export type BattleScriptFaintedActionsResult =
   | Readonly<{
@@ -258,10 +268,11 @@ function runScriptToOwnEnd(
     if (stepped.kind === "blocked") {
       const acknowledged = acknowledgeAllPendingControllers(stepped.state);
       if (acknowledged === stepped.state) {
-        throw new Error(
-          `fainted-actions orchestration blocked inside ${instruction.source.label} without a safe `
-            + "controller acknowledgement",
-        );
+        // pause/waitmessage may establish only scheduler time, with no
+        // controller owner. Preserve that scheduler state and let the next
+        // machine step advance its bounded wait.
+        state = stepped.state;
+        continue;
       }
       state = acknowledged;
       continue;
@@ -272,7 +283,7 @@ function runScriptToOwnEnd(
     }
     if (stepped.kind === "halted") {
       const haltReason = stepped.state.haltReason;
-      if (haltReason?.kind === "terminal") {
+      if (haltReason?.kind === "terminal" || haltReason?.kind === "end3") {
         return Object.freeze({ kind: "terminal", state: stepped.state });
       }
       if (haltReason?.kind === "player-choice-required") {
@@ -312,7 +323,10 @@ export function runBattleScriptFaintedActionsOrchestration(
 ): BattleScriptFaintedActionsResult {
   const faintedBattlers = collectFaintedBattlers(initialState.rulesContext);
   if (faintedBattlers.length === 0) {
-    return Object.freeze({ kind: "no-fainted-battlers", state: initialState });
+    return Object.freeze({
+      kind: "no-fainted-battlers",
+      state: runPendingSwitchinEffects(program, handlers, initialState),
+    });
   }
 
   let state = initialState;
@@ -332,6 +346,119 @@ export function runBattleScriptFaintedActionsOrchestration(
     state = run.state;
   }
 
+  return runFaintedBattlerHandlers(program, handlers, state, faintedBattlers);
+}
+
+function replaceBattler(
+  rules: BattleScriptRulesContext,
+  battler: BattleScriptBattlerId,
+  patch: Partial<BattleScriptRulesContext["battlers"][number]>,
+): BattleScriptRulesContext {
+  const battlers = rules.battlers.map((candidate, index) =>
+    index === battler ? Object.freeze({ ...candidate, ...patch }) : candidate
+  ) as unknown as BattleScriptRulesBattlers;
+  return Object.freeze({ ...rules, battlers: Object.freeze(battlers) });
+}
+
+function requireCompletedPendingScript(
+  program: BattleScriptProgram,
+  handlers: BattleScriptOpcodeHandlers<BattleScriptRulesContext>,
+  state: BattleScriptMachineState<BattleScriptRulesContext>,
+  label: string,
+): BattleScriptMachineState<BattleScriptRulesContext> {
+  const result = runScriptToOwnEnd(program, handlers, startBattleScriptExecute(program, label, state));
+  if (result.kind !== "terminal") {
+    throw new Error(`fainted-actions state 6 ${label} did not complete (${result.kind})`);
+  }
+  return result.state;
+}
+
+/** `HandleFaintedMonActions` state 6: pending Intimidate, Trace, then the reachable White Herb item pass. */
+function runPendingSwitchinEffects(
+  program: BattleScriptProgram,
+  handlers: BattleScriptOpcodeHandlers<BattleScriptRulesContext>,
+  initialState: BattleScriptMachineState<BattleScriptRulesContext>,
+): BattleScriptMachineState<BattleScriptRulesContext> {
+  let state = initialState;
+  for (let battler = 0; battler < state.rulesContext.battleTopology.battlersCount; battler += 1) {
+    const id = battler as BattleScriptBattlerId;
+    const active = state.rulesContext.battlers[id];
+    if (active.ability !== PENDING_ENTRY_ABILITY.intimidate || (active.status3 & STATUS3_INTIMIDATE_POKES) === 0) continue;
+    const rules = replaceBattler(state.rulesContext, id, {
+      status3: (active.status3 & ~STATUS3_INTIMIDATE_POKES) >>> 0,
+    });
+    state = requireCompletedPendingScript(program, handlers, Object.freeze({
+      ...state,
+      haltReason: null,
+      rulesContext: Object.freeze({
+        ...rules,
+        aiObservedAbilityIds: Object.freeze(
+          rules.aiObservedAbilityIds.map((value, index) =>
+            index === id ? PENDING_ENTRY_ABILITY.intimidate : value
+          ),
+        ) as BattleScriptRulesContext["aiObservedAbilityIds"],
+        scriptingBattler: id,
+        lastUsedAbility: PENDING_ENTRY_ABILITY.intimidate,
+      }),
+    }), INTIMIDATE_LABEL);
+  }
+  for (let battler = 0; battler < state.rulesContext.battleTopology.battlersCount; battler += 1) {
+    const id = battler as BattleScriptBattlerId;
+    const active = state.rulesContext.battlers[id];
+    if (active.ability !== PENDING_ENTRY_ABILITY.trace || (active.status3 & STATUS3_TRACE) === 0) continue;
+    const target = state.rulesContext.battlers.findIndex((candidate, index) =>
+      index < state.rulesContext.battleTopology.battlersCount
+      && candidate.side !== active.side
+      && candidate.hp !== 0
+      && candidate.ability !== 0
+    );
+    if (target < 0) continue;
+    const opposing = target as BattleScriptBattlerId;
+    const copiedAbility = state.rulesContext.battlers[opposing].ability;
+    const rules = replaceBattler(state.rulesContext, id, {
+      ability: copiedAbility,
+      status3: (active.status3 & ~STATUS3_TRACE) >>> 0,
+    });
+    state = requireCompletedPendingScript(program, handlers, Object.freeze({
+      ...state,
+      haltReason: null,
+      rulesContext: Object.freeze({
+        ...rules,
+        aiObservedAbilityIds: Object.freeze(
+          rules.aiObservedAbilityIds.map((value, index) =>
+            index === id ? copiedAbility : value
+          ),
+        ) as BattleScriptRulesContext["aiObservedAbilityIds"],
+        scriptingBattler: id,
+        lastUsedAbility: copiedAbility,
+        battleTextBuff1MonNick: Object.freeze({
+          battler: opposing,
+          partyIndex: state.rulesContext.battlers[opposing].partyIndex,
+        }),
+      }),
+    }), TRACE_LABEL);
+  }
+  const player = state.rulesContext.battlers[0];
+  if (player.hp !== 0 && player.item === ITEM_WHITE_HERB && player.statStages.some((stage) => stage < 6)) {
+    const rules = replaceBattler(state.rulesContext, 0, {
+      statStages: Object.freeze(player.statStages.map((stage) => stage < 6 ? 6 : stage)) as never,
+    });
+    state = requireCompletedPendingScript(program, handlers, Object.freeze({
+      ...state,
+      haltReason: null,
+      rulesContext: Object.freeze({ ...rules, scriptingBattler: 0 }),
+    }), WHITE_HERB_END2_LABEL);
+  }
+  return state;
+}
+
+function runFaintedBattlerHandlers(
+  program: BattleScriptProgram,
+  handlers: BattleScriptOpcodeHandlers<BattleScriptRulesContext>,
+  initialState: BattleScriptMachineState<BattleScriptRulesContext>,
+  faintedBattlers: readonly BattleScriptBattlerId[],
+): BattleScriptFaintedActionsResult {
+  let state = initialState;
   for (const faintedBattler of faintedBattlers) {
     state = enterFaintedBattlerContext(state, faintedBattler);
     const started = startBattleScriptExecute(program, HANDLE_FAINTED_MON_LABEL, state);
@@ -355,9 +482,10 @@ export function runBattleScriptFaintedActionsOrchestration(
   // nonzero means its own terminal jump was taken (BattleScript_FaintedMonEnd via the WON/LOST/DREW
   // path); zero means every fainted battler instead ran the full forced-switch dance to the SAME
   // BattleScript_FaintedMonEnd label (docs/forced-switch-ground-truth.md §1) -- the battle resumes.
-  return state.rulesContext.battleOutcome !== 0
-    ? Object.freeze({ kind: "terminal", state })
-    : Object.freeze({ kind: "resumed", state });
+  const completed = runPendingSwitchinEffects(program, handlers, state);
+  return completed.rulesContext.battleOutcome !== 0
+    ? Object.freeze({ kind: "terminal", state: completed })
+    : Object.freeze({ kind: "resumed", state: completed });
 }
 
 /**
@@ -390,6 +518,7 @@ export function resumeBattleScriptFaintedActionsAfterPlayerChoice(
     );
   }
   const rules = haltedState.rulesContext;
+  const resumedBattler = reason.battler;
   const monToSwitchIntoId = Object.freeze(
     rules.monToSwitchIntoId.map((value, index) => (index === reason.battler ? chosenPartyIndex : value)),
   ) as unknown as BattleScriptRulesContext["monToSwitchIntoId"];
@@ -407,7 +536,18 @@ export function resumeBattleScriptFaintedActionsAfterPlayerChoice(
     return Object.freeze({ kind: "non-terminal-barrier", state: run.state, instruction: run.instruction });
   }
   const state = run.state;
-  return state.rulesContext.battleOutcome !== 0
-    ? Object.freeze({ kind: "terminal", state })
-    : Object.freeze({ kind: "resumed", state });
+  const remainingFaintedBattlers = collectFaintedBattlers(state.rulesContext)
+    .filter((battler) => battler > resumedBattler);
+  if (remainingFaintedBattlers.length !== 0) {
+    return runFaintedBattlerHandlers(
+      program,
+      handlers,
+      state,
+      Object.freeze(remainingFaintedBattlers),
+    );
+  }
+  const completed = runPendingSwitchinEffects(program, handlers, state);
+  return completed.rulesContext.battleOutcome !== 0
+    ? Object.freeze({ kind: "terminal", state: completed })
+    : Object.freeze({ kind: "resumed", state: completed });
 }

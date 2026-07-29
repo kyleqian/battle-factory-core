@@ -444,6 +444,6 @@ describe("source-complete B_SCR_OP_TRYSWAPITEMS registration", () => {
     });
     // One accuracy roll for Trick plus Tackle's four standard hit-chain
     // rolls; the direct opcode test above proves tryswapitems adds none.
-    expect(result.state.rng.calls).toBe(5);
+    expect(result.state.rng.calls).toBe(6);
   });
 });

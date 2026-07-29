@@ -148,6 +148,7 @@ export const BATTLE_SCRIPT_HITMARKER_ATTACKSTRING_PRINTED = 1 << 10;
 export const BATTLE_SCRIPT_HITMARKER_SWAP_ATTACKER_TARGET = 1 << 12;
 export const BATTLE_SCRIPT_MOVE_RESULT_FAILED = 1 << 5;
 export const BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT = (1 << 0) | (1 << 3) | (1 << 5);
+export const BATTLE_SCRIPT_MOVE_FLAG_MAKES_CONTACT = 1 << 0;
 export const BATTLE_SCRIPT_MOVE_FLAG_MIRROR_MOVE_AFFECTED = 1 << 4;
 export const BATTLE_SCRIPT_EFFECT_BATON_PASS = 127;
 export const BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE = 1 << 0;
@@ -665,6 +666,10 @@ export type BattleScriptRulesContext = Readonly<
     lastUsedAbility: number;
     /** Source u16 gLastUsedItem, prepared by item-steal/knock-off messages. */
     lastUsedItem: number;
+    /** BattleHistory reveal handoff populated only at source RecordAbilityBattle-equivalent activation sites. */
+    aiObservedAbilityIds: BattleScriptMoveEndBytes;
+    /** BattleHistory reveal handoff populated only at source RecordItemEffectBattle-equivalent activation sites. */
+    aiObservedItemEffects: BattleScriptMoveEndBytes;
     /** Source u16 gPaydayMoney. */
     paydayMoney: number;
     /** Source u8 gBattleStruct->moneyMultiplier. */
@@ -780,6 +785,12 @@ export type BattleScriptRulesContext = Readonly<
     sideTimers: readonly [BattleScriptSideTimerState, BattleScriptSideTimerState];
     /** Source u32 gBattleWeather. */
     weather: number;
+    /**
+     * Source u16 gRandomTurnNumber. BattleTurnPassed draws this once before
+     * next-turn action selection; every same-turn Quick Claw comparison
+     * reads the stored value without advancing RNG.
+     */
+    randomTurnNumber: number;
     /** Source u8 gWishFutureKnock.weatherDuration -- the one shared weather timer every Cmd_set<weather> writes (include/battle.h:172, byte offset 0x28). */
     weatherTimer: number;
     /** Source gWishFutureKnock.wishCounter[MAX_BATTLERS_COUNT], owned by positional battler slots. */
@@ -853,6 +864,8 @@ export type BattleScriptRulesContextInput = Readonly<{
   gBattleEnvironment?: number;
   lastUsedAbility?: number;
   lastUsedItem?: number;
+  aiObservedAbilityIds?: readonly number[];
+  aiObservedItemEffects?: readonly number[];
   paydayMoney?: number;
   moneyMultiplier?: number;
   playerMoney?: number;
@@ -925,6 +938,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   mistTimers?: readonly [number?, number?];
   sideTimers?: readonly [BattleScriptSideTimerInput?, BattleScriptSideTimerInput?];
   weather?: number;
+  randomTurnNumber?: number;
   weatherTimer?: number;
   wishCounter?: readonly number[];
   wishMonId?: readonly number[];
@@ -1083,6 +1097,12 @@ const BATTLE_SCRIPT_MOVE_TYPE_IDS = new Map<string, number>([
   "TYPE_DARK",
 ].map((name, id) => [name, id]));
 
+const BATTLE_SCRIPT_MOVE_TYPE_NAMES = Object.freeze(
+  [...BATTLE_SCRIPT_MOVE_TYPE_IDS.entries()]
+    .sort((left, right) => left[1] - right[1])
+    .map(([name]) => name),
+);
+
 const GENERATED_MOVE_EFFECTS = new Map<number, number>(
   (topologyData.moves as readonly GeneratedMoveEffectRow[]).map(
     ({ id, effectId }) => [id, effectId],
@@ -1106,9 +1126,8 @@ const GENERATED_MOVE_TYPES = new Map<number, number>(
 const GENERATED_MOVE_FLAGS = new Map<number, number>(
   (movesData.moves as readonly GeneratedMoveTypeRow[]).map(({ id, flags }) => [
     id,
-    flags.includes("FLAG_MIRROR_MOVE_AFFECTED")
-      ? BATTLE_SCRIPT_MOVE_FLAG_MIRROR_MOVE_AFFECTED
-      : 0,
+    (flags.includes("FLAG_MAKES_CONTACT") ? BATTLE_SCRIPT_MOVE_FLAG_MAKES_CONTACT : 0)
+      | (flags.includes("FLAG_MIRROR_MOVE_AFFECTED") ? BATTLE_SCRIPT_MOVE_FLAG_MIRROR_MOVE_AFFECTED : 0),
   ]),
 );
 
@@ -1200,7 +1219,17 @@ export function resolveBattleScriptMoveType(
   return type;
 }
 
-/** Resolves the source gBattleMoves[move].flags bits needed by state 15. */
+/** Resolves GET_MOVE_TYPE to the source TYPE_* identity used by battler state. */
+export function resolveBattleScriptMoveTypeName(
+  currentMove: number,
+  dynamicMoveType: number,
+): string {
+  const type = BATTLE_SCRIPT_MOVE_TYPE_NAMES[resolveBattleScriptMoveType(currentMove, dynamicMoveType)];
+  if (type === undefined) throw new Error("resolved move type is outside the source TYPE_* domain");
+  return type;
+}
+
+/** Resolves the source gBattleMoves[move].flags bits needed by moveend states 3 and 15. */
 export function resolveBattleScriptMoveFlags(move: number): number {
   const flags = GENERATED_MOVE_FLAGS.get(move);
   if (flags === undefined) {
@@ -2470,6 +2499,16 @@ export function createBattleScriptRulesContext(
     "enigmaBerryHoldEffects",
   ) as BattleScriptMoveEndBytes;
   const moveHistory = createBattleScriptMoveHistory(input.moveHistory);
+  const aiObservedAbilityIds = createMoveEndArray(
+    input.aiObservedAbilityIds,
+    0xff,
+    "aiObservedAbilityIds",
+  ) as BattleScriptMoveEndBytes;
+  const aiObservedItemEffects = createMoveEndArray(
+    input.aiObservedItemEffects,
+    0xff,
+    "aiObservedItemEffects",
+  ) as BattleScriptMoveEndBytes;
   const battleTopology = createBattleScriptBattleTopology(input.battleTopology);
   const party = createBattleScriptPartyBySide(input.party);
   return Object.freeze({
@@ -2502,6 +2541,8 @@ export function createBattleScriptRulesContext(
       "lastUsedAbility",
     ),
     lastUsedItem: requireUnsigned(input.lastUsedItem ?? 0, 0xffff, "lastUsedItem"),
+    aiObservedAbilityIds,
+    aiObservedItemEffects,
     paydayMoney: requireUnsigned(input.paydayMoney ?? 0, 0xffff, "paydayMoney"),
     moneyMultiplier: requireUnsigned(input.moneyMultiplier ?? 1, 0xff, "moneyMultiplier"),
     playerMoney: requireUnsigned(input.playerMoney ?? 0, 999_999, "playerMoney"),
@@ -2603,6 +2644,7 @@ export function createBattleScriptRulesContext(
       buildSideTimerState(input.sideTimers?.[1], 1),
     ]) as unknown as readonly [BattleScriptSideTimerState, BattleScriptSideTimerState],
     weather: requireUnsigned(input.weather ?? 0, 0xffff_ffff, "weather") >>> 0,
+    randomTurnNumber: requireUnsigned(input.randomTurnNumber ?? 0xffff, 0xffff, "randomTurnNumber"),
     weatherTimer: requireUnsigned(input.weatherTimer ?? 0, 0xff, "weatherTimer"),
     wishCounter: Object.freeze([
       requireUnsigned(input.wishCounter?.[0] ?? 0, 0xff, "wishCounter[0]"),
@@ -2724,6 +2766,12 @@ export const resolveRulesBattlerForBattleScript: NonNullable<
   }
   if (selector === BATTLE_SCRIPT_BATTLER_SELECTORS.BS_EFFECT_BATTLER) {
     return context.state.rulesContext.selectorRoles.effectBattler;
+  }
+  // battle_util.c:708-710: unlike the position-derived selectors below it,
+  // BS_BATTLER_0 is the literal battler id 0. Weather-ability scripts use
+  // this for the field animation during pre-first-turn entry hooks.
+  if (selector === BATTLE_SCRIPT_BATTLER_SELECTORS.BS_BATTLER_0) {
+    return 0;
   }
   if (selector === BATTLE_SCRIPT_BATTLER_SELECTORS.BS_FAINTED) {
     return context.state.rulesContext.selectorRoles.fainted;

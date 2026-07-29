@@ -995,7 +995,7 @@ type ItemsTickOutcome =
   | Readonly<{ kind: "case-barrier"; state: MachineState; detail: string }>;
 
 /** `WEATHER_HAS_EFFECT` (include/battle_util.h:47), modeled the same as `battleScriptDamagingWeatherOpcode.ts`'s own `battlerCarriesCloudNine` precedent. */
-function weatherHasEffect(rulesContext: BattleScriptRulesContext): boolean {
+export function weatherHasEffect(rulesContext: BattleScriptRulesContext): boolean {
   const count = rulesContext.battleTopology.battlersCount;
   for (let i = 0; i < count; i += 1) {
     if (rulesContext.battlers[i]!.ability === ABILITY_CLOUD_NINE) return false;
@@ -1159,7 +1159,15 @@ function runItemsTick(
   if (holdEffect === HOLD_EFFECT_LEFTOVERS) {
     if (moveTurn || b.hp >= b.maxHP) return Object.freeze({ kind: "advance", state });
     const heal = Math.min(floorDivAtLeastOne(b.maxHP, 16), b.maxHP - b.hp);
-    const rc = Object.freeze({ ...state.rulesContext, battleMoveDamage: -heal });
+    const rc = Object.freeze({
+      ...state.rulesContext,
+      battleMoveDamage: -heal,
+      aiObservedItemEffects: Object.freeze(
+        state.rulesContext.aiObservedItemEffects.map((value, index) =>
+          index === battler ? holdEffect : value
+        ),
+      ) as BattleScriptRulesContext["aiObservedItemEffects"],
+    });
     return runTickScript(program, handlers, state, rc, battler, ITEM_HEAL_HP_END2_LABEL);
   }
 
@@ -2157,6 +2165,31 @@ function finishFaintedThenDelayed(
     ? "next-turn"
     : result.kind;
   return runFutureAttacksAfterFaints(program, handlers, result.state, completionKind);
+}
+
+/**
+ * Resumes `BattleTurnPassed` immediately after a player-selected faint
+ * replacement finishes `HandleFaintedMonActions`.
+ *
+ * The C main loop keeps the completed field/battler cursors in
+ * `gBattleStruct` while `HandleFaintedMonActions` blocks for the party
+ * choice (`battle_main.c:3963-3972`). Once the replacement script returns,
+ * it does not call `DoFieldEndTurnEffects` or `DoBattlerEndTurnEffects`
+ * again; it continues with `HandleWishPerishSongOnTurnEnd`, whose own
+ * positional cursors then lead into the final cleanup
+ * (`battle_main.c:3970-3974`, `battle_util.c:1779-1892`).
+ *
+ * The reducer has already collapsed those completed loops into `state`, so
+ * this is the source-equivalent continuation seam. Re-entering
+ * `runBattleEndTurnOrchestration` here would incorrectly apply poison,
+ * burn, Leftovers, weather, and every other completed end-turn effect twice.
+ */
+export function resumeBattleEndTurnAfterFaintedActions(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+): BattleEndTurnResult {
+  return runFutureAttacksAfterFaints(program, handlers, state, "resumed");
 }
 
 /**

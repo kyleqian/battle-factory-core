@@ -166,12 +166,14 @@ const HOLD_EFFECT_ID_LUCKY_PUNCH = 63;
 const HOLD_EFFECT_ID_STICK = 66;
 
 /**
- * hold_effects.h ids -> damageCalc.ts's HOLD_EFFECT_* spellings, for the
- * CalculateBaseDamage hold-item block (sHoldEffectToType's 17 type-power
- * rows, Choice Band, and the 6 species-locked items) - every id that block
- * reads, mapped once here rather than as another per-effect ternary chain.
+ * hold_effects.h ids -> engine HOLD_EFFECT_* spellings. This is the shared
+ * numeric-id resolver for consumers whose pure helpers retain a string ABI:
+ * CalculateBaseDamage's item block and GetWhoStrikesFirst's Macho Brace
+ * check. Keep each source id here rather than creating consumer-local tables.
  */
-const HOLD_EFFECT_NAME_BY_ID: Readonly<Record<number, string>> = Object.freeze({
+export const HOLD_EFFECT_NAME_BY_ID: Readonly<Record<number, string>> = Object.freeze({
+  24: "HOLD_EFFECT_MACHO_BRACE",
+  26: "HOLD_EFFECT_QUICK_CLAW",
   29: "HOLD_EFFECT_CHOICE_BAND",
   31: "HOLD_EFFECT_BUG_POWER",
   34: "HOLD_EFFECT_SOUL_DEW",
@@ -2257,8 +2259,9 @@ function createHealthbarupdateOpcodeHandler(
  * protectPhysicalBattlerId/protectSpecialDmg/protectSpecialBattlerId,
  * cleared once per turn -- docs/counter-retaliation-design.md §1.2/§2.3
  * explains why these cannot share a field despite the identical value),
- * matching the shellBellDmg/gBideDmg-via-gBattleScripting omissions
- * elsewhere in this rung. The real (non-substitute, non-negative-damage) HP
+ * Shell Bell's first non-passive damage receipt is stored in parallel with
+ * those damage trackers (`battle_script_commands.c:1932-1933`). The real
+ * (non-substitute, non-negative-damage) HP
  * write also lands in the party slice at this battler's own side/partyIndex
  * (docs/faint-outcome-ground-truth.md §3.2's sync point), keeping
  * Cmd_checkteamslost's party-wide sum consistent with the hit chain's own
@@ -2297,7 +2300,15 @@ function createDatahpupdateOpcodeHandler(
     if (substituteActive) {
       const remaining = battlerState.substituteHP;
       if (remaining >= damage) {
-        const nextRulesContext = withBattler(rulesContext, battler, { substituteHP: remaining - damage });
+        const nextRulesContext = withBattler(rulesContext, battler, {
+          substituteHP: remaining - damage,
+          specialStatus: Object.freeze({
+            ...battlerState.specialStatus,
+            shellBellDmg: battlerState.specialStatus.shellBellDmg === 0
+              ? damage
+              : battlerState.specialStatus.shellBellDmg,
+          }),
+        });
         return transitionBattleScriptCommand(
           context,
           Object.freeze({ kind: "advance" }),
@@ -2372,8 +2383,20 @@ function createDatahpupdateOpcodeHandler(
       battlerChanges = {
         ...battlerChanges,
         specialStatus: physical
-          ? Object.freeze({ ...battlerState.specialStatus, physicalDmg: dealt })
-          : Object.freeze({ ...battlerState.specialStatus, specialDmg: dealt }),
+          ? Object.freeze({
+            ...battlerState.specialStatus,
+            physicalDmg: dealt,
+            shellBellDmg: battlerState.specialStatus.shellBellDmg === 0
+              ? dealt
+              : battlerState.specialStatus.shellBellDmg,
+          })
+          : Object.freeze({
+            ...battlerState.specialStatus,
+            specialDmg: dealt,
+            shellBellDmg: battlerState.specialStatus.shellBellDmg === 0
+              ? dealt
+              : battlerState.specialStatus.shellBellDmg,
+          }),
         ...(physical
           ? { protectPhysicalDmg: dealt, protectPhysicalBattlerId: retaliationBattlerId }
           : { protectSpecialDmg: dealt, protectSpecialBattlerId: retaliationBattlerId }),
@@ -3783,6 +3806,23 @@ function createSeteffectprimaryOpcodeHandler(): BattleScriptOpcodeHandler<Battle
   };
 }
 
+/** Cmd_seteffectsecondary: `SetMoveEffect(FALSE, 0)`, then clear MOVE_EFFECT_BYTE. */
+function createSeteffectsecondaryOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
+  return (context) => {
+    const transition = applySetMoveEffect(
+      context,
+      context.state.rulesContext,
+      context.state.rulesContext.moveEffectByte,
+      false,
+      false,
+    );
+    return Object.freeze({
+      ...transition,
+      rulesContext: Object.freeze({ ...transition.rulesContext, moveEffectByte: 0 }),
+    });
+  };
+}
+
 /**
  * Cmd_printfromtable (battle_script_commands.c:2180-2192). Resolves
  * table[MULTISTRING_CHOOSER] to a literal STRINGID_* and feeds it to the
@@ -4407,6 +4447,7 @@ export function createBattleScriptHitChainOpcodeHandlers(
   install("B_SCR_OP_RESULTMESSAGE", createResultmessageOpcodeHandler(ports.isControllerIdle, ports.prepareMessage));
   install("B_SCR_OP_SETEFFECTWITHCHANCE", createSeteffectwithchanceOpcodeHandler());
   install("B_SCR_OP_SETEFFECTPRIMARY", createSeteffectprimaryOpcodeHandler());
+  install("B_SCR_OP_SETEFFECTSECONDARY", createSeteffectsecondaryOpcodeHandler());
   install("B_SCR_OP_PRINTFROMTABLE", createPrintfromtableOpcodeHandler(ports.isControllerIdle, ports.prepareMessage));
   install(
     "B_SCR_OP_UPDATESTATUSICON",
