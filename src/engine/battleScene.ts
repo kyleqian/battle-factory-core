@@ -14438,7 +14438,9 @@ const PARTY_ICON_BASE: Record<PartyMenuIconLayer["species"], { x: number; y: num
 };
 
 function drawTurn15PartyIcon(fb: Uint8Array, layer: PartyMenuIconLayer): void {
-  const asset = partyMonIcons[layer.species]!;
+  // The 376-species catalog (be7a4fee) is keyed by SPECIES_* constants; the
+  // pre-existing plain-name keys were dropped in that regeneration.
+  const asset = partyMonIcons[`SPECIES_${layer.species}`]!;
   const base = PARTY_ICON_BASE[layer.species];
   // Base x/y is OAM center; offsets are the RAM-derived selected hop or
   // AnimateSelectedPartyIcon's permanent deselected offset.

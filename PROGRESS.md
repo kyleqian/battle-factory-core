@@ -57,13 +57,36 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   harness-side); (v) remaining CBM/CV arms (Roar next candidate, needs
   party staging); (vi) reveal class-B sites with their named barriers;
   (vii) Gate-6 interaction matrix.
+- **Day-audit (read-only Terra, post-surge — pattern now 4-for-4):** three
+  real cross-step defects, all invisible to per-slice suites. (a)
+  **[FIXED same-session]** forced-switch UI could submit the fainted
+  Pokémon into a kernel throw — confirm guard + Tier-1 pin landed;
+  refusal-message remainder filed as **ISSUES #49**. (b) While proving (a)
+  pixel-neutral, found `turn15-party-select(.json/-delayed)` had been
+  **crashing on master since ~12:00**: the morning session's 376-species
+  icon catalog (`be7a4fee`, merged after entry 694's verification) rekeyed
+  `party-mon-icons.json` to `SPECIES_*`, breaking `drawTurn15PartyIcon`'s
+  plain-name lookup — **[FIXED]** key remap; both windows back to
+  **200/200 + 200/200 exact** (new-catalog pixel data proved inert:
+  palette[0] transparent-slot difference only). (c) FIGHT cursor resets
+  per request where source persists `gMoveSelectionCursor` per battler →
+  **ISSUES #50** (Slice-6 boundary work). (d) generated draft state
+  ignored by the summary screen (anchor globals) → **ISSUES #51**. Audit
+  verdicts otherwise: handoff-seam stale-ID rejection, live-PP single
+  source, and source-exact action-cursor edges all CLEAN; lifecycle
+  teardown correctly deferred to Slice 6. Final post-fix state: **518
+  files / 5251 tests + 1 skip**, build, both party-select windows exact.
 - **Notes:** oracle freshness FAIL at orient was again the docs-only
   false positive (807b449 NOTES.md-only; services kept, healthy all day).
   Two papercuts recorded: cross-lane full-suite contention (new entry,
   workaround now in briefs: full suite once at end, staggered) and
   parallel compares racing over `tools/compare/out/latest` (bumped
   below). Side-lane briefs naming the last supervisor-verified green
-  commit worked cleanly all session (zero base-drift bites).
+  commit worked cleanly all session (zero base-drift bites). Standing
+  lesson from (b): a catalog regeneration that rekeys/reshapes an
+  existing asset must rerun that asset's consumer traces, not just
+  `npm test` — the fourteen-window battle-command set never covered the
+  party-select windows.
 
 ---
 

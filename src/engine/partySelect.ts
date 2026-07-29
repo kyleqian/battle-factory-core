@@ -473,7 +473,13 @@ export function advancePartySelect(state: PartySelectState, newKeys: ReadonlySet
   if (next.sendOutElapsed !== null || next.elapsed < PARTY_LIST_INPUT_ELAPSED) return next;
   if (!next.submenuOpen && newKeys.has("DOWN")) return { ...next, cursor: "magby" };
   if (newKeys.has("A")) {
-    return next.submenuOpen ? { ...next, sendOutElapsed: 0 } : { ...next, submenuOpen: true };
+    if (!next.submenuOpen) return { ...next, submenuOpen: true };
+    // Source SEND OUT refuses a fainted row ("... has no energy to
+    // battle!" stays in the menu); the confirm must never hand an illegal
+    // party index to the kernel. The refusal message window is ISSUES #49.
+    const selected = next.party.find((member) => member.partyIndex === selectedPartyIndex(next));
+    if (!selected?.legal) return next;
+    return { ...next, sendOutElapsed: 0 };
   }
   return next;
 }

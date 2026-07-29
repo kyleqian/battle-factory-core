@@ -5,6 +5,52 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #49 — forced-switch SEND OUT on a fainted row lacks the source refusal message
+
+**Symptom:** the party-select reducer now *refuses* SEND OUT confirmation on
+an illegal (fainted) row (guard landed 2026-07-29 after the day-audit found
+the old path submitting `faintedPartyIndex` into a kernel throw), but the
+refusal is a silent no-op. The source prints "<mon> has no energy to
+battle!" in the party-menu message window and stays in the menu.
+**Confirmed:** `partySelect.ts` guard + Tier-1 pin ("refuses SEND OUT
+confirmation on the fainted row"); canonical/delayed windows remain 200/200.
+**Lead:** the message window is ordinary party-menu chrome; extract its text
+rendering when the voluntary party-selector renderer slice (battle-command
+design §4 Slice 5 handoff dependency) is built — same screen family.
+
+## #50 — new battle-command presentations reset the FIGHT cursor; source persists it per battler
+
+**Symptom:** every `createBattleCommandPresentation` starts `fightCursor`/
+`fightDisplayCursor` at 0. Emerald seeds the move menu from the persistent
+`gMoveSelectionCursor[battler]` (`battle_controller_player.c:2643`), which
+resets on switch-in (`:2185`) or explicit controller reset (`:3101`) — not
+per command request. Cross-request cursor persistence is therefore wrong the
+moment Slice 6 chains two live requests (canonical windows can't see it:
+each recorded window is a fresh lifecycle).
+**Confirmed:** day-audit 2026-07-29 with source citations above; repro shape:
+navigate to slot 3, submit, construct the next request's presentation → slot
+0 instead of 3.
+**Lead:** keep a per-battler source cursor OUTSIDE the request-owned
+lifecycle (the design's §2.2 identity note already permits this); seed each
+new presentation from it and reset only on source-equivalent switch/reset
+events. Belongs in Slice 6's boundary-ownership work.
+
+## #51 — summary screen ignores generated draft state; renders anchor identity for every slot
+
+**Symptom:** the draft generated-slots adapter (`73543153`) carries only
+`{species, category}` per slot, and the summary path
+(`summaryInfoPage.ts:88,96`, `core.ts:1974`) reads the fixed anchor
+`draft-pool-header.json`/`anchor-state.json` globals with only a slot
+number. Any generated six-mon draft — including un-rented pool slots
+navigated by summary UP/DOWN — renders anchor identity/details.
+**Confirmed:** day-audit 2026-07-29 (file:line above). Canonical pixels are
+unaffected (the anchor IS the canonical pool), so no current trace can see
+this.
+**Lead:** preserve six full rental presentation records in the draft/summary
+state and make summary renderers consume them instead of anchor globals —
+the draft-window breadth slice's natural next step (needs the summary data
+surface: moves/item/nature per record, all already in rental records).
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn
