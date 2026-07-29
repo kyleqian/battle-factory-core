@@ -31,6 +31,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **2478/2140/1911/1436**. An already-chosen trainer switch draws zero;
   the equal-speed move receipt stays four action draws + one boundary draw.
   Pursuit interception remains one symmetric named barrier/call site.
+- **Supervisor fold (post-step):** ROM receipt §7B merged (`bfb7cff0`):
+  Wonder Guard direct selector — success `%3=1` → switch index 1, delta 1;
+  control `%3=2` → move chooser, delta 8; both byte-identical twice-fresh
+  (Shedinja staging correction documented). Supervisor reran the union:
+  **496/5087**, build, seeds 18/20/21/23 = 2478/2140/1911/1436 unchanged.
 - **Next / notes:** R13-C owns live-driver policy wiring; its
   `factory-ai-switch-precheck-unimplemented` constraint is intentionally
   unchanged. No unsupported/import ratchet, census byte, generated artifact,
