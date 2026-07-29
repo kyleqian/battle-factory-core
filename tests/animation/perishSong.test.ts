@@ -5,6 +5,11 @@ import {
   perishSongBackgroundBlackCoefficient,
   perishSongNotesAtAge,
 } from "../../src/animation/perishSong.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnPerishSongView,
+  type SceneOnPresentationBattler,
+} from "../../src/animation/sceneOnPresentation.ts";
 
 describe("Perish Song source reducer", () => {
   it("ports all sixteen MUSIC_NOTES_2 creates and their fixed-point callbacks", () => {
@@ -52,7 +57,7 @@ describe("Perish Song source reducer", () => {
     });
     expect(perishSongAtAge(108, "player")).toMatchObject({
       paletteSentinelActive: true,
-      musicNotes2PaletteRestored: true,
+      musicNotes2PaletteGrayscale: true,
       battlersGrayscale: false,
     });
     expect(perishSongAtAge(109, "player").battlersGrayscale).toBe(true);
@@ -67,5 +72,47 @@ describe("Perish Song source reducer", () => {
       battlersGrayscale: false,
     });
     expect(perishSongAtAge(PERISH_SONG_FRAME_COUNT, "opponent").active).toBe(false);
+  });
+
+  it("crosses the typed seam without owning the battle timers", () => {
+    const attacker: SceneOnPresentationBattler = {
+      species: "MURKROW",
+      geometry: {
+        side: "player",
+        spriteCorner: { x: 40, y: 57 },
+        animationCenter: { x: 72, y: 89 },
+        battlePositionCenter: { x: 72, y: 80 },
+      },
+    };
+    const target: SceneOnPresentationBattler = {
+      species: "ONIX",
+      geometry: {
+        side: "opponent",
+        spriteCorner: { x: 144, y: 10 },
+        animationCenter: { x: 176, y: 42 },
+        battlePositionCenter: { x: 176, y: 40 },
+      },
+    };
+    const stage = createSceneOnMovePresentation({
+      move: "PERISH_SONG",
+      attacker,
+      target,
+      fieldProfile: {
+        playerHp: 156,
+        playerMaxHp: 156,
+        opponentHp: 142,
+        opponentMaxHp: 142,
+        playerPerishSongTurns: 3,
+        opponentPerishSongTurns: 3,
+      },
+    });
+    const view = sceneOnPerishSongView({ ...stage, age: 124 });
+    expect(view.attacker).toBe(attacker);
+    expect(view.target).toBe(target);
+    expect(view.notes).toHaveLength(16);
+    expect(stage.config.fieldProfile).toMatchObject({
+      playerPerishSongTurns: 3,
+      opponentPerishSongTurns: 3,
+    });
   });
 });

@@ -304,6 +304,10 @@ import {
   type HowlState,
 } from "./howl.ts";
 import {
+  perishSongAtAge,
+  type PerishSongState,
+} from "./perishSong.ts";
+import {
   needleArmAtAge,
   type NeedleArmState,
 } from "./needleArm.ts";
@@ -1339,6 +1343,20 @@ export interface SceneOnHowlConfig {
   readonly fieldProfile: Readonly<SceneOnHowlFieldProfile>;
 }
 
+export interface SceneOnPerishSongFieldProfile
+  extends SceneOnDragonRageFieldProfile {
+  /** Immutable battle-engine result; presentation never advances these. */
+  readonly playerPerishSongTurns: 3;
+  readonly opponentPerishSongTurns: 3;
+}
+
+export interface SceneOnPerishSongConfig {
+  readonly move: "PERISH_SONG";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnPerishSongFieldProfile>;
+}
+
 export interface SceneOnNeedleArmConfig {
   readonly move: "NEEDLE_ARM";
   readonly attacker: SceneOnPresentationBattler;
@@ -1579,6 +1597,7 @@ export type SceneOnMoveConfig =
   | SceneOnFollowMeConfig
   | SceneOnRestConfig
   | SceneOnHowlConfig
+  | SceneOnPerishSongConfig
   | SceneOnNeedleArmConfig
   | SceneOnSandstormConfig
   | SceneOnTailGlowConfig
@@ -1656,6 +1675,8 @@ export type SceneOnRestPresentationState =
   SceneOnMovePresentationState<SceneOnRestConfig>;
 export type SceneOnHowlPresentationState =
   SceneOnMovePresentationState<SceneOnHowlConfig>;
+export type SceneOnPerishSongPresentationState =
+  SceneOnMovePresentationState<SceneOnPerishSongConfig>;
 export type SceneOnNeedleArmPresentationState =
   SceneOnMovePresentationState<SceneOnNeedleArmConfig>;
 export type SceneOnSandstormPresentationState =
@@ -1879,6 +1900,12 @@ export interface SceneOnRestView extends RestState {
 }
 
 export interface SceneOnHowlView extends HowlState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnPerishSongView extends PerishSongState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3662,6 +3689,24 @@ export function sceneOnHowlView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_PERISH_SONG's first displayed source-script frame. */
+export function sceneOnPerishSongView(
+  state: SceneOnPerishSongPresentationState,
+): SceneOnPerishSongView {
+  if (state.config.move !== "PERISH_SONG") {
+    throw new Error(`expected PERISH_SONG presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...perishSongAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
     ),
   };
 }

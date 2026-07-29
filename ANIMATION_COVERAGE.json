@@ -2,6 +2,35 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_PERISH_SONG",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal challenge-2 Level-50 set-289 FRONTIER_MON_MURKROW_2 versus ONIX Scene-ON parties pass the entire 259-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 71-329 reproduce evidence 2127f8270310ceae01c00debfafdfb276ad80cfbb422b26672b27a21846b9250 / raw RGB 85d2c46b94112f9f5a30c076e58c5cf58a70e4f38fe9c3b6f008d6416e5edfc6 and opponent-front frames 75-333 reproduce evidence 0bd858e7ba1571ab2545d4d2e9d2ad0cff7562ae2c27ac7a71ae5968580d0597 / raw RGB b68c78f41dec5baa09ae444b312822d747c53af3e81e4cd598e6aa8b42482b6d",
+        "the source audit proves set 289 FRONTIER_MON_MURKROW_2 is the lowest suitable legal Level-50 carrier and pins species 198, move 195, Quirky nature, HP/Defense/SpDefense spread, BrightPowder, and complete legal challenge-2 three-Pokemon parties",
+        "the pure relative reducer ports MUSIC_NOTES_2 load/cleanup, all sixteen gPerishSongMusicNoteSpriteTemplate fixed-point cosine/sine paths, animation selection, affine half-turn, hold and four-bounce teardown, the invisible gPerishSongMusicNote2SpriteTemplate palette sentinel, side-relative panse, both simple BG-to-black palette fades, battler grayscale/original palette transitions, OAM/VBlank ordering, and first inactive cleanup",
+        "the typed Scene-ON seam carries only resolved MURKROW/ONIX presentation geometry and immutable HP/item/perish-timer state; source-extracted Murkrow front/back and MUSIC_NOTES_2 art plus shared ONIX/chrome pass software sprites, hardware OAM/matrices, palette/tag buffers, callbacks, registers, audio, raw RGB, and every production framebuffer without applying timers, consuming gameplay RNG, or changing battle/controller/turn/facility outcomes",
+        "perishSongPortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves all 259 immutable source/OAM/VBlank/register/audio/palette/seam/raw-RGB/framebuffer frames twice fresh in both orientations through first inactive cleanup; MOVE_SING remains the independently exact shared note/compositor control",
+        "MOVE_HEAL_BELL remains unsupported: its distinct BELL load/body, explicit MUSIC_NOTES_2 palette load/free, twelve HealBellMusicNote paths, three HealBellRing thin-ring/palette groups, healing particles, two star families, unload/reload boundaries, BlendBattleAnimPalExclude finale, and cleanup lack independent complete legal both-orientation twice-fresh dense acceptance",
+        "no damage, gameplay RNG, controller selection, turn order, round/facility state, animation boundary list, canonical-recording allowlist, or unsupported barrier changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-perish-song-player-murkrow-opponent-onix.json",
+        "tools/battle-lab/mechanic-perish-song-opponent-murkrow-player-onix.json",
+        "tools/compare/fixtures/perish-song-player-murkrow-opponent-onix.json",
+        "tools/compare/fixtures/perish-song-opponent-murkrow-player-onix.json",
+        "tools/compare/perishSongProbe.py",
+        "tools/compare/perishSongPortable.ts",
+        "tools/compare/perishSongSourceAudit.ts",
+        "tools/compare/extractPerishSongAssets.ts",
+        "src/animation/assets/perish-song.json",
+        "src/animation/perishSong.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/perishSongEvidence.test.ts",
+        "tests/animation/perishSong.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_HOWL",
       "status": "exact",
       "covered": [
@@ -2468,6 +2497,19 @@
         "MOVE_GRASS_WHISTLE"
       ],
       "goal": "MOVE_SING is exact: its complete first animation-script block is 245/245 player-back and 248/248 opponent-front for strengthened component/OAM/matrix/palette/monbg and raw-RGB/shared-seam framebuffer evidence, reproduced twice. No sibling is promoted. BELLY DRUM has six alternating purple-hand hits, six ShakeMon tasks, six gSlowFlyingMusicNotesSpriteTemplate arcs with distinct animation/palette/phase argv, attacker-pan sounds, and rainbow cleanup. TEETER DANCE has AnimTask_TeeterDanceMovement, five gFastFlyingMusicNotesSpriteTemplate paths at three signed offsets, five attacker-pan sounds, and ANIM_TAG_DUCK. FAKE TEARS only loads MUSIC_NOTES for its distinct thought-bubble/music-note tear macro body and additionally needs SMALL_BUBBLES BlendParticle, RockMonBackAndForth, four looped tail-whip sounds, and eight type-varied tear sprites. GRASS WHISTLE shares the 12 wavy-note geometry but fixes every initial palette to index 1 with no cycling, uses a green whole-BG blend/restore instead of monbg, and has its distinct grass-whistle pan sweep. Every sibling remains unsupported pending its own complete dense evidence."
+    },
+    {
+      "id": "music-notes-2",
+      "components": [
+        "asset:ANIM_TAG_MUSIC_NOTES_2",
+        "sprite:gPerishSongMusicNoteSpriteTemplate",
+        "sprite:gPerishSongMusicNote2SpriteTemplate"
+      ],
+      "representatives": [
+        "MOVE_PERISH_SONG",
+        "MOVE_HEAL_BELL"
+      ],
+      "goal": "MOVE_PERISH_SONG independently proves MUSIC_NOTES_2 and its complete sixteen-note fixed-point/affine/bounce body, invisible grayscale-palette sentinel, side-relative panse, two BG black fades, four-battler grayscale/original transitions, and cleanup in both orientations at 259/259 complete source/OAM/VBlank/register/audio/palette/raw-RGB/shared-framebuffer frames, reproduced twice fresh. MOVE_SING remains an exact shared note/compositor control. MOVE_HEAL_BELL remains unsupported: it adds BELL, explicit MUSIC_NOTES_2 palette load/free, twelve distinct HealBellMusicNote paths, three HealBellRing thin-ring/palette groups, healing particles, sparkling and granting stars, asset unload/reload boundaries, BlendBattleAnimPalExclude, and independent timing; it needs its own complete legal both-orientation twice-fresh dense acceptance."
     },
     {
       "id": "play-se1-with-panning",

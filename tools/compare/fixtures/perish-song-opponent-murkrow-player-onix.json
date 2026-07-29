@@ -1,0 +1,38 @@
+{
+  "schema": "perish-song-portable-evidence/v1",
+  "orientation": "opponent-murkrow-player-onix",
+  "scenario": "tools/battle-lab/mechanic-perish-song-opponent-murkrow-player-onix.json",
+  "probe": "tools/compare/perishSongProbe.py",
+  "attacker": {
+    "species": "MURKROW",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 19 },
+      "animationCenter": { "x": 176, "y": 51 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 80 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 142,
+    "playerMaxHp": 142,
+    "opponentHp": 156,
+    "opponentMaxHp": 156,
+    "playerGender": "male",
+    "opponentGender": "male",
+    "playerPerishSongTurns": 3,
+    "opponentPerishSongTurns": 3
+  },
+  "sourceWindow": { "startFrame": 75, "endFrame": 333, "frameCount": 259 },
+  "evidenceSha256": "0bd858e7ba1571ab2545d4d2e9d2ad0cff7562ae2c27ac7a71ae5968580d0597",
+  "rawRgbSha256": "b68c78f41dec5baa09ae444b312822d747c53af3e81e4cd598e6aa8b42482b6d",
+  "opponentMoveSlot": 3
+}

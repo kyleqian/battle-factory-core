@@ -578,6 +578,7 @@ import tickleAsset from "../animation/assets/tickle.json" with { type: "json" };
 import metronomeAsset from "../animation/assets/metronome.json" with { type: "json" };
 import restAsset from "../animation/assets/rest.json" with { type: "json" };
 import howlAsset from "../animation/assets/howl.json" with { type: "json" };
+import perishSongAsset from "../animation/assets/perish-song.json" with { type: "json" };
 import needleArmAsset from "../animation/assets/needle-arm.json" with { type: "json" };
 import sandstormAsset from "../animation/assets/sandstorm.json" with { type: "json" };
 import selfDestructAsset from "../animation/assets/selfDestruct.json" with { type: "json" };
@@ -752,6 +753,7 @@ import {
   sceneOnFollowMeView,
   sceneOnRestView,
   sceneOnHowlView,
+  sceneOnPerishSongView,
   sceneOnNeedleArmView,
   sceneOnSandstormView,
   sceneOnDragonClawView,
@@ -773,6 +775,7 @@ import {
   type SceneOnFollowMePresentationState,
   type SceneOnRestPresentationState,
   type SceneOnHowlPresentationState,
+  type SceneOnPerishSongPresentationState,
   type SceneOnNeedleArmPresentationState,
   type SceneOnSandstormPresentationState,
   type SceneOnScaryFacePresentationState,
@@ -1370,6 +1373,11 @@ const howlArt = howlAsset as {
   loudredBack: { tileset: Tileset; palette: RgbColor[] };
   loudredFront: { tileset: Tileset; palette: RgbColor[] };
   noiseLine: { tileset: Tileset; palette: RgbColor[] };
+};
+const perishSongArt = perishSongAsset as {
+  murkrowBack: { tileset: Tileset; palette: RgbColor[] };
+  murkrowFront: { tileset: Tileset; palette: RgbColor[] };
+  musicNotes2: { tileset: Tileset; palette: RgbColor[] };
 };
 const needleArmArt = needleArmAsset as {
   cacneaBack: { tileset: Tileset; palette: RgbColor[] };
@@ -20068,6 +20076,151 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "TEDDIURSA went" : "Foe TEDDIURSA went",
       "to sleep!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "PERISH_SONG") {
+    const perishState = state as SceneOnPerishSongPresentationState;
+    const view = sceneOnPerishSongView(perishState);
+    const displayed = sceneOnPerishSongView({
+      ...perishState,
+      age: perishState.age - 1,
+    });
+    const affineDisplayed = sceneOnPerishSongView({
+      ...perishState,
+      age: perishState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "MURKROW"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MURKROW"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged PERISH_SONG pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const profile = perishState.config.fieldProfile;
+    if (
+      profile.playerPerishSongTurns !== 3
+      || profile.opponentPerishSongTurns !== 3
+    ) {
+      throw new Error("PERISH_SONG presentation requires immutable timers 3/3");
+    }
+    const black = { r: 0, g: 0, b: 0 };
+    const bgPalette = blendPaletteBanksToward(
+      battleBg.palette,
+      black,
+      displayed.backgroundBlackCoefficient,
+    );
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, bgPalette);
+
+    const murkrowSource = playerToOpponent
+      ? perishSongArt.murkrowBack : perishSongArt.murkrowFront;
+    const murkrow = playerToOpponent
+      ? murkrowSource
+      : { ...murkrowSource, tileset: subTileset(murkrowSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const battlerPalette = (palette: readonly RgbColor[]) =>
+      displayed.battlersGrayscale ? grayscalePalette(palette) : palette.slice();
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const murkrowIdle = opponentToPlayer
+      ? speciesFrontIdleRestOffset("MURKROW") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const drawMurkrow = () => drawSpriteSheet(
+      fb,
+      murkrow.tileset,
+      battlerPalette(murkrow.palette),
+      view.attacker.geometry.spriteCorner.x + murkrowIdle.x2,
+      view.attacker.geometry.spriteCorner.y + murkrowIdle.y2,
+    );
+    const drawOnix = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      battlerPalette(onix.palette),
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    if (playerToOpponent) {
+      drawOnix();
+      drawMurkrow();
+    } else {
+      drawMurkrow();
+    }
+    const affineByIndex = new Map(
+      affineDisplayed.notes.map((note) => [note.index, note.matrix] as const),
+    );
+    // The first create batch misses the already-built hardware OAM buffer;
+    // all sixteen become visible together on the following VBlank.
+    const displayNotes = perishState.age === 5 ? [] : displayed.notes;
+    const sortedNotes = displayNotes.slice().sort(
+      (left, right) =>
+        left.centerY - right.centerY || right.oamSlot - left.oamSlot,
+    );
+    const drawNotes = (notes: typeof sortedNotes) => {
+      for (const note of notes) {
+        const matrix = affineByIndex.get(note.index) ?? note.matrix;
+        drawSpriteSheetAffineRotate(
+          fb,
+          subTileset(
+            perishSongArt.musicNotes2.tileset,
+            note.tileOffset / perishSongArt.musicNotes2.tileset.columns,
+            2,
+          ),
+          displayed.musicNotes2PaletteGrayscale
+            ? grayscalePalette(perishSongArt.musicNotes2.palette)
+            : perishSongArt.musicNotes2.palette,
+          note.centerX,
+          note.centerY,
+          matrix.a,
+          matrix.b,
+          matrix.c,
+          matrix.d,
+          undefined,
+          false,
+        );
+      }
+    };
+    drawNotes(sortedNotes);
+    if (opponentToPlayer) drawOnix();
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "MURKROW",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "MURKROW" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MURKROW used" : "Foe MURKROW used",
+      "PERISH SONG!",
       99,
     );
     return;

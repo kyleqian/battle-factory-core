@@ -36,7 +36,7 @@ export interface PerishSongState {
   readonly musicNotes2Loaded: boolean;
   readonly notes: readonly PerishSongNote[];
   readonly paletteSentinelActive: boolean;
-  readonly musicNotes2PaletteRestored: boolean;
+  readonly musicNotes2PaletteGrayscale: boolean;
   readonly backgroundBlackCoefficient: number;
   readonly battlersGrayscale: boolean;
   readonly pan: PerishSongPan | null;
@@ -99,7 +99,13 @@ export function perishSongNotesAtAge(age: number): readonly PerishSongNote[] {
     const [arg0, animation, phase] = NOTE_ARGS[index]!;
     let centerX: number;
     let centerY: number;
-    if (callbackCount <= 120) {
+    if (age === 4) {
+      // Created after this tick's AnimateSprites pass: the live structs are
+      // still zero-positioned and receive their first two callbacks together
+      // on the following tick.
+      centerX = 8;
+      centerY = 8;
+    } else if (callbackCount <= 120) {
       const wave = (callbackCount * 3 + phase) & 0xff;
       centerX = 120 + cosine(wave, 100);
       centerY = Math.trunc(arg0 / 2) - 15
@@ -119,7 +125,7 @@ export function perishSongNotesAtAge(age: number): readonly PerishSongNote[] {
       animation,
       tileOffset: (animation * 4) as 0 | 4 | 8 | 12,
       phase,
-      callbackCount,
+      callbackCount: age === 4 ? 0 : callbackCount,
       centerX,
       centerY,
       matrix: matrixAtAge(age),
@@ -164,7 +170,7 @@ export function perishSongAtAge(
     musicNotes2Loaded: age >= 1 && age < 258,
     notes: perishSongNotesAtAge(age),
     paletteSentinelActive: age >= 5 && age <= 187,
-    musicNotes2PaletteRestored: age >= 108,
+    musicNotes2PaletteGrayscale: age >= 108,
     backgroundBlackCoefficient: perishSongBackgroundBlackCoefficient(age),
     battlersGrayscale: age >= 109 && age < 211,
     pan: perishSongPanAtAge(age, attackerSide),

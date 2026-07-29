@@ -1,5 +1,39 @@
 # Animation coverage
 
+## MOVE_PERISH_SONG promoted exact; MUSIC_NOTES_2 track bounded (2026-07-29)
+
+**Verdict:** `MOVE_PERISH_SONG` is exact. The lowest suitable legal Level-50
+carrier is challenge-2 set **289** `FRONTIER_MON_MURKROW_2` (species **198**,
+Perish Song **195**, Quirky, HP+Defense+SpDefense, BrightPowder). Complete
+three-mon Scene-ON parties pass the entire body through first inactive cleanup
+at **259/259** frames in both orientations, twice fresh. Player-back frames
+**71–329** have evidence/raw digests
+`2127f8270310ceae01c00debfafdfb276ad80cfbb422b26672b27a21846b9250` /
+`85d2c46b94112f9f5a30c076e58c5cf58a70e4f38fe9c3b6f008d6416e5edfc6`;
+opponent-front frames **75–333** have
+`0bd858e7ba1571ab2545d4d2e9d2ad0cff7562ae2c27ac7a71ae5968580d0597` /
+`b68c78f41dec5baa09ae444b312822d747c53af3e81e4cd598e6aa8b42482b6d`.
+
+**Model/boundary:** the pure relative reducer, typed seam, and narrow
+compositor port all **16** `gPerishSongMusicNoteSpriteTemplate` fixed-point
+paths, tile animations, affine half-turn, hold/four-bounce cleanup, the
+invisible `gPerishSongMusicNote2SpriteTemplate` grayscale-palette sentinel,
+MUSIC_NOTES_2 tag/palette lifetime, side-relative panse, both BG-black fades,
+four battler grayscale/original transitions, OAM/VBlank order, display
+register/callback state, and cleanup. Source-extracted Murkrow front/back and
+MUSIC_NOTES_2 assets reproduce byte-for-byte. Immutable HP/items and both
+Perish timers (**3**) cross only as verification inputs; gameplay RNG,
+damage, timer advancement, controller/turn/facility state, import boundaries,
+and unsupported barriers are unchanged.
+
+**Sibling/control:** `MOVE_HEAL_BELL` remains **unsupported**. Its independent
+body adds BELL, explicit MUSIC_NOTES_2 palette load/free, twelve note paths,
+three ring/palette groups, healing particles, two star families, asset
+unload/reload boundaries, `BlendBattleAnimPalExclude`, and distinct timing;
+it has no complete legal both-orientation twice-fresh dense proof.
+`MOVE_SING` remains the independently exact note/compositor control. Coverage
+is **86 exact / 0 partial / 0 staged / 190 unsupported**.
+
 ## MOVE_HOWL promoted exact; NOISE_LINE track bounded (2026-07-29)
 
 **Verdict:** `MOVE_HOWL` is exact. Lowest suitable challenge-0 Level-50
