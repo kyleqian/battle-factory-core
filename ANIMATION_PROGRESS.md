@@ -1,5 +1,36 @@
 # Animation coverage
 
+## MOVE_SLAM promoted exact; SLAM_HIT track bounded (2026-07-29)
+
+**Verdict:** `MOVE_SLAM` is exact. The lowest suitable Level-50 Factory
+carrier is challenge-0 set **164** `FRONTIER_MON_LICKITUNG_1` (species
+**108**, Slam **21**, Quirky, Attack+HP, Sitrus Berry). Complete legal
+three-mon Scene-ON parties pass the whole move through first inactive cleanup
+at **54/54** source/component, typed-seam, hardware, audio, raw-RGB, and
+shared-framebuffer frames in both orientations, twice fresh. Player-back
+frames **212–265** reproduce evidence/raw digests
+`8f520d7599ce22335081f096258dba8a4dc61f880c9b5167f0d3d68a33e14182` /
+`4e3abdaf0e4ab636fc415fb933a10cb47f9ed86fffcef880fd3d6479d1a4c8c2`;
+opponent-front frames **211–264** reproduce
+`66a2b9d72b6dd0eb160faf6336a395fd036745d1fc09433fca7aea3641697401` /
+`66d4cdf1aed7f739b15a44eaccbb346268f5cc3b05112836b8717d31255f62fc`.
+
+**Model/boundary:** the pure source-relative reducer and typed seam port
+SLAM_HIT/IMPACT load and free, the four-cell side-flipped
+`gSlamHitSpriteTemplate`, both attacker and target slide/return sequences,
+animation-1 hitsplat, target `ShakeMonInPlace`, monbg/alpha, audio, OAM/display
+latches, and cleanup. Source extraction regenerates Lickitung front/back and
+SLAM_HIT assets byte-for-byte; the narrow compositor reuses exact IMPACT,
+slide, shake, Onix, and field primitives. No damage, RNG, turn, controller,
+facility, import-boundary, or unsupported-barrier behavior changed.
+
+**Sibling/control:** `MOVE_SECRET_POWER` remains **unsupported** because the
+Factory building environment selects the distinct `Move_STRENGTH` body; other
+environments also dispatch to independent bodies. Shared SLAM_HIT proof does
+not promote it. The existing BODY SLAM slide/impact/shake control remains
+independent. Coverage is **88 exact / 0 partial / 0 staged / 188
+unsupported**.
+
 ## MOVE_MOONLIGHT promoted exact; GREEN_SPARKLE track bounded (2026-07-29)
 
 **Verdict:** `MOVE_MOONLIGHT` is exact. The lowest suitable legal Level-50

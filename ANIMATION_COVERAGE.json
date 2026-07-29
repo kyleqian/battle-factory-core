@@ -2238,6 +2238,34 @@
         "tests/animation/astonish.test.ts",
         "tests/animation/astonishEvidence.test.ts"
       ]
+    },
+    {
+      "move": "MOVE_SLAM",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal challenge-0 Level-50 Factory parties stage the lowest suitable carrier set-164 FRONTIER_MON_LICKITUNG_1 against ONIX in both Scene-ON orientations; all active choices are constrained to SLAM",
+        "the complete move-owned source interval through first inactive cleanup passes 54/54 source-component, typed-seam, software/hardware OAM, matrix, palette/tag, register, audio, immutable battle-state, raw-RGB, and shared-framebuffer frames 212-265 player-back and 211-264 opponent-front, twice fresh",
+        "the pure source-relative reducer ports ANIM_TAG_SLAM_HIT and IMPACT load/free, gSlamHitSpriteTemplate's four source cells and side-dependent horizontal flip, both SlideMonToOffset and both SlideMonToOriginalPos lifecycles, animation-1 basic hitsplat, target AnimTask_ShakeMonInPlace, monbg/alpha, both pan sounds, waits, and cleanup",
+        "source extraction regenerates legal LICKITUNG front/back and SLAM_HIT art byte-for-byte; the narrow shared compositor reuses exact IMPACT, slide, shake, ONIX, and field primitives and ports the player-target idle-to-translation hardware-OAM latch without battle clocks, coordinate/RGB fitting, or pixel exceptions",
+        "slamEvidence.ts proves both committed v2 receipts twice fresh with stable player evidence/raw digests 8f520d7599ce22335081f096258dba8a4dc61f880c9b5167f0d3d68a33e14182 / 4e3abdaf0e4ab636fc415fb933a10cb47f9ed86fffcef880fd3d6479d1a4c8c2 and opponent digests 66a2b9d72b6dd0eb160faf6336a395fd036745d1fc09433fca7aea3641697401 / 66d4cdf1aed7f739b15a44eaccbb346268f5cc3b05112836b8717d31255f62fc",
+        "MOVE_SECRET_POWER remains unsupported: the Factory building environment dispatches to the distinct Move_STRENGTH body, while other environments select other complete scripts; shared SLAM_HIT coverage alone does not promote it"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-slam-player-lickitung-opponent-onix.json",
+        "tools/battle-lab/mechanic-slam-opponent-lickitung-player-onix.json",
+        "tools/compare/fixtures/slam-player-lickitung-opponent-onix.json",
+        "tools/compare/fixtures/slam-opponent-lickitung-player-onix.json",
+        "tools/compare/bodySlamProbe.py",
+        "tools/compare/slamEvidence.ts",
+        "tools/compare/slamSourceAudit.ts",
+        "tools/compare/extractSlamAssets.ts",
+        "src/animation/assets/slam.json",
+        "src/animation/slam.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/slam.test.ts",
+        "tests/animation/slamEvidence.test.ts"
+      ]
     }
   ],
   "queue": [
@@ -2245,6 +2273,26 @@
     "MOVE_BIND"
   ],
   "componentTracks": [
+    {
+      "id": "slam-hit-slide-shake",
+      "components": [
+        "asset:ANIM_TAG_SLAM_HIT",
+        "sprite:gSlamHitSpriteTemplate",
+        "sprite:gSlideMonToOffsetSpriteTemplate",
+        "sprite:gSlideMonToOriginalPosSpriteTemplate",
+        "visualCommand:create_basic_hitsplat_sprite",
+        "task:AnimTask_ShakeMonInPlace",
+        "visualCommand:monbg",
+        "visualCommand:setalpha",
+        "visualCommand:blendoff",
+        "visualCommand:clearmonbg"
+      ],
+      "representatives": [
+        "MOVE_SLAM",
+        "MOVE_SECRET_POWER"
+      ],
+      "goal": "MOVE_SLAM independently proves its complete SLAM_HIT/IMPACT, dual-slide, ShakeMonInPlace, target-monbg/alpha, audio, and cleanup body at 54/54 dense source/seam/framebuffer frames in both orientations twice fresh. MOVE_SECRET_POWER remains unsupported because the Factory building route dispatches to the distinct Move_STRENGTH body; component reuse does not waive its independent move acceptance."
+    },
     {
       "id": "green-sparkle-moonlight",
       "components": [
