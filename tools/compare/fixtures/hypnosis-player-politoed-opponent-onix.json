@@ -1,0 +1,13 @@
+{
+  "schema": "hypnosis-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "orientation": "player-back",
+  "scenario": "tools/battle-lab/mechanic-hypnosis-player-politoed-opponent-onix.json",
+  "probe": "tools/compare/hypnosisProbe.py",
+  "attackerSide": "player",
+  "attackerCenter": {"x":72,"y":97},
+  "targetCenter": {"x":176,"y":42},
+  "sourceWindow": {"startFrame":74,"endFrame":242,"frameCount":169},
+  "evidenceSha256": "6b164293b9a3ad086504808422b0f95ab07ccd84595eb87b3ca908e34189b0c4",
+  "rawRgbSha256": "7c06a1b4825562841f65768ae6b9a97374dba4a727a0ecd59f28220deddf10a1"
+}
