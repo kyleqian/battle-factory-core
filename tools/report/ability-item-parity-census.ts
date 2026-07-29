@@ -81,7 +81,14 @@ type HookCase = {
   dispatchLabels: TokenMention[];
   tokenMentions: TokenMention[];
 };
-type InlineSite = { file: string; tag: "rules" | "ai"; line: number; enclosingGuess: string | null };
+type InlineSite = {
+  file: string;
+  tag: "rules" | "ai";
+  line: number;
+  enclosingGuess: string | null;
+  factoryBattleReachability: "candidate" | "proven-unreachable";
+  factoryBattleGate?: string;
+};
 type HooksArtifact = {
   schema: string;
   universes: {
@@ -97,7 +104,7 @@ type HooksArtifact = {
 };
 
 const hooks = JSON.parse(readFileSync(HOOKS_PATH, "utf8")) as HooksArtifact;
-check(hooks.schema === "ability-item-hooks/v1", "hooks artifact schema is ability-item-hooks/v1");
+check(hooks.schema === "ability-item-hooks/v2", "hooks artifact schema is ability-item-hooks/v2");
 check(hooks.universes.abilities.length === 78, "ability universe has 78 members");
 check(hooks.universes.holdEffects.length === 67, "hold-effect universe has 67 members");
 check(hooks.abilityBattleEffects.cases.length === 20, "AbilityBattleEffects has 20 caseID segments");
@@ -105,6 +112,21 @@ check(hooks.itemBattleEffects.cases.length === 5, "ItemBattleEffects has 5 caseI
 check(
   hooks.abilityBattleEffects.cases.flatMap((c) => c.aliasLabels).length === 3,
   "AbilityBattleEffects carries exactly 3 nested pseudo-mode aliases",
+);
+const provenUnreachableInlineSites = [
+  ...Object.entries(hooks.inlineSites.abilities),
+  ...Object.entries(hooks.inlineSites.holdEffects),
+].flatMap(([token, sites]) =>
+  sites
+    .filter((site) => site.factoryBattleReachability === "proven-unreachable")
+    .map((site) => `${site.file}:${site.line}:${token}`)
+).sort();
+check(
+  JSON.stringify(provenUnreachableInlineSites) === JSON.stringify([
+    "src/battle_script_commands.c:9676:ABILITY_PICKUP",
+    "src/battle_script_commands.c:9699:ABILITY_PICKUP",
+  ]),
+  "Factory-unreachable inline sites are exactly Pickup's two Pyramid-gated Cmd_pickup checks",
 );
 
 type FrontierMon = {
@@ -481,8 +503,9 @@ for (const { name, id } of hooks.universes.abilities) {
   if (name === "ABILITY_NONE") continue;
   const inline = hooks.inlineSites.abilities[name] ?? [];
   const delegateCases = delegateCasesFor(hooks.abilityBattleEffects.cases, name);
-  const inlineRules = inline.filter((site) => site.tag === "rules");
-  const inlineAi = inline.filter((site) => site.tag === "ai");
+  const reachableInline = inline.filter((site) => site.factoryBattleReachability !== "proven-unreachable");
+  const inlineRules = reachableInline.filter((site) => site.tag === "rules");
+  const inlineAi = reachableInline.filter((site) => site.tag === "ai");
   const carrierSets = mons.entries.filter((mon) => {
     const species = speciesByName.get(mon.species)!;
     return species.abilities[0] === name || species.abilities[1] === name;
@@ -516,8 +539,9 @@ for (const { name, id } of hooks.universes.holdEffects) {
   if (name === "HOLD_EFFECT_NONE") continue;
   const inline = hooks.inlineSites.holdEffects[name] ?? [];
   const delegateCases = delegateCasesFor(hooks.itemBattleEffects.cases, name);
-  const inlineRules = inline.filter((site) => site.tag === "rules");
-  const inlineAi = inline.filter((site) => site.tag === "ai");
+  const reachableInline = inline.filter((site) => site.factoryBattleReachability !== "proven-unreachable");
+  const inlineRules = reachableInline.filter((site) => site.tag === "rules");
+  const inlineAi = reachableInline.filter((site) => site.tag === "ai");
   const rows = heldItems.entries.filter((row) => row.holdEffect === name);
   const tableIds = new Set(rows.map((row) => row.itemTableId));
   const carrierSets = mons.entries.filter((mon) => tableIds.has(mon.itemTableId));
@@ -608,13 +632,13 @@ lines.push("");
 lines.push(
   `- **Abilities: ${abilityHeadline.referenced}/${abilityHeadline.inScope} members engine-referenced** `
     + `(weighted by L50 set-carriers: ${abilityHeadline.weightedReferenced}/${abilityHeadline.weightedTotal}); `
-    + `${abilityHeadline.zeroCarrier} zero-carrier, ${abilityHeadline.noBattleHooks} without battle hooks `
-    + "(out-of-battle only).",
+    + `${abilityHeadline.zeroCarrier} zero-carrier, ${abilityHeadline.noBattleHooks} without Factory battle hooks `
+    + "(out-of-battle or source-proven Factory-gated only).",
 );
 lines.push(
   `- **Hold effects: ${holdEffectHeadline.referenced}/${holdEffectHeadline.inScope} members engine-referenced** `
     + `(weighted by L50 set-carriers: ${holdEffectHeadline.weightedReferenced}/${holdEffectHeadline.weightedTotal}); `
-    + `${holdEffectHeadline.zeroCarrier} zero-carrier, ${holdEffectHeadline.noBattleHooks} without battle hooks.`,
+    + `${holdEffectHeadline.zeroCarrier} zero-carrier, ${holdEffectHeadline.noBattleHooks} without Factory battle hooks.`,
 );
 lines.push(`- All ${validationChecks.length} ground-truth validation checks passed.`);
 lines.push("");
@@ -729,9 +753,11 @@ lines.push(
     + "2026-07-28 user decision, later milestone OK); they do not gate rules-parity rows.",
 );
 lines.push(
-  "- **Out-of-battle hooks are out of census scope.** `no-battle-hooks` members (and inline sites in "
-    + "e.g. `src/pokemon.c` whose enclosing function is not battle-reachable) may still matter for "
-    + "non-battle features; this census only tracks the Level-50 singles battle surface.",
+  "- **Out-of-battle and Factory-gated hooks are out of census scope.** `no-battle-hooks` members "
+    + "may still matter for non-battle features. Exact-pinned `proven-unreachable` inline sites are "
+    + "also excluded: Pickup's two `Cmd_pickup` checks are reached from the Frontier victory script "
+    + "only when `BATTLE_TYPE_PYRAMID` is set (`battle_scripts_1.s:3045-3047`), which Battle Factory "
+    + "does not set. This census tracks only the Level-50 Factory singles battle surface.",
 );
 lines.push("");
 

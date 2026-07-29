@@ -6,16 +6,14 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 
 ## Headline
 
-- **Abilities: 68/70 members engine-referenced** (weighted by L50 set-carriers: 1073/1103); 4 zero-carrier, 3 without battle hooks (out-of-battle only).
-- **Hold effects: 42/42 members engine-referenced** (weighted by L50 set-carriers: 850/850); 21 zero-carrier, 3 without battle hooks.
-- All 16 ground-truth validation checks passed.
+- **Abilities: 69/69 members engine-referenced** (weighted by L50 set-carriers: 1096/1096); 4 zero-carrier, 4 without Factory battle hooks (out-of-battle or source-proven Factory-gated only).
+- **Hold effects: 42/42 members engine-referenced** (weighted by L50 set-carriers: 850/850); 21 zero-carrier, 3 without Factory battle hooks.
+- All 17 ground-truth validation checks passed.
 
 ## Ability worklist (ranked: unreferenced first, then by L50 carriers)
 
 | Ability | Status | L50 carriers (det.) | All | Delegate cases | Inline rules | AI | Engine refs |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| ABILITY_RUN_AWAY | unreferenced | 23 (2) | 23 | — | 4 | 0 | 0 |
-| ABILITY_PICKUP | unreferenced | 7 (6) | 7 | — | 2 | 0 | 0 |
 | ABILITY_LEVITATE | engine-referenced | 54 (54) | 54 | — | 10 | 0 | 13 |
 | ABILITY_STURDY | engine-referenced | 42 (13) | 42 | — | 3 | 0 | 3 |
 | ABILITY_ROCK_HEAD | engine-referenced | 40 (3) | 40 | — | 1 | 0 | 3 |
@@ -35,6 +33,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_FLASH_FIRE | engine-referenced | 25 (9) | 25 | ABSORBING | 0 | 1 | 2 |
 | ABILITY_INNER_FOCUS | engine-referenced | 24 (12) | 34 | — | 3 | 0 | 3 |
 | ABILITY_NATURAL_CURE | engine-referenced | 23 (5) | 23 | — | 1 | 1 | 2 |
+| ABILITY_RUN_AWAY | engine-referenced | 23 (2) | 23 | — | 4 | 0 | 2 |
 | ABILITY_OVERGROW | engine-referenced | 21 (21) | 21 | — | 1 | 0 | 2 |
 | ABILITY_BLAZE | engine-referenced | 21 (21) | 21 | — | 1 | 0 | 2 |
 | ABILITY_TORRENT | engine-referenced | 21 (21) | 21 | — | 1 | 0 | 2 |
@@ -89,6 +88,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_DROUGHT | zero-carrier | 0 (0) | 0 | ON_SWITCHIN | 0 | 0 | 2 |
 | ABILITY_AIR_LOCK | zero-carrier | 0 (0) | 0 | ON_SWITCHIN | 1 | 0 | 12 |
 | ABILITY_ILLUMINATE | no-battle-hooks | 16 (0) | 16 | — | 0 | 0 | 0 |
+| ABILITY_PICKUP | no-battle-hooks | 7 (6) | 7 | — | 0 | 0 | 0 |
 | ABILITY_STENCH | no-battle-hooks | 5 (0) | 5 | — | 0 | 0 | 0 |
 | ABILITY_CACOPHONY | no-battle-hooks | 0 (0) | 0 | — | 0 | 0 | 0 |
 
@@ -186,12 +186,13 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 
 ## Validation checks
 
-- hooks artifact schema is ability-item-hooks/v1
+- hooks artifact schema is ability-item-hooks/v2
 - ability universe has 78 members
 - hold-effect universe has 67 members
 - AbilityBattleEffects has 20 caseID segments
 - ItemBattleEffects has 5 caseID segments
 - AbilityBattleEffects carries exactly 3 nested pseudo-mode aliases
+- Factory-unreachable inline sites are exactly Pickup's two Pyramid-gated Cmd_pickup checks
 - Frontier corpus has 882 sets
 - Frontier held-item table has 63 rows
 - species-stats has 411 real species
@@ -209,5 +210,5 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 - **One-sided error direction.** The engine can implement a member through generated data, a differently-prefixed constant (`BATTLE_SCRIPT_ABILITY_*`, `ROLE_PLAY_ABILITY_*`), or a quoted-string surface outside the narrow recovery shape — all undercounts (a member can look missing while partially present, never the reverse beyond "some surface exists"). The worklist's zero-reference rows are reliable; treat reference counts as leads, not verdicts.
 - **Ability carriers count both slots.** A dual-ability species' set carries either slot depending on rental personality; the deterministic column counts single-ability species only (the fixture rule prefers those carriers for briefs). Carrier arithmetic is validated against the 850-set partition above.
 - **AI sites are informational for rules parity.** `battle_ai_script_commands.c` /`battle_ai_switch_items.c` sites mark where the native AI reads a member (in scope per the 2026-07-28 user decision, later milestone OK); they do not gate rules-parity rows.
-- **Out-of-battle hooks are out of census scope.** `no-battle-hooks` members (and inline sites in e.g. `src/pokemon.c` whose enclosing function is not battle-reachable) may still matter for non-battle features; this census only tracks the Level-50 singles battle surface.
+- **Out-of-battle and Factory-gated hooks are out of census scope.** `no-battle-hooks` members may still matter for non-battle features. Exact-pinned `proven-unreachable` inline sites are also excluded: Pickup's two `Cmd_pickup` checks are reached from the Frontier victory script only when `BATTLE_TYPE_PYRAMID` is set (`battle_scripts_1.s:3045-3047`), which Battle Factory does not set. This census tracks only the Level-50 Factory singles battle surface.
 

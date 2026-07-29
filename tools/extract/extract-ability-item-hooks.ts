@@ -326,7 +326,32 @@ type InlineSite = {
   tag: "rules" | "ai";
   line: number;
   enclosingGuess: string | null;
+  factoryBattleReachability: "candidate" | "proven-unreachable";
+  factoryBattleGate?: string;
 };
+
+/**
+ * Exact source-proven exclusions from the Factory singles battle surface.
+ *
+ * Both Pickup mentions are inside `Cmd_pickup`
+ * (`battle_script_commands.c:9654-9729`). Factory wins select
+ * `BattleScript_FrontierTrainerBattleWon` (`battle_main.c:4972-4977`), whose
+ * `battle_scripts_1.s:3045-3047` gate skips `pickup` unless
+ * `BATTLE_TYPE_PYRAMID` is set. Battle Factory sets
+ * `BATTLE_TYPE_TRAINER | BATTLE_TYPE_FACTORY`, not `BATTLE_TYPE_PYRAMID`.
+ * Keep the exact sites pinned so source movement cannot silently inherit the
+ * classification.
+ */
+const FACTORY_UNREACHABLE_INLINE_SITES: ReadonlyMap<string, string> = new Map([
+  [
+    "src/battle_script_commands.c:9676:ABILITY_PICKUP",
+    "BattleScript_FrontierTrainerBattleWon: battle_scripts_1.s:3045-3047 executes pickup only for BATTLE_TYPE_PYRAMID",
+  ],
+  [
+    "src/battle_script_commands.c:9699:ABILITY_PICKUP",
+    "BattleScript_FrontierTrainerBattleWon: battle_scripts_1.s:3045-3047 executes pickup only for BATTLE_TYPE_PYRAMID",
+  ],
+] as const);
 
 const C_FUNCTION_GUESS = /^[A-Za-z_][A-Za-z0-9_ *]*\b([A-Za-z_][A-Za-z0-9_]*)\s*\(/;
 const ASM_LABEL_GUESS = /^([A-Za-z_][A-Za-z0-9_]*):{1,2}\s*$/;
@@ -377,11 +402,39 @@ for (const { file, tag } of SCAN_FILES) {
         const token = match[1]!;
         if (!universe.has(token)) continue;
         const sites = sink.get(token) ?? [];
-        sites.push({ file, tag, line: lineNumber, enclosingGuess: enclosingGuessFor(lines, i, isAsm) });
+        const siteKey = `${file}:${lineNumber}:${token}`;
+        const factoryBattleGate = FACTORY_UNREACHABLE_INLINE_SITES.get(siteKey);
+        sites.push({
+          file,
+          tag,
+          line: lineNumber,
+          enclosingGuess: enclosingGuessFor(lines, i, isAsm),
+          factoryBattleReachability: factoryBattleGate === undefined ? "candidate" : "proven-unreachable",
+          ...(factoryBattleGate === undefined ? {} : { factoryBattleGate }),
+        });
         sink.set(token, sites);
       }
     }
   }
+}
+
+const classifiedUnreachableSites = [
+  ...inlineAbilitySites.entries(),
+  ...inlineHoldEffectSites.entries(),
+].flatMap(([token, sites]) =>
+  sites
+    .filter((site) => site.factoryBattleReachability === "proven-unreachable")
+    .map((site) => `${site.file}:${site.line}:${token}`)
+).sort();
+if (
+  JSON.stringify(classifiedUnreachableSites)
+  !== JSON.stringify([...FACTORY_UNREACHABLE_INLINE_SITES.keys()].sort())
+) {
+  throw new Error(
+    "Factory-unreachable inline-site classification drifted.\nExpected: "
+      + [...FACTORY_UNREACHABLE_INLINE_SITES.keys()].sort().join(", ")
+      + `\nActual: ${classifiedUnreachableSites.join(", ")}`,
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -401,7 +454,7 @@ function sortedSites(sink: ReadonlyMap<string, InlineSite[]>): Record<string, In
 }
 
 const artifact = {
-  schema: "ability-item-hooks/v1",
+  schema: "ability-item-hooks/v2",
   rerunCommand: "node --experimental-strip-types tools/extract/extract-ability-item-hooks.ts",
   source: {
     battleUtil: {

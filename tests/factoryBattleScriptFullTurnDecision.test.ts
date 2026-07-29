@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  FACTORY_RUN_AWAY_NOOP_INVARIANT,
   createFactoryFullTurnBattleState,
   reduceFactoryFullTurnDecision,
   submitFactoryFullTurnDecision,
@@ -34,6 +35,7 @@ const ABILITY_LEVITATE = 26;
 const ABILITY_SWIFT_SWIM = 33;
 const ABILITY_CHLOROPHYLL = 34;
 const ABILITY_MAGNET_PULL = 42;
+const ABILITY_RUN_AWAY = 50;
 const ABILITY_ARENA_TRAP = 71;
 const ITEM_MACHO_BRACE = 181;
 const ITEM_QUICK_CLAW = 183;
@@ -206,6 +208,30 @@ describe("factory full-turn decision -- voluntary-switch enumeration and trappin
       {},
       { absentBattlerFlags: 1 << 1 },
     ))).toEqual([1]);
+  });
+
+  it("Run Away adds no Factory run command and does not bypass the distinct voluntary-switch trap gate", () => {
+    const untrapped = createFactoryFullTurnBattleState(trappingConfig(
+      0,
+      { ability: ABILITY_RUN_AWAY },
+    ));
+    if (
+      untrapped.boundary.kind !== "decision-required"
+      || untrapped.boundary.request.kind !== "command"
+    ) {
+      throw new Error("expected initial player command request");
+    }
+    expect(FACTORY_RUN_AWAY_NOOP_INVARIANT).toEqual({
+      abilityId: ABILITY_RUN_AWAY,
+      battleTypeFlags: (1 << 3) | (1 << 19),
+      legalDecisionKinds: ["use-move", "switch"],
+    });
+    expect([...new Set(untrapped.boundary.request.legalDecisions.map(({ kind }) => kind))].sort())
+      .toEqual(["switch", "use-move"]);
+    expect(initialPlayerSwitchIndexes(trappingConfig(
+      ABILITY_SHADOW_TAG,
+      { ability: ABILITY_RUN_AWAY },
+    ))).toEqual([]);
   });
 });
 

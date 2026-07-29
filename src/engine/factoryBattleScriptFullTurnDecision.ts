@@ -171,15 +171,40 @@ const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
 const B_WEATHER_SUN = (1 << 5) | (1 << 6);
 /** include/constants/battle.h:120. */
 const STATUS1_PARALYSIS = 1 << 6;
-/** include/constants/abilities.h: exact identity constants used by battle_main.c:4248-4256. */
+/** include/constants/abilities.h: exact identity constants used by the cited source gates below. */
 const ABILITY_SHADOW_TAG = 23;
 const ABILITY_LEVITATE = 26;
 const ABILITY_MAGNET_PULL = 42;
+const ABILITY_RUN_AWAY = 50;
 const ABILITY_ARENA_TRAP = 71;
 /** include/constants/battle.h: STATUS2_ESCAPE_PREVENTION. */
 const STATUS2_ESCAPE_PREVENTION = 1 << 26;
 /** include/constants/moves.h. */
 const MOVE_PURSUIT = 228;
+
+/**
+ * Run Away is an honest Factory no-op at this adapter's decision boundary.
+ *
+ * Source order matters:
+ * - `battle_main.c:4322-4339` intercepts a Factory trainer RUN as a forfeit
+ *   confirmation before calling `IsRunningFromBattleImpossible`; therefore
+ *   its `ABILITY_RUN_AWAY` check at `battle_main.c:4038` is not RUN-menu
+ *   legality for this mode.
+ * - After confirmation, `battle_util.c:427-448` does reach the Run Away
+ *   branch before its generic Frontier-trainer success branch. However,
+ *   `battle_main.c:5058-5062` maps every such Factory RUN to
+ *   `B_OUTCOME_FORFEITED` before consulting `fleeType`.
+ *
+ * This kernel models the battle command surface, not the surrounding forfeit
+ * UI: `BattleCommandDecision` intentionally contains only use-move/switch.
+ * Keeping the identity here pins why Run Away must neither add a flee command
+ * nor bypass the separate voluntary-switch trapping gate below.
+ */
+export const FACTORY_RUN_AWAY_NOOP_INVARIANT = Object.freeze({
+  abilityId: ABILITY_RUN_AWAY,
+  battleTypeFlags: BATTLE_SCRIPT_BATTLE_TYPE_TRAINER | BATTLE_SCRIPT_BATTLE_TYPE_FACTORY,
+  legalDecisionKinds: Object.freeze(["use-move", "switch"] as const),
+});
 
 type MachineState = BattleScriptMachineState<BattleScriptRulesContext>;
 type Handlers = BattleScriptOpcodeHandlers<BattleScriptRulesContext>;
@@ -525,7 +550,7 @@ function createInitialRules(config: FactoryFullTurnConfig): FactoryFullTurnDecis
     party: { player: playerParty, opponent: opponentParty },
     battleTopology: {
       battlersCount: 2,
-      battleTypeFlags: BATTLE_SCRIPT_BATTLE_TYPE_TRAINER | BATTLE_SCRIPT_BATTLE_TYPE_FACTORY,
+      battleTypeFlags: FACTORY_RUN_AWAY_NOOP_INVARIANT.battleTypeFlags,
       battlerPositions: [0, 1, 0xff, 0xff],
     },
     absentBattlerFlags: config.absentBattlerFlags ?? 0,
