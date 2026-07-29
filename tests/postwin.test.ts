@@ -39,6 +39,7 @@ import {
   acceptPostwinHealDismiss,
   acceptPostwinSwapDecline,
   acceptPostwinRightThisWayDismiss,
+  createPostwinStateFromOpponentRentalRecords,
   INITIAL_POSTWIN_STATE,
   POSTWIN_BATTLE_BLACK_AGE,
   POSTWIN_BATTLE_FADE_FIRST_AGE,
@@ -169,14 +170,24 @@ describe("S8 Battle-1 postwin transition", () => {
       roundController,
     }, new Set(["A"]));
     const expected = getFactoryOpponentCommentary(generated.party);
+    const staged = createPostwinStateFromOpponentRentalRecords(generated.opponents);
 
     expect(accepted.postwin?.scoutingLines.slice(1, 3)).toEqual([
       expected.favoriteTypeLines,
       expected.battleStyleLines,
     ]);
+    expect(accepted.postwin).toEqual(staged);
     expect(accepted.postwin?.scoutingLines.slice(1, 3)).not.toEqual(
       INITIAL_POSTWIN_STATE.scoutingLines.slice(1, 3),
     );
+  });
+
+  it("keeps the canonical rental-record stage equal to the frozen postwin state", () => {
+    expect(createPostwinStateFromOpponentRentalRecords([
+      { setId: 153, personality: 24, fixedIv: 3, abilitySlot: 0 },
+      { setId: 179, personality: 19, fixedIv: 3, abilitySlot: 1 },
+      { setId: 181, personality: 6, fixedIv: 3, abilitySlot: 0 },
+    ])).toEqual(INITIAL_POSTWIN_STATE);
   });
 
   it("keeps every visual ownership boundary relative to the stored edge", () => {

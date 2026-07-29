@@ -6,7 +6,16 @@ import {
   getFactoryOpponentCommentary,
   type FactoryCommentaryParty,
 } from "./factoryCommentary.ts";
-import { createFactoryCorpusParty } from "./factoryCorpusParty.ts";
+import {
+  createFactoryCorpusParty,
+  type FactoryCorpusPartyInstance,
+} from "./factoryCorpusParty.ts";
+
+export type FactoryPostwinOpponentRentalRecords = readonly [
+  FactoryCorpusPartyInstance,
+  FactoryCorpusPartyInstance,
+  FactoryCorpusPartyInstance,
+];
 
 export type PostwinScoutingLines = readonly [
   readonly [string, string],
@@ -143,6 +152,16 @@ export function createPostwinState(
     swapDeclineElapsed: null,
     rightThisWayDismissElapsed: null,
   };
+}
+
+/**
+ * Presentation-boundary adapter for the source rental records owned by the
+ * round controller and dev-time app stages.
+ */
+export function createPostwinStateFromOpponentRentalRecords(
+  opponentRentalRecords: FactoryPostwinOpponentRentalRecords,
+): PostwinState {
+  return createPostwinState(createFactoryCorpusParty(opponentRentalRecords));
 }
 
 export const INITIAL_POSTWIN_STATE = createPostwinState();

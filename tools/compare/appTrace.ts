@@ -22,6 +22,10 @@ import {
   createFactoryTerminalLossPresentation,
   createFactoryTerminalRoundWonPresentation,
 } from "../../src/engine/factoryTerminalPresentation.ts";
+import {
+  createPostwinStateFromOpponentRentalRecords,
+  type FactoryPostwinOpponentRentalRecords,
+} from "../../src/engine/postwin.ts";
 
 export interface AppCapture {
   frame: number;
@@ -31,12 +35,41 @@ export interface AppCapture {
 
 type AppStage = (state: EngineState) => EngineState;
 
+function createFactoryPostwinStage(
+  opponentRentalRecords: FactoryPostwinOpponentRentalRecords,
+): AppStage {
+  return (state) => ({
+    ...state,
+    postwin: createPostwinStateFromOpponentRentalRecords(opponentRentalRecords),
+  });
+}
+
+const CANONICAL_POSTWIN_OPPONENT_RECORDS = [
+  { setId: 153, personality: 24, fixedIv: 3, abilitySlot: 0 },
+  { setId: 179, personality: 19, fixedIv: 3, abilitySlot: 1 },
+  { setId: 181, personality: 6, fixedIv: 3, abilitySlot: 0 },
+] as const;
+
+// Honest rung-8 generation output for seed 3. Its commentary is ROCK /
+// unrestrained, differing in both classifications from the canonical
+// no-favorite / weakening pages. This stage is app-visible even though no
+// matching source-valid oracle field checkpoint exists yet.
+const GENERATED_POSTWIN_ROCK_UNRESTRAINED_RECORDS = [
+  { setId: 156, personality: 116865875, fixedIv: 3, abilitySlot: 1 },
+  { setId: 180, personality: 1392861431, fixedIv: 3, abilitySlot: 0 },
+  { setId: 122, personality: 3471709106, fixedIv: 3, abilitySlot: 0 },
+] as const;
+
 /**
  * Named, dev-time-only staging registry. A stage may replace logical state at
  * a target boundary while the oracle still replays the untouched anchor
  * trace. Production code never imports this registry.
  */
 const APP_STAGES: Readonly<Record<string, AppStage>> = {
+  "factory-postwin-canonical-opponent-party":
+    createFactoryPostwinStage(CANONICAL_POSTWIN_OPPONENT_RECORDS),
+  "factory-postwin-generated-rock-unrestrained-opponent-party":
+    createFactoryPostwinStage(GENERATED_POSTWIN_ROCK_UNRESTRAINED_RECORDS),
   "factory-swap-duplicate-species-enemy-picker": (state) => {
     if (!state.factorySwap) {
       throw new Error("duplicate-species stage requires the live Factory swap picker");

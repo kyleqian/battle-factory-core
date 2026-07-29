@@ -14,7 +14,7 @@ import {
   type FactoryCommentaryPartyMember,
   type FactoryTypeId,
 } from "../src/engine/factoryCommentary.ts";
-import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
+import { createFactoryCorpusParty } from "../src/engine/factoryCorpusParty.ts";
 import { generateFactoryOpponent } from "../src/engine/factoryOpponentGeneration.ts";
 import { POSTWIN_SCOUTING_LINES } from "../src/engine/postwin.ts";
 
@@ -267,6 +267,16 @@ describe("rung-8 generated opponent integration", () => {
       [180, "SPECIES_BAYLEEF"],
       [122, "SPECIES_ARON"],
     ]);
+    expect(seed3.opponents.map((mon) => ({
+      setId: mon.setId,
+      personality: mon.personality,
+      fixedIv: mon.fixedIv,
+      abilitySlot: mon.abilitySlot,
+    }))).toEqual([
+      { setId: 156, personality: 116865875, fixedIv: 3, abilitySlot: 1 },
+      { setId: 180, personality: 1392861431, fixedIv: 3, abilitySlot: 0 },
+      { setId: 122, personality: 3471709106, fixedIv: 3, abilitySlot: 0 },
+    ]);
     expect(commentary1.favoriteType.result).toBe(FACTORY_NO_FAVORITE_TYPE);
     expect(commentary1.battleStyle.result).toBe(FACTORY_STYLE.WEAKENING);
     expect(commentary3.favoriteType.result).toBe(5);
@@ -276,17 +286,17 @@ describe("rung-8 generated opponent integration", () => {
   });
 
   it("keeps the canonical upcoming opponent equivalent to frozen presentation", () => {
-    const canonical = [
-      createFactoryCorpusPartyMember({
+    const canonical = createFactoryCorpusParty([
+      {
         setId: 153, personality: 24, fixedIv: 3, abilitySlot: 0,
-      }),
-      createFactoryCorpusPartyMember({
+      },
+      {
         setId: 179, personality: 19, fixedIv: 3, abilitySlot: 1,
-      }),
-      createFactoryCorpusPartyMember({
+      },
+      {
         setId: 181, personality: 6, fixedIv: 3, abilitySlot: 0,
-      }),
-    ] as const;
+      },
+    ]);
     const commentary = getFactoryOpponentCommentary(canonical);
 
     expect(canonical.map((mon) => [mon.setId, mon.speciesName])).toEqual([

@@ -168,7 +168,6 @@ import {
   TURN7_ROCKSLIDE_REOPEN_GATE_DELAY,
 } from "./battleMenu.ts";
 import { activeMonMoveset, createBattleSetup, rentalMoveset, type BattleSetupState } from "./battleSetup.ts";
-import { createFactoryCorpusParty } from "./factoryCorpusParty.ts";
 import { factoryTrainerPresentationForOpponent } from "./factoryTrainerPresentation.ts";
 import {
   advancePostwin,
@@ -176,6 +175,7 @@ import {
   acceptPostwinDialoguePage,
   acceptPostwinHealDismiss,
   createPostwinState,
+  createPostwinStateFromOpponentRentalRecords,
   POSTWIN_BATTLE_ROOM_FADE_OUT_AGE,
   POSTWIN_BATTLE_ROOM_FIRST_AGE,
   POSTWIN_COUNTER_ROOM_FIRST_AGE,
@@ -753,7 +753,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         state.roundController?.rules.currentOpponent.rentalRecords;
       postwin = opponentRecords === undefined
         ? createPostwinState()
-        : createPostwinState(createFactoryCorpusParty(opponentRecords));
+        : createPostwinStateFromOpponentRentalRecords(opponentRecords);
       battleScene = advanceBattleScene(battleScene);
       return {
         ...state,
