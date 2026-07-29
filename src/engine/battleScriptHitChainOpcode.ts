@@ -3409,16 +3409,10 @@ function applyWrapMoveEffect(
  * never pushes/jumps to a script -- `SetMoveEffect`'s switch just `break`s
  * for this case, so `"advance"` is correct, not `"call"`.
  *
- * `gLockedMoves[gEffectBattler] = gCurrentMove` is deliberately NOT ported,
- * for the exact reason `applyThrashMoveEffect`'s own doc comment above
- * establishes: this engine has no ported `HandleAction_UseMove` anywhere, so
- * `gLockedMoves` has no read-back consumer in this codebase at any layer.
- * `gProtectStructs[gEffectBattler].chargingTurn = 1` IS ported -- unlike
- * `gLockedMoves`, `chargingTurn` is already a modeled field
- * (`BattleScriptRulesContext.battlers[i].chargingTurn`), cheap to set
- * faithfully even though its one consumer (`resolveBattleScriptMoveEndNextTarget`'s
- * doubles-only spread-move replay) has no observable effect in Factory-L50
- * singles scope.
+ * The source also writes `gCurrentMove` to the effect battler's
+ * `gLockedMoves` entry. The full-turn adapter consumes that exact move on the
+ * next action while preserving the original chosen position as PP owner,
+ * which matters when Assist called this charging move from a different slot.
  */
 function applyChargingMoveEffect(
   context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
@@ -3435,10 +3429,16 @@ function applyChargingMoveEffect(
     );
   }
 
-  const nextRulesContext = withBattler(baseRulesContext, effectBattler, {
+  const withCharging = withBattler(baseRulesContext, effectBattler, {
     status2: (effectBattlerState.status2 | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS) >>> 0,
     chargingTurn: 1,
   });
+  const lockedMoves = Object.freeze(
+    withCharging.lockedMoves.map((move, index) =>
+      index === effectBattler ? baseRulesContext.currentMove : move
+    ),
+  ) as BattleScriptRulesContext["lockedMoves"];
+  const nextRulesContext = Object.freeze({ ...withCharging, lockedMoves });
   return transitionBattleScriptCommand(
     context,
     Object.freeze({ kind: "advance" }),
@@ -3467,19 +3467,9 @@ function applyChargingMoveEffect(
  * reaches this dispatch) is genuinely the whole move; `"advance"` is the
  * correct transition, not a `"call"`.
  *
- * `gLockedMoves[gEffectBattler] = gCurrentMove` is deliberately NOT ported.
- * Source reads it back exactly once, in `HandleAction_UseMove`
- * (`battle_util.c:109`) -- the per-battler "which move does this turn
- * execute" selector that runs once per battler action, before
- * `Cmd_attackcanceler`/this engine's Battle Script machine ever starts.
- * This engine has no ported equivalent of `HandleAction_UseMove` anywhere
- * (confirmed by grep: zero references outside doc citations) -- every call
- * site that starts a move's execution (`factoryBattleScriptFullTurnDecision
- * .ts`'s `buildActionContext`/`runMoveAction`, every battle-lab/Tier-1 test)
- * takes the move id as a given external input, never derives it internally.
- * So `gLockedMoves` has no read-back consumer in this codebase at any layer
- * -- an inert source field distinct from the observable status/counter state
- * that Sleep and Freeze clear through `CancelMultiTurnMoves`.
+ * Source stores `gCurrentMove` in the effect battler's `gLockedMoves` entry.
+ * The full-turn action consumer reads it back independently of the move
+ * occupying the remembered chosen slot, preserving called Thrash semantics.
  */
 function applyThrashMoveEffect(
   context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
@@ -3502,13 +3492,19 @@ function applyThrashMoveEffect(
     "SetMoveEffect Thrash-family lock-in duration ((Random() & 1) + 2)",
   );
   const turns = (randomValue & 1) + 2;
-  const nextRulesContext = withBattler(baseRulesContext, effectBattler, {
+  const withRampage = withBattler(baseRulesContext, effectBattler, {
     status2: (
       effectBattlerState.status2
       | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
       | (turns << 10)
     ) >>> 0,
   });
+  const lockedMoves = Object.freeze(
+    withRampage.lockedMoves.map((move, index) =>
+      index === effectBattler ? baseRulesContext.currentMove : move
+    ),
+  ) as BattleScriptRulesContext["lockedMoves"];
+  const nextRulesContext = Object.freeze({ ...withRampage, lockedMoves });
   return transitionBattleScriptCommand(
     context,
     Object.freeze({ kind: "advance" }),

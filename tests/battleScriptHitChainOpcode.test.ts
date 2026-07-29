@@ -2619,13 +2619,18 @@ describe("SetMoveEffect two-turn-charge family (registered) -- MOVE_EFFECT_CHARG
     return { execution, result: stepBattleScriptMachine(program, patched, execution.handlers) };
   }
 
-  it("turn 1 (not yet charging): sets STATUS2_MULTIPLETURNS + chargingTurn on the attacker, zero RNG, advances (SetMoveEffect just breaks, not a call)", () => {
-    const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_CHARGING | MOVE_EFFECT_AFFECTS_USER });
+  it("turn 1 (not yet charging): sets STATUS2_MULTIPLETURNS + chargingTurn + gLockedMoves on the attacker, zero RNG, advances (SetMoveEffect just breaks, not a call)", () => {
+    const rc = context(0, {}, {
+      currentMove: 19,
+      lockedMoves: [7, 8, 9, 10],
+      moveEffectByte: MOVE_EFFECT_CHARGING | MOVE_EFFECT_AFFECTS_USER,
+    });
     const { execution, result } = stepAtChargingSetEffectPrimary(rc);
     if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
     expect(result.state.rng.calls).toBe(execution.state.rng.calls);
     expect(result.state.rulesContext.battlers[0]!.status2 & STATUS2_MULTIPLETURNS).toBe(STATUS2_MULTIPLETURNS);
     expect(result.state.rulesContext.battlers[0]!.chargingTurn).toBe(1);
+    expect(result.state.rulesContext.lockedMoves).toEqual([19, 8, 9, 10]);
     expect(result.state.programCounter).toBe(setEffectPrimaryPc + 1);
   });
 
@@ -2641,13 +2646,18 @@ describe("SetMoveEffect two-turn-charge family (registered) -- MOVE_EFFECT_CHARG
     const rc = context(
       0,
       { status2: STATUS2_MULTIPLETURNS, chargingTurn: 0 },
-      { moveEffectByte: MOVE_EFFECT_CHARGING | MOVE_EFFECT_AFFECTS_USER },
+      {
+        currentMove: 19,
+        lockedMoves: [7, 8, 9, 10],
+        moveEffectByte: MOVE_EFFECT_CHARGING | MOVE_EFFECT_AFFECTS_USER,
+      },
     );
     const { execution, result } = stepAtChargingSetEffectPrimary(rc);
     if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
     expect(result.state.rng.calls).toBe(execution.state.rng.calls);
     expect(result.state.rulesContext.battlers[0]!.status2).toBe(STATUS2_MULTIPLETURNS);
     expect(result.state.rulesContext.battlers[0]!.chargingTurn).toBe(0);
+    expect(result.state.rulesContext.lockedMoves).toEqual([7, 8, 9, 10]);
     expect(result.state.programCounter).toBe(setEffectPrimaryPc + 1);
   });
 

@@ -203,10 +203,14 @@ describe("SetMoveEffect MOVE_EFFECT_THRASH case (Cmd_seteffectwithchance's dispa
     return { execution, result: stepBattleScriptMachine(program, patched, execution.handlers) };
   }
 
-  it("not yet locked: draws the (Random()&1)+2 duration, sets STATUS2_MULTIPLETURNS|STATUS2_LOCK_CONFUSE on the ATTACKER (affects-user), plain advance -- no script call, unlike MOVE_EFFECT_CONFUSION", () => {
+  it("not yet locked: draws the duration and sets STATUS2_MULTIPLETURNS|STATUS2_LOCK_CONFUSE + gLockedMoves on the ATTACKER, plain advance", () => {
     const rc = context(
       { status2: 0 },
-      { currentMove: MOVE_THRASH, moveEffectByte: MOVE_EFFECT_THRASH | MOVE_EFFECT_AFFECTS_USER },
+      {
+        currentMove: MOVE_THRASH,
+        lockedMoves: [7, 8, 9, 10],
+        moveEffectByte: MOVE_EFFECT_THRASH | MOVE_EFFECT_AFFECTS_USER,
+      },
     );
     const { execution, result } = stepAtSetEffectWithChance(rc, 1);
     if (result.kind !== "advanced") throw new Error("expected advance");
@@ -220,6 +224,7 @@ describe("SetMoveEffect MOVE_EFFECT_THRASH case (Cmd_seteffectwithchance's dispa
     const turns = (attackerState.status2 & STATUS2_LOCK_CONFUSE) >>> 10;
     expect(turns).toBeGreaterThanOrEqual(2);
     expect(turns).toBeLessThanOrEqual(3);
+    expect(result.state.rulesContext.lockedMoves).toEqual([MOVE_THRASH, 8, 9, 10]);
     // target (the OTHER battler) is untouched -- MOVE_EFFECT_AFFECTS_USER routes gEffectBattler to the attacker, not the target.
     expect(result.state.rulesContext.battlers[1]!.status2).toBe(0);
     // no script call: SetMoveEffect's own switch just `break`s for this case -- the transition is the opcode after seteffectwithchance, not a call/jump.
@@ -230,11 +235,16 @@ describe("SetMoveEffect MOVE_EFFECT_THRASH case (Cmd_seteffectwithchance's dispa
     const existingLock = STATUS2_MULTIPLETURNS | (3 << 10); // mid-lock, 3 turns left
     const rc = context(
       { status2: existingLock },
-      { currentMove: MOVE_THRASH, moveEffectByte: MOVE_EFFECT_THRASH | MOVE_EFFECT_AFFECTS_USER },
+      {
+        currentMove: MOVE_THRASH,
+        lockedMoves: [7, 8, 9, 10],
+        moveEffectByte: MOVE_EFFECT_THRASH | MOVE_EFFECT_AFFECTS_USER,
+      },
     );
     const { execution, result } = stepAtSetEffectWithChance(rc, 1);
     if (result.kind !== "advanced") throw new Error("expected advance");
     expect(result.state.rng.calls).toBe(execution.state.rng.calls + 1);
     expect(result.state.rulesContext.battlers[0]!.status2).toBe(existingLock);
+    expect(result.state.rulesContext.lockedMoves).toEqual([7, 8, 9, 10]);
   });
 });
