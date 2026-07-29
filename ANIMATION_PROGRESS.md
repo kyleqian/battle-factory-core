@@ -1,5 +1,27 @@
 # Animation coverage
 
+## MOVE_FOCUS_ENERGY promoted exact; FOCUS_ENERGY/EndureEffect track established (2026-07-28)
+
+**Verdict:** `MOVE_FOCUS_ENERGY` is exact. Legal Level-50 Factory set-44
+TAILLOW→ONIX Scene-ON parties pass the complete source body through first
+inactive cleanup at **122/122** reducer/component, typed-seam, hardware,
+audio, raw-RGB, and shared-framebuffer frames **73–194** player-back and
+**77–198** opponent-front, twice fresh. Player evidence/raw digests are
+`949eb218…d80ae4` / `45e75715…7049c5`; opponent digests are
+`67990c21…782cc7` / `a0e387e6…0c9ad5`.
+
+**Model/boundary:** the pure relative-age reducer ports all three literal
+EndureEffect calls (**15** sprites with source OAM reuse), white
+BlendColorCycle, attacker ShakeMon2, Dragon Rage audio, asset/task/sprite
+lifetimes, source subpriority and OAM/palette display latches, and cleanup.
+The typed seam and source-extracted Taillow/FOCUS_ENERGY compositor match
+every production frame without battle clocks, fitting, pixel exceptions, or
+recording imports. `MOVE_ENDURE` remains unsupported for its independently
+unaccepted red palette body; `MOVE_FOCUS_PUNCH` remains unsupported for its
+distinct two-pass HyperVoiceEffect scale/ring/shake/platform/cry body.
+Coverage is **76 exact / 0 partial / 0 staged / 200 unsupported**; no battle
+state, boundary list, unsupported barrier, or sibling status changed.
+
 ## ANIM_TAG_FOCUS_ENERGY evidence checkpoint; siblings remain unsupported (2026-07-28)
 
 **Verdict:** Evidence-only checkpoint. `MOVE_FOCUS_ENERGY` remains
