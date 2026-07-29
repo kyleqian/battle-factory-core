@@ -1,3 +1,28 @@
+## 697 — [BOUNDED MAIN WORKER 2026-07-29 ~12:36] Battle-command seam Slice 1 landed
+
+- **State:** implementation `9e5799bf`; tree green at **515 files / 5193
+  tests + 1 deliberate animation-lane skip**, production build,
+  `git diff --check`, and Battle Scene OFF oracle info. Import/barrier ratchet
+  remains **6/6**.
+- **Did:** added immutable
+  `createBattleCommandPresentation(BattleCommandRequest,
+  BattleScriptRulesContext)`: request-owned exact move targets and switch
+  indexes, live active HP/status/moves/PP, party-indexed persistent identity,
+  generated species name/gender conversion, and phase-relative initial
+  cursors. Canonical Battle-2 render-state projection is deeply equal to the
+  old model; a noncanonical fixture proves sparse slots, self-targeting,
+  statuses, changed parties, and both active party indexes.
+- **Next:** dispatch design §4 Slice 2: phase-relative action/FIGHT lifecycle
+  reducer plus ordinary `submitBattleDecision` bridge, without renderer/core
+  integration.
+- **Notes:** state-only pixel gates remain exact:
+  `battle2-action-menu-dense` **209/209**, `fight-submenu` **235/235**, reopen
+  **90/90**. No core, renderer, trace, census, issue, roadmap, animation,
+  recording import, or battle/turn/absolute-tick dispatch changed. PAPERCUT:
+  none.
+
+---
+
 ## 696 — [BOUNDED MAIN WORKER 2026-07-29 ~12:22] Rung-14 battle-command seam design complete
 
 - **State:** docs-only design step complete; inherited tree remains green at

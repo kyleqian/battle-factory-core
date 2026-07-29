@@ -13,6 +13,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 700 — [BOUNDED MAIN WORKER 2026-07-29 ~14:06] Battle-command seam Slice 4 landed
+
+- **State:** implementation `1b72c15c`; tree green at **516 files / 5211
+  tests + 1 deliberate animation-lane skip**, production build,
+  `git diff --check`, and import/barrier ratchet **6/6**.
+- **Did:** the generic command render view now derives both composed
+  healthboxes exclusively from `BattleCommandFieldBattler`, and derives the
+  FIGHT rows from live active `moveIds`/`currentPP`/packed PP bonuses. The
+  Battle-2 seam consumes that view directly; its generic path no longer calls
+  the fourteen-turn PP reconstruction. Tier 1 covers non-full HP and
+  poison/burn/paralysis on each side plus MAGBY's non-ONIX four-move set.
+- **Next:** dispatch design §4 Slice 5: build generic action-cursor chrome and
+  the typed POKéMON handoff; retain the complete fourteen-window regression
+  set and do not begin Slice 6's generated route or battle-pic wiring.
+- **Notes:** all fourteen windows exact: Battle 2 **209/209**, FIGHT
+  **235/235**, reopen **90/90**; turns 3–13 **254/254, 44/44, 42/42, 44/44,
+  93/93, 88/88, 111/111, 83/83, 56/56, 46/46, 57/57**. No battler art,
+  generated route, action cursor, party screen, trace/capture list, core,
+  issue, census, roadmap, animation, or battle/turn/absolute-tick selector
+  changed. PAPERCUT: none.
+
+---
+
 ## 699 — [BOUNDED MAIN WORKER 2026-07-29 ~13:42] Battle-command seam Slice 3 landed
 
 - **State:** implementation `4d27ff46` + scope cleanup `0a14c6ad`; tree green
@@ -81,30 +104,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   checks). Worker PAPERCUT (census pin forced a behavior-neutral helper
   relocation, ~3 min) noted; no PAPERCUTS.md bump — one-off placement cost,
   not recurring friction.
-
----
-
-## 697 — [BOUNDED MAIN WORKER 2026-07-29 ~12:36] Battle-command seam Slice 1 landed
-
-- **State:** implementation `9e5799bf`; tree green at **515 files / 5193
-  tests + 1 deliberate animation-lane skip**, production build,
-  `git diff --check`, and Battle Scene OFF oracle info. Import/barrier ratchet
-  remains **6/6**.
-- **Did:** added immutable
-  `createBattleCommandPresentation(BattleCommandRequest,
-  BattleScriptRulesContext)`: request-owned exact move targets and switch
-  indexes, live active HP/status/moves/PP, party-indexed persistent identity,
-  generated species name/gender conversion, and phase-relative initial
-  cursors. Canonical Battle-2 render-state projection is deeply equal to the
-  old model; a noncanonical fixture proves sparse slots, self-targeting,
-  statuses, changed parties, and both active party indexes.
-- **Next:** dispatch design §4 Slice 2: phase-relative action/FIGHT lifecycle
-  reducer plus ordinary `submitBattleDecision` bridge, without renderer/core
-  integration.
-- **Notes:** state-only pixel gates remain exact:
-  `battle2-action-menu-dense` **209/209**, `fight-submenu` **235/235**, reopen
-  **90/90**. No core, renderer, trace, census, issue, roadmap, animation,
-  recording import, or battle/turn/absolute-tick dispatch changed. PAPERCUT:
-  none.
 
 ---
