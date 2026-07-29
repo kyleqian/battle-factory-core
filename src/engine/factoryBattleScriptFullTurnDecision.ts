@@ -141,6 +141,8 @@ const B_WAIT_TIME_SHORT = 32;
 const STAT_SPEED = 3;
 /** Real per-script instruction ceiling, matching battleEndTurnOrchestration.ts's own bump for the DoTurnDmg-family scripts' controller round trips. */
 const SCRIPT_BUDGET = 256;
+/** Controller/message waits are resumptions of one source opcode, not new opcodes. */
+const SCRIPT_YIELD_BUDGET = 4_096;
 
 type MoveRow = Readonly<{
   id: number;
@@ -771,8 +773,9 @@ type RunToOwnEndResult =
 /** Runs one already-started BattleScriptExecute script to its own end/end2 halt (same shape as the fainted-actions/end-turn precedents' own helper). */
 function runScriptToOwnEnd(program: BattleScriptProgram, handlers: Handlers, initialState: MachineState): RunToOwnEndResult {
   let state = initialState;
-  const instructionsAtStart = state.instructionsExecuted;
-  while (state.instructionsExecuted - instructionsAtStart < SCRIPT_BUDGET) {
+  let sourceInstructions = 0;
+  let yieldSteps = 0;
+  while (sourceInstructions < SCRIPT_BUDGET && yieldSteps < SCRIPT_YIELD_BUDGET) {
     const instruction = program.instructions[state.programCounter];
     if (!instruction) {
       throw new Error(`full-turn reducer left the committed program at ${state.programCounter}`);
@@ -789,6 +792,7 @@ function runScriptToOwnEnd(program: BattleScriptProgram, handlers: Handlers, ini
             + `without a safe controller acknowledgement: ${JSON.stringify(stepped.reason)}`,
         );
       }
+      yieldSteps += 1;
       state = acknowledged;
       continue;
     }
@@ -801,13 +805,35 @@ function runScriptToOwnEnd(program: BattleScriptProgram, handlers: Handlers, ini
     if (stepped.kind === "unsupported") {
       return Object.freeze({ kind: "barrier", state: stepped.state, instruction });
     }
+    if (stepped.kind === "scheduler-progressed") {
+      yieldSteps += 1;
+      state = stepped.state;
+      continue;
+    }
+    const controllerYield = (
+      stepped.state.programCounter === state.programCounter
+      && stepped.state.scheduler.pendingControllerBattlers.length
+        > state.scheduler.pendingControllerBattlers.length
+    );
+    if (controllerYield) {
+      yieldSteps += 1;
+    } else {
+      sourceInstructions += 1;
+    }
     state = stepped.state;
+  }
+  if (yieldSteps >= SCRIPT_YIELD_BUDGET) {
+    throw new Error(
+      `full-turn reducer exceeded its controller/message yield budget at `
+        + `${program.instructions[state.programCounter]?.source.label}/`
+        + `${program.instructions[state.programCounter]?.opcodeName}`,
+    );
   }
   throw new Error(
     `full-turn reducer exceeded its per-script instruction budget at `
       + `${program.instructions[state.programCounter]?.source.label}/`
       + `${program.instructions[state.programCounter]?.opcodeName} after `
-      + `${state.instructionsExecuted} executed instructions`,
+      + `${sourceInstructions} source instructions`,
   );
 }
 
