@@ -36,10 +36,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   441 calls**; segment endpoints are pinned as
   `4→2423399196→3960941853→2133491021→1174811135`. No fixture resolution
   occurs anywhere in the carrier.
-- **Next:** rung 12 owns the seven-battle loop, accepted-swap carrier, streak/
-  terminal facility state, multiple seeds, and loss control. Rung 13 remains
-  AI switch/item/history breadth; rung 14 remains commentary/presentation
-  wiring. Keep the equal-speed fresh-start receipt barrier intact.
+- **Supervisor fold (same round, side merge):** the equal-speed tie receipt
+  landed (`9eec0e10`, Terra) — one added draw between A and B from
+  `GetWhoStrikesFirst+0x3b1`, tie `&1=1`, order `[1,0]`; per-case process
+  isolation fixed the prior instability; wrapper re-run fresh by the
+  supervisor: both cases PASS. The fresh-start barrier may now retire in a
+  main-lane step that consumes the receipt.
+- **Next:** rung 12 (seven-battle loop, accepted swap, streak/terminal
+  facility state, multiple seeds, loss control, main — rung (a): retire the
+  equal-speed barrier against the receipt) + rung-13 ground-truth scout
+  (AI switch/history breadth — mission-scope-checked: opponent switch AI is
+  NOT excluded by the mission brief, side). Rung 14 remains
+  commentary/presentation wiring.
 - **Notes:** scout §2.1's frozen claim that Factory selection still required
   fixture parties was proved at the live seam; the minimal adapter now accepts
   a complete generated opponent while reusing the controller's index/heal/
