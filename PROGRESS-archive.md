@@ -1,5 +1,32 @@
 ---
 
+## 654 — [BOUNDED MAIN WORKER 2026-07-28 ~19:01] Assigned CheckViability phase-1 step already complete — verified, not redone
+
+- **State:** no implementation delta: the assigned phase-1 handler sequence
+  was already committed in entries 463/466/467/468, and later work completed
+  all **22/22** reachable `AI_CV_*` handlers. Tree green at **440 files /
+  4791 tests**, production build, OFF oracle info, `git diff --check`, and
+  the full banked CheckViability verifier **ALL PASS**.
+- **Did:** read the mandatory ground-truth doc, including §§3/4's corrected
+  RNG-site counts and CBM-before-CV reachability rule; inspected the production
+  dispatch, per-handler trace fields, Tier-1 coverage, and historical commits
+  (`7fec289e`, `07a5f6a6`, `9e951cc6`, `02784ecf`). Regenerated the census
+  byte-identically at **214/214 effects, 355/355 moves, 276/276 distinct,
+  2957/2957 weighted**, all **72** validations. The OFF verifier reproduced
+  the banked **11/11/13** instrument-attributed scenarios and every later
+  doc-cited handler ledger.
+- **Next:** supervisor should correct or retire the stale brief premise that
+  `AI_CheckViability` is dispatch-only. The named
+  `factory-ai-check-viability` barrier remains tested for the unported,
+  currently unreachable remainder of the 90-handler source table; do not
+  reopen the completed 22-handler program without a newly reachable effect.
+- **Notes:** unsupported-branch pin count unchanged: these AI dispatch barriers
+  are plain tagged returns and are not part of `PINNED_BARRIER_COUNTS`
+  (historical entry 463 records this explicitly). No source, test, census,
+  issue, roadmap, presentation, animation, round, tick, or pixel change.
+
+---
+
 ## 653 — [BOUNDED MAIN WORKER 2026-07-28 ~18:51] Switch-in entry hooks registered and follow-up pins closed
 
 - **State:** implementation commits `2ec8ef8a` / `38da44ab` (+ final Forecast

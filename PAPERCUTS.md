@@ -83,18 +83,6 @@ Per entry:
 - **Workaround:** include the accepted endpoint in the staged capture range
   and reuse one fresh probe artifact while iterating on app-side rendering.
 
-## Default Python lacks the mGBA probe dependencies
-
-- **What:** invoking a fresh mGBA probe with the shell's default `python3`
-  fails at import time because it lacks `cffi`, even though the repository's
-  wrapper and probe are otherwise valid. Third hit (2026-07-25): a worker
-  lost ~8 min rediscovering the venv path via `ps aux` because it is
-  documented only here, not in AGENTS.md/README.
-- **Hits:** 3.
-- **Cost each:** ~3 min.
-- **Workaround:** invoke both `tools/run-mgba-probe.py` and its nested probe
-  with `/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python3`.
-
 ## Supervisor launcher option names are easy to misaddress
 
 - **What:** supervisor briefs used the conceptual lane names
@@ -131,17 +119,6 @@ Per entry:
   redirected to a named `/tmp` log, then poll `/v1/info` for readiness and
   retain only the process handle for shutdown.
 
-## Serialized oracle compares can strand or terminate multi-trace batches
-
-- **What:** launching several oracle-backed compares concurrently can leave a
-  call unresolved or race on the shared `tools/compare/out/latest`, while long
-  serialized shell batches can terminate mid-command even though their
-  individual traces are healthy.
-- **Hits:** 4.
-- **Cost each:** ~1-3 min.
-- **Workaround:** run short bounded batches, retain and poll every execution
-  handle, and resume from the first unverified trace after an interruption.
-
 ## Scene-ON battle-lab HTTP route is unavailable
 
 - **What:** the Scene-ON service answers canonical oracle requests but returns
@@ -171,17 +148,6 @@ Per entry:
 - **Cost each:** ~8 min.
 - **Workaround:** split each outcome/control into a fresh
   `run-mgba-probe.py` wrapper invocation and merge only the concise evidence.
-
-## `bin/oracle run`/`lab` always print the full capture manifest
-
-- **What:** targeted oracle probes with dense captures flood the terminal with
-  the complete manifest even when only the written artifacts are needed;
-  `bin/oracle lab` does the same for battle-lab scenarios.
-- **Hits:** 3 (run 2026-07-2x; lab 2026-07-28 Cluster-1 and Cluster-3
-  staging workers — both pre-warned in their briefs, still ~1 min each).
-- **Cost each:** ~1-2 min.
-- **Workaround:** redirect successful oracle stdout to `/dev/null` and inspect
-  the named manifest or RAM probe output directly.
 
 ## ImageMagick unavailable for raw-frame inspection
 
@@ -277,16 +243,6 @@ Per entry:
   segments via `EmeraldOracle`, dump named symbols/offsets per tick to
   JSON) next time a RAM chase happens — ISSUES #12/#13 are natural
   occasions.
-
-## Oracle-probe vs appTrace frame numbering ambiguity (~2x time cost, 2026-07-17)
-
-Two S4 workers independently lost time reconciling "press-tick N" labels
-from direct `bin/oracle run` probes with `tools/compare/appTrace.ts`'s
-frame counter when building dense traces of a fresh interaction. Worth a
-one-paragraph clarification (worked example: a 2-frame press at trace
-position K and which captureFrames index shows its first visible effect)
-in ROADMAP.md Domain notes or a doc both cite. Flagged by the S4 renderer
-worker (PROGRESS entry 13).
 
 ## New-window engine slices: baseline A/B check not done first (2026-07-19)
 
@@ -455,9 +411,12 @@ worker (PROGRESS entry 13).
   throwaway PNG-diff/crop scripts for the same need (GROWTH rungs 4-5).
 - **Hits:** 3 (same session).
 - **Cost each:** ~10-15 min of bespoke scratch scripting per residual hunt.
-- **Workaround:** copy `tools/compare/scratch/future-sight-per-frame-bbox.ts`
-  as the starting point; a shared `--per-frame-bbox` flag on the portable
-  harness template would retire this.
+- **Workaround:** partially fixed 2026-07-28: `npm run compare` now prints a
+  per-frame `bbox=` for every DIFF frame, and `tools/compare/diffBounds.ts`
+  exports `boundsForPixelIndices` for reuse. Remainder: the portable
+  mGBA-probe comparators (`growthPortable.ts` siblings) still bbox-dump only
+  their first diff frame — import `diffBounds.ts` there, or copy
+  `tools/compare/scratch/future-sight-per-frame-bbox.ts`.
 
 ## Mash-rep counts for staged multi-turn fixtures don't transfer between move-animation classes
 
@@ -477,22 +436,6 @@ worker (PROGRESS entry 13).
   committed table in `tools/battle-lab/README.md` indexed by animation
   class would let new fixtures start from a sibling's number instead of
   zero.
-
-## Historical turn-N traces route to the Scene-ON oracle by design — scouts keep rediscovering it
-- **What:** the `turn*-*.json` presentation-trace family predates the
-  `oracleProfile` field, so `npm run compare` routes them to Battle Scene
-  ON (8012) per AGENTS.md's documented legacy contract ("historical traces
-  without that field remain ON-profile so their established frame contract
-  does not silently change"). Forcing 8014 drops e.g.
-  `turn13-sandattack.json` to 78/190 — structural, not drift. Every
-  established turn-N acceptance count is an ON-profile bar, intentionally.
-- **Hits:** 1 (§15 scout, 2026-07-27, ~10 min re-deriving this before
-  finding the AGENTS.md paragraph).
-- **Cost each:** ~10 min.
-- **Workaround:** briefs citing turn-N acceptance counts should say
-  "profile-routed (ON for this family)" instead of naming a port; a
-  one-line banner in docs/presentation-seam-scout.md's intro would stop
-  the rediscovery loop at the doc every scout reads first.
 
 ## Codex `apply_patch` fails to match PROGRESS-archive.md tail blocks
 
