@@ -119,6 +119,22 @@ describe("presentationEventWindowBridge (S10 presentation-seam checkpoint, gap 7
     });
   });
 
+  it("preserves an opponent-target accuracy drop for the SAND_ATTACK banner instead of assuming the earlier attack-stat shape", () => {
+    const events: BattleScriptSemanticEvent[] = [
+      event({ kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }, EFFECT_STAT_DOWN_SCRIPT_LABEL),
+      event({ kind: "stat-stage-change", battler: 0, stat: "accuracy", from: 6, to: 5 }, EFFECT_STAT_DOWN_SCRIPT_LABEL),
+      event({ kind: "animation", animationId: "STATS_CHANGE", battler: 0, arguments: ["27"] }, "BattleScript_StatDownDoAnim"),
+      event({ kind: "message", messageId: "STRINGID_DEFENDERSSTATFELL", substitutions: [] }, STAT_DOWN_PRINT_STRING_SCRIPT_LABEL),
+    ];
+
+    const content = resolveFeatherDanceKickoffPresentationWindowContent(events);
+    expect(content).toEqual({
+      message: { messageId: "STRINGID_USEDMOVE", substitutions: [] },
+      statChange: { battler: 0, stat: "accuracy", from: 6, to: 5 },
+      statFellMessage: { messageId: "STRINGID_DEFENDERSSTATFELL", substitutions: [] },
+    });
+  });
+
   it("returns null when no message event carries the separate stat-fell script's own sourceLabel (the two-sourceLabel signal this window's own shape genuinely needs)", () => {
     const events: BattleScriptSemanticEvent[] = [
       event({ kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }, EFFECT_STAT_DOWN_SCRIPT_LABEL),

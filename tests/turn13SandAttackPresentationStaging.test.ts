@@ -54,12 +54,12 @@ describe("turn13SandAttackPresentationStaging: staged real SAND_ATTACK opponent-
     expect(ppEvent).toMatchObject({ battler: 1, movePosition: 3, pp: 14 });
   });
 
-  it("resolveTurn13SandAttackKickoffLines resolves to \"Foe PIDGEOTTO used\\nSAND-ATTACK!\", byte-identical to TURN13_SANDATTACK_LINE1/2's own hardcoded literal (battleScene.ts:11813-11814)", () => {
+  it("resolveTurn13SandAttackKickoffLines resolves the production window's kickoff from the staged STRINGID_USEDMOVE event", () => {
     const lines = resolveTurn13SandAttackKickoffLines();
     expect(lines).toEqual(["Foe PIDGEOTTO used", "SAND-ATTACK!"]);
   });
 
-  it("resolveTurn13AccFellLines resolves byte-identical to TURN13_ACCFELL_LINE1/2 (battleScene.ts:11907-11908), curly apostrophe included -- a magnitude-1 drop, so the 'fell!' tail, not 'harshly fell!'", () => {
+  it("resolveTurn13AccFellLines resolves the production window's accuracy banner from the staged 6 -> 5 stat-stage-change, curly apostrophe included", () => {
     const lines = resolveTurn13AccFellLines();
     expect(lines).toEqual(["ONIX’s accuracy", "fell!"]);
   });
