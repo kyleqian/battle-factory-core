@@ -56,6 +56,8 @@ export interface PartySelectState {
   submenuOpen: boolean;
   /** Null until SEND OUT is confirmed; then frames since that input edge. */
   sendOutElapsed: number | null;
+  /** Source party-menu refusal text; null during ordinary list/submenu input. */
+  message: string | null;
   /** Immutable kernel request whose selection this presentation owns. */
   request: BattleForcedSwitchRequest;
   /** Full round identities/live HP used to construct the three visible rows. */
@@ -220,6 +222,7 @@ export function createPartySelectStateFromForcedSwitch(
     cursor: "onix",
     submenuOpen: false,
     sendOutElapsed: null,
+    message: null,
     request,
     party,
   };
@@ -235,6 +238,7 @@ export const INITIAL_PARTY_SELECT_STATE: PartySelectState = {
   cursor: "onix",
   submenuOpen: false,
   sendOutElapsed: null,
+  message: null,
   request: CANONICAL_FORCED_SWITCH_REQUEST,
   party: [
     {
@@ -471,14 +475,24 @@ export function advancePartySelect(state: PartySelectState, newKeys: ReadonlySet
     sendOutElapsed: state.sendOutElapsed === null ? null : state.sendOutElapsed + 1,
   };
   if (next.sendOutElapsed !== null || next.elapsed < PARTY_LIST_INPUT_ELAPSED) return next;
+  if (next.message !== null) {
+    return newKeys.has("A") || newKeys.has("B")
+      ? { ...next, message: null }
+      : next;
+  }
   if (!next.submenuOpen && newKeys.has("DOWN")) return { ...next, cursor: "magby" };
   if (newKeys.has("A")) {
     if (!next.submenuOpen) return { ...next, submenuOpen: true };
-    // Source SEND OUT refuses a fainted row ("... has no energy to
-    // battle!" stays in the menu); the confirm must never hand an illegal
-    // party index to the kernel. The refusal message window is ISSUES #49.
     const selected = next.party.find((member) => member.partyIndex === selectedPartyIndex(next));
-    if (!selected?.legal) return next;
+    if (!selected?.legal) {
+      return selected?.fainted
+        ? {
+            ...next,
+            submenuOpen: false,
+            message: `${selected.species} has no energy\nleft to battle!`,
+          }
+        : next;
+    }
     return { ...next, sendOutElapsed: 0 };
   }
   return next;

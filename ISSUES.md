@@ -5,19 +5,6 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #49 — forced-switch SEND OUT on a fainted row lacks the source refusal message
-
-**Symptom:** the party-select reducer now *refuses* SEND OUT confirmation on
-an illegal (fainted) row (guard landed 2026-07-29 after the day-audit found
-the old path submitting `faintedPartyIndex` into a kernel throw), but the
-refusal is a silent no-op. The source prints "<mon> has no energy to
-battle!" in the party-menu message window and stays in the menu.
-**Confirmed:** `partySelect.ts` guard + Tier-1 pin ("refuses SEND OUT
-confirmation on the fainted row"); canonical/delayed windows remain 200/200.
-**Lead:** the message window is ordinary party-menu chrome; extract its text
-rendering when the voluntary party-selector renderer slice (battle-command
-design §4 Slice 5 handoff dependency) is built — same screen family.
-
 ## #51 — summary screen ignores generated draft state; renders anchor identity for every slot
 
 **Symptom:** the draft generated-slots adapter (`73543153`) carries only

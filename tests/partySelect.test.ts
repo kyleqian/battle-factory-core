@@ -108,7 +108,7 @@ describe("forced turn-15 party select", () => {
     expect(advancePartySelect(submenu, new Set(["A"])).sendOutElapsed).toBe(0);
   });
 
-  it("refuses SEND OUT confirmation on the fainted row (day-audit 2026-07-29; message window is ISSUES #49)", () => {
+  it("prints the source refusal and stays in the forced-switch menu on a fainted row", () => {
     const onixSubmenu = advancePartySelect(
       { ...INITIAL_PARTY_SELECT_STATE, elapsed: PARTY_LIST_INPUT_ELAPSED - 1 },
       new Set(["A"]),
@@ -116,12 +116,15 @@ describe("forced turn-15 party select", () => {
     expect(onixSubmenu).toMatchObject({ cursor: "onix", submenuOpen: true, sendOutElapsed: null });
     const refused = advancePartySelect(onixSubmenu, new Set(["A"]));
     expect(refused.sendOutElapsed).toBeNull();
-    expect(refused.submenuOpen).toBe(true);
+    expect(refused.submenuOpen).toBe(false);
+    expect(refused.message).toBe("ONIX has no energy\nleft to battle!");
     expect(submitPartySelectBattleDecision(
       { boundary: { kind: "forced-switch", request: refused.request } } as never,
       refused,
       (() => { throw new Error("must not reduce"); }) as never,
     )).toBeNull();
+    expect(advancePartySelect(refused, new Set()).message)
+      .toBe("ONIX has no energy\nleft to battle!");
   });
 
   it("keeps the SEND OUT exit clock relative to its own confirmation edge", () => {

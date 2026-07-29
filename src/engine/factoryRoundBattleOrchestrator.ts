@@ -11,10 +11,17 @@
 import type { GbaButton } from "../input.ts";
 import {
   advanceBattleCommandPresentation,
+  cancelBattleCommandPartySelection,
   createBattleCommandPresentation,
+  returnBattleCommandPartySelection,
   submitBattleCommandPresentationDecision,
   type BattleCommandPresentationState,
 } from "./battleCommandPresentation.ts";
+import {
+  advanceBattlePartySelect,
+  createBattlePartySelectState,
+  type BattlePartySelectState,
+} from "./battlePartySelect.ts";
 import {
   healFactoryKernelParty,
   type BattleMon,
@@ -152,6 +159,8 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
   battle: BattleState<FactoryFullTurnDecisionRules> | null;
   /** Request-owned player command UI, replaced at each command boundary. */
   battleCommandPresentation: BattleCommandPresentationState | null;
+  /** Adjacent voluntary selector while the command UI owns party-handoff. */
+  battlePartySelect: BattlePartySelectState | null;
   /** Source gMoveSelectionCursor: controller-owned, not request-owned. */
   moveSelectionCursors: FactoryBattleMoveSelectionCursors;
   aiHistory: FactoryAiBattleHistory | null;
@@ -343,6 +352,7 @@ export function createFactoryRoundBattleOrchestrator(
     round,
     battle: null,
     battleCommandPresentation: null,
+    battlePartySelect: null,
     moveSelectionCursors: RESET_MOVE_SELECTION_CURSORS,
     aiHistory: null,
     initialRentalGeneration,
@@ -388,6 +398,7 @@ function startCurrentBattle(
       started.rules.rulesContext,
       moveSelectionCursors[started.boundary.request.battler],
     ),
+    battlePartySelect: null,
     moveSelectionCursors,
     aiHistory: createFactoryAiBattleHistory(started.rules.rulesContext),
     facilityRngCalls: callStart + started.rng.calls,
@@ -521,6 +532,7 @@ function finishBattle(
     round,
     battle: null,
     battleCommandPresentation: null,
+    battlePartySelect: null,
     aiHistory,
     rngSegments: Object.freeze([...state.rngSegments, segment]),
     facilityRngCalls: segment.callEnd,
@@ -625,6 +637,7 @@ function driveTrainerBoundary(
       nextBattle,
       moveSelectionCursors,
     ),
+    battlePartySelect: null,
     moveSelectionCursors,
     aiHistory: nextHistory,
     facilityRngCalls: state.activeBattleCallStart! + nextBattle.rng.calls,
@@ -646,6 +659,36 @@ export function advanceFactoryRoundBattleCommand(
   if (battle === null || presentation === null || history === null) {
     return fail("battle-command input requires a published player command presentation");
   }
+  if (state.battlePartySelect !== null) {
+    const selector = advanceBattlePartySelect(state.battlePartySelect, newKeys);
+    if (selector.outcome === null) {
+      return Object.freeze({ ...state, battlePartySelect: selector });
+    }
+    if (selector.outcome.kind === "cancel") {
+      return Object.freeze({
+        ...state,
+        battleCommandPresentation: cancelBattleCommandPartySelection(presentation),
+        battlePartySelect: null,
+      });
+    }
+    const returned = returnBattleCommandPartySelection(
+      presentation,
+      selector.outcome.partyIndex,
+    );
+    const transition = submitBattleCommandPresentationDecision(
+      battle,
+      returned,
+      reduceFactoryFullTurnDecision,
+    );
+    if (transition === null) {
+      return fail("legal voluntary party selection did not submit");
+    }
+    return driveTrainerBoundary(
+      Object.freeze({ ...state, battlePartySelect: null }),
+      transition.state,
+      history,
+    );
+  }
   const advanced = advanceBattleCommandPresentation(presentation, newKeys);
   const moveSelectionCursors = Object.freeze(
     state.moveSelectionCursors.map((cursor, battler) =>
@@ -657,6 +700,20 @@ export function advanceFactoryRoundBattleCommand(
     reduceFactoryFullTurnDecision,
   );
   if (transition === null) {
+    if (
+      advanced.lifecycle.phase === "party-handoff"
+      && presentation.lifecycle.phase !== "party-handoff"
+    ) {
+      return Object.freeze({
+        ...state,
+        battleCommandPresentation: advanced,
+        battlePartySelect: createBattlePartySelectState(
+          advanced.request,
+          battle.rules.rulesContext,
+        ),
+        moveSelectionCursors,
+      });
+    }
     return Object.freeze({
       ...state,
       battleCommandPresentation: advanced,

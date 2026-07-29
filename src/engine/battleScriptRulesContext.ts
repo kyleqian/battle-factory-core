@@ -268,6 +268,19 @@ type BattleScriptRulesBattlerBase = Readonly<{
   loveImmobility?: 0 | 1;
   /** ProtectStruct::stealMove; absent legacy inputs normalize to zero at read sites. */
   stealMove?: 0 | 1;
+  /**
+   * ProtectStruct::notFirstStrike. Cmd_ppreduce sets this only when it
+   * actually deducts PP; AbilityBattleEffects(ABILITYEFFECT_ABSORBING)
+   * uses it to avoid deducting PP again when a spread move visits another
+   * target. TurnValuesCleanUp clears it with the rest of ProtectStruct.
+   */
+  notFirstStrike?: 0 | 1;
+  /**
+   * gBattleResources->flags->flags[battler] &
+   * RESOURCE_FLAG_FLASH_FIRE. This survives turn cleanup, boosts later Fire
+   * damage, and is cleared only when the battler faints or switches.
+   */
+  flashFireBoosted?: 0 | 1;
   /** SpecialStatus::lightningRodRedirected; absent legacy inputs normalize to zero. */
   lightningRodRedirected?: 0 | 1;
   /** ProtectStruct::endured (Cmd_adjustnormaldamage's HP-clamp gate); absent legacy inputs normalize to zero. */
@@ -2248,6 +2261,20 @@ export function createBattleScriptRulesContext(
         battler.stealMove,
         1,
         `battlers[${index}].stealMove`,
+      ) as 0 | 1,
+    }),
+    ...(battler.notFirstStrike === undefined ? {} : {
+      notFirstStrike: requireUnsigned(
+        battler.notFirstStrike,
+        1,
+        `battlers[${index}].notFirstStrike`,
+      ) as 0 | 1,
+    }),
+    ...(battler.flashFireBoosted === undefined ? {} : {
+      flashFireBoosted: requireUnsigned(
+        battler.flashFireBoosted,
+        1,
+        `battlers[${index}].flashFireBoosted`,
       ) as 0 | 1,
     }),
     ...(battler.lightningRodRedirected === undefined ? {} : {

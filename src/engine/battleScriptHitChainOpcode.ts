@@ -479,6 +479,11 @@ const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Objec
   ]),
   /** battle_message.c:1120-1124 -- BattleScript_EffectAbsorb's own table, B_MSG_ABSORB(0)/ABSORB_OOZE(1). */
   gAbsorbDrainStringIds: Object.freeze(["STRINGID_PKMNENERGYDRAINED", "STRINGID_ITSUCKEDLIQUIDOOZE"]),
+  /** battle_message.c:1242-1246 -- first Flash Fire activation (0) vs an already-active boost (1). */
+  gFlashFireStringIds: Object.freeze([
+    "STRINGID_PKMNRAISEDFIREPOWERWITH",
+    "STRINGID_PKMNSXMADEYINEFFECTIVE",
+  ]),
   /** battle_message.c:969-973 -- BattleScript_EffectRest's own table (Cmd_trysetrest, battleScriptTrysetrestOpcode.ts), B_MSG_REST(0)/REST_STATUSED(1). */
   gRestUsedStringIds: Object.freeze(["STRINGID_PKMNWENTTOSLEEP", "STRINGID_PKMNSLEPTHEALTHY"]),
   /** battle_message.c:1038-1045 -- indexed by the move's own position in gTrappingMoves, not MULTISTRING_CHOOSER's usual small enum. */
@@ -838,16 +843,16 @@ export function applyTrySetDestinyBondToHappen(
 
 /**
  * JumpIfMoveFailed's "not failed" branch: TrySetDestinyBondToHappen (above)
- * plus AbilityBattleEffects (ABILITYEFFECT_ABSORBING, ...) -- that switch
- * (battle_util.c:2679-2729) only special-cases three abilities (Volt Absorb/
- * Water Absorb/Flash Fire, each needing a full HP-drain/immunity redirect
- * this engine does not model yet); every other ability -- including
- * ABILITY_NONE -- falls through with `effect` staying 0, so
- * `AbilityBattleEffects` returns FALSE and `JumpIfMoveFailed` proceeds
- * exactly like the none-ability case. Barriering only the three real switch
- * cases (not "any nonzero ability") matters here: Attract's own Oblivious
- * block (`Cmd_tryinfatuating`, a later opcode in the same script) needs to
- * walk straight through this accuracycheck first.
+ * plus AbilityBattleEffects (ABILITYEFFECT_ABSORBING, ...), source-complete
+ * for its only three cases (battle_util.c:2679-2729). Volt/Water Absorb
+ * require a damaging matching-type move, heal one quarter max HP through
+ * BattleScript_MoveHPDrain, and take the full-HP useless arm instead when
+ * capped. Flash Fire accepts any Fire move while not frozen, sets its
+ * persistent resource flag only once, and chooses the boost/no-boost string
+ * for BattleScript_FlashFireBoost. Each activation records the exact AI
+ * reveal at AbilityBattleEffects' shared tail. Every other ability, a
+ * mismatched type, zero-power Volt/Water move, or frozen Flash Fire target
+ * falls through with `effect == 0`.
  */
 function advancePastAccuracyCheck(
   context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
@@ -857,22 +862,76 @@ function advancePastAccuracyCheck(
   rng: BattleScriptRngState,
   move: number,
 ): BattleScriptCommandTransition<BattleScriptRulesContext> {
+  let nextRulesContext = applyTrySetDestinyBondToHappen(rulesContext, attacker, target);
+  const attackerBattler = nextRulesContext.battlers[attacker];
   const targetBattler = rulesContext.battlers[target];
   const moveType = resolveMoveTypeName(rulesContext, move);
-  if (
-    (targetBattler.ability === ABILITY_VOLT_ABSORB && moveType === "TYPE_ELECTRIC")
-    || (targetBattler.ability === ABILITY_WATER_ABSORB && moveType === "TYPE_WATER")
-    || (targetBattler.ability === ABILITY_FLASH_FIRE && moveType === "TYPE_FIRE")
-  ) {
-    return unsupportedBranch(
+  const ppWasAlreadyReduced = attackerBattler.notFirstStrike === 1;
+
+  const absorbAbility = (
+    targetBattler.ability === ABILITY_VOLT_ABSORB
+    && moveType === "TYPE_ELECTRIC"
+    && nextRulesContext.currentMovePower !== 0
+  )
+    || (
+      targetBattler.ability === ABILITY_WATER_ABSORB
+      && moveType === "TYPE_WATER"
+      && nextRulesContext.currentMovePower !== 0
+    );
+  if (absorbAbility) {
+    nextRulesContext = recordBattleScriptAbilityReveal(
+      Object.freeze({
+        ...nextRulesContext,
+        lastUsedAbility: targetBattler.ability === ABILITY_VOLT_ABSORB
+          ? ABILITY_VOLT_ABSORB
+          : ABILITY_WATER_ABSORB,
+        ...(targetBattler.hp === targetBattler.maxHP
+          ? {}
+          : { battleMoveDamage: -Math.max(1, Math.trunc(targetBattler.maxHP / 4)) }),
+      }),
+      target,
+      targetBattler.ability,
+    );
+    const label = targetBattler.hp === targetBattler.maxHP
+      ? `BattleScript_MonMadeMoveUseless${ppWasAlreadyReduced ? "" : "_PPLoss"}`
+      : `BattleScript_MoveHPDrain${ppWasAlreadyReduced ? "" : "_PPLoss"}`;
+    const programCounter = resolveRequiredLabelProgramCounter(context.program, label);
+    return transitionBattleScriptCommand(
       context,
-      `JumpIfMoveFailed's AbilityBattleEffects(ABILITYEFFECT_ABSORBING) check needs the full `
-        + `generated ability-effect switch (target ability ${targetBattler.ability} is one of the three real switch cases)`,
-      "battle_script_commands.c",
-      1020,
+      Object.freeze({ kind: "jump", programCounter }),
+      { rulesContext: nextRulesContext, rng },
     );
   }
-  const nextRulesContext = applyTrySetDestinyBondToHappen(rulesContext, attacker, target);
+
+  if (
+    targetBattler.ability === ABILITY_FLASH_FIRE
+    && moveType === "TYPE_FIRE"
+    && (targetBattler.status1 & STATUS1_FREEZE) === 0
+  ) {
+    const alreadyBoosted = targetBattler.flashFireBoosted === 1;
+    nextRulesContext = withBattler(
+      Object.freeze({
+        ...nextRulesContext,
+        lastUsedAbility: ABILITY_FLASH_FIRE,
+        multistringChooser: alreadyBoosted ? 1 : 0,
+      }),
+      target,
+      { flashFireBoosted: 1 },
+    );
+    nextRulesContext = recordBattleScriptAbilityReveal(
+      nextRulesContext,
+      target,
+      ABILITY_FLASH_FIRE,
+    );
+    const label = `BattleScript_FlashFireBoost${ppWasAlreadyReduced ? "" : "_PPLoss"}`;
+    const programCounter = resolveRequiredLabelProgramCounter(context.program, label);
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "jump", programCounter }),
+      { rulesContext: nextRulesContext, rng },
+    );
+  }
+
   return transitionBattleScriptCommand(
     context,
     Object.freeze({ kind: "advance" }),
@@ -1290,7 +1349,7 @@ export const ppreduceOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesC
     const nextPp = currentPp > ppToDeduct ? currentPp - ppToDeduct : 0;
     const pp = attackerBattler.pp.map((value, index) => (index === slot ? nextPp : value)) as unknown as
       BattleScriptRulesBattlerState["pp"];
-    const withActivePp = withBattler(rulesContext, attacker, { pp });
+    const withActivePp = withBattler(rulesContext, attacker, { pp, notFirstStrike: 1 });
     nextRulesContext = Object.freeze({
       ...withActivePp,
       party: withBattleScriptPartyMemberPp(
@@ -1463,6 +1522,7 @@ export function calculateBattleScriptBaseDamageForCurrentMove(
     currentMove: rulesContext.currentMove,
     activeBattlerAbilities: activeBattlers.map((b) => ABILITY_NAME_BY_ID[b.ability] ?? null),
     isFrontierBattle: (rulesContext.battleTopology.battleTypeFlags & BATTLE_TYPE_FRONTIER) !== 0,
+    flashFireBoosted: attackerBattler.flashFireBoosted === 1,
   });
 }
 
@@ -4364,8 +4424,8 @@ function replaceAt<T extends readonly number[]>(values: T, index: number, value:
  * zeroes (isFirstTurn, truantSwitchInHack,
  * ProtectStruct's noValidMoves/fleeType/physicalDmg/
  * specialDmg/physicalBattlerId/specialBattlerId), gActionSelectionCursor/
- * gMoveSelectionCursor, gBattleResources->flags->flags, the species-base
- * `types` reassignment (this engine has no code path that ever moves `types`
+ * gMoveSelectionCursor, the species-base `types` reassignment (this engine
+ * has no code path that ever moves `types`
  * away from base, so leaving it untouched is exactly equivalent), and
  * ClearBattlerMoveHistory/ClearBattlerAbilityHistory (a wholly separate
  * AI-history structure) all have no reader anywhere in this engine's
@@ -4428,6 +4488,8 @@ function createCleareffectsonfaintOpcodeHandler(
           stealMove: 0 as const,
           endured: 0 as const,
           helpingHand: 0 as const,
+          notFirstStrike: 0 as const,
+          flashFireBoosted: 0 as const,
           chargingTurn: 0 as const,
           targetNotAffected: 0 as const,
           flag2Unknown: 0 as const,

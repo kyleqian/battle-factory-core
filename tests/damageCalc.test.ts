@@ -260,6 +260,22 @@ describe("calculateBaseDamage - WEATHER_HAS_EFFECT2 damage block (pokemon.c:3331
     expect(weatherDamage("TYPE_WATER", 0)).toBe(25);
   });
 
+  it("a consumed Flash Fire resource flag boosts only Fire damage by 1.5x before the unconditional +2", () => {
+    const boosted = (moveType: "TYPE_FIRE" | "TYPE_WATER", weather = 0) =>
+      calculateBaseDamage({
+        attacker: neutralSpecialAttacker,
+        defender: neutralSpecialDefender,
+        movePower: 53,
+        moveType,
+        isCriticalHit: false,
+        weather,
+        flashFireBoosted: true,
+      });
+    expect(boosted("TYPE_FIRE")).toBe(36); // raw 23 -> floor(34.5) -> 34 + 2
+    expect(boosted("TYPE_WATER")).toBe(25);
+    expect(boosted("TYPE_FIRE", B_WEATHER_SUN)).toBe(53); // raw 23 -> sun 34 -> Flash Fire 51 -> +2
+  });
+
   it.each([
     ["rain", B_WEATHER_RAIN, 13],
     ["sandstorm", B_WEATHER_SANDSTORM, 13],

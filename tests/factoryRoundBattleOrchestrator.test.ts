@@ -158,6 +158,37 @@ function driveGeneratedRoundToCompletion(
 }
 
 describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
+  it("cancels POKéMON back to the same action request and cursor", () => {
+    let state = createStartedGeneratedBattle(RNG_SEED);
+    state = advanceCommandToPhase(state, "action-menu");
+    const requestId = state.battleCommandPresentation!.request.requestId;
+    state = advanceFactoryRoundBattleCommand(state, new Set(["DOWN"]));
+    expect(state.battleCommandPresentation?.actionCursor).toBe(2);
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+    expect(state.battleCommandPresentation?.lifecycle.phase).toBe("party-handoff");
+    expect(state.battlePartySelect).not.toBeNull();
+    state = advanceFactoryRoundBattleCommand(state, new Set(["B"]));
+    expect(state.battlePartySelect).toBeNull();
+    expect(state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+    expect(state.battleCommandPresentation?.actionCursor).toBe(2);
+    expect(state.battleCommandPresentation?.request.requestId).toBe(requestId);
+  });
+
+  it("returns the exact legal voluntary row to the ordinary switch submission", () => {
+    let state = createStartedGeneratedBattle(RNG_SEED);
+    state = advanceCommandToPhase(state, "action-menu");
+    state = advanceFactoryRoundBattleCommand(state, new Set(["DOWN"]));
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+    state = advanceFactoryRoundBattleCommand(state, new Set(["DOWN"]));
+    state = advanceFactoryRoundBattleCommand(state, new Set(["DOWN"]));
+    expect(state.battlePartySelect?.cursor).toBe(2);
+    expect(state.battlePartySelect?.rows[2].legal).toBe(true);
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+    expect(state.battle?.rules.rulesContext.battlers[0].partyIndex).toBe(2);
+    expect(state.battlePartySelect).toBeNull();
+  });
+
   it("routes a live request through FIGHT slot 3 and seeds the next request from the controller-owned cursor", () => {
     let state = createStartedGeneratedBattle(RNG_SEED);
     const firstBoundary = state.battle?.boundary;
