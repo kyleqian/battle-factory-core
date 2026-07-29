@@ -29,8 +29,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   through `submitFactoryAiDecision`; every choice is live-request-legal and
   all policy/hit/boundary draws share the exact **188-call** cursor through a
   real player-win terminal. Commits `7d93cf8c`, `ad888ce7`.
-- **Next:** rung 11: let the round controller own one real generated battle
-  lifecycle through result/swap/next-battle. Rung 13 remains the explicit
+- **Supervisor fold (same round, side merge):** rung 9 landed (`a9f22553`
+  + `833b61ee`) — `factoryCommentary.ts` ports favorite-type and
+  battle-style rules (every branch incl. TYPE_MYSTERY's tally-only
+  exclusion and no-singular-style; 35 focused tests; two rung-8 seeds
+  produce different commentary) with an OFF canonical scouting compare
+  **164/164 exact**. Wiring point identified (postwin.ts:100/:300,
+  core.ts:1806), deferred to rung 11/14; the two-party pre-scout fixture
+  (`opponentSetIds`) is the named follow-up. Union green **460 files /
+  4955 tests**, census no-op.
+- **Next:** rung 11 (controller owns one real generated battle lifecycle,
+  main) + the equal-speed tie receipt via the narrower instrument (side)
+  launch this round; then rung 12 (seven battles). Rung 13 remains the
   Factory AI switch/item/history breadth closure.
 - **Notes:** source `ChooseMoveOrAction_Singles` move recording and switch/
   faint clears are modeled (`battle_ai_script_commands.c:396-403,618-660`;
