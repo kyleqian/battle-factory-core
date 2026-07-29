@@ -13,6 +13,45 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 673 — [BOUNDED MAIN WORKER 2026-07-29 ~01:15] controller owns one generated battle lifecycle
+
+- **State:** Gate-5 plan rung 11 is committed at `9a741230` and green at
+  **461 files / 4956 tests**, production build, `git diff --check`, Battle
+  Scene OFF oracle info, and focused round/whole-battle compatibility
+  **34/34**. Executable (**214/214 effects, 355/355 moves**) and ability/item
+  (**69/69 abilities, 42/42 hold effects**) censuses regenerate
+  byte-identically.
+- **Did:** added a production-shaped round/battle orchestrator with generated-
+  initial-rental or current-full-record entry modes. It admits a complete
+  rung-8 trainer/party only at the controller's existing `battleStart`
+  transition, starts the fresh kernel after presentation acknowledgement,
+  routes player decisions through its published boundary, routes every
+  trainer command through the rung-6 live AI, overlays terminal mutable state
+  onto the full rental identities, adapts the real terminal, and calls
+  `resolveRoundBattle`. The fixture scenario/resolution ABI remains intact.
+- **Acceptance:** seed 4 pins battle 0 trainer 17/sets 122,118,110 → real
+  3v3 win → swap offer → DECLINE → battle 1 trainer 51/sets 199,178,148 →
+  fresh player command. The single facility cursor is exact:
+  **152 generation + 175 battle + 112 next-generation + 2 fresh-start =
+  441 calls**; segment endpoints are pinned as
+  `4→2423399196→3960941853→2133491021→1174811135`. No fixture resolution
+  occurs anywhere in the carrier.
+- **Next:** rung 12 owns the seven-battle loop, accepted-swap carrier, streak/
+  terminal facility state, multiple seeds, and loss control. Rung 13 remains
+  AI switch/item/history breadth; rung 14 remains commentary/presentation
+  wiring. Keep the equal-speed fresh-start receipt barrier intact.
+- **Notes:** scout §2.1's frozen claim that Factory selection still required
+  fixture parties was proved at the live seam; the minimal adapter now accepts
+  a complete generated opponent while reusing the controller's index/heal/
+  presentation transition unchanged. Rung-10 compatibility exposed that the
+  normalized kernel party drops corpus-only identity metadata; terminal HP/
+  PP/status/item are therefore overlaid onto the controller's full identity
+  records before healing (no controller rule moved). No ratchet/barrier,
+  census artifact, issue, scout/probe/battle-lab, commentary/presentation, or
+  canonical-recording file changed. PAPERCUT: none.
+
+---
+
 ## 672 — [BOUNDED MAIN WORKER 2026-07-29 ~00:57] production Factory AI turn driver landed
 
 - **State:** Gate-5 plan rung 6 is green at **459 files / 4920 tests** plus
@@ -92,47 +131,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   No barrier count/ratchet moved; no canonical recording, issue, round/swap,
   generation, scout/probe/battle-lab, or presentation file changed.
   PAPERCUT: none.
-
----
-
-## 670 — [BOUNDED MAIN WORKER 2026-07-29 ~00:10] pre-first-turn entry hooks implemented
-
-- **State:** committed `a5358114`; tree green at **455 files / 4907 tests**,
-  production build, `git diff --check`, and Battle Scene OFF oracle info.
-  Required lifecycle/switch-in focus is **48/48**; expanded lifecycle/shared-
-  selector/ratchet focus is **73/73**. Ability/item extraction + census
-  regenerate byte-identically at **69/69 abilities (1096/1096)** and **42/42
-  hold effects (850/850)** with all 17 validations.
-- **Did:** `TryDoEventsBeforeFirstTurn` now stable-orders the two actives from
-  draw A, documents the Factory battle room's `WEATHER_NONE` overworld no-op,
-  runs shared weather/form ON_SWITCHIN dispatch fastest-to-slowest, then
-  resolves pending Intimidate, pending Trace, and speed-ordered switch-in
-  items before draw B. Lifecycle events are returned in exact kernel order
-  and seed the first boundary's next event sequence. White Herb restores
-  Intimidate-lowered stages and consumes through its shared Battle Script.
-  The shared switch-in port also now source-correctly sets both temporary and
-  permanent Sand Stream/Drought weather bits and resolves literal
-  `BS_BATTLER_0` for weather animations.
-- **Supervisor fold (same round, side merge):** rung 8 landed (`244cce0f`)
-  — `factoryOpponentGeneration.ts` ports trainer selection +
-  GenerateOpponentMons (set retries, duplicate species/item exclusions with
-  cited lines, the retail fixed-IV bug preserved: opponent IVs use the
-  Battle Tower L50 streak per `battle_tower.c:1832-1847`) with a unified
-  position-by-position draw ledger; includes a reachability proof that the
-  high-tier rejection has no valid L50 seed. Union green **456 files /
-  4913 tests**, census no-op. Scenario-fixture replacement honestly
-  deferred (would edit the roundController seam — rung 10/11 territory).
-- **Next:** rung 4 (fresh 3v3 battle → real terminal, main) + rung 10
-  (swap/heal + full rental record unification, side) launch this round;
-  the equal-speed tie receipt stays a separate evidence task — do not
-  widen or remove its barrier.
-- **Notes:** citations in scout §3.2/§3.3/§4.1 were re-derived from
-  `battle_main.c:3841-3929`, `battle_util.c:2485-2600,3003-3073,3303-3329`,
-  and the Factory room map's `WEATHER_NONE`. Real L50 carriers pin
-  Intimidate (Ekans 53), Trace (Porygon2 436), and White Herb (Kirlia 48);
-  Drought uses a complete adapter-shaped Groudon because no L50 corpus set
-  carries it. Hook scripts draw zero RNG; hook and no-hook cases remain
-  exactly A/B-only. The hook-loop `unsupported-branch` is retired and the
-  module ratchet moves **2→1**; the equal-speed receipt-gated barrier is the
-  sole remainder. No canonical recording, scout/probe/battle-lab, issue,
-  generation, presentation, or opponent-owned file changed. PAPERCUT: none.
