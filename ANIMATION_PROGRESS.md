@@ -1,5 +1,26 @@
 # Animation coverage
 
+## MOVE_ENDURE promoted exact; shared EndureEffect track closed (2026-07-28)
+
+**Verdict:** `MOVE_ENDURE` is exact. Legal Level-50 set-113 EEVEE→ONIX
+Scene-ON parties pass the complete source body through first inactive cleanup
+at **122/122** reducer/component, typed-seam, hardware, audio, raw-RGB, and
+production-framebuffer frames **64–185** player-back and **68–189**
+opponent-front, twice fresh. Player evidence/raw digests are
+`5ffe4994…030024` / `941937cb…f9ce3a`; opponent digests are
+`3fc347ae…26c1d2` / `19b16868…972ffd`.
+
+**Model/boundary:** the pure relative-age reducer shares Focus Energy's exact
+three-wave/fifteen-sprite EndureEffect lifecycle, Dragon Rage pan, ShakeMon2,
+display latches, waits, and cleanup while keeping Endure's red palette cycle
+and in-window subroutine offsets explicit. Source-extracted Eevee front/back
+plus shared FOCUS_ENERGY/Onix/chrome assets pass full software/hardware OAM,
+matrices, palette/tag/register, both-audio-player, raw-RGB, and compositor
+receipts. `MOVE_FOCUS_ENERGY` remains an exact white-palette regression
+control; `MOVE_FOCUS_PUNCH` remains unsupported as its distinct
+HyperVoiceEffect body. Coverage is **77 exact / 0 partial / 0 staged / 199
+unsupported**; no battle state, boundary list, or unsupported barrier changed.
+
 ## MOVE_ENDURE independent dense-ROM evidence checkpoint; production remains unsupported (2026-07-28)
 
 **Verdict:** Evidence-only checkpoint. `MOVE_ENDURE` remains unsupported; it

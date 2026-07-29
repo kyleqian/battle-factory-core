@@ -2,6 +2,35 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_ENDURE",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal Level-50 Factory set-113 EEVEE versus ONIX Scene-ON parties pass the entire 122-frame source body through first inactive cleanup in both orientations, twice fresh: player-back frames 64-185 reproduce evidence 5ffe4994c6309b84567bbc7042861001df3275b1f8b2c330e0fa7dc6b5030024 / raw RGB 941937cba7a24982a921510a31582ae4fb2bc927ce18d04b9ddd1a61ecf9ce3a and opponent-front frames 68-189 reproduce evidence 3fc347ae124e95c51bf7975169ac6a59c1734f1f5b111776cca088531726c1d2 / raw RGB 19b16868e0184521c3514ebc73a47235400bc06a09a7f216a93b8d0e29972ffd",
+        "the pure source-relative reducer reuses the exact three-wave/fifteen-sprite EndureEffect lifecycle, Dragon Rage attacker pan, ShakeMon2, waits, display latches, and cleanup while explicitly porting Endure's red BlendColorCycle(2,2,0,11) and its in-window subroutine script offsets",
+        "the typed Scene-ON seam exposes only resolved attacker presentation geometry; source-extracted EEVEE front/back plus shared source-exact FOCUS_ENERGY and ONIX/chrome assets feed the production compositor with source subpriority sorting, software-to-hardware OAM and palette transfer, tagged palette, matrices, registers, and both audio players without battle clocks, damage, RNG, move/input/battle numbers, coordinate/RGB fitting, pixel exceptions, canonical recordings, or battle calculation",
+        "endurePortable.ts reruns the committed probe through tools/run-mgba-probe.py and proves every reducer/component state, typed seam, task/sprite topology and callbacks, software/hardware OAM, matrices, palettes/tags, registers, both audio players and pan, raw RGB, and application framebuffer frame twice fresh in both orientations",
+        "MOVE_FOCUS_ENERGY remains an exact white-palette regression control. MOVE_FOCUS_PUNCH remains unsupported because its distinct two-pass HyperVoiceEffect scale/ring/shake/platform/cry body lacks independent complete dense acceptance",
+        "no damage, RNG, controller selection, turn order, round/facility state, boundary list, unsupported barrier, or sibling acceptance changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-endure-player-eevee-opponent-onix.json",
+        "tools/battle-lab/mechanic-endure-opponent-eevee-player-onix.json",
+        "tools/compare/fixtures/endure-player-eevee-opponent-onix.json",
+        "tools/compare/fixtures/endure-opponent-eevee-player-onix.json",
+        "tools/compare/endureProbe.py",
+        "tools/compare/endurePortable.ts",
+        "tools/compare/endureSourceAudit.ts",
+        "tools/compare/extractEndureAssets.ts",
+        "src/animation/assets/endure.json",
+        "src/animation/assets/focus-energy.json",
+        "src/animation/endure.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/endureEvidence.test.ts",
+        "tests/animation/endure.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_FOCUS_ENERGY",
       "status": "exact",
       "covered": [
@@ -9,7 +38,7 @@
         "the pure source-relative reducer ports ANIM_TAG_FOCUS_ENERGY load/free, attacker-panned Dragon Rage, all three literal EndureEffect calls and exactly fifteen gEndureEnergySpriteTemplate lifecycles with observed OAM-slot reuse, white BlendColorCycle(2,2,0,11), attacker ShakeMon2(1,0,32,1), waits, software/hardware display latches, and first inactive cleanup",
         "the typed Scene-ON seam exposes only resolved attacker presentation geometry; source-extracted TAILLOW front/back and FOCUS_ENERGY art plus shared ONIX/chrome feed the production compositor with source subpriority sorting, software-to-hardware OAM and palette transfer, tagged palette, matrices, registers, and both audio players without battle clocks, damage, RNG, move/input/battle numbers, coordinate/RGB fitting, pixel exceptions, canonical recordings, or battle calculation",
         "focusEnergyPortable.ts reruns the committed probe through tools/run-mgba-probe.py and proves every reducer/component state, typed seam, task/sprite topology and callbacks, software/hardware OAM, matrices, palettes/tags, registers, both audio players and pan, raw RGB, and application framebuffer frame twice fresh in both orientations",
-        "MOVE_ENDURE remains unsupported: it uses a red rather than white BlendColorCycle and lacks independent complete dense move acceptance. MOVE_FOCUS_PUNCH remains unsupported: Move_FOCUS_PUNCH is a distinct two-pass HyperVoiceEffect body with yellow palette blend, attacker scale, rings, target/partner shakes, platform shake, echoed cry tasks, and no independent complete dense acceptance",
+        "MOVE_ENDURE independently passes its distinct red BlendColorCycle body and complete dense acceptance. MOVE_FOCUS_PUNCH remains unsupported: Move_FOCUS_PUNCH is a distinct two-pass HyperVoiceEffect body with yellow palette blend, attacker scale, rings, target/partner shakes, platform shake, echoed cry tasks, and no independent complete dense acceptance",
         "no damage, RNG, controller selection, turn order, round/facility state, boundary list, unsupported barrier, or sibling acceptance changed"
       ],
       "evidence": [
@@ -1937,7 +1966,7 @@
         "MOVE_FOCUS_ENERGY",
         "MOVE_ENDURE"
       ],
-      "goal": "MOVE_FOCUS_ENERGY independently proves its complete three-wave/fifteen-sprite, white BlendColorCycle, attacker ShakeMon2, audio, and cleanup body at 122/122 reducer/component, typed-seam, software/hardware OAM, matrices, palettes, registers, both audio players, raw-RGB, and shared-framebuffer frames in both orientations twice fresh. MOVE_ENDURE now has independent evidence-only dense-ROM receipts from legal Level-50 set-113 EEVEE versus ONIX parties: its complete red BlendColorCycle body through first inactive cleanup is 122/122 frames 64-185 player-back (evidence 5ffe4994c6309b84567bbc7042861001df3275b1f8b2c330e0fa7dc6b5030024 / raw RGB 941937cba7a24982a921510a31582ae4fb2bc927ce18d04b9ddd1a61ecf9ce3a) and 68-189 opponent-front (evidence 3fc347ae124e95c51bf7975169ac6a59c1734f1f5b111776cca088531726c1d2 / raw RGB 19b16868e0184521c3514ebc73a47235400bc06a09a7f216a93b8d0e29972ffd), twice fresh; it remains unsupported because no reducer, renderer, typed seam, or shared-framebuffer acceptance exists. MOVE_FOCUS_PUNCH remains unsupported because its distinct HyperVoiceEffect scale/ring/shake/platform/cry body lacks independent complete dense acceptance."
+      "goal": "MOVE_FOCUS_ENERGY and MOVE_ENDURE independently prove their complete three-wave/fifteen-sprite bodies at 122/122 reducer/component, typed-seam, software/hardware OAM, matrices, palettes, registers, both audio players, raw-RGB, and shared-framebuffer frames in both orientations twice fresh. Focus Energy keeps its white BlendColorCycle explicit; Endure keeps its red BlendColorCycle and in-window subroutine offsets explicit. MOVE_FOCUS_PUNCH remains unsupported because its distinct HyperVoiceEffect scale/ring/shake/platform/cry body lacks independent complete dense acceptance."
     },
     {
       "id": "cross-impact-cross-chop",
