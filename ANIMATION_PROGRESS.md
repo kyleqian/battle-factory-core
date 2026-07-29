@@ -1,55 +1,48 @@
 # Animation coverage
 
-## MOVE_TICKLE reducer checkpoint; legal-carrier evidence defect blocks exact promotion (2026-07-28)
+## MOVE_TICKLE promoted exact; RockMon/EYE_SPARKLE track complete (2026-07-28)
 
-**Verdict:** Reusable source-derived component only. `MOVE_TICKLE` remains
-unsupported; `ANIMATION_COVERAGE.json` is unchanged. The pure relative-age
-reducer ports the two black attacker-palette ramps, both EYE_SPARKLE
-lifecycles, `SwayMon(0,6,1280,3)`, target
-`RockMonBackAndForth(target,6,2)`, DETECT/TAIL_WHIP sound cadence, and first
-inactive cleanup. OMANYTE front/back and EYE_SPARKLE art regenerate from the
-pinned source, and focused hermetic tests cover both side geometries.
+**Verdict:** `MOVE_TICKLE` is exact. Corrected legal Level-50 set-138
+OMANYTE→ONIX Scene-ON parties pass the complete source body through first
+inactive cleanup at **205/205** reducer/seam, immutable source/hardware/audio,
+raw-RGB, and shared-framebuffer frames **288–492** in both orientations,
+twice fresh. Player evidence/raw digests remain `509f6618…7e41c4` /
+`5b6253ce…12da8c`; opponent digests remain `c4327c31…3e5447` /
+`b06ea14f…9323a5`.
 
-**Blocker found:** the committed evidence scenarios named
-`mechanic-tickle-*-omanyte-*.json` inject species **139**, but pinned Emerald
-defines `SPECIES_OMANYTE` as **138** and species 139 as `SPECIES_OMASTAR`.
-The dense receipt confirms the mismatch independently: its attacker OBJ
-palette is byte-identical to `graphics/pokemon/omastar/normal.pal` (16/16
-colors) and its framebuffer prints `OMASTAR used`, not OMANYTE. Therefore the
-existing 205-frame receipts are complete Omastar Tickle evidence, not legal
-Factory set-138 OMANYTE acceptance, and cannot justify a Tickle seam,
-compositor, or exact promotion.
+**Model/boundary:** the typed relative seam and narrow compositor port both
+eye lifecycles, black palette ramps, DETECT, SwayMon, target
+RockMonBackAndForth, the Tail Whip loop, front-idle offset, palette/OAM
+latches, affine-double clipping, and cleanup using source-extracted species
+138 assets plus shared ONIX/chrome. The corrected eye-coordinate test now
+pins the source `GetBattlerSpriteCoord` center. Coverage is **78 exact / 0
+partial / 0 staged / 198 unsupported**; no battle/controller/RNG/facility
+state, boundary list, unsupported barrier, or sibling acceptance changed.
 
-**Next:** correct both complete legal party scenarios to species 138,
-regenerate and twice-fresh-pin the two dense receipts, then implement the
-typed seam/compositor against those corrected 205-frame windows. No
-controller, battle/RNG/facility state, boundary list, unsupported barrier, or
-sibling status changed.
+## MOVE_TICKLE corrected legal-Omanyte dense-ROM evidence checkpoint; production remains unsupported (2026-07-28)
 
-## MOVE_TICKLE independent dense-ROM evidence checkpoint; production remains unsupported (2026-07-28)
+**Verdict:** Evidence-only checkpoint. `MOVE_TICKLE` remains unsupported;
+coverage is unchanged. The former Omastar receipts are superseded: pinned
+Emerald maps `FRONTIER_MON_OMANYTE` set **138** to `SPECIES_OMANYTE` **138**
+(`SPECIES_OMASTAR` is 139). Corrected complete legal Scene-ON mechanicLab
+parties against ONIX reproduce the complete source body through first inactive
+cleanup at **205/205** frames **288–492** in both orientations, twice fresh.
+Player-back Omanyte evidence/raw-RGB: `509f6618…7e41c4` /
+`5b6253ce…12da8c`; opponent-front Omanyte: `c4327c31…3e5447` /
+`b06ea14f…9323a5`.
 
-**Verdict:** Evidence-only checkpoint. `MOVE_TICKLE` remains unsupported; it
-is not staged, partial, or exact, and the coverage census is unchanged. Legal
-Level-50 Factory set **138** `FRONTIER_MON_OMANYTE` (species **139**, Quirky,
-Tickle **321**) drives complete legal Scene-ON mechanicLab parties against
-ONIX in both orientations. The full move-owned source body through first
-inactive cleanup is **205/205** frames **67–271** player-back and **288–492**
-opponent-front, reproduced twice fresh. Evidence/raw-RGB digests are player
-`a502cee3…228621` / `5f7feebf…44c216` and opponent `6ea16e18…1fca5e` /
-`6aa776d5…5811e3`.
+**Evidence/source:** the audit derives the constants and carrier relationship,
+and regenerated OMANYTE/EYE_SPARKLE assets name species 138. `Move_TICKLE`
+loads EYE_SPARKLE, performs palette ramps, two sparkle lifecycles,
+attacker-panned DETECT, `SwayMon(0,6,1280,3)`, target
+`RockMonBackAndForth(6,2)`, and the 8×8 target-panned TAIL_WHIP loop. The
+portable comparator twice-fresh-pins both corrected orientations, including
+source offsets, topology, OAM, matrices, palettes/tags/buffers, registers,
+audio, every raw RGB frame, and inactive cleanup.
 
-**Evidence/source:** `Move_TICKLE` loads EYE_SPARKLE, fades attacker palette
-black and back, creates two eye sparkle lifecycles, plays attacker-panned
-DETECT, then runs `SwayMon(0,6,1280,3,attacker)` and
-`RockMonBackAndForth(target,6,2)` with target-panned 8×8 TAIL_WHIP loop. The
-portable comparator reruns both orientations twice through
-`run-mgba-probe.py`, byte-pinning source offsets, task/template/callback
-topology, software/hardware OAM, matrices, palettes/tags/buffers, registers,
-SE1/SE2/pans, every raw RGB frame, and inactive cleanup.
-
-**Boundary:** CHARM/COVET remain exact shared controls, but do not promote
-Tickle. No reducer, seam, renderer, battle/controller/RNG/facility state,
-boundary list, unsupported barrier, or sibling status changed.
+**Boundary:** reusable reducer remains a checkpoint only; CHARM/COVET do not
+promote Tickle. No runtime seam/compositor, battle state, boundary list, or
+unsupported barrier changed.
 
 ## MOVE_LEAF_BLADE independent dense-ROM evidence checkpoint; production remains unsupported (2026-07-28)
 

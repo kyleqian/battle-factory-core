@@ -31,9 +31,9 @@ mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, `${JSON.stringify({
   source: {
     omanyteBack:
-      "graphics/pokemon/omanyte/back.png; FRONTIER_MON_OMANYTE set 138; SPECIES_OMANYTE 139",
+      "graphics/pokemon/omanyte/back.png; FRONTIER_MON_OMANYTE set 138; SPECIES_OMANYTE 138",
     omanyteFront:
-      "graphics/pokemon/omanyte/anim_front.png frame 0; FRONTIER_MON_OMANYTE set 138; SPECIES_OMANYTE 139",
+      "graphics/pokemon/omanyte/anim_front.png frame 0; FRONTIER_MON_OMANYTE set 138; SPECIES_OMANYTE 138",
     target: "reuse generated ONIX front/back exact battle assets",
     eyeSparkle:
       "graphics/battle_anims/sprites/eye_sparkle.png; ANIM_TAG_EYE_SPARKLE; gEyeSparkleSpriteTemplate",

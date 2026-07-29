@@ -54,7 +54,7 @@ export function tickleEyesAtAge(
   return offsets.map((offset, index) => ({
     slot: (3 + index) as 3 | 4,
     x: attackerPictureCenter.x + offset,
-    y: attackerPictureCenter.y - 8,
+    y: attackerPictureCenter.y,
     frame: eyeFrame(localAge),
   }));
 }

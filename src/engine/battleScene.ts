@@ -573,6 +573,7 @@ import tauntAsset from "../animation/assets/taunt.json" with { type: "json" };
 import scaryFaceAsset from "../animation/assets/scary-face.json" with { type: "json" };
 import charmAsset from "../animation/assets/charm.json" with { type: "json" };
 import fakeTearsAsset from "../animation/assets/fake-tears.json" with { type: "json" };
+import tickleAsset from "../animation/assets/tickle.json" with { type: "json" };
 import selfDestructAsset from "../animation/assets/selfDestruct.json" with { type: "json" };
 import explosionAsset from "../animation/assets/explosion.json" with { type: "json" };
 import dynamicPunchAsset from "../animation/assets/dynamicPunch.json" with { type: "json" };
@@ -739,6 +740,7 @@ import {
   sceneOnCharmView,
   sceneOnCovetView,
   sceneOnFakeTearsView,
+  sceneOnTickleView,
   sceneOnDragonClawView,
   sceneOnSingView,
   sceneOnFutureSightView,
@@ -753,6 +755,7 @@ import {
   type SceneOnCharmPresentationState,
   type SceneOnCovetPresentationState,
   type SceneOnFakeTearsPresentationState,
+  type SceneOnTicklePresentationState,
   type SceneOnScaryFacePresentationState,
   type SceneOnAbsorbPresentationState,
   type SceneOnReflectPresentationState,
@@ -1319,6 +1322,11 @@ const fakeTearsArt = fakeTearsAsset as {
   delcattyBack: { tileset: Tileset; palette: RgbColor[] };
   delcattyFront: { tileset: Tileset; palette: RgbColor[] };
   smallBubbles: { tileset: Tileset; palette: RgbColor[] };
+};
+const tickleArt = tickleAsset as {
+  omanyteBack: { tileset: Tileset; palette: RgbColor[] };
+  omanyteFront: { tileset: Tileset; palette: RgbColor[] };
+  eyeSparkle: { tileset: Tileset; palette: RgbColor[] };
 };
 const dragonClawArt = dragonClawAsset as {
   smallEmber: { tileset: Tileset; palette: RgbColor[] };
@@ -19485,6 +19493,145 @@ export function renderSceneOnMovePresentation(
         controllerDisplay.moveTextVisibleChars,
       );
     }
+    return;
+  }
+
+  if (state.config.move === "TICKLE") {
+    const tickleState = state as SceneOnTicklePresentationState;
+    const view = sceneOnTickleView(tickleState);
+    const displayed = sceneOnTickleView({
+      ...tickleState,
+      age: tickleState.age - 1,
+    });
+    // Effect callbacks precede the hardware transfer by one display; battler
+    // task writes traverse the additional software-OAM latch.
+    const displayedBattlers = sceneOnTickleView({
+      ...tickleState,
+      age: tickleState.age - 2,
+    });
+    const playerToOpponent =
+      view.attacker.species === "OMANYTE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "OMANYTE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged TICKLE pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const omanyteSource = playerToOpponent
+      ? tickleArt.omanyteBack : tickleArt.omanyteFront;
+    const omanyte = playerToOpponent
+      ? omanyteSource
+      : { ...omanyteSource, tileset: subTileset(omanyteSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const targetIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+
+    type TicklePainterItem = {
+      priority: number; subpriority: number; top: number; slot: number;
+      draw: () => void;
+    };
+    const items: TicklePainterItem[] = [];
+    const attackerPalette = blendPaletteToward(
+      omanyte.palette,
+      { r: 0, g: 0, b: 0 },
+      displayed.attackerPaletteBlackCoeff,
+    );
+    items.push({
+      priority: 2,
+      subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
+      top: view.attacker.geometry.spriteCorner.y,
+      slot: playerToOpponent ? 6 : 8,
+      draw: () => drawSpriteSheet(
+        fb, omanyte.tileset, attackerPalette,
+        view.attacker.geometry.spriteCorner.x + displayedBattlers.attackerX2,
+        view.attacker.geometry.spriteCorner.y,
+      ),
+    }, {
+      priority: 2,
+      subpriority: view.target.geometry.side === "player" ? 30 : 40,
+      top: view.target.geometry.spriteCorner.y + displayedBattlers.targetRock.y2,
+      slot: playerToOpponent ? 8 : 6,
+      draw: () => displayedBattlers.targetRock.active
+        ? drawSpriteSheetAffineRotate(
+          fb, onix.tileset, onix.palette,
+          view.target.geometry.animationCenter.x + targetIdle.x2
+            + displayedBattlers.targetRock.x2,
+          view.target.geometry.animationCenter.y + displayedBattlers.targetRock.y2,
+          displayedBattlers.targetRock.matrix.a,
+          displayedBattlers.targetRock.matrix.b,
+          displayedBattlers.targetRock.matrix.c,
+          displayedBattlers.targetRock.matrix.d,
+          undefined, true,
+        )
+        : drawSpriteSheet(
+          fb, onix.tileset, onix.palette,
+          view.target.geometry.spriteCorner.x + targetIdle.x2,
+          view.target.geometry.spriteCorner.y + targetIdle.y2,
+        ),
+    });
+    const eyeRows = [0, 2, 4] as const;
+    for (const eye of displayed.eyes) {
+      const tileset = subTileset(
+        tickleArt.eyeSparkle.tileset, eyeRows[eye.frame], 2,
+      );
+      items.push({
+        priority: 2,
+        subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
+        top: eye.y - 8,
+        slot: eye.slot,
+        draw: () => drawSpriteSheet(
+          fb, tileset, tickleArt.eyeSparkle.palette,
+          eye.x - 8, eye.y - 8,
+        ),
+      });
+    }
+    items.sort((a, b) =>
+      b.priority - a.priority || b.subpriority - a.subpriority
+      || a.top - b.top || a.slot - b.slot);
+    for (const item of items) item.draw();
+
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "OMANYTE",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "OMANYTE" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "OMANYTE used" : "Foe OMANYTE used",
+      "TICKLE!",
+      99,
+    );
     return;
   }
 
