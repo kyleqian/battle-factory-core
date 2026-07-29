@@ -29,6 +29,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   seven. Seed 12 remains the sole legitimate battle-7 loss (**1846** calls);
   blocker census is empty. The permanent **17-carrier** entry-678 table stays
   capped and every cursor remains exact.
+- **Supervisor fold (post-step):** side-lane R13-A merged (`6961530a`) —
+  pure `factoryAiSwitchPolicy.ts` port of `ShouldSwitch` +
+  suitable-mon resolution with 15 receipt tests, not yet wired to the live
+  driver; union green **496 files / 5081 tests**, production build,
+  worktree/branch cleaned.
 - **Next / notes:** supervisor resumes entry 681's ordered queue at the AI
   reveal-site remainder, then lane-owned R13/King's Rock/presentation work.
   No opcode/operand census byte, unsupported-branch/import ratchet, issue,
