@@ -1,5 +1,34 @@
 # Animation coverage
 
+## MOVE_ENDURE independent dense-ROM evidence checkpoint; production remains unsupported (2026-07-28)
+
+**Verdict:** Evidence-only checkpoint. `MOVE_ENDURE` remains unsupported; it
+is not staged, partial, or exact. The source-verified Level-50 Factory
+carrier is set **113** `FRONTIER_MON_EEVEE` (species **133**, Docile,
+Speed/HP spread, Endure **203**); complete legal Scene-ON mechanicLab parties
+stage it against ONIX in both orientations. The complete move-owned source
+body through first inactive cleanup is **122/122** frames **64–185**
+player-back and **68–189** opponent-front, reproduced twice fresh. Evidence
+/ raw-RGB digests are player `5ffe4994…030024` / `941937cb…f9ce3a` and
+opponent `3fc347ae…26c1d2` / `19b16868…972ffd`.
+
+**Evidence/source:** `Move_ENDURE` loads FOCUS_ENERGY, starts attacker-panned
+Dragon Rage, calls the shared five-sprite `EndureEffect` three times (**15**
+lifecycles), runs its distinct red `BlendColorCycle(2,2,0,11)`, starts
+attacker `ShakeMon2(1,0,32,1)`, waits, and cleans up. The portable comparator
+reruns both orientations twice through `run-mgba-probe.py`, byte-pinning every
+source offset, task/template/callback instance, software/hardware OAM,
+matrices, palettes/tags/buffers, registers, both audio players/pans, raw RGB,
+lifecycle counts, and first inactive cleanup. Known mGBA teardown SIGSEGVs
+were accepted only after the wrapper validated freshly written JSON.
+
+**Boundary:** Focus Energy remains the exact control, but does not promote
+Endure. `MOVE_FOCUS_PUNCH` remains a distinct unsupported HyperVoiceEffect
+body. No reducer, asset, renderer, Scene-ON seam, application framebuffer,
+battle/controller/RNG state, status, census, boundary list, or unsupported
+barrier changed. Coverage remains **76 exact / 0 partial / 0 staged / 200
+unsupported**.
+
 ## MOVE_FOCUS_ENERGY promoted exact; FOCUS_ENERGY/EndureEffect track established (2026-07-28)
 
 **Verdict:** `MOVE_FOCUS_ENERGY` is exact. Legal Level-50 Factory set-44
