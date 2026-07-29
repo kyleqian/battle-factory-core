@@ -21,6 +21,8 @@ type Fixture = SceneOnMegaPunchConfig & {
   attackerSide: "player" | "opponent";
   targetSide: "player" | "opponent";
   sourceWindow: { startFrame: number; endFrame: number; frameCount: 160 };
+  evidenceSha256: string;
+  rawRgbSha256: string;
 };
 type Frame = {
   frame: number; sha256: string; animScriptActive: boolean;
@@ -47,6 +49,11 @@ if (paths.length !== 2) {
 }
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 const receipts = new Map<string, string>();
+
+function targetPan(side: "player" | "opponent"): number {
+  // SOUND_PAN_TARGET: player battler is left, opponent battler is right.
+  return side === "player" ? -63 : 63;
+}
 
 function verify(path: string, runNumber: number): void {
   const fixture = JSON.parse(readFileSync(resolve(path), "utf8")) as Fixture;
@@ -101,6 +108,24 @@ function verify(path: string, runNumber: number): void {
     const { age: _age, attacker: _a, target: _t, ...seamState } = seam;
     if (!same(predicted, seamState)) failures.push(`age ${age}: typed seam`);
     if (predicted.active !== oracle!.animScriptActive) failures.push(`age ${age}: cleanup`);
+    const alphaEnabled = age >= 15 && age < 114;
+    const restoreActive = age >= 121 && age <= 157;
+    if (
+      alphaEnabled
+        ? oracle!.bldcnt !== 16192 || oracle!.bldalpha !== 2060 || oracle!.bldy !== 0
+        : restoreActive
+          ? oracle!.bldcnt !== 232 || oracle!.bldalpha !== 0
+            || oracle!.bldy !== predicted.background.restoreBldy
+          : oracle!.bldcnt !== 0 || oracle!.bldalpha !== 0 || oracle!.bldy !== 0
+    ) failures.push(`age ${age}: blend registers`);
+    if (predicted.sound !== null) {
+      const header = probe.songHeaders[predicted.sound];
+      const audibleTargetTrack = oracle!.se1.tracks.some((track) =>
+        (track.flags & 0x80) !== 0 && track.panX === targetPan(fixture.targetSide));
+      if (header === undefined || oracle!.se1.songHeader !== header || !audibleTargetTrack) {
+        failures.push(`age ${age}: ${predicted.sound} target-pan trigger`);
+      }
+    }
     const fist = oracle!.sprites.filter((s) =>
       s.template === probe.templates.gMegaPunchKickSpriteTemplate);
     if (
@@ -158,11 +183,17 @@ function verify(path: string, runNumber: number): void {
   }
   const digest = receipt.digest("hex");
   const rawDigest = rawWindow.digest("hex");
+  if (digest !== fixture.evidenceSha256) {
+    failures.push(`evidence receipt ${digest} !== ${fixture.evidenceSha256}`);
+  }
+  if (rawDigest !== fixture.rawRgbSha256) {
+    failures.push(`raw RGB receipt ${rawDigest} !== ${fixture.rawRgbSha256}`);
+  }
   if (runNumber === 1) receipts.set(fixture.orientation, digest);
   else if (receipts.get(fixture.orientation) !== digest) failures.push("fresh-run receipt");
   console.log(
-    `${fixture.orientation} run ${runNumber}: ${componentMatches}/160 component/hardware/raw-RGB; `
-    + `${framebufferMatches}/160 production framebuffer; receipt ${digest}; raw ${rawDigest}`,
+    `${fixture.orientation} run ${runNumber}: ${componentMatches}/160 semantic checks; `
+    + `${framebufferMatches}/160 production framebuffer; evidence/raw-RGB receipts ${digest}/${rawDigest}`,
   );
   if (failures.length) {
     console.error(failures.slice(0, 30).join("\n"));

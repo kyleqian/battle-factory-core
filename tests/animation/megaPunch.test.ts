@@ -81,4 +81,15 @@ describe("MOVE_MEGA_PUNCH source-relative reducer", () => {
     execFileSync("npx", ["tsx", "tools/compare/extractMegaPunchAssets.ts"]);
     expect(readFileSync("src/animation/assets/megaPunch.json")).toEqual(before);
   });
+
+  it("commits both portable-evidence and raw-RGB receipts", () => {
+    for (const [path, evidenceSha256, rawRgbSha256] of [
+      ["tools/compare/fixtures/mega-punch-player-cacturne-opponent-onix.json", "9a324ee534928083d1f41dea0c2366ef2b47392c7869fb7aee81a7bf5641cd2f", "7bab206057ef1ae1e99eb24bb9879a8052b73cfae92ccf90a51202cc851c5a36"],
+      ["tools/compare/fixtures/mega-punch-opponent-cacturne-player-onix.json", "d8f787f50acb0d43013b904de76a0f22543a348e56cf36a403b715eb233b701f", "c05a36ec1e051de5783282bda799cbde791ee4613b4405ab3874094b33f80a55"],
+    ] as const) {
+      const fixture = JSON.parse(readFileSync(path, "utf8")) as Record<string, unknown>;
+      expect(fixture.evidenceSha256).toBe(evidenceSha256);
+      expect(fixture.rawRgbSha256).toBe(rawRgbSha256);
+    }
+  });
 });

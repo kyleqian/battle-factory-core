@@ -17,9 +17,11 @@ opponent-front **80–239**,
 compositor port variant-0 `gMegaPunchKickSpriteTemplate`, HANDS_AND_FEET,
 IMPACT/hitsplat, target monbg/alpha, both palette-blend programs, side-specific
 impact background, ShakeMon2, audio, Cacturne/Onix/chrome, display latches,
-and cleanup. `megaPunchPortable.ts` proves **160/160** source/component,
-software/hardware OAM/matrix, palette/tag/register/audio/unchanged-state,
-raw-RGB, and every production framebuffer pixel twice fresh per orientation.
+and cleanup. `megaPunchPortable.ts` proves **160/160** reducer/seam/cleanup,
+MegaPunchKick software sprite+matrix, ShakeMon2 task/offset, blend-register,
+and side-panned SE trigger assertions; each complete probe record and raw-RGB
+window is fixture-receipt-pinned, and every production framebuffer pixel passes
+twice fresh per orientation.
 
 **Sibling / next:** `MOVE_MEGA_KICK` remains unsupported: its distinct
 variant-1 art selection and `SE_M_MEGA_KICK2` require independent complete
