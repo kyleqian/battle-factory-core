@@ -5878,7 +5878,7 @@ function drawComposedPlayerHealthbox(
   }
 }
 
-function drawBattle2ActionMenuLayers(
+function drawBattle2ActionMenuWindow(
   fb: Uint8Array,
   t: number,
   handoffTick: number,
@@ -6045,7 +6045,7 @@ function drawBattle2FightSubmenuWindow(
 
   renderBattleCommandPresentation(fb, presentation, {
     drawActionMenu(framebuffer, _state, revealed) {
-      drawBattle2ActionMenuLayers(
+      drawBattle2ActionMenuWindow(
         framebuffer,
         t,
         handoffTick,
@@ -6055,7 +6055,7 @@ function drawBattle2FightSubmenuWindow(
       );
     },
     drawFightMenu(framebuffer, state) {
-      drawBattle2ActionMenuLayers(
+      drawBattle2ActionMenuWindow(
         framebuffer,
         t,
         handoffTick,
@@ -6144,7 +6144,7 @@ function drawBattle2RockSlideTurn1Window(
       t >= confirmTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY
         ? { onixY2: 0, healthboxY2: 0 }
         : undefined;
-    drawBattle2ActionMenuLayers(
+    drawBattle2ActionMenuWindow(
       fb,
       t,
       handoffTick,
