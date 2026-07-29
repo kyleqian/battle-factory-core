@@ -455,10 +455,29 @@ receipt is:
 Thus B overwrites A before first action ordering; the receipt records LR,
 pre/post RNG state, battle-main pointer, controller flags, turn order, chosen
 actions/moves, and current move for each attributed call.  The equal-Speed
-case is scaffolded in the probe but intentionally not claimed as landed: its
-second-pass whole-route mGBA run is unstable in this libmgba build after the
-large pre-battle VBlank random stream, so rung 2 must not consume a tie claim
-from this receipt.
+case is now also claimed.  Its two-pass receipt uses only the first two
+`gRandomTurnNumber` mutations to select the second-pass step frames, excluding
+later action-order ties from the trace.
+
+**Equal-speed tie case: landed / attributed.** The equal case replaces the
+opponent lead with the same fully specified no-hook Murkrow as the player
+lead; both effective lead Speeds are 111, while all benches remain distinct.
+The fast pass finds A at frame 1194 and the B-containing frame at 1832; their
+`sRandCount` deltas total **3**, exactly one more than the no-hook case's 2.
+The second pass single-steps only frames 1194 and 1832 and records this
+instruction order:
+
+| position | frame | caller | LR | returned u16 | result |
+| --- | ---: | --- | --- | ---: | --- |
+| A | 1194 | `BattleStartClearSetData+0x29b` | `0x0803a1db` | 62606 | draw A |
+| tie | 1832 | `GetWhoStrikesFirst+0x3b1` | `0x0803d2c1` | 997 (`& 1 = 1`) | order becomes `[1, 0]` |
+| B | 1832 | `TryDoEventsBeforeFirstTurn+0x26f` | `0x0803b897` | 8088 | overwrites `gRandomTurnNumber` |
+
+The tie and B share a video frame but are strictly ordered instructions: the
+probe requires A, then exactly one `GetWhoStrikesFirst` call, then B, and
+requires the outer A/B caller positions to remain unchanged from the landed
+no-hook receipt.  The wrapper's `PASS` now includes both cases and checks the
+one-draw delta plus the resulting turn order mechanically.
 
 ## 5. Ordered bounded rung plan
 
