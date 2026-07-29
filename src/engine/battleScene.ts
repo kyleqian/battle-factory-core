@@ -662,6 +662,7 @@ import type {
   BattleCommandPresentationState,
 } from "./battleCommandPresentation.ts";
 import {
+  drawBattleCommandActionChrome,
   renderBattleCommandPresentation,
   type BattleCommandPresentationRenderView,
 } from "./battleCommandPresentationRender.ts";
@@ -5924,9 +5925,9 @@ function drawBattle2ActionMenuWindow(
     drawSendOutHealthbox(fb, 0, kabutoHealthboxContent);
     drawComposedPlayerHealthbox(fb, onixPlayerHealthboxContent, 0, bounce.healthboxY2);
   }
-  // Reuse only the accepted shared y>=112 action-window chrome. The
-  // encounter field, mons, and both healthboxes above it are all composed
-  // live; no Grovyle/full-frame Battle-1 base participates.
+  // FIGHT phases need the accepted bottom base below their own source patch.
+  // Action phases rebuild every interactive element in the caller from the
+  // typed render view and source battle-window tiles/font.
   if (revealed) drawTurn5SitrusSettledMenuChrome(fb);
   else drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
 }
@@ -6070,6 +6071,7 @@ function drawBattle2FightSubmenuWindow(
         revealed,
         view.healthboxes,
       );
+      if (revealed) drawBattleCommandActionChrome(framebuffer, view.actionMenu);
     },
     drawFightMenu(framebuffer, view) {
       drawBattle2ActionMenuWindow(

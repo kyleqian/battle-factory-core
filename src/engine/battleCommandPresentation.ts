@@ -110,6 +110,13 @@ export class BattleCommandPresentationError extends Error {
 /** Six displayed blank-message frames precede the atomic action-menu draw. */
 export const BATTLE_COMMAND_ACTION_ENTER_DELAY = 6;
 
+export function moveBattleCommandActionCursor(
+  cursor: 0 | 1 | 2 | 3,
+  direction: "LEFT" | "RIGHT" | "UP" | "DOWN",
+): 0 | 1 | 2 | 3 {
+  return moveFightCursor(cursor, direction);
+}
+
 function withLifecycle(
   state: BattleCommandPresentationState,
   phase: BattleCommandPresentationPhase,
@@ -338,8 +345,22 @@ export function advanceBattleCommandPresentation(
   }
 
   if (state.lifecycle.phase === "action-menu") {
-    if (newKeys.has("A") && state.actionCursor === 0) {
-      return withLifecycle(state, "fight-opening", 0);
+    if (newKeys.has("A")) {
+      if (state.actionCursor === 0) {
+        return withLifecycle(state, "fight-opening", 0);
+      }
+      if (state.actionCursor === 2) {
+        return withLifecycle(state, "party-handoff", 0);
+      }
+      return state;
+    }
+    const direction = (["LEFT", "RIGHT", "UP", "DOWN"] as const)
+      .find((button) => newKeys.has(button));
+    if (direction !== undefined) {
+      return Object.freeze({
+        ...state,
+        actionCursor: moveBattleCommandActionCursor(state.actionCursor, direction),
+      });
     }
     return state;
   }
@@ -363,6 +384,25 @@ export function advanceBattleCommandPresentation(
     ...state,
     fightCursor: moveFightCursor(state.fightCursor, direction),
   });
+}
+
+/**
+ * Completes the adjacent voluntary party-selector handoff with one of the
+ * request-owned legal switch decisions. The party UI itself is deliberately
+ * outside this presentation seam.
+ */
+export function returnBattleCommandPartySelection(
+  state: BattleCommandPresentationState,
+  partyIndex: BattlePartyIndex,
+): BattleCommandPresentationState {
+  if (state.lifecycle.phase !== "party-handoff") return state;
+  const decision = state.request.legalDecisions.find(
+    (candidate) =>
+      candidate.kind === "switch" && candidate.partyIndex === partyIndex,
+  );
+  return decision === undefined
+    ? state
+    : withLifecycle(state, "submitting", 0, { pendingDecision: decision });
 }
 
 /**

@@ -8,6 +8,8 @@ import {
   BattleCommandPresentationError,
   advanceBattleCommandPresentation,
   createBattleCommandPresentation,
+  moveBattleCommandActionCursor,
+  returnBattleCommandPartySelection,
   submitBattleCommandPresentationDecision,
   type BattleCommandPresentationState,
 } from "../src/engine/battleCommandPresentation.ts";
@@ -315,6 +317,92 @@ describe("battle-command presentation state construction", () => {
 });
 
 describe("battle-command phase-relative lifecycle", () => {
+  it.each([
+    [0, "LEFT", 0],
+    [0, "RIGHT", 1],
+    [0, "UP", 0],
+    [0, "DOWN", 2],
+    [1, "LEFT", 0],
+    [1, "RIGHT", 1],
+    [1, "UP", 1],
+    [1, "DOWN", 3],
+    [2, "LEFT", 2],
+    [2, "RIGHT", 3],
+    [2, "UP", 0],
+    [2, "DOWN", 2],
+    [3, "LEFT", 2],
+    [3, "RIGHT", 3],
+    [3, "UP", 1],
+    [3, "DOWN", 3],
+  ] as const)(
+    "moves action cursor %i %s to %i with the source 2x2 no-wrap rule",
+    (cursor, direction, expected) => {
+      expect(moveBattleCommandActionCursor(cursor, direction)).toBe(expected);
+    },
+  );
+
+  it("navigates all four action positions, leaves BAG/RUN as chrome, and returns FIGHT B to the same cursor/request", () => {
+    const { request, rules } = canonicalBoundary();
+    let state = advanceFrames(
+      createBattleCommandPresentation(request, rules),
+      BATTLE_COMMAND_ACTION_ENTER_DELAY,
+    );
+
+    state = advanceBattleCommandPresentation(state, new Set(["RIGHT"] as const));
+    expect(state.actionCursor).toBe(1);
+    state = advanceBattleCommandPresentation(state, new Set(["A"] as const));
+    expect(state.lifecycle.phase).toBe("action-menu");
+    expect(state.pendingDecision).toBeNull();
+
+    state = advanceBattleCommandPresentation(state, new Set(["DOWN"] as const));
+    expect(state.actionCursor).toBe(3);
+    state = advanceBattleCommandPresentation(state, new Set(["A"] as const));
+    expect(state.lifecycle.phase).toBe("action-menu");
+    expect(state.pendingDecision).toBeNull();
+
+    state = advanceBattleCommandPresentation(state, new Set(["LEFT"] as const));
+    expect(state.actionCursor).toBe(2);
+    state = advanceBattleCommandPresentation(state, new Set(["UP"] as const));
+    expect(state.actionCursor).toBe(0);
+    state = advanceBattleCommandPresentation(state, new Set(["A"] as const));
+    state = advanceFrames(state, FIGHT_SUBMENU_OPEN_DELAY);
+    state = advanceBattleCommandPresentation(state, new Set(["B"] as const));
+    state = advanceFrames(state, FIGHT_SUBMENU_CLOSE_DELAY);
+    expect(state.lifecycle).toEqual({ phase: "action-menu", phaseElapsed: 0 });
+    expect(state.actionCursor).toBe(0);
+    expect(state.request).toEqual(request);
+  });
+
+  it("hands POKéMON the request-owned legal indexes and submits only an exact returned switch", () => {
+    const canonical = canonicalBoundary();
+    const request: BattleCommandRequest = {
+      ...canonical.request,
+      requestId: 92,
+      legalDecisions: [
+        { kind: "use-move", moveSlot: 0, targetBattler: 1 },
+        { kind: "switch", partyIndex: 1 },
+        { kind: "switch", partyIndex: 2 },
+      ],
+    };
+    let state = advanceFrames(
+      createBattleCommandPresentation(request, canonical.rules),
+      BATTLE_COMMAND_ACTION_ENTER_DELAY,
+    );
+    state = advanceBattleCommandPresentation(state, new Set(["DOWN"] as const));
+    expect(state.actionCursor).toBe(2);
+    state = advanceBattleCommandPresentation(state, new Set(["A"] as const));
+    expect(state.lifecycle).toEqual({ phase: "party-handoff", phaseElapsed: 0 });
+    expect(state.legalSwitchPartyIndexes).toEqual([1, 2]);
+    expect(state.pendingDecision).toBeNull();
+
+    const beforeReturn = state;
+    state = returnBattleCommandPartySelection(state, 0);
+    expect(state).toBe(beforeReturn);
+    state = returnBattleCommandPartySelection(state, 2);
+    expect(state.lifecycle).toEqual({ phase: "submitting", phaseElapsed: 0 });
+    expect(state.pendingDecision).toEqual({ kind: "switch", partyIndex: 2 });
+  });
+
   it("advances relative clocks, opens FIGHT, applies source 2x2 JOY_NEW navigation with display lag, and preserves the cursor across B-close/reopen", () => {
     const { request, rules } = canonicalBoundary();
     let state = createBattleCommandPresentation(request, rules);
@@ -514,6 +602,11 @@ describe("battle-command presentation renderer", () => {
           hpFraction: 19 / 60,
           status: opponentStatus,
         },
+      });
+      expect(view.actionMenu).toEqual({
+        prompt: "What will MAGBY do?",
+        options: ["FIGHT", "BAG", "POKéMON", "RUN"],
+        cursor: 0,
       });
       expect(view.fightMenu.displayCursor).toBe(1);
       expect(view.fightMenu.moveset.map((move) => [
