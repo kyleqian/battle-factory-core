@@ -15,9 +15,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 699 — [BOUNDED MAIN WORKER 2026-07-29 ~13:42] Battle-command seam Slice 3 landed
 
-- **State:** implementation `4d27ff46`; tree green at **515 files / 5205
-  tests + 1 deliberate animation-lane skip**, production build,
-  `git diff --check`, and import/barrier ratchet **6/6**.
+- **State:** implementation `4d27ff46` + scope cleanup `0a14c6ad`; tree green
+  at **515 files / 5205 tests + 1 deliberate animation-lane skip**,
+  production build, `git diff --check`, and import/barrier ratchet **6/6**.
 - **Did:** added the phase-only
   `renderBattleCommandPresentation(framebuffer, presentation, assets)` seam
   and swapped only the canonical Battle-2 blank/action/FIGHT path onto it.
