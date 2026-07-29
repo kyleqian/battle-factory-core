@@ -317,10 +317,21 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
 
   it.each([
     [4, 1517],
+    [5, 1688],
     [6, 1563],
+    [7, 1827],
     [8, 2089],
+    [11, 1970],
     [13, 2224],
+    [14, 2325],
+    [15, 2036],
+    [16, 1660],
+    [19, 1842],
+    [22, 1377],
+    [24, 1690],
     [26, 1556],
+    [29, 1543],
+    [30, 1558],
   ])("seed %i is a permanent seven-win carrier at an exact %i-call cursor", (seed, calls) => {
     const state = driveGeneratedRoundToCompletion(seed);
     expect(state.round.rules.phase).toBe("roundComplete");
