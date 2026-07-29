@@ -1550,9 +1550,11 @@ export const typecalcOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesC
   let missType = rulesContext.missType;
   let lastUsedAbility = rulesContext.lastUsedAbility;
   let moveHistory = rulesContext.moveHistory;
+  let revealedAbility = false;
 
   if (targetBattler.ability === ABILITY_LEVITATE && moveType === "TYPE_GROUND") {
     lastUsedAbility = ABILITY_LEVITATE;
+    revealedAbility = true;
     moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_MISSED | BATTLE_SCRIPT_MOVE_RESULT_DOESNT_AFFECT_FOE) >>> 0;
     moveHistory = withClearedLandedMove(moveHistory, target);
     missType = B_MSG_GROUND_MISS;
@@ -1607,6 +1609,7 @@ export const typecalcOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesC
     )
   ) {
     lastUsedAbility = ABILITY_WONDER_GUARD;
+    revealedAbility = true;
     moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_MISSED) >>> 0;
     moveHistory = withClearedLandedMove(moveHistory, target);
     missType = B_MSG_AVOIDED_DMG;
@@ -1623,7 +1626,7 @@ export const typecalcOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesC
   if ((moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_DOESNT_AFFECT_FOE) !== 0) {
     nextRulesContext = withBattler(nextRulesContext, attacker, { targetNotAffected: 1 });
   }
-  if (lastUsedAbility !== undefined) {
+  if (revealedAbility) {
     nextRulesContext = recordBattleScriptAbilityReveal(nextRulesContext, target, lastUsedAbility);
   }
 
@@ -1708,9 +1711,11 @@ export const typecalc2OpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRules
   let lastUsedAbility = rulesContext.lastUsedAbility;
   let moveHistory = rulesContext.moveHistory;
   let flags = 0;
+  let revealedAbility = false;
 
   if (targetBattler.ability === ABILITY_LEVITATE && moveType === "TYPE_GROUND") {
     lastUsedAbility = ABILITY_LEVITATE;
+    revealedAbility = true;
     moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_MISSED | BATTLE_SCRIPT_MOVE_RESULT_DOESNT_AFFECT_FOE) >>> 0;
     moveHistory = withClearedLandedMove(moveHistory, target);
     missType = B_MSG_GROUND_MISS;
@@ -1750,6 +1755,7 @@ export const typecalc2OpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRules
     )
   ) {
     lastUsedAbility = ABILITY_WONDER_GUARD;
+    revealedAbility = true;
     moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_MISSED) >>> 0;
     moveHistory = withClearedLandedMove(moveHistory, target);
     missType = B_MSG_AVOIDED_DMG;
@@ -1765,7 +1771,7 @@ export const typecalc2OpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRules
   if ((moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_DOESNT_AFFECT_FOE) !== 0) {
     nextRulesContext = withBattler(nextRulesContext, attacker, { targetNotAffected: 1 });
   }
-  if (lastUsedAbility !== undefined) {
+  if (revealedAbility) {
     nextRulesContext = recordBattleScriptAbilityReveal(nextRulesContext, target, lastUsedAbility);
   }
 
