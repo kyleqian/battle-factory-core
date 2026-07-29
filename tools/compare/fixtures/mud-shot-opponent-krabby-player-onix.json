@@ -1,0 +1,11 @@
+{
+  "schema":"mud-shot-portable-evidence/v1",
+  "oracleProfile":"battle-scene-on",
+  "orientation":"opponent-front",
+  "pair":"set-111 KRABBY (opponent-front) -> ONIX (player-back)",
+  "scenario":"tools/battle-lab/mechanic-mud-shot-opponent-krabby-player-onix.json",
+  "probe":"tools/compare/mudShotProbe.py",
+  "sourceWindow":{"startFrame":302,"endFrame":445,"frameCount":144},
+  "evidenceSha256":"85fe40b0e1f3dbc600ed00740f3a8b9a1fa910cc589a27462dabbffd1c901840",
+  "rawRgbSha256":"52bd4b4b7e590260e7dc06e8ee1726ca690534f7382f28afa3f177ad3549a443"
+}
