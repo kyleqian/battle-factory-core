@@ -11,6 +11,8 @@ import {
 } from "../src/engine/battleScriptRulesContext.ts";
 import { loadBattleScriptProgram } from "../src/engine/battleScriptProgram.ts";
 import { runBattleEndTurnOrchestration } from "../src/engine/battleEndTurnOrchestration.ts";
+import frontierHeldItemsData from "../src/data/gen/battle-frontier-held-items.json" with { type: "json" };
+import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 
 const program = loadBattleScriptProgram();
 /** include/constants/battle.h:78/117-122. */
@@ -38,10 +40,18 @@ const ITEM_LEPPA_BERRY = 138;
 const ITEM_PERSIM_BERRY = 140;
 const ITEM_LUM_BERRY = 141;
 const ITEM_SITRUS_BERRY = 142;
+const ITEM_FIGY_BERRY = 143;
+const ITEM_WIKI_BERRY = 144;
+const ITEM_MAGO_BERRY = 145;
+const ITEM_AGUAV_BERRY = 146;
+const ITEM_IAPAPA_BERRY = 147;
 const ITEM_LIECHI_BERRY = 168;
 const ITEM_GANLON_BERRY = 169;
 const ITEM_SALAC_BERRY = 170;
 const ITEM_PETAYA_BERRY = 171;
+const ITEM_APICOT_BERRY = 172;
+const ITEM_LANSAT_BERRY = 173;
+const ITEM_STARF_BERRY = 174;
 const ITEM_WHITE_HERB = 180;
 const ITEM_MENTAL_HERB = 185;
 const ITEM_LEFTOVERS = 200;
@@ -81,6 +91,18 @@ const STATUS2_UPROAR_TURN_3 = 3 << 4;
 /** src/data/gen/moves.json -- gBattleMoves[].pp (base PP), doc §6 addendum's RESTORE_PP tests. */
 const MOVE_TACKLE = 33;
 const MOVE_HYDRO_PUMP = 56;
+
+const ZERO_CARRIER_ITEM_CASES = [
+  [ITEM_FIGY_BERRY, "HOLD_EFFECT_CONFUSE_SPICY"],
+  [ITEM_WIKI_BERRY, "HOLD_EFFECT_CONFUSE_DRY"],
+  [ITEM_MAGO_BERRY, "HOLD_EFFECT_CONFUSE_SWEET"],
+  [ITEM_AGUAV_BERRY, "HOLD_EFFECT_CONFUSE_BITTER"],
+  [ITEM_IAPAPA_BERRY, "HOLD_EFFECT_CONFUSE_SOUR"],
+  [ITEM_GANLON_BERRY, "HOLD_EFFECT_DEFENSE_UP"],
+  [ITEM_APICOT_BERRY, "HOLD_EFFECT_SP_DEFENSE_UP"],
+  [ITEM_LANSAT_BERRY, "HOLD_EFFECT_CRITICAL_UP"],
+  [ITEM_STARF_BERRY, "HOLD_EFFECT_RANDOM_STAT_UP"],
+] as const;
 
 function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number } = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -1465,21 +1487,53 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
         },
       );
 
-      describe("(b) unsupported-branch/case-barrier: real hold effects this slice does not implement", () => {
-        it("Ganlon Berry (DEFENSE_UP, zero Factory L50 carriers per doc §2b) barriers on possession", () => {
+      describe("(b) named case barriers: source-real hold effects with zero Factory L50 carriers", () => {
+        it.each(ZERO_CARRIER_ITEM_CASES)(
+          "%s / %s barriers by its source name when explicitly staged",
+          (item, holdEffect) => {
+            const rc = context({
+              battlers: [
+                battler({ side: 0 }),
+                battler({ side: 1, hp: 100, maxHP: 100, item, partyIndex: 2 }),
+                battler({ side: 0 }),
+                battler({ side: 1 }),
+              ],
+            });
+            const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+            const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+            expect(result.kind).toBe("case-barrier");
+            if (result.kind !== "case-barrier") throw new Error("expected case-barrier");
+            expect(result.caseName).toBe("ENDTURN_ITEMS1");
+            expect(result.detail).toContain(holdEffect);
+            expect(result.detail).toContain("zero Factory L50 carriers");
+          },
+        );
+
+        it("proves all nine barriers have zero carriers in the complete generated 882-entry catalog", () => {
+          expect(frontierMonsData.count).toBe(882);
+          const effectByTableId = new Map(
+            frontierHeldItemsData.entries.map((entry) => [entry.itemTableId, entry.holdEffect]),
+          );
+          for (const [, holdEffect] of ZERO_CARRIER_ITEM_CASES) {
+            const carriers = frontierMonsData.entries.filter(
+              (mon) => effectByTableId.get(mon.itemTableId) === holdEffect,
+            );
+            expect(carriers, holdEffect).toHaveLength(0);
+          }
+        });
+
+        it("does not blanket-barrier an ordinary non-end-turn hold effect", () => {
           const rc = context({
             battlers: [
               battler({ side: 0 }),
-              battler({ side: 1, hp: 100, maxHP: 100, item: ITEM_GANLON_BERRY, partyIndex: 2 }),
+              battler({ side: 1, hp: 100, maxHP: 100, item: 186, partyIndex: 2 }), // Choice Band
               battler({ side: 0 }),
               battler({ side: 1 }),
             ],
           });
           const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
           const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
-          expect(result.kind).toBe("case-barrier");
-          if (result.kind !== "case-barrier") throw new Error("expected case-barrier");
-          expect(result.detail).toContain("zero Factory L50 carriers");
+          expect(result.kind).toBe("next-turn");
         });
       });
 
