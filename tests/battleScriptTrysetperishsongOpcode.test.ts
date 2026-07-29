@@ -225,7 +225,8 @@ describe("B_SCR_OP_TRYSETPERISHSONG", () => {
     expect(first.state.rulesContext.battlers[0].pp[0]).toBe(4);
     expect(first.state.rulesContext.battlers[0].perishSongTimer).toBe(3);
     expect(first.state.rulesContext.battlers[1].perishSongTimer).toBe(0);
-    expect(first.state.rulesContext.lastUsedAbility).toBe(ABILITY_SOUNDPROOF);
+    // State 4's later quiet immunity pass writes battler 0's NONE ability.
+    expect(first.state.rulesContext.lastUsedAbility).toBe(0);
     expect(first.state.rng.calls).toBe(0);
     expect(replay.state.rulesContext).toEqual(first.state.rulesContext);
     expect(replay.state.rng).toEqual(first.state.rng);

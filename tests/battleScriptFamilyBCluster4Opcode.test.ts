@@ -202,7 +202,8 @@ describe("Family-B Cluster 4 Thief/Covet and Knock Off", () => {
     expect(result.rulesContext.battlers[0].item).toBe(ITEM_NONE);
     expect(result.rulesContext.battlers[1].item).toBe(ITEM_CHOICE_BAND);
     expect(result.rulesContext.party.opponent[0].item).toBe(ITEM_CHOICE_BAND);
-    expect(result.rulesContext.lastUsedAbility).toBe(ABILITY_STICKY_HOLD);
+    // State-4's later quiet immunity pass writes battler 0's NONE ability.
+    expect(result.rulesContext.lastUsedAbility).toBe(0);
     expect(messages(result)).toContain("STRINGID_PKMNSXMADEYINEFFECTIVE");
   });
 
@@ -283,7 +284,7 @@ describe("Family-B Cluster 4 Thief/Covet and Knock Off", () => {
     expect(result.rulesContext.battlers[1].item).toBe(ITEM_LEFTOVERS);
     expect(result.rulesContext.party.opponent[0].item).toBe(ITEM_LEFTOVERS);
     expect(result.rulesContext.knockedOffMons).toEqual([0, 0]);
-    expect(result.rulesContext.lastUsedAbility).toBe(ABILITY_STICKY_HOLD);
+    expect(result.rulesContext.lastUsedAbility).toBe(0);
     expect(messages(result)).toContain("STRINGID_PKMNSXMADEYINEFFECTIVE");
   });
 

@@ -521,7 +521,9 @@ describe("primary status-move opcode cluster: full committed scripts (docs/statu
     const result = runToTerminal("BattleScript_EffectWillOWisp", rc, 1);
     expect(result.state.rulesContext.battlers[1].status1).toBe(0);
     expect(result.state.rulesContext).toMatchObject({
-      lastUsedAbility: ABILITY_WATER_VEIL,
+      // The later state-4 immunity scan's common pre-dispatch assignment
+      // overwrites this with literal battler 0's ability.
+      lastUsedAbility: 0,
       battlerWithAbility: 1,
       selectorRoles: { effectBattler: 1 },
     });
