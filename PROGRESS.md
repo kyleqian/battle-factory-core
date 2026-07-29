@@ -13,6 +13,38 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 677 — [BOUNDED MAIN WORKER 2026-07-29 ~02:37] interaction audit: double faint + deferred entry hooks + AI reveals
+
+- **State:** committed `91857570`, `234b5405`, and `9c0eca68`; tree green at
+  **461 files / 4975 tests**, production build, `git diff --check`, and Battle
+  Scene OFF oracle info. All six seven-win carriers retain exact facility
+  cursors: seeds **4/6/8/13/17/26 = 1517/1563/2089/2224/1787/1556**.
+- **Did:** fainted-actions resume now carries the source's ascending battler
+  cursor past a player replacement, so simultaneous contact-ability
+  double-faints resolve the opponent replacement before leaving the pass
+  (or source `checkteamslost` terminates immediately when the opponent has no
+  surviving party HP). Mid-battle `Cmd_switchineffects` now only marks
+  Intimidate/Trace pending; faint state 6 resolves Intimidate → Trace → item,
+  including White Herb stage restoration/consumption. Voluntary and forced
+  switch callers share the same pass; battle-start's already-correct split
+  stays green.
+- **AI / acceptance:** successful Static (failed proc excluded), state-6
+  Intimidate/Trace, and Leftovers now publish source reveal handoffs; the live
+  Factory AI consumes them through the existing record functions and projects
+  both `knownAbility` and `knownItemEffect`. Focused coverage is **79/79**;
+  executable and ability/item censuses regenerate byte-identically; no import
+  or unsupported-branch ratchet moved.
+- **Next / bounded remainder:** finish the still-unwired source reveal calls:
+  `battle_util.c:216,3859`, the other successful `:3195` ability branches,
+  and `battle_script_commands.c:990,1382,1418,1441,1496,1679,1722,2304,2346,
+  2401,2431,2553,2774,2874,3118,3133,3148,4512,4587,5880,6229,6572,6842,
+  7003,7018,7031,7509,7518,7680,8394,8410,9233`. These opcode-owned
+  absorption/prevention/item sites need their own semantic pins; do not infer
+  them from `lastUsedAbility/Item`. No issue, probe, presentation, animation,
+  canonical recording, or tick branch changed. PAPERCUT: none.
+
+---
+
 ## 676 — [BOUNDED MAIN WORKER 2026-07-29 ~02:15] multi-hit/Earthquake resumptions retired; six seeds win seven
 
 - **State:** committed `a04a26c1`, `c104d8f8`, `bc2a65a0`, `027e5aa0`,
@@ -90,47 +122,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   at `B_SCR_OP_OPENPARTYSCREEN`; its module ratchet moves exactly **2→1**.
   No other ratchet, census artifact, canonical recording, issue, scout/probe,
   presentation, or commentary file changed. PAPERCUT: none.
-
----
-
-## 674 — [BOUNDED MAIN WORKER 2026-07-29 ~01:35] tie retired; seven-battle rung hit honest stop
-
-- **State:** assigned rung (a) is committed at `bd36b615` and green at **461
-  files / 4956 tests**, production build, `git diff --check`, and focused
-  lifecycle/orchestrator/ratchet coverage **14/14**. Rung (b) hit its
-  mandated honest stop: seeds **4–30** with generated parties produced no
-  seven-win carrier; only 22/23 passed battle 0, then halted in battles 1/2.
-  The red exploratory test was removed; the landed tree remains green.
-- **Did:** consumed scout §4.1's landed Scene-OFF receipt. Equal effective
-  speeds now add exactly one `Random()` strictly after draw A and before draw
-  B; `tie & 1` stable-orders `[0,1]` or `[1,0]`, and the post-tie cursor feeds
-  every entry hook before B overwrites `randomTurnNumber`. The Tier-1 receipt
-  pin reproduces **62606 → 997 → 8088**, exactly **3 calls**, `997 & 1 = 1`,
-  and observes resulting hook order **[1,0]**.
-- **Supervisor fold (same round, side merge):** the rung-13 scout landed
-  (`f9788112`) — `docs/factory-ai-switch-scout.md`, a 557-line frozen
-  dossier: complete `ShouldSwitch` + `GetMostSuitableMonToSwitchInto`
-  derivation (incl. source quirks), Factory L50 reachability per helper,
-  draw ordering vs the 11/13-draw ledgers, masks 0/1/7 by streak, exact
-  kernel changes for trainer-originated switches, 3 staged OFF recipes
-  (predictions, not receipts), and 4 bounded implementation rungs. The
-  sweep's dominant blocker (multi-choice trainer faint replacement) is the
-  same mechanism — the dossier's scoring section unblocks it.
-- **Next:** implement multi-candidate trainer faint replacement from the
-  dossier's `GetMostSuitableMonToSwitchInto` derivation (main), wire
-  generated commentary into its identified presentation seam (side); then
-  the remaining sweep blockers (`Cmd_various` paralysis, confusion
-  self-hit context, multi-hit/Twineedle resumption, Earthquake
-  `DoHitAllWithUndergroundBonus`, player forced-switch end-turn
-  resumption) and the rung-12 rerun.
-- **Notes:** `factoryBattleStart.ts`'s last `unsupported-branch` and union
-  return path are gone; its module ratchet moves exactly **1→0**. No census
-  artifact, canonical recording, issue, scout/probe/battle-lab,
-  commentary/presentation, or AI-switch-breadth file changed. Sweep evidence:
-  seed 4 battle 1 sets **199/178/148** hit paralysis `Cmd_various`; seed 5
-  battle 0 **163/161/189** hit Earthquake controller handling; seed 6 battle
-  1 **181/199/127** and most seeds 8–21/26–29 hit multi-choice trainer
-  replacement; seed 22 battle 1 **144/173/192** hit confusion self-damage;
-  seed 23 battle 2 **141/185/114** hit Earthquake; seed 7 hit Twineedle and
-  seed 25 multi-hit. This satisfies the rung row's STOP-and-report clause,
-  not its seven-win acceptance. PAPERCUT: none.

@@ -1,5 +1,49 @@
 ---
 
+## 674 — [BOUNDED MAIN WORKER 2026-07-29 ~01:35] tie retired; seven-battle rung hit honest stop
+
+- **State:** assigned rung (a) is committed at `bd36b615` and green at **461
+  files / 4956 tests**, production build, `git diff --check`, and focused
+  lifecycle/orchestrator/ratchet coverage **14/14**. Rung (b) hit its
+  mandated honest stop: seeds **4–30** with generated parties produced no
+  seven-win carrier; only 22/23 passed battle 0, then halted in battles 1/2.
+  The red exploratory test was removed; the landed tree remains green.
+- **Did:** consumed scout §4.1's landed Scene-OFF receipt. Equal effective
+  speeds now add exactly one `Random()` strictly after draw A and before draw
+  B; `tie & 1` stable-orders `[0,1]` or `[1,0]`, and the post-tie cursor feeds
+  every entry hook before B overwrites `randomTurnNumber`. The Tier-1 receipt
+  pin reproduces **62606 → 997 → 8088**, exactly **3 calls**, `997 & 1 = 1`,
+  and observes resulting hook order **[1,0]**.
+- **Supervisor fold (same round, side merge):** the rung-13 scout landed
+  (`f9788112`) — `docs/factory-ai-switch-scout.md`, a 557-line frozen
+  dossier: complete `ShouldSwitch` + `GetMostSuitableMonToSwitchInto`
+  derivation (incl. source quirks), Factory L50 reachability per helper,
+  draw ordering vs the 11/13-draw ledgers, masks 0/1/7 by streak, exact
+  kernel changes for trainer-originated switches, 3 staged OFF recipes
+  (predictions, not receipts), and 4 bounded implementation rungs. The
+  sweep's dominant blocker (multi-choice trainer faint replacement) is the
+  same mechanism — the dossier's scoring section unblocks it.
+- **Next:** implement multi-candidate trainer faint replacement from the
+  dossier's `GetMostSuitableMonToSwitchInto` derivation (main), wire
+  generated commentary into its identified presentation seam (side); then
+  the remaining sweep blockers (`Cmd_various` paralysis, confusion
+  self-hit context, multi-hit/Twineedle resumption, Earthquake
+  `DoHitAllWithUndergroundBonus`, player forced-switch end-turn
+  resumption) and the rung-12 rerun.
+- **Notes:** `factoryBattleStart.ts`'s last `unsupported-branch` and union
+  return path are gone; its module ratchet moves exactly **1→0**. No census
+  artifact, canonical recording, issue, scout/probe/battle-lab,
+  commentary/presentation, or AI-switch-breadth file changed. Sweep evidence:
+  seed 4 battle 1 sets **199/178/148** hit paralysis `Cmd_various`; seed 5
+  battle 0 **163/161/189** hit Earthquake controller handling; seed 6 battle
+  1 **181/199/127** and most seeds 8–21/26–29 hit multi-choice trainer
+  replacement; seed 22 battle 1 **144/173/192** hit confusion self-damage;
+  seed 23 battle 2 **141/185/114** hit Earthquake; seed 7 hit Twineedle and
+  seed 25 multi-hit. This satisfies the rung row's STOP-and-report clause,
+  not its seven-win acceptance. PAPERCUT: none.
+
+---
+
 ## 673 — [BOUNDED MAIN WORKER 2026-07-29 ~01:15] controller owns one generated battle lifecycle
 
 - **State:** Gate-5 plan rung 11 is committed at `9a741230` and green at
