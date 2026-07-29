@@ -45,6 +45,10 @@ import {
   type MudShotState,
 } from "./mudShot.ts";
 import {
+  hydroPumpAtAge,
+  type HydroPumpState,
+} from "./hydroPump.ts";
+import {
   bubbleBeamAtAge,
   type BubbleBeamState,
 } from "./bubbleBeam.ts";
@@ -552,6 +556,7 @@ export interface SceneOnPresentationBattler {
     | "FLAAFFY"
     | "VOLBEAT"
     | "ILLUMISE"
+    | "MASQUERAIN"
     | "EXEGGCUTE"
     | "GLOOM"
     | "TOGETIC"
@@ -1215,6 +1220,15 @@ export interface SceneOnMudShotConfig {
   readonly targetPictureOffset: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnHydroPumpConfig {
+  readonly move: "HYDRO_PUMP";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly attackerPictureOffset: Readonly<{ x: number; y: number }>;
+  readonly targetPictureOffset: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnBubbleBeamConfig {
   readonly move: "BUBBLE_BEAM";
   readonly attacker: SceneOnPresentationBattler;
@@ -1696,6 +1710,7 @@ export type SceneOnMoveConfig =
   | SceneOnSonicBoomConfig
   | SceneOnSmokescreenConfig
   | SceneOnMudShotConfig
+  | SceneOnHydroPumpConfig
   | SceneOnBubbleBeamConfig
   | SceneOnCrossChopConfig
   | SceneOnFocusEnergyConfig
@@ -1929,6 +1944,12 @@ export interface SceneOnSmokescreenView extends SmokescreenEffect {
 }
 
 export interface SceneOnMudShotView extends MudShotState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnHydroPumpView extends HydroPumpState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3581,6 +3602,28 @@ export function sceneOnMudShotView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...mudShotAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attackerPictureOffset,
+      state.config.targetPictureOffset,
+    ),
+  };
+}
+
+/** `age=0` is Move_HYDRO_PUMP's first WATER_ORB load display. */
+export function sceneOnHydroPumpView(
+  state: SceneOnMovePresentationState<SceneOnHydroPumpConfig>,
+): SceneOnHydroPumpView {
+  if (state.config.move !== "HYDRO_PUMP") {
+    throw new Error(
+      `expected HYDRO_PUMP presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...hydroPumpAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attackerPictureOffset,

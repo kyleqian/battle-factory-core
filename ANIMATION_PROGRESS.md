@@ -1,24 +1,25 @@
 # Animation coverage
 
-## WATER_ORB checkpoint landed; Hydro Pump partial, Whirlpool unsupported (2026-07-29)
+## WATER_ORB implementation checkpoint; Hydro Pump remains partial (2026-07-29)
 
-**Verdict:** `MOVE_HYDRO_PUMP` is a bounded **partial**, not exact. The
-lowest suitable legal Level-50 carrier is challenge-2 set **303**
-`FRONTIER_MON_MASQUERAIN_2` (species **312**, Quiet, SpAttack+Defense, Lax
-Incense). Complete legal three-mon Scene-ON parties successfully stage Hydro
-Pump against ONIX in both orientations. Reproducible extraction pins
-Masquerain front/back, WATER_ORB with its source WaterImpact palette, and the
-already-exact WATER_IMPACT art.
+**Verdict:** `MOVE_HYDRO_PUMP` remains an honest **partial**, not exact.
+Fresh dense probes now pin the complete 141-frame move-owned body through
+first inactive cleanup in both legal set-303 MASQUERAIN orientations:
+player-back **213–353**, evidence/raw
+`9c8210033328ee98ceae81e54e2d4ec36ecbc4a763deb925171f23f6ef117af7` /
+`360d0d7292aa8fa6125f3de46d5170d2d1a3ca62181ada3cdf11ff1cff779706`;
+opponent-front **232–372**,
+`3330496d0d3dd1feec78443a274380e43b593250459b36ed0b6976ae2e105880` /
+`ff315fb58f55bcaa8c5e728faa33635d97e41d624747d867d4f1c9487fc06cee`.
 
-**Source/reuse:** the pinned graph is **44** sine WATER_ORBs (11 calls × 4),
-**12** Water Impact splats (6 × 2), StartSinAnimTimer, attacker/target
-ShakeMon, monbg/split priority/12:8 alpha, audio, waits, and cleanup.
-`MOVE_MUD_SHOT` already proves the sine/timer/shake/compositor primitives and
-`MOVE_WATER_GUN` proves the splat/art primitive. Exact still requires the
-Hydro Pump relative reducer, typed seam, production compositor, and every
-body frame through first inactive cleanup across source/OAM/matrices/palettes/
-registers/audio/immutable state/raw RGB/shared framebuffer twice fresh in
-both orientations.
+**Landed / gate:** the source-relative reducer, typed seam, narrow
+MASQUERAIN/ONIX compositor, and portable comparator now cover all **44** sine
+WATER_ORBs, **12** impact splats, task/audio/tag/register/cleanup schedules,
+and immutable gameplay inputs. The diagnostic comparator currently passes
+player **83/141** component frames and **43/141** shared framebuffers;
+opponent **83/141** components and **42/141** framebuffers. Exact is blocked on the
+remaining late orb phase/slot assertions plus monbg/display-latch compositor
+differences beginning at age 11; no frames were thinned.
 
 **Sibling / next:** `MOVE_WHIRLPOOL` stays unsupported after an independent
 source, asset, and legal-party both-orientation audit. Its lowest carrier is
@@ -27,8 +28,9 @@ vortex orbs, target palette blend/shake/audio, trap outcome, later repetition/
 status-animation variants, and cleanup need independent dense proof. Coverage
 is **94 exact / 1 partial / 0 staged / 181 unsupported**. No animation
 boundary, unsupported barrier, canonical recording allowlist, or gameplay
-ownership changed. Next: implement and densely prove Hydro Pump before
-independently accepting Whirlpool.
+ownership changed. Next: finish the bounded Hydro Pump orb/latch and
+framebuffer gate, rerun both orientations twice fresh, then independently
+accept or reject Whirlpool.
 
 ## MOVE_SPORE promoted exact; ANIM_TAG_SPORE track bounded (2026-07-29)
 

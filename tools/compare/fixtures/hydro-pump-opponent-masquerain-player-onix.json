@@ -1,0 +1,16 @@
+{
+  "schema":"hydro-pump-portable-evidence/v1",
+  "oracleProfile":"battle-scene-on",
+  "orientation":"opponent-front",
+  "scenario":"tools/battle-lab/mechanic-hydro-pump-opponent-masquerain-player-onix.json",
+  "probe":"tools/compare/hydroPumpProbe.py",
+  "sourceWindow":{"startFrame":232,"endFrame":372,"frameCount":141},
+  "evidenceSha256":"3330496d0d3dd1feec78443a274380e43b593250459b36ed0b6976ae2e105880",
+  "rawRgbSha256":"ff315fb58f55bcaa8c5e728faa33635d97e41d624747d867d4f1c9487fc06cee",
+  "move":"HYDRO_PUMP",
+  "attacker":{"species":"MASQUERAIN","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":-1},"animationCenter":{"x":176,"y":31},"battlePositionCenter":{"x":176,"y":40}}},
+  "target":{"species":"ONIX","geometry":{"side":"player","spriteCorner":{"x":40,"y":48},"animationCenter":{"x":72,"y":88},"battlePositionCenter":{"x":72,"y":80}}},
+  "attackerPictureOffset":{"x":176,"y":31},
+  "targetPictureOffset":{"x":72,"y":88},
+  "fieldProfile":{"playerHp":142,"playerMaxHp":142,"opponentHp":145,"opponentMaxHp":145,"playerGender":"male","opponentGender":"female"}
+}

@@ -554,6 +554,7 @@ import spikeCannonAsset from "../animation/assets/spike-cannon.json" with { type
 import sonicBoomAsset from "../animation/assets/sonic-boom.json" with { type: "json" };
 import smokescreenAsset from "../animation/assets/smokescreen.json" with { type: "json" };
 import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json" };
+import waterOrbAsset from "../animation/assets/water-orb.json" with { type: "json" };
 import bubbleBeamAsset from "../animation/assets/bubble-beam.json" with { type: "json" };
 import crossChopAsset from "../animation/assets/cross-chop.json" with { type: "json" };
 import focusEnergyAsset from "../animation/assets/focus-energy.json" with { type: "json" };
@@ -739,6 +740,7 @@ import {
   sceneOnSonicBoomView,
   sceneOnSmokescreenView,
   sceneOnMudShotView,
+  sceneOnHydroPumpView,
   sceneOnBubbleBeamView,
   sceneOnCrossChopView,
   sceneOnFocusEnergyView,
@@ -816,6 +818,7 @@ import {
   type SceneOnSonicBoomConfig,
   type SceneOnSmokescreenConfig,
   type SceneOnMudShotConfig,
+  type SceneOnHydroPumpConfig,
   type SceneOnBubbleBeamConfig,
   type SceneOnCrossChopConfig,
   type SceneOnFocusEnergyConfig,
@@ -1153,6 +1156,12 @@ const mudShotArt = mudShotAsset as {
   brownOrb: { tileset: Tileset; palette: RgbColor[] };
   krabbyBack: { tileset: Tileset; palette: RgbColor[] };
   krabbyFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const hydroPumpArt = waterOrbAsset as {
+  waterOrb: { tileset: Tileset; palette: RgbColor[] };
+  waterImpact: { tileset: Tileset; palette: RgbColor[] };
+  masquerainBack: { tileset: Tileset; palette: RgbColor[] };
+  masquerainFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const bubbleBeamArt = bubbleBeamAsset as {
   bubble: { tileset: Tileset; palette: RgbColor[] };
@@ -17818,6 +17827,161 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "KRABBY used" : "Foe KRABBY used",
       "MUD SHOT!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "HYDRO_PUMP") {
+    const hydroState =
+      state as SceneOnMovePresentationState<SceneOnHydroPumpConfig>;
+    const view = sceneOnHydroPumpView(hydroState);
+    const displayed = sceneOnHydroPumpView({
+      ...hydroState,
+      age: view.battlerDisplayAge,
+    });
+    const playerToOpponent =
+      view.attacker.species === "MASQUERAIN"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MASQUERAIN"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged HYDRO_PUMP pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const masquerainSource = playerToOpponent
+      ? hydroPumpArt.masquerainBack : hydroPumpArt.masquerainFront;
+    const masquerain = playerToOpponent
+      ? masquerainSource
+      : {
+          ...masquerainSource,
+          tileset: subTileset(masquerainSource.tileset, 0, 8),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const nonObjTarget2 = fb.slice();
+    const attackerHardwareOffset =
+      view.age >= 12 && view.age <= 87 && (view.age - 12) % 4 < 2
+        ? { x2: 0, y2: 2 } : { x2: 0, y2: 0 };
+    const targetHardwareOffset =
+      view.age >= 38 && view.age <= 107 && (view.age - 38) % 4 < 2
+        ? { x2: 3, y2: 0 } : { x2: 0, y2: 0 };
+    const targetHardwareBaseline = playerToOpponent && view.age < 36 ? 1 : 0;
+    drawSpriteSheet(
+      nonObjTarget2,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x
+        + targetHardwareBaseline + targetHardwareOffset.x2,
+      view.target.geometry.spriteCorner.y + targetHardwareOffset.y2,
+    );
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x
+        + targetHardwareBaseline + targetHardwareOffset.x2,
+      view.target.geometry.spriteCorner.y + targetHardwareOffset.y2,
+    );
+    drawSpriteSheet(
+      fb,
+      masquerain.tileset,
+      masquerain.palette,
+      view.attacker.geometry.spriteCorner.x + attackerHardwareOffset.x2,
+      view.attacker.geometry.spriteCorner.y + attackerHardwareOffset.y2,
+    );
+    const particles = [
+      ...displayed.orbs.map((orb) => ({ kind: "orb" as const, item: orb })),
+      ...displayed.splats.map((splat) => ({
+        kind: "splat" as const,
+        item: splat,
+      })),
+    ].sort((left, right) => right.item.oamSlot - left.item.oamSlot);
+    for (const particle of particles) {
+      if (!displayed.alpha) continue;
+      if (particle.kind === "orb") {
+        const orb = particle.item;
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          nonObjTarget2,
+          subTileset(hydroPumpArt.waterOrb.tileset, orb.frame * 2, 2),
+          hydroPumpArt.waterOrb.palette,
+          orb.x + orb.x2,
+          orb.y + orb.y2,
+          256,
+          0,
+          0,
+          256,
+          displayed.alpha.eva,
+          displayed.alpha.evb,
+          false,
+        );
+      } else {
+        const splat = particle.item;
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          nonObjTarget2,
+          hydroPumpArt.waterImpact.tileset,
+          hydroPumpArt.waterImpact.palette,
+          splat.x,
+          splat.y,
+          splat.matrix.a,
+          splat.matrix.b,
+          splat.matrix.c,
+          splat.matrix.d,
+          displayed.alpha.eva,
+          displayed.alpha.evb,
+          false,
+        );
+      }
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "MASQUERAIN",
+        level: 50,
+        gender: playerToOpponent ? "male" : "female",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "MASQUERAIN" : "ONIX",
+        level: 50,
+        gender: playerToOpponent ? "female" : "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MASQUERAIN used" : "Foe MASQUERAIN used",
+      "HYDRO PUMP!",
       99,
     );
     return;
