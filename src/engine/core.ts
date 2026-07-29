@@ -116,6 +116,7 @@ import {
   DRAGONBREATH_MENU_REDRAW_DELAY,
   INITIAL_BATTLE_SCENE_STATE,
   renderBattleScene,
+  renderGeneratedBattleCommandPresentation,
   renderSceneOnMovePresentation,
   renderSceneOffTurnView,
   sendOutHandoffTick,
@@ -249,6 +250,10 @@ import {
   type FactoryTerminalPresentationState,
 } from "./factoryTerminalPresentation.ts";
 import { renderFactoryTerminalPresentation } from "./factoryTerminalRender.ts";
+import {
+  advanceFactoryRoundBattleCommand,
+  type FactoryRoundBattleOrchestratorState,
+} from "./factoryRoundBattleOrchestrator.ts";
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
 
@@ -288,6 +293,8 @@ export interface EngineState {
   factorySwap: FactorySwapPresentationState | null;
   /** Source-relative Factory lobby terminal adapter for roundLost. */
   factoryTerminal: FactoryTerminalPresentationState | null;
+  /** App-visible generated battle-command route; dev staging may install it. */
+  factoryRoundBattleOrchestrator: FactoryRoundBattleOrchestratorState | null;
 }
 
 /** battleRoom "settled" phase's own elapsed (0 = trace tick 843, see battleTransition.ts) at which core.ts hands off to battleScene.ts - trace tick 1040 (battleScene.ts's own TICK0), the ground-truth trace's own window start. Ticks 1030-1039 are flat black either way (battleTransition's own exit-fade hold and battleScene's own pre-reveal hold render byte-identical solid black), so the exact handoff point within that range is inconsequential to pixels. */
@@ -327,6 +334,7 @@ export function createInitialState(
     sceneOnPresentation: null,
     factorySwap: null,
     factoryTerminal: null,
+    factoryRoundBattleOrchestrator: null,
   };
 }
 
@@ -373,6 +381,22 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     )
   ) {
     factoryTerminal = createFactoryTerminalPresentation(pendingTerminalCommand);
+  }
+
+  if (state.factoryRoundBattleOrchestrator?.battleCommandPresentation) {
+    const factoryRoundBattleOrchestrator = advanceFactoryRoundBattleCommand(
+      state.factoryRoundBattleOrchestrator,
+      newKeys,
+    );
+    return {
+      ...state,
+      frame: state.frame + 1,
+      keyRepeat,
+      factoryRoundBattleOrchestrator,
+      rngMode: "frontierBattle",
+      rngValue:
+        factoryRoundBattleOrchestrator.battle?.rng.value ?? state.rngValue,
+    };
   }
 
   if (factoryTerminal) {
@@ -1907,6 +1931,14 @@ function renderPostwinState(state: EngineState): Uint8Array {
 }
 
 function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
+  if (state.factoryRoundBattleOrchestrator?.battleCommandPresentation) {
+    const fb = createFramebuffer();
+    renderGeneratedBattleCommandPresentation(
+      fb,
+      state.factoryRoundBattleOrchestrator.battleCommandPresentation,
+    );
+    return fb;
+  }
   if (state.factorySwap) {
     const swap = state.factorySwap;
     if (swap.elapsed === 0) return renderPostwinState(state);
