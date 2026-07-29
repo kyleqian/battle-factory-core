@@ -3,51 +3,26 @@ import { createInitialState } from "../src/engine/core.ts";
 import {
   ANCHOR_DRAFT_RENTAL_RECORDS,
   createDraftScreenStateFromRentalRecords,
-  type DraftScreenState,
 } from "../src/engine/factoryDraftScreen.ts";
 import { generateInitialFactoryRentals } from "../src/engine/factoryRentalGeneration.ts";
-import { INITIAL_MON_PIC_STATE } from "../src/engine/monPic.ts";
-import { ANCHOR_SPECIES_NAME_FADE_STATE } from "../src/engine/speciesNameFade.ts";
-
-const PREVIOUS_CANONICAL_DRAFT_STATE: DraftScreenState = {
-  mode: "cursor",
-  cursorPos: 0,
-  menuCursorPos: 0,
-  slots: [
-    { species: "ONIX", category: "ROCK SNAKE" },
-    { species: "MAGBY", category: "LIVE COAL" },
-    { species: "BAYLEEF", category: "LEAF" },
-    { species: "BUTTERFREE", category: "BUTTERFLY" },
-    { species: "HAUNTER", category: "GAS" },
-    { species: "QUILAVA", category: "VOLCANO" },
-  ],
-  message: "Select the first POKéMON.",
-  monPic: INITIAL_MON_PIC_STATE,
-  hasActed: false,
-  hasOpenedMonPic: false,
-  cursorRedraw: null,
-  menuHighlightRedraw: null,
-  selectedIds: [0, 0, 0, 0, 0, 0],
-  selectingMonsState: 1,
-  ballAnims: [null, null, null, null, null, null],
-  rentConfirmRedraw: null,
-  ballAnimStall: [],
-  confirmReveal: null,
-  yesNoCursorPos: 0,
-  yesNoCursorRedraw: null,
-  speciesNameFade: ANCHOR_SPECIES_NAME_FADE_STATE,
-  closingFlashResidual: false,
-};
 
 describe("Factory draft generated-rental state adapter", () => {
-  it("preserves the complete previous canonical state through the generic constructor", () => {
+  it("preserves the canonical six rentals and initial draft controller state", () => {
     const adapted = createDraftScreenStateFromRentalRecords(ANCHOR_DRAFT_RENTAL_RECORDS);
 
-    expect(adapted).toEqual(PREVIOUS_CANONICAL_DRAFT_STATE);
-    expect(createInitialState().draftScreen).toEqual(PREVIOUS_CANONICAL_DRAFT_STATE);
+    expect(adapted).toEqual(createInitialState().draftScreen);
+    expect(adapted.slots).toEqual([
+      { species: "ONIX", category: "ROCK SNAKE" },
+      { species: "MAGBY", category: "LIVE COAL" },
+      { species: "BAYLEEF", category: "LEAF" },
+      { species: "BUTTERFREE", category: "BUTTERFLY" },
+      { species: "HAUNTER", category: "GAS" },
+      { species: "QUILAVA", category: "VOLCANO" },
+    ]);
+    expect(adapted.rentals).toHaveLength(6);
   });
 
-  it("constructs six well-formed slots from a non-canonical generated rental set", () => {
+  it("preserves complete non-anchor presentation records for multiple slots", () => {
     const generated = generateInitialFactoryRentals({
       rngValue: 0,
       factoryWinStreak: 0,
@@ -57,7 +32,6 @@ describe("Factory draft generated-rental state adapter", () => {
 
     const state = createDraftScreenStateFromRentalRecords(generated.rentals);
 
-    expect(state.slots).toHaveLength(6);
     expect(state.slots).toEqual([
       { species: "GRIMER", category: "SLUDGE" },
       { species: "POLIWHIRL", category: "TADPOLE" },
@@ -66,6 +40,36 @@ describe("Factory draft generated-rental state adapter", () => {
       { species: "RATICATE", category: "MOUSE" },
       { species: "NIDORINO", category: "POISON PIN" },
     ]);
+    expect(state.rentals[0]).toMatchObject({
+      species: "SPECIES_GRIMER",
+      name: "GRIMER",
+      level: 50,
+      nature: "QUIRKY",
+      item: { name: "PECHA BERRY" },
+      moves: [
+        { name: "SLUDGE", currentPp: 20, maxPp: 20 },
+        { name: "ROCK TOMB", currentPp: 10, maxPp: 10 },
+        { name: "ACID ARMOR", currentPp: 40, maxPp: 40 },
+        { name: "MINIMIZE", currentPp: 20, maxPp: 20 },
+      ],
+      ot: { id: 0x1234_5678, nameText: null, idText: null },
+      frontPicSpecies: "GRIMER",
+    });
+    expect(state.rentals[1]).toMatchObject({
+      species: "SPECIES_POLIWHIRL",
+      name: "POLIWHIRL",
+      level: 50,
+      nature: "QUIRKY",
+      item: { name: "PETAYA BERRY" },
+      moves: [
+        { name: "WATER PULSE", currentPp: 20, maxPp: 20 },
+        { name: "DOUBLESLAP", currentPp: 10, maxPp: 10 },
+        { name: "ICY WIND", currentPp: 15, maxPp: 15 },
+        { name: "RAIN DANCE", currentPp: 5, maxPp: 5 },
+      ],
+      ot: { id: 0x1234_5678, nameText: null, idText: null },
+      frontPicSpecies: "POLIWHIRL",
+    });
   });
 
   it("rejects anything other than the source's six selectable rentals", () => {

@@ -22,7 +22,6 @@ import {
   type TextColors,
 } from "./font.ts";
 import { drawSpriteFaded, drawTextFaded, drawTileBgFaded, drawTilePatchFaded, fadeColor } from "./fadeRender.ts";
-import { getMonGender } from "./monGender.ts";
 import { drawSpriteSheetAffineRotate } from "./battleScene.ts";
 import type {
   SummaryMonTransition,
@@ -42,6 +41,7 @@ import {
   summaryFrontAnimationForSpecies,
   summaryFrontSpritePresentation,
 } from "./summaryFrontAnimation.ts";
+import type { FactoryRentalPresentation } from "./factoryRentalPresentation.ts";
 
 import summaryBgData from "../assets/gen/summary-bg.json" with { type: "json" };
 import summaryTypeIconsData from "../assets/gen/summary-type-icons.json" with { type: "json" };
@@ -51,13 +51,6 @@ import summaryBallData from "../assets/gen/summary-ball.json" with { type: "json
 import frontSpritesData from "../assets/gen/front-sprites.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
-import draftPoolHeaderData from "../data/gen/draft-pool-header.json" with { type: "json" };
-import summaryInfoData from "../data/gen/summary-info.json" with { type: "json" };
-import anchorStateData from "../data/gen/anchor-state.json" with { type: "json" };
-import frontierMonsData from "../data/gen/battle-frontier-mons.json" with { type: "json" };
-import itemNamesData from "../data/gen/item-names.json" with { type: "json" };
-import expTablesData from "../data/gen/exp-tables.json" with { type: "json" };
-import movesData from "../data/gen/moves.json" with { type: "json" };
 import summaryMoveEffectBattleData from "../assets/gen/summary-move-effect-battle.json" with { type: "json" };
 import summaryMoveEffectContestData from "../assets/gen/summary-move-effect-contest.json" with { type: "json" };
 import summaryMoveEffectCancelData from "../assets/gen/summary-move-effect-cancel.json" with { type: "json" };
@@ -85,48 +78,6 @@ const ball = summaryBallData as unknown as { tileset: TileGrid; palette: RgbColo
 const frontSprites = frontSpritesData as unknown as Record<string, { tileset: TileGrid; animationFrame1: TileGrid; palette: RgbColor[] }>;
 const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
-const draftPool = (draftPoolHeaderData as { pool: Array<{ species: string; category: string }> }).pool;
-const speciesInfoBySpecies = new Map(
-  (summaryInfoData as { species: Array<{ species: string; dexNumber: number; types: string[]; genderRatio: number }> }).species.map((s) => [
-    s.species,
-    s,
-  ]),
-);
-const abilities = (summaryInfoData as { abilities: Record<string, { name: string; description: string }> }).abilities;
-const rentals = (anchorStateData as { rentals: Array<{ species: string; personality: number; ability: string; nature: string; level: number }> })
-  .rentals;
-const frontierMons = (frontierMonsData as {
-  entries: Array<{ index: number; itemName: string; moves: string[] }>;
-}).entries;
-const itemNames = new Map(
-  (itemNamesData as { items: Array<{ item: string; name: string }> }).items.map(
-    ({ item, name }) => [item, name],
-  ),
-);
-const expTables = expTablesData as {
-  growthRates: Record<string, number[]>;
-  speciesGrowthRate: Record<string, string>;
-};
-const moves = new Map(
-  (movesData as {
-    moves: Array<{
-      move: string;
-      name: string;
-      type: string;
-      pp: number;
-      power: number;
-      accuracy: number;
-      description: string;
-      contest: {
-        category: string;
-        appeal: number;
-        jam: number;
-        effect: string;
-        description: string;
-      };
-    }>;
-  }).moves.map((move) => [move.move, move]),
-);
 const moveEffectBattle = summaryMoveEffectBattleData as unknown as {
   tilemap: SummaryTilemap;
   readRows: number;
@@ -362,6 +313,7 @@ function moveEffectPatch(
 
 function compose(
   fb: Uint8Array,
+  rentals: readonly FactoryRentalPresentation[],
   selectedSlot: number,
   bgY: number,
   objY: number,
@@ -451,17 +403,15 @@ function compose(
   const memoSlot = monReplacement.memoSlot ?? selectedSlot;
   const pageTextSlot = monReplacement.pageTextSlot ?? selectedSlot;
   const pageIconSlot = monReplacement.pageIconSlot ?? selectedSlot;
-  const pool = draftPool[monInfoSlot]!;
   const rental = rentals[monInfoSlot]!;
-  const info = speciesInfoBySpecies.get(rental.species)!;
-  const gender = getMonGender(info.genderRatio, rental.personality);
+  if (!rental) throw new Error(`summary rental slot ${monInfoSlot} is unavailable`);
 
   // Sprites, back to front (§7's composition order): type icon(s), markings,
   // caught-ball icon, mon front sprite.
   if (page === "info" && !clearPageWindows) {
     const typeRental = rentals[typeSlot]!;
-    const typeInfo = speciesInfoBySpecies.get(typeRental.species)!;
-    const types = typeInfo.types.map((t) => t.replace("TYPE_", ""));
+    if (!typeRental) throw new Error(`summary type rental slot ${typeSlot} is unavailable`);
+    const types = typeRental.types.map((t) => t.replace("TYPE_", ""));
     const type1 = typeIcons.types[types[0]!]!;
     sprite({ tileset: type1.tileset }, type1.palette, 136, 56, 4, 2, 0);
     if (types[1] && types[1] !== types[0]) {
@@ -483,44 +433,51 @@ function compose(
   // CreateMonSprite(..., 40, 64, 5): hFlip = !IsMonSpriteNotFlipped(species)
   // - all 6 anchor species have noFlip=FALSE in species_info.h, so hFlip is
   // always TRUE here (unlike the draft screen's unflipped ball-open pic).
-  const spritePool = draftPool[spriteSlot]!;
-  const frontSprite = frontSprites[spritePool.species]!;
-  let presentationClock = monAnimClock;
-  if (monReplacement.replacementAnimationDelay) {
-    const motionType = summaryFrontAnimationForSpecies(spritePool.species).motion.type;
-    presentationClock =
-      motionType === "ANIM_RAPID_H_HOPS"
-        ? monAnimClock
-        : monAnimClock - monReplacement.replacementAnimationDelay;
-  }
-  const frontPresentation = summaryFrontSpritePresentation(
-    spritePool.species,
-    presentationClock,
-    monReplacement.animateSwitchedMon === true,
-  );
-  const monTileset =
-    frontPresentation.frame === 1 ? frontSprite.animationFrame1 : frontSprite.tileset;
-  const monX = 40 + frontPresentation.x2;
-  const monY = 64 + frontPresentation.y2;
-  if (
-    monReplacement.showMon !== false &&
-    frontPresentation.affine
-  ) {
-    drawSpriteSheetAffineRotate(
-      fb,
-      monTileset,
-      frontSprite.palette.map((color) => fadeColor(color, objY)),
-      monX,
-      monY,
-      -frontPresentation.affine.xScale,
-      0,
-      0,
-      frontPresentation.affine.yScale,
-      undefined,
-      true,
+  const spriteRental = rentals[spriteSlot]!;
+  if (!spriteRental) throw new Error(`summary sprite rental slot ${spriteSlot} is unavailable`);
+  const frontSprite = frontSprites[spriteRental.frontPicSpecies];
+  // The current front-pic asset tranche covers the canonical six. A live
+  // generated rental keeps its exact front-pic identity in state and never
+  // substitutes anchor art; until that species asset exists, only the
+  // portrait layer is absent while all record-backed text remains visible.
+  if (frontSprite) {
+    let presentationClock = monAnimClock;
+    if (monReplacement.replacementAnimationDelay) {
+      const motionType = summaryFrontAnimationForSpecies(spriteRental.frontPicSpecies).motion.type;
+      presentationClock =
+        motionType === "ANIM_RAPID_H_HOPS"
+          ? monAnimClock
+          : monAnimClock - monReplacement.replacementAnimationDelay;
+    }
+    const frontPresentation = summaryFrontSpritePresentation(
+      spriteRental.frontPicSpecies,
+      presentationClock,
+      monReplacement.animateSwitchedMon === true,
     );
-  } else if (monReplacement.showMon !== false) {
-    sprite({ tileset: monTileset }, frontSprite.palette, monX, monY, 8, 8, 0, true);
+    const monTileset =
+      frontPresentation.frame === 1 ? frontSprite.animationFrame1 : frontSprite.tileset;
+    const monX = 40 + frontPresentation.x2;
+    const monY = 64 + frontPresentation.y2;
+    if (
+      monReplacement.showMon !== false &&
+      frontPresentation.affine
+    ) {
+      drawSpriteSheetAffineRotate(
+        fb,
+        monTileset,
+        frontSprite.palette.map((color) => fadeColor(color, objY)),
+        monX,
+        monY,
+        -frontPresentation.affine.xScale,
+        0,
+        0,
+        frontPresentation.affine.yScale,
+        undefined,
+        true,
+      );
+    } else if (monReplacement.showMon !== false) {
+      sprite({ tileset: monTileset }, frontSprite.palette, monX, monY, 8, 8, 0, true);
+    }
   }
 
   const moveSelectInstalled =
@@ -531,10 +488,7 @@ function compose(
       moveSelect.phase === "closing"
         ? Math.min(10, moveSelect.elapsed * 3)
         : Math.max(0, 9 - (moveSelect.elapsed - 2) * 3);
-    const frontierMon = frontierMons.find(
-      (entry) => entry.index === (rental as { frontierMonIndex?: number }).frontierMonIndex,
-    )!;
-    const presentedMove = moves.get(frontierMon.moves[moveSelect.presentedMoveIndex]!)!;
+    const presentedMove = rental.moves[moveSelect.presentedMoveIndex]!;
     drawTilePatchFaded(
       fb,
       summaryBg.tileset,
@@ -596,14 +550,16 @@ function compose(
   // gText_NumberClear01 = "{NO}{CLEAR 1}" + the zero-padded dex number.
   const noGlyphWidth = drawGlyphCode(fb, GLYPH_CODE_NO, WIN_DEX_NUMBER.x, WIN_DEX_NUMBER.y + 1, COLOR_1, summaryBg.subpalettes[PAL7]!, bgY);
   const CLEAR_1_WIDTH = 1;
-  text(
-    String(info.dexNumber).padStart(3, "0"),
-    WIN_DEX_NUMBER.x + noGlyphWidth + CLEAR_1_WIDTH,
-    WIN_DEX_NUMBER.y + 1,
-    COLOR_1,
-    PAL7,
-  );
-  text(pool.species, WIN_NICKNAME.x, WIN_NICKNAME.y + 1, COLOR_1, PAL6);
+  if (rental.dexNumber !== null) {
+    text(
+      String(rental.dexNumber).padStart(3, "0"),
+      WIN_DEX_NUMBER.x + noGlyphWidth + CLEAR_1_WIDTH,
+      WIN_DEX_NUMBER.y + 1,
+      COLOR_1,
+      PAL7,
+    );
+  }
+  text(rental.name, WIN_NICKNAME.x, WIN_NICKNAME.y + 1, COLOR_1, PAL6);
 
   // gText_LevelSymbol = "{LV}" + the (left-aligned, not zero-padded) level.
   if (!moveSelectInstalled) {
@@ -617,19 +573,25 @@ function compose(
       bgY,
     );
     text(`${rental.level}`, WIN_SPECIES.x + 24 + lvGlyphWidth, WIN_SPECIES.y + 17, COLOR_1, PAL6);
-    text(`/${pool.species}`, WIN_SPECIES.x, WIN_SPECIES.y + 1, COLOR_1, PAL6);
-    if (gender === "male") text("♂", WIN_SPECIES.x + 57, WIN_SPECIES.y + 17, COLOR_MALE, PAL6);
-    else if (gender === "female") text("♀", WIN_SPECIES.x + 57, WIN_SPECIES.y + 17, COLOR_FEMALE, PAL6);
+    text(`/${rental.name}`, WIN_SPECIES.x, WIN_SPECIES.y + 1, COLOR_1, PAL6);
+    if (rental.gender === "male") text("♂", WIN_SPECIES.x + 57, WIN_SPECIES.y + 17, COLOR_MALE, PAL6);
+    else if (rental.gender === "female") text("♀", WIN_SPECIES.x + 57, WIN_SPECIES.y + 17, COLOR_FEMALE, PAL6);
   }
 
   if (page === "info" && !clearPageWindows) {
     const abilityRental = rentals[abilitySlot]!;
-    const ability = abilities[abilityRental.ability]!;
+    if (!abilityRental) throw new Error(`summary ability rental slot ${abilitySlot} is unavailable`);
+    const ability = abilityRental.ability;
     const memoRental = rentals[memoSlot]!;
-    const natureName = memoRental.nature.replace("NATURE_", "");
-    text(ability.name, WIN_ABILITY.x, WIN_ABILITY.y + 1, COLOR_1, PAL6);
+    if (!memoRental) throw new Error(`summary memo rental slot ${memoSlot} is unavailable`);
+    const natureName = memoRental.nature;
+    if (ability.name !== null) {
+      text(ability.name, WIN_ABILITY.x, WIN_ABILITY.y + 1, COLOR_1, PAL6);
+    }
     const abilityDescription =
-      monReplacement.abilityDescriptionCharLimit === undefined
+      ability.description === null
+        ? ""
+        : monReplacement.abilityDescriptionCharLimit === undefined
         ? ability.description
         : ability.description.slice(0, monReplacement.abilityDescriptionCharLimit);
     text(abilityDescription, WIN_ABILITY.x, WIN_ABILITY.y + 17, COLOR_0, PAL6);
@@ -668,15 +630,11 @@ function compose(
     text("EXP. POINTS", WIN_SKILLS_LABEL_EXP.x + 6, WIN_SKILLS_LABEL_EXP.y + 1, COLOR_1, PAL6);
     text("NEXT LV.", WIN_SKILLS_LABEL_EXP.x + 6, WIN_SKILLS_LABEL_EXP.y + 17, COLOR_1, PAL6);
 
-    const frontierMon = frontierMons.find((entry) => entry.index === (rental as { frontierMonIndex?: number }).frontierMonIndex);
-    const itemKey = frontierMon?.itemName.replace("BATTLE_FRONTIER_", "") ?? "ITEM_NONE";
-    const item = itemNames.get(itemKey) ?? "NONE";
+    const item = rental.item.name;
     text(item, WIN_SKILLS_ITEM.x + center(item, 72, 6), WIN_SKILLS_ITEM.y + 1, COLOR_0, PAL6);
     text("NONE", WIN_SKILLS_RIBBON.x + center("NONE", 70, 6), WIN_SKILLS_RIBBON.y + 1, COLOR_0, PAL6);
 
-    const stats = (rental as unknown as {
-      stats: { hp: number; maxHp: number; attack: number; defense: number; spAttack: number; spDefense: number; speed: number };
-    }).stats;
+    const stats = rental.stats;
     drawCodes(
       [...digitCodes(stats.hp, 3), charmap.get("/")!, ...digitCodes(stats.maxHp, 3)],
       WIN_SKILLS_STATS_LEFT.x + 4,
@@ -688,9 +646,8 @@ function compose(
     drawCodes(digitCodes(stats.spDefense, 3), WIN_SKILLS_STATS_RIGHT.x + 2, WIN_SKILLS_STATS_RIGHT.y + 17);
     drawCodes(digitCodes(stats.speed, 3), WIN_SKILLS_STATS_RIGHT.x + 2, WIN_SKILLS_STATS_RIGHT.y + 33);
 
-    const growth = expTables.growthRates[expTables.speciesGrowthRate[rental.species]!]!;
-    const totalExp = growth[rental.level]!;
-    const nextExp = growth[rental.level + 1]! - totalExp;
+    const totalExp = rental.experience;
+    const nextExp = rental.nextLevelExperience;
     const totalCodes = digitCodes(totalExp, 7);
     const nextCodes = digitCodes(nextExp, 6);
     const codeWidth = (codes: readonly number[]) =>
@@ -704,12 +661,8 @@ function compose(
   ) {
     const pageRental = rentals[pageTextSlot]!;
     const iconRental = rentals[pageIconSlot]!;
-    const frontierMon = frontierMons.find(
-      (entry) => entry.index === (pageRental as { frontierMonIndex?: number }).frontierMonIndex,
-    )!;
-    const iconFrontierMon = frontierMons.find(
-      (entry) => entry.index === (iconRental as { frontierMonIndex?: number }).frontierMonIndex,
-    )!;
+    if (!pageRental) throw new Error(`summary page rental slot ${pageTextSlot} is unavailable`);
+    if (!iconRental) throw new Error(`summary icon rental slot ${pageIconSlot} is unavailable`);
     const ppPalette = [
       summaryBg.subpalettes[0]![0]!,
       ...summaryBg.ppPalette.slice(0, 15),
@@ -720,7 +673,7 @@ function compose(
         0,
       );
     for (let i = 0; i < 4; i += 1) {
-      const move = moves.get(frontierMon.moves[i]!)!;
+      const move = pageRental.moves[i]!;
       const y = i * 16 + 1;
       const windowTransfer = monReplacement.movesWindowTransfer;
       const namesTransfer = windowTransfer?.names ?? { completeRows: 4 };
@@ -728,13 +681,13 @@ function compose(
       if (i < namesTransfer.completeRows) {
         text(move.name, WIN_MOVES_NAMES.x, WIN_MOVES_NAMES.y + y, COLOR_1, PAL6);
       }
-      const currentPp = (pageRental as unknown as { pp: number[] }).pp[i]!;
+      const currentPp = move.currentPp;
       const ppCodes = [
         GLYPH_CODE_PP,
         ...String(currentPp).padStart(2, " ").split("").map((char) =>
           char === " " ? CHAR_SPACER : charmap.get(char)!),
         charmap.get("/")!,
-        ...String(move.pp).padStart(2, " ").split("").map((char) =>
+        ...String(move.maxPp).padStart(2, " ").split("").map((char) =>
           char === " " ? CHAR_SPACER : charmap.get(char)!),
       ];
       const ppX = WIN_MOVES_PP.x + 44 - codeWidth(ppCodes);
@@ -775,10 +728,10 @@ function compose(
       const icon =
         page === "contestMoves"
           ? typeIcons.contestCategories[
-              moves.get(iconFrontierMon.moves[i]!)!.contest.category.replace("CONTEST_CATEGORY_", "")
+              iconRental.moves[i]!.contest.category.replace("CONTEST_CATEGORY_", "")
             ]!
           : typeIcons.types[
-              moves.get(iconFrontierMon.moves[i]!)!.type.replace("TYPE_", "")
+              iconRental.moves[i]!.type.replace("TYPE_", "")
             ]!;
       sprite({ tileset: icon.tileset }, icon.palette, 101, 40 + i * 16, 4, 2, 0);
     }
@@ -797,7 +750,7 @@ function compose(
       text("CANCEL", WIN_MOVES_NAMES.x, WIN_MOVES_NAMES.y + 65, COLOR_1, PAL6);
     }
     if (showMoveDetails) {
-      const presentedMove = moves.get(frontierMon.moves[moveSelect.presentedMoveIndex]!)!;
+      const presentedMove = pageRental.moves[moveSelect.presentedMoveIndex]!;
       const description =
         page === "contestMoves"
           ? presentedMove.contest.description
@@ -815,7 +768,7 @@ function compose(
           moveSelect.pendingPresentationTicks > 1
             ? moveSelect.presentedMoveIndex
             : moveSelect.selectedMoveIndex;
-        const detailMove = moves.get(frontierMon.moves[powerMoveIndex]!)!;
+        const detailMove = pageRental.moves[powerMoveIndex]!;
         text(page === "contestMoves" ? "APPEAL" : "POWER", 8, 121, COLOR_1, PAL6);
         text(page === "contestMoves" ? "JAM" : "ACCURACY", 8, 137, COLOR_1, PAL6);
         if (page === "contestMoves") {
@@ -876,12 +829,13 @@ function compose(
 }
 
 export function renderSummaryInfoPage(
+  rentals: readonly FactoryRentalPresentation[],
   selectedSlot: number,
   monAnimClock = 0,
   animateSwitchedMon = false,
 ): Uint8Array {
   const fb = createFramebuffer();
-  compose(fb, selectedSlot, 0, 0, "info", monAnimClock, false, 0, false, {
+  compose(fb, rentals, selectedSlot, 0, 0, "info", monAnimClock, false, 0, false, {
     animateSwitchedMon,
   });
   return fb;
@@ -889,6 +843,7 @@ export function renderSummaryInfoPage(
 
 /** S4 entry/exit fade variant - see module doc. bgY=objY=0 reproduces renderSummaryInfoPage exactly. */
 export function renderSummaryInfoPageFaded(
+  rentals: readonly FactoryRentalPresentation[],
   selectedSlot: number,
   bgY: number,
   objY: number,
@@ -896,37 +851,40 @@ export function renderSummaryInfoPageFaded(
   animateSwitchedMon = false,
 ): Uint8Array {
   const fb = createFramebuffer();
-  compose(fb, selectedSlot, bgY, objY, "info", monAnimClock, false, 0, false, {
+  compose(fb, rentals, selectedSlot, bgY, objY, "info", monAnimClock, false, 0, false, {
     animateSwitchedMon,
   });
   return fb;
 }
 
 export function renderSummarySkillsPage(
+  rentals: readonly FactoryRentalPresentation[],
   selectedSlot: number,
   monAnimClock = 0,
   animateSwitchedMon = false,
 ): Uint8Array {
   const fb = createFramebuffer();
-  compose(fb, selectedSlot, 0, 0, "skills", monAnimClock, false, 0, true, {
+  compose(fb, rentals, selectedSlot, 0, 0, "skills", monAnimClock, false, 0, true, {
     animateSwitchedMon,
   });
   return fb;
 }
 
 export function renderSummaryBattleMovesPage(
+  rentals: readonly FactoryRentalPresentation[],
   selectedSlot: number,
   monAnimClock = 0,
   animateSwitchedMon = false,
 ): Uint8Array {
   const fb = createFramebuffer();
-  compose(fb, selectedSlot, 0, 0, "battleMoves", monAnimClock, false, 0, true, {
+  compose(fb, rentals, selectedSlot, 0, 0, "battleMoves", monAnimClock, false, 0, true, {
     animateSwitchedMon,
   });
   return fb;
 }
 
 export function renderSummaryBattleMoveSelectPage(
+  rentals: readonly FactoryRentalPresentation[],
   selectedSlot: number,
   monAnimClock: number,
   moveSelect: SummaryMoveSelectState,
@@ -936,6 +894,7 @@ export function renderSummaryBattleMoveSelectPage(
   const fb = createFramebuffer();
   compose(
     fb,
+    rentals,
     selectedSlot,
     0,
     0,
@@ -952,12 +911,13 @@ export function renderSummaryBattleMoveSelectPage(
 }
 
 export function renderSummaryContestMovesPage(
+  rentals: readonly FactoryRentalPresentation[],
   selectedSlot: number,
   monAnimClock = 0,
   animateSwitchedMon = false,
 ): Uint8Array {
   const fb = createFramebuffer();
-  compose(fb, selectedSlot, 0, 0, "contestMoves", monAnimClock, false, 0, true, {
+  compose(fb, rentals, selectedSlot, 0, 0, "contestMoves", monAnimClock, false, 0, true, {
     animateSwitchedMon,
     // Contest's longer page-specific text copy defers the replacement sprite
     // callback by one presentation tick without delaying controller input.
@@ -967,6 +927,7 @@ export function renderSummaryContestMovesPage(
 }
 
 export function renderSummaryPageFaded(
+  rentals: readonly FactoryRentalPresentation[],
   selectedSlot: number,
   page: SummaryPage,
   bgY: number,
@@ -975,13 +936,14 @@ export function renderSummaryPageFaded(
   animateSwitchedMon = false,
 ): Uint8Array {
   const fb = createFramebuffer();
-  compose(fb, selectedSlot, bgY, objY, page, monAnimClock, false, 0, page !== "info", {
+  compose(fb, rentals, selectedSlot, bgY, objY, page, monAnimClock, false, 0, page !== "info", {
     animateSwitchedMon,
   });
   return fb;
 }
 
 export function renderSummaryPageCleared(
+  rentals: readonly FactoryRentalPresentation[],
   selectedSlot: number,
   monAnimClock: number,
   page: SummaryPage = "info",
@@ -990,6 +952,7 @@ export function renderSummaryPageCleared(
   const fb = createFramebuffer();
   compose(
     fb,
+    rentals,
     selectedSlot,
     0,
     0,
@@ -1010,6 +973,7 @@ export function renderSummaryPageCleared(
  * portrait is absent while graphics and sprite resources are rebuilt.
  */
 export function renderSummaryMonTransition(
+  rentals: readonly FactoryRentalPresentation[],
   transition: SummaryMonTransition,
   oldMonAnimClock: number,
   sourceIsReplacement = false,
@@ -1025,6 +989,7 @@ export function renderSummaryMonTransition(
   const fb = createFramebuffer();
   compose(
     fb,
+    rentals,
     transition.fromSlot,
     0,
     0,
@@ -1067,7 +1032,7 @@ export function renderSummaryMonTransition(
         page,
       ).pp.clearHandoff;
       if (handoff) {
-        const cleared = renderSummaryPageCleared(transition.toSlot, 0, page);
+        const cleared = renderSummaryPageCleared(rentals, transition.toSlot, 0, page);
         // PP layout is always the 10px PP glyph plus five 6px cells,
         // right-aligned in the source's 44px field: its glyph origin is +4.
         const x0 = WIN_MOVES_PP.x + 4 + handoff.glyphX;
@@ -1084,7 +1049,7 @@ export function renderSummaryMonTransition(
       }
       return fb;
     }
-    const description = abilities[rentals[transition.toSlot]!.ability]!.description;
+    const description = rentals[transition.toSlot]!.ability.description ?? "";
     const prefix = description.slice(0, 21);
     const glyphX = WIN_ABILITY.x + measureText(font, charmap, prefix);
     const glyphWidth = measureText(font, charmap, description.slice(0, 22)) - measureText(font, charmap, prefix);
@@ -1094,7 +1059,7 @@ export function renderSummaryMonTransition(
     // out, but only its first 9 cell rows have crossed COPYWIN_GFX yet.
     // Model that window-transfer boundary from glyph metrics (not pixels).
     const partial = createFramebuffer();
-    compose(partial, transition.fromSlot, 0, 0, "info", oldMonAnimClock, false, 0, false, {
+    compose(partial, rentals, transition.fromSlot, 0, 0, "info", oldMonAnimClock, false, 0, false, {
       spriteSlot: transition.toSlot,
       typeSlot: transition.toSlot,
       monInfoSlot: transition.toSlot,
@@ -1128,6 +1093,7 @@ export function renderSummaryMonTransition(
 }
 
 export function renderSummaryPageTransition(
+  rentals: readonly FactoryRentalPresentation[],
   selectedSlot: number,
   transition: SummaryPageTransition,
   monAnimClock: number,
@@ -1141,6 +1107,7 @@ export function renderSummaryPageTransition(
   ) {
     compose(
       fb,
+      rentals,
       selectedSlot,
       0,
       0,
@@ -1157,6 +1124,7 @@ export function renderSummaryPageTransition(
   if (layers.movingPage === "battleMoves" && layers.fixedPage === "skills") {
     compose(
       fb,
+      rentals,
       selectedSlot,
       0,
       0,
@@ -1173,6 +1141,7 @@ export function renderSummaryPageTransition(
   if (layers.movingPage === "contestMoves" && layers.fixedPage === "battleMoves") {
     compose(
       fb,
+      rentals,
       selectedSlot,
       0,
       0,
@@ -1186,6 +1155,6 @@ export function renderSummaryPageTransition(
     );
     return fb;
   }
-  compose(fb, selectedSlot, 0, 0, "info", monAnimClock, true);
+  compose(fb, rentals, selectedSlot, 0, 0, "info", monAnimClock, true);
   return fb;
 }
