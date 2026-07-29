@@ -1,0 +1,377 @@
+{
+  "fixture": "tools/battle-lab/mechanic-factory-ai-switch-receipt-a-off.json",
+  "profile": "battle-scene-off",
+  "seed": 2,
+  "fastPass": [
+    {
+      "frame": 57,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 60,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 161,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 173,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 201,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 204,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 313,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 323,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 329,
+      "delta": 1,
+      "state": {
+        "activeBattler": 2,
+        "chosenActions": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    }
+  ],
+  "attributedDraws": [
+    {
+      "frame": 57,
+      "lr": "0x08046d3f",
+      "caller": "Cmd_critcalc+0x127",
+      "preRng": "0x8761d6d4",
+      "postRng": "0x701570b7",
+      "returnU16": 28693,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 60,
+      "lr": "0x080478fb",
+      "caller": "Cmd_adjustnormaldamage+0x7",
+      "preRng": "0x701570b7",
+      "postRng": "0xe603205e",
+      "returnU16": 58883,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 161,
+      "lr": "0x08049a55",
+      "caller": "Cmd_seteffectwithchance+0x81",
+      "preRng": "0xe603205e",
+      "postRng": "0xc9e5cc79",
+      "returnU16": 51685,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 173,
+      "lr": "0x08046965",
+      "caller": "Cmd_accuracycheck+0x305",
+      "preRng": "0xc9e5cc79",
+      "postRng": "0xd9bb4df8",
+      "returnU16": 55739,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 201,
+      "lr": "0x08046d3f",
+      "caller": "Cmd_critcalc+0x127",
+      "preRng": "0xd9bb4df8",
+      "postRng": "0x0c52230b",
+      "returnU16": 3154,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 204,
+      "lr": "0x080478fb",
+      "caller": "Cmd_adjustnormaldamage+0x7",
+      "preRng": "0x0c52230b",
+      "postRng": "0x2b28a622",
+      "returnU16": 11048,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 313,
+      "lr": "0x08049a55",
+      "caller": "Cmd_seteffectwithchance+0x81",
+      "preRng": "0x2b28a622",
+      "postRng": "0xe33978ed",
+      "returnU16": 58169,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          0,
+          0,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 323,
+      "lr": "0x0803bb13",
+      "caller": "BattleTurnPassed+0x157",
+      "preRng": "0xe33978ed",
+      "postRng": "0xf69f135c",
+      "returnU16": 63135,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    },
+    {
+      "frame": 329,
+      "lr": "0x0806309d",
+      "caller": "FindMonThatAbsorbsOpponentsMove+0x249",
+      "preRng": "0xf69f135c",
+      "postRng": "0xcec9a69f",
+      "returnU16": 52937,
+      "expression": "Random() & 1",
+      "expressionResult": 1,
+      "aiMonToSwitchIntoIdWhenWritten": 1,
+      "stateAfterFrame": {
+        "activeBattler": 2,
+        "chosenActions": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "aiMonToSwitchIntoId": 6,
+        "monToSwitchIntoId": 6
+      }
+    }
+  ],
+  "absorberReceipt": {
+    "frame": 329,
+    "lr": "0x0806309d",
+    "caller": "FindMonThatAbsorbsOpponentsMove+0x249",
+    "preRng": "0xf69f135c",
+    "postRng": "0xcec9a69f",
+    "returnU16": 52937,
+    "expression": "Random() & 1",
+    "expressionResult": 1,
+    "aiMonToSwitchIntoIdWhenWritten": 1,
+    "stateAfterFrame": {
+      "activeBattler": 2,
+      "chosenActions": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "aiMonToSwitchIntoId": 6,
+      "monToSwitchIntoId": 6
+    }
+  },
+  "command": {
+    "firstChosenAction": {
+      "frame": 330,
+      "chosenAction": 2,
+      "aiMonToSwitchIntoId": 6
+    },
+    "drawDelta": 1,
+    "attributedDraws": [
+      {
+        "frame": 329,
+        "lr": "0x0806309d",
+        "caller": "FindMonThatAbsorbsOpponentsMove+0x249",
+        "preRng": "0xf69f135c",
+        "postRng": "0xcec9a69f",
+        "returnU16": 52937,
+        "expression": "Random() & 1",
+        "expressionResult": 1,
+        "aiMonToSwitchIntoIdWhenWritten": 1,
+        "stateAfterFrame": {
+          "activeBattler": 2,
+          "chosenActions": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "aiMonToSwitchIntoId": 6,
+          "monToSwitchIntoId": 6
+        }
+      }
+    ]
+  },
+  "verdict": {
+    "oddReturnSwitchesToPartyIndex1": true,
+    "expectedCommandDelta": 1,
+    "controlRequiresOrdinaryMoveLedgerPlusOne": false
+  }
+}
