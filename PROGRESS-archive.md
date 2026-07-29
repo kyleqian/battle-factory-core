@@ -1,3 +1,26 @@
+## 642 — [BOUNDED MAIN WORKER 2026-07-28 ~16:29] Frontier-tail row 6a Assist source-complete
+
+- **State:** committed `9c9a6337`; tree green at **428 files / 4676 tests**,
+  production build, OFF oracle info, and `git diff --check`. Census is exactly
+  **211/214 effects, 352/355 moves, 275/276 distinct, 2955/2957 weighted**:
+  assigned-baseline delta **+1/+1/+0/+0**; all **70** validations pass.
+- **Did:** registered `B_SCR_OP_ASSISTATTACKSELECT` beside the existing shared
+  called-move machinery. It scans party slot then move slot, excludes the
+  user's active party slot (not same-species records), applies the exact
+  invalid/forbidden bounds, scaled-selects once, retargets, and takes the
+  no-candidate failure pointer without a draw.
+- **Next:** supervisor verify this commit; continue only from the ordered
+  frontier-tail plan, not Beat Up/Transform/Metronome unless separately assigned.
+- **Notes:** consumed `docs/assist-off-evidence.md`; receipt test reproduces
+  seed `0x29a72072` → `0xb237ecfd`, low byte `0x37`, candidate index 1/Growl.
+  Tests pin active/empty/Egg/forbidden filters, same-species inclusion,
+  party-major order, no dedup, exact Uproar boundary, zero-candidate failure,
+  and existing `jumptocalledmove TRUE` target/RNG/PP ownership. Deliberate
+  handler exact-set pin **205→206**. No barrier, canonical import, recording,
+  presentation, round, tick, roadmap, or issue change.
+
+---
+
 ## 641 — [BOUNDED MAIN WORKER 2026-07-28 ~16:20] Frontier-tail row 5c Snatch source-complete
 
 - **State:** committed `42863c36`; tree green at **425 files / 4661 tests**,

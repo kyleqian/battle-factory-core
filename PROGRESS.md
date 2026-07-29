@@ -13,6 +13,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 645 — [BOUNDED MAIN WORKER 2026-07-28 ~17:02] Frontier-tail row 8 Metronome closes census
+
+- **State:** committed `529b48ec`; tree green at **431 files / 4712 tests**,
+  production build, OFF oracle info, and `git diff --check`. The executable
+  census is CLOSED exactly at **214/214 effects, 355/355 moves, 276/276
+  distinct, 2957/2957 weighted**: assigned-baseline delta **+1/+1/+1/+2**;
+  all **72** validations pass.
+- **Did:** registered `B_SCR_OP_METRONOME` with the exact sentinel-bearing
+  forbidden table, unbounded one-draw retry loop, source target selection,
+  and direct selected-effect tail jump. It writes `gCurrentMove` without
+  `gCalledMove`, preserves Metronome as chosen move/PP slot owner, and closes
+  the dynamic selectable-universe gate with a live census ratchet.
+- **Next:** supervisor verify `529b48ec`; the ordered frontier-tail census plan
+  is complete. Do not resume retired canonical Battle 2 or presentation work.
+- **Notes:** consumed mandatory `docs/metronome-off-evidence.md`; 25 focused
+  tests cover every forbidden move, out-of-range candidates, one/two/N-draw
+  streams including both seeds, target/direct-jump state, selected-effect END,
+  Metronome-slot PP, and the four history owners. Deliberate handler exact-set
+  pin **208→209**. Evidence prose calls candidate 55 Mist, while pinned source
+  names 55 Water Gun (Mist is 54); the numeric ROM receipt is pinned exactly.
+  No barrier, recording import, presentation, round, tick, roadmap, or issue change.
+
+---
+
 ## 644 — [BOUNDED MAIN WORKER 2026-07-28 ~16:53] Frontier-tail row 7 Transform source-complete
 
 - **State:** committed `0577134c`; tree green at **430 files / 4687 tests**,
@@ -54,26 +78,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   slot-specific damage/nickname, Helping Hand, and end-vs-initial-failure.
   Deliberate handler exact-set pin **206→207**. No barrier, canonical import,
   recording, presentation, round, tick, roadmap, or issue change.
-
----
-
-## 642 — [BOUNDED MAIN WORKER 2026-07-28 ~16:29] Frontier-tail row 6a Assist source-complete
-
-- **State:** committed `9c9a6337`; tree green at **428 files / 4676 tests**,
-  production build, OFF oracle info, and `git diff --check`. Census is exactly
-  **211/214 effects, 352/355 moves, 275/276 distinct, 2955/2957 weighted**:
-  assigned-baseline delta **+1/+1/+0/+0**; all **70** validations pass.
-- **Did:** registered `B_SCR_OP_ASSISTATTACKSELECT` beside the existing shared
-  called-move machinery. It scans party slot then move slot, excludes the
-  user's active party slot (not same-species records), applies the exact
-  invalid/forbidden bounds, scaled-selects once, retargets, and takes the
-  no-candidate failure pointer without a draw.
-- **Next:** supervisor verify this commit; continue only from the ordered
-  frontier-tail plan, not Beat Up/Transform/Metronome unless separately assigned.
-- **Notes:** consumed `docs/assist-off-evidence.md`; receipt test reproduces
-  seed `0x29a72072` → `0xb237ecfd`, low byte `0x37`, candidate index 1/Growl.
-  Tests pin active/empty/Egg/forbidden filters, same-species inclusion,
-  party-major order, no dedup, exact Uproar boundary, zero-candidate failure,
-  and existing `jumptocalledmove TRUE` target/RNG/PP ownership. Deliberate
-  handler exact-set pin **205→206**. No barrier, canonical import, recording,
-  presentation, round, tick, roadmap, or issue change.
