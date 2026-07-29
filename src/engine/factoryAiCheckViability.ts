@@ -368,7 +368,7 @@ export type FactoryAiCheckViabilityDraw =
   | Readonly<{
     ordinal: number;
     reason: string;
-    kind: "pursuit-roll" | "sleep-roll";
+    kind: "pursuit-roll" | "sleep-roll" | "roar-roll";
     before: BattleRngState;
     after: BattleRngState;
     rawRngValue: number;
@@ -3396,6 +3396,22 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
+  if (move.effect === "EFFECT_ROAR") {
+    const roar = runCvRoar({
+      rng: input.rng,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: roar.rng,
+      draws: roar.draws,
+      scoreDelta: roar.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
   if (AI_CHECK_VIABILITY_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
       kind: "unsupported-branch",
@@ -3449,5 +3465,43 @@ function runCvSleep(input: Readonly<{
       succeeded: !jumpedToEnd,
     })]),
     scoreDelta: jumpedToEnd ? 0 : 1,
+  });
+}
+
+/**
+ * `AI_CV_Roar` (`data/battle_ai_scripts.s:1290-1303`, doc §30). The five
+ * target-stage gates execute in source order: ATK, DEF, SPATK, SPDEF, then
+ * EVASION. The first value >8 JUMPs to the single random site. If all five
+ * FALL THROUGH, score -3 and goto End with no draw. At the random site a
+ * low byte <128 JUMPs to End; >=128 FALLS THROUGH and scores +2.
+ */
+function runCvRoar(input: Readonly<{
+  rng: BattleRngState;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckViabilityDraw[];
+  scoreDelta: number;
+}> {
+  const hasRaisedTargetStat = input.target.atkStage > 8
+    || input.target.defStage > 8
+    || (input.target.spAtkStage ?? DEFAULT_STAT_STAGE) > 8
+    || input.target.spDefStage > 8
+    || input.target.evasionStage > 8;
+  if (!hasRaisedTargetStat) {
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: -3 });
+  }
+  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-roar-roll`);
+  const jumpedToEnd = roll.randomValue % 256 < 128;
+  return Object.freeze({
+    rng: roll.after,
+    draws: Object.freeze([Object.freeze({
+      ...roll,
+      kind: "roar-roll" as const,
+      succeeded: !jumpedToEnd,
+    })]),
+    scoreDelta: jumpedToEnd ? 0 : 2,
   });
 }

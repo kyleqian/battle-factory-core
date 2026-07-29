@@ -264,6 +264,75 @@ describe("AI_CBM_Sleep (docs/factory-ai-checkviability-ground-truth.md §29)", (
   });
 });
 
+describe("AI_CBM_Roar (docs/factory-ai-checkviability-ground-truth.md §30)", () => {
+  const MOVE_ROAR = 46;
+
+  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      usablePartyMons: 1,
+      ...overrides,
+    });
+  }
+
+  it("usable-party count 0 JUMPs to Score_Minus10 before the handler ability read", () => {
+    const result = run(MOVE_ROAR, target({
+      species: 111,
+      knownAbility: null,
+      realAbility: "ABILITY_LIGHTNING_ROD",
+      usablePartyMons: 0,
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual(["test-slot-soundproof"]);
+  });
+
+  it("positive usable-party count FALLS THROUGH; Suction Cups JUMPs to Score_Minus10", () => {
+    const result = run(MOVE_ROAR, target({
+      knownAbility: "ABILITY_SUCTION_CUPS",
+      realAbility: "ABILITY_SUCTION_CUPS",
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("positive usable-party count and another ability FALL THROUGH to end", () => {
+    expect(run(MOVE_ROAR, target())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+
+  it("executes the handler's fresh get_ability only after the count gate falls through", () => {
+    const result = run(MOVE_ROAR, target({
+      species: 111,
+      knownAbility: null,
+      realAbility: "ABILITY_LIGHTNING_ROD",
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-roar-ability",
+    ]);
+  });
+
+  it("leaves Haze behind the same generic CBM barrier", () => {
+    expect(run(MOVE_HAZE, target())).toMatchObject({
+      kind: "unsupported-branch",
+      barrier: "factory-ai-check-bad-move",
+      effect: "EFFECT_HAZE",
+    });
+  });
+});
+
 describe("AI_CBM_Toxic (data/battle_ai_scripts.s:341-352)", () => {
   const CLEAN_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
     species: 213, // Shuckle: single known-by-species Sturdy keeps all handler draws at zero.

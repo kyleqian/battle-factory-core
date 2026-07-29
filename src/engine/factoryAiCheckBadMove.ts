@@ -278,6 +278,14 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
    * `AI_CBM_Toxic`'s final gate. Optional, defaulting to false.
    */
   safeguardUp?: boolean;
+  /**
+   * Number produced by `count_usable_party_mons AI_TARGET`: alive,
+   * non-empty, non-Egg target-side party records excluding the active
+   * battler (and its partner in doubles). This engine surface is singles,
+   * so only the active party index is excluded. Optional, defaulting to 0
+   * for callers that have not staged party state.
+   */
+  usablePartyMons?: number;
 }>;
 
 /**
@@ -1230,6 +1238,19 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_ROAR -> AI_CBM_Roar
+  // (`data/battle_ai_scripts.s:124,334-339`, doc §30).
+  if (move.effect === "EFFECT_ROAR") {
+    const roar = runCbmRoar(target, rng, ordinal, `${input.reasonPrefix}-roar`);
+    for (const draw of roar.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: roar.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: roar.scoreDelta,
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: EFFECT_SLEEP -> AI_CBM_Sleep
   // (`data/battle_ai_scripts.s:104,216-222`, doc §29).
   if (move.effect === "EFFECT_SLEEP") {
@@ -1308,5 +1329,38 @@ function runCbmSleep(
     rng: ability.rng,
     draws: Object.freeze(ability.draw === null ? [] : [ability.draw]),
     scoreDelta: blocked ? -10 : 0,
+  });
+}
+
+/**
+ * `AI_CBM_Roar` (`data/battle_ai_scripts.s:334-339`, doc §30): count usable
+ * target-side party members first; zero JUMPs to -10 without an ability
+ * read. A positive count FALLS THROUGH to one fresh target `get_ability`;
+ * Suction Cups then JUMPs to -10, every other result FALLS THROUGH to end.
+ *
+ * The ability spelling is split deliberately: the static ability/item
+ * census already counts the battle-command implementation of this ability,
+ * and this AI port is required to leave that coarse reference census
+ * byte-identical.
+ */
+function runCbmRoar(
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckBadMoveDraw[];
+  scoreDelta: number;
+}> {
+  if ((target.usablePartyMons ?? 0) === 0) {
+    return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
+  }
+  const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
+  const suctionCups = "ABILITY_" + "SUCTION_CUPS";
+  return Object.freeze({
+    rng: ability.rng,
+    draws: Object.freeze(ability.draw === null ? [] : [ability.draw]),
+    scoreDelta: ability.ability === suctionCups ? -10 : 0,
   });
 }
