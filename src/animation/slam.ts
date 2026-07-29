@@ -113,9 +113,11 @@ export function slamAtAge(
     shakeTaskActive: age >= 23 && age <= 31,
     monbgActive: age >= 10 && age <= 46,
     alpha: age >= 10 && age <= 46 ? { eva: 12, evb: 8 } : null,
-    loadedTags: age >= 10 && age <= 46
-      ? ["ANIM_TAG_SLAM_HIT", "ANIM_TAG_IMPACT"]
-      : [],
+    loadedTags: age < 1 || age > 52
+      ? []
+      : age < 4
+        ? ["ANIM_TAG_SLAM_HIT"]
+        : ["ANIM_TAG_SLAM_HIT", "ANIM_TAG_IMPACT"],
     active: age >= 0 && age <= 52,
   };
 }

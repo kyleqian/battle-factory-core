@@ -16122,7 +16122,7 @@ export function renderSceneOnMovePresentation(
       battleBg.palette,
     );
 
-    const targetIdle = playerToOpponent && slamState.age < 18
+    const targetIdle = playerToOpponent && slamState.age <= 18
       ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
       : { x2: 0, y2: 0 };
     const drawAttacker = () => drawSpriteSheet(
