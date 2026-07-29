@@ -13,6 +13,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 681 — [SUPERVISOR SESSION OPEN 2026-07-29 ~08:25] animation-main folded (Sweet Kiss + Aromatherapy exact); union green; freshness FAIL judged false positive
+
+- **State:** master fast-forwarded to `d166f9cf` (= animation-main union:
+  the concurrent animation supervisor had already merged master in, so the
+  fold was a clean ff bringing 9 animation commits — MOVE_SWEET_KISS and
+  MOVE_AROMATHERAPY promoted exact). Union green at **493 files / 5061
+  tests**, production build passes, tree clean.
+- **Oracle freshness:** `check-oracle-freshness.sh` exits 1 for both ports
+  (services started 2026-07-28 21:42, harness HEAD 807b449 22:08). Verified
+  the sole intervening harness commit is docs-only (`NOTES.md`, +54 lines,
+  no oracle/schema change), and the animation supervisor is live on port
+  8012 — decision: **no restart**, false positive recorded here; both
+  profiles answer `info` healthily.
+- **Session plan (entry 680's ordered Next):** (i) sweep blockers — wake-up
+  `Cmd_bicword` (seeds 18/20), end-turn instruction budget (seed 21),
+  attack-canceler stop (seed 23); (ii) entry 677 AI reveal-site remainder;
+  (iii) rung-13 mid-turn ShouldSwitch; (iv) King's Rock flinch; (v) rung 14
+  presentation windows + Gate-6 matrix; (vi) ISSUES #48.
+
+---
+
 ## 680 — [SUPERVISOR WIND-DOWN 2026-07-29 ~03:35] ability/item parity closed; Gate-5 plan executed to 22/27 seven-win seeds in one session
 
 - **State:** master `15c549e2`, union green at **489 files / 5048 tests**,
@@ -100,51 +121,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   artifact moved; no issue, probe, presentation, animation, canonical
   recording, or tick branch changed. This is the session's last worker entry.
   PAPERCUT: none.
-
----
-
-## 678 — [BOUNDED MAIN WORKER 2026-07-29 ~02:56] confusion self-hit resumes; 17 seeds win seven
-
-- **State:** committed `2c1cd213` and `9a1611ba`; tree green at **486 files /
-  5033 tests**, production build, `git diff --check`, focused
-  confusion/orchestrator/ratchet/census coverage **34/34**, and Battle Scene
-  OFF oracle info. The original six carriers remain exact:
-  **4/6/8/13/17/26 = 1517/1563/2089/2224/1787/1556** calls.
-- **Diagnosis / source fix:** seed 22 halted in battle 2 at facility call
-  **430**, player HP **144**, confusion counter **2**: the canceler threw
-  because generated battlers lacked the staged duplicate `confusionDamage`
-  object despite already carrying every live `gBattleMons` operand. The
-  reducer now falls back to those live level/Attack/Defense/stage/burn/Guts
-  fields, matching `battle_util.c:2157-2177`'s sole `Random() & 1`, self
-  target, `CalculateBaseDamage(attacker, attacker, MOVE_POUND, 0, 40, 0,
-  attacker, attacker)`, self-damage marker, and unable hitmarker.
-- **Script / RNG acceptance:** the newly exposed honest stop was
-  `BattleScript_DoSelfConfusionDmg`'s first opcode, `various BS_ATTACKER,
-  VARIOUS_CANCEL_MULTI_TURN_MOVES`; case 0 now delegates to the existing
-  exact cancellation helper per `battle_script_commands.c:6327-6329` and
-  `battle_util.c:877-888`, then completes the literal
-  `battle_scripts_1.s:3796-3815` script. Full-turn tests pin survival, self-KO
-  into player replacement, and no-self-hit; self-hit draws are exactly
-  canceler position 0 then `adjustnormaldamage2` position 1, with no ordinary
-  accuracy/crit/hit-chain rolls, and the end-turn cursor remains continuous.
-- **Sweep / Next:** seeds **4-30** now pass battles 0/1/2 at **23/21/20**;
-  **17/27** complete seven wins. New exact carriers are
-  **5/7/11/14/15/16/19/22/24/29/30 =
-  1688/1827/1970/2325/2036/1660/1842/1377/1690/1543/1558** calls and are
-  pinned alongside the originals. Dominant blocker is now forced-switch
-  end-turn resumption (**4** seeds), then move-end barriers (**3**), then one
-  each wake-up `Cmd_bicword`, end-turn budget, and attack-canceler stop.
-- **Supervisor fold (same round, side merge):** the trainer-identity seam
-  landed (`cb57045d` + `1c78886d`, `factoryTrainerPresentation.ts`) —
-  pre-battle trainer name/class/speech presentation now derives from the
-  round's generated trainer record, with the canonical trainer proven
-  byte-identical first and 12 committed traces re-verified at their
-  recorded counts (incl. the permanently-parked 255/256 and 224/228).
-  Union green **487 files / 5037 tests**, census no-op.
-- **Notes:** retired named barrier `Cmd_various:
-  VARIOUS_CANCEL_MULTI_TURN_MOVES`; no unsupported-branch/import ratchet
-  moved because the generic `Cmd_various` barrier remains for other cases.
-  Executable and ability/item censuses regenerate byte-identically. No issue,
-  probe, presentation, animation, canonical recording, or tick branch
-  changed. PAPERCUT: none.
 
