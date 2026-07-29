@@ -218,4 +218,6 @@ function verify(path: string, runNumber: number): void {
   }
 }
 
-for (const path of paths) verify(path, 1);
+for (let runNumber = 1; runNumber <= 2; runNumber += 1) {
+  for (const path of paths) verify(path, runNumber);
+}

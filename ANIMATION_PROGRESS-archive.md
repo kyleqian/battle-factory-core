@@ -4,6 +4,36 @@ Older dated sections moved out of `ANIMATION_PROGRESS.md` to keep that
 file lean (`AGENTS.md`'s ~3-most-recent convention). Git history has the
 full record regardless; this file is a read-only reference.
 
+## MOVE_HYDRO_PUMP promoted exact; WATER_ORB repair complete (2026-07-29)
+
+**Verdict:** `MOVE_HYDRO_PUMP` is exact. Complete legal three-mon Scene-ON
+parties pass the full 141-frame move-owned body through first inactive cleanup
+twice fresh in both set-303 MASQUERAIN orientations: player-back **213–353
+(141/141)**, evidence/raw
+`9c8210033328ee98ceae81e54e2d4ec36ecbc4a763deb925171f23f6ef117af7` /
+`360d0d7292aa8fa6125f3de46d5170d2d1a3ca62181ada3cdf11ff1cff779706`;
+opponent-front **232–372 (141/141)**,
+`3330496d0d3dd1feec78443a274380e43b593250459b36ed0b6976ae2e105880` /
+`ff315fb58f55bcaa8c5e728faa33635d97e41d624747d867d4f1c9487fc06cee`.
+
+**Repair/evidence:** the source-relative reducer and typed seam cover all
+**44** sine WATER_ORBs, **12** WATER_IMPACT splats, tasks, tags, registers,
+audio, waits, and cleanup. The repair ports the clamped audio display latch
+separately from sound-task lifetime, prior-frame battler offsets and the
+opponent enemy-shadow latch, plus `sprite.c`'s stable priority/Y ordering
+across reused OAM slots; splat relative priority 4 resolves in front of the
+beam's relative priority 3. `hydroPumpPortable.ts` proves every dense
+source/component, seam, software/hardware OAM/matrix, palette/tag/register/
+audio/unchanged-state/raw-RGB/production-framebuffer frame twice fresh.
+
+**Sibling / next:** `MOVE_WHIRLPOOL` remains unsupported/audit-only. Its
+lowest carrier is set **170** `FRONTIER_MON_WAILMER_1`; its distinct **18**
+affine vortex orbs, target blend/shake/audio, trap outcome, later repetition/
+status-animation variants, and cleanup need independent complete dense
+both-orientation acceptance. Coverage is **95 exact / 0 partial / 0 staged /
+181 unsupported**. No animation boundary, unsupported barrier, canonical
+recording allowlist, or gameplay ownership changed.
+
 ## MOVE_SPORE promoted exact; ANIM_TAG_SPORE track bounded (2026-07-29)
 
 **Verdict:** `MOVE_SPORE` is exact. The lowest suitable legal Level-50

@@ -1,5 +1,29 @@
 # Animation coverage
 
+## MOVE_ROLLING_KICK source evidence complete; compositor remains (2026-07-29)
+
+**Verdict:** `MOVE_ROLLING_KICK` remains unsupported, with its source side
+ready for the next exact repair. Source and generated inventory prove
+challenge-1 set **233 `FRONTIER_MON_HITMONLEE_1`** is the sole/lowest legal
+Level-50 carrier. Complete legal Scene-ON parties pass the full 55-frame
+source body through first inactive cleanup twice fresh in both orientations:
+player-back **81–135**, evidence/raw
+`3f35463979c0971b6432ed8695caa1130e21890d07ea4edb80b6685271932f92` /
+`76c1741106018ee425f40505c56af234d7d033562dc8bd3c84386e465d9d7ef3`;
+opponent-front **85–139**,
+`4fb8c542ab55e346e4f22129cfa10f028d1a43ff8be0ee6e1e1d8b4160849690` /
+`237e0cd3062b05c1ffa91a1ecc2e03a60ba1f195012ad079f0980933ea12d5a1`.
+
+**Evidence / next:** fixture-pinned probes prove `gSlidingKickSpriteTemplate`,
+elliptical attacker motion, both slide callbacks, hitsplat, target ShakeMon,
+alpha registers, side-relative audio, immutable battle state, and raw RGB.
+Exact still requires the source-relative reducer, typed seam, extracted
+Hitmonlee art, production compositor/display latches, and **55/55** production
+framebuffer equality twice per orientation. `MOVE_LOW_KICK` remains
+unsupported with target-relative geometry and its distinct rotation body.
+Coverage remains **97 exact / 0 partial / 0 staged / 179 unsupported**; no
+gameplay, boundary, barrier, or canonical allowlist changed.
+
 ## MOVE_MEGA_PUNCH promoted exact; MegaPunchKick track established (2026-07-29)
 
 **Verdict:** `MOVE_MEGA_PUNCH` is exact. Generated inventory and source audit
@@ -58,33 +82,3 @@ carrier is set **145 SPINDA**; eleven shorter rings, SwayMon, two-leg tint, and
 acceptance. Coverage is **96 exact / 0 partial / 0 staged / 180 unsupported**.
 No boundary list, barrier, canonical allowlist, sleep, damage, RNG, controller,
 turn, or facility state changed.
-
-## MOVE_HYDRO_PUMP promoted exact; WATER_ORB repair complete (2026-07-29)
-
-**Verdict:** `MOVE_HYDRO_PUMP` is exact. Complete legal three-mon Scene-ON
-parties pass the full 141-frame move-owned body through first inactive cleanup
-twice fresh in both set-303 MASQUERAIN orientations: player-back **213–353
-(141/141)**, evidence/raw
-`9c8210033328ee98ceae81e54e2d4ec36ecbc4a763deb925171f23f6ef117af7` /
-`360d0d7292aa8fa6125f3de46d5170d2d1a3ca62181ada3cdf11ff1cff779706`;
-opponent-front **232–372 (141/141)**,
-`3330496d0d3dd1feec78443a274380e43b593250459b36ed0b6976ae2e105880` /
-`ff315fb58f55bcaa8c5e728faa33635d97e41d624747d867d4f1c9487fc06cee`.
-
-**Repair/evidence:** the source-relative reducer and typed seam cover all
-**44** sine WATER_ORBs, **12** WATER_IMPACT splats, tasks, tags, registers,
-audio, waits, and cleanup. The repair ports the clamped audio display latch
-separately from sound-task lifetime, prior-frame battler offsets and the
-opponent enemy-shadow latch, plus `sprite.c`'s stable priority/Y ordering
-across reused OAM slots; splat relative priority 4 resolves in front of the
-beam's relative priority 3. `hydroPumpPortable.ts` proves every dense
-source/component, seam, software/hardware OAM/matrix, palette/tag/register/
-audio/unchanged-state/raw-RGB/production-framebuffer frame twice fresh.
-
-**Sibling / next:** `MOVE_WHIRLPOOL` remains unsupported/audit-only. Its
-lowest carrier is set **170** `FRONTIER_MON_WAILMER_1`; its distinct **18**
-affine vortex orbs, target blend/shake/audio, trap outcome, later repetition/
-status-animation variants, and cleanup need independent complete dense
-both-orientation acceptance. Coverage is **95 exact / 0 partial / 0 staged /
-181 unsupported**. No animation boundary, unsupported barrier, canonical
-recording allowlist, or gameplay ownership changed.
