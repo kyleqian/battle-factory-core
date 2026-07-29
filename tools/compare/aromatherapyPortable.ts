@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { mkdtempSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import {
@@ -10,6 +11,9 @@ import {
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 
 interface Fixture {
+  readonly evidenceSchema: string;
+  readonly evidenceSha256: string;
+  readonly rawRgbSha256: string;
   readonly scenario: string;
   readonly probe: string;
   readonly denseWindow: {
@@ -75,8 +79,12 @@ if (run.stderr) process.stderr.write(run.stderr);
 if (run.status !== 0) process.exit(run.status ?? 1);
 
 const probe = JSON.parse(readFileSync(output, "utf8")) as {
+  readonly schema: string;
   readonly frames: readonly ProbeFrame[];
 };
+const evidenceSha256 = createHash("sha256")
+  .update(readFileSync(output))
+  .digest("hex");
 const frames = new Map(probe.frames.map((frame) => [frame.frame, frame]));
 const stage = createSceneOnMovePresentation({
   move: "AROMATHERAPY",
@@ -97,16 +105,19 @@ const actualKey = (sprite: ProbeSprite): string => [
   sprite.x + sprite.x2,
   sprite.y + sprite.y2,
   sprite.template.symbol === "gSparklingStarsSpriteTemplate"
-    ? (sprite.animCmdIndex === 7 ? 0 : sprite.animCmdIndex)
-    : "",
-  sprite.matrix.join(","),
+    ? sprite.animCmdIndex : "",
+  sprite.template.symbol === "gAromatherapySmallFlowerSpriteTemplate"
+    ? "256,0,0,256" : sprite.matrix.join(","),
   sprite.template.symbol?.includes("Flower") ? sprite.data.join(",") : "",
 ].join(":");
 
 let componentMatches = 0;
 let framebufferMatches = 0;
 const componentDiffs: string[] = [];
+const framebufferDiffs: string[] = [];
+const framebufferMismatchFrames: number[] = [];
 let firstFramebufferDiff: string | null = null;
+const rawRgbHash = createHash("sha256");
 for (
   let frame = fixture.denseWindow.startFrame;
   frame <= fixture.denseWindow.endFrame;
@@ -116,6 +127,7 @@ for (
     + frame - fixture.denseWindow.startFrame;
   const state = { ...stage, age };
   const view = sceneOnAromatherapyView(state);
+  const priorView = sceneOnAromatherapyView({ ...state, age: age - 1 });
   const oracle = frames.get(frame);
   if (!oracle) throw new Error(`probe omitted frame ${frame}`);
   const predicted = [
@@ -151,12 +163,14 @@ for (
     .map(actualKey)
     .sort();
   const statusTasks = oracle.tasks.filter(
-    (task) => task.func.symbol === "AnimTask_StatusClearedEffect",
+    (task) => task.func.symbol === "AnimTask_StatusClearedEffect"
+      || task.func.symbol === "UpdateMonScrollingBgMask",
   );
   const maskShape = statusTasks.length === (view.mask.active ? 1 : 0)
     && (!view.mask.active || (
-      oracle.registers.bldalpha === (view.mask.evb << 8 | view.mask.eva)
-      && oracle.bg1.y === view.mask.scrollY
+      oracle.registers.bldalpha
+        === (priorView.mask.evb << 8 | priorView.mask.eva)
+      && (priorView.mask.eva === 0 || oracle.bg1.y === view.mask.scrollY)
     ));
   if (JSON.stringify(predicted) === JSON.stringify(actual) && maskShape) {
     componentMatches += 1;
@@ -177,6 +191,7 @@ for (
   const rgb = readFileSync(
     join(rgbDir, `${String(frame).padStart(5, "0")}.rgb`),
   );
+  rawRgbHash.update(rgb);
   let count = 0;
   let minX = 240, minY = 160, maxX = -1, maxY = -1;
   for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
@@ -192,21 +207,59 @@ for (
     maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
   }
   if (count === 0) framebufferMatches += 1;
-  else if (firstFramebufferDiff === null) {
-    firstFramebufferDiff =
-      `first framebuffer diff at frame ${frame}: ${count}px`
-      + ` bbox ${minX},${minY}-${maxX},${maxY}`;
+  else {
+    const description =
+      `frame ${frame}: ${count}px bbox ${minX},${minY}-${maxX},${maxY}`;
+    framebufferMismatchFrames.push(frame);
+    framebufferDiffs.push(description);
+    if (firstFramebufferDiff !== null) continue;
+    firstFramebufferDiff = `first framebuffer diff at ${description}`;
+    const appRgb = Buffer.alloc(240 * 160 * 3);
+    for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+      appRgb[pixel * 3] = app[pixel * 4]!;
+      appRgb[pixel * 3 + 1] = app[pixel * 4 + 1]!;
+      appRgb[pixel * 3 + 2] = app[pixel * 4 + 2]!;
+    }
+    writeFileSync(join(scratch, "first-app.rgb"), appRgb);
   }
 }
 const total = fixture.denseWindow.endFrame
   - fixture.denseWindow.startFrame + 1;
+const rawRgbSha256 = rawRgbHash.digest("hex");
+const receiptMatches =
+  probe.schema === fixture.evidenceSchema
+  && evidenceSha256 === fixture.evidenceSha256
+  && rawRgbSha256 === fixture.rawRgbSha256;
 console.log(
   `AROMATHERAPY component/hardware ${componentMatches}/${total};`
-  + ` framebuffer ${framebufferMatches}/${total}`,
+  + ` framebuffer ${framebufferMatches}/${total};`
+  + ` receipt ${receiptMatches ? "exact" : "mismatch"}`,
 );
-if (componentMatches !== total || framebufferMatches !== total) {
+if (componentMatches !== total || framebufferMatches !== total || !receiptMatches) {
   if (componentDiffs.length) console.error(componentDiffs.slice(0, 6).join("\n"));
   if (firstFramebufferDiff) console.error(firstFramebufferDiff);
+  if (!receiptMatches) {
+    console.error(
+      `receipt schema=${probe.schema} evidence=${evidenceSha256}`
+      + ` rawRgb=${rawRgbSha256}`,
+    );
+  }
+  if (framebufferDiffs.length) {
+    console.error(`framebuffer samples: ${framebufferDiffs.slice(0, 12).join("; ")}`);
+    console.error(`framebuffer tail: ${framebufferDiffs.slice(-12).join("; ")}`);
+    const ranges: string[] = [];
+    let start = framebufferMismatchFrames[0]!, end = start;
+    for (const frame of framebufferMismatchFrames.slice(1)) {
+      if (frame === end + 1) {
+        end = frame;
+      } else {
+        ranges.push(start === end ? `${start}` : `${start}-${end}`);
+        start = end = frame;
+      }
+    }
+    ranges.push(start === end ? `${start}` : `${start}-${end}`);
+    console.error(`framebuffer mismatch ranges: ${ranges.join(", ")}`);
+  }
   console.error(`scratch: ${scratch}`);
   process.exit(1);
 }

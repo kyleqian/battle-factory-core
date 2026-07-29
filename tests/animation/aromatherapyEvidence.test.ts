@@ -30,6 +30,7 @@ describe("MOVE_AROMATHERAPY FLOWER checkpoint", () => {
       const receipt = JSON.parse(readFileSync(path, "utf8"));
       const scenario = JSON.parse(readFileSync(receipt.scenario, "utf8"));
       expect(receipt.schema).toBe("scene-on-portable-evidence/v1");
+      expect(receipt.evidenceSchema).toBe("aromatherapy-dense-evidence/v2");
       expect(receipt.appStage).toEqual({
         oracleFrame: receipt.denseWindow.startFrame,
         presentationAge: 0,

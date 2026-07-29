@@ -152,13 +152,20 @@ function initialBackgroundBlendY(age: number): number {
 function reverseBackgroundBlendY(age: number, side: "player" | "opponent"): number {
   const start = side === "player" ? 195 : 191;
   if (age < start) return initialBackgroundBlendY(age);
-  return Math.max(0, 7 - 2 * (Math.floor((age - start) / 2) + 1));
+  // The first callback installs the 7->0 task. StatusClearedEffect's setup
+  // reloads the selected banks while the first decrement is active, giving
+  // the source-observed four-tick 5 hold before the normal two-tick cadence.
+  if (age <= start) return 7;
+  if (age <= start + 4) return 5;
+  if (age <= start + 6) return 3;
+  if (age <= start + 8) return 1;
+  return 0;
 }
 
 function finalBlendY(age: number, side: "player" | "opponent"): number {
   const start = side === "player" ? 364 : 360;
   if (age < start) return 0;
-  return Math.max(0, 10 - 2 * Math.floor((age - start + 1) / 5));
+  return Math.max(0, 10 - 2 * Math.floor((age - start) / 5));
 }
 
 function statusMaskAtAge(

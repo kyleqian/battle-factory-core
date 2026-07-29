@@ -34,8 +34,9 @@
     "playerGender": "male",
     "opponentGender": "female"
   },
-  "evidenceSha256": "62348e0f820b93d15d6ed167466de0df2f426ebf5d6d21ec21b9a2e9837fb86e",
-  "rawRgbSha256": "43d73662d4dc639079c6b6d4a62f0ea8377d15b9068f64220727acbf02cd71ed",
+  "evidenceSchema": "aromatherapy-dense-evidence/v2",
+  "evidenceSha256": "323ccf6d2752af1f726823e7925fcb4b91db586f56493c878e1a532d1974c686",
+  "rawRgbSha256": "43d736b2d9f70f771a24566e3958a845381b7f3b51a69411c64e3a088b8e359b",
   "lifecycleCounts": {
     "gAromatherapySmallFlowerSpriteTemplate": 7,
     "gAromatherapyBigFlowerSpriteTemplate": 2,

@@ -23642,6 +23642,12 @@ export function renderSceneOnMovePresentation(
 
   if (state.config.move === "AROMATHERAPY") {
     const view = sceneOnAromatherapyView(state);
+    const paletteView = sceneOnAromatherapyView({
+      ...state,
+      age: state.age - 1,
+    });
+    // OAM is assembled after sprite callbacks and becomes visible next frame.
+    const displayed = paletteView;
     const playerToOpponent =
       view.attacker.species === "VILEPLUME"
       && view.attacker.geometry.side === "player"
@@ -23657,8 +23663,12 @@ export function renderSceneOnMovePresentation(
         `unsupported staged AROMATHERAPY pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const green = { r: 222, g: 255, b: 148 };
-    const bgY = Math.max(view.backgroundBlendY, view.finalAnim1BlendY);
+    // Source RGB(13, 31, 12), expanded with mGBA's 5-bit channel curve.
+    const green = { r: 107, g: 255, b: 99 };
+    const bgY = Math.max(
+      paletteView.backgroundBlendY,
+      view.finalAnim1BlendY,
+    );
     const backgroundPalette = blendPaletteBanksToward(
       battleBg.palette,
       green,
@@ -23688,12 +23698,23 @@ export function renderSceneOnMovePresentation(
     const onixIdle = playerToOpponent
       ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
       : { x2: 0, y2: 0 };
-    drawSpriteSheet(
+    const drawOnix = (): void => drawSpriteSheet(
       fb,
       onixSprite.tileset,
       onixSprite.palette,
       view.target.geometry.spriteCorner.x + onixIdle.x2,
       view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    const drawVileplume = (): void => drawSpriteSheet(
+      fb,
+      vileplumeSprite.tileset,
+      blendPaletteToward(
+        vileplumeSprite.palette,
+        green,
+        paletteView.finalAttackerBlendY,
+      ),
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
     );
 
     const drawFlower = (
@@ -23724,34 +23745,67 @@ export function renderSceneOnMovePresentation(
         );
       }
     };
-    for (const flower of view.flowers) {
+    const flowersInDrawOrder = displayed.flowers.slice().sort((left, right) => {
+      const leftTop = left.y + left.y2
+        - (left.kind === "smallFlower" ? 4 : 8);
+      const rightTop = right.y + right.y2
+        - (right.kind === "smallFlower" ? 4 : 8);
+      // SortSprites gives the greater OAM Y the lower OAM index. Draw the
+      // reverse painter order so that winner lands last. Equal Y preserves
+      // the preceding frame's insertion-sort order.
+      if (leftTop !== rightTop) return leftTop - rightTop;
+      for (let lookback = 1; lookback <= 8; lookback += 1) {
+        const earlier = sceneOnAromatherapyView({
+          ...state,
+          age: state.age - 1 - lookback,
+        }).flowers;
+        const priorLeft = earlier.find((flower) => flower.slot === left.slot);
+        const priorRight = earlier.find((flower) => flower.slot === right.slot);
+        if (!priorLeft || !priorRight) continue;
+        const priorLeftTop = priorLeft.y + priorLeft.y2
+          - (priorLeft.kind === "smallFlower" ? 4 : 8);
+        const priorRightTop = priorRight.y + priorRight.y2
+          - (priorRight.kind === "smallFlower" ? 4 : 8);
+        if (priorLeftTop !== priorRightTop) {
+          return priorLeftTop - priorRightTop;
+        }
+      }
+      return left.slot - right.slot;
+    });
+    // Mode 1 raises the flower to priority 3 (behind both priority-2
+    // battlers). Mode 0 stays in front; lower sprite slots win its OAM ties.
+    for (const flower of flowersInDrawOrder) {
       if (flower.behindAttacker) drawFlower(flower);
     }
-    drawSpriteSheet(
-      fb,
-      vileplumeSprite.tileset,
-      blendPaletteToward(
-        vileplumeSprite.palette,
-        green,
-        view.finalAttackerBlendY,
-      ),
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
-    );
+    const drawFrontFlowers = (): void => {
+      for (const flower of flowersInDrawOrder) {
+        if (!flower.behindAttacker) drawFlower(flower);
+      }
+    };
+    // In this legal reverse orientation both battlers precede every created
+    // flower in the OAM buffer, so their opaque pixels win equal-priority
+    // ties. The player orientation's established subpriority order is the
+    // inverse painter order used below.
+    if (opponentToPlayer && displayed.flowers.length > 0) {
+      drawVileplume();
+      drawFrontFlowers();
+      drawOnix();
+    } else {
+      drawOnix();
+      drawVileplume();
+    }
     if (view.mask.active) {
       drawAromatherapyCureMask(
         fb,
         vileplumeSprite,
         view.attacker.geometry.spriteCorner,
-        view.mask.scrollY,
-        view.mask.eva,
-        view.mask.evb,
+        paletteView.mask.scrollY,
+        paletteView.mask.eva,
+        paletteView.mask.evb,
       );
     }
-    for (const flower of view.flowers) {
-      if (!flower.behindAttacker) drawFlower(flower);
-    }
-    for (const star of view.stars.slice().reverse()) {
+    if (playerToOpponent) drawFrontFlowers();
+    for (const star of displayed.stars.slice().reverse()) {
       drawSpriteSheet(
         fb,
         {
@@ -23767,21 +23821,17 @@ export function renderSceneOnMovePresentation(
         star.y - 16,
       );
     }
-    if (view.ring) {
+    if (displayed.ring) {
       drawSpriteSheetAffineRotate(
         fb,
         aromatherapyArt.thinRing.tileset,
-        blendPaletteToward(
-          aromatherapyArt.thinRing.palette,
-          green,
-          view.finalAnim1BlendY,
-        ),
-        view.ring.x,
-        view.ring.y,
-        view.ring.matrixScale,
+        aromatherapyArt.thinRing.palette,
+        displayed.ring.x,
+        displayed.ring.y,
+        displayed.ring.matrixScale,
         0,
         0,
-        view.ring.matrixScale,
+        displayed.ring.matrixScale,
         undefined,
         true,
       );
@@ -23816,7 +23866,7 @@ export function renderSceneOnMovePresentation(
       fb,
       battleWindow.tileset,
       battleWindow.tilemap,
-      backgroundPalette,
+      battleWindow.palette,
     );
     drawMessageTextLines(
       fb,
