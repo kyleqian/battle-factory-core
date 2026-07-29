@@ -1,4 +1,39 @@
 ---
+## 684 — [BOUNDED MAIN WORKER 2026-07-29 ~09:20] entry-677 AI reveal-site remainder classified and wired
+
+- **State:** implementation commits `0488e6e4`, `1ddfc68e`, `beb383cf`;
+  tree green at **496 files / 5082 tests**, production build,
+  `git diff --check`, Battle Scene OFF oracle info, and both censuses exact at
+  pre-step SHA-256 **8b18f754…5261 / 52687085…257c**.
+  All **17** entry-678 carriers remain exact; seeds **18/20/23** remain seven
+  wins at **2478/2140/1436** calls. Final full-suite rerun is pending.
+- **Did:** source owners now publish BattleHistory ability/item observations
+  only on their successful activation arm; misses, failed procs, no-op weather/
+  form/status branches, secondary/non-certain prevention, and absent abilities
+  remain unrevealed. The live driver consumes the existing handoff unchanged;
+  no RNG, outcome, controller, opcode registration, or switching path changed.
+  Final full-suite diagnosis caught and fixed one stale-`lastUsedAbility`
+  typecalc false reveal; fresh per-opcode activation flags restore the
+  whole-battle fixture's original 12 AI turns/cursor and failed-Static silence.
+
+- **Classification:** 27 sites wired class-A with quiet-arm pins; 11
+  class-B sites each name their exact barrier/opcode dependency. Full table:
+  `docs/ai-reveal-sites.md`.
+
+- **Supervisor folds (post-step):** rung-14 presentation-seam map merged
+  (`3fc5ee40`, docs-only — swap is the cheapest genuine gap; seventh-win
+  terminal already generic). ROM ground-truth receipt §7A banked and merged
+  (`055fc60e`): absorber switch draw attributed to
+  `FindMonThatAbsorbsOpponentsMove+0x249`, odd 52937 → switch index 1
+  delta 1; even 50708 control → ordinary ledger +1; both byte-identical
+  across fresh processes. Supervisor reran full suite (**496/5082**),
+  build, and re-drove seeds 18/20/21/23 = **2478/2140/1911/1436** unchanged.
+- **Next / notes:** supervisor resumes R13 live switching / King's Rock /
+  presentation queue. No unsupported/import ratchet, generated census byte,
+  hook universe, issue, presentation, animation, canonical recording, or tick
+  branch moved. PAPERCUT: none.
+
+---
 ## 683 — [BOUNDED MAIN WORKER 2026-07-29 ~09:00] seed 21 end-turn budget halt retired; sweep blocker-free
 
 - **State:** implementation committed `39b4dceb`; tree green at **495 files /
