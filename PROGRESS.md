@@ -13,6 +13,49 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+
+## 661 — [SUPERVISOR WIND-DOWN 2026-07-28 ~21:20] Ability/item parity surge: census abilities 55/70 + hold effects 41/42; speed/turn-order scout pack landed; animation-main folded twice (Tickle exact)
+
+- **State:** master `2f5167a8`, union green at **452 files / 4855 tests**,
+  production build, `git diff --check` clean, census byte-idempotent
+  (**abilities 55/70 engine-referenced, weighted 905/1103; hold effects
+  41/42, weighted 775/850; QUICK_CLAW is the only unreferenced hold-effect
+  row**). DEFERRED.md empty; no orphan worktrees or branches; both oracle
+  profiles fresh (checked at orient).
+- **Did:** (1) folded `animation-main` at orient (`1aefbdf8`, Tickle/Leaf
+  Blade evidence + the Omanyte-vs-Omastar carrier-mismatch catch) and again
+  at wind-down (`2f5167a8`) — **MOVE_TICKLE promoted exact; L50 animation
+  coverage 78/276**; animation session ended ~21:06, lane fully folded.
+  (2) Main worker: CalculateBaseDamage ability block bit-exact
+  (`1f8d7727`, entry 659) — 12 rows flipped at the exact predicted delta.
+  (3) Main worker: hold-item block bit-exact (`a4673f25`, entry 660) — 19
+  rows flipped at the exact predicted delta; its 2-line
+  `ENGINE_INFRA_SPELLINGS` addition is benign infra-name registration, not
+  a counting-semantics change. (4) Side scout landed
+  `docs/ability-item-speed-scout.md` (`f8aabadd`): census string-literal
+  false-negative audit (10 members classified; generator fix described,
+  deliberately NOT applied) + GetWhoStrikesFirst ground truth, consumer
+  map, L50 fixtures with computed speeds, and 3 staged recipes.
+- **Next (ordered):** (i) **Falsify the scout's RNG-gap hypothesis first**:
+  `gRandomTurnNumber` (drawn once per turn in `BattleTurnPassed`,
+  battle_main.c:4013) has zero engine footprint — but multi-turn staged
+  windows pass RNG-exact, so `battleTurn.ts`'s `turnEndRngGroups` likely
+  absorbs the draw unnamed. Run the scout's 2-turn no-Quick-Claw probe
+  before trusting any Quick Claw fixture. (ii) Wire `turnOrder.ts`'s dead
+  inputs (call site `factoryBattleScriptFullTurnDecision.ts:810` never
+  threads ability/holdEffect/weather; weather already sits in
+  `rulesContext.weather`) — closes Chlorophyll/Swift Swim semantically.
+  (iii) Quick Claw row after (i). (iv) ON_DAMAGE contact family (Static 27
+  et al.). (v) Census generator string-literal counting fix per scout §A3.
+- **Notes:** ability rows still unreferenced are the speed pair (closes
+  with ii), the ON_DAMAGE family, Run Away/Pickup (battle no-ops to prove),
+  and trapping/AI-scoped rows. "Engine-referenced" still ≠ semantically
+  complete — dense oracle evidence for the two damage blocks remains the
+  standing follow-up; the scout pack's recipes are the template. No
+  deferred questions this session.
+
+---
+
 ## 660 — [BOUNDED MAIN WORKER 2026-07-28 ~21:05] damageCalc hold-item block ported bit-exact; census hold effects 22/42 -> 41/42
 
 - **State:** union green at **452 files / 4855 tests**, production build,
@@ -98,44 +141,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   TORRENT, SWARM) — none blocked. No hold items, badge boosts, field
   sports, AI, or new `unsupported-branch` barrier touched (ratchet
   unchanged). PAPERCUT: none this session.
-
----
-## 658 — [INTERACTIVE SESSION 2026-07-28 ~20:25] Ability/item parity setup landed: census generator + worklist live; scope decisions recorded (AI in scope, audio = S11)
-
-- **State:** master `275c415c`+docs, union green at **449 files / 4819
-  tests**, production build, `git diff --check`. New standing artifacts:
-  `npm run census:ability-item` →
-  `docs/ability-item-parity-census.md` (ranked worklists, 15 validations,
-  byte-idempotent); `npm run extract:ability-item-hooks` →
-  `src/data/gen/ability-item-hooks.json` (literal AbilityBattleEffects/
-  ItemBattleEffects segmentation + inline sites, exact-set pinned).
-  **Headline: abilities 43/70 engine-referenced (weighted 729/1103 L50
-  carriers), hold effects 22/42 (weighted 713/850).**
-- **Did:** built the move-census pattern for the last two enumerable
-  families. Ground truth: 20 ability caseID segments (+3 alias
-  pseudo-modes), 5 item segments, 187+54 inline sites across 6 rules + 2
-  AI files. Census: source hooks × L50 carriers (deterministic
-  single-ability split for fixture selection) × live engine surface
-  (identifier-only scan — the engine's universe-spelling ABILITY_SYMBOLS
-  name table made naive counting vacuous at 70/70; string literals
-  excluded, jumpifability live-set exports unioned, alias spellings
-  dealiased, unknown spellings hard-error). Tier-1: 6 new tests incl. two
-  regeneration ratchets — **the census doc is pinned to the tree; regen it
-  in the same commit as any engine change that moves it.** ROADMAP: S11
-  audio stage created (separate milestone, user-directed); 2026-07-28
-  scope block added under S10.
-- **Next:** supervisor sessions consume the worklists exactly like move
-  census rows: top unreferenced abilities Chlorophyll 38 / Thick Fat 36 /
-  Guts 36 / Swift Swim 34 (damage/speed-calc modifier class), contact
-  ON_DAMAGE family (Static 27 …), pinch boosts; top unreferenced hold
-  effects Quick Claw 75, type-power family (~40 sets), Choice Band is
-  referenced-partial. Scout-ahead prep packs + serial implementation rows
-  at exact predicted deltas is the proven cadence. Switch/item/trainer AI
-  is IN scope for a later milestone (user decision); doubles/Open/Noland
-  stay out; audio is S11.
-- **Notes:** "engine-referenced" = named surface, not semantic
-  completeness — rows close via fixtures + oracle evidence like move rows
-  (see the doc's Caveats). Animation program live to ~21:06 tonight;
-  its fold at next orient is expected.
 
 ---

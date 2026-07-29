@@ -1,5 +1,45 @@
 ---
 
+## 658 — [INTERACTIVE SESSION 2026-07-28 ~20:25] Ability/item parity setup landed: census generator + worklist live; scope decisions recorded (AI in scope, audio = S11)
+
+- **State:** master `275c415c`+docs, union green at **449 files / 4819
+  tests**, production build, `git diff --check`. New standing artifacts:
+  `npm run census:ability-item` →
+  `docs/ability-item-parity-census.md` (ranked worklists, 15 validations,
+  byte-idempotent); `npm run extract:ability-item-hooks` →
+  `src/data/gen/ability-item-hooks.json` (literal AbilityBattleEffects/
+  ItemBattleEffects segmentation + inline sites, exact-set pinned).
+  **Headline: abilities 43/70 engine-referenced (weighted 729/1103 L50
+  carriers), hold effects 22/42 (weighted 713/850).**
+- **Did:** built the move-census pattern for the last two enumerable
+  families. Ground truth: 20 ability caseID segments (+3 alias
+  pseudo-modes), 5 item segments, 187+54 inline sites across 6 rules + 2
+  AI files. Census: source hooks × L50 carriers (deterministic
+  single-ability split for fixture selection) × live engine surface
+  (identifier-only scan — the engine's universe-spelling ABILITY_SYMBOLS
+  name table made naive counting vacuous at 70/70; string literals
+  excluded, jumpifability live-set exports unioned, alias spellings
+  dealiased, unknown spellings hard-error). Tier-1: 6 new tests incl. two
+  regeneration ratchets — **the census doc is pinned to the tree; regen it
+  in the same commit as any engine change that moves it.** ROADMAP: S11
+  audio stage created (separate milestone, user-directed); 2026-07-28
+  scope block added under S10.
+- **Next:** supervisor sessions consume the worklists exactly like move
+  census rows: top unreferenced abilities Chlorophyll 38 / Thick Fat 36 /
+  Guts 36 / Swift Swim 34 (damage/speed-calc modifier class), contact
+  ON_DAMAGE family (Static 27 …), pinch boosts; top unreferenced hold
+  effects Quick Claw 75, type-power family (~40 sets), Choice Band is
+  referenced-partial. Scout-ahead prep packs + serial implementation rows
+  at exact predicted deltas is the proven cadence. Switch/item/trainer AI
+  is IN scope for a later milestone (user decision); doubles/Open/Noland
+  stay out; audio is S11.
+- **Notes:** "engine-referenced" = named surface, not semantic
+  completeness — rows close via fixtures + oracle evidence like move rows
+  (see the doc's Caveats). Animation program live to ~21:06 tonight;
+  its fold at next orient is expected.
+
+---
+
 ## 657 — [INTERACTIVE SESSION 2026-07-28 ~19:55] Pre-next-run cleanup: animation fold, 07-26 oracle-tooling branch landed, papercuts pruned; USER DIRECTIVE: held-item + ability parity is the next objective
 
 - **State:** master `b791ea88`, union green at **448 files / 4813 tests**,
