@@ -1,5 +1,29 @@
 ---
 
+## 650 — [BOUNDED MAIN WORKER 2026-07-28 ~18:10] Production recording-import allowlist reaches zero
+
+- **State:** implementation committed `9ab6985d`; tree green at **437 files /
+  4763 tests**, production build, OFF oracle info, and `git diff --check`.
+  Census remains byte-idempotent at **214/214 effects, 355/355 moves, 276/276
+  distinct, 2957/2957 weighted** with all **72** validations passing.
+- **Did:** retired `factorySwapPresentation.ts`'s final canonical recording
+  import. The six rental records now derive from drafted anchor state,
+  generated Frontier/species corpora, Factory fixed IVs, and the existing
+  source-ported opponent personality generator. The production recording
+  allowlist shrank **1→0**; the dump remains test-only field parity evidence.
+  ISSUES #41 is complete and deleted.
+- **Next:** supervisor verify `9ab6985d` and this docs commit. ISSUES #39's
+  battle-presentation turn-keying remains separate and explicitly out of
+  scope.
+- **Notes:** all **19** committed OFF swap traces remain exact at their
+  recorded counts; primary windows: picker **101/101**, options **58/58**,
+  popup **44/44**, B-close **59/59**, enemy picker **130/130**, accept prompt
+  **66/66**, accept exit **43/43**, summary return **147/147**. No behavior,
+  barrier-count, handler-set, census, round, tick, roadmap, or animation
+  change.
+
+---
+
 ## 649 — [BOUNDED MAIN WORKER 2026-07-28 ~17:57] Battle 1 HP recording imports retired
 
 - **State:** implementation committed `78a3bfbc`; tree green at **437 files /

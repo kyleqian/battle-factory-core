@@ -30,7 +30,7 @@ import {
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
 import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
-import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
+import type { BattleScriptBattlerId, BattleScriptSemanticEventPayload } from "./battleScriptEvents.ts";
 import type { BattleScriptControllerIdlePort } from "./battleScriptSourceCommands.ts";
 import {
   resolveRulesBattlerForBattleScript,
@@ -44,6 +44,7 @@ import {
   type BattleScriptStatStages,
 } from "./battleScriptRulesContext.ts";
 import { BATTLE_SCRIPT_STATUS2_WRAPPED_MASK } from "./battleScriptSourceConstants.ts";
+import { computeCastformForm } from "./battleScriptTryCastformDataChangeOpcode.ts";
 import speciesTypesData from "../data/gen/species-types.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
 
@@ -84,10 +85,12 @@ const ABILITY_FORECAST = 59;
 const ABILITY_TRUANT = 54;
 const ABILITY_DROUGHT = 70;
 const ABILITY_AIR_LOCK = 77;
-const SWITCH_IN_ABILITY_EFFECTS = new Set([
-  ABILITY_DRIZZLE, ABILITY_CLOUD_NINE, ABILITY_INTIMIDATE, ABILITY_TRACE,
-  ABILITY_SAND_STREAM, ABILITY_FORECAST, ABILITY_DROUGHT, ABILITY_AIR_LOCK,
-]);
+const STATUS3_INTIMIDATE_POKES = 1 << 19;
+const STATUS3_TRACE = 1 << 20;
+const B_WEATHER_RAIN_TEMPORARY = 1 << 0;
+const B_WEATHER_RAIN_PERMANENT = 1 << 2;
+const B_WEATHER_SANDSTORM_PERMANENT = 1 << 4;
+const B_WEATHER_SUN_PERMANENT = 1 << 6;
 
 type SpeciesTypesRow = Readonly<{ name: string; types: readonly [string, string] }>;
 const SPECIES_TYPES_ROWS = speciesTypesData.species as unknown as readonly SpeciesTypesRow[];
@@ -168,6 +171,21 @@ function controllerBusyBlock(
     opcodeName: context.instruction.opcodeName,
   });
   return transitionBattleScriptCommand(context, Object.freeze({ kind: "block", reason }));
+}
+
+function callSwitchinScript(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  label: string,
+  rulesContext: BattleScriptRulesContext,
+  events: readonly BattleScriptSemanticEventPayload[] = Object.freeze([]),
+): BattleScriptCommandTransition<BattleScriptRulesContext> {
+  const script = resolveBattleScriptLabel(context.program, label);
+  if (!script) throw new Error(`committed Battle Script program has no ${label}`);
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "call-current", programCounter: script.programCounter }),
+    { rulesContext, events },
+  );
 }
 
 /**
@@ -689,10 +707,10 @@ function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRul
  * `Cmd_switchineffects` (`battle_script_commands.c:5219-5299`). Spikes runs
  * through the source's shared BattleScript_SpikesOn* scripts. The transient
  * SPIKES_DAMAGED bit makes the pushed-cursor re-entry a no-damage pass that
- * clears the guard before normal switch-in hooks. The Truant switch-in hack and
- * `AbilityBattleEffects(ABILITYEFFECT_ON_SWITCHIN)` are named barriers gated
- * on the switched-in battler's real `ability` value (a small, closed set of
- * trigger abilities, `battle_util.c:2485-2599`); `ItemBattleEffects
+ * clears the guard before normal switch-in hooks. The Truant switch-in hack
+ * and grouped `AbilityBattleEffects(ABILITYEFFECT_ON_SWITCHIN)` dispatch are
+ * source-ported here; callbacks return to this opcode before its item/tail
+ * seam. `ItemBattleEffects
  * (ITEMEFFECT_ON_SWITCH_IN)` needs no barrier at all -- its only two cases
  * are `HOLD_EFFECT_RESTORE_STATS` (unreachable: stat stages are always reset
  * to the neutral default by `switchindataupdate` just before this opcode
@@ -755,30 +773,129 @@ function createSwitchineffectsOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
         },
       );
     }
-    if (active.ability === ABILITY_TRUANT) {
-      return unsupportedBranch(
-        context,
-        "Cmd_switchineffects's Truant switch-in-hack counter set is not modeled",
-        5260,
-      );
+    let nextRules = rules;
+    if (active.ability === ABILITY_TRUANT && active.truantCounter !== 1) {
+      const battlers = rules.battlers.map((candidate, index) =>
+        index === battler ? Object.freeze({ ...candidate, truantCounter: 1 as const }) : candidate
+      ) as unknown as BattleScriptRulesBattlers;
+      nextRules = Object.freeze({ ...rules, battlers: Object.freeze(battlers) });
     }
-    if (SWITCH_IN_ABILITY_EFFECTS.has(active.ability)) {
-      return unsupportedBranch(
-        context,
-        `AbilityBattleEffects(ABILITYEFFECT_ON_SWITCHIN) for ability ${active.ability} is not modeled`,
-        2485,
-      );
+    const nextActive = nextRules.battlers[battler as BattleScriptBattlerId];
+    const abilityRules = Object.freeze({
+      ...nextRules,
+      scriptingBattler: battler as BattleScriptBattlerId,
+      lastUsedAbility: nextActive.ability,
+    });
+    if (nextActive.ability === ABILITY_DRIZZLE && !(nextRules.weather & B_WEATHER_RAIN_PERMANENT)) {
+      return callSwitchinScript(context, "BattleScript_DrizzleActivates", Object.freeze({
+        ...abilityRules,
+        weather: B_WEATHER_RAIN_TEMPORARY | B_WEATHER_RAIN_PERMANENT,
+      }));
     }
-    const sideStatuses = [...rules.sideStatuses] as [number, number];
+    if (nextActive.ability === ABILITY_SAND_STREAM && !(nextRules.weather & B_WEATHER_SANDSTORM_PERMANENT)) {
+      return callSwitchinScript(context, "BattleScript_SandstreamActivates", Object.freeze({
+        ...abilityRules,
+        weather: B_WEATHER_SANDSTORM_PERMANENT,
+      }));
+    }
+    if (nextActive.ability === ABILITY_DROUGHT && !(nextRules.weather & B_WEATHER_SUN_PERMANENT)) {
+      return callSwitchinScript(context, "BattleScript_DroughtActivates", Object.freeze({
+        ...abilityRules,
+        weather: B_WEATHER_SUN_PERMANENT,
+      }));
+    }
+    if (nextActive.ability === ABILITY_INTIMIDATE && !(nextActive.status3 & STATUS3_INTIMIDATE_POKES)) {
+      const battlers = nextRules.battlers.map((candidate, index) =>
+        index === battler
+          ? Object.freeze({ ...candidate, status3: (candidate.status3 | STATUS3_INTIMIDATE_POKES) >>> 0 })
+          : candidate
+      ) as unknown as BattleScriptRulesBattlers;
+      return callSwitchinScript(context, "BattleScript_IntimidateActivates", Object.freeze({
+        ...abilityRules,
+        battlers: Object.freeze(battlers),
+      }));
+    }
+    if (nextActive.ability === ABILITY_TRACE && !(nextActive.status3 & STATUS3_TRACE)) {
+      const target = nextRules.battlers.findIndex((candidate, index) =>
+        index < nextRules.battleTopology.battlersCount
+        && candidate.side !== nextActive.side
+        && candidate.hp !== 0
+        && candidate.ability !== 0
+      );
+      if (target >= 0) {
+        const copiedAbility = nextRules.battlers[target as BattleScriptBattlerId].ability;
+        const battlers = nextRules.battlers.map((candidate, index) =>
+          index === battler ? Object.freeze({ ...candidate, ability: copiedAbility }) : candidate
+        ) as unknown as BattleScriptRulesBattlers;
+        return callSwitchinScript(context, "BattleScript_TraceActivates", Object.freeze({
+          ...abilityRules,
+          battlers: Object.freeze(battlers),
+          lastUsedAbility: copiedAbility,
+          battleTextBuff1MonNick: Object.freeze({
+            battler: target as BattleScriptBattlerId,
+            partyIndex: nextRules.battlers[target as BattleScriptBattlerId].partyIndex,
+          }),
+        }));
+      }
+    }
+    if (
+      nextActive.ability === ABILITY_FORECAST
+      || nextActive.ability === ABILITY_CLOUD_NINE
+      || nextActive.ability === ABILITY_AIR_LOCK
+    ) {
+      const wouldChange = nextActive.ability === ABILITY_FORECAST
+        ? computeCastformForm(nextRules, nextActive) !== 0
+        : nextRules.battlers
+          .slice(0, nextRules.battleTopology.battlersCount)
+          .some((candidate) => computeCastformForm(nextRules, candidate) !== 0);
+      if (wouldChange) {
+        return callSwitchinScript(context, "BattleScript_WeatherFormChanges", abilityRules);
+      }
+    }
+    const sideStatuses = [...nextRules.sideStatuses] as [number, number];
     sideStatuses[side] = (sideStatuses[side] & ~SIDE_STATUS_SPIKES_DAMAGED) >>> 0;
     return transitionBattleScriptCommand(
       context,
       Object.freeze({ kind: "advance" }),
       {
         rulesContext: Object.freeze({
-          ...rules,
+          ...nextRules,
           hitMarker: hitMarkerWithoutFainted,
           sideStatuses: Object.freeze(sideStatuses),
+        }),
+      },
+    );
+  };
+}
+
+/** `Cmd_trygetintimidatetarget` (`battle_script_commands.c:9567-9590`). */
+function createTrygetintimidatetargetOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
+  return (context) => {
+    const jump = resolveBattleScriptLabel(context.program, context.instruction.operands[0]!.expression);
+    if (!jump) throw new Error("Cmd_trygetintimidatetarget has an unresolved return label");
+    const rules = context.state.rulesContext;
+    const source = rules.scriptingBattler;
+    let target = rules.selectorRoles.target ?? 0;
+    while (
+      target < rules.battleTopology.battlersCount
+      && (
+        rules.battlers[target].side === rules.battlers[source].side
+        || (rules.absentBattlerFlags & (1 << target)) !== 0
+      )
+    ) target += 1;
+    if (target >= rules.battleTopology.battlersCount) {
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "jump", programCounter: jump.programCounter }),
+      );
+    }
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "advance" }),
+      {
+        rulesContext: Object.freeze({
+          ...rules,
+          selectorRoles: Object.freeze({ ...rules.selectorRoles, target: target as BattleScriptBattlerId }),
         }),
       },
     );
@@ -810,5 +927,6 @@ export function createBattleScriptSwitchinOpcodeHandlers(
   install("B_SCR_OP_CANCELALLACTIONS", cancelallactionsOpcodeHandler);
   install("B_SCR_OP_VARIOUS", createVariousOpcodeHandler());
   install("B_SCR_OP_SWITCHINEFFECTS", createSwitchineffectsOpcodeHandler());
+  install("B_SCR_OP_TRYGETINTIMIDATETARGET", createTrygetintimidatetargetOpcodeHandler());
   return Object.freeze(handlers);
 }

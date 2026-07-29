@@ -154,16 +154,15 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // this script's case 2/3); SwitchInClearSetData's unconditional
   // STATUS2_WRAPPED clear; switchinanim's BATTLE_TYPE_ARENA
   // point-init call (never set for Factory); various's every id other than
-  // RESET_PLAYER_FAINTED (7); switchineffects's Truant switch-in-hack counter
-  // set and its AbilityBattleEffects
-  // (ABILITYEFFECT_ON_SWITCHIN) dispatch for the small closed set of trigger
-  // abilities. 6 total, none reached by the committed forced-switch fixtures;
+  // RESET_PLAYER_FAINTED (7). The Truant counter write and grouped
+  // ABILITYEFFECT_ON_SWITCHIN dispatch are source-ported. 4 total, none
+  // reached by the committed forced-switch fixtures;
   // the Spikes fixture now executes its shared path, while their other state
   // carries no trigger ability/item/escape/sure-hit/wrapped dependency.
   // 10 -> 9: Spikes damage now executes through the shared source scripts.
   // 9 -> 8: Mean Look release now compares battlerPreventingEscape.
   // 8 -> 6: Lock On clear/refresh now compares battlerWithSureHit.
-  ["src/engine/battleScriptSwitchinOpcode.ts", 6],
+  ["src/engine/battleScriptSwitchinOpcode.ts", 4],
   // Primary-effect stat-change registration (docs/primary-stat-ground-truth.md):
   // Cmd_playanimation is narrowed to its B_ANIM_STATS_CHANGE arm (the only
   // animType BattleScript_EffectStatUp/EffectStatDown ever pass) -- any other

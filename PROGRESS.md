@@ -13,6 +13,34 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 653 — [BOUNDED MAIN WORKER 2026-07-28 ~18:51] Switch-in entry hooks registered and follow-up pins closed
+
+- **State:** implementation commits `2ec8ef8a` / `38da44ab` (+ final Forecast
+  guard/docs commit); tree green at **440 files / 4791 tests**, production
+  build, OFF oracle info, and `git diff --check`. Handler inventory
+  pin updated **209→210** for the newly registered target opcode. Census
+  byte-idempotent at **214/214 effects, 355/355 moves, 276/276 distinct,
+  2957/2957 weighted**, all **72** validations.
+- **Did:** consumed `docs/switchin-entryhooks-off-evidence.md`; ported the
+  exact Truant counter write and grouped ON_SWITCHIN dispatch for permanent
+  weather, Intimidate, Trace, Forecast, Cloud Nine, and Air Lock. Weather
+  callbacks/no-ops, Trace's live opposing ability copy/message buffers, and
+  Intimidate's STATUS3 marker, shared statbuffchange path, Substitute and
+  all three source prevention abilities are Tier-1 pinned with exact messages
+  and zero RNG draws. Battle-start ordering now pins faster Drizzle's weather
+  message before slower Intimidate's stat drop. The new full-script pins
+  exposed and fixed one real defect: removed a duplicate synthetic prevention
+  event so the source script is the sole message owner.
+- **Next:** supervisor verify `38da44ab` and this ledger commit; on-switch item
+  breadth remains separate.
+- **Notes:** switch-in unsupported-branch ratchet **6→4**; the retained
+  barriers are unchanged: switchhandleorder cases 0/1, non-singles wrapped
+  cross-clear, Arena init, and other `various` ids. The named Castform form
+  barrier remains. No census, issue, roadmap, presentation, animation, round,
+  tick, or pixel change.
+
+---
+
 ## 652 — [BOUNDED MAIN WORKER 2026-07-28 ~18:27] ENDTURN abilities/items acceptance closed
 
 - **State:** implementation commits `733042df` / `f424fd3b`; tree green at
@@ -73,26 +101,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   commit after this wind-down; an unfolded animation-main at next orient is
   expected and fine. PAPERCUTS: bumped the generated-JSON broad-search entry
   (2 new hits).
-
----
-## 650 — [BOUNDED MAIN WORKER 2026-07-28 ~18:10] Production recording-import allowlist reaches zero
-
-- **State:** implementation committed `9ab6985d`; tree green at **437 files /
-  4763 tests**, production build, OFF oracle info, and `git diff --check`.
-  Census remains byte-idempotent at **214/214 effects, 355/355 moves, 276/276
-  distinct, 2957/2957 weighted** with all **72** validations passing.
-- **Did:** retired `factorySwapPresentation.ts`'s final canonical recording
-  import. The six rental records now derive from drafted anchor state,
-  generated Frontier/species corpora, Factory fixed IVs, and the existing
-  source-ported opponent personality generator. The production recording
-  allowlist shrank **1→0**; the dump remains test-only field parity evidence.
-  ISSUES #41 is complete and deleted.
-- **Next:** supervisor verify `9ab6985d` and this docs commit. ISSUES #39's
-  battle-presentation turn-keying remains separate and explicitly out of
-  scope.
-- **Notes:** all **19** committed OFF swap traces remain exact at their
-  recorded counts; primary windows: picker **101/101**, options **58/58**,
-  popup **44/44**, B-close **59/59**, enemy picker **130/130**, accept prompt
-  **66/66**, accept exit **43/43**, summary return **147/147**. No behavior,
-  barrier-count, handler-set, census, round, tick, roadmap, or animation
-  change.
