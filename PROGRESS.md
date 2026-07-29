@@ -29,9 +29,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   adapts to a real win. Every submission is request-legal and the entire
   battle pins one monotonic **32-call** LCG cursor from draws A/B through the
   terminal hit chain.
-- **Next:** rung 6 (production-shaped Factory AI view/driver) can extend this
-  whole-battle driver; rung 11 controller ownership remains later. Keep the
-  equal-speed pre-hook receipt barrier intact.
+- **Supervisor fold (same round, side merge):** rung 10 landed (`af959d79`)
+  — round swap mutation unified with the full rental record (identity copy
+  `battle_factory_screen.c:2350-2360`, party reconstruction
+  `battle_factory.c:433-464`, item restore `:714-728`, heal
+  `script_pokemon_util.c:30-58`, PP-Up formula `pokemon.c:4650-4653`);
+  accept/decline both feed the next kernel party exactly; between-battle
+  full restore proven. Union green **458 files / 4918 tests**, census
+  no-op.
+- **Next:** rung 6 (production AI view/driver extending the whole-battle
+  test, main) + rung 9 (commentary favorite-type/battle-style rules with
+  OFF compare, side) launch this round; then rung 11 (controller owns one
+  real battle lifecycle) and rung 12 (seven battles). Equal-speed pre-hook
+  receipt barrier stays intact.
 - **Notes:** whole-battle reachability exposed and fixed two narrow over-
   barriers: inactive move-end cure items now pass unless their matching
   status/stat condition exists; trainer faint replacement selects the sole
