@@ -79,6 +79,21 @@ export interface BattleResolution {
   readonly rngValue: number;
 }
 
+export interface GeneratedFactoryRoundStart {
+  readonly id: string;
+  readonly playerParty: BattleParty;
+  readonly playerRentalRecords: FactoryRentalParty;
+  readonly opponent: BattleOpponent;
+  /** Cursor after complete opponent construction. */
+  readonly rngValue: number;
+}
+
+export interface GeneratedFactoryRoundOpponent {
+  readonly opponent: BattleOpponent;
+  /** Cursor after complete opponent construction. */
+  readonly rngValue: number;
+}
+
 export class RoundTransitionError extends Error {
   override readonly name = "RoundTransitionError";
 }
@@ -144,6 +159,54 @@ export function createRoundController(scenario: BattleScenario): RoundController
 }
 
 /**
+ * Production-shaped constructor used after rental/opponent generation. It
+ * preserves `createRoundController`'s fixture ABI while making the generator
+ * seam explicit instead of disguising generated parties as a seven-opponent
+ * fixture pool.
+ */
+export function createGeneratedFactoryRoundController(
+  input: GeneratedFactoryRoundStart,
+): RoundControllerState {
+  assertBattleParty(input.playerParty, "playerParty");
+  assertBattleParty(input.opponent.party, "opponent.party");
+  if (input.opponent.rentalRecords === undefined) {
+    return fail("a generated Factory opponent requires full rental records");
+  }
+  if (!Number.isSafeInteger(input.rngValue) || input.rngValue < 0) {
+    return fail("rngValue must be a non-negative safe integer");
+  }
+  const playerParty = cloneBattleParty(input.playerParty);
+  const opponent = cloneOpponent(input.opponent);
+  const playerRentalRecords = input.playerRentalRecords.map(
+    (record) => ({ ...record }),
+  ) as unknown as FactoryRentalParty;
+  const base = {
+    scenarioId: input.id,
+    opponentSchedule: [opponent],
+    opponentSelection: { type: "factoryGenerated" as const },
+    rules: {
+      phase: "presentingBattleStart" as const,
+      battleIndex: 0 as const,
+      playerParty,
+      playerRentalRecords,
+      playerKernelParty: healFactoryKernelParty(playerRentalRecords),
+      currentOpponent: opponent,
+      opponentHistory: [opponent.id],
+      rngValue: input.rngValue >>> 0,
+      lastBattle: null,
+      lastSwap: null,
+    },
+    nextPresentationCommandId: 1,
+  };
+  return issueCommand(base, {
+    type: "battleStart",
+    battleIndex: 0,
+    playerParty,
+    opponent,
+  });
+}
+
+/**
  * Records presentation completion only. In particular, this cannot change
  * rules, opponent selection, or RNG. Repeating the same completion is a
  * no-op so asynchronous adapters can safely acknowledge once-or-more.
@@ -202,6 +265,9 @@ function selectNextOpponent(
       rngValue: state.rules.rngValue,
     };
   }
+  if (state.opponentSelection.type === "factoryGenerated") {
+    return fail("generated Factory rounds require a complete generated opponent");
+  }
 
   const strategy = state.opponentSelection;
   const selection = selectFactoryTrainer(
@@ -229,6 +295,53 @@ function selectNextOpponent(
     },
     rngValue: selection.rngValue,
   };
+}
+
+function advanceAfterSwapResult(
+  state: RoundControllerState,
+  selection: {
+    readonly opponent: BattleOpponent;
+    readonly opponentSchedule: readonly BattleOpponent[];
+    readonly opponentSelection: PreparedOpponentSelection;
+    readonly rngValue: number;
+  },
+): RoundControllerState {
+  const battleIndex = nextBattleIndex(state.rules.battleIndex);
+  const opponent = selection.opponent;
+  if (state.rules.opponentHistory.includes(opponent.id)) {
+    return fail(`opponent ${opponent.id} would repeat`);
+  }
+  const playerParty = healBattleParty(state.rules.playerParty);
+  const playerKernelParty = state.rules.playerRentalRecords === null
+    ? null
+    : healFactoryKernelParty(
+      state.rules.playerRentalRecords,
+      state.rules.playerKernelParty ?? undefined,
+    );
+  return issueCommand(
+    {
+      ...state,
+      opponentSchedule: selection.opponentSchedule,
+      opponentSelection: selection.opponentSelection,
+      rules: {
+        ...state.rules,
+        phase: "presentingBattleStart",
+        battleIndex,
+        playerParty,
+        playerKernelParty,
+        currentOpponent: opponent,
+        opponentHistory: [...state.rules.opponentHistory, opponent.id],
+        rngValue: selection.rngValue,
+        lastBattle: null,
+      },
+    },
+    {
+      type: "battleStart",
+      battleIndex,
+      playerParty,
+      opponent,
+    },
+  );
 }
 
 /**
@@ -269,41 +382,7 @@ export function advanceRoundController(state: RoundControllerState): RoundContro
       requireCompletedPresentation(state, "swapResolved");
       const battleIndex = nextBattleIndex(state.rules.battleIndex);
       const selection = selectNextOpponent(state, battleIndex);
-      const opponent = selection.opponent;
-      if (state.rules.opponentHistory.includes(opponent.id)) {
-        return fail(`opponent ${opponent.id} would repeat`);
-      }
-      const playerParty = healBattleParty(state.rules.playerParty);
-      const playerKernelParty = state.rules.playerRentalRecords === null
-        ? null
-        : healFactoryKernelParty(
-          state.rules.playerRentalRecords,
-          state.rules.playerKernelParty ?? undefined,
-        );
-      return issueCommand(
-        {
-          ...state,
-          opponentSchedule: selection.opponentSchedule,
-          opponentSelection: selection.opponentSelection,
-          rules: {
-            ...state.rules,
-            phase: "presentingBattleStart",
-            battleIndex,
-            playerParty,
-            playerKernelParty,
-            currentOpponent: opponent,
-            opponentHistory: [...state.rules.opponentHistory, opponent.id],
-            rngValue: selection.rngValue,
-            lastBattle: null,
-          },
-        },
-        {
-          type: "battleStart",
-          battleIndex,
-          playerParty,
-          opponent,
-        },
-      );
+      return advanceAfterSwapResult(state, selection);
     }
     case "battleActive":
     case "awaitingSwapDecision":
@@ -311,6 +390,37 @@ export function advanceRoundController(state: RoundControllerState): RoundContro
     case "roundComplete":
       return fail(`cannot advance round while phase is ${state.rules.phase}`);
   }
+}
+
+/**
+ * Adapts rung-8's complete trainer+party result at the exact point where the
+ * existing controller admits its next opponent. All index/heal/presentation
+ * rules remain in the same controller-owned transition above.
+ */
+export function advanceRoundControllerWithGeneratedOpponent(
+  state: RoundControllerState,
+  generated: GeneratedFactoryRoundOpponent,
+): RoundControllerState {
+  if (state.rules.phase !== "presentingSwapResult") {
+    return fail("a generated opponent can only advance presentingSwapResult");
+  }
+  requireCompletedPresentation(state, "swapResolved");
+  if (state.opponentSelection.type !== "factoryGenerated") {
+    return fail("generated opponent advance requires a generated Factory round");
+  }
+  if (generated.opponent.rentalRecords === undefined) {
+    return fail("a generated Factory opponent requires full rental records");
+  }
+  if (!Number.isSafeInteger(generated.rngValue) || generated.rngValue < 0) {
+    return fail("generated opponent rngValue must be a non-negative safe integer");
+  }
+  const opponent = cloneOpponent(generated.opponent);
+  return advanceAfterSwapResult(state, {
+    opponent,
+    opponentSchedule: [...state.opponentSchedule, opponent],
+    opponentSelection: state.opponentSelection,
+    rngValue: generated.rngValue >>> 0,
+  });
 }
 
 function assertSamePartyIdentity(

@@ -168,7 +168,24 @@ export function healFactoryKernelParty(
         || currentMember.abilitySlot !== member.abilitySlot
       )
     ) {
-      throw new Error(`current Factory kernel party slot ${index} does not match its rental record`);
+      throw new Error(
+        `current Factory kernel party slot ${index} does not match its rental record: ${
+          JSON.stringify({
+            current: {
+              setId: currentMember.setId,
+              personality: currentMember.personality,
+              fixedIv: currentMember.ivs.attack,
+              abilitySlot: currentMember.abilitySlot,
+            },
+            rebuilt: {
+              setId: member.setId,
+              personality: member.personality,
+              fixedIv: records[index]!.fixedIv,
+              abilitySlot: member.abilitySlot,
+            },
+          })
+        }`,
+      );
     }
     const ppBonuses = currentMember?.ppBonuses ?? member.ppBonuses;
     const ppUps = ppUpsFromPackedBonuses(ppBonuses);
@@ -269,9 +286,18 @@ export interface PreparedFactoryTrainerSelection {
   readonly ledger: readonly FactoryTrainerDrawLedgerEntry[];
 }
 
+/**
+ * The production round orchestrator owns complete trainer+party generation.
+ * The controller still owns when that generated opponent may enter the round.
+ */
+export interface PreparedGeneratedFactorySelection {
+  readonly type: "factoryGenerated";
+}
+
 export type PreparedOpponentSelection =
   | PreparedFixtureSelection
-  | PreparedFactoryTrainerSelection;
+  | PreparedFactoryTrainerSelection
+  | PreparedGeneratedFactorySelection;
 
 export function prepareBattleScenario(scenario: BattleScenario): {
   readonly id: string;
