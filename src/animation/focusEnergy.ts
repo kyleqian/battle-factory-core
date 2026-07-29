@@ -28,6 +28,7 @@ export interface FocusEnergyState {
   readonly sprites: readonly FocusEnergySprite[];
   readonly paletteTaskActive: boolean;
   readonly attackerPaletteY: number;
+  readonly attackerPaletteTarget: "white" | "red";
   readonly shakeTaskActive: boolean;
   readonly attackerX2: number;
   readonly soundEvents: readonly FocusEnergySoundEvent[];
@@ -153,6 +154,7 @@ export function focusEnergyAtAge(
     sprites,
     paletteTaskActive,
     attackerPaletteY: attackerPaletteYAtAge(age),
+    attackerPaletteTarget: "white",
     shakeTaskActive,
     attackerX2: attackerShakeX2AtAge(age),
     soundEvents: age === 1

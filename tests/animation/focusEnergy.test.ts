@@ -70,6 +70,7 @@ describe("MOVE_FOCUS_ENERGY source-relative reducer", () => {
     expect(focusEnergyAtAge(1, "opponent", { x: 176, y: 40 }).soundEvents[0])
       .toMatchObject({ pan: 63 });
     expect(player(39)).toMatchObject({
+      attackerPaletteTarget: "white",
       attackerX2: -1,
       attackerShakeDisplayAge: 37,
       attackerDisplayX2: 1,
