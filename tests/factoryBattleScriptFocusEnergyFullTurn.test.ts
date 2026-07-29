@@ -91,7 +91,7 @@ describe("Factory full-turn Focus Energy shared-script receipt", () => {
       .toBeGreaterThan(firstKinds.indexOf("message:STRINGID_USEDMOVE"));
     expect(firstKinds.indexOf("message:STRINGID_PKMNGETTINGPUMPED"))
       .toBeGreaterThan(firstKinds.indexOf("set-battler-pp-data"));
-    expect(first.state.rng.calls).toBe(0);
+    expect(first.state.rng.calls).toBe(1);
 
     const repeated = turn(first.state, 3, PLAYER_FOCUS);
     const repeatedRules = repeated.state.rules.rulesContext;
@@ -101,7 +101,7 @@ describe("Factory full-turn Focus Energy shared-script receipt", () => {
     expect(repeatedRules.multistringChooser).toBe(0);
     expect(messageIds(repeated)).not.toContain("STRINGID_PKMNGETTINGPUMPED");
     expect(messageIds(repeated)).toContain("STRINGID_BUTITFAILED");
-    expect(repeated.state.rng.calls).toBe(0);
+    expect(repeated.state.rng.calls).toBe(2);
   });
 
   it("a subsequent ordinary hit consumes the persisted bit through shared critcalc's +2 stage", () => {
@@ -115,6 +115,10 @@ describe("Factory full-turn Focus Energy shared-script receipt", () => {
     const plainInitial = createFactoryFullTurnBattleState(config(0));
     const plainHit = turn(plainInitial, 1, PLAYER_TACKLE);
     expect(messageIds(plainHit)).not.toContain("STRINGID_CRITICALHIT");
-    expect(hit.state.rng).toEqual(plainHit.state.rng);
+    // Focus Energy's completed turn contributes the intervening
+    // BattleTurnPassed draw, so the subsequent hit occupies the next ROM
+    // positions instead of sharing the plain turn-1 cursor.
+    expect(hit.state.rng).toEqual({ value: 842925522, calls: 6 });
+    expect(plainHit.state.rng).toEqual({ value: 1019704187, calls: 5 });
   });
 });

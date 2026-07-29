@@ -102,8 +102,8 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
     expect(staged.phase).toBe("presenting");
     expect(staged.kernelTransition?.kind).toBe("decision-required");
     expect(staged.kernelTransition?.state.rng).toEqual({
-      value: 650807554,
-      calls: 4,
+      value: 3011990093,
+      calls: 5,
     });
     expect(staged.kernelTransition?.state.boundary).toMatchObject({
       kind: "decision-required",
@@ -178,8 +178,8 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
     }
     expect(staged.kernelTransition).toBe(transition);
     expect(staged.kernelTransition?.state.rng).toEqual({
-      value: 650807554,
-      calls: 4,
+      value: 3011990093,
+      calls: 5,
     });
     expect(Object.isFrozen(staged.kernelTransition)).toBe(true);
     expect(Object.isFrozen(staged.kernelTransition?.state)).toBe(true);

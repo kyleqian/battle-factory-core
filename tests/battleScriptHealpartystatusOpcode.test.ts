@@ -413,7 +413,7 @@ describe("EFFECT_HEAL_BELL committed-script full-turn integration", () => {
     const rules = result.state.rules.rulesContext;
     expect(rules.battlers[0].pp[0]).toBe(4);
     expect(rules.party.player[0].status1).toBe(0);
-    expect(result.state.rng).toMatchObject({ value: SEED, calls: 0 });
+    expect(result.state.rng).toMatchObject({ value: 1_281_610_112, calls: 1 });
     expect(result.events.map(({ payload }) => payload.kind))
       .toEqual(expect.arrayContaining([
         "set-battler-pp-data",

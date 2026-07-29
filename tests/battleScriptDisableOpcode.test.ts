@@ -427,8 +427,8 @@ describe("Disable through the generic Factory full-turn seam", () => {
     expect(state.rules.rulesContext.battlers[1].pp).toEqual([35, 35, 34, 35]);
     expect(state.rules.rulesContext.battlers[1]).toMatchObject({
       disabledMove: TACKLE,
-      disableTimer: 1,
-      disableTimerStartValue: 2,
+      disableTimer: 3,
+      disableTimerStartValue: 4,
       usedDisabledMove: 0,
     });
 
@@ -468,8 +468,8 @@ describe("Disable through the generic Factory full-turn seam", () => {
     expect(state.rules.rulesContext.currentMove).toBe(0);
     expect(state.rules.rulesContext.moveHistory.lastMoves[1]).toBe(STRUGGLE);
     expect(state.rules.rulesContext.battlers[1]).toMatchObject({
-      disabledMove: 0,
-      disableTimer: 0,
+      disabledMove: TACKLE,
+      disableTimer: 2,
     });
     expect(state.rules.rulesContext.battlers[0].hp).toBeLessThan(
       playerHpBeforeStruggle,

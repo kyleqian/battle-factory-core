@@ -257,7 +257,7 @@ describe("Future Sight through the generic full-turn seam", () => {
     }
 
     expect(futurePp).toEqual([14, 13, 12]);
-    expect(targetHp).toEqual([140, 140, 103]);
+    expect(targetHp).toEqual([140, 140, 101]);
     expect(state.rules.rulesContext.futureSightCounter[1]).toBe(0);
     expect(state.rules.rulesContext.sideStatuses[1] & SIDE_STATUS_FUTUREATTACK).toBe(0);
     expect(state.rules.rulesContext.moveHistory.lastMoves).toEqual([FUTURE_SIGHT, TACKLE, 0, 0]);

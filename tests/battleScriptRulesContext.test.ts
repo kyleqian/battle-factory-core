@@ -240,6 +240,7 @@ describe("source-shaped Battle Script rules context", () => {
       "party",
       "paydayMoney",
       "playerMoney",
+      "randomTurnNumber",
       "rolloutTimerStartValues",
       "scriptingBattler",
       "scriptingBideDmg",

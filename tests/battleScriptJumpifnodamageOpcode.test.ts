@@ -386,8 +386,8 @@ describe("Focus Punch receipts carry through the generic full-turn owner", () =>
       payload: expect.objectContaining({ kind: "hp-change", battler: 0, from: 135, to: 111 }),
       provenance: expect.objectContaining({ opcodeName: "B_SCR_OP_DATAHPUPDATE" }),
     }));
-    expect(result.state.rng.calls).toBe(3);
-    expect(result.state.rng.value).toBe(3421819359);
+    expect(result.state.rng.calls).toBe(4);
+    expect(result.state.rng.value).toBe(1621732966);
     // The receipt survived between actions, then the existing
     // TurnValuesCleanUp(FALSE) owner reset it at the next-turn boundary.
     expect(rc.battlers[0]!.specialStatus.physicalDmg).toBe(0);
@@ -406,8 +406,8 @@ describe("Focus Punch receipts carry through the generic full-turn owner", () =>
     expect(result.events.some(({ payload }) =>
       payload.kind === "message" && payload.messageId === "STRINGID_PKMNLOSTFOCUS"
     )).toBe(false);
-    expect(result.state.rng.calls).toBe(4);
-    expect(result.state.rng.value).toBe(1621732966);
+    expect(result.state.rng.calls).toBe(5);
+    expect(result.state.rng.value).toBe(2756097505);
     expect(rc.battlers[0]!.protectPhysicalDmg).toBe(0);
     expect(rc.battlers[0]!.protectSpecialDmg).toBe(0);
   });

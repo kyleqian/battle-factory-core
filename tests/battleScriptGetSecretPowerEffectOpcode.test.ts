@@ -318,8 +318,8 @@ describe("source-complete B_SCR_OP_GETSECRETPOWEREFFECT registration", () => {
     expect(context.battlers[1].status1).toBe(STATUS1_PARALYSIS);
     expect(context.party.opponent[0].status1).toBe(STATUS1_PARALYSIS);
     expect(result.state.rng).toMatchObject({
-      value: 1_633_612_974,
-      calls: 4,
+      value: 3_499_070_089,
+      calls: 5,
     });
     expect(result.events.find(({ payload }) =>
       payload.kind === "set-battler-pp-data"

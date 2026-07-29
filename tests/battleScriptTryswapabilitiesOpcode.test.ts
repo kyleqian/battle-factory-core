@@ -357,8 +357,8 @@ describe("source-complete B_SCR_OP_TRYSWAPABILITIES registration", () => {
     expect(context.battlers[0].pp).toEqual([20, 20, 10, 9]);
     expect(context.battlers[1].pp).toEqual([35, 35, 34, 35]);
     expect(result.state.rng).toMatchObject({
-      value: 3_031_698_222,
-      calls: 4,
+      value: 530_917_129,
+      calls: 5,
     });
     // This engine party slice carries species/isEgg/hp/status1/moves/PP, but no
     // ability or abilityNum. Tackle writes its modeled player HP; these

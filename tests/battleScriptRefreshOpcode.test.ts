@@ -333,8 +333,8 @@ describe("accepted Battle Scene OFF Refresh full-turn receipt", () => {
     });
     expect(result.kind).toBe("decision-required");
     expect(result.state.rng).toMatchObject({
-      value: 786_441_859,
-      calls: 0,
+      value: 1_300_148_282,
+      calls: 1,
     });
     const rulesContext = result.state.rules.rulesContext;
     expect(rulesContext.battlers[0]).toMatchObject({

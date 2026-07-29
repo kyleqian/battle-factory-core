@@ -34,13 +34,14 @@ const TRAINER_SLEEP_TALK = Object.freeze({
  * mechanicLab evidence's legal Shuckle 1 / Blissey matchup. The Rollout-only
  * tests use the exact state after the evidence's real Defense Curl turn.
  *
- * Seed 32731 is a controlled full-turn seed whose ordinary Emerald LCG draws
- * select the same first four observed damages as the evidence: 35, 157, 158,
- * then a KO from 12 HP. Unlike the oracle capture frames, these assertions
- * are all post-turn boundaries; the awake trainer's harmless failed Sleep
- * Talk consumes no RNG and makes the complete draw ledger deterministic.
+ * Seed 325391 is a controlled full-turn seed whose ordinary Emerald LCG draws,
+ * including BattleTurnPassed's draw between continuing turns,
+ * select a deterministic four-hit route after the newly modeled boundary
+ * draws: 35, 78, 158, then a KO from 91 HP. Unlike the oracle capture
+ * frames, these assertions are all post-turn boundaries; the awake trainer's
+ * harmless failed Sleep Talk consumes no RNG.
  */
-function rolloutConfig(rngSeed = 32731): FactoryFullTurnConfig {
+function rolloutConfig(rngSeed = 325391): FactoryFullTurnConfig {
   return {
     requestId: 1,
     rngSeed,
@@ -76,7 +77,7 @@ function rolloutConfig(rngSeed = 32731): FactoryFullTurnConfig {
 }
 
 /** Same evidence matchup before either selected move has executed. */
-function defenseCurlRolloutConfig(rngSeed = 32731): FactoryFullTurnConfig {
+function defenseCurlRolloutConfig(rngSeed = 325391): FactoryFullTurnConfig {
   const config = rolloutConfig(rngSeed);
   return {
     ...config,
@@ -145,7 +146,7 @@ describe("factory full-turn Defense Curl / Rollout continuation", () => {
       expect(defenseCurlRules.battlers[0]!.statStages[2]).toBe(7);
       expect(defenseCurlRules.battlers[0]!.status2).toBe(DEFENSE_CURL_STATUS);
       expect(defenseCurlRules.battlers[1]!.hp).toBe(362);
-      expect(afterDefenseCurl.state.rng.calls).toBe(0);
+      expect(afterDefenseCurl.state.rng.calls).toBe(1);
 
       const afterRolloutSelection = submitFactoryFullTurnDecision(
         afterDefenseCurl.state,
@@ -186,11 +187,13 @@ describe("factory full-turn Defense Curl / Rollout continuation", () => {
         expect(rules.chosenMovePositions[0]).toBe(0);
         expect(rules.rolloutTimerStartValues[0]).toBe(5);
         expect(rules.battlers[0]!.rolloutTimer).toBe(4 - hitIndex);
-        expect(result.state.rng.calls).toBe((hitIndex + 1) * 4);
+        // One Defense Curl boundary precedes Rollout; each continuing hit
+        // adds its four hit-chain draws plus one BattleTurnPassed draw.
+        expect(result.state.rng.calls).toBe(1 + ((hitIndex + 1) * 5));
         state = result.state;
       }
 
-      expect(observedHp).toEqual([327, 170, 12]);
+      expect(observedHp).toEqual([327, 249, 91]);
       const terminal = submitTrainerSleepTalk(state, 7);
       expect(terminal.kind).toBe("terminal");
       if (terminal.kind !== "terminal") throw new Error("expected Rollout KO");
@@ -207,14 +210,15 @@ describe("factory full-turn Defense Curl / Rollout continuation", () => {
       expect(rules.rolloutTimerStartValues[0]).toBe(5);
       expect(rules.lockedMoves[0]).toBe(ROLLOUT);
       expect(rules.battleOutcome).toBe(1);
-      expect(terminal.state.rng.calls).toBe(16);
+      expect(terminal.state.rng.calls).toBe(20);
     },
   );
 
   it("a continuation miss cancels the timer and unlocks the next player decision without another PP spend", () => {
-    // Seed 11: the first accuracy roll is 50 (hit), then the next Rollout
-    // accuracy roll is 93 (miss). Failed Sleep Talk consumes no draws between them.
-    const initial = createFactoryFullTurnBattleState(rolloutConfig(11));
+    // Seed 8: the first accuracy roll is 34 (hit), then, after the stored
+    // turn-random boundary draw, the next Rollout accuracy roll is 99 (miss).
+    // Failed Sleep Talk consumes no draws between them.
+    const initial = createFactoryFullTurnBattleState(rolloutConfig(8));
     const afterPlayer = submitFactoryFullTurnDecision(initial, {
       requestId: 1,
       side: "player",
@@ -253,7 +257,7 @@ describe("factory full-turn Defense Curl / Rollout continuation", () => {
     // Source CancelMultiTurnMoves deliberately leaves these diagnostic fields.
     expect(rules.rolloutTimerStartValues[0]).toBe(5);
     expect(rules.lockedMoves[0]).toBe(ROLLOUT);
-    expect(miss.state.rng.calls).toBe(5);
+    expect(miss.state.rng.calls).toBe(7);
   });
 
   it("auto-confirms a trainer-owned Rollout lock after the player supplies the only open command", () => {
@@ -327,11 +331,11 @@ describe("factory full-turn Defense Curl / Rollout continuation", () => {
       battler: 0,
     });
     const rules = secondHit.state.rules.rulesContext;
-    expect(rules.battlers[0]!.hp).toBe(808);
+    expect(rules.battlers[0]!.hp).toBe(887);
     expect(rules.battlers[1]!.pp[0]).toBe(19);
     expect(rules.battlers[1]!.rolloutTimer).toBe(3);
     expect(rules.lockedMoves[1]).toBe(ROLLOUT);
-    expect(secondHit.state.rng.calls).toBe(8);
+    expect(secondHit.state.rng.calls).toBe(10);
   });
 
   it("auto-resolves simultaneous locks until both five-hit Rollout sequences release", () => {
@@ -384,7 +388,8 @@ describe("factory full-turn Defense Curl / Rollout continuation", () => {
     expect(rules.battlers[1]!.rolloutTimer).toBe(0);
     expect(rules.battlers[0]!.status2).toBe(DEFENSE_CURL_STATUS);
     expect(rules.battlers[1]!.status2).toBe(DEFENSE_CURL_STATUS);
-    // Five speed ties plus ten Rollout hit chains: 5 + (10 * 4).
-    expect(completed.state.rng.calls).toBe(45);
+    // Five speed ties plus ten Rollout hit chains plus five continuing-turn
+    // BattleTurnPassed draws: 5 + (10 * 4) + 5.
+    expect(completed.state.rng.calls).toBe(50);
   });
 });

@@ -215,6 +215,13 @@ export type FactoryFullTurnConfig = Readonly<{
   rngSeed: number;
   /** Optional source gBattleWeather staging for finite full-turn fixtures. */
   weather?: number;
+  /**
+   * Source gRandomTurnNumber already drawn before this staged mid-battle
+   * window. Defaults to 0xffff (Quick Claw does not proc). Whole-battle
+   * integration must model battle_main.c:3140/:3923 for turn 1; this reducer
+   * owns only BattleTurnPassed's continuing-turn draw at :4013.
+   */
+  initialRandomTurnNumber?: number;
   player: FactoryFullTurnBattlerConfig;
   trainer: FactoryFullTurnBattlerConfig;
   /**
@@ -504,6 +511,7 @@ function createInitialRules(config: FactoryFullTurnConfig): FactoryFullTurnDecis
       battlerPositions: [0, 1, 0xff, 0xff],
     },
     weather: config.weather ?? 0,
+    randomTurnNumber: config.initialRandomTurnNumber ?? 0xffff,
   });
   return Object.freeze({
     adapter: ADAPTER,
@@ -1170,19 +1178,37 @@ function runEndTurnTail(
   }
 
   // "next-turn" or "resumed": the battle continues into a fresh decision-required boundary.
+  // BattleTurnPassed (battle_main.c:4013) draws gRandomTurnNumber after its
+  // continuing cleanup and before HandleTurnActionSelectionState runs. First
+  // reconcile the completed interpreter ledger, then perform that one
+  // unconditional boundary draw on the durable cursor and reset the local
+  // ledger at the new cursor so finishFullTurn cannot replay prior draws.
+  reconcileFullTurnRng(ctxRng, rngBeforeCalls, endTurn.state);
+  const randomTurnNumber = ctxRng.draw(
+    "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+  );
+  const boundaryCursor = ctxRng.snapshot();
+  const continuingState: MachineState = Object.freeze({
+    ...endTurn.state,
+    rulesContext: Object.freeze({
+      ...endTurn.state.rulesContext,
+      randomTurnNumber,
+    }),
+    rng: createBattleScriptRngState(boundaryCursor.value),
+  });
+
   // HandleTurnActionSelectionState auto-confirms a multi-turn player's
   // B_ACTION_USE_MOVE, so only the trainer command remains to collect.
-  const lockedPlayerDecision = lockedMoveDecision(endTurn.state.rulesContext, 0);
-  const lockedTrainerDecision = lockedMoveDecision(endTurn.state.rulesContext, 1);
+  const lockedPlayerDecision = lockedMoveDecision(continuingState.rulesContext, 0);
+  const lockedTrainerDecision = lockedMoveDecision(continuingState.rulesContext, 1);
   if (lockedPlayerDecision !== null && lockedTrainerDecision !== null) {
     // Source auto-confirms both locked B_ACTION_USE_MOVE entries without
     // exposing either controller command. Resolve the next turn inside this
     // same decision transition, preserving the single RNG cursor and
     // prepending this turn's machine events to the recursively resolved tail.
-    reconcileFullTurnRng(ctxRng, rngBeforeCalls, endTurn.state);
     const nested = reduceFactoryFullTurnDecision(Object.freeze({
       rules: buildRules(
-        endTurn.state.rulesContext,
+        continuingState.rulesContext,
         "awaiting-trainer-command",
         Object.freeze({
           moveSlot: lockedPlayerDecision.moveSlot,
@@ -1202,16 +1228,16 @@ function runEndTurnTail(
     return Object.freeze({
       ...nested,
       events: Object.freeze([
-        ...provenanceEvents(endTurn.state),
+        ...provenanceEvents(continuingState),
         ...nested.events,
       ]),
     });
   }
   if (lockedPlayerDecision !== null) {
     return finishFullTurn(
-      ctxRng, rngBeforeCalls, endTurn.state,
+      ctxRng, boundaryCursor.calls, continuingState,
       buildRules(
-        endTurn.state.rulesContext,
+        continuingState.rulesContext,
         "awaiting-trainer-command",
         Object.freeze({
           moveSlot: lockedPlayerDecision.moveSlot,
@@ -1225,15 +1251,15 @@ function runEndTurnTail(
           requestId: nextRequestId,
           side: "trainer",
           battler: 1 as const,
-          legalDecisions: legalMoveDecisions(endTurn.state.rulesContext, 1),
+          legalDecisions: legalMoveDecisions(continuingState.rulesContext, 1),
         }),
       }),
     );
   }
 
   return finishFullTurn(
-    ctxRng, rngBeforeCalls, endTurn.state,
-    buildRules(endTurn.state.rulesContext, "awaiting-player-command", null),
+    ctxRng, boundaryCursor.calls, continuingState,
+    buildRules(continuingState.rulesContext, "awaiting-player-command", null),
     Object.freeze({
       kind: "decision-required",
       request: Object.freeze({
@@ -1241,7 +1267,7 @@ function runEndTurnTail(
         requestId: nextRequestId,
         side: "player",
         battler: 0 as const,
-        legalDecisions: legalMoveDecisions(endTurn.state.rulesContext, 0),
+        legalDecisions: legalMoveDecisions(continuingState.rulesContext, 0),
       }),
     }),
   );

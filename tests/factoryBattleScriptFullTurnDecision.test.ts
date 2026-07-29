@@ -10,6 +10,7 @@ import {
   type FactoryAiScoredView,
 } from "../src/engine/factoryAiDecisionPolicy.ts";
 import { BATTLE_SCRIPT_STATUS3_MINIMIZED } from "../src/engine/battleScriptSourceConstants.ts";
+import { advanceRngValue } from "../src/engine/rng.ts";
 
 const STRENGTH = 70; // EFFECT_HIT, TYPE_NORMAL -- the banked KO-scenario move (factoryBattleScriptTerminalDecision.test.ts).
 const EMBER = 52; // EFFECT_BURN_HIT, TYPE_FIRE, 10% MOVE_EFFECT_BURN secondary proc.
@@ -19,6 +20,7 @@ const DOUBLE_TEAM = 104;
 const MINIMIZE = 107;
 const STOMP = 23;
 const SPIKES = 191;
+const RAIN_DANCE = 240;
 /** The banked KO-scenario seed (factoryBattleScriptTerminalDecision.test.ts, docs/hit-chain-ground-truth.md). */
 const KO_SCENARIO_RNG_SEED = 919694434;
 /** Brute-force-found: Ember's 10% burn proc actually lands on turn 1 with this seed, per this move's own real hit-chain RNG order (accuracy, crit, damage, secondary-effect-chance). */
@@ -188,7 +190,7 @@ describe("factory full-turn decision -- GetWhoStrikesFirst production inputs", (
     }));
     expect(dry.ppOrder.slice(0, 2)).toEqual([1, 0]);
     expect(rain.ppOrder.slice(0, 2)).toEqual([0, 1]);
-    expect([dry.rngCalls, rain.rngCalls]).toEqual([8, 8]);
+    expect([dry.rngCalls, rain.rngCalls]).toEqual([9, 9]);
   });
 
   it("threads Chlorophyll and live sun through the equivalent 76 -> 152 effective-speed flip", () => {
@@ -205,7 +207,7 @@ describe("factory full-turn decision -- GetWhoStrikesFirst production inputs", (
     }));
     expect(noSun.ppOrder.slice(0, 2)).toEqual([1, 0]);
     expect(sun.ppOrder.slice(0, 2)).toEqual([0, 1]);
-    expect([noSun.rngCalls, sun.rngCalls]).toEqual([8, 8]);
+    expect([noSun.rngCalls, sun.rngCalls]).toEqual([9, 9]);
   });
 
   it("reuses WEATHER_HAS_EFFECT: opposing Cloud Nine suppresses Swift Swim's rain doubling", () => {
@@ -217,7 +219,7 @@ describe("factory full-turn decision -- GetWhoStrikesFirst production inputs", (
       weather: B_WEATHER_RAIN,
     }));
     expect(suppressed.ppOrder.slice(0, 2)).toEqual([1, 0]);
-    expect(suppressed.rngCalls).toBe(8);
+    expect(suppressed.rngCalls).toBe(9);
   });
 
   it("threads the real STATUS1_PARALYSIS bit and quarters speed after weather/stages", () => {
@@ -232,10 +234,11 @@ describe("factory full-turn decision -- GetWhoStrikesFirst production inputs", (
     }));
     expect(healthy.ppOrder.slice(0, 2)).toEqual([0, 1]);
     expect(paralyzed.ppOrder.slice(0, 2)).toEqual([1, 0]);
-    expect(healthy.rngCalls).toBe(8);
+    expect(healthy.rngCalls).toBe(9);
     // The ninth draw is the existing AtkCanceler_UnableToUseMove paralysis
-    // admission roll. A mistaken turn-order tie would add another (10).
-    expect(paralyzed.rngCalls).toBe(9);
+    // admission roll; the tenth is BattleTurnPassed's boundary draw. A
+    // mistaken turn-order tie would add another (11).
+    expect(paralyzed.rngCalls).toBe(10);
   });
 
   it("resolves Macho Brace's real item hold effect and halves speed through the call site", () => {
@@ -250,7 +253,7 @@ describe("factory full-turn decision -- GetWhoStrikesFirst production inputs", (
     }));
     expect(unheld.ppOrder.slice(0, 2)).toEqual([0, 1]);
     expect(braced.ppOrder.slice(0, 2)).toEqual([1, 0]);
-    expect([unheld.rngCalls, braced.rngCalls]).toEqual([8, 8]);
+    expect([unheld.rngCalls, braced.rngCalls]).toEqual([9, 9]);
   });
 
   it("preserves the existing speed-tie contract: exactly one turn-order draw, and none for a one-point non-tie", () => {
@@ -264,12 +267,80 @@ describe("factory full-turn decision -- GetWhoStrikesFirst production inputs", (
     }));
     expect(tie.ppOrder.slice(0, 2)).toHaveLength(2);
     expect(nonTie.ppOrder.slice(0, 2)).toEqual([0, 1]);
-    expect(tie.rngCalls).toBe(9);
-    expect(nonTie.rngCalls).toBe(8);
+    expect(tie.rngCalls).toBe(10);
+    expect(nonTie.rngCalls).toBe(9);
   });
 });
 
 describe("factory full-turn decision -- decision -> both actions -> end-turn -> next decision boundary", () => {
+  it("places BattleTurnPassed's stored draw at ROM ledger positions 5 and 19 across the overlapping two-turn shape", () => {
+    // Typed directly from docs/ability-item-speed-scout.md §B5's ROM table:
+    // four turn-1 move draws, boundary, five turn-2 AI draws, eight turn-2
+    // move draws, boundary. The policy span is advanced explicitly because
+    // this reducer is decision-source-agnostic.
+    const expectedPositions = Object.freeze([
+      "turn-1 accuracy", "turn-1 crit", "turn-1 damage", "turn-1 effect",
+      "turn-2 boundary",
+      "turn-2 AI setup 1", "turn-2 AI setup 2", "turn-2 AI setup 3",
+      "turn-2 AI setup 4", "turn-2 AI move tie",
+      "turn-2 player accuracy", "turn-2 player crit", "turn-2 player damage",
+      "turn-2 player effect", "turn-2 trainer accuracy", "turn-2 trainer crit",
+      "turn-2 trainer damage", "turn-2 trainer effect",
+      "turn-3 boundary",
+    ] as const);
+    expect(expectedPositions[4]).toBe("turn-2 boundary");
+    expect(expectedPositions[18]).toBe("turn-3 boundary");
+
+    const initial = createFactoryFullTurnBattleState(config({
+      player: {
+        species: 1,
+        moveId: RAIN_DANCE,
+        moves: [RAIN_DANCE, STRENGTH, 0, 0],
+        pp: [5, 15, 0, 0],
+        attack: 50, defense: 200, spAttack: 50, spDefense: 200,
+        speed: 100, hp: 999,
+      },
+      trainer: {
+        species: 43, moveId: STRENGTH, attack: 50, defense: 200,
+        spAttack: 50, spDefense: 200, speed: 50, hp: 999,
+      },
+    }));
+    const afterPlayer1 = submitFactoryFullTurnDecision(initial, {
+      requestId: 1, side: "player",
+      decision: { kind: "use-move", moveSlot: 0, targetBattler: 0 },
+    });
+    if (afterPlayer1.kind !== "decision-required") throw new Error("expected trainer decision");
+    const afterTurn1 = submitFactoryFullTurnDecision(afterPlayer1.state, {
+      requestId: 2, side: "trainer", decision: TRAINER_ATTACKS,
+    });
+    if (afterTurn1.kind !== "decision-required") throw new Error("expected turn-2 player decision");
+    expect(afterTurn1.state.rng.calls).toBe(5);
+    expect(afterTurn1.state.rules.rulesContext.randomTurnNumber)
+      .toBe((afterTurn1.state.rng.value >>> 16) & 0xffff);
+
+    let afterAiValue = afterTurn1.state.rng.value;
+    for (let position = 6; position <= 10; position++) {
+      expect(expectedPositions[position - 1]).toMatch(/^turn-2 AI/);
+      afterAiValue = advanceRngValue(afterAiValue);
+    }
+    const afterAiState = Object.freeze({
+      ...afterTurn1.state,
+      rng: Object.freeze({ value: afterAiValue, calls: 10 }),
+    });
+    const afterPlayer2 = submitFactoryFullTurnDecision(afterAiState, {
+      requestId: 3, side: "player",
+      decision: { kind: "use-move", moveSlot: 1, targetBattler: 1 },
+    });
+    if (afterPlayer2.kind !== "decision-required") throw new Error("expected trainer decision");
+    const afterTurn2 = submitFactoryFullTurnDecision(afterPlayer2.state, {
+      requestId: 4, side: "trainer", decision: TRAINER_ATTACKS,
+    });
+    if (afterTurn2.kind !== "decision-required") throw new Error("expected turn-3 player decision");
+    expect(afterTurn2.state.rng.calls).toBe(expectedPositions.length);
+    expect(afterTurn2.state.rules.rulesContext.randomTurnNumber)
+      .toBe((afterTurn2.state.rng.value >>> 16) & 0xffff);
+  });
+
   it("excludes and rejects a party-switch command while Mean Look's 0x04000000 trap is active", () => {
     const initial = createFactoryFullTurnBattleState(config({
       player: {
@@ -492,7 +563,7 @@ describe("factory full-turn decision -- decision -> both actions -> end-turn -> 
       expect((rc1.battlers as Array<{ hp: number }>)[0]!.hp).toBe(950);
       expect((rc1.battlers as Array<{ hp: number }>)[1]!.hp).toBe(795);
       expect(rc1.battleOutcome).toBe(0);
-      expect(t1t.state.rng.calls).toBe(8);
+      expect(t1t.state.rng.calls).toBe(9);
       expect(t1t.nextRequest).toEqual({
         kind: "command", requestId: 3, side: "player", battler: 0,
         legalDecisions: [{ kind: "use-move", moveSlot: 0, targetBattler: 1 }],
@@ -504,13 +575,13 @@ describe("factory full-turn decision -- decision -> both actions -> end-turn -> 
       const t2t = submitFactoryFullTurnDecision(state, { requestId: 4, side: "trainer", decision: TRAINER_ATTACKS });
       if (t2t.kind !== "decision-required") throw new Error("expected decision-required after turn 2");
 
-      // Turn 2 repeats the SAME mechanism from wherever the single LCG stream left off (900/614 -- pinned
-      // by direct replay, not hand-derived, since the seed has already advanced 8 calls by this point).
+      // Turn 2 repeats the SAME mechanism from the ROM-faithful stream after
+      // BattleTurnPassed's intervening draw (re-derived by direct replay).
       const rc2 = (t2t.state.rules as { rulesContext: Record<string, unknown> }).rulesContext;
-      expect((rc2.battlers as Array<{ hp: number }>)[0]!.hp).toBe(900);
-      expect((rc2.battlers as Array<{ hp: number }>)[1]!.hp).toBe(614);
+      expect((rc2.battlers as Array<{ hp: number }>)[0]!.hp).toBe(898);
+      expect((rc2.battlers as Array<{ hp: number }>)[1]!.hp).toBe(591);
       expect(rc2.battleOutcome).toBe(0);
-      expect(t2t.state.rng.calls).toBe(16); // cumulative across both turns -- one continuous stream, not reset per turn.
+      expect(t2t.state.rng.calls).toBe(18); // cumulative across both turns, including one BattleTurnPassed draw per boundary.
       expect(t2t.nextRequest).toEqual({
         kind: "command", requestId: 5, side: "player", battler: 0,
         legalDecisions: [{ kind: "use-move", moveSlot: 0, targetBattler: 1 }],
@@ -731,8 +802,9 @@ describe(
         if (t1.kind !== "decision-required") throw new Error("expected decision-required after turn 1");
         expect(t1.nextRequest.side).toBe("player");
         // The whole-battle cumulative cursor: 11 policy draws + 4 (player's Strength hit chain)
-        // + 4 (trainer's real Surf hit chain, chosen by the policy) = 19.
-        expect(t1.state.rng.calls).toBe(19);
+        // + 4 (trainer's real Surf hit chain, chosen by the policy) + 1
+        // BattleTurnPassed boundary draw = 20.
+        expect(t1.state.rng.calls).toBe(20);
         const rc1 = (t1.state.rules as { rulesContext: Record<string, unknown> }).rulesContext;
         expect(rc1.battleOutcome).toBe(0);
         const rc1Battlers = rc1.battlers as ReadonlyArray<{ hp: number }>;
@@ -763,13 +835,14 @@ describe(
         expect(t2.kind).toBe("decision-required");
         if (t2.kind !== "decision-required") throw new Error("expected decision-required after turn 2");
         // Cumulative across BOTH turns -- one continuous stream, not reset per turn:
-        // 19 (turn 1) + 11 (turn 2 policy) + 4 (turn 2 player hit chain) + 4 (turn 2 trainer hit chain) = 38.
-        expect(t2.state.rng.calls).toBe(38);
+        // 20 (turn 1) + 11 (turn 2 policy) + 4 (turn 2 player hit chain)
+        // + 4 (turn 2 trainer hit chain) + 1 boundary draw = 40.
+        expect(t2.state.rng.calls).toBe(40);
         const rc2 = (t2.state.rules as { rulesContext: Record<string, unknown> }).rulesContext;
         expect(rc2.battleOutcome).toBe(0);
         const rc2Battlers = rc2.battlers as ReadonlyArray<{ hp: number }>;
-        expect(rc2Battlers[1]!.hp).toBe(871); // trainer: 936 -> 871 (Strength again)
-        expect(rc2Battlers[0]!.hp).toBe(694); // player: 835 -> 694 (Surf again)
+        expect(rc2Battlers[1]!.hp).toBe(869); // trainer: 936 -> 869 (ROM-positioned turn-2 Strength variance)
+        expect(rc2Battlers[0]!.hp).toBe(681); // player: 835 -> 681 (ROM-positioned turn-2 Surf variance)
       },
     );
   },
@@ -923,9 +996,10 @@ describe(
         // Zero extra RNG beyond the banked ledgers: exactly the killing blow's own 4-roll hit chain
         // (accuracy, crit, adjustnormaldamage, seteffectwithchance) -- the entire forced-switch dance
         // draws zero Random() (docs/forced-switch-ground-truth.md §2b), the cancelled second action
-        // draws none (it never dispatches), and this scenario's quiet end-turn (no weather/status set)
-        // draws none either. If the second action HAD dispatched, this would be 8, not 4.
-        expect(result.state.rng.calls).toBe(4);
+        // draws none (it never dispatches), and this scenario's quiet end-turn adds only
+        // BattleTurnPassed's unconditional boundary draw. If the second action HAD dispatched,
+        // this would be 9, not 5.
+        expect(result.state.rng.calls).toBe(5);
       },
     );
   },
@@ -1057,8 +1131,8 @@ describe(
         // Zero Random() draws across all three submissions: exactly the killing blow's own 4-roll hit
         // chain (accuracy, crit, adjustnormaldamage, seteffectwithchance) -- the forced-switch dance
         // draws zero (same as item 2's trainer-side proof), the cancelled second action draws none (it
-        // never dispatches), and this scenario's quiet end-turn (no weather/status set) draws none either.
-        expect(result.state.rng.calls).toBe(4);
+        // never dispatches), and the resumed quiet end-turn adds BattleTurnPassed's one boundary draw.
+        expect(result.state.rng.calls).toBe(5);
       },
     );
 
