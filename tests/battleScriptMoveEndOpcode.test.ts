@@ -322,6 +322,22 @@ describe("production moveend (Cmd_moveend) registration", () => {
         throw new Error(`expected advanced, got ${passThrough.kind}`);
       }
       expect(passThrough.state.rulesContext.moveendState).toBe(17);
+
+      const LUM_BERRY = 141; // HOLD_EFFECT_CURE_STATUS also cures confusion.
+      const STATUS2_CONFUSION = 1;
+      const lumConfused = context(
+        0,
+        {},
+        { moveendState: 11 },
+        { item: LUM_BERRY, status2: STATUS2_CONFUSION },
+      );
+      const { result: lumResult } = stepAtMoveend(lumConfused);
+      expect(lumResult.kind).toBe("halted");
+      if (lumResult.kind !== "halted") throw new Error("expected halted");
+      expect(lumResult.state.haltReason).toMatchObject({
+        kind: "unsupported-branch",
+        sourceLine: 3639,
+      });
     });
 
     it("MOVEEND_ITEM_EFFECTS_ALL passes through when no battler holds a matching item", () => {

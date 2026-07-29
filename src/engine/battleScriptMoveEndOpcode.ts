@@ -170,7 +170,7 @@ function moveEndItemEffectApplies(
         | STATUS1_FREEZE
         | STATUS1_PARALYSIS
         | STATUS1_TOXIC_POISON
-      )) !== 0;
+      )) !== 0 || (battlerState.status2 & STATUS2_CONFUSION) !== 0;
     case 23: // HOLD_EFFECT_RESTORE_STATS
       return battlerState.statStages.some((stage) => stage < 6);
     case 28: // HOLD_EFFECT_CURE_ATTRACT
