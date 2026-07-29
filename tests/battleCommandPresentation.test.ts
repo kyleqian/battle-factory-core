@@ -11,6 +11,9 @@ import {
   submitBattleCommandPresentationDecision,
   type BattleCommandPresentationState,
 } from "../src/engine/battleCommandPresentation.ts";
+import {
+  renderBattleCommandPresentation,
+} from "../src/engine/battleCommandPresentationRender.ts";
 import type {
   BattleDecisionReducer,
   BattleCommandRequest,
@@ -388,6 +391,58 @@ describe("battle-command phase-relative lifecycle", () => {
       moveSlot: 3,
       targetBattler: 1,
     });
+  });
+});
+
+describe("battle-command presentation renderer", () => {
+  it("selects blank/action/FIGHT layers only from the typed lifecycle and forwards the display cursor", () => {
+    const canonical = canonicalBoundary();
+    const base = createBattleCommandPresentation(canonical.request, canonical.rules);
+    const calls: string[] = [];
+    const framebuffer = new Uint8Array(4);
+    const assets = {
+      drawActionMenu(
+        receivedFramebuffer: Uint8Array,
+        presentation: BattleCommandPresentationState,
+        revealed: boolean,
+      ) {
+        expect(receivedFramebuffer).toBe(framebuffer);
+        calls.push(`action:${revealed}:${presentation.lifecycle.phaseElapsed}`);
+      },
+      drawFightMenu(
+        receivedFramebuffer: Uint8Array,
+        presentation: BattleCommandPresentationState,
+      ) {
+        expect(receivedFramebuffer).toBe(framebuffer);
+        calls.push(
+          `fight:${presentation.fightCursor}:${presentation.fightDisplayCursor}:${presentation.lifecycle.phaseElapsed}`,
+        );
+      },
+    };
+    const at = (
+      phase: BattleCommandPresentationState["lifecycle"]["phase"],
+      phaseElapsed: number,
+      cursors: readonly [0 | 1 | 2 | 3, 0 | 1 | 2 | 3] = [0, 0],
+    ): BattleCommandPresentationState => Object.freeze({
+      ...base,
+      lifecycle: Object.freeze({ phase, phaseElapsed }),
+      fightCursor: cursors[0],
+      fightDisplayCursor: cursors[1],
+    });
+
+    renderBattleCommandPresentation(framebuffer, at("action-enter", 5), assets);
+    renderBattleCommandPresentation(framebuffer, at("action-menu", 17), assets);
+    renderBattleCommandPresentation(framebuffer, at("fight-opening", 4), assets);
+    renderBattleCommandPresentation(framebuffer, at("fight-menu", 8, [3, 1]), assets);
+    renderBattleCommandPresentation(framebuffer, at("fight-closing", 5, [3, 3]), assets);
+
+    expect(calls).toEqual([
+      "action:false:5",
+      "action:true:17",
+      "action:true:4",
+      "fight:3:1:8",
+      "fight:3:3:5",
+    ]);
   });
 });
 

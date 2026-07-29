@@ -657,6 +657,13 @@ import {
   actionMenuAge,
   actionMenuBounceTick,
 } from "./battle2ActionMenu.ts";
+import type {
+  BattleCommandPresentationPhase,
+  BattleCommandPresentationState,
+} from "./battleCommandPresentation.ts";
+import {
+  renderBattleCommandPresentation,
+} from "./battleCommandPresentationRender.ts";
 import {
   battle2RockSlideMechanismPressTick,
   battle2Turn1State,
@@ -5871,16 +5878,17 @@ function drawComposedPlayerHealthbox(
   }
 }
 
-function drawBattle2ActionMenuWindow(
+function drawBattle2ActionMenuLayers(
   fb: Uint8Array,
   t: number,
   handoffTick: number,
   bounceShift = 0,
   bounceOverride?: { onixY2: number; healthboxY2: number },
+  revealedOverride?: boolean,
 ): void {
   const age = actionMenuAge(t, handoffTick);
   const playerVisualT = playerTrainerSendOutClock(t, handoffTick, "jenson");
-  const revealed = age > ACTION_MENU_BLANK_END_OFFSET;
+  const revealed = revealedOverride ?? age > ACTION_MENU_BLANK_END_OFFSET;
   const bounce = bounceOverride ?? (revealed
     ? menuIdleBounce(actionMenuBounceTick(t, handoffTick) - bounceShift)
     : { onixY2: 0, healthboxY2: 0 });
@@ -5908,11 +5916,100 @@ function drawBattle2ActionMenuWindow(
 }
 
 /**
- * Battle 2's first FIGHT interaction uses the generic submenu state/chrome
- * but composes the JENSON field live.  All clocks are relative to this
- * submenu instance: opening keeps the action-menu phase during the DMA wait,
- * the revealed submenu applies the shared two-tick drift, and B-close
- * resumes the action menu with the shared cumulative four-tick drift.
+ * Equivalence adapter for the legacy Battle-2 controller. The handoff age
+ * activates `action-enter`; every later phase clock is relative to the
+ * corresponding legacy open/close event. The typed renderer receives no
+ * encounter, turn, scene-elapsed, or trace-tick selector.
+ */
+function battle2CommandPresentationForRender(
+  age: number,
+  legacyElapsed: number,
+  sm: FightSubmenuState,
+): BattleCommandPresentationState {
+  let phase: BattleCommandPresentationPhase;
+  let phaseElapsed: number;
+
+  if (age <= ACTION_MENU_BLANK_END_OFFSET) {
+    phase = "action-enter";
+    phaseElapsed = age - ACTION_MENU_BLANK_START_OFFSET;
+  } else if (sm.openElapsed === null) {
+    phase = "action-menu";
+    phaseElapsed = age - (ACTION_MENU_BLANK_END_OFFSET + 1);
+  } else {
+    const openElapsed = legacyElapsed - sm.openElapsed;
+    if (openElapsed < FIGHT_SUBMENU_OPEN_DELAY) {
+      phase = "fight-opening";
+      phaseElapsed = openElapsed;
+    } else if (sm.closeElapsed === null) {
+      phase = "fight-menu";
+      phaseElapsed = openElapsed - FIGHT_SUBMENU_OPEN_DELAY;
+    } else {
+      const closeElapsed = legacyElapsed - sm.closeElapsed;
+      if (closeElapsed < FIGHT_SUBMENU_CLOSE_DELAY) {
+        phase = "fight-closing";
+        phaseElapsed = closeElapsed;
+      } else {
+        phase = "action-menu";
+        phaseElapsed = closeElapsed - FIGHT_SUBMENU_CLOSE_DELAY;
+      }
+    }
+  }
+
+  const legalMoveBySlot = Object.freeze([
+    Object.freeze({ kind: "use-move", moveSlot: 0, targetBattler: 1 }),
+    Object.freeze({ kind: "use-move", moveSlot: 1, targetBattler: 1 }),
+    Object.freeze({ kind: "use-move", moveSlot: 2, targetBattler: 1 }),
+    Object.freeze({ kind: "use-move", moveSlot: 3, targetBattler: 1 }),
+  ] as const);
+  const legalSwitchPartyIndexes = Object.freeze([1, 2] as const);
+  return Object.freeze({
+    request: Object.freeze({
+      kind: "command",
+      requestId: 0,
+      side: "player",
+      battler: 0,
+      legalDecisions: Object.freeze([
+        ...legalMoveBySlot,
+        Object.freeze({ kind: "switch", partyIndex: 1 }),
+        Object.freeze({ kind: "switch", partyIndex: 2 }),
+      ]),
+    }),
+    lifecycle: Object.freeze({ phase, phaseElapsed }),
+    field: Object.freeze({
+      player: Object.freeze({
+        side: "player",
+        battler: 0,
+        partyIndex: 0,
+        ...BATTLE2_ACTION_MENU_MODEL.player,
+        status: "none",
+        moveIds: sm.activeMonMoveset.moveIds,
+        currentPP: sm.activeMonMoveset.maxPP,
+        ppBonuses: 0,
+      }),
+      opponent: Object.freeze({
+        side: "trainer",
+        battler: 1,
+        partyIndex: 0,
+        ...BATTLE2_ACTION_MENU_MODEL.opponent,
+        status: "none",
+        moveIds: Object.freeze([72, 246, 28, 182] as const),
+        currentPP: Object.freeze([10, 5, 15, 10] as const),
+        ppBonuses: 0,
+      }),
+    }),
+    actionCursor: BATTLE2_ACTION_MENU_MODEL.cursor,
+    fightCursor: sm.cursor,
+    fightDisplayCursor: sm.displayCursor,
+    legalMoveBySlot,
+    legalSwitchPartyIndexes,
+    pendingDecision: null,
+  });
+}
+
+/**
+ * Battle 2's action/FIGHT window now dispatches through the typed command
+ * renderer. A-confirm deliberately remains on the established turn-resolution
+ * predecessor until a later slice owns that semantic handoff.
  */
 function drawBattle2FightSubmenuWindow(
   fb: Uint8Array,
@@ -5920,10 +6017,6 @@ function drawBattle2FightSubmenuWindow(
   handoffTick: number,
   sm: FightSubmenuState,
 ): void {
-  if (sm.openElapsed === null) {
-    drawBattle2ActionMenuWindow(fb, t, handoffTick);
-    return;
-  }
   if (sm.confirmElapsed !== null) {
     drawBattle2RockSlideTurn1Window(
       fb,
@@ -5934,21 +6027,51 @@ function drawBattle2FightSubmenuWindow(
     );
     return;
   }
-  const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
-  if (t < revealTick) {
-    drawBattle2ActionMenuWindow(fb, t, handoffTick);
-    return;
-  }
-  if (
-    sm.closeElapsed !== null &&
-    t >= TICK0 + sm.closeElapsed + FIGHT_SUBMENU_CLOSE_DELAY
-  ) {
-    drawBattle2ActionMenuWindow(fb, t, handoffTick, FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT);
-    return;
-  }
 
-  drawBattle2ActionMenuWindow(fb, t, handoffTick, FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT);
-  drawFightSubmenuChrome(fb, sm.displayCursor, false, false, sm.activeMonMoveset);
+  const presentation = battle2CommandPresentationForRender(
+    actionMenuAge(t, handoffTick),
+    t - TICK0,
+    sm,
+  );
+  const actionBounceShift =
+    presentation.lifecycle.phase === "action-menu" && sm.closeElapsed !== null
+      ? FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT
+      : presentation.lifecycle.phase === "fight-opening" && sm.reopenedFromClose
+        ? FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT
+        : 0;
+  const fightBounceShift = sm.reopenedFromClose
+    ? FIGHT_SUBMENU_REOPEN_BOUNCE_SHIFT
+    : FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+
+  renderBattleCommandPresentation(fb, presentation, {
+    drawActionMenu(framebuffer, _state, revealed) {
+      drawBattle2ActionMenuLayers(
+        framebuffer,
+        t,
+        handoffTick,
+        actionBounceShift,
+        undefined,
+        revealed,
+      );
+    },
+    drawFightMenu(framebuffer, state) {
+      drawBattle2ActionMenuLayers(
+        framebuffer,
+        t,
+        handoffTick,
+        fightBounceShift,
+        undefined,
+        true,
+      );
+      drawFightSubmenuChrome(
+        framebuffer,
+        state.fightDisplayCursor,
+        false,
+        false,
+        sm.activeMonMoveset,
+      );
+    },
+  });
 }
 
 function battle2Turn1BounceTick(
@@ -6021,7 +6144,7 @@ function drawBattle2RockSlideTurn1Window(
       t >= confirmTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY
         ? { onixY2: 0, healthboxY2: 0 }
         : undefined;
-    drawBattle2ActionMenuWindow(
+    drawBattle2ActionMenuLayers(
       fb,
       t,
       handoffTick,
