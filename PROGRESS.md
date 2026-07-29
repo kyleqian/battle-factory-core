@@ -114,6 +114,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   ROM-pinned. Supervisor verified union **497/5104** + build. Rung 13
   (R13-A/B/C/D) is complete; the sole named remainder is B-control
   equivalence behind the pre-existing `EFFECT_TOXIC` CheckBadMove barrier.
+- **Supervisor fold (post-step):** rung-14's cheapest window landed from
+  the side lane (`d67656c4`+`9e40b10f`): generic swap entry — record-derived
+  swap construction beside the canonical constructor (equal-state
+  equivalence pinned), pending `swapOffer` adapter, +21 copy-boundary
+  submission through `chooseRoundSwap`; canonical route now calls the
+  generic constructor. All eight committed OFF swap windows re-verified at
+  recorded counts (supervisor re-ran picker 101/101 independently). Union
+  green **497/5115**, build, censuses byte-identical, no ratchet movement.
 - **Next / notes:** supervisor resumes R13-D or its ordered queue. No
   unsupported/import ratchet, census byte, generated artifact, issue,
   presentation, animation, canonical recording, or tick branch moved.
