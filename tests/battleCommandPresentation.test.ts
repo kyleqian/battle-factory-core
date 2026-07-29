@@ -214,6 +214,16 @@ describe("battle-command presentation state construction", () => {
     expect(Object.isFrozen(state.legalSwitchPartyIndexes)).toBe(true);
   });
 
+  it("keeps fresh canonical-window construction identical through the zero-cursor seeding path", () => {
+    const { request, rules } = canonicalBoundary();
+    const freshLifecycle = createBattleCommandPresentation(request, rules);
+    const explicitlyResetLifecycle = createBattleCommandPresentation(request, rules, 0);
+
+    expect(explicitlyResetLifecycle).toEqual(freshLifecycle);
+    expect(projectPresentation(explicitlyResetLifecycle))
+      .toEqual(projectPresentation(freshLifecycle));
+  });
+
   it("adapts a noncanonical live field, party indexes, statuses, PP, and sparse exact legal decisions", () => {
     const canonical = canonicalBoundary();
     const player = canonical.rules.battlers[0];

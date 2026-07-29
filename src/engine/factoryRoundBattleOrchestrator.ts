@@ -2,12 +2,19 @@
  * Production-shaped owner of the generated Factory opponent -> fresh battle
  * -> terminal adapter -> round-controller seam.
  *
- * Presentation remains an acknowledgement protocol owned by roundController.
- * This module only starts a kernel after `battleStart` completes, accepts
- * player decisions at published boundaries, supplies trainer decisions from
- * the live Factory AI, and returns terminal state to `resolveRoundBattle`.
+ * Round presentation acknowledgements remain owned by roundController. During
+ * an active battle, this module also owns the live player command presentation,
+ * supplies trainer decisions from the Factory AI, and returns terminal state
+ * to `resolveRoundBattle`.
  */
 
+import type { GbaButton } from "../input.ts";
+import {
+  advanceBattleCommandPresentation,
+  createBattleCommandPresentation,
+  submitBattleCommandPresentationDecision,
+  type BattleCommandPresentationState,
+} from "./battleCommandPresentation.ts";
 import {
   healFactoryKernelParty,
   type BattleMon,
@@ -126,6 +133,16 @@ export type FactoryFacilityRngSegment = Readonly<{
   rngAfter: number;
 }>;
 
+export type FactoryBattleMoveSelectionCursors = readonly [
+  0 | 1 | 2 | 3,
+  0 | 1 | 2 | 3,
+  0 | 1 | 2 | 3,
+  0 | 1 | 2 | 3,
+];
+
+const RESET_MOVE_SELECTION_CURSORS: FactoryBattleMoveSelectionCursors =
+  Object.freeze([0, 0, 0, 0]);
+
 export type FactoryRoundBattleOrchestratorState = Readonly<{
   config: FactoryRoundBattleOrchestratorConfig;
   facilityState: FactoryFacilityState;
@@ -133,6 +150,10 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
   performedRentalSwap: boolean;
   round: RoundControllerState;
   battle: BattleState<FactoryFullTurnDecisionRules> | null;
+  /** Request-owned player command UI, replaced at each command boundary. */
+  battleCommandPresentation: BattleCommandPresentationState | null;
+  /** Source gMoveSelectionCursor: controller-owned, not request-owned. */
+  moveSelectionCursors: FactoryBattleMoveSelectionCursors;
   aiHistory: FactoryAiBattleHistory | null;
   initialRentalGeneration: FactoryInitialRentalGenerationResult | null;
   opponentGenerations: readonly FactoryOpponentGenerationResult[];
@@ -321,6 +342,8 @@ export function createFactoryRoundBattleOrchestrator(
     performedRentalSwap: false,
     round,
     battle: null,
+    battleCommandPresentation: null,
+    moveSelectionCursors: RESET_MOVE_SELECTION_CURSORS,
     aiHistory: null,
     initialRentalGeneration,
     opponentGenerations: Object.freeze([firstOpponent]),
@@ -349,9 +372,23 @@ function startCurrentBattle(
     opponentParty: asBattleScriptParty(asKernelParty(opponentRecords)),
   });
   const callStart = state.facilityRngCalls;
+  if (
+    started.boundary.kind !== "decision-required"
+    || started.boundary.request.kind !== "command"
+    || started.boundary.request.side !== "player"
+  ) {
+    return fail("fresh Factory battle must publish a player command boundary");
+  }
+  const moveSelectionCursors = RESET_MOVE_SELECTION_CURSORS;
   return Object.freeze({
     ...state,
     battle: started,
+    battleCommandPresentation: createBattleCommandPresentation(
+      started.boundary.request,
+      started.rules.rulesContext,
+      moveSelectionCursors[started.boundary.request.battler],
+    ),
+    moveSelectionCursors,
     aiHistory: createFactoryAiBattleHistory(started.rules.rulesContext),
     facilityRngCalls: callStart + started.rng.calls,
     activeBattleCallStart: callStart,
@@ -483,11 +520,48 @@ function finishBattle(
     performedRentalSwap: persistRentalSwap ? false : state.performedRentalSwap,
     round,
     battle: null,
+    battleCommandPresentation: null,
     aiHistory,
     rngSegments: Object.freeze([...state.rngSegments, segment]),
     facilityRngCalls: segment.callEnd,
     activeBattleCallStart: null,
   });
+}
+
+function resetMoveSelectionCursorsForSwitchIns(
+  cursors: FactoryBattleMoveSelectionCursors,
+  before: BattleState<FactoryFullTurnDecisionRules>,
+  after: BattleState<FactoryFullTurnDecisionRules>,
+): FactoryBattleMoveSelectionCursors {
+  let next: [0 | 1 | 2 | 3, 0 | 1 | 2 | 3, 0 | 1 | 2 | 3, 0 | 1 | 2 | 3]
+    | null = null;
+  const battlersCount = after.rules.rulesContext.battleTopology.battlersCount;
+  for (let battler = 0; battler < battlersCount; battler += 1) {
+    if (
+      before.rules.rulesContext.battlers[battler]!.partyIndex
+      !== after.rules.rulesContext.battlers[battler]!.partyIndex
+    ) {
+      next ??= [...cursors];
+      next[battler] = 0;
+    }
+  }
+  return next === null ? cursors : Object.freeze(next);
+}
+
+function commandPresentationForBoundary(
+  battle: BattleState<FactoryFullTurnDecisionRules>,
+  cursors: FactoryBattleMoveSelectionCursors,
+): BattleCommandPresentationState | null {
+  if (
+    battle.boundary.kind !== "decision-required"
+    || battle.boundary.request.kind !== "command"
+    || battle.boundary.request.side !== "player"
+  ) return null;
+  return createBattleCommandPresentation(
+    battle.boundary.request,
+    battle.rules.rulesContext,
+    cursors[battle.boundary.request.battler],
+  );
 }
 
 function driveTrainerBoundary(
@@ -497,6 +571,13 @@ function driveTrainerBoundary(
 ): FactoryRoundBattleOrchestratorState {
   let nextBattle = battle;
   let nextHistory = history;
+  let moveSelectionCursors = state.battle === null
+    ? state.moveSelectionCursors
+    : resetMoveSelectionCursorsForSwitchIns(
+      state.moveSelectionCursors,
+      state.battle,
+      nextBattle,
+    );
   while (
     nextBattle.boundary.kind === "decision-required"
     && nextBattle.boundary.request.kind === "command"
@@ -510,6 +591,11 @@ function driveTrainerBoundary(
         trainerOpponentId: state.opponentGenerations.at(-1)!.trainerId,
       },
       reduceFactoryFullTurnDecision,
+    );
+    moveSelectionCursors = resetMoveSelectionCursorsForSwitchIns(
+      moveSelectionCursors,
+      nextBattle,
+      ai.transition.state,
     );
     nextBattle = ai.transition.state;
     nextHistory = ai.history;
@@ -535,9 +621,53 @@ function driveTrainerBoundary(
   return Object.freeze({
     ...state,
     battle: nextBattle,
+    battleCommandPresentation: commandPresentationForBoundary(
+      nextBattle,
+      moveSelectionCursors,
+    ),
+    moveSelectionCursors,
     aiHistory: nextHistory,
     facilityRngCalls: state.activeBattleCallStart! + nextBattle.rng.calls,
   });
+}
+
+/**
+ * Advances the live request-owned player command UI. A completed move choice
+ * crosses the same submitBattleDecision bridge as every other battle client;
+ * the resulting trainer boundaries remain automatically driven.
+ */
+export function advanceFactoryRoundBattleCommand(
+  state: FactoryRoundBattleOrchestratorState,
+  newKeys: ReadonlySet<GbaButton>,
+): FactoryRoundBattleOrchestratorState {
+  const battle = state.battle;
+  const presentation = state.battleCommandPresentation;
+  const history = state.aiHistory;
+  if (battle === null || presentation === null || history === null) {
+    return fail("battle-command input requires a published player command presentation");
+  }
+  const advanced = advanceBattleCommandPresentation(presentation, newKeys);
+  const moveSelectionCursors = Object.freeze(
+    state.moveSelectionCursors.map((cursor, battler) =>
+      battler === advanced.request.battler ? advanced.fightCursor : cursor),
+  ) as FactoryBattleMoveSelectionCursors;
+  const transition = submitBattleCommandPresentationDecision(
+    battle,
+    advanced,
+    reduceFactoryFullTurnDecision,
+  );
+  if (transition === null) {
+    return Object.freeze({
+      ...state,
+      battleCommandPresentation: advanced,
+      moveSelectionCursors,
+    });
+  }
+  return driveTrainerBoundary(
+    Object.freeze({ ...state, moveSelectionCursors }),
+    transition.state,
+    history,
+  );
 }
 
 export function submitFactoryRoundPlayerDecision(
