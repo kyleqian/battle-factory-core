@@ -1,5 +1,65 @@
 # Animation coverage
 
+## MOVE_BUBBLE_BEAM evidence checkpoint; production remains unsupported (2026-07-28)
+
+**Verdict:** Evidence-only checkpoint. `MOVE_BUBBLE_BEAM` remains unsupported;
+it is not staged, partial, or exact, and `ANIMATION_COVERAGE.json` is
+unchanged. Complete legal Scene-ON mechanicLab parties use the source-verified
+Factory set-42 `FRONTIER_MON_SURSKIT` (species **311**, Bubble Beam move
+**61**, Relaxed/Mystic Water source identity) as the constrained carrier
+against ONIX, in both player-back and opponent-front orientations. The
+complete source-owned script body through first inactive cleanup is **239/239**
+frames **77–315** player-back and **81–319** opponent-front, reproduced twice
+fresh. Evidence/raw-RGB digests are player
+`bbdd5e47…76e7e0` / `ebdcf7ed…090baa`; opponent
+`c56465ad…e36662` / `776ffc9f…d8a8bd`.
+
+**Evidence/source:** the audit pins `Move_BUBBLE_BEAM`, BUBBLE and
+SMALL_BUBBLES loads, target monbg/split priority/12:8 alpha, all three
+`BubblebeamCreateBubbles` calls (six distinct argv each; **18**
+`gWaterBubbleProjectileSpriteTemplate` lifecycles), their BUBBLE sound family,
+`AnimWaterBubbleProjectile` affine/animation/three-step callback body,
+`AnimTask_SwayMon(0,3,3072,8,target)`, waits, and `WaterBubblesEffectShort`'s
+six `gWaterBubbleSpriteTemplate` lifecycles plus BUBBLE3 family. The portable
+comparator reruns both orientations twice through `run-mgba-probe.py` and
+byte-pins script offsets, tasks/sprites, software→hardware OAM, affine
+matrices, BUBBLE/SMALL_BUBBLES tagged palettes, relevant registers, SE1/SE2
+pans, raw RGB, and cleanup. BUBBLE/Surskit assets regenerate from pinned
+source; SMALL_BUBBLES is byte-equal to the already-proved Water Gun asset.
+
+**Exact implementation remainder:** port the complete source-relative reducer,
+typed Scene-ON seam, asset compositor, and every-frame shared framebuffer
+contract—no pixel fitting or recordings—then independently accept it. Bubble
+`MOVE_BUBBLE` outside Factory remains unsupported, and Secret Power's pond dispatch to
+Bubble Beam remains unsupported without independent acceptance. No battle
+logic, controller/RNG/turn/facility state, unsupported barrier, boundary list,
+or sibling status changed.
+
+## MOVE_MUD_SHOT promoted exact; complete BROWN_ORB body closed (2026-07-28)
+
+**Verdict:** `MOVE_MUD_SHOT` is exact. Legal set-111 KRABBY→ONIX Scene-ON
+parties pass the complete source body through first inactive cleanup at
+**145/145** frames **212–356** player-back and **144/144** frames **302–445**
+opponent-front, twice fresh. Evidence/raw-RGB digests are player
+`cef2f455…034c6` / `a9dcc157…c0b3f` and opponent `85fe40b0…840` /
+`52bd4b4b…a443`.
+
+**Model/evidence:** the pure source-relative reducer and typed seam port
+BROWN_ORB load/free; 11 calls creating exactly 22 sinus orbs;
+StartSinAnimTimer; both ShakeMon tasks; target monbg/split priority/12:8
+alpha; the Whirlpool pan sweep; waits and cleanup. Source-extracted KRABBY
+front/back and BROWN_ORB plus shared ONIX/chrome pass software→hardware OAM,
+matrices, tagged palettes, registers, both audio players/pans, raw RGB, and
+the production framebuffer on every frame. No absolute tick/input delay,
+move/battle number, fitting, pixel exception, canonical recording import, or
+battle/controller state was added.
+
+**Boundary/next:** the new `brown-orb-mud-shot` track keeps
+`MOVE_SECRET_POWER` unsupported because Factory building dispatches Strength.
+Coverage is **73 exact / 0 partial / 0 staged / 203 unsupported**. Next
+bounded target: select the next supervisor-ranked component track; no sibling
+earned acceptance from shared code alone.
+
 ## MOVE_REVERSAL promoted exact; complete BLUE_ORB body closed (2026-07-28)
 
 **Verdict:** `MOVE_REVERSAL` is exact. The legally corrected challenge-2

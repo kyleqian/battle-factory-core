@@ -547,6 +547,7 @@ import twineedleAsset from "../animation/assets/twineedle.json" with { type: "js
 import spikeCannonAsset from "../animation/assets/spike-cannon.json" with { type: "json" };
 import sonicBoomAsset from "../animation/assets/sonic-boom.json" with { type: "json" };
 import smokescreenAsset from "../animation/assets/smokescreen.json" with { type: "json" };
+import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json" };
 import reversalAsset from "../animation/assets/reversal.json" with { type: "json" };
 import tailGlowAsset from "../animation/assets/tail-glow.json" with { type: "json" };
 import dizzyPunchAsset from "../animation/assets/dizzyPunch.json" with { type: "json" };
@@ -700,6 +701,7 @@ import {
   sceneOnSpikeCannonView,
   sceneOnSonicBoomView,
   sceneOnSmokescreenView,
+  sceneOnMudShotView,
   sceneOnReversalView,
   sceneOnTailGlowView,
   sceneOnDizzyPunchView,
@@ -748,6 +750,7 @@ import {
   type SceneOnSpikeCannonConfig,
   type SceneOnSonicBoomConfig,
   type SceneOnSmokescreenConfig,
+  type SceneOnMudShotConfig,
   type SceneOnReversalConfig,
   type SceneOnTailGlowConfig,
   type SceneOnDizzyPunchConfig,
@@ -1070,6 +1073,11 @@ const smokescreenArt = smokescreenAsset as {
   impact: { tileset: Tileset; palette: RgbColor[] };
   koffingBack: { tileset: Tileset; palette: RgbColor[] };
   koffingFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const mudShotArt = mudShotAsset as {
+  brownOrb: { tileset: Tileset; palette: RgbColor[] };
+  krabbyBack: { tileset: Tileset; palette: RgbColor[] };
+  krabbyFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const reversalArt = reversalAsset as {
   blueOrb: { tileset: Tileset; palette: RgbColor[] };
@@ -16694,6 +16702,145 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "VIGOROTH used" : "Foe VIGOROTH used",
       "REVERSAL!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "MUD_SHOT") {
+    const mudState =
+      state as SceneOnMovePresentationState<SceneOnMudShotConfig>;
+    const view = sceneOnMudShotView(mudState);
+    // Animation callbacks run after BuildOamBuffer, so scanout consumes the
+    // immediately preceding software battler/orb state.
+    const displayed = sceneOnMudShotView({
+      ...mudState,
+      age: view.battlerDisplayAge,
+    });
+    const playerToOpponent =
+      view.attacker.species === "KRABBY"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "KRABBY"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged MUD_SHOT pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const krabbySource = playerToOpponent
+      ? mudShotArt.krabbyBack : mudShotArt.krabbyFront;
+    const krabby = playerToOpponent
+      ? krabbySource
+      : {
+          ...krabbySource,
+          tileset: subTileset(krabbySource.tileset, 0, 8),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const nonObjTarget2 = fb.slice();
+    const attackerHardwareOn = view.age === 8
+      || (
+        view.age >= 11 && view.age <= 96
+        && (view.age - 11) % 4 < 2
+      );
+    const targetHardwareOn = view.age >= 42 && view.age <= 123
+      && (view.age - 42) % 4 < 2;
+    const attackerHardwareOffset = attackerHardwareOn
+      ? { x2: 0, y2: 2 } : { x2: 0, y2: 0 };
+    const targetHardwareOffset = targetHardwareOn
+      ? { x2: 3, y2: 0 } : { x2: 0, y2: 0 };
+    const targetHardwareBaseline = playerToOpponent && view.age <= 39 ? 1 : 0;
+    drawSpriteSheet(
+      nonObjTarget2,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x
+        + targetHardwareBaseline + targetHardwareOffset.x2,
+      view.target.geometry.spriteCorner.y + targetHardwareOffset.y2,
+    );
+    const drawKrabby = () => drawSpriteSheet(
+      fb,
+      krabby.tileset,
+      krabby.palette,
+      view.attacker.geometry.spriteCorner.x + attackerHardwareOffset.x2,
+      view.attacker.geometry.spriteCorner.y + attackerHardwareOffset.y2,
+    );
+    const drawOnix = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x
+        + targetHardwareBaseline + targetHardwareOffset.x2,
+      view.target.geometry.spriteCorner.y + targetHardwareOffset.y2,
+    );
+    drawOnix();
+    drawKrabby();
+    for (const orb of displayed.orbs.slice().sort(
+      (left, right) => right.oamSlot - left.oamSlot,
+    )) {
+      if (!displayed.alpha) continue;
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        nonObjTarget2,
+        subTileset(mudShotArt.brownOrb.tileset, orb.frame * 2, 2),
+        mudShotArt.brownOrb.palette,
+        orb.x + orb.x2,
+        orb.y + orb.y2,
+        256,
+        0,
+        0,
+        256,
+        displayed.alpha.eva,
+        displayed.alpha.evb,
+        false,
+      );
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "KRABBY",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "KRABBY" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "KRABBY used" : "Foe KRABBY used",
+      "MUD SHOT!",
       99,
     );
     return;
