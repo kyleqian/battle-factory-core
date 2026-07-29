@@ -169,6 +169,7 @@ import {
 } from "./battleMenu.ts";
 import { activeMonMoveset, createBattleSetup, rentalMoveset, type BattleSetupState } from "./battleSetup.ts";
 import { createFactoryCorpusParty } from "./factoryCorpusParty.ts";
+import { factoryTrainerPresentationForOpponent } from "./factoryTrainerPresentation.ts";
 import {
   advancePostwin,
   acceptPostwinContinuation,
@@ -348,6 +349,9 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   let battle2Turn1 = state.battle2Turn1 ?? null;
   let factorySwap = state.factorySwap ?? null;
   let factoryTerminal = state.factoryTerminal;
+  const currentTrainerPresentation = factoryTrainerPresentationForOpponent(
+    state.roundController?.rules.currentOpponent,
+  ) ?? undefined;
   const pendingTerminalCommand = state.roundController?.presentation?.command;
   if (
     factoryTerminal === null &&
@@ -483,7 +487,10 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         advancedPrebattleRoom.elapsed === WARP_FADE_TO_ROOM_ELAPSED
       ) {
         prebattleRoom = null;
-        battleRoom = INITIAL_BATTLE_2_ROOM_STATE;
+        battleRoom = {
+          ...INITIAL_BATTLE_2_ROOM_STATE,
+          trainerPresentation: currentTrainerPresentation,
+        };
       }
     } else if (battleRoom) {
       if (battleRoomQuoteInputReady(battleRoom) && newKeys.has("A")) {
@@ -507,10 +514,12 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
             "jenson",
             nextPostwin.playerPartyHp,
           );
+          const trainerPresentation = battleRoom.trainerPresentation;
           battleRoom = null;
           battleScene = {
             ...INITIAL_BATTLE_SCENE_STATE,
             encounter: "jenson",
+            trainerPresentation,
             fightSubmenu: {
               ...CLOSED_FIGHT_SUBMENU_STATE,
               activeMonMoveset: battleSetup.activeMonMoveset,
@@ -701,6 +710,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn17OutcomeDismissEligible(
         battleScene.elapsed + 1,
         battleScene.turn17KoDismissElapsed ?? null,
+        battleScene.trainerPresentation,
       )
     ) {
       battleScene = {
@@ -718,6 +728,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn17LossDismissEligible(
         battleScene.elapsed + 1,
         battleScene.turn17OutcomeDismissElapsed ?? null,
+        battleScene.trainerPresentation,
       )
     ) {
       battleScene = {
@@ -770,6 +781,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         ? sendOutHandoffTick(
             SCENE_TICK0 + battleScene.sendOutPressElapsed,
             battleScene.encounter,
+            battleScene.trainerPresentation,
           )
         : null;
     const partySendOutElapsed = battleScene.turn15PartySelect?.sendOutElapsed;
@@ -1221,10 +1233,12 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // the ground-truth trace's own window start (trace tick 1040).
       if (battleRoom?.phase === "settled" && battleRoom.elapsed === BATTLE_SCENE_HANDOFF_ELAPSED) {
         battleSetup = createBattleSetup(draftScreen, battleRoom.encounter ?? "destin");
+        const trainerPresentation = battleRoom.trainerPresentation;
         battleRoom = null;
         battleScene = {
           ...INITIAL_BATTLE_SCENE_STATE,
           encounter: battleSetup.encounter,
+          trainerPresentation,
           fightSubmenu: {
             ...CLOSED_FIGHT_SUBMENU_STATE,
             activeMonMoveset: battleSetup.activeMonMoveset,
@@ -1272,7 +1286,10 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // ground-truth trace's room actually becomes visible again.
       if (prebattleRoom?.phase === "warpFade" && prebattleRoom.elapsed === WARP_FADE_TO_ROOM_ELAPSED) {
         prebattleRoom = null;
-        battleRoom = INITIAL_BATTLE_ROOM_STATE;
+        battleRoom = {
+          ...INITIAL_BATTLE_ROOM_STATE,
+          trainerPresentation: currentTrainerPresentation,
+        };
       }
     }
     return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, rngValue };
