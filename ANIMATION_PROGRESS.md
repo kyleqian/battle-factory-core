@@ -1,5 +1,32 @@
 # Animation coverage
 
+## MOVE_HYPNOSIS bounded partial; GOLD_RING track proven short of framebuffer (2026-07-29)
+
+**Verdict:** `MOVE_HYPNOSIS` is a durable partial, not exact. The Level-50
+eligibility graph rejects source set 38 Hoothoot; challenge-1 set **265
+POLITOED_1** is the lowest legal carrier. Complete legal Scene-ON parties
+pass the entire body through first inactive cleanup twice fresh in both
+orientations: player-back **74–242 (169/169)**, evidence/raw
+`6b164293b9a3ad086504808422b0f95ab07ccd84595eb87b3ca908e34189b0c4` /
+`7c06a1b4825562841f65768ae6b9a97374dba4a727a0ecd59f28220deddf10a1`;
+opponent-front **78–245 (168/168)**,
+`8baa59de6a99008bebd74e72b4089c6146f5f98fefd03ca7805a84412b4f100b` /
+`69b6f767aef05462568e2229c129b620b2ebfa6da399d072507eaa438ee453ec`.
+
+**Landed / gate:** source extraction pins Politoed front/back + GoldRing.
+The pure reducer and portable comparator prove all six 27-tick
+`gGoldRingSpriteTemplate` paths, side geometry, psychic-BG BLDY, blend-task
+lifetime, sound triggers, waits/cleanup, OAM/matrices, palettes/tags,
+registers/audio fields, unchanged gameplay state, and raw RGB. Exact remains
+blocked only on a typed seam plus every **169/168** production shared
+framebuffer matching: psychic palette rotation, target tint, ring ordering/
+latches, Politoed idle latches, audio semantics, and cleanup. `MOVE_PSYBEAM`
+remains unsupported: lowest carrier set **145 SPINDA**; eleven shorter rings,
+SwayMon, two-leg tint, and `LoopSEAdjustPanning 3/4/0/15` need independent
+dense evidence. Coverage is **95 exact / 1 partial / 0 staged / 180
+unsupported**. No boundary list, barrier, canonical allowlist, sleep,
+damage, RNG, controller, turn, or facility state changed.
+
 ## MOVE_HYDRO_PUMP promoted exact; WATER_ORB repair complete (2026-07-29)
 
 **Verdict:** `MOVE_HYDRO_PUMP` is exact. Complete legal three-mon Scene-ON
