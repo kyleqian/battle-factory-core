@@ -200,6 +200,7 @@ describe("source-shaped Battle Script rules context", () => {
       "battleTextBuff1Move",
       "battleTextBuff1PaydayMoney",
       "battleTextBuff1Species",
+      "battleTextBuff1Status",
       "battleTextBuff1Type",
       "battleTextBuff2ByteNumber",
       "battleTextBuff2Item",

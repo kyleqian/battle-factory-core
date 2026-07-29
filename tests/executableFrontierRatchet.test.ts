@@ -136,7 +136,11 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // and synchronous non-certain SetMoveEffect flinch mutation. The five
   // remaining barriers belong to states 0, 2, 4, 5, and 11; state 12 has
   // none.
-  ["src/engine/battleScriptMoveEndOpcode.ts", 5],
+  // 5 -> 4 (MOVEEND_IMMUNITY_ABILITIES): the eight status-curing abilities
+  // now clear source-exact battle/party state, emit the controller status
+  // write, run BattleScript_AbilityCuredStatus, and rescan state 4 after its
+  // return. The four remaining barriers belong to states 0, 2, 5, and 11.
+  ["src/engine/battleScriptMoveEndOpcode.ts", 4],
   ["src/engine/battleScriptJumpifbyteOpcode.ts", 1],
   // Forced-switch ground truth §4 slice 1: one operand-shape barrier, shared
   // by both the unmodeled-memWord and unmodeled-value cases (e.g.
