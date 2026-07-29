@@ -31,9 +31,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   pin Swift Swim, Chlorophyll, opposing Cloud Nine, paralysis, Macho Brace,
   and the existing one-draw-only speed-tie contract. Census identity aliases
   close exactly the two assigned ability rows.
-- **Next:** keep the supervisor's order: falsify the scout's two-turn
-  `gRandomTurnNumber` gap before implementing Quick Claw; then choose Quick
-  Claw or the ON_DAMAGE contact family.
+- **Supervisor fold (same round, `ece08e49`):** the paired side-lane probe
+  REFUTED the RNG-gap hypothesis — the production engine is genuinely one
+  draw short at every clean turn boundary (`BattleTurnPassed`'s
+  unconditional `gRandomTurnNumber = Random()`, attributed at positions
+  5/19 of a 24-draw two-turn ROM ledger, before each turn's AI draws;
+  `turnEndRngGroups` is legacy fixture-only). Full evidence + fix shape:
+  `docs/ability-item-speed-scout.md` §B5; mechanical recheck
+  `tools/probe/verify-turn-boundary-rng-gap.py` (supervisor re-ran: PASS).
+  The probe's OFF fixture also corroborated this entry's wiring on real
+  hardware: turn-2 order flips under rain exactly as predicted.
+- **Next:** model the boundary draw + persist it as the rules-context
+  `gRandomTurnNumber` equivalent, then Quick Claw reads it (closes hold
+  effects at 42/42); then the ON_DAMAGE contact family (scout in flight).
 - **Notes:** source citations were re-read. ROM `WEATHER_HAS_EFFECT` also
   requires `hp != 0`; this is vacuous at action selection because the
   full-turn reducer resumes only after fainted-actions installs live singles
