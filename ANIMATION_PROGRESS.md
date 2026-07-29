@@ -1,28 +1,31 @@
 # Animation coverage
 
-## MOVE_ROLLING_KICK source evidence complete; compositor remains (2026-07-29)
+## MOVE_ROLLING_KICK promoted exact; SlidingKick representative complete (2026-07-29)
 
-**Verdict:** `MOVE_ROLLING_KICK` remains unsupported, with its source side
-ready for the next exact repair. Source and generated inventory prove
+**Verdict:** `MOVE_ROLLING_KICK` is exact. Source and generated inventory prove
 challenge-1 set **233 `FRONTIER_MON_HITMONLEE_1`** is the sole/lowest legal
-Level-50 carrier. Complete legal Scene-ON parties pass the full 55-frame
-source body through first inactive cleanup twice fresh in both orientations:
-player-back **81–135**, evidence/raw
+Level-50 carrier. Complete legal Scene-ON parties pass the whole 55-frame body
+through first inactive cleanup twice fresh in both orientations: player-back
+**81–135 (55/55)**, evidence/raw
 `3f35463979c0971b6432ed8695caa1130e21890d07ea4edb80b6685271932f92` /
 `76c1741106018ee425f40505c56af234d7d033562dc8bd3c84386e465d9d7ef3`;
-opponent-front **85–139**,
+opponent-front **85–139 (55/55)**,
 `4fb8c542ab55e346e4f22129cfa10f028d1a43ff8be0ee6e1e1d8b4160849690` /
 `237e0cd3062b05c1ffa91a1ecc2e03a60ba1f195012ad079f0980933ea12d5a1`.
 
-**Evidence / next:** fixture-pinned probes prove `gSlidingKickSpriteTemplate`,
-elliptical attacker motion, both slide callbacks, hitsplat, target ShakeMon,
-alpha registers, side-relative audio, immutable battle state, and raw RGB.
-Exact still requires the source-relative reducer, typed seam, extracted
-Hitmonlee art, production compositor/display latches, and **55/55** production
-framebuffer equality twice per orientation. `MOVE_LOW_KICK` remains
-unsupported with target-relative geometry and its distinct rotation body.
-Coverage remains **97 exact / 0 partial / 0 staged / 179 unsupported**; no
-gameplay, boundary, barrier, or canonical allowlist changed.
+**Model/evidence:** the pure reducer, narrow typed seam, extracted Hitmonlee
+art, and production compositor port attacker elliptical motion, both slide
+callbacks, attacker-relative `gSlidingKickSpriteTemplate`, affine hitsplat,
+target ShakeMon, monbg/alpha, side-relative audio, windows/text, the task
+two-interval versus sprite one-interval OAM latches, and cleanup.
+`rollingKickPortable.ts` proves **55/55** reducer/component/seam/cleanup and
+production shared-framebuffer equality twice per orientation.
+
+**Sibling / next:** `MOVE_LOW_KICK` remains unsupported: target-relative
+geometry, `AnimTask_RotateMonSpriteToSide`, and its distinct timing/body need
+independent complete dense both-orientation acceptance. Coverage is **98 exact
+/ 0 partial / 0 staged / 178 unsupported**. No gameplay, boundary, barrier,
+canonical allowlist, damage, RNG, turn, controller, or facility state changed.
 
 ## MOVE_MEGA_PUNCH promoted exact; MegaPunchKick track established (2026-07-29)
 

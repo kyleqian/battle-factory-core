@@ -278,6 +278,10 @@ import {
   type MegaPunchState,
 } from "./megaPunch.ts";
 import {
+  rollingKickAtAge,
+  type RollingKickState,
+} from "./rollingKick.ts";
+import {
   swaggerAtAge,
   type SwaggerState,
 } from "./swagger.ts";
@@ -557,6 +561,7 @@ export interface SceneOnPresentationBattler {
     | "ZUBAT"
     | "RATICATE"
     | "CACTURNE"
+    | "HITMONLEE"
     | "RATTATA"
     | "SKIPLOOM"
     | "RELICANTH"
@@ -1158,6 +1163,13 @@ export interface SceneOnMegaPunchConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnRollingKickConfig {
+  readonly move: "ROLLING_KICK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnBiteConfig {
   readonly move: "BITE";
   readonly attacker: SceneOnPresentationBattler;
@@ -1726,6 +1738,7 @@ export type SceneOnMoveConfig =
   | SceneOnPoisonFangConfig
   | SceneOnHyperFangConfig
   | SceneOnMegaPunchConfig
+  | SceneOnRollingKickConfig
   | SceneOnBiteConfig
   | SceneOnHeadbuttConfig
   | SceneOnWhirlwindConfig
@@ -1920,6 +1933,12 @@ export interface SceneOnHyperFangView extends HyperFangEffect {
 }
 
 export interface SceneOnMegaPunchView extends MegaPunchState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnRollingKickView extends RollingKickState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3429,6 +3448,27 @@ export function sceneOnMegaPunchView(
     ...megaPunchAtAge(
       state.age,
       state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first active `Move_ROLLING_KICK` source display. */
+export function sceneOnRollingKickView(
+  state: SceneOnMovePresentationState,
+): SceneOnRollingKickView {
+  if (state.config.move !== "ROLLING_KICK") {
+    throw new Error(
+      `expected ROLLING_KICK presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...rollingKickAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
       state.config.target.geometry.animationCenter,
     ),
   };

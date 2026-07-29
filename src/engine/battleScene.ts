@@ -581,6 +581,7 @@ import sludgeBombAsset from "../animation/assets/sludgeBomb.json" with { type: "
 import poisonFangAsset from "../animation/assets/poisonFang.json" with { type: "json" };
 import hyperFangAsset from "../animation/assets/hyperFang.json" with { type: "json" };
 import megaPunchAsset from "../animation/assets/megaPunch.json" with { type: "json" };
+import rollingKickAsset from "../animation/assets/rollingKick.json" with { type: "json" };
 import swaggerAsset from "../animation/assets/swagger.json" with { type: "json" };
 import tauntAsset from "../animation/assets/taunt.json" with { type: "json" };
 import scaryFaceAsset from "../animation/assets/scary-face.json" with { type: "json" };
@@ -740,6 +741,7 @@ import {
   sceneOnPoisonFangView,
   sceneOnHyperFangView,
   sceneOnMegaPunchView,
+  sceneOnRollingKickView,
   sceneOnBiteView,
   sceneOnHeadbuttView,
   sceneOnWhirlwindView,
@@ -1343,6 +1345,10 @@ const hyperFangArt = hyperFangAsset as {
 const megaPunchArt = megaPunchAsset as {
   cacturneBack: { tileset: Tileset; palette: RgbColor[] };
   cacturneFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const rollingKickArt = rollingKickAsset as {
+  hitmonleeBack: { tileset: Tileset; palette: RgbColor[] };
+  hitmonleeFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const swaggerArt = swaggerAsset as {
   breath: { tileset: Tileset; palette: RgbColor[] };
@@ -20637,6 +20643,123 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "CACTURNE used" : "Foe CACTURNE used",
       "MEGA PUNCH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "ROLLING_KICK") {
+    const view = sceneOnRollingKickView(state);
+    // RunTasks/AnimateSprites update software state after the current OAM
+    // transfer; the shared framebuffer therefore consumes the prior reducer
+    // age for battler offsets and both transient sprites.
+    const priorDisplayed = sceneOnRollingKickView({ ...state, age: state.age - 1 });
+    // The elliptical task mutates the battler after this frame's OAM build;
+    // the subsequent sprite-driven slide moves before OAM build. The command
+    // handoff is therefore two ages behind through age 25, then one.
+    const attackerDisplayed = state.age >= 10 && state.age <= 25
+      ? sceneOnRollingKickView({ ...state, age: state.age - 2 })
+      : priorDisplayed;
+    const playerToOpponent =
+      view.attacker.species === "HITMONLEE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "HITMONLEE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged ROLLING_KICK pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    drawExtractedTileBg(fb, {
+      tileset: battleBg.static.tileset,
+      tilemap: battleBg.static.tilemap,
+      subpalettes: battleBg.palette,
+    });
+    const hitmonlee = playerToOpponent
+      ? rollingKickArt.hitmonleeBack
+      : rollingKickArt.hitmonleeFront;
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const earlyTargetIdle = playerToOpponent && state.age <= 32
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const targetOffset = priorDisplayed.targetOffset.x2 !== 0
+      || priorDisplayed.targetOffset.y2 !== 0
+      ? priorDisplayed.targetOffset
+      : earlyTargetIdle;
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + targetOffset.x2,
+      view.target.geometry.spriteCorner.y + targetOffset.y2,
+    );
+    drawSpriteSheet(
+      fb,
+      hitmonlee.tileset,
+      hitmonlee.palette,
+      view.attacker.geometry.spriteCorner.x + attackerDisplayed.attackerOffset.x2,
+      view.attacker.geometry.spriteCorner.y + attackerDisplayed.attackerOffset.y2,
+    );
+    if (priorDisplayed.slidingFoot) {
+      drawSpriteSheet(
+        fb,
+        subTileset(battleAnimHandsAndFeet.tileset, 4, 4),
+        battleAnimHandsAndFeet.palette,
+        priorDisplayed.slidingFoot.x + priorDisplayed.slidingFoot.x2 - 16,
+        priorDisplayed.slidingFoot.y + priorDisplayed.slidingFoot.y2 - 16,
+      );
+    }
+    if (priorDisplayed.hitsplat && view.alpha) {
+      drawSpriteSheetAffineStretchBlendedOverFb(
+        fb,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        priorDisplayed.hitsplat.x - 16,
+        priorDisplayed.hitsplat.y - 16,
+        372,
+        372,
+        view.alpha.eva,
+        view.alpha.evb,
+        true,
+        "live",
+      );
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "HITMONLEE",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "HITMONLEE" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "HITMONLEE used" : "Foe HITMONLEE used",
+      "ROLLING KICK!",
       99,
     );
     return;

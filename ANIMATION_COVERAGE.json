@@ -2,6 +2,34 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_ROLLING_KICK",
+      "status": "exact",
+      "covered": [
+        "source and generated-inventory audits prove challenge-1 FRONTIER_MON_HITMONLEE_1 set 233 is the sole and therefore lowest legal Level-50 carrier (species 106, Rolling Kick 27, Adamant, HP+Defense, Black Belt); complete legal three-Pokemon Scene-ON parties stage Hitmonlee against Onix in both orientations",
+        "fresh dense probes cover the complete 55-frame Move_ROLLING_KICK body through first inactive cleanup twice reproducibly in both orientations: player-back frames 81-135 pass 55/55 reducer/component/seam/cleanup and production-framebuffer equality with evidence 3f35463979c0971b6432ed8695caa1130e21890d07ea4edb80b6685271932f92 and raw RGB 76c1741106018ee425f40505c56af234d7d033562dc8bd3c84386e465d9d7ef3; opponent-front frames 85-139 pass 55/55 with evidence 4fb8c542ab55e346e4f22129cfa10f028d1a43ff8be0ee6e1e1d8b4160849690 and raw RGB 237e0cd3062b05c1ffa91a1ecc2e03a60ba1f195012ad079f0980933ea12d5a1",
+        "the pure source-relative reducer and narrow typed Scene-ON seam port attacker TranslateMonEllipticalRespectSide, SlideMonToOffset and SlideMonToOriginalPos, attacker-relative gSlidingKickSpriteTemplate, IMPACT hitsplat, target AnimTask_ShakeMon, target monbg and 12:8 alpha, both side-panned Double Team triggers, target-panned impact audio, waits, blendoff, and first inactive cleanup",
+        "the production shared-framebuffer compositor uses reproducibly extracted Hitmonlee art plus shared HANDS_AND_FEET foot, affine IMPACT, Onix, field chrome, healthboxes, and text; it preserves the source task two-interval OAM latch, sprite one-interval OAM latch, target idle/shake, monbg/alpha, and cleanup without absolute battle ticks, recorded screenshots, fitted pixels, or gameplay ownership",
+        "MOVE_LOW_KICK remains unsupported: its target-relative gSlidingKickSpriteTemplate geometry, RotateMonSpriteToSide task, distinct timing, and orientation body require independent complete both-orientation dense acceptance",
+        "presentation owns no damage, RNG, move outcome, turn order, controller, facility state, or shared battle state; no animation-boundary list, unsupported barrier, or canonical-recording allowlist changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-rolling-kick-player-hitmonlee-opponent-onix.json",
+        "tools/battle-lab/mechanic-rolling-kick-opponent-hitmonlee-player-onix.json",
+        "tools/compare/fixtures/rolling-kick-player-hitmonlee-opponent-onix.json",
+        "tools/compare/fixtures/rolling-kick-opponent-hitmonlee-player-onix.json",
+        "tools/compare/rollingKickSourceAudit.ts",
+        "tools/compare/rollingKickEvidence.ts",
+        "tools/compare/rollingKickPortable.ts",
+        "tools/compare/extractRollingKickAssets.ts",
+        "tools/compare/poisonFangProbe.py",
+        "src/animation/assets/rollingKick.json",
+        "src/animation/rollingKick.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/rollingKickSourceAudit.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_MEGA_PUNCH",
       "status": "exact",
       "covered": [
