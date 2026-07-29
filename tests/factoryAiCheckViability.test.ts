@@ -69,6 +69,60 @@ describe("AI_CheckViability dispatch shell (docs/factory-ai-ground-truth.md §4 
   });
 });
 
+describe("AI_CV_Sleep (docs/factory-ai-checkviability-ground-truth.md §29)", () => {
+  const MOVE_SING = 47;
+  const MOVE_DREAM_EATER = 138;
+  const MOVE_NIGHTMARE = 171;
+
+  function sleepRun(rngValue: number, knownMoves: readonly number[]) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_SING,
+      attacker: NEUTRAL_BATTLER,
+      target: { ...NEUTRAL_BATTLER, knownMoves },
+      drawOrdinalStart: 1,
+      reasonPrefix: "sleep",
+    });
+  }
+
+  it("neither Dream Eater nor Nightmare known: both scans FALL THROUGH, goto End makes zero draws", () => {
+    expect(sleepRun(1, [MOVE_SURF])).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+
+  it.each([
+    ["Dream Eater", [MOVE_DREAM_EATER]],
+    ["Nightmare after a nonmatching earlier move", [MOVE_SURF, MOVE_NIGHTMARE]],
+  ])("%s reaches the single random site; roll < 128 JUMPs to End and skips +1", (_label, knownMoves) => {
+    // seed 3 -> high-half 50515, low byte 83.
+    const result = sleepRun(3, knownMoves);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "sleep-roll", succeeded: false });
+  });
+
+  it("roll >= 128 FALLS THROUGH and applies +1", () => {
+    // seed 1 -> high-half 16838, low byte 198.
+    const result = sleepRun(1, [MOVE_DREAM_EATER]);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "sleep-roll", succeeded: true });
+  });
+
+  it("leaves the next unported CV table effect behind the generic barrier", () => {
+    expect(run({ value: 1, calls: 0 }, MOVE_HAZE)).toMatchObject({
+      kind: "unsupported-branch",
+      barrier: "factory-ai-check-viability",
+      effect: "EFFECT_HAZE",
+    });
+  });
+});
+
 describe("AI_CV_Toxic (data/battle_ai_scripts.s:1353-1371)", () => {
   function toxicRun(input: Readonly<{
     rngValue?: number;
