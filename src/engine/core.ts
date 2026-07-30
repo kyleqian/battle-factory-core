@@ -261,7 +261,10 @@ import {
   advanceFactoryRoundBattleResolution,
   type FactoryRoundBattleOrchestratorState,
 } from "./factoryRoundBattleOrchestrator.ts";
-import type { FactoryRentalParty, FactoryRentalRecord } from "./battleScenario.ts";
+import {
+  createFactoryAnchorSession,
+} from "./factoryAnchorSession.ts";
+import { CANONICAL_DESTIN_PRESENTATION } from "./factoryTrainerPresentation.ts";
 import {
   createBattleResolutionPresentationRenderView,
   renderBattleResolutionPresentation,
@@ -277,17 +280,12 @@ export type InteractiveBattleRoute =
   | "generated-orchestrator"
   | "canonical-recorded";
 
-export type GeneratedBattleSessionFactory = (
-  playerRentalRecords: FactoryRentalParty,
-  savedRentalRecords: readonly FactoryRentalRecord[],
-) => FactoryRoundBattleOrchestratorState;
-
 export interface EngineState {
   frame: number;
   /** Immutable owner choice, consulted only at the battle-room handoff. */
   appRoute: InteractiveBattleRoute;
-  /** Slice-1 test seam; production does not supply a generated session yet. */
-  generatedBattleSessionFactory: GeneratedBattleSessionFactory | null;
+  /** Live cursors at each Battle-1 personality-construction burst. */
+  battle1OpponentConstructionRngValues: readonly number[];
   draftScreen: DraftScreenState;
   keyRepeat: KeyRepeatState;
   summaryScreen: SummaryScreenState;
@@ -338,8 +336,6 @@ export const BATTLE_IN_BATTLE_FIRST_ELAPSED = 5;
 export interface InitialEngineStateOptions {
   readonly battleScenario?: BattleScenario;
   readonly appRoute?: InteractiveBattleRoute;
-  /** Test-only until the source-pinned anchor session lands in Slice 2. */
-  readonly generatedBattleSessionFactory?: GeneratedBattleSessionFactory;
 }
 
 export function createInitialState(
@@ -348,8 +344,7 @@ export function createInitialState(
   return {
     frame: 0,
     appRoute: options.appRoute ?? "canonical-recorded",
-    generatedBattleSessionFactory:
-      options.generatedBattleSessionFactory ?? null,
+    battle1OpponentConstructionRngValues: Object.freeze([]),
     draftScreen: createDraftScreenStateFromRentalRecords(ANCHOR_DRAFT_RENTAL_RECORDS),
     keyRepeat: INITIAL_KEY_REPEAT_STATE,
     summaryScreen: CLOSED_SUMMARY_SCREEN_STATE,
@@ -400,6 +395,8 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   let battleSetup: BattleSetupState | null = state.battleSetup;
   let battleControllerExecFlags = state.battleControllerExecFlags ?? 0;
   let battle2Turn1 = state.battle2Turn1 ?? null;
+  let battle1OpponentConstructionRngValues =
+    state.battle1OpponentConstructionRngValues ?? [];
   let roundController = state.roundController;
   let factorySwap = state.factorySwap ?? null;
   let factoryTerminal = state.factoryTerminal;
@@ -1377,7 +1374,14 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       battleRoom = { ...battleRoom, phase: "msgboxClosing", elapsed: 0 };
     } else {
       battleRoom = advanceBattleRoom(battleRoom);
-      for (let i = 0; i < opponentSetupExtraRngSteps(battleRoom); i += 1) {
+      const extraRngSteps = opponentSetupExtraRngSteps(battleRoom);
+      if (extraRngSteps > 1 && battleRoom.encounter !== "jenson") {
+        battle1OpponentConstructionRngValues = Object.freeze([
+          ...battle1OpponentConstructionRngValues,
+          rngValue,
+        ]);
+      }
+      for (let i = 0; i < extraRngSteps; i += 1) {
         rngValue = advanceRngValue(rngValue);
       }
       // S6 scene-assembly handoff (battleScene.ts doc): the CIRCLES_MEET
@@ -1386,16 +1390,17 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // the ground-truth trace's own window start (trace tick 1040).
       if (battleRoom?.phase === "settled" && battleRoom.elapsed === BATTLE_SCENE_HANDOFF_ELAPSED) {
         if (state.appRoute === "generated-orchestrator") {
-          const createGeneratedSession = state.generatedBattleSessionFactory;
-          if (createGeneratedSession === null) {
+          if (battle1OpponentConstructionRngValues.length !== 3) {
             throw new Error(
-              "generated-orchestrator route requires an injected battle session",
+              "generated-orchestrator route requires three live construction cursors",
             );
           }
           const playerRentalRecords = selectedRentalParty(draftScreen);
           const savedRentalRecords = draftScreen.rentals.map(
             ({ source }) => source,
           );
+          const roomTrainer =
+            battleRoom.trainerPresentation ?? CANONICAL_DESTIN_PRESENTATION;
           battleRoom = null;
           return {
             ...state,
@@ -1407,10 +1412,17 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
             battleRoom,
             battleScene: null,
             battleSetup: null,
-            factoryRoundBattleOrchestrator: createGeneratedSession(
+            factoryRoundBattleOrchestrator: createFactoryAnchorSession({
               playerRentalRecords,
               savedRentalRecords,
-            ),
+              roomTrainer,
+              constructionRngValues:
+                battle1OpponentConstructionRngValues as unknown as readonly [
+                  number, number, number,
+                ],
+              freshBattleRngValue: rngValue,
+            }),
+            battle1OpponentConstructionRngValues,
             rngMode,
             rngValue,
           };
@@ -1430,7 +1442,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         }
       }
     }
-    return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, battleSetup, rngMode, rngValue };
+    return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, battleSetup, battle1OpponentConstructionRngValues, rngMode, rngValue };
   }
 
   if (prebattleRoom) {
@@ -1472,7 +1484,11 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         prebattleRoom = null;
         battleRoom = {
           ...INITIAL_BATTLE_ROOM_STATE,
-          trainerPresentation: currentTrainerPresentation,
+          trainerPresentation:
+            currentTrainerPresentation
+            ?? (state.appRoute === "generated-orchestrator"
+              ? CANONICAL_DESTIN_PRESENTATION
+              : undefined),
         };
       }
     }

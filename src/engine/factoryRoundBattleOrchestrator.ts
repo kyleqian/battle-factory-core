@@ -159,10 +159,24 @@ export type FactoryRoundBattleOrchestratorConfig = Readonly<{
   battleTowerLevel50WinStreak: number;
   facilityState: FactoryFacilityState;
   rentals: FactoryRoundRentalSource;
+  /**
+   * Battle 1 may already have its trainer/set schedule selected before the
+   * interactive anchor. Adopt that construction result and seed the fresh
+   * kernel from the later transition cursor instead of selecting twice.
+   */
+  adoptedInitialOpponent?: Readonly<{
+    generation: FactoryOpponentGenerationResult;
+    freshBattleRngValue: number;
+  }>;
 }>;
 
 export type FactoryFacilityRngSegment = Readonly<{
-  kind: "initial-rentals" | "opponent-generation" | "battle";
+  kind:
+    | "initial-rentals"
+    | "opponent-generation"
+    | "opponent-selection"
+    | "opponent-construction"
+    | "battle";
   battleIndex: number;
   callStart: number;
   callEnd: number;
@@ -334,7 +348,7 @@ function selectedInitialRecords(
 }
 
 function generationSegment(
-  kind: "initial-rentals" | "opponent-generation",
+  kind: Exclude<FactoryFacilityRngSegment["kind"], "battle">,
   battleIndex: number,
   callStart: number,
   rngBefore: number,
@@ -413,23 +427,53 @@ export function createFactoryRoundBattleOrchestrator(
     savedRentalRecords = config.rentals.savedRentalRecords;
   }
 
-  const firstOpponent = generateOpponentFor(config, 0, rngValue, [], savedRentalRecords);
-  rngSegments.push(generationSegment(
-    "opponent-generation",
-    0,
-    facilityRngCalls,
-    rngValue,
-    firstOpponent.rngValue,
-    firstOpponent.drawLedger.length,
-  ));
-  facilityRngCalls += firstOpponent.drawLedger.length;
+  const adopted = config.adoptedInitialOpponent;
+  const firstOpponent = adopted?.generation
+    ?? generateOpponentFor(config, 0, rngValue, [], savedRentalRecords);
+  if (adopted === undefined) {
+    rngSegments.push(generationSegment(
+      "opponent-generation",
+      0,
+      facilityRngCalls,
+      rngValue,
+      firstOpponent.rngValue,
+      firstOpponent.drawLedger.length,
+    ));
+    facilityRngCalls += firstOpponent.drawLedger.length;
+  } else {
+    const selection = firstOpponent.drawLedger.filter(({ phase }) => phase !== "personality");
+    rngSegments.push(generationSegment(
+      "opponent-selection",
+      0,
+      facilityRngCalls,
+      selection[0]!.rngBefore,
+      firstOpponent.selectionRngValue,
+      selection.length,
+    ));
+    facilityRngCalls += selection.length;
+    for (let opponentIndex = 0; opponentIndex < 3; opponentIndex += 1) {
+      const construction = firstOpponent.drawLedger.filter(
+        (draw) => draw.phase === "personality" && draw.opponentIndex === opponentIndex,
+      );
+      rngSegments.push(generationSegment(
+        "opponent-construction",
+        0,
+        facilityRngCalls,
+        construction[0]!.rngBefore,
+        construction.at(-1)!.rngAfter,
+        construction.length,
+      ));
+      facilityRngCalls += construction.length;
+    }
+  }
   const opponent = generatedOpponent(firstOpponent);
+  rngValue = adopted?.freshBattleRngValue ?? firstOpponent.rngValue;
   const round = createGeneratedFactoryRoundController({
     id: config.id,
     playerParty: asBattleParty(playerRentalRecords),
     playerRentalRecords,
     opponent,
-    rngValue: firstOpponent.rngValue,
+    rngValue,
   });
 
   return Object.freeze({

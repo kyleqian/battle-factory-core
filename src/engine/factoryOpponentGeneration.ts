@@ -162,6 +162,20 @@ export type FactoryOpponentGenerationResult = Readonly<{
   drawLedger: readonly FactoryOpponentDrawLedgerEntry[];
 }>;
 
+export type FactoryAdoptedOpponentScheduleInput = Readonly<{
+  factoryWinStreak: number;
+  battleIndex: number;
+  storedTrainerIds: readonly number[];
+  savedRentalSetIds: readonly number[];
+  playerTrainerId: number;
+  battleTowerLevel50WinStreak: number;
+  trainerId: number;
+  setIds: readonly [number, number, number];
+  selectionDrawLedger: readonly FactoryOpponentDrawLedgerEntry[];
+  /** Live source cursors immediately before each mon's personality loop. */
+  constructionRngValues: readonly [number, number, number];
+}>;
+
 function requireU32(value: number, field: string): number {
   if (!Number.isSafeInteger(value) || value < 0 || value > 0xffff_ffff) {
     throw new Error(`${field} must be a source u32, got ${value}`);
@@ -234,6 +248,146 @@ function freezeLedger(
     ...entry,
     range: entry.range === undefined ? undefined : Object.freeze({ ...entry.range }),
   })));
+}
+
+/**
+ * Adopt a preselected source schedule and run only the later personality
+ * construction epoch. This is the Battle-1 anchor path: selection happened
+ * before the draft snapshot, so replaying it at the room handoff would spend
+ * those draws twice.
+ */
+export function adoptFactoryOpponentSchedule(
+  input: FactoryAdoptedOpponentScheduleInput,
+): FactoryOpponentGenerationResult {
+  const factoryWinStreak = requireNonnegativeInteger(input.factoryWinStreak, "factoryWinStreak");
+  const challengeNum = Math.floor(factoryWinStreak / STAGES_PER_CHALLENGE);
+  const otId = requireU32(input.playerTrainerId, "playerTrainerId");
+  if (input.savedRentalSetIds.length !== SAVED_RENTAL_COUNT) {
+    throw new Error(`savedRentalSetIds must contain exactly ${SAVED_RENTAL_COUNT} source records`);
+  }
+  const trainer = TRAINERS[input.trainerId];
+  if (trainer === undefined || trainer.id !== input.trainerId) {
+    throw new Error(`adopted schedule selected missing Battle Frontier trainer ${input.trainerId}`);
+  }
+  const selectionLedger = input.selectionDrawLedger.map((entry, position) => {
+    if (
+      entry.position !== position
+      || entry.phase === "personality"
+      || entry.rngAfter !== advanceRngValueForValidation(entry.rngBefore)
+      || entry.randomU16 !== entry.rngAfter >>> 16
+      || (position > 0 && entry.rngBefore !== input.selectionDrawLedger[position - 1]!.rngAfter)
+    ) {
+      throw new Error(`invalid adopted selection draw ${position}`);
+    }
+    return { ...entry, range: entry.range === undefined ? undefined : { ...entry.range } };
+  });
+  const acceptedTrainer = selectionLedger.filter(
+    (entry) => entry.phase === "trainer-selection" && entry.trainerOutcome === "accepted",
+  );
+  const acceptedSets = selectionLedger.filter(
+    (entry) => entry.phase === "set-selection" && entry.selectionOutcome === "accepted",
+  );
+  if (
+    acceptedTrainer.length !== 1
+    || acceptedTrainer[0]!.trainerId !== input.trainerId
+    || acceptedSets.length !== FRONTIER_PARTY_SIZE
+    || acceptedSets.some((entry, index) => entry.candidateSetId !== input.setIds[index])
+  ) {
+    throw new Error("adopted trainer/set schedule does not match its pinned selection ledger");
+  }
+  const storedTrainerIds = [...input.storedTrainerIds, input.trainerId];
+  const fixedIv = getLevel50FactoryOpponentFixedIv(
+    input.battleTowerLevel50WinStreak,
+    input.battleIndex,
+  );
+  const ledger: FactoryOpponentDrawLedgerEntry[] = [...selectionLedger];
+  const opponents: FactoryOpponentRecord[] = [];
+
+  for (let opponentIndex = 0; opponentIndex < FRONTIER_PARTY_SIZE; opponentIndex += 1) {
+    const set = setRow(input.setIds[opponentIndex]!, `setIds[${opponentIndex}]`);
+    const targetNature = NATURE_BY_NAME.get(set.nature);
+    const itemId = HELD_ITEM_BY_TABLE_ID.get(set.itemTableId);
+    if (targetNature === undefined || itemId === undefined) {
+      throw new Error(`adopted Factory set ${set.index} has incomplete source data`);
+    }
+    let rngValue = requireU32(
+      input.constructionRngValues[opponentIndex]!,
+      `constructionRngValues[${opponentIndex}]`,
+    );
+    let personality = 0;
+    let lowPosition = 0;
+    let highPosition = 0;
+    do {
+      lowPosition = ledger.length;
+      const lowBefore = rngValue;
+      const low = randomU16(rngValue);
+      rngValue = low.rngValue;
+      highPosition = lowPosition + 1;
+      const highBefore = rngValue;
+      const high = randomU16(rngValue);
+      rngValue = high.rngValue;
+      personality = (low.value | (high.value << 16)) >>> 0;
+      const personalityOutcome = natureFromPersonality(personality) === targetNature
+        ? "accepted"
+        : "wrong-nature";
+      ledger.push({
+        position: lowPosition, phase: "personality", purpose: "personality-low",
+        rngBefore: lowBefore, rngAfter: low.rngValue, randomU16: low.value,
+        battleIndex: input.battleIndex, opponentIndex, personality, personalityOutcome,
+      }, {
+        position: highPosition, phase: "personality", purpose: "personality-high",
+        rngBefore: highBefore, rngAfter: high.rngValue, randomU16: high.value,
+        battleIndex: input.battleIndex, opponentIndex, personality, personalityOutcome,
+      });
+    } while (natureFromPersonality(personality) !== targetNature);
+
+    const instance: FactoryCorpusPartyInstance = {
+      setId: set.index,
+      personality,
+      fixedIv,
+      abilitySlot: (personality & 1) as 0 | 1,
+      otId,
+    };
+    const member = createFactoryCorpusPartyMember(instance);
+    opponents.push(Object.freeze({
+      ...instance,
+      abilitySlot: member.abilitySlot,
+      otId,
+      speciesName: set.species,
+      itemId,
+      nature: targetNature,
+      selectionDrawPosition: acceptedSets[opponentIndex]!.position,
+      personalityDrawPositions: Object.freeze([lowPosition, highPosition] as const),
+      member,
+    }));
+  }
+  const tuple = opponents as [
+    FactoryOpponentRecord,
+    FactoryOpponentRecord,
+    FactoryOpponentRecord,
+  ];
+  const party = opponents.map(({ member }) => member) as [
+    FactoryCorpusPartyMemberState,
+    FactoryCorpusPartyMemberState,
+    FactoryCorpusPartyMemberState,
+  ];
+  return Object.freeze({
+    challengeNum,
+    trainerId: trainer.id,
+    trainerSourceId: trainer.sourceId,
+    trainerName: trainer.name,
+    storedTrainerIds: Object.freeze(storedTrainerIds),
+    fixedIv,
+    opponents: Object.freeze(tuple),
+    party: Object.freeze(party),
+    selectionRngValue: selectionLedger.at(-1)!.rngAfter,
+    rngValue: ledger.at(-1)!.rngAfter,
+    drawLedger: freezeLedger(ledger),
+  });
+}
+
+function advanceRngValueForValidation(rngValue: number): number {
+  return randomU16(rngValue).rngValue;
 }
 
 export function generateFactoryOpponent(
