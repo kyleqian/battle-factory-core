@@ -1,3 +1,29 @@
+## 712 — [SUPERVISOR 2026-07-29 ~19:00] Slice 1 + Synchronize reveal folded; union green; round 7 dispatched
+
+- **State:** master green at **521 files / 5309 tests + 1 deliberate
+  animation-lane skip**, production build, `git diff --check` clean, no
+  orphan worktrees/branches, DEFERRED.md empty.
+- **Did:** (1) verified + accepted resolution Slice 1 (`8dee1d7b`:
+  targeted 37/37, staged window 16/16, file surface exactly per design §4,
+  battleScene.ts untouched). (2) verified + merged
+  `worker/side-20260729-171940`: both Synchronize moveend states
+  source-complete (four-status banking, toxic→poison, target-first
+  ordering), sites B→A, moveend barriers **4→2**; fresh seed-324508639
+  probe reproduced the banked receipt byte-identically; reachability is
+  Factory-legal (RALTS set 5 Synchronize vs MAGNETON set 244 Thunder
+  Wave). Census delta Synchronize 2→3 recorded honestly. (3) Banked the
+  mechanicLab internal-vs-dex species-ID papercut (`15134025`).
+- **Next:** round 7 dispatched — main: design §4 Slice 2 (resolution
+  renderer, pixel-neutral helper factoring, eleven-menu + sandattack
+  regression table); side: next CBM/CV pair by ranked rubric. Then Slice
+  3+, Gate-6 matrix. Wind-down target ~21:30 with animation fold re-check.
+- **Notes:** 10 workers so far, 0 failed steps, 1 integrity correction
+  (entry 705). Class-B reveal program this session: absorption,
+  immunity-cure, Synchronize — moveend barriers 5→2, all with two-seed
+  byte-identical live receipts.
+
+---
+
 ## 711 — [BOUNDED MAIN WORKER 2026-07-29 ~18:55] Battle-resolution Slice 1 landed
 
 - **State:** implementation `8dee1d7b`; tree green at **521 files / 5301
