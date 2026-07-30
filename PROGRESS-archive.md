@@ -1,3 +1,29 @@
+## 711 — [BOUNDED MAIN WORKER 2026-07-29 ~18:55] Battle-resolution Slice 1 landed
+
+- **State:** implementation `8dee1d7b`; tree green at **521 files / 5301
+  tests + 1 deliberate animation-lane skip**, production build, targeted
+  seam acceptance **37/37**, and `git diff --check`. The unchanged explicit-OFF
+  staged turn remains **16/16** exact.
+- **Did:** added the immutable resolution receipt/segment/command/display
+  types and structural constructor; it retains the genuine pending battle
+  boundary, freezes event-time strings, pairs HP controller events, and fails
+  closed on unordered/unpaired facts or a switch without its semantic
+  switch-in marker. The existing nine-command Scene-OFF projector is now a
+  compatibility wrapper over that typed projection. Canonical request-1 →
+  request-3 deep equivalence and noncanonical damage/effectiveness,
+  zero-HP/faint/forced-boundary, and marked switch-in fixtures are pinned.
+- **Next:** dispatch `docs/battle-resolution-seam-design.md` **Slice 2 —
+  live non-KO Scene-OFF renderer** verbatim; do not begin orchestrator
+  replacement before Slice 2 acceptance is exact.
+- **Notes:** no `battleScene.ts`, renderer, orchestrator, kernel outcome/RNG,
+  trace/capture list, canonical-recording import, unsupported barrier, or
+  battle/turn/absolute-tick branch changed. Slice 5 still owns emission of the
+  typed `switch-in-animation` marker; Slice 1 only consumes a fixture marker.
+  The finite Stage 8 reset remains intact. PAPERCUT: none.
+
+
+---
+
 ## 710 — [BOUNDED MAIN WORKER 2026-07-29 ~18:00] Battle-resolution seam design landed
 
 - **State:** docs-only battle-resolution design complete; tree green at

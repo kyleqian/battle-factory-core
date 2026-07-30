@@ -13,6 +13,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 714 — [SUPERVISOR 2026-07-29 ~19:25] Slice 2 + Paralyze pair folded; union green; round 8 dispatched
+
+- **State:** master `18f31d25`+docs green at **521 files / 5332 tests + 1
+  deliberate animation-lane skip**, production build, `git diff --check`
+  clean, no orphan worktrees/branches, DEFERRED.md empty.
+- **Did:** (1) verified + accepted resolution Slice 2 (`84374947`:
+  targeted 322/322; staged 16/16, sandattack 190/190, turn3/8/13 menus
+  254/88/57 re-run exact; renderer consumes typed commands only). (2)
+  verified + merged `worker/side-20260729-175941` (Paralyze pair,
+  `7c251fdc`+`c90631e4`, doc §31): 72 L50 carriers (ranked over Confuse
+  64, Counter 42, Swagger 30), source-exact incl. the non-BUGFIX
+  Ground/Flying quirk; supervisor re-ran the live verify — 4/4 PASS
+  (control+reach on seeds 1/99, exact PP-slot choices and RNG endpoints).
+  Census delta Limber 8→10 recorded honestly; executable census
+  byte-identical.
+- **Next:** round 8 dispatched — main: design §4 Slice 3 (orchestrator
+  replacement + generated non-KO handoff, §2.3 boundary state); side:
+  next CBM/CV pair (Confuse-led remainder). Then Slice 4+, Gate-6.
+  Wind-down target ~21:30 with animation fold re-check.
+- **Notes:** 12 workers, 0 failed steps. New papercut motif from two
+  workers: executable census regen churns its embedded date/trailing
+  blank — restore-if-date-only is now standing brief language; consider a
+  harness-side dateless regen at some point.
+
+---
+
 ## 713 — [BOUNDED MAIN WORKER 2026-07-29 ~19:15] Battle-resolution Slice 2 landed
 
 - **State:** implementation `84374947`; tree green at **521 files / 5317
@@ -64,28 +90,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 711 — [BOUNDED MAIN WORKER 2026-07-29 ~18:55] Battle-resolution Slice 1 landed
-
-- **State:** implementation `8dee1d7b`; tree green at **521 files / 5301
-  tests + 1 deliberate animation-lane skip**, production build, targeted
-  seam acceptance **37/37**, and `git diff --check`. The unchanged explicit-OFF
-  staged turn remains **16/16** exact.
-- **Did:** added the immutable resolution receipt/segment/command/display
-  types and structural constructor; it retains the genuine pending battle
-  boundary, freezes event-time strings, pairs HP controller events, and fails
-  closed on unordered/unpaired facts or a switch without its semantic
-  switch-in marker. The existing nine-command Scene-OFF projector is now a
-  compatibility wrapper over that typed projection. Canonical request-1 →
-  request-3 deep equivalence and noncanonical damage/effectiveness,
-  zero-HP/faint/forced-boundary, and marked switch-in fixtures are pinned.
-- **Next:** dispatch `docs/battle-resolution-seam-design.md` **Slice 2 —
-  live non-KO Scene-OFF renderer** verbatim; do not begin orchestrator
-  replacement before Slice 2 acceptance is exact.
-- **Notes:** no `battleScene.ts`, renderer, orchestrator, kernel outcome/RNG,
-  trace/capture list, canonical-recording import, unsupported barrier, or
-  battle/turn/absolute-tick branch changed. Slice 5 still owns emission of the
-  typed `switch-in-animation` marker; Slice 1 only consumes a fixture marker.
-  The finite Stage 8 reset remains intact. PAPERCUT: none.
-
-
----
