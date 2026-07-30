@@ -13,21 +13,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
-## 745 — [BOUNDED MAIN WORKER 2026-07-30 ~14:49] Slice 4 implementation green; acceptance in progress
+## 745 — [BOUNDED MAIN WORKER 2026-07-30 ~15:00] Slice 4 complete: live postwin → orchestrator swapOffer
 
-- **State:** typed round-to-postwin adapter, owner-aware core bridge, and
-  noncanonical generated fixture landed; focused orchestrator+ratchet
-  **2 files / 36 tests**, build clean.
+- **State:** landed in `f34fd465` + `2f744ccf`; focused acceptance **7 files /
+  119 tests**, full gate green at **550 files / 5569 tests + 1 deliberate
+  animation-lane skip**, build clean.
 - **Did:** generated `battleWon` now freezes challenge index, live HP/full-heal
   values, opponent rental IDs, and commentary from one typed round snapshot;
   postwin bookkeeping no longer substitutes canonical literals. The core
   fixture proves terminal handoff creates postwin, rules do not change before
   the third-scouting-page edge, that edge publishes `swapOffer`, and YES
   builds every player/enemy/rental row from that same orchestrator round.
-- **Next:** run the complete named Slice-4 focused suite and compares, then
-  immutable 25-row loop, full suite/build.
+- **Next:** supervisor may proceed to design Slice 5 (swap result → reusable
+  Battles 2-7 room/intro re-entry).
 - **Notes:** production default and canonical constructors remain unchanged;
-  no new barrier, trace/capture, issue, later-opponent, or Battle-2 work.
+  postwin/swap exact **199/199, 216/216, 171/171, 164/164, 101/101**;
+  generated intro **715/715**, command **128/128**; all **25/25** immutable
+  rows exact. No new barrier, trace/capture, issue, opponent selection,
+  or Battle-2 work.
 
 ---
 ## 744 — [SUPERVISOR 2026-07-30 ~15:00] Slice 3 CLOSED at 715/715 (supervisor re-verified); moveend barrier drained and merged; #53 fix-path updated
