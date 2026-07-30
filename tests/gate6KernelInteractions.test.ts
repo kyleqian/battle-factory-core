@@ -5,21 +5,33 @@ import {
   createBattleScriptStatusRulesHandlers,
   type BattleScriptPartyMemberInput,
   type BattleScriptRulesBattler,
+  type BattleScriptRulesContext,
   type BattleScriptRulesContextInput,
   type BattleScriptStatusRulesExternalPorts,
 } from "../src/engine/battleScriptRulesContext.ts";
 import { advanceBattleScriptAttackCancelerUnableToUseMove } from "../src/engine/battleScriptAttackCanceler.ts";
 import { runBattleEndTurnOrchestration } from "../src/engine/battleEndTurnOrchestration.ts";
 import type { BattleScriptSemanticEvent } from "../src/engine/battleScriptEvents.ts";
-import { stepBattleScriptMachine } from "../src/engine/battleScriptMachine.ts";
+import {
+  acknowledgeBattleScriptMachineController,
+  stepBattleScriptMachine,
+  type BattleScriptMachineState,
+} from "../src/engine/battleScriptMachine.ts";
 import {
   loadBattleScriptProgram,
   resolveBattleScriptLabel,
 } from "../src/engine/battleScriptProgram.ts";
 import {
+  BATTLE_SCRIPT_STATUS1_BURN,
   BATTLE_SCRIPT_STATUS1_PARALYSIS,
+  BATTLE_SCRIPT_STATUS2_FORESIGHT,
   BATTLE_SCRIPT_STATUS2_MASKS,
 } from "../src/engine/battleScriptSourceConstants.ts";
+import {
+  calculateBaseDamage,
+  NEUTRAL_STAT_STAGES,
+} from "../src/engine/damageCalc.ts";
+import { effectiveSpeed } from "../src/engine/turnOrder.ts";
 
 const program = loadBattleScriptProgram();
 const BATTLE_TYPE_FACTORY = 1 << 19;
@@ -29,8 +41,18 @@ const B_WEATHER_SUN_TEMPORARY = 1 << 5;
 const ITEM_CHESTO_BERRY = 134;
 const ITEM_LUM_BERRY = 141;
 const ITEM_SITRUS_BERRY = 142;
+const ITEM_LIECHI_BERRY = 168;
+const ITEM_SALAC_BERRY = 170;
+const ITEM_PETAYA_BERRY = 171;
+const ITEM_WHITE_HERB = 180;
 const ITEM_LEFTOVERS = 200;
+const MOVE_SWORDS_DANCE = 14;
+const MOVE_FORESIGHT = 193;
+const MOVE_SWAGGER = 207;
+const MOVE_THUNDER_WAVE = 86;
 const MOVE_THUNDER = 87;
+const MOVE_WILL_O_WISP = 261;
+const ABILITY_OWN_TEMPO = 20;
 const ABILITY_SAND_VEIL = 8;
 const STATUS1_SLEEP_TURN_3 = 3;
 const STATUS2_CONFUSION_TURN_2 = 2;
@@ -159,6 +181,15 @@ const ports = Object.freeze({
     operand.expression === "B_WAIT_TIME_LONG" ? 64 : null,
   resolveByteOperand: () => null,
 } satisfies BattleScriptStatusRulesExternalPorts);
+
+const completeEffectPorts = Object.freeze({
+  ...ports,
+  resolveHalfwordOperand: (_context, operand) =>
+    operand.expression === "B_WAIT_TIME_LONG"
+      || operand.expression === "B_WAIT_TIME_SHORT"
+      ? 1
+      : null,
+}) satisfies BattleScriptStatusRulesExternalPorts;
 
 function runEndTurn(
   item: number,
@@ -325,6 +356,175 @@ function cancelerPhaseNames(
 ) {
   return result.receipt.phases.map((phase) => phase.receipt.sourcePhase);
 }
+
+function effectContext(
+  move: number,
+  attackerChanges: Partial<BattleScriptRulesBattler> = {},
+  targetChanges: Partial<BattleScriptRulesBattler> = {},
+): BattleScriptRulesContext {
+  return createBattleScriptRulesContext({
+    battlers: [
+      battler({
+        side: 0,
+        moves: [move, 0, 0, 0],
+        pp: [20, 0, 0, 0],
+        ...attackerChanges,
+      }),
+      battler({ side: 1, ...targetChanges }),
+      battler({ side: 0 }),
+      battler({ side: 1 }),
+    ],
+    selectorRoles: { attacker: 0, target: 1, effectBattler: 1, fainted: null },
+    scriptingBattler: 0,
+    atkCancelerTracker: 0,
+    battleOutcome: 0,
+    currentMove: move,
+    currentMovePosition: 0,
+    moveResultFlags: 0,
+    dmgMultiplier: 1,
+    critMultiplier: 1,
+    moveEffectByte: 0,
+    missType: 0,
+    hitMarker: 0,
+    multiHitCounter: 0,
+  });
+}
+
+function runCompleteEffect(
+  entryLabel: string,
+  rulesContext: BattleScriptRulesContext,
+  rngSeed = 1,
+): BattleScriptMachineState<BattleScriptRulesContext> {
+  const execution = createBattleScriptStatusRulesExecution(
+    program,
+    entryLabel,
+    rulesContext,
+    rngSeed,
+    completeEffectPorts,
+  );
+  let result = stepBattleScriptMachine(
+    program,
+    execution.state,
+    execution.handlers,
+  );
+  for (let steps = 1; steps < 250 && result.kind !== "halted"; steps++) {
+    if (
+      result.kind !== "advanced"
+      && result.kind !== "scheduler-progressed"
+      && result.kind !== "blocked"
+    ) {
+      throw new Error(`${entryLabel} stopped at ${result.kind}`);
+    }
+    let next = result.state;
+    if (result.kind === "blocked") {
+      for (const battlerId of next.scheduler.pendingControllerBattlers) {
+        next = acknowledgeBattleScriptMachineController(next, battlerId);
+      }
+    }
+    result = stepBattleScriptMachine(program, next, execution.handlers);
+  }
+  if (result.kind !== "halted") {
+    throw new Error(`${entryLabel} did not finish within the step budget`);
+  }
+  return result.state;
+}
+
+const K4_DAMAGE_DEFENDER = Object.freeze({
+  attack: 100,
+  defense: 100,
+  spAttack: 100,
+  spDefense: 100,
+  level: 50,
+  types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+  statStages: { ...NEUTRAL_STAT_STAGES },
+});
+
+function k4PhysicalDamage(attackStage: number, isBurned: boolean): number {
+  return calculateBaseDamage({
+    attacker: {
+      ...K4_DAMAGE_DEFENDER,
+      statStages: { ...NEUTRAL_STAT_STAGES, atk: attackStage },
+      isBurned,
+    },
+    defender: K4_DAMAGE_DEFENDER,
+    movePower: 50,
+    moveType: "TYPE_NORMAL",
+    isCriticalHit: false,
+  });
+}
+
+function k5AccuracyContext(
+  accuracyStage: number,
+  evasionStage: number,
+  targetStatus2: number,
+): BattleScriptRulesContext {
+  return createBattleScriptRulesContext({
+    battlers: [
+      battler({
+        side: 0,
+        moves: [33, 0, 0, 0],
+        statStages: [6, 6, 6, 6, 6, 6, accuracyStage, 6],
+      }),
+      battler({
+        side: 1,
+        status2: targetStatus2,
+        statStages: [6, 6, 6, 6, 6, 6, 6, evasionStage],
+      }),
+      battler({ side: 0 }),
+      battler({ side: 1 }),
+    ],
+    selectorRoles: { attacker: 0, target: 1, effectBattler: 1, fainted: null },
+    scriptingBattler: 0,
+    atkCancelerTracker: 0,
+    battleOutcome: 0,
+    currentMove: 33,
+    currentMovePosition: 0,
+    moveResultFlags: 0,
+    dmgMultiplier: 1,
+    critMultiplier: 1,
+    moveEffectByte: 0,
+    missType: 0,
+    hitMarker: 0,
+    multiHitCounter: 0,
+  });
+}
+
+function stepK5Accuracy(
+  accuracyStage: number,
+  evasionStage: number,
+  targetStatus2: number,
+  nextRandomU16: number,
+): BattleScriptMachineState<BattleScriptRulesContext> {
+  const execution = createBattleScriptStatusRulesExecution(
+    program,
+    "BattleScript_HitFromAccCheck",
+    k5AccuracyContext(accuracyStage, evasionStage, targetStatus2),
+    rngValueBeforeU16(nextRandomU16),
+    ports,
+  );
+  const result = stepBattleScriptMachine(
+    program,
+    execution.state,
+    execution.handlers,
+  );
+  if (result.kind !== "advanced") {
+    throw new Error(`K5 accuracy script stopped at ${result.kind}`);
+  }
+  return result.state;
+}
+
+const K6_THRESHOLD_BERRIES = Object.freeze([
+  ["Liechi", ITEM_LIECHI_BERRY, 1, "attack"],
+  ["Salac", ITEM_SALAC_BERRY, 3, "speed"],
+  ["Petaya", ITEM_PETAYA_BERRY, 4, "special-attack"],
+] as const);
+
+const K6_THRESHOLD_BERRY_STAGE_CASES = K6_THRESHOLD_BERRIES.flatMap(
+  ([name, item, statId, statName]) =>
+    [0, 5, 6, 10, 11, 12].map(
+      (stage) => [name, item, statId, statName, stage] as const,
+    ),
+);
 
 describe("Gate-6 K1 weather × held-item end-turn ordering", () => {
   it("finishes sand chip before Leftovers heals, while the no-weather control performs only the heal", () => {
@@ -538,5 +738,275 @@ describe("Gate-6 K3 status × volatile ordering", () => {
       result.rulesContext.battlers[0].status2
       & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION,
     ).not.toBe(0);
+  });
+});
+
+describe("Gate-6 K4 status × stat-stage arithmetic", () => {
+  it.each([
+    [
+      "burn",
+      MOVE_WILL_O_WISP,
+      "BattleScript_EffectWillOWisp",
+      BATTLE_SCRIPT_STATUS1_BURN,
+    ],
+    [
+      "paralysis",
+      MOVE_THUNDER_WAVE,
+      "BattleScript_EffectParalyze",
+      BATTLE_SCRIPT_STATUS1_PARALYSIS,
+    ],
+  ] as const)(
+    "applying %s through its complete effect script sets status without mutating any staged stat",
+    (_name, move, entryLabel, expectedStatus) => {
+      const stages = Object.freeze([6, 8, 4, 9, 3, 11, 5, 10]);
+      const state = runCompleteEffect(
+        entryLabel,
+        effectContext(move, {}, { statStages: stages }),
+        rngValueBeforeU16(0),
+      );
+      expect(state.haltReason).toMatchObject({
+        kind: "terminal",
+        opcodeName: "B_SCR_OP_END",
+      });
+      expect(state.rulesContext.battlers[1]).toMatchObject({
+        status1: expectedStatus,
+        statStages: stages,
+      });
+    },
+  );
+
+  it("burn halves physical damage after the Attack-stage modifier, including the +2 Attack combination", () => {
+    expect(k4PhysicalDamage(6, false)).toBe(24);
+    expect(k4PhysicalDamage(6, true)).toBe(13);
+    expect(k4PhysicalDamage(8, false)).toBe(46);
+    expect(k4PhysicalDamage(8, true)).toBe(24);
+  });
+
+  it("paralysis quarters speed after the Speed-stage modifier, including the +2 Speed combination", () => {
+    expect(effectiveSpeed({
+      speed: 101,
+      speedStage: 6,
+      movePriority: 0,
+      isParalyzed: false,
+    })).toBe(101);
+    expect(effectiveSpeed({
+      speed: 101,
+      speedStage: 6,
+      movePriority: 0,
+      isParalyzed: true,
+    })).toBe(25);
+    expect(effectiveSpeed({
+      speed: 101,
+      speedStage: 8,
+      movePriority: 0,
+      isParalyzed: false,
+    })).toBe(202);
+    expect(effectiveSpeed({
+      speed: 101,
+      speedStage: 8,
+      movePriority: 0,
+      isParalyzed: true,
+    })).toBe(50);
+  });
+
+  it.each([
+    [10, 12],
+    [11, 12],
+    [12, 12],
+  ] as const)(
+    "the independent Swords Dance stage mutation clamps Attack %i + 2 to %i",
+    (initialAttackStage, expectedAttackStage) => {
+      const state = runCompleteEffect(
+        "BattleScript_EffectAttackUp2",
+        effectContext(MOVE_SWORDS_DANCE, {
+          statStages: [6, initialAttackStage, 6, 6, 6, 6, 6, 6],
+        }),
+      );
+      expect(state.rulesContext.battlers[0].statStages[1]).toBe(
+        expectedAttackStage,
+      );
+    },
+  );
+});
+
+describe("Gate-6 K5 volatile × stat-stage interactions", () => {
+  it("Swagger's complete effect applies confusion and exactly one +2 Attack mutation", () => {
+    const state = runCompleteEffect(
+      "BattleScript_EffectSwagger",
+      effectContext(MOVE_SWAGGER),
+    );
+    expect(state.rulesContext.battlers[1].status2 & 0x7).not.toBe(0);
+    expect(state.rulesContext.battlers[1].statStages[1]).toBe(8);
+    expect(
+      state.events.filter((event) => event.kind === "stat-stage-change"),
+    ).toEqual([
+      expect.objectContaining({
+        battler: 1,
+        stat: "attack",
+        from: 6,
+        to: 8,
+      }),
+    ]);
+  });
+
+  it("Swagger raises an Own Tempo target's Attack once before the ability rejects confusion", () => {
+    const state = runCompleteEffect(
+      "BattleScript_EffectSwagger",
+      effectContext(MOVE_SWAGGER, {}, { ability: ABILITY_OWN_TEMPO }),
+    );
+    expect(state.rulesContext.battlers[1]).toMatchObject({
+      ability: ABILITY_OWN_TEMPO,
+      status2: 0,
+    });
+    expect(state.rulesContext.battlers[1].statStages[1]).toBe(8);
+    expect(
+      state.events.filter((event) => event.kind === "stat-stage-change"),
+    ).toEqual([
+      expect.objectContaining({
+        battler: 1,
+        stat: "attack",
+        from: 6,
+        to: 8,
+      }),
+    ]);
+    expect(state.rng.calls).toBe(1);
+  });
+
+  it("Foresight's complete effect makes accuracy ignore target EVASION only, while the attacker's lowered ACCURACY still sets the hit boundary", () => {
+    const foresight = runCompleteEffect(
+      "BattleScript_EffectForesight",
+      effectContext(MOVE_FORESIGHT, {}, {
+        statStages: [6, 6, 6, 6, 6, 6, 6, 12],
+      }),
+      rngValueBeforeU16(0),
+    );
+    const targetStatus2 = foresight.rulesContext.battlers[1].status2;
+    expect(targetStatus2 & BATTLE_SCRIPT_STATUS2_FORESIGHT).not.toBe(0);
+    expect(foresight.rulesContext.battlers[1].statStages[7]).toBe(12);
+
+    const withoutForesight = stepK5Accuracy(4, 12, 0, 40);
+    expect(withoutForesight.programCounter).toBe(
+      labelPc("BattleScript_PrintMoveMissed"),
+    );
+
+    const ignoredEvasion = stepK5Accuracy(4, 12, targetStatus2, 40);
+    expect(ignoredEvasion.programCounter).toBe(
+      labelPc("BattleScript_HitFromAtkString"),
+    );
+
+    // Tackle's 95 base accuracy at stage -2 is floor(95 * 60 / 100) = 57.
+    const boundaryHit = stepK5Accuracy(4, 12, targetStatus2, 56);
+    expect(boundaryHit.programCounter).toBe(
+      labelPc("BattleScript_HitFromAtkString"),
+    );
+    const firstMiss = stepK5Accuracy(4, 12, targetStatus2, 57);
+    expect(firstMiss.programCounter).toBe(
+      labelPc("BattleScript_PrintMoveMissed"),
+    );
+
+    const neutralEvasionSameBoundary = stepK5Accuracy(
+      4,
+      6,
+      targetStatus2,
+      57,
+    );
+    expect(neutralEvasionSameBoundary.programCounter).toBe(
+      labelPc("BattleScript_PrintMoveMissed"),
+    );
+  });
+});
+
+describe("Gate-6 K6 held-item × stat-stage interactions", () => {
+  it.each(K6_THRESHOLD_BERRY_STAGE_CASES)(
+    "%s Berry (item %i), stat index %i/%s at stage %i: raises exactly once below +6 and remains held at the cap",
+    (_name, item, statId, statName, initialStage) => {
+      const beforeStages = [6, 6, 6, 6, 6, 6, 6, 6];
+      beforeStages[statId] = initialStage;
+      const state = runEndTurn(item, 40, 0, {
+        statStages: beforeStages,
+      });
+      const expectedStage = initialStage < 12 ? initialStage + 1 : 12;
+      const expectedStages = [...beforeStages];
+      expectedStages[statId] = expectedStage;
+
+      expect(state.rulesContext.battlers[0].statStages).toEqual(
+        expectedStages,
+      );
+      expect(state.rulesContext.battlers[0].item).toBe(
+        initialStage < 12 ? 0 : item,
+      );
+      expect(
+        state.events.filter((event) => event.kind === "stat-stage-change"),
+      ).toEqual(
+        initialStage < 12
+          ? [
+              expect.objectContaining({
+                battler: 0,
+                stat: statName,
+                from: initialStage,
+                to: initialStage + 1,
+              }),
+            ]
+          : [],
+      );
+    },
+  );
+
+  it.each([0, 1, 2, 3, 4, 5] as const)(
+    "White Herb resets an Attack stage of %i to neutral and consumes only once across both item passes",
+    (initialStage) => {
+      const state = runEndTurn(ITEM_WHITE_HERB, 100, 0, {
+        statStages: [6, initialStage, 6, 6, 6, 6, 6, 6],
+      });
+      expect(state.rulesContext.battlers[0]).toMatchObject({
+        item: 0,
+        statStages: [6, 6, 6, 6, 6, 6, 6, 6],
+      });
+      expect(
+        state.events.filter(
+          (event) =>
+            event.kind === "set-battler-item"
+            && event.battler === 0
+            && event.item === 0,
+        ),
+      ).toHaveLength(1);
+      expect(
+        state.events.filter(
+          (event) =>
+            event.kind === "message"
+            && event.messageId === "STRINGID_PKMNSITEMRESTOREDSTATUS",
+        ),
+      ).toHaveLength(1);
+    },
+  );
+
+  it("White Herb restores every simultaneously negative stage while preserving neutral and positive stages", () => {
+    const state = runEndTurn(ITEM_WHITE_HERB, 100, 0, {
+      statStages: [6, 0, 1, 2, 3, 4, 5, 12],
+    });
+    expect(state.rulesContext.battlers[0]).toMatchObject({
+      item: 0,
+      statStages: [6, 6, 6, 6, 6, 6, 6, 12],
+    });
+  });
+
+  it("the R9-adjacent above-neutral control has nothing to restore, so White Herb and confusion are both retained", () => {
+    const state = runEndTurn(ITEM_WHITE_HERB, 100, 0, {
+      statStages: [6, 8, 6, 6, 6, 6, 6, 6],
+      status2: STATUS2_CONFUSION_TURN_2,
+    });
+    expect(state.rulesContext.battlers[0]).toMatchObject({
+      item: ITEM_WHITE_HERB,
+      statStages: [6, 8, 6, 6, 6, 6, 6, 6],
+      status2: STATUS2_CONFUSION_TURN_2,
+    });
+    expect(
+      state.events.some(
+        (event) =>
+          event.kind === "set-battler-item"
+          && event.battler === 0
+          && event.item === 0,
+      ),
+    ).toBe(false);
   });
 });
