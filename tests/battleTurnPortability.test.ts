@@ -157,6 +157,18 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
         timing: { minimumFrames: 24 },
       },
       {
+        type: "move-animation",
+        eventSequence: 2,
+        battler: 0,
+        timing: { minimumFrames: 42 },
+      },
+      {
+        type: "hit-animation",
+        eventSequence: 4,
+        battler: 1,
+        timing: { minimumFrames: 35, firstDisplayedAge: 1 },
+      },
+      {
         type: "hp",
         eventSequence: 5,
         battler: 1,
