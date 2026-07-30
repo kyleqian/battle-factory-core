@@ -326,7 +326,7 @@ describe("live Factory AI rules adapter (Gate-5 rung 6)", () => {
     const liveView = createFactoryAiViewFromLiveRules({
       rulesContext,
       history,
-      challenge: { factoryWinStreak: 28, trainerOpponentId: 222 },
+      challenge: { factoryWinStreak: 28, trainerOpponentId: 222, battleTurnCount: 7 },
     });
     const stagedView: FactoryAiScoredView = {
       schema: "factory-ai-scored-view/v1",
@@ -352,6 +352,7 @@ describe("live Factory AI rules adapter (Gate-5 rung 6)", () => {
         hp: 135,
         maxHp: 135,
         ability: "ABILITY_NONE",
+        battleTurnCount: 7,
         lightScreenUp: false,
         reflectUp: false,
         isRooted: false,

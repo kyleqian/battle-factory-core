@@ -98,6 +98,13 @@ export type FactoryAiBattleHistory = Readonly<{
 export type FactoryAiChallengePolicy = Readonly<{
   factoryWinStreak: number;
   trainerOpponentId: number;
+  /**
+   * Source `gBattleResults.battleTurnCounter`, needed only by
+   * `AI_CV_Swagger` after its Psych Up/target-ATK gate (doc §33). Optional
+   * while older callers have no turn counter; the policy's source default is
+   * the real battle-start value 0.
+   */
+  battleTurnCount?: number;
 }>;
 
 /** Factory items remain source-unreachable in Frontier trainer battles. */
@@ -294,6 +301,7 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       hp: attacker.hp,
       maxHp: attacker.maxHP,
       ability: abilityName(attacker.ability),
+      battleTurnCount: input.challenge.battleTurnCount ?? 0,
       lightScreenUp: (input.rulesContext.sideStatuses[1] & SIDE_STATUS_LIGHTSCREEN) !== 0,
       reflectUp: (input.rulesContext.sideStatuses[1] & SIDE_STATUS_REFLECT) !== 0,
       ...(weather === undefined ? {} : { currentWeather: weather }),

@@ -514,6 +514,12 @@ export type FactoryAiScoredBattlerView = Readonly<{
   hasPerishSong?: boolean;
   /** DisableStruct::protectUses, read by AI_CV_Protect. */
   protectUses?: number;
+  /**
+   * Source `gBattleResults.battleTurnCounter`, read by `AI_CV_Swagger` only
+   * after its Psych Up/target-ATK gate (doc §33). Optional battle-start
+   * default is 0.
+   */
+  battleTurnCount?: number;
   /** `gStatuses3[] & STATUS3_ROOTED` (Ingrain) -- source-required for `AI_CV_AccuracyDown`'s Gate F (AI_USER's own copy only, doc §19.1). Optional, defaulting to `false`. */
   isRooted?: boolean;
   /** `gBattleMons[].status2 & STATUS2_CURSED` -- source-required for `AI_CV_AccuracyDown`'s Gate G (target only, doc §19.1). Optional, defaulting to `false`. */
@@ -932,6 +938,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           ability: view.attacker.ability,
           currentWeather: view.attacker.currentWeather,
           moves: view.moves,
+          battleTurnCount: view.attacker.battleTurnCount,
           isInfatuated: view.attacker.isInfatuated,
           isLeechSeeded: view.attacker.isLeechSeeded,
           hasYawn: view.attacker.hasYawn,
