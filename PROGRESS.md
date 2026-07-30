@@ -19,15 +19,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   focused acceptance **2 files / 124 tests** plus ratchet **6/6**. Fresh
   private Scene-OFF pre-reset probe matches **249/249** player-release frames
   B+466..+714; whole B+0..+714 is **714/715**, solely the recorded Slice-3
-  B+444 10px summary-slot residual.
+  B+444 10px summary-slot residual. Full gate green at **531 files / 5433
+  tests + 1 deliberate animation-lane skip / 514 modules**.
 - **Did:** the typed lifecycle now covers generated player text, source-arc
   trainer throw/release at species y-offset, materialization, healthbox,
   Scene-OFF neutral OAM settle, and readiness/message-clear. Player-ready
   converts to the exact shared settled `action-menu` typed state used by the
   generated command window.
-- **Next:** run the one final full suite/build gate. Then #53's separately
-  designed interactive `core.ts` routing flip is the next main-lane step;
-  do not fold it into this intro slice.
+- **Next:** #53's separately designed interactive `core.ts` routing flip is
+  the next main-lane step; do not fold it into this intro slice.
 - **Notes:** all **25/25** immutable rows and generated command **128/128**
   remain exact. Probe regenerated through `tools/run-mgba-probe.py`; no
   public trace committed. No import/barrier/ratchet pin, core routing,

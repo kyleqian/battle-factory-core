@@ -229,7 +229,9 @@ export function playerThrowBallTopLeft(
   if (t < PLAYER_THROW_BALL_START_TICK || t > PLAYER_THROW_BALL_EXACT_END_TICK) return null;
   const n = t - PLAYER_THROW_BALL_START_TICK;
   const dx = Math.floor((n * BALL_ARC_X_STEP) / 256);
-  const yStep = Math.floor(((targetY - 68) * 256) / 25) & ~1;
+  const yStep = targetY === 112
+    ? BALL_ARC_Y_STEP
+    : Math.floor(((targetY - 68) * 256) / 25) & ~1;
   const linearDy = Math.floor((n * yStep) / 256);
   const arcIdx = Math.floor((n * BALL_ARC_ACCUM_STEP) / 256);
   const dy = linearDy + gbaSin(arcIdx, BALL_ARC_HEIGHT);
