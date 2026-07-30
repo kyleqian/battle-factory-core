@@ -41,7 +41,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_POISON_POINT | engine-referenced | 18 (14) | 18 | ON_DAMAGE | 0 | 0 | 5 |
 | ABILITY_SWARM | engine-referenced | 18 (8) | 18 | — | 1 | 0 | 2 |
 | ABILITY_DAMP | engine-referenced | 16 (0) | 16 | — | 2 | 0 | 3 |
-| ABILITY_OWN_TEMPO | engine-referenced | 16 (2) | 16 | IMMUNITY | 5 | 0 | 7 |
+| ABILITY_OWN_TEMPO | engine-referenced | 16 (2) | 16 | IMMUNITY | 5 | 0 | 9 |
 | ABILITY_TRACE | engine-referenced | 16 (6) | 16 | ON_SWITCHIN, TRACE | 0 | 0 | 2 |
 | ABILITY_INSOMNIA | engine-referenced | 15 (10) | 15 | IMMUNITY | 5 | 0 | 13 |
 | ABILITY_LIGHTNING_ROD | engine-referenced | 15 (0) | 15 | — | 5 | 0 | 3 |

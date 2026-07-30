@@ -199,6 +199,7 @@ for (const seed of SEEDS) {
       `PASS seed ${seed} ${role}: PP ${START_PP.join(",")} -> `
       + `${firstPpDelta.state.battlers.opponent.pp.join(",")}; `
       + `CBM ${reach ? -10 : 0}/CV 0; engine 8 draws chose slot ${chosen.moveSlot}; `
+      + `scores ${engine.trace.slotScores.map((slot) => slot.finalScore).join(",")}; `
       + `RNG ${engineFirst.before.state.rngValue} -> ${engine.rng.value}`,
     );
   }

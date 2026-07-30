@@ -466,6 +466,16 @@ describe("AI_CBM_Confuse (docs/factory-ai-checkviability-ground-truth.md §32)",
     });
   });
 
+  it.each([
+    ["Swagger", 207],
+    ["Flatter", 260],
+  ])("%s's separate dispatch converges on the same source-complete CBM body", (_label, moveId) => {
+    expect(run(moveId, target({ isConfused: true }))).toMatchObject({
+      kind: "scored",
+      scoreDelta: -5,
+    });
+  });
+
   it("executes the handler's own fresh get_ability after the universal preamble", () => {
     const result = run(MOVE_CONFUSE_RAY, MAROWAK);
     expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });

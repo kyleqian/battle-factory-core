@@ -1277,10 +1277,15 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
-  // AI_CheckBadMove_CheckEffect: EFFECT_CONFUSE -> AI_CBM_Confuse
-  // (`data/battle_ai_scripts.s:132,386-391`, doc §32). Swagger and Flatter
-  // share this CBM body in source but retain their unported CV barriers.
-  if (move.effect === "EFFECT_CONFUSE") {
+  // AI_CheckBadMove_CheckEffect: EFFECT_CONFUSE/EFFECT_SWAGGER/EFFECT_FLATTER
+  // -> the one shared AI_CBM_Confuse body (`data/battle_ai_scripts.s:
+  // 132,169,193,386-391`, doc §32). Swagger/Flatter retain their unported
+  // CV barriers after this source-complete shared CBM dispatch.
+  if (
+    move.effect === "EFFECT_CONFUSE"
+    || move.effect === "EFFECT_SWAGGER"
+    || move.effect === "EFFECT_FLATTER"
+  ) {
     const confuse = runCbmConfuse(target, rng, ordinal, `${input.reasonPrefix}-confuse`);
     for (const draw of confuse.draws) draws.push(draw);
     return Object.freeze({
