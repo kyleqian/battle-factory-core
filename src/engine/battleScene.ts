@@ -677,6 +677,7 @@ import type {
 } from "./battleCommandPresentation.ts";
 import {
   createBattleCommandFieldRenderView,
+  drawBattleCommandActionChrome,
   renderBattleCommandPresentation,
   type BattleCommandPresentationRenderView,
 } from "./battleCommandPresentationRender.ts";
