@@ -6710,3 +6710,190 @@ validation checks remain complete. No hold-effect count moves. The shared
 CBM and Confuse CV dispatches replace runtime effect halts behind the same
 two existing generic barrier statements: no new unsupported-branch
 statement and no canonical-recording import.
+
+## 33. 2026-07-29 addendum #23: `AI_CV_Swagger` closes the already-ported shared-CBM pair
+
+Bounded side-lane implementation session, Battle Scene OFF oracle. Swagger
+was the best remaining Factory-reachable pair after §32: that addendum
+already ported Swagger's shared `AI_CBM_Confuse` half, so this increment adds
+only the source's distinct `AI_CV_Swagger` half. No CBM body was invented.
+
+### 33.1 Re-ranked selection and Level-50 reachability
+
+The post-Confuse shortlist, counted directly over Level-50 set indexes
+0-849, was:
+
+| Pair | Distinct Level-50 set carriers | Remaining staging surface after §32 |
+| --- | ---: | --- |
+| Counter | **42** | its entire CV body remains: target sleep/infatuation/confusion, two own-HP bands, Taunt, last-move power/type, Mirror Coat knowledge, the non-`BUGFIX` type-list quirk, and up to four random sites |
+| Swagger | **30** | CBM is already complete; only a Psych Up move scan, one target-ATK gate, turn count, one roll, and the already-ported Confuse tail remain |
+
+Swagger wins the established reachability/staging ratio despite Counter's
+12-carrier numerical lead: one compact CV-only port closes the pair, while
+Counter still needs a materially larger battle-history fixture. Swagger is
+not merely theoretical: **15 of its 30** Level-50 carriers also carry Psych
+Up, so both sides of the CV's first gate are Factory-reachable.
+
+### 33.2 Source-exact bodies, gates, and polarity
+
+The already-ported CBM dispatch is
+`EFFECT_SWAGGER -> AI_CBM_Confuse`
+(`data/battle_ai_scripts.s:169,386-391`; §32). Its confusion, Own Tempo, and
+Safeguard gates are unchanged.
+
+CV dispatch is `EFFECT_SWAGGER -> AI_CV_Swagger`
+(`data/battle_ai_scripts.s:705`), and its complete body is the source span
+`:1462-1490`:
+
+```asm
+AI_CV_Swagger:
+	if_has_move AI_USER, MOVE_PSYCH_UP, AI_CV_SwaggerHasPsychUp
+AI_CV_Flatter:
+	if_random_less_than 128, AI_CV_Confuse
+	score +1
+AI_CV_Confuse:
+	if_hp_more_than AI_TARGET, 70, AI_CV_Confuse_End
+	if_random_less_than 128, AI_CV_Confuse2
+	score -1
+AI_CV_Confuse2:
+	if_hp_more_than AI_TARGET, 50, AI_CV_Confuse_End
+	score -1
+	if_hp_more_than AI_TARGET, 30, AI_CV_Confuse_End
+	score -1
+AI_CV_Confuse_End:
+	end
+
+AI_CV_SwaggerHasPsychUp:
+	if_stat_level_more_than AI_TARGET, STAT_ATK, 3, AI_CV_SwaggerHasPsychUp_Minus5
+	score +3
+	get_turn_count
+	if_not_equal 0, AI_CV_SwaggerHasPsychUp_End
+	score +2
+	goto AI_CV_SwaggerHasPsychUp_End
+
+AI_CV_SwaggerHasPsychUp_Minus5:
+	score -5
+AI_CV_SwaggerHasPsychUp_End:
+	end
+```
+
+Gates execute in source order with source polarity:
+
+1. Psych Up present in AI_USER's real four-move set **JUMPS** to the
+   dedicated branch; absent **FALLS THROUGH** to the shared Flatter prefix.
+   The source command scans `gBattleMons[sBattler_AI].moves[]`, including
+   moves whose current PP is zero
+   (`battle_ai_script_commands.c:1803-1825`).
+2. Without Psych Up, low byte `<128` **JUMPS** over Swagger's `+1` into
+   `AI_CV_Confuse`; `>=128` **FALLS THROUGH** to `+1`, then enters the same
+   tail. The random command is exactly `Random() % 256`
+   (`battle_ai_script_commands.c:663-671`).
+3. The shared Confuse tail retains §32's strict target-HP gates and random
+   polarity. `Cmd_if_hp_more_than` truncates `100*hp/maxHP` before the
+   strict comparison (`battle_ai_script_commands.c:728-740`).
+4. With Psych Up, target ATK stage `>3` **JUMPS** directly to `-5`; stage
+   `<=3` **FALLS THROUGH** to `+3`
+   (`battle_ai_script_commands.c:1698-1710`).
+5. Only that low-ATK path executes `get_turn_count`, overwriting
+   `funcResult` with `gBattleResults.battleTurnCounter`
+   (`battle_ai_script_commands.c:1109-1113`). A nonzero count **JUMPS** to
+   End at `+3`; exact zero **FALLS THROUGH** to another `+2`, totaling `+5`
+   (`Cmd_if_not_equal`, `:943-949`).
+
+The no-Psych-Up path and the Psych-Up/ATK-`>3` short circuit preserve the
+incoming `funcResult`; the Psych-Up/ATK-`<=3` path exposes the written turn
+count to the next move slot. Tier 1 drives JUMP and FALLTHROUGH for every
+gate, both random polarities, the strict ATK threshold, turn zero/nonzero,
+entry into the Confuse tail, carry preservation/overwrite, and continued
+reachability of Haze behind the same single
+`factory-ai-check-viability` barrier statement. `EFFECT_FLATTER` remains
+behind that barrier at its own distinct dispatch entry; this port does not
+invent or claim a Flatter pair.
+
+### 33.3 Live OFF staging, direct move receipts, and RNG ledger
+
+The reproducible complete-party twins are:
+
+- `mechanic-factory-ai-swagger-control-off.json`;
+- `mechanic-factory-ai-swagger-reach-off.json`;
+- generator: `tools/probe/generate-factory-ai-swagger-fixtures.ts`;
+- process-isolated receipt probe:
+  `tools/probe/probe-factory-ai-swagger-case.py`;
+- engine/ROM verifier: `tools/probe/verify-factory-ai-swagger-live.ts`.
+
+A level-5 Magikarp first establishes Light Screen, then the player's
+four-slot Vital Throw KOs it. Gengar switches in with
+`[Swagger, Light Screen, Light Screen, Light Screen]`; Vital Throw is
+Ghost-immune thereafter, holding both battlers at full HP. Control is
+single-ability Thick Fat Miltank; reach is single-ability Own Tempo Spinda.
+Thus the shared Confuse tail takes its first `>70%` JUMP with zero draws,
+while the newly ported Swagger prefix contributes exactly one draw. The
+control/reach choice flip is caused by the already-ported shared CBM
+(`0` versus `-10`); the new CV draw changes Swagger by `+1` on seed 1 and
+`0` on seed 99 and shifts all following screen/tie draws.
+
+| Seed | Fixture | First Gengar PP delta | Final scores by slot | ROM and engine choice | Exact engine RNG |
+| ---: | --- | --- | --- | --- | --- |
+| 1 | control | `[15,30,30,30] -> [14,30,30,30]` | `[101,90,90,92]` | Swagger slot 0 | `3726110690 -> 724352597` |
+| 1 | reach | `[15,30,30,30] -> [15,30,30,29]` | `[91,90,90,92]` | Light Screen slot 3 | `3726110690 -> 724352597` |
+| 99 | control | `[15,30,30,30] -> [14,30,30,30]` | `[100,92,90,92]` | Swagger slot 0 | `1329715331 -> 4213767554` |
+| 99 | reach | `[15,30,30,30] -> [15,29,30,30]` | `[90,92,90,92]` | Light Screen slot 1 | `1329715331 -> 4213767554` |
+
+Every row was rerun byte-identically. The engine matches the move slot read
+directly from PP, not merely the score sign or draw total.
+
+Fresh process-isolated caller attribution on the reach decision windows
+`(742,750]` (seed 1) and `(822,830]` (seed 99) is identical:
+
+| Caller | Seed 1 | Seed 99 | Attribution |
+| --- | ---: | ---: | --- |
+| `BattleTurnPassed+0x157` | 1 | 1 | ordinary pre-decision battle call |
+| `BattleAI_SetupAIData+0x83` | 4 | 4 | one simulated-RNG setup draw per slot |
+| `Cmd_if_random_less_than+0x7` | 4 | 4 | Swagger prefix once plus three Light Screen CV sites |
+| `ChooseMoveOrAction_Singles+0xf7` | 1 | 1 | unconditional final best-move tie selection |
+| **Live window total** | **10** | **10** | `sRandCount` equals targeted single-step hit count |
+
+Removing the ordinary battle call leaves the exact **9-draw engine
+receipt** in all four rows: setup 4 + Swagger 1 + screens 3 + final tie 1.
+The engine draw-kind ledger records those nine entries in that order and
+lands on the ROM endpoint for both seeds. Multi-megabyte emulator logs and
+caller JSON stayed in a fresh `/tmp/pokebench-swagger.*` scratch directory
+and are not committed.
+
+### 33.4 Reproduce and census status
+
+```sh
+node --experimental-strip-types tools/probe/generate-factory-ai-swagger-fixtures.ts
+node --experimental-strip-types tools/probe/verify-factory-ai-swagger-live.ts
+npx vitest run tests/factoryAiCheckBadMove.test.ts tests/factoryAiCheckViability.test.ts tests/factoryAiScoredDecision.test.ts
+node --experimental-strip-types tools/report/ability-item-parity-census.ts
+npx tsx tools/report/executable-frontier-census.ts
+```
+
+For process-isolated receipts and caller attribution, allocate fresh scratch
+and keep each seed/output separate:
+
+```sh
+probe_scratch_dir=$(mktemp -d /tmp/pokebench-swagger.XXXXXX)
+python3 tools/run-mgba-probe.py "$probe_scratch_dir/swagger-reach-1.json" -- tools/probe/probe-factory-ai-swagger-case.py tools/battle-lab/mechanic-factory-ai-swagger-reach-off.json 1 "$probe_scratch_dir/swagger-reach-1.json"
+python3 tools/run-mgba-probe.py "$probe_scratch_dir/swagger-callers-1.json" -- tools/probe/attribute-factory-ai-random-callers.py tools/battle-lab/mechanic-factory-ai-swagger-reach-off.json "$probe_scratch_dir/swagger-callers-1.json" 742 750
+node --experimental-strip-types tools/probe/generate-factory-ai-swagger-fixtures.ts "$probe_scratch_dir/seed99" 99
+python3 tools/run-mgba-probe.py "$probe_scratch_dir/swagger-callers-99.json" -- tools/probe/attribute-factory-ai-random-callers.py "$probe_scratch_dir/seed99/mechanic-factory-ai-swagger-reach-off.json" "$probe_scratch_dir/swagger-callers-99.json" 822 830
+```
+
+Both censuses were run. The ability/item census has **no legitimate count
+delta**: it remains 69/69 abilities referenced (weighted
+**1096/1096**), 42/42 hold effects referenced (weighted **850/850**), and
+17/17 validation checks, with byte-identical SHA-256
+`183885e764fca4cb1d3066309cb608e336be152cd163aeab57b16cdb4db1639f`.
+The only generator edit advances three exact quoted-comparison line pins
+after the source insertion; it does not hide or add an `ABILITY_*` or
+`HOLD_EFFECT_*` identity reference.
+
+The executable-frontier census remains 214/214 effects, 355/355 moves,
+276/276 distinct Level-50 moves, 2957/2957 weighted Level-50 moves, and
+72/72 checks. Regeneration changed only its date and trailing blank line,
+so both were restored; committed SHA-256 remains
+`8b18f75413c8046530f75c8a5b331a0bf31e8b92596029356ef6025071965261`.
+This replaces one runtime effect-table halt behind the same generic barrier:
+no unsupported-branch statement or canonical-recording import was added.
