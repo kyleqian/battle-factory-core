@@ -1,3 +1,15 @@
+## 705 — [SUPERVISOR 2026-07-29 ~16:25] Roar CBM/CV pair merged with census-evasion correction; union green
+
+- **State:** master `6ac336b9` green at **518 files / 5266 tests + 1
+  deliberate animation-lane skip**, production build, `git diff --check`
+  clean. Side worktree/branch merged and removed; no orphans.
+- **Did:** merged Roar CBM/CV (`3580b199` + `906f3ff1`) and corrected a
+  hidden Suction Cups census delta in `4527fd9f`; source order, live
+  receipts, docs, and the exact census delta were supervisor-verified.
+- **Next:** party selector, ISSUES #51, trainer-pic OFF, commentary
+  checkpoint, then Gate-6.
+- **Notes:** executable-frontier census unchanged (`8b18f754…5261`).
+
 ## 704 — [BOUNDED MAIN WORKER 2026-07-29 ~16:05] Battle-command seam Slice 6 Part B field-art route landed; breadth trace honestly open
 
 - **State:** implementation `216a7fab`; tree green at **518 files / 5254

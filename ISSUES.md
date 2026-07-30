@@ -5,22 +5,6 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #51 — summary screen ignores generated draft state; renders anchor identity for every slot
-
-**Symptom:** the draft generated-slots adapter (`73543153`) carries only
-`{species, category}` per slot, and the summary path
-(`summaryInfoPage.ts:88,96`, `core.ts:1974`) reads the fixed anchor
-`draft-pool-header.json`/`anchor-state.json` globals with only a slot
-number. Any generated six-mon draft — including un-rented pool slots
-navigated by summary UP/DOWN — renders anchor identity/details.
-**Confirmed:** day-audit 2026-07-29 (file:line above). Canonical pixels are
-unaffected (the anchor IS the canonical pool), so no current trace can see
-this.
-**Lead:** preserve six full rental presentation records in the draft/summary
-state and make summary renderers consume them instead of anchor globals —
-the draft-window breadth slice's natural next step (needs the summary data
-surface: moves/item/nature per record, all already in rental records).
-
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn

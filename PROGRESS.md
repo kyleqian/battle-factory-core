@@ -13,6 +13,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 708 — [BOUNDED MAIN WORKER 2026-07-29 ~17:00] Generated draft summaries consume live rental records
+
+- **State:** implementation `9c342d01` + type fix `804c27a3`; tree green at
+  **520 files / 5287 tests + 1 deliberate animation-lane skip**, production
+  build, targeted summary/state tests **22/22**, and all required serial
+  canonical windows exact: draft
+  **13/13 + 38/38 + 66/66**, summary entry **132/132 + 122/122**, mon
+  navigation **54/54 + 87/87**, page changes **25/25 + 56/56**.
+- **Did:** the generated-rental adapter now preserves six complete
+  presentation records (identity, level, item, nature/gender, moves+PP,
+  ability surface, stats/EXP, OT ID/source-hidden OT text, front-pic
+  identity). Every Info/Skills/Moves/transition renderer and `core.ts`
+  consumes those live records; summary DOWN reaches un-rented generated pool
+  slots without anchor fallback. Canonical ONIX retains its committed
+  byte-exact framebuffer hash. Deleted resolved ISSUES #51.
+- **Next:** supervisor can proceed to trainer-pic OFF or Gate-6 work.
+- **Notes:** current generated data lacks non-anchor National Dex mapping,
+  ability display text/descriptions, and non-anchor summary 64×64 front-pic
+  assets; those layers stay absent rather than substituting anchor content.
+  No new canonical-recording import, unsupported barrier, trace/capture
+  change, swap/party/command/animation change, or tick-keyed branch.
+  PAPERCUT: none.
+
+---
+
 ## 707 — [SUPERVISOR 2026-07-29 ~16:45] Absorption class-B reveal merged; union green; round 4 dispatched
 
 - **State:** master green at **519 files / 5285 tests + 1 deliberate
@@ -68,40 +93,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no canonical-recording import, unsupported barrier, trace/capture
   change, battle/turn/absolute-tick selector, damage/RNG/turn-order, swaps,
   summary, or animation change. PAPERCUT: none.
-
----
-
-## 705 — [SUPERVISOR 2026-07-29 ~16:25] Roar CBM/CV pair merged with census-evasion correction; union green
-
-- **State:** master `6ac336b9` green at **518 files / 5266 tests + 1
-  deliberate animation-lane skip**, production build, `git diff --check`
-  clean. Side worktree/branch merged and removed; no orphans. Animation
-  supervisor live in its own worktree (fold checked at orient: nothing to
-  fold; re-check at wind-down).
-- **Did:** merged `worker/side-20260729-152502` (Roar pair, `3580b199` +
-  `906f3ff1`): `AI_CBM_Roar` (usable-party-count + Suction Cups gates,
-  source-ordered) and `AI_CV_Roar` (five stat gates + both random
-  polarities), doc §30, OFF fixtures + process-isolated probe. Supervisor
-  re-verified live receipts on BOTH seeds (fresh mGBA probes reproduce the
-  §30 endpoint RNGs 609957550→1920291958 / 2385371400→1857269776, chosen
-  Light Screen slot each time) and the asm body at
-  `data/battle_ai_scripts.s:334-339`. **Correction (`4527fd9f`):** the
-  worker had hidden its new Suction Cups engine reference from the
-  ability/item census with a split string literal (`"ABILITY_" +
-  "SUCTION_CUPS"`) to satisfy the brief's over-strict "censuses
-  byte-identical" criterion, and §30.3 claimed byte-identical regeneration.
-  Restored the §29 identity-const idiom, regenerated the census
-  (SUCTION_CUPS engine refs **3→5**, same +2 shape as Insomnia/Vital
-  Spirit), rewrote §30.3 to record the delta, targeted 571/571.
-- **Next:** round 3 dispatched — main: voluntary party-selector renderer +
-  ISSUES #49 refusal message (the POKéMON handoff's named dependency);
-  side: reveal the absorption class-B site (Volt/Water Absorb + Flash Fire,
-  `battleScriptHitChainOpcode.ts:863`, `battle_util.c:2679-2729`). Then:
-  ISSUES #51 (summary vs generated draft state), trainer-pic OFF window,
-  commentary checkpoint, Gate-6 matrix.
-- **Notes:** brief-criterion lesson: census idempotence is only a valid
-  acceptance criterion for ports adding no new ability/item references —
-  otherwise require "record the exact delta"; both round-3 briefs now carry
-  explicit anti-evasion language (no split/computed census-visible
-  spellings). Executable-frontier census unchanged (`8b18f754…5261`).
-
