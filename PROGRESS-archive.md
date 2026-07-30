@@ -1,3 +1,20 @@
+## 724 — [BOUNDED MAIN WORKER 2026-07-29] Trainer-pic OFF-window scout complete
+
+- **State:** banked legal OFF fixture and source-backed dossier; no app,
+  trace, test, animation, or issue-file change. Full tests/build green.
+- **Did:** dense noncanonical BLACK BELT SHIZUKA source route from transition
+  A edge through player-ready menu (**927 frames**, B+0..+714); confirmed
+  BLACK_BELT -> TRAINER_PIC_BLACK_BELT and mapped typed/start-command versus
+  legacy intro seams in `docs/trainer-pic-off-window-scout.md`.
+- **Next:** implement the four recommended generated battle-start intro slices;
+  final slice owns a new OFF generated-route acceptance trace. Do not use the
+  private BattleLab route as a public trace (frame 0 is post-intro).
+- **Notes:** fixture `tools/battle-lab/factory-trainer-pic-shizuka-off.json`;
+  RAM anchors: pic +59..+178, opponent healthbox +443..+466, player healthbox
+  +629..+651, player-ready +714. PAPERCUT: none.
+
+---
+
 ## 723 — [BOUNDED MAIN WORKER 2026-07-29 ~22:05] Resolution Slice 6 complete
 
 - **State:** implementation commits `985ec1fa`, `ae94cc4c`; focused Slice-6

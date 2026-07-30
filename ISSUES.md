@@ -5,23 +5,26 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #52 — generated OFF resolution starts before the confirmed-FIGHT handoff
+## #52 — generated OFF resolution skips Scene-OFF animation controller waits
 
-**Fixed portion:** the fight-closing bounce reset is removed. A persistent
-controller-owned callback clock now survives FIGHT open/close/reopen, matching
-the source's already-running `DoBounceEffect` guard; the generated route is
-exact through both cursor moves, B cancel, and reopen (frames 8-33).
+**Fixed portion:** the typed resolution seam now owns the complete generic
+confirm handoff. Nine source stages retain the selected FIGHT field through
+frame 42, reset both bouncers when STOP_BOUNCE completes, and start the attack
+string at frame 43. The generated route is exact through the settled menu,
+cursor moves, B cancel/reopen, confirm handoff, and attack text (frames 8-67).
 
-**Open remainder:** the legal EARTHQUAKE confirm now first diverges at capture
-27 (frame 34): **13,279px**, bbox (1,59)-(238,158). The app replaces FIGHT
-with the first message glyph immediately; the ROM retains the confirmed FIGHT
-field through frame 42 and first draws `G` at frame 43. Updated diagnostic:
-**26/128**, while acceptance remains **0/128 claimed**.
+**Open remainder:** capture 61 (frame 68) first differs by **2px**, bbox
+(99,33)-(99,34). The app has begun draining ARON's HP while the ROM still
+holds the full bar; at frame 116 the ROM begins the target hit blink while the
+app still shows it. The typed projector ignores the receipt's
+`MOVE_ANIMATION` and `HIT_ANIMATION` events, skipping the source Scene-OFF
+pause/hit-controller choreography. Updated diagnostic: **60/128**, while
+acceptance remains **0/128 claimed**.
 
 **Evidence:** `tools/battle-lab/mechanic-battle-command-generated-off.json`
 (trainer 17, seed 2423399196, Intimidate live) plus the pinned post-fix
-fixture/test. The remaining fix belongs to the generic typed resolution
-controller-handoff lifecycle, not a route delay or fitted frame offset.
+fixture/test. The remaining fix belongs to the generic typed Scene-OFF
+animation-event projector, not a route delay or fitted frame offset.
 
 **Blocks:** resolution design §4 Slice 7's 128/128 acceptance.
 

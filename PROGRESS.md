@@ -13,6 +13,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 727 — [BOUNDED MAIN WORKER 2026-07-29 ~23:45] Typed confirm handoff exact; Slice-7 checkpoint advances to 60/128
+
+- **State:** implementation `7f8e876b`; full suite green at **527 files /
+  5410 tests + 1 deliberate animation-lane skip**, focused acceptance **7
+  files / 167 tests**, production build and `git diff --check` green. Live
+  diagnostic improved **26/128 → 60/128**; Slice-7 acceptance remains
+  **0/128 claimed** and no trace is committed.
+- **Did:** generalized the canonical confirmed-FIGHT hold into nine typed
+  player-controller/battle-main/script stages. It preserves the selected
+  move field through frame 42, resets both bouncers at STOP_BOUNCE completion,
+  and begins the attack string at frame 43 without a fitted delay. Frames
+  **8-67 are exact**.
+- **Next:** project Scene-OFF `MOVE_ANIMATION`/`HIT_ANIMATION` controller
+  events before HP drain. First divergence is frame 68: **2px**, bbox
+  **(99,33)-(99,34)**; app removes opponent HP pixels while ROM holds the full
+  bar, then begins its target hit blink at frame 116.
+- **Notes:** all **25/25** §3.2 regression rows remain exact. Source:
+  `battle_controller_player.c:200-213,481-527,3082-3098`;
+  `battle_main.c:2940-2965,4354-4551,4756-4957`; `battle_util.c:78-292`;
+  `battle_scripts_1.s:236-247`; `battle_script_commands.c:915-1006,1191-1203`.
+  No trace/capture/import/barrier/ratchet-pin change or route/tick branch.
+  PAPERCUT: none.
+
+---
 ## 726 — [BOUNDED MAIN WORKER 2026-07-29 ~23:00] Slice-7 bounce fixed; honest confirm-handoff checkpoint
 
 - **State:** full suite green at **527 files / 5409 tests + 1 deliberate
@@ -60,19 +84,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   1-3 per the dossier.
 - **Notes:** cross-lane full suite runs 563-688s while the animation
   supervisor is live — union suite once per merge point only.
-
----
-## 724 — [BOUNDED MAIN WORKER 2026-07-29] Trainer-pic OFF-window scout complete
-
-- **State:** banked legal OFF fixture and source-backed dossier; no app,
-  trace, test, animation, or issue-file change. Full tests/build green.
-- **Did:** dense noncanonical BLACK BELT SHIZUKA source route from transition
-  A edge through player-ready menu (**927 frames**, B+0..+714); confirmed
-  BLACK_BELT -> TRAINER_PIC_BLACK_BELT and mapped typed/start-command versus
-  legacy intro seams in `docs/trainer-pic-off-window-scout.md`.
-- **Next:** implement the four recommended generated battle-start intro slices;
-  final slice owns a new OFF generated-route acceptance trace. Do not use the
-  private BattleLab route as a public trace (frame 0 is post-intro).
-- **Notes:** fixture `tools/battle-lab/factory-trainer-pic-shizuka-off.json`;
-  RAM anchors: pic +59..+178, opponent healthbox +443..+466, player healthbox
-  +629..+651, player-ready +714. PAPERCUT: none.
