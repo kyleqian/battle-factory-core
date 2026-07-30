@@ -334,6 +334,84 @@ describe("AI_CBM_Roar (docs/factory-ai-checkviability-ground-truth.md §30)", ()
   });
 });
 
+describe("AI_CBM_Paralyze (docs/factory-ai-checkviability-ground-truth.md §31)", () => {
+  const MOVE_THUNDER_WAVE = 86;
+
+  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  it("type immunity JUMPs to Score_Minus10 before the handler ability read", () => {
+    const result = run(MOVE_THUNDER_WAVE, {
+      ...MAROWAK,
+      knownAbility: null,
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual(["test-slot-soundproof"]);
+  });
+
+  it("nonimmune type FALLS THROUGH; Limber JUMPs to Score_Minus10", () => {
+    expect(run(MOVE_THUNDER_WAVE, target({
+      species: 132,
+      types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+      knownAbility: "ABILITY_LIMBER",
+      realAbility: "ABILITY_LIMBER",
+    }))).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it.each([
+    ["any primary status", { hasAnyStatus: true }],
+    ["Safeguard", { safeguardUp: true }],
+  ])("%s gate JUMPs to Score_Minus10 after the non-Limber ability FALLTHROUGH", (_label, overrides) => {
+    expect(run(MOVE_THUNDER_WAVE, target(overrides))).toMatchObject({
+      kind: "scored",
+      scoreDelta: -10,
+      draws: [],
+    });
+  });
+
+  it("all four gates FALL THROUGH to end for an eligible target", () => {
+    expect(run(MOVE_THUNDER_WAVE, target())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+
+  it("executes the handler's own fresh get_ability after the universal preamble", () => {
+    const result = run(MOVE_THUNDER_WAVE, {
+      ...MAROWAK,
+      types: ["TYPE_ROCK", "TYPE_ROCK"],
+      hasAnyStatus: true,
+    });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-paralyze-ability",
+    ]);
+  });
+
+  it("leaves Haze behind the same generic CBM barrier", () => {
+    expect(run(MOVE_HAZE, target())).toMatchObject({
+      kind: "unsupported-branch",
+      barrier: "factory-ai-check-bad-move",
+      effect: "EFFECT_HAZE",
+    });
+  });
+});
+
 describe("AI_CBM_Toxic (data/battle_ai_scripts.s:341-352)", () => {
   const CLEAN_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
     species: 213, // Shuckle: single known-by-species Sturdy keeps all handler draws at zero.
