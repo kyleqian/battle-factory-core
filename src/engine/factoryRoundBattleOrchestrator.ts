@@ -1012,6 +1012,21 @@ export function advanceFactoryRoundBattleResolution(
       && command.advance === "button"
       && isBattleResolutionButtonMessageReady(resolution)
     ) {
+      if (newKeys.has("A")) {
+        if (resolution.forcedRequest === null) {
+          return fail("Slice 4 only dismisses faint messages at a forced-party boundary");
+        }
+        return Object.freeze({
+          ...state,
+          battleResolutionPresentation: withResolutionLifecycle(
+            resolution,
+            resolution.commandIndex,
+            "forced-party-handoff",
+            resolution.lifecycle.phaseElapsed,
+          ),
+          battleForcedPartySelect: createForcedPartySelect(state, resolution),
+        });
+      }
       return Object.freeze({
         ...state,
         battleResolutionPresentation: withResolutionLifecycle(
