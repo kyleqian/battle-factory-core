@@ -209,6 +209,33 @@ function damageResolution(): BattleResolutionPresentationState {
 }
 
 describe("battle resolution presentation receipt ownership", () => {
+  it("resolves a no-effect defender from the preceding semantic move owner", () => {
+    const resolution = createBattleResolutionPresentation(inputFor([
+      event(0, {
+        kind: "message",
+        messageId: "STRINGID_USEDMOVE",
+        substitutions: [],
+      }),
+      event(1, {
+        kind: "set-battler-pp-data",
+        battler: 0,
+        movePosition: 0,
+        pp: 9,
+      }),
+      event(2, {
+        kind: "message",
+        messageId: "STRINGID_ITDOESNTAFFECT",
+        substitutions: [],
+      }),
+    ], NEXT_COMMAND));
+
+    expect(resolution.segments[0]!.commands).toMatchObject([
+      { type: "message", lines: ["ONIX used", "ROCK SLIDE!"] },
+      { type: "message", lines: ["It doesn’t affect", "Foe KABUTO…"] },
+      { type: "turn-end" },
+    ]);
+  });
+
   it("derives the confirmed-FIGHT handoff from controller and script stages", () => {
     let resolution = createBattleResolutionPresentation({
       ...inputFor([

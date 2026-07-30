@@ -358,6 +358,7 @@ function messageLines(
     { kind: "stat-stage-change" }
   > | null,
   lastFaintBattler: 0 | 1 | null,
+  lastMoveAttacker: 0 | 1 | null,
   opponentTrainer: Readonly<{ className: string; name: string }> | null,
 ): readonly string[] {
   if (event.payload.kind !== "message") {
@@ -375,6 +376,22 @@ function messageLines(
         nickname: displayed.name,
       }),
       B_BUFF2: () => resolveMoveNameExclaim(displayed.moveIds[pp.movePosition]!),
+    });
+  }
+  if (messageId === "STRINGID_ITDOESNTAFFECT") {
+    if (lastMoveAttacker === null) {
+      throw new Error(
+        "battle resolution no-effect message has no preceding used-move event",
+      );
+    }
+    const defender = lastMoveAttacker === 0 ? 1 : 0;
+    const displayed = fieldBattler(field, defender);
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: () => resolveBattleNameWithPrefix({
+        side: defender === 0 ? "player" : "opponent",
+        isTrainerBattle: true,
+        nickname: displayed.name,
+      }),
     });
   }
   if (messageId === "STRINGID_DEFENDERSSTATFELL") {
@@ -492,6 +509,7 @@ export function projectBattleResolutionCommands(
     { kind: "stat-stage-change" }
   > | null = null;
   let lastFaintBattler: 0 | 1 | null = null;
+  let lastMoveAttacker: 0 | 1 | null = null;
   let usedMoveInstructionExecution: number | null = null;
   const zeroHpBattlers = new Set<0 | 1>();
   const fieldArt = createBattleCommandFieldArtView(field);
@@ -509,6 +527,10 @@ export function projectBattleResolutionCommands(
       sourceLabelOf(event);
       if (payload.messageId === "STRINGID_USEDMOVE") {
         usedMoveInstructionExecution = instructionExecutionOf(event);
+        lastMoveAttacker = singlesBattler(
+          ppEventAfter(events, index).battler,
+          "used-move message",
+        );
       }
       const switchInBattler = payload.messageId === "STRINGID_SWITCHINMON"
         ? ([...pendingSwitch.keys()].at(-1) ?? null)
@@ -525,6 +547,7 @@ export function projectBattleResolutionCommands(
           afterField,
           lastStatChange,
           lastFaintBattler,
+          lastMoveAttacker,
           opponentTrainer,
         ),
         advance:
