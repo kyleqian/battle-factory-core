@@ -9,9 +9,12 @@ import type {
 } from "./battleDecisionBoundary.ts";
 import type {
   BattleScriptBattlerId,
-  BattleScriptSemanticEventPayload,
 } from "./battleScriptEvents.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import {
+  projectBattleResolutionCommands,
+  type BattleResolutionDisplayedField,
+} from "./battleResolutionPresentation.ts";
 
 interface SceneOffCommandBase {
   readonly commandId: number;
@@ -193,29 +196,6 @@ function commandBase(
   return { commandId, minimumFrames: MINIMUM_FRAMES[type] };
 }
 
-function isUsedMoveMessage(
-  payload: BattleScriptSemanticEventPayload,
-): boolean {
-  return payload.kind === "message" && payload.messageId === "STRINGID_USEDMOVE";
-}
-
-function actionPpEvent(
-  events: readonly BattleKernelSemanticEvent[],
-  messageIndex: number,
-): Extract<
-  BattleScriptSemanticEventPayload,
-  { kind: "set-battler-pp-data" }
-> {
-  for (let index = messageIndex + 1; index < events.length; index += 1) {
-    const payload = events[index]!.payload;
-    if (isUsedMoveMessage(payload)) break;
-    if (payload.kind === "set-battler-pp-data") return payload;
-  }
-  throw new Error(
-    "Scene OFF used-move event has no same-action PP semantic event",
-  );
-}
-
 function sourceLabelOf(
   event: BattleKernelSemanticEvent,
 ): string {
@@ -225,6 +205,39 @@ function sourceLabelOf(
     );
   }
   return event.provenance.sourceLabel;
+}
+
+function resolutionField(
+  input: SceneOffKernelTurnProjectionInput,
+): BattleResolutionDisplayedField {
+  const battler = (id: 0 | 1) => {
+    const active = input.before.battlers[id]!;
+    const metadata = metadataForBattler(input, id);
+    const partyIndex = active.partyIndex;
+    if (!Number.isInteger(partyIndex) || partyIndex < 0 || partyIndex > 5) {
+      throw new Error(`Scene OFF battler ${id} has invalid party index ${partyIndex}`);
+    }
+    const party = id === 0
+      ? input.before.party.player
+      : input.before.party.opponent;
+    const member = party[partyIndex]!;
+    return Object.freeze({
+      side: id === 0 ? "player" as const : "trainer" as const,
+      battler: id,
+      partyIndex: partyIndex as 0 | 1 | 2 | 3 | 4 | 5,
+      species: member.species,
+      name: metadata.name,
+      level: member.level,
+      gender: "genderless" as const,
+      hp: active.hp,
+      maxHP: active.maxHP,
+      status: "none" as const,
+      moveIds: active.moves,
+      currentPP: active.pp,
+      ppBonuses: active.ppBonuses,
+    });
+  };
+  return Object.freeze({ player: battler(0), opponent: battler(1) });
 }
 
 /**
@@ -237,28 +250,54 @@ export function createBattleKernelTurnPresentation(
   input: SceneOffKernelTurnProjectionInput,
 ): BattleTurnPresentationState {
   const commands: SceneOffPresentationCommand[] = [];
-  let lastStatChange: Extract<
-    BattleScriptSemanticEventPayload,
-    { kind: "stat-stage-change" }
-  > | null = null;
+  const projected = projectBattleResolutionCommands(
+    input.events,
+    input.before,
+    input.after,
+    resolutionField(input),
+    null,
+  );
+  const projectedBySequence = new Map(
+    projected.flatMap((command) =>
+      "eventSequence" in command ? [[command.eventSequence, command] as const] : []
+    ),
+  );
 
-  for (let index = 0; index < input.events.length; index += 1) {
-    const event = input.events[index]!;
+  for (const event of input.events) {
     const payload = event.payload;
-    if (isUsedMoveMessage(payload)) {
-      sourceLabelOf(event);
-      const ppEvent = actionPpEvent(input.events, index);
-      const metadata = metadataForBattler(input, ppEvent.battler);
-      const prefix = ppEvent.battler === 1 ? `Foe ${metadata.name}` : metadata.name;
+    const resolutionCommand = projectedBySequence.get(event.sequence);
+    if (resolutionCommand?.type === "message") {
       commands.push({
         ...commandBase(commands.length + 1, "text"),
         type: "text",
-        lines: [
-          `${prefix} used`,
-          `${metadata.moveNames[ppEvent.movePosition] ?? `MOVE ${ppEvent.movePosition}`}!`,
-        ],
+        lines: resolutionCommand.lines,
       });
-      continue;
+    } else if (resolutionCommand?.type === "hp") {
+      commands.push({
+        ...commandBase(commands.length + 1, "hp"),
+        type: "hp",
+        target: battlerSide(resolutionCommand.battler),
+        from: resolutionCommand.from,
+        to: resolutionCommand.to,
+      });
+    } else if (resolutionCommand?.type === "stat") {
+      if (resolutionCommand.stat !== "accuracy") {
+        throw new Error(
+          `Scene OFF compatibility projection does not yet render ${resolutionCommand.stat} stat commands`,
+        );
+      }
+      commands.push({
+        ...commandBase(commands.length + 1, "stat"),
+        type: "stat",
+        target: battlerSide(resolutionCommand.battler),
+        stat: "accuracy",
+        from: resolutionCommand.from,
+        to: resolutionCommand.to,
+      });
+    } else if (resolutionCommand !== undefined) {
+      throw new Error(
+        `Scene OFF compatibility projection does not yet render ${resolutionCommand.type} commands`,
+      );
     }
     if (payload.kind === "set-battler-pp-data") {
       sourceLabelOf(event);
@@ -274,55 +313,6 @@ export function createBattleKernelTurnPresentation(
           payload.movePosition
         ]!,
         to: payload.pp,
-      });
-      continue;
-    }
-    if (payload.kind === "hp-change") {
-      commands.push({
-        ...commandBase(commands.length + 1, "hp"),
-        type: "hp",
-        target: battlerSide(payload.battler as BattleScriptBattlerId),
-        from: payload.from,
-        to: payload.to,
-      });
-      continue;
-    }
-    if (payload.kind === "stat-stage-change") {
-      if (payload.stat !== "accuracy") {
-        throw new Error(
-          `Scene OFF projection does not yet render ${payload.stat} stat commands`,
-        );
-      }
-      lastStatChange = payload;
-      commands.push({
-        ...commandBase(commands.length + 1, "stat"),
-        type: "stat",
-        target: battlerSide(payload.battler as BattleScriptBattlerId),
-        stat: "accuracy",
-        from: payload.from,
-        to: payload.to,
-      });
-      continue;
-    }
-    if (
-      payload.kind === "message"
-      && payload.messageId === "STRINGID_DEFENDERSSTATFELL"
-    ) {
-      sourceLabelOf(event);
-      if (!lastStatChange) {
-        throw new Error(
-          "Scene OFF stat-fell message has no preceding stat semantic event",
-        );
-      }
-      const battler = lastStatChange.battler as BattleScriptBattlerId;
-      const metadata = metadataForBattler(input, battler);
-      const target = battler === 1
-        ? `Foe ${metadata.name}’s`
-        : `${metadata.name}’s`;
-      commands.push({
-        ...commandBase(commands.length + 1, "text"),
-        type: "text",
-        lines: [`${target} ${lastStatChange.stat}`, "fell!"],
       });
     }
   }
