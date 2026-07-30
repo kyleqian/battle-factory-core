@@ -4,6 +4,10 @@ const read = (path: string) => readFileSync(path, "utf8");
 const scripts = read("reference/pokeemerald/data/battle_anim_scripts.s");
 const psychic = read("reference/pokeemerald/src/battle_anim_psychic.c");
 const graphics = read("reference/pokeemerald/src/graphics.c");
+const battleScripts = read("reference/pokeemerald/data/battle_scripts_1.s");
+const battleCommands = read(
+  "reference/pokeemerald/src/battle_script_commands.c",
+);
 const mons = read(
   "reference/pokeemerald/src/data/battle_frontier/battle_frontier_mons.h",
 );
@@ -99,6 +103,15 @@ if (
   || !mirrorCoat.includes("call SpecialScreenSparkle")
   || !psychic.includes("const struct SpriteTemplate gMirrorCoatWallSpriteTemplate")
   || !graphics.includes("gBattleAnimSpritePal_RedLightWall")
+  || !battleScripts.includes("BattleScript_EffectMirrorCoat::")
+  || !battleScripts.includes(
+    "mirrorcoatdamagecalculator BattleScript_FailedFromAtkString",
+  )
+  || !battleScripts.includes("goto BattleScript_HitFromAtkAnimation")
+  || !battleCommands.includes("static void Cmd_mirrorcoatdamagecalculator(void)")
+  || !battleCommands.includes(
+    "gBattleMoveDamage = gProtectStructs[gBattlerAttacker].specialDmg * 2",
+  )
 ) throw new Error("Mirror Coat sibling audit changed");
 
 console.log(JSON.stringify({
@@ -117,12 +130,18 @@ console.log(JSON.stringify({
     move: "MOVE_MIRROR_COAT",
     lowestCarrier:
       "set 151 FRONTIER_MON_CORSOLA / SPECIES_CORSOLA",
-    remainder:
-      "independent RED_LIGHT_WALL palette/tag and "
-      + "gMirrorCoatWallSpriteTemplate; wall-before-audio body with delay 10 "
-      + "then immediate playse (not Light Screen's delayed sound task); "
-      + "Mirror Coat counter staging/result state; complete dense raw-RGB, "
-      + "audio, palette, register, teardown, and production-framebuffer "
-      + "acceptance twice fresh in both orientations",
+    reachableBodies: [{
+      name: "successful-special-damage-counter",
+      route:
+        "mirrorcoatdamagecalculator accepts nonzero opposing specialDmg, "
+        + "doubles it, and reaches BattleScript_HitFromAtkAnimation",
+      animation: "Move_MIRROR_COAT",
+    }],
+    failureRoute:
+      "zero/invalid special damage jumps to BattleScript_FailedFromAtkString "
+      + "and does not select a move-animation body",
+    presentationDifference:
+      "RED_LIGHT_WALL/gMirrorCoatWallSpriteTemplate; wall-before-audio "
+      + "delay-10 then immediate playse, with no Light Screen sound task",
   },
 }));

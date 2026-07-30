@@ -8,10 +8,17 @@ import subprocess
 import sys
 from pathlib import Path
 
-if len(sys.argv) != 4:
-    raise SystemExit("usage: lightScreenProbe.py <scenario> <output.json> <rgb-dir>")
+if len(sys.argv) not in (4, 5):
+    raise SystemExit(
+        "usage: lightScreenProbe.py <scenario> <output.json> <rgb-dir> "
+        "[mirror-coat]"
+    )
 
-SCENARIO, OUTPUT, RGB_DIR = map(Path, sys.argv[1:])
+SCENARIO, OUTPUT, RGB_DIR = map(Path, sys.argv[1:4])
+MODE = sys.argv[4] if len(sys.argv) == 5 else "light-screen"
+if MODE not in ("light-screen", "mirror-coat"):
+    raise SystemExit(f"unsupported special-screen mode: {MODE}")
+CURRENT_MOVE = 113 if MODE == "light-screen" else 243
 ROOT = Path(__file__).resolve().parents[2]
 HARNESS = next(
     path for path in (ROOT, *ROOT.parents)
@@ -59,8 +66,15 @@ def main() -> None:
         if len(parts := line.split()) == 3
     }
     palette_tags = names["sSpritePaletteTags"] & ~1
-    wall = symbols["gLightScreenWallSpriteTemplate"]
+    wall = symbols[
+        "gLightScreenWallSpriteTemplate"
+        if MODE == "light-screen"
+        else "gMirrorCoatWallSpriteTemplate"
+    ]
     sparkle = symbols["gSpecialScreenSparkleSpriteTemplate"]
+    protect = symbols["gProtectStructs"]
+    battler_attacker = symbols["gBattlerAttacker"]
+    move_damage = symbols["gBattleMoveDamage"]
 
     def u16(address: int) -> int:
         return oracle.read_u8(address) | (oracle.read_u8(address + 1) << 8)
@@ -108,7 +122,7 @@ def main() -> None:
 
     def capture(frame: int) -> None:
         snapshot = lab.snapshot()
-        if snapshot["engine"]["currentMove"] != 113:
+        if snapshot["engine"]["currentMove"] != CURRENT_MOVE:
             return
         active = [
             sprite(index)
@@ -117,7 +131,7 @@ def main() -> None:
         ]
         rgb = oracle.screen_rgb()
         (RGB_DIR / f"{frame:05d}.rgb").write_bytes(rgb)
-        rows.append({
+        row = {
             "frame": frame,
             "sha256": hashlib.sha256(rgb).hexdigest(),
             "effectSprites": [
@@ -158,7 +172,17 @@ def main() -> None:
                 "player": snapshot["battlers"]["player"],
                 "opponent": snapshot["battlers"]["opponent"],
             },
-        })
+        }
+        if MODE == "mirror-coat":
+            attacker = oracle.read_u8(battler_attacker)
+            base = protect + attacker * 16
+            row["counterReceipt"] = {
+                "attacker": attacker,
+                "specialDmg": oracle.read_u32(base + 8),
+                "specialBattlerId": oracle.read_u8(base + 13),
+                "resolvedDamage": oracle.read_u32(move_damage),
+            }
+        rows.append(row)
 
     frame = 0
     capture(frame)
@@ -168,14 +192,19 @@ def main() -> None:
             frame += 1
             capture(frame)
     if not rows or not any(row["effectSprites"] for row in rows):
-        raise RuntimeError("MOVE_LIGHT_SCREEN body not reached")
-    OUTPUT.write_text(json.dumps({
-        "schema": "light-screen-dense-evidence/v1",
+        raise RuntimeError(f"{MODE} body not reached")
+    payload = {
+        "schema": (
+            "light-screen-dense-evidence/v1"
+            if MODE == "light-screen"
+            else "mirror-coat-dense-evidence/v1"
+        ),
         "setup": setup,
         "songHeader": oracle.read_u32(songs + 207 * 8),
         "templates": {"wall": wall, "sparkle": sparkle},
         "frames": rows,
-    }) + "\n")
+    }
+    OUTPUT.write_text(json.dumps(payload) + "\n")
     print(
         f"wrote {OUTPUT} ({len(rows)} move frames; "
         f"{rows[0]['frame']}..{rows[-1]['frame']})"

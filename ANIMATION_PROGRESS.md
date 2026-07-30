@@ -1,89 +1,113 @@
 # Animation coverage
 
-## MOVE_BRICK_BREAK promoted exact; both controller-selected bodies accepted (2026-07-29)
+## MOVE_PRESENT bounded source/probe checkpoint; remains unsupported (2026-07-30)
 
-**Verdict:** `MOVE_BRICK_BREAK` is exact. Source/controller audit proves
-`removelightscreenreflect` selects distinct normal and shattered-wall
-presentation bodies. Complete legal Lombre/Onix Scene-ON parties prove both
-twice fresh per orientation. `BrickBreakNormal` passes **151/151** semantic
-and production frames: player-back **234–384** evidence/raw
-`ad3d3e90b70fde1595dda316a773e887f17123df5ad5815086159ddb52398b5d` /
-`67687eb221c4efb306fdca646b78fd181469aa22ef98e48d7006b4a9ec2c27cb`;
-opponent-front **220–370**
-`b1ac1081da160add8d9e92f878e3051199a909987735dc5bf06cd921bb1f8fab` /
-`4a03768b6549b364296e3639833e7c5d0cd6dedcec567ee62f20e32fd94c2645`.
+**Verdict:** `MOVE_PRESENT` remains unsupported. Set **118
+`FRONTIER_MON_DELIBIRD`** is the sole and therefore lowest legal Level-50
+Factory carrier (Docile, Never-Melt Ice, Sp.Atk/HP). Source pins the common
+60-frame `ITEM_BAG` path and `AnimTask_IsHealingMove`: `gAnimMoveDmg > 0`
+selects five target-relative `EXPLOSION`s; zero selects nine
+`GREEN_SPARKLE`s and target `HealingEffect2`. The battle script's live
+`Random() & 0xff` roll reaches healing only at `>= 204`, and full-target
+heals skip attack animation entirely.
 
-**Wall body / model:** `BrickBreakShatteredWall` passes **192/192** twice per
-orientation: player-back **288–479** evidence/raw
-`e484e602be861db10e4042c2a6de75e5f6e261e533515d48d8597637db5c4697` /
-`e1b36f8036f30386af0c7cdaac9645f73bb9eb526802c3179e745871cf637363`;
-opponent-front **289–480**
-`f0314f159cb9b141c107cbe078382ebb4ff7379c4ce2c835aa9b921c65bbe27a` /
-`8402d60c9605e852c0f099dbc617c80dc21d005097ed1985395b647564ae23bc`.
-The reducer/seam/compositor preserve two lunges, three hitsplats, fist,
-24+10+3 WindUpLunge, target-panned audio, BG blend, monbg/alpha, wall, four
-40-step TORN_METAL shards, hardware transfer/order, and cleanup.
+**Evidence / remainder:** the player Delibird scenario now uses the complete
+source set-118 loadout `{Present, Ice Ball, Aerial Ace, Hail}` and selects its
+real Aerial Ace to chip Onix before Present. A fresh damage probe records the
+actual absolute first-active through first-inactive source window
+**1012–1212 (201 frames)**, bag ×1 / explosion ×5. It records
+pointer/tasks/sprites/OAM/matrices/palettes/tags/registers/audio/raw RGB, but
+the output is deliberately uncommitted: no dense receipt or hash is claimed.
+The reverse scenario's opponent Delibird keeps duplicated Present slots only
+under mechanicLab's documented AI-constraint exception, so it is not a
+complete set-118 loadout. Healing and opponent-orientation routes remain
+unproved. The exact remainder is fixed legal damage-then-heal controller
+routes in both orientations, twice-fresh dense receipts, and an independent
+reducer/compositor. No typed seam or runtime code changed.
 
-**Boundary:** `MOVE_CRUSH_CLAW` stays independently unsupported; no gameplay,
-screen outcome, RNG, controller, facility state, boundary list, unsupported
-barrier, or canonical allowlist changed. Coverage is **101 exact / 0 partial /
-0 staged / 175 unsupported**.
+## MOVE_SECRET_POWER promoted exact; slam-hit-slide-shake complete (2026-07-30)
 
-## MOVE_WHIRLPOOL promoted exact; both source bodies accepted (2026-07-29)
+**Verdict:** `MOVE_SECRET_POWER` is exact through its sole reachable Factory
+body, indoor `BATTLE_ENVIRONMENT_BUILDING` → `Move_STRENGTH`. Complete legal
+challenge-0 set-117 Teddiursa/Onix parties pass the full first-active through
+first-inactive cleanup interval at **222–323 (102/102)** twice fresh in both
+orientations through the source reducer, typed seam, software/hardware OAM,
+matrices, palette/tag/register/audio receipts, raw RGB, and production shared
+framebuffer. Player-back evidence/raw hashes remain
+`9d8f3ad7a472bdd940aa35a7aa7e9c62823d8d2b11c0114ce6d4b1f92aed73a3` /
+`af6ff533abeb22e9b2f45c09339dcb979ac8508501e64d6d012faa1eb91a2903`;
+opponent-front hashes remain
+`8d6902b63b3dc96622261856cdb413c452d3c55140465a674d97aa51271a2172` /
+`f4c81b0de053a8703ed10238c70d6398693fc937c1ad2d088de451a097d6376a`.
 
-**Verdict:** `MOVE_WHIRLPOOL` is exact through one pure source-relative
-reducer, typed Scene-ON seam, and production compositor. The complete main
-body passes **133/133** semantic and framebuffer frames twice in both
-orientations: player-back evidence/raw
-`2942fa0bf1a07da485bcf391ca4ecea06a41361d648adc27a1e48a3f32018125` /
-`d3a4cebcb258d334414d99096b7ded4accc90be1af37da4abf01610866ae96c8`;
-opponent-front
-`7e57488e1a265960fec441a02b5133f0b4a6e38ddde46cd42e21b5a29b0aaba3` /
-`8b42073d713d49286935abd3079c2266464f6f66c492a039903fb70740a26ffa`.
+**Model / boundaries:** the compositor preserves IMPACT lifetime,
+`ShakeAndSinkMon`'s distinct two-transfer position latch, four-tick return
+slide, side-respecting two-loop ellipse, three animation-1 hitsplats including
+source slot-reuse priority, final `ShakeMon2`, monbg/12:8 alpha, all four
+sounds, legal Teddiursa/Onix art and geometry, waits, and cleanup. The later
+**472–509** secondary-status animation remains controller-owned and outside
+the move body. `MOVE_SLAM` independently reruns **54/54 twice fresh in both
+orientations** with unchanged hashes. No battle semantics or boundary pins
+changed. Coverage is **105 exact / 0 partial / 0 staged / 171 unsupported**;
+the `slam-hit-slide-shake` component track is complete.
 
-**Residual / model:** the independently staged `Status_Whirlpool` body passes
-**108/108** twice per orientation: player-back
-`e5d210e7908b269ba0722959c4035d4bc39c04378a323cf74698375baa615b84` /
-`8a809496f28e7cb8e5eb9a37e26f721a9e9b3c14ef67bbf798825d4b527a9e71`;
-opponent-front
-`d6b1d9e43817259be6ad63c9b36e5f4d11112a868785925253716eb97fead93a` /
-`481017b8c09ddf3bbe585e6e2845a02384e27e1b7ed38169834e3eb2ea82463c`.
-The model preserves the main body's 18 vortex-orb lifecycles and 50-tick
-ShakeMon, the residual body's 12 lifecycles and 30-tick ShakeMon, their
-distinct affine/OAM creation latches, palettes/registers/audio, stable sprite
-ordering, Wailmer/Onix art, field chrome, and cleanup.
+## MOVE_SECRET_POWER source/controller checkpoint; remains unsupported (2026-07-30)
 
-**Ownership:** no trapping outcome, damage, RNG, turn/controller, round,
-facility, boundary list, unsupported barrier, or canonical allowlist changed.
-Coverage is **100 exact / 0 partial / 0 staged / 176 unsupported**.
+**Verdict:** `MOVE_SECRET_POWER` remains unsupported. A complete source,
+generated-inventory, battle-script, controller, and environment audit proves
+challenge-0 set **117 `FRONTIER_MON_TEDDIURSA`** is the lowest legal Level-50
+carrier, correcting the older set-162 Delcatty evidence. The Factory battle
+room is indoor, so its only reachable visual dispatch is
+`BATTLE_ENVIRONMENT_BUILDING` → `Move_STRENGTH`; all nine explicit terrain
+branches plus the plain fallback are now pinned.
 
-## MOVE_LOW_KICK promoted exact; target-rotation track complete (2026-07-29)
+**Controller/body boundary:** a successful hit emits
+`CONTROLLER_MOVEANIMATION`, both player and opponent controllers call
+`DoMoveAnim(290)`, and `AnimTask_GetBattleEnvironment` selects Strength.
+Accuracy misses bypass `attackanimation`; `MOVE_RESULT_NO_EFFECT` and
+`HITMARKER_NO_ANIMATIONS` select the pause route; the secondary effect is
+chosen only after the animation/result message. The required Strength body is
+independently enumerated: IMPACT, `ShakeAndSinkMon`, return slide, elliptical
+target translation, three hitsplats, `ShakeMon2`, monbg/alpha, four sounds,
+and cleanup.
 
-**Verdict:** `MOVE_LOW_KICK` is exact. Source and inventory prove set **178
-`FRONTIER_MON_MACHOKE_1`** is the lowest legal Level-50 carrier (before set
-298 Sudowoodo_2). Complete legal Scene-ON Machoke/Onix parties pass the full
-body through first inactive cleanup twice fresh per orientation: player-back
-**214–246 (33/33)** evidence/raw
-`f3b4b291ee90208d9f9dcf7e2ea91a355c6da0e270289e6a083cdae126782a74` /
-`40639ddccc47ad2f867891ce5daa4d6a5769ff22b85352095bac14ba5cc9d9e5`;
-opponent-front **214–246 (33/33)**
-`7264ca8cdc9335c80e375354c674322eb857f1c2a7d0ea253fe2e73cefd14e0a` /
-`4d657cf51c4c28805b20ed868890418aaf2ab03c7074ccce9757ea63bef75e20`.
+**Evidence / next:** `secretPowerSourceAudit.ts` and its focused Tier-1 test
+pin the full dispatch/controller contract while reusing the existing
+source-complete `getsecretpowereffect` semantic tests without changing battle
+logic. No reducer, compositor, dense oracle fixture, or exact status was
+added. `MOVE_SLAM` remains independently exact at **54/54 twice fresh in both
+orientations with unchanged hashes**. Coverage remains **104 exact / 0 partial
+/ 0 staged / 172 unsupported**. Next work is a separate complete Strength
+reducer/compositor and twice-fresh full dense Scene-ON acceptance in both
+orientations using legal set-117 Teddiursa parties.
 
-**Model/evidence:** the pure source-relative reducer, narrow typed seam,
-reproducible Machoke art, and production compositor port both slide callbacks,
-target-relative SlidingKick/hitsplat, RotateMonSpriteToSide's ObjAffineSet
-matrix plus target position/OAM transfer, Vital Throw target panning, field
-chrome/text, sprite/task display latches, tag cleanup, and first inactive
-cleanup. `lowKickPortable.ts` proves **33/33** reducer/component/seam/cleanup
-and **33/33** shared-framebuffer equality twice per orientation.
+## MOVE_ATTRACT promoted exact; red-heart-sweet-kiss track complete (2026-07-29)
 
-**Sibling / next:** `MOVE_ROLLING_KICK` remains independently exact under its
-own 55-frame portable verifier. Next independent component track:
-`water-orb-hydro-pump-whirlpool`, with `MOVE_WHIRLPOOL` requiring its own dense
-both-orientation proof despite Hydro Pump's exact shared components. Coverage
-is **99 exact / 0 partial / 0 staged / 177 unsupported**.
+**Verdict:** `MOVE_ATTRACT` is exact. Source, generated inventory,
+battle-script, and controller audit pin set **113 `FRONTIER_MON_EEVEE`** as
+the lowest legal Level-50 carrier and one reachable animation body after
+accuracy and `tryinfatuating`. Accuracy, same-gender, genderless,
+already-infatuated, and `OBLIVIOUS` failures select no animation body.
 
-**Ownership:** no damage, Low Kick weight calculation, RNG, turn order,
-controller, round advancement, facility state, animation-boundary list,
-unsupported barrier, or canonical-recording allowlist changed.
+**Evidence:** complete legal female-Eevee/male-Onix Scene-ON parties pass the
+complete first-active frame through first-inactive cleanup twice fresh per
+orientation. Player-back **66–500 (435/435)** evidence/raw
+`a5008ce72fd22417d8ec1be80158fd3a5f93b715165700b875601c476c5717c8` /
+`e627d99e69936a320250ab89b946221a179d2ea3a2ed076068a2ff82e9edd9a9`;
+opponent-front **70–504 (435/435)**
+`234dd9d0da4f02be12a404f3ef36eaa1071bd66d2886eaa75fe3aa25ae48422e` /
+`daa9c2ed067fcfa6d56a98d364c5d3e31e0ca7af30bd15ca72c2c93ddb2ef329`.
+
+**Model / sibling:** the reducer, typed seam, and production compositor port
+the projectile, six burst, and eight rising RED_HEART sprites, including the
+opponent-front pre-OAM allocation; SwayMon; HeartsBackground tiles, palette,
+alpha ramp and cleanup; two target blend cycles; all audio/panning;
+attacker/target geometry; legal art/idle offsets; OAM/hardware transfer and
+cleanup. `MOVE_SWEET_KISS` independently reruns **159/159** twice fresh in
+both orientations with unchanged evidence/raw hashes.
+
+**Ownership / next:** presentation owns no accuracy, gender/ability or
+infatuation result, RNG, controller, turn/facility state, boundary list,
+unsupported barrier, or canonical allowlist. Coverage is **104 exact / 0
+partial / 0 staged / 172 unsupported**. Next ranked incomplete component
+track: `slam-hit-slide-shake` (`MOVE_SECRET_POWER` independently unsupported).

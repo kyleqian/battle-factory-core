@@ -4,6 +4,152 @@ Older dated sections moved out of `ANIMATION_PROGRESS.md` to keep that
 file lean (`AGENTS.md`'s ~3-most-recent convention). Git history has the
 full record regardless; this file is a read-only reference.
 
+## MOVE_MIRROR_COAT promoted exact; sparkle-3-special-screen track complete (2026-07-29)
+
+**Verdict:** `MOVE_MIRROR_COAT` is exact. Source, generated inventory, and
+controller audit prove set **151 `FRONTIER_MON_CORSOLA`** is its lowest legal
+Level-50 carrier and one animation body is reachable: a valid opposing special
+hit reaches `Move_MIRROR_COAT`; the failure route selects no animation body.
+Complete legal Corsola/Exeggcute Scene-ON parties stage real Confusion damage
+before Mirror Coat's -5-priority counter in both orientations.
+
+**Evidence:** the complete first-active wall frame through first-inactive
+cleanup passes twice fresh per orientation. Player-back **349–423 (75/75)**
+records special damage/result **26→52**, evidence/raw
+`1ea5591d85dc0e4926b8e763584f405ed4ec72d43c676ad06fc551cedb44aa92` /
+`c8a70485e2d13ae522c31760ee7e6ecb24bb464eb567427855448389ab1128a7`;
+opponent-front **355–429 (75/75)** records **31→62**,
+`3328d443c81b35a5305590705e7448d009aa0111a326b318c08b420a29939a7d` /
+`0fcba1ad43f479f613f84243bca184e10f4545e7e6566558327c081444b73b5b`.
+
+**Model / sibling:** the reducer and seam reuse only source-identical
+`AnimDefensiveWall` and six `SpecialScreenSparkle` lifecycles while preserving
+Mirror Coat's red wall/tag, wall-before-audio delay-10/immediate attacker pan,
+no Light Screen sound task, palettes/registers, BG/OBJ ordering, legal carrier
+art/geometry, and cleanup. `MOVE_LIGHT_SCREEN` independently reruns exact twice
+fresh at **115/115 player-back + 119/119 opponent-front**, with unchanged
+evidence/raw hashes.
+
+**Ownership / next:** no counter/damage semantics, accuracy, RNG, controller,
+turn/facility state, boundary list, unsupported barrier, or canonical allowlist
+changed. Coverage is **103 exact / 0 partial / 0 staged / 173 unsupported**.
+Next incomplete ranked track: `red-heart-sweet-kiss`
+(`MOVE_ATTRACT` independently unsupported).
+
+## MOVE_COTTON_SPORE promoted exact; spore-particles track complete (2026-07-29)
+
+**Verdict:** `MOVE_COTTON_SPORE` is exact. Source and legal inventory prove
+set **49 `FRONTIER_MON_MAREEP`** is its lowest Level-50 carrier (Relaxed,
+HP+SpAttack, Cheri Berry). Complete Scene-ON Mareep/Onix parties pass the
+full source body through first inactive cleanup twice fresh per orientation:
+player-back **286–489 (204/204)** evidence/raw
+`f3505c583dbfd81459fa5a6ae013a0e84d8583f0cf3e0d0ec8cb1817c120e0c3` /
+`b46bd803dd59cf953c0fa0d4a979d15ab6c9060a6cc7b14571dbcb69cea38007`;
+opponent-front **285–488 (204/204)**
+`a719bb8dff37cdf3f82a3909b6129e694b1982fa0800152dbbd7c3ae105e5983` /
+`629fb753f6e9522a6144b90c630b4d6306e3fcdd1b2558fe9af8a55617ab569c`.
+
+**Model/evidence:** the pure reducer, typed seam, and production compositor
+reuse `ANIM_TAG_SPORE`/`AnimSporeParticle` while preserving Cotton Spore's
+splitbgprio, opaque particle cell/OAM, 18/10 target-panned loop audio, lack of
+alpha/blendoff/SporeDoubleBattle, target-relative geometry, hardware latch,
+monbg, and cleanup. `MOVE_SPORE` independently reruns **207/207** twice fresh
+in both orientations and remains exact.
+
+**Ownership / next:** no accuracy or Speed result, damage, RNG, controller,
+turn/facility state, boundary list, unsupported barrier, or canonical
+allowlist changed. Coverage is **102 exact / 0 partial / 0 staged / 174
+unsupported**. Next incomplete ranked component track:
+`sparkle-3-special-screen` (`MOVE_MIRROR_COAT` independently unsupported).
+
+## MOVE_BRICK_BREAK promoted exact; both controller-selected bodies accepted (2026-07-29)
+
+**Verdict:** `MOVE_BRICK_BREAK` is exact. Source/controller audit proves
+`removelightscreenreflect` selects distinct normal and shattered-wall
+presentation bodies. Complete legal Lombre/Onix Scene-ON parties prove both
+twice fresh per orientation. `BrickBreakNormal` passes **151/151** semantic
+and production frames: player-back **234–384** evidence/raw
+`ad3d3e90b70fde1595dda316a773e887f17123df5ad5815086159ddb52398b5d` /
+`67687eb221c4efb306fdca646b78fd181469aa22ef98e48d7006b4a9ec2c27cb`;
+opponent-front **220–370**
+`b1ac1081da160add8d9e92f878e3051199a909987735dc5bf06cd921bb1f8fab` /
+`4a03768b6549b364296e3639833e7c5d0cd6dedcec567ee62f20e32fd94c2645`.
+
+**Wall body / model:** `BrickBreakShatteredWall` passes **192/192** twice per
+orientation: player-back **288–479** evidence/raw
+`e484e602be861db10e4042c2a6de75e5f6e261e533515d48d8597637db5c4697` /
+`e1b36f8036f30386af0c7cdaac9645f73bb9eb526802c3179e745871cf637363`;
+opponent-front **289–480**
+`f0314f159cb9b141c107cbe078382ebb4ff7379c4ce2c835aa9b921c65bbe27a` /
+`8402d60c9605e852c0f099dbc617c80dc21d005097ed1985395b647564ae23bc`.
+The reducer/seam/compositor preserve two lunges, three hitsplats, fist,
+24+10+3 WindUpLunge, target-panned audio, BG blend, monbg/alpha, wall, four
+40-step TORN_METAL shards, hardware transfer/order, and cleanup.
+
+**Boundary:** `MOVE_CRUSH_CLAW` stays independently unsupported; no gameplay,
+screen outcome, RNG, controller, facility state, boundary list, unsupported
+barrier, or canonical allowlist changed. Coverage is **101 exact / 0 partial /
+0 staged / 175 unsupported**.
+
+## MOVE_WHIRLPOOL promoted exact; both source bodies accepted (2026-07-29)
+
+**Verdict:** `MOVE_WHIRLPOOL` is exact through one pure source-relative
+reducer, typed Scene-ON seam, and production compositor. The complete main
+body passes **133/133** semantic and framebuffer frames twice in both
+orientations: player-back evidence/raw
+`2942fa0bf1a07da485bcf391ca4ecea06a41361d648adc27a1e48a3f32018125` /
+`d3a4cebcb258d334414d99096b7ded4accc90be1af37da4abf01610866ae96c8`;
+opponent-front
+`7e57488e1a265960fec441a02b5133f0b4a6e38ddde46cd42e21b5a29b0aaba3` /
+`8b42073d713d49286935abd3079c2266464f6f66c492a039903fb70740a26ffa`.
+
+**Residual / model:** the independently staged `Status_Whirlpool` body passes
+**108/108** twice per orientation: player-back
+`e5d210e7908b269ba0722959c4035d4bc39c04378a323cf74698375baa615b84` /
+`8a809496f28e7cb8e5eb9a37e26f721a9e9b3c14ef67bbf798825d4b527a9e71`;
+opponent-front
+`d6b1d9e43817259be6ad63c9b36e5f4d11112a868785925253716eb97fead93a` /
+`481017b8c09ddf3bbe585e6e2845a02384e27e1b7ed38169834e3eb2ea82463c`.
+The model preserves the main body's 18 vortex-orb lifecycles and 50-tick
+ShakeMon, the residual body's 12 lifecycles and 30-tick ShakeMon, their
+distinct affine/OAM creation latches, palettes/registers/audio, stable sprite
+ordering, Wailmer/Onix art, field chrome, and cleanup.
+
+**Ownership:** no trapping outcome, damage, RNG, turn/controller, round,
+facility, boundary list, unsupported barrier, or canonical allowlist changed.
+Coverage is **100 exact / 0 partial / 0 staged / 176 unsupported**.
+
+## MOVE_LOW_KICK promoted exact; target-rotation track complete (2026-07-29)
+
+**Verdict:** `MOVE_LOW_KICK` is exact. Source and inventory prove set **178
+`FRONTIER_MON_MACHOKE_1`** is the lowest legal Level-50 carrier (before set
+298 Sudowoodo_2). Complete legal Scene-ON Machoke/Onix parties pass the full
+body through first inactive cleanup twice fresh per orientation: player-back
+**214–246 (33/33)** evidence/raw
+`f3b4b291ee90208d9f9dcf7e2ea91a355c6da0e270289e6a083cdae126782a74` /
+`40639ddccc47ad2f867891ce5daa4d6a5769ff22b85352095bac14ba5cc9d9e5`;
+opponent-front **214–246 (33/33)**
+`7264ca8cdc9335c80e375354c674322eb857f1c2a7d0ea253fe2e73cefd14e0a` /
+`4d657cf51c4c28805b20ed868890418aaf2ab03c7074ccce9757ea63bef75e20`.
+
+**Model/evidence:** the pure source-relative reducer, narrow typed seam,
+reproducible Machoke art, and production compositor port both slide callbacks,
+target-relative SlidingKick/hitsplat, RotateMonSpriteToSide's ObjAffineSet
+matrix plus target position/OAM transfer, Vital Throw target panning, field
+chrome/text, sprite/task display latches, tag cleanup, and first inactive
+cleanup. `lowKickPortable.ts` proves **33/33** reducer/component/seam/cleanup
+and **33/33** shared-framebuffer equality twice per orientation.
+
+**Sibling / next:** `MOVE_ROLLING_KICK` remains independently exact under its
+own 55-frame portable verifier. Next independent component track:
+`water-orb-hydro-pump-whirlpool`, with `MOVE_WHIRLPOOL` requiring its own dense
+both-orientation proof despite Hydro Pump's exact shared components. Coverage
+is **99 exact / 0 partial / 0 staged / 177 unsupported**.
+
+**Ownership:** no damage, Low Kick weight calculation, RNG, turn order,
+controller, round advancement, facility state, animation-boundary list,
+unsupported barrier, or canonical-recording allowlist changed.
+
 ## MOVE_ROLLING_KICK promoted exact; SlidingKick representative complete (2026-07-29)
 
 **Verdict:** `MOVE_ROLLING_KICK` is exact. Source and generated inventory prove

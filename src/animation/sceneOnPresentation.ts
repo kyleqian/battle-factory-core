@@ -25,6 +25,10 @@ import {
   type SlamState,
 } from "./slam.ts";
 import {
+  strengthAtAge,
+  type StrengthState,
+} from "./strength.ts";
+import {
   twineedleEffectAtAge,
   type TwineedleEffect,
 } from "./twineedle.ts";
@@ -225,6 +229,7 @@ import {
 } from "./brickBreak.ts";
 import {
   lightScreenAtAge,
+  mirrorCoatAtAge,
   type LightScreenState,
 } from "./lightScreen.ts";
 import {
@@ -521,9 +526,17 @@ import {
   type SweetKissState,
 } from "./sweetKiss.ts";
 import {
+  attractAtAge,
+  type AttractState,
+} from "./attract.ts";
+import {
   sporeAtAge,
   type SporeState,
 } from "./spore.ts";
+import {
+  cottonSporeAtAge,
+  type CottonSporeState,
+} from "./cottonSpore.ts";
 import {
   hypnosisDisplayedRingsAtAge,
   hypnosisAtAge,
@@ -553,6 +566,7 @@ export interface SceneOnPresentationBattler {
     | "KOFFING"
     | "MAGNETON"
     | "MAGBY"
+    | "MAREEP"
     | "GROVYLE"
     | "PIDGEOTTO"
     | "MURKROW"
@@ -590,6 +604,7 @@ export interface SceneOnPresentationBattler {
     | "WAILMER"
     | "POLITOED"
     | "EXEGGCUTE"
+    | "CORSOLA"
     | "GLOOM"
     | "TOGETIC"
     | "MACHOKE"
@@ -1093,6 +1108,17 @@ export interface SceneOnLightScreenConfig {
   }>;
 }
 
+export interface SceneOnMirrorCoatConfig {
+  readonly move: "MIRROR_COAT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly allocatorProfile: Readonly<{
+    readonly wall: number;
+    readonly sparkles: readonly number[];
+  }>;
+}
+
 export interface SceneOnSynthesisConfig {
   readonly move: "SYNTHESIS";
   readonly attacker: SceneOnPresentationBattler;
@@ -1237,6 +1263,13 @@ export interface SceneOnBodySlamConfig {
 
 export interface SceneOnSlamConfig {
   readonly move: "SLAM";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnSecretPowerConfig {
+  readonly move: "SECRET_POWER";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
@@ -1531,8 +1564,22 @@ export interface SceneOnSweetKissConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnAttractConfig {
+  readonly move: "ATTRACT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnSporeConfig {
   readonly move: "SPORE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnCottonSporeConfig {
+  readonly move: "COTTON_SPORE";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
@@ -1765,6 +1812,7 @@ export type SceneOnMoveConfig =
   | SceneOnReflectConfig
   | SceneOnBrickBreakConfig
   | SceneOnLightScreenConfig
+  | SceneOnMirrorCoatConfig
   | SceneOnSynthesisConfig
   | SceneOnAromatherapyConfig
   | SceneOnWishConfig
@@ -1785,6 +1833,7 @@ export type SceneOnMoveConfig =
   | SceneOnBlockConfig
   | SceneOnBodySlamConfig
   | SceneOnSlamConfig
+  | SceneOnSecretPowerConfig
   | SceneOnTwineedleConfig
   | SceneOnSpikeCannonConfig
   | SceneOnSonicBoomConfig
@@ -1812,7 +1861,9 @@ export type SceneOnMoveConfig =
   | SceneOnRestConfig
   | SceneOnHowlConfig
   | SceneOnSweetKissConfig
+  | SceneOnAttractConfig
   | SceneOnSporeConfig
+  | SceneOnCottonSporeConfig
   | SceneOnHypnosisConfig
   | SceneOnPerishSongConfig
   | SceneOnNeedleArmConfig
@@ -1878,6 +1929,8 @@ export type SceneOnBrickBreakPresentationState =
   SceneOnMovePresentationState<SceneOnBrickBreakConfig>;
 export type SceneOnLightScreenPresentationState =
   SceneOnMovePresentationState<SceneOnLightScreenConfig>;
+export type SceneOnMirrorCoatPresentationState =
+  SceneOnMovePresentationState<SceneOnMirrorCoatConfig>;
 export type SceneOnSparkPresentationState =
   SceneOnMovePresentationState<SceneOnSparkConfig>;
 export type SceneOnThunderWavePresentationState =
@@ -1902,8 +1955,12 @@ export type SceneOnHowlPresentationState =
   SceneOnMovePresentationState<SceneOnHowlConfig>;
 export type SceneOnSweetKissPresentationState =
   SceneOnMovePresentationState<SceneOnSweetKissConfig>;
+export type SceneOnAttractPresentationState =
+  SceneOnMovePresentationState<SceneOnAttractConfig>;
 export type SceneOnSporePresentationState =
   SceneOnMovePresentationState<SceneOnSporeConfig>;
+export type SceneOnCottonSporePresentationState =
+  SceneOnMovePresentationState<SceneOnCottonSporeConfig>;
 export type SceneOnHypnosisPresentationState =
   SceneOnMovePresentationState<SceneOnHypnosisConfig>;
 export type SceneOnBlockPresentationState =
@@ -2018,6 +2075,12 @@ export interface SceneOnBodySlamView extends BodySlamState {
 }
 
 export interface SceneOnSlamView extends SlamState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSecretPowerView extends StrengthState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2786,6 +2849,7 @@ export function createSceneOnMovePresentation<
     | SceneOnAbsorbConfig | SceneOnReflectConfig | SceneOnLightScreenConfig
     | SceneOnBiteConfig
     | SceneOnHeadbuttConfig | SceneOnBodySlamConfig | SceneOnSlamConfig
+    | SceneOnSecretPowerConfig
     | SceneOnWhirlwindConfig | SceneOnBlockConfig,
 >(
   config: TConfig,
@@ -3285,6 +3349,33 @@ export function sceneOnLightScreenView(
   };
 }
 
+export interface SceneOnMirrorCoatView extends LightScreenState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age` is relative to gMirrorCoatWallSpriteTemplate's creation pass. */
+export function sceneOnMirrorCoatView(
+  state: SceneOnMovePresentationState<SceneOnMirrorCoatConfig>,
+): SceneOnMirrorCoatView {
+  if (state.config.move !== "MIRROR_COAT") {
+    throw new Error(
+      `expected MIRROR_COAT presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...mirrorCoatAtAge(
+      state.age,
+      state.config.attacker.geometry.battlePositionCenter,
+      state.config.attacker.geometry.side,
+    ),
+  };
+}
+
 /** `age` is ticks since the first GrantingStarsEffect sprite creation. */
 export function sceneOnSynthesisView(
   state: SceneOnMovePresentationState,
@@ -3692,6 +3783,27 @@ export function sceneOnSlamView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...slamAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is Secret Power's Factory `Move_STRENGTH` first active display. */
+export function sceneOnSecretPowerView(
+  state: SceneOnMovePresentationState<SceneOnSecretPowerConfig>,
+): SceneOnSecretPowerView {
+  if (state.config.move !== "SECRET_POWER") {
+    throw new Error(
+      `expected SECRET_POWER presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...strengthAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.target.geometry.animationCenter,
@@ -4279,6 +4391,32 @@ export function sceneOnSweetKissView(
   };
 }
 
+export interface SceneOnAttractView extends AttractState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age=0` is Move_ATTRACT's first active source-script frame. */
+export function sceneOnAttractView(
+  state: SceneOnAttractPresentationState,
+): SceneOnAttractView {
+  if (state.config.move !== "ATTRACT") {
+    throw new Error(`expected ATTRACT presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...attractAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
 export interface SceneOnSporeView extends SporeState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -4297,6 +4435,33 @@ export function sceneOnSporeView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...sporeAtAge(
+      state.age,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+export interface SceneOnCottonSporeView extends CottonSporeState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age=0` is Move_COTTON_SPORE's first active source-script frame. */
+export function sceneOnCottonSporeView(
+  state: SceneOnCottonSporePresentationState,
+): SceneOnCottonSporeView {
+  if (state.config.move !== "COTTON_SPORE") {
+    throw new Error(
+      `expected COTTON_SPORE presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...cottonSporeAtAge(
       state.age,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,

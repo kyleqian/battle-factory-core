@@ -553,6 +553,7 @@ import absorbAsset from "../animation/assets/absorb.json" with { type: "json" };
 import reflectAsset from "../animation/assets/reflect.json" with { type: "json" };
 import brickBreakAsset from "../animation/assets/brick-break.json" with { type: "json" };
 import lightScreenAsset from "../animation/assets/light-screen.json" with { type: "json" };
+import mirrorCoatAsset from "../animation/assets/mirror-coat.json" with { type: "json" };
 import biteAsset from "../animation/assets/bite.json" with { type: "json" };
 import twineedleAsset from "../animation/assets/twineedle.json" with { type: "json" };
 import spikeCannonAsset from "../animation/assets/spike-cannon.json" with { type: "json" };
@@ -599,6 +600,7 @@ import metronomeAsset from "../animation/assets/metronome.json" with { type: "js
 import restAsset from "../animation/assets/rest.json" with { type: "json" };
 import howlAsset from "../animation/assets/howl.json" with { type: "json" };
 import sweetKissAsset from "../animation/assets/sweet-kiss.json" with { type: "json" };
+import attractAsset from "../animation/assets/attract.json" with { type: "json" };
 import sporeAsset from "../animation/assets/spore.json" with { type: "json" };
 import hypnosisAsset from "../animation/assets/hypnosis.json" with { type: "json" };
 import perishSongAsset from "../animation/assets/perish-song.json" with { type: "json" };
@@ -752,6 +754,7 @@ import {
   sceneOnReflectView,
   sceneOnBrickBreakView,
   sceneOnLightScreenView,
+  sceneOnMirrorCoatView,
   sceneOnAromatherapyView,
   sceneOnSynthesisView,
   sceneOnWishView,
@@ -772,6 +775,7 @@ import {
   sceneOnBlockView,
   sceneOnBodySlamView,
   sceneOnSlamView,
+  sceneOnSecretPowerView,
   sceneOnTwineedleView,
   sceneOnSpikeCannonView,
   sceneOnSonicBoomView,
@@ -813,7 +817,9 @@ import {
   sceneOnRestView,
   sceneOnHowlView,
   sceneOnSweetKissView,
+  sceneOnAttractView,
   sceneOnSporeView,
+  sceneOnCottonSporeView,
   sceneOnHypnosisView,
   sceneOnPerishSongView,
   sceneOnNeedleArmView,
@@ -838,7 +844,9 @@ import {
   type SceneOnRestPresentationState,
   type SceneOnHowlPresentationState,
   type SceneOnSweetKissPresentationState,
+  type SceneOnAttractPresentationState,
   type SceneOnSporePresentationState,
+  type SceneOnCottonSporePresentationState,
   type SceneOnHypnosisPresentationState,
   type SceneOnPerishSongPresentationState,
   type SceneOnNeedleArmPresentationState,
@@ -848,12 +856,14 @@ import {
   type SceneOnReflectPresentationState,
   type SceneOnBrickBreakPresentationState,
   type SceneOnLightScreenPresentationState,
+  type SceneOnMirrorCoatPresentationState,
   type SceneOnBiteConfig,
   type SceneOnHeadbuttConfig,
   type SceneOnWhirlwindConfig,
   type SceneOnBlockConfig,
   type SceneOnBodySlamConfig,
   type SceneOnSlamConfig,
+  type SceneOnSecretPowerConfig,
   type SceneOnTwineedleConfig,
   type SceneOnSpikeCannonConfig,
   type SceneOnSonicBoomConfig,
@@ -1151,6 +1161,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 /** S7 slice L-3 (docs/faint-switch-notes.md §5): opponent front-sprite corner = `(144, 8 + gMonFrontPicCoords[species].yOffset)` - Pidgeotto's `yOffset` is 11, byte-exact-verified against the oracle at `(144,19)` (0/1087 mismatched px). */
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const mareepFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MAREEP!;
 const PIDGEOTTO_CORNER = { x: 144, y: 19 };
 /** S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6/§7): MURKROW's own `yOffset` (11, `mon-pic-coords.json`) is bit-identical to Pidgeotto's, so the same `(144, 8+yOffset)` formula lands on the identical corner - not a coincidence, both front pics share the same 48px-wide/11px-yOffset box. */
 const murkrowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MURKROW!;
@@ -1190,6 +1201,11 @@ const lightScreenArt = lightScreenAsset as {
   exeggcuteFront: { tileset: Tileset; palette: RgbColor[] };
   greenLightWall: { tileset: Tileset; palette: RgbColor[] };
   sparkle3: { tileset: Tileset; palette: RgbColor[] };
+};
+const mirrorCoatArt = mirrorCoatAsset as {
+  corsolaBack: { tileset: Tileset; palette: RgbColor[] };
+  corsolaFront: { tileset: Tileset; palette: RgbColor[] };
+  redLightWall: { tileset: Tileset; palette: RgbColor[] };
 };
 const biteArt = biteAsset as {
   sharpTeeth: { tileset: Tileset; palette: RgbColor[] };
@@ -1534,6 +1550,13 @@ const sweetKissArt = sweetKissAsset as {
   luvdiscFront: { tileset: Tileset; palette: RgbColor[] };
   redHeart: { tileset: Tileset; palette: RgbColor[] };
   angel: { tileset: Tileset; palette: RgbColor[] };
+};
+const attractArt = attractAsset as {
+  background: {
+    tileset: Tileset;
+    tilemap: Tilemap;
+    palette: RgbColor[];
+  };
 };
 const sporeArt = sporeAsset as {
   parasectBack: { tileset: Tileset; palette: RgbColor[] };
@@ -2208,6 +2231,7 @@ const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
 const magbyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAGBY!;
+const mareepBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAREEP!;
 const battleAnimItemHeal = battleAnimItemHealAsset as BattleAnimItemHealAsset;
 const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
@@ -17376,6 +17400,158 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
+  if (state.config.move === "SECRET_POWER") {
+    const strengthState =
+      state as SceneOnMovePresentationState<SceneOnSecretPowerConfig>;
+    const view = sceneOnSecretPowerView(strengthState);
+    // BuildOamBuffer runs before sprite/task callbacks. Battler offsets and
+    // IMPACT objects therefore reach the production framebuffer one display
+    // after the source-relative reducer, while monbg/blend register writes
+    // are visible on their current display.
+    const displayed = sceneOnSecretPowerView({
+      ...strengthState,
+      age: strengthState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "TEDDIURSA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "TEDDIURSA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SECRET_POWER pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const teddiursaSource = playerToOpponent
+      ? restArt.teddiursaBack : restArt.teddiursaFront;
+    const teddiursa = playerToOpponent
+      ? teddiursaSource
+      : {
+          ...teddiursaSource,
+          tileset: subTileset(teddiursaSource.tileset, 0, 8),
+        };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+
+    const targetIdle = playerToOpponent && strengthState.age <= 48
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    // ShakeAndSink writes x2/y2 from a task callback after BuildOamBuffer,
+    // adding one more transfer than the return-slide sprite callback.
+    const displayedAttacker = strengthState.age >= 7
+      && strengthState.age <= 47
+      ? sceneOnSecretPowerView({
+          ...strengthState,
+          age: strengthState.age - 2,
+        }).attackerOffset
+      : displayed.attackerOffset;
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      teddiursa.tileset,
+      teddiursa.palette,
+      view.attacker.geometry.spriteCorner.x + displayedAttacker.x2,
+      view.attacker.geometry.spriteCorner.y + displayedAttacker.y2,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x
+        + targetIdle.x2 + displayed.targetOffset.x2,
+      view.target.geometry.spriteCorner.y
+        + targetIdle.y2 + displayed.targetOffset.y2,
+    );
+
+    // Before target monbg reaches scanout, the player-back target is the
+    // foreground OBJ. Once monbg owns it, target-2 sits beneath attacker and
+    // the semi-transparent affine IMPACT objects.
+    let target2Backdrop: Uint8Array;
+    if (opponentToPlayer && strengthState.age < 7) {
+      drawAttacker();
+      drawTarget();
+      target2Backdrop = fb.slice();
+    } else {
+      drawTarget();
+      target2Backdrop = fb.slice();
+      drawAttacker();
+    }
+    // Lower OAM slots win same-priority OBJ overlap. Each later source
+    // allocation has a higher slot, so paint the reducer order in reverse.
+    const displayedHits = [...displayed.hitSplats].sort((left, right) =>
+      Number(left.sourceIndex !== 1) - Number(right.sourceIndex !== 1)
+    );
+    for (const hit of displayedHits) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        target2Backdrop,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        hit.x,
+        hit.y,
+        303,
+        0,
+        0,
+        303,
+        12,
+        8,
+        false,
+      );
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "TEDDIURSA",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "TEDDIURSA" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "TEDDIURSA used" : "Foe TEDDIURSA used",
+      "SECRET POWER!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "SLAM") {
     const slamState =
       state as SceneOnMovePresentationState<SceneOnSlamConfig>;
@@ -20493,6 +20669,146 @@ export function renderSceneOnMovePresentation(
     );
     return;
   }
+  if (state.config.move === "MIRROR_COAT") {
+    const mirrorCoatState = state as SceneOnMirrorCoatPresentationState;
+    const view = sceneOnMirrorCoatView(mirrorCoatState);
+    // Source callback state reaches OAM/palette hardware on the next display.
+    const displayed = sceneOnMirrorCoatView({
+      ...mirrorCoatState, age: mirrorCoatState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "CORSOLA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "EXEGGCUTE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "CORSOLA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "EXEGGCUTE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged MIRROR_COAT pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const corsolaSource = playerToOpponent
+      ? mirrorCoatArt.corsolaBack : mirrorCoatArt.corsolaFront;
+    const corsola = playerToOpponent
+      ? corsolaSource
+      : {
+          ...corsolaSource,
+          tileset: subTileset(corsolaSource.tileset, 0, 8),
+        };
+    const exeggcuteSource = playerToOpponent
+      ? lightScreenArt.exeggcuteFront : lightScreenArt.exeggcuteBack;
+    const exeggcute = playerToOpponent
+      ? {
+          ...exeggcuteSource,
+          tileset: subTileset(exeggcuteSource.tileset, 0, 8),
+        }
+      : exeggcuteSource;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+
+    // AnimDefensiveWall copies the opponent battler to BG before hiding OBJ.
+    const opponent = playerToOpponent ? exeggcute : corsola;
+    const player = playerToOpponent ? corsola : exeggcute;
+    drawSpriteSheet(
+      fb,
+      opponent.tileset,
+      opponent.palette,
+      playerToOpponent
+        ? view.target.geometry.spriteCorner.x
+        : view.attacker.geometry.spriteCorner.x,
+      playerToOpponent
+        ? view.target.geometry.spriteCorner.y
+        : view.attacker.geometry.spriteCorner.y,
+    );
+    if (displayed.wall && view.alpha && view.alpha.eva > 0) {
+      const palette = mirrorCoatArt.redLightWall.palette.slice();
+      const rotating = palette.slice(1, 9);
+      for (let step = 0; step < displayed.wall.paletteRotationSteps; step++) {
+        rotating.unshift(rotating.pop()!);
+      }
+      palette.splice(1, 8, ...rotating);
+      drawSpriteSheetBlendedOverFb(
+        fb,
+        mirrorCoatArt.redLightWall.tileset,
+        palette,
+        displayed.wall.x - 32,
+        displayed.wall.y - 32,
+        view.alpha.eva,
+        view.alpha.evb,
+      );
+    }
+    drawSpriteSheet(
+      fb,
+      player.tileset,
+      player.palette,
+      playerToOpponent
+        ? view.attacker.geometry.spriteCorner.x
+        : view.target.geometry.spriteCorner.x,
+      playerToOpponent
+        ? view.attacker.geometry.spriteCorner.y
+        : view.target.geometry.spriteCorner.y,
+    );
+    // The three allocator slots are reused by the second sparkle trio.
+    for (const sparkle of displayed.sparkles.slice().reverse()) {
+      drawSpriteSheet(
+        fb,
+        subTileset(
+          lightScreenArt.sparkle3.tileset,
+          sparkle.tileOffset / 2,
+          2,
+        ),
+        lightScreenArt.sparkle3.palette,
+        sparkle.x - 8,
+        sparkle.y - 8,
+      );
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "EXEGGCUTE" : "CORSOLA",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "female",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "CORSOLA" : "EXEGGCUTE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "female",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "CORSOLA used" : "Foe CORSOLA used",
+      "MIRROR COAT!",
+      64,
+    );
+    return;
+  }
   if (state.config.move === "LIGHT_SCREEN") {
     const lightScreenState = state as SceneOnLightScreenPresentationState;
     const view = sceneOnLightScreenView(lightScreenState);
@@ -23020,6 +23336,187 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
+  if (state.config.move === "ATTRACT") {
+    const attractState = state as SceneOnAttractPresentationState;
+    const view = sceneOnAttractView(attractState);
+    const displayed = sceneOnAttractView({
+      ...attractState,
+      age: attractState.age - 1,
+    });
+    const attackerDisplayed = sceneOnAttractView({
+      ...attractState,
+      // SwayMon mutates an already-existing battler after BuildOamBuffer;
+      // unlike newly-created hearts, its existing OAM path latches two ages.
+      age: attractState.age - 2,
+    });
+    const playerToOpponent =
+      view.attacker.species === "EEVEE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "EEVEE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged ATTRACT pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const eeveeSource = playerToOpponent
+      ? endureArt.eeveeBack : endureArt.eeveeFront;
+    const eevee = playerToOpponent
+      ? eeveeSource
+      : { ...eeveeSource, tileset: subTileset(eeveeSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    if (
+      view.heartsBackground.visible
+      && view.heartsBackground.eva > 0
+    ) {
+      const map = attractArt.background.tilemap;
+      for (let y = 0; y < 160; y += 1) {
+        for (let x = 0; x < 240; x += 1) {
+          const entry = map.entries[
+            Math.floor(y / 8) * map.width + Math.floor(x / 8)
+          ];
+          if (!entry) continue;
+          const tile = attractArt.background.tileset.tiles[entry.tile];
+          if (!tile) continue;
+          const sx = entry.hFlip ? 7 - (x % 8) : x % 8;
+          const sy = entry.vFlip ? 7 - (y % 8) : y % 8;
+          const index = tile[sy * 8 + sx]!;
+          if (index === 0) continue;
+          const color = attractArt.background.palette[index];
+          if (!color) continue;
+          const offset = (y * 240 + x) * 4;
+          fb[offset] = blendChannel(
+            color.r,
+            fb[offset]!,
+            view.heartsBackground.eva,
+            view.heartsBackground.evb,
+          );
+          fb[offset + 1] = blendChannel(
+            color.g,
+            fb[offset + 1]!,
+            view.heartsBackground.eva,
+            view.heartsBackground.evb,
+          );
+          fb[offset + 2] = blendChannel(
+            color.b,
+            fb[offset + 2]!,
+            view.heartsBackground.eva,
+            view.heartsBackground.evb,
+          );
+        }
+      }
+    }
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      eevee.tileset,
+      eevee.palette,
+      view.attacker.geometry.spriteCorner.x
+        + attackerDisplayed.attackerOffset.x2,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      blendPaletteToward(
+        onix.palette,
+        { r: 255, g: 206, b: 222 },
+        displayed.targetBlendCoefficient,
+      ),
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    const drawHeart = (heart: typeof displayed.bursts[number]) => {
+      if (heart.invisible || !heart.submitted) return;
+      drawSpriteSheet(
+        fb,
+        sweetKissArt.redHeart.tileset,
+        sweetKissArt.redHeart.palette,
+        heart.x + heart.x2 - 8,
+        heart.y + heart.y2 - 8,
+      );
+    };
+    // Stable OAM sorting preserves 10-before-3 until their unequal-Y frame
+    // at age 121, then preserves 3-before-10 at the later equal-Y crossing.
+    const burstTieBackToFront = displayed.age >= 121
+      ? [7, 3, 10, 4, 9, 5] as const
+      : [7, 10, 3, 4, 9, 5] as const;
+    const drawHearts = () => {
+      for (const heart of [...displayed.bursts].sort((a, b) =>
+        (a.y + a.y2) - (b.y + b.y2)
+        || burstTieBackToFront.indexOf(
+          a.slot as typeof burstTieBackToFront[number],
+        ) - burstTieBackToFront.indexOf(
+          b.slot as typeof burstTieBackToFront[number],
+        )
+      )) drawHeart(heart);
+      for (
+        const heart of [...displayed.rising].sort((a, b) => b.slot - a.slot)
+      ) drawHeart(heart);
+    };
+    if (playerToOpponent) {
+      drawTarget();
+      if (displayed.projectile) drawHeart(displayed.projectile);
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+      if (displayed.projectile) drawHeart(displayed.projectile);
+    }
+    drawHearts();
+    const profile = attractState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "EEVEE",
+        level: 50,
+        gender: profile.opponentGender ?? (playerToOpponent ? "male" : "female"),
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "EEVEE" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? (playerToOpponent ? "female" : "male"),
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "EEVEE used" : "Foe EEVEE used",
+      "ATTRACT!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "SWEET_KISS") {
     const sweetKissState = state as SceneOnSweetKissPresentationState;
     const view = sceneOnSweetKissView(sweetKissState);
@@ -23276,6 +23773,136 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "PARASECT used" : "Foe PARASECT used",
       "SPORE!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "COTTON_SPORE") {
+    const cottonState = state as SceneOnCottonSporePresentationState;
+    const view = sceneOnCottonSporeView(cottonState);
+    // AnimSporeParticle mutates software OAM after the frame's hardware
+    // transfer, so the framebuffer consumes the preceding reducer age.
+    const displayed = sceneOnCottonSporeView({
+      ...cottonState,
+      age: cottonState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "MAREEP"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MAREEP"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged COTTON_SPORE pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const mareepSource = playerToOpponent ? mareepBackSprite : mareepFrontSprite;
+    const mareep = playerToOpponent
+      ? mareepSource
+      : {
+          ...mareepSource,
+          tileset: subTileset(mareepSource.tileset, 0, 8),
+        };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const attackerIdle = opponentToPlayer
+      ? speciesFrontIdleRestOffset("MAREEP") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const targetIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      mareep.tileset,
+      mareep.palette,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const sporeTiles = subTileset(sporeArt.spore.tileset, 0, 2);
+    const particles = displayed.particles.slice().sort((a, b) =>
+      a.priority - b.priority
+      || (a.y + a.y2) - (b.y + b.y2)
+      || b.slot - a.slot
+    );
+    const drawParticles = (priority: 2 | 3) => {
+      for (const particle of particles.filter((value) =>
+        value.priority === priority
+      )) {
+        drawSpriteSheet(
+          fb,
+          sporeTiles,
+          sporeArt.spore.palette,
+          particle.x + particle.x2 - 8,
+          particle.y + particle.y2 - 8,
+        );
+      }
+    };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    drawParticles(3);
+    if (playerToOpponent) {
+      drawTarget();
+      drawParticles(2);
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+      drawParticles(2);
+    }
+    const profile = cottonState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "MAREEP",
+        level: 50,
+        gender: profile.opponentGender ?? (playerToOpponent ? "male" : "female"),
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "MAREEP" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? (playerToOpponent ? "female" : "male"),
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MAREEP used" : "Foe MAREEP used",
+      "COTTON SPORE!",
       99,
     );
     return;

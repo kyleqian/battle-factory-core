@@ -18,6 +18,7 @@ from emerald_core import EmeraldOracle  # noqa: E402
 
 MOVE_BODY_SLAM = 34
 MOVE_SLAM = 21
+MOVE_SECRET_POWER = 290
 
 
 def main() -> None:
@@ -71,9 +72,23 @@ def main() -> None:
             "gSlamHitSpriteTemplate",
         )
     }
+    is_secret_power = any(
+        mon["moves"][0] == MOVE_SECRET_POWER
+        for party in request["overrides"]["parties"].values()
+        for mon in party
+    )
+    task_names = ["AnimTask_ShakeMonInPlace", "AnimTask_ShakeMonInPlace_Step"]
+    if is_secret_power:
+        task_names.extend((
+            "AnimTask_ShakeAndSinkMon", "AnimTask_ShakeAndSinkMon_Step",
+            "AnimTask_TranslateMonEllipticalRespectSide",
+            "AnimTask_TranslateMonElliptical",
+            "AnimTask_TranslateMonElliptical_Step",
+            "AnimTask_ShakeMon2", "AnimTask_ShakeMon2_Step",
+        ))
     task_funcs = {
         name: symbols[name]
-        for name in ("AnimTask_ShakeMonInPlace", "AnimTask_ShakeMonInPlace_Step")
+        for name in task_names
     }
 
     def u16(address: int) -> int:
@@ -141,7 +156,7 @@ def main() -> None:
         nonlocal observed_move
         snapshot = lab.snapshot()
         current_move = snapshot["engine"]["currentMove"]
-        if current_move not in (MOVE_SLAM, MOVE_BODY_SLAM):
+        if current_move not in (MOVE_SLAM, MOVE_BODY_SLAM, MOVE_SECRET_POWER):
             return
         if observed_move is not None and observed_move != current_move:
             raise RuntimeError(
@@ -197,12 +212,14 @@ def main() -> None:
             frame += 1
             capture(frame)
     if not frames:
-        raise RuntimeError("stock ROM did not reach MOVE_SLAM/MOVE_BODY_SLAM")
-    schema = (
-        "slam-dense-evidence/v2"
-        if observed_move == MOVE_SLAM
-        else "body-slam-dense-evidence/v2"
-    )
+        raise RuntimeError(
+            "stock ROM did not reach MOVE_SLAM/MOVE_BODY_SLAM/MOVE_SECRET_POWER"
+        )
+    schema = {
+        MOVE_SLAM: "slam-dense-evidence/v2",
+        MOVE_BODY_SLAM: "body-slam-dense-evidence/v2",
+        MOVE_SECRET_POWER: "secret-power-strength-dense-evidence/v1",
+    }[observed_move]
     OUTPUT.write_text(json.dumps({
         "schema": schema, "move": observed_move, "setup": setup,
         "templates": templates, "taskFuncs": task_funcs,

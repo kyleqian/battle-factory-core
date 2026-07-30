@@ -14,7 +14,7 @@ export interface SporeParticle {
   readonly data1: number;
   readonly data2: number;
   readonly priority: 2 | 3;
-  readonly blend: true;
+  readonly blend: boolean;
   readonly callback: "AnimSporeParticle_Step";
 }
 
@@ -75,6 +75,7 @@ function particleAtAge(
   age: number,
   index: number,
   targetCenter: SporePoint,
+  blend: boolean,
 ): SporeParticle | null {
   const spawn = SPAWNS[index]!;
   if (age < spawn.age || age > spawn.age + 78) return null;
@@ -95,9 +96,20 @@ function particleAtAge(
     data1,
     data2,
     priority: angle >= 64 && angle < 192 ? 2 : 3,
-    blend: true,
+    blend,
     callback: "AnimSporeParticle_Step",
   };
+}
+
+/** Shared source port of `AnimSporeParticle`; move scripts own blend/timing. */
+export function sporeParticlesAtAge(
+  age: number,
+  targetCenter: SporePoint,
+  blend: boolean,
+): readonly SporeParticle[] {
+  return SPAWNS
+    .map((_, index) => particleAtAge(age, index, targetCenter, blend))
+    .filter((value): value is SporeParticle => value !== null);
 }
 
 /**
@@ -116,9 +128,7 @@ export function sporeAtAge(
     targetMonBg: age >= 4 && age < 205,
     alpha: age >= 7 && age < 202 ? { eva: 12, evb: 8 } : null,
     scriptOffset: scriptOffsetAtAge(age),
-    particles: SPAWNS
-      .map((_, index) => particleAtAge(age, index, targetCenter))
-      .filter((value): value is SporeParticle => value !== null),
+    particles: sporeParticlesAtAge(age, targetCenter, true),
     sound,
     soundPanSide: sound ? targetSide : null,
     soundLoopActive: age >= 7 && age < 176,
