@@ -13,6 +13,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 726 — [BOUNDED MAIN WORKER 2026-07-29 ~23:00] Slice-7 bounce fixed; honest confirm-handoff checkpoint
+
+- **State:** focused acceptance **166/166** green; live generated OFF
+  diagnostic improved **11/128 → 26/128**. Acceptance remains **0/128
+  claimed** and no trace is committed.
+- **Did:** replaced phase-local bounce rendering with a persistent
+  controller-owned callback clock across FIGHT open/close/reopen. Source:
+  `battle_controller_player.c:233-238,471-548`;
+  `battle_main.c:2899-2937,2967-2978`. Frames 8-33 (settled menu, two cursor
+  moves, B cancel, reopen) are now exact; Tier 1 pins clock continuity.
+- **Next:** implement the generic typed resolution confirm-handoff lifecycle.
+  New first divergence is legal EARTHQUAKE A at frame 34: **13,279px**, bbox
+  **(1,59)-(238,158)**; ROM holds FIGHT through 42 and first prints `G` at
+  43, while app prints immediately.
+- **Notes:** fixture/test regenerated to the post-fix checkpoint; #52 trimmed
+  to the open remainder. No trace/capture change, import/barrier/ratchet-pin
+  move, or battle/turn/absolute-tick branch. PAPERCUT: none.
+
+---
 ## 725 — [SUPERVISOR 2026-07-29 ~22:45] Rounds 1-2: Slice 6 verified, Slice-7 honest checkpoint merged (#52 filed), trainer-pic dossier banked
 
 - **State:** master green at **527 files / 5408 tests + 1 deliberate

@@ -18,6 +18,7 @@ import {
 import {
   FIGHT_SUBMENU_CLOSE_DELAY,
   FIGHT_SUBMENU_OPEN_DELAY,
+  FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
   moveFightCursor,
 } from "./battleMenu.ts";
 import type {
@@ -86,6 +87,12 @@ export type BattleCommandPresentationState = Readonly<{
     phase: BattleCommandPresentationPhase;
     phaseElapsed: number;
   }>;
+  /**
+   * Controller-owned age of the live battler/healthbox bounce. Unlike the
+   * lifecycle phase clock, the source bouncer sprite survives FIGHT
+   * open/cancel/reopen transitions.
+   */
+  idleBounceElapsed: number;
   field: Readonly<{
     player: BattleCommandFieldBattler;
     opponent: BattleCommandFieldBattler;
@@ -275,6 +282,7 @@ export function createBattleCommandPresentation(
   return Object.freeze({
     request,
     lifecycle: Object.freeze({ phase: "action-enter", phaseElapsed: 0 }),
+    idleBounceElapsed: 0,
     field: Object.freeze({
       player: fieldBattler(
         "player",
@@ -308,7 +316,25 @@ export function advanceBattleCommandPresentation(
   stateInput: BattleCommandPresentationState,
   newKeys: ReadonlySet<GbaButton>,
 ): BattleCommandPresentationState {
-  let state = stateInput;
+  // `DoBounceEffect` starts when the action menu becomes interactive and its
+  // already-running guard preserves the same invisible bouncer sprite across
+  // FIGHT controller phases (battle_main.c:2899-2937). Keep this clock
+  // independent from the phase-relative window timing below.
+  const bounceCallbackRuns =
+    stateInput.lifecycle.phase !== "action-enter"
+    && (
+      (
+        stateInput.lifecycle.phase !== "fight-opening"
+        && stateInput.lifecycle.phase !== "fight-closing"
+      )
+      || stateInput.lifecycle.phaseElapsed >= FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT
+    );
+  let state = !bounceCallbackRuns
+    ? stateInput
+    : Object.freeze({
+      ...stateInput,
+      idleBounceElapsed: stateInput.idleBounceElapsed + 1,
+    });
 
   switch (state.lifecycle.phase) {
     case "action-enter": {

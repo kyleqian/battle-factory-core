@@ -47,14 +47,14 @@ describe("generated Scene-OFF battle-command evidence checkpoint", () => {
       startFrame: 8,
       endFrame: 135,
       captureCount: 128,
-      matched: 11,
-      mismatched: 117,
-      matchingPrefix: { startFrame: 8, endFrame: 18, count: 11 },
+      matched: 26,
+      mismatched: 102,
+      matchingPrefix: { startFrame: 8, endFrame: 33, count: 26 },
       firstDivergence: {
-        captureOrdinal: 12,
-        frame: 19,
-        diffPixels: 644,
-        input: "B",
+        captureOrdinal: 27,
+        frame: 34,
+        diffPixels: 13279,
+        input: "A",
       },
     });
     expect(evidence.oracleRoute).toMatchObject({

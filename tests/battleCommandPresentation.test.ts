@@ -27,6 +27,7 @@ import {
   CLOSED_FIGHT_SUBMENU_STATE,
   FIGHT_SUBMENU_CLOSE_DELAY,
   FIGHT_SUBMENU_OPEN_DELAY,
+  FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
 } from "../src/engine/battleMenu.ts";
 import {
   createBattleScriptRulesContext,
@@ -459,6 +460,44 @@ describe("battle-command phase-relative lifecycle", () => {
     state = advanceFrames(state, FIGHT_SUBMENU_OPEN_DELAY);
     expect(state.lifecycle).toEqual({ phase: "fight-menu", phaseElapsed: 0 });
     expect(state.fightCursor).toBe(3);
+  });
+
+  it("keeps the idle bounce clock continuous across FIGHT open, close, and reopen", () => {
+    const { request, rules } = canonicalBoundary();
+    let state = advanceFrames(
+      createBattleCommandPresentation(request, rules),
+      BATTLE_COMMAND_ACTION_ENTER_DELAY,
+    );
+    expect(state.lifecycle).toEqual({ phase: "action-menu", phaseElapsed: 0 });
+    expect(state.idleBounceElapsed).toBe(0);
+
+    state = advanceBattleCommandPresentation(state, new Set(["A"] as const));
+    expect(state.lifecycle.phase).toBe("fight-opening");
+    expect(state.idleBounceElapsed).toBe(1);
+    state = advanceFrames(state, FIGHT_SUBMENU_OPEN_DELAY);
+    expect(state.lifecycle.phase).toBe("fight-menu");
+    expect(state.idleBounceElapsed).toBe(
+      1 + FIGHT_SUBMENU_OPEN_DELAY - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+    );
+
+    state = advanceBattleCommandPresentation(state, new Set(["B"] as const));
+    expect(state.lifecycle.phase).toBe("fight-closing");
+    expect(state.idleBounceElapsed).toBe(
+      2 + FIGHT_SUBMENU_OPEN_DELAY - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+    );
+    state = advanceFrames(state, FIGHT_SUBMENU_CLOSE_DELAY);
+    expect(state.lifecycle.phase).toBe("action-menu");
+    expect(state.idleBounceElapsed).toBe(
+      2 + FIGHT_SUBMENU_OPEN_DELAY + FIGHT_SUBMENU_CLOSE_DELAY
+        - 2 * FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+    );
+
+    state = advanceBattleCommandPresentation(state, new Set(["A"] as const));
+    expect(state.lifecycle.phase).toBe("fight-opening");
+    expect(state.idleBounceElapsed).toBe(
+      3 + FIGHT_SUBMENU_OPEN_DELAY + FIGHT_SUBMENU_CLOSE_DELAY
+        - 2 * FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+    );
   });
 
   it("ignores A on a request-illegal move slot and submits slot 3 when that exact slot is legal", () => {

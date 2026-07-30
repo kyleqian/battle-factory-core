@@ -5,23 +5,25 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #52 — fight-closing resets the battler idle-bounce clock; ROM's runs continuously
+## #52 — generated OFF resolution starts before the confirmed-FIGHT handoff
 
-**Symptom:** on the generated GRANBULL-vs-ARON OFF route, the B-cancel edge
-diverges: the app's battler idle bounce restarts while the oracle's continues
-across FIGHT open/close. First divergence at capture 12 (frame 19) of the
-128-window, 644px delta, bbox (42,59)-(100,111); diagnostic **11/128**.
+**Fixed portion:** the fight-closing bounce reset is removed. A persistent
+controller-owned callback clock now survives FIGHT open/close/reopen, matching
+the source's already-running `DoBounceEffect` guard; the generated route is
+exact through both cursor moves, B cancel, and reopen (frames 8-33).
 
-**Evidence (merged `c7a5d30e`):**
-`tools/battle-lab/mechanic-battle-command-generated-off.json` (trainer 17,
-seed 2423399196, Intimidate live) + pinned diagnostic in
-`tests/fixtures/battle-command-generated-off-evidence.json` and
-`tests/battleCommandGeneratedOffEvidence.test.ts`. App cause: `phaseElapsed`
-is reset entering `fight-closing` and doubles as the bounce clock. Canonical
-menu windows stay exact under the old behavior, so the fix must be the
-generic continuous-clock mechanism — no per-route/per-window branch.
+**Open remainder:** the legal EARTHQUAKE confirm now first diverges at capture
+27 (frame 34): **13,279px**, bbox (1,59)-(238,158). The app replaces FIGHT
+with the first message glyph immediately; the ROM retains the confirmed FIGHT
+field through frame 42 and first draws `G` at frame 43. Updated diagnostic:
+**26/128**, while acceptance remains **0/128 claimed**.
 
-**Blocks:** resolution design §4 Slice 7's 128/128 acceptance (0/128 claimed).
+**Evidence:** `tools/battle-lab/mechanic-battle-command-generated-off.json`
+(trainer 17, seed 2423399196, Intimidate live) plus the pinned post-fix
+fixture/test. The remaining fix belongs to the generic typed resolution
+controller-handoff lifecycle, not a route delay or fitted frame offset.
+
+**Blocks:** resolution design §4 Slice 7's 128/128 acceptance.
 
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 

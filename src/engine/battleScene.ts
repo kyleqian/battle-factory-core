@@ -438,6 +438,7 @@ import {
   MENU_IDLE_BLANK_START_TICK,
   MENU_IDLE_BLANK_END_TICK,
   menuIdleBounce,
+  actionMenuDisplayAtAge,
   FIGHT_SUBMENU_OPEN_DELAY,
   FIGHT_SUBMENU_CLOSE_DELAY,
   FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
@@ -16032,8 +16033,12 @@ export function renderGeneratedBattleCommandPresentation(
   fb: Uint8Array,
   presentation: BattleCommandPresentationState,
 ): void {
-  const bounceTick = presentation.lifecycle.phaseElapsed;
-  const bounce = menuIdleBounce(bounceTick);
+  const bounceTick = presentation.idleBounceElapsed;
+  const idleBounce = actionMenuDisplayAtAge(bounceTick, 0);
+  const bounce = {
+    onixY2: idleBounce.battlerY2,
+    healthboxY2: idleBounce.healthboxY2,
+  };
   renderBattleCommandPresentation(fb, presentation, {
     drawActionMenu(framebuffer, view, revealed) {
       drawBattle2ActionMenuWindow(
