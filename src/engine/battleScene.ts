@@ -546,6 +546,7 @@ import knockOffAsset from "../animation/assets/knock-off.json" with { type: "jso
 import recoverAsset from "../animation/assets/recover.json" with { type: "json" };
 import absorbAsset from "../animation/assets/absorb.json" with { type: "json" };
 import reflectAsset from "../animation/assets/reflect.json" with { type: "json" };
+import brickBreakAsset from "../animation/assets/brick-break.json" with { type: "json" };
 import lightScreenAsset from "../animation/assets/light-screen.json" with { type: "json" };
 import biteAsset from "../animation/assets/bite.json" with { type: "json" };
 import twineedleAsset from "../animation/assets/twineedle.json" with { type: "json" };
@@ -740,6 +741,7 @@ import {
   sceneOnMoonlightView,
   sceneOnAbsorbView,
   sceneOnReflectView,
+  sceneOnBrickBreakView,
   sceneOnLightScreenView,
   sceneOnAromatherapyView,
   sceneOnSynthesisView,
@@ -835,6 +837,7 @@ import {
   type SceneOnScaryFacePresentationState,
   type SceneOnAbsorbPresentationState,
   type SceneOnReflectPresentationState,
+  type SceneOnBrickBreakPresentationState,
   type SceneOnLightScreenPresentationState,
   type SceneOnBiteConfig,
   type SceneOnHeadbuttConfig,
@@ -1161,6 +1164,9 @@ const absorbArt = absorbAsset as {
 const reflectArt = reflectAsset as {
   blueLightWall: { tileset: Tileset; palette: RgbColor[] };
   sparkle4: { tileset: Tileset; palette: RgbColor[] };
+};
+const brickBreakArt = brickBreakAsset as {
+  tornMetal: { tileset: Tileset; palette: RgbColor[] };
 };
 const lightScreenArt = lightScreenAsset as {
   exeggcuteBack: { tileset: Tileset; palette: RgbColor[] };
@@ -19501,6 +19507,188 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "MEOWTH used" : "Foe MEOWTH used",
       "BITE!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "BRICK_BREAK") {
+    const brickState = state as SceneOnBrickBreakPresentationState;
+    const view = sceneOnBrickBreakView(brickState);
+    // BuildOamBuffer and palette transfer precede callbacks, so battler,
+    // effect, and simple-palette-blend displays consume the preceding reducer
+    // state while the current alpha registers are already visible.
+    const displayed = sceneOnBrickBreakView({
+      ...brickState,
+      age: brickState.age - 1,
+    });
+    const displayedBattler = sceneOnBrickBreakView({
+      ...brickState,
+      age: view.battlerDisplayAge,
+    });
+    const playerToOpponent =
+      view.attacker.species === "LOMBRE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "LOMBRE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged BRICK_BREAK pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const lombreSource = playerToOpponent
+      ? absorbArt.lombreBack : absorbArt.lombreFront;
+    const lombre = playerToOpponent
+      ? lombreSource
+      : {
+          ...lombreSource,
+          tileset: subTileset(lombreSource.tileset, 0, 8),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const black = { r: 0, g: 0, b: 0 };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(
+        battleBg.palette,
+        black,
+        displayed.bgBlendY,
+      ),
+    );
+    const targetIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const nonObjTarget2 = fb.slice();
+    drawSpriteSheet(
+      fb,
+      lombre.tileset,
+      lombre.palette,
+      view.attacker.geometry.spriteCorner.x
+        + displayedBattler.attackerOffset.x2,
+      view.attacker.geometry.spriteCorner.y
+        + displayedBattler.attackerOffset.y2,
+    );
+
+    for (const sprite of displayed.sprites.slice().sort(
+      (left, right) =>
+        Number(left.kind === "fist") - Number(right.kind === "fist")
+        || (opponentToPlayer
+          ? Number(left.kind !== "wall") - Number(right.kind !== "wall")
+          : 0)
+        || left.y + left.y2 - (right.y + right.y2)
+        || right.oamSlot - left.oamSlot,
+    )) {
+      if (sprite.kind === "wall" && view.alpha) {
+        // Lower hardware OAM wins before alpha composition. Sample target-2
+        // from the pre-OBJ field so the wall correctly suppresses overlapping
+        // hitsplat pixels instead of blending over an already painted OBJ.
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          nonObjTarget2,
+          reflectArt.blueLightWall.tileset,
+          reflectArt.blueLightWall.palette,
+          sprite.x + sprite.x2,
+          sprite.y + sprite.y2,
+          256,
+          0,
+          0,
+          256,
+          view.alpha.eva,
+          view.alpha.evb,
+          false,
+        );
+      } else if (sprite.kind === "hitsplat" && view.alpha) {
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          nonObjTarget2,
+          absorbArt.impact.tileset,
+          absorbArt.impact.palette,
+          sprite.x,
+          sprite.y,
+          303,
+          0,
+          0,
+          303,
+          view.alpha.eva,
+          view.alpha.evb,
+          false,
+        );
+      } else if (sprite.kind === "fist") {
+        drawSpriteSheet(
+          fb,
+          subTileset(crossChopArt.handsAndFeet.tileset, 0, 4),
+          crossChopArt.handsAndFeet.palette,
+          sprite.x - 16,
+          sprite.y - 16,
+        );
+      } else if (sprite.kind === "shard") {
+        // Each OAM cell advances tileNum by 16. The 16x4 source PNG is a
+        // linear four-cell sheet, so each 32x32 shard consumes 16 consecutive
+        // tiles rather than a visual four-column slice.
+        const start = sprite.cell * 16;
+        const tiles = brickBreakArt.tornMetal.tileset.tiles.slice(
+          start,
+          start + 16,
+        );
+        drawSpriteSheet(
+          fb,
+          { columns: 4, rows: 4, tiles },
+          brickBreakArt.tornMetal.palette,
+          sprite.x - 16,
+          sprite.y - 16,
+        );
+      }
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "LOMBRE",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "LOMBRE" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "LOMBRE used" : "Foe LOMBRE used",
+      "BRICK BREAK!",
       99,
     );
     return;
