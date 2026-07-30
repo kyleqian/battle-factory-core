@@ -4,6 +4,32 @@ Older dated sections moved out of `ANIMATION_PROGRESS.md` to keep that
 file lean (`AGENTS.md`'s ~3-most-recent convention). Git history has the
 full record regardless; this file is a read-only reference.
 
+## MOVE_COTTON_SPORE promoted exact; spore-particles track complete (2026-07-29)
+
+**Verdict:** `MOVE_COTTON_SPORE` is exact. Source and legal inventory prove
+set **49 `FRONTIER_MON_MAREEP`** is its lowest Level-50 carrier (Relaxed,
+HP+SpAttack, Cheri Berry). Complete Scene-ON Mareep/Onix parties pass the
+full source body through first inactive cleanup twice fresh per orientation:
+player-back **286–489 (204/204)** evidence/raw
+`f3505c583dbfd81459fa5a6ae013a0e84d8583f0cf3e0d0ec8cb1817c120e0c3` /
+`b46bd803dd59cf953c0fa0d4a979d15ab6c9060a6cc7b14571dbcb69cea38007`;
+opponent-front **285–488 (204/204)**
+`a719bb8dff37cdf3f82a3909b6129e694b1982fa0800152dbbd7c3ae105e5983` /
+`629fb753f6e9522a6144b90c630b4d6306e3fcdd1b2558fe9af8a55617ab569c`.
+
+**Model/evidence:** the pure reducer, typed seam, and production compositor
+reuse `ANIM_TAG_SPORE`/`AnimSporeParticle` while preserving Cotton Spore's
+splitbgprio, opaque particle cell/OAM, 18/10 target-panned loop audio, lack of
+alpha/blendoff/SporeDoubleBattle, target-relative geometry, hardware latch,
+monbg, and cleanup. `MOVE_SPORE` independently reruns **207/207** twice fresh
+in both orientations and remains exact.
+
+**Ownership / next:** no accuracy or Speed result, damage, RNG, controller,
+turn/facility state, boundary list, unsupported barrier, or canonical
+allowlist changed. Coverage is **102 exact / 0 partial / 0 staged / 174
+unsupported**. Next incomplete ranked component track:
+`sparkle-3-special-screen` (`MOVE_MIRROR_COAT` independently unsupported).
+
 ## MOVE_BRICK_BREAK promoted exact; both controller-selected bodies accepted (2026-07-29)
 
 **Verdict:** `MOVE_BRICK_BREAK` is exact. Source/controller audit proves

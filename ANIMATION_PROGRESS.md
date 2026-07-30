@@ -1,5 +1,35 @@
 # Animation coverage
 
+## MOVE_SECRET_POWER source/controller checkpoint; remains unsupported (2026-07-30)
+
+**Verdict:** `MOVE_SECRET_POWER` remains unsupported. A complete source,
+generated-inventory, battle-script, controller, and environment audit proves
+challenge-0 set **117 `FRONTIER_MON_TEDDIURSA`** is the lowest legal Level-50
+carrier, correcting the older set-162 Delcatty evidence. The Factory battle
+room is indoor, so its only reachable visual dispatch is
+`BATTLE_ENVIRONMENT_BUILDING` → `Move_STRENGTH`; all nine explicit terrain
+branches plus the plain fallback are now pinned.
+
+**Controller/body boundary:** a successful hit emits
+`CONTROLLER_MOVEANIMATION`, both player and opponent controllers call
+`DoMoveAnim(290)`, and `AnimTask_GetBattleEnvironment` selects Strength.
+Accuracy misses bypass `attackanimation`; `MOVE_RESULT_NO_EFFECT` and
+`HITMARKER_NO_ANIMATIONS` select the pause route; the secondary effect is
+chosen only after the animation/result message. The required Strength body is
+independently enumerated: IMPACT, `ShakeAndSinkMon`, return slide, elliptical
+target translation, three hitsplats, `ShakeMon2`, monbg/alpha, four sounds,
+and cleanup.
+
+**Evidence / next:** `secretPowerSourceAudit.ts` and its focused Tier-1 test
+pin the full dispatch/controller contract while reusing the existing
+source-complete `getsecretpowereffect` semantic tests without changing battle
+logic. No reducer, compositor, dense oracle fixture, or exact status was
+added. `MOVE_SLAM` remains independently exact at **54/54 twice fresh in both
+orientations with unchanged hashes**. Coverage remains **104 exact / 0 partial
+/ 0 staged / 172 unsupported**. Next work is a separate complete Strength
+reducer/compositor and twice-fresh full dense Scene-ON acceptance in both
+orientations using legal set-117 Teddiursa parties.
+
 ## MOVE_ATTRACT promoted exact; red-heart-sweet-kiss track complete (2026-07-29)
 
 **Verdict:** `MOVE_ATTRACT` is exact. Source, generated inventory,
@@ -62,29 +92,3 @@ turn/facility state, boundary list, unsupported barrier, or canonical allowlist
 changed. Coverage is **103 exact / 0 partial / 0 staged / 173 unsupported**.
 Next incomplete ranked track: `red-heart-sweet-kiss`
 (`MOVE_ATTRACT` independently unsupported).
-
-## MOVE_COTTON_SPORE promoted exact; spore-particles track complete (2026-07-29)
-
-**Verdict:** `MOVE_COTTON_SPORE` is exact. Source and legal inventory prove
-set **49 `FRONTIER_MON_MAREEP`** is its lowest Level-50 carrier (Relaxed,
-HP+SpAttack, Cheri Berry). Complete Scene-ON Mareep/Onix parties pass the
-full source body through first inactive cleanup twice fresh per orientation:
-player-back **286–489 (204/204)** evidence/raw
-`f3505c583dbfd81459fa5a6ae013a0e84d8583f0cf3e0d0ec8cb1817c120e0c3` /
-`b46bd803dd59cf953c0fa0d4a979d15ab6c9060a6cc7b14571dbcb69cea38007`;
-opponent-front **285–488 (204/204)**
-`a719bb8dff37cdf3f82a3909b6129e694b1982fa0800152dbbd7c3ae105e5983` /
-`629fb753f6e9522a6144b90c630b4d6306e3fcdd1b2558fe9af8a55617ab569c`.
-
-**Model/evidence:** the pure reducer, typed seam, and production compositor
-reuse `ANIM_TAG_SPORE`/`AnimSporeParticle` while preserving Cotton Spore's
-splitbgprio, opaque particle cell/OAM, 18/10 target-panned loop audio, lack of
-alpha/blendoff/SporeDoubleBattle, target-relative geometry, hardware latch,
-monbg, and cleanup. `MOVE_SPORE` independently reruns **207/207** twice fresh
-in both orientations and remains exact.
-
-**Ownership / next:** no accuracy or Speed result, damage, RNG, controller,
-turn/facility state, boundary list, unsupported barrier, or canonical
-allowlist changed. Coverage is **102 exact / 0 partial / 0 staged / 174
-unsupported**. Next incomplete ranked component track:
-`sparkle-3-special-screen` (`MOVE_MIRROR_COAT` independently unsupported).

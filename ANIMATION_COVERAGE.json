@@ -2629,7 +2629,9 @@
         "the pure source-relative reducer ports ANIM_TAG_SLAM_HIT and IMPACT load/free, gSlamHitSpriteTemplate's four source cells and side-dependent horizontal flip, both SlideMonToOffset and both SlideMonToOriginalPos lifecycles, animation-1 basic hitsplat, target AnimTask_ShakeMonInPlace, monbg/alpha, both pan sounds, waits, and cleanup",
         "source extraction regenerates legal LICKITUNG front/back and SLAM_HIT art byte-for-byte; the narrow shared compositor reuses exact IMPACT, slide, shake, ONIX, and field primitives and ports the player-target idle-to-translation hardware-OAM latch without battle clocks, coordinate/RGB fitting, or pixel exceptions",
         "slamEvidence.ts proves both committed v2 receipts twice fresh with stable player evidence/raw digests 8f520d7599ce22335081f096258dba8a4dc61f880c9b5167f0d3d68a33e14182 / 4e3abdaf0e4ab636fc415fb933a10cb47f9ed86fffcef880fd3d6479d1a4c8c2 and opponent digests 66a2b9d72b6dd0eb160faf6336a395fd036745d1fc09433fca7aea3641697401 / 66d4cdf1aed7f739b15a44eaccbb346268f5cc3b05112836b8717d31255f62fc",
-        "MOVE_SECRET_POWER remains unsupported: the Factory building environment dispatches to the distinct Move_STRENGTH body, while other environments select other complete scripts; shared SLAM_HIT coverage alone does not promote it"
+        "MOVE_SECRET_POWER remains unsupported after a complete source/controller checkpoint: generated inventory plus challenge-0 range 110-199 prove set-117 FRONTIER_MON_TEDDIURSA is the lowest legal Level-50 carrier; all ten environment dispatches are pinned, and the indoor Factory battle room conclusively selects only BATTLE_ENVIRONMENT_BUILDING -> Move_STRENGTH",
+        "the successful controller route is CONTROLLER_MOVEANIMATION -> DoMoveAnim(290) -> Move_SECRET_POWER -> AnimTask_GetBattleEnvironment -> Move_STRENGTH; accuracy miss, MOVE_RESULT_NO_EFFECT, and HITMARKER_NO_ANIMATIONS routes launch no move body, while the secondary effect is selected after the move animation",
+        "Move_STRENGTH independently requires IMPACT, ShakeAndSinkMon, SlideMonToOriginalPos, TranslateMonEllipticalRespectSide, three animation-1 hitsplats, ShakeMon2, monbg/alpha, four sound triggers, and cleanup; no implementation or dense both-orientation Scene-ON proof was attempted, so neither shared Slam code nor this checkpoint promotes Secret Power"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-slam-player-lickitung-opponent-onix.json",
@@ -2639,13 +2641,15 @@
         "tools/compare/bodySlamProbe.py",
         "tools/compare/slamEvidence.ts",
         "tools/compare/slamSourceAudit.ts",
+        "tools/compare/secretPowerSourceAudit.ts",
         "tools/compare/extractSlamAssets.ts",
         "src/animation/assets/slam.json",
         "src/animation/slam.ts",
         "src/animation/sceneOnPresentation.ts",
         "src/engine/battleScene.ts",
         "tests/animation/slam.test.ts",
-        "tests/animation/slamEvidence.test.ts"
+        "tests/animation/slamEvidence.test.ts",
+        "tests/animation/secretPowerSourceAudit.test.ts"
       ]
     },
     {
@@ -2844,7 +2848,7 @@
         "MOVE_SLAM",
         "MOVE_SECRET_POWER"
       ],
-      "goal": "MOVE_SLAM independently proves its complete SLAM_HIT/IMPACT, dual-slide, ShakeMonInPlace, target-monbg/alpha, audio, and cleanup body at 54/54 dense source/seam/framebuffer frames in both orientations twice fresh. MOVE_SECRET_POWER remains unsupported because the Factory building route dispatches to the distinct Move_STRENGTH body; component reuse does not waive its independent move acceptance."
+      "goal": "MOVE_SLAM independently proves its complete SLAM_HIT/IMPACT, dual-slide, ShakeMonInPlace, target-monbg/alpha, audio, and cleanup body at 54/54 dense source/seam/framebuffer frames in both orientations twice fresh. MOVE_SECRET_POWER has a complete source/controller checkpoint: set-117 TEDDIURSA is the lowest legal Level-50 carrier, every environment body and animation-bypass route is pinned, and Factory's indoor BUILDING contract reaches only Move_STRENGTH. It remains unsupported pending an independent Move_STRENGTH reducer/compositor plus complete twice-fresh both-orientation dense Scene-ON acceptance; component reuse does not waive that move acceptance."
     },
     {
       "id": "green-sparkle-moonlight",
