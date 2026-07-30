@@ -408,6 +408,8 @@ import {
   CANONICAL_JENSON_PRESENTATION,
   type FactoryTrainerPresentation,
 } from "./factoryTrainerPresentation.ts";
+import type { FactoryBattleStartIntroState } from "./factoryBattleStartIntro.ts";
+import type { PartyBallState } from "./battleResolutionPresentation.ts";
 import { fillFramebuffer } from "./framebuffer.ts";
 import { drawText, measureText, type FontData } from "./font.ts";
 import { blendComponentToWhite } from "./paletteFade.ts";
@@ -2704,10 +2706,11 @@ export function battleIntroEncounterParams(
     line1,
     line2: LINE2,
     textStartTick: TEXT_START_TICK,
-    // JENSON's two-character-shorter class/name line completes two ticks
-    // earlier, so PAUSE_UNTIL_PRESS creates its visible cursor at 1272.
-    // Controller input readiness still begins at 1274.
-    cursorStartTick: encounter === "jenson" ? CURSOR_START_TICK - 2 : CURSOR_START_TICK,
+    // PAUSE_UNTIL_PRESS begins two controller callbacks after the final
+    // printable character. Derive it from the typed line length so every
+    // generated trainer follows the same printer rather than an encounter
+    // name branch.
+    cursorStartTick: TEXT_START_TICK + line1.length + LINE2.length + 1,
     cursorX: LINE2_ORIGIN.x + measureText(font, charmap, LINE2),
   };
 }
@@ -2879,10 +2882,32 @@ export interface BallIcon {
  * needed one further asymmetric tick of gating, RAM+pixel-confirmed rather
  * than guessed (PROGRESS.md #70) - closing the module's last residual.
  */
-export function ballIcons(t: number): BallIcon[] {
+export function ballIcons(
+  t: number,
+  summaries?: Readonly<{
+    player: readonly PartyBallState[];
+    opponent: readonly PartyBallState[];
+  }>,
+): BallIcon[] {
   const rt = t - 1;
-  const opponentStates = ["Empty", "Empty", "Empty", "Full", "Full", "Full"];
-  const playerStates = ["Full", "Full", "Full", "Empty", "Empty", "Empty"];
+  const displayState = (state: PartyBallState | undefined): string =>
+    state === "empty"
+      ? "Empty"
+      : state === "fainted"
+        ? "Fainted"
+        : state === "status"
+          ? "Statused"
+          : "Full";
+  const opponentStates = summaries === undefined
+    ? ["Empty", "Empty", "Empty", "Full", "Full", "Full"]
+    : [0, 1, 2, 3, 4, 5].map(
+      (index) => displayState(summaries.opponent[5 - index]),
+    );
+  const playerStates = summaries === undefined
+    ? ["Full", "Full", "Full", "Empty", "Empty", "Empty"]
+    : [0, 1, 2, 3, 4, 5].map(
+      (index) => displayState(summaries.player[index]),
+    );
   const icons: BallIcon[] = [];
   for (let i = 0; i < 6; i += 1) {
     icons.push({
@@ -3733,7 +3758,19 @@ function drawBallStatusBar(fb: Uint8Array, ox: number, oy: number, hFlip: boolea
   }
 }
 
-function drawBallIcons(fb: Uint8Array, t: number, sides: { opponent: boolean; player: boolean; playerEvaOffset?: number } = { opponent: true, player: true }): void {
+function drawBallIcons(
+  fb: Uint8Array,
+  t: number,
+  sides: {
+    opponent: boolean;
+    player: boolean;
+    playerEvaOffset?: number;
+    summaries?: Readonly<{
+      player: readonly PartyBallState[];
+      opponent: readonly PartyBallState[];
+    }>;
+  } = { opponent: true, player: true },
+): void {
   const bars = ballStatusBarPositions(t);
   const basePlayerEva = playerSummaryFadeEva(t);
   const playerEva = basePlayerEva === null
@@ -3760,7 +3797,7 @@ function drawBallIcons(fb: Uint8Array, t: number, sides: { opponent: boolean; pl
     else drawBallStatusBar(fb, barX, 96, false, playerEva);
   }
   let playerIconIndex = 0;
-  for (const icon of ballIcons(t)) {
+  for (const icon of ballIcons(t, sides.summaries)) {
     if (!icon.visible) continue;
     if (icon.y === 32 && !sides.opponent) continue;
     if (icon.y === 88 && (!sides.player || !playerSummaryAlive)) {
@@ -3781,6 +3818,80 @@ function drawBallIcons(fb: Uint8Array, t: number, sides: { opponent: boolean; pl
         blendedSetPixel(fb, icon.x + iconExitDx + px, icon.y + py, c, eva);
       }
     }
+  }
+}
+
+/**
+ * Existing BattleIntroSlide3's displayed clock is one VBlank behind the
+ * BeginBattleIntro callback clock: its first visible callback is source age
+ * 27 at display clock 1075. Rebasing at 1048 preserves that already-proven
+ * controller/window/scanline render lag without putting a canonical trace
+ * tick into lifecycle state.
+ */
+const GENERATED_BATTLE_INTRO_SOURCE_CLOCK_ORIGIN = 1048;
+
+export function generatedBattleIntroSourceClock(elapsed: number): number {
+  return GENERATED_BATTLE_INTRO_SOURCE_CLOCK_ORIGIN + elapsed;
+}
+
+export function generatedBattleIntroVisualPhase(
+  elapsed: number,
+): "handoff" | "trainer-slide" | "trainer-message" {
+  const t = generatedBattleIntroSourceClock(elapsed);
+  if (t < FIRST_VISIBLE_TICK) return "handoff";
+  if (t < SLIDE_END_TICK) return "trainer-slide";
+  return "trainer-message";
+}
+
+export function isGeneratedBattleIntroInputReady(
+  state: FactoryBattleStartIntroState,
+): boolean {
+  const t = generatedBattleIntroSourceClock(state.elapsed);
+  const params = battleIntroEncounterParams(
+    "destin",
+    state.command.opponentTrainer,
+  );
+  return cursorState(t, params.cursorStartTick).visible;
+}
+
+/**
+ * Generic Scene-OFF pre-send-out compositor. It consumes only the frozen
+ * generated command plus a BeginBattleIntro-relative clock; no battle number,
+ * turn number, canonical tick, or fixture species participates.
+ */
+export function renderGeneratedBattleStartPreSendOut(
+  fb: Uint8Array,
+  state: FactoryBattleStartIntroState,
+): void {
+  const t = generatedBattleIntroSourceClock(
+    state.acknowledgedElapsed ?? state.elapsed,
+  );
+  const win = windowRange(t);
+  if (win === null) return;
+  if (t < SLIDE_END_TICK) {
+    drawSlideScene(fb, t, win, "destin", state.command.opponentTrainer);
+    return;
+  }
+  drawSettledScene(fb, "destin", state.command.opponentTrainer);
+  drawBallIcons(fb, t, {
+    opponent: true,
+    player: true,
+    summaries: state.command.partySummaries,
+  });
+  const [line1, line2] = state.command.text.wantsToBattle;
+  const visibleCharacters = Math.max(
+    0,
+    Math.min(line1.length + line2.length, t - TEXT_START_TICK + 1),
+  );
+  drawMessageTextLines(fb, line1, line2, visibleCharacters);
+  const cursorStartTick = TEXT_START_TICK + line1.length + line2.length + 1;
+  const cursor = cursorState(t, cursorStartTick);
+  if (cursor.visible) {
+    drawCursor(
+      fb,
+      cursor.yOffset,
+      LINE2_ORIGIN.x + measureText(font, charmap, line2),
+    );
   }
 }
 

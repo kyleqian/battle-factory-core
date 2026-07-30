@@ -13,24 +13,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
-## 730 — [BOUNDED MAIN WORKER 2026-07-30 ~00:45] Intro Slice 1 complete — generated battle-start contract frozen
+## 730 — [BOUNDED MAIN WORKER 2026-07-30 ~00:53] Intro Slices 1-2 complete — generated pre-send-out is 373/373
 
-- **State:** Slice 1 is green at **1 focused file / 2 tests**; the existing
-  trainer/orchestrator controls are also green at **2 files / 34 tests**.
-  Full suite/build and the immutable §3.2 table remain for end-of-step
-  acceptance.
+- **State:** implementation commits `01320712` + pending Slice 2; focused
+  acceptance is green at **2 files / 4 tests**. Fresh private OFF probe
+  comparison is **373/373 exact** across B+0..+372 (route 1171..1543).
+  Full suite/build and the immutable §3.2 table remain for end acceptance.
 - **Did:** the generated round owner now projects its pending `battleStart`
   into a frozen typed command: source trainer/facility-class/trainer-class/
   pic identities, both complete three-row kernel parties, active indexes,
   six-slot summary states, and all three intro string substitutions. A real
   challenge-2 seed pins SHIZUKA → `FACILITY_CLASS_BLACK_BELT` →
-  `TRAINER_PIC_BLACK_BELT` (id 11 in the 50-pic catalog).
-- **Next:** only if cap permits, Slice 2's source-relative pre-send-out
-  lifecycle and private probe comparison; otherwise run the required
-  immutable acceptance table, full suite/build once, and stop green.
-- **Notes:** no pixel claim, core/app routing, trace, capture list, recording
-  import, barrier/ratchet pin, battle/turn/tick branch, or fitted literal.
-  #53 now has intro slices 2-4 remaining. PAPERCUT: none.
+  `TRAINER_PIC_BLACK_BELT` (id 11 in the 50-pic catalog). Slice 2 adds one
+  BeginBattleIntro-relative lifecycle through the shared slide, typed
+  summaries, printer, cursor, and first accepted A; the existing one-VBlank
+  display lag supplies the probe rebase.
+- **Next:** run the complete immutable §3.2 + generated-command acceptance,
+  then full suite/build once. Intro slices 3-4 and routing remain later work.
+- **Notes:** regenerated via `tools/run-mgba-probe.py` in a fresh temp dir;
+  no public route exists, so no trace committed. No core routing, capture
+  thinning, recording import, barrier/ratchet pin, battle/turn/absolute-tick
+  branch, fitted coordinate/RGB, or fixture icon. PAPERCUT: none.
 
 ---
 ## 729 — [SUPERVISOR 2026-07-30 ~00:35] Slice 7 verified 128/128 — resolution seam design COMPLETE; user stitching report filed as #53; Gate-6 R12b/R11 merged

@@ -42,7 +42,7 @@ interactive routing flip.
 **Fix path (enabled this session):** generated Scene-OFF battle is now
 128/128 exact (`battle-command-generated-off.json`, Slice 7). Remaining:
 (a) generated battle-start intro lifecycle — Slice 1's frozen generated
-start contract is complete; slices 2-4 remain as scoped in
+start contract and Slice 2's pre-send-out lifecycle are complete; slices 3-4 remain as scoped in
 `docs/trainer-pic-off-window-scout.md`; (b) an interactive-routing decision +
 flip so the playable battle consumes the drafted party through the generated
 orchestrator; (c) round-loop continuation for battles 2-7 already exists in
