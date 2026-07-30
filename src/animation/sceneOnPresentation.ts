@@ -215,6 +215,11 @@ import {
   type MoonlightState,
 } from "./moonlight.ts";
 import {
+  presentAtAge,
+  type PresentBranch,
+  type PresentState,
+} from "./present.ts";
+import {
   absorbAtAge,
   type AbsorbState,
 } from "./absorb.ts";
@@ -637,6 +642,7 @@ export interface SceneOnPresentationBattler {
     | "TEDDIURSA"
     | "WARTORTLE"
     | "LUVDISC"
+    | "DELIBIRD"
     | "PARASECT";
   readonly geometry: SceneOnBattlerGeometry;
 }
@@ -1058,6 +1064,15 @@ export interface SceneOnMoonlightConfig {
   readonly fieldProfile: Readonly<SceneOnMoonlightFieldProfile>;
   /** Source `InitSpritePosToAnimAttacker(TRUE)` center for HealingEffect. */
   readonly healingCenter: Readonly<{ x: number; y: number }>;
+}
+
+export interface SceneOnPresentConfig {
+  readonly move: "PRESENT";
+  /** Immutable result chosen by the battle controller. */
+  readonly branch: PresentBranch;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
 export interface SceneOnAbsorbConfig {
@@ -1808,6 +1823,7 @@ export type SceneOnMoveConfig =
   | SceneOnGrowthConfig
   | SceneOnRecoverConfig
   | SceneOnMoonlightConfig
+  | SceneOnPresentConfig
   | SceneOnAbsorbConfig
   | SceneOnReflectConfig
   | SceneOnBrickBreakConfig
@@ -1921,6 +1937,8 @@ export type SceneOnAbsorbPresentationState =
   SceneOnMovePresentationState<SceneOnAbsorbConfig>;
 export type SceneOnMoonlightPresentationState =
   SceneOnMovePresentationState<SceneOnMoonlightConfig>;
+export type SceneOnPresentPresentationState =
+  SceneOnMovePresentationState<SceneOnPresentConfig>;
 export type SceneOnAromatherapyPresentationState =
   SceneOnMovePresentationState<SceneOnAromatherapyConfig>;
 export type SceneOnReflectPresentationState =
@@ -2081,6 +2099,12 @@ export interface SceneOnSlamView extends SlamState {
 }
 
 export interface SceneOnSecretPowerView extends StrengthState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnPresentView extends PresentState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3243,6 +3267,28 @@ export function sceneOnMoonlightView(
       config.attacker.geometry.side,
       config.attacker.geometry.animationCenter.x,
       config.healingCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_PRESENT's first active source-script frame. */
+export function sceneOnPresentView(
+  state: SceneOnPresentPresentationState,
+): SceneOnPresentView {
+  if (state.config.move !== "PRESENT") {
+    throw new Error(`expected PRESENT presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...presentAtAge(
+      state.age,
+      state.config.branch,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.battlePositionCenter,
+      state.config.target.geometry.battlePositionCenter,
+      state.config.target.geometry.animationCenter,
     ),
   };
 }

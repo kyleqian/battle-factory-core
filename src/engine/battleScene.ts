@@ -750,6 +750,7 @@ import {
   sceneOnGrowthView,
   sceneOnRecoverView,
   sceneOnMoonlightView,
+  sceneOnPresentView,
   sceneOnAbsorbView,
   sceneOnReflectView,
   sceneOnBrickBreakView,
@@ -845,6 +846,7 @@ import {
   type SceneOnHowlPresentationState,
   type SceneOnSweetKissPresentationState,
   type SceneOnAttractPresentationState,
+  type SceneOnPresentPresentationState,
   type SceneOnSporePresentationState,
   type SceneOnCottonSporePresentationState,
   type SceneOnHypnosisPresentationState,
@@ -1161,6 +1163,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 /** S7 slice L-3 (docs/faint-switch-notes.md §5): opponent front-sprite corner = `(144, 8 + gMonFrontPicCoords[species].yOffset)` - Pidgeotto's `yOffset` is 11, byte-exact-verified against the oracle at `(144,19)` (0/1087 mismatched px). */
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const delibirdFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DELIBIRD!;
 const mareepFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MAREEP!;
 const PIDGEOTTO_CORNER = { x: 144, y: 19 };
 /** S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6/§7): MURKROW's own `yOffset` (11, `mon-pic-coords.json`) is bit-identical to Pidgeotto's, so the same `(144, 8+yOffset)` formula lands on the identical corner - not a coincidence, both front pics share the same 48px-wide/11px-yOffset box. */
@@ -1631,6 +1634,7 @@ const battleAnimLightning = battleAnimLightningAsset as {
   palette: RgbColor[];
 };
 const pidgeottoBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PIDGEOTTO!;
+const delibirdBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).DELIBIRD!;
 const murkrowBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MURKROW!;
 const spoinkBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SPOINK!;
 const arcanineBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ARCANINE!;
@@ -23331,6 +23335,160 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "MURKROW used" : "Foe MURKROW used",
       "PERISH SONG!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "PRESENT") {
+    const presentState = state as SceneOnPresentPresentationState;
+    const view = sceneOnPresentView(presentState);
+    // Sprite callbacks and OAM affine animation run after BuildOamBuffer.
+    const displayed = sceneOnPresentView({
+      ...presentState,
+      age: presentState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "DELIBIRD"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "DELIBIRD"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged PRESENT pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const delibird = playerToOpponent
+      ? delibirdBackSprite
+      : {
+          ...delibirdFrontSprite,
+          tileset: subTileset(delibirdFrontSprite.tileset, 0, 8),
+        };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      delibird.tileset,
+      delibird.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y,
+    );
+    const drawBag = () => {
+      if (!displayed.bag) return;
+      const bag = displayed.bag;
+      drawSpriteSheetAffineRotate(
+        fb,
+        covetArt.itemBag.tileset,
+        covetArt.itemBag.palette,
+        bag.x,
+        bag.y + bag.y2,
+        bag.matrix.a,
+        bag.matrix.b,
+        bag.matrix.c,
+        bag.matrix.d,
+        undefined,
+        false,
+      );
+    };
+    // AnimPresent's subpriority is side-relative: the player-side bag sorts
+    // below its attacker, while the opponent-side bag sorts above it.
+    drawTarget();
+    if (playerToOpponent) {
+      drawBag();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawBag();
+    }
+    const effects = [
+      ...displayed.explosions,
+      ...displayed.greenSparkles,
+      ...displayed.blueStars,
+    ].sort(
+      (left, right) =>
+        left.y + left.y2 - (right.y + right.y2)
+        || right.sourceIndex - left.sourceIndex,
+    );
+    for (const effect of effects) {
+      if (effect.kind === "explosion") {
+        drawSpriteSheet(
+          fb,
+          subTileset(selfDestructArt.explosion.tileset, effect.frame * 4, 4),
+          selfDestructArt.explosion.palette,
+          effect.x - 16,
+          effect.y + effect.y2 - 16,
+        );
+      } else if (effect.kind === "greenSparkle") {
+        drawSpriteSheet(
+          fb,
+          subTileset(moonlightArt.greenSparkle.tileset, effect.frame * 2, 2),
+          moonlightArt.greenSparkle.palette,
+          effect.x - 8,
+          effect.y + effect.y2 - 8,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          subTileset(moonlightArt.blueStar.tileset, effect.frame * 4, 4),
+          moonlightArt.blueStar.palette,
+          effect.x - 16,
+          effect.y + effect.y2 - 16,
+        );
+      }
+    }
+
+    const profile = presentState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "DELIBIRD",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "DELIBIRD" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "DELIBIRD used" : "Foe DELIBIRD used",
+      "PRESENT!",
       99,
     );
     return;
