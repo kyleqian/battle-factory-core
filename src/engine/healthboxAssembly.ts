@@ -64,6 +64,106 @@ export interface HealthboxContentParams {
   status: "none" | "sleep" | "poison" | "burn" | "freeze" | "paralysis";
 }
 
+export type BattleHealthBarProgram = Readonly<{
+  maxHp: number;
+  from: number;
+  to: number;
+}>;
+
+function assertBattleHealthBarProgram(
+  program: BattleHealthBarProgram,
+): void {
+  if (
+    !Number.isSafeInteger(program.maxHp)
+    || program.maxHp <= 0
+    || !Number.isSafeInteger(program.from)
+    || !Number.isSafeInteger(program.to)
+    || program.from < 0
+    || program.from > program.maxHp
+    || program.to < 0
+    || program.to > program.maxHp
+  ) {
+    throw new Error(
+      `battleHealthBar: invalid HP program ${program.from}->${program.to}/${program.maxHp}`,
+    );
+  }
+}
+
+/**
+ * `CalcNewBarValue` (`battle_interface.c:2334-2395`) reduced to a
+ * command-relative display value. Frame 0 is the controller's old value;
+ * each subsequent frame applies one `MoveBattleBar` step. Real Factory HP
+ * is normally at least the 48-pixel bar width and therefore moves one HP per
+ * frame. The Q24.8 branch is retained for low-max-HP source completeness.
+ */
+export function battleHealthBarValueAtFrame(
+  program: BattleHealthBarProgram,
+  frame: number,
+): number {
+  assertBattleHealthBarProgram(program);
+  if (!Number.isSafeInteger(frame)) {
+    throw new Error(`battleHealthBar: frame must be a safe integer, got ${frame}`);
+  }
+  const age = Math.max(0, frame);
+  if (program.from === program.to || age === 0) return program.from;
+
+  if (program.maxHp >= HP_BAR_TOTAL_PIXELS) {
+    const direction = program.to > program.from ? 1 : -1;
+    const stepped = program.from + direction * age;
+    return direction > 0
+      ? Math.min(program.to, stepped)
+      : Math.max(program.to, stepped);
+  }
+
+  // Q_24_8(maxValue) / 48, exactly as the source's low-max-value branch.
+  const fixedStep = Math.floor((program.maxHp * 256) / HP_BAR_TOTAL_PIXELS);
+  let current = program.from * 256;
+  for (let tick = 0; tick < age; tick += 1) {
+    if (program.to > program.from) {
+      current += fixedStep;
+      const displayed = Math.floor(current / 256);
+      if (displayed >= program.to) {
+        current = program.to * 256;
+        break;
+      }
+    } else {
+      current -= fixedStep;
+      const truncated = Math.trunc(current / 256);
+      const displayed = truncated + (current % 256 === 0 ? 0 : 1);
+      if (displayed <= program.to) {
+        current = program.to * 256;
+        break;
+      }
+    }
+  }
+  if (program.to > program.from) {
+    return Math.min(program.to, Math.floor(current / 256));
+  }
+  const truncated = Math.trunc(current / 256);
+  return Math.max(
+    program.to,
+    truncated + (current % 256 === 0 ? 0 : 1),
+  );
+}
+
+/** Number of `MoveBattleBar` steps needed to reach the semantic endpoint. */
+export function battleHealthBarAnimationFrames(
+  program: BattleHealthBarProgram,
+): number {
+  assertBattleHealthBarProgram(program);
+  if (program.from === program.to) return 0;
+  const conservativeLimit = Math.max(
+    HP_BAR_TOTAL_PIXELS * 2,
+    Math.abs(program.to - program.from) * HP_BAR_TOTAL_PIXELS + 1,
+  );
+  for (let frame = 1; frame <= conservativeLimit; frame += 1) {
+    if (battleHealthBarValueAtFrame(program, frame) === program.to) return frame;
+  }
+  throw new Error(
+    `battleHealthBar: source program did not converge ${program.from}->${program.to}/${program.maxHp}`,
+  );
+}
+
 /** RAM/VRAM-derived screen-space layout, relative to the healthbox's own corner (12,14) for this trace's opponent slot - see the doc's table. */
 const FRAME_ORIGIN = { x: 12, y: 14 };
 const FRAME_SIZE = { width: 128, height: 32 };

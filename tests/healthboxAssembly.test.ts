@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calcBarFilledPixels, composeOpponentHealthbox, composePlayerHealthbox, composePlayerHealthboxHpOverlay, HEALTHBOX_FRAME_ORIGIN, HP_BAR_FULL_TILES, pickHpBarBand, PLAYER_HEALTHBOX_FRAME_ORIGIN, rightAlign3GlyphCodes } from "../src/engine/healthboxAssembly.ts";
+import { battleHealthBarAnimationFrames, battleHealthBarValueAtFrame, calcBarFilledPixels, composeOpponentHealthbox, composePlayerHealthbox, composePlayerHealthboxHpOverlay, HEALTHBOX_FRAME_ORIGIN, HP_BAR_FULL_TILES, pickHpBarBand, PLAYER_HEALTHBOX_FRAME_ORIGIN, rightAlign3GlyphCodes } from "../src/engine/healthboxAssembly.ts";
 import { CHAR_SPACER } from "../src/engine/battleMenu.ts";
 import battleHealthbox from "../src/assets/gen/battle-healthbox.json" with { type: "json" };
 import harvested from "../src/assets/gen/sendout-healthbox-opponent.json" with { type: "json" };
@@ -203,6 +203,30 @@ describe("calcBarFilledPixels (ISSUES #16 round 3)", () => {
     expect(pickHpBarBand(9)).toBe("red");
     expect(calcBarFilledPixels(10 / 48).filledPixels).toBe(10);
     expect(pickHpBarBand(10)).toBe("yellow");
+  });
+});
+
+describe("source-relative BattleResolution health-bar clock", () => {
+  it("drains and heals one HP per controller frame when max HP spans the 48px bar", () => {
+    const drain = { maxHp: 91, from: 91, to: 63 };
+    expect(battleHealthBarValueAtFrame(drain, 0)).toBe(91);
+    expect(battleHealthBarValueAtFrame(drain, 1)).toBe(90);
+    expect(battleHealthBarValueAtFrame(drain, 27)).toBe(64);
+    expect(battleHealthBarValueAtFrame(drain, 28)).toBe(63);
+    expect(battleHealthBarValueAtFrame(drain, 200)).toBe(63);
+    expect(battleHealthBarAnimationFrames(drain)).toBe(28);
+
+    const heal = { maxHp: 117, from: 4, to: 36 };
+    expect(battleHealthBarValueAtFrame(heal, 12)).toBe(16);
+    expect(battleHealthBarAnimationFrames(heal)).toBe(32);
+  });
+
+  it("retains CalcNewBarValue's Q24.8 progression below the bar width", () => {
+    const lowMax = { maxHp: 24, from: 24, to: 20 };
+    expect(battleHealthBarValueAtFrame(lowMax, 1)).toBe(24);
+    expect(battleHealthBarValueAtFrame(lowMax, 2)).toBe(23);
+    expect(battleHealthBarValueAtFrame(lowMax, 8)).toBe(20);
+    expect(battleHealthBarAnimationFrames(lowMax)).toBe(8);
   });
 });
 

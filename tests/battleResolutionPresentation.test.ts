@@ -2,8 +2,20 @@ import { describe, expect, it } from "vitest";
 import { createBattleCommandPresentation } from "../src/engine/battleCommandPresentation.ts";
 import {
   createBattleResolutionPresentation,
+  type BattleResolutionPresentationState,
   type CreateBattleResolutionPresentationInput,
 } from "../src/engine/battleResolutionPresentation.ts";
+import {
+  battleResolutionCommandDuration,
+  createBattleResolutionPresentationRenderView,
+  isBattleResolutionCommandComplete,
+  isBattleResolutionNextCommandHandoffComplete,
+  renderBattleResolutionPresentation,
+} from "../src/engine/battleResolutionPresentationRender.ts";
+import {
+  renderBattleResolutionSceneOffView,
+  renderSceneOffTurnView,
+} from "../src/engine/battleScene.ts";
 import {
   createBattleState,
   type BattleBoundary,
@@ -157,6 +169,29 @@ const NEXT_COMMAND: BattleBoundary = Object.freeze({
   }),
 });
 
+function atRenderClock(
+  state: BattleResolutionPresentationState,
+  commandIndex: number,
+  phaseElapsed: number,
+  phase: BattleResolutionPresentationState["lifecycle"]["phase"] = "presenting",
+): BattleResolutionPresentationState {
+  return Object.freeze({
+    ...state,
+    commandIndex,
+    lifecycle: Object.freeze({ phase, phaseElapsed }),
+  });
+}
+
+function damageResolution(): BattleResolutionPresentationState {
+  return createBattleResolutionPresentation(inputFor([
+    event(0, { kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }),
+    event(1, { kind: "set-battler-pp-data", battler: 0, movePosition: 0, pp: 9 }),
+    event(2, { kind: "health-bar-update", battler: 1, healthValue: 17 }),
+    event(3, { kind: "hp-change", battler: 1, from: 91, to: 74 }),
+    event(4, { kind: "message", messageId: "STRINGID_SUPEREFFECTIVE", substitutions: [] }),
+  ], NEXT_COMMAND));
+}
+
 describe("battle resolution presentation receipt ownership", () => {
   it("projects noncritical damage and its effectiveness message without exposing settled HP early", () => {
     const resolution = createBattleResolutionPresentation(inputFor([
@@ -303,5 +338,179 @@ describe("battle resolution presentation receipt ownership", () => {
       event(2, { kind: "health-bar-update", battler: 1, healthValue: 11 }),
       event(1, { kind: "hp-change", battler: 1, from: 91, to: 80 }),
     ], NEXT_COMMAND))).toThrow(/not strictly increasing/);
+  });
+});
+
+describe("battle resolution typed Scene-OFF renderer", () => {
+  it("prints frozen attack/result lines one glyph per relative frame", () => {
+    const resolution = damageResolution();
+    const first = createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, 0, 0),
+    );
+    expect(first.message).toEqual({
+      lines: ["ONIX used", "ROCK SLIDE!"],
+      visibleCharacters: 1,
+    });
+    expect(first.field.opponent.hp).toBe(91);
+    expect(
+      battleResolutionCommandDuration(
+        resolution.segments[0]!.commands[0]!,
+        resolution.field,
+      ),
+    ).toBe(24);
+
+    const result = createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, 2, 2),
+    );
+    expect(result.field.opponent.hp).toBe(74);
+    expect(result.message).toEqual({
+      lines: ["It’s super effective!"],
+      visibleCharacters: 3,
+    });
+  });
+
+  it("drains only the typed HP endpoint and preserves the attack string underneath", () => {
+    const resolution = damageResolution();
+    const start = createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, 1, 0),
+    );
+    const middle = createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, 1, 10),
+    );
+    const end = createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, 1, 27),
+    );
+
+    expect(start.field.opponent.hp).toBe(91);
+    expect(middle.field.opponent.hp).toBe(81);
+    expect(end.field.opponent.hp).toBe(74);
+    expect(middle.message).toEqual({
+      lines: ["ONIX used", "ROCK SLIDE!"],
+      visibleCharacters: 20,
+    });
+    expect(middle.healthboxes.opponent.hpTargetFraction).toBe(74 / 91);
+    expect(isBattleResolutionCommandComplete(
+      atRenderClock(resolution, 1, 26),
+    )).toBe(false);
+    expect(isBattleResolutionCommandComplete(
+      atRenderClock(resolution, 1, 27),
+    )).toBe(true);
+  });
+
+  it("projects stat/status effects and commits a status icon only after its command", () => {
+    const statResolution = createBattleResolutionPresentation(inputFor([
+      event(0, {
+        kind: "stat-stage-change",
+        battler: 0,
+        stat: "accuracy",
+        from: 6,
+        to: 5,
+      }),
+      event(1, {
+        kind: "message",
+        messageId: "STRINGID_DEFENDERSSTATFELL",
+        substitutions: [],
+      }),
+    ], NEXT_COMMAND));
+    expect(
+      createBattleResolutionPresentationRenderView(
+        atRenderClock(statResolution, 0, 12),
+      ).effect,
+    ).toEqual({
+      type: "stat",
+      battler: 0,
+      stat: "accuracy",
+      from: 6,
+      to: 5,
+      age: 12,
+    });
+    expect(
+      battleResolutionCommandDuration(
+        statResolution.segments[0]!.commands[0]!,
+        statResolution.field,
+      ),
+    ).toBe(50);
+
+    const statusResolution = createBattleResolutionPresentation(inputFor([
+      event(0, {
+        kind: "set-battler-status-data",
+        battler: 1,
+        status1: 1 << 3,
+      }),
+    ], NEXT_COMMAND));
+    expect(
+      createBattleResolutionPresentationRenderView(
+        atRenderClock(statusResolution, 0, 4),
+      ).field.opponent.status,
+    ).toBe("none");
+    expect(
+      createBattleResolutionPresentationRenderView(
+        atRenderClock(statusResolution, 1, 0),
+      ).field.opponent.status,
+    ).toBe("poison");
+  });
+
+  it("owns exactly six blank next-command handoff frames", () => {
+    const resolution = damageResolution();
+    const handoff5 = atRenderClock(
+      resolution,
+      resolution.segments[0]!.commands.length,
+      5,
+      "next-command-handoff",
+    );
+    const handoff6 = atRenderClock(
+      resolution,
+      resolution.segments[0]!.commands.length,
+      6,
+      "next-command-handoff",
+    );
+    expect(createBattleResolutionPresentationRenderView(handoff5).bottom).toBe(
+      "blank",
+    );
+    expect(isBattleResolutionNextCommandHandoffComplete(handoff5)).toBe(false);
+    expect(isBattleResolutionNextCommandHandoffComplete(handoff6)).toBe(true);
+  });
+
+  it("renders through the source-composed scene adapter without exposing kernel rules", () => {
+    const resolution = damageResolution();
+    const canonicalField = Object.freeze({
+      player: Object.freeze({ ...resolution.field.player, gender: "male" as const }),
+      opponent: Object.freeze({ ...resolution.field.opponent, gender: "male" as const }),
+    });
+    const state = Object.freeze({
+      ...atRenderClock(resolution, 0, 40),
+      field: canonicalField,
+    });
+    const typed = new Uint8Array(240 * 160 * 4);
+    renderBattleResolutionPresentation(typed, state, {
+      drawScene: renderBattleResolutionSceneOffView,
+    });
+
+    const legacy = new Uint8Array(240 * 160 * 4);
+    renderSceneOffTurnView(legacy, {
+      opponentHp: 91,
+      messageLines: ["ONIX used", "ROCK SLIDE!"],
+      messageChars: 20,
+      statEffectAge: null,
+      bottom: "message",
+    });
+    const changed: Array<{ x: number; y: number }> = [];
+    for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+      const offset = pixel * 4;
+      if (
+        typed[offset] !== legacy[offset]
+        || typed[offset + 1] !== legacy[offset + 1]
+        || typed[offset + 2] !== legacy[offset + 2]
+      ) changed.push({ x: pixel % 240, y: Math.floor(pixel / 240) });
+    }
+    expect({
+      count: changed.length,
+      bounds: changed.length === 0 ? null : {
+        minX: Math.min(...changed.map(({ x }) => x)),
+        maxX: Math.max(...changed.map(({ x }) => x)),
+        minY: Math.min(...changed.map(({ y }) => y)),
+        maxY: Math.max(...changed.map(({ y }) => y)),
+      },
+    }).toEqual({ count: 0, bounds: null });
   });
 });
