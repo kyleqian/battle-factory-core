@@ -5,6 +5,24 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #52 — fight-closing resets the battler idle-bounce clock; ROM's runs continuously
+
+**Symptom:** on the generated GRANBULL-vs-ARON OFF route, the B-cancel edge
+diverges: the app's battler idle bounce restarts while the oracle's continues
+across FIGHT open/close. First divergence at capture 12 (frame 19) of the
+128-window, 644px delta, bbox (42,59)-(100,111); diagnostic **11/128**.
+
+**Evidence (merged `c7a5d30e`):**
+`tools/battle-lab/mechanic-battle-command-generated-off.json` (trainer 17,
+seed 2423399196, Intimidate live) + pinned diagnostic in
+`tests/fixtures/battle-command-generated-off-evidence.json` and
+`tests/battleCommandGeneratedOffEvidence.test.ts`. App cause: `phaseElapsed`
+is reset entering `fight-closing` and doubles as the bounce clock. Canonical
+menu windows stay exact under the old behavior, so the fix must be the
+generic continuous-clock mechanism — no per-route/per-window branch.
+
+**Blocks:** resolution design §4 Slice 7's 128/128 acceptance (0/128 claimed).
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn
