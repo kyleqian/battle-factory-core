@@ -65,7 +65,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_HUSTLE | engine-referenced | 6 (1) | 6 | — | 2 | 0 | 3 |
 | ABILITY_ARENA_TRAP | engine-referenced | 6 (0) | 6 | — | 2 | 3 | 2 |
 | ABILITY_VITAL_SPIRIT | engine-referenced | 6 (5) | 6 | IMMUNITY | 5 | 0 | 13 |
-| ABILITY_LIMBER | engine-referenced | 5 (5) | 5 | IMMUNITY | 4 | 0 | 8 |
+| ABILITY_LIMBER | engine-referenced | 5 (5) | 5 | IMMUNITY | 4 | 0 | 10 |
 | ABILITY_CLOUD_NINE | engine-referenced | 5 (0) | 5 | ON_SWITCHIN | 1 | 0 | 18 |
 | ABILITY_MAGMA_ARMOR | engine-referenced | 5 (2) | 5 | IMMUNITY | 1 | 0 | 4 |
 | ABILITY_TRUANT | engine-referenced | 5 (5) | 5 | ENDTURN | 2 | 0 | 7 |

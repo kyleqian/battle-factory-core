@@ -412,6 +412,7 @@ const ABILITY_KEEN_EYE = "ABILITY_KEEN_EYE";
 const ABILITY_CLEAR_BODY = "ABILITY_CLEAR_BODY";
 const ABILITY_WHITE_SMOKE = "ABILITY_WHITE_SMOKE";
 const ABILITY_IMMUNITY = "ABILITY_IMMUNITY";
+const ABILITY_LIMBER = "ABILITY_LIMBER";
 
 /**
  * `check_ability AI_TARGET, ability` / `if_ability AI_TARGET, ability, ptr`
@@ -1256,6 +1257,19 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_PARALYZE -> AI_CBM_Paralyze
+  // (`data/battle_ai_scripts.s:149,397-403`, doc §31).
+  if (move.effect === "EFFECT_PARALYZE") {
+    const paralyze = runCbmParalyze(move.type, target, rng, ordinal, `${input.reasonPrefix}-paralyze`);
+    for (const draw of paralyze.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: paralyze.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: paralyze.scoreDelta,
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -1320,6 +1334,51 @@ function runCbmSleep(
   const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
   const blocked = ability.ability === ABILITY_INSOMNIA
     || ability.ability === ABILITY_VITAL_SPIRIT
+    || (target.hasAnyStatus ?? false)
+    || (target.safeguardUp ?? false);
+  return Object.freeze({
+    rng: ability.rng,
+    draws: Object.freeze(ability.draw === null ? [] : [ability.draw]),
+    scoreDelta: blocked ? -10 : 0,
+  });
+}
+
+/**
+ * `AI_CBM_Paralyze` (`data/battle_ai_scripts.s:397-403`, doc §31):
+ * type immunity, one fresh target ability read, Limber, primary-status, and
+ * Safeguard rejection gates in source order. Every rejection JUMPS to
+ * Score_Minus10; only the all-clear path FALLS THROUGH to end at zero.
+ */
+function runCbmParalyze(
+  moveType: string,
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckBadMoveDraw[];
+  scoreDelta: number;
+}> {
+  // Cmd_if_type_effectiveness initializes damage to AI_EFFECTIVENESS_x1
+  // (40), then TypeCalc mutates it in table order. Preserve the source's
+  // no-effect-followed-by-nonzero quirk: ModulateDmgByType2 clamps a
+  // zero-damage intermediate back to 1 whenever the later multiplier is
+  // nonzero, while Cmd_if_type_effectiveness's non-BUGFIX build never copies
+  // TypeCalc's no-effect flag into gMoveResultFlags. Thus Electric against
+  // Ground/Flying is 1 here, not x0 (battle_ai_script_commands.c:1515-1557;
+  // battle_script_commands.c:1502-1506,1536-1591).
+  let aiEffectiveness = 40;
+  for (const entry of TYPE_EFFECTIVENESS) {
+    if (entry.attackingType !== moveType || !target.types.includes(entry.defendingType)) continue;
+    aiEffectiveness = Math.trunc((aiEffectiveness * entry.multiplierTenths) / 10);
+    if (aiEffectiveness === 0 && entry.multiplierTenths !== 0) aiEffectiveness = 1;
+  }
+  if (aiEffectiveness === 0) {
+    return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
+  }
+  const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
+  const blocked = ability.ability === ABILITY_LIMBER
     || (target.hasAnyStatus ?? false)
     || (target.safeguardUp ?? false);
   return Object.freeze({
