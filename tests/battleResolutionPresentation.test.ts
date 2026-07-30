@@ -289,6 +289,17 @@ describe("battle resolution presentation receipt ownership", () => {
     });
     const afterContext = Object.freeze({
       ...context,
+      party: Object.freeze({
+        ...context.party,
+        player: Object.freeze([
+          Object.freeze({ ...context.party.player[0]!, hp: 0 }),
+          context.party.player[1]!,
+          context.party.player[2]!,
+          context.party.player[3]!,
+          context.party.player[4]!,
+          context.party.player[5]!,
+        ]),
+      }),
       battlers: Object.freeze([
         switchedBattler,
         context.battlers[1]!,
@@ -352,6 +363,12 @@ describe("battle resolution presentation receipt ownership", () => {
     expect(appended.segments).toHaveLength(2);
     expect(appended.forcedRequest).toBeNull();
     expect(appended.pendingBattle).toBe(continuationState);
+    expect(appended.segmentIndex).toBe(1);
+    expect(appended.commandIndex).toBe(0);
+    expect(appended.lifecycle).toEqual({
+      phase: "presenting-switch-in",
+      phaseElapsed: 0,
+    });
     expect(appended.segments[1]!.commands).toMatchObject([
       { type: "party-summary", battler: 0, visible: true },
       { type: "message", lines: ["Go! MACHOP!"] },
@@ -371,6 +388,24 @@ describe("battle resolution presentation receipt ownership", () => {
       },
       { type: "turn-end" },
     ]);
+    const view = createBattleResolutionPresentationRenderView(appended);
+    expect(view.field.player).toMatchObject({
+      partyIndex: 1,
+      species: 66,
+      name: "MACHOP",
+      hp: 80,
+      maxHP: 80,
+    });
+    expect(view.message).toEqual({
+      lines: ["Go! MACHOP!"],
+      visibleCharacters: 0,
+    });
+    expect(view.switchIn).toEqual({
+      elapsed: 0,
+      phase: "submenuHold",
+      battler: 0,
+      partyStates: ["fainted", "healthy", "empty", "empty", "empty", "empty"],
+    });
   });
 
   it("freezes the trainer class/name used by an opponent switch-in message", () => {

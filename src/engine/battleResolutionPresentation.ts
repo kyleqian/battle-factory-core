@@ -669,6 +669,12 @@ export function appendBattleResolutionContinuation(
   return Object.freeze({
     ...resolution,
     segments: Object.freeze([...resolution.segments, segment]),
+    segmentIndex: resolution.segments.length,
+    commandIndex: 0,
+    lifecycle: Object.freeze({
+      phase: "presenting-switch-in" as const,
+      phaseElapsed: 0,
+    }),
     pendingBoundary: transition.state.boundary,
     pendingBattle: transition.state,
     forcedRequest: null,

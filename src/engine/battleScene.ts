@@ -647,7 +647,7 @@ import faintAttackDarkBgAsset from "../assets/gen/battle-anim-bg-dark.json" with
 import extremeSpeedAsset from "../assets/gen/battle-anim-extreme-speed.json" with { type: "json" };
 import battleAnimGhostBgAsset from "../assets/gen/battle-anim-ghost-bg.json" with { type: "json" };
 import battleAnimPsychicBgAsset from "../assets/gen/battle-anim-psychic-bg.json" with { type: "json" };
-import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, type PartyMenuIconLayer } from "./partySelect.ts";
+import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, PARTY_SENDOUT_RELEASE_VISIBLE_START, type PartyMenuIconLayer } from "./partySelect.ts";
 import {
   battlePartySelectStateForForcedParty,
   renderBattlePartySelect,
@@ -14492,15 +14492,17 @@ function partyChromePixels(key: string): Uint8Array {
   return pixels;
 }
 
-const PARTY_ICON_BASE: Record<PartyMenuIconLayer["species"], { x: number; y: number }> = {
-  ONIX: { x: 16, y: 40 }, MAGBY: { x: 104, y: 18 }, BAYLEEF: { x: 104, y: 42 },
-};
+const PARTY_ICON_BASE = [
+  { x: 16, y: 40 },
+  { x: 104, y: 18 },
+  { x: 104, y: 42 },
+] as const;
 
 function drawTurn15PartyIcon(fb: Uint8Array, layer: PartyMenuIconLayer): void {
   // The 376-species catalog (be7a4fee) is keyed by SPECIES_* constants; the
   // pre-existing plain-name keys were dropped in that regeneration.
   const asset = partyMonIcons[`SPECIES_${layer.species}`]!;
-  const base = PARTY_ICON_BASE[layer.species];
+  const base = PARTY_ICON_BASE[layer.partyIndex];
   // Base x/y is OAM center; offsets are the RAM-derived selected hop or
   // AnimateSelectedPartyIcon's permanent deselected offset.
   drawSpriteSheet(fb, layer.frame === 0 ? asset.frame0 : asset.frame1, asset.palette, base.x + layer.x2 - 16, base.y + layer.y2 - 16);
@@ -30637,6 +30639,137 @@ export function renderBattleResolutionForcedPartySelect(
   view: BattleResolutionPresentationRenderView,
   party: import("./partySelect.ts").PartySelectState,
 ): void {
+  if (party.sendOutElapsed !== null) {
+    const elapsed = party.sendOutElapsed;
+    if (
+      view.switchIn === null
+      || view.switchIn.elapsed !== elapsed
+      || view.switchIn.battler !== 0
+    ) {
+      throw new Error(
+        "forced send-out render requires the matching typed player switch-in lifecycle",
+      );
+    }
+    const phase = view.switchIn.phase;
+    if (phase === "submenuHold") {
+      drawTurn15PartySelectList(fb, party);
+      return;
+    }
+    if (phase === "fadingOut") {
+      drawTurn15PartySelectList(fb, party);
+      const mask = new Uint8Array(fb.length);
+      drawTurn15PartyListObjMask(mask, party);
+      fadeTurn15PartyFramebuffer(
+        fb,
+        bgFadeY(elapsed - PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_FADE_OUT),
+        mask,
+        objFadeY(elapsed - PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_FADE_OUT),
+      );
+      return;
+    }
+    if (phase === "black") return;
+
+    const canonicalIncoming =
+      view.field.player.name === "MAGBY"
+      && view.field.player.species === 240;
+    const releaseTick = partySendOutReleaseLogicalTick(elapsed);
+    if (canonicalIncoming) {
+      drawMode0Ppu(fb, {
+        ...turn15FieldPpuAsset,
+        bldy: partySendOutBattleFadeBldy(elapsed),
+        paletteBgr555:
+          releaseTick === null
+            ? turn15FieldPpuAsset.paletteBgr555
+            : turn15ReleaseFieldPalette(releaseTick),
+      });
+    } else {
+      renderBattleResolutionSceneOffView(fb, {
+        ...view,
+        visibility: Object.freeze({
+          ...view.visibility,
+          player: Object.freeze({ sprite: false, healthbox: false }),
+        }),
+      });
+      const bldy = partySendOutBattleFadeBldy(elapsed);
+      if (bldy > 0) {
+        for (let p = 0; p < 240 * 160; p += 1) {
+          const o = p * 4;
+          fb[o] = blendComponentToWhite(fb[o]!, bldy);
+          fb[o + 1] = blendComponentToWhite(fb[o + 1]!, bldy);
+          fb[o + 2] = blendComponentToWhite(fb[o + 2]!, bldy);
+        }
+      }
+      if (elapsed < PARTY_SENDOUT_RELEASE_VISIBLE_START) {
+        drawTypedPartyStatusSummary(
+          fb,
+          view.switchIn.battler,
+          view.switchIn.partyStates,
+        );
+      }
+    }
+
+    drawTurn15ForcedSwitchBall(fb, elapsed);
+    if (releaseTick !== null) {
+      if (canonicalIncoming) {
+        drawTurn15ForcedSwitchRelease(fb, releaseTick);
+      } else if (releaseTick <= 16) {
+        drawPlayerSideAffineMaterialize(
+          fb,
+          view.fieldArt.player.pic.tileset as Tileset,
+          view.fieldArt.player.origin,
+          releaseTick,
+          1,
+          PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
+        );
+        drawCleanSwitchinParticles(
+          fb,
+          releaseTick,
+          FORCED_SWITCH_PARTICLE_ORIGIN,
+          PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
+          FORCED_SWITCH_PARTICLE_STALL_LOGICAL_TICK,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          view.fieldArt.player.pic.tileset as Tileset,
+          view.fieldArt.player.pic.palette as RgbColor[],
+          view.fieldArt.player.origin.x,
+          view.fieldArt.player.origin.y,
+        );
+        drawCleanSwitchinParticles(
+          fb,
+          releaseTick,
+          FORCED_SWITCH_PARTICLE_ORIGIN,
+          PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
+          FORCED_SWITCH_PARTICLE_STALL_LOGICAL_TICK,
+        );
+      }
+    }
+    const healthboxDx = partySendOutHealthboxDx(elapsed);
+    if (healthboxDx !== null) {
+      if (canonicalIncoming) {
+        drawTurn15MagbyHealthbox(fb, healthboxDx);
+      } else {
+        drawComposedPlayerHealthbox(
+          fb,
+          composePlayerHealthbox(playerHealthboxAssets, view.healthboxes.player),
+          healthboxDx,
+        );
+      }
+    }
+    if (
+      phase !== "blankMessage"
+      && view.message !== null
+    ) {
+      drawMessageTextLines(
+        fb,
+        view.message.lines[0] ?? "",
+        view.message.lines[1] ?? "",
+        view.message.visibleCharacters,
+      );
+    }
+    return;
+  }
   const phase = partySelectEntryPhase(party.elapsed);
   if (phase === "battleHold") {
     renderBattleResolutionSceneOffView(fb, view);
@@ -30667,6 +30800,38 @@ export function renderBattleResolutionForcedPartySelect(
       mask,
       objFadeY(local, PARTY_ENTRY_FADE_IN),
     );
+  }
+}
+
+function drawTypedPartyStatusSummary(
+  fb: Uint8Array,
+  battler: 0 | 1,
+  states: readonly import("./battleResolutionPresentation.ts").PartyBallState[],
+): void {
+  const opponent = battler === 1;
+  const barX = opponent ? -24 : 136;
+  const barY = opponent ? 40 : 96;
+  const iconX = opponent ? 26 : 156;
+  const iconY = opponent ? 32 : 88;
+  drawBallStatusBar(fb, barX, barY, opponent);
+  for (let index = 0; index < 6; index += 1) {
+    const state = states[index] ?? "empty";
+    const displayState =
+      state === "empty"
+        ? "Empty"
+        : state === "fainted"
+          ? "Fainted"
+          : state === "status"
+            ? "Statused"
+            : "Full";
+    const tile = ballDisplay.tileset.tiles[ballStateTileIndex(displayState)];
+    if (!tile) continue;
+    for (let py = 0; py < 8; py += 1) for (let px = 0; px < 8; px += 1) {
+      const colorIndex = tile[py * 8 + px]!;
+      if (colorIndex === 0) continue;
+      const color = ballDisplay.palette[colorIndex];
+      if (color) setPixel(fb, iconX + index * 10 + px, iconY + py, color);
+    }
   }
 }
 

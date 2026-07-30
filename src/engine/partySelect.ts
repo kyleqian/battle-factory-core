@@ -22,7 +22,8 @@ import { createFactoryCorpusPartyMember } from "./factoryCorpusParty.ts";
 export type PartySelectCursor = "onix" | "magby";
 export type PartyMenuChromeKey = "listOnix" | "listOnixFrame1" | "listOnixMidHop" | "listMagby" | "listMagbyMidHop" | "submenu" | "sendOutExit" | "sendOutExitFrame0";
 export type PartyMenuIconLayer = {
-  species: "ONIX" | "MAGBY" | "BAYLEEF";
+  partyIndex: 0 | 1 | 2;
+  species: string;
   frame: 0 | 1;
   selected: boolean;
   y2: -3 | 1 | -4 | 0;
@@ -413,12 +414,7 @@ export function onixSelectedHopY2(elapsed: number): -3 | 1 {
  * text/palette snapshots; every OBJ texel is drawn below from ROM extraction.
  */
 export function partyMenuLayers(state: PartySelectState): PartyMenuLayers {
-  const species = state.party.map((member) => member.species).join("/");
-  if (species !== "ONIX/MAGBY/BAYLEEF") {
-    throw new Error(
-      `party-select visual assets do not yet cover ${species}; arbitrary-species chrome is a later slice`,
-    );
-  }
+  const [first, second, third] = state.party;
   const fullFrame = fullPartyIconFrame(state.elapsed);
   // `Task_HandleChooseMonInput` removes the SEND OUT window on the first
   // fade VBlank but leaves the party rows and their live OBJ icons in place.
@@ -429,9 +425,9 @@ export function partyMenuLayers(state: PartySelectState): PartyMenuLayers {
     return {
       chromeKey: fullFrame === 1 ? "sendOutExit" : "sendOutExitFrame0",
       icons: [
-        { species: "ONIX", frame: 0, selected: false, x2: 0, y2: -4 },
-        { species: "MAGBY", frame: fullFrame, selected: true, x2: 0, y2 },
-        { species: "BAYLEEF", frame: fullFrame, selected: false, x2: -4, y2: 0 },
+        { partyIndex: 0, species: first.species, frame: 0, selected: false, x2: 0, y2: -4 },
+        { partyIndex: 1, species: second.species, frame: fullFrame, selected: true, x2: 0, y2 },
+        { partyIndex: 2, species: third.species, frame: fullFrame, selected: false, x2: -4, y2: 0 },
       ],
       status: fullFrame === 1 ? "magby" : "normal",
     };
@@ -440,9 +436,9 @@ export function partyMenuLayers(state: PartySelectState): PartyMenuLayers {
     return {
       chromeKey: "submenu",
       icons: [
-        { species: "ONIX", frame: 0, selected: false, x2: 0, y2: -4 },
-        { species: "MAGBY", frame: 1, selected: true, x2: 0, y2: 1 },
-        { species: "BAYLEEF", frame: 1, selected: false, x2: -4, y2: 0 },
+        { partyIndex: 0, species: first.species, frame: 0, selected: false, x2: 0, y2: -4 },
+        { partyIndex: 1, species: second.species, frame: 1, selected: true, x2: 0, y2: 1 },
+        { partyIndex: 2, species: third.species, frame: 1, selected: false, x2: -4, y2: 0 },
       ],
       status: "magby",
     };
@@ -458,9 +454,9 @@ export function partyMenuLayers(state: PartySelectState): PartyMenuLayers {
       // frame-0 erase sentinel through frame-1 transparency.
       chromeKey: y2 === 1 && fullFrame === 1 ? "listOnixMidHop" : fullFrame === 1 ? "listOnixFrame1" : "listOnix",
       icons: [
-        { species: "ONIX", frame: 0, selected: true, x2: 0, y2 },
-        { species: "MAGBY", frame: fullFrame, selected: false, x2: -4, y2: 0 },
-        { species: "BAYLEEF", frame: fullFrame, selected: false, x2: -4, y2: 0 },
+        { partyIndex: 0, species: first.species, frame: 0, selected: true, x2: 0, y2 },
+        { partyIndex: 1, species: second.species, frame: fullFrame, selected: false, x2: -4, y2: 0 },
+        { partyIndex: 2, species: third.species, frame: fullFrame, selected: false, x2: -4, y2: 0 },
       ],
       status: "normal",
     };
@@ -469,9 +465,9 @@ export function partyMenuLayers(state: PartySelectState): PartyMenuLayers {
   return {
     chromeKey: fullFrame === 1 ? "listMagbyMidHop" : "listMagby",
     icons: [
-      { species: "ONIX", frame: 0, selected: false, x2: 0, y2: -4 },
-      { species: "MAGBY", frame: fullFrame, selected: true, x2: 0, y2 },
-      { species: "BAYLEEF", frame: fullFrame, selected: false, x2: -4, y2: 0 },
+      { partyIndex: 0, species: first.species, frame: 0, selected: false, x2: 0, y2: -4 },
+      { partyIndex: 1, species: second.species, frame: fullFrame, selected: true, x2: 0, y2 },
+      { partyIndex: 2, species: third.species, frame: fullFrame, selected: false, x2: -4, y2: 0 },
     ],
     status: fullFrame === 1 ? "magby" : "normal",
   };

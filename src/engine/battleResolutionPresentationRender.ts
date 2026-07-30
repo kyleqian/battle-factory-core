@@ -29,6 +29,11 @@ import {
   battleHealthBarValueAtFrame,
   type HealthboxContentParams,
 } from "./healthboxAssembly.ts";
+import {
+  partySendOutGoTextVisibleChars,
+  type PartySendOutPhase,
+  partySendOutPhase,
+} from "./partySelect.ts";
 
 export const BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES =
   BATTLE_COMMAND_ACTION_ENTER_DELAY;
@@ -85,6 +90,12 @@ export type BattleResolutionPresentationRenderView = Readonly<{
   }>;
   waitCursor: Readonly<{ age: number }> | null;
   bottom: "message" | "blank";
+  switchIn: Readonly<{
+    elapsed: number;
+    phase: PartySendOutPhase;
+    battler: 0 | 1;
+    partyStates: readonly import("./battleResolutionPresentation.ts").PartyBallState[];
+  }> | null;
 }>;
 
 export type BattleResolutionPresentationRenderAssets = Readonly<{
@@ -166,11 +177,13 @@ function applyCompletedCommand(
     command.type === "message"
     || command.type === "stat"
     || command.type === "faint"
+    || command.type === "party-summary"
     || command.type === "turn-end"
   ) return field;
-  throw new Error(
-    `battle resolution non-KO renderer cannot apply ${command.type} commands`,
-  );
+  if (command.type === "switch-in") {
+    return replaceFieldBattler(field, command.battler, command.incoming);
+  }
+  throw new Error("battle resolution renderer received an unknown command");
 }
 
 function currentSegment(state: BattleResolutionPresentationState) {
@@ -291,7 +304,45 @@ export function createBattleResolutionPresentationRenderView(
   const segment = currentSegment(state);
   let field = state.field;
   let latestMessage: readonly string[] | null = null;
+  let switchIn: BattleResolutionPresentationRenderView["switchIn"] = null;
   const fainted = new Set<0 | 1>();
+  if (state.lifecycle.phase === "presenting-switch-in") {
+    const switchCommand = segment.commands.find(
+      (candidate): candidate is Extract<
+        BattleResolutionPresentationCommand,
+        { type: "switch-in" }
+      > => candidate.type === "switch-in",
+    );
+    const summary = segment.commands.find(
+      (candidate): candidate is Extract<
+        BattleResolutionPresentationCommand,
+        { type: "party-summary" }
+      > => candidate.type === "party-summary" && candidate.visible,
+    );
+    const message = segment.commands.find(
+      (candidate): candidate is Extract<
+        BattleResolutionPresentationCommand,
+        { type: "message" }
+      > => candidate.type === "message",
+    );
+    if (!switchCommand || !summary || !message) {
+      throw new Error(
+        "battle resolution switch-in lifecycle requires summary, message, and switch commands",
+      );
+    }
+    field = replaceFieldBattler(
+      field,
+      switchCommand.battler,
+      switchCommand.incoming,
+    );
+    latestMessage = message.lines;
+    switchIn = Object.freeze({
+      elapsed: state.lifecycle.phaseElapsed,
+      phase: partySendOutPhase(state.lifecycle.phaseElapsed),
+      battler: switchCommand.battler,
+      partyStates: summary.states,
+    });
+  }
   for (let index = 0; index < state.commandIndex; index += 1) {
     const completed = segment.commands[index]!;
     field = applyCompletedCommand(field, completed);
@@ -303,7 +354,9 @@ export function createBattleResolutionPresentationRenderView(
   let effect: BattleResolutionRenderEffect | null = null;
   let visibleCharacters = latestMessage === null
     ? 0
-    : battleStringPrintableLength(latestMessage);
+    : switchIn === null
+      ? battleStringPrintableLength(latestMessage)
+      : partySendOutGoTextVisibleChars(switchIn.elapsed);
   let hpTarget: Readonly<{ battler: 0 | 1; to: number }> | null = null;
   let waitCursor: Readonly<{ age: number }> | null = null;
 
@@ -415,6 +468,7 @@ export function createBattleResolutionPresentationRenderView(
     }
   } else if (
     state.lifecycle.phase !== "next-command-handoff"
+    && state.lifecycle.phase !== "presenting-switch-in"
     && state.lifecycle.phase !== "presenting"
   ) {
     throw new Error(
@@ -476,8 +530,10 @@ export function createBattleResolutionPresentationRenderView(
     waitCursor,
     bottom:
       state.lifecycle.phase === "next-command-handoff"
+      || switchIn?.phase === "blankMessage"
         ? "blank"
         : "message",
+    switchIn,
   });
 }
 

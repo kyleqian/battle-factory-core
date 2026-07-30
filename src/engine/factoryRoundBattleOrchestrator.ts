@@ -55,6 +55,7 @@ import {
 import {
   advancePartySelect,
   createPartySelectStateFromForcedSwitch,
+  partySendOutBattleMenuReady,
   submitPartySelectBattleDecision,
   type PartySelectState,
 } from "./partySelect.ts";
@@ -1129,6 +1130,11 @@ export function advanceFactoryRoundBattleResolution(
         ...state,
         battle: receipt.battle,
         battleResolutionPresentation: appended,
+        moveSelectionCursors: resetMoveSelectionCursorsForSwitchIns(
+          state.moveSelectionCursors,
+          resolution.pendingBattle,
+          receipt.battle,
+        ),
         aiHistory: receipt.history,
         facilityRngCalls:
           state.activeBattleCallStart! + receipt.battle.rng.calls,
@@ -1137,6 +1143,64 @@ export function advanceFactoryRoundBattleResolution(
     return Object.freeze({
       ...state,
       battleForcedPartySelect: advancePartySelect(selector, newKeys),
+    });
+  }
+  if (resolution.lifecycle.phase === "presenting-switch-in") {
+    const selector = state.battleForcedPartySelect;
+    if (selector?.sendOutElapsed === null || selector === null) {
+      return fail("switch-in presentation requires a confirmed forced selector");
+    }
+    const advancedSelector = advancePartySelect(selector, new Set());
+    const elapsed = advancedSelector.sendOutElapsed;
+    if (elapsed === null) {
+      return fail("switch-in presentation lost its confirmation clock");
+    }
+    const advancedResolution = withResolutionLifecycle(
+      resolution,
+      resolution.commandIndex,
+      "presenting-switch-in",
+      elapsed,
+    );
+    if (!partySendOutBattleMenuReady(elapsed)) {
+      return Object.freeze({
+        ...state,
+        battleResolutionPresentation: advancedResolution,
+        battleForcedPartySelect: advancedSelector,
+      });
+    }
+    const switchCommand = resolution.segments[resolution.segmentIndex]!.commands
+      .find((command) => command.type === "switch-in");
+    if (switchCommand?.type !== "switch-in") {
+      return fail("switch-in lifecycle has no typed switch command");
+    }
+    const active = resolution.pendingBattle.rules.rulesContext
+      .battlers[switchCommand.battler]!;
+    const committedBoundaries = Object.freeze(boundaries.map((boundary) =>
+      boundary.battler === switchCommand.battler
+        ? Object.freeze({
+            ...boundary,
+            partyIndex: switchCommand.toPartyIndex,
+            field: switchCommand.incoming,
+            displayedHp: switchCommand.incoming.hp,
+            displayedStatus1: active.status1,
+            spriteVisible: true,
+            idleEpoch: 0,
+            moveCursor: 0,
+          })
+        : boundary
+    )) as unknown as FactoryBattlePresentationBoundaries;
+    const handoff = settledCommandForResolutionHandoff(
+      resolution.pendingBattle,
+      state.moveSelectionCursors,
+      committedBoundaries,
+    );
+    return Object.freeze({
+      ...state,
+      battle: resolution.pendingBattle,
+      battleCommandPresentation: handoff.presentation,
+      battleResolutionPresentation: null,
+      battleForcedPartySelect: null,
+      battlePresentationBoundaries: handoff.boundaries,
     });
   }
   if (resolution.lifecycle.phase !== "next-command-handoff") {
