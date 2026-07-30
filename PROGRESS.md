@@ -13,6 +13,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 747 — [BOUNDED MAIN WORKER 2026-07-30 ~15:23] Slice 6 terminal owner bridge in progress
+
+- **State:** first green checkpoint; focused Slice 6 baseline remains **6 files /
+  75 tests**, production build clean.
+- **Did:** core now discovers generated `roundLost` / `roundCompleted`
+  commands, installs their terminal presenter on the terminal-resolution edge,
+  renders a pending generated terminal without draft fallback, and acknowledges
+  completion on the orchestrator-owned round.
+- **Next:** add battle-index and rent-count boundary proofs, then run all named
+  terminal compares, immutable traces, full suite, and build.
+- **Notes:** production default, terminal policy, BP award, captures, and
+  Scene-ON remain unchanged; no new barrier or battle/turn/tick branch.
+
+---
 ## 746 — [BOUNDED MAIN WORKER 2026-07-30 ~15:15] Slice 5 complete: generated Battles 2-7 reusable re-entry
 
 - **State:** landed in `5c19ef95`; named acceptance **8 files / 107 tests**,
@@ -49,23 +63,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   generated intro **715/715**, command **128/128**; all **25/25** immutable
   rows exact. No new barrier, trace/capture, issue, opponent selection,
   or Battle-2 work.
-
----
-## 744 — [SUPERVISOR 2026-07-30 ~15:00] Slice 3 CLOSED at 715/715 (supervisor re-verified); moveend barrier drained and merged; #53 fix-path updated
-
-- **State:** master union green **550 files / 5568 tests + 1 deliberate
-  animation-lane skip**, build clean, no live workers, no side
-  worktrees beyond permanent animation-main. Barrier ratchet for
-  `battleScriptMoveEndOpcode.ts` deliberately 2→1 (sole remainder: the
-  census-unreachable `MOVEEND_NEXT_TARGET` doubles branch).
-- **Did:** re-verified the closed intro myself (**715/715**, command
-  entry **7/7**). Merged the moveend burn-down: full
-  `ITEMEFFECT_MOVE_END` restoring family ported source-cited (per-status
-  berry cures, Lum, White Herb, script transfers, party mirror,
-  state-11 rescan); all 10 census halts re-driven to legitimate
-  terminals (4 seven-win incl. three HAUNTER leads, 6 losses, 0 halts;
-  addendum doc committed). ISSUES #53 fix-path text updated to the
-  Slices-1-3-landed state.
-- **Next:** main — design Slice 4 (postwin/swap generalization over
-  `orchestrator.round`), then 5/6/7 in order. Side idle unless a
-  disjoint need appears.

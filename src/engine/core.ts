@@ -348,6 +348,26 @@ export interface InitialEngineStateOptions {
   readonly appRoute?: InteractiveBattleRoute;
 }
 
+type FactoryTerminalCommand =
+  Parameters<typeof createFactoryTerminalPresentation>[0];
+
+function terminalCommandForRound(
+  round: RoundControllerState | null,
+): FactoryTerminalCommand | null {
+  const command = round?.presentation?.command;
+  return command?.type === "roundLost" || command?.type === "roundCompleted"
+    ? command
+    : null;
+}
+
+function pendingFactoryTerminalCommand(
+  generated: FactoryRoundBattleOrchestratorState | null,
+  legacy: RoundControllerState | null,
+): FactoryTerminalCommand | null {
+  return terminalCommandForRound(generated?.round ?? null)
+    ?? terminalCommandForRound(legacy);
+}
+
 export function createInitialState(
   options: InitialEngineStateOptions = {},
 ): EngineState {
@@ -416,14 +436,13 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     state.factoryRoundBattleOrchestrator?.round.rules.currentOpponent
       ?? state.roundController?.rules.currentOpponent,
   ) ?? undefined;
-  const pendingTerminalCommand = state.roundController?.presentation?.command;
+  const pendingTerminalCommand = pendingFactoryTerminalCommand(
+    factoryRoundBattleOrchestrator,
+    roundController,
+  );
   if (
     factoryTerminal === null &&
-    pendingTerminalCommand !== undefined &&
-    (
-      pendingTerminalCommand.type === "roundLost" ||
-      pendingTerminalCommand.type === "roundCompleted"
-    )
+    pendingTerminalCommand !== null
   ) {
     factoryTerminal = createFactoryTerminalPresentation(pendingTerminalCommand);
   }
@@ -439,12 +458,18 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       && generatedRound.presentation?.command.type === "battleWon"
         ? createPostwinStateFromRound(generatedRound)
         : postwin;
+    const generatedTerminalCommand = terminalCommandForRound(generatedRound);
+    const generatedFactoryTerminal =
+      factoryTerminal === null && generatedTerminalCommand !== null
+        ? createFactoryTerminalPresentation(generatedTerminalCommand)
+        : factoryTerminal;
     return {
       ...state,
       frame: state.frame + 1,
       keyRepeat,
       factoryRoundBattleOrchestrator,
       postwin: generatedPostwin,
+      factoryTerminal: generatedFactoryTerminal,
       rngMode: "frontierBattle",
       rngValue:
         factoryRoundBattleOrchestrator.battle?.rng.value ?? state.rngValue,
@@ -498,18 +523,29 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       },
     );
     const completion = factoryTerminalCompletion(factoryTerminal);
-    const roundController =
+    roundController =
       completion !== null &&
       state.roundController?.presentation?.command.commandId ===
         completion.commandId
         ? completeBattlePresentation(state.roundController, completion)
         : state.roundController;
+    if (
+      completion !== null &&
+      factoryRoundBattleOrchestrator?.round.presentation?.command.commandId ===
+        completion.commandId
+    ) {
+      factoryRoundBattleOrchestrator = completeFactoryRoundPresentation(
+        factoryRoundBattleOrchestrator,
+        completion,
+      );
+    }
     return {
       ...state,
       frame: state.frame + 1,
       keyRepeat,
       factoryTerminal,
       roundController,
+      factoryRoundBattleOrchestrator,
       rngMode: "vblank",
       rngValue,
     };
@@ -2616,9 +2652,20 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
 }
 
 export function render(state: EngineState): Uint8Array {
-  if (state.factoryTerminal) {
+  const pendingTerminalCommand = pendingFactoryTerminalCommand(
+    state.factoryRoundBattleOrchestrator,
+    state.roundController,
+  );
+  const terminalPresentation =
+    state.factoryTerminal ??
+    (
+      pendingTerminalCommand === null
+        ? null
+        : createFactoryTerminalPresentation(pendingTerminalCommand)
+    );
+  if (terminalPresentation) {
     return renderFactoryTerminalPresentation(
-      state.factoryTerminal,
+      terminalPresentation,
       () => renderWithoutFactoryTerminal({ ...state, factoryTerminal: null }),
     );
   }

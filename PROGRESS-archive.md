@@ -1,3 +1,23 @@
+## 744 — [SUPERVISOR 2026-07-30 ~15:00] Slice 3 CLOSED at 715/715 (supervisor re-verified); moveend barrier drained and merged; #53 fix-path updated
+
+- **State:** master union green **550 files / 5568 tests + 1 deliberate
+  animation-lane skip**, build clean, no live workers, no side
+  worktrees beyond permanent animation-main. Barrier ratchet for
+  `battleScriptMoveEndOpcode.ts` deliberately 2→1 (sole remainder: the
+  census-unreachable `MOVEEND_NEXT_TARGET` doubles branch).
+- **Did:** re-verified the closed intro myself (**715/715**, command
+  entry **7/7**). Merged the moveend burn-down: full
+  `ITEMEFFECT_MOVE_END` restoring family ported source-cited (per-status
+  berry cures, Lum, White Herb, script transfers, party mirror,
+  state-11 rescan); all 10 census halts re-driven to legitimate
+  terminals (4 seven-win incl. three HAUNTER leads, 6 losses, 0 halts;
+  addendum doc committed). ISSUES #53 fix-path text updated to the
+  Slices-1-3-landed state.
+- **Next:** main — design Slice 4 (postwin/swap generalization over
+  `orchestrator.round`), then 5/6/7 in order. Side idle unless a
+  disjoint need appears.
+
+---
 ## 743 — [BOUNDED MAIN WORKER 2026-07-30 ~14:29] Slice 3 intro exact and closed
 
 - **State:** fixes `0c4dab29` + `e85d5360`; focused acceptance **5 files / 49
