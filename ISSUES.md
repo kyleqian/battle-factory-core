@@ -5,6 +5,49 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #54 — Natural Cure's switch-out cure is not mirrored into the party record
+
+**Symptom:** the kernel clears the active battler's status on a Natural Cure
+switch-out, but the departing mon's party record keeps `status1` (receipted
+`0x80` Toxic). A switch-out-and-return would rebuild the status the ROM has
+already cured.
+
+**Confirmed (Gate-6 R6, two seeds):** the ROM clears BOTH the active and the
+party status; its party write is `battle_script_commands.c:9596`. Our
+`rulesContext.party.player[0].status1` stays `0x80` after the cure. All other
+R6 semantics (clean incoming rebuild, ordinary-switch persistence control,
+message order) are at parity. Evidence: `tools/battle-lab/gate6-r6-off.json` +
+`tests/gate6SwitchInteractions.test.ts` (merged).
+
+**Fix shape:** mirror the cure into the party record at the
+source-corresponding switch-out site, matching the ROM's write ordering — a
+general party-sync write, not a Natural-Cure special case.
+
+## #53 — [USER-REPORTED 2026-07-30] playable app: battle is disconnected from the draft (canonical railroad)
+
+**Symptom (user, playing `npm run dev`):** rental draft works and accepts real
+picks, but the battle then shows ONIX and always ROCK SLIDE regardless of the
+drafted party (e.g. HAUNTER/SHADOW PUNCH selected); command choices don't
+drive what happens; continued A-presses eventually land back on a
+Pokémon-select-style screen.
+
+**Confirmed wiring:** the interactive path hands off to the canonical
+recorded-battle state machine unconditionally (`core.ts:314` →
+`battleScene.ts`); the generated orchestrator path is dev-stage-only
+(`core.ts:302` "null on the canonical production path"). The "warp" is the
+canonical post-win flow reaching the rental-swap picker, which reuses the
+select-screen UI. This is #39's user-visible face plus the not-yet-made
+interactive routing flip.
+
+**Fix path (enabled this session):** generated Scene-OFF battle is now
+128/128 exact (`battle-command-generated-off.json`, Slice 7). Remaining:
+(a) generated battle-start intro lifecycle — 4 slices scoped in
+`docs/trainer-pic-off-window-scout.md`; (b) an interactive-routing decision +
+flip so the playable battle consumes the drafted party through the generated
+orchestrator; (c) round-loop continuation for battles 2-7 already exists in
+`roundController.ts`. No quick species-swap hack into the canonical replay —
+that would fake the stitching.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn
