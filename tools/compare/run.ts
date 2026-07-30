@@ -61,6 +61,8 @@ interface CompareTraceFile extends Partial<Trace> {
   readonly sourceSegmentCount?: number;
   /** Phase-specific controls appended after sourceSegmentCount. */
   readonly appendSegments?: Trace["segments"];
+  /** Inclusive dense capture window, expanded without thinning before replay. */
+  readonly captureWindow?: Readonly<{ start: number; end: number }>;
 }
 
 const traceFile = JSON.parse(readFileSync(tracePath, "utf8")) as CompareTraceFile;
@@ -72,6 +74,7 @@ if (traceFile.sourceTrace) {
     sourceTrace: _sourceTrace,
     sourceSegmentCount,
     appendSegments,
+    captureWindow,
     ...overrides
   } = traceFile;
   const sourceSegments =
@@ -82,9 +85,24 @@ if (traceFile.sourceTrace) {
     ...source,
     ...overrides,
     segments: [...sourceSegments, ...(appendSegments ?? [])],
+    captureFrames: captureWindow === undefined
+      ? overrides.captureFrames ?? source.captureFrames
+      : Array.from(
+          { length: captureWindow.end - captureWindow.start + 1 },
+          (_, index) => captureWindow.start + index,
+        ),
   };
 } else {
-  trace = traceFile as Trace;
+  const { captureWindow, ...plainTrace } = traceFile;
+  trace = {
+    ...plainTrace,
+    captureFrames: captureWindow === undefined
+      ? plainTrace.captureFrames
+      : Array.from(
+          { length: captureWindow.end - captureWindow.start + 1 },
+          (_, index) => captureWindow.start + index,
+        ),
+  } as Trace;
 }
 trace = withCaptureRange(trace, captureRange);
 const oracleProfile: OracleProfile = trace.oracleProfile ?? "battle-scene-on";

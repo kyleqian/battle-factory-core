@@ -3872,6 +3872,9 @@ function drawBallIcons(
  * tick into lifecycle state.
  */
 const GENERATED_BATTLE_INTRO_SOURCE_CLOCK_ORIGIN = 1048;
+/** Black callbacks between the room-owner seam and BeginBattleIntro age 0. */
+export const GENERATED_BATTLE_INTRO_ROOM_HANDOFF_DELAY =
+  GENERATED_BATTLE_INTRO_SOURCE_CLOCK_ORIGIN - TICK0;
 
 export function generatedBattleIntroSourceClock(elapsed: number): number {
   return GENERATED_BATTLE_INTRO_SOURCE_CLOCK_ORIGIN + elapsed;
@@ -3983,16 +3986,16 @@ function generatedBattleStartOpponentHandoffTick(
 }
 
 /**
- * BeginBattleIntro's ordinary singles controller waits 110 callbacks from
- * the opponent release handoff before dispatching STRINGID_INTROSENDOUT for
- * the player. The throw controller starts 14 callbacks later.
+ * The live room's ordinary singles controller dispatches STRINGID_INTROSENDOUT
+ * 101 callbacks after the opponent handoff; the trainer throw becomes visible
+ * another 11 callbacks later.
  */
-const GENERATED_PLAYER_DISPATCH_DELAY = 110;
-const GENERATED_PLAYER_TEXT_DELAY = 111;
-const GENERATED_PLAYER_VISUAL_DELAY = 125;
+const GENERATED_PLAYER_DISPATCH_DELAY = 101;
+const GENERATED_PLAYER_TEXT_DELAY = 101;
+const GENERATED_PLAYER_VISUAL_DELAY = 112;
 const GENERATED_OPPONENT_SHADOW_DELAY = 104;
-/** First callback satisfying Battle Lab's CHOOSE_ACTION/exec-flags predicate. */
-const GENERATED_PLAYER_READY_DELAY = 302;
+/** First live-room callback satisfying CHOOSE_ACTION/exec-flags. */
+const GENERATED_PLAYER_READY_DELAY = 286;
 /** First Scene-OFF render after the release callback leaves player OAM y2=0. */
 const GENERATED_PLAYER_NEUTRAL_Y_VISUAL_TICK = 1670;
 
@@ -4058,17 +4061,15 @@ function drawGeneratedOpponentRelease(
   const pic = fieldView.fieldArt.opponent.pic;
   const origin = {
     x: fieldView.fieldArt.opponent.origin.x,
-    // CreateBattlerSprite fixes the opponent OBJ center at (176,40);
-    // the extracted 64×64 canvas therefore begins at y=8 during release.
-    y: OPPONENT_CORNER.y,
+    y: fieldView.fieldArt.opponent.origin.y,
   };
   if (coeff === 0) {
     drawSpriteSheet(
       fb,
       pic.tileset as Tileset,
       pic.palette as RgbColor[],
-      origin.x,
-      origin.y,
+      fieldView.fieldArt.opponent.origin.x,
+      fieldView.fieldArt.opponent.origin.y,
     );
     return;
   }
@@ -4290,7 +4291,7 @@ export function renderGeneratedBattleStartPlayerRelease(
   // The intro controller clears its message only after the main callback has
   // selected action input. The shared command reducer owns the subsequent
   // six blank action-enter frames and atomic menu draw.
-  const menuBlank = playerVisualT > MENU_IDLE_BLANK_END_TICK;
+  const menuBlank = playerVisualT >= MENU_IDLE_BLANK_START_TICK;
 
   drawTileBgFaded(
     fb,
@@ -4304,8 +4305,8 @@ export function renderGeneratedBattleStartPlayerRelease(
     fb,
     fieldView.fieldArt.opponent.pic.tileset as Tileset,
     fieldView.fieldArt.opponent.pic.palette as RgbColor[],
-    OPPONENT_CORNER.x,
-    OPPONENT_CORNER.y,
+    fieldView.fieldArt.opponent.origin.x,
+    fieldView.fieldArt.opponent.origin.y,
   );
   const throwFrame = brendanThrowFrame(playerVisualT);
   if (playerVisualT < BRENDAN_THROW_START_TICK) {

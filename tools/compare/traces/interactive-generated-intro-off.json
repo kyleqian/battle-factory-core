@@ -1,0 +1,12 @@
+{
+  "sourceTrace": "../traces-groundtruth/battle1-intro.json",
+  "sourceSegmentCount": 34,
+  "appRoute": "generated-orchestrator",
+  "oracleProfile": "battle-scene-off",
+  "appendSegments": [
+    {"frames": 98, "buttons": []},
+    {"frames": 2, "buttons": ["A"]},
+    {"frames": 400, "buttons": []}
+  ],
+  "captureWindow": {"start": 1048, "end": 1762}
+}

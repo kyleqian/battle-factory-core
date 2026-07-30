@@ -94,7 +94,10 @@ import {
   settleFactoryBattleStartCommand,
   type FactoryBattleStartIntroState,
 } from "./factoryBattleStartIntro.ts";
-import { generatedBattleStartCommandReady } from "./battleScene.ts";
+import {
+  GENERATED_BATTLE_INTRO_ROOM_HANDOFF_DELAY,
+  generatedBattleStartCommandReady,
+} from "./battleScene.ts";
 import {
   generateInitialFactoryRentals,
   type FactoryInitialRentalGenerationResult,
@@ -524,7 +527,10 @@ export function beginFactoryRoundBattleStartIntro(
   }
   return Object.freeze({
     ...state,
-    battleStartIntro: createFactoryBattleStartIntro(command),
+    battleStartIntro: Object.freeze({
+      ...createFactoryBattleStartIntro(command),
+      elapsed: -GENERATED_BATTLE_INTRO_ROOM_HANDOFF_DELAY,
+    }),
   });
 }
 
@@ -540,7 +546,24 @@ export function advanceFactoryRoundBattleStartIntro(
   if (state.battleStartIntro === null) {
     return fail("Factory battle-start intro input requires an installed intro");
   }
-  const intro = advanceFactoryBattleStartIntro(state.battleStartIntro, newKeys);
+  const intro = advanceFactoryBattleStartIntro(
+    state.battleStartIntro,
+    newKeys,
+  );
+  // The source PAUSE_UNTIL_PRESS callback accepts the edge before its
+  // BeginBattleIntro presentation task advances on the following callback.
+  if (
+    state.battleStartIntro.acknowledgedElapsed === null
+    && intro.acknowledgedElapsed !== null
+  ) {
+    return Object.freeze({
+      ...state,
+      battleStartIntro: Object.freeze({
+        ...intro,
+        elapsed: state.battleStartIntro.elapsed,
+      }),
+    });
+  }
   if (!generatedBattleStartCommandReady(intro)) {
     return Object.freeze({ ...state, battleStartIntro: intro });
   }

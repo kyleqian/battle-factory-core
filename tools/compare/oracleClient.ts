@@ -54,6 +54,42 @@ export interface OracleRunResult {
   captures: OracleCapture[];
 }
 
+const ORACLE_MAX_CAPTURES_PER_RUN = 256;
+
+function captureBatches(trace: Trace): Trace[] {
+  const captureFrames = trace.captureFrames ?? [];
+  if (captureFrames.length <= ORACLE_MAX_CAPTURES_PER_RUN) return [trace];
+  const batches: Trace[] = [];
+  for (
+    let start = 0;
+    start < captureFrames.length;
+    start += ORACLE_MAX_CAPTURES_PER_RUN
+  ) {
+    batches.push({
+      ...trace,
+      captureFrames: captureFrames.slice(
+        start,
+        start + ORACLE_MAX_CAPTURES_PER_RUN,
+      ),
+    });
+  }
+  return batches;
+}
+
+function decodeOracleRun(payload: {
+  totalFrames: number;
+  captures: Array<{ frame: number; sha256: string; pngBase64: string }>;
+}): OracleRunResult {
+  return {
+    totalFrames: payload.totalFrames,
+    captures: payload.captures.map((capture) => {
+      const png = Buffer.from(capture.pngBase64, "base64");
+      const decoded = PNG.sync.read(png);
+      return { frame: capture.frame, sha256: capture.sha256, rgba: decoded.data, png };
+    }),
+  };
+}
+
 export async function oracleInfo(
   profile: OracleProfile = "battle-scene-on",
 ): Promise<Record<string, unknown>> {
@@ -65,25 +101,24 @@ export async function oracleInfo(
 export async function runOracleTrace(trace: Trace): Promise<OracleRunResult> {
   const profile = trace.oracleProfile ?? "battle-scene-on";
   const oracleTrace = stripAppTraceMetadata(trace);
-  const response = await fetch(`${oracleUrlForProfile(profile)}/v1/run`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(oracleTrace),
-  });
-  if (!response.ok) {
-    throw new Error(`oracle /v1/run failed: HTTP ${response.status}: ${await response.text()}`);
+  const results: OracleRunResult[] = [];
+  for (const batch of captureBatches(oracleTrace)) {
+    const response = await fetch(`${oracleUrlForProfile(profile)}/v1/run`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(batch),
+    });
+    if (!response.ok) {
+      throw new Error(`oracle /v1/run failed: HTTP ${response.status}: ${await response.text()}`);
+    }
+    results.push(decodeOracleRun(await response.json() as {
+      totalFrames: number;
+      captures: Array<{ frame: number; sha256: string; pngBase64: string }>;
+    }));
   }
-  const payload = (await response.json()) as {
-    totalFrames: number;
-    captures: Array<{ frame: number; sha256: string; pngBase64: string }>;
-  };
   return {
-    totalFrames: payload.totalFrames,
-    captures: payload.captures.map((capture) => {
-      const png = Buffer.from(capture.pngBase64, "base64");
-      const decoded = PNG.sync.read(png);
-      return { frame: capture.frame, sha256: capture.sha256, rgba: decoded.data, png };
-    }),
+    totalFrames: results[0]?.totalFrames ?? 0,
+    captures: results.flatMap(({ captures }) => captures),
   };
 }
 
@@ -96,30 +131,29 @@ export async function runOracleBattleLab(
     oracleProfile: _oracleProfile,
     ...oracleTrace
   } = stripAppTraceMetadata(trace);
-  const response = await fetch(`${oracleUrlForProfile(profile)}/v1/battle-lab/run`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      ...scenario,
-      profile,
-      trace: oracleTrace,
-    }),
-  });
-  if (!response.ok) {
-    throw new Error(
-      `oracle /v1/battle-lab/run failed: HTTP ${response.status}: ${await response.text()}`,
-    );
+  const results: OracleRunResult[] = [];
+  for (const batch of captureBatches(oracleTrace)) {
+    const response = await fetch(`${oracleUrlForProfile(profile)}/v1/battle-lab/run`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        ...scenario,
+        profile,
+        trace: batch,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(
+        `oracle /v1/battle-lab/run failed: HTTP ${response.status}: ${await response.text()}`,
+      );
+    }
+    results.push(decodeOracleRun(await response.json() as {
+      totalFrames: number;
+      captures: Array<{ frame: number; sha256: string; pngBase64: string }>;
+    }));
   }
-  const payload = (await response.json()) as {
-    totalFrames: number;
-    captures: Array<{ frame: number; sha256: string; pngBase64: string }>;
-  };
   return {
-    totalFrames: payload.totalFrames,
-    captures: payload.captures.map((capture) => {
-      const png = Buffer.from(capture.pngBase64, "base64");
-      const decoded = PNG.sync.read(png);
-      return { frame: capture.frame, sha256: capture.sha256, rgba: decoded.data, png };
-    }),
+    totalFrames: results[0]?.totalFrames ?? 0,
+    captures: results.flatMap(({ captures }) => captures),
   };
 }
