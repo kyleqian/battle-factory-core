@@ -4,6 +4,25 @@ Older dated sections moved out of `ANIMATION_PROGRESS.md` to keep that
 file lean (`AGENTS.md`'s ~3-most-recent convention). Git history has the
 full record regardless; this file is a read-only reference.
 
+## MOVE_ROLLING_KICK promoted exact; SlidingKick representative complete (2026-07-29)
+
+**Verdict:** `MOVE_ROLLING_KICK` is exact. Source and generated inventory prove
+challenge-1 set **233 `FRONTIER_MON_HITMONLEE_1`** is the sole/lowest legal
+Level-50 carrier. Complete legal Scene-ON parties pass the full 55-frame body
+through first inactive cleanup twice fresh in both orientations: player-back
+**81–135 (55/55)** evidence/raw
+`3f35463979c0971b6432ed8695caa1130e21890d07ea4edb80b6685271932f92` /
+`76c1741106018ee425f40505c56af234d7d033562dc8bd3c84386e465d9d7ef3`;
+opponent-front **85–139 (55/55)**
+`4fb8c542ab55e346e4f22129cfa10f028d1a43ff8be0ee6e1e1d8b4160849690` /
+`237e0cd3062b05c1ffa91a1ecc2e03a60ba1f195012ad079f0980933ea12d5a1`.
+
+**Model/evidence:** the pure reducer and production compositor port attacker
+elliptical motion, slide callbacks, attacker-relative foot/hitsplat, ShakeMon,
+alpha, audio, OAM latches, and cleanup. `MOVE_LOW_KICK` then received its own
+independent target-relative proof. No gameplay, boundary, barrier, canonical
+allowlist, or facility state changed.
+
 ## MOVE_WHIRLPOOL status body proven; move remains partial (2026-07-29)
 
 **Verdict:** `Status_Whirlpool` is independently source-pointer-pinned and

@@ -1,5 +1,28 @@
 # Animation coverage
 
+## MOVE_BRICK_BREAK evidence checkpoint; TORN_METAL representative partial (2026-07-29)
+
+**Verdict:** `MOVE_BRICK_BREAK` is **partial**, evidence only. Inventory
+proves its **46** Level-50 Factory carriers outrank `MOVE_CRUSH_CLAW`'s **11**;
+set **131 `FRONTIER_MON_LOMBRE`** is the lowest legal carrier. Complete legal
+Lombre/Onix Scene-ON parties use real target `REFLECT`, selecting the source
+`BrickBreakShatteredWall` body. Dense receipts run twice fresh through first
+inactive cleanup: player-back **288–479 (192/192)** evidence/raw
+`e484e602be861db10e4042c2a6de75e5f6e261e533515d48d8597637db5c4697` /
+`e1b36f8036f30386af0c7cdaac9645f73bb9eb526802c3179e745871cf637363`;
+opponent-front **289–480 (192/192)**
+`f0314f159cb9b141c107cbe078382ebb4ff7379c4ce2c835aa9b921c65bbe27a` /
+`8402d60c9605e852c0f099dbc617c80dc21d005097ed1985395b647564ae23bc`.
+
+**Evidence / boundary:** source and portable hardware verifier pin both
+source branches, four `gBrickBreakWallShardSpriteTemplate` / TORN_METAL
+lifecycles, wall, lunge/hitsplat/fist, WindUpLunge, OAM/affine/palette and
+register ordering, three target-panned audio events, and cleanup. `CRUSH_CLAW`
+stays unsupported: it only loads TORN_METAL and has its own lunge/ShakeMon2/
+four-claw-slash body. No production reducer, seam, compositor, gameplay, RNG,
+or exact credit changed. Coverage is **100 exact / 1 partial / 0 staged / 175
+unsupported**.
+
 ## MOVE_WHIRLPOOL promoted exact; both source bodies accepted (2026-07-29)
 
 **Verdict:** `MOVE_WHIRLPOOL` is exact through one pure source-relative
@@ -58,29 +81,3 @@ is **99 exact / 0 partial / 0 staged / 177 unsupported**.
 **Ownership:** no damage, Low Kick weight calculation, RNG, turn order,
 controller, round advancement, facility state, animation-boundary list,
 unsupported barrier, or canonical-recording allowlist changed.
-
-## MOVE_ROLLING_KICK promoted exact; SlidingKick representative complete (2026-07-29)
-
-**Verdict:** `MOVE_ROLLING_KICK` is exact. Source and generated inventory prove
-challenge-1 set **233 `FRONTIER_MON_HITMONLEE_1`** is the sole/lowest legal
-Level-50 carrier. Complete legal Scene-ON parties pass the whole 55-frame body
-through first inactive cleanup twice fresh in both orientations: player-back
-**81–135 (55/55)**, evidence/raw
-`3f35463979c0971b6432ed8695caa1130e21890d07ea4edb80b6685271932f92` /
-`76c1741106018ee425f40505c56af234d7d033562dc8bd3c84386e465d9d7ef3`;
-opponent-front **85–139 (55/55)**,
-`4fb8c542ab55e346e4f22129cfa10f028d1a43ff8be0ee6e1e1d8b4160849690` /
-`237e0cd3062b05c1ffa91a1ecc2e03a60ba1f195012ad079f0980933ea12d5a1`.
-
-**Model/evidence:** the pure reducer, narrow typed seam, extracted Hitmonlee
-art, and production compositor port attacker elliptical motion, both slide
-callbacks, attacker-relative `gSlidingKickSpriteTemplate`, affine hitsplat,
-target ShakeMon, monbg/alpha, side-relative audio, windows/text, the task
-two-interval versus sprite one-interval OAM latches, and cleanup.
-`rollingKickPortable.ts` proves **55/55** reducer/component/seam/cleanup and
-production shared-framebuffer equality twice per orientation.
-
-**Sibling / next:** `MOVE_LOW_KICK` is now exact independently through its own
-target-relative geometry, `AnimTask_RotateMonSpriteToSide`, 33-frame body, and
-portable verifier. No gameplay, boundary, barrier, canonical allowlist,
-damage, RNG, turn, controller, or facility state changed.
