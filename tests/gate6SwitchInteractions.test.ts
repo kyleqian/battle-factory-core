@@ -13,10 +13,7 @@ import {
   stepBattleScriptMachine,
   type BattleScriptMachineState,
 } from "../src/engine/battleScriptMachine.ts";
-import {
-  loadBattleScriptProgram,
-  resolveBattleScriptLabel,
-} from "../src/engine/battleScriptProgram.ts";
+import { loadBattleScriptProgram } from "../src/engine/battleScriptProgram.ts";
 
 const program = loadBattleScriptProgram();
 const TACKLE = 33;
