@@ -13,6 +13,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 740 — [SUPERVISOR 2026-07-30 ~13:20] Slice 2 verified; Gate-6 R7/R8 + K4-K6 merged — matrix now closed except R4 (in flight)
+
+- **State:** master union green **549 files / 5544 tests + 1 deliberate
+  animation-lane skip**, build clean. Live: R4 Castform side worker
+  (`side-20260730-130543`); main lane freeing for Slice 3.
+- **Did:** verified Slice 2 myself (focused suites rerun;
+  `accept-prebattle` **137/137**, `turn17-rung7a` 255/255 spot-check).
+  Merged R7/R8 (burn×Guts×Facade exact two-seed damage receipts 122/135;
+  Immunity/Limber never statused over 734 frames, affected controls;
+  Snorlax substituted for Muk on census legality) and K4-K6 (Swagger
+  single +2 before Own Tempo confusion reject; Foresight evasion-only;
+  berry cap/White Herb once-only; burn/paralysis modifiers live in stat
+  calc not stages). Scout-doc receipt notes came with R7/R8; K4-K6 rows
+  closed by workers' evidence, doc cells already current. Papercuts:
+  out/latest race bumped to 2; census line-drift added.
+- **Next:** main — Slice 3 (generated intro ownership at the real
+  handoff, anchor-to-intro trace, honest 714/715); side — R4 merge, then
+  B+444 RAM-probe fix-vs-attribute.
+
+---
 ## 739 — [BOUNDED MAIN WORKER 2026-07-30 ~13:15] #53 routing Slice 2 complete
 
 - **State:** source-/oracle-pinned anchor-session adapter landed in
@@ -50,24 +70,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   coverage rows updated by supervisor.
 - **Next:** main — Slice 2 (anchor session, Battle 1 RNG epoch
   reconciliation); side — R7+R8 receipts, then K4-K6, R4, B+444 probe.
-
----
-## 737 — [BOUNDED MAIN WORKER 2026-07-30 ~12:38] #53 routing Slice 1 complete
-
-- **State:** explicit route seam and draft-source adapter landed in
-  `8dd8ebcf`; route-tagged regression traces landed in `9bc0b39a`. Focused
-  acceptance is **4 files / 38 tests**; full gate green at **546 files /
-  5482 tests + 1 deliberate animation-lane skip**, production build clean.
-- **Did:** added immutable generated/canonical route ownership at the sole
-  battle-room handoff; the pure adapter returns exact compact rental sources
-  by one-based pick rank (including HAUNTER-first and a second order). Default
-  remains canonical; generated tests inject a session factory. `Trace.appRoute`
-  is stripped before both oracle paths; tagged all 25 immutable rows, the
-  historical Battle 1/2 intro chain, and generated command evidence.
-- **Next:** issue design Slice 2: source-/oracle-pin the anchor facility and
-  RNG epochs, then replace the temporary injected generated-session factory.
-- **Notes:** all **25/25** immutable rows retain their exact table counts;
-  generated command remains **128/128**. No capture/segment/profile, recording
-  import, barrier/ratchet pin, renderer/rules/AI/per-turn route branch,
-  production-default, issue, docs-design, or Gate-6 change. PAPERCUT: none.
 
