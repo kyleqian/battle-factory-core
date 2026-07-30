@@ -73,7 +73,7 @@ the state transition.
 | weather x switching/entry | Entry weather abilities set permanent weather exactly on switch-in; subsequent same-weather entries are a no-op (`battle_util.c:2485-2558`). Drizzle/Sand Stream/Drought are **UNREACHABLE (3)** at L50; Cloud Nine is a legal entry suppression case. | `tests/battleScriptSwitchinOpcode.test.ts` (Drizzle/Sand Stream/Drought unit mechanics) | R3 oracle uses legal Golduck Cloud Nine against manually created Rain Dance, not unreachable setter staging. |
 | weather x immunity/absorb | Type immunity (Rock/Ground/Steel vs sand, Ice vs hail), Sand Veil, and underground/underwater suppress weather chip (`battle_script_commands.c:7606-7635`); Cloud Nine globally suppresses the predicate (`battle_util.h:47-48`). | `tests/battleScriptDamagingWeatherOpcode.test.ts` | Covered single-axis; R2/R3 make the pairwise boundary explicit. |
 | status x volatile | Sleep clears Nightmare when cured; confusion, paralysis, and infatuation are independent ordered attack-canceler gates (`battle_util.c:2040-2054,2156-2218`). | NONE | K3: sleep+Nightmare then Chesto/Lum, and paralysis+confusion RNG ledger property. |
-| status x held-item | Chesto clears sleep and Nightmare; condition berries cure their matching major status; Lum clears any major status plus confusion (`battle_util.c:3499-3591`). | `tests/battleScriptMoveEndOpcode.test.ts` (Cheri/Lum move-end activation) | R5 oracle: Hypnosis/Confuse Ray into Chesto vs Lum timing. |
+| status x held-item | Chesto clears sleep and Nightmare; condition berries cure their matching major status; Lum clears any major status plus confusion (`battle_util.c:3499-3591`). | `tests/battleScriptMoveEndOpcode.test.ts` (Cheri/Lum move-end activation); `tests/gate6EntryItemInteractions.test.ts` (R5 Chesto sleep+Nightmare and Lum confusion specificity) | R5 receipts exact Chesto/Lum controller timing. |
 | status x ability | Natural Cure clears major status on switch-out; Guts/Marvel Scale read status for stats; immunities reject sleep/poison/burn/freeze/paralysis and Own Tempo rejects confusion (`battle_script_commands.c:9590-9604,2360-2435,2531-2545`; `battle_util.c:2873-2945`). | `tests/battleScriptMoveEndOpcode.test.ts` (ability status cures/Own Tempo) | R6: poisoned Natural Cure switch; R7: burn Guts damage/stat. |
 | status x stat-stage | Burn's physical Attack modifier and paralysis speed modifier belong in stat calculation, while status application does not itself mutate stages; stage mutation is separately clamped (`battle_script_commands.c:7085-7089`). | NONE | K4: damage/speed property with fixed stages, status on/off. |
 | status x switching/entry | Ordinary switching rebuilds the incoming record; Natural Cure only clears the departing major status (`battle_script_commands.c:4621-4657,9590-9604`). | `tests/battleScriptSwitchinOpcode.test.ts` (rebuild semantics) | R6 oracle. |
@@ -106,7 +106,7 @@ are legal inert duplicates with `[Tackle,Tackle,Tackle,Tackle]`.
 | R2 | A: Dugtrio, Dig; B: Tyranitar, Sandstorm x4 (or Hail user/Hail x4). | Active underground ignores chip; surfacing re-enables it. |
 | R3 | A: Golduck abilitySlot=1 (Cloud Nine), Rain Dance; B: neutral Tackle x4. Switch Golduck out after rain is live. | Weather flag remains but chip/accuracy resumes only after Cloud Nine leaves. |
 | R4 | A: Castform Forecast, Weather Ball; B: Rain Dance x4. | Entry/form/update gives Water type and Weather Ball changes; this is the Forecast boundary. |
-| R5 | A: Chesto Snorlax, Rest; B: Gengar Hypnosis x4; repeat Lum holder with Confuse Ray source. | Chesto clears sleep and Nightmare; Lum clears the selected status/confusion path. |
+| R5 | `gate6-r5-off.json`: Chesto Snorlax uses Rest twice versus Tackle x4 (the first full-HP failure stages real damage; the second Rest succeeds). `gate6-r5-lum-off.json`: Lum Machamp versus Duskull Confuse Ray x4. | Chesto clears Rest sleep/Nightmare and is consumed only after its wake message; Lum clears the RNG-duration confusion and is consumed after its distinct cure message. |
 | R6 | A: Starmie Natural Cure, Recover; bench: neutral. B: Muk Toxic x4. Apply Toxic, voluntarily switch, then return. | Departing Starmie party status becomes clear; ordinary incoming state is rebuilt. |
 | R7 | A: Ursaring Guts, Facade; B: Ninetales Will-O-Wisp x4. | Burn appears and Facade damage/stat result is the Guts branch. |
 | R8 | A: Muk Immunity (or Lanturn); B: Toxic x4; repeat B Thunder Wave x4 versus Limber Persian. | No durable status or incorrect cure message; control target is affected. |
@@ -163,6 +163,28 @@ Fire moves; HP and item remain unchanged, no item-removal event is emitted,
 and Flash Fire still sets its persistent resource flag.  This is a pure
 source-defined dispatch boundary, so the staging card's kernel-first rule
 does not promote it to a duplicate ROM fixture.
+
+### R5 — Chesto Rest wake and Lum confusion cure timing
+
+Both complete-party fixtures were run fresh on Battle Scene OFF with seeds
+`1` and `324508639`.  `gate6-r5-off.json` first lets Rest fail honestly at
+full HP, then Duskull's constrained Tackle deals real damage (`267→258` or
+`267→257` from the seed-dependent damage roll); the second Rest succeeds.
+At frame 860 sleep is `3`, frame 1020 has restored HP with sleep still `3`,
+frame 1120 has sleep and Nightmare cleared while Chesto is still held, frame
+1160 displays `SNORLAX's CHESTO BERRY woke it from its sleep!`, and only
+afterward is the item removed in both the battle and party records.  The two
+frame-1160 receipts share raw-RGB SHA-256
+`8be78feffbf9144beec61d94ad9b3e9330ce66fef632b043659051f9d49b059a`.
+
+`gate6-r5-lum-off.json` lets Duskull's four identical Confuse Ray slots set
+an RNG-duration confusion (`2` turns at seed `1`, `4` at seed `324508639`).
+By frame 420 confusion is cleared while Lum remains held; frame 540 displays
+`MACHAMP's LUM BERRY cured its confusion problem!` and both item copies are
+then zero.  Both frame-540 receipts share raw-RGB SHA-256
+`67631f6a11f55791a30a99d57fc35d3eaa90653190f09ab12a2cd7373aa70961`.
+The Gate-6 Tier-1 pin confirms Chesto clears both sleep and Nightmare while
+Lum reaches the distinct confusion cure branch.
 
 ## Ranked dispatch shortlist
 

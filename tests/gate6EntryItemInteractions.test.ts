@@ -23,6 +23,7 @@ const BATON_PASS = 226;
 const ITEM_WHITE_HERB = 180;
 const ITEM_LUM_BERRY = 141;
 const ITEM_SITRUS_BERRY = 142;
+const ITEM_CHESTO_BERRY = 134;
 const SAND_ATTACK = 28;
 const WATER_GUN = 55;
 const SPARK = 209;
@@ -33,6 +34,7 @@ const ABILITY_VOLT_ABSORB = 10;
 const ABILITY_WATER_ABSORB = 11;
 const ABILITY_FLASH_FIRE = 18;
 const STATUS2_CONFUSION_TURN_2 = 2;
+const STATUS2_NIGHTMARE = 1 << 27;
 const STATUS2_SUBSTITUTE = 1 << 24;
 const MACHAMP_SET = 431;
 const GRANBULL_SET = 376;
@@ -325,6 +327,44 @@ function runR9ItemPass(item: number) {
   return result.state.rulesContext.battlers[0];
 }
 
+function runR5ChestoPass() {
+  const rulesContext = createBattleScriptRulesContext({
+    ...switchContext(TACKLE),
+    battlers: [
+      battler({
+        side: 0,
+        species: 143,
+        ability: 17,
+        item: ITEM_CHESTO_BERRY,
+        partyIndex: 0,
+        status1: 3,
+        status2: STATUS2_NIGHTMARE,
+        types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+      }),
+      battler({ side: 1, species: 361, ability: 46, types: ["TYPE_GHOST", "TYPE_GHOST"] }),
+      battler({ side: 0 }),
+      battler({ side: 1 }),
+    ],
+    party: {
+      player: corpusParty(MACHAMP_SET, ITEM_CHESTO_BERRY),
+      opponent: corpusParty(300),
+    },
+  });
+  const handlers = createBattleScriptStatusRulesHandlers(program, ports);
+  const initial = createBattleScriptStatusRulesExecution(
+    program,
+    "BattleScript_HandleFaintedMon",
+    rulesContext,
+    1,
+    ports,
+  ).state;
+  const result = runBattleEndTurnOrchestration(program, handlers, initial);
+  if (result.kind !== "next-turn") {
+    throw new Error(`R5 Chesto pass stopped at ${result.kind}`);
+  }
+  return result.state.rulesContext.battlers[0];
+}
+
 describe("Gate-6 R12b and R11 entry/item interactions", () => {
   it("orders Granbull Intimidate before Machamp's White Herb restore and consumes the herb without hook RNG", () => {
     const result = initializeFreshFactoryBattle({
@@ -475,4 +515,19 @@ describe("Gate-6 R14 absorb dispatch versus held items", () => {
       }
     },
   );
+});
+
+describe("Gate-6 R5 Chesto/Lum cure specificity", () => {
+  it("Chesto clears Rest sleep plus Nightmare, while Lum clears confusion through the distinct status-or-confusion branch", () => {
+    expect(runR5ChestoPass()).toMatchObject({
+      item: 0,
+      status1: 0,
+      status2: 0,
+    });
+    expect(runR9ItemPass(ITEM_LUM_BERRY)).toMatchObject({
+      item: 0,
+      status1: 0,
+      status2: 0,
+    });
+  });
 });
