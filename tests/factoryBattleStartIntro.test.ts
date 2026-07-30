@@ -13,6 +13,11 @@ import {
   factoryBattleStartPresentationForState,
 } from "../src/engine/factoryRoundBattleOrchestrator.ts";
 import {
+  createFactoryBattleStartPresentationCommand,
+  type FactoryBattleStartParty,
+} from "../src/engine/factoryBattleStartPresentation.ts";
+import {
+  generatedBattleStartOpponentReleaseStarted,
   generatedBattleIntroSourceClock,
   renderGeneratedBattleStartPreSendOut,
 } from "../src/engine/battleScene.ts";
@@ -56,9 +61,21 @@ function intro() {
       ],
     },
   });
-  return createFactoryBattleStartIntro(
-    factoryBattleStartPresentationForState(state)!,
-  );
+  const generated = factoryBattleStartPresentationForState(state)!;
+  const party = (
+    setIds: readonly [number, number, number],
+  ): FactoryBattleStartParty => Object.freeze([
+    createFactoryCorpusPartyMember(record(setIds[0])),
+    createFactoryCorpusPartyMember(record(setIds[1])),
+    createFactoryCorpusPartyMember(record(setIds[2])),
+  ]);
+  return createFactoryBattleStartIntro(createFactoryBattleStartPresentationCommand({
+    commandId: generated.commandId,
+    battleIndex: generated.battleIndex,
+    opponentTrainer: generated.opponentTrainer,
+    playerParty: party([274, 354, 338]),
+    opponentParty: party([349, 339, 327]),
+  }));
 }
 
 describe("generated Factory pre-send-out intro lifecycle", () => {
@@ -84,11 +101,23 @@ describe("generated Factory pre-send-out intro lifecycle", () => {
     }
     const accepted = advanceFactoryBattleStartIntro(state, new Set(["A"]));
     expect(accepted.acknowledgedElapsed).toBe(state.elapsed);
-    expect(factoryBattleStartIntroPhase(accepted)).toBe("acknowledged");
-    expect(advanceFactoryBattleStartIntro(accepted)).toBe(accepted);
+    expect(factoryBattleStartIntroPhase(accepted)).toBe("opponent-message");
+
+    let release = accepted;
+    while (!generatedBattleStartOpponentReleaseStarted(release)) {
+      release = advanceFactoryBattleStartIntro(release);
+    }
+    expect(factoryBattleStartIntroPhase(release)).toBe("opponent-release");
+    expect(release.elapsed - release.acknowledgedElapsed!).toBe(
+      release.command.text.opponentSendOut[0].length
+        + release.command.text.opponentSendOut[1].length
+        + 5
+        + 3
+        - 2,
+    );
   });
 
-  it("renders every lifecycle phase from the frozen generated command", () => {
+  it("renders every lifecycle phase through opponent healthbox settle from the frozen generated command", () => {
     let state = intro();
     for (const elapsed of [0, 27, 59, 178, 185, 225, 370]) {
       while (state.elapsed < elapsed) state = advanceFactoryBattleStartIntro(state);
@@ -100,6 +129,13 @@ describe("generated Factory pre-send-out intro lifecycle", () => {
       } else {
         expect(frame.some((value) => value !== 0)).toBe(true);
       }
+    }
+    state = advanceFactoryBattleStartIntro(state, new Set(["A"]));
+    for (const elapsed of [374, 411, 430, 443, 466, 521]) {
+      while (state.elapsed < elapsed) state = advanceFactoryBattleStartIntro(state);
+      const frame = new Uint8Array(240 * 160 * 4);
+      renderGeneratedBattleStartPreSendOut(frame, state);
+      expect(frame.some((value) => value !== 0)).toBe(true);
     }
   });
 });

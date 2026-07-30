@@ -22,7 +22,19 @@ const TACKLE = 33;
 const BATON_PASS = 226;
 const ITEM_WHITE_HERB = 180;
 const ITEM_LUM_BERRY = 141;
+const ITEM_SITRUS_BERRY = 142;
+const ITEM_CHESTO_BERRY = 134;
+const SAND_ATTACK = 28;
+const WATER_GUN = 55;
+const SPARK = 209;
+const FLAMETHROWER = 53;
+const PIDGEOT_SET = 355;
+const ABILITY_KEEN_EYE = 51;
+const ABILITY_VOLT_ABSORB = 10;
+const ABILITY_WATER_ABSORB = 11;
+const ABILITY_FLASH_FIRE = 18;
 const STATUS2_CONFUSION_TURN_2 = 2;
+const STATUS2_NIGHTMARE = 1 << 27;
 const STATUS2_SUBSTITUTE = 1 << 24;
 const MACHAMP_SET = 431;
 const GRANBULL_SET = 376;
@@ -167,9 +179,94 @@ const ports = Object.freeze({
   resolveAttackerBattler: () => 0 as const,
   resolveBattlerAtPosition: () => null,
   resolveHalfwordOperand: (_context, operand) =>
-    operand.expression === "B_WAIT_TIME_LONG" ? 64 : null,
+    operand.expression === "B_WAIT_TIME_LONG"
+      ? 64
+      : operand.expression === "B_WAIT_TIME_SHORT"
+        ? 32
+        : null,
   resolveByteOperand: () => null,
 } satisfies BattleScriptStatusRulesExternalPorts);
+
+function runR13StatChange(statChanger: number) {
+  const rulesContext = createBattleScriptRulesContext({
+    ...switchContext(SAND_ATTACK),
+    battlers: [
+      battler({
+        side: 0,
+        species: 18,
+        ability: ABILITY_KEEN_EYE,
+        statStages: [6, 6, 6, 6, 6, 6, 6, 6],
+        types: ["TYPE_NORMAL", "TYPE_FLYING"],
+      }),
+      battler({ side: 1, species: 210, ability: 22 }),
+      battler({ side: 0 }),
+      battler({ side: 1 }),
+    ],
+    selectorRoles: { attacker: 1, target: 0, effectBattler: 0, fainted: 0 },
+    scriptingBattler: 1,
+    currentMove: SAND_ATTACK,
+    statChanger,
+  });
+  const execution = createBattleScriptStatusRulesExecution(
+    program,
+    "BattleScript_EffectAccuracyDown",
+    rulesContext,
+    1,
+    ports,
+  );
+  const pc = program.instructions.find(
+    (instruction) =>
+      instruction.opcodeName === "B_SCR_OP_STATBUFFCHANGE"
+      && instruction.source.label === "BattleScript_EffectStatDown",
+  )?.programCounter;
+  if (pc === undefined) throw new Error("missing Sand-Attack STATBUFFCHANGE");
+  const result = stepBattleScriptMachine(
+    program,
+    Object.freeze({ ...execution.state, programCounter: pc }),
+    execution.handlers,
+  );
+  if (result.kind !== "advanced") {
+    throw new Error(`R13 stat change stopped at ${result.kind}`);
+  }
+  return result.state;
+}
+
+function runR14AbsorbRedirect(ability: number, move: number) {
+  const rulesContext = createBattleScriptRulesContext({
+    ...switchContext(move),
+    battlers: [
+      battler({ side: 0, moves: [move, 0, 0, 0], pp: [15, 0, 0, 0] }),
+      battler({
+        side: 1,
+        ability,
+        hp: 100,
+        item: ITEM_SITRUS_BERRY,
+      }),
+      battler({ side: 0 }),
+      battler({ side: 1 }),
+    ],
+    selectorRoles: { attacker: 0, target: 1, effectBattler: 1, fainted: 1 },
+    scriptingBattler: 0,
+    currentMove: move,
+    battleMoveDamage: 0,
+  });
+  const execution = createBattleScriptStatusRulesExecution(
+    program,
+    "BattleScript_HitFromAccCheck",
+    rulesContext,
+    1,
+    ports,
+  );
+  const result = stepBattleScriptMachine(
+    program,
+    execution.state,
+    execution.handlers,
+  );
+  if (result.kind !== "advanced") {
+    throw new Error(`R14 absorb redirect stopped at ${result.kind}`);
+  }
+  return result.state;
+}
 
 function runSwitchDataUpdate(currentMove: number) {
   const execution = createBattleScriptStatusRulesExecution(
@@ -226,6 +323,44 @@ function runR9ItemPass(item: number) {
   const result = runBattleEndTurnOrchestration(program, handlers, initial);
   if (result.kind !== "next-turn") {
     throw new Error(`R9 item pass stopped at ${result.kind}`);
+  }
+  return result.state.rulesContext.battlers[0];
+}
+
+function runR5ChestoPass() {
+  const rulesContext = createBattleScriptRulesContext({
+    ...switchContext(TACKLE),
+    battlers: [
+      battler({
+        side: 0,
+        species: 143,
+        ability: 17,
+        item: ITEM_CHESTO_BERRY,
+        partyIndex: 0,
+        status1: 3,
+        status2: STATUS2_NIGHTMARE,
+        types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+      }),
+      battler({ side: 1, species: 361, ability: 46, types: ["TYPE_GHOST", "TYPE_GHOST"] }),
+      battler({ side: 0 }),
+      battler({ side: 1 }),
+    ],
+    party: {
+      player: corpusParty(MACHAMP_SET, ITEM_CHESTO_BERRY),
+      opponent: corpusParty(300),
+    },
+  });
+  const handlers = createBattleScriptStatusRulesHandlers(program, ports);
+  const initial = createBattleScriptStatusRulesExecution(
+    program,
+    "BattleScript_HandleFaintedMon",
+    rulesContext,
+    1,
+    ports,
+  ).state;
+  const result = runBattleEndTurnOrchestration(program, handlers, initial);
+  if (result.kind !== "next-turn") {
+    throw new Error(`R5 Chesto pass stopped at ${result.kind}`);
   }
   return result.state.rulesContext.battlers[0];
 }
@@ -306,6 +441,93 @@ describe("Gate-6 R9 Swagger into Lum Berry versus White Herb", () => {
       item: ITEM_WHITE_HERB,
       statStages: [6, 8, 6, 6, 6, 6, 6, 6],
       status2: STATUS2_CONFUSION_TURN_2,
+    });
+  });
+});
+
+describe("Gate-6 R13 Keen Eye stat-drop specificity", () => {
+  it("rejects Sand-Attack through the specific ability-message branch while allowing Granbull Intimidate to lower Attack", () => {
+    const accuracy = runR13StatChange(0x96);
+    expect(accuracy.rulesContext.battlers[0].statStages).toEqual(
+      [6, 6, 6, 6, 6, 6, 6, 6],
+    );
+    expect(accuracy.rulesContext.lastUsedAbility).toBe(ABILITY_KEEN_EYE);
+    expect(accuracy.rulesContext.aiObservedAbilityIds[0]).toBe(ABILITY_KEEN_EYE);
+    expect(
+      program.instructions[accuracy.programCounter]?.source.label,
+    ).toBe("BattleScript_AbilityNoSpecificStatLoss");
+
+    const attack = runR13StatChange(0x91);
+    expect(attack.rulesContext.battlers[0].statStages[1]).toBe(5);
+    expect(attack.events).toContainEqual(
+      expect.objectContaining({
+        kind: "stat-stage-change",
+        battler: 0,
+        stat: "attack",
+        from: 6,
+        to: 5,
+      }),
+    );
+
+    const entry = initializeFreshFactoryBattle({
+      requestId: 13,
+      rngSeed: 3,
+      playerParty: corpusParty(PIDGEOT_SET),
+      opponentParty: corpusParty(GRANBULL_SET),
+    });
+    expect(entry.state.rules.rulesContext.battlers[0]).toMatchObject({
+      ability: ABILITY_KEEN_EYE,
+      statStages: [6, 5, 6, 6, 6, 6, 6, 6],
+    });
+    expect(
+      entry.events
+        .map((event) => event.payload)
+        .filter((payload) => payload.kind === "message")
+        .map((payload) => payload.messageId),
+    ).toEqual(["STRINGID_PKMNCUTSATTACKWITH"]);
+  });
+});
+
+describe("Gate-6 R14 absorb dispatch versus held items", () => {
+  it.each([
+    [ABILITY_VOLT_ABSORB, SPARK, "BattleScript_MonMadeMoveUseless_PPLoss"],
+    [ABILITY_WATER_ABSORB, WATER_GUN, "BattleScript_MonMadeMoveUseless_PPLoss"],
+    [ABILITY_FLASH_FIRE, FLAMETHROWER, "BattleScript_FlashFireBoost_PPLoss"],
+  ] as const)(
+    "ability %i redirects matching move %i before direct damage or Sitrus activation",
+    (ability, move, expectedLabel) => {
+      const state = runR14AbsorbRedirect(ability, move);
+      expect(program.instructions[state.programCounter]?.source.label).toBe(
+        expectedLabel,
+      );
+      expect(state.rulesContext.battlers[1]).toMatchObject({
+        hp: 100,
+        item: ITEM_SITRUS_BERRY,
+      });
+      expect(state.rulesContext.battleMoveDamage).toBe(0);
+      expect(state.rulesContext.lastUsedAbility).toBe(ability);
+      expect(state.rulesContext.aiObservedAbilityIds[1]).toBe(ability);
+      expect(
+        state.events.filter((event) => event.kind === "set-battler-item"),
+      ).toEqual([]);
+      if (ability === ABILITY_FLASH_FIRE) {
+        expect(state.rulesContext.battlers[1].flashFireBoosted).toBe(1);
+      }
+    },
+  );
+});
+
+describe("Gate-6 R5 Chesto/Lum cure specificity", () => {
+  it("Chesto clears Rest sleep plus Nightmare, while Lum clears confusion through the distinct status-or-confusion branch", () => {
+    expect(runR5ChestoPass()).toMatchObject({
+      item: 0,
+      status1: 0,
+      status2: 0,
+    });
+    expect(runR9ItemPass(ITEM_LUM_BERRY)).toMatchObject({
+      item: 0,
+      status1: 0,
+      status2: 0,
     });
   });
 });
