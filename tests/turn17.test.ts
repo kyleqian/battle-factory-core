@@ -33,6 +33,10 @@ import {
 } from "../src/animation/firePunch.ts";
 import { createInitialState, tick } from "../src/engine/core.ts";
 import { CLOSED_FIGHT_SUBMENU_STATE } from "../src/engine/battleMenu.ts";
+import {
+  createBattleTerminalResolutionPresentation,
+  storeBattleTerminalPresentationDismiss,
+} from "../src/engine/battleResolutionPresentation.ts";
 
 describe("turn 17 confirmation-relative dispatch", () => {
   it("pins MURKROW-first ownership and currentMove writes", () => {
@@ -72,6 +76,16 @@ describe("turn 17 faint hold and outcome latency", () => {
 
   function battleStateAt(elapsed: number): ReturnType<typeof createInitialState> {
     const state = createInitialState();
+    const terminalResolution = createBattleTerminalResolutionPresentation({
+      pendingBoundary: Object.freeze({
+        kind: "terminal",
+        outcome: "player-win",
+      }),
+      resultLines: ["Player defeated", "BUG CATCHER DESTIN!"],
+      opponentLossLines: ["PLEASE I NEED", "SOME WATER"],
+      confirmElapsed,
+      menuRedrawElapsed: confirmElapsed - 100,
+    });
     return {
       ...state,
       battleScene: {
@@ -94,6 +108,7 @@ describe("turn 17 faint hold and outcome latency", () => {
         turn14Resolved: true,
         turn16Resolved: true,
         turn17MenuRedrawElapsed: confirmElapsed - 100,
+        terminalResolution,
         fightSubmenu: {
           ...CLOSED_FIGHT_SUBMENU_STATE,
           openElapsed: confirmElapsed - 30,
@@ -182,6 +197,12 @@ describe("turn 17 faint hold and outcome latency", () => {
       battleScene: {
         ...battleStateAt(faintDismiss + TURN17_OUTCOME_INPUT_READY_DELAY - 2).battleScene!,
         turn17KoDismissElapsed: faintDismiss,
+        terminalResolution: storeBattleTerminalPresentationDismiss(
+          battleStateAt(faintDismiss + TURN17_OUTCOME_INPUT_READY_DELAY - 2)
+            .battleScene!.terminalResolution!,
+          "faint",
+          faintDismiss,
+        ),
       },
     };
     const early = tick(base, new Set(["A"]));
@@ -205,6 +226,12 @@ describe("turn 17 faint hold and outcome latency", () => {
       battleScene: {
         ...battleStateAt(faintDismiss + TURN17_OUTCOME_INPUT_READY_DELAY - 1).battleScene!,
         turn17KoDismissElapsed: faintDismiss,
+        terminalResolution: storeBattleTerminalPresentationDismiss(
+          battleStateAt(faintDismiss + TURN17_OUTCOME_INPUT_READY_DELAY - 1)
+            .battleScene!.terminalResolution!,
+          "faint",
+          faintDismiss,
+        ),
       },
     };
     state = tick(state, new Set(["A"]));

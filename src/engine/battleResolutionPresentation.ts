@@ -120,6 +120,62 @@ export type BattleResolutionDisplayedField = Readonly<{
   opponent: BattleCommandFieldBattler;
 }>;
 
+/**
+ * Narrow compatibility receipt for the already-exact terminal battle window.
+ * The immutable terminal boundary and all rendered strings are frozen before
+ * the adapter starts; battleScene may consume its relative clocks, but may
+ * not rediscover an outcome or trainer string from turn flags.
+ */
+export type BattleTerminalResolutionPresentationState = Readonly<{
+  pendingBoundary: Extract<BattleBoundary, { kind: "terminal" }>;
+  command: Readonly<{
+    type: "terminal-result";
+    resultLines: readonly [string, string];
+    opponentLossLines: readonly [string, string];
+  }>;
+  confirmElapsed: number;
+  menuRedrawElapsed: number;
+  faintDismissElapsed: number | null;
+  resultDismissElapsed: number | null;
+  lossDismissElapsed: number | null;
+}>;
+
+export function createBattleTerminalResolutionPresentation(input: Readonly<{
+  pendingBoundary: Extract<BattleBoundary, { kind: "terminal" }>;
+  resultLines: readonly [string, string];
+  opponentLossLines: readonly [string, string];
+  confirmElapsed: number;
+  menuRedrawElapsed: number;
+}>): BattleTerminalResolutionPresentationState {
+  return Object.freeze({
+    pendingBoundary: input.pendingBoundary,
+    command: Object.freeze({
+      type: "terminal-result" as const,
+      resultLines: Object.freeze([...input.resultLines]) as unknown as readonly [string, string],
+      opponentLossLines: Object.freeze([...input.opponentLossLines]) as unknown as readonly [string, string],
+    }),
+    confirmElapsed: input.confirmElapsed,
+    menuRedrawElapsed: input.menuRedrawElapsed,
+    faintDismissElapsed: null,
+    resultDismissElapsed: null,
+    lossDismissElapsed: null,
+  });
+}
+
+export function storeBattleTerminalPresentationDismiss(
+  state: BattleTerminalResolutionPresentationState,
+  gate: "faint" | "result" | "loss",
+  elapsed: number,
+): BattleTerminalResolutionPresentationState {
+  const key = gate === "faint"
+    ? "faintDismissElapsed"
+    : gate === "result"
+      ? "resultDismissElapsed"
+      : "lossDismissElapsed";
+  if (state[key] !== null) return state;
+  return Object.freeze({ ...state, [key]: elapsed });
+}
+
 export type BattleResolutionSegment = Readonly<{
   beforeRules: FactoryFullTurnDecisionRules;
   afterRules: FactoryFullTurnDecisionRules;

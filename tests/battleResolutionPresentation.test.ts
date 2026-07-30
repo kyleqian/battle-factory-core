@@ -3,6 +3,8 @@ import { createBattleCommandPresentation } from "../src/engine/battleCommandPres
 import {
   appendBattleResolutionContinuation,
   createBattleResolutionPresentation,
+  createBattleTerminalResolutionPresentation,
+  storeBattleTerminalPresentationDismiss,
   type BattleResolutionPresentationState,
   type CreateBattleResolutionPresentationInput,
 } from "../src/engine/battleResolutionPresentation.ts";
@@ -195,6 +197,39 @@ function damageResolution(): BattleResolutionPresentationState {
 }
 
 describe("battle resolution presentation receipt ownership", () => {
+  it("freezes terminal result content behind the immutable terminal boundary", () => {
+    const pendingBoundary = Object.freeze({
+      kind: "terminal" as const,
+      outcome: "player-win" as const,
+    });
+    const presentation = createBattleTerminalResolutionPresentation({
+      pendingBoundary,
+      resultLines: ["Player defeated", "BUG CATCHER DESTIN!"],
+      opponentLossLines: ["PLEASE I NEED", "SOME WATER"],
+      confirmElapsed: 10,
+      menuRedrawElapsed: 5,
+    });
+    expect(presentation.pendingBoundary).toBe(pendingBoundary);
+    expect(presentation.command).toEqual({
+      type: "terminal-result",
+      resultLines: ["Player defeated", "BUG CATCHER DESTIN!"],
+      opponentLossLines: ["PLEASE I NEED", "SOME WATER"],
+    });
+    const dismissed = storeBattleTerminalPresentationDismiss(
+      storeBattleTerminalPresentationDismiss(presentation, "faint", 100),
+      "result",
+      200,
+    );
+    expect(dismissed).toMatchObject({
+      faintDismissElapsed: 100,
+      resultDismissElapsed: 200,
+      lossDismissElapsed: null,
+    });
+    expect(storeBattleTerminalPresentationDismiss(dismissed, "faint", 999))
+      .toBe(dismissed);
+    expect(dismissed.pendingBoundary).toBe(pendingBoundary);
+  });
+
   it("projects noncritical damage and its effectiveness message without exposing settled HP early", () => {
     const resolution = createBattleResolutionPresentation(inputFor([
       event(0, { kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }),
