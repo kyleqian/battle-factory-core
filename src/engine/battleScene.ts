@@ -537,6 +537,7 @@ import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { t
 import battleAnimMudSandAsset from "../assets/gen/battle-anim-mud-sand.json" with { type: "json" };
 import battleAnimWhiteFeatherAsset from "../assets/gen/battle-anim-white-feather.json" with { type: "json" };
 import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
+import battleEnemyShadowAsset from "../assets/gen/battle-enemy-shadow.json" with { type: "json" };
 import statAnimBannerAsset from "../assets/gen/stat-anim-banner.json" with { type: "json" };
 import battleWindowAsset from "../assets/gen/battle-window.json" with { type: "json" };
 import frontierTrainerPicsAsset from "../assets/gen/frontier-trainer-pics.json" with { type: "json" };
@@ -676,7 +677,6 @@ import type {
 } from "./battleCommandPresentation.ts";
 import {
   createBattleCommandFieldRenderView,
-  drawBattleCommandActionChrome,
   renderBattleCommandPresentation,
   type BattleCommandPresentationRenderView,
 } from "./battleCommandPresentationRender.ts";
@@ -1125,6 +1125,14 @@ interface BattleAnimCuttingSliceAsset {
 }
 
 const battleBg = battleBgAsset as BattleBgAsset;
+const battleEnemyShadow = battleEnemyShadowAsset as Readonly<{
+  width: number;
+  height: number;
+  mask: readonly number[];
+  color: RgbColor;
+  elevatedSpecies: readonly string[];
+}>;
+const elevatedEnemyShadowSpecies = new Set(battleEnemyShadow.elevatedSpecies);
 const statAnimBanner = statAnimBannerAsset as StatAnimBannerAsset;
 const battleWindow = battleWindowAsset as BattleWindowAsset;
 const frontierTrainerPics =
@@ -3866,6 +3874,10 @@ export function renderGeneratedBattleStartPreSendOut(
   state: FactoryBattleStartIntroState,
 ): void {
   if (state.acknowledgedElapsed !== null) {
+    if (generatedBattleStartPlayerReleaseStarted(state)) {
+      renderGeneratedBattleStartPlayerRelease(fb, state);
+      return;
+    }
     renderGeneratedBattleStartOpponentRelease(fb, state);
     return;
   }
@@ -3924,6 +3936,71 @@ export function generatedBattleStartOpponentReleaseStarted(
     >= sendOutTextStartTick(pressTick)
       + line1.length + line2.length - 1
       + SENDOUT_HANDOFF_LAG;
+}
+
+function generatedBattleStartOpponentHandoffTick(
+  state: FactoryBattleStartIntroState,
+): number | null {
+  const pressTick = generatedBattleStartPressTick(state);
+  if (pressTick === null) return null;
+  const [line1, line2] = state.command.text.opponentSendOut;
+  return sendOutTextStartTick(pressTick)
+    + line1.length + line2.length - 1
+    + SENDOUT_HANDOFF_LAG;
+}
+
+/**
+ * BeginBattleIntro's ordinary singles controller waits 110 callbacks from
+ * the opponent release handoff before dispatching STRINGID_INTROSENDOUT for
+ * the player. The throw controller starts 14 callbacks later.
+ */
+const GENERATED_PLAYER_DISPATCH_DELAY = 110;
+const GENERATED_PLAYER_TEXT_DELAY = 111;
+const GENERATED_PLAYER_VISUAL_DELAY = 125;
+const GENERATED_OPPONENT_SHADOW_DELAY = 104;
+/** First callback satisfying Battle Lab's CHOOSE_ACTION/exec-flags predicate. */
+const GENERATED_PLAYER_READY_DELAY = 302;
+/** First Scene-OFF render after the release callback leaves player OAM y2=0. */
+const GENERATED_PLAYER_NEUTRAL_Y_VISUAL_TICK = 1670;
+
+export function generatedBattleStartPlayerReleaseStarted(
+  state: FactoryBattleStartIntroState,
+): boolean {
+  const handoffTick = generatedBattleStartOpponentHandoffTick(state);
+  return handoffTick !== null
+    && generatedBattleIntroSourceClock(state.elapsed)
+      >= handoffTick + GENERATED_PLAYER_DISPATCH_DELAY;
+}
+
+function drawGeneratedOpponentShadow(
+  fb: Uint8Array,
+  fieldView: ReturnType<typeof createBattleCommandFieldRenderView>,
+): void {
+  if (
+    !elevatedEnemyShadowSpecies.has(
+      `SPECIES_${fieldView.fieldArt.opponent.speciesSymbol}`,
+    )
+  ) return;
+  // Source singles coordinate (176,40), +29 y, centered 32x8 OAM shape.
+  const x = 176 - battleEnemyShadow.width / 2;
+  const y = 40 + 29 - battleEnemyShadow.height / 2;
+  for (const pixel of battleEnemyShadow.mask) {
+    setPixel(
+      fb,
+      x + pixel % battleEnemyShadow.width,
+      y + Math.floor(pixel / battleEnemyShadow.width),
+      battleEnemyShadow.color,
+    );
+  }
+}
+
+export function generatedBattleStartCommandReady(
+  state: FactoryBattleStartIntroState,
+): boolean {
+  const handoffTick = generatedBattleStartOpponentHandoffTick(state);
+  return handoffTick !== null
+    && generatedBattleIntroSourceClock(state.elapsed)
+      >= handoffTick + GENERATED_PLAYER_READY_DELAY;
 }
 
 /**
@@ -4050,6 +4127,9 @@ export function renderGeneratedBattleStartOpponentRelease(
     PLAYER_CORNER.x,
     PLAYER_CORNER.y,
   );
+  if (t >= handoffTick + GENERATED_OPPONENT_SHADOW_DELAY) {
+    drawGeneratedOpponentShadow(fb, fieldView);
+  }
   const trainerX = trainerExitX(t, handoffTick);
   if (trainerX !== null) {
     const trainer = introTrainer("destin", state.command.opponentTrainer);
@@ -4107,6 +4187,183 @@ export function renderGeneratedBattleStartOpponentRelease(
   }
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawMessageTextLines(fb, line1, line2, textTotal);
+}
+
+function generatedPlayerVisualClock(t: number, handoffTick: number): number {
+  return t - (handoffTick + GENERATED_PLAYER_VISUAL_DELAY)
+    + BRENDAN_THROW_START_TICK;
+}
+
+function drawGeneratedPlayerMaterialize(
+  fb: Uint8Array,
+  playerVisualT: number,
+  fieldView: ReturnType<typeof createBattleCommandFieldRenderView>,
+): void {
+  const art = fieldView.fieldArt.player;
+  const origin = art.origin;
+  if (
+    playerVisualT >= PLAYER_MATERIALIZE_START_TICK
+    && playerVisualT <= PLAYER_MATERIALIZE_END_TICK
+  ) {
+    const local = playerVisualT - PLAYER_MATERIALIZE_START_TICK;
+    drawPlayerSideAffineMaterialize(
+      fb,
+      art.pic.tileset as Tileset,
+      origin,
+      local,
+      PLAYER_MATERIALIZE_ACCUMULATOR_LEAD,
+    );
+    return;
+  }
+  if (playerVisualT < PLAYER_MATERIALIZE_SETTLE_START_TICK) return;
+  drawSpriteSheetAffineStretch(
+    fb,
+    art.pic.tileset as Tileset,
+    art.pic.palette as RgbColor[],
+    origin.x,
+    origin.y,
+    256,
+    256,
+    // Scene OFF leaves the player sprite at neutral y once the ball-release
+    // callback clears. The older ONIX window's later bob belongs to Scene ON;
+    // the shared pre-clear settle offsets remain valid through tick 1669.
+    playerVisualT >= GENERATED_PLAYER_NEUTRAL_Y_VISUAL_TICK
+      ? 0
+      : playerMaterializeSettleY2(playerVisualT),
+    MATERIALIZE_TINT_COLOR,
+    playerMaterializeSettleTintCoeff(playerVisualT),
+  );
+}
+
+/**
+ * Generated Scene-OFF player controller compositor. The delays are measured
+ * from the typed opponent handoff, while all throw/release/menu mechanisms
+ * retain their already-proved controller-relative clocks.
+ */
+export function renderGeneratedBattleStartPlayerRelease(
+  fb: Uint8Array,
+  state: FactoryBattleStartIntroState,
+): void {
+  const handoffTick = generatedBattleStartOpponentHandoffTick(state);
+  if (handoffTick === null) {
+    renderGeneratedBattleStartOpponentRelease(fb, state);
+    return;
+  }
+  const t = generatedBattleIntroSourceClock(state.elapsed);
+  const playerVisualT = generatedPlayerVisualClock(t, handoffTick);
+  const fieldView = createBattleCommandFieldRenderView(
+    factoryBattleStartField(state.command),
+  );
+  // The intro controller clears its message only after the main callback has
+  // selected action input. The shared command reducer owns the subsequent
+  // six blank action-enter frames and atomic menu draw.
+  const menuBlank = playerVisualT > MENU_IDLE_BLANK_END_TICK;
+
+  drawTileBgFaded(
+    fb,
+    battleBg.static.tileset,
+    battleBg.static.tilemap,
+    battleBg.palette,
+    playerMaterializeBgFadeY(playerVisualT),
+  );
+  drawGeneratedOpponentShadow(fb, fieldView);
+  drawSpriteSheet(
+    fb,
+    fieldView.fieldArt.opponent.pic.tileset as Tileset,
+    fieldView.fieldArt.opponent.pic.palette as RgbColor[],
+    OPPONENT_CORNER.x,
+    OPPONENT_CORNER.y,
+  );
+  const throwFrame = brendanThrowFrame(playerVisualT);
+  if (playerVisualT < BRENDAN_THROW_START_TICK) {
+    drawSpriteSheet(
+      fb,
+      brendanSettledTileset,
+      brendan.palette,
+      PLAYER_CORNER.x,
+      PLAYER_CORNER.y,
+    );
+  } else if (throwFrame !== null) {
+    drawSpriteSheet(
+      fb,
+      brendanThrowTilesets[throwFrame]!,
+      brendan.palette,
+      PLAYER_CORNER.x + (brendanThrowDx(playerVisualT) ?? 0),
+      PLAYER_CORNER.y,
+    );
+  }
+  const playerThrowTargetY = 112 + fieldView.fieldArt.player.coords.yOffset;
+  const ballTopLeft = playerThrowBallTopLeft(playerVisualT, playerThrowTargetY);
+  if (ballTopLeft !== null) {
+    drawSpriteSheet(
+      fb,
+      BALL_CLOSED_TILESET,
+      summaryBall.palette,
+      ballTopLeft.x,
+      ballTopLeft.y,
+    );
+  }
+  const ballSpin = playerThrowBallSpin(playerVisualT, playerThrowTargetY);
+  if (ballSpin !== null) {
+    drawSpriteSheetAffineRotate(
+      fb,
+      BALL_CLOSED_TILESET,
+      summaryBall.palette,
+      ballSpin.centerX,
+      ballSpin.centerY,
+      ballSpin.pa,
+      ballSpin.pb,
+      ballSpin.pc,
+      ballSpin.pd,
+    );
+  }
+  drawGeneratedPlayerMaterialize(fb, playerVisualT, fieldView);
+  drawPlayerBallOpen(fb, playerVisualT, playerThrowTargetY);
+  drawPlayerBallOpenParticles(fb, playerVisualT, playerThrowTargetY);
+  drawBallIcons(fb, playerVisualT, {
+    opponent: false,
+    player: true,
+    summaries: state.command.partySummaries,
+  });
+  drawSendOutHealthbox(
+    fb,
+    0,
+    composeOpponentHealthbox(
+      healthboxAssemblyAssets,
+      fieldView.healthboxes.opponent,
+    ),
+  );
+  const playerHealthboxDx = playerHealthboxSlideDx(playerVisualT);
+  if (playerHealthboxDx !== null) {
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(
+        playerHealthboxAssets,
+        fieldView.healthboxes.player,
+      ),
+      playerHealthboxDx,
+    );
+  }
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  if (menuBlank) return;
+  const playerTextStart = handoffTick + GENERATED_PLAYER_TEXT_DELAY;
+  const [playerLine] = state.command.text.playerSendOut;
+  if (t < playerTextStart) {
+    const [opponentLine1, opponentLine2] = state.command.text.opponentSendOut;
+    drawMessageTextLines(
+      fb,
+      opponentLine1,
+      opponentLine2,
+      opponentLine1.length + opponentLine2.length,
+    );
+    return;
+  }
+  drawMessageTextLines(
+    fb,
+    playerLine,
+    "",
+    Math.min(playerLine.length, t - playerTextStart + 1),
+  );
 }
 
 /** §7.5: Grovyle's settled front sprite - see `GROVYLE_MATERIALIZE_TICK`'s doc comment. */
@@ -4418,8 +4675,12 @@ function drawPlayerMaterializeSettle(fb: Uint8Array, t: number): void {
  * clipping here; `drawSendOutBall` owns the opponent's own unclipped
  * corner).
  */
-function drawPlayerBallOpen(fb: Uint8Array, t: number): void {
-  const topLeft = playerBallOpenTopLeft(t);
+function drawPlayerBallOpen(
+  fb: Uint8Array,
+  t: number,
+  targetY: number = 112,
+): void {
+  const topLeft = playerBallOpenTopLeft(t, targetY);
   if (!topLeft) return;
   const tileRowOffset = t <= PLAYER_BALL_OPEN_END_TICK ? 0 : 2;
   for (let ty = 0; ty < 2; ty += 1) {
@@ -5516,7 +5777,11 @@ function drawBallOpenParticles(
  */
 const PLAYER_PARTICLE_ORIGIN = { x: 68, y: 106 };
 
-function drawPlayerBallOpenParticles(fb: Uint8Array, t: number): void {
+function drawPlayerBallOpenParticles(
+  fb: Uint8Array,
+  t: number,
+  targetY: number = 112,
+): void {
   const logicalT = t - PLAYER_BG_FADE_START_TICK;
   if (logicalT < 0) return;
   const anim = battleAnimParticles.regularBallAnim;
@@ -5540,7 +5805,7 @@ function drawPlayerBallOpenParticles(fb: Uint8Array, t: number): void {
       frame.tile,
       frame.hFlip,
       PLAYER_PARTICLE_ORIGIN.x + p.dx,
-      PLAYER_PARTICLE_ORIGIN.y + p.dy,
+      PLAYER_PARTICLE_ORIGIN.y + targetY - 112 + p.dy,
       PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
     );
   }

@@ -7,17 +7,19 @@ import {
   advanceFactoryBattleStartIntro,
   createFactoryBattleStartIntro,
   factoryBattleStartIntroPhase,
+  settleFactoryBattleStartCommand,
 } from "../src/engine/factoryBattleStartIntro.ts";
 import {
+  advanceFactoryRoundPresentation,
+  completeFactoryRoundPresentation,
   createFactoryRoundBattleOrchestrator,
   factoryBattleStartPresentationForState,
 } from "../src/engine/factoryRoundBattleOrchestrator.ts";
-import {
-  createFactoryBattleStartPresentationCommand,
-  type FactoryBattleStartParty,
-} from "../src/engine/factoryBattleStartPresentation.ts";
+import { advanceBattleCommandPresentation } from "../src/engine/battleCommandPresentation.ts";
 import {
   generatedBattleStartOpponentReleaseStarted,
+  generatedBattleStartCommandReady,
+  generatedBattleStartPlayerReleaseStarted,
   generatedBattleIntroSourceClock,
   renderGeneratedBattleStartPreSendOut,
 } from "../src/engine/battleScene.ts";
@@ -27,11 +29,13 @@ const natureByName = new Map(naturesData.natures.map((row) => [row.name, row.ind
 
 function record(setId: number): FactoryRentalRecord {
   const set = frontierMonsData.entries[setId]!;
-  const personality = natureByName.get(set.nature)!;
+  const personality = setId === 274
+    ? 3695979440
+    : natureByName.get(set.nature)!;
   const input = {
     setId,
     personality,
-    fixedIv: 31,
+    fixedIv: 9,
     abilitySlot: (personality & 1) as 0 | 1,
     otId: PLAYER_TRAINER_ID,
   };
@@ -41,9 +45,9 @@ function record(setId: number): FactoryRentalRecord {
   });
 }
 
-function intro() {
+function orchestrator() {
   const playerRentalRecords = [record(274), record(354), record(338)] as const;
-  const state = createFactoryRoundBattleOrchestrator({
+  return createFactoryRoundBattleOrchestrator({
     id: "trainer-pic-shizuka-pre-send-out",
     rngValue: 13,
     factoryWinStreak: 14,
@@ -61,21 +65,11 @@ function intro() {
       ],
     },
   });
-  const generated = factoryBattleStartPresentationForState(state)!;
-  const party = (
-    setIds: readonly [number, number, number],
-  ): FactoryBattleStartParty => Object.freeze([
-    createFactoryCorpusPartyMember(record(setIds[0])),
-    createFactoryCorpusPartyMember(record(setIds[1])),
-    createFactoryCorpusPartyMember(record(setIds[2])),
-  ]);
-  return createFactoryBattleStartIntro(createFactoryBattleStartPresentationCommand({
-    commandId: generated.commandId,
-    battleIndex: generated.battleIndex,
-    opponentTrainer: generated.opponentTrainer,
-    playerParty: party([274, 354, 338]),
-    opponentParty: party([349, 339, 327]),
-  }));
+}
+
+function intro() {
+  const generated = factoryBattleStartPresentationForState(orchestrator())!;
+  return createFactoryBattleStartIntro(generated);
 }
 
 describe("generated Factory pre-send-out intro lifecycle", () => {
@@ -131,11 +125,42 @@ describe("generated Factory pre-send-out intro lifecycle", () => {
       }
     }
     state = advanceFactoryBattleStartIntro(state, new Set(["A"]));
-    for (const elapsed of [374, 411, 430, 443, 466, 521]) {
+    for (const elapsed of [374, 411, 430, 443, 466, 521, 522, 536, 615, 629, 651, 710, 714]) {
       while (state.elapsed < elapsed) state = advanceFactoryBattleStartIntro(state);
       const frame = new Uint8Array(240 * 160 * 4);
       renderGeneratedBattleStartPreSendOut(frame, state);
       expect(frame.some((value) => value !== 0)).toBe(true);
     }
+    expect(generatedBattleStartPlayerReleaseStarted(state)).toBe(true);
+    expect(generatedBattleStartCommandReady(state)).toBe(true);
+    expect(factoryBattleStartIntroPhase(state)).toBe("command-ready");
+  });
+
+  it("hands player-ready to the same settled typed command checkpoint", () => {
+    let state = intro();
+    while (state.elapsed < 370) state = advanceFactoryBattleStartIntro(state);
+    state = advanceFactoryBattleStartIntro(state, new Set(["A"]));
+    while (!generatedBattleStartCommandReady(state)) {
+      state = advanceFactoryBattleStartIntro(state);
+    }
+
+    let round = orchestrator();
+    const commandId = round.round.presentation!.command.commandId;
+    round = advanceFactoryRoundPresentation(
+      completeFactoryRoundPresentation(round, { commandId }),
+    );
+    const initial = round.battleCommandPresentation!;
+    let expected = initial;
+    for (let frame = 0; frame < 8; frame += 1) {
+      expected = advanceBattleCommandPresentation(expected, new Set());
+    }
+
+    const settled = settleFactoryBattleStartCommand(state, initial);
+    expect(settled).toEqual(expected);
+    expect(settled.lifecycle).toEqual({
+      phase: "action-menu",
+      phaseElapsed: 2,
+    });
+    expect(settled.field).toEqual(initial.field);
   });
 });

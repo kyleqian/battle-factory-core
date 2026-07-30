@@ -222,11 +222,15 @@ export function playerSummaryBarExitDx(t: number): number {
   return -2 * (t - PLAYER_SUMMARY_FADE_START_TICK);
 }
 
-export function playerThrowBallTopLeft(t: number): { x: number; y: number } | null {
+export function playerThrowBallTopLeft(
+  t: number,
+  targetY: number = 112,
+): { x: number; y: number } | null {
   if (t < PLAYER_THROW_BALL_START_TICK || t > PLAYER_THROW_BALL_EXACT_END_TICK) return null;
   const n = t - PLAYER_THROW_BALL_START_TICK;
   const dx = Math.floor((n * BALL_ARC_X_STEP) / 256);
-  const linearDy = Math.floor((n * BALL_ARC_Y_STEP) / 256);
+  const yStep = Math.floor(((targetY - 68) * 256) / 25) & ~1;
+  const linearDy = Math.floor((n * yStep) / 256);
   const arcIdx = Math.floor((n * BALL_ARC_ACCUM_STEP) / 256);
   const dy = linearDy + gbaSin(arcIdx, BALL_ARC_HEIGHT);
   return { x: 16 + dx, y: 60 + dy };
@@ -366,16 +370,51 @@ const BALL_SPIN_NEUTRAL_SCALE = 256; // xScale/yScale delta 0 - stays at StartSp
  * matrix is a literal table rather than computed from `angle` directly, and
  * the render-lag convention.
  */
-export function playerThrowBallSpin(t: number): { centerX: number; centerY: number; pa: number; pb: number; pc: number; pd: number } | null {
+function playerThrowLinearYAt(t: number, targetY: number): number {
+  let step = Math.floor(((targetY - BALL_SPIN_CENTER_Y) * 256) / 25) & ~1;
+  let accumulator = 0;
+  let remaining = 25;
+  let arc = 0;
+  let affineParam = 0;
+  for (
+    let tick = PLAYER_THROW_BALL_START_TICK + 1;
+    tick <= t && remaining > 0;
+    tick += 1
+  ) {
+    const high = (arc >> 8) & 0xff;
+    if (high >= 35 && high < 80) {
+      if (affineParam === 0) step = Math.floor(step / 3) & ~1;
+      const before = remaining;
+      accumulator += step;
+      remaining -= 1;
+      arc += Math.floor(BALL_ARC_ACCUM_STEP / 3);
+      affineParam += 1;
+      remaining = affineParam % 3 === 0 ? before - 1 : before;
+      if (((arc >> 8) & 0xff) >= 80) step = (step * 3) & ~1;
+    } else {
+      accumulator += step;
+      remaining -= 1;
+      arc += BALL_ARC_ACCUM_STEP;
+    }
+  }
+  return Math.floor(accumulator / 256);
+}
+
+export function playerThrowBallSpin(
+  t: number,
+  targetY: number = 112,
+): { centerX: number; centerY: number; pa: number; pb: number; pc: number; pd: number } | null {
   if (t < PLAYER_THROW_BALL_SPIN_START_TICK || t > PLAYER_THROW_BALL_ARRIVE_TICK) return null;
   if (t === PLAYER_THROW_BALL_ARRIVE_TICK) {
-    return { centerX: BALL_ARRIVE_CENTER_X, centerY: BALL_ARRIVE_CENTER_Y, pa: BALL_SPIN_NEUTRAL_SCALE, pb: 0, pc: 0, pd: BALL_SPIN_NEUTRAL_SCALE };
+    return { centerX: BALL_ARRIVE_CENTER_X, centerY: BALL_ARRIVE_CENTER_Y + targetY - 112, pa: BALL_SPIN_NEUTRAL_SCALE, pb: 0, pc: 0, pd: BALL_SPIN_NEUTRAL_SCALE };
   }
   const k = t - PLAYER_THROW_BALL_SPIN_START_TICK;
   const entry = BALL_SPIN_TABLE[k]!;
   return {
     centerX: BALL_SPIN_CENTER_X + entry.x2,
-    centerY: BALL_SPIN_CENTER_Y + entry.y2,
+    centerY: BALL_SPIN_CENTER_Y + entry.y2
+      + playerThrowLinearYAt(t, targetY)
+      - playerThrowLinearYAt(t, 112),
     pa: entry.pa,
     pb: entry.pb,
     pc: entry.pc,
@@ -505,9 +544,12 @@ const BALL_OPEN_TOP_LEFT = { x: BALL_ARRIVE_CENTER_X - 8, y: BALL_ARRIVE_CENTER_
 export const PLAYER_BALL_OPEN_VISIBLE_BOTTOM = 112;
 
 /** The ball's open/openFinal-pose top-left corner at tick `t` (both poses share the same settled-position corner), or `null` outside `[PLAYER_BALL_OPEN_START_TICK, PLAYER_BALL_OPEN_FINAL_END_TICK]`. Callers must clip the draw to `y < PLAYER_BALL_OPEN_VISIBLE_BOTTOM` (see its own doc comment) and pick the pose (open vs openFinal) by comparing `t` against `PLAYER_BALL_OPEN_END_TICK` (see that constant's own doc comment). */
-export function playerBallOpenTopLeft(t: number): { x: number; y: number } | null {
+export function playerBallOpenTopLeft(
+  t: number,
+  targetY: number = 112,
+): { x: number; y: number } | null {
   if (t < PLAYER_BALL_OPEN_START_TICK || t > PLAYER_BALL_OPEN_FINAL_END_TICK) return null;
-  return BALL_OPEN_TOP_LEFT;
+  return { x: BALL_OPEN_TOP_LEFT.x, y: BALL_OPEN_TOP_LEFT.y + targetY - 112 };
 }
 
 // --- The pre-existing ~1653+ full-frame residual named in PROGRESS.md #98 /
