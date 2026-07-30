@@ -190,8 +190,8 @@
         "the pure source-relative reducer ports ANIM_TAG_SPORE load/free, target mon-BG and 12/8 alpha lifetimes, all nine staggered gSporeParticleSpriteTemplate/AnimSporeParticle_Step sine-and-rise lifecycles, priority transitions, looped poison-powder audio, script waits, blendoff, and first inactive age 206",
         "the typed seam carries only resolved PARASECT/ONIX geometry and immutable HP/gender state; source extraction regenerates Parasect front/back and both Spore animation cells byte-for-byte, and the production compositor respects source OBJ priority and semi-transparent OBJ-to-non-OBJ blending without owning sleep, damage, RNG, turn, controller, or facility state",
         "sporePortable.ts reruns both probes only through tools/run-mgba-probe.py and proves every dense source/component, typed-seam, software/hardware OAM and matrices, palettes/tags, blend registers, audio task, immutable battler, raw-RGB, and production-framebuffer frame twice fresh",
-        "MOVE_COTTON_SPORE remains unsupported after an independent source batch-check: although it shares ANIM_TAG_SPORE and AnimSporeParticle, it uses splitbgprio, unblended particles, different looped audio, no setalpha/SporeDoubleBattle task, and still requires its own complete dense both-orientation acceptance",
-        "no animation-boundary list, unsupported barrier, canonical-recording allowlist, gameplay outcome, or sibling coverage changed"
+        "MOVE_COTTON_SPORE is independently exact after a complete 204-frame both-orientation proof; its separate reducer, seam, and compositor preserve splitbgprio, unblended particles, 18/10 loop audio, and the absence of setalpha/SporeDoubleBattle rather than inheriting Spore's body",
+        "Spore was independently batch-rerun at 207/207 twice fresh in both orientations after the shared AnimSporeParticle extraction; no animation-boundary list, unsupported barrier, canonical-recording allowlist, gameplay outcome, or sibling coverage changed"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-spore-player-parasect-opponent-onix.json",
@@ -206,6 +206,35 @@
         "src/animation/spore.ts",
         "src/animation/sceneOnPresentation.ts",
         "src/engine/battleScene.ts",
+        "tests/animation/spore.test.ts",
+        "tests/animation/sporeEvidence.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_COTTON_SPORE",
+      "status": "exact",
+      "covered": [
+        "the pinned source and generated-inventory audit identifies set 49 FRONTIER_MON_MAREEP as the lowest legal Level-50 carrier (species 179, Cotton Spore 178, Relaxed, HP+SpAttack, Cheri Berry); complete legal three-Pokemon Battle Scene ON parties stage Mareep against ONIX in both orientations",
+        "fresh dense probes cover the complete Cotton Spore body through first inactive cleanup twice reproducibly in both orientations: player-back frames 286-489 pass 204/204 with evidence f3505c583dbfd81459fa5a6ae013a0e84d8583f0cf3e0d0ec8cb1817c120e0c3 and raw RGB b46bd803dd59cf953c0fa0d4a979d15ab6c9060a6cc7b14571dbcb69cea38007; opponent-front frames 285-488 pass 204/204 with evidence a719bb8dff37cdf3f82a3909b6129e694b1982fa0800152dbbd7c3ae105e5983 and raw RGB 629fb753f6e9522a6144b90c630b4d6306e3fcdd1b2558fe9af8a55617ab569c",
+        "the pure reducer reuses source-derived ANIM_TAG_SPORE and all nine AnimSporeParticle sine/rise/priority lifecycles while preserving Cotton Spore's splitbgprio, opaque animation cell and OAM mode, 18-frame 10-repeat target-panned audio, no setalpha, no blendoff, no AnimTask_SporeDoubleBattle, monbg, waits, and first inactive age 203",
+        "the typed seam carries only resolved MAREEP/ONIX geometry and immutable HP/gender state; the production compositor uses reproducible generic Mareep front/back art, target-relative geometry, source OBJ priority and hardware-transfer age without owning accuracy, the Speed drop, damage, RNG, controller, turn, or facility state",
+        "sporePortable.ts runs both Cotton Spore probes only through tools/run-mgba-probe.py and proves every dense source/component, typed-seam, software/hardware OAM and matrices, palette/tag/register/audio/immutable-state/raw-RGB, and production-framebuffer frame twice fresh",
+        "MOVE_SPORE remains independently exact and was batch-rerun at 207/207 twice fresh in both orientations; no boundary list, unsupported barrier, canonical-recording allowlist, gameplay outcome, or facility state changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-cotton-spore-player-mareep-opponent-onix.json",
+        "tools/battle-lab/mechanic-cotton-spore-opponent-mareep-player-onix.json",
+        "tools/compare/fixtures/cotton-spore-player-mareep-opponent-onix.json",
+        "tools/compare/fixtures/cotton-spore-opponent-mareep-player-onix.json",
+        "tools/compare/sporeProbe.py",
+        "tools/compare/sporePortable.ts",
+        "tools/compare/sporeSourceAudit.ts",
+        "src/animation/assets/spore.json",
+        "src/animation/spore.ts",
+        "src/animation/cottonSpore.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/cottonSpore.test.ts",
         "tests/animation/spore.test.ts",
         "tests/animation/sporeEvidence.test.ts"
       ]
@@ -2700,7 +2729,7 @@
         "MOVE_SPORE",
         "MOVE_COTTON_SPORE"
       ],
-      "goal": "MOVE_SPORE independently proves its complete nine-particle blended body through cleanup at 207/207 dense source/seam/framebuffer frames in both orientations twice fresh. MOVE_COTTON_SPORE remains unsupported because its splitbgprio, unblended particle mode, distinct audio and no-alpha/no-SporeDoubleBattle body require separate complete both-orientation acceptance."
+      "goal": "MOVE_SPORE and MOVE_COTTON_SPORE are independently exact through complete dense both-orientation proofs twice fresh: Spore's 207-frame blended/alpha/SporeDoubleBattle body and Cotton Spore's distinct 204-frame splitbgprio/unblended/no-alpha/no-SporeDoubleBattle body."
     },
     {
       "id": "sparkle-3-special-screen",
