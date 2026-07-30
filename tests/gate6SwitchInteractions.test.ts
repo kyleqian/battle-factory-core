@@ -13,13 +13,16 @@ import {
   stepBattleScriptMachine,
   type BattleScriptMachineState,
 } from "../src/engine/battleScriptMachine.ts";
+import { weatherHasEffect } from "../src/engine/battleEndTurnOrchestration.ts";
 import { loadBattleScriptProgram } from "../src/engine/battleScriptProgram.ts";
 
 const program = loadBattleScriptProgram();
 const TACKLE = 33;
 const STARMIE = 121;
 const ABILITY_NATURAL_CURE = 30;
+const ABILITY_CLOUD_NINE = 13;
 const ABILITY_LEVITATE = 26;
+const B_WEATHER_RAIN_TEMPORARY = 1 << 0;
 const STATUS1_TOXIC_POISON = 1 << 7;
 const STATUS1_TOXIC_TURN_1 = 1 << 8;
 const SIDE_STATUS_SPIKES = 1 << 4;
@@ -416,6 +419,50 @@ describe("Gate-6 R6 Natural Cure switch persistence", () => {
       });
       expect(rebuilt.state.rulesContext.battlers[0].status1 & (15 << 8)).toBe(0);
     }
+  });
+});
+
+describe("Gate-6 R3 Cloud Nine switch-out weather reactivation", () => {
+  it("keeps Rain Dance's field state while replacing Cloud Nine, reactivating WEATHER_HAS_EFFECT for subsequent consumers", () => {
+    const cloudNine = rules({
+      battlers: [
+        battler({
+          side: 0,
+          species: 55,
+          ability: ABILITY_CLOUD_NINE,
+          types: ["TYPE_WATER", "TYPE_WATER"],
+        }),
+        battler({ side: 1 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      weather: B_WEATHER_RAIN_TEMPORARY,
+      weatherTimer: 4,
+      party: {
+        player: [
+          partyMember({ species: 55, abilityNum: 1 }),
+          partyMember({ species: 19, abilityNum: 0 }),
+          EMPTY_SLOT,
+          EMPTY_SLOT,
+          EMPTY_SLOT,
+          EMPTY_SLOT,
+        ],
+        opponent: [EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT],
+      },
+    });
+    expect(weatherHasEffect(cloudNine)).toBe(false);
+
+    const switched = switchPlayerToPartyIndex(cloudNine, 1);
+    expect(switched).toMatchObject({
+      weather: B_WEATHER_RAIN_TEMPORARY,
+      weatherTimer: 4,
+    });
+    expect(switched.battlers[0]).toMatchObject({
+      species: 19,
+      ability: 50,
+      partyIndex: 1,
+    });
+    expect(weatherHasEffect(switched)).toBe(true);
   });
 });
 
