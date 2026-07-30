@@ -13,10 +13,12 @@ is covered elsewhere.
 
 The coverage column is deliberately limited to test files opened for this
 scout: `battleScriptDamagingWeatherOpcode.test.ts`,
+`battleScriptHitChainOpcode.test.ts`,
 `battleScriptMoveEndOpcode.test.ts`,
 `battleScriptStatbuffchangeOpcode.test.ts`, and
-`battleScriptSwitchinOpcode.test.ts`.  Thus it does not over-credit a grep
-hit in an unreviewed test.
+`battleScriptSwitchinOpcode.test.ts`, plus the absorption consumer pin in
+`damageCalc.test.ts`.  Thus it does not over-credit a grep hit in an
+unreviewed test.
 
 The recipe shorthand is a complete `mechanicLab.overrides.parties` battle:
 all mons are level 50, legal ability slots for their species, six ordinary
@@ -84,10 +86,10 @@ the state transition.
 | held-item x ability | Entry/fainted-action orchestration invokes Intimidate/Trace before normal item effects, so an Intimidate-created negative stage can feed White Herb (`battle_util.c:1959-1964,3305-3329`). Pinsir cannot demonstrate that interaction: its sole legal ability is Hyper Cutter, which prevents Intimidate's Attack drop before the item can activate (`species_info.h:3819-3843`). | `tests/battleScriptSwitchinOpcode.test.ts` (Intimidate/Trace); `tests/battleScriptMoveEndOpcode.test.ts` (item effects) | R12 is the Pinsir prevention control; R12b uses legal White Herb Machamp (Guts) for the activation/order/consumption proof. |
 | held-item x stat-stage | White Herb restores every negative stage, and threshold berries raise a stage only below the cap (`battle_util.c:3383-3398,3431-3496`). | `tests/battleScriptMoveEndOpcode.test.ts` (item activation) | R9 above-neutral non-activation control plus R12b's restore and K6's cap/reset parameter test. |
 | held-item x switching/entry | White Herb has an explicit switch-in handler that normalizes negative stages (`battle_util.c:3305-3329`); a normal switch reconstructs the party item unless Knock Off recorded it (`battle_script_commands.c:4637-4646`). | `tests/battleScriptSwitchinOpcode.test.ts` (item reconstruction) | R12 oracle. |
-| held-item x immunity/absorb | No held-item branch changes an ability/type absorb result in Gen III; item effects run only after damage/effect eligibility.  Absorb handler is ability-only (`battle_util.c:2676-2747`) and item dispatch is separate (`3257-3330`). | NONE | K7: dispatch property—Volt/Water Absorb and Flash Fire consume no berry/Leftovers path on zero damage. |
+| held-item x immunity/absorb | No held-item branch changes an ability/type absorb result in Gen III; item effects run only after damage/effect eligibility.  Absorb handler is ability-only (`battle_util.c:2676-2747`) and item dispatch is separate (`3257-3330`). | `tests/gate6EntryItemInteractions.test.ts` (K7: all three matching redirects preserve Sitrus before damage/item dispatch) | Closed by K7; no new ROM fixture needed. |
 | ability x stat-stage | Clear Body/White Smoke block most preventable drops; Keen Eye blocks accuracy and Hyper Cutter Attack specifically; Intimidate creates an Attack drop (`battle_script_commands.c:6975-7038`; `battle_util.c:3003-3087`). | `tests/battleScriptStatbuffchangeOpcode.test.ts` (Clear Body/White Smoke/Keen Eye/Hyper Cutter specificity); `tests/battleScriptSwitchinOpcode.test.ts` (Intimidate blockers); `tests/gate6EntryItemInteractions.test.ts` (R13 Pidgeot pair) | R13 fixture receipts the paired Keen Eye-specific block and unrelated Intimidate Attack drop. |
 | ability x switching/entry | Switch-in scan queues weather, Intimidate, Trace, and Forecast; Natural Cure is the distinct switch-out hook (`battle_util.c:1959-1964,2485-2596`; `battle_script_commands.c:9590-9604`). | `tests/battleScriptSwitchinOpcode.test.ts` | R6/R12/R13 cover legal ordered combinations. |
-| ability x immunity/absorb | Volts/Water Absorb and Flash Fire use the absorbing handler; Levitate, Wonder Guard, Soundproof and status immunities gate effects elsewhere (`battle_util.c:2676-2747`; `battle_script_commands.c:1375-1496,2275-2425`). | `tests/battleScriptMoveEndOpcode.test.ts` (status immunity); `tests/battleScriptSwitchinOpcode.test.ts` (Levitate entry) | R14: flash/water/electric absorb versus type control, then R10 Soundproof. |
+| ability x immunity/absorb | Volt/Water Absorb and Flash Fire use the absorbing handler; Levitate, Wonder Guard, Soundproof and status immunities gate effects elsewhere (`battle_util.c:2676-2747`; `battle_script_commands.c:1375-1496,2275-2425`). | `tests/battleScriptHitChainOpcode.test.ts` (all three matching/mismatched types, full/partial HP, Flash Fire state); `tests/damageCalc.test.ts` (Flash Fire damage consumer); `tests/battleScriptMoveEndOpcode.test.ts` (status immunity); `tests/battleScriptSwitchinOpcode.test.ts` (Levitate entry) | R14 already covered; Volt Absorb additionally has two-seed OFF-ROM receipts. R10 Soundproof remains separate. |
 | stat-stage x switching/entry | Normal switch discards stages because full incoming BattlePokemon overwrites the active record; Baton Pass copies all stages first (`battle_script_commands.c:4621-4657`). | `tests/battleScriptSwitchinOpcode.test.ts` | R11 oracle. |
 | stat-stage x immunity/absorb | The stat-drop immunity family is the boundary: Clear Body/White Smoke/Keen Eye/Hyper Cutter and Shield Dust suppress eligible drops (`battle_script_commands.c:6975-7038`). | `tests/battleScriptStatbuffchangeOpcode.test.ts` | R13 oracle. |
 | switching/entry x immunity/absorb | Spikes damages only a non-Flying, non-Levitate switch-in (`battle_script_commands.c:5219-5254`); switch-in also obtains the incoming ability from species/slot (`4637-4646`). | `tests/battleScriptSwitchinOpcode.test.ts` | R15 oracle: three Spikes layers, Flying/Levitate/type control. |
@@ -114,7 +116,7 @@ are legal inert duplicates with `[Tackle,Tackle,Tackle,Tackle]`.
 | R12 | A: White Herb Pinsir (sole ability Hyper Cutter); B: Granbull Intimidate x4; switch Granbull in after initial player action. | Prevention control: Hyper Cutter blocks the Attack cut, so White Herb does not activate or get consumed. |
 | R12b | A: White Herb Machamp (sole ability Guts); B enters as Granbull Intimidate with Tackle x4 after an initial action. | Viable interaction: Attack 6→5, Intimidate message, White Herb restore 5→6, herb message, then item consumption. |
 | R13 | A: Pidgeot Keen Eye with Tackle x4; B: Granbull Intimidate with Sand-Attack x4 (`gate6-r13-off.json`). | The entry hook lowers Attack 6→5; Sand-Attack then prints the Keen Eye-specific prevention message and leaves accuracy 6. Hyper Cutter×Intimidate and White Smoke×Intimidate are already kernel-pinned controls. |
-| R14 | A: Lanturn Volt Absorb, Lombre Water Absorb, Houndoom Flash Fire; B has Thunder/Water Gun/Ember respectively x4. | Zero direct damage and correct heal/Flash Fire state against type controls. |
+| R14 | No new fixture: `docs/absorbing-abilities-ground-truth.md` already proves the source family and banks Volt Absorb OFF-ROM receipts; the kernel has matching/nonmatching typed controls for Volt/Water Absorb and Flash Fire. | Existing pins cover zero direct damage, exact quarter-heal/minimum/cap behavior, full-HP bypass, first/repeat Flash Fire state, and later Fire damage. K7 adds the previously missing held-item dispatch boundary. |
 | R15 | A: Spikes user sets three layers; B bench switches to Pidgeot then Levitate Lunatone and a grounded control. Opponent uses Tackle x4. | Flying/Levitate avoid Spikes, grounded mon takes source fraction. |
 
 K1--K7 are deliberately Tier-1-first: they assert pure reducer/dispatcher
@@ -142,6 +144,26 @@ decrease.  This is the source-specific control required by
 Intimidate's entry script does not list it as an Attack blocker
 (`battle_scripts_1.s:4027-4048`).
 
+### R14 / K7 — banked absorption family, missing pair pin closed
+
+No `gate6-r14-off.json` was added.  The earlier program documented in
+`docs/absorbing-abilities-ground-truth.md` already has source/kernel parity
+for Volt Absorb, Water Absorb, and Flash Fire.  Its tests cover matching and
+mismatched types, the nonzero-power gate, exact quarter-max healing with the
+one-HP minimum and max-HP cap, full-HP routing, and first/repeated Flash Fire
+state; `tests/damageCalc.test.ts` covers later consumption of that state.
+Volt Absorb's independent OFF-ROM receipts use seeds `610839776` and
+`324508639` and show battle/party HP `170→172`, the exact ability message,
+`MOVE_RESULT_DOESNT_AFFECT_FOE`, and no post-accuracy crit/damage RNG draws.
+
+The genuinely missing K7 pairwise assertion is now in
+`tests/gate6EntryItemInteractions.test.ts`: a full-HP target holding Sitrus
+is redirected before damage/item dispatch for matching Electric, Water, and
+Fire moves; HP and item remain unchanged, no item-removal event is emitted,
+and Flash Fire still sets its persistent resource flag.  This is a pure
+source-defined dispatch boundary, so the staging card's kernel-first rule
+does not promote it to a duplicate ROM fixture.
+
 ## Ranked dispatch shortlist
 
 Each line is one bounded worker slice, not an instruction to create all traces
@@ -155,12 +177,11 @@ in scenario/evidence once accepted.
 5. **R3 — Cloud Nine removal/reactivation.** `bin/oracle lab tools/battle-lab/gate6-r3-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptDamagingWeatherOpcode.test.ts; npm run build`
 6. **R9 — Swagger x Lum versus White Herb's negative-stage guard.** `bin/oracle lab tools/battle-lab/gate6-r9-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptMoveEndOpcode.test.ts; npm run build`
 7. **R13 — Intimidate x stat-drop prevention specificity.** `bin/oracle lab tools/battle-lab/gate6-r13-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptStatbuffchangeOpcode.test.ts tests/battleScriptSwitchinOpcode.test.ts; npm run build`
-8. **R14 — absorb ability x typed attack.** `bin/oracle lab tools/battle-lab/gate6-r14-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptMoveEndOpcode.test.ts; npm run build`
+8. **R14 — CLOSED by the banked absorption program plus K7's Gate-6 pair pin.** See the completed receipt note above; intentionally no duplicate `gate6-r14-off.json`.
 9. **R5 — sleep/confusion x Chesto/Lum exact cure timing.** `bin/oracle lab tools/battle-lab/gate6-r5-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptMoveEndOpcode.test.ts; npm run build`
 10. **R1 — sun x freeze prevention.** `bin/oracle lab tools/battle-lab/gate6-r1-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptDamagingWeatherOpcode.test.ts; npm run build`
 
 The remaining lower-risk kernel-first cards are K1 (end-turn item/weather
 order), K2 (weather-stage accuracy), K3 (major/volatile canceler ordering),
-K4 (status modifiers at fixed stages), K5 (Swagger/Foresight), K6 (White Herb
-cap/reset), and K7 (absorb bypasses item activation).  They are intentionally
-not inflated into oracle work until their pure contract fails.
+K4 (status modifiers at fixed stages), K5 (Swagger/Foresight), and K6 (White
+Herb cap/reset).  K7 is closed above without inflated oracle work.

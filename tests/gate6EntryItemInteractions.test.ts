@@ -22,9 +22,16 @@ const TACKLE = 33;
 const BATON_PASS = 226;
 const ITEM_WHITE_HERB = 180;
 const ITEM_LUM_BERRY = 141;
+const ITEM_SITRUS_BERRY = 142;
 const SAND_ATTACK = 28;
+const WATER_GUN = 55;
+const SPARK = 209;
+const FLAMETHROWER = 53;
 const PIDGEOT_SET = 355;
 const ABILITY_KEEN_EYE = 51;
+const ABILITY_VOLT_ABSORB = 10;
+const ABILITY_WATER_ABSORB = 11;
+const ABILITY_FLASH_FIRE = 18;
 const STATUS2_CONFUSION_TURN_2 = 2;
 const STATUS2_SUBSTITUTE = 1 << 24;
 const MACHAMP_SET = 431;
@@ -222,6 +229,43 @@ function runR13StatChange(statChanger: number) {
   return result.state;
 }
 
+function runR14AbsorbRedirect(ability: number, move: number) {
+  const rulesContext = createBattleScriptRulesContext({
+    ...switchContext(move),
+    battlers: [
+      battler({ side: 0, moves: [move, 0, 0, 0], pp: [15, 0, 0, 0] }),
+      battler({
+        side: 1,
+        ability,
+        hp: 100,
+        item: ITEM_SITRUS_BERRY,
+      }),
+      battler({ side: 0 }),
+      battler({ side: 1 }),
+    ],
+    selectorRoles: { attacker: 0, target: 1, effectBattler: 1, fainted: 1 },
+    scriptingBattler: 0,
+    currentMove: move,
+    battleMoveDamage: 0,
+  });
+  const execution = createBattleScriptStatusRulesExecution(
+    program,
+    "BattleScript_HitFromAccCheck",
+    rulesContext,
+    1,
+    ports,
+  );
+  const result = stepBattleScriptMachine(
+    program,
+    execution.state,
+    execution.handlers,
+  );
+  if (result.kind !== "advanced") {
+    throw new Error(`R14 absorb redirect stopped at ${result.kind}`);
+  }
+  return result.state;
+}
+
 function runSwitchDataUpdate(currentMove: number) {
   const execution = createBattleScriptStatusRulesExecution(
     program,
@@ -402,4 +446,33 @@ describe("Gate-6 R13 Keen Eye stat-drop specificity", () => {
         .map((payload) => payload.messageId),
     ).toEqual(["STRINGID_PKMNCUTSATTACKWITH"]);
   });
+});
+
+describe("Gate-6 R14 absorb dispatch versus held items", () => {
+  it.each([
+    [ABILITY_VOLT_ABSORB, SPARK, "BattleScript_MonMadeMoveUseless_PPLoss"],
+    [ABILITY_WATER_ABSORB, WATER_GUN, "BattleScript_MonMadeMoveUseless_PPLoss"],
+    [ABILITY_FLASH_FIRE, FLAMETHROWER, "BattleScript_FlashFireBoost_PPLoss"],
+  ] as const)(
+    "ability %i redirects matching move %i before direct damage or Sitrus activation",
+    (ability, move, expectedLabel) => {
+      const state = runR14AbsorbRedirect(ability, move);
+      expect(program.instructions[state.programCounter]?.source.label).toBe(
+        expectedLabel,
+      );
+      expect(state.rulesContext.battlers[1]).toMatchObject({
+        hp: 100,
+        item: ITEM_SITRUS_BERRY,
+      });
+      expect(state.rulesContext.battleMoveDamage).toBe(0);
+      expect(state.rulesContext.lastUsedAbility).toBe(ability);
+      expect(state.rulesContext.aiObservedAbilityIds[1]).toBe(ability);
+      expect(
+        state.events.filter((event) => event.kind === "set-battler-item"),
+      ).toEqual([]);
+      if (ability === ABILITY_FLASH_FIRE) {
+        expect(state.rulesContext.battlers[1].flashFireBoosted).toBe(1);
+      }
+    },
+  );
 });
