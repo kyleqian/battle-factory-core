@@ -8,6 +8,7 @@ import {
 import {
   battleResolutionCommandDuration,
   createBattleResolutionPresentationRenderView,
+  isBattleResolutionButtonMessageReady,
   isBattleResolutionCommandComplete,
   isBattleResolutionNextCommandHandoffComplete,
   renderBattleResolutionPresentation,
@@ -261,8 +262,16 @@ describe("battle resolution presentation receipt ownership", () => {
         lines: ["ONIX", "fainted!"],
         advance: "button",
       },
-      { type: "turn-end" },
     ]);
+    expect(resolution.segments[0]!.commands[1]).toMatchObject({
+      timing: {
+        sink: "player-pixel-rows",
+        pixelsPerFrame: 5,
+        spriteRows: 64,
+        healthboxVanishFrame: 18,
+        minimumFrames: 20,
+      },
+    });
   });
 
   it("projects a marked switch continuation onto the post-switch species and healthbox snapshot", () => {
@@ -342,6 +351,50 @@ describe("battle resolution presentation receipt ownership", () => {
 });
 
 describe("battle resolution typed Scene-OFF renderer", () => {
+  it("sinks a zero-HP battler, removes its healthbox, and exposes a real button wait", () => {
+    const forced = Object.freeze({
+      kind: "decision-required" as const,
+      request: Object.freeze({
+        kind: "forced-switch" as const,
+        requestId: 3,
+        side: "player" as const,
+        battler: 0 as const,
+        faintedPartyIndex: 0 as const,
+        legalPartyIndexes: Object.freeze([1 as const]),
+      }),
+    });
+    const resolution = createBattleResolutionPresentation(inputFor([
+      event(0, { kind: "health-bar-update", battler: 0, healthValue: 117 }),
+      event(1, { kind: "hp-change", battler: 0, from: 117, to: 0 }),
+      event(2, { kind: "play-faint-cry", battler: 0 }),
+      event(3, { kind: "faint-animation", battler: 0 }),
+      event(4, { kind: "message", messageId: "STRINGID_ATTACKERFAINTED", substitutions: [] }),
+    ], forced));
+
+    const sinking = createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, 1, 6),
+    );
+    expect(sinking.effect).toEqual({
+      type: "faint",
+      battler: 0,
+      healthboxVisible: true,
+      sink: { type: "player-pixel-rows", skipPixelRows: 30 },
+    });
+    expect(sinking.visibility.player).toEqual({
+      sprite: true,
+      healthbox: true,
+    });
+
+    const faintMessage = atRenderClock(resolution, 2, 13);
+    const waiting = createBattleResolutionPresentationRenderView(faintMessage);
+    expect(waiting.visibility.player).toEqual({
+      sprite: false,
+      healthbox: false,
+    });
+    expect(waiting.waitCursor).toEqual({ age: 0 });
+    expect(isBattleResolutionButtonMessageReady(faintMessage)).toBe(true);
+  });
+
   it("prints frozen attack/result lines one glyph per relative frame", () => {
     const resolution = damageResolution();
     const first = createBattleResolutionPresentationRenderView(

@@ -30070,29 +30070,66 @@ export function renderBattleResolutionSceneOffView(
   view: BattleResolutionPresentationRenderView,
 ): void {
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
-  drawSpriteSheet(
-    fb,
-    view.fieldArt.opponent.pic.tileset as Tileset,
-    view.fieldArt.opponent.pic.palette as RgbColor[],
-    view.fieldArt.opponent.origin.x,
-    view.fieldArt.opponent.origin.y,
-  );
-  drawSpriteSheet(
-    fb,
-    view.fieldArt.player.pic.tileset as Tileset,
-    view.fieldArt.player.pic.palette as RgbColor[],
-    view.fieldArt.player.origin.x,
-    view.fieldArt.player.origin.y,
-  );
-  drawSendOutHealthbox(
-    fb,
-    0,
-    composeOpponentHealthbox(healthboxAssemblyAssets, view.healthboxes.opponent),
-  );
-  drawComposedPlayerHealthbox(
-    fb,
-    composePlayerHealthbox(playerHealthboxAssets, view.healthboxes.player),
-  );
+  const faint = view.effect?.type === "faint" ? view.effect : null;
+  if (view.visibility.opponent.sprite) {
+    if (
+      faint?.battler === 1
+      && faint.sink.type === "opponent-tile-rows"
+    ) {
+      drawSpriteSheetTopRows(
+        fb,
+        view.fieldArt.opponent.pic.tileset as Tileset,
+        view.fieldArt.opponent.pic.palette as RgbColor[],
+        view.fieldArt.opponent.origin.x,
+        view.fieldArt.opponent.origin.y + faint.sink.y2,
+        faint.sink.keptRows,
+      );
+    } else {
+      drawSpriteSheet(
+        fb,
+        view.fieldArt.opponent.pic.tileset as Tileset,
+        view.fieldArt.opponent.pic.palette as RgbColor[],
+        view.fieldArt.opponent.origin.x,
+        view.fieldArt.opponent.origin.y,
+      );
+    }
+  }
+  if (view.visibility.player.sprite) {
+    if (
+      faint?.battler === 0
+      && faint.sink.type === "player-pixel-rows"
+    ) {
+      drawSpriteSheetTopClipped(
+        fb,
+        view.fieldArt.player.pic.tileset as Tileset,
+        view.fieldArt.player.pic.palette as RgbColor[],
+        view.fieldArt.player.origin.x,
+        view.fieldArt.player.origin.y,
+        faint.sink.skipPixelRows,
+      );
+    } else {
+      drawSpriteSheet(
+        fb,
+        view.fieldArt.player.pic.tileset as Tileset,
+        view.fieldArt.player.pic.palette as RgbColor[],
+        view.fieldArt.player.origin.x,
+        view.fieldArt.player.origin.y,
+      );
+    }
+  }
+  if (view.visibility.opponent.healthbox) {
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, view.healthboxes.opponent),
+    );
+  }
+  if (view.visibility.player.healthbox) {
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, view.healthboxes.player),
+    );
+  }
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
 
   if (view.effect?.type === "stat") {
@@ -30122,6 +30159,99 @@ export function renderBattleResolutionSceneOffView(
       view.message.lines[0] ?? "",
       view.message.lines[1] ?? "",
       view.message.visibleCharacters,
+    );
+    if (view.waitCursor) {
+      const line2 = view.message.lines[1] ?? "";
+      drawCursor(
+        fb,
+        CURSOR_Y_OFFSETS[
+          Math.floor(view.waitCursor.age / 9) % CURSOR_Y_OFFSETS.length
+        ]!,
+        LINE2_ORIGIN.x + measureText(font, charmap, line2),
+      );
+    }
+  }
+}
+
+function drawBattleResolutionSceneOffObjMask(
+  mask: Uint8Array,
+  view: BattleResolutionPresentationRenderView,
+): void {
+  if (view.visibility.opponent.sprite) {
+    drawSpriteSheet(
+      mask,
+      view.fieldArt.opponent.pic.tileset as Tileset,
+      view.fieldArt.opponent.pic.palette as RgbColor[],
+      view.fieldArt.opponent.origin.x,
+      view.fieldArt.opponent.origin.y,
+    );
+  }
+  if (view.visibility.player.sprite) {
+    drawSpriteSheet(
+      mask,
+      view.fieldArt.player.pic.tileset as Tileset,
+      view.fieldArt.player.pic.palette as RgbColor[],
+      view.fieldArt.player.origin.x,
+      view.fieldArt.player.origin.y,
+    );
+  }
+  if (view.visibility.opponent.healthbox) {
+    drawSendOutHealthbox(
+      mask,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, view.healthboxes.opponent),
+    );
+  }
+  if (view.visibility.player.healthbox) {
+    drawComposedPlayerHealthbox(
+      mask,
+      composePlayerHealthbox(playerHealthboxAssets, view.healthboxes.player),
+    );
+  }
+  // BG0's opaque message window owns the complete bottom strip.
+  mask.fill(0, 112 * 240 * 4);
+}
+
+/**
+ * Request-relative forced-selector entry shared by the typed resolution
+ * route and the accepted canonical party menu. The frozen faint view is the
+ * exact dismiss-edge snapshot; entry fades and party input use only the
+ * selector's own relative clock.
+ */
+export function renderBattleResolutionForcedPartySelect(
+  fb: Uint8Array,
+  view: BattleResolutionPresentationRenderView,
+  party: import("./partySelect.ts").PartySelectState,
+): void {
+  const phase = partySelectEntryPhase(party.elapsed);
+  if (phase === "battleHold") {
+    renderBattleResolutionSceneOffView(fb, view);
+    return;
+  }
+  if (phase === "fadingOut") {
+    renderBattleResolutionSceneOffView(fb, view);
+    const mask = new Uint8Array(fb.length);
+    drawBattleResolutionSceneOffObjMask(mask, view);
+    const local = party.elapsed - PARTY_ENTRY_FADE_OUT_START;
+    fadeTurn15PartyFramebuffer(
+      fb,
+      bgFadeY(local, PARTY_ENTRY_FADE_OUT),
+      mask,
+      objFadeY(local, PARTY_ENTRY_FADE_OUT),
+    );
+    return;
+  }
+  if (phase === "black") return;
+  drawTurn15PartySelectList(fb, party);
+  if (phase === "fadingIn") {
+    const mask = new Uint8Array(fb.length);
+    drawTurn15PartyListObjMask(mask, party);
+    const local = party.elapsed - PARTY_ENTRY_FADE_IN_START;
+    fadeTurn15PartyFramebuffer(
+      fb,
+      bgFadeY(local, PARTY_ENTRY_FADE_IN),
+      mask,
+      objFadeY(local, PARTY_ENTRY_FADE_IN),
     );
   }
 }

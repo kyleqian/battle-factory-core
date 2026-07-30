@@ -116,6 +116,7 @@ import {
   DRAGONBREATH_MENU_REDRAW_DELAY,
   INITIAL_BATTLE_SCENE_STATE,
   renderBattleScene,
+  renderBattleResolutionForcedPartySelect,
   renderBattleResolutionSceneOffView,
   renderGeneratedBattleCommandPresentation,
   renderSceneOnMovePresentation,
@@ -259,7 +260,10 @@ import {
   advanceFactoryRoundBattleResolution,
   type FactoryRoundBattleOrchestratorState,
 } from "./factoryRoundBattleOrchestrator.ts";
-import { renderBattleResolutionPresentation } from "./battleResolutionPresentationRender.ts";
+import {
+  createBattleResolutionPresentationRenderView,
+  renderBattleResolutionPresentation,
+} from "./battleResolutionPresentationRender.ts";
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
 
@@ -392,6 +396,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   if (state.factoryRoundBattleOrchestrator?.battleResolutionPresentation) {
     const factoryRoundBattleOrchestrator = advanceFactoryRoundBattleResolution(
       state.factoryRoundBattleOrchestrator,
+      newKeys,
     );
     return {
       ...state,
@@ -1954,11 +1959,22 @@ function renderPostwinState(state: EngineState): Uint8Array {
 function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
   if (state.factoryRoundBattleOrchestrator?.battleResolutionPresentation) {
     const fb = createFramebuffer();
-    renderBattleResolutionPresentation(
-      fb,
-      state.factoryRoundBattleOrchestrator.battleResolutionPresentation,
-      { drawScene: renderBattleResolutionSceneOffView },
-    );
+    const resolution =
+      state.factoryRoundBattleOrchestrator.battleResolutionPresentation;
+    const forced = state.factoryRoundBattleOrchestrator.battleForcedPartySelect;
+    if (forced) {
+      renderBattleResolutionForcedPartySelect(
+        fb,
+        createBattleResolutionPresentationRenderView(resolution),
+        forced,
+      );
+    } else {
+      renderBattleResolutionPresentation(
+        fb,
+        resolution,
+        { drawScene: renderBattleResolutionSceneOffView },
+      );
+    }
     return fb;
   }
   if (state.factoryRoundBattleOrchestrator?.battleCommandPresentation) {

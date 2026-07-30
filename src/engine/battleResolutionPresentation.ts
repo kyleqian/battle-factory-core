@@ -3,6 +3,7 @@ import {
   type BattleCommandFieldBattler,
   type BattleCommandPresentationState,
 } from "./battleCommandPresentation.ts";
+import { createBattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
 import type {
   BattleBoundary,
   BattleCommandDecision,
@@ -35,7 +36,20 @@ export type BattleMessageTiming = Readonly<{ minimumFrames: 24 }>;
 export type BattleHpTiming = Readonly<{ minimumFrames: 28 }>;
 export type BattleStatTiming = Readonly<{ minimumFrames: 32 }>;
 export type BattleStatusTiming = Readonly<{ minimumFrames: 32 }>;
-export type BattleFaintTiming = Readonly<{ minimumFrames: 1 }>;
+export type BattleFaintTiming =
+  | Readonly<{
+      minimumFrames: number;
+      sink: "opponent-tile-rows";
+      steps: number;
+      healthboxVanishFrame: number;
+    }>
+  | Readonly<{
+      minimumFrames: number;
+      sink: "player-pixel-rows";
+      pixelsPerFrame: 5;
+      spriteRows: number;
+      healthboxVanishFrame: number;
+    }>;
 export type BattleSwitchInTiming = Readonly<{ minimumFrames: 1 }>;
 export type BattleTurnEndTiming = Readonly<{ minimumFrames: 8 }>;
 
@@ -151,7 +165,6 @@ const MESSAGE_TIMING = Object.freeze({ minimumFrames: 24 } as const);
 const HP_TIMING = Object.freeze({ minimumFrames: 28 } as const);
 const STAT_TIMING = Object.freeze({ minimumFrames: 32 } as const);
 const STATUS_TIMING = Object.freeze({ minimumFrames: 32 } as const);
-const FAINT_TIMING = Object.freeze({ minimumFrames: 1 } as const);
 const SWITCH_IN_TIMING = Object.freeze({ minimumFrames: 1 } as const);
 const TURN_END_TIMING = Object.freeze({ minimumFrames: 8 } as const);
 
@@ -205,6 +218,7 @@ function messageLines(
     BattleScriptSemanticEventPayload,
     { kind: "stat-stage-change" }
   > | null,
+  lastFaintBattler: 0 | 1 | null,
 ): readonly string[] {
   if (event.payload.kind !== "message") {
     throw new Error("battle resolution message resolver received a non-message event");
@@ -241,20 +255,28 @@ function messageLines(
     });
   }
   if (messageId === "STRINGID_TARGETFAINTED") {
+    if (lastFaintBattler === null) {
+      throw new Error("battle resolution target-fainted message has no faint event");
+    }
+    const displayed = fieldBattler(field, lastFaintBattler);
     return resolveBattleStringLines(messageId, {
       B_DEF_NAME_WITH_PREFIX: () => resolveBattleNameWithPrefix({
-        side: "opponent",
+        side: lastFaintBattler === 0 ? "player" : "opponent",
         isTrainerBattle: true,
-        nickname: field.opponent.name,
+        nickname: displayed.name,
       }),
     });
   }
   if (messageId === "STRINGID_ATTACKERFAINTED") {
+    if (lastFaintBattler === null) {
+      throw new Error("battle resolution attacker-fainted message has no faint event");
+    }
+    const displayed = fieldBattler(field, lastFaintBattler);
     return resolveBattleStringLines(messageId, {
       B_ATK_NAME_WITH_PREFIX: () => resolveBattleNameWithPrefix({
-        side: "player",
+        side: lastFaintBattler === 0 ? "player" : "opponent",
         isTrainerBattle: true,
-        nickname: field.player.name,
+        nickname: displayed.name,
       }),
     });
   }
@@ -308,6 +330,9 @@ export function projectBattleResolutionCommands(
     BattleScriptSemanticEventPayload,
     { kind: "stat-stage-change" }
   > | null = null;
+  let lastFaintBattler: 0 | 1 | null = null;
+  const zeroHpBattlers = new Set<0 | 1>();
+  const fieldArt = createBattleCommandFieldArtView(field);
 
   for (let index = 0; index < events.length; index += 1) {
     const event = events[index]!;
@@ -323,7 +348,14 @@ export function projectBattleResolutionCommands(
       commands.push(Object.freeze({
         type: "message",
         eventSequence: event.sequence,
-        lines: messageLines(event, index, events, field, lastStatChange),
+        lines: messageLines(
+          event,
+          index,
+          events,
+          field,
+          lastStatChange,
+          lastFaintBattler,
+        ),
         advance:
           payload.messageId === "STRINGID_TARGETFAINTED"
           || payload.messageId === "STRINGID_ATTACKERFAINTED"
@@ -360,6 +392,7 @@ export function projectBattleResolutionCommands(
         healthValue: health.healthValue,
         timing: HP_TIMING,
       }));
+      if (payload.to === 0) zeroHpBattlers.add(battler);
       continue;
     }
     if (payload.kind === "stat-stage-change") {
@@ -390,13 +423,41 @@ export function projectBattleResolutionCommands(
     }
     if (payload.kind === "faint-animation") {
       const battler = singlesBattler(payload.battler, "faint animation");
+      if (!zeroHpBattlers.has(battler)) {
+        throw new Error(
+          `battle resolution faint animation for battler ${battler} has no zero-HP event`,
+        );
+      }
+      const timing: BattleFaintTiming = battler === 1
+        ? (() => {
+            const steps = 8 - Math.floor(fieldArt.opponent.coords.yOffset / 8);
+            const healthboxVanishFrame = 2 * steps + 3;
+            return Object.freeze({
+              minimumFrames: healthboxVanishFrame + 2,
+              sink: "opponent-tile-rows" as const,
+              steps,
+              healthboxVanishFrame,
+            });
+          })()
+        : (() => {
+            const spriteRows = fieldArt.player.pic.tileset.rows * 8;
+            const healthboxVanishFrame = Math.ceil(spriteRows / 5) + 5;
+            return Object.freeze({
+              minimumFrames: healthboxVanishFrame + 2,
+              sink: "player-pixel-rows" as const,
+              pixelsPerFrame: 5 as const,
+              spriteRows,
+              healthboxVanishFrame,
+            });
+          })();
       commands.push(Object.freeze({
         type: "faint",
         eventSequence: event.sequence,
         battler,
         partyIndex: fieldBattler(field, battler).partyIndex,
-        timing: FAINT_TIMING,
+        timing,
       }));
+      lastFaintBattler = battler;
       continue;
     }
     if (
@@ -472,7 +533,11 @@ export function projectBattleResolutionCommands(
       "battle resolution switch has no switch-in-animation presentation marker",
     );
   }
-  commands.push(Object.freeze({ type: "turn-end", timing: TURN_END_TIMING }));
+  if (!commands.some(
+    (command) => command.type === "message" && command.advance === "button",
+  )) {
+    commands.push(Object.freeze({ type: "turn-end", timing: TURN_END_TIMING }));
+  }
   return Object.freeze(commands);
 }
 

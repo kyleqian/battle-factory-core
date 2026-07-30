@@ -47,14 +47,21 @@ import {
 } from "./battleResolutionPresentation.ts";
 import {
   createBattleResolutionPresentationRenderView,
+  isBattleResolutionButtonMessageReady,
   isBattleResolutionCommandComplete,
   isBattleResolutionNextCommandHandoffComplete,
 } from "./battleResolutionPresentationRender.ts";
+import {
+  advancePartySelect,
+  createPartySelectStateFromForcedSwitch,
+  type PartySelectState,
+} from "./partySelect.ts";
 import type {
   BattleScriptPartyMemberState,
   BattleScriptPartyState,
 } from "./battleScriptRulesContext.ts";
 import { deriveBattleResolutionFromTerminalBoundary } from "./battleResolutionAdapter.ts";
+import { mapStatus1ToBattleStatus } from "./battleResolutionAdapter.ts";
 import {
   createFreshFactoryBattle,
 } from "./factoryBattleStart.ts";
@@ -200,6 +207,8 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
   battleResolutionPresentation: BattleResolutionPresentationState | null;
   /** Adjacent voluntary selector while the command UI owns party-handoff. */
   battlePartySelect: BattlePartySelectState | null;
+  /** Request-owned forced selector, created only on faint-message dismissal. */
+  battleForcedPartySelect: PartySelectState | null;
   /** Source gMoveSelectionCursor: controller-owned, not request-owned. */
   moveSelectionCursors: FactoryBattleMoveSelectionCursors;
   /** Singles controller display/cursor state persisted across request boundaries. */
@@ -395,6 +404,7 @@ export function createFactoryRoundBattleOrchestrator(
     battleCommandPresentation: null,
     battleResolutionPresentation: null,
     battlePartySelect: null,
+    battleForcedPartySelect: null,
     moveSelectionCursors: RESET_MOVE_SELECTION_CURSORS,
     battlePresentationBoundaries: null,
     aiHistory: null,
@@ -444,6 +454,7 @@ function startCurrentBattle(
     battleCommandPresentation,
     battleResolutionPresentation: null,
     battlePartySelect: null,
+    battleForcedPartySelect: null,
     moveSelectionCursors,
     battlePresentationBoundaries: createBattlePresentationBoundaries(
       battleCommandPresentation,
@@ -584,6 +595,7 @@ function finishBattle(
     battleCommandPresentation: null,
     battleResolutionPresentation: null,
     battlePartySelect: null,
+    battleForcedPartySelect: null,
     battlePresentationBoundaries: null,
     aiHistory,
     rngSegments: Object.freeze([...state.rngSegments, segment]),
@@ -744,6 +756,7 @@ function installDriveReceiptImmediately(
     battleCommandPresentation,
     battleResolutionPresentation: null,
     battlePartySelect: null,
+    battleForcedPartySelect: null,
     moveSelectionCursors,
     battlePresentationBoundaries: battleCommandPresentation === null
       ? state.battlePresentationBoundaries
@@ -839,6 +852,7 @@ function beginCommandResolution(
     battleCommandPresentation: null,
     battleResolutionPresentation: resolution,
     battlePartySelect: null,
+    battleForcedPartySelect: null,
     battlePresentationBoundaries: applyReceiptPpToBoundaries(
       state.battlePresentationBoundaries,
       receipt.events,
@@ -873,12 +887,8 @@ function commitCompletedResolutionCommand(
   resolution: BattleResolutionPresentationState,
   command: BattleResolutionPresentationCommand,
 ): FactoryBattlePresentationBoundaries {
-  if (
-    command.type === "faint"
-    || command.type === "party-summary"
-    || command.type === "switch-in"
-  ) {
-    return fail(`Slice 3 cannot commit ${command.type} presentation`);
+  if (command.type === "party-summary" || command.type === "switch-in") {
+    return fail(`Slice 4 cannot commit ${command.type} presentation`);
   }
   const displayed = createBattleResolutionPresentationRenderView(resolution).field;
   return Object.freeze(boundaries.map((boundary, battler) => Object.freeze({
@@ -889,7 +899,41 @@ function commitCompletedResolutionCommand(
       command.type === "status" && command.battler === battler
         ? command.after
         : boundary.displayedStatus1,
+    spriteVisible:
+      command.type === "faint" && command.battler === battler
+        ? false
+        : boundary.spriteVisible,
   }))) as unknown as FactoryBattlePresentationBoundaries;
+}
+
+function forcedPartyForResolution(
+  state: FactoryRoundBattleOrchestratorState,
+  resolution: BattleResolutionPresentationState,
+): BattleParty {
+  const identities = state.round.rules.playerParty;
+  const live = resolution.pendingBattle.rules.rulesContext.party.player;
+  return Object.freeze(identities.map((identity, index) => Object.freeze({
+    ...identity,
+    hp: live[index]!.hp,
+    maxHp: live[index]!.maxHP,
+    status: mapStatus1ToBattleStatus(live[index]!.status1),
+  }))) as BattleParty;
+}
+
+function createForcedPartySelect(
+  state: FactoryRoundBattleOrchestratorState,
+  resolution: BattleResolutionPresentationState,
+): PartySelectState {
+  const request = resolution.forcedRequest;
+  const records = state.round.rules.playerRentalRecords;
+  if (request === null || records === null) {
+    return fail("forced-party handoff requires a genuine request and rental records");
+  }
+  return createPartySelectStateFromForcedSwitch(
+    request,
+    records,
+    forcedPartyForResolution(state, resolution),
+  );
 }
 
 function settledCommandForResolutionHandoff(
@@ -941,6 +985,7 @@ function settledCommandForResolutionHandoff(
  */
 export function advanceFactoryRoundBattleResolution(
   state: FactoryRoundBattleOrchestratorState,
+  newKeys: ReadonlySet<GbaButton> = new Set(),
 ): FactoryRoundBattleOrchestratorState {
   const resolution = state.battleResolutionPresentation;
   const boundaries = state.battlePresentationBoundaries;
@@ -959,6 +1004,21 @@ export function advanceFactoryRoundBattleResolution(
           resolution.commandIndex,
           "next-command-handoff",
           0,
+        ),
+      });
+    }
+    if (
+      command.type === "message"
+      && command.advance === "button"
+      && isBattleResolutionButtonMessageReady(resolution)
+    ) {
+      return Object.freeze({
+        ...state,
+        battleResolutionPresentation: withResolutionLifecycle(
+          resolution,
+          resolution.commandIndex,
+          "awaiting-message-dismiss",
+          resolution.lifecycle.phaseElapsed,
         ),
       });
     }
@@ -992,8 +1052,47 @@ export function advanceFactoryRoundBattleResolution(
       ),
     });
   }
+  if (resolution.lifecycle.phase === "awaiting-message-dismiss") {
+    if (!newKeys.has("A")) {
+      return Object.freeze({
+        ...state,
+        battleResolutionPresentation: withResolutionLifecycle(
+          resolution,
+          resolution.commandIndex,
+          "awaiting-message-dismiss",
+          resolution.lifecycle.phaseElapsed + 1,
+        ),
+      });
+    }
+    if (resolution.forcedRequest === null) {
+      return fail("Slice 4 only dismisses faint messages at a forced-party boundary");
+    }
+    return Object.freeze({
+      ...state,
+      battleResolutionPresentation: withResolutionLifecycle(
+        resolution,
+        resolution.commandIndex,
+        "forced-party-handoff",
+        resolution.lifecycle.phaseElapsed,
+      ),
+      battleForcedPartySelect: createForcedPartySelect(state, resolution),
+    });
+  }
+  if (resolution.lifecycle.phase === "forced-party-handoff") {
+    const selector = state.battleForcedPartySelect;
+    if (selector === null) {
+      return fail("forced-party handoff has no request-owned selector");
+    }
+    // Slice 4 stops honestly at confirmation. Slice 5 owns submission,
+    // continuation receipt projection, and every send-out frame.
+    if (selector.sendOutElapsed !== null) return state;
+    return Object.freeze({
+      ...state,
+      battleForcedPartySelect: advancePartySelect(selector, newKeys),
+    });
+  }
   if (resolution.lifecycle.phase !== "next-command-handoff") {
-    return fail(`Slice 3 cannot advance resolution phase ${resolution.lifecycle.phase}`);
+    return fail(`Slice 4 cannot advance resolution phase ${resolution.lifecycle.phase}`);
   }
   const advanced = withResolutionLifecycle(
     resolution,
