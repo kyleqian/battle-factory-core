@@ -13,6 +13,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 730 — [BOUNDED MAIN WORKER 2026-07-30 ~00:45] Intro Slice 1 complete — generated battle-start contract frozen
+
+- **State:** Slice 1 is green at **1 focused file / 2 tests**; the existing
+  trainer/orchestrator controls are also green at **2 files / 34 tests**.
+  Full suite/build and the immutable §3.2 table remain for end-of-step
+  acceptance.
+- **Did:** the generated round owner now projects its pending `battleStart`
+  into a frozen typed command: source trainer/facility-class/trainer-class/
+  pic identities, both complete three-row kernel parties, active indexes,
+  six-slot summary states, and all three intro string substitutions. A real
+  challenge-2 seed pins SHIZUKA → `FACILITY_CLASS_BLACK_BELT` →
+  `TRAINER_PIC_BLACK_BELT` (id 11 in the 50-pic catalog).
+- **Next:** only if cap permits, Slice 2's source-relative pre-send-out
+  lifecycle and private probe comparison; otherwise run the required
+  immutable acceptance table, full suite/build once, and stop green.
+- **Notes:** no pixel claim, core/app routing, trace, capture list, recording
+  import, barrier/ratchet pin, battle/turn/tick branch, or fitted literal.
+  #53 now has intro slices 2-4 remaining. PAPERCUT: none.
+
+---
 ## 729 — [SUPERVISOR 2026-07-30 ~00:35] Slice 7 verified 128/128 — resolution seam design COMPLETE; user stitching report filed as #53; Gate-6 R12b/R11 merged
 
 - **State:** master green (union suite re-run by supervisor after merge
@@ -69,27 +89,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `battle_controller_opponent.c:440-456,1804-1816`;
   `pokeball.c:1284-1306`. No import/barrier/ratchet pin, route/tick branch,
   fitted coordinate/RGB, or capture thinning. PAPERCUT: none.
-
----
-## 727 — [BOUNDED MAIN WORKER 2026-07-29 ~23:45] Typed confirm handoff exact; Slice-7 checkpoint advances to 60/128
-
-- **State:** implementation `7f8e876b`; full suite green at **527 files /
-  5410 tests + 1 deliberate animation-lane skip**, focused acceptance **7
-  files / 167 tests**, production build and `git diff --check` green. Live
-  diagnostic improved **26/128 → 60/128**; Slice-7 acceptance remains
-  **0/128 claimed** and no trace is committed.
-- **Did:** generalized the canonical confirmed-FIGHT hold into nine typed
-  player-controller/battle-main/script stages. It preserves the selected
-  move field through frame 42, resets both bouncers at STOP_BOUNCE completion,
-  and begins the attack string at frame 43 without a fitted delay. Frames
-  **8-67 are exact**.
-- **Next:** project Scene-OFF `MOVE_ANIMATION`/`HIT_ANIMATION` controller
-  events before HP drain. First divergence is frame 68: **2px**, bbox
-  **(99,33)-(99,34)**; app removes opponent HP pixels while ROM holds the full
-  bar, then begins its target hit blink at frame 116.
-- **Notes:** all **25/25** §3.2 regression rows remain exact. Source:
-  `battle_controller_player.c:200-213,481-527,3082-3098`;
-  `battle_main.c:2940-2965,4354-4551,4756-4957`; `battle_util.c:78-292`;
-  `battle_scripts_1.s:236-247`; `battle_script_commands.c:915-1006,1191-1203`.
-  No trace/capture/import/barrier/ratchet-pin change or route/tick branch.
-  PAPERCUT: none.

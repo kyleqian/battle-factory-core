@@ -14,8 +14,9 @@ type EasyChatWord = Readonly<{
 
 type FrontierTrainerRow = Readonly<{
   id: number;
+  sourceId: string;
   name: string;
-  facilityClass: Readonly<{ id: number }>;
+  facilityClass: Readonly<{ id: number; source: string }>;
   speeches: Readonly<{
     speechBefore: readonly EasyChatWord[];
     speechWin: readonly EasyChatWord[];
@@ -24,15 +25,21 @@ type FrontierTrainerRow = Readonly<{
 }>;
 
 type FacilityClassLookupRow = Readonly<{
-  facilityClass: Readonly<{ id: number }>;
-  trainerClass: Readonly<{ displayName: string }>;
-  trainerPic: Readonly<{ symbol: string }>;
+  facilityClass: Readonly<{ id: number; symbol: string }>;
+  trainerClass: Readonly<{ id: number; symbol: string; displayName: string }>;
+  trainerPic: Readonly<{ id: number; symbol: string }>;
 }>;
 
 export interface FactoryTrainerPresentation {
   readonly trainerId: number;
+  readonly trainerSourceId: string;
   readonly name: string;
+  readonly facilityClassId: number;
+  readonly facilityClass: string;
+  readonly trainerClassId: number;
+  readonly trainerClass: string;
   readonly className: string;
+  readonly trainerPicIndex: number;
   readonly trainerPic: string;
   readonly speechBefore: readonly [string, string];
   readonly speechWin: readonly [string, string];
@@ -80,8 +87,14 @@ export function getFactoryTrainerPresentation(
   }
   return Object.freeze({
     trainerId,
+    trainerSourceId: trainer.sourceId,
     name: trainer.name,
+    facilityClassId: facilityClass.facilityClass.id,
+    facilityClass: facilityClass.facilityClass.symbol,
+    trainerClassId: facilityClass.trainerClass.id,
+    trainerClass: facilityClass.trainerClass.symbol,
     className: facilityClass.trainerClass.displayName,
+    trainerPicIndex: facilityClass.trainerPic.id,
     trainerPic: facilityClass.trainerPic.symbol,
     speechBefore: formatFactoryEasyChatSpeech(trainer.speeches.speechBefore),
     speechWin: formatFactoryEasyChatSpeech(trainer.speeches.speechWin),
