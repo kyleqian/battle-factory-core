@@ -74,10 +74,10 @@ the state transition.
 | weather x immunity/absorb | Type immunity (Rock/Ground/Steel vs sand, Ice vs hail), Sand Veil, and underground/underwater suppress weather chip (`battle_script_commands.c:7606-7640`); Cloud Nine globally suppresses the predicate (`battle_util.h:47-48`). | `tests/battleScriptDamagingWeatherOpcode.test.ts`; `tests/gate6WeatherVolatileInteractions.test.ts` (R2) | R2/R3 make the pairwise boundaries explicit. |
 | status x volatile | Sleep clears Nightmare when cured; confusion, paralysis, and infatuation are independent ordered attack-canceler gates (`battle_util.c:2040-2054,2156-2218`). | NONE | K3: sleep+Nightmare then Chesto/Lum, and paralysis+confusion RNG ledger property. |
 | status x held-item | Chesto clears sleep and Nightmare; condition berries cure their matching major status; Lum clears any major status plus confusion (`battle_util.c:3499-3591`). | `tests/battleScriptMoveEndOpcode.test.ts` (Cheri/Lum move-end activation); `tests/gate6EntryItemInteractions.test.ts` (R5 Chesto sleep+Nightmare and Lum confusion specificity) | R5 receipts exact Chesto/Lum controller timing. |
-| status x ability | Natural Cure clears major status on switch-out; Guts/Marvel Scale read status for stats; immunities reject sleep/poison/burn/freeze/paralysis and Own Tempo rejects confusion (`battle_script_commands.c:9590-9604,2360-2435,2531-2545`; `battle_util.c:2873-2945`). | `tests/battleScriptMoveEndOpcode.test.ts` (ability status cures/Own Tempo) | R6: poisoned Natural Cure switch; R7: burn Guts damage/stat. |
+| status x ability | Natural Cure clears major status on switch-out; Guts/Marvel Scale read status for stats; immunities reject sleep/poison/burn/freeze/paralysis and Own Tempo rejects confusion (`battle_script_commands.c:9590-9604,2360-2435,2531-2545`; `battle_util.c:2873-2945`). | `tests/battleScriptMoveEndOpcode.test.ts` (ability status cures/Own Tempo); `tests/gate6StatusAbilityInteractions.test.ts` (R7 complete burn/Guts/Facade scripts, arithmetic, and chip) | R6 complete; R7 complete with two-seed OFF-ROM receipts. |
 | status x stat-stage | Burn's physical Attack modifier and paralysis speed modifier belong in stat calculation, while status application does not itself mutate stages; stage mutation is separately clamped (`battle_script_commands.c:7085-7089`). | NONE | K4: damage/speed property with fixed stages, status on/off. |
 | status x switching/entry | Ordinary switching rebuilds the incoming record; Natural Cure only clears the departing major status (`battle_script_commands.c:4621-4657,9590-9604`). | `tests/battleScriptSwitchinOpcode.test.ts` (rebuild semantics) | R6 oracle. |
-| status x immunity/absorb | Type/ability gates prevent status before durable mutation: Fire blocks burn, Ice blocks freeze, Limber blocks paralysis, Immunity blocks poison (`battle_script_commands.c:2360-2425`). | `tests/battleScriptMoveEndOpcode.test.ts` (immunity cure pass) | R8: Toxic/Thunder Wave versus Immunity/Limber with an ordinary control target. |
+| status x immunity/absorb | Type/ability gates prevent status before durable mutation: Fire blocks burn, Ice blocks freeze, Limber blocks paralysis, Immunity blocks poison (`battle_script_commands.c:2360-2425`). | `tests/battleScriptMoveEndOpcode.test.ts` (immunity cure pass); `tests/gate6StatusImmunityInteractions.test.ts` (R8 complete primary-effect scripts and ordinary controls) | R8 complete with paired two-seed OFF-ROM receipts. |
 | volatile x held-item | Persim/Lum cure confusion; Mental Herb cures attraction; White Herb restores negative stages, including at move-end (`battle_util.c:3383-3398,3540-3601,3739-3755`). | `tests/battleScriptMoveEndOpcode.test.ts` (Lum confusion) | R9: Swagger into Lum/White Herb distinguishes volatile cure from stage restore. |
 | volatile x ability | Own Tempo blocks confusion, Oblivious blocks attraction, Soundproof blocks sound-based state effects; end-turn ability hooks run before item hooks (`battle_script_commands.c:2531-2545,7676-7695,8508-8533`; `battle_util.c:1494-1507`). | `tests/battleScriptTryinfatuatingOpcode.test.ts`; `tests/battleScriptTrysetperishsongOpcode.test.ts`; `tests/gate6VolatileAbilityInteractions.test.ts` | R10 complete: paired Attract/Oblivious receipt plus Soundproof partial-immunity receipt. |
 | volatile x stat-stage | Swagger/Flatter-like effects combine a volatile application with a stat change; accuracy/evasion stages combine with Foresight's volatile exception (`battle_script_commands.c:1128-1142`; stat application `7085-7089`). | NONE | K5: Swagger should set confusion and +2 Attack exactly once; Foresight ignores target evasion only. |
@@ -108,8 +108,8 @@ are legal inert duplicates with `[Tackle,Tackle,Tackle,Tackle]`.
 | R4 | A: Castform Forecast, Weather Ball; B: Rain Dance x4. | Entry/form/update gives Water type and Weather Ball changes; this is the Forecast boundary. |
 | R5 | `gate6-r5-off.json`: Chesto Snorlax uses Rest twice versus Tackle x4 (the first full-HP failure stages real damage; the second Rest succeeds). `gate6-r5-lum-off.json`: Lum Machamp versus Duskull Confuse Ray x4. | Chesto clears Rest sleep/Nightmare and is consumed only after its wake message; Lum clears the RNG-duration confusion and is consumed after its distinct cure message. |
 | R6 | A: Starmie Natural Cure, Recover; bench: neutral. B: Muk Toxic x4. Apply Toxic, voluntarily switch, then return. | Departing Starmie party status becomes clear; ordinary incoming state is rebuilt. |
-| R7 | A: Ursaring Guts, Facade; B: Ninetales Will-O-Wisp x4. | Burn appears and Facade damage/stat result is the Guts branch. |
-| R8 | A: Muk Immunity (or Lanturn); B: Toxic x4; repeat B Thunder Wave x4 versus Limber Persian. | No durable status or incorrect cure message; control target is affected. |
+| R7 | `gate6-r7-off.json`: Ursaring Guts/Facade versus Ninetales Will-O-Wisp x4. | Burn, exact Guts + Facade damage, and the independent end-turn chip are all receipted. |
+| R8 | `gate6-r8-off.json`: Snorlax Immunity versus Roselia Toxic x4; `gate6-r8-control-off.json` changes only Snorlax to Thick Fat. `gate6-r8-paralysis-off.json`: Limber Persian versus Electrike Thunder Wave x4; `gate6-r8-paralysis-control-off.json` uses ordinary Thick Fat Snorlax. | No durable status on either immune target; exact ability-specific prevention message, PP loss, and normal control application. Muk was corrected because it has no Immunity slot. |
 | R9 | A: Lum/White Herb Machamp; B: Gengar Swagger x4. | Lum removes confusion but not the +2 Attack boost; White Herb has no negative stage to restore, so it remains held while both +2 Attack and confusion persist (`battle_util.c:3739-3755`). |
 | R10 | `gate6-r10-attract-off.json`: male Oblivious Lickitung versus female Gardevoir Attract x4; `gate6-r10-attract-control-off.json` changes only Lickitung to Own Tempo. `gate6-r10-perish-song-off.json`: Soundproof Exploud versus Lapras Perish Song x4. | Attraction is rejected with its distinct ability message while the compatible control is affected; Perish Song skips only Soundproof and still marks its ordinary user. |
 | R11 | A: Ninjask Substitute then Baton Pass; bench: recipient. B: passive Tackle x4. Repeat ordinary manual switch. | Baton Pass retains intended status2/stages; ordinary switch clears them. |
@@ -160,6 +160,99 @@ branches at `battle_script_commands.c:2396-2417,2428-2449`, distinct from
 Poison/Steel type gates and Electric damage immunity.
 
 ## Completed receipt notes
+
+### R7 — burn, Guts Attack, Facade multiplier, and end-turn chip
+
+`gate6-r7-off.json` uses complete legal parties: the corpus has both
+Ursaring/Facade and Ninetales/Will-O-Wisp carriers, and both species' requested
+ability slots are their real slots.  The deliberately low Attack IV keeps
+Ninetales alive through an ordinary Facade roll.  Before either ROM run, the
+ported builder/formula prediction was Ursaring `HP 165 / Attack 121`,
+Ninetales `HP 180 / Defense 127`, durable burn `0→0x10`, noncritical damage
+`114..135`, and end-turn burn chip `165→145` (`floor(165/8)=20`).  Both seeds
+derived exactly those stats, the same status/chip deltas, and no critical hit.
+
+On seed `1`, Will-O-Wisp's accuracy roll is `56317` and burn appears at frame
+117; frame 200 displays `URSARING was burned!` with raw-RGB SHA-256
+`1ed7bba83895816565b3d4553bfce1e4f35af1d909190193976647005a1005b7`.
+Facade then consumes accuracy/crit/damage rolls `15002/52212/24745`; the last
+is `91%`, so the pre-roll `135` becomes exactly `122`, and Ninetales changes
+`180→58` at frame 447 (hash
+`1f0282e123f5840c9d0997e2cf1658bad2a1765693b8c8a104aca9f1975c59db`).
+Burn chip changes Ursaring `165→145` at frame 582 with the exact
+`URSARING is hurt by its burn!` tail and hash
+`710a428c1cf6501d8f90d29b01ffb796a11a50ec05c996241ea02d07480bde64`.
+
+On seed `324508639`, the corresponding Will-O-Wisp roll is `55014` and the
+Facade rolls are `57953/33692/28096`; the `100%` damage roll preserves exact
+damage `135`, Ninetales `180→45` at frame 460 (hash
+`4e14b08dd50b3864a16ed5cf54353ffefc235512a44b04fef0bba2c88011462a`),
+and the same twenty-HP chip lands at frame 595 (hash
+`3acb8ce34742047570686c1b0bb7332ff08ea1abac7fe0cdf311006721d80c34`).
+Thus prediction versus observation is exact for both seeds, not merely
+"Facade did more damage."
+
+The paired Tier-1 pin runs Will-O-Wisp and Facade from their literal effect
+entries through `END`, including PP, burn/status-icon message tail, and the
+same two seeded damage results.  Its arithmetic separately proves the two
+load-bearing source branches: Guts changes Attack
+`floor(121*150/100)=181` and suppresses burn's physical halving
+(`pokemon.c:3203-3213,3263-3264`), producing base damage `45` instead of
+`16`; `BattleScript_FacadeDoubleDmg` supplies `sDMG_MULTIPLIER=2`
+(`battle_scripts_1.s:2252-2258`), consumed by `Cmd_damagecalc`
+(`battle_script_commands.c:1290-1297`) before STAB and the random multiplier
+(`battle_script_commands.c:1639-1651`).  The durable chip is the independent
+`ENDTURN_BURN` `maxHP/8` branch at `battle_util.c:1550-1560`, with
+`BattleScript_BurnTurnDmg`'s exact message/update tail at
+`battle_scripts_1.s:3750-3763`.
+
+### R8 — Immunity/Limber prevention versus ordinary controls
+
+The Toxic card corrects the original staging suggestion: Emerald Muk has
+Stench/Sticky Hold and cannot legally carry Immunity.  Snorlax has real slot-0
+Immunity and slot-1 Thick Fat, so the checked-in pair changes only the
+same-species ability.  Roselia is a legal Toxic carrier.  Dense fresh probes
+on seeds `1` and `324508639` sample every one of 734 trace frames: both
+Immunity runs keep battle and party status exactly zero throughout, spend
+exactly one Toxic PP (the Factory AI may choose a different one of four
+identical slots), and record `gLastUsedAbility = 17` during the prevention
+tail.  Frame 160 on both seeds displays exactly
+`SNORLAX's IMMUNITY prevents poisoning!`, never `But it failed!`, with
+raw-RGB SHA-256
+`ff1719f9df728b5de286a5076af8010108c12d938a00112868695a62181f9c5f`.
+The Thick Fat control gains battle/party `STATUS1_TOXIC_POISON = 0x80` at
+frame 111, displays `SNORLAX is badly poisoned!` at frame 160 with shared
+hash `7a64658972ba705c32e2b18b5aa571f946cc7fbfafd99f0c6202cf7a419c53f4`,
+then advances battle status to `0x180` and takes the predicted
+`floor(267/16)=16` chip (`267→251`).  The immune branch consumes zero
+accuracy draws; the ordinary control consumes its real Toxic accuracy draw.
+
+The paralysis pair uses legal single-ability Limber Persian and legal
+Thunder-Wave Electrike.  On both seeds, all 734 dense frames keep Persian's
+battle/party status zero, one Thunder Wave PP is spent, and
+`gLastUsedAbility = 7` during the prevention tail.  Frame 320 displays exactly
+`PERSIAN's LIMBER prevents paralysis!`, never `But it failed!`, with shared
+hash `be920de334f14020616679d4cb92b552cc91655f91d7e063450c70ef2fd1c9c1`.
+The ordinary Normal-type Thick Fat Snorlax control gains battle/party
+`STATUS1_PARALYSIS = 0x40` at frame 119 on both seeds and displays the normal
+application tail (frame-200 shared hash
+`05bd819aa8168ac1c431c72048030d811aa0fa5a64199a7353117596ef0cca68`).
+Again the ability branch runs before accuracy while the control consumes its
+normal accuracy draw.
+
+The full-script Tier-1 pairs pin status bytes, PP loss, zero draws on the
+early ability branches, one accuracy draw on each ordinary success,
+AI-observed ability identity, and the exact prevention/application message
+IDs.  Toxic's Immunity gate is ahead of Poison/Steel type and accuracy checks
+in `BattleScript_EffectToxic` (`battle_scripts_1.s:685-705`), while Thunder
+Wave checks Limber before `typecalc` and accuracy
+(`battle_scripts_1.s:1006-1026`).  The underlying primary/certain status
+writer has distinct Immunity and Limber branches at
+`battle_script_commands.c:2396-2417,2428-2449`; the prevention scripts select
+their ability-specific tables at `battle_scripts_1.s:4128-4139`, whose exact
+English templates live at `battle_message.c:270-272,1221-1234`.  Both targets
+are Normal type, so neither receipt can accidentally prove a Poison/Steel or
+Electric-type immunity instead.
 
 ### R10 — Oblivious Attract rejection and Soundproof partial immunity
 
