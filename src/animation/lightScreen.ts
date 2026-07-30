@@ -1,4 +1,5 @@
 export type LightScreenSide = "player" | "opponent";
+export type SpecialScreenKind = "light-screen" | "mirror-coat";
 
 export interface LightScreenSparkle {
   readonly spawnIndex: number;
@@ -59,10 +60,11 @@ function sparkleAtAge(
  * Source-relative reducer for Move_LIGHT_SCREEN. Age zero is the creation
  * pass of gLightScreenWallSpriteTemplate; the body is inactive after age 73.
  */
-export function lightScreenAtAge(
+export function specialScreenAtAge(
   age: number,
   attackerCenter: Readonly<{ x: number; y: number }>,
   side: LightScreenSide,
+  kind: SpecialScreenKind,
 ): LightScreenState {
   const wallLive = age >= 0 && age <= 63;
   const sparkles = SPARKLE_ARGS.flatMap((_, index) => {
@@ -74,7 +76,7 @@ export function lightScreenAtAge(
     const eva = age <= 1 ? 0
       : age <= 14 ? age - 1
         : age <= 47 ? 13
-          : side === "opponent" && age === 52 ? 9
+          : kind === "light-screen" && side === "opponent" && age === 52 ? 9
             : age <= 60 ? 60 - age : 0;
     alpha = { eva, evb: 16 - eva };
   }
@@ -88,7 +90,28 @@ export function lightScreenAtAge(
     sparkles,
     alpha,
     opponentBattlerHidden: age >= 1 && age <= 59,
-    soundTaskActive: age >= 0 && age <= 14,
+    soundTaskActive: kind === "light-screen" && age >= 0 && age <= 14,
     active: age >= 0 && age <= 73,
   };
+}
+
+export function lightScreenAtAge(
+  age: number,
+  attackerCenter: Readonly<{ x: number; y: number }>,
+  side: LightScreenSide,
+): LightScreenState {
+  return specialScreenAtAge(age, attackerCenter, side, "light-screen");
+}
+
+/**
+ * Source-relative reducer for Move_MIRROR_COAT. Its red wall and immediate
+ * audio command differ from Light Screen, while AnimDefensiveWall and all six
+ * SpecialScreenSparkle callbacks are source-identical.
+ */
+export function mirrorCoatAtAge(
+  age: number,
+  attackerCenter: Readonly<{ x: number; y: number }>,
+  side: LightScreenSide,
+): LightScreenState {
+  return specialScreenAtAge(age, attackerCenter, side, "mirror-coat");
 }

@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { lightScreenAtAge } from "../../src/animation/lightScreen.ts";
+import {
+  lightScreenAtAge,
+  mirrorCoatAtAge,
+} from "../../src/animation/lightScreen.ts";
 import {
   createSceneOnMovePresentation,
   sceneOnLightScreenView,
+  sceneOnMirrorCoatView,
+  type SceneOnMirrorCoatConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
 
 describe("MOVE_LIGHT_SCREEN source reducer", () => {
@@ -71,5 +76,44 @@ describe("MOVE_LIGHT_SCREEN source reducer", () => {
       sparkles: [{ spawnIndex: 0 }],
     });
     expect(stage.config).not.toHaveProperty("sideCondition");
+  });
+
+  it("reuses only the source-identical Mirror Coat wall/sparkle callbacks", () => {
+    const center = { x: 72, y: 80 };
+    expect(mirrorCoatAtAge(36, center, "player")).toEqual({
+      ...lightScreenAtAge(36, center, "player"),
+      soundTaskActive: false,
+    });
+    const stage = createSceneOnMovePresentation<SceneOnMirrorCoatConfig>({
+      move: "MIRROR_COAT",
+      attacker: {
+        species: "CORSOLA",
+        geometry: {
+          side: "player", spriteCorner: { x: 40, y: 56 },
+          animationCenter: { x: 72, y: 88 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "EXEGGCUTE",
+        geometry: {
+          side: "opponent", spriteCorner: { x: 144, y: 15 },
+          animationCenter: { x: 176, y: 47 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      allocatorProfile: { wall: 3, sparkles: [4, 5, 7, 4, 5, 7] },
+      fieldProfile: {
+        playerHp: 106, playerMaxHp: 137,
+        opponentHp: 153, opponentMaxHp: 153,
+      },
+    });
+    expect(sceneOnMirrorCoatView({ ...stage, age: 12 })).toMatchObject({
+      attacker: { species: "CORSOLA" },
+      wall: { x: 112 },
+      sparkles: [{ spawnIndex: 0 }],
+      soundTaskActive: false,
+    });
+    expect(stage.config).not.toHaveProperty("damage");
   });
 });

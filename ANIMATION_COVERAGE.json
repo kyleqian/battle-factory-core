@@ -248,8 +248,8 @@
         "the pure source-relative reducer ports GREEN_LIGHT_WALL and SPARKLE_3 load/display lifetimes; gLightScreenWallSpriteTemplate/AnimDefensiveWall alpha, palette rotation, opponent-BG transfer, visibility and cleanup; all six gSpecialScreenSparkleSpriteTemplate/AnimWallSparkle instances from SpecialScreenSparkle; setalpha, delayed Reflect audio, blendoff register tail, OAM/VBlank display latches, and first inactive age 74",
         "the typed seam carries only resolved EXEGGCUTE/ONIX geometry, allocator slots, HP and gender; source-extracted Exeggcute front/back, GREEN_LIGHT_WALL, and SPARKLE_3 art pass software/hardware OAM and matrices, palettes/tags/buffers, registers, audio, immutable battler fields, raw RGB, and every production framebuffer without owning Light Screen side-condition state, damage, RNG, turn order, controllers, or facility state",
         "lightScreenEvidence.ts reruns both probes only through tools/run-mgba-probe.py and proves all 115/119 dense move-owned frames twice fresh; the three immediately preceding frames in each trace are the prior Tackle's critical-hit message and are deliberately outside the Light Screen acceptance window rather than thinned from its body",
-        "MOVE_MIRROR_COAT remains unsupported after its independent source batch-check: its lowest suitable carrier is set 151 FRONTIER_MON_CORSOLA, and it requires RED_LIGHT_WALL palette/tag plus gMirrorCoatWallSpriteTemplate, wall-before-audio delay-10/immediate-playse timing, a real prior-special-damage counter setup/result, and its own complete both-orientation audio/palette/register/cleanup/raw-RGB/framebuffer acceptance twice fresh",
-        "no animation-boundary list, unsupported barrier, canonical-recording allowlist, gameplay outcome, or sibling coverage changed"
+        "MOVE_MIRROR_COAT independently reruns exact at 75/75 twice fresh in both orientations under its own real special-damage counter staging and distinct red-wall/audio acceptance",
+        "no animation-boundary list, unsupported barrier, canonical-recording allowlist, gameplay outcome, or facility state changed"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-light-screen-player-exeggcute-opponent-onix.json",
@@ -266,6 +266,34 @@
         "src/engine/battleScene.ts",
         "tests/animation/lightScreen.test.ts",
         "tests/animation/lightScreenEvidence.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_MIRROR_COAT",
+      "status": "exact",
+      "covered": [
+        "the source/inventory/controller audit proves challenge-0 set 151 FRONTIER_MON_CORSOLA is the lowest legal Level-50 carrier (species 222, Mirror Coat 243, Impish, HP+Defense+SpDefense, Sitrus Berry) and finds one reachable animation body: nonzero opposing special damage reaches Move_MIRROR_COAT, while the failure route selects no move-animation body",
+        "complete legal three-Pokemon Battle Scene ON parties constrain Exeggcute to real Confusion and Corsola to real Mirror Coat; Mirror Coat's source -5 priority populates gProtectStructs before Cmd_mirrorcoatdamagecalculator doubles 26 to 52 player-back and 31 to 62 opponent-front, without injecting transient damage or counter state",
+        "fresh dense probes cover first active gMirrorCoatWallSpriteTemplate creation through the first inactive cleanup twice reproducibly in both orientations: player-back frames 349-423 pass 75/75 source/component/hardware/raw-RGB/production-framebuffer checks with evidence 1ea5591d85dc0e4926b8e763584f405ed4ec72d43c676ad06fc551cedb44aa92 and raw RGB c8a70485e2d13ae522c31760ee7e6ecb24bb464eb567427855448389ab1128a7; opponent-front frames 355-429 pass 75/75 with evidence 3328d443c81b35a5305590705e7448d009aa0111a326b318c08b420a29939a7d and raw RGB 0fcba1ad43f479f613f84243bca184e10f4545e7e6566558327c081444b73b5b",
+        "the reducer and typed seam reuse only source-identical AnimDefensiveWall and all six SpecialScreenSparkle/AnimWallSparkle lifecycles; Mirror Coat preserves RED_LIGHT_WALL/gMirrorCoatWallSpriteTemplate, wall-before-audio delay-10 plus immediate attacker-panned SE_M_REFLECT, no Light Screen sound task, palette rotation, opponent BG transfer/visibility, OAM/VBlank latches, blend/register tail, and complete cleanup",
+        "source-derived Corsola front/back and shared wall tiles with the red palette regenerate byte-for-byte; the production compositor carries only resolved Corsola/Exeggcute geometry, allocator slots, HP, and gender, and owns no counter/damage calculation, accuracy, RNG, controller, turn order/advancement, or facility state",
+        "MOVE_LIGHT_SCREEN independently batch-reruns 115/115 player-back and 119/119 opponent-front twice fresh with unchanged evidence/raw hashes and remains exact",
+        "no animation-boundary list, unsupported barrier, canonical-recording allowlist, or non-animation engine ownership changed"
+      ],
+      "evidence": [
+        "tools/compare/fixtures/mirror-coat-player-corsola-opponent-exeggcute.json",
+        "tools/compare/fixtures/mirror-coat-opponent-corsola-player-exeggcute.json",
+        "tools/compare/mirrorCoatScenario.ts",
+        "tools/compare/lightScreenProbe.py",
+        "tools/compare/mirrorCoatEvidence.ts",
+        "tools/compare/lightScreenSourceAudit.ts",
+        "tools/compare/extractMirrorCoatAssets.ts",
+        "src/animation/assets/mirror-coat.json",
+        "src/animation/lightScreen.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/lightScreen.test.ts",
+        "tests/animation/mirrorCoatEvidence.test.ts"
       ]
     },
     {
@@ -2735,8 +2763,10 @@
       "id": "sparkle-3-special-screen",
       "components": [
         "asset:ANIM_TAG_GREEN_LIGHT_WALL",
+        "asset:ANIM_TAG_RED_LIGHT_WALL",
         "asset:ANIM_TAG_SPARKLE_3",
         "sprite:gLightScreenWallSpriteTemplate",
+        "sprite:gMirrorCoatWallSpriteTemplate",
         "sprite:gSpecialScreenSparkleSpriteTemplate",
         "subroutine:SpecialScreenSparkle",
         "visualCommand:setalpha",
@@ -2746,7 +2776,7 @@
         "MOVE_LIGHT_SCREEN",
         "MOVE_MIRROR_COAT"
       ],
-      "goal": "MOVE_LIGHT_SCREEN independently proves its complete wall, six-SPARKLE_3, alpha/palette/audio, OAM/display, and cleanup body at 115/115 player-back and 119/119 opponent-front dense source/seam/framebuffer frames twice fresh. MOVE_MIRROR_COAT remains unsupported: it independently needs RED_LIGHT_WALL/gMirrorCoatWallSpriteTemplate, wall-before-audio delay-10/immediate-playse timing, real counter staging/result state, and complete dense both-orientation audio/palette/register/cleanup/raw-RGB/framebuffer acceptance."
+      "goal": "Track complete: MOVE_LIGHT_SCREEN independently proves 115/115 player-back and 119/119 opponent-front twice fresh; MOVE_MIRROR_COAT independently proves its sole reachable successful-counter body at 75/75 twice fresh in both orientations, including RED_LIGHT_WALL, real special-damage receipts, distinct immediate audio, OAM/display, registers, and cleanup."
     },
     {
       "id": "red-heart-sweet-kiss",

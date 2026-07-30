@@ -4,6 +4,34 @@ Older dated sections moved out of `ANIMATION_PROGRESS.md` to keep that
 file lean (`AGENTS.md`'s ~3-most-recent convention). Git history has the
 full record regardless; this file is a read-only reference.
 
+## MOVE_WHIRLPOOL promoted exact; both source bodies accepted (2026-07-29)
+
+**Verdict:** `MOVE_WHIRLPOOL` is exact through one pure source-relative
+reducer, typed Scene-ON seam, and production compositor. The complete main
+body passes **133/133** semantic and framebuffer frames twice in both
+orientations: player-back evidence/raw
+`2942fa0bf1a07da485bcf391ca4ecea06a41361d648adc27a1e48a3f32018125` /
+`d3a4cebcb258d334414d99096b7ded4accc90be1af37da4abf01610866ae96c8`;
+opponent-front
+`7e57488e1a265960fec441a02b5133f0b4a6e38ddde46cd42e21b5a29b0aaba3` /
+`8b42073d713d49286935abd3079c2266464f6f66c492a039903fb70740a26ffa`.
+
+**Residual / model:** the independently staged `Status_Whirlpool` body passes
+**108/108** twice per orientation: player-back
+`e5d210e7908b269ba0722959c4035d4bc39c04378a323cf74698375baa615b84` /
+`8a809496f28e7cb8e5eb9a37e26f721a9e9b3c14ef67bbf798825d4b527a9e71`;
+opponent-front
+`d6b1d9e43817259be6ad63c9b36e5f4d11112a868785925253716eb97fead93a` /
+`481017b8c09ddf3bbe585e6e2845a02384e27e1b7ed38169834e3eb2ea82463c`.
+The model preserves the main body's 18 vortex-orb lifecycles and 50-tick
+ShakeMon, the residual body's 12 lifecycles and 30-tick ShakeMon, their
+distinct affine/OAM creation latches, palettes/registers/audio, stable sprite
+ordering, Wailmer/Onix art, field chrome, and cleanup.
+
+**Ownership:** no trapping outcome, damage, RNG, turn/controller, round,
+facility, boundary list, unsupported barrier, or canonical allowlist changed.
+Coverage is **100 exact / 0 partial / 0 staged / 176 unsupported**.
+
 ## MOVE_LOW_KICK promoted exact; target-rotation track complete (2026-07-29)
 
 **Verdict:** `MOVE_LOW_KICK` is exact. Source and inventory prove set **178

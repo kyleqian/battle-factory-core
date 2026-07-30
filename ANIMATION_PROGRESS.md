@@ -1,5 +1,37 @@
 # Animation coverage
 
+## MOVE_MIRROR_COAT promoted exact; sparkle-3-special-screen track complete (2026-07-29)
+
+**Verdict:** `MOVE_MIRROR_COAT` is exact. Source, generated inventory, and
+controller audit prove set **151 `FRONTIER_MON_CORSOLA`** is its lowest legal
+Level-50 carrier and one animation body is reachable: a valid opposing special
+hit reaches `Move_MIRROR_COAT`; the failure route selects no animation body.
+Complete legal Corsola/Exeggcute Scene-ON parties stage real Confusion damage
+before Mirror Coat's -5-priority counter in both orientations.
+
+**Evidence:** the complete first-active wall frame through first-inactive
+cleanup passes twice fresh per orientation. Player-back **349–423 (75/75)**
+records special damage/result **26→52**, evidence/raw
+`1ea5591d85dc0e4926b8e763584f405ed4ec72d43c676ad06fc551cedb44aa92` /
+`c8a70485e2d13ae522c31760ee7e6ecb24bb464eb567427855448389ab1128a7`;
+opponent-front **355–429 (75/75)** records **31→62**,
+`3328d443c81b35a5305590705e7448d009aa0111a326b318c08b420a29939a7d` /
+`0fcba1ad43f479f613f84243bca184e10f4545e7e6566558327c081444b73b5b`.
+
+**Model / sibling:** the reducer and seam reuse only source-identical
+`AnimDefensiveWall` and six `SpecialScreenSparkle` lifecycles while preserving
+Mirror Coat's red wall/tag, wall-before-audio delay-10/immediate attacker pan,
+no Light Screen sound task, palettes/registers, BG/OBJ ordering, legal carrier
+art/geometry, and cleanup. `MOVE_LIGHT_SCREEN` independently reruns exact twice
+fresh at **115/115 player-back + 119/119 opponent-front**, with unchanged
+evidence/raw hashes.
+
+**Ownership / next:** no counter/damage semantics, accuracy, RNG, controller,
+turn/facility state, boundary list, unsupported barrier, or canonical allowlist
+changed. Coverage is **103 exact / 0 partial / 0 staged / 173 unsupported**.
+Next incomplete ranked track: `red-heart-sweet-kiss`
+(`MOVE_ATTRACT` independently unsupported).
+
 ## MOVE_COTTON_SPORE promoted exact; spore-particles track complete (2026-07-29)
 
 **Verdict:** `MOVE_COTTON_SPORE` is exact. Source and legal inventory prove
@@ -54,31 +86,3 @@ The reducer/seam/compositor preserve two lunges, three hitsplats, fist,
 screen outcome, RNG, controller, facility state, boundary list, unsupported
 barrier, or canonical allowlist changed. Coverage is **101 exact / 0 partial /
 0 staged / 175 unsupported**.
-
-## MOVE_WHIRLPOOL promoted exact; both source bodies accepted (2026-07-29)
-
-**Verdict:** `MOVE_WHIRLPOOL` is exact through one pure source-relative
-reducer, typed Scene-ON seam, and production compositor. The complete main
-body passes **133/133** semantic and framebuffer frames twice in both
-orientations: player-back evidence/raw
-`2942fa0bf1a07da485bcf391ca4ecea06a41361d648adc27a1e48a3f32018125` /
-`d3a4cebcb258d334414d99096b7ded4accc90be1af37da4abf01610866ae96c8`;
-opponent-front
-`7e57488e1a265960fec441a02b5133f0b4a6e38ddde46cd42e21b5a29b0aaba3` /
-`8b42073d713d49286935abd3079c2266464f6f66c492a039903fb70740a26ffa`.
-
-**Residual / model:** the independently staged `Status_Whirlpool` body passes
-**108/108** twice per orientation: player-back
-`e5d210e7908b269ba0722959c4035d4bc39c04378a323cf74698375baa615b84` /
-`8a809496f28e7cb8e5eb9a37e26f721a9e9b3c14ef67bbf798825d4b527a9e71`;
-opponent-front
-`d6b1d9e43817259be6ad63c9b36e5f4d11112a868785925253716eb97fead93a` /
-`481017b8c09ddf3bbe585e6e2845a02384e27e1b7ed38169834e3eb2ea82463c`.
-The model preserves the main body's 18 vortex-orb lifecycles and 50-tick
-ShakeMon, the residual body's 12 lifecycles and 30-tick ShakeMon, their
-distinct affine/OAM creation latches, palettes/registers/audio, stable sprite
-ordering, Wailmer/Onix art, field chrome, and cleanup.
-
-**Ownership:** no trapping outcome, damage, RNG, turn/controller, round,
-facility, boundary list, unsupported barrier, or canonical allowlist changed.
-Coverage is **100 exact / 0 partial / 0 staged / 176 unsupported**.

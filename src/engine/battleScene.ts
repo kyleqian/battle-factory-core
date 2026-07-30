@@ -548,6 +548,7 @@ import absorbAsset from "../animation/assets/absorb.json" with { type: "json" };
 import reflectAsset from "../animation/assets/reflect.json" with { type: "json" };
 import brickBreakAsset from "../animation/assets/brick-break.json" with { type: "json" };
 import lightScreenAsset from "../animation/assets/light-screen.json" with { type: "json" };
+import mirrorCoatAsset from "../animation/assets/mirror-coat.json" with { type: "json" };
 import biteAsset from "../animation/assets/bite.json" with { type: "json" };
 import twineedleAsset from "../animation/assets/twineedle.json" with { type: "json" };
 import spikeCannonAsset from "../animation/assets/spike-cannon.json" with { type: "json" };
@@ -743,6 +744,7 @@ import {
   sceneOnReflectView,
   sceneOnBrickBreakView,
   sceneOnLightScreenView,
+  sceneOnMirrorCoatView,
   sceneOnAromatherapyView,
   sceneOnSynthesisView,
   sceneOnWishView,
@@ -841,6 +843,7 @@ import {
   type SceneOnReflectPresentationState,
   type SceneOnBrickBreakPresentationState,
   type SceneOnLightScreenPresentationState,
+  type SceneOnMirrorCoatPresentationState,
   type SceneOnBiteConfig,
   type SceneOnHeadbuttConfig,
   type SceneOnWhirlwindConfig,
@@ -1176,6 +1179,11 @@ const lightScreenArt = lightScreenAsset as {
   exeggcuteFront: { tileset: Tileset; palette: RgbColor[] };
   greenLightWall: { tileset: Tileset; palette: RgbColor[] };
   sparkle3: { tileset: Tileset; palette: RgbColor[] };
+};
+const mirrorCoatArt = mirrorCoatAsset as {
+  corsolaBack: { tileset: Tileset; palette: RgbColor[] };
+  corsolaFront: { tileset: Tileset; palette: RgbColor[] };
+  redLightWall: { tileset: Tileset; palette: RgbColor[] };
 };
 const biteArt = biteAsset as {
   sharpTeeth: { tileset: Tileset; palette: RgbColor[] };
@@ -19840,6 +19848,146 @@ export function renderSceneOnMovePresentation(
       resultText
         ? reflectState.age - 74
         : Math.max(0, reflectState.age + (playerToOpponent ? 31 : 35)),
+    );
+    return;
+  }
+  if (state.config.move === "MIRROR_COAT") {
+    const mirrorCoatState = state as SceneOnMirrorCoatPresentationState;
+    const view = sceneOnMirrorCoatView(mirrorCoatState);
+    // Source callback state reaches OAM/palette hardware on the next display.
+    const displayed = sceneOnMirrorCoatView({
+      ...mirrorCoatState, age: mirrorCoatState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "CORSOLA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "EXEGGCUTE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "CORSOLA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "EXEGGCUTE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged MIRROR_COAT pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const corsolaSource = playerToOpponent
+      ? mirrorCoatArt.corsolaBack : mirrorCoatArt.corsolaFront;
+    const corsola = playerToOpponent
+      ? corsolaSource
+      : {
+          ...corsolaSource,
+          tileset: subTileset(corsolaSource.tileset, 0, 8),
+        };
+    const exeggcuteSource = playerToOpponent
+      ? lightScreenArt.exeggcuteFront : lightScreenArt.exeggcuteBack;
+    const exeggcute = playerToOpponent
+      ? {
+          ...exeggcuteSource,
+          tileset: subTileset(exeggcuteSource.tileset, 0, 8),
+        }
+      : exeggcuteSource;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+
+    // AnimDefensiveWall copies the opponent battler to BG before hiding OBJ.
+    const opponent = playerToOpponent ? exeggcute : corsola;
+    const player = playerToOpponent ? corsola : exeggcute;
+    drawSpriteSheet(
+      fb,
+      opponent.tileset,
+      opponent.palette,
+      playerToOpponent
+        ? view.target.geometry.spriteCorner.x
+        : view.attacker.geometry.spriteCorner.x,
+      playerToOpponent
+        ? view.target.geometry.spriteCorner.y
+        : view.attacker.geometry.spriteCorner.y,
+    );
+    if (displayed.wall && view.alpha && view.alpha.eva > 0) {
+      const palette = mirrorCoatArt.redLightWall.palette.slice();
+      const rotating = palette.slice(1, 9);
+      for (let step = 0; step < displayed.wall.paletteRotationSteps; step++) {
+        rotating.unshift(rotating.pop()!);
+      }
+      palette.splice(1, 8, ...rotating);
+      drawSpriteSheetBlendedOverFb(
+        fb,
+        mirrorCoatArt.redLightWall.tileset,
+        palette,
+        displayed.wall.x - 32,
+        displayed.wall.y - 32,
+        view.alpha.eva,
+        view.alpha.evb,
+      );
+    }
+    drawSpriteSheet(
+      fb,
+      player.tileset,
+      player.palette,
+      playerToOpponent
+        ? view.attacker.geometry.spriteCorner.x
+        : view.target.geometry.spriteCorner.x,
+      playerToOpponent
+        ? view.attacker.geometry.spriteCorner.y
+        : view.target.geometry.spriteCorner.y,
+    );
+    // The three allocator slots are reused by the second sparkle trio.
+    for (const sparkle of displayed.sparkles.slice().reverse()) {
+      drawSpriteSheet(
+        fb,
+        subTileset(
+          lightScreenArt.sparkle3.tileset,
+          sparkle.tileOffset / 2,
+          2,
+        ),
+        lightScreenArt.sparkle3.palette,
+        sparkle.x - 8,
+        sparkle.y - 8,
+      );
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "EXEGGCUTE" : "CORSOLA",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "female",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "CORSOLA" : "EXEGGCUTE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "female",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "CORSOLA used" : "Foe CORSOLA used",
+      "MIRROR COAT!",
+      64,
     );
     return;
   }

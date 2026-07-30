@@ -1,0 +1,48 @@
+{
+  "schema": "mirror-coat-portable-evidence/v1",
+  "orientation": "opponent-front",
+  "sourceWindow": {
+    "startFrame": 355,
+    "endFrame": 429,
+    "frameCount": 75,
+    "wallFrame": 355
+  },
+  "move": "MIRROR_COAT",
+  "attacker": {
+    "species": "CORSOLA",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 20 },
+      "animationCenter": { "x": 176, "y": 52 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "target": {
+    "species": "EXEGGCUTE",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 61 },
+      "animationCenter": { "x": 72, "y": 93 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "allocatorProfile": {
+    "wall": 3,
+    "sparkles": [4, 5, 7, 4, 5, 7]
+  },
+  "fieldProfile": {
+    "playerHp": 153,
+    "playerMaxHp": 153,
+    "opponentHp": 106,
+    "opponentMaxHp": 137,
+    "playerGender": "female",
+    "opponentGender": "female"
+  },
+  "counterReceipt": {
+    "specialDmg": 31,
+    "specialBattlerId": 0,
+    "resolvedDamage": 62
+  },
+  "evidenceSha256": "3328d443c81b35a5305590705e7448d009aa0111a326b318c08b420a29939a7d",
+  "rawRgbSha256": "0fcba1ad43f479f613f84243bca184e10f4545e7e6566558327c081444b73b5b"
+}

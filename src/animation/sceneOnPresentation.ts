@@ -225,6 +225,7 @@ import {
 } from "./brickBreak.ts";
 import {
   lightScreenAtAge,
+  mirrorCoatAtAge,
   type LightScreenState,
 } from "./lightScreen.ts";
 import {
@@ -595,6 +596,7 @@ export interface SceneOnPresentationBattler {
     | "WAILMER"
     | "POLITOED"
     | "EXEGGCUTE"
+    | "CORSOLA"
     | "GLOOM"
     | "TOGETIC"
     | "MACHOKE"
@@ -1089,6 +1091,17 @@ export interface SceneOnBrickBreakConfig {
 
 export interface SceneOnLightScreenConfig {
   readonly move: "LIGHT_SCREEN";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly allocatorProfile: Readonly<{
+    readonly wall: number;
+    readonly sparkles: readonly number[];
+  }>;
+}
+
+export interface SceneOnMirrorCoatConfig {
+  readonly move: "MIRROR_COAT";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
@@ -1777,6 +1790,7 @@ export type SceneOnMoveConfig =
   | SceneOnReflectConfig
   | SceneOnBrickBreakConfig
   | SceneOnLightScreenConfig
+  | SceneOnMirrorCoatConfig
   | SceneOnSynthesisConfig
   | SceneOnAromatherapyConfig
   | SceneOnWishConfig
@@ -1891,6 +1905,8 @@ export type SceneOnBrickBreakPresentationState =
   SceneOnMovePresentationState<SceneOnBrickBreakConfig>;
 export type SceneOnLightScreenPresentationState =
   SceneOnMovePresentationState<SceneOnLightScreenConfig>;
+export type SceneOnMirrorCoatPresentationState =
+  SceneOnMovePresentationState<SceneOnMirrorCoatConfig>;
 export type SceneOnSparkPresentationState =
   SceneOnMovePresentationState<SceneOnSparkConfig>;
 export type SceneOnThunderWavePresentationState =
@@ -3293,6 +3309,33 @@ export function sceneOnLightScreenView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...lightScreenAtAge(
+      state.age,
+      state.config.attacker.geometry.battlePositionCenter,
+      state.config.attacker.geometry.side,
+    ),
+  };
+}
+
+export interface SceneOnMirrorCoatView extends LightScreenState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age` is relative to gMirrorCoatWallSpriteTemplate's creation pass. */
+export function sceneOnMirrorCoatView(
+  state: SceneOnMovePresentationState<SceneOnMirrorCoatConfig>,
+): SceneOnMirrorCoatView {
+  if (state.config.move !== "MIRROR_COAT") {
+    throw new Error(
+      `expected MIRROR_COAT presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...mirrorCoatAtAge(
       state.age,
       state.config.attacker.geometry.battlePositionCenter,
       state.config.attacker.geometry.side,
