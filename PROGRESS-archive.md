@@ -1,3 +1,29 @@
+## 714 — [SUPERVISOR 2026-07-29 ~19:25] Slice 2 + Paralyze pair folded; union green; round 8 dispatched
+
+- **State:** master `18f31d25`+docs green at **521 files / 5332 tests + 1
+  deliberate animation-lane skip**, production build, `git diff --check`
+  clean, no orphan worktrees/branches, DEFERRED.md empty.
+- **Did:** (1) verified + accepted resolution Slice 2 (`84374947`:
+  targeted 322/322; staged 16/16, sandattack 190/190, turn3/8/13 menus
+  254/88/57 re-run exact; renderer consumes typed commands only). (2)
+  verified + merged `worker/side-20260729-175941` (Paralyze pair,
+  `7c251fdc`+`c90631e4`, doc §31): 72 L50 carriers (ranked over Confuse
+  64, Counter 42, Swagger 30), source-exact incl. the non-BUGFIX
+  Ground/Flying quirk; supervisor re-ran the live verify — 4/4 PASS
+  (control+reach on seeds 1/99, exact PP-slot choices and RNG endpoints).
+  Census delta Limber 8→10 recorded honestly; executable census
+  byte-identical.
+- **Next:** round 8 dispatched — main: design §4 Slice 3 (orchestrator
+  replacement + generated non-KO handoff, §2.3 boundary state); side:
+  next CBM/CV pair (Confuse-led remainder). Then Slice 4+, Gate-6.
+  Wind-down target ~21:30 with animation fold re-check.
+- **Notes:** 12 workers, 0 failed steps. New papercut motif from two
+  workers: executable census regen churns its embedded date/trailing
+  blank — restore-if-date-only is now standing brief language; consider a
+  harness-side dateless regen at some point.
+
+---
+
 ## 713 — [BOUNDED MAIN WORKER 2026-07-29 ~19:15] Battle-resolution Slice 2 landed
 
 - **State:** implementation `84374947`; tree green at **521 files / 5317

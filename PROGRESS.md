@@ -13,6 +13,34 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 717 — [BOUNDED MAIN WORKER 2026-07-29 ~19:35] Battle-resolution Slice 4 landed
+
+- **State:** implementation `3b62f97c` + first-eligible-edge fix `291d3cde`;
+  tree green at **521 files / 5349 tests + 1 deliberate animation-lane
+  skip**, production build, targeted Slice-4 acceptance **84/84**, and
+  `git diff --check`.
+- **Did:** zero-HP plus faint events now project into typed, source-relative
+  opponent tile-row or player pixel-row sink programs. The live Scene-OFF
+  compositor removes the fainted sprite/healthbox, prints frozen resolved
+  faint text, owns the wait cursor, and accepts the first eligible A edge.
+  A genuine player forced-switch boundary remains pending throughout; only
+  that dismiss edge constructs the existing request-owned selector and its
+  relative battle→party fade. SEND OUT confirmation stops honestly at
+  `sendOutElapsed: 0`; no continuation or send-out was implemented.
+- **Next:** dispatch `docs/battle-resolution-seam-design.md` **Slice 5 —
+  semantic switch-in and generic send-out** verbatim; retain the complete
+  Slice-4 regression table.
+- **Notes:** pixels remain exact: faint/party rows **141/141, 256/256,
+  200/200, 200/200**; staged OFF **16/16**; SAND_ATTACK **190/190**; menus
+  3-13 **254/254, 44/44, 42/42, 44/44, 93/93, 88/88, 111/111, 83/83,
+  56/56, 46/46, 57/57**. No trace/capture change, canonical-recording
+  import, unsupported barrier, semantic switch-in marker, terminal handoff,
+  or battle/turn/absolute-tick branch was added. PAPERCUT: the long serial
+  compare loop detached from captured output and required explicit reruns,
+  ~2 minutes lost.
+
+---
+
 ## 716 — [SUPERVISOR 2026-07-29 ~20:05] Slice 3 + Confuse pair folded; union green; round 9 (final) dispatched
 
 - **State:** master green at **521 files / 5348 tests + 1 deliberate
@@ -60,32 +88,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   pre-Slice-5 compatibility path; no faint/forced selector/send-out/terminal
   rendering, trace/capture change, canonical-recording import, unsupported
   barrier, or battle/turn/absolute-tick branch was added. PAPERCUT: none.
-
----
-
-## 714 — [SUPERVISOR 2026-07-29 ~19:25] Slice 2 + Paralyze pair folded; union green; round 8 dispatched
-
-- **State:** master `18f31d25`+docs green at **521 files / 5332 tests + 1
-  deliberate animation-lane skip**, production build, `git diff --check`
-  clean, no orphan worktrees/branches, DEFERRED.md empty.
-- **Did:** (1) verified + accepted resolution Slice 2 (`84374947`:
-  targeted 322/322; staged 16/16, sandattack 190/190, turn3/8/13 menus
-  254/88/57 re-run exact; renderer consumes typed commands only). (2)
-  verified + merged `worker/side-20260729-175941` (Paralyze pair,
-  `7c251fdc`+`c90631e4`, doc §31): 72 L50 carriers (ranked over Confuse
-  64, Counter 42, Swagger 30), source-exact incl. the non-BUGFIX
-  Ground/Flying quirk; supervisor re-ran the live verify — 4/4 PASS
-  (control+reach on seeds 1/99, exact PP-slot choices and RNG endpoints).
-  Census delta Limber 8→10 recorded honestly; executable census
-  byte-identical.
-- **Next:** round 8 dispatched — main: design §4 Slice 3 (orchestrator
-  replacement + generated non-KO handoff, §2.3 boundary state); side:
-  next CBM/CV pair (Confuse-led remainder). Then Slice 4+, Gate-6.
-  Wind-down target ~21:30 with animation fold re-check.
-- **Notes:** 12 workers, 0 failed steps. New papercut motif from two
-  workers: executable census regen churns its embedded date/trailing
-  blank — restore-if-date-only is now standing brief language; consider a
-  harness-side dateless regen at some point.
-
----
 
