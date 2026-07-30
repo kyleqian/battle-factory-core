@@ -1,31 +1,26 @@
 # Animation coverage
 
-## MOVE_PRESENT bounded source/probe checkpoint; remains unsupported (2026-07-30)
+## MOVE_PRESENT promoted exact; green-sparkle-moonlight complete (2026-07-30)
 
-**Verdict:** `MOVE_PRESENT` remains unsupported. Set **118
-`FRONTIER_MON_DELIBIRD`** is the sole and therefore lowest legal Level-50
-Factory carrier (Docile, Never-Melt Ice, Sp.Atk/HP). Source pins the common
-60-frame `ITEM_BAG` path and `AnimTask_IsHealingMove`: `gAnimMoveDmg > 0`
-selects five target-relative `EXPLOSION`s; zero selects nine
-`GREEN_SPARKLE`s and target `HealingEffect2`. The battle script's live
-`Random() & 0xff` roll reaches healing only at `>= 204`, and full-target
-heals skip attack animation entirely.
+**Verdict:** `MOVE_PRESENT` is exact for all four committed branch/orientation
+bodies. The pure source-relative reducer ports the common 60-frame moving
+`ITEM_BAG`, five-`EXPLOSION` damage branch, and nine-`GREEN_SPARKLE` plus
+four-target-`BLUE_STAR` healing branch. The typed Scene-ON seam takes damage
+or heal as immutable controller input; animation code owns no branch choice,
+outcome, damage, healing, or RNG.
 
-**Evidence / remainder:** all four legal Scene-ON source windows reproduce
-twice fresh with committed probe/RGB receipts: player damage **1012–1212
-(201)** `a2cc09d1` / `0507c412`, player healing **1946–2197 (252)**
-`bbb023fe` / `b2fe7f30`, opponent damage **78–278 (201)** `9d752ec6` /
-`8e9f36a7`, opponent healing **1404–1655 (252)** `9a76aeeb` /
-`2e5b78ad`. Every receipt pins complete active→first-inactive windows,
-bag, five explosion or nine green-particle/four HealingEffect2-star
-lifecycles, pointers, tasks, sprites, software/hardware OAM and matrices,
-palettes/tags/registers/audio and concatenated raw RGB. Player Delibird
-retains exact set-118 moves; its healing route uses real Aerial Ace then Hail
-to shape the ROM action stream. Opponent Delibird's duplicated Present slots
-are only the documented AI constraint; player Onix's prior Bind then
-tutor-legal Double-Edge with Sturdy supplies genuine recoil chip (not claimed
-as a Factory loadout). MOVE_PRESENT remains unsupported pending its own
-source-relative reducer, typed seam and compositor; no runtime code changed.
+**Dense acceptance:** player damage **1012–1212 (201/201)**, player heal
+**1946–2197 (252/252)**, opponent damage **78–278 (201/201)**, and opponent
+heal **1404–1655 (252/252)** each pass source/component/seam/raw-RGB and
+production framebuffer equality twice fresh. Receipt/raw prefixes remain
+`a2cc09d1/0507c412`, `bbb023fe/b2fe7f30`,
+`9d752ec6/8e9f36a7`, and `9a76aeeb/2e5b78ad`. The compositor reuses honest
+source-derived bag, explosion, Moonlight sparkle/star, Delibird/Onix, field,
+healthbox, and text assets, preserving mirrored geometry, OAM/matrix latches,
+tag/palette/audio/wait cleanup and side-relative subpriority ordering.
+Coverage is **106 exact / 0 partial / 0 staged / 170 unsupported**; the
+`green-sparkle-moonlight` track is complete. No boundary, barrier, canonical
+recording, gameplay, controller, turn, round, or facility state changed.
 
 ## MOVE_SECRET_POWER promoted exact; slam-hit-slide-shake complete (2026-07-30)
 

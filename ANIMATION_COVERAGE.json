@@ -391,7 +391,7 @@
         "the pure relative reducer ports MOON, GREEN_SPARKLE, and shared BLUE_STAR tag/palette lifetimes, gMoonSpriteTemplate, all five staggered gMoonlightSparkleSpriteTemplate lifecycles, AnimTask_AlphaFadeIn, AnimTask_MoonlightEndFade, the black BG palette fill/fade, BLDCNT/BLDALPHA state, audio, HealingEffect's four blue stars with OAM-slot reuse, OAM/VBlank display order, and first inactive cleanup",
         "the typed Scene-ON seam carries only resolved GLOOM/ONIX geometry plus immutable HP/weather/healing verification state; byte-identical source-extracted Gloom front/back, MOON, GREEN_SPARKLE, and BLUE_STAR art pass source/software tasks and sprites, hardware OAM/matrices, palette/tag buffers, registers, callbacks, both audio players, raw RGB, seam state, and every production framebuffer without applying healing or owning gameplay state",
         "moonlightPortable.ts reruns both probes through tools/run-mgba-probe.py and proves all 352 immutable dense source/hardware/audio/reducer/seam/raw-RGB/framebuffer frames twice fresh in both orientations through first inactive cleanup; MOVE_RECOVER remains exact at 169/169 in both orientations as the independently rerun shared HealingEffect/BLUE_STAR control",
-        "MOVE_PRESENT remains unsupported, but all four legal source/RAM/RGB bodies now rerun twice fresh: player damage 1012-1212 (201) a2cc09d1/0507c412, player healing 1946-2197 (252) bbb023fe/b2fe7f30, opponent damage 78-278 (201) 9d752ec6/8e9f36a7, opponent healing 1404-1655 (252) 9a76aeeb/2e5b78ad. Each pins ITEM_BAG, five EXPLOSION or nine GREEN_SPARKLE plus four HealingEffect2 stars, source pointers, task/sprite callbacks, software/hardware OAM and matrices, palette/tag/register/audio state and concatenated RGB. Player Delibird retains source set-118; opponent duplication remains only the documented AI constraint. Player Onix's opponent-heal prechip is tutor-legal Double-Edge + Sturdy, explicitly not a claimed Factory loadout. A source-relative reducer, typed seam, and compositor remain required before promotion",
+        "MOVE_PRESENT is independently exact through all four conditional branch/orientation bodies: its source-relative reducer, typed immutable-branch seam, and production compositor pass all 906 source/component/seam/raw-RGB/framebuffer frames twice fresh per receipt",
         "healing amount/timing, HP, weather multiplier, gameplay RNG, controller selection, turn order, round/facility state, animation boundary list, canonical-recording allowlist, and unsupported barriers are unchanged"
       ],
       "evidence": [
@@ -414,6 +414,41 @@
         "tests/animation/moonlightEvidence.test.ts",
         "tests/animation/moonlightAssets.test.ts",
         "tests/animation/moonlight.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_PRESENT",
+      "status": "exact",
+      "covered": [
+        "source and inventory audits prove set 118 FRONTIER_MON_DELIBIRD is the sole and therefore lowest legal Level-50 Factory carrier; the animation reducer consumes an explicit immutable damage-or-heal controller result and never selects the branch, rolls RNG, applies damage, or heals",
+        "four complete legal Scene-ON windows pass twice fresh through first inactive cleanup: player damage 1012-1212 passes 201/201 component/seam/framebuffer frames with evidence/raw a2cc09d1f2e3424c16412095b63bb028fdae781f3c0d4b9ad7330fc2b18dd6dd/0507c4120384abae357322f65905bb7426d14d55a426853670e18814748e903f; player heal 1946-2197 passes 252/252 with bbb023fe5b5bfa1ef06cf14a22fddc994f1af61ed4e3c39175d2d65e44406359/b2fe7f30fa358dd7255026be702920ea977afabaf7517cddecdc78feea2e75c7",
+        "opponent damage 78-278 passes 201/201 component/seam/framebuffer frames twice fresh with evidence/raw 9d752ec604a8d2e7f5f871b156ceb72e6f65902f9f03625787a15f5b8a0a4779/8e9f36a7cd0858ed4d05c13be30fdc24e156df67b23f6d1445d89be3b1948442; opponent heal 1404-1655 passes 252/252 with 9a76aeeb3b5ea1f21ab38903d9d3f025c38f2501a76001b7560743faebc13fd5/2e5b78ad63f1968c74a51f7366a1b2267ebfdbd41420bfb3f70a588303cc11e0",
+        "the pure source-relative reducer ports the common 60-frame ITEM_BAG translation, bounce, two affine programs and cleanup; five staggered EXPLOSION sprites for damage; or nine mirrored GREEN_SPARKLE risers plus target HealingEffect2's four BLUE_STAR stars for healing; it also ports tags, palettes, audio triggers, waits, OAM matrices and source cleanup",
+        "the typed Scene-ON seam carries resolved Delibird/Onix geometry, immutable HP/gender field presentation, and an explicit controller-owned branch; the compositor reuses source-extracted ITEM_BAG, explosion, Moonlight GREEN_SPARKLE/BLUE_STAR, Delibird/Onix and field assets while preserving side-relative offsets, OAM display latches and subpriority/Y ordering",
+        "presentPortable.ts preserves and revalidates every committed presentProbe.py source receipt, then compares reducer, seam and production raw RGB densely without screenshots, fitted pixels, absolute battle ticks, or gameplay state ownership",
+        "player Delibird retains source set-118 moves; opponent Present duplication is only the documented AI constraint, and the player Onix opponent-heal prechip remains tutor-legal Double-Edge plus Sturdy rather than a claimed Factory loadout",
+        "no damage, healing, RNG, turn order, controller choice, round advancement, facility state, animation boundary, unsupported barrier, or canonical-recording allowlist changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-present-player-delibird-opponent-onix.json",
+        "tools/battle-lab/mechanic-present-player-delibird-opponent-onix-heal.json",
+        "tools/battle-lab/mechanic-present-opponent-delibird-player-onix.json",
+        "tools/battle-lab/mechanic-present-opponent-delibird-player-onix-heal.json",
+        "tools/compare/fixtures/present-player-damage.json",
+        "tools/compare/fixtures/present-player-heal.json",
+        "tools/compare/fixtures/present-opponent-damage.json",
+        "tools/compare/fixtures/present-opponent-heal.json",
+        "tools/compare/presentProbe.py",
+        "tools/compare/presentEvidence.ts",
+        "tools/compare/presentPortable.ts",
+        "tools/compare/presentSourceAudit.ts",
+        "src/animation/assets/covet.json",
+        "src/animation/assets/moonlight.json",
+        "src/animation/assets/selfDestruct.json",
+        "src/animation/present.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/present.test.ts"
       ]
     },
     {
@@ -1297,7 +1332,7 @@
         "complete legal Level-50 Scene-ON mechanicLab parties stage SUDOWOODO, the real Factory set-298 SELF DESTRUCT carrier (Hardy, SpDef/HP), in both player-back and opponent-front orientations; all four active choices are constrained to SELF DESTRUCT and a slower SHUCKLE is constrained to TACKLE",
         "complete first move-owned body at oracle frames 82-194 player-back and 86-198 opponent-front: all ten gExplosionSpriteTemplate instances, four animation cells, mirrored attacker geometry, both visible battler ShakeMon2 offsets, attacker-only 0->9->0 red palette ramps, ten SE_M_SELF_DESTRUCT restart/pan boundaries, and the shared-seam raw-RGB framebuffer match 113/113 in each orientation, reproduced twice fresh",
         "ANIM_TAG_EXPLOSION plus SUDOWOODO/SHUCKLE art in both orientations are reproducibly extracted; the renderer ports the one-display palette/explosion OAM latches, ShakeMon2's neutral first hardware frame and subsequent two-display latch, source SortSprites Y ordering, audio-neutral field chrome, and complete teardown",
-        "the move-owned animation body stops before damage resolution, fainting, health-bar loss, controller, turn, RNG, and facility ownership; EXPLOSION and DYNAMIC_PUNCH have independent complete dense acceptance, while PRESENT plus every other sibling remain unsupported"
+        "the move-owned animation body stops before damage resolution, fainting, health-bar loss, controller, turn, RNG, and facility ownership; EXPLOSION, DYNAMIC_PUNCH, and PRESENT have independent complete dense acceptance, while every other sibling remains unsupported"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-self-destruct-player-sudowoodo-opponent-shuckle.json",
@@ -1322,7 +1357,7 @@
         "complete first move-owned body matches 212/212 source-component, typed relative-seam, and raw-RGB framebuffer frames at oracle 76-287 player-back and 80-291 opponent-front, reproduced twice fresh: both literal Explosion1 calls and all ten gExplosionSpriteTemplate instances, mirrored geometry and four animation cells, both visible battlers' AnimTask_ShakeMon2(8,0,40,1), nine complex F_PAL_BG red/black alternations, cleanup gap, white coefficient-16 hold, coefficient 15->0 fade, all ten SE_M_EXPLOSION restart/pan boundaries, and final teardown",
         "GLALIE back/front art is reproducibly source-extracted, while the already-proved explosion and SHUCKLE field assets are reused; the shared renderer ports the one-display BG-palette/explosion-OAM latches, ShakeMon2's neutral first hardware frame plus two-display latch, source SortSprites Y ordering, audio-neutral field chrome, and final palette restore",
         "the portable comparator retains all 212 original software sprites, hardware OAM, affine matrix, task, faded/unfaded/hardware palette, blend-register, audio, and cleanup checks, and independently requires the same 212 typed-seam and raw-RGB frames; SELF DESTRUCT remains 113/113 and DRAGON BREATH 85/85 component plus framebuffer exact in both orientations as fresh regression controls",
-        "PRESENT remains unsupported: its moving item bag precedes a conditional target-relative five-explosion damage branch or a distinct nine-particle healing branch plus HealingEffect2; DYNAMIC PUNCH now has independent complete component, typed-seam, and framebuffer acceptance"
+        "PRESENT and DYNAMIC PUNCH now each have independent complete component, typed-seam, and framebuffer acceptance for their distinct bodies"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-explosion-player-glalie-opponent-shuckle.json",
@@ -1348,7 +1383,7 @@
         "the source reducer reuses the exact explosion sprite reducer only for literal gExplosionSpriteTemplate identity and compatible offsets/cell program; the distinct DYNAMIC PUNCH prelude and target selection are independently ported and densely checked",
         "the shared Scene-ON compositor matches all 75/75 raw-RGB frames in both orientations, reproduced twice fresh, with source-derived HITMONCHAN back/front, fist, hitsplat, explosion, SHUCKLE, field chrome, and healthbox art; the comparator independently checks software sprites, affine matrices, hardware OAM transfer counts, hardware/faded palette identity, blend registers, target-pan audio, typed-seam teardown, and framebuffer equality",
         "the hardware display path keeps the monbg target copy as the hitsplat's alpha target-2, transfers the target ShakeMon/ShakeMon2 offset after one display, leaves the fist and explosions opaque, preserves source SortSprites explosion ordering, and restores the unmodified field at ages 72-74; EXPLOSION 212/212 and SELF DESTRUCT 113/113 remain exact in both orientations as dense controls",
-        "PRESENT was source-audited only and remains unsupported: its common moving item bag precedes a conditional five-explosion damage branch or a distinct nine-green-particle healing branch plus HealingEffect2, none of which has independent dense move evidence"
+        "PRESENT now independently proves its common moving item bag plus both conditional five-explosion damage and nine-green-particle/HealingEffect2 branches in both orientations"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-dynamic-punch-player-hitmonchan-opponent-shuckle.json",
@@ -2910,7 +2945,7 @@
         "MOVE_MOONLIGHT",
         "MOVE_PRESENT"
       ],
-      "goal": "MOVE_MOONLIGHT independently proves its complete 352-frame blackout, fixed moon, alpha fade, five staggered descending GREEN_SPARKLE sprites, MoonlightEndFade palette choreography, shared HealingEffect BLUE_STAR tail, audio, hardware transfer, typed seam, raw RGB, and first inactive cleanup in both legal GLOOM orientations twice fresh. MOVE_PRESENT remains unsupported: sharing GREEN_SPARKLE does not accept its AnimTask_IsHealingMove dispatch, moving ITEM_BAG projectile, conditional five-EXPLOSION damage body, conditional nine-particle healing body, target HealingEffect2, or branch-specific timing without complete legal both-orientation twice-fresh acceptance of both outcomes."
+      "goal": "Track complete. MOVE_MOONLIGHT independently proves its complete 352-frame blackout, fixed moon, alpha fade, five staggered descending GREEN_SPARKLE sprites, MoonlightEndFade palette choreography, shared HealingEffect BLUE_STAR tail, audio, hardware transfer, typed seam, raw RGB, and first inactive cleanup in both legal GLOOM orientations twice fresh. MOVE_PRESENT independently proves all four damage/heal and player/opponent bodies at 201/201 or 252/252 complete source/component/seam/raw-RGB/framebuffer frames twice fresh, including its moving ITEM_BAG, five EXPLOSION damage branch, nine GREEN_SPARKLE healing branch and target HealingEffect2."
     },
     {
       "id": "noise-line-roar-effect",
@@ -3140,7 +3175,7 @@
         "MOVE_PRESENT",
         "MOVE_DYNAMIC_PUNCH"
       ],
-      "goal": "MOVE_SELF_DESTRUCT is exact at 113/113, MOVE_EXPLOSION at 212/212, and MOVE_DYNAMIC_PUNCH at 75/75 component, typed-seam, hardware-transfer, and raw-RGB framebuffer frames in both orientations. PRESENT still needs its moving bag plus independently accepted damage/heal branches. No sibling is promoted without its own complete dense move acceptance."
+      "goal": "Track complete for the named representatives. MOVE_SELF_DESTRUCT is exact at 113/113, MOVE_EXPLOSION at 212/212, MOVE_DYNAMIC_PUNCH at 75/75, and MOVE_PRESENT at 201/201 damage plus 252/252 healing component, typed-seam, hardware-transfer, and raw-RGB framebuffer frames in both orientations. No sibling is promoted without its own complete dense move acceptance."
     },
     {
       "id": "anger-mark-grow-breath",
@@ -3567,7 +3602,7 @@
         "MOVE_MOONLIGHT",
         "MOVE_SWALLOW"
       ],
-      "goal": "MOVE_RECOVER proves the complete three-wave RecoverAbsorbEffect plus attacker HealingEffect body in both orientations at 169/169 component/RAM and framebuffer frames, reproduced twice. MOVE_ABSORB independently proves its eight-orb drain/hitsplat/green-field body plus attacker HealingEffect at 195/195 complete hardware/framebuffer frames in both orientations, reproduced twice. MOVE_MILK_DRINK independently proves its complete bottle/thin-ring/target HealingEffect2 body in both orientations at 186/186 component/RAM and framebuffer frames, reproduced twice. MOVE_SYNTHESIS independently proves its complete GrantingStarsEffect/blend/load-boundary/attacker HealingEffect body in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. MOVE_MOONLIGHT independently proves its complete blackout/moon/alpha/five-GREEN_SPARKLE pipeline plus attacker HealingEffect at 352/352 source/hardware/audio/seam/raw-RGB/framebuffer frames in both orientations twice fresh. RECOVER remains 169/169 in both orientations as the freshly rerun shared HealingEffect control. No other sibling is promoted: MEGA_DRAIN needs its paired 16-orb stronger-green body; DREAM_EATER its psychic-background/target-scale-and-shake/24-orb body; GIGA_DRAIN its 24-orb/high-green body; SOFT_BOILED has a distinct breaking-egg pair, attacker shake, two offset affine-program-0 thin rings, palette blend, and target HealingEffect2 body; PRESENT has a distinct moving item-bag body plus conditional five-explosion damage body or nine-green-particle healing body before target HealingEffect2 and needs dense evidence for both conditional outcomes; and SWALLOW needs its move-turn-dependent deform/shake/blue-orb multiplicity. Each remains unsupported pending its own complete dense acceptance."
+      "goal": "MOVE_RECOVER proves the complete three-wave RecoverAbsorbEffect plus attacker HealingEffect body in both orientations at 169/169 component/RAM and framebuffer frames, reproduced twice. MOVE_ABSORB independently proves its eight-orb drain/hitsplat/green-field body plus attacker HealingEffect at 195/195 complete hardware/framebuffer frames in both orientations, reproduced twice. MOVE_MILK_DRINK independently proves its complete bottle/thin-ring/target HealingEffect2 body in both orientations at 186/186 component/RAM and framebuffer frames, reproduced twice. MOVE_SYNTHESIS independently proves its complete GrantingStarsEffect/blend/load-boundary/attacker HealingEffect body in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. MOVE_MOONLIGHT independently proves its complete blackout/moon/alpha/five-GREEN_SPARKLE pipeline plus attacker HealingEffect at 352/352 source/hardware/audio/seam/raw-RGB/framebuffer frames in both orientations twice fresh. MOVE_PRESENT independently proves its target HealingEffect2 tail within both 252-frame healing orientations, alongside its separately accepted damage branch. No other sibling is promoted: MEGA_DRAIN needs its paired 16-orb stronger-green body; DREAM_EATER its psychic-background/target-scale-and-shake/24-orb body; GIGA_DRAIN its 24-orb/high-green body; SOFT_BOILED has a distinct breaking-egg pair, attacker shake, two offset affine-program-0 thin rings, palette blend, and target HealingEffect2 body; and SWALLOW needs its move-turn-dependent deform/shake/blue-orb multiplicity. Each remains unsupported pending its own complete dense acceptance."
     },
     {
       "id": "absorption-orb-drain",
