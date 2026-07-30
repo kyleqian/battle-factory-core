@@ -81,6 +81,7 @@ import {
   generateFactoryOpponent,
   type FactoryOpponentGenerationResult,
 } from "./factoryOpponentGeneration.ts";
+import { factoryTrainerPresentationForOpponent } from "./factoryTrainerPresentation.ts";
 import {
   generateInitialFactoryRentals,
   type FactoryInitialRentalGenerationResult,
@@ -847,6 +848,9 @@ function beginCommandResolution(
     beforeRules: state.battle.rules,
     transition: transitionFromDriveReceipt(receipt),
     fieldBoundary: presentation.field,
+    opponentTrainer: factoryTrainerPresentationForOpponent(
+      state.round.rules.currentOpponent,
+    ),
   });
   return Object.freeze({
     ...state,
