@@ -185,7 +185,10 @@ describe("Family-B Cluster 4 Thief/Covet and Knock Off", () => {
     expect(result.rulesContext.battlers[1].item).toBe(ITEM_NONE);
     expect(result.rulesContext.party.player[0].item).toBe(ITEM_LEFTOVERS);
     expect(result.rulesContext.party.opponent[0].item).toBe(ITEM_NONE);
-    expect(result.rulesContext.lastUsedItem).toBe(ITEM_LEFTOVERS);
+    // ITEMEFFECT_MOVE_END scans both battlers after the steal and assigns
+    // gLastUsedItem on every iteration; battler 1 is now empty and wins the
+    // final write (battle_util.c:3626-3637).
+    expect(result.rulesContext.lastUsedItem).toBe(ITEM_NONE);
     expect(result.rulesContext.changedItems).toEqual([0, 0, 0, 0]);
     expect(messages(result)).toContain("STRINGID_PKMNSTOLEITEM");
   });
@@ -267,7 +270,9 @@ describe("Family-B Cluster 4 Thief/Covet and Knock Off", () => {
     expect(result.rulesContext.battlers[1].item).toBe(ITEM_NONE);
     expect(result.rulesContext.party.opponent[0].item).toBe(ITEM_LEFTOVERS);
     expect(result.rulesContext.knockedOffMons).toEqual([0, 1]);
-    expect(result.rulesContext.lastUsedItem).toBe(ITEM_LEFTOVERS);
+    // The move-end item scan overwrites Knock Off's earlier message scratch
+    // with the final quiet holder (battle_util.c:3626-3637).
+    expect(result.rulesContext.lastUsedItem).toBe(ITEM_NONE);
     expect(result.rulesContext.choicedMove[1]).toBe(0);
     expect(messages(result)).toContain("STRINGID_PKMNKNOCKEDOFF");
   });

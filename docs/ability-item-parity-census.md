@@ -98,28 +98,28 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | HOLD_EFFECT_EVASION_UP | engine-referenced | 120 | 125 | BRIGHT_POWDER, LAX_INCENSE | — | 1 | 0 | 4 |
 | HOLD_EFFECT_FOCUS_BAND | engine-referenced | 78 | 80 | FOCUS_BAND | — | 5 | 0 | 5 |
-| HOLD_EFFECT_CURE_STATUS | engine-referenced | 75 | 80 | LUM_BERRY | NORMAL, MOVE_END | 0 | 0 | 2 |
+| HOLD_EFFECT_CURE_STATUS | engine-referenced | 75 | 80 | LUM_BERRY | NORMAL, MOVE_END | 0 | 0 | 4 |
 | HOLD_EFFECT_QUICK_CLAW | engine-referenced | 75 | 80 | QUICK_CLAW | — | 2 | 0 | 2 |
 | HOLD_EFFECT_LEFTOVERS | engine-referenced | 69 | 70 | LEFTOVERS | NORMAL | 0 | 0 | 2 |
 | HOLD_EFFECT_SCOPE_LENS | engine-referenced | 54 | 55 | SCOPE_LENS | — | 1 | 0 | 3 |
 | HOLD_EFFECT_RESTORE_HP | engine-referenced | 45 | 45 | SITRUS_BERRY, ORAN_BERRY, BERRY_JUICE | NORMAL | 0 | 0 | 2 |
-| HOLD_EFFECT_CURE_SLP | engine-referenced | 43 | 50 | CHESTO_BERRY | NORMAL, MOVE_END | 0 | 0 | 2 |
+| HOLD_EFFECT_CURE_SLP | engine-referenced | 43 | 50 | CHESTO_BERRY | NORMAL, MOVE_END | 0 | 0 | 4 |
 | HOLD_EFFECT_SHELL_BELL | engine-referenced | 43 | 46 | SHELL_BELL | KINGSROCK_SHELLBELL | 0 | 0 | 2 |
-| HOLD_EFFECT_CURE_CONFUSION | engine-referenced | 31 | 31 | PERSIM_BERRY | NORMAL, MOVE_END | 0 | 0 | 2 |
+| HOLD_EFFECT_CURE_CONFUSION | engine-referenced | 31 | 31 | PERSIM_BERRY | NORMAL, MOVE_END | 0 | 0 | 4 |
 | HOLD_EFFECT_FLINCH | engine-referenced | 27 | 27 | KINGS_ROCK | KINGSROCK_SHELLBELL | 0 | 0 | 2 |
-| HOLD_EFFECT_RESTORE_STATS | engine-referenced | 23 | 25 | WHITE_HERB | ON_SWITCH_IN, NORMAL, MOVE_END | 0 | 0 | 2 |
-| HOLD_EFFECT_CURE_PAR | engine-referenced | 21 | 21 | CHERI_BERRY | NORMAL, MOVE_END | 0 | 0 | 2 |
+| HOLD_EFFECT_RESTORE_STATS | engine-referenced | 23 | 25 | WHITE_HERB | ON_SWITCH_IN, NORMAL, MOVE_END | 0 | 0 | 4 |
+| HOLD_EFFECT_CURE_PAR | engine-referenced | 21 | 21 | CHERI_BERRY | NORMAL, MOVE_END | 0 | 0 | 4 |
 | HOLD_EFFECT_SPEED_UP | engine-referenced | 21 | 22 | SALAC_BERRY | NORMAL | 0 | 0 | 2 |
 | HOLD_EFFECT_SP_ATTACK_UP | engine-referenced | 16 | 16 | PETAYA_BERRY | NORMAL | 0 | 0 | 2 |
 | HOLD_EFFECT_ATTACK_UP | engine-referenced | 12 | 12 | LIECHI_BERRY | NORMAL | 0 | 0 | 2 |
 | HOLD_EFFECT_CHOICE_BAND | engine-referenced | 12 | 12 | CHOICE_BAND | — | 4 | 0 | 8 |
 | HOLD_EFFECT_PSYCHIC_POWER | engine-referenced | 10 | 10 | TWISTED_SPOON | — | 1 | 0 | 2 |
-| HOLD_EFFECT_CURE_BRN | engine-referenced | 8 | 8 | RAWST_BERRY | NORMAL, MOVE_END | 0 | 0 | 2 |
-| HOLD_EFFECT_CURE_PSN | engine-referenced | 7 | 7 | PECHA_BERRY | NORMAL, MOVE_END | 0 | 0 | 2 |
+| HOLD_EFFECT_CURE_BRN | engine-referenced | 8 | 8 | RAWST_BERRY | NORMAL, MOVE_END | 0 | 0 | 4 |
+| HOLD_EFFECT_CURE_PSN | engine-referenced | 7 | 7 | PECHA_BERRY | NORMAL, MOVE_END | 0 | 0 | 4 |
 | HOLD_EFFECT_WATER_POWER | engine-referenced | 7 | 7 | MYSTIC_WATER, SEA_INCENSE | — | 1 | 0 | 2 |
 | HOLD_EFFECT_NORMAL_POWER | engine-referenced | 6 | 6 | SILK_SCARF | — | 1 | 0 | 2 |
 | HOLD_EFFECT_GROUND_POWER | engine-referenced | 5 | 5 | SOFT_SAND | — | 1 | 0 | 2 |
-| HOLD_EFFECT_CURE_ATTRACT | engine-referenced | 4 | 4 | MENTAL_HERB | NORMAL, MOVE_END | 0 | 0 | 2 |
+| HOLD_EFFECT_CURE_ATTRACT | engine-referenced | 4 | 4 | MENTAL_HERB | NORMAL, MOVE_END | 0 | 0 | 4 |
 | HOLD_EFFECT_FIGHTING_POWER | engine-referenced | 4 | 4 | BLACK_BELT | — | 1 | 0 | 2 |
 | HOLD_EFFECT_FLYING_POWER | engine-referenced | 4 | 4 | SHARP_BEAK | — | 1 | 0 | 2 |
 | HOLD_EFFECT_ICE_POWER | engine-referenced | 4 | 4 | NEVER_MELT_ICE | — | 1 | 0 | 2 |
@@ -130,7 +130,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | HOLD_EFFECT_ROCK_POWER | engine-referenced | 2 | 2 | HARD_STONE | — | 1 | 0 | 2 |
 | HOLD_EFFECT_GRASS_POWER | engine-referenced | 2 | 2 | MIRACLE_SEED | — | 1 | 0 | 2 |
 | HOLD_EFFECT_FIRE_POWER | engine-referenced | 2 | 2 | CHARCOAL | — | 1 | 0 | 2 |
-| HOLD_EFFECT_CURE_FRZ | engine-referenced | 1 | 1 | ASPEAR_BERRY | NORMAL, MOVE_END | 0 | 0 | 2 |
+| HOLD_EFFECT_CURE_FRZ | engine-referenced | 1 | 1 | ASPEAR_BERRY | NORMAL, MOVE_END | 0 | 0 | 4 |
 | HOLD_EFFECT_BUG_POWER | engine-referenced | 1 | 1 | SILVER_POWDER | — | 1 | 0 | 2 |
 | HOLD_EFFECT_DEEP_SEA_SCALE | engine-referenced | 1 | 1 | DEEP_SEA_SCALE | — | 1 | 0 | 2 |
 | HOLD_EFFECT_STEEL_POWER | engine-referenced | 1 | 1 | METAL_COAT | — | 1 | 0 | 2 |
