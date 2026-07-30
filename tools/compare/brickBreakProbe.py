@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dense, source-addressed Scene-ON receipts for Brick Break's wall body."""
+"""Dense, source-addressed Scene-ON receipts for both Brick Break bodies."""
 from __future__ import annotations
 import hashlib, json, subprocess, sys
 from pathlib import Path
@@ -64,7 +64,8 @@ def main() -> None:
             now = {x["slot"] for x in row["sprites"] if x["template"]["symbol"] == template}; count += len(now-old); old = now
         return count
     counts = {"wall":starts("gBrickBreakWallSpriteTemplate"),"shard":starts("gBrickBreakWallShardSpriteTemplate")}
-    if counts != {"wall":1,"shard":4}: raise RuntimeError(f"expected shattered-wall lifecycles, got {counts}")
+    if counts not in ({"wall":1,"shard":4}, {"wall":0,"shard":0}):
+        raise RuntimeError(f"unexpected Brick Break wall lifecycles: {counts}")
     OUTPUT.write_text(json.dumps({"schema":"brick-break-dense-evidence/v1","setup":setup,"sourceWindow":{"startFrame":source[0]["frame"],"endFrame":source[-1]["frame"],"frameCount":len(source)},"sourceSymbols":{"Move_BRICK_BREAK":start,"Move_YAWN":end},"lifecycleCounts":counts,"templates":{n:names[n] for n in ("gBrickBreakWallSpriteTemplate","gBrickBreakWallShardSpriteTemplate","gHorizontalLungeSpriteTemplate","gBasicHitSplatSpriteTemplate","gFistFootSpriteTemplate")},"taskSymbols":{n:names[n] for n in ("AnimTask_WindUpLunge","AnimTask_WindUpLunge_Step1","AnimTask_WindUpLunge_Step2")},"songHeaders":{"SE_M_VITAL_THROW":names["se_m_vital_throw"],"SE_M_VITAL_THROW2":names["se_m_vital_throw2"],"SE_M_BRICK_BREAK":names["se_m_brick_break"]},"frames":source},separators=(",",":")) + "\n")
     print(f"wrote {OUTPUT}: {source[0]['frame']}..{source[-1]['frame']} ({len(source)} frames)")
 if __name__ == "__main__": main()

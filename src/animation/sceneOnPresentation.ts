@@ -219,6 +219,11 @@ import {
   type ReflectState,
 } from "./reflect.ts";
 import {
+  brickBreakAtAge,
+  type BrickBreakBody,
+  type BrickBreakState,
+} from "./brickBreak.ts";
+import {
   lightScreenAtAge,
   type LightScreenState,
 } from "./lightScreen.ts";
@@ -1069,6 +1074,14 @@ export interface SceneOnReflectConfig {
   }>;
 }
 
+export interface SceneOnBrickBreakConfig {
+  readonly move: "BRICK_BREAK";
+  readonly body: BrickBreakBody;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnLightScreenConfig {
   readonly move: "LIGHT_SCREEN";
   readonly attacker: SceneOnPresentationBattler;
@@ -1750,6 +1763,7 @@ export type SceneOnMoveConfig =
   | SceneOnMoonlightConfig
   | SceneOnAbsorbConfig
   | SceneOnReflectConfig
+  | SceneOnBrickBreakConfig
   | SceneOnLightScreenConfig
   | SceneOnSynthesisConfig
   | SceneOnAromatherapyConfig
@@ -1860,6 +1874,8 @@ export type SceneOnAromatherapyPresentationState =
   SceneOnMovePresentationState<SceneOnAromatherapyConfig>;
 export type SceneOnReflectPresentationState =
   SceneOnMovePresentationState<SceneOnReflectConfig>;
+export type SceneOnBrickBreakPresentationState =
+  SceneOnMovePresentationState<SceneOnBrickBreakConfig>;
 export type SceneOnLightScreenPresentationState =
   SceneOnMovePresentationState<SceneOnLightScreenConfig>;
 export type SceneOnSparkPresentationState =
@@ -3209,6 +3225,35 @@ export function sceneOnReflectView(
       state.age,
       state.config.attacker.geometry.battlePositionCenter,
       state.config.attacker.geometry.side,
+    ),
+  };
+}
+
+export interface SceneOnBrickBreakView extends BrickBreakState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age=0` is Move_BRICK_BREAK's first source-pointer display. */
+export function sceneOnBrickBreakView(
+  state: SceneOnMovePresentationState<SceneOnBrickBreakConfig>,
+): SceneOnBrickBreakView {
+  if (state.config.move !== "BRICK_BREAK") {
+    throw new Error(
+      `expected BRICK_BREAK presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...brickBreakAtAge(
+      state.age,
+      state.config.body,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.animationCenter,
+      state.config.target.geometry.battlePositionCenter,
     ),
   };
 }
