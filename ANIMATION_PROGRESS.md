@@ -1,5 +1,25 @@
 # Animation coverage
 
+## MOVE_PRESENT bounded source/probe checkpoint; remains unsupported (2026-07-30)
+
+**Verdict:** `MOVE_PRESENT` remains unsupported. Set **118
+`FRONTIER_MON_DELIBIRD`** is the sole and therefore lowest legal Level-50
+Factory carrier (Docile, Never-Melt Ice, Sp.Atk/HP). Source pins the common
+60-frame `ITEM_BAG` path and `AnimTask_IsHealingMove`: `gAnimMoveDmg > 0`
+selects five target-relative `EXPLOSION`s; zero selects nine
+`GREEN_SPARKLE`s and target `HealingEffect2`. The battle script's live
+`Random() & 0xff` roll reaches healing only at `>= 204`, and full-target
+heals skip attack animation entirely.
+
+**Evidence / remainder:** complete legal three-mon Scene-ON mechanicLab
+parties exist for player-Delibird/opponent-Onix and the reverse. The dense
+probe captures source pointer/tasks/sprites/OAM/matrices/palettes/tags/
+registers/audio/raw RGB through first inactive cleanup; the player damage
+route is 74–274 (201 frames), bag ×1 / explosion ×5. The exact remainder is
+to select fixed legal damage-then-heal controller routes in both orientations
+and commit twice-fresh dense receipts for damage and healing, then port an
+independent reducer/compositor. No typed seam or runtime code changed.
+
 ## MOVE_SECRET_POWER promoted exact; slam-hit-slide-shake complete (2026-07-30)
 
 **Verdict:** `MOVE_SECRET_POWER` is exact through its sole reachable Factory
