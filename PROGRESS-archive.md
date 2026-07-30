@@ -1,3 +1,41 @@
+## 736 — [BOUNDED MAIN WORKER 2026-07-30 ~12:28] #53 interactive routing-flip design complete
+
+- **State:** design-only step complete; full gate green at **545 files /
+  5478 tests + 1 deliberate animation-lane skip**, production build clean.
+  No source, test, trace, issue, or Gate-6 file changed.
+- **Did:** authored `docs/interactive-routing-flip-design.md`: traced the live
+  draft → recorded-battle railroad, exact draft/RNG inputs, and generated
+  intro/command/round ownership; fixed the route rule as generated for normal
+  play and canonical only by explicit compare/test injection; specified seven
+  bounded implementation slices and a final HAUNTER/SHADOW PUNCH user proof.
+- **Next:** issue Slice 1 verbatim: add the explicit route discriminator and
+  rank-ordered draft adapter, isolate `Trace.appRoute` from the oracle, mark
+  immutable traces, and deliberately leave production default canonical.
+- **Notes:** preservation is explicit for all 25 immutable rows, generated
+  command **128/128**, and intro **714/715** with only B+444 outstanding. No
+  oracle run, recording import, barrier/ratchet-pin change, tick branch, or
+  capture fitting/thinning. PAPERCUT: none.
+
+---
+## 735 — [SUPERVISOR 2026-07-30 ~12:10] Session open: animation-main folded (+7, Present/Roar exact); lanes on #53 routing-flip design + Gate-6 remainder
+
+- **State:** master fast-forwarded to `1f31e2af` (fold of
+  `animation-main`: MOVE_PRESENT and MOVE_ROAR promoted to exact;
+  animation coverage 107 exact / 0 partial / 169 unsupported). Union
+  verified by supervisor: **545 files / 5478 tests + 1 deliberate
+  animation-lane skip**, production build clean, oracle freshness PASS
+  (both profiles current vs harness HEAD `2bcab14`). DEFERRED.md empty.
+- **Plan (entry 734 order):** (i) main lane — #53 interactive
+  routing-flip design doc (`core.ts` battleRoom handoff → generated
+  orchestrator), then flip slices; (ii) side lane — Gate-6 remainder:
+  K1-K3 kernel tests, then R4/R7/R8 staged cards + K4-K6; (iii) B+444
+  RAM-probe fix-vs-attribute interleaved when a lane frees. Hard stop
+  19:59; wind-down entry will supersede this one.
+- **Notes:** fold was a fast-forward (master had no unique commits since
+  the 734 wind-down fold). Animation top entry carries no "For the main
+  program:" line.
+
+---
 ## 734 — [SUPERVISOR WIND-DOWN 2026-07-30 ~03:15] 8 paired rounds / 16 workers, 0 failed steps: resolution seam CLOSED (128/128), intro lifecycle 1-4, Gate-6 12 rows + #54 fixed, #53 filed
 
 - **State:** master green at **533 files / 5440 tests + 1 deliberate

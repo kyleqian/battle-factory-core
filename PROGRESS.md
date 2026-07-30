@@ -13,6 +13,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 739 — [BOUNDED MAIN WORKER 2026-07-30 ~13:15] #53 routing Slice 2 complete
+
+- **State:** source-/oracle-pinned anchor-session adapter landed in
+  `bd96c90a`; focused acceptance **5 files / 50 tests**, full gate green at
+  **547 files / 5500 tests + 1 deliberate animation-lane skip**, build clean.
+- **Did:** fresh OFF probes pinned the zeroed Factory/Tower/rent metadata,
+  player OT, DESTIN 50 + sets 188/184/135, and three RNG epochs. The route
+  adopts the 5-draw pre-anchor schedule (no reselection), captures live
+  56/32/190-draw construction cursors, constructs all three exact opponent
+  records, and seeds the round from the live post-transition cursor. Negative
+  tests prove one-draw sensitivity, wrong-epoch reselection, and room-trainer
+  mismatch; room/intro/round/kernel projections agree.
+- **Next:** Slice 3 — store/advance/render the generated intro at this handoff,
+  acknowledge `battleStart` only at its settled-command boundary.
+- **Notes:** `accept-prebattle` **137/137**, generated command **128/128**,
+  all **25/25** immutable rows exact. Default remains canonical; no trace,
+  recording/barrier ratchet, issue, design, Gate-6, or recorded
+  `BattleSetupState` change. PAPERCUT: concurrent compares race on shared
+  `out/latest`; reran serially, ~1 minute lost.
+
+---
 ## 738 — [SUPERVISOR 2026-07-30 ~12:50] Gate-6 K1-K3 merged (K2 caught a real weather-accuracy kernel defect); Slice 1 supervisor-verified
 
 - **State:** master `54124ee9`, union green **546 files / 5497 tests + 1
@@ -49,42 +70,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   generated command remains **128/128**. No capture/segment/profile, recording
   import, barrier/ratchet pin, renderer/rules/AI/per-turn route branch,
   production-default, issue, docs-design, or Gate-6 change. PAPERCUT: none.
-
----
-## 736 — [BOUNDED MAIN WORKER 2026-07-30 ~12:28] #53 interactive routing-flip design complete
-
-- **State:** design-only step complete; full gate green at **545 files /
-  5478 tests + 1 deliberate animation-lane skip**, production build clean.
-  No source, test, trace, issue, or Gate-6 file changed.
-- **Did:** authored `docs/interactive-routing-flip-design.md`: traced the live
-  draft → recorded-battle railroad, exact draft/RNG inputs, and generated
-  intro/command/round ownership; fixed the route rule as generated for normal
-  play and canonical only by explicit compare/test injection; specified seven
-  bounded implementation slices and a final HAUNTER/SHADOW PUNCH user proof.
-- **Next:** issue Slice 1 verbatim: add the explicit route discriminator and
-  rank-ordered draft adapter, isolate `Trace.appRoute` from the oracle, mark
-  immutable traces, and deliberately leave production default canonical.
-- **Notes:** preservation is explicit for all 25 immutable rows, generated
-  command **128/128**, and intro **714/715** with only B+444 outstanding. No
-  oracle run, recording import, barrier/ratchet-pin change, tick branch, or
-  capture fitting/thinning. PAPERCUT: none.
-
----
-## 735 — [SUPERVISOR 2026-07-30 ~12:10] Session open: animation-main folded (+7, Present/Roar exact); lanes on #53 routing-flip design + Gate-6 remainder
-
-- **State:** master fast-forwarded to `1f31e2af` (fold of
-  `animation-main`: MOVE_PRESENT and MOVE_ROAR promoted to exact;
-  animation coverage 107 exact / 0 partial / 169 unsupported). Union
-  verified by supervisor: **545 files / 5478 tests + 1 deliberate
-  animation-lane skip**, production build clean, oracle freshness PASS
-  (both profiles current vs harness HEAD `2bcab14`). DEFERRED.md empty.
-- **Plan (entry 734 order):** (i) main lane — #53 interactive
-  routing-flip design doc (`core.ts` battleRoom handoff → generated
-  orchestrator), then flip slices; (ii) side lane — Gate-6 remainder:
-  K1-K3 kernel tests, then R4/R7/R8 staged cards + K4-K6; (iii) B+444
-  RAM-probe fix-vs-attribute interleaved when a lane frees. Hard stop
-  19:59; wind-down entry will supersede this one.
-- **Notes:** fold was a fast-forward (master had no unique commits since
-  the 734 wind-down fold). Animation top entry carries no "For the main
-  program:" line.
 
