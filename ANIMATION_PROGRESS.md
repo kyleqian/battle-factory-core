@@ -1,46 +1,32 @@
 # Animation coverage
 
-## MOVE_WHIRLPOOL status body proven; move remains partial (2026-07-29)
+## MOVE_WHIRLPOOL promoted exact; both source bodies accepted (2026-07-29)
 
-**Verdict:** `Status_Whirlpool` is independently source-pointer-pinned and
-fully evidenced, but `MOVE_WHIRLPOOL` remains **partial** because this work
-adds no reducer, seam, compositor, or production framebuffer claim. Legal
-three-Pokémon Wailmer/Onix Scene-ON parties land Whirlpool normally, then use
-real second-turn controller input to reach residual status play: player-back
-**663–770 (108/108)**, evidence/raw
-`e5d210e7908b269ba0722959c4035d4bc39c04378a323cf74698375baa615b84` /
-`8a809496f28e7cb8e5eb9a37e26f721a9e9b3c14ef67bbf798825d4b527a9e71`;
-opponent-front **653–760 (108/108)**,
-`d6b1d9e43817259be6ad63c9b36e5f4d11112a868785925253716eb97fead93a` /
-`481017b8c09ddf3bbe585e6e2845a02384e27e1b7ed38169834e3eb2ea82463c`.
-
-**Evidence:** `statusWhirlpoolProbe.py` identifies `Status_Whirlpool` by its
-pointer and source bounds, confirms real prior Whirlpool + trapped status,
-then captures through first inactive cleanup. Its portable verifier proves
-two `WhirlpoolEffect` calls / 12 vortex lifecycles, source parameters and
-affine/OAM latches, 30-tick ShakeMon, target blend, WATER_ORB/monbg/split
-priority/12:8 alpha, target-panned audio, stopsound cleanup, registers, and
-stable gameplay twice fresh per orientation. Coverage remains **99 exact / 1
-partial / 0 staged / 176 unsupported**.
-
-## MOVE_WHIRLPOOL promoted partial; main body evidence complete (2026-07-29)
-
-**Verdict:** `MOVE_WHIRLPOOL` is partial. Legal Scene-ON Wailmer/Onix probes
-cover the entire main `Move_WHIRLPOOL` body through first inactive cleanup
-twice fresh in both orientations: player-back **78–210 (133/133)**
-evidence/raw `2942fa0bf1a07da485bcf391ca4ecea06a41361d648adc27a1e48a3f32018125` /
+**Verdict:** `MOVE_WHIRLPOOL` is exact through one pure source-relative
+reducer, typed Scene-ON seam, and production compositor. The complete main
+body passes **133/133** semantic and framebuffer frames twice in both
+orientations: player-back evidence/raw
+`2942fa0bf1a07da485bcf391ca4ecea06a41361d648adc27a1e48a3f32018125` /
 `d3a4cebcb258d334414d99096b7ded4accc90be1af37da4abf01610866ae96c8`;
-opponent-front **82–214 (133/133)**
+opponent-front
 `7e57488e1a265960fec441a02b5133f0b4a6e38ddde46cd42e21b5a29b0aaba3` /
 `8b42073d713d49286935abd3079c2266464f6f66c492a039903fb70740a26ffa`.
 
-**Evidence / boundary:** `whirlpoolPortableEvidence.ts` pins all 18 affine
-vortex lifecycles, OAM/matrix and palette/register latches, target blend and
-ShakeMon, WATER_ORB tags, target-pan audio, immutable gameplay, and cleanup.
-No reducer, seam, compositor, or production renderer was added. The later
-`Status_Whirlpool` has separate complete evidence above; neither body has
-production presentation acceptance. Coverage is **99 exact / 1 partial / 0
-staged / 176 unsupported**.
+**Residual / model:** the independently staged `Status_Whirlpool` body passes
+**108/108** twice per orientation: player-back
+`e5d210e7908b269ba0722959c4035d4bc39c04378a323cf74698375baa615b84` /
+`8a809496f28e7cb8e5eb9a37e26f721a9e9b3c14ef67bbf798825d4b527a9e71`;
+opponent-front
+`d6b1d9e43817259be6ad63c9b36e5f4d11112a868785925253716eb97fead93a` /
+`481017b8c09ddf3bbe585e6e2845a02384e27e1b7ed38169834e3eb2ea82463c`.
+The model preserves the main body's 18 vortex-orb lifecycles and 50-tick
+ShakeMon, the residual body's 12 lifecycles and 30-tick ShakeMon, their
+distinct affine/OAM creation latches, palettes/registers/audio, stable sprite
+ordering, Wailmer/Onix art, field chrome, and cleanup.
+
+**Ownership:** no trapping outcome, damage, RNG, turn/controller, round,
+facility, boundary list, unsupported barrier, or canonical allowlist changed.
+Coverage is **100 exact / 0 partial / 0 staged / 176 unsupported**.
 
 ## MOVE_LOW_KICK promoted exact; target-rotation track complete (2026-07-29)
 

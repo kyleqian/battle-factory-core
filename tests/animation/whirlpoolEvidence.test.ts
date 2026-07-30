@@ -2,17 +2,23 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-describe("MOVE_WHIRLPOOL main-animation evidence checkpoint", () => {
+describe("MOVE_WHIRLPOOL exact Scene-ON evidence", () => {
   it("keeps the independent source body and legal Wailmer carrier pinned", () => {
     expect(execFileSync(process.execPath, ["--experimental-strip-types",
       "tools/compare/waterOrbSourceAudit.ts"], { encoding: "utf8" }))
       .toContain("18 affine vortex orbs");
   });
 
-  it("records only the complete main body, twice fresh in both orientations", () => {
+  it("records the complete main body, twice fresh in both orientations", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.find((entry: { move: string }) =>
-      entry.move === "MOVE_WHIRLPOOL")).toMatchObject({ status: "partial" });
+    const entry = coverage.entries.find((candidate: { move: string }) =>
+      candidate.move === "MOVE_WHIRLPOOL");
+    expect(entry).toMatchObject({ status: "exact" });
+    expect(entry.evidence).toEqual(expect.arrayContaining([
+      "src/animation/whirlpool.ts",
+      "tools/compare/whirlpoolPortable.ts",
+      "tests/animation/whirlpool.test.ts",
+    ]));
     for (const [path, frameCount, evidence, raw] of [
       ["tools/compare/fixtures/whirlpool-player-wailmer-opponent-onix.json", 133,
         "2942fa0bf1a07da485bcf391ca4ecea06a41361d648adc27a1e48a3f32018125",
