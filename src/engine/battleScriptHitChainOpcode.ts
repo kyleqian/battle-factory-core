@@ -312,6 +312,8 @@ const ABILITY_AIR_LOCK = 77;
 const ABILITY_VITAL_SPIRIT = 72;
 /** include/constants/battle.h:190 -- SetMoveEffect's ability-vs-move message discriminant. */
 const HITMARKER_STATUS_ABILITY_EFFECT = 1 << 13;
+/** include/constants/battle.h:191 -- SetMoveEffect's Synchronize handoff marker. */
+const HITMARKER_SYNCHRONIZE_EFFECT = 1 << 14;
 /** include/constants/battle.h:214. */
 const SIDE_STATUS_SAFEGUARD = 1 << 5;
 /** include/constants/battle.h:239-241. */
@@ -3409,9 +3411,18 @@ function applySetMoveEffect(
       ? cancelBattleScriptMultiTurnMoves(baseRulesContext, effectBattler).rulesContext
       : baseRulesContext;
     const updatedContext = withBattler(statusWriteBase, effectBattler, { status1: newStatus1 });
+    const synchronizable = effectByte === MOVE_EFFECT_POISON
+      || effectByte === MOVE_EFFECT_TOXIC
+      || effectByte === MOVE_EFFECT_PARALYSIS
+      || effectByte === MOVE_EFFECT_BURN;
     const finalRulesContext = Object.freeze({
       ...updatedContext,
-      hitMarker: nextHitMarker,
+      hitMarker: synchronizable
+        ? (nextHitMarker | HITMARKER_SYNCHRONIZE_EFFECT) >>> 0
+        : nextHitMarker,
+      synchronizeMoveEffect: synchronizable
+        ? effectByte
+        : updatedContext.synchronizeMoveEffect,
       multistringChooser,
       party: withBattleScriptPartyMemberStatus1(
         updatedContext.party,

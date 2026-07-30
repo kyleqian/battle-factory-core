@@ -2426,6 +2426,7 @@ const ABILITY_MAGMA_ARMOR = 40;
 const ABILITY_ROCK_HEAD = 69;
 const ABILITY_WATER_VEIL = 41;
 const HITMARKER_STATUS_ABILITY_EFFECT = 1 << 13;
+const HITMARKER_SYNCHRONIZE_EFFECT = 1 << 14;
 const B_MSG_STATUSED = 0;
 const B_MSG_STATUSED_BY_ABILITY = 1;
 const B_MSG_ABILITY_PREVENTS_MOVE_STATUS = 0;
@@ -2470,6 +2471,30 @@ describe("production seteffectwithchance (Cmd_seteffectwithchance) dispatch", ()
   });
 
   describe("SetMoveEffect status-write quartet (registered)", () => {
+    it.each([
+      ["poison", MOVE_EFFECT_POISON],
+      ["burn", MOVE_EFFECT_BURN],
+      ["paralysis", MOVE_EFFECT_PARALYSIS],
+      ["toxic", MOVE_EFFECT_TOXIC],
+    ])("%s banks the exact Synchronize effect and marker; sleep/freeze remain quiet", (_name, effect) => {
+      const rc = context(0, {}, { moveEffectByte: effect | MOVE_EFFECT_CERTAIN });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.synchronizeMoveEffect).toBe(effect);
+      expect(result.state.rulesContext.hitMarker & HITMARKER_SYNCHRONIZE_EFFECT).not.toBe(0);
+
+      for (const quietEffect of [MOVE_EFFECT_SLEEP, MOVE_EFFECT_FREEZE]) {
+        const quietRc = context(0, {}, {
+          moveEffectByte: quietEffect | MOVE_EFFECT_CERTAIN,
+          synchronizeMoveEffect: 0xaa,
+        });
+        const { result: quiet } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", quietRc);
+        if (quiet.kind !== "advanced") throw new Error(`expected advance, got ${quiet.kind}`);
+        expect(quiet.state.rulesContext.synchronizeMoveEffect).toBe(0xaa);
+        expect(quiet.state.rulesContext.hitMarker & HITMARKER_SYNCHRONIZE_EFFECT).toBe(0);
+      }
+    });
+
     it("POISON: certain-bit dispatch statuses the target, calls BattleScript_MoveEffectPoison, zero extra RNG, party slot synced", () => {
       const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_POISON | MOVE_EFFECT_CERTAIN });
       const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
