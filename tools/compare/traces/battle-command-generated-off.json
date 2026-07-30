@@ -1,4 +1,5 @@
 {
+  "appRoute": "generated-orchestrator",
   "oracleProfile": "battle-scene-off",
   "appStage": {
     "id": "battle-command-generated-off",

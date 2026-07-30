@@ -1,4 +1,5 @@
 {
+  "appRoute": "canonical-recorded",
   "oracleProfile": "battle-scene-off",
   "sourceTrace": "../traces-groundtruth/battle2-off-turn1.json",
   "appStage": {
