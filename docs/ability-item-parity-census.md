@@ -25,7 +25,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_SWIFT_SWIM | engine-referenced | 34 (13) | 34 | — | 2 | 0 | 4 |
 | ABILITY_PRESSURE | engine-referenced | 34 (30) | 46 | — | 6 | 0 | 11 |
 | ABILITY_OBLIVIOUS | engine-referenced | 33 (16) | 33 | ON_DAMAGE, IMMUNITY | 3 | 0 | 6 |
-| ABILITY_SYNCHRONIZE | engine-referenced | 30 (8) | 30 | SYNCHRONIZE, ATK_SYNCHRONIZE | 0 | 0 | 2 |
+| ABILITY_SYNCHRONIZE | engine-referenced | 30 (8) | 30 | SYNCHRONIZE, ATK_SYNCHRONIZE | 0 | 0 | 3 |
 | ABILITY_EARLY_BIRD | engine-referenced | 29 (4) | 29 | — | 2 | 0 | 3 |
 | ABILITY_KEEN_EYE | engine-referenced | 29 (16) | 29 | — | 2 | 0 | 6 |
 | ABILITY_STATIC | engine-referenced | 27 (17) | 27 | ON_DAMAGE | 0 | 0 | 5 |

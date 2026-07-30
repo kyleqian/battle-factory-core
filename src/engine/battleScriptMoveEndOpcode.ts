@@ -96,9 +96,11 @@ const ABILITY_VITAL_SPIRIT = 72;
 const ABILITY_WATER_VEIL = 41;
 const ABILITY_MAGMA_ARMOR = 40;
 const MOVE_EFFECT_AFFECTS_USER = 1 << 6;
+const MOVE_EFFECT_CERTAIN = 1 << 7;
 const MOVE_EFFECT_POISON = 2;
 const MOVE_EFFECT_BURN = 3;
 const MOVE_EFFECT_PARALYSIS = 5;
+const MOVE_EFFECT_TOXIC = 6;
 
 /**
  * AbilityBattleEffects' ABILITYEFFECT_IMMUNITY case (battle_util.c:2873-
@@ -325,9 +327,50 @@ function transferState(
   return Object.freeze({ kind: "transfer", transition });
 }
 
-function abilitySynchronizeApplies(rules: BattleScriptRulesContext, battler: BattleScriptBattlerId): boolean {
-  return rules.battlers[battler].ability === ABILITY_SYNCHRONIZE
-    && (rules.hitMarker & HITMARKER_SYNCHRONIZE_EFFECT) !== 0;
+function executeSynchronize(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  rules: BattleScriptRulesContext,
+  holder: BattleScriptBattlerId,
+  affectsUser: boolean,
+): MoveendStateOutcome {
+  if ((rules.battleTopology.battleTypeFlags & BATTLE_TYPE_SAFARI) !== 0) {
+    return continueState(advanceMoveend(rules));
+  }
+
+  // AbilityBattleEffects' common pre-dispatch assignment uses the literal
+  // battler argument for both Synchronize modes, including quiet calls.
+  const baseRules = Object.freeze({
+    ...rules,
+    lastUsedAbility: rules.battlers[holder].ability,
+  });
+  if (
+    baseRules.lastUsedAbility !== ABILITY_SYNCHRONIZE
+    || (baseRules.hitMarker & HITMARKER_SYNCHRONIZE_EFFECT) === 0
+  ) {
+    return continueState(advanceMoveend(baseRules));
+  }
+
+  let moveEffect = baseRules.synchronizeMoveEffect
+    & ~(MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN);
+  if (moveEffect === MOVE_EFFECT_TOXIC) moveEffect = MOVE_EFFECT_POISON;
+
+  const nextRules = recordBattleScriptAbilityReveal(Object.freeze({
+    ...baseRules,
+    hitMarker: (
+      (baseRules.hitMarker & ~HITMARKER_SYNCHRONIZE_EFFECT)
+      | HITMARKER_STATUS_ABILITY_EFFECT
+    ) >>> 0,
+    synchronizeMoveEffect: moveEffect,
+    moveEffectByte: affectsUser
+      ? moveEffect | MOVE_EFFECT_AFFECTS_USER
+      : moveEffect,
+    scriptingBattler: holder,
+  }), holder, ABILITY_SYNCHRONIZE);
+  return callCurrentMoveendScript(
+    context,
+    nextRules,
+    "BattleScript_SynchronizeActivates",
+  );
 }
 
 function executeRage(
@@ -584,16 +627,7 @@ function executeMoveendState(
       return executeControllerDelegatedState(context, rules);
     case MOVEEND_SYNCHRONIZE_TARGET: {
       const target = requireBattlerRole(rules, "target");
-      if (abilitySynchronizeApplies(rules, target)) {
-        return transferState(unsupportedBranch(
-          context,
-          "AbilityBattleEffects(ABILITYEFFECT_SYNCHRONIZE)'s ABILITY_SYNCHRONIZE branch "
-            + "(gBattleStruct->synchronizeMoveEffect, BattleScript_SynchronizeActivates transfer) is not modeled",
-          "battle_util.c",
-          2971,
-        ));
-      }
-      return continueState(advanceMoveend(rules));
+      return executeSynchronize(context, rules, target, true);
     }
     case MOVEEND_ON_DAMAGE_ABILITIES:
       return executeOnDamageAbilities(context, rules);
@@ -661,16 +695,7 @@ function executeMoveendState(
     }
     case MOVEEND_SYNCHRONIZE_ATTACKER: {
       const attacker = requireBattlerRole(rules, "attacker");
-      if (abilitySynchronizeApplies(rules, attacker)) {
-        return transferState(unsupportedBranch(
-          context,
-          "AbilityBattleEffects(ABILITYEFFECT_ATK_SYNCHRONIZE)'s ABILITY_SYNCHRONIZE branch "
-            + "(gBattleStruct->synchronizeMoveEffect, BattleScript_SynchronizeActivates transfer) is not modeled",
-          "battle_util.c",
-          2987,
-        ));
-      }
-      return continueState(advanceMoveend(rules));
+      return executeSynchronize(context, rules, attacker, false);
     }
     case MOVEEND_CHOICE_MOVE:
       return continueState(advanceMoveend(applyBattleScriptMoveEndChoiceOwnership(rules)));
