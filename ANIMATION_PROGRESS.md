@@ -1,5 +1,28 @@
 # Animation coverage
 
+## MOVE_WHIRLPOOL status body proven; move remains partial (2026-07-29)
+
+**Verdict:** `Status_Whirlpool` is independently source-pointer-pinned and
+fully evidenced, but `MOVE_WHIRLPOOL` remains **partial** because this work
+adds no reducer, seam, compositor, or production framebuffer claim. Legal
+three-Pokémon Wailmer/Onix Scene-ON parties land Whirlpool normally, then use
+real second-turn controller input to reach residual status play: player-back
+**663–770 (108/108)**, evidence/raw
+`e5d210e7908b269ba0722959c4035d4bc39c04378a323cf74698375baa615b84` /
+`8a809496f28e7cb8e5eb9a37e26f721a9e9b3c14ef67bbf798825d4b527a9e71`;
+opponent-front **653–760 (108/108)**,
+`d6b1d9e43817259be6ad63c9b36e5f4d11112a868785925253716eb97fead93a` /
+`481017b8c09ddf3bbe585e6e2845a02384e27e1b7ed38169834e3eb2ea82463c`.
+
+**Evidence:** `statusWhirlpoolProbe.py` identifies `Status_Whirlpool` by its
+pointer and source bounds, confirms real prior Whirlpool + trapped status,
+then captures through first inactive cleanup. Its portable verifier proves
+two `WhirlpoolEffect` calls / 12 vortex lifecycles, source parameters and
+affine/OAM latches, 30-tick ShakeMon, target blend, WATER_ORB/monbg/split
+priority/12:8 alpha, target-panned audio, stopsound cleanup, registers, and
+stable gameplay twice fresh per orientation. Coverage remains **99 exact / 1
+partial / 0 staged / 176 unsupported**.
+
 ## MOVE_WHIRLPOOL promoted partial; main body evidence complete (2026-07-29)
 
 **Verdict:** `MOVE_WHIRLPOOL` is partial. Legal Scene-ON Wailmer/Onix probes
@@ -15,8 +38,9 @@ opponent-front **82–214 (133/133)**
 vortex lifecycles, OAM/matrix and palette/register latches, target blend and
 ShakeMon, WATER_ORB tags, target-pan audio, immutable gameplay, and cleanup.
 No reducer, seam, compositor, or production renderer was added. The later
-`Status_Whirlpool` trapping/repetition animation remains outside this
-checkpoint. Coverage is **99 exact / 1 partial / 0 staged / 176 unsupported**.
+`Status_Whirlpool` has separate complete evidence above; neither body has
+production presentation acceptance. Coverage is **99 exact / 1 partial / 0
+staged / 176 unsupported**.
 
 ## MOVE_LOW_KICK promoted exact; target-rotation track complete (2026-07-29)
 
@@ -74,32 +98,3 @@ production shared-framebuffer equality twice per orientation.
 target-relative geometry, `AnimTask_RotateMonSpriteToSide`, 33-frame body, and
 portable verifier. No gameplay, boundary, barrier, canonical allowlist,
 damage, RNG, turn, controller, or facility state changed.
-
-## MOVE_MEGA_PUNCH promoted exact; MegaPunchKick track established (2026-07-29)
-
-**Verdict:** `MOVE_MEGA_PUNCH` is exact. Generated inventory and source audit
-prove challenge-1 set **254 `FRONTIER_MON_CACTURNE_1`** is the sole/lowest
-legal Level-50 carrier. Complete legal Scene-ON parties pass the entire
-160-frame source body through first inactive cleanup twice fresh in both
-orientations: player-back **76–235**, receipt/raw
-`9a324ee534928083d1f41dea0c2366ef2b47392c7869fb7aee81a7bf5641cd2f` /
-`7bab206057ef1ae1e99eb24bb9879a8052b73cfae92ccf90a51202cc851c5a36`;
-opponent-front **80–239**,
-`d8f787f50acb0d43013b904de76a0f22543a348e56cf36a403b715eb233b701f` /
-`c05a36ec1e051de5783282bda799cbde791ee4613b4405ab3874094b33f80a55`.
-
-**Model/evidence:** the source-relative reducer, typed seam, and production
-compositor port variant-0 `gMegaPunchKickSpriteTemplate`, HANDS_AND_FEET,
-IMPACT/hitsplat, target monbg/alpha, both palette-blend programs, side-specific
-impact background, ShakeMon2, audio, Cacturne/Onix/chrome, display latches,
-and cleanup. `megaPunchPortable.ts` proves **160/160** reducer/seam/cleanup,
-MegaPunchKick software sprite+matrix, ShakeMon2 task/offset, blend-register,
-and side-panned SE trigger assertions; each complete probe record and raw-RGB
-window is fixture-receipt-pinned, and every production framebuffer pixel passes
-twice fresh per orientation.
-
-**Sibling / next:** `MOVE_MEGA_KICK` remains unsupported: its distinct
-variant-1 art selection and `SE_M_MEGA_KICK2` require independent complete
-both-orientation dense acceptance. Coverage is **97 exact / 0 partial /
-0 staged / 179 unsupported**. No gameplay, boundary, barrier, or canonical
-allowlist ownership changed.

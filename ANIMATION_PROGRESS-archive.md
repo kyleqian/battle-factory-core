@@ -4,6 +4,29 @@ Older dated sections moved out of `ANIMATION_PROGRESS.md` to keep that
 file lean (`AGENTS.md`'s ~3-most-recent convention). Git history has the
 full record regardless; this file is a read-only reference.
 
+## MOVE_MEGA_PUNCH promoted exact; MegaPunchKick track established (2026-07-29)
+
+**Verdict:** `MOVE_MEGA_PUNCH` is exact. Generated inventory and source audit
+prove challenge-1 set **254 `FRONTIER_MON_CACTURNE_1`** is the sole/lowest
+legal Level-50 carrier. Complete legal Scene-ON parties pass the entire
+160-frame source body through first inactive cleanup twice fresh in both
+orientations: player-back **76–235**, receipt/raw
+`9a324ee534928083d1f41dea0c2366ef2b47392c7869fb7aee81a7bf5641cd2f` /
+`7bab206057ef1ae1e99eb24bb9879a8052b73cfae92ccf90a51202cc851c5a36`;
+opponent-front **80–239**,
+`d8f787f50acb0d43013b904de76a0f22543a348e56cf36a403b715eb233b701f` /
+`c05a36ec1e051de5783282bda799cbde791ee4613b4405ab3874094b33f80a55`.
+
+**Model/evidence:** the source-relative reducer, typed seam, and production
+compositor port variant-0 `gMegaPunchKickSpriteTemplate`, HANDS_AND_FEET,
+IMPACT/hitsplat, target monbg/alpha, palette blends, side-specific impact
+background, ShakeMon2, audio, Cacturne/Onix/chrome, display latches, and
+cleanup. `megaPunchPortable.ts` proves **160/160** reducer/seam/cleanup and
+production framebuffer equality twice fresh per orientation.
+
+**Sibling:** `MOVE_MEGA_KICK` remains unsupported: its distinct variant-1 art
+selection and `SE_M_MEGA_KICK2` need independent complete acceptance.
+
 ## MOVE_HYPNOSIS promoted exact; GOLD_RING repair complete (2026-07-29)
 
 **Verdict:** `MOVE_HYPNOSIS` is exact. The Level-50 eligibility graph rejects

@@ -2563,18 +2563,25 @@
         "source and generated inventory audit pin challenge-0 FRONTIER_MON_WAILMER_1 set 170 as the lowest legal Level-50 carrier; complete legal three-Pokemon Scene-ON Wailmer-versus-Onix parties cover both orientations",
         "fresh dense main Move_WHIRLPOOL probes cover every frame through first inactive cleanup twice per orientation: player-back frames 78-210 and opponent-front frames 82-214 each pass 133/133 source/hardware/audio/immutable-state checks; evidence/raw RGB receipts are 2942fa0bf1a07da485bcf391ca4ecea06a41361d648adc27a1e48a3f32018125/d3a4cebcb258d334414d99096b7ded4accc90be1af37da4abf01610866ae96c8 and 7e57488e1a265960fec441a02b5133f0b4a6e38ddde46cd42e21b5a29b0aaba3/8b42073d713d49286935abd3079c2266464f6f66c492a039903fb70740a26ffa",
         "portable evidence pins all three source six-orb bursts: all 18 gWhirlpoolSpriteTemplate/AnimParticleInVortex lifecycles, source parameters, target-relative affine/OAM geometry and prior-software OAM latch, target palette blend programs, target AnimTask_ShakeMon, WATER_ORB tag lifetime, target monbg/split priority/12:8 alpha, target-panned SE_M_WHIRLPOOL, relevant palette/OAM/register shapes, immutable gameplay fields, and first inactive cleanup",
+        "separate legal second-turn residual scenarios reach Status_Whirlpool only after real Whirlpool trapping provenance; fresh dense 108-frame windows through first inactive cleanup twice per orientation pin its source pointer, two six-orb bursts (12 AnimParticleInVortex lifecycles), source parameters/affine/OAM geometry and latch, 30-tick target ShakeMon, target blend, WATER_ORB lifetime, monbg/split priority/12:8 alpha, exact target-panned SE_M_WHIRLPOOL, stopsound/cleanup, relevant palette/register latches, and stable gameplay fields; player-back receipts e5d210e7908b269ba0722959c4035d4bc39c04378a323cf74698375baa615b84/8a809496f28e7cb8e5eb9a37e26f721a9e9b3c14ef67bbf798825d4b527a9e71 and opponent-front d6b1d9e43817259be6ad63c9b36e5f4d11112a868785925253716eb97fead93a/481017b8c09ddf3bbe585e6e2845a02384e27e1b7ed38169834e3eb2ea82463c",
         "this is evidence only: no reducer, typed scene seam, compositor, production renderer, gameplay state, boundary list, unsupported barrier, or canonical-recording allowlist changed",
-        "the later Status_Whirlpool trapping/repetition animation remains explicitly outside this main-move checkpoint and receives no credit"
+        "MOVE_WHIRLPOOL remains partial: neither independent source body has a production presentation implementation or framebuffer-equality claim"
       ],
-      "remaining": "Port and accept the later Status_Whirlpool trapping/repetition animation independently; this main-move evidence checkpoint neither models nor credits it.",
+      "remaining": "Port and accept both independently evidenced Whirlpool bodies through the shared presentation seam and a live production framebuffer proof; status evidence alone does not claim production framebuffer equality.",
       "evidence": [
         "tools/battle-lab/mechanic-whirlpool-player-wailmer-opponent-onix.json",
         "tools/battle-lab/mechanic-whirlpool-opponent-wailmer-player-onix.json",
+        "tools/battle-lab/mechanic-status-whirlpool-player-wailmer-opponent-onix.json",
+        "tools/battle-lab/mechanic-status-whirlpool-opponent-wailmer-player-onix.json",
         "tools/compare/fixtures/whirlpool-player-wailmer-opponent-onix.json",
         "tools/compare/fixtures/whirlpool-opponent-wailmer-player-onix.json",
+        "tools/compare/fixtures/status-whirlpool-player-wailmer-opponent-onix.json",
+        "tools/compare/fixtures/status-whirlpool-opponent-wailmer-player-onix.json",
         "tools/compare/waterOrbSourceAudit.ts",
         "tools/compare/whirlpoolProbe.py",
         "tools/compare/whirlpoolPortableEvidence.ts",
+        "tools/compare/statusWhirlpoolProbe.py",
+        "tools/compare/statusWhirlpoolPortableEvidence.ts",
         "tests/animation/whirlpoolEvidence.test.ts"
       ]
     },
