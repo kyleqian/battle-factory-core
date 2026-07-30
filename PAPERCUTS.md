@@ -552,3 +552,16 @@ Per entry:
 - **Workaround:** keep edits above/below pinned sites position-neutral when
   cheap; otherwise regenerate the census pin set in the same commit (the
   documented line-drift recipe) rather than contorting the edit.
+
+## Cap-killed Codex worker prints "exited unauthenticated — log in and retry"
+
+- **What:** when the launcher kills a worker at its `--cap-minutes`
+  ceiling, the digest tail appends `codex worker exited unauthenticated —
+  log in with the codex CLI and retry` even though authentication is fine
+  (the very next launch succeeds). The line mis-directs triage toward
+  re-auth when the real event is an ordinary cap timeout (exit 124).
+- **Hits:** 1 (Slice-7 flip worker, 2026-07-30 16:38).
+- **Cost each:** ~3 min.
+- **Workaround:** on exit 124, read the `=== worker FAILED (killed before
+  turn completion) ===` marker and the branch's committed state first; test
+  auth by simply launching the continuation worker.
