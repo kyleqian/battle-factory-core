@@ -15,6 +15,14 @@ import {
   submitFactoryRoundPlayerDecision,
   type FactoryRoundBattleOrchestratorState,
 } from "../src/engine/factoryRoundBattleOrchestrator.ts";
+import {
+  createPendingFactorySwapPresentation,
+} from "../src/engine/factorySwapPresentation.ts";
+import {
+  POSTWIN_OPPONENT_RENTAL_IDS,
+  POSTWIN_SCOUTING_INPUT_READY_DELAYS,
+  POSTWIN_SWAP_INPUT_READY_DELAY,
+} from "../src/engine/postwin.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
 
 const RNG_SEED = 4;
@@ -355,11 +363,89 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expect(state.battleResolutionPresentation?.pendingBoundary).toBe(retainedBoundary);
     expect(state.round.rules.phase).toBe("battleActive");
 
-    state = advanceFactoryRoundBattleResolution(state);
+    let engine = tick({
+      ...createInitialState({ appRoute: "generated-orchestrator" }),
+      factoryRoundBattleOrchestrator: state,
+      rngMode: "frontierBattle",
+      rngValue: state.battle!.rng.value,
+    }, new Set());
+    state = engine.factoryRoundBattleOrchestrator!;
     expect(state.battle).toBeNull();
     expect(state.battleResolutionPresentation).toBeNull();
     expect(state.round.rules.phase).toBe("presentingBattleWin");
     expect(state.round.rules.lastBattle?.outcome).toBe("win");
+    const opponentSetIds =
+      state.round.rules.currentOpponent.rentalRecords!.map(({ setId }) => setId);
+    expect(opponentSetIds).not.toEqual(POSTWIN_OPPONENT_RENTAL_IDS);
+    expect(engine.postwin).toMatchObject({
+      challengeBattleNum: 0,
+      challengeBattleNumAfterWrite: 1,
+      opponentRentalMonIds: opponentSetIds,
+      opponentRentalMonIdsAfterWrite: opponentSetIds,
+      playerPartyHp:
+        state.round.rules.lastBattle!.playerParty.map(({ hp }) => hp),
+      healedPlayerPartyHp:
+        state.round.rules.lastBattle!.playerParty.map(({ maxHp }) => maxHp),
+    });
+
+    const page3Edge = 10_000;
+    engine = {
+      ...engine,
+      postwin: {
+        ...engine.postwin!,
+        elapsed: page3Edge,
+        healDismissElapsed: 1,
+        continuationCursorPos: 0,
+        continuationConfirmElapsed: 2,
+        dialoguePage: 3,
+        dialoguePageEdgeElapsed:
+          page3Edge - POSTWIN_SCOUTING_INPUT_READY_DELAYS[2],
+      },
+    };
+    const beforeCompletionRules =
+      engine.factoryRoundBattleOrchestrator!.round.rules;
+    engine = tick(engine, new Set());
+    expect(engine.factoryRoundBattleOrchestrator!.round.rules)
+      .toBe(beforeCompletionRules);
+    expect(engine.factoryRoundBattleOrchestrator!.round.presentation?.command.type)
+      .toBe("battleWon");
+
+    engine = tick(engine, new Set(["A"]));
+    const swapOfferRound = engine.factoryRoundBattleOrchestrator!.round;
+    expect(swapOfferRound.rules.phase).toBe("awaitingSwapDecision");
+    expect(swapOfferRound.presentation).toMatchObject({
+      completed: false,
+      command: {
+        type: "swapOffer",
+        playerParty: state.round.rules.lastBattle!.playerParty,
+        opponentParty: state.round.rules.lastBattle!.opponentParty,
+      },
+    });
+    expect(engine.roundController).toBeNull();
+
+    const swapOfferEdge = 20_000;
+    engine = {
+      ...engine,
+      postwin: {
+        ...engine.postwin!,
+        elapsed: swapOfferEdge,
+        dialoguePage: 4,
+        dialoguePageEdgeElapsed:
+          swapOfferEdge - POSTWIN_SWAP_INPUT_READY_DELAY,
+        swapCursorPos: 0,
+        swapCursorDisplayPos: 0,
+      },
+    };
+    const expectedSwap = createPendingFactorySwapPresentation(swapOfferRound);
+    engine = tick(engine, new Set());
+    engine = tick(engine, new Set(["A"]));
+    expect(engine.factorySwap).toEqual(expectedSwap);
+    expect(engine.factoryRoundBattleOrchestrator!.round).toBe(swapOfferRound);
+    expect(engine.factorySwap!.controller).toMatchObject({
+      playerParty: expectedSwap!.controller.playerParty,
+      enemyParty: expectedSwap!.controller.enemyParty,
+      rentalMons: expectedSwap!.controller.rentalMons,
+    });
   });
 
   it("resets the persistent cursor when a live player switch-in changes the active party slot", () => {

@@ -13,17 +13,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
-## 745 — [BOUNDED MAIN WORKER 2026-07-30 ~14:45] Slice 4 typed postwin checkpoint
+## 745 — [BOUNDED MAIN WORKER 2026-07-30 ~14:49] Slice 4 implementation green; acceptance in progress
 
-- **State:** typed round-to-postwin adapter and owner-aware core bridge landed;
-  focused checkpoint **4 files / 69 tests**, ratchet green, build clean.
+- **State:** typed round-to-postwin adapter, owner-aware core bridge, and
+  noncanonical generated fixture landed; focused orchestrator+ratchet
+  **2 files / 36 tests**, build clean.
 - **Did:** generated `battleWon` now freezes challenge index, live HP/full-heal
   values, opponent rental IDs, and commentary from one typed round snapshot;
-  postwin bookkeeping no longer substitutes canonical literals. Core retains
-  the orchestrator round and prepares its pending `swapOffer` at the existing
-  third-scouting-page completion edge.
-- **Next:** pin core's completion edge and live swap rows with the same
-  noncanonical state-only fixture; then run all named Slice-4 compares,
+  postwin bookkeeping no longer substitutes canonical literals. The core
+  fixture proves terminal handoff creates postwin, rules do not change before
+  the third-scouting-page edge, that edge publishes `swapOffer`, and YES
+  builds every player/enemy/rental row from that same orchestrator round.
+- **Next:** run the complete named Slice-4 focused suite and compares, then
   immutable 25-row loop, full suite/build.
 - **Notes:** production default and canonical constructors remain unchanged;
   no new barrier, trace/capture, issue, later-opponent, or Battle-2 work.
@@ -64,4 +65,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   command **128/128**; all **25/25** immutable rows exact at established
   counts. Slice 3's sole intro residual family is **CLOSED**. No capture,
   route default, barrier, issue, Scene-ON, or later-round change.
-
