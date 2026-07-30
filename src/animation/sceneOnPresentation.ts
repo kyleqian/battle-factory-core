@@ -49,6 +49,11 @@ import {
   type HydroPumpState,
 } from "./hydroPump.ts";
 import {
+  whirlpoolAtAge,
+  type WhirlpoolBody,
+  type WhirlpoolState,
+} from "./whirlpool.ts";
+import {
   bubbleBeamAtAge,
   type BubbleBeamState,
 } from "./bubbleBeam.ts";
@@ -577,6 +582,7 @@ export interface SceneOnPresentationBattler {
     | "VOLBEAT"
     | "ILLUMISE"
     | "MASQUERAIN"
+    | "WAILMER"
     | "POLITOED"
     | "EXEGGCUTE"
     | "GLOOM"
@@ -1271,6 +1277,14 @@ export interface SceneOnHydroPumpConfig {
   readonly targetPictureOffset: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnWhirlpoolConfig {
+  readonly move: "WHIRLPOOL";
+  readonly body: WhirlpoolBody;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnBubbleBeamConfig {
   readonly move: "BUBBLE_BEAM";
   readonly attacker: SceneOnPresentationBattler;
@@ -1763,6 +1777,7 @@ export type SceneOnMoveConfig =
   | SceneOnSmokescreenConfig
   | SceneOnMudShotConfig
   | SceneOnHydroPumpConfig
+  | SceneOnWhirlpoolConfig
   | SceneOnBubbleBeamConfig
   | SceneOnCrossChopConfig
   | SceneOnFocusEnergyConfig
@@ -2023,6 +2038,12 @@ export interface SceneOnMudShotView extends MudShotState {
 }
 
 export interface SceneOnHydroPumpView extends HydroPumpState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnWhirlpoolView extends WhirlpoolState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3761,6 +3782,31 @@ export function sceneOnHydroPumpView(
       state.config.attacker.geometry.side,
       state.config.attackerPictureOffset,
       state.config.targetPictureOffset,
+    ),
+  };
+}
+
+/**
+ * `age=0` is the first active source display of either Move_WHIRLPOOL or
+ * Status_Whirlpool, selected by the typed `body` discriminant.
+ */
+export function sceneOnWhirlpoolView(
+  state: SceneOnMovePresentationState<SceneOnWhirlpoolConfig>,
+): SceneOnWhirlpoolView {
+  if (state.config.move !== "WHIRLPOOL") {
+    throw new Error(
+      `expected WHIRLPOOL presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...whirlpoolAtAge(
+      state.age,
+      state.config.body,
+      state.config.target.geometry.side,
+      state.config.target.geometry.battlePositionCenter,
     ),
   };
 }

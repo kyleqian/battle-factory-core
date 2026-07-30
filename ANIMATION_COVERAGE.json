@@ -124,7 +124,7 @@
         "fresh dense probes pin the complete 141-frame body through first inactive cleanup in both orientations: player-back frames 213-353 with evidence 9c8210033328ee98ceae81e54e2d4ec36ecbc4a763deb925171f23f6ef117af7 and source-window raw RGB 360d0d7292aa8fa6125f3de46d5170d2d1a3ca62181ada3cdf11ff1cff779706; opponent-front frames 232-372 with evidence 3330496d0d3dd1feec78443a274380e43b593250459b36ed0b6976ae2e105880 and raw RGB ff315fb58f55bcaa8c5e728faa33635d97e41d624747d867d4f1c9487fc06cee",
         "the source-relative reducer and typed Scene-ON seam port the 44 orb and 12 splat schedules, StartSinAnimTimer, both ShakeMon tasks, tags, 12:8 alpha, clamped audio pan with the distinct sound-task/display latch, blendoff, and first inactive age 140; the renderer ports prior-frame battler and enemy-shadow latches plus sprite.c's stable priority/Y sort across reused OAM slots",
         "hydroPumpPortable.ts passes all 141/141 source/component, seam, software/hardware OAM and matrix, palette/tag/register/audio/immutable-state/raw-RGB, and production shared-framebuffer frames twice fresh in both orientations without thinning the complete windows",
-        "MOVE_WHIRLPOOL remains unsupported after an independent source and legal-party batch audit: the lowest suitable carrier is challenge-0 set 170 FRONTIER_MON_WAILMER_1, and its distinct body has 18 affine gWhirlpoolSpriteTemplate/AnimParticleInVortex lifecycles, target palette blend, target ShakeMon, audio, trapping outcome and later repetition/status-animation differences; it requires its own complete dense both-orientation evidence before promotion",
+        "MOVE_WHIRLPOOL is independently exact through both its 133-frame main body and distinct 108-frame Status_Whirlpool residual body; shared WATER_ORB art does not substitute for its separate source-relative reducer, typed seam, compositor, and dense both-orientation production-framebuffer proofs",
         "no animation boundary, unsupported barrier, canonical recording allowlist, gameplay outcome, damage, status, RNG, controller, turn, or facility state changed"
       ],
       "evidence": [
@@ -2558,16 +2558,16 @@
     },
     {
       "move": "MOVE_WHIRLPOOL",
-      "status": "partial",
+      "status": "exact",
       "covered": [
         "source and generated inventory audit pin challenge-0 FRONTIER_MON_WAILMER_1 set 170 as the lowest legal Level-50 carrier; complete legal three-Pokemon Scene-ON Wailmer-versus-Onix parties cover both orientations",
         "fresh dense main Move_WHIRLPOOL probes cover every frame through first inactive cleanup twice per orientation: player-back frames 78-210 and opponent-front frames 82-214 each pass 133/133 source/hardware/audio/immutable-state checks; evidence/raw RGB receipts are 2942fa0bf1a07da485bcf391ca4ecea06a41361d648adc27a1e48a3f32018125/d3a4cebcb258d334414d99096b7ded4accc90be1af37da4abf01610866ae96c8 and 7e57488e1a265960fec441a02b5133f0b4a6e38ddde46cd42e21b5a29b0aaba3/8b42073d713d49286935abd3079c2266464f6f66c492a039903fb70740a26ffa",
-        "portable evidence pins all three source six-orb bursts: all 18 gWhirlpoolSpriteTemplate/AnimParticleInVortex lifecycles, source parameters, target-relative affine/OAM geometry and prior-software OAM latch, target palette blend programs, target AnimTask_ShakeMon, WATER_ORB tag lifetime, target monbg/split priority/12:8 alpha, target-panned SE_M_WHIRLPOOL, relevant palette/OAM/register shapes, immutable gameplay fields, and first inactive cleanup",
+        "the pure source-relative reducer, typed Scene-ON seam, and production compositor port all three source six-orb bursts: all 18 gWhirlpoolSpriteTemplate/AnimParticleInVortex lifecycles, source parameters, target-relative affine/OAM geometry and prior-software OAM latch, 50-tick target ShakeMon, WATER_ORB tag lifetime, target blend, monbg/split priority/12:8 alpha, target-panned SE_M_WHIRLPOOL, Wailmer/Onix art and field chrome, stable sprite ordering, and first inactive cleanup",
         "separate legal second-turn residual scenarios reach Status_Whirlpool only after real Whirlpool trapping provenance; fresh dense 108-frame windows through first inactive cleanup twice per orientation pin its source pointer, two six-orb bursts (12 AnimParticleInVortex lifecycles), source parameters/affine/OAM geometry and latch, 30-tick target ShakeMon, target blend, WATER_ORB lifetime, monbg/split priority/12:8 alpha, exact target-panned SE_M_WHIRLPOOL, stopsound/cleanup, relevant palette/register latches, and stable gameplay fields; player-back receipts e5d210e7908b269ba0722959c4035d4bc39c04378a323cf74698375baa615b84/8a809496f28e7cb8e5eb9a37e26f721a9e9b3c14ef67bbf798825d4b527a9e71 and opponent-front d6b1d9e43817259be6ad63c9b36e5f4d11112a868785925253716eb97fead93a/481017b8c09ddf3bbe585e6e2845a02384e27e1b7ed38169834e3eb2ea82463c",
-        "this is evidence only: no reducer, typed scene seam, compositor, production renderer, gameplay state, boundary list, unsupported barrier, or canonical-recording allowlist changed",
-        "MOVE_WHIRLPOOL remains partial: neither independent source body has a production presentation implementation or framebuffer-equality claim"
+        "the same reducer, seam, and compositor independently port Status_Whirlpool's two six-orb bursts, all 12 lifecycles, its distinct affine/OAM creation latch, 30-tick target ShakeMon, target blend, tags/register/audio state, field presentation, stopsound, and cleanup",
+        "whirlpoolPortable.ts reruns all four complete legal probes twice fresh and passes 133/133 main and 108/108 residual source/component, seam, software/hardware affine/OAM, palette/tag/register/audio/immutable-state, raw-RGB, and production shared-framebuffer frames in both orientations",
+        "presentation owns no trapping outcome, damage, HP transition, status, RNG, turn order, controller input, round advancement, or facility state; no animation boundary, unsupported barrier, or canonical-recording allowlist changed"
       ],
-      "remaining": "Port and accept both independently evidenced Whirlpool bodies through the shared presentation seam and a live production framebuffer proof; status evidence alone does not claim production framebuffer equality.",
       "evidence": [
         "tools/battle-lab/mechanic-whirlpool-player-wailmer-opponent-onix.json",
         "tools/battle-lab/mechanic-whirlpool-opponent-wailmer-player-onix.json",
@@ -2582,6 +2582,12 @@
         "tools/compare/whirlpoolPortableEvidence.ts",
         "tools/compare/statusWhirlpoolProbe.py",
         "tools/compare/statusWhirlpoolPortableEvidence.ts",
+        "tools/compare/whirlpoolPortable.ts",
+        "src/animation/assets/water-orb.json",
+        "src/animation/whirlpool.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/whirlpool.test.ts",
         "tests/animation/whirlpoolEvidence.test.ts"
       ]
     },
@@ -2641,7 +2647,7 @@
         "MOVE_HYDRO_PUMP",
         "MOVE_WHIRLPOOL"
       ],
-      "goal": "MOVE_HYDRO_PUMP is exact through its independently accepted reducer, seam, compositor, and twice-fresh dense proof. MOVE_WHIRLPOOL has a partial main-move evidence checkpoint for its independent 18 affine vortex orbs, target blend/shake/audio, and first inactive cleanup in both orientations; its later Status_Whirlpool trapping/repetition animation remains outside that checkpoint and needs independent acceptance before any exact promotion."
+      "goal": "MOVE_HYDRO_PUMP and MOVE_WHIRLPOOL are independently exact through source-relative reducers, typed seams, production compositors, and twice-fresh dense both-orientation proofs. Whirlpool separately accepts its 133-frame main body with 18 affine vortex orbs and 50-tick ShakeMon plus its distinct 108-frame Status_Whirlpool residual body with 12 orbs and 30-tick ShakeMon."
     },
     {
       "id": "spore-particles",

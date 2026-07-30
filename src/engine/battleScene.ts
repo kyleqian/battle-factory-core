@@ -760,6 +760,7 @@ import {
   sceneOnSmokescreenView,
   sceneOnMudShotView,
   sceneOnHydroPumpView,
+  sceneOnWhirlpoolView,
   sceneOnBubbleBeamView,
   sceneOnCrossChopView,
   sceneOnFocusEnergyView,
@@ -840,6 +841,7 @@ import {
   type SceneOnSmokescreenConfig,
   type SceneOnMudShotConfig,
   type SceneOnHydroPumpConfig,
+  type SceneOnWhirlpoolConfig,
   type SceneOnBubbleBeamConfig,
   type SceneOnCrossChopConfig,
   type SceneOnFocusEnergyConfig,
@@ -1196,6 +1198,8 @@ const hydroPumpArt = waterOrbAsset as {
   waterImpact: { tileset: Tileset; palette: RgbColor[] };
   masquerainBack: { tileset: Tileset; palette: RgbColor[] };
   masquerainFront: { tileset: Tileset; palette: RgbColor[] };
+  wailmerBack: { tileset: Tileset; palette: RgbColor[] };
+  wailmerFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const bubbleBeamArt = bubbleBeamAsset as {
   bubble: { tileset: Tileset; palette: RgbColor[] };
@@ -18294,6 +18298,150 @@ export function renderSceneOnMovePresentation(
       "HYDRO PUMP!",
       99,
     );
+    return;
+  }
+
+  if (state.config.move === "WHIRLPOOL") {
+    const whirlpoolState =
+      state as SceneOnMovePresentationState<SceneOnWhirlpoolConfig>;
+    const view = sceneOnWhirlpoolView(whirlpoolState);
+    // BuildOamBuffer and the affine-matrix copy both precede animation
+    // callbacks. Scanout therefore consumes the preceding software vortex
+    // state. Status_Whirlpool's creation display is one scheduler pass
+    // earlier and leaves a newly allocated matrix at hardware identity.
+    const displayed = sceneOnWhirlpoolView({
+      ...whirlpoolState,
+      age: view.battlerDisplayAge,
+    });
+    const playerToOpponent =
+      view.attacker.species === "WAILMER"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "WAILMER"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged WHIRLPOOL pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const wailmerSource = playerToOpponent
+      ? hydroPumpArt.wailmerBack : hydroPumpArt.wailmerFront;
+    const wailmer = playerToOpponent
+      ? wailmerSource
+      : {
+          ...wailmerSource,
+          tileset: subTileset(wailmerSource.tileset, 0, 8),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const vortexTint = { r: 0, g: 107, b: 189 };
+    const targetPalette = blendPaletteToward(
+      onix.palette,
+      vortexTint,
+      view.targetPaletteBlendY,
+    );
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const targetInitialX2 =
+      view.body === "main" && playerToOpponent && view.age <= 9 ? 1 : 0;
+    const drawOnix = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      targetPalette,
+      view.target.geometry.spriteCorner.x
+        + targetInitialX2 + view.targetOffset.x2,
+      view.target.geometry.spriteCorner.y + view.targetOffset.y2,
+    );
+    const drawWailmer = () => drawSpriteSheet(
+      fb,
+      wailmer.tileset,
+      wailmer.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    drawOnix();
+    drawWailmer();
+    const nonObjTarget2 = fb.slice();
+    const orderedOrbs = displayed.orbs.slice().sort(
+      (left, right) =>
+        displayed.particleOamSlotsBackToFront.indexOf(left.oamSlot)
+        - displayed.particleOamSlotsBackToFront.indexOf(right.oamSlot),
+    );
+    for (const orb of orderedOrbs) {
+      if (!displayed.alpha) continue;
+      // Status_Whirlpool's pre-callback creation state has not yet entered
+      // the hardware OAM buffer; the first scanout is its following step.
+      if (displayed.body === "residual" && orb.localAge === 0) continue;
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        nonObjTarget2,
+        subTileset(hydroPumpArt.waterOrb.tileset, orb.frame * 2, 2),
+        hydroPumpArt.waterOrb.palette,
+        orb.x + orb.x2,
+        orb.y + orb.y2,
+        orb.matrix.a,
+        orb.matrix.b,
+        orb.matrix.c,
+        orb.matrix.d,
+        displayed.alpha.eva,
+        displayed.alpha.evb,
+        false,
+      );
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "WAILMER",
+        level: 50,
+        gender: "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "WAILMER" : "ONIX",
+        level: 50,
+        gender: "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    if (view.body === "main") {
+      drawMessageTextLines(
+        fb,
+        playerToOpponent ? "WAILMER used" : "Foe WAILMER used",
+        "WHIRLPOOL!",
+        99,
+      );
+    } else {
+      drawMessageTextLines(
+        fb,
+        playerToOpponent ? "Foe ONIX used" : "ONIX used",
+        "TACKLE!",
+        99,
+      );
+    }
     return;
   }
 
