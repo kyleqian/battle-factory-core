@@ -13,6 +13,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 746 — [BOUNDED MAIN WORKER 2026-07-30 ~15:10] Slice 5 implementation green; acceptance in progress
+
+- **State:** generated swap accept/decline and reusable later-battle re-entry
+  are implemented; focused route tests and production build green.
+- **Did:** live swap decisions now mutate the persistent orchestrator, complete
+  `swapResolved`, generate the next non-repeating opponent, retain the accepted
+  rental, and route the current trainer through the shared room/intro owner.
+  Accelerated fixtures prove the identical handoff at battle indexes 1 and 5,
+  full healing, retained history, and one monotonic facility-call ledger.
+- **Next:** run the complete Slice-5 named compare/test matrix and full gate,
+  then record exact totals here.
+- **Notes:** swap exit/NO-return remain **43/43 + 69/69** exact. No new
+  battle/turn/tick dispatch, barrier, trace/capture, issue, or Scene-ON change.
+
+---
 ## 745 — [BOUNDED MAIN WORKER 2026-07-30 ~15:00] Slice 4 complete: live postwin → orchestrator swapOffer
 
 - **State:** landed in `f34fd465` + `2f744ccf`; focused acceptance **7 files /
@@ -51,20 +66,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** main — design Slice 4 (postwin/swap generalization over
   `orchestrator.round`), then 5/6/7 in order. Side idle unless a
   disjoint need appears.
-
----
-## 743 — [BOUNDED MAIN WORKER 2026-07-30 ~14:29] Slice 3 intro exact and closed
-
-- **State:** fixes `0c4dab29` + `e85d5360`; focused acceptance **5 files / 49
-  tests**, full gate green at **550 files / 5560 tests + 1 deliberate
-  animation-lane skip**, production build clean.
-- **Did:** the typed initial-release summary tail advances its stateless final
-  exit step, while canonical clocks remain unchanged. The live command
-  conversion now consumes only the source-owned six blank `action-enter`
-  callbacks and enters `action-menu` at bounce age zero; this closes frames
-  1747/1755-56 without frame-relative routing.
-- **Next:** supervisor may proceed to routing design Slice 4.
-- **Notes:** generated intro **715/715**, command entry **7/7**, generated
-  command **128/128**; all **25/25** immutable rows exact at established
-  counts. Slice 3's sole intro residual family is **CLOSED**. No capture,
-  route default, barrier, issue, Scene-ON, or later-round change.

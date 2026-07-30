@@ -1,3 +1,20 @@
+## 743 — [BOUNDED MAIN WORKER 2026-07-30 ~14:29] Slice 3 intro exact and closed
+
+- **State:** fixes `0c4dab29` + `e85d5360`; focused acceptance **5 files / 49
+  tests**, full gate green at **550 files / 5560 tests + 1 deliberate
+  animation-lane skip**, production build clean.
+- **Did:** the typed initial-release summary tail advances its stateless final
+  exit step, while canonical clocks remain unchanged. The live command
+  conversion now consumes only the source-owned six blank `action-enter`
+  callbacks and enters `action-menu` at bounce age zero; this closes frames
+  1747/1755-56 without frame-relative routing.
+- **Next:** supervisor may proceed to routing design Slice 4.
+- **Notes:** generated intro **715/715**, command entry **7/7**, generated
+  command **128/128**; all **25/25** immutable rows exact at established
+  counts. Slice 3's sole intro residual family is **CLOSED**. No capture,
+  route default, barrier, issue, Scene-ON, or later-round change.
+
+---
 ## 742 — [SUPERVISOR 2026-07-30 ~14:25] Slice 3 verified (711/715 honest); 4 side branches merged; census found 10 reachable moveend halts — burn-down in flight
 
 - **State:** master `e023c365`, union green **550 files / 5559 tests + 1

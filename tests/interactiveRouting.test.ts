@@ -19,8 +19,24 @@ import {
 } from "../src/engine/factoryBattleStartIntro.ts";
 import { factoryBattleStartField } from "../src/engine/factoryBattleStartPresentation.ts";
 import {
+  advanceFactoryRoundPresentation,
+  chooseFactoryRoundSwap,
+  completeFactoryRoundPresentation,
   factoryBattleStartPresentationForState,
+  type FactoryRoundBattleOrchestratorState,
 } from "../src/engine/factoryRoundBattleOrchestrator.ts";
+import {
+  advanceRoundController,
+  completeBattlePresentation,
+  resolveRoundBattle,
+} from "../src/engine/roundController.ts";
+import type { BattleParty } from "../src/engine/battleScenario.ts";
+import { INITIAL_POSTWIN_STATE } from "../src/engine/postwin.ts";
+import {
+  BATTLE_2_SCENE_HANDOFF_ELAPSED,
+  WARP_FADE_TO_ROOM_ELAPSED,
+} from "../src/engine/battleRoom.ts";
+import { createPendingFactorySwapPresentation } from "../src/engine/factorySwapPresentation.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
 import {
   CANONICAL_DESTIN_PRESENTATION,
@@ -58,6 +74,95 @@ function atBattleHandoff(
       trainerPresentation: CANONICAL_DESTIN_PRESENTATION,
     },
   };
+}
+
+function accelerateWinToSwapOffer(
+  state: FactoryRoundBattleOrchestratorState,
+): FactoryRoundBattleOrchestratorState {
+  const start = state.round.presentation?.command;
+  if (start?.type !== "battleStart") throw new Error("expected battleStart");
+  let round = advanceRoundController(
+    completeBattlePresentation(state.round, { commandId: start.commandId }),
+  );
+  const playerParty = round.rules.playerParty.map((member) => ({
+    ...member,
+    hp: Math.max(1, member.maxHp - 17),
+    status: "burn" as const,
+  })) as unknown as BattleParty;
+  const opponentParty = round.rules.currentOpponent.party.map((member) => ({
+    ...member,
+    hp: 0,
+  })) as unknown as BattleParty;
+  round = resolveRoundBattle(round, {
+    outcome: "win",
+    playerParty,
+    opponentParty,
+    rngValue: round.rules.rngValue,
+  });
+  let next: FactoryRoundBattleOrchestratorState = {
+    ...state,
+    round,
+    battle: null,
+    battleCommandPresentation: null,
+    battleResolutionPresentation: null,
+    activeBattleCallStart: null,
+  };
+  const won = next.round.presentation!.command;
+  return advanceFactoryRoundPresentation(
+    completeFactoryRoundPresentation(next, { commandId: won.commandId }),
+  );
+}
+
+function accelerateWinToNextBattle(
+  state: FactoryRoundBattleOrchestratorState,
+  decision: Parameters<typeof chooseFactoryRoundSwap>[1],
+): FactoryRoundBattleOrchestratorState {
+  let next = accelerateWinToSwapOffer(state);
+  const offer = next.round.presentation!.command;
+  next = chooseFactoryRoundSwap(
+    completeFactoryRoundPresentation(next, { commandId: offer.commandId }),
+    decision,
+  );
+  const resolved = next.round.presentation!.command;
+  return advanceFactoryRoundPresentation(
+    completeFactoryRoundPresentation(next, {
+      commandId: resolved.commandId,
+    }),
+  );
+}
+
+function routePendingStartThroughRoom(
+  orchestrator: FactoryRoundBattleOrchestratorState,
+): EngineState {
+  let state: EngineState = {
+    ...createInitialState({ appRoute: "generated-orchestrator" }),
+    postwin: INITIAL_POSTWIN_STATE,
+    prebattleRoom: {
+      phase: "warpFade",
+      elapsed: WARP_FADE_TO_ROOM_ELAPSED - 1,
+    },
+    factoryRoundBattleOrchestrator: orchestrator,
+  };
+  state = tick(state, new Set());
+  const expectedTrainer = factoryBattleStartPresentationForState(
+    orchestrator,
+  )!.opponentTrainer;
+  expect(state.battleRoom?.trainerPresentation).toEqual(expectedTrainer);
+  state = {
+    ...state,
+    battleRoom: {
+      ...state.battleRoom!,
+      phase: "settled",
+      elapsed: BATTLE_2_SCENE_HANDOFF_ELAPSED - 1,
+    },
+  };
+  state = tick(state, new Set());
+  expect(state.battleRoom).toBeNull();
+  expect(state.battleScene).toBeNull();
+  expect(state.postwin).toBeNull();
+  expect(state.factoryRoundBattleOrchestrator!.battleStartIntro!.command)
+    .toEqual(factoryBattleStartPresentationForState(orchestrator));
+  return state;
 }
 
 describe("interactive battle routing", () => {
@@ -309,5 +414,150 @@ describe("interactive battle routing", () => {
       wronglyReselectedAtHandoff.trainerId,
       ...wronglyReselectedAtHandoff.opponents.map(({ setId }) => setId),
     ]).not.toEqual([50, 188, 184, 135]);
+  });
+
+  it("feeds postwin decline and accepted copy results into the generated owner", () => {
+    const anchor = createInitialState();
+    const initial = createFactoryAnchorSession({
+      playerRentalRecords: selectedRentalParty({
+        ...anchor.draftScreen,
+        selectedIds: selectedIdsForSlots(4, 0, 2),
+      }),
+      savedRentalRecords: anchor.draftScreen.rentals.map(({ source }) => source),
+      roomTrainer: CANONICAL_DESTIN_PRESENTATION,
+      constructionRngValues: ANCHOR_BATTLE_1_CONSTRUCTION_RNG_VALUES,
+      freshBattleRngValue: ANCHOR_BATTLE_1_HANDOFF_RNG_VALUE,
+    });
+    const declineOffer = accelerateWinToSwapOffer(initial);
+    let declined = tick({
+      ...createInitialState({ appRoute: "generated-orchestrator" }),
+      postwin: {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: 20_000,
+        dialoguePage: 4,
+        dialoguePageEdgeElapsed: 19_000,
+        swapCursorPos: 1,
+        swapCursorDisplayPos: 1,
+      },
+      factoryRoundBattleOrchestrator: declineOffer,
+    }, new Set(["A"]));
+    expect(declined.factoryRoundBattleOrchestrator!.round.rules.lastSwap)
+      .toEqual({ type: "decline" });
+    expect(declined.factoryRoundBattleOrchestrator!.round.rules.battleIndex)
+      .toBe(1);
+    expect(declined.factoryRoundBattleOrchestrator!.round.presentation?.command.type)
+      .toBe("battleStart");
+
+    const acceptOffer = accelerateWinToSwapOffer(initial);
+    const pendingSwap = createPendingFactorySwapPresentation(
+      acceptOffer.round,
+    )!;
+    let accepted: EngineState = {
+      ...createInitialState({ appRoute: "generated-orchestrator" }),
+      postwin: {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: 20_000,
+        dialoguePage: 4,
+        dialoguePageEdgeElapsed: 19_000,
+        swapCursorPos: 0,
+        swapCursorDisplayPos: 0,
+      },
+      factorySwap: {
+        ...pendingSwap,
+        phaseElapsed: 20,
+        controller: {
+          ...pendingSwap.controller,
+          phase: "acceptExit",
+          playerMonId: 0,
+          enemyMonId: 0,
+          scriptResult: false,
+        },
+      },
+      factoryRoundBattleOrchestrator: acceptOffer,
+    };
+    accepted = tick(accepted, new Set());
+    expect(accepted.factoryRoundBattleOrchestrator!.round.rules.lastSwap)
+      .toEqual({
+        type: "accept",
+        playerPartyIndex: 0,
+        opponentPartyIndex: 0,
+      });
+    expect(accepted.factoryRoundBattleOrchestrator!.round.presentation?.command.type)
+      .toBe("swapResolved");
+    for (let elapsed = 21; elapsed < 41; elapsed += 1) {
+      accepted = tick(accepted, new Set());
+    }
+    expect(accepted.factorySwap?.fieldHandoff)
+      .toBe("CB2_ReturnToFieldContinueScript");
+    accepted = tick(accepted, new Set());
+    expect(accepted.factorySwap).toBeNull();
+    expect(accepted.factoryRoundBattleOrchestrator!.round.rules.battleIndex)
+      .toBe(1);
+    expect(accepted.factoryRoundBattleOrchestrator!.round.presentation?.command.type)
+      .toBe("battleStart");
+    expect(accepted.postwin!.swapDeclineElapsed).not.toBeNull();
+  });
+
+  it("reuses one generated room/intro/start lifecycle at battle indexes 1 and 5", () => {
+    const anchor = createInitialState();
+    let orchestrator = createFactoryAnchorSession({
+      playerRentalRecords: selectedRentalParty({
+        ...anchor.draftScreen,
+        selectedIds: selectedIdsForSlots(4, 0, 2),
+      }),
+      savedRentalRecords: anchor.draftScreen.rentals.map(({ source }) => source),
+      roomTrainer: CANONICAL_DESTIN_PRESENTATION,
+      constructionRngValues: ANCHOR_BATTLE_1_CONSTRUCTION_RNG_VALUES,
+      freshBattleRngValue: ANCHOR_BATTLE_1_HANDOFF_RNG_VALUE,
+    });
+    const acceptedRecord =
+      orchestrator.round.rules.currentOpponent.rentalRecords![0]!;
+    orchestrator = accelerateWinToNextBattle(orchestrator, {
+      type: "accept",
+      playerPartyIndex: 0,
+      opponentPartyIndex: 0,
+    });
+    const battle1 = orchestrator;
+    expect(battle1.round.rules.battleIndex).toBe(1);
+    expect(battle1.round.rules.playerRentalRecords![0]).toEqual(acceptedRecord);
+    expect(battle1.round.rules.playerParty.every(
+      ({ hp, maxHp, status }) => hp === maxHp && status === "none",
+    )).toBe(true);
+
+    for (let index = 1; index < 5; index += 1) {
+      orchestrator = accelerateWinToNextBattle(
+        orchestrator,
+        { type: "decline" },
+      );
+    }
+    const battle5 = orchestrator;
+    expect(battle5.round.rules.battleIndex).toBe(5);
+    expect(battle5.round.rules.playerRentalRecords![0]).toEqual(acceptedRecord);
+    expect(battle5.round.rules.playerParty.every(
+      ({ hp, maxHp, status }) => hp === maxHp && status === "none",
+    )).toBe(true);
+    const trainerIds = battle5.opponentGenerations.map(({ trainerId }) => trainerId);
+    expect(new Set(trainerIds).size).toBe(trainerIds.length);
+    for (let index = 1; index < battle5.rngSegments.length; index += 1) {
+      expect(battle5.rngSegments[index]!.callStart)
+        .toBe(battle5.rngSegments[index - 1]!.callEnd);
+    }
+
+    const reentered1 = routePendingStartThroughRoom(battle1);
+    const reentered5 = routePendingStartThroughRoom(battle5);
+    expect([
+      reentered1.factoryRoundBattleOrchestrator!.battleStartIntro!.command
+        .battleIndex,
+      reentered5.factoryRoundBattleOrchestrator!.battleStartIntro!.command
+        .battleIndex,
+    ]).toEqual([1, 5]);
+    expect([
+      factoryBattleStartIntroPhase(
+        reentered1.factoryRoundBattleOrchestrator!.battleStartIntro!,
+      ),
+      factoryBattleStartIntroPhase(
+        reentered5.factoryRoundBattleOrchestrator!.battleStartIntro!,
+      ),
+    ]).toEqual(["handoff", "handoff"]);
   });
 });

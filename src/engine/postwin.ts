@@ -538,6 +538,17 @@ export function acceptPostwinSwapDecline(state: PostwinState): PostwinState {
   return { ...state, swapDeclineElapsed: state.elapsed };
 }
 
+/** Shared field-script continuation after either NO or a completed swap. */
+export function beginPostwinNextBattleGuide(
+  state: PostwinState,
+): PostwinState {
+  if (
+    state.swapDeclineElapsed !== null ||
+    !postwinDialogueInputReady(state)
+  ) return state;
+  return { ...state, swapDeclineElapsed: state.elapsed };
+}
+
 export function postwinRightThisWayVisibleChars(state: PostwinState): number {
   if (state.swapDeclineElapsed === null) return 0;
   const delay = state.elapsed - state.swapDeclineElapsed;
