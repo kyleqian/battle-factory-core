@@ -33,6 +33,11 @@ export type BattleStatName = Extract<
 export type PartyBallState = "empty" | "healthy" | "status" | "fainted";
 
 export type BattleMessageTiming = Readonly<{ minimumFrames: 24 }>;
+export type BattleMoveAnimationTiming = Readonly<{ minimumFrames: number }>;
+export type BattleHitAnimationTiming = Readonly<{
+  minimumFrames: 35;
+  firstDisplayedAge: 1;
+}>;
 export type BattleHpTiming = Readonly<{ minimumFrames: 28 }>;
 export type BattleStatTiming = Readonly<{ minimumFrames: 32 }>;
 export type BattleStatusTiming = Readonly<{ minimumFrames: 32 }>;
@@ -60,6 +65,18 @@ export type BattleResolutionPresentationCommand =
       lines: readonly string[];
       advance: "automatic" | "button";
       timing: BattleMessageTiming;
+    }>
+  | Readonly<{
+      type: "move-animation";
+      eventSequence: number;
+      battler: 0 | 1;
+      timing: BattleMoveAnimationTiming;
+    }>
+  | Readonly<{
+      type: "hit-animation";
+      eventSequence: number;
+      battler: 0 | 1;
+      timing: BattleHitAnimationTiming;
     }>
   | Readonly<{
       type: "hp";
@@ -183,6 +200,35 @@ export type BattleResolutionSegment = Readonly<{
   commands: readonly BattleResolutionPresentationCommand[];
 }>;
 
+/**
+ * The one-main-callback-at-a-time path from HandleInputChooseMove's accepted
+ * response to Cmd_attackstring. These are source controller/interpreter
+ * states, not a fitted duration:
+ *
+ * - battle_controller_player.c:481-527,200-213
+ * - battle_main.c:4354-4402,4458-4551,4756-4854,4906-4957
+ * - battle_util.c:78-292
+ * - battle_scripts_1.s:236-247
+ * - battle_script_commands.c:915-1006,1191-1203
+ */
+export type BattleResolutionConfirmHandoffStage =
+  | "move-selection-response"
+  | "selection-accepted"
+  | "stop-bounce-request"
+  | "actions-confirmed"
+  | "turn-order"
+  | "before-turn"
+  | "action-dispatch"
+  | "attack-canceler"
+  | "accuracy-check";
+
+export type BattleResolutionConfirmHandoff = Readonly<{
+  stage: BattleResolutionConfirmHandoffStage;
+  fightDisplayCursor: 0 | 1 | 2 | 3;
+  idleBounceElapsed: number;
+  bounceReset: boolean;
+}>;
+
 export type BattleResolutionPresentationState = Readonly<{
   resolutionId: Readonly<{
     requestId: number;
@@ -195,6 +241,7 @@ export type BattleResolutionPresentationState = Readonly<{
   commandIndex: number;
   lifecycle: Readonly<{
     phase:
+      | "confirm-handoff"
       | "presenting"
       | "awaiting-message-dismiss"
       | "forced-party-handoff"
@@ -203,6 +250,7 @@ export type BattleResolutionPresentationState = Readonly<{
       | "terminal-handoff";
     phaseElapsed: number;
   }>;
+  confirmHandoff: BattleResolutionConfirmHandoff | null;
   field: BattleResolutionDisplayedField;
   pendingBoundary: BattleBoundary;
   pendingBattle: BattleState<FactoryFullTurnDecisionRules>;
@@ -216,10 +264,26 @@ export type CreateBattleResolutionPresentationInput = Readonly<{
   beforeRules: FactoryFullTurnDecisionRules;
   transition: BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>;
   fieldBoundary: BattleCommandPresentationState["field"];
+  confirmHandoff: Readonly<{
+    fightDisplayCursor: 0 | 1 | 2 | 3;
+    idleBounceElapsed: number;
+  }>;
   opponentTrainer?: Readonly<{ className: string; name: string }> | null;
 }>;
 
 const MESSAGE_TIMING = Object.freeze({ minimumFrames: 24 } as const);
+/**
+ * Scene-OFF hit controller lifetime:
+ * setup, 32 blink callbacks, completion, and waitstate release.
+ * battle_controller_opponent.c:1804-1816,440-456;
+ * battle_script_commands.c:3927-3931.
+ */
+const HIT_ANIMATION_TIMING = Object.freeze({
+  minimumFrames: 35,
+  firstDisplayedAge: 1,
+} as const);
+/** BattleScript_Pausex20's `pause B_WAIT_TIME_SHORT`. */
+const SCENE_OFF_MOVE_PAUSE_FRAMES = 32;
 const HP_TIMING = Object.freeze({ minimumFrames: 28 } as const);
 const STAT_TIMING = Object.freeze({ minimumFrames: 32 } as const);
 const STATUS_TIMING = Object.freeze({ minimumFrames: 32 } as const);
@@ -245,6 +309,29 @@ function sourceLabelOf(event: BattleKernelSemanticEvent): string {
     );
   }
   return event.provenance.sourceLabel;
+}
+
+function instructionExecutionOf(event: BattleKernelSemanticEvent): number {
+  sourceLabelOf(event);
+  return event.provenance!.instructionExecution;
+}
+
+function nextHitAnimation(
+  events: readonly BattleKernelSemanticEvent[],
+  moveIndex: number,
+): BattleKernelSemanticEvent | null {
+  for (let index = moveIndex + 1; index < events.length; index += 1) {
+    const candidate = events[index]!;
+    if (
+      candidate.payload.kind === "animation"
+      && candidate.payload.animationId === "HIT_ANIMATION"
+    ) return candidate;
+    if (
+      candidate.payload.kind === "animation"
+      && candidate.payload.animationId === "MOVE_ANIMATION"
+    ) break;
+  }
+  return null;
 }
 
 function ppEventAfter(
@@ -405,6 +492,7 @@ export function projectBattleResolutionCommands(
     { kind: "stat-stage-change" }
   > | null = null;
   let lastFaintBattler: 0 | 1 | null = null;
+  let usedMoveInstructionExecution: number | null = null;
   const zeroHpBattlers = new Set<0 | 1>();
   const fieldArt = createBattleCommandFieldArtView(field);
 
@@ -419,6 +507,9 @@ export function projectBattleResolutionCommands(
     const payload = event.payload;
     if (payload.kind === "message") {
       sourceLabelOf(event);
+      if (payload.messageId === "STRINGID_USEDMOVE") {
+        usedMoveInstructionExecution = instructionExecutionOf(event);
+      }
       const switchInBattler = payload.messageId === "STRINGID_SWITCHINMON"
         ? ([...pendingSwitch.keys()].at(-1) ?? null)
         : null;
@@ -442,6 +533,51 @@ export function projectBattleResolutionCommands(
             ? "button"
             : "automatic",
         timing: MESSAGE_TIMING,
+      }));
+      continue;
+    }
+    if (
+      payload.kind === "animation"
+      && payload.animationId === "MOVE_ANIMATION"
+    ) {
+      const battler = singlesBattler(payload.battler ?? -1, "move animation");
+      const hit = nextHitAnimation(events, index);
+      if (usedMoveInstructionExecution === null || hit === null) {
+        // A move animation without a hit receipt has no target hit/drain
+        // choreography. Existing typed effect/status commands own its
+        // controller-specific presentation.
+        continue;
+      }
+      const hitExecution = instructionExecutionOf(hit);
+      const interveningInstructions =
+        hitExecution - usedMoveInstructionExecution;
+      if (interveningInstructions <= 0) {
+        throw new Error("battle resolution move/hit provenance is not ordered");
+      }
+      commands.push(Object.freeze({
+        type: "move-animation",
+        eventSequence: event.sequence,
+        battler,
+        // The attack-string text printer releases one callback after the
+        // final displayed glyph. Then every source instruction through
+        // Cmd_hitanimation runs once, while Scene OFF substitutes the
+        // attackanimation command with BattleScript_Pausex20.
+        timing: Object.freeze({
+          minimumFrames:
+            1 + interveningInstructions + SCENE_OFF_MOVE_PAUSE_FRAMES,
+        }),
+      }));
+      continue;
+    }
+    if (
+      payload.kind === "animation"
+      && payload.animationId === "HIT_ANIMATION"
+    ) {
+      commands.push(Object.freeze({
+        type: "hit-animation",
+        eventSequence: event.sequence,
+        battler: singlesBattler(payload.battler ?? -1, "hit animation"),
+        timing: HIT_ANIMATION_TIMING,
       }));
       continue;
     }
@@ -632,6 +768,14 @@ export function createBattleResolutionPresentation(
   )) {
     throw new Error("battle resolution source decision is not legal for its source request");
   }
+  if (
+    input.sourceDecision.kind !== "use-move"
+    || input.sourceDecision.moveSlot !== input.confirmHandoff.fightDisplayCursor
+  ) {
+    throw new Error(
+      "battle resolution confirm handoff requires the confirmed move cursor",
+    );
+  }
   const field = Object.freeze({
     player: input.fieldBoundary.player,
     opponent: input.fieldBoundary.opponent,
@@ -666,12 +810,84 @@ export function createBattleResolutionPresentation(
     segments: Object.freeze([segment]),
     segmentIndex: 0,
     commandIndex: 0,
-    lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 0 }),
+    lifecycle: Object.freeze({
+      phase: "confirm-handoff" as const,
+      phaseElapsed: 0,
+    }),
+    confirmHandoff: Object.freeze({
+      stage: "move-selection-response" as const,
+      bounceReset: false,
+      ...input.confirmHandoff,
+    }),
     field,
     pendingBoundary: boundary,
     pendingBattle: input.transition.state,
     forcedRequest,
     opponentTrainer: input.opponentTrainer ?? null,
+  });
+}
+
+const CONFIRM_HANDOFF_NEXT = Object.freeze({
+  "move-selection-response": "selection-accepted",
+  "selection-accepted": "stop-bounce-request",
+  "stop-bounce-request": "actions-confirmed",
+  "actions-confirmed": "turn-order",
+  "turn-order": "before-turn",
+  "before-turn": "action-dispatch",
+  "action-dispatch": "attack-canceler",
+  "attack-canceler": "accuracy-check",
+  "accuracy-check": null,
+} satisfies Readonly<
+  Record<
+    BattleResolutionConfirmHandoffStage,
+    BattleResolutionConfirmHandoffStage | null
+  >
+>);
+
+/**
+ * Advances one source battle-main/controller callback. The bouncer sprite
+ * runs before controllers each frame, so the selection-accepted and
+ * stop-bounce-request callbacks still contribute a step; once the STOP_BOUNCE
+ * controller completes, the confirmed field remains frozen.
+ */
+export function advanceBattleResolutionConfirmHandoff(
+  state: BattleResolutionPresentationState,
+): BattleResolutionPresentationState {
+  const handoff = state.confirmHandoff;
+  if (state.lifecycle.phase !== "confirm-handoff" || handoff === null) {
+    return state;
+  }
+  const nextStage = CONFIRM_HANDOFF_NEXT[handoff.stage];
+  if (nextStage === null) {
+    return Object.freeze({
+      ...state,
+      lifecycle: Object.freeze({
+        phase: "presenting" as const,
+        phaseElapsed: 0,
+      }),
+      confirmHandoff: null,
+    });
+  }
+  const bounceRuns =
+    nextStage === "selection-accepted"
+    || nextStage === "stop-bounce-request";
+  return Object.freeze({
+    ...state,
+    lifecycle: Object.freeze({
+      phase: "confirm-handoff" as const,
+      phaseElapsed: 0,
+    }),
+    confirmHandoff: Object.freeze({
+      ...handoff,
+      stage: nextStage,
+      // EndBounceEffect destroys both invisible bouncers and writes x2/y2=0
+      // when LINK_STANDBY_MSG_STOP_BOUNCE is handled
+      // (battle_main.c:2940-2965).
+      bounceReset:
+        handoff.bounceReset || nextStage === "actions-confirmed",
+      idleBounceElapsed:
+        handoff.idleBounceElapsed + (bounceRuns ? 1 : 0),
+    }),
   });
 }
 

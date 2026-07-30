@@ -5,26 +5,6 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #52 — generated OFF resolution starts before the confirmed-FIGHT handoff
-
-**Fixed portion:** the fight-closing bounce reset is removed. A persistent
-controller-owned callback clock now survives FIGHT open/close/reopen, matching
-the source's already-running `DoBounceEffect` guard; the generated route is
-exact through both cursor moves, B cancel, and reopen (frames 8-33).
-
-**Open remainder:** the legal EARTHQUAKE confirm now first diverges at capture
-27 (frame 34): **13,279px**, bbox (1,59)-(238,158). The app replaces FIGHT
-with the first message glyph immediately; the ROM retains the confirmed FIGHT
-field through frame 42 and first draws `G` at frame 43. Updated diagnostic:
-**26/128**, while acceptance remains **0/128 claimed**.
-
-**Evidence:** `tools/battle-lab/mechanic-battle-command-generated-off.json`
-(trainer 17, seed 2423399196, Intimidate live) plus the pinned post-fix
-fixture/test. The remaining fix belongs to the generic typed resolution
-controller-handoff lifecycle, not a route delay or fitted frame offset.
-
-**Blocks:** resolution design §4 Slice 7's 128/128 acceptance.
-
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn

@@ -30,10 +30,15 @@ import {
   type HealthboxContentParams,
 } from "./healthboxAssembly.ts";
 import {
+  buildFightMoveset,
+  type FightMoveset,
+} from "./fightSubmenuText.ts";
+import {
   partySendOutGoTextVisibleChars,
   type PartySendOutPhase,
   partySendOutPhase,
 } from "./partySelect.ts";
+import { genericHitReactionAtAge } from "./battleMenu.ts";
 
 export const BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES =
   BATTLE_COMMAND_ACTION_ENTER_DELAY;
@@ -41,6 +46,12 @@ export const BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES =
 export const BATTLE_RESOLUTION_STAT_CHANGE_FRAMES = 50;
 
 export type BattleResolutionRenderEffect =
+  | Readonly<{
+      type: "hit";
+      battler: 0 | 1;
+      healthboxY2: number;
+      targetInvisible: boolean;
+    }>
   | Readonly<{
       type: "stat";
       battler: 0 | 1;
@@ -89,7 +100,15 @@ export type BattleResolutionPresentationRenderView = Readonly<{
     opponent: Readonly<{ sprite: boolean; healthbox: boolean }>;
   }>;
   waitCursor: Readonly<{ age: number }> | null;
-  bottom: "message" | "blank";
+  bottom: "fight" | "message" | "blank";
+  confirmHandoff: Readonly<{
+    idleBounceElapsed: number;
+    bounceReset: boolean;
+    fightMenu: Readonly<{
+      moveset: FightMoveset;
+      displayCursor: 0 | 1 | 2 | 3;
+    }>;
+  }> | null;
   switchIn: Readonly<{
     elapsed: number;
     phase: PartySendOutPhase;
@@ -179,6 +198,8 @@ function applyCompletedCommand(
   }
   if (
     command.type === "message"
+    || command.type === "move-animation"
+    || command.type === "hit-animation"
     || command.type === "stat"
     || command.type === "faint"
     || command.type === "party-summary"
@@ -219,6 +240,9 @@ export function battleResolutionCommandDuration(
         command.timing.minimumFrames,
         battleStringPrintableLength(command.lines),
       );
+    case "move-animation":
+    case "hit-animation":
+      return command.timing.minimumFrames;
     case "hp": {
       const maxHp = fieldBattler(field, command.battler).maxHP;
       return Math.max(
@@ -311,6 +335,20 @@ export function createBattleResolutionPresentationRenderView(
   let switchIn: BattleResolutionPresentationRenderView["switchIn"] = null;
   let partySummary: BattleResolutionPresentationRenderView["partySummary"] = null;
   const fainted = new Set<0 | 1>();
+  const confirmHandoff = state.confirmHandoff === null
+    ? null
+    : Object.freeze({
+        idleBounceElapsed: state.confirmHandoff.idleBounceElapsed,
+        bounceReset: state.confirmHandoff.bounceReset,
+        fightMenu: Object.freeze({
+          moveset: buildFightMoveset(
+            state.field.player.moveIds,
+            state.field.player.currentPP,
+            state.field.player.ppBonuses,
+          ),
+          displayCursor: state.confirmHandoff.fightDisplayCursor,
+        }),
+      });
   if (state.lifecycle.phase === "presenting-switch-in") {
     const switchCommand = segment.commands.find(
       (candidate): candidate is Extract<
@@ -421,6 +459,15 @@ export function createBattleResolutionPresentationRenderView(
         ),
       );
       hpTarget = Object.freeze({ battler: command.battler, to: command.to });
+    } else if (command.type === "hit-animation") {
+      effect = Object.freeze({
+        type: "hit",
+        battler: command.battler,
+        ...genericHitReactionAtAge(
+          state.lifecycle.phaseElapsed,
+          command.timing.firstDisplayedAge,
+        ),
+      });
     } else if (command.type === "stat") {
       effect = Object.freeze({
         type: "stat",
@@ -481,6 +528,8 @@ export function createBattleResolutionPresentationRenderView(
       fainted.delete(command.battler);
     }
   } else if (
+    state.lifecycle.phase !== "confirm-handoff"
+    &&
     state.lifecycle.phase !== "next-command-handoff"
     && state.lifecycle.phase !== "terminal-handoff"
     && state.lifecycle.phase !== "presenting-switch-in"
@@ -502,6 +551,12 @@ export function createBattleResolutionPresentationRenderView(
     ? effect
     : null;
   const fieldArt = createBattleCommandFieldArtView(field);
+  const playerHit = effect?.type === "hit" && effect.battler === 0
+    ? effect
+    : null;
+  const opponentHit = effect?.type === "hit" && effect.battler === 1
+    ? effect
+    : null;
   return Object.freeze({
     field,
     fieldArt,
@@ -524,6 +579,7 @@ export function createBattleResolutionPresentationRenderView(
     visibility: Object.freeze({
       player: Object.freeze({
         sprite: !fainted.has(0)
+          && !(playerHit?.targetInvisible ?? false)
           && !(
             playerFaint?.sink.type === "player-pixel-rows"
             && playerFaint.sink.skipPixelRows
@@ -534,6 +590,7 @@ export function createBattleResolutionPresentationRenderView(
       }),
       opponent: Object.freeze({
         sprite: !fainted.has(1)
+          && !(opponentHit?.targetInvisible ?? false)
           && !(
             opponentFaint?.sink.type === "opponent-tile-rows"
             && opponentFaint.sink.keptRows === 0
@@ -544,10 +601,13 @@ export function createBattleResolutionPresentationRenderView(
     }),
     waitCursor,
     bottom:
-      state.lifecycle.phase === "next-command-handoff"
+      confirmHandoff !== null
+        ? "fight"
+      : state.lifecycle.phase === "next-command-handoff"
       || switchIn?.phase === "blankMessage"
         ? "blank"
         : "message",
+    confirmHandoff,
     switchIn,
     partySummary,
   });

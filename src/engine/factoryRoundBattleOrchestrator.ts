@@ -41,6 +41,7 @@ import {
   type BattleSubmittedDecision,
 } from "./battleDecisionBoundary.ts";
 import {
+  advanceBattleResolutionConfirmHandoff,
   appendBattleResolutionContinuation,
   createBattleResolutionPresentation,
   type BattleResolutionPresentationCommand,
@@ -849,6 +850,10 @@ function beginCommandResolution(
     beforeRules: state.battle.rules,
     transition: transitionFromDriveReceipt(receipt),
     fieldBoundary: presentation.field,
+    confirmHandoff: Object.freeze({
+      fightDisplayCursor: presentation.fightDisplayCursor,
+      idleBounceElapsed: presentation.idleBounceElapsed,
+    }),
     opponentTrainer: factoryTrainerPresentationForOpponent(
       state.round.rules.currentOpponent,
     ),
@@ -1017,6 +1022,13 @@ export function advanceFactoryRoundBattleResolution(
   const boundaries = state.battlePresentationBoundaries;
   if (resolution === null || boundaries === null) {
     return fail("battle-resolution advance requires an active display boundary");
+  }
+  if (resolution.lifecycle.phase === "confirm-handoff") {
+    return Object.freeze({
+      ...state,
+      battleResolutionPresentation:
+        advanceBattleResolutionConfirmHandoff(resolution),
+    });
   }
   if (resolution.lifecycle.phase === "presenting") {
     const segment = resolution.segments[resolution.segmentIndex];

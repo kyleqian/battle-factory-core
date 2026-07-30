@@ -294,6 +294,13 @@ export function createBattleKernelTurnPresentation(
         from: resolutionCommand.from,
         to: resolutionCommand.to,
       });
+    } else if (
+      resolutionCommand?.type === "move-animation"
+      || resolutionCommand?.type === "hit-animation"
+    ) {
+      // The legacy canonical adapter already includes these controller waits
+      // in its immutable per-command durations. Typed animation commands are
+      // consumed only by the generated resolution lifecycle.
     } else if (resolutionCommand !== undefined) {
       throw new Error(
         `Scene OFF compatibility projection does not yet render ${resolutionCommand.type} commands`,

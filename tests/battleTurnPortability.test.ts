@@ -118,6 +118,10 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
       beforeRules: initial.rules,
       transition,
       fieldBoundary,
+      confirmHandoff: {
+        fightDisplayCursor: 0,
+        idleBounceElapsed: 0,
+      },
     });
 
     expect(resolution.resolutionId).toEqual({
@@ -151,6 +155,18 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
         lines: ["ONIX used", "ROCK SLIDE!"],
         advance: "automatic",
         timing: { minimumFrames: 24 },
+      },
+      {
+        type: "move-animation",
+        eventSequence: 2,
+        battler: 0,
+        timing: { minimumFrames: 42 },
+      },
+      {
+        type: "hit-animation",
+        eventSequence: 4,
+        battler: 1,
+        timing: { minimumFrames: 35, firstDisplayedAge: 1 },
       },
       {
         type: "hp",

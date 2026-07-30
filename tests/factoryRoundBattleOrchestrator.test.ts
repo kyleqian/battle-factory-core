@@ -260,10 +260,19 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       factoryRoundBattleOrchestrator: state,
     };
     expect(render(engine)).toHaveLength(240 * 160 * 4);
-    expect(
-      tick(engine, new Set()).factoryRoundBattleOrchestrator
-        ?.battleResolutionPresentation?.lifecycle.phaseElapsed,
-    ).toBe(1);
+    const afterOneHandoffCallback = tick(
+      engine,
+      new Set(),
+    ).factoryRoundBattleOrchestrator?.battleResolutionPresentation;
+    expect(afterOneHandoffCallback?.lifecycle).toEqual({
+      phase: "confirm-handoff",
+      phaseElapsed: 0,
+    });
+    expect(afterOneHandoffCallback?.confirmHandoff).toMatchObject({
+      stage: "selection-accepted",
+      fightDisplayCursor: 3,
+      idleBounceElapsed: resolution!.confirmHandoff!.idleBounceElapsed + 1,
+    });
 
     const retainedBoundary = state.battlePresentationBoundaries;
     state = advanceResolutionToNextCommand(state);
