@@ -373,6 +373,75 @@ describe("battle resolution presentation receipt ownership", () => {
     ]);
   });
 
+  it("freezes the trainer class/name used by an opponent switch-in message", () => {
+    const initial = initialBattle();
+    const context = initial.rules.rulesContext;
+    const incoming = context.party.player[1]!;
+    const afterContext = Object.freeze({
+      ...context,
+      party: Object.freeze({
+        ...context.party,
+        opponent: Object.freeze([
+          context.party.opponent[0]!,
+          incoming,
+          context.party.opponent[2]!,
+          context.party.opponent[3]!,
+          context.party.opponent[4]!,
+          context.party.opponent[5]!,
+        ]),
+      }),
+      battlers: Object.freeze([
+        context.battlers[0]!,
+        Object.freeze({
+          ...context.battlers[1]!,
+          ...incoming,
+          side: 1 as const,
+          partyIndex: 1,
+          species: incoming.species,
+        }),
+        context.battlers[2]!,
+        context.battlers[3]!,
+      ]) as typeof context.battlers,
+    });
+    const afterRules = Object.freeze({
+      ...initial.rules,
+      rulesContext: afterContext,
+    }) as FactoryFullTurnDecisionRules;
+    const resolution = createBattleResolutionPresentation({
+      ...inputFor([
+        event(0, {
+          kind: "switch",
+          side: "opponent",
+          fromPartyIndex: 0,
+          toPartyIndex: 1,
+        }),
+        event(1, {
+          kind: "message",
+          messageId: "STRINGID_SWITCHINMON",
+          substitutions: [],
+        }),
+        event(2, {
+          kind: "switch-in-animation",
+          battler: 1,
+          partyIndex: 1,
+        }),
+      ], NEXT_COMMAND, afterRules),
+      opponentTrainer: Object.freeze({
+        className: "BUG CATCHER",
+        name: "DESTIN",
+      }),
+    });
+
+    expect(resolution.opponentTrainer).toEqual({
+      className: "BUG CATCHER",
+      name: "DESTIN",
+    });
+    expect(resolution.segments[0]!.commands[0]).toMatchObject({
+      type: "message",
+      lines: ["BUG CATCHER DESTIN sent", "out MACHOP!"],
+    });
+  });
+
   it("fails closed on unpaired HP, missing switch-in markers, and out-of-order sequences", () => {
     expect(() => createBattleResolutionPresentation(inputFor([
       event(0, { kind: "hp-change", battler: 1, from: 91, to: 80 }),

@@ -151,6 +151,7 @@ export type BattleResolutionPresentationState = Readonly<{
   pendingBoundary: BattleBoundary;
   pendingBattle: BattleState<FactoryFullTurnDecisionRules>;
   forcedRequest: BattleForcedSwitchRequest | null;
+  opponentTrainer: Readonly<{ className: string; name: string }> | null;
 }>;
 
 export type CreateBattleResolutionPresentationInput = Readonly<{
@@ -159,6 +160,7 @@ export type CreateBattleResolutionPresentationInput = Readonly<{
   beforeRules: FactoryFullTurnDecisionRules;
   transition: BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>;
   fieldBoundary: BattleCommandPresentationState["field"];
+  opponentTrainer?: Readonly<{ className: string; name: string }> | null;
 }>;
 
 const MESSAGE_TIMING = Object.freeze({ minimumFrames: 24 } as const);
@@ -213,6 +215,7 @@ function messageLines(
     { kind: "stat-stage-change" }
   > | null,
   lastFaintBattler: 0 | 1 | null,
+  opponentTrainer: Readonly<{ className: string; name: string }> | null,
 ): readonly string[] {
   if (event.payload.kind !== "message") {
     throw new Error("battle resolution message resolver received a non-message event");
@@ -284,9 +287,15 @@ function messageLines(
     if (switchInBattler === 0) {
       return Object.freeze([`Go! ${incoming.name}!`]);
     }
-    throw new Error(
-      "battle resolution opponent switch-in message requires a frozen trainer-name substitution",
-    );
+    if (opponentTrainer === null) {
+      throw new Error(
+        "battle resolution opponent switch-in message requires a frozen trainer-name substitution",
+      );
+    }
+    return Object.freeze([
+      `${opponentTrainer.className} ${opponentTrainer.name} sent`,
+      `out ${incoming.name}!`,
+    ]);
   }
   return resolveBattleStringLines(messageId);
 }
@@ -326,6 +335,7 @@ export function projectBattleResolutionCommands(
   afterRules: BattleScriptRulesContext,
   field: BattleResolutionDisplayedField,
   afterField: BattleResolutionDisplayedField | null,
+  opponentTrainer: Readonly<{ className: string; name: string }> | null = null,
 ): readonly BattleResolutionPresentationCommand[] {
   const commands: BattleResolutionPresentationCommand[] = [];
   const pendingHealth = new Map<0 | 1, { eventSequence: number; healthValue: number }>();
@@ -368,6 +378,7 @@ export function projectBattleResolutionCommands(
           afterField,
           lastStatChange,
           lastFaintBattler,
+          opponentTrainer,
         ),
         advance:
           payload.messageId === "STRINGID_TARGETFAINTED"
@@ -579,6 +590,7 @@ export function createBattleResolutionPresentation(
       input.transition.state.rules.rulesContext,
       field,
       fieldAfter(input.transition),
+      input.opponentTrainer ?? null,
     ),
   });
   const boundary = input.transition.state.boundary;
@@ -603,6 +615,7 @@ export function createBattleResolutionPresentation(
     pendingBoundary: boundary,
     pendingBattle: input.transition.state,
     forcedRequest,
+    opponentTrainer: input.opponentTrainer ?? null,
   });
 }
 
@@ -650,6 +663,7 @@ export function appendBattleResolutionContinuation(
       transition.state.rules.rulesContext,
       fieldBoundary,
       fieldAfter(transition),
+      resolution.opponentTrainer,
     ),
   });
   return Object.freeze({
