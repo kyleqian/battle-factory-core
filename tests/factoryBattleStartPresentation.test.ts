@@ -129,9 +129,11 @@ describe("generated Factory battle-start presentation command", () => {
       wantsToBattle: ["BLACK BELT SHIZUKA", "would like to battle!"],
       opponentSendOut: [
         "BLACK BELT SHIZUKA sent",
-        `out ${opponentActive.speciesName}!`,
+        `out ${opponentActive.speciesName.replace(/^SPECIES_/, "")}!`,
       ],
-      playerSendOut: [`Go! ${playerActive.speciesName}!`],
+      playerSendOut: [
+        `Go! ${playerActive.speciesName.replace(/^SPECIES_/, "")}!`,
+      ],
     });
     expect(Object.isFrozen(command)).toBe(true);
     expect(Object.isFrozen(command.parties.player)).toBe(true);

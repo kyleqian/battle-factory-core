@@ -11,6 +11,11 @@ import type { BattleIndex } from "./battleScenario.ts";
 import type {
   FactoryCorpusPartyMemberState,
 } from "./factoryCorpusParty.ts";
+import {
+  battleCommandSpeciesDisplayName,
+  battleCommandUiStatusFromStatus1,
+  type BattleCommandFieldBattler,
+} from "./battleCommandPresentation.ts";
 import type { FactoryTrainerPresentation } from "./factoryTrainerPresentation.ts";
 import type { PartyBallState } from "./battleResolutionPresentation.ts";
 
@@ -45,6 +50,56 @@ export type FactoryBattleStartPresentationCommand = Readonly<{
   }>;
   text: FactoryBattleStartTextInputs;
 }>;
+
+export type FactoryBattleStartField = Readonly<{
+  player: BattleCommandFieldBattler;
+  opponent: BattleCommandFieldBattler;
+}>;
+
+function activeFieldBattler(
+  side: "player" | "trainer",
+  battler: 0 | 1,
+  partyIndex: 0 | 1 | 2,
+  member: FactoryCorpusPartyMemberState,
+): BattleCommandFieldBattler {
+  return Object.freeze({
+    side,
+    battler,
+    partyIndex,
+    species: member.species,
+    name: battleCommandSpeciesDisplayName(member.species),
+    level: member.level,
+    gender: member.gender,
+    hp: member.hp,
+    maxHP: member.maxHP,
+    status: battleCommandUiStatusFromStatus1(member.status1),
+    moveIds: member.moves,
+    currentPP: member.pp,
+    ppBonuses: member.ppBonuses,
+  });
+}
+
+/** Active field snapshot shared by the initial release and command views. */
+export function factoryBattleStartField(
+  command: FactoryBattleStartPresentationCommand,
+): FactoryBattleStartField {
+  const playerIndex = command.activePartyIndexes.player;
+  const opponentIndex = command.activePartyIndexes.opponent;
+  return Object.freeze({
+    player: activeFieldBattler(
+      "player",
+      0,
+      playerIndex,
+      command.parties.player[playerIndex],
+    ),
+    opponent: activeFieldBattler(
+      "trainer",
+      1,
+      opponentIndex,
+      command.parties.opponent[opponentIndex],
+    ),
+  });
+}
 
 function clonePartyMember(
   member: FactoryCorpusPartyMemberState,
@@ -91,6 +146,12 @@ export function createFactoryBattleStartPresentationCommand(input: Readonly<{
   const opponentActive = input.opponentActivePartyIndex ?? 0;
   const trainerLabel =
     `${input.opponentTrainer.className} ${input.opponentTrainer.name}`;
+  const opponentName = battleCommandSpeciesDisplayName(
+    opponent[opponentActive].species,
+  );
+  const playerName = battleCommandSpeciesDisplayName(
+    player[playerActive].species,
+  );
   return Object.freeze({
     type: "factory-battle-start",
     commandId: input.commandId,
@@ -112,10 +173,10 @@ export function createFactoryBattleStartPresentationCommand(input: Readonly<{
       ] as const),
       opponentSendOut: Object.freeze([
         `${trainerLabel} sent`,
-        `out ${opponent[opponentActive].speciesName}!`,
+        `out ${opponentName}!`,
       ] as const),
       playerSendOut: Object.freeze([
-        `Go! ${player[playerActive].speciesName}!`,
+        `Go! ${playerName}!`,
       ] as const),
     }),
   });

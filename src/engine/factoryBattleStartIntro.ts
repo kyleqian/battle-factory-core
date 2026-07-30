@@ -2,12 +2,13 @@
  * Source-relative pre-send-out lifecycle for a generated Factory battle.
  *
  * The command is immutable. This reducer owns only the BeginBattleIntro
- * presentation clock and the first PAUSE_UNTIL_PRESS edge; send-out
- * controllers are deliberately left to the next lifecycle slice.
+ * presentation clock and the first PAUSE_UNTIL_PRESS edge, then continues
+ * through the opponent controller's ordinary release.
  */
 
 import type { GbaButton } from "../input.ts";
 import {
+  generatedBattleStartOpponentReleaseStarted,
   generatedBattleIntroVisualPhase,
   isGeneratedBattleIntroInputReady,
 } from "./battleScene.ts";
@@ -20,7 +21,8 @@ export type FactoryBattleStartIntroPhase =
   | "trainer-slide"
   | "trainer-message"
   | "awaiting-acknowledgement"
-  | "acknowledged";
+  | "opponent-message"
+  | "opponent-release";
 
 export type FactoryBattleStartIntroState = Readonly<{
   command: FactoryBattleStartPresentationCommand;
@@ -43,7 +45,11 @@ export function createFactoryBattleStartIntro(
 export function factoryBattleStartIntroPhase(
   state: FactoryBattleStartIntroState,
 ): FactoryBattleStartIntroPhase {
-  if (state.acknowledgedElapsed !== null) return "acknowledged";
+  if (state.acknowledgedElapsed !== null) {
+    return generatedBattleStartOpponentReleaseStarted(state)
+      ? "opponent-release"
+      : "opponent-message";
+  }
   const visualPhase = generatedBattleIntroVisualPhase(state.elapsed);
   if (visualPhase !== "trainer-message") return visualPhase;
   if (!isGeneratedBattleIntroInputReady(state)) return "trainer-message";
@@ -54,11 +60,13 @@ export function advanceFactoryBattleStartIntro(
   state: FactoryBattleStartIntroState,
   newKeys: ReadonlySet<GbaButton> = new Set(),
 ): FactoryBattleStartIntroState {
-  if (state.acknowledgedElapsed !== null) return state;
   const acknowledgedElapsed =
-    newKeys.has("A") && isGeneratedBattleIntroInputReady(state)
-      ? state.elapsed
-      : null;
+    state.acknowledgedElapsed
+    ?? (
+      newKeys.has("A") && isGeneratedBattleIntroInputReady(state)
+        ? state.elapsed
+        : null
+    );
   return Object.freeze({
     ...state,
     elapsed: state.elapsed + 1,

@@ -409,6 +409,7 @@ import {
   type FactoryTrainerPresentation,
 } from "./factoryTrainerPresentation.ts";
 import type { FactoryBattleStartIntroState } from "./factoryBattleStartIntro.ts";
+import { factoryBattleStartField } from "./factoryBattleStartPresentation.ts";
 import type { PartyBallState } from "./battleResolutionPresentation.ts";
 import { fillFramebuffer } from "./framebuffer.ts";
 import { drawText, measureText, type FontData } from "./font.ts";
@@ -674,6 +675,7 @@ import type {
   BattleCommandPresentationState,
 } from "./battleCommandPresentation.ts";
 import {
+  createBattleCommandFieldRenderView,
   drawBattleCommandActionChrome,
   renderBattleCommandPresentation,
   type BattleCommandPresentationRenderView,
@@ -3863,8 +3865,12 @@ export function renderGeneratedBattleStartPreSendOut(
   fb: Uint8Array,
   state: FactoryBattleStartIntroState,
 ): void {
+  if (state.acknowledgedElapsed !== null) {
+    renderGeneratedBattleStartOpponentRelease(fb, state);
+    return;
+  }
   const t = generatedBattleIntroSourceClock(
-    state.acknowledgedElapsed ?? state.elapsed,
+    state.elapsed,
   );
   const win = windowRange(t);
   if (win === null) return;
@@ -3893,6 +3899,214 @@ export function renderGeneratedBattleStartPreSendOut(
       LINE2_ORIGIN.x + measureText(font, charmap, line2),
     );
   }
+}
+
+/**
+ * The PAUSE_UNTIL_PRESS controller consumes the edge one callback before
+ * this engine's stored acknowledgement frame. The existing printer then
+ * owns five callbacks before its first visible glyph.
+ */
+function generatedBattleStartPressTick(
+  state: FactoryBattleStartIntroState,
+): number | null {
+  return state.acknowledgedElapsed === null
+    ? null
+    : generatedBattleIntroSourceClock(state.acknowledgedElapsed - 1);
+}
+
+export function generatedBattleStartOpponentReleaseStarted(
+  state: FactoryBattleStartIntroState,
+): boolean {
+  const pressTick = generatedBattleStartPressTick(state);
+  if (pressTick === null) return false;
+  const [line1, line2] = state.command.text.opponentSendOut;
+  return generatedBattleIntroSourceClock(state.elapsed)
+    >= sendOutTextStartTick(pressTick)
+      + line1.length + line2.length - 1
+      + SENDOUT_HANDOFF_LAG;
+}
+
+/**
+ * Species-independent opponent ReleaseMonFromBall projection. This is the
+ * same affine-emerge/tint ramp used by the typed Slice-5 switch-in view;
+ * Battle Scene OFF skips the later species front-animation callback.
+ */
+function drawGeneratedOpponentRelease(
+  fb: Uint8Array,
+  t: number,
+  handoffTick: number,
+  fieldView: ReturnType<typeof createBattleCommandFieldRenderView>,
+): void {
+  const elapsed = t - handoffTick;
+  if (elapsed < MATERIALIZE_START_OFFSET) return;
+  const local = elapsed - MATERIALIZE_START_OFFSET;
+  // Intro release reaches Task_FadeMon_ToNormal's poll one controller
+  // callback after the ordinary switch-in chain reused below.
+  const coeff = turn5MaterializeCoeff(
+    TURN5_BALL_HANDOFF_TICK + MATERIALIZE_START_OFFSET + local - 1,
+  );
+  const pic = fieldView.fieldArt.opponent.pic;
+  const origin = {
+    x: fieldView.fieldArt.opponent.origin.x,
+    // CreateBattlerSprite fixes the opponent OBJ center at (176,40);
+    // the extracted 64×64 canvas therefore begins at y=8 during release.
+    y: OPPONENT_CORNER.y,
+  };
+  if (coeff === 0) {
+    drawSpriteSheet(
+      fb,
+      pic.tileset as Tileset,
+      pic.palette as RgbColor[],
+      origin.x,
+      origin.y,
+    );
+    return;
+  }
+  const accumulator = affineEmergeAccumulator(local + 1);
+  const y2 = MATERIALIZE_Y2_TABLE[local] ?? 0;
+  drawSpriteSheetAffineTintedBlend(
+    fb,
+    pic.tileset as Tileset,
+    pic.palette as RgbColor[],
+    origin.x,
+    origin.y,
+    accumulator,
+    MATERIALIZE_TINT_COLOR,
+    coeff,
+    y2,
+  );
+}
+
+/**
+ * Generated Scene-OFF opponent controller compositor. Every clock is
+ * relative to the stored acknowledgement and the typed printer length.
+ */
+export function renderGeneratedBattleStartOpponentRelease(
+  fb: Uint8Array,
+  state: FactoryBattleStartIntroState,
+): void {
+  const pressTick = generatedBattleStartPressTick(state);
+  if (pressTick === null) {
+    renderGeneratedBattleStartPreSendOut(fb, state);
+    return;
+  }
+  const t = generatedBattleIntroSourceClock(state.elapsed);
+  const [line1, line2] = state.command.text.opponentSendOut;
+  const textStartTick = sendOutTextStartTick(pressTick);
+  const textTotal = line1.length + line2.length;
+  const handoffTick =
+    textStartTick + textTotal - 1 + SENDOUT_HANDOFF_LAG;
+
+  if (t < handoffTick) {
+    drawSettledScene(fb, "destin", state.command.opponentTrainer);
+    drawBallIcons(fb, t, {
+      opponent: true,
+      player: true,
+      summaries: state.command.partySummaries,
+    });
+    if (t < textStartTick) {
+      const [introLine1, introLine2] = state.command.text.wantsToBattle;
+      drawMessageTextLines(
+        fb,
+        introLine1,
+        introLine2,
+        introLine1.length + introLine2.length,
+      );
+      const cursorStartTick =
+        TEXT_START_TICK + introLine1.length + introLine2.length + 1;
+      const cursor = cursorState(t, cursorStartTick);
+      if (cursor.visible) {
+        drawCursor(
+          fb,
+          cursor.yOffset,
+          LINE2_ORIGIN.x + measureText(font, charmap, introLine2),
+        );
+      }
+    } else {
+      drawMessageTextLines(
+        fb,
+        line1,
+        line2,
+        Math.min(textTotal, t - textStartTick + 1),
+      );
+    }
+    return;
+  }
+
+  const fieldView = createBattleCommandFieldRenderView(
+    factoryBattleStartField(state.command),
+  );
+  drawTileBgFaded(
+    fb,
+    battleBg.static.tileset,
+    battleBg.static.tilemap,
+    battleBg.palette,
+    sendOutBgFadeY(t, handoffTick),
+  );
+  drawSpriteSheet(
+    fb,
+    brendanSettledTileset,
+    brendan.palette,
+    PLAYER_CORNER.x,
+    PLAYER_CORNER.y,
+  );
+  const trainerX = trainerExitX(t, handoffTick);
+  if (trainerX !== null) {
+    const trainer = introTrainer("destin", state.command.opponentTrainer);
+    drawSpriteSheet(
+      fb,
+      trainer.tileset,
+      trainer.palette,
+      trainerX,
+      OPPONENT_CORNER.y,
+    );
+  }
+  drawGeneratedOpponentRelease(fb, t, handoffTick, fieldView);
+  drawSendOutBall(fb, t, handoffTick);
+  drawBallOpenParticles(fb, t, handoffTick, "destin", {
+    // The Scene-OFF intro controller reaches the shared one-frame particle
+    // stall one callback later than the canonical Scene-ON release.
+    stallLag: 1,
+    persistentTieWinner14: true,
+  });
+  if (t === handoffTick) {
+    drawBallIcons(fb, t, {
+      opponent: true,
+      player: true,
+      summaries: state.command.partySummaries,
+    });
+  } else {
+    drawBallIcons(fb, t, {
+      opponent: false,
+      player: true,
+      summaries: state.command.partySummaries,
+    });
+    drawOpponentSummaryExit(
+      fb,
+      t,
+      handoffTick,
+      "destin",
+      state.command.partySummaries.opponent,
+    );
+  }
+  const healthboxDx = healthboxSlideDx(
+    t,
+    handoffTick + 32,
+    HEALTHBOX_SLIDE_START_DX,
+    true,
+  );
+  if (healthboxDx !== null) {
+    drawSendOutHealthbox(
+      fb,
+      healthboxDx,
+      composeOpponentHealthbox(
+        healthboxAssemblyAssets,
+        fieldView.healthboxes.opponent,
+      ),
+    );
+  }
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawMessageTextLines(fb, line1, line2, textTotal);
 }
 
 /** §7.5: Grovyle's settled front sprite - see `GROVYLE_MATERIALIZE_TICK`'s doc comment. */
@@ -5181,7 +5395,16 @@ function drawParticleTile(fb: Uint8Array, tileIndex: number, hFlip: boolean, ox:
   }
 }
 
-function drawBallOpenParticles(fb: Uint8Array, t: number, handoffTick: number, encounter: BattleSceneState["encounter"] = "destin"): void {
+function drawBallOpenParticles(
+  fb: Uint8Array,
+  t: number,
+  handoffTick: number,
+  encounter: BattleSceneState["encounter"] = "destin",
+  options: Readonly<{
+    stallLag?: number;
+    persistentTieWinner14?: boolean;
+  }> = {},
+): void {
   const logicalT = t - handoffTick - BALL_OPEN_START_OFFSET - 1;
   if (logicalT < 0) return;
   const anim = battleAnimParticles.regularBallAnim;
@@ -5190,7 +5413,11 @@ function drawBallOpenParticles(fb: Uint8Array, t: number, handoffTick: number, e
     let age = logicalT - i;
     if (i >= PARTICLE_LATE_SPAWN_START_INDEX) {
       age -= 1;
-    } else if (logicalT >= PARTICLE_STALL_LOGICAL_TICK + (encounter === "jenson" ? 1 : 0)) {
+    } else if (
+      logicalT >= PARTICLE_STALL_LOGICAL_TICK
+        + (encounter === "jenson" ? 1 : 0)
+        + (options.stallLag ?? 0)
+    ) {
       age -= 1;
     }
     if (age < 0 || age > PARTICLE_MAX_AGE) continue;
@@ -5198,7 +5425,12 @@ function drawBallOpenParticles(fb: Uint8Array, t: number, handoffTick: number, e
     const radius = age === 0 ? 0 : 2 * (age - 1);
     alive.push({ i, age, dx: gbaSin(angle, radius), dy: gbaCos(angle, radius) });
   }
-  for (const p of sortAliveParticlesByScreenY(alive, encounter === "jenson")) {
+  for (
+    const p of sortAliveParticlesByScreenY(
+      alive,
+      options.persistentTieWinner14 ?? encounter === "jenson",
+    )
+  ) {
     const frame = anim[p.age % anim.length]!;
     drawParticleTile(fb, frame.tile, frame.hFlip, PARTICLE_ORIGIN.x + p.dx, PARTICLE_ORIGIN.y + p.dy);
   }
@@ -5898,7 +6130,13 @@ function drawPlayerSummaryBarExit(fb: Uint8Array, barX: number, eva: number): vo
  */
 const SUMMARY_EXIT_LAST_ALIVE_ELAPSED = 32;
 
-function drawOpponentSummaryExit(fb: Uint8Array, t: number, handoffTick: number, encounter: BattleSceneState["encounter"] = "destin"): void {
+function drawOpponentSummaryExit(
+  fb: Uint8Array,
+  t: number,
+  handoffTick: number,
+  encounter: BattleSceneState["encounter"] = "destin",
+  summaryStates?: readonly PartyBallState[],
+): void {
   const rawElapsed = t - handoffTick - 1;
   if (rawElapsed < 0 || rawElapsed > SUMMARY_EXIT_LAST_ALIVE_ELAPSED) return;
   // §7.32: the position/blend clock stalls one tick at the RAM-confirmed
@@ -5921,7 +6159,16 @@ function drawOpponentSummaryExit(fb: Uint8Array, t: number, handoffTick: number,
   for (let j = 0; j < 6; j += 1) {
     const x = opponentIconExitX(j, elapsed);
     if (x === null) continue;
-    const tileIndex = ballStateTileIndex(OPP_SUMMARY_STATES[j]!);
+    const state = summaryStates === undefined
+      ? OPP_SUMMARY_STATES[j]!
+      : summaryStates[5 - j] === "empty"
+        ? "Empty"
+        : summaryStates[5 - j] === "fainted"
+          ? "Fainted"
+          : summaryStates[5 - j] === "status"
+            ? "Statused"
+            : "Full";
+    const tileIndex = ballStateTileIndex(state);
     const tile = ballDisplay.tileset.tiles[tileIndex];
     if (!tile) continue;
     blendedTile(fb, tile, ballDisplay.palette, false, x, OPP_SUMMARY_ICON_BASE.y, eva, evb);

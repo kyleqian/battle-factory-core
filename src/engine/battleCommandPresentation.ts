@@ -45,6 +45,14 @@ const SPECIES_STATS_BY_ID = new Map(
   (speciesStatsData as { species: SpeciesStatsRow[] }).species.map((row) => [row.id, row]),
 );
 
+export function battleCommandSpeciesDisplayName(species: number): string {
+  const entry = SPECIES_NAMES[species];
+  if (entry === undefined) {
+    throw new BattleCommandPresentationError(`unresolved species ${species}`);
+  }
+  return entry.name;
+}
+
 export const BATTLE_COMMAND_ACTION_LABELS = Object.freeze([
   "FIGHT",
   "BAG",
@@ -147,7 +155,9 @@ function advancePhaseElapsed(
   );
 }
 
-function uiStatusFromStatus1(status1: number): BattleCommandUiStatus {
+export function battleCommandUiStatusFromStatus1(
+  status1: number,
+): BattleCommandUiStatus {
   if (
     (status1 & BATTLE_SCRIPT_STATUS1_POISON) !== 0
     || (status1 & BATTLE_SCRIPT_STATUS1_TOXIC_POISON) !== 0
@@ -209,12 +219,12 @@ function fieldBattler(
     battler: battlerId,
     partyIndex,
     species: partyMember.species,
-    name: speciesName.name,
+    name: battleCommandSpeciesDisplayName(partyMember.species),
     level: partyMember.level,
     gender: getMonGender(speciesStats.genderRatio, partyMember.personality),
     hp: active.hp,
     maxHP: active.maxHP,
-    status: uiStatusFromStatus1(active.status1),
+    status: battleCommandUiStatusFromStatus1(active.status1),
     moveIds: Object.freeze([...active.moves]) as BattleCommandMoveIds,
     currentPP: Object.freeze([...active.pp]) as BattleCommandMovePp,
     ppBonuses: active.ppBonuses,

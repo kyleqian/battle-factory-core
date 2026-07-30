@@ -71,6 +71,12 @@ export type BattleCommandPresentationRenderView = Readonly<{
   }>;
 }>;
 
+export type BattleCommandFieldRenderView = Readonly<{
+  field: BattleCommandPresentationState["field"];
+  fieldArt: BattleCommandFieldArtView;
+  healthboxes: BattleCommandPresentationRenderView["healthboxes"];
+}>;
+
 function healthboxParams(
   battler: BattleCommandFieldBattler,
 ): HealthboxContentParams {
@@ -83,6 +89,24 @@ function healthboxParams(
   });
 }
 
+/** Shared typed field art and healthbox projection for command and send-out. */
+export function createBattleCommandFieldRenderView(
+  field: BattleCommandPresentationState["field"],
+): BattleCommandFieldRenderView {
+  return Object.freeze({
+    field,
+    fieldArt: createBattleCommandFieldArtView(field),
+    healthboxes: Object.freeze({
+      player: Object.freeze({
+        ...healthboxParams(field.player),
+        currentHp: field.player.hp,
+        maxHp: field.player.maxHP,
+      }),
+      opponent: healthboxParams(field.opponent),
+    }),
+  });
+}
+
 /**
  * Projects the complete field/FIGHT content from the active battler snapshot.
  * No recorded turn flags participate in live HP, status, moves, or PP.
@@ -90,17 +114,9 @@ function healthboxParams(
 export function createBattleCommandPresentationRenderView(
   presentation: BattleCommandPresentationState,
 ): BattleCommandPresentationRenderView {
+  const fieldView = createBattleCommandFieldRenderView(presentation.field);
   return Object.freeze({
-    field: presentation.field,
-    fieldArt: createBattleCommandFieldArtView(presentation.field),
-    healthboxes: Object.freeze({
-      player: Object.freeze({
-        ...healthboxParams(presentation.field.player),
-        currentHp: presentation.field.player.hp,
-        maxHp: presentation.field.player.maxHP,
-      }),
-      opponent: healthboxParams(presentation.field.opponent),
-    }),
+    ...fieldView,
     actionMenu: Object.freeze({
       prompt:
         `${BATTLE_COMMAND_ACTION_PROMPT_PREFIX}${presentation.field.player.name}`
