@@ -253,6 +253,61 @@ describe("AI_CV_Paralyze (docs/factory-ai-checkviability-ground-truth.md §31)",
   });
 });
 
+describe("AI_CV_Confuse (docs/factory-ai-checkviability-ground-truth.md §32)", () => {
+  const MOVE_CONFUSE_RAY = 109;
+
+  function confuseRun(rngValue: number, targetHp: number) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_CONFUSE_RAY,
+      attacker: NEUTRAL_BATTLER,
+      target: { ...NEUTRAL_BATTLER, hp: targetHp, maxHp: 100 },
+      drawOrdinalStart: 1,
+      reasonPrefix: "confuse",
+    });
+  }
+
+  it("target HP >70 JUMPs to End with zero score and zero draws", () => {
+    expect(confuseRun(1, 71)).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+
+  it("target HP 70 FALLS THROUGH; roll <128 JUMPs over the first -1", () => {
+    const result = confuseRun(3, 70); // low byte 83
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws[0]).toMatchObject({ kind: "confuse-roll", jumped: true });
+  });
+
+  it("roll >=128 FALLS THROUGH to the first -1", () => {
+    const result = confuseRun(1, 70); // low byte 198
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws[0]).toMatchObject({ kind: "confuse-roll", jumped: false });
+  });
+
+  it("target HP >50 JUMPs after the roll; exact 50 FALLS THROUGH to the second -1", () => {
+    expect(confuseRun(3, 51)).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    expect(confuseRun(3, 50)).toMatchObject({ kind: "scored", scoreDelta: -1 });
+  });
+
+  it("target HP >30 JUMPs after the second -1; exact 30 FALLS THROUGH to the third -1", () => {
+    expect(confuseRun(3, 31)).toMatchObject({ kind: "scored", scoreDelta: -1 });
+    expect(confuseRun(3, 30)).toMatchObject({ kind: "scored", scoreDelta: -2 });
+  });
+
+  it("leaves Haze behind the same generic CV barrier", () => {
+    expect(run({ value: 1, calls: 0 }, MOVE_HAZE)).toMatchObject({
+      kind: "unsupported-branch",
+      barrier: "factory-ai-check-viability",
+      effect: "EFFECT_HAZE",
+    });
+  });
+});
+
 describe("AI_CV_Toxic (data/battle_ai_scripts.s:1353-1371)", () => {
   function toxicRun(input: Readonly<{
     rngValue?: number;
