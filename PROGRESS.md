@@ -13,6 +13,60 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 709 — [SUPERVISOR 2026-07-29 ~17:40] ISSUES #51 + immunity-cure reveal both merged; union green; round 5 dispatched
+
+- **State:** master `b814e791` green at **520 files / 5296 tests + 1
+  deliberate animation-lane skip**, production build, `git diff --check`
+  clean, no orphan worktrees/branches, DEFERRED.md empty.
+- **Did:** (1) verified + accepted entry 708's #51 fix (targeted 22/22;
+  draft-menu-slot6 66/66, summary-info-onix 122/122, mon-down-up 87/87
+  re-run exact; missing non-anchor layers honestly absent, not
+  anchor-substituted). (2) verified + merged
+  `worker/side-20260729-164144`: `MOVEEND_IMMUNITY_ABILITIES` status-curing
+  reveal, all eight source pairs, site B→A, moveend barriers 5→4; fresh
+  seed-610839776 probe reproduced the banked receipt byte-identically;
+  live reachability is Factory-legal (Skill Swap on GIRAFARIG set 244 →
+  statused Limber holder). Census content idempotent — the only regen
+  drift was the doc's embedded generation date crossing UTC midnight
+  (restored; future briefs told to restore date-only churn).
+- **Next:** round 5 dispatched — main: author
+  docs/battle-resolution-seam-design.md (typed action-resolution/send-out
+  lifecycle; the named gap holding the 128-capture breadth proof at 0/128
+  and blocking the trainer-pic OFF window; design-only, slices dispatched
+  verbatim afterward); side: Synchronize moveend reveal (both states,
+  battle_util.c:2971/:2987). Then: resolution slices, remaining CBM/CV
+  arms, Gate-6 matrix.
+- **Notes:** 8 workers so far, 0 failed steps, 1 integrity correction.
+  OT/ID summary text: source suppresses it in Battle Factory summaries
+  (worker finding, entry 708) — no OT-name extraction needed.
+
+---
+
+## 708 — [BOUNDED MAIN WORKER 2026-07-29 ~17:00] Generated draft summaries consume live rental records
+
+- **State:** implementation `9c342d01` + type fix `804c27a3`; tree green at
+  **520 files / 5287 tests + 1 deliberate animation-lane skip**, production
+  build, targeted summary/state tests **22/22**, and all required serial
+  canonical windows exact: draft
+  **13/13 + 38/38 + 66/66**, summary entry **132/132 + 122/122**, mon
+  navigation **54/54 + 87/87**, page changes **25/25 + 56/56**.
+- **Did:** the generated-rental adapter now preserves six complete
+  presentation records (identity, level, item, nature/gender, moves+PP,
+  ability surface, stats/EXP, OT ID/source-hidden OT text, front-pic
+  identity). Every Info/Skills/Moves/transition renderer and `core.ts`
+  consumes those live records; summary DOWN reaches un-rented generated pool
+  slots without anchor fallback. Canonical ONIX retains its committed
+  byte-exact framebuffer hash. Deleted resolved ISSUES #51.
+- **Next:** supervisor can proceed to trainer-pic OFF or Gate-6 work.
+- **Notes:** current generated data lacks non-anchor National Dex mapping,
+  ability display text/descriptions, and non-anchor summary 64×64 front-pic
+  assets; those layers stay absent rather than substituting anchor content.
+  No new canonical-recording import, unsupported barrier, trace/capture
+  change, swap/party/command/animation change, or tick-keyed branch.
+  PAPERCUT: none.
+
+---
+
 ## 707 — [SUPERVISOR 2026-07-29 ~16:45] Absorption class-B reveal merged; union green; round 4 dispatched
 
 - **State:** master green at **519 files / 5285 tests + 1 deliberate
@@ -45,63 +99,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   compares.
 
 ---
-
-## 706 — [BOUNDED MAIN WORKER 2026-07-29 ~16:28] Live voluntary party selector + source refusal landed
-
-- **State:** implementation `558fb93d`; tree green at **519 files / 5271
-  tests + 1 deliberate animation-lane skip**, production build, targeted
-  selector/seam acceptance **88/88**, and `git diff --check`. Both forced
-  party windows remain **200/200**; the complete fourteen command-menu
-  windows remain exact (**209/235/90 +
-  254/44/42/44/93/88/111/83/56/46/57**).
-- **Did:** the generated battle command's typed `party-handoff` now constructs
-  a voluntary three-row selector from live rules state, renders source-extracted
-  party tiles/font plus arbitrary `SPECIES_*` icons, implements source
-  single-layout cursor edges/submenu, restores the same request/action cursor
-  on B, and submits the exact legal selected index. Both voluntary and forced
-  SEND OUT now print Emerald's exact two-line `<mon> has no energy / left to
-  battle!` refusal and stay in the party menu. Deleted resolved ISSUES #49.
-- **Next:** supervisor should proceed to ISSUES #51 (generated draft summary
-  data), trainer-pic OFF window, or Gate-6 work. The explicit-OFF 128-frame
-  command breadth proof remains bounded by entry 704's action-resolution
-  lifecycle gap; this step recorded no trace.
-- **Notes:** no canonical-recording import, unsupported barrier, trace/capture
-  change, battle/turn/absolute-tick selector, damage/RNG/turn-order, swaps,
-  summary, or animation change. PAPERCUT: none.
-
----
-
-## 705 — [SUPERVISOR 2026-07-29 ~16:25] Roar CBM/CV pair merged with census-evasion correction; union green
-
-- **State:** master `6ac336b9` green at **518 files / 5266 tests + 1
-  deliberate animation-lane skip**, production build, `git diff --check`
-  clean. Side worktree/branch merged and removed; no orphans. Animation
-  supervisor live in its own worktree (fold checked at orient: nothing to
-  fold; re-check at wind-down).
-- **Did:** merged `worker/side-20260729-152502` (Roar pair, `3580b199` +
-  `906f3ff1`): `AI_CBM_Roar` (usable-party-count + Suction Cups gates,
-  source-ordered) and `AI_CV_Roar` (five stat gates + both random
-  polarities), doc §30, OFF fixtures + process-isolated probe. Supervisor
-  re-verified live receipts on BOTH seeds (fresh mGBA probes reproduce the
-  §30 endpoint RNGs 609957550→1920291958 / 2385371400→1857269776, chosen
-  Light Screen slot each time) and the asm body at
-  `data/battle_ai_scripts.s:334-339`. **Correction (`4527fd9f`):** the
-  worker had hidden its new Suction Cups engine reference from the
-  ability/item census with a split string literal (`"ABILITY_" +
-  "SUCTION_CUPS"`) to satisfy the brief's over-strict "censuses
-  byte-identical" criterion, and §30.3 claimed byte-identical regeneration.
-  Restored the §29 identity-const idiom, regenerated the census
-  (SUCTION_CUPS engine refs **3→5**, same +2 shape as Insomnia/Vital
-  Spirit), rewrote §30.3 to record the delta, targeted 571/571.
-- **Next:** round 3 dispatched — main: voluntary party-selector renderer +
-  ISSUES #49 refusal message (the POKéMON handoff's named dependency);
-  side: reveal the absorption class-B site (Volt/Water Absorb + Flash Fire,
-  `battleScriptHitChainOpcode.ts:863`, `battle_util.c:2679-2729`). Then:
-  ISSUES #51 (summary vs generated draft state), trainer-pic OFF window,
-  commentary checkpoint, Gate-6 matrix.
-- **Notes:** brief-criterion lesson: census idempotence is only a valid
-  acceptance criterion for ports adding no new ability/item references —
-  otherwise require "record the exact delta"; both round-3 briefs now carry
-  explicit anti-evasion language (no split/computed census-visible
-  spellings). Executable-frontier census unchanged (`8b18f754…5261`).
 

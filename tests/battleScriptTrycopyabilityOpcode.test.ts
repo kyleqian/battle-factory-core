@@ -112,9 +112,10 @@ describe("source-complete TRYCOPYABILITY / EFFECT_ROLE_PLAY", () => {
   ])("rejects exactly %s and reaches the ordinary failure END", (_name, ability) => {
     const state = run(rules(ability));
     expect(state.rulesContext.battlers[0].ability).toBe(1);
-    // accuracycheck's existing ability-result owner records the target
-    // ability before TRYCOPYABILITY takes its failure pointer.
-    expect(state.rulesContext.lastUsedAbility).toBe(ability);
+    // accuracycheck writes the target ability before TRYCOPYABILITY takes
+    // its failure pointer; MoveEnd's later state-4 immunity pass overwrites
+    // it with literal battler 0's own ability (1).
+    expect(state.rulesContext.lastUsedAbility).toBe(1);
     expect(state.rng.calls).toBe(0);
   });
 

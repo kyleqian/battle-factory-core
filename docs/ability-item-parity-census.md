@@ -24,7 +24,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_CLEAR_BODY | engine-referenced | 34 (29) | 34 | — | 3 | 0 | 12 |
 | ABILITY_SWIFT_SWIM | engine-referenced | 34 (13) | 34 | — | 2 | 0 | 4 |
 | ABILITY_PRESSURE | engine-referenced | 34 (30) | 46 | — | 6 | 0 | 11 |
-| ABILITY_OBLIVIOUS | engine-referenced | 33 (16) | 33 | ON_DAMAGE, IMMUNITY | 3 | 0 | 5 |
+| ABILITY_OBLIVIOUS | engine-referenced | 33 (16) | 33 | ON_DAMAGE, IMMUNITY | 3 | 0 | 6 |
 | ABILITY_SYNCHRONIZE | engine-referenced | 30 (8) | 30 | SYNCHRONIZE, ATK_SYNCHRONIZE | 0 | 0 | 2 |
 | ABILITY_EARLY_BIRD | engine-referenced | 29 (4) | 29 | — | 2 | 0 | 3 |
 | ABILITY_KEEN_EYE | engine-referenced | 29 (16) | 29 | — | 2 | 0 | 6 |
@@ -41,9 +41,9 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_POISON_POINT | engine-referenced | 18 (14) | 18 | ON_DAMAGE | 0 | 0 | 5 |
 | ABILITY_SWARM | engine-referenced | 18 (8) | 18 | — | 1 | 0 | 2 |
 | ABILITY_DAMP | engine-referenced | 16 (0) | 16 | — | 2 | 0 | 3 |
-| ABILITY_OWN_TEMPO | engine-referenced | 16 (2) | 16 | IMMUNITY | 5 | 0 | 5 |
+| ABILITY_OWN_TEMPO | engine-referenced | 16 (2) | 16 | IMMUNITY | 5 | 0 | 7 |
 | ABILITY_TRACE | engine-referenced | 16 (6) | 16 | ON_SWITCHIN, TRACE | 0 | 0 | 2 |
-| ABILITY_INSOMNIA | engine-referenced | 15 (10) | 15 | IMMUNITY | 5 | 0 | 11 |
+| ABILITY_INSOMNIA | engine-referenced | 15 (10) | 15 | IMMUNITY | 5 | 0 | 13 |
 | ABILITY_LIGHTNING_ROD | engine-referenced | 15 (0) | 15 | — | 5 | 0 | 3 |
 | ABILITY_SOUNDPROOF | engine-referenced | 15 (10) | 15 | MOVES_BLOCK | 8 | 0 | 24 |
 | ABILITY_SHED_SKIN | engine-referenced | 14 (11) | 14 | ENDTURN | 0 | 0 | 2 |
@@ -51,9 +51,9 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_CUTE_CHARM | engine-referenced | 13 (13) | 13 | ON_DAMAGE | 0 | 0 | 5 |
 | ABILITY_HYPER_CUTTER | engine-referenced | 12 (2) | 12 | — | 3 | 0 | 9 |
 | ABILITY_SERENE_GRACE | engine-referenced | 11 (0) | 11 | — | 1 | 0 | 2 |
-| ABILITY_IMMUNITY | engine-referenced | 10 (2) | 10 | IMMUNITY | 10 | 0 | 12 |
+| ABILITY_IMMUNITY | engine-referenced | 10 (2) | 10 | IMMUNITY | 10 | 0 | 14 |
 | ABILITY_VOLT_ABSORB | engine-referenced | 9 (4) | 9 | ABSORBING | 0 | 1 | 4 |
-| ABILITY_WATER_VEIL | engine-referenced | 9 (0) | 9 | IMMUNITY | 5 | 0 | 7 |
+| ABILITY_WATER_VEIL | engine-referenced | 9 (0) | 9 | IMMUNITY | 5 | 0 | 9 |
 | ABILITY_BATTLE_ARMOR | engine-referenced | 8 (5) | 8 | — | 1 | 0 | 2 |
 | ABILITY_EFFECT_SPORE | engine-referenced | 8 (8) | 8 | ON_DAMAGE | 0 | 0 | 6 |
 | ABILITY_FLAME_BODY | engine-referenced | 8 (5) | 8 | ON_DAMAGE | 0 | 0 | 4 |
@@ -64,10 +64,10 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_RAIN_DISH | engine-referenced | 6 (0) | 6 | ENDTURN | 0 | 0 | 3 |
 | ABILITY_HUSTLE | engine-referenced | 6 (1) | 6 | — | 2 | 0 | 3 |
 | ABILITY_ARENA_TRAP | engine-referenced | 6 (0) | 6 | — | 2 | 3 | 2 |
-| ABILITY_VITAL_SPIRIT | engine-referenced | 6 (5) | 6 | IMMUNITY | 5 | 0 | 11 |
-| ABILITY_LIMBER | engine-referenced | 5 (5) | 5 | IMMUNITY | 4 | 0 | 6 |
+| ABILITY_VITAL_SPIRIT | engine-referenced | 6 (5) | 6 | IMMUNITY | 5 | 0 | 13 |
+| ABILITY_LIMBER | engine-referenced | 5 (5) | 5 | IMMUNITY | 4 | 0 | 8 |
 | ABILITY_CLOUD_NINE | engine-referenced | 5 (0) | 5 | ON_SWITCHIN | 1 | 0 | 18 |
-| ABILITY_MAGMA_ARMOR | engine-referenced | 5 (2) | 5 | IMMUNITY | 1 | 0 | 2 |
+| ABILITY_MAGMA_ARMOR | engine-referenced | 5 (2) | 5 | IMMUNITY | 1 | 0 | 4 |
 | ABILITY_TRUANT | engine-referenced | 5 (5) | 5 | ENDTURN | 2 | 0 | 7 |
 | ABILITY_PURE_POWER | engine-referenced | 5 (5) | 5 | — | 1 | 0 | 2 |
 | ABILITY_COMPOUND_EYES | engine-referenced | 4 (3) | 4 | — | 2 | 0 | 1 |

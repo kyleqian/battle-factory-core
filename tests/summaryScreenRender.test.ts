@@ -18,6 +18,8 @@ import { renderFactoryDraftScreenFaded } from "../src/engine/factoryDraftScreen.
 import { renderSummaryInfoPageFaded } from "../src/engine/summaryInfoPage.ts";
 import { bgFadeY, objFadeY, ENTRY_FADE_OUT, EXIT_FADE_OUT, FADE_IN } from "../src/engine/paletteFade.ts";
 
+const rentals = createInitialState().draftScreen.rentals;
+
 function run(state: SummaryScreenState, ticks: number): SummaryScreenState {
   for (let i = 0; i < ticks; i += 1) state = advanceSummaryScreen(state);
   return state;
@@ -44,7 +46,7 @@ describe("render() dispatch: entry (toSummary) transition", () => {
 
     const lastBlackTick = withSummary(run(openSummaryScreen(0), 20 + 23)); // black, elapsed=23 (holdTicks-1)
     expect(lastBlackTick.summaryScreen.transition).toMatchObject({ phase: "black", elapsed: 23 });
-    const expected = renderSummaryInfoPageFaded(0, bgFadeY(0, FADE_IN), objFadeY(0, FADE_IN));
+    const expected = renderSummaryInfoPageFaded(rentals, 0, bgFadeY(0, FADE_IN), objFadeY(0, FADE_IN));
     expect(render(lastBlackTick)).toEqual(expected);
   });
 
@@ -52,7 +54,7 @@ describe("render() dispatch: entry (toSummary) transition", () => {
     const state = withSummary(run(openSummaryScreen(5), 20 + 24 + 3)); // fadingIn, elapsed=3, slot 5
     const t = state.summaryScreen.transition!;
     expect(t).toMatchObject({ phase: "fadingIn" });
-    const expected = renderSummaryInfoPageFaded(5, bgFadeY(t.elapsed + 1, FADE_IN), objFadeY(t.elapsed + 1, FADE_IN));
+    const expected = renderSummaryInfoPageFaded(rentals, 5, bgFadeY(t.elapsed + 1, FADE_IN), objFadeY(t.elapsed + 1, FADE_IN));
     expect(render(state)).toEqual(expected);
   });
 });
@@ -68,10 +70,10 @@ describe("render() dispatch: exit (toDraft, B on the settled Info page) transiti
     const state = afterB(2, 6); // mid fade-out, elapsed=6
     const t = state.summaryScreen.transition!;
     expect(t).toMatchObject({ direction: "toDraft", phase: "fadingOut" });
-    const expected = renderSummaryInfoPageFaded(2, bgFadeY(t.elapsed + 1, EXIT_FADE_OUT), objFadeY(t.elapsed + 1, EXIT_FADE_OUT));
+    const expected = renderSummaryInfoPageFaded(rentals, 2, bgFadeY(t.elapsed + 1, EXIT_FADE_OUT), objFadeY(t.elapsed + 1, EXIT_FADE_OUT));
     expect(render(state)).toEqual(expected);
     // Sanity: the entry's curve would disagree here, proving direction actually matters to the dispatch.
-    const wrongCurve = renderSummaryInfoPageFaded(2, bgFadeY(t.elapsed + 1, ENTRY_FADE_OUT), objFadeY(t.elapsed + 1, ENTRY_FADE_OUT));
+    const wrongCurve = renderSummaryInfoPageFaded(rentals, 2, bgFadeY(t.elapsed + 1, ENTRY_FADE_OUT), objFadeY(t.elapsed + 1, ENTRY_FADE_OUT));
     expect(render(state)).not.toEqual(wrongCurve);
   });
 

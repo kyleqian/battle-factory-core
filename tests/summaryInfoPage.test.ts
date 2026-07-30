@@ -15,11 +15,14 @@ import {
 } from "../src/engine/summaryInfoPage.ts";
 import type { SummaryMoveSelectState } from "../src/engine/summaryScreen.ts";
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from "../src/engine/framebuffer.ts";
+import { ANCHOR_DRAFT_SCREEN_STATE } from "../src/engine/factoryDraftScreen.ts";
+
+const rentals = ANCHOR_DRAFT_SCREEN_STATE.rentals;
 
 describe("summary Info page render", () => {
   it("renders a fully-opaque 240x160 RGBA frame for every anchor rental slot", () => {
     for (let slot = 0; slot < 6; slot += 1) {
-      const fb = renderSummaryInfoPage(slot);
+      const fb = renderSummaryInfoPage(rentals, slot);
       expect(fb.length).toBe(SCREEN_WIDTH * SCREEN_HEIGHT * 4);
       for (let i = 3; i < fb.length; i += 4) {
         expect(fb[i]).toBe(255);
@@ -28,21 +31,21 @@ describe("summary Info page render", () => {
   });
 
   it("is deterministic across repeated renders of the same slot", () => {
-    const a = renderSummaryInfoPage(0);
-    const b = renderSummaryInfoPage(0);
+    const a = renderSummaryInfoPage(rentals, 0);
+    const b = renderSummaryInfoPage(rentals, 0);
     expect(Buffer.from(a).equals(Buffer.from(b))).toBe(true);
   });
 
   it("renders a different frame per slot (species-specific art/text)", () => {
-    const onix = renderSummaryInfoPage(0);
-    const magby = renderSummaryInfoPage(1);
+    const onix = renderSummaryInfoPage(rentals, 0);
+    const magby = renderSummaryInfoPage(rentals, 1);
     expect(Buffer.from(onix).equals(Buffer.from(magby))).toBe(false);
   });
 
   it("owns a deterministic, fully opaque Battle Moves page for the selected rental", () => {
-    const onix = renderSummaryBattleMovesPage(0, 30);
-    const onixAgain = renderSummaryBattleMovesPage(0, 30);
-    const magby = renderSummaryBattleMovesPage(1, 30);
+    const onix = renderSummaryBattleMovesPage(rentals, 0, 30);
+    const onixAgain = renderSummaryBattleMovesPage(rentals, 0, 30);
+    const magby = renderSummaryBattleMovesPage(rentals, 1, 30);
     expect(onix.length).toBe(SCREEN_WIDTH * SCREEN_HEIGHT * 4);
     expect(Buffer.from(onix).equals(Buffer.from(onixAgain))).toBe(true);
     expect(Buffer.from(onix).equals(Buffer.from(magby))).toBe(false);
@@ -59,13 +62,13 @@ describe("summary Info page render", () => {
       pendingPresentedMoveIndex: null,
       pendingPresentationTicks: 0,
     };
-    const visible = renderSummaryBattleMoveSelectPage(0, 40, select);
-    const visibleAgain = renderSummaryBattleMoveSelectPage(0, 40, select);
-    const blinkOff = renderSummaryBattleMoveSelectPage(0, 40, {
+    const visible = renderSummaryBattleMoveSelectPage(rentals, 0, 40, select);
+    const visibleAgain = renderSummaryBattleMoveSelectPage(rentals, 0, 40, select);
+    const blinkOff = renderSummaryBattleMoveSelectPage(rentals, 0, 40, {
       ...select,
       selectorAnimationClock: 27,
     });
-    const secondMove = renderSummaryBattleMoveSelectPage(0, 40, {
+    const secondMove = renderSummaryBattleMoveSelectPage(rentals, 0, 40, {
       ...select,
       selectedMoveIndex: 1,
       presentedMoveIndex: 1,
@@ -86,8 +89,9 @@ describe("summary Info page render", () => {
       pendingPresentedMoveIndex: null,
       pendingPresentationTicks: 0,
     };
-    const ordinary = renderSummaryContestMovesPage(0, 40);
+    const ordinary = renderSummaryContestMovesPage(rentals, 0, 40);
     const rockSlide = renderSummaryBattleMoveSelectPage(
+      rentals,
       0,
       40,
       select,
@@ -95,6 +99,7 @@ describe("summary Info page render", () => {
       "contestMoves",
     );
     const bind = renderSummaryBattleMoveSelectPage(
+      rentals,
       0,
       40,
       {
@@ -105,7 +110,7 @@ describe("summary Info page render", () => {
       false,
       "contestMoves",
     );
-    const battle = renderSummaryBattleMoveSelectPage(0, 40, select);
+    const battle = renderSummaryBattleMoveSelectPage(rentals, 0, 40, select);
     expect(Buffer.from(rockSlide).equals(Buffer.from(ordinary))).toBe(false);
     expect(Buffer.from(rockSlide).equals(Buffer.from(bind))).toBe(false);
     expect(Buffer.from(rockSlide).equals(Buffer.from(battle))).toBe(false);
@@ -113,25 +118,25 @@ describe("summary Info page render", () => {
   });
 
   it("owns a deterministic, fully opaque Contest Moves page for the selected rental", () => {
-    const onix = renderSummaryContestMovesPage(0, 30);
-    const onixAgain = renderSummaryContestMovesPage(0, 30);
-    const magby = renderSummaryContestMovesPage(1, 30);
+    const onix = renderSummaryContestMovesPage(rentals, 0, 30);
+    const onixAgain = renderSummaryContestMovesPage(rentals, 0, 30);
+    const magby = renderSummaryContestMovesPage(rentals, 1, 30);
     expect(onix.length).toBe(SCREEN_WIDTH * SCREEN_HEIGHT * 4);
     expect(Buffer.from(onix).equals(Buffer.from(onixAgain))).toBe(true);
     expect(Buffer.from(onix).equals(Buffer.from(magby))).toBe(false);
-    expect(Buffer.from(onix).equals(Buffer.from(renderSummaryBattleMovesPage(0, 30)))).toBe(false);
+    expect(Buffer.from(onix).equals(Buffer.from(renderSummaryBattleMovesPage(rentals, 0, 30)))).toBe(false);
     for (let i = 3; i < onix.length; i += 4) expect(onix[i]).toBe(255);
   });
 
   it("renderSummaryInfoPageFaded(slot, 0, 0) matches the unfaded render exactly", () => {
-    const flat = renderSummaryInfoPage(2);
-    const faded = renderSummaryInfoPageFaded(2, 0, 0);
+    const flat = renderSummaryInfoPage(rentals, 2);
+    const faded = renderSummaryInfoPageFaded(rentals, 2, 0, 0);
     expect(Buffer.from(flat).equals(Buffer.from(faded))).toBe(true);
   });
 
   it("fading toward black (bgY=16, objY=16) darkens every opaque pixel", () => {
-    const flat = renderSummaryInfoPage(0);
-    const faded = renderSummaryInfoPageFaded(0, 16, 16);
+    const flat = renderSummaryInfoPage(rentals, 0);
+    const faded = renderSummaryInfoPageFaded(rentals, 0, 16, 16);
     for (let i = 0; i < flat.length; i += 4) {
       expect(faded[i]!).toBeLessThanOrEqual(flat[i]!);
       expect(faded[i + 1]!).toBeLessThanOrEqual(flat[i + 1]!);
@@ -140,7 +145,7 @@ describe("summary Info page render", () => {
   });
 
   it("pins slot 0 (ONIX)'s current render byte-for-byte (update deliberately, not accidentally)", () => {
-    const fb = renderSummaryInfoPage(0);
+    const fb = renderSummaryInfoPage(rentals, 0);
     const hash = createHash("sha256").update(fb).digest("hex");
     expect(hash).toBe("b9d8ab9c6363ea204a036a11e73e78dd084a9ece300ccd69b1f67093b23f76a3");
   });

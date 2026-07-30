@@ -744,7 +744,9 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
         : (FACTORY_ITEM_NAME_BY_ID.get(item) ?? `ITEM_${item}`);
       const buff1 = itemName(rules.battleTextBuff1Item);
       const buff2 = itemName(rules.battleTextBuff2Item);
-      const substitutions = operand.expression === "STRINGID_PKMNOBTAINEDX"
+      const substitutions = operand.expression === "STRINGID_PKMNSXCUREDITSYPROBLEM"
+        ? (rules.battleTextBuff1Status === null ? [] : [rules.battleTextBuff1Status])
+        : operand.expression === "STRINGID_PKMNOBTAINEDX"
         ? (buff1 === null ? [] : [buff1])
         : operand.expression === "STRINGID_PKMNOBTAINEDX2"
           ? (buff2 === null ? [] : [buff2])

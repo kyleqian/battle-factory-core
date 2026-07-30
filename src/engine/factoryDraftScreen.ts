@@ -28,9 +28,12 @@ import {
 import { bg3ColorWide, blend8, FLASH_BLENDED_COLOR, target2Color } from "./monPicRender.ts";
 import { ANCHOR_SPECIES_NAME_FADE_STATE, speciesNameColor, type SpeciesNameFadeState } from "./speciesNameFade.ts";
 import {
-  createFactoryCorpusPartyMember,
   type FactoryCorpusPartyInstance,
 } from "./factoryCorpusParty.ts";
+import {
+  createFactoryRentalPresentation,
+  type FactoryRentalPresentation,
+} from "./factoryRentalPresentation.ts";
 
 import menuBgData from "../assets/gen/menu-bg.json" with { type: "json" };
 import pokeballData from "../assets/gen/pokeball.json" with { type: "json" };
@@ -38,7 +41,6 @@ import arrowData from "../assets/gen/arrow.json" with { type: "json" };
 import textPaletteData from "../assets/gen/text-palette.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
-import draftPoolHeaderData from "../data/gen/draft-pool-header.json" with { type: "json" };
 import anchorStateData from "../data/gen/anchor-state.json" with { type: "json" };
 import menuHighlightData from "../assets/gen/menu-highlight.json" with { type: "json" };
 
@@ -78,17 +80,6 @@ export interface RentalSlot {
   category: string;
   species: string;
 }
-
-type FactorySpeciesHeader = Readonly<{
-  species: string;
-  name: string;
-  category: string;
-}>;
-
-const FACTORY_SPECIES_HEADERS = new Map(
-  (draftPoolHeaderData as { speciesHeaders: FactorySpeciesHeader[] }).speciesHeaders
-    .map((header) => [header.species, header]),
-);
 
 export type DraftScreenMode = "cursor" | "menu";
 
@@ -220,6 +211,8 @@ export interface DraftScreenState {
   cursorPos: number;
   menuCursorPos: number;
   slots: RentalSlot[];
+  /** Six complete live rentals used by every summary page and mon switch. */
+  rentals: readonly FactoryRentalPresentation[];
   message: string;
   monPic: MonPicState;
   /** Has any LEFT/RIGHT/UP/DOWN been processed yet - see monPic.ts's variant-selection comment. */
@@ -739,22 +732,17 @@ export function createDraftScreenStateFromRentalRecords(
   if (rentalRecords.length !== 6) {
     throw new Error(`Factory draft screen requires exactly 6 rental records, got ${rentalRecords.length}`);
   }
-  const slots = rentalRecords.map((record, index): RentalSlot => {
-    const member = createFactoryCorpusPartyMember(record);
-    const header = FACTORY_SPECIES_HEADERS.get(member.speciesName);
-    if (header === undefined) {
-      throw new Error(
-        `Factory draft rental ${index} has no extracted species header for ${member.speciesName}`,
-      );
-    }
-    return Object.freeze({ species: header.name, category: header.category });
-  });
+  const rentals = Object.freeze(rentalRecords.map(createFactoryRentalPresentation));
+  const slots = rentals.map((rental): RentalSlot =>
+    Object.freeze({ species: rental.name, category: rental.category })
+  );
 
   return {
     mode: "cursor",
     cursorPos: 0,
     menuCursorPos: 0,
     slots,
+    rentals,
     message: "Select the first POKéMON.",
     monPic: INITIAL_MON_PIC_STATE,
     hasActed: false,

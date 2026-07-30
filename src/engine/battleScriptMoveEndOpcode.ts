@@ -16,6 +16,7 @@ import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import { recordBattleScriptAbilityReveal } from "./battleScriptAiReveal.ts";
 import {
   drawBattleScriptRng,
+  markBattleScriptControllerPending,
   transitionBattleScriptCommand,
   type BattleScriptBlockReason,
   type BattleScriptCommandTransition,
@@ -75,6 +76,7 @@ const STAT_ATK = 1;
 const MAX_STAT_STAGE = 12;
 const HITMARKER_SYNCHRONIZE_EFFECT = 1 << 14;
 const HITMARKER_STATUS_ABILITY_EFFECT = 1 << 13;
+const BATTLE_TYPE_SAFARI = 1 << 7;
 const ABILITY_SYNCHRONIZE = 28;
 
 /** include/constants/abilities.h -- AbilityBattleEffects' ON_DAMAGE case (battle_util.c:2749-2871). */
@@ -86,6 +88,13 @@ const ABILITY_STATIC = 9;
 const ABILITY_FLAME_BODY = 49;
 const ABILITY_CUTE_CHARM = 56;
 const ABILITY_OBLIVIOUS = 12;
+const ABILITY_IMMUNITY = 17;
+const ABILITY_OWN_TEMPO = 20;
+const ABILITY_LIMBER = 7;
+const ABILITY_INSOMNIA = 15;
+const ABILITY_VITAL_SPIRIT = 72;
+const ABILITY_WATER_VEIL = 41;
+const ABILITY_MAGMA_ARMOR = 40;
 const MOVE_EFFECT_AFFECTS_USER = 1 << 6;
 const MOVE_EFFECT_POISON = 2;
 const MOVE_EFFECT_BURN = 3;
@@ -113,25 +122,60 @@ const STATUS2_CONFUSION = (1 << 0) | (1 << 1) | (1 << 2);
 const STATUS2_NIGHTMARE = 1 << 27;
 const STATUS2_INFATUATION = (1 << 16) | (1 << 17) | (1 << 18) | (1 << 19);
 
-function immunityAbilityCuresStatus(ability: number, battlerState: BattleScriptRulesBattlerState): boolean {
+type ImmunityAbilityCure = Readonly<{
+  status1: number;
+  status2: number;
+  statusName: "poison" | "confusion" | "paralysis" | "sleep" | "burn" | "ice" | "love";
+}>;
+
+function immunityAbilityCure(
+  ability: number,
+  battlerState: BattleScriptRulesBattlerState,
+): ImmunityAbilityCure | null {
   switch (ability) {
-    case 17: // ABILITY_IMMUNITY
-      return (battlerState.status1 & (STATUS1_POISON | STATUS1_TOXIC_POISON | STATUS1_TOXIC_COUNTER)) !== 0;
-    case 20: // ABILITY_OWN_TEMPO
-      return (battlerState.status2 & STATUS2_CONFUSION) !== 0;
-    case 7: // ABILITY_LIMBER
-      return (battlerState.status1 & STATUS1_PARALYSIS) !== 0;
-    case 15: // ABILITY_INSOMNIA
-    case 72: // ABILITY_VITAL_SPIRIT
-      return (battlerState.status1 & STATUS1_SLEEP) !== 0;
-    case 41: // ABILITY_WATER_VEIL
-      return (battlerState.status1 & STATUS1_BURN) !== 0;
-    case 40: // ABILITY_MAGMA_ARMOR
-      return (battlerState.status1 & STATUS1_FREEZE) !== 0;
-    case 12: // ABILITY_OBLIVIOUS
-      return (battlerState.status2 & STATUS2_INFATUATION) !== 0;
+    case ABILITY_IMMUNITY:
+      return (battlerState.status1 & (STATUS1_POISON | STATUS1_TOXIC_POISON | STATUS1_TOXIC_COUNTER)) !== 0
+        ? Object.freeze({ status1: 0, status2: battlerState.status2, statusName: "poison" })
+        : null;
+    case ABILITY_OWN_TEMPO:
+      return (battlerState.status2 & STATUS2_CONFUSION) !== 0
+        ? Object.freeze({
+          status1: battlerState.status1,
+          status2: (battlerState.status2 & ~STATUS2_CONFUSION) >>> 0,
+          statusName: "confusion",
+        })
+        : null;
+    case ABILITY_LIMBER:
+      return (battlerState.status1 & STATUS1_PARALYSIS) !== 0
+        ? Object.freeze({ status1: 0, status2: battlerState.status2, statusName: "paralysis" })
+        : null;
+    case ABILITY_INSOMNIA:
+    case ABILITY_VITAL_SPIRIT:
+      return (battlerState.status1 & STATUS1_SLEEP) !== 0
+        ? Object.freeze({
+          status1: 0,
+          status2: (battlerState.status2 & ~STATUS2_NIGHTMARE) >>> 0,
+          statusName: "sleep",
+        })
+        : null;
+    case ABILITY_WATER_VEIL:
+      return (battlerState.status1 & STATUS1_BURN) !== 0
+        ? Object.freeze({ status1: 0, status2: battlerState.status2, statusName: "burn" })
+        : null;
+    case ABILITY_MAGMA_ARMOR:
+      return (battlerState.status1 & STATUS1_FREEZE) !== 0
+        ? Object.freeze({ status1: 0, status2: battlerState.status2, statusName: "ice" })
+        : null;
+    case ABILITY_OBLIVIOUS:
+      return (battlerState.status2 & STATUS2_INFATUATION) !== 0
+        ? Object.freeze({
+          status1: battlerState.status1,
+          status2: (battlerState.status2 & ~STATUS2_INFATUATION) >>> 0,
+          statusName: "love",
+        })
+        : null;
     default:
-      return false;
+      return null;
   }
 }
 
@@ -554,23 +598,66 @@ function executeMoveendState(
     case MOVEEND_ON_DAMAGE_ABILITIES:
       return executeOnDamageAbilities(context, rules);
     case MOVEEND_IMMUNITY_ABILITIES: {
+      if ((rules.battleTopology.battleTypeFlags & BATTLE_TYPE_SAFARI) !== 0) {
+        return continueState(advanceMoveend(rules));
+      }
+      // AbilityBattleEffects receives literal battler 0, so its common
+      // pre-dispatch assignment writes battler 0's ability even when the
+      // cross-battler scan is quiet. Its successful branch returns early,
+      // before the helper's common RecordAbilityBattle tail.
+      const baseRules = Object.freeze({
+        ...rules,
+        lastUsedAbility: rules.battlers[0].ability,
+      });
       const count = rules.battleTopology.battlersCount;
       for (let battler = 0; battler < count; battler += 1) {
-        const battlerState = rules.battlers[battler as BattleScriptBattlerId];
-        const ability = battlerState.ability;
-        if (immunityAbilityCuresStatus(ability, battlerState)) {
-          return transferState(unsupportedBranch(
+        const battlerId = battler as BattleScriptBattlerId;
+        const battlerState = baseRules.battlers[battlerId];
+        const cure = immunityAbilityCure(battlerState.ability, battlerState);
+        if (cure !== null) {
+          const curedBattlers = replaceBattlerAt(baseRules.battlers, battlerId, Object.freeze({
+            ...battlerState,
+            status1: cure.status1,
+            status2: cure.status2,
+          }));
+          const nextRules = Object.freeze({
+            ...baseRules,
+            battlers: curedBattlers,
+            party: withBattleScriptPartyMemberStatus1(
+              baseRules.party,
+              battlerState.side,
+              battlerState.partyIndex,
+              cure.status1,
+            ),
+            scriptingBattler: battlerId,
+            battleTextBuff1Status: cure.statusName,
+          });
+          const label = resolveBattleScriptLabel(context.program, "BattleScript_AbilityCuredStatus");
+          if (!label) {
+            throw new Error("committed Battle Script program lacks BattleScript_AbilityCuredStatus");
+          }
+          return transferState(transitionBattleScriptCommand(
             context,
-            `AbilityBattleEffects(ABILITYEFFECT_IMMUNITY)'s status-curing branch (battler ${battler}, `
-              + `ability ${ability}: Immunity/Own Tempo/Limber/Insomnia/Vital Spirit/Water Veil/Magma Armor/`
-              + "Oblivious) needs the BtlController_EmitSetMonData/BattleScript_AbilityCuredStatus transfer "
-              + "not modeled here",
-            "battle_util.c",
-            2876,
+            Object.freeze({ kind: "call-current", programCounter: label.programCounter }),
+            {
+              // Unlike every ordinary callCurrentMoveendScript user, source
+              // deliberately keeps state 4 selected after a cure. RETURN
+              // re-enters Cmd_moveend, which rescans from battler 0 and only
+              // advances when a complete quiet pass reports effect == 0.
+              rulesContext: nextRules,
+              scheduler: markBattleScriptControllerPending(context.state.scheduler, battlerId),
+              events: Object.freeze([
+                Object.freeze({
+                  kind: "set-battler-status-data" as const,
+                  battler: battlerId,
+                  status1: cure.status1,
+                }),
+              ]),
+            },
           ));
         }
       }
-      return continueState(advanceMoveend(rules));
+      return continueState(advanceMoveend(baseRules));
     }
     case MOVEEND_SYNCHRONIZE_ATTACKER: {
       const attacker = requireBattlerRole(rules, "attacker");

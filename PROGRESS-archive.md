@@ -1,3 +1,38 @@
+## 706 — [BOUNDED MAIN WORKER 2026-07-29 ~16:28] Live voluntary party selector + source refusal landed
+
+- **State:** implementation `558fb93d`; tree green at **519 files / 5271
+  tests + 1 deliberate animation-lane skip**, production build, targeted
+  selector/seam acceptance **88/88**, and `git diff --check`. Both forced
+  party windows remain **200/200**; the complete fourteen command-menu
+  windows remain exact (**209/235/90 +
+  254/44/42/44/93/88/111/83/56/46/57**).
+- **Did:** the generated battle command's typed `party-handoff` now constructs
+  a voluntary three-row selector from live rules state, renders source-extracted
+  party tiles/font plus arbitrary `SPECIES_*` icons, implements source
+  single-layout cursor edges/submenu, restores the same request/action cursor
+  on B, and submits the exact legal selected index. Both voluntary and forced
+  SEND OUT now print Emerald's exact two-line `<mon> has no energy / left to
+  battle!` refusal and stay in the party menu. Deleted resolved ISSUES #49.
+- **Next:** supervisor should proceed to ISSUES #51 (generated draft summary
+  data), trainer-pic OFF window, or Gate-6 work. The explicit-OFF 128-frame
+  command breadth proof remains bounded by entry 704's action-resolution
+  lifecycle gap; this step recorded no trace.
+- **Notes:** no canonical-recording import, unsupported barrier, trace/capture
+  change, battle/turn/absolute-tick selector, damage/RNG/turn-order, swaps,
+  summary, or animation change. PAPERCUT: none.
+
+## 705 — [SUPERVISOR 2026-07-29 ~16:25] Roar CBM/CV pair merged with census-evasion correction; union green
+
+- **State:** master `6ac336b9` green at **518 files / 5266 tests + 1
+  deliberate animation-lane skip**, production build, `git diff --check`
+  clean. Side worktree/branch merged and removed; no orphans.
+- **Did:** merged Roar CBM/CV (`3580b199` + `906f3ff1`) and corrected a
+  hidden Suction Cups census delta in `4527fd9f`; source order, live
+  receipts, docs, and the exact census delta were supervisor-verified.
+- **Next:** party selector, ISSUES #51, trainer-pic OFF, commentary
+  checkpoint, then Gate-6.
+- **Notes:** executable-frontier census unchanged (`8b18f754…5261`).
+
 ## 704 — [BOUNDED MAIN WORKER 2026-07-29 ~16:05] Battle-command seam Slice 6 Part B field-art route landed; breadth trace honestly open
 
 - **State:** implementation `216a7fab`; tree green at **518 files / 5254

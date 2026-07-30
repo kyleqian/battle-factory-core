@@ -58,6 +58,7 @@ function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptR
     spDefense: changes.spDefense ?? 0,
     level: changes.level ?? 50,
     friendship: changes.friendship ?? 0,
+    partyIndex: changes.partyIndex ?? 0,
   });
 }
 
@@ -101,9 +102,18 @@ function externalPorts(
 ): BattleScriptStatusRulesExternalPorts {
   return Object.freeze({
     isControllerIdle: () => true,
-    prepareMessage: (_context, operand) =>
+    prepareMessage: (context, operand) =>
       operand.expression.startsWith("STRINGID_")
-        ? Object.freeze({ kind: "message" as const, messageId: operand.expression, substitutions: Object.freeze([]) })
+        ? Object.freeze({
+          kind: "message" as const,
+          messageId: operand.expression,
+          substitutions: Object.freeze(
+            operand.expression === "STRINGID_PKMNSXCUREDITSYPROBLEM"
+              && context.state.rulesContext.battleTextBuff1Status !== null
+              ? [context.state.rulesContext.battleTextBuff1Status]
+              : [],
+          ),
+        })
         : null,
     prepareSelectionMessage: () => null,
     prepareSelectionMessageFromTable: () => null,
@@ -273,20 +283,6 @@ describe("production moveend (Cmd_moveend) registration", () => {
       expect(result.state.rulesContext.moveendState).toBe(10); // paused at MOVEEND_ATTACKER_VISIBLE
     });
 
-    it("halts on MOVEEND_IMMUNITY_ABILITIES' status-curing branch (ABILITY_LIMBER, any battler) only when that battler's own matching status bit is actually set -- ability membership alone is a no-op in source (battle_util.c:2892-2898's own `if` gate)", () => {
-      const STATUS1_PARALYSIS = 1 << 6;
-      const rc = context(0, {}, { moveendState: 4 }, { ability: 7, status1: STATUS1_PARALYSIS });
-      const { result } = stepAtMoveend(rc);
-      expect(result.kind).toBe("halted");
-      if (result.kind !== "halted") throw new Error("expected halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2876 });
-
-      const rcNoStatus = context(0, {}, { moveendState: 4 }, { ability: 7 });
-      const { result: passThrough } = stepAtMoveend(rcNoStatus);
-      if (passThrough.kind !== "advanced") throw new Error(`expected advanced, got ${passThrough.kind}`);
-      expect(passThrough.state.rulesContext.moveendState).toBe(10); // Limber held but not paralyzed -- no cure, no barrier
-    });
-
     it("MOVEEND_IMMUNITY_ABILITIES passes through when no battler holds a curing ability", () => {
       const rc = context(0, {}, { moveendState: 4 });
       const { result } = stepAtMoveend(rc);
@@ -444,6 +440,167 @@ describe("production moveend (Cmd_moveend) registration", () => {
       const { result } = stepAtMoveend(rc);
       if (result.kind !== "advanced") throw new Error(`expected advanced, got ${result.kind}`);
       expect(result.state.rulesContext.moveendState).toBe(17);
+    });
+  });
+
+  describe("MOVEEND_IMMUNITY_ABILITIES status-curing pass", () => {
+    const STATUS1_POISON = 1 << 3;
+    const STATUS1_BURN = 1 << 4;
+    const STATUS1_FREEZE = 1 << 5;
+    const STATUS1_PARALYSIS = 1 << 6;
+    const STATUS1_TOXIC_POISON = 1 << 7;
+    const STATUS1_TOXIC_COUNTER = (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11);
+    const STATUS1_SLEEP = 3;
+    const STATUS2_CONFUSION = 5;
+    const STATUS2_NIGHTMARE = 1 << 27;
+    const STATUS2_INFATUATION = 1 << 16;
+
+    it.each([
+      ["Immunity poison", 17, STATUS1_TOXIC_POISON | STATUS1_TOXIC_COUNTER | STATUS1_PARALYSIS, 0, 0, 0, "poison"],
+      ["Own Tempo confusion", 20, STATUS1_BURN, STATUS2_CONFUSION | STATUS2_NIGHTMARE, STATUS1_BURN, STATUS2_NIGHTMARE, "confusion"],
+      ["Limber paralysis", 7, STATUS1_PARALYSIS | STATUS1_POISON, 0, 0, 0, "paralysis"],
+      ["Insomnia sleep", 15, STATUS1_SLEEP | STATUS1_BURN, STATUS2_NIGHTMARE | STATUS2_INFATUATION, 0, STATUS2_INFATUATION, "sleep"],
+      ["Vital Spirit sleep", 72, STATUS1_SLEEP | STATUS1_PARALYSIS, STATUS2_NIGHTMARE, 0, 0, "sleep"],
+      ["Water Veil burn", 41, STATUS1_BURN | STATUS1_PARALYSIS, 0, 0, 0, "burn"],
+      ["Magma Armor freeze", 40, STATUS1_FREEZE | STATUS1_POISON, 0, 0, 0, "ice"],
+      ["Oblivious infatuation", 12, STATUS1_BURN, STATUS2_INFATUATION | STATUS2_CONFUSION, STATUS1_BURN, STATUS2_CONFUSION, "love"],
+    ])(
+      "%s clears the source-selected state, syncs status1, prints the selected problem, and reveals only through the source message",
+      (_name, ability, status1, status2, expectedStatus1, expectedStatus2, statusName) => {
+        const rc = context(
+          0,
+          {},
+          {
+            moveendState: 4,
+            party: {
+              opponent: [{}, {}, { species: 113, hp: 100, status1 }, {}, {}, {}],
+            },
+          },
+          { ability, status1, status2, partyIndex: 2 },
+        );
+        const { result, moveendPc } = stepAtMoveend(rc);
+        if (result.kind !== "advanced") throw new Error(`expected advanced, got ${result.kind}`);
+        expect(result.state.programCounter).toBe(labelPc("BattleScript_AbilityCuredStatus"));
+        expect(result.state.callStack.at(-1)).toBe(moveendPc);
+        expect(result.state.rulesContext.moveendState).toBe(4);
+        expect(result.state.rulesContext.battlers[1]).toMatchObject({
+          status1: expectedStatus1,
+          status2: expectedStatus2,
+        });
+        expect(result.state.rulesContext.party.opponent[2]!.status1).toBe(expectedStatus1);
+        expect(result.state.rulesContext.scriptingBattler).toBe(1);
+        expect(result.state.rulesContext.battleTextBuff1Status).toBe(statusName);
+        expect(result.state.rulesContext.lastUsedAbility).toBe(0);
+        // The successful case returns at battle_util.c:2949, before the
+        // common RecordAbilityBattle tail at :3194-3195.
+        expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(0);
+        expect(result.state.scheduler.pendingControllerBattlers).toEqual([1]);
+        expect(result.state.events.at(-1)).toMatchObject({
+          kind: "set-battler-status-data",
+          battler: 1,
+          status1: expectedStatus1,
+        });
+
+        const terminal = runMoveendScriptToTerminal(rc);
+        expect(terminal.state.events).toContainEqual(expect.objectContaining({
+          kind: "message",
+          messageId: "STRINGID_PKMNSXCUREDITSYPROBLEM",
+          substitutions: [statusName],
+        }));
+        expect(terminal.state.events).toContainEqual(expect.objectContaining({
+          kind: "status-icon-update",
+          battler: 1,
+          status1: expectedStatus1,
+          status2: expectedStatus2,
+        }));
+        expect(terminal.state.rulesContext.moveendState).toBe(17);
+      },
+    );
+
+    it("keeps a non-matching status and party copy unchanged, and a no-status holder is a quiet pass", () => {
+      const nonMatching = context(
+        0,
+        {},
+        {
+          moveendState: 4,
+          party: {
+            opponent: [{}, {}, { species: 113, hp: 100, status1: STATUS1_BURN }, {}, {}, {}],
+          },
+        },
+        { ability: 7, status1: STATUS1_BURN, partyIndex: 2 },
+      );
+      const { result } = stepAtMoveend(nonMatching);
+      if (result.kind !== "advanced") throw new Error(`expected advanced, got ${result.kind}`);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(STATUS1_BURN);
+      expect(result.state.rulesContext.party.opponent[2]!.status1).toBe(STATUS1_BURN);
+      expect(result.state.rulesContext.moveendState).toBe(10);
+      expect(result.state.events.some((event) =>
+        event.kind === "set-battler-status-data"
+        || event.kind === "message"
+        || event.kind === "status-icon-update"
+      )).toBe(false);
+
+      const noStatus = context(0, {}, { moveendState: 4 }, { ability: 7 });
+      const { result: quiet } = stepAtMoveend(noStatus);
+      if (quiet.kind !== "advanced") throw new Error(`expected advanced, got ${quiet.kind}`);
+      expect(quiet.state.rulesContext.moveendState).toBe(10);
+      expect(quiet.state.rulesContext.battleTextBuff1Status).toBeNull();
+      expect(quiet.state.events.some((event) =>
+        event.kind === "set-battler-status-data"
+        || event.kind === "message"
+        || event.kind === "status-icon-update"
+      )).toBe(false);
+
+      const safari = context(
+        0,
+        {},
+        {
+          moveendState: 4,
+          battleTopology: {
+            battlersCount: 2,
+            battleTypeFlags: 1 << 7,
+            battlerPositions: [0, 1, 0xff, 0xff],
+          },
+        },
+        { ability: 7, status1: STATUS1_PARALYSIS },
+      );
+      const { result: safariQuiet } = stepAtMoveend(safari);
+      if (safariQuiet.kind !== "advanced") {
+        throw new Error(`expected advanced, got ${safariQuiet.kind}`);
+      }
+      expect(safariQuiet.state.rulesContext.battlers[1]!.status1).toBe(STATUS1_PARALYSIS);
+      expect(safariQuiet.state.rulesContext.moveendState).toBe(10);
+    });
+
+    it("returns to state 4 and rescans from battler 0 so two curable battlers are handled one at a time", () => {
+      const battlers = [
+        battler({ side: 0, ability: 7, status1: STATUS1_PARALYSIS, partyIndex: 1 }),
+        battler({ side: 1, ability: 41, status1: STATUS1_BURN, partyIndex: 2 }),
+        battler({ side: 0, hp: 0 }),
+        battler({ side: 1, hp: 0 }),
+      ];
+      const rc = context(0, {}, {
+        battlers,
+        moveendState: 4,
+        party: {
+          player: [{}, { species: 106, hp: 100, status1: STATUS1_PARALYSIS }, {}, {}, {}, {}],
+          opponent: [{}, {}, { species: 226, hp: 100, status1: STATUS1_BURN }, {}, {}, {}],
+        },
+      });
+      const terminal = runMoveendScriptToTerminal(rc);
+      expect(terminal.state.rulesContext.battlers[0]!.status1).toBe(0);
+      expect(terminal.state.rulesContext.battlers[1]!.status1).toBe(0);
+      expect(terminal.state.rulesContext.party.player[1]!.status1).toBe(0);
+      expect(terminal.state.rulesContext.party.opponent[2]!.status1).toBe(0);
+      expect(terminal.state.events.filter((event) =>
+        event.kind === "set-battler-status-data"
+      ).map((event) => event.kind === "set-battler-status-data" ? event.battler : -1))
+        .toEqual([0, 1]);
+      expect(terminal.state.events.filter((event) =>
+        event.kind === "message"
+        && event.messageId === "STRINGID_PKMNSXCUREDITSYPROBLEM"
+      ).map((event) => event.kind === "message" ? event.substitutions[0] : null))
+        .toEqual(["paralysis", "burn"]);
     });
   });
 

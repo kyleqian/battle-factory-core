@@ -2003,6 +2003,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
       if (!transition) {
         if (summary.monTransition) {
           return renderSummaryMonTransition(
+            state.draftScreen.rentals,
             summary.monTransition,
             summaryMonAnimClock,
             animateSwitchedMon,
@@ -2010,7 +2011,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
           );
         }
         return summary.onInfoPage
-          ? renderSummaryInfoPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
+          ? renderSummaryInfoPage(state.draftScreen.rentals, summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
           : renderPopup(0, 0);
       }
       const isEntry = transition.direction === "toSummary";
@@ -2020,7 +2021,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
         const bgY = bgFadeY(0, FADE_IN);
         const objY = objFadeY(0, FADE_IN);
         return isEntry
-          ? renderSummaryInfoPageFaded(summary.selectedSlot, bgY, objY)
+          ? renderSummaryInfoPageFaded(state.draftScreen.rentals, summary.selectedSlot, bgY, objY)
           : renderPopup(bgY, objY);
       }
       const timing =
@@ -2036,6 +2037,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
       return showingPopup
         ? renderPopup(bgY, objY)
         : renderSummaryInfoPageFaded(
+            state.draftScreen.rentals,
             summary.selectedSlot,
             bgY,
             objY,
@@ -2184,6 +2186,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
   if (!t) {
     if (summary.moveSelect) {
       return renderSummaryBattleMoveSelectPage(
+        state.draftScreen.rentals,
         summary.selectedSlot,
         summaryMonAnimClock,
         summary.moveSelect,
@@ -2193,6 +2196,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
     }
     if (summary.monTransition) {
       return renderSummaryMonTransition(
+        state.draftScreen.rentals,
         summary.monTransition,
         summaryMonAnimClock,
         animateSwitchedMon,
@@ -2210,15 +2214,16 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
       const layers = summaryPageLayerOffsets(pageTransition);
       if (pageTransition.elapsed === 0) {
         return pageTransition.fromPage === "skills"
-          ? renderSummarySkillsPage(summary.selectedSlot, summary.openElapsed + 1, animateSwitchedMon)
+          ? renderSummarySkillsPage(state.draftScreen.rentals, summary.selectedSlot, summary.openElapsed + 1, animateSwitchedMon)
           : pageTransition.fromPage === "battleMoves"
-            ? renderSummaryBattleMovesPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
+            ? renderSummaryBattleMovesPage(state.draftScreen.rentals, summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
             : pageTransition.fromPage === "contestMoves"
-              ? renderSummaryContestMovesPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
-              : renderSummaryInfoPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon);
+              ? renderSummaryContestMovesPage(state.draftScreen.rentals, summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
+              : renderSummaryInfoPage(state.draftScreen.rentals, summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon);
       }
       if (layers.movingPage === pageTransition.toPage && pageTransition.elapsed <= 2) {
         return renderSummaryPageCleared(
+          state.draftScreen.rentals,
           summary.selectedSlot,
           summaryMonAnimClock,
           pageTransition.fromPage,
@@ -2226,6 +2231,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
         );
       }
       return renderSummaryPageTransition(
+        state.draftScreen.rentals,
         summary.selectedSlot,
         pageTransition,
         summaryMonAnimClock,
@@ -2234,12 +2240,12 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
     }
     return summary.isOpen
       ? summary.page === "skills"
-        ? renderSummarySkillsPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
+        ? renderSummarySkillsPage(state.draftScreen.rentals, summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
         : summary.page === "battleMoves"
-          ? renderSummaryBattleMovesPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
+          ? renderSummaryBattleMovesPage(state.draftScreen.rentals, summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
           : summary.page === "contestMoves"
-            ? renderSummaryContestMovesPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
-        : renderSummaryInfoPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
+            ? renderSummaryContestMovesPage(state.draftScreen.rentals, summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
+        : renderSummaryInfoPage(state.draftScreen.rentals, summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
       : renderFactoryDraftScreen(state.draftScreen);
   }
   const isEntry = t.direction === "toSummary";
@@ -2253,7 +2259,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
     const bgY = bgFadeY(0, FADE_IN);
     const objY = objFadeY(0, FADE_IN);
     return isEntry
-      ? renderSummaryInfoPageFaded(summary.selectedSlot, bgY, objY)
+      ? renderSummaryInfoPageFaded(state.draftScreen.rentals, summary.selectedSlot, bgY, objY)
       : renderFactoryDraftScreenFaded(state.draftScreen, bgY, objY);
   }
 
@@ -2278,6 +2284,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
   return showingDraft
     ? renderFactoryDraftScreenFaded(state.draftScreen, bgY, objY)
     : renderSummaryPageFaded(
+        state.draftScreen.rentals,
         summary.selectedSlot,
         summary.page,
         bgY,
