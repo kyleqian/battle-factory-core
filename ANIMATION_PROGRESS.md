@@ -1,5 +1,35 @@
 # Animation coverage
 
+## MOVE_SECRET_POWER Strength reducer/evidence checkpoint; remains unsupported (2026-07-30)
+
+**Verdict:** `MOVE_SECRET_POWER` remains unsupported. The sole reachable
+Factory body now has a pure source-relative reducer and portable evidence
+checkpoint, but no typed seam or production compositor. Exact promotion is
+therefore deliberately blocked.
+
+**Evidence:** complete legal challenge-0 set-117 Teddiursa parties reach
+`Move_STRENGTH` in both orientations. Fresh probes reproduce twice with a
+complete first-active through first-inactive cleanup window of **222–323
+(102 frames)**. Player-back evidence/raw hashes are
+`9d8f3ad7a472bdd940aa35a7aa7e9c62823d8d2b11c0114ce6d4b1f92aed73a3` /
+`af6ff533abeb22e9b2f45c09339dcb979ac8508501e64d6d012faa1eb91a2903`;
+opponent-front hashes are
+`8d6902b63b3dc96622261856cdb413c452d3c55140465a674d97aa51271a2172` /
+`f4c81b0de053a8703ed10238c70d6398693fc937c1ad2d088de451a097d6376a`.
+The opponent's later **472–509** secondary-status animation is independently
+outside the move-body boundary, matching the source audit.
+
+**Model / sibling / next:** `strengthAtAge` ports the IMPACT lifetime,
+`ShakeAndSinkMon`, four-tick return slide, two-loop side-respecting ellipse,
+three mirrored animation-1 hitsplat lifecycles, `ShakeMon2`, monbg/12:8
+alpha, four source audio triggers, waits, and cleanup. Teddiursa art remains
+source-reproducible through the existing set-117 REST extractor. `MOVE_SLAM`
+independently reruns **54/54 twice fresh in both orientations** with unchanged
+hashes. Coverage remains **104 exact / 0 partial / 0 staged / 172
+unsupported**. The bounded remainder is the typed presentation seam,
+Teddiursa/Onix compositor with exact OAM/register latches, and twice-fresh
+102/102 shared-framebuffer acceptance per orientation.
+
 ## MOVE_SECRET_POWER source/controller checkpoint; remains unsupported (2026-07-30)
 
 **Verdict:** `MOVE_SECRET_POWER` remains unsupported. A complete source,
@@ -60,35 +90,3 @@ infatuation result, RNG, controller, turn/facility state, boundary list,
 unsupported barrier, or canonical allowlist. Coverage is **104 exact / 0
 partial / 0 staged / 172 unsupported**. Next ranked incomplete component
 track: `slam-hit-slide-shake` (`MOVE_SECRET_POWER` independently unsupported).
-
-## MOVE_MIRROR_COAT promoted exact; sparkle-3-special-screen track complete (2026-07-29)
-
-**Verdict:** `MOVE_MIRROR_COAT` is exact. Source, generated inventory, and
-controller audit prove set **151 `FRONTIER_MON_CORSOLA`** is its lowest legal
-Level-50 carrier and one animation body is reachable: a valid opposing special
-hit reaches `Move_MIRROR_COAT`; the failure route selects no animation body.
-Complete legal Corsola/Exeggcute Scene-ON parties stage real Confusion damage
-before Mirror Coat's -5-priority counter in both orientations.
-
-**Evidence:** the complete first-active wall frame through first-inactive
-cleanup passes twice fresh per orientation. Player-back **349–423 (75/75)**
-records special damage/result **26→52**, evidence/raw
-`1ea5591d85dc0e4926b8e763584f405ed4ec72d43c676ad06fc551cedb44aa92` /
-`c8a70485e2d13ae522c31760ee7e6ecb24bb464eb567427855448389ab1128a7`;
-opponent-front **355–429 (75/75)** records **31→62**,
-`3328d443c81b35a5305590705e7448d009aa0111a326b318c08b420a29939a7d` /
-`0fcba1ad43f479f613f84243bca184e10f4545e7e6566558327c081444b73b5b`.
-
-**Model / sibling:** the reducer and seam reuse only source-identical
-`AnimDefensiveWall` and six `SpecialScreenSparkle` lifecycles while preserving
-Mirror Coat's red wall/tag, wall-before-audio delay-10/immediate attacker pan,
-no Light Screen sound task, palettes/registers, BG/OBJ ordering, legal carrier
-art/geometry, and cleanup. `MOVE_LIGHT_SCREEN` independently reruns exact twice
-fresh at **115/115 player-back + 119/119 opponent-front**, with unchanged
-evidence/raw hashes.
-
-**Ownership / next:** no counter/damage semantics, accuracy, RNG, controller,
-turn/facility state, boundary list, unsupported barrier, or canonical allowlist
-changed. Coverage is **103 exact / 0 partial / 0 staged / 173 unsupported**.
-Next incomplete ranked track: `red-heart-sweet-kiss`
-(`MOVE_ATTRACT` independently unsupported).

@@ -4,6 +4,38 @@ Older dated sections moved out of `ANIMATION_PROGRESS.md` to keep that
 file lean (`AGENTS.md`'s ~3-most-recent convention). Git history has the
 full record regardless; this file is a read-only reference.
 
+## MOVE_MIRROR_COAT promoted exact; sparkle-3-special-screen track complete (2026-07-29)
+
+**Verdict:** `MOVE_MIRROR_COAT` is exact. Source, generated inventory, and
+controller audit prove set **151 `FRONTIER_MON_CORSOLA`** is its lowest legal
+Level-50 carrier and one animation body is reachable: a valid opposing special
+hit reaches `Move_MIRROR_COAT`; the failure route selects no animation body.
+Complete legal Corsola/Exeggcute Scene-ON parties stage real Confusion damage
+before Mirror Coat's -5-priority counter in both orientations.
+
+**Evidence:** the complete first-active wall frame through first-inactive
+cleanup passes twice fresh per orientation. Player-back **349–423 (75/75)**
+records special damage/result **26→52**, evidence/raw
+`1ea5591d85dc0e4926b8e763584f405ed4ec72d43c676ad06fc551cedb44aa92` /
+`c8a70485e2d13ae522c31760ee7e6ecb24bb464eb567427855448389ab1128a7`;
+opponent-front **355–429 (75/75)** records **31→62**,
+`3328d443c81b35a5305590705e7448d009aa0111a326b318c08b420a29939a7d` /
+`0fcba1ad43f479f613f84243bca184e10f4545e7e6566558327c081444b73b5b`.
+
+**Model / sibling:** the reducer and seam reuse only source-identical
+`AnimDefensiveWall` and six `SpecialScreenSparkle` lifecycles while preserving
+Mirror Coat's red wall/tag, wall-before-audio delay-10/immediate attacker pan,
+no Light Screen sound task, palettes/registers, BG/OBJ ordering, legal carrier
+art/geometry, and cleanup. `MOVE_LIGHT_SCREEN` independently reruns exact twice
+fresh at **115/115 player-back + 119/119 opponent-front**, with unchanged
+evidence/raw hashes.
+
+**Ownership / next:** no counter/damage semantics, accuracy, RNG, controller,
+turn/facility state, boundary list, unsupported barrier, or canonical allowlist
+changed. Coverage is **103 exact / 0 partial / 0 staged / 173 unsupported**.
+Next incomplete ranked track: `red-heart-sweet-kiss`
+(`MOVE_ATTRACT` independently unsupported).
+
 ## MOVE_COTTON_SPORE promoted exact; spore-particles track complete (2026-07-29)
 
 **Verdict:** `MOVE_COTTON_SPORE` is exact. Source and legal inventory prove

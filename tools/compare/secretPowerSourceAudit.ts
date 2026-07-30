@@ -264,5 +264,6 @@ console.log(JSON.stringify({
     "tests/secretPowerOracleEvidence.test.ts",
   ],
   verdict: "unsupported: Factory reaches one body, Move_STRENGTH; "
-    + "complete dense Scene-ON acceptance is not yet implemented",
+    + "the reducer/evidence checkpoint lacks typed-seam and production-"
+    + "framebuffer acceptance",
 }));

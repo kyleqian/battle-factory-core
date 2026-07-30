@@ -2631,7 +2631,8 @@
         "slamEvidence.ts proves both committed v2 receipts twice fresh with stable player evidence/raw digests 8f520d7599ce22335081f096258dba8a4dc61f880c9b5167f0d3d68a33e14182 / 4e3abdaf0e4ab636fc415fb933a10cb47f9ed86fffcef880fd3d6479d1a4c8c2 and opponent digests 66a2b9d72b6dd0eb160faf6336a395fd036745d1fc09433fca7aea3641697401 / 66d4cdf1aed7f739b15a44eaccbb346268f5cc3b05112836b8717d31255f62fc",
         "MOVE_SECRET_POWER remains unsupported after a complete source/controller checkpoint: generated inventory plus challenge-0 range 110-199 prove set-117 FRONTIER_MON_TEDDIURSA is the lowest legal Level-50 carrier; all ten environment dispatches are pinned, and the indoor Factory battle room conclusively selects only BATTLE_ENVIRONMENT_BUILDING -> Move_STRENGTH",
         "the successful controller route is CONTROLLER_MOVEANIMATION -> DoMoveAnim(290) -> Move_SECRET_POWER -> AnimTask_GetBattleEnvironment -> Move_STRENGTH; accuracy miss, MOVE_RESULT_NO_EFFECT, and HITMARKER_NO_ANIMATIONS routes launch no move body, while the secondary effect is selected after the move animation",
-        "Move_STRENGTH independently requires IMPACT, ShakeAndSinkMon, SlideMonToOriginalPos, TranslateMonEllipticalRespectSide, three animation-1 hitsplats, ShakeMon2, monbg/alpha, four sound triggers, and cleanup; no implementation or dense both-orientation Scene-ON proof was attempted, so neither shared Slam code nor this checkpoint promotes Secret Power"
+        "Move_STRENGTH now has an honest source-relative reducer and complete legal portable evidence checkpoint: both orientations reproducibly span first-active frame 222 through first-inactive cleanup 323 (102 frames), with player evidence/raw 9d8f3ad7a472bdd940aa35a7aa7e9c62823d8d2b11c0114ce6d4b1f92aed73a3/af6ff533abeb22e9b2f45c09339dcb979ac8508501e64d6d012faa1eb91a2903 and opponent 8d6902b63b3dc96622261856cdb413c452d3c55140465a674d97aa51271a2172/f4c81b0de053a8703ed10238c70d6398693fc937c1ad2d088de451a097d6376a",
+        "the checkpoint reducer ports IMPACT load/free, ShakeAndSinkMon, SlideMonToOriginalPos, TranslateMonEllipticalRespectSide, three mirrored animation-1 hitsplat lifecycles, ShakeMon2, monbg/12:8 alpha, four sound triggers, waits, and cleanup; Secret Power deliberately remains unsupported because no typed seam or production shared-framebuffer compositor/102-frame acceptance is wired"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-slam-player-lickitung-opponent-onix.json",
@@ -2642,14 +2643,20 @@
         "tools/compare/slamEvidence.ts",
         "tools/compare/slamSourceAudit.ts",
         "tools/compare/secretPowerSourceAudit.ts",
+        "tools/battle-lab/mechanic-secret-power-player-teddiursa-opponent-onix.json",
+        "tools/battle-lab/mechanic-secret-power-opponent-teddiursa-player-onix.json",
+        "tools/compare/fixtures/secret-power-strength-player-teddiursa-opponent-onix.json",
+        "tools/compare/fixtures/secret-power-strength-opponent-teddiursa-player-onix.json",
         "tools/compare/extractSlamAssets.ts",
         "src/animation/assets/slam.json",
         "src/animation/slam.ts",
+        "src/animation/strength.ts",
         "src/animation/sceneOnPresentation.ts",
         "src/engine/battleScene.ts",
         "tests/animation/slam.test.ts",
         "tests/animation/slamEvidence.test.ts",
-        "tests/animation/secretPowerSourceAudit.test.ts"
+        "tests/animation/secretPowerSourceAudit.test.ts",
+        "tests/animation/strengthCheckpoint.test.ts"
       ]
     },
     {
