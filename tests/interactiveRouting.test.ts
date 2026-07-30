@@ -220,9 +220,10 @@ describe("interactive battle routing", () => {
     ]);
   });
 
-  it("keeps canonical as the default owner and installs its battle scene", () => {
+  it("uses the generated owner by default and keeps canonical explicit", () => {
+    expect(createInitialState().appRoute).toBe("generated-orchestrator");
     const before = atBattleHandoff(
-      {},
+      { appRoute: "canonical-recorded" },
       selectedIdsForSlots(4, 0, 2),
     );
     expect(before.appRoute).toBe("canonical-recorded");
@@ -230,6 +231,70 @@ describe("interactive battle routing", () => {
     expect(after.battleRoom).toBeNull();
     expect(after.battleScene).not.toBeNull();
     expect(after.factoryRoundBattleOrchestrator).toBeNull();
+  });
+
+  it("routes a different lead and decision from its own species, moves, and PP", () => {
+    let state = tick(
+      atBattleHandoff(
+        {},
+        selectedIdsForSlots(0, 2, 4),
+      ),
+      new Set(),
+    );
+    const start = state.factoryRoundBattleOrchestrator!;
+    expect(start.round.rules.playerRentalRecords![0]).toEqual(
+      state.draftScreen.rentals[0]!.source,
+    );
+    expect(start.battleStartIntro!.command.parties.player[0]).toMatchObject({
+      species: 95,
+      moves: [157, 20, 225, 201],
+      pp: [10, 20, 20, 10],
+    });
+    while (
+      factoryBattleStartIntroPhase(
+        state.factoryRoundBattleOrchestrator!.battleStartIntro!,
+      ) !== "awaiting-acknowledgement"
+    ) {
+      state = tick(state, new Set());
+    }
+    state = tick(state, new Set(["A"]));
+    while (state.factoryRoundBattleOrchestrator!.battleStartIntro !== null) {
+      state = tick(state, new Set());
+    }
+    while (
+      state.factoryRoundBattleOrchestrator!.battleCommandPresentation!
+        .lifecycle.phase !== "action-menu"
+    ) {
+      state = tick(state, new Set());
+    }
+    state = tick(state, new Set(["A"]));
+    const commandPhase = () =>
+      state.factoryRoundBattleOrchestrator!.battleCommandPresentation!
+        .lifecycle.phase;
+    while (
+      commandPhase() !== "fight-menu"
+    ) {
+      state = tick(state, new Set());
+    }
+    state = tick(state, new Set(["DOWN"]));
+    state = tick(state, new Set());
+    state = tick(state, new Set(["A"]));
+
+    const resolution =
+      state.factoryRoundBattleOrchestrator!.battleResolutionPresentation!;
+    expect(resolution.sourceDecision).toEqual({
+      kind: "use-move",
+      moveSlot: 2,
+      targetBattler: 1,
+    });
+    expect(resolution.field.player).toMatchObject({
+      name: "ONIX",
+      moveIds: [157, 20, 225, 201],
+      currentPP: [10, 20, 20, 10],
+    });
+    expect(
+      resolution.pendingBattle.rules.rulesContext.battlers[0].pp,
+    ).toEqual([10, 20, 19, 10]);
   });
 
   it("installs only the source-pinned generated owner with HAUNTER first", () => {

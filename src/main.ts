@@ -65,7 +65,8 @@ function loop(now: number): void {
 requestAnimationFrame(loop);
 
 // Deterministic test ABI, mirrored from the pewter demo: reset() rewinds to
-// the canonical start, advance() replays trace segments synchronously.
+// the real draft on the production generated route, advance() replays trace
+// segments synchronously.
 if (benchMode) {
   (window as unknown as Record<string, unknown>).__POKEBENCH__ = {
     reset(): void {

@@ -322,7 +322,7 @@ export interface EngineState {
    * injection. The canonical pixel path remains unwired and therefore null.
    */
   roundController: RoundControllerState | null;
-  /** Dev-probe staged battle port; null on the canonical production path. */
+  /** Dev-probe staged battle port; null on the ordinary production path. */
   stagedBattleTurn: StagedBattleTurnState | null;
   /** Dev-probe relative Battle Scene ON move presentation. */
   sceneOnPresentation: SceneOnMovePresentationState | null;
@@ -330,7 +330,7 @@ export interface EngineState {
   factorySwap: FactorySwapPresentationState | null;
   /** Source-relative Factory lobby terminal adapter for roundLost. */
   factoryTerminal: FactoryTerminalPresentationState | null;
-  /** App-visible generated battle-command route; dev staging may install it. */
+  /** App-visible generated battle-command route; production installs it after draft. */
   factoryRoundBattleOrchestrator: FactoryRoundBattleOrchestratorState | null;
 }
 
@@ -373,7 +373,7 @@ export function createInitialState(
 ): EngineState {
   return {
     frame: 0,
-    appRoute: options.appRoute ?? "canonical-recorded",
+    appRoute: options.appRoute ?? "generated-orchestrator",
     battle1OpponentConstructionRngValues: Object.freeze([]),
     draftScreen: createDraftScreenStateFromRentalRecords(ANCHOR_DRAFT_RENTAL_RECORDS),
     keyRepeat: INITIAL_KEY_REPEAT_STATE,
