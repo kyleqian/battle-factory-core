@@ -2,6 +2,27 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_BRICK_BREAK",
+      "status": "partial",
+      "remaining": "Port BrickBreakNormal and the Reflect-selected shattered-wall body through a source-relative reducer, typed Scene-ON seam, and live production compositor; then prove full dense production-framebuffer parity in both orientations. Crush Claw retains its independent lunge/ShakeMon2/four-claw-slash acceptance obligation.",
+      "covered": [
+        "evidence-only ANIM_TAG_TORN_METAL checkpoint: inventory ranks Brick Break's 46 Level-50 Factory carriers over Crush Claw's 11; set 131 FRONTIER_MON_LOMBRE is the lowest legal Level-50 carrier",
+        "complete legal Scene-ON Lombre/Onix parties stage the real target Reflect before Brick Break in both orientations, selecting the source's BrickBreakShatteredWall body without transient state injection",
+        "fresh dense source/hardware receipts cover frames 288-479 player-back and 289-480 opponent-front (192 each), twice, through first inactive cleanup: four TORN_METAL gBrickBreakWallShardSpriteTemplate lifecycles, wall/lunges/hitsplats/fist, WindUpLunge, palette/OAM/affine/register latches, target-panned three audio events, and cleanup",
+        "no reducer, typed Scene-ON seam, compositor, gameplay, or acceptance credit was added; BrickBreakNormal and live production behavior remain unported"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-brick-break-player-lombre-opponent-onix.json",
+        "tools/battle-lab/mechanic-brick-break-opponent-lombre-player-onix.json",
+        "tools/compare/fixtures/brick-break-player-lombre-opponent-onix.json",
+        "tools/compare/fixtures/brick-break-opponent-lombre-player-onix.json",
+        "tools/compare/brickBreakProbe.py",
+        "tools/compare/brickBreakPortableEvidence.ts",
+        "tools/compare/brickBreakSourceAudit.ts",
+        "tests/animation/brickBreakEvidence.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_ROLLING_KICK",
       "status": "exact",
       "covered": [
@@ -2896,7 +2917,7 @@
         "MOVE_BRICK_BREAK",
         "MOVE_CRUSH_CLAW"
       ],
-      "goal": "MOVE_REFLECT is exact at 208/208 frames 39-246 player-back and 211/211 frames 39-249 opponent-front twice fresh through software, typed seam, hardware display, audio, raw RGB, and shared framebuffer. BRICK BREAK remains unsupported because its normal and separate gBrickBreakWall/shard branch are distinct; CRUSH CLAW remains unsupported because it loads but never instantiates the wall and has lunge/shake/four claw-slash body."
+      "goal": "MOVE_REFLECT is exact at 208/208 frames 39-246 player-back and 211/211 frames 39-249 opponent-front twice fresh through software, typed seam, hardware display, audio, raw RGB, and shared framebuffer. BRICK BREAK is evidence-only partial: its Reflect-selected shattered-wall branch is dense-probed at 192 frames twice per orientation, but BrickBreakNormal and live production behavior are unported. CRUSH CLAW remains unsupported because it loads but never instantiates the wall and has a distinct lunge/ShakeMon2/four claw-slash body."
     },
     {
       "id": "shake-target-in-pattern-scary-face",
