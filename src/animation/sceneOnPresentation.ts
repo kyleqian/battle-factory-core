@@ -557,6 +557,7 @@ export interface SceneOnPresentationBattler {
     | "KOFFING"
     | "MAGNETON"
     | "MAGBY"
+    | "MAREEP"
     | "GROVYLE"
     | "PIDGEOTTO"
     | "MURKROW"
