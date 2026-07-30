@@ -31,7 +31,7 @@ import type { GbaButton } from "../src/input.ts";
 type Segment = [number, GbaButton | null];
 
 function replay(segments: Segment[]) {
-  let state = createInitialState();
+  let state = createInitialState({ appRoute: "canonical-recorded" });
   for (const [count, button] of segments) {
     for (let i = 0; i < count; i += 1) {
       state = tick(state, button ? new Set([button]) : new Set());
@@ -288,13 +288,19 @@ describe("battleRoom.ts: advanceBattleRoom - entering -> msgboxIdle -> msgboxClo
 
 describe("core.ts wiring: msgboxIdle's A-press gate (S6 slice 2c - the only input this window reads)", () => {
   it("ignores A everywhere except msgboxIdle - holding it through the whole print window causes no early close", () => {
-    let state: EngineState = { ...createInitialState(), battleRoom: { phase: "entering", elapsed: 0 } };
+    let state: EngineState = {
+      ...createInitialState({ appRoute: "canonical-recorded" }),
+      battleRoom: { phase: "entering", elapsed: 0 },
+    };
     for (let i = 0; i < MSGBOX_PRINT_COMPLETE_ELAPSED - 1; i += 1) state = tick(state, new Set(["A"]));
     expect(state.battleRoom).toEqual({ phase: "entering", elapsed: MSGBOX_PRINT_COMPLETE_ELAPSED - 1 });
   });
 
   it("starts the 4-tick close the exact tick A registers, once idle; vanishes after MSGBOX_CLOSE_TICKS and holds settled thereafter (reproduces battle1-intro.json's segment 29 press -> oracle tick 843, room-msgbox.json 142/142)", () => {
-    let state: EngineState = { ...createInitialState(), battleRoom: { phase: "msgboxIdle", elapsed: 0 } };
+    let state: EngineState = {
+      ...createInitialState({ appRoute: "canonical-recorded" }),
+      battleRoom: { phase: "msgboxIdle", elapsed: 0 },
+    };
     // No press yet - holds idle byte-identically.
     state = tick(state, new Set());
     expect(state.battleRoom).toEqual({ phase: "msgboxIdle", elapsed: 0 });

@@ -133,7 +133,7 @@ describe("battleMenu: FightSubmenuState open/close/display-lag", () => {
  * A synthetic EngineState with `battleScene` already in the settled action-menu idle window, `elapsed` chosen so the FIRST tick() call below lands on trace tick `firstTickAbsolute` (see the `+1` convention noted in core.ts's own fightSubmenu block). Other fields are inert pass-throughs for this branch of tick() (verified by reading core.ts: the battleScene branch returns early using only battleScene/keyRepeat) - EXCEPT `draftScreen`, which core.ts's `openFightSubmenu` call sites now read (S8 engine dependency, docs/battle-menu-notes.md §13c): `selectedIds: [1, 2, 3, 0, 0, 0]` reproduces the real anchor trace's own fully-confirmed ONIX/MAGBY/BAYLEEF pick order (the same shape `tests/confirmDecline.test.ts` pins for a real played-through draft screen), so `chosenMonSpecies` resolves to Onix's lead exactly as every committed trace's own real button script does.
  */
 function stateAtTick(firstTickAbsolute: number): EngineState {
-  const initial = createInitialState();
+  const initial = createInitialState({ appRoute: "canonical-recorded" });
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
@@ -147,7 +147,7 @@ function press(state: EngineState, buttons: GbaButton[]): EngineState {
 
 describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gating, 1-tick lag, B-close resume)", () => {
   it("completed forced SEND OUT resets the stale turn-15 choice and the next A opens ordinary FIGHT with MAGBY's real moveset", () => {
-    const initial = createInitialState();
+    const initial = createInitialState({ appRoute: "canonical-recorded" });
     const staleTurn15Choice = confirmFightMove(openFightSubmenu(19000, ONIX_MOVESET, 2), 19030);
     let state: EngineState = {
       ...initial,
@@ -188,7 +188,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
     const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn17-rung1.json", import.meta.url), "utf8")) as {
       segments: { frames: number; buttons?: GbaButton[] }[];
     };
-    let state = createInitialState();
+    let state = createInitialState({ appRoute: "canonical-recorded" });
     let frame = 0;
     let atOpen: EngineState | null = null;
     let atConfirm: EngineState | null = null;
@@ -407,7 +407,7 @@ const TURN2_PRESS_TICK = 2945;
 
 /** A synthetic EngineState already past turn 2's whole resolution (`turn1Resolved`+`turn2Resolved=false`, `fightSubmenu` confirmed on cursor 2 back at `TURN2_PRESS_TICK`) - the exact state `turn3-menu.json`'s own committed trace reaches at tick 3846, before its own fresh A-press reopens FIGHT for turn 3 (S7 slice F, docs/battle-turn-notes.md §13). */
 function stateAtTurn3Reopen(firstTickAbsolute: number): EngineState {
-  const initial = createInitialState();
+  const initial = createInitialState({ appRoute: "canonical-recorded" });
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
@@ -530,7 +530,7 @@ describe("battleMenu: turn kickoff text (S7 slice A, docs/battle-turn-notes.md �
 
 /** A synthetic EngineState at turn 3's own confirm (cursor 0, ROCK_SLIDE selected by the player, `turn2Resolved=true` - the state `turn3-menu.json`'s own committed trace reaches at tick 3891, right before its idle tail). */
 function stateAtTurn3Confirm(): EngineState {
-  const initial = createInitialState();
+  const initial = createInitialState({ appRoute: "canonical-recorded" });
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
@@ -563,7 +563,7 @@ describe("battleMenu: turn 3's ENDEAVOR resolution (S7 slice G, docs/battle-turn
     const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn3-menu.json", import.meta.url), "utf8")) as {
       segments: { frames: number; buttons?: GbaButton[] }[];
     };
-    let state = createInitialState();
+    let state = createInitialState({ appRoute: "canonical-recorded" });
     for (const seg of trace.segments) {
       for (let i = 0; i < seg.frames; i += 1) state = press(state, seg.buttons ?? []);
     }
@@ -637,7 +637,7 @@ describe("battleMenu/battleScene: turn 4's FIGHT-submenu reopen (S7 slice I, doc
     const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn4-menu.json", import.meta.url), "utf8")) as {
       segments: { frames: number; buttons?: GbaButton[] }[];
     };
-    let state = createInitialState();
+    let state = createInitialState({ appRoute: "canonical-recorded" });
     for (const seg of trace.segments) {
       for (let i = 0; i < seg.frames; i += 1) state = press(state, seg.buttons ?? []);
     }
@@ -682,7 +682,7 @@ describe("battleMenu/battleScene: turn 4's FIGHT-submenu reopen (S7 slice I, doc
       segments: { frames: number; buttons?: GbaButton[] }[];
     };
     function replay(): EngineState {
-      let state = createInitialState();
+      let state = createInitialState({ appRoute: "canonical-recorded" });
       for (const seg of trace.segments) {
         for (let i = 0; i < seg.frames; i += 1) state = press(state, seg.buttons ?? []);
       }
@@ -693,7 +693,7 @@ describe("battleMenu/battleScene: turn 4's FIGHT-submenu reopen (S7 slice I, doc
 });
 
 function stateAtTurn4Confirm(): EngineState {
-  const initial = createInitialState();
+  const initial = createInitialState({ appRoute: "canonical-recorded" });
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
@@ -723,7 +723,7 @@ function stateAtTurn4Confirm(): EngineState {
 }
 
 function stateAtTurn5Confirm(): EngineState {
-  const initial = createInitialState();
+  const initial = createInitialState({ appRoute: "canonical-recorded" });
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
@@ -757,7 +757,7 @@ describe("battleMenu/battleScene: turn 5's FIGHT-submenu reopen (S7 slice J, doc
     const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn5-menu.json", import.meta.url), "utf8")) as {
       segments: { frames: number; buttons?: GbaButton[] }[];
     };
-    let state = createInitialState();
+    let state = createInitialState({ appRoute: "canonical-recorded" });
     for (const seg of trace.segments) {
       for (let i = 0; i < seg.frames; i += 1) state = press(state, seg.buttons ?? []);
     }
@@ -793,7 +793,7 @@ describe("battleMenu/battleScene: turn 5's FIGHT-submenu reopen (S7 slice J, doc
       segments: { frames: number; buttons?: GbaButton[] }[];
     };
     function replay(): EngineState {
-      let state = createInitialState();
+      let state = createInitialState({ appRoute: "canonical-recorded" });
       for (const seg of trace.segments) {
         for (let i = 0; i < seg.frames; i += 1) state = press(state, seg.buttons ?? []);
       }
@@ -814,7 +814,7 @@ describe("battleMenu/battleScene: turn 5's FIGHT-submenu reopen (S7 slice J, doc
 });
 
 function stateAtTurn5SitrusConfirm(): EngineState {
-  const initial = createInitialState();
+  const initial = createInitialState({ appRoute: "canonical-recorded" });
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
@@ -848,7 +848,7 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
     const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn6-menu.json", import.meta.url), "utf8")) as {
       segments: { frames: number; buttons?: GbaButton[] }[];
     };
-    let state = createInitialState();
+    let state = createInitialState({ appRoute: "canonical-recorded" });
     for (const seg of trace.segments) {
       for (let i = 0; i < seg.frames; i += 1) state = press(state, seg.buttons ?? []);
     }
@@ -902,7 +902,7 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
       segments: { frames: number; buttons?: GbaButton[] }[];
     };
     function replay(): EngineState {
-      let state = createInitialState();
+      let state = createInitialState({ appRoute: "canonical-recorded" });
       for (const seg of trace.segments) {
         for (let i = 0; i < seg.frames; i += 1) state = press(state, seg.buttons ?? []);
       }

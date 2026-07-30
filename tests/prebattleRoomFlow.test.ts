@@ -26,7 +26,7 @@ import type { GbaButton } from "../src/input.ts";
 type Segment = [number, GbaButton | null];
 
 function replay(segments: Segment[]) {
-  let state = createInitialState();
+  let state = createInitialState({ appRoute: "canonical-recorded" });
   for (const [count, button] of segments) {
     for (let i = 0; i < count; i += 1) {
       state = tick(state, button ? new Set([button]) : new Set());
@@ -335,7 +335,7 @@ describe("ISSUES #14: accept-path closing window/flash table reads one tick earl
 
 describe("core.ts wiring: RNG continuity through the exit sequence (ROADMAP S6 correction note)", () => {
   it("advances exactly one LCG step per tick throughout the whole accept-prebattle.json window (no gaps, no double-steps)", () => {
-    let state = createInitialState();
+    let state = createInitialState({ appRoute: "canonical-recorded" });
     let prevRng = state.rngValue;
     for (const [count, button] of THROUGH_YES) {
       for (let i = 0; i < count; i += 1) {
