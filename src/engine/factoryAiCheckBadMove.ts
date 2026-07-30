@@ -970,6 +970,25 @@ export function runCheckBadMovePreamble(input: Readonly<{
   reachedCheckEffect = true;
   void reachedCheckEffect;
 
+  // Counter dispatches to the shared AI_CBM_HighRiskForDamage body
+  // (`data/battle_ai_scripts.s:156,368-376`, doc §34).
+  if (move.effect === "EFFECT_COUNTER") {
+    const highRisk = runCbmHighRiskForDamage(
+      move.type,
+      target,
+      rng,
+      ordinal,
+      `${input.reasonPrefix}-high-risk`,
+    );
+    for (const draw of highRisk.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: highRisk.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: highRisk.scoreDelta,
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: EFFECT_SPEED_DOWN(_2) -> AI_CBM_SpeedDown,
   // one of the two handlers this port implements out of the table's ~100 entries.
   if (move.effect === "EFFECT_SPEED_DOWN" || move.effect === "EFFECT_SPEED_DOWN_2") {
@@ -1331,6 +1350,38 @@ export function runCheckBadMovePreamble(input: Readonly<{
  */
 function runCbmSpDefUp(attackerSpDefStage: number): number {
   return attackerSpDefStage === MAX_STAT_STAGE ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_HighRiskForDamage` (`data/battle_ai_scripts.s:368-376`), reached
+ * by Counter at dispatch line 156. Its target ability read is fresh even
+ * though the universal Soundproof prologue already read the same target.
+ */
+function runCbmHighRiskForDamage(
+  moveType: string,
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckBadMoveDraw[];
+  scoreDelta: number;
+}> {
+  const effectivenessTenths = typeMultiplierTenths(moveType, target.types);
+  if (effectivenessTenths === 0) {
+    return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
+  }
+  const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
+  const draws = ability.draw === null ? [] : [ability.draw];
+  return Object.freeze({
+    rng: ability.rng,
+    draws: Object.freeze(draws),
+    scoreDelta: ability.ability === "ABILITY_WONDER_GUARD"
+      && effectivenessTenths !== 20
+      ? -10
+      : 0,
+  });
 }
 
 export type FactoryAiCheckBadMoveRoarTarget = FactoryAiCheckBadMoveTarget & Readonly<{

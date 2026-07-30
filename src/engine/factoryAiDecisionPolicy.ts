@@ -504,6 +504,10 @@ export type FactoryAiScoredBattlerView = Readonly<{
   hasAnyStatus?: boolean;
   /** `gBattleMons[].status2 & STATUS2_CONFUSION` -- source-required for `AI_CBM_Confuse`'s first gate (target only, doc §32). Optional, defaulting to `false`. */
   isConfused?: boolean;
+  /** `gBattleMons[].status1 & STATUS1_SLEEP`, read by AI_CV_Counter. */
+  isAsleep?: boolean;
+  /** `gDisableStructs[].tauntTimer != 0`, read by AI_CV_Counter. */
+  isTaunted?: boolean;
   /** `gStatuses3[] & STATUS3_LEECHSEED` -- source-required for `AI_CV_AccuracyDown`'s Gate E (target only, doc §19.1). Optional, defaulting to `false`. */
   isLeechSeeded?: boolean;
   /** STATUS2_INFATUATION, read by AI_CV_Protect. */
@@ -961,6 +965,9 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           isLeechSeeded: view.target.isLeechSeeded,
           isCursed: view.target.isCursed,
           isInfatuated: view.target.isInfatuated,
+          isAsleep: view.target.isAsleep,
+          isConfused: view.target.isConfused,
+          isTaunted: view.target.isTaunted,
           hasYawn: view.target.hasYawn,
           hasPerishSong: view.target.hasPerishSong,
           knownMoves: view.target.knownMoveIds,

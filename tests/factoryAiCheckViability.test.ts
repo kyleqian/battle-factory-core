@@ -30,6 +30,161 @@ const NEUTRAL_BATTLER = Object.freeze({
   moves: [MOVE_SURF, MOVE_ROCK_SLIDE, MOVE_BODY_SLAM, MOVE_THUNDERBOLT] as const,
 });
 
+describe("AI_CV_Counter (docs/factory-ai-checkviability-ground-truth.md §34)", () => {
+  const MOVE_COUNTER = 68;
+  const MOVE_MIRROR_COAT = 243;
+  const MOVE_TACKLE = 33; // nonzero-power physical
+  const MOVE_WATER_GUN = 55; // nonzero-power special
+
+  function counterRun(
+    rngValue: number,
+    attackerOverrides: Record<string, unknown> = {},
+    targetOverrides: Record<string, unknown> = {},
+  ) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_COUNTER,
+      attacker: {
+        ...NEUTRAL_BATTLER,
+        moves: [MOVE_COUNTER, 150, 150, 150] as const,
+        ...attackerOverrides,
+      },
+      target: {
+        ...NEUTRAL_BATTLER,
+        types: ["TYPE_WATER", "TYPE_WATER"] as const,
+        lastUsedMoveId: MOVE_TACKLE,
+        ...targetOverrides,
+      },
+      staleFuncResultFallback: 3,
+      drawOrdinalStart: 1,
+      reasonPrefix: "counter",
+    });
+  }
+
+  it.each([
+    ["sleep", { isAsleep: true }],
+    ["infatuation", { isInfatuated: true }],
+    ["confusion", { isConfused: true }],
+  ])("%s gate JUMPs immediately to ScoreDown1", (_label, targetOverrides) => {
+    expect(counterRun(1, {}, targetOverrides)).toMatchObject({
+      kind: "scored",
+      scoreDelta: -1,
+      draws: [],
+      funcResultAfter: 3,
+    });
+  });
+
+  it("HP >30 and >50 JUMP over both HP rolls", () => {
+    const result = counterRun(1, { hp: 100, maxHp: 100 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.kind)).toEqual(["counter-physical-roll"]);
+  });
+
+  it("HP <=30 FALLS THROUGH to both HP rolls, driving each random JUMP polarity", () => {
+    const jumped = counterRun(31, { hp: 30, maxHp: 100 });
+    if (jumped.kind !== "scored") throw new Error("unreachable");
+    expect(jumped.draws.slice(0, 2).map((draw) => draw.kind)).toEqual([
+      "counter-low-hp-roll",
+      "counter-mid-hp-roll",
+    ]);
+    expect(jumped.draws[0]).toMatchObject({ jumped: true });
+
+    const fellThrough = counterRun(1, { hp: 30, maxHp: 100 });
+    if (fellThrough.kind !== "scored") throw new Error("unreachable");
+    expect(fellThrough.draws[0]).toMatchObject({ jumped: false });
+  });
+
+  it("HP in (30,50] skips the first HP roll and FALLS THROUGH to the second", () => {
+    const jumped = counterRun(3, { hp: 40, maxHp: 100 });
+    const fellThrough = counterRun(1, { hp: 40, maxHp: 100 });
+    if (jumped.kind !== "scored" || fellThrough.kind !== "scored") throw new Error("unreachable");
+    expect(jumped.draws[0]).toMatchObject({ kind: "counter-mid-hp-roll", jumped: true });
+    expect(fellThrough.draws[0]).toMatchObject({ kind: "counter-mid-hp-roll", jumped: false });
+  });
+
+  it("Mirror Coat present JUMPs over last-move/taunt/type gates into the bonus roll", () => {
+    const result = counterRun(1, {
+      moves: [MOVE_COUNTER, MOVE_MIRROR_COAT, 150, 150],
+    }, {
+      isTaunted: true,
+      lastUsedMoveId: MOVE_WATER_GUN,
+    });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.kind)).toEqual(["counter-bonus-roll"]);
+    expect(result).toMatchObject({ scoreDelta: 4, funcResultAfter: 3 });
+    expect(counterRun(3, {
+      moves: [MOVE_COUNTER, MOVE_MIRROR_COAT, 150, 150],
+    })).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("nonzero-power physical last move FALLS THROUGH the type gate and drives both roll polarities", () => {
+    const jumped = counterRun(3);
+    const fellThrough = counterRun(1);
+    expect(jumped).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    expect(fellThrough).toMatchObject({ kind: "scored", scoreDelta: 1 });
+    if (jumped.kind !== "scored" || fellThrough.kind !== "scored") throw new Error("unreachable");
+    expect(jumped.draws[0]).toMatchObject({ kind: "counter-physical-roll", jumped: true });
+    expect(fellThrough.draws[0]).toMatchObject({ kind: "counter-physical-roll", jumped: false });
+  });
+
+  it("nonzero-power special last move JUMPs to ScoreDown1 without a type-tail draw", () => {
+    expect(counterRun(1, {}, { lastUsedMoveId: MOVE_WATER_GUN })).toMatchObject({
+      kind: "scored",
+      scoreDelta: -1,
+      draws: [],
+    });
+  });
+
+  it("Taunt FALLTHROUGH drives its roll; not-taunted JUMPs over it", () => {
+    const taunted = counterRun(1, {}, { isTaunted: true });
+    const clear = counterRun(1);
+    if (taunted.kind !== "scored" || clear.kind !== "scored") throw new Error("unreachable");
+    expect(taunted.draws.map((draw) => draw.kind)).toEqual([
+      "counter-taunt-roll",
+      "counter-physical-roll",
+    ]);
+    expect(clear.draws.map((draw) => draw.kind)).toEqual(["counter-physical-roll"]);
+    const tauntJump = counterRun(3, {}, { isTaunted: true });
+    if (tauntJump.kind !== "scored") throw new Error("unreachable");
+    expect(tauntJump.draws[0]).toMatchObject({ kind: "counter-taunt-roll", jumped: true });
+  });
+
+  it("zero-power path preserves Emerald's non-BUGFIX physical-type JUMPs", () => {
+    const type1 = counterRun(1, {}, {
+      lastUsedMoveId: 0,
+      types: ["TYPE_NORMAL", "TYPE_WATER"],
+    });
+    const type2 = counterRun(1, {}, {
+      lastUsedMoveId: 0,
+      types: ["TYPE_WATER", "TYPE_STEEL"],
+    });
+    expect(type1).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [], funcResultAfter: 0 });
+    expect(type2).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [], funcResultAfter: undefined });
+  });
+
+  it("zero-power, both-special path drives target-type and bonus roll JUMP/FALLTHROUGH", () => {
+    const targetJump = counterRun(31, {}, { lastUsedMoveId: 0 });
+    if (targetJump.kind !== "scored") throw new Error("unreachable");
+    expect(targetJump.draws).toHaveLength(1);
+    expect(targetJump.draws[0]).toMatchObject({ kind: "counter-target-type-roll", jumped: true });
+
+    const fallthrough = counterRun(8, {}, { lastUsedMoveId: 0 });
+    if (fallthrough.kind !== "scored") throw new Error("unreachable");
+    expect(fallthrough.draws.map((draw) => draw.kind)).toEqual([
+      "counter-target-type-roll",
+      "counter-bonus-roll",
+    ]);
+    expect(fallthrough.draws[0]).toMatchObject({ jumped: false });
+  });
+
+  it("leaves Haze behind the same generic CV barrier", () => {
+    expect(run({ value: 1, calls: 0 }, MOVE_HAZE)).toMatchObject({
+      kind: "unsupported-branch",
+      barrier: "factory-ai-check-viability",
+    });
+  });
+});
+
 function run(rng: { value: number; calls: number }, moveId: number) {
   return runCheckViability({
     rng,

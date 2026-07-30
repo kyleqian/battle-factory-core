@@ -333,6 +333,12 @@ export type FactoryAiCheckViabilityBattler = Readonly<{
   knownMoves?: readonly number[];
   /** STATUS2_INFATUATION. */
   isInfatuated?: boolean;
+  /** STATUS1_SLEEP, read by AI_CV_Counter's first gate. */
+  isAsleep?: boolean;
+  /** STATUS2_CONFUSION, read by AI_CV_Counter's third gate. */
+  isConfused?: boolean;
+  /** DisableStruct::tauntTimer != 0, read by AI_CV_Counter. */
+  isTaunted?: boolean;
   /** STATUS3_YAWN. */
   hasYawn?: boolean;
   /** STATUS3_PERISH_SONG. */
@@ -404,6 +410,22 @@ export type FactoryAiCheckViabilityDraw =
     rawRngValue: number;
     randomValue: number;
     succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind:
+      | "counter-low-hp-roll"
+      | "counter-mid-hp-roll"
+      | "counter-taunt-roll"
+      | "counter-physical-roll"
+      | "counter-target-type-roll"
+      | "counter-bonus-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    jumped: boolean;
   }>
   | Readonly<{
     ordinal: number;
@@ -3497,6 +3519,24 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
+  if (move.effect === "EFFECT_COUNTER") {
+    const counter = runCvCounter({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      funcResultCarry,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: counter.rng,
+      draws: counter.draws,
+      scoreDelta: counter.scoreDelta,
+      funcResultAfter: counter.funcResultAfter,
+    });
+  }
+
   if (AI_CHECK_VIABILITY_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
       kind: "unsupported-branch",
@@ -3758,5 +3798,111 @@ function runCvSwagger(input: Readonly<{
     ]),
     scoreDelta: (jumped ? 0 : 1) + confuse.scoreDelta,
     funcResultAfter: input.funcResultCarry,
+  });
+}
+
+/**
+ * `AI_CV_Counter` (`data/battle_ai_scripts.s:1618-1685`, doc §34),
+ * including Emerald's non-BUGFIX target-type polarity at lines 1657-1661.
+ */
+function runCvCounter(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  funcResultCarry: AiWeatherValue | undefined;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckViabilityDraw[];
+  scoreDelta: number;
+  funcResultAfter: AiWeatherValue | undefined;
+}> {
+  const physicalTypes = new Set([
+    "TYPE_NORMAL", "TYPE_FIGHTING", "TYPE_FLYING", "TYPE_POISON",
+    "TYPE_GROUND", "TYPE_ROCK", "TYPE_BUG", "TYPE_GHOST", "TYPE_STEEL",
+  ]);
+  if (
+    (input.target.isAsleep ?? false)
+    || (input.target.isInfatuated ?? false)
+    || (input.target.isConfused ?? false)
+  ) {
+    return Object.freeze({
+      rng: input.rng,
+      draws: Object.freeze([]),
+      scoreDelta: -1,
+      funcResultAfter: input.funcResultCarry,
+    });
+  }
+
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+  let score = 0;
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  const roll = (
+    kind: Extract<FactoryAiCheckViabilityDraw, { kind: `counter-${string}` }>["kind"],
+    threshold: number,
+  ): boolean => {
+    const draw = nextDraw(rng, ordinal, `${input.reasonPrefix}-${kind}`);
+    rng = draw.after;
+    ordinal += 1;
+    const jumped = draw.randomValue % 256 < threshold;
+    draws.push(Object.freeze({ ...draw, kind, jumped }));
+    return jumped;
+  };
+
+  const attackerHpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+  if (attackerHpPercent <= 30 && !roll("counter-low-hp-roll", 10)) score -= 1;
+  if (attackerHpPercent <= 50 && !roll("counter-mid-hp-roll", 100)) score -= 1;
+
+  if ((input.attacker.moves ?? [0, 0, 0, 0]).includes(243)) {
+    if (!roll("counter-bonus-roll", 100)) score += 4;
+    return Object.freeze({
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: score,
+      funcResultAfter: input.funcResultCarry,
+    });
+  }
+
+  const lastMove = MOVES_BY_ID.get(input.target.lastUsedMoveId ?? 0);
+  const lastPower = lastMove?.power ?? 0;
+  if (lastPower !== 0) {
+    if ((input.target.isTaunted ?? false) && !roll("counter-taunt-roll", 100)) score += 1;
+    const lastType = lastMove?.type ?? "TYPE_NORMAL";
+    const funcResultAfter = typeFuncResultCollision(lastType);
+    if (!physicalTypes.has(lastType)) {
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score - 1, funcResultAfter });
+    }
+    if (!roll("counter-physical-roll", 100)) score += 1;
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
+  }
+
+  if ((input.target.isTaunted ?? false) && !roll("counter-taunt-roll", 100)) score += 1;
+  const [type1, type2] = input.target.types;
+  if (physicalTypes.has(type1)) {
+    return Object.freeze({
+      rng, draws: Object.freeze(draws), scoreDelta: score,
+      funcResultAfter: typeFuncResultCollision(type1),
+    });
+  }
+  if (physicalTypes.has(type2)) {
+    return Object.freeze({
+      rng, draws: Object.freeze(draws), scoreDelta: score,
+      funcResultAfter: typeFuncResultCollision(type2),
+    });
+  }
+  if (roll("counter-target-type-roll", 50)) {
+    return Object.freeze({
+      rng, draws: Object.freeze(draws), scoreDelta: score,
+      funcResultAfter: typeFuncResultCollision(type2),
+    });
+  }
+  if (!roll("counter-bonus-roll", 100)) score += 4;
+  return Object.freeze({
+    rng,
+    draws: Object.freeze(draws),
+    scoreDelta: score,
+    funcResultAfter: typeFuncResultCollision(type2),
   });
 }

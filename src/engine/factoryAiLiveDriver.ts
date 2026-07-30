@@ -29,6 +29,7 @@ import {
   type BattleState,
 } from "./battleDecisionBoundary.ts";
 import {
+  BATTLE_SCRIPT_STATUS1_SLEEP,
   BATTLE_SCRIPT_STATUS1_TOXIC_POISON,
   BATTLE_SCRIPT_STATUS2_MASKS,
   BATTLE_SCRIPT_STATUS3_LEECHSEED,
@@ -332,12 +333,19 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       maxHp: target.maxHP,
       lastUsedMoveId: input.rulesContext.moveHistory.lastMoves[0],
       ...(target.status1 !== 0 ? { hasAnyStatus: true } : {}),
+      ...((target.status1 & BATTLE_SCRIPT_STATUS1_SLEEP) !== 0
+        ? { isAsleep: true }
+        : {}),
       isToxicPoisoned:
         (target.status1 & BATTLE_SCRIPT_STATUS1_TOXIC_POISON) !== 0,
       isLeechSeeded:
         (target.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED) !== 0,
       isCursed:
         (target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CURSED) !== 0,
+      ...((target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION) !== 0
+        ? { isConfused: true }
+        : {}),
+      ...(target.tauntTimer !== 0 ? { isTaunted: true } : {}),
       ...((target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION) !== 0
         ? { isInfatuated: true }
         : {}),
