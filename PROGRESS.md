@@ -13,6 +13,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 737 — [BOUNDED MAIN WORKER 2026-07-30 ~12:38] #53 routing Slice 1 complete
+
+- **State:** explicit route seam and draft-source adapter landed in
+  `8dd8ebcf`; route-tagged regression traces landed in `9bc0b39a`. Focused
+  acceptance is **4 files / 38 tests**; full gate green at **546 files /
+  5482 tests + 1 deliberate animation-lane skip**, production build clean.
+- **Did:** added immutable generated/canonical route ownership at the sole
+  battle-room handoff; the pure adapter returns exact compact rental sources
+  by one-based pick rank (including HAUNTER-first and a second order). Default
+  remains canonical; generated tests inject a session factory. `Trace.appRoute`
+  is stripped before both oracle paths; tagged all 25 immutable rows, the
+  historical Battle 1/2 intro chain, and generated command evidence.
+- **Next:** issue design Slice 2: source-/oracle-pin the anchor facility and
+  RNG epochs, then replace the temporary injected generated-session factory.
+- **Notes:** all **25/25** immutable rows retain their exact table counts;
+  generated command remains **128/128**. No capture/segment/profile, recording
+  import, barrier/ratchet pin, renderer/rules/AI/per-turn route branch,
+  production-default, issue, docs-design, or Gate-6 change. PAPERCUT: none.
+
+---
 ## 736 — [BOUNDED MAIN WORKER 2026-07-30 ~12:28] #53 interactive routing-flip design complete
 
 - **State:** design-only step complete; full gate green at **545 files /
