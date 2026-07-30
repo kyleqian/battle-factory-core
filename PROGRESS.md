@@ -13,6 +13,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 736 — [BOUNDED MAIN WORKER 2026-07-30 ~12:28] #53 interactive routing-flip design complete
+
+- **State:** design-only step complete; full gate green at **545 files /
+  5478 tests + 1 deliberate animation-lane skip**, production build clean.
+  No source, test, trace, issue, or Gate-6 file changed.
+- **Did:** authored `docs/interactive-routing-flip-design.md`: traced the live
+  draft → recorded-battle railroad, exact draft/RNG inputs, and generated
+  intro/command/round ownership; fixed the route rule as generated for normal
+  play and canonical only by explicit compare/test injection; specified seven
+  bounded implementation slices and a final HAUNTER/SHADOW PUNCH user proof.
+- **Next:** issue Slice 1 verbatim: add the explicit route discriminator and
+  rank-ordered draft adapter, isolate `Trace.appRoute` from the oracle, mark
+  immutable traces, and deliberately leave production default canonical.
+- **Notes:** preservation is explicit for all 25 immutable rows, generated
+  command **128/128**, and intro **714/715** with only B+444 outstanding. No
+  oracle run, recording import, barrier/ratchet-pin change, tick branch, or
+  capture fitting/thinning. PAPERCUT: none.
+
+---
 ## 735 — [SUPERVISOR 2026-07-30 ~12:10] Session open: animation-main folded (+7, Present/Roar exact); lanes on #53 routing-flip design + Gate-6 remainder
 
 - **State:** master fast-forwarded to `1f31e2af` (fold of
@@ -68,26 +87,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no deferred questions. Papercuts banked: audit-switchin
   stat-label, battle-lab A-edge pulses, vitest freeze-typing. Next
   session resumes from this entry alone.
-
----
-## 733 — [BOUNDED MAIN WORKER 2026-07-30 ~02:45] Intro Slice 4 complete; player release 249/249
-
-- **State:** implementation `659392a6` + compatibility fix `f9af408a`;
-  focused acceptance **2 files / 124 tests** plus ratchet **6/6**. Fresh
-  private Scene-OFF pre-reset probe matches **249/249** player-release frames
-  B+466..+714; whole B+0..+714 is **714/715**, solely the recorded Slice-3
-  B+444 10px summary-slot residual. Full gate green at **531 files / 5433
-  tests + 1 deliberate animation-lane skip / 514 modules**.
-- **Did:** the typed lifecycle now covers generated player text, source-arc
-  trainer throw/release at species y-offset, materialization, healthbox,
-  Scene-OFF neutral OAM settle, and readiness/message-clear. Player-ready
-  converts to the exact shared settled `action-menu` typed state used by the
-  generated command window.
-- **Next:** #53's separately designed interactive `core.ts` routing flip is
-  the next main-lane step; do not fold it into this intro slice.
-- **Notes:** all **25/25** immutable rows and generated command **128/128**
-  remain exact. Probe regenerated through `tools/run-mgba-probe.py`; no
-  public trace committed. No import/barrier/ratchet pin, core routing,
-  battle/turn/absolute-tick branch, capture fitting/thinning, or Gate-6 file.
-  PAPERCUT: none.
-

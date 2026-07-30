@@ -1,3 +1,25 @@
+## 733 — [BOUNDED MAIN WORKER 2026-07-30 ~02:45] Intro Slice 4 complete; player release 249/249
+
+- **State:** implementation `659392a6` + compatibility fix `f9af408a`;
+  focused acceptance **2 files / 124 tests** plus ratchet **6/6**. Fresh
+  private Scene-OFF pre-reset probe matches **249/249** player-release frames
+  B+466..+714; whole B+0..+714 is **714/715**, solely the recorded Slice-3
+  B+444 10px summary-slot residual. Full gate green at **531 files / 5433
+  tests + 1 deliberate animation-lane skip / 514 modules**.
+- **Did:** the typed lifecycle now covers generated player text, source-arc
+  trainer throw/release at species y-offset, materialization, healthbox,
+  Scene-OFF neutral OAM settle, and readiness/message-clear. Player-ready
+  converts to the exact shared settled `action-menu` typed state used by the
+  generated command window.
+- **Next:** #53's separately designed interactive `core.ts` routing flip is
+  the next main-lane step; do not fold it into this intro slice.
+- **Notes:** all **25/25** immutable rows and generated command **128/128**
+  remain exact. Probe regenerated through `tools/run-mgba-probe.py`; no
+  public trace committed. No import/barrier/ratchet pin, core routing,
+  battle/turn/absolute-tick branch, capture fitting/thinning, or Gate-6 file.
+  PAPERCUT: none.
+
+---
 ## 732 — [BOUNDED MAIN WORKER 2026-07-30 ~01:48] Intro Slice 3 landed; opponent release 93/94
 
 - **State:** implementation `42c559dd`; focused acceptance **2 files / 4
