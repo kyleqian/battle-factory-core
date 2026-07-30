@@ -305,15 +305,11 @@ describe("battle resolution presentation receipt ownership", () => {
       fromPartyIndex: 0,
       toPartyIndex: 1,
     });
-    const marker = Object.freeze({
-      sequence: 1,
-      payload: Object.freeze({
-        kind: "switch-in-animation",
-        battler: 0,
-        partyIndex: 1,
-      }),
-      provenance: PROVENANCE,
-    }) as unknown as BattleKernelSemanticEvent;
+    const marker = event(1, {
+      kind: "switch-in-animation",
+      battler: 0,
+      partyIndex: 1,
+    });
     const resolution = createBattleResolutionPresentation(
       inputFor([switchEvent, marker], NEXT_COMMAND, afterRules),
     );

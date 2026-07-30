@@ -208,6 +208,12 @@ export type BattleScriptSemanticEventPayload =
     toPartyIndex: number;
   }>
   | Readonly<{
+    /** BtlController_EmitSwitchInAnim from Cmd_switchinanim. */
+    kind: "switch-in-animation";
+    battler: BattleScriptBattlerId;
+    partyIndex: number;
+  }>
+  | Readonly<{
     kind: "outcome";
     outcome: "player-win" | "opponent-win" | "draw";
   }>;

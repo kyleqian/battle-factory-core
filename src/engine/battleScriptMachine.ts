@@ -712,6 +712,7 @@ function freezeEventPayload(
     case "status-change":
     case "stat-stage-change":
     case "switch":
+    case "switch-in-animation":
     case "outcome":
       return Object.freeze({ ...payload });
   }

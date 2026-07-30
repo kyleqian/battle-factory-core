@@ -168,14 +168,6 @@ const STATUS_TIMING = Object.freeze({ minimumFrames: 32 } as const);
 const SWITCH_IN_TIMING = Object.freeze({ minimumFrames: 1 } as const);
 const TURN_END_TIMING = Object.freeze({ minimumFrames: 8 } as const);
 
-type ResolutionEventPayload =
-  | BattleScriptSemanticEventPayload
-  | Readonly<{
-      kind: "switch-in-animation";
-      battler: 0 | 1;
-      partyIndex: BattlePartyIndex;
-    }>;
-
 function singlesBattler(battler: number, context: string): 0 | 1 {
   if (battler === 0 || battler === 1) return battler;
   throw new Error(`${context} cannot present non-singles battler ${battler}`);
@@ -342,7 +334,7 @@ export function projectBattleResolutionCommands(
       );
     }
     lastSequence = event.sequence;
-    const payload = event.payload as ResolutionEventPayload;
+    const payload = event.payload;
     if (payload.kind === "message") {
       sourceLabelOf(event);
       commands.push(Object.freeze({

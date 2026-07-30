@@ -750,6 +750,12 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(result.state.programCounter).toBe(SWITCHINANIM_PC + 1);
     expect(result.state.rulesContext.absentBattlerFlags).toBe(0b01);
     expect(result.state.scheduler.pendingControllerBattlers).toEqual([1]);
+    expect(result.state.events).toHaveLength(1);
+    expect(result.state.events[0]).toMatchObject({
+      kind: "switch-in-animation",
+      battler: 1,
+      partyIndex: 0,
+    });
   });
 
   it("switchinanim: BATTLE_TYPE_ARENA is a named barrier (BattleArena_InitPoints not modeled)", () => {

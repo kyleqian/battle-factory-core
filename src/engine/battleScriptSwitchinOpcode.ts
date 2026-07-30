@@ -639,7 +639,15 @@ function createSwitchinanimOpcodeHandler(
     return transitionBattleScriptCommand(
       context,
       Object.freeze({ kind: "advance" }),
-      { rulesContext: Object.freeze({ ...rules, absentBattlerFlags }), scheduler },
+      {
+        rulesContext: Object.freeze({ ...rules, absentBattlerFlags }),
+        scheduler,
+        events: Object.freeze([Object.freeze({
+          kind: "switch-in-animation" as const,
+          battler: battler as 0 | 1 | 2 | 3,
+          partyIndex: rules.battlers[battler as 0 | 1 | 2 | 3].partyIndex,
+        })]),
+      },
     );
   };
 }
