@@ -515,3 +515,15 @@ Per entry:
 - **Cost each:** ~1 min.
 - **Workaround:** point probe outputs at scratch space and copy only the
   JSON into the repo; or teach the wrapper a `--log-dir`.
+
+## mechanicLab species field takes internal IDs; a National Dex ID stages the wrong mon silently
+
+- **What:** `overrides.parties` species is the internal species ID; passing
+  a National Dex number (280 for RALTS) staged TORCHIC without any
+  validation error, and only a snapshot RAM diff surfaced it.
+- **Hits:** 1 (2026-07-29, Synchronize-reveal worker; correct internal ID
+  was 392).
+- **Cost each:** ~6 min.
+- **Workaround:** always derive species from the extracted internal-ID
+  tables (or rental set IDs); a lab-side name/ID sanity echo would be the
+  real fix (harness-side).
