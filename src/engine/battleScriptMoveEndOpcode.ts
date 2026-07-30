@@ -182,56 +182,20 @@ function immunityAbilityCure(
 }
 
 /** include/constants/hold_effects.h -- ItemBattleEffects' ITEMEFFECT_MOVE_END case (battle_util.c:3625-3767). */
-const ITEM_MOVE_END_HOLD_EFFECTS: ReadonlySet<number> = new Set([
-  2, // HOLD_EFFECT_CURE_PAR
-  3, // HOLD_EFFECT_CURE_SLP
-  4, // HOLD_EFFECT_CURE_PSN
-  5, // HOLD_EFFECT_CURE_BRN
-  6, // HOLD_EFFECT_CURE_FRZ
-  8, // HOLD_EFFECT_CURE_CONFUSION
-  9, // HOLD_EFFECT_CURE_STATUS
-  23, // HOLD_EFFECT_RESTORE_STATS
-  28, // HOLD_EFFECT_CURE_ATTRACT
-]);
+const HOLD_EFFECT_CURE_PAR = 2;
+const HOLD_EFFECT_CURE_SLP = 3;
+const HOLD_EFFECT_CURE_PSN = 4;
+const HOLD_EFFECT_CURE_BRN = 5;
+const HOLD_EFFECT_CURE_FRZ = 6;
+const HOLD_EFFECT_CURE_CONFUSION = 8;
+const HOLD_EFFECT_CURE_STATUS = 9;
+const HOLD_EFFECT_RESTORE_STATS = 23;
+const HOLD_EFFECT_CURE_ATTRACT = 28;
 
 const HOLD_EFFECT_FLINCH = 30;
 const HOLD_EFFECT_SHELL_BELL = 62;
 /** include/battle.h:61. */
 const IGNORE_SHELL_BELL = 0xffff;
-function moveEndItemEffectApplies(
-  holdEffect: number,
-  battlerState: BattleScriptRulesBattlerState,
-): boolean {
-  switch (holdEffect) {
-    case 2: // HOLD_EFFECT_CURE_PAR
-      return (battlerState.status1 & STATUS1_PARALYSIS) !== 0;
-    case 3: // HOLD_EFFECT_CURE_SLP
-      return (battlerState.status1 & STATUS1_SLEEP) !== 0;
-    case 4: // HOLD_EFFECT_CURE_PSN
-      return (battlerState.status1 & (STATUS1_POISON | STATUS1_TOXIC_POISON)) !== 0;
-    case 5: // HOLD_EFFECT_CURE_BRN
-      return (battlerState.status1 & STATUS1_BURN) !== 0;
-    case 6: // HOLD_EFFECT_CURE_FRZ
-      return (battlerState.status1 & STATUS1_FREEZE) !== 0;
-    case 8: // HOLD_EFFECT_CURE_CONFUSION
-      return (battlerState.status2 & STATUS2_CONFUSION) !== 0;
-    case 9: // HOLD_EFFECT_CURE_STATUS
-      return (battlerState.status1 & (
-        STATUS1_SLEEP
-        | STATUS1_POISON
-        | STATUS1_BURN
-        | STATUS1_FREEZE
-        | STATUS1_PARALYSIS
-        | STATUS1_TOXIC_POISON
-      )) !== 0 || (battlerState.status2 & STATUS2_CONFUSION) !== 0;
-    case 23: // HOLD_EFFECT_RESTORE_STATS
-      return battlerState.statStages.some((stage) => stage < 6);
-    case 28: // HOLD_EFFECT_CURE_ATTRACT
-      return (battlerState.status2 & STATUS2_INFATUATION) !== 0;
-    default:
-      return false;
-  }
-}
 
 const MOVEEND_STATE_NAME_TO_VALUE: Readonly<Record<string, number>> = Object.freeze({
   MOVEEND_RAGE,
@@ -423,6 +387,60 @@ function callCurrentMoveendScript(
       { rulesContext: advanceMoveend(rules) },
     ),
   );
+}
+
+/**
+ * `ItemBattleEffects(ITEMEFFECT_MOVE_END)` returns an effect to Cmd_moveend,
+ * so state 11 stays selected while the pushed cure/White Herb script runs.
+ * The script's RETURN re-enters state 11; only a later quiet scan advances
+ * it (battle_script_commands.c:4330-4334). Status1 cures additionally emit
+ * the source controller write at battle_util.c:3758-3765.
+ */
+function callCurrentMoveendItemScript(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  rules: BattleScriptRulesContext,
+  labelName: string,
+  statusControllerBattler: BattleScriptBattlerId | null,
+): MoveendStateOutcome {
+  const label = resolveBattleScriptLabel(context.program, labelName);
+  if (!label) throw new Error(`committed Battle Script program lacks ${labelName}`);
+  return transferState(
+    transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "call-current", programCounter: label.programCounter }),
+      statusControllerBattler === null
+        ? { rulesContext: rules }
+        : {
+          rulesContext: rules,
+          scheduler: markBattleScriptControllerPending(
+            context.state.scheduler,
+            statusControllerBattler,
+          ),
+          events: Object.freeze([
+            Object.freeze({
+              kind: "set-battler-status-data" as const,
+              battler: statusControllerBattler,
+              status1: rules.battlers[statusControllerBattler].status1,
+            }),
+          ]),
+        },
+    ),
+  );
+}
+
+function moveEndLumStatusName(
+  battlerState: BattleScriptRulesBattlerState,
+): "poison" | "sleep" | "paralysis" | "burn" | "ice" | "confusion" {
+  // battle_util.c:3710-3729 uses independent `if`s, so the last matching
+  // condition wins the shared text buffer in this exact source order.
+  let statusName: "poison" | "sleep" | "paralysis" | "burn" | "ice" | "confusion" =
+    "poison";
+  if ((battlerState.status1 & STATUS1_SLEEP) !== 0) statusName = "sleep";
+  if ((battlerState.status1 & STATUS1_PARALYSIS) !== 0) statusName = "paralysis";
+  if ((battlerState.status1 & STATUS1_BURN) !== 0) statusName = "burn";
+  if ((battlerState.status1 & STATUS1_FREEZE) !== 0) statusName = "ice";
+  if ((battlerState.status2 & STATUS2_CONFUSION) !== 0) statusName = "confusion";
+  return statusName;
 }
 
 /** AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE), battle_util.c:2749-2872. */
@@ -703,53 +721,164 @@ function executeMoveendState(
       return continueState(advanceMoveend(applyBattleScriptMoveEndChangedItemOwnership(rules)));
     case MOVEEND_ITEM_EFFECTS_ALL: {
       const count = rules.battleTopology.battlersCount;
+      let scannedRules = rules;
       for (let battler = 0; battler < count; battler += 1) {
         const battlerId = battler as BattleScriptBattlerId;
-        const battlerState = rules.battlers[battlerId];
-        const holdEffect = resolveBattleScriptBattlerHoldEffect(rules, battlerId);
-        if (
-          holdEffect === 3
-          && (battlerState.status1 & STATUS1_SLEEP) !== 0
-        ) {
-          const status1 = (battlerState.status1 & ~STATUS1_SLEEP) >>> 0;
-          const cured = replaceBattlerAt(rules.battlers, battlerId, Object.freeze({
-            ...battlerState,
-            status1,
-            status2: (battlerState.status2 & ~STATUS2_NIGHTMARE) >>> 0,
-          }));
-          return callCurrentMoveendScript(
+        const battlerState = scannedRules.battlers[battlerId];
+        // battle_util.c:3626-3637 assigns gLastUsedItem on every scan,
+        // including quiet holders before and after the battler that fires.
+        scannedRules = Object.freeze({
+          ...scannedRules,
+          lastUsedItem: battlerState.item,
+        });
+        const holdEffect = resolveBattleScriptBattlerHoldEffect(scannedRules, battlerId);
+
+        let status1 = battlerState.status1;
+        let status2 = battlerState.status2;
+        let scriptLabel: string | null = null;
+        let statusController = false;
+        let battleTextBuff1Status = scannedRules.battleTextBuff1Status;
+        let multistringChooser = scannedRules.multistringChooser;
+
+        // battle_util.c:3641-3737: all seven status-restoring switch arms.
+        switch (holdEffect) {
+          case HOLD_EFFECT_CURE_PAR:
+            if ((status1 & STATUS1_PARALYSIS) !== 0) {
+              status1 = (status1 & ~STATUS1_PARALYSIS) >>> 0;
+              scriptLabel = "BattleScript_BerryCureParRet";
+              statusController = true;
+            }
+            break;
+          case HOLD_EFFECT_CURE_PSN:
+            if ((status1 & (STATUS1_POISON | STATUS1_TOXIC_POISON)) !== 0) {
+              status1 = (
+                status1
+                & ~(STATUS1_POISON | STATUS1_TOXIC_POISON | STATUS1_TOXIC_COUNTER)
+              ) >>> 0;
+              scriptLabel = "BattleScript_BerryCurePsnRet";
+              statusController = true;
+            }
+            break;
+          case HOLD_EFFECT_CURE_BRN:
+            if ((status1 & STATUS1_BURN) !== 0) {
+              status1 = (status1 & ~STATUS1_BURN) >>> 0;
+              scriptLabel = "BattleScript_BerryCureBrnRet";
+              statusController = true;
+            }
+            break;
+          case HOLD_EFFECT_CURE_FRZ:
+            if ((status1 & STATUS1_FREEZE) !== 0) {
+              status1 = (status1 & ~STATUS1_FREEZE) >>> 0;
+              scriptLabel = "BattleScript_BerryCureFrzRet";
+              statusController = true;
+            }
+            break;
+          case HOLD_EFFECT_CURE_SLP:
+            if ((status1 & STATUS1_SLEEP) !== 0) {
+              status1 = (status1 & ~STATUS1_SLEEP) >>> 0;
+              status2 = (status2 & ~STATUS2_NIGHTMARE) >>> 0;
+              scriptLabel = "BattleScript_BerryCureSlpRet";
+              statusController = true;
+            }
+            break;
+          case HOLD_EFFECT_CURE_CONFUSION:
+            if ((status2 & STATUS2_CONFUSION) !== 0) {
+              status2 = (status2 & ~STATUS2_CONFUSION) >>> 0;
+              scriptLabel = "BattleScript_BerryCureConfusionRet";
+            }
+            break;
+          case HOLD_EFFECT_CURE_ATTRACT:
+            if ((status2 & STATUS2_INFATUATION) !== 0) {
+              status2 = (status2 & ~STATUS2_INFATUATION) >>> 0;
+              battleTextBuff1Status = "love";
+              multistringChooser = 0; // B_MSG_CURED_PROBLEM
+              scriptLabel = "BattleScript_BerryCureChosenStatusRet";
+            }
+            break;
+          case HOLD_EFFECT_CURE_STATUS: {
+            const hasStatus1 = (
+              status1 & (
+                STATUS1_SLEEP
+                | STATUS1_POISON
+                | STATUS1_BURN
+                | STATUS1_FREEZE
+                | STATUS1_PARALYSIS
+                | STATUS1_TOXIC_POISON
+              )
+            ) !== 0;
+            const hasConfusion = (status2 & STATUS2_CONFUSION) !== 0;
+            if (hasStatus1 || hasConfusion) {
+              battleTextBuff1Status = moveEndLumStatusName(battlerState);
+              if ((status1 & STATUS1_SLEEP) !== 0) {
+                status2 = (status2 & ~STATUS2_NIGHTMARE) >>> 0;
+              }
+              status1 = 0;
+              status2 = (status2 & ~STATUS2_CONFUSION) >>> 0;
+              multistringChooser = 0; // B_MSG_CURED_PROBLEM
+              scriptLabel = "BattleScript_BerryCureChosenStatusRet";
+              statusController = true;
+            }
+            break;
+          }
+          default:
+            break;
+        }
+
+        if (scriptLabel !== null) {
+          const curedBattlers = replaceBattlerAt(
+            scannedRules.battlers,
+            battlerId,
+            Object.freeze({ ...battlerState, status1, status2 }),
+          );
+          const nextRules = Object.freeze({
+            ...scannedRules,
+            battlers: curedBattlers,
+            party: withBattleScriptPartyMemberStatus1(
+              scannedRules.party,
+              battlerState.side,
+              battlerState.partyIndex,
+              status1,
+            ),
+            scriptingBattler: battlerId,
+            battleTextBuff1Status,
+            multistringChooser,
+          });
+          return callCurrentMoveendItemScript(
             context,
-            Object.freeze({
-              ...rules,
-              battlers: cured,
-              party: withBattleScriptPartyMemberStatus1(
-                rules.party,
-                battlerState.side,
-                battlerState.partyIndex,
-                status1,
-              ),
-              scriptingBattler: battlerId,
-              lastUsedItem: battlerState.item,
-            }),
-            "BattleScript_BerryCureSlpRet",
+            nextRules,
+            scriptLabel,
+            statusController ? battlerId : null,
           );
         }
+
+        // battle_util.c:3739-3755 returns immediately after restoring every
+        // negative stage; no status controller write occurs for White Herb.
         if (
-          ITEM_MOVE_END_HOLD_EFFECTS.has(holdEffect)
-          && moveEndItemEffectApplies(holdEffect, battlerState)
+          holdEffect === HOLD_EFFECT_RESTORE_STATS
+          && battlerState.statStages.some((stage) => stage < 6)
         ) {
-          return transferState(unsupportedBranch(
+          const statStages = Object.freeze(
+            battlerState.statStages.map((stage) => stage < 6 ? 6 : stage),
+          ) as unknown as BattleScriptStatStages;
+          const restoredBattlers = replaceBattlerAt(
+            scannedRules.battlers,
+            battlerId,
+            Object.freeze({ ...battlerState, statStages }),
+          );
+          return callCurrentMoveendItemScript(
             context,
-            `ItemBattleEffects(ITEMEFFECT_MOVE_END)'s status/stat-restoring branch (battler ${battler}, `
-              + `holdEffect ${holdEffect}) needs the BattleScriptPushCursor/controller cutscene transfer `
-              + "not modeled here",
-            "battle_util.c",
-            3639,
-          ));
+            Object.freeze({
+              ...scannedRules,
+              battlers: restoredBattlers,
+              scriptingBattler: battlerId,
+            }),
+            "BattleScript_WhiteHerbRet",
+            null,
+          );
         }
       }
       // Source increments moveendState only when ItemBattleEffects reports no effect.
-      return continueState(advanceMoveend(rules));
+      return continueState(advanceMoveend(scannedRules));
     }
     case MOVEEND_KINGSROCK_SHELLBELL: {
       const attacker = requireBattlerRole(rules, "attacker");

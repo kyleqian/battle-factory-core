@@ -22,6 +22,15 @@ const TACKLE = 33; // EFFECT_HIT, power 35, TYPE_NORMAL
 const DOUBLE_TEAM = 104; // non-damaging and not FLAG_KINGS_ROCK_AFFECTED
 const HYPER_VOICE = 304; // damaging but excluded from FLAG_KINGS_ROCK_AFFECTED in Gen 3
 const KINGS_ROCK = 187; // GetItemHoldEffect -> HOLD_EFFECT_FLINCH, parameter 10
+const CHERI_BERRY = 133;
+const CHESTO_BERRY = 134;
+const PECHA_BERRY = 135;
+const RAWST_BERRY = 136;
+const ASPEAR_BERRY = 137;
+const PERSIM_BERRY = 140;
+const LUM_BERRY = 141;
+const WHITE_HERB = 180;
+const MENTAL_HERB = 185;
 
 function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -421,49 +430,232 @@ describe("production moveend (Cmd_moveend) registration", () => {
       expect(result.state.rulesContext.moveendState).toBe(10); // paused at MOVEEND_ATTACKER_VISIBLE
     });
 
-    it("halts on MOVEEND_ITEM_EFFECTS_ALL's status/stat-restoring branch only when the held item can activate", () => {
-      const CHERI_BERRY = 133; // GetItemHoldEffect -> HOLD_EFFECT_CURE_PAR
-      const STATUS1_PARALYSIS = 1 << 6;
+    it.each([
+      [
+        "Cheri/paralysis",
+        CHERI_BERRY,
+        (1 << 6) | (1 << 4),
+        0,
+        1 << 4,
+        0,
+        "BattleScript_BerryCureParRet",
+        "STRINGID_PKMNSITEMCUREDPARALYSIS",
+        true,
+      ],
+      [
+        "Chesto/sleep",
+        CHESTO_BERRY,
+        3 | (1 << 3),
+        (1 << 27) | 1,
+        1 << 3,
+        1,
+        "BattleScript_BerryCureSlpRet",
+        "STRINGID_PKMNSITEMWOKEIT",
+        true,
+      ],
+      [
+        "Pecha/poison",
+        PECHA_BERRY,
+        (1 << 3) | (1 << 7) | (0xf << 8) | (1 << 4),
+        0,
+        1 << 4,
+        0,
+        "BattleScript_BerryCurePsnRet",
+        "STRINGID_PKMNSITEMCUREDPOISON",
+        true,
+      ],
+      [
+        "Rawst/burn",
+        RAWST_BERRY,
+        (1 << 4) | (1 << 6),
+        0,
+        1 << 6,
+        0,
+        "BattleScript_BerryCureBrnRet",
+        "STRINGID_PKMNSITEMHEALEDBURN",
+        true,
+      ],
+      [
+        "Aspear/freeze",
+        ASPEAR_BERRY,
+        (1 << 5) | (1 << 6),
+        0,
+        1 << 6,
+        0,
+        "BattleScript_BerryCureFrzRet",
+        "STRINGID_PKMNSITEMDEFROSTEDIT",
+        true,
+      ],
+      [
+        "Persim/confusion",
+        PERSIM_BERRY,
+        1 << 4,
+        3 | (1 << 16),
+        1 << 4,
+        1 << 16,
+        "BattleScript_BerryCureConfusionRet",
+        "STRINGID_PKMNSITEMSNAPPEDOUT",
+        false,
+      ],
+      [
+        "Mental Herb/infatuation",
+        MENTAL_HERB,
+        1 << 4,
+        (1 << 16) | 3,
+        1 << 4,
+        3,
+        "BattleScript_BerryCureChosenStatusRet",
+        "STRINGID_PKMNSITEMCUREDPROBLEM",
+        false,
+      ],
+    ] as const)(
+      "%s cures only its selected condition, keeps state 11 through the script, consumes once, then advances on the quiet rescan",
+      (
+        _name,
+        item,
+        status1,
+        status2,
+        expectedStatus1,
+        expectedStatus2,
+        scriptLabel,
+        messageId,
+        hasStatusController,
+      ) => {
+        const rc = context(
+          0,
+          {},
+          {
+            moveendState: 11,
+            party: {
+              opponent: [{ species: 1, hp: 100, status1 }, {}, {}, {}, {}, {}],
+            },
+          },
+          { item, status1, status2 },
+        );
+        const { result, moveendPc } = stepAtMoveend(rc);
+        if (result.kind !== "advanced") throw new Error(`expected advanced, got ${result.kind}`);
+        expect(result.state.programCounter).toBe(labelPc(scriptLabel));
+        expect(result.state.callStack.at(-1)).toBe(moveendPc);
+        expect(result.state.rulesContext.moveendState).toBe(11);
+        expect(result.state.rulesContext.scriptingBattler).toBe(1);
+        expect(result.state.rulesContext.lastUsedItem).toBe(item);
+        expect(result.state.rulesContext.battlers[1]).toMatchObject({
+          item,
+          status1: expectedStatus1,
+          status2: expectedStatus2,
+        });
+        expect(result.state.rulesContext.party.opponent[0]!.status1).toBe(expectedStatus1);
+        expect(result.state.scheduler.pendingControllerBattlers).toEqual(
+          hasStatusController ? [1] : [],
+        );
+        expect(
+          result.state.events.filter((event) => event.kind === "set-battler-status-data"),
+        ).toHaveLength(hasStatusController ? 1 : 0);
+
+        const terminal = runMoveendScriptToTerminal(rc);
+        expect(terminal.state.rulesContext.moveendState).toBe(17);
+        expect(terminal.state.rulesContext.battlers[1]).toMatchObject({
+          item: 0,
+          status1: expectedStatus1,
+          status2: expectedStatus2,
+        });
+        expect(terminal.state.rulesContext.usedHeldItems[1]).toBe(item);
+        expect(terminal.state.events).toContainEqual(expect.objectContaining({
+          kind: "message",
+          messageId,
+        }));
+      },
+    );
+
+    it("Lum clears every primary status plus confusion, mirrors status1, and retains unrelated status2 bits", () => {
+      const status1 = 3 | (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6) | (1 << 7) | (0xf << 8);
+      const status2 = (1 << 27) | 3 | (1 << 16);
+      const rc = context(
+        0,
+        {},
+        {
+          moveendState: 11,
+          party: {
+            opponent: [{ species: 1, hp: 100, status1 }, {}, {}, {}, {}, {}],
+          },
+        },
+        { item: LUM_BERRY, status1, status2 },
+      );
+      const { result, moveendPc } = stepAtMoveend(rc);
+      if (result.kind !== "advanced") throw new Error(`expected advanced, got ${result.kind}`);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_BerryCureChosenStatusRet"));
+      expect(result.state.callStack.at(-1)).toBe(moveendPc);
+      expect(result.state.rulesContext.moveendState).toBe(11);
+      expect(result.state.rulesContext).toMatchObject({
+        scriptingBattler: 1,
+        lastUsedItem: LUM_BERRY,
+        battleTextBuff1Status: "confusion",
+        multistringChooser: 0,
+      });
+      expect(result.state.rulesContext.battlers[1]).toMatchObject({
+        item: LUM_BERRY,
+        status1: 0,
+        status2: 1 << 16,
+      });
+      expect(result.state.rulesContext.party.opponent[0]!.status1).toBe(0);
+      expect(result.state.scheduler.pendingControllerBattlers).toEqual([1]);
+
+      const terminal = runMoveendScriptToTerminal(rc);
+      expect(terminal.state.rulesContext.moveendState).toBe(17);
+      expect(terminal.state.rulesContext.battlers[1]).toMatchObject({
+        item: 0,
+        status1: 0,
+        status2: 1 << 16,
+      });
+      expect(terminal.state.rulesContext.usedHeldItems[1]).toBe(LUM_BERRY);
+      expect(terminal.state.events).toContainEqual(expect.objectContaining({
+        kind: "message",
+        messageId: "STRINGID_PKMNSITEMCUREDPROBLEM",
+      }));
+    });
+
+    it("White Herb restores all and only negative stages, keeps state 11 during its tail, and consumes once", () => {
+      const statStages = [4, 5, 6, 7, 3, 8, 6, 2] as const;
+      const expectedStages = [6, 6, 6, 7, 6, 8, 6, 6] as const;
       const rc = context(
         0,
         {},
         { moveendState: 11 },
-        { item: CHERI_BERRY, status1: STATUS1_PARALYSIS },
+        { item: WHITE_HERB, statStages: [...statStages] },
       );
-      const { result } = stepAtMoveend(rc);
-      expect(result.kind).toBe("halted");
-      if (result.kind !== "halted") throw new Error("expected halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 3639 });
-
-      const noStatus = context(0, {}, { moveendState: 11 }, { item: CHERI_BERRY });
-      const { result: passThrough } = stepAtMoveend(noStatus);
-      if (passThrough.kind !== "advanced") {
-        throw new Error(`expected advanced, got ${passThrough.kind}`);
-      }
-      expect(passThrough.state.rulesContext.moveendState).toBe(17);
-
-      const LUM_BERRY = 141; // HOLD_EFFECT_CURE_STATUS also cures confusion.
-      const STATUS2_CONFUSION = 1;
-      const lumConfused = context(
-        0,
-        {},
-        { moveendState: 11 },
-        { item: LUM_BERRY, status2: STATUS2_CONFUSION },
-      );
-      const { result: lumResult } = stepAtMoveend(lumConfused);
-      expect(lumResult.kind).toBe("halted");
-      if (lumResult.kind !== "halted") throw new Error("expected halted");
-      expect(lumResult.state.haltReason).toMatchObject({
-        kind: "unsupported-branch",
-        sourceLine: 3639,
+      const { result, moveendPc } = stepAtMoveend(rc);
+      if (result.kind !== "advanced") throw new Error(`expected advanced, got ${result.kind}`);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_WhiteHerbRet"));
+      expect(result.state.callStack.at(-1)).toBe(moveendPc);
+      expect(result.state.rulesContext.moveendState).toBe(11);
+      expect(result.state.rulesContext.scriptingBattler).toBe(1);
+      expect(result.state.rulesContext.lastUsedItem).toBe(WHITE_HERB);
+      expect(result.state.rulesContext.battlers[1]).toMatchObject({
+        item: WHITE_HERB,
+        statStages: expectedStages,
       });
+      expect(result.state.scheduler.pendingControllerBattlers).toEqual([]);
+
+      const terminal = runMoveendScriptToTerminal(rc);
+      expect(terminal.state.rulesContext.moveendState).toBe(17);
+      expect(terminal.state.rulesContext.battlers[1]).toMatchObject({
+        item: 0,
+        statStages: expectedStages,
+      });
+      expect(terminal.state.rulesContext.usedHeldItems[1]).toBe(WHITE_HERB);
+      expect(terminal.state.events).toContainEqual(expect.objectContaining({
+        kind: "message",
+        messageId: "STRINGID_PKMNSITEMRESTOREDSTATUS",
+      }));
     });
 
     it("MOVEEND_ITEM_EFFECTS_ALL passes through when no battler holds a matching item", () => {
-      const rc = context(0, {}, { moveendState: 11 });
+      const rc = context(0, {}, { moveendState: 11 }, { item: CHERI_BERRY });
       const { result } = stepAtMoveend(rc);
       if (result.kind !== "advanced") throw new Error(`expected advanced, got ${result.kind}`);
       expect(result.state.rulesContext.moveendState).toBe(17);
+      expect(result.state.rulesContext.lastUsedItem).toBe(CHERI_BERRY);
+      expect(result.state.rulesContext.battlers[1].item).toBe(CHERI_BERRY);
     });
 
     it("MOVEEND_KINGSROCK_SHELLBELL draws exactly once and applies non-certain flinch for a qualifying landed hit", () => {

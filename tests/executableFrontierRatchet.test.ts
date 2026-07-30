@@ -139,12 +139,13 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // 5 -> 4 (MOVEEND_IMMUNITY_ABILITIES): the eight status-curing abilities
   // now clear source-exact battle/party state, emit the controller status
   // write, run BattleScript_AbilityCuredStatus, and rescan state 4 after its
-  // return. The four remaining barriers belong to states 0, 2, 5, and 11.
+  // return. MOVEEND_ITEM_EFFECTS_ALL's full cure/White Herb family now does
+  // the same source-exact pushed-script rescan, leaving only state 0's barrier.
   // 4 -> 2 (both Synchronize states): target-first and attacker-second now
   // consume SetMoveEffect's banked reflectable status, call the committed
   // callback, and re-enter the real primary-status controller path. Only
-  // states 0 and 11 remain barriered.
-  ["src/engine/battleScriptMoveEndOpcode.ts", 2],
+  // Only state 0 remains barriered.
+  ["src/engine/battleScriptMoveEndOpcode.ts", 1],
   ["src/engine/battleScriptJumpifbyteOpcode.ts", 1],
   // Forced-switch ground truth §4 slice 1: one operand-shape barrier, shared
   // by both the unmodeled-memWord and unmodeled-value cases (e.g.
