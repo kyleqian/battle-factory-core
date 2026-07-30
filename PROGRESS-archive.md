@@ -1,3 +1,31 @@
+## 717 — [BOUNDED MAIN WORKER 2026-07-29 ~19:35] Battle-resolution Slice 4 landed
+
+- **State:** implementation `3b62f97c` + first-eligible-edge fix `291d3cde`;
+  tree green at **521 files / 5349 tests + 1 deliberate animation-lane
+  skip**, production build, targeted Slice-4 acceptance **84/84**, and
+  `git diff --check`.
+- **Did:** zero-HP plus faint events now project into typed, source-relative
+  opponent tile-row or player pixel-row sink programs. The live Scene-OFF
+  compositor removes the fainted sprite/healthbox, prints frozen resolved
+  faint text, owns the wait cursor, and accepts the first eligible A edge.
+  A genuine player forced-switch boundary remains pending throughout; only
+  that dismiss edge constructs the existing request-owned selector and its
+  relative battle→party fade. SEND OUT confirmation stops honestly at
+  `sendOutElapsed: 0`; no continuation or send-out was implemented.
+- **Next:** dispatch `docs/battle-resolution-seam-design.md` **Slice 5 —
+  semantic switch-in and generic send-out** verbatim; retain the complete
+  Slice-4 regression table.
+- **Notes:** pixels remain exact: faint/party rows **141/141, 256/256,
+  200/200, 200/200**; staged OFF **16/16**; SAND_ATTACK **190/190**; menus
+  3-13 **254/254, 44/44, 42/42, 44/44, 93/93, 88/88, 111/111, 83/83,
+  56/56, 46/46, 57/57**. No trace/capture change, canonical-recording
+  import, unsupported barrier, semantic switch-in marker, terminal handoff,
+  or battle/turn/absolute-tick branch was added. PAPERCUT: the long serial
+  compare loop detached from captured output and required explicit reruns,
+  ~2 minutes lost.
+
+---
+
 ## 716 — [SUPERVISOR 2026-07-29 ~20:05] Slice 3 + Confuse pair folded; union green; round 9 (final) dispatched
 
 - **State:** master green at **521 files / 5348 tests + 1 deliberate
