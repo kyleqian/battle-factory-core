@@ -13,6 +13,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 710 — [BOUNDED MAIN WORKER 2026-07-29 ~18:00] Battle-resolution seam design landed
+
+- **State:** docs-only battle-resolution design complete; tree green at
+  **520 files / 5296 tests + 1 deliberate animation-lane skip**, production
+  build, and `git diff --check`.
+- **Did:** specified the typed command-resolution lifecycle from legal
+  A-confirm through messages, HP drain, faint, forced-party handoff, semantic
+  switch-in/send-out, and next-command or terminal replacement. Inventoried
+  existing kernel events versus the one required `switch-in-animation` marker,
+  extended entry 703's per-battler boundary-state pattern, fixed an immutable
+  25-window regression table, and split implementation into seven dispatchable
+  slices capped at 45 minutes. The last slice is entry 704's honest explicit-OFF
+  **128/128** generated-command breadth proof.
+- **Next:** dispatch
+  `docs/battle-resolution-seam-design.md` **Slice 1 — receipt ownership and
+  structural projection** verbatim; do not begin renderer/orchestrator work
+  until its structural equivalence acceptance is green.
+- **Notes:** no production code, canonical-recording import, oracle/app
+  acceptance trace, or capture-list change. Existing banked OFF evidence
+  covered the inventory, so no new oracle trace was necessary. The finite
+  Stage 8 reset remains intact; this does not resume the canonical Battle 2
+  turn march. PAPERCUT: none.
+
+---
+
 ## 709 — [SUPERVISOR 2026-07-29 ~17:40] ISSUES #51 + immunity-cure reveal both merged; union green; round 5 dispatched
 
 - **State:** master `b814e791` green at **520 files / 5296 tests + 1
@@ -66,37 +91,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   PAPERCUT: none.
 
 ---
-
-## 707 — [SUPERVISOR 2026-07-29 ~16:45] Absorption class-B reveal merged; union green; round 4 dispatched
-
-- **State:** master green at **519 files / 5285 tests + 1 deliberate
-  animation-lane skip**, production build, `git diff --check` clean, side
-  worktree/branch merged and removed, no orphans.
-- **Did:** merged `worker/side-20260729-161729` (absorption reveal,
-  `523ae6e6`+`2a291b4f`+`18541792`): Volt Absorb/Water Absorb quarter-max
-  heal (min-1, full-HP failure, PP-loss selection, battle+party HP sync)
-  and Flash Fire boost/consumption source-complete at `JumpIfMoveFailed`;
-  reveal row promoted B→A; unsupported-branch ratchet deliberately shrank
-  **13→12**. Supervisor verification: no census evasion (deltas recorded
-  honestly: Volt Absorb 2→4, Water Absorb 2→3, Flash Fire 2→4; generator
-  diff was only exact-set pin line-drift re-pinning), censuses idempotent
-  in-worktree, targeted 405/405 incl. ratchet, and a fresh seed-324508639
-  mGBA probe reproduced the banked receipt **byte-identically**. Also
-  banked two new papercuts (`7f690de1`: oracle-lab verbosity, mGBA stray
-  probe logs).
-- **Next:** round 4 dispatched — main: ISSUES #51 (summary consumes six
-  full generated rental records instead of anchor globals); side: reveal
-  the status-curing `MOVEEND_IMMUNITY_ABILITIES` class-B site
-  (`battleScriptMoveEndOpcode.ts:556`, `battle_util.c:2876`), with an
-  explicit unreachability-finding escape hatch. Then: trainer-pic OFF
-  window, remaining CBM/CV arms, Synchronize moveend reveal, Gate-6
-  matrix. Commentary OFF checkpoint stays blocked on a harness-side Battle
-  Lab earlier-checkpoint decision (entry 690) — not worker-brief material.
-- **Notes:** session so far: 6 workers, 0 failed steps, 1 integrity
-  correction (entry 705's census evasion — both round-4 briefs carry the
-  anti-evasion clause). Full-suite runs stay staggered to lane-idle
-  windows; spot-checks between rounds are targeted vitest + serial
-  compares.
-
----
-
