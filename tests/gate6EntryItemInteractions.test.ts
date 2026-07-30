@@ -4,6 +4,7 @@ import naturesData from "../src/data/gen/natures.json" with { type: "json" };
 import {
   createBattleScriptRulesContext,
   createBattleScriptStatusRulesExecution,
+  createBattleScriptStatusRulesHandlers,
   type BattleScriptPartyMemberInput,
   type BattleScriptPartyState,
   type BattleScriptRulesBattler,
@@ -12,6 +13,7 @@ import {
 } from "../src/engine/battleScriptRulesContext.ts";
 import { stepBattleScriptMachine } from "../src/engine/battleScriptMachine.ts";
 import { loadBattleScriptProgram } from "../src/engine/battleScriptProgram.ts";
+import { runBattleEndTurnOrchestration } from "../src/engine/battleEndTurnOrchestration.ts";
 import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
 import { initializeFreshFactoryBattle } from "../src/engine/factoryBattleStart.ts";
 
@@ -19,6 +21,8 @@ const program = loadBattleScriptProgram();
 const TACKLE = 33;
 const BATON_PASS = 226;
 const ITEM_WHITE_HERB = 180;
+const ITEM_LUM_BERRY = 141;
+const STATUS2_CONFUSION_TURN_2 = 2;
 const STATUS2_SUBSTITUTE = 1 << 24;
 const MACHAMP_SET = 431;
 const GRANBULL_SET = 376;
@@ -148,16 +152,24 @@ function switchContext(currentMove: number): BattleScriptRulesContextInput {
   };
 }
 
-const ports: BattleScriptStatusRulesExternalPorts = Object.freeze({
+const ports = Object.freeze({
   isControllerIdle: () => true,
-  prepareMessage: () => null,
+  prepareMessage: (_context, operand) =>
+    operand.expression.startsWith("STRINGID_")
+      ? Object.freeze({
+          kind: "message" as const,
+          messageId: operand.expression,
+          substitutions: Object.freeze([]),
+        })
+      : null,
   prepareSelectionMessage: () => null,
   prepareSelectionMessageFromTable: () => null,
-  resolveAttackerBattler: () => null,
+  resolveAttackerBattler: () => 0 as const,
   resolveBattlerAtPosition: () => null,
-  resolveHalfwordOperand: () => null,
+  resolveHalfwordOperand: (_context, operand) =>
+    operand.expression === "B_WAIT_TIME_LONG" ? 64 : null,
   resolveByteOperand: () => null,
-});
+} satisfies BattleScriptStatusRulesExternalPorts);
 
 function runSwitchDataUpdate(currentMove: number) {
   const execution = createBattleScriptStatusRulesExecution(
@@ -177,6 +189,44 @@ function runSwitchDataUpdate(currentMove: number) {
     execution.handlers,
   );
   if (result.kind !== "advanced") throw new Error(`switch update stopped at ${result.kind}`);
+  return result.state.rulesContext.battlers[0];
+}
+
+function runR9ItemPass(item: number) {
+  const rulesContext = createBattleScriptRulesContext({
+    ...switchContext(TACKLE),
+    battlers: [
+      battler({
+        side: 0,
+        species: 68,
+        ability: 62,
+        item,
+        partyIndex: 0,
+        status2: STATUS2_CONFUSION_TURN_2,
+        statStages: [6, 8, 6, 6, 6, 6, 6, 6],
+        types: ["TYPE_FIGHTING", "TYPE_FIGHTING"],
+      }),
+      battler({ side: 1, species: 94, ability: 26, types: ["TYPE_GHOST", "TYPE_POISON"] }),
+      battler({ side: 0 }),
+      battler({ side: 1 }),
+    ],
+    party: {
+      player: corpusParty(MACHAMP_SET, item),
+      opponent: corpusParty(300),
+    },
+  });
+  const handlers = createBattleScriptStatusRulesHandlers(program, ports);
+  const initial = createBattleScriptStatusRulesExecution(
+    program,
+    "BattleScript_HandleFaintedMon",
+    rulesContext,
+    1,
+    ports,
+  ).state;
+  const result = runBattleEndTurnOrchestration(program, handlers, initial);
+  if (result.kind !== "next-turn") {
+    throw new Error(`R9 item pass stopped at ${result.kind}`);
+  }
   return result.state.rulesContext.battlers[0];
 }
 
@@ -238,6 +288,24 @@ describe("Gate-6 R12b and R11 entry/item interactions", () => {
       status2: 0,
       substituteHP: 0,
       statStages: [6, 6, 6, 6, 6, 6, 6, 6],
+    });
+  });
+});
+
+describe("Gate-6 R9 Swagger into Lum Berry versus White Herb", () => {
+  it("Lum cures Swagger confusion without undoing +2 Attack, while White Herb sees no negative stage and leaves both the boost and confusion intact", () => {
+    const lum = runR9ItemPass(ITEM_LUM_BERRY);
+    expect(lum).toMatchObject({
+      item: 0,
+      statStages: [6, 8, 6, 6, 6, 6, 6, 6],
+      status2: 0,
+    });
+
+    const whiteHerb = runR9ItemPass(ITEM_WHITE_HERB);
+    expect(whiteHerb).toMatchObject({
+      item: ITEM_WHITE_HERB,
+      statStages: [6, 8, 6, 6, 6, 6, 6, 6],
+      status2: STATUS2_CONFUSION_TURN_2,
     });
   });
 });

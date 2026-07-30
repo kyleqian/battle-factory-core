@@ -13,13 +13,16 @@ import {
   stepBattleScriptMachine,
   type BattleScriptMachineState,
 } from "../src/engine/battleScriptMachine.ts";
+import { weatherHasEffect } from "../src/engine/battleEndTurnOrchestration.ts";
 import { loadBattleScriptProgram } from "../src/engine/battleScriptProgram.ts";
 
 const program = loadBattleScriptProgram();
 const TACKLE = 33;
 const STARMIE = 121;
 const ABILITY_NATURAL_CURE = 30;
+const ABILITY_CLOUD_NINE = 13;
 const ABILITY_LEVITATE = 26;
+const B_WEATHER_RAIN_TEMPORARY = 1 << 0;
 const STATUS1_TOXIC_POISON = 1 << 7;
 const STATUS1_TOXIC_TURN_1 = 1 << 8;
 const SIDE_STATUS_SPIKES = 1 << 4;
@@ -233,6 +236,10 @@ const SWITCHOUT_PC = instructionPc(
   "B_SCR_OP_SWITCHOUTABILITIES",
   "BattleScript_DoSwitchOut",
 );
+const GETSWITCHEDMONDATA_PC = instructionPc(
+  "B_SCR_OP_GETSWITCHEDMONDATA",
+  "BattleScript_FaintedMonSendOutNew",
+);
 const SWITCHIN_DATA_PC = instructionPc(
   "B_SCR_OP_SWITCHINDATAUPDATE",
   "BattleScript_FaintedMonSendOutNew",
@@ -242,8 +249,33 @@ const SWITCHIN_EFFECTS_PC = instructionPc(
   "BattleScript_FaintedMonSendOutNew",
 );
 
+function switchPlayerToPartyIndex(
+  context: BattleScriptRulesContext,
+  partyIndex: number,
+): BattleScriptRulesContext {
+  const staged = createBattleScriptRulesContext({
+    ...context,
+    selectorRoles: { ...context.selectorRoles, fainted: 0 },
+    monToSwitchIntoId: context.monToSwitchIntoId.map((value, index) =>
+      index === 0 ? partyIndex : value
+    ) as unknown as BattleScriptRulesContextInput["monToSwitchIntoId"],
+  });
+  const indexed = stepAt(GETSWITCHEDMONDATA_PC, staged).result;
+  if (indexed.kind !== "advanced") {
+    throw new Error(`getswitchedmondata stopped at ${indexed.kind}`);
+  }
+  const rebuilt = stepAt(
+    SWITCHIN_DATA_PC,
+    indexed.state.rulesContext,
+  ).result;
+  if (rebuilt.kind !== "advanced") {
+    throw new Error(`switch-in rebuild stopped at ${rebuilt.kind}`);
+  }
+  return rebuilt.state.rulesContext;
+}
+
 describe("Gate-6 R6 Natural Cure switch persistence", () => {
-  it("clears Natural Cure's outgoing active status without a message, while an ordinary ability retains it; the party-mirror omission remains an explicit bounded checkpoint", () => {
+  it("writes Natural Cure's clear into the departing party record so return is clean, while an ordinary Toxic record persists across the same round trip", () => {
     const toxic = STATUS1_TOXIC_POISON | STATUS1_TOXIC_TURN_1;
     const naturalContext = rules({
       battlers: [
@@ -261,7 +293,7 @@ describe("Gate-6 R6 Natural Cure switch persistence", () => {
       party: {
         player: [
           partyMember({ status1: STATUS1_TOXIC_POISON }),
-          EMPTY_SLOT,
+          partyMember(),
           EMPTY_SLOT,
           EMPTY_SLOT,
           EMPTY_SLOT,
@@ -276,23 +308,69 @@ describe("Gate-6 R6 Natural Cure switch persistence", () => {
     expect(natural.state.scheduler.pendingControllerBattlers).toEqual([0]);
     expect(natural.state.events).toEqual([]);
 
-    // ROM REQUEST_STATUS_BATTLE also writes zero to gPlayerParty[0].status1.
-    // The kernel currently models the active clear/controller wait only.
-    expect(natural.state.rulesContext.party.player[0].status1).toBe(
-      STATUS1_TOXIC_POISON,
+    // Cmd_switchoutabilities clears gBattleMons first, then its
+    // REQUEST_STATUS_BATTLE controller transfer writes that zero to the
+    // departing party slot before the battle script advances.
+    expect(natural.state.rulesContext.party.player[0].status1).toBe(0);
+    const naturalBench = switchPlayerToPartyIndex(
+      natural.state.rulesContext,
+      1,
     );
+    expect(naturalBench.battlers[0].status1).toBe(0);
+    const naturalReturned = switchPlayerToPartyIndex(naturalBench, 0);
+    expect(naturalReturned.battlers[0]).toMatchObject({
+      species: STARMIE,
+      ability: ABILITY_NATURAL_CURE,
+      status1: 0,
+    });
 
     const ordinaryContext = createBattleScriptRulesContext({
       ...naturalContext,
       battlers: naturalContext.battlers.map((candidate, index) =>
-        index === 0 ? Object.freeze({ ...candidate, ability: 0 }) : candidate
+        index === 0
+          ? Object.freeze({
+              ...candidate,
+              species: 19,
+              ability: 50,
+              types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+            })
+          : candidate
       ) as unknown as BattleScriptRulesContextInput["battlers"],
+      party: {
+        ...naturalContext.party,
+        player: [
+          partyMember({
+            species: 19,
+            abilityNum: 0,
+            status1: STATUS1_TOXIC_POISON,
+          }),
+          partyMember(),
+          EMPTY_SLOT,
+          EMPTY_SLOT,
+          EMPTY_SLOT,
+          EMPTY_SLOT,
+        ],
+      },
     });
     const ordinary = stepAt(SWITCHOUT_PC, ordinaryContext).result;
     if (ordinary.kind !== "advanced") throw new Error(`ordinary switch stopped at ${ordinary.kind}`);
     expect(ordinary.state.rulesContext.battlers[0].status1).toBe(toxic);
+    expect(ordinary.state.rulesContext.party.player[0].status1).toBe(
+      STATUS1_TOXIC_POISON,
+    );
     expect(ordinary.state.scheduler.pendingControllerBattlers).toEqual([]);
     expect(ordinary.state.events).toEqual([]);
+    const ordinaryBench = switchPlayerToPartyIndex(
+      ordinary.state.rulesContext,
+      1,
+    );
+    expect(ordinaryBench.battlers[0].status1).toBe(0);
+    const ordinaryReturned = switchPlayerToPartyIndex(ordinaryBench, 0);
+    expect(ordinaryReturned.battlers[0]).toMatchObject({
+      species: 19,
+      ability: 50,
+      status1: STATUS1_TOXIC_POISON,
+    });
   });
 
   it("ordinary switch-in reconstruction resets transient stages and rebuilds either a clean record or only the durable Toxic bit (counter zero)", () => {
@@ -341,6 +419,50 @@ describe("Gate-6 R6 Natural Cure switch persistence", () => {
       });
       expect(rebuilt.state.rulesContext.battlers[0].status1 & (15 << 8)).toBe(0);
     }
+  });
+});
+
+describe("Gate-6 R3 Cloud Nine switch-out weather reactivation", () => {
+  it("keeps Rain Dance's field state while replacing Cloud Nine, reactivating WEATHER_HAS_EFFECT for subsequent consumers", () => {
+    const cloudNine = rules({
+      battlers: [
+        battler({
+          side: 0,
+          species: 55,
+          ability: ABILITY_CLOUD_NINE,
+          types: ["TYPE_WATER", "TYPE_WATER"],
+        }),
+        battler({ side: 1 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      weather: B_WEATHER_RAIN_TEMPORARY,
+      weatherTimer: 4,
+      party: {
+        player: [
+          partyMember({ species: 55, abilityNum: 1 }),
+          partyMember({ species: 19, abilityNum: 0 }),
+          EMPTY_SLOT,
+          EMPTY_SLOT,
+          EMPTY_SLOT,
+          EMPTY_SLOT,
+        ],
+        opponent: [EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT],
+      },
+    });
+    expect(weatherHasEffect(cloudNine)).toBe(false);
+
+    const switched = switchPlayerToPartyIndex(cloudNine, 1);
+    expect(switched).toMatchObject({
+      weather: B_WEATHER_RAIN_TEMPORARY,
+      weatherTimer: 4,
+    });
+    expect(switched.battlers[0]).toMatchObject({
+      species: 19,
+      ability: 50,
+      partyIndex: 1,
+    });
+    expect(weatherHasEffect(switched)).toBe(true);
   });
 });
 
