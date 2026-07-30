@@ -220,6 +220,10 @@ import {
   type PresentState,
 } from "./present.ts";
 import {
+  roarAtAge,
+  type RoarState,
+} from "./roar.ts";
+import {
   absorbAtAge,
   type AbsorbState,
 } from "./absorb.ts";
@@ -563,6 +567,7 @@ export interface SceneOnBattlerGeometry {
 
 export interface SceneOnPresentationBattler {
   readonly species:
+    | "HOUNDOUR"
     | "VILEPLUME"
     | "BUTTERFREE"
     | "ONIX"
@@ -1572,6 +1577,14 @@ export interface SceneOnHowlConfig {
   readonly fieldProfile: Readonly<SceneOnHowlFieldProfile>;
 }
 
+export interface SceneOnRoarConfig {
+  readonly move: "ROAR";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  /** Immutable field presentation; no move guard or forced switch is owned. */
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnSweetKissConfig {
   readonly move: "SWEET_KISS";
   readonly attacker: SceneOnPresentationBattler;
@@ -1876,6 +1889,7 @@ export type SceneOnMoveConfig =
   | SceneOnFollowMeConfig
   | SceneOnRestConfig
   | SceneOnHowlConfig
+  | SceneOnRoarConfig
   | SceneOnSweetKissConfig
   | SceneOnAttractConfig
   | SceneOnSporeConfig
@@ -1971,6 +1985,8 @@ export type SceneOnRestPresentationState =
   SceneOnMovePresentationState<SceneOnRestConfig>;
 export type SceneOnHowlPresentationState =
   SceneOnMovePresentationState<SceneOnHowlConfig>;
+export type SceneOnRoarPresentationState =
+  SceneOnMovePresentationState<SceneOnRoarConfig>;
 export type SceneOnSweetKissPresentationState =
   SceneOnMovePresentationState<SceneOnSweetKissConfig>;
 export type SceneOnAttractPresentationState =
@@ -2262,6 +2278,12 @@ export interface SceneOnRestView extends RestState {
 }
 
 export interface SceneOnHowlView extends HowlState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnRoarView extends RoarState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -4403,6 +4425,25 @@ export function sceneOnHowlView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...howlAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_ROAR's first active source-script frame. */
+export function sceneOnRoarView(
+  state: SceneOnRoarPresentationState,
+): SceneOnRoarView {
+  if (state.config.move !== "ROAR") {
+    throw new Error(`expected ROAR presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...roarAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.battlePositionCenter,

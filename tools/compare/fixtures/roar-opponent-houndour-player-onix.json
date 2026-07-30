@@ -3,6 +3,33 @@
   "orientation": "opponent-front",
   "scenario": "tools/battle-lab/mechanic-roar-opponent-houndour-player-onix.json",
   "probe": "tools/compare/roarProbe.py",
+  "appStage": { "presentationAge": 0 },
+  "attacker": {
+    "species": "HOUNDOUR",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 19 },
+      "animationCenter": { "x": 176, "y": 51 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 80 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 117,
+    "playerMaxHp": 117,
+    "opponentHp": 118,
+    "opponentMaxHp": 138,
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
   "sourceWindow": { "startFrame": 219, "endFrame": 322, "frameCount": 104 },
   "evidenceSha256": "d7b5ddc1dea422802dbb466b050e7830259e891eb0acf5323530c4be3e1b4da8",
   "rawRgbSha256": "727e277d1fae2dbb76b10948497badd0390c4a1b206719218cfcd3a8d1a0002a"

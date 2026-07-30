@@ -3,15 +3,40 @@ import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
+import { roarAtAge } from "../../src/animation/roar.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnRoarView,
+  type SceneOnDragonRageFieldProfile,
+  type SceneOnPresentationBattler,
+} from "../../src/animation/sceneOnPresentation.ts";
+import {
+  createInitialState,
+  render,
+  type EngineState,
+} from "../../src/engine/core.ts";
 
 type Fixture = {
   schema: "roar-portable-evidence/v1";
   orientation: string;
   scenario: string;
   probe: string;
+  appStage: { presentationAge: number };
+  attacker: SceneOnPresentationBattler;
+  target: SceneOnPresentationBattler;
+  fieldProfile: SceneOnDragonRageFieldProfile;
   sourceWindow: { startFrame: number; endFrame: number; frameCount: number };
   evidenceSha256: string;
   rawRgbSha256: string;
+};
+type Sprite = {
+  slot: number;
+  attr: number[];
+  matrixNum: number;
+  matrix: number[];
+  data: number[];
+  template: { symbol: string | null };
+  callback: { symbol: string | null };
 };
 type Frame = {
   frame: number;
@@ -27,6 +52,7 @@ type Frame = {
   paletteTags: number[];
   tileTags: number[];
   registers: Record<string, number>;
+  sprites: Sprite[];
 };
 type Probe = {
   schema: "roar-dense-evidence/v1";
@@ -94,6 +120,88 @@ function verify(path: string, runNumber: number): void {
     || probe.frames.at(-1)?.gAnimScriptActive !== 0
     || probe.frames.at(-1)?.visualTaskCount !== 0
   ) errors.push(`${fixture.orientation}: immutable Roar receipt changed`);
+  const stage = createSceneOnMovePresentation({
+    move: "ROAR",
+    attacker: fixture.attacker,
+    target: fixture.target,
+    fieldProfile: fixture.fieldProfile,
+  });
+  for (const [index, oracle] of probe.frames.entries()) {
+    const age = fixture.appStage.presentationAge + index;
+    const component = roarAtAge(
+      age,
+      fixture.attacker.geometry.side,
+      fixture.attacker.geometry.battlePositionCenter,
+    );
+    const seam = sceneOnRoarView({ ...stage, age });
+    const {
+      age: _age,
+      attacker: _attacker,
+      target: _target,
+      ...seamComponent
+    } = seam;
+    if (!same(component, seamComponent)) {
+      errors.push(`frame ${oracle.frame}: typed seam changed`);
+    }
+    const sourceNoise = oracle.sprites.filter(
+      (sprite) => sprite.template.symbol === "gRoarNoiseLineSpriteTemplate",
+    );
+    if (sourceNoise.length !== component.noiseLines.length) {
+      errors.push(`frame ${oracle.frame}: NOISE_LINE lifecycle changed`);
+    }
+    const attacker = oracle.sprites.find((sprite) => sprite.data[2] === 228);
+    if (
+      !attacker
+      || !same(attacker.matrix, [
+        component.attackerTransform.matrix.a,
+        0,
+        0,
+        component.attackerTransform.matrix.d,
+      ])
+    ) errors.push(`frame ${oracle.frame}: software affine changed`);
+    const hardware = roarAtAge(
+      age - 2,
+      fixture.attacker.geometry.side,
+      fixture.attacker.geometry.battlePositionCenter,
+    );
+    if (
+      !attacker
+      || !same(oracle.hardwareMatrices[attacker.matrixNum], [
+        hardware.attackerTransform.matrix.a,
+        0,
+        0,
+        hardware.attackerTransform.matrix.d,
+      ])
+    ) errors.push(`frame ${oracle.frame}: hardware affine changed`);
+    const engine: EngineState = {
+      ...createInitialState(),
+      rngMode: "frontierBattle",
+      sceneOnPresentation: { ...stage, age },
+    };
+    const app = render(engine);
+    const rgb = readFileSync(
+      join(rgbDir, `${String(oracle.frame).padStart(5, "0")}.rgb`),
+    );
+    let diff = 0;
+    for (let pixel = 0; pixel < 240 * 160; pixel++) {
+      if (
+        app[pixel * 4] !== rgb[pixel * 3]
+        || app[pixel * 4 + 1] !== rgb[pixel * 3 + 1]
+        || app[pixel * 4 + 2] !== rgb[pixel * 3 + 2]
+      ) diff += 1;
+    }
+    const cleanup = index !== probe.frames.length - 1
+      || (!component.active
+        && !component.noiseLineLoaded
+        && !oracle.gAnimScriptActive
+        && oracle.visualTaskCount === 0);
+    if (diff || !cleanup) {
+      errors.push(
+        `frame ${oracle.frame}/age ${age}: framebuffer=${diff === 0} `
+        + `diff=${diff} cleanup=${cleanup}`,
+      );
+    }
+  }
   if (errors.length) throw new Error(errors.slice(0, 100).join("\n"));
   const prior = fresh.get(fixture.orientation);
   if (prior && !same(prior, { evidence, raw: rawDigest })) {

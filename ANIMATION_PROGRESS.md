@@ -1,5 +1,26 @@
 # Animation coverage
 
+## MOVE_ROAR promoted exact; noise-line-roar-effect complete (2026-07-30)
+
+**Verdict:** `MOVE_ROAR` is exact. The pure source-relative reducer, narrow
+typed Scene-ON seam and production compositor cover shared six-NOISE_LINE
+RoarEffect sprites, attacker monbg/splitbgprio/8:8 alpha, double cry/wait,
+ScaleMonAndRestore, target SlideOffScreen, waits, hardware latches, tags,
+palettes, registers, audio, blend/monbg cleanup and first inactive frame. The
+seam carries only resolved Houndour/Onix geometry and immutable field
+presentation; all guards, accuracy, forced switching, controller, RNG, turn
+and facility state remain external.
+
+**Dense acceptance:** corrected legal set-119 Houndour parties pass every
+source/reducer/seam/raw-RGB/production framebuffer frame twice fresh:
+player-back **252-350 (99/99)** with evidence/raw
+`cec50726…3b688aa1` / `0a90faea…21174899`; opponent-front **219-322
+(104/104)** with `d7b5ddc1…e1b4da8` / `727e277d…d1a0002a`. `MOVE_HOWL`
+independently remains **102/102 twice fresh in both orientations**. Coverage
+is **107 exact / 0 partial / 0 staged / 169 unsupported** and the
+`noise-line-roar-effect` track is complete. No gameplay, boundary, barrier,
+canonical-dependency or main-doc change.
+
 ## MOVE_ROAR corrected source/probe checkpoint; remains unsupported (2026-07-30)
 
 **State:** `MOVE_ROAR` remains unsupported; coverage is unchanged at **106

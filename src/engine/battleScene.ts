@@ -817,6 +817,7 @@ import {
   sceneOnFollowMeView,
   sceneOnRestView,
   sceneOnHowlView,
+  sceneOnRoarView,
   sceneOnSweetKissView,
   sceneOnAttractView,
   sceneOnSporeView,
@@ -844,6 +845,7 @@ import {
   type SceneOnFollowMePresentationState,
   type SceneOnRestPresentationState,
   type SceneOnHowlPresentationState,
+  type SceneOnRoarPresentationState,
   type SceneOnSweetKissPresentationState,
   type SceneOnAttractPresentationState,
   type SceneOnPresentPresentationState,
@@ -1163,6 +1165,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 /** S7 slice L-3 (docs/faint-switch-notes.md §5): opponent front-sprite corner = `(144, 8 + gMonFrontPicCoords[species].yOffset)` - Pidgeotto's `yOffset` is 11, byte-exact-verified against the oracle at `(144,19)` (0/1087 mismatched px). */
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const houndourFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HOUNDOUR!;
 const delibirdFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DELIBIRD!;
 const mareepFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MAREEP!;
 const PIDGEOTTO_CORNER = { x: 144, y: 19 };
@@ -2234,6 +2237,7 @@ const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+const houndourBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HOUNDOUR!;
 const magbyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAGBY!;
 const mareepBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAREEP!;
 const battleAnimItemHeal = battleAnimItemHealAsset as BattleAnimItemHealAsset;
@@ -24344,6 +24348,133 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "LOUDRED used" : "Foe LOUDRED used",
       "HOWL!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "ROAR") {
+    const roarState = state as SceneOnRoarPresentationState;
+    const view = sceneOnRoarView(roarState);
+    const displayed = sceneOnRoarView({ ...roarState, age: roarState.age - 1 });
+    const affineDisplayed = sceneOnRoarView({
+      ...roarState,
+      age: roarState.age - 2,
+    });
+    const playerToOpponent =
+      view.attacker.species === "HOUNDOUR"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "HOUNDOUR"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged ROAR pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const houndourSource = playerToOpponent
+      ? houndourBackSprite : houndourFrontSprite;
+    const houndour = playerToOpponent
+      ? houndourSource
+      : { ...houndourSource, tileset: subTileset(houndourSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const drawAttacker = () => {
+      if (affineDisplayed.attackerTransform.active) {
+        // `monbg` retains the untransformed attacker as target-2 while the
+        // affine OBJ is force-blended over it at 8:8.
+        drawSpriteSheet(
+          fb,
+          houndour.tileset,
+          houndour.palette,
+          view.attacker.geometry.spriteCorner.x,
+          view.attacker.geometry.spriteCorner.y,
+        );
+        drawSpriteSheetAffineStretchBlendedOverFb(
+          fb,
+          houndour.tileset,
+          houndour.palette,
+          view.attacker.geometry.spriteCorner.x,
+          view.attacker.geometry.spriteCorner.y,
+          affineDisplayed.attackerTransform.matrix.a,
+          affineDisplayed.attackerTransform.matrix.d,
+          8,
+          8,
+          true,
+          "live",
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          houndour.tileset,
+          houndour.palette,
+          view.attacker.geometry.spriteCorner.x,
+          view.attacker.geometry.spriteCorner.y,
+        );
+      }
+    };
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + onixIdle.x2 + displayed.targetX2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+    for (const line of displayed.noiseLines) {
+      drawSpriteSheetFlipped(
+        fb,
+        subTileset(howlArt.noiseLine.tileset, line.frame * 4, 4),
+        howlArt.noiseLine.palette,
+        line.centerX - 16,
+        line.centerY - 16,
+        line.hFlip,
+        line.vFlip,
+      );
+    }
+    const profile = roarState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "HOUNDOUR",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "HOUNDOUR" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "HOUNDOUR used" : "Foe HOUNDOUR used",
+      "ROAR!",
       99,
     );
     return;

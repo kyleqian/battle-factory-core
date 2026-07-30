@@ -30,7 +30,7 @@ describe("MOVE_ROAR dense evidence fixtures", () => {
     expect(opponent.overrides.parties.player.some((mon) => mon.species === 228)).toBe(false);
   });
 
-  it("pins the portable receipt hashes without promoting Roar", () => {
+  it("pins the exact portable receipt and production seam inputs", () => {
     for (const path of [
       "tools/compare/fixtures/roar-player-houndour-opponent-onix.json",
       "tools/compare/fixtures/roar-opponent-houndour-player-onix.json",
@@ -40,6 +40,9 @@ describe("MOVE_ROAR dense evidence fixtures", () => {
       expect(fixture.sourceWindow.frameCount).toBeGreaterThan(90);
       expect(fixture.evidenceSha256).toMatch(/^[0-9a-f]{64}$/);
       expect(fixture.rawRgbSha256).toMatch(/^[0-9a-f]{64}$/);
+      expect(fixture.attacker.species).toBe("HOUNDOUR");
+      expect(fixture.target.species).toBe("ONIX");
+      expect(fixture.appStage.presentationAge).toBe(0);
     }
   });
 });
