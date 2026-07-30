@@ -28,6 +28,12 @@ SAND_ATTACK content now resolves its kickoff and opponent-target accuracy-fall
 text from the staged real kernel event stream through the generic stat-down
 bridge (`e50bf210`, **190/190**); all four raw turn-13 text literals were
 deleted. Its later DRAGON_BREATH half is a separate, still-unwired window.
+Resolution Slice 6 (`985ec1fa`, `ae94cc4c`) also retires the Turn-17
+KO/result/trainer-loss render dispatch: the exact adapter consumes an immutable
+typed terminal boundary, frozen result/loss strings, and presentation-relative
+dismiss clocks without inspecting a turn flag (**255/255, 147/147, 255/255,
+118/118**). The old post-win fields are still mirrored for the downstream
+canonical post-win owner, so this entry remains open.
 
 **Not a request to rewrite it.** The windows it renders are individually
 oracle-exact and that evidence is worth keeping. The debt is the *keying*.
