@@ -17,7 +17,7 @@ function scenario(playerSpecies: number) {
   const segments: Segment[] = [
     { frames: 2, buttons: ["A"] },
     { frames: 30, buttons: [] },
-    ...mash(65),
+    ...mash(52),
   ];
   const totalFrames = segments.reduce((sum, segment) => sum + segment.frames, 0);
   const captureFrames = Array.from(
