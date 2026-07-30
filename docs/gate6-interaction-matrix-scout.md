@@ -68,7 +68,7 @@ the state transition.
 | weather x status | Sun prevents a new freeze; weather itself is not a major-status cure. `seteffect` checks sun before Ice type/Magma Armor (`battle_script_commands.c:2380-2393`). | `tests/battleScriptHitChainOpcode.test.ts` (freeze applies without weather and is blocked by active sun) | R1 receipts the RNG-gated Ice Beam pair on two freeze-producing seeds. |
 | weather x volatile | Sand/hail chip skips underground and underwater; weather also changes Thunder's accuracy while semi-invulnerability is checked first (`battle_script_commands.c:1062-1094`, `7602-7640`). | `tests/battleScriptDamagingWeatherOpcode.test.ts` (underground weather chip); `tests/gate6WeatherVolatileInteractions.test.ts` (R2 full weather pass, damage/message order) | R2 complete: Dig under Hail, then surface, paired with a grounded two-turn control. |
 | weather x held-item | The only shared scheduling boundary is end-turn: abilities, normal items, then Leech Seed/poison are sequenced by `DoBattlerEndTurnEffects` (`battle_util.c:1494-1533`); weather damage is a separate script loop (`battle_scripts_1.s:3200-3222`). No weather-specific held-item branch exists. | `tests/gate6KernelInteractions.test.ts` (K1: sand chip precedes Leftovers/Sitrus activation, exact HP event sequences, Sitrus threshold crossing, no-weather controls) | K1 complete (kernel proof; event order matched source, no oracle promotion needed). |
-| weather x ability | Cloud Nine/Air Lock suppress **all** `WEATHER_HAS_EFFECT`; Forecast changes Castform's type in rain/sun/hail; Rain Dish, Swift Swim and Chlorophyll read active weather; Sand Veil changes accuracy (`battle_util.h:47-48`; `battle_util.c:2396-2427,2601-2648`; `battle_script_commands.c:1152-1155`). Air Lock is UNREACHABLE; Cloud Nine/Forecast and the speed/end-turn abilities are legal. | `tests/battleScriptDamagingWeatherOpcode.test.ts` (Cloud Nine, Sand Veil); `tests/battleScriptSwitchinOpcode.test.ts` (weather entry scheduling) | R3, R4: Cloud Nine removal restores weather, then Forecast/type and speed timing. |
+| weather x ability | Cloud Nine/Air Lock suppress **all** `WEATHER_HAS_EFFECT`; Forecast changes Castform's type in rain/sun/hail; Rain Dish, Swift Swim and Chlorophyll read active weather; Sand Veil changes accuracy (`battle_util.h:47-48`; `battle_util.c:2396-2427,2955-2970`; `battle_script_commands.c:1152-1155`). Air Lock is UNREACHABLE; Cloud Nine/Forecast and the speed/end-turn abilities are legal. | `tests/battleScriptDamagingWeatherOpcode.test.ts` (Cloud Nine, Sand Veil); `tests/battleScriptSwitchinOpcode.test.ts` (weather entry scheduling); `tests/gate6WeatherAbilityInteractions.test.ts` (R4 Forecast form/type pairs, Weather Ball type/power under every weather, exact two-seed damage) | R4 complete: same-turn Rain Dance Forecast pass, Water Weather Ball, paired clear-weather damage, and five-turn expiry/revert. R3 remains the Cloud Nine removal proof. |
 | weather x stat-stage | Accuracy calculation applies accuracy/evasion stages before sun-Thunder and Sand Veil modifiers (`battle_script_commands.c:1128-1155`). | `tests/gate6KernelInteractions.test.ts` (K2: sun/rain/sand across stages -2/0/+2; sun boundaries 30/50/83, Sand Veil 33/56/92, rain Thunder zero-RNG guaranteed hit) | K2 complete — and it caught a real kernel defect: `battleScriptHitChainOpcode.ts` hardcoded weather inactive in accuracy checks (rain-Thunder bypass, sun-Thunder 50, Sand Veil all missing); fixed source-cited in `450cf532`. |
 | weather x switching/entry | Entry weather abilities set permanent weather exactly on switch-in; subsequent same-weather entries are a no-op (`battle_util.c:2485-2558`). Drizzle/Sand Stream/Drought are **UNREACHABLE (3)** at L50; Cloud Nine is a legal entry suppression case. | `tests/battleScriptSwitchinOpcode.test.ts` (Drizzle/Sand Stream/Drought unit mechanics) | R3 oracle uses legal Golduck Cloud Nine against manually created Rain Dance, not unreachable setter staging. |
 | weather x immunity/absorb | Type immunity (Rock/Ground/Steel vs sand, Ice vs hail), Sand Veil, and underground/underwater suppress weather chip (`battle_script_commands.c:7606-7640`); Cloud Nine globally suppresses the predicate (`battle_util.h:47-48`). | `tests/battleScriptDamagingWeatherOpcode.test.ts`; `tests/gate6WeatherVolatileInteractions.test.ts` (R2) | R2/R3 make the pairwise boundaries explicit. |
@@ -105,7 +105,7 @@ are legal inert duplicates with `[Tackle,Tackle,Tackle,Tackle]`.
 | R1 | `gate6-r1-sun-off.json`: faster player Vileplume uses Sunny Day, then constrained Articuno uses Ice Beam. `gate6-r1-control-off.json`: the identical parties/turn use Growth, a legal non-weather move with the same zero-RNG setup shape. | On seeds selected because the control's Ice Beam secondary roll freezes, both scenarios consume the same move RNG states; only active sun prevents status `0x20`. |
 | R2 | `gate6-r2-hail-off.json`: A: Dugtrio, Dig x4; B: Articuno, Hail x4. `gate6-r2-hail-control-off.json` replaces Dig with Growl x4. Hail is required here: Dugtrio's Ground type independently makes the suggested Sandstorm pairing permanently immune. | Active underground ignores chip; surfacing re-enables exact `floor(maxHP/16)` chip; the grounded control takes it every end turn. |
 | R3 | A: Golduck abilitySlot=1 (Cloud Nine), Rain Dance; B: neutral Tackle x4. Switch Golduck out after rain is live. | Weather flag remains but chip/accuracy resumes only after Cloud Nine leaves. |
-| R4 | A: Castform Forecast, Weather Ball; B: Rain Dance x4. | Entry/form/update gives Water type and Weather Ball changes; this is the Forecast boundary. |
+| R4 | `gate6-r4-off.json`: A: Castform Forecast, Weather Ball x4; B: Rain Dance x4. `gate6-r4-control-off.json` changes only the opponent move to Splash x4. | Rain Dance's same-turn form pass sets Water type/form before Weather Ball; the paired control stays Normal. The long rain fixture also receipts expiry and Normal reversion. |
 | R5 | `gate6-r5-off.json`: Chesto Snorlax uses Rest twice versus Tackle x4 (the first full-HP failure stages real damage; the second Rest succeeds). `gate6-r5-lum-off.json`: Lum Machamp versus Duskull Confuse Ray x4. | Chesto clears Rest sleep/Nightmare and is consumed only after its wake message; Lum clears the RNG-duration confusion and is consumed after its distinct cure message. |
 | R6 | A: Starmie Natural Cure, Recover; bench: neutral. B: Muk Toxic x4. Apply Toxic, voluntarily switch, then return. | Departing Starmie party status becomes clear; ordinary incoming state is rebuilt. |
 | R7 | A: Ursaring Guts, Facade; B: Ninetales Will-O-Wisp x4. | Burn appears and Facade damage/stat result is the Guts branch. |
@@ -126,6 +126,75 @@ or ROM-only randomness at those boundaries; promote only a mismatch to a
 mechanicLab trace.
 
 ## Completed receipt notes
+
+### R4 — same-turn Forecast update, typed Weather Ball, and expiry revert
+
+Castform has two concrete Frontier carriers, set IDs 204 and 309
+(`FRONTIER_MON_CASTFORM_1`/`_2`, `battle_frontier_mons.h:1431-1437,
+2166-2172`), matching the census's two Level-50-eligible Forecast carriers.
+The mechanicLab base constructor still uses its legal challenge-2 band; the
+complete party override installs source species 385, ability slot 0
+(Forecast), and four Weather Ball slots before `CB2_InitBattle`.  Fast
+Blissey (Speed 117 versus Castform's 75) carries four Rain Dance slots in
+`gate6-r4-off.json`; the paired control changes only those four slots to
+Splash.  Both retain three complete records per side and inert benches.
+
+The prediction was written before the final two-seed receipts.  Rain Dance
+must set rain and call `BattleScript_WeatherFormChanges` on the same move
+(`battle_scripts_1.s:1744-1755,3999-4005`); `CastformDataTypeChange` must
+write both types to Water and return `CASTFORM_WATER + 1` before the form
+animation (`battle_util.c:2396-2427`; `battle_script_commands.c:9744-9755`).
+Weather Ball is source base power 50/Normal
+(`battle_moves.h:4046-4056`), but active rain makes its dynamic type Water
+and sets `dmgMultiplier = 2` (`battle_script_commands.c:9787-9805`).  A
+focused pre-receipt kernel calculation corrected the initial handwritten
+control assumption: Normal is physical in Gen III, so clear Weather Ball
+uses Attack 99/Defense 30, not the special stats.  The final predicted
+pre-random values were therefore clear
+`CalculateBaseDamage=74 -> STAB 111` (94--111 spread), and rain
+`CalculateBaseDamage=15 -> Weather Ball 2x 30 -> STAB 45` (38--45 spread).
+The rain calculation uses Sp. Atk 67/Sp. Def 155 and includes the source rain
+Water boost (`pokemon.c:3287-3344,3371`); `Cmd_damagecalc` applies Weather
+Ball's multiplier at `battle_script_commands.c:1290-1297`, and type/STAB and
+the final 85--100% roll are at `1355-1373,1638-1651`.
+
+Both seeds match that prediction and use the same damage draw within each
+rain/control pair.  Seed `1` returns `52212` (`%16 = 4`): clear damage is
+exactly `floor(111*96/100) = 106`, while rain damage is
+`floor(45*96/100) = 43`.  The HP receipts are control frame 415,
+`330 -> 224`, raw-RGB SHA-256
+`5760dd058e588b3c3bb80177bb4005f2a853a67334a24b2c79ac1a442ee35c4e`,
+and rain frame 564, `330 -> 287`, hash
+`329c289c035ca2c0d8da3e24660e1812fb6a324256b1a9dceef63f064fc64499`.
+Seed `324508639` returns `33692` (`%16 = 12`): clear is exactly `97`
+(frame 406, `330 -> 233`, hash
+`04a47a45812c4c4571a271c23d595c357a752e932498e038983de41bee6671f7`)
+and rain is exactly `39` (frame 560, `330 -> 291`, hash
+`e32b64d7373a190d1cb8fb154edde7998151094cbdd0534b4783628ba3d12ab0`).
+The paired final damage RNG states are respectively `3421819359` and
+`2208080798`; the weather change itself consumes no move RNG.
+
+The Forecast timing is seed-independent.  Rain becomes active at frame 71;
+Castform is still Normal there.  Its battle types become `[11,11]` at frame
+194 while Rain Dance is still the current move (hash
+`10fb4c591181e6e3bc28f859e75995e47ef75746dea36a1911876e76e05bc1a2`);
+form index 2 becomes visible at frame 245 (hash
+`bc791677d2827e8cc42dc8daf10762232252398ad331ecce4723271ad5f1e42b`).
+Weather Ball does not become current until frame 409.  This is the source's
+same-turn weather-script ability pass, not a deferred switch-in update.
+
+The five-turn fixture also reaches the neutral boundary.  On seed `1`, rain
+expires at frame 4105, types revert to `[0,0]` at frame 4192 (hash
+`a43eff7ce84863916d692fe990f04dd948aae1320063a44a3663b0eb15ba812d`),
+and form returns to 0 at frame 4244 (hash
+`e2fda9aba12e7d769d2b1d788c4bc563ae3ce0e8576d62246476db5802196c44`).
+Seed `324508639` gives the same ordered boundary at frames
+4110/4197/4249; the Normal-type and Normal-form hashes are respectively
+`0bf3388a118c4d1628bd48a88d0bea1b0af7cffd3924e7a868ee59250ab3400f`
+and `2002ddfd619e46d795c47d31f5312079f901913a1ec61983e1d5a96bdbcd9d61`.
+The Tier-1 sibling pins Forecast's clear/sun/rain/hail form/type results,
+Weather Ball's Normal/Water/Rock/Fire/Ice type and 1x/2x multiplier, Cloud
+Nine suppression, the two pre-random values, and both exact seed rolls.
 
 ### R10 — Oblivious Attract rejection and Soundproof partial immunity
 
