@@ -15,10 +15,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 730 — [BOUNDED MAIN WORKER 2026-07-30 ~00:53] Intro Slices 1-2 complete — generated pre-send-out is 373/373
 
-- **State:** implementation commits `01320712` + pending Slice 2; focused
-  acceptance is green at **2 files / 4 tests**. Fresh private OFF probe
-  comparison is **373/373 exact** across B+0..+372 (route 1171..1543).
-  Full suite/build and the immutable §3.2 table remain for end acceptance.
+- **State:** implementation commits `01320712` + `a19690e0`; focused
+  acceptance **2 files / 4 tests**, fresh private OFF probe **373/373**
+  exact across B+0..+372 (route 1171..1543), all **25/25** immutable §3.2
+  rows plus generated command **128/128** exact. Full suite/build green at
+  **531 files / 5425 tests + 1 deliberate animation-lane skip / 513 modules**.
 - **Did:** the generated round owner now projects its pending `battleStart`
   into a frozen typed command: source trainer/facility-class/trainer-class/
   pic identities, both complete three-row kernel parties, active indexes,
@@ -28,8 +29,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   BeginBattleIntro-relative lifecycle through the shared slide, typed
   summaries, printer, cursor, and first accepted A; the existing one-VBlank
   display lag supplies the probe rebase.
-- **Next:** run the complete immutable §3.2 + generated-command acceptance,
-  then full suite/build once. Intro slices 3-4 and routing remain later work.
+- **Next:** intro Slice 3 (typed opponent sent-out text, trainer exit,
+  ball/release/materialization/healthbox) remains the next main-lane step;
+  Slice 4 and the separately designed interactive routing flip follow.
 - **Notes:** regenerated via `tools/run-mgba-probe.py` in a fresh temp dir;
   no public route exists, so no trace committed. No core routing, capture
   thinning, recording import, barrier/ratchet pin, battle/turn/absolute-tick
