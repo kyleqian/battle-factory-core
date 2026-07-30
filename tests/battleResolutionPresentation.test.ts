@@ -475,6 +475,41 @@ describe("battle resolution presentation receipt ownership", () => {
       type: "message",
       lines: ["BUG CATCHER DESTIN sent", "out MACHOP!"],
     });
+    const summaryState = atRenderClock(resolution, 0, 0);
+    const summarySegment = Object.freeze({
+      ...resolution.segments[0]!,
+      commands: Object.freeze([
+        Object.freeze({
+          type: "party-summary" as const,
+          eventSequence: -1,
+          battler: 1 as const,
+          visible: true,
+          states: Object.freeze([
+            "healthy", "healthy", "empty", "empty", "empty", "empty",
+          ] as const),
+        }),
+        ...resolution.segments[0]!.commands,
+      ]),
+    });
+    const summaryView = createBattleResolutionPresentationRenderView({
+      ...summaryState,
+      segments: Object.freeze([summarySegment]),
+    });
+    expect(summaryView.partySummary).toEqual({
+      battler: 1,
+      states: ["healthy", "healthy", "empty", "empty", "empty", "empty"],
+    });
+    const incomingView = createBattleResolutionPresentationRenderView({
+      ...summaryState,
+      segments: Object.freeze([summarySegment]),
+      commandIndex: 3,
+    });
+    expect(incomingView.field.opponent).toMatchObject({
+      partyIndex: 1,
+      name: "MACHOP",
+      hp: 80,
+      maxHP: 80,
+    });
   });
 
   it("fails closed on unpaired HP, missing switch-in markers, and out-of-order sequences", () => {

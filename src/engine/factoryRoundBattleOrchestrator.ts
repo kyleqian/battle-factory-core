@@ -894,9 +894,6 @@ function commitCompletedResolutionCommand(
   resolution: BattleResolutionPresentationState,
   command: BattleResolutionPresentationCommand,
 ): FactoryBattlePresentationBoundaries {
-  if (command.type === "party-summary" || command.type === "switch-in") {
-    return fail(`Slice 4 cannot commit ${command.type} presentation`);
-  }
   const displayed = createBattleResolutionPresentationRenderView(resolution).field;
   return Object.freeze(boundaries.map((boundary, battler) => Object.freeze({
     ...boundary,
@@ -906,10 +903,24 @@ function commitCompletedResolutionCommand(
       command.type === "status" && command.battler === battler
         ? command.after
         : boundary.displayedStatus1,
+    partyIndex:
+      command.type === "switch-in" && command.battler === battler
+        ? command.toPartyIndex
+        : boundary.partyIndex,
     spriteVisible:
       command.type === "faint" && command.battler === battler
         ? false
-        : boundary.spriteVisible,
+        : command.type === "switch-in" && command.battler === battler
+          ? true
+          : boundary.spriteVisible,
+    idleEpoch:
+      command.type === "switch-in" && command.battler === battler
+        ? 0
+        : boundary.idleEpoch,
+    moveCursor:
+      command.type === "switch-in" && command.battler === battler
+        ? 0
+        : boundary.moveCursor,
   }))) as unknown as FactoryBattlePresentationBoundaries;
 }
 
@@ -1021,7 +1032,24 @@ export function advanceFactoryRoundBattleResolution(
     ) {
       if (newKeys.has("A")) {
         if (resolution.forcedRequest === null) {
-          return fail("Slice 4 only dismisses faint messages at a forced-party boundary");
+          const nextCommandIndex = resolution.commandIndex + 1;
+          const nextResolution = withResolutionLifecycle(
+            resolution,
+            nextCommandIndex,
+            nextCommandIndex >= segment.commands.length
+              ? "next-command-handoff"
+              : "presenting",
+            0,
+          );
+          return Object.freeze({
+            ...state,
+            battleResolutionPresentation: nextResolution,
+            battlePresentationBoundaries: commitCompletedResolutionCommand(
+              boundaries,
+              nextResolution,
+              command,
+            ),
+          });
         }
         return Object.freeze({
           ...state,
@@ -1087,7 +1115,26 @@ export function advanceFactoryRoundBattleResolution(
       });
     }
     if (resolution.forcedRequest === null) {
-      return fail("Slice 4 only dismisses faint messages at a forced-party boundary");
+      const segment = resolution.segments[resolution.segmentIndex]!;
+      const command = segment.commands[resolution.commandIndex]!;
+      const nextCommandIndex = resolution.commandIndex + 1;
+      const nextResolution = withResolutionLifecycle(
+        resolution,
+        nextCommandIndex,
+        nextCommandIndex >= segment.commands.length
+          ? "next-command-handoff"
+          : "presenting",
+        0,
+      );
+      return Object.freeze({
+        ...state,
+        battleResolutionPresentation: nextResolution,
+        battlePresentationBoundaries: commitCompletedResolutionCommand(
+          boundaries,
+          nextResolution,
+          command,
+        ),
+      });
     }
     return Object.freeze({
       ...state,

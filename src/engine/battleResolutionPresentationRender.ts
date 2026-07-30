@@ -96,6 +96,10 @@ export type BattleResolutionPresentationRenderView = Readonly<{
     battler: 0 | 1;
     partyStates: readonly import("./battleResolutionPresentation.ts").PartyBallState[];
   }> | null;
+  partySummary: Readonly<{
+    battler: 0 | 1;
+    states: readonly import("./battleResolutionPresentation.ts").PartyBallState[];
+  }> | null;
 }>;
 
 export type BattleResolutionPresentationRenderAssets = Readonly<{
@@ -305,6 +309,7 @@ export function createBattleResolutionPresentationRenderView(
   let field = state.field;
   let latestMessage: readonly string[] | null = null;
   let switchIn: BattleResolutionPresentationRenderView["switchIn"] = null;
+  let partySummary: BattleResolutionPresentationRenderView["partySummary"] = null;
   const fainted = new Set<0 | 1>();
   if (state.lifecycle.phase === "presenting-switch-in") {
     const switchCommand = segment.commands.find(
@@ -348,6 +353,12 @@ export function createBattleResolutionPresentationRenderView(
     field = applyCompletedCommand(field, completed);
     if (completed.type === "message") latestMessage = completed.lines;
     if (completed.type === "faint") fainted.add(completed.battler);
+    if (completed.type === "switch-in") fainted.delete(completed.battler);
+    if (completed.type === "party-summary") {
+      partySummary = completed.visible
+        ? Object.freeze({ battler: completed.battler, states: completed.states })
+        : null;
+    }
   }
 
   const command = segment.commands[state.commandIndex] ?? null;
@@ -461,10 +472,13 @@ export function createBattleResolutionPresentationRenderView(
           }),
         });
       }
-    } else if (command.type !== "turn-end") {
-      throw new Error(
-        `battle resolution non-KO renderer cannot render ${command.type} commands`,
-      );
+    } else if (command.type === "party-summary") {
+      partySummary = command.visible
+        ? Object.freeze({ battler: command.battler, states: command.states })
+        : null;
+    } else if (command.type === "switch-in") {
+      field = replaceFieldBattler(field, command.battler, command.incoming);
+      fainted.delete(command.battler);
     }
   } else if (
     state.lifecycle.phase !== "next-command-handoff"
@@ -534,6 +548,7 @@ export function createBattleResolutionPresentationRenderView(
         ? "blank"
         : "message",
     switchIn,
+    partySummary,
   });
 }
 

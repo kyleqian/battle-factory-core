@@ -30546,6 +30546,13 @@ export function renderBattleResolutionSceneOffView(
       composePlayerHealthbox(playerHealthboxAssets, view.healthboxes.player),
     );
   }
+  if (view.partySummary) {
+    drawTypedPartyStatusSummary(
+      fb,
+      view.partySummary.battler,
+      view.partySummary.states,
+    );
+  }
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
 
   if (view.effect?.type === "stat") {
