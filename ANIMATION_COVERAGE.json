@@ -489,7 +489,7 @@
         "the pure source-relative reducer ports ANIM_TAG_NOISE_LINE load/free, all six gRoarNoiseLineSpriteTemplate fixed-point lifecycles and frame/flip programs, AnimTask_DeepInhale's complete affine program, back/front y-offset variants, x2 shake, high-pitch cry task/audio, script waits, OAM/matrix/display latches, allocation order, and first inactive cleanup",
         "the typed Scene-ON seam carries only resolved LOUDRED/ONIX presentation geometry and immutable Attack-stage/HP state; source-extracted Loudred front/back and NOISE_LINE art plus shared ONIX/chrome pass software task/sprite state, hardware OAM/matrices, tags/palettes/buffers, registers, audio, raw RGB, and every production framebuffer without applying Howl's stat outcome or consuming gameplay RNG",
         "howlPortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves all 102 immutable dense source/hardware/audio/reducer/seam/framebuffer frames twice fresh in both orientations through first inactive cleanup",
-        "MOVE_ROAR remains unsupported: source audit proves its distinct ScaleMonAndRestore, SlideOffScreen, double-cry/wait tasks, monbg/splitbgprio/alpha choreography, and cleanup; it lacks independent complete legal both-orientation twice-fresh dense acceptance",
+        "MOVE_ROAR remains unsupported despite a corrected independent source/probe checkpoint: player set-119 Houndour retains its exact CRUNCH/EMBER/ROAR/PROTECT set and controller input selects its third-slot Roar, while only the opponent Houndour has four Roars to constrain normal AI choice. Complete legal Scene-ON parties reproduce every first-active-through-first-inactive source receipt twice fresh at player-back 252-350 (99/99), evidence/raw cec50726a292d511a1a8317a501a60256c1932c9bb0b4ec42e026ef43b688aa1/0a90faea42c2ccf0886c633ec5234ad867aa54df51193c7a04e56cec21174899, and opponent-front 219-322 (104/104), d7b5ddc1dea422802dbb466b050e7830259e891eb0acf5323530c4be3e1b4da8/727e277d1fae2dbb76b10948497badd0390c4a1b206719218cfcd3a8d1a0002a. It proves ScaleMonAndRestore, SlideOffScreen, double-cry/wait, monbg/splitbgprio/alpha choreography, six NOISE_LINE lifecycles, and cleanup, but has no independent reducer, typed production seam, compositor, or framebuffer equality",
         "no damage, stat-stage outcome, gameplay RNG, controller selection, turn order, round/facility state, animation boundary list, or unsupported barrier changed"
       ],
       "evidence": [
@@ -501,6 +501,15 @@
         "tools/compare/howlPortable.ts",
         "tools/compare/howlSourceAudit.ts",
         "tools/compare/extractHowlAssets.ts",
+        "tools/battle-lab/mechanic-roar-player-houndour-opponent-onix.json",
+        "tools/battle-lab/mechanic-roar-opponent-houndour-player-onix.json",
+        "tools/compare/fixtures/roar-player-houndour-opponent-onix.json",
+        "tools/compare/fixtures/roar-opponent-houndour-player-onix.json",
+        "tools/compare/roarProbe.py",
+        "tools/compare/roarPortable.ts",
+        "tools/compare/roarSourceAudit.ts",
+        "tests/animation/roarSourceCheckpoint.test.ts",
+        "tests/animation/roarEvidence.test.ts",
         "src/animation/assets/howl.json",
         "src/animation/howl.ts",
         "src/animation/sceneOnPresentation.ts",
@@ -2960,7 +2969,7 @@
         "MOVE_HOWL",
         "MOVE_ROAR"
       ],
-      "goal": "MOVE_HOWL independently proves its complete NOISE_LINE/RoarEffect, DeepInhale, high-pitch cry, waits and cleanup in both orientations at 102/102 source/task/sprite/OAM/matrix/tag/register/audio/raw-RGB and framebuffer frames, reproduced twice. MOVE_ROAR remains unsupported: it additionally needs ScaleMonAndRestore, SlideOffScreen, double-cry/wait tasks, monbg/splitbgprio/alpha choreography, and independent complete dense acceptance."
+      "goal": "MOVE_HOWL independently proves its complete NOISE_LINE/RoarEffect, DeepInhale, high-pitch cry, waits and cleanup in both orientations at 102/102 source/task/sprite/OAM/matrix/tag/register/audio/raw-RGB and framebuffer frames, reproduced twice. MOVE_ROAR has corrected source/probe-only twice-fresh legal receipts at 99/99 and 104/104: player Houndour uses its real four-move set with DOWN to third-slot Roar; only the opponent duplicates Roar for AI constraint. It remains unsupported until an independent reducer, typed seam, compositor, and complete live framebuffer proof exist."
     },
     {
       "id": "letter-z-rest",

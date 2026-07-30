@@ -1,0 +1,9 @@
+{
+  "schema": "roar-portable-evidence/v1",
+  "orientation": "player-back",
+  "scenario": "tools/battle-lab/mechanic-roar-player-houndour-opponent-onix.json",
+  "probe": "tools/compare/roarProbe.py",
+  "sourceWindow": { "startFrame": 252, "endFrame": 350, "frameCount": 99 },
+  "evidenceSha256": "cec50726a292d511a1a8317a501a60256c1932c9bb0b4ec42e026ef43b688aa1",
+  "rawRgbSha256": "0a90faea42c2ccf0886c633ec5234ad867aa54df51193c7a04e56cec21174899"
+}

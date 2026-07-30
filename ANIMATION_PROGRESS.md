@@ -1,5 +1,28 @@
 # Animation coverage
 
+## MOVE_ROAR corrected source/probe checkpoint; remains unsupported (2026-07-30)
+
+**State:** `MOVE_ROAR` remains unsupported; coverage is unchanged at **106
+exact / 0 partial / 0 staged / 170 unsupported**. The source audit pins
+challenge-0 set **119 `FRONTIER_MON_HOUNDOUR`** (species 228, Docile,
+Sp. Atk/HP, Charcoal) and its distinct ScaleMonAndRestore, SlideOffScreen,
+double-cry/wait, monbg/splitbgprio/8:8-alpha, six-NOISE_LINE, and cleanup
+body.
+
+**Evidence:** both complete legal Scene-ON parties are mechanically
+asymmetric: player Houndour retains exact **CRUNCH/EMBER/ROAR/PROTECT** and
+the controller presses DOWN to choose slot three; only opponent Houndour uses
+four Roars to constrain AI. Every first-active through first-inactive frame
+reproduces twice fresh: player-back **252-350 (99/99)** evidence/raw
+`cec50726…3b688aa1` / `0a90faea…21174899`; opponent-front **219-322
+(104/104)** `d7b5ddc1…e1b4da8` / `727e277d…d1a0002a`. The shared
+parameterized recorder also reran Howl's complete receipts unchanged.
+
+**Next:** separately port a source-relative Roar reducer, narrow typed
+presentation seam, and production compositor, then prove every dense frame
+in both orientations; this checkpoint supplies no production support or exact
+promotion.
+
 ## MOVE_PRESENT promoted exact; green-sparkle-moonlight complete (2026-07-30)
 
 **Verdict:** `MOVE_PRESENT` is exact for all four committed branch/orientation

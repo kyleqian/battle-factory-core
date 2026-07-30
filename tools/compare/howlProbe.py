@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Complete Scene-ON Howl source/hardware/audio/raw-RGB receipt."""
 from __future__ import annotations
-import hashlib, json, subprocess, sys
+import hashlib, json, os, subprocess, sys
 from pathlib import Path
 
 if len(sys.argv) != 4:
@@ -13,9 +13,12 @@ sys.path.insert(0, str(HARNESS / "oracle"))
 from battle_lab import BattleLab, validate_request  # noqa: E402
 from emerald_core import EmeraldOracle  # noqa: E402
 
-MOVE = 336
-MOVE_NAME = "Move_HOWL"
-END_NAME = "Move_BULK_UP"
+MOVE = int(os.environ.get("POKEBENCH_ANIM_PROBE_MOVE", "336"))
+MOVE_NAME = os.environ.get("POKEBENCH_ANIM_PROBE_MOVE_NAME", "Move_HOWL")
+END_NAME = os.environ.get("POKEBENCH_ANIM_PROBE_END_NAME", "Move_BULK_UP")
+EVIDENCE_SCHEMA = os.environ.get(
+    "POKEBENCH_ANIM_PROBE_SCHEMA", "howl-dense-evidence/v1",
+)
 TEMPLATE = "gRoarNoiseLineSpriteTemplate"
 CALLBACKS = ("AnimRoarNoiseLine", "AnimRoarNoiseLine_Step")
 
@@ -233,7 +236,7 @@ def main() -> None:
     if source[-1]["gAnimScriptActive"] or source[-1]["visualTaskCount"]:
         raise RuntimeError(f"{MOVE_NAME} first cleanup retained animation")
     result = {
-        "schema": "howl-dense-evidence/v1",
+        "schema": EVIDENCE_SCHEMA,
         "setup": setup,
         "sourceWindow": {
             "startFrame": source[0]["frame"],
