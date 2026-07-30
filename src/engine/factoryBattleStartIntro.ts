@@ -8,10 +8,17 @@
 
 import type { GbaButton } from "../input.ts";
 import {
+  advanceBattleCommandPresentation,
+  type BattleCommandPresentationState,
+} from "./battleCommandPresentation.ts";
+import {
+  generatedBattleStartCommandReady,
   generatedBattleStartOpponentReleaseStarted,
+  generatedBattleStartPlayerReleaseStarted,
   generatedBattleIntroVisualPhase,
   isGeneratedBattleIntroInputReady,
 } from "./battleScene.ts";
+import { factoryBattleStartField } from "./factoryBattleStartPresentation.ts";
 import type {
   FactoryBattleStartPresentationCommand,
 } from "./factoryBattleStartPresentation.ts";
@@ -22,7 +29,9 @@ export type FactoryBattleStartIntroPhase =
   | "trainer-message"
   | "awaiting-acknowledgement"
   | "opponent-message"
-  | "opponent-release";
+  | "opponent-release"
+  | "player-release"
+  | "command-ready";
 
 export type FactoryBattleStartIntroState = Readonly<{
   command: FactoryBattleStartPresentationCommand;
@@ -46,6 +55,8 @@ export function factoryBattleStartIntroPhase(
   state: FactoryBattleStartIntroState,
 ): FactoryBattleStartIntroPhase {
   if (state.acknowledgedElapsed !== null) {
+    if (generatedBattleStartCommandReady(state)) return "command-ready";
+    if (generatedBattleStartPlayerReleaseStarted(state)) return "player-release";
     return generatedBattleStartOpponentReleaseStarted(state)
       ? "opponent-release"
       : "opponent-message";
@@ -72,4 +83,27 @@ export function advanceFactoryBattleStartIntro(
     elapsed: state.elapsed + 1,
     acknowledgedElapsed,
   });
+}
+
+/**
+ * Converts the completed intro into the exact typed command checkpoint used
+ * by capture 8 of battle-command-generated-off. The caller supplies the real
+ * fresh-battle boundary; this lifecycle only verifies its frozen field and
+ * advances the shared controller reducer to that already-proven checkpoint.
+ */
+export function settleFactoryBattleStartCommand(
+  state: FactoryBattleStartIntroState,
+  command: BattleCommandPresentationState,
+): BattleCommandPresentationState {
+  if (!generatedBattleStartCommandReady(state)) {
+    throw new Error("Factory battle-start command requested before player-ready");
+  }
+  if (JSON.stringify(command.field) !== JSON.stringify(factoryBattleStartField(state.command))) {
+    throw new Error("Factory battle-start command field does not match the frozen intro");
+  }
+  let settled = command;
+  for (let frame = 0; frame < 8; frame += 1) {
+    settled = advanceBattleCommandPresentation(settled, new Set());
+  }
+  return settled;
 }
