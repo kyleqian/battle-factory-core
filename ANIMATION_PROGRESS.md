@@ -1,5 +1,23 @@
 # Animation coverage
 
+## MOVE_WHIRLPOOL promoted partial; main body evidence complete (2026-07-29)
+
+**Verdict:** `MOVE_WHIRLPOOL` is partial. Legal Scene-ON Wailmer/Onix probes
+cover the entire main `Move_WHIRLPOOL` body through first inactive cleanup
+twice fresh in both orientations: player-back **78–210 (133/133)**
+evidence/raw `2942fa0bf1a07da485bcf391ca4ecea06a41361d648adc27a1e48a3f32018125` /
+`d3a4cebcb258d334414d99096b7ded4accc90be1af37da4abf01610866ae96c8`;
+opponent-front **82–214 (133/133)**
+`7e57488e1a265960fec441a02b5133f0b4a6e38ddde46cd42e21b5a29b0aaba3` /
+`8b42073d713d49286935abd3079c2266464f6f66c492a039903fb70740a26ffa`.
+
+**Evidence / boundary:** `whirlpoolPortableEvidence.ts` pins all 18 affine
+vortex lifecycles, OAM/matrix and palette/register latches, target blend and
+ShakeMon, WATER_ORB tags, target-pan audio, immutable gameplay, and cleanup.
+No reducer, seam, compositor, or production renderer was added. The later
+`Status_Whirlpool` trapping/repetition animation remains outside this
+checkpoint. Coverage is **99 exact / 1 partial / 0 staged / 176 unsupported**.
+
 ## MOVE_LOW_KICK promoted exact; target-rotation track complete (2026-07-29)
 
 **Verdict:** `MOVE_LOW_KICK` is exact. Source and inventory prove set **178

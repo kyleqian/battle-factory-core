@@ -2557,6 +2557,28 @@
       ]
     },
     {
+      "move": "MOVE_WHIRLPOOL",
+      "status": "partial",
+      "covered": [
+        "source and generated inventory audit pin challenge-0 FRONTIER_MON_WAILMER_1 set 170 as the lowest legal Level-50 carrier; complete legal three-Pokemon Scene-ON Wailmer-versus-Onix parties cover both orientations",
+        "fresh dense main Move_WHIRLPOOL probes cover every frame through first inactive cleanup twice per orientation: player-back frames 78-210 and opponent-front frames 82-214 each pass 133/133 source/hardware/audio/immutable-state checks; evidence/raw RGB receipts are 2942fa0bf1a07da485bcf391ca4ecea06a41361d648adc27a1e48a3f32018125/d3a4cebcb258d334414d99096b7ded4accc90be1af37da4abf01610866ae96c8 and 7e57488e1a265960fec441a02b5133f0b4a6e38ddde46cd42e21b5a29b0aaba3/8b42073d713d49286935abd3079c2266464f6f66c492a039903fb70740a26ffa",
+        "portable evidence pins all three source six-orb bursts: all 18 gWhirlpoolSpriteTemplate/AnimParticleInVortex lifecycles, source parameters, target-relative affine/OAM geometry and prior-software OAM latch, target palette blend programs, target AnimTask_ShakeMon, WATER_ORB tag lifetime, target monbg/split priority/12:8 alpha, target-panned SE_M_WHIRLPOOL, relevant palette/OAM/register shapes, immutable gameplay fields, and first inactive cleanup",
+        "this is evidence only: no reducer, typed scene seam, compositor, production renderer, gameplay state, boundary list, unsupported barrier, or canonical-recording allowlist changed",
+        "the later Status_Whirlpool trapping/repetition animation remains explicitly outside this main-move checkpoint and receives no credit"
+      ],
+      "remaining": "Port and accept the later Status_Whirlpool trapping/repetition animation independently; this main-move evidence checkpoint neither models nor credits it.",
+      "evidence": [
+        "tools/battle-lab/mechanic-whirlpool-player-wailmer-opponent-onix.json",
+        "tools/battle-lab/mechanic-whirlpool-opponent-wailmer-player-onix.json",
+        "tools/compare/fixtures/whirlpool-player-wailmer-opponent-onix.json",
+        "tools/compare/fixtures/whirlpool-opponent-wailmer-player-onix.json",
+        "tools/compare/waterOrbSourceAudit.ts",
+        "tools/compare/whirlpoolProbe.py",
+        "tools/compare/whirlpoolPortableEvidence.ts",
+        "tests/animation/whirlpoolEvidence.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_SWEET_KISS",
       "status": "exact",
       "covered": [
@@ -2612,7 +2634,7 @@
         "MOVE_HYDRO_PUMP",
         "MOVE_WHIRLPOOL"
       ],
-      "goal": "MOVE_HYDRO_PUMP is a bounded source/asset/legal-party partial: its 44 sine WATER_ORBs and 12 already-proved WATER_IMPACT splats still need a complete relative reducer, typed seam, production compositor, and twice-fresh dense both-orientation acceptance through first inactive cleanup. MOVE_WHIRLPOOL remains unsupported because its independent 18 affine vortex orbs, target blend/shake/audio, trapping outcome, repetition/status-animation variants, cleanup, and both orientations have no complete dense proof."
+      "goal": "MOVE_HYDRO_PUMP is exact through its independently accepted reducer, seam, compositor, and twice-fresh dense proof. MOVE_WHIRLPOOL has a partial main-move evidence checkpoint for its independent 18 affine vortex orbs, target blend/shake/audio, and first inactive cleanup in both orientations; its later Status_Whirlpool trapping/repetition animation remains outside that checkpoint and needs independent acceptance before any exact promotion."
     },
     {
       "id": "spore-particles",
