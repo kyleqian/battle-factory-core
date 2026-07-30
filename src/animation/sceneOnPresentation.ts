@@ -49,6 +49,11 @@ import {
   type HydroPumpState,
 } from "./hydroPump.ts";
 import {
+  whirlpoolAtAge,
+  type WhirlpoolBody,
+  type WhirlpoolState,
+} from "./whirlpool.ts";
+import {
   bubbleBeamAtAge,
   type BubbleBeamState,
 } from "./bubbleBeam.ts";
@@ -277,6 +282,14 @@ import {
   megaPunchAtAge,
   type MegaPunchState,
 } from "./megaPunch.ts";
+import {
+  rollingKickAtAge,
+  type RollingKickState,
+} from "./rollingKick.ts";
+import {
+  lowKickAtAge,
+  type LowKickState,
+} from "./lowKick.ts";
 import {
   swaggerAtAge,
   type SwaggerState,
@@ -557,6 +570,7 @@ export interface SceneOnPresentationBattler {
     | "ZUBAT"
     | "RATICATE"
     | "CACTURNE"
+    | "HITMONLEE"
     | "RATTATA"
     | "SKIPLOOM"
     | "RELICANTH"
@@ -568,6 +582,7 @@ export interface SceneOnPresentationBattler {
     | "VOLBEAT"
     | "ILLUMISE"
     | "MASQUERAIN"
+    | "WAILMER"
     | "POLITOED"
     | "EXEGGCUTE"
     | "GLOOM"
@@ -1158,6 +1173,20 @@ export interface SceneOnMegaPunchConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnRollingKickConfig {
+  readonly move: "ROLLING_KICK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnLowKickConfig {
+  readonly move: "LOW_KICK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnBiteConfig {
   readonly move: "BITE";
   readonly attacker: SceneOnPresentationBattler;
@@ -1246,6 +1275,14 @@ export interface SceneOnHydroPumpConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
   readonly attackerPictureOffset: Readonly<{ x: number; y: number }>;
   readonly targetPictureOffset: Readonly<{ x: number; y: number }>;
+}
+
+export interface SceneOnWhirlpoolConfig {
+  readonly move: "WHIRLPOOL";
+  readonly body: WhirlpoolBody;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
 export interface SceneOnBubbleBeamConfig {
@@ -1726,6 +1763,8 @@ export type SceneOnMoveConfig =
   | SceneOnPoisonFangConfig
   | SceneOnHyperFangConfig
   | SceneOnMegaPunchConfig
+  | SceneOnRollingKickConfig
+  | SceneOnLowKickConfig
   | SceneOnBiteConfig
   | SceneOnHeadbuttConfig
   | SceneOnWhirlwindConfig
@@ -1738,6 +1777,7 @@ export type SceneOnMoveConfig =
   | SceneOnSmokescreenConfig
   | SceneOnMudShotConfig
   | SceneOnHydroPumpConfig
+  | SceneOnWhirlpoolConfig
   | SceneOnBubbleBeamConfig
   | SceneOnCrossChopConfig
   | SceneOnFocusEnergyConfig
@@ -1925,6 +1965,18 @@ export interface SceneOnMegaPunchView extends MegaPunchState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnRollingKickView extends RollingKickState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnLowKickView extends LowKickState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnBiteView extends BiteEffect {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -1986,6 +2038,12 @@ export interface SceneOnMudShotView extends MudShotState {
 }
 
 export interface SceneOnHydroPumpView extends HydroPumpState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnWhirlpoolView extends WhirlpoolState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3434,6 +3492,47 @@ export function sceneOnMegaPunchView(
   };
 }
 
+/** `age=0` is the first active `Move_ROLLING_KICK` source display. */
+export function sceneOnRollingKickView(
+  state: SceneOnMovePresentationState,
+): SceneOnRollingKickView {
+  if (state.config.move !== "ROLLING_KICK") {
+    throw new Error(
+      `expected ROLLING_KICK presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...rollingKickAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first active `Move_LOW_KICK` source display. */
+export function sceneOnLowKickView(
+  state: SceneOnMovePresentationState,
+): SceneOnLowKickView {
+  if (state.config.move !== "LOW_KICK") {
+    throw new Error(`expected LOW_KICK presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...lowKickAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
 /** `age=0` is Bite's first displayed sharp-teeth callback step. */
 export function sceneOnBiteView(
   state: SceneOnMovePresentationState<SceneOnBiteConfig>,
@@ -3683,6 +3782,31 @@ export function sceneOnHydroPumpView(
       state.config.attacker.geometry.side,
       state.config.attackerPictureOffset,
       state.config.targetPictureOffset,
+    ),
+  };
+}
+
+/**
+ * `age=0` is the first active source display of either Move_WHIRLPOOL or
+ * Status_Whirlpool, selected by the typed `body` discriminant.
+ */
+export function sceneOnWhirlpoolView(
+  state: SceneOnMovePresentationState<SceneOnWhirlpoolConfig>,
+): SceneOnWhirlpoolView {
+  if (state.config.move !== "WHIRLPOOL") {
+    throw new Error(
+      `expected WHIRLPOOL presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...whirlpoolAtAge(
+      state.age,
+      state.config.body,
+      state.config.target.geometry.side,
+      state.config.target.geometry.battlePositionCenter,
     ),
   };
 }

@@ -6,7 +6,7 @@ import { dirname, join, resolve } from "node:path";
 
 type Side = "player" | "opponent";
 type Fixture = {
-  schema: "rolling-kick-evidence/v1";
+  schema: "rolling-kick-portable-evidence/v1";
   oracleProfile: "battle-scene-on";
   orientation: string;
   scenario: string;
@@ -97,7 +97,7 @@ function verify(path: string, runNumber: number): void {
     (_, age) => byFrame.get(fixture.sourceWindow.startFrame + age),
   );
   if (
-    fixture.schema !== "rolling-kick-evidence/v1"
+    fixture.schema !== "rolling-kick-portable-evidence/v1"
     || fixture.oracleProfile !== "battle-scene-on"
     || source.some((frame) => !frame)
   ) throw new Error(`${fixture.orientation}: incomplete source window`);

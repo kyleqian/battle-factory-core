@@ -1,84 +1,83 @@
 # Animation coverage
 
-## MOVE_ROLLING_KICK source evidence complete; compositor remains (2026-07-29)
+## MOVE_BRICK_BREAK evidence checkpoint; TORN_METAL representative partial (2026-07-29)
 
-**Verdict:** `MOVE_ROLLING_KICK` remains unsupported, with its source side
-ready for the next exact repair. Source and generated inventory prove
-challenge-1 set **233 `FRONTIER_MON_HITMONLEE_1`** is the sole/lowest legal
-Level-50 carrier. Complete legal Scene-ON parties pass the full 55-frame
-source body through first inactive cleanup twice fresh in both orientations:
-player-back **81–135**, evidence/raw
-`3f35463979c0971b6432ed8695caa1130e21890d07ea4edb80b6685271932f92` /
-`76c1741106018ee425f40505c56af234d7d033562dc8bd3c84386e465d9d7ef3`;
-opponent-front **85–139**,
-`4fb8c542ab55e346e4f22129cfa10f028d1a43ff8be0ee6e1e1d8b4160849690` /
-`237e0cd3062b05c1ffa91a1ecc2e03a60ba1f195012ad079f0980933ea12d5a1`.
+**Verdict:** `MOVE_BRICK_BREAK` is **partial**, evidence only. Inventory
+proves its **46** Level-50 Factory carriers outrank `MOVE_CRUSH_CLAW`'s **11**;
+set **131 `FRONTIER_MON_LOMBRE`** is the lowest legal carrier. Complete legal
+Lombre/Onix Scene-ON parties use real target `REFLECT`, selecting the source
+`BrickBreakShatteredWall` body. Dense receipts run twice fresh through first
+inactive cleanup: player-back **288–479 (192/192)** evidence/raw
+`e484e602be861db10e4042c2a6de75e5f6e261e533515d48d8597637db5c4697` /
+`e1b36f8036f30386af0c7cdaac9645f73bb9eb526802c3179e745871cf637363`;
+opponent-front **289–480 (192/192)**
+`f0314f159cb9b141c107cbe078382ebb4ff7379c4ce2c835aa9b921c65bbe27a` /
+`8402d60c9605e852c0f099dbc617c80dc21d005097ed1985395b647564ae23bc`.
 
-**Evidence / next:** fixture-pinned probes prove `gSlidingKickSpriteTemplate`,
-elliptical attacker motion, both slide callbacks, hitsplat, target ShakeMon,
-alpha registers, side-relative audio, immutable battle state, and raw RGB.
-Exact still requires the source-relative reducer, typed seam, extracted
-Hitmonlee art, production compositor/display latches, and **55/55** production
-framebuffer equality twice per orientation. `MOVE_LOW_KICK` remains
-unsupported with target-relative geometry and its distinct rotation body.
-Coverage remains **97 exact / 0 partial / 0 staged / 179 unsupported**; no
-gameplay, boundary, barrier, or canonical allowlist changed.
+**Evidence / boundary:** source and portable hardware verifier pin both
+source branches, four `gBrickBreakWallShardSpriteTemplate` / TORN_METAL
+lifecycles, wall, lunge/hitsplat/fist, WindUpLunge, OAM/affine/palette and
+register ordering, three target-panned audio events, and cleanup. `CRUSH_CLAW`
+stays unsupported: it only loads TORN_METAL and has its own lunge/ShakeMon2/
+four-claw-slash body. No production reducer, seam, compositor, gameplay, RNG,
+or exact credit changed. Coverage is **100 exact / 1 partial / 0 staged / 175
+unsupported**.
 
-## MOVE_MEGA_PUNCH promoted exact; MegaPunchKick track established (2026-07-29)
+## MOVE_WHIRLPOOL promoted exact; both source bodies accepted (2026-07-29)
 
-**Verdict:** `MOVE_MEGA_PUNCH` is exact. Generated inventory and source audit
-prove challenge-1 set **254 `FRONTIER_MON_CACTURNE_1`** is the sole/lowest
-legal Level-50 carrier. Complete legal Scene-ON parties pass the entire
-160-frame source body through first inactive cleanup twice fresh in both
-orientations: player-back **76–235**, receipt/raw
-`9a324ee534928083d1f41dea0c2366ef2b47392c7869fb7aee81a7bf5641cd2f` /
-`7bab206057ef1ae1e99eb24bb9879a8052b73cfae92ccf90a51202cc851c5a36`;
-opponent-front **80–239**,
-`d8f787f50acb0d43013b904de76a0f22543a348e56cf36a403b715eb233b701f` /
-`c05a36ec1e051de5783282bda799cbde791ee4613b4405ab3874094b33f80a55`.
+**Verdict:** `MOVE_WHIRLPOOL` is exact through one pure source-relative
+reducer, typed Scene-ON seam, and production compositor. The complete main
+body passes **133/133** semantic and framebuffer frames twice in both
+orientations: player-back evidence/raw
+`2942fa0bf1a07da485bcf391ca4ecea06a41361d648adc27a1e48a3f32018125` /
+`d3a4cebcb258d334414d99096b7ded4accc90be1af37da4abf01610866ae96c8`;
+opponent-front
+`7e57488e1a265960fec441a02b5133f0b4a6e38ddde46cd42e21b5a29b0aaba3` /
+`8b42073d713d49286935abd3079c2266464f6f66c492a039903fb70740a26ffa`.
 
-**Model/evidence:** the source-relative reducer, typed seam, and production
-compositor port variant-0 `gMegaPunchKickSpriteTemplate`, HANDS_AND_FEET,
-IMPACT/hitsplat, target monbg/alpha, both palette-blend programs, side-specific
-impact background, ShakeMon2, audio, Cacturne/Onix/chrome, display latches,
-and cleanup. `megaPunchPortable.ts` proves **160/160** reducer/seam/cleanup,
-MegaPunchKick software sprite+matrix, ShakeMon2 task/offset, blend-register,
-and side-panned SE trigger assertions; each complete probe record and raw-RGB
-window is fixture-receipt-pinned, and every production framebuffer pixel passes
-twice fresh per orientation.
+**Residual / model:** the independently staged `Status_Whirlpool` body passes
+**108/108** twice per orientation: player-back
+`e5d210e7908b269ba0722959c4035d4bc39c04378a323cf74698375baa615b84` /
+`8a809496f28e7cb8e5eb9a37e26f721a9e9b3c14ef67bbf798825d4b527a9e71`;
+opponent-front
+`d6b1d9e43817259be6ad63c9b36e5f4d11112a868785925253716eb97fead93a` /
+`481017b8c09ddf3bbe585e6e2845a02384e27e1b7ed38169834e3eb2ea82463c`.
+The model preserves the main body's 18 vortex-orb lifecycles and 50-tick
+ShakeMon, the residual body's 12 lifecycles and 30-tick ShakeMon, their
+distinct affine/OAM creation latches, palettes/registers/audio, stable sprite
+ordering, Wailmer/Onix art, field chrome, and cleanup.
 
-**Sibling / next:** `MOVE_MEGA_KICK` remains unsupported: its distinct
-variant-1 art selection and `SE_M_MEGA_KICK2` require independent complete
-both-orientation dense acceptance. Coverage is **97 exact / 0 partial /
-0 staged / 179 unsupported**. No gameplay, boundary, barrier, or canonical
-allowlist ownership changed.
+**Ownership:** no trapping outcome, damage, RNG, turn/controller, round,
+facility, boundary list, unsupported barrier, or canonical allowlist changed.
+Coverage is **100 exact / 0 partial / 0 staged / 176 unsupported**.
 
-## MOVE_HYPNOSIS promoted exact; GOLD_RING repair complete (2026-07-29)
+## MOVE_LOW_KICK promoted exact; target-rotation track complete (2026-07-29)
 
-**Verdict:** `MOVE_HYPNOSIS` is exact. The Level-50 eligibility graph rejects
-source set 38 Hoothoot; challenge-1 set **265 POLITOED_1** is the lowest legal
-carrier. Complete legal Scene-ON parties pass the entire body through first
-inactive cleanup twice fresh in both orientations: player-back **74–242
-(169/169)**, evidence/raw
-`6b164293b9a3ad086504808422b0f95ab07ccd84595eb87b3ca908e34189b0c4` /
-`7c06a1b4825562841f65768ae6b9a97374dba4a727a0ecd59f28220deddf10a1`;
-opponent-front **78–245 (168/168)**,
-`8baa59de6a99008bebd74e72b4089c6146f5f98fefd03ca7805a84412b4f100b` /
-`69b6f767aef05462568e2229c129b620b2ebfa6da399d072507eaa438ee453ec`.
+**Verdict:** `MOVE_LOW_KICK` is exact. Source and inventory prove set **178
+`FRONTIER_MON_MACHOKE_1`** is the lowest legal Level-50 carrier (before set
+298 Sudowoodo_2). Complete legal Scene-ON Machoke/Onix parties pass the full
+body through first inactive cleanup twice fresh per orientation: player-back
+**214–246 (33/33)** evidence/raw
+`f3b4b291ee90208d9f9dcf7e2ea91a355c6da0e270289e6a083cdae126782a74` /
+`40639ddccc47ad2f867891ce5daa4d6a5769ff22b85352095bac14ba5cc9d9e5`;
+opponent-front **214–246 (33/33)**
+`7264ca8cdc9335c80e375354c674322eb857f1c2a7d0ea253fe2e73cefd14e0a` /
+`4d657cf51c4c28805b20ed868890418aaf2ab03c7074ccce9757ea63bef75e20`.
 
-**Repair/evidence:** the typed Scene-ON seam carries resolved POLITOED/ONIX
-geometry and immutable field state. The source-relative reducer and production
-compositor port the queued psychic palette rotation/BLDY, target
-RGB(31,18,31) 0↔12 tint, all six 27-tick GoldRing paths with source OAM order
-and display latches, Politoed/Onix idle and enemy-shadow latches, three
-side-panned Supersonic triggers, windows/text, and first inactive cleanup.
-`hypnosisPortable.ts` proves every dense source/component, seam,
-software/hardware OAM/matrix, palette/tag/register/audio/unchanged-state,
-raw-RGB, and production shared-framebuffer frame twice fresh.
+**Model/evidence:** the pure source-relative reducer, narrow typed seam,
+reproducible Machoke art, and production compositor port both slide callbacks,
+target-relative SlidingKick/hitsplat, RotateMonSpriteToSide's ObjAffineSet
+matrix plus target position/OAM transfer, Vital Throw target panning, field
+chrome/text, sprite/task display latches, tag cleanup, and first inactive
+cleanup. `lowKickPortable.ts` proves **33/33** reducer/component/seam/cleanup
+and **33/33** shared-framebuffer equality twice per orientation.
 
-**Sibling / next:** `MOVE_PSYBEAM` remains unsupported/audit-only. Its lowest
-carrier is set **145 SPINDA**; eleven shorter rings, SwayMon, two-leg tint, and
-`LoopSEAdjustPanning 3/4/0/15` need independent complete dense both-orientation
-acceptance. Coverage is **96 exact / 0 partial / 0 staged / 180 unsupported**.
-No boundary list, barrier, canonical allowlist, sleep, damage, RNG, controller,
-turn, or facility state changed.
+**Sibling / next:** `MOVE_ROLLING_KICK` remains independently exact under its
+own 55-frame portable verifier. Next independent component track:
+`water-orb-hydro-pump-whirlpool`, with `MOVE_WHIRLPOOL` requiring its own dense
+both-orientation proof despite Hydro Pump's exact shared components. Coverage
+is **99 exact / 0 partial / 0 staged / 177 unsupported**.
+
+**Ownership:** no damage, Low Kick weight calculation, RNG, turn order,
+controller, round advancement, facility state, animation-boundary list,
+unsupported barrier, or canonical-recording allowlist changed.

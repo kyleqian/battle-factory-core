@@ -2,6 +2,82 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_BRICK_BREAK",
+      "status": "partial",
+      "remaining": "Port BrickBreakNormal and the Reflect-selected shattered-wall body through a source-relative reducer, typed Scene-ON seam, and live production compositor; then prove full dense production-framebuffer parity in both orientations. Crush Claw retains its independent lunge/ShakeMon2/four-claw-slash acceptance obligation.",
+      "covered": [
+        "evidence-only ANIM_TAG_TORN_METAL checkpoint: inventory ranks Brick Break's 46 Level-50 Factory carriers over Crush Claw's 11; set 131 FRONTIER_MON_LOMBRE is the lowest legal Level-50 carrier",
+        "complete legal Scene-ON Lombre/Onix parties stage the real target Reflect before Brick Break in both orientations, selecting the source's BrickBreakShatteredWall body without transient state injection",
+        "fresh dense source/hardware receipts cover frames 288-479 player-back and 289-480 opponent-front (192 each), twice, through first inactive cleanup: four TORN_METAL gBrickBreakWallShardSpriteTemplate lifecycles, wall/lunges/hitsplats/fist, WindUpLunge, palette/OAM/affine/register latches, target-panned three audio events, and cleanup",
+        "no reducer, typed Scene-ON seam, compositor, gameplay, or acceptance credit was added; BrickBreakNormal and live production behavior remain unported"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-brick-break-player-lombre-opponent-onix.json",
+        "tools/battle-lab/mechanic-brick-break-opponent-lombre-player-onix.json",
+        "tools/compare/fixtures/brick-break-player-lombre-opponent-onix.json",
+        "tools/compare/fixtures/brick-break-opponent-lombre-player-onix.json",
+        "tools/compare/brickBreakProbe.py",
+        "tools/compare/brickBreakPortableEvidence.ts",
+        "tools/compare/brickBreakSourceAudit.ts",
+        "tests/animation/brickBreakEvidence.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_ROLLING_KICK",
+      "status": "exact",
+      "covered": [
+        "source and generated-inventory audits prove challenge-1 FRONTIER_MON_HITMONLEE_1 set 233 is the sole and therefore lowest legal Level-50 carrier (species 106, Rolling Kick 27, Adamant, HP+Defense, Black Belt); complete legal three-Pokemon Scene-ON parties stage Hitmonlee against Onix in both orientations",
+        "fresh dense probes cover the complete 55-frame Move_ROLLING_KICK body through first inactive cleanup twice reproducibly in both orientations: player-back frames 81-135 pass 55/55 reducer/component/seam/cleanup and production-framebuffer equality with evidence 3f35463979c0971b6432ed8695caa1130e21890d07ea4edb80b6685271932f92 and raw RGB 76c1741106018ee425f40505c56af234d7d033562dc8bd3c84386e465d9d7ef3; opponent-front frames 85-139 pass 55/55 with evidence 4fb8c542ab55e346e4f22129cfa10f028d1a43ff8be0ee6e1e1d8b4160849690 and raw RGB 237e0cd3062b05c1ffa91a1ecc2e03a60ba1f195012ad079f0980933ea12d5a1",
+        "the pure source-relative reducer and narrow typed Scene-ON seam port attacker TranslateMonEllipticalRespectSide, SlideMonToOffset and SlideMonToOriginalPos, attacker-relative gSlidingKickSpriteTemplate, IMPACT hitsplat, target AnimTask_ShakeMon, target monbg and 12:8 alpha, both side-panned Double Team triggers, target-panned impact audio, waits, blendoff, and first inactive cleanup",
+        "the production shared-framebuffer compositor uses reproducibly extracted Hitmonlee art plus shared HANDS_AND_FEET foot, affine IMPACT, Onix, field chrome, healthboxes, and text; it preserves the source task two-interval OAM latch, sprite one-interval OAM latch, target idle/shake, monbg/alpha, and cleanup without absolute battle ticks, recorded screenshots, fitted pixels, or gameplay ownership",
+        "MOVE_LOW_KICK is exact independently through its own target-relative geometry, RotateMonSpriteToSide, distinct timing, complete dense receipts, and portable production-framebuffer proof; it receives no credit merely from Rolling Kick's shared template",
+        "presentation owns no damage, RNG, move outcome, turn order, controller, facility state, or shared battle state; no animation-boundary list, unsupported barrier, or canonical-recording allowlist changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-rolling-kick-player-hitmonlee-opponent-onix.json",
+        "tools/battle-lab/mechanic-rolling-kick-opponent-hitmonlee-player-onix.json",
+        "tools/compare/fixtures/rolling-kick-player-hitmonlee-opponent-onix.json",
+        "tools/compare/fixtures/rolling-kick-opponent-hitmonlee-player-onix.json",
+        "tools/compare/rollingKickSourceAudit.ts",
+        "tools/compare/rollingKickEvidence.ts",
+        "tools/compare/rollingKickPortable.ts",
+        "tools/compare/extractRollingKickAssets.ts",
+        "tools/compare/poisonFangProbe.py",
+        "src/animation/assets/rollingKick.json",
+        "src/animation/rollingKick.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/rollingKickSourceAudit.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_LOW_KICK",
+      "status": "exact",
+      "covered": [
+        "source and generated Level-50 inventory audits prove the only legal carriers are challenge-1 FRONTIER_MON_MACHOKE_1 set 178 and later set 298 FRONTIER_MON_SUDOWOODO_2; set 178 MACHOKE is the sole lowest carrier (Adamant, HP+SpDefense, Focus Band)",
+        "fresh complete legal three-Pokemon Scene-ON Machoke-versus-Onix probes pass the full source body through first inactive cleanup twice per orientation: player-back frames 214-246 pass 33/33 reducer/component/seam/cleanup and 33/33 production-framebuffer equality with evidence/raw f3b4b291ee90208d9f9dcf7e2ea91a355c6da0e270289e6a083cdae126782a74/40639ddccc47ad2f867891ce5daa4d6a5769ff22b85352095bac14ba5cc9d9e5; opponent-front frames 214-246 pass 33/33 with evidence/raw 7264ca8cdc9335c80e375354c674322eb857f1c2a7d0ea253fe2e73cefd14e0a/4d657cf51c4c28805b20ed868890418aaf2ab03c7074ccce9757ea63bef75e20",
+        "the pure source-relative reducer and narrow typed Scene-ON seam port HANDS_AND_FEET and IMPACT loads, attacker SlideMonToOffset/SlideMonToOriginalPos, target-relative gSlidingKickSpriteTemplate and affine gBasicHitSplatSpriteTemplate, target AnimTask_RotateMonSpriteToSide with ObjAffineSet matrices and player-side y displacement, SE_M_VITAL_THROW2 target panning, waits, tag cleanup, and first inactive cleanup",
+        "the production shared-framebuffer compositor uses reproducibly extracted Machoke front/back art plus shared foot, hitsplat, Onix, field chrome, healthboxes, windows, and text; it preserves sprite/task/OAM display latches, front/back OAM centers, target affine-double matrix and position transfer, tag cleanup, and immutable gameplay state without absolute ticks, captured screenshots, fitted pixels, or per-frame exceptions",
+        "MOVE_ROLLING_KICK remains exact independently: its attacker-relative SlidingKick geometry, TranslateMonEllipticalRespectSide, ShakeMon/alpha, Double Team timing, and distinct 55-frame body retain their focused reducer and portable-verifier acceptance",
+        "presentation owns no damage, Low Kick weight calculation, RNG, outcome, turn order, controller, round advancement, facility state, or shared battle state; no animation boundary list, unsupported barrier, or canonical-recording allowlist changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-low-kick-player-machoke-opponent-onix.json",
+        "tools/battle-lab/mechanic-low-kick-opponent-machoke-player-onix.json",
+        "tools/compare/fixtures/low-kick-player-machoke-opponent-onix.json",
+        "tools/compare/fixtures/low-kick-opponent-machoke-player-onix.json",
+        "tools/compare/lowKickSourceAudit.ts",
+        "tools/compare/lowKickPortable.ts",
+        "tools/compare/extractLowKickAssets.ts",
+        "tools/compare/poisonFangProbe.py",
+        "src/animation/assets/lowKick.json",
+        "src/animation/lowKick.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/lowKick.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_MEGA_PUNCH",
       "status": "exact",
       "covered": [
@@ -69,7 +145,7 @@
         "fresh dense probes pin the complete 141-frame body through first inactive cleanup in both orientations: player-back frames 213-353 with evidence 9c8210033328ee98ceae81e54e2d4ec36ecbc4a763deb925171f23f6ef117af7 and source-window raw RGB 360d0d7292aa8fa6125f3de46d5170d2d1a3ca62181ada3cdf11ff1cff779706; opponent-front frames 232-372 with evidence 3330496d0d3dd1feec78443a274380e43b593250459b36ed0b6976ae2e105880 and raw RGB ff315fb58f55bcaa8c5e728faa33635d97e41d624747d867d4f1c9487fc06cee",
         "the source-relative reducer and typed Scene-ON seam port the 44 orb and 12 splat schedules, StartSinAnimTimer, both ShakeMon tasks, tags, 12:8 alpha, clamped audio pan with the distinct sound-task/display latch, blendoff, and first inactive age 140; the renderer ports prior-frame battler and enemy-shadow latches plus sprite.c's stable priority/Y sort across reused OAM slots",
         "hydroPumpPortable.ts passes all 141/141 source/component, seam, software/hardware OAM and matrix, palette/tag/register/audio/immutable-state/raw-RGB, and production shared-framebuffer frames twice fresh in both orientations without thinning the complete windows",
-        "MOVE_WHIRLPOOL remains unsupported after an independent source and legal-party batch audit: the lowest suitable carrier is challenge-0 set 170 FRONTIER_MON_WAILMER_1, and its distinct body has 18 affine gWhirlpoolSpriteTemplate/AnimParticleInVortex lifecycles, target palette blend, target ShakeMon, audio, trapping outcome and later repetition/status-animation differences; it requires its own complete dense both-orientation evidence before promotion",
+        "MOVE_WHIRLPOOL is independently exact through both its 133-frame main body and distinct 108-frame Status_Whirlpool residual body; shared WATER_ORB art does not substitute for its separate source-relative reducer, typed seam, compositor, and dense both-orientation production-framebuffer proofs",
         "no animation boundary, unsupported barrier, canonical recording allowlist, gameplay outcome, damage, status, RNG, controller, turn, or facility state changed"
       ],
       "evidence": [
@@ -2502,6 +2578,41 @@
       ]
     },
     {
+      "move": "MOVE_WHIRLPOOL",
+      "status": "exact",
+      "covered": [
+        "source and generated inventory audit pin challenge-0 FRONTIER_MON_WAILMER_1 set 170 as the lowest legal Level-50 carrier; complete legal three-Pokemon Scene-ON Wailmer-versus-Onix parties cover both orientations",
+        "fresh dense main Move_WHIRLPOOL probes cover every frame through first inactive cleanup twice per orientation: player-back frames 78-210 and opponent-front frames 82-214 each pass 133/133 source/hardware/audio/immutable-state checks; evidence/raw RGB receipts are 2942fa0bf1a07da485bcf391ca4ecea06a41361d648adc27a1e48a3f32018125/d3a4cebcb258d334414d99096b7ded4accc90be1af37da4abf01610866ae96c8 and 7e57488e1a265960fec441a02b5133f0b4a6e38ddde46cd42e21b5a29b0aaba3/8b42073d713d49286935abd3079c2266464f6f66c492a039903fb70740a26ffa",
+        "the pure source-relative reducer, typed Scene-ON seam, and production compositor port all three source six-orb bursts: all 18 gWhirlpoolSpriteTemplate/AnimParticleInVortex lifecycles, source parameters, target-relative affine/OAM geometry and prior-software OAM latch, 50-tick target ShakeMon, WATER_ORB tag lifetime, target blend, monbg/split priority/12:8 alpha, target-panned SE_M_WHIRLPOOL, Wailmer/Onix art and field chrome, stable sprite ordering, and first inactive cleanup",
+        "separate legal second-turn residual scenarios reach Status_Whirlpool only after real Whirlpool trapping provenance; fresh dense 108-frame windows through first inactive cleanup twice per orientation pin its source pointer, two six-orb bursts (12 AnimParticleInVortex lifecycles), source parameters/affine/OAM geometry and latch, 30-tick target ShakeMon, target blend, WATER_ORB lifetime, monbg/split priority/12:8 alpha, exact target-panned SE_M_WHIRLPOOL, stopsound/cleanup, relevant palette/register latches, and stable gameplay fields; player-back receipts e5d210e7908b269ba0722959c4035d4bc39c04378a323cf74698375baa615b84/8a809496f28e7cb8e5eb9a37e26f721a9e9b3c14ef67bbf798825d4b527a9e71 and opponent-front d6b1d9e43817259be6ad63c9b36e5f4d11112a868785925253716eb97fead93a/481017b8c09ddf3bbe585e6e2845a02384e27e1b7ed38169834e3eb2ea82463c",
+        "the same reducer, seam, and compositor independently port Status_Whirlpool's two six-orb bursts, all 12 lifecycles, its distinct affine/OAM creation latch, 30-tick target ShakeMon, target blend, tags/register/audio state, field presentation, stopsound, and cleanup",
+        "whirlpoolPortable.ts reruns all four complete legal probes twice fresh and passes 133/133 main and 108/108 residual source/component, seam, software/hardware affine/OAM, palette/tag/register/audio/immutable-state, raw-RGB, and production shared-framebuffer frames in both orientations",
+        "presentation owns no trapping outcome, damage, HP transition, status, RNG, turn order, controller input, round advancement, or facility state; no animation boundary, unsupported barrier, or canonical-recording allowlist changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-whirlpool-player-wailmer-opponent-onix.json",
+        "tools/battle-lab/mechanic-whirlpool-opponent-wailmer-player-onix.json",
+        "tools/battle-lab/mechanic-status-whirlpool-player-wailmer-opponent-onix.json",
+        "tools/battle-lab/mechanic-status-whirlpool-opponent-wailmer-player-onix.json",
+        "tools/compare/fixtures/whirlpool-player-wailmer-opponent-onix.json",
+        "tools/compare/fixtures/whirlpool-opponent-wailmer-player-onix.json",
+        "tools/compare/fixtures/status-whirlpool-player-wailmer-opponent-onix.json",
+        "tools/compare/fixtures/status-whirlpool-opponent-wailmer-player-onix.json",
+        "tools/compare/waterOrbSourceAudit.ts",
+        "tools/compare/whirlpoolProbe.py",
+        "tools/compare/whirlpoolPortableEvidence.ts",
+        "tools/compare/statusWhirlpoolProbe.py",
+        "tools/compare/statusWhirlpoolPortableEvidence.ts",
+        "tools/compare/whirlpoolPortable.ts",
+        "src/animation/assets/water-orb.json",
+        "src/animation/whirlpool.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/whirlpool.test.ts",
+        "tests/animation/whirlpoolEvidence.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_SWEET_KISS",
       "status": "exact",
       "covered": [
@@ -2557,7 +2668,7 @@
         "MOVE_HYDRO_PUMP",
         "MOVE_WHIRLPOOL"
       ],
-      "goal": "MOVE_HYDRO_PUMP is a bounded source/asset/legal-party partial: its 44 sine WATER_ORBs and 12 already-proved WATER_IMPACT splats still need a complete relative reducer, typed seam, production compositor, and twice-fresh dense both-orientation acceptance through first inactive cleanup. MOVE_WHIRLPOOL remains unsupported because its independent 18 affine vortex orbs, target blend/shake/audio, trapping outcome, repetition/status-animation variants, cleanup, and both orientations have no complete dense proof."
+      "goal": "MOVE_HYDRO_PUMP and MOVE_WHIRLPOOL are independently exact through source-relative reducers, typed seams, production compositors, and twice-fresh dense both-orientation proofs. Whirlpool separately accepts its 133-frame main body with 18 affine vortex orbs and 50-tick ShakeMon plus its distinct 108-frame Status_Whirlpool residual body with 12 orbs and 30-tick ShakeMon."
     },
     {
       "id": "spore-particles",
@@ -2806,7 +2917,7 @@
         "MOVE_BRICK_BREAK",
         "MOVE_CRUSH_CLAW"
       ],
-      "goal": "MOVE_REFLECT is exact at 208/208 frames 39-246 player-back and 211/211 frames 39-249 opponent-front twice fresh through software, typed seam, hardware display, audio, raw RGB, and shared framebuffer. BRICK BREAK remains unsupported because its normal and separate gBrickBreakWall/shard branch are distinct; CRUSH CLAW remains unsupported because it loads but never instantiates the wall and has lunge/shake/four claw-slash body."
+      "goal": "MOVE_REFLECT is exact at 208/208 frames 39-246 player-back and 211/211 frames 39-249 opponent-front twice fresh through software, typed seam, hardware display, audio, raw RGB, and shared framebuffer. BRICK BREAK is evidence-only partial: its Reflect-selected shattered-wall branch is dense-probed at 192 frames twice per orientation, but BrickBreakNormal and live production behavior are unported. CRUSH CLAW remains unsupported because it loads but never instantiates the wall and has a distinct lunge/ShakeMon2/four claw-slash body."
     },
     {
       "id": "shake-target-in-pattern-scary-face",

@@ -1,8 +1,16 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import {
+  ROLLING_KICK_FRAME_COUNT,
+  rollingKickAtAge,
+} from "../../src/animation/rollingKick.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnRollingKickView,
+} from "../../src/animation/sceneOnPresentation.ts";
 
-describe("MOVE_ROLLING_KICK source and legal-carrier checkpoint", () => {
+describe("MOVE_ROLLING_KICK exact source-relative presentation", () => {
   it("pins the sole lowest Level-50 carrier and the distinct Low Kick body", () => {
     expect(execFileSync(
       "npx",
@@ -34,7 +42,75 @@ describe("MOVE_ROLLING_KICK source and legal-carrier checkpoint", () => {
     }
   });
 
-  it("pins both complete dense source-window receipts without promoting coverage", () => {
+  it("ports ellipse, slide callbacks, SlidingKick, impact, ShakeMon, alpha, audio, and cleanup", () => {
+    const playerTarget = { x: 176, y: 42 };
+    expect(ROLLING_KICK_FRAME_COUNT).toBe(55);
+    expect(rollingKickAtAge(10, "player", playerTarget)).toMatchObject({
+      active: true,
+      alpha: { eva: 12, evb: 8 },
+      attackerOffset: { x2: 6, y2: 1 },
+      sound: "SE_M_DOUBLE_TEAM",
+      soundPanSide: "player",
+    });
+    expect(rollingKickAtAge(25, "player", playerTarget)).toMatchObject({
+      attackerOffset: { x2: 5, y2: 0 },
+      slidingFoot: { x: 152, y: 42, x2: 4, y2: 0 },
+    });
+    expect(rollingKickAtAge(32, "player", playerTarget)).toMatchObject({
+      attackerOffset: { x2: 20, y2: 0 },
+      hitsplat: { x: 168, y: 42 },
+      sound: "SE_M_VITAL_THROW2",
+      soundPanSide: "opponent",
+    });
+    expect(rollingKickAtAge(43, "opponent", { x: 72, y: 88 }))
+      .toMatchObject({ alpha: null, attackerOffset: { x2: -18, y2: 0 } });
+    expect(rollingKickAtAge(53, "player", playerTarget).active).toBe(true);
+    expect(rollingKickAtAge(54, "player", playerTarget).active).toBe(false);
+  });
+
+  it("exposes only resolved geometry and immutable field state through the typed seam", () => {
+    const stage = createSceneOnMovePresentation({
+      move: "ROLLING_KICK",
+      attacker: {
+        species: "HITMONLEE",
+        geometry: {
+          side: "player",
+          spriteCorner: { x: 40, y: 60 },
+          animationCenter: { x: 72, y: 92 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "ONIX",
+        geometry: {
+          side: "opponent",
+          spriteCorner: { x: 144, y: 10 },
+          animationCenter: { x: 176, y: 42 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      fieldProfile: {
+        playerHp: 157,
+        playerMaxHp: 157,
+        opponentHp: 142,
+        opponentMaxHp: 142,
+      },
+    });
+    expect(sceneOnRollingKickView({ ...stage, age: 32 })).toMatchObject({
+      age: 32,
+      attacker: { species: "HITMONLEE" },
+      target: { species: "ONIX" },
+      hitsplat: { x: 168, y: 42 },
+    });
+  });
+
+  it("regenerates Hitmonlee art byte-for-byte", () => {
+    const before = readFileSync("src/animation/assets/rollingKick.json");
+    execFileSync("npx", ["tsx", "tools/compare/extractRollingKickAssets.ts"]);
+    expect(readFileSync("src/animation/assets/rollingKick.json")).toEqual(before);
+  });
+
+  it("pins both complete dense exact-window receipts", () => {
     const coverage = JSON.parse(
       readFileSync("ANIMATION_COVERAGE.json", "utf8"),
     );
@@ -42,7 +118,7 @@ describe("MOVE_ROLLING_KICK source and legal-carrier checkpoint", () => {
       coverage.entries.find(
         (entry: { move: string }) => entry.move === "MOVE_ROLLING_KICK",
       ),
-    ).toBeUndefined();
+    ).toMatchObject({ status: "exact" });
     for (const [path, evidence, raw] of [
       [
         "tools/compare/fixtures/rolling-kick-player-hitmonlee-opponent-onix.json",

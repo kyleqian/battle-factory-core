@@ -1,5 +1,5 @@
 {
-  "schema": "rolling-kick-evidence/v1",
+  "schema": "rolling-kick-portable-evidence/v1",
   "oracleProfile": "battle-scene-on",
   "orientation": "opponent-front",
   "scenario": "tools/battle-lab/mechanic-rolling-kick-opponent-hitmonlee-player-onix.json",
@@ -9,5 +9,9 @@
   "targetSide": "player",
   "sourceWindow": {"startFrame": 85, "endFrame": 139, "frameCount": 55},
   "evidenceSha256": "4fb8c542ab55e346e4f22129cfa10f028d1a43ff8be0ee6e1e1d8b4160849690",
-  "rawRgbSha256": "237e0cd3062b05c1ffa91a1ecc2e03a60ba1f195012ad079f0980933ea12d5a1"
+  "rawRgbSha256": "237e0cd3062b05c1ffa91a1ecc2e03a60ba1f195012ad079f0980933ea12d5a1",
+  "move": "ROLLING_KICK",
+  "attacker": {"species":"HITMONLEE","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":12},"animationCenter":{"x":176,"y":44},"battlePositionCenter":{"x":176,"y":40}}},
+  "target": {"species":"ONIX","geometry":{"side":"player","spriteCorner":{"x":40,"y":48},"animationCenter":{"x":72,"y":88},"battlePositionCenter":{"x":72,"y":80}}},
+  "fieldProfile":{"playerHp":142,"playerMaxHp":142,"opponentHp":157,"opponentMaxHp":157,"playerGender":"male","opponentGender":"male"}
 }

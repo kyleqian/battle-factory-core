@@ -8,7 +8,7 @@
   "trainerId": 50,
   "playerSetIds": [170, 150, 151],
   "opponentSetIds": [152, 153, 154],
-  "seed": 305419897,
+  "seed": 12,
   "overrides": {
     "parties": {
       "player": [

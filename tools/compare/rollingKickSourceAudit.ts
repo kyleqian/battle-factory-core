@@ -81,6 +81,7 @@ console.log(
   "set 233/FRONTIER_MON_HITMONLEE_1 is the sole and lowest legal Level-50 "
   + "MOVE_ROLLING_KICK carrier; Rolling Kick owns attacker elliptical motion, "
   + "attacker-relative gSlidingKickSpriteTemplate args, impact/ShakeMon, and "
-  + "8-tick horizontal restoration. MOVE_LOW_KICK uses target-relative "
-  + "geometry, RotateMonSpriteToSide, different timing, and remains unsupported.",
+  + "8-tick horizontal restoration. MOVE_LOW_KICK has its own partial source "
+  + "checkpoint only: target-relative geometry, RotateMonSpriteToSide, and "
+  + "different timing remain independently unported.",
 );
