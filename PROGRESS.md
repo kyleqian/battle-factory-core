@@ -13,6 +13,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 735 — [SUPERVISOR 2026-07-30 ~12:10] Session open: animation-main folded (+7, Present/Roar exact); lanes on #53 routing-flip design + Gate-6 remainder
+
+- **State:** master fast-forwarded to `1f31e2af` (fold of
+  `animation-main`: MOVE_PRESENT and MOVE_ROAR promoted to exact;
+  animation coverage 107 exact / 0 partial / 169 unsupported). Union
+  verified by supervisor: **545 files / 5478 tests + 1 deliberate
+  animation-lane skip**, production build clean, oracle freshness PASS
+  (both profiles current vs harness HEAD `2bcab14`). DEFERRED.md empty.
+- **Plan (entry 734 order):** (i) main lane — #53 interactive
+  routing-flip design doc (`core.ts` battleRoom handoff → generated
+  orchestrator), then flip slices; (ii) side lane — Gate-6 remainder:
+  K1-K3 kernel tests, then R4/R7/R8 staged cards + K4-K6; (iii) B+444
+  RAM-probe fix-vs-attribute interleaved when a lane frees. Hard stop
+  19:59; wind-down entry will supersede this one.
+- **Notes:** fold was a fast-forward (master had no unique commits since
+  the 734 wind-down fold). Animation top entry carries no "For the main
+  program:" line.
+
+---
 ## 734 — [SUPERVISOR WIND-DOWN 2026-07-30 ~03:15] 8 paired rounds / 16 workers, 0 failed steps: resolution seam CLOSED (128/128), intro lifecycle 1-4, Gate-6 12 rows + #54 fixed, #53 filed
 
 - **State:** master green at **533 files / 5440 tests + 1 deliberate
@@ -71,28 +90,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   public trace committed. No import/barrier/ratchet pin, core routing,
   battle/turn/absolute-tick branch, capture fitting/thinning, or Gate-6 file.
   PAPERCUT: none.
-
----
-## 732 — [BOUNDED MAIN WORKER 2026-07-30 ~01:48] Intro Slice 3 landed; opponent release 93/94
-
-- **State:** implementation `42c559dd`; focused acceptance **2 files / 4
-  tests**. Fresh private Scene-OFF pre-reset probe preserves **373/373**
-  pre-send-out frames and matches **93/94** opponent-release frames
-  B+373..+466; the only residual is **10px at B+444**, where the
-  source-summary bar slot is reused during the particle burst. Full gate
-  green at **531 files / 5427 tests + 1 deliberate animation-lane skip /
-  513 modules**.
-- **Did:** the typed start lifecycle now continues after acknowledgement
-  through generic sent-out text, trainer exit, ball/open particles, typed
-  species materialization, and typed opponent healthbox. It reuses the
-  Slice-5 field-art/healthbox view; visible species names now resolve from
-  the source name table instead of leaking `SPECIES_*`.
-- **Next:** close the bounded B+444 summary-slot compositor residual without
-  a tick patch, then Slice 4 (player release-to-command). The #53 interactive
-  routing flip remains a separately designed later step.
-- **Notes:** all **25/25** immutable rows plus generated command **128/128**
-  remain exact. Probe regenerated through `tools/run-mgba-probe.py` in fresh
-  temp dirs; no public trace committed. No import/barrier/ratchet pin,
-  core routing, battle/turn/absolute-tick branch, fitted coordinate/RGB,
-  capture thinning, or Gate-6 file. PAPERCUT: none.
 

@@ -1,3 +1,27 @@
+## 732 — [BOUNDED MAIN WORKER 2026-07-30 ~01:48] Intro Slice 3 landed; opponent release 93/94
+
+- **State:** implementation `42c559dd`; focused acceptance **2 files / 4
+  tests**. Fresh private Scene-OFF pre-reset probe preserves **373/373**
+  pre-send-out frames and matches **93/94** opponent-release frames
+  B+373..+466; the only residual is **10px at B+444**, where the
+  source-summary bar slot is reused during the particle burst. Full gate
+  green at **531 files / 5427 tests + 1 deliberate animation-lane skip /
+  513 modules**.
+- **Did:** the typed start lifecycle now continues after acknowledgement
+  through generic sent-out text, trainer exit, ball/open particles, typed
+  species materialization, and typed opponent healthbox. It reuses the
+  Slice-5 field-art/healthbox view; visible species names now resolve from
+  the source name table instead of leaking `SPECIES_*`.
+- **Next:** close the bounded B+444 summary-slot compositor residual without
+  a tick patch, then Slice 4 (player release-to-command). The #53 interactive
+  routing flip remains a separately designed later step.
+- **Notes:** all **25/25** immutable rows plus generated command **128/128**
+  remain exact. Probe regenerated through `tools/run-mgba-probe.py` in fresh
+  temp dirs; no public trace committed. No import/barrier/ratchet pin,
+  core routing, battle/turn/absolute-tick branch, fitted coordinate/RGB,
+  capture thinning, or Gate-6 file. PAPERCUT: none.
+
+---
 ## 731 — [SUPERVISOR 2026-07-30 ~01:10] #54 fixed+merged, Gate-6 at 8 rows (R3/R9 in), intro slices 1-2 verified; round 7 dispatched
 
 - **State:** master green after merge `c3a9742f` (union suite re-run by
