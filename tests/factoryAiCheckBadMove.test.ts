@@ -22,6 +22,71 @@ const MAROWAK: FactoryAiCheckBadMoveTarget = Object.freeze({
   spDefStage: 6,
 });
 
+describe("AI_CBM_HighRiskForDamage via Counter (docs/factory-ai-checkviability-ground-truth.md §34)", () => {
+  const MOVE_COUNTER = 68;
+
+  function counterTarget(
+    overrides: Partial<FactoryAiCheckBadMoveTarget> = {},
+  ): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      ...MAROWAK,
+      species: 213,
+      types: ["TYPE_WATER", "TYPE_WATER"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      ...overrides,
+    });
+  }
+
+  it("x0 effectiveness JUMPs to Score_Minus10 before the handler ability read", () => {
+    const result = run(MOVE_COUNTER, counterTarget({
+      types: ["TYPE_GHOST", "TYPE_GHOST"],
+      knownAbility: null,
+    }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("non-Wonder-Guard FALLTHROUGH reaches End at zero", () => {
+    expect(run(MOVE_COUNTER, counterTarget())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+    });
+  });
+
+  it("Wonder Guard FALLTHROUGH plus x2 effectiveness JUMPs to End at zero", () => {
+    expect(run(MOVE_COUNTER, counterTarget({
+      types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+      knownAbility: "ABILITY_WONDER_GUARD",
+      realAbility: "ABILITY_WONDER_GUARD",
+    }))).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("Wonder Guard FALLTHROUGH plus non-x2 effectiveness reaches Score_Minus10", () => {
+    expect(run(MOVE_COUNTER, counterTarget({
+      knownAbility: "ABILITY_WONDER_GUARD",
+      realAbility: "ABILITY_WONDER_GUARD",
+    }))).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("performs the handler's fresh ability read after the universal Soundproof read", () => {
+    const result = run(MOVE_COUNTER, { ...MAROWAK, types: ["TYPE_WATER", "TYPE_WATER"] });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-high-risk-ability",
+    ]);
+  });
+
+  it("leaves Haze behind the same generic CBM barrier", () => {
+    expect(run(MOVE_HAZE, counterTarget())).toMatchObject({
+      kind: "unsupported-branch",
+      barrier: "factory-ai-check-bad-move",
+    });
+  });
+});
+
 const MOVE_SURF = 57;
 const MOVE_ROCK_SLIDE = 157;
 const MOVE_BODY_SLAM = 34;
