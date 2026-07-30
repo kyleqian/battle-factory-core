@@ -28,6 +28,14 @@ export interface Trace {
     readonly id: string;
     readonly frame: number;
   };
+  /**
+   * Dev-only honest ROM staging fixture consumed by compare/run.ts.
+   * The referenced battle-lab scenario supplies complete pre-battle parties;
+   * this trace's controls and captures replace the scenario's nested trace.
+   */
+  oracleBattleLab?: {
+    readonly scenario: string;
+  };
 }
 
 export interface OracleCapture {
@@ -53,7 +61,11 @@ export async function oracleInfo(
 
 export async function runOracleTrace(trace: Trace): Promise<OracleRunResult> {
   const profile = trace.oracleProfile ?? "battle-scene-on";
-  const { appStage: _appStage, ...oracleTrace } = trace;
+  const {
+    appStage: _appStage,
+    oracleBattleLab: _oracleBattleLab,
+    ...oracleTrace
+  } = trace;
   const response = await fetch(`${oracleUrlForProfile(profile)}/v1/run`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -61,6 +73,45 @@ export async function runOracleTrace(trace: Trace): Promise<OracleRunResult> {
   });
   if (!response.ok) {
     throw new Error(`oracle /v1/run failed: HTTP ${response.status}: ${await response.text()}`);
+  }
+  const payload = (await response.json()) as {
+    totalFrames: number;
+    captures: Array<{ frame: number; sha256: string; pngBase64: string }>;
+  };
+  return {
+    totalFrames: payload.totalFrames,
+    captures: payload.captures.map((capture) => {
+      const png = Buffer.from(capture.pngBase64, "base64");
+      const decoded = PNG.sync.read(png);
+      return { frame: capture.frame, sha256: capture.sha256, rgba: decoded.data, png };
+    }),
+  };
+}
+
+export async function runOracleBattleLab(
+  scenario: Readonly<Record<string, unknown>>,
+  trace: Trace,
+): Promise<OracleRunResult> {
+  const profile = trace.oracleProfile ?? "battle-scene-on";
+  const {
+    appStage: _appStage,
+    oracleBattleLab: _oracleBattleLab,
+    oracleProfile: _oracleProfile,
+    ...oracleTrace
+  } = trace;
+  const response = await fetch(`${oracleUrlForProfile(profile)}/v1/battle-lab/run`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      ...scenario,
+      profile,
+      trace: oracleTrace,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(
+      `oracle /v1/battle-lab/run failed: HTTP ${response.status}: ${await response.text()}`,
+    );
   }
   const payload = (await response.json()) as {
     totalFrames: number;
