@@ -24,6 +24,7 @@ import {
 import {
   BATTLE_SCRIPT_STATUS1_BURN,
   BATTLE_SCRIPT_STATUS1_PARALYSIS,
+  BATTLE_SCRIPT_STATUS2_FORESIGHT,
   BATTLE_SCRIPT_STATUS2_MASKS,
 } from "../src/engine/battleScriptSourceConstants.ts";
 import {
@@ -42,9 +43,12 @@ const ITEM_LUM_BERRY = 141;
 const ITEM_SITRUS_BERRY = 142;
 const ITEM_LEFTOVERS = 200;
 const MOVE_SWORDS_DANCE = 14;
+const MOVE_FORESIGHT = 193;
+const MOVE_SWAGGER = 207;
 const MOVE_THUNDER_WAVE = 86;
 const MOVE_THUNDER = 87;
 const MOVE_WILL_O_WISP = 261;
+const ABILITY_OWN_TEMPO = 20;
 const ABILITY_SAND_VEIL = 8;
 const STATUS1_SLEEP_TURN_3 = 3;
 const STATUS2_CONFUSION_TURN_2 = 2;
@@ -445,6 +449,66 @@ function k4PhysicalDamage(attackStage: number, isBurned: boolean): number {
   });
 }
 
+function k5AccuracyContext(
+  accuracyStage: number,
+  evasionStage: number,
+  targetStatus2: number,
+): BattleScriptRulesContext {
+  return createBattleScriptRulesContext({
+    battlers: [
+      battler({
+        side: 0,
+        moves: [33, 0, 0, 0],
+        statStages: [6, 6, 6, 6, 6, 6, accuracyStage, 6],
+      }),
+      battler({
+        side: 1,
+        status2: targetStatus2,
+        statStages: [6, 6, 6, 6, 6, 6, 6, evasionStage],
+      }),
+      battler({ side: 0 }),
+      battler({ side: 1 }),
+    ],
+    selectorRoles: { attacker: 0, target: 1, effectBattler: 1, fainted: null },
+    scriptingBattler: 0,
+    atkCancelerTracker: 0,
+    battleOutcome: 0,
+    currentMove: 33,
+    currentMovePosition: 0,
+    moveResultFlags: 0,
+    dmgMultiplier: 1,
+    critMultiplier: 1,
+    moveEffectByte: 0,
+    missType: 0,
+    hitMarker: 0,
+    multiHitCounter: 0,
+  });
+}
+
+function stepK5Accuracy(
+  accuracyStage: number,
+  evasionStage: number,
+  targetStatus2: number,
+  nextRandomU16: number,
+): BattleScriptMachineState<BattleScriptRulesContext> {
+  const execution = createBattleScriptStatusRulesExecution(
+    program,
+    "BattleScript_HitFromAccCheck",
+    k5AccuracyContext(accuracyStage, evasionStage, targetStatus2),
+    rngValueBeforeU16(nextRandomU16),
+    ports,
+  );
+  const result = stepBattleScriptMachine(
+    program,
+    execution.state,
+    execution.handlers,
+  );
+  if (result.kind !== "advanced") {
+    throw new Error(`K5 accuracy script stopped at ${result.kind}`);
+  }
+  return result.state;
+}
+
 describe("Gate-6 K1 weather × held-item end-turn ordering", () => {
   it("finishes sand chip before Leftovers heals, while the no-weather control performs only the heal", () => {
     const sand = runEndTurn(
@@ -746,4 +810,91 @@ describe("Gate-6 K4 status × stat-stage arithmetic", () => {
       );
     },
   );
+});
+
+describe("Gate-6 K5 volatile × stat-stage interactions", () => {
+  it("Swagger's complete effect applies confusion and exactly one +2 Attack mutation", () => {
+    const state = runCompleteEffect(
+      "BattleScript_EffectSwagger",
+      effectContext(MOVE_SWAGGER),
+    );
+    expect(state.rulesContext.battlers[1].status2 & 0x7).not.toBe(0);
+    expect(state.rulesContext.battlers[1].statStages[1]).toBe(8);
+    expect(
+      state.events.filter((event) => event.kind === "stat-stage-change"),
+    ).toEqual([
+      expect.objectContaining({
+        battler: 1,
+        stat: "attack",
+        from: 6,
+        to: 8,
+      }),
+    ]);
+  });
+
+  it("Swagger raises an Own Tempo target's Attack once before the ability rejects confusion", () => {
+    const state = runCompleteEffect(
+      "BattleScript_EffectSwagger",
+      effectContext(MOVE_SWAGGER, {}, { ability: ABILITY_OWN_TEMPO }),
+    );
+    expect(state.rulesContext.battlers[1]).toMatchObject({
+      ability: ABILITY_OWN_TEMPO,
+      status2: 0,
+    });
+    expect(state.rulesContext.battlers[1].statStages[1]).toBe(8);
+    expect(
+      state.events.filter((event) => event.kind === "stat-stage-change"),
+    ).toEqual([
+      expect.objectContaining({
+        battler: 1,
+        stat: "attack",
+        from: 6,
+        to: 8,
+      }),
+    ]);
+    expect(state.rng.calls).toBe(1);
+  });
+
+  it("Foresight's complete effect makes accuracy ignore target EVASION only, while the attacker's lowered ACCURACY still sets the hit boundary", () => {
+    const foresight = runCompleteEffect(
+      "BattleScript_EffectForesight",
+      effectContext(MOVE_FORESIGHT, {}, {
+        statStages: [6, 6, 6, 6, 6, 6, 6, 12],
+      }),
+      rngValueBeforeU16(0),
+    );
+    const targetStatus2 = foresight.rulesContext.battlers[1].status2;
+    expect(targetStatus2 & BATTLE_SCRIPT_STATUS2_FORESIGHT).not.toBe(0);
+    expect(foresight.rulesContext.battlers[1].statStages[7]).toBe(12);
+
+    const withoutForesight = stepK5Accuracy(4, 12, 0, 40);
+    expect(withoutForesight.programCounter).toBe(
+      labelPc("BattleScript_PrintMoveMissed"),
+    );
+
+    const ignoredEvasion = stepK5Accuracy(4, 12, targetStatus2, 40);
+    expect(ignoredEvasion.programCounter).toBe(
+      labelPc("BattleScript_HitFromAtkString"),
+    );
+
+    // Tackle's 95 base accuracy at stage -2 is floor(95 * 60 / 100) = 57.
+    const boundaryHit = stepK5Accuracy(4, 12, targetStatus2, 56);
+    expect(boundaryHit.programCounter).toBe(
+      labelPc("BattleScript_HitFromAtkString"),
+    );
+    const firstMiss = stepK5Accuracy(4, 12, targetStatus2, 57);
+    expect(firstMiss.programCounter).toBe(
+      labelPc("BattleScript_PrintMoveMissed"),
+    );
+
+    const neutralEvasionSameBoundary = stepK5Accuracy(
+      4,
+      6,
+      targetStatus2,
+      57,
+    );
+    expect(neutralEvasionSameBoundary.programCounter).toBe(
+      labelPc("BattleScript_PrintMoveMissed"),
+    );
+  });
 });
