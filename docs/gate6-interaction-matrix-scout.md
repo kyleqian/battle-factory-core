@@ -125,6 +125,40 @@ kernel proof is enough because the source citations specify no controller/UI
 or ROM-only randomness at those boundaries; promote only a mismatch to a
 mechanicLab trace.
 
+## R7/R8 pre-ROM predictions (recorded before receipt runs)
+
+The R7 fixture deliberately lowers Ursaring's Attack enough that an ordinary
+Facade roll cannot faint the target before the burn pass.  The complete-party
+builder should derive level-50 stats `HP 165 / Attack 121` for Bold, zero-
+Attack-IV Ursaring and `HP 180 / Defense 127` for Ninetales.  Will-O-Wisp
+should change Ursaring's durable status `0→STATUS1_BURN (0x10)` before its
+action.  The ported damage kernel then takes Guts' status gate
+`floor(121*150/100)=181`, Facade's script multiplier `2`, and Normal STAB:
+base `45`, then `45*2*1.5 = 135` before the 85--100% roll, for noncritical
+damage `114..135` (or `229..270` if the seed's crit roll succeeds).  The
+source end-turn pass should then apply `floor(165/8)=20` burn damage,
+`165→145`, without clearing `0x10`.  The exact per-seed damage prediction
+will be selected from that source-derived branch by each receipt's recorded
+crit/damage rolls; both Guts and Facade's own multiplier are load-bearing.
+
+R8 corrects the staging card's suggested Muk: Emerald Muk has Stench/Sticky
+Hold, not Immunity.  Legal Snorlax slot 0 supplies Immunity, with the same
+species' slot-1 Thick Fat as the ordinary Toxic control.  Before any ROM run,
+the predicted immune path is status `0→0` for the entire trace, Toxic PP
+`10→9`, `gLastUsedAbility = ABILITY_IMMUNITY`, and the exact message
+`SNORLAX's IMMUNITY prevents poisoning!`, never `But it failed!`.  The
+control should first gain `STATUS1_TOXIC_POISON (0x80)`, then advance to
+`0x180` while taking `floor(267/16)=16` first-turn poison damage.
+
+For the second R8 pair, legal single-ability Persian supplies Limber and
+same-profile Thick Fat Snorlax is the ordinary control.  The predicted immune
+path is status `0→0` throughout, Thunder Wave PP `20→19`,
+`gLastUsedAbility = ABILITY_LIMBER`, and
+`PERSIAN's LIMBER prevents paralysis!`, never `But it failed!`; the control
+should gain exactly `STATUS1_PARALYSIS (0x40)`.  These are the ability
+branches at `battle_script_commands.c:2396-2417,2428-2449`, distinct from
+Poison/Steel type gates and Electric damage immunity.
+
 ## Completed receipt notes
 
 ### R10 — Oblivious Attract rejection and Soundproof partial immunity
