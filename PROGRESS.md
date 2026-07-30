@@ -13,6 +13,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 742 — [SUPERVISOR 2026-07-30 ~14:25] Slice 3 verified (711/715 honest); 4 side branches merged; census found 10 reachable moveend halts — burn-down in flight
+
+- **State:** master `e023c365`, union green **550 files / 5559 tests + 1
+  deliberate animation-lane skip**, build clean. Live: moveend-barrier
+  side worker. Merged this round: Gate-6 R4 (Castform Forecast/Weather
+  Ball two-seed receipts — **Gate-6 matrix now fully closed**: 15 rows +
+  K1-K7, unreachables census-recorded), B+444 probe doc (**verdict
+  FIXABLE** — summary-bar exit-clock rule, NOT #18 `sSpriteOrder`; OAM
+  receipt disproves the competing-sprite premise), seed sweep 61-90
+  (0 halts), anchor-draft combo census (60/60 rows: 9 seven-win, 41
+  losses, **10 halts** — 8× `BattleScript_MoveEnd` pc 26, 2× Teeter
+  Dance moveend, i.e. the `ITEMEFFECT_MOVE_END` restoring barrier at
+  `battleScriptMoveEndOpcode.ts:741`; three HAUNTER-lead rows halt).
+- **Did:** supervisor verified Slice 3's two new traces myself (command
+  entry **7/7**; intro **711/715** with exactly frames 1492/1747/
+  1755-56), resolved the scout-doc both-append conflict (9 receipt
+  sections), ran union suite+build after all merges.
+- **Next:** main — Slice 3 closure brief (bounce-seam frames 1747/
+  1755-56 + the probe's B+444 stateless exit-clock fix → target
+  715/715), then Slice 4; side — moveend burn-down merge + re-driven
+  census rows.
+
+---
 ## 741 — [BOUNDED MAIN WORKER 2026-07-30 ~14:10] #53 routing Slice 3 honest checkpoint
 
 - **State:** intro ownership/handoff landed in `a6a8489c` + `81557cb3`;
@@ -53,25 +76,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** main — Slice 3 (generated intro ownership at the real
   handoff, anchor-to-intro trace, honest 714/715); side — R4 merge, then
   B+444 RAM-probe fix-vs-attribute.
-
----
-## 739 — [BOUNDED MAIN WORKER 2026-07-30 ~13:15] #53 routing Slice 2 complete
-
-- **State:** source-/oracle-pinned anchor-session adapter landed in
-  `bd96c90a`; focused acceptance **5 files / 50 tests**, full gate green at
-  **547 files / 5500 tests + 1 deliberate animation-lane skip**, build clean.
-- **Did:** fresh OFF probes pinned the zeroed Factory/Tower/rent metadata,
-  player OT, DESTIN 50 + sets 188/184/135, and three RNG epochs. The route
-  adopts the 5-draw pre-anchor schedule (no reselection), captures live
-  56/32/190-draw construction cursors, constructs all three exact opponent
-  records, and seeds the round from the live post-transition cursor. Negative
-  tests prove one-draw sensitivity, wrong-epoch reselection, and room-trainer
-  mismatch; room/intro/round/kernel projections agree.
-- **Next:** Slice 3 — store/advance/render the generated intro at this handoff,
-  acknowledge `battleStart` only at its settled-command boundary.
-- **Notes:** `accept-prebattle` **137/137**, generated command **128/128**,
-  all **25/25** immutable rows exact. Default remains canonical; no trace,
-  recording/barrier ratchet, issue, design, Gate-6, or recorded
-  `BattleSetupState` change. PAPERCUT: concurrent compares race on shared
-  `out/latest`; reran serially, ~1 minute lost.
 
