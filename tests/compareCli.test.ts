@@ -18,6 +18,7 @@ import {
   resolveCompareTracePath,
   resolveSourceTracePath,
 } from "../tools/compare/paths.ts";
+import { stripAppTraceMetadata } from "../tools/compare/traceMetadata.ts";
 
 describe("compare CLI options", () => {
   it("preserves the existing positional interface", () => {
@@ -131,5 +132,23 @@ describe("compare trace and output paths", () => {
     expect(() => readFileSync(join(out, "diff-00001.png"))).toThrow();
     expect(() => readFileSync(join(out, "manifest.json"))).toThrow();
     expect(readFileSync(join(out, "notes.txt"), "utf8")).toBe("keep");
+  });
+});
+
+describe("app-only trace metadata", () => {
+  it("strips appRoute alongside both existing app-only fields", () => {
+    const trace = {
+      appRoute: "generated-orchestrator" as const,
+      appStage: { id: "generated", frame: 0 },
+      oracleBattleLab: { scenario: "fixture.json" },
+      oracleProfile: "battle-scene-off" as const,
+      segments: [{ frames: 1 }],
+      captureFrames: [1],
+    };
+    expect(stripAppTraceMetadata(trace)).toEqual({
+      oracleProfile: "battle-scene-off",
+      segments: [{ frames: 1 }],
+      captureFrames: [1],
+    });
   });
 });

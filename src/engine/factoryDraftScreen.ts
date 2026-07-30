@@ -34,6 +34,7 @@ import {
   createFactoryRentalPresentation,
   type FactoryRentalPresentation,
 } from "./factoryRentalPresentation.ts";
+import type { FactoryRentalParty } from "./battleScenario.ts";
 
 import menuBgData from "../assets/gen/menu-bg.json" with { type: "json" };
 import pokeballData from "../assets/gen/pokeball.json" with { type: "json" };
@@ -295,6 +296,29 @@ export function chosenMonSpecies(state: DraftScreenState): string[] {
     if (species) result.push(species);
   }
   return result;
+}
+
+/**
+ * The three exact compact rental records in source pick-rank order.
+ *
+ * `selectedIds` belongs to each pool slot and stores a one-based rank. Keep
+ * this adapter at the draft boundary so routing never has to recover identity
+ * by joining displayed species names.
+ */
+export function selectedRentalParty(state: DraftScreenState): FactoryRentalParty {
+  const byRank: Array<FactoryRentalPresentation["source"] | undefined> =
+    Array.from({ length: FRONTIER_PARTY_SIZE });
+  state.selectedIds.forEach((rank, slot) => {
+    if (rank === 0) return;
+    if (rank < 1 || rank > FRONTIER_PARTY_SIZE || byRank[rank - 1]) {
+      throw new Error(`invalid draft pick rank ${rank} at rental slot ${slot}`);
+    }
+    byRank[rank - 1] = state.rentals[slot]?.source;
+  });
+  if (byRank.some((record) => record === undefined)) {
+    throw new Error("draft routing requires exactly three ranked rental picks");
+  }
+  return Object.freeze(byRank) as FactoryRentalParty;
 }
 
 /**

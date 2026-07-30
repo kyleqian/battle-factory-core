@@ -23,6 +23,7 @@ import {
   drawYesNoOverlayFaded,
   renderFactoryDraftScreen,
   renderFactoryDraftScreenFaded,
+  selectedRentalParty,
   selectMonMessage,
   type DraftScreenState,
 } from "./factoryDraftScreen.ts";
@@ -260,6 +261,7 @@ import {
   advanceFactoryRoundBattleResolution,
   type FactoryRoundBattleOrchestratorState,
 } from "./factoryRoundBattleOrchestrator.ts";
+import type { FactoryRentalParty, FactoryRentalRecord } from "./battleScenario.ts";
 import {
   createBattleResolutionPresentationRenderView,
   renderBattleResolutionPresentation,
@@ -271,8 +273,21 @@ import {
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
 
+export type InteractiveBattleRoute =
+  | "generated-orchestrator"
+  | "canonical-recorded";
+
+export type GeneratedBattleSessionFactory = (
+  playerRentalRecords: FactoryRentalParty,
+  savedRentalRecords: readonly FactoryRentalRecord[],
+) => FactoryRoundBattleOrchestratorState;
+
 export interface EngineState {
   frame: number;
+  /** Immutable owner choice, consulted only at the battle-room handoff. */
+  appRoute: InteractiveBattleRoute;
+  /** Slice-1 test seam; production does not supply a generated session yet. */
+  generatedBattleSessionFactory: GeneratedBattleSessionFactory | null;
   draftScreen: DraftScreenState;
   keyRepeat: KeyRepeatState;
   summaryScreen: SummaryScreenState;
@@ -322,6 +337,9 @@ export const BATTLE_IN_BATTLE_FIRST_ELAPSED = 5;
 
 export interface InitialEngineStateOptions {
   readonly battleScenario?: BattleScenario;
+  readonly appRoute?: InteractiveBattleRoute;
+  /** Test-only until the source-pinned anchor session lands in Slice 2. */
+  readonly generatedBattleSessionFactory?: GeneratedBattleSessionFactory;
 }
 
 export function createInitialState(
@@ -329,6 +347,9 @@ export function createInitialState(
 ): EngineState {
   return {
     frame: 0,
+    appRoute: options.appRoute ?? "canonical-recorded",
+    generatedBattleSessionFactory:
+      options.generatedBattleSessionFactory ?? null,
     draftScreen: createDraftScreenStateFromRentalRecords(ANCHOR_DRAFT_RENTAL_RECORDS),
     keyRepeat: INITIAL_KEY_REPEAT_STATE,
     summaryScreen: CLOSED_SUMMARY_SCREEN_STATE,
@@ -1364,18 +1385,49 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // indefinite on its own - this is the fixed elapsed count matching
       // the ground-truth trace's own window start (trace tick 1040).
       if (battleRoom?.phase === "settled" && battleRoom.elapsed === BATTLE_SCENE_HANDOFF_ELAPSED) {
-        battleSetup = createBattleSetup(draftScreen, battleRoom.encounter ?? "destin");
-        const trainerPresentation = battleRoom.trainerPresentation;
-        battleRoom = null;
-        battleScene = {
-          ...INITIAL_BATTLE_SCENE_STATE,
-          encounter: battleSetup.encounter,
-          trainerPresentation,
-          fightSubmenu: {
-            ...CLOSED_FIGHT_SUBMENU_STATE,
-            activeMonMoveset: battleSetup.activeMonMoveset,
-          },
-        };
+        if (state.appRoute === "generated-orchestrator") {
+          const createGeneratedSession = state.generatedBattleSessionFactory;
+          if (createGeneratedSession === null) {
+            throw new Error(
+              "generated-orchestrator route requires an injected battle session",
+            );
+          }
+          const playerRentalRecords = selectedRentalParty(draftScreen);
+          const savedRentalRecords = draftScreen.rentals.map(
+            ({ source }) => source,
+          );
+          battleRoom = null;
+          return {
+            ...state,
+            frame: state.frame + 1,
+            draftScreen,
+            keyRepeat,
+            summaryScreen,
+            prebattleRoom,
+            battleRoom,
+            battleScene: null,
+            battleSetup: null,
+            factoryRoundBattleOrchestrator: createGeneratedSession(
+              playerRentalRecords,
+              savedRentalRecords,
+            ),
+            rngMode,
+            rngValue,
+          };
+        } else {
+          battleSetup = createBattleSetup(draftScreen, battleRoom.encounter ?? "destin");
+          const trainerPresentation = battleRoom.trainerPresentation;
+          battleRoom = null;
+          battleScene = {
+            ...INITIAL_BATTLE_SCENE_STATE,
+            encounter: battleSetup.encounter,
+            trainerPresentation,
+            fightSubmenu: {
+              ...CLOSED_FIGHT_SUBMENU_STATE,
+              activeMonMoveset: battleSetup.activeMonMoveset,
+            },
+          };
+        }
       }
     }
     return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, battleSetup, rngMode, rngValue };

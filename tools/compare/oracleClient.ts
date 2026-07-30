@@ -7,6 +7,7 @@ import {
   oracleUrlForProfile,
   type OracleProfile,
 } from "./oracleProfiles.ts";
+import { stripAppTraceMetadata } from "./traceMetadata.ts";
 
 export { oracleUrlForProfile, type OracleProfile } from "./oracleProfiles.ts";
 
@@ -18,6 +19,8 @@ export interface TraceSegment {
 export interface Trace {
   segments: TraceSegment[];
   captureFrames?: number[];
+  /** App-only battle owner selection; never sent to the ROM oracle. */
+  appRoute?: "generated-orchestrator" | "canonical-recorded";
   /**
    * Existing traces predate profiles and therefore default to Battle Scene ON.
    * New main/round-loop traces must opt into battle-scene-off explicitly.
@@ -61,11 +64,7 @@ export async function oracleInfo(
 
 export async function runOracleTrace(trace: Trace): Promise<OracleRunResult> {
   const profile = trace.oracleProfile ?? "battle-scene-on";
-  const {
-    appStage: _appStage,
-    oracleBattleLab: _oracleBattleLab,
-    ...oracleTrace
-  } = trace;
+  const oracleTrace = stripAppTraceMetadata(trace);
   const response = await fetch(`${oracleUrlForProfile(profile)}/v1/run`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -94,11 +93,9 @@ export async function runOracleBattleLab(
 ): Promise<OracleRunResult> {
   const profile = trace.oracleProfile ?? "battle-scene-on";
   const {
-    appStage: _appStage,
-    oracleBattleLab: _oracleBattleLab,
     oracleProfile: _oracleProfile,
     ...oracleTrace
-  } = trace;
+  } = stripAppTraceMetadata(trace);
   const response = await fetch(`${oracleUrlForProfile(profile)}/v1/battle-lab/run`, {
     method: "POST",
     headers: { "content-type": "application/json" },
