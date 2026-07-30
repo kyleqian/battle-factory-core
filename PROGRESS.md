@@ -13,6 +13,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 721 — [BOUNDED MAIN WORKER 2026-07-29 ~20:40] Resolution Slice 5 complete
+
+- **State:** implementation commits `8a0b46b2`, `cccbde92`, `d06ec040`,
+  `67af4eff`;
+  focused Slice-5 acceptance **110/110**, full suite green at **525 files /
+  5399 tests + 1 deliberate animation-lane skip**, production build and
+  `git diff --check` green.
+- **Did:** the appended forced-switch segment now owns a
+  confirmation-relative `presenting-switch-in` lifecycle under the original
+  resolution ID. Typed state freezes player/opponent switch text (including
+  generated trainer class/name), party-ball summary, incoming species/art,
+  populated healthbox, ball/release clock, and six-frame blank handoff.
+  Forced rows/icons reuse the source-composed voluntary selector path for
+  arbitrary Factory species; the ONIX/MAGBY/BAYLEEF guard is removed.
+  Automatic opponent replacements consume the same typed summary/switch
+  commands and commit only their addressed battler boundary.
+- **Next:** design §4 Slice 6 terminal handoff + canonical retirement proof
+  is next. Slice 7 remains untouched behind it.
+- **Notes:** post-guard Slice-5 rows exact: switch-in/send-out/delayed/Turn-16
+  **242/242, 195/195, 195/195, 175/175**. Every earlier §3.2 row is exact:
+  staged **16/16**; menus **254,44,42,44,93,88,111,83,56,46,57**;
+  stat/faint/fly/party **190,141,256,200,200**. No trace/capture change,
+  canonical-recording import, unsupported barrier, terminal handoff, or
+  battle/turn/absolute-tick branch was added. PAPERCUT: none observed.
+
+---
+
 ## 720 — [SUPERVISOR WIND-DOWN 2026-07-29 ~21:15] 10-round session: command Slice 6 closed, resolution seam design→Slice-5 checkpoint, CBM/CV program CLOSED, 3 class-B reveals
 
 - **State:** master green at **525 files / 5397 tests + 1 deliberate
@@ -92,33 +119,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   terminal handoff, or battle/turn/absolute-tick branch was added.
   PAPERCUT: the final full suite took 626s versus the 117s baseline despite
   no intentional concurrent suite, ~8 minutes lost.
-
----
-
-## 718 — [SUPERVISOR 2026-07-29 ~20:45] Slice 4 + Swagger folded + 18-commit animation fold; union green; round 10 dispatched
-
-- **State:** master green at **525 files / 5378 tests + 1 deliberate
-  animation-lane skip**, production build, `git diff --check` clean, no
-  orphan worktrees/branches, DEFERRED.md empty, `animation-main` fully
-  folded (0 commits unfolded).
-- **Did:** (1) verified + accepted resolution Slice 4 (`3b62f97c`+
-  `291d3cde`: targeted 84/84; faint 141/141, fly-strike 256/256,
-  party-select 200/200, staged 16/16 re-run exact; honest
-  `sendOutElapsed: 0` checkpoint — send-out is Slice 5's). (2) verified +
-  merged `worker/side-20260729-190052` (Swagger CV pair, doc §33, ranked
-  over Counter after Confuse completed the shared CBM): supervisor re-ran
-  live verify 4/4 PASS (9-draw endpoints, seeds 1/99); censuses unchanged
-  and idempotent. (3) folded `animation-main` (+18: Rolling Kick, Low
-  Kick, Whirlpool promoted exact; Brick Break evidence checkpoint; no
-  "For the main program" asks); union suite/build green on the fold.
-- **Next:** round 10 (time-boxed final round) dispatched — main: design §4
-  Slice 5 (semantic switch-in + generic send-out, honest-subset fallback
-  written into the brief); side: Counter CBM/CV or documented negative
-  closure of the remainder. Wind-down immediately after: fold re-check,
-  final union, session report. Slices 6-7 remain the next session's queue.
-- **Notes:** 16 workers, 0 failed steps, 1 integrity correction (705).
-  The animation supervisor may still be live; any post-fold tail is for
-  the next orient.
-
----
-
