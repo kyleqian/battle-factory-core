@@ -2652,10 +2652,11 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
 }
 
 export function render(state: EngineState): Uint8Array {
-  const pendingTerminalCommand = pendingFactoryTerminalCommand(
-    state.factoryRoundBattleOrchestrator,
-    state.roundController,
+  const generatedTerminalCommand = terminalCommandForRound(
+    state.factoryRoundBattleOrchestrator?.round ?? null,
   );
+  const pendingTerminalCommand =
+    generatedTerminalCommand ?? terminalCommandForRound(state.roundController);
   const terminalPresentation =
     state.factoryTerminal ??
     (
@@ -2666,7 +2667,12 @@ export function render(state: EngineState): Uint8Array {
   if (terminalPresentation) {
     return renderFactoryTerminalPresentation(
       terminalPresentation,
-      () => renderWithoutFactoryTerminal({ ...state, factoryTerminal: null }),
+      // finishBattle deliberately clears the generated battle/resolution owner
+      // before publishing its terminal round command. Do not let the terminal
+      // profile's two prior-presentation frames expose the unrelated draft.
+      () => generatedTerminalCommand === null
+        ? renderWithoutFactoryTerminal({ ...state, factoryTerminal: null })
+        : blackFrame(),
     );
   }
   return renderWithoutFactoryTerminal(state);

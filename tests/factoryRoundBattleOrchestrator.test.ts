@@ -490,7 +490,7 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     });
   });
 
-  it("persists any accepted swaps once into the next challenge's rental rank", () => {
+  it("persists accepted swaps exactly once on completion and never on loss", () => {
     const accepted = driveGeneratedRoundToCompletion(
       17,
       undefined,
@@ -502,10 +502,44 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expect(accepted.round.rules.phase).toBe("roundComplete");
     expect(accepted.facilityState.rentsCount).toBe(15);
     expect(accepted.performedRentalSwap).toBe(false);
+    const completion = {
+      commandId: accepted.round.presentation!.command.commandId,
+    };
+    const acknowledged = completeFactoryRoundPresentation(
+      accepted,
+      completion,
+    );
+    const acknowledgedAgain = completeFactoryRoundPresentation(
+      acknowledged,
+      completion,
+    );
+    expect(acknowledged.facilityState.rentsCount).toBe(15);
+    expect(acknowledgedAgain.facilityState.rentsCount).toBe(15);
 
     const declined = driveGeneratedRoundToCompletion(17, undefined, undefined, 14);
     expect(declined.round.rules.phase).toBe("roundComplete");
     expect(declined.facilityState.rentsCount).toBe(14);
+
+    const lostAfterSwap = driveGeneratedRoundToCompletion(
+      6,
+      undefined,
+      (state) => state.round.rules.battleIndex === 0
+        ? { type: "accept", playerPartyIndex: 2, opponentPartyIndex: 0 }
+        : { type: "decline" },
+      14,
+    );
+    expect(lostAfterSwap.round.rules.phase).toBe("roundLost");
+    expect(lostAfterSwap.round.rules.battleIndex).toBe(1);
+    expect(lostAfterSwap.performedRentalSwap).toBe(true);
+    expect(lostAfterSwap.facilityState.rentsCount).toBe(14);
+    const lostAcknowledged = completeFactoryRoundPresentation(
+      lostAfterSwap,
+      {
+        commandId:
+          lostAfterSwap.round.presentation!.command.commandId,
+      },
+    );
+    expect(lostAcknowledged.facilityState.rentsCount).toBe(14);
 
     const createNextChallenge = (
       previous: FactoryRoundBattleOrchestratorState,

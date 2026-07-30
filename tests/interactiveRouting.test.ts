@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { TICK0 as BATTLE_SCENE_TICK0 } from "../src/engine/battleScene.ts";
 import {
   createInitialState,
+  render,
   tick,
   type EngineState,
 } from "../src/engine/core.ts";
@@ -42,6 +43,10 @@ import {
   CANONICAL_DESTIN_PRESENTATION,
   CANONICAL_JENSON_PRESENTATION,
 } from "../src/engine/factoryTrainerPresentation.ts";
+import {
+  createFactoryTerminalLossPresentation,
+  createFactoryTerminalRoundWonPresentation,
+} from "../src/engine/factoryTerminalPresentation.ts";
 
 const HANDOFF_ELAPSED = BATTLE_SCENE_TICK0 - 843;
 
@@ -129,6 +134,31 @@ function accelerateWinToNextBattle(
       commandId: resolved.commandId,
     }),
   );
+}
+
+function accelerateCurrentBattleOutcome(
+  state: FactoryRoundBattleOrchestratorState,
+  outcome: "win" | "loss",
+): FactoryRoundBattleOrchestratorState {
+  const start = state.round.presentation?.command;
+  if (start?.type !== "battleStart") throw new Error("expected battleStart");
+  const active = advanceRoundController(
+    completeBattlePresentation(state.round, { commandId: start.commandId }),
+  );
+  const round = resolveRoundBattle(active, {
+    outcome,
+    playerParty: active.rules.playerParty,
+    opponentParty: active.rules.currentOpponent.party,
+    rngValue: active.rules.rngValue,
+  });
+  return {
+    ...state,
+    round,
+    battle: null,
+    battleCommandPresentation: null,
+    battleResolutionPresentation: null,
+    activeBattleCallStart: null,
+  };
 }
 
 function routePendingStartThroughRoom(
@@ -559,5 +589,144 @@ describe("interactive battle routing", () => {
         reentered5.factoryRoundBattleOrchestrator!.battleStartIntro!,
       ),
     ]).toEqual(["handoff", "handoff"]);
+  });
+
+  it.each([0, 5])(
+    "routes a generated loss at battle index %i into the terminal owner and acknowledges its round",
+    (lossIndex) => {
+      const anchor = createInitialState();
+      let orchestrator = createFactoryAnchorSession({
+        playerRentalRecords: selectedRentalParty({
+          ...anchor.draftScreen,
+          selectedIds: selectedIdsForSlots(4, 0, 2),
+        }),
+        savedRentalRecords: anchor.draftScreen.rentals.map(({ source }) => source),
+        roomTrainer: CANONICAL_DESTIN_PRESENTATION,
+        constructionRngValues: ANCHOR_BATTLE_1_CONSTRUCTION_RNG_VALUES,
+        freshBattleRngValue: ANCHOR_BATTLE_1_HANDOFF_RNG_VALUE,
+      });
+      for (let index = 0; index < lossIndex; index += 1) {
+        orchestrator = accelerateWinToNextBattle(
+          orchestrator,
+          { type: "decline" },
+        );
+      }
+      orchestrator = accelerateCurrentBattleOutcome(orchestrator, "loss");
+      const command = orchestrator.round.presentation!.command;
+      expect(command).toMatchObject({ type: "roundLost", battleIndex: lossIndex });
+      if (command.type !== "roundLost") throw new Error("expected roundLost");
+
+      let engine: EngineState = {
+        ...createInitialState({ appRoute: "generated-orchestrator" }),
+        factoryRoundBattleOrchestrator: orchestrator,
+        factoryTerminal: null,
+      };
+      const draftFallback = render({
+        ...engine,
+        factoryRoundBattleOrchestrator: null,
+      });
+      expect(render(engine)).not.toEqual(draftFallback);
+
+      engine = tick(engine, new Set());
+      expect(engine.factoryTerminal).toMatchObject({
+        commandId: command.commandId,
+        battleIndex: lossIndex,
+        profile: { outcome: "loss" },
+        age: 1,
+      });
+      engine = {
+        ...engine,
+        factoryTerminal: {
+          ...createFactoryTerminalLossPresentation(command),
+          age: 209,
+          firstPageReleaseAge: 80,
+          secondPageReleaseAge: 160,
+        },
+      };
+      engine = tick(engine, new Set());
+      expect(engine.factoryTerminal).toMatchObject({
+        completed: true,
+        partyRestored: true,
+      });
+      expect(
+        engine.factoryRoundBattleOrchestrator!.round.presentation,
+      ).toMatchObject({
+        completed: true,
+        command: { type: "roundLost", battleIndex: lossIndex },
+      });
+      expect(engine.roundController).toBeNull();
+    },
+  );
+
+  it("discovers round completion only after the generated battle at index 6 and acknowledges that owner", () => {
+    const anchor = createInitialState();
+    let orchestrator = createFactoryAnchorSession({
+      playerRentalRecords: selectedRentalParty({
+        ...anchor.draftScreen,
+        selectedIds: selectedIdsForSlots(4, 0, 2),
+      }),
+      savedRentalRecords: anchor.draftScreen.rentals.map(({ source }) => source),
+      roomTrainer: CANONICAL_DESTIN_PRESENTATION,
+      constructionRngValues: ANCHOR_BATTLE_1_CONSTRUCTION_RNG_VALUES,
+      freshBattleRngValue: ANCHOR_BATTLE_1_HANDOFF_RNG_VALUE,
+    });
+    for (let index = 0; index < 6; index += 1) {
+      const won = accelerateWinToSwapOffer(orchestrator);
+      expect(won.round.presentation?.command.type).toBe("swapOffer");
+      orchestrator = accelerateWinToNextBattle(
+        orchestrator,
+        { type: "decline" },
+      );
+      expect(orchestrator.round.rules.battleIndex).toBe(index + 1);
+      expect(orchestrator.round.presentation?.command.type).toBe("battleStart");
+    }
+    orchestrator = accelerateCurrentBattleOutcome(orchestrator, "win");
+    const command = orchestrator.round.presentation!.command;
+    expect(command).toMatchObject({ type: "roundCompleted", battleIndex: 6 });
+    if (command.type !== "roundCompleted") {
+      throw new Error("expected roundCompleted");
+    }
+
+    let engine: EngineState = {
+      ...createInitialState({ appRoute: "generated-orchestrator" }),
+      factoryRoundBattleOrchestrator: orchestrator,
+      factoryTerminal: null,
+    };
+    const draftFallback = render({
+      ...engine,
+      factoryRoundBattleOrchestrator: null,
+    });
+    expect(render(engine)).not.toEqual(draftFallback);
+    engine = tick(engine, new Set());
+    expect(engine.factoryTerminal).toMatchObject({
+      commandId: command.commandId,
+      battleIndex: 6,
+      profile: { outcome: "roundWon" },
+      age: 1,
+    });
+    engine = {
+      ...engine,
+      factoryTerminal: {
+        ...createFactoryTerminalRoundWonPresentation(command),
+        age: 3548,
+        congratulationsReleaseAge: 300,
+        awardScrollReleaseAge: 1100,
+        awardReleaseAge: 2200,
+        displayedBattlePoints: 3,
+        exchangeReleaseAge: 3500,
+      },
+    };
+    engine = tick(engine, new Set());
+    expect(engine.factoryTerminal).toMatchObject({
+      completed: true,
+      partyRestored: true,
+    });
+    expect(
+      engine.factoryRoundBattleOrchestrator!.round.presentation,
+    ).toMatchObject({
+      completed: true,
+      command: { type: "roundCompleted", battleIndex: 6 },
+    });
+    expect(engine.roundController).toBeNull();
   });
 });

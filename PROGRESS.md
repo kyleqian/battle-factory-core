@@ -13,16 +13,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
-## 747 — [BOUNDED MAIN WORKER 2026-07-30 ~15:23] Slice 6 terminal owner bridge in progress
+## 747 — [BOUNDED MAIN WORKER 2026-07-30 ~15:27] Slice 6 terminal owner bridge in acceptance
 
-- **State:** first green checkpoint; focused Slice 6 baseline remains **6 files /
-  75 tests**, production build clean.
+- **State:** implementation and boundary proofs green at **6 files / 78
+  tests**, production build clean; compares/full gate pending.
 - **Did:** core now discovers generated `roundLost` / `roundCompleted`
   commands, installs their terminal presenter on the terminal-resolution edge,
-  renders a pending generated terminal without draft fallback, and acknowledges
-  completion on the orchestrator-owned round.
-- **Next:** add battle-index and rent-count boundary proofs, then run all named
-  terminal compares, immutable traces, full suite, and build.
+  protects the two prior-frame ticks from draft fallback, and acknowledges
+  completion on the orchestrator-owned round. Fixtures prove losses at indexes
+  0/5, completion only at 6, and accepted-swap rent count **14→15 exactly
+  once** on completion but **14→14** on loss.
+- **Next:** run all named terminal compares, generated intro/command checks,
+  immutable traces, full suite, and final build.
 - **Notes:** production default, terminal policy, BP award, captures, and
   Scene-ON remain unchanged; no new barrier or battle/turn/tick branch.
 
