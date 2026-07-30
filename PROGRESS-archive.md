@@ -1,3 +1,28 @@
+## 710 — [BOUNDED MAIN WORKER 2026-07-29 ~18:00] Battle-resolution seam design landed
+
+- **State:** docs-only battle-resolution design complete; tree green at
+  **520 files / 5296 tests + 1 deliberate animation-lane skip**, production
+  build, and `git diff --check`.
+- **Did:** specified the typed command-resolution lifecycle from legal
+  A-confirm through messages, HP drain, faint, forced-party handoff, semantic
+  switch-in/send-out, and next-command or terminal replacement. Inventoried
+  existing kernel events versus the one required `switch-in-animation` marker,
+  extended entry 703's per-battler boundary-state pattern, fixed an immutable
+  25-window regression table, and split implementation into seven dispatchable
+  slices capped at 45 minutes. The last slice is entry 704's honest explicit-OFF
+  **128/128** generated-command breadth proof.
+- **Next:** dispatch
+  `docs/battle-resolution-seam-design.md` **Slice 1 — receipt ownership and
+  structural projection** verbatim; do not begin renderer/orchestrator work
+  until its structural equivalence acceptance is green.
+- **Notes:** no production code, canonical-recording import, oracle/app
+  acceptance trace, or capture-list change. Existing banked OFF evidence
+  covered the inventory, so no new oracle trace was necessary. The finite
+  Stage 8 reset remains intact; this does not resume the canonical Battle 2
+  turn march. PAPERCUT: none.
+
+---
+
 ## 709 — [SUPERVISOR 2026-07-29 ~17:40] ISSUES #51 + immunity-cure reveal both merged; union green; round 5 dispatched
 
 - **State:** master `b814e791` green at **520 files / 5296 tests + 1
