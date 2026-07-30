@@ -882,6 +882,14 @@ function withResolutionLifecycle(
   });
 }
 
+function completedResolutionPhase(
+  resolution: BattleResolutionPresentationState,
+): "next-command-handoff" | "terminal-handoff" {
+  return resolution.pendingBoundary.kind === "terminal"
+    ? "terminal-handoff"
+    : "next-command-handoff";
+}
+
 function boundaryFieldAt(
   field: BattleResolutionPresentationState["field"],
   battler: 0 | 1,
@@ -1020,7 +1028,7 @@ export function advanceFactoryRoundBattleResolution(
         battleResolutionPresentation: withResolutionLifecycle(
           resolution,
           resolution.commandIndex,
-          "next-command-handoff",
+          completedResolutionPhase(resolution),
           0,
         ),
       });
@@ -1037,7 +1045,7 @@ export function advanceFactoryRoundBattleResolution(
             resolution,
             nextCommandIndex,
             nextCommandIndex >= segment.commands.length
-              ? "next-command-handoff"
+              ? completedResolutionPhase(resolution)
               : "presenting",
             0,
           );
@@ -1088,7 +1096,7 @@ export function advanceFactoryRoundBattleResolution(
       resolution,
       nextCommandIndex,
       nextCommandIndex >= segment.commands.length
-        ? "next-command-handoff"
+        ? completedResolutionPhase(resolution)
         : "presenting",
       0,
     );
@@ -1122,7 +1130,7 @@ export function advanceFactoryRoundBattleResolution(
         resolution,
         nextCommandIndex,
         nextCommandIndex >= segment.commands.length
-          ? "next-command-handoff"
+          ? completedResolutionPhase(resolution)
           : "presenting",
         0,
       );
@@ -1250,8 +1258,27 @@ export function advanceFactoryRoundBattleResolution(
       battlePresentationBoundaries: handoff.boundaries,
     });
   }
+  if (resolution.lifecycle.phase === "terminal-handoff") {
+    if (resolution.pendingBoundary.kind !== "terminal") {
+      return fail("terminal presentation handoff requires an immutable terminal boundary");
+    }
+    if (
+      resolution.pendingBattle !== state.battle
+      || resolution.pendingBattle.boundary !== resolution.pendingBoundary
+    ) {
+      return fail("terminal presentation handoff lost its retained battle boundary");
+    }
+    if (state.aiHistory === null) {
+      return fail("terminal presentation handoff requires live AI history");
+    }
+    return finishBattle(
+      state,
+      resolution.pendingBattle,
+      state.aiHistory,
+    );
+  }
   if (resolution.lifecycle.phase !== "next-command-handoff") {
-    return fail(`Slice 4 cannot advance resolution phase ${resolution.lifecycle.phase}`);
+    return fail(`cannot advance resolution phase ${resolution.lifecycle.phase}`);
   }
   const advanced = withResolutionLifecycle(
     resolution,

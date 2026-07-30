@@ -482,6 +482,7 @@ export function createBattleResolutionPresentationRenderView(
     }
   } else if (
     state.lifecycle.phase !== "next-command-handoff"
+    && state.lifecycle.phase !== "terminal-handoff"
     && state.lifecycle.phase !== "presenting-switch-in"
     && state.lifecycle.phase !== "presenting"
   ) {
