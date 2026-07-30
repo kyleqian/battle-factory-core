@@ -33,9 +33,23 @@ import {
 } from "./battleScenario.ts";
 import {
   submitBattleDecision,
+  type BattleBoundary,
+  type BattleDecisionTransitionResult,
+  type BattleKernelSemanticEvent,
+  type BattlePartyIndex,
   type BattleState,
   type BattleSubmittedDecision,
 } from "./battleDecisionBoundary.ts";
+import {
+  createBattleResolutionPresentation,
+  type BattleResolutionPresentationCommand,
+  type BattleResolutionPresentationState,
+} from "./battleResolutionPresentation.ts";
+import {
+  createBattleResolutionPresentationRenderView,
+  isBattleResolutionCommandComplete,
+  isBattleResolutionNextCommandHandoffComplete,
+} from "./battleResolutionPresentationRender.ts";
 import type {
   BattleScriptPartyMemberState,
   BattleScriptPartyState,
@@ -150,6 +164,29 @@ export type FactoryBattleMoveSelectionCursors = readonly [
 const RESET_MOVE_SELECTION_CURSORS: FactoryBattleMoveSelectionCursors =
   Object.freeze([0, 0, 0, 0]);
 
+export type FactoryBattlePresentationBattlerBoundary = Readonly<{
+  battler: 0 | 1;
+  partyIndex: BattlePartyIndex;
+  field: BattleCommandPresentationState["field"]["player"];
+  displayedHp: number;
+  displayedStatus1: number;
+  spriteVisible: boolean;
+  idleEpoch: number;
+  moveCursor: 0 | 1 | 2 | 3;
+}>;
+
+export type FactoryBattlePresentationBoundaries = readonly [
+  FactoryBattlePresentationBattlerBoundary,
+  FactoryBattlePresentationBattlerBoundary,
+];
+
+export type FactoryBattleDriveReceipt = Readonly<{
+  battle: BattleState<FactoryFullTurnDecisionRules>;
+  history: FactoryAiBattleHistory;
+  events: readonly BattleKernelSemanticEvent[];
+  boundary: BattleBoundary;
+}>;
+
 export type FactoryRoundBattleOrchestratorState = Readonly<{
   config: FactoryRoundBattleOrchestratorConfig;
   facilityState: FactoryFacilityState;
@@ -159,10 +196,14 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
   battle: BattleState<FactoryFullTurnDecisionRules> | null;
   /** Request-owned player command UI, replaced at each command boundary. */
   battleCommandPresentation: BattleCommandPresentationState | null;
+  /** Submitted command lifecycle, retained until its visible resolution ends. */
+  battleResolutionPresentation: BattleResolutionPresentationState | null;
   /** Adjacent voluntary selector while the command UI owns party-handoff. */
   battlePartySelect: BattlePartySelectState | null;
   /** Source gMoveSelectionCursor: controller-owned, not request-owned. */
   moveSelectionCursors: FactoryBattleMoveSelectionCursors;
+  /** Singles controller display/cursor state persisted across request boundaries. */
+  battlePresentationBoundaries: FactoryBattlePresentationBoundaries | null;
   aiHistory: FactoryAiBattleHistory | null;
   initialRentalGeneration: FactoryInitialRentalGenerationResult | null;
   opponentGenerations: readonly FactoryOpponentGenerationResult[];
@@ -352,8 +393,10 @@ export function createFactoryRoundBattleOrchestrator(
     round,
     battle: null,
     battleCommandPresentation: null,
+    battleResolutionPresentation: null,
     battlePartySelect: null,
     moveSelectionCursors: RESET_MOVE_SELECTION_CURSORS,
+    battlePresentationBoundaries: null,
     aiHistory: null,
     initialRentalGeneration,
     opponentGenerations: Object.freeze([firstOpponent]),
@@ -390,16 +433,23 @@ function startCurrentBattle(
     return fail("fresh Factory battle must publish a player command boundary");
   }
   const moveSelectionCursors = RESET_MOVE_SELECTION_CURSORS;
+  const battleCommandPresentation = createBattleCommandPresentation(
+    started.boundary.request,
+    started.rules.rulesContext,
+    moveSelectionCursors[started.boundary.request.battler],
+  );
   return Object.freeze({
     ...state,
     battle: started,
-    battleCommandPresentation: createBattleCommandPresentation(
-      started.boundary.request,
-      started.rules.rulesContext,
-      moveSelectionCursors[started.boundary.request.battler],
-    ),
+    battleCommandPresentation,
+    battleResolutionPresentation: null,
     battlePartySelect: null,
     moveSelectionCursors,
+    battlePresentationBoundaries: createBattlePresentationBoundaries(
+      battleCommandPresentation,
+      started,
+      moveSelectionCursors,
+    ),
     aiHistory: createFactoryAiBattleHistory(started.rules.rulesContext),
     facilityRngCalls: callStart + started.rng.calls,
     activeBattleCallStart: callStart,
@@ -532,7 +582,9 @@ function finishBattle(
     round,
     battle: null,
     battleCommandPresentation: null,
+    battleResolutionPresentation: null,
     battlePartySelect: null,
+    battlePresentationBoundaries: null,
     aiHistory,
     rngSegments: Object.freeze([...state.rngSegments, segment]),
     facilityRngCalls: segment.callEnd,
@@ -560,6 +612,30 @@ function resetMoveSelectionCursorsForSwitchIns(
   return next === null ? cursors : Object.freeze(next);
 }
 
+function createBattlePresentationBoundaries(
+  presentation: BattleCommandPresentationState,
+  battle: BattleState<FactoryFullTurnDecisionRules>,
+  cursors: FactoryBattleMoveSelectionCursors,
+  previous: FactoryBattlePresentationBoundaries | null = null,
+): FactoryBattlePresentationBoundaries {
+  const fields = [presentation.field.player, presentation.field.opponent] as const;
+  return Object.freeze(fields.map((field, battler) => {
+    const active = battle.rules.rulesContext.battlers[battler]!;
+    const prior = previous?.[battler];
+    const switched = prior !== undefined && prior.partyIndex !== field.partyIndex;
+    return Object.freeze({
+      battler: battler as 0 | 1,
+      partyIndex: field.partyIndex,
+      field,
+      displayedHp: field.hp,
+      displayedStatus1: active.status1,
+      spriteVisible: true,
+      idleEpoch: prior === undefined || switched ? 0 : prior.idleEpoch,
+      moveCursor: switched ? 0 : cursors[battler]!,
+    });
+  })) as unknown as FactoryBattlePresentationBoundaries;
+}
+
 function commandPresentationForBoundary(
   battle: BattleState<FactoryFullTurnDecisionRules>,
   cursors: FactoryBattleMoveSelectionCursors,
@@ -576,20 +652,30 @@ function commandPresentationForBoundary(
   );
 }
 
+function appendDriveEvents(
+  events: readonly BattleKernelSemanticEvent[],
+  appended: readonly BattleKernelSemanticEvent[],
+): readonly BattleKernelSemanticEvent[] {
+  let previous = events.at(-1)?.sequence ?? -1;
+  for (const event of appended) {
+    if (!Number.isSafeInteger(event.sequence) || event.sequence <= previous) {
+      return fail(
+        `trainer drive event sequence ${event.sequence} is not strictly increasing after ${previous}`,
+      );
+    }
+    previous = event.sequence;
+  }
+  return Object.freeze([...events, ...appended]);
+}
+
 function driveTrainerBoundary(
   state: FactoryRoundBattleOrchestratorState,
-  battle: BattleState<FactoryFullTurnDecisionRules>,
+  transition: BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>,
   history: FactoryAiBattleHistory,
-): FactoryRoundBattleOrchestratorState {
-  let nextBattle = battle;
+): FactoryBattleDriveReceipt {
+  let nextBattle = transition.state;
   let nextHistory = history;
-  let moveSelectionCursors = state.battle === null
-    ? state.moveSelectionCursors
-    : resetMoveSelectionCursorsForSwitchIns(
-      state.moveSelectionCursors,
-      state.battle,
-      nextBattle,
-    );
+  let events = appendDriveEvents([], transition.events);
   while (
     nextBattle.boundary.kind === "decision-required"
     && nextBattle.boundary.request.kind === "command"
@@ -604,11 +690,7 @@ function driveTrainerBoundary(
       },
       reduceFactoryFullTurnDecision,
     );
-    moveSelectionCursors = resetMoveSelectionCursorsForSwitchIns(
-      moveSelectionCursors,
-      nextBattle,
-      ai.transition.state,
-    );
+    events = appendDriveEvents(events, ai.transition.events);
     nextBattle = ai.transition.state;
     nextHistory = ai.history;
   }
@@ -621,26 +703,321 @@ function driveTrainerBoundary(
       opponentHp: nextBattle.rules.rulesContext.party.opponent.slice(0, 3).map((member) => member.hp),
     })}`);
   }
-  if (nextBattle.boundary.kind === "terminal") {
-    return finishBattle(state, nextBattle, nextHistory);
-  }
   if (
-    nextBattle.boundary.kind !== "decision-required"
-    || nextBattle.boundary.request.side !== "player"
+    nextBattle.boundary.kind !== "terminal"
+    && (
+      nextBattle.boundary.kind !== "decision-required"
+      || nextBattle.boundary.request.side !== "player"
+    )
   ) {
     return fail("battle stopped outside a player, trainer, terminal, or barrier boundary");
   }
   return Object.freeze({
-    ...state,
     battle: nextBattle,
-    battleCommandPresentation: commandPresentationForBoundary(
-      nextBattle,
-      moveSelectionCursors,
-    ),
+    history: nextHistory,
+    events,
+    boundary: nextBattle.boundary,
+  });
+}
+
+function installDriveReceiptImmediately(
+  state: FactoryRoundBattleOrchestratorState,
+  receipt: FactoryBattleDriveReceipt,
+): FactoryRoundBattleOrchestratorState {
+  if (receipt.boundary.kind === "terminal") {
+    return finishBattle(state, receipt.battle, receipt.history);
+  }
+  const moveSelectionCursors = state.battle === null
+    ? state.moveSelectionCursors
+    : resetMoveSelectionCursorsForSwitchIns(
+      state.moveSelectionCursors,
+      state.battle,
+      receipt.battle,
+    );
+  const battleCommandPresentation = commandPresentationForBoundary(
+    receipt.battle,
+    moveSelectionCursors,
+  );
+  return Object.freeze({
+    ...state,
+    battle: receipt.battle,
+    battleCommandPresentation,
+    battleResolutionPresentation: null,
     battlePartySelect: null,
     moveSelectionCursors,
-    aiHistory: nextHistory,
-    facilityRngCalls: state.activeBattleCallStart! + nextBattle.rng.calls,
+    battlePresentationBoundaries: battleCommandPresentation === null
+      ? state.battlePresentationBoundaries
+      : createBattlePresentationBoundaries(
+        battleCommandPresentation,
+        receipt.battle,
+        moveSelectionCursors,
+        state.battlePresentationBoundaries,
+      ),
+    aiHistory: receipt.history,
+    facilityRngCalls: state.activeBattleCallStart! + receipt.battle.rng.calls,
+  });
+}
+
+function transitionFromDriveReceipt(
+  receipt: FactoryBattleDriveReceipt,
+): BattleDecisionTransitionResult<FactoryFullTurnDecisionRules> {
+  if (receipt.boundary.kind === "decision-required") {
+    return Object.freeze({
+      kind: "decision-required",
+      state: receipt.battle,
+      events: receipt.events,
+      nextRequest: receipt.boundary.request,
+    });
+  }
+  if (receipt.boundary.kind === "machine-barrier") {
+    return Object.freeze({
+      kind: "machine-barrier",
+      state: receipt.battle,
+      events: receipt.events,
+      barrier: receipt.boundary.barrier,
+    });
+  }
+  return Object.freeze({
+    kind: "terminal",
+    state: receipt.battle,
+    events: receipt.events,
+    outcome: receipt.boundary.outcome,
+  });
+}
+
+function applyReceiptPpToBoundaries(
+  boundaries: FactoryBattlePresentationBoundaries,
+  events: readonly BattleKernelSemanticEvent[],
+): FactoryBattlePresentationBoundaries {
+  let next = boundaries;
+  for (const event of events) {
+    const payload = event.payload;
+    if (payload.kind !== "set-battler-pp-data") continue;
+    if (payload.battler !== 0 && payload.battler !== 1) {
+      return fail(`Slice 3 cannot store PP for non-singles battler ${payload.battler}`);
+    }
+    const boundary = next[payload.battler];
+    const currentPP = [...boundary.field.currentPP] as [number, number, number, number];
+    currentPP[payload.movePosition] = payload.pp;
+    const replacement = Object.freeze({
+      ...boundary,
+      field: Object.freeze({
+        ...boundary.field,
+        currentPP: Object.freeze(currentPP),
+      }),
+    });
+    next = Object.freeze(next.map((candidate, battler) =>
+      battler === payload.battler ? replacement : candidate
+    )) as unknown as FactoryBattlePresentationBoundaries;
+  }
+  return next;
+}
+
+function beginCommandResolution(
+  state: FactoryRoundBattleOrchestratorState,
+  presentation: BattleCommandPresentationState,
+  transition: BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>,
+  history: FactoryAiBattleHistory,
+): FactoryRoundBattleOrchestratorState {
+  if (state.battle === null || presentation.pendingDecision === null) {
+    return fail("command resolution requires a submitted live battle decision");
+  }
+  if (state.battlePresentationBoundaries === null) {
+    return fail("command resolution requires controller battler boundaries");
+  }
+  const receipt = driveTrainerBoundary(state, transition, history);
+  const resolution = createBattleResolutionPresentation({
+    sourceRequest: presentation.request,
+    sourceDecision: presentation.pendingDecision,
+    beforeRules: state.battle.rules,
+    transition: transitionFromDriveReceipt(receipt),
+    fieldBoundary: presentation.field,
+  });
+  return Object.freeze({
+    ...state,
+    battle: receipt.battle,
+    battleCommandPresentation: null,
+    battleResolutionPresentation: resolution,
+    battlePartySelect: null,
+    battlePresentationBoundaries: applyReceiptPpToBoundaries(
+      state.battlePresentationBoundaries,
+      receipt.events,
+    ),
+    aiHistory: receipt.history,
+    facilityRngCalls: state.activeBattleCallStart! + receipt.battle.rng.calls,
+  });
+}
+
+function withResolutionLifecycle(
+  state: BattleResolutionPresentationState,
+  commandIndex: number,
+  phase: BattleResolutionPresentationState["lifecycle"]["phase"],
+  phaseElapsed: number,
+): BattleResolutionPresentationState {
+  return Object.freeze({
+    ...state,
+    commandIndex,
+    lifecycle: Object.freeze({ phase, phaseElapsed }),
+  });
+}
+
+function boundaryFieldAt(
+  field: BattleResolutionPresentationState["field"],
+  battler: 0 | 1,
+) {
+  return battler === 0 ? field.player : field.opponent;
+}
+
+function commitCompletedResolutionCommand(
+  boundaries: FactoryBattlePresentationBoundaries,
+  resolution: BattleResolutionPresentationState,
+  command: BattleResolutionPresentationCommand,
+): FactoryBattlePresentationBoundaries {
+  if (
+    command.type === "faint"
+    || command.type === "party-summary"
+    || command.type === "switch-in"
+  ) {
+    return fail(`Slice 3 cannot commit ${command.type} presentation`);
+  }
+  const displayed = createBattleResolutionPresentationRenderView(resolution).field;
+  return Object.freeze(boundaries.map((boundary, battler) => Object.freeze({
+    ...boundary,
+    field: boundaryFieldAt(displayed, battler as 0 | 1),
+    displayedHp: boundaryFieldAt(displayed, battler as 0 | 1).hp,
+    displayedStatus1:
+      command.type === "status" && command.battler === battler
+        ? command.after
+        : boundary.displayedStatus1,
+  }))) as unknown as FactoryBattlePresentationBoundaries;
+}
+
+function settledCommandForResolutionHandoff(
+  battle: BattleState<FactoryFullTurnDecisionRules>,
+  cursors: FactoryBattleMoveSelectionCursors,
+  boundaries: FactoryBattlePresentationBoundaries,
+): Readonly<{
+  presentation: BattleCommandPresentationState;
+  boundaries: FactoryBattlePresentationBoundaries;
+}> {
+  const entering = commandPresentationForBoundary(battle, cursors);
+  if (entering === null) {
+    return fail("Slice 3 resolution completed without a player command boundary");
+  }
+  const fields = [entering.field.player, entering.field.opponent] as const;
+  for (const [battler, field] of fields.entries()) {
+    const boundary = boundaries[battler]!;
+    const active = battle.rules.rulesContext.battlers[battler]!;
+    if (
+      boundary.partyIndex !== field.partyIndex
+      || boundary.displayedHp !== field.hp
+      || boundary.displayedStatus1 !== active.status1
+      || !boundary.spriteVisible
+    ) {
+      return fail(
+        `resolution handoff battler ${battler} display does not match the genuine next boundary`,
+      );
+    }
+  }
+  const presentation = Object.freeze({
+    ...entering,
+    lifecycle: Object.freeze({ phase: "action-menu" as const, phaseElapsed: 0 }),
+  });
+  return Object.freeze({
+    presentation,
+    boundaries: createBattlePresentationBoundaries(
+      presentation,
+      battle,
+      cursors,
+      boundaries,
+    ),
+  });
+}
+
+/**
+ * Advances only the controller-owned Scene-OFF resolution clock. The pending
+ * kernel boundary remains immutable, and the next command UI does not exist
+ * until the six displayed blank handoff frames have completed.
+ */
+export function advanceFactoryRoundBattleResolution(
+  state: FactoryRoundBattleOrchestratorState,
+): FactoryRoundBattleOrchestratorState {
+  const resolution = state.battleResolutionPresentation;
+  const boundaries = state.battlePresentationBoundaries;
+  if (resolution === null || boundaries === null) {
+    return fail("battle-resolution advance requires an active display boundary");
+  }
+  if (resolution.lifecycle.phase === "presenting") {
+    const segment = resolution.segments[resolution.segmentIndex];
+    if (!segment) return fail(`resolution has no segment ${resolution.segmentIndex}`);
+    const command = segment.commands[resolution.commandIndex];
+    if (command === undefined) {
+      return Object.freeze({
+        ...state,
+        battleResolutionPresentation: withResolutionLifecycle(
+          resolution,
+          resolution.commandIndex,
+          "next-command-handoff",
+          0,
+        ),
+      });
+    }
+    if (!isBattleResolutionCommandComplete(resolution)) {
+      return Object.freeze({
+        ...state,
+        battleResolutionPresentation: withResolutionLifecycle(
+          resolution,
+          resolution.commandIndex,
+          "presenting",
+          resolution.lifecycle.phaseElapsed + 1,
+        ),
+      });
+    }
+    const nextCommandIndex = resolution.commandIndex + 1;
+    const nextResolution = withResolutionLifecycle(
+      resolution,
+      nextCommandIndex,
+      nextCommandIndex >= segment.commands.length
+        ? "next-command-handoff"
+        : "presenting",
+      0,
+    );
+    return Object.freeze({
+      ...state,
+      battleResolutionPresentation: nextResolution,
+      battlePresentationBoundaries: commitCompletedResolutionCommand(
+        boundaries,
+        nextResolution,
+        command,
+      ),
+    });
+  }
+  if (resolution.lifecycle.phase !== "next-command-handoff") {
+    return fail(`Slice 3 cannot advance resolution phase ${resolution.lifecycle.phase}`);
+  }
+  const advanced = withResolutionLifecycle(
+    resolution,
+    resolution.commandIndex,
+    "next-command-handoff",
+    resolution.lifecycle.phaseElapsed + 1,
+  );
+  if (!isBattleResolutionNextCommandHandoffComplete(advanced)) {
+    return Object.freeze({
+      ...state,
+      battleResolutionPresentation: advanced,
+    });
+  }
+  const handoff = settledCommandForResolutionHandoff(
+    resolution.pendingBattle,
+    state.moveSelectionCursors,
+    boundaries,
+  );
+  return Object.freeze({
+    ...state,
+    battle: resolution.pendingBattle,
+    battleCommandPresentation: handoff.presentation,
+    battleResolutionPresentation: null,
+    battlePresentationBoundaries: handoff.boundaries,
   });
 }
 
@@ -683,10 +1060,10 @@ export function advanceFactoryRoundBattleCommand(
     if (transition === null) {
       return fail("legal voluntary party selection did not submit");
     }
-    return driveTrainerBoundary(
-      Object.freeze({ ...state, battlePartySelect: null }),
-      transition.state,
-      history,
+    const cleared = Object.freeze({ ...state, battlePartySelect: null });
+    return installDriveReceiptImmediately(
+      cleared,
+      driveTrainerBoundary(cleared, transition, history),
     );
   }
   const advanced = advanceBattleCommandPresentation(presentation, newKeys);
@@ -694,6 +1071,17 @@ export function advanceFactoryRoundBattleCommand(
     state.moveSelectionCursors.map((cursor, battler) =>
       battler === advanced.request.battler ? advanced.fightCursor : cursor),
   ) as FactoryBattleMoveSelectionCursors;
+  const battlePresentationBoundaries = state.battlePresentationBoundaries === null
+    ? null
+    : Object.freeze(state.battlePresentationBoundaries.map((boundary) =>
+      boundary.battler === advanced.request.battler
+        ? Object.freeze({
+            ...boundary,
+            idleEpoch: boundary.idleEpoch + 1,
+            moveCursor: advanced.fightCursor,
+          })
+        : boundary
+    )) as unknown as FactoryBattlePresentationBoundaries;
   const transition = submitBattleCommandPresentationDecision(
     battle,
     advanced,
@@ -712,19 +1100,27 @@ export function advanceFactoryRoundBattleCommand(
           battle.rules.rulesContext,
         ),
         moveSelectionCursors,
+        battlePresentationBoundaries,
       });
     }
     return Object.freeze({
       ...state,
       battleCommandPresentation: advanced,
       moveSelectionCursors,
+      battlePresentationBoundaries,
     });
   }
-  return driveTrainerBoundary(
-    Object.freeze({ ...state, moveSelectionCursors }),
-    transition.state,
-    history,
-  );
+  const submitting = Object.freeze({
+    ...state,
+    moveSelectionCursors,
+    battlePresentationBoundaries,
+  });
+  return advanced.pendingDecision?.kind === "use-move"
+    ? beginCommandResolution(submitting, advanced, transition, history)
+    : installDriveReceiptImmediately(
+        submitting,
+        driveTrainerBoundary(submitting, transition, history),
+      );
 }
 
 export function submitFactoryRoundPlayerDecision(
@@ -750,5 +1146,8 @@ export function submitFactoryRoundPlayerDecision(
     },
     reduceFactoryFullTurnDecision,
   );
-  return driveTrainerBoundary(state, transition.state, history);
+  return installDriveReceiptImmediately(
+    state,
+    driveTrainerBoundary(state, transition, history),
+  );
 }
