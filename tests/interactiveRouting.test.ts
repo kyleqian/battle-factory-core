@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { TICK0 as BATTLE_SCENE_TICK0 } from "../src/engine/battleScene.ts";
 import {
@@ -231,6 +232,15 @@ describe("interactive battle routing", () => {
     expect(after.battleRoom).toBeNull();
     expect(after.battleScene).not.toBeNull();
     expect(after.factoryRoundBattleOrchestrator).toBeNull();
+  });
+
+  it("keeps browser startup and reset on the generated default route", () => {
+    const mainSource = readFileSync(
+      new URL("../src/main.ts", import.meta.url),
+      "utf8",
+    );
+    expect(mainSource.match(/\bcreateInitialState\(\)/g)).toHaveLength(2);
+    expect(mainSource).not.toContain("canonical-recorded");
   });
 
   it("routes a different lead and decision from its own species, moves, and PP", () => {
