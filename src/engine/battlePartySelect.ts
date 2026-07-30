@@ -9,6 +9,7 @@ import type {
   BattlePartyIndex,
 } from "./battleDecisionBoundary.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import type { PartySelectState } from "./partySelect.ts";
 import type { RgbColor } from "./bg.ts";
 import { setPixel } from "./framebuffer.ts";
 import { drawText, type FontData } from "./font.ts";
@@ -52,6 +53,46 @@ export type BattlePartySelectState = Readonly<{
     | Readonly<{ kind: "select"; partyIndex: BattlePartyIndex }>;
   elapsed: number;
 }>;
+
+/**
+ * Shares the source-composed voluntary selector's row/icon renderer with a
+ * request-owned forced selector. Forced cancel semantics remain in
+ * partySelect.ts; this is a frozen render projection only.
+ */
+export function battlePartySelectStateForForcedParty(
+  forced: PartySelectState,
+): BattlePartySelectState {
+  const selectedPartyIndex = forced.cursor === "onix"
+    ? forced.request.faintedPartyIndex
+    : forced.request.legalPartyIndexes[0]!;
+  if (selectedPartyIndex > 2) {
+    return fail(`forced cursor points outside the three-mon party: ${selectedPartyIndex}`);
+  }
+  const rows = forced.party.map((member): BattlePartySelectRow => Object.freeze({
+    partyIndex: member.partyIndex,
+    species: member.speciesId,
+    speciesKey: member.speciesKey,
+    name: member.species,
+    level: member.level,
+    hp: member.hp,
+    maxHP: member.maxHp,
+    fainted: member.fainted,
+    active: member.partyIndex === forced.request.faintedPartyIndex,
+    legal: member.legal,
+  })) as unknown as BattlePartySelectState["rows"];
+  return Object.freeze({
+    requestId: forced.request.requestId,
+    rows: Object.freeze(rows),
+    cursor: selectedPartyIndex as 0 | 1 | 2,
+    rightColumnCursor: selectedPartyIndex === 2 ? 2 : 1,
+    submenuOpen:
+      forced.submenuOpen
+      && (forced.sendOutElapsed === null || forced.sendOutElapsed === 0),
+    message: forced.message,
+    outcome: null,
+    elapsed: forced.elapsed,
+  });
+}
 
 type SpeciesNameRow = Readonly<{ species: string; name: string }>;
 const SPECIES_NAMES = (speciesNamesData as { species: SpeciesNameRow[] }).species;

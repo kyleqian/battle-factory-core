@@ -2,14 +2,62 @@ import { describe, expect, it } from "vitest";
 import { advancePartySelect, CANONICAL_FORCED_SWITCH_PARTY, CANONICAL_FORCED_SWITCH_RENTAL_RECORDS, CANONICAL_FORCED_SWITCH_REQUEST, createPartySelectStateFromForcedSwitch, fullPartyIconFrame, INITIAL_PARTY_SELECT_STATE, onixSelectedHopY2, partyMenuLayers, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutBattleMenuReady, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_BLACK_START, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_ENTRY_SETTLED_START, PARTY_LIST_INPUT_ELAPSED, PARTY_SENDOUT_ACTION_MENU_START, PARTY_SENDOUT_BALL_LAST_VISIBLE, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_BATTLE_FADE_IN_START, PARTY_SENDOUT_BLACK_START, PARTY_SENDOUT_BLANK_MESSAGE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, PARTY_SENDOUT_GO_TEXT_START, PARTY_SENDOUT_RELEASE_VISIBLE_START, partySelectEntryPhase, submitPartySelectBattleDecision } from "../src/engine/partySelect.ts";
 import { bgFadeY, objFadeY } from "../src/engine/paletteFade.ts";
 import { createBattleState, type BattleDecisionReducer } from "../src/engine/battleDecisionBoundary.ts";
+import { battlePartySelectStateForForcedParty, renderBattlePartySelect } from "../src/engine/battlePartySelect.ts";
+import { createFramebuffer } from "../src/engine/framebuffer.ts";
+import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
+import naturesData from "../src/data/gen/natures.json" with { type: "json" };
+import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
+import type { FactoryRentalRecord } from "../src/engine/battleScenario.ts";
 
 describe("forced turn-15 party select", () => {
+  const natureByName = new Map(naturesData.natures.map((row) => [row.name, row.index]));
+  const record = (setId: number): FactoryRentalRecord => {
+    const set = frontierMonsData.entries[setId]!;
+    const personality = natureByName.get(set.nature)!;
+    const input = {
+      setId,
+      personality,
+      fixedIv: 31,
+      abilitySlot: (personality & 1) as 0 | 1,
+    };
+    return Object.freeze({
+      ...input,
+      abilitySlot: createFactoryCorpusPartyMember(input).abilitySlot,
+    });
+  };
+
   it("constructs the canonical three-rental state through the request-driven entry point exactly", () => {
     expect(createPartySelectStateFromForcedSwitch(
       CANONICAL_FORCED_SWITCH_REQUEST,
       CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
       CANONICAL_FORCED_SWITCH_PARTY,
     )).toEqual(INITIAL_PARTY_SELECT_STATE);
+  });
+
+  it("source-composes arbitrary forced-party rows and SPECIES_* icons", () => {
+    const records = [record(664), record(678), record(527)] as const;
+    const members = records.map(createFactoryCorpusPartyMember);
+    const party = members.map((member, index) => Object.freeze({
+      id: member.speciesName.toLowerCase(),
+      species: member.speciesName.replace(/^SPECIES_/, ""),
+      hp: index === 0 ? 0 : member.maxHP,
+      maxHp: member.maxHP,
+      status: "none" as const,
+    })) as never;
+    const forced = createPartySelectStateFromForcedSwitch(
+      CANONICAL_FORCED_SWITCH_REQUEST,
+      records,
+      party,
+    );
+    const source = battlePartySelectStateForForcedParty(forced);
+    expect(source.rows.map((row) => row.speciesKey)).toEqual([
+      "SPECIES_GRANBULL",
+      "SPECIES_HARIYAMA",
+      "SPECIES_MACHAMP",
+    ]);
+    const fb = createFramebuffer();
+    renderBattlePartySelect(fb, source);
+    expect(fb.some((channel) => channel !== 0 && channel !== 255)).toBe(true);
   });
 
   it("submits the confirmed selection as an ordinary forced-switch boundary decision", () => {

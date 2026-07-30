@@ -648,6 +648,10 @@ import extremeSpeedAsset from "../assets/gen/battle-anim-extreme-speed.json" wit
 import battleAnimGhostBgAsset from "../assets/gen/battle-anim-ghost-bg.json" with { type: "json" };
 import battleAnimPsychicBgAsset from "../assets/gen/battle-anim-psychic-bg.json" with { type: "json" };
 import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, type PartyMenuIconLayer } from "./partySelect.ts";
+import {
+  battlePartySelectStateForForcedParty,
+  renderBattlePartySelect,
+} from "./battlePartySelect.ts";
 import { bgFadeY, objFadeY, type FadeTiming } from "./paletteFade.ts";
 import { fadeColor } from "./fadeRender.ts";
 import { drawTileBg as drawExtractedTileBg } from "./bg.ts";
@@ -14534,6 +14538,12 @@ function drawTurn15ExitObjSubset(fb: Uint8Array, oam: Mode0Oam[]): void {
 }
 
 function drawTurn15PartySelectList(fb: Uint8Array, state: import("./partySelect.ts").PartySelectState): void {
+  if (state.party.some((member, index) =>
+    member.species !== (["ONIX", "MAGBY", "BAYLEEF"] as const)[index]
+  )) {
+    renderBattlePartySelect(fb, battlePartySelectStateForForcedParty(state));
+    return;
+  }
   const layers = partyMenuLayers(state);
   const pixels = partyChromePixels(layers.chromeKey);
   for (let p = 0, o = 0; p < 240 * 160; p += 1, o += 4) {
@@ -14713,6 +14723,12 @@ function drawPartyMenuSourceMask(mask: Uint8Array, encoded: string, width: numbe
 
 /** Live OBJ ownership for the party list (three icons plus two status OBJ instances). */
 function drawTurn15PartyListObjMask(mask: Uint8Array, state: import("./partySelect.ts").PartySelectState): void {
+  if (state.party.some((member, index) =>
+    member.species !== (["ONIX", "MAGBY", "BAYLEEF"] as const)[index]
+  )) {
+    renderBattlePartySelect(mask, battlePartySelectStateForForcedParty(state));
+    return;
+  }
   const layers = partyMenuLayers(state);
   const exitFading = state.sendOutElapsed !== null && partySendOutPhase(state.sendOutElapsed) === "fadingOut";
   for (const icon of layers.icons) drawTurn15PartyIcon(mask, icon);
