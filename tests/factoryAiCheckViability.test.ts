@@ -308,6 +308,120 @@ describe("AI_CV_Confuse (docs/factory-ai-checkviability-ground-truth.md §32)", 
   });
 });
 
+describe("AI_CV_Swagger (docs/factory-ai-checkviability-ground-truth.md §33)", () => {
+  const MOVE_SWAGGER = 207;
+  const MOVE_PSYCH_UP = 244;
+
+  function swaggerRun(input: Readonly<{
+    rngValue?: number;
+    attackerMoves?: readonly [number, number, number, number];
+    battleTurnCount?: number;
+    targetAtkStage?: number;
+    targetHp?: number;
+    staleFuncResultFallback?: 0 | 1 | 2 | 3;
+  }> = {}) {
+    return runCheckViability({
+      rng: { value: input.rngValue ?? 1, calls: 0 },
+      moveId: MOVE_SWAGGER,
+      attacker: {
+        ...NEUTRAL_BATTLER,
+        moves: input.attackerMoves ?? [MOVE_SWAGGER, MOVE_SURF, MOVE_ROCK_SLIDE, MOVE_BODY_SLAM],
+        battleTurnCount: input.battleTurnCount,
+      },
+      target: {
+        ...NEUTRAL_BATTLER,
+        atkStage: input.targetAtkStage ?? 6,
+        hp: input.targetHp ?? 100,
+        maxHp: 100,
+      },
+      staleFuncResultFallback: input.staleFuncResultFallback,
+      drawOrdinalStart: 1,
+      reasonPrefix: "swagger",
+    });
+  }
+
+  it("no Psych Up FALLS THROUGH to Swagger's roll; low byte <128 JUMPs over +1 into Confuse", () => {
+    const result = swaggerRun({ rngValue: 3 }); // low byte 83
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "swagger-roll", jumped: true });
+  });
+
+  it("no Psych Up and low byte >=128 FALLS THROUGH to +1 before the Confuse tail", () => {
+    const result = swaggerRun({ rngValue: 1 }); // low byte 198
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "swagger-roll", jumped: false });
+  });
+
+  it("the no-Psych-Up path enters Confuse: target HP <=70 FALLS THROUGH to its independent roll", () => {
+    const result = swaggerRun({ rngValue: 1, targetHp: 70 });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.kind)).toEqual(["swagger-roll", "confuse-roll"]);
+  });
+
+  it("Psych Up present and target ATK >3 JUMPs directly to -5 without get_turn_count", () => {
+    const result = swaggerRun({
+      attackerMoves: [MOVE_SWAGGER, MOVE_PSYCH_UP, MOVE_SURF, MOVE_ROCK_SLIDE],
+      targetAtkStage: 4,
+      battleTurnCount: 2,
+      staleFuncResultFallback: 3,
+    });
+    expect(result).toMatchObject({
+      kind: "scored",
+      scoreDelta: -5,
+      draws: [],
+      funcResultAfter: 3,
+    });
+  });
+
+  it("target ATK exactly 3 FALLS THROUGH to +3; turn count 0 FALLS THROUGH to another +2", () => {
+    expect(swaggerRun({
+      attackerMoves: [MOVE_SWAGGER, MOVE_PSYCH_UP, MOVE_SURF, MOVE_ROCK_SLIDE],
+      targetAtkStage: 3,
+      battleTurnCount: 0,
+      staleFuncResultFallback: 3,
+    })).toMatchObject({
+      kind: "scored",
+      scoreDelta: 5,
+      draws: [],
+      funcResultAfter: 0,
+    });
+  });
+
+  it("after +3, nonzero turn count JUMPs to End and get_turn_count overwrites funcResult", () => {
+    expect(swaggerRun({
+      attackerMoves: [MOVE_SWAGGER, MOVE_PSYCH_UP, MOVE_SURF, MOVE_ROCK_SLIDE],
+      targetAtkStage: 2,
+      battleTurnCount: 2,
+      staleFuncResultFallback: 0,
+    })).toMatchObject({
+      kind: "scored",
+      scoreDelta: 3,
+      draws: [],
+      funcResultAfter: 2,
+    });
+  });
+
+  it("no-Psych-Up path preserves the incoming funcResult carry", () => {
+    expect(swaggerRun({ staleFuncResultFallback: 3 })).toMatchObject({
+      kind: "scored",
+      funcResultAfter: 3,
+    });
+  });
+
+  it("leaves Haze behind the same generic CV barrier", () => {
+    expect(run({ value: 1, calls: 0 }, MOVE_HAZE)).toMatchObject({
+      kind: "unsupported-branch",
+      barrier: "factory-ai-check-viability",
+      effect: "EFFECT_HAZE",
+    });
+  });
+});
+
 describe("AI_CV_Toxic (data/battle_ai_scripts.s:1353-1371)", () => {
   function toxicRun(input: Readonly<{
     rngValue?: number;

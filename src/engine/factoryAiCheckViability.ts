@@ -13,7 +13,8 @@
  * following (the ported handlers per
  * `docs/factory-ai-checkviability-ground-truth.md` §5's table, dispatched
  * before that barrier check): `EFFECT_SLEEP` (`AI_CV_Sleep`, doc §29),
- * `EFFECT_CONFUSE` (`AI_CV_Confuse`, doc §32), `EFFECT_SPEED_DOWN(_2)` (`AI_CV_SpeedDown`,
+ * `EFFECT_CONFUSE` (`AI_CV_Confuse`, doc §32), `EFFECT_SWAGGER`
+ * (`AI_CV_Swagger`, doc §33), `EFFECT_SPEED_DOWN(_2)` (`AI_CV_SpeedDown`,
  * `runCvSpeedDown` below, `data/battle_ai_scripts.s:1142-1152`,
  * `docs/factory-ai-checkviability-ground-truth.md` §6), `EFFECT_PURSUIT`
  * (`AI_CV_Pursuit`, `runCvPursuit` below, `:2018-2036`, doc §11.1),
@@ -322,6 +323,12 @@ export type FactoryAiCheckViabilityBattler = Readonly<{
    * Required by that handler's source path; other handlers ignore it.
    */
   moves?: readonly [number, number, number, number];
+  /**
+   * Source `gBattleResults.battleTurnCounter`, written into `funcResult` by
+   * `AI_CV_Swagger`'s `get_turn_count` only on its Psych Up/low-target-ATK
+   * branch (doc §33). Optional, defaulting to the real battle-start value 0.
+   */
+  battleTurnCount?: number;
   /** BattleHistory-known moves for AI_TARGET move-effect scans. */
   knownMoves?: readonly number[];
   /** STATUS2_INFATUATION. */
@@ -354,6 +361,17 @@ export type FactoryAiCheckViabilityDraw =
     rawRngValue: number;
     randomValue: number;
     /** True when low byte <128 JUMPs over the first -1. */
+    jumped: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "swagger-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when low byte <128 JUMPs over Swagger's +1 into AI_CV_Confuse. */
     jumped: boolean;
   }>
   | Readonly<{
@@ -3458,6 +3476,27 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
+  if (move.effect === "EFFECT_SWAGGER") {
+    const swagger = runCvSwagger({
+      rng: input.rng,
+      attackerMoves: input.attacker.moves ?? [0, 0, 0, 0],
+      battleTurnCount: input.attacker.battleTurnCount ?? 0,
+      targetAtkStage: input.target.atkStage,
+      targetHp: input.target.hp,
+      targetMaxHp: input.target.maxHp,
+      funcResultCarry,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: swagger.rng,
+      draws: swagger.draws,
+      scoreDelta: swagger.scoreDelta,
+      funcResultAfter: swagger.funcResultAfter,
+    });
+  }
+
   if (AI_CHECK_VIABILITY_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
       kind: "unsupported-branch",
@@ -3654,5 +3693,70 @@ function runCvConfuse(input: Readonly<{
       jumped,
     })]),
     scoreDelta,
+  });
+}
+
+/**
+ * `AI_CV_Swagger` (`data/battle_ai_scripts.s:1462-1490`, doc §33).
+ *
+ * Without Psych Up in AI_USER's live four-move set, one low-byte roll either
+ * JUMPs over Swagger's +1 (<128) or FALLS THROUGH to it (>=128), then both
+ * paths enter the already-ported `AI_CV_Confuse` tail. With Psych Up, the
+ * target-ATK `>3` JUMP applies -5. ATK `<=3` FALLS THROUGH to +3 and
+ * `get_turn_count`; nonzero turn counts JUMP to End, while zero FALLS THROUGH
+ * to another +2. Only `get_turn_count` writes `funcResult`.
+ */
+function runCvSwagger(input: Readonly<{
+  rng: BattleRngState;
+  attackerMoves: readonly [number, number, number, number];
+  battleTurnCount: number;
+  targetAtkStage: number;
+  targetHp: number;
+  targetMaxHp: number;
+  funcResultCarry: AiWeatherValue | undefined;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckViabilityDraw[];
+  scoreDelta: number;
+  funcResultAfter: AiWeatherValue | undefined;
+}> {
+  const MOVE_PSYCH_UP = 244;
+  if (input.attackerMoves.includes(MOVE_PSYCH_UP)) {
+    if (input.targetAtkStage > 3) {
+      return Object.freeze({
+        rng: input.rng,
+        draws: Object.freeze([]),
+        scoreDelta: -5,
+        funcResultAfter: input.funcResultCarry,
+      });
+    }
+    const turnCount = Math.max(0, Math.min(0xff, Math.trunc(input.battleTurnCount)));
+    return Object.freeze({
+      rng: input.rng,
+      draws: Object.freeze([]),
+      scoreDelta: turnCount === 0 ? 5 : 3,
+      funcResultAfter: turnCount <= 3 ? turnCount as AiWeatherValue : undefined,
+    });
+  }
+
+  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-swagger-roll`);
+  const jumped = roll.randomValue % 256 < 128;
+  const confuse = runCvConfuse({
+    rng: roll.after,
+    targetHp: input.targetHp,
+    targetMaxHp: input.targetMaxHp,
+    drawOrdinalStart: input.drawOrdinalStart + 1,
+    reasonPrefix: input.reasonPrefix,
+  });
+  return Object.freeze({
+    rng: confuse.rng,
+    draws: Object.freeze([
+      Object.freeze({ ...roll, kind: "swagger-roll" as const, jumped }),
+      ...confuse.draws,
+    ]),
+    scoreDelta: (jumped ? 0 : 1) + confuse.scoreDelta,
+    funcResultAfter: input.funcResultCarry,
   });
 }
