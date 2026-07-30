@@ -6897,3 +6897,158 @@ so both were restored; committed SHA-256 remains
 `8b18f75413c8046530f75c8a5b331a0bf31e8b92596029356ef6025071965261`.
 This replaces one runtime effect-table halt behind the same generic barrier:
 no unsupported-branch statement or canonical-recording import was added.
+
+## 34. 2026-07-29 addendum #24: `AI_CBM_HighRiskForDamage` + `AI_CV_Counter`
+
+Bounded side-lane implementation session, Battle Scene OFF oracle. Counter is
+the last ranked Factory-reachable remainder from §§31-33, and both of its
+previously barriered scoring halves are now source-complete.
+
+### 34.1 Final selection and Level-50 reachability
+
+The shortlist was re-derived over Level-50 set indexes 0-849:
+
+| Pair | Distinct Level-50 set carriers | Remaining staging surface |
+| --- | ---: | --- |
+| Counter | **42** | shared HighRisk CBM; status/HP/Taunt/last-move/Mirror Coat/type CV |
+| Swagger | **30** | already completed in §33 |
+| Confuse | **64** | already completed in §32 |
+| Paralyze | **72** | already completed in §31 |
+
+Counter occurs at set indexes 35, 51, 185, 221, 232, 234, 271, 290, 339,
+341, 353, 382, 386, 388, 390, 402, 406, 411, 413, 414, 423, 424, 425,
+426, 431, 458, 481, 493, 521, 554, 607, 640, 650, 674, 750, 773, 786,
+809, 811, 824, 825, and 838. No better-qualified survivor remains behind
+the two generic barriers: the three other ranked pairs are already complete,
+and Counter is the sole unfinished member of the established shortlist.
+
+### 34.2 Source-exact bodies, gates, and polarity
+
+CBM dispatch is `EFFECT_COUNTER -> AI_CBM_HighRiskForDamage`
+(`data/battle_ai_scripts.s:156`). Counter has no private CBM body; it uses the
+shared source body at `:368-376`:
+
+```asm
+AI_CBM_HighRiskForDamage:
+	if_type_effectiveness AI_EFFECTIVENESS_x0, Score_Minus10
+	get_ability AI_TARGET
+	if_not_equal ABILITY_WONDER_GUARD, AI_CBM_HighRiskForDamage_End
+	if_type_effectiveness AI_EFFECTIVENESS_x2, AI_CBM_HighRiskForDamage_End
+	goto Score_Minus10
+AI_CBM_HighRiskForDamage_End:
+	end
+```
+
+Exact x0 effectiveness **JUMPS** to `-10` before the ability read.
+Non-x0 **FALLS THROUGH** to one fresh, uncached target-ability read
+(`battle_ai_script_commands.c:1350-1400`). Non-Wonder Guard **JUMPS** to End
+at zero. Wonder Guard **FALLS THROUGH**: exact x2 **JUMPS** to End, while
+every non-x2 result **FALLS THROUGH** to `-10`. The read is distinct from
+the universal Soundproof-prologue read.
+
+CV dispatch is `EFFECT_COUNTER -> AI_CV_Counter`
+(`battle_ai_scripts.s:713`); the complete body and physical-type table are
+`:1618-1685`. Gates execute in this source order:
+
+1. target sleep, infatuation, then confusion each **JUMP** to `-1`; clear
+   state **FALLS THROUGH** each gate;
+2. AI user's HP `>30%` **JUMPS** over the `<10` roll and first `-1`;
+   HP `<=30%` **FALLS THROUGH**, low byte `<10` **JUMPS**, and `>=10`
+   **FALLS THROUGH** to `-1`;
+3. HP `>50%` likewise **JUMPS** over the `<100` roll and second `-1`;
+4. Mirror Coat present in AI_USER's real four-move set **JUMPS** directly
+   to Counter8's `<100` bonus roll; absent **FALLS THROUGH**;
+5. target last-move power zero **JUMPS** to Counter5; nonzero
+   **FALLS THROUGH**. On the nonzero path, target not taunted **JUMPS** over
+   a `<100` roll/+1 pair; taunted **FALLS THROUGH** to it. A non-physical
+   last-move type then **JUMPS** to `-1`; physical **FALLS THROUGH** to
+   another `<100` roll whose failure applies `+1`;
+6. on the zero-power path, the same Taunt gate/roll runs. Emerald's
+   non-`BUGFIX` branch at `:1657-1661` makes physical target type1 or type2
+   **JUMP to End**. Only two non-physical target types **FALL THROUGH** to
+   the `<50` roll. This preserves the source bug called out at `:1616-1617`
+   rather than applying the corrected branch;
+7. Counter7's low byte `<50` **JUMPS** to End; `>=50` **FALLS THROUGH** to
+   Counter8. Counter8's low byte `<100` **JUMPS** to End; `>=100`
+   **FALLS THROUGH** to `+4`.
+
+Tier 1 drives JUMP and FALLTHROUGH for every gate and every random polarity,
+including exact HP boundaries, both target-type reads, the non-`BUGFIX`
+polarity, `funcResult` carry/write behavior, and the unchanged Haze barrier.
+
+### 34.3 Live OFF staging, direct move receipts, and RNG ledger
+
+The reproducible complete-party fixtures are:
+
+- `mechanic-factory-ai-counter-control-off.json`;
+- `mechanic-factory-ai-counter-reach-off.json`;
+- generator: `tools/probe/generate-factory-ai-counter-fixtures.ts`;
+- process probe: `tools/probe/probe-factory-ai-counter-case.py`;
+- engine/ROM verifier: `tools/probe/verify-factory-ai-counter-live.ts`.
+
+A level-5 Magikarp relay uses Splash while Vaporeon records the controlled
+last move and KOs it. Shuckle switches in with
+`[Counter, Splash, Splash, Splash]`. Control records Psychic (special);
+Counter's type gate scores `-1`, so a Splash wins. Reach records Vital Throw
+(physical); the `<100` physical-path roll falls through on both selected
+seeds, scoring Counter `+1`, so Counter wins strictly. Both player moves are
+already known when Shuckle's first decision runs; complete
+`overrides.parties` records stage every species, move, level, and bench.
+
+| Seed | Fixture | Shuckle PP start→first action | Scores by slot | ROM/engine choice | Exact engine RNG |
+| ---: | --- | --- | --- | --- | --- |
+| 2 | control | `[20,40,40,40]→[20,40,39,40]` | `[99,100,100,100]` | Splash slot 2 | 5 draws, `206709515→3130704934` |
+| 2 | reach | `[20,40,40,40]→[19,40,40,40]` | `[101,100,100,100]` | Counter slot 0 | 6 draws, `3652931064→3130704934` |
+| 3 | control | `[20,40,40,40]→[20,40,39,40]` | `[99,100,100,100]` | Splash slot 2 | 5 draws, `238378527→2582738922` |
+| 3 | reach | `[20,40,40,40]→[19,40,40,40]` | `[101,100,100,100]` | Counter slot 0 | 6 draws, `2031155420→2582738922` |
+
+All four rows reran byte-identically. The engine matches the exact PP-selected
+slot, score vector, draw count, and endpoint RNG. The control receipt is setup
+simulated-RNG x4 plus final tie x1. Reach adds exactly one
+`counter-physical-roll` between setup and the final selection.
+
+Fresh process-isolated reach attribution on `(710,719]` reconciles identically
+on seeds 2 and 3:
+
+| Caller | Count | Attribution |
+| --- | ---: | --- |
+| `BattleTurnPassed+0x157` | 1 | ordinary pre-decision battle call |
+| `BattleAI_SetupAIData+0x83` | 4 | one simulated-RNG setup draw per slot |
+| `Cmd_if_random_less_than+0x7` | 1 | Counter physical-last-move `<100` site |
+| `ChooseMoveOrAction_Singles+0xf7` | 1 | unconditional final selection draw |
+| **Live window total** | **7** | `sRandCount == single-step hit count` |
+
+Removing the ordinary battle call leaves the exact six-draw reach engine
+receipt. Multi-megabyte emulator logs remained in fresh
+`/tmp/pokebench-counter.*` scratch and are not committed.
+
+### 34.4 Reproduce and census status
+
+```sh
+node --experimental-strip-types tools/probe/generate-factory-ai-counter-fixtures.ts
+node --experimental-strip-types tools/probe/verify-factory-ai-counter-live.ts
+npx vitest run tests/factoryAiCheckBadMove.test.ts tests/factoryAiCheckViability.test.ts tests/factoryAiScoredDecision.test.ts
+node --experimental-strip-types tools/report/ability-item-parity-census.ts
+npx tsx tools/report/executable-frontier-census.ts
+```
+
+For process-isolated receipts, generate seed-specific fixtures and allocate a
+fresh output path for each run:
+
+```sh
+probe_scratch_dir=$(mktemp -d /tmp/pokebench-counter.XXXXXX)
+node --experimental-strip-types tools/probe/generate-factory-ai-counter-fixtures.ts "$probe_scratch_dir/seed2" 2
+python3 tools/run-mgba-probe.py "$probe_scratch_dir/counter-reach-2.json" -- tools/probe/probe-factory-ai-counter-case.py "$probe_scratch_dir/seed2/mechanic-factory-ai-counter-reach-off.json" 2 "$probe_scratch_dir/counter-reach-2.json"
+python3 tools/run-mgba-probe.py "$probe_scratch_dir/counter-callers-2.json" -- tools/probe/attribute-factory-ai-random-callers.py "$probe_scratch_dir/seed2/mechanic-factory-ai-counter-reach-off.json" "$probe_scratch_dir/counter-callers-2.json" 710 719
+```
+
+The ability/item census legitimately changes exactly one cell:
+`ABILITY_WONDER_GUARD` engine-reference count **10 -> 11**, from the new
+identity-constant comparison in the shared CBM body. Totals remain 69/69
+abilities (weighted 1096/1096), 42/42 hold effects (weighted 850/850), and
+17/17 checks. The executable-frontier census remains 214/214 effects,
+355/355 moves, 276/276 distinct Level-50 moves, 2957/2957 weighted Level-50
+moves, and 72/72 checks; regeneration changed only its embedded date, which
+was restored. Both ports replace their runtime effect halts behind the same
+two generic barrier statements: no unsupported-branch statement or canonical
+recording import was added.
