@@ -175,7 +175,7 @@ describe("generated Factory pre-send-out intro lifecycle", () => {
     );
     const initial = round.battleCommandPresentation!;
     let expected = initial;
-    for (let frame = 0; frame < 8; frame += 1) {
+    for (let frame = 0; frame < 6; frame += 1) {
       expected = advanceBattleCommandPresentation(expected, new Set());
     }
 
@@ -183,8 +183,9 @@ describe("generated Factory pre-send-out intro lifecycle", () => {
     expect(settled).toEqual(expected);
     expect(settled.lifecycle).toEqual({
       phase: "action-menu",
-      phaseElapsed: 2,
+      phaseElapsed: 0,
     });
+    expect(settled.idleBounceElapsed).toBe(0);
     expect(settled.field).toEqual(initial.field);
   });
 });

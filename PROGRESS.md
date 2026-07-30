@@ -13,19 +13,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
-## 743 — [BOUNDED MAIN WORKER 2026-07-30 ~14:18] Slice 3 closure in progress: summary tail exact
+## 743 — [BOUNDED MAIN WORKER 2026-07-30 ~14:22] Slice 3 intro exact; final gates in progress
 
-- **State:** Fix 1 is green and ready to commit; focused intro/ratchet
-  acceptance **2 files / 10 tests**.
-- **Did:** the typed generated initial-release summary tail now advances its
-  stateless exit clock at `rawElapsed=31`; canonical DESTIN/JENSON clocks are
-  unchanged. The committed intro improved **711/715 → 712/715** and frame
-  1492 is exact.
-- **Next:** derive and close only the typed action-menu handoff residuals at
-  frames 1747/1755-56, then run the full assigned acceptance.
-- **Notes:** current honest remainder is exactly frame 1747 (1579px) and
-  1755-1756 (769px each). No capture, canonical route, barrier, or issue
-  change.
+- **State:** both fixes landed locally; focused acceptance **5 files / 49
+  tests**. Generated intro **715/715**, command entry **7/7**, and generated
+  command **128/128** are exact.
+- **Did:** the typed initial-release summary tail advances its stateless final
+  exit step, while canonical clocks remain unchanged. The live command
+  conversion now consumes only the source-owned six blank `action-enter`
+  callbacks and enters `action-menu` at bounce age zero; this closes frames
+  1747/1755-56 without frame-relative routing.
+- **Next:** run all 25 immutable traces, full Tier-1, and production build;
+  then finalize this entry with the green counts.
+- **Notes:** Slice 3's sole intro residual family is **CLOSED**. No capture,
+  route default, barrier, issue, Scene-ON, or later-round change.
 
 ---
 ## 742 — [SUPERVISOR 2026-07-30 ~14:25] Slice 3 verified (711/715 honest); 4 side branches merged; census found 10 reachable moveend halts — burn-down in flight
@@ -71,4 +72,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Default/canonical route unchanged; no issue, recording/barrier ratchet,
   Gate-6, Scene-ON, later-round, or postbattle change. PAPERCUT: oracle's
   256-capture ceiling required serialized batching, ~10 minutes.
-

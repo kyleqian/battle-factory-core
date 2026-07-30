@@ -223,8 +223,9 @@ describe("interactive battle routing", () => {
     expect(orchestrator.battle).not.toBeNull();
     expect(orchestrator.battleCommandPresentation!.lifecycle).toEqual({
       phase: "action-menu",
-      phaseElapsed: 2,
+      phaseElapsed: 0,
     });
+    expect(orchestrator.battleCommandPresentation!.idleBounceElapsed).toBe(0);
     expect(orchestrator.battleCommandPresentation!.field).toEqual(
       factoryBattleStartField(frozen),
     );

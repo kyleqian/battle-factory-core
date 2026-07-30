@@ -86,10 +86,12 @@ export function advanceFactoryBattleStartIntro(
 }
 
 /**
- * Converts the completed intro into the exact typed command checkpoint used
- * by capture 8 of battle-command-generated-off. The caller supplies the real
- * fresh-battle boundary; this lifecycle only verifies its frozen field and
- * advances the shared controller reducer to that already-proven checkpoint.
+ * Converts the completed intro into the first visible typed action-menu
+ * checkpoint. The caller supplies the real fresh-battle boundary; this
+ * lifecycle verifies its frozen field and consumes only PlayerHandleChoose-
+ * Action's six blank action-enter callbacks. HandleInputChooseAction starts
+ * the two DoBounceEffect clocks on later callbacks (battle_controller_player.c
+ * and battle_main.c), so those clocks must remain at age zero at this seam.
  */
 export function settleFactoryBattleStartCommand(
   state: FactoryBattleStartIntroState,
@@ -101,8 +103,11 @@ export function settleFactoryBattleStartCommand(
   if (JSON.stringify(command.field) !== JSON.stringify(factoryBattleStartField(state.command))) {
     throw new Error("Factory battle-start command field does not match the frozen intro");
   }
+  if (command.lifecycle.phase !== "action-enter") {
+    throw new Error("Factory battle-start command must begin at action-enter");
+  }
   let settled = command;
-  for (let frame = 0; frame < 8; frame += 1) {
+  while (settled.lifecycle.phase === "action-enter") {
     settled = advanceBattleCommandPresentation(settled, new Set());
   }
   return settled;
