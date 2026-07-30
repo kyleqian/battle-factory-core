@@ -13,6 +13,37 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 722 — [SUPERVISOR FINAL WIND-DOWN 2026-07-29 ~20:55] Slice 5 COMPLETE verified; last animation fold; session closed at 11 rounds / 18 workers / 0 failed steps
+
+- **State:** master green at **526 files / 5403 tests + 1 deliberate
+  animation-lane skip**, production build, `git diff --check` clean,
+  DEFERRED.md empty all session, no orphan worktrees/worker branches,
+  `animation-main` folded (final +5: Brick Break both bodies accepted;
+  post-fold delta 0 at ~20:49 — the animation supervisor may still be
+  live; any newer tail is the next orient's fold).
+- **Did (since entry 720):** dispatched the Slice-5 remainder as a bonus
+  time-boxed round — it landed **complete** (`8a0b46b2..a6342e17`): typed
+  send-out lifecycle consumed, arbitrary source-composed forced-party
+  rows/icons, generic summaries/art/healthboxes, frozen opponent trainer
+  text, delayed-confirm parity, and the **ONIX/MAGBY/BAYLEEF visual guard
+  removed**. Supervisor verification: targeted 110/110; seven windows
+  re-run exact across every affected family (switch-in 242, send-out
+  195+195 delayed, turn16 175, party-select 200, action-menu 209, faint
+  141); full suite + build green before and after the final animation
+  fold.
+- **Next (ordered, next session):** (i) design §4 Slice 6 — terminal
+  handoff + canonical retirement proof (ISSUES #39 path); (ii) Slice 7 —
+  explicit-OFF 128-capture breadth trace (entry 704's 0/128); (iii)
+  trainer-pic OFF window; (iv) commentary OFF checkpoint (harness-side
+  Battle Lab decision, entry 690); (v) Gate-6 interaction matrix. Entry
+  720 has the full session totals (command seam closed, CBM/CV program
+  closed §§28-34, three class-B reveals, integrity correction 705).
+- **Notes:** the resolution seam went design→Slices 1-5 COMPLETE in one
+  session; only Slices 6-7 remain. No deferred questions. Next session
+  resumes from this entry alone.
+
+---
+
 ## 721 — [BOUNDED MAIN WORKER 2026-07-29 ~20:40] Resolution Slice 5 complete
 
 - **State:** implementation commits `8a0b46b2`, `cccbde92`, `d06ec040`,
@@ -91,31 +122,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 719 — [BOUNDED MAIN WORKER 2026-07-29 ~20:00] Slice 5 semantic checkpoint landed
-
-- **State:** implementation `4727bbf8` + `b297345b`; focused Slice-5
-  acceptance **108/108**, full suite green at **525 files / 5378 tests + 1
-  deliberate animation-lane skip**, production build and `git diff --check`
-  green.
-- **Did:** `Cmd_switchinanim` now emits the narrow provenance-bearing
-  `switch-in-animation { battler, partyIndex }` event. Confirmed forced
-  selection crosses the ordinary battle reducer; the driven continuation
-  receipt (party summary, switch, frozen `Go! <species>!`, summary hide,
-  switch-in marker, next boundary) appends as segment 2 under the original
-  resolution ID. Invalid/missing markers and non-monotonic continuation
-  sequences fail closed.
-- **Next:** finish Slice 5 from this honest checkpoint: consume the appended
-  segment in typed presentation; source-compose arbitrary forced-party
-  rows/icons; render generic player/opponent summary, ball/species,
-  healthbox, and six-frame next-menu handoff; only then remove the
-  ONIX/MAGBY/BAYLEEF guard. Opponent switch text also needs a frozen trainer
-  class/name substitution. Slices 6-7 remain untouched.
-- **Notes:** all new rows exact: switch-in/send-out/delayed/Turn-16
-  **242/242, 195/195, 195/195, 175/175**. Every earlier §3.2 row through
-  delayed party selection remains exact: staged **16/16**; menus
-  **254,44,42,44,93,88,111,83,56,46,57**; stat/faint/fly/party
-  **190,141,256,200,200**. The visual guard remains intentionally in place;
-  no trace/capture change, canonical-recording import, unsupported barrier,
-  terminal handoff, or battle/turn/absolute-tick branch was added.
-  PAPERCUT: the final full suite took 626s versus the 117s baseline despite
-  no intentional concurrent suite, ~8 minutes lost.

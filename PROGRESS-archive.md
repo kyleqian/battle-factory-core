@@ -1,3 +1,32 @@
+## 719 — [BOUNDED MAIN WORKER 2026-07-29 ~20:00] Slice 5 semantic checkpoint landed
+
+- **State:** implementation `4727bbf8` + `b297345b`; focused Slice-5
+  acceptance **108/108**, full suite green at **525 files / 5378 tests + 1
+  deliberate animation-lane skip**, production build and `git diff --check`
+  green.
+- **Did:** `Cmd_switchinanim` now emits the narrow provenance-bearing
+  `switch-in-animation { battler, partyIndex }` event. Confirmed forced
+  selection crosses the ordinary battle reducer; the driven continuation
+  receipt (party summary, switch, frozen `Go! <species>!`, summary hide,
+  switch-in marker, next boundary) appends as segment 2 under the original
+  resolution ID. Invalid/missing markers and non-monotonic continuation
+  sequences fail closed.
+- **Next:** finish Slice 5 from this honest checkpoint: consume the appended
+  segment in typed presentation; source-compose arbitrary forced-party
+  rows/icons; render generic player/opponent summary, ball/species,
+  healthbox, and six-frame next-menu handoff; only then remove the
+  ONIX/MAGBY/BAYLEEF guard. Opponent switch text also needs a frozen trainer
+  class/name substitution. Slices 6-7 remain untouched.
+- **Notes:** all new rows exact: switch-in/send-out/delayed/Turn-16
+  **242/242, 195/195, 195/195, 175/175**. Every earlier §3.2 row through
+  delayed party selection remains exact: staged **16/16**; menus
+  **254,44,42,44,93,88,111,83,56,46,57**; stat/faint/fly/party
+  **190,141,256,200,200**. The visual guard remains intentionally in place;
+  no trace/capture change, canonical-recording import, unsupported barrier,
+  terminal handoff, or battle/turn/absolute-tick branch was added.
+  PAPERCUT: the final full suite took 626s versus the 117s baseline despite
+  no intentional concurrent suite, ~8 minutes lost.
+
 ## 718 — [SUPERVISOR 2026-07-29 ~20:45] Slice 4 + Swagger folded + 18-commit animation fold; union green; round 10 dispatched
 
 - **State:** master green at **525 files / 5378 tests + 1 deliberate
