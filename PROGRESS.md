@@ -13,6 +13,36 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 719 — [BOUNDED MAIN WORKER 2026-07-29 ~20:00] Slice 5 semantic checkpoint landed
+
+- **State:** implementation `4727bbf8` + `b297345b`; focused Slice-5
+  acceptance **108/108**, full suite green at **525 files / 5378 tests + 1
+  deliberate animation-lane skip**, production build and `git diff --check`
+  green.
+- **Did:** `Cmd_switchinanim` now emits the narrow provenance-bearing
+  `switch-in-animation { battler, partyIndex }` event. Confirmed forced
+  selection crosses the ordinary battle reducer; the driven continuation
+  receipt (party summary, switch, frozen `Go! <species>!`, summary hide,
+  switch-in marker, next boundary) appends as segment 2 under the original
+  resolution ID. Invalid/missing markers and non-monotonic continuation
+  sequences fail closed.
+- **Next:** finish Slice 5 from this honest checkpoint: consume the appended
+  segment in typed presentation; source-compose arbitrary forced-party
+  rows/icons; render generic player/opponent summary, ball/species,
+  healthbox, and six-frame next-menu handoff; only then remove the
+  ONIX/MAGBY/BAYLEEF guard. Opponent switch text also needs a frozen trainer
+  class/name substitution. Slices 6-7 remain untouched.
+- **Notes:** all new rows exact: switch-in/send-out/delayed/Turn-16
+  **242/242, 195/195, 195/195, 175/175**. Every earlier §3.2 row through
+  delayed party selection remains exact: staged **16/16**; menus
+  **254,44,42,44,93,88,111,83,56,46,57**; stat/faint/fly/party
+  **190,141,256,200,200**. The visual guard remains intentionally in place;
+  no trace/capture change, canonical-recording import, unsupported barrier,
+  terminal handoff, or battle/turn/absolute-tick branch was added.
+  PAPERCUT: none.
+
+---
+
 ## 718 — [SUPERVISOR 2026-07-29 ~20:45] Slice 4 + Swagger folded + 18-commit animation fold; union green; round 10 dispatched
 
 - **State:** master green at **525 files / 5378 tests + 1 deliberate
@@ -67,29 +97,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   ~2 minutes lost.
 
 ---
-
-## 716 — [SUPERVISOR 2026-07-29 ~20:05] Slice 3 + Confuse pair folded; union green; round 9 (final) dispatched
-
-- **State:** master green at **521 files / 5348 tests + 1 deliberate
-  animation-lane skip**, production build, `git diff --check` clean, no
-  orphan worktrees/branches, DEFERRED.md empty.
-- **Did:** (1) verified + accepted resolution Slice 3 (`eae69a47`:
-  targeted 122/122; staged 16/16, turn5/11 menus 42/56 re-run exact;
-  generated turns now flow orchestrator→resolution→next command with §2.3
-  boundary state). (2) verified + merged `worker/side-20260729-182316`
-  (Confuse pair, doc §32): 64 L50 carriers, supervisor re-ran live verify
-  4/4 PASS (control+reach, seeds 1/99, exact scores/PP-slots/RNG
-  endpoints incl. the 70/50/30 HP gates). Census delta Own Tempo 7→9
-  honest; executable census byte-identical.
-- **Next:** round 9 (final full round) dispatched — main: design §4
-  Slice 4 (faint + forced-party midpoint); side: Counter-vs-Swagger
-  re-ranked CBM/CV pair. Then wind-down: fold re-check on
-  animation-main, final union, session report. Slices 5-7 (send-out,
-  terminal handoff + #39 retirement proof, 128-capture breadth) are the
-  next session's ordered queue.
-- **Notes:** 14 workers, 0 failed steps. CBM/CV program: SpDefUp, Sleep,
-  Roar, Paralyze, Confuse done with two-seed live receipts each;
-  remainder Counter/Swagger.
-
----
-

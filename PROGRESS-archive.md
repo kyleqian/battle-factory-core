@@ -1,3 +1,28 @@
+## 716 — [SUPERVISOR 2026-07-29 ~20:05] Slice 3 + Confuse pair folded; union green; round 9 (final) dispatched
+
+- **State:** master green at **521 files / 5348 tests + 1 deliberate
+  animation-lane skip**, production build, `git diff --check` clean, no
+  orphan worktrees/branches, DEFERRED.md empty.
+- **Did:** (1) verified + accepted resolution Slice 3 (`eae69a47`:
+  targeted 122/122; staged 16/16, turn5/11 menus 42/56 re-run exact;
+  generated turns now flow orchestrator→resolution→next command with §2.3
+  boundary state). (2) verified + merged `worker/side-20260729-182316`
+  (Confuse pair, doc §32): 64 L50 carriers, supervisor re-ran live verify
+  4/4 PASS (control+reach, seeds 1/99, exact scores/PP-slots/RNG
+  endpoints incl. the 70/50/30 HP gates). Census delta Own Tempo 7→9
+  honest; executable census byte-identical.
+- **Next:** round 9 (final full round) dispatched — main: design §4
+  Slice 4 (faint + forced-party midpoint); side: Counter-vs-Swagger
+  re-ranked CBM/CV pair. Then wind-down: fold re-check on
+  animation-main, final union, session report. Slices 5-7 (send-out,
+  terminal handoff + #39 retirement proof, 128-capture breadth) are the
+  next session's ordered queue.
+- **Notes:** 14 workers, 0 failed steps. CBM/CV program: SpDefUp, Sleep,
+  Roar, Paralyze, Confuse done with two-seed live receipts each;
+  remainder Counter/Swagger.
+
+---
+
 ## 715 — [BOUNDED MAIN WORKER 2026-07-29 ~20:00] Battle-resolution Slice 3 landed
 
 - **State:** implementation `eae69a47`; tree green at **521 files / 5332
