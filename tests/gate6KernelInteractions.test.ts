@@ -5,21 +5,32 @@ import {
   createBattleScriptStatusRulesHandlers,
   type BattleScriptPartyMemberInput,
   type BattleScriptRulesBattler,
+  type BattleScriptRulesContext,
   type BattleScriptRulesContextInput,
   type BattleScriptStatusRulesExternalPorts,
 } from "../src/engine/battleScriptRulesContext.ts";
 import { advanceBattleScriptAttackCancelerUnableToUseMove } from "../src/engine/battleScriptAttackCanceler.ts";
 import { runBattleEndTurnOrchestration } from "../src/engine/battleEndTurnOrchestration.ts";
 import type { BattleScriptSemanticEvent } from "../src/engine/battleScriptEvents.ts";
-import { stepBattleScriptMachine } from "../src/engine/battleScriptMachine.ts";
+import {
+  acknowledgeBattleScriptMachineController,
+  stepBattleScriptMachine,
+  type BattleScriptMachineState,
+} from "../src/engine/battleScriptMachine.ts";
 import {
   loadBattleScriptProgram,
   resolveBattleScriptLabel,
 } from "../src/engine/battleScriptProgram.ts";
 import {
+  BATTLE_SCRIPT_STATUS1_BURN,
   BATTLE_SCRIPT_STATUS1_PARALYSIS,
   BATTLE_SCRIPT_STATUS2_MASKS,
 } from "../src/engine/battleScriptSourceConstants.ts";
+import {
+  calculateBaseDamage,
+  NEUTRAL_STAT_STAGES,
+} from "../src/engine/damageCalc.ts";
+import { effectiveSpeed } from "../src/engine/turnOrder.ts";
 
 const program = loadBattleScriptProgram();
 const BATTLE_TYPE_FACTORY = 1 << 19;
@@ -30,7 +41,10 @@ const ITEM_CHESTO_BERRY = 134;
 const ITEM_LUM_BERRY = 141;
 const ITEM_SITRUS_BERRY = 142;
 const ITEM_LEFTOVERS = 200;
+const MOVE_SWORDS_DANCE = 14;
+const MOVE_THUNDER_WAVE = 86;
 const MOVE_THUNDER = 87;
+const MOVE_WILL_O_WISP = 261;
 const ABILITY_SAND_VEIL = 8;
 const STATUS1_SLEEP_TURN_3 = 3;
 const STATUS2_CONFUSION_TURN_2 = 2;
@@ -159,6 +173,15 @@ const ports = Object.freeze({
     operand.expression === "B_WAIT_TIME_LONG" ? 64 : null,
   resolveByteOperand: () => null,
 } satisfies BattleScriptStatusRulesExternalPorts);
+
+const completeEffectPorts = Object.freeze({
+  ...ports,
+  resolveHalfwordOperand: (_context, operand) =>
+    operand.expression === "B_WAIT_TIME_LONG"
+      || operand.expression === "B_WAIT_TIME_SHORT"
+      ? 1
+      : null,
+}) satisfies BattleScriptStatusRulesExternalPorts;
 
 function runEndTurn(
   item: number,
@@ -324,6 +347,102 @@ function cancelerPhaseNames(
   result: ReturnType<typeof advanceBattleScriptAttackCancelerUnableToUseMove>,
 ) {
   return result.receipt.phases.map((phase) => phase.receipt.sourcePhase);
+}
+
+function effectContext(
+  move: number,
+  attackerChanges: Partial<BattleScriptRulesBattler> = {},
+  targetChanges: Partial<BattleScriptRulesBattler> = {},
+): BattleScriptRulesContext {
+  return createBattleScriptRulesContext({
+    battlers: [
+      battler({
+        side: 0,
+        moves: [move, 0, 0, 0],
+        pp: [20, 0, 0, 0],
+        ...attackerChanges,
+      }),
+      battler({ side: 1, ...targetChanges }),
+      battler({ side: 0 }),
+      battler({ side: 1 }),
+    ],
+    selectorRoles: { attacker: 0, target: 1, effectBattler: 1, fainted: null },
+    scriptingBattler: 0,
+    atkCancelerTracker: 0,
+    battleOutcome: 0,
+    currentMove: move,
+    currentMovePosition: 0,
+    moveResultFlags: 0,
+    dmgMultiplier: 1,
+    critMultiplier: 1,
+    moveEffectByte: 0,
+    missType: 0,
+    hitMarker: 0,
+    multiHitCounter: 0,
+  });
+}
+
+function runCompleteEffect(
+  entryLabel: string,
+  rulesContext: BattleScriptRulesContext,
+  rngSeed = 1,
+): BattleScriptMachineState<BattleScriptRulesContext> {
+  const execution = createBattleScriptStatusRulesExecution(
+    program,
+    entryLabel,
+    rulesContext,
+    rngSeed,
+    completeEffectPorts,
+  );
+  let result = stepBattleScriptMachine(
+    program,
+    execution.state,
+    execution.handlers,
+  );
+  for (let steps = 1; steps < 250 && result.kind !== "halted"; steps++) {
+    if (
+      result.kind !== "advanced"
+      && result.kind !== "scheduler-progressed"
+      && result.kind !== "blocked"
+    ) {
+      throw new Error(`${entryLabel} stopped at ${result.kind}`);
+    }
+    let next = result.state;
+    if (result.kind === "blocked") {
+      for (const battlerId of next.scheduler.pendingControllerBattlers) {
+        next = acknowledgeBattleScriptMachineController(next, battlerId);
+      }
+    }
+    result = stepBattleScriptMachine(program, next, execution.handlers);
+  }
+  if (result.kind !== "halted") {
+    throw new Error(`${entryLabel} did not finish within the step budget`);
+  }
+  return result.state;
+}
+
+const K4_DAMAGE_DEFENDER = Object.freeze({
+  attack: 100,
+  defense: 100,
+  spAttack: 100,
+  spDefense: 100,
+  level: 50,
+  types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+  statStages: { ...NEUTRAL_STAT_STAGES },
+});
+
+function k4PhysicalDamage(attackStage: number, isBurned: boolean): number {
+  return calculateBaseDamage({
+    attacker: {
+      ...K4_DAMAGE_DEFENDER,
+      statStages: { ...NEUTRAL_STAT_STAGES, atk: attackStage },
+      isBurned,
+    },
+    defender: K4_DAMAGE_DEFENDER,
+    movePower: 50,
+    moveType: "TYPE_NORMAL",
+    isCriticalHit: false,
+  });
 }
 
 describe("Gate-6 K1 weather × held-item end-turn ordering", () => {
@@ -539,4 +658,92 @@ describe("Gate-6 K3 status × volatile ordering", () => {
       & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION,
     ).not.toBe(0);
   });
+});
+
+describe("Gate-6 K4 status × stat-stage arithmetic", () => {
+  it.each([
+    [
+      "burn",
+      MOVE_WILL_O_WISP,
+      "BattleScript_EffectWillOWisp",
+      BATTLE_SCRIPT_STATUS1_BURN,
+    ],
+    [
+      "paralysis",
+      MOVE_THUNDER_WAVE,
+      "BattleScript_EffectParalyze",
+      BATTLE_SCRIPT_STATUS1_PARALYSIS,
+    ],
+  ] as const)(
+    "applying %s through its complete effect script sets status without mutating any staged stat",
+    (_name, move, entryLabel, expectedStatus) => {
+      const stages = Object.freeze([6, 8, 4, 9, 3, 11, 5, 10]);
+      const state = runCompleteEffect(
+        entryLabel,
+        effectContext(move, {}, { statStages: stages }),
+        rngValueBeforeU16(0),
+      );
+      expect(state.haltReason).toMatchObject({
+        kind: "terminal",
+        opcodeName: "B_SCR_OP_END",
+      });
+      expect(state.rulesContext.battlers[1]).toMatchObject({
+        status1: expectedStatus,
+        statStages: stages,
+      });
+    },
+  );
+
+  it("burn halves physical damage after the Attack-stage modifier, including the +2 Attack combination", () => {
+    expect(k4PhysicalDamage(6, false)).toBe(24);
+    expect(k4PhysicalDamage(6, true)).toBe(13);
+    expect(k4PhysicalDamage(8, false)).toBe(46);
+    expect(k4PhysicalDamage(8, true)).toBe(24);
+  });
+
+  it("paralysis quarters speed after the Speed-stage modifier, including the +2 Speed combination", () => {
+    expect(effectiveSpeed({
+      speed: 101,
+      speedStage: 6,
+      movePriority: 0,
+      isParalyzed: false,
+    })).toBe(101);
+    expect(effectiveSpeed({
+      speed: 101,
+      speedStage: 6,
+      movePriority: 0,
+      isParalyzed: true,
+    })).toBe(25);
+    expect(effectiveSpeed({
+      speed: 101,
+      speedStage: 8,
+      movePriority: 0,
+      isParalyzed: false,
+    })).toBe(202);
+    expect(effectiveSpeed({
+      speed: 101,
+      speedStage: 8,
+      movePriority: 0,
+      isParalyzed: true,
+    })).toBe(50);
+  });
+
+  it.each([
+    [10, 12],
+    [11, 12],
+    [12, 12],
+  ] as const)(
+    "the independent Swords Dance stage mutation clamps Attack %i + 2 to %i",
+    (initialAttackStage, expectedAttackStage) => {
+      const state = runCompleteEffect(
+        "BattleScript_EffectAttackUp2",
+        effectContext(MOVE_SWORDS_DANCE, {
+          statStages: [6, initialAttackStage, 6, 6, 6, 6, 6, 6],
+        }),
+      );
+      expect(state.rulesContext.battlers[0].statStages[1]).toBe(
+        expectedAttackStage,
+      );
+    },
+  );
 });
