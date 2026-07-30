@@ -867,6 +867,25 @@ describe("battle resolution typed Scene-OFF renderer", () => {
       ),
     ).toBe(50);
 
+    const roseResolution = createBattleResolutionPresentation(inputFor([
+      event(0, {
+        kind: "stat-stage-change",
+        battler: 1,
+        stat: "evasion",
+        from: 6,
+        to: 7,
+      }),
+      event(1, {
+        kind: "message",
+        messageId: "STRINGID_DEFENDERSSTATROSE",
+        substitutions: [],
+      }),
+    ], NEXT_COMMAND));
+    expect(roseResolution.segments[0]!.commands[1]).toMatchObject({
+      type: "message",
+      lines: ["Foe KABUTO’s evasion", "rose!"],
+    });
+
     const statusResolution = createBattleResolutionPresentation(inputFor([
       event(0, {
         kind: "set-battler-status-data",

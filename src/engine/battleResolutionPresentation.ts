@@ -394,13 +394,19 @@ function messageLines(
       }),
     });
   }
-  if (messageId === "STRINGID_DEFENDERSSTATFELL") {
+  if (
+    messageId === "STRINGID_DEFENDERSSTATROSE"
+    || messageId === "STRINGID_DEFENDERSSTATFELL"
+  ) {
     if (!lastStatChange) {
-      throw new Error("battle resolution stat-fell message has no preceding stat event");
+      throw new Error(
+        "battle resolution stat-change message has no preceding stat event",
+      );
     }
     const battler = singlesBattler(lastStatChange.battler, "stat-fell message");
     const displayed = fieldBattler(field, battler);
-    const amount = lastStatChange.from - lastStatChange.to;
+    const amount = Math.abs(lastStatChange.from - lastStatChange.to);
+    const rose = messageId === "STRINGID_DEFENDERSSTATROSE";
     return resolveBattleStringLines(messageId, {
       B_DEF_NAME_WITH_PREFIX: () => resolveBattleNameWithPrefix({
         side: battler === 0 ? "player" : "opponent",
@@ -408,7 +414,10 @@ function messageLines(
         nickname: displayed.name,
       }),
       B_BUFF1: () => lastStatChange.stat,
-      B_BUFF2: () => amount >= 2 ? "harshly fell!" : "fell!",
+      B_BUFF2: () =>
+        rose
+          ? amount >= 2 ? "sharply rose!" : "rose!"
+          : amount >= 2 ? "harshly fell!" : "fell!",
     });
   }
   if (messageId === "STRINGID_TARGETFAINTED") {
