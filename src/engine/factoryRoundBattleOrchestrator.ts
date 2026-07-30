@@ -41,6 +41,7 @@ import {
   type BattleSubmittedDecision,
 } from "./battleDecisionBoundary.ts";
 import {
+  appendBattleResolutionContinuation,
   createBattleResolutionPresentation,
   type BattleResolutionPresentationCommand,
   type BattleResolutionPresentationState,
@@ -54,6 +55,7 @@ import {
 import {
   advancePartySelect,
   createPartySelectStateFromForcedSwitch,
+  submitPartySelectBattleDecision,
   type PartySelectState,
 } from "./partySelect.ts";
 import type {
@@ -1098,9 +1100,36 @@ export function advanceFactoryRoundBattleResolution(
     if (selector === null) {
       return fail("forced-party handoff has no request-owned selector");
     }
-    // Slice 4 stops honestly at confirmation. Slice 5 owns submission,
-    // continuation receipt projection, and every send-out frame.
-    if (selector.sendOutElapsed !== null) return state;
+    if (selector.sendOutElapsed !== null) {
+      if (resolution.segments.length !== 1) return state;
+      const history = state.aiHistory;
+      if (history === null) {
+        return fail("forced-party continuation requires live AI history");
+      }
+      const submitted = submitPartySelectBattleDecision(
+        resolution.pendingBattle,
+        selector,
+        reduceFactoryFullTurnDecision,
+      );
+      if (submitted === null) {
+        return fail("confirmed forced-party selector did not submit a decision");
+      }
+      const receipt = driveTrainerBoundary(state, submitted, history);
+      const appended = appendBattleResolutionContinuation({
+        resolution,
+        transition: transitionFromDriveReceipt(receipt),
+        fieldBoundary:
+          createBattleResolutionPresentationRenderView(resolution).field,
+      });
+      return Object.freeze({
+        ...state,
+        battle: receipt.battle,
+        battleResolutionPresentation: appended,
+        aiHistory: receipt.history,
+        facilityRngCalls:
+          state.activeBattleCallStart! + receipt.battle.rng.calls,
+      });
+    }
     return Object.freeze({
       ...state,
       battleForcedPartySelect: advancePartySelect(selector, newKeys),

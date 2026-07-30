@@ -206,6 +206,8 @@ function messageLines(
   eventIndex: number,
   events: readonly BattleKernelSemanticEvent[],
   field: BattleResolutionDisplayedField,
+  switchInBattler: 0 | 1 | null,
+  afterField: BattleResolutionDisplayedField | null,
   lastStatChange: Extract<
     BattleScriptSemanticEventPayload,
     { kind: "stat-stage-change" }
@@ -272,6 +274,20 @@ function messageLines(
       }),
     });
   }
+  if (messageId === "STRINGID_SWITCHINMON") {
+    if (switchInBattler === null || afterField === null) {
+      throw new Error(
+        "battle resolution switch-in message has no preceding switch/post-switch field",
+      );
+    }
+    const incoming = fieldBattler(afterField, switchInBattler);
+    if (switchInBattler === 0) {
+      return Object.freeze([`Go! ${incoming.name}!`]);
+    }
+    throw new Error(
+      "battle resolution opponent switch-in message requires a frozen trainer-name substitution",
+    );
+  }
   return resolveBattleStringLines(messageId);
 }
 
@@ -337,6 +353,9 @@ export function projectBattleResolutionCommands(
     const payload = event.payload;
     if (payload.kind === "message") {
       sourceLabelOf(event);
+      const switchInBattler = payload.messageId === "STRINGID_SWITCHINMON"
+        ? ([...pendingSwitch.keys()].at(-1) ?? null)
+        : null;
       commands.push(Object.freeze({
         type: "message",
         eventSequence: event.sequence,
@@ -345,6 +364,8 @@ export function projectBattleResolutionCommands(
           index,
           events,
           field,
+          switchInBattler,
+          afterField,
           lastStatChange,
           lastFaintBattler,
         ),
@@ -582,5 +603,60 @@ export function createBattleResolutionPresentation(
     pendingBoundary: boundary,
     pendingBattle: input.transition.state,
     forcedRequest,
+  });
+}
+
+export type AppendBattleResolutionContinuationInput = Readonly<{
+  resolution: BattleResolutionPresentationState;
+  transition: BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>;
+  fieldBoundary: BattleResolutionDisplayedField;
+}>;
+
+/**
+ * Appends the genuine forced-switch submission receipt without minting a
+ * second resolution identity. Presentation may continue to hold the forced
+ * selector while Slice 5's send-out renderer consumes this segment.
+ */
+export function appendBattleResolutionContinuation(
+  input: AppendBattleResolutionContinuationInput,
+): BattleResolutionPresentationState {
+  const { resolution, transition, fieldBoundary } = input;
+  if (resolution.forcedRequest === null) {
+    throw new Error("battle resolution continuation requires a forced-switch request");
+  }
+  if (
+    resolution.pendingBoundary.kind !== "decision-required"
+    || resolution.pendingBoundary.request.requestId
+      !== resolution.forcedRequest.requestId
+  ) {
+    throw new Error("battle resolution continuation does not match its pending boundary");
+  }
+  const priorSequence = resolution.segments
+    .flatMap((segment) => segment.events)
+    .at(-1)?.sequence ?? -1;
+  const firstSequence = transition.events[0]?.sequence;
+  if (firstSequence !== undefined && firstSequence <= priorSequence) {
+    throw new Error(
+      `battle resolution continuation event sequence ${firstSequence} is not after ${priorSequence}`,
+    );
+  }
+  const segment = Object.freeze({
+    beforeRules: resolution.pendingBattle.rules,
+    afterRules: transition.state.rules,
+    events: transition.events,
+    commands: projectBattleResolutionCommands(
+      transition.events,
+      resolution.pendingBattle.rules.rulesContext,
+      transition.state.rules.rulesContext,
+      fieldBoundary,
+      fieldAfter(transition),
+    ),
+  });
+  return Object.freeze({
+    ...resolution,
+    segments: Object.freeze([...resolution.segments, segment]),
+    pendingBoundary: transition.state.boundary,
+    pendingBattle: transition.state,
+    forcedRequest: null,
   });
 }

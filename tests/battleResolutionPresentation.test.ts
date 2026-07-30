@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createBattleCommandPresentation } from "../src/engine/battleCommandPresentation.ts";
 import {
+  appendBattleResolutionContinuation,
   createBattleResolutionPresentation,
   type BattleResolutionPresentationState,
   type CreateBattleResolutionPresentationInput,
@@ -274,7 +275,7 @@ describe("battle resolution presentation receipt ownership", () => {
     });
   });
 
-  it("projects a marked switch continuation onto the post-switch species and healthbox snapshot", () => {
+  it("appends a marked forced-switch continuation under the same resolution identity", () => {
     const initial = initialBattle();
     const context = initial.rules.rulesContext;
     const incoming = context.party.player[1]!;
@@ -299,22 +300,62 @@ describe("battle resolution presentation receipt ownership", () => {
       ...initial.rules,
       rulesContext: afterContext,
     }) as FactoryFullTurnDecisionRules;
-    const switchEvent = event(0, {
-      kind: "switch",
-      side: "player",
-      fromPartyIndex: 0,
-      toPartyIndex: 1,
+    const forced = Object.freeze({
+      kind: "decision-required" as const,
+      request: Object.freeze({
+        kind: "forced-switch" as const,
+        requestId: 3,
+        side: "player" as const,
+        battler: 0 as const,
+        faintedPartyIndex: 0 as const,
+        legalPartyIndexes: Object.freeze([1 as const]),
+      }),
     });
-    const marker = event(1, {
-      kind: "switch-in-animation",
-      battler: 0,
-      partyIndex: 1,
+    const resolution = createBattleResolutionPresentation(inputFor([
+      event(0, { kind: "health-bar-update", battler: 0, healthValue: 117 }),
+      event(1, { kind: "hp-change", battler: 0, from: 117, to: 0 }),
+      event(2, { kind: "faint-animation", battler: 0 }),
+      event(3, { kind: "message", messageId: "STRINGID_ATTACKERFAINTED", substitutions: [] }),
+    ], forced));
+    const continuationState = nextState(afterRules, NEXT_COMMAND);
+    const continuation = Object.freeze({
+      kind: "decision-required" as const,
+      state: continuationState,
+      nextRequest: NEXT_COMMAND.request,
+      events: Object.freeze([
+        event(4, { kind: "draw-party-status-summary", battler: 0 }),
+        event(5, {
+          kind: "switch",
+          side: "player",
+          fromPartyIndex: 0,
+          toPartyIndex: 1,
+        }),
+        event(6, { kind: "message", messageId: "STRINGID_SWITCHINMON", substitutions: [] }),
+        event(7, { kind: "hide-party-status-summary", battler: 0 }),
+        event(8, {
+          kind: "switch-in-animation",
+          battler: 0,
+          partyIndex: 1,
+        }),
+      ]),
+    }) satisfies BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>;
+    const appended = appendBattleResolutionContinuation({
+      resolution,
+      transition: continuation,
+      fieldBoundary: Object.freeze({
+        ...resolution.field,
+        player: Object.freeze({ ...resolution.field.player, hp: 0 }),
+      }),
     });
-    const resolution = createBattleResolutionPresentation(
-      inputFor([switchEvent, marker], NEXT_COMMAND, afterRules),
-    );
 
-    expect(resolution.segments[0]!.commands).toMatchObject([
+    expect(appended.resolutionId).toBe(resolution.resolutionId);
+    expect(appended.segments).toHaveLength(2);
+    expect(appended.forcedRequest).toBeNull();
+    expect(appended.pendingBattle).toBe(continuationState);
+    expect(appended.segments[1]!.commands).toMatchObject([
+      { type: "party-summary", battler: 0, visible: true },
+      { type: "message", lines: ["Go! MACHOP!"] },
+      { type: "party-summary", battler: 0, visible: false },
       {
         type: "switch-in",
         battler: 0,
