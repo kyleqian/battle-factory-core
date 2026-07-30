@@ -189,6 +189,7 @@ import {
   acceptPostwinHealDismiss,
   createPostwinState,
   createPostwinStateFromOpponentRentalRecords,
+  createPostwinStateFromRound,
   POSTWIN_BATTLE_ROOM_FADE_OUT_AGE,
   POSTWIN_BATTLE_ROOM_FIRST_AGE,
   POSTWIN_COUNTER_ROOM_FIRST_AGE,
@@ -222,6 +223,7 @@ import {
 } from "./postwin.ts";
 import type { BattleScenario } from "./battleScenario.ts";
 import {
+  advanceRoundController,
   completeBattlePresentation,
   createRoundController,
   type RoundControllerState,
@@ -261,7 +263,9 @@ import {
   advanceFactoryRoundBattleStartIntro,
   advanceFactoryRoundBattleCommand,
   advanceFactoryRoundBattleResolution,
+  advanceFactoryRoundPresentation,
   beginFactoryRoundBattleStartIntro,
+  completeFactoryRoundPresentation,
   type FactoryRoundBattleOrchestratorState,
 } from "./factoryRoundBattleOrchestrator.ts";
 import {
@@ -403,6 +407,8 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   let roundController = state.roundController;
   let factorySwap = state.factorySwap ?? null;
   let factoryTerminal = state.factoryTerminal;
+  let factoryRoundBattleOrchestrator =
+    state.factoryRoundBattleOrchestrator;
   const currentTrainerPresentation = factoryTrainerPresentationForOpponent(
     state.roundController?.rules.currentOpponent,
   ) ?? undefined;
@@ -419,15 +425,22 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   }
 
   if (state.factoryRoundBattleOrchestrator?.battleResolutionPresentation) {
-    const factoryRoundBattleOrchestrator = advanceFactoryRoundBattleResolution(
+    factoryRoundBattleOrchestrator = advanceFactoryRoundBattleResolution(
       state.factoryRoundBattleOrchestrator,
       newKeys,
     );
+    const generatedRound = factoryRoundBattleOrchestrator.round;
+    const generatedPostwin =
+      postwin === null
+      && generatedRound.presentation?.command.type === "battleWon"
+        ? createPostwinStateFromRound(generatedRound)
+        : postwin;
     return {
       ...state,
       frame: state.frame + 1,
       keyRepeat,
       factoryRoundBattleOrchestrator,
+      postwin: generatedPostwin,
       rngMode: "frontierBattle",
       rngValue:
         factoryRoundBattleOrchestrator.battle?.rng.value ?? state.rngValue,
@@ -587,6 +600,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         postwin: nextPostwin,
         factorySwap: nextFactorySwap,
         roundController,
+        factoryRoundBattleOrchestrator,
         summaryScreen,
         rngMode,
         rngValue,
@@ -669,7 +683,29 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       postwinDialogueInputReady(nextPostwin) &&
       newKeys.has("A")
     ) {
+      const completingBattleWin = nextPostwin.dialoguePage === 3;
       nextPostwin = acceptPostwinDialoguePage(nextPostwin);
+      if (completingBattleWin && nextPostwin.dialoguePage === 4) {
+        const generatedPending =
+          factoryRoundBattleOrchestrator?.round.presentation;
+        if (generatedPending?.command.type === "battleWon") {
+          factoryRoundBattleOrchestrator = advanceFactoryRoundPresentation(
+            completeFactoryRoundPresentation(
+              factoryRoundBattleOrchestrator!,
+              { commandId: generatedPending.command.commandId },
+            ),
+          );
+        } else if (
+          roundController?.presentation?.command.type === "battleWon"
+        ) {
+          roundController = advanceRoundController(
+            completeBattlePresentation(roundController, {
+              commandId:
+                roundController.presentation.command.commandId,
+            }),
+          );
+        }
+      }
     }
     if (
       nextPostwin.dialoguePage === 4 &&
@@ -682,11 +718,21 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         nextPostwin = movePostwinSwapCursor(nextPostwin, -1);
       } else if (newKeys.has("A")) {
         if (nextPostwin.swapCursorPos === 0) {
-          factorySwap = (
-            roundController === null
-              ? null
-              : createPendingFactorySwapPresentation(roundController)
-          ) ?? createCanonicalFactorySwapPresentation();
+          const liveRound =
+            factoryRoundBattleOrchestrator?.round ?? roundController;
+          const pendingSwap = liveRound === null
+            ? null
+            : createPendingFactorySwapPresentation(liveRound);
+          if (
+            factoryRoundBattleOrchestrator !== null
+            && pendingSwap === null
+          ) {
+            throw new Error(
+              "generated postwin YES requires its orchestrator swapOffer",
+            );
+          }
+          factorySwap =
+            pendingSwap ?? createCanonicalFactorySwapPresentation();
         } else {
           nextPostwin = acceptPostwinSwapDecline(nextPostwin);
         }
@@ -724,6 +770,8 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       rngMode,
       rngValue,
       factorySwap,
+      roundController,
+      factoryRoundBattleOrchestrator,
     };
   }
 

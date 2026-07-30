@@ -1,3 +1,26 @@
+## 742 — [SUPERVISOR 2026-07-30 ~14:25] Slice 3 verified (711/715 honest); 4 side branches merged; census found 10 reachable moveend halts — burn-down in flight
+
+- **State:** master `e023c365`, union green **550 files / 5559 tests + 1
+  deliberate animation-lane skip**, build clean. Live: moveend-barrier
+  side worker. Merged this round: Gate-6 R4 (Castform Forecast/Weather
+  Ball two-seed receipts — **Gate-6 matrix now fully closed**: 15 rows +
+  K1-K7, unreachables census-recorded), B+444 probe doc (**verdict
+  FIXABLE** — summary-bar exit-clock rule, NOT #18 `sSpriteOrder`; OAM
+  receipt disproves the competing-sprite premise), seed sweep 61-90
+  (0 halts), anchor-draft combo census (60/60 rows: 9 seven-win, 41
+  losses, **10 halts** — 8× `BattleScript_MoveEnd` pc 26, 2× Teeter
+  Dance moveend, i.e. the `ITEMEFFECT_MOVE_END` restoring barrier at
+  `battleScriptMoveEndOpcode.ts:741`; three HAUNTER-lead rows halt).
+- **Did:** supervisor verified Slice 3's two new traces myself (command
+  entry **7/7**; intro **711/715** with exactly frames 1492/1747/
+  1755-56), resolved the scout-doc both-append conflict (9 receipt
+  sections), ran union suite+build after all merges.
+- **Next:** main — Slice 3 closure brief (bounce-seam frames 1747/
+  1755-56 + the probe's B+444 stateless exit-clock fix → target
+  715/715), then Slice 4; side — moveend burn-down merge + re-driven
+  census rows.
+
+---
 ## 741 — [BOUNDED MAIN WORKER 2026-07-30 ~14:10] #53 routing Slice 3 honest checkpoint
 
 - **State:** intro ownership/handoff landed in `a6a8489c` + `81557cb3`;

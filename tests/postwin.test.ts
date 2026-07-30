@@ -14,7 +14,12 @@ import type { BattleParty } from "../src/engine/battleScenario.ts";
 import { getFactoryOpponentCommentary } from "../src/engine/factoryCommentary.ts";
 import { generateFactoryOpponent } from "../src/engine/factoryOpponentGeneration.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
-import { createGeneratedFactoryRoundController } from "../src/engine/roundController.ts";
+import {
+  advanceRoundController,
+  completeBattlePresentation,
+  createGeneratedFactoryRoundController,
+  resolveRoundBattle,
+} from "../src/engine/roundController.ts";
 import {
   createBattleTerminalResolutionPresentation,
   storeBattleTerminalPresentationDismiss,
@@ -44,6 +49,7 @@ import {
   acceptPostwinSwapDecline,
   acceptPostwinRightThisWayDismiss,
   createPostwinStateFromOpponentRentalRecords,
+  createPostwinStateFromRound,
   INITIAL_POSTWIN_STATE,
   POSTWIN_BATTLE_BLACK_AGE,
   POSTWIN_BATTLE_FADE_FIRST_AGE,
@@ -211,6 +217,92 @@ describe("S8 Battle-1 postwin transition", () => {
       { setId: 179, personality: 19, fixedIv: 3, abilitySlot: 1 },
       { setId: 181, personality: 6, fixedIv: 3, abilitySlot: 0 },
     ])).toEqual(INITIAL_POSTWIN_STATE);
+  });
+
+  it("freezes every generated postwin row from one noncanonical typed win snapshot", () => {
+    const generated = generateFactoryOpponent({
+      rngValue: 3,
+      factoryWinStreak: 0,
+      battleIndex: 0,
+      storedTrainerIds: [],
+      savedRentalSetIds: [110, 155, 140, 168, 197, 147],
+      playerTrainerId: 0x1234_5678,
+      battleTowerLevel50WinStreak: 0,
+    });
+    const battleParty = (prefix: string): BattleParty =>
+      generated.party.map((member, index) => ({
+        id: `${prefix}-${index}`,
+        species: member.speciesName,
+        maxHp: member.maxHP,
+        hp: member.hp,
+        status: "none" as const,
+      })) as unknown as BattleParty;
+    let round = createGeneratedFactoryRoundController({
+      id: "generated-postwin-state-only",
+      playerParty: battleParty("player"),
+      playerRentalRecords: generated.opponents,
+      opponent: {
+        id: "generated-postwin-opponent",
+        trainerName: generated.trainerName,
+        party: battleParty("opponent"),
+        rentalRecords: generated.opponents,
+      },
+      rngValue: generated.rngValue,
+    });
+    round = completeBattlePresentation(round, {
+      commandId: round.presentation!.command.commandId,
+    });
+    round = advanceRoundController(round);
+    const terminalPlayerParty = round.rules.playerParty.map(
+      (member, index) => ({
+        ...member,
+        hp: [11, 22, 33][index]!,
+      }),
+    ) as unknown as BattleParty;
+    round = resolveRoundBattle(round, {
+      outcome: "win",
+      playerParty: terminalPlayerParty,
+      opponentParty: round.rules.currentOpponent.party,
+      rngValue: round.rules.rngValue,
+    });
+    const beforeRules = round.rules;
+    const state = createPostwinStateFromRound(round);
+    const opponentSetIds = generated.opponents.map(({ setId }) => setId);
+    const commentary = getFactoryOpponentCommentary(generated.party);
+
+    expect(opponentSetIds).not.toEqual(POSTWIN_OPPONENT_RENTAL_IDS);
+    expect(state).toMatchObject({
+      challengeBattleNum: 0,
+      challengeBattleNumAfterWrite: 1,
+      opponentRentalMonIds: opponentSetIds,
+      opponentRentalMonIdsAfterWrite: opponentSetIds,
+      playerPartyHp: [11, 22, 33],
+      healedPlayerPartyHp: terminalPlayerParty.map(({ maxHp }) => maxHp),
+    });
+    expect(state.scoutingLines.slice(1, 3)).toEqual([
+      commentary.favoriteTypeLines,
+      commentary.battleStyleLines,
+    ]);
+
+    let advanced = state;
+    while (advanced.elapsed < POSTWIN_OPPONENT_RENTALS_WRITE_AGE) {
+      advanced = advancePostwin(advanced);
+    }
+    expect(advanced.challengeBattleNum).toBe(1);
+    expect(advanced.opponentRentalMonIds).toEqual(opponentSetIds);
+    expect(round.rules).toBe(beforeRules);
+
+    advanced = {
+      ...advanced,
+      healDismissElapsed: advanced.elapsed,
+    };
+    for (let i = 0; i < POSTWIN_PARTY_HEAL_DELAY; i += 1) {
+      advanced = advancePostwin(advanced);
+    }
+    expect(advanced.playerPartyHp).toEqual(
+      terminalPlayerParty.map(({ maxHp }) => maxHp),
+    );
+    expect(round.rules).toBe(beforeRules);
   });
 
   it("keeps every visual ownership boundary relative to the stored edge", () => {

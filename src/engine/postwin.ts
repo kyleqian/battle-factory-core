@@ -10,6 +10,11 @@ import {
   createFactoryCorpusParty,
   type FactoryCorpusPartyInstance,
 } from "./factoryCorpusParty.ts";
+import type {
+  BattleIndex,
+  BattleParty,
+} from "./battleScenario.ts";
+import type { RoundControllerState } from "./roundController.ts";
 
 export type FactoryPostwinOpponentRentalRecords = readonly [
   FactoryCorpusPartyInstance,
@@ -36,15 +41,21 @@ export interface PostwinState {
   /** Ticks since the accepted loss-quote dismiss (0 = the A edge). */
   elapsed: number;
   /** SaveBlock2.frontier.curChallengeBattleNum. */
-  challengeBattleNum: 0 | 1;
+  challengeBattleNum: BattleIndex;
+  /** Typed round value written at the source bookkeeping boundary. */
+  challengeBattleNumAfterWrite: BattleIndex;
   /** SaveBlock2.frontier.rentalMons[3..5].monId. */
   opponentRentalMonIds: readonly [number, number, number];
+  /** Typed rental ids written at the source bookkeeping boundary. */
+  opponentRentalMonIdsAfterWrite: readonly [number, number, number];
   /** Attendant pages derived from the upcoming opponent party. */
   scoutingLines: PostwinScoutingLines;
   /** Accepted heal-message A edge, in this state's relative elapsed clock. */
   healDismissElapsed: number | null;
   /** gPlayerParty[0..2] HP: ONIX / MAGBY / BAYLEEF. */
   playerPartyHp: readonly [number, number, number];
+  /** Typed full-heal values written after the heal-message edge. */
+  healedPlayerPartyHp: readonly [number, number, number];
   /** MULTI_GO_ON_RECORD_REST_RETIRE cursor; null until the menu exists. */
   continuationCursorPos: 0 | 1 | 2 | 3 | null;
   /** Accepted GO ON edge; every following dialogue clock is edge-relative. */
@@ -132,16 +143,39 @@ export function createPostwinScoutingLines(
 export const POSTWIN_SCOUTING_LINES =
   createPostwinScoutingLines(CANONICAL_POSTWIN_OPPONENT_PARTY);
 
-export function createPostwinState(
-  opponentParty: FactoryCommentaryParty = CANONICAL_POSTWIN_OPPONENT_PARTY,
+type PostwinSnapshot = Readonly<{
+  challengeBattleNum: BattleIndex;
+  challengeBattleNumAfterWrite: BattleIndex;
+  opponentRentalMonIds: readonly [number, number, number];
+  opponentRentalMonIdsAfterWrite: readonly [number, number, number];
+  opponentParty: FactoryCommentaryParty;
+  playerPartyHp: readonly [number, number, number];
+  healedPlayerPartyHp: readonly [number, number, number];
+}>;
+
+const CANONICAL_POSTWIN_SNAPSHOT: PostwinSnapshot = Object.freeze({
+  challengeBattleNum: 0,
+  challengeBattleNumAfterWrite: 1,
+  opponentRentalMonIds: [153, 179, 181] as const,
+  opponentRentalMonIdsAfterWrite: [188, 184, 135] as const,
+  opponentParty: CANONICAL_POSTWIN_OPPONENT_PARTY,
+  playerPartyHp: [0, 27, 153] as const,
+  healedPlayerPartyHp: [117, 138, 153] as const,
+});
+
+function createPostwinStateFromSnapshot(
+  snapshot: PostwinSnapshot,
 ): PostwinState {
   return {
     elapsed: 0,
-    challengeBattleNum: 0,
-    opponentRentalMonIds: [153, 179, 181],
-    scoutingLines: createPostwinScoutingLines(opponentParty),
+    challengeBattleNum: snapshot.challengeBattleNum,
+    challengeBattleNumAfterWrite: snapshot.challengeBattleNumAfterWrite,
+    opponentRentalMonIds: snapshot.opponentRentalMonIds,
+    opponentRentalMonIdsAfterWrite: snapshot.opponentRentalMonIdsAfterWrite,
+    scoutingLines: createPostwinScoutingLines(snapshot.opponentParty),
     healDismissElapsed: null,
-    playerPartyHp: [0, 27, 153],
+    playerPartyHp: snapshot.playerPartyHp,
+    healedPlayerPartyHp: snapshot.healedPlayerPartyHp,
     continuationCursorPos: null,
     continuationConfirmElapsed: null,
     dialoguePage: 0,
@@ -154,6 +188,15 @@ export function createPostwinState(
   };
 }
 
+export function createPostwinState(
+  opponentParty: FactoryCommentaryParty = CANONICAL_POSTWIN_OPPONENT_PARTY,
+): PostwinState {
+  return createPostwinStateFromSnapshot({
+    ...CANONICAL_POSTWIN_SNAPSHOT,
+    opponentParty,
+  });
+}
+
 /**
  * Presentation-boundary adapter for the source rental records owned by the
  * round controller and dev-time app stages.
@@ -162,6 +205,87 @@ export function createPostwinStateFromOpponentRentalRecords(
   opponentRentalRecords: FactoryPostwinOpponentRentalRecords,
 ): PostwinState {
   return createPostwinState(createFactoryCorpusParty(opponentRentalRecords));
+}
+
+function partyHp(
+  party: BattleParty,
+  field: "hp" | "maxHp",
+): readonly [number, number, number] {
+  return party.map((member) => member[field]) as unknown as readonly [
+    number,
+    number,
+    number,
+  ];
+}
+
+function sameBattlePartySnapshot(
+  actual: BattleParty,
+  expected: BattleParty,
+): boolean {
+  return actual.every((member, index) => {
+    const other = expected[index]!;
+    return member.id === other.id
+      && member.species === other.species
+      && member.hp === other.hp
+      && member.maxHp === other.maxHp
+      && member.status === other.status;
+  });
+}
+
+/**
+ * Generated-route adapter. The pending battleWon command and retained
+ * last-battle snapshot are the presentation boundary; all mutable-looking
+ * rows are frozen from that same typed round before postwin clocks begin.
+ */
+export function createPostwinStateFromRound(
+  round: RoundControllerState,
+): PostwinState {
+  const pending = round.presentation;
+  const lastBattle = round.rules.lastBattle;
+  const opponentRentalRecords =
+    round.rules.currentOpponent.rentalRecords;
+  if (
+    pending?.command.type !== "battleWon"
+    || pending.completed
+    || round.rules.phase !== "presentingBattleWin"
+    || lastBattle?.outcome !== "win"
+    || opponentRentalRecords === undefined
+  ) {
+    throw new Error(
+      "generated postwin requires an uncompleted battleWon with a full win snapshot",
+    );
+  }
+  if (
+    pending.command.battleIndex !== round.rules.battleIndex
+    || !sameBattlePartySnapshot(
+      pending.command.playerParty,
+      lastBattle.playerParty,
+    )
+    || !sameBattlePartySnapshot(
+      pending.command.opponentParty,
+      lastBattle.opponentParty,
+    )
+  ) {
+    throw new Error(
+      "generated postwin battleWon does not match the retained battle snapshot",
+    );
+  }
+  const nextBattleIndex = round.rules.battleIndex + 1;
+  if (nextBattleIndex > 6) {
+    throw new Error("a seventh win has no postwin swap offer");
+  }
+  const opponentRentalMonIds = opponentRentalRecords.map(
+    ({ setId }) => setId,
+  ) as unknown as readonly [number, number, number];
+  return createPostwinStateFromSnapshot({
+    challengeBattleNum: round.rules.battleIndex,
+    challengeBattleNumAfterWrite: nextBattleIndex as BattleIndex,
+    opponentRentalMonIds,
+    opponentRentalMonIdsAfterWrite: opponentRentalMonIds,
+    opponentParty: createFactoryCorpusParty(opponentRentalRecords),
+    playerPartyHp: partyHp(lastBattle.playerParty, "hp"),
+    healedPlayerPartyHp: partyHp(lastBattle.playerParty, "maxHp"),
+  });
 }
 
 export const INITIAL_POSTWIN_STATE = createPostwinState();
@@ -253,14 +377,19 @@ export function advancePostwin(state: PostwinState): PostwinState {
   return {
     elapsed,
     challengeBattleNum:
-      elapsed >= POSTWIN_CHALLENGE_BATTLE_WRITE_AGE ? 1 : state.challengeBattleNum,
+      elapsed >= POSTWIN_CHALLENGE_BATTLE_WRITE_AGE
+        ? state.challengeBattleNumAfterWrite
+        : state.challengeBattleNum,
+    challengeBattleNumAfterWrite: state.challengeBattleNumAfterWrite,
     opponentRentalMonIds:
       elapsed >= POSTWIN_OPPONENT_RENTALS_WRITE_AGE
-        ? POSTWIN_OPPONENT_RENTAL_IDS
+        ? state.opponentRentalMonIdsAfterWrite
         : state.opponentRentalMonIds,
+    opponentRentalMonIdsAfterWrite: state.opponentRentalMonIdsAfterWrite,
     scoutingLines: state.scoutingLines,
     healDismissElapsed: state.healDismissElapsed,
-    playerPartyHp: healed ? POSTWIN_HEALED_PARTY_HP : state.playerPartyHp,
+    playerPartyHp: healed ? state.healedPlayerPartyHp : state.playerPartyHp,
+    healedPlayerPartyHp: state.healedPlayerPartyHp,
     continuationCursorPos:
       menuVisible && state.continuationCursorPos === null
         ? 0
