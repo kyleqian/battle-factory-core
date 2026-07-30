@@ -1,3 +1,23 @@
+## 740 — [SUPERVISOR 2026-07-30 ~13:20] Slice 2 verified; Gate-6 R7/R8 + K4-K6 merged — matrix now closed except R4 (in flight)
+
+- **State:** master union green **549 files / 5544 tests + 1 deliberate
+  animation-lane skip**, build clean. Live: R4 Castform side worker
+  (`side-20260730-130543`); main lane freeing for Slice 3.
+- **Did:** verified Slice 2 myself (focused suites rerun;
+  `accept-prebattle` **137/137**, `turn17-rung7a` 255/255 spot-check).
+  Merged R7/R8 (burn×Guts×Facade exact two-seed damage receipts 122/135;
+  Immunity/Limber never statused over 734 frames, affected controls;
+  Snorlax substituted for Muk on census legality) and K4-K6 (Swagger
+  single +2 before Own Tempo confusion reject; Foresight evasion-only;
+  berry cap/White Herb once-only; burn/paralysis modifiers live in stat
+  calc not stages). Scout-doc receipt notes came with R7/R8; K4-K6 rows
+  closed by workers' evidence, doc cells already current. Papercuts:
+  out/latest race bumped to 2; census line-drift added.
+- **Next:** main — Slice 3 (generated intro ownership at the real
+  handoff, anchor-to-intro trace, honest 714/715); side — R4 merge, then
+  B+444 RAM-probe fix-vs-attribute.
+
+---
 ## 739 — [BOUNDED MAIN WORKER 2026-07-30 ~13:15] #53 routing Slice 2 complete
 
 - **State:** source-/oracle-pinned anchor-session adapter landed in

@@ -4201,6 +4201,7 @@ export function renderGeneratedBattleStartOpponentRelease(
       handoffTick,
       "destin",
       state.command.partySummaries.opponent,
+      "generated-initial-release",
     );
   }
   const healthboxDx = healthboxSlideDx(
@@ -6429,20 +6430,36 @@ function drawPlayerSummaryBarExit(fb: Uint8Array, barX: number, eva: number): vo
  */
 const SUMMARY_EXIT_LAST_ALIVE_ELAPSED = 32;
 
+export function opponentSummaryExitElapsed(
+  rawElapsed: number,
+  encounter: BattleSceneState["encounter"],
+  lifecycle: "canonical-recorded" | "generated-initial-release",
+): number {
+  // The typed initial release has no persistent sprite-slot state to carry
+  // the canonical DESTIN destroy/reuse stall. Its last displayed summary
+  // tail therefore advances to the next source exit step directly.
+  if (lifecycle === "generated-initial-release" && rawElapsed === 31) {
+    return 31;
+  }
+  const stallAt = encounter === "jenson" ? 31 : 30;
+  return rawElapsed <= stallAt ? rawElapsed : rawElapsed - 1;
+}
+
 function drawOpponentSummaryExit(
   fb: Uint8Array,
   t: number,
   handoffTick: number,
   encounter: BattleSceneState["encounter"] = "destin",
   summaryStates?: readonly PartyBallState[],
+  lifecycle: "canonical-recorded" | "generated-initial-release" =
+    "canonical-recorded",
 ): void {
   const rawElapsed = t - handoffTick - 1;
   if (rawElapsed < 0 || rawElapsed > SUMMARY_EXIT_LAST_ALIVE_ELAPSED) return;
   // §7.32: the position/blend clock stalls one tick at the RAM-confirmed
   // destroy/reuse (renders 1493 and 1494 both read as elapsed=30), then
   // resumes normal 1:1 counting - see the doc comment above.
-  const stallAt = encounter === "jenson" ? 31 : 30;
-  const elapsed = rawElapsed <= stallAt ? rawElapsed : rawElapsed - 1;
+  const elapsed = opponentSummaryExitElapsed(rawElapsed, encounter, lifecycle);
   const blend = Math.max(0, 15 - Math.floor(elapsed / 2));
   const eva = blend;
   const evb = 16 - blend;

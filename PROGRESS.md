@@ -13,6 +13,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 743 — [BOUNDED MAIN WORKER 2026-07-30 ~14:18] Slice 3 closure in progress: summary tail exact
+
+- **State:** Fix 1 is green and ready to commit; focused intro/ratchet
+  acceptance **2 files / 10 tests**.
+- **Did:** the typed generated initial-release summary tail now advances its
+  stateless exit clock at `rawElapsed=31`; canonical DESTIN/JENSON clocks are
+  unchanged. The committed intro improved **711/715 → 712/715** and frame
+  1492 is exact.
+- **Next:** derive and close only the typed action-menu handoff residuals at
+  frames 1747/1755-56, then run the full assigned acceptance.
+- **Notes:** current honest remainder is exactly frame 1747 (1579px) and
+  1755-1756 (769px each). No capture, canonical route, barrier, or issue
+  change.
+
+---
 ## 742 — [SUPERVISOR 2026-07-30 ~14:25] Slice 3 verified (711/715 honest); 4 side branches merged; census found 10 reachable moveend halts — burn-down in flight
 
 - **State:** master `e023c365`, union green **550 files / 5559 tests + 1
@@ -56,24 +71,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Default/canonical route unchanged; no issue, recording/barrier ratchet,
   Gate-6, Scene-ON, later-round, or postbattle change. PAPERCUT: oracle's
   256-capture ceiling required serialized batching, ~10 minutes.
-
----
-## 740 — [SUPERVISOR 2026-07-30 ~13:20] Slice 2 verified; Gate-6 R7/R8 + K4-K6 merged — matrix now closed except R4 (in flight)
-
-- **State:** master union green **549 files / 5544 tests + 1 deliberate
-  animation-lane skip**, build clean. Live: R4 Castform side worker
-  (`side-20260730-130543`); main lane freeing for Slice 3.
-- **Did:** verified Slice 2 myself (focused suites rerun;
-  `accept-prebattle` **137/137**, `turn17-rung7a` 255/255 spot-check).
-  Merged R7/R8 (burn×Guts×Facade exact two-seed damage receipts 122/135;
-  Immunity/Limber never statused over 734 frames, affected controls;
-  Snorlax substituted for Muk on census legality) and K4-K6 (Swagger
-  single +2 before Own Tempo confusion reject; Foresight evasion-only;
-  berry cap/White Herb once-only; burn/paralysis modifiers live in stat
-  calc not stages). Scout-doc receipt notes came with R7/R8; K4-K6 rows
-  closed by workers' evidence, doc cells already current. Papercuts:
-  out/latest race bumped to 2; census line-drift added.
-- **Next:** main — Slice 3 (generated intro ownership at the real
-  handoff, anchor-to-intro trace, honest 714/715); side — R4 merge, then
-  B+444 RAM-probe fix-vs-attribute.
 

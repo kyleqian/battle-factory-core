@@ -21,6 +21,7 @@ import {
   generatedBattleStartCommandReady,
   generatedBattleStartPlayerReleaseStarted,
   generatedBattleIntroSourceClock,
+  opponentSummaryExitElapsed,
   renderGeneratedBattleStartPreSendOut,
 } from "../src/engine/battleScene.ts";
 
@@ -73,6 +74,29 @@ function intro() {
 }
 
 describe("generated Factory pre-send-out intro lifecycle", () => {
+  it("advances only the typed initial summary tail past DESTIN's recorded stall", () => {
+    expect(opponentSummaryExitElapsed(
+      31,
+      "destin",
+      "generated-initial-release",
+    )).toBe(31);
+    expect(opponentSummaryExitElapsed(
+      31,
+      "destin",
+      "canonical-recorded",
+    )).toBe(30);
+    expect(opponentSummaryExitElapsed(
+      32,
+      "destin",
+      "generated-initial-release",
+    )).toBe(31);
+    expect(opponentSummaryExitElapsed(
+      31,
+      "jenson",
+      "canonical-recorded",
+    )).toBe(31);
+  });
+
   it("uses one BeginBattleIntro-relative clock through slide, printer, and A gate", () => {
     let state = intro();
     expect(factoryBattleStartIntroPhase(state)).toBe("handoff");
