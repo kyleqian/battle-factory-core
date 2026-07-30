@@ -15,8 +15,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 726 — [BOUNDED MAIN WORKER 2026-07-29 ~23:00] Slice-7 bounce fixed; honest confirm-handoff checkpoint
 
-- **State:** focused acceptance **166/166** green; live generated OFF
-  diagnostic improved **11/128 → 26/128**. Acceptance remains **0/128
+- **State:** full suite green at **527 files / 5409 tests + 1 deliberate
+  animation-lane skip**, production build and `git diff --check` green.
+  Live diagnostic improved **11/128 → 26/128**; acceptance remains **0/128
   claimed** and no trace is committed.
 - **Did:** replaced phase-local bounce rendering with a persistent
   controller-owned callback clock across FIGHT open/close/reopen. Source:
@@ -28,8 +29,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **(1,59)-(238,158)**; ROM holds FIGHT through 42 and first prints `G` at
   43, while app prints immediately.
 - **Notes:** fixture/test regenerated to the post-fix checkpoint; #52 trimmed
-  to the open remainder. No trace/capture change, import/barrier/ratchet-pin
-  move, or battle/turn/absolute-tick branch. PAPERCUT: none.
+  to the open remainder. Complete §3.2 table remains exact (**25/25 rows**).
+  No trace/capture change, import/barrier/ratchet-pin move, or
+  battle/turn/absolute-tick branch. PAPERCUT: none.
 
 ---
 ## 725 — [SUPERVISOR 2026-07-29 ~22:45] Rounds 1-2: Slice 6 verified, Slice-7 honest checkpoint merged (#52 filed), trainer-pic dossier banked
@@ -74,36 +76,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** fixture `tools/battle-lab/factory-trainer-pic-shizuka-off.json`;
   RAM anchors: pic +59..+178, opponent healthbox +443..+466, player healthbox
   +629..+651, player-ready +714. PAPERCUT: none.
-
----
-> **STANDING ARRANGEMENT (user directive, 2026-07-26):** the animation
-> program runs under its own supervisor (`./run-supervisor.sh --lane
-> animation`, guide `ANIMATION_SUPERVISOR.md`) in the persistent
-> `.worktrees/animation-main` worktree on branch `animation-main`. Main
-> supervisor: never brief animation work; fold `animation-main` into
-> `master` at orient when it has new commits (details in SUPERVISOR.md's
-> parallel-workers note). This replaces the temporary animation pause —
-> entry 468's animation items are the animation supervisor's backlog now.
-
-## 723 — [BOUNDED MAIN WORKER 2026-07-29 ~22:05] Resolution Slice 6 complete
-
-- **State:** implementation commits `985ec1fa`, `ae94cc4c`; focused Slice-6
-  acceptance **330/330**, full suite green at **526 files / 5405 tests + 1
-  deliberate animation-lane skip**, production build and `git diff --check`
-  green.
-- **Did:** a real generated terminal receipt now retains its immutable battle
-  and boundary through the button-gated final faint, enters
-  `terminal-handoff`, and only then calls the existing round completion owner.
-  The accepted Turn-17 KO/result/trainer-loss adapter now consumes one typed
-  terminal receipt with frozen result/loss strings and relative dismiss
-  clocks; its render branch no longer inspects `turn16Resolved` or another turn
-  flag. Existing post-win fields remain mirrored only for the out-of-scope
-  downstream owner.
-- **Next:** design §4 Slice 7 explicit-OFF generated command breadth proof is
-  next; do not create its trace or app stage from this main-lane step.
-- **Notes:** Turn-17 exact **255/255, 147/147, 255/255, 118/118**. Complete
-  §3.2 predecessors remain exact: staged **16/16**; menus
-  **254,44,42,44,93,88,111,83,56,46,57**; stat/faint/switch/fly/party/sendout/
-  Turn-16 **190,141,242,256,200,200,195,195,175**. No trace/capture change,
-  canonical-recording import, unsupported barrier, ratchet-pin move, or new
-  battle/turn/absolute-tick branch. PAPERCUT: none observed.

@@ -1,3 +1,28 @@
+## 723 — [BOUNDED MAIN WORKER 2026-07-29 ~22:05] Resolution Slice 6 complete
+
+- **State:** implementation commits `985ec1fa`, `ae94cc4c`; focused Slice-6
+  acceptance **330/330**, full suite green at **526 files / 5405 tests + 1
+  deliberate animation-lane skip**, production build and `git diff --check`
+  green.
+- **Did:** a real generated terminal receipt now retains its immutable battle
+  and boundary through the button-gated final faint, enters
+  `terminal-handoff`, and only then calls the existing round completion owner.
+  The accepted Turn-17 KO/result/trainer-loss adapter now consumes one typed
+  terminal receipt with frozen result/loss strings and relative dismiss
+  clocks; its render branch no longer inspects `turn16Resolved` or another turn
+  flag. Existing post-win fields remain mirrored only for the out-of-scope
+  downstream owner.
+- **Next:** design §4 Slice 7 explicit-OFF generated command breadth proof is
+  next; do not create its trace or app stage from this main-lane step.
+- **Notes:** Turn-17 exact **255/255, 147/147, 255/255, 118/118**. Complete
+  §3.2 predecessors remain exact: staged **16/16**; menus
+  **254,44,42,44,93,88,111,83,56,46,57**; stat/faint/switch/fly/party/sendout/
+  Turn-16 **190,141,242,256,200,200,195,195,175**. No trace/capture change,
+  canonical-recording import, unsupported barrier, ratchet-pin move, or new
+  battle/turn/absolute-tick branch. PAPERCUT: none observed.
+
+---
+
 ## 722 — [SUPERVISOR FINAL WIND-DOWN 2026-07-29 ~20:55] Slice 5 COMPLETE verified; last animation fold; session closed at 11 rounds / 18 workers / 0 failed steps
 
 - **State:** master green at **526 files / 5403 tests + 1 deliberate
