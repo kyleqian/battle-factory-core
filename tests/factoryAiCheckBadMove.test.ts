@@ -370,6 +370,12 @@ describe("AI_CBM_Paralyze (docs/factory-ai-checkviability-ground-truth.md §31)"
     }))).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
   });
 
+  it("pins Cmd_if_type_effectiveness's source no-effect glitch: Ground then Flying FALLS THROUGH at damage 1", () => {
+    expect(run(MOVE_THUNDER_WAVE, target({
+      types: ["TYPE_GROUND", "TYPE_FLYING"],
+    }))).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
   it.each([
     ["any primary status", { hasAnyStatus: true }],
     ["Safeguard", { safeguardUp: true }],

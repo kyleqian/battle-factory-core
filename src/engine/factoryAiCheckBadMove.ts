@@ -1360,7 +1360,21 @@ function runCbmParalyze(
   draws: readonly FactoryAiCheckBadMoveDraw[];
   scoreDelta: number;
 }> {
-  if (typeMultiplierTenths(moveType, target.types) === 0) {
+  // Cmd_if_type_effectiveness initializes damage to AI_EFFECTIVENESS_x1
+  // (40), then TypeCalc mutates it in table order. Preserve the source's
+  // no-effect-followed-by-nonzero quirk: ModulateDmgByType2 clamps a
+  // zero-damage intermediate back to 1 whenever the later multiplier is
+  // nonzero, while Cmd_if_type_effectiveness's non-BUGFIX build never copies
+  // TypeCalc's no-effect flag into gMoveResultFlags. Thus Electric against
+  // Ground/Flying is 1 here, not x0 (battle_ai_script_commands.c:1515-1557;
+  // battle_script_commands.c:1502-1506,1536-1591).
+  let aiEffectiveness = 40;
+  for (const entry of TYPE_EFFECTIVENESS) {
+    if (entry.attackingType !== moveType || !target.types.includes(entry.defendingType)) continue;
+    aiEffectiveness = Math.trunc((aiEffectiveness * entry.multiplierTenths) / 10);
+    if (aiEffectiveness === 0 && entry.multiplierTenths !== 0) aiEffectiveness = 1;
+  }
+  if (aiEffectiveness === 0) {
     return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
   }
   const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
