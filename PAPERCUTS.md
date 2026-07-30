@@ -474,7 +474,9 @@ Per entry:
   the main lane and a side worker that could not complete its full-suite
   validation inside its cap at all (honestly reported "not claiming it
   passed"; supervisor reran it green post-contention).
-- **Hits:** 1 (both lanes of the same round, 2026-07-29 ~13:40).
+- **Hits:** 2 (both lanes of the same round, 2026-07-29 ~13:40; Slice-3
+  closure worker 2026-07-30 — concurrent baseline sessions left orphaned
+  Vitest workers, ~2 min).
 - **Cost each:** ~10 min (main retry) + ~20 min (side validation stall).
 - **Workaround:** stagger full-suite runs — workers run focused suites
   during the step and the full suite once near the end; supervisors avoid

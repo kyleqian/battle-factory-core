@@ -21,17 +21,20 @@ canonical post-win flow reaching the rental-swap picker, which reuses the
 select-screen UI. This is #39's user-visible face plus the not-yet-made
 interactive routing flip.
 
-**Fix path (enabled this session):** generated Scene-OFF battle is now
-128/128 exact (`battle-command-generated-off.json`, Slice 7). Remaining:
-(a) generated battle-start intro lifecycle — Slices 1-4 are complete; Slice
-4's player-release span is **249/249** private-probe exact and hands off to
-the same settled typed command state as the 128/128 generated window. The
-whole intro remains **714/715**, solely the recorded 10px B+444 summary-slot
-reuse residual from Slice 3; (b) an interactive-routing decision + flip so
-the playable battle consumes the drafted party through the generated
-orchestrator; (c) round-loop continuation for battles 2-7 already exists in
-`roundController.ts`. No quick species-swap hack into the canonical replay —
-that would fake the stitching.
+**Fix path (design + Slices 1-3 landed 2026-07-30 PM;
+`docs/interactive-routing-flip-design.md` is authoritative):** the explicit
+route seam, rank-ordered draft adapter, anchor session (three pinned RNG
+epochs), and generated-intro ownership are all landed; the real-draft intro
+trace `interactive-generated-intro-off.json` is **715/715 exact** (the old
+B+444 residual proved fixable — `docs/intro-b444-residual-probe.md` — and is
+closed) and the settled command entry is exact. The anchor-draft combination
+census (`docs/anchor-draft-combo-census.md` + after-fix addendum) drives all
+60 draft/lead rounds to legitimate terminals with zero kernel halts.
+Remaining: design Slices 4-7 — (4) postwin/swap generalization over the
+orchestrator round, (5) battles 2-7 room/intro re-entry, (6) loss/seventh-win
+endings from the generated owner, (7) production default flip + the
+HAUNTER/SHADOW-PUNCH acceptance trace. No quick species-swap hack into the
+canonical replay — that would fake the stitching.
 
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 

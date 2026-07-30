@@ -1,3 +1,24 @@
+## 741 — [BOUNDED MAIN WORKER 2026-07-30 ~14:10] #53 routing Slice 3 honest checkpoint
+
+- **State:** intro ownership/handoff landed in `a6a8489c` + `81557cb3`;
+  focused acceptance **5 files / 48 tests**, full gate green at **549 files /
+  5545 tests + 1 deliberate animation-lane skip**, build clean.
+- **Did:** the generated orchestrator now owns the room-relative intro, accepts
+  its live A edge, acknowledges `battleStart` only at command-ready, starts the
+  fresh kernel, and settles the frozen field through the proven adapter.
+  Actual-draft OFF traces landed with dense >256-capture oracle batching:
+  settled command **7/7**, generated dev command **128/128**, all **25/25**
+  immutable rows exact.
+- **Next:** Slice 3 remains a bounded evidence checkpoint: close only the
+  three additional intro/command seam frames, without fitting or touching the
+  separately recorded B+444 family; then rerun its two traces.
+- **Notes:** full intro is honestly **711/715**. B+444 is 3px at frame 1492
+  (`165,42-167,43`); additional mismatches are frame 1747 (1579px) and
+  1755-1756 (769px each), all at the settled action-menu bounce seam.
+  Default/canonical route unchanged; no issue, recording/barrier ratchet,
+  Gate-6, Scene-ON, later-round, or postbattle change. PAPERCUT: oracle's
+  256-capture ceiling required serialized batching, ~10 minutes.
+---
 ## 740 — [SUPERVISOR 2026-07-30 ~13:20] Slice 2 verified; Gate-6 R7/R8 + K4-K6 merged — matrix now closed except R4 (in flight)
 
 - **State:** master union green **549 files / 5544 tests + 1 deliberate

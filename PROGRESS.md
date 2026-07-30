@@ -13,6 +13,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 744 — [SUPERVISOR 2026-07-30 ~15:00] Slice 3 CLOSED at 715/715 (supervisor re-verified); moveend barrier drained and merged; #53 fix-path updated
+
+- **State:** master union green **550 files / 5568 tests + 1 deliberate
+  animation-lane skip**, build clean, no live workers, no side
+  worktrees beyond permanent animation-main. Barrier ratchet for
+  `battleScriptMoveEndOpcode.ts` deliberately 2→1 (sole remainder: the
+  census-unreachable `MOVEEND_NEXT_TARGET` doubles branch).
+- **Did:** re-verified the closed intro myself (**715/715**, command
+  entry **7/7**). Merged the moveend burn-down: full
+  `ITEMEFFECT_MOVE_END` restoring family ported source-cited (per-status
+  berry cures, Lum, White Herb, script transfers, party mirror,
+  state-11 rescan); all 10 census halts re-driven to legitimate
+  terminals (4 seven-win incl. three HAUNTER leads, 6 losses, 0 halts;
+  addendum doc committed). ISSUES #53 fix-path text updated to the
+  Slices-1-3-landed state.
+- **Next:** main — design Slice 4 (postwin/swap generalization over
+  `orchestrator.round`), then 5/6/7 in order. Side idle unless a
+  disjoint need appears.
+
+---
 ## 743 — [BOUNDED MAIN WORKER 2026-07-30 ~14:29] Slice 3 intro exact and closed
 
 - **State:** fixes `0c4dab29` + `e85d5360`; focused acceptance **5 files / 49
@@ -52,24 +72,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   715/715), then Slice 4; side — moveend burn-down merge + re-driven
   census rows.
 
----
-## 741 — [BOUNDED MAIN WORKER 2026-07-30 ~14:10] #53 routing Slice 3 honest checkpoint
-
-- **State:** intro ownership/handoff landed in `a6a8489c` + `81557cb3`;
-  focused acceptance **5 files / 48 tests**, full gate green at **549 files /
-  5545 tests + 1 deliberate animation-lane skip**, build clean.
-- **Did:** the generated orchestrator now owns the room-relative intro, accepts
-  its live A edge, acknowledges `battleStart` only at command-ready, starts the
-  fresh kernel, and settles the frozen field through the proven adapter.
-  Actual-draft OFF traces landed with dense >256-capture oracle batching:
-  settled command **7/7**, generated dev command **128/128**, all **25/25**
-  immutable rows exact.
-- **Next:** Slice 3 remains a bounded evidence checkpoint: close only the
-  three additional intro/command seam frames, without fitting or touching the
-  separately recorded B+444 family; then rerun its two traces.
-- **Notes:** full intro is honestly **711/715**. B+444 is 3px at frame 1492
-  (`165,42-167,43`); additional mismatches are frame 1747 (1579px) and
-  1755-1756 (769px each), all at the settled action-menu bounce seam.
-  Default/canonical route unchanged; no issue, recording/barrier ratchet,
-  Gate-6, Scene-ON, later-round, or postbattle change. PAPERCUT: oracle's
-  256-capture ceiling required serialized batching, ~10 minutes.
