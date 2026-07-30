@@ -828,6 +828,13 @@ export type BattleScriptRulesContext = Readonly<
     battleTextBuff1Item: number | null;
     /** Typed form of PREPARE_TYPE_BUFFER(gBattleTextBuff1, type). */
     battleTextBuff1Type: string | null;
+    /**
+     * Typed form of AbilityBattleEffects(ABILITYEFFECT_IMMUNITY)'s
+     * gStatusConditionString_*Jpn sentinel copied into gBattleTextBuff1.
+     * BattleStringExpandPlaceholders maps that sentinel to its English
+     * gStatusConditionStringsTable partner before substituting B_BUFF1.
+     */
+    battleTextBuff1Status: string | null;
     /** Typed form of PREPARE_SPECIES_BUFFER(gBattleTextBuff1, species). */
     battleTextBuff1Species: number | null;
     /** Typed form of PREPARE_BYTE_NUMBER_BUFFER(gBattleTextBuff2, 1, value). */
@@ -966,6 +973,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   battleTextBuff1Move?: number | null;
   battleTextBuff1Item?: number | null;
   battleTextBuff1Type?: string | null;
+  battleTextBuff1Status?: string | null;
   battleTextBuff1Species?: number | null;
   battleTextBuff2ByteNumber?: number | null;
   battleTextBuff2Item?: number | null;
@@ -2735,6 +2743,7 @@ export function createBattleScriptRulesContext(
       ? null
       : requireUnsigned(input.battleTextBuff1Item, 0xffff, "battleTextBuff1Item"),
     battleTextBuff1Type: input.battleTextBuff1Type ?? null,
+    battleTextBuff1Status: input.battleTextBuff1Status ?? null,
     battleTextBuff1Species: input.battleTextBuff1Species === null
       || input.battleTextBuff1Species === undefined
       ? null

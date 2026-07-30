@@ -334,7 +334,9 @@ describe(
       if (result.kind !== "halted") throw new Error("expected halt");
       expect(result.state.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
       expect(result.state.rulesContext.battlers[1]!.status2).toBe(0);
-      expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_OBLIVIOUS);
+      // The message exposes Oblivious before MoveEnd state 4 overwrites
+      // gLastUsedAbility with literal battler 0's NONE ability.
+      expect(result.state.rulesContext.lastUsedAbility).toBe(0);
       const messageEvents = result.state.events.filter((e) => e.kind === "message").map((e) => e.messageId);
       expect(messageEvents).toContain("STRINGID_PKMNPREVENTSROMANCEWITH");
       expect(messageEvents).not.toContain("STRINGID_BUTITFAILED");

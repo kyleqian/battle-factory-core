@@ -1,0 +1,1405 @@
+{
+  "fixture": "tools/battle-lab/mechanic-immunity-limber-skill-swap-off.json",
+  "profile": "battle-scene-off",
+  "seed": 324508639,
+  "initial": {
+    "rngValue": 3908550445,
+    "battleStatus1": {
+      "player": 0,
+      "opponent": 0
+    },
+    "partyStatus1": {
+      "player": [
+        0,
+        0,
+        0
+      ],
+      "opponent": [
+        0,
+        0,
+        0
+      ]
+    },
+    "activeAbility": {
+      "player": 39,
+      "opponent": 7
+    },
+    "persistentAbility": {
+      "player": 39,
+      "opponent": 7
+    },
+    "pp": {
+      "player": [
+        20,
+        20,
+        10,
+        10
+      ],
+      "opponent": [
+        20,
+        20,
+        20,
+        20
+      ]
+    },
+    "currentMove": 0,
+    "chosenMoveByBattler": [
+      0,
+      86
+    ],
+    "lastUsedAbility": 7,
+    "displayedString": "What will\nGIRAFARIG do?"
+  },
+  "randomFrames": [
+    {
+      "frame": 145,
+      "randomCalls": 1,
+      "rngBefore": 3908550445,
+      "rngAfter": 4153048220,
+      "currentMove": 86,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "sourceAttribution": "Factory AI equal-slot choice (all four slots are THUNDER_WAVE)"
+    },
+    {
+      "frame": 315,
+      "randomCalls": 1,
+      "rngBefore": 4153048220,
+      "rngAfter": 2492921567,
+      "currentMove": 285,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "sourceAttribution": "BattleScript_MoveUsedIsParalyzed Random() % 4 mobility check"
+    }
+  ],
+  "checkpoints": {
+    "statusStaged": {
+      "frame": 183,
+      "rngValue": 4153048220,
+      "battleStatus1": {
+        "player": 64,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          64,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          10
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          19
+        ]
+      },
+      "currentMove": 86,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "lastUsedAbility": 39,
+      "displayedString": "Foe HITMONLEE used\nTHUNDER WAVE!"
+    },
+    "abilitySwapped": {
+      "frame": 345,
+      "rngValue": 2492921567,
+      "battleStatus1": {
+        "player": 64,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          64,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 7,
+        "opponent": 39
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          9
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          19
+        ]
+      },
+      "currentMove": 285,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "lastUsedAbility": 7,
+      "displayedString": "GIRAFARIG used\nSKILL SWAP!"
+    },
+    "statusCured": {
+      "frame": 494,
+      "rngValue": 2492921567,
+      "battleStatus1": {
+        "player": 0,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          0,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 7,
+        "opponent": 39
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          9
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          19
+        ]
+      },
+      "currentMove": 285,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "lastUsedAbility": 7,
+      "displayedString": "GIRAFARIG swapped abilities\nwith its opponent!"
+    },
+    "cureMessage": {
+      "frame": 495,
+      "rngValue": 2492921567,
+      "battleStatus1": {
+        "player": 0,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          0,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 7,
+        "opponent": 39
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          9
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          19
+        ]
+      },
+      "currentMove": 285,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "lastUsedAbility": 7,
+      "displayedString": "GIRAFARIG\u2019s LIMBER\ncured its paralysis problem!"
+    }
+  },
+  "transitions": [
+    {
+      "frame": 2,
+      "rngValue": 3908550445,
+      "battleStatus1": {
+        "player": 0,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          0,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          10
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          20
+        ]
+      },
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        0,
+        86
+      ],
+      "lastUsedAbility": 39,
+      "displayedString": "SKILL SWAP"
+    },
+    {
+      "frame": 3,
+      "rngValue": 3908550445,
+      "battleStatus1": {
+        "player": 0,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          0,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          10
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          20
+        ]
+      },
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        0,
+        86
+      ],
+      "lastUsedAbility": 39,
+      "displayedString": "TYPE/<FC><06><01>PSYCHC"
+    },
+    {
+      "frame": 33,
+      "rngValue": 3908550445,
+      "battleStatus1": {
+        "player": 0,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          0,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          10
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          20
+        ]
+      },
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        0,
+        86
+      ],
+      "lastUsedAbility": 39,
+      "displayedString": "TYPE/<FC><06><01>NORMAL"
+    },
+    {
+      "frame": 65,
+      "rngValue": 3908550445,
+      "battleStatus1": {
+        "player": 0,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          0,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          10
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          20
+        ]
+      },
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        0,
+        86
+      ],
+      "lastUsedAbility": 39,
+      "displayedString": "TYPE/<FC><06><01>PSYCHC"
+    },
+    {
+      "frame": 98,
+      "rngValue": 3908550445,
+      "battleStatus1": {
+        "player": 0,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          0,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          10
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          20
+        ]
+      },
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "lastUsedAbility": 39,
+      "displayedString": "TYPE/<FC><06><01>PSYCHC"
+    },
+    {
+      "frame": 103,
+      "rngValue": 3908550445,
+      "battleStatus1": {
+        "player": 0,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          0,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          10
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          20
+        ]
+      },
+      "currentMove": 86,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "lastUsedAbility": 39,
+      "displayedString": "TYPE/<FC><06><01>PSYCHC"
+    },
+    {
+      "frame": 105,
+      "rngValue": 3908550445,
+      "battleStatus1": {
+        "player": 0,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          0,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          10
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          20
+        ]
+      },
+      "currentMove": 86,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "lastUsedAbility": 39,
+      "displayedString": "Foe HITMONLEE used\nTHUNDER WAVE!"
+    },
+    {
+      "frame": 138,
+      "rngValue": 3908550445,
+      "battleStatus1": {
+        "player": 0,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          0,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          10
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          19
+        ]
+      },
+      "currentMove": 86,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "lastUsedAbility": 39,
+      "displayedString": "Foe HITMONLEE used\nTHUNDER WAVE!"
+    },
+    {
+      "frame": 145,
+      "rngValue": 4153048220,
+      "battleStatus1": {
+        "player": 0,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          0,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          10
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          19
+        ]
+      },
+      "currentMove": 86,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "lastUsedAbility": 39,
+      "displayedString": "Foe HITMONLEE used\nTHUNDER WAVE!"
+    },
+    {
+      "frame": 183,
+      "rngValue": 4153048220,
+      "battleStatus1": {
+        "player": 64,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          64,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          10
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          19
+        ]
+      },
+      "currentMove": 86,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "lastUsedAbility": 39,
+      "displayedString": "Foe HITMONLEE used\nTHUNDER WAVE!"
+    },
+    {
+      "frame": 185,
+      "rngValue": 4153048220,
+      "battleStatus1": {
+        "player": 64,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          64,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          10
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          19
+        ]
+      },
+      "currentMove": 86,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "lastUsedAbility": 39,
+      "displayedString": "GIRAFARIG is paralyzed!\nIt may be unable to move!"
+    },
+    {
+      "frame": 308,
+      "rngValue": 4153048220,
+      "battleStatus1": {
+        "player": 64,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          64,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          10
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          19
+        ]
+      },
+      "currentMove": 86,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "lastUsedAbility": 7,
+      "displayedString": "GIRAFARIG is paralyzed!\nIt may be unable to move!"
+    },
+    {
+      "frame": 312,
+      "rngValue": 4153048220,
+      "battleStatus1": {
+        "player": 64,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          64,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          10
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          19
+        ]
+      },
+      "currentMove": 86,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "lastUsedAbility": 39,
+      "displayedString": "GIRAFARIG is paralyzed!\nIt may be unable to move!"
+    },
+    {
+      "frame": 313,
+      "rngValue": 4153048220,
+      "battleStatus1": {
+        "player": 64,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          64,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          10
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          19
+        ]
+      },
+      "currentMove": 0,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "lastUsedAbility": 39,
+      "displayedString": "GIRAFARIG is paralyzed!\nIt may be unable to move!"
+    },
+    {
+      "frame": 314,
+      "rngValue": 4153048220,
+      "battleStatus1": {
+        "player": 64,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          64,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          10
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          19
+        ]
+      },
+      "currentMove": 285,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "lastUsedAbility": 39,
+      "displayedString": "GIRAFARIG is paralyzed!\nIt may be unable to move!"
+    },
+    {
+      "frame": 315,
+      "rngValue": 2492921567,
+      "battleStatus1": {
+        "player": 64,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          64,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          10
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          19
+        ]
+      },
+      "currentMove": 285,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "lastUsedAbility": 7,
+      "displayedString": "GIRAFARIG is paralyzed!\nIt may be unable to move!"
+    },
+    {
+      "frame": 316,
+      "rngValue": 2492921567,
+      "battleStatus1": {
+        "player": 64,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          64,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          10
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          19
+        ]
+      },
+      "currentMove": 285,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "lastUsedAbility": 7,
+      "displayedString": "GIRAFARIG used\nSKILL SWAP!"
+    },
+    {
+      "frame": 343,
+      "rngValue": 2492921567,
+      "battleStatus1": {
+        "player": 64,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          64,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          9
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          19
+        ]
+      },
+      "currentMove": 285,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "lastUsedAbility": 7,
+      "displayedString": "GIRAFARIG used\nSKILL SWAP!"
+    },
+    {
+      "frame": 345,
+      "rngValue": 2492921567,
+      "battleStatus1": {
+        "player": 64,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          64,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 7,
+        "opponent": 39
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          9
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          19
+        ]
+      },
+      "currentMove": 285,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "lastUsedAbility": 7,
+      "displayedString": "GIRAFARIG used\nSKILL SWAP!"
+    },
+    {
+      "frame": 381,
+      "rngValue": 2492921567,
+      "battleStatus1": {
+        "player": 64,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          64,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 7,
+        "opponent": 39
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          9
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          19
+        ]
+      },
+      "currentMove": 285,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "lastUsedAbility": 7,
+      "displayedString": "GIRAFARIG swapped abilities\nwith its opponent!"
+    },
+    {
+      "frame": 494,
+      "rngValue": 2492921567,
+      "battleStatus1": {
+        "player": 0,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          0,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 7,
+        "opponent": 39
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          9
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          19
+        ]
+      },
+      "currentMove": 285,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "lastUsedAbility": 7,
+      "displayedString": "GIRAFARIG swapped abilities\nwith its opponent!"
+    },
+    {
+      "frame": 495,
+      "rngValue": 2492921567,
+      "battleStatus1": {
+        "player": 0,
+        "opponent": 0
+      },
+      "partyStatus1": {
+        "player": [
+          0,
+          0,
+          0
+        ],
+        "opponent": [
+          0,
+          0,
+          0
+        ]
+      },
+      "activeAbility": {
+        "player": 7,
+        "opponent": 39
+      },
+      "persistentAbility": {
+        "player": 39,
+        "opponent": 7
+      },
+      "pp": {
+        "player": [
+          20,
+          20,
+          10,
+          9
+        ],
+        "opponent": [
+          20,
+          20,
+          20,
+          19
+        ]
+      },
+      "currentMove": 285,
+      "chosenMoveByBattler": [
+        285,
+        86
+      ],
+      "lastUsedAbility": 7,
+      "displayedString": "GIRAFARIG\u2019s LIMBER\ncured its paralysis problem!"
+    }
+  ],
+  "final": {
+    "rngValue": 2492921567,
+    "battleStatus1": {
+      "player": 0,
+      "opponent": 0
+    },
+    "partyStatus1": {
+      "player": [
+        0,
+        0,
+        0
+      ],
+      "opponent": [
+        0,
+        0,
+        0
+      ]
+    },
+    "activeAbility": {
+      "player": 7,
+      "opponent": 39
+    },
+    "persistentAbility": {
+      "player": 39,
+      "opponent": 7
+    },
+    "pp": {
+      "player": [
+        20,
+        20,
+        10,
+        9
+      ],
+      "opponent": [
+        20,
+        20,
+        20,
+        19
+      ]
+    },
+    "currentMove": 285,
+    "chosenMoveByBattler": [
+      285,
+      86
+    ],
+    "lastUsedAbility": 7,
+    "displayedString": "GIRAFARIG\u2019s LIMBER\ncured its paralysis problem!"
+  }
+}

@@ -193,7 +193,9 @@ describe("EFFECT_EXPLOSION: full committed script walk, genuine terminal halt", 
     const result = runToTerminal(rc, 1);
     expect(result.state.rulesContext.battlers[0]!.hp).toBe(400); // attacker's HP untouched -- setatkhptozero never ran
     expect(result.state.rulesContext.battlers[1]!.hp).toBe(900); // target untouched -- damage chain never ran
-    expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_DAMP);
+    // MOVEEND_IMMUNITY_ABILITIES' ordinary pass later assigns the literal
+    // battler-0 ability (NONE) to gLastUsedAbility (battle_util.c:2471-2474).
+    expect(result.state.rulesContext.lastUsedAbility).toBe(0);
     expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(ABILITY_DAMP);
   });
 
@@ -207,7 +209,7 @@ describe("EFFECT_EXPLOSION: full committed script walk, genuine terminal halt", 
     const result = runToTerminal(rc, 1);
     expect(result.state.rulesContext.battlers[0]!.hp).toBe(400);
     expect(result.state.rulesContext.battlers[1]!.hp).toBe(900);
-    expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_DAMP);
+    expect(result.state.rulesContext.lastUsedAbility).toBe(0);
   });
 
   it("attacker-faints-but-target-survives: target's HP comfortably exceeds the halved-defense damage roll", () => {
