@@ -1,3 +1,26 @@
+## 715 — [BOUNDED MAIN WORKER 2026-07-29 ~20:00] Battle-resolution Slice 3 landed
+
+- **State:** implementation `eae69a47`; tree green at **521 files / 5332
+  tests + 1 deliberate animation-lane skip**, production build, targeted
+  Slice-3 acceptance **122/122**, and `git diff --check`.
+- **Did:** trainer driving now returns one strictly ordered player+trainer
+  transition receipt. A generated non-KO move replaces its submitting command
+  UI with typed resolution, retains the genuine pending battle/request, and
+  constructs the next command only after resolution plus the six-frame blank
+  handoff. Persistent singles battler boundaries now own displayed HP/status,
+  sprite visibility, idle epoch, PP, party identity, and move cursor; PP
+  commits immediately, HP/status commit with their visible command, same-mon
+  cursor/epoch survive, and only a switched battler resets. `core.ts` advances
+  and renders this route.
+- **Next:** dispatch `docs/battle-resolution-seam-design.md` **Slice 4 —
+  faint and forced-party midpoint** verbatim; retain all Slice-3 regressions.
+- **Notes:** pixels remain exact: staged OFF **16/16**, SAND_ATTACK **190/190**,
+  menus 3-13 **254/254, 44/44, 42/42, 44/44, 93/93, 88/88, 111/111,
+  83/83, 56/56, 46/46, 57/57**. Voluntary-switch rendering remains on its
+  pre-Slice-5 compatibility path; no faint/forced selector/send-out/terminal
+  rendering, trace/capture change, canonical-recording import, unsupported
+  barrier, or battle/turn/absolute-tick branch was added. PAPERCUT: none.
+
 ## 714 — [SUPERVISOR 2026-07-29 ~19:25] Slice 2 + Paralyze pair folded; union green; round 8 dispatched
 
 - **State:** master `18f31d25`+docs green at **521 files / 5332 tests + 1

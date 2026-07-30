@@ -13,6 +13,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 718 — [SUPERVISOR 2026-07-29 ~20:45] Slice 4 + Swagger folded + 18-commit animation fold; union green; round 10 dispatched
+
+- **State:** master green at **525 files / 5378 tests + 1 deliberate
+  animation-lane skip**, production build, `git diff --check` clean, no
+  orphan worktrees/branches, DEFERRED.md empty, `animation-main` fully
+  folded (0 commits unfolded).
+- **Did:** (1) verified + accepted resolution Slice 4 (`3b62f97c`+
+  `291d3cde`: targeted 84/84; faint 141/141, fly-strike 256/256,
+  party-select 200/200, staged 16/16 re-run exact; honest
+  `sendOutElapsed: 0` checkpoint — send-out is Slice 5's). (2) verified +
+  merged `worker/side-20260729-190052` (Swagger CV pair, doc §33, ranked
+  over Counter after Confuse completed the shared CBM): supervisor re-ran
+  live verify 4/4 PASS (9-draw endpoints, seeds 1/99); censuses unchanged
+  and idempotent. (3) folded `animation-main` (+18: Rolling Kick, Low
+  Kick, Whirlpool promoted exact; Brick Break evidence checkpoint; no
+  "For the main program" asks); union suite/build green on the fold.
+- **Next:** round 10 (time-boxed final round) dispatched — main: design §4
+  Slice 5 (semantic switch-in + generic send-out, honest-subset fallback
+  written into the brief); side: Counter CBM/CV or documented negative
+  closure of the remainder. Wind-down immediately after: fold re-check,
+  final union, session report. Slices 6-7 remain the next session's queue.
+- **Notes:** 16 workers, 0 failed steps, 1 integrity correction (705).
+  The animation supervisor may still be live; any post-fold tail is for
+  the next orient.
+
+---
+
 ## 717 — [BOUNDED MAIN WORKER 2026-07-29 ~19:35] Battle-resolution Slice 4 landed
 
 - **State:** implementation `3b62f97c` + first-eligible-edge fix `291d3cde`;
@@ -65,27 +92,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   remainder Counter/Swagger.
 
 ---
-
-## 715 — [BOUNDED MAIN WORKER 2026-07-29 ~20:00] Battle-resolution Slice 3 landed
-
-- **State:** implementation `eae69a47`; tree green at **521 files / 5332
-  tests + 1 deliberate animation-lane skip**, production build, targeted
-  Slice-3 acceptance **122/122**, and `git diff --check`.
-- **Did:** trainer driving now returns one strictly ordered player+trainer
-  transition receipt. A generated non-KO move replaces its submitting command
-  UI with typed resolution, retains the genuine pending battle/request, and
-  constructs the next command only after resolution plus the six-frame blank
-  handoff. Persistent singles battler boundaries now own displayed HP/status,
-  sprite visibility, idle epoch, PP, party identity, and move cursor; PP
-  commits immediately, HP/status commit with their visible command, same-mon
-  cursor/epoch survive, and only a switched battler resets. `core.ts` advances
-  and renders this route.
-- **Next:** dispatch `docs/battle-resolution-seam-design.md` **Slice 4 —
-  faint and forced-party midpoint** verbatim; retain all Slice-3 regressions.
-- **Notes:** pixels remain exact: staged OFF **16/16**, SAND_ATTACK **190/190**,
-  menus 3-13 **254/254, 44/44, 42/42, 44/44, 93/93, 88/88, 111/111,
-  83/83, 56/56, 46/46, 57/57**. Voluntary-switch rendering remains on its
-  pre-Slice-5 compatibility path; no faint/forced selector/send-out/terminal
-  rendering, trace/capture change, canonical-recording import, unsupported
-  barrier, or battle/turn/absolute-tick branch was added. PAPERCUT: none.
 
