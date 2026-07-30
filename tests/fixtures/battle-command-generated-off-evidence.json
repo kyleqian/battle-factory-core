@@ -1,0 +1,69 @@
+{
+  "schema": "battle-command-generated-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "oracleScenario": "tools/battle-lab/mechanic-battle-command-generated-off.json",
+  "appStage": {
+    "id": "battle-command-generated-off",
+    "frame": 0
+  },
+  "acceptance": {
+    "matchedClaimed": 0,
+    "captureCount": 128,
+    "traceCommitted": false
+  },
+  "honestInitialField": {
+    "playerSpecies": 210,
+    "playerName": "GRANBULL",
+    "playerMoves": [25, 89, 242, 247],
+    "playerHp": 165,
+    "opponentSpecies": 382,
+    "opponentName": "ARON",
+    "opponentMoves": [232, 332, 319, 46],
+    "opponentHp": 143,
+    "opponentAttackStageAfterIntimidate": 5
+  },
+  "diagnosticDenseWindow": {
+    "startFrame": 8,
+    "endFrame": 135,
+    "captureCount": 128,
+    "matched": 26,
+    "mismatched": 102,
+    "matchingPrefix": {
+      "startFrame": 8,
+      "endFrame": 33,
+      "count": 26
+    },
+    "firstDivergence": {
+      "captureOrdinal": 27,
+      "frame": 34,
+      "diffPixels": 13279,
+      "bounds": {
+        "minX": 1,
+        "minY": 59,
+        "maxX": 238,
+        "maxY": 158
+      },
+      "input": "A",
+      "cause": "The bounce clock is now continuous and frames 8-33 are exact. On the legal EARTHQUAKE confirm, the app replaces the FIGHT field with the first message glyph immediately at frame 34; the ROM retains the confirmed FIGHT field through frame 42 and first draws the G at frame 43. The typed resolution seam still lacks that controller handoff lifecycle."
+    }
+  },
+  "selectedLegalMove": {
+    "moveSlot": 1,
+    "moveId": 89,
+    "moveName": "EARTHQUAKE",
+    "reason": "MEGA KICK misses on the staged RNG and exposes an unresolved attacker-name placeholder; SHADOW BALL exposes the unsupported special-defense 6->5 stat adapter. EARTHQUAKE follows the implemented typed faint and automatic switch-in path without transient state injection."
+  },
+  "oracleRoute": {
+    "initialSettledFrame": 0,
+    "fightOpenedFrame": 14,
+    "cursorMoveFrames": [15, 17],
+    "cancelFrame": 19,
+    "reopenFrame": 26,
+    "confirmFrame": 34,
+    "faintedOpponentFrame": 519,
+    "nextSettledCommandFrame": 820,
+    "nextOpponentSpecies": 88,
+    "nextOpponentName": "GRIMER",
+    "nextSettledCommandSha256": "bfcc380c41086166a69b46945540628bf328e0756df4e40f3eae4a85653714c6"
+  }
+}

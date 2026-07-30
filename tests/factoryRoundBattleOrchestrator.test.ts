@@ -292,6 +292,67 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     ));
   });
 
+  it("retains a terminal boundary through the final faint message, then hands its immutable outcome to the round owner", () => {
+    let state = createStartedGeneratedBattle(RNG_SEED);
+    let terminalDecision: BattleSubmittedDecision | null = null;
+    for (let budget = 0; budget < 80 && terminalDecision === null; budget += 1) {
+      const decision = choosePlayerDecision(state);
+      const preview = submitFactoryRoundPlayerDecision(state, decision);
+      if (preview.battle === null) {
+        terminalDecision = decision;
+        break;
+      }
+      state = preview;
+    }
+    expect(terminalDecision?.kind).toBe("use-move");
+    if (terminalDecision?.kind !== "use-move") {
+      throw new Error("expected the generated battle's terminal player move");
+    }
+
+    state = advanceCommandToPhase(state, "action-menu");
+    expect(state.battleCommandPresentation?.actionCursor).toBe(0);
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+    state = advanceCommandToPhase(state, "fight-menu");
+    const target = terminalDecision.moveSlot;
+    const current = state.battleCommandPresentation!.fightCursor;
+    if (current % 2 !== target % 2) {
+      state = advanceFactoryRoundBattleCommand(state, new Set(["RIGHT"]));
+    }
+    if (Math.floor(state.battleCommandPresentation!.fightCursor / 2)
+      !== Math.floor(target / 2)) {
+      state = advanceFactoryRoundBattleCommand(state, new Set(["DOWN"]));
+    }
+    expect(state.battleCommandPresentation?.fightCursor).toBe(target);
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+
+    const retainedBattle = state.battleResolutionPresentation?.pendingBattle;
+    const retainedBoundary = state.battleResolutionPresentation?.pendingBoundary;
+    expect(retainedBoundary?.kind).toBe("terminal");
+    expect(retainedBattle?.boundary).toBe(retainedBoundary);
+    expect(state.battle).toBe(retainedBattle);
+    expect(state.round.rules.phase).toBe("battleActive");
+
+    for (
+      let budget = 0;
+      budget < 2_000
+        && state.battleResolutionPresentation?.lifecycle.phase !== "terminal-handoff";
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state, new Set(["A"]));
+    }
+    expect(state.battleResolutionPresentation?.lifecycle.phase)
+      .toBe("terminal-handoff");
+    expect(state.battleResolutionPresentation?.pendingBattle).toBe(retainedBattle);
+    expect(state.battleResolutionPresentation?.pendingBoundary).toBe(retainedBoundary);
+    expect(state.round.rules.phase).toBe("battleActive");
+
+    state = advanceFactoryRoundBattleResolution(state);
+    expect(state.battle).toBeNull();
+    expect(state.battleResolutionPresentation).toBeNull();
+    expect(state.round.rules.phase).toBe("presentingBattleWin");
+    expect(state.round.rules.lastBattle?.outcome).toBe("win");
+  });
+
   it("resets the persistent cursor when a live player switch-in changes the active party slot", () => {
     let state = createStartedGeneratedBattle(RNG_SEED);
     state = advanceCommandToPhase(state, "action-menu");

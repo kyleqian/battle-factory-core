@@ -438,6 +438,7 @@ import {
   MENU_IDLE_BLANK_START_TICK,
   MENU_IDLE_BLANK_END_TICK,
   menuIdleBounce,
+  actionMenuDisplayAtAge,
   FIGHT_SUBMENU_OPEN_DELAY,
   FIGHT_SUBMENU_CLOSE_DELAY,
   FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
@@ -679,6 +680,9 @@ import {
 import type {
   BattleResolutionPresentationRenderView,
 } from "./battleResolutionPresentationRender.ts";
+import type {
+  BattleTerminalResolutionPresentationState,
+} from "./battleResolutionPresentation.ts";
 import {
   drawStandardWindowFrame,
   drawStandardWindowText,
@@ -2435,6 +2439,12 @@ export interface BattleSceneState {
    * remains frozen until the later outcome renderer takes ownership.
    */
   battleOutcome?: 0 | 1;
+  /**
+   * Immutable terminal receipt plus its presentation-local dismiss clocks.
+   * Once installed, the terminal render path consumes this typed state and
+   * does not inspect a turn-resolution flag.
+   */
+  terminalResolution?: BattleTerminalResolutionPresentationState | null;
   /** Forced player-switch menu, created only by the real turn-15 faint-text A press. */
   turn15PartySelect?: import("./partySelect.ts").PartySelectState | null;
 }
@@ -2465,6 +2475,7 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn17OutcomeDismissElapsed: null,
   turn17LossDismissElapsed: null,
   battleOutcome: 0,
+  terminalResolution: null,
 };
 
 export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
@@ -2501,6 +2512,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn17LossDismissElapsed: state.turn17LossDismissElapsed ?? null,
     battleOutcome:
       postDismiss === null ? (state.battleOutcome ?? 0) : postDismiss.battleOutcome,
+    terminalResolution: state.terminalResolution ?? null,
     turn15PartySelect: state.turn15PartySelect,
   };
 }
@@ -6085,6 +6097,9 @@ function battle2CommandPresentationForRender(
       ]),
     }),
     lifecycle: Object.freeze({ phase, phaseElapsed }),
+    // The legacy equivalence caller supplies its already-proven bounce
+    // overlay separately; this typed adapter only dispatches window chrome.
+    idleBounceElapsed: 0,
     field: Object.freeze({
       player: Object.freeze({
         side: "player",
@@ -15504,10 +15519,7 @@ function drawTurn16FightSubmenuWindow(
   t: number,
   sm: FightSubmenuState,
   partyElapsed: number,
-  turn16Resolved: boolean,
-  turn17MenuRedrawElapsed: number | null,
-  turn17KoDismissElapsed: number | null,
-  turn17OutcomeDismissElapsed: number | null,
+  terminalResolution: BattleTerminalResolutionPresentationState | null,
   trainerPresentation?: FactoryTrainerPresentation,
 ): void {
   if (sm.openElapsed === null) return;
@@ -15515,8 +15527,14 @@ function drawTurn16FightSubmenuWindow(
   const revealTick = openTick + TURN16_FIGHT_SUBMENU_REVEAL_DELAY;
   const openPartyElapsed = turn16PartyElapsedAtTick(partyElapsed, t, openTick);
 
-  if (turn16Resolved && turn17MenuRedrawElapsed !== null) {
-    const redrawTick = TICK0 + turn17MenuRedrawElapsed;
+  if (terminalResolution !== null) {
+    const {
+      confirmElapsed,
+      menuRedrawElapsed,
+      faintDismissElapsed,
+      resultDismissElapsed,
+    } = terminalResolution;
+    const redrawTick = TICK0 + menuRedrawElapsed;
     const settledBounceTick = 1748 + t - redrawTick;
     if (t < revealTick) {
       drawTurn16PostSwitchField(
@@ -15530,7 +15548,7 @@ function drawTurn16FightSubmenuWindow(
       return;
     }
 
-    const confirmTick = sm.confirmElapsed === null ? null : TICK0 + sm.confirmElapsed;
+    const confirmTick = TICK0 + confirmElapsed;
     const freezeTick = confirmTick === null ? null : confirmTick + TURN16_BOUNCE_FREEZE_DELAY;
     const bounceTick =
       freezeTick !== null && t >= freezeTick
@@ -15542,12 +15560,11 @@ function drawTurn16FightSubmenuWindow(
         : t - (confirmTick + TURN16_FAINT_ATTACK_ANIM_DELAY);
     const frozenAnimationAge =
       animationAge !== null
-      && turn17KoDismissElapsed !== null
-      && sm.confirmElapsed !== null
+      && faintDismissElapsed !== null
         ? Math.min(
             animationAge,
-            turn17KoDismissElapsed
-              - sm.confirmElapsed
+            faintDismissElapsed
+              - confirmElapsed
               - TURN16_FAINT_ATTACK_ANIM_DELAY,
           )
         : animationAge;
@@ -15581,21 +15598,23 @@ function drawTurn16FightSubmenuWindow(
         // Battle script/controller writes become DMA-visible on this path
         // one reducer step ahead of the field clock used above.
         t - TICK0 + 1,
-        turn17KoDismissElapsed,
-        turn17OutcomeDismissElapsed,
+        faintDismissElapsed,
+        resultDismissElapsed,
         trainerPresentation,
       );
       if (outcome !== null) {
-        const outcomeLine2 = turn17OutcomeLine2(trainerPresentation);
+        const [outcomeLine1, outcomeLine2] =
+          terminalResolution.command.resultLines;
         const outcomeCursorStart =
           TURN17_FIRST_OUTCOME_RENDER_DELAY
-          + TURN17_OUTCOME_LINE1.length
+          + outcomeLine1.length
           + outcomeLine2.length
           + 1;
-        const [lossLine1, lossLine2] = turn17LossLines(trainerPresentation);
+        const [lossLine1, lossLine2] =
+          terminalResolution.command.opponentLossLines;
         const trainerLoss = turn17TrainerLossState(
           t - TICK0 + 1,
-          turn17OutcomeDismissElapsed,
+          resultDismissElapsed,
           trainerPresentation,
         );
         if (trainerLoss !== null) {
@@ -15613,7 +15632,7 @@ function drawTurn16FightSubmenuWindow(
             // until the following `printstring` clears the window.
             drawMessageTextLines(
               fb,
-              TURN17_OUTCOME_LINE1,
+              outcomeLine1,
               outcomeLine2,
               outcome.visibleChars,
             );
@@ -15638,7 +15657,7 @@ function drawTurn16FightSubmenuWindow(
         }
         drawMessageTextLines(
           fb,
-          TURN17_OUTCOME_LINE1,
+          outcomeLine1,
           outcomeLine2,
           outcome.visibleChars,
         );
@@ -15849,10 +15868,7 @@ function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, pa
         TICK0 + state.elapsed,
         state.fightSubmenu,
         party.sendOutElapsed,
-        state.turn16Resolved ?? false,
-        state.turn17MenuRedrawElapsed ?? null,
-        state.turn17KoDismissElapsed ?? null,
-        state.turn17OutcomeDismissElapsed ?? null,
+        state.terminalResolution ?? null,
         state.trainerPresentation,
       );
       return true;
@@ -16032,8 +16048,12 @@ export function renderGeneratedBattleCommandPresentation(
   fb: Uint8Array,
   presentation: BattleCommandPresentationState,
 ): void {
-  const bounceTick = presentation.lifecycle.phaseElapsed;
-  const bounce = menuIdleBounce(bounceTick);
+  const bounceTick = presentation.idleBounceElapsed;
+  const idleBounce = actionMenuDisplayAtAge(bounceTick, 0);
+  const bounce = {
+    onixY2: idleBounce.battlerY2,
+    healthboxY2: idleBounce.healthboxY2,
+  };
   renderBattleCommandPresentation(fb, presentation, {
     drawActionMenu(framebuffer, view, revealed) {
       drawBattle2ActionMenuWindow(

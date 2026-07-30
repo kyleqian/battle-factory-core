@@ -16,6 +16,10 @@ import { generateFactoryOpponent } from "../src/engine/factoryOpponentGeneration
 import { advanceRngValue } from "../src/engine/rng.ts";
 import { createGeneratedFactoryRoundController } from "../src/engine/roundController.ts";
 import {
+  createBattleTerminalResolutionPresentation,
+  storeBattleTerminalPresentationDismiss,
+} from "../src/engine/battleResolutionPresentation.ts";
+import {
   BATTLE_2_SCENE_HANDOFF_ELAPSED,
   INITIAL_BATTLE_2_ROOM_STATE,
   JENSON_MSGBOX_LINE1,
@@ -85,6 +89,24 @@ describe("S8 Battle-1 postwin transition", () => {
 
   function lossQuoteState(elapsed: number) {
     const state = createInitialState();
+    const terminalResolution = storeBattleTerminalPresentationDismiss(
+      storeBattleTerminalPresentationDismiss(
+        createBattleTerminalResolutionPresentation({
+          pendingBoundary: Object.freeze({
+            kind: "terminal",
+            outcome: "player-win",
+          }),
+          resultLines: ["Player defeated", "BUG CATCHER DESTIN!"],
+          opponentLossLines: ["PLEASE I NEED", "SOME WATER"],
+          confirmElapsed: 2,
+          menuRedrawElapsed: 1,
+        }),
+        "faint",
+        outcomeDismiss - 100,
+      ),
+      "result",
+      outcomeDismiss,
+    );
     return {
       ...state,
       draftScreen: {
@@ -103,6 +125,7 @@ describe("S8 Battle-1 postwin transition", () => {
         turn16Resolved: true,
         turn17KoDismissElapsed: outcomeDismiss - 100,
         turn17OutcomeDismissElapsed: outcomeDismiss,
+        terminalResolution,
       },
     };
   }

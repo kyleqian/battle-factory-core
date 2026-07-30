@@ -14,6 +14,7 @@ import {
 } from "../tools/compare/cli.ts";
 import {
   prepareCompareOutputDirectory,
+  resolveCompareFixturePath,
   resolveCompareTracePath,
   resolveSourceTracePath,
 } from "../tools/compare/paths.ts";
@@ -97,6 +98,24 @@ describe("compare trace and output paths", () => {
     const derived = join(root, "scratch", "derived.json");
 
     expect(resolveSourceTracePath("base.json", derived, root)).toBe(source);
+  });
+
+  it("resolves honest oracle fixtures relative to their compare trace", () => {
+    const root = mkdtempSync(join(tmpdir(), "compare-fixture-"));
+    const traces = join(root, "tools", "compare", "traces");
+    const battleLab = join(root, "tools", "battle-lab");
+    mkdirSync(traces, { recursive: true });
+    mkdirSync(battleLab, { recursive: true });
+    const trace = join(traces, "generated.json");
+    const fixture = join(battleLab, "generated.json");
+    writeFileSync(fixture, "{}");
+
+    expect(resolveCompareFixturePath("../../battle-lab/generated.json", trace)).toBe(
+      fixture,
+    );
+    expect(() =>
+      resolveCompareFixturePath("../../battle-lab/missing.json", trace),
+    ).toThrow("compare fixture not found");
   });
 
   it("clears stale generated artifacts but preserves unrelated files", () => {

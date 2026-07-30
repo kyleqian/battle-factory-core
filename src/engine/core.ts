@@ -264,6 +264,10 @@ import {
   createBattleResolutionPresentationRenderView,
   renderBattleResolutionPresentation,
 } from "./battleResolutionPresentationRender.ts";
+import {
+  createBattleTerminalResolutionPresentation,
+  storeBattleTerminalPresentationDismiss,
+} from "./battleResolutionPresentation.ts";
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
 
@@ -765,54 +769,74 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     // a fresh A edge after the confirmation-relative wait-cursor epoch; an
     // early edge is dropped, and idle time alone can never dismiss it.
     if (
-      (battleScene.turn16Resolved ?? false) &&
-      (battleScene.turn17KoDismissElapsed ?? null) === null &&
-      battleScene.fightSubmenu.confirmElapsed !== null &&
+      battleScene.terminalResolution !== null &&
+      battleScene.terminalResolution !== undefined &&
+      battleScene.terminalResolution.faintDismissElapsed === null &&
       newKeys.has("A") &&
       turn17KoDismissEligible(
         battleScene.elapsed + 1,
-        battleScene.fightSubmenu.confirmElapsed,
+        battleScene.terminalResolution.confirmElapsed,
       )
     ) {
+      const terminalResolution = storeBattleTerminalPresentationDismiss(
+        battleScene.terminalResolution,
+        "faint",
+        battleScene.elapsed + 1,
+      );
       battleScene = {
         ...battleScene,
         turn17KoDismissElapsed: battleScene.elapsed + 1,
+        terminalResolution,
       };
     }
     // The frontier-win printstring is a second, independent input gate.
     // Store its real A edge once; rendering freezes that exact cursor pose
     // until the trainer-slide controller becomes visible.
     if (
-      (battleScene.turn17KoDismissElapsed ?? null) !== null &&
-      (battleScene.turn17OutcomeDismissElapsed ?? null) === null &&
+      battleScene.terminalResolution?.faintDismissElapsed !== null &&
+      battleScene.terminalResolution?.faintDismissElapsed !== undefined &&
+      battleScene.terminalResolution.resultDismissElapsed === null &&
       newKeys.has("A") &&
       turn17OutcomeDismissEligible(
         battleScene.elapsed + 1,
-        battleScene.turn17KoDismissElapsed ?? null,
+        battleScene.terminalResolution.faintDismissElapsed,
         battleScene.trainerPresentation,
       )
     ) {
+      const terminalResolution = storeBattleTerminalPresentationDismiss(
+        battleScene.terminalResolution,
+        "result",
+        battleScene.elapsed + 1,
+      );
       battleScene = {
         ...battleScene,
         turn17OutcomeDismissElapsed: battleScene.elapsed + 1,
+        terminalResolution,
       };
     }
     // DESTIN's expanded Easy Chat quote ends in PAUSE_UNTIL_PRESS. Unlike
     // the prior battle printers this wait draws no cursor, but it remains a
     // genuine one-shot A gate. The accepted edge starts every postwin clock.
     if (
-      (battleScene.turn17OutcomeDismissElapsed ?? null) !== null &&
-      (battleScene.turn17LossDismissElapsed ?? null) === null &&
+      battleScene.terminalResolution?.resultDismissElapsed !== null &&
+      battleScene.terminalResolution?.resultDismissElapsed !== undefined &&
+      battleScene.terminalResolution.lossDismissElapsed === null &&
       newKeys.has("A") &&
       turn17LossDismissEligible(
         battleScene.elapsed + 1,
-        battleScene.turn17OutcomeDismissElapsed ?? null,
+        battleScene.terminalResolution.resultDismissElapsed,
         battleScene.trainerPresentation,
       )
     ) {
+      const terminalResolution = storeBattleTerminalPresentationDismiss(
+        battleScene.terminalResolution,
+        "loss",
+        battleScene.elapsed + 1,
+      );
       battleScene = {
         ...battleScene,
         turn17LossDismissElapsed: battleScene.elapsed + 1,
+        terminalResolution,
       };
       const opponentRecords =
         state.roundController?.rules.currentOpponent.rentalRecords;
@@ -843,6 +867,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     // catch up BEFORE this tick's own input is applied (see
     // `advanceFightSubmenuDisplay`'s own doc) - hence this runs before the
     // input checks below, not after.
+    const priorFightConfirmElapsed = battleScene.fightSubmenu.confirmElapsed;
     let fightSubmenu = advanceFightSubmenuDisplay(battleScene.fightSubmenu);
     // `battleScene.elapsed` here is still this tick's PRE-increment value
     // (advanceBattleScene hasn't run yet) - the trace tick this tick's own
@@ -886,6 +911,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let turn14Resolved = battleScene.turn14Resolved;
     let turn16Resolved = battleScene.turn16Resolved ?? false;
     let turn17MenuRedrawElapsed = battleScene.turn17MenuRedrawElapsed ?? null;
+    let terminalResolution = battleScene.terminalResolution ?? null;
     if (fightSubmenu.openElapsed === null) {
       const actionReady = battle2HandoffTick === null
         ? sceneT >= MENU_DRAW_TICK
@@ -1219,6 +1245,32 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       );
       turn16Resolved = true;
     }
+    if (
+      terminalResolution === null
+      && turn16Resolved
+      && turn17MenuRedrawElapsed !== null
+      && priorFightConfirmElapsed === null
+      && fightSubmenu.confirmElapsed !== null
+    ) {
+      const trainer = currentTrainerPresentation ?? {
+        className: "BUG CATCHER",
+        name: "DESTIN",
+        speechLose: ["PLEASE I NEED", "SOME WATER"] as const,
+      };
+      terminalResolution = createBattleTerminalResolutionPresentation({
+        pendingBoundary: Object.freeze({
+          kind: "terminal" as const,
+          outcome: "player-win" as const,
+        }),
+        resultLines: [
+          "Player defeated",
+          `${trainer.className} ${trainer.name}!`,
+        ],
+        opponentLossLines: trainer.speechLose,
+        confirmElapsed: fightSubmenu.confirmElapsed,
+        menuRedrawElapsed: turn17MenuRedrawElapsed,
+      });
+    }
     battleScene = {
       ...battleScene,
       fightSubmenu,
@@ -1238,6 +1290,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn14Resolved,
       turn16Resolved,
       turn17MenuRedrawElapsed,
+      terminalResolution,
     };
     const previousBattle2RngCalls = battle2HandoffTick === null
       ? 0

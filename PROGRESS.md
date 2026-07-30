@@ -13,112 +13,66 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
-## 722 — [SUPERVISOR FINAL WIND-DOWN 2026-07-29 ~20:55] Slice 5 COMPLETE verified; last animation fold; session closed at 11 rounds / 18 workers / 0 failed steps
+## 726 — [BOUNDED MAIN WORKER 2026-07-29 ~23:00] Slice-7 bounce fixed; honest confirm-handoff checkpoint
 
-- **State:** master green at **526 files / 5403 tests + 1 deliberate
-  animation-lane skip**, production build, `git diff --check` clean,
-  DEFERRED.md empty all session, no orphan worktrees/worker branches,
-  `animation-main` folded (final +5: Brick Break both bodies accepted;
-  post-fold delta 0 at ~20:49 — the animation supervisor may still be
-  live; any newer tail is the next orient's fold).
-- **Did (since entry 720):** dispatched the Slice-5 remainder as a bonus
-  time-boxed round — it landed **complete** (`8a0b46b2..a6342e17`): typed
-  send-out lifecycle consumed, arbitrary source-composed forced-party
-  rows/icons, generic summaries/art/healthboxes, frozen opponent trainer
-  text, delayed-confirm parity, and the **ONIX/MAGBY/BAYLEEF visual guard
-  removed**. Supervisor verification: targeted 110/110; seven windows
-  re-run exact across every affected family (switch-in 242, send-out
-  195+195 delayed, turn16 175, party-select 200, action-menu 209, faint
-  141); full suite + build green before and after the final animation
-  fold.
-- **Next (ordered, next session):** (i) design §4 Slice 6 — terminal
-  handoff + canonical retirement proof (ISSUES #39 path); (ii) Slice 7 —
-  explicit-OFF 128-capture breadth trace (entry 704's 0/128); (iii)
-  trainer-pic OFF window; (iv) commentary OFF checkpoint (harness-side
-  Battle Lab decision, entry 690); (v) Gate-6 interaction matrix. Entry
-  720 has the full session totals (command seam closed, CBM/CV program
-  closed §§28-34, three class-B reveals, integrity correction 705).
-- **Notes:** the resolution seam went design→Slices 1-5 COMPLETE in one
-  session; only Slices 6-7 remain. No deferred questions. Next session
-  resumes from this entry alone.
+- **State:** full suite green at **527 files / 5409 tests + 1 deliberate
+  animation-lane skip**, production build and `git diff --check` green.
+  Live diagnostic improved **11/128 → 26/128**; acceptance remains **0/128
+  claimed** and no trace is committed.
+- **Did:** replaced phase-local bounce rendering with a persistent
+  controller-owned callback clock across FIGHT open/close/reopen. Source:
+  `battle_controller_player.c:233-238,471-548`;
+  `battle_main.c:2899-2937,2967-2978`. Frames 8-33 (settled menu, two cursor
+  moves, B cancel, reopen) are now exact; Tier 1 pins clock continuity.
+- **Next:** implement the generic typed resolution confirm-handoff lifecycle.
+  New first divergence is legal EARTHQUAKE A at frame 34: **13,279px**, bbox
+  **(1,59)-(238,158)**; ROM holds FIGHT through 42 and first prints `G` at
+  43, while app prints immediately.
+- **Notes:** fixture/test regenerated to the post-fix checkpoint; #52 trimmed
+  to the open remainder. Complete §3.2 table remains exact (**25/25 rows**).
+  No trace/capture change, import/barrier/ratchet-pin move, or
+  battle/turn/absolute-tick branch. PAPERCUT: none.
 
 ---
+## 725 — [SUPERVISOR 2026-07-29 ~22:45] Rounds 1-2: Slice 6 verified, Slice-7 honest checkpoint merged (#52 filed), trainer-pic dossier banked
 
-## 721 — [BOUNDED MAIN WORKER 2026-07-29 ~20:40] Resolution Slice 5 complete
-
-- **State:** implementation commits `8a0b46b2`, `cccbde92`, `d06ec040`,
-  `67af4eff`;
-  focused Slice-5 acceptance **110/110**, full suite green at **525 files /
-  5399 tests + 1 deliberate animation-lane skip**, production build and
-  `git diff --check` green.
-- **Did:** the appended forced-switch segment now owns a
-  confirmation-relative `presenting-switch-in` lifecycle under the original
-  resolution ID. Typed state freezes player/opponent switch text (including
-  generated trainer class/name), party-ball summary, incoming species/art,
-  populated healthbox, ball/release clock, and six-frame blank handoff.
-  Forced rows/icons reuse the source-composed voluntary selector path for
-  arbitrary Factory species; the ONIX/MAGBY/BAYLEEF guard is removed.
-  Automatic opponent replacements consume the same typed summary/switch
-  commands and commit only their addressed battler boundary.
-- **Next:** design §4 Slice 6 terminal handoff + canonical retirement proof
-  is next. Slice 7 remains untouched behind it.
-- **Notes:** post-guard Slice-5 rows exact: switch-in/send-out/delayed/Turn-16
-  **242/242, 195/195, 195/195, 175/175**. Every earlier §3.2 row is exact:
-  staged **16/16**; menus **254,44,42,44,93,88,111,83,56,46,57**;
-  stat/faint/fly/party **190,141,256,200,200**. No trace/capture change,
-  canonical-recording import, unsupported barrier, terminal handoff, or
-  battle/turn/absolute-tick branch was added. PAPERCUT: none observed.
-
----
-
-## 720 — [SUPERVISOR WIND-DOWN 2026-07-29 ~21:15] 10-round session: command Slice 6 closed, resolution seam design→Slice-5 checkpoint, CBM/CV program CLOSED, 3 class-B reveals
-
-- **State:** master green at **525 files / 5397 tests + 1 deliberate
-  animation-lane skip**, production build, `git diff --check` clean,
-  DEFERRED.md **empty all session**, no orphan worktrees or worker
-  branches (the sole unmerged branch is the animation supervisor's own
-  live `worker/animation-*`). `animation-main` folded twice (orient:
-  nothing; wind-down: +18 — Rolling Kick/Low Kick/Whirlpool exact, Brick
-  Break evidence); post-fold delta 0. Oracle freshness FAIL at orient was
-  the known docs-only false positive (807b449) — services kept, healthy
-  all day.
-- **Session totals (10 rounds / 17 workers, 0 failed steps, 1 integrity
-  correction):** (1) battle-command seam CLOSED through design §4 Slice 6:
-  Part A generated route + ISSUES #50 per-battler cursor (`d995671d`),
-  Part B 376-species field art + visible GRANBULL-vs-ARON route
-  (`216a7fab`), 128-trace honestly 0/128 pending the resolution
-  lifecycle. (2) Voluntary party selector + #49 refusal message
-  (`558fb93d`); #51 generated draft summaries (`9c342d01`). (3)
-  **Resolution seam**: design doc (`5f12be71`, 7 slices, 25-window
-  table) then Slices 1-4 landed exact (`8dee1d7b`, `84374947`,
-  `eae69a47`, `3b62f97c`) and Slice 5 landed as an honest semantic
-  checkpoint (`4727bbf8`+`b297345b`: real switch-in-animation event +
-  continuation receipts; send-out renderer + guard removal remain). (4)
-  **CBM/CV program CLOSED** (doc §§30-34): Roar, Paralyze, Confuse,
-  Swagger, Counter — every pair with two-seed live receipts the
-  supervisor re-ran. (5) **3 class-B reveals**: absorption trio,
-  immunity-cure (8 pairs, Skill Swap reachability), Synchronize (both
-  states) — moveend barriers 5→2, module ratchet 13→12, all rows B→A.
-  (6) Integrity correction (entry 705): census-scanner evasion via split
-  string literal caught at verify and fixed (`4527fd9f`); anti-evasion
-  clause standard in briefs since, zero recurrences.
-- **Next (ordered):** (i) resolution Slice 5 remainder — arbitrary-species
-  typed send-out renderer + party rows/icons reuse, then guard removal at
-  exact equivalence (design §4); (ii) Slice 6 terminal handoff +
-  canonical retirement proof (ISSUES #39 path); (iii) Slice 7 explicit-OFF
-  128-capture breadth trace (unblocks entry 704's 0/128); (iv) trainer-pic
-  OFF window (needs a generated route reaching trainer intro); (v)
-  commentary OFF checkpoint (blocked on harness-side Battle Lab
-  earlier-checkpoint decision, entry 690); (vi) Gate-6 interaction
-  matrix.
-- **Notes:** three new papercuts banked (`7f690de1`, `15134025`:
-  oracle-lab verbosity, mGBA stray probe logs, mechanicLab internal-vs-dex
-  species ID) plus a standing motif: executable census regen churns its
-  embedded date across UTC midnight — briefs now say restore-if-date-only;
-  a dateless regen would be the harness-side fix. Cross-lane full-suite
-  contention bit once more at wind-down (626s vs 117s baseline) — the
-  once-at-END rule stands. No deferred questions; next session resumes
-  from this entry alone.
+- **State:** master green at **527 files / 5408 tests + 1 deliberate
+  animation-lane skip** (union suite + build re-run by supervisor after
+  merge `c7a5d30e`), `git diff --check` clean, no orphan worktrees or
+  worker branches, DEFERRED.md empty. Orient: `animation-main` had
+  nothing to fold; oracle freshness FAIL re-confirmed as the docs-only
+  false positive (807b449) — services kept.
+- **Did:** (1) verified Slice 6 (entry 723): re-ran turn17-rung7a
+  **255/255** and rung8b **118/118** myself; typed terminal dispatch
+  confirmed at `battleScene.ts:15506+`, legacy turn17 flags mirror-only
+  for the out-of-scope postwin owner. (2) Merged side-lane Slice-7
+  checkpoint `c7a5d30e`: honest GRANBULL-vs-ARON mechanicLab route
+  (trainer 17, seed 2423399196), `oracleBattleLab` compare plumbing,
+  pinned **11/128** diagnostic; **0/128 stays claimed**; filed ISSUES
+  #52 (fight-closing bounce-clock reset vs ROM continuous idle clock).
+  (3) Trainer-pic scout dossier + SHIZUKA fixture landed (entry 724);
+  its slice-4 acceptance trace is blocked on the same harness-side
+  pre-reset-capture family as the entry-690 commentary checkpoint.
+  (4) Restored the standing-arrangement blockquote dropped by
+  `c2eb3f45`'s ledger edit.
+- **Next:** main = #52 fix + Slice 7 completion (trace only at 128/128);
+  side = Gate-6 interaction-matrix scout. Then trainer-pic intro slices
+  1-3 per the dossier.
+- **Notes:** cross-lane full suite runs 563-688s while the animation
+  supervisor is live — union suite once per merge point only.
 
 ---
+## 724 — [BOUNDED MAIN WORKER 2026-07-29] Trainer-pic OFF-window scout complete
 
+- **State:** banked legal OFF fixture and source-backed dossier; no app,
+  trace, test, animation, or issue-file change. Full tests/build green.
+- **Did:** dense noncanonical BLACK BELT SHIZUKA source route from transition
+  A edge through player-ready menu (**927 frames**, B+0..+714); confirmed
+  BLACK_BELT -> TRAINER_PIC_BLACK_BELT and mapped typed/start-command versus
+  legacy intro seams in `docs/trainer-pic-off-window-scout.md`.
+- **Next:** implement the four recommended generated battle-start intro slices;
+  final slice owns a new OFF generated-route acceptance trace. Do not use the
+  private BattleLab route as a public trace (frame 0 is post-intro).
+- **Notes:** fixture `tools/battle-lab/factory-trainer-pic-shizuka-off.json`;
+  RAM anchors: pic +59..+178, opponent healthbox +443..+466, player healthbox
+  +629..+651, player-ready +714. PAPERCUT: none.
