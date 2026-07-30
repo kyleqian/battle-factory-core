@@ -98,7 +98,7 @@ function context(targetAbility: number) {
 }
 
 function ports(): BattleScriptStatusRulesExternalPorts {
-  return Object.freeze({
+  const externalPorts: BattleScriptStatusRulesExternalPorts = {
     isControllerIdle: () => true,
     prepareMessage: (_context, operand) =>
       operand.expression.startsWith("STRINGID_")
@@ -118,7 +118,8 @@ function ports(): BattleScriptStatusRulesExternalPorts {
         ? 1
         : null,
     resolveByteOperand: () => null,
-  });
+  };
+  return Object.freeze(externalPorts);
 }
 
 function acknowledgeAll(

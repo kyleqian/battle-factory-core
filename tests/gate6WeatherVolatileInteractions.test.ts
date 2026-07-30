@@ -112,7 +112,7 @@ function rules(status3: number) {
 }
 
 function ports(): BattleScriptStatusRulesExternalPorts {
-  return Object.freeze({
+  const externalPorts: BattleScriptStatusRulesExternalPorts = {
     isControllerIdle: (context) =>
       context.state.scheduler.pendingControllerBattlers.length === 0,
     prepareMessage: (_context, operand) =>
@@ -130,7 +130,8 @@ function ports(): BattleScriptStatusRulesExternalPorts {
     resolveHalfwordOperand: (_context, operand) =>
       operand.expression === "B_WAIT_TIME_LONG" ? B_WAIT_TIME_LONG : null,
     resolveByteOperand: () => null,
-  });
+  };
+  return Object.freeze(externalPorts);
 }
 
 function runEndTurn(status3: number) {
