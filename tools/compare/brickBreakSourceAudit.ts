@@ -21,5 +21,5 @@ const l50 = inventory.tiers.level50.moves; const bb = l50.find((x: { move: strin
 if (bb.frontierMonCount !== 46 || cc.frontierMonCount !== 11) throw new Error("Level-50 census changed");
 need(constants, "#define FRONTIER_MON_LOMBRE         131"); const lombre = mons.slice(mons.indexOf("[FRONTIER_MON_LOMBRE]"), mons.indexOf("[FRONTIER_MON_POLIWHIRL_1]")); need(lombre, "SPECIES_LOMBRE"); need(lombre, "MOVE_BRICK_BREAK");
 for (const move of ["MOVE_BRICK_BREAK", "MOVE_CRUSH_CLAW"]) { if (!components.moves.find((x: { move: string; componentIds: string[] }) => x.move === move)?.componentIds.includes("asset:ANIM_TAG_TORN_METAL")) throw new Error(`${move} lost TORN_METAL`); }
-if (!coverage.entries.some((x: { move: string; status: string }) => x.move === "MOVE_BRICK_BREAK" && x.status === "partial")) throw new Error("Brick Break must be evidence-only partial");
-console.log("TORN_METAL audit: Brick Break 46 L50 carriers, lowest set 131/FRONTIER_MON_LOMBRE; four shard shattered-wall lifecycles; Crush Claw 11-carrier claw-slash body remains unsupported");
+if (!coverage.entries.some((x: { move: string; status: string }) => x.move === "MOVE_BRICK_BREAK" && x.status === "exact")) throw new Error("Brick Break must retain exact acceptance");
+console.log("TORN_METAL audit: Brick Break 46 L50 carriers, lowest set 131/FRONTIER_MON_LOMBRE; normal plus four-shard wall bodies exact; Crush Claw 11-carrier claw-slash body remains unsupported");

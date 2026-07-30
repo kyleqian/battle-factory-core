@@ -1,8 +1,8 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-describe("ANIM_TAG_TORN_METAL Brick Break evidence checkpoint", () => {
-  it("pins the 46-to-11 prioritization, lowest Lombre carrier, both bodies, and partial boundary", () => {
+describe("ANIM_TAG_TORN_METAL Brick Break acceptance", () => {
+  it("pins the 46-to-11 prioritization, lowest Lombre carrier, both bodies, and exact boundary", () => {
     expect(execFileSync("npx", ["tsx", "tools/compare/brickBreakSourceAudit.ts"], { encoding: "utf8" })).toContain("set 131/FRONTIER_MON_LOMBRE");
   });
   it("stages three complete legal parties in both orientations and pins both dense receipts", () => {

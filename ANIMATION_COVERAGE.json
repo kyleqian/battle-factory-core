@@ -3,22 +3,36 @@
   "entries": [
     {
       "move": "MOVE_BRICK_BREAK",
-      "status": "partial",
-      "remaining": "Port BrickBreakNormal and the Reflect-selected shattered-wall body through a source-relative reducer, typed Scene-ON seam, and live production compositor; then prove full dense production-framebuffer parity in both orientations. Crush Claw retains its independent lunge/ShakeMon2/four-claw-slash acceptance obligation.",
+      "status": "exact",
       "covered": [
-        "evidence-only ANIM_TAG_TORN_METAL checkpoint: inventory ranks Brick Break's 46 Level-50 Factory carriers over Crush Claw's 11; set 131 FRONTIER_MON_LOMBRE is the lowest legal Level-50 carrier",
-        "complete legal Scene-ON Lombre/Onix parties stage the real target Reflect before Brick Break in both orientations, selecting the source's BrickBreakShatteredWall body without transient state injection",
-        "fresh dense source/hardware receipts cover frames 288-479 player-back and 289-480 opponent-front (192 each), twice, through first inactive cleanup: four TORN_METAL gBrickBreakWallShardSpriteTemplate lifecycles, wall/lunges/hitsplats/fist, WindUpLunge, palette/OAM/affine/register latches, target-panned three audio events, and cleanup",
-        "no reducer, typed Scene-ON seam, compositor, gameplay, or acceptance credit was added; BrickBreakNormal and live production behavior remain unported"
+        "source and controller audits prove Cmd_removelightscreenreflect sets animTurn=0 without a screen and animTurn=1 after removing Reflect or Light Screen; choosetwoturnanim therefore requires independent BrickBreakNormal and BrickBreakShatteredWall presentation acceptance",
+        "complete legal Scene-ON Lombre/Onix parties prove both controller-selected bodies without transient state injection: no-screen Tackle parties select BrickBreakNormal, while real target Reflect selects BrickBreakShatteredWall in both orientations",
+        "fresh dense probes pass BrickBreakNormal twice per orientation through first inactive cleanup: player-back frames 234-384 pass 151/151 source/component/seam and 151/151 production framebuffer with evidence/raw ad3d3e90b70fde1595dda316a773e887f17123df5ad5815086159ddb52398b5d / 67687eb221c4efb306fdca646b78fd181469aa22ef98e48d7006b4a9ec2c27cb; opponent-front frames 220-370 pass 151/151 with b1ac1081da160add8d9e92f878e3051199a909987735dc5bf06cd921bb1f8fab / 4a03768b6549b364296e3639833e7c5d0cd6dedcec567ee62f20e32fd94c2645",
+        "fresh dense probes pass BrickBreakShatteredWall twice per orientation through first inactive cleanup: player-back frames 288-479 pass 192/192 source/component/seam and 192/192 production framebuffer with evidence/raw e484e602be861db10e4042c2a6de75e5f6e261e533515d48d8597637db5c4697 / e1b36f8036f30386af0c7cdaac9645f73bb9eb526802c3179e745871cf637363; opponent-front frames 289-480 pass 192/192 with f0314f159cb9b141c107cbe078382ebb4ff7379c4ce2c835aa9b921c65bbe27a / 8402d60c9605e852c0f099dbc617c80dc21d005097ed1985395b647564ae23bc",
+        "the pure source-relative reducer and typed seam port both HorizontalLunges, three affine hitsplats, fist, 24+10+3 WindUpLunge, BG simple-palette blend, target monbg and 12:8 alpha, target-panned audio, source task/OAM/palette/register latches, and cleanup; the shattered branch additionally ports the 90+10 wall and four 40-step TORN_METAL shard lifecycles",
+        "the production compositor uses reproducibly extracted TORN_METAL plus shared source-derived Lombre, Onix, blue-wall, IMPACT, HANDS_AND_FEET, field, healthbox, and text assets; it preserves side-specific OAM depth/Y ordering and one-selected-OBJ alpha composition without recorded screenshots, fitted pixels, or absolute ticks",
+        "MOVE_CRUSH_CLAW remains unsupported: it only loads TORN_METAL and has an independent lunge, ShakeMon2, four-claw-slash body, audio, timing, and cleanup acceptance obligation; no credit transfers from Brick Break",
+        "presentation owns no screen outcome, damage, RNG, turn order, controller, round advancement, facility state, shared battle state, boundary widening, unsupported barrier, or canonical-recording allowlist"
       ],
       "evidence": [
+        "tools/battle-lab/mechanic-brick-break-normal-player-lombre-opponent-onix.json",
+        "tools/battle-lab/mechanic-brick-break-normal-opponent-lombre-player-onix.json",
         "tools/battle-lab/mechanic-brick-break-player-lombre-opponent-onix.json",
         "tools/battle-lab/mechanic-brick-break-opponent-lombre-player-onix.json",
+        "tools/compare/fixtures/brick-break-normal-player-lombre-opponent-onix.json",
+        "tools/compare/fixtures/brick-break-normal-opponent-lombre-player-onix.json",
         "tools/compare/fixtures/brick-break-player-lombre-opponent-onix.json",
         "tools/compare/fixtures/brick-break-opponent-lombre-player-onix.json",
         "tools/compare/brickBreakProbe.py",
+        "tools/compare/brickBreakPortable.ts",
         "tools/compare/brickBreakPortableEvidence.ts",
         "tools/compare/brickBreakSourceAudit.ts",
+        "tools/compare/extractBrickBreakAssets.ts",
+        "src/animation/assets/brick-break.json",
+        "src/animation/brickBreak.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/brickBreak.test.ts",
         "tests/animation/brickBreakEvidence.test.ts"
       ]
     },
@@ -1031,7 +1045,7 @@
         "fresh local-mGBA portable receipts prove the complete Move_SPIKE_CANNON source pointer interval through first inactive cleanup twice fresh: 84/84 source/component, typed-seam, hardware, and shared-application-framebuffer frames 86-169 player-back and 90-173 opponent-front; player evidence/raw RGB digests are 80760b25a51d583fc20fe056986a1f9f9e8cc1f5b1369bf13bdfb9ed0c854654 / c5af7071168adebfc894a8708e3309f83bac149b39d0a77dfa3f048345997e61 and opponent digests are 7c4e2dd5481323c175e92641b68339553e1d0a8a8aa5adbf7a8fc84a3134b8a2 / 8f393625ce9871d50fb2ffff6b9160d5deca6384286cf57b0af45a1681163c2a",
         "the source-relative reducer and typed presentation seam port side-inverting AnimTask_WindUpLunge, gSlideMonToOriginalPos, target monbg/splitbgprio/12:8 alpha, three attacker-relative linear NEEDLE stingers, three simultaneous animation-2 invert hitsplats, ShakeMon2(target,3,0,7,1), attacker/target loop-audio families, source OAM transfer ordering, and clear/blendoff cleanup",
         "source extraction byte-pins legal set-260 OMASTAR front/back art; the narrow shared compositor reuses ONIX/field/healthbox chrome plus only the source-identical Twineedle NEEDLE, linear-stinger, invert-hitsplat, ShakeMon2, monbg/alpha, OAM-transfer, audio, and cleanup primitives. Twineedle's two-stinger timing and ShakeMon2(target,2,0,5,1) reducer do not cover Spike Cannon.",
-        "MOVE_TAKE_DOWN remains unsupported: it has a distinct 23+10+10 WindUpLunge plus palette blend, offset sprite, ShakeMonInPlace, and dual return slides. MOVE_BRICK_BREAK remains unsupported: it has a two-turn wall branch, two HorizontalLunges, 24+10+3 WindUpLunge, fist/shards, and background blend. Outside-Factory MOVE_SNATCH remains unsupported with its bare 10+10+6 WindUpLunge and TAKE_DOWN sound."
+        "MOVE_TAKE_DOWN remains unsupported: it has a distinct 23+10+10 WindUpLunge plus palette blend, offset sprite, ShakeMonInPlace, and dual return slides. MOVE_BRICK_BREAK is exact independently through both controller-selected bodies, two HorizontalLunges, 24+10+3 WindUpLunge, fist/wall/shards, background blend, and its own dense acceptance. Outside-Factory MOVE_SNATCH remains unsupported with its bare 10+10+6 WindUpLunge and TAKE_DOWN sound."
       ],
       "evidence": [
         "tools/battle-lab/mechanic-poison-fang-player-zubat-opponent-onix.json",
@@ -1062,7 +1076,7 @@
         "the narrow compositor reuses exact MINUN/SHUCKLE field art and source-extracted GreenLightWall tiles with the blue rotated OBJ palette plus SPARKLE_4; it ports one-display effect OAM and palette transfer, lower-OAM sparkle overlap order, opponent BG copy/OBJ visibility, side-specific move-menu/text timing, result text, field chrome, and teardown",
         "reflectPortable.ts invokes fresh local mGBA only through tools/run-mgba-probe.py and pins prior-software-to-hardware OAM/palette transfers, palette tags, blend registers, SE_M_REFLECT header/pan interval, raw-RGB digests, and shared framebuffer equality on every frame",
         "the earlier partial fixture labels were corrected from SHUPPET/126 HP and estimated corners to the scenario's actual species 354 MINUN, 167 HP, source geometry, and genders; the legacy filenames remain but their typed contents now describe the ROM party",
-        "exact CHARM MINUN/SHUCKLE control remains 93/93 body plus 4/4 clear frames in both orientations twice fresh; MOVE_BRICK_BREAK and MOVE_CRUSH_CLAW remain unsupported independent acceptance units because their audited move bodies do not instantiate this same wall/sparkle sequence"
+        "exact CHARM MINUN/SHUCKLE control remains 93/93 body plus 4/4 clear frames in both orientations twice fresh; MOVE_BRICK_BREAK is exact independently through its distinct normal and shattered-wall bodies, while MOVE_CRUSH_CLAW remains unsupported because it does not instantiate Reflect's wall/sparkle sequence"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-reflect-player-shuppet-opponent-shuckle.json",
@@ -2917,7 +2931,7 @@
         "MOVE_BRICK_BREAK",
         "MOVE_CRUSH_CLAW"
       ],
-      "goal": "MOVE_REFLECT is exact at 208/208 frames 39-246 player-back and 211/211 frames 39-249 opponent-front twice fresh through software, typed seam, hardware display, audio, raw RGB, and shared framebuffer. BRICK BREAK is evidence-only partial: its Reflect-selected shattered-wall branch is dense-probed at 192 frames twice per orientation, but BrickBreakNormal and live production behavior are unported. CRUSH CLAW remains unsupported because it loads but never instantiates the wall and has a distinct lunge/ShakeMon2/four claw-slash body."
+      "goal": "MOVE_REFLECT is exact at 208/208 frames 39-246 player-back and 211/211 frames 39-249 opponent-front twice fresh through software, typed seam, hardware display, audio, raw RGB, and shared framebuffer. BRICK BREAK is exact independently: both 151-frame normal and 192-frame shattered-wall bodies pass dense semantic and production-framebuffer proof twice per orientation. CRUSH CLAW remains unsupported because it loads but never instantiates the wall and has a distinct lunge/ShakeMon2/four claw-slash body."
     },
     {
       "id": "shake-target-in-pattern-scary-face",
