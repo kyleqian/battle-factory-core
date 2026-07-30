@@ -489,7 +489,7 @@ Per entry:
   (or a supervisor spot-checking while a worker compares) has the second
   run clobber the first's output mid-read, producing confusing artifact
   mismatches.
-- **Hits:** 1 (Slice-5 worker, 2026-07-29).
+- **Hits:** 2 (Slice-5 worker, 2026-07-29; routing Slice-2 worker, 2026-07-30).
 - **Cost each:** ~1-5 min.
 - **Workaround:** run compares serially within a step; treat
   `out/latest` as valid only immediately after its own run. A per-run
@@ -534,3 +534,19 @@ Per entry:
   but index 0 is HP; Attack is index 1. A worker chasing Intimidate's cut
   read the wrong column until raw RAM cross-checking exposed it.
 - **Hits:** 1 (2026-07-30, Gate-6 R12b worker; ~4 min lost).
+- **Cost each:** ~4 min.
+- **Workaround:** trust only raw stage-array dumps with explicit index
+  arithmetic; fixing the probe's label map is a two-line change next time
+  it is regenerated.
+
+## Ability-census exact-set pins are line-number-sensitive (2026-07-30)
+
+- **What:** the parity-census ratchet pins engine ability/item reference
+  sites as exact `file:line` sets; an unrelated edit in a pinned module
+  (K2's weather fix in `battleScriptHitChainOpcode.ts`) shifts later lines
+  and fails the census until the worker re-pins or preserves positions.
+- **Hits:** 1 (Gate-6 K1-K3 worker, 2026-07-30).
+- **Cost each:** ~2 min.
+- **Workaround:** keep edits above/below pinned sites position-neutral when
+  cheap; otherwise regenerate the census pin set in the same commit (the
+  documented line-drift recipe) rather than contorting the edit.
