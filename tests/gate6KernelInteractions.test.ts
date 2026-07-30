@@ -41,6 +41,10 @@ const B_WEATHER_SUN_TEMPORARY = 1 << 5;
 const ITEM_CHESTO_BERRY = 134;
 const ITEM_LUM_BERRY = 141;
 const ITEM_SITRUS_BERRY = 142;
+const ITEM_LIECHI_BERRY = 168;
+const ITEM_SALAC_BERRY = 170;
+const ITEM_PETAYA_BERRY = 171;
+const ITEM_WHITE_HERB = 180;
 const ITEM_LEFTOVERS = 200;
 const MOVE_SWORDS_DANCE = 14;
 const MOVE_FORESIGHT = 193;
@@ -509,6 +513,19 @@ function stepK5Accuracy(
   return result.state;
 }
 
+const K6_THRESHOLD_BERRIES = Object.freeze([
+  ["Liechi", ITEM_LIECHI_BERRY, 1, "attack"],
+  ["Salac", ITEM_SALAC_BERRY, 3, "speed"],
+  ["Petaya", ITEM_PETAYA_BERRY, 4, "special-attack"],
+] as const);
+
+const K6_THRESHOLD_BERRY_STAGE_CASES = K6_THRESHOLD_BERRIES.flatMap(
+  ([name, item, statId, statName]) =>
+    [0, 5, 6, 10, 11, 12].map(
+      (stage) => [name, item, statId, statName, stage] as const,
+    ),
+);
+
 describe("Gate-6 K1 weather × held-item end-turn ordering", () => {
   it("finishes sand chip before Leftovers heals, while the no-weather control performs only the heal", () => {
     const sand = runEndTurn(
@@ -896,5 +913,100 @@ describe("Gate-6 K5 volatile × stat-stage interactions", () => {
     expect(neutralEvasionSameBoundary.programCounter).toBe(
       labelPc("BattleScript_PrintMoveMissed"),
     );
+  });
+});
+
+describe("Gate-6 K6 held-item × stat-stage interactions", () => {
+  it.each(K6_THRESHOLD_BERRY_STAGE_CASES)(
+    "%s Berry (item %i), stat index %i/%s at stage %i: raises exactly once below +6 and remains held at the cap",
+    (_name, item, statId, statName, initialStage) => {
+      const beforeStages = [6, 6, 6, 6, 6, 6, 6, 6];
+      beforeStages[statId] = initialStage;
+      const state = runEndTurn(item, 40, 0, {
+        statStages: beforeStages,
+      });
+      const expectedStage = initialStage < 12 ? initialStage + 1 : 12;
+      const expectedStages = [...beforeStages];
+      expectedStages[statId] = expectedStage;
+
+      expect(state.rulesContext.battlers[0].statStages).toEqual(
+        expectedStages,
+      );
+      expect(state.rulesContext.battlers[0].item).toBe(
+        initialStage < 12 ? 0 : item,
+      );
+      expect(
+        state.events.filter((event) => event.kind === "stat-stage-change"),
+      ).toEqual(
+        initialStage < 12
+          ? [
+              expect.objectContaining({
+                battler: 0,
+                stat: statName,
+                from: initialStage,
+                to: initialStage + 1,
+              }),
+            ]
+          : [],
+      );
+    },
+  );
+
+  it.each([0, 1, 2, 3, 4, 5] as const)(
+    "White Herb resets an Attack stage of %i to neutral and consumes only once across both item passes",
+    (initialStage) => {
+      const state = runEndTurn(ITEM_WHITE_HERB, 100, 0, {
+        statStages: [6, initialStage, 6, 6, 6, 6, 6, 6],
+      });
+      expect(state.rulesContext.battlers[0]).toMatchObject({
+        item: 0,
+        statStages: [6, 6, 6, 6, 6, 6, 6, 6],
+      });
+      expect(
+        state.events.filter(
+          (event) =>
+            event.kind === "set-battler-item"
+            && event.battler === 0
+            && event.item === 0,
+        ),
+      ).toHaveLength(1);
+      expect(
+        state.events.filter(
+          (event) =>
+            event.kind === "message"
+            && event.messageId === "STRINGID_PKMNSITEMRESTOREDSTATUS",
+        ),
+      ).toHaveLength(1);
+    },
+  );
+
+  it("White Herb restores every simultaneously negative stage while preserving neutral and positive stages", () => {
+    const state = runEndTurn(ITEM_WHITE_HERB, 100, 0, {
+      statStages: [6, 0, 1, 2, 3, 4, 5, 12],
+    });
+    expect(state.rulesContext.battlers[0]).toMatchObject({
+      item: 0,
+      statStages: [6, 6, 6, 6, 6, 6, 6, 12],
+    });
+  });
+
+  it("the R9-adjacent above-neutral control has nothing to restore, so White Herb and confusion are both retained", () => {
+    const state = runEndTurn(ITEM_WHITE_HERB, 100, 0, {
+      statStages: [6, 8, 6, 6, 6, 6, 6, 6],
+      status2: STATUS2_CONFUSION_TURN_2,
+    });
+    expect(state.rulesContext.battlers[0]).toMatchObject({
+      item: ITEM_WHITE_HERB,
+      statStages: [6, 8, 6, 6, 6, 6, 6, 6],
+      status2: STATUS2_CONFUSION_TURN_2,
+    });
+    expect(
+      state.events.some(
+        (event) =>
+          event.kind === "set-battler-item"
+          && event.battler === 0
+          && event.item === 0,
+      ),
+    ).toBe(false);
   });
 });
