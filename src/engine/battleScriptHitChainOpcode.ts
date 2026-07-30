@@ -1148,10 +1148,10 @@ export const accuracycheckOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptR
   }
   hitMarker = (hitMarker & ~BATTLE_SCRIPT_HITMARKER_IGNORE_UNDERWATER) >>> 0;
 
-  // Rain-boosted Thunder is not representable: no weather state exists
-  // anywhere in this engine yet (consistent with damageCalc.ts's documented
-  // weather scope), so that disjunct is structurally always false.
-  const alwaysHits = moveRow.effect === "EFFECT_ALWAYS_HIT" || moveRow.effect === "EFFECT_VITAL_THROW";
+  // AccuracyCalcHelper's effective-rain Thunder bypass (battle_script_commands.c:1088-1094);
+  // the rules context now carries raw gBattleWeather, so this is no longer structurally false.
+  const effectiveWeather = weatherHasEffect(rulesContext);
+  const alwaysHits = (effectiveWeather && (rulesContext.weather & ((1 << 0) | (1 << 1) | (1 << 2))) !== 0 && moveRow.effect === "EFFECT_THUNDER") || moveRow.effect === "EFFECT_ALWAYS_HIT" || moveRow.effect === "EFFECT_VITAL_THROW";
   if (alwaysHits) {
     return advancePastAccuracyCheck(
       context,
@@ -1181,13 +1181,13 @@ export const accuracycheckOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptR
   const targetHoldEffectParam = targetHoldEffect ? holdEffectRow!.holdEffectParam : 0;
 
   const calc = calculateAccuracy({
-    moveAccuracy: moveRow.accuracy,
+    moveAccuracy: effectiveWeather && (rulesContext.weather & B_WEATHER_SUN) !== 0 && moveRow.effect === "EFFECT_THUNDER" ? 50 : moveRow.accuracy,
     attackerAccuracyStage: attackerBattler.statStages[6],
     targetEvasionStage: targetBattler.statStages[7],
     targetHasForesight: (targetBattler.status2 & BATTLE_SCRIPT_STATUS2_FORESIGHT) !== 0,
     attackerAbility: ABILITY_NAME_BY_ID[attackerBattler.ability] ?? null,
     targetAbility: ABILITY_NAME_BY_ID[targetBattler.ability] ?? null,
-    isSandstorm: false,
+    isSandstorm: effectiveWeather && (rulesContext.weather & ((1 << 3) | (1 << 4))) !== 0,
     moveType,
     targetHoldEffect,
     targetHoldEffectParam,
