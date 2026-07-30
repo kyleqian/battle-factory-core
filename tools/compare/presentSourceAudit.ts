@@ -6,6 +6,8 @@ const effects1 = read("reference/pokeemerald/src/battle_anim_effects_1.c");
 const effects3 = read("reference/pokeemerald/src/battle_anim_effects_3.c");
 const battle = read("reference/pokeemerald/src/battle_script_commands.c");
 const mons = read("reference/pokeemerald/src/data/battle_frontier/battle_frontier_mons.h");
+const tutorLearnsets = read("reference/pokeemerald/src/data/pokemon/tutor_learnsets.h");
+const speciesInfo = read("reference/pokeemerald/src/data/pokemon/species_info.h");
 const generatedMons = JSON.parse(read("src/data/gen/battle-frontier-mons.json")) as {
   entries: readonly { index: number; label: string; species: string; moves: readonly string[] }[];
 };
@@ -33,6 +35,15 @@ const delibirdStart = mons.indexOf("[FRONTIER_MON_DELIBIRD]");
 const delibirdEnd = mons.indexOf("[FRONTIER_MON_HOUNDOUR]", delibirdStart);
 if (delibirdStart < 0 || delibirdEnd < 0) throw new Error("missing Delibird set");
 const delibird = mons.slice(delibirdStart, delibirdEnd);
+const onixTutorStart = tutorLearnsets.indexOf("[SPECIES_ONIX]");
+const onixTutorEnd = tutorLearnsets.indexOf("[SPECIES_DROWZEE]", onixTutorStart);
+const onixInfoStart = speciesInfo.indexOf("[SPECIES_ONIX]");
+const onixInfoEnd = speciesInfo.indexOf("[SPECIES_DROWZEE]", onixInfoStart);
+if (onixTutorStart < 0 || onixTutorEnd < 0 || onixInfoStart < 0 || onixInfoEnd < 0) {
+  throw new Error("missing Onix source rows");
+}
+const onixTutor = tutorLearnsets.slice(onixTutorStart, onixTutorEnd);
+const onixInfo = speciesInfo.slice(onixInfoStart, onixInfoEnd);
 const level50Present = inventory.tiers.level50.moves.find((entry) => entry.move === "MOVE_PRESENT");
 const legalPresentCarriers = generatedMons.entries.filter((mon) =>
   mon.index >= 110 && mon.index <= 849 && mon.moves.includes("MOVE_PRESENT"),
@@ -70,8 +81,13 @@ if (required.some((entry) => !present.includes(entry))
   || !delibird.includes(".moves = {MOVE_PRESENT, MOVE_ICE_BALL, MOVE_AERIAL_ACE, MOVE_HAIL}")
   || !delibird.includes("BATTLE_FRONTIER_ITEM_NEVER_MELT_ICE")
   || !delibird.includes("F_EV_SPREAD_SP_ATTACK | F_EV_SPREAD_HP")
-  || !delibird.includes("NATURE_DOCILE")) {
+  || !delibird.includes("NATURE_DOCILE")
+  // The opponent-heal staging uses a species-legal tutor move, deliberately
+  // not a fabricated second Factory Onix set. Sturdy is needed because the
+  // set-156 default Rock Head suppresses the legal recoil chip.
+  || !onixTutor.includes("TUTOR(MOVE_DOUBLE_EDGE)")
+  || !onixInfo.includes(".abilities = {ABILITY_ROCK_HEAD, ABILITY_STURDY}")) {
   throw new Error("MOVE_PRESENT source contract changed");
 }
 
-console.log("generated Level-50 inventory and source prove set 118 DELIBIRD is the sole/lowest Factory Present carrier: Present bag -> 5 EXPLOSION damage or 9 GREEN_SPARKLE + target HealingEffect2; healing requires a non-full target and a ROM RNG roll >= 204");
+console.log("generated Level-50 inventory and source prove set 118 DELIBIRD is the sole/lowest Factory Present carrier: Present bag -> 5 EXPLOSION damage or 9 GREEN_SPARKLE + target HealingEffect2; healing requires a non-full target and a ROM RNG roll >= 204; opponent-heal staging uses only tutor-legal Onix Double-Edge with Sturdy, not a claimed Factory set");

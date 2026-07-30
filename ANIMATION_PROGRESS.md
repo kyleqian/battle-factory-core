@@ -11,19 +11,21 @@ selects five target-relative `EXPLOSION`s; zero selects nine
 `Random() & 0xff` roll reaches healing only at `>= 204`, and full-target
 heals skip attack animation entirely.
 
-**Evidence / remainder:** the player Delibird scenario now uses the complete
-source set-118 loadout `{Present, Ice Ball, Aerial Ace, Hail}` and selects its
-real Aerial Ace to chip Onix before Present. A fresh damage probe records the
-actual absolute first-active through first-inactive source window
-**1012–1212 (201 frames)**, bag ×1 / explosion ×5. It records
-pointer/tasks/sprites/OAM/matrices/palettes/tags/registers/audio/raw RGB, but
-the output is deliberately uncommitted: no dense receipt or hash is claimed.
-The reverse scenario's opponent Delibird keeps duplicated Present slots only
-under mechanicLab's documented AI-constraint exception, so it is not a
-complete set-118 loadout. Healing and opponent-orientation routes remain
-unproved. The exact remainder is fixed legal damage-then-heal controller
-routes in both orientations, twice-fresh dense receipts, and an independent
-reducer/compositor. No typed seam or runtime code changed.
+**Evidence / remainder:** all four legal Scene-ON source windows reproduce
+twice fresh with committed probe/RGB receipts: player damage **1012–1212
+(201)** `a2cc09d1` / `0507c412`, player healing **1946–2197 (252)**
+`bbb023fe` / `b2fe7f30`, opponent damage **78–278 (201)** `9d752ec6` /
+`8e9f36a7`, opponent healing **1404–1655 (252)** `9a76aeeb` /
+`2e5b78ad`. Every receipt pins complete active→first-inactive windows,
+bag, five explosion or nine green-particle/four HealingEffect2-star
+lifecycles, pointers, tasks, sprites, software/hardware OAM and matrices,
+palettes/tags/registers/audio and concatenated raw RGB. Player Delibird
+retains exact set-118 moves; its healing route uses real Aerial Ace then Hail
+to shape the ROM action stream. Opponent Delibird's duplicated Present slots
+are only the documented AI constraint; player Onix's prior Bind then
+tutor-legal Double-Edge with Sturdy supplies genuine recoil chip (not claimed
+as a Factory loadout). MOVE_PRESENT remains unsupported pending its own
+source-relative reducer, typed seam and compositor; no runtime code changed.
 
 ## MOVE_SECRET_POWER promoted exact; slam-hit-slide-shake complete (2026-07-30)
 

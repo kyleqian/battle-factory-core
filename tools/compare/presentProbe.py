@@ -20,6 +20,7 @@ END_NAME = "Move_BATON_PASS"
 BAG = "gPresentSpriteTemplate"
 PARTICLE = "gPresentHealParticleSpriteTemplate"
 EXPLOSION = "gExplosionSpriteTemplate"
+HEALING_STAR = "gHealingBlueStarSpriteTemplate"
 CALLBACKS = (
     "AnimPresent", "AnimItemSteal_Step1", "AnimItemSteal_Step2",
     "AnimPresentHealParticle", "AnimTask_IsHealingMove",
@@ -266,9 +267,11 @@ def main() -> None:
 
     lifecycles = {
         BAG: starts_for(BAG), PARTICLE: starts_for(PARTICLE),
-        EXPLOSION: starts_for(EXPLOSION),
+        EXPLOSION: starts_for(EXPLOSION), HEALING_STAR: starts_for(HEALING_STAR),
     }
-    if lifecycles[BAG] != 1 or lifecycles[PARTICLE] not in (0, 9) or lifecycles[EXPLOSION] not in (0, 5):
+    if (lifecycles[BAG] != 1 or lifecycles[PARTICLE] not in (0, 9)
+            or lifecycles[EXPLOSION] not in (0, 5)
+            or lifecycles[HEALING_STAR] not in (0, 4)):
         raise RuntimeError(f"{MOVE_NAME} lifecycle changed: {lifecycles}")
     if source[-1]["gAnimScriptActive"] or source[-1]["visualTaskCount"]:
         raise RuntimeError(f"{MOVE_NAME} first cleanup retained animation")
