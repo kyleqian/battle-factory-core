@@ -66,12 +66,12 @@ the state transition.
 | Axis pair | Distinct source mechanism(s) | Existing Tier-1 coverage | Gap / first proof |
 | --- | --- | --- | --- |
 | weather x status | Sun prevents a new freeze; weather itself is not a major-status cure. `seteffect` checks sun before Ice type/Magma Armor (`battle_script_commands.c:2380-2393`). | `tests/battleScriptHitChainOpcode.test.ts` (freeze applies without weather and is blocked by active sun) | R1 receipts the RNG-gated Ice Beam pair on two freeze-producing seeds. |
-| weather x volatile | Sand/hail chip skips underground and underwater; weather also changes Thunder's accuracy while semi-invulnerability is checked first (`battle_script_commands.c:1062-1094`, `7602-7635`). | `tests/battleScriptDamagingWeatherOpcode.test.ts` (underground weather chip) | R2 oracle: Dig on sand/hail turn, then surface. |
+| weather x volatile | Sand/hail chip skips underground and underwater; weather also changes Thunder's accuracy while semi-invulnerability is checked first (`battle_script_commands.c:1062-1094`, `7602-7640`). | `tests/battleScriptDamagingWeatherOpcode.test.ts` (underground weather chip); `tests/gate6WeatherVolatileInteractions.test.ts` (R2 full weather pass, damage/message order) | R2 complete: Dig under Hail, then surface, paired with a grounded two-turn control. |
 | weather x held-item | The only shared scheduling boundary is end-turn: abilities, normal items, then Leech Seed/poison are sequenced by `DoBattlerEndTurnEffects` (`battle_util.c:1494-1533`); weather damage is a separate script loop (`battle_scripts_1.s:3200-3222`). No weather-specific held-item branch exists. | NONE | K1: ordering property (weather chip vs Leftovers/Sitrus) in the end-turn orchestrator; oracle only if event order differs. |
 | weather x ability | Cloud Nine/Air Lock suppress **all** `WEATHER_HAS_EFFECT`; Forecast changes Castform's type in rain/sun/hail; Rain Dish, Swift Swim and Chlorophyll read active weather; Sand Veil changes accuracy (`battle_util.h:47-48`; `battle_util.c:2396-2427,2601-2648`; `battle_script_commands.c:1152-1155`). Air Lock is UNREACHABLE; Cloud Nine/Forecast and the speed/end-turn abilities are legal. | `tests/battleScriptDamagingWeatherOpcode.test.ts` (Cloud Nine, Sand Veil); `tests/battleScriptSwitchinOpcode.test.ts` (weather entry scheduling) | R3, R4: Cloud Nine removal restores weather, then Forecast/type and speed timing. |
 | weather x stat-stage | Accuracy calculation applies accuracy/evasion stages before sun-Thunder and Sand Veil modifiers (`battle_script_commands.c:1128-1155`). | NONE | K2: parameterized accuracy stage x sun/rain/sand property. |
 | weather x switching/entry | Entry weather abilities set permanent weather exactly on switch-in; subsequent same-weather entries are a no-op (`battle_util.c:2485-2558`). Drizzle/Sand Stream/Drought are **UNREACHABLE (3)** at L50; Cloud Nine is a legal entry suppression case. | `tests/battleScriptSwitchinOpcode.test.ts` (Drizzle/Sand Stream/Drought unit mechanics) | R3 oracle uses legal Golduck Cloud Nine against manually created Rain Dance, not unreachable setter staging. |
-| weather x immunity/absorb | Type immunity (Rock/Ground/Steel vs sand, Ice vs hail), Sand Veil, and underground/underwater suppress weather chip (`battle_script_commands.c:7606-7635`); Cloud Nine globally suppresses the predicate (`battle_util.h:47-48`). | `tests/battleScriptDamagingWeatherOpcode.test.ts` | Covered single-axis; R2/R3 make the pairwise boundary explicit. |
+| weather x immunity/absorb | Type immunity (Rock/Ground/Steel vs sand, Ice vs hail), Sand Veil, and underground/underwater suppress weather chip (`battle_script_commands.c:7606-7640`); Cloud Nine globally suppresses the predicate (`battle_util.h:47-48`). | `tests/battleScriptDamagingWeatherOpcode.test.ts`; `tests/gate6WeatherVolatileInteractions.test.ts` (R2) | R2/R3 make the pairwise boundaries explicit. |
 | status x volatile | Sleep clears Nightmare when cured; confusion, paralysis, and infatuation are independent ordered attack-canceler gates (`battle_util.c:2040-2054,2156-2218`). | NONE | K3: sleep+Nightmare then Chesto/Lum, and paralysis+confusion RNG ledger property. |
 | status x held-item | Chesto clears sleep and Nightmare; condition berries cure their matching major status; Lum clears any major status plus confusion (`battle_util.c:3499-3591`). | `tests/battleScriptMoveEndOpcode.test.ts` (Cheri/Lum move-end activation); `tests/gate6EntryItemInteractions.test.ts` (R5 Chesto sleep+Nightmare and Lum confusion specificity) | R5 receipts exact Chesto/Lum controller timing. |
 | status x ability | Natural Cure clears major status on switch-out; Guts/Marvel Scale read status for stats; immunities reject sleep/poison/burn/freeze/paralysis and Own Tempo rejects confusion (`battle_script_commands.c:9590-9604,2360-2435,2531-2545`; `battle_util.c:2873-2945`). | `tests/battleScriptMoveEndOpcode.test.ts` (ability status cures/Own Tempo) | R6: poisoned Natural Cure switch; R7: burn Guts damage/stat. |
@@ -103,7 +103,7 @@ are legal inert duplicates with `[Tackle,Tackle,Tackle,Tackle]`.
 | ID | Parties and controller route | Assertion |
 | --- | --- | --- |
 | R1 | `gate6-r1-sun-off.json`: faster player Vileplume uses Sunny Day, then constrained Articuno uses Ice Beam. `gate6-r1-control-off.json`: the identical parties/turn use Growth, a legal non-weather move with the same zero-RNG setup shape. | On seeds selected because the control's Ice Beam secondary roll freezes, both scenarios consume the same move RNG states; only active sun prevents status `0x20`. |
-| R2 | A: Dugtrio, Dig; B: Tyranitar, Sandstorm x4 (or Hail user/Hail x4). | Active underground ignores chip; surfacing re-enables it. |
+| R2 | `gate6-r2-hail-off.json`: A: Dugtrio, Dig x4; B: Articuno, Hail x4. `gate6-r2-hail-control-off.json` replaces Dig with Growl x4. Hail is required here: Dugtrio's Ground type independently makes the suggested Sandstorm pairing permanently immune. | Active underground ignores chip; surfacing re-enables exact `floor(maxHP/16)` chip; the grounded control takes it every end turn. |
 | R3 | A: Golduck abilitySlot=1 (Cloud Nine), Rain Dance; B: neutral Tackle x4. Switch Golduck out after rain is live. | Weather flag remains but chip/accuracy resumes only after Cloud Nine leaves. |
 | R4 | A: Castform Forecast, Weather Ball; B: Rain Dance x4. | Entry/form/update gives Water type and Weather Ball changes; this is the Forecast boundary. |
 | R5 | `gate6-r5-off.json`: Chesto Snorlax uses Rest twice versus Tackle x4 (the first full-HP failure stages real damage; the second Rest succeeds). `gate6-r5-lum-off.json`: Lum Machamp versus Duskull Confuse Ray x4. | Chesto clears Rest sleep/Nightmare and is consumed only after its wake message; Lum clears the RNG-duration confusion and is consumed after its distinct cure message. |
@@ -126,6 +126,40 @@ or ROM-only randomness at those boundaries; promote only a mismatch to a
 mechanicLab trace.
 
 ## Completed receipt notes
+
+### R2 — Dig's underground weather window, surfacing, and grounded control
+
+The card uses Hail rather than Sandstorm because Dugtrio's Ground typing is
+itself permanently sand-immune; a Dugtrio × Tyranitar fixture could not
+distinguish the volatile gate.  Both checked-in fixtures use complete legal
+parties.  Articuno's four Hail slots constrain the Factory AI; the control
+changes only Dugtrio's four Dig slots to Growl.
+
+Fresh Battle Scene OFF probes on seeds `1` and `324508639` agree exactly on
+the relevant state frames.  In `gate6-r2-hail-off.json`, Dig registers
+`STATUS3_UNDERGROUND` at frame 177, Hail becomes active at frame 213, and
+the first end-turn weather pass decrements its timer `5→4` at frame 352
+without changing Dugtrio's `142/142` HP.  Dig clears the underground bit on
+surfacing at frame 478.  The next weather pass decrements the timer `4→3`
+at frame 811 and applies `floor(142/16) = 8` damage at frame 1043,
+`142→134`.  Both frame-1043 receipts have raw-RGB SHA-256
+`b313741f71d4f4cb40918136519441dfb99816ad185c7e20b60b5f5211a49c9c`.
+
+In `gate6-r2-hail-control-off.json`, the always-grounded Growl control takes
+the same eight HP at each end turn: `142→134` at frame 679 and `134→126`
+at frame 1508 on both seeds.  The frame-1508 hash is
+`513a143cb3905b19900ed3030046ce0c93558717e0969c788beecc7b8cc58bf7`.
+The paired Tier-1 test pins the full field pass: `HAILCONTINUES` precedes
+`PKMNPELTEDBYHAIL`, health-bar update, and HP mutation; while underground,
+the damage message and HP events are absent.
+
+The exact immunity gate is not in `battle_util.c`: its field scheduler
+selects `BattleScript_DamagingWeatherContinues` at
+`battle_util.c:1412-1429`, while `Cmd_weatherdamage` performs the Hail
+underground/underwater checks and `maxHP / 16` calculation at
+`battle_script_commands.c:7627-7640`.  The script establishes continues
+message → per-battler damage message → health update order at
+`battle_scripts_1.s:3200-3224`.
 
 ### R13 — Keen Eye specificity plus unrelated-stat control
 
