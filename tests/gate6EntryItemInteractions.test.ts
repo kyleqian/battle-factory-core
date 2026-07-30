@@ -152,7 +152,7 @@ function switchContext(currentMove: number): BattleScriptRulesContextInput {
   };
 }
 
-const ports: BattleScriptStatusRulesExternalPorts = Object.freeze({
+const ports = Object.freeze({
   isControllerIdle: () => true,
   prepareMessage: (_context, operand) =>
     operand.expression.startsWith("STRINGID_")
@@ -164,12 +164,12 @@ const ports: BattleScriptStatusRulesExternalPorts = Object.freeze({
       : null,
   prepareSelectionMessage: () => null,
   prepareSelectionMessageFromTable: () => null,
-  resolveAttackerBattler: () => 0,
+  resolveAttackerBattler: () => 0 as const,
   resolveBattlerAtPosition: () => null,
   resolveHalfwordOperand: (_context, operand) =>
     operand.expression === "B_WAIT_TIME_LONG" ? 64 : null,
   resolveByteOperand: () => null,
-});
+} satisfies BattleScriptStatusRulesExternalPorts);
 
 function runSwitchDataUpdate(currentMove: number) {
   const execution = createBattleScriptStatusRulesExecution(
