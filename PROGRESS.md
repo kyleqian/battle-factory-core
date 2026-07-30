@@ -51,9 +51,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   1 kernel bug found and fixed same-session**. (3) Verified intro
   slices 1-2 (entry 730): 373/373 probe-exact pre-send-out, all 26
   regression rows exact.
-- **Next:** main = intro slice 3 (opponent release); side = Gate-6 R13
-  remainder + R14 (R5/R1 stretch). Then slice 4 as evidence checkpoint
-  if time; wind-down before 05:32 with the animation-fold re-check.
+- **Did (cont., ~02:05):** intro slice 3 landed as an honest **93/94**
+  opponent-release checkpoint (`42c559dd`) — sole residual B+444, 10px,
+  summary-bar sprite-slot reuse during the particle burst (#18's
+  persistent-`sSpriteOrder` family; next session decides
+  fix-vs-attribute). Merged Gate-6 R13/R14-boundary/R5/R1 (`a2442f73`):
+  Keen Eye specificity, K7 absorb-item boundary, Chesto/Lum timing, and
+  sun-blocks-freeze with an exact RNG draw-ledger probe — **the dossier's
+  entire top-10 shortlist is now addressed**, no divergences.
+- **Next:** round 8 (final): main = intro slice 4 (player release →
+  command handoff, probe-evidence only — trace stays blocked on the
+  harness pre-reset-capture decision); side = Gate-6 R2 + R10 (R7/R8
+  stretch). Then wind-down before 05:32 with the animation-fold
+  re-check.
 - **Notes:** intro slice 4's committed-trace acceptance and the
   commentary checkpoint both remain blocked on the harness-side Battle
   Lab pre-reset-capture decision (entries 690/724) — user-level item for
