@@ -8,6 +8,7 @@ import {
   type BattleScriptRulesContextInput,
   type BattleScriptStatusRulesExternalPorts,
 } from "../src/engine/battleScriptRulesContext.ts";
+import { advanceBattleScriptAttackCancelerUnableToUseMove } from "../src/engine/battleScriptAttackCanceler.ts";
 import { runBattleEndTurnOrchestration } from "../src/engine/battleEndTurnOrchestration.ts";
 import type { BattleScriptSemanticEvent } from "../src/engine/battleScriptEvents.ts";
 import { stepBattleScriptMachine } from "../src/engine/battleScriptMachine.ts";
@@ -15,16 +16,27 @@ import {
   loadBattleScriptProgram,
   resolveBattleScriptLabel,
 } from "../src/engine/battleScriptProgram.ts";
+import {
+  BATTLE_SCRIPT_STATUS1_PARALYSIS,
+  BATTLE_SCRIPT_STATUS2_MASKS,
+} from "../src/engine/battleScriptSourceConstants.ts";
 
 const program = loadBattleScriptProgram();
 const BATTLE_TYPE_FACTORY = 1 << 19;
 const B_WEATHER_RAIN_TEMPORARY = 1 << 0;
 const B_WEATHER_SANDSTORM_TEMPORARY = 1 << 3;
 const B_WEATHER_SUN_TEMPORARY = 1 << 5;
+const ITEM_CHESTO_BERRY = 134;
+const ITEM_LUM_BERRY = 141;
 const ITEM_SITRUS_BERRY = 142;
 const ITEM_LEFTOVERS = 200;
 const MOVE_THUNDER = 87;
 const ABILITY_SAND_VEIL = 8;
+const STATUS1_SLEEP_TURN_3 = 3;
+const STATUS2_CONFUSION_TURN_2 = 2;
+const STATUS2_NIGHTMARE = 1 << 27;
+const STATUS2_INFATUATED_BY_BATTLER_1 = 1 << 17;
+const ATTACK_CANCELER_PC = 0x0800_1234;
 
 function battler(
   changes: Partial<BattleScriptRulesBattler> & { maxHP?: number } = {},
@@ -78,6 +90,7 @@ function endTurnContext(
   item: number,
   hp: number,
   weather: number,
+  activeChanges: Partial<BattleScriptRulesBattler> = {},
 ): ReturnType<typeof createBattleScriptRulesContext> {
   return createBattleScriptRulesContext({
     battlers: [
@@ -87,6 +100,7 @@ function endTurnContext(
         maxHP: 160,
         item,
         types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+        ...activeChanges,
       }),
       battler({
         side: 1,
@@ -146,8 +160,13 @@ const ports = Object.freeze({
   resolveByteOperand: () => null,
 } satisfies BattleScriptStatusRulesExternalPorts);
 
-function runEndTurn(item: number, hp: number, weather: number) {
-  const rulesContext = endTurnContext(item, hp, weather);
+function runEndTurn(
+  item: number,
+  hp: number,
+  weather: number,
+  activeChanges: Partial<BattleScriptRulesBattler> = {},
+) {
+  const rulesContext = endTurnContext(item, hp, weather, activeChanges);
   const initial = createBattleScriptStatusRulesExecution(
     program,
     "BattleScript_HandleFaintedMon",
@@ -263,6 +282,50 @@ function stepAccuracy(
   return result.state;
 }
 
+function cancelerContext(
+  status1: number,
+  status2: number,
+): ReturnType<typeof createBattleScriptRulesContext> {
+  return createBattleScriptRulesContext({
+    battlers: [
+      battler({ side: 0, status1, status2 }),
+      battler({ side: 1 }),
+      battler({ side: 0 }),
+      battler({ side: 1 }),
+    ],
+    selectorRoles: { attacker: 0, target: 1, effectBattler: 1, fainted: null },
+    scriptingBattler: 0,
+    atkCancelerTracker: 0,
+    battleOutcome: 0,
+    currentMove: 33,
+    currentMovePosition: 0,
+    moveResultFlags: 0,
+    dmgMultiplier: 1,
+    critMultiplier: 1,
+    moveEffectByte: 0,
+    missType: 0,
+    hitMarker: 0,
+    multiHitCounter: 0,
+  });
+}
+
+function runCanceler(status1: number, status2: number, rngValue: number) {
+  return advanceBattleScriptAttackCancelerUnableToUseMove(
+    Object.freeze({
+      rulesContext: cancelerContext(status1, status2),
+      rngValue,
+      rngCallsConsumed: 0,
+    }),
+    ATTACK_CANCELER_PC,
+  );
+}
+
+function cancelerPhaseNames(
+  result: ReturnType<typeof advanceBattleScriptAttackCancelerUnableToUseMove>,
+) {
+  return result.receipt.phases.map((phase) => phase.receipt.sourcePhase);
+}
+
 describe("Gate-6 K1 weather × held-item end-turn ordering", () => {
   it("finishes sand chip before Leftovers heals, while the no-weather control performs only the heal", () => {
     const sand = runEndTurn(
@@ -354,4 +417,126 @@ describe("Gate-6 K2 weather × accuracy-stage arithmetic", () => {
       expect(state.rng.calls).toBe(0);
     },
   );
+});
+
+describe("Gate-6 K3 status × volatile ordering", () => {
+  it.each([
+    ["Chesto", ITEM_CHESTO_BERRY],
+    ["Lum", ITEM_LUM_BERRY],
+  ] as const)(
+    "%s's complete end-turn item script cures sleep and its coupled Nightmare bit without clearing independent infatuation",
+    (_name, item) => {
+      const state = runEndTurn(item, 100, 0, {
+        status1: STATUS1_SLEEP_TURN_3,
+        status2: STATUS2_NIGHTMARE | STATUS2_INFATUATED_BY_BATTLER_1,
+      });
+      expect(state.rulesContext.battlers[0]).toMatchObject({
+        item: 0,
+        status1: 0,
+        status2: STATUS2_INFATUATED_BY_BATTLER_1,
+      });
+      expect(state.rulesContext.party.player[0]?.status1).toBe(0);
+      expect(state.events).toContainEqual(
+        expect.objectContaining({
+          kind: "set-battler-item",
+          battler: 0,
+          item: 0,
+        }),
+      );
+    },
+  );
+
+  it("orders confusion before paralysis before infatuation and threads only the draws reached after each resumable gate", () => {
+    const first = runCanceler(
+      BATTLE_SCRIPT_STATUS1_PARALYSIS,
+      STATUS2_CONFUSION_TURN_2 | STATUS2_INFATUATED_BY_BATTLER_1,
+      3,
+    );
+    expect(cancelerPhaseNames(first).at(-1)).toBe("CANCELER_CONFUSED");
+    expect(cancelerPhaseNames(first)).not.toContain("CANCELER_PARALYZED");
+    expect(cancelerPhaseNames(first)).not.toContain("CANCELER_IN_LOVE");
+    expect(first).toMatchObject({
+      effect: 1,
+      rngValue: 3310570426,
+      rngCallsConsumed: 1,
+      rulesContext: { atkCancelerTracker: 10 },
+      receipt: {
+        rng: {
+          before: 3,
+          after: 3310570426,
+          callsConsumed: 1,
+        },
+      },
+    });
+    expect(
+      first.rulesContext.battlers[0].status1
+      & BATTLE_SCRIPT_STATUS1_PARALYSIS,
+    ).not.toBe(0);
+    expect(
+      first.rulesContext.battlers[0].status2
+      & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION,
+    ).not.toBe(0);
+
+    const resumed = advanceBattleScriptAttackCancelerUnableToUseMove(
+      first,
+      ATTACK_CANCELER_PC,
+    );
+    expect(cancelerPhaseNames(resumed)).toEqual([
+      "CANCELER_PARALYZED",
+      "CANCELER_IN_LOVE",
+    ]);
+    expect(resumed).toMatchObject({
+      effect: 1,
+      rngValue: 3555356340,
+      rngCallsConsumed: 3,
+      rulesContext: { atkCancelerTracker: 12 },
+      receipt: {
+        rng: {
+          before: 3310570426,
+          after: 3555356340,
+          callsBefore: 1,
+          callsAfter: 3,
+          callsConsumed: 2,
+        },
+      },
+    });
+    expect(resumed.receipt.phases[0]?.receipt).toMatchObject({
+      sourcePhase: "CANCELER_PARALYZED",
+      rng: {
+        before: 3310570426,
+        after: 828787365,
+        modulo: 2,
+      },
+      effect: 0,
+    });
+    expect(resumed.receipt.phases[1]?.receipt).toMatchObject({
+      sourcePhase: "CANCELER_IN_LOVE",
+      rng: {
+        before: 828787365,
+        after: 3555356340,
+        lowBit: 0,
+      },
+      effect: 1,
+    });
+  });
+
+  it("a paralysis early-out consumes its one draw and skips infatuation's draw without clearing that volatile", () => {
+    const result = runCanceler(
+      BATTLE_SCRIPT_STATUS1_PARALYSIS,
+      STATUS2_INFATUATED_BY_BATTLER_1,
+      rngValueBeforeU16(0),
+    );
+    expect(cancelerPhaseNames(result).at(-1)).toBe("CANCELER_PARALYZED");
+    expect(cancelerPhaseNames(result)).not.toContain("CANCELER_IN_LOVE");
+    expect(result).toMatchObject({
+      effect: 1,
+      rngCallsConsumed: 1,
+      rulesContext: { atkCancelerTracker: 11 },
+      receipt: { rng: { callsConsumed: 1 } },
+    });
+    expect(
+      result.rulesContext.battlers[0].status2
+      & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION,
+    ).not.toBe(0);
+  });
 });
