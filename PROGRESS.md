@@ -13,19 +13,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
-## 746 — [BOUNDED MAIN WORKER 2026-07-30 ~15:10] Slice 5 implementation green; acceptance in progress
+## 746 — [BOUNDED MAIN WORKER 2026-07-30 ~15:15] Slice 5 complete: generated Battles 2-7 reusable re-entry
 
-- **State:** generated swap accept/decline and reusable later-battle re-entry
-  are implemented; focused route tests and production build green.
+- **State:** landed in `5c19ef95`; named acceptance **8 files / 107 tests**,
+  full gate green at **550 files / 5571 tests + 1 deliberate animation-lane
+  skip**, production build clean.
 - **Did:** live swap decisions now mutate the persistent orchestrator, complete
   `swapResolved`, generate the next non-repeating opponent, retain the accepted
   rental, and route the current trainer through the shared room/intro owner.
   Accelerated fixtures prove the identical handoff at battle indexes 1 and 5,
   full healing, retained history, and one monotonic facility-call ledger.
-- **Next:** run the complete Slice-5 named compare/test matrix and full gate,
-  then record exact totals here.
-- **Notes:** swap exit/NO-return remain **43/43 + 69/69** exact. No new
-  battle/turn/tick dispatch, barrier, trace/capture, issue, or Scene-ON change.
+- **Next:** supervisor may proceed to design Slice 6 (generated loss and
+  seventh-win endings).
+- **Notes:** swap exit/NO-return **43/43 + 69/69**, generated command entry /
+  intro / command **7/7 + 715/715 + 128/128**; all **25/25** immutable rows
+  exact. No new battle/turn/tick dispatch, barrier, trace/capture, issue, or
+  Scene-ON change.
 
 ---
 ## 745 — [BOUNDED MAIN WORKER 2026-07-30 ~15:00] Slice 4 complete: live postwin → orchestrator swapOffer
