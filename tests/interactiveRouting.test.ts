@@ -15,6 +15,10 @@ import {
 import { generateFactoryOpponent } from "../src/engine/factoryOpponentGeneration.ts";
 import { selectedRentalParty } from "../src/engine/factoryDraftScreen.ts";
 import {
+  factoryBattleStartIntroPhase,
+} from "../src/engine/factoryBattleStartIntro.ts";
+import { factoryBattleStartField } from "../src/engine/factoryBattleStartPresentation.ts";
+import {
   factoryBattleStartPresentationForState,
 } from "../src/engine/factoryRoundBattleOrchestrator.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
@@ -104,6 +108,11 @@ describe("interactive battle routing", () => {
     expect(after.battleSetup).toBeNull();
     expect(after.factoryRoundBattleOrchestrator).not.toBeNull();
     const orchestrator = after.factoryRoundBattleOrchestrator!;
+    expect(factoryBattleStartIntroPhase(orchestrator.battleStartIntro!))
+      .toBe("handoff");
+    expect(orchestrator.round.presentation?.command.type).toBe("battleStart");
+    expect(orchestrator.battle).toBeNull();
+    expect(orchestrator.battleCommandPresentation).toBeNull();
     expect(orchestrator.round.rules.playerRentalRecords).toEqual([
       before.draftScreen.rentals[4]!.source,
       before.draftScreen.rentals[0]!.source,
@@ -180,6 +189,45 @@ describe("interactive battle routing", () => {
       ["opponent-construction", 3_372_555_893, 3_475_319_573, 32],
       ["opponent-construction", 1_792_028_978, 3_971_701_576, 190],
     ]);
+  });
+
+  it("keeps battleStart pending until intro readiness, then settles the same field", () => {
+    let state = tick(
+      atBattleHandoff(
+        { appRoute: "generated-orchestrator" },
+        selectedIdsForSlots(4, 0, 2),
+      ),
+      new Set(),
+    );
+    const frozen = state.factoryRoundBattleOrchestrator!.battleStartIntro!.command;
+    while (
+      factoryBattleStartIntroPhase(
+        state.factoryRoundBattleOrchestrator!.battleStartIntro!,
+      ) !== "awaiting-acknowledgement"
+    ) {
+      state = tick(state, new Set());
+    }
+    expect(state.factoryRoundBattleOrchestrator!.round.presentation?.command.type)
+      .toBe("battleStart");
+    expect(state.factoryRoundBattleOrchestrator!.battle).toBeNull();
+
+    state = tick(state, new Set(["A"]));
+    expect(state.factoryRoundBattleOrchestrator!.round.presentation?.command.type)
+      .toBe("battleStart");
+    while (state.factoryRoundBattleOrchestrator!.battleStartIntro !== null) {
+      state = tick(state, new Set());
+    }
+
+    const orchestrator = state.factoryRoundBattleOrchestrator!;
+    expect(orchestrator.round.presentation).toBeNull();
+    expect(orchestrator.battle).not.toBeNull();
+    expect(orchestrator.battleCommandPresentation!.lifecycle).toEqual({
+      phase: "action-menu",
+      phaseElapsed: 2,
+    });
+    expect(orchestrator.battleCommandPresentation!.field).toEqual(
+      factoryBattleStartField(frozen),
+    );
   });
 
   it("captures the three live construction epochs before spending their draws", () => {

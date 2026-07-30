@@ -120,6 +120,7 @@ import {
   renderBattleResolutionForcedPartySelect,
   renderBattleResolutionSceneOffView,
   renderGeneratedBattleCommandPresentation,
+  renderGeneratedBattleStartPreSendOut,
   renderSceneOnMovePresentation,
   renderSceneOffTurnView,
   sendOutHandoffTick,
@@ -257,8 +258,10 @@ import {
   renderBattlePartySelect,
 } from "./battlePartySelect.ts";
 import {
+  advanceFactoryRoundBattleStartIntro,
   advanceFactoryRoundBattleCommand,
   advanceFactoryRoundBattleResolution,
+  beginFactoryRoundBattleStartIntro,
   type FactoryRoundBattleOrchestratorState,
 } from "./factoryRoundBattleOrchestrator.ts";
 import {
@@ -428,6 +431,26 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       rngMode: "frontierBattle",
       rngValue:
         factoryRoundBattleOrchestrator.battle?.rng.value ?? state.rngValue,
+    };
+  }
+
+  if (state.factoryRoundBattleOrchestrator?.battleStartIntro) {
+    const factoryRoundBattleOrchestrator = advanceFactoryRoundBattleStartIntro(
+      state.factoryRoundBattleOrchestrator,
+      newKeys,
+    );
+    const intro = factoryRoundBattleOrchestrator.battleStartIntro;
+    return {
+      ...state,
+      frame: state.frame + 1,
+      keyRepeat,
+      factoryRoundBattleOrchestrator,
+      rngMode:
+        intro !== null && intro.elapsed < BATTLE_IN_BATTLE_FIRST_ELAPSED
+          ? rngMode
+          : "frontierBattle",
+      rngValue:
+        factoryRoundBattleOrchestrator.battle?.rng.value ?? rngValue,
     };
   }
 
@@ -1412,16 +1435,18 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
             battleRoom,
             battleScene: null,
             battleSetup: null,
-            factoryRoundBattleOrchestrator: createFactoryAnchorSession({
-              playerRentalRecords,
-              savedRentalRecords,
-              roomTrainer,
-              constructionRngValues:
-                battle1OpponentConstructionRngValues as unknown as readonly [
-                  number, number, number,
-                ],
-              freshBattleRngValue: rngValue,
-            }),
+            factoryRoundBattleOrchestrator: beginFactoryRoundBattleStartIntro(
+              createFactoryAnchorSession({
+                playerRentalRecords,
+                savedRentalRecords,
+                roomTrainer,
+                constructionRngValues:
+                  battle1OpponentConstructionRngValues as unknown as readonly [
+                    number, number, number,
+                  ],
+                freshBattleRngValue: rngValue,
+              }),
+            ),
             battle1OpponentConstructionRngValues,
             rngMode,
             rngValue,
@@ -2078,6 +2103,14 @@ function renderPostwinState(state: EngineState): Uint8Array {
 }
 
 function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
+  if (state.factoryRoundBattleOrchestrator?.battleStartIntro) {
+    const fb = createFramebuffer();
+    renderGeneratedBattleStartPreSendOut(
+      fb,
+      state.factoryRoundBattleOrchestrator.battleStartIntro,
+    );
+    return fb;
+  }
   if (state.factoryRoundBattleOrchestrator?.battleResolutionPresentation) {
     const fb = createFramebuffer();
     const resolution =

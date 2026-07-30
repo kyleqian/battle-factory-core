@@ -89,6 +89,13 @@ import {
   type FactoryBattleStartPresentationCommand,
 } from "./factoryBattleStartPresentation.ts";
 import {
+  advanceFactoryBattleStartIntro,
+  createFactoryBattleStartIntro,
+  settleFactoryBattleStartCommand,
+  type FactoryBattleStartIntroState,
+} from "./factoryBattleStartIntro.ts";
+import { generatedBattleStartCommandReady } from "./battleScene.ts";
+import {
   generateInitialFactoryRentals,
   type FactoryInitialRentalGenerationResult,
 } from "./factoryRentalGeneration.ts";
@@ -223,6 +230,8 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
   /** Source sPerformedRentalSwap: challenge-scoped, persisted once on win 7. */
   performedRentalSwap: boolean;
   round: RoundControllerState;
+  /** Frozen generated intro, installed only by the live room handoff. */
+  battleStartIntro: FactoryBattleStartIntroState | null;
   battle: BattleState<FactoryFullTurnDecisionRules> | null;
   /** Request-owned player command UI, replaced at each command boundary. */
   battleCommandPresentation: BattleCommandPresentationState | null;
@@ -481,6 +490,7 @@ export function createFactoryRoundBattleOrchestrator(
     facilityState: Object.freeze({ ...config.facilityState }),
     performedRentalSwap: false,
     round,
+    battleStartIntro: null,
     battle: null,
     battleCommandPresentation: null,
     battleResolutionPresentation: null,
@@ -495,6 +505,65 @@ export function createFactoryRoundBattleOrchestrator(
     facilityRngCalls,
     activeBattleCallStart: null,
     nextBattleRequestId: 1,
+  });
+}
+
+/**
+ * Installs the pending round command's frozen intro at the real room seam.
+ * Dev-stage command fixtures may continue to acknowledge battleStart directly.
+ */
+export function beginFactoryRoundBattleStartIntro(
+  state: FactoryRoundBattleOrchestratorState,
+): FactoryRoundBattleOrchestratorState {
+  if (state.battleStartIntro !== null || state.battle !== null) {
+    return fail("Factory battle-start intro requires an unstarted battle");
+  }
+  const command = factoryBattleStartPresentationForState(state);
+  if (command === null) {
+    return fail("Factory battle-start intro requires a pending battleStart command");
+  }
+  return Object.freeze({
+    ...state,
+    battleStartIntro: createFactoryBattleStartIntro(command),
+  });
+}
+
+/**
+ * Owns the live A edge through command readiness. Only that boundary
+ * acknowledges battleStart, creates the fresh kernel, and settles its exact
+ * typed command field into the already-proven action-menu lifecycle.
+ */
+export function advanceFactoryRoundBattleStartIntro(
+  state: FactoryRoundBattleOrchestratorState,
+  newKeys: ReadonlySet<GbaButton>,
+): FactoryRoundBattleOrchestratorState {
+  if (state.battleStartIntro === null) {
+    return fail("Factory battle-start intro input requires an installed intro");
+  }
+  const intro = advanceFactoryBattleStartIntro(state.battleStartIntro, newKeys);
+  if (!generatedBattleStartCommandReady(intro)) {
+    return Object.freeze({ ...state, battleStartIntro: intro });
+  }
+  const commandId = state.round.presentation?.command.commandId;
+  if (
+    state.round.presentation?.command.type !== "battleStart"
+    || commandId !== intro.command.commandId
+  ) {
+    return fail("Factory battle-start intro lost its pending round command");
+  }
+  const started = advanceFactoryRoundPresentation(
+    completeFactoryRoundPresentation(state, { commandId }),
+  );
+  if (started.battleCommandPresentation === null) {
+    return fail("Factory battle-start intro did not publish a fresh command");
+  }
+  return Object.freeze({
+    ...started,
+    battleStartIntro: null,
+    battleCommandPresentation: settleFactoryBattleStartCommand(
+      intro,
+      started.battleCommandPresentation,
+    ),
   });
 }
 
