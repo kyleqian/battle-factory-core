@@ -368,7 +368,7 @@ export type FactoryAiCheckViabilityDraw =
   | Readonly<{
     ordinal: number;
     reason: string;
-    kind: "pursuit-roll" | "sleep-roll" | "roar-roll";
+    kind: "pursuit-roll" | "sleep-roll" | "roar-roll" | "paralyze-roll";
     before: BattleRngState;
     after: BattleRngState;
     rawRngValue: number;
@@ -3412,6 +3412,23 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
+  if (move.effect === "EFFECT_PARALYZE") {
+    const paralyze = runCvParalyze({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: paralyze.rng,
+      draws: paralyze.draws,
+      scoreDelta: paralyze.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
   if (AI_CHECK_VIABILITY_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
       kind: "unsupported-branch",
@@ -3503,5 +3520,71 @@ function runCvRoar(input: Readonly<{
       succeeded: !jumpedToEnd,
     })]),
     scoreDelta: jumpedToEnd ? 0 : 2,
+  });
+}
+
+/**
+ * `AI_CV_Paralyze` (`data/battle_ai_scripts.s:1524-1534`, doc §31).
+ * Target faster JUMPS to the single roll; low byte <20 JUMPS to End and
+ * scores zero, while >=20 FALLS THROUGH to +3. Target not faster continues
+ * to the user's own strict >70% HP gate: >70 JUMPS to End at zero, while
+ * <=70 FALLS THROUGH to -1 and then goes to End. An exact Speed tie burns
+ * the source's normal `GetWhoStrikesFirst` tie draw.
+ */
+function runCvParalyze(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckViabilityDraw[];
+  scoreDelta: number;
+}> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+  const attacker: TurnOrderBattler = {
+    speed: input.attacker.speed,
+    speedStage: input.attacker.speedStage,
+    movePriority: 0,
+  };
+  const target: TurnOrderBattler = {
+    speed: input.target.speed,
+    speedStage: input.target.speedStage,
+    movePriority: 0,
+  };
+
+  let tieRoll = 0;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    const tie = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tie.after;
+    ordinal += 1;
+    tieRoll = tie.randomValue;
+    const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+    draws.push(Object.freeze({ ...tie, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  const targetFaster = getWhoStrikesFirst(attacker, target, tieRoll) === 1;
+  if (targetFaster) {
+    const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-paralyze-roll`);
+    const jumpedToEnd = roll.randomValue % 256 < 20;
+    draws.push(Object.freeze({
+      ...roll,
+      kind: "paralyze-roll" as const,
+      succeeded: !jumpedToEnd,
+    }));
+    return Object.freeze({
+      rng: roll.after,
+      draws: Object.freeze(draws),
+      scoreDelta: jumpedToEnd ? 0 : 3,
+    });
+  }
+
+  const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+  return Object.freeze({
+    rng,
+    draws: Object.freeze(draws),
+    scoreDelta: hpPercent > 70 ? 0 : -1,
   });
 }

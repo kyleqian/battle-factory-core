@@ -264,6 +264,7 @@ describe("source-shaped Battle Script rules context", () => {
       "sideTimers",
       "statAnimPlayed",
       "statChanger",
+      "synchronizeMoveEffect",
       "tripleKickPower",
       "twoTurnStringId",
       "usedHeldItems",

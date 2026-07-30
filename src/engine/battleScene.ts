@@ -670,6 +670,9 @@ import {
   renderBattleCommandPresentation,
   type BattleCommandPresentationRenderView,
 } from "./battleCommandPresentationRender.ts";
+import type {
+  BattleResolutionPresentationRenderView,
+} from "./battleResolutionPresentationRender.ts";
 import {
   drawStandardWindowFrame,
   drawStandardWindowText,
@@ -3599,7 +3602,12 @@ const MESSAGE_TEXT_COLORS = { fg: 1, bg: 15, shadow: 6 };
 const LINE1_ORIGIN = { x: 16, y: 121 };
 const LINE2_ORIGIN = { x: 16, y: 137 };
 
-function drawMessageTextLines(fb: Uint8Array, line1: string, line2: string, chars: number): void {
+export function drawBattleMessageTextLines(
+  fb: Uint8Array,
+  line1: string,
+  line2: string,
+  chars: number,
+): void {
   if (chars <= 0) return;
   const l1 = line1.slice(0, Math.min(chars, line1.length));
   drawText(fb, font, charmap, l1, LINE1_ORIGIN.x, LINE1_ORIGIN.y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
@@ -3608,6 +3616,10 @@ function drawMessageTextLines(fb: Uint8Array, line1: string, line2: string, char
     drawText(fb, font, charmap, l2, LINE2_ORIGIN.x, LINE2_ORIGIN.y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
   }
 }
+
+// Canonical callers retain their established local name and behavior while
+// the typed resolution renderer consumes the exported source-relative helper.
+const drawMessageTextLines = drawBattleMessageTextLines;
 
 function drawMessageText(
   fb: Uint8Array,
@@ -30296,6 +30308,72 @@ export interface SceneOffTurnView {
   readonly statEffectAge: number | null;
   readonly bottom: "fight" | "message" | "blank" | "action";
   readonly playerY2?: number;
+}
+
+/**
+ * Source-composed battlefield/message adapter for the typed non-KO
+ * resolution renderer. All species, HP, status, lines, and effect clocks
+ * arrive in the render view; this layer performs no battle-rule lookup.
+ */
+export function renderBattleResolutionSceneOffView(
+  fb: Uint8Array,
+  view: BattleResolutionPresentationRenderView,
+): void {
+  drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+  drawSpriteSheet(
+    fb,
+    view.fieldArt.opponent.pic.tileset as Tileset,
+    view.fieldArt.opponent.pic.palette as RgbColor[],
+    view.fieldArt.opponent.origin.x,
+    view.fieldArt.opponent.origin.y,
+  );
+  drawSpriteSheet(
+    fb,
+    view.fieldArt.player.pic.tileset as Tileset,
+    view.fieldArt.player.pic.palette as RgbColor[],
+    view.fieldArt.player.origin.x,
+    view.fieldArt.player.origin.y,
+  );
+  drawSendOutHealthbox(
+    fb,
+    0,
+    composeOpponentHealthbox(healthboxAssemblyAssets, view.healthboxes.opponent),
+  );
+  drawComposedPlayerHealthbox(
+    fb,
+    composePlayerHealthbox(playerHealthboxAssets, view.healthboxes.player),
+  );
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+
+  if (view.effect?.type === "stat") {
+    if (
+      view.effect.battler !== 0
+      || view.effect.stat !== "accuracy"
+      || view.effect.to >= view.effect.from
+    ) {
+      throw new Error(
+        `Scene OFF typed stat adapter cannot draw battler ${view.effect.battler} ${view.effect.stat} ${view.effect.from}->${view.effect.to}`,
+      );
+    }
+    // Existing exact Scene-OFF controller adapter: one typed command frame
+    // advances two source animation ticks after the controller's setup age.
+    const sourceAge = view.effect.age * 2 + 94;
+    const eva = turn13SandAttackAccEva(sourceAge, 0);
+    if (eva !== null) {
+      drawTurn13SandAttackAccBanner(fb, sourceAge, 0, eva);
+    }
+  }
+  // A status controller's lasting visible result is the healthbox icon. The
+  // command following it observes the updated frozen display field.
+
+  if (view.bottom === "message" && view.message) {
+    drawBattleMessageTextLines(
+      fb,
+      view.message.lines[0] ?? "",
+      view.message.lines[1] ?? "",
+      view.message.visibleCharacters,
+    );
+  }
 }
 
 /**

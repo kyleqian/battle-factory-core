@@ -678,6 +678,12 @@ export type BattleScriptRulesContext = Readonly<
     gBattleEnvironment: number;
     /** Source u8 gLastUsedAbility. */
     lastUsedAbility: number;
+    /**
+     * Source gBattleStruct->synchronizeMoveEffect. SetMoveEffect banks the
+     * last successfully written reflectable primary status here; the two
+     * Synchronize move-end states consume it after stripping selector bits.
+     */
+    synchronizeMoveEffect: number;
     /** Source u16 gLastUsedItem, prepared by item-steal/knock-off messages. */
     lastUsedItem: number;
     /** BattleHistory reveal handoff populated only at source RecordAbilityBattle-equivalent activation sites. */
@@ -894,6 +900,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   dmgMultiplier: number;
   critMultiplier: number;
   moveEffectByte: number;
+  synchronizeMoveEffect?: number;
   missType: number;
   hitMarker: number;
   multiHitCounter: number;
@@ -2587,6 +2594,11 @@ export function createBattleScriptRulesContext(
     dmgMultiplier: requireUnsigned(input.dmgMultiplier, 0xff, "dmgMultiplier"),
     critMultiplier: requireUnsigned(input.critMultiplier, 0xff, "critMultiplier"),
     moveEffectByte: requireUnsigned(input.moveEffectByte, 0xff, "moveEffectByte"),
+    synchronizeMoveEffect: requireUnsigned(
+      input.synchronizeMoveEffect ?? 0,
+      0xff,
+      "synchronizeMoveEffect",
+    ),
     missType: requireUnsigned(input.missType, 0xff, "missType"),
     hitMarker: requireUnsigned(input.hitMarker, 0xffff_ffff, "hitMarker") >>> 0,
     multiHitCounter: requireUnsigned(input.multiHitCounter, 0xff, "multiHitCounter"),

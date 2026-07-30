@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  battleStringPrintableLength,
+  battleStringVisibleCharacters,
   resolveBattleNameWithPrefix,
   resolveBattleStringLines,
 } from "../src/engine/battleStringResolver.ts";
@@ -68,5 +70,15 @@ describe("battleStringResolver (S10 presentation-seam checkpoint, gap 5)", () =>
     });
     expect(lines).toEqual(["Foe GROVYLE’s", "attack missed!"]);
     expect(lines[0]).not.toContain("'");
+  });
+
+  it("uses a command-relative one-glyph-per-frame clock with free line breaks", () => {
+    const lines = ["ONIX used", "ROCK SLIDE!"];
+    expect(battleStringPrintableLength(lines)).toBe(20);
+    expect(battleStringVisibleCharacters(lines, -1)).toBe(0);
+    expect(battleStringVisibleCharacters(lines, 0)).toBe(1);
+    expect(battleStringVisibleCharacters(lines, 18)).toBe(19);
+    expect(battleStringVisibleCharacters(lines, 19)).toBe(20);
+    expect(battleStringVisibleCharacters(lines, 200)).toBe(20);
   });
 });

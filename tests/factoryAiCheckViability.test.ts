@@ -186,6 +186,73 @@ describe("AI_CV_Roar (docs/factory-ai-checkviability-ground-truth.md §30)", () 
   });
 });
 
+describe("AI_CV_Paralyze (docs/factory-ai-checkviability-ground-truth.md §31)", () => {
+  const MOVE_THUNDER_WAVE = 86;
+
+  function paralyzeRun(
+    rngValue: number,
+    attackerOverrides: Record<string, number> = {},
+    targetOverrides: Record<string, number> = {},
+  ) {
+    return runCheckViability({
+      rng: { value: rngValue, calls: 0 },
+      moveId: MOVE_THUNDER_WAVE,
+      attacker: { ...NEUTRAL_BATTLER, speed: 100, ...attackerOverrides },
+      target: { ...NEUTRAL_BATTLER, speed: 50, ...targetOverrides },
+      drawOrdinalStart: 1,
+      reasonPrefix: "paralyze",
+    });
+  }
+
+  it("target-faster gate JUMPs to the random site; roll <20 JUMPs to End at zero", () => {
+    const result = paralyzeRun(13, { speed: 50 }, { speed: 100 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "paralyze-roll", succeeded: false });
+  });
+
+  it("target-faster gate JUMPs to the random site; roll >=20 FALLS THROUGH to +3", () => {
+    const result = paralyzeRun(1, { speed: 50 }, { speed: 100 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 3 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "paralyze-roll", succeeded: true });
+  });
+
+  it("target-not-faster FALLTHROUGH and own HP >70 JUMPs to End at zero", () => {
+    expect(paralyzeRun(1, { hp: 71 })).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+
+  it.each([70, 1])("target-not-faster and own HP %i%% (not >70) FALL THROUGH to -1", (hp) => {
+    expect(paralyzeRun(1, { hp })).toMatchObject({
+      kind: "scored",
+      scoreDelta: -1,
+      draws: [],
+    });
+  });
+
+  it("an exact Speed tie burns the source turn-order tie draw before following its selected polarity", () => {
+    const result = paralyzeRun(1, { speed: 100 }, { speed: 100 });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws[0]).toMatchObject({ kind: "target-faster-tie" });
+    expect(result.rng.calls).toBeGreaterThanOrEqual(1);
+  });
+
+  it("leaves Haze behind the same generic CV barrier", () => {
+    expect(run({ value: 1, calls: 0 }, MOVE_HAZE)).toMatchObject({
+      kind: "unsupported-branch",
+      barrier: "factory-ai-check-viability",
+      effect: "EFFECT_HAZE",
+    });
+  });
+});
+
 describe("AI_CV_Toxic (data/battle_ai_scripts.s:1353-1371)", () => {
   function toxicRun(input: Readonly<{
     rngValue?: number;

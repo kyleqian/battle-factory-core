@@ -6388,3 +6388,160 @@ shape as §29's Insomnia/Vital Spirit delta. All 69 abilities, 42 hold
 effects, and 17 validation checks remain complete. This replaces the
 runtime Roar halt behind the same single generic barrier: no new
 unsupported-branch statement and no import ratchet change.
+
+## 31. 2026-07-29 addendum #21: `AI_CBM_Paralyze` + `AI_CV_Paralyze`
+
+Bounded side-lane implementation session, Battle Scene OFF oracle. Both
+halves of the highest-ranked remaining Factory-reachable pair behind the
+generic barriers are now source-complete and live-verified.
+
+### 31.1 Selection and Level-50 reachability
+
+The ranked shortlist, counted directly over Level-50 set indexes 0-849,
+was:
+
+| Pair | Distinct Level-50 set carriers | Staging assessment |
+| --- | ---: | --- |
+| Paralyze | **72** | one type/ability/status rejection chain; one Speed/HP CV fork |
+| Confuse | **64** | shared CBM with Swagger; CV has an HP cascade and fallthrough scoring |
+| Counter | **42** | status, HP, Taunt, last-move power/type, known-move, and multi-roll staging |
+| Swagger | **30** | shares Confuse CBM, but adds Psych Up knowledge/stat-stage branches before Confuse CV |
+
+Paralyze wins both numerically and by staging cost. Its 72 carriers span
+Stun Spore, Thunder Wave, and Glare. Confuse is the only close carrier-count
+runner-up, but its shared-CBM/two-CV topology costs more independent state
+than Paralyze's single pair. Counter and Swagger are both less reachable
+and materially more expensive to stage gate-by-gate.
+
+### 31.2 Source-exact bodies, gates, and polarity
+
+CBM dispatch/body are `data/battle_ai_scripts.s:149,397-403`:
+
+```asm
+AI_CBM_Paralyze:
+	if_type_effectiveness AI_EFFECTIVENESS_x0, Score_Minus10
+	get_ability AI_TARGET
+	if_equal ABILITY_LIMBER, Score_Minus10
+	if_status AI_TARGET, STATUS1_ANY, Score_Minus10
+	if_side_affecting AI_TARGET, SIDE_STATUS_SAFEGUARD, Score_Minus10
+	end
+```
+
+Gates execute in source order. Type effectiveness exactly x0 **JUMPS** to
+`-10` before the ability read; every non-x0 result **FALLS THROUGH**.
+Limber, any primary status, or Safeguard then independently **JUMPS** to
+`-10`; only all three false results **FALL THROUGH** to `end` at zero.
+The `get_ability AI_TARGET` call is fresh and uncached, using the same
+two-ability guessing draw as §29 (`battle_ai_script_commands.c:1350-1400`).
+
+The x0 gate also preserves the pinned non-`BUGFIX` source quirk rather than
+using a normalized type multiplier. `Cmd_if_type_effectiveness`
+(`battle_ai_script_commands.c:1515-1557`) initializes damage to 40 and calls
+`TypeCalc` without copying its result flags. `ModulateDmgByType2`
+(`battle_script_commands.c:1502-1506,1536-1591`) clamps a zero intermediate
+back to 1 when a later type multiplier is nonzero. Consequently Thunder
+Wave against Ground/Flying **FALLS THROUGH** at damage 1 instead of matching
+x0; Tier 1 pins that glitch and ordinary mono-Ground's x0 JUMP separately.
+
+CV dispatch/body are `data/battle_ai_scripts.s:704,1524-1534`:
+
+```asm
+AI_CV_Paralyze:
+	if_target_faster AI_CV_Paralyze2
+	if_hp_more_than AI_USER, 70, AI_CV_Paralyze_End
+	score -1
+	goto AI_CV_Paralyze_End
+AI_CV_Paralyze2:
+	if_random_less_than 20, AI_CV_Paralyze_End
+	score +3
+AI_CV_Paralyze_End:
+	end
+```
+
+The target-faster JUMP goes directly to the single draw site. There, low
+byte `<20` **JUMPS** to End at zero; `>=20` **FALLS THROUGH** to `+3`.
+Target-not-faster **FALLS THROUGH** to the user's own strict HP gate:
+HP `>70%` **JUMPS** to End, while HP `<=70%` **FALLS THROUGH** to `-1`.
+An exact Speed tie consumes `GetWhoStrikesFirst`'s normal tie draw. The
+handler never writes `funcResult`, so the incoming carry is preserved.
+
+Tier 1 drives JUMP and FALLTHROUGH for every CBM and CV gate, including
+both random polarities, the exact 70% boundary, a Speed tie, the x0 type
+short-circuit, and the source's Ground/Flying x0 glitch.
+
+### 31.3 Live OFF staging, direct move receipts, and RNG ledger
+
+The reproducible complete-party pair is:
+
+- `mechanic-factory-ai-paralyze-control-off.json`;
+- `mechanic-factory-ai-paralyze-reach-off.json`;
+- generator: `tools/probe/generate-factory-ai-paralyze-fixtures.ts`;
+- process-isolated receipt probe:
+  `tools/probe/probe-factory-ai-paralyze-case.py`;
+- engine/ROM verifier: `tools/probe/verify-factory-ai-paralyze-live.ts`.
+
+A level-5 Magikarp first sets Light Screen, then the player's four-slot
+Vital Throw KOs it. Gengar switches in with
+`[Thunder Wave, Light Screen, Light Screen, Light Screen]`; Vital Throw is
+Ghost-immune thereafter, so Gengar remains at 135/135. Gengar is faster
+than both complete-party targets, so `AI_CV_Paralyze` takes its
+target-not-faster, HP>70% zero-draw route in every row. Control is
+Miltank/Thick Fat; reach is Ditto/Limber. Both are pure Normal, single-
+ability targets, isolating the CBM ability gate without an ability-guess
+draw or type change.
+
+| Seed | Fixture | First Gengar PP delta | CBM/CV | ROM and engine choice | Exact engine RNG |
+| ---: | --- | --- | --- | --- | --- |
+| 1 | control | `[20,30,30,30] -> [19,30,30,30]` | `0/0` | Thunder Wave slot 0 | `3726110690 -> 3070328874` |
+| 1 | reach | `[20,30,30,30] -> [20,29,30,30]` | `-10/0` | Light Screen slot 1 | `3726110690 -> 3070328874` |
+| 99 | control | `[20,30,30,30] -> [19,30,30,30]` | `0/0` | Thunder Wave slot 0 | `1329715331 -> 3507076075` |
+| 99 | reach | `[20,30,30,30] -> [20,30,29,30]` | `-10/0` | Light Screen slot 2 | `1329715331 -> 3507076075` |
+
+Every row was rerun byte-identically. The choice is read directly from the
+executed move's PP decrement, and the engine matches that exact slot, not
+merely the score sign or total draw count.
+
+Fresh process-isolated caller attribution on the reach decision windows
+`(742,751]` (seed 1) and `(822,831]` (seed 99) reconciles identically:
+
+| Caller | Seed 1 | Seed 99 | Attribution |
+| --- | ---: | ---: | --- |
+| `BattleTurnPassed+0x157` | 1 | 1 | ordinary pre-decision battle call |
+| `BattleAI_SetupAIData+0x83` | 4 | 4 | one simulated-RNG setup draw per slot |
+| `Cmd_if_random_less_than+0x7` | 3 | 3 | the three Light Screen CV sites |
+| `ChooseMoveOrAction_Singles+0xf7` | 1 | 1 | best-move tie selection |
+| **Live window total** | **9** | **9** | `sRandCount` equals single-step hit count |
+
+Removing the one ordinary battle call leaves the exact **8-draw engine
+receipt** in every row: setup 4 + Paralyze CBM 0 + TryToFaint 0 + Paralyze
+CV 0 + three Light Screen CV rolls 3 + final tie 1. Both caller probes
+report `pass1WindowTotal == pass2HitCount == 9`.
+
+### 31.4 Reproduce and census status
+
+```sh
+node --experimental-strip-types tools/probe/generate-factory-ai-paralyze-fixtures.ts
+node --experimental-strip-types tools/probe/verify-factory-ai-paralyze-live.ts
+npx vitest run tests/factoryAiCheckBadMove.test.ts tests/factoryAiCheckViability.test.ts tests/factoryAiScoredDecision.test.ts
+node --experimental-strip-types tools/report/ability-item-parity-census.ts
+npx tsx tools/report/executable-frontier-census.ts
+```
+
+For process-isolated receipts, allocate a fresh scratch directory and run
+each seed/output separately through `tools/run-mgba-probe.py`, as in:
+
+```sh
+python3 tools/run-mgba-probe.py /tmp/paralyze-reach-1.json -- tools/probe/probe-factory-ai-paralyze-case.py tools/battle-lab/mechanic-factory-ai-paralyze-reach-off.json 1 /tmp/paralyze-reach-1.json
+python3 tools/run-mgba-probe.py /tmp/paralyze-reach-99.json -- tools/probe/probe-factory-ai-paralyze-case.py tools/battle-lab/mechanic-factory-ai-paralyze-reach-off.json 99 /tmp/paralyze-reach-99.json
+```
+
+The executable-frontier census changes only its embedded generation date
+and trailing blank line when regenerated, so that date-only churn is
+restored; its committed SHA-256 remains
+`8b18f75413c8046530f75c8a5b331a0bf31e8b92596029356ef6025071965261`.
+The ability/item census legitimately changes exactly one cell:
+`ABILITY_LIMBER` engine-reference count **8 -> 10**, from the identity
+constant and live CBM comparison. All 69 abilities, 42 hold effects, and 17
+validation checks remain complete. The port replaces two runtime effect
+halts behind the same two existing generic barrier statements: no new
+unsupported-branch statement and no canonical-recording import.

@@ -255,27 +255,158 @@ describe("production moveend (Cmd_moveend) registration", () => {
     expect(result.state.rulesContext.battlers[1]!.statStages[1]).toBe(6);
   });
 
-  describe("(b) unsupported-branch barriers", () => {
-    it("halts on MOVEEND_SYNCHRONIZE_TARGET's ABILITY_SYNCHRONIZE branch", () => {
+  describe("MOVEEND_SYNCHRONIZE_TARGET / MOVEEND_SYNCHRONIZE_ATTACKER", () => {
+    const ABILITY_SYNCHRONIZE = 28;
+    const HITMARKER_STATUS_ABILITY_EFFECT = 1 << 13;
+    const HITMARKER_SYNCHRONIZE_EFFECT = 1 << 14;
+    const MOVE_EFFECT_AFFECTS_USER = 1 << 6;
+
+    it.each([
+      ["poison", 2, 1 << 3],
+      ["burn", 3, 1 << 4],
+      ["paralysis", 5, 1 << 6],
+      ["toxic becomes ordinary poison", 6, 1 << 3],
+    ])(
+      "target Synchronize reflects %s to the attacker with battle + party controller sync and ability-message selection",
+      (_name, synchronizeMoveEffect, expectedStatus1) => {
+        const rc = context(
+          0,
+          { partyIndex: 2 },
+          {
+            moveendState: 2,
+            hitMarker: HITMARKER_SYNCHRONIZE_EFFECT,
+            synchronizeMoveEffect,
+            party: {
+              player: [{}, {}, { species: 95, hp: 100 }, {}, {}, {}],
+            },
+          },
+          { ability: ABILITY_SYNCHRONIZE },
+        );
+        const { result, moveendPc } = stepAtMoveend(rc);
+        if (result.kind !== "advanced") throw new Error(`expected advanced, got ${result.kind}`);
+        expect(result.state.programCounter).toBe(labelPc("BattleScript_SynchronizeActivates"));
+        expect(result.state.callStack.at(-1)).toBe(moveendPc);
+        expect(result.state.rulesContext).toMatchObject({
+          moveendState: 3,
+          moveEffectByte: 2 === synchronizeMoveEffect
+            ? MOVE_EFFECT_AFFECTS_USER | 2
+            : MOVE_EFFECT_AFFECTS_USER | (synchronizeMoveEffect === 6 ? 2 : synchronizeMoveEffect),
+          synchronizeMoveEffect: synchronizeMoveEffect === 6 ? 2 : synchronizeMoveEffect,
+          scriptingBattler: 1,
+          lastUsedAbility: ABILITY_SYNCHRONIZE,
+          multistringChooser: 0,
+        });
+        expect(result.state.rulesContext.hitMarker & HITMARKER_SYNCHRONIZE_EFFECT).toBe(0);
+        expect(result.state.rulesContext.hitMarker & HITMARKER_STATUS_ABILITY_EFFECT).not.toBe(0);
+        expect(result.state.rulesContext.aiObservedAbilityIds[1]).toBe(ABILITY_SYNCHRONIZE);
+
+        const terminal = runMoveendScriptToTerminal(rc);
+        expect(terminal.state.rulesContext.battlers[0]!.status1).toBe(expectedStatus1);
+        expect(terminal.state.rulesContext.party.player[2]!.status1).toBe(expectedStatus1);
+        expect(terminal.state.rulesContext.multistringChooser).toBe(1);
+        expect(terminal.state.events).toContainEqual(expect.objectContaining({
+          kind: "set-battler-status-data",
+          battler: 0,
+          status1: expectedStatus1,
+        }));
+        // The reflected write re-arms the marker. Source leaves it set when
+        // the later attacker holder is not itself Synchronize.
+        expect(terminal.state.rulesContext.hitMarker & HITMARKER_SYNCHRONIZE_EFFECT).not.toBe(0);
+      },
+    );
+
+    it("target state runs before attacker state: two Synchronize holders reveal in order, while the second reflection is quiet against the already-statused target", () => {
       const rc = context(
         0,
-        {},
-        { moveendState: 2, hitMarker: 1 << 14 },
-        { ability: 28 },
+        { ability: ABILITY_SYNCHRONIZE },
+        {
+          moveendState: 2,
+          hitMarker: HITMARKER_SYNCHRONIZE_EFFECT,
+          synchronizeMoveEffect: 3,
+        },
+        { ability: ABILITY_SYNCHRONIZE, status1: 1 << 4 },
       );
-      const { result } = stepAtMoveend(rc);
-      expect(result.kind).toBe("halted");
-      if (result.kind !== "halted") throw new Error("expected halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2971 });
+      const terminal = runMoveendScriptToTerminal(rc);
+      expect(terminal.state.rulesContext.battlers[0]!.status1).toBe(1 << 4);
+      expect(terminal.state.rulesContext.battlers[1]!.status1).toBe(1 << 4);
+      expect(terminal.state.rulesContext.aiObservedAbilityIds.slice(0, 2)).toEqual([
+        ABILITY_SYNCHRONIZE,
+        ABILITY_SYNCHRONIZE,
+      ]);
+      expect(terminal.state.events.filter((event) => event.kind === "set-battler-status-data"))
+        .toHaveLength(1);
     });
 
-    it("MOVEEND_SYNCHRONIZE_TARGET passes through without ABILITY_SYNCHRONIZE or the hitMarker bit", () => {
-      const rc = context(0, {}, { moveendState: 2 }, { ability: 28 });
-      const { result } = stepAtMoveend(rc);
-      if (result.kind !== "advanced") throw new Error(`expected advanced, got ${result.kind}`);
-      expect(result.state.rulesContext.moveendState).toBe(10); // paused at MOVEEND_ATTACKER_VISIBLE
+    it("attacker Synchronize runs after a quiet target state and reflects to the target", () => {
+      const rc = context(
+        0,
+        { ability: ABILITY_SYNCHRONIZE, status1: 1 << 6 },
+        {
+          moveendState: 2,
+          hitMarker: HITMARKER_SYNCHRONIZE_EFFECT,
+          synchronizeMoveEffect: 5,
+        },
+      );
+      const terminal = runMoveendScriptToTerminal(rc);
+      expect(terminal.state.rulesContext.battlers[1]!.status1).toBe(1 << 6);
+      expect(terminal.state.rulesContext.aiObservedAbilityIds[0]).toBe(ABILITY_SYNCHRONIZE);
+      expect(terminal.state.events).toContainEqual(expect.objectContaining({
+        kind: "set-battler-status-data",
+        battler: 1,
+        status1: 1 << 6,
+      }));
     });
 
+    it("is quiet for a non-Synchronize holder, an absent marker, and Safari topology", () => {
+      const noAbility = context(
+        0,
+        {},
+        {
+          moveendState: 2,
+          hitMarker: HITMARKER_SYNCHRONIZE_EFFECT,
+          synchronizeMoveEffect: 3,
+        },
+      );
+      const noAbilityResult = runMoveendToCompletion(noAbility).result;
+      if (noAbilityResult.kind !== "advanced") throw new Error("expected no-ability pass");
+      expect(noAbilityResult.state.rulesContext.battlers[0]!.status1).toBe(0);
+      expect(noAbilityResult.state.rulesContext.battlers[1]!.status1).toBe(0);
+      expect(noAbilityResult.state.rulesContext.hitMarker & HITMARKER_SYNCHRONIZE_EFFECT).not.toBe(0);
+
+      const noMarker = context(
+        0,
+        {},
+        { moveendState: 2, synchronizeMoveEffect: 3 },
+        { ability: ABILITY_SYNCHRONIZE },
+      );
+      const noMarkerResult = runMoveendToCompletion(noMarker).result;
+      if (noMarkerResult.kind !== "advanced") throw new Error("expected no-marker pass");
+      expect(noMarkerResult.state.rulesContext.battlers[0]!.status1).toBe(0);
+      expect(noMarkerResult.state.rulesContext.lastUsedAbility).toBe(0);
+
+      const safari = context(
+        0,
+        {},
+        {
+          moveendState: 2,
+          hitMarker: HITMARKER_SYNCHRONIZE_EFFECT,
+          synchronizeMoveEffect: 3,
+          battleTopology: {
+            battlersCount: 2,
+            battleTypeFlags: 1 << 7,
+            battlerPositions: [0, 1, 0xff, 0xff],
+          },
+        },
+        { ability: ABILITY_SYNCHRONIZE },
+      );
+      const safariResult = runMoveendToCompletion(safari).result;
+      if (safariResult.kind !== "advanced") throw new Error("expected Safari pass");
+      expect(safariResult.state.rulesContext.battlers[0]!.status1).toBe(0);
+      expect(safariResult.state.rulesContext.hitMarker & HITMARKER_SYNCHRONIZE_EFFECT).not.toBe(0);
+    });
+  });
+
+  describe("(b) unsupported-branch barriers", () => {
     it("MOVEEND_ON_DAMAGE_ABILITIES passes through for an unrelated ability", () => {
       const rc = context(0, {}, { moveendState: 3 }, { ability: 62 }); // ABILITY_GUTS
       const { result } = stepAtMoveend(rc);
@@ -288,18 +419,6 @@ describe("production moveend (Cmd_moveend) registration", () => {
       const { result } = stepAtMoveend(rc);
       if (result.kind !== "advanced") throw new Error(`expected advanced, got ${result.kind}`);
       expect(result.state.rulesContext.moveendState).toBe(10); // paused at MOVEEND_ATTACKER_VISIBLE
-    });
-
-    it("halts on MOVEEND_SYNCHRONIZE_ATTACKER's ABILITY_SYNCHRONIZE branch", () => {
-      const rc = context(
-        0,
-        { ability: 28 },
-        { moveendState: 5, hitMarker: 1 << 14 },
-      );
-      const { result } = stepAtMoveend(rc);
-      expect(result.kind).toBe("halted");
-      if (result.kind !== "halted") throw new Error("expected halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2987 });
     });
 
     it("halts on MOVEEND_ITEM_EFFECTS_ALL's status/stat-restoring branch only when the held item can activate", () => {

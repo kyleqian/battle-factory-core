@@ -25,7 +25,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_SWIFT_SWIM | engine-referenced | 34 (13) | 34 | — | 2 | 0 | 4 |
 | ABILITY_PRESSURE | engine-referenced | 34 (30) | 46 | — | 6 | 0 | 11 |
 | ABILITY_OBLIVIOUS | engine-referenced | 33 (16) | 33 | ON_DAMAGE, IMMUNITY | 3 | 0 | 6 |
-| ABILITY_SYNCHRONIZE | engine-referenced | 30 (8) | 30 | SYNCHRONIZE, ATK_SYNCHRONIZE | 0 | 0 | 2 |
+| ABILITY_SYNCHRONIZE | engine-referenced | 30 (8) | 30 | SYNCHRONIZE, ATK_SYNCHRONIZE | 0 | 0 | 3 |
 | ABILITY_EARLY_BIRD | engine-referenced | 29 (4) | 29 | — | 2 | 0 | 3 |
 | ABILITY_KEEN_EYE | engine-referenced | 29 (16) | 29 | — | 2 | 0 | 6 |
 | ABILITY_STATIC | engine-referenced | 27 (17) | 27 | ON_DAMAGE | 0 | 0 | 5 |
@@ -65,7 +65,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_HUSTLE | engine-referenced | 6 (1) | 6 | — | 2 | 0 | 3 |
 | ABILITY_ARENA_TRAP | engine-referenced | 6 (0) | 6 | — | 2 | 3 | 2 |
 | ABILITY_VITAL_SPIRIT | engine-referenced | 6 (5) | 6 | IMMUNITY | 5 | 0 | 13 |
-| ABILITY_LIMBER | engine-referenced | 5 (5) | 5 | IMMUNITY | 4 | 0 | 8 |
+| ABILITY_LIMBER | engine-referenced | 5 (5) | 5 | IMMUNITY | 4 | 0 | 10 |
 | ABILITY_CLOUD_NINE | engine-referenced | 5 (0) | 5 | ON_SWITCHIN | 1 | 0 | 18 |
 | ABILITY_MAGMA_ARMOR | engine-referenced | 5 (2) | 5 | IMMUNITY | 1 | 0 | 4 |
 | ABILITY_TRUANT | engine-referenced | 5 (5) | 5 | ENDTURN | 2 | 0 | 7 |

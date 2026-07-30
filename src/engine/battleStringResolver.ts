@@ -80,6 +80,36 @@ export type BattleStringPlaceholderResolvers = Readonly<Record<string, () => str
 const LINE_BREAK_CODES = new Set(["\\n", "\\l", "\\p"]);
 
 /**
+ * Source text printers advance once per printable glyph; line-break control
+ * codes select the next window line without consuming a glyph frame.
+ * Resolution commands already contain frozen, resolved lines, so their
+ * presentation clock can use this helper without reopening the string table
+ * or consulting battle state.
+ */
+export function battleStringPrintableLength(lines: readonly string[]): number {
+  return lines.reduce((total, line) => total + [...line].length, 0);
+}
+
+/**
+ * Number of resolved glyphs visible at a command-relative text-printer age.
+ * Age 0 is the first printer callback and therefore exposes the first glyph.
+ */
+export function battleStringVisibleCharacters(
+  lines: readonly string[],
+  printerAge: number,
+): number {
+  if (!Number.isSafeInteger(printerAge)) {
+    throw new Error(
+      `battleStringResolver: printer age must be a safe integer, got ${printerAge}`,
+    );
+  }
+  return Math.min(
+    battleStringPrintableLength(lines),
+    Math.max(0, printerAge + 1),
+  );
+}
+
+/**
  * Resolves `messageId` (a `STRINGID_*` symbol) against the extracted
  * template table, splicing `resolvers[token]()` for every `{TOKEN}`
  * placeholder segment the template references, and splitting on the

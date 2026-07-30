@@ -13,81 +13,80 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
-## 710 — [BOUNDED MAIN WORKER 2026-07-29 ~18:00] Battle-resolution seam design landed
+## 714 — [SUPERVISOR 2026-07-29 ~19:25] Slice 2 + Paralyze pair folded; union green; round 8 dispatched
 
-- **State:** docs-only battle-resolution design complete; tree green at
-  **520 files / 5296 tests + 1 deliberate animation-lane skip**, production
-  build, and `git diff --check`.
-- **Did:** specified the typed command-resolution lifecycle from legal
-  A-confirm through messages, HP drain, faint, forced-party handoff, semantic
-  switch-in/send-out, and next-command or terminal replacement. Inventoried
-  existing kernel events versus the one required `switch-in-animation` marker,
-  extended entry 703's per-battler boundary-state pattern, fixed an immutable
-  25-window regression table, and split implementation into seven dispatchable
-  slices capped at 45 minutes. The last slice is entry 704's honest explicit-OFF
-  **128/128** generated-command breadth proof.
-- **Next:** dispatch
-  `docs/battle-resolution-seam-design.md` **Slice 1 — receipt ownership and
-  structural projection** verbatim; do not begin renderer/orchestrator work
-  until its structural equivalence acceptance is green.
-- **Notes:** no production code, canonical-recording import, oracle/app
-  acceptance trace, or capture-list change. Existing banked OFF evidence
-  covered the inventory, so no new oracle trace was necessary. The finite
-  Stage 8 reset remains intact; this does not resume the canonical Battle 2
-  turn march. PAPERCUT: none.
-
----
-
-## 709 — [SUPERVISOR 2026-07-29 ~17:40] ISSUES #51 + immunity-cure reveal both merged; union green; round 5 dispatched
-
-- **State:** master `b814e791` green at **520 files / 5296 tests + 1
+- **State:** master `18f31d25`+docs green at **521 files / 5332 tests + 1
   deliberate animation-lane skip**, production build, `git diff --check`
   clean, no orphan worktrees/branches, DEFERRED.md empty.
-- **Did:** (1) verified + accepted entry 708's #51 fix (targeted 22/22;
-  draft-menu-slot6 66/66, summary-info-onix 122/122, mon-down-up 87/87
-  re-run exact; missing non-anchor layers honestly absent, not
-  anchor-substituted). (2) verified + merged
-  `worker/side-20260729-164144`: `MOVEEND_IMMUNITY_ABILITIES` status-curing
-  reveal, all eight source pairs, site B→A, moveend barriers 5→4; fresh
-  seed-610839776 probe reproduced the banked receipt byte-identically;
-  live reachability is Factory-legal (Skill Swap on GIRAFARIG set 244 →
-  statused Limber holder). Census content idempotent — the only regen
-  drift was the doc's embedded generation date crossing UTC midnight
-  (restored; future briefs told to restore date-only churn).
-- **Next:** round 5 dispatched — main: author
-  docs/battle-resolution-seam-design.md (typed action-resolution/send-out
-  lifecycle; the named gap holding the 128-capture breadth proof at 0/128
-  and blocking the trainer-pic OFF window; design-only, slices dispatched
-  verbatim afterward); side: Synchronize moveend reveal (both states,
-  battle_util.c:2971/:2987). Then: resolution slices, remaining CBM/CV
-  arms, Gate-6 matrix.
-- **Notes:** 8 workers so far, 0 failed steps, 1 integrity correction.
-  OT/ID summary text: source suppresses it in Battle Factory summaries
-  (worker finding, entry 708) — no OT-name extraction needed.
+- **Did:** (1) verified + accepted resolution Slice 2 (`84374947`:
+  targeted 322/322; staged 16/16, sandattack 190/190, turn3/8/13 menus
+  254/88/57 re-run exact; renderer consumes typed commands only). (2)
+  verified + merged `worker/side-20260729-175941` (Paralyze pair,
+  `7c251fdc`+`c90631e4`, doc §31): 72 L50 carriers (ranked over Confuse
+  64, Counter 42, Swagger 30), source-exact incl. the non-BUGFIX
+  Ground/Flying quirk; supervisor re-ran the live verify — 4/4 PASS
+  (control+reach on seeds 1/99, exact PP-slot choices and RNG endpoints).
+  Census delta Limber 8→10 recorded honestly; executable census
+  byte-identical.
+- **Next:** round 8 dispatched — main: design §4 Slice 3 (orchestrator
+  replacement + generated non-KO handoff, §2.3 boundary state); side:
+  next CBM/CV pair (Confuse-led remainder). Then Slice 4+, Gate-6.
+  Wind-down target ~21:30 with animation fold re-check.
+- **Notes:** 12 workers, 0 failed steps. New papercut motif from two
+  workers: executable census regen churns its embedded date/trailing
+  blank — restore-if-date-only is now standing brief language; consider a
+  harness-side dateless regen at some point.
 
 ---
 
-## 708 — [BOUNDED MAIN WORKER 2026-07-29 ~17:00] Generated draft summaries consume live rental records
+## 713 — [BOUNDED MAIN WORKER 2026-07-29 ~19:15] Battle-resolution Slice 2 landed
 
-- **State:** implementation `9c342d01` + type fix `804c27a3`; tree green at
-  **520 files / 5287 tests + 1 deliberate animation-lane skip**, production
-  build, targeted summary/state tests **22/22**, and all required serial
-  canonical windows exact: draft
-  **13/13 + 38/38 + 66/66**, summary entry **132/132 + 122/122**, mon
-  navigation **54/54 + 87/87**, page changes **25/25 + 56/56**.
-- **Did:** the generated-rental adapter now preserves six complete
-  presentation records (identity, level, item, nature/gender, moves+PP,
-  ability surface, stats/EXP, OT ID/source-hidden OT text, front-pic
-  identity). Every Info/Skills/Moves/transition renderer and `core.ts`
-  consumes those live records; summary DOWN reaches un-rented generated pool
-  slots without anchor fallback. Canonical ONIX retains its committed
-  byte-exact framebuffer hash. Deleted resolved ISSUES #51.
-- **Next:** supervisor can proceed to trainer-pic OFF or Gate-6 work.
-- **Notes:** current generated data lacks non-anchor National Dex mapping,
-  ability display text/descriptions, and non-anchor summary 64×64 front-pic
-  assets; those layers stay absent rather than substituting anchor content.
-  No new canonical-recording import, unsupported barrier, trace/capture
-  change, swap/party/command/animation change, or tick-keyed branch.
-  PAPERCUT: none.
+- **State:** implementation `84374947`; tree green at **521 files / 5317
+  tests + 1 deliberate animation-lane skip**, production build, targeted
+  Slice-2 acceptance **322/322**, and `git diff --check`.
+- **Did:** added the typed non-KO Scene-OFF renderer and source-composed scene
+  adapter. Frozen commands now drive one-glyph-per-frame attack/result text,
+  source `CalcNewBarValue` HP drain/heal clocks (including Q24.8 low-max-HP),
+  stat/status effect views, persistent displayed-field HP/status, turn-end,
+  and the six-frame blank next-command handoff. The canonical message helper
+  was exported without changing its callers. Pixel acceptance is exact:
+  staged OFF **16/16**, SAND_ATTACK **190/190**, and menus 3-13
+  **254/254, 44/44, 42/42, 44/44, 93/93, 88/88, 111/111, 83/83, 56/56,
+  46/46, 57/57**.
+- **Next:** dispatch `docs/battle-resolution-seam-design.md` **Slice 3 —
+  orchestrator replacement and generated non-KO handoff** verbatim; retain
+  the complete Slice-2 regression table.
+- **Notes:** no orchestrator/core, faint/party/send-out/terminal path,
+  trace/capture list, canonical-recording import, unsupported barrier, or
+  battle/turn/absolute-tick branch changed. The renderer consumes only its
+  frozen display field, typed commands, and command-relative lifecycle; it
+  imports no canonical duration vector. PAPERCUT: none.
 
 ---
+
+## 712 — [SUPERVISOR 2026-07-29 ~19:00] Slice 1 + Synchronize reveal folded; union green; round 7 dispatched
+
+- **State:** master green at **521 files / 5309 tests + 1 deliberate
+  animation-lane skip**, production build, `git diff --check` clean, no
+  orphan worktrees/branches, DEFERRED.md empty.
+- **Did:** (1) verified + accepted resolution Slice 1 (`8dee1d7b`:
+  targeted 37/37, staged window 16/16, file surface exactly per design §4,
+  battleScene.ts untouched). (2) verified + merged
+  `worker/side-20260729-171940`: both Synchronize moveend states
+  source-complete (four-status banking, toxic→poison, target-first
+  ordering), sites B→A, moveend barriers **4→2**; fresh seed-324508639
+  probe reproduced the banked receipt byte-identically; reachability is
+  Factory-legal (RALTS set 5 Synchronize vs MAGNETON set 244 Thunder
+  Wave). Census delta Synchronize 2→3 recorded honestly. (3) Banked the
+  mechanicLab internal-vs-dex species-ID papercut (`15134025`).
+- **Next:** round 7 dispatched — main: design §4 Slice 2 (resolution
+  renderer, pixel-neutral helper factoring, eleven-menu + sandattack
+  regression table); side: next CBM/CV pair by ranked rubric. Then Slice
+  3+, Gate-6 matrix. Wind-down target ~21:30 with fold re-check.
+- **Notes:** 10 workers so far, 0 failed steps, 1 integrity correction
+  (entry 705). Class-B reveal program this session: absorption,
+  immunity-cure, Synchronize — moveend barriers 5→2, all with two-seed
+  byte-identical live receipts.
+
+---
+
