@@ -79,7 +79,7 @@ the state transition.
 | status x switching/entry | Ordinary switching rebuilds the incoming record; Natural Cure only clears the departing major status (`battle_script_commands.c:4621-4657,9590-9604`). | `tests/battleScriptSwitchinOpcode.test.ts` (rebuild semantics) | R6 oracle. |
 | status x immunity/absorb | Type/ability gates prevent status before durable mutation: Fire blocks burn, Ice blocks freeze, Limber blocks paralysis, Immunity blocks poison (`battle_script_commands.c:2360-2425`). | `tests/battleScriptMoveEndOpcode.test.ts` (immunity cure pass) | R8: Toxic/Thunder Wave versus Immunity/Limber with an ordinary control target. |
 | volatile x held-item | Persim/Lum cure confusion; Mental Herb cures attraction; White Herb restores negative stages, including at move-end (`battle_util.c:3383-3398,3540-3601,3739-3755`). | `tests/battleScriptMoveEndOpcode.test.ts` (Lum confusion) | R9: Swagger into Lum/White Herb distinguishes volatile cure from stage restore. |
-| volatile x ability | Own Tempo blocks confusion, Oblivious blocks attraction, Soundproof blocks sound-based state effects; end-turn ability hooks run before item hooks (`battle_script_commands.c:2531-2545,7676-7689,8387-8516`; `battle_util.c:1494-1507`). | `tests/battleScriptMoveEndOpcode.test.ts` (Own Tempo) | R10: Attract into Oblivious and Uproar/Perish Song into Soundproof. |
+| volatile x ability | Own Tempo blocks confusion, Oblivious blocks attraction, Soundproof blocks sound-based state effects; end-turn ability hooks run before item hooks (`battle_script_commands.c:2531-2545,7676-7695,8508-8533`; `battle_util.c:1494-1507`). | `tests/battleScriptTryinfatuatingOpcode.test.ts`; `tests/battleScriptTrysetperishsongOpcode.test.ts`; `tests/gate6VolatileAbilityInteractions.test.ts` | R10 complete: paired Attract/Oblivious receipt plus Soundproof partial-immunity receipt. |
 | volatile x stat-stage | Swagger/Flatter-like effects combine a volatile application with a stat change; accuracy/evasion stages combine with Foresight's volatile exception (`battle_script_commands.c:1128-1142`; stat application `7085-7089`). | NONE | K5: Swagger should set confusion and +2 Attack exactly once; Foresight ignores target evasion only. |
 | volatile x switching/entry | Ordinary switch replaces state; Baton Pass preserves `status2` and all stat stages, then clear-set-data handles the remainder (`battle_script_commands.c:4621-4657`). | `tests/battleScriptSwitchinOpcode.test.ts` (ordinary clear/Baton Pass retain) | R11 oracle: Substitute/Focus Energy/Baton Pass versus ordinary switch. |
 | volatile x immunity/absorb | Semi-invulnerable state blocks ordinary targeting; it also suppresses weather chip only underground/underwater (`battle_script_commands.c:1062-1085,7606-7635`). | `tests/battleScriptDamagingWeatherOpcode.test.ts` | R2 oracle (shared with weather). |
@@ -89,7 +89,7 @@ the state transition.
 | held-item x immunity/absorb | No held-item branch changes an ability/type absorb result in Gen III; item effects run only after damage/effect eligibility.  Absorb handler is ability-only (`battle_util.c:2676-2747`) and item dispatch is separate (`3257-3330`). | `tests/gate6EntryItemInteractions.test.ts` (K7: all three matching redirects preserve Sitrus before damage/item dispatch) | Closed by K7; no new ROM fixture needed. |
 | ability x stat-stage | Clear Body/White Smoke block most preventable drops; Keen Eye blocks accuracy and Hyper Cutter Attack specifically; Intimidate creates an Attack drop (`battle_script_commands.c:6975-7038`; `battle_util.c:3003-3087`). | `tests/battleScriptStatbuffchangeOpcode.test.ts` (Clear Body/White Smoke/Keen Eye/Hyper Cutter specificity); `tests/battleScriptSwitchinOpcode.test.ts` (Intimidate blockers); `tests/gate6EntryItemInteractions.test.ts` (R13 Pidgeot pair) | R13 fixture receipts the paired Keen Eye-specific block and unrelated Intimidate Attack drop. |
 | ability x switching/entry | Switch-in scan queues weather, Intimidate, Trace, and Forecast; Natural Cure is the distinct switch-out hook (`battle_util.c:1959-1964,2485-2596`; `battle_script_commands.c:9590-9604`). | `tests/battleScriptSwitchinOpcode.test.ts` | R6/R12/R13 cover legal ordered combinations. |
-| ability x immunity/absorb | Volt/Water Absorb and Flash Fire use the absorbing handler; Levitate, Wonder Guard, Soundproof and status immunities gate effects elsewhere (`battle_util.c:2676-2747`; `battle_script_commands.c:1375-1496,2275-2425`). | `tests/battleScriptHitChainOpcode.test.ts` (all three matching/mismatched types, full/partial HP, Flash Fire state); `tests/damageCalc.test.ts` (Flash Fire damage consumer); `tests/battleScriptMoveEndOpcode.test.ts` (status immunity); `tests/battleScriptSwitchinOpcode.test.ts` (Levitate entry) | R14 already covered; Volt Absorb additionally has two-seed OFF-ROM receipts. R10 Soundproof remains separate. |
+| ability x immunity/absorb | Volt/Water Absorb and Flash Fire use the absorbing handler; Levitate, Wonder Guard, Soundproof and status immunities gate effects elsewhere (`battle_util.c:2676-2747`; `battle_script_commands.c:1375-1496,2275-2425`). | `tests/battleScriptHitChainOpcode.test.ts` (all three matching/mismatched types, full/partial HP, Flash Fire state); `tests/damageCalc.test.ts` (Flash Fire damage consumer); `tests/battleScriptMoveEndOpcode.test.ts` (status immunity); `tests/battleScriptSwitchinOpcode.test.ts` (Levitate entry); `tests/battleScriptTrysetperishsongOpcode.test.ts` (Soundproof) | R14 already covered; Volt Absorb additionally has two-seed OFF-ROM receipts. R10 Soundproof is now independently receipted. |
 | stat-stage x switching/entry | Normal switch discards stages because full incoming BattlePokemon overwrites the active record; Baton Pass copies all stages first (`battle_script_commands.c:4621-4657`). | `tests/battleScriptSwitchinOpcode.test.ts` | R11 oracle. |
 | stat-stage x immunity/absorb | The stat-drop immunity family is the boundary: Clear Body/White Smoke/Keen Eye/Hyper Cutter and Shield Dust suppress eligible drops (`battle_script_commands.c:6975-7038`). | `tests/battleScriptStatbuffchangeOpcode.test.ts` | R13 oracle. |
 | switching/entry x immunity/absorb | Spikes damages only a non-Flying, non-Levitate switch-in (`battle_script_commands.c:5219-5254`); switch-in also obtains the incoming ability from species/slot (`4637-4646`). | `tests/battleScriptSwitchinOpcode.test.ts` | R15 oracle: three Spikes layers, Flying/Levitate/type control. |
@@ -111,7 +111,7 @@ are legal inert duplicates with `[Tackle,Tackle,Tackle,Tackle]`.
 | R7 | A: Ursaring Guts, Facade; B: Ninetales Will-O-Wisp x4. | Burn appears and Facade damage/stat result is the Guts branch. |
 | R8 | A: Muk Immunity (or Lanturn); B: Toxic x4; repeat B Thunder Wave x4 versus Limber Persian. | No durable status or incorrect cure message; control target is affected. |
 | R9 | A: Lum/White Herb Machamp; B: Gengar Swagger x4. | Lum removes confusion but not the +2 Attack boost; White Herb has no negative stage to restore, so it remains held while both +2 Attack and confusion persist (`battle_util.c:3739-3755`). |
-| R10 | A: Lickitung Oblivious; B: compatible-gender Attract x4; second card A: Exploud Soundproof, B: Perish Song x4. | Attraction/sound volatile is rejected through its ability branch. |
+| R10 | `gate6-r10-attract-off.json`: male Oblivious Lickitung versus female Gardevoir Attract x4; `gate6-r10-attract-control-off.json` changes only Lickitung to Own Tempo. `gate6-r10-perish-song-off.json`: Soundproof Exploud versus Lapras Perish Song x4. | Attraction is rejected with its distinct ability message while the compatible control is affected; Perish Song skips only Soundproof and still marks its ordinary user. |
 | R11 | A: Ninjask Substitute then Baton Pass; bench: recipient. B: passive Tackle x4. Repeat ordinary manual switch. | Baton Pass retains intended status2/stages; ordinary switch clears them. |
 | R12 | A: White Herb Pinsir (sole ability Hyper Cutter); B: Granbull Intimidate x4; switch Granbull in after initial player action. | Prevention control: Hyper Cutter blocks the Attack cut, so White Herb does not activate or get consumed. |
 | R12b | A: White Herb Machamp (sole ability Guts); B enters as Granbull Intimidate with Tackle x4 after an initial action. | Viable interaction: Attack 6→5, Intimidate message, White Herb restore 5→6, herb message, then item consumption. |
@@ -126,6 +126,42 @@ or ROM-only randomness at those boundaries; promote only a mismatch to a
 mechanicLab trace.
 
 ## Completed receipt notes
+
+### R10 — Oblivious Attract rejection and Soundproof partial immunity
+
+The Attract pair uses complete, compatible-gender parties: male Lickitung
+versus female Gardevoir, with Gardevoir constrained to four Attract slots.
+The only target-side mechanic difference is Lickitung's legal ability slot:
+slot 1 is Oblivious and slot 0 is Own Tempo.  On seeds `1` and `324508639`,
+the Oblivious target remains at `status2 = 0`; the move spends one PP and
+records `gLastUsedAbility = 12`.  Frames 160 and 200 display the specific
+`LICKITUNG's OBLIVIOUS prevents romance!` message with raw-RGB SHA-256
+`60083432b743e314d9c55e5e27e9c65c1f92aea4b94839dafa68b5d3937dc9d2`.
+The Own Tempo control gains exactly `STATUS2_INFATUATED_WITH(1) = 0x20000`
+at frame 71 on both seeds and displays `LICKITUNG fell in love!`.
+
+This is the hardcoded Oblivious branch at
+`battle_script_commands.c:7676-7681`, which precedes the same-gender,
+already-infatuated, and genderless failure checks at 7684-7690.  Compatible
+success writes only the attacker-indexed infatuation bit at 7692-7694.
+`BattleScript_ObliviousPreventsAttraction` supplies the distinct
+`STRINGID_PKMNPREVENTSROMANCEWITH` tail at
+`battle_scripts_1.s:4140-4144`; it is not `BattleScript_ButItFailed`.
+The Gate-6 Tier-1 pair runs the complete effect script and pins both message
+tails, exact status2 mutation, PP loss, and the single accuracy draw.
+
+The prior `perish-song-off-evidence.json` was not enough to skip the second
+card: its own bounded remainder says it did not observe a Soundproof active
+battler.  `gate6-r10-perish-song-off.json` closes that receipt gap with
+Soundproof Exploud versus constrained Perish Song Lapras.  On both seeds,
+frame 311 sets only Lapras to `STATUS3_PERISH_SONG = 0x20`, timer `3`;
+Exploud remains at status3/timer zero.  The shared frame-311 hash is
+`1ac6ee39d8403c4ba71110bfd968a9b508da53a1a9fe5bda716bd61e2d57389f`.
+Lapras's timer then counts `3→2` at frame 580 while Exploud remains exempt.
+The existing `tests/battleScriptTrysetperishsongOpcode.test.ts` pins the
+source loop at `battle_script_commands.c:8508-8533`: Soundproof increments
+the unaffected count, ordinary battlers receive the bit/timers, and partial
+immunity is still overall success.
 
 ### R2 — Dig's underground weather window, surfacing, and grounded control
 
