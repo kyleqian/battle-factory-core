@@ -13,6 +13,35 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 709 — [SUPERVISOR 2026-07-29 ~17:40] ISSUES #51 + immunity-cure reveal both merged; union green; round 5 dispatched
+
+- **State:** master `b814e791` green at **520 files / 5296 tests + 1
+  deliberate animation-lane skip**, production build, `git diff --check`
+  clean, no orphan worktrees/branches, DEFERRED.md empty.
+- **Did:** (1) verified + accepted entry 708's #51 fix (targeted 22/22;
+  draft-menu-slot6 66/66, summary-info-onix 122/122, mon-down-up 87/87
+  re-run exact; missing non-anchor layers honestly absent, not
+  anchor-substituted). (2) verified + merged
+  `worker/side-20260729-164144`: `MOVEEND_IMMUNITY_ABILITIES` status-curing
+  reveal, all eight source pairs, site B→A, moveend barriers 5→4; fresh
+  seed-610839776 probe reproduced the banked receipt byte-identically;
+  live reachability is Factory-legal (Skill Swap on GIRAFARIG set 244 →
+  statused Limber holder). Census content idempotent — the only regen
+  drift was the doc's embedded generation date crossing UTC midnight
+  (restored; future briefs told to restore date-only churn).
+- **Next:** round 5 dispatched — main: author
+  docs/battle-resolution-seam-design.md (typed action-resolution/send-out
+  lifecycle; the named gap holding the 128-capture breadth proof at 0/128
+  and blocking the trainer-pic OFF window; design-only, slices dispatched
+  verbatim afterward); side: Synchronize moveend reveal (both states,
+  battle_util.c:2971/:2987). Then: resolution slices, remaining CBM/CV
+  arms, Gate-6 matrix.
+- **Notes:** 8 workers so far, 0 failed steps, 1 integrity correction.
+  OT/ID summary text: source suppresses it in Battle Factory summaries
+  (worker finding, entry 708) — no OT-name extraction needed.
+
+---
+
 ## 708 — [BOUNDED MAIN WORKER 2026-07-29 ~17:00] Generated draft summaries consume live rental records
 
 - **State:** implementation `9c342d01` + type fix `804c27a3`; tree green at
@@ -71,25 +100,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 706 — [BOUNDED MAIN WORKER 2026-07-29 ~16:28] Live voluntary party selector + source refusal landed
-
-- **State:** implementation `558fb93d`; tree green at **519 files / 5271
-  tests + 1 deliberate animation-lane skip**, production build, targeted
-  selector/seam acceptance **88/88**, and `git diff --check`. Both forced
-  party windows remain **200/200**; the complete fourteen command-menu
-  windows remain exact (**209/235/90 +
-  254/44/42/44/93/88/111/83/56/46/57**).
-- **Did:** the generated battle command's typed `party-handoff` now constructs
-  a voluntary three-row selector from live rules state, renders source-extracted
-  party tiles/font plus arbitrary `SPECIES_*` icons, implements source
-  single-layout cursor edges/submenu, restores the same request/action cursor
-  on B, and submits the exact legal selected index. Both voluntary and forced
-  SEND OUT now print Emerald's exact two-line `<mon> has no energy / left to
-  battle!` refusal and stay in the party menu. Deleted resolved ISSUES #49.
-- **Next:** supervisor should proceed to ISSUES #51 (generated draft summary
-  data), trainer-pic OFF window, or Gate-6 work. The explicit-OFF 128-frame
-  command breadth proof remains bounded by entry 704's action-resolution
-  lifecycle gap; this step recorded no trace.
-- **Notes:** no canonical-recording import, unsupported barrier, trace/capture
-  change, battle/turn/absolute-tick selector, damage/RNG/turn-order, swaps,
-  summary, or animation change. PAPERCUT: none.
