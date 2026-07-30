@@ -99,7 +99,10 @@ describe("source-complete TRYRECYCLEITEM / EFFECT_RECYCLE", () => {
     expect(state.rulesContext.battlers[0].item).toBe(SITRUS_BERRY);
     expect(state.rulesContext.party.player[0].item).toBe(SITRUS_BERRY);
     expect(state.rulesContext.usedHeldItems).toEqual([0, 9, 8, 7]);
-    expect(state.rulesContext.lastUsedItem).toBe(SITRUS_BERRY);
+    // Recycle's message observes Sitrus before the later move-end item scan;
+    // that scan then writes each holder in order and ends on battler 1's NONE
+    // (battle_util.c:3626-3637).
+    expect(state.rulesContext.lastUsedItem).toBe(0);
     expect(state.events).toContainEqual(expect.objectContaining({ kind: "set-battler-item", battler: 0, item: SITRUS_BERRY }));
     expect(state.events).toContainEqual(expect.objectContaining({
       kind: "message", messageId: "STRINGID_XFOUNDONEY", substitutions: ["ATTACKER", `ITEM_${SITRUS_BERRY}`],
@@ -112,7 +115,7 @@ describe("source-complete TRYRECYCLEITEM / EFFECT_RECYCLE", () => {
     const state = run(rules(0));
     expect(state.rulesContext.battlers[0].item).toBe(0);
     expect(state.rulesContext.usedHeldItems).toEqual([0, 9, 8, 7]);
-    expect(state.rulesContext.lastUsedItem).toBe(77);
+    expect(state.rulesContext.lastUsedItem).toBe(0);
     expect(state.rng.calls).toBe(0);
   });
 
@@ -121,7 +124,7 @@ describe("source-complete TRYRECYCLEITEM / EFFECT_RECYCLE", () => {
     expect(state.rulesContext.battlers[0].item).toBe(LEFTOVERS);
     expect(state.rulesContext.party.player[0].item).toBe(LEFTOVERS);
     expect(state.rulesContext.usedHeldItems).toEqual([SITRUS_BERRY, 9, 8, 7]);
-    expect(state.rulesContext.lastUsedItem).toBe(77);
+    expect(state.rulesContext.lastUsedItem).toBe(0);
     expect(state.rng.calls).toBe(0);
   });
 
