@@ -80,6 +80,10 @@ const TYPE_NORMAL = "TYPE_NORMAL";
 const TYPE_FIRE = "TYPE_FIRE";
 const TYPE_WATER = "TYPE_WATER";
 const TYPE_ICE = "TYPE_ICE";
+const CASTFORM_NORMAL_TYPES = Object.freeze([TYPE_NORMAL, TYPE_NORMAL]) as readonly [string, string];
+const CASTFORM_FIRE_TYPES = Object.freeze([TYPE_FIRE, TYPE_FIRE]) as readonly [string, string];
+const CASTFORM_WATER_TYPES = Object.freeze([TYPE_WATER, TYPE_WATER]) as readonly [string, string];
+const CASTFORM_ICE_TYPES = Object.freeze([TYPE_ICE, TYPE_ICE]) as readonly [string, string];
 
 function isBattlerOfType(battler: BattleScriptRulesBattlerState, type: string): boolean {
   return battler.types[0] === type || battler.types[1] === type;
@@ -94,28 +98,52 @@ function weatherIsNullified(rules: BattleScriptRulesContext): boolean {
   return false;
 }
 
-/** Pure port of CastformDataTypeChange (battle_util.c:2396-2429) -- no mutation, see module doc comment. */
-export function computeCastformForm(rules: BattleScriptRulesContext, battler: BattleScriptRulesBattlerState): number {
+export interface CastformTypeChange {
+  form: number;
+  types: readonly [string, string];
+}
+
+/**
+ * Pure source-shaped result of CastformDataTypeChange (battle_util.c:2396-2429).
+ * The caller owns durable mutation/controller presentation; this pins the exact
+ * form and SET_BATTLER_TYPE pair selected at the ability pass.
+ */
+export function computeCastformTypeChange(
+  rules: BattleScriptRulesContext,
+  battler: BattleScriptRulesBattlerState,
+): CastformTypeChange {
   if (battler.species !== SPECIES_CASTFORM || battler.ability !== ABILITY_FORECAST || battler.hp === 0) {
-    return 0; // :2399-2400
+    return Object.freeze({ form: 0, types: battler.types }); // :2399-2400
   }
   if (weatherIsNullified(rules)) {
-    return isBattlerOfType(battler, TYPE_NORMAL) ? 0 : CASTFORM_NORMAL_FORM; // :2401-2407
+    return isBattlerOfType(battler, TYPE_NORMAL)
+      ? Object.freeze({ form: 0, types: battler.types })
+      : Object.freeze({ form: CASTFORM_NORMAL_FORM, types: CASTFORM_NORMAL_TYPES }); // :2401-2407
   }
   let form = 0;
+  let types = battler.types;
   if ((rules.weather & B_WEATHER_RAIN_SUN_HAIL) === 0 && !isBattlerOfType(battler, TYPE_NORMAL)) {
     form = CASTFORM_NORMAL_FORM; // :2408-2412
+    types = CASTFORM_NORMAL_TYPES;
   }
   if ((rules.weather & B_WEATHER_SUN) !== 0 && !isBattlerOfType(battler, TYPE_FIRE)) {
     form = CASTFORM_FIRE_FORM; // :2413-2417
+    types = CASTFORM_FIRE_TYPES;
   }
   if ((rules.weather & B_WEATHER_RAIN) !== 0 && !isBattlerOfType(battler, TYPE_WATER)) {
     form = CASTFORM_WATER_FORM; // :2418-2422
+    types = CASTFORM_WATER_TYPES;
   }
   if ((rules.weather & B_WEATHER_HAIL) !== 0 && !isBattlerOfType(battler, TYPE_ICE)) {
     form = CASTFORM_ICE_FORM; // :2423-2427
+    types = CASTFORM_ICE_TYPES;
   }
-  return form;
+  return Object.freeze({ form, types: Object.freeze(types) });
+}
+
+/** Compatibility projection used by existing switch-in scheduling. */
+export function computeCastformForm(rules: BattleScriptRulesContext, battler: BattleScriptRulesBattlerState): number {
+  return computeCastformTypeChange(rules, battler).form;
 }
 
 function createTrycastformdatachangeHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
