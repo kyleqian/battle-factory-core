@@ -502,6 +502,8 @@ export type FactoryAiScoredBattlerView = Readonly<{
   isToxicPoisoned?: boolean;
   /** `gBattleMons[].status1 & STATUS1_ANY` -- source-required for `AI_CBM_Toxic`'s target-status gate. Optional, defaulting to `false`. */
   hasAnyStatus?: boolean;
+  /** `gBattleMons[].status2 & STATUS2_CONFUSION` -- source-required for `AI_CBM_Confuse`'s first gate (target only, doc §32). Optional, defaulting to `false`. */
+  isConfused?: boolean;
   /** `gStatuses3[] & STATUS3_LEECHSEED` -- source-required for `AI_CV_AccuracyDown`'s Gate E (target only, doc §19.1). Optional, defaulting to `false`. */
   isLeechSeeded?: boolean;
   /** STATUS2_INFATUATION, read by AI_CV_Protect. */
@@ -790,6 +792,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     accStage: view.target.statStages.acc,
     evasionStage: view.target.statStages.evasion,
     hasAnyStatus: view.target.hasAnyStatus,
+    isConfused: view.target.isConfused,
     safeguardUp: view.target.safeguardUp,
     usablePartyMons: view.target.usablePartyMons,
   });

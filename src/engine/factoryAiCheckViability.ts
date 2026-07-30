@@ -12,7 +12,8 @@
  * `"factory-ai-check-viability"` unsupported-branch barrier -- except the
  * following (the ported handlers per
  * `docs/factory-ai-checkviability-ground-truth.md` §5's table, dispatched
- * before that barrier check): `EFFECT_SLEEP` (`AI_CV_Sleep`, doc §29), `EFFECT_SPEED_DOWN(_2)` (`AI_CV_SpeedDown`,
+ * before that barrier check): `EFFECT_SLEEP` (`AI_CV_Sleep`, doc §29),
+ * `EFFECT_CONFUSE` (`AI_CV_Confuse`, doc §32), `EFFECT_SPEED_DOWN(_2)` (`AI_CV_SpeedDown`,
  * `runCvSpeedDown` below, `data/battle_ai_scripts.s:1142-1152`,
  * `docs/factory-ai-checkviability-ground-truth.md` §6), `EFFECT_PURSUIT`
  * (`AI_CV_Pursuit`, `runCvPursuit` below, `:2018-2036`, doc §11.1),
@@ -343,6 +344,17 @@ export type FactoryAiCheckViabilityDraw =
     rawRngValue: number;
     randomValue: number;
     strikesFirst: 0 | 1 | 2;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "confuse-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** True when low byte <128 JUMPs over the first -1. */
+    jumped: boolean;
   }>
   | Readonly<{
     ordinal: number;
@@ -3429,6 +3441,23 @@ export function runCheckViability(input: Readonly<{
     });
   }
 
+  if (move.effect === "EFFECT_CONFUSE") {
+    const confuse = runCvConfuse({
+      rng: input.rng,
+      targetHp: input.target.hp,
+      targetMaxHp: input.target.maxHp,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: confuse.rng,
+      draws: confuse.draws,
+      scoreDelta: confuse.scoreDelta,
+      funcResultAfter: funcResultCarry,
+    });
+  }
+
   if (AI_CHECK_VIABILITY_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
       kind: "unsupported-branch",
@@ -3586,5 +3615,44 @@ function runCvParalyze(input: Readonly<{
     rng,
     draws: Object.freeze(draws),
     scoreDelta: hpPercent > 70 ? 0 : -1,
+  });
+}
+
+/**
+ * `AI_CV_Confuse` (`data/battle_ai_scripts.s:1467-1477`, doc §32).
+ * Target HP >70% JUMPs straight to End with no draw. Otherwise one low-byte
+ * roll decides whether to JUMP over the first -1 (<128) or FALL THROUGH to
+ * it (>=128), then the strict >50% and >30% HP gates successively JUMP to
+ * End or FALL THROUGH to an additional -1.
+ */
+function runCvConfuse(input: Readonly<{
+  rng: BattleRngState;
+  targetHp: number;
+  targetMaxHp: number;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckViabilityDraw[];
+  scoreDelta: number;
+}> {
+  const hpPercent = Math.floor((100 * input.targetHp) / input.targetMaxHp);
+  if (hpPercent > 70) {
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 0 });
+  }
+
+  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-confuse-roll`);
+  const jumped = roll.randomValue % 256 < 128;
+  let scoreDelta = jumped ? 0 : -1;
+  if (hpPercent <= 50) scoreDelta -= 1;
+  if (hpPercent <= 30) scoreDelta -= 1;
+  return Object.freeze({
+    rng: roll.after,
+    draws: Object.freeze([Object.freeze({
+      ...roll,
+      kind: "confuse-roll" as const,
+      jumped,
+    })]),
+    scoreDelta,
   });
 }

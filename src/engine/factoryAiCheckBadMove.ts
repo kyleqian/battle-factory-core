@@ -29,7 +29,7 @@
  * that path, not a stub (none of the three banked ledgers' four moves reach
  * a table entry; confirmed by direct grep of `data/battle_ai_scripts.s`).
  *
- * Ported table entries include `EFFECT_SLEEP` and `EFFECT_SPEED_DOWN(_2)` -> `AI_CBM_SpeedDown`
+ * Ported table entries include `EFFECT_SLEEP`, `EFFECT_CONFUSE`, and `EFFECT_SPEED_DOWN(_2)` -> `AI_CBM_SpeedDown`
  * (`data/battle_ai_scripts.s:287-312`, `runCbmSpeedDown` below), the
  * proven CBM+CV pair with `factoryAiCheckViability.ts`'s `AI_CV_SpeedDown`
  * (`docs/factory-ai-checkviability-ground-truth.md` §6); `EFFECT_ATTACK_DOWN(_2)`
@@ -278,6 +278,12 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
    * `AI_CBM_Toxic`'s final gate. Optional, defaulting to false.
    */
   safeguardUp?: boolean;
+  /**
+   * Whether `gBattleMons[AI_TARGET].status2 & STATUS2_CONFUSION` is nonzero
+   * -- `AI_CBM_Confuse`'s first, source-ordered rejection gate (doc §32).
+   * Optional, defaulting to false.
+   */
+  isConfused?: boolean;
 }>;
 
 /**
@@ -413,6 +419,7 @@ const ABILITY_CLEAR_BODY = "ABILITY_CLEAR_BODY";
 const ABILITY_WHITE_SMOKE = "ABILITY_WHITE_SMOKE";
 const ABILITY_IMMUNITY = "ABILITY_IMMUNITY";
 const ABILITY_LIMBER = "ABILITY_LIMBER";
+const ABILITY_OWN_TEMPO = "ABILITY_OWN_TEMPO";
 
 /**
  * `check_ability AI_TARGET, ability` / `if_ability AI_TARGET, ability, ptr`
@@ -1270,6 +1277,20 @@ export function runCheckBadMovePreamble(input: Readonly<{
     });
   }
 
+  // AI_CheckBadMove_CheckEffect: EFFECT_CONFUSE -> AI_CBM_Confuse
+  // (`data/battle_ai_scripts.s:132,386-391`, doc §32). Swagger and Flatter
+  // share this CBM body in source but retain their unported CV barriers.
+  if (move.effect === "EFFECT_CONFUSE") {
+    const confuse = runCbmConfuse(target, rng, ordinal, `${input.reasonPrefix}-confuse`);
+    for (const draw of confuse.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: confuse.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: confuse.scoreDelta,
+    });
+  }
+
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {
     return Object.freeze({
@@ -1381,6 +1402,34 @@ function runCbmParalyze(
   const blocked = ability.ability === ABILITY_LIMBER
     || (target.hasAnyStatus ?? false)
     || (target.safeguardUp ?? false);
+  return Object.freeze({
+    rng: ability.rng,
+    draws: Object.freeze(ability.draw === null ? [] : [ability.draw]),
+    scoreDelta: blocked ? -10 : 0,
+  });
+}
+
+/**
+ * `AI_CBM_Confuse` (`data/battle_ai_scripts.s:386-391`, doc §32):
+ * existing confusion JUMPs to -5 before the ability read; otherwise one
+ * fresh target ability read runs, Own Tempo JUMPs to -10, Safeguard JUMPs
+ * to -10, and only the all-clear path FALLS THROUGH to end at zero.
+ */
+function runCbmConfuse(
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{
+  rng: BattleRngState;
+  draws: readonly FactoryAiCheckBadMoveDraw[];
+  scoreDelta: number;
+}> {
+  if (target.isConfused ?? false) {
+    return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -5 });
+  }
+  const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
+  const blocked = ability.ability === ABILITY_OWN_TEMPO || (target.safeguardUp ?? false);
   return Object.freeze({
     rng: ability.rng,
     draws: Object.freeze(ability.draw === null ? [] : [ability.draw]),
