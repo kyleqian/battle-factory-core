@@ -65,7 +65,7 @@ the state transition.
 
 | Axis pair | Distinct source mechanism(s) | Existing Tier-1 coverage | Gap / first proof |
 | --- | --- | --- | --- |
-| weather x status | Sun prevents a new freeze; weather itself is not a major-status cure. `seteffect` checks sun before Ice type/Magma Armor (`battle_script_commands.c:2380-2393`). | NONE | R1 oracle: Sunny Day then Ice Beam freeze attempt; compare sun/no-sun. |
+| weather x status | Sun prevents a new freeze; weather itself is not a major-status cure. `seteffect` checks sun before Ice type/Magma Armor (`battle_script_commands.c:2380-2393`). | `tests/battleScriptHitChainOpcode.test.ts` (freeze applies without weather and is blocked by active sun) | R1 receipts the RNG-gated Ice Beam pair on two freeze-producing seeds. |
 | weather x volatile | Sand/hail chip skips underground and underwater; weather also changes Thunder's accuracy while semi-invulnerability is checked first (`battle_script_commands.c:1062-1094`, `7602-7635`). | `tests/battleScriptDamagingWeatherOpcode.test.ts` (underground weather chip) | R2 oracle: Dig on sand/hail turn, then surface. |
 | weather x held-item | The only shared scheduling boundary is end-turn: abilities, normal items, then Leech Seed/poison are sequenced by `DoBattlerEndTurnEffects` (`battle_util.c:1494-1533`); weather damage is a separate script loop (`battle_scripts_1.s:3200-3222`). No weather-specific held-item branch exists. | NONE | K1: ordering property (weather chip vs Leftovers/Sitrus) in the end-turn orchestrator; oracle only if event order differs. |
 | weather x ability | Cloud Nine/Air Lock suppress **all** `WEATHER_HAS_EFFECT`; Forecast changes Castform's type in rain/sun/hail; Rain Dish, Swift Swim and Chlorophyll read active weather; Sand Veil changes accuracy (`battle_util.h:47-48`; `battle_util.c:2396-2427,2601-2648`; `battle_script_commands.c:1152-1155`). Air Lock is UNREACHABLE; Cloud Nine/Forecast and the speed/end-turn abilities are legal. | `tests/battleScriptDamagingWeatherOpcode.test.ts` (Cloud Nine, Sand Veil); `tests/battleScriptSwitchinOpcode.test.ts` (weather entry scheduling) | R3, R4: Cloud Nine removal restores weather, then Forecast/type and speed timing. |
@@ -102,7 +102,7 @@ are legal inert duplicates with `[Tackle,Tackle,Tackle,Tackle]`.
 
 | ID | Parties and controller route | Assertion |
 | --- | --- | --- |
-| R1 | A: Articuno, Ice Beam; B: Vileplume, Sunny Day, then repeat without Sun. Opponent four Sunny Day slots for its one choice. | Freeze status never appears under Sun; control can freeze. |
+| R1 | `gate6-r1-sun-off.json`: faster player Vileplume uses Sunny Day, then constrained Articuno uses Ice Beam. `gate6-r1-control-off.json`: the identical parties/turn use Growth, a legal non-weather move with the same zero-RNG setup shape. | On seeds selected because the control's Ice Beam secondary roll freezes, both scenarios consume the same move RNG states; only active sun prevents status `0x20`. |
 | R2 | A: Dugtrio, Dig; B: Tyranitar, Sandstorm x4 (or Hail user/Hail x4). | Active underground ignores chip; surfacing re-enables it. |
 | R3 | A: Golduck abilitySlot=1 (Cloud Nine), Rain Dance; B: neutral Tackle x4. Switch Golduck out after rain is live. | Weather flag remains but chip/accuracy resumes only after Cloud Nine leaves. |
 | R4 | A: Castform Forecast, Weather Ball; B: Rain Dance x4. | Entry/form/update gives Water type and Weather Ball changes; this is the Forecast boundary. |
@@ -186,6 +186,35 @@ then zero.  Both frame-540 receipts share raw-RGB SHA-256
 The Gate-6 Tier-1 pin confirms Chesto clears both sleep and Nightmare while
 Lum reaches the distinct confusion cure branch.
 
+### R1 — active sun prevents the same RNG-gated freeze rolls
+
+`tools/probe/probe-gate6-r1-off.py`, run only through
+`tools/run-mgba-probe.py`, records every `sRandCount` change and the stock
+ROM state.  Seeds `17` and `22` were selected by a bounded control search
+because Growth→Ice Beam genuinely freezes Vileplume; the sun fixture differs
+only by using Sunny Day instead of Growth before the same constrained Ice
+Beam.  Both player setup moves are legal, status-class, and consume no RNG.
+
+For seed `17`, the four Ice Beam move-window states are
+`274638845→4197121324→2574881839→4014262902→1665042609`; the last draw's
+returned upper half is `25406` (`%100 = 6`).  Control frames are
+`284/314/317/561`, and status becomes `0x20` on frame 561.  Under sun, the
+identical states occur at frames `216/246/249/493`, weather is `0x20`, and
+status remains zero.
+
+For seed `22`, the matching ledger is
+`162615947→1244192674→550958189→860727516→4155264543`; the last returned
+upper half is `63404` (`%100 = 4`).  Control frames are
+`284/314/317/554`, with status `0x20` on frame 554; sun frames are
+`216/246/249/486`, with weather `0x20` and status zero.  The whole remaining
+turn ledger also stays identical within each sun/control pair: final RNG is
+`3419046873` for seed 17 and `3284998766` for seed 22.  Thus neither
+fixture thins away or rerolls the secondary effect; the literal
+`WEATHER_HAS_EFFECT && B_WEATHER_SUN` gate is the sole outcome difference.
+The already-existing Tier-1 pair in
+`tests/battleScriptHitChainOpcode.test.ts` pins both the no-weather freeze
+dispatch and active-sun rejection.
+
 ## Ranked dispatch shortlist
 
 Each line is one bounded worker slice, not an instruction to create all traces
@@ -201,7 +230,7 @@ in scenario/evidence once accepted.
 7. **R13 — Intimidate x stat-drop prevention specificity.** `bin/oracle lab tools/battle-lab/gate6-r13-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptStatbuffchangeOpcode.test.ts tests/battleScriptSwitchinOpcode.test.ts; npm run build`
 8. **R14 — CLOSED by the banked absorption program plus K7's Gate-6 pair pin.** See the completed receipt note above; intentionally no duplicate `gate6-r14-off.json`.
 9. **R5 — sleep/confusion x Chesto/Lum exact cure timing.** `bin/oracle lab tools/battle-lab/gate6-r5-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptMoveEndOpcode.test.ts; npm run build`
-10. **R1 — sun x freeze prevention.** `bin/oracle lab tools/battle-lab/gate6-r1-off.json -o "$(mktemp -d)"; npm test -- tests/battleScriptDamagingWeatherOpcode.test.ts; npm run build`
+10. **R1 — CLOSED by the paired sun/control fixtures, two freeze-producing seeds, exact RNG ledgers, and existing kernel pair.**
 
 The remaining lower-risk kernel-first cards are K1 (end-turn item/weather
 order), K2 (weather-stage accuracy), K3 (major/volatile canceler ordering),
