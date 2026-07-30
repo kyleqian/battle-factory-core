@@ -13,6 +13,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 728 — [BOUNDED MAIN WORKER 2026-07-30 ~00:10] Resolution Slice 7 complete; generated Scene-OFF command 128/128
+
+- **State:** implementation `7485848a`, acceptance `4305a82f`, compatibility
+  `43344166`; generated explicit-OFF trace **128/128** and all **25/25**
+  immutable §3.2 rows exact. Focused acceptance is green at **7 files / 168
+  tests**; full suite/build green at **527 files / 5412 tests + 1 deliberate
+  animation-lane skip**.
+- **Did:** typed resolution now consumes provenance-bearing
+  `MOVE_ANIMATION`/`HIT_ANIMATION` receipts. The pre-hit hold derives from
+  the receipt instruction span plus source `B_WAIT_TIME_SHORT`; the target
+  uses the existing generic 32-tick blink/20-pose healthbox reaction before
+  immutable HP drain. Committed consecutive frames 8-135, deleted #52, and
+  completed design Slice 7.
+- **Next:** trainer-pic intro slices remain the next main-lane roadmap work.
+- **Notes:** source: `battle_scripts_1.s:236-266,3151-3153`;
+  `battle_script_commands.c:1743-1754,3914-3931,5558-5575`;
+  `battle_controller_opponent.c:440-456,1804-1816`;
+  `pokeball.c:1284-1306`. No import/barrier/ratchet pin, route/tick branch,
+  fitted coordinate/RGB, or capture thinning. PAPERCUT: none.
+
+---
 ## 727 — [BOUNDED MAIN WORKER 2026-07-29 ~23:45] Typed confirm handoff exact; Slice-7 checkpoint advances to 60/128
 
 - **State:** implementation `7f8e876b`; full suite green at **527 files /
@@ -56,31 +77,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   to the open remainder. Complete §3.2 table remains exact (**25/25 rows**).
   No trace/capture change, import/barrier/ratchet-pin move, or
   battle/turn/absolute-tick branch. PAPERCUT: none.
-
----
-## 725 — [SUPERVISOR 2026-07-29 ~22:45] Rounds 1-2: Slice 6 verified, Slice-7 honest checkpoint merged (#52 filed), trainer-pic dossier banked
-
-- **State:** master green at **527 files / 5408 tests + 1 deliberate
-  animation-lane skip** (union suite + build re-run by supervisor after
-  merge `c7a5d30e`), `git diff --check` clean, no orphan worktrees or
-  worker branches, DEFERRED.md empty. Orient: `animation-main` had
-  nothing to fold; oracle freshness FAIL re-confirmed as the docs-only
-  false positive (807b449) — services kept.
-- **Did:** (1) verified Slice 6 (entry 723): re-ran turn17-rung7a
-  **255/255** and rung8b **118/118** myself; typed terminal dispatch
-  confirmed at `battleScene.ts:15506+`, legacy turn17 flags mirror-only
-  for the out-of-scope postwin owner. (2) Merged side-lane Slice-7
-  checkpoint `c7a5d30e`: honest GRANBULL-vs-ARON mechanicLab route
-  (trainer 17, seed 2423399196), `oracleBattleLab` compare plumbing,
-  pinned **11/128** diagnostic; **0/128 stays claimed**; filed ISSUES
-  #52 (fight-closing bounce-clock reset vs ROM continuous idle clock).
-  (3) Trainer-pic scout dossier + SHIZUKA fixture landed (entry 724);
-  its slice-4 acceptance trace is blocked on the same harness-side
-  pre-reset-capture family as the entry-690 commentary checkpoint.
-  (4) Restored the standing-arrangement blockquote dropped by
-  `c2eb3f45`'s ledger edit.
-- **Next:** main = #52 fix + Slice 7 completion (trace only at 128/128);
-  side = Gate-6 interaction-matrix scout. Then trainer-pic intro slices
-  1-3 per the dossier.
-- **Notes:** cross-lane full suite runs 563-688s while the animation
-  supervisor is live — union suite once per merge point only.

@@ -1,3 +1,32 @@
+## 725 — [SUPERVISOR 2026-07-29 ~22:45] Rounds 1-2: Slice 6 verified, Slice-7 honest checkpoint merged (#52 filed), trainer-pic dossier banked
+
+- **State:** master green at **527 files / 5408 tests + 1 deliberate
+  animation-lane skip** (union suite + build re-run by supervisor after
+  merge `c7a5d30e`), `git diff --check` clean, no orphan worktrees or
+  worker branches, DEFERRED.md empty. Orient: `animation-main` had
+  nothing to fold; oracle freshness FAIL re-confirmed as the docs-only
+  false positive (807b449) — services kept.
+- **Did:** (1) verified Slice 6 (entry 723): re-ran turn17-rung7a
+  **255/255** and rung8b **118/118** myself; typed terminal dispatch
+  confirmed at `battleScene.ts:15506+`, legacy turn17 flags mirror-only
+  for the out-of-scope postwin owner. (2) Merged side-lane Slice-7
+  checkpoint `c7a5d30e`: honest GRANBULL-vs-ARON mechanicLab route
+  (trainer 17, seed 2423399196), `oracleBattleLab` compare plumbing,
+  pinned **11/128** diagnostic; **0/128 stays claimed**; filed ISSUES
+  #52 (fight-closing bounce-clock reset vs ROM continuous idle clock).
+  (3) Trainer-pic scout dossier + SHIZUKA fixture landed (entry 724);
+  its slice-4 acceptance trace is blocked on the same harness-side
+  pre-reset-capture family as the entry-690 commentary checkpoint.
+  (4) Restored the standing-arrangement blockquote dropped by
+  `c2eb3f45`'s ledger edit.
+- **Next:** main = #52 fix + Slice 7 completion (trace only at 128/128);
+  side = Gate-6 interaction-matrix scout. Then trainer-pic intro slices
+  1-3 per the dossier.
+- **Notes:** cross-lane full suite runs 563-688s while the animation
+  supervisor is live — union suite once per merge point only.
+
+---
+
 ## 724 — [BOUNDED MAIN WORKER 2026-07-29] Trainer-pic OFF-window scout complete
 
 - **State:** banked legal OFF fixture and source-backed dossier; no app,
