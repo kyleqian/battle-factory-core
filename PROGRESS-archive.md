@@ -1,3 +1,28 @@
+## 713 — [BOUNDED MAIN WORKER 2026-07-29 ~19:15] Battle-resolution Slice 2 landed
+
+- **State:** implementation `84374947`; tree green at **521 files / 5317
+  tests + 1 deliberate animation-lane skip**, production build, targeted
+  Slice-2 acceptance **322/322**, and `git diff --check`.
+- **Did:** added the typed non-KO Scene-OFF renderer and source-composed scene
+  adapter. Frozen commands now drive one-glyph-per-frame attack/result text,
+  source `CalcNewBarValue` HP drain/heal clocks (including Q24.8 low-max-HP),
+  stat/status effect views, persistent displayed-field HP/status, turn-end,
+  and the six-frame blank next-command handoff. The canonical message helper
+  was exported without changing its callers. Pixel acceptance is exact:
+  staged OFF **16/16**, SAND_ATTACK **190/190**, and menus 3-13
+  **254/254, 44/44, 42/42, 44/44, 93/93, 88/88, 111/111, 83/83, 56/56,
+  46/46, 57/57**.
+- **Next:** dispatch `docs/battle-resolution-seam-design.md` **Slice 3 —
+  orchestrator replacement and generated non-KO handoff** verbatim; retain
+  the complete Slice-2 regression table.
+- **Notes:** no orchestrator/core, faint/party/send-out/terminal path,
+  trace/capture list, canonical-recording import, unsupported barrier, or
+  battle/turn/absolute-tick branch changed. The renderer consumes only its
+  frozen display field, typed commands, and command-relative lifecycle; it
+  imports no canonical duration vector. PAPERCUT: none.
+
+---
+
 ## 712 — [SUPERVISOR 2026-07-29 ~19:00] Slice 1 + Synchronize reveal folded; union green; round 7 dispatched
 
 - **State:** master green at **521 files / 5309 tests + 1 deliberate

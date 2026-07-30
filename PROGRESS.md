@@ -13,6 +13,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 716 — [SUPERVISOR 2026-07-29 ~20:05] Slice 3 + Confuse pair folded; union green; round 9 (final) dispatched
+
+- **State:** master green at **521 files / 5348 tests + 1 deliberate
+  animation-lane skip**, production build, `git diff --check` clean, no
+  orphan worktrees/branches, DEFERRED.md empty.
+- **Did:** (1) verified + accepted resolution Slice 3 (`eae69a47`:
+  targeted 122/122; staged 16/16, turn5/11 menus 42/56 re-run exact;
+  generated turns now flow orchestrator→resolution→next command with §2.3
+  boundary state). (2) verified + merged `worker/side-20260729-182316`
+  (Confuse pair, doc §32): 64 L50 carriers, supervisor re-ran live verify
+  4/4 PASS (control+reach, seeds 1/99, exact scores/PP-slots/RNG
+  endpoints incl. the 70/50/30 HP gates). Census delta Own Tempo 7→9
+  honest; executable census byte-identical.
+- **Next:** round 9 (final full round) dispatched — main: design §4
+  Slice 4 (faint + forced-party midpoint); side: Counter-vs-Swagger
+  re-ranked CBM/CV pair. Then wind-down: fold re-check on
+  animation-main, final union, session report. Slices 5-7 (send-out,
+  terminal handoff + #39 retirement proof, 128-capture breadth) are the
+  next session's ordered queue.
+- **Notes:** 14 workers, 0 failed steps. CBM/CV program: SpDefUp, Sleep,
+  Roar, Paralyze, Confuse done with two-seed live receipts each;
+  remainder Counter/Swagger.
+
+---
+
 ## 715 — [BOUNDED MAIN WORKER 2026-07-29 ~20:00] Battle-resolution Slice 3 landed
 
 - **State:** implementation `eae69a47`; tree green at **521 files / 5332
@@ -64,27 +89,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 713 — [BOUNDED MAIN WORKER 2026-07-29 ~19:15] Battle-resolution Slice 2 landed
-
-- **State:** implementation `84374947`; tree green at **521 files / 5317
-  tests + 1 deliberate animation-lane skip**, production build, targeted
-  Slice-2 acceptance **322/322**, and `git diff --check`.
-- **Did:** added the typed non-KO Scene-OFF renderer and source-composed scene
-  adapter. Frozen commands now drive one-glyph-per-frame attack/result text,
-  source `CalcNewBarValue` HP drain/heal clocks (including Q24.8 low-max-HP),
-  stat/status effect views, persistent displayed-field HP/status, turn-end,
-  and the six-frame blank next-command handoff. The canonical message helper
-  was exported without changing its callers. Pixel acceptance is exact:
-  staged OFF **16/16**, SAND_ATTACK **190/190**, and menus 3-13
-  **254/254, 44/44, 42/42, 44/44, 93/93, 88/88, 111/111, 83/83, 56/56,
-  46/46, 57/57**.
-- **Next:** dispatch `docs/battle-resolution-seam-design.md` **Slice 3 —
-  orchestrator replacement and generated non-KO handoff** verbatim; retain
-  the complete Slice-2 regression table.
-- **Notes:** no orchestrator/core, faint/party/send-out/terminal path,
-  trace/capture list, canonical-recording import, unsupported barrier, or
-  battle/turn/absolute-tick branch changed. The renderer consumes only its
-  frozen display field, typed commands, and command-relative lifecycle; it
-  imports no canonical duration vector. PAPERCUT: none.
-
----
