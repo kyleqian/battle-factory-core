@@ -4,6 +4,35 @@ Older dated sections moved out of `ANIMATION_PROGRESS.md` to keep that
 file lean (`AGENTS.md`'s ~3-most-recent convention). Git history has the
 full record regardless; this file is a read-only reference.
 
+## MOVE_BRICK_BREAK promoted exact; both controller-selected bodies accepted (2026-07-29)
+
+**Verdict:** `MOVE_BRICK_BREAK` is exact. Source/controller audit proves
+`removelightscreenreflect` selects distinct normal and shattered-wall
+presentation bodies. Complete legal Lombre/Onix Scene-ON parties prove both
+twice fresh per orientation. `BrickBreakNormal` passes **151/151** semantic
+and production frames: player-back **234–384** evidence/raw
+`ad3d3e90b70fde1595dda316a773e887f17123df5ad5815086159ddb52398b5d` /
+`67687eb221c4efb306fdca646b78fd181469aa22ef98e48d7006b4a9ec2c27cb`;
+opponent-front **220–370**
+`b1ac1081da160add8d9e92f878e3051199a909987735dc5bf06cd921bb1f8fab` /
+`4a03768b6549b364296e3639833e7c5d0cd6dedcec567ee62f20e32fd94c2645`.
+
+**Wall body / model:** `BrickBreakShatteredWall` passes **192/192** twice per
+orientation: player-back **288–479** evidence/raw
+`e484e602be861db10e4042c2a6de75e5f6e261e533515d48d8597637db5c4697` /
+`e1b36f8036f30386af0c7cdaac9645f73bb9eb526802c3179e745871cf637363`;
+opponent-front **289–480**
+`f0314f159cb9b141c107cbe078382ebb4ff7379c4ce2c835aa9b921c65bbe27a` /
+`8402d60c9605e852c0f099dbc617c80dc21d005097ed1985395b647564ae23bc`.
+The reducer/seam/compositor preserve two lunges, three hitsplats, fist,
+24+10+3 WindUpLunge, target-panned audio, BG blend, monbg/alpha, wall, four
+40-step TORN_METAL shards, hardware transfer/order, and cleanup.
+
+**Boundary:** `MOVE_CRUSH_CLAW` stays independently unsupported; no gameplay,
+screen outcome, RNG, controller, facility state, boundary list, unsupported
+barrier, or canonical allowlist changed. Coverage is **101 exact / 0 partial /
+0 staged / 175 unsupported**.
+
 ## MOVE_WHIRLPOOL promoted exact; both source bodies accepted (2026-07-29)
 
 **Verdict:** `MOVE_WHIRLPOOL` is exact through one pure source-relative

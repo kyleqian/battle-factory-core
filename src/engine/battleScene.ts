@@ -596,6 +596,7 @@ import metronomeAsset from "../animation/assets/metronome.json" with { type: "js
 import restAsset from "../animation/assets/rest.json" with { type: "json" };
 import howlAsset from "../animation/assets/howl.json" with { type: "json" };
 import sweetKissAsset from "../animation/assets/sweet-kiss.json" with { type: "json" };
+import attractAsset from "../animation/assets/attract.json" with { type: "json" };
 import sporeAsset from "../animation/assets/spore.json" with { type: "json" };
 import hypnosisAsset from "../animation/assets/hypnosis.json" with { type: "json" };
 import perishSongAsset from "../animation/assets/perish-song.json" with { type: "json" };
@@ -810,6 +811,7 @@ import {
   sceneOnRestView,
   sceneOnHowlView,
   sceneOnSweetKissView,
+  sceneOnAttractView,
   sceneOnSporeView,
   sceneOnCottonSporeView,
   sceneOnHypnosisView,
@@ -836,6 +838,7 @@ import {
   type SceneOnRestPresentationState,
   type SceneOnHowlPresentationState,
   type SceneOnSweetKissPresentationState,
+  type SceneOnAttractPresentationState,
   type SceneOnSporePresentationState,
   type SceneOnCottonSporePresentationState,
   type SceneOnHypnosisPresentationState,
@@ -1532,6 +1535,13 @@ const sweetKissArt = sweetKissAsset as {
   luvdiscFront: { tileset: Tileset; palette: RgbColor[] };
   redHeart: { tileset: Tileset; palette: RgbColor[] };
   angel: { tileset: Tileset; palette: RgbColor[] };
+};
+const attractArt = attractAsset as {
+  background: {
+    tileset: Tileset;
+    tilemap: Tilemap;
+    palette: RgbColor[];
+  };
 };
 const sporeArt = sporeAsset as {
   parasectBack: { tileset: Tileset; palette: RgbColor[] };
@@ -22533,6 +22543,187 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "MURKROW used" : "Foe MURKROW used",
       "PERISH SONG!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "ATTRACT") {
+    const attractState = state as SceneOnAttractPresentationState;
+    const view = sceneOnAttractView(attractState);
+    const displayed = sceneOnAttractView({
+      ...attractState,
+      age: attractState.age - 1,
+    });
+    const attackerDisplayed = sceneOnAttractView({
+      ...attractState,
+      // SwayMon mutates an already-existing battler after BuildOamBuffer;
+      // unlike newly-created hearts, its existing OAM path latches two ages.
+      age: attractState.age - 2,
+    });
+    const playerToOpponent =
+      view.attacker.species === "EEVEE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "EEVEE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged ATTRACT pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const eeveeSource = playerToOpponent
+      ? endureArt.eeveeBack : endureArt.eeveeFront;
+    const eevee = playerToOpponent
+      ? eeveeSource
+      : { ...eeveeSource, tileset: subTileset(eeveeSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    if (
+      view.heartsBackground.visible
+      && view.heartsBackground.eva > 0
+    ) {
+      const map = attractArt.background.tilemap;
+      for (let y = 0; y < 160; y += 1) {
+        for (let x = 0; x < 240; x += 1) {
+          const entry = map.entries[
+            Math.floor(y / 8) * map.width + Math.floor(x / 8)
+          ];
+          if (!entry) continue;
+          const tile = attractArt.background.tileset.tiles[entry.tile];
+          if (!tile) continue;
+          const sx = entry.hFlip ? 7 - (x % 8) : x % 8;
+          const sy = entry.vFlip ? 7 - (y % 8) : y % 8;
+          const index = tile[sy * 8 + sx]!;
+          if (index === 0) continue;
+          const color = attractArt.background.palette[index];
+          if (!color) continue;
+          const offset = (y * 240 + x) * 4;
+          fb[offset] = blendChannel(
+            color.r,
+            fb[offset]!,
+            view.heartsBackground.eva,
+            view.heartsBackground.evb,
+          );
+          fb[offset + 1] = blendChannel(
+            color.g,
+            fb[offset + 1]!,
+            view.heartsBackground.eva,
+            view.heartsBackground.evb,
+          );
+          fb[offset + 2] = blendChannel(
+            color.b,
+            fb[offset + 2]!,
+            view.heartsBackground.eva,
+            view.heartsBackground.evb,
+          );
+        }
+      }
+    }
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      eevee.tileset,
+      eevee.palette,
+      view.attacker.geometry.spriteCorner.x
+        + attackerDisplayed.attackerOffset.x2,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      blendPaletteToward(
+        onix.palette,
+        { r: 255, g: 206, b: 222 },
+        displayed.targetBlendCoefficient,
+      ),
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    const drawHeart = (heart: typeof displayed.bursts[number]) => {
+      if (heart.invisible || !heart.submitted) return;
+      drawSpriteSheet(
+        fb,
+        sweetKissArt.redHeart.tileset,
+        sweetKissArt.redHeart.palette,
+        heart.x + heart.x2 - 8,
+        heart.y + heart.y2 - 8,
+      );
+    };
+    // Stable OAM sorting preserves 10-before-3 until their unequal-Y frame
+    // at age 121, then preserves 3-before-10 at the later equal-Y crossing.
+    const burstTieBackToFront = displayed.age >= 121
+      ? [7, 3, 10, 4, 9, 5] as const
+      : [7, 10, 3, 4, 9, 5] as const;
+    const drawHearts = () => {
+      for (const heart of [...displayed.bursts].sort((a, b) =>
+        (a.y + a.y2) - (b.y + b.y2)
+        || burstTieBackToFront.indexOf(
+          a.slot as typeof burstTieBackToFront[number],
+        ) - burstTieBackToFront.indexOf(
+          b.slot as typeof burstTieBackToFront[number],
+        )
+      )) drawHeart(heart);
+      for (
+        const heart of [...displayed.rising].sort((a, b) => b.slot - a.slot)
+      ) drawHeart(heart);
+    };
+    if (playerToOpponent) {
+      drawTarget();
+      if (displayed.projectile) drawHeart(displayed.projectile);
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+      if (displayed.projectile) drawHeart(displayed.projectile);
+    }
+    drawHearts();
+    const profile = attractState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "EEVEE",
+        level: 50,
+        gender: profile.opponentGender ?? (playerToOpponent ? "male" : "female"),
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "EEVEE" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? (playerToOpponent ? "female" : "male"),
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "EEVEE used" : "Foe EEVEE used",
+      "ATTRACT!",
       99,
     );
     return;

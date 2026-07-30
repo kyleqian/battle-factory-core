@@ -522,6 +522,10 @@ import {
   type SweetKissState,
 } from "./sweetKiss.ts";
 import {
+  attractAtAge,
+  type AttractState,
+} from "./attract.ts";
+import {
   sporeAtAge,
   type SporeState,
 } from "./spore.ts";
@@ -1549,6 +1553,13 @@ export interface SceneOnSweetKissConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnAttractConfig {
+  readonly move: "ATTRACT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnSporeConfig {
   readonly move: "SPORE";
   readonly attacker: SceneOnPresentationBattler;
@@ -1838,6 +1849,7 @@ export type SceneOnMoveConfig =
   | SceneOnRestConfig
   | SceneOnHowlConfig
   | SceneOnSweetKissConfig
+  | SceneOnAttractConfig
   | SceneOnSporeConfig
   | SceneOnCottonSporeConfig
   | SceneOnHypnosisConfig
@@ -1931,6 +1943,8 @@ export type SceneOnHowlPresentationState =
   SceneOnMovePresentationState<SceneOnHowlConfig>;
 export type SceneOnSweetKissPresentationState =
   SceneOnMovePresentationState<SceneOnSweetKissConfig>;
+export type SceneOnAttractPresentationState =
+  SceneOnMovePresentationState<SceneOnAttractConfig>;
 export type SceneOnSporePresentationState =
   SceneOnMovePresentationState<SceneOnSporeConfig>;
 export type SceneOnCottonSporePresentationState =
@@ -4332,6 +4346,32 @@ export function sceneOnSweetKissView(
     ...sweetKissAtAge(
       state.age,
       state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+export interface SceneOnAttractView extends AttractState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age=0` is Move_ATTRACT's first active source-script frame. */
+export function sceneOnAttractView(
+  state: SceneOnAttractPresentationState,
+): SceneOnAttractView {
+  if (state.config.move !== "ATTRACT") {
+    throw new Error(`expected ATTRACT presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...attractAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
       state.config.target.geometry.animationCenter,
     ),
   };

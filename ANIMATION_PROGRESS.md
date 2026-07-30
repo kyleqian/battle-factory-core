@@ -1,5 +1,36 @@
 # Animation coverage
 
+## MOVE_ATTRACT promoted exact; red-heart-sweet-kiss track complete (2026-07-29)
+
+**Verdict:** `MOVE_ATTRACT` is exact. Source, generated inventory,
+battle-script, and controller audit pin set **113 `FRONTIER_MON_EEVEE`** as
+the lowest legal Level-50 carrier and one reachable animation body after
+accuracy and `tryinfatuating`. Accuracy, same-gender, genderless,
+already-infatuated, and `OBLIVIOUS` failures select no animation body.
+
+**Evidence:** complete legal female-Eevee/male-Onix Scene-ON parties pass the
+complete first-active frame through first-inactive cleanup twice fresh per
+orientation. Player-back **66–500 (435/435)** evidence/raw
+`a5008ce72fd22417d8ec1be80158fd3a5f93b715165700b875601c476c5717c8` /
+`e627d99e69936a320250ab89b946221a179d2ea3a2ed076068a2ff82e9edd9a9`;
+opponent-front **70–504 (435/435)**
+`234dd9d0da4f02be12a404f3ef36eaa1071bd66d2886eaa75fe3aa25ae48422e` /
+`daa9c2ed067fcfa6d56a98d364c5d3e31e0ca7af30bd15ca72c2c93ddb2ef329`.
+
+**Model / sibling:** the reducer, typed seam, and production compositor port
+the projectile, six burst, and eight rising RED_HEART sprites, including the
+opponent-front pre-OAM allocation; SwayMon; HeartsBackground tiles, palette,
+alpha ramp and cleanup; two target blend cycles; all audio/panning;
+attacker/target geometry; legal art/idle offsets; OAM/hardware transfer and
+cleanup. `MOVE_SWEET_KISS` independently reruns **159/159** twice fresh in
+both orientations with unchanged evidence/raw hashes.
+
+**Ownership / next:** presentation owns no accuracy, gender/ability or
+infatuation result, RNG, controller, turn/facility state, boundary list,
+unsupported barrier, or canonical allowlist. Coverage is **104 exact / 0
+partial / 0 staged / 172 unsupported**. Next ranked incomplete component
+track: `slam-hit-slide-shake` (`MOVE_SECRET_POWER` independently unsupported).
+
 ## MOVE_MIRROR_COAT promoted exact; sparkle-3-special-screen track complete (2026-07-29)
 
 **Verdict:** `MOVE_MIRROR_COAT` is exact. Source, generated inventory, and
@@ -57,32 +88,3 @@ turn/facility state, boundary list, unsupported barrier, or canonical
 allowlist changed. Coverage is **102 exact / 0 partial / 0 staged / 174
 unsupported**. Next incomplete ranked component track:
 `sparkle-3-special-screen` (`MOVE_MIRROR_COAT` independently unsupported).
-
-## MOVE_BRICK_BREAK promoted exact; both controller-selected bodies accepted (2026-07-29)
-
-**Verdict:** `MOVE_BRICK_BREAK` is exact. Source/controller audit proves
-`removelightscreenreflect` selects distinct normal and shattered-wall
-presentation bodies. Complete legal Lombre/Onix Scene-ON parties prove both
-twice fresh per orientation. `BrickBreakNormal` passes **151/151** semantic
-and production frames: player-back **234–384** evidence/raw
-`ad3d3e90b70fde1595dda316a773e887f17123df5ad5815086159ddb52398b5d` /
-`67687eb221c4efb306fdca646b78fd181469aa22ef98e48d7006b4a9ec2c27cb`;
-opponent-front **220–370**
-`b1ac1081da160add8d9e92f878e3051199a909987735dc5bf06cd921bb1f8fab` /
-`4a03768b6549b364296e3639833e7c5d0cd6dedcec567ee62f20e32fd94c2645`.
-
-**Wall body / model:** `BrickBreakShatteredWall` passes **192/192** twice per
-orientation: player-back **288–479** evidence/raw
-`e484e602be861db10e4042c2a6de75e5f6e261e533515d48d8597637db5c4697` /
-`e1b36f8036f30386af0c7cdaac9645f73bb9eb526802c3179e745871cf637363`;
-opponent-front **289–480**
-`f0314f159cb9b141c107cbe078382ebb4ff7379c4ce2c835aa9b921c65bbe27a` /
-`8402d60c9605e852c0f099dbc617c80dc21d005097ed1985395b647564ae23bc`.
-The reducer/seam/compositor preserve two lunges, three hitsplats, fist,
-24+10+3 WindUpLunge, target-panned audio, BG blend, monbg/alpha, wall, four
-40-step TORN_METAL shards, hardware transfer/order, and cleanup.
-
-**Boundary:** `MOVE_CRUSH_CLAW` stays independently unsupported; no gameplay,
-screen outcome, RNG, controller, facility state, boundary list, unsupported
-barrier, or canonical allowlist changed. Coverage is **101 exact / 0 partial /
-0 staged / 175 unsupported**.

@@ -2684,6 +2684,35 @@
       ]
     },
     {
+      "move": "MOVE_ATTRACT",
+      "status": "exact",
+      "covered": [
+        "source, generated Factory inventory, battle-script, and controller audit pin set 113 FRONTIER_MON_EEVEE as the lowest legal Level-50 carrier and exactly one reachable animation body after accuracy and tryinfatuating; accuracy failure, same-gender, genderless, already-infatuated, and OBLIVIOUS routes select no animation body",
+        "complete legal three-Pokemon Scene-ON parties stage female EEVEE against male ONIX without transient-state injection; the successful player route records target status2 65536 and the successful opponent route records 131072 while presentation owns none of the gender, ability, accuracy, RNG, or infatuation outcome",
+        "the complete first-active body frame through first-inactive cleanup passes 435/435 source-component, typed-seam, sprite-callback/OAM, palette/tag/register, audio, immutable battle-state, raw-RGB, and production shared-framebuffer frames twice fresh per orientation: player-back frames 66-500 evidence/raw a5008ce72fd22417d8ec1be80158fd3a5f93b715165700b875601c476c5717c8/e627d99e69936a320250ab89b946221a179d2ea3a2ed076068a2ff82e9edd9a9; opponent-front frames 70-504 evidence/raw 234dd9d0da4f02be12a404f3ef36eaa1071bd66d2886eaa75fe3aa25ae48422e/daa9c2ed067fcfa6d56a98d364c5d3e31e0ca7af30bd15ca72c2c93ddb2ef329",
+        "the pure source-relative reducer ports the one projectile, six burst, and eight rising RED_HEART lifecycles; opponent-front pre-OAM allocation; SwayMon; HeartsBackground load, tilemap, palette and alpha ramp; two BlendColorCycle loops; CHARM/ATTRACT/ATTRACT2 audio and panning; attacker/target-relative geometry; affine/OAM/hardware transfer ordering; tagged resource lifetime; and complete cleanup",
+        "source extraction regenerates HeartsBackground tiles, tilemap, and palette byte-for-byte; the compositor reuses only source-identical RED_HEART art from Sweet Kiss and preserves Attract's independent script, route, timings, target palette, legal EEVEE/ONIX art and idle offsets",
+        "MOVE_SWEET_KISS independently reruns exact twice fresh at 159/159 player-back and opponent-front frames with unchanged evidence/raw digests; shared RED_HEART code does not substitute for either move's evidence",
+        "no damage, accuracy, infatuation result, gender/ability rule, RNG, controller, turn order/advancement, facility state, animation boundary, unsupported barrier, or canonical-recording allowlist changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-attract-player-eevee-opponent-onix.json",
+        "tools/battle-lab/mechanic-attract-opponent-eevee-player-onix.json",
+        "tools/compare/fixtures/attract-player-eevee-opponent-onix.json",
+        "tools/compare/fixtures/attract-opponent-eevee-player-onix.json",
+        "tools/compare/attractProbe.py",
+        "tools/compare/attractPortable.ts",
+        "tools/compare/attractSourceAudit.ts",
+        "tools/compare/extractAttractAssets.ts",
+        "src/animation/assets/attract.json",
+        "src/animation/attract.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/attract.test.ts",
+        "tests/animation/attractEvidence.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_SWEET_KISS",
       "status": "exact",
       "covered": [
@@ -2693,7 +2722,7 @@
         "source extraction regenerates legal LUVDISC front/back, RED_HEART, and ANGEL art byte-for-byte; the narrow compositor uses source OAM order and the existing exact field primitives without battle clocks, coordinate/RGB fitting, or pixel exceptions",
         "sweetKissPortable.ts proves both committed receipts twice fresh with stable player evidence/raw digests 5117db12992b65aadfc65a448ea2260dfd5848be19fc3d6e2df733d90604af21 / 61870ad0f56694de71f2d492c51fbe208216ef88b8550eca8a3a17fca8f73f11 and opponent digests db45d09de25efa0d267f53c0337017c98094b0d174e8b99babfaa7dabf496821 / 76f32756df4d9bbdbfee5daf5d5ecf5b72bcdbacc3c4eab909c44cd7a8759876",
         "the existing MOVE_CHARM magenta-heart compositor control remains exact at 93/93 body plus 4/4 teardown frames in both orientations twice fresh",
-        "MOVE_ATTRACT remains unsupported: its distinct body adds a projectile heart, rising hearts, HeartsBackground, SwayMon, blend color cycling, and independent cleanup; shared RED_HEART art does not promote it"
+        "fresh sibling batch-check reruns both committed Sweet Kiss receipts twice and remains exact at 159/159 player-back and opponent-front frames after Attract's independent RED_HEART implementation"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-sweet-kiss-player-luvdisc-opponent-onix.json",
@@ -2783,14 +2812,19 @@
       "components": [
         "asset:ANIM_TAG_RED_HEART",
         "sprite:gRedHeartBurstSpriteTemplate",
+        "sprite:gRedHeartProjectileSpriteTemplate",
+        "sprite:gRedHeartRisingSpriteTemplate",
         "asset:ANIM_TAG_ANGEL",
-        "sprite:gAngelSpriteTemplate"
+        "sprite:gAngelSpriteTemplate",
+        "task:AnimTask_SwayMon",
+        "task:AnimTask_HeartsBackground",
+        "visualCommand:blend_color_cycle"
       ],
       "representatives": [
         "MOVE_SWEET_KISS",
         "MOVE_ATTRACT"
       ],
-      "goal": "MOVE_SWEET_KISS independently proves its complete ANGEL and six-RED_HEART-burst body, three Heal Bell cues, Attract cue, target-relative geometry, OAM/affine/display cadence, tagged resource lifetimes, and cleanup at 159/159 dense source/seam/framebuffer frames in both orientations twice fresh. MOVE_ATTRACT remains unsupported because it adds a projectile heart, rising hearts, HeartsBackground, SwayMon, blend color cycling, and distinct cleanup; RED_HEART reuse does not waive independent move acceptance."
+      "goal": "Track complete. MOVE_SWEET_KISS independently proves its complete ANGEL and six-RED_HEART-burst body at 159/159 dense source/seam/framebuffer frames in both orientations twice fresh. MOVE_ATTRACT independently proves its one projectile, six burst, eight rising hearts, SwayMon, HeartsBackground, two target blend cycles, audio/panning, hardware/OAM cadence, tagged lifetimes, and cleanup at 435/435 frames in both orientations twice fresh. RED_HEART reuse does not waive either move's acceptance."
     },
     {
       "id": "slam-hit-slide-shake",
