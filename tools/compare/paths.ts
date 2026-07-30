@@ -47,6 +47,18 @@ export function resolveSourceTracePath(
   return resolveCompareTracePath(sourceTrace, cwd);
 }
 
+/** Resolve a fixture path relative to the compare trace that names it. */
+export function resolveCompareFixturePath(
+  fixturePath: string,
+  tracePath: string,
+): string {
+  const resolved = resolve(dirname(tracePath), fixturePath);
+  if (!isFile(resolved)) {
+    throw new Error(`compare fixture not found: ${fixturePath} (resolved to ${resolved})`);
+  }
+  return resolved;
+}
+
 /** Remove only artifacts produced by this tool, preserving unrelated files. */
 export function prepareCompareOutputDirectory(outDir: string): void {
   mkdirSync(outDir, { recursive: true });

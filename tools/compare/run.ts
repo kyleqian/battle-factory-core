@@ -24,12 +24,14 @@ import {
 } from "./cli.ts";
 import {
   oracleUrlForProfile,
+  runOracleBattleLab,
   runOracleTrace,
   type OracleProfile,
   type Trace,
 } from "./oracleClient.ts";
 import {
   prepareCompareOutputDirectory,
+  resolveCompareFixturePath,
   resolveCompareTracePath,
   resolveSourceTracePath,
 } from "./paths.ts";
@@ -88,6 +90,18 @@ trace = withCaptureRange(trace, captureRange);
 const oracleProfile: OracleProfile = trace.oracleProfile ?? "battle-scene-on";
 prepareCompareOutputDirectory(outDir);
 
+const oracleRun = trace.oracleBattleLab
+  ? runOracleBattleLab(
+      JSON.parse(
+        readFileSync(
+          resolveCompareFixturePath(trace.oracleBattleLab.scenario, tracePath),
+          "utf8",
+        ),
+      ) as Record<string, unknown>,
+      trace,
+    )
+  : runOracleTrace(trace);
+
 function rgbaToPng(rgba: Buffer | Uint8Array): Buffer {
   const png = new PNG({ width: WIDTH, height: HEIGHT });
   rgba.forEach((value, index) => (png.data[index] = value));
@@ -97,7 +111,7 @@ function rgbaToPng(rgba: Buffer | Uint8Array): Buffer {
 const pad = (frame: number) => String(frame).padStart(5, "0");
 
 const [oracleResult, appCaptures] = await Promise.all([
-  runOracleTrace(trace),
+  oracleRun,
   renderAppTrace(trace),
 ]);
 
