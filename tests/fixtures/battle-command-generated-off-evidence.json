@@ -26,25 +26,25 @@
     "startFrame": 8,
     "endFrame": 135,
     "captureCount": 128,
-    "matched": 26,
-    "mismatched": 102,
+    "matched": 60,
+    "mismatched": 68,
     "matchingPrefix": {
       "startFrame": 8,
-      "endFrame": 33,
-      "count": 26
+      "endFrame": 67,
+      "count": 60
     },
     "firstDivergence": {
-      "captureOrdinal": 27,
-      "frame": 34,
-      "diffPixels": 13279,
+      "captureOrdinal": 61,
+      "frame": 68,
+      "diffPixels": 2,
       "bounds": {
-        "minX": 1,
-        "minY": 59,
-        "maxX": 238,
-        "maxY": 158
+        "minX": 99,
+        "minY": 33,
+        "maxX": 99,
+        "maxY": 34
       },
-      "input": "A",
-      "cause": "The bounce clock is now continuous and frames 8-33 are exact. On the legal EARTHQUAKE confirm, the app replaces the FIGHT field with the first message glyph immediately at frame 34; the ROM retains the confirmed FIGHT field through frame 42 and first draws the G at frame 43. The typed resolution seam still lacks that controller handoff lifecycle."
+      "input": "none",
+      "cause": "The typed confirm handoff now retains the confirmed FIGHT field through frame 42, starts the attack string at the source-relative frame 43, and makes frames 8-67 exact. At frame 68 the app clears two opponent HP-bar pixels while the ROM still holds the full bar: the Scene-OFF projector currently ignores the emitted MOVE_ANIMATION and HIT_ANIMATION controller events, so it begins HP drain before the ROM's source-driven no-animation pause and target hit blink (the ROM begins that blink at frame 116)."
     }
   },
   "selectedLegalMove": {

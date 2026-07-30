@@ -30,6 +30,10 @@ import {
   type HealthboxContentParams,
 } from "./healthboxAssembly.ts";
 import {
+  buildFightMoveset,
+  type FightMoveset,
+} from "./fightSubmenuText.ts";
+import {
   partySendOutGoTextVisibleChars,
   type PartySendOutPhase,
   partySendOutPhase,
@@ -89,7 +93,15 @@ export type BattleResolutionPresentationRenderView = Readonly<{
     opponent: Readonly<{ sprite: boolean; healthbox: boolean }>;
   }>;
   waitCursor: Readonly<{ age: number }> | null;
-  bottom: "message" | "blank";
+  bottom: "fight" | "message" | "blank";
+  confirmHandoff: Readonly<{
+    idleBounceElapsed: number;
+    bounceReset: boolean;
+    fightMenu: Readonly<{
+      moveset: FightMoveset;
+      displayCursor: 0 | 1 | 2 | 3;
+    }>;
+  }> | null;
   switchIn: Readonly<{
     elapsed: number;
     phase: PartySendOutPhase;
@@ -311,6 +323,20 @@ export function createBattleResolutionPresentationRenderView(
   let switchIn: BattleResolutionPresentationRenderView["switchIn"] = null;
   let partySummary: BattleResolutionPresentationRenderView["partySummary"] = null;
   const fainted = new Set<0 | 1>();
+  const confirmHandoff = state.confirmHandoff === null
+    ? null
+    : Object.freeze({
+        idleBounceElapsed: state.confirmHandoff.idleBounceElapsed,
+        bounceReset: state.confirmHandoff.bounceReset,
+        fightMenu: Object.freeze({
+          moveset: buildFightMoveset(
+            state.field.player.moveIds,
+            state.field.player.currentPP,
+            state.field.player.ppBonuses,
+          ),
+          displayCursor: state.confirmHandoff.fightDisplayCursor,
+        }),
+      });
   if (state.lifecycle.phase === "presenting-switch-in") {
     const switchCommand = segment.commands.find(
       (candidate): candidate is Extract<
@@ -481,6 +507,8 @@ export function createBattleResolutionPresentationRenderView(
       fainted.delete(command.battler);
     }
   } else if (
+    state.lifecycle.phase !== "confirm-handoff"
+    &&
     state.lifecycle.phase !== "next-command-handoff"
     && state.lifecycle.phase !== "terminal-handoff"
     && state.lifecycle.phase !== "presenting-switch-in"
@@ -544,10 +572,13 @@ export function createBattleResolutionPresentationRenderView(
     }),
     waitCursor,
     bottom:
-      state.lifecycle.phase === "next-command-handoff"
+      confirmHandoff !== null
+        ? "fight"
+      : state.lifecycle.phase === "next-command-handoff"
       || switchIn?.phase === "blankMessage"
         ? "blank"
         : "message",
+    confirmHandoff,
     switchIn,
     partySummary,
   });

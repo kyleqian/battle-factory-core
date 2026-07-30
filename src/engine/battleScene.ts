@@ -30693,6 +30693,31 @@ export function renderBattleResolutionSceneOffView(
   fb: Uint8Array,
   view: BattleResolutionPresentationRenderView,
 ): void {
+  if (view.confirmHandoff) {
+    const bounceTick = view.confirmHandoff.idleBounceElapsed;
+    const idleBounce = actionMenuDisplayAtAge(bounceTick, 0);
+    drawBattle2ActionMenuWindow(
+      fb,
+      bounceTick,
+      0,
+      0,
+      {
+        onixY2:
+          view.confirmHandoff.bounceReset ? 0 : idleBounce.battlerY2,
+        healthboxY2:
+          view.confirmHandoff.bounceReset ? 0 : idleBounce.healthboxY2,
+      },
+      true,
+      view.healthboxes,
+      view.fieldArt,
+    );
+    drawFightSubmenuChromeFromLiveState(
+      fb,
+      view.confirmHandoff.fightMenu.displayCursor,
+      view.confirmHandoff.fightMenu.moveset,
+    );
+    return;
+  }
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
   const faint = view.effect?.type === "faint" ? view.effect : null;
   if (view.visibility.opponent.sprite) {

@@ -118,6 +118,10 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
       beforeRules: initial.rules,
       transition,
       fieldBoundary,
+      confirmHandoff: {
+        fightDisplayCursor: 0,
+        idleBounceElapsed: 0,
+      },
     });
 
     expect(resolution.resolutionId).toEqual({

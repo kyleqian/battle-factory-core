@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createBattleCommandPresentation } from "../src/engine/battleCommandPresentation.ts";
 import {
+  advanceBattleResolutionConfirmHandoff,
   appendBattleResolutionContinuation,
   createBattleResolutionPresentation,
   createBattleTerminalResolutionPresentation,
@@ -157,6 +158,10 @@ function inputFor(
       initial.boundary.request,
       initial.rules.rulesContext,
     ).field,
+    confirmHandoff: {
+      fightDisplayCursor: 0,
+      idleBounceElapsed: 0,
+    },
   };
 }
 
@@ -183,6 +188,8 @@ function atRenderClock(
     ...state,
     commandIndex,
     lifecycle: Object.freeze({ phase, phaseElapsed }),
+    confirmHandoff:
+      phase === "confirm-handoff" ? state.confirmHandoff : null,
   });
 }
 
@@ -197,6 +204,66 @@ function damageResolution(): BattleResolutionPresentationState {
 }
 
 describe("battle resolution presentation receipt ownership", () => {
+  it("derives the confirmed-FIGHT handoff from controller and script stages", () => {
+    let resolution = createBattleResolutionPresentation({
+      ...inputFor([
+        event(0, {
+          kind: "message",
+          messageId: "STRINGID_USEDMOVE",
+          substitutions: [],
+        }),
+        event(1, {
+          kind: "set-battler-pp-data",
+          battler: 0,
+          movePosition: 0,
+          pp: 9,
+        }),
+      ], NEXT_COMMAND),
+      confirmHandoff: {
+        fightDisplayCursor: 0,
+        idleBounceElapsed: 40,
+      },
+    });
+    const stages: string[] = [];
+    const bounceClocks: number[] = [];
+    const bounceResets: boolean[] = [];
+    while (resolution.lifecycle.phase === "confirm-handoff") {
+      stages.push(resolution.confirmHandoff!.stage);
+      const view = createBattleResolutionPresentationRenderView(resolution);
+      expect(view.bottom).toBe("fight");
+      expect(view.message).toBeNull();
+      expect(view.confirmHandoff?.fightMenu.displayCursor).toBe(0);
+      bounceClocks.push(view.confirmHandoff!.idleBounceElapsed);
+      bounceResets.push(view.confirmHandoff!.bounceReset);
+      resolution = advanceBattleResolutionConfirmHandoff(resolution);
+    }
+    expect(stages).toEqual([
+      "move-selection-response",
+      "selection-accepted",
+      "stop-bounce-request",
+      "actions-confirmed",
+      "turn-order",
+      "before-turn",
+      "action-dispatch",
+      "attack-canceler",
+      "accuracy-check",
+    ]);
+    expect(bounceClocks).toEqual([40, 41, 42, 42, 42, 42, 42, 42, 42]);
+    expect(bounceResets).toEqual([
+      false, false, false, true, true, true, true, true, true,
+    ]);
+    expect(resolution.lifecycle).toEqual({
+      phase: "presenting",
+      phaseElapsed: 0,
+    });
+    expect(resolution.confirmHandoff).toBeNull();
+    expect(createBattleResolutionPresentationRenderView(resolution).message)
+      .toEqual({
+        lines: ["ONIX used", "ROCK SLIDE!"],
+        visibleCharacters: 1,
+      });
+  });
+
   it("freezes terminal result content behind the immutable terminal boundary", () => {
     const pendingBoundary = Object.freeze({
       kind: "terminal" as const,
