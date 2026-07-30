@@ -236,6 +236,33 @@ describe("battle resolution presentation receipt ownership", () => {
     ]);
   });
 
+  it("resolves a missed attack from the preceding semantic move owner", () => {
+    const resolution = createBattleResolutionPresentation(inputFor([
+      event(0, {
+        kind: "message",
+        messageId: "STRINGID_USEDMOVE",
+        substitutions: [],
+      }),
+      event(1, {
+        kind: "set-battler-pp-data",
+        battler: 1,
+        movePosition: 0,
+        pp: 9,
+      }),
+      event(2, {
+        kind: "message",
+        messageId: "STRINGID_ATTACKMISSED",
+        substitutions: [],
+      }),
+    ], NEXT_COMMAND));
+
+    expect(resolution.segments[0]!.commands).toMatchObject([
+      { type: "message", lines: ["Foe KABUTO used", "MEGA DRAIN!"] },
+      { type: "message", lines: ["Foe KABUTO’s", "attack missed!"] },
+      { type: "turn-end" },
+    ]);
+  });
+
   it("derives the confirmed-FIGHT handoff from controller and script stages", () => {
     let resolution = createBattleResolutionPresentation({
       ...inputFor([

@@ -394,6 +394,21 @@ function messageLines(
       }),
     });
   }
+  if (messageId === "STRINGID_ATTACKMISSED") {
+    if (lastMoveAttacker === null) {
+      throw new Error(
+        "battle resolution attack-missed message has no preceding used-move event",
+      );
+    }
+    const displayed = fieldBattler(field, lastMoveAttacker);
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: () => resolveBattleNameWithPrefix({
+        side: lastMoveAttacker === 0 ? "player" : "opponent",
+        isTrainerBattle: true,
+        nickname: displayed.name,
+      }),
+    });
+  }
   if (
     messageId === "STRINGID_DEFENDERSSTATROSE"
     || messageId === "STRINGID_DEFENDERSSTATFELL"
