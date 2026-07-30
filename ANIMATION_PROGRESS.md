@@ -11,14 +11,19 @@ selects five target-relative `EXPLOSION`s; zero selects nine
 `Random() & 0xff` roll reaches healing only at `>= 204`, and full-target
 heals skip attack animation entirely.
 
-**Evidence / remainder:** complete legal three-mon Scene-ON mechanicLab
-parties exist for player-Delibird/opponent-Onix and the reverse. The dense
-probe captures source pointer/tasks/sprites/OAM/matrices/palettes/tags/
-registers/audio/raw RGB through first inactive cleanup; the player damage
-route is 74–274 (201 frames), bag ×1 / explosion ×5. The exact remainder is
-to select fixed legal damage-then-heal controller routes in both orientations
-and commit twice-fresh dense receipts for damage and healing, then port an
-independent reducer/compositor. No typed seam or runtime code changed.
+**Evidence / remainder:** the player Delibird scenario now uses the complete
+source set-118 loadout `{Present, Ice Ball, Aerial Ace, Hail}` and selects its
+real Aerial Ace to chip Onix before Present. A fresh damage probe records the
+actual absolute first-active through first-inactive source window
+**1012–1212 (201 frames)**, bag ×1 / explosion ×5. It records
+pointer/tasks/sprites/OAM/matrices/palettes/tags/registers/audio/raw RGB, but
+the output is deliberately uncommitted: no dense receipt or hash is claimed.
+The reverse scenario's opponent Delibird keeps duplicated Present slots only
+under mechanicLab's documented AI-constraint exception, so it is not a
+complete set-118 loadout. Healing and opponent-orientation routes remain
+unproved. The exact remainder is fixed legal damage-then-heal controller
+routes in both orientations, twice-fresh dense receipts, and an independent
+reducer/compositor. No typed seam or runtime code changed.
 
 ## MOVE_SECRET_POWER promoted exact; slam-hit-slide-shake complete (2026-07-30)
 
