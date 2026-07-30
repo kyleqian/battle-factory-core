@@ -224,6 +224,75 @@ describe("Roar zero-usable-bench live receipt (doc §30)", () => {
   });
 });
 
+describe("Confuse Own Tempo live receipt (doc §32)", () => {
+  it.each([
+    [1, 3_726_110_690, 1, 3_070_328_874, [-2, -2, -2]],
+    [99, 1_329_715_331, 2, 3_507_076_075, [-2, 0, -2]],
+  ])("seed %i matches the OFF PP-selected Light Screen slot and exact RNG endpoint", (
+    _seed,
+    rngStart,
+    expectedSlot,
+    expectedRng,
+    screenCvDeltas,
+  ) => {
+    const stages = NEUTRAL_STAGES;
+    const view: FactoryAiScoredView = Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1, targetBattler: 0 }),
+      factory: Object.freeze({
+        levelMode: 0,
+        battleMode: 0,
+        factoryWinStreak: 28,
+        trainerOpponentId: 222,
+      }),
+      moves: [109, 113, 113, 113] as const,
+      attacker: Object.freeze({
+        types: ["TYPE_GHOST", "TYPE_POISON"] as const,
+        attack: 85, defense: 80, spAttack: 150, spDefense: 95, speed: 130, level: 50,
+        statStages: stages, isFirstTurn: 2, hp: 135, maxHp: 135,
+        lightScreenUp: true, ability: "ABILITY_LEVITATE",
+      }),
+      target: Object.freeze({
+        species: 308,
+        types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+        attack: 80, defense: 80, spAttack: 80, spDefense: 80, speed: 80, level: 50,
+        statStages: stages, isFirstTurn: 0, hp: 135, maxHp: 135,
+        ability: "ABILITY_OWN_TEMPO", knownAbility: null,
+        lastUsedMoveId: 233, knownMoveIds: [233],
+      }),
+    });
+    const result = chooseFactoryAiScoredDecision({
+      view,
+      request: fourSlotRequest,
+      rng: { value: rngStart, calls: 0 },
+    });
+    expect(result.trace.slotScores.map((slot) => [
+      slot.checkBadMoveDelta,
+      slot.checkViabilityDelta,
+      slot.finalScore,
+    ])).toEqual([
+      [-10, 0, 90],
+      [-8, screenCvDeltas[0], 92 + screenCvDeltas[0]],
+      [-8, screenCvDeltas[1], 92 + screenCvDeltas[1]],
+      [-8, screenCvDeltas[2], 92 + screenCvDeltas[2]],
+    ]);
+    expect(result.trace.draws).toHaveLength(8);
+    expect(result.trace.draws.map((draw) => draw.kind)).toEqual([
+      "setup-simulated-rng",
+      "setup-simulated-rng",
+      "setup-simulated-rng",
+      "setup-simulated-rng",
+      "light-screen-roll",
+      "light-screen-roll",
+      "light-screen-roll",
+      "best-move-tie",
+    ]);
+    expect(result.trace.tie.chosenDecision).toMatchObject({ kind: "use-move", moveSlot: expectedSlot });
+    expect(result.rng.value).toBe(expectedRng);
+  });
+});
+
 describe("Factory AI mask 7 (CheckBadMove + TryToFaint + CheckViability), scenario reproduction", () => {
   it("unambiguous (Surf/RockSlide/BodySlam/Thunderbolt vs pure-Ground Marowak at 5/135 HP): 11 draws, Thunderbolt loses", () => {
     const rng = advanceToDecisionStart(249_678_687); // frame-100 rngValue, seed 1

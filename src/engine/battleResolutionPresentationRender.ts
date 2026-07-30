@@ -50,6 +50,21 @@ export type BattleResolutionRenderEffect =
       before: number;
       after: number;
       age: number;
+    }>
+  | Readonly<{
+      type: "faint";
+      battler: 0 | 1;
+      healthboxVisible: boolean;
+      sink:
+        | Readonly<{
+            type: "opponent-tile-rows";
+            keptRows: number;
+            y2: number;
+          }>
+        | Readonly<{
+            type: "player-pixel-rows";
+            skipPixelRows: number;
+          }>;
     }>;
 
 export type BattleResolutionPresentationRenderView = Readonly<{
@@ -64,6 +79,11 @@ export type BattleResolutionPresentationRenderView = Readonly<{
     visibleCharacters: number;
   }> | null;
   effect: BattleResolutionRenderEffect | null;
+  visibility: Readonly<{
+    player: Readonly<{ sprite: boolean; healthbox: boolean }>;
+    opponent: Readonly<{ sprite: boolean; healthbox: boolean }>;
+  }>;
+  waitCursor: Readonly<{ age: number }> | null;
   bottom: "message" | "blank";
 }>;
 
@@ -145,6 +165,7 @@ function applyCompletedCommand(
   if (
     command.type === "message"
     || command.type === "stat"
+    || command.type === "faint"
     || command.type === "turn-end"
   ) return field;
   throw new Error(
@@ -225,6 +246,16 @@ export function isBattleResolutionCommandComplete(
     >= battleResolutionCommandDuration(command, field);
 }
 
+export function isBattleResolutionButtonMessageReady(
+  state: BattleResolutionPresentationState,
+): boolean {
+  const command = currentSegment(state).commands[state.commandIndex];
+  return command?.type === "message"
+    && command.advance === "button"
+    && state.lifecycle.phaseElapsed
+      >= battleStringPrintableLength(command.lines) + 1;
+}
+
 export function isBattleResolutionNextCommandHandoffComplete(
   state: BattleResolutionPresentationState,
 ): boolean {
@@ -260,10 +291,12 @@ export function createBattleResolutionPresentationRenderView(
   const segment = currentSegment(state);
   let field = state.field;
   let latestMessage: readonly string[] | null = null;
+  const fainted = new Set<0 | 1>();
   for (let index = 0; index < state.commandIndex; index += 1) {
     const completed = segment.commands[index]!;
     field = applyCompletedCommand(field, completed);
     if (completed.type === "message") latestMessage = completed.lines;
+    if (completed.type === "faint") fainted.add(completed.battler);
   }
 
   const command = segment.commands[state.commandIndex] ?? null;
@@ -272,14 +305,33 @@ export function createBattleResolutionPresentationRenderView(
     ? 0
     : battleStringPrintableLength(latestMessage);
   let hpTarget: Readonly<{ battler: 0 | 1; to: number }> | null = null;
+  let waitCursor: Readonly<{ age: number }> | null = null;
 
-  if (state.lifecycle.phase === "presenting" && command) {
+  if (
+    (
+      state.lifecycle.phase === "presenting"
+      || state.lifecycle.phase === "awaiting-message-dismiss"
+      || state.lifecycle.phase === "forced-party-handoff"
+    )
+    && command
+  ) {
     if (command.type === "message") {
       latestMessage = command.lines;
       visibleCharacters = battleStringVisibleCharacters(
         command.lines,
         state.lifecycle.phaseElapsed,
       );
+      if (
+        command.advance === "button"
+        && isBattleResolutionButtonMessageReady(state)
+      ) {
+        waitCursor = Object.freeze({
+          age:
+            state.lifecycle.phaseElapsed
+            - battleStringPrintableLength(command.lines)
+            - 1,
+        });
+      }
     } else if (command.type === "hp") {
       const battler = fieldBattler(field, command.battler);
       if (battler.hp !== command.from) {
@@ -322,6 +374,40 @@ export function createBattleResolutionPresentationRenderView(
         after: command.after,
         age: state.lifecycle.phaseElapsed,
       });
+    } else if (command.type === "faint") {
+      if (command.timing.sink === "opponent-tile-rows") {
+        const d = state.lifecycle.phaseElapsed - 1;
+        const erased = d <= 0
+          ? 0
+          : Math.min(command.timing.steps, Math.ceil(d / 2));
+        effect = Object.freeze({
+          type: "faint",
+          battler: command.battler,
+          healthboxVisible:
+            state.lifecycle.phaseElapsed
+            < command.timing.healthboxVanishFrame,
+          sink: Object.freeze({
+            type: "opponent-tile-rows",
+            keptRows: command.timing.steps - erased,
+            y2: erased * 8,
+          }),
+        });
+      } else {
+        effect = Object.freeze({
+          type: "faint",
+          battler: command.battler,
+          healthboxVisible:
+            state.lifecycle.phaseElapsed
+            < command.timing.healthboxVanishFrame,
+          sink: Object.freeze({
+            type: "player-pixel-rows",
+            skipPixelRows: Math.min(
+              command.timing.spriteRows,
+              command.timing.pixelsPerFrame * state.lifecycle.phaseElapsed,
+            ),
+          }),
+        });
+      }
     } else if (command.type !== "turn-end") {
       throw new Error(
         `battle resolution non-KO renderer cannot render ${command.type} commands`,
@@ -340,9 +426,16 @@ export function createBattleResolutionPresentationRenderView(
     hpTarget?.battler === 0 ? hpTarget.to : undefined;
   const opponentTarget =
     hpTarget?.battler === 1 ? hpTarget.to : undefined;
+  const playerFaint = effect?.type === "faint" && effect.battler === 0
+    ? effect
+    : null;
+  const opponentFaint = effect?.type === "faint" && effect.battler === 1
+    ? effect
+    : null;
+  const fieldArt = createBattleCommandFieldArtView(field);
   return Object.freeze({
     field,
-    fieldArt: createBattleCommandFieldArtView(field),
+    fieldArt,
     healthboxes: Object.freeze({
       player: Object.freeze({
         ...healthboxParams(field.player, playerTarget),
@@ -359,6 +452,28 @@ export function createBattleResolutionPresentationRenderView(
             visibleCharacters,
           }),
     effect,
+    visibility: Object.freeze({
+      player: Object.freeze({
+        sprite: !fainted.has(0)
+          && !(
+            playerFaint?.sink.type === "player-pixel-rows"
+            && playerFaint.sink.skipPixelRows
+              >= fieldArt.player.pic.tileset.rows * 8
+          ),
+        healthbox: !fainted.has(0)
+          && (playerFaint?.healthboxVisible ?? true),
+      }),
+      opponent: Object.freeze({
+        sprite: !fainted.has(1)
+          && !(
+            opponentFaint?.sink.type === "opponent-tile-rows"
+            && opponentFaint.sink.keptRows === 0
+          ),
+        healthbox: !fainted.has(1)
+          && (opponentFaint?.healthboxVisible ?? true),
+      }),
+    }),
+    waitCursor,
     bottom:
       state.lifecycle.phase === "next-command-handoff"
         ? "blank"

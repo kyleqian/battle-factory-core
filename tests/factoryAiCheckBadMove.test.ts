@@ -418,6 +418,83 @@ describe("AI_CBM_Paralyze (docs/factory-ai-checkviability-ground-truth.md §31)"
   });
 });
 
+describe("AI_CBM_Confuse (docs/factory-ai-checkviability-ground-truth.md §32)", () => {
+  const MOVE_CONFUSE_RAY = 109;
+
+  function target(overrides: Partial<FactoryAiCheckBadMoveTarget> = {}): FactoryAiCheckBadMoveTarget {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      knownAbility: "ABILITY_STURDY",
+      realAbility: "ABILITY_STURDY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      ...overrides,
+    });
+  }
+
+  it("existing confusion JUMPs to Score_Minus5 before the handler ability read", () => {
+    expect(run(MOVE_CONFUSE_RAY, target({ isConfused: true }))).toMatchObject({
+      kind: "scored",
+      scoreDelta: -5,
+      draws: [],
+    });
+  });
+
+  it("not-confused FALLTHROUGH reaches Own Tempo, which JUMPs to Score_Minus10", () => {
+    expect(run(MOVE_CONFUSE_RAY, target({
+      knownAbility: "ABILITY_OWN_TEMPO",
+      realAbility: "ABILITY_OWN_TEMPO",
+    }))).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
+  });
+
+  it("non-Own-Tempo FALLTHROUGH reaches Safeguard, which JUMPs to Score_Minus10", () => {
+    expect(run(MOVE_CONFUSE_RAY, target({ safeguardUp: true }))).toMatchObject({
+      kind: "scored",
+      scoreDelta: -10,
+      draws: [],
+    });
+  });
+
+  it("all three gates FALL THROUGH to end for an eligible target", () => {
+    expect(run(MOVE_CONFUSE_RAY, target())).toMatchObject({
+      kind: "scored",
+      scoreDelta: 0,
+      draws: [],
+    });
+  });
+
+  it.each([
+    ["Swagger", 207],
+    ["Flatter", 260],
+  ])("%s's separate dispatch converges on the same source-complete CBM body", (_label, moveId) => {
+    expect(run(moveId, target({ isConfused: true }))).toMatchObject({
+      kind: "scored",
+      scoreDelta: -5,
+    });
+  });
+
+  it("executes the handler's own fresh get_ability after the universal preamble", () => {
+    const result = run(MOVE_CONFUSE_RAY, MAROWAK);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map((draw) => draw.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-confuse-ability",
+    ]);
+  });
+
+  it("leaves Haze behind the same generic CBM barrier", () => {
+    expect(run(MOVE_HAZE, target())).toMatchObject({
+      kind: "unsupported-branch",
+      barrier: "factory-ai-check-bad-move",
+      effect: "EFFECT_HAZE",
+    });
+  });
+});
+
 describe("AI_CBM_Toxic (data/battle_ai_scripts.s:341-352)", () => {
   const CLEAN_TARGET: FactoryAiCheckBadMoveTarget = Object.freeze({
     species: 213, // Shuckle: single known-by-species Sturdy keeps all handler draws at zero.

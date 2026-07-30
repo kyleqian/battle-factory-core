@@ -6545,3 +6545,168 @@ constant and live CBM comparison. All 69 abilities, 42 hold effects, and 17
 validation checks remain complete. The port replaces two runtime effect
 halts behind the same two existing generic barrier statements: no new
 unsupported-branch statement and no canonical-recording import.
+
+## 32. 2026-07-29 addendum #22: `AI_CBM_Confuse` + `AI_CV_Confuse`
+
+Bounded side-lane implementation session, Battle Scene OFF oracle. Both
+halves of the highest-ranked remaining Factory-reachable pair behind the
+generic barriers are source-complete and live-verified.
+
+### 32.1 Selection and Level-50 reachability
+
+The post-Paralyze shortlist was re-derived directly over Level-50 set
+indexes 0-849:
+
+| Pair | Distinct Level-50 set carriers | Staging assessment |
+| --- | ---: | --- |
+| Confuse | **64** | three-gate shared CBM; one roll and three strict HP gates in CV |
+| Counter | **42** | status/HP/Taunt/last-move type and power/known-move/multi-roll state |
+| Swagger | **30** | shares Confuse CBM, then adds Psych Up knowledge, ATK-stage, and turn-count branches before its Confuse fallthrough |
+
+Confuse wins on both reachability and staging cost. Its 64 carriers span
+Supersonic, Confuse Ray, Sweet Kiss, and Teeter Dance. Counter needs a much
+larger independently controlled battle-history surface, while Swagger has
+fewer than half as many carriers and a strictly larger CV topology.
+
+The shared CBM source body is also the dispatch target for Swagger and
+Flatter, so this increment wires all three CBM dispatch entries rather than
+artificially leaving two aliases at the barrier. Only `EFFECT_CONFUSE`
+dispatches directly to the chosen `AI_CV_Confuse` body; Swagger and Flatter
+retain their source-distinct, still-unported CV entry paths behind the same
+single generic `factory-ai-check-viability` barrier statement.
+
+### 32.2 Source-exact bodies, gates, and polarity
+
+CBM dispatch is
+`EFFECT_CONFUSE`/`EFFECT_SWAGGER`/`EFFECT_FLATTER -> AI_CBM_Confuse`
+(`data/battle_ai_scripts.s:132,169,193,386-391`):
+
+```asm
+AI_CBM_Confuse:
+	if_status2 AI_TARGET, STATUS2_CONFUSION, Score_Minus5
+	get_ability AI_TARGET
+	if_equal ABILITY_OWN_TEMPO, Score_Minus10
+	if_side_affecting AI_TARGET, SIDE_STATUS_SAFEGUARD, Score_Minus10
+	end
+```
+
+The three gates execute in source order. Existing confusion **JUMPS** to
+`-5` before the ability read. Not-confused **FALLS THROUGH** to one fresh
+target ability read; Own Tempo **JUMPS** to `-10`, while every other
+ability **FALLS THROUGH**. Safeguard then **JUMPS** to `-10`; only all
+three false gates **FALL THROUGH** to `end` at zero. As in §§29 and 31,
+`get_ability AI_TARGET` is uncached and draws only for an unknown species
+with two distinct abilities (`battle_ai_script_commands.c:1350-1400`).
+
+CV dispatch/body are `data/battle_ai_scripts.s:687,1467-1477`:
+
+```asm
+AI_CV_Confuse:
+	if_hp_more_than AI_TARGET, 70, AI_CV_Confuse_End
+	if_random_less_than 128, AI_CV_Confuse2
+	score -1
+AI_CV_Confuse2:
+	if_hp_more_than AI_TARGET, 50, AI_CV_Confuse_End
+	score -1
+	if_hp_more_than AI_TARGET, 30, AI_CV_Confuse_End
+	score -1
+AI_CV_Confuse_End:
+	end
+```
+
+Target HP `>70%` **JUMPS** to End with zero draws. HP `<=70%`
+**FALLS THROUGH** to the one draw site: low byte `<128` **JUMPS** over the
+first `-1`, while `>=128` **FALLS THROUGH** and applies it. The strict
+`>50%` and `>30%` gates each **JUMP** to End; values at or below their
+thresholds **FALL THROUGH** and apply another `-1`. Thus the possible CV
+deltas are `0/-1/-2/-3`, and the body preserves its incoming `funcResult`
+carry.
+
+Tier 1 drives JUMP and FALLTHROUGH at every CBM and CV gate, both random
+polarities, exact HP boundaries 70/50/30, all three shared CBM dispatches,
+the handler's own fresh ability draw, and continued reachability of Haze
+through each unchanged generic barrier.
+
+### 32.3 Live OFF staging, direct move receipts, and RNG ledger
+
+The reproducible complete-party pair is:
+
+- `mechanic-factory-ai-confuse-control-off.json`;
+- `mechanic-factory-ai-confuse-reach-off.json`;
+- generator: `tools/probe/generate-factory-ai-confuse-fixtures.ts`;
+- process-isolated receipt probe:
+  `tools/probe/probe-factory-ai-confuse-case.py`;
+- engine/ROM verifier: `tools/probe/verify-factory-ai-confuse-live.ts`.
+
+A level-5 Magikarp first sets Light Screen, then the player's four-slot
+Vital Throw KOs it. Gengar switches in with
+`[Confuse Ray, Light Screen, Light Screen, Light Screen]`; Vital Throw is
+Ghost-immune thereafter, so Gengar remains 135/135 and the player target
+remains at full HP. Control is single-ability Thick Fat Miltank; reach is
+single-ability Own Tempo Spinda. Both are pure Normal, isolating the
+ability gate without a target-ability guessing draw or type change.
+
+At full target HP, `AI_CV_Confuse` takes its first `>70%` jump and consumes
+zero draws. Control leaves Confuse Ray at score 100, so it strictly wins.
+Reach applies the Own Tempo `-10`; the three already-active screen slots
+then tie or beat score 90 according to their own independent CV rolls.
+
+| Seed | Fixture | First Gengar PP delta | Scores by slot | ROM and engine choice | Exact engine RNG |
+| ---: | --- | --- | --- | --- | --- |
+| 1 | control | `[10,30,30,30] -> [9,30,30,30]` | `[100,90,90,90]` | Confuse Ray slot 0 | `3726110690 -> 3070328874` |
+| 1 | reach | `[10,30,30,30] -> [10,29,30,30]` | `[90,90,90,90]` | Light Screen slot 1 | `3726110690 -> 3070328874` |
+| 99 | control | `[10,30,30,30] -> [9,30,30,30]` | `[100,90,92,90]` | Confuse Ray slot 0 | `1329715331 -> 3507076075` |
+| 99 | reach | `[10,30,30,30] -> [10,30,29,30]` | `[90,90,92,90]` | Light Screen slot 2 | `1329715331 -> 3507076075` |
+
+Every row was rerun byte-identically. The chosen move is read from its exact
+PP decrement, and the engine matches that slot directly, not merely the
+score sign or total draw count.
+
+Fresh process-isolated reach receipts reconcile the decision windows
+identically:
+
+| Caller | Seed 1 `(742,750]` | Seed 99 `(822,830]` | Attribution |
+| --- | ---: | ---: | --- |
+| `BattleTurnPassed+0x157` | 1 | 1 | ordinary pre-decision battle call |
+| `BattleAI_SetupAIData+0x83` | 4 | 4 | one simulated-RNG setup draw per slot |
+| `AI_CBM_Confuse` | 0 | 0 | single-ability Own Tempo read; no guessing draw |
+| `AI_TryToFaint` | 0 | 0 | all four zero-power moves tie as most powerful |
+| `AI_CV_Confuse` | 0 | 0 | full-HP `>70%` short circuit |
+| `Cmd_if_random_less_than+0x7` | 3 | 3 | the three Light Screen CV sites |
+| `ChooseMoveOrAction_Singles+0xf7` | 1 | 1 | unconditional final selection draw |
+| **Live window total** | **9** | **9** | one ordinary + eight engine draws |
+
+Removing the ordinary battle call leaves the exact **8-draw engine
+receipt** in both seeds. The process probe's per-frame `sRandCount` ledger
+records `1 + 8` calls and the same start/end RNG values; its multi-megabyte
+emulator logs remain in fresh scratch and are not committed.
+
+### 32.4 Reproduce and census status
+
+```sh
+node --experimental-strip-types tools/probe/generate-factory-ai-confuse-fixtures.ts
+node --experimental-strip-types tools/probe/verify-factory-ai-confuse-live.ts
+npx vitest run tests/factoryAiCheckBadMove.test.ts tests/factoryAiCheckViability.test.ts tests/factoryAiScoredDecision.test.ts
+node --experimental-strip-types tools/report/ability-item-parity-census.ts
+npx tsx tools/report/executable-frontier-census.ts
+```
+
+For process-isolated receipts, allocate one fresh scratch directory and run
+each seed separately through the wrapper:
+
+```sh
+probe_scratch_dir=$(mktemp -d /tmp/pokebench-confuse.XXXXXX)
+python3 tools/run-mgba-probe.py "$probe_scratch_dir/confuse-reach-1.json" -- tools/probe/probe-factory-ai-confuse-case.py tools/battle-lab/mechanic-factory-ai-confuse-reach-off.json 1 "$probe_scratch_dir/confuse-reach-1.json"
+python3 tools/run-mgba-probe.py "$probe_scratch_dir/confuse-reach-99.json" -- tools/probe/probe-factory-ai-confuse-case.py tools/battle-lab/mechanic-factory-ai-confuse-reach-off.json 99 "$probe_scratch_dir/confuse-reach-99.json"
+```
+
+The executable-frontier census changes only its embedded generation date,
+so that date-only churn is restored; its committed SHA-256 remains
+`8b18f75413c8046530f75c8a5b331a0bf31e8b92596029356ef6025071965261`.
+The ability/item census legitimately changes exactly one cell:
+`ABILITY_OWN_TEMPO` engine-reference count **7 -> 9**, from the identity
+constant and live CBM comparison. All 69 abilities, 42 hold effects, and 17
+validation checks remain complete. No hold-effect count moves. The shared
+CBM and Confuse CV dispatches replace runtime effect halts behind the same
+two existing generic barrier statements: no new unsupported-branch
+statement and no canonical-recording import.
