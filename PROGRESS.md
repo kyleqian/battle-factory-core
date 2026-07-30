@@ -39,7 +39,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **190,141,256,200,200**. The visual guard remains intentionally in place;
   no trace/capture change, canonical-recording import, unsupported barrier,
   terminal handoff, or battle/turn/absolute-tick branch was added.
-  PAPERCUT: none.
+  PAPERCUT: the final full suite took 626s versus the 117s baseline despite
+  no intentional concurrent suite, ~8 minutes lost.
 
 ---
 
