@@ -78,6 +78,12 @@ const HELD_ITEM_BY_ID = new Map(
 export type FactoryFreshBattleConfig = Readonly<{
   requestId: number;
   rngSeed: number;
+  /**
+   * Source-owned draws between the supplied facility cursor and
+   * BattleStartClearSetData. Anchor adapters may pin this from live RAM;
+   * ordinary generated battles begin directly at the battle-start kernel.
+   */
+  preCommandRngCalls?: number;
   playerParty: BattleScriptPartyState;
   opponentParty: BattleScriptPartyState;
 }>;
@@ -331,9 +337,17 @@ function kernelEvents(events: readonly BattleScriptSemanticEvent[]): readonly Ba
 export function initializeFreshFactoryBattle(
   config: FactoryFreshBattleConfig,
 ): FactoryFreshBattleInitialization {
+  const preCommandRngCalls = config.preCommandRngCalls ?? 0;
+  if (!Number.isSafeInteger(preCommandRngCalls) || preCommandRngCalls < 0) {
+    throw new Error("preCommandRngCalls must be a non-negative safe integer");
+  }
+  let battleStartRngValue = config.rngSeed >>> 0;
+  for (let call = 0; call < preCommandRngCalls; call += 1) {
+    battleStartRngValue = randomU16(battleStartRngValue).rngValue;
+  }
   // BattleStartClearSetData:3140. The receipt proves this value is overwritten
   // before turn-1 selection but consumed by the pre-hook order sort.
-  const drawA = randomU16(config.rngSeed);
+  const drawA = randomU16(battleStartRngValue);
   const player = activeFromParty(0, config.playerParty[0]);
   const opponent = activeFromParty(1, config.opponentParty[0]);
   const playerSpeed = preHookEffectiveSpeed(player, drawA.value);
@@ -514,7 +528,7 @@ export function initializeFreshFactoryBattle(
   const state = createFactoryFullTurnBattleStateFromRulesContext({
     requestId: config.requestId,
     rngSeed: drawB.rngValue,
-    rngCalls: tieDraw === null ? 2 : 3,
+    rngCalls: preCommandRngCalls + (tieDraw === null ? 2 : 3),
     nextEventSequence: events.length,
     rulesContext,
   });

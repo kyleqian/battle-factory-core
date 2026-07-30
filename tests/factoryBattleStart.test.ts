@@ -100,6 +100,26 @@ describe("fresh Factory battle initializer (Gate-5 rungs 2-3)", () => {
     });
   });
 
+  it("accounts for an adapter-pinned pre-command RNG span before draws A and B", () => {
+    const seed = 3;
+    let cursor = seed;
+    for (let call = 0; call < 33; call += 1) {
+      cursor = randomU16(cursor).rngValue;
+    }
+    const drawA = randomU16(cursor);
+    const drawB = randomU16(drawA.rngValue);
+    const state = createFreshFactoryBattle({
+      requestId: 41,
+      rngSeed: seed,
+      preCommandRngCalls: 33,
+      playerParty: party(300),
+      opponentParty: party(301),
+    });
+
+    expect(state.rng).toEqual({ value: drawB.rngValue, calls: 35 });
+    expect(state.rules.rulesContext.randomTurnNumber).toBe(drawB.value);
+  });
+
   it("stores draw B for turn-1 Quick Claw: slower Magcargo acts first when A misses and B procs", () => {
     // Seed 3: draw A=50515 (no proc), draw B=12646 (20% proc).
     const corpusParty = party(299);

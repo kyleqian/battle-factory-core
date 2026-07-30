@@ -177,6 +177,8 @@ export type FactoryRoundBattleOrchestratorConfig = Readonly<{
   adoptedInitialOpponent?: Readonly<{
     generation: FactoryOpponentGenerationResult;
     freshBattleRngValue: number;
+    /** Adapter-pinned draws before the fresh battle kernel begins. */
+    preCommandRngCalls?: number;
   }>;
 }>;
 
@@ -255,6 +257,8 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
   /** Monotonic count across facility generation and every battle cursor. */
   facilityRngCalls: number;
   activeBattleCallStart: number | null;
+  /** One-shot adapter input, cleared as soon as the adopted battle starts. */
+  pendingBattlePreCommandRngCalls: number;
   nextBattleRequestId: number;
 }>;
 
@@ -507,6 +511,7 @@ export function createFactoryRoundBattleOrchestrator(
     rngSegments: Object.freeze(rngSegments),
     facilityRngCalls,
     activeBattleCallStart: null,
+    pendingBattlePreCommandRngCalls: adopted?.preCommandRngCalls ?? 0,
     nextBattleRequestId: 1,
   });
 }
@@ -604,6 +609,7 @@ function startCurrentBattle(
   const started = createFreshFactoryBattle({
     requestId: state.nextBattleRequestId,
     rngSeed: state.round.rules.rngValue,
+    preCommandRngCalls: state.pendingBattlePreCommandRngCalls,
     playerParty: asBattleScriptParty(player),
     opponentParty: asBattleScriptParty(asKernelParty(opponentRecords)),
   });
@@ -637,6 +643,7 @@ function startCurrentBattle(
     aiHistory: createFactoryAiBattleHistory(started.rules.rulesContext),
     facilityRngCalls: callStart + started.rng.calls,
     activeBattleCallStart: callStart,
+    pendingBattlePreCommandRngCalls: 0,
     nextBattleRequestId: state.nextBattleRequestId + 1,
   });
 }

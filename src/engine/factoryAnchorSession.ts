@@ -42,6 +42,12 @@ export const ANCHOR_BATTLE_1_CONSTRUCTION_RNG_VALUES = Object.freeze(
   [2_074_070_560, 3_372_555_893, 1_792_028_978] as const,
 );
 export const ANCHOR_BATTLE_1_HANDOFF_RNG_VALUE = 2_288_692_129;
+/**
+ * The Battle Scene OFF anchor's live gRngValue advances 33 times between the
+ * room handoff cursor and BattleStartClearSetData. This is semantic RAM state,
+ * not presentation timing.
+ */
+export const ANCHOR_BATTLE_1_PRE_COMMAND_RNG_CALLS = 33;
 export const ANCHOR_BATTLE_1_PERSONALITIES = Object.freeze(
   [1_094_072_807, 3_475_344_024, 3_971_699_699] as const,
 );
@@ -143,6 +149,7 @@ export function createFactoryAnchorSession(
     adoptedInitialOpponent: {
       generation,
       freshBattleRngValue: input.freshBattleRngValue,
+      preCommandRngCalls: ANCHOR_BATTLE_1_PRE_COMMAND_RNG_CALLS,
     },
   });
   const roundTrainer = factoryTrainerPresentationForOpponent(
