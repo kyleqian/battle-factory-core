@@ -108,7 +108,37 @@
     }
   },
   "trace": {
-    "segments": [{"frames": 1, "buttons": []}],
-    "captureFrames": [0, 1]
+    "segments": [
+      {"frames": 8, "buttons": []},
+      {"frames": 1, "buttons": ["A"]},
+      {"frames": 5, "buttons": []},
+      {"frames": 1, "buttons": ["RIGHT"]},
+      {"frames": 1, "buttons": []},
+      {"frames": 1, "buttons": ["DOWN"]},
+      {"frames": 1, "buttons": []},
+      {"frames": 1, "buttons": ["B"]},
+      {"frames": 6, "buttons": []},
+      {"frames": 1, "buttons": ["A"]},
+      {"frames": 5, "buttons": []},
+      {"frames": 1, "buttons": ["UP"]},
+      {"frames": 1, "buttons": []},
+      {"frames": 1, "buttons": ["A"]},
+      {"frames": 60, "buttons": []},
+      {"frames": 1, "buttons": ["A"]},
+      {"frames": 60, "buttons": []},
+      {"frames": 1, "buttons": ["A"]},
+      {"frames": 60, "buttons": []},
+      {"frames": 1, "buttons": ["A"]},
+      {"frames": 60, "buttons": []},
+      {"frames": 1, "buttons": ["A"]},
+      {"frames": 60, "buttons": []},
+      {"frames": 1, "buttons": ["A"]},
+      {"frames": 60, "buttons": []},
+      {"frames": 1, "buttons": ["A"]},
+      {"frames": 120, "buttons": []},
+      {"frames": 1, "buttons": ["A"]},
+      {"frames": 300, "buttons": []}
+    ],
+    "captureFrames": [0, 8, 18, 19, 34, 519, 520, 521, 600, 700, 820]
   }
 }
