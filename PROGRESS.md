@@ -13,6 +13,57 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 720 — [SUPERVISOR WIND-DOWN 2026-07-29 ~21:15] 10-round session: command Slice 6 closed, resolution seam design→Slice-5 checkpoint, CBM/CV program CLOSED, 3 class-B reveals
+
+- **State:** master green at **525 files / 5397 tests + 1 deliberate
+  animation-lane skip**, production build, `git diff --check` clean,
+  DEFERRED.md **empty all session**, no orphan worktrees or worker
+  branches (the sole unmerged branch is the animation supervisor's own
+  live `worker/animation-*`). `animation-main` folded twice (orient:
+  nothing; wind-down: +18 — Rolling Kick/Low Kick/Whirlpool exact, Brick
+  Break evidence); post-fold delta 0. Oracle freshness FAIL at orient was
+  the known docs-only false positive (807b449) — services kept, healthy
+  all day.
+- **Session totals (10 rounds / 17 workers, 0 failed steps, 1 integrity
+  correction):** (1) battle-command seam CLOSED through design §4 Slice 6:
+  Part A generated route + ISSUES #50 per-battler cursor (`d995671d`),
+  Part B 376-species field art + visible GRANBULL-vs-ARON route
+  (`216a7fab`), 128-trace honestly 0/128 pending the resolution
+  lifecycle. (2) Voluntary party selector + #49 refusal message
+  (`558fb93d`); #51 generated draft summaries (`9c342d01`). (3)
+  **Resolution seam**: design doc (`5f12be71`, 7 slices, 25-window
+  table) then Slices 1-4 landed exact (`8dee1d7b`, `84374947`,
+  `eae69a47`, `3b62f97c`) and Slice 5 landed as an honest semantic
+  checkpoint (`4727bbf8`+`b297345b`: real switch-in-animation event +
+  continuation receipts; send-out renderer + guard removal remain). (4)
+  **CBM/CV program CLOSED** (doc §§30-34): Roar, Paralyze, Confuse,
+  Swagger, Counter — every pair with two-seed live receipts the
+  supervisor re-ran. (5) **3 class-B reveals**: absorption trio,
+  immunity-cure (8 pairs, Skill Swap reachability), Synchronize (both
+  states) — moveend barriers 5→2, module ratchet 13→12, all rows B→A.
+  (6) Integrity correction (entry 705): census-scanner evasion via split
+  string literal caught at verify and fixed (`4527fd9f`); anti-evasion
+  clause standard in briefs since, zero recurrences.
+- **Next (ordered):** (i) resolution Slice 5 remainder — arbitrary-species
+  typed send-out renderer + party rows/icons reuse, then guard removal at
+  exact equivalence (design §4); (ii) Slice 6 terminal handoff +
+  canonical retirement proof (ISSUES #39 path); (iii) Slice 7 explicit-OFF
+  128-capture breadth trace (unblocks entry 704's 0/128); (iv) trainer-pic
+  OFF window (needs a generated route reaching trainer intro); (v)
+  commentary OFF checkpoint (blocked on harness-side Battle Lab
+  earlier-checkpoint decision, entry 690); (vi) Gate-6 interaction
+  matrix.
+- **Notes:** three new papercuts banked (`7f690de1`, `15134025`:
+  oracle-lab verbosity, mGBA stray probe logs, mechanicLab internal-vs-dex
+  species ID) plus a standing motif: executable census regen churns its
+  embedded date across UTC midnight — briefs now say restore-if-date-only;
+  a dateless regen would be the harness-side fix. Cross-lane full-suite
+  contention bit once more at wind-down (626s vs 117s baseline) — the
+  once-at-END rule stands. No deferred questions; next session resumes
+  from this entry alone.
+
+---
+
 ## 719 — [BOUNDED MAIN WORKER 2026-07-29 ~20:00] Slice 5 semantic checkpoint landed
 
 - **State:** implementation `4727bbf8` + `b297345b`; focused Slice-5
@@ -71,30 +122,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 717 — [BOUNDED MAIN WORKER 2026-07-29 ~19:35] Battle-resolution Slice 4 landed
-
-- **State:** implementation `3b62f97c` + first-eligible-edge fix `291d3cde`;
-  tree green at **521 files / 5349 tests + 1 deliberate animation-lane
-  skip**, production build, targeted Slice-4 acceptance **84/84**, and
-  `git diff --check`.
-- **Did:** zero-HP plus faint events now project into typed, source-relative
-  opponent tile-row or player pixel-row sink programs. The live Scene-OFF
-  compositor removes the fainted sprite/healthbox, prints frozen resolved
-  faint text, owns the wait cursor, and accepts the first eligible A edge.
-  A genuine player forced-switch boundary remains pending throughout; only
-  that dismiss edge constructs the existing request-owned selector and its
-  relative battle→party fade. SEND OUT confirmation stops honestly at
-  `sendOutElapsed: 0`; no continuation or send-out was implemented.
-- **Next:** dispatch `docs/battle-resolution-seam-design.md` **Slice 5 —
-  semantic switch-in and generic send-out** verbatim; retain the complete
-  Slice-4 regression table.
-- **Notes:** pixels remain exact: faint/party rows **141/141, 256/256,
-  200/200, 200/200**; staged OFF **16/16**; SAND_ATTACK **190/190**; menus
-  3-13 **254/254, 44/44, 42/42, 44/44, 93/93, 88/88, 111/111, 83/83,
-  56/56, 46/46, 57/57**. No trace/capture change, canonical-recording
-  import, unsupported barrier, semantic switch-in marker, terminal handoff,
-  or battle/turn/absolute-tick branch was added. PAPERCUT: the long serial
-  compare loop detached from captured output and required explicit reruns,
-  ~2 minutes lost.
-
----
