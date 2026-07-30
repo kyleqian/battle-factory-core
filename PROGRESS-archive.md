@@ -1,3 +1,21 @@
+## 738 — [SUPERVISOR 2026-07-30 ~12:50] Gate-6 K1-K3 merged (K2 caught a real weather-accuracy kernel defect); Slice 1 supervisor-verified
+
+- **State:** master `54124ee9`, union green **546 files / 5497 tests + 1
+  deliberate animation-lane skip**, build clean. Merged side worktree
+  removed; R7+R8 side worker live (stacked worktree, base `126c2cf`).
+- **Did:** verified Slice 1 myself (route+ratchet tests rerun; generated
+  **128/128**; spot-checked `turn13-sandattack` 190/190 and
+  `battle2-off-turn1-staged` 16/16). Merged K1-K3
+  (`gate6KernelInteractions.test.ts`, 542 lines): K1 end-turn
+  weather-vs-item ordering, K2 accuracy×weather (fix `450cf532` —
+  `battleScriptHitChainOpcode.ts` hardcoded weather inactive in accuracy
+  checks: rain-Thunder bypass, sun-Thunder 50, Sand Veil were all
+  missing), K3 status×volatile gate order + RNG ledger. Scout-doc
+  coverage rows updated by supervisor.
+- **Next:** main — Slice 2 (anchor session, Battle 1 RNG epoch
+  reconciliation); side — R7+R8 receipts, then K4-K6, R4, B+444 probe.
+
+---
 ## 737 — [BOUNDED MAIN WORKER 2026-07-30 ~12:38] #53 routing Slice 1 complete
 
 - **State:** explicit route seam and draft-source adapter landed in

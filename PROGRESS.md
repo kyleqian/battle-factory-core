@@ -13,6 +13,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 741 — [BOUNDED MAIN WORKER 2026-07-30 ~14:10] #53 routing Slice 3 honest checkpoint
+
+- **State:** intro ownership/handoff landed in `a6a8489c` + `81557cb3`;
+  focused acceptance **5 files / 48 tests**, full gate green at **549 files /
+  5545 tests + 1 deliberate animation-lane skip**, build clean.
+- **Did:** the generated orchestrator now owns the room-relative intro, accepts
+  its live A edge, acknowledges `battleStart` only at command-ready, starts the
+  fresh kernel, and settles the frozen field through the proven adapter.
+  Actual-draft OFF traces landed with dense >256-capture oracle batching:
+  settled command **7/7**, generated dev command **128/128**, all **25/25**
+  immutable rows exact.
+- **Next:** Slice 3 remains a bounded evidence checkpoint: close only the
+  three additional intro/command seam frames, without fitting or touching the
+  separately recorded B+444 family; then rerun its two traces.
+- **Notes:** full intro is honestly **711/715**. B+444 is 3px at frame 1492
+  (`165,42-167,43`); additional mismatches are frame 1747 (1579px) and
+  1755-1756 (769px each), all at the settled action-menu bounce seam.
+  Default/canonical route unchanged; no issue, recording/barrier ratchet,
+  Gate-6, Scene-ON, later-round, or postbattle change. PAPERCUT: oracle's
+  256-capture ceiling required serialized batching, ~10 minutes.
+
+---
 ## 740 — [SUPERVISOR 2026-07-30 ~13:20] Slice 2 verified; Gate-6 R7/R8 + K4-K6 merged — matrix now closed except R4 (in flight)
 
 - **State:** master union green **549 files / 5544 tests + 1 deliberate
@@ -52,22 +74,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   recording/barrier ratchet, issue, design, Gate-6, or recorded
   `BattleSetupState` change. PAPERCUT: concurrent compares race on shared
   `out/latest`; reran serially, ~1 minute lost.
-
----
-## 738 — [SUPERVISOR 2026-07-30 ~12:50] Gate-6 K1-K3 merged (K2 caught a real weather-accuracy kernel defect); Slice 1 supervisor-verified
-
-- **State:** master `54124ee9`, union green **546 files / 5497 tests + 1
-  deliberate animation-lane skip**, build clean. Merged side worktree
-  removed; R7+R8 side worker live (stacked worktree, base `126c2cf`).
-- **Did:** verified Slice 1 myself (route+ratchet tests rerun; generated
-  **128/128**; spot-checked `turn13-sandattack` 190/190 and
-  `battle2-off-turn1-staged` 16/16). Merged K1-K3
-  (`gate6KernelInteractions.test.ts`, 542 lines): K1 end-turn
-  weather-vs-item ordering, K2 accuracy×weather (fix `450cf532` —
-  `battleScriptHitChainOpcode.ts` hardcoded weather inactive in accuracy
-  checks: rain-Thunder bypass, sun-Thunder 50, Sand Veil were all
-  missing), K3 status×volatile gate order + RNG ledger. Scout-doc
-  coverage rows updated by supervisor.
-- **Next:** main — Slice 2 (anchor session, Battle 1 RNG epoch
-  reconciliation); side — R7+R8 receipts, then K4-K6, R4, B+444 probe.
 
