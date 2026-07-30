@@ -28,7 +28,7 @@ type FactorySpeciesHeader = Readonly<{
 
 type SummarySpeciesInfo = Readonly<{
   species: string;
-  dexNumber: number | null;
+  dexNumber: number;
   types: readonly string[];
   genderRatio: number;
 }>;
@@ -63,7 +63,7 @@ export type FactoryRentalPresentation = Readonly<{
   species: string;
   name: string;
   category: string;
-  dexNumber: number;
+  dexNumber: number | null;
   types: readonly string[];
   personality: number;
   level: number;
