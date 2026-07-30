@@ -25,6 +25,10 @@ import {
   type SlamState,
 } from "./slam.ts";
 import {
+  strengthAtAge,
+  type StrengthState,
+} from "./strength.ts";
+import {
   twineedleEffectAtAge,
   type TwineedleEffect,
 } from "./twineedle.ts";
@@ -1264,6 +1268,13 @@ export interface SceneOnSlamConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnSecretPowerConfig {
+  readonly move: "SECRET_POWER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnTwineedleConfig {
   readonly move: "TWINEEDLE";
   readonly attacker: SceneOnPresentationBattler;
@@ -1822,6 +1833,7 @@ export type SceneOnMoveConfig =
   | SceneOnBlockConfig
   | SceneOnBodySlamConfig
   | SceneOnSlamConfig
+  | SceneOnSecretPowerConfig
   | SceneOnTwineedleConfig
   | SceneOnSpikeCannonConfig
   | SceneOnSonicBoomConfig
@@ -2063,6 +2075,12 @@ export interface SceneOnBodySlamView extends BodySlamState {
 }
 
 export interface SceneOnSlamView extends SlamState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSecretPowerView extends StrengthState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2831,6 +2849,7 @@ export function createSceneOnMovePresentation<
     | SceneOnAbsorbConfig | SceneOnReflectConfig | SceneOnLightScreenConfig
     | SceneOnBiteConfig
     | SceneOnHeadbuttConfig | SceneOnBodySlamConfig | SceneOnSlamConfig
+    | SceneOnSecretPowerConfig
     | SceneOnWhirlwindConfig | SceneOnBlockConfig,
 >(
   config: TConfig,
@@ -3764,6 +3783,27 @@ export function sceneOnSlamView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...slamAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is Secret Power's Factory `Move_STRENGTH` first active display. */
+export function sceneOnSecretPowerView(
+  state: SceneOnMovePresentationState<SceneOnSecretPowerConfig>,
+): SceneOnSecretPowerView {
+  if (state.config.move !== "SECRET_POWER") {
+    throw new Error(
+      `expected SECRET_POWER presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...strengthAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.target.geometry.animationCenter,

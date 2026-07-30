@@ -772,6 +772,7 @@ import {
   sceneOnBlockView,
   sceneOnBodySlamView,
   sceneOnSlamView,
+  sceneOnSecretPowerView,
   sceneOnTwineedleView,
   sceneOnSpikeCannonView,
   sceneOnSonicBoomView,
@@ -859,6 +860,7 @@ import {
   type SceneOnBlockConfig,
   type SceneOnBodySlamConfig,
   type SceneOnSlamConfig,
+  type SceneOnSecretPowerConfig,
   type SceneOnTwineedleConfig,
   type SceneOnSpikeCannonConfig,
   type SceneOnSonicBoomConfig,
@@ -16880,6 +16882,158 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "LOUDRED used" : "Foe LOUDRED used",
       "ASTONISH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SECRET_POWER") {
+    const strengthState =
+      state as SceneOnMovePresentationState<SceneOnSecretPowerConfig>;
+    const view = sceneOnSecretPowerView(strengthState);
+    // BuildOamBuffer runs before sprite/task callbacks. Battler offsets and
+    // IMPACT objects therefore reach the production framebuffer one display
+    // after the source-relative reducer, while monbg/blend register writes
+    // are visible on their current display.
+    const displayed = sceneOnSecretPowerView({
+      ...strengthState,
+      age: strengthState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "TEDDIURSA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "TEDDIURSA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SECRET_POWER pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const teddiursaSource = playerToOpponent
+      ? restArt.teddiursaBack : restArt.teddiursaFront;
+    const teddiursa = playerToOpponent
+      ? teddiursaSource
+      : {
+          ...teddiursaSource,
+          tileset: subTileset(teddiursaSource.tileset, 0, 8),
+        };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+
+    const targetIdle = playerToOpponent && strengthState.age <= 48
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    // ShakeAndSink writes x2/y2 from a task callback after BuildOamBuffer,
+    // adding one more transfer than the return-slide sprite callback.
+    const displayedAttacker = strengthState.age >= 7
+      && strengthState.age <= 47
+      ? sceneOnSecretPowerView({
+          ...strengthState,
+          age: strengthState.age - 2,
+        }).attackerOffset
+      : displayed.attackerOffset;
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      teddiursa.tileset,
+      teddiursa.palette,
+      view.attacker.geometry.spriteCorner.x + displayedAttacker.x2,
+      view.attacker.geometry.spriteCorner.y + displayedAttacker.y2,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x
+        + targetIdle.x2 + displayed.targetOffset.x2,
+      view.target.geometry.spriteCorner.y
+        + targetIdle.y2 + displayed.targetOffset.y2,
+    );
+
+    // Before target monbg reaches scanout, the player-back target is the
+    // foreground OBJ. Once monbg owns it, target-2 sits beneath attacker and
+    // the semi-transparent affine IMPACT objects.
+    let target2Backdrop: Uint8Array;
+    if (opponentToPlayer && strengthState.age < 7) {
+      drawAttacker();
+      drawTarget();
+      target2Backdrop = fb.slice();
+    } else {
+      drawTarget();
+      target2Backdrop = fb.slice();
+      drawAttacker();
+    }
+    // Lower OAM slots win same-priority OBJ overlap. Each later source
+    // allocation has a higher slot, so paint the reducer order in reverse.
+    const displayedHits = [...displayed.hitSplats].sort((left, right) =>
+      Number(left.sourceIndex !== 1) - Number(right.sourceIndex !== 1)
+    );
+    for (const hit of displayedHits) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        target2Backdrop,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        hit.x,
+        hit.y,
+        303,
+        0,
+        0,
+        303,
+        12,
+        8,
+        false,
+      );
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "TEDDIURSA",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "TEDDIURSA" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "TEDDIURSA used" : "Foe TEDDIURSA used",
+      "SECRET POWER!",
       99,
     );
     return;

@@ -1,6 +1,11 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { strengthAtAge } from "../../src/animation/strength.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnSecretPowerView,
+  type SceneOnSecretPowerConfig,
+} from "../../src/animation/sceneOnPresentation.ts";
 
 describe("Secret Power Factory Strength reducer checkpoint", () => {
   it("ports ShakeAndSink, return-slide, ellipse, and ShakeMon2 schedules", () => {
@@ -89,7 +94,41 @@ describe("Secret Power Factory Strength reducer checkpoint", () => {
     }
   });
 
-  it("keeps exact promotion blocked at the first inactive cleanup display", () => {
+  it("threads immutable side and geometry through the typed Scene-ON seam", () => {
+    const fixture = JSON.parse(readFileSync(
+      "tools/compare/fixtures/"
+      + "secret-power-strength-opponent-teddiursa-player-onix.json",
+      "utf8",
+    ));
+    const config: SceneOnSecretPowerConfig = {
+      move: "SECRET_POWER",
+      attacker: fixture.attacker,
+      target: fixture.target,
+      fieldProfile: fixture.fieldProfile,
+    };
+    const state = createSceneOnMovePresentation(config);
+    expect(sceneOnSecretPowerView({ ...state, age: 66 })).toMatchObject({
+      age: 66,
+      attacker: {
+        species: "TEDDIURSA",
+        geometry: { side: "opponent" },
+      },
+      target: {
+        species: "ONIX",
+        geometry: {
+          side: "player",
+          animationCenter: { x: 72, y: 88 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      hitSplats: [
+        { x: 88, y: 76, sourceIndex: 1 },
+        { x: 69, y: 92, sourceIndex: 2 },
+      ],
+    });
+  });
+
+  it("pins exact production acceptance through the inactive cleanup display", () => {
     expect(strengthAtAge(100, "player", { x: 176, y: 42 })).toMatchObject({
       impactLoaded: true, active: true,
     });
@@ -102,13 +141,14 @@ describe("Secret Power Factory Strength reducer checkpoint", () => {
     ]) {
       expect(JSON.parse(readFileSync(path, "utf8"))).toMatchObject({
         schema: "secret-power-strength-portable-evidence/v1",
+        oracleProfile: "battle-scene-on",
         sourceWindow: { startFrame: 222, endFrame: 323, frameCount: 102 },
-        status: "evidence-checkpoint",
+        status: "exact",
         acceptance: {
           reducerPinned: true,
-          typedSeam: false,
-          productionFramebuffer: false,
-          exact: false,
+          typedSeam: true,
+          productionFramebuffer: true,
+          exact: true,
         },
       });
     }
