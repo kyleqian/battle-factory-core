@@ -10,13 +10,21 @@ import {
 } from "../src/engine/battleScriptRulesContext.ts";
 import { runBattleEndTurnOrchestration } from "../src/engine/battleEndTurnOrchestration.ts";
 import type { BattleScriptSemanticEvent } from "../src/engine/battleScriptEvents.ts";
-import { loadBattleScriptProgram } from "../src/engine/battleScriptProgram.ts";
+import { stepBattleScriptMachine } from "../src/engine/battleScriptMachine.ts";
+import {
+  loadBattleScriptProgram,
+  resolveBattleScriptLabel,
+} from "../src/engine/battleScriptProgram.ts";
 
 const program = loadBattleScriptProgram();
 const BATTLE_TYPE_FACTORY = 1 << 19;
+const B_WEATHER_RAIN_TEMPORARY = 1 << 0;
 const B_WEATHER_SANDSTORM_TEMPORARY = 1 << 3;
+const B_WEATHER_SUN_TEMPORARY = 1 << 5;
 const ITEM_SITRUS_BERRY = 142;
 const ITEM_LEFTOVERS = 200;
+const MOVE_THUNDER = 87;
+const ABILITY_SAND_VEIL = 8;
 
 function battler(
   changes: Partial<BattleScriptRulesBattler> & { maxHP?: number } = {},
@@ -169,6 +177,92 @@ function hpChangesForBattler(
   );
 }
 
+/** Modular inverse of ISO_RANDOMIZE1's multiplier (1103515245) mod 2**32. */
+const RNG_MULTIPLIER_INVERSE = 4005161829n;
+const RNG_MOD = 1n << 32n;
+
+function rngValueBeforeU16(targetU16: number): number {
+  const after = BigInt(targetU16) * 65536n;
+  const before = (
+    (((after - 24691n) % RNG_MOD + RNG_MOD) % RNG_MOD
+      * RNG_MULTIPLIER_INVERSE)
+    % RNG_MOD
+  );
+  return Number(before);
+}
+
+function labelPc(label: string): number {
+  const entry = resolveBattleScriptLabel(program, label);
+  if (!entry) throw new Error(`missing Battle Script label ${label}`);
+  return entry.programCounter;
+}
+
+function accuracyContext(
+  weather: number,
+  accuracyDelta: -2 | 0 | 2,
+): ReturnType<typeof createBattleScriptRulesContext> {
+  return createBattleScriptRulesContext({
+    battlers: [
+      battler({
+        side: 0,
+        moves: [MOVE_THUNDER, 0, 0, 0],
+        pp: [10, 0, 0, 0],
+        statStages: [6, 6, 6, 6, 6, 6, 6 + accuracyDelta, 6],
+      }),
+      battler({
+        side: 1,
+        ability: weather === B_WEATHER_SANDSTORM_TEMPORARY
+          ? ABILITY_SAND_VEIL
+          : 0,
+      }),
+      battler({ side: 0 }),
+      battler({ side: 1 }),
+    ],
+    selectorRoles: { attacker: 0, target: 1, effectBattler: 1, fainted: null },
+    scriptingBattler: 0,
+    atkCancelerTracker: 0,
+    battleOutcome: 0,
+    currentMove: MOVE_THUNDER,
+    currentMovePosition: 0,
+    moveResultFlags: 0,
+    dmgMultiplier: 1,
+    critMultiplier: 1,
+    moveEffectByte: 0,
+    missType: 0,
+    hitMarker: 0,
+    multiHitCounter: 0,
+    weather,
+    battleTopology: {
+      battlersCount: 2,
+      battleTypeFlags: BATTLE_TYPE_FACTORY,
+      battlerPositions: [0, 1, 0xff, 0xff],
+    },
+  });
+}
+
+function stepAccuracy(
+  weather: number,
+  accuracyDelta: -2 | 0 | 2,
+  nextRandomU16: number,
+) {
+  const execution = createBattleScriptStatusRulesExecution(
+    program,
+    "BattleScript_HitFromAccCheck",
+    accuracyContext(weather, accuracyDelta),
+    rngValueBeforeU16(nextRandomU16),
+    ports,
+  );
+  const result = stepBattleScriptMachine(
+    program,
+    execution.state,
+    execution.handlers,
+  );
+  if (result.kind !== "advanced") {
+    throw new Error(`K2 accuracy script stopped at ${result.kind}`);
+  }
+  return result.state;
+}
+
 describe("Gate-6 K1 weather × held-item end-turn ordering", () => {
   it("finishes sand chip before Leftovers heals, while the no-weather control performs only the heal", () => {
     const sand = runEndTurn(
@@ -216,4 +310,48 @@ describe("Gate-6 K1 weather × held-item end-turn ordering", () => {
       item: ITEM_SITRUS_BERRY,
     });
   });
+});
+
+describe("Gate-6 K2 weather × accuracy-stage arithmetic", () => {
+  it.each([
+    ["sun", B_WEATHER_SUN_TEMPORARY, -2, 30],
+    ["sun", B_WEATHER_SUN_TEMPORARY, 0, 50],
+    ["sun", B_WEATHER_SUN_TEMPORARY, 2, 83],
+    ["sand", B_WEATHER_SANDSTORM_TEMPORARY, -2, 33],
+    ["sand", B_WEATHER_SANDSTORM_TEMPORARY, 0, 56],
+    ["sand", B_WEATHER_SANDSTORM_TEMPORARY, 2, 92],
+  ] as const)(
+    "%s at accuracy stage %+i applies the stage ratio before its weather/ability boundary, yielding %i",
+    (_name, weather, stage, expectedAccuracy) => {
+      const boundaryHit = stepAccuracy(weather, stage, expectedAccuracy - 1);
+      expect(boundaryHit.programCounter).toBe(
+        labelPc("BattleScript_HitFromAtkString"),
+      );
+      expect(boundaryHit.rulesContext.moveResultFlags & 1).toBe(0);
+      expect(boundaryHit.rng.calls).toBe(1);
+
+      const firstMiss = stepAccuracy(weather, stage, expectedAccuracy);
+      expect(firstMiss.programCounter).toBe(
+        labelPc("BattleScript_PrintMoveMissed"),
+      );
+      expect(firstMiss.rulesContext.moveResultFlags & 1).toBe(1);
+      expect(firstMiss.rng.calls).toBe(1);
+    },
+  );
+
+  it.each([-2, 0, 2] as const)(
+    "rain Thunder bypasses the ordinary stage-%+i accuracy roll entirely",
+    (stage) => {
+      const state = stepAccuracy(
+        B_WEATHER_RAIN_TEMPORARY,
+        stage,
+        99,
+      );
+      expect(state.programCounter).toBe(
+        labelPc("BattleScript_HitFromAtkString"),
+      );
+      expect(state.rulesContext.moveResultFlags & 1).toBe(0);
+      expect(state.rng.calls).toBe(0);
+    },
+  );
 });
