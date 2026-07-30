@@ -13,67 +13,88 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
-## 728 — [BOUNDED MAIN WORKER 2026-07-30 ~00:10] Resolution Slice 7 complete; generated Scene-OFF command 128/128
+## 731 — [SUPERVISOR 2026-07-30 ~01:10] #54 fixed+merged, Gate-6 at 8 rows (R3/R9 in), intro slices 1-2 verified; round 7 dispatched
 
-- **State:** implementation `7485848a`, acceptance `4305a82f`, compatibility
-  `43344166`; generated explicit-OFF trace **128/128** and all **25/25**
-  immutable §3.2 rows exact. Focused acceptance is green at **7 files / 168
-  tests**; full suite/build green at **527 files / 5412 tests + 1 deliberate
-  animation-lane skip**.
-- **Did:** typed resolution now consumes provenance-bearing
-  `MOVE_ANIMATION`/`HIT_ANIMATION` receipts. The pre-hit hold derives from
-  the receipt instruction span plus source `B_WAIT_TIME_SHORT`; the target
-  uses the existing generic 32-tick blink/20-pose healthbox reaction before
-  immutable HP drain. Committed consecutive frames 8-135, deleted #52, and
-  completed design Slice 7.
-- **Next:** trainer-pic intro slices remain the next main-lane roadmap work.
-- **Notes:** source: `battle_scripts_1.s:236-266,3151-3153`;
-  `battle_script_commands.c:1743-1754,3914-3931,5558-5575`;
-  `battle_controller_opponent.c:440-456,1804-1816`;
-  `pokeball.c:1284-1306`. No import/barrier/ratchet pin, route/tick branch,
-  fitted coordinate/RGB, or capture thinning. PAPERCUT: none.
-
----
-## 727 — [BOUNDED MAIN WORKER 2026-07-29 ~23:45] Typed confirm handoff exact; Slice-7 checkpoint advances to 60/128
-
-- **State:** implementation `7f8e876b`; full suite green at **527 files /
-  5410 tests + 1 deliberate animation-lane skip**, focused acceptance **7
-  files / 167 tests**, production build and `git diff --check` green. Live
-  diagnostic improved **26/128 → 60/128**; Slice-7 acceptance remains
-  **0/128 claimed** and no trace is committed.
-- **Did:** generalized the canonical confirmed-FIGHT hold into nine typed
-  player-controller/battle-main/script stages. It preserves the selected
-  move field through frame 42, resets both bouncers at STOP_BOUNCE completion,
-  and begins the attack string at frame 43 without a fitted delay. Frames
-  **8-67 are exact**.
-- **Next:** project Scene-OFF `MOVE_ANIMATION`/`HIT_ANIMATION` controller
-  events before HP drain. First divergence is frame 68: **2px**, bbox
-  **(99,33)-(99,34)**; app removes opponent HP pixels while ROM holds the full
-  bar, then begins its target hit blink at frame 116.
-- **Notes:** all **25/25** §3.2 regression rows remain exact. Source:
-  `battle_controller_player.c:200-213,481-527,3082-3098`;
-  `battle_main.c:2940-2965,4354-4551,4756-4957`; `battle_util.c:78-292`;
-  `battle_scripts_1.s:236-247`; `battle_script_commands.c:915-1006,1191-1203`.
-  No trace/capture/import/barrier/ratchet-pin change or route/tick branch.
-  PAPERCUT: none.
+- **State:** master green after merge `c3a9742f` (union suite re-run by
+  supervisor), DEFERRED.md empty, no orphan worktrees/branches. Session:
+  14 workers, 0 failed steps, 2 honest scout corrections.
+- **Did:** (1) merged the #54 Natural Cure party-sync fix — generic
+  mirror in the source-mapped `Cmd_switchoutabilities` handler
+  (`battleScriptForceSwitchOpcode.ts:166`), round-trip Tier-1 pins, ROM
+  re-verified; **#54 deleted**. (2) Gate-6 R3 (Cloud Nine
+  suppress/reactivate) and R9 (Swagger×Lum; White Herb correctly inert —
+  dossier corrected) pinned at parity, two seeds each: **8 rows proven,
+  1 kernel bug found and fixed same-session**. (3) Verified intro
+  slices 1-2 (entry 730): 373/373 probe-exact pre-send-out, all 26
+  regression rows exact.
+- **Next:** main = intro slice 3 (opponent release); side = Gate-6 R13
+  remainder + R14 (R5/R1 stretch). Then slice 4 as evidence checkpoint
+  if time; wind-down before 05:32 with the animation-fold re-check.
+- **Notes:** intro slice 4's committed-trace acceptance and the
+  commentary checkpoint both remain blocked on the harness-side Battle
+  Lab pre-reset-capture decision (entries 690/724) — user-level item for
+  the next session. The #53 interactive-routing flip design is the other
+  next-session headline.
 
 ---
-## 726 — [BOUNDED MAIN WORKER 2026-07-29 ~23:00] Slice-7 bounce fixed; honest confirm-handoff checkpoint
+## 730 — [BOUNDED MAIN WORKER 2026-07-30 ~00:53] Intro Slices 1-2 complete — generated pre-send-out is 373/373
 
-- **State:** full suite green at **527 files / 5409 tests + 1 deliberate
-  animation-lane skip**, production build and `git diff --check` green.
-  Live diagnostic improved **11/128 → 26/128**; acceptance remains **0/128
-  claimed** and no trace is committed.
-- **Did:** replaced phase-local bounce rendering with a persistent
-  controller-owned callback clock across FIGHT open/close/reopen. Source:
-  `battle_controller_player.c:233-238,471-548`;
-  `battle_main.c:2899-2937,2967-2978`. Frames 8-33 (settled menu, two cursor
-  moves, B cancel, reopen) are now exact; Tier 1 pins clock continuity.
-- **Next:** implement the generic typed resolution confirm-handoff lifecycle.
-  New first divergence is legal EARTHQUAKE A at frame 34: **13,279px**, bbox
-  **(1,59)-(238,158)**; ROM holds FIGHT through 42 and first prints `G` at
-  43, while app prints immediately.
-- **Notes:** fixture/test regenerated to the post-fix checkpoint; #52 trimmed
-  to the open remainder. Complete §3.2 table remains exact (**25/25 rows**).
-  No trace/capture change, import/barrier/ratchet-pin move, or
-  battle/turn/absolute-tick branch. PAPERCUT: none.
+- **State:** implementation commits `01320712` + `a19690e0`; focused
+  acceptance **2 files / 4 tests**, fresh private OFF probe **373/373**
+  exact across B+0..+372 (route 1171..1543), all **25/25** immutable §3.2
+  rows plus generated command **128/128** exact. Full suite/build green at
+  **531 files / 5425 tests + 1 deliberate animation-lane skip / 513 modules**.
+- **Did:** the generated round owner now projects its pending `battleStart`
+  into a frozen typed command: source trainer/facility-class/trainer-class/
+  pic identities, both complete three-row kernel parties, active indexes,
+  six-slot summary states, and all three intro string substitutions. A real
+  challenge-2 seed pins SHIZUKA → `FACILITY_CLASS_BLACK_BELT` →
+  `TRAINER_PIC_BLACK_BELT` (id 11 in the 50-pic catalog). Slice 2 adds one
+  BeginBattleIntro-relative lifecycle through the shared slide, typed
+  summaries, printer, cursor, and first accepted A; the existing one-VBlank
+  display lag supplies the probe rebase.
+- **Next:** intro Slice 3 (typed opponent sent-out text, trainer exit,
+  ball/release/materialization/healthbox) remains the next main-lane step;
+  Slice 4 and the separately designed interactive routing flip follow.
+- **Notes:** regenerated via `tools/run-mgba-probe.py` in a fresh temp dir;
+  no public route exists, so no trace committed. No core routing, capture
+  thinning, recording import, barrier/ratchet pin, battle/turn/absolute-tick
+  branch, fitted coordinate/RGB, or fixture icon. PAPERCUT: none.
+
+---
+## 729 — [SUPERVISOR 2026-07-30 ~00:35] Slice 7 verified 128/128 — resolution seam design COMPLETE; user stitching report filed as #53; Gate-6 R12b/R11 merged
+
+- **State:** master green (union suite re-run by supervisor after merge
+  `5b477d2f`), `git diff --check` clean, DEFERRED.md empty, no orphan
+  worktrees; one side worker live (Gate-6 R6+R15). Session so far: 10
+  workers, 0 failed steps.
+- **Did:** (1) re-ran `battle-command-generated-off.json` myself:
+  **128/128 exact** — design §4 Slices 1-7 are all complete, #52 deleted,
+  and the command seam's deferred breadth acceptance (entry 704) is
+  closed. (2) Merged Gate-6 R12b + R11 (`5b477d2f`): Intimidate→White
+  Herb restore/consume and Baton-Pass-vs-switch retention both at kernel
+  parity on two seeds; dossier R12 card corrected (Pinsir Hyper Cutter
+  mis-scope). (3) **User report (2026-07-30, in-session): the playable
+  app's battle is disconnected from the draft** — filed as ISSUES #53
+  with the confirmed wiring diagnosis (`core.ts:314` canonical handoff;
+  generated path dev-stage-only per `core.ts:302`); the A-mash "warp to
+  select screen" is the canonical post-win swap picker. The fix path is
+  the already-queued chain: intro lifecycle slices → interactive routing
+  flip. (4) PAPERCUTS: audit-switchin stat-stage label entry added.
+- **Did (cont., ~00:40):** merged Gate-6 R6+R15 (`worker/side-20260729-235427`):
+  R15 Spikes×Flying/Levitate at full kernel parity (all three layer
+  fractions, both immunities, exact event order, two seeds); R6 Natural
+  Cure caught a REAL kernel divergence — cure not mirrored into the party
+  record — filed as **ISSUES #54** (ROM party write
+  `battle_script_commands.c:9596`). Union before this merge: **5414
+  passed + 1 skip**, build green.
+- **Next:** main = trainer-pic/intro slices 1-2 (start-command contract +
+  pre-send-out intro) toward the #53 interactive flip; side = #54 fix
+  (scoped kernel authorization) then Gate-6 R3/R9. Wind-down before
+  05:32 with the animation-fold re-check.
+- **Notes:** the #53 flip also needs an interactive-routing decision
+  (when the playable path selects generated vs canonical presentation) —
+  design it before the flip slice, do not slip it into an intro slice.
+  Gate-6 score so far: 5 rows proven (R12-control, R12b, R11, R15, R6
+  receipts), 1 kernel divergence found (#54).
+

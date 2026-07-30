@@ -85,6 +85,10 @@ import {
 } from "./factoryOpponentGeneration.ts";
 import { factoryTrainerPresentationForOpponent } from "./factoryTrainerPresentation.ts";
 import {
+  createFactoryBattleStartPresentationCommand,
+  type FactoryBattleStartPresentationCommand,
+} from "./factoryBattleStartPresentation.ts";
+import {
   generateInitialFactoryRentals,
   type FactoryInitialRentalGenerationResult,
 } from "./factoryRentalGeneration.ts";
@@ -230,6 +234,34 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
 
 export class FactoryRoundOrchestratorError extends Error {
   override readonly name = "FactoryRoundOrchestratorError";
+}
+
+/**
+ * Freezes the generated presentation inputs while the round controller owns
+ * a battle-start command. Simplified fixture rounds cannot enter this owner.
+ */
+export function factoryBattleStartPresentationForState(
+  state: FactoryRoundBattleOrchestratorState,
+): FactoryBattleStartPresentationCommand | null {
+  const pending = state.round.presentation?.command;
+  if (pending?.type !== "battleStart") return null;
+  const playerParty = state.round.rules.playerKernelParty;
+  const opponentRecords = pending.opponent.rentalRecords;
+  const opponentTrainer = factoryTrainerPresentationForOpponent(pending.opponent);
+  if (
+    playerParty === null
+    || opponentRecords === undefined
+    || opponentTrainer === null
+  ) {
+    return fail("generated Factory battle-start presentation requires complete generated state");
+  }
+  return createFactoryBattleStartPresentationCommand({
+    commandId: pending.commandId,
+    battleIndex: pending.battleIndex,
+    opponentTrainer,
+    playerParty,
+    opponentParty: asKernelParty(opponentRecords),
+  });
 }
 
 function fail(message: string): never {

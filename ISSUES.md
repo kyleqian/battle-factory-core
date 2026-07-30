@@ -5,6 +5,32 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #53 — [USER-REPORTED 2026-07-30] playable app: battle is disconnected from the draft (canonical railroad)
+
+**Symptom (user, playing `npm run dev`):** rental draft works and accepts real
+picks, but the battle then shows ONIX and always ROCK SLIDE regardless of the
+drafted party (e.g. HAUNTER/SHADOW PUNCH selected); command choices don't
+drive what happens; continued A-presses eventually land back on a
+Pokémon-select-style screen.
+
+**Confirmed wiring:** the interactive path hands off to the canonical
+recorded-battle state machine unconditionally (`core.ts:314` →
+`battleScene.ts`); the generated orchestrator path is dev-stage-only
+(`core.ts:302` "null on the canonical production path"). The "warp" is the
+canonical post-win flow reaching the rental-swap picker, which reuses the
+select-screen UI. This is #39's user-visible face plus the not-yet-made
+interactive routing flip.
+
+**Fix path (enabled this session):** generated Scene-OFF battle is now
+128/128 exact (`battle-command-generated-off.json`, Slice 7). Remaining:
+(a) generated battle-start intro lifecycle — Slice 1's frozen generated
+start contract and Slice 2's pre-send-out lifecycle are complete; slices 3-4 remain as scoped in
+`docs/trainer-pic-off-window-scout.md`; (b) an interactive-routing decision +
+flip so the playable battle consumes the drafted party through the generated
+orchestrator; (c) round-loop continuation for battles 2-7 already exists in
+`roundController.ts`. No quick species-swap hack into the canonical replay —
+that would fake the stitching.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn

@@ -57,6 +57,7 @@ import { unsupportedBranch } from "./battleScriptHitChainOpcode.ts";
 import type { BattleScriptControllerIdlePort } from "./battleScriptSourceCommands.ts";
 import {
   BATTLE_SCRIPT_PARTY_SIZE,
+  withBattleScriptPartyMemberStatus1,
   type BattleScriptRulesBattlers,
   type BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
@@ -164,7 +165,8 @@ function createForcerandomswitchHandler(): BattleScriptOpcodeHandler<BattleScrip
 
 /**
  * `Cmd_switchoutabilities` (`:9590-9607`): a single-case switch. Only
- * Natural Cure fires (clears the outgoing battler's `status1` and
+ * Natural Cure fires (clears the outgoing battler's `status1`, mirrors the
+ * REQUEST_STATUS_BATTLE write into its persistent party slot, and
  * acknowledges a controller round trip); every other ability is a no-op
  * advance -- source-complete, not narrowed.
  */
@@ -198,11 +200,25 @@ function createSwitchoutabilitiesHandler(
     const battlers = rules.battlers.map((candidate, index) =>
       index === battler ? Object.freeze({ ...candidate, status1: 0 }) : candidate
     ) as unknown as BattleScriptRulesBattlers;
+    const departing = rules.battlers[battler];
+    const party = withBattleScriptPartyMemberStatus1(
+      rules.party,
+      departing.side,
+      departing.partyIndex,
+      0,
+    );
     const scheduler = markBattleScriptControllerPending(context.state.scheduler, battler);
     return transitionBattleScriptCommand(
       context,
       Object.freeze({ kind: "advance" }),
-      { rulesContext: Object.freeze({ ...rules, battlers: Object.freeze(battlers) }), scheduler },
+      {
+        rulesContext: Object.freeze({
+          ...rules,
+          battlers: Object.freeze(battlers),
+          party,
+        }),
+        scheduler,
+      },
     );
   };
 }

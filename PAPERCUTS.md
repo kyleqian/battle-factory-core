@@ -527,3 +527,10 @@ Per entry:
 - **Workaround:** always derive species from the extracted internal-ID
   tables (or rental set IDs); a lab-side name/ID sanity echo would be the
   real fix (harness-side).
+
+## `audit-switchin-entryhooks-off.py` mislabels stat-stage indexes
+
+- **What:** the probe's output labels stat-stage index 0 as `attackStages`,
+  but index 0 is HP; Attack is index 1. A worker chasing Intimidate's cut
+  read the wrong column until raw RAM cross-checking exposed it.
+- **Hits:** 1 (2026-07-30, Gate-6 R12b worker; ~4 min lost).
