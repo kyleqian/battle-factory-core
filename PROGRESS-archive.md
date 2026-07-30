@@ -1,3 +1,29 @@
+## 730 — [BOUNDED MAIN WORKER 2026-07-30 ~00:53] Intro Slices 1-2 complete — generated pre-send-out is 373/373
+
+- **State:** implementation commits `01320712` + `a19690e0`; focused
+  acceptance **2 files / 4 tests**, fresh private OFF probe **373/373**
+  exact across B+0..+372 (route 1171..1543), all **25/25** immutable §3.2
+  rows plus generated command **128/128** exact. Full suite/build green at
+  **531 files / 5425 tests + 1 deliberate animation-lane skip / 513 modules**.
+- **Did:** the generated round owner now projects its pending `battleStart`
+  into a frozen typed command: source trainer/facility-class/trainer-class/
+  pic identities, both complete three-row kernel parties, active indexes,
+  six-slot summary states, and all three intro string substitutions. A real
+  challenge-2 seed pins SHIZUKA → `FACILITY_CLASS_BLACK_BELT` →
+  `TRAINER_PIC_BLACK_BELT` (id 11 in the 50-pic catalog). Slice 2 adds one
+  BeginBattleIntro-relative lifecycle through the shared slide, typed
+  summaries, printer, cursor, and first accepted A; the existing one-VBlank
+  display lag supplies the probe rebase.
+- **Next:** intro Slice 3 (typed opponent sent-out text, trainer exit,
+  ball/release/materialization/healthbox) remains the next main-lane step;
+  Slice 4 and the separately designed interactive routing flip follow.
+- **Notes:** regenerated via `tools/run-mgba-probe.py` in a fresh temp dir;
+  no public route exists, so no trace committed. No core routing, capture
+  thinning, recording import, barrier/ratchet pin, battle/turn/absolute-tick
+  branch, fitted coordinate/RGB, or fixture icon. PAPERCUT: none.
+
+---
+
 ## 729 — [SUPERVISOR 2026-07-30 ~00:35] Slice 7 verified 128/128 — resolution seam design COMPLETE; user stitching report filed as #53; Gate-6 R12b/R11 merged
 
 - **State:** master green (union suite re-run by supervisor after merge

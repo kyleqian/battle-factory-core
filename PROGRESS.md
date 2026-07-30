@@ -13,6 +13,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 733 — [BOUNDED MAIN WORKER 2026-07-30 ~02:45] Intro Slice 4 complete; player release 249/249
+
+- **State:** implementation `659392a6` + compatibility fix `f9af408a`;
+  focused acceptance **2 files / 124 tests** plus ratchet **6/6**. Fresh
+  private Scene-OFF pre-reset probe matches **249/249** player-release frames
+  B+466..+714; whole B+0..+714 is **714/715**, solely the recorded Slice-3
+  B+444 10px summary-slot residual.
+- **Did:** the typed lifecycle now covers generated player text, source-arc
+  trainer throw/release at species y-offset, materialization, healthbox,
+  Scene-OFF neutral OAM settle, and readiness/message-clear. Player-ready
+  converts to the exact shared settled `action-menu` typed state used by the
+  generated command window.
+- **Next:** run the one final full suite/build gate. Then #53's separately
+  designed interactive `core.ts` routing flip is the next main-lane step;
+  do not fold it into this intro slice.
+- **Notes:** all **25/25** immutable rows and generated command **128/128**
+  remain exact. Probe regenerated through `tools/run-mgba-probe.py`; no
+  public trace committed. No import/barrier/ratchet pin, core routing,
+  battle/turn/absolute-tick branch, capture fitting/thinning, or Gate-6 file.
+  PAPERCUT: none.
+
+---
 ## 732 — [BOUNDED MAIN WORKER 2026-07-30 ~01:48] Intro Slice 3 landed; opponent release 93/94
 
 - **State:** implementation `42c559dd`; focused acceptance **2 files / 4
@@ -69,28 +91,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Lab pre-reset-capture decision (entries 690/724) — user-level item for
   the next session. The #53 interactive-routing flip design is the other
   next-session headline.
-
----
-## 730 — [BOUNDED MAIN WORKER 2026-07-30 ~00:53] Intro Slices 1-2 complete — generated pre-send-out is 373/373
-
-- **State:** implementation commits `01320712` + `a19690e0`; focused
-  acceptance **2 files / 4 tests**, fresh private OFF probe **373/373**
-  exact across B+0..+372 (route 1171..1543), all **25/25** immutable §3.2
-  rows plus generated command **128/128** exact. Full suite/build green at
-  **531 files / 5425 tests + 1 deliberate animation-lane skip / 513 modules**.
-- **Did:** the generated round owner now projects its pending `battleStart`
-  into a frozen typed command: source trainer/facility-class/trainer-class/
-  pic identities, both complete three-row kernel parties, active indexes,
-  six-slot summary states, and all three intro string substitutions. A real
-  challenge-2 seed pins SHIZUKA → `FACILITY_CLASS_BLACK_BELT` →
-  `TRAINER_PIC_BLACK_BELT` (id 11 in the 50-pic catalog). Slice 2 adds one
-  BeginBattleIntro-relative lifecycle through the shared slide, typed
-  summaries, printer, cursor, and first accepted A; the existing one-VBlank
-  display lag supplies the probe rebase.
-- **Next:** intro Slice 3 (typed opponent sent-out text, trainer exit,
-  ball/release/materialization/healthbox) remains the next main-lane step;
-  Slice 4 and the separately designed interactive routing flip follow.
-- **Notes:** regenerated via `tools/run-mgba-probe.py` in a fresh temp dir;
-  no public route exists, so no trace committed. No core routing, capture
-  thinning, recording import, barrier/ratchet pin, battle/turn/absolute-tick
-  branch, fitted coordinate/RGB, or fixture icon. PAPERCUT: none.

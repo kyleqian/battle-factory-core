@@ -23,12 +23,12 @@ interactive routing flip.
 
 **Fix path (enabled this session):** generated Scene-OFF battle is now
 128/128 exact (`battle-command-generated-off.json`, Slice 7). Remaining:
-(a) generated battle-start intro lifecycle — Slice 1's frozen generated
-start contract and Slice 2's pre-send-out lifecycle are complete; Slice 3's
-opponent release is implemented at **93/94** private-probe frames, with only
-the 10px B+444 summary-slot reuse residual remaining; Slice 4 remains as
-scoped in `docs/trainer-pic-off-window-scout.md`; (b) an interactive-routing decision +
-flip so the playable battle consumes the drafted party through the generated
+(a) generated battle-start intro lifecycle — Slices 1-4 are complete; Slice
+4's player-release span is **249/249** private-probe exact and hands off to
+the same settled typed command state as the 128/128 generated window. The
+whole intro remains **714/715**, solely the recorded 10px B+444 summary-slot
+reuse residual from Slice 3; (b) an interactive-routing decision + flip so
+the playable battle consumes the drafted party through the generated
 orchestrator; (c) round-loop continuation for battles 2-7 already exists in
 `roundController.ts`. No quick species-swap hack into the canonical replay —
 that would fake the stitching.
