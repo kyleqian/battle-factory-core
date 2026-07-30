@@ -22,6 +22,9 @@ const TACKLE = 33;
 const BATON_PASS = 226;
 const ITEM_WHITE_HERB = 180;
 const ITEM_LUM_BERRY = 141;
+const SAND_ATTACK = 28;
+const PIDGEOT_SET = 355;
+const ABILITY_KEEN_EYE = 51;
 const STATUS2_CONFUSION_TURN_2 = 2;
 const STATUS2_SUBSTITUTE = 1 << 24;
 const MACHAMP_SET = 431;
@@ -167,9 +170,57 @@ const ports = Object.freeze({
   resolveAttackerBattler: () => 0 as const,
   resolveBattlerAtPosition: () => null,
   resolveHalfwordOperand: (_context, operand) =>
-    operand.expression === "B_WAIT_TIME_LONG" ? 64 : null,
+    operand.expression === "B_WAIT_TIME_LONG"
+      ? 64
+      : operand.expression === "B_WAIT_TIME_SHORT"
+        ? 32
+        : null,
   resolveByteOperand: () => null,
 } satisfies BattleScriptStatusRulesExternalPorts);
+
+function runR13StatChange(statChanger: number) {
+  const rulesContext = createBattleScriptRulesContext({
+    ...switchContext(SAND_ATTACK),
+    battlers: [
+      battler({
+        side: 0,
+        species: 18,
+        ability: ABILITY_KEEN_EYE,
+        statStages: [6, 6, 6, 6, 6, 6, 6, 6],
+        types: ["TYPE_NORMAL", "TYPE_FLYING"],
+      }),
+      battler({ side: 1, species: 210, ability: 22 }),
+      battler({ side: 0 }),
+      battler({ side: 1 }),
+    ],
+    selectorRoles: { attacker: 1, target: 0, effectBattler: 0, fainted: 0 },
+    scriptingBattler: 1,
+    currentMove: SAND_ATTACK,
+    statChanger,
+  });
+  const execution = createBattleScriptStatusRulesExecution(
+    program,
+    "BattleScript_EffectAccuracyDown",
+    rulesContext,
+    1,
+    ports,
+  );
+  const pc = program.instructions.find(
+    (instruction) =>
+      instruction.opcodeName === "B_SCR_OP_STATBUFFCHANGE"
+      && instruction.source.label === "BattleScript_EffectStatDown",
+  )?.programCounter;
+  if (pc === undefined) throw new Error("missing Sand-Attack STATBUFFCHANGE");
+  const result = stepBattleScriptMachine(
+    program,
+    Object.freeze({ ...execution.state, programCounter: pc }),
+    execution.handlers,
+  );
+  if (result.kind !== "advanced") {
+    throw new Error(`R13 stat change stopped at ${result.kind}`);
+  }
+  return result.state;
+}
 
 function runSwitchDataUpdate(currentMove: number) {
   const execution = createBattleScriptStatusRulesExecution(
@@ -307,5 +358,48 @@ describe("Gate-6 R9 Swagger into Lum Berry versus White Herb", () => {
       statStages: [6, 8, 6, 6, 6, 6, 6, 6],
       status2: STATUS2_CONFUSION_TURN_2,
     });
+  });
+});
+
+describe("Gate-6 R13 Keen Eye stat-drop specificity", () => {
+  it("rejects Sand-Attack through the specific ability-message branch while allowing Granbull Intimidate to lower Attack", () => {
+    const accuracy = runR13StatChange(0x96);
+    expect(accuracy.rulesContext.battlers[0].statStages).toEqual(
+      [6, 6, 6, 6, 6, 6, 6, 6],
+    );
+    expect(accuracy.rulesContext.lastUsedAbility).toBe(ABILITY_KEEN_EYE);
+    expect(accuracy.rulesContext.aiObservedAbilityIds[0]).toBe(ABILITY_KEEN_EYE);
+    expect(
+      program.instructions[accuracy.programCounter]?.source.label,
+    ).toBe("BattleScript_AbilityNoSpecificStatLoss");
+
+    const attack = runR13StatChange(0x91);
+    expect(attack.rulesContext.battlers[0].statStages[1]).toBe(5);
+    expect(attack.events).toContainEqual(
+      expect.objectContaining({
+        kind: "stat-stage-change",
+        battler: 0,
+        stat: "attack",
+        from: 6,
+        to: 5,
+      }),
+    );
+
+    const entry = initializeFreshFactoryBattle({
+      requestId: 13,
+      rngSeed: 3,
+      playerParty: corpusParty(PIDGEOT_SET),
+      opponentParty: corpusParty(GRANBULL_SET),
+    });
+    expect(entry.state.rules.rulesContext.battlers[0]).toMatchObject({
+      ability: ABILITY_KEEN_EYE,
+      statStages: [6, 5, 6, 6, 6, 6, 6, 6],
+    });
+    expect(
+      entry.events
+        .map((event) => event.payload)
+        .filter((payload) => payload.kind === "message")
+        .map((payload) => payload.messageId),
+    ).toEqual(["STRINGID_PKMNCUTSATTACKWITH"]);
   });
 });

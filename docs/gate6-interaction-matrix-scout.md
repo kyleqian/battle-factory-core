@@ -85,7 +85,7 @@ the state transition.
 | held-item x stat-stage | White Herb restores every negative stage, and threshold berries raise a stage only below the cap (`battle_util.c:3383-3398,3431-3496`). | `tests/battleScriptMoveEndOpcode.test.ts` (item activation) | R9 above-neutral non-activation control plus R12b's restore and K6's cap/reset parameter test. |
 | held-item x switching/entry | White Herb has an explicit switch-in handler that normalizes negative stages (`battle_util.c:3305-3329`); a normal switch reconstructs the party item unless Knock Off recorded it (`battle_script_commands.c:4637-4646`). | `tests/battleScriptSwitchinOpcode.test.ts` (item reconstruction) | R12 oracle. |
 | held-item x immunity/absorb | No held-item branch changes an ability/type absorb result in Gen III; item effects run only after damage/effect eligibility.  Absorb handler is ability-only (`battle_util.c:2676-2747`) and item dispatch is separate (`3257-3330`). | NONE | K7: dispatch property—Volt/Water Absorb and Flash Fire consume no berry/Leftovers path on zero damage. |
-| ability x stat-stage | Clear Body/White Smoke block most preventable drops; Keen Eye blocks accuracy and Hyper Cutter Attack specifically; Intimidate creates an Attack drop (`battle_script_commands.c:6975-7038`; `battle_util.c:3003-3087`). | `tests/battleScriptStatbuffchangeOpcode.test.ts` (Clear Body); `tests/battleScriptSwitchinOpcode.test.ts` (Intimidate blockers) | R13: Intimidate × each specificity class, source message/order. |
+| ability x stat-stage | Clear Body/White Smoke block most preventable drops; Keen Eye blocks accuracy and Hyper Cutter Attack specifically; Intimidate creates an Attack drop (`battle_script_commands.c:6975-7038`; `battle_util.c:3003-3087`). | `tests/battleScriptStatbuffchangeOpcode.test.ts` (Clear Body/White Smoke/Keen Eye/Hyper Cutter specificity); `tests/battleScriptSwitchinOpcode.test.ts` (Intimidate blockers); `tests/gate6EntryItemInteractions.test.ts` (R13 Pidgeot pair) | R13 fixture receipts the paired Keen Eye-specific block and unrelated Intimidate Attack drop. |
 | ability x switching/entry | Switch-in scan queues weather, Intimidate, Trace, and Forecast; Natural Cure is the distinct switch-out hook (`battle_util.c:1959-1964,2485-2596`; `battle_script_commands.c:9590-9604`). | `tests/battleScriptSwitchinOpcode.test.ts` | R6/R12/R13 cover legal ordered combinations. |
 | ability x immunity/absorb | Volts/Water Absorb and Flash Fire use the absorbing handler; Levitate, Wonder Guard, Soundproof and status immunities gate effects elsewhere (`battle_util.c:2676-2747`; `battle_script_commands.c:1375-1496,2275-2425`). | `tests/battleScriptMoveEndOpcode.test.ts` (status immunity); `tests/battleScriptSwitchinOpcode.test.ts` (Levitate entry) | R14: flash/water/electric absorb versus type control, then R10 Soundproof. |
 | stat-stage x switching/entry | Normal switch discards stages because full incoming BattlePokemon overwrites the active record; Baton Pass copies all stages first (`battle_script_commands.c:4621-4657`). | `tests/battleScriptSwitchinOpcode.test.ts` | R11 oracle. |
@@ -113,7 +113,7 @@ are legal inert duplicates with `[Tackle,Tackle,Tackle,Tackle]`.
 | R11 | A: Ninjask Substitute then Baton Pass; bench: recipient. B: passive Tackle x4. Repeat ordinary manual switch. | Baton Pass retains intended status2/stages; ordinary switch clears them. |
 | R12 | A: White Herb Pinsir (sole ability Hyper Cutter); B: Granbull Intimidate x4; switch Granbull in after initial player action. | Prevention control: Hyper Cutter blocks the Attack cut, so White Herb does not activate or get consumed. |
 | R12b | A: White Herb Machamp (sole ability Guts); B enters as Granbull Intimidate with Tackle x4 after an initial action. | Viable interaction: Attack 6→5, Intimidate message, White Herb restore 5→6, herb message, then item consumption. |
-| R13 | A: Pinsir Hyper Cutter / Torkoal White Smoke / Pidgeot Keen Eye; B: Granbull Intimidate x4 or Sand-Attack x4. | Correct protected stat and prevention message; unrelated stat can still fall. |
+| R13 | A: Pidgeot Keen Eye with Tackle x4; B: Granbull Intimidate with Sand-Attack x4 (`gate6-r13-off.json`). | The entry hook lowers Attack 6→5; Sand-Attack then prints the Keen Eye-specific prevention message and leaves accuracy 6. Hyper Cutter×Intimidate and White Smoke×Intimidate are already kernel-pinned controls. |
 | R14 | A: Lanturn Volt Absorb, Lombre Water Absorb, Houndoom Flash Fire; B has Thunder/Water Gun/Ember respectively x4. | Zero direct damage and correct heal/Flash Fire state against type controls. |
 | R15 | A: Spikes user sets three layers; B bench switches to Pidgeot then Levitate Lunatone and a grounded control. Opponent uses Tackle x4. | Flying/Levitate avoid Spikes, grounded mon takes source fraction. |
 
@@ -122,6 +122,25 @@ ordering, stage arithmetic, and zero-damage non-activation.  A successful
 kernel proof is enough because the source citations specify no controller/UI
 or ROM-only randomness at those boundaries; promote only a mismatch to a
 mechanicLab trace.
+
+## Completed receipt notes
+
+### R13 — Keen Eye specificity plus unrelated-stat control
+
+`tools/battle-lab/gate6-r13-off.json` uses complete legal parties and
+constrains Granbull to four Sand-Attack slots.  Fresh Battle Scene OFF runs
+with seeds `1` and `324508639` agree on every state assertion: at trace frame
+0 the already-completed Intimidate entry hook has Pidgeot Attack stage `5`
+while accuracy remains `6`; frame 320 displays `PIDGEOT's KEEN EYE prevents
+accuracy loss!`; frame 734 still has Attack `5`, accuracy `6`, and
+Sand-Attack PP `14`.  Both frame-320 receipts have raw-RGB SHA-256
+`68ce297ee2838248d986a78e118156ffa92846b22bc4893c554972772a870489`.
+The paired Tier-1 pin walks the primary `STATBUFFCHANGE` ability-message
+branch and separately proves the same Keen Eye target accepts an Attack
+decrease.  This is the source-specific control required by
+`battle_script_commands.c:7009-7020`: Keen Eye tests only `STAT_ACC`;
+Intimidate's entry script does not list it as an Attack blocker
+(`battle_scripts_1.s:4027-4048`).
 
 ## Ranked dispatch shortlist
 
