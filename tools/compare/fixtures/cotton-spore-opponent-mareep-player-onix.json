@@ -1,0 +1,43 @@
+{
+  "schema": "cotton-spore-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "orientation": "opponent-front",
+  "scenario": "tools/battle-lab/mechanic-cotton-spore-opponent-mareep-player-onix.json",
+  "probe": "tools/compare/sporeProbe.py",
+  "appStage": {"presentationAge":0},
+  "attacker": {
+    "species": "MAREEP",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": {"x":144,"y":24},
+      "animationCenter": {"x":176,"y":56},
+      "battlePositionCenter": {"x":176,"y":40}
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": {"x":40,"y":48},
+      "animationCenter": {"x":72,"y":88},
+      "battlePositionCenter": {"x":72,"y":80}
+    }
+  },
+  "fieldProfile": {
+    "playerHp":142,
+    "playerMaxHp":142,
+    "opponentHp":131,
+    "opponentMaxHp":162,
+    "playerGender":"male",
+    "opponentGender":"female"
+  },
+  "sourceWindow": {"startFrame":285,"endFrame":488,"frameCount":204},
+  "evidenceSha256": "a719bb8dff37cdf3f82a3909b6129e694b1982fa0800152dbbd7c3ae105e5983",
+  "rawRgbSha256": "629fb753f6e9522a6144b90c630b4d6306e3fcdd1b2558fe9af8a55617ab569c",
+  "battleState": {
+    "attackerSide":"opponent",
+    "targetSide":"player",
+    "attackerItem":133,
+    "targetStatus1":0
+  }
+}

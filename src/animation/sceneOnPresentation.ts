@@ -525,6 +525,10 @@ import {
   type SporeState,
 } from "./spore.ts";
 import {
+  cottonSporeAtAge,
+  type CottonSporeState,
+} from "./cottonSpore.ts";
+import {
   hypnosisDisplayedRingsAtAge,
   hypnosisAtAge,
   type HypnosisRing,
@@ -1538,6 +1542,13 @@ export interface SceneOnSporeConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnCottonSporeConfig {
+  readonly move: "COTTON_SPORE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnHypnosisConfig {
   readonly move: "HYPNOSIS";
   readonly attacker: SceneOnPresentationBattler;
@@ -1813,6 +1824,7 @@ export type SceneOnMoveConfig =
   | SceneOnHowlConfig
   | SceneOnSweetKissConfig
   | SceneOnSporeConfig
+  | SceneOnCottonSporeConfig
   | SceneOnHypnosisConfig
   | SceneOnPerishSongConfig
   | SceneOnNeedleArmConfig
@@ -1904,6 +1916,8 @@ export type SceneOnSweetKissPresentationState =
   SceneOnMovePresentationState<SceneOnSweetKissConfig>;
 export type SceneOnSporePresentationState =
   SceneOnMovePresentationState<SceneOnSporeConfig>;
+export type SceneOnCottonSporePresentationState =
+  SceneOnMovePresentationState<SceneOnCottonSporeConfig>;
 export type SceneOnHypnosisPresentationState =
   SceneOnMovePresentationState<SceneOnHypnosisConfig>;
 export type SceneOnBlockPresentationState =
@@ -4297,6 +4311,33 @@ export function sceneOnSporeView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...sporeAtAge(
+      state.age,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+export interface SceneOnCottonSporeView extends CottonSporeState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age=0` is Move_COTTON_SPORE's first active source-script frame. */
+export function sceneOnCottonSporeView(
+  state: SceneOnCottonSporePresentationState,
+): SceneOnCottonSporeView {
+  if (state.config.move !== "COTTON_SPORE") {
+    throw new Error(
+      `expected COTTON_SPORE presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...cottonSporeAtAge(
       state.age,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,

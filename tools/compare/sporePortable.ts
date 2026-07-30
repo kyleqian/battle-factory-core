@@ -9,7 +9,12 @@ import {
   type SporeParticle,
 } from "../../src/animation/spore.ts";
 import {
+  COTTON_SPORE_FRAME_COUNT,
+  cottonSporeAtAge,
+} from "../../src/animation/cottonSpore.ts";
+import {
   createSceneOnMovePresentation,
+  sceneOnCottonSporeView,
   sceneOnSporeView,
   type SceneOnDragonRageFieldProfile,
   type SceneOnPresentationBattler,
@@ -22,7 +27,7 @@ import {
 
 type Window = { startFrame: number; endFrame: number; frameCount: number };
 type Fixture = {
-  schema: "spore-portable-evidence/v1";
+  schema: "spore-portable-evidence/v1" | "cotton-spore-portable-evidence/v1";
   orientation: string;
   scenario: string;
   probe: string;
@@ -36,7 +41,7 @@ type Fixture = {
   battleState: {
     attackerSide: "player" | "opponent";
     targetSide: "player" | "opponent";
-    attackerItem: 200;
+    attackerItem: number;
     targetStatus1: 0;
   };
 };
@@ -82,7 +87,7 @@ type Frame = {
   visualTaskCount: number;
 };
 type Probe = {
-  schema: "spore-dense-evidence/v1";
+  schema: "spore-dense-evidence/v1" | "cotton-spore-dense-evidence/v1";
   sourceWindow: Window;
   lifecycleCounts: Record<string, number>;
   topology: {
@@ -155,6 +160,8 @@ function verify(fixturePath: string, runNumber: number): void {
 
   const bytes = readFileSync(output);
   const probe = JSON.parse(bytes.toString()) as Probe;
+  const isCotton = fixture.schema === "cotton-spore-portable-evidence/v1";
+  const frameCount = isCotton ? COTTON_SPORE_FRAME_COUNT : SPORE_FRAME_COUNT;
   const evidence = createHash("sha256").update(bytes).digest("hex");
   const fields = probe.frames.every((frame) =>
     frame.softwareOam.length === 128
@@ -173,11 +180,18 @@ function verify(fixturePath: string, runNumber: number): void {
     && frame.se2 !== null
   );
   if (
-    fixture.schema !== "spore-portable-evidence/v1"
-    || probe.schema !== "spore-dense-evidence/v1"
+    !(
+      fixture.schema === "spore-portable-evidence/v1"
+      || fixture.schema === "cotton-spore-portable-evidence/v1"
+    )
+    || probe.schema !== (
+      isCotton
+        ? "cotton-spore-dense-evidence/v1"
+        : "spore-dense-evidence/v1"
+    )
     || !same(probe.sourceWindow, fixture.sourceWindow)
     || evidence !== fixture.evidenceSha256
-    || probe.frames.length !== SPORE_FRAME_COUNT
+    || probe.frames.length !== frameCount
     || probe.lifecycleCounts.gSporeParticleSpriteTemplate !== 9
     || !probe.topology.tasks.includes("Task_LoopAndPlaySE")
     || !probe.topology.tasks.includes("Task_UpdateMonBg")
@@ -187,7 +201,7 @@ function verify(fixturePath: string, runNumber: number): void {
   ) throw new Error(`${fixture.orientation}: immutable dense receipt changed`);
 
   const stage = createSceneOnMovePresentation({
-    move: "SPORE",
+    move: isCotton ? "COTTON_SPORE" : "SPORE",
     attacker: fixture.attacker,
     target: fixture.target,
     fieldProfile: fixture.fieldProfile,
@@ -204,12 +218,28 @@ function verify(fixturePath: string, runNumber: number): void {
       continue;
     }
     const age = fixture.appStage.presentationAge + index;
-    const component = sporeAtAge(
-      age,
-      fixture.target.geometry.side,
-      fixture.target.geometry.animationCenter,
-    );
-    const seam = sceneOnSporeView({ ...stage, age });
+    const component = isCotton
+      ? cottonSporeAtAge(
+          age,
+          fixture.target.geometry.side,
+          fixture.target.geometry.animationCenter,
+        )
+      : sporeAtAge(
+          age,
+          fixture.target.geometry.side,
+          fixture.target.geometry.animationCenter,
+        );
+    const seam = isCotton
+      ? sceneOnCottonSporeView({
+          ...stage,
+          config: { ...stage.config, move: "COTTON_SPORE" },
+          age,
+        })
+      : sceneOnSporeView({
+          ...stage,
+          config: { ...stage.config, move: "SPORE" },
+          age,
+        });
     const {
       age: _age,
       attacker: _attacker,
@@ -241,12 +271,12 @@ function verify(fixturePath: string, runNumber: number): void {
         && soundTask.data[0] === 169
         && soundTask.data[1]
           === (fixture.target.geometry.side === "opponent" ? 63 : -63)
-        && soundTask.data[2] === 16
+        && soundTask.data[2] === (isCotton ? 18 : 16)
       : !soundTask;
     const monBgMatch =
       oracle.tasks.some((task) => task.func.symbol === "Task_UpdateMonBg")
         === component.targetMonBg
-      || age === 205;
+      || age === (isCotton ? 202 : 205);
     const registerMatch = component.alpha
       ? oracle.registers.bldcnt === 16192
         && oracle.registers.bldalpha === 2060
@@ -257,7 +287,7 @@ function verify(fixturePath: string, runNumber: number): void {
     const attacker = oracle.battlers[fixture.battleState.attackerSide];
     const target = oracle.battlers[fixture.battleState.targetSide];
     const battleStateMatch =
-      attacker.species === 47
+      attacker.species === (isCotton ? 179 : 47)
       && attacker.item === fixture.battleState.attackerItem
       && attacker.status1 === 0
       && target.species === 95
@@ -276,7 +306,7 @@ function verify(fixturePath: string, runNumber: number): void {
         || app[pixel * 4 + 2] !== rgb[pixel * 3 + 2]
       ) diff += 1;
     }
-    const cleanup = index !== SPORE_FRAME_COUNT - 1
+    const cleanup = index !== frameCount - 1
       || (!component.active
         && !oracle.gAnimScriptActive
         && oracle.visualTaskCount === 0);
@@ -308,7 +338,7 @@ function verify(fixturePath: string, runNumber: number): void {
   fresh.set(fixture.orientation, { evidence, raw: rawDigest });
   console.log(
     `${fixture.orientation} run ${runNumber}: `
-    + `${probe.frames.length}/${SPORE_FRAME_COUNT} `
+    + `${probe.frames.length}/${frameCount} `
     + "source/OAM/matrix/palette/register/audio/seam/framebuffer exact",
   );
 }

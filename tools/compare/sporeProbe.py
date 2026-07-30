@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Complete Scene-ON Spore source/hardware/audio/raw-RGB receipt."""
+"""Complete Scene-ON Spore/Cotton Spore source/hardware/audio/raw-RGB receipt."""
 from __future__ import annotations
 import hashlib
 import json
@@ -19,9 +19,15 @@ sys.path.insert(0, str(HARNESS / "oracle"))
 from battle_lab import BattleLab, validate_request  # noqa: E402
 from emerald_core import EmeraldOracle  # noqa: E402
 
-MOVE = 147
-MOVE_NAME = "Move_SPORE"
-END_NAME = "Move_PETAL_DANCE"
+IS_COTTON = "cotton-spore" in SCENARIO.name
+MOVE = 178 if IS_COTTON else 147
+MOVE_NAME = "Move_COTTON_SPORE" if IS_COTTON else "Move_SPORE"
+END_NAME = "Move_SPORE" if IS_COTTON else "Move_PETAL_DANCE"
+SCHEMA = (
+    "cotton-spore-dense-evidence/v1"
+    if IS_COTTON
+    else "spore-dense-evidence/v1"
+)
 TEMPLATE = "gSporeParticleSpriteTemplate"
 CALLBACK = "AnimSporeParticle_Step"
 
@@ -266,7 +272,7 @@ def main() -> None:
     if source[-1]["gAnimScriptActive"] or source[-1]["visualTaskCount"]:
         raise RuntimeError(f"{MOVE_NAME} first cleanup retained animation")
     result = {
-        "schema": "spore-dense-evidence/v1",
+        "schema": SCHEMA,
         "setup": setup,
         "sourceWindow": {
             "startFrame": source[0]["frame"],

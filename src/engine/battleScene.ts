@@ -805,6 +805,7 @@ import {
   sceneOnHowlView,
   sceneOnSweetKissView,
   sceneOnSporeView,
+  sceneOnCottonSporeView,
   sceneOnHypnosisView,
   sceneOnPerishSongView,
   sceneOnNeedleArmView,
@@ -830,6 +831,7 @@ import {
   type SceneOnHowlPresentationState,
   type SceneOnSweetKissPresentationState,
   type SceneOnSporePresentationState,
+  type SceneOnCottonSporePresentationState,
   type SceneOnHypnosisPresentationState,
   type SceneOnPerishSongPresentationState,
   type SceneOnNeedleArmPresentationState,
@@ -1134,6 +1136,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 /** S7 slice L-3 (docs/faint-switch-notes.md §5): opponent front-sprite corner = `(144, 8 + gMonFrontPicCoords[species].yOffset)` - Pidgeotto's `yOffset` is 11, byte-exact-verified against the oracle at `(144,19)` (0/1087 mismatched px). */
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const mareepFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MAREEP!;
 const PIDGEOTTO_CORNER = { x: 144, y: 19 };
 /** S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6/§7): MURKROW's own `yOffset` (11, `mon-pic-coords.json`) is bit-identical to Pidgeotto's, so the same `(144, 8+yOffset)` formula lands on the identical corner - not a coincidence, both front pics share the same 48px-wide/11px-yOffset box. */
 const murkrowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MURKROW!;
@@ -2191,6 +2194,7 @@ const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
 const magbyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAGBY!;
+const mareepBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAREEP!;
 const battleAnimItemHeal = battleAnimItemHealAsset as BattleAnimItemHealAsset;
 const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
@@ -22622,6 +22626,136 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "PARASECT used" : "Foe PARASECT used",
       "SPORE!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "COTTON_SPORE") {
+    const cottonState = state as SceneOnCottonSporePresentationState;
+    const view = sceneOnCottonSporeView(cottonState);
+    // AnimSporeParticle mutates software OAM after the frame's hardware
+    // transfer, so the framebuffer consumes the preceding reducer age.
+    const displayed = sceneOnCottonSporeView({
+      ...cottonState,
+      age: cottonState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "MAREEP"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MAREEP"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged COTTON_SPORE pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const mareepSource = playerToOpponent ? mareepBackSprite : mareepFrontSprite;
+    const mareep = playerToOpponent
+      ? mareepSource
+      : {
+          ...mareepSource,
+          tileset: subTileset(mareepSource.tileset, 0, 8),
+        };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const attackerIdle = opponentToPlayer
+      ? speciesFrontIdleRestOffset("MAREEP") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const targetIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      mareep.tileset,
+      mareep.palette,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const sporeTiles = subTileset(sporeArt.spore.tileset, 0, 2);
+    const particles = displayed.particles.slice().sort((a, b) =>
+      a.priority - b.priority
+      || (a.y + a.y2) - (b.y + b.y2)
+      || b.slot - a.slot
+    );
+    const drawParticles = (priority: 2 | 3) => {
+      for (const particle of particles.filter((value) =>
+        value.priority === priority
+      )) {
+        drawSpriteSheet(
+          fb,
+          sporeTiles,
+          sporeArt.spore.palette,
+          particle.x + particle.x2 - 8,
+          particle.y + particle.y2 - 8,
+        );
+      }
+    };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    drawParticles(3);
+    if (playerToOpponent) {
+      drawTarget();
+      drawParticles(2);
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+      drawParticles(2);
+    }
+    const profile = cottonState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "MAREEP",
+        level: 50,
+        gender: profile.opponentGender ?? (playerToOpponent ? "male" : "female"),
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "MAREEP" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? (playerToOpponent ? "female" : "male"),
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MAREEP used" : "Foe MAREEP used",
+      "COTTON SPORE!",
       99,
     );
     return;

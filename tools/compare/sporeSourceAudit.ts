@@ -28,6 +28,10 @@ const parasect = mons.slice(
   mons.indexOf("[FRONTIER_MON_PARASECT_2]"),
   mons.indexOf("[FRONTIER_MON_PARASECT_2]") + 500,
 );
+const mareep = mons.slice(
+  mons.indexOf("[FRONTIER_MON_MAREEP]"),
+  mons.indexOf("[FRONTIER_MON_MAREEP]") + 500,
+);
 const sporeEntry = inventory.tiers.level50.moves.find(
   (value: { move: string }) => value.move === "MOVE_SPORE",
 );
@@ -59,7 +63,9 @@ if (
   !sporeEntry || sporeEntry.id !== 147 || sporeEntry.frontierMonCount !== 4
   || !cottonEntry || cottonEntry.id !== 178
   || !constants.includes("#define FRONTIER_MON_PARASECT_2     282")
+  || !constants.includes("#define FRONTIER_MON_MAREEP         49")
   || !species.includes("#define SPECIES_PARASECT 47")
+  || !species.includes("#define SPECIES_MAREEP 179")
   || !moves.includes("#define MOVE_SPORE 147")
   || !parasect.includes(".species = SPECIES_PARASECT")
   || !parasect.includes(
@@ -70,6 +76,15 @@ if (
     "F_EV_SPREAD_SP_DEFENSE | F_EV_SPREAD_DEFENSE | F_EV_SPREAD_HP",
   )
   || !parasect.includes("NATURE_CALM")
+  || !mareep.includes(".species = SPECIES_MAREEP")
+  || !mareep.includes(
+    ".moves = {MOVE_SHOCK_WAVE, MOVE_FLASH, MOVE_REFLECT, MOVE_COTTON_SPORE}",
+  )
+  || !mareep.includes("BATTLE_FRONTIER_ITEM_CHERI_BERRY")
+  || !mareep.includes(
+    "F_EV_SPREAD_SP_ATTACK | F_EV_SPREAD_HP",
+  )
+  || !mareep.includes("NATURE_RELAXED")
   || sporeRequired.some((text) => !spore.includes(text))
   || (spore.match(/call CreateSpore/g) ?? []).length !== 3
   || cottonDistinct.some((text) => !cotton.includes(text))
@@ -85,6 +100,9 @@ console.log(
   "set 282/FRONTIER_MON_PARASECT_2 -> SPECIES_PARASECT 47/"
   + "MOVE_SPORE 147/LEFTOVERS/SP_DEFENSE+DEFENSE+HP/CALM; Spore owns nine "
   + "blended gSporeParticleSpriteTemplate lifecycles and "
-  + "AnimTask_SporeDoubleBattle; MOVE_COTTON_SPORE remains distinct with "
-  + "splitbgprio, unblended particles, and 18/10 loop audio",
+  + "AnimTask_SporeDoubleBattle; lowest Cotton Spore carrier set "
+  + "49/FRONTIER_MON_MAREEP -> SPECIES_MAREEP 179/CHERI_BERRY/"
+  + "SP_ATTACK+HP/RELAXED; MOVE_COTTON_SPORE remains distinct with "
+  + "splitbgprio, nine unblended particles, no alpha/SporeDoubleBattle, "
+  + "and 18/10 loop audio",
 );
