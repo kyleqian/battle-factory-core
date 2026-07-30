@@ -13,6 +13,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 711 — [BOUNDED MAIN WORKER 2026-07-29 ~18:55] Battle-resolution Slice 1 landed
+
+- **State:** implementation `8dee1d7b`; tree green at **521 files / 5301
+  tests + 1 deliberate animation-lane skip**, production build, targeted
+  seam acceptance **37/37**, and `git diff --check`. The unchanged explicit-OFF
+  staged turn remains **16/16** exact.
+- **Did:** added the immutable resolution receipt/segment/command/display
+  types and structural constructor; it retains the genuine pending battle
+  boundary, freezes event-time strings, pairs HP controller events, and fails
+  closed on unordered/unpaired facts or a switch without its semantic
+  switch-in marker. The existing nine-command Scene-OFF projector is now a
+  compatibility wrapper over that typed projection. Canonical request-1 →
+  request-3 deep equivalence and noncanonical damage/effectiveness,
+  zero-HP/faint/forced-boundary, and marked switch-in fixtures are pinned.
+- **Next:** dispatch `docs/battle-resolution-seam-design.md` **Slice 2 —
+  live non-KO Scene-OFF renderer** verbatim; do not begin orchestrator
+  replacement before Slice 2 acceptance is exact.
+- **Notes:** no `battleScene.ts`, renderer, orchestrator, kernel outcome/RNG,
+  trace/capture list, canonical-recording import, unsupported barrier, or
+  battle/turn/absolute-tick branch changed. Slice 5 still owns emission of the
+  typed `switch-in-animation` marker; Slice 1 only consumes a fixture marker.
+  The finite Stage 8 reset remains intact. PAPERCUT: none.
+
+---
+
 ## 710 — [BOUNDED MAIN WORKER 2026-07-29 ~18:00] Battle-resolution seam design landed
 
 - **State:** docs-only battle-resolution design complete; tree green at
@@ -64,30 +89,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** 8 workers so far, 0 failed steps, 1 integrity correction.
   OT/ID summary text: source suppresses it in Battle Factory summaries
   (worker finding, entry 708) — no OT-name extraction needed.
-
----
-
-## 708 — [BOUNDED MAIN WORKER 2026-07-29 ~17:00] Generated draft summaries consume live rental records
-
-- **State:** implementation `9c342d01` + type fix `804c27a3`; tree green at
-  **520 files / 5287 tests + 1 deliberate animation-lane skip**, production
-  build, targeted summary/state tests **22/22**, and all required serial
-  canonical windows exact: draft
-  **13/13 + 38/38 + 66/66**, summary entry **132/132 + 122/122**, mon
-  navigation **54/54 + 87/87**, page changes **25/25 + 56/56**.
-- **Did:** the generated-rental adapter now preserves six complete
-  presentation records (identity, level, item, nature/gender, moves+PP,
-  ability surface, stats/EXP, OT ID/source-hidden OT text, front-pic
-  identity). Every Info/Skills/Moves/transition renderer and `core.ts`
-  consumes those live records; summary DOWN reaches un-rented generated pool
-  slots without anchor fallback. Canonical ONIX retains its committed
-  byte-exact framebuffer hash. Deleted resolved ISSUES #51.
-- **Next:** supervisor can proceed to trainer-pic OFF or Gate-6 work.
-- **Notes:** current generated data lacks non-anchor National Dex mapping,
-  ability display text/descriptions, and non-anchor summary 64×64 front-pic
-  assets; those layers stay absent rather than substituting anchor content.
-  No new canonical-recording import, unsupported barrier, trace/capture
-  change, swap/party/command/animation change, or tick-keyed branch.
-  PAPERCUT: none.
 
 ---

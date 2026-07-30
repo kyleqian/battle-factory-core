@@ -1,3 +1,28 @@
+## 708 — [BOUNDED MAIN WORKER 2026-07-29 ~17:00] Generated draft summaries consume live rental records
+
+- **State:** implementation `9c342d01` + type fix `804c27a3`; tree green at
+  **520 files / 5287 tests + 1 deliberate animation-lane skip**, production
+  build, targeted summary/state tests **22/22**, and all required serial
+  canonical windows exact: draft
+  **13/13 + 38/38 + 66/66**, summary entry **132/132 + 122/122**, mon
+  navigation **54/54 + 87/87**, page changes **25/25 + 56/56**.
+- **Did:** the generated-rental adapter now preserves six complete
+  presentation records (identity, level, item, nature/gender, moves+PP,
+  ability surface, stats/EXP, OT ID/source-hidden OT text, front-pic
+  identity). Every Info/Skills/Moves/transition renderer and `core.ts`
+  consumes those live records; summary DOWN reaches un-rented generated pool
+  slots without anchor fallback. Canonical ONIX retains its committed
+  byte-exact framebuffer hash. Deleted resolved ISSUES #51.
+- **Next:** supervisor can proceed to trainer-pic OFF or Gate-6 work.
+- **Notes:** current generated data lacks non-anchor National Dex mapping,
+  ability display text/descriptions, and non-anchor summary 64×64 front-pic
+  assets; those layers stay absent rather than substituting anchor content.
+  No new canonical-recording import, unsupported barrier, trace/capture
+  change, swap/party/command/animation change, or tick-keyed branch.
+  PAPERCUT: none.
+
+---
+
 ## 707 — [SUPERVISOR 2026-07-29 ~16:45] Absorption class-B reveal merged; union green; round 4 dispatched
 
 - **State:** master green at **519 files / 5285 tests + 1 deliberate
