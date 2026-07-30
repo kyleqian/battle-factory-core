@@ -2629,10 +2629,10 @@
         "the pure source-relative reducer ports ANIM_TAG_SLAM_HIT and IMPACT load/free, gSlamHitSpriteTemplate's four source cells and side-dependent horizontal flip, both SlideMonToOffset and both SlideMonToOriginalPos lifecycles, animation-1 basic hitsplat, target AnimTask_ShakeMonInPlace, monbg/alpha, both pan sounds, waits, and cleanup",
         "source extraction regenerates legal LICKITUNG front/back and SLAM_HIT art byte-for-byte; the narrow shared compositor reuses exact IMPACT, slide, shake, ONIX, and field primitives and ports the player-target idle-to-translation hardware-OAM latch without battle clocks, coordinate/RGB fitting, or pixel exceptions",
         "slamEvidence.ts proves both committed v2 receipts twice fresh with stable player evidence/raw digests 8f520d7599ce22335081f096258dba8a4dc61f880c9b5167f0d3d68a33e14182 / 4e3abdaf0e4ab636fc415fb933a10cb47f9ed86fffcef880fd3d6479d1a4c8c2 and opponent digests 66a2b9d72b6dd0eb160faf6336a395fd036745d1fc09433fca7aea3641697401 / 66d4cdf1aed7f739b15a44eaccbb346268f5cc3b05112836b8717d31255f62fc",
-        "MOVE_SECRET_POWER remains unsupported after a complete source/controller checkpoint: generated inventory plus challenge-0 range 110-199 prove set-117 FRONTIER_MON_TEDDIURSA is the lowest legal Level-50 carrier; all ten environment dispatches are pinned, and the indoor Factory battle room conclusively selects only BATTLE_ENVIRONMENT_BUILDING -> Move_STRENGTH",
+        "MOVE_SECRET_POWER is independently exact through its sole Factory body: generated inventory plus challenge-0 range 110-199 prove set-117 FRONTIER_MON_TEDDIURSA is the lowest legal Level-50 carrier; all ten environment dispatches are pinned, and the indoor Factory battle room conclusively selects only BATTLE_ENVIRONMENT_BUILDING -> Move_STRENGTH",
         "the successful controller route is CONTROLLER_MOVEANIMATION -> DoMoveAnim(290) -> Move_SECRET_POWER -> AnimTask_GetBattleEnvironment -> Move_STRENGTH; accuracy miss, MOVE_RESULT_NO_EFFECT, and HITMARKER_NO_ANIMATIONS routes launch no move body, while the secondary effect is selected after the move animation",
-        "Move_STRENGTH now has an honest source-relative reducer and complete legal portable evidence checkpoint: both orientations reproducibly span first-active frame 222 through first-inactive cleanup 323 (102 frames), with player evidence/raw 9d8f3ad7a472bdd940aa35a7aa7e9c62823d8d2b11c0114ce6d4b1f92aed73a3/af6ff533abeb22e9b2f45c09339dcb979ac8508501e64d6d012faa1eb91a2903 and opponent 8d6902b63b3dc96622261856cdb413c452d3c55140465a674d97aa51271a2172/f4c81b0de053a8703ed10238c70d6398693fc937c1ad2d088de451a097d6376a",
-        "the checkpoint reducer ports IMPACT load/free, ShakeAndSinkMon, SlideMonToOriginalPos, TranslateMonEllipticalRespectSide, three mirrored animation-1 hitsplat lifecycles, ShakeMon2, monbg/12:8 alpha, four sound triggers, waits, and cleanup; Secret Power deliberately remains unsupported because no typed seam or production shared-framebuffer compositor/102-frame acceptance is wired"
+        "Move_STRENGTH independently passes its complete first-active through first-inactive cleanup interval at 102/102 reducer/component, typed-seam, software/hardware OAM, matrix, palette/tag, register, audio, raw-RGB, and shared-framebuffer frames 222-323 in both orientations twice fresh, with player evidence/raw 9d8f3ad7a472bdd940aa35a7aa7e9c62823d8d2b11c0114ce6d4b1f92aed73a3/af6ff533abeb22e9b2f45c09339dcb979ac8508501e64d6d012faa1eb91a2903 and opponent 8d6902b63b3dc96622261856cdb413c452d3c55140465a674d97aa51271a2172/f4c81b0de053a8703ed10238c70d6398693fc937c1ad2d088de451a097d6376a",
+        "the source-relative reducer, typed seam, and production compositor port IMPACT load/free, ShakeAndSinkMon's distinct hardware-transfer delay, SlideMonToOriginalPos, TranslateMonEllipticalRespectSide, three mirrored animation-1 hitsplat lifecycles and source slot reuse priority, ShakeMon2, monbg/12:8 alpha, four sound triggers, legal Teddiursa/Onix art and geometry, waits, and cleanup"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-slam-player-lickitung-opponent-onix.json",
@@ -2643,6 +2643,7 @@
         "tools/compare/slamEvidence.ts",
         "tools/compare/slamSourceAudit.ts",
         "tools/compare/secretPowerSourceAudit.ts",
+        "tools/compare/secretPowerStrengthEvidence.ts",
         "tools/battle-lab/mechanic-secret-power-player-teddiursa-opponent-onix.json",
         "tools/battle-lab/mechanic-secret-power-opponent-teddiursa-player-onix.json",
         "tools/compare/fixtures/secret-power-strength-player-teddiursa-opponent-onix.json",
@@ -2656,7 +2657,38 @@
         "tests/animation/slam.test.ts",
         "tests/animation/slamEvidence.test.ts",
         "tests/animation/secretPowerSourceAudit.test.ts",
-        "tests/animation/strengthCheckpoint.test.ts"
+        "tests/animation/strengthCheckpoint.test.ts",
+        "tests/animation/secretPowerStrengthProduction.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_SECRET_POWER",
+      "status": "exact",
+      "covered": [
+        "source, generated inventory, battle-script, controller, and environment audits prove challenge-0 set-117 FRONTIER_MON_TEDDIURSA is the lowest legal Level-50 carrier and Factory's indoor BATTLE_ENVIRONMENT_BUILDING dispatches the sole reachable Move_STRENGTH body",
+        "complete legal Teddiursa/Onix Scene-ON parties pass the full first-active through first-inactive cleanup interval at 102/102 source/component, typed-seam, software/hardware OAM, matrix, palette/tag/buffer, register, audio, raw-RGB, and production shared-framebuffer frames 222-323 in both orientations twice fresh",
+        "player-back evidence/raw digests remain 9d8f3ad7a472bdd940aa35a7aa7e9c62823d8d2b11c0114ce6d4b1f92aed73a3 / af6ff533abeb22e9b2f45c09339dcb979ac8508501e64d6d012faa1eb91a2903; opponent-front digests remain 8d6902b63b3dc96622261856cdb413c452d3c55140465a674d97aa51271a2172 / f4c81b0de053a8703ed10238c70d6398693fc937c1ad2d088de451a097d6376a",
+        "the reducer, typed seam, and compositor preserve IMPACT lifetime, ShakeAndSinkMon's two-transfer position latch, four-tick return slide, two-loop side-respecting ellipse, three animation-1 hitsplats including source slot-reuse priority, final ShakeMon2, monbg/12:8 alpha, four sounds, legal Teddiursa/Onix art and geometry, waits, and cleanup",
+        "accuracy miss, MOVE_RESULT_NO_EFFECT, and HITMARKER_NO_ANIMATIONS routes launch no move body; the later secondary effect is controller-owned and remains outside the accepted animation interval",
+        "MOVE_SLAM independently reruns 54/54 twice fresh in both orientations with unchanged evidence/raw hashes; component reuse does not waive either move's acceptance",
+        "no damage, secondary-effect selection, accuracy, RNG, turn order, controller/round/facility state, animation boundary, unsupported barrier, or canonical allowlist changed"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-secret-power-player-teddiursa-opponent-onix.json",
+        "tools/battle-lab/mechanic-secret-power-opponent-teddiursa-player-onix.json",
+        "tools/compare/fixtures/secret-power-strength-player-teddiursa-opponent-onix.json",
+        "tools/compare/fixtures/secret-power-strength-opponent-teddiursa-player-onix.json",
+        "tools/compare/bodySlamProbe.py",
+        "tools/compare/secretPowerSourceAudit.ts",
+        "tools/compare/secretPowerStrengthEvidence.ts",
+        "tools/compare/extractRestAssets.ts",
+        "src/animation/assets/rest.json",
+        "src/animation/strength.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/secretPowerSourceAudit.test.ts",
+        "tests/animation/strengthCheckpoint.test.ts",
+        "tests/animation/secretPowerStrengthProduction.test.ts"
       ]
     },
     {
@@ -2855,7 +2887,7 @@
         "MOVE_SLAM",
         "MOVE_SECRET_POWER"
       ],
-      "goal": "MOVE_SLAM independently proves its complete SLAM_HIT/IMPACT, dual-slide, ShakeMonInPlace, target-monbg/alpha, audio, and cleanup body at 54/54 dense source/seam/framebuffer frames in both orientations twice fresh. MOVE_SECRET_POWER has a complete source/controller checkpoint: set-117 TEDDIURSA is the lowest legal Level-50 carrier, every environment body and animation-bypass route is pinned, and Factory's indoor BUILDING contract reaches only Move_STRENGTH. It remains unsupported pending an independent Move_STRENGTH reducer/compositor plus complete twice-fresh both-orientation dense Scene-ON acceptance; component reuse does not waive that move acceptance."
+      "goal": "Track complete. MOVE_SLAM independently proves its complete SLAM_HIT/IMPACT, dual-slide, ShakeMonInPlace, target-monbg/alpha, audio, and cleanup body at 54/54 dense source/seam/framebuffer frames in both orientations twice fresh. MOVE_SECRET_POWER independently proves its sole Factory Move_STRENGTH body at 102/102 complete first-active through first-inactive frames twice fresh in both orientations, including IMPACT, ShakeAndSinkMon, return slide, ellipse, three hitsplats, ShakeMon2, monbg/alpha, audio, legal geometry, hardware latches, and cleanup."
     },
     {
       "id": "green-sparkle-moonlight",

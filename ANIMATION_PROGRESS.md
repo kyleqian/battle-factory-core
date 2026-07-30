@@ -1,34 +1,30 @@
 # Animation coverage
 
-## MOVE_SECRET_POWER Strength reducer/evidence checkpoint; remains unsupported (2026-07-30)
+## MOVE_SECRET_POWER promoted exact; slam-hit-slide-shake complete (2026-07-30)
 
-**Verdict:** `MOVE_SECRET_POWER` remains unsupported. The sole reachable
-Factory body now has a pure source-relative reducer and portable evidence
-checkpoint, but no typed seam or production compositor. Exact promotion is
-therefore deliberately blocked.
-
-**Evidence:** complete legal challenge-0 set-117 Teddiursa parties reach
-`Move_STRENGTH` in both orientations. Fresh probes reproduce twice with a
-complete first-active through first-inactive cleanup window of **222–323
-(102 frames)**. Player-back evidence/raw hashes are
+**Verdict:** `MOVE_SECRET_POWER` is exact through its sole reachable Factory
+body, indoor `BATTLE_ENVIRONMENT_BUILDING` → `Move_STRENGTH`. Complete legal
+challenge-0 set-117 Teddiursa/Onix parties pass the full first-active through
+first-inactive cleanup interval at **222–323 (102/102)** twice fresh in both
+orientations through the source reducer, typed seam, software/hardware OAM,
+matrices, palette/tag/register/audio receipts, raw RGB, and production shared
+framebuffer. Player-back evidence/raw hashes remain
 `9d8f3ad7a472bdd940aa35a7aa7e9c62823d8d2b11c0114ce6d4b1f92aed73a3` /
 `af6ff533abeb22e9b2f45c09339dcb979ac8508501e64d6d012faa1eb91a2903`;
-opponent-front hashes are
+opponent-front hashes remain
 `8d6902b63b3dc96622261856cdb413c452d3c55140465a674d97aa51271a2172` /
 `f4c81b0de053a8703ed10238c70d6398693fc937c1ad2d088de451a097d6376a`.
-The opponent's later **472–509** secondary-status animation is independently
-outside the move-body boundary, matching the source audit.
 
-**Model / sibling / next:** `strengthAtAge` ports the IMPACT lifetime,
-`ShakeAndSinkMon`, four-tick return slide, two-loop side-respecting ellipse,
-three mirrored animation-1 hitsplat lifecycles, `ShakeMon2`, monbg/12:8
-alpha, four source audio triggers, waits, and cleanup. Teddiursa art remains
-source-reproducible through the existing set-117 REST extractor. `MOVE_SLAM`
-independently reruns **54/54 twice fresh in both orientations** with unchanged
-hashes. Coverage remains **104 exact / 0 partial / 0 staged / 172
-unsupported**. The bounded remainder is the typed presentation seam,
-Teddiursa/Onix compositor with exact OAM/register latches, and twice-fresh
-102/102 shared-framebuffer acceptance per orientation.
+**Model / boundaries:** the compositor preserves IMPACT lifetime,
+`ShakeAndSinkMon`'s distinct two-transfer position latch, four-tick return
+slide, side-respecting two-loop ellipse, three animation-1 hitsplats including
+source slot-reuse priority, final `ShakeMon2`, monbg/12:8 alpha, all four
+sounds, legal Teddiursa/Onix art and geometry, waits, and cleanup. The later
+**472–509** secondary-status animation remains controller-owned and outside
+the move body. `MOVE_SLAM` independently reruns **54/54 twice fresh in both
+orientations** with unchanged hashes. No battle semantics or boundary pins
+changed. Coverage is **105 exact / 0 partial / 0 staged / 171 unsupported**;
+the `slam-hit-slide-shake` component track is complete.
 
 ## MOVE_SECRET_POWER source/controller checkpoint; remains unsupported (2026-07-30)
 
