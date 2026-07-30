@@ -6085,6 +6085,9 @@ function battle2CommandPresentationForRender(
       ]),
     }),
     lifecycle: Object.freeze({ phase, phaseElapsed }),
+    // The legacy equivalence caller supplies its already-proven bounce
+    // overlay separately; this typed adapter only dispatches window chrome.
+    idleBounceElapsed: 0,
     field: Object.freeze({
       player: Object.freeze({
         side: "player",
