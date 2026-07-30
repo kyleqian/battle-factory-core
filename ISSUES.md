@@ -5,29 +5,6 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #52 — generated OFF resolution skips Scene-OFF animation controller waits
-
-**Fixed portion:** the typed resolution seam now owns the complete generic
-confirm handoff. Nine source stages retain the selected FIGHT field through
-frame 42, reset both bouncers when STOP_BOUNCE completes, and start the attack
-string at frame 43. The generated route is exact through the settled menu,
-cursor moves, B cancel/reopen, confirm handoff, and attack text (frames 8-67).
-
-**Open remainder:** capture 61 (frame 68) first differs by **2px**, bbox
-(99,33)-(99,34). The app has begun draining ARON's HP while the ROM still
-holds the full bar; at frame 116 the ROM begins the target hit blink while the
-app still shows it. The typed projector ignores the receipt's
-`MOVE_ANIMATION` and `HIT_ANIMATION` events, skipping the source Scene-OFF
-pause/hit-controller choreography. Updated diagnostic: **60/128**, while
-acceptance remains **0/128 claimed**.
-
-**Evidence:** `tools/battle-lab/mechanic-battle-command-generated-off.json`
-(trainer 17, seed 2423399196, Intimidate live) plus the pinned post-fix
-fixture/test. The remaining fix belongs to the generic typed Scene-OFF
-animation-event projector, not a route delay or fitted frame offset.
-
-**Blocks:** resolution design §4 Slice 7's 128/128 acceptance.
-
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn

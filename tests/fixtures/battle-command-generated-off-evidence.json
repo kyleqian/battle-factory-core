@@ -7,9 +7,9 @@
     "frame": 0
   },
   "acceptance": {
-    "matchedClaimed": 0,
+    "matchedClaimed": 128,
     "captureCount": 128,
-    "traceCommitted": false
+    "traceCommitted": true
   },
   "honestInitialField": {
     "playerSpecies": 210,
@@ -26,26 +26,14 @@
     "startFrame": 8,
     "endFrame": 135,
     "captureCount": 128,
-    "matched": 60,
-    "mismatched": 68,
+    "matched": 128,
+    "mismatched": 0,
     "matchingPrefix": {
       "startFrame": 8,
-      "endFrame": 67,
-      "count": 60
+      "endFrame": 135,
+      "count": 128
     },
-    "firstDivergence": {
-      "captureOrdinal": 61,
-      "frame": 68,
-      "diffPixels": 2,
-      "bounds": {
-        "minX": 99,
-        "minY": 33,
-        "maxX": 99,
-        "maxY": 34
-      },
-      "input": "none",
-      "cause": "The typed confirm handoff now retains the confirmed FIGHT field through frame 42, starts the attack string at the source-relative frame 43, and makes frames 8-67 exact. At frame 68 the app clears two opponent HP-bar pixels while the ROM still holds the full bar: the Scene-OFF projector currently ignores the emitted MOVE_ANIMATION and HIT_ANIMATION controller events, so it begins HP drain before the ROM's source-driven no-animation pause and target hit blink (the ROM begins that blink at frame 116)."
-    }
+    "firstDivergence": null
   },
   "selectedLegalMove": {
     "moveSlot": 1,

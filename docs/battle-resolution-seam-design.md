@@ -1,11 +1,11 @@
 # Battle-resolution presentation seam design
 
-Status: bounded MAIN-lane design at `3445e568` (2026-07-29). This document
-extends the landed battle-command seam through Battle Scene OFF action
-resolution, faint handling, forced-party handoff, and send-out. It does not
-propose a rewrite of `battleScene.ts`, and none of the implementation slices
-below may add a battle-number, turn-number, absolute-tick, or trace-frame
-dispatch branch.
+Status: all seven bounded MAIN-lane slices complete (2026-07-30). The landed
+battle-command seam now covers Battle Scene OFF action resolution, faint
+handling, forced-party handoff, send-out, terminal handoff, and the explicit
+generated-command breadth proof. It does not propose a rewrite of
+`battleScene.ts`, and none of the implementation slices below may add a
+battle-number, turn-number, absolute-tick, or trace-frame dispatch branch.
 
 ## 1. Render inventory
 
@@ -623,6 +623,11 @@ npm run build
 ```
 
 ### Slice 7 — explicit-OFF generated command breadth proof
+
+Complete at `7485848a`: the generated GRANBULL-vs-ARON route consumes typed
+`MOVE_ANIMATION`/`HIT_ANIMATION` receipts, derives the Scene-OFF pause from
+interpreter provenance and source controller cadence, and matches all 128
+consecutive frames 8-135. The committed trace below is the acceptance proof.
 
 Goal: finish the command seam's deferred acceptance. From the existing
 `battle-command-generated-off` app stage
