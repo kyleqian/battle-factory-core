@@ -13,6 +13,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 731 — [SUPERVISOR 2026-07-30 ~01:10] #54 fixed+merged, Gate-6 at 8 rows (R3/R9 in), intro slices 1-2 verified; round 7 dispatched
+
+- **State:** master green after merge `c3a9742f` (union suite re-run by
+  supervisor), DEFERRED.md empty, no orphan worktrees/branches. Session:
+  14 workers, 0 failed steps, 2 honest scout corrections.
+- **Did:** (1) merged the #54 Natural Cure party-sync fix — generic
+  mirror in the source-mapped `Cmd_switchoutabilities` handler
+  (`battleScriptForceSwitchOpcode.ts:166`), round-trip Tier-1 pins, ROM
+  re-verified; **#54 deleted**. (2) Gate-6 R3 (Cloud Nine
+  suppress/reactivate) and R9 (Swagger×Lum; White Herb correctly inert —
+  dossier corrected) pinned at parity, two seeds each: **8 rows proven,
+  1 kernel bug found and fixed same-session**. (3) Verified intro
+  slices 1-2 (entry 730): 373/373 probe-exact pre-send-out, all 26
+  regression rows exact.
+- **Next:** main = intro slice 3 (opponent release); side = Gate-6 R13
+  remainder + R14 (R5/R1 stretch). Then slice 4 as evidence checkpoint
+  if time; wind-down before 05:32 with the animation-fold re-check.
+- **Notes:** intro slice 4's committed-trace acceptance and the
+  commentary checkpoint both remain blocked on the harness-side Battle
+  Lab pre-reset-capture decision (entries 690/724) — user-level item for
+  the next session. The #53 interactive-routing flip design is the other
+  next-session headline.
+
+---
 ## 730 — [BOUNDED MAIN WORKER 2026-07-30 ~00:53] Intro Slices 1-2 complete — generated pre-send-out is 373/373
 
 - **State:** implementation commits `01320712` + `a19690e0`; focused
@@ -74,23 +98,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Gate-6 score so far: 5 rows proven (R12-control, R12b, R11, R15, R6
   receipts), 1 kernel divergence found (#54).
 
----
-## 728 — [BOUNDED MAIN WORKER 2026-07-30 ~00:10] Resolution Slice 7 complete; generated Scene-OFF command 128/128
-
-- **State:** implementation `7485848a`, acceptance `4305a82f`, compatibility
-  `43344166`; generated explicit-OFF trace **128/128** and all **25/25**
-  immutable §3.2 rows exact. Focused acceptance is green at **7 files / 168
-  tests**; full suite/build green at **527 files / 5412 tests + 1 deliberate
-  animation-lane skip**.
-- **Did:** typed resolution now consumes provenance-bearing
-  `MOVE_ANIMATION`/`HIT_ANIMATION` receipts. The pre-hit hold derives from
-  the receipt instruction span plus source `B_WAIT_TIME_SHORT`; the target
-  uses the existing generic 32-tick blink/20-pose healthbox reaction before
-  immutable HP drain. Committed consecutive frames 8-135, deleted #52, and
-  completed design Slice 7.
-- **Next:** trainer-pic intro slices remain the next main-lane roadmap work.
-- **Notes:** source: `battle_scripts_1.s:236-266,3151-3153`;
-  `battle_script_commands.c:1743-1754,3914-3931,5558-5575`;
-  `battle_controller_opponent.c:440-456,1804-1816`;
-  `pokeball.c:1284-1306`. No import/barrier/ratchet pin, route/tick branch,
-  fitted coordinate/RGB, or capture thinning. PAPERCUT: none.

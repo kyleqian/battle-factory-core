@@ -1,3 +1,25 @@
+## 728 — [BOUNDED MAIN WORKER 2026-07-30 ~00:10] Resolution Slice 7 complete; generated Scene-OFF command 128/128
+
+- **State:** implementation `7485848a`, acceptance `4305a82f`, compatibility
+  `43344166`; generated explicit-OFF trace **128/128** and all **25/25**
+  immutable §3.2 rows exact. Focused acceptance is green at **7 files / 168
+  tests**; full suite/build green at **527 files / 5412 tests + 1 deliberate
+  animation-lane skip**.
+- **Did:** typed resolution now consumes provenance-bearing
+  `MOVE_ANIMATION`/`HIT_ANIMATION` receipts. The pre-hit hold derives from
+  the receipt instruction span plus source `B_WAIT_TIME_SHORT`; the target
+  uses the existing generic 32-tick blink/20-pose healthbox reaction before
+  immutable HP drain. Committed consecutive frames 8-135, deleted #52, and
+  completed design Slice 7.
+- **Next:** trainer-pic intro slices remain the next main-lane roadmap work.
+- **Notes:** source: `battle_scripts_1.s:236-266,3151-3153`;
+  `battle_script_commands.c:1743-1754,3914-3931,5558-5575`;
+  `battle_controller_opponent.c:440-456,1804-1816`;
+  `pokeball.c:1284-1306`. No import/barrier/ratchet pin, route/tick branch,
+  fitted coordinate/RGB, or capture thinning. PAPERCUT: none.
+
+---
+
 ## 727 — [BOUNDED MAIN WORKER 2026-07-29 ~23:45] Typed confirm handoff exact; Slice-7 checkpoint advances to 60/128
 
 - **State:** implementation `7f8e876b`; full suite green at **527 files /
