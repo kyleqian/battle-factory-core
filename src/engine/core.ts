@@ -116,6 +116,7 @@ import {
   DRAGONBREATH_MENU_REDRAW_DELAY,
   INITIAL_BATTLE_SCENE_STATE,
   renderBattleScene,
+  renderBattleResolutionSceneOffView,
   renderGeneratedBattleCommandPresentation,
   renderSceneOnMovePresentation,
   renderSceneOffTurnView,
@@ -255,8 +256,10 @@ import {
 } from "./battlePartySelect.ts";
 import {
   advanceFactoryRoundBattleCommand,
+  advanceFactoryRoundBattleResolution,
   type FactoryRoundBattleOrchestratorState,
 } from "./factoryRoundBattleOrchestrator.ts";
+import { renderBattleResolutionPresentation } from "./battleResolutionPresentationRender.ts";
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
 
@@ -384,6 +387,21 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     )
   ) {
     factoryTerminal = createFactoryTerminalPresentation(pendingTerminalCommand);
+  }
+
+  if (state.factoryRoundBattleOrchestrator?.battleResolutionPresentation) {
+    const factoryRoundBattleOrchestrator = advanceFactoryRoundBattleResolution(
+      state.factoryRoundBattleOrchestrator,
+    );
+    return {
+      ...state,
+      frame: state.frame + 1,
+      keyRepeat,
+      factoryRoundBattleOrchestrator,
+      rngMode: "frontierBattle",
+      rngValue:
+        factoryRoundBattleOrchestrator.battle?.rng.value ?? state.rngValue,
+    };
   }
 
   if (state.factoryRoundBattleOrchestrator?.battleCommandPresentation) {
@@ -1934,6 +1952,15 @@ function renderPostwinState(state: EngineState): Uint8Array {
 }
 
 function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
+  if (state.factoryRoundBattleOrchestrator?.battleResolutionPresentation) {
+    const fb = createFramebuffer();
+    renderBattleResolutionPresentation(
+      fb,
+      state.factoryRoundBattleOrchestrator.battleResolutionPresentation,
+      { drawScene: renderBattleResolutionSceneOffView },
+    );
+    return fb;
+  }
   if (state.factoryRoundBattleOrchestrator?.battleCommandPresentation) {
     const fb = createFramebuffer();
     const selector = state.factoryRoundBattleOrchestrator.battlePartySelect;

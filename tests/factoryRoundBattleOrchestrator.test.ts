@@ -4,8 +4,10 @@ import naturesData from "../src/data/gen/natures.json" with { type: "json" };
 import type { FactoryRentalRecord } from "../src/engine/battleScenario.ts";
 import type { BattleSubmittedDecision } from "../src/engine/battleDecisionBoundary.ts";
 import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
+import { createInitialState, render, tick } from "../src/engine/core.ts";
 import {
   advanceFactoryRoundBattleCommand,
+  advanceFactoryRoundBattleResolution,
   advanceFactoryRoundPresentation,
   chooseFactoryRoundSwap,
   completeFactoryRoundPresentation,
@@ -80,6 +82,22 @@ function advanceCommandToPhase(
     next = advanceFactoryRoundBattleCommand(next, new Set());
   }
   expect(next.battleCommandPresentation?.lifecycle.phase).toBe(phase);
+  return next;
+}
+
+function advanceResolutionToNextCommand(
+  state: FactoryRoundBattleOrchestratorState,
+): FactoryRoundBattleOrchestratorState {
+  let next = state;
+  for (
+    let budget = 0;
+    budget < 2_000 && next.battleResolutionPresentation !== null;
+    budget += 1
+  ) {
+    next = advanceFactoryRoundBattleResolution(next);
+  }
+  expect(next.battleResolutionPresentation).toBeNull();
+  expect(next.battleCommandPresentation).not.toBeNull();
   return next;
 }
 
@@ -210,11 +228,68 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expect(state.battleCommandPresentation?.fightCursor).toBe(3);
 
     state = advanceFactoryRoundBattleCommand(state, new Set(["A"] as const));
+    const resolution = state.battleResolutionPresentation;
+    expect(state.battleCommandPresentation).toBeNull();
+    expect(resolution?.resolutionId.requestId).toBe(firstBoundary.request.requestId);
+    expect(resolution?.sourceDecision).toEqual({
+      kind: "use-move",
+      moveSlot: 3,
+      targetBattler: 1,
+    });
+    expect(resolution?.pendingBoundary).toBe(resolution?.pendingBattle.boundary);
+    const eventSequences = resolution?.segments[0]?.events.map(({ sequence }) => sequence) ?? [];
+    expect(eventSequences).toEqual(eventSequences.map(
+      (_, index) => eventSequences[0]! + index,
+    ));
+    expect(resolution?.segments[0]?.events.filter(
+      ({ payload }) =>
+        payload.kind === "message" && payload.messageId === "STRINGID_USEDMOVE",
+    )).toHaveLength(2);
+    expect(state.moveSelectionCursors[0]).toBe(3);
+    expect(state.battlePresentationBoundaries?.[0].moveCursor).toBe(3);
+    expect(state.battlePresentationBoundaries?.[0].displayedHp)
+      .toBe(resolution?.field.player.hp);
+    expect(state.battlePresentationBoundaries?.[1].displayedHp)
+      .toBe(resolution?.field.opponent.hp);
+    expect(state.battlePresentationBoundaries?.map(({ field }) => field.currentPP))
+      .toEqual(state.battle?.rules.rulesContext.battlers.slice(0, 2).map(
+        ({ pp }) => pp,
+      ));
+    const engine = {
+      ...createInitialState(),
+      factoryRoundBattleOrchestrator: state,
+    };
+    expect(render(engine)).toHaveLength(240 * 160 * 4);
+    expect(
+      tick(engine, new Set()).factoryRoundBattleOrchestrator
+        ?.battleResolutionPresentation?.lifecycle.phaseElapsed,
+    ).toBe(1);
+
+    const retainedBoundary = state.battlePresentationBoundaries;
+    state = advanceResolutionToNextCommand(state);
+    expect(state.battleCommandPresentation?.request)
+      .toEqual(resolution?.pendingBattle.boundary.kind === "decision-required"
+        ? resolution.pendingBattle.boundary.request
+        : undefined);
     expect(state.battleCommandPresentation?.request.requestId)
       .not.toBe(firstBoundary.request.requestId);
-    expect(state.moveSelectionCursors[0]).toBe(3);
+    expect(state.battleCommandPresentation?.lifecycle).toEqual({
+      phase: "action-menu",
+      phaseElapsed: 0,
+    });
     expect(state.battleCommandPresentation?.fightCursor).toBe(3);
     expect(state.battleCommandPresentation?.fightDisplayCursor).toBe(3);
+    expect(state.battlePresentationBoundaries?.[0].idleEpoch)
+      .toBe(retainedBoundary?.[0].idleEpoch);
+    expect(state.battlePresentationBoundaries?.map((boundary) => ({
+      partyIndex: boundary.partyIndex,
+      displayedHp: boundary.displayedHp,
+    }))).toEqual(state.battle?.rules.rulesContext.battlers.slice(0, 2).map(
+      (battler) => ({
+        partyIndex: battler.partyIndex,
+        displayedHp: battler.hp,
+      }),
+    ));
   });
 
   it("resets the persistent cursor when a live player switch-in changes the active party slot", () => {
@@ -225,6 +300,7 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     state = advanceFactoryRoundBattleCommand(state, new Set(["RIGHT"] as const));
     state = advanceFactoryRoundBattleCommand(state, new Set(["DOWN"] as const));
     state = advanceFactoryRoundBattleCommand(state, new Set(["A"] as const));
+    state = advanceResolutionToNextCommand(state);
     expect(state.battleCommandPresentation?.fightCursor).toBe(3);
 
     const beforePartyIndex = state.battle?.rules.rulesContext.battlers[0].partyIndex;
@@ -232,12 +308,30 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       (decision) => decision.kind === "switch",
     );
     if (switchDecision?.kind !== "switch") throw new Error("expected a legal switch");
+    const trainerBoundaryBeforeSwitch = state.battlePresentationBoundaries?.[1];
     state = submitFactoryRoundPlayerDecision(state, switchDecision);
 
     expect(state.battle?.rules.rulesContext.battlers[0].partyIndex).not.toBe(beforePartyIndex);
     expect(state.moveSelectionCursors[0]).toBe(0);
     expect(state.battleCommandPresentation?.fightCursor).toBe(0);
     expect(state.battleCommandPresentation?.fightDisplayCursor).toBe(0);
+    expect(state.battlePresentationBoundaries?.[0]).toMatchObject({
+      partyIndex: state.battle?.rules.rulesContext.battlers[0].partyIndex,
+      idleEpoch: 0,
+      moveCursor: 0,
+      spriteVisible: true,
+    });
+    expect({
+      partyIndex: state.battlePresentationBoundaries?.[1].partyIndex,
+      idleEpoch: state.battlePresentationBoundaries?.[1].idleEpoch,
+      moveCursor: state.battlePresentationBoundaries?.[1].moveCursor,
+      spriteVisible: state.battlePresentationBoundaries?.[1].spriteVisible,
+    }).toEqual({
+      partyIndex: trainerBoundaryBeforeSwitch?.partyIndex,
+      idleEpoch: trainerBoundaryBeforeSwitch?.idleEpoch,
+      moveCursor: trainerBoundaryBeforeSwitch?.moveCursor,
+      spriteVisible: trainerBoundaryBeforeSwitch?.spriteVisible,
+    });
   });
 
   it("persists any accepted swaps once into the next challenge's rental rank", () => {
