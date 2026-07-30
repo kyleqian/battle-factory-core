@@ -38,6 +38,7 @@ import {
   type PartySendOutPhase,
   partySendOutPhase,
 } from "./partySelect.ts";
+import { genericHitReactionAtAge } from "./battleMenu.ts";
 
 export const BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES =
   BATTLE_COMMAND_ACTION_ENTER_DELAY;
@@ -45,6 +46,12 @@ export const BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES =
 export const BATTLE_RESOLUTION_STAT_CHANGE_FRAMES = 50;
 
 export type BattleResolutionRenderEffect =
+  | Readonly<{
+      type: "hit";
+      battler: 0 | 1;
+      healthboxY2: number;
+      targetInvisible: boolean;
+    }>
   | Readonly<{
       type: "stat";
       battler: 0 | 1;
@@ -191,6 +198,8 @@ function applyCompletedCommand(
   }
   if (
     command.type === "message"
+    || command.type === "move-animation"
+    || command.type === "hit-animation"
     || command.type === "stat"
     || command.type === "faint"
     || command.type === "party-summary"
@@ -231,6 +240,9 @@ export function battleResolutionCommandDuration(
         command.timing.minimumFrames,
         battleStringPrintableLength(command.lines),
       );
+    case "move-animation":
+    case "hit-animation":
+      return command.timing.minimumFrames;
     case "hp": {
       const maxHp = fieldBattler(field, command.battler).maxHP;
       return Math.max(
@@ -447,6 +459,15 @@ export function createBattleResolutionPresentationRenderView(
         ),
       );
       hpTarget = Object.freeze({ battler: command.battler, to: command.to });
+    } else if (command.type === "hit-animation") {
+      effect = Object.freeze({
+        type: "hit",
+        battler: command.battler,
+        ...genericHitReactionAtAge(
+          state.lifecycle.phaseElapsed,
+          command.timing.firstDisplayedAge,
+        ),
+      });
     } else if (command.type === "stat") {
       effect = Object.freeze({
         type: "stat",
@@ -530,6 +551,12 @@ export function createBattleResolutionPresentationRenderView(
     ? effect
     : null;
   const fieldArt = createBattleCommandFieldArtView(field);
+  const playerHit = effect?.type === "hit" && effect.battler === 0
+    ? effect
+    : null;
+  const opponentHit = effect?.type === "hit" && effect.battler === 1
+    ? effect
+    : null;
   return Object.freeze({
     field,
     fieldArt,
@@ -552,6 +579,7 @@ export function createBattleResolutionPresentationRenderView(
     visibility: Object.freeze({
       player: Object.freeze({
         sprite: !fainted.has(0)
+          && !(playerHit?.targetInvisible ?? false)
           && !(
             playerFaint?.sink.type === "player-pixel-rows"
             && playerFaint.sink.skipPixelRows
@@ -562,6 +590,7 @@ export function createBattleResolutionPresentationRenderView(
       }),
       opponent: Object.freeze({
         sprite: !fainted.has(1)
+          && !(opponentHit?.targetInvisible ?? false)
           && !(
             opponentFaint?.sink.type === "opponent-tile-rows"
             && opponentFaint.sink.keptRows === 0

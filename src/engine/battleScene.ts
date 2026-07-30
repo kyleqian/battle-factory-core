@@ -5854,13 +5854,23 @@ function healthboxBackgroundColorAt(x: number, y: number, paletteOverride?: RgbC
  * caller that ever passes a different (drained) one, via
  * `opponentHealthboxContentForHp`.
  */
-function drawSendOutHealthbox(fb: Uint8Array, dx: number, content: ReturnType<typeof composeOpponentHealthbox> = opponentHealthboxContent): void {
+function drawSendOutHealthbox(
+  fb: Uint8Array,
+  dx: number,
+  content: ReturnType<typeof composeOpponentHealthbox> = opponentHealthboxContent,
+  dy = 0,
+): void {
   const { width, height, pixels } = content;
   for (let py = 0; py < height; py += 1) {
     for (let px = 0; px < width; px += 1) {
       const color = pixels[py * width + px];
       if (!color) continue;
-      setPixel(fb, HEALTHBOX_FRAME_ORIGIN.x + dx + px, HEALTHBOX_FRAME_ORIGIN.y + py, color);
+      setPixel(
+        fb,
+        HEALTHBOX_FRAME_ORIGIN.x + dx + px,
+        HEALTHBOX_FRAME_ORIGIN.y + dy + py,
+        color,
+      );
     }
   }
 }
@@ -30720,6 +30730,7 @@ export function renderBattleResolutionSceneOffView(
   }
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
   const faint = view.effect?.type === "faint" ? view.effect : null;
+  const hit = view.effect?.type === "hit" ? view.effect : null;
   if (view.visibility.opponent.sprite) {
     if (
       faint?.battler === 1
@@ -30771,12 +30782,15 @@ export function renderBattleResolutionSceneOffView(
       fb,
       0,
       composeOpponentHealthbox(healthboxAssemblyAssets, view.healthboxes.opponent),
+      hit?.battler === 1 ? hit.healthboxY2 : 0,
     );
   }
   if (view.visibility.player.healthbox) {
     drawComposedPlayerHealthbox(
       fb,
       composePlayerHealthbox(playerHealthboxAssets, view.healthboxes.player),
+      0,
+      hit?.battler === 0 ? hit.healthboxY2 : 0,
     );
   }
   if (view.partySummary) {

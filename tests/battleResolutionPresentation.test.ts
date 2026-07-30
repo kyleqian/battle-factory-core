@@ -96,8 +96,13 @@ const PROVENANCE = Object.freeze({
 function event(
   sequence: number,
   payload: BattleKernelSemanticEvent["payload"],
+  instructionExecution = 1,
 ): BattleKernelSemanticEvent {
-  return Object.freeze({ sequence, payload: Object.freeze(payload), provenance: PROVENANCE });
+  return Object.freeze({
+    sequence,
+    payload: Object.freeze(payload),
+    provenance: Object.freeze({ ...PROVENANCE, instructionExecution }),
+  });
 }
 
 function nextState(
@@ -333,6 +338,79 @@ describe("battle resolution presentation receipt ownership", () => {
       },
       { type: "turn-end", timing: { minimumFrames: 8 } },
     ]);
+  });
+
+  it("projects Scene-OFF move pause and target hit receipt before immutable HP drain", () => {
+    const resolution = createBattleResolutionPresentation(inputFor([
+      event(0, { kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }, 2),
+      event(1, { kind: "set-battler-pp-data", battler: 0, movePosition: 0, pp: 9 }, 3),
+      event(2, {
+        kind: "animation",
+        animationId: "MOVE_ANIMATION",
+        battler: 0,
+        arguments: [],
+      }, 14),
+      event(3, { kind: "play-se", battler: 1, songId: 1 }, 16),
+      event(4, {
+        kind: "animation",
+        animationId: "HIT_ANIMATION",
+        battler: 1,
+        arguments: [],
+      }, 17),
+      event(5, { kind: "health-bar-update", battler: 1, healthValue: 17 }, 19),
+      event(6, { kind: "hp-change", battler: 1, from: 91, to: 74 }, 20),
+    ], NEXT_COMMAND));
+
+    expect(resolution.segments[0]!.commands).toMatchObject([
+      { type: "message" },
+      {
+        type: "move-animation",
+        eventSequence: 2,
+        battler: 0,
+        timing: { minimumFrames: 48 },
+      },
+      {
+        type: "hit-animation",
+        eventSequence: 4,
+        battler: 1,
+        timing: { minimumFrames: 35, firstDisplayedAge: 1 },
+      },
+      { type: "hp", eventSequence: 5, from: 91, to: 74 },
+      { type: "turn-end" },
+    ]);
+    expect(battleResolutionCommandDuration(
+      resolution.segments[0]!.commands[1]!,
+      resolution.field,
+    )).toBe(48);
+
+    const setup = createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, 2, 0),
+    );
+    expect(setup.effect).toEqual({
+      type: "hit",
+      battler: 1,
+      healthboxY2: 0,
+      targetInvisible: false,
+    });
+    const firstDisplayed = createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, 2, 1),
+    );
+    expect(firstDisplayed.effect).toEqual({
+      type: "hit",
+      battler: 1,
+      healthboxY2: 1,
+      targetInvisible: false,
+    });
+    const firstBlink = createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, 2, 2),
+    );
+    expect(firstBlink.effect).toEqual({
+      type: "hit",
+      battler: 1,
+      healthboxY2: -1,
+      targetInvisible: true,
+    });
+    expect(firstBlink.visibility.opponent.sprite).toBe(false);
   });
 
   it("retains a genuine player forced-switch boundary behind a button-gated faint lifecycle", () => {

@@ -33,6 +33,11 @@ export type BattleStatName = Extract<
 export type PartyBallState = "empty" | "healthy" | "status" | "fainted";
 
 export type BattleMessageTiming = Readonly<{ minimumFrames: 24 }>;
+export type BattleMoveAnimationTiming = Readonly<{ minimumFrames: number }>;
+export type BattleHitAnimationTiming = Readonly<{
+  minimumFrames: 35;
+  firstDisplayedAge: 1;
+}>;
 export type BattleHpTiming = Readonly<{ minimumFrames: 28 }>;
 export type BattleStatTiming = Readonly<{ minimumFrames: 32 }>;
 export type BattleStatusTiming = Readonly<{ minimumFrames: 32 }>;
@@ -60,6 +65,18 @@ export type BattleResolutionPresentationCommand =
       lines: readonly string[];
       advance: "automatic" | "button";
       timing: BattleMessageTiming;
+    }>
+  | Readonly<{
+      type: "move-animation";
+      eventSequence: number;
+      battler: 0 | 1;
+      timing: BattleMoveAnimationTiming;
+    }>
+  | Readonly<{
+      type: "hit-animation";
+      eventSequence: number;
+      battler: 0 | 1;
+      timing: BattleHitAnimationTiming;
     }>
   | Readonly<{
       type: "hp";
@@ -255,6 +272,18 @@ export type CreateBattleResolutionPresentationInput = Readonly<{
 }>;
 
 const MESSAGE_TIMING = Object.freeze({ minimumFrames: 24 } as const);
+/**
+ * Scene-OFF hit controller lifetime:
+ * setup, 32 blink callbacks, completion, and waitstate release.
+ * battle_controller_opponent.c:1804-1816,440-456;
+ * battle_script_commands.c:3927-3931.
+ */
+const HIT_ANIMATION_TIMING = Object.freeze({
+  minimumFrames: 35,
+  firstDisplayedAge: 1,
+} as const);
+/** BattleScript_Pausex20's `pause B_WAIT_TIME_SHORT`. */
+const SCENE_OFF_MOVE_PAUSE_FRAMES = 32;
 const HP_TIMING = Object.freeze({ minimumFrames: 28 } as const);
 const STAT_TIMING = Object.freeze({ minimumFrames: 32 } as const);
 const STATUS_TIMING = Object.freeze({ minimumFrames: 32 } as const);
@@ -280,6 +309,29 @@ function sourceLabelOf(event: BattleKernelSemanticEvent): string {
     );
   }
   return event.provenance.sourceLabel;
+}
+
+function instructionExecutionOf(event: BattleKernelSemanticEvent): number {
+  sourceLabelOf(event);
+  return event.provenance!.instructionExecution;
+}
+
+function nextHitAnimation(
+  events: readonly BattleKernelSemanticEvent[],
+  moveIndex: number,
+): BattleKernelSemanticEvent | null {
+  for (let index = moveIndex + 1; index < events.length; index += 1) {
+    const candidate = events[index]!;
+    if (
+      candidate.payload.kind === "animation"
+      && candidate.payload.animationId === "HIT_ANIMATION"
+    ) return candidate;
+    if (
+      candidate.payload.kind === "animation"
+      && candidate.payload.animationId === "MOVE_ANIMATION"
+    ) break;
+  }
+  return null;
 }
 
 function ppEventAfter(
@@ -440,6 +492,7 @@ export function projectBattleResolutionCommands(
     { kind: "stat-stage-change" }
   > | null = null;
   let lastFaintBattler: 0 | 1 | null = null;
+  let usedMoveInstructionExecution: number | null = null;
   const zeroHpBattlers = new Set<0 | 1>();
   const fieldArt = createBattleCommandFieldArtView(field);
 
@@ -454,6 +507,9 @@ export function projectBattleResolutionCommands(
     const payload = event.payload;
     if (payload.kind === "message") {
       sourceLabelOf(event);
+      if (payload.messageId === "STRINGID_USEDMOVE") {
+        usedMoveInstructionExecution = instructionExecutionOf(event);
+      }
       const switchInBattler = payload.messageId === "STRINGID_SWITCHINMON"
         ? ([...pendingSwitch.keys()].at(-1) ?? null)
         : null;
@@ -477,6 +533,51 @@ export function projectBattleResolutionCommands(
             ? "button"
             : "automatic",
         timing: MESSAGE_TIMING,
+      }));
+      continue;
+    }
+    if (
+      payload.kind === "animation"
+      && payload.animationId === "MOVE_ANIMATION"
+    ) {
+      const battler = singlesBattler(payload.battler ?? -1, "move animation");
+      const hit = nextHitAnimation(events, index);
+      if (usedMoveInstructionExecution === null || hit === null) {
+        // A move animation without a hit receipt has no target hit/drain
+        // choreography. Existing typed effect/status commands own its
+        // controller-specific presentation.
+        continue;
+      }
+      const hitExecution = instructionExecutionOf(hit);
+      const interveningInstructions =
+        hitExecution - usedMoveInstructionExecution;
+      if (interveningInstructions <= 0) {
+        throw new Error("battle resolution move/hit provenance is not ordered");
+      }
+      commands.push(Object.freeze({
+        type: "move-animation",
+        eventSequence: event.sequence,
+        battler,
+        // The attack-string text printer releases one callback after the
+        // final displayed glyph. Then every source instruction through
+        // Cmd_hitanimation runs once, while Scene OFF substitutes the
+        // attackanimation command with BattleScript_Pausex20.
+        timing: Object.freeze({
+          minimumFrames:
+            1 + interveningInstructions + SCENE_OFF_MOVE_PAUSE_FRAMES,
+        }),
+      }));
+      continue;
+    }
+    if (
+      payload.kind === "animation"
+      && payload.animationId === "HIT_ANIMATION"
+    ) {
+      commands.push(Object.freeze({
+        type: "hit-animation",
+        eventSequence: event.sequence,
+        battler: singlesBattler(payload.battler ?? -1, "hit animation"),
+        timing: HIT_ANIMATION_TIMING,
       }));
       continue;
     }
