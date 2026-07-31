@@ -92,7 +92,15 @@ a turn number; per-species render entry points are hardcoded
 `battle2Turn1.ts`, `battle2ActionMenu.ts`, `battle2OffScenario.ts`,
 `turn17.ts` share the shape.
 
-**Retirement progress:** `turn13-sandattack.json`'s complete captured
+**Retirement progress:** the inventory's **rank-1 window is retired**
+(2026-07-31, `289fe2c7`): the Battle-2 command turn now sources
+request/field/HP facts from the real kernel via `battle2CommandAdapter.ts`
+with RAM-probed personalities and bench; `battle2Turn1.ts`,
+`battle2ActionMenu.ts`, and `battle2OffScenario.ts` are deleted, all dense
+pins held (191/191, 209/209, 16/16, plus generated-route 128/128 and
+715/715). Rank 2 (Turn-13 DRAGON_BREATH → faint → Murkrow switch-in) is
+next per the inventory's order. Earlier progress:
+`turn13-sandattack.json`'s complete captured
 SAND_ATTACK content now resolves its kickoff and opponent-target accuracy-fall
 text from the staged real kernel event stream through the generic stat-down
 bridge (`e50bf210`, **190/190**); all four raw turn-13 text literals were

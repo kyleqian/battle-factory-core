@@ -565,3 +565,10 @@ Per entry:
 - **Workaround:** on exit 124, read the `=== worker FAILED (killed before
   turn completion) ===` marker and the branch's committed state first; test
   auth by simply launching the continuation worker.
+
+## No pixel-inspection helper in tools/compare
+Isolating pixel-diff root causes (which sprite/region changed, exact bbox
+content) requires ad-hoc PNG-decoding scripts every time; two workers
+rebuilt the same throwaway tooling in one session (~10 min each). A small
+`tools/compare/inspect-frame.ts` (decode two PNGs, print diff bbox + region
+crops) would pay for itself immediately. (2026-07-31, bumped x1)
