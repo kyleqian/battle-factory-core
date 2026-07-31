@@ -13,6 +13,42 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 774 — [SUPERVISOR FINAL WIND-DOWN 2026-07-31 ~04:35] Round 11 verified: #39 rank 2 FULLY retired; MAGNETON tint rule SOLVED (gEnemyMonElevation). Session closed: 11 rounds / 22 workers / 0 failed steps
+
+- **State:** master green at FINAL gate **559 files / 5688 tests + 1
+  deliberate animation-lane skip**, production build clean, tree clean.
+  `animation-main` fold delta **0** (orient and wind-down). Only the
+  permanent `.worktrees/animation-main` remains; no orphan branches.
+  **DEFERRED.md empty all session** — no open deferred questions.
+- **Round 11 (verified):** M11 flipped the rank-2 Murkrow switch-in half
+  (supervisor re-ran `turn13-switchin` **242/242** and
+  `turn13-dragonbreath-faint` **141/141**; real
+  `openpartyscreen`/`switchindataupdate` opcodes materialize MURKROW from
+  DESTIN's probed bench through the 0-draw proven replacement) — **#39
+  rank 2 is fully retired**, issue + inventory updated. S11 solved the
+  MAGNETON materialize-tint rule with 4 species + source confirmation:
+  `origin.y = 8 + yOffset − gEnemyMonElevation[species]`, where
+  `gEnemyMonElevation` (`battle_anim_mons.c`) is a never-extracted
+  per-species elevation table — #56 item 3 is now a bounded
+  extract-and-apply step (probe fixtures committed).
+- **Session totals (2026-07-30 22:10 → 07-31 04:35):** GATE 5 TICKED
+  with its audited evidence chain (entry 772 has the full summary);
+  #39 ranks 1 and 2 retired end-to-end via the equivalence-first
+  two-phase pattern; #55/#56 filed with precise remainders; one
+  worker-committed pin regression caught, quarantined, root-caused by
+  discriminating probe, and properly un-quarantined; suite grew
+  5586 → 5688 tests across 30+ commits.
+- **Next session (ordered, per user's Gate 5 → #39 → Gate 6):**
+  (i) #39 rank 3 (Turn-5 KO → switch-in → Sitrus) equivalence-first;
+  (ii) #56: extract `gEnemyMonElevation` + apply the solved formula
+  (expect MAGNETON ≫424/751, then rule on the elevated-shadow branch),
+  frames 444/536, canonical +6 route term; (iii) ranks 4-9; (iv) Gate 6
+  breadth.
+- **Notes:** papercuts banked in PAPERCUTS.md; ledger-collision
+  numbering instruction now proven in two consecutive briefs; no
+  harness asks outstanding.
+
+---
 ## 773 — [BOUNDED MAIN WORKER 2026-07-31 ~04:20] #39 rank-2 switch-in half RETIRED: stagePlayerHitChain terminal exposure + Murkrow switch-in flip
 
 - **State:** all mandated pins hold: `turn13-switchin.json` **242/242**
@@ -108,52 +144,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   wrong-route replays — recorded in entry 766/769 notes). Worker
   ledger-numbering collided 4× (all repaired; future briefs carry the
   numbering instruction that fixed it in round 10).
-
----
-## 771 — [BOUNDED MAIN WORKER 2026-07-31 ~04:50] #56 item 1 UN-QUARANTINED via route discriminator; item 3 (MAGNETON tint) isolated, not fixed
-
-- **State:** `interactive-generated-intro-off` **715/715** (hard
-  requirement, held). `factory-arbitrary-intro-yoshi-off` **699/751**
-  (recovers the 1-frame quarantine cost). `factory-arbitrary-intro-
-  magneton-off` **424/751** (unchanged, expected — dominated by the
-  separate tint bug). `battle-command-generated-off` **128/128**. `npx tsc
-  --noEmit` clean; focused suite (`factoryBattleStartIntro`,
-  `factoryBattleStartIntroAckAlignment`, `factoryBattleStartPresentation`,
-  `interactiveRouting`, `battleScene`, `factoryRoundBattleOrchestrator`,
-  `executableFrontierRatchet`) **336/336** green (2nd pass after the
-  MAGNETON investigation: `battleScene`+`executableFrontierRatchet`
-  **282/282**). Full `npm test`/`npm run build` not run this step (side
-  worker live concurrently, per brief).
-- **Did:** (1) Un-quarantined `generatedPlayerReadyLagSpeciesFormula`
-  (proven exact on 4 species now — GRIMER/KADABRA/DELCATTY +
-  round-9's lab-ONIX 0-residual probe) by adding
-  `FactoryBattleStartIntroState.isCanonicalAnchorIntro`, set at
-  `beginFactoryRoundBattleStartIntro` from an EXISTING route-level fact
-  (`config.adoptedInitialOpponent !== undefined && battleIndex === 0` —
-  true only for the interactive draft anchor's own Battle 1, never a
-  species/trainer/trace-name check). The canonical route keeps its flat
-  ONIX-calibrated `GENERATED_PLAYER_READY_LAG`; every other route now uses
-  the species formula. Both calibrations documented at the code site.
-  (2) Isolated MAGNETON's affine-emerge tint divergence
-  (`drawGeneratedOpponentRelease`, handoff+19) to `origin.y` wrongly
-  including the species resting-Y offset (`coords.yOffset`) during the
-  materialize blend — a joint (accumulator, y-offset) brute-force sweep
-  found the exact fix for MAGNETON (0 missing-tint pixels, 12/12 ticks),
-  but the SAME fix regresses COMBUSKEN (`factory-arbitrary-intro-yoshi-
-  off` 699→662/751) — falsifies the source's "species-independent" claim
-  but the true relationship isn't a single `8 +/- yOffset` constant from
-  only two data points. Left unmodified (doc-only commit) rather than
-  trade one held pin for another. Shadow verdict (elevated-shadow branch,
-  onset app-relative 509) stays **inconclusive** — reported explicitly per
-  the brief since the earlier tint divergence still masks it. Frames
-  444/536 not reached (budget spent on the MAGNETON investigation).
-- **Next:** MAGNETON tint needs a 3rd species or a RAM read of the real
-  sprite position during a short-sprite (`coords.height<64`) materialize
-  to distinguish a real per-species geometry term from a
-  `coords.height`-keyed one (see `battleScene.ts`'s
-  `drawGeneratedOpponentRelease` doc comment and
-  `docs/trainer-pic-off-window-scout.md`'s new Round 10 section for the
-  full finding). Frames 444/536 still open.
-- **Notes:** #56 item 1 can be marked resolved in the ISSUES.md trim
-  (supervisor). #56 item 3 stays open, now precisely bounded instead of
-  "inconclusive/masked."

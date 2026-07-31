@@ -37,22 +37,22 @@ characterized in `docs/trainer-pic-off-window-scout.md` §D. Remainder:
 2. **Isolated frames 444 and 536** (trainer-exit/shadow region;
    opponent healthbox/summary region) — single-frame, unisolated to a site,
    unchanged this round.
-3. **MAGNETON elevated-shadow coverage — tint ROOT-CAUSED, fix needs a
-   third data point.** The affine-emerge divergence (`424/751`, first
-   divergent frame handoff+19, before the shadow's own +104 onset) is
-   `drawGeneratedOpponentRelease`'s `origin.y` wrongly including the
-   species resting-Y offset during the materialize blend. A per-tick fix
-   achieving zero MAGNETON residual regressed the already-validated
-   COMBUSKEN case (699→662/751), falsifying "species-independent" but
-   proving two data points under-determine the universal rule — reverted
-   rather than trade pins (2026-07-31; finding documented at the code
-   site and in `docs/trainer-pic-off-window-scout.md`). Shadow branch
-   verdict remains inconclusive until the tint is fixed with a third
-   species. Also banked: the decision side of the rank-2 switch-in flip
-   is proven (`tests/destinCanonicalReplacements.test.ts` — faint
-   replacement is `getMostSuitableMonToSwitchInto` directly, 0 RNG
-   draws, both canonical replacements reproduced;
-   `docs/destin-canonical-replacements-decision-proof.md`).
+3. **MAGNETON tint — rule SOLVED, fix is a bounded extraction step.**
+   Four species (MAGNETON/COMBUSKEN/DUNSPARCE/GOLBAT,
+   `docs/opponent-release-tint-third-species.md`) pin the materialize
+   origin as `origin.y = 8 + coords.yOffset − gEnemyMonElevation[species]`
+   — `gEnemyMonElevation` (`battle_anim_mons.c`) is a real per-species
+   floating/flying elevation table never extracted into `src/data/gen/`
+   (MAGNETON's earlier "exclude yOffset" fit was coincidence: its
+   yOffset and elevation are both 8; DUNSPARCE falsified the
+   height-keyed hypothesis; GOLBAT favors elevation-adjusted 10-13×).
+   Next step: extract the table (isolated extractor test), apply the
+   formula in `drawGeneratedOpponentRelease`, re-run MAGNETON
+   (expect large jump from 424/751) and then rule on the elevated-shadow
+   branch (onset app-relative 509) that the tint currently masks.
+   COMBUSKEN/YOSHI 699/751 must hold (its elevation is 0). Reusable
+   probe fixtures committed: `factory-tintprobe-dunsparce-off.json`,
+   `factory-tintprobe-golbat-off.json`.
 
 **Not blocking:** Gate 5 ticked with these named (ROADMAP S10 gate 5
 completion note); this is the worklist to finish the window honestly.
@@ -114,15 +114,17 @@ request/field/HP facts from the real kernel via `battle2CommandAdapter.ts`
 with RAM-probed personalities and bench; `battle2Turn1.ts`,
 `battle2ActionMenu.ts`, and `battle2OffScenario.ts` are deleted, all dense
 pins held (191/191, 209/209, 16/16, plus generated-route 128/128 and
-715/715). Rank 2's DRAGON_BREATH/faint half is also **retired**
-(2026-07-31, `bd1d6beb`, `turn13ResolutionAdapter.ts`; pins 141/141 +
-242/242 + dense-b 223/223 held, dense-a 205/256 A/B-proved the
-pre-existing parked #23 exclusion). Rank 2's Murkrow switch-in half:
-decision side proven (`tests/destinCanonicalReplacements.test.ts` — 0-draw
-`getMostSuitableMonToSwitchInto`, both canonical replacements reproduced);
-presentation side still blocked on `stagePlayerHitChain` terminal-state
-exposure. Rank 3 (Turn-5 KO → switch-in → Sitrus) is next after that
-unblock. Earlier progress:
+715/715). Rank 2 is **fully retired** (2026-07-31): the
+DRAGON_BREATH/faint half (`bd1d6beb`) and the Murkrow switch-in half
+(round 11 — `stagePlayerHitChainToTerminalMachineState` exposure, the
+real `openpartyscreen`/`switchindataupdate` opcodes materializing MURKROW
+from DESTIN's probed bench via the 0-draw proven replacement decision,
+and the MURKROW level/healthbox/sent-out literals now adapter-derived)
+onto `turn13ResolutionAdapter.ts`. Pins held: 141/141 + 242/242 +
+dense-b 223/223 (dense-a 205/256 is the A/B-proved pre-existing parked
+#23 exclusion). `turn13Resolved`/turn-14 mirroring remains (unchanged
+consumers). Rank 3 (Turn-5 KO → switch-in → Sitrus) is next. Earlier
+progress:
 `turn13-sandattack.json`'s complete captured
 SAND_ATTACK content now resolves its kickoff and opponent-target accuracy-fall
 text from the staged real kernel event stream through the generic stat-down
