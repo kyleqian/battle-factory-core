@@ -1,3 +1,55 @@
+## 772 — [SUPERVISOR WIND-DOWN 2026-07-31 ~04:00] GATE 5 TICKED + #39 ranks 1+2(faint half) retired: 10 rounds / 20 workers / 0 failed steps
+
+- **State:** master green at final gate **559 files / 5683 tests + 1
+  deliberate animation-lane skip**, production build clean, tree clean at
+  this commit. `animation-main` fold delta **0 at orient and at
+  wind-down**. No orphan worktrees/branches (only permanent
+  `.worktrees/animation-main`). **DEFERRED.md empty all session.**
+- **Session headlines (2026-07-30 22:10 → 07-31 04:00):**
+  (1) **GATE 5 TICKED** (ROADMAP S10) on a verified chain: clause-by-clause
+  audit (`docs/gate5-acceptance-audit.md`, 6/11 discharged at audit) →
+  commentary ROM receipts (10 preview_report seeds, all matching, 6
+  types/6 styles) → anchor-draft receipt link at freshly probed
+  pre-generation cursors (selection byte-exact; #55 filed for the
+  ambient-VBlank stream boundary) → factory-AI barrier ratchet pins →
+  public dense arbitrary-trainer intro proof (pre-checkpoint contract:
+  offset-0 mapping, deterministic, YOSHI **699/751** + MAGNETON 424/751
+  evidence traces, GROVYLE pins 128/128 + 715/715 intact) → cry-duration
+  mechanism (send-out delays gate on cry playback; 376 species extracted,
+  exact on 4 opponent + 4 player data points). Scope rulings recorded in
+  the completion note (CBM/CV breadth → Gate 6; battles-3-7 receipts
+  declined per S8 policy; P..B fade → #39-class).
+  (2) **#39 rank 1 RETIRED** — Battle-2 command turn flipped onto
+  `battle2CommandAdapter.ts` (kernel-driven, RAM-probed personalities +
+  bench), three legacy fixture files deleted, all pins held.
+  (3) **#39 rank-2 faint half RETIRED** — `turn13ResolutionAdapter.ts`,
+  hand-fit faint geometry replaced by the generic formula; switch-in
+  half's decision side proven (`destinCanonicalReplacements`, 0-draw
+  `getMostSuitableMonToSwitchInto`), blocked only on
+  `stagePlayerHitChain` terminal-state exposure.
+  (4) **Quarantine precedent:** M8's species ready-lag regressed the
+  715/715 pin → quarantined same round; S9's discriminating probe proved
+  the anomaly route-specific (lab-ONIX 0 residual); M10 un-quarantined
+  via the route-level `isCanonicalAnchorIntro` fact. Pins outrank open
+  evidence; probes beat hypotheses.
+- **Open issues:** #56 (MAGNETON tint root-caused, needs 3rd species;
+  frames 444/536; canonical +6 route term unnamed), #55 (stream-model
+  boundary), #39 (ranks 2-switch-in..9 remain; inventory annotated).
+- **Next session (ordered, per user's Gate 5 → #39 → Gate 6):**
+  (i) #39 continuation: switch-in half after `stagePlayerHitChain`
+  terminal exposure (main), then rank 3 (Turn-5 KO/Sitrus) via the
+  proven equivalence-first two-phase pattern; (ii) #56 burn-down
+  (MAGNETON 3rd-species tint data point unblocks the shadow verdict);
+  (iii) Gate 6 breadth after #39.
+- **Notes:** no deferred questions all session. Papercuts banked:
+  pixel-inspection helper (new), out/latest race + missing appRoute on
+  historical traces (three pinned this session; a pre-existing
+  Sitrus string-resolver crash on the generated route surfaces only via
+  wrong-route replays — recorded in entry 766/769 notes). Worker
+  ledger-numbering collided 4× (all repaired; future briefs carry the
+  numbering instruction that fixed it in round 10).
+
+---
 ## 771 — [BOUNDED MAIN WORKER 2026-07-31 ~04:50] #56 item 1 UN-QUARANTINED via route discriminator; item 3 (MAGNETON tint) isolated, not fixed
 
 - **State:** `interactive-generated-intro-off` **715/715** (hard

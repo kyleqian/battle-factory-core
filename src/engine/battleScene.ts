@@ -775,6 +775,7 @@ import {
   renderBattleCommandPresentation,
   type BattleCommandPresentationRenderView,
 } from "./battleCommandPresentationRender.ts";
+import type { BattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
 import type {
   BattleResolutionPresentationRenderView,
 } from "./battleResolutionPresentationRender.ts";
@@ -1060,6 +1061,7 @@ import {
 } from "../animation/firePunch.ts";
 import speciesNamesAsset from "../data/gen/species-names.json" with { type: "json" };
 import cryDurationsAsset from "../data/gen/cry-durations.json" with { type: "json" };
+import enemyMonElevationsAsset from "../data/gen/enemy-mon-elevations.json" with { type: "json" };
 
 interface Tileset {
   columns: number;
@@ -4142,6 +4144,18 @@ function generatedPlayerVisualLag(playerLineLength: number): number {
 const GENERATED_OPPONENT_SHADOW_DELAY = 104;
 
 /**
+ * `gEnemyMonElevation[species]` (`battle_anim_mons.c` `GetBattlerElevation`,
+ * extracted by `extract-enemy-mon-elevations.ts` - ISSUES #56 item 3):
+ * species absent from the source table have no floating/flying elevation,
+ * i.e. 0.
+ */
+const ENEMY_MON_ELEVATION_BY_SPECIES = enemyMonElevationsAsset as Readonly<Record<string, number>>;
+
+function enemyMonElevation(speciesSymbol: string): number {
+  return ENEMY_MON_ELEVATION_BY_SPECIES[speciesSymbol] ?? 0;
+}
+
+/**
  * Species-dependent span from the player's own throw-becomes-visible tick to
  * the live room's CHOOSE_ACTION/exec-flags-clear callback (the command menu
  * becoming interactive). Source: `Intro_TryShinyAnimShowHealthbox`
@@ -4215,11 +4229,11 @@ export function generatedBattleStartPlayerReleaseStarted(
 
 function drawGeneratedOpponentShadow(
   fb: Uint8Array,
-  fieldView: ReturnType<typeof createBattleCommandFieldRenderView>,
+  fieldArt: BattleCommandFieldArtView,
 ): void {
   if (
     !elevatedEnemyShadowSpecies.has(
-      `SPECIES_${fieldView.fieldArt.opponent.speciesSymbol}`,
+      `SPECIES_${fieldArt.opponent.speciesSymbol}`,
     )
   ) return;
   // Source singles coordinate (176,40), +29 y, centered 32x8 OAM shape.
@@ -4245,36 +4259,23 @@ export function generatedBattleStartCommandReady(
 }
 
 /**
- * Species-independent opponent ReleaseMonFromBall projection. This is the
- * same affine-emerge/tint ramp used by the typed Slice-5 switch-in view;
- * Battle Scene OFF skips the later species front-animation callback.
+ * Opponent ReleaseMonFromBall projection. This is the same affine-emerge/
+ * tint ramp used by the typed Slice-5 switch-in view; Battle Scene OFF skips
+ * the later species front-animation callback.
  *
- * #56 item 3 investigation (2026-07-31): the "species-independent" claim
- * above does NOT extend to the vertical anchor. A joint (accumulator,
- * y-offset) brute-force sweep of MAGNETON's own dense captures
- * (`factory-arbitrary-intro-magneton-off.json`, `coords.yOffset=8`) against
- * this window's first 12 materialize ticks lands exactly (zero missing-tint
- * pixels, every tick) on `origin.y` WITHOUT the species resting-Y offset
- * (base 8, not `8 + yOffset`) - i.e. `MATERIALIZE_Y2_TABLE`/accumulator
- * unchanged, only the anchor stripped of `coords.yOffset`. But the SAME
- * change regresses the already-validated COMBUSKEN case
- * (`factory-arbitrary-intro-yoshi-off`, `yOffset=1`: 699/751 -> 662/751,
- * new divergence from the very first materialize tick) - so "subtract
- * yOffset" is not the universal rule either; COMBUSKEN's materialize wants
- * the offset-INCLUSIVE origin (today's code, unmodified below) and
- * MAGNETON wants it excluded, which cannot both be `8 +/- yOffset` for a
- * single constant relationship. Left AS-IS (species-offset-inclusive
- * origin, matching the validated COMBUSKEN/GRIMER precedent) rather than
- * ship a two-point curve-fit that regresses a held pin. MAGNETON's own
- * materialize divergence (handoff+19 through the coeff-hits-zero cutoff,
- * app-relative 424-461) is therefore NOT fixed, but is now precisely
- * bounded: `tools/compare/scratch/materialize_2d_bruteforce.mjs`'s own
- * per-species-independent-vs-not question needs a THIRD species (or a RAM
- * read of `sprite->pos1`/`pos2` during a MAGNETON-class short-sprite
- * materialize) to distinguish real per-species geometry from a
- * `coords.height`-keyed term (MAGNETON height 48 vs COMBUSKEN's 64 - the
- * two data points available correlate yOffset with height, not with a
- * clean additive rule) before a general fix is safe.
+ * #56 item 3 SOLVED (2026-07-31, `docs/opponent-release-tint-third-species.md`):
+ * the vertical anchor is NOT species-independent - it needs
+ * `gEnemyMonElevation[species]` (`battle_anim_mons.c` `GetBattlerElevation`/
+ * `GetBattlerSpriteFinal_Y`), a real per-species floating/flying elevation
+ * table this engine had never extracted. `fieldView.fieldArt.opponent.origin.y`
+ * (`battleCommandFieldArt.ts`) is `8 + coords.yOffset`; this materialize
+ * anchor additionally subtracts the species elevation:
+ * `origin.y = 8 + coords.yOffset - gEnemyMonElevation[species]`. Confirmed
+ * exact on MAGNETON/GOLBAT (elevation 8, both) and COMBUSKEN/DUNSPARCE
+ * (absent from the source table, elevation 0) - the earlier two-point
+ * "MAGNETON wants yOffset excluded" fit was coincidence: MAGNETON's
+ * `coords.yOffset` (8) happens to equal its own elevation (8), so
+ * `8+8-8=8` numerically matched the exclusive guess by accident.
  */
 function drawGeneratedOpponentRelease(
   fb: Uint8Array,
@@ -4293,15 +4294,16 @@ function drawGeneratedOpponentRelease(
   const pic = fieldView.fieldArt.opponent.pic;
   const origin = {
     x: fieldView.fieldArt.opponent.origin.x,
-    y: fieldView.fieldArt.opponent.origin.y,
+    y: fieldView.fieldArt.opponent.origin.y
+      - enemyMonElevation(fieldView.fieldArt.opponent.speciesSymbol),
   };
   if (coeff === 0) {
     drawSpriteSheet(
       fb,
       pic.tileset as Tileset,
       pic.palette as RgbColor[],
-      fieldView.fieldArt.opponent.origin.x,
-      fieldView.fieldArt.opponent.origin.y,
+      origin.x,
+      origin.y,
     );
     return;
   }
@@ -4394,7 +4396,7 @@ export function renderGeneratedBattleStartOpponentRelease(
     PLAYER_CORNER.y,
   );
   if (t >= handoffTick + GENERATED_OPPONENT_SHADOW_DELAY) {
-    drawGeneratedOpponentShadow(fb, fieldView);
+    drawGeneratedOpponentShadow(fb, fieldView.fieldArt);
   }
   const trainerX = trainerExitX(t, handoffTick);
   if (trainerX !== null) {
@@ -4545,13 +4547,18 @@ export function renderGeneratedBattleStartPlayerRelease(
     battleBg.palette,
     playerMaterializeBgFadeY(playerVisualT),
   );
-  drawGeneratedOpponentShadow(fb, fieldView);
+  drawGeneratedOpponentShadow(fb, fieldView.fieldArt);
+  // Same settled-opponent draw as drawGeneratedOpponentRelease's coeff===0
+  // branch (post-materialize), reached once the compositor hands off to the
+  // player's own release - the elevation adjustment must persist here too,
+  // see the #56 item 3 rule at drawGeneratedOpponentRelease.
   drawSpriteSheet(
     fb,
     fieldView.fieldArt.opponent.pic.tileset as Tileset,
     fieldView.fieldArt.opponent.pic.palette as RgbColor[],
     fieldView.fieldArt.opponent.origin.x,
-    fieldView.fieldArt.opponent.origin.y,
+    fieldView.fieldArt.opponent.origin.y
+      - enemyMonElevation(fieldView.fieldArt.opponent.speciesSymbol),
   );
   const throwFrame = brendanThrowFrame(playerVisualT);
   if (playerVisualT < BRENDAN_THROW_START_TICK) {
@@ -6899,12 +6906,16 @@ function drawBattle2ActionMenuWindow(
 
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
   if (fieldArt) {
+    // Post-send-out settled opponent: same elevation rule as
+    // drawGeneratedOpponentRelease (ISSUES #56 item 3) - the shadow persists
+    // for the whole battle, not just the send-out materialize window.
+    drawGeneratedOpponentShadow(fb, fieldArt);
     drawSpriteSheet(
       fb,
       fieldArt.opponent.pic.tileset as Tileset,
       fieldArt.opponent.pic.palette as RgbColor[],
       fieldArt.opponent.origin.x,
-      fieldArt.opponent.origin.y,
+      fieldArt.opponent.origin.y - enemyMonElevation(fieldArt.opponent.speciesSymbol),
     );
   } else {
     drawKabutoHSlideWobble(fb, t, handoffTick);
