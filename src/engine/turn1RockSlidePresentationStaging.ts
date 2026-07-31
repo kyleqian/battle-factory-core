@@ -111,7 +111,8 @@ function battler(changes: Partial<BattleScriptRulesBattler>): BattleScriptRulesB
     tauntTimer: 0,
     usedTauntedMove: 0,
     usedImprisonedMove: 0,
-    item: 0,
+    /** ISSUES #57: forward a caller-supplied item verbatim instead of collapsing it to 0. */
+    item: changes.item ?? 0,
     statStages: [6, 6, 6, 6, 6, 6, 6, 6],
     types: changes.types ?? (["TYPE_NORMAL", "TYPE_NORMAL"] as const),
     species: changes.species ?? 0,
@@ -122,6 +123,13 @@ function battler(changes: Partial<BattleScriptRulesBattler>): BattleScriptRulesB
     level: changes.level ?? 50,
     friendship: 0,
     partyIndex: changes.partyIndex ?? 0,
+    /**
+     * ISSUES #57: forward a caller-supplied maxHP verbatim; omitted (every
+     * pre-existing caller) leaves this `undefined` so
+     * `createBattleScriptRulesContext`'s own `battler.maxHP ?? battler.hp`
+     * default (line ~2410) applies unchanged.
+     */
+    maxHP: changes.maxHP,
   });
 }
 
