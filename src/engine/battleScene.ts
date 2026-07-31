@@ -493,8 +493,6 @@ import {
   TURN6_STATFALL_BG1_X,
   turn6AtkFellTextStartTick,
   turn6AtkFellTextVisibleChars,
-  TURN6_ATKFELL_LINE1,
-  TURN6_ATKFELL_LINE2,
   TURN6_ROCKSLIDE_PRESS_TICK,
   TURN6_SUPER_EFFECTIVE_LINE,
   turn6SuperEffectiveTextStartTick,
@@ -803,6 +801,12 @@ import {
 import { resolveTurn4RockSlideHpEndpoints } from "./turn4RockSlidePresentationStaging.ts";
 import { resolveTurn4DoubleTeamKickoffLines } from "./turn4DoubleTeamPresentationStaging.ts";
 import { resolveTurn6AtkFellLines, resolveTurn6FeatherDanceKickoffLines } from "./turn6FeatherDancePresentationStaging.ts";
+import {
+  resolveTurn7AtkFellLines,
+  resolveTurn7FeatherDanceKickoffLines,
+  resolveTurn8AtkFellLines,
+  resolveTurn8FeatherDanceKickoffLines,
+} from "./turn78FeatherDancePresentationStaging.ts";
 import { resolveTurn3RockSlideHpEndpoints } from "./turn3RockSlidePresentationStaging.ts";
 import {
   resolveTurn6RockSlideAttackLines,
@@ -2211,12 +2215,11 @@ const [TURN4_DOUBLETEAM_KICKOFF_LINE1, TURN4_DOUBLETEAM_KICKOFF_LINE2] = resolve
  * byte-identical content (same `STRINGID_USEDMOVE` template, same
  * Pidgeotto/FEATHER_DANCE splice), but now identified from provenance
  * (`BattleScript_EffectStatDown`), not a bare literal. `TURN6_FEATHERDANCE_
- * LINE1`/`LINE2` themselves stay defined and in use by every OTHER turn's own
- * repeat-FEATHER_DANCE kickoff call site in this file (turns 7/8/11's own
- * 2nd/3rd/4th uses, `drawTurn7FeatherDanceKickoffText`/
- * `drawTurn8FeatherDanceKickoffText`/`drawTurn11FeatherDanceWindow` --
- * out of this step's own scope, §12.3) -- only `drawTurn6FeatherDanceKickoffText`'s
- * own one call site was retired from reading them directly.
+ * LINE1`/`LINE2` themselves stay defined and in use by turn 11's own
+ * repeat-FEATHER_DANCE kickoff call site (`drawTurn11FeatherDanceWindow`,
+ * its own 4th-use floored case, out of this step's own scope) -- turns
+ * 7/8's own call sites were retired next, see below (ISSUES #39 rank-4
+ * slice 3).
  */
 const [TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2] = resolveTurn6FeatherDanceKickoffLines();
 
@@ -2230,13 +2233,33 @@ const [TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2] = res
  * apostrophe (`tests/turn6FeatherDancePresentationStaging.test.ts`'s own
  * equivalence assertion), but now identified from provenance
  * (`BattleScript_StatDownPrintString`), not a bare literal.
- * `TURN6_ATKFELL_LINE1`/`LINE2` themselves stay defined and in use by turns
- * 7/8's own repeat-FEATHER_DANCE call sites in this file
- * (`drawTurn7FeatherDanceKickoffText`/`drawTurn8FeatherDanceKickoffText`,
- * out of this step's own scope) -- only `drawTurn6FeatherDanceKickoffText`'s
- * own one call site was retired from reading them directly.
+ * `TURN6_ATKFELL_LINE1`/`LINE2` themselves stay defined (`battleMenu.ts`) and
+ * in use by turn 11's own call site -- turns 7/8's own call sites were
+ * retired next, see below.
  */
 const [TURN6_ATKFELL_KICKOFF_LINE1, TURN6_ATKFELL_KICKOFF_LINE2] = resolveTurn6AtkFellLines();
+
+/**
+ * ISSUES #39 rank-4 slice 3 (`docs/rank4-prep-scout.md` slice 3): turn 7's
+ * own repeat FEATHER_DANCE kickoff/ATK-fell text (2nd use, real ATK stage
+ * 4 -> 2), now re-derived from `turn78FeatherDancePresentationStaging.ts`'s
+ * own staged real event stream -- byte-identical content to
+ * `TURN6_FEATHERDANCE_LINE1/2`/`TURN6_ATKFELL_LINE1/2` (same messageId, same
+ * magnitude), but now sourced from turn 7's OWN facts, not turn 6's borrowed
+ * literal (the "safe but not real" gap `docs/rank4-prep-scout.md` §1 named).
+ */
+const [TURN7_FEATHERDANCE_KICKOFF_LINE1, TURN7_FEATHERDANCE_KICKOFF_LINE2] = resolveTurn7FeatherDanceKickoffLines();
+const [TURN7_ATKFELL_KICKOFF_LINE1, TURN7_ATKFELL_KICKOFF_LINE2] = resolveTurn7AtkFellLines();
+
+/**
+ * ISSUES #39 rank-4 slice 3: turn 8's own repeat FEATHER_DANCE kickoff/
+ * ATK-fell text (3rd use, real ATK stage 2 -> 0, lands exactly on the floor
+ * but still takes the ordinary "harshly fell!" branch -- `docs/turn8-notes.md`
+ * §4), now re-derived from `turn78FeatherDancePresentationStaging.ts`'s own
+ * staged real event stream, same reasoning as turn 7's own pair above.
+ */
+const [TURN8_FEATHERDANCE_KICKOFF_LINE1, TURN8_FEATHERDANCE_KICKOFF_LINE2] = resolveTurn8FeatherDanceKickoffLines();
+const [TURN8_ATKFELL_KICKOFF_LINE1, TURN8_ATKFELL_KICKOFF_LINE2] = resolveTurn8AtkFellLines();
 
 /**
  * Presentation-seam retirement (`docs/presentation-seam-scout.md` §10.2/
@@ -11271,6 +11294,13 @@ function drawTurn7FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenu
  * dispatcher IS responsible for (the flat holds immediately before/after
  * the feather window, oracle-confirmed sha-identical to the settled
  * kickoff-text picture at both 8422 and 8593).
+ *
+ * ISSUES #39 rank-4 slice 3: the kickoff/ATK-fell text below now reads
+ * `TURN7_FEATHERDANCE_KICKOFF_LINE1/2`/`TURN7_ATKFELL_KICKOFF_LINE1/2`
+ * (`turn78FeatherDancePresentationStaging.ts`'s own real turn-7 staged
+ * facts), not turn 6's borrowed `TURN6_FEATHERDANCE_LINE1/2`/
+ * `TURN6_ATKFELL_LINE1/2` literals -- byte-identical content, now sourced
+ * from this turn's own real event stream.
  */
 function drawTurn7FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: number): void {
   if (t >= rockSlideTextStartTick(TURN7_ROCKSLIDE_PRESS_TICK)) {
@@ -11285,9 +11315,9 @@ function drawTurn7FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: 
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const atkFellStart = turn6AtkFellTextStartTick(pressTick);
   if (t >= atkFellStart) {
-    drawMessageTextLines(fb, TURN6_ATKFELL_LINE1, TURN6_ATKFELL_LINE2, turn6AtkFellTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, TURN7_ATKFELL_KICKOFF_LINE1, TURN7_ATKFELL_KICKOFF_LINE2, turn6AtkFellTextVisibleChars(t, pressTick));
   } else {
-    drawMessageTextLines(fb, TURN6_FEATHERDANCE_LINE1, TURN6_FEATHERDANCE_LINE2, turn6FeatherDanceTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, TURN7_FEATHERDANCE_KICKOFF_LINE1, TURN7_FEATHERDANCE_KICKOFF_LINE2, turn6FeatherDanceTextVisibleChars(t, pressTick));
   }
 }
 
@@ -11470,6 +11500,11 @@ function drawTurn8FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenu
  * see battle-turn-notes.md §33) - `turn6FeatherSprites(t)` naturally returns
  * `[]` for every tick in turn 8's own range (keyed to turn 6's own RAM
  * ticks), same harmless-no-op reasoning turn 7's own dispatcher relies on.
+ *
+ * ISSUES #39 rank-4 slice 3: the kickoff/ATK-fell text below now reads
+ * `TURN8_FEATHERDANCE_KICKOFF_LINE1/2`/`TURN8_ATKFELL_KICKOFF_LINE1/2`
+ * (`turn78FeatherDancePresentationStaging.ts`'s own real turn-8 staged
+ * facts, real ATK stage 2 -> 0), not turn 6's borrowed literals.
  */
 function drawTurn8FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: number): void {
   if (t >= turn8BindTextStartTick(pressTick)) {
@@ -11484,9 +11519,9 @@ function drawTurn8FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: 
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const atkFellStart = turn6AtkFellTextStartTick(pressTick);
   if (t >= atkFellStart) {
-    drawMessageTextLines(fb, TURN6_ATKFELL_LINE1, TURN6_ATKFELL_LINE2, turn6AtkFellTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, TURN8_ATKFELL_KICKOFF_LINE1, TURN8_ATKFELL_KICKOFF_LINE2, turn6AtkFellTextVisibleChars(t, pressTick));
   } else {
-    drawMessageTextLines(fb, TURN6_FEATHERDANCE_LINE1, TURN6_FEATHERDANCE_LINE2, turn6FeatherDanceTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, TURN8_FEATHERDANCE_KICKOFF_LINE1, TURN8_FEATHERDANCE_KICKOFF_LINE2, turn6FeatherDanceTextVisibleChars(t, pressTick));
   }
 }
 
