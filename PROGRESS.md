@@ -76,6 +76,34 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   future docs/tooling pass.
 
 ---
+## 765 — [SUPERVISOR 2026-07-31 ~02:25] #39 rank-1 RETIRED (flip verified); player-cry mechanism confirmed on 3 species; round 8 dispatched
+
+- **State:** union gate green **557 files / 5671 tests + 1 deliberate
+  animation-lane skip** (net delta = deleted legacy fixture tests), build
+  clean. M7's flip verified: legacy files gone, supervisor personally
+  re-ran `battle2-turn1-rockslide` **191/191** and
+  `battle2-action-menu-dense` **209/209** (worker verified 16/16, 128/128,
+  715/715, ground-truth 38/179 unchanged). S7 merged: player-cry
+  triangulation (GRIMER/KADABRA/DELCATTY → `readyLag = 98 + cryDuration`
+  within 1 tick — round-6's 8-tick miss was a wrong anchor) + committed
+  MAGNETON/RICARDO fixture with landmark map incl. pixel-confirmed
+  shadow-elevation frame 1687.
+- **Supervisor actions:** #39 issue text + inventory rank-1 row marked
+  retired; `battle2-turn1-rockslide.json` given explicit
+  `appRoute: canonical-recorded` (fixes the wrong-route crash from the
+  M7 papercut); PAPERCUTS bumped (pixel-inspection helper).
+- **Round 8 dispatched:** main M8 — implement species-keyed player ready
+  lag (canonical route untouched; GRANBULL flat-286 flagged as a separate
+  path), build the MAGNETON app-side comparison (second arbitrary-species
+  proof; first shadow-path exercise), stage real personalities in the
+  staged stages (gender-icon residual), then frames 444/536. Side S8 —
+  #39 rank-2 (turn-13 DRAGON_BREATH→faint→switch-in) equivalence
+  groundwork, new-files-only, tsc mandatory.
+- **Notes:** GRANBULL flat-286 non-reconciliation is recorded in
+  `docs/intro-cry-shadow-evidence.md` — treat as a flag on the canonical
+  path, not a defect claim.
+
+---
 ## 764 — [SUPERVISOR 2026-07-31 ~01:55] GATE 5 TICKED; #56 filed; round 7: #39 rank-1 flip (main) + #56 evidence pack (side)
 
 - **State:** union gate green **557 files / 5676 tests + 1 deliberate
@@ -102,55 +130,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   landmark mapping (new files only, no src changes).
 - **Notes:** worker-lesson from entry 762 applied: both briefs demand
   `npx tsc --noEmit` where TS is touched.
-
----
-## 763 — [BOUNDED MAIN WORKER 2026-07-31 ~01:50] Round 6: 652..750 partly isolated (HP-IV data bug fixed, ready-lag mechanism named); MAGNETON coverage not reached
-
-- **State:** `tools/compare/appTrace.ts` fix only (dev-time harness, no
-  `src/` change); `docs/trainer-pic-off-window-scout.md` §D "Round 6
-  resolution" has full findings. YOSHI **650/751** (unchanged count,
-  narrower/more-honest residual). GROVYLE pins re-verified intact:
-  `battle-command-generated-off` **128/128**, `interactive-generated-
-  intro-off` **715/715**. Focused suite (`factoryBattleStartIntro` +
-  ack-alignment + `executableFrontierRatchet` + `factoryRoundBattle
-  Orchestrator` + `cryDurationsExtraction` + `speciesStatsExtraction` +
-  `battleScene` + `kabutoSendOut`) **340/340 green**; `npx tsc --noEmit`
-  clean. Full `npm test`/`npm run build` **not run this step**, per the
-  brief (side worker live concurrently).
-- **Did:** (1) Isolated the dominant piece of the 652..750 family: it was
-  a **data bug, not a timing bug** — `generatedCommandRecord`'s hardcoded
-  `fixedIv: 31` is only correct for the mechanicLab-override
-  `battle-command-generated-off` fixture; the YOSHI `factoryLegal` stage
-  needs the real challenge-0 initial-rental IV (**3**, `factory-round-
-  policy.json`'s own `fixedIvs[0].regular`), which was making GRIMER's
-  displayed max HP wrong (176 vs oracle's 162). Fixed with a `fixedIv`
-  parameter (default unchanged for the mechanicLab call site); shrank the
-  window's dominant per-frame diff from 102px to 24px. (2) Named the
-  larger remaining mechanism (frames 678..721): `battle_controller_
-  player.c:979-1063`'s `Intro_TryShinyAnimShowHealthbox` is the same
-  cry-duration gate already fixed for the opponent last round, but on the
-  **player's own** mon — so `GENERATED_PLAYER_READY_LAG` (currently a
-  flat 185) is also species-dependent. A first-cut linear reparametrization
-  off GRIMER alone missed by 8 ticks (unlike the opponent fix, which
-  matched two species exactly first try) — needs a second player-species
-  data point (KADABRA, via MAGNETON/SHIZUKA) before committing a formula,
-  so left unfixed rather than curve-fit to one point. (3) Frames 444/536:
-  re-checked, unaffected by the HP fix, still not isolated to a site. (4)
-  MAGNETON coverage: the committed SHIZUKA fixture's exact tuple
-  (trainerId 110, `opponentSetIds:[349,339,327]`) needs 16 battles of real
-  ROM RNG history to reproduce independently; brute-forced 1..30000 with
-  no match. Found and verified a working **alternative** arbitrary
-  (non-reversed-workflow, YOSHI-pattern) tuple that does exercise the
-  elevated-shadow path with MAGNETON as the actual opponent lead
-  (`rngValue:70, factoryWinStreak:14, battleIndex:0` → trainerId 109
-  RICARDO, `opponentSetIds:[349,353,292]`, dispatch delay 111) — recorded
-  as the concrete next-step in §D, not built out (would have consumed the
-  budget needed for the regression re-runs and this write-up).
-- **Next:** three items remain, all named in §D round 6: the ready-lag
-  species-dependent formula (needs a second player-cry data point), the
-  tiny 24px gender-icon residual (needs real RNG-derived personality —
-  same class as the #39 "unproven gender/personality" FINDING), and
-  MAGNETON coverage (concrete tuple + fixture-build recipe recorded,
-  ready for the next round to pick up directly).
-- **Notes:** `GENERATED_OPPONENT_SHADOW_DELAY`(104) is still untested
-  against any app-side pixel comparison after this round.
