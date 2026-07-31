@@ -16,6 +16,39 @@ one without a user decision, and do not count them as backlog.
 
 # Open
 
+## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
+
+**Symptom:** `generateInitialFactoryRentals`'s `constructionRngValue`
+contract consumes construction draws back-to-back from one cursor, but on
+real hardware `CreateFrontierFactorySelectableMons` spans **53 video frames**
+for the anchor draft, and `VBlankIntr`'s ambient `Random()` tick
+(`main.c:366`) interleaves into the same `gRngValue` stream mid-loop. Direct
+two-cursor replay of the probed anchor cursors reproduces slots 0/2 but
+diverges on personalities for slots 1/3/4/5 (first: MAGBY expected
+`1534575931`, got `431990256`).
+
+**Confirmed** (2026-07-30, `docs/anchor-draft-cursor-receipt.md` §§3-6):
+probe ledger attributes 242 construction draws + 53 ambient ticks in the
+6696–6748 window with a gapless LCG chain; **filtering to construction-only
+calls reproduces all six anchor personalities byte-for-byte**, so the ported
+nature-rejection algorithm is correct — only the stream model is wrong.
+Blast radius: setId, species, nature, EVs, moves, item, fixed IVs are
+setId/challenge-derived and unaffected; ability slot unaffected for this
+anchor (the four wrong slots are single-ability species); personality-derived
+gender and shininess are the real exposure. The production anchor route loads
+`anchor-state.json` directly and never calls this function today, so nothing
+user-visible is wrong now; the boundary bites any future live-generation or
+personality-exact receipt (e.g. Gate-6 seeded end-to-end rounds).
+
+**Leads:** either extend the construction contract with an explicit
+interleaving representation (per-mon start cursors or a per-frame tick
+schedule — recording-flavored, decide deliberately), or keep the clean-stream
+contract and document personality-exactness as out of model whenever
+construction spans >1 frame. Supervisor decision 2026-07-30 (entry 758):
+Gate-5 clause (a) is receipt-linked at the rules level (selection byte-exact
+from the probed cursor; construction proven via filtered ledger); this entry
+tracks the remaining stream-model boundary, not a Gate-5 blocker.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn
