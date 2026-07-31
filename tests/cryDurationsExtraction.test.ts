@@ -44,13 +44,19 @@ describe("cry-durations.json (per-species send-out cry duration in GBA VBlank ti
   it("pins the four oracle-triangulated species (docs/trainer-pic-off-window-scout.md §D)", () => {
     // GROVYLE is the already-validated baseline fixture
     // (battle-command-generated-off / interactive-generated-intro-off).
-    expect(byName.get("SPECIES_GROVYLE")).toMatchObject({ id: 278, durationTicks: 57 });
+    // durationTicks is the ceiling of the raw WAV-derived tick count (a
+    // per-VBlank "still playing" poll counts any partial remaining tick as
+    // playing, docs/intro-cry-shadow-evidence.md Part 1) - one tick higher
+    // than nearest-rounding for species whose raw fraction is <= 0.5.
+    expect(byName.get("SPECIES_GROVYLE")).toMatchObject({ id: 278, durationTicks: 58 });
     // COMBUSKEN and MAGNETON: dense oracle captures pin the observed
     // handoff-to-"Go!" delta at +125 and +111 respectively; both match
-    // `101 + (durationTicks - 57)` exactly (124 -> 125, 110 -> 111 by
-    // rounding, and independently: 57+24=81, 57+10=67).
-    expect(byName.get("SPECIES_COMBUSKEN")).toMatchObject({ id: 281, durationTicks: 81 });
-    expect(byName.get("SPECIES_MAGNETON")).toMatchObject({ id: 82, durationTicks: 67 });
+    // `101 + (durationTicks - 58)` exactly (124 -> 125, 110 -> 111, and
+    // independently: 58+24=82, 58+10=68) - the difference formula is
+    // invariant to the round-vs-ceil choice as long as both terms use the
+    // same representation.
+    expect(byName.get("SPECIES_COMBUSKEN")).toMatchObject({ id: 281, durationTicks: 82 });
+    expect(byName.get("SPECIES_MAGNETON")).toMatchObject({ id: 82, durationTicks: 68 });
     // KABUTO: not independently oracle-validated this round (only the WAV-
     // duration prediction, +79 vs GROVYLE's +101 baseline); pinned here as a
     // regression guard on the extractor's own output, not a ground-truth claim.

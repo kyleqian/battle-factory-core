@@ -4122,6 +4122,11 @@ function generatedOpponentSpeciesId(state: FactoryBattleStartIntroState): number
   return state.command.parties.opponent[opponentIndex].species;
 }
 
+function generatedPlayerSpeciesId(state: FactoryBattleStartIntroState): number {
+  const playerIndex = state.command.activePartyIndexes.player;
+  return state.command.parties.player[playerIndex].species;
+}
+
 function generatedPlayerDispatchDelay(state: FactoryBattleStartIntroState): number {
   return GENERATED_PLAYER_DISPATCH_BASELINE_DELAY
     + (cryDurationTicks(generatedOpponentSpeciesId(state)) - GROVYLE_CRY_DURATION_TICKS);
@@ -4139,8 +4144,32 @@ function generatedPlayerVisualLag(playerLineLength: number): number {
   return playerLineLength - 1 + SENDOUT_HANDOFF_LAG;
 }
 const GENERATED_OPPONENT_SHADOW_DELAY = 104;
-/** Live-room callbacks from dispatch to the first CHOOSE_ACTION/exec-flags callback. */
-const GENERATED_PLAYER_READY_LAG = 286 - GENERATED_PLAYER_DISPATCH_BASELINE_DELAY;
+
+/**
+ * Species-dependent span from the player's own throw-becomes-visible tick to
+ * the live room's CHOOSE_ACTION/exec-flags-clear callback (the command menu
+ * becoming interactive). Source: `Intro_TryShinyAnimShowHealthbox`
+ * (reference/pokeemerald/src/battle_controller_player.c:979-1063) is the
+ * player-side twin of the opponent's own send-out cry gate fixed above
+ * (`battle_controller_opponent.c:292-383`) - the same
+ * `!IsCryPlayingOrClearCrySongs()` wait, this time on the PLAYER's own
+ * released mon, not the opponent's. An earlier attempt anchored this lag at
+ * the dispatch/text-start tick and missed by 5-8 ticks on GRIMER; the correct
+ * anchor is the player's own throw-becomes-visible tick (the earliest point
+ * the released mon - and therefore its cry - can exist), confirmed against
+ * three independent fixtures within 1 tick
+ * (docs/intro-cry-shadow-evidence.md Part 1): GRIMER, KADABRA, and DELCATTY
+ * all reproduce their observed ready tick via
+ * `GENERATED_PLAYER_READY_LAG_BASELINE + cryDurationTicks(playerLeadSpecies)`.
+ */
+const GENERATED_PLAYER_READY_LAG_BASELINE = 98;
+
+function generatedPlayerReadyLag(state: FactoryBattleStartIntroState): number {
+  const [playerLine] = state.command.text.playerSendOut;
+  return generatedPlayerVisualLag(playerLine.length)
+    + GENERATED_PLAYER_READY_LAG_BASELINE
+    + cryDurationTicks(generatedPlayerSpeciesId(state));
+}
 /** First Scene-OFF render after the release callback leaves player OAM y2=0. */
 const GENERATED_PLAYER_NEUTRAL_Y_VISUAL_TICK = 1670;
 
@@ -4181,7 +4210,7 @@ export function generatedBattleStartCommandReady(
   const handoffTick = generatedBattleStartOpponentHandoffTick(state);
   return handoffTick !== null
     && generatedBattleIntroSourceClock(state.elapsed)
-      >= handoffTick + generatedPlayerDispatchDelay(state) + GENERATED_PLAYER_READY_LAG;
+      >= handoffTick + generatedPlayerDispatchDelay(state) + generatedPlayerReadyLag(state);
 }
 
 /**

@@ -108,7 +108,15 @@ const species = rentalSpecies.map((name) => {
   if (id === undefined) throw new Error(`${name}: no species-stats.json entry`);
   const wavPath = join(CRIES_DIR, `${speciesToWavName(name)}.wav`);
   const durationSeconds = readWavDurationSeconds(wavPath);
-  const durationTicks = Math.round(durationSeconds * GBA_FPS);
+  // IsCryPlayingOrClearCrySongs (src/sound.c:521-532) is a per-VBlank poll of
+  // whether the M4A channel has finished, not a rounded-to-nearest sample: a
+  // tick with any remaining fractional playback still reads "still playing",
+  // so the true gate duration is the ceiling of the raw tick count, not the
+  // nearest integer. Math.round happens to equal Math.ceil whenever the raw
+  // value's fractional part exceeds 0.5 (most species), which is why this was
+  // only visible as a species-dependent +-1 residual rather than a systematic
+  // one (docs/intro-cry-shadow-evidence.md Part 1's "98-vs-99" resolution).
+  const durationTicks = Math.ceil(durationSeconds * GBA_FPS);
   return { id, name, durationTicks };
 }).sort((a, b) => a.id - b.id);
 
