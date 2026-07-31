@@ -817,7 +817,7 @@ import {
   resolveTurn13AccFellLines,
   resolveTurn13SandAttackKickoffLines,
 } from "./turn13SandAttackPresentationStaging.ts";
-import { resolveTurn13ResolutionAdapter } from "./turn13ResolutionAdapter.ts";
+import { resolveTurn13ResolutionAdapter, resolveTurn13SwitchInAdapter } from "./turn13ResolutionAdapter.ts";
 import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
@@ -10529,13 +10529,20 @@ function drawTurn13MurkrowSwitchinSprite(fb: Uint8Array, t: number): void {
   if (t >= TURN13_MURKROW_SETTLE_TICK) drawTurn13MurkrowSettled(fb);
 }
 
-/** S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6): MURKROW's own opponent healthbox, Lv50 (docs/turn15-notes.md §own re-confirmation, unchanged across the whole battle), full HP (142/142 switch-in, `pickHpBarBand` green per `verify-turn13.ts`'s own check). */
-const MURKROW_LEVEL = 50;
+/**
+ * ISSUES #39 rank-2 switch-in half flip: the real switched-in-mon fact
+ * source (`turn13ResolutionAdapter.ts`'s `resolveTurn13SwitchInAdapter`),
+ * chaining the real forced-switch dance (`runBattleScriptFaintedActionsOrchestration`)
+ * instead of independently re-stating DESTIN's replacement here.
+ */
+const TURN13_SWITCHIN = resolveTurn13SwitchInAdapter();
+/** S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6): MURKROW's own opponent healthbox, Lv50 (docs/turn15-notes.md §own re-confirmation, unchanged across the whole battle), full HP (142/142 switch-in, `pickHpBarBand` green per `verify-turn13.ts`'s own check) -- now literally derived from `TURN13_SWITCHIN`, not independently re-stated. */
+const MURKROW_LEVEL = TURN13_SWITCHIN.replacementLevel;
 const murkrowHealthboxContent = composeOpponentHealthbox(healthboxAssemblyAssets, {
-  name: "MURKROW",
+  name: TURN13_SWITCHIN.replacementSpecies,
   level: MURKROW_LEVEL,
   gender: "male",
-  hpFraction: 1,
+  hpFraction: TURN13_SWITCHIN.replacementHp.current / TURN13_SWITCHIN.replacementHp.max,
   status: "none",
 });
 const murkrowHealthboxContentByHp = new Map<string, ReturnType<typeof composeOpponentHealthbox>>();
@@ -10550,7 +10557,7 @@ function murkrowHealthboxContentForHp(
     cached = hp === 142 && status === "none"
       ? murkrowHealthboxContent
       : composeOpponentHealthbox(healthboxAssemblyAssets, {
-          name: "MURKROW",
+          name: TURN13_SWITCHIN.replacementSpecies,
           level: MURKROW_LEVEL,
           gender: "male",
           hpFraction: hp / 142,
@@ -10562,8 +10569,8 @@ function murkrowHealthboxContentForHp(
   return cached;
 }
 
-/** "BUG CATCHER DESTIN sent\nout MURKROW!" - same line 1 as `SWITCHIN_SENTOUT_LINE1`/`SENDOUT_LINE1` (`sText_Trainer1SentOutPkmn` family), oracle-pixel-bisected start tick: flat at the icon-bar-retrigger's own settled sha through render 16946, first distinct glyph at 16947. */
-const TURN13_SWITCHIN_SENTOUT_LINE2 = "out MURKROW!";
+/** "BUG CATCHER DESTIN sent\nout MURKROW!" - same line 1 as `SWITCHIN_SENTOUT_LINE1`/`SENDOUT_LINE1` (`sText_Trainer1SentOutPkmn` family), oracle-pixel-bisected start tick: flat at the icon-bar-retrigger's own settled sha through render 16946, first distinct glyph at 16947. Line 2 is now `TURN13_SWITCHIN.sentOutLine2`, sourced from the real forced-switch decision instead of a raw literal. */
+const TURN13_SWITCHIN_SENTOUT_LINE2 = TURN13_SWITCHIN.sentOutLine2;
 export const TURN13_SWITCHIN_SENTOUT_TEXT_START_TICK = 16947;
 export function turn13SwitchinSentOutTextVisibleChars(
   t: number,
