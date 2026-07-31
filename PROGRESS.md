@@ -13,6 +13,44 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 792 — [SUPERVISOR TRUE FINAL 2026-07-31 ~13:10] USER DECISION: rank-5 OFF-pin policy ADOPTED (Option A). S8 banked first OFF ground truth (4/13 windows, ZERO desync). Session: 9 rounds / 16 workers / 0 failed steps
+
+- **State:** master tree clean at this commit; S8's 5 new files merged
+  (4 `-off` traces + `docs/rank5-off-ground-truth.md`); supervisor
+  re-ran turn9-quickattack-off from the main tree (108/233 — the
+  expected honest pre-retiming baseline) + ratchet 6/6. Full gate not
+  re-run for this docs+additive-traces-only delta: last full gate
+  **5736 + 1 skip** green at `b6f0e2ab`, and S8 itself ran the full
+  suite (5736+1) on effectively this union in its worktree. Worktree/
+  branch cleaned; only `.worktrees/animation-main` remains; DEFERRED.md
+  empty.
+- **USER DECISION (mid-session, recorded `afaffc92`):** rank-5
+  Scene-OFF pin policy ADOPTED — Option A: delete class-(c)
+  move-specific bodies on the OFF route, re-time class-(b) generic
+  choreography against fresh explicit-`oracleProfile` OFF pins,
+  retiring the legacy profile-less (ON) turn9-12 pins as rank 5
+  executes. Frame-444 landing tactics + next-session ordering delegated
+  to supervisor judgment.
+- **S8 (verified, `df42d281`):** OFF ground truth for the turn-9
+  triplet + turn10-aerialace — canonical button stream replays under
+  OFF with **ZERO desync** (content lands 2-114 ticks earlier,
+  byte-matched to the scout's cited ON shas; determinism re-run
+  0/233 mismatches). App baselines honestly recorded (108/233,
+  141/231, 37/256, 19/116 — low until re-timing, not chased). The 9
+  remaining windows are listed in the doc for the next slice.
+- **Next session (final ordered list):** (i) rank-5 execution is now
+  UNBLOCKED and opened — capture the 9 remaining OFF windows, then
+  re-time class-(b)/delete class-(c) per the adopted policy;
+  (ii) #56 frame-444 fix behind a 751-frame regression + frame-536
+  probe extension; (iii) animation handoff five-table extraction (side
+  lane); (iv) turn17-rung1's 28 newly-visible frames; (v) rank 6;
+  (vi) #56 +6 route term. #55 parked.
+- **Notes:** this entry supersedes 791 as the resume point. Session
+  totals: 9 rounds / 16 workers (M1-M8, S1-S8) / 0 failed steps; #39
+  ranks 3, 4, 9 retired; #57+#58 full lifecycle; rank-5 policy decided
+  by user and its execution begun.
+
+---
 ## 791 — [SUPERVISOR FINAL CLOSE 2026-07-31] Bonus round 8 verified: rank 9 ALSO retired. Session: 8 rounds / 15 workers / 0 failed steps; ranks 3, 4, 9 all fully retired today
 
 - **State:** master green at the definitive FINAL gate **5736 tests
@@ -127,49 +165,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   frames 444/536 and +6 route term remain parked per entry 789.
 
 ---
-
-## 789 — [SUPERVISOR FINAL WIND-DOWN 2026-07-31] Session CLOSED: 7 rounds / 14 workers / 0 failed steps. #39 ranks 3+4 FULLY retired; #57+#58 closed+deleted; #56 two probes resolved/sharpened; rank-5 policy PROPOSED
-
-- **State:** master green at FINAL gate **5739 tests passed + 1
-  deliberate animation-lane skip**, production build clean, tree clean
-  at this commit. `animation-main` folded at wind-down (`e36a17c6`,
-  one commit `555bab3f` — the orient-time delta was 0; the re-check
-  caught it again). Only the permanent `.worktrees/animation-main`
-  remains; no orphan branches. **DEFERRED.md empty all session.**
-- **Session totals (2026-07-31 ~08:55 → ~11:40, 7 rounds, 14 workers
-  M1-M7 + S1-S7, 0 failed steps; two honest stops both converted to
-  landed work next round):**
-  - **#39 rank 3 FULLY retired** (KO/switch-in `5db34996`, Sitrus
-    `54278249`) and **rank 4 FULLY retired, all 5 slices**
-    (`174cc388`, `441ddf83`+`6aba6662`, `0769ccc6`,
-    `40c969e5`+`ef971686`). Every dense pin held at every rung.
-  - **#57 closed+deleted** (`387a34a1` core + `14c4295b` retire) and
-    **#58 found+filed+closed+deleted same-session** (`594442e6` core +
-    `20b12d38` retire) — the shared staging helper now threads
-    maxHP/item/statStages + entryLabel, all additive, all pinned.
-  - **#56:** idle-bounce family closed no-app-bug (decisive instrument
-    `432e16aa`: deltas +67/+139 unequal — falsified); frame 444
-    resolved to exact sub-step with described fix (needs 751-frame
-    regression); frame 536 model falsified sharper (RAM flat through
-    542; species-lead term suspected). +6 route term untouched.
-  - **Rank-5 unblocked by evidence** (`350424ed`): OFF gates only the
-    move-anim script; committed turn9-12 pins are profile-less (=ON,
-    never run vs this lane's oracle). Policy PROPOSED, NOT adopted.
-  - Papercut class closed at breadth: appRoute added to 13 traces
-    (`9929caf1` turn5, `e3a7f486` turn6/7/8, +3 in M6).
-- **Next session (ordered):** (i) adopt-or-reject the rank-5 OFF-pin
-  policy (inventory row 5 — it retires/replaces ON-profile pins; user
-  or next supervisor decides at start); (ii) #56 frame-444 described
-  fix behind a 751-frame regression + frame-536 probe extension;
-  (iii) animation handoff: extract the five anim tables into
-  `src/data/gen/` (side lane; ANIMATION_PROGRESS "For the main
-  program" note — blocks animation rung 2); (iv) rank 6 (turns 1-4)
-  or rank 9 postwin-mirror removal per inventory; (v) #56 +6 route
-  term; #55 stays a parked boundary record.
-- **Notes:** notification/monitor timestamps unreliable all session
-  (spurious early "completed", clock-skewed monitor lines, one
-  shared-log collision when two launchers started the same second) —
-  policy that held: act only on fresh-shell `kill -0` + branch/log
-  evidence. Sonnet side workers ran the full suite in their own
-  worktrees despite briefs 3x (harmless, own node_modules; no action).
-  This entry supersedes 788/787 as the resume point.
