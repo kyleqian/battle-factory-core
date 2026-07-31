@@ -36,6 +36,13 @@ windows; it is not retirement progress. Future slices should record both
 figures with the same commands, and separately delete executable owner
 branches.
 
+Delta since the pin: entry 751's turn-13 DRAGON_BREATH retirement (`77cb49d0`)
+moves `battleScene.ts` to 2,377 refs / 32,721 LOC — four raw `TURN13_*`
+references deleted while evidence comments grew the file by 25 lines. The
+other four files are unchanged, so the totals read 2,446 refs / 33,027 LOC.
+This is the expected shape of a receipt-driven retirement: the ref count is
+the signal, LOC is not.
+
 ## The remaining owner chain
 
 `BattleSceneState` still declares the canonical epoch fields at

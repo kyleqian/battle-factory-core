@@ -1,3 +1,19 @@
+## 749 — [BOUNDED MAIN WORKER 2026-07-30 ~17:30] HAUNTER FURY CUTTER residual closed
+
+- **State:** source/RAM cursor fix landed in `671a8887`; focused acceptance
+  **4 files / 97 tests**, full gate green at **550 files / 5581 tests + 1
+  deliberate animation-lane skip**, production build clean.
+- **Did:** the anchor adapter now enters `BattleStartClearSetData` from the
+  OFF-profile RAM cursor instead of the approximate overworld VBlank cursor.
+  Source AI therefore selects FURY CUTTER, whose exact typed damage chain is
+  pinned **10→5→2→1** with a neutral control; HAUNTER ends **137/138**.
+- **Next:** supervisor may close #53's user-visible acceptance: the drafted
+  HAUNTER / selected SHADOW PUNCH route is now fully exact.
+- **Notes:** HAUNTER **6/6**, generated intro **715/715**, generated command
+  **128/128**, and all **25/25** immutable rows exact. No capture, route
+  default, barrier, issue, Scene-ON, or battle/turn/tick branch change.
+
+---
 ## 748 — [BOUNDED MAIN WORKER 2026-07-30 ~17:03] Slice 7 COMPLETE at honest HAUNTER checkpoint
 
 - **State:** landed in `15e9ef33` + `9a94caab`; focused routing/ratchet

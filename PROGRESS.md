@@ -13,6 +13,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 752 — [SUPERVISOR FOLD 2026-07-30 ~21:55] Stranded side-worker inventory folded; #39 worklist now on master
+
+- **State:** `worker/side-20260730-183612` (docs-only, `ff36195e`) merged to
+  master; worktree removed and branch deleted, so only the permanent
+  `.worktrees/animation-main` remains. `animation-main` fold delta **0**.
+- **Did:** folded `docs/battle-scene-retirement-inventory.md` — the
+  reproducible census, textual debt metric, and the remaining owner chain for
+  #39. The side worker landed it at 18:41 but it was never merged and never
+  ledgered; entry 750's wind-down predates it. Re-ran the census: the doc is
+  **exact at its pinned `6fe623bb`** (2,381 refs / 32,696 LOC in
+  `battleScene.ts`). Appended the post-751 delta (2,377 refs / 32,721 LOC)
+  since master has advanced past the pin.
+- **Next:** #39 window-by-window retirement continues from this worklist —
+  it is the census and owner-chain map the next slices should cite.
+- **Notes:** docs-only fold, no source or test change. The stranding is worth
+  remembering: a side worker that finishes after the supervisor winds down
+  leaves no trace in the ledger unless the next session sweeps
+  `git branch --no-merged`.
+
+---
 ## 751 — [BOUNDED MAIN WORKER 2026-07-30 ~18:52] Turn-13 DRAGON_BREATH content re-driven from kernel receipts
 
 - **State:** landed in `77cb49d0`; focused acceptance **4 files / 293
@@ -77,20 +97,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   out/latest race (bumped), census line-drift, cap-kill digest
   misreports "unauthenticated", concurrent-suite vitest orphans
   (bumped). Next session resumes from this entry alone.
-
----
-## 749 — [BOUNDED MAIN WORKER 2026-07-30 ~17:30] HAUNTER FURY CUTTER residual closed
-
-- **State:** source/RAM cursor fix landed in `671a8887`; focused acceptance
-  **4 files / 97 tests**, full gate green at **550 files / 5581 tests + 1
-  deliberate animation-lane skip**, production build clean.
-- **Did:** the anchor adapter now enters `BattleStartClearSetData` from the
-  OFF-profile RAM cursor instead of the approximate overworld VBlank cursor.
-  Source AI therefore selects FURY CUTTER, whose exact typed damage chain is
-  pinned **10→5→2→1** with a neutral control; HAUNTER ends **137/138**.
-- **Next:** supervisor may close #53's user-visible acceptance: the drafted
-  HAUNTER / selected SHADOW PUNCH route is now fully exact.
-- **Notes:** HAUNTER **6/6**, generated intro **715/715**, generated command
-  **128/128**, and all **25/25** immutable rows exact. No capture, route
-  default, barrier, issue, Scene-ON, or battle/turn/tick branch change.
 

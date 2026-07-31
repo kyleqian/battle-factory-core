@@ -35,6 +35,11 @@ dismiss clocks without inspecting a turn flag (**255/255, 147/147, 255/255,
 118/118**). The old post-win fields are still mirrored for the downstream
 canonical post-win owner, so this entry remains open.
 
+**Worklist:** `docs/battle-scene-retirement-inventory.md` (folded 2026-07-30)
+carries the reproducible census, the remaining owner chain with line ranges,
+and the per-slice ordering. Cite it — and re-run its commands to record both
+the ref count and LOC — when opening the next retirement slice.
+
 **Not a request to rewrite it.** The windows it renders are individually
 oracle-exact and that evidence is worth keeping. The debt is the *keying*.
 ROADMAP S10 §3 requires one already-exact window to be re-driven from semantic
