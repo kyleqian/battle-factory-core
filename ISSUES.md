@@ -16,17 +16,6 @@ one without a user decision, and do not count them as backlog.
 
 # Open
 
-## #57 — [core fixed 2026-07-31, `387a34a1`] retire `turn5ResolutionAdapter.ts`'s local staging workaround
-
-**Open remainder only:** the shared helper now threads caller-supplied
-maxHP/item (pinned by `tests/stagePlayerHitChainMaxHpItem.test.ts`;
-turn13 pins re-verified 141/141 + 242/242 with the previously-dropped
-maxHP values now live). Still open: `turn5ResolutionAdapter.ts` predates
-the fix and still stages through its own local pipeline — swap it onto
-`stagePlayerHitChainToTerminalMachineState` and delete the local
-workaround (natural home: the rank-3 Sitrus-half flip step). Delete this
-entry when that lands.
-
 ## #56 — Arbitrary-trainer intro: residuals, ONIX ready-lag regression, MAGNETON shadow coverage
 
 **Symptom:** the public dense arbitrary-trainer intro comparison
@@ -129,14 +118,19 @@ and the MURKROW level/healthbox/sent-out literals now adapter-derived)
 onto `turn13ResolutionAdapter.ts`. Pins held: 141/141 + 242/242 +
 dense-b 223/223 (dense-a 205/256 is the A/B-proved pre-existing parked
 #23 exclusion). `turn13Resolved`/turn-14 mirroring remains (unchanged
-consumers). Rank 3 (Turn-5 KO → switch-in → Sitrus): KO/switch-in half
-flipped (2026-07-31, `5db34996` — preview promoted to
-`turn5ResolutionAdapter.ts`, faint-sink geometry from the generic
-formula at Grovyle's yOffset, PIDGEOTTO level/healthbox/sent-out
-adapter-derived; all nine turn5 pins + five insurance pins held;
-`turn5KoDismissElapsed` verified state-only/never render-read, left
-mirroring like turn13's). The Sitrus heal half (presentation-timing
-projection) remains. Earlier
+consumers). Rank 3 is **fully retired** (2026-07-31): KO/switch-in half
+`5db34996` (preview promoted to `turn5ResolutionAdapter.ts`, faint-sink
+geometry from the generic formula at Grovyle's yOffset, PIDGEOTTO
+level/healthbox/sent-out adapter-derived), Sitrus heal half `54278249`
+(heal HP endpoints + STRINGID_PKMNSITEMRESTOREDHEALTH lines
+adapter-derived, timing curves kept, `TURN5_PRESENTATION_TIMING_NOT_
+STAGED` deleted), and the adapter swapped onto the #57-fixed shared
+staging helper (`14c4295b`, ~120-line local workaround deleted). All
+nine turn5 pins + five insurance pins held at every step;
+`turn5KoDismissElapsed`/`turn5Resolved` mirroring remains (unchanged
+consumers, same as turn13's). Rank 4 prep-scout banked
+(`docs/rank4-prep-scout.md`: ROCK_SLIDE tails first — zero new staging
+surface; stat-down bridge already generalizes to ATK-falls). Earlier
 progress:
 `turn13-sandattack.json`'s complete captured
 SAND_ATTACK content now resolves its kickoff and opponent-target accuracy-fall

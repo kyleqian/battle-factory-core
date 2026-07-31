@@ -13,6 +13,38 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 780 — [SUPERVISOR 2026-07-31 round 2] M2 (#39 rank-3 complete + #57 closed), S2 (#56 probe), S3 (rank-4 scout) all verified and merged
+
+- **State:** master = M2's three commits + S2 (`45220c2f`, #56 evidence
+  probe) + S3 (`08d49fe0`, rank-4 prep-scout) merged (`7abe977c`,
+  `df6234df`); union `npm test`+`npm run build` gate running at commit
+  time — result in the next entry if not amended here. Supervisor
+  independently re-ran: turn5-sitrus-a **110/110**, turn5-sitrus-d
+  **133/133**, turn5-rockslide **256/256** post-M2; equivalence test
+  checked non-self-referential (hard-value anchors both sides). Both
+  merged side worktrees/branches cleaned; only `animation-main` remains.
+- **Headline:** **#39 rank 3 fully retired and #57 fully closed** (entry
+  deleted). Retirement inventory rank-3 row updated by M2; #39 prose
+  updated by supervisor.
+- **S2's #56 evidence (docs/issue56-residual-probe.md):** idle-bounce
+  oscillator RAM-proven exact + species-independent — residual is a pure
+  phase offset; decisive instrument step named (instrument
+  `idleBounceElapsed` start frame; leading suspect
+  `BATTLE_COMMAND_ACTION_ENTER_DELAY`'s flat 6-tick,
+  `battleCommandPresentation.ts:126`). Frames 444/536 = single-tick 2-3px
+  sub-step misalignments (site named, sub-step not isolated). +6 route
+  term: `BATTLE_TYPE_FIRST_BATTLE` falsified; two candidates remain.
+- **S3's rank-4 scout (docs/rank4-prep-scout.md):** corrected inventory
+  warning — stat-down bridge already generalizes ATK/ACC; turns-6/7
+  ROCK_SLIDE tails stage through the existing helper with ZERO new
+  surface (recommended first slice); BIND needs a `{message,
+  missMessage}` bridge shape + entry-label fix.
+- **Next:** round 3 — M3 = #56 idle-bounce instrument-then-fix (S2's
+  named decisive step). Then rank-4 slice 1 (ROCK_SLIDE tails) per the
+  scout. Side workers' harmless full-suite runs in own worktrees noted
+  (twice despite brief; no action).
+
+---
 ## 779 — [BOUNDED MAIN WORKER 2026-07-31 ~09:45] #39 rank-3 FULLY RETIRED: Sitrus heal content flipped (half 2 of 2) + #57 remainder closed
 
 - **State:** `npx tsc --noEmit` clean; focused suite (turn5Resolution
@@ -98,67 +130,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Both round-1 launchers also named the SAME raw JSONL log
   (`...085850.jsonl`, both launched the same second) — worker events
   interleave in it; read with session_id filters.
-
----
-## 777 — [BOUNDED MAIN WORKER 2026-07-31 ~05:45] #39 rank-3 flip, half 1 of 2 DONE: adapter promoted, faint-sink geometry + PIDGEOTTO switch-in literals flipped; Sitrus half deliberately deferred
-
-- **State:** `npx tsc --noEmit` clean; focused suite (turn5Resolution
-  AdapterEquivalence, turn13ResolutionAdapterEquivalence, battleScene,
-  executableFrontierRatchet, battleMenu, battleMenuIdle, fightSubmenu,
-  battleSetup, destinCanonicalReplacements) **513/513 green**, no new
-  ratchet barriers, no new canonical-recording imports. Tree clean at
-  this commit. Full `npm test`/`npm run build` intentionally not run
-  (side worker live concurrently, per brief, precedent entry 775).
-- **Did (2 commits):** (1) **Papercut fix, found before any flip work**:
-  all ten `tools/compare/traces/turn5-*.json` lacked `"appRoute"`,
-  silently defaulting to `"generated-orchestrator"` instead of
-  `"canonical-recorded"` — every one mismatched wholesale (0/N, 20-46%
-  diff) despite zero renderer bug; same class bd1d6beb already fixed for
-  `battle1-turn13-dense-a/b.json`. Bisected to rule out any commit in
-  this session before concluding it was the missing field (confirmed:
-  `turn5-menu.json` already had it set and was the ONE turn5 trace
-  passing). Fixed by adding the field; zero source changes. (2) **The
-  actual flip**: promoted `turn5ResolutionAdapterPreview.ts` ->
-  `turn5ResolutionAdapter.ts` (+ test rename), added
-  `resolveTurn5FaintSinkGeometry` (reuses `turn13ResolutionAdapter.ts`'s
-  own generic `opponentFaintSinkGeometry`, now also exporting
-  `frontYOffset`, evaluated at Grovyle's real yOffset=4). `battleScene.ts`
-  now sources `GROVYLE_FAINT_SINK_STEPS`/`GROVYLE_HEALTHBOX_VANISH_TICK`
-  from that formula (deleting the hand-fit `8`/`+19` constants) and
-  `PIDGEOTTO_LEVEL`/`pidgeottoHealthboxContent`'s name/level/hpFraction/
-  `SWITCHIN_SENTOUT_LINE2` from `resolveTurn5SwitchInAdapter()` — mirrors
-  36b60ec5's MURKROW diff exactly, including leaving
-  `pidgeottoHealthboxContentForHp`'s own per-tick `PIDGEOTTO_MAX_HP=156`
-  denominator alone (same as MURKROW's analogous `142`, out of scope).
-- **All mandated pins hold exactly**: turn5-rockslide 256/256, turn5-faint
-  110/110, turn5-switchin 241/241, turn5-sitrus-a/b/c/d 110/82/181/133,
-  turn5-endeavor 254/254, turn5-menu 42/42, turn5-healthbox 55/55,
-  turn5-sentout 141/141; insurance pins turn13-dragonbreath-faint
-  141/141, turn13-switchin 242/242, turn13-sandattack 190/190,
-  interactive-generated-intro-off 715/715, battle-command-generated-off
-  128/128.
-- **Deliberately NOT done, with reasons (honest stop within the cap):**
-  (a) **Sitrus heal half stays fully hand-fit** — `TURN5_PRESENTATION_
-  TIMING_NOT_STAGED` stays exported `true`; this is rank-3's own named
-  "half 2 of 2", not this step's scope. (b) **`turn5KoDismissElapsed`
-  left alone** — investigated the brief's "replace it the same way
-  36b60ec5 replaced turn13's" instruction and found it doesn't hold:
-  `git show 36b60ec5` touches zero dismiss-elapsed code, and grep across
-  `src`/`tests` shows `turn5KoDismissElapsed` is never read by any render
-  path (only gates a one-shot input edge in `core.ts:901-905`), so
-  "the render path doesn't inspect a turn number" was already true for
-  it. It cannot be merged into turn13's own generic
-  `opponentFaintDismissElapsed` field either: that field's one-shot
-  latch never resets (`core.ts:913`, `=== null` guard), so turn 5's own
-  dismiss would permanently block turn 13's real dismiss detection from
-  ever firing again — a genuine regression against `turn13-switchin
-  .json`'s own 141/141 pin, confirmed by reading `core.ts`'s full input
-  chain and both fields' own dedicated test suites
-  (`battleScene.test.ts:1657`, `:2696`). Left as two independent
-  one-shot latches, which is what the current architecture requires.
-- **Next:** rank-3 half 2 (Sitrus heal presentation-timing projection —
-  `resolveTurn5SitrusAdapter` is already proven, just not wired); then
-  #57 (shared staging helper's dropped maxHP/item), then ranks 4-9.
-- **Notes:** no papercuts beyond the one fixed above (banked in the
-  commit, not PAPERCUTS.md — a real bug in committed data, not dev-loop
-  friction).
