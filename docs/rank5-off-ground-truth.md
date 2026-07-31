@@ -377,6 +377,109 @@ compression tracks animation content or just elapsed ticks.
   slice's time budget favoring breadth (covering all remaining windows)
   over redundant depth on an already-well-established mechanism.
 
+### turn10-menu-off.json (banked) + a flagged finding about the other three menu windows (item 4, attempted)
+
+With priorities 1-3 done and time remaining, attempted item 4 (lowest
+priority: `turn9-menu`/`turn10-menu`/`turn11-menu`/`turn12-menu`). The
+assigned brief predicted these would be "likely near-identical... since no
+compression has happened yet at that point in the sequence" — **this
+session's own live cross-check against the ON oracle found that assumption
+is only true for `turn10-menu`,** and even then not perfectly. The other
+three show a genuinely different phenomenon worth flagging precisely rather
+than either rushing a wrong "confirmed identical" claim or silently
+dropping the item.
+
+**Methodology difference from every other window this slice**: rather than
+cross-referencing written dossier citations, ran the **original ON-era
+trace files live** against `--profile battle-scene-on` (the ON oracle at
+8012, exported as `POKEBENCH_ANIMATION_ORACLE_URL`) side-by-side with a
+fresh OFF run of the same `captureFrames`, and diffed the two manifests
+directly — the most direct possible cross-check, since all four menu files'
+`captureFrames` were already fully dense (stride 1) in their ON-era form.
+
+**Banked: `turn10-menu-off.json`** (verbatim ON captureFrames, 12262-12344,
+83 captures) — command: `bin/oracle run tools/compare/traces/
+turn10-menu-off.json -o <dir>`.
+- **81/83 frames byte-identical to a live ON run at the same absolute
+  ticks** (checked directly, not inferred).
+- The only two mismatches: (1) tick 12269 vs ON's 12269 — OFF shows the
+  ON-12269 sha one tick late (at OFF 12270); (2) ON has a single-tick idle
+  blip (`e0f0aed31be8`) at tick 12280 that's simply **absent** under OFF
+  (the preceding sha holds straight through instead). Both are consistent
+  with a **sub-10-tick idle-bounce phase difference**, not new/different
+  content — every sha OFF produces also appears in the ON run, just
+  occasionally one tick off during an idle hold.
+- **Desync verdict: none.** Same content, trivial idle-bounce phase noise.
+- **App baseline**: **81/83 frames matched**.
+- **Determinism**: re-ran twice back-to-back, **0/83 sha mismatches**.
+
+**Not banked — `turn9-menu`, `turn11-menu`, `turn12-menu`: idle-bounce phase
+misalignment is much larger and the mechanism needs proper attribution
+before pinning, not a quick spot-check.** Live ON-vs-OFF diffs on their own
+(unmodified) verbatim captureFrames:
+
+| File | Common frames | Mismatches |
+| --- | --- | --- |
+| `turn9-menu.json` | 111 | 56 |
+| `turn11-menu.json` | 56 | 46 |
+| `turn12-menu.json` | 46 | 12 |
+
+For `turn9-menu` (10818-10928), per-tick dedup shows the ON and OFF
+sequences carry the **same set of shas** but the settled-menu idle-bounce
+(`docs/turn9-notes.md`'s own §5 citation: "turn-9 settled menu persists...
+same resting frame `battle1-turn8-dense.json` itself ends on", plus a
+`LEFT` press at 10858-10860 and the move-confirm `A` at 10869-10877) is
+**out of phase by up to 9 ticks** between the two profiles for the pure-idle
+portion (10818-~10868: ON's `bda161ec91f5`/`d75ee6c58ea8`/`87e19f2d77e8`/
+`4eb7db7c26ca` cycle at ticks 10833/10842/10851/10860 vs OFF's *same four
+shas* at 10842/10851/10860/10869 — a consistent -9 lag, i.e. **OFF is
+LATER, not earlier**, the opposite direction from every move-effect window
+this program has found). Once the `LEFT`/`A` button-press-driven content
+takes over (fixed absolute-frame positions, as established throughout this
+program), the two profiles **snap to exact zero-shift alignment** at tick
+10874 and stay byte-identical for the rest of the window.
+
+`turn11-menu` and `turn12-menu` show the same *shape* of finding (same set
+of shas present in both profiles, reordered/phase-shifted relative to each
+other, re-converging once real button input takes over) but with a
+same-sha-different-relative-order wrinkle that needs care to read correctly:
+some shas (e.g. `528d4d92a33e`, `e280e37fc2e9`) legitimately recur at
+**multiple distinct narrative points** (a generic, content-independent
+box-transition sub-frame, same phenomenon already noted for
+`b60ceefdb735` in turn 11's own move-window findings above) — a naive
+"first sha match" diff can misattribute these. This needs the same
+per-tick, RAM-cross-checked treatment `turn9/10/11/12-notes.md` already
+gave their own ON-era windows, not a quick sha-diff, to state a correct
+per-tick shift table.
+
+**Working hypothesis (not yet confirmed — flagged for whoever picks this
+up)**: the settled-menu idle-bounce is Scene-agnostic (matches every prior
+finding in this program) and genuinely periodic; its **phase** at the start
+of any given turn's menu window is inherited from however much compression
+already accumulated in *upstream* turns (1-8 for turn 9's own menu, which
+are out of this worker's/this program's scope — see `AGENTS.md`'s lane
+table, main lane owns "another canonical Battle 2 turn... after tick
+33331" but turns 1-8 predate this rank-5 arc entirely and were never
+Scene-OFF-pinned). That upstream, out-of-scope phase inheritance — not a
+new bug in turns 9-12 — is the most likely explanation for why the "no
+compression yet" assumption doesn't hold pixel-for-pixel here, even though
+the **content itself never diverges** (no new/different battle line
+appeared in any of the four windows; §"Desync verdict" would be **none**
+once the phase attribution is done correctly). Not stated as certain,
+because the actual upstream turns were not re-examined this session
+(time-boxed) — a hypothesis for the next slice to confirm or refute, not a
+resolved finding.
+
+- **App baseline / determinism**: not run for the three unbanked files —
+  pinning a `captureFrames` window before its own tick-shift is understood
+  would risk banking a *wrong* pin (an app baseline against a mis-shifted
+  window is worse than no baseline at all).
+- **Scope honesty**: these three scratch trace files were **not committed**
+  (removed after this investigation) — only `turn10-menu-off.json` is
+  banked. This should NOT be treated as "menus are low-risk, skip them
+  entirely" for the next slice — the finding above is real, reproducible
+  data (specific tick citations, specific sha lists), not a shrug.
+
 ### turn10-aerialace-off.json — settle extended (item 3)
 
 Command: `bin/oracle run tools/compare/traces/turn10-aerialace-off.json -o <dir>`
@@ -572,44 +675,74 @@ Command: `bin/oracle run tools/compare/traces/turn10-aerialace-off.json -o <dir>
 ## Commands (reproduce everything above)
 
 ```sh
-# oracle ground truth
+# oracle ground truth — slice 1 (turn 9 triplet + turn10-aerialace)
 bin/oracle run tools/compare/traces/turn9-quickattack-off.json -o <dir>
 bin/oracle run tools/compare/traces/turn9-quickattack-b-off.json -o <dir>
 bin/oracle run tools/compare/traces/turn9-rockslide-off.json -o <dir>
 bin/oracle run tools/compare/traces/turn10-aerialace-off.json -o <dir>
 
-# honest app baseline (expected low, not chased)
-npm run compare -- tools/compare/traces/turn9-quickattack-off.json --summary
-npm run compare -- tools/compare/traces/turn9-quickattack-b-off.json --summary
-npm run compare -- tools/compare/traces/turn9-rockslide-off.json --summary
-npm run compare -- tools/compare/traces/turn10-aerialace-off.json --summary
+# oracle ground truth — slice 2 (turn10-rockslide, turn11, turn12, turn10-menu)
+bin/oracle run tools/compare/traces/turn10-rockslide-off.json -o <dir>
+bin/oracle run tools/compare/traces/turn10-rockslide-off-b.json -o <dir>
+bin/oracle run tools/compare/traces/turn11-featherdance-off.json -o <dir>
+bin/oracle run tools/compare/traces/turn11-rockslide-off.json -o <dir>
+bin/oracle run tools/compare/traces/turn12-aerialace-off.json -o <dir>
+bin/oracle run tools/compare/traces/turn12-rockslide-miss-off.json -o <dir>
+bin/oracle run tools/compare/traces/turn10-menu-off.json -o <dir>
 
-# determinism check (turn9-quickattack-off re-run twice, diffed by sha)
-bin/oracle run tools/compare/traces/turn9-quickattack-off.json -o /tmp/a
-bin/oracle run tools/compare/traces/turn9-quickattack-off.json -o /tmp/b
-# 0/233 sha256 mismatches between /tmp/a and /tmp/b manifests
+# honest app baseline (expected low except turn11-featherdance/turn10-menu, not chased)
+npm run compare -- tools/compare/traces/<file>.json --summary
+
+# determinism check pattern (repeated per file this slice, always 0 mismatches)
+bin/oracle run tools/compare/traces/<file>.json -o /tmp/a
+bin/oracle run tools/compare/traces/<file>.json -o /tmp/b
+# diff manifests by sha256 per frame
+
+# menu cross-check methodology (item 4) — live ON-vs-OFF diff, not doc citations
+bin/oracle --profile battle-scene-on run tools/compare/traces/turn9-menu.json -o <on-dir>
+bin/oracle run tools/compare/traces/turn9-menu-off.json -o <off-dir>
+# (turn9-menu-off.json itself was NOT committed — see finding above; recreate
+# by copying turn9-menu.json + oracleProfile: battle-scene-off if re-attempting)
 ```
 
 ## Remaining work for the next slice (not done here — honest gap, not silent)
 
-- **turn10-rockslide** (Onix's turn-10 counter — the row's biggest window,
-  961-tick ON range with heavy internal gaps; needs its own landmark scout
-  the way turn9-rockslide got here, not a blind stride-1 over the full ON
-  range) plus **turn11-featherdance**, **turn11-rockslide**,
-  **turn12-aerialace**, **turn12-rockslide-miss** — the remaining five of
-  the nine move/result windows.
-- **turn9-menu, turn10-menu, turn11-menu, turn12-menu** — lowest priority
-  per the assigned brief; likely near-identical to their ON pins since they
-  sit *before* any move fires in their turn (no compression has happened yet
-  at that point in the sequence), but not verified this session.
-- turn10-aerialace's own settle tick (see above) needs a wider capture past
-  12460 to land precisely.
-- Once all 13 windows are banked, the actual re-timing/retirement of the
-  class-c call sites the scout doc named is main-lane `src/` work, out of
-  scope for this side-lane doc.
+**All nine move/result windows are now banked** (slice 1: turn9 triplet +
+turn10-aerialace; slice 2: turn10-rockslide, turn11-featherdance,
+turn11-rockslide, turn12-aerialace, turn12-rockslide-miss). Item 3
+(turn10-aerialace's own settle) is also done — settle tick pinned at OFF
+12461, sha `0802bec48f53`, holding 82 ticks.
+
+Remaining for whoever picks up next:
+- **turn9-menu, turn11-menu, turn12-menu** (item 4, lowest priority) — **not
+  a quick "likely near-identical" spot-check as originally assumed.** This
+  slice found real idle-bounce phase misalignment (up to 9-16 ticks,
+  non-monotonic, opposite-direction from the move-window compression
+  pattern) that needs proper per-tick attribution before pinning — see the
+  full writeup and working hypothesis above (search "Not banked" in this
+  doc). `turn10-menu` **is** banked (`turn10-menu-off.json`, 81/83
+  byte-identical to a live ON run, the two mismatches are a trivial 1-tick
+  idle-bounce blip) — it turned out to be the one genuinely simple case of
+  the four.
+- Once all 13 windows are banked (9 move/result + turn10-menu done; 3 menu
+  windows remain, see above), the actual re-timing/retirement of the class-c
+  call sites the scout doc named is main-lane `src/` work, out of scope for
+  this side-lane doc.
+- Minor open thread from this slice: the exact HP-drain duration comparison
+  for turn10-rockslide's Pidgeotto drain (ON ~23 ticks vs. an eyeballed ~44
+  in the OFF dense data) was noted but not tightened to an exact tick
+  boundary — doesn't affect the desync verdict, flagged for precision only.
 
 ## Verification
 
-`npm test` and `npm run build` (run after this doc, see commit) — no `src/`
-changes this session. New files only: the four `-off.json` traces above plus
-this doc. `git status` shows only these five new files.
+Slice 1: `npm test` and `npm run build` green, four new trace files + this
+doc, confirmed via `git status`.
+
+Slice 2: `npm test` and `npm run build` re-run green (see commit history) —
+no `src/` changes this session either. New files this slice: `turn10-
+rockslide-off.json`, `turn10-rockslide-off-b.json`, `turn11-featherdance-
+off.json`, `turn11-rockslide-off.json`, `turn12-aerialace-off.json`,
+`turn12-rockslide-miss-off.json`, `turn10-menu-off.json`, plus `turn10-
+aerialace-off.json` widened in place (item 3) and this doc updated. The
+three menu-off scratch files for turn9/11/12 were created, investigated, and
+removed (not committed) per the finding above.
