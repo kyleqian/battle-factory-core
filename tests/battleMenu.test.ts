@@ -810,9 +810,9 @@ describe("battleMenu: S7 slice O - turn 7's own FEATHER_DANCE/ROCK_SLIDE (Onix v
     expect(moveFightCursor(2, "UP")).toBe(0);
   });
 
-  it("S7 slice R rung (a): TURN9_QUICKATTACK_PRESS_TICK+TURN9_MENU_REDRAW_DELAY is the turn-9-to-10 bounce-reset anchor (574, NOT the same tick as the visual settle turn9-notes.md §5 cites, 579 - fresh-oracle-bisected against turn10-menu.json, see the constant's own doc)", () => {
+  it("ISSUES #39 rank-5 slice 1: TURN9_QUICKATTACK_PRESS_TICK+TURN9_MENU_REDRAW_DELAY is the turn-9-to-10 bounce-reset anchor, re-anchored to Scene OFF (465, oracle-bisected against turn9-rockslide-off.json's own settled turn-10-menu content at render 11336 - see the constant's own doc)", () => {
     expect(TURN9_QUICKATTACK_PRESS_TICK).toBe(10871);
-    expect(TURN9_QUICKATTACK_PRESS_TICK + TURN9_MENU_REDRAW_DELAY).toBe(11445);
+    expect(TURN9_QUICKATTACK_PRESS_TICK + TURN9_MENU_REDRAW_DELAY).toBe(11336);
   });
 
   it("turn9ResettledBounceTick re-initializes the bounce cycle fresh at the redraw tick, same shape as turn8ResettledBounceTick", () => {

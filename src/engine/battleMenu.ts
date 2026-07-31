@@ -2256,8 +2256,19 @@ export function rockSlideAnimationAtAge(
  */
 export const ROCK_SLIDE_HP_DRAIN_START_DELAY = 597;
 
-export function rockSlideOpponentHp(t: number, pressTick: number, startHp: number, endHp: number): number {
-  const d = t - (pressTick + ROCK_SLIDE_HP_DRAIN_START_DELAY);
+/**
+ * `startDelay` (ISSUES #39 rank-5 slice 1, defaults to the ON-fit
+ * `ROCK_SLIDE_HP_DRAIN_START_DELAY` above, every pre-existing caller
+ * unaffected): under Scene OFF, `attackanimation` substitutes a fixed
+ * `BattleScript_Pausex20` pause for the move's own (much longer) real
+ * animation, so the HP-bar drain that follows `waitanimation` lands
+ * dramatically earlier relative to `pressTick` - the same "generalize a
+ * hardcoded value into a defaulted param" idiom `rockSlideHealthboxWobbleY2`'s
+ * own `profile.hitFlashAnchorAge` already establishes for the other
+ * generic hit-reaction mechanism this move triggers.
+ */
+export function rockSlideOpponentHp(t: number, pressTick: number, startHp: number, endHp: number, startDelay: number = ROCK_SLIDE_HP_DRAIN_START_DELAY): number {
+  const d = t - (pressTick + startDelay);
   return Math.max(endHp, startHp - Math.max(d, 0));
 }
 

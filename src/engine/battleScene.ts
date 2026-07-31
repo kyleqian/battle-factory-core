@@ -474,6 +474,7 @@ import {
   rockSlideHealthboxWobbleY2,
   rockSlideMonBlinkInvisible,
   rockSlideMonShakeY2,
+  ROCK_SLIDE_ANIMATION_PROFILE,
   HIT_FLASH_RAM_ANCHOR_DELAY,
   STATS_BANNER_END_DELAY,
   rockSlideOpponentHp,
@@ -5374,9 +5375,8 @@ function drawSpriteSheetAffineStretch(
  * which the old "blend over fb" version sampled wherever both overlapped,
  * must contribute NOTHING to the blend, exactly the same crack AERIAL_ACE's
  * own clone-vs-real overlap had (`drawTurn10AerialAceCloneWinsOverField`).
- * The sole remaining caller (`drawTurn9Hitsplat`) always passes `doubled`
- * false in practice today, but the doubled-footprint math is kept general
- * since nothing here is doubled-specific.
+ * The doubled-footprint math is kept general since not every caller is
+ * doubled-specific.
  */
 function drawSpriteSheetAffineStretchBlendedOverFb(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, xScale: number, yScale: number, eva: number, evb: number, doubled = false, target: "static" | "live" | Uint8Array = "static", coverageMask?: Uint8Array): void {
   const w = tileset.columns * 8;
@@ -8248,6 +8248,18 @@ const ENDEAVOR_HITSPLAT_ROUNDS: readonly { center: { x: number; y: number }; ram
   { center: { x: 60, y: 76 }, ramOffset: 62 }, // round 0: RAM 3007-3016 visible (script offset (12,-12), X-flipped for the target side)
   { center: { x: 84, y: 100 }, ramOffset: 88 }, // round 1: RAM 3033-3042 visible (script offset (-12,12), X-flipped for the target side)
 ];
+
+/**
+ * Shared `drawSpriteSheetAffineStretchBlendedOverFb` matrix for the several
+ * other still-un-flipped turns' own hitsplats elsewhere in this file (turn
+ * 9's own instance, `drawTurn9Hitsplat`, was retired under ISSUES #39 rank-5
+ * slice 1 - `attackanimation`'s `HITMARKER_NO_ANIMATIONS` gate means no
+ * hitsplat ever renders for turn 9 on the Scene-OFF route). RAM-confirmed
+ * `matrixA=matrixD=303` (NOT `ENDEAVOR_HITSPLAT_MATRIX`'s own 372 - the two
+ * hitsplats' own affine "pop" anim settles at a different per-instance
+ * scale, not a shared engine constant).
+ */
+const TURN9_HITSPLAT_MATRIX = 303;
 
 /** Draws both `AnimHitSplatBasic` sprites active at trace tick `t` (0, 1, or - briefly at the very start of this window - neither), on top of the target. */
 function drawEndeavorHitsplats(fb: Uint8Array, t: number, pressTick: number): void {
@@ -11735,37 +11747,6 @@ export function turn9QuickAttackTextVisibleChars(t: number, pressTick: number): 
 }
 
 /**
- * S7 slice R rung (c1): the real Pidgeotto sprite's own (slot 5) lunge -
- * out toward Onix and back - during QUICK_ATTACK's animation, RAM-tabled by
- * `docs/battle-turn-notes.md` §36 (RAM ticks 10928-10933, x2/y2 nonzero;
- * 10934 on, back to (0,0) - a 6-tick out-and-back curve, not a ramp to a
- * held extreme). **Retry #3's own diagnostic (§38) corrects §36/§37's own
- * assumed anchor**: RAM ticks are absolute (this table's own indices, valid
- * as probed), but the delay from `pressTick` to the window's first nonzero
- * tick is NOT `61` (`10928-10867`, §36/§37's assumed anchor) - the LIVE
- * `pressTick` this dispatcher actually computes for this trace
- * (`TICK0 + sm.confirmElapsed`) is `10871`, four ticks later than assumed,
- * so the correct delay is `57` (`10928-10871`), fit directly against the
- * live value (an `console.log` in a scratch harness against
- * `battle1-turn9-dense.json`'s own script, not re-guessed) rather than
- * reused from the earlier probe's own mislabeled anchor. `invisible`
- * doesn't matter here (§37's own puzzle-#1 resolution) - the real sprite
- * draws continuously at its own x2/y2, which happen to be (0,0) - i.e.
- * indistinguishable from the un-animated baseline - everywhere outside
- * this 6-tick window, so no special-casing is needed past it.
- */
-const TURN9_QUICKATTACK_LUNGE_RENDER_LAG = 1; // render = RAM tick + 1, same family as every other creation/position lag this dossier has established (§36/§37)
-const TURN9_QUICKATTACK_LUNGE_DELAY = 57; // RAM 10928 (first nonzero x2/y2) - live pressTick 10871
-const TURN9_QUICKATTACK_LUNGE_TABLE: readonly { x2: number; y2: number }[] = [
-  { x2: -17, y2: 2 }, // RAM 10928 (render 10929)
-  { x2: -24, y2: 6 }, // RAM 10929 (render 10930)
-  { x2: -17, y2: 11 }, // RAM 10930 (render 10931)
-  { x2: 0, y2: 12 }, // RAM 10931 (render 10932)
-  { x2: 16, y2: 11 }, // RAM 10932 (render 10933)
-  { x2: 24, y2: 6 }, // RAM 10933 (render 10934)
-];
-
-/**
  * The lunge redraw's own ground clip - pixel-confirmed against fresh oracle
  * PNGs (this rung's own bisection, docs/battle-turn-notes.md §39): applying
  * the lunge table's `y2` to the sprite's LOWEST rows (feet) produces a
@@ -11784,14 +11765,6 @@ const TURN9_QUICKATTACK_LUNGE_TABLE: readonly { x2: number; y2: number }[] = [
  * subject to that layer too.
  */
 const OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM = 74;
-
-/** The real Pidgeotto sprite's own lunge offset at trace tick `t`, or `null` outside the window (the caller should draw nothing extra - the normal, already-drawn settled sprite is already correct there). */
-export function turn9QuickAttackLungeOffset(t: number, pressTick: number): { x2: number; y2: number } | null {
-  const ramTick = t - TURN9_QUICKATTACK_LUNGE_RENDER_LAG;
-  const n = ramTick - pressTick - TURN9_QUICKATTACK_LUNGE_DELAY;
-  if (n < 0 || n >= TURN9_QUICKATTACK_LUNGE_TABLE.length) return null;
-  return TURN9_QUICKATTACK_LUNGE_TABLE[n]!;
-}
 
 /**
  * Erases Pidgeotto's own real-sprite footprint (only the settled tileset's
@@ -11857,75 +11830,6 @@ function drawSpriteSheetClippedBelow(fb: Uint8Array, tileset: Tileset, palette: 
     }
   }
 }
-
-/**
- * S7 slice R rung (c2): QUICK_ATTACK's two `AnimTask_TraceMonBlended`
- * afterimage clones (sprite slots 3/4) - frozen (non-translating) blended
- * copies of Pidgeotto's own settled sprite art, UNDARKENED (unlike
- * DOUBLE_TEAM's own darkened clone palette - §36's own oracle-crop note),
- * same flat `eva=12/evb=8` ratio `drawDoubleTeamClones` already established.
- * RAM-tabled by §36, cross-checked by this rung's own fresh RAM re-probe
- * (§39 - ticks 10935-10938 and 10940-10941 directly re-read, not
- * re-transcribed): slot 3 lives RAM `[10928,10935]` at `(x2=-17,y2=2)`, a
- * 2-tick gap (RAM 10936-10937, destroyed), then RAM `[10938,10945]` at
- * `(0,0)` - retry #3's own handoff (§38) transcribed this SECOND life as
- * `[67,69]` (RAM 10938-10940 only); the fresh probe shows the slot is
- * actually still `inUse` through RAM 10945, so that was a 5-tick truncation
- * bug, corrected here to the RAM-confirmed full span. Slot 4 lives RAM
- * `[10933,10940]` at `(x2=24,y2=6)`, independently re-confirmed unchanged
- * from the handoff's own value.
- *
- * Both clones need ONE MORE tick of lag than the usual render=RAM+1
- * convention before their FIRST blended pixel actually appears (pixel-
- * confirmed this rung: render 10929 is already proven 0-diff for the lunge
- * ALONE, and slot 3's first life's own RAM window - naively `render=RAM+1`
- * - would otherwise also cover render 10929, where its offset is IDENTICAL
- * to the lunge table's own first entry; drawing the clone there at all
- * regresses that tick, since `blendChannel` at `eva+evb=20` does not
- * preserve a color blended with itself). One extra tick of creation-only
- * latency before a freshly-allocated semi-transparent OBJ's first visible
- * blended pixel - separate from the ordinary per-frame position-update lag
- * every other mechanism here already carries - resolves it cleanly. Slot
- * 4's own start and slot 3's second life both get the same treatment by the
- * same reasoning, though the hitsplat (rung (c3), unmodeled) obscures the
- * only render ticks that could independently pixel-confirm those two.
- */
-const TURN9_QUICKATTACK_CLONE_RENDER_LAG = 1; // the ordinary render=RAM+1 convention
-
-/** Slot 3's own offset at trace tick `t` (either of its two lives), or `null` outside both. */
-export function turn9QuickAttackSlot3Offset(t: number, pressTick: number): { x2: number; y2: number } | null {
-  const n = t - TURN9_QUICKATTACK_CLONE_RENDER_LAG - pressTick;
-  if (n >= 58 && n <= 64) return { x2: -17, y2: 2 }; // RAM 10928-10935, first visible render one tick after RAM creation
-  if (n >= 68 && n <= 74) return { x2: 0, y2: 0 }; // RAM 10938-10945 (corrected from the handoff's own [67,69]), first visible render one tick after RAM creation
-  return null;
-}
-
-/** Slot 4's own offset at trace tick `t`, or `null` outside its single life. */
-export function turn9QuickAttackSlot4Offset(t: number, pressTick: number): { x2: number; y2: number } | null {
-  const n = t - TURN9_QUICKATTACK_CLONE_RENDER_LAG - pressTick;
-  if (n >= 63 && n <= 69) return { x2: 24, y2: 6 }; // RAM 10933-10940, first visible render one tick after RAM creation
-  return null;
-}
-/**
- * PART 3 close-out finding, NOT closed (S7 engine step, this session):
- * restoring the excluded 10935-10944 span into `turn9-quickattack.json`
- * (per ISSUES #31's own hitsplat fix) exposed a SEPARATE, previously-
- * unprobed 203px residual at renders 10940-10941 only, confined to
- * Pidgeotto's own silhouette (bbox `(178,41)-(190,62)`) - structurally the
- * same SHAPE as AERIAL_ACE's own solved clone-vs-real overlap (slot 4 sits
- * at its own life-end here too, `n=68,69`), but applying that exact solved
- * rule (clone wins, blends against the field) here does NOT reach 0
- * tolerance (tried and reverted this session - predicted colors don't match
- * oracle, unlike AERIAL_ACE's own pixel-exact fit). Not curve-fit further:
- * this is a genuinely different, unpinned mechanism that happens to share
- * AERIAL_ACE's general shape, not the identical rule - named here rather
- * than guessed. `turn9-quickattack.json`'s own `captureFrames` restores
- * 10935-10939 and 10942-10944 (matching the hitsplat's own solved rule
- * exactly, 0 diff) but excludes 10940-10941 specifically, pending a fresh
- * RAM probe of slot 3/slot 4's own OAM order in this window (the same
- * `dump-quickattack-hitsplat-oam.py`-style instrument, not yet run for
- * these two sprites).
- */
 
 /**
  * `blendedTile`'s own target-2 always prefers the plain static field
@@ -12110,121 +12014,6 @@ export function drawSpriteSheetBlendedOverFbSkipping(fb: Uint8Array, tileset: Ti
 }
 
 /**
- * Draws QUICK_ATTACK's real-sprite lunge (rung c1) plus its two afterimage
- * clones (rung c2) for trace tick `t`, if any of the three is active -
- * returns whether it drew anything, so the caller knows the normal draw
- * already in `fb` needs no further changes otherwise. The real sprite is
- * redrawn (erase-footprint-then-opaque-redraw, `eraseGrovyleFootprint`'s own
- * shape) FIRST, both clones blended on top of it LAST (see
- * `blendedTileOverFb`'s own doc comment for why) - both the erase and the
- * real sprite's own redraw are clipped to `TURN9_QUICKATTACK_LUNGE_GROUND_
- * CLIP_Y` (the feet stay grounded throughout the lunge, unmoved). Wherever
- * slot 3 and slot 4 are simultaneously active and overlap (ISSUES #32, see
- * `turn9QuickAttackOpaqueMask`'s doc comment), slot 4's own opaque texels
- * suppress slot 3's blend there entirely, since slot 4 wins that OAM tie
- * unconditionally.
- */
-function drawTurn9QuickAttackAnimation(fb: Uint8Array, t: number, pressTick: number): boolean {
-  const lunge = turn9QuickAttackLungeOffset(t, pressTick);
-  const slot3 = turn9QuickAttackSlot3Offset(t, pressTick);
-  const slot4 = turn9QuickAttackSlot4Offset(t, pressTick);
-  if (!lunge && !slot3 && !slot4) return false;
-  erasePidgeottoFootprint(fb, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM);
-  const { tileset, palette } = pidgeottoFrontSprite;
-  const real = lunge ?? { x2: 0, y2: 0 };
-  drawSpriteSheetClippedBelow(fb, tileset, palette, PIDGEOTTO_CORNER.x + real.x2, PIDGEOTTO_CORNER.y + real.y2, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM);
-  if (slot3) {
-    const slot4Mask = slot4 ? turn9QuickAttackOpaqueMask(tileset, PIDGEOTTO_CORNER.x + slot4.x2, PIDGEOTTO_CORNER.y + slot4.y2, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM) : null;
-    if (slot4Mask) {
-      drawSpriteSheetBlendedOverFbSkipping(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot3.x2, PIDGEOTTO_CORNER.y + slot3.y2, 12, 8, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM, slot4Mask);
-    } else {
-      drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot3.x2, PIDGEOTTO_CORNER.y + slot3.y2, 12, 8, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM);
-    }
-  }
-  if (slot4) drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot4.x2, PIDGEOTTO_CORNER.y + slot4.y2, 12, 8, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM);
-  return true;
-}
-
-/**
- * S7 slice R rung (c3) (docs/turn9-shake-notes.md §1): the `AnimHitSplatBasic`
- * sprite over Onix (the QUICK_ATTACK TARGET this time, unlike ENDEAVOR's own
- * two-round table) - a single round, RAM-live 10934-10943 (10 ticks,
- * `ENDEAVOR_HITSPLAT_VISIBLE_TICKS`'s own convention exactly), render=RAM+1
- * (`ENDEAVOR_HITSPLAT_RENDER_LAG`'s own family), fixed screen center
- * `(72,88)`. **The affine matrix is NOT the same constant as ENDEAVOR's own
- * hitsplat** - fresh RAM read this session (`dump-endeavor-hitsplat-shake.py`
- * against `battle1-turn9-dense.json`, ticks 10930-10946): `matrixA=matrixD=
- * 303` throughout this hitsplat's whole life (ENDEAVOR's own instance reads
- * 372 - the two hitsplats' own affine "pop" anim apparently settles at a
- * different per-instance scale, not a shared engine constant as first
- * assumed; oracle-pixel-caught via `npm run compare` before this fresh RAM
- * read - the 372 guess undersized the starburst by ~20%). Same RAM read also
- * cross-confirms the shake table above bit-for-bit (`targetX2` 5 at RAM
- * 10936/10937/10940/10941, 0 elsewhere) and the hitsplat's own RAM span
- * (10934-10943, empty by 10944). Also RAM-confirmed the palette bank itself
- * (`PALRAM_OBJ` bank 7) matches `battle-anim-hitsplat.json`'s own stored
- * colors exactly (index 4 = `(255,255,173)`) - the asset is NOT the bug.
- *
- * ISSUES #31 close-out (S7 engine step PART 3, docs/turn9-shake-notes.md's
- * own "ISSUES #31 SOLVES completely" section): the hitsplat (OAM index 9)
- * wins its own OAM tie against Onix (index 10) UNCONDITIONALLY for its
- * whole life (RAM-proven, `dump-quickattack-hitsplat-oam.py`, never flips) -
- * Onix's own drawn body must contribute NOTHING to the blend. The prior
- * `eva=16,evb=16` "additive lighten over live fb" coefficient was a
- * plausible-looking but ultimately WRONG fit: it was fit against a target2
- * contaminated by Onix's own texel wherever both sprites overlapped (the
- * exact "blend over live fb" bug AERIAL_ACE's own clone-vs-real overlap
- * had), which is why it only ever matched near the hitsplat's own edges, not
- * its full footprint. The RAM-true blend is `eva=12,evb=8` (`BLDALPHA=
- * 0x080c`, the SAME ratio AERIAL_ACE's own solved rule uses) against the
- * static field ALONE, computed from the BG asset
- * (`drawSpriteSheetAffineStretchBlendedOverFb`'s own doc comment) - verified
- * 0-tolerance across the hitsplat's entire 421-opaque-pixel footprint, all
- * 10 live ticks (4210/4210 pixel-tick pairs exact).
- */
-const TURN9_HITSPLAT_CENTER = { x: 72, y: 88 };
-const TURN9_HITSPLAT_MATRIX = 303;
-const TURN9_HITSPLAT_RAM_OFFSET = 63; // RAM 10934 - pressTick(10871)
-function drawTurn9Hitsplat(fb: Uint8Array, t: number, pressTick: number): void {
-  const ramTick = t - ENDEAVOR_HITSPLAT_RENDER_LAG;
-  const n = ramTick - pressTick - TURN9_HITSPLAT_RAM_OFFSET;
-  if (n < 0 || n >= ENDEAVOR_HITSPLAT_VISIBLE_TICKS) return;
-  drawSpriteSheetAffineStretchBlendedOverFb(
-    fb,
-    battleAnimHitsplat.tileset,
-    battleAnimHitsplat.palette,
-    TURN9_HITSPLAT_CENTER.x - 16,
-    TURN9_HITSPLAT_CENTER.y - 16,
-    TURN9_HITSPLAT_MATRIX,
-    TURN9_HITSPLAT_MATRIX,
-    12,
-    8,
-    true,
-  );
-}
-
-/**
- * S7 slice R rung (c3) (docs/turn9-shake-notes.md §1): Onix's own episode-1
- * `x2` shake (`AnimTask_ShakeTargetBasedOnMovePowerOrDmg`, slot 6) -
- * RAM-confirmed square wave `5,5,0,0,5,5,0,0` over RAM 10936-10943 (`y2`
- * flat 0 throughout - this shake never moves Onix vertically). Render lag is
- * `RAM+2` (the shake/squish family, `ENDEAVOR_SHAKE_RENDER_LAG`'s own
- * convention - NOT the hitsplat's own separate `RAM+1` family), **plus one
- * genuine extra stall tick at render 10935** (the shake task's own
- * creation-tick quirk, matching `battle-menu-notes.md` §15f's "fade-out
- * task's own creation-tick stall" precedent) - modeled as a literal extra
- * table row (render offset 64) rather than a formula tweak, per that same
- * precedent's own doc comment. Render ticks showing `x2=5` (offsets from
- * `pressTick`): `{64,67,68,71,72}` = render `{10935,10938,10939,10942,
- * 10943}` - every other tick in and around this window is `0`.
- */
-const TURN9_EP1_ONIX_SHAKE_X2 = 5;
-const TURN9_EP1_ONIX_SHAKE_RENDER_OFFSETS: ReadonlySet<number> = new Set([64, 67, 68, 71, 72]);
-export function turn9Ep1OnixShakeX2(t: number, pressTick: number): number {
-  return TURN9_EP1_ONIX_SHAKE_RENDER_OFFSETS.has(t - pressTick) ? TURN9_EP1_ONIX_SHAKE_X2 : 0;
-}
-
-/**
  * S7 slice R rung (c4) (docs/turn9-shake-notes.md §2): episode 2's
  * healthbox/border `y2` wobble - RAM-confirmed alternating `+1,-1,...` for
  * exactly 20 ticks (RAM 10957-10976), render=RAM+1, same shape as ENDEAVOR's
@@ -12233,7 +12022,7 @@ export function turn9Ep1OnixShakeX2(t: number, pressTick: number): number {
  * them" per the brief).
  */
 const TURN9_EP2_HEALTHBOX_WOBBLE_RENDER_LAG = 1;
-const TURN9_EP2_HEALTHBOX_WOBBLE_START = 86; // RAM 10957 - pressTick(10871)
+const TURN9_EP2_HEALTHBOX_WOBBLE_START = 84; // ISSUES #39 rank-5 slice 1: Scene-OFF RAM 10955 - pressTick(10871), dump-turn9-hitanim-off.py against factory-battle-scene-off.json (was RAM 10957/86 on the retired ON pin - Cmd_hitanimation lands 2 ticks earlier once attackanimation's own Pausex20 substitute replaces QUICK_ATTACK's real animation)
 const TURN9_EP2_HEALTHBOX_WOBBLE_TICKS = 20;
 /** `start` defaults to turn 9's own anchor (every pre-existing caller unaffected) - see `turn9Ep2OnixInvisible`'s own doc comment for why this generalization exists (turn 10's own re-trigger of the same ENDEAVOR §15f-precedented companion mechanism). */
 export function turn9Ep2HealthboxWobbleY2(t: number, pressTick: number, start: number = TURN9_EP2_HEALTHBOX_WOBBLE_START): number {
@@ -12259,7 +12048,7 @@ export function turn9Ep2HealthboxWobbleY2(t: number, pressTick: number, start: n
  * episode - this is a pure visibility gate, not a position shake).
  */
 const TURN9_EP2_FLICKER_RENDER_LAG = 1;
-const TURN9_EP2_FLICKER_START = 87; // RAM 10958 - pressTick(10871)
+const TURN9_EP2_FLICKER_START = 85; // ISSUES #39 rank-5 slice 1: Scene-OFF RAM 10956 - pressTick(10871), dump-turn9-hitanim-off.py (was RAM 10958/87 on the retired ON pin, same 2-tick shift as the wobble start above)
 const TURN9_EP2_FLICKER_TOTAL_TICKS = 32; // RAM 10958-10989 inclusive (4 blocks of 4-on/4-off)
 const TURN9_EP2_FLICKER_PERIOD = 8;
 const TURN9_EP2_FLICKER_ON_TICKS = 4;
@@ -12289,7 +12078,7 @@ export function turn9Ep2OnixInvisible(t: number, pressTick: number, start: numbe
  * decrement lands the next tick (10993), matching `ENDEAVOR_HP_DRAIN_START_
  * DELAY`'s own convention.
  */
-const TURN9_HP_DRAIN_START_DELAY = 121;
+const TURN9_HP_DRAIN_START_DELAY = 119; // ISSUES #39 rank-5 slice 1: Scene-OFF RAM sentinel tick 10990 - pressTick(10871), dump-turn9-hitanim-off.py's own bar0Curr read (was 121 on the retired ON pin, same 2-tick shift as the wobble/flicker starts above)
 /** Onix's own HP entering turn 9 (flat 31, unchanged since turn 5's own Sitrus heal - `turn5SitrusOnixHp`'s own settled endpoint) - `turn9OnixHp`'s own `startHp`. */
 const TURN9_ONIX_BEFORE_QUICKATTACK_HP = 31;
 export function turn9OnixHp(t: number, pressTick: number, startHp: number, endHp: number): number {
@@ -12302,14 +12091,17 @@ export function turn9OnixHp(t: number, pressTick: number, startHp: number, endHp
  * `sText_NotVeryEffective` - a SINGLE line (turn9-notes.md §5's own
  * two-line transcription was wrong, corrected by fresh pixel probing: line 2
  * never gets ink), same `TURN6_SUPER_EFFECTIVE_LINE`-shaped single-line
- * reveal. First char at render 11005 (`pressTick+134`), fully typed at
- * render 11028 (24/24 chars, the `…` glyph), then a flat, non-periodic hold
- * through 11109.
+ * reveal. ISSUES #39 rank-5 slice 1: under Scene OFF,
+ * `turn9-quickattack-off.json` settles to its own held sha 2 ticks earlier
+ * (render 11026, was 11028 on the retired ON pin) - same 2-tick shift
+ * `TURN9_EP2_*`/`TURN9_HP_DRAIN_START_DELAY` above already carry. First
+ * char now at render 11003 (`pressTick+132`), fully typed at 11026 (24/24
+ * chars, the `…` glyph).
  */
 export const TURN9_NOTVERYEFFECTIVE_LINE = "It’s not very effective…";
 
 export function turn9NotVeryEffectiveTextStartTick(pressTick: number): number {
-  return pressTick + 134;
+  return pressTick + 132;
 }
 
 export function turn9NotVeryEffectiveTextVisibleChars(t: number, pressTick: number): number {
@@ -12319,12 +12111,17 @@ export function turn9NotVeryEffectiveTextVisibleChars(t: number, pressTick: numb
 }
 
 /**
- * S7 slice R rung (d): turn 9's own QUICK_ATTACK-resolution window - ep1
- * (hitsplat+shake), ep2 (healthbox wobble+Onix flicker), Onix's own HP
- * drain, the "not very effective" message, its settled hold, then handoff to
- * ROCK_SLIDE once its own kickoff text begins - same "handoff at the next
- * move's own kickoff-text start" shape `drawTurn6FeatherDanceKickoffText`'s
- * own `rockSlideTextStartTick(TURN6_ROCKSLIDE_PRESS_TICK)` check already
+ * ISSUES #39 rank-5 slice 1: turn 9's own QUICK_ATTACK-resolution window
+ * under the Scene-OFF-owned presentation - `attackanimation` substitutes a
+ * fixed `BattleScript_Pausex20` pause for the move's own animation
+ * (`docs/rank5-effect-visibility-scout.md` §1), so QUICK_ATTACK's own
+ * lunge/clone/hitsplat/shake (class c) never renders; only the generic
+ * `Cmd_hitanimation` pair (healthbox wobble+Onix flicker, class b, still
+ * `turn9Ep2*`) and the ordinary HP drain/message text (class a/b) fire, then
+ * handoff to ROCK_SLIDE once its own kickoff text begins - same "handoff at
+ * the next move's own kickoff-text start" shape
+ * `drawTurn6FeatherDanceKickoffText`'s own
+ * `rockSlideTextStartTick(TURN6_ROCKSLIDE_PRESS_TICK)` check already
  * establishes.
  */
 function drawTurn9QuickAttackWindow(fb: Uint8Array, t: number, pressTick: number): void {
@@ -12333,13 +12130,10 @@ function drawTurn9QuickAttackWindow(fb: Uint8Array, t: number, pressTick: number
     return;
   }
   const bounceTick = turn9KickoffBounceTick(t, pressTick);
-  const onixX2 = turn9Ep1OnixShakeX2(t, pressTick);
   const onixInvisible = turn9Ep2OnixInvisible(t, pressTick);
   const healthboxY2 = turn9Ep2HealthboxWobbleY2(t, pressTick);
   const onixHp = turn9OnixHp(t, pressTick, TURN9_ONIX_BEFORE_QUICKATTACK_HP, TURN9_ONIX_AFTER_QUICKATTACK_HP);
-  drawTurn9FieldBase(fb, t, bounceTick, undefined, onixHp, onixX2, onixInvisible, healthboxY2);
-  drawTurn9QuickAttackAnimation(fb, t, pressTick);
-  drawTurn9Hitsplat(fb, t, pressTick);
+  drawTurn9FieldBase(fb, t, bounceTick, undefined, onixHp, 0, onixInvisible, healthboxY2);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const notVeryEffectiveStart = turn9NotVeryEffectiveTextStartTick(pressTick);
   if (t >= notVeryEffectiveStart) {
@@ -12352,23 +12146,29 @@ function drawTurn9QuickAttackWindow(fb: Uint8Array, t: number, pressTick: number
 /**
  * S7 slice R rung (d): a SYNTHETIC press anchor (same reasoning as
  * `TURN6_ROCKSLIDE_PRESS_TICK`/`TURN7_ROCKSLIDE_PRESS_TICK`), chosen so
- * `rockSlideTextStartTick(TURN9_ROCKSLIDE_PRESS_TICK)` lands on render
- * 11110 - the fresh-oracle-pinned first tick of the "ONIX used\nROCK
- * SLIDE!" transition (`verify-turn9-postlunge.ts`'s own "settled hold ends"
- * check; docs/turn9-shake-notes.md's 2026-07-21 addendum §3).
- * `11110 - ROCK_SLIDE_TEXT_DELAY(393) = 10717`.
+ * `rockSlideTextStartTick(TURN9_ROCKSLIDE_PRESS_TICK)` lands on the "ONIX
+ * used\nROCK SLIDE!" transition tick. ISSUES #39 rank-5 slice 1 (Scene-OFF):
+ * fresh oracle re-run (`bin/oracle run tools/compare/traces/
+ * turn9-rockslide-off.json`) shows this transition lands on render **11108**
+ * under Scene OFF (was 11110 on the retired ON pin - QUICK_ATTACK's own
+ * resolution compresses by 2 ticks, same shift `TURN9_EP2_*`/
+ * `TURN9_HP_DRAIN_START_DELAY` above already carry). `11108 -
+ * ROCK_SLIDE_TEXT_DELAY(393) = 10715`.
  */
-export const TURN9_ROCKSLIDE_PRESS_TICK = 10717;
+export const TURN9_ROCKSLIDE_PRESS_TICK = 10715;
 
 /**
  * Turn-specific, NOT transferable from `TURN6_SUPER_EFFECTIVE_TEXT_DELAY`/
  * `TURN7_SUPER_EFFECTIVE_TEXT_DELAY` (same "each turn gets its own literal
  * constant" convention those two doc comments already establish - Pidgeotto's
- * own HP-drain duration differs turn to turn). `turn9-notes.md` §5's own
- * table cites the transition's first tick at 11341
- * (`TURN9_ROCKSLIDE_PRESS_TICK(10717)+624`).
+ * own HP-drain duration differs turn to turn). ISSUES #39 rank-5 slice 1:
+ * `bin/oracle run tools/compare/traces/turn9-rockslide-off.json` shows the
+ * fully-typed "It's super effective!" hold beginning at render **11252**
+ * under Scene OFF (21-char line, so first char at 11252-20=11232) -
+ * `11232 - TURN9_ROCKSLIDE_PRESS_TICK(10715) = 517` (was `624` on the
+ * retired ON pin, whose own transition landed at render 11341).
  */
-const TURN9_SUPER_EFFECTIVE_TEXT_DELAY = 624;
+const TURN9_SUPER_EFFECTIVE_TEXT_DELAY = 517;
 
 export function turn9SuperEffectiveTextStartTick(pressTick: number): number {
   return pressTick + TURN9_SUPER_EFFECTIVE_TEXT_DELAY;
@@ -12381,23 +12181,48 @@ export function turn9SuperEffectiveTextVisibleChars(t: number, pressTick: number
 }
 
 /**
- * S7 slice R rung (d): turn 9's own ROCK_SLIDE (Onix vs. Pidgeotto) - every
- * mechanism reused with ZERO changes from turns 6/7's own instances
- * (`rockSlideBg3Y`/`rockSlideRockState`/`rockSlideDrawOrder`/
- * `rockSlideMonShakeY2`/`rockSlideHealthboxWobbleY2`/`rockSlideMonBlinkInvisible`/
- * `rockSlideOpponentHp`, all still `pressTick`-relative) - only
- * `TURN9_ROCKSLIDE_PRESS_TICK` and Pidgeotto's own HP (82->61) are new. Onix
- * (the attacker this time) is already at its final post-QUICK_ATTACK HP
- * (24) and doesn't move - drawn via `drawTurn9FieldBase`'s own plain settled
- * path (no shake/invisible override needed, ep1/ep2 are long over).
+ * ISSUES #39 rank-5 slice 1: turn 9's own OFF-fit hit-reaction anchor -
+ * `dump-turn9-hitanim-off.py` against `factory-battle-scene-off.json`
+ * (RAM-confirmed: the healthbox wobble/Pidgeotto-flicker pair starts RAM
+ * tick 11170, `TURN9_ROCKSLIDE_PRESS_TICK`(10715)+455) plus Pidgeotto's own
+ * `x2`/`y2` target shake (`rockSlideMonShakeY2`'s own
+ * `targetShakeStartAge`/`targetShakeEndAge`, ON-fit `[443,536]`) confirmed
+ * flat 0 for this window's ENTIRE span under Scene OFF - the move-specific
+ * shake never fires (same source rule as `docs/
+ * rank5-effect-visibility-scout.md` §1, so its own call is dropped below
+ * rather than given a never-active override). `rockAnchorAge`/
+ * `spriteOrderSeed`/`occupiedSpriteSlots` are irrelevant here since neither
+ * `rockSlideBg3Y` nor the rock-prop loop are called for this turn anymore.
+ */
+const TURN9_ROCKSLIDE_ANIMATION_PROFILE = { ...ROCK_SLIDE_ANIMATION_PROFILE, hitFlashAnchorAge: 455 };
+
+/** ISSUES #39 rank-5 slice 1: Scene-OFF RAM sentinel tick 11205 - `TURN9_ROCKSLIDE_PRESS_TICK`(10715), `dump-turn9-hitanim-off.py`'s own `bar1Curr` read (was `ROCK_SLIDE_HP_DRAIN_START_DELAY`(597) on the retired ON pin - the fixed `Pausex20` substitute for ROCK_SLIDE's own long real animation compresses this by far more than QUICK_ATTACK's own 2-tick shift). */
+export const TURN9_ROCKSLIDE_HP_DRAIN_START_DELAY = 490;
+
+/**
+ * ISSUES #39 rank-5 slice 1: turn 9's own ROCK_SLIDE (Onix vs. Pidgeotto)
+ * under the Scene-OFF-owned presentation - the shared generic hit-reaction
+ * pair (`rockSlideHealthboxWobbleY2`/`rockSlideMonBlinkInvisible`, class b,
+ * re-anchored via `TURN9_ROCKSLIDE_ANIMATION_PROFILE` above) and the HP
+ * drain (`rockSlideOpponentHp`, re-anchored via
+ * `TURN9_ROCKSLIDE_HP_DRAIN_START_DELAY`) still fire, same source rule as
+ * QUICK_ATTACK's own window above; ROCK_SLIDE's own class-c bodies - the
+ * `rockSlideBg3Y` camera shake (tied to the same rock-anchor task as the
+ * rock-prop sprites), Pidgeotto's own target shake
+ * (`rockSlideMonShakeY2`), and the rock-prop drop sprites themselves
+ * (`rockSlideRockState`/`drawRockSprite`, `docs/
+ * rank5-effect-visibility-scout.md` §2/§3) - never render under
+ * `HITMARKER_NO_ANIMATIONS` and are dropped here. Onix (the attacker this
+ * time) is already at its final post-QUICK_ATTACK HP (24) and doesn't move -
+ * drawn via `drawTurn9FieldBase`'s own plain settled path (no
+ * shake/invisible override needed, ep1/ep2 are long over).
  */
 function drawTurn9RockSlideAttack(fb: Uint8Array, t: number): void {
   const pressTick = TURN9_ROCKSLIDE_PRESS_TICK;
-  const shiftY = rockSlideBg3Y(t, pressTick);
-  drawStaticBgShiftedY(fb, shiftY, turn5BgFadeY(t));
+  drawStaticBgShiftedY(fb, 0, turn5BgFadeY(t));
   drawTurn5IconBar(fb, t);
-  if (!rockSlideMonBlinkInvisible(t, pressTick)) {
-    drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y + rockSlideMonShakeY2(t, pressTick));
+  if (!rockSlideMonBlinkInvisible(t, pressTick, TURN9_ROCKSLIDE_ANIMATION_PROFILE)) {
+    drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y);
   }
   // Onix's own DoBounceEffect stopped being polled at turn 9's real A-press
   // (`turn9KickoffBounceTick`'s own frozen anchor) and never resets mid-turn
@@ -12407,33 +12232,40 @@ function drawTurn9RockSlideAttack(fb: Uint8Array, t: number): void {
   const frozenBounceTick = turn9KickoffBounceTick(t, TURN9_QUICKATTACK_PRESS_TICK);
   const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(frozenBounceTick + TURN9_REGIME4_TO_REGIME1_SHIFT));
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
-  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
-  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP);
+  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick, TURN9_ROCKSLIDE_ANIMATION_PROFILE);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN9_ROCKSLIDE_HP_DRAIN_START_DELAY);
   const opponentContent = pidgeottoHealthboxContentForHp(opponentHp);
   drawSendOutHealthbox(fb, 0, opponentContent);
   if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
-  for (const i of rockSlideDrawOrder(t, pressTick)) {
-    const rock = rockSlideRockState(i, t, pressTick);
-    if (!rock) continue;
-    drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
-  }
   drawMenuHealthboxPlayer(fb, 0, 0);
   drawPlayerHealthboxHpOverlay(fb, TURN9_ONIX_AFTER_QUICKATTACK_HP, 0);
 }
 
 /**
+ * ISSUES #39 rank-5 slice 1: turn 9's own ROCK_SLIDE window's own held
+ * "It's super effective!" text goes blank (box/scene stay, no text - same
+ * "teal blank box" shape `TURN8_TEXT_CLEAR_DELAY`'s own doc establishes)
+ * before the OUTER dispatcher's own hard-cut to the next menu -
+ * oracle-confirmed (`turn9-rockslide-off.json`): render 11329
+ * (`TURN9_ROCKSLIDE_PRESS_TICK`(10715)+614).
+ */
+const TURN9_ROCKSLIDE_TEXT_CLEAR_DELAY = 614;
+
+/**
  * S7 slice R rung (d): turn 9's own ROCK_SLIDE window - kickoff text, attack
- * animation, "It's super effective!" message, settled hold. Unlike turns
- * 6/7's own top-level ROCK_SLIDE dispatchers, this one does NOT need its own
- * redraw-tick/turn-end branch: the OUTER dispatcher
- * (`drawTurn9FightSubmenuWindow`) already hands off to `drawTurn9TurnEndSettledMenu`
- * at `TURN9_QUICKATTACK_PRESS_TICK+TURN9_MENU_REDRAW_DELAY` (11445) before
- * this function is ever reached for `t` past that point.
+ * animation, "It's super effective!" message, its own blank-text clear step,
+ * settled hold. Unlike turns 6/7's own top-level ROCK_SLIDE dispatchers,
+ * this one does NOT need its own redraw-tick/turn-end branch: the OUTER
+ * dispatcher (`drawTurn9FightSubmenuWindow`) already hands off to
+ * `drawTurn9TurnEndSettledMenu` at
+ * `TURN9_QUICKATTACK_PRESS_TICK+TURN9_MENU_REDRAW_DELAY` before this
+ * function is ever reached for `t` past that point.
  */
 function drawTurn9RockSlideWindow(fb: Uint8Array, t: number): void {
   const pressTick = TURN9_ROCKSLIDE_PRESS_TICK;
   drawTurn9RockSlideAttack(fb, t);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  if (t >= pressTick + TURN9_ROCKSLIDE_TEXT_CLEAR_DELAY) return;
   const superEffectiveStart = turn9SuperEffectiveTextStartTick(pressTick);
   if (t >= superEffectiveStart) {
     drawMessageTextLines(fb, TURN6_SUPER_EFFECTIVE_LINE, "", turn9SuperEffectiveTextVisibleChars(t, pressTick));
@@ -12522,7 +12354,17 @@ export const TURN9_QUICKATTACK_PRESS_TICK = 10871;
  * still NOT modeled this session (out of scope, rungs c3/c4/d) - only the
  * pure-`t` redraw boundary and the resettled bounce phase are pinned here.
  */
-export const TURN9_MENU_REDRAW_DELAY = 574;
+/**
+ * ISSUES #39 rank-5 slice 1: re-fit against Scene OFF. `turn9-rockslide-off.json`
+ * shows the settled turn-10 menu's own content sha landing at render 11336
+ * (`TURN9_QUICKATTACK_PRESS_TICK`(10871)+465), 114 ticks earlier than the
+ * retired ON pin's own 11450 - oracle-bisected directly against the
+ * acceptance pin (exact switchover tick, not the ON pin's own "bounce task
+ * resets ~5 ticks before the visual settle" approximation, which does not
+ * hold once `TURN9_ROCKSLIDE_TEXT_CLEAR_DELAY` below's own blank-text phase
+ * is accounted for).
+ */
+export const TURN9_MENU_REDRAW_DELAY = 465;
 
 /** Same "resettled menu re-initializes its own bounce phase fresh at redraw" formula as `turn8ResettledBounceTick`, keyed off `TURN9_MENU_REDRAW_DELAY`. */
 export function turn9ResettledBounceTick(t: number, pressTick: number): number {
