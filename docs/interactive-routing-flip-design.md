@@ -650,13 +650,29 @@ changing any immutable capture list.
    cursor, and the fresh-battle cursor boundary. Slice 2 must establish these
    with a short read-only OFF-profile probe and source reconciliation. Do not
    infer them from whichever seed happens to reproduce DESTIN.
-2. **Arbitrary-trainer dense intro acceptance.** Battle Lab currently resets
-   its public clock at the first command menu, so the landed SHIZUKA private
-   probe cannot become a public pre-reset compare trace without a harness-side
-   capture contract (`docs/trainer-pic-off-window-scout.md:1-16,113-131`).
-   The anchor DESTIN interactive trace does not require that change. Whether
-   to add a harness pre-reset capture mode is a cross-program/user decision
-   and is not part of this flip.
+2. **Arbitrary-trainer dense intro acceptance.** ~~Whether to add a harness
+   pre-reset capture mode is a cross-program/user decision.~~ **RESOLVED —
+   this paragraph was already stale when written (2026-07-30 12:24).** The
+   harness added exactly that contract earlier the same morning:
+   `preCheckpointCaptureFrames` (harness `8251953`, 10:13) exposes the
+   rental-selection and battle-start intro frames `prepare()` already drives,
+   and `preCheckpointCaptureAllFrames` (`38fea69`, 10:19) captures them
+   densely with no count cap; see `../../oracle/BATTLE_LAB.md` "Pre-checkpoint
+   captures". The running main oracle service (started 11:59) includes both.
+   No user decision is needed — what remains is wiring: pre-checkpoint frames
+   use a **separate absolute coordinate space** (frame 0 is immediately after
+   `new_session()`, before any semantic writes), so the scout's measured
+   P..B+714 window must be mapped onto that numbering and coverage confirmed
+   by probe. Early frames' `state` battle-struct fields are meaningless until
+   `gBattlersCount == 2`. The anchor DESTIN interactive trace never required
+   this change.
+
+   **Still genuinely open (smaller):** the attendant-commentary checkpoint
+   (entry 690) wants a *specific* generated party. `BattleLab.preview_report`
+   (`047af61`, 10:57) replays the scouting-report dialogue from an earlier
+   anchor but "can pick a seed, not a specific opponent". Reaching a chosen
+   party therefore needs either a seed search or a harness ask for
+   opponent-specific control.
 3. **The B+444 residual.** The generated intro remains 714/715 because of the
    already-recorded 10px summary-slot ordering residual. This design preserves
    and reports it. Fix-versus-attribute remains its separately scheduled

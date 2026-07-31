@@ -933,6 +933,14 @@ weighting + named-barrier cross-reference). Clarified standing scope:
   explicit schema rejection stands; not a blocker for Gates 3–6).
 - **Audio is its own later milestone — S11**; no S10 gate includes it.
 
+**User ordering decision (2026-07-30):** work the remaining program in this
+order — **Gate 5 first, then ISSUES #39, then Gate 6.** Gate 5 is the
+headline: it is what makes a real generated Factory run possible, so it leads
+even though #39 is older debt. #39 is not getting worse (AGENTS.md already
+forbids new turn-keyed branches), so its slices fill gaps around Gate-5 work
+rather than blocking it. Gate 6's breadth sweep depends on Gate 5 landing
+first and follows it.
+
 Build the rules engine from the pinned source's actual structure: generated
 tables plus a typed Battle Script IR/interpreter and source-mapped item,
 ability, end-turn, AI, and switching hooks. Do not grow a collection of

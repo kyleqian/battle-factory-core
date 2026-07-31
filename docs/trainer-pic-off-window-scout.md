@@ -115,6 +115,14 @@ That lookup maps BLACK_BELT to `TRAINER_PIC_BLACK_BELT`
    harness deliberately add pre-reset capture. **PREDICTION:** keep the
    private route as probe until generated route exists; no harness change here.
 
+   **PREDICTION FALSIFIED (2026-07-30).** The harness took the second branch
+   the next morning: `preCheckpointCaptureFrames` (`8251953`) plus
+   `preCheckpointCaptureAllFrames` (`38fea69`) expose the rental-selection and
+   intro-cutscene frames, so this window is publicly capturable and slice 4's
+   trace no longer depends on the generated route reaching P first. Mind the
+   separate absolute frame numbering — see
+   `interactive-routing-flip-design.md` §6.2.
+
 ### Recommended slices
 
 1. **Start-command contract (<=35 min):** freeze trainer, parties, active

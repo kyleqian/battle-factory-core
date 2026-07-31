@@ -5,6 +5,17 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+**Two kinds of entry live here — do not confuse them.** Only `#39` below is
+open, actionable debt. `#38`, `#18`, and `#5` are **settled records, not
+work**: each was investigated to root cause and then parked or accepted by
+decision. They stay because ROADMAP acceptance lines cite them by number as
+the recorded reason specific pixel diffs are accepted (`#5` at ROADMAP:127,
+142, 150, 163, 175; `#18` at :176; `#38` at :503) — deleting them would
+orphan those citations and lose the *why* behind a green tick. Do not reopen
+one without a user decision, and do not count them as backlog.
+
+# Open
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn
@@ -45,6 +56,8 @@ oracle-exact and that evidence is worth keeping. The debt is the *keying*.
 ROADMAP S10 §3 requires one already-exact window to be re-driven from semantic
 events as a proof of the seam; that conversion, window by window, is the
 retirement path. AGENTS.md already forbids adding new turn-keyed branches.
+
+# Settled records (not open work — see the note at the top of this file)
 
 ## #38 — [PARKED 2026-07-22, supervisor decision] Turn 16 FAINT_ATTACK
   delayed-control tick 21006 exposes `BLDALPHA` one VBlank early
