@@ -1,16 +1,21 @@
 /**
- * ISSUES #39 rank-3 flip, half 1 of 2 (docs/battle-scene-retirement-
- * inventory.md rank-3 row): the Turn-5 ROCK_SLIDE KO (Onix -> Grovyle, the
- * OPPONENT's mon) -> Pidgeotto switch-in half of `battleScene.ts`'s turn-5
- * window now sources its opponent-faint sink geometry and PIDGEOTTO
- * switch-in facts from this adapter instead of a hand-fit sink constant plus
- * independently re-stated switch-in literals. Formerly a preview proof
+ * ISSUES #39 rank-3 flip (docs/battle-scene-retirement-inventory.md rank-3
+ * row), both halves now landed: the Turn-5 ROCK_SLIDE KO (Onix -> Grovyle,
+ * the OPPONENT's mon) -> Pidgeotto switch-in -> Sitrus heal window of
+ * `battleScene.ts`'s turn-5 window sources its opponent-faint sink geometry,
+ * PIDGEOTTO switch-in facts, and Sitrus heal HP endpoints/message text from
+ * this adapter instead of hand-fit constants plus independently re-stated
+ * literals. Formerly a preview proof
  * (`turn5ResolutionAdapterPreview.ts`/`...PreviewEquivalence.test.ts`, rank-1/
  * rank-2's own promotion pattern) -- see this module's own git history for
- * that precedent. The Sitrus heal half (`resolveTurn5SitrusAdapter`) remains
- * proven but NOT wired into `battleScene.ts` -- see
- * `TURN5_PRESENTATION_TIMING_NOT_STAGED`'s own doc below, this flip's own
- * explicit out-of-scope boundary.
+ * that precedent. Half 1 (faint-sink/switch-in) landed first; half 2
+ * (Sitrus) reuses `resolveTurn5SitrusAdapter`, wiring its already-proven
+ * facts into `battleScene.ts`'s `TURN5_SITRUS_HEAL_HP_START`/`_END` and
+ * `TURN5_SITRUS_HEAL_LINE1`/`_LINE2` -- the presentation TIMING curves
+ * themselves (`turn5SitrusHealTextVisibleChars`, `turn5SitrusOnixHp`'s
+ * animation shape, `turn5SitrusRingMatrix`, `turn5SitrusResettledBounceTick`)
+ * are untouched, still their own oracle-pixel-fit closed forms -- this flip
+ * is the keying/content, not the choreography.
  *
  * KO/faint half: `turn5FaintPresentationStaging.ts` already stages Onix's
  * real ONIX(1hp)->GROVYLE(1hp) hit chain (MOVE_STRENGTH substituted for
@@ -58,13 +63,12 @@
  * `B_ATK_NAME_WITH_PREFIX`/`B_BUFF2`/etc: NOT a missing mechanism, just an
  * unsupplied resolver pair at this one call site. Onix's real HP climb
  * (1->31) and the real heal text
- * ("ONIX’s SITRUS BERRY"/"restored health!") this module reproduces
- * match `battleScene.ts`'s own unexported hand constants
- * (`TURN5_SITRUS_HEAL_HP_START`/`_END` at `9629-9630`,
- * `TURN5_SITRUS_HEAL_LINE1`/`_LINE2` at `9592-9593`) -- see this module's
- * own equivalence test for the numeric/text pins (those constants are not
- * exported, so the test pins literal values with line citations, the same
- * shape rank 2's own switch-in test used for `MURKROW_LEVEL`/hp-142).
+ * ("ONIX’s SITRUS BERRY"/"restored health!") this module reproduces now
+ * literally ARE `battleScene.ts`'s own exported `TURN5_SITRUS_HEAL_HP_START`/
+ * `_END` and `TURN5_SITRUS_HEAL_LINE1`/`_LINE2` -- see this module's own
+ * equivalence test, which pins the live production path against a fresh,
+ * independently-computed adapter call, the same shape rank-3 half 1's own
+ * faint-sink/switch-in pins already established.
  *
  * ISSUES #57 (`387a34a1`): this module now REUSES
  * `turn1RockSlidePresentationStaging.ts`'s own shared
@@ -332,17 +336,3 @@ export function resolveTurn5SitrusAdapter(): Turn5SitrusAdapter {
     itemConsumed: onix.item === 0,
   });
 }
-
-/**
- * Named gap marker, rank-3's own explicit half-2 scope boundary (not this
- * slice's -- see docs/battle-scene-retirement-inventory.md rank-3 row and
- * ISSUES #39's own "half 1 of 2" brief): the Sitrus heal half is proven
- * above (`resolveTurn5SitrusAdapter`) but not wired into `battleScene.ts`,
- * and its own presentation TIMING (text-printer start tick, HP-bar climb
- * cadence, menu-redraw handoff -- `turn5SitrusHealTextVisibleChars`,
- * `turn5SitrusOnixHp`, `turn5SitrusRingMatrix`,
- * `turn5SitrusResettledBounceTick` and their consumers) is untouched, still
- * hand-fit. This module proves the Sitrus half's own FACTS, not the
- * projection that would render them -- a later slice's own flip.
- */
-export const TURN5_PRESENTATION_TIMING_NOT_STAGED = true;

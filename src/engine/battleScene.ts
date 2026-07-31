@@ -819,7 +819,11 @@ import {
   resolveTurn13SandAttackKickoffLines,
 } from "./turn13SandAttackPresentationStaging.ts";
 import { resolveTurn13ResolutionAdapter, resolveTurn13SwitchInAdapter } from "./turn13ResolutionAdapter.ts";
-import { resolveTurn5FaintSinkGeometry, resolveTurn5SwitchInAdapter } from "./turn5ResolutionAdapter.ts";
+import {
+  resolveTurn5FaintSinkGeometry,
+  resolveTurn5SitrusAdapter,
+  resolveTurn5SwitchInAdapter,
+} from "./turn5ResolutionAdapter.ts";
 import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
@@ -9595,6 +9599,18 @@ function drawGrantingStarsAtAge(
 }
 
 /**
+ * ISSUES #39 rank-3 flip, half 2: the real Sitrus-heal fact source
+ * (`turn5ResolutionAdapter.ts`'s `resolveTurn5SitrusAdapter`), chaining
+ * Onix's own real held-item proc (`runBattleEndTurnOrchestration`'s already-
+ * ported `HOLD_EFFECT_RESTORE_HP` case) instead of independently re-stating
+ * the heal's HP endpoints/message text here - reused below for
+ * `TURN5_SITRUS_HEAL_LINE1`/`_LINE2` and `TURN5_SITRUS_HEAL_HP_START`/`_END`,
+ * same "module-level constant derived once at import time" discipline
+ * `TURN5_SWITCHIN` already established.
+ */
+const TURN5_SITRUS = resolveTurn5SitrusAdapter();
+
+/**
  * S7 slice M-5 (docs/faint-switch-notes.md §15): "ONIX's SITRUS BERRY\n
  * restored health!" (`STRINGID_ITEMHEALHP_BERRY`'s own two-line wrap) -
  * pixel-confirmed this session via a full oracle diff scan of `battle1-
@@ -9607,10 +9623,13 @@ function drawGrantingStarsAtAge(
  * in between, 7084/7091/7105 - same mechanism/cadence as every other
  * message in this dossier). Held flat 7112 through **7215** (104 ticks,
  * matching §11's own "held" note, now bounded exactly) - the HP bar climbs
- * DURING this hold (`turn5SitrusOnixHp` below), not after it.
+ * DURING this hold (`turn5SitrusOnixHp` below), not after it. ISSUES #39
+ * rank-3 flip: line content is now `TURN5_SITRUS.healLines`, the real
+ * `STRINGID_PKMNSITEMRESTOREDHEALTH` resolution, not an independently
+ * re-stated literal pair.
  */
-const TURN5_SITRUS_HEAL_LINE1 = "ONIX’s SITRUS BERRY";
-const TURN5_SITRUS_HEAL_LINE2 = "restored health!";
+export const TURN5_SITRUS_HEAL_LINE1 = TURN5_SITRUS.healLines[0]!;
+export const TURN5_SITRUS_HEAL_LINE2 = TURN5_SITRUS.healLines[1]!;
 const TURN5_SITRUS_HEAL_TEXT_START_TICK = 7078;
 
 export function turn5SitrusHealTextVisibleChars(t: number): number {
@@ -9644,10 +9663,12 @@ const TURN5_SITRUS_MENU_REDRAW_TICK = 7222;
  * every later pixel change in that region is purely the ordinary idle-
  * bounce y-shift (confirmed by re-matching at 9 candidate yOffsets: exact
  * 0-diff hits at yOffset 0/1/2 only, matching `menuIdleBounce`'s own
- * 0..2 range, never a different hp).
+ * 0..2 range, never a different hp). ISSUES #39 rank-3 flip: the endpoints
+ * are now `TURN5_SITRUS.hp.from`/`.to`, the real staged Sitrus proc's own
+ * HP-change event, not independently re-stated literals.
  */
-const TURN5_SITRUS_HEAL_HP_START = 1;
-const TURN5_SITRUS_HEAL_HP_END = 31;
+export const TURN5_SITRUS_HEAL_HP_START = TURN5_SITRUS.hp.from;
+export const TURN5_SITRUS_HEAL_HP_END = TURN5_SITRUS.hp.to;
 
 export function turn5SitrusOnixHp(t: number): number {
   return sitrusDisplayedHpAtAge(
