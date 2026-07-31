@@ -1,3 +1,55 @@
+## 761 — [BOUNDED MAIN WORKER 2026-07-31 ~00:50] Species-dependent dispatch delay: mechanism named, cry-duration-modeled, fixed; YOSHI 650/751
+
+- **State:** new `tools/extract/extract-cry-durations.ts` →
+  `src/data/gen/cry-durations.json` (376 species) + isolated extractor test
+  `tests/cryDurationsExtraction.test.ts`; `battleScene.ts` dispatch/text/
+  visual/ready delay constants replaced with a shared species-keyed
+  function (no species-name branch); `docs/trainer-pic-off-window-scout.md`
+  §D "Round 5 resolution" has full mechanism citations + the 4-species
+  triangulation table. Focused: `factoryBattleStartIntro` + ack-alignment +
+  `executableFrontierRatchet` + `factoryRoundBattleOrchestrator` +
+  `cryDurationsExtraction` + `speciesStatsExtraction` + `battleScene` +
+  `kabutoSendOut` **340/340 green**; `npx tsc --noEmit` clean. Full
+  `npm test`/`npm run build` **not run this step**, per the brief.
+- **Did:** named the source mechanism (`Intro_TryShinyAnimShowHealthbox`,
+  `battle_controller_opponent.c:292-383` — gates on cry-playback completion,
+  `IsCryPlayingOrClearCrySongs`, `sound.c:521-532`, genuinely species-
+  dependent since ordinary send-out cries use no pitch shift and an
+  effectively-unbounded note length, so play for their own native sample
+  duration) before touching any constant. Extracted per-species cry
+  durations from `reference/pokeemerald/sound/direct_sound_samples/cries/
+  *.wav` (dev-time asset, no runtime ROM/oracle access, no audio played) for
+  all 376 Frontier-rental species. Triangulated against dense oracle
+  captures for MAGNETON (+111) and COMBUSKEN (+125) — both match the
+  cry-duration prediction **exactly**. Fixing dispatch delay exposed a
+  second, closely-coupled site (`GENERATED_PLAYER_VISUAL_DELAY`, the
+  player's own throw-becomes-visible tick) that also needed to shift;
+  re-derived it as `player-line-length - 1 + SENDOUT_HANDOFF_LAG`, matching
+  both fixtures exactly. GROVYLE-pinned fixtures unchanged
+  (`battle-command-generated-off` **128/128**, `interactive-generated-
+  intro-off` **715/715**). YOSHI re-run: **650/751**, up from 512/751 (two
+  isolated single-frame mismatches at 444/536 plus a new named 99-frame
+  small residual at 652..750, opponent healthbox/summary region — not the
+  dispatch mechanism, which is now proven exact through frame 651).
+- **Next:** three characterized loose ends, none blocking: (1) frame 444
+  (unchanged from round 4, still unisolated), (2) new frame 536, (3) the
+  652..750 small residual (opponent healthbox/summary area, distinct site).
+  `GENERATED_OPPONENT_SHADOW_DELAY`(104) is untouched and now reachable for
+  species with `dispatchDelay >= 104` (MAGNETON is in
+  `elevatedEnemyShadowSpecies` but has no app-side compare trace this
+  round) — worth a future species/shadow cross-check. KABUTO's own
+  cry-duration prediction (+79) was not oracle-verified (its existing
+  `kabutoSendOut.ts` models a different, unrelated per-species mechanism —
+  a front-sprite idle wobble, not cry length — so wasn't usable as a
+  cross-check).
+- **Notes:** Gate-5's sole open engineering thread (entry 760) is now
+  substantially advanced (86.6% vs 68.2%) with three small residuals
+  remaining, all named — supervisor's call whether to file the residuals as
+  a new issue or fold them into a future round.
+
+---
+
+---
 ## 760 — [SUPERVISOR 2026-07-31 ~00:30] Round 4 verified+merged; gate 554/5653 green; round 5: dispatch-delay mechanism (main) + #39 rank-1 equivalence groundwork (side)
 
 - **State:** union gate green **554 files / 5653 tests + 1 deliberate

@@ -16,6 +16,31 @@ one without a user decision, and do not count them as backlog.
 
 # Open
 
+## #56 — Arbitrary-trainer intro: three named residuals + player-side cry gate
+
+**Symptom:** the public dense arbitrary-trainer intro comparison
+(`factory-arbitrary-intro-yoshi-off`, YOSHI/COMBUSKEN) stands at **650/751**
+with every divergent frame characterized in
+`docs/trainer-pic-off-window-scout.md` §D. Remainder:
+
+1. **`GENERATED_PLAYER_READY_LAG` must become species-dependent** — the
+   player controller's own `Intro_TryShinyAnimShowHealthbox` gates on the
+   player lead's cry, symmetric to the opponent mechanism fixed 2026-07-31
+   (frames 678-721 family). A one-species fit missed by 8 ticks; needs a
+   KADABRA (or other player-lead) second data point before touching the
+   constant. Cry durations are already extracted
+   (`src/data/gen/cry-durations.json`).
+2. **Isolated frames 444 and 536** (trainer-exit/shadow region;
+   opponent healthbox/summary region) — single-frame, unisolated to a site.
+3. **MAGNETON elevated-shadow coverage** — `GENERATED_OPPONENT_SHADOW_DELAY`
+   (104) is reachable for species with dispatch delay >= 104 but exercised
+   by no committed comparison; the SHIZUKA tuple cannot be reproduced
+   app-side (16 battles of RNG history; 30k-seed search failed), but §D
+   records a verified alternative MAGNETON-lead tuple to build instead.
+
+**Not blocking:** Gate 5 ticked with these named (ROADMAP S10 gate 5
+completion note); this is the worklist to finish the window honestly.
+
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
 **Symptom:** `generateInitialFactoryRentals`'s `constructionRngValue`

@@ -1497,7 +1497,7 @@ S10 has six ordered completion gates:
    recoil/drain, berries, Leftovers, Quick Claw, Choice Band, White Herb,
    Wonder Guard/Levitate/Intimidate/Pressure/contact abilities, and the other
    source-reachable Level-50 singles cases rather than only this named sample.
-5. [ ] **Facility integration:** generate initial rentals and all seven real
+5. [x] **Facility integration:** generate initial rentals and all seven real
    opponent parties through the source-exact range/retry/personality/IV/
    ability/item rules; run the native Factory AI; compute the attendant's
    favorite-type/style commentary from the generated party; render arbitrary
@@ -1509,6 +1509,36 @@ S10 has six ordered completion gates:
    challenge-policy branch. Integration tests prove that the AI returns only a
    kernel-enumerated legal decision and enters through the same submission
    boundary as a player or test decision.
+
+   **Completion (2026-07-31, supervisor-verified):** every clause was
+   audited verbatim against evidence in `docs/gate5-acceptance-audit.md`
+   (2026-07-30 session): six clauses discharged at audit time with checked
+   citations (arbitrary trainer/party render, voluntary+forced switching,
+   real-outcome consumption, single submission boundary), and the audited
+   remainder landed the same session: attendant commentary verified against
+   ROM ground truth across 10 `preview_report` seeds — 6 distinct favorite
+   types, 6 styles, all matching, including tie/no-favorite and FLEXIBLE
+   fallbacks (`tests/factoryCommentaryRomReceipts.test.ts`,
+   `docs/commentary-preview-report-receipts.md`); the anchor-draft receipt
+   link at the probed pre-generation cursors
+   (`tests/anchorDraftReceiptLink.test.ts`,
+   `docs/anchor-draft-cursor-receipt.md` — selection byte-exact, all
+   setId-derived fields byte-exact, construction algorithm proven via
+   filtered ledger; the ambient-VBlank stream-model boundary is tracked as
+   ISSUES #55, not silently absorbed); factory-AI barrier-count ratchet
+   pins for the CBM/CV modules; and a public dense arbitrary-trainer intro
+   comparison via the harness pre-checkpoint capture contract — YOSHI/BUG
+   CATCHER (never-rendered trainer, COMBUSKEN/POLIWHIRL/PORYGON) at
+   **650/751** with every residual frame named (ISSUES #56), the
+   GROVYLE-validated windows intact (**128/128**, **715/715**), and the
+   species-dependent send-out delay solved at the mechanism level
+   (cry-duration gate, source-cited, triangulated exactly on two
+   independent species; `src/data/gen/cry-durations.json`).
+   Recorded scope rulings: remaining ~70 CBM / ~55 CV AI table handlers
+   behind named, tested, ratchet-pinned barriers are Gate-6 breadth work
+   (entry 755); battles-3-7 per-battle opponent receipts stay declined per
+   the S8 reset policy; the P..B pre-battle fade for arbitrary trainers is
+   #39-class ownership work, not a Gate-5 clause.
 6. [ ] **Breadth acceptance:** a committed mechanics coverage manifest has no
    unsupported move/effect, status, volatile-effect, held-item, ability,
    trainer, or Level-50 Frontier-set entries. Every distinct effect/hook family
