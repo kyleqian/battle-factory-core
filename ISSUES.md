@@ -136,13 +136,12 @@ STAGED` deleted), and the adapter swapped onto the #57-fixed shared
 staging helper (`14c4295b`, ~120-line local workaround deleted). All
 nine turn5 pins + five insurance pins held at every step;
 `turn5KoDismissElapsed`/`turn5Resolved` mirroring remains (unchanged
-consumers, same as turn13's). Rank 4 slice 1 flipped (2026-07-31,
-`174cc388`: turn-6/7 ROCK_SLIDE HP endpoints + attack lines onto the
-promoted `turn67RockSlidePresentationStaging.ts`; all ten rank-4 pins +
-insurance held). Rank-4 remainder per `docs/rank4-prep-scout.md`:
-slice 2 (stat-fall banner caller/naming mismatch), slice 3 (turn-7/8
-FEATHER_DANCE repeat sites), BIND (`{message, missMessage}` bridge +
-entry-label fix); plus #58's retire step. Earlier
+consumers, same as turn13's). Rank 4 slices 1-3 flipped (2026-07-31:
+`174cc388` ROCK_SLIDE tails; `441ddf83`+`6aba6662` turn-7/8
+FEATHER_DANCE staged+flipped; `0769ccc6` stat-fall banner reads each
+turn's own staged stat). Rank-4 remainder: slice 5 BIND only. Rank-5
+unblock evidence banked (`docs/rank5-effect-visibility-scout.md`,
+policy PROPOSED — see inventory row 5). Earlier
 progress:
 `turn13-sandattack.json`'s complete captured
 SAND_ATTACK content now resolves its kickoff and opponent-target accuracy-fall

@@ -1,3 +1,26 @@
+## 784 — [SUPERVISOR 2026-07-31 round 4] M4 (rank-4 slice 1) + S5 (#58 core fix) verified and merged; round 5 dispatching
+
+- **State:** master = M4's three commits + S5's `594442e6` merged
+  (`8cc0ccaa`); union `npm test`+`npm run build` gate running at commit
+  time — result in the next entry if not amended. Supervisor
+  independently re-ran turn6-rockslide-a **255/255**, turn7-rockslide-b
+  **256/256**, turn8-bind-a **256/256** post-M4, and the statStages +
+  renamed turn67 equivalence tests **16/16** post-merge (S5 pre-verified
+  34/34 in-worktree incl. ratchet before merge). Worktree/branch
+  cleaned; only `animation-main` remains.
+- **Headline:** rank-4 slice 1 flipped (`174cc388`) and #58's core
+  threading fixed same-round (S5, 3.6 min, real-fixture pin 156→113 at
+  recorded RNG). #58 trimmed to its retire-the-local-pipeline remainder;
+  #39 rank-4 prose updated. M4 also fixed the same appRoute trace-gap
+  class for all ten turn6/7/8 traces (`e3a7f486`, third recurrence —
+  turn5 `9929caf1`, turn13 `bd1d6beb` precedents).
+- **Next:** round 5 — M5 = #58 remainder retire (recipe `14c4295b`)
+  then rank-4 slice 2 (stat-fall banner) as time allows; S6 = rank-5
+  policy-evidence scout (Scene-OFF effect visibility for turns 9-12 —
+  the inventory's blocked-work item; evidence + proposal doc,
+  new-files-only, no policy decision made unilaterally).
+
+---
 ## 783 — [BOUNDED MAIN WORKER 2026-07-31 ~10:10] #39 rank-4 slice 1 landed: turn-6/7 ROCK_SLIDE tails flipped
 
 - **State:** `npx tsc --noEmit` clean; focused suite (renamed
