@@ -16,20 +16,16 @@ one without a user decision, and do not count them as backlog.
 
 # Open
 
-## #57 — `stagePlayerHitChainToTerminalMachineState` drops caller-supplied maxHP/item
+## #57 — [core fixed 2026-07-31, `387a34a1`] retire `turn5ResolutionAdapter.ts`'s local staging workaround
 
-**Symptom:** the shared staging helper's local `battler()` hardcodes
-`item: 0` and never sets `maxHP`, so a caller-supplied attacker
-maxHP/item silently collapses (maxHP → current HP) downstream. Found by
-the rank-3 equivalence slice (2026-07-31), which needed Onix's real
-1/31 maxHP for the Sitrus heal and worked around it with a local staging
-pipeline (`turn5ResolutionAdapterPreview.ts`, matching
-`turn5FaintPresentationStaging.ts`'s idiom). Rank 2 never hit it (never
-reads the attacker's own maxHP/item back).
-
-**Fix shape:** thread the optional fields through the shared helper's
-battler construction (additive; existing callers pass neither), then
-retire the rank-3 file's local workaround. Small, test-pinnable.
+**Open remainder only:** the shared helper now threads caller-supplied
+maxHP/item (pinned by `tests/stagePlayerHitChainMaxHpItem.test.ts`;
+turn13 pins re-verified 141/141 + 242/242 with the previously-dropped
+maxHP values now live). Still open: `turn5ResolutionAdapter.ts` predates
+the fix and still stages through its own local pipeline — swap it onto
+`stagePlayerHitChainToTerminalMachineState` and delete the local
+workaround (natural home: the rank-3 Sitrus-half flip step). Delete this
+entry when that lands.
 
 ## #56 — Arbitrary-trainer intro: residuals, ONIX ready-lag regression, MAGNETON shadow coverage
 
@@ -133,7 +129,14 @@ and the MURKROW level/healthbox/sent-out literals now adapter-derived)
 onto `turn13ResolutionAdapter.ts`. Pins held: 141/141 + 242/242 +
 dense-b 223/223 (dense-a 205/256 is the A/B-proved pre-existing parked
 #23 exclusion). `turn13Resolved`/turn-14 mirroring remains (unchanged
-consumers). Rank 3 (Turn-5 KO → switch-in → Sitrus) is next. Earlier
+consumers). Rank 3 (Turn-5 KO → switch-in → Sitrus): KO/switch-in half
+flipped (2026-07-31, `5db34996` — preview promoted to
+`turn5ResolutionAdapter.ts`, faint-sink geometry from the generic
+formula at Grovyle's yOffset, PIDGEOTTO level/healthbox/sent-out
+adapter-derived; all nine turn5 pins + five insurance pins held;
+`turn5KoDismissElapsed` verified state-only/never render-read, left
+mirroring like turn13's). The Sitrus heal half (presentation-timing
+projection) remains. Earlier
 progress:
 `turn13-sandattack.json`'s complete captured
 SAND_ATTACK content now resolves its kickoff and opponent-target accuracy-fall

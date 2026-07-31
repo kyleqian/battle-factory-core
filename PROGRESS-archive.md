@@ -1,3 +1,62 @@
+## 775 — [BOUNDED MAIN WORKER 2026-07-31 ~05:05] #56 item 3 FIXED: gEnemyMonElevation extracted + applied; MAGNETON 424→703/751
+
+- **State:** `npx tsc --noEmit` clean; focused suite 520/520 green (incl. new
+  `enemyMonElevationsExtraction.test.ts`); ratchet unchanged (no new
+  barriers, no new canonical-recording imports). `factory-arbitrary-intro-
+  yoshi-off` **699/751 held** (hard requirement, COMBUSKEN elevation 0).
+  `interactive-generated-intro-off` **715/715**, `battle-command-generated-
+  off` **128/128**, both held. `factory-arbitrary-intro-magneton-off`
+  **424/751 → 703/751**. Full `npm test`/`npm run build` not run this step
+  (side worker live concurrently, per brief).
+- **Did:** (1) Extracted `gEnemyMonElevation` (`battle_anim_mons.c`) into
+  `src/data/gen/enemy-mon-elevations.json` (61 species, sparse — absent
+  species are elevation 0 by construction) via
+  `tools/extract/extract-enemy-mon-elevations.ts`, byte-for-byte pinned
+  (`tests/enemyMonElevationsExtraction.test.ts`, also cross-checked equal to
+  `battle-enemy-shadow.json`'s `elevatedSpecies` set — same source table).
+  (2) Applied `origin.y = 8 + coords.yOffset - gEnemyMonElevation[species]`
+  at `drawGeneratedOpponentRelease` (both the affine-blend and coeff===0
+  branches) — no species-name branch, doc comment rewritten with the solved
+  rule + evidence citation. (3) The SAME settled-opponent draw appears at two
+  more sites reusing `fieldArt.opponent.origin.y` for the identical
+  post-materialize/post-send-out battler position
+  (`renderGeneratedBattleStartPlayerRelease`, `drawBattle2ActionMenuWindow`'s
+  `fieldArt` branch) — both needed the identical subtraction or the fix
+  would regress to wrong-Y once the intro handed off to the command menu;
+  fixed both, plus wired the elevated-shadow draw (previously intro-only)
+  into `drawBattle2ActionMenuWindow` too, since the shadow persists for the
+  whole battle. `drawGeneratedOpponentShadow` refactored to take `fieldArt`
+  directly (was the full `fieldView`) so both call sites could share it.
+  `battle2ActionMenu`'s own ONIX/legacy fallback path is untouched (only the
+  `fieldArt`-present branch changed; ONIX/MURKROW have no elevation entry,
+  so the shared function is a no-op for every currently-pinned species).
+- **Verified — shadow branch ruled (brief's explicit ask):** MAGNETON's
+  shadow was **missing entirely** at the command-menu phase before this fix
+  (`GENERATED_OPPONENT_SHADOW_DELAY`'s gate covered only the intro; the
+  command-menu's `drawBattle2ActionMenuWindow` never drew a shadow at all).
+  Fixed — MAGNETON's shadow now renders at both the intro and the settled
+  command view.
+- **Honest remainder (characterized, not chased — new divergence family
+  post-fix, per the brief's stop rule):** MAGNETON now diverges only on 48
+  frames (703/751), all in a periodic ~9-tick idle-menu-bounce pattern
+  (alternating small bboxes around the player sprite `x41-102,y64-111` and
+  opponent sprite `x127-229,y74-110`, frames 700-706/709-715/718-724/...).
+  This is **not new**: the identical bbox/period pattern already exists,
+  already-accepted, inside YOSHI's own committed 699/751 (visible at its own
+  tail, e.g. frames 730-749) — confirmed pre-existing and species-
+  independent, previously invisible for MAGNETON only because the tint bug
+  swallowed the whole post-handoff window. No code changed for this; it's
+  the same already-known residual family docs/trainer-pic-off-window-
+  scout.md §D already covers, now also touching MAGNETON's own count.
+- **Next:** #56 item 2 (frames 444/536) and the canonical +6 route term
+  remain open, untouched (out of scope this step). #39 rank 3 is the
+  ordered next main-lane item per entry 774.
+- **Notes:** no papercuts. `docs/opponent-release-tint-third-species.md` and
+  ISSUES #56 item 3 are stale (still describe this as unfixed) — trim owed
+  in the next docs pass; not edited here per this step's scope (worker
+  briefs don't edit ISSUES.md).
+
+---
 ## 774 — [SUPERVISOR FINAL WIND-DOWN 2026-07-31 ~04:35] Round 11 verified: #39 rank 2 FULLY retired; MAGNETON tint rule SOLVED (gEnemyMonElevation). Session closed: 11 rounds / 22 workers / 0 failed steps
 
 - **State:** master green at FINAL gate **559 files / 5688 tests + 1

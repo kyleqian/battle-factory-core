@@ -13,6 +13,37 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 778 — [SUPERVISOR 2026-07-31 round 1] M1 (#39 rank-3 half 1) + S1 (#57 core fix) both verified and merged; round 2 dispatching
+
+- **State:** master = M1's flip + S1's `387a34a1` merged (`b9fad3f7`);
+  full union `npm test` + `npm run build` gate running at commit time —
+  result recorded in the next entry if not amended here. Supervisor
+  independently re-ran: turn5-switchin **241/241**, turn5-faint
+  **110/110**, turn5-sitrus-c **181/181**, and post-merge
+  turn13-dragonbreath-faint **141/141** + turn13-switchin **242/242**
+  (the maxHP values S1 un-dropped change no pixels). Trace rewrite in
+  `9929caf1` checked semantically (`turn5-sitrus-c` old==new modulo
+  `appRoute` + pretty-print).
+- **Verified worker deviations (both accepted on checked evidence):**
+  M1's `turn5KoDismissElapsed` narrowing (36b60ec5 truly touches no
+  dismiss-elapsed code — my brief overstated the model; field is
+  state-only, never render-read) and S1's wider focused suite (11
+  files/65 tests). S1 finding worth keeping: turn13 staging already
+  supplied maxHP 117/156 that the pre-fix helper silently dropped.
+- **Docs:** #57 trimmed to its open remainder (swap
+  `turn5ResolutionAdapter.ts`'s local staging onto the fixed helper);
+  #39 + inventory rank-3 row updated to half-1-retired.
+- **Next:** M2 = rank-3 half 2 (Sitrus presentation-timing projection +
+  #57 remainder swap). S2 (live) = #56 residual evidence probe
+  (new-files-only). Then ranks 4-9 / Gate 6 breadth as time allows.
+- **Notes:** launcher/monitor notification timestamps proved unreliable
+  this session (spurious early "completed" + clock-skewed monitor
+  events); policy adopted: act only on `kill -0` from a fresh shell.
+  Both round-1 launchers also named the SAME raw JSONL log
+  (`...085850.jsonl`, both launched the same second) — worker events
+  interleave in it; read with session_id filters.
+
+---
 ## 777 — [BOUNDED MAIN WORKER 2026-07-31 ~05:45] #39 rank-3 flip, half 1 of 2 DONE: adapter promoted, faint-sink geometry + PIDGEOTTO switch-in literals flipped; Sitrus half deliberately deferred
 
 - **State:** `npx tsc --noEmit` clean; focused suite (turn5Resolution
@@ -112,63 +143,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** papercuts banked; ledger numbering instruction held for
   rounds 10-12 (no new collisions); no harness asks outstanding. This
   entry supersedes 772/774 as the resume point.
-
----
-## 775 — [BOUNDED MAIN WORKER 2026-07-31 ~05:05] #56 item 3 FIXED: gEnemyMonElevation extracted + applied; MAGNETON 424→703/751
-
-- **State:** `npx tsc --noEmit` clean; focused suite 520/520 green (incl. new
-  `enemyMonElevationsExtraction.test.ts`); ratchet unchanged (no new
-  barriers, no new canonical-recording imports). `factory-arbitrary-intro-
-  yoshi-off` **699/751 held** (hard requirement, COMBUSKEN elevation 0).
-  `interactive-generated-intro-off` **715/715**, `battle-command-generated-
-  off` **128/128**, both held. `factory-arbitrary-intro-magneton-off`
-  **424/751 → 703/751**. Full `npm test`/`npm run build` not run this step
-  (side worker live concurrently, per brief).
-- **Did:** (1) Extracted `gEnemyMonElevation` (`battle_anim_mons.c`) into
-  `src/data/gen/enemy-mon-elevations.json` (61 species, sparse — absent
-  species are elevation 0 by construction) via
-  `tools/extract/extract-enemy-mon-elevations.ts`, byte-for-byte pinned
-  (`tests/enemyMonElevationsExtraction.test.ts`, also cross-checked equal to
-  `battle-enemy-shadow.json`'s `elevatedSpecies` set — same source table).
-  (2) Applied `origin.y = 8 + coords.yOffset - gEnemyMonElevation[species]`
-  at `drawGeneratedOpponentRelease` (both the affine-blend and coeff===0
-  branches) — no species-name branch, doc comment rewritten with the solved
-  rule + evidence citation. (3) The SAME settled-opponent draw appears at two
-  more sites reusing `fieldArt.opponent.origin.y` for the identical
-  post-materialize/post-send-out battler position
-  (`renderGeneratedBattleStartPlayerRelease`, `drawBattle2ActionMenuWindow`'s
-  `fieldArt` branch) — both needed the identical subtraction or the fix
-  would regress to wrong-Y once the intro handed off to the command menu;
-  fixed both, plus wired the elevated-shadow draw (previously intro-only)
-  into `drawBattle2ActionMenuWindow` too, since the shadow persists for the
-  whole battle. `drawGeneratedOpponentShadow` refactored to take `fieldArt`
-  directly (was the full `fieldView`) so both call sites could share it.
-  `battle2ActionMenu`'s own ONIX/legacy fallback path is untouched (only the
-  `fieldArt`-present branch changed; ONIX/MURKROW have no elevation entry,
-  so the shared function is a no-op for every currently-pinned species).
-- **Verified — shadow branch ruled (brief's explicit ask):** MAGNETON's
-  shadow was **missing entirely** at the command-menu phase before this fix
-  (`GENERATED_OPPONENT_SHADOW_DELAY`'s gate covered only the intro; the
-  command-menu's `drawBattle2ActionMenuWindow` never drew a shadow at all).
-  Fixed — MAGNETON's shadow now renders at both the intro and the settled
-  command view.
-- **Honest remainder (characterized, not chased — new divergence family
-  post-fix, per the brief's stop rule):** MAGNETON now diverges only on 48
-  frames (703/751), all in a periodic ~9-tick idle-menu-bounce pattern
-  (alternating small bboxes around the player sprite `x41-102,y64-111` and
-  opponent sprite `x127-229,y74-110`, frames 700-706/709-715/718-724/...).
-  This is **not new**: the identical bbox/period pattern already exists,
-  already-accepted, inside YOSHI's own committed 699/751 (visible at its own
-  tail, e.g. frames 730-749) — confirmed pre-existing and species-
-  independent, previously invisible for MAGNETON only because the tint bug
-  swallowed the whole post-handoff window. No code changed for this; it's
-  the same already-known residual family docs/trainer-pic-off-window-
-  scout.md §D already covers, now also touching MAGNETON's own count.
-- **Next:** #56 item 2 (frames 444/536) and the canonical +6 route term
-  remain open, untouched (out of scope this step). #39 rank 3 is the
-  ordered next main-lane item per entry 774.
-- **Notes:** no papercuts. `docs/opponent-release-tint-third-species.md` and
-  ISSUES #56 item 3 are stale (still describe this as unfixed) — trim owed
-  in the next docs pass; not edited here per this step's scope (worker
-  briefs don't edit ISSUES.md).
-
