@@ -1,3 +1,45 @@
+## 783 — [BOUNDED MAIN WORKER 2026-07-31 ~10:10] #39 rank-4 slice 1 landed: turn-6/7 ROCK_SLIDE tails flipped
+
+- **State:** `npx tsc --noEmit` clean; focused suite (renamed
+  turn67RockSlidePresentationStagingEquivalence, executableFrontierRatchet,
+  battleScene, battleMenu, battleMenuIdle, battle2CommandAdapterEquivalence,
+  fightSubmenu, battleSetup, destinCanonicalReplacements,
+  turn13/turn5ResolutionAdapterEquivalence) **539/539 green**, no new
+  ratchet barriers, no new canonical-recording imports. Tree clean at this
+  commit. Full `npm test`/`npm run build` intentionally not run (side
+  worktree `side-20260731-100323` live concurrently, per brief).
+- **Did (2 commits):** (1) fixed a blocking papercut: all ten turn6/7/8
+  rank-4 compare traces lacked `appRoute`, same class `9929caf1` fixed for
+  turn5-*.json — two (`turn6-featherdance`/`turn6-feathers`) crashed
+  outright through the generated-orchestrator's own unrelated unfinished
+  resolver, the rest silently mismatched; adding the field alone restored
+  every trace to its expected baseline, zero source changes. (2) promoted
+  `turn67RockSlidePresentationStagingPreview.ts` → `turn67RockSlide
+  PresentationStaging.ts` (rank-1/2/3's own pattern) and flipped
+  `battleScene.ts`'s turn-6/7 ROCK_SLIDE HP endpoints
+  (`TURN6/7_PIDGEOTTO_AFTER_ROCKSLIDE_HP`, `:11038`/`:11302`) and
+  attack-kickoff text (new `TURN6/7_ROCKSLIDE_ATTACK_LINE1/2`, replacing the
+  shared `ROCK_SLIDE_LINE1/LINE2` hand literals at those two call sites
+  only — every other turn's own ROCK_SLIDE window still reads them
+  directly, untouched) onto the adapter's real staged facts.
+- **All mandated pins hold exactly:** turn6-featherdance 90/90,
+  turn6-feathers 235/235, turn6-rockslide-a/b 255/255 105/105,
+  turn7-rockslide-a/b/c/d 256/256/256/19, turn8-bind-a/b 256/66. Insurance
+  pins held: turn5-rockslide 256/256, turn5-faint 110/110, turn5-switchin
+  241/241, turn5-sitrus-a/b/c/d 110/82/181/133, interactive-generated-
+  intro-off 715/715, battle-command-generated-off 128/128.
+- **Next:** #58 (shared helper drops `statStages`) is still open, owned by
+  whoever picks it up — not touched this step (this module's own local
+  pipeline workaround stays). Remaining rank-4 slices per
+  `docs/rank4-prep-scout.md`: slice 2 (turn-6 stat-fall banner, §2.3's
+  named blocker), slice 3 (turn-7/8's own repeat FEATHER_DANCE staging,
+  two new modules), slice 5 (turn-8 BIND kickoff+miss, needs a new bridge
+  shape + entry-label parameter). Then retire this module's own local
+  `statStages` workaround once #58 lands (recipe `14c4295b`).
+- **Notes:** no papercuts beyond the one fixed above (already banked into
+  the commit, not left as friction).
+
+---
 ## 782 — [SUPERVISOR 2026-07-31 round 3] M3 (#56 idle-bounce falsification banked) + S4 (rank-4 groundwork + NEW #58) verified and merged
 
 - **State:** master = M3 (test+docs only, verified no production change;
