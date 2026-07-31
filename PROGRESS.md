@@ -13,6 +13,51 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 795 — [WORKER 2026-07-31 ~15:40] Turns 11-12 flipped OFF (M11); rank-5 execution's four move windows now ALL flipped
+
+- **State:** master green — tsc clean, focused vitest (battleScene 247/
+  battleMenu 121/turn11FeatherDancePresentationStaging 10) green,
+  ratchet 6/6, full `npm test` **567 files / 5719 passed + 1 skipped**
+  (5735 − 16 deleted AERIAL_ACE-helper tests = 5719, exact), build
+  clean. Full derivation for every constant in the commit message.
+- **M11 (verified, `59a3fa7d`):** turn11-featherdance-off **189/191**
+  (2 pre-existing idle-bounce-phase frames at 13340-13341, attributed:
+  sub-pixel Onix-sprite/healthbox edge offset, no new content, code
+  for this window untouched this slice); turn11-rockslide-off
+  **256/256**; turn12-aerialace-off **246/247** (same idle-bounce-phase
+  signature recurs at frame 14374, same attribution); turn12-rockslide
+  -miss-off **256/256**. Turn-9/10 OFF pins + all 5 insurance pins held
+  exact. **turn9-menu 111/111 and turn12-menu 46/46 BOTH held
+  unaffected** — unlike turn11-menu's own slice-2 collateral, no
+  analogous regression hit turn12-menu here. Retired legacy ON pins
+  turn11-{featherdance,rockslide}.json, turn12-{aerialace,rockslide
+  -miss}.json, turn11-menu.json (45/56, slice-2 collateral, authorized).
+  Class-(c) AERIAL_ACE helpers shared with turn 10 (lunge/clones/slice/
+  Onix-shake/palette-darken + their own sub-helpers/constants) died
+  with turn 12 as last consumer — `drawTurn10AerialAceCloneWinsOverField`/
+  `cuttingSliceFrameTileset` survive (2nd caller in the generic Scene-ON
+  `renderSceneOnMovePresentation` adapter). The ROCK_SLIDE rock-prop
+  loop (`rockSlideRockState`/`drawRockSprite`/`rockSlideBg3Y`/
+  `rockSlideMonShakeY2`) does **NOT** die despite losing turn 11 —
+  turns 1-8's own still-ON windows + that same adapter keep it alive
+  (correcting the brief's own anticipation, verified via grep). Turn 11
+  FEATHER_DANCE needed no code changes: zero class-(c) content
+  pre-slice (Onix's floored ATK stat short-circuits the animation
+  step).
+- **Rank-5 status:** all four move windows (turns 9/10/11/12) now
+  Scene-OFF-owned. Remaining: the idle-bounce PHASE misalignment
+  residual class (turn9-quickattack-off's 56 frames, turn11-
+  featherdance-off's 2, turn12-aerialace-off's 1; blocks turn9/11/12
+  -menu's own OFF pins) — parallel side-worker territory, untouched
+  here.
+- **Next:** idle-bounce phase attribution probe (may unlock turn9/12
+  -menu OFF pins); then #56 444/536, turn17-rung1's 28 frames, rank 6.
+- **PAPERCUT:** none — every new OFF-fit constant this slice decomposed
+  cleanly from the already-established fixed −107 hit-reaction-chain
+  shift (turns 9/10) plus each window's own compression, confirming
+  first-try or near-first-try; no blind bisection needed.
+
+---
 ## 794 — [SUPERVISOR round 2, 2026-07-31 ~14:50] Turn-10 flipped OFF at EXACT acceptance (M10); animation-handoff five-table extraction landed (S10)
 
 - **State:** master green on the M10+S10 union (full gate in commit
@@ -81,39 +126,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   idle-bounce phase probe, #56 444/536, turn17-rung1's 28 frames.
 
 ---
-## 792 — [SUPERVISOR TRUE FINAL 2026-07-31 ~13:10] USER DECISION: rank-5 OFF-pin policy ADOPTED (Option A). S8 banked first OFF ground truth (4/13 windows, ZERO desync). Session: 9 rounds / 16 workers / 0 failed steps
-
-- **State:** master tree clean at this commit; S8's 5 new files merged
-  (4 `-off` traces + `docs/rank5-off-ground-truth.md`); supervisor
-  re-ran turn9-quickattack-off from the main tree (108/233 — the
-  expected honest pre-retiming baseline) + ratchet 6/6. Full gate not
-  re-run for this docs+additive-traces-only delta: last full gate
-  **5736 + 1 skip** green at `b6f0e2ab`, and S8 itself ran the full
-  suite (5736+1) on effectively this union in its worktree. Worktree/
-  branch cleaned; only `.worktrees/animation-main` remains; DEFERRED.md
-  empty.
-- **USER DECISION (mid-session, recorded `afaffc92`):** rank-5
-  Scene-OFF pin policy ADOPTED — Option A: delete class-(c)
-  move-specific bodies on the OFF route, re-time class-(b) generic
-  choreography against fresh explicit-`oracleProfile` OFF pins,
-  retiring the legacy profile-less (ON) turn9-12 pins as rank 5
-  executes. Frame-444 landing tactics + next-session ordering delegated
-  to supervisor judgment.
-- **S8 (verified, `df42d281`):** OFF ground truth for the turn-9
-  triplet + turn10-aerialace — canonical button stream replays under
-  OFF with **ZERO desync** (content lands 2-114 ticks earlier,
-  byte-matched to the scout's cited ON shas; determinism re-run
-  0/233 mismatches). App baselines honestly recorded (108/233,
-  141/231, 37/256, 19/116 — low until re-timing, not chased). The 9
-  remaining windows are listed in the doc for the next slice.
-- **Next session (final ordered list):** (i) rank-5 execution is now
-  UNBLOCKED and opened — capture the 9 remaining OFF windows, then
-  re-time class-(b)/delete class-(c) per the adopted policy;
-  (ii) #56 frame-444 fix behind a 751-frame regression + frame-536
-  probe extension; (iii) animation handoff five-table extraction (side
-  lane); (iv) turn17-rung1's 28 newly-visible frames; (v) rank 6;
-  (vi) #56 +6 route term. #55 parked.
-- **Notes:** this entry supersedes 791 as the resume point. Session
-  totals: 9 rounds / 16 workers (M1-M8, S1-S8) / 0 failed steps; #39
-  ranks 3, 4, 9 retired; #57+#58 full lifecycle; rank-5 policy decided
-  by user and its execution begun.

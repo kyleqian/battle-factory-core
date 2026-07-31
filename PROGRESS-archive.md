@@ -1,3 +1,39 @@
+## 792 — [SUPERVISOR TRUE FINAL 2026-07-31 ~13:10] USER DECISION: rank-5 OFF-pin policy ADOPTED (Option A). S8 banked first OFF ground truth (4/13 windows, ZERO desync). Session: 9 rounds / 16 workers / 0 failed steps
+
+- **State:** master tree clean at this commit; S8's 5 new files merged
+  (4 `-off` traces + `docs/rank5-off-ground-truth.md`); supervisor
+  re-ran turn9-quickattack-off from the main tree (108/233 — the
+  expected honest pre-retiming baseline) + ratchet 6/6. Full gate not
+  re-run for this docs+additive-traces-only delta: last full gate
+  **5736 + 1 skip** green at `b6f0e2ab`, and S8 itself ran the full
+  suite (5736+1) on effectively this union in its worktree. Worktree/
+  branch cleaned; only `.worktrees/animation-main` remains; DEFERRED.md
+  empty.
+- **USER DECISION (mid-session, recorded `afaffc92`):** rank-5
+  Scene-OFF pin policy ADOPTED — Option A: delete class-(c)
+  move-specific bodies on the OFF route, re-time class-(b) generic
+  choreography against fresh explicit-`oracleProfile` OFF pins,
+  retiring the legacy profile-less (ON) turn9-12 pins as rank 5
+  executes. Frame-444 landing tactics + next-session ordering delegated
+  to supervisor judgment.
+- **S8 (verified, `df42d281`):** OFF ground truth for the turn-9
+  triplet + turn10-aerialace — canonical button stream replays under
+  OFF with **ZERO desync** (content lands 2-114 ticks earlier,
+  byte-matched to the scout's cited ON shas; determinism re-run
+  0/233 mismatches). App baselines honestly recorded (108/233,
+  141/231, 37/256, 19/116 — low until re-timing, not chased). The 9
+  remaining windows are listed in the doc for the next slice.
+- **Next session (final ordered list):** (i) rank-5 execution is now
+  UNBLOCKED and opened — capture the 9 remaining OFF windows, then
+  re-time class-(b)/delete class-(c) per the adopted policy;
+  (ii) #56 frame-444 fix behind a 751-frame regression + frame-536
+  probe extension; (iii) animation handoff five-table extraction (side
+  lane); (iv) turn17-rung1's 28 newly-visible frames; (v) rank 6;
+  (vi) #56 +6 route term. #55 parked.
+- **Notes:** this entry supersedes 791 as the resume point. Session
+  totals: 9 rounds / 16 workers (M1-M8, S1-S8) / 0 failed steps; #39
+  ranks 3, 4, 9 retired; #57+#58 full lifecycle; rank-5 policy decided
+  by user and its execution begun.
 ## 791 — [SUPERVISOR FINAL CLOSE 2026-07-31] Bonus round 8 verified: rank 9 ALSO retired. Session: 8 rounds / 15 workers / 0 failed steps; ranks 3, 4, 9 all fully retired today
 
 - **State:** master green at the definitive FINAL gate **5736 tests
