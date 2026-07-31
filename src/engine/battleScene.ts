@@ -819,6 +819,7 @@ import {
   resolveTurn13SandAttackKickoffLines,
 } from "./turn13SandAttackPresentationStaging.ts";
 import { resolveTurn13ResolutionAdapter, resolveTurn13SwitchInAdapter } from "./turn13ResolutionAdapter.ts";
+import { resolveTurn5FaintSinkGeometry, resolveTurn5SwitchInAdapter } from "./turn5ResolutionAdapter.ts";
 import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
@@ -9348,7 +9349,15 @@ const TURN5_ROCKSLIDE_PRESS_TICK = 5829; // rockSlideTextStartTick(5829) = 6222
  * zero further diff from 6519 on.
  */
 export const GROVYLE_FAINT_SINK_START_TICK = 6502; // S
-export const GROVYLE_FAINT_SINK_STEPS = 8; // n = 8 - floor(yOffset/8), Grovyle yOffset=4 (mon-pic-coords.json)
+// steps: createBattleResolutionPresentation's own generic opponent-faint-
+// timing formula (opponentFaintSinkGeometry, turn13ResolutionAdapter.ts,
+// reused via turn5ResolutionAdapter.ts's own resolveTurn5FaintSinkGeometry),
+// evaluated at Grovyle's real front-pic yOffset=4 (mon-pic-coords.json) --
+// ISSUES #39 rank-3 flip: proven equal to the former hand-fit
+// GROVYLE_FAINT_SINK_STEPS=8 constant by turn5ResolutionAdapterEquivalence
+// .test.ts, not independently re-derived.
+const GROVYLE_FAINT_SINK = resolveTurn5FaintSinkGeometry();
+export const GROVYLE_FAINT_SINK_STEPS = GROVYLE_FAINT_SINK.steps; // n = 8 - floor(yOffset/8), Grovyle yOffset=4 (mon-pic-coords.json)
 
 /**
  * `{ keptRows, y2 }` for a fainting mon's own sink at render tick `t` -
@@ -9369,8 +9378,8 @@ export function grovyleFaintSinkRowsAndY2(t: number, startTick: number = GROVYLE
   return { keptRows: steps - k, y2: k * 8 };
 }
 
-/** Grovyle's own opponent healthbox vanishes entirely 2 ticks after the sink's own last visible erase-step (`GROVYLE_FAINT_SINK_START_TICK + 2*GROVYLE_FAINT_SINK_STEPS + 3` = 6521) - pixel-confirmed this session (dense oracle sweep of the healthbox's own crop: byte-identical bare background from tick 6521 on, a 7064px whole-healthbox-region diff the tick before). A distinct UI element from the sprite sink above (different screen region), not itemized in docs/faint-switch-notes.md §3/§7 - this session's own re-probe answers the brief's own "what happens to Grovyle's healthbox" question directly. */
-const GROVYLE_HEALTHBOX_VANISH_TICK = GROVYLE_FAINT_SINK_START_TICK + 19; // 6521
+/** Grovyle's own opponent healthbox vanishes entirely 2 ticks after the sink's own last visible erase-step (`GROVYLE_FAINT_SINK_START_TICK + 2*GROVYLE_FAINT_SINK_STEPS + 3` = 6521) - pixel-confirmed this session (dense oracle sweep of the healthbox's own crop: byte-identical bare background from tick 6521 on, a 7064px whole-healthbox-region diff the tick before). A distinct UI element from the sprite sink above (different screen region), not itemized in docs/faint-switch-notes.md §3/§7 - this session's own re-probe answers the brief's own "what happens to Grovyle's healthbox" question directly. ISSUES #39 rank-3 flip: `healthboxVanishFrame` is now the SAME generic formula's own output (`GROVYLE_FAINT_SINK.healthboxVanishFrame`), not an independently re-stated `+19`. */
+export const GROVYLE_HEALTHBOX_VANISH_TICK = GROVYLE_FAINT_SINK_START_TICK + GROVYLE_FAINT_SINK.healthboxVanishFrame; // 6521
 
 /** Same tile-grid walk as `drawSpriteSheet`, but only the top `keptRows` of `tileset.rows` (the faint sink's own progressive bottom-up erase, `grovyleFaintSinkRowsAndY2`) - `oy` already includes any `y2` shift, same convention every other sprite draw in this file uses. */
 function drawSpriteSheetTopRows(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, keptRows: number): void {
@@ -10028,9 +10037,19 @@ export const TURN13_ICONBAR_DESTROY_TICK = 17000;
 /** Pidgeotto's own former slot (index 3, DESTIN's SECOND fainted mon) flips `"Full"` -> `"Statused"` - oracle-pixel-confirmed (0-diff tile match against `battle-interface-ball-display.json`'s own 4 states at the settled tick 16900) directly against `TURN5_OPPONENT_ICON_STATES`: index 3 flips, index 4 (MURKROW, freshly sent out) stays `"Full"`, index 5 (GROVYLE) stays `"Statused"` unchanged from turn 5. */
 export const TURN13_OPPONENT_ICON_STATES: readonly string[] = ["Empty", "Empty", "Empty", "Statused", "Full", "Statused"];
 
-/** "BUG CATCHER DESTIN sent\nout PIDGEOTTO!" (docs §9, `sText_Trainer1SentOutPkmn` family, same line 1 as `SENDOUT_LINE1`) - starts printing at the oracle-pixel-confirmed absolute tick 6687, 1 char/tick. */
+/**
+ * ISSUES #39 rank-3 flip: the real switched-in-mon fact source
+ * (`turn5ResolutionAdapter.ts`'s `resolveTurn5SwitchInAdapter`), chaining
+ * the real forced-switch dance (`runBattleScriptFaintedActionsOrchestration`)
+ * instead of independently re-stating DESTIN's replacement here - reused
+ * below for `PIDGEOTTO_LEVEL`/`pidgeottoHealthboxContent` too, same
+ * "module-level constant derived once at import time" discipline rank 2's
+ * own switch-in flip established.
+ */
+const TURN5_SWITCHIN = resolveTurn5SwitchInAdapter();
+/** "BUG CATCHER DESTIN sent\nout PIDGEOTTO!" (docs §9, `sText_Trainer1SentOutPkmn` family, same line 1 as `SENDOUT_LINE1`) - starts printing at the oracle-pixel-confirmed absolute tick 6687, 1 char/tick. Line 2 is `TURN5_SWITCHIN.sentOutLine2`, sourced from the real forced-switch decision instead of a raw literal. */
 const SWITCHIN_SENTOUT_LINE1 = "BUG CATCHER DESTIN sent";
-const SWITCHIN_SENTOUT_LINE2 = "out PIDGEOTTO!";
+const SWITCHIN_SENTOUT_LINE2 = TURN5_SWITCHIN.sentOutLine2;
 export const SWITCHIN_SENTOUT_TEXT_TOTAL = SWITCHIN_SENTOUT_LINE1.length + SWITCHIN_SENTOUT_LINE2.length;
 export const SWITCHIN_SENTOUT_TEXT_START_TICK = 6687;
 
@@ -10230,14 +10249,17 @@ export const TURN5_PIDGEOTTO_SETTLE_TICK = 6828;
  * (`PIDGEOTTO Lv50`, gender glyph sampled blue = male, oracle frame crop at
  * tick 6900 of `battle1-switchin-dense-c.json`). HP stays full (156/156)
  * for this entire slice's own window (turn 6's own ROCK_SLIDE hit, which
- * drains it to 113, is out of scope - `docs/turn6-notes.md` §4).
+ * drains it to 113, is out of scope - `docs/turn6-notes.md` §4). ISSUES #39
+ * rank-3 flip: name/level/hpFraction are now literally derived from
+ * `TURN5_SWITCHIN` (declared above, near `SWITCHIN_SENTOUT_LINE2`), not
+ * independently re-stated.
  */
-const PIDGEOTTO_LEVEL = 50;
+const PIDGEOTTO_LEVEL = TURN5_SWITCHIN.replacementLevel;
 const pidgeottoHealthboxContent = composeOpponentHealthbox(healthboxAssemblyAssets, {
-  name: "PIDGEOTTO",
+  name: TURN5_SWITCHIN.replacementSpecies,
   level: PIDGEOTTO_LEVEL,
   gender: "male",
-  hpFraction: 1,
+  hpFraction: TURN5_SWITCHIN.replacementHp.current / TURN5_SWITCHIN.replacementHp.max,
   status: "none",
 });
 
@@ -10260,7 +10282,7 @@ function pidgeottoHealthboxContentForHp(hp: number): ReturnType<typeof composeOp
     cached = hp === PIDGEOTTO_MAX_HP
       ? pidgeottoHealthboxContent
       : composeOpponentHealthbox(healthboxAssemblyAssets, {
-          name: "PIDGEOTTO",
+          name: TURN5_SWITCHIN.replacementSpecies,
           level: PIDGEOTTO_LEVEL,
           gender: "male",
           hpFraction: hp / PIDGEOTTO_MAX_HP,

@@ -75,7 +75,8 @@ type MonPicCoordsAsset = Readonly<{
   front: Readonly<Record<string, Readonly<{ yOffset: number }>>>;
 }>;
 
-function frontYOffset(speciesSymbol: string): number {
+/** Reused by turn5ResolutionAdapter.ts's own faint-sink geometry (the same generic front-pic yOffset lookup, a different species). */
+export function frontYOffset(speciesSymbol: string): number {
   const entry = (monPicCoordsData as MonPicCoordsAsset).front[speciesSymbol];
   if (entry === undefined) {
     throw new Error(

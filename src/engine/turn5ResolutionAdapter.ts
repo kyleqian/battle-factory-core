@@ -1,12 +1,16 @@
 /**
- * ISSUES #39 rank-3 groundwork (docs/battle-scene-retirement-inventory.md
- * rank-3 row): equivalence-proof-FIRST preview for the Turn-5 ROCK_SLIDE KO
- * (Onix -> Grovyle, the OPPONENT's mon) -> Pidgeotto switch-in -> Onix's own
- * Sitrus Berry heal window (`battleScene.ts:9027-10470`). NOT wired into
- * production -- this is a "preview" stage, the same shape rank-2's own
- * `turn13ResolutionAdapterPreview.ts`/`...PreviewEquivalence.test.ts`
- * established before its flip (see `turn13ResolutionAdapter.ts`'s module doc
- * for that precedent). No existing file is touched by this module.
+ * ISSUES #39 rank-3 flip, half 1 of 2 (docs/battle-scene-retirement-
+ * inventory.md rank-3 row): the Turn-5 ROCK_SLIDE KO (Onix -> Grovyle, the
+ * OPPONENT's mon) -> Pidgeotto switch-in half of `battleScene.ts`'s turn-5
+ * window now sources its opponent-faint sink geometry and PIDGEOTTO
+ * switch-in facts from this adapter instead of a hand-fit sink constant plus
+ * independently re-stated switch-in literals. Formerly a preview proof
+ * (`turn5ResolutionAdapterPreview.ts`/`...PreviewEquivalence.test.ts`, rank-1/
+ * rank-2's own promotion pattern) -- see this module's own git history for
+ * that precedent. The Sitrus heal half (`resolveTurn5SitrusAdapter`) remains
+ * proven but NOT wired into `battleScene.ts` -- see
+ * `TURN5_PRESENTATION_TIMING_NOT_STAGED`'s own doc below, this flip's own
+ * explicit out-of-scope boundary.
  *
  * KO/faint half: `turn5FaintPresentationStaging.ts` already stages Onix's
  * real ONIX(1hp)->GROVYLE(1hp) hit chain (MOVE_STRENGTH substituted for
@@ -98,6 +102,11 @@ import {
 import { runBattleScriptFaintedActionsOrchestration } from "./battleScriptFaintedActionsOrchestration.ts";
 import { runBattleEndTurnOrchestration } from "./battleEndTurnOrchestration.ts";
 import { resolveBattleNameWithPrefix, resolveBattleStringLines } from "./battleStringResolver.ts";
+import {
+  frontYOffset,
+  opponentFaintSinkGeometry,
+  type Turn13FaintSinkGeometry,
+} from "./turn13ResolutionAdapter.ts";
 import speciesNamesAsset from "../data/gen/species-names.json" with { type: "json" };
 import itemNamesAsset from "../data/gen/item-names.json" with { type: "json" };
 import itemHoldEffectsAsset from "../data/gen/item-hold-effects.json" with { type: "json" };
@@ -106,7 +115,7 @@ type SpeciesNamesAsset = Readonly<{ species: readonly Readonly<{ species: string
 function speciesDisplayName(speciesId: number): string {
   const entry = (speciesNamesAsset as SpeciesNamesAsset).species[speciesId];
   if (entry === undefined) {
-    throw new Error(`turn5ResolutionAdapterPreview: species-names.json has no entry for species id ${speciesId}`);
+    throw new Error(`turn5ResolutionAdapter: species-names.json has no entry for species id ${speciesId}`);
   }
   return entry.name;
 }
@@ -116,11 +125,11 @@ type ItemNamesAsset = Readonly<{ items: readonly Readonly<{ item: string; name: 
 function itemDisplayName(itemId: number): string {
   const holdEffectEntry = (itemHoldEffectsAsset as ItemHoldEffectsAsset).items.find((row) => row.itemId === itemId);
   if (!holdEffectEntry) {
-    throw new Error(`turn5ResolutionAdapterPreview: item-hold-effects.json has no entry for item id ${itemId}`);
+    throw new Error(`turn5ResolutionAdapter: item-hold-effects.json has no entry for item id ${itemId}`);
   }
   const nameEntry = (itemNamesAsset as ItemNamesAsset).items.find((row) => row.item === holdEffectEntry.item);
   if (!nameEntry) {
-    throw new Error(`turn5ResolutionAdapterPreview: item-names.json has no entry for ${holdEffectEntry.item}`);
+    throw new Error(`turn5ResolutionAdapter: item-names.json has no entry for ${holdEffectEntry.item}`);
   }
   return nameEntry.name;
 }
@@ -140,6 +149,19 @@ const BATTLE_TYPE_FACTORY = 1 << 19;
 const ITEM_SITRUS_BERRY = 142;
 /** STRINGID_PKMNSITEMRESTOREDHEALTH's own real messageId (battle_message.c:492,805), reused verbatim, not fabricated. */
 const STRINGID_PKMNSITEMRESTOREDHEALTH = "STRINGID_PKMNSITEMRESTOREDHEALTH";
+
+/**
+ * ISSUES #39 rank-3 flip: Grovyle's own opponent-faint sink geometry, the
+ * SAME generic formula `turn13ResolutionAdapter.ts`'s own
+ * `opponentFaintSinkGeometry` already applies for Pidgeotto's faint
+ * (`createBattleResolutionPresentation`'s own `steps = 8 - floor(yOffset/8)`,
+ * `healthboxVanishFrame = 2*steps+3`), evaluated here for Grovyle's real
+ * front-pic `yOffset` (`mon-pic-coords.json`) instead of `battleScene.ts`'s
+ * own hand-fit `GROVYLE_FAINT_SINK_STEPS`/`GROVYLE_HEALTHBOX_VANISH_TICK`.
+ */
+export function resolveTurn5FaintSinkGeometry(): Turn13FaintSinkGeometry {
+  return opponentFaintSinkGeometry(frontYOffset("GROVYLE"));
+}
 
 /**
  * DESTIN's real turn-5 bench (`docs/onix-readylag-destin-bench-probes.md`
@@ -245,7 +267,7 @@ function acknowledgePendingControllers(
   return next;
 }
 
-export type Turn5ResolutionAdapterPreviewMachineState = Readonly<{
+export type Turn5ResolutionAdapterMachineState = Readonly<{
   program: BattleScriptProgram;
   handlers: BattleScriptOpcodeHandlers<BattleScriptRulesContext>;
   state: BattleScriptMachineState<BattleScriptRulesContext>;
@@ -261,7 +283,7 @@ export type Turn5ResolutionAdapterPreviewMachineState = Readonly<{
  * chain into the fainted-actions orchestration, also inert during the KO
  * script itself -- same non-interference rank 2's own module doc notes).
  */
-export function stageTurn5KoHitChainToTerminalMachineState(): Turn5ResolutionAdapterPreviewMachineState {
+export function stageTurn5KoHitChainToTerminalMachineState(): Turn5ResolutionAdapterMachineState {
   const onix = battler({
     side: 0,
     hp: 1,
@@ -321,23 +343,23 @@ export function stageTurn5KoHitChainToTerminalMachineState(): Turn5ResolutionAda
     if (stepped.kind === "blocked") {
       const acknowledged = acknowledgePendingControllers(state);
       if (acknowledged === state) {
-        throw new Error("turn5ResolutionAdapterPreview: Battle Script blocked without a safe controller acknowledgement");
+        throw new Error("turn5ResolutionAdapter: Battle Script blocked without a safe controller acknowledgement");
       }
       state = acknowledged;
       continue;
     }
     if (stepped.kind !== "advanced" && stepped.kind !== "scheduler-progressed") {
       throw new Error(
-        `turn5ResolutionAdapterPreview: staged KO hit chain stopped unexpectedly (${stepped.kind}) `
+        `turn5ResolutionAdapter: staged KO hit chain stopped unexpectedly (${stepped.kind}) `
           + "before its own script completed",
       );
     }
     state = stepped.state;
   }
-  throw new Error("turn5ResolutionAdapterPreview: staged hit chain did not reach its own script end in budget");
+  throw new Error("turn5ResolutionAdapter: staged hit chain did not reach its own script end in budget");
 }
 
-export type Turn5SwitchInAdapterPreview = Readonly<{
+export type Turn5SwitchInAdapter = Readonly<{
   replacementSpecies: string;
   replacementPartyIndex: number;
   replacementLevel: number;
@@ -353,12 +375,12 @@ export type Turn5SwitchInAdapterPreview = Readonly<{
  * replacement -- a real machine boundary this window's own real turn 5
  * never crosses.
  */
-export function resolveTurn5SwitchInAdapterPreview(): Turn5SwitchInAdapterPreview {
+export function resolveTurn5SwitchInAdapter(): Turn5SwitchInAdapter {
   const { program, handlers, state } = stageTurn5KoHitChainToTerminalMachineState();
   const result = runBattleScriptFaintedActionsOrchestration(program, handlers, state);
   if (result.kind !== "resumed") {
     throw new Error(
-      `turn5ResolutionAdapterPreview: expected the forced-switch dance to resume with a healthy `
+      `turn5ResolutionAdapter: expected the forced-switch dance to resume with a healthy `
         + `replacement, got "${result.kind}" instead`,
     );
   }
@@ -373,7 +395,7 @@ export function resolveTurn5SwitchInAdapterPreview(): Turn5SwitchInAdapterPrevie
   });
 }
 
-export type Turn5SitrusAdapterPreview = Readonly<{
+export type Turn5SitrusAdapter = Readonly<{
   hp: Readonly<{ from: number; to: number }>;
   healLines: readonly string[];
   itemConsumed: boolean;
@@ -388,19 +410,19 @@ export type Turn5SitrusAdapterPreview = Readonly<{
  * both real machine boundaries this window's own real turn 5 never crosses,
  * not silently-wrong defaults.
  */
-export function resolveTurn5SitrusAdapterPreview(): Turn5SitrusAdapterPreview {
+export function resolveTurn5SitrusAdapter(): Turn5SitrusAdapter {
   const { program, handlers, state } = stageTurn5KoHitChainToTerminalMachineState();
   const faintedResult = runBattleScriptFaintedActionsOrchestration(program, handlers, state);
   if (faintedResult.kind !== "resumed") {
     throw new Error(
-      `turn5ResolutionAdapterPreview: expected the forced-switch dance to resume with a healthy `
+      `turn5ResolutionAdapter: expected the forced-switch dance to resume with a healthy `
         + `replacement, got "${faintedResult.kind}" instead`,
     );
   }
   const endTurnResult = runBattleEndTurnOrchestration(program, handlers, faintedResult.state);
   if (endTurnResult.kind !== "next-turn") {
     throw new Error(
-      `turn5ResolutionAdapterPreview: expected the end-turn pass to settle on "next-turn", `
+      `turn5ResolutionAdapter: expected the end-turn pass to settle on "next-turn", `
         + `got "${endTurnResult.kind}" instead`,
     );
   }
@@ -409,13 +431,13 @@ export function resolveTurn5SitrusAdapterPreview(): Turn5SitrusAdapterPreview {
   const events = endTurnResult.state.events;
   const hpChangeEvent = [...events].reverse().find((event) => event.kind === "hp-change" && event.battler === 0);
   if (!hpChangeEvent || hpChangeEvent.kind !== "hp-change") {
-    throw new Error("turn5ResolutionAdapterPreview: end-turn pass did not emit Onix's own hp-change event");
+    throw new Error("turn5ResolutionAdapter: end-turn pass did not emit Onix's own hp-change event");
   }
   const messageEvent = [...events].reverse().find(
     (event) => event.kind === "message" && event.messageId === STRINGID_PKMNSITEMRESTOREDHEALTH,
   );
   if (!messageEvent || messageEvent.kind !== "message") {
-    throw new Error("turn5ResolutionAdapterPreview: end-turn pass did not emit Onix's own Sitrus heal message");
+    throw new Error("turn5ResolutionAdapter: end-turn pass did not emit Onix's own Sitrus heal message");
   }
 
   const healLines = resolveBattleStringLines(messageEvent.messageId, {
@@ -432,14 +454,15 @@ export function resolveTurn5SitrusAdapterPreview(): Turn5SitrusAdapterPreview {
 }
 
 /**
- * Named gap marker, this slice's own honest-stop scope boundary: the
- * turn-5/turn-6 menu redraw clocks (`turn5KoDismissElapsed`/`turn5Resolved`,
- * `battleScene.ts:2399,2412`) and the presentation TIMING of the Sitrus
- * window (text-printer start tick, HP-bar climb cadence, menu-redraw
- * handoff) are NOT staged here -- only the structural facts (HP endpoints,
- * message text, replacement identity, item consumption) are. A real flip
- * still needs a source-derived clock projection for those ticks; this
- * preview proves the FACTS a source-derived projection would receive, not
- * the projection itself.
+ * Named gap marker, rank-3's own explicit half-2 scope boundary (not this
+ * slice's -- see docs/battle-scene-retirement-inventory.md rank-3 row and
+ * ISSUES #39's own "half 1 of 2" brief): the Sitrus heal half is proven
+ * above (`resolveTurn5SitrusAdapter`) but not wired into `battleScene.ts`,
+ * and its own presentation TIMING (text-printer start tick, HP-bar climb
+ * cadence, menu-redraw handoff -- `turn5SitrusHealTextVisibleChars`,
+ * `turn5SitrusOnixHp`, `turn5SitrusRingMatrix`,
+ * `turn5SitrusResettledBounceTick` and their consumers) is untouched, still
+ * hand-fit. This module proves the Sitrus half's own FACTS, not the
+ * projection that would render them -- a later slice's own flip.
  */
 export const TURN5_PRESENTATION_TIMING_NOT_STAGED = true;
