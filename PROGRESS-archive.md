@@ -1,3 +1,36 @@
+## 753 — [USER DECISIONS 2026-07-30 ~22:06] Gate 5 → #39 → Gate 6 ordering set; stale pre-reset "decision" retired
+
+- **State:** docs-only. Gate green at **551 files / 5586 tests + 1 deliberate
+  animation-lane skip** (entry 752's run), build clean, DEFERRED.md empty.
+- **User ordering decision:** **Gate 5 first, then ISSUES #39, then Gate 6**
+  — recorded in ROADMAP S10. This overrides entry 750's "(i) #39 first"
+  next-session ordering. Rationale on file: Gate 5 is the product; #39 is not
+  getting worse under the no-new-turn-keyed-branches rule, so its slices fill
+  gaps around Gate-5 work.
+- **Stale-blocker retirement:** the "harness pre-reset capture" item was
+  **never an open user decision** by the time it was written. Harness added
+  `preCheckpointCaptureFrames` (`8251953`, 07-30 10:13) and
+  `preCheckpointCaptureAllFrames` (`38fea69`, 10:19); the running main oracle
+  (started 11:59) has both. The routing design was authored 12:24 and still
+  cited the 07-29 scout instead of re-reading `../../oracle/BATTLE_LAB.md`.
+  Corrected §6.2 and marked the scout's item-7 PREDICTION falsified. What
+  remains is **wiring, not a decision**: pre-checkpoint frames use a separate
+  absolute coordinate space, so map the scout's P..B+714 window onto it and
+  confirm coverage by probe.
+- **Second user decision — browser Battle Scene ON/OFF selector: SKIP
+  (2026-07-30).** Recorded as out of scope in ROADMAP S10 and closed in
+  design §6.4. The browser stays Battle Scene OFF; Scene ON remains the
+  animation lane's proof, not a player toggle. Closed, not parked — do not
+  re-litigate.
+- **Only remainder for the user:** the attendant-commentary checkpoint needs
+  a *specific* party, but `preview_report` picks a seed, not an opponent —
+  seed search or a harness ask. Small, and not blocking Gate 5.
+- **Notes:** ISSUES.md now separates **Open** (#39 only) from **Settled
+  records** (#38/#18/#5). The settled entries stay because ROADMAP acceptance
+  lines cite them by number as the reason specific pixel diffs are accepted;
+  deleting them would orphan those citations.
+
+---
 ## 752 — [SUPERVISOR FOLD 2026-07-30 ~21:55] Stranded side-worker inventory folded; #39 worklist now on master
 
 - **State:** `worker/side-20260730-183612` (docs-only, `ff36195e`) merged to

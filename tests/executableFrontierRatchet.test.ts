@@ -336,6 +336,23 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // half and second-active-slot identities the current context does not own.
   // Reachability-tested in tests/battleScriptJumpifcantswitchOpcode.test.ts.
   ["src/engine/battleScriptJumpifcantswitchOpcode.ts", 1],
+  // Gate-5 audit item (j.6): AI_CheckBadMove_CheckEffect's if_effect table
+  // dispatch (`data/battle_ai_scripts.s`) is source-complete for the ported
+  // per-effect handlers (EFFECT_ROAR/SLEEP/PARALYZE/CONFUSE family); every
+  // other table-listed effect shares one named barrier
+  // (`factoryAiCheckBadMove.ts` "AI_CheckBadMove_CheckEffect: source-complete
+  // if_effect table lookup"), reachability-tested in
+  // tests/factoryAiCheckBadMove.test.ts.
+  ["src/engine/factoryAiCheckBadMove.ts", 1],
+  // Gate-5 audit item (j.6): AI_CheckViability's if_effect table dispatch is
+  // source-complete for the ported per-effect handlers (Swagger/Counter/...);
+  // every other table-listed effect shares one named barrier
+  // (`factoryAiCheckViability.ts` "AI_CHECK_VIABILITY_TABLE_EFFECTS" branch),
+  // reachability-tested in tests/factoryAiCheckViability.test.ts. An
+  // effect with no if_effect table entry at all is not a barrier (it's the
+  // source-faithful zero-dispatch "scored" no-op, same shape as the other
+  // ported handlers) and does not add to this count.
+  ["src/engine/factoryAiCheckViability.ts", 1],
 ]);
 
 function recordingImportsIn(file: string): string[] {
@@ -349,10 +366,23 @@ function recordingImportsIn(file: string): string[] {
 
 function barrierCallSitesIn(file: string): number {
   const source = readFileSync(file, "utf8");
-  return source
-    .split("\n")
+  const lines = source.split("\n");
+  const helperCalls = lines
     .filter((line) => line.includes("unsupportedBranch(") && !/^\s*(?:export\s+)?(?:function|const)\s+unsupportedBranch\b/.test(line))
     .length;
+  const definesHelper = lines.some(
+    (line) => /^\s*(?:export\s+)?(?:function|const)\s+unsupportedBranch\b/.test(line),
+  );
+  if (definesHelper) return helperCalls;
+  // The factoryAi* modules have no `unsupportedBranch(...)` helper at all
+  // (local or imported): each barrier is its own `{ kind:
+  // "unsupported-branch", ... }` result-literal construction. A trailing
+  // `,` marks a construction; the type union member naming the shape ends
+  // in `;` and must not be counted.
+  const literalConstructions = lines
+    .filter((line) => /kind:\s*"unsupported-branch",\s*$/.test(line))
+    .length;
+  return helperCalls + literalConstructions;
 }
 
 describe("overfit containment ratchet (ROADMAP S10 §4, ISSUES #41)", () => {
