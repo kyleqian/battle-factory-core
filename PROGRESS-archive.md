@@ -1,3 +1,52 @@
+## 759 — [BOUNDED MAIN WORKER 2026-07-31 ~00:15] YOSHI intro slice 2: ack-handoff divergence pinned as (a) alignment-only, fixed; 512/751, new downstream defect named and stopped
+
+- **State:** `tools/compare/traces/factory-arbitrary-intro-yoshi-off.json`
+  (A-press offset only) + new
+  `tests/factoryBattleStartIntroAckAlignment.test.ts` + `docs/trainer-pic-
+  off-window-scout.md` §D updated. No other `src/` change. Focused:
+  `factoryBattleStartIntro` + new ack-alignment test + `executableFrontier
+  Ratchet` + `factoryRoundBattleOrchestrator` **43/43 green**; `npx tsc
+  --noEmit` clean. Full `npm test`/`npm run build` **not run this step**,
+  per the brief (side worker live concurrently).
+- **Did:** Pinned the first divergence (entry 757/758) exactly. Oracle: dense
+  pixel diff of the fixture's own `preCheckpointCaptures` shows the message
+  box pixel-static across absolute frames 1541-1544 and first changed at
+  1545 — settles 1544/1545/1546 (1541 = accepted-edge frame, 1545 = redraw).
+  App: instrumented `advanceFactoryRoundBattleStartIntro` directly (not the
+  compare loop) and confirmed its documented one-tick `elapsed` freeze on the
+  accepted `A` edge, then simulated: the message-switch always lands at
+  `(A-press tick) + 4`. Both previously-tried offsets (374, 379) are late;
+  the source-faithful press tick is **370** (`1545 - preCheckpointFrameOffset
+  1171 - 4`), landing the switch exactly on app-frame 374. **Verdict: (a)**,
+  pure comparison-alignment — no renderer/lifecycle bug. Fixed the trace's
+  segments (`[373,1,376]` → `[369,1,380]`, same 750-tick total) and re-ran
+  the dense comparison: **512/751 matched** (was 415/751), frames 0..512
+  match except one isolated frame. This exposed a **second, previously-
+  hidden, genuinely different divergence** (not ack timing): dense-diffing
+  confirms `generatedBattleStartOpponentHandoffTick` (text-complete + 3-tick
+  lag) is exactly correct (predicted app-412/oracle-1583 handoff matches the
+  oracle's own release-start jump precisely), but
+  `GENERATED_PLAYER_DISPATCH_DELAY`/`_TEXT_DELAY = 101` undercounts by 24
+  ticks for this fixture's COMBUSKEN opponent (oracle's own "Go!" text
+  starts at handoff+125, i.e. absolute 1708, not +101). That constant was
+  evidently validated against a GROVYLE-opponent fixture; 24 ticks isn't
+  explained by trainer-name-length alone, so the real per-species dependency
+  is unidentified — a bounded fix isn't safe without a second species data
+  point (risks regressing the GROVYLE-validated fixtures). Per the brief's
+  own out-of-scope clause: characterized (site, tick arithmetic, oracle
+  citations) in §D and not chased. One further isolated single-frame
+  mismatch (app 444) inside the otherwise-exact release window is likely the
+  same species-dependent family, not separately isolated to a site.
+- **Next:** supervisor — the ack-handoff item this round targeted is fully
+  resolved (512/751, every residual frame named). The new species-dependent
+  post-handoff dispatch-delay defect (§D) is unstarted, real work — needs a
+  second (non-GROVYLE, non-COMBUSKEN) generated-opponent oracle data point to
+  pin the actual dependency before touching `GENERATED_PLAYER_DISPATCH_DELAY`.
+- **Notes:** the two isolated/rejected `A`-press offsets from slice 1 (374,
+  379) are now regression-pinned in the new test as "still-late, switch not
+  yet visible at frame 374" cases, guarding against re-introducing either.
+
+---
 ## 758 — [SUPERVISOR 2026-07-30 ~23:50] Round 3 verified: YOSHI 415/751 re-run confirmed; #55 filed from the S3 probe; three rulings
 
 - **State:** S3's probe doc merged (`630bc805`, worktree removed); M3's

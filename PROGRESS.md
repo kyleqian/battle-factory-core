@@ -63,6 +63,42 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   a new issue or fold them into a future round.
 
 ---
+## 761 — [SUPERVISOR 2026-07-31 ~01:10] Round 5 verified: cry-duration mechanism proven (YOSHI 650/751, GROVYLE pins intact); #39 adapter merged after supervisor type-fix; round 6 dispatched
+
+- **State:** union green — suite **556 files / 5670 tests + 1 deliberate
+  animation-lane skip**, build clean after supervisor fix `18c3299c`.
+  Supervisor personally re-ran: YOSHI **650/751**,
+  `battle-command-generated-off` **128/128**,
+  `interactive-generated-intro-off` **715/715**.
+- **Round-5 outcomes:** (1) M5 identified the dispatch-delay mechanism —
+  `Intro_TryShinyAnimShowHealthbox` blocks on `IsCryPlayingOrClearCrySongs`,
+  so the wait is the opponent's cry duration. Extracted
+  `src/data/gen/cry-durations.json` (376 species, isolated extractor
+  test); MAGNETON (+111) and COMBUSKEN (+125) matched the GROVYLE-baseline
+  prediction exactly; species-keyed function replaced both fixed constants
+  plus the coupled `GENERATED_PLAYER_VISUAL_DELAY`. Three named YOSHI
+  residuals remain (444, 536, 652-750) + the reachable-but-unexercised
+  `GENERATED_OPPONENT_SHADOW_DELAY` (MAGNETON is the live case). (2) S5
+  banked the #39 rank-1 typed adapter + equivalence proofs (new files
+  only) with three FINDINGs (hardcoded move-target legality, unproven
+  gender/personality, no generic move-visual owner) and a concrete flip
+  checklist.
+- **Supervisor fix:** S5's files had two type errors `npm run build`
+  catches but vitest does not (tuple-vs-number[] cast; a vacuous
+  "flinch" event-kind comparison — no such kind exists). Fixed minimally
+  (`as const` tuples; assert no FLINCH messageId instead) in `18c3299c`.
+  Worker-brief lesson: focused runs must include `npx tsc --noEmit` for
+  new src/test files — added to future side briefs.
+- **Round 6 dispatched:** main M6 — isolate/fix the 652-750 family, then
+  536/444, then build the MAGNETON app-side comparison (second
+  arbitrary-species proof; exercises the shadow path); GROVYLE pins must
+  hold. Side S6 — battle-2 party ground-truth probe (personalities,
+  genders, bench legality) to discharge the flip's FINDINGs 1-2.
+- **Next:** after M6, supervisor ticks Gate 5 (per entry-760 intent — the
+  delay mechanism is now fixed and proven on two species) and the main
+  lane moves to the #39 rank-1 flip consuming S5+S6.
+
+---
 ## 760 — [SUPERVISOR 2026-07-31 ~00:30] Round 4 verified+merged; gate 554/5653 green; round 5: dispatch-delay mechanism (main) + #39 rank-1 equivalence groundwork (side)
 
 - **State:** union gate green **554 files / 5653 tests + 1 deliberate
@@ -91,52 +127,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** #39 rank-1 ordering follows
   `docs/battle-scene-retirement-inventory.md`'s own recommendation; the
   two-phase equivalence-first split keeps lanes file-disjoint.
-
----
-## 759 — [BOUNDED MAIN WORKER 2026-07-31 ~00:15] YOSHI intro slice 2: ack-handoff divergence pinned as (a) alignment-only, fixed; 512/751, new downstream defect named and stopped
-
-- **State:** `tools/compare/traces/factory-arbitrary-intro-yoshi-off.json`
-  (A-press offset only) + new
-  `tests/factoryBattleStartIntroAckAlignment.test.ts` + `docs/trainer-pic-
-  off-window-scout.md` §D updated. No other `src/` change. Focused:
-  `factoryBattleStartIntro` + new ack-alignment test + `executableFrontier
-  Ratchet` + `factoryRoundBattleOrchestrator` **43/43 green**; `npx tsc
-  --noEmit` clean. Full `npm test`/`npm run build` **not run this step**,
-  per the brief (side worker live concurrently).
-- **Did:** Pinned the first divergence (entry 757/758) exactly. Oracle: dense
-  pixel diff of the fixture's own `preCheckpointCaptures` shows the message
-  box pixel-static across absolute frames 1541-1544 and first changed at
-  1545 — settles 1544/1545/1546 (1541 = accepted-edge frame, 1545 = redraw).
-  App: instrumented `advanceFactoryRoundBattleStartIntro` directly (not the
-  compare loop) and confirmed its documented one-tick `elapsed` freeze on the
-  accepted `A` edge, then simulated: the message-switch always lands at
-  `(A-press tick) + 4`. Both previously-tried offsets (374, 379) are late;
-  the source-faithful press tick is **370** (`1545 - preCheckpointFrameOffset
-  1171 - 4`), landing the switch exactly on app-frame 374. **Verdict: (a)**,
-  pure comparison-alignment — no renderer/lifecycle bug. Fixed the trace's
-  segments (`[373,1,376]` → `[369,1,380]`, same 750-tick total) and re-ran
-  the dense comparison: **512/751 matched** (was 415/751), frames 0..512
-  match except one isolated frame. This exposed a **second, previously-
-  hidden, genuinely different divergence** (not ack timing): dense-diffing
-  confirms `generatedBattleStartOpponentHandoffTick` (text-complete + 3-tick
-  lag) is exactly correct (predicted app-412/oracle-1583 handoff matches the
-  oracle's own release-start jump precisely), but
-  `GENERATED_PLAYER_DISPATCH_DELAY`/`_TEXT_DELAY = 101` undercounts by 24
-  ticks for this fixture's COMBUSKEN opponent (oracle's own "Go!" text
-  starts at handoff+125, i.e. absolute 1708, not +101). That constant was
-  evidently validated against a GROVYLE-opponent fixture; 24 ticks isn't
-  explained by trainer-name-length alone, so the real per-species dependency
-  is unidentified — a bounded fix isn't safe without a second species data
-  point (risks regressing the GROVYLE-validated fixtures). Per the brief's
-  own out-of-scope clause: characterized (site, tick arithmetic, oracle
-  citations) in §D and not chased. One further isolated single-frame
-  mismatch (app 444) inside the otherwise-exact release window is likely the
-  same species-dependent family, not separately isolated to a site.
-- **Next:** supervisor — the ack-handoff item this round targeted is fully
-  resolved (512/751, every residual frame named). The new species-dependent
-  post-handoff dispatch-delay defect (§D) is unstarted, real work — needs a
-  second (non-GROVYLE, non-COMBUSKEN) generated-opponent oracle data point to
-  pin the actual dependency before touching `GENERATED_PLAYER_DISPATCH_DELAY`.
-- **Notes:** the two isolated/rejected `A`-press offsets from slice 1 (374,
-  379) are now regression-pinned in the new test as "still-late, switch not
-  yet visible at frame 374" cases, guarding against re-introducing either.
