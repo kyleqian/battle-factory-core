@@ -1,3 +1,31 @@
+## 764 — [SUPERVISOR 2026-07-31 ~01:55] GATE 5 TICKED; #56 filed; round 7: #39 rank-1 flip (main) + #56 evidence pack (side)
+
+- **State:** union gate green **557 files / 5676 tests + 1 deliberate
+  animation-lane skip**, build clean. Round 6 verified and merged: M6's
+  `fixedIv` harness fix (`7708e362`) + S6's battle-2 ground truth
+  (`259e3358` — ONIX/KABUTO personalities probed; ONIX `1205102525`
+  independently matches the anchor-draft receipt, a cross-validation
+  neither worker planned).
+- **GATE 5 TICKED** in ROADMAP S10 with a completion note carrying the
+  full evidence chain (audit → commentary ROM receipts → anchor receipt
+  link → AI ratchet pins → YOSHI 650/751 arbitrary-trainer proof +
+  cry-duration mechanism) and the recorded scope rulings (CBM/CV breadth
+  → Gate 6; battles-3-7 receipts declined per S8 policy; P..B fade →
+  #39-class; #55 stream model tracked, not absorbed). **ISSUES #56 filed**
+  as the honest remainder worklist for the arbitrary-intro window
+  (player-side cry gate needs a second data point; frames 444/536;
+  MAGNETON shadow coverage via §D's alternative tuple).
+- **Round 7 dispatched (user ordering: #39 next):** main M7 — the rank-1
+  FLIP consuming the banked adapter + ground truth; six committed pins
+  mandatory at recorded counts (179/191/16/209 + 128/128 + 715/715),
+  legacy fixture files deleted, honest-stop on any regressed pin. Side
+  S7 — #56 evidence pack: player-cry triangulation (>=2 player-lead
+  species vs `cry-durations.json`) + committed MAGNETON-lead fixture with
+  landmark mapping (new files only, no src changes).
+- **Notes:** worker-lesson from entry 762 applied: both briefs demand
+  `npx tsc --noEmit` where TS is touched.
+
+---
 ## 763 — [BOUNDED MAIN WORKER 2026-07-31 ~01:50] Round 6: 652..750 partly isolated (HP-IV data bug fixed, ready-lag mechanism named); MAGNETON coverage not reached
 
 - **State:** `tools/compare/appTrace.ts` fix only (dev-time harness, no

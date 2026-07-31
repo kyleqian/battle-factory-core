@@ -13,6 +13,56 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 767 — [BOUNDED MAIN WORKER 2026-07-31 ~03:15] #56: species-keyed ready lag applied, MAGNETON app-side proof built, ONIX regression found
+
+- **State:** YOSHI **699/751** (up from 650/751 — real personalities +
+  species-keyed ready lag both landed). MAGNETON app-side proof built:
+  **424/751** (new; exact 0..423, diverges 424..750 with no recovery —
+  masks a clean shadow-branch check, see below). GROVYLE
+  `battle-command-generated-off` **128/128** unchanged. GROVYLE
+  `interactive-generated-intro-off` **699/715, regressed from 715/715**
+  (honest, characterized — not silently fixed, see Did). Battle-2 insurance
+  pins unaffected: `battle2-turn1-rockslide` **191/191**,
+  `battle2-action-menu-dense` **209/209**. `npx tsc --noEmit` clean; focused
+  suite (`cryDurationsExtraction`, `factoryBattleStartIntro`,
+  `executableFrontierRatchet`, `factoryRoundBattleOrchestrator`) **44/44**
+  green. Full `npm test`/`npm run build` **not run this step** per the brief
+  (side worker live concurrently).
+- **Did:** (1) `GENERATED_PLAYER_READY_LAG` (flat 185) replaced with
+  `generatedPlayerReadyLag(state)` keyed off the player's own active species
+  (`98 + cryDurationTicks(playerLeadSpecies) + generatedPlayerVisualLag`),
+  per docs/intro-cry-shadow-evidence.md Part 1. Settled the "98 vs 99"
+  residual by fixing `cry-durations.json`'s extractor
+  (`Math.round`→`Math.ceil`, matching the real per-VBlank "still playing"
+  poll) and regenerating the 376-species file — invariant for the already-
+  validated opponent dispatch-delay species, resolves DELCATTY's own +1.
+  (2) Built the MAGNETON `AppStage` (`generatedBattleStartIntroMagnetonStage`,
+  `tools/compare/appTrace.ts`) + compare trace
+  (`factory-arbitrary-intro-magneton-off.json`), reproducing trainerId 109/
+  RICARDO exactly. (3) Staged real ROM personalities (from
+  `bin/oracle lab`'s own dense `state.parties`) in both the YOSHI and
+  MAGNETON stages, closing the round-6 gender-icon residual. (4) Found (not
+  fixed) a **new regression**: `interactive-generated-intro-off`'s real
+  canonical Battle-1 lead (ONIX) needs ready-lag 185, but the 3-species
+  formula predicts 179 — a clean 6-tick miss that survived several
+  hypotheses (extraction bug, line-length, floor/max term). Left
+  precisely characterized rather than force-fit. Full write-up:
+  `docs/trainer-pic-off-window-scout.md` §D "Round 7 resolution".
+- **Next:** ISSUES #56 — item 1 has a real regression (ONIX/canonical-
+  route ready-lag) needing a 5th data point or a source read of
+  `battlerAnimsDone`; item 3's MAGNETON shadow-branch check is blocked by
+  an earlier, unrelated affine-emerge/tint divergence in
+  `drawGeneratedOpponentRelease` (first at handoff+19, well before the
+  shadow's own handoff+104 onset) that needs isolating against a second
+  species; item 2 (frames 444/536) untouched this round — no budget left
+  after the above.
+- **Notes:** `tools/extract/extract-cry-durations.ts` and
+  `src/data/gen/cry-durations.json` are normally side-lane files; touched
+  here because task 1 required the ceil fix to reconcile the three
+  triangulated species — flagged for the supervisor's awareness of the
+  lane boundary, not hidden.
+
+---
 ## 766 — [SUPERVISOR 2026-07-31 ~02:25] #39 rank-1 RETIRED (flip verified); player-cry mechanism confirmed on 3 species; round 8 dispatched
 
 - **State:** union gate green **557 files / 5671 tests + 1 deliberate
@@ -104,29 +154,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   future docs/tooling pass.
 
 ---
-## 764 — [SUPERVISOR 2026-07-31 ~01:55] GATE 5 TICKED; #56 filed; round 7: #39 rank-1 flip (main) + #56 evidence pack (side)
-
-- **State:** union gate green **557 files / 5676 tests + 1 deliberate
-  animation-lane skip**, build clean. Round 6 verified and merged: M6's
-  `fixedIv` harness fix (`7708e362`) + S6's battle-2 ground truth
-  (`259e3358` — ONIX/KABUTO personalities probed; ONIX `1205102525`
-  independently matches the anchor-draft receipt, a cross-validation
-  neither worker planned).
-- **GATE 5 TICKED** in ROADMAP S10 with a completion note carrying the
-  full evidence chain (audit → commentary ROM receipts → anchor receipt
-  link → AI ratchet pins → YOSHI 650/751 arbitrary-trainer proof +
-  cry-duration mechanism) and the recorded scope rulings (CBM/CV breadth
-  → Gate 6; battles-3-7 receipts declined per S8 policy; P..B fade →
-  #39-class; #55 stream model tracked, not absorbed). **ISSUES #56 filed**
-  as the honest remainder worklist for the arbitrary-intro window
-  (player-side cry gate needs a second data point; frames 444/536;
-  MAGNETON shadow coverage via §D's alternative tuple).
-- **Round 7 dispatched (user ordering: #39 next):** main M7 — the rank-1
-  FLIP consuming the banked adapter + ground truth; six committed pins
-  mandatory at recorded counts (179/191/16/209 + 128/128 + 715/715),
-  legacy fixture files deleted, honest-stop on any regressed pin. Side
-  S7 — #56 evidence pack: player-cry triangulation (>=2 player-lead
-  species vs `cry-durations.json`) + committed MAGNETON-lead fixture with
-  landmark mapping (new files only, no src changes).
-- **Notes:** worker-lesson from entry 762 applied: both briefs demand
-  `npx tsc --noEmit` where TS is touched.

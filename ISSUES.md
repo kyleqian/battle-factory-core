@@ -16,27 +16,43 @@ one without a user decision, and do not count them as backlog.
 
 # Open
 
-## #56 — Arbitrary-trainer intro: three named residuals + player-side cry gate
+## #56 — Arbitrary-trainer intro: residuals, ONIX ready-lag regression, MAGNETON shadow coverage
 
 **Symptom:** the public dense arbitrary-trainer intro comparison
-(`factory-arbitrary-intro-yoshi-off`, YOSHI/COMBUSKEN) stands at **650/751**
-with every divergent frame characterized in
-`docs/trainer-pic-off-window-scout.md` §D. Remainder:
+(`factory-arbitrary-intro-yoshi-off`, YOSHI/COMBUSKEN) now stands at
+**699/751** (up from 650/751, round 7 2026-07-31) with every divergent frame
+characterized in `docs/trainer-pic-off-window-scout.md` §D. Remainder:
 
-1. **`GENERATED_PLAYER_READY_LAG` must become species-dependent** — the
-   player controller's own `Intro_TryShinyAnimShowHealthbox` gates on the
-   player lead's cry, symmetric to the opponent mechanism fixed 2026-07-31
-   (frames 678-721 family). A one-species fit missed by 8 ticks; needs a
-   KADABRA (or other player-lead) second data point before touching the
-   constant. Cry durations are already extracted
-   (`src/data/gen/cry-durations.json`).
+1. **DONE (round 7):** `GENERATED_PLAYER_READY_LAG` is now species-keyed
+   (`generatedPlayerReadyLag`, `battleScene.ts`), confirmed exact (within
+   the WAV-ceiling-rounding fix) on three independent `factoryLegal`
+   fixtures (GRIMER/KADABRA/DELCATTY). **New regression found by the same
+   change:** `interactive-generated-intro-off` (the real canonical Battle-1
+   recording, player lead ONIX) dropped from **715/715 to 699/715** — a 4th
+   data point that disagrees with the 3-species formula by a clean 6 ticks
+   (predicts 179, needs 185). Root cause not found (extraction, line-length,
+   and simple floor/max hypotheses all ruled out — see §D round 7's own
+   write-up). This is the canonical-route reconciliation gap the round-6/7
+   briefs anticipated (previously misattributed to GRANBULL/
+   `battle-command-generated-off`, which turns out not to exercise this
+   mechanism at all since it bypasses the generic intro state machine
+   entirely). Needs a 5th data point or a source-level look at
+   `battle_controller_player.c`'s `battlerAnimsDone` term before touching
+   the formula further.
 2. **Isolated frames 444 and 536** (trainer-exit/shadow region;
-   opponent healthbox/summary region) — single-frame, unisolated to a site.
-3. **MAGNETON elevated-shadow coverage** — `GENERATED_OPPONENT_SHADOW_DELAY`
-   (104) is reachable for species with dispatch delay >= 104 but exercised
-   by no committed comparison; the SHIZUKA tuple cannot be reproduced
-   app-side (16 battles of RNG history; 30k-seed search failed), but §D
-   records a verified alternative MAGNETON-lead tuple to build instead.
+   opponent healthbox/summary region) — single-frame, unisolated to a site,
+   unchanged this round.
+3. **MAGNETON elevated-shadow coverage — app-side proof built (round 7),
+   result inconclusive.** `factory-arbitrary-intro-magneton-off` compare
+   trace built and run: **424/751**, exact through frame 423 then diverging
+   through the end of the window with no recovery. The divergence starts at
+   handoff+19 (app-relative 424), well *before*
+   `GENERATED_OPPONENT_SHADOW_DELAY`(104)'s own onset (app-relative 509) —
+   a growing color/tint mismatch in the opponent-release affine-emerge
+   sequence (`drawGeneratedOpponentRelease`), which the source comments
+   claim is species-independent but evidently is not. This masks a clean
+   verification of the shadow branch itself in this run. Not fixed —
+   needs the affine-emerge blend math checked against a second species.
 
 **Not blocking:** Gate 5 ticked with these named (ROADMAP S10 gate 5
 completion note); this is the worklist to finish the window honestly.

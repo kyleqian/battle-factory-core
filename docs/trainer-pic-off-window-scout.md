@@ -812,3 +812,120 @@ app-side pixel comparison after this round too.
 `battle-command-generated-off` **128/128**, `interactive-generated-intro-off`
 **715/715**, both pixel-exact — the HP-IV fix's default-`31` fallback for
 the mechanicLab call site keeps GRANBULL's own fixture untouched.
+
+### Round 7 resolution (2026-07-31): species-keyed ready lag applied, MAGNETON app-side proof built, ONIX 4th-datapoint regression found
+
+**Applied docs/intro-cry-shadow-evidence.md Part 1's formula.**
+`GENERATED_PLAYER_READY_LAG` (flat 185) replaced with
+`generatedPlayerReadyLag(state) = generatedPlayerVisualLag(playerLine.length)
++ 98 + cryDurationTicks(playerLeadSpeciesId)` (`battleScene.ts`), keyed off
+the player's own active species (`generatedPlayerSpeciesId`, symmetric to the
+existing `generatedOpponentSpeciesId`) - no species-name branch. Settled the
+evidence doc's "98 vs 99" residual: `cry-durations.json`'s extractor used
+`Math.round` on the raw WAV-derived tick count, but the real per-VBlank
+"still playing" poll (`IsCryPlayingOrClearCrySongs`) means any partial
+remaining tick still counts as playing, so the true duration is `Math.ceil`.
+Switched the extractor to ceil and regenerated the 376-species file
+(`tools/extract/extract-cry-durations.ts`); invariant for the opponent
+dispatch-delay mechanism's three validated species (GROVYLE/MAGNETON/
+COMBUSKEN all shift +1 uniformly, canceling in that difference formula) but
+resolves DELCATTY's own +1 (59→60), giving a single exact constant (98) for
+all three player-lead species instead of 98/98/99.
+
+**MAGNETON app-side proof built** (`tools/compare/appTrace.ts`'s
+`generatedBattleStartIntroMagnetonStage`, mirroring the YOSHI stage's
+`createFactoryRoundBattleOrchestrator` + `beginFactoryRoundBattleStartIntro`
+pattern): active player party `playerSetIds:[267,268,269]`
+(DELCATTY/SABLEYE/LICKITUNG, the real challenge-2/rank-0 range), `saved
+RentalRecords` set to the exact six-setId list
+(`[110,130,150,115,135,145]`) docs/intro-cry-shadow-evidence.md Part 2's own
+verification used - `generateFactoryOpponent`'s only use of the saved bench
+is `savedRentalSetIds`, so this reproduces trainerId 109 (RICARDO)/
+`opponentSetIds:[349,353,292]` (MAGNETON/SWALOT/MINUN) exactly, confirmed
+directly (`orchestrator.round.opponentSchedule[0]`). New compare trace
+`tools/compare/traces/factory-arbitrary-intro-magneton-off.json`;
+`preCheckpointFrameOffset` derived the same way as YOSHI/SHIZUKA
+(`B - GENERATED_BATTLE_INTRO_ROOM_HANDOFF_DELAY(8)`, with `B` itself
+`speciesPopulateFrame - 26` per §C/§D's own convention: `1212 - 26 = 1186`,
+offset `1178`); the "wants to battle" ack-handoff frame (oracle 1544→1545
+box-clear, dense-diff-confirmed directly on this fixture, same method as
+round 5.5's slice-2) placed the trace's `A`-press at tick 373 (segments
+`[362, 1, 387]`), and the resulting app-relative redraw landed exactly on
+target - the alignment methodology transfers cleanly to a second species.
+
+**MAGNETON result: 424/751 frames matched, frames 0..423 exact, then
+divergence from 424 through the end of the window (750) with no frame
+recovering in between.** First mismatch (bbox 171,49-181,61, 64px) sits
+inside the opponent-release affine-emerge/tint materialize sequence
+(handoff at app-relative 405, so this is handoff+19 - well *before*
+`GENERATED_OPPONENT_SHADOW_DELAY`(104)'s own onset at app-relative 509), and
+the divergence widens over the next several frames rather than resolving
+after one tick (unlike the isolated single-frame 444/536 residuals below) -
+a genuine, growing color/tint mismatch (app renders a dull tan blend,
+`(214,214,198)`; oracle shows a saturated pink `(255,181,247)` at the same
+pixels), not an off-by-a-tick alignment error (checked: comparing oracle
+frame 424 against the app's own adjacent frames 421-426 shows app-424 is
+already the closest match, ruling out a simple frame-shift fix). **Because
+this divergence starts and persists well before the shadow's own onset
+tick, it masks a clean pixel confirmation of
+`GENERATED_OPPONENT_SHADOW_DELAY`'s live branch in this run** - the intended
+target of this fixture (per ISSUES #56 item 3) is blocked by this earlier,
+more fundamental defect in the "species-independent"
+`drawGeneratedOpponentRelease` affine-emerge sequence, which is evidently
+*not* actually species-independent as its own comment currently claims. Not
+fixed this round (would need instrumenting `turn5MaterializeCoeff`/
+`affineEmergeAccumulator`/`MATERIALIZE_Y2_TABLE` against a second species'
+own oracle captures, out of budget) - named precisely rather than chased.
+
+**YOSHI re-run: 699/751 (up from 650/751), also staged real player
+personalities.** `generatedBattleStartIntroArbitraryStage`'s three player
+rentals now pass the ROM's own real personalities (read off `bin/oracle lab`
+on the committed fixture's dense `state.parties.player`:
+GRIMER=2737562574, 130's own record=3230415900, 150's own
+record=391062422) instead of the synthetic nature-index placeholder -
+closes the round-6 gender-icon residual. Remaining 52 mismatches: the two
+already-named single-frame residuals (444, 536, unchanged, still not
+isolated to a site) and a much smaller version of round 6's "652..750"
+family (now only a handful of frames in the 678..750 range, down from all
+99 of them - the dominant cause, the flat ready-lag constant, is fixed;
+what's left is presumably the same small opponent-healthbox/party-summary
+periodic-redraw residual round 6 already flagged as separate and unfixed).
+
+**Regression: `interactive-generated-intro-off` 699/715 (down from
+715/715) - a genuine 4th data point that contradicts the 3-species model.**
+This fixture replays the real canonical Battle-1 recording (`battle1-intro
+.json`) via the SAME generic `beginFactoryRoundBattleStartIntro` machinery
+(confirmed in `core.ts`'s `generated-orchestrator` branch - this is *not*
+the mechanicLab-only canonical path `battle-command-generated-off`/GRANBULL
+uses, which bypasses the intro state machine entirely and was never
+actually exercising `GENERATED_PLAYER_READY_LAG` despite historically being
+described as its calibration source). The player's real active lead here is
+ONIX (`reference` RAM dump `battle1-turn1-ram-dump.json`: "battler0
+(player/ONIX)"), send-out line `"Go! ONIX!"` (9 chars). Dense-diffing the
+oracle's own captures for this fixture (same method as elsewhere) pins its
+true ready-transition onset at trace-frame 1746 (small pre-transition
+change at 1740, matching the same UI-element bbox seen in every other
+fixture's own ready-transition). The new formula predicts
+`98 + cryDurationTicks(ONIX=70) + generatedPlayerVisualLag(9) = 179`,
+6 ticks earlier than the required 185 (the exact old flat value) - confirmed
+directly by instrumenting `generatedPlayerReadyLag` for this one run. Ruled
+out: extraction bug (ONIX's own WAV re-verified independently, ceil is
+genuinely 70), wrong line length (hand-counted "Go! ONIX!" = 9), and a
+simple species-independent max/floor term layered on the additive formula
+(would need to bind at ~185 for ONIX while staying below its own value for
+GRIMER/KADABRA/DELCATTY at 128/174/158 - no single floor constant satisfies
+all four simultaneously, since a floor high enough to lift ONIX to 185 would
+also lift the other three above their own exact observed values). **Not
+resolved this round** - the two independently-solid three-species data
+points (dispatch-delay's 101-baseline mechanism and this ready-lag's
+98-baseline mechanism) both hold exactly for arbitrary `factoryLegal`
+fixtures, but the one canonical anchor-session fixture measured against the
+ready-lag mechanism disagrees by a clean 6 ticks. Given the brief's own
+flagged caution anticipated exactly this class of canonical-route
+non-reconciliation (attributed to GRANBULL, which turns out not to expose
+the mechanism at all) - this is that same reconciliation gap, just found on
+a different, real fixture. Left as a named, precisely-characterized
+regression rather than force-fit with an untested branch, per this run's
+own honesty rule. `battle-command-generated-off` **128/128** and both
+battle-2 pins (`battle2-turn1-rockslide` **191/191**,
+`battle2-action-menu-dense` **209/209**) re-verified unaffected.
