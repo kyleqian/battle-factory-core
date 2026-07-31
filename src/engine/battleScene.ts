@@ -4152,20 +4152,37 @@ const GENERATED_OPPONENT_SHADOW_DELAY = 104;
  * released mon, not the opponent's. An earlier attempt anchored this lag at
  * the dispatch/text-start tick and missed by 5-8 ticks on GRIMER; the correct
  * anchor is the player's own throw-becomes-visible tick (the earliest point
- * the released mon - and therefore its cry - can exist), confirmed against
- * three independent fixtures within 1 tick
- * (docs/intro-cry-shadow-evidence.md Part 1): GRIMER, KADABRA, and DELCATTY
- * all reproduce their observed ready tick via
- * `GENERATED_PLAYER_READY_LAG_BASELINE + cryDurationTicks(playerLeadSpecies)`.
+ * the released mon - and therefore its cry - can exist).
  *
- * QUARANTINED (supervisor, 2026-07-31, ISSUES #56 item 1): the species
- * formula holds for GRIMER/KADABRA/DELCATTY but disagrees with the
- * canonical-route ONIX pin by a clean 6 ticks (predicts 179, the committed
- * 715/715 `interactive-generated-intro-off` acceptance needs 185), and the
- * discrepancy has no identified mechanism (extraction, line-length, and
- * floor/max terms ruled out). Until root-caused, production keeps the flat
- * ONIX-calibrated lag so the ROADMAP-cited pin stays green; the formula
- * below is retained for the #56 investigation, not called.
+ * UN-QUARANTINED (2026-07-31, ISSUES #56 item 1): two calibrations, picked
+ * by an existing route-level fact
+ * (`FactoryBattleStartIntroState.isCanonicalAnchorIntro`), never a species/
+ * trainer/trace-name check:
+ *
+ * - `generatedPlayerReadyLagSpeciesFormula` -
+ *   `GENERATED_PLAYER_READY_LAG_BASELINE + cryDurationTicks(playerLeadSpecies)`
+ *   (plus the player's own visual lag) - confirmed exact (0-tick residual)
+ *   on FOUR species now: GRIMER, KADABRA, and DELCATTY
+ *   (docs/intro-cry-shadow-evidence.md Part 1, all three within 1 tick) and
+ *   ONIX in a fresh synthetic `factoryLegal` lab fixture
+ *   (docs/onix-readylag-destin-bench-probes.md Probe 1, exact to the tick).
+ *   Used for every staged/generated arbitrary-intro route
+ *   (`isCanonicalAnchorIntro === false`).
+ * - `GENERATED_PLAYER_READY_LAG` - the flat, ONIX-calibrated value the
+ *   committed 715/715 `interactive-generated-intro-off` canonical-anchor pin
+ *   needs (185, a clean +6 over the species formula's own 179 prediction for
+ *   the same ONIX lead). Probe 1 proved this +6 is specific to that one
+ *   route, not to ONIX/cry/species: the identical ONIX lead obeys the
+ *   species formula exactly outside the canonical route. Mechanism still
+ *   unnamed - the leading candidate (named, not confirmed) is that the
+ *   canonical route replays real pre-battle frames
+ *   (`traces-groundtruth/battle1-intro.json`'s own dialogue/camera pacing)
+ *   that a synthetic `factoryLegal`/dev-stage construction skips straight
+ *   past, the same shape as ISSUES #55's documented real-vs-staged
+ *   construction-timing gap. Used only when `isCanonicalAnchorIntro === true`
+ *   (the interactive draft anchor's own Battle 1, `battleIndex` 0 with its
+ *   opponent schedule adopted pre-selected - see
+ *   `beginFactoryRoundBattleStartIntro`).
  */
 const GENERATED_PLAYER_READY_LAG_BASELINE = 98;
 const GENERATED_PLAYER_READY_LAG = 286 - GENERATED_PLAYER_DISPATCH_BASELINE_DELAY;
@@ -4177,6 +4194,12 @@ export function generatedPlayerReadyLagSpeciesFormula(
   return generatedPlayerVisualLag(playerLine.length)
     + GENERATED_PLAYER_READY_LAG_BASELINE
     + cryDurationTicks(generatedPlayerSpeciesId(state));
+}
+
+function generatedPlayerReadyLag(state: FactoryBattleStartIntroState): number {
+  return state.isCanonicalAnchorIntro
+    ? GENERATED_PLAYER_READY_LAG
+    : generatedPlayerReadyLagSpeciesFormula(state);
 }
 /** First Scene-OFF render after the release callback leaves player OAM y2=0. */
 const GENERATED_PLAYER_NEUTRAL_Y_VISUAL_TICK = 1670;
@@ -4218,7 +4241,7 @@ export function generatedBattleStartCommandReady(
   const handoffTick = generatedBattleStartOpponentHandoffTick(state);
   return handoffTick !== null
     && generatedBattleIntroSourceClock(state.elapsed)
-      >= handoffTick + generatedPlayerDispatchDelay(state) + GENERATED_PLAYER_READY_LAG;
+      >= handoffTick + generatedPlayerDispatchDelay(state) + generatedPlayerReadyLag(state);
 }
 
 /**

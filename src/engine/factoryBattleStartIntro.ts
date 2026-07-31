@@ -39,15 +39,26 @@ export type FactoryBattleStartIntroState = Readonly<{
   elapsed: number;
   /** First accepted PAUSE_UNTIL_PRESS A edge, frozen once. */
   acknowledgedElapsed: number | null;
+  /**
+   * True only for the interactive draft anchor's own Battle 1 (the route
+   * whose opponent schedule is adopted pre-selected rather than freshly
+   * generated, `FactoryRoundBattleOrchestratorConfig.adoptedInitialOpponent`
+   * at `battleIndex` 0 — see `beginFactoryRoundBattleStartIntro`). Selects
+   * which player-ready-lag calibration `battleScene.ts` uses; see
+   * `GENERATED_PLAYER_READY_LAG`'s doc there for both.
+   */
+  isCanonicalAnchorIntro: boolean;
 }>;
 
 export function createFactoryBattleStartIntro(
   command: FactoryBattleStartPresentationCommand,
+  isCanonicalAnchorIntro: boolean,
 ): FactoryBattleStartIntroState {
   return Object.freeze({
     command,
     elapsed: 0,
     acknowledgedElapsed: null,
+    isCanonicalAnchorIntro,
   });
 }
 

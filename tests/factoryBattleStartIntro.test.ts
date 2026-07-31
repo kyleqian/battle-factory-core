@@ -70,7 +70,7 @@ function orchestrator() {
 
 function intro() {
   const generated = factoryBattleStartPresentationForState(orchestrator())!;
-  return createFactoryBattleStartIntro(generated);
+  return createFactoryBattleStartIntro(generated, false);
 }
 
 describe("generated Factory pre-send-out intro lifecycle", () => {

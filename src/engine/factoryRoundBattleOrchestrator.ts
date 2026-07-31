@@ -530,10 +530,17 @@ export function beginFactoryRoundBattleStartIntro(
   if (command === null) {
     return fail("Factory battle-start intro requires a pending battleStart command");
   }
+  // Route-level fact, not a species/trainer/trace-name check: only the
+  // interactive draft anchor adopts its Battle 1 opponent schedule
+  // pre-selected (config.adoptedInitialOpponent, factoryAnchorSession.ts);
+  // every other caller (dev-stage fixtures, and any later live battle within
+  // the same session) generates its opponent fresh at this battleIndex.
+  const isCanonicalAnchorIntro =
+    state.config.adoptedInitialOpponent !== undefined && command.battleIndex === 0;
   return Object.freeze({
     ...state,
     battleStartIntro: Object.freeze({
-      ...createFactoryBattleStartIntro(command),
+      ...createFactoryBattleStartIntro(command, isCanonicalAnchorIntro),
       elapsed: -GENERATED_BATTLE_INTRO_ROOM_HANDOFF_DELAY,
     }),
   });
