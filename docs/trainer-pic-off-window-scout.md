@@ -137,3 +137,166 @@ That lookup maps BLACK_BELT to `TRAINER_PIC_BLACK_BELT`
 
 Open remainder: ground truth is complete, but no public generated app/oracle
 trace reaches P yet. This scout intentionally did not create one.
+
+## C. Absolute pre-checkpoint coordinate mapping (2026-07-30 probe)
+
+Ground truth above (P/B/B+offsets) uses the throwaway private-route frame
+numbering from the original scout. The harness has since shipped
+`preCheckpointCaptureFrames`/`preCheckpointCaptureAllFrames`
+(`../../oracle/BATTLE_LAB.md` "Pre-checkpoint captures"), a **separate,
+absolute** coordinate space (frame 0 = immediately after `new_session()`).
+This section maps §A's window onto that public numbering by direct probe
+against the running main OFF oracle, using the exact same banked fixture
+(`tools/battle-lab/factory-trainer-pic-shizuka-off.json`: `factoryLegal`,
+`challengeNum: 2`, `battleNum: 2`, `trainerId: 110` (SHIZUKA),
+`playerSetIds: [274, 354, 338]`, `opponentSetIds: [349, 339, 327]`,
+`seed: 1`) so §A's landmark descriptions apply unchanged. Set 274 is
+`FRONTIER_MON_KADABRA_2` (species KADABRA, id 64); set 349 is
+`FRONTIER_MON_MAGNETON_2` (species MAGNETON, id 82) — confirmed against
+`src/data/gen/battle-frontier-mons.json`.
+
+### Method
+
+1. **Coarse**: added `"preCheckpointCaptureFrames"` with a 246-frame grid
+   (step 15, `0..3664`) to `bin/oracle lab`. Only 134 frames (`0..1995`)
+   came back — the internal route for this fixture is shorter than the
+   3664-frame ceiling, so requested frames past its real end are silently
+   absent (matches `BATTLE_LAB.md`'s "never exceeds" wording; it is not a
+   fixed length).
+2. **Dense**: reran with `"preCheckpointCaptureAllFrames": true` (single
+   request, no enumeration cap). Returned **2007 captures, frames `0..2006`
+   inclusive** — the complete internal route for this exact fixture. All 134
+   coarse-grid hashes matched the dense run's hashes at the same frame
+   numbers (cross-check, 0 mismatches).
+3. Symbol-resolved two callback addresses to anchor the transition precisely:
+   `bin/oracle symbols CB2_InitBattle BattleMainCB2` → `0x8036760` /
+   `0x8038420`. Observed `state.engine.mainCallback2` values `134440801`
+   (`0x8036761`) and `134448161` (`0x8038421`) are exactly those addresses
+   +1 (GBA Thumb bit) — i.e. directly identified, not guessed from behavior.
+4. Decoded `pngBase64` at candidate frames to disk and read them as images
+   to confirm on-screen content against §A's cited text/sprites.
+
+### Mapping table (absolute preCheckpointCaptureFrames numbering)
+
+| §A landmark | Absolute frame | Evidence |
+| --- | --- | --- |
+| P — Factory-room message showing, pre-dismiss | 959 | PNG: room + "SHOW ME THAT YOU'RE SERIOUS!" visible; `sha256` constant `953..962`, first change at `963` (dismiss animation starts). |
+| `CB2_InitBattle` running (fade/circles/black) | 1160–1187 | `mainCallback2 == 0x8036761` (`CB2_InitBattle`+1) for this whole span; PNGs are solid black (192-byte PNGs). |
+| B — `gBattlersCount==2` ∧ `gBattleMainFunc==BeginBattleIntro` | 1171 (inferred exactly; see note) | `InitSinglePlayerBtlControllers` sets both in the same statement block for a non-double singles battle (`reference/pokeemerald/src/battle_controllers.c:161-177`), which runs **inside** the `CB2_InitBattle` window above (before the `BattleMainCB2` switch) — consistent with B preceding the 1188 callback switch below. Pinned by the B+26 sub-event next row landing at exactly `1171+26=1197`. |
+| `gMain.callback2` switches to `BattleMainCB2` | 1188 | `mainCallback2 == 0x8038421` (`BattleMainCB2`+1) first at 1188; constant through frame 2006 (gMain.callback2 stays `BattleMainCB2` for the whole battle — `gBattleMainFunc` sub-state isn't a separately exposed field). |
+| Opponent pic created / battlers struct populated (B+26) | **1197** | `state.battlers.player.species=64`, `opponent.species=82` first nonzero at exactly `1171+26=1197` — matches §A's own "Opponent pic created \| 1197/B+26" row verbatim, confirming **offset 0** at B. |
+| Party summaries (B+26..+179) | 1198–1350 | Dense per-frame `sha256` churn across `1198..1350`, matching §A's "1197..1350/+26..+179" almost frame for frame. |
+| "BLACK BELT SHIZUKA would like to battle!" fully printed | ~1400 (dispatch ≈1351, printer ≈1356 per §A) | PNG at 1400 shows the full line including the heart glyph. |
+| Message ack / sent-out dispatch | 1541–1544 (stable), box redraw starts 1545 | `sha256` constant `1541..1544`, first change at 1545 — matches §A's ack "1541-1542" / dispatch "1544" almost exactly. |
+| "…sent out MAGNETON!" + release flash (B+443) | 1614 | PNG confirms text + pink release-flash sprite. |
+| "Go! KADABRA!" + both healthboxes settled (B+651) | 1822 | PNG confirms both healthboxes and the line. |
+| Checkpoint predicate first true (`CONTROLLER_CHOOSE_ACTION`=18, `PLAYER_CONTROLLER_FLAG`=1) — §A's B+714 | **1885** | `state.engine.playerControllerCommand==18 && controllerExecFlags==1` first true at exactly 1885 — the same absolute frame number §A reports for B+714. |
+| True checkpoint (pixel-identical to post-checkpoint frame 0) | 1887 | `preCheckpointCaptures[frame=1887].sha256 == captures[0].sha256` exactly (the ordinary post-checkpoint trace's frame 0). Recurs every ~37–39 frames after (1926, 1963, 1999…) — an idle blink-cycle repeating the same pixels, not further motion. 2 frames later than the RAM-predicate-only match at 1885; likely an edge-sampling difference between this probe and §A's throwaway subclass, not a real behavior gap. |
+| Route end (`preCheckpointCaptureAllFrames` last frame) | 2006 | Total 2007 frames captured. The harness overshoots the logical checkpoint (1885/1887) by up to ~121 frames because the internal acknowledgment loop only re-checks its stop condition at coarse polling-chunk boundaries (consistent with `BATTLE_LAB.md`'s "up to 12 further chunks of up to 134 frames": `2006-1872=134`). This is harmless for capture (every frame through 2006 is still returned), just a cue that "last captured frame" ≠ "the semantic checkpoint frame" — use the predicate/hash match (1885/1887) for that. |
+
+**Verdict: the offset between §A's private-route numbering and the public
+absolute `preCheckpointCaptureFrames` numbering is 0 for this fixture**,
+confirmed independently at P (959), at B via its B+26 sub-landmark (1197),
+at the message/send-out/release/healthbox landmarks (1400/1544/1614/1822),
+and at the checkpoint predicate (1885) — with only a 2-frame slack at the
+finest (pixel-identical-to-post-checkpoint) granularity. §A's frame numbers
+can be used directly as absolute `preCheckpointCaptureFrames` values for
+this fixture; a future fixture with a different rental-selection frame count
+(non-`(0,1,2)` pick order — the range is 1886–1936 per `BATTLE_LAB.md`)
+should re-verify P using the same message-content probe before assuming the
+same equivalence, since P sits immediately after rental selection ends.
+
+### Determinism check
+
+Ran the identical dense request (`preCheckpointCaptureAllFrames: true`,
+same fixture) twice back to back:
+
+- Both runs: **2007/2007 frames**, identical frame index list (`0..2006`).
+- **0 `sha256` diffs** across all 2007 pre-checkpoint captures.
+- **0 diffs** in the full semantic `state` dict across all 2007 captures
+  (deep equality, not just the pixel hash).
+- Post-checkpoint `captures[0].sha256` identical between runs.
+- Combined-sequence digest (`sha256` of the concatenation of all 2007
+  per-frame `sha256` hex strings, both runs):
+  `47e7d635f6084ba47bb76c5216449e090698f7a34c959b983468f2a7256d44b2`.
+
+**Verdict: fully deterministic.** Absolute numbering and pixel hashes are
+stable across runs; the chunked intro-acknowledgment polling does not
+introduce frame jitter for this fixture, and it does not affect which
+frames get returned (`preCheckpointCaptureAllFrames` still returns every
+frame through the (later) actual stop point, run to run).
+
+**Secondary finding — seed sensitivity.** Reran a spot-check (19 enumerated
+`preCheckpointCaptureFrames`, the landmark rows above) with `seed: 999999`
+instead of `1`, same `trainerId`/`playerSetIds`/`opponentSetIds`. 16/19
+landmark frames matched the seed-1 hashes exactly byte-for-byte (transition,
+send-out, ball-throw, materialize, healthbox, and checkpoint frames — 959,
+963, 1171, 1197, 1582, 1601, 1614, 1637, 1693, 1786, 1800, 1822, 1885, 1887,
+1911, 2006). Three frames inside the *"would like to battle!"* message's
+text-print window (1351, 1400, 1544) did **not** match — the variant-seed
+PNG at 1400 shows the line mid-print ("would like to batt") where seed 1
+already shows it complete — but the two runs resynchronize by 1582 (the
+next structural landmark). So: **structural landmarks (transition, pic
+slide, send-out/release/materialize, healthbox, checkpoint) are seed-
+invariant; text-print completion timing inside a message box is not.** A
+future comparison fixture must match the app's actual seed to claim an
+exact pixel match across the *whole* P..B+714 window; matching only
+trainer/party identity (not seed) is sufficient for every landmark outside
+message-print sub-windows.
+
+### Feasibility verdict for the consumer step
+
+**The comparable subwindow is P..B+714** (the pre-battle transition plus
+the full intro cutscene through command-menu readiness), reproducible
+pixel-for-pixel by the app's generated route — but only via the *non-
+reversed* workflow, and not yet exercised for an arbitrary (non-anchor)
+trainer:
+
+- This window's content is determined entirely by **trainer identity +
+  final player lead/party + final opponent party** (species, names,
+  trainer class, speech), never by *how* the rental-selection screen was
+  navigated to reach that roster. `factoryLegal`'s internal route stages
+  the requested `trainerId`/`playerSetIds`/`opponentSetIds` directly
+  ("replaces the semantic Factory IDs... selects the requested three
+  candidates through controller input", `BATTLE_LAB.md:30-35`) rather than
+  reproducing any particular menu-navigation path, so its P..B+714 output
+  is valid ground truth regardless of how a *different* route (the app's)
+  arrived at the same roster.
+- The app does **not** let you request an arbitrary `trainerId`/
+  `opponentSetIds` directly (that's a lab-only staging shortcut). It must
+  instead *compute* them from a seed via its own source-derived generation:
+  `src/engine/factoryOpponentGeneration.ts` (`GenerateOpponentMons`
+  trainer/set selection, `battle_factory.c:316-375`) and
+  `src/engine/factoryTrainerSchedule.ts` (`selectFactoryTrainer`, an
+  explicit-RNG-port pure function) already port this math and are already
+  consumed by `factoryRoundBattleOrchestrator.ts` for battles 2–7. **This
+  means no seed search is needed**: run the app's own generation function
+  for a candidate seed/challenge/battle state, read off the resulting
+  `(trainerId, opponentSetIds)` (and the player-side drafted set ids, in
+  the same slot order the app assigns them — lead/active-battler order
+  matters for which species sends out first), then request *exactly that*
+  combination from `factoryLegal` with `preCheckpointCaptureFrames`/
+  `preCheckpointCaptureAllFrames` to get pixel ground truth. Reversing the
+  direction — picking a canned lab fixture first and trying to make the
+  app's seed-driven draft reproduce it — would need an actual seed search
+  and should be avoided.
+- What's still missing is **not** the harness/capture contract (this probe
+  shows it is deterministic, dense, and pixel-exact) — it's the
+  presentation/rendering side for an *arbitrary* trainer: §B's exact gap
+  list (trainer pic choreography, generic intro text, generic release
+  lifecycle) is still open, which is exactly why no such comparison trace
+  exists yet. This probe removes the "is the harness ready" question from
+  that remaining work.
+- **Not claimed comparable:** the `0..P` window (the rental-selection
+  screen itself). `factoryLegal`'s navigation to reach specific requested
+  candidate IDs is a scripted shortcut through the menu, not the same input
+  sequence the app's actual draft UI/adapter would produce for a given
+  seed's candidate offering — comparing that window needs the app's own
+  draft-screen trace (already separately covered, e.g. `tests/
+  draftScreen.test.ts`), not this pre-checkpoint capture of the lab's
+  internal shortcut route.
+- **Seed caveat** (from the determinism section above): matching
+  `trainerId`/`playerSetIds`/`opponentSetIds` is sufficient for every
+  structural landmark in P..B+714, but an exact pixel match through the
+  message-print sub-windows also requires the comparison fixture's `seed`
+  to match the app's actual seed for that battle.

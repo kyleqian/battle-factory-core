@@ -1,3 +1,26 @@
+## 751 — [BOUNDED MAIN WORKER 2026-07-30 ~18:52] Turn-13 DRAGON_BREATH content re-driven from kernel receipts
+
+- **State:** landed in `77cb49d0`; focused acceptance **4 files / 293
+  tests**, full gate green at **551 files / 5586 tests + 1 deliberate
+  animation-lane skip**, production build clean.
+- **Did:** staged Onix's real DRAGON_BREATH hit chain from the post-SAND RNG
+  cursor and consumed its generic damage/HP/faint receipts. Deleted raw
+  `TURN13_PIDGEOTTO_STARTING_HP`, `TURN13_PIDGEOTTO_FAINT_HP`,
+  `TURN13_FAINTED_LINE1/2`, the raw kickoff-line call, and the
+  `turn13KoDismissElapsed` field; renamed the two KO/faint dispatchers and
+  removed KO dismissal's `turn12Resolved` guard. Source-cited damage,
+  secondary roll (90: no paralysis), HP update, and faint sequencing.
+- **Next:** continue #39 outside this bounded half-window: the surrounding
+  turn-13 SAND_ATTACK→DRAGON_BREATH timing cascade and post-KO Murkrow
+  switch-in/materialization remain keyed. `turn13Resolved` remains mirrored
+  because the turn-14 dispatcher and slot-2 PP accounting consume it;
+  `TURN13_DRAGONBREATH_MENU_REDRAW_DELAY` remains the turn-14 reopen gate.
+- **Notes:** SAND_ATTACK **190/190**, DRAGON_BREATH/faint **141/141**,
+  switch-in **242/242**, generated intro **715/715**, generated command
+  **128/128**. No capture, route, Scene-ON, barrier, or new
+  battle/turn/absolute-tick branch.
+
+---
 ## 750 — [SUPERVISOR WIND-DOWN 2026-07-30 ~17:50] #53 CLOSED same-day: design→7 slices→flip→6/6 acceptance; Gate-6 program closed; 2 censuses; moveend barrier drained
 
 - **State:** master green at final gate **550 files / 5581 tests + 1

@@ -13,6 +13,49 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 754 — [BOUNDED MAIN WORKER 2026-07-30 ~22:40] Pre-checkpoint intro-window mapping probe: offset 0, deterministic, feasibility verdict recorded
+
+- **State:** docs-only (`docs/trainer-pic-off-window-scout.md` §C added).
+  Read-only oracle probing, no src/tools/fixture change; tree clean at
+  commit. Gate unchanged from entry 753 (**551 files / 5586 tests + 1
+  deliberate animation-lane skip**, build clean) — not rerun this step per
+  the step brief (docs-only, supervisor runs the full gate).
+- **Did:** mapped entry 753's P..B+714 window onto the new absolute
+  `preCheckpointCaptureFrames` numbering via `bin/oracle lab` against
+  `tools/battle-lab/factory-trainer-pic-shizuka-off.json` (coarse
+  246-frame grid, then `preCheckpointCaptureAllFrames: true` for the exact
+  2007-frame route). **Offset is 0** — the scout's private-route frame
+  numbers are usable directly as absolute frame numbers for this fixture,
+  confirmed independently at P (959, PNG match), at B via its B+26
+  sub-landmark (species populate at exactly `1171+26=1197`), and at the
+  B+714 checkpoint predicate (`playerControllerCommand==18 &&
+  controllerExecFlags==1` first true at 1885; pixel-identical to
+  post-checkpoint frame 0 by 1887). Two full dense reruns matched
+  byte-for-byte on all 2007 `sha256` hashes and full `state` dicts (0
+  diffs) — fully deterministic. A same-roster different-seed rerun found
+  every structural landmark seed-invariant except the intro message's
+  text-print completion timing (3/19 sampled frames), which needs a
+  matching seed to compare exactly.
+- **Next:** the follow-up step can build the public dense arbitrary-trainer
+  intro comparison trace per §C's feasibility verdict: compute a
+  `(trainerId, opponentSetIds, playerSetIds)` tuple from the app's own
+  `factoryOpponentGeneration.ts`/`factoryTrainerSchedule.ts` for some
+  seed/challenge/battle (no seed search needed — these are pure,
+  explicit-RNG-port functions already wired into
+  `factoryRoundBattleOrchestrator.ts`), then request that exact
+  combination from `factoryLegal` with `preCheckpointCaptureFrames` for
+  pixel ground truth. §B's rendering gap list (generic trainer pic
+  choreography, intro text, release lifecycle) is the remaining blocker,
+  not the harness.
+- **Notes:** the `0..P` rental-selection window is explicitly **not**
+  claimed comparable (lab navigation to reach requested candidate IDs is a
+  scripted shortcut, not the app's real draft-UI input path). Full
+  evidence (mapping table, symbol-resolved callback addresses, hash
+  digests, PNG spot-checks) is in `docs/trainer-pic-off-window-scout.md`
+  §C. No source/tooling/fixture change; scratch probe JSON/PNGs stayed
+  under `/tmp`, never the repo.
+
+---
 ## 753 — [USER DECISIONS 2026-07-30 ~22:06] Gate 5 → #39 → Gate 6 ordering set; stale pre-reset "decision" retired
 
 - **State:** docs-only. Gate green at **551 files / 5586 tests + 1 deliberate
@@ -64,27 +107,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   remembering: a side worker that finishes after the supervisor winds down
   leaves no trace in the ledger unless the next session sweeps
   `git branch --no-merged`.
-
----
-## 751 — [BOUNDED MAIN WORKER 2026-07-30 ~18:52] Turn-13 DRAGON_BREATH content re-driven from kernel receipts
-
-- **State:** landed in `77cb49d0`; focused acceptance **4 files / 293
-  tests**, full gate green at **551 files / 5586 tests + 1 deliberate
-  animation-lane skip**, production build clean.
-- **Did:** staged Onix's real DRAGON_BREATH hit chain from the post-SAND RNG
-  cursor and consumed its generic damage/HP/faint receipts. Deleted raw
-  `TURN13_PIDGEOTTO_STARTING_HP`, `TURN13_PIDGEOTTO_FAINT_HP`,
-  `TURN13_FAINTED_LINE1/2`, the raw kickoff-line call, and the
-  `turn13KoDismissElapsed` field; renamed the two KO/faint dispatchers and
-  removed KO dismissal's `turn12Resolved` guard. Source-cited damage,
-  secondary roll (90: no paralysis), HP update, and faint sequencing.
-- **Next:** continue #39 outside this bounded half-window: the surrounding
-  turn-13 SAND_ATTACK→DRAGON_BREATH timing cascade and post-KO Murkrow
-  switch-in/materialization remain keyed. `turn13Resolved` remains mirrored
-  because the turn-14 dispatcher and slot-2 PP accounting consume it;
-  `TURN13_DRAGONBREATH_MENU_REDRAW_DELAY` remains the turn-14 reopen gate.
-- **Notes:** SAND_ATTACK **190/190**, DRAGON_BREATH/faint **141/141**,
-  switch-in **242/242**, generated intro **715/715**, generated command
-  **128/128**. No capture, route, Scene-ON, barrier, or new
-  battle/turn/absolute-tick branch.
-
