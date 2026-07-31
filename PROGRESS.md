@@ -13,6 +13,58 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 763 — [BOUNDED MAIN WORKER 2026-07-31 ~01:50] Round 6: 652..750 partly isolated (HP-IV data bug fixed, ready-lag mechanism named); MAGNETON coverage not reached
+
+- **State:** `tools/compare/appTrace.ts` fix only (dev-time harness, no
+  `src/` change); `docs/trainer-pic-off-window-scout.md` §D "Round 6
+  resolution" has full findings. YOSHI **650/751** (unchanged count,
+  narrower/more-honest residual). GROVYLE pins re-verified intact:
+  `battle-command-generated-off` **128/128**, `interactive-generated-
+  intro-off` **715/715**. Focused suite (`factoryBattleStartIntro` +
+  ack-alignment + `executableFrontierRatchet` + `factoryRoundBattle
+  Orchestrator` + `cryDurationsExtraction` + `speciesStatsExtraction` +
+  `battleScene` + `kabutoSendOut`) **340/340 green**; `npx tsc --noEmit`
+  clean. Full `npm test`/`npm run build` **not run this step**, per the
+  brief (side worker live concurrently).
+- **Did:** (1) Isolated the dominant piece of the 652..750 family: it was
+  a **data bug, not a timing bug** — `generatedCommandRecord`'s hardcoded
+  `fixedIv: 31` is only correct for the mechanicLab-override
+  `battle-command-generated-off` fixture; the YOSHI `factoryLegal` stage
+  needs the real challenge-0 initial-rental IV (**3**, `factory-round-
+  policy.json`'s own `fixedIvs[0].regular`), which was making GRIMER's
+  displayed max HP wrong (176 vs oracle's 162). Fixed with a `fixedIv`
+  parameter (default unchanged for the mechanicLab call site); shrank the
+  window's dominant per-frame diff from 102px to 24px. (2) Named the
+  larger remaining mechanism (frames 678..721): `battle_controller_
+  player.c:979-1063`'s `Intro_TryShinyAnimShowHealthbox` is the same
+  cry-duration gate already fixed for the opponent last round, but on the
+  **player's own** mon — so `GENERATED_PLAYER_READY_LAG` (currently a
+  flat 185) is also species-dependent. A first-cut linear reparametrization
+  off GRIMER alone missed by 8 ticks (unlike the opponent fix, which
+  matched two species exactly first try) — needs a second player-species
+  data point (KADABRA, via MAGNETON/SHIZUKA) before committing a formula,
+  so left unfixed rather than curve-fit to one point. (3) Frames 444/536:
+  re-checked, unaffected by the HP fix, still not isolated to a site. (4)
+  MAGNETON coverage: the committed SHIZUKA fixture's exact tuple
+  (trainerId 110, `opponentSetIds:[349,339,327]`) needs 16 battles of real
+  ROM RNG history to reproduce independently; brute-forced 1..30000 with
+  no match. Found and verified a working **alternative** arbitrary
+  (non-reversed-workflow, YOSHI-pattern) tuple that does exercise the
+  elevated-shadow path with MAGNETON as the actual opponent lead
+  (`rngValue:70, factoryWinStreak:14, battleIndex:0` → trainerId 109
+  RICARDO, `opponentSetIds:[349,353,292]`, dispatch delay 111) — recorded
+  as the concrete next-step in §D, not built out (would have consumed the
+  budget needed for the regression re-runs and this write-up).
+- **Next:** three items remain, all named in §D round 6: the ready-lag
+  species-dependent formula (needs a second player-cry data point), the
+  tiny 24px gender-icon residual (needs real RNG-derived personality —
+  same class as the #39 "unproven gender/personality" FINDING), and
+  MAGNETON coverage (concrete tuple + fixture-build recipe recorded,
+  ready for the next round to pick up directly).
+- **Notes:** `GENERATED_OPPONENT_SHADOW_DELAY`(104) is still untested
+  against any app-side pixel comparison after this round.
+
+---
 ## 762 — [SUPERVISOR 2026-07-31 ~01:10] Round 5 verified: cry-duration mechanism proven (YOSHI 650/751, GROVYLE pins intact); #39 adapter merged after supervisor type-fix; round 6 dispatched
 
 - **State:** union green — suite **556 files / 5670 tests + 1 deliberate
@@ -99,31 +151,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   a new issue or fold them into a future round.
 
 ---
-## 760 — [SUPERVISOR 2026-07-31 ~00:30] Round 4 verified+merged; gate 554/5653 green; round 5: dispatch-delay mechanism (main) + #39 rank-1 equivalence groundwork (side)
-
-- **State:** union gate green **554 files / 5653 tests + 1 deliberate
-  animation-lane skip**, build clean. M4's 512/751 re-run and confirmed by
-  the supervisor; S4's `anchorDraftReceiptLink.test.ts` (52 assertions)
-  merged and green on the union — Gate-5 audit item 2 is landed in its
-  entry-758 re-scoped form (ROM-pinned setId-derived fields all slots +
-  slots 0/2 personalities; slots 1/3/4/5 as labeled clean-model regression
-  literals per #55; item field is a catalog cross-check, not RAM, because
-  `anchor-state.json` never decoded it).
-- **Gate-5 position:** every audit item is now discharged, landed, or
-  ruled (entries 755/758). The YOSHI dense intro claim stands at 512/751
-  with both residual families named; the sole open engineering thread is
-  the species-dependent dispatch-delay (§D), which strengthens (e)/(f)
-  evidence but does not gate the clauses (already DISCHARGED in the
-  audit). Supervisor intent: tick Gate 5 after round 5's main step either
-  fixes the delay mechanism or files it as a numbered issue with complete
-  evidence.
-- **Round 5 dispatched:** main M5 — name the ROM's actual wait mechanism
-  between opponent handoff and player dispatch (source read), triangulate
-  GROVYLE/COMBUSKEN/MAGNETON/KABUTO, fix data-driven if bounded (GROVYLE
-  windows must stay at recorded counts) else evidence for a new issue;
-  side S5 — #39 rank-1 groundwork, equivalence-proof-first (new-files-only
-  typed adapter + Tier-1 equivalence for the Battle-2 command turn; flip
-  and deletions stay a later main step).
-- **Notes:** #39 rank-1 ordering follows
-  `docs/battle-scene-retirement-inventory.md`'s own recommendation; the
-  two-phase equivalence-first split keeps lanes file-disjoint.

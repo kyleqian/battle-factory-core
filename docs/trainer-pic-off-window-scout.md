@@ -667,3 +667,148 @@ MAGNETON/SHIZUKA fixture (this round only used it for oracle-side dense
 pixel-diffing to extract its triangulation data point, never built the
 matching app `compare` trace), so it was not exercised or verified either
 way this round.
+
+### Round 6 resolution (2026-07-31): 652..750 partly isolated (HP-IV data bug fixed, ready-lag mechanism named), MAGNETON coverage not reached
+
+**652..750, first site found and fixed: wrong player rental IV, not a timing bug.**
+Dense per-pixel diffing (not just `sha256`/bbox) of the "static 171,79-220,103"
+region named in round 5 showed it was **not** static content drift but a
+**data** mismatch: the player healthbox HP text read `176/176` (app) vs
+`162/162` (oracle) for GRIMER, every frame, from the moment the healthbox
+settles. Root cause: `tools/compare/appTrace.ts`'s `generatedCommandRecord`
+hardcoded `fixedIv: 31` for every staged rental record. That value is only
+correct for `battle-command-generated-off`'s own oracle fixture
+(`mechanic-battle-command-generated-off.json`), which uses `mechanicLab`
+mode's `overrides.parties` to inject exact stats (including IV 31 by
+construction) — **not** the real Factory rental-generation formula. The
+YOSHI fixture uses `factoryLegal` mode (the ROM's own real generation
+pipeline), whose challenge-0 initial-rental fixed IV is **3**
+(`src/data/gen/factory-round-policy.json` `rentalSelection.fixedIvs[0]
+.regular`, ported from `GetFactoryMonFixedIV`/`getLevel50InitialRentalFixedIv`),
+confirmed by checking `battle-command-generated-off` itself still matches
+128/128 pixel-exact (i.e. IV 31 really is correct for *that* fixture's own
+hand-set oracle override, so the two call sites were never supposed to share
+one hardcoded value). Fixed: `generatedCommandRecord` now takes an explicit
+`fixedIv` parameter (default 31, preserving the mechanicLab call site
+unchanged); the YOSHI stage now passes
+`getLevel50InitialRentalFixedIv(0, false)` (3) for its own player records.
+Dev-time compare-harness file only (`tools/compare/`), not `src/`.
+
+Effect: the 652..750 window's dominant per-frame diff shrank from 102px
+(49×24 bbox) to 24px (4×7 bbox) at every one of the previously-"static"
+frames (665..677, 722, 724..730, 733..739, ...) — the HP-digit portion of
+the mismatch is now byte-exact. Total match count is **unchanged (still
+650/751)** because this window's frames were already failing for the
+larger, separate reason below; fixing the HP text alone doesn't flip any
+frame to a full match, but the residual is now correctly and narrowly
+characterized instead of mis-attributed to "opponent healthbox/summary
+timing."
+
+**Remaining 24px at the same site: gender-icon color, characterized but not
+fixed.** After the HP fix, GRIMER's healthbox still differs by a small
+fixed 4×7px patch (a shade-pair `255,156,148` (app) vs `66,206,255`
+(oracle) — pink/salmon vs blue, i.e. the ♀/♂ gender-icon glyph color).
+Root cause: `generatedCommandRecord`'s `personality` is synthesized from
+the *nature's own table index* (0..24) purely to pick a nature
+deterministically — it was never meant to model a real RNG-derived
+personality, so the gender bit it happens to produce is incidental, not
+provably correct. This is the same class of gap as the #39 rank-1 audit's
+"unproven gender/personality" FINDING (entry 761's notes), now confirmed
+present in this second harness too. Not fixed: the real fix needs either
+the ROM's actual rental-generation personality draw (a full RNG-history
+port, out of scope) or picking a personality bit to match this one
+observed oracle frame (curve-fitting to a single data point, against this
+run's honesty rule). Left as a named, tiny (24px), non-blocking residual.
+
+**652..750's larger remaining divergence (frames 678..721, ~36 of the 99):
+mechanism named, not fixed.** This is the single biggest piece of the
+family. Oracle transitions from the static "Go! GRIMER!" message box to a
+blank box at app-relative frame **678** and to the fully-open FIGHT/BAG/
+POKEMON/RUN command menu by **684**; the app (unfixed) doesn't make that
+transition until **722** (`generatedBattleStartCommandReady`'s current
+formula: `handoffTick + dispatchDelay + GENERATED_PLAYER_READY_LAG`, with
+`GENERATED_PLAYER_READY_LAG` a flat 185 inherited unchanged from round 5).
+Source-checked: `battle_controller_player.c:979-1063`
+(`Intro_TryShinyAnimShowHealthbox`) is the **exact same gate** as the
+opponent's own `battle_controller_opponent.c:292-383` twin fixed last
+round — `!IsCryPlayingOrClearCrySongs()` on the **player's own** mon (not
+the opponent's), i.e. `GENERATED_PLAYER_READY_LAG` is genuinely
+species-dependent on the player's lead cry duration, not a constant. A
+first-cut reparametrization (`185 + (cryDuration(GRIMER) −
+cryDuration(GRANBULL)) = 185 + (30−66) = 149`, giving a predicted
+transition at app-frame 686) landed **8 ticks late** against the observed
+678 — unlike the dispatch-delay fix, which matched two species exactly on
+the first attempt, this one-species check does not close cleanly. That
+mismatch means either a second additive term participates (a candidate:
+the player's own throw-visible lag is also line-length-dependent, per
+round 5's `generatedPlayerVisualLag`, and the cry-wait window is measured
+from throw-visible, not from text-start — a rough correction using that
+term lands at 684, still 6 off) or the linear model itself needs a second
+species point to pin down, exactly as dispatch delay did. **Not fixed this
+round** — committing a formula off one data point would be curve-fitting,
+against this run's honesty rule; needs the KADABRA (SHIZUKA/MAGNETON
+fixture's player lead) data point next round.
+
+**Frames 444 and 536: still not isolated.** Re-checked after the HP fix
+(unaffected, as expected — both are timing/particle-shaped diffs, not
+data): frame 444 (219px, bbox 0,40-196,85, during the opponent's
+affine-emerge materialize) and frame 536 (394px, bbox 134,88-239,99, one
+tick before player release begins at 537) are both sparse, evenly-spaced
+pixel patterns — frame 536's diff sits in 3px-wide groups spaced 10px
+apart, matching the player's own status ball-icon row
+(`drawBallIcons(..., {opponent:false, player:true, ...})`), a shade-pair
+difference consistent with a one-tick blend/flash offset rather than
+position. Neither was isolated to a specific constant or call site this
+round; both remain named, single-frame, non-blocking residuals.
+
+**Final count for this tuple: still 650/751 (86.6%)** — unchanged in
+count, narrower in cause. Every divergent frame is now explained by one of:
+the still-open ready-lag mechanism (frames 513..721, the large majority),
+the newly-tiny gender-icon residual riding along inside that same window,
+or the two untouched single-frame residuals (444, 536). No new
+unexplained residual was introduced, and none of the round-5 findings
+regressed (verified below).
+
+**MAGNETON coverage: not reached this round — concrete next-step
+recorded.** The committed `factory-trainer-pic-shizuka-off.json` fixture
+(trainerId 110, `challengeNum:2`/`battleNum:2`, opponentSetIds
+`[349,339,327]`) is a `factoryLegal`-mode fixture whose exact tuple was
+produced by the real ROM's own 16-battles-deep RNG history — reproducing
+it from the app's own `generateFactoryOpponent` would require either that
+full RNG history (not ported) or guessing the injection-point `rngValue`
+blind. Brute-force search (`generateFactoryOpponent` called directly,
+`factoryWinStreak:14`, all seven `battleIndex` values, `rngValue` 1..30000,
+`storedTrainerIds: []`) found no `rngValue` reproducing trainerId 110 with
+that exact `opponentSetIds` triple — matching a specific 3-set-ID tuple by
+brute force is combinatorially unlikely in a search this small, so this
+was abandoned rather than escalated (an exact-tuple reproduction fixture
+was never how YOSHI's own slice was built either — see §D slice 1's own
+"non-reversed workflow" framing). Continuing to search for a genuinely
+*independent* (non-reversed-workflow, same convention as YOSHI) tuple that
+still exercises the elevated-shadow path instead: `generateFactoryOpponent`
+with `rngValue:70, factoryWinStreak:14` (challenge 2, `battleIndex:0`),
+`battleTowerLevel50WinStreak:14`, `storedTrainerIds:[]`,
+`savedRentalSetIds:[110,130,150,115,135,145]` produces trainerId **109
+(RICARDO)**, `opponentSetIds:[349,353,292]` — **MAGNETON is the opponent's
+own active lead** (dispatch delay 111 by the same cry-duration formula,
+matching this round's own prediction), genuinely exercising
+`GENERATED_OPPONENT_SHADOW_DELAY`(104)'s live branch. This is a real,
+checked starting point for a future round: build a new oracle
+`battle-lab` fixture from that exact tuple (`challengeNum:2`,
+`battleNum:0`, `trainerId:109`, that `opponentSetIds`, a legal
+challenge-2-range `playerSetIds`, `preCheckpointCaptureAllFrames:true`,
+mirroring `factory-arbitrary-intro-yoshi-off.json`'s own construction),
+probe its own `B`/landmark frame via `bin/oracle lab` (per-fixture
+re-probe, §D's own standing caveat — do not assume YOSHI's `B` carries
+over), then build the matching `factory-arbitrary-intro-magneton` app
+stage + compare trace. Not attempted this round: landmark discovery plus a
+fresh dense oracle round-trip would have consumed the remaining session
+budget needed for the regression re-runs and this write-up, and an
+honest partial characterization beats a rushed, unverified fixture.
+`GENERATED_OPPONENT_SHADOW_DELAY` therefore remains untested against any
+app-side pixel comparison after this round too.
+
+**Regression re-runs (unchanged from round 5, re-verified this round):**
+`battle-command-generated-off` **128/128**, `interactive-generated-intro-off`
+**715/715**, both pixel-exact — the HP-IV fix's default-`31` fallback for
+the mechanicLab call site keeps GRANBULL's own fixture untouched.
