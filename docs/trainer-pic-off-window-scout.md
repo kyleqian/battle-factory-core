@@ -300,3 +300,125 @@ trainer:
   structural landmark in P..B+714, but an exact pixel match through the
   message-print sub-windows also requires the comparison fixture's `seed`
   to match the app's actual seed for that battle.
+
+## D. Public dense arbitrary-trainer intro comparison, slice 1 (2026-07-30)
+
+**Tuple (non-reversed workflow).** Ran `generateFactoryOpponent`
+(`factoryOpponentGeneration.ts`) directly with `rngValue=42`,
+`factoryWinStreak=0`, `battleIndex=0`, `storedTrainerIds=[]`,
+`savedRentalSetIds=[110,130,150,115,135,145]` (legal challenge-0/rank-0 range
+110-199) and read off `trainerId=49` (YOSHI, `FACILITY_CLASS_BUG_CATCHER`),
+`opponentSetIds=[189,155,168]` (COMBUSKEN/POLIWHIRL/PORYGON) —
+`selectionRngValue=918039689`, final `rngValue=2909125605`. Not DESTIN(50)/
+JENSON(58)/SHIZUKA(110, §C's own mapping fixture); species disjoint from all
+three casts. `playerSetIds=[110,130,150]` (GRIMER/NUZLEAF/NOSEPASS) is the
+app's own already-drafted roster in slot order, staged directly via
+`rentals.type: "currentRecords"` — same convention `battle-command-
+generated-off` and the `factoryBattleStartIntro` unit tests already use; the
+`0..P` draft UI itself stays out of scope per this slice's brief.
+
+**Ground truth.** `tools/battle-lab/factory-arbitrary-intro-yoshi-off.json`:
+`factoryLegal`, `challengeNum:0`/`battleNum:0`/`trainerId:49`/that
+`playerSetIds`/`opponentSetIds`, `seed:42`, `preCheckpointCaptureAllFrames:
+true` → 2007 captures, frames `0..2006` (same total as the SHIZUKA fixture;
+`selectedRentalPositions` is also `[0,1,2]`).
+
+**Per-fixture landmark re-probe** (§C's own caveat: re-verify per fixture,
+don't assume offset 0). Message-dismiss plateau is unchanged: `sha256`
+constant `900..962`, first change `963` → **P=959**, identical to SHIZUKA (a
+generic, trainer-independent room-message dismiss). But `mainCallback2==
+CB2_InitBattle+1` first at **1168** (SHIZUKA ~1160) and battlers
+species-populate (B+26) at **1205** (SHIZUKA 1197) — **+8 vs SHIZUKA**,
+species-sprite-load-dependent, not text/seed; inferred **B=1179**. Checkpoint
+predicate true at **1853**, pixel-match-to-post-checkpoint-frame-0 at
+**1855** (SHIZUKA 1885/1887) — B-relative duration **674** vs SHIZUKA's
+**714** (40 fewer frames), matching the shorter "BUG CATCHER YOSHI"/
+"COMBUSKEN" text vs "BLACK BELT SHIZUKA"/"MAGNETON" (confirmed by the dense
+comparison below: the character-by-character print of the full message
+matches exactly, so the duration delta is real text-length cost, not drift).
+
+**App side.** New `factory-arbitrary-intro-yoshi-off` `AppStage`
+(`tools/compare/appTrace.ts`) builds the same tuple via
+`createFactoryRoundBattleOrchestrator` + `beginFactoryRoundBattleStartIntro`
+— the existing generated pre-send-out intro machinery (`factoryBattleStart
+Intro.ts`, wired generically into `core.ts`'s `tick`/`render`, landed the
+same day as this scout per §B's now-falsified item 7 prediction) — mirroring
+`battle-command-generated-off`'s staging pattern with no new battle-number/
+turn/tick branch.
+
+**Consumer extension.** `tools/compare/oracleClient.ts`'s
+`runOracleBattleLab` gained an additive `oracleBattleLab.
+preCheckpointFrameOffset` field. When set: decode `battleLab.
+preCheckpointCaptures` (instead of ordinary post-checkpoint `captures`),
+rebase each frame to app-relative (`absolute - offset`), and filter to the
+trace's own `captureFrames` — so `run.ts`'s existing compare loop is
+unchanged and every other fixture (`battle-command-generated-off` etc.,
+which never set this field) is byte-for-byte unaffected. The post-checkpoint
+request this path sends the oracle is deliberately minimal (`captureFrames:
+[0]`) since pre-checkpoint captures don't depend on it — avoids extra
+full-route replay batches for frames never read.
+
+**Frame mapping.** `app_trace_frame 0 == oracle absolute frame 1171`
+(`preCheckpointFrameOffset: 1171`), derived from `GENERATED_BATTLE_INTRO_
+ROOM_HANDOFF_DELAY=8` (`battleScene.ts:3872`) and this fixture's own `B=1179`
+(`1179-8=1171`). **This app stage does not render the P..B fade/circles/
+black room transition at all** — `beginFactoryRoundBattleStartIntro` installs
+the intro only 8 frames before `BeginBattleIntro`; the ~212-frame P..B fade
+is owned by the canonical-only `battleRoom.ts` lifecycle (DESTIN/JENSON
+only), not the generic intro. So the achievable app-side window is
+**B-8..checkpoint**, not P..checkpoint — a real, characterized gap (§B's
+"no generic initial release lifecycle" item), not attempted this slice.
+
+**Seed alignment (task 5).** Best-effort only: used `seed=42` (the app's own
+`config.rngValue` entering `generateFactoryOpponent`) as the fixture's
+`seed`. This is **not provably** the same RNG-injection point the lab's
+`seed` field writes to (`BATTLE_LAB.md` only documents that precisely for the
+separate `preview_report` anchor — "written immediately after
+`new_session()`, thousands of frames before generation runs"; `factoryLegal`'s
+own injection point relative to its internal rental-selection-screen
+navigation isn't specified, and per entry 756's HONEST-STOP the count of
+ambient per-VBlank `Random()` ticks between any earlier point and generation
+is not committed evidence anywhere). Genuinely unresolvable with committed
+evidence this slice — same class of gap as entry 756 — so proceeded with the
+best-effort value rather than blocking. In the event, no text-print-window
+divergence was observed at all (see below), so this caveat did not bite for
+this specific run.
+
+**Comparison run.** `npm run compare -- tools/compare/traces/factory-
+arbitrary-intro-yoshi-off.json --summary`, app-relative window `0..750`.
+
+**Result: 415/751 frames matched.** Frames **0..373 (374 consecutive
+frames) are pixel-identical byte-for-byte** — the entire trainer-slide,
+party-summary, and full "BUG CATCHER YOSHI / would like to battle!♥"
+text-print animation (character-by-character) plus idle cursor blink, for a
+genuinely arbitrary, never-before-rendered trainer/species pair. That
+contiguous exact match is the headline finding for this slice.
+
+**First divergence: app-relative frame 374 (absolute oracle frame 1545).**
+Oracle: the message box clears and starts a new, barely-printed message at
+exactly frame 1545 — the lab's internal automated route auto-acknowledges
+the `PAUSE_UNTIL_PRESS` gate and advances to the send-out message at a
+near-fixed absolute frame (1545 here, versus the unrelated SHIZUKA fixture's
+1544/1545 "ack/dispatch" landmarks in §C's own table — schedule-driven, not
+reactive to this fixture's shorter text). App: still renders the completed
+"would like to battle!" box + cursor at frame 374 regardless of whether the
+trace's own scripted `A` press had already been placed at app-relative frame
+374 or 379 (both tried; identical output) — the acknowledgement transition
+had not visibly taken effect by then either way. Root cause not isolated
+this slice: candidates are (a) an off-by-a-few-frames error in the
+`app_trace_frame`↔`elapsed` mapping used to choose the `A`-press timing, or
+(b) a multi-frame lag in `factoryBattleStartIntro`'s post-acknowledgement
+render. Renderer/lifecycle sites: `battleScene.ts:3904-3946`
+(`renderGeneratedBattleStartPreSendOut`), `factoryBattleStartIntro.ts:69-86`
+(`advanceFactoryBattleStartIntro`'s `acknowledgedElapsed` handling). The
+residual 336/751 mismatched frames (send-out, release, healthbox settle,
+command-ready) are entirely downstream of this one handoff-timing
+divergence — no independent divergence was found in that tail, consistent
+with a single upstream misalignment propagating forward rather than several
+separate rendering bugs.
+
+Per this slice's brief: characterized and stopped here rather than
+marathon-fixing. **Next slice:** pin the exact acknowledgement-handoff frame
+(compare oracle frames 1544/1545/1546 against a spread of app `A`-press
+offsets, or instrument `state.acknowledgedElapsed`/`elapsed` directly) before
+re-attempting a full-window dense claim for this tuple.

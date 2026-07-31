@@ -31,6 +31,7 @@ import naturesData from "../../src/data/gen/natures.json" with { type: "json" };
 import { createFactoryCorpusPartyMember } from "../../src/engine/factoryCorpusParty.ts";
 import {
   advanceFactoryRoundPresentation,
+  beginFactoryRoundBattleStartIntro,
   completeFactoryRoundPresentation,
   createFactoryRoundBattleOrchestrator,
 } from "../../src/engine/factoryRoundBattleOrchestrator.ts";
@@ -128,6 +129,47 @@ function generatedBattleCommandStage(state: EngineState): EngineState {
   };
 }
 
+// Arbitrary (non-canonical) generated Factory opponent for the public dense
+// intro comparison (docs/trainer-pic-off-window-scout.md §C/§D): trainerId 49
+// (YOSHI) and opponent species COMBUSKEN/POLIWHIRL/PORYGON are whatever
+// factoryOpponentGeneration.ts's own selectFactoryTrainer/GenerateOpponentMons
+// port produces for rngValue 42, factoryWinStreak 0, battleIndex 0 (the
+// non-reversed workflow: the tuple is read off the generator, not chosen to
+// match a known trainer) — neither DESTIN(50) nor JENSON(58) nor the
+// SHIZUKA(110) mapping fixture, and outside all three casts.
+function generatedBattleStartIntroArbitraryStage(state: EngineState): EngineState {
+  const playerRentalRecords = [
+    generatedCommandRecord(110),
+    generatedCommandRecord(130),
+    generatedCommandRecord(150),
+  ] as const;
+  let orchestrator = createFactoryRoundBattleOrchestrator({
+    id: "factory-arbitrary-intro-yoshi-off",
+    rngValue: 42,
+    factoryWinStreak: 0,
+    playerTrainerId: 0x89ab_cdef,
+    battleTowerLevel50WinStreak: 0,
+    facilityState: { rentsCount: 0 },
+    rentals: {
+      type: "currentRecords",
+      playerRentalRecords,
+      savedRentalRecords: [
+        ...playerRentalRecords,
+        generatedCommandRecord(115),
+        generatedCommandRecord(135),
+        generatedCommandRecord(145),
+      ],
+    },
+  });
+  orchestrator = beginFactoryRoundBattleStartIntro(orchestrator);
+  return {
+    ...state,
+    factoryRoundBattleOrchestrator: orchestrator,
+    rngMode: "frontierBattle",
+    rngValue: orchestrator.battle?.rng.value ?? state.rngValue,
+  };
+}
+
 /**
  * Named, dev-time-only staging registry. A stage may replace logical state at
  * a target boundary while the oracle still replays the untouched anchor
@@ -135,6 +177,7 @@ function generatedBattleCommandStage(state: EngineState): EngineState {
  */
 const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "battle-command-generated-off": generatedBattleCommandStage,
+  "factory-arbitrary-intro-yoshi-off": generatedBattleStartIntroArbitraryStage,
   "factory-postwin-canonical-opponent-party":
     createFactoryPostwinStage(CANONICAL_POSTWIN_OPPONENT_RECORDS),
   "factory-postwin-generated-rock-unrestrained-opponent-party":

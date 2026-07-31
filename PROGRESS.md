@@ -13,6 +13,57 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 757 — [BOUNDED MAIN WORKER 2026-07-30 ~23:50] Public dense arbitrary-trainer intro comparison, slice 1: 415/751 matched, first divergence characterized
+
+- **State:** new fixture + consumer wiring, no other src changes. Focused:
+  `executableFrontierRatchet` + `factoryBattleStartIntro` +
+  `factoryRoundBattleOrchestrator` **40/40 green**; `npx tsc --noEmit`
+  clean. Full `npm test`/`npm run build` **not run this step**, per the
+  brief (a side worker is live concurrently).
+- **Did:** non-reversed-workflow tuple via `generateFactoryOpponent`
+  (rngValue 42, factoryWinStreak 0) → trainerId 49 YOSHI (BUG CATCHER),
+  opponent COMBUSKEN/POLIWHIRL/PORYGON — not DESTIN/JENSON/SHIZUKA, disjoint
+  cast. New ground-truth fixture
+  `tools/battle-lab/factory-arbitrary-intro-yoshi-off.json`
+  (`preCheckpointCaptureAllFrames`). Re-probed this fixture's own P/B/
+  checkpoint landmarks per §C's caveat rather than reusing SHIZUKA's: P=959
+  (unchanged, generic), B=1179 (+8 vs SHIZUKA, species-load cost), checkpoint
+  duration 674 vs SHIZUKA's 714 (shorter trainer/species text). New app
+  `AppStage` (`factory-arbitrary-intro-yoshi-off` in `appTrace.ts`) stages
+  the same tuple via `createFactoryRoundBattleOrchestrator` +
+  `beginFactoryRoundBattleStartIntro`. Extended `oracleClient.ts`'s
+  `runOracleBattleLab` with an additive `oracleBattleLab.
+  preCheckpointFrameOffset` field to consume `preCheckpointCaptures` as the
+  oracle side of a comparison, rebased to app-relative frames — existing
+  fixtures/behavior unchanged (opt-in field, verified via the green focused
+  suite above). Ran the dense comparison (751-frame window): **415/751
+  matched, frames 0..373 (374 consecutive) pixel-identical** — the entire
+  trainer-slide/summary/full text-print-animation/idle-cursor-blink for this
+  arbitrary trainer. First divergence at app-relative frame 374 (absolute
+  1545): the oracle's own internal auto-acknowledgement of the intro's
+  `PAUSE_UNTIL_PRESS` gate fires at a near-fixed absolute frame; the app's
+  acknowledgement transition hadn't visibly landed by the same frame in
+  either of two tried `A`-press offsets. Root cause not isolated (off-by-
+  frames mapping vs. a real post-ack render lag); all 336 residual mismatches
+  are downstream of this single divergence, not independent bugs. Also
+  found/characterized: this app stage doesn't render the P..B fade transition
+  at all (canonical-only `battleRoom.ts` owns it) — achievable window is
+  B-8..checkpoint, not P..checkpoint. Seed alignment (task 5) is HONEST-STOP:
+  same class of gap as entry 756 (ambient per-VBlank RNG ticks of unknown
+  count before generation, not committed evidence) — used a best-effort seed;
+  it happened not to matter (no text-window divergence appeared).
+- **Next:** pin the exact acknowledgement-handoff frame (oracle 1544/1545/
+  1546 vs. a spread of app `A`-press offsets, or instrument
+  `acknowledgedElapsed` directly), then re-run for a full-window claim on
+  this tuple. Separately: a generic (non-canonical) room/fade lifecycle for
+  the P..B span is real, uncharacterized §B work, not started.
+- **Notes:** full §D writeup with all landmark numbers, mapping derivation,
+  and the divergence characterization is in
+  `docs/trainer-pic-off-window-scout.md` §D. Also trimmed PROGRESS.md: entry
+  753 was already duplicated in `PROGRESS-archive.md` (a prior ledger-edit
+  slip per `b261e4fc`) and has been removed from here, not re-archived.
+
+---
 ## 756 — [BOUNDED MAIN WORKER 2026-07-30 ~23:10] Audit item 3 (j.6 barrier ratchet) pinned; audit item 2 (anchor-draft receipt) HONEST-STOP — no committed cursor reproduces the draft
 
 - **State:** `tests/executableFrontierRatchet.test.ts` updated only; no
@@ -149,35 +200,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   §C. No source/tooling/fixture change; scratch probe JSON/PNGs stayed
   under `/tmp`, never the repo.
 
----
-## 753 — [USER DECISIONS 2026-07-30 ~22:06] Gate 5 → #39 → Gate 6 ordering set; stale pre-reset "decision" retired
-
-- **State:** docs-only. Gate green at **551 files / 5586 tests + 1 deliberate
-  animation-lane skip** (entry 752's run), build clean, DEFERRED.md empty.
-- **User ordering decision:** **Gate 5 first, then ISSUES #39, then Gate 6**
-  — recorded in ROADMAP S10. This overrides entry 750's "(i) #39 first"
-  next-session ordering. Rationale on file: Gate 5 is the product; #39 is not
-  getting worse under the no-new-turn-keyed-branches rule, so its slices fill
-  gaps around Gate-5 work.
-- **Stale-blocker retirement:** the "harness pre-reset capture" item was
-  **never an open user decision** by the time it was written. Harness added
-  `preCheckpointCaptureFrames` (`8251953`, 07-30 10:13) and
-  `preCheckpointCaptureAllFrames` (`38fea69`, 10:19); the running main oracle
-  (started 11:59) has both. The routing design was authored 12:24 and still
-  cited the 07-29 scout instead of re-reading `../../oracle/BATTLE_LAB.md`.
-  Corrected §6.2 and marked the scout's item-7 PREDICTION falsified. What
-  remains is **wiring, not a decision**: pre-checkpoint frames use a separate
-  absolute coordinate space, so map the scout's P..B+714 window onto it and
-  confirm coverage by probe.
-- **Second user decision — browser Battle Scene ON/OFF selector: SKIP
-  (2026-07-30).** Recorded as out of scope in ROADMAP S10 and closed in
-  design §6.4. The browser stays Battle Scene OFF; Scene ON remains the
-  animation lane's proof, not a player toggle. Closed, not parked — do not
-  re-litigate.
-- **Only remainder for the user:** the attendant-commentary checkpoint needs
-  a *specific* party, but `preview_report` picks a seed, not an opponent —
-  seed search or a harness ask. Small, and not blocking Gate 5.
-- **Notes:** ISSUES.md now separates **Open** (#39 only) from **Settled
-  records** (#38/#18/#5). The settled entries stay because ROADMAP acceptance
-  lines cite them by number as the reason specific pixel diffs are accepted;
-  deleting them would orphan those citations.

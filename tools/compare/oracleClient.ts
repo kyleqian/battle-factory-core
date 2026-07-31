@@ -38,6 +38,19 @@ export interface Trace {
    */
   oracleBattleLab?: {
     readonly scenario: string;
+    /**
+     * Consume the scenario's `preCheckpointCaptures` (absolute pre-checkpoint
+     * numbering — frame 0 immediately after `new_session()`, per
+     * `../../oracle/BATTLE_LAB.md` "Pre-checkpoint captures") instead of the
+     * ordinary post-checkpoint `captures`. `oracleCapture.frame` in the
+     * result is rebased to app-relative (absolute frame minus this offset)
+     * so it lines up with this trace's own app frame numbers; only frames
+     * also present in `captureFrames` are returned, so the comparison window
+     * is explicit rather than the fixture's whole internal route. The
+     * mapping is fixture-specific — see
+     * docs/trainer-pic-off-window-scout.md §C/§D.
+     */
+    readonly preCheckpointFrameOffset?: number;
   };
 }
 
@@ -122,15 +135,71 @@ export async function runOracleTrace(trace: Trace): Promise<OracleRunResult> {
   };
 }
 
+function decodePreCheckpointRun(
+  payload: {
+    totalFrames: number;
+    battleLab?: {
+      preCheckpointCaptures?: Array<{ frame: number; sha256: string; pngBase64: string }>;
+    };
+  },
+  frameOffset: number,
+  wanted: ReadonlySet<number> | null,
+): OracleRunResult {
+  const captures = (payload.battleLab?.preCheckpointCaptures ?? [])
+    .map((capture) => {
+      const png = Buffer.from(capture.pngBase64, "base64");
+      const decoded = PNG.sync.read(png);
+      return {
+        frame: capture.frame - frameOffset,
+        sha256: capture.sha256,
+        rgba: decoded.data,
+        png,
+      };
+    })
+    .filter((capture) => wanted === null || wanted.has(capture.frame));
+  return { totalFrames: payload.totalFrames, captures };
+}
+
 export async function runOracleBattleLab(
   scenario: Readonly<Record<string, unknown>>,
   trace: Trace,
 ): Promise<OracleRunResult> {
   const profile = trace.oracleProfile ?? "battle-scene-on";
+  const frameOffset = trace.oracleBattleLab?.preCheckpointFrameOffset;
   const {
     oracleProfile: _oracleProfile,
     ...oracleTrace
   } = stripAppTraceMetadata(trace);
+  if (frameOffset !== undefined) {
+    // Pre-checkpoint captures are driven entirely by the scenario's own
+    // preCheckpointCaptureFrames/-AllFrames request field (BATTLE_LAB.md),
+    // not by the post-checkpoint trace, so keep the post-checkpoint request
+    // minimal — a real (large) post-checkpoint captureFrames list here would
+    // just trigger extra full-route replay batches for frames this path
+    // never reads.
+    const response = await fetch(`${oracleUrlForProfile(profile)}/v1/battle-lab/run`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        ...scenario,
+        profile,
+        trace: { segments: [], captureFrames: [0] },
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(
+        `oracle /v1/battle-lab/run failed: HTTP ${response.status}: ${await response.text()}`,
+      );
+    }
+    const payload = await response.json() as {
+      totalFrames: number;
+      battleLab?: {
+        preCheckpointCaptures?: Array<{ frame: number; sha256: string; pngBase64: string }>;
+      };
+    };
+    const wanted = trace.captureFrames === undefined ? null : new Set(trace.captureFrames);
+    return decodePreCheckpointRun(payload, frameOffset, wanted);
+  }
   const results: OracleRunResult[] = [];
   for (const batch of captureBatches(oracleTrace)) {
     const response = await fetch(`${oracleUrlForProfile(profile)}/v1/battle-lab/run`, {

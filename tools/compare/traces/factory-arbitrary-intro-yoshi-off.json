@@ -1,0 +1,18 @@
+{
+  "appRoute": "generated-orchestrator",
+  "oracleProfile": "battle-scene-off",
+  "appStage": {
+    "id": "factory-arbitrary-intro-yoshi-off",
+    "frame": 0
+  },
+  "oracleBattleLab": {
+    "scenario": "../../battle-lab/factory-arbitrary-intro-yoshi-off.json",
+    "preCheckpointFrameOffset": 1171
+  },
+  "segments": [
+    {"frames": 373, "buttons": []},
+    {"frames": 1, "buttons": ["A"]},
+    {"frames": 376, "buttons": []}
+  ],
+  "captureWindow": {"start": 0, "end": 750}
+}
