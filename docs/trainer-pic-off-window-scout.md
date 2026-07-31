@@ -929,3 +929,68 @@ regression rather than force-fit with an untested branch, per this run's
 own honesty rule. `battle-command-generated-off` **128/128** and both
 battle-2 pins (`battle2-turn1-rockslide` **191/191**,
 `battle2-action-menu-dense` **209/209**) re-verified unaffected.
+
+### Round 10 resolution (2026-07-31): route-discriminated ready lag un-quarantined; MAGNETON tint isolated to a non-universal yOffset term (not fixed)
+
+**Ready lag un-quarantined via a route-level discriminator, not a species
+fix.** Round 9's side-lane probe (`docs/onix-readylag-destin-bench-probes.md`
+Probe 1) proved the round-7 regression above was never a 4th data point
+against the species formula - a fresh `factoryLegal` ONIX-lead lab fixture
+reproduces the formula exactly (0-tick residual), so the canonical anchor's
+own +6 is a property of *that one route*, not of ONIX/cry/species. This
+round wired that: `FactoryBattleStartIntroState` gained
+`isCanonicalAnchorIntro`, set at `beginFactoryRoundBattleStartIntro`
+(`factoryRoundBattleOrchestrator.ts`) from
+`config.adoptedInitialOpponent !== undefined && command.battleIndex === 0`
+- true only for the interactive draft anchor's own Battle 1
+(`factoryAnchorSession.ts` is the only caller that adopts a pre-selected
+opponent schedule instead of generating fresh), never a species/trainer/
+trace-name check. `generatedBattleStartCommandReady` now picks
+`generatedPlayerReadyLagSpeciesFormula` for every non-anchor route and keeps
+the flat `GENERATED_PLAYER_READY_LAG`(185) only when
+`isCanonicalAnchorIntro` - the canonical route's own +6 stays a named,
+unmechanized route term (leading candidate still the real-vs-staged
+pre-battle-frame gap named in the probe doc, same shape as ISSUES #55).
+Oracle-verified: `interactive-generated-intro-off` **715/715** (held),
+`factory-arbitrary-intro-yoshi-off` **699/751** (recovers the 1-frame
+quarantine cost, 698→699), `factory-arbitrary-intro-magneton-off`
+**424/751** (unchanged, as expected - this window is dominated by the
+separate tint bug below), `battle-command-generated-off` **128/128**
+(never exercises this state machine).
+
+**MAGNETON affine-emerge tint: isolated, falsified for a second species,
+not fixed.** A joint (accumulator, y-offset) brute-force sweep of
+MAGNETON's own dense captures (script not committed, scratch) against the
+first 12 materialize ticks (app-relative 424-435) found the accumulator/
+`MATERIALIZE_Y2_TABLE` schedule is exactly right - only the vertical
+anchor is wrong: `drawGeneratedOpponentRelease`'s `origin.y` uses
+`fieldView.fieldArt.opponent.origin.y`, which already bakes in the species
+resting-Y correction (`coords.yOffset`, `battleCommandFieldArt.ts`).
+Stripping it (`origin.y - coords.yOffset`, base 8 instead of `8+8=16` for
+MAGNETON) reproduces oracle's silhouette with **zero missing-tint pixels
+on every one of the 12 ticks** - a real, confirmed effect, not curve-fit.
+But the same change **regresses COMBUSKEN** (`factory-arbitrary-intro-
+yoshi-off`, `coords.yOffset=1`): 699/751 → 662/751, new divergence from the
+very first materialize tick. So "exclude yOffset" is not the universal
+rule the source comment's "species-independent" claim would need either -
+COMBUSKEN's materialize wants the offset-INCLUSIVE origin (today's code,
+unchanged) and MAGNETON wants it excluded, and no single constant
+`8 +/- yOffset` relationship explains both data points from only two
+species. **Left unmodified** rather than ship a fix that trades one held
+pin for another; MAGNETON stays **424/751**, YOSHI stays **699/751**. The
+finding is documented at `drawGeneratedOpponentRelease`'s doc comment in
+`battleScene.ts` for the next attempt (needs a third species, or a RAM read
+of the real sprite position during a short-sprite (`coords.height<64`)
+materialize, to tell a real per-species geometry term from a
+`coords.height`-keyed one).
+
+**Shadow verdict: still inconclusive, unchanged.** Because the tint fix
+above was not shipped, MAGNETON's divergence still starts at handoff+19
+(app-relative 424), well before `GENERATED_OPPONENT_SHADOW_DELAY`(104)'s
+own onset (app-relative 509), and still never recovers within the window -
+so this round still cannot cleanly verify the elevated-shadow branch either
+way. Reported explicitly per the brief rather than left silent.
+
+Frames 444/536 (trainer-exit/shadow region; opponent healthbox/summary
+region) not reached this round - remain single-frame, unisolated, unchanged
+from round 7's own characterization above.

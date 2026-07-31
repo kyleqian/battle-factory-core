@@ -13,6 +13,55 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 771 — [BOUNDED MAIN WORKER 2026-07-31 ~04:50] #56 item 1 UN-QUARANTINED via route discriminator; item 3 (MAGNETON tint) isolated, not fixed
+
+- **State:** `interactive-generated-intro-off` **715/715** (hard
+  requirement, held). `factory-arbitrary-intro-yoshi-off` **699/751**
+  (recovers the 1-frame quarantine cost). `factory-arbitrary-intro-
+  magneton-off` **424/751** (unchanged, expected — dominated by the
+  separate tint bug). `battle-command-generated-off` **128/128**. `npx tsc
+  --noEmit` clean; focused suite (`factoryBattleStartIntro`,
+  `factoryBattleStartIntroAckAlignment`, `factoryBattleStartPresentation`,
+  `interactiveRouting`, `battleScene`, `factoryRoundBattleOrchestrator`,
+  `executableFrontierRatchet`) **336/336** green (2nd pass after the
+  MAGNETON investigation: `battleScene`+`executableFrontierRatchet`
+  **282/282**). Full `npm test`/`npm run build` not run this step (side
+  worker live concurrently, per brief).
+- **Did:** (1) Un-quarantined `generatedPlayerReadyLagSpeciesFormula`
+  (proven exact on 4 species now — GRIMER/KADABRA/DELCATTY +
+  round-9's lab-ONIX 0-residual probe) by adding
+  `FactoryBattleStartIntroState.isCanonicalAnchorIntro`, set at
+  `beginFactoryRoundBattleStartIntro` from an EXISTING route-level fact
+  (`config.adoptedInitialOpponent !== undefined && battleIndex === 0` —
+  true only for the interactive draft anchor's own Battle 1, never a
+  species/trainer/trace-name check). The canonical route keeps its flat
+  ONIX-calibrated `GENERATED_PLAYER_READY_LAG`; every other route now uses
+  the species formula. Both calibrations documented at the code site.
+  (2) Isolated MAGNETON's affine-emerge tint divergence
+  (`drawGeneratedOpponentRelease`, handoff+19) to `origin.y` wrongly
+  including the species resting-Y offset (`coords.yOffset`) during the
+  materialize blend — a joint (accumulator, y-offset) brute-force sweep
+  found the exact fix for MAGNETON (0 missing-tint pixels, 12/12 ticks),
+  but the SAME fix regresses COMBUSKEN (`factory-arbitrary-intro-yoshi-
+  off` 699→662/751) — falsifies the source's "species-independent" claim
+  but the true relationship isn't a single `8 +/- yOffset` constant from
+  only two data points. Left unmodified (doc-only commit) rather than
+  trade one held pin for another. Shadow verdict (elevated-shadow branch,
+  onset app-relative 509) stays **inconclusive** — reported explicitly per
+  the brief since the earlier tint divergence still masks it. Frames
+  444/536 not reached (budget spent on the MAGNETON investigation).
+- **Next:** MAGNETON tint needs a 3rd species or a RAM read of the real
+  sprite position during a short-sprite (`coords.height<64`) materialize
+  to distinguish a real per-species geometry term from a
+  `coords.height`-keyed one (see `battleScene.ts`'s
+  `drawGeneratedOpponentRelease` doc comment and
+  `docs/trainer-pic-off-window-scout.md`'s new Round 10 section for the
+  full finding). Frames 444/536 still open.
+- **Notes:** #56 item 1 can be marked resolved in the ISSUES.md trim
+  (supervisor). #56 item 3 stays open, now precisely bounded instead of
+  "inconclusive/masked."
+
+---
 ## 770 — [SUPERVISOR 2026-07-31 ~03:10] Rank-2 faint half RETIRED (pins verified); 6-tick anomaly = ROUTE-specific (lab-ONIX 0 residual); DESTIN bench probed; round 10 dispatched
 
 - **State:** union gate green **558 files / 5677 tests + 1 deliberate
@@ -89,35 +138,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   "Retirement progress" prose should note rank 2 flipped onto
   `turn13ResolutionAdapter.ts`.
 
----
-## 768 — [SUPERVISOR 2026-07-31 ~03:15] Round-8 regression QUARANTINED (715/715 restored); rank-2 groundwork merged; round 9: faint-half flip + discriminating probes
-
-- **State:** union gate green **558 files / 5677 tests + 1 deliberate
-  animation-lane skip**, build clean. M8's species ready-lag formula had
-  regressed the ROADMAP-cited `interactive-generated-intro-off` pin
-  **715/715 → 699/715** and was committed anyway — supervisor
-  **quarantined** it (flat ONIX-calibrated lag restored; formula retained
-  as an exported uncalled function for the #56 investigation). Cost of
-  quarantine on the open evidence traces: exactly **1 frame** (YOSHI
-  698/751 vs 699; MAGNETON 424/751 unchanged — its divergence is a
-  newly-found species-dependent affine-emerge tint, pre-shadow). Kept
-  from M8: the mechanism-derived cry-duration ceiling fix (extractor
-  round→ceil, 376 species regenerated) and the real-personality staging
-  that closed the gender-icon residual. #56 item 1 rewritten to the
-  quarantine state; M8's out-of-brief direct ISSUES edit noted — content
-  was accurate, process wasn't.
-- **S8 merged:** turn-13 DRAGON_BREATH/faint-half adapter + equivalence
-  (6 tests) with two brief corrections (fainting mon is PIDGEOTTO, no
-  party-select UI — AI auto-replacement) and a proof the faint-sink
-  geometry is the generic opponent-faint formula at Pidgeotto's
-  `mon-pic-coords` yOffset, not a hand constant. Switch-in half blocked
-  on `stagePlayerHitChain` terminal-state exposure + DESTIN's unprobed
-  bench.
-- **Round 9 dispatched:** main M9 — rank-2 faint-half flip per the
-  banked checklist (turn13 pins 141/141 + 242/242 + dense-a/b, insurance
-  190/190 + 715/715, honest-stop hard rule). Side S9 — two probes: lab
-  ONIX-lead ready-lag (discriminates route-vs-species for the 6-tick
-  anomaly) and DESTIN full-bench RAM (switch-in unblock).
-- **Notes:** the quarantine decision priority: committed acceptance pins
-  outrank open evidence traces; no formula ships while its 4th data
-  point contradicts it without a mechanism.
