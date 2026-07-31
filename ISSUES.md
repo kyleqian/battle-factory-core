@@ -23,38 +23,36 @@ one without a user decision, and do not count them as backlog.
 **699/751** (up from 650/751, round 7 2026-07-31) with every divergent frame
 characterized in `docs/trainer-pic-off-window-scout.md` §D. Remainder:
 
-1. **Player ready lag — species formula QUARANTINED (supervisor,
-   2026-07-31).** The 3-species formula
-   (`generatedPlayerReadyLagSpeciesFormula`, retained-not-called in
-   `battleScene.ts`) is exact for GRIMER/KADABRA/DELCATTY but disagrees
-   with the 4th data point — the canonical ONIX pin — by a clean 6 ticks
-   (predicts 179; the ROADMAP-cited 715/715
-   `interactive-generated-intro-off` acceptance needs 185). It briefly
-   shipped and regressed that pin to 699/715; production now keeps the
-   flat ONIX-calibrated lag (pin restored 715/715; YOSHI cost is exactly
-   1 frame: 698 vs 699). Root cause unknown — extraction, line-length,
-   and floor/max hypotheses ruled out; GRANBULL/
-   `battle-command-generated-off` turns out not to exercise this state
-   machine at all. Needs a 5th data point or a source-level look at
-   `battle_controller_player.c`'s `battlerAnimsDone` term before the
-   formula can be trusted generally. The cry-duration ceiling fix
-   (extractor `Math.round`→`Math.ceil`, regenerated for 376 species) is
-   KEPT — it is mechanism-derived and invariant for the opponent-side
-   dispatch formula's three validated species.
+1. **RESOLVED by route discrimination (2026-07-31).** The species
+   formula is proven exact on FOUR species via `factoryLegal` fixtures
+   (GRIMER/KADABRA/DELCATTY/lab-ONIX at 0-tick residual —
+   `docs/onix-readylag-destin-bench-probes.md` probe 1); the 6-tick
+   surplus is ROUTE-specific to the canonical anchor intro. Production
+   now discriminates on the existing route-level fact
+   `isCanonicalAnchorIntro` (`adoptedInitialOpponent !== undefined &&
+   battleIndex === 0`): species formula on staged/generated intros,
+   calibrated flat lag on the canonical anchor. 715/715 held, YOSHI
+   699/751, 128/128 held. Open remainder: the canonical route's +6 has
+   no named mechanism (route term documented at the code site).
 2. **Isolated frames 444 and 536** (trainer-exit/shadow region;
    opponent healthbox/summary region) — single-frame, unisolated to a site,
    unchanged this round.
-3. **MAGNETON elevated-shadow coverage — app-side proof built (round 7),
-   result inconclusive.** `factory-arbitrary-intro-magneton-off` compare
-   trace built and run: **424/751**, exact through frame 423 then diverging
-   through the end of the window with no recovery. The divergence starts at
-   handoff+19 (app-relative 424), well *before*
-   `GENERATED_OPPONENT_SHADOW_DELAY`(104)'s own onset (app-relative 509) —
-   a growing color/tint mismatch in the opponent-release affine-emerge
-   sequence (`drawGeneratedOpponentRelease`), which the source comments
-   claim is species-independent but evidently is not. This masks a clean
-   verification of the shadow branch itself in this run. Not fixed —
-   needs the affine-emerge blend math checked against a second species.
+3. **MAGNETON elevated-shadow coverage — tint ROOT-CAUSED, fix needs a
+   third data point.** The affine-emerge divergence (`424/751`, first
+   divergent frame handoff+19, before the shadow's own +104 onset) is
+   `drawGeneratedOpponentRelease`'s `origin.y` wrongly including the
+   species resting-Y offset during the materialize blend. A per-tick fix
+   achieving zero MAGNETON residual regressed the already-validated
+   COMBUSKEN case (699→662/751), falsifying "species-independent" but
+   proving two data points under-determine the universal rule — reverted
+   rather than trade pins (2026-07-31; finding documented at the code
+   site and in `docs/trainer-pic-off-window-scout.md`). Shadow branch
+   verdict remains inconclusive until the tint is fixed with a third
+   species. Also banked: the decision side of the rank-2 switch-in flip
+   is proven (`tests/destinCanonicalReplacements.test.ts` — faint
+   replacement is `getMostSuitableMonToSwitchInto` directly, 0 RNG
+   draws, both canonical replacements reproduced;
+   `docs/destin-canonical-replacements-decision-proof.md`).
 
 **Not blocking:** Gate 5 ticked with these named (ROADMAP S10 gate 5
 completion note); this is the worklist to finish the window honestly.
@@ -116,8 +114,15 @@ request/field/HP facts from the real kernel via `battle2CommandAdapter.ts`
 with RAM-probed personalities and bench; `battle2Turn1.ts`,
 `battle2ActionMenu.ts`, and `battle2OffScenario.ts` are deleted, all dense
 pins held (191/191, 209/209, 16/16, plus generated-route 128/128 and
-715/715). Rank 2 (Turn-13 DRAGON_BREATH → faint → Murkrow switch-in) is
-next per the inventory's order. Earlier progress:
+715/715). Rank 2's DRAGON_BREATH/faint half is also **retired**
+(2026-07-31, `bd1d6beb`, `turn13ResolutionAdapter.ts`; pins 141/141 +
+242/242 + dense-b 223/223 held, dense-a 205/256 A/B-proved the
+pre-existing parked #23 exclusion). Rank 2's Murkrow switch-in half:
+decision side proven (`tests/destinCanonicalReplacements.test.ts` — 0-draw
+`getMostSuitableMonToSwitchInto`, both canonical replacements reproduced);
+presentation side still blocked on `stagePlayerHitChain` terminal-state
+exposure. Rank 3 (Turn-5 KO → switch-in → Sitrus) is next after that
+unblock. Earlier progress:
 `turn13-sandattack.json`'s complete captured
 SAND_ATTACK content now resolves its kickoff and opponent-target accuracy-fall
 text from the staged real kernel event stream through the generic stat-down

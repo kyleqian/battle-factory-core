@@ -1,3 +1,50 @@
+## 769 — [BOUNDED MAIN WORKER 2026-07-31 ~04:10] #39 rank-2 FLIPPED: DRAGON_BREATH/faint half onto turn13ResolutionAdapter.ts
+
+- **State:** all mandated pins hold: `turn13-dragonbreath-faint.json`
+  **141/141**, `turn13-switchin.json` **242/242**,
+  `battle1-turn13-dense-a.json` **205/256** (pre-existing ISSUES #23
+  parked projectile/shake exclusion + a named 3-frame HP-drain residual —
+  confirmed byte-identical to the pre-flip baseline via a stash A/B, not a
+  regression) / `-b.json` **223/223**. Insurance:
+  `turn13-sandattack.json` **190/190**, `interactive-generated-intro-off`
+  **715/715**. Rank-1 pins unaffected: `battle2-turn1-rockslide`
+  **191/191**, `battle2-action-menu-dense` **209/209**. `npx tsc --noEmit`
+  clean; focused suite (`turn13ResolutionAdapterEquivalence`,
+  `turn13DragonBreathPresentationStaging`, `battleScene`,
+  `battle2CommandAdapterEquivalence`, `executableFrontierRatchet`)
+  **305/305** green. Full `npm test`/`npm run build` not run this step
+  (side worker live concurrently, per brief).
+- **Did:** Promoted `turn13ResolutionAdapterPreview.ts` → production
+  `turn13ResolutionAdapter.ts` (rank-1's own promotion pattern) and wired
+  `battleScene.ts`'s DRAGON_BREATH/faint half
+  (`drawDragonBreathKoWindow`/`drawFaintedOpponentWindow`) onto it:
+  `TURN13_DRAGONBREATH_HP` and the kickoff/faint line constants now come
+  from one `resolveTurn13ResolutionAdapter()` call (replacing three
+  separate direct staging-module imports), and
+  `TURN13_FAINT_SINK_STEPS`/`TURN13_HEALTHBOX_VANISH_TICK` are now
+  literally derived from the adapter's `opponentFaintSinkGeometry`
+  formula (Pidgeotto yOffset=11) instead of independently hand-fit
+  constants — deleted the now-dead `faintHealthboxVanishTick` helper.
+  Renamed the equivalence test to `turn13ResolutionAdapterEquivalence.test.ts`
+  (rank-1's own rename convention) to pin the live production path. Found
+  + fixed a papercut in the same class as entry 766's: the ground-truth
+  `battle1-turn13-dense-a/b.json` traces lacked `appRoute`, silently
+  defaulting to `generated-orchestrator` and crashing on an unrelated
+  Sitrus-heal string-resolver gap on that route — added explicit
+  `appRoute: "canonical-recorded"` to both (same fix rank-1 applied to
+  `battle2-turn1-rockslide.json`).
+- **Next:** rank 3 (Turn-5 KO → Pidgeotto switch-in → Sitrus, per the
+  inventory) is the next retirement slice. This rank's own switch-in half
+  (Murkrow) stays OUT of scope/blocked exactly as banked: `stagePlayerHitChain`
+  terminal-state exposure + DESTIN's unprobed bench (a side probe is
+  running concurrently per round 9's own dispatch).
+- **Notes (for the supervisor's ISSUES.md/inventory trim, left untouched
+  per brief):** ISSUES #39's rank-2 row (docs/battle-scene-retirement-
+  inventory.md) can now read [RETIRED] like rank 1's, and the #39
+  "Retirement progress" prose should note rank 2 flipped onto
+  `turn13ResolutionAdapter.ts`.
+
+---
 ## 768 — [SUPERVISOR 2026-07-31 ~03:15] Round-8 regression QUARANTINED (715/715 restored); rank-2 groundwork merged; round 9: faint-half flip + discriminating probes
 
 - **State:** union gate green **558 files / 5677 tests + 1 deliberate

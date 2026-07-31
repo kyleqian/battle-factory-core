@@ -13,6 +13,58 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 772 — [SUPERVISOR WIND-DOWN 2026-07-31 ~04:00] GATE 5 TICKED + #39 ranks 1+2(faint half) retired: 10 rounds / 20 workers / 0 failed steps
+
+- **State:** master green at final gate **559 files / 5683 tests + 1
+  deliberate animation-lane skip**, production build clean, tree clean at
+  this commit. `animation-main` fold delta **0 at orient and at
+  wind-down**. No orphan worktrees/branches (only permanent
+  `.worktrees/animation-main`). **DEFERRED.md empty all session.**
+- **Session headlines (2026-07-30 22:10 → 07-31 04:00):**
+  (1) **GATE 5 TICKED** (ROADMAP S10) on a verified chain: clause-by-clause
+  audit (`docs/gate5-acceptance-audit.md`, 6/11 discharged at audit) →
+  commentary ROM receipts (10 preview_report seeds, all matching, 6
+  types/6 styles) → anchor-draft receipt link at freshly probed
+  pre-generation cursors (selection byte-exact; #55 filed for the
+  ambient-VBlank stream boundary) → factory-AI barrier ratchet pins →
+  public dense arbitrary-trainer intro proof (pre-checkpoint contract:
+  offset-0 mapping, deterministic, YOSHI **699/751** + MAGNETON 424/751
+  evidence traces, GROVYLE pins 128/128 + 715/715 intact) → cry-duration
+  mechanism (send-out delays gate on cry playback; 376 species extracted,
+  exact on 4 opponent + 4 player data points). Scope rulings recorded in
+  the completion note (CBM/CV breadth → Gate 6; battles-3-7 receipts
+  declined per S8 policy; P..B fade → #39-class).
+  (2) **#39 rank 1 RETIRED** — Battle-2 command turn flipped onto
+  `battle2CommandAdapter.ts` (kernel-driven, RAM-probed personalities +
+  bench), three legacy fixture files deleted, all pins held.
+  (3) **#39 rank-2 faint half RETIRED** — `turn13ResolutionAdapter.ts`,
+  hand-fit faint geometry replaced by the generic formula; switch-in
+  half's decision side proven (`destinCanonicalReplacements`, 0-draw
+  `getMostSuitableMonToSwitchInto`), blocked only on
+  `stagePlayerHitChain` terminal-state exposure.
+  (4) **Quarantine precedent:** M8's species ready-lag regressed the
+  715/715 pin → quarantined same round; S9's discriminating probe proved
+  the anomaly route-specific (lab-ONIX 0 residual); M10 un-quarantined
+  via the route-level `isCanonicalAnchorIntro` fact. Pins outrank open
+  evidence; probes beat hypotheses.
+- **Open issues:** #56 (MAGNETON tint root-caused, needs 3rd species;
+  frames 444/536; canonical +6 route term unnamed), #55 (stream-model
+  boundary), #39 (ranks 2-switch-in..9 remain; inventory annotated).
+- **Next session (ordered, per user's Gate 5 → #39 → Gate 6):**
+  (i) #39 continuation: switch-in half after `stagePlayerHitChain`
+  terminal exposure (main), then rank 3 (Turn-5 KO/Sitrus) via the
+  proven equivalence-first two-phase pattern; (ii) #56 burn-down
+  (MAGNETON 3rd-species tint data point unblocks the shadow verdict);
+  (iii) Gate 6 breadth after #39.
+- **Notes:** no deferred questions all session. Papercuts banked:
+  pixel-inspection helper (new), out/latest race + missing appRoute on
+  historical traces (three pinned this session; a pre-existing
+  Sitrus string-resolver crash on the generated route surfaces only via
+  wrong-route replays — recorded in entry 766/769 notes). Worker
+  ledger-numbering collided 4× (all repaired; future briefs carry the
+  numbering instruction that fixed it in round 10).
+
+---
 ## 771 — [BOUNDED MAIN WORKER 2026-07-31 ~04:50] #56 item 1 UN-QUARANTINED via route discriminator; item 3 (MAGNETON tint) isolated, not fixed
 
 - **State:** `interactive-generated-intro-off` **715/715** (hard
@@ -90,51 +142,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   from committed evidence, honest-stop if inputs unreconstructable.
 - **Notes:** wind-down after round 10: fold check, final gate, #56/#39
   trims, session report.
-
----
-## 769 — [BOUNDED MAIN WORKER 2026-07-31 ~04:10] #39 rank-2 FLIPPED: DRAGON_BREATH/faint half onto turn13ResolutionAdapter.ts
-
-- **State:** all mandated pins hold: `turn13-dragonbreath-faint.json`
-  **141/141**, `turn13-switchin.json` **242/242**,
-  `battle1-turn13-dense-a.json` **205/256** (pre-existing ISSUES #23
-  parked projectile/shake exclusion + a named 3-frame HP-drain residual —
-  confirmed byte-identical to the pre-flip baseline via a stash A/B, not a
-  regression) / `-b.json` **223/223**. Insurance:
-  `turn13-sandattack.json` **190/190**, `interactive-generated-intro-off`
-  **715/715**. Rank-1 pins unaffected: `battle2-turn1-rockslide`
-  **191/191**, `battle2-action-menu-dense` **209/209**. `npx tsc --noEmit`
-  clean; focused suite (`turn13ResolutionAdapterEquivalence`,
-  `turn13DragonBreathPresentationStaging`, `battleScene`,
-  `battle2CommandAdapterEquivalence`, `executableFrontierRatchet`)
-  **305/305** green. Full `npm test`/`npm run build` not run this step
-  (side worker live concurrently, per brief).
-- **Did:** Promoted `turn13ResolutionAdapterPreview.ts` → production
-  `turn13ResolutionAdapter.ts` (rank-1's own promotion pattern) and wired
-  `battleScene.ts`'s DRAGON_BREATH/faint half
-  (`drawDragonBreathKoWindow`/`drawFaintedOpponentWindow`) onto it:
-  `TURN13_DRAGONBREATH_HP` and the kickoff/faint line constants now come
-  from one `resolveTurn13ResolutionAdapter()` call (replacing three
-  separate direct staging-module imports), and
-  `TURN13_FAINT_SINK_STEPS`/`TURN13_HEALTHBOX_VANISH_TICK` are now
-  literally derived from the adapter's `opponentFaintSinkGeometry`
-  formula (Pidgeotto yOffset=11) instead of independently hand-fit
-  constants — deleted the now-dead `faintHealthboxVanishTick` helper.
-  Renamed the equivalence test to `turn13ResolutionAdapterEquivalence.test.ts`
-  (rank-1's own rename convention) to pin the live production path. Found
-  + fixed a papercut in the same class as entry 766's: the ground-truth
-  `battle1-turn13-dense-a/b.json` traces lacked `appRoute`, silently
-  defaulting to `generated-orchestrator` and crashing on an unrelated
-  Sitrus-heal string-resolver gap on that route — added explicit
-  `appRoute: "canonical-recorded"` to both (same fix rank-1 applied to
-  `battle2-turn1-rockslide.json`).
-- **Next:** rank 3 (Turn-5 KO → Pidgeotto switch-in → Sitrus, per the
-  inventory) is the next retirement slice. This rank's own switch-in half
-  (Murkrow) stays OUT of scope/blocked exactly as banked: `stagePlayerHitChain`
-  terminal-state exposure + DESTIN's unprobed bench (a side probe is
-  running concurrently per round 9's own dispatch).
-- **Notes (for the supervisor's ISSUES.md/inventory trim, left untouched
-  per brief):** ISSUES #39's rank-2 row (docs/battle-scene-retirement-
-  inventory.md) can now read [RETIRED] like rank 1's, and the #39
-  "Retirement progress" prose should note rank 2 flipped onto
-  `turn13ResolutionAdapter.ts`.
-
