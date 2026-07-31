@@ -516,3 +516,154 @@ clause, so characterized and not chased:
 explained by name** (one isolated species-dependent release sub-frame at
 444; a named, evidenced 24-callback species-dependent dispatch-delay gap for
 513 onward). No unexplained residual.
+
+### Round 5 resolution (2026-07-31): dispatch-delay mechanism named, cry-duration modeled, fixed
+
+**Mechanism (source-cited, not fitted).** The wait is the opponent
+controller's own intro state machine, not a documented "101-callback"
+constant — that number was a fitted approximation for one species.
+`BattleIntroPrintPlayerSendsOut` (`battle_main.c:3711-3737`) only runs once
+`gBattleControllerExecFlags == 0`, i.e. once the opponent controller's own
+send-out sequence has signalled completion via `OpponentBufferExecCompleted`.
+That completion is reached through `Intro_TryShinyAnimShowHealthbox`
+(`battle_controller_opponent.c:292-383`), which gates on
+`bgmRestored && battlerAnimsDone`; `bgmRestored` requires
+`!waitForCry && !IsCryPlayingOrClearCrySongs()` (line 327-330). The
+`waitForCry` *flag* clears the instant the cry is *launched*
+(`Task_PlayCryWhenReleasedFromBall` case 1, `pokeball.c:681-689` — gated only
+on the ball's own affine-emerge animation ending, species-independent), but
+`IsCryPlayingOrClearCrySongs()` (`sound.c:521-532`) polls the real M4A
+channel and stays true until the cry sample **finishes playing** — the
+genuine species-dependent gate. For the ordinary singles send-out
+(`CRY_MODE_NORMAL`), `PlayCryInternal` (`sound.c:369-392`) applies no pitch
+shift (default pitch 15360 resolves back to the sample's own
+`base_midi_key` 60 via `SetPokemonCryPitch`, `m4a.c:1711-1718`) and requests
+a note length of 140 — far longer than any real cry sample — so the cry
+plays for exactly its own native sample duration. `battlerAnimsDone`
+(ball-throw + mon materialize sprite callbacks idle) is the same
+species-independent ~42-tick window this run already had pixel-exact
+(§D slice 2's "opponent-release window" match). So:
+`dispatchDelay(species) = 101 + (cryDurationTicks(species) - cryDurationTicks(GROVYLE))`,
+with 101 as the already-oracle-validated GROVYLE baseline.
+
+**Per-species duration source.** `reference/pokeemerald/sound/direct_sound_
+samples/cries/<name>.wav` — the uncompressed PCM the compiled `Cry_<Name>`
+directsound asset (`sound/cry_tables.inc`) is built from, at the same
+10512Hz mixing rate already embedded in the wav's own `fmt` chunk. Every one
+of the 376 distinct species in the Frontier rental catalog
+(`src/data/gen/battle-frontier-mons.json`) resolves via a plain
+`SPECIES_X` → lowercase-name → `<name>.wav` lookup with zero mismatches
+(verified by brute-force set-intersection before writing the extractor) —
+`gSpeciesIdToCryId`'s remap table (needed for old-Unown/shared-cry
+species outside this catalog) was not needed. This is a dev-time asset
+read (no ROM/emulator/oracle at runtime) and no audio is played — only the
+sample's native duration is measured, per AGENTS.md's "modeling a DURATION
+as data is in scope; playing sound is not."
+
+**Triangulation (four species, one consistent handoff definition).** Handoff
+= opponent send-out text-complete + `SENDOUT_HANDOFF_LAG`(3); dispatch delta
+= (oracle's own player "Go!"/box-clear tick) − handoff, found by dense
+per-frame pixel diffing the same way as §D's own COMBUSKEN analysis (text
+prints small ~20-50px/frame diffs; the message-box clear for the player's
+own line is a distinct ~1000-1200px jump — that onset, not the later
+throw-becomes-visible jump, is the dispatch/text-start moment):
+
+| Species | Fixture | Handoff (abs.) | Observed dispatch delta | Cry ticks (WAV, 59.7275Hz) | Predicted (`101+Δcry`) |
+| --- | --- | --- | --- | --- | --- |
+| GROVYLE | `battle-command-generated-off` (existing) | — | **+101** (baseline, oracle-validated) | 57 | 101 (baseline) |
+| MAGNETON | `factory-trainer-pic-shizuka-off`, re-run dense this round | 1583 | **+111** (box-clear at abs. 1694) | 67 | 111 |
+| COMBUSKEN | `factory-arbitrary-intro-yoshi-off` (§D slice 2) | 1583 | **+125** (box-clear at abs. 1708) | 81 | 125 |
+| KABUTO | not independently oracle-verified this round (time-boxed) | — | not measured | 35 | 79 (prediction only) |
+
+MAGNETON and COMBUSKEN both match the cry-duration prediction **exactly**
+(111 and 125), not just approximately — strong confirmation the mechanism
+is fully identified, not curve-fit. KABUTO's canonical-route code
+(`src/engine/kabutoSendOut.ts`) turned out to model a *different*
+species-specific mechanism (`Anim_HorizontalSlideWobble`, a front-sprite
+idle animation, not cry length) and was not used as a cross-check to avoid
+conflating the two; its 79-tick prediction is recorded as a regression pin
+on the extractor's own output, not a ground-truth claim.
+
+**A second, closely-coupled species-dependent site found and fixed in the
+same pass.** With `dispatchDelay` now variable, `GENERATED_PLAYER_VISUAL_
+DELAY` (previously a flat 112 = 101+11) needed to track it or the player's
+own throw animation would start mid-sequence for any non-GROVYLE species
+(a real visual bug, not a pre-existing latent one — it was unreachable
+while dispatch was pinned at 101). Dense-diffing the same two fixtures'
+"throw becomes visible" jump (distinct from the box-clear jump above) found
+the true lag is **not** a flat constant: GRIMER (YOSHI fixture's own
+player lead, 11-char `"Go! GRIMER!"`) shows a 13-tick gap after box-clear;
+KADABRA (SHIZUKA fixture's player lead, 12-char `"Go! KADABRA!"`) shows 14.
+Both equal `line.length - 1 + SENDOUT_HANDOFF_LAG(3)` exactly — the same
+text-complete-plus-fixed-lag shape the opponent's own handoff already uses,
+not a new mechanism. `generatedBattleStartCommandReady`'s
+`GENERATED_PLAYER_READY_DELAY`(286) was similarly re-expressed as
+`dispatchDelay(state) + 185` (same fixed post-dispatch remainder) so the
+command-ready checkpoint keeps tracking the shifted dispatch point instead
+of firing at a species-blind absolute tick.
+
+**Implementation.** `tools/extract/extract-cry-durations.ts` →
+`src/data/gen/cry-durations.json` (376 species, isolated extractor test
+`tests/cryDurationsExtraction.test.ts`: byte-for-byte reproduction,
+Frontier-catalog coverage, sorted-by-id, and the four triangulated pins
+above). `battleScene.ts`: `GENERATED_PLAYER_DISPATCH_DELAY`/`_TEXT_DELAY`
+replaced by `generatedPlayerDispatchDelay(state)` (a shared function keyed
+by the opponent's numeric species id — no species-name branch);
+`GENERATED_PLAYER_VISUAL_DELAY` replaced by `generatedPlayerVisualLag`
+(player-line-length-driven); `GENERATED_PLAYER_READY_DELAY` re-expressed
+as `dispatchDelay + GENERATED_PLAYER_READY_LAG`. `GENERATED_OPPONENT_
+SHADOW_DELAY`(104) was left untouched — out of scope this round, flagged
+below.
+
+**Regression proof.** Both previously-pinned GROVYLE fixtures stay at
+their exact recorded counts (`battle-command-generated-off` **128/128**,
+`interactive-generated-intro-off` **715/715** — GROVYLE's own delta is 0 by
+construction, so this is a real regression check, not a tautology). The
+43/43 focused unit suite (`factoryBattleStartIntro` + ack-alignment +
+`executableFrontierRatchet` + `factoryRoundBattleOrchestrator`) stays green.
+
+**Re-run result: 650/751 frames matched**, up from 512/751 (and up from an
+intermediate 548/751 before the visual-lag fix above). Frames 0..651 are
+now pixel-identical except two isolated single-frame mismatches:
+
+- **Frame 444** (219px, trainer-exit/shadow region) — unchanged from slice
+  2, still not isolated to a specific site. Given the dispatch/visual-lag
+  fix resolved everything else in this window, this is likely a small,
+  separate species-dependent sub-frame (ball-open particle stall timing or
+  similar) rather than part of the mechanism fixed this round.
+- **Frame 536** (394px, bbox near the opponent healthbox/summary region) —
+  new, isolated, not present in the slice-2 512/751 result (that result's
+  divergence started at 513, before reaching 536). Not isolated to a site
+  this round.
+
+**Remaining named divergence: frames 652..750 (99 of 751), small residual.**
+Bounding box starts near the screen's right edge (652: 236,79-239,86) and
+by ~665 settles into a **static** 171,79-220,103 region that persists
+almost unchanged through 750 (with occasional larger blips at 723/731/740/
+749 — all in the same region, suggesting a periodic re-draw rather than
+continuous drift). The region matches the opponent healthbox/party-summary
+area, not the player-throw sequence the dispatch/visual-lag fix targeted —
+consistent with a **third, distinct** small species-dependent site (opponent
+summary-exit or healthbox settle timing), not a leftover of the dispatch
+mechanism fixed above (which is proven exact through frame 651). Not
+isolated to a specific site or constant this round — time-boxed per this
+step's brief.
+
+**Final count for this tuple: 650/751 (86.6%)**, up from 512/751 (68.2%).
+`GENERATED_OPPONENT_SHADOW_DELAY`(104) is a known, deliberately-untouched
+loose end: it is only reachable within `renderGeneratedBattleStartOpponent
+Release`'s pre-dispatch window, which for GROVYLE (dispatch 101 < 104) never
+reaches it (dead for the already-validated fixture, hence the 128/128 and
+715/715 regression checks above can't exercise it either) but for any
+species with `dispatchDelay >= 104` is now reachable. COMBUSKEN (this
+slice's own 650/751 comparison, dispatch 125) is **not** in
+`elevatedEnemyShadowSpecies` (`src/assets/gen/battle-enemy-shadow.json`), so
+the 650/751 result doesn't exercise this path either — the pixel-exact
+0..651 window is not a clean bill of health for the shadow constant.
+MAGNETON **is** in `elevatedEnemyShadowSpecies` and its new dispatch delay
+(111) now exceeds 104, so this is a live, uncovered risk, not a merely
+theoretical one — but no app-side pixel-comparison trace exists for the
+MAGNETON/SHIZUKA fixture (this round only used it for oracle-side dense
+pixel-diffing to extract its triangulation data point, never built the
+matching app `compare` trace), so it was not exercised or verified either
+way this round.

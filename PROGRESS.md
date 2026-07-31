@@ -13,6 +13,56 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 761 — [BOUNDED MAIN WORKER 2026-07-31 ~00:50] Species-dependent dispatch delay: mechanism named, cry-duration-modeled, fixed; YOSHI 650/751
+
+- **State:** new `tools/extract/extract-cry-durations.ts` →
+  `src/data/gen/cry-durations.json` (376 species) + isolated extractor test
+  `tests/cryDurationsExtraction.test.ts`; `battleScene.ts` dispatch/text/
+  visual/ready delay constants replaced with a shared species-keyed
+  function (no species-name branch); `docs/trainer-pic-off-window-scout.md`
+  §D "Round 5 resolution" has full mechanism citations + the 4-species
+  triangulation table. Focused: `factoryBattleStartIntro` + ack-alignment +
+  `executableFrontierRatchet` + `factoryRoundBattleOrchestrator` +
+  `cryDurationsExtraction` + `speciesStatsExtraction` + `battleScene` +
+  `kabutoSendOut` **340/340 green**; `npx tsc --noEmit` clean. Full
+  `npm test`/`npm run build` **not run this step**, per the brief.
+- **Did:** named the source mechanism (`Intro_TryShinyAnimShowHealthbox`,
+  `battle_controller_opponent.c:292-383` — gates on cry-playback completion,
+  `IsCryPlayingOrClearCrySongs`, `sound.c:521-532`, genuinely species-
+  dependent since ordinary send-out cries use no pitch shift and an
+  effectively-unbounded note length, so play for their own native sample
+  duration) before touching any constant. Extracted per-species cry
+  durations from `reference/pokeemerald/sound/direct_sound_samples/cries/
+  *.wav` (dev-time asset, no runtime ROM/oracle access, no audio played) for
+  all 376 Frontier-rental species. Triangulated against dense oracle
+  captures for MAGNETON (+111) and COMBUSKEN (+125) — both match the
+  cry-duration prediction **exactly**. Fixing dispatch delay exposed a
+  second, closely-coupled site (`GENERATED_PLAYER_VISUAL_DELAY`, the
+  player's own throw-becomes-visible tick) that also needed to shift;
+  re-derived it as `player-line-length - 1 + SENDOUT_HANDOFF_LAG`, matching
+  both fixtures exactly. GROVYLE-pinned fixtures unchanged
+  (`battle-command-generated-off` **128/128**, `interactive-generated-
+  intro-off` **715/715**). YOSHI re-run: **650/751**, up from 512/751 (two
+  isolated single-frame mismatches at 444/536 plus a new named 99-frame
+  small residual at 652..750, opponent healthbox/summary region — not the
+  dispatch mechanism, which is now proven exact through frame 651).
+- **Next:** three characterized loose ends, none blocking: (1) frame 444
+  (unchanged from round 4, still unisolated), (2) new frame 536, (3) the
+  652..750 small residual (opponent healthbox/summary area, distinct site).
+  `GENERATED_OPPONENT_SHADOW_DELAY`(104) is untouched and now reachable for
+  species with `dispatchDelay >= 104` (MAGNETON is in
+  `elevatedEnemyShadowSpecies` but has no app-side compare trace this
+  round) — worth a future species/shadow cross-check. KABUTO's own
+  cry-duration prediction (+79) was not oracle-verified (its existing
+  `kabutoSendOut.ts` models a different, unrelated per-species mechanism —
+  a front-sprite idle wobble, not cry length — so wasn't usable as a
+  cross-check).
+- **Notes:** Gate-5's sole open engineering thread (entry 760) is now
+  substantially advanced (86.6% vs 68.2%) with three small residuals
+  remaining, all named — supervisor's call whether to file the residuals as
+  a new issue or fold them into a future round.
+
+---
 ## 760 — [SUPERVISOR 2026-07-31 ~00:30] Round 4 verified+merged; gate 554/5653 green; round 5: dispatch-delay mechanism (main) + #39 rank-1 equivalence groundwork (side)
 
 - **State:** union gate green **554 files / 5653 tests + 1 deliberate
@@ -90,33 +140,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** the two isolated/rejected `A`-press offsets from slice 1 (374,
   379) are now regression-pinned in the new test as "still-late, switch not
   yet visible at frame 374" cases, guarding against re-introducing either.
-
----
-## 758 — [SUPERVISOR 2026-07-30 ~23:50] Round 3 verified: YOSHI 415/751 re-run confirmed; #55 filed from the S3 probe; three rulings
-
-- **State:** S3's probe doc merged (`630bc805`, worktree removed); M3's
-  YOSHI comparison re-run by the supervisor personally — **415/751
-  confirmed exactly**, residual bbox confined to the message-box region,
-  consistent with the single ack-handoff divergence. Full union gate
-  running at write time (result in next entry or amended here).
-- **Rulings (reversible, evidence-cited):** (1) **ISSUES #55 filed** —
-  S3 proved the rental-construction stream contract cannot represent
-  ambient VBlank interleaving (53 ticks woven into the anchor's 53-frame
-  construction window); the algorithm is correct (filtered-ledger replay
-  reproduces all six personalities). Gate-5 clause (a) counts as
-  receipt-linked at the *rules* level: selection byte-exact from the probed
-  pre-selection cursor `145179184`, construction proven via filtered
-  ledger; the stream-model boundary is tracked debt (#55), not a Gate-5
-  blocker — the production route never calls the generator today.
-  (2) The P..B fade for arbitrary trainers is **not** a Gate-5 blocker:
-  canonical-only `battleRoom.ts` owns the fade today, the fade is
-  trainer-invariant chrome, and re-owning it generically is #39-class
-  keying retirement. The arbitrary-trainer intro claim window is
-  B-8..checkpoint. (3) Round 4 dispatched — main M4: pin the
-  acknowledgement-handoff frame and re-run YOSHI for a full-window honest
-  claim; side S4: land the re-scoped anchor receipt-link test (all
-  setId-derived fields all slots + slot-0/2 personalities, #55 cited for
-  the excluded four).
-- **Next:** if M4 lands the full window, every Gate-5 audit item is
-  discharged or ruled — supervisor then ticks Gate 5 in ROADMAP with the
-  recorded rulings and moves to #39 per the user ordering.

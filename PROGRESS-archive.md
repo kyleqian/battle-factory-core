@@ -1,3 +1,33 @@
+## 758 — [SUPERVISOR 2026-07-30 ~23:50] Round 3 verified: YOSHI 415/751 re-run confirmed; #55 filed from the S3 probe; three rulings
+
+- **State:** S3's probe doc merged (`630bc805`, worktree removed); M3's
+  YOSHI comparison re-run by the supervisor personally — **415/751
+  confirmed exactly**, residual bbox confined to the message-box region,
+  consistent with the single ack-handoff divergence. Full union gate
+  running at write time (result in next entry or amended here).
+- **Rulings (reversible, evidence-cited):** (1) **ISSUES #55 filed** —
+  S3 proved the rental-construction stream contract cannot represent
+  ambient VBlank interleaving (53 ticks woven into the anchor's 53-frame
+  construction window); the algorithm is correct (filtered-ledger replay
+  reproduces all six personalities). Gate-5 clause (a) counts as
+  receipt-linked at the *rules* level: selection byte-exact from the probed
+  pre-selection cursor `145179184`, construction proven via filtered
+  ledger; the stream-model boundary is tracked debt (#55), not a Gate-5
+  blocker — the production route never calls the generator today.
+  (2) The P..B fade for arbitrary trainers is **not** a Gate-5 blocker:
+  canonical-only `battleRoom.ts` owns the fade today, the fade is
+  trainer-invariant chrome, and re-owning it generically is #39-class
+  keying retirement. The arbitrary-trainer intro claim window is
+  B-8..checkpoint. (3) Round 4 dispatched — main M4: pin the
+  acknowledgement-handoff frame and re-run YOSHI for a full-window honest
+  claim; side S4: land the re-scoped anchor receipt-link test (all
+  setId-derived fields all slots + slot-0/2 personalities, #55 cited for
+  the excluded four).
+- **Next:** if M4 lands the full window, every Gate-5 audit item is
+  discharged or ruled — supervisor then ticks Gate 5 in ROADMAP with the
+  recorded rulings and moves to #39 per the user ordering.
+
+---
 ## 757 — [BOUNDED MAIN WORKER 2026-07-30 ~23:50] Public dense arbitrary-trainer intro comparison, slice 1: 415/751 matched, first divergence characterized
 
 - **State:** new fixture + consumer wiring, no other src changes. Focused:

@@ -970,6 +970,7 @@ import {
   firePunchTurn17MenuBounceTick,
 } from "../animation/firePunch.ts";
 import speciesNamesAsset from "../data/gen/species-names.json" with { type: "json" };
+import cryDurationsAsset from "../data/gen/cry-durations.json" with { type: "json" };
 
 interface Tileset {
   columns: number;
@@ -3982,16 +3983,71 @@ function generatedBattleStartOpponentHandoffTick(
 }
 
 /**
- * The live room's ordinary singles controller dispatches STRINGID_INTROSENDOUT
- * 101 callbacks after the opponent handoff; the trainer throw becomes visible
- * another 11 callbacks later.
+ * Species-dependent span from the opponent handoff to the live room's
+ * ordinary singles controller dispatching STRINGID_INTROSENDOUT. Source:
+ * `Intro_TryShinyAnimShowHealthbox` (reference/pokeemerald/src/battle_
+ * controller_opponent.c:292-383) only clears the opponent controller's exec
+ * flag once the released mon's cry has finished playing
+ * (`!IsCryPlayingOrClearCrySongs()`, src/sound.c:521-532 - the cry-trigger
+ * flag itself clears as soon as the cry is launched, src/pokeball.c:665-748,
+ * so audible cry completion is the real gate), in addition to the
+ * (species-independent) ball/materialize animation. The ordinary send-out
+ * cry (CRY_MODE_NORMAL) applies no pitch shift (src/sound.c:369-392 default
+ * pitch 15360 maps back to the sample's own `base_midi_key` 60,
+ * src/m4a.c:1711-1718) and requests a note length (140) far longer than any
+ * real cry sample (src/sound.c:383,391-392), so the cry plays for exactly
+ * its own native sample duration - genuinely per-species. Per-species
+ * durations are extracted at dev time from the reference source's own cry
+ * assets (`src/data/gen/cry-durations.json`,
+ * `tools/extract/extract-cry-durations.ts`); `GENERATED_PLAYER_DISPATCH_
+ * BASELINE_DELAY` is the already-oracle-validated GROVYLE-opponent value
+ * (`battle-command-generated-off`/`interactive-generated-intro-off`), and
+ * every other species' delay is that baseline plus its own cry-duration
+ * delta from GROVYLE's. Triangulated against dense oracle captures for
+ * COMBUSKEN (+125, `factory-arbitrary-intro-yoshi-off`) and MAGNETON (+111,
+ * `factory-trainer-pic-shizuka-off`): both match the cry-duration-delta
+ * prediction exactly (docs/trainer-pic-off-window-scout.md §D).
  */
-const GENERATED_PLAYER_DISPATCH_DELAY = 101;
-const GENERATED_PLAYER_TEXT_DELAY = 101;
-const GENERATED_PLAYER_VISUAL_DELAY = 112;
+const GENERATED_PLAYER_DISPATCH_BASELINE_DELAY = 101;
+const GROVYLE_SPECIES_ID = 278;
+type CryDurationRow = Readonly<{ id: number; name: string; durationTicks: number }>;
+const CRY_DURATION_TICKS_BY_SPECIES: ReadonlyMap<number, number> = new Map(
+  (cryDurationsAsset as { species: CryDurationRow[] }).species.map((row) => [row.id, row.durationTicks]),
+);
+const GROVYLE_CRY_DURATION_TICKS = CRY_DURATION_TICKS_BY_SPECIES.get(GROVYLE_SPECIES_ID)!;
+
+function cryDurationTicks(speciesId: number): number {
+  const durationTicks = CRY_DURATION_TICKS_BY_SPECIES.get(speciesId);
+  if (durationTicks === undefined) {
+    throw new Error(`no extracted cry duration for species id ${speciesId}`);
+  }
+  return durationTicks;
+}
+
+function generatedOpponentSpeciesId(state: FactoryBattleStartIntroState): number {
+  const opponentIndex = state.command.activePartyIndexes.opponent;
+  return state.command.parties.opponent[opponentIndex].species;
+}
+
+function generatedPlayerDispatchDelay(state: FactoryBattleStartIntroState): number {
+  return GENERATED_PLAYER_DISPATCH_BASELINE_DELAY
+    + (cryDurationTicks(generatedOpponentSpeciesId(state)) - GROVYLE_CRY_DURATION_TICKS);
+}
+
+/**
+ * The trainer throw becomes visible once the player's own "Go! <mon>!"
+ * dispatch message finishes printing (one character per callback from
+ * `playerTextStart`), plus the same fixed post-text-completion lag the
+ * opponent's own release uses (`SENDOUT_HANDOFF_LAG`). Oracle-triangulated
+ * (docs/trainer-pic-off-window-scout.md §D): GRIMER (11 chars) and KADABRA
+ * (12 chars) both land exactly on `length - 1 + 3`.
+ */
+function generatedPlayerVisualLag(playerLineLength: number): number {
+  return playerLineLength - 1 + SENDOUT_HANDOFF_LAG;
+}
 const GENERATED_OPPONENT_SHADOW_DELAY = 104;
-/** First live-room callback satisfying CHOOSE_ACTION/exec-flags. */
-const GENERATED_PLAYER_READY_DELAY = 286;
+/** Live-room callbacks from dispatch to the first CHOOSE_ACTION/exec-flags callback. */
+const GENERATED_PLAYER_READY_LAG = 286 - GENERATED_PLAYER_DISPATCH_BASELINE_DELAY;
 /** First Scene-OFF render after the release callback leaves player OAM y2=0. */
 const GENERATED_PLAYER_NEUTRAL_Y_VISUAL_TICK = 1670;
 
@@ -4001,7 +4057,7 @@ export function generatedBattleStartPlayerReleaseStarted(
   const handoffTick = generatedBattleStartOpponentHandoffTick(state);
   return handoffTick !== null
     && generatedBattleIntroSourceClock(state.elapsed)
-      >= handoffTick + GENERATED_PLAYER_DISPATCH_DELAY;
+      >= handoffTick + generatedPlayerDispatchDelay(state);
 }
 
 function drawGeneratedOpponentShadow(
@@ -4032,7 +4088,7 @@ export function generatedBattleStartCommandReady(
   const handoffTick = generatedBattleStartOpponentHandoffTick(state);
   return handoffTick !== null
     && generatedBattleIntroSourceClock(state.elapsed)
-      >= handoffTick + GENERATED_PLAYER_READY_DELAY;
+      >= handoffTick + generatedPlayerDispatchDelay(state) + GENERATED_PLAYER_READY_LAG;
 }
 
 /**
@@ -4220,8 +4276,13 @@ export function renderGeneratedBattleStartOpponentRelease(
   drawMessageTextLines(fb, line1, line2, textTotal);
 }
 
-function generatedPlayerVisualClock(t: number, handoffTick: number): number {
-  return t - (handoffTick + GENERATED_PLAYER_VISUAL_DELAY)
+function generatedPlayerVisualClock(
+  t: number,
+  handoffTick: number,
+  dispatchDelay: number,
+  visualLag: number,
+): number {
+  return t - (handoffTick + dispatchDelay + visualLag)
     + BRENDAN_THROW_START_TICK;
 }
 
@@ -4281,7 +4342,14 @@ export function renderGeneratedBattleStartPlayerRelease(
     return;
   }
   const t = generatedBattleIntroSourceClock(state.elapsed);
-  const playerVisualT = generatedPlayerVisualClock(t, handoffTick);
+  const dispatchDelay = generatedPlayerDispatchDelay(state);
+  const [playerLineForVisualLag] = state.command.text.playerSendOut;
+  const playerVisualT = generatedPlayerVisualClock(
+    t,
+    handoffTick,
+    dispatchDelay,
+    generatedPlayerVisualLag(playerLineForVisualLag.length),
+  );
   const fieldView = createBattleCommandFieldRenderView(
     factoryBattleStartField(state.command),
   );
@@ -4377,7 +4445,7 @@ export function renderGeneratedBattleStartPlayerRelease(
   }
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   if (menuBlank) return;
-  const playerTextStart = handoffTick + GENERATED_PLAYER_TEXT_DELAY;
+  const playerTextStart = handoffTick + dispatchDelay;
   const [playerLine] = state.command.text.playerSendOut;
   if (t < playerTextStart) {
     const [opponentLine1, opponentLine2] = state.command.text.opponentSendOut;
