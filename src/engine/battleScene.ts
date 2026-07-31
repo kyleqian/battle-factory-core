@@ -12471,8 +12471,22 @@ export function turn10AerialAceTextVisibleChars(t: number, pressTick: number): n
 const TURN10_AERIALACE_HP_DRAIN_START_DELAY = 136;
 /** Onix's own HP after turn 10's AERIAL_ACE hit (docs/turn10-notes.md addendum §2: 24->14, -10). */
 const TURN10_ONIX_AFTER_AERIALACE_HP = 14;
-export function turn10AerialAceOnixHp(t: number, pressTick: number, startHp: number, endHp: number): number {
-  const d = t - (pressTick + TURN10_AERIALACE_HP_DRAIN_START_DELAY);
+/**
+ * ISSUES #39 rank-5 slice 2 (Scene-OFF): RAM-confirmed (`dump-turn9-hitanim-off.py`
+ * against `turn10-aerialace-off.json`, ticks 12305-12440) - the HP-bar
+ * sentinel now lands at RAM tick 12422 (`12422 - pressTick(12305) = 117`,
+ * was 136 on the ON-fit `TURN10_AERIALACE_HP_DRAIN_START_DELAY` above, a
+ * modest 19-tick compression since AERIAL_ACE's own ON animation was
+ * already fairly short before `attackanimation`'s `Pausex20` substitute).
+ * `startDelay` (added to `turn10AerialAceOnixHp` below, default = the
+ * ON-fit constant, every pre-existing caller - including turn 12's own
+ * still-ON-fit `drawTurn12AerialAceWindow` - unaffected) is the SAME
+ * "generalize a hardcoded value into a defaulted param" idiom `rockSlideOpponentHp`'s
+ * own `startDelay` override already established in slice 1.
+ */
+const TURN10_OFF_AERIALACE_HP_DRAIN_START_DELAY = 117;
+export function turn10AerialAceOnixHp(t: number, pressTick: number, startHp: number, endHp: number, startDelay: number = TURN10_AERIALACE_HP_DRAIN_START_DELAY): number {
+  const d = t - (pressTick + startDelay);
   return Math.max(endHp, startHp - Math.max(d, 0));
 }
 
@@ -12488,11 +12502,19 @@ export function turn10AerialAceOnixHp(t: number, pressTick: number, startHp: num
  * gets its own literal constant" convention.
  */
 const TURN10_NOTVERYEFFECTIVE_TEXT_DELAY = 152; // render 12457 - pressTick(12305)
-export function turn10NotVeryEffectiveTextStartTick(pressTick: number): number {
-  return pressTick + TURN10_NOTVERYEFFECTIVE_TEXT_DELAY;
+/**
+ * ISSUES #39 rank-5 slice 2 (Scene-OFF): `bin/oracle run tools/compare/
+ * traces/turn10-aerialace-off.json` shows the fully-typed "It's not very
+ * effective…" hold beginning render 12461 (24-char line, 12461-23=12438)
+ * - `12438 - pressTick(12305) = 133`, was 152 on the ON-fit constant above.
+ * `delay` param default preserves turn 12's own still-ON-fit call site.
+ */
+const TURN10_OFF_NOTVERYEFFECTIVE_TEXT_DELAY = 133;
+export function turn10NotVeryEffectiveTextStartTick(pressTick: number, delay: number = TURN10_NOTVERYEFFECTIVE_TEXT_DELAY): number {
+  return pressTick + delay;
 }
-export function turn10NotVeryEffectiveTextVisibleChars(t: number, pressTick: number): number {
-  const start = turn10NotVeryEffectiveTextStartTick(pressTick);
+export function turn10NotVeryEffectiveTextVisibleChars(t: number, pressTick: number, delay: number = TURN10_NOTVERYEFFECTIVE_TEXT_DELAY): number {
+  const start = turn10NotVeryEffectiveTextStartTick(pressTick, delay);
   if (t < start) return 0;
   return Math.min(TURN9_NOTVERYEFFECTIVE_LINE.length, t - start + 1);
 }
@@ -12713,6 +12735,22 @@ export function turn10AerialAceOnixShakeY2(t: number, pressTick: number): number
  */
 const TURN10_ONIX_FLICKER_START = 102; // RAM 12407 - pressTick(12305)
 const TURN10_ONIX_HEALTHBOX_WOBBLE_START = 101; // TEST HYPOTHESIS - 1 tick before the flicker, mirroring turn9's own 86-vs-87 relative offset
+/**
+ * ISSUES #39 rank-5 slice 2 (Scene-OFF): RAM-confirmed (`dump-turn9-hitanim-off.py`
+ * against `turn10-aerialace-off.json`, ticks 12305-12410, WIDENED after a
+ * first narrow probe missed the actual onset) - Onix's own healthbox `y2`
+ * wobble first RAM-active at 12387 (`12387-pressTick(12305)=82`), the
+ * flicker one tick later at 12388 (`=83`) - matches the visible-pixel dedup
+ * (`docs/rank5-off-ground-truth.md`'s own "12388-12408: generic wobble/
+ * flicker alternation" citation) exactly, and preserves the SAME "flicker
+ * starts 1 tick after wobble" relative offset turn9's own OFF-fit
+ * `TURN9_EP2_HEALTHBOX_WOBBLE_START`(84)/`TURN9_EP2_FLICKER_START`(85) pair
+ * already established. Separate constants from the ON-fit pair above -
+ * turn 12's own still-ON-fit `drawTurn12AerialAceWindow` keeps passing
+ * those unchanged.
+ */
+const TURN10_OFF_ONIX_HEALTHBOX_WOBBLE_START = 82;
+const TURN10_OFF_ONIX_FLICKER_START = 83;
 
 /**
  * Mechanism 4 (docs/aerial-ace-notes.md continuation, "Mechanism 4"): the
@@ -12812,41 +12850,74 @@ function drawTurn10AerialAceSlice(fb: Uint8Array, t: number, pressTick: number):
  */
 export const TURN10_ROCKSLIDE_PRESS_TICK = 12169;
 
+/**
+ * ISSUES #39 rank-5 slice 2 (Scene-OFF): a SEPARATE synthetic anchor from
+ * the ON-fit `TURN10_ROCKSLIDE_PRESS_TICK` above, fit against the fresh OFF
+ * ground truth (`docs/rank5-off-ground-truth.md`'s own turn10-rockslide-off
+ * section) instead: `bin/oracle run tools/compare/traces/
+ * turn10-rockslide-off.json` shows the message-box-open transition's own
+ * 4-sha sequence landing at render 12543 (byte-identical to `docs/
+ * turn10-notes.md`'s own ON citation at 12562-12565, ~19 ticks earlier) -
+ * `12543 - ROCK_SLIDE_TEXT_DELAY(393) = 12150`. The ON-fit constant above
+ * stays UNTOUCHED (not renamed, not reassigned) because it is still
+ * consumed by `TURN11_REGIME6_TO_REGIME1_SHIFT`, `core.ts`'s own real
+ * `turn10Resolved` gate, and turn 11's own still-ON-fit reuse of
+ * `drawTurn10RockSlideTurnEndSettledMenu` (default params below) - none of
+ * which are in scope for this slice (turns 11-12 stay Scene-ON-fit until
+ * their own slice per the assigned brief).
+ */
+const TURN10_OFF_ROCKSLIDE_PRESS_TICK = 12150;
+
+/**
+ * ISSUES #39 rank-5 slice 2: RAM-confirmed (`dump-turn9-hitanim-off.py`
+ * against `turn10-rockslide-off.json`, ticks 12595-12660) - Pidgeotto's own
+ * healthbox `y2` wobble first RAM-active at 12605
+ * (`12605-TURN10_OFF_ROCKSLIDE_PRESS_TICK(12150)=455`), its own blink
+ * flicker one tick later, and the HP-bar sentinel at 12640 (`=490`) -
+ * IDENTICAL relative offsets to turn9's own OFF-fit
+ * `TURN9_ROCKSLIDE_ANIMATION_PROFILE`/`TURN9_ROCKSLIDE_HP_DRAIN_START_DELAY`
+ * (both 455/490) - the post-`Cmd_attackanimation` hit-reaction chain runs at
+ * a fixed relative offset independent of which move/turn triggered it,
+ * structurally consistent with `docs/rank5-effect-visibility-scout.md` §1's
+ * source rule (confirmed by direct RAM probe, not assumed transferable).
+ */
+const TURN10_OFF_ROCKSLIDE_ANIMATION_PROFILE = { ...ROCK_SLIDE_ANIMATION_PROFILE, hitFlashAnchorAge: 455 };
+const TURN10_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY = 490;
+
 /** Pidgeotto's own HP after turn 10's ROCK_SLIDE (docs/turn10-notes.md addendum §2: 61->38, -23). */
 const TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP = 38;
 
 /**
- * S7 slice R rung (a): turn 10's own ROCK_SLIDE (Onix vs. Pidgeotto) - every
- * mechanism reused with ZERO changes from turns 6/7/9's own instances
- * (`rockSlideBg3Y`/`rockSlideRockState`/`rockSlideDrawOrder`/
- * `rockSlideMonShakeY2`/`rockSlideHealthboxWobbleY2`/`rockSlideMonBlinkInvisible`/
- * `rockSlideOpponentHp`, all still `pressTick`-relative) - only
- * `TURN10_ROCKSLIDE_PRESS_TICK` and Pidgeotto's own HP (61->38) are new. Onix
- * (the attacker) is already at its final post-AERIAL_ACE HP (14) and doesn't
- * move - same frozen idle-bounce anchor the AERIAL_ACE window already holds
- * (`turn10KickoffBounceTick`, exactly `drawTurn9RockSlideAttack`'s own shape).
+ * ISSUES #39 rank-5 slice 2: turn 10's own ROCK_SLIDE under the Scene-OFF-
+ * owned presentation - the shared generic hit-reaction pair
+ * (`rockSlideHealthboxWobbleY2`/`rockSlideMonBlinkInvisible`, class b,
+ * re-anchored via `TURN10_OFF_ROCKSLIDE_ANIMATION_PROFILE`) and the HP
+ * drain (`rockSlideOpponentHp`, re-anchored via
+ * `TURN10_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY`) still fire, same source rule
+ * as turn 9's own slice-1 rewrite; ROCK_SLIDE's own class-c bodies - the
+ * `rockSlideBg3Y` camera shake, Pidgeotto's own target shake
+ * (`rockSlideMonShakeY2`), and the rock-prop drop sprites themselves
+ * (`rockSlideRockState`/`drawRockSprite`) - never render under
+ * `HITMARKER_NO_ANIMATIONS` and are dropped here, same recipe as
+ * `drawTurn9RockSlideAttack`. Onix (the attacker) is already at its final
+ * post-AERIAL_ACE HP (14) and doesn't move - same frozen idle-bounce anchor
+ * the AERIAL_ACE window already holds (`turn10KickoffBounceTick`).
  */
 function drawTurn10RockSlideAttack(fb: Uint8Array, t: number): void {
-  const pressTick = TURN10_ROCKSLIDE_PRESS_TICK;
-  const shiftY = rockSlideBg3Y(t, pressTick);
-  drawStaticBgShiftedY(fb, shiftY, turn5BgFadeY(t));
+  const pressTick = TURN10_OFF_ROCKSLIDE_PRESS_TICK;
+  drawStaticBgShiftedY(fb, 0, turn5BgFadeY(t));
   drawTurn5IconBar(fb, t);
-  if (!rockSlideMonBlinkInvisible(t, pressTick)) {
-    drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y + rockSlideMonShakeY2(t, pressTick));
+  if (!rockSlideMonBlinkInvisible(t, pressTick, TURN10_OFF_ROCKSLIDE_ANIMATION_PROFILE)) {
+    drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y);
   }
-  const frozenBounceTick = turn10KickoffBounceTick(t, TURN10_ROCKSLIDE_PRESS_TICK);
+  const frozenBounceTick = turn10KickoffBounceTick(t, pressTick);
   const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(frozenBounceTick + TURN10_REGIME5_TO_REGIME1_SHIFT));
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
-  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
-  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP);
+  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick, TURN10_OFF_ROCKSLIDE_ANIMATION_PROFILE);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN10_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
   const opponentContent = pidgeottoHealthboxContentForHp(opponentHp);
   drawSendOutHealthbox(fb, 0, opponentContent);
   if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
-  for (const i of rockSlideDrawOrder(t, pressTick)) {
-    const rock = rockSlideRockState(i, t, pressTick);
-    if (!rock) continue;
-    drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
-  }
   drawMenuHealthboxPlayer(fb, 0, 0);
   drawPlayerHealthboxHpOverlay(fb, TURN10_ONIX_AFTER_AERIALACE_HP, 0);
 }
@@ -12859,11 +12930,20 @@ function drawTurn10RockSlideAttack(fb: Uint8Array, t: number): void {
  * turn's own super-effective hit already uses).
  */
 const TURN10_SUPER_EFFECTIVE_TEXT_DELAY = 626; // render 12795 - pressTick(12169)
-export function turn10SuperEffectiveTextStartTick(pressTick: number): number {
-  return pressTick + TURN10_SUPER_EFFECTIVE_TEXT_DELAY;
+/**
+ * ISSUES #39 rank-5 slice 2 (Scene-OFF): `bin/oracle run tools/compare/
+ * traces/turn10-rockslide-off.json` shows the fully-typed "It's super
+ * effective!" hold beginning render 12689 (21-char line, 12689-20=12669) -
+ * `12669 - TURN10_OFF_ROCKSLIDE_PRESS_TICK(12150) = 519`, was 626 on the
+ * ON-fit constant above. `delay` param default (added below) preserves the
+ * existing pinned test's own 2-arg call.
+ */
+const TURN10_OFF_SUPER_EFFECTIVE_TEXT_DELAY = 519;
+export function turn10SuperEffectiveTextStartTick(pressTick: number, delay: number = TURN10_SUPER_EFFECTIVE_TEXT_DELAY): number {
+  return pressTick + delay;
 }
-export function turn10SuperEffectiveTextVisibleChars(t: number, pressTick: number): number {
-  const start = turn10SuperEffectiveTextStartTick(pressTick);
+export function turn10SuperEffectiveTextVisibleChars(t: number, pressTick: number, delay: number = TURN10_SUPER_EFFECTIVE_TEXT_DELAY): number {
+  const start = turn10SuperEffectiveTextStartTick(pressTick, delay);
   if (t < start) return 0;
   return Math.min(TURN6_SUPER_EFFECTIVE_LINE.length, t - start + 1);
 }
@@ -12876,14 +12956,27 @@ export function turn10SuperEffectiveTextVisibleChars(t: number, pressTick: numbe
  * SAME 7-tick clear-to-redraw gap `TURN6_ROCKSLIDE_TEXT_CLEAR_DELAY`->
  * `TURN6_ROCKSLIDE_MENU_REDRAW_DELAY` (743->750) and `TURN7_ROCKSLIDE_*`
  * (731->738) both already establish, freshly fit this turn rather than
- * assumed transferable.
+ * assumed transferable. ISSUES #39 rank-5 slice 2: the ON-fit 723-tick
+ * text-clear delay itself is no longer read anywhere (turn 10's own
+ * dispatcher is fully OFF-fit now, see `TURN10_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY`
+ * below) - left undeclared rather than kept as dead code, this doc comment's
+ * own historical citation stays accurate regardless.
  */
-const TURN10_ROCKSLIDE_TEXT_CLEAR_DELAY = 723;
 export const TURN10_ROCKSLIDE_MENU_REDRAW_DELAY = 730;
+/**
+ * ISSUES #39 rank-5 slice 2 (Scene-OFF): `turn10-rockslide-off.json` shows
+ * text-clear beginning render 12766 (`12766-12150=616`) and the settled
+ * turn-11 menu content first appearing render 12773 (`12773-12150=623`) -
+ * same 7-tick clear-to-redraw gap the ON-fit pair above already carries.
+ * The exported ON-fit `TURN10_ROCKSLIDE_MENU_REDRAW_DELAY` stays untouched
+ * (still consumed by `core.ts`'s own real gate + turn 11's reuse below).
+ */
+const TURN10_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY = 616;
+const TURN10_OFF_ROCKSLIDE_MENU_REDRAW_DELAY = 623;
 
-/** Same "resettled menu re-initializes its own bounce phase fresh at redraw" formula as `turn6RockSlideResettledBounceTick`, keyed off this turn's own `TURN10_ROCKSLIDE_MENU_REDRAW_DELAY`. */
-export function turn10RockSlideResettledBounceTick(t: number, pressTick: number): number {
-  return t - (pressTick + TURN10_ROCKSLIDE_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
+/** Same "resettled menu re-initializes its own bounce phase fresh at redraw" formula as `turn6RockSlideResettledBounceTick`, keyed off this turn's own `TURN10_ROCKSLIDE_MENU_REDRAW_DELAY` (or, ISSUES #39 rank-5 slice 2, an explicit `menuRedrawDelay` override - default unchanged, every pre-existing caller unaffected). */
+export function turn10RockSlideResettledBounceTick(t: number, pressTick: number, menuRedrawDelay: number = TURN10_ROCKSLIDE_MENU_REDRAW_DELAY): number {
+  return t - (pressTick + menuRedrawDelay) + (MENU_IDLE_BLANK_END_TICK + 1);
 }
 
 /**
@@ -12898,10 +12991,14 @@ export function turn10RockSlideResettledBounceTick(t: number, pressTick: number)
  * param already established, reused here since turn 11's own pre-open/
  * reveal window is this exact function, just extended forward in time (the
  * resting idle-bounce oscillator never resets between turn 10's own redraw
- * and turn 11's own fresh confirm).
+ * and turn 11's own fresh confirm). ISSUES #39 rank-5 slice 2: `pressTick`/
+ * `menuRedrawDelay` (default the ON-fit pair, every pre-existing caller -
+ * including turn 11's own still-ON-fit reuse below - unaffected) let turn
+ * 10's own OFF-fit call site pass its own anchor without disturbing turn
+ * 11's.
  */
-function drawTurn10RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number, bounceRawTick: number = t): void {
-  const bounceTick = turn10RockSlideResettledBounceTick(bounceRawTick, TURN10_ROCKSLIDE_PRESS_TICK);
+function drawTurn10RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number, bounceRawTick: number = t, pressTick: number = TURN10_ROCKSLIDE_PRESS_TICK, menuRedrawDelay: number = TURN10_ROCKSLIDE_MENU_REDRAW_DELAY): void {
+  const bounceTick = turn10RockSlideResettledBounceTick(bounceRawTick, pressTick, menuRedrawDelay);
   const bounce = menuIdleBounce(bounceTick);
   drawStaticBgShiftedY(fb, 0, 0);
   drawTurn5IconBar(fb, t);
@@ -12918,22 +13015,25 @@ function drawTurn10RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number, bounce
  * S7 slice R rung (a): turn 10's own ROCK_SLIDE window dispatcher - same
  * three-phase shape as `drawTurn6RockSlideWindow`/`drawTurn7RockSlideWindow`
  * (attack animation + held kickoff text, "It's super effective!" swap-in,
- * text-clear, hard-cut to the resettled menu).
+ * text-clear, hard-cut to the resettled menu). ISSUES #39 rank-5 slice 2:
+ * re-anchored to the OFF-fit `TURN10_OFF_ROCKSLIDE_*` constants throughout -
+ * this dispatcher is turn-10-exclusive (no turn-11/12 call site), so it's
+ * safe to flip outright rather than needing an override param.
  */
 function drawTurn10RockSlideWindow(fb: Uint8Array, t: number): void {
-  const pressTick = TURN10_ROCKSLIDE_PRESS_TICK;
-  const redrawTick = pressTick + TURN10_ROCKSLIDE_MENU_REDRAW_DELAY;
+  const pressTick = TURN10_OFF_ROCKSLIDE_PRESS_TICK;
+  const redrawTick = pressTick + TURN10_OFF_ROCKSLIDE_MENU_REDRAW_DELAY;
   if (t >= redrawTick) {
-    drawTurn10RockSlideTurnEndSettledMenu(fb, t);
+    drawTurn10RockSlideTurnEndSettledMenu(fb, t, t, pressTick, TURN10_OFF_ROCKSLIDE_MENU_REDRAW_DELAY);
     return;
   }
-  const textClearTick = pressTick + TURN10_ROCKSLIDE_TEXT_CLEAR_DELAY;
+  const textClearTick = pressTick + TURN10_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY;
   drawTurn10RockSlideAttack(fb, t);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   if (t < textClearTick) {
-    const superEffectiveStart = turn10SuperEffectiveTextStartTick(pressTick);
+    const superEffectiveStart = turn10SuperEffectiveTextStartTick(pressTick, TURN10_OFF_SUPER_EFFECTIVE_TEXT_DELAY);
     if (t >= superEffectiveStart) {
-      drawMessageTextLines(fb, TURN6_SUPER_EFFECTIVE_LINE, "", turn10SuperEffectiveTextVisibleChars(t, pressTick));
+      drawMessageTextLines(fb, TURN6_SUPER_EFFECTIVE_LINE, "", turn10SuperEffectiveTextVisibleChars(t, pressTick, TURN10_OFF_SUPER_EFFECTIVE_TEXT_DELAY));
     } else {
       drawMessageTextLines(fb, ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2, rockSlideTextVisibleChars(t, pressTick));
     }
@@ -12941,46 +13041,42 @@ function drawTurn10RockSlideWindow(fb: Uint8Array, t: number): void {
 }
 
 /**
- * S7 slice R rung (b): the top-level AERIAL_ACE animation dispatcher - all
- * five mechanisms layered onto turn 10's own field base (Onix's own live
- * draining HP threaded through), then the message box - either the held
- * "Foe PIDGEOTTO used\nAERIAL ACE!" kickoff text, or (rung (a)) "It's not
- * very effective…" once Onix's own drain settles. Once ROCK_SLIDE's own
- * kickoff text starts (`TURN10_ROCKSLIDE_PRESS_TICK`, a wholly independent
- * synthetic anchor from this window's own live `pressTick`), hands off to
- * `drawTurn10RockSlideWindow` - the same "handoff at the next move's own
- * kickoff-text start" shape `drawTurn9QuickAttackWindow`'s own `rockSlideTextStartTick`
- * check already establishes. A no-op past `drawTurn10FieldBase` for any tick
- * before every mechanism's own window opens (all five return null/0 there),
- * so this function is safe to reach as soon as the kickoff text settles - it
- * doesn't regress `turn10-menu.json`'s own already-proven 0-diff window.
+ * ISSUES #39 rank-5 slice 2: turn 10's own AERIAL_ACE window under the
+ * Scene-OFF-owned presentation - `attackanimation` substitutes a fixed
+ * `BattleScript_Pausex20` pause for the move's own animation (`docs/
+ * rank5-effect-visibility-scout.md` §1), so all five of AERIAL_ACE's own
+ * mechanisms (lunge, two afterimage clones, Onix's own shake, the
+ * palette-darken pulse, the cutting-slice sprite - class c, all confirmed
+ * absent under Scene OFF by this slice's own fresh RAM probe against
+ * `turn10-aerialace-off.json`, `onixX2`/`onixY2` flat 0 the WHOLE pre-hit
+ * window 12307-12387) never render; only the generic `Cmd_hitanimation`
+ * pair (healthbox wobble + Onix flicker, class b, still `turn9Ep2*` via the
+ * OFF-fit `TURN10_OFF_ONIX_*_START` anchors) and the ordinary HP drain/
+ * message text (class a/b, via the OFF-fit delay overrides above) fire,
+ * then handoff to ROCK_SLIDE once ITS OWN (OFF-fit) kickoff text begins -
+ * same "handoff at the next move's own kickoff-text start" shape every
+ * prior turn's own dispatcher already establishes. The shared
+ * `turn10AerialAceOnixShakeY2`/`turn10AerialAcePaletteDarkenCoeff`/
+ * `drawTurn10AerialAceLungeAndClones`/`drawTurn10AerialAceSlice`
+ * functions/`TURN10_ONIX_FLICKER_START`/`TURN10_ONIX_HEALTHBOX_WOBBLE_START`
+ * constants themselves are NOT deleted - turn 12's own still-ON-fit
+ * `drawTurn12AerialAceWindow` reuses every one of them verbatim - only this
+ * dispatcher's OWN call sites are dropped/re-anchored.
  */
 function drawTurn10AerialAceWindow(fb: Uint8Array, t: number, pressTick: number): void {
-  if (t >= rockSlideTextStartTick(TURN10_ROCKSLIDE_PRESS_TICK)) {
+  if (t >= rockSlideTextStartTick(TURN10_OFF_ROCKSLIDE_PRESS_TICK)) {
     drawTurn10RockSlideWindow(fb, t);
     return;
   }
   const bounceTick = turn10KickoffBounceTick(t, pressTick);
-  const onixY2 = turn10AerialAceOnixShakeY2(t, pressTick);
-  const onixHp = turn10AerialAceOnixHp(t, pressTick, TURN9_ONIX_AFTER_QUICKATTACK_HP, TURN10_ONIX_AFTER_AERIALACE_HP);
-  // Mechanism 4 (docs/aerial-ace-notes.md's own continuation section): the
-  // palette-pulse's own coefficient state machine (turn10AerialAcePaletteDarkenCoeff)
-  // is RAM-pinned; `darken` gates the SAME BG/Onix/Pidgeotto darkened-palette
-  // plumbing `drawTurn5RockSlideAttack`/`drawTurn10AerialAceLungeAndClones`
-  // already carry for turn 5's own sitrus darken, covering selector 31's
-  // F_PAL_BG (drawTurn10FieldBase's own static BG) + F_PAL_BATTLERS (both
-  // Onix, via the same field-base chain, and Pidgeotto, via the lunge/clone
-  // drawer) in one flag - no new palette code needed, a pure wiring job.
-  const darken = turn10AerialAcePaletteDarkenCoeff(t, pressTick) > 0;
-  const onixInvisible = turn9Ep2OnixInvisible(t, pressTick, TURN10_ONIX_FLICKER_START);
-  const healthboxY2 = turn9Ep2HealthboxWobbleY2(t, pressTick, TURN10_ONIX_HEALTHBOX_WOBBLE_START);
-  drawTurn10FieldBase(fb, t, bounceTick, undefined, onixHp, onixY2, darken, onixInvisible, healthboxY2);
-  drawTurn10AerialAceLungeAndClones(fb, t, pressTick, darken);
-  drawTurn10AerialAceSlice(fb, t, pressTick);
+  const onixHp = turn10AerialAceOnixHp(t, pressTick, TURN9_ONIX_AFTER_QUICKATTACK_HP, TURN10_ONIX_AFTER_AERIALACE_HP, TURN10_OFF_AERIALACE_HP_DRAIN_START_DELAY);
+  const onixInvisible = turn9Ep2OnixInvisible(t, pressTick, TURN10_OFF_ONIX_FLICKER_START);
+  const healthboxY2 = turn9Ep2HealthboxWobbleY2(t, pressTick, TURN10_OFF_ONIX_HEALTHBOX_WOBBLE_START);
+  drawTurn10FieldBase(fb, t, bounceTick, undefined, onixHp, 0, false, onixInvisible, healthboxY2);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-  const notVeryEffectiveStart = turn10NotVeryEffectiveTextStartTick(pressTick);
+  const notVeryEffectiveStart = turn10NotVeryEffectiveTextStartTick(pressTick, TURN10_OFF_NOTVERYEFFECTIVE_TEXT_DELAY);
   if (t >= notVeryEffectiveStart) {
-    drawMessageTextLines(fb, TURN9_NOTVERYEFFECTIVE_LINE, "", turn10NotVeryEffectiveTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, TURN9_NOTVERYEFFECTIVE_LINE, "", turn10NotVeryEffectiveTextVisibleChars(t, pressTick, TURN10_OFF_NOTVERYEFFECTIVE_TEXT_DELAY));
   } else {
     drawMessageTextLines(fb, TURN10_AERIALACE_LINE1, TURN10_AERIALACE_LINE2, turn10AerialAceTextVisibleChars(t, pressTick));
   }
