@@ -800,12 +800,18 @@ import {
 } from "./turn1RockSlidePresentationStaging.ts";
 import { resolveTurn4RockSlideHpEndpoints } from "./turn4RockSlidePresentationStaging.ts";
 import { resolveTurn4DoubleTeamKickoffLines } from "./turn4DoubleTeamPresentationStaging.ts";
-import { resolveTurn6AtkFellLines, resolveTurn6FeatherDanceKickoffLines } from "./turn6FeatherDancePresentationStaging.ts";
+import {
+  resolveTurn6AtkFellLines,
+  resolveTurn6FeatherDanceKickoffLines,
+  resolveTurn6FeatherDanceWindowContent,
+} from "./turn6FeatherDancePresentationStaging.ts";
 import {
   resolveTurn7AtkFellLines,
   resolveTurn7FeatherDanceKickoffLines,
+  resolveTurn7FeatherDanceWindowContent,
   resolveTurn8AtkFellLines,
   resolveTurn8FeatherDanceKickoffLines,
+  resolveTurn8FeatherDanceWindowContent,
 } from "./turn78FeatherDancePresentationStaging.ts";
 import { resolveTurn3RockSlideHpEndpoints } from "./turn3RockSlidePresentationStaging.ts";
 import {
@@ -2260,6 +2266,19 @@ const [TURN7_ATKFELL_KICKOFF_LINE1, TURN7_ATKFELL_KICKOFF_LINE2] = resolveTurn7A
  */
 const [TURN8_FEATHERDANCE_KICKOFF_LINE1, TURN8_FEATHERDANCE_KICKOFF_LINE2] = resolveTurn8FeatherDanceKickoffLines();
 const [TURN8_ATKFELL_KICKOFF_LINE1, TURN8_ATKFELL_KICKOFF_LINE2] = resolveTurn8AtkFellLines();
+
+/**
+ * ISSUES #39 rank-4 slice 2 (`docs/rank4-prep-scout.md` slice 2): the
+ * turn-6/7/8 stat-fall banner's own palette, now each turn's own real
+ * `resolveTurnNFeatherDanceWindowContent().statChange.stat` fact
+ * (`assertFeatherDanceAttackStatPalette`, `:6532`) rather than
+ * `drawStatDecreaseBannerForBattler`'s former hardcoded-`attack` default --
+ * every one of the three canonical callers now passes its own real fact,
+ * matching FAKE_TEARS's own explicit-palette precedent (`:23256`).
+ */
+const TURN6_FEATHERDANCE_STAT_PALETTE = assertFeatherDanceAttackStatPalette(resolveTurn6FeatherDanceWindowContent().statChange.stat);
+const TURN7_FEATHERDANCE_STAT_PALETTE = assertFeatherDanceAttackStatPalette(resolveTurn7FeatherDanceWindowContent().statChange.stat);
+const TURN8_FEATHERDANCE_STAT_PALETTE = assertFeatherDanceAttackStatPalette(resolveTurn8FeatherDanceWindowContent().statChange.stat);
 
 /**
  * Presentation-seam retirement (`docs/presentation-seam-scout.md` §10.2/
@@ -6529,21 +6548,23 @@ function drawStatIncreaseBannerForBattler(
   }
 }
 
-function drawStatDecreaseBannerForBattler(
-  fb: Uint8Array,
-  tileset: Tileset,
-  corner: Readonly<{ x: number; y: number }>,
-  eva: number,
-  bg1Y: number,
-): void {
-  drawStatDecreaseBannerForBattlerPalette(
-    fb,
-    tileset,
-    corner,
-    eva,
-    bg1Y,
-    statAnimBanner.palettes.attack,
-  );
+/**
+ * ISSUES #39 rank-4 slice 2 (`docs/rank4-prep-scout.md` §2.3): every real
+ * canonical caller of the turn-6/7/8 stat-fall banner (`drawTurn6StatFallBanner`
+ * below) is FEATHER_DANCE, which only ever drops ATK -- this asserts that
+ * real per-turn fact (`resolveTurnN FeatherDanceWindowContent().statChange.stat`,
+ * not a bare literal) rather than building a full seven-stat hyphenated-to-
+ * camelCase translation table (`spAttack`/`spDefense` etc.) this window's own
+ * real domain never exercises -- the "disproportionate new surface" §2.3
+ * itself named. Replaces the former `drawStatDecreaseBannerForBattler`
+ * wrapper's own hardcoded-`attack` default (same FAKE_TEARS-precedent
+ * explicit-palette-at-the-call-site shape, `:23256`).
+ */
+function assertFeatherDanceAttackStatPalette(stat: string): RgbColor[] {
+  if (stat !== "attack") {
+    throw new Error(`battleScene: FEATHER_DANCE stat-fall banner expected stat "attack", got "${stat}"`);
+  }
+  return statAnimBanner.palettes.attack;
 }
 
 function drawStatDecreaseBannerForBattlerPalette(
@@ -11012,14 +11033,21 @@ const FEATHER_BASE_PRIORITY_CUTOFF = 3;
  * it - the two are similar enough in spirit to share `statAnimBg1PixelAt`
  * but different enough in every actual parameter that a copy is clearer
  * than a 6-optional-parameter generalization for a single second caller.
+ *
+ * ISSUES #39 rank-4 slice 2: `palette` is now an explicit parameter (each of
+ * turns 6/7/8's own call sites passes its own real
+ * `TURNN_FEATHERDANCE_STAT_PALETTE`, `:2270`) instead of this function
+ * reaching for `drawStatDecreaseBannerForBattler`'s former hardcoded-`attack`
+ * default.
  */
-function drawTurn6StatFallBanner(fb: Uint8Array, t: number, pressTick: number, eva: number): void {
-  drawStatDecreaseBannerForBattler(
+function drawTurn6StatFallBanner(fb: Uint8Array, t: number, pressTick: number, eva: number, palette: RgbColor[]): void {
+  drawStatDecreaseBannerForBattlerPalette(
     fb,
     onixBackSprite.tileset,
     ONIX_MATERIALIZE_CORNER,
     eva,
     turn6StatFallBg1Y(t, pressTick),
+    palette,
   );
 }
 
@@ -11037,7 +11065,7 @@ function drawTurn6FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: 
   drawTurn6FieldBase(fb, t, pressTick - TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET, () => drawTurn6FeatherSprites(fb, t, true));
   drawTurn6FeatherSprites(fb, t, false);
   const eva = turn6StatFallEva(t, pressTick);
-  if (eva !== null) drawTurn6StatFallBanner(fb, t, pressTick, eva);
+  if (eva !== null) drawTurn6StatFallBanner(fb, t, pressTick, eva, TURN6_FEATHERDANCE_STAT_PALETTE);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const atkFellStart = turn6AtkFellTextStartTick(pressTick);
   if (t >= atkFellStart) {
@@ -11311,7 +11339,7 @@ function drawTurn7FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: 
   drawTurn7FieldBase(fb, t, frozenRegime2Tick, () => drawTurn6FeatherSprites(fb, t, true, turn7FeatherSprites));
   drawTurn6FeatherSprites(fb, t, false, turn7FeatherSprites);
   const eva = turn6StatFallEva(t, pressTick);
-  if (eva !== null) drawTurn6StatFallBanner(fb, t, pressTick, eva);
+  if (eva !== null) drawTurn6StatFallBanner(fb, t, pressTick, eva, TURN7_FEATHERDANCE_STAT_PALETTE);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const atkFellStart = turn6AtkFellTextStartTick(pressTick);
   if (t >= atkFellStart) {
@@ -11515,7 +11543,7 @@ function drawTurn8FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: 
   drawTurn8FieldBase(fb, t, frozenRegime3Tick, () => drawTurn6FeatherSprites(fb, t, true, turn8FeatherSprites));
   drawTurn6FeatherSprites(fb, t, false, turn8FeatherSprites);
   const eva = turn6StatFallEva(t, pressTick);
-  if (eva !== null) drawTurn6StatFallBanner(fb, t, pressTick, eva);
+  if (eva !== null) drawTurn6StatFallBanner(fb, t, pressTick, eva, TURN8_FEATHERDANCE_STAT_PALETTE);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const atkFellStart = turn6AtkFellTextStartTick(pressTick);
   if (t >= atkFellStart) {
@@ -30212,12 +30240,21 @@ export function renderSceneOnMovePresentation(
       );
     }
     if (view.controllerDisplay.banner) {
-      drawStatDecreaseBannerForBattler(
+      // ISSUES #39 rank-4 slice 2, honest stop (docs/rank4-prep-scout.md
+      // §2.3, PROGRESS 785): `view` comes from `sceneOnFeatherDanceView`
+      // (../animation/sceneOnPresentation.ts, animation-lane-owned per
+      // AGENTS.md's worker-lane table) and carries no `stat` fact this
+      // main-lane module may derive from -- kept as an explicit literal at
+      // this call site rather than threading a kernel fact through a file
+      // this lane does not own. Correct-by-construction (FEATHER_DANCE only
+      // ever drops ATK), not yet real.
+      drawStatDecreaseBannerForBattlerPalette(
         fb,
         targetSprite.tileset,
         target.geometry.spriteCorner,
         view.controllerDisplay.banner.eva,
         view.controllerDisplay.banner.bg1Y,
+        statAnimBanner.palettes.attack,
       );
     }
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
