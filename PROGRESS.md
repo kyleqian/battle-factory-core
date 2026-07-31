@@ -13,6 +13,41 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 793 — [SUPERVISOR round 1, evening session 2026-07-31 ~14:30] Rank-5 execution OPEN: turn-9 flipped OFF (M9), ALL nine move/result OFF windows banked (S9)
+
+- **State:** master green on the M9+S9 union (full gate re-run by
+  supervisor — see commit); `battleScene.ts` turn-9 class-(c) bodies
+  deleted, class-(b) re-timed OFF; 8 new OFF traces banked. Only
+  `.worktrees/animation-main` remains; DEFERRED.md empty.
+- **M9 (verified, `8802fcb6`):** turn-9 OFF flip per adopted Option A.
+  turn9-rockslide-off **256/256**, turn9-quickattack-b-off **231/231**
+  (supervisor re-ran both); turn9-quickattack-off **177/233** — all 56
+  misses in ticks 10818-10873 PRE-move idle-bounce, supervisor-verified
+  from the manifest and git-stash-proven pre-existing (not a slice
+  regression). Legacy ON pins turn9-{quickattack,quickattack-b,rockslide}
+  .json retired + clone-mask test + 3 stale scratch drivers deleted;
+  test delta 5736→5719 fully accounted (33 ON-era turn-9 fixtures out,
+  16 OFF pins in). Insurance pins all held (256/242/256/715/128).
+  turn9-menu.json still 111/111.
+- **S9 (verified, merged `9544776b`):** all NINE rank-5 move/result OFF
+  windows now banked (turn10-rockslide split a/b 255+131,
+  turn11-featherdance 191, turn11-rockslide 256, turn12-aerialace 247,
+  turn12-rockslide-miss 256), turn10-aerialace settle extended (206),
+  turn10-menu-off banked (83). Zero desync anywhere; determinism 0/255.
+  Supervisor re-ran turn11-featherdance-off in-worktree: 189/191 as
+  reported. Turn-12 miss case shows compression tracks stripped
+  animation content, not elapsed ticks (~19-29 vs 112-138 ticks).
+- **NEW named residual class (two independent hits this round):**
+  pre-move/menu **idle-bounce phase misalignment** inherited from
+  upstream turns 1-8 — owns turn9-quickattack-off's 56 frames and
+  blocked S9 from pinning turn9/11/12-menu OFF traces (concrete
+  tick/sha data + hypothesis in `docs/rank5-off-ground-truth.md`).
+  Needs its own attribution probe before rank-5 can close fully.
+- **Next:** (a) M10 turn-10 OFF flip (brief ready); (b) S10 five-table
+  animation-handoff extraction (brief ready); then turns 11-12 flip,
+  idle-bounce phase probe, #56 444/536, turn17-rung1's 28 frames.
+
+---
 ## 792 — [SUPERVISOR TRUE FINAL 2026-07-31 ~13:10] USER DECISION: rank-5 OFF-pin policy ADOPTED (Option A). S8 banked first OFF ground truth (4/13 windows, ZERO desync). Session: 9 rounds / 16 workers / 0 failed steps
 
 - **State:** master tree clean at this commit; S8's 5 new files merged
