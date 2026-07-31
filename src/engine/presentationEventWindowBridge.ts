@@ -239,3 +239,63 @@ export function resolveFeatherDanceKickoffPresentationWindowContent(
     }),
   });
 }
+
+/**
+ * ISSUES #39 rank-4 slice 5 (`docs/rank4-prep-scout.md` §2.4): the third
+ * bridge shape rank 4 needs, for a move that misses. Every resolver above
+ * keys on `{message, hp}` (ROCK_SLIDE-shape) or `{message, statChange[,
+ * statFellMessage]}` (stat-shape); a missed move has neither -- just the
+ * kickoff "used move" message and a separate miss message. On a miss, the
+ * real compiled program (`reference/pokeemerald/data/battle_scripts_1.s:
+ * 271-282`) prints the kickoff message under `BattleScript_PrintMoveMissed`
+ * (a DIFFERENT `sourceLabel` from `HIT_FROM_ATK_STRING_SCRIPT_LABEL` above,
+ * even though it is the SAME fixed `STRINGID_USEDMOVE` `Cmd_attackstring`
+ * always emits), then the miss text under `BattleScript_MoveMissed`.
+ * Generic, no move/turn naming in the shape itself -- any missed move's own
+ * staging module can reuse this unchanged, the same "generalizes across
+ * moves" discipline `resolveFeatherDanceKickoffPresentationWindowContent`
+ * already proved for SAND_ATTACK.
+ */
+export const PRINT_MOVE_MISSED_SCRIPT_LABEL = "BattleScript_PrintMoveMissed";
+export const MOVE_MISSED_SCRIPT_LABEL = "BattleScript_MoveMissed";
+
+export type MoveMissedKickoffPresentationWindowContent = Readonly<{
+  message: Readonly<{ messageId: string; substitutions: readonly string[] }>;
+  missMessage: Readonly<{ messageId: string; substitutions: readonly string[] }>;
+}>;
+
+/**
+ * Answers "are we in a missed move's own kickoff + miss presentation
+ * content" from the event stream's own provenance. Returns `null` (not a
+ * guess) when either signal is absent -- both the real
+ * `BattleScript_PrintMoveMissed`-labeled kickoff `message` and the
+ * separately-labeled `BattleScript_MoveMissed` miss `message` must be
+ * present for this window to be genuinely active. No `hp` field, no
+ * `statChange` field -- a miss has neither.
+ */
+export function resolveMoveMissedKickoffPresentationWindowContent(
+  events: readonly BattleScriptSemanticEvent[],
+  kickoffScriptLabel: string = PRINT_MOVE_MISSED_SCRIPT_LABEL,
+  missScriptLabel: string = MOVE_MISSED_SCRIPT_LABEL,
+): MoveMissedKickoffPresentationWindowContent | null {
+  const messageEvent = events.find(
+    (event) => event.kind === "message" && event.provenance.sourceLabel === kickoffScriptLabel,
+  );
+  if (!messageEvent || messageEvent.kind !== "message") return null;
+
+  const missMessageEvent = events.find(
+    (event) => event.kind === "message" && event.provenance.sourceLabel === missScriptLabel,
+  );
+  if (!missMessageEvent || missMessageEvent.kind !== "message") return null;
+
+  return Object.freeze({
+    message: Object.freeze({
+      messageId: messageEvent.messageId,
+      substitutions: messageEvent.substitutions,
+    }),
+    missMessage: Object.freeze({
+      messageId: missMessageEvent.messageId,
+      substitutions: missMessageEvent.substitutions,
+    }),
+  });
+}

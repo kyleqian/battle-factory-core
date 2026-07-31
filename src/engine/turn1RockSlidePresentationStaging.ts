@@ -78,6 +78,8 @@ function speciesDisplayName(speciesId: number): string {
 const PROGRAM = loadBattleScriptProgram();
 const ENTRY_LABEL = "BattleScript_HitFromAtkCanceler";
 const B_WAIT_TIME_LONG = 64;
+/** `include/constants/battle.h:326` -- ISSUES #39 rank-4 slice 5: BIND's own miss branch (`BattleScript_MoveMissedPause`) is the first player-attacker chain to reach a `pause B_WAIT_TIME_SHORT` step; every pre-existing caller's own script only ever reaches `B_WAIT_TIME_LONG` waits, so this is additive. */
+const B_WAIT_TIME_SHORT = 32;
 /** src/data/gen/moves.json MOVE_ROCK_SLIDE -- the real move this window uses, not a substitute. */
 const MOVE_ROCK_SLIDE = 157;
 /** src/data/gen/moves.json MOVE_DOUBLE_TEAM -- the turn-kickoff phase's own real move (Grovyle's own evasion-rise). */
@@ -146,7 +148,9 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
     resolveAttackerBattler: () => null,
     resolveBattlerAtPosition: () => null,
     resolveHalfwordOperand: (_context, operand) =>
-      operand.expression === "B_WAIT_TIME_LONG" ? B_WAIT_TIME_LONG : null,
+      operand.expression === "B_WAIT_TIME_LONG" ? B_WAIT_TIME_LONG
+        : operand.expression === "B_WAIT_TIME_SHORT" ? B_WAIT_TIME_SHORT
+        : null,
     resolveByteOperand: () => null,
   });
 }
@@ -194,6 +198,18 @@ export type StagePlayerHitChainInput = Readonly<{
    * faint script never reads.
    */
   battleTopology?: BattleScriptRulesContextInput["battleTopology"];
+  /**
+   * ISSUES #39 rank-4 slice 5 (`docs/rank4-prep-scout.md` §2.4/§3 item 5):
+   * optional override for the compiled program's own entry label, defaulting
+   * to `ENTRY_LABEL` (`BattleScript_HitFromAtkCanceler`, the generic hit-chain
+   * entry every pre-existing caller relies on) when omitted -- every
+   * pre-existing caller omits this field and is unaffected. Lets a
+   * player-attacker chain enter at a different real dispatch label (e.g.
+   * BIND's own `BattleScript_EffectTrap`, which itself runs `setmoveeffect
+   * MOVE_EFFECT_WRAP` before joining the same generic hit chain) without a
+   * parallel local rulesContext/execution pipeline.
+   */
+  entryLabel?: string;
 }>;
 
 export type StagedPlayerHitChainResult = Readonly<{
@@ -247,7 +263,7 @@ export function stagePlayerHitChainToTerminalMachineState(
 
   const execution = createBattleScriptStatusRulesExecution(
     PROGRAM,
-    ENTRY_LABEL,
+    input.entryLabel ?? ENTRY_LABEL,
     rulesContext,
     input.rngSeed,
     externalPorts(),
