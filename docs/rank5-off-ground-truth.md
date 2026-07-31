@@ -151,6 +151,122 @@ cap — same precedent as `turn9-quickattack-b`:
   between the two moves' own windows, found precisely (not guessed) from the
   widened aerialace trace's own tail.
 
+### turn11-featherdance-off.json + turn11-rockslide-off.json (Pidgeotto FEATHER_DANCE / Onix ROCK_SLIDE)
+
+Commands:
+```sh
+bin/oracle run tools/compare/traces/turn11-featherdance-off.json -o <dir>
+bin/oracle run tools/compare/traces/turn11-rockslide-off.json -o <dir>
+```
+
+Siblings: `turn11-featherdance.json` (ON range 13352-13529, already dense) and
+`turn11-rockslide.json` (ON range 13530-14340, sparse). Both share
+byte-identical `segments` (14340 total, 96 segments); last button fires at
+13338-13340, then a 1000-tick no-input stretch carries both moves to
+completion — same shape as turn 10. `docs/turn11-notes.md` is an
+exceptionally detailed existing ON dossier for this exact window (per-tick
+sha citations for nearly every boundary), so this round's scout (coarse
+stride-4 over 13340-14340, uncommitted `/tmp` scratch) was almost entirely a
+byte-for-byte cross-check against it rather than fresh discovery.
+
+| New file | Capture range (stride) | Oracle captures |
+| --- | --- | --- |
+| `turn11-featherdance-off.json` | 13340–13530 (1) | 191 |
+| `turn11-rockslide-off.json` | 13530–13785 (1) | 256 |
+
+**Headline finding — FEATHER_DANCE shows ~zero compression this turn**, unlike
+every move in this program so far: `docs/turn11-notes.md` §5 itself
+documents that Onix's ATK stat is already at the floor, so the stat-change
+handler **short-circuits before its own animation step** — there is no
+class-c animation for OFF to strip, so nothing compresses:
+- **13342–13351**: settled post-confirm submenu, sha `528d4d92a33e` —
+  **byte-identical AND same absolute tick** as the ON dossier's own citation
+  (ON 13341-13351).
+- **13352–13381**: kickoff-text typing letter-by-letter, settling to
+  `492ccf070e80` at OFF **13382** — only **7 ticks earlier** than the ON
+  dossier's own citation (ON 13389), the smallest shift measured in this
+  program so far.
+- **13422**: message-box transition into the ATK-floor message begins —
+  **exact same absolute tick** as the ON dossier's own citation (ON 13422,
+  sha `b60ceefdb735`) — **zero compression**.
+- **13449**: settles to `82aa7ca871df` — **exact same absolute tick** as the
+  ON dossier's own citation (ON 13449) — **zero compression** for this
+  move's entire sequence, holds flat through **13529** (80 ticks, matching
+  the ON dossier's own measured hold span exactly).
+- **13530**: transitions toward ROCK_SLIDE's own kickoff (`b60ceefdb735` —
+  the same sha as the earlier 13422 transition-frame, a reused
+  content-agnostic box-transition graphic, not a coincidence worth flagging
+  as new content).
+- **App baseline**: **189/191 frames matched** — far higher than every other
+  window in this program, because there is no class-c content or timing
+  drift for the app to get wrong here; not chased, still an honest number.
+- **Determinism**: re-ran twice back-to-back, **0/191 sha mismatches**.
+
+**turn11-rockslide-off.json — compression resumes once ROCK_SLIDE's own
+animation-gated content starts:**
+- **13530–13548**: message-box transition + kickoff-text typing.
+- **13549**: settles to `aa0bf4647996` — **exact same absolute tick** as the
+  ON dossier's own citation (ON 13549) — still zero compression (pure
+  text-typing, no animation yet).
+- **13549–13592**: held flat (43 ticks) — crit/spread rolls resolve silently
+  underneath, matching the ON dossier's own "RNG rolls don't need a pixel
+  change" rule.
+- **13593–13612**: generic wobble alternation (`00a2c9955417`/
+  `773530fb2e95`/`63f7c19b5cdb`/`a351b9c785eb`) — **no rock-prop content
+  appears**, the fourth independent confirmation in this program of the
+  class-(c)-absence rule for ROCK_SLIDE (turns 9 and 10 were the first two;
+  this is turn 11's own spot-check, exactly as the assigned brief asked for).
+- **13622**: round-trip back to `aa0bf4647996` — **byte-identical** to the ON
+  dossier's own cited round-trip ("the animation loop completes and the
+  frame returns to the exact same kickoff-text sha... right as the HP-drain
+  begins"), there at ON tick 13734 — **112 ticks earlier** here.
+- **13630**: `27ca305dbfa8` — **byte-identical** to the ON dossier's own
+  "still yellow" healthbar citation (ON 13737-13739) — **107-109 ticks
+  earlier**.
+- **13633**: `579f9eae60b7` — **byte-identical** to the ON dossier's own
+  "now red" healthbar **color-zone-crossing** citation (ON 13740+) — **107
+  ticks earlier**. A third independent data point (after turn9 Onix, turn11
+  ON-era Pidgeotto) landing on the same crossing sha, now confirmed
+  Scene-agnostic too.
+- **13649**: `aeb115ac712f` — **byte-identical** to the ON dossier's own
+  "drain done" citation (ON 13756-13761) — **107-112 ticks earlier**.
+- **13675**: `6ccb690b57b3` — **byte-identical** to the ON dossier's own
+  ""It's super effective!" text holds" citation (ON 13787-13857) — **112-182
+  ticks earlier**.
+- **13752**: `cf34cbe53962` — **byte-identical** to the ON dossier's own
+  "text starts clearing" citation (ON ~13858-13865) — **106-113 ticks
+  earlier**.
+- **13759-13760**: `a173d834997e`/`db251fad6c61` — **byte-identical** to the
+  ON dossier's own settled-turn-12-menu citation (ON ~13895-13898) — **135-138
+  ticks earlier**, the deepest compression point in this window, consistent
+  with the "compression peaks at the final post-animation settle" pattern
+  turn10 established.
+- **13761–13785**: idle-menu cycling continues (`a173d834997e`/
+  `55822ddf41b2`/`1b57eb51635c`) — **byte-identical** to the ON dossier's own
+  "cycling through a slow multi-frame idle animation... at ~70-175-tick
+  intervals" citation — confirms this Scene-agnostic idle loop reproduces
+  under OFF too.
+- **Desync verdict: none** for both files. Every distinctive sha the ON
+  dossier names for this window reproduces byte-identical under OFF, with
+  compression ranging from **0 ticks** (pure text-typing-driven points) to
+  **~138 ticks** (the deepest post-animation settle) — same shape turn 10
+  established, this turn's own spot-check confirms it generalizes.
+- **App baseline**: **38/256 frames matched**.
+- **Determinism**: re-ran twice back-to-back, **0/256 sha mismatches**.
+- **Range-choice rationale**: `docs/turn11-notes.md`'s existing per-tick sha
+  citations made this the fastest window in the program to scout — nearly
+  every landmark was a direct byte-for-byte lookup rather than fresh
+  discovery, so the coarse scout mainly confirmed *where* (not *whether*)
+  each cited sha reproduces under OFF. `turn11-rockslide-off.json`'s range
+  (13530-13785, 256, the oracle's per-request cap) was chosen to land the
+  settled turn-12 menu plus a few idle-cycle ticks inside a single file,
+  unlike turn10-rockslide which needed a second `-b` file — turn 11's total
+  active-content span (13530→13760, 230 ticks) is smaller than turn 10's
+  (12546→12773, 227 ticks, but turn 10 needed 3+ full idle-bob cycles as
+  extra settle confirmation, which this window's leaner single-shot check
+  didn't reproduce past the second sha change — a smaller settle-confirmation
+  than turn 10 got, flagged here for honesty, not fabricated as equally deep).
+
 ### turn10-aerialace-off.json — settle extended (item 3)
 
 Command: `bin/oracle run tools/compare/traces/turn10-aerialace-off.json -o <dir>`
