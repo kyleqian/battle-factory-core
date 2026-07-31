@@ -1,5 +1,60 @@
 # Animation coverage
 
+## PRIORITY DIRECTIVE — send-out intro animations run ahead of the move queue (2026-07-31)
+
+**State:** User-set priority, recorded by the interactive main session at the
+user's request. The per-species **send-out intro animation** family takes
+priority over the remaining move acceptance queue (`MOVE_DRAGON_BREATH`,
+`MOVE_BIND`) and over new component tracks. Coverage is unchanged at **107
+exact / 0 partial / 0 staged / 169 unsupported**; no code, test, boundary,
+barrier or gameplay change accompanies this entry.
+
+**Why it outranks the moves:** every one of these functions freezes its
+`x2`/`y2` at its last active accumulator and hands off to
+`SpriteCallbackDummy` — a **permanent residual offset for the rest of the
+battle**, leaking into windows that never show the send-out. Two windows have
+already paid for the same missing residual by hand (DRAGON_RAGE's dense window
+and `docs/aerial-ace-portable-staging-probe.md`, both the settled
+opponent-front ONIX at `x2=+1`). It is a defect class under the move queue,
+not a cosmetic backlog behind it.
+
+**Did:** derived the full scope from pinned source and wrote
+**`docs/send-out-intro-animation-program.md`** — mechanism, both selector
+paths, the 5-rung ladder, the acceptance bar, and a re-runnable derivation
+script for every figure. Headline numbers: 881 rental entries / 376 species;
+front (opponent) collapses to **62** functions with a steep head (12 → 56%,
+30 → 85%); back (player) is selected by species **and nature** and stays flat
+at **68** reachable functions (top 8 → 34%); union closure is **194 of the
+file's 234** static functions, with only ~20 shared between the two families.
+Load-bearing invariant, grep-verified: **no `Anim_*` function reads species or
+mon data** — species/nature enter at selection time only, so one ported
+function is correct for every species that maps to it.
+
+**Next:** rung 2 of the ladder — generalize `computeTerminalOffset` out of
+`src/animation/speciesIdleAnim.ts` and bank tier-1 terminal constants for the
+62 front functions, steep head first, each accepted against a RAM probe of a
+settled front sprite (not pixels alone). Rung 1 (selector-table extraction) is
+a prerequisite owned by another lane — see below. Rungs 4-5 stay
+demand-driven; do not batch them speculatively.
+
+**Notes:** this family has no home in `ANIMATION_COVERAGE.json` — its
+acceptance unit is a move, and `componentTracks` validation
+(`tools/animation/coverage.ts:150-168`) requires every representative to be a
+Level 50 move sharing the track's components. The queue was deliberately left
+untouched rather than faking a move representative; this entry is the
+directive. Three hand-done one-offs exist today with no dispatcher: ONIX front
+(`src/animation/speciesIdleAnim.ts:44`, terminal only), MAGBY back
+(`src/engine/magbySendOut.ts:18`), ONIX back (`src/engine/battleMenu.ts:708`)
+— the latter two sit outside animation-owned paths, so retiring them into a
+dispatcher is a coordinated cross-lane change, not a drive-by.
+
+**For the main program:** rung 1 is yours, not animation's. Five literal
+source tables need extracting into `src/data/gen/` (side-lane ownership per
+AGENTS.md): `sMonFrontAnimIdsTable`, `sSpeciesToBackAnimSet`,
+`sBackAnimNatureModTable`, `sMonAnimationDelayTable` (nonzero for 52 of the
+376 pool species), `sBackAnimationIds`. Identity-const census idiom applies.
+Animation is blocked on these before rung 2 can be keyed by species.
+
 ## MOVE_ROAR promoted exact; noise-line-roar-effect complete (2026-07-30)
 
 **Verdict:** `MOVE_ROAR` is exact. The pure source-relative reducer, narrow
