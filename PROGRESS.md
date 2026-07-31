@@ -13,6 +13,36 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 770 — [SUPERVISOR 2026-07-31 ~03:10] Rank-2 faint half RETIRED (pins verified); 6-tick anomaly = ROUTE-specific (lab-ONIX 0 residual); DESTIN bench probed; round 10 dispatched
+
+- **State:** union gate green **558 files / 5677 tests + 1 deliberate
+  animation-lane skip**, build clean. M9's faint-half flip verified —
+  supervisor re-ran `turn13-dragonbreath-faint` **141/141** and
+  `turn13-switchin` **242/242**; worker A/B-proved `dense-a` 205/256 is
+  the pre-existing parked #23 exclusion byte-identical to baseline, not
+  a regression; 715/715 + 190/190 + rank-1 pins held. M9 also fixed the
+  dense-a/b missing-appRoute papercut (same class as entry 766's).
+  Inventory rank-2 row annotated [FAINT HALF RETIRED].
+- **S9 probes (merged):** (1) the ready-lag 6-tick anomaly is
+  **route-specific** — a lab `factoryLegal` fixture with ONIX as player
+  lead matches the quarantined species formula with **0-tick residual**;
+  the formula is species-correct on 4 species and the canonical anchor
+  route carries its own +6 (mechanism still unnamed). (2) DESTIN's real
+  bench probed: GROVYLE slot 0 (real opener, previously unrecorded) /
+  MURKROW slot 1 / PIDGEOTTO slot 2; real send-out order
+  GROVYLE→PIDGEOTTO→MURKROW — the switch-in flip needs the real AI
+  replacement rule, not next-index.
+- **Round 10 dispatched (final work round before wind-down):** main M10
+  — un-quarantine by route discrimination (species formula on
+  staged/generated intros, canonical keeps its calibrated flat lag;
+  715/715 hard), then MAGNETON affine-tint isolation (+ shadow verdict
+  if unblocked), then 444/536. Side S10 — ported switch-policy vs the
+  two canonical replacements (PIDGEOTTO at turn 5, MURKROW at turn 13)
+  from committed evidence, honest-stop if inputs unreconstructable.
+- **Notes:** wind-down after round 10: fold check, final gate, #56/#39
+  trims, session report.
+
+---
 ## 769 — [BOUNDED MAIN WORKER 2026-07-31 ~04:10] #39 rank-2 FLIPPED: DRAGON_BREATH/faint half onto turn13ResolutionAdapter.ts
 
 - **State:** all mandated pins hold: `turn13-dragonbreath-faint.json`
@@ -58,36 +88,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   inventory.md) can now read [RETIRED] like rank 1's, and the #39
   "Retirement progress" prose should note rank 2 flipped onto
   `turn13ResolutionAdapter.ts`.
-
----
-## 769 — [SUPERVISOR 2026-07-31 ~03:10] Rank-2 faint half RETIRED (pins verified); 6-tick anomaly = ROUTE-specific (lab-ONIX 0 residual); DESTIN bench probed; round 10 dispatched
-
-- **State:** union gate green **558 files / 5677 tests + 1 deliberate
-  animation-lane skip**, build clean. M9's faint-half flip verified —
-  supervisor re-ran `turn13-dragonbreath-faint` **141/141** and
-  `turn13-switchin` **242/242**; worker A/B-proved `dense-a` 205/256 is
-  the pre-existing parked #23 exclusion byte-identical to baseline, not
-  a regression; 715/715 + 190/190 + rank-1 pins held. M9 also fixed the
-  dense-a/b missing-appRoute papercut (same class as entry 766's).
-  Inventory rank-2 row annotated [FAINT HALF RETIRED].
-- **S9 probes (merged):** (1) the ready-lag 6-tick anomaly is
-  **route-specific** — a lab `factoryLegal` fixture with ONIX as player
-  lead matches the quarantined species formula with **0-tick residual**;
-  the formula is species-correct on 4 species and the canonical anchor
-  route carries its own +6 (mechanism still unnamed). (2) DESTIN's real
-  bench probed: GROVYLE slot 0 (real opener, previously unrecorded) /
-  MURKROW slot 1 / PIDGEOTTO slot 2; real send-out order
-  GROVYLE→PIDGEOTTO→MURKROW — the switch-in flip needs the real AI
-  replacement rule, not next-index.
-- **Round 10 dispatched (final work round before wind-down):** main M10
-  — un-quarantine by route discrimination (species formula on
-  staged/generated intros, canonical keeps its calibrated flat lag;
-  715/715 hard), then MAGNETON affine-tint isolation (+ shadow verdict
-  if unblocked), then 444/536. Side S10 — ported switch-policy vs the
-  two canonical replacements (PIDGEOTTO at turn 5, MURKROW at turn 13)
-  from committed evidence, honest-stop if inputs unreconstructable.
-- **Notes:** wind-down after round 10: fold check, final gate, #56/#39
-  trims, session report.
 
 ---
 ## 768 — [SUPERVISOR 2026-07-31 ~03:15] Round-8 regression QUARANTINED (715/715 restored); rank-2 groundwork merged; round 9: faint-half flip + discriminating probes
