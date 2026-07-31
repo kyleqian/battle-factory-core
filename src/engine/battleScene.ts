@@ -6260,10 +6260,6 @@ function getOnixDoubleTeamClonePalette(): RgbColor[] {
 function darkenPaletteToward10(palette: readonly (RgbColor | undefined)[]): RgbColor[] {
   return palette.map((c) => (c ? { r: blendComponentToward(c.r, 0, 10), g: blendComponentToward(c.g, 0, 10), b: blendComponentToward(c.b, 0, 10) } : (c as unknown as RgbColor)));
 }
-let turn10PidgeottoDarkPaletteCache: RgbColor[] | null = null;
-function turn10PidgeottoDarkPalette(): RgbColor[] {
-  return (turn10PidgeottoDarkPaletteCache ??= darkenPaletteToward10(pidgeottoFrontSprite.palette));
-}
 let turn10OnixDarkPaletteCache: RgbColor[] | null = null;
 function turn10OnixDarkPalette(): RgbColor[] {
   return (turn10OnixDarkPaletteCache ??= darkenPaletteToward10(onixBackSprite.palette));
@@ -11798,16 +11794,6 @@ function eraseSpriteFootprint(
   }
 }
 
-function erasePidgeottoFootprint(fb: Uint8Array, maxY: number = Infinity, bgPaletteOverride?: RgbColor[][]): void {
-  eraseSpriteFootprint(
-    fb,
-    pidgeottoFrontSprite.tileset,
-    PIDGEOTTO_CORNER,
-    maxY,
-    bgPaletteOverride,
-  );
-}
-
 /** Same tile-grid iteration as `drawSpriteSheet`, but skipping any pixel at screen `y >= maxY` - see `OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM`'s own doc comment for why the lunge needs this. */
 function drawSpriteSheetClippedBelow(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, maxY: number): void {
   for (let ty = 0; ty < tileset.rows; ty += 1) {
@@ -12528,142 +12514,13 @@ export function turn10NotVeryEffectiveTextVisibleChars(t: number, pressTick: num
 // window by the dossier's own `diag-aerialace-anchor.ts` instrument.
 
 /**
- * Mechanism 1 (docs/aerial-ace-notes.md continuation, "Mechanism 1"):
- * Pidgeotto's own elliptical lunge (slot 5, the real sprite) -
- * `AnimTask_TranslateMonEllipticalRespectSide_Step` active RAM 12360-12365
- * (n=55-60 relative to pressTick), reverting to `(0,0)` after. Needs a
- * genuine **+2** render lag (not the ordinary +1) - PNG-evidenced: mechanism
- * 5 (the slice) shares this exact RAM-active start tick (12360) yet debuts a
- * full tick earlier on screen (render 12361 vs this mechanism's render
- * 12362), not root-caused, see the dossier's own gap note.
+ * ISSUES #39 rank-5 slice 3 (Scene-OFF): AERIAL_ACE's mechanisms 1/3 (the
+ * elliptical lunge + the two blended afterimage clones) - class-c, deleted
+ * with turn 12's own flip (their last consumer, `drawTurn12AerialAceWindow`).
+ * `drawTurn10AerialAceCloneWinsOverField` (below) survives - it has a SECOND,
+ * unrelated caller in `renderSceneOnMovePresentation`'s own generic Scene-ON
+ * adapter (`battleScene.ts:31327`ish).
  */
-const TURN10_LUNGE_RENDER_LAG = 2;
-const TURN10_LUNGE_DELAY = 55; // RAM 12360 - pressTick(12305)
-const TURN10_LUNGE_TABLE: readonly { x2: number; y2: number }[] = [
-  { x2: -17, y2: 2 }, // RAM 12360
-  { x2: -24, y2: 6 }, // RAM 12361
-  { x2: -17, y2: 11 }, // RAM 12362
-  { x2: 0, y2: 12 }, // RAM 12363
-  { x2: 16, y2: 11 }, // RAM 12364
-  { x2: 24, y2: 6 }, // RAM 12365
-];
-export function turn10AerialAceLungeOffset(t: number, pressTick: number): { x2: number; y2: number } | null {
-  const ramTick = t - TURN10_LUNGE_RENDER_LAG;
-  const n = ramTick - pressTick - TURN10_LUNGE_DELAY;
-  if (n < 0 || n >= TURN10_LUNGE_TABLE.length) return null;
-  return TURN10_LUNGE_TABLE[n]!;
-}
-
-/**
- * Mechanism 3 (docs/aerial-ace-notes.md continuation, "Mechanism 3"): the
- * two blended `AnimTask_TraceMonBlended` afterimage clones (slots 4/7),
- * frozen (non-translating) copies sampling the lunge's own start/end
- * extremes - slot 4 has TWO lives (the lunge's first value, then a gap, then
- * `(0,0)`), slot 7 a single life at the lunge's last value. Base **+2**
- * render lag as mechanism 1 for the START (both go RAM-active the same tick,
- * both debut a tick later than mechanism 5) plus ONE MORE tick of latency on
- * top of that ("a freshly-allocated semi-transparent OBJ's OAM copy needs an
- * extra frame before it's meaningful", `turn9QuickAttackSlot3Offset`'s own
- * doc comment) - so **+3** at the START. The END, however, is the ORDINARY
- * **+1** lag (RAM-pixel-bisected this session, `tools/compare/scratch/quick-
- * diff.ts`: slot 7's own RAM-confirmed end (12372) needs render 12373, not
- * 12374 - the naive +2-at-both-ends guess left slot 7 visible one tick too
- * long and regressed render 12374). `eva=12,evb=8` (`setalpha 12, 8`, the
- * script's own args) - the SAME ratio QUICK_ATTACK's own clones use.
- */
-const TURN10_CLONE_START_RENDER_LAG = 3;
-const TURN10_CLONE_END_RENDER_LAG = 1;
-export function turn10AerialAceSlot4Offset(t: number, pressTick: number): { x2: number; y2: number } | null {
-  const nStart = t - TURN10_CLONE_START_RENDER_LAG - pressTick;
-  const nEnd = t - TURN10_CLONE_END_RENDER_LAG - pressTick;
-  if (nStart >= 55 && nEnd <= 62) return { x2: -17, y2: 2 }; // RAM 12360-12367, life 1 (matches the lunge's own FIRST value); render 12363-12368, ordinary +1 end lag (corrected this session - see turn10AerialAceSlot4WinsAtLifeEnd's own doc comment, the borrowed +2 lunge-lag left this alive one tick too long, render 12369 pixel-confirmed already gone)
-  const nEndLife2 = t - TURN10_LUNGE_RENDER_LAG - pressTick;
-  if (nStart >= 65 && nEndLife2 <= 72) return { x2: 0, y2: 0 }; // RAM 12370-12377, life 2
-  return null;
-}
-/**
- * PART 1 close-out finding (S7 engine step, this session, `npm run compare`
- * pixel-bisected against `docs/aerial-ace-notes.md`'s own OVERLAP RULE):
- * slot 4's own OAM tie against the real sprite is NOT constant across its
- * life - it LOSES for renders 12363-12367 (rung (a)'s own proven order:
- * blended against the field, drawn BEFORE the real sprite's opaque redraw)
- * but WINS outright at the very last tick of its life, render **12368**
- * only (pixel-exact match to slot 4's own blend-against-field formula at
- * multiple sample pixels with differing underlying real-sprite indices,
- * `tools/compare/scratch/diag-aerialace-overlap-window.ts`) - render 12369
- * (one tick later) shows slot 4 already fully gone (oracle reverts to the
- * untouched PLAIN field, not even the darkened erase color), confirming its
- * true RAM death falls between those two render ticks, consistent with the
- * corrected ordinary +1 end lag above. Not curve-fit further: this one-tick
- * flip is odd but the pixel evidence at both boundary ticks is unambiguous
- * and independently confirmed by `npm run compare` twice.
- */
-export function turn10AerialAceSlot4WinsAtLifeEnd(t: number, pressTick: number): boolean {
-  return t - pressTick === 63; // render 12368 only
-}
-export function turn10AerialAceSlot7Offset(t: number, pressTick: number): { x2: number; y2: number } | null {
-  const nStart = t - TURN10_CLONE_START_RENDER_LAG - pressTick;
-  const nEnd = t - TURN10_CLONE_END_RENDER_LAG - pressTick;
-  if (nStart >= 60 && nEnd <= 67) return { x2: 24, y2: 6 }; // RAM 12365-12372 (matches the lunge's own LAST value)
-  return null;
-}
-
-/**
- * Mechanisms 1+3 together: erase Pidgeotto's own settled footprint, redraw
- * slot 4 blended FIRST (against the static field, still in `fb` at this
- * point), then the real sprite OPAQUE on top, then slot 7 LAST via
- * `drawTurn10AerialAceCloneWinsOverField` (wins its own OAM tie against the
- * real sprite UNCONDITIONALLY, blended against the field alone, never the
- * live `fb`). The two clones do NOT share one rule: rung (a)'s own session
- * RAM-pixel-bisected that reversing QUICK_ATTACK's own "real first, clones
- * blended over fb last" order for BOTH clones (real always wins) closes the
- * 12363-12367 residual (666->29px, `docs/battle-turn-notes.md` §42/§43) to
- * exactly 0 - independently reconfirmed by `npm run compare` this session
- * (forcing slot 4 to win unconditionally like slot 7 regresses this exact
- * window straight back to that same residual). Slot 7 is a genuinely
- * different case (this session's own Mission A2 + rule-transfer PROBE,
- * `docs/aerial-ace-notes.md`): RAM-proven (`gMain.oamBuffer`) to sit at a
- * stably lower OAM index than the real sprite for its ENTIRE life
- * (12368-12373), never flipping - it wins outright, drawn last, wherever its
- * own texel is opaque. `darken` (mechanism 4, below) swaps in the
- * palette-pulse's darkened palette for every draw here when the pulse
- * plateau is active - real hardware's `BlendPalette` writes straight into
- * the live palette RAM bank Pidgeotto's sprite (and its clones, same
- * physical palette) reads from, so both must darken together, not just the
- * real sprite.
- */
-function drawTurn10AerialAceLungeAndClones(fb: Uint8Array, t: number, pressTick: number, darken: boolean): void {
-  const lunge = turn10AerialAceLungeOffset(t, pressTick);
-  const slot4 = turn10AerialAceSlot4Offset(t, pressTick);
-  const slot7 = turn10AerialAceSlot7Offset(t, pressTick);
-  if (!lunge && !slot4 && !slot7) return;
-  erasePidgeottoFootprint(fb, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM, darken ? turn10BgDarkPalette() : undefined);
-  const { tileset } = pidgeottoFrontSprite;
-  const palette = darken ? turn10PidgeottoDarkPalette() : pidgeottoFrontSprite.palette;
-  const bgPaletteOverride = darken ? turn10BgDarkPalette() : undefined;
-  const real = lunge ?? { x2: 0, y2: 0 };
-  // Slot 4 keeps rung (a)'s own proven order for MOST of its life (blended
-  // against the field, drawn BEFORE the real sprite's own opaque redraw
-  // covers it) - RAM-pixel-bisected in an earlier session for renders
-  // 12363-12367 and independently reconfirmed by `npm run compare` this
-  // session (forcing it to win unconditionally like slot 7 regresses this
-  // exact window back to the pre-fix 666/695/320/29px residual) - EXCEPT the
-  // very last tick of its life, render 12368, where it flips to winning (see
-  // `turn10AerialAceSlot4WinsAtLifeEnd`'s own doc comment).
-  const slot4WinsNow = slot4 !== null && turn10AerialAceSlot4WinsAtLifeEnd(t, pressTick);
-  if (slot4 && !slot4WinsNow) drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot4.x2, PIDGEOTTO_CORNER.y + slot4.y2, 12, 8, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM);
-  drawSpriteSheetClippedBelow(fb, tileset, palette, PIDGEOTTO_CORNER.x + real.x2, PIDGEOTTO_CORNER.y + real.y2, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM);
-  // OVERLAP RULE (docs/aerial-ace-notes.md's Mission A2 + rule-transfer PROBE
-  // sessions): slot 7 wins its own OAM tie against the real sprite
-  // UNCONDITIONALLY, for its whole life (RAM-proven stably lower
-  // `gMain.oamBuffer` index, never flips) - drawn LAST, on top of the
-  // just-drawn real sprite, wherever its own texel is opaque, blended
-  // against the field alone (never the live `fb`, which already has the
-  // real sprite's own redraw painted into it here). Slot 4 joins it here
-  // ONLY at its own life-end tick (`slot4WinsNow`, above).
-  if (slot4WinsNow) drawTurn10AerialAceCloneWinsOverField(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot4!.x2, PIDGEOTTO_CORNER.y + slot4!.y2, 12, 8, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM, bgPaletteOverride);
-  if (slot7) drawTurn10AerialAceCloneWinsOverField(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot7.x2, PIDGEOTTO_CORNER.y + slot7.y2, 12, 8, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM, bgPaletteOverride);
-}
 
 /**
  * The clone's own blend target2 at true overlap pixels: the static field
@@ -12707,34 +12564,15 @@ function drawTurn10AerialAceCloneWinsOverField(fb: Uint8Array, tileset: Tileset,
 }
 
 /**
- * Mechanism 2 (docs/aerial-ace-notes.md continuation, "Mechanism 2"): Onix's
- * own shake (slot 6, the real sprite) - `y2` square-wave `3,3,0,0` repeating
- * over RAM 12369-12384 (4 full cycles, 16 ticks), ordinary **+1** render lag
- * (PNG-confirmed via the verify script's own ON/OFF phase check, unlike
- * mechanisms 1/3's +2). `x2` stays 0 throughout - a pure vertical shake.
+ * ISSUES #39 rank-5 slice 3 (Scene-OFF): AERIAL_ACE's mechanism 2 (Onix's
+ * own shake, `turn10AerialAceOnixShakeY2`) - class-c per slice 2's own
+ * (b)/(c) disambiguation, deleted with turn 12's own flip (its last
+ * consumer). The ON-fit `TURN10_ONIX_FLICKER_START`/`TURN10_ONIX_HEALTHBOX_
+ * WOBBLE_START` pair (Onix's own generic `Cmd_hitanimation` reaction, class
+ * b) dies alongside it too - turn 12's own flip was its last consumer; the
+ * OFF-fit sibling pair right below stays (turn 10's own still-live OFF
+ * dispatcher).
  */
-const TURN10_ONIX_SHAKE_RENDER_LAG = 1;
-const TURN10_ONIX_SHAKE_DELAY = 64; // RAM 12369 - pressTick(12305)
-const TURN10_ONIX_SHAKE_TICKS = 16;
-const TURN10_ONIX_SHAKE_PERIOD = 4;
-const TURN10_ONIX_SHAKE_AMPLITUDE = 3;
-export function turn10AerialAceOnixShakeY2(t: number, pressTick: number): number {
-  const ramTick = t - TURN10_ONIX_SHAKE_RENDER_LAG;
-  const n = ramTick - pressTick - TURN10_ONIX_SHAKE_DELAY;
-  if (n < 0 || n >= TURN10_ONIX_SHAKE_TICKS) return 0;
-  return n % TURN10_ONIX_SHAKE_PERIOD < 2 ? TURN10_ONIX_SHAKE_AMPLITUDE : 0;
-}
-
-/**
- * S7 engine step PART 2 (docs/aerial-ace-notes.md's own "Mission B: SOLVED"
- * section): Onix's own post-AERIAL_ACE-hit invisibility flicker (renders
- * 12408-12435, RAM 12407-12434 +1 lag) - the EXACT SAME `turn9Ep2OnixInvisible`
- * task re-triggered for this turn's own hit, a reuse not new code, only the
- * anchor delay differs (turn 9's own `START=87` vs. this window's `102`, both
- * relative to each turn's own live `pressTick`).
- */
-const TURN10_ONIX_FLICKER_START = 102; // RAM 12407 - pressTick(12305)
-const TURN10_ONIX_HEALTHBOX_WOBBLE_START = 101; // TEST HYPOTHESIS - 1 tick before the flicker, mirroring turn9's own 86-vs-87 relative offset
 /**
  * ISSUES #39 rank-5 slice 2 (Scene-OFF): RAM-confirmed (`dump-turn9-hitanim-off.py`
  * against `turn10-aerialace-off.json`, ticks 12305-12410, WIDENED after a
@@ -12753,88 +12591,15 @@ const TURN10_OFF_ONIX_HEALTHBOX_WOBBLE_START = 82;
 const TURN10_OFF_ONIX_FLICKER_START = 83;
 
 /**
- * Mechanism 4 (docs/aerial-ace-notes.md continuation, "Mechanism 4"): the
- * background/battler palette darken-then-restore pulse - a SOFTWARE
- * `BlendPalette` write straight into `gPlttBufferFaded` (NOT hardware BLDY),
- * confirmed by a direct RAM read of the palette-blend sprite's own `data[]`
- * state machine: exactly TWO discrete coefficient writes (10, then 0 three
- * ticks later), not a smooth ramp. Palette-RAM visibility carries **0**
- * render lag here (unlike every OAM x2/y2 field elsewhere in this window) -
- * the darkened plateau is RAM ticks 12368-12370 AND render ticks 12368-12370,
- * the exact same absolute numbers.
+ * ISSUES #39 rank-5 slice 3 (Scene-OFF): AERIAL_ACE's mechanisms 4/5 (the
+ * field-darken pulse, `turn10AerialAcePaletteDarkenCoeff`, and the cutting
+ * slice, `turn10AerialAceSliceState`/`drawTurn10AerialAceSlice`) - class-c,
+ * deleted with turn 12's own flip (their last consumer).
+ * `cuttingSliceFrameTileset` (below) survives - it has a SECOND, unrelated
+ * caller in `renderSceneOnMovePresentation`'s own generic Scene-ON adapter.
  */
-const TURN10_PALETTE_PULSE_DELAY = 63; // RAM 12368 - pressTick(12305), 0 render lag
-const TURN10_PALETTE_PULSE_TICKS = 3; // RAM/render 12368-12370
-export function turn10AerialAcePaletteDarkenCoeff(t: number, pressTick: number): number {
-  const n = t - pressTick - TURN10_PALETTE_PULSE_DELAY;
-  if (n < 0 || n >= TURN10_PALETTE_PULSE_TICKS) return 0;
-  return 10;
-}
-
-/**
- * Mechanism 5 (docs/aerial-ace-notes.md, "Mechanism 5", fully re-derived
- * this session against a fresh `dump-cuttingslice-vram.py` probe): the
- * "cutting slice" sprite (slot 3, `gCuttingSliceSpriteTemplate`) - a 4-frame
- * diagonal claw-slash streak, base `(x,y)=(112,56)` fixed for its whole
- * life, `x2,y2` via a decelerating linear recurrence, ordinary **+1** render
- * lag (RAM-tick-indexed table below; render = RAM tick + 1). Screen corner
- * is CENTER-based (`base + x2/y2 - 16`, halfway across the 32x32 sheet) -
- * fit directly against the oracle's own 71px onset patch at render 12361
- * (RAM 12360's row): only this corner formula reproduces that patch's exact
- * bbox `(92,64)-(103,75)` from frame 0's own local opaque-pixel bbox
- * `(0,20)-(11,31)`, not guessed. `eva=12,evb=8` (`setalpha 12, 8`, OBJ BLEND
- * per the OAM), same ratio as mechanism 3's clones - blends over the live
- * `fb`, same `blendedTileOverFb` reasoning. No explicit ground-clip: the
- * message window (`drawTileBg(battleWindow...)`) is drawn AFTER this sprite
- * in the dispatcher below, the same "message box always wins the bottom
- * strip" convention every other overlapping animation in this file already
- * relies on.
- */
-const TURN10_SLICE_RENDER_LAG = 1;
-const TURN10_SLICE_DELAY = 55; // RAM 12360 - pressTick(12305)
-const TURN10_SLICE_BASE = { x: 112, y: 56 };
-const TURN10_SLICE_TABLE: readonly { x2: number; y2: number; frame: number }[] = [
-  { x2: -4, y2: 4, frame: 0 }, // RAM 12360
-  { x2: -8, y2: 7, frame: 0 }, // RAM 12361
-  { x2: -12, y2: 11, frame: 0 }, // RAM 12362
-  { x2: -16, y2: 15, frame: 0 }, // RAM 12363
-  { x2: -20, y2: 19, frame: 1 }, // RAM 12364
-  { x2: -23, y2: 22, frame: 1 }, // RAM 12365
-  { x2: -27, y2: 26, frame: 1 }, // RAM 12366
-  { x2: -30, y2: 29, frame: 1 }, // RAM 12367
-  { x2: -33, y2: 32, frame: 1 }, // RAM 12368
-  { x2: -36, y2: 35, frame: 2 }, // RAM 12369
-  { x2: -39, y2: 38, frame: 2 }, // RAM 12370
-  { x2: -42, y2: 41, frame: 2 }, // RAM 12371
-  { x2: -45, y2: 44, frame: 2 }, // RAM 12372
-  { x2: -48, y2: 47, frame: 2 }, // RAM 12373
-  { x2: -51, y2: 50, frame: 3 }, // RAM 12374
-  { x2: -53, y2: 52, frame: 3 }, // RAM 12375
-  { x2: -56, y2: 55, frame: 3 }, // RAM 12376
-  { x2: -58, y2: 57, frame: 3 }, // RAM 12377
-  { x2: -60, y2: 59, frame: 3 }, // RAM 12378
-  { x2: -63, y2: 62, frame: 3 }, // RAM 12379
-  { x2: -63, y2: 62, frame: 3 }, // RAM 12380, held (WaitAnimForDuration)
-  { x2: -63, y2: 62, frame: 3 }, // RAM 12381, held
-  { x2: -63, y2: 62, frame: 3 }, // RAM 12382, held
-  { x2: -63, y2: 62, frame: 3 }, // RAM 12383, held
-];
-export function turn10AerialAceSliceState(t: number, pressTick: number): { x2: number; y2: number; frame: number } | null {
-  const ramTick = t - TURN10_SLICE_RENDER_LAG;
-  const n = ramTick - pressTick - TURN10_SLICE_DELAY;
-  if (n < 0 || n >= TURN10_SLICE_TABLE.length) return null;
-  return TURN10_SLICE_TABLE[n]!;
-}
 function cuttingSliceFrameTileset(frame: number): Tileset {
   return { columns: battleAnimCuttingSlice.frames.columns, rows: battleAnimCuttingSlice.frames.rows, tiles: battleAnimCuttingSlice.frames.list[frame]! };
-}
-function drawTurn10AerialAceSlice(fb: Uint8Array, t: number, pressTick: number): void {
-  const state = turn10AerialAceSliceState(t, pressTick);
-  if (!state) return;
-  const frameTileset = cuttingSliceFrameTileset(state.frame);
-  const ox = TURN10_SLICE_BASE.x + state.x2 - 16;
-  const oy = TURN10_SLICE_BASE.y + state.y2 - 16;
-  drawSpriteSheetBlendedOverFb(fb, frameTileset, battleAnimCuttingSlice.palette, ox, oy, 12, 8);
 }
 
 /**
@@ -13195,27 +12960,57 @@ export function turn11AtkFloorTextVisibleChars(t: number, pressTick: number): nu
 export const TURN11_ROCKSLIDE_PRESS_TICK = 13137;
 const TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP = 16;
 
+/**
+ * ISSUES #39 rank-5 slice 3 (Scene-OFF): unlike turns 9/10, this turn's OWN
+ * kickoff (the FEATHER_DANCE-then-ROCK_SLIDE handoff) shows ZERO pre-hit
+ * compression (`docs/rank5-off-ground-truth.md`'s own turn11-featherdance-off
+ * section - every cited sha lands at the exact SAME absolute tick as the ON
+ * dossier, because FEATHER_DANCE's own stat-change handler short-circuits
+ * before its own animation step, leaving nothing for OFF to strip upstream
+ * of ROCK_SLIDE) - so `TURN11_ROCKSLIDE_PRESS_TICK` itself needs NO OFF-fit
+ * sibling, unlike `TURN10_OFF_ROCKSLIDE_PRESS_TICK`. Compression only begins
+ * once ROCK_SLIDE's OWN hit-reaction chain fires, at the SAME fixed
+ * `hitFlashAnchorAge=455`/`startDelay=490` pair turns 9/10 already
+ * RAM-confirmed independent of move/turn (`turn10-rockslide-off.json`'s own
+ * doc comment) - `rockSlideHealthboxWobbleY2`'s own wobble onset predicted
+ * by `pressTick+455=13593` lands EXACTLY on `turn11-rockslide-off.json`'s
+ * own cited "13593-13612: generic wobble alternation" span, confirming the
+ * same fixed-offset mechanism a third time rather than assuming transfer.
+ */
+const TURN11_OFF_ROCKSLIDE_ANIMATION_PROFILE = { ...ROCK_SLIDE_ANIMATION_PROFILE, hitFlashAnchorAge: 455 };
+const TURN11_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY = 490;
+
+/**
+ * ISSUES #39 rank-5 slice 3 (Scene-OFF): turn 11's own ROCK_SLIDE under the
+ * Scene-OFF-owned presentation - same recipe as `drawTurn10RockSlideAttack`.
+ * Class-c bodies dropped: the camera shake (`rockSlideBg3Y`), Pidgeotto's
+ * own target shake (`rockSlideMonShakeY2`), and the rock-prop drop sprites
+ * (`rockSlideRockState`/`drawRockSprite`) - this is their LAST call site in
+ * the turn 9-12 arc (turn 9/10 already dropped their own, turn 12's own
+ * ROCK_SLIDE is a miss with zero rock content even under ON) - see the
+ * shared-helper survival note where `drawRockSlideWindow`'s own turn-1-8
+ * callers are confirmed still live, so the underlying `battleMenu.ts`
+ * primitives themselves stay. The generic hit-reaction pair
+ * (`rockSlideHealthboxWobbleY2`/`rockSlideMonBlinkInvisible`, class b,
+ * re-anchored via `TURN11_OFF_ROCKSLIDE_ANIMATION_PROFILE`) and the HP
+ * drain (`rockSlideOpponentHp`, via `TURN11_OFF_ROCKSLIDE_HP_DRAIN_START_
+ * DELAY`) still fire.
+ */
 function drawTurn11RockSlideAttack(fb: Uint8Array, t: number): void {
   const pressTick = TURN11_ROCKSLIDE_PRESS_TICK;
-  const shiftY = rockSlideBg3Y(t, pressTick);
-  drawStaticBgShiftedY(fb, shiftY, turn5BgFadeY(t));
+  drawStaticBgShiftedY(fb, 0, turn5BgFadeY(t));
   drawTurn5IconBar(fb, t);
-  if (!rockSlideMonBlinkInvisible(t, pressTick)) {
-    drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y + rockSlideMonShakeY2(t, pressTick));
+  if (!rockSlideMonBlinkInvisible(t, pressTick, TURN11_OFF_ROCKSLIDE_ANIMATION_PROFILE)) {
+    drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y);
   }
   const frozenBounceTick = turn10KickoffBounceTick(t, pressTick);
   const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(frozenBounceTick + TURN10_REGIME5_TO_REGIME1_SHIFT));
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
-  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
-  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP);
+  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick, TURN11_OFF_ROCKSLIDE_ANIMATION_PROFILE);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN11_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
   const opponentContent = pidgeottoHealthboxContentForHp(opponentHp);
   drawSendOutHealthbox(fb, 0, opponentContent);
   if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
-  for (const i of rockSlideDrawOrder(t, pressTick)) {
-    const rock = rockSlideRockState(i, t, pressTick);
-    if (!rock) continue;
-    drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
-  }
   drawMenuHealthboxPlayer(fb, 0, 0);
   drawPlayerHealthboxHpOverlay(fb, TURN10_ONIX_AFTER_AERIALACE_HP, 0);
 }
@@ -13228,11 +13023,21 @@ function drawTurn11RockSlideAttack(fb: Uint8Array, t: number): void {
  * prior turn's own super-effective hit already uses).
  */
 const TURN11_SUPER_EFFECTIVE_TEXT_DELAY = 625; // render 13762 - pressTick(13137)
-export function turn11SuperEffectiveTextStartTick(pressTick: number): number {
-  return pressTick + TURN11_SUPER_EFFECTIVE_TEXT_DELAY;
+/**
+ * ISSUES #39 rank-5 slice 3 (Scene-OFF): the fixed -107-tick hit-reaction
+ * shift (`TURN11_OFF_ROCKSLIDE_ANIMATION_PROFILE`'s own 562->455) applied to
+ * this turn's own unchanged pressTick - `bin/oracle run tools/compare/
+ * traces/turn11-rockslide-off.json` shows the fully-typed hold reproducing
+ * the ON dossier's own citation ~107-112 ticks earlier throughout this
+ * window, matching turns 9/10's own established delta exactly. `delay` param
+ * default (added below) preserves the existing pinned test's own 2-arg call.
+ */
+const TURN11_OFF_SUPER_EFFECTIVE_TEXT_DELAY = 518;
+export function turn11SuperEffectiveTextStartTick(pressTick: number, delay: number = TURN11_SUPER_EFFECTIVE_TEXT_DELAY): number {
+  return pressTick + delay;
 }
-export function turn11SuperEffectiveTextVisibleChars(t: number, pressTick: number): number {
-  const start = turn11SuperEffectiveTextStartTick(pressTick);
+export function turn11SuperEffectiveTextVisibleChars(t: number, pressTick: number, delay: number = TURN11_SUPER_EFFECTIVE_TEXT_DELAY): number {
+  const start = turn11SuperEffectiveTextStartTick(pressTick, delay);
   if (t < start) return 0;
   return Math.min(TURN6_SUPER_EFFECTIVE_LINE.length, t - start + 1);
 }
@@ -13256,12 +13061,26 @@ export function turn11SuperEffectiveTextVisibleChars(t: number, pressTick: numbe
  * `turn10RockSlideResettledBounceTick` already uses, just this turn's own
  * literal redraw delay, not a new mechanism - fresh-oracle-confirmed this
  * whole span (13866-13897) reproduces 0-diff with no special-casing.
+ * ISSUES #39 rank-5 slice 3: the ON-fit 722-tick text-clear delay itself is
+ * no longer read anywhere (turn 11's own dispatcher is fully OFF-fit now,
+ * see `TURN11_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY` below) - left undeclared
+ * rather than kept as dead code, this doc comment's own historical citation
+ * stays accurate regardless.
  */
-const TURN11_ROCKSLIDE_TEXT_CLEAR_DELAY = 722; // render 13859 - pressTick(13137)
 export const TURN11_ROCKSLIDE_MENU_REDRAW_DELAY = 729; // render 13866 - pressTick(13137)
+/**
+ * ISSUES #39 rank-5 slice 3 (Scene-OFF): the exported ON-fit pair above
+ * stays UNTOUCHED (still consumed by `core.ts`'s own real `turn11Resolved`
+ * gate + `TURN12_REGIME7_TO_REGIME1_SHIFT` + turn 12's own still-live reuse
+ * of `drawTurn11RockSlideTurnEndSettledMenu` below) - same -107 fixed
+ * hit-reaction shift as the super-effective text delay above.
+ */
+const TURN11_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY = 615;
+const TURN11_OFF_ROCKSLIDE_MENU_REDRAW_DELAY = 622;
 
-export function turn11RockSlideResettledBounceTick(t: number, pressTick: number): number {
-  return t - (pressTick + TURN11_ROCKSLIDE_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
+/** Same "resettled menu re-initializes its own bounce phase fresh at redraw" formula as `turn10RockSlideResettledBounceTick`, keyed off this turn's own `TURN11_ROCKSLIDE_MENU_REDRAW_DELAY` (or, ISSUES #39 rank-5 slice 3, an explicit `menuRedrawDelay` override - default unchanged, every pre-existing caller unaffected). */
+export function turn11RockSlideResettledBounceTick(t: number, pressTick: number, menuRedrawDelay: number = TURN11_ROCKSLIDE_MENU_REDRAW_DELAY): number {
+  return t - (pressTick + menuRedrawDelay) + (MENU_IDLE_BLANK_END_TICK + 1);
 }
 
 /**
@@ -13274,8 +13093,8 @@ export function turn11RockSlideResettledBounceTick(t: number, pressTick: number)
  * `drawTurn9TurnEndSettledMenu`/`drawTurn10RockSlideTurnEndSettledMenu`
  * precedent already established for their own next-turn callers.
  */
-function drawTurn11RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number, bounceRawTick: number = t): void {
-  const bounceTick = turn11RockSlideResettledBounceTick(bounceRawTick, TURN11_ROCKSLIDE_PRESS_TICK);
+function drawTurn11RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number, bounceRawTick: number = t, pressTick: number = TURN11_ROCKSLIDE_PRESS_TICK, menuRedrawDelay: number = TURN11_ROCKSLIDE_MENU_REDRAW_DELAY): void {
+  const bounceTick = turn11RockSlideResettledBounceTick(bounceRawTick, pressTick, menuRedrawDelay);
   const bounce = menuIdleBounce(bounceTick);
   drawStaticBgShiftedY(fb, 0, 0);
   drawTurn5IconBar(fb, t);
@@ -13296,18 +13115,18 @@ function drawTurn11RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number, bounce
  */
 function drawTurn11RockSlideWindow(fb: Uint8Array, t: number): void {
   const pressTick = TURN11_ROCKSLIDE_PRESS_TICK;
-  const redrawTick = pressTick + TURN11_ROCKSLIDE_MENU_REDRAW_DELAY;
+  const redrawTick = pressTick + TURN11_OFF_ROCKSLIDE_MENU_REDRAW_DELAY;
   if (t >= redrawTick) {
-    drawTurn11RockSlideTurnEndSettledMenu(fb, t);
+    drawTurn11RockSlideTurnEndSettledMenu(fb, t, t, pressTick, TURN11_OFF_ROCKSLIDE_MENU_REDRAW_DELAY);
     return;
   }
-  const textClearTick = pressTick + TURN11_ROCKSLIDE_TEXT_CLEAR_DELAY;
+  const textClearTick = pressTick + TURN11_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY;
   drawTurn11RockSlideAttack(fb, t);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   if (t < textClearTick) {
-    const superEffectiveStart = turn11SuperEffectiveTextStartTick(pressTick);
+    const superEffectiveStart = turn11SuperEffectiveTextStartTick(pressTick, TURN11_OFF_SUPER_EFFECTIVE_TEXT_DELAY);
     if (t >= superEffectiveStart) {
-      drawMessageTextLines(fb, TURN6_SUPER_EFFECTIVE_LINE, "", turn11SuperEffectiveTextVisibleChars(t, pressTick));
+      drawMessageTextLines(fb, TURN6_SUPER_EFFECTIVE_LINE, "", turn11SuperEffectiveTextVisibleChars(t, pressTick, TURN11_OFF_SUPER_EFFECTIVE_TEXT_DELAY));
     } else {
       drawMessageTextLines(fb, ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2, rockSlideTextVisibleChars(t, pressTick));
     }
@@ -13426,39 +13245,49 @@ function turn12KickoffBounceTick(t: number, pressTick: number): number {
 const TURN12_ONIX_AFTER_AERIALACE_HP = 4;
 
 /**
- * S7/S8 (docs/turn12-notes.md's 2026-07-21 update §1, closed out by the S7
- * engine step's own PART 4): Pidgeotto's SECOND AERIAL_ACE use - RAM-PROVEN
- * a bit-exact +2068-tick re-anchor of turn 10's own five-mechanism dispatch
- * (`drawTurn10AerialAceLungeAndClones`/`drawTurn10AerialAceSlice`/
- * `turn10AerialAceOnixShakeY2`, every one of them already `pressTick`-
- * relative and reused here VERBATIM, not forked) - only `pressTick` (this
- * turn's own live confirm) and Onix's own HP endpoints (14->4, vs turn 10's
- * 24->14) are new. Mechanism 4's own darkened-palette render, the flicker
- * (PART 2), and the player-healthbox wobble (PART 2's own companion finding)
- * are ALL now wired here too, at the SAME `pressTick`-relative anchors turn
- * 10 uses (`turn10AerialAcePaletteDarkenCoeff`/`TURN10_ONIX_FLICKER_START`/
- * `TURN10_ONIX_HEALTHBOX_WOBBLE_START`) - since every one of those functions
- * is already purely `(t, pressTick)`-relative, the same verbatim-reuse shape
- * this whole window already establishes applies to them too.
+ * ISSUES #39 rank-5 slice 3 (Scene-OFF): turn 12's own AERIAL_ACE anchors,
+ * fresh-oracle-fit against `turn12-aerialace-off.json` - same fixed
+ * hit-reaction-chain shift `TURN10_OFF_ONIX_FLICKER_START`/`TURN10_OFF_
+ * ONIX_HEALTHBOX_WOBBLE_START`/`TURN10_OFF_AERIALACE_HP_DRAIN_START_DELAY`/
+ * `TURN10_OFF_NOTVERYEFFECTIVE_TEXT_DELAY` already established for turn 10's
+ * own instance of this exact mechanism.
+ */
+const TURN12_OFF_ONIX_FLICKER_START = 83;
+const TURN12_OFF_ONIX_HEALTHBOX_WOBBLE_START = 82;
+const TURN12_OFF_AERIALACE_HP_DRAIN_START_DELAY = 117;
+const TURN12_OFF_NOTVERYEFFECTIVE_TEXT_DELAY = 133;
+
+/**
+ * ISSUES #39 rank-5 slice 3 (Scene-OFF): turn 12's own AERIAL_ACE window
+ * under the Scene-OFF-owned presentation - same recipe as
+ * `drawTurn10AerialAceWindow`. Class-c bodies dropped: the lunge+clones
+ * (`drawTurn10AerialAceLungeAndClones`), the cutting slice
+ * (`drawTurn10AerialAceSlice`), Onix's own shake (`turn10AerialAceOnixShakeY2`,
+ * the (b)/(c) ambiguity slice 2 already resolved class-c for turn 10's own
+ * instance), and the field-darken pulse (`turn10AerialAcePaletteDarkenCoeff`).
+ * This is their LAST call site in the turn 9-12 arc - once this lands, these
+ * four functions (plus their own exclusive helper functions/constants) have
+ * zero remaining consumers and are deleted below, EXCEPT
+ * `drawTurn10AerialAceCloneWinsOverField`, which stays alive (a second, fully
+ * unrelated caller in `renderSceneOnMovePresentation`'s own generic Scene-ON
+ * adapter, `battleScene.ts:31327`). The generic `Cmd_hitanimation` pair
+ * (class b) and the ordinary HP drain/message text still fire, re-anchored
+ * via the OFF-fit constants above.
  */
 function drawTurn12AerialAceWindow(fb: Uint8Array, t: number, pressTick: number): void {
-  if (t >= rockSlideTextStartTick(TURN12_ROCKSLIDE_PRESS_TICK)) {
+  if (t >= rockSlideTextStartTick(TURN12_OFF_ROCKSLIDE_PRESS_TICK)) {
     drawTurn12RockSlideWindow(fb, t);
     return;
   }
   const bounceTick = turn12KickoffBounceTick(t, pressTick);
-  const onixY2 = turn10AerialAceOnixShakeY2(t, pressTick);
-  const onixHp = turn10AerialAceOnixHp(t, pressTick, TURN10_ONIX_AFTER_AERIALACE_HP, TURN12_ONIX_AFTER_AERIALACE_HP);
-  const darken = turn10AerialAcePaletteDarkenCoeff(t, pressTick) > 0;
-  const onixInvisible = turn9Ep2OnixInvisible(t, pressTick, TURN10_ONIX_FLICKER_START);
-  const healthboxY2 = turn9Ep2HealthboxWobbleY2(t, pressTick, TURN10_ONIX_HEALTHBOX_WOBBLE_START);
-  drawTurn12FieldBase(fb, t, bounceTick, undefined, onixHp, onixY2, darken, onixInvisible, healthboxY2);
-  drawTurn10AerialAceLungeAndClones(fb, t, pressTick, darken);
-  drawTurn10AerialAceSlice(fb, t, pressTick);
+  const onixHp = turn10AerialAceOnixHp(t, pressTick, TURN10_ONIX_AFTER_AERIALACE_HP, TURN12_ONIX_AFTER_AERIALACE_HP, TURN12_OFF_AERIALACE_HP_DRAIN_START_DELAY);
+  const onixInvisible = turn9Ep2OnixInvisible(t, pressTick, TURN12_OFF_ONIX_FLICKER_START);
+  const healthboxY2 = turn9Ep2HealthboxWobbleY2(t, pressTick, TURN12_OFF_ONIX_HEALTHBOX_WOBBLE_START);
+  drawTurn12FieldBase(fb, t, bounceTick, undefined, onixHp, 0, false, onixInvisible, healthboxY2);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-  const notVeryEffectiveStart = turn10NotVeryEffectiveTextStartTick(pressTick);
+  const notVeryEffectiveStart = turn10NotVeryEffectiveTextStartTick(pressTick, TURN12_OFF_NOTVERYEFFECTIVE_TEXT_DELAY);
   if (t >= notVeryEffectiveStart) {
-    drawMessageTextLines(fb, TURN9_NOTVERYEFFECTIVE_LINE, "", turn10NotVeryEffectiveTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, TURN9_NOTVERYEFFECTIVE_LINE, "", turn10NotVeryEffectiveTextVisibleChars(t, pressTick, TURN12_OFF_NOTVERYEFFECTIVE_TEXT_DELAY));
   } else {
     drawMessageTextLines(fb, TURN10_AERIALACE_LINE1, TURN10_AERIALACE_LINE2, turn10AerialAceTextVisibleChars(t, pressTick));
   }
@@ -13476,6 +13305,27 @@ function drawTurn12AerialAceWindow(fb: Uint8Array, t: number, pressTick: number)
  * SECOND, structurally different move.
  */
 export const TURN12_ROCKSLIDE_PRESS_TICK = 14237;
+
+/**
+ * ISSUES #39 rank-5 slice 3 (Scene-OFF): a SEPARATE synthetic anchor from
+ * the ON-fit constant above, fit against `turn12-rockslide-miss-off.json` -
+ * `bin/oracle run` shows the fully-typed "ONIX's attack missed!" headline
+ * hold landing render 14686 (byte-identical to the ON dossier's own
+ * 14705-14780 citation, 19 ticks earlier), and the turn-13 resettle
+ * transition at 14762/14769 (19/~19-29 ticks earlier than the ON dossier's
+ * own 14781-14789/14790-14798 citations) - every one of `ROCK_SLIDE_TEXT_
+ * DELAY`(393)/`TURN12_ROCKSLIDE_MISS_TEXT_DELAY`(449)/`TURN12_ROCKSLIDE_
+ * TEXT_CLEAR_DELAY`(544)/`TURN12_ROCKSLIDE_MENU_REDRAW_DELAY`(551) reproduces
+ * EXACTLY unchanged relative to this new anchor (`14218+551=14769`,
+ * `14218+544=14762`, etc, all landing on the cited ticks precisely) - a miss
+ * has no animation-gated content of its own to strip (`docs/rank5-off-
+ * ground-truth.md`'s own "cleanest confirmation... compression tracks
+ * stripped animation content" finding), so the ENTIRE 19-tick shift here is
+ * simply AERIAL_ACE's own upstream hit-reaction-chain compression carried
+ * forward through the shared confirm-press tick, not a new source.
+ * `14237-19=14218`.
+ */
+const TURN12_OFF_ROCKSLIDE_PRESS_TICK = 14218;
 
 /**
  * ROCK_SLIDE's own miss text (`sText_AttackMissed` resolved for Onix,
@@ -13517,8 +13367,8 @@ export function turn12RockSlideResettledBounceTick(t: number, pressTick: number)
  * HP (4), Pidgeotto UNCHANGED at 16 (ROCK_SLIDE missed - no drain this
  * turn).
  */
-function drawTurn12TurnEndSettledMenu(fb: Uint8Array, t: number, bounceRawTick: number = t): void {
-  const bounceTick = turn12RockSlideResettledBounceTick(bounceRawTick, TURN12_ROCKSLIDE_PRESS_TICK);
+function drawTurn12TurnEndSettledMenu(fb: Uint8Array, t: number, bounceRawTick: number = t, pressTick: number = TURN12_ROCKSLIDE_PRESS_TICK): void {
+  const bounceTick = turn12RockSlideResettledBounceTick(bounceRawTick, pressTick);
   const bounce = menuIdleBounce(bounceTick);
   drawStaticBgShiftedY(fb, 0, 0);
   drawTurn5IconBar(fb, t);
@@ -13544,10 +13394,10 @@ function drawTurn12TurnEndSettledMenu(fb: Uint8Array, t: number, bounceRawTick: 
  * kickoff text in place of BIND's).
  */
 function drawTurn12RockSlideWindow(fb: Uint8Array, t: number): void {
-  const pressTick = TURN12_ROCKSLIDE_PRESS_TICK;
+  const pressTick = TURN12_OFF_ROCKSLIDE_PRESS_TICK;
   const redrawTick = pressTick + TURN12_ROCKSLIDE_MENU_REDRAW_DELAY;
   if (t >= redrawTick) {
-    drawTurn12TurnEndSettledMenu(fb, t);
+    drawTurn12TurnEndSettledMenu(fb, t, t, pressTick);
     return;
   }
   const frozenBounceTick = turn12KickoffBounceTick(t, pressTick);

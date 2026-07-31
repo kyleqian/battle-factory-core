@@ -1,5 +1,5 @@
 /**
- * Presentation-seam prep-scout, `turn11-featherdance.json` (docs/
+ * Presentation-seam prep-scout, `turn11-featherdance-off.json` (docs/
  * presentation-seam-scout.md §14). Stages a real hit chain through the
  * registered kernel opcodes and reads this window's own content from the
  * result via `presentationEventWindowBridge.ts`'s already-existing

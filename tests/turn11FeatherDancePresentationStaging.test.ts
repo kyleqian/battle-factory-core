@@ -8,8 +8,9 @@ import {
 } from "../src/engine/turn11FeatherDancePresentationStaging.ts";
 
 /**
- * Presentation-seam prep-scout, `turn11-featherdance.json`'s own genuinely
- * new content (`docs/presentation-seam-scout.md` §14.2): pins the real
+ * Presentation-seam prep-scout, `turn11-featherdance-off.json`'s own
+ * genuinely new content (`docs/presentation-seam-scout.md` §14.2): pins the
+ * real
  * kernel event inventory a staged PIDGEOTTO FEATHER_DANCE opponent-target
  * chain produces for turn 11's own REPEAT use against Onix's ALREADY-
  * FLOORED ATK stage (0 -> 0), using the real RNG seed `docs/turn11-notes.md`
