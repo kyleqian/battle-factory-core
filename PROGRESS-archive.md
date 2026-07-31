@@ -1,3 +1,39 @@
+## 774 — [SUPERVISOR FINAL WIND-DOWN 2026-07-31 ~04:35] Round 11 verified: #39 rank 2 FULLY retired; MAGNETON tint rule SOLVED (gEnemyMonElevation). Session closed: 11 rounds / 22 workers / 0 failed steps
+
+- **State:** master green at FINAL gate **559 files / 5688 tests + 1
+  deliberate animation-lane skip**, production build clean, tree clean.
+  `animation-main` fold delta **0** (orient and wind-down). Only the
+  permanent `.worktrees/animation-main` remains; no orphan branches.
+  **DEFERRED.md empty all session** — no open deferred questions.
+- **Round 11 (verified):** M11 flipped the rank-2 Murkrow switch-in half
+  (supervisor re-ran `turn13-switchin` **242/242** and
+  `turn13-dragonbreath-faint` **141/141**; real
+  `openpartyscreen`/`switchindataupdate` opcodes materialize MURKROW from
+  DESTIN's probed bench through the 0-draw proven replacement) — **#39
+  rank 2 is fully retired**, issue + inventory updated. S11 solved the
+  MAGNETON materialize-tint rule with 4 species + source confirmation:
+  `origin.y = 8 + yOffset − gEnemyMonElevation[species]`, where
+  `gEnemyMonElevation` (`battle_anim_mons.c`) is a never-extracted
+  per-species elevation table — #56 item 3 is now a bounded
+  extract-and-apply step (probe fixtures committed).
+- **Session totals (2026-07-30 22:10 → 07-31 04:35):** GATE 5 TICKED
+  with its audited evidence chain (entry 772 has the full summary);
+  #39 ranks 1 and 2 retired end-to-end via the equivalence-first
+  two-phase pattern; #55/#56 filed with precise remainders; one
+  worker-committed pin regression caught, quarantined, root-caused by
+  discriminating probe, and properly un-quarantined; suite grew
+  5586 → 5688 tests across 30+ commits.
+- **Next session (ordered, per user's Gate 5 → #39 → Gate 6):**
+  (i) #39 rank 3 (Turn-5 KO → switch-in → Sitrus) equivalence-first;
+  (ii) #56: extract `gEnemyMonElevation` + apply the solved formula
+  (expect MAGNETON ≫424/751, then rule on the elevated-shadow branch),
+  frames 444/536, canonical +6 route term; (iii) ranks 4-9; (iv) Gate 6
+  breadth.
+- **Notes:** papercuts banked in PAPERCUTS.md; ledger-collision
+  numbering instruction now proven in two consecutive briefs; no
+  harness asks outstanding.
+
+---
 ## 773 — [BOUNDED MAIN WORKER 2026-07-31 ~04:20] #39 rank-2 switch-in half RETIRED: stagePlayerHitChain terminal exposure + Murkrow switch-in flip
 
 - **State:** all mandated pins hold: `turn13-switchin.json` **242/242**
