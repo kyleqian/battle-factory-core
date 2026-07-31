@@ -176,3 +176,9 @@ direct transcription of `affineEmergeAccumulator`, `MATERIALIZE_Y2_TABLE`,
 and `drawSpriteSheetAffineTintedBlend`'s sampler, parameterized over
 `oy`, re-derivable from the citations above in a few minutes if needed
 again.
+
+---
+**STATUS (2026-07-31, `7cfef2d7`):** APPLIED. The elevation table is
+extracted (`src/data/gen/enemy-mon-elevations.json`) and the rule is live
+at all three settled-opponent draw sites; MAGNETON 424→703/751, shadow
+branch verified. This doc remains as the derivation evidence.

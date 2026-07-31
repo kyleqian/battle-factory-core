@@ -100,7 +100,17 @@ trace. “Kernel” names the producer, not a renderer inference.
 
 ## Blocked work
 
-- **Generic item and end-turn controller projection:** required before the
+- **[CORRECTED 2026-07-31, rank-3 equivalence slice]** ~~Generic item and
+  end-turn controller projection~~ — the item-result text path is NOT
+  missing: `resolveBattleStringLines` is already fully generic
+  (365-entry table); only two placeholder resolvers
+  (`B_SCR_ACTIVE_NAME_WITH_PREFIX`, `B_LAST_ITEM`) need supplying at the
+  call site, and the Sitrus heal facts flow from the already-ported
+  `HOLD_EFFECT_RESTORE_HP` end-turn orchestration
+  (`turn5ResolutionAdapterPreview.ts` proves both). What remains for the
+  rank-3 flip is the presentation-TIMING projection
+  (`TURN5_PRESENTATION_TIMING_NOT_STAGED`), not the text/content.
+  Original note: **Generic item and end-turn controller projection:** required before the
   Turn-5 Sitrus family and several repeated-loop tails can leave their
   canonical clocks. The kernel has HP/item facts, but no source-derived
   presentation segment that binds an item activation/result message to one

@@ -16,6 +16,21 @@ one without a user decision, and do not count them as backlog.
 
 # Open
 
+## #57 — `stagePlayerHitChainToTerminalMachineState` drops caller-supplied maxHP/item
+
+**Symptom:** the shared staging helper's local `battler()` hardcodes
+`item: 0` and never sets `maxHP`, so a caller-supplied attacker
+maxHP/item silently collapses (maxHP → current HP) downstream. Found by
+the rank-3 equivalence slice (2026-07-31), which needed Onix's real
+1/31 maxHP for the Sitrus heal and worked around it with a local staging
+pipeline (`turn5ResolutionAdapterPreview.ts`, matching
+`turn5FaintPresentationStaging.ts`'s idiom). Rank 2 never hit it (never
+reads the attacker's own maxHP/item back).
+
+**Fix shape:** thread the optional fields through the shared helper's
+battler construction (additive; existing callers pass neither), then
+retire the rank-3 file's local workaround. Small, test-pinnable.
+
 ## #56 — Arbitrary-trainer intro: residuals, ONIX ready-lag regression, MAGNETON shadow coverage
 
 **Symptom:** the public dense arbitrary-trainer intro comparison
@@ -37,22 +52,17 @@ characterized in `docs/trainer-pic-off-window-scout.md` §D. Remainder:
 2. **Isolated frames 444 and 536** (trainer-exit/shadow region;
    opponent healthbox/summary region) — single-frame, unisolated to a site,
    unchanged this round.
-3. **MAGNETON tint — rule SOLVED, fix is a bounded extraction step.**
-   Four species (MAGNETON/COMBUSKEN/DUNSPARCE/GOLBAT,
-   `docs/opponent-release-tint-third-species.md`) pin the materialize
-   origin as `origin.y = 8 + coords.yOffset − gEnemyMonElevation[species]`
-   — `gEnemyMonElevation` (`battle_anim_mons.c`) is a real per-species
-   floating/flying elevation table never extracted into `src/data/gen/`
-   (MAGNETON's earlier "exclude yOffset" fit was coincidence: its
-   yOffset and elevation are both 8; DUNSPARCE falsified the
-   height-keyed hypothesis; GOLBAT favors elevation-adjusted 10-13×).
-   Next step: extract the table (isolated extractor test), apply the
-   formula in `drawGeneratedOpponentRelease`, re-run MAGNETON
-   (expect large jump from 424/751) and then rule on the elevated-shadow
-   branch (onset app-relative 509) that the tint currently masks.
-   COMBUSKEN/YOSHI 699/751 must hold (its elevation is 0). Reusable
-   probe fixtures committed: `factory-tintprobe-dunsparce-off.json`,
-   `factory-tintprobe-golbat-off.json`.
+3. **RESOLVED (2026-07-31, `7cfef2d7`).** `gEnemyMonElevation` extracted
+   (61 species sparse, absent = 0, isolated extractor test) and the
+   solved rule `origin.y = 8 + yOffset − elevation` applied at all three
+   settled-opponent draw sites (release, player-release view, command
+   view); the elevated shadow now persists into the command phase
+   (previously intro-only — MAGNETON's shadow was missing entirely at
+   the menu). **MAGNETON 424 → 703/751; shadow branch verified**; YOSHI
+   699/751, 715/715, 128/128 all held. Remaining MAGNETON tail (~48
+   frames) is a pre-existing species-independent periodic idle-menu
+   bounce family also present inside YOSHI's accepted tail — folded into
+   item 2's isolated-residual class (444/536 + idle-bounce family).
 
 **Not blocking:** Gate 5 ticked with these named (ROADMAP S10 gate 5
 completion note); this is the worklist to finish the window honestly.

@@ -1,3 +1,48 @@
+## 773 — [BOUNDED MAIN WORKER 2026-07-31 ~04:20] #39 rank-2 switch-in half RETIRED: stagePlayerHitChain terminal exposure + Murkrow switch-in flip
+
+- **State:** all mandated pins hold: `turn13-switchin.json` **242/242**
+  (hard), `turn13-dragonbreath-faint.json` **141/141**,
+  `battle1-turn13-dense-a.json` **205/256** (pre-existing #23-parked
+  exclusion, A/B baseline) / `-b.json` **223/223**,
+  `turn13-sandattack.json` **190/190**, `interactive-generated-intro-off`
+  **715/715**; rank-1 pins unaffected (`battle2-turn1-rockslide.json`
+  191/191, `battle2-action-menu-dense.json` 209/209). `npx tsc --noEmit`
+  clean; focused suite 443/443 green; ratchet unchanged (no new barriers).
+  Full `npm test`/`npm run build` not run this step (side worker live
+  concurrently, per brief).
+- **Did:** (1) Exposed `stagePlayerHitChain`'s terminal
+  `BattleScriptMachineState` additively
+  (`stagePlayerHitChainToTerminalMachineState`,
+  `turn1RockSlidePresentationStaging.ts`) plus two new optional inputs
+  (`party`, `battleTopology`) — every pre-existing caller unaffected (same
+  computation, empirically confirmed via unchanged pinned test outputs).
+  (2) `turn13DragonBreathPresentationStaging.ts` DRY'd its staged input
+  and added `stageTurn13DragonBreathHitChainToTerminalMachineState`,
+  carrying DESTIN's real bench (`docs/onix-readylag-destin-bench-
+  probes.md` Probe 2, `docs/battle-turn-notes.md` HEADLINE 3 for MURKROW's
+  full stat block) and `BATTLE_TYPE_FACTORY`. (3)
+  `turn13ResolutionAdapter.ts`'s new `resolveTurn13SwitchInAdapter` chains
+  that terminal state through `runBattleScriptFaintedActionsOrchestration`
+  — the real `openpartyscreen` opcode picks MURKROW via
+  `getMostSuitableMonToSwitchInto` (already proven in
+  `tests/destinCanonicalReplacements.test.ts`) and `switchindataupdate`
+  rebuilds the incoming battler's real species/level/HP; result "resumed"
+  (not terminal), MURKROW/slot 1/Lv50/142/142. (4) Flipped
+  `battleScene.ts`'s `MURKROW_LEVEL`, `murkrowHealthboxContent`'s name/
+  level/hpFraction, and `TURN13_SWITCHIN_SENTOUT_LINE2` onto this adapter
+  (same promotion discipline as the two prior flips); left
+  `murkrowHealthboxContentForHp`'s own per-tick HP-fraction literal (142,
+  turns 14-16's ongoing tracking) alone — out of scope.
+- **Next:** #39 rank 3 (Turn-5 KO → Pidgeotto switch-in → Sitrus) via the
+  same proven equivalence-first two-phase pattern; the turn-14 dispatcher/
+  slot-2 PP mirroring (`TURN13_TURN14_HANDOFF_NOT_STAGED`) stays a later
+  step's own flip.
+- **Notes:** ISSUES.md #39 rank-2 row can now read fully retired (both
+  halves); `docs/battle-scene-retirement-inventory.md` rank-2 row's
+  "Switch-in half still keyed" caveat is stale and should be dropped in
+  the same trim. No papercuts this step.
+
+---
 ## 772 — [SUPERVISOR WIND-DOWN 2026-07-31 ~04:00] GATE 5 TICKED + #39 ranks 1+2(faint half) retired: 10 rounds / 20 workers / 0 failed steps
 
 - **State:** master green at final gate **559 files / 5683 tests + 1
