@@ -232,3 +232,70 @@ this doc, `tools/probe/dump-issue56-frames-444-536-oam.py`,
 `tools/probe/analyze-issue56-frames-444-536-app-series.ts`. Scratch RAM
 dump (`/tmp/issue56-oam-yoshi.json`) and pixel captures (`/tmp/issue56-frames-probe/`)
 are not committed, reproducible from the command lines above.
+
+## Round 2 (2026-07-31, main lane): Part A investigated - RAM/pixel-verified sub-fix found, but a new MAGNETON regression blocks landing it
+
+### Part A — the described fix, RAM/pixel-verified for its own targeted 4 pixels, but NOT landed
+
+Applied exactly the described fix (remove the `generated-initial-release &&
+rawElapsed === 31` special case in `opponentSummaryExitElapsed`) and
+re-derived its original fitted window first, per this round's brief:
+`git log -S opponentSummaryExitElapsed` finds exactly one commit,
+`0c4dab29` ("fix: advance generated intro summary tail"), whose own
+PROGRESS entry (#743) says it was fitted to **frame 1492** of the
+*canonical-anchor* fixture `interactive-generated-intro-off` (711/715 →
+712/715). That fixture is already in this round's required acceptance set,
+so re-running it directly re-exercises the special case's original window.
+
+**Confirmed exact for its own targeted pixels.** With the special case
+removed, YOSHI's frame 444 px(158-161,40) — the 4 pixels
+`docs/issue56-residual-probe.md` Q1 originally sampled and this doc's own
+RAM probe targeted — flip to byte-exact matches with the oracle (verified
+directly, not just via the aggregate count). Frame 444's total diff drops
+219px → 207px, same bbox (0,40-196,85).
+
+**But the frame does not flip to a full match.** The remaining 207px sit at
+x=163-196 (plus 6 stray px at x=0-2), a region `docs/issue56-residual-probe.md`
+Q1 *separately* characterized as the opponent's own affine-emerge
+materialize sprite showing "a small, single-tick horizontal-position/
+sub-step misalignment" — a **second, distinct, previously-flagged-but-
+never-RAM-diagnosed defect** at the same frame, never in scope of "the
+described fix" (which only ever targeted the status-bar/icon widget, per
+this doc's own Frame 444 section above). Closing it needs its own RAM
+probe of the opponent's materialize sprite's OAM affine params at this
+exact tick — out of this round's budget.
+
+**Removing the special case outright regresses two currently-passing
+fixtures**, confirming the brief's own warning: `interactive-generated-
+intro-off` 715/715 → 714/715 (frame 1492, exactly its original fitted
+window) and, newly discovered, `factory-arbitrary-intro-magneton-off`
+703/751 → 702/751 (frame 437 — MAGNETON's own analogue of YOSHI's frame
+444, at the same `rawElapsed=31` tick).
+
+**Narrowing via `isCanonicalAnchorIntro` (the existing route discriminator
+`generatedPlayerReadyLag` already uses for exactly this canonical-anchor-
+vs-generated split) restores `interactive-generated-intro-off` to
+715/715 — but MAGNETON's frame 437 still regresses (702/751).** MAGNETON is
+not the canonical-anchor route, so it gets the same (RAM-confirmed-for-
+YOSHI) stall formula as YOSHI — and MAGNETON's own oracle pixels want the
+**opposite** behavior at that tick: `pre-fix diff count at 437: 0`
+(pixel-exact under the OLD unconditioned special case), broken by the
+narrowed fix (10px diff, same shifted-pink-block shape as YOSHI's own
+frame 444 evidence, but in the opposite direction — app's block ends up
+2px right of where oracle wants it, the mirror of YOSHI's 2px-left error).
+
+**Verdict: NOT landed, reverted to the original unmodified special case.**
+`isCanonicalAnchorIntro` is not the right discriminator — it fixes the
+canonical-anchor window but the special case's true condition depends on
+something that differs between COMBUSKEN (YOSHI, wants no special case)
+and MAGNETON (wants the special case) at this same `rawElapsed=31` tick,
+not just canonical-vs-generated. This needs a **second RAM probe, this
+round scoped to MAGNETON's own `gSprites[6]` around its own frame 437**
+(the same technique this doc's Frame 444 section already used for YOSHI) to
+find the real per-fixture/species discriminator — not attempted this round
+(would have consumed the budget needed for Part B, which resolved cleanly).
+`src/engine/battleScene.ts`'s `opponentSummaryExitElapsed`/
+`drawOpponentSummaryExit` are unchanged from before this round; frame 444
+remains an open, two-defect residual (status-bar widget sub-fix pinned
+here but not shipped, pending the discriminator fix; materialize column
+shift undiagnosed).
