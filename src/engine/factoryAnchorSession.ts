@@ -43,11 +43,15 @@ export const ANCHOR_BATTLE_1_CONSTRUCTION_RNG_VALUES = Object.freeze(
 );
 export const ANCHOR_BATTLE_1_HANDOFF_RNG_VALUE = 2_288_692_129;
 /**
- * The Battle Scene OFF anchor's live gRngValue advances 33 times between the
- * room handoff cursor and BattleStartClearSetData. This is semantic RAM state,
- * not presentation timing.
+ * Battle Scene OFF RAM at the generated-route battle handoff (frame 1062 of
+ * interactive-haunter-shadow-punch-off.json). From this cursor the ROM makes
+ * 27 ordinary pre-command draws before BattleStartClearSetData's Random()
+ * (`battle_main.c:3140`), then TryDoEventsBeforeFirstTurn makes the turn-one
+ * draw (`battle_main.c:3923`). This is semantic RAM state, not presentation
+ * timing; the app's approximate overworld VBlank cursor is not a substitute.
  */
-export const ANCHOR_BATTLE_1_PRE_COMMAND_RNG_CALLS = 33;
+export const ANCHOR_BATTLE_1_BATTLE_INIT_RNG_VALUE = 4_087_349_631;
+export const ANCHOR_BATTLE_1_PRE_COMMAND_RNG_CALLS = 27;
 export const ANCHOR_BATTLE_1_PERSONALITIES = Object.freeze(
   [1_094_072_807, 3_475_344_024, 3_971_699_699] as const,
 );

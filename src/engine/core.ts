@@ -272,6 +272,7 @@ import {
   type FactoryRoundBattleOrchestratorState,
 } from "./factoryRoundBattleOrchestrator.ts";
 import {
+  ANCHOR_BATTLE_1_BATTLE_INIT_RNG_VALUE,
   createFactoryAnchorSession,
 } from "./factoryAnchorSession.ts";
 import { CANONICAL_DESTIN_PRESENTATION } from "./factoryTrainerPresentation.ts";
@@ -1604,7 +1605,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
                   battle1OpponentConstructionRngValues as unknown as readonly [
                     number, number, number,
                   ],
-                freshBattleRngValue: rngValue,
+                freshBattleRngValue: ANCHOR_BATTLE_1_BATTLE_INIT_RNG_VALUE,
               }),
             ),
             battle1OpponentConstructionRngValues,

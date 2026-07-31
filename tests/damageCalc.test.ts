@@ -51,6 +51,15 @@ const GROVYLE = {
   types: typesOf("SPECIES_GROVYLE"),
   statStages: { ...NEUTRAL_STAT_STAGES },
 };
+const HAUNTER = {
+  attack: 88,
+  defense: 51,
+  spAttack: 126,
+  spDefense: 76,
+  level: 50,
+  types: typesOf("SPECIES_HAUNTER"),
+  statStages: { ...NEUTRAL_STAT_STAGES },
+};
 const MURKROW = {
   attack: 91,
   defense: 69,
@@ -168,6 +177,43 @@ describe("calculateBaseDamage - RAM-pinned regression cases (turn-resolution-not
       expect(applyRandomDamageMultiplier(4, rand16)).toBe(3);
     }
     expect(applyRandomDamageMultiplier(4, 0)).toBe(4);
+  });
+
+  it("Fury Cutter into exact HAUNTER reproduces the source 10 -> 5 -> 2 -> 1 chain without over-clamping neutral damage", () => {
+    // CalculateBaseDamage (pokemon.c:3106-3371):
+    // trunc(trunc(trunc(103 * 10 * 22 / 51) / 50)) + 2 = 10.
+    const base = calculateBaseDamage({
+      attacker: GROVYLE,
+      defender: HAUNTER,
+      movePower: 10,
+      moveType: "TYPE_BUG",
+      isCriticalHit: false,
+    });
+    expect(base).toBe(10);
+
+    // Cmd_typecalc / ModulateDmgByType2 (battle_script_commands.c):
+    // BUG->GHOST floors 10*5/10 to 5, then BUG->POISON floors 5*5/10 to 2.
+    // Each nonzero type multiplier has the source's minimum-1 guard.
+    expect(
+      applyTypeEffectiveness(base, "TYPE_BUG", HAUNTER.types, TYPE_TABLE),
+    ).toEqual({ damage: 2, multiplierTenths: 2 });
+
+    // Cmd_adjustnormaldamage's source RNG draw is 50015 (`% 16 === 15`,
+    // 85%), which floors 2 to 1. Only the 100% endpoint could retain 2;
+    // this exact draw rules the random-band mismatch out for the anchor.
+    expect(applyRandomDamageMultiplier(2, 50_015)).toBe(1);
+
+    // Neutral effectiveness must preserve the ordinary value; the minimum
+    // guard is not a blanket clamp of every hit to one.
+    expect(
+      applyTypeEffectiveness(
+        base,
+        "TYPE_BUG",
+        ["TYPE_WATER", "TYPE_WATER"],
+        TYPE_TABLE,
+      ),
+    ).toEqual({ damage: 10, multiplierTenths: 10 });
+    expect(applyRandomDamageMultiplier(10, 50_015)).toBe(8);
   });
 });
 

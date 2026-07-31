@@ -8,6 +8,7 @@ import {
   type EngineState,
 } from "../src/engine/core.ts";
 import {
+  ANCHOR_BATTLE_1_BATTLE_INIT_RNG_VALUE,
   ANCHOR_BATTLE_1_CONSTRUCTION_RNG_VALUES,
   ANCHOR_BATTLE_1_HANDOFF_RNG_VALUE,
   ANCHOR_BATTLE_1_PERSONALITIES,
@@ -307,6 +308,43 @@ describe("interactive battle routing", () => {
     ).toEqual([10, 20, 19, 10]);
   });
 
+  it("runs the exact HAUNTER anchor turn through source-selected FURY CUTTER for one damage", () => {
+    const trace = JSON.parse(readFileSync(
+      new URL(
+        "../tools/compare/traces/interactive-haunter-shadow-punch-off.json",
+        import.meta.url,
+      ),
+      "utf8",
+    )) as {
+      segments: readonly { frames: number; buttons?: readonly string[] }[];
+    };
+    let state = createInitialState({ appRoute: "generated-orchestrator" });
+    for (const segment of trace.segments) {
+      for (let frame = 0; frame < segment.frames; frame += 1) {
+        state = tick(
+          state,
+          new Set(segment.buttons ?? []) as ReadonlySet<
+            Parameters<typeof tick>[1] extends ReadonlySet<infer Button> ? Button : never
+          >,
+        );
+      }
+    }
+
+    const rules =
+      state.factoryRoundBattleOrchestrator!.battle!.rules.rulesContext;
+    expect(rules.battlers.slice(0, 2).map(({ species, hp, maxHP }) => ({
+      species,
+      hp,
+      maxHP,
+    }))).toEqual([
+      { species: 93, hp: 137, maxHP: 138 },
+      { species: 278, hp: 89, maxHP: 143 },
+    ]);
+    expect(rules.battlers[0].pp).toEqual([19, 10, 10, 5]);
+    expect(rules.battlers[1].pp).toEqual([19, 5, 15, 15]);
+    expect(rules.battlers[1].furyCutterCounter).toBe(1);
+  });
+
   it("installs only the source-pinned generated owner with HAUNTER first", () => {
     const before = atBattleHandoff(
       { appRoute: "generated-orchestrator" },
@@ -388,7 +426,7 @@ describe("interactive battle routing", () => {
     expect(orchestrator.round.rules.currentOpponent.rentalRecords)
       .toEqual(orchestrator.opponentGenerations[0]!.opponents);
     expect(orchestrator.round.rules.rngValue).toBe(
-      ANCHOR_BATTLE_1_HANDOFF_RNG_VALUE,
+      ANCHOR_BATTLE_1_BATTLE_INIT_RNG_VALUE,
     );
     expect(orchestrator.rngSegments.map(
       ({ kind, rngBefore, rngAfter, callEnd, callStart }) =>
