@@ -929,6 +929,9 @@ weighting + named-barrier cross-reference). Clarified standing scope:
   branch is expected to close as a source-faithful proof of its no-op shape
   rather than deep behavior.)
 - **Doubles and the Open-level rule set remain OUT of scope.**
+- **The browser Battle Scene ON/OFF selector is OUT of scope** (user
+  decision, 2026-07-30). The playable browser path stays Battle Scene OFF;
+  Scene ON is proven by the animation lane, not exposed as a player toggle.
 - **Noland / Frontier Brain battles are OUT of scope for now** (Gate 2's
   explicit schema rejection stands; not a blocker for Gates 3–6).
 - **Audio is its own later milestone — S11**; no S10 gate includes it.

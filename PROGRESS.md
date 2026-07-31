@@ -32,11 +32,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   remains is **wiring, not a decision**: pre-checkpoint frames use a separate
   absolute coordinate space, so map the scout's P..B+714 window onto it and
   confirm coverage by probe.
-- **Still open for the user:** (a) the browser Battle Scene ON/OFF selector
-  (design §6.4) — supervisor recommendation is **no for now**, not yet
-  decided; (b) the attendant-commentary checkpoint needs a *specific* party,
-  but `preview_report` picks a seed, not an opponent — seed search or a
-  harness ask.
+- **Second user decision — browser Battle Scene ON/OFF selector: SKIP
+  (2026-07-30).** Recorded as out of scope in ROADMAP S10 and closed in
+  design §6.4. The browser stays Battle Scene OFF; Scene ON remains the
+  animation lane's proof, not a player toggle. Closed, not parked — do not
+  re-litigate.
+- **Only remainder for the user:** the attendant-commentary checkpoint needs
+  a *specific* party, but `preview_report` picks a seed, not an opponent —
+  seed search or a harness ask. Small, and not blocking Gate 5.
 - **Notes:** ISSUES.md now separates **Open** (#39 only) from **Settled
   records** (#38/#18/#5). The settled entries stay because ROADMAP acceptance
   lines cite them by number as the reason specific pixel diffs are accepted;

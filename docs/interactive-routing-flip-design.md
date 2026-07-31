@@ -677,8 +677,15 @@ changing any immutable capture list.
    already-recorded 10px summary-slot ordering residual. This design preserves
    and reports it. Fix-versus-attribute remains its separately scheduled
    evidence decision; routing work must not fit or remove the frame.
-4. **Browser scene-setting policy.** There is no interactive scene-mode
-   selector in this route contract. MAIN accepts the generated browser path
-   against Battle Scene OFF. If the product later exposes the ROM's Battle
-   Scene ON/OFF option, it needs a separate user decision and presentation
-   adapter; it must reuse the same generated logical state.
+4. **Browser scene-setting policy — DECIDED 2026-07-30 (user): skip it.**
+   There is no interactive scene-mode selector, and none is planned. MAIN
+   accepts the generated browser path against Battle Scene OFF; the animation
+   program continues to prove Scene ON separately under its own lane. The
+   selector's value is authenticity rather than capability, and it would
+   roughly double the pixel surface that must stay exact — it lost to
+   remaining breadth work (Gate 5, then #39, then Gate 6).
+
+   This is a closed question, not a parked one: do not re-litigate it in a
+   session. If the user reopens it, the constraint still holds — a selector
+   needs its own presentation adapter and must reuse the same generated
+   logical state, never a second copy of battle logic.
