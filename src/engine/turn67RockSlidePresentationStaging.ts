@@ -1,10 +1,15 @@
 /**
- * ISSUES #39 rank-4 groundwork (`docs/rank4-prep-scout.md` slice 1 + slice
- * 4): the turn-6 and turn-7 ROCK_SLIDE tails (Onix -> Pidgeotto, both hit),
- * the SAME shape rank 1 already retired three times over
+ * ISSUES #39 rank-4 slice 1 (`docs/rank4-prep-scout.md` slice 1 + slice 4):
+ * the turn-6 and turn-7 ROCK_SLIDE tails (Onix -> Pidgeotto, both hit), the
+ * SAME shape rank 1 already retired three times over
  * (`turn1/3/4RockSlidePresentationStaging.ts`) and rank 3 a fourth
- * (`turn5ResolutionAdapter.ts`), now proved for turns 6/7. Preview only --
- * NOT wired into `battleScene.ts`, no production file touched this session.
+ * (`turn5ResolutionAdapter.ts`), now proved and wired for turns 6/7.
+ * Promoted from `turn67RockSlidePresentationStagingPreview.ts`/
+ * `...PreviewEquivalence.test.ts` (`1c015a37`, rank-1/rank-2/rank-3's own
+ * promotion pattern) -- see this module's own git history for that
+ * groundwork precedent. `battleScene.ts`'s turn-6/7 ROCK_SLIDE HP endpoints
+ * and attack-kickoff text now source from this module's own
+ * `resolveTurn6/7RockSlideHpEndpoints`/`resolveTurn6/7RockSlideAttackLines`.
  *
  * Ground truth, not fabricated: `docs/turn6-notes.md` §3/§4 and
  * `docs/turn7-notes.md` §3/§4 (both already-committed RAM+pixel dossiers,
@@ -110,7 +115,7 @@ import speciesNamesAsset from "../data/gen/species-names.json" with { type: "jso
 const SPECIES_NAMES = speciesNamesAsset.species as readonly { species: string; name: string }[];
 function speciesDisplayName(speciesId: number): string {
   const entry = SPECIES_NAMES[speciesId];
-  if (!entry) throw new Error(`turn67RockSlidePresentationStagingPreview: no species-names.json entry at index ${speciesId}`);
+  if (!entry) throw new Error(`turn67RockSlidePresentationStaging: no species-names.json entry at index ${speciesId}`);
   return entry.name;
 }
 
@@ -271,20 +276,20 @@ function stageRockSlideTail(input: Readonly<{
     if (stepped.kind === "blocked") {
       const acknowledged = acknowledgePendingControllers(state);
       if (acknowledged === state) {
-        throw new Error("turn67RockSlidePresentationStagingPreview: Battle Script blocked without a safe controller acknowledgement");
+        throw new Error("turn67RockSlidePresentationStaging: Battle Script blocked without a safe controller acknowledgement");
       }
       state = acknowledged;
       continue;
     }
     if (stepped.kind !== "advanced" && stepped.kind !== "scheduler-progressed") {
       throw new Error(
-        `turn67RockSlidePresentationStagingPreview: staged ROCK_SLIDE hit chain stopped unexpectedly (${stepped.kind}) `
+        `turn67RockSlidePresentationStaging: staged ROCK_SLIDE hit chain stopped unexpectedly (${stepped.kind}) `
           + "before its own script completed",
       );
     }
     state = stepped.state;
   }
-  throw new Error("turn67RockSlidePresentationStagingPreview: staged hit chain did not reach its own script end in budget");
+  throw new Error("turn67RockSlidePresentationStaging: staged hit chain did not reach its own script end in budget");
 }
 
 function acknowledgePendingControllers(
@@ -344,7 +349,7 @@ export function resolveTurn6RockSlideWindowContent(): RockSlidePresentationWindo
   const { events } = stageTurn6RockSlideHitChain();
   const content = resolveRockSlidePresentationWindowContent(events);
   if (!content) {
-    throw new Error("turn67RockSlidePresentationStagingPreview: turn 6 staged hit chain did not produce the ROCK_SLIDE window's own event pair");
+    throw new Error("turn67RockSlidePresentationStaging: turn 6 staged hit chain did not produce the ROCK_SLIDE window's own event pair");
   }
   return content;
 }
@@ -354,7 +359,7 @@ export function resolveTurn7RockSlideWindowContent(): RockSlidePresentationWindo
   const { events } = stageTurn7RockSlideHitChain();
   const content = resolveRockSlidePresentationWindowContent(events);
   if (!content) {
-    throw new Error("turn67RockSlidePresentationStagingPreview: turn 7 staged hit chain did not produce the ROCK_SLIDE window's own event pair");
+    throw new Error("turn67RockSlidePresentationStaging: turn 7 staged hit chain did not produce the ROCK_SLIDE window's own event pair");
   }
   return content;
 }

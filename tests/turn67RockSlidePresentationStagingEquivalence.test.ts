@@ -8,26 +8,33 @@ import {
   resolveTurn7RockSlideWindowContent,
   stageTurn6RockSlideHitChain,
   stageTurn7RockSlideHitChain,
-} from "../src/engine/turn67RockSlidePresentationStagingPreview.ts";
+} from "../src/engine/turn67RockSlidePresentationStaging.ts";
 import { ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2 } from "../src/engine/battleMenu.ts";
 
 /**
- * ISSUES #39 rank-4 groundwork (`docs/rank4-prep-scout.md` slice 1 + slice
- * 4): equivalence-proof-FIRST pin, NOT a flip -- `battleScene.ts` is
- * untouched, still rendering its own hand literals for the turn-6/7
- * ROCK_SLIDE windows. `TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP`/
- * `TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP` are unexported `const`s
- * (`battleScene.ts:11022`/`:11268`), so those two are pinned with a line
- * citation rather than imported, the same convention rank 3's own preview
- * equivalence test (`turn5ResolutionAdapterPreviewEquivalence.test.ts`,
- * `2fa31c96`) used for `PIDGEOTTO_LEVEL`/`PIDGEOTTO_MAX_HP`.
- * `ROCK_SLIDE_LINE1`/`LINE2` ARE exported from `battleMenu.ts`
- * (`battle2CommandAdapterEquivalence.test.ts` already imports them the same
- * way), so those are imported and compared directly.
+ * ISSUES #39 rank-4 slice 1 (`docs/rank4-prep-scout.md` slice 1 + slice 4):
+ * promoted from the equivalence-proof-first preview
+ * (`turn67RockSlidePresentationStagingPreviewEquivalence.test.ts`,
+ * `1c015a37`) now that `battleScene.ts` sources its turn-6/7 ROCK_SLIDE HP
+ * endpoints and attack-kickoff text from this module
+ * (`TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP`/`TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP`,
+ * `battleScene.ts:11038`/`:11302`, both now `resolveTurn6/7RockSlideHpEndpoints().to`
+ * calls rather than bare literals) -- this is the live production path's own
+ * regression pin, not a standalone proof. Those two HP constants are still
+ * unexported `const`s, so they are pinned with a line citation rather than
+ * imported, the same convention rank 3's own preview equivalence test
+ * (`turn5ResolutionAdapterPreviewEquivalence.test.ts`, `2fa31c96`) used for
+ * `PIDGEOTTO_LEVEL`/`PIDGEOTTO_MAX_HP`. `ROCK_SLIDE_LINE1`/`LINE2` ARE
+ * exported from `battleMenu.ts` (`battle2CommandAdapterEquivalence.test.ts`
+ * already imports them the same way), so those are imported and compared
+ * directly -- `battleScene.ts`'s own turn-6/7 ROCK_SLIDE windows no longer
+ * read them directly (retired to `TURN6/7_ROCKSLIDE_ATTACK_LINE1/2`, this
+ * module's own output), but every OTHER turn's own ROCK_SLIDE window in that
+ * file still does, out of this slice's own scope.
  */
-describe("turn67RockSlidePresentationStagingPreview: #39 rank-4 groundwork (preview, no flip)", () => {
+describe("turn67RockSlidePresentationStaging: #39 rank-4 slice 1 (production path, flipped)", () => {
   describe("turn 6: Onix ROCK_SLIDE -> Pidgeotto, real -2 ATK stage already applied by this turn's own FEATHER_DANCE", () => {
-    it("reaches the script's own terminal end with the real recorded hit -- 156 -> 113 (-43), byte-identical to docs/turn6-notes.md §4 and battleScene.ts's own TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP (11022)", () => {
+    it("reaches the script's own terminal end with the real recorded hit -- 156 -> 113 (-43), byte-identical to docs/turn6-notes.md §4 and battleScene.ts's own TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP (11038)", () => {
       const result = stageTurn6RockSlideHitChain();
       expect(result.targetHpAfter).toBe(113);
     });
@@ -64,7 +71,7 @@ describe("turn67RockSlidePresentationStagingPreview: #39 rank-4 groundwork (prev
       expect(content.hp).toMatchObject({ battler: 1, from: 156, to: 113 });
     });
 
-    it("resolveTurn6RockSlideHpEndpoints exposes the real {from, to} pair replacing TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP's own missing staged proof", () => {
+    it("resolveTurn6RockSlideHpEndpoints exposes the real {from, to} pair that now literally drives TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP's own .to value", () => {
       expect(resolveTurn6RockSlideHpEndpoints()).toEqual({ from: 156, to: 113 });
     });
 
@@ -74,7 +81,7 @@ describe("turn67RockSlidePresentationStagingPreview: #39 rank-4 groundwork (prev
   });
 
   describe("turn 7: repeats turn 6's exact move pair, real cumulative -4 ATK stage, own HP pair", () => {
-    it("reaches the script's own terminal end with the real recorded hit -- 113 -> 82 (-31), byte-identical to docs/turn7-notes.md §4 and battleScene.ts's own TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP (11268)", () => {
+    it("reaches the script's own terminal end with the real recorded hit -- 113 -> 82 (-31), byte-identical to docs/turn7-notes.md §4 and battleScene.ts's own TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP (11302)", () => {
       const result = stageTurn7RockSlideHitChain();
       expect(result.targetHpAfter).toBe(82);
     });
@@ -95,7 +102,7 @@ describe("turn67RockSlidePresentationStagingPreview: #39 rank-4 groundwork (prev
       expect(content.hp).toMatchObject({ battler: 1, from: 113, to: 82 });
     });
 
-    it("resolveTurn7RockSlideHpEndpoints exposes the real {from, to} pair replacing TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP's own missing staged proof", () => {
+    it("resolveTurn7RockSlideHpEndpoints exposes the real {from, to} pair that now literally drives TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP's own .to value", () => {
       expect(resolveTurn7RockSlideHpEndpoints()).toEqual({ from: 113, to: 82 });
     });
 

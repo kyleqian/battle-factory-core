@@ -805,6 +805,12 @@ import { resolveTurn4DoubleTeamKickoffLines } from "./turn4DoubleTeamPresentatio
 import { resolveTurn6AtkFellLines, resolveTurn6FeatherDanceKickoffLines } from "./turn6FeatherDancePresentationStaging.ts";
 import { resolveTurn3RockSlideHpEndpoints } from "./turn3RockSlidePresentationStaging.ts";
 import {
+  resolveTurn6RockSlideAttackLines,
+  resolveTurn6RockSlideHpEndpoints,
+  resolveTurn7RockSlideAttackLines,
+  resolveTurn7RockSlideHpEndpoints,
+} from "./turn67RockSlidePresentationStaging.ts";
+import {
   resolveTurn5EndeavorAttackLines,
   resolveTurn5EndeavorHpEndpoints,
 } from "./turn5EndeavorPresentationStaging.ts";
@@ -11018,8 +11024,29 @@ function drawTurn6FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: 
   }
 }
 
-/** Pidgeotto's own HP after turn 6's ROCK_SLIDE (`docs/turn6-notes.md` §4, RAM-confirmed: 156->113, -43 - matches `gBattleMoveDamage`'s own RAM lock at tick 7790). */
-const TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP = 113;
+/**
+ * ISSUES #39 rank-4 slice 1 (`docs/rank4-prep-scout.md` slice 1): Pidgeotto's
+ * own HP after turn 6's ROCK_SLIDE (`docs/turn6-notes.md` §4, RAM-confirmed:
+ * 156->113, -43 - matches `gBattleMoveDamage`'s own RAM lock at tick 7790),
+ * now re-derived from `turn67RockSlidePresentationStaging.ts`'s own staged
+ * real hit chain (`BattleScript_HitFromAtkCanceler`, Onix's real
+ * already-lowered ATK stage from this turn's own FEATHER_DANCE) via
+ * `presentationEventWindowBridge.ts`'s existing
+ * `resolveRockSlidePresentationWindowContent` - byte-identical to the former
+ * bare literal, but now identified from provenance, not asserted.
+ */
+const TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP = resolveTurn6RockSlideHpEndpoints().to;
+
+/**
+ * Turn 6's own ROCK_SLIDE attack-kickoff text ("ONIX used\nROCK SLIDE!"),
+ * re-derived from the same staged run as the HP endpoint above, replacing
+ * the raw `ROCK_SLIDE_LINE1`/`ROCK_SLIDE_LINE2` literals at this window's own
+ * call site - byte-identical content (same `STRINGID_USEDMOVE` template,
+ * same Onix/ROCK_SLIDE splice). `ROCK_SLIDE_LINE1`/`LINE2` themselves stay
+ * defined and in use by every other turn's own ROCK_SLIDE window in this
+ * file.
+ */
+const [TURN6_ROCKSLIDE_ATTACK_LINE1, TURN6_ROCKSLIDE_ATTACK_LINE2] = resolveTurn6RockSlideAttackLines();
 
 /**
  * S7 slice N-4 rung (b) (docs/battle-turn-notes.md §31): turn 6's own
@@ -11103,7 +11130,7 @@ function drawTurn6RockSlideWindow(fb: Uint8Array, t: number, realPressTick: numb
     if (t >= superEffectiveStart) {
       drawMessageTextLines(fb, TURN6_SUPER_EFFECTIVE_LINE, "", turn6SuperEffectiveTextVisibleChars(t, pressTick));
     } else {
-      drawMessageTextLines(fb, ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2, rockSlideTextVisibleChars(t, pressTick));
+      drawMessageTextLines(fb, TURN6_ROCKSLIDE_ATTACK_LINE1, TURN6_ROCKSLIDE_ATTACK_LINE2, rockSlideTextVisibleChars(t, pressTick));
     }
   }
 }
@@ -11264,8 +11291,18 @@ function drawTurn7FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: 
   }
 }
 
-/** Pidgeotto's own HP after turn 7's ROCK_SLIDE (turn7-notes.md §4, RAM-confirmed: 113->82, -31). */
-const TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP = 82;
+/**
+ * ISSUES #39 rank-4 slice 1: Pidgeotto's own HP after turn 7's ROCK_SLIDE
+ * (`docs/turn7-notes.md` §4, RAM-confirmed: 113->82, -31), now re-derived
+ * from `turn67RockSlidePresentationStaging.ts`'s own staged run (real
+ * cumulative -4 ATK stage from turns 6+7's own FEATHER_DANCE uses) - same
+ * flip as turn 6's own HP endpoint above, re-derived from this turn's own
+ * staged facts, not copied from turn 6's.
+ */
+const TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP = resolveTurn7RockSlideHpEndpoints().to;
+
+/** Turn 7's own ROCK_SLIDE attack-kickoff text, re-derived from turn 7's own staged run - same flip as `TURN6_ROCKSLIDE_ATTACK_LINE1/2` above. */
+const [TURN7_ROCKSLIDE_ATTACK_LINE1, TURN7_ROCKSLIDE_ATTACK_LINE2] = resolveTurn7RockSlideAttackLines();
 
 /**
  * S7 slice O: turn 7's own ROCK_SLIDE (Onix vs. Pidgeotto again) - every
@@ -11336,7 +11373,7 @@ function drawTurn7RockSlideWindow(fb: Uint8Array, t: number): void {
     if (t >= superEffectiveStart) {
       drawMessageTextLines(fb, TURN6_SUPER_EFFECTIVE_LINE, "", turn7SuperEffectiveTextVisibleChars(t, pressTick));
     } else {
-      drawMessageTextLines(fb, ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2, rockSlideTextVisibleChars(t, pressTick));
+      drawMessageTextLines(fb, TURN7_ROCKSLIDE_ATTACK_LINE1, TURN7_ROCKSLIDE_ATTACK_LINE2, rockSlideTextVisibleChars(t, pressTick));
     }
   }
 }
