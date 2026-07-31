@@ -159,17 +159,20 @@ policy ADOPTED (user decision 2026-07-31; evidence
 `docs/rank5-effect-visibility-scout.md`, plan in inventory row 5):
 delete class-(c) move bodies on the OFF route, re-time class-(b)
 choreography against fresh explicit-`oracleProfile` OFF pins, retiring
-the legacy ON-profile turn9-12 pins as rank 5 executes. Execution
-begun 2026-07-31 evening: turn-9 flipped (`8802fcb6` — 256/256 +
-231/231 exact; turn9-quickattack-off 177/233 with all 56 misses the
-pre-existing PRE-move idle-bounce phase residual, ticks 10818-10873,
-git-stash-proven; legacy turn-9 ON pins retired), and ALL nine
-move/result OFF windows are banked (`9544776b`,
-`docs/rank5-off-ground-truth.md`) — remaining: turns 10-12 flips,
-turn9/11/12-menu OFF pins (blocked on the idle-bounce PHASE
-misalignment inherited from upstream turns 1-8; tick/sha data in the
-ground-truth doc), and the phase-attribution probe that closes both
-residual groups. Earlier
+the legacy ON-profile turn9-12 pins as rank 5 executes. **Executed
+2026-07-31 evening — all four move windows flipped** (`8802fcb6` turn
+9, `329f8320` turn 10, `59a3fa7d` turns 11-12): OFF pins
+231+256+206+255+131+83+256+256 all EXACT; residuals 177/233 (turn-9
+pre-move), 189/191, 246/247 all attributed to ONE mechanism —
+idle-bounce PHASE misalignment, fully root-caused in
+`docs/idle-bounce-phase-attribution.md` (app seeds turn-9's bounce
+reset 141 ticks late because upstream `TURN8_MENU_REDRAW_DELAY` is
+still ON-fit 572 vs real OFF ≈434; verdict (b): closes as turns 1-8
+get their own OFF re-timing under ranks 6-8, predicted constant
+banked, not a rank-5 blocker). Eleven legacy ON turn9-12 pins retired
+(turn9-menu.json 111/111 + turn12-menu.json 46/46 remain until the
+phase family closes and their OFF pins can be banked — S9's landmark
+data for them is in `docs/rank5-off-ground-truth.md`). Earlier
 progress:
 `turn13-sandattack.json`'s complete captured
 SAND_ATTACK content now resolves its kickoff and opponent-target accuracy-fall

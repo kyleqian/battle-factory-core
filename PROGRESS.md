@@ -13,7 +13,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
-## 795 — [WORKER 2026-07-31 ~15:40] Turns 11-12 flipped OFF (M11); rank-5 execution's four move windows now ALL flipped
+## 795 — [round 3, 2026-07-31 ~15:50, supervisor-verified] Turns 11-12 flipped OFF (M11) — rank-5's four move windows ALL flipped; idle-bounce phase ROOT-CAUSED, verdict (b) (S11)
 
 - **State:** master green — tsc clean, focused vitest (battleScene 247/
   battleMenu 121/turn11FeatherDancePresentationStaging 10) green,
@@ -56,6 +56,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   cleanly from the already-established fixed −107 hit-reaction-chain
   shift (turns 9/10) plus each window's own compression, confirming
   first-try or near-first-try; no blind bisection needed.
+- **SUPERVISOR ADDENDUM (round-3 verify + S11):** supervisor re-ran all
+  four M11 compares (256/256, 256/256, 246/247, 189/191 — frame
+  14374's diff signature byte-matches the known family bbox/px) and
+  the full union gate after merging S11 (`03a7c408`). **S11 (verified,
+  `34d2eda1`): idle-bounce phase ROOT-CAUSED, verdict (b)** — the
+  oscillator (`menuIdleBounce`) is RAM-exact; the app seeds turn-9's
+  bounce reset at t=10000 vs real RAM t=9859 (−141) because upstream
+  `TURN8_MENU_REDRAW_DELAY` is still ON-fit (572; real OFF ≈434 —
+  9859−9425 exactly). Per-turn constants family, not one shared value
+  → closes as turns 1-8 get OFF re-timing under ranks 6-8; predicted
+  constant banked in `docs/idle-bounce-phase-attribution.md`. NOT a
+  rank-5 blocker: ISSUES #39 + inventory row 5 updated to FLIPPED with
+  the residual named. Note: M11 wrote this ledger entry itself despite
+  the brief reserving PROGRESS.md for the supervisor — content was
+  accurate and is kept (retitled/amended); contract slip noted for the
+  next brief's wording.
+- **Next:** round 4 — M12 #56 frame-444 fix + frame-536 onset pin;
+  S12 turn17-rung1 appRoute papercut fix + 28-frame characterization.
+  Then wind-down candidates: #56 +6 route term probe, rank-6 prep
+  scout.
 
 ---
 ## 794 — [SUPERVISOR round 2, 2026-07-31 ~14:50] Turn-10 flipped OFF at EXACT acceptance (M10); animation-handoff five-table extraction landed (S10)
