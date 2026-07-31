@@ -74,6 +74,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   a `TaskStop` could land (same slip as both round-1 workers per entry
   755's note); read-only, same tree, no side effects, ~0 minutes lost.
 
+---
+## 755 — [SUPERVISOR 2026-07-30 ~22:55] Gate-5 audit merged (6/11 discharged); two scope decisions; round 2 on the three small blockers
+
 - **State:** union gate green **551 files / 5586 tests + 1 deliberate
   animation-lane skip**, build clean. Entry 754's mapping probe
   supervisor-re-verified by an independent enumerated probe (species
