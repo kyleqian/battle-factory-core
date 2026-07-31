@@ -13,6 +13,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 748 — [BOUNDED MAIN WORKER 2026-07-30 ~17:03] Slice 7 COMPLETE at honest HAUNTER checkpoint
+
+- **State:** landed in `15e9ef33` + `9a94caab`; focused routing/ratchet
+  acceptance **2 files / 20 tests**, full gate green at **550 files / 5579
+  tests + 1 deliberate animation-lane skip**, production build clean.
+- **Did:** the explicit-OFF real-anchor trace drafts HAUNTER/ONIX/BAYLEEF,
+  traverses both rooms and generated intro, selects SHADOW PUNCH, and proves
+  release/name, action menu, move menu, and use-message exact **4/4**. The
+  existing different-lead test proves ONIX's species/moves/PP and move-slot-2
+  decision replace HAUNTER without adapter changes; a new automated contract
+  pins normal dev startup and reset to the generated default.
+- **Next:** supervisor decides whether the newly exposed FURY CUTTER response
+  remainder warrants another bounded slice before #53 bookkeeping.
+- **Notes:** **Yes, #53's user-visible ONIX/ROCK-SLIDE canonical-railroad
+  symptom is gone**: the drafted HAUNTER and selected SHADOW PUNCH own the
+  live turn and next request. Trace is honestly **4/6**: frames 2263/2274
+  each differ by exactly **27px**, solely ROM HAUNTER HP **137/138** versus
+  app **138/138** after FURY CUTTER; opponent HP and HAUNTER PP **19/20** are
+  aligned. All **25/25** immutable rows exact; no appStage, existing capture
+  change, new barrier, battle/turn/tick branch, issue edit, or Scene-ON work.
+
+---
 ## 747 — [BOUNDED MAIN WORKER 2026-07-30 ~15:36] Slice 6 complete: orchestrator-owned endings
 
 - **State:** landed in `cca9d54c` + `429c170b`; focused acceptance **6 files /
@@ -49,23 +71,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   intro / command **7/7 + 715/715 + 128/128**; all **25/25** immutable rows
   exact. No new battle/turn/tick dispatch, barrier, trace/capture, issue, or
   Scene-ON change.
-
----
-## 745 — [BOUNDED MAIN WORKER 2026-07-30 ~15:00] Slice 4 complete: live postwin → orchestrator swapOffer
-
-- **State:** landed in `f34fd465` + `2f744ccf`; focused acceptance **7 files /
-  119 tests**, full gate green at **550 files / 5569 tests + 1 deliberate
-  animation-lane skip**, build clean.
-- **Did:** generated `battleWon` now freezes challenge index, live HP/full-heal
-  values, opponent rental IDs, and commentary from one typed round snapshot;
-  postwin bookkeeping no longer substitutes canonical literals. The core
-  fixture proves terminal handoff creates postwin, rules do not change before
-  the third-scouting-page edge, that edge publishes `swapOffer`, and YES
-  builds every player/enemy/rental row from that same orchestrator round.
-- **Next:** supervisor may proceed to design Slice 5 (swap result → reusable
-  Battles 2-7 room/intro re-entry).
-- **Notes:** production default and canonical constructors remain unchanged;
-  postwin/swap exact **199/199, 216/216, 171/171, 164/164, 101/101**;
-  generated intro **715/715**, command **128/128**; all **25/25** immutable
-  rows exact. No new barrier, trace/capture, issue, opponent selection,
-  or Battle-2 work.

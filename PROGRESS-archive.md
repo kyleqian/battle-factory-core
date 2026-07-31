@@ -1,3 +1,23 @@
+## 745 — [BOUNDED MAIN WORKER 2026-07-30 ~15:00] Slice 4 complete: live postwin → orchestrator swapOffer
+
+- **State:** landed in `f34fd465` + `2f744ccf`; focused acceptance **7 files /
+  119 tests**, full gate green at **550 files / 5569 tests + 1 deliberate
+  animation-lane skip**, build clean.
+- **Did:** generated `battleWon` now freezes challenge index, live HP/full-heal
+  values, opponent rental IDs, and commentary from one typed round snapshot;
+  postwin bookkeeping no longer substitutes canonical literals. The core
+  fixture proves terminal handoff creates postwin, rules do not change before
+  the third-scouting-page edge, that edge publishes `swapOffer`, and YES
+  builds every player/enemy/rental row from that same orchestrator round.
+- **Next:** supervisor may proceed to design Slice 5 (swap result → reusable
+  Battles 2-7 room/intro re-entry).
+- **Notes:** production default and canonical constructors remain unchanged;
+  postwin/swap exact **199/199, 216/216, 171/171, 164/164, 101/101**;
+  generated intro **715/715**, command **128/128**; all **25/25** immutable
+  rows exact. No new barrier, trace/capture, issue, opponent selection,
+  or Battle-2 work.
+
+---
 ## 744 — [SUPERVISOR 2026-07-30 ~15:00] Slice 3 CLOSED at 715/715 (supervisor re-verified); moveend barrier drained and merged; #53 fix-path updated
 
 - **State:** master union green **550 files / 5568 tests + 1 deliberate
