@@ -13,6 +13,49 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 750 — [SUPERVISOR WIND-DOWN 2026-07-30 ~17:50] #53 CLOSED same-day: design→7 slices→flip→6/6 acceptance; Gate-6 program closed; 2 censuses; moveend barrier drained
+
+- **State:** master green at final gate **550 files / 5581 tests + 1
+  deliberate animation-lane skip**, production build clean,
+  `git diff --check` clean, DEFERRED.md **empty all session**, no orphan
+  worktrees/branches (only permanent `.worktrees/animation-main`).
+  `animation-main` folded at orient (+7, Present/Roar exact); fold delta
+  **0 at wind-down** — nothing new to fold.
+- **Session headlines (19 workers, 1 cap-kill salvaged green, 0 failed
+  steps):** (1) **ISSUES #53 CLOSED and deleted** — routing-flip design
+  doc + all 7 slices landed same-day: route seam, rank-ordered draft
+  adapter, anchor session (3 RAM-pinned RNG epochs), generated-intro
+  ownership (**715/715** after the B+444 fix), postwin/swap/endings from
+  `orchestrator.round`, battles-2-7 re-entry, and the **production
+  default flip to the generated orchestrator**. User-visible acceptance
+  `interactive-haunter-shadow-punch-off.json` is **6/6 exact** (drafted
+  HAUNTER leads, SHADOW PUNCH drives the outcome, opponent FURY CUTTER
+  does its real 1 damage after the battle-init RNG-cursor fix);
+  different-lead ONIX Tier-1 proof; all 25 immutable rows byte-exact on
+  the explicit canonical route. (2) **Gate-6 interaction program fully
+  closed**: R4/R7/R8 receipts + K1-K6 kernel proofs (K7 prior) — K2
+  caught and fixed a real defect (weather ignored in accuracy checks).
+  (3) **Censuses:** seeds 61-90 clean; anchor-draft combos 60/60 found
+  **10 reachable moveend halts** → full `ITEMEFFECT_MOVE_END` restoring
+  family ported, all 10 rows re-driven to legitimate terminals, barrier
+  ratchet 2→1 (sole remainder: census-unreachable doubles branch).
+  (4) **B+444 overturned**: OAM probe disproved the #18-family
+  assumption; fixed statelessly (summary-exit clock + bounce-seam
+  alignment).
+- **Next session (ordered):** (i) #39 window-by-window retirement is now
+  the top open debt (the flip added semantic missed-attack/stat-rise/
+  no-effect owners — continue from those); (ii) **user-level:** the
+  harness-side Battle Lab pre-reset-capture decision (entries 690/724)
+  still blocks the arbitrary-trainer dense intro trace + commentary
+  checkpoint; routing-design §6 also leaves the browser scene-mode
+  selector as a user decision; (iii) S10 gate 2+ harness work per
+  roadmap.
+- **Notes:** no deferred questions all session. Papercuts banked:
+  out/latest race (bumped), census line-drift, cap-kill digest
+  misreports "unauthenticated", concurrent-suite vitest orphans
+  (bumped). Next session resumes from this entry alone.
+
+---
 ## 749 — [BOUNDED MAIN WORKER 2026-07-30 ~17:30] HAUNTER FURY CUTTER residual closed
 
 - **State:** source/RAM cursor fix landed in `671a8887`; focused acceptance
@@ -50,22 +93,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   aligned. All **25/25** immutable rows exact; no appStage, existing capture
   change, new barrier, battle/turn/tick branch, issue edit, or Scene-ON work.
 
----
-## 747 — [BOUNDED MAIN WORKER 2026-07-30 ~15:36] Slice 6 complete: orchestrator-owned endings
-
-- **State:** landed in `cca9d54c` + `429c170b`; focused acceptance **6 files /
-  78 tests**, full gate green at **550 files / 5574 tests + 1 deliberate
-  animation-lane skip**, production build clean.
-- **Did:** core now discovers generated `roundLost` / `roundCompleted`
-  commands, installs their terminal presenter on the terminal-resolution edge,
-  protects the two prior-frame ticks from draft fallback, and acknowledges
-  completion on the orchestrator-owned round. Fixtures prove losses at indexes
-  0/5, completion only at 6, and accepted-swap rent count **14→15 exactly
-  once** on completion but **14→14** on loss.
-- **Next:** supervisor may proceed to design Slice 7 (production routing flip
-  and user-visible HAUNTER/SHADOW PUNCH acceptance).
-- **Notes:** production default, terminal policy, BP award, captures, and
-  Scene-ON unchanged. Terminal loss/menu/win/continuation exact **210/210 +
-  414/414 + 2513/2513 + 1911/1911**; generated intro/command **715/715 +
-  128/128**; all **25/25** immutable rows exact. No new barrier or
-  battle/turn/tick branch.

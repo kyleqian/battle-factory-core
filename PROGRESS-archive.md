@@ -1,3 +1,22 @@
+## 747 — [BOUNDED MAIN WORKER 2026-07-30 ~15:36] Slice 6 complete: orchestrator-owned endings
+
+- **State:** landed in `cca9d54c` + `429c170b`; focused acceptance **6 files /
+  78 tests**, full gate green at **550 files / 5574 tests + 1 deliberate
+  animation-lane skip**, production build clean.
+- **Did:** core now discovers generated `roundLost` / `roundCompleted`
+  commands, installs their terminal presenter on the terminal-resolution edge,
+  protects the two prior-frame ticks from draft fallback, and acknowledges
+  completion on the orchestrator-owned round. Fixtures prove losses at indexes
+  0/5, completion only at 6, and accepted-swap rent count **14→15 exactly
+  once** on completion but **14→14** on loss.
+- **Next:** supervisor may proceed to design Slice 7 (production routing flip
+  and user-visible HAUNTER/SHADOW PUNCH acceptance).
+- **Notes:** production default, terminal policy, BP award, captures, and
+  Scene-ON unchanged. Terminal loss/menu/win/continuation exact **210/210 +
+  414/414 + 2513/2513 + 1911/1911**; generated intro/command **715/715 +
+  128/128**; all **25/25** immutable rows exact. No new barrier or
+  battle/turn/tick branch.
+---
 ## 746 — [BOUNDED MAIN WORKER 2026-07-30 ~15:15] Slice 5 complete: generated Battles 2-7 reusable re-entry
 
 - **State:** landed in `5c19ef95`; named acceptance **8 files / 107 tests**,

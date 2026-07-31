@@ -5,37 +5,6 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #53 — [USER-REPORTED 2026-07-30] playable app: battle is disconnected from the draft (canonical railroad)
-
-**Symptom (user, playing `npm run dev`):** rental draft works and accepts real
-picks, but the battle then shows ONIX and always ROCK SLIDE regardless of the
-drafted party (e.g. HAUNTER/SHADOW PUNCH selected); command choices don't
-drive what happens; continued A-presses eventually land back on a
-Pokémon-select-style screen.
-
-**Confirmed wiring:** the interactive path hands off to the canonical
-recorded-battle state machine unconditionally (`core.ts:314` →
-`battleScene.ts`); the generated orchestrator path is dev-stage-only
-(`core.ts:302` "null on the canonical production path"). The "warp" is the
-canonical post-win flow reaching the rental-swap picker, which reuses the
-select-screen UI. This is #39's user-visible face plus the not-yet-made
-interactive routing flip.
-
-**Fix path (design + Slices 1-3 landed 2026-07-30 PM;
-`docs/interactive-routing-flip-design.md` is authoritative):** the explicit
-route seam, rank-ordered draft adapter, anchor session (three pinned RNG
-epochs), and generated-intro ownership are all landed; the real-draft intro
-trace `interactive-generated-intro-off.json` is **715/715 exact** (the old
-B+444 residual proved fixable — `docs/intro-b444-residual-probe.md` — and is
-closed) and the settled command entry is exact. The anchor-draft combination
-census (`docs/anchor-draft-combo-census.md` + after-fix addendum) drives all
-60 draft/lead rounds to legitimate terminals with zero kernel halts.
-Remaining: design Slices 4-7 — (4) postwin/swap generalization over the
-orchestrator round, (5) battles 2-7 room/intro re-entry, (6) loss/seventh-win
-endings from the generated owner, (7) production default flip + the
-HAUNTER/SHADOW-PUNCH acceptance trace. No quick species-swap hack into the
-canonical replay — that would fake the stitching.
-
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn
