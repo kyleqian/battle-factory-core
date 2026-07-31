@@ -49,13 +49,15 @@ import {
   createBattleScriptRulesContext,
   createBattleScriptStatusRulesExecution,
   type BattleScriptRulesBattler,
+  type BattleScriptRulesContextInput,
   type BattleScriptStatusRulesExternalPorts,
 } from "./battleScriptRulesContext.ts";
-import { loadBattleScriptProgram } from "./battleScriptProgram.ts";
+import { loadBattleScriptProgram, type BattleScriptProgram } from "./battleScriptProgram.ts";
 import {
   acknowledgeBattleScriptMachineController,
   stepBattleScriptMachine,
   type BattleScriptMachineState,
+  type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import type { BattleScriptSemanticEvent } from "./battleScriptEvents.ts";
@@ -119,7 +121,7 @@ function battler(changes: Partial<BattleScriptRulesBattler>): BattleScriptRulesB
     spDefense: changes.spDefense ?? 0,
     level: changes.level ?? 50,
     friendship: 0,
-    partyIndex: 0,
+    partyIndex: changes.partyIndex ?? 0,
   });
 }
 
@@ -164,6 +166,25 @@ export type StagePlayerHitChainInput = Readonly<{
   currentMovePosition: 0 | 1 | 2 | 3;
   moveEffectByte: number;
   rngSeed: number;
+  /**
+   * ISSUES #39 rank-2 switch-in half: optional real party-by-side bench,
+   * threaded straight into `createBattleScriptRulesContext`'s own `party`
+   * input. Omitted (every pre-existing caller) keeps the default empty
+   * party -- this hit chain's own damage/faint script never reads `party`
+   * itself, only a later, separately-staged `HandleFaintedMonActions` run
+   * does (`turn13ResolutionAdapter.ts`).
+   */
+  party?: BattleScriptRulesContextInput["party"];
+  /**
+   * ISSUES #39 rank-2 switch-in half: optional battle topology (chiefly
+   * `battleTypeFlags`), threaded straight into `createBattleScriptRulesContext`.
+   * Omitted (every pre-existing caller) keeps the default `{battlersCount: 2,
+   * battleTypeFlags: 0}` -- a later `HandleFaintedMonActions` chain needs the
+   * real `BATTLE_TYPE_FACTORY` bit (`Cmd_getexp`'s own Frontier short-circuit
+   * gate, `battleScriptGetexpOpcode.ts`), which this hit chain's own damage/
+   * faint script never reads.
+   */
+  battleTopology?: BattleScriptRulesContextInput["battleTopology"];
 }>;
 
 export type StagedPlayerHitChainResult = Readonly<{
@@ -173,9 +194,27 @@ export type StagedPlayerHitChainResult = Readonly<{
   target: BattleScriptRulesBattler;
 }>;
 
-export function stagePlayerHitChain(
+export type StagedPlayerHitChainMachineState = Readonly<{
+  program: BattleScriptProgram;
+  handlers: BattleScriptOpcodeHandlers<BattleScriptRulesContext>;
+  state: BattleScriptMachineState<BattleScriptRulesContext>;
+}>;
+
+/**
+ * ISSUES #39 rank-2 switch-in half: additive sibling to `stagePlayerHitChain`
+ * exposing the FULL terminal `BattleScriptMachineState` (program/handlers/
+ * rulesContext) this hit chain halted at, not just the reduced `{events,
+ * rngValueAfter, attacker, target}` projection -- the shape
+ * `runBattleScriptFaintedActionsOrchestration` needs to keep staging
+ * straight into the forced-switch dance from where a move script's own
+ * `end` left off (`docs/faint-outcome-ground-truth.md` §3.1). Every
+ * pre-existing caller keeps using `stagePlayerHitChain` below unchanged --
+ * it now just projects this same terminal state down to its own reduced
+ * view, same computation either way.
+ */
+export function stagePlayerHitChainToTerminalMachineState(
   input: StagePlayerHitChainInput,
-): StagedPlayerHitChainResult {
+): StagedPlayerHitChainMachineState {
   const attacker = battler({ ...input.attacker, side: 0 });
   const target = battler({ ...input.target, side: 1 });
   const rulesContext = createBattleScriptRulesContext({
@@ -193,6 +232,8 @@ export function stagePlayerHitChain(
     missType: 0,
     hitMarker: 0,
     multiHitCounter: 0,
+    party: input.party,
+    battleTopology: input.battleTopology,
   });
 
   const execution = createBattleScriptStatusRulesExecution(
@@ -206,18 +247,13 @@ export function stagePlayerHitChain(
   for (let budget = 0; budget < 512; budget += 1) {
     const stepped = stepBattleScriptMachine(PROGRAM, state, execution.handlers);
     if (stepped.kind === "halted" && stepped.state.haltReason?.kind === "terminal") {
-      return Object.freeze({
-        events: stepped.state.events,
-        rngValueAfter: stepped.state.rng.value,
-        attacker: stepped.state.rulesContext.battlers[0],
-        target: stepped.state.rulesContext.battlers[1],
-      });
+      return Object.freeze({ program: PROGRAM, handlers: execution.handlers, state: stepped.state });
     }
     if (stepped.kind === "blocked") {
       const acknowledged = acknowledgePendingControllers(state);
       if (acknowledged === state) {
         throw new Error(
-          "stagePlayerHitChain: Battle Script blocked without a safe controller acknowledgement "
+          "stagePlayerHitChainToTerminalMachineState: Battle Script blocked without a safe controller acknowledgement "
             + JSON.stringify(stepped.reason),
         );
       }
@@ -226,13 +262,27 @@ export function stagePlayerHitChain(
     }
     if (stepped.kind !== "advanced" && stepped.kind !== "scheduler-progressed") {
       throw new Error(
-        `stagePlayerHitChain: staged hit chain stopped unexpectedly (${stepped.kind}) `
+        `stagePlayerHitChainToTerminalMachineState: staged hit chain stopped unexpectedly (${stepped.kind}) `
           + "before its own script completed",
       );
     }
     state = stepped.state;
   }
-  throw new Error("stagePlayerHitChain: staged hit chain did not reach its own script end in budget");
+  throw new Error(
+    "stagePlayerHitChainToTerminalMachineState: staged hit chain did not reach its own script end in budget",
+  );
+}
+
+export function stagePlayerHitChain(
+  input: StagePlayerHitChainInput,
+): StagedPlayerHitChainResult {
+  const { state } = stagePlayerHitChainToTerminalMachineState(input);
+  return Object.freeze({
+    events: state.events,
+    rngValueAfter: state.rng.value,
+    attacker: state.rulesContext.battlers[0],
+    target: state.rulesContext.battlers[1],
+  });
 }
 
 /**

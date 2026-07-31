@@ -21,24 +21,32 @@
  * (`mon-pic-coords.json`) instead of battleScene.ts's own hand-fit
  * `TURN13_FAINT_SINK_STEPS`/`faintHealthboxVanishTick` call.
  *
- * FINDING (named, not silently skipped): the forced-switch decision itself
- * (DESTIN choosing MURKROW) and the Murkrow switch-in are NOT staged here.
+ * SWITCH-IN HALF (rank-2's second flip, this slice): the forced-switch
+ * decision (DESTIN choosing MURKROW) and the Murkrow switch-in are now
+ * staged too, chaining `stageTurn13DragonBreathHitChainToTerminalMachineState`'s
+ * real terminal `BattleScriptMachineState` (`turn13DragonBreathPresentationStaging.ts`,
+ * itself built on `turn1RockSlidePresentationStaging.ts`'s additive
+ * `stagePlayerHitChainToTerminalMachineState`) straight into
  * `runBattleScriptFaintedActionsOrchestration`
- * (`battleScriptFaintedActionsOrchestration.ts`) is the real
- * `HandleFaintedMonActions` port and `battleAiSwitchInto.ts`
- * (`getMostSuitableMonToSwitchInto`) is the real AI scoring function it
- * calls through `battleScriptOpenPartyScreenOpcode.ts` -- both already
- * exist and are the correct next machinery -- but chaining onto them here
- * needs two things this slice does not have: (1) the DRAGON_BREATH hit
- * chain's own terminal `BattleScriptMachineState`, which
- * `turn1RockSlidePresentationStaging.ts`'s `stagePlayerHitChain` (entry
- * 751's own staging seam) does not expose (only
- * `{events, rngValueAfter, attacker, target}`); (2) DESTIN's real remaining
- * bench (species/moves/stats past PIDGEOTTO), which is not RAM-probed
- * anywhere in this repo yet (`docs/forced-switch-ground-truth.md` has no
- * turn-13/DESTIN/MURKROW rows). Fabricating either would violate this
- * codebase's no-guessing discipline, so this half stays unowned here -- see
- * this slice's final report for the concrete unblock.
+ * (`battleScriptFaintedActionsOrchestration.ts`, the real
+ * `HandleFaintedMonActions` port). Its own `openpartyscreen` opcode handler
+ * (`battleScriptOpenPartyScreenOpcode.ts`) calls the real AI scoring
+ * function (`battleAiSwitchInto.ts`'s `getMostSuitableMonToSwitchInto`,
+ * already proven against both of DESTIN's real send-outs in
+ * `tests/destinCanonicalReplacements.test.ts`/
+ * `docs/destin-canonical-replacements-decision-proof.md`) against DESTIN's
+ * real bench (`docs/onix-readylag-destin-bench-probes.md` Probe 2,
+ * `docs/battle-turn-notes.md` HEADLINE 3 for MURKROW's full stat block) and
+ * the real `switchindataupdate` opcode rebuilds the incoming battler's
+ * species/level/HP from that same bench -- no fabricated content.
+ * `runFaintedBattlerHandlers`'s own "resumed" result (`battleOutcome`
+ * still 0, a real healthy replacement now active) is this window's own
+ * real outcome, not a terminal WON/LOST -- the battle genuinely continues
+ * into turn 14.
+ *
+ * Still unowned here, named per this slice's own brief: the turn-14
+ * dispatcher and slot-2 PP mirroring (`battleScene.ts`'s `turn13Resolved`/
+ * turn-14 consumers, entry 751) -- a later step's own flip, not this one's.
  *
  * Two corrections to this slice's own brief, made explicit so a later flip
  * does not inherit them: (a) the fainting mon is PIDGEOTTO, not "Grovyle" --
@@ -52,13 +60,16 @@
  * trainer-side path.
  */
 import monPicCoordsData from "../data/gen/mon-pic-coords.json" with { type: "json" };
+import speciesNamesAsset from "../data/gen/species-names.json" with { type: "json" };
 import {
   resolveTurn13DragonBreathFaintLines,
   resolveTurn13DragonBreathHpEndpoints,
   resolveTurn13DragonBreathKickoffLines,
   resolveTurn13DragonBreathWindowContent,
+  stageTurn13DragonBreathHitChainToTerminalMachineState,
   turn13DragonBreathHasParalysisStatusChange,
 } from "./turn13DragonBreathPresentationStaging.ts";
+import { runBattleScriptFaintedActionsOrchestration } from "./battleScriptFaintedActionsOrchestration.ts";
 
 type MonPicCoordsAsset = Readonly<{
   front: Readonly<Record<string, Readonly<{ yOffset: number }>>>;
@@ -122,8 +133,57 @@ export function resolveTurn13ResolutionAdapter(): Turn13ResolutionAdapter {
 
 /**
  * Named gap marker (docs/battle-scene-retirement-inventory.md rank-2's own
- * "Missing bridge" column): this adapter does not own the forced-switch
- * decision, the Murkrow switch-in, or the turn-14 handoff. See this
- * module's own top doc for exactly what is missing and why.
+ * "Missing bridge" column), narrowed by this slice: the switch-in decision
+ * and the incoming battler's own species/level/HP are now staged below
+ * (`resolveTurn13SwitchInAdapter`). Only the turn-14 dispatcher/slot-2 PP
+ * mirroring stay unowned -- see this module's own top doc.
  */
-export const TURN13_FORCED_SWITCH_AND_MURKROW_SWITCHIN_NOT_STAGED = true;
+export const TURN13_TURN14_HANDOFF_NOT_STAGED = true;
+
+type SpeciesNamesAsset = Readonly<{ species: readonly Readonly<{ species: string; name: string }>[] }>;
+
+function speciesDisplayName(speciesId: number): string {
+  const entry = (speciesNamesAsset as SpeciesNamesAsset).species[speciesId];
+  if (entry === undefined) {
+    throw new Error(`turn13ResolutionAdapter: species-names.json has no entry for species id ${speciesId}`);
+  }
+  return entry.name;
+}
+
+export type Turn13SwitchInAdapter = Readonly<{
+  replacementSpecies: string;
+  replacementPartyIndex: number;
+  replacementLevel: number;
+  replacementHp: Readonly<{ current: number; max: number }>;
+  /** "out MURKROW!" -- the STRINGID_SWITCHINMON family's own line-2 shape (`battleResolutionPresentation.ts`'s own precedent), sourced from the real switched-in species, not a raw literal. */
+  sentOutLine2: string;
+}>;
+
+/**
+ * Stages DESTIN's real turn-13 forced-switch dance (see this module's own
+ * top doc) and returns the typed facts this window's switch-in dispatcher
+ * (`drawTurn13SwitchinFieldBase`/`murkrowHealthboxContent`/
+ * `TURN13_SWITCHIN_SENTOUT_LINE2`, `battleScene.ts`) consumes. Throws if
+ * the staged chain does not resume with a healthy replacement -- a real
+ * machine boundary this window's own real turn 13 never crosses, not a
+ * silently-wrong default.
+ */
+export function resolveTurn13SwitchInAdapter(): Turn13SwitchInAdapter {
+  const { program, handlers, state } = stageTurn13DragonBreathHitChainToTerminalMachineState();
+  const result = runBattleScriptFaintedActionsOrchestration(program, handlers, state);
+  if (result.kind !== "resumed") {
+    throw new Error(
+      `turn13ResolutionAdapter: expected the forced-switch dance to resume with a healthy `
+        + `replacement, got "${result.kind}" instead`,
+    );
+  }
+  const replacement = result.state.rulesContext.battlers[1];
+  const replacementSpecies = speciesDisplayName(replacement.species);
+  return Object.freeze({
+    replacementSpecies,
+    replacementPartyIndex: replacement.partyIndex,
+    replacementLevel: replacement.level,
+    replacementHp: Object.freeze({ current: replacement.hp, max: replacement.maxHP }),
+    sentOutLine2: `out ${replacementSpecies}!`,
+  });
+}

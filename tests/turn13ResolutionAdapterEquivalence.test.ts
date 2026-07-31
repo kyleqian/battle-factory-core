@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   opponentFaintSinkGeometry,
   resolveTurn13ResolutionAdapter,
-  TURN13_FORCED_SWITCH_AND_MURKROW_SWITCHIN_NOT_STAGED,
+  resolveTurn13SwitchInAdapter,
+  TURN13_TURN14_HANDOFF_NOT_STAGED,
 } from "../src/engine/turn13ResolutionAdapter.ts";
 import {
   TURN13_DRAGONBREATH_PRESS_TICK,
@@ -90,9 +91,24 @@ describe("turn13ResolutionAdapter: #39 rank-2 kernel-to-typed-owner equivalence 
     });
   });
 
-  describe("documented gap: the forced-switch decision + Murkrow switch-in + turn-14 handoff are NOT staged here", () => {
+  describe("switch-in half (this slice): the forced-switch decision + Murkrow switch-in are now staged, chained through runBattleScriptFaintedActionsOrchestration", () => {
+    it("resolves DESTIN's real replacement -- MURKROW, party slot 1, Lv50, full 142/142 HP -- matching battleScene.ts's own MURKROW_LEVEL/hp-142 constants and destinCanonicalReplacements.test.ts's own proven decision", () => {
+      const switchIn = resolveTurn13SwitchInAdapter();
+      expect(switchIn.replacementSpecies).toBe("MURKROW");
+      expect(switchIn.replacementPartyIndex).toBe(1);
+      expect(switchIn.replacementLevel).toBe(50);
+      expect(switchIn.replacementHp).toEqual({ current: 142, max: 142 });
+    });
+
+    it("sentOutLine2 is the real STRINGID_SWITCHINMON line-2 shape, byte-identical to battleScene.ts's own former raw literal TURN13_SWITCHIN_SENTOUT_LINE2", () => {
+      const switchIn = resolveTurn13SwitchInAdapter();
+      expect(switchIn.sentOutLine2).toBe("out MURKROW!");
+    });
+  });
+
+  describe("documented gap: the turn-14 dispatcher/slot-2 PP mirroring are NOT staged here", () => {
     it("is named as an explicit, exported marker, not a silently-green omission", () => {
-      expect(TURN13_FORCED_SWITCH_AND_MURKROW_SWITCHIN_NOT_STAGED).toBe(true);
+      expect(TURN13_TURN14_HANDOFF_NOT_STAGED).toBe(true);
     });
   });
 });

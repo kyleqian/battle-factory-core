@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { stageTurn1RockSlideHitChain } from "../src/engine/turn1RockSlidePresentationStaging.ts";
+import {
+  stagePlayerHitChain,
+  stagePlayerHitChainToTerminalMachineState,
+  stageTurn1RockSlideHitChain,
+} from "../src/engine/turn1RockSlidePresentationStaging.ts";
+import { runBattleScriptFaintedActionsOrchestration } from "../src/engine/battleScriptFaintedActionsOrchestration.ts";
 
 /**
  * Presentation-seam retirement, window 2 (`docs/presentation-seam-scout.md`
@@ -65,5 +70,67 @@ describe("turn1RockSlidePresentationStaging: staged real ROCK_SLIDE hit chain (d
   it("this ROCK_SLIDE hit chain specifically does not exercise stat-stage-change (the DOUBLE_TEAM evasion-rise banner's own STAT_ROSE_LINE1/2 input needs a SEPARATE DOUBLE_TEAM/EFFECT_EVASION_UP script run, not this ONIX-attacks-GROVYLE chain) -- correction to this scout's own §7.1/§7.2 #3 framing ('zero production emission sites anywhere in the kernel'): the main-lane step's pre-work (tests/battleScriptStatbuffchangeOpcode.test.ts's own 'Double Team' case) proved the kernel already constructs and threads this event end-to-end for a real move's own script entry label -- the gap was never-asserted-by-any-test, not never-emitted-by-any-code. This chain's own absence of the event is simply because ROCK_SLIDE has no stat effect, not because the event kind is unreachable.", () => {
     const { events } = stageTurn1RockSlideHitChain();
     expect(events.some((e) => e.kind === "stat-stage-change")).toBe(false);
+  });
+});
+
+/**
+ * ISSUES #39 rank-2 switch-in half: `stagePlayerHitChainToTerminalMachineState`
+ * is the additive sibling `turn13ResolutionAdapter.ts` needs to chain a
+ * staged hit chain's own terminal halt straight into
+ * `runBattleScriptFaintedActionsOrchestration` -- both shapes (the
+ * pre-existing reduced `{events, rngValueAfter, attacker, target}` view and
+ * this new full machine-state view) must agree, and the new view must be a
+ * directly usable `runBattleScriptFaintedActionsOrchestration` input with no
+ * further construction.
+ */
+describe("stagePlayerHitChainToTerminalMachineState: additive full terminal state (ISSUES #39 rank-2)", () => {
+  const TURN1_INPUT = Object.freeze({
+    attacker: {
+      hp: 143,
+      species: 95, // SPECIES_ONIX
+      attack: 51,
+      defense: 187,
+      spAttack: 36,
+      spDefense: 72,
+      types: ["TYPE_ROCK", "TYPE_GROUND"] as const,
+      moves: [157, 0, 0, 0] as const, // MOVE_ROCK_SLIDE
+      pp: [10, 0, 0, 0] as const,
+    },
+    target: {
+      hp: 143,
+      species: 278, // SPECIES_GROVYLE
+      attack: 103,
+      defense: 56,
+      spAttack: 91,
+      spDefense: 71,
+      types: ["TYPE_GRASS", "TYPE_GRASS"] as const,
+    },
+    currentMove: 157,
+    currentMovePosition: 0 as const,
+    moveEffectByte: 0,
+    rngSeed: 3485459011,
+  });
+
+  it("state.rulesContext.battlers[0]/[1] and events are byte-identical to stagePlayerHitChain's own reduced projection of the same input", () => {
+    const reduced = stagePlayerHitChain(TURN1_INPUT);
+    const { state } = stagePlayerHitChainToTerminalMachineState(TURN1_INPUT);
+    expect(state.rulesContext.battlers[0]).toEqual(reduced.attacker);
+    expect(state.rulesContext.battlers[1]).toEqual(reduced.target);
+    expect(state.rng.value).toBe(reduced.rngValueAfter);
+    expect(state.events).toEqual(reduced.events);
+  });
+
+  it("halts with a real terminal haltReason, ready to hand to runBattleScriptFaintedActionsOrchestration with no further construction", () => {
+    const { program, handlers, state } = stagePlayerHitChainToTerminalMachineState(TURN1_INPUT);
+    expect(state.haltReason?.kind).toBe("terminal");
+    // Grovyle survives this hit (143 -> 101, non-lethal) -- the real,
+    // provable "nothing to do" shape for this seam, not a fabricated stub.
+    const result = runBattleScriptFaintedActionsOrchestration(program, handlers, state);
+    expect(result.kind).toBe("no-fainted-battlers");
+  });
+
+  it("accepts the optional party input additively -- omitted (every pre-existing caller) still defaults to the empty party, unaffected", () => {
+    const { state } = stagePlayerHitChainToTerminalMachineState(TURN1_INPUT);
+    expect(state.rulesContext.party.opponent.every((member) => member.species === 0)).toBe(true);
   });
 });
