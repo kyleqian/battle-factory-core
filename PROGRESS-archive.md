@@ -1,3 +1,66 @@
+## 756 — [BOUNDED MAIN WORKER 2026-07-30 ~23:10] Audit item 3 (j.6 barrier ratchet) pinned; audit item 2 (anchor-draft receipt) HONEST-STOP — no committed cursor reproduces the draft
+
+- **State:** `tests/executableFrontierRatchet.test.ts` updated only; no
+  src/, fixture, or barrier/handler change. Focused: ratchet + 
+  `factoryRentalGeneration.test.ts` + `anchorRentals.test.ts` **58/58
+  green**. A full `npm test` also completed (should not have run per the
+  brief — see Notes) at **551 files / 5586 tests + 1 deliberate
+  animation-lane skip**, unchanged from entry 755; `npm run build` **not
+  run**, per the brief.
+- **Did — Part 2 (landed):** `factoryAiCheckBadMove.ts`/
+  `factoryAiCheckViability.ts` each pin exactly **1** barrier call site
+  (their shared `AI_CHECK_*_TABLE_EFFECTS` fallback, the one place each
+  file constructs `{kind: "unsupported-branch", ...}` for the ~70/~55
+  un-ported table effects). Neither file uses the shared
+  `unsupportedBranch()` helper the other `PINNED_BARRIER_COUNTS` entries
+  rely on — they build the halt object literal directly — so
+  `barrierCallSitesIn` needed a second counting path (comma- vs
+  semicolon-terminated `kind: "unsupported-branch"` disambiguates a
+  construction from the type union member naming the shape). Verified the
+  new path doesn't double-count the ~20 existing helper-based files (their
+  local `unsupportedBranch` definition body also contains that same
+  literal once — excluded by only taking this path when no local helper
+  definition exists).
+- **Did — Part 3 (HONEST-STOP, per the brief's own clause):** Part 1 asked
+  for a test feeding `anchor-state.json`'s `gRngValue=0xd2ddeec8` into
+  `generateInitialFactoryRentals` and asserting byte-identity. Direct
+  substitution diverges immediately (slot 0: setId 135/ONIX expected 156,
+  personality 506218524 vs expected 1205102525) — expected, since
+  `tools/extract/inspect-anchor.py`'s own docstring and `ROADMAP.md`'s
+  Domain notes establish `0xd2ddeec8` as the cursor **after** both
+  generation phases complete, not before. Tried the 5 candidate cursors
+  the brief pointed at (`0xd2ddeec8` direct; `factoryAnchorSession.ts`'s
+  three Battle-1-**opponent** epochs `ANCHOR_BATTLE_1_SELECTION_{START,END}`,
+  `_HANDOFF`, `_BATTLE_INIT`) as full-generation starting cursors — none
+  reproduce the six setIds/personalities. Then did the derivation the
+  brief asked for directly: LCG is invertible (odd multiplier mod 2^32);
+  walked backward from `0xd2ddeec8` up to 20,000 steps under two
+  hypotheses (whole-generation back-to-back, and personality-construction-
+  only) checking every candidate start against the known 6 setIds/
+  personalities — no match either way. 20,000 steps is ~10,000 nature-
+  rejection iterations total, statistically impossible for a true match
+  under the source's real ~1/25-per-draw acceptance rate ((24/25)^1666 ≈
+  1e-29) — so this isn't a search-radius gap, it's that `0xd2ddeec8`
+  genuinely sits behind an unknown number of ambient per-VBlank `Random()`
+  ticks (`main.c:366`, ROADMAP Domain notes) between generation finishing
+  and whatever frame the RAM probe paused on, and no committed evidence
+  pins that count. The three cited "RNG epochs" (entry 739) are Battle 1's
+  **opponent** trainer/set selection, not the player draft — a later,
+  causally disconnected generation call with its own independent, also
+  undocumented gap from the draft screen. Per the brief's own clause: not
+  tweaking the generator or fixture; not adding a red/pending test.
+  Closing this needs a fresh oracle probe (out of scope this step) pinning
+  either the true pre-generation seed or the exact idle-frame count.
+- **Next:** supervisor — re-scope or accept item 2's HONEST-STOP (needs an
+  oracle-probe step, not a test-authoring one); then the §C consumer step
+  (public dense arbitrary-trainer intro comparison) remains the Gate-5
+  headline per entry 755.
+- **Notes:** PAPERCUT — `npm test` auto-completed in the background before
+  a `TaskStop` could land (same slip as both round-1 workers per entry
+  755's note); read-only, same tree, no side effects, ~0 minutes lost.
+
+---
+
 ## 755 — [SUPERVISOR 2026-07-30 ~22:55] Gate-5 audit merged (6/11 discharged); two scope decisions; round 2 on the three small blockers
 
 - **State:** union gate green **551 files / 5586 tests + 1 deliberate

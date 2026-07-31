@@ -422,3 +422,97 @@ marathon-fixing. **Next slice:** pin the exact acknowledgement-handoff frame
 (compare oracle frames 1544/1545/1546 against a spread of app `A`-press
 offsets, or instrument `state.acknowledgedElapsed`/`elapsed` directly) before
 re-attempting a full-window dense claim for this tuple.
+
+### Slice 2 resolution (2026-07-31): ack-handoff pinned as (a), alignment-only
+
+**Oracle side, pinned exactly.** Re-ran `bin/oracle lab` on the committed
+fixture into scratch and dense-diffed consecutive `preCheckpointCaptures`
+pixels (not just `sha256` presence/absence). The message box is pixel-static
+across **1541..1544** (0 diff between any consecutive pair in that span) and
+the first pixel change is at **1545** (diff 2811px) — so 1541 is the first
+frame reflecting the ROM's own accepted `PAUSE_UNTIL_PRESS` edge, and 1545 is
+the box-clear/new-message-start frame confirmed in slice 1. This settles
+1544/1545/1546 exactly: **1541** is the accepted-edge frame, **1545** is the
+redraw frame, not 1544 or 1546.
+
+**App side, pinned exactly.** Instrumented the intro lifecycle directly (not
+the compare loop): built the same YOSHI orchestrator, ticked
+`advanceFactoryRoundBattleStartIntro` frame-by-frame, and rendered
+`renderGeneratedBattleStartPreSendOut` per frame. Confirmed
+`advanceFactoryRoundBattleStartIntro`'s orchestrator-level wrapper
+(`factoryRoundBattleOrchestrator.ts:547-571`) freezes `elapsed` for exactly
+one tick on the accepted `A` edge (by design — its own comment: "the source
+`PAUSE_UNTIL_PRESS` callback accepts the edge before its `BeginBattleIntro`
+presentation task advances on the following callback"). Given that freeze,
+the message-box switch always lands on app-relative frame `(A-press tick) +
+4` — verified by direct simulation, not just algebra: pressing `A` at
+app-tick 374 (the trace's committed value at the time) switches the message
+at app-frame **378**; pressing at 379 switches at **383**; pressing at
+**370** switches at exactly **374**, matching the oracle target derived from
+`preCheckpointFrameOffset: 1171` (`1545 - 1171 = 374`). This is now pinned by
+`tests/factoryBattleStartIntroAckAlignment.test.ts`.
+
+**Verdict: (a), pure comparison-alignment.** The renderer/lifecycle math
+(`advanceFactoryBattleStartIntro`'s freeze, `generatedBattleStartPressTick`,
+`sendOutTextStartTick`) is correct and source-faithful; the trace fixture's
+scripted `A`-press placement was simply 4 frames too late (both previously-
+tried offsets, 374 and 379, are late, not early — there is no ambiguity about
+direction). **Fix:** `tools/compare/traces/factory-arbitrary-intro-yoshi-off.json`'s
+segments changed from `[373, 1(A), 376]` to `[369, 1(A), 380]` (same 750-tick
+total, same `captureWindow`), moving the `A` press from app-tick 374 to 370.
+No `src/` renderer or lifecycle change was needed or made.
+
+**Re-run result: 512/751 frames matched**, up from 415/751 — frames
+**0..512 now match except for one isolated frame (444)**, a large
+improvement extending the exact-match run by 138 frames past the old first
+divergence. The ack-handoff divergence this slice was scoped to is fully
+resolved.
+
+**New, out-of-scope divergence found downstream (frames 444 and 513..750).**
+Fixing the ack alignment exposed a second, previously-hidden, genuinely
+different defect — not ack/input timing, per this slice's own out-of-scope
+clause, so characterized and not chased:
+
+- **Frame 444 (absolute oracle 1615), isolated single-frame mismatch**
+  (219px, bbox near the trainer-exit/shadow region) inside an otherwise
+  exactly-matching opponent-release window (app 412..512 / oracle
+  1583..1683). Not further isolated to a specific site this slice; likely
+  the same species-dependent-timing family as the next item, at a smaller
+  sub-frame (ball-open particle stall, shadow delay, or similar).
+- **Frames 513..750, persistent divergence.** `generatedBattleStartOpponent
+  HandoffTick` (`battleScene.ts:3973-3982`, text-complete + `SENDOUT_HANDOFF_
+  LAG=3`) is confirmed **exactly correct**: predicted handoff at app-frame
+  412 matches the oracle's own release-animation start at absolute 1583
+  precisely (verified via dense per-frame pixel diffing — text-print's small
+  ~100px/frame diffs give way to a 2375px jump exactly there). But
+  `GENERATED_PLAYER_DISPATCH_DELAY`/`GENERATED_PLAYER_TEXT_DELAY = 101`
+  (`battleScene.ts:3989-3990`, documented as a fixed ROM-callback count from
+  that handoff to the player-send-out "Go!" message) is **wrong for this
+  fixture**: dense-diffing the oracle's own captures shows "Go!" first
+  appears at absolute frame **1708**, i.e. handoff **+125**, not **+101**.
+  Both constants' own comment cites a fixed callback count "the live room's
+  ordinary singles controller dispatches ... 101 callbacks after the
+  opponent handoff" — apparently validated against a GROVYLE-opponent
+  fixture (the shared `out GROVYLE!` text in `battleSendOutEncounterParams`
+  and the `battle-command-generated-off` stage). This fixture's opponent is
+  COMBUSKEN — a different species, and this run's own history has repeatedly
+  found species/sprite-load-dependent timing deltas at exactly this kind of
+  boundary (entry 757's own B-offset: "+8 vs SHIZUKA, species-sprite-load-
+  dependent"). The 24-callback gap is not explained by opponent-name text
+  length alone (COMBUSKEN vs GROVYLE is a 2-character difference, not 24
+  ticks), so the dependency (sprite load cost? cry length? something else)
+  is not yet identified. **Not fixed**: changing a shared constant blindly
+  would risk the already-validated GROVYLE-based fixtures/tests, and pinning
+  the real dependency needs at least one more species data point — squarely
+  "a genuinely new renderer defect class" per this slice's scope boundary,
+  not an ack-timing issue. All frames from 513 through the end of the
+  capture window (750) are consistent with this single downstream shift (the
+  app renders its own release/dispatch sequence ~24 frames early relative to
+  the oracle); the window ends before the app's sequence and the oracle's
+  settled command-ready idle state could re-synchronize, so the tail was not
+  individually re-derived frame-by-frame beyond that.
+
+**Final count for this tuple: 512/751 (68.2%), every divergent frame
+explained by name** (one isolated species-dependent release sub-frame at
+444; a named, evidenced 24-callback species-dependent dispatch-delay gap for
+513 onward). No unexplained residual.

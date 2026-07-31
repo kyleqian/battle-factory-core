@@ -13,6 +13,55 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 759 — [BOUNDED MAIN WORKER 2026-07-31 ~00:15] YOSHI intro slice 2: ack-handoff divergence pinned as (a) alignment-only, fixed; 512/751, new downstream defect named and stopped
+
+- **State:** `tools/compare/traces/factory-arbitrary-intro-yoshi-off.json`
+  (A-press offset only) + new
+  `tests/factoryBattleStartIntroAckAlignment.test.ts` + `docs/trainer-pic-
+  off-window-scout.md` §D updated. No other `src/` change. Focused:
+  `factoryBattleStartIntro` + new ack-alignment test + `executableFrontier
+  Ratchet` + `factoryRoundBattleOrchestrator` **43/43 green**; `npx tsc
+  --noEmit` clean. Full `npm test`/`npm run build` **not run this step**,
+  per the brief (side worker live concurrently).
+- **Did:** Pinned the first divergence (entry 757/758) exactly. Oracle: dense
+  pixel diff of the fixture's own `preCheckpointCaptures` shows the message
+  box pixel-static across absolute frames 1541-1544 and first changed at
+  1545 — settles 1544/1545/1546 (1541 = accepted-edge frame, 1545 = redraw).
+  App: instrumented `advanceFactoryRoundBattleStartIntro` directly (not the
+  compare loop) and confirmed its documented one-tick `elapsed` freeze on the
+  accepted `A` edge, then simulated: the message-switch always lands at
+  `(A-press tick) + 4`. Both previously-tried offsets (374, 379) are late;
+  the source-faithful press tick is **370** (`1545 - preCheckpointFrameOffset
+  1171 - 4`), landing the switch exactly on app-frame 374. **Verdict: (a)**,
+  pure comparison-alignment — no renderer/lifecycle bug. Fixed the trace's
+  segments (`[373,1,376]` → `[369,1,380]`, same 750-tick total) and re-ran
+  the dense comparison: **512/751 matched** (was 415/751), frames 0..512
+  match except one isolated frame. This exposed a **second, previously-
+  hidden, genuinely different divergence** (not ack timing): dense-diffing
+  confirms `generatedBattleStartOpponentHandoffTick` (text-complete + 3-tick
+  lag) is exactly correct (predicted app-412/oracle-1583 handoff matches the
+  oracle's own release-start jump precisely), but
+  `GENERATED_PLAYER_DISPATCH_DELAY`/`_TEXT_DELAY = 101` undercounts by 24
+  ticks for this fixture's COMBUSKEN opponent (oracle's own "Go!" text
+  starts at handoff+125, i.e. absolute 1708, not +101). That constant was
+  evidently validated against a GROVYLE-opponent fixture; 24 ticks isn't
+  explained by trainer-name-length alone, so the real per-species dependency
+  is unidentified — a bounded fix isn't safe without a second species data
+  point (risks regressing the GROVYLE-validated fixtures). Per the brief's
+  own out-of-scope clause: characterized (site, tick arithmetic, oracle
+  citations) in §D and not chased. One further isolated single-frame
+  mismatch (app 444) inside the otherwise-exact release window is likely the
+  same species-dependent family, not separately isolated to a site.
+- **Next:** supervisor — the ack-handoff item this round targeted is fully
+  resolved (512/751, every residual frame named). The new species-dependent
+  post-handoff dispatch-delay defect (§D) is unstarted, real work — needs a
+  second (non-GROVYLE, non-COMBUSKEN) generated-opponent oracle data point to
+  pin the actual dependency before touching `GENERATED_PLAYER_DISPATCH_DELAY`.
+- **Notes:** the two isolated/rejected `A`-press offsets from slice 1 (374,
+  379) are now regression-pinned in the new test as "still-late, switch not
+  yet visible at frame 374" cases, guarding against re-introducing either.
+
+---
 ## 758 — [SUPERVISOR 2026-07-30 ~23:50] Round 3 verified: YOSHI 415/751 re-run confirmed; #55 filed from the S3 probe; three rulings
 
 - **State:** S3's probe doc merged (`630bc805`, worktree removed); M3's
@@ -93,64 +142,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   753 was already duplicated in `PROGRESS-archive.md` (a prior ledger-edit
   slip per `b261e4fc`) and has been removed from here, not re-archived.
 
----
-## 756 — [BOUNDED MAIN WORKER 2026-07-30 ~23:10] Audit item 3 (j.6 barrier ratchet) pinned; audit item 2 (anchor-draft receipt) HONEST-STOP — no committed cursor reproduces the draft
-
-- **State:** `tests/executableFrontierRatchet.test.ts` updated only; no
-  src/, fixture, or barrier/handler change. Focused: ratchet + 
-  `factoryRentalGeneration.test.ts` + `anchorRentals.test.ts` **58/58
-  green**. A full `npm test` also completed (should not have run per the
-  brief — see Notes) at **551 files / 5586 tests + 1 deliberate
-  animation-lane skip**, unchanged from entry 755; `npm run build` **not
-  run**, per the brief.
-- **Did — Part 2 (landed):** `factoryAiCheckBadMove.ts`/
-  `factoryAiCheckViability.ts` each pin exactly **1** barrier call site
-  (their shared `AI_CHECK_*_TABLE_EFFECTS` fallback, the one place each
-  file constructs `{kind: "unsupported-branch", ...}` for the ~70/~55
-  un-ported table effects). Neither file uses the shared
-  `unsupportedBranch()` helper the other `PINNED_BARRIER_COUNTS` entries
-  rely on — they build the halt object literal directly — so
-  `barrierCallSitesIn` needed a second counting path (comma- vs
-  semicolon-terminated `kind: "unsupported-branch"` disambiguates a
-  construction from the type union member naming the shape). Verified the
-  new path doesn't double-count the ~20 existing helper-based files (their
-  local `unsupportedBranch` definition body also contains that same
-  literal once — excluded by only taking this path when no local helper
-  definition exists).
-- **Did — Part 3 (HONEST-STOP, per the brief's own clause):** Part 1 asked
-  for a test feeding `anchor-state.json`'s `gRngValue=0xd2ddeec8` into
-  `generateInitialFactoryRentals` and asserting byte-identity. Direct
-  substitution diverges immediately (slot 0: setId 135/ONIX expected 156,
-  personality 506218524 vs expected 1205102525) — expected, since
-  `tools/extract/inspect-anchor.py`'s own docstring and `ROADMAP.md`'s
-  Domain notes establish `0xd2ddeec8` as the cursor **after** both
-  generation phases complete, not before. Tried the 5 candidate cursors
-  the brief pointed at (`0xd2ddeec8` direct; `factoryAnchorSession.ts`'s
-  three Battle-1-**opponent** epochs `ANCHOR_BATTLE_1_SELECTION_{START,END}`,
-  `_HANDOFF`, `_BATTLE_INIT`) as full-generation starting cursors — none
-  reproduce the six setIds/personalities. Then did the derivation the
-  brief asked for directly: LCG is invertible (odd multiplier mod 2^32);
-  walked backward from `0xd2ddeec8` up to 20,000 steps under two
-  hypotheses (whole-generation back-to-back, and personality-construction-
-  only) checking every candidate start against the known 6 setIds/
-  personalities — no match either way. 20,000 steps is ~10,000 nature-
-  rejection iterations total, statistically impossible for a true match
-  under the source's real ~1/25-per-draw acceptance rate ((24/25)^1666 ≈
-  1e-29) — so this isn't a search-radius gap, it's that `0xd2ddeec8`
-  genuinely sits behind an unknown number of ambient per-VBlank `Random()`
-  ticks (`main.c:366`, ROADMAP Domain notes) between generation finishing
-  and whatever frame the RAM probe paused on, and no committed evidence
-  pins that count. The three cited "RNG epochs" (entry 739) are Battle 1's
-  **opponent** trainer/set selection, not the player draft — a later,
-  causally disconnected generation call with its own independent, also
-  undocumented gap from the draft screen. Per the brief's own clause: not
-  tweaking the generator or fixture; not adding a red/pending test.
-  Closing this needs a fresh oracle probe (out of scope this step) pinning
-  either the true pre-generation seed or the exact idle-frame count.
-- **Next:** supervisor — re-scope or accept item 2's HONEST-STOP (needs an
-  oracle-probe step, not a test-authoring one); then the §C consumer step
-  (public dense arbitrary-trainer intro comparison) remains the Gate-5
-  headline per entry 755.
-- **Notes:** PAPERCUT — `npm test` auto-completed in the background before
-  a `TaskStop` could land (same slip as both round-1 workers per entry
-  755's note); read-only, same tree, no side effects, ~0 minutes lost.
