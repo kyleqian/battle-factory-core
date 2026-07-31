@@ -60,6 +60,36 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `turn13ResolutionAdapter.ts`.
 
 ---
+## 769 — [SUPERVISOR 2026-07-31 ~03:10] Rank-2 faint half RETIRED (pins verified); 6-tick anomaly = ROUTE-specific (lab-ONIX 0 residual); DESTIN bench probed; round 10 dispatched
+
+- **State:** union gate green **558 files / 5677 tests + 1 deliberate
+  animation-lane skip**, build clean. M9's faint-half flip verified —
+  supervisor re-ran `turn13-dragonbreath-faint` **141/141** and
+  `turn13-switchin` **242/242**; worker A/B-proved `dense-a` 205/256 is
+  the pre-existing parked #23 exclusion byte-identical to baseline, not
+  a regression; 715/715 + 190/190 + rank-1 pins held. M9 also fixed the
+  dense-a/b missing-appRoute papercut (same class as entry 766's).
+  Inventory rank-2 row annotated [FAINT HALF RETIRED].
+- **S9 probes (merged):** (1) the ready-lag 6-tick anomaly is
+  **route-specific** — a lab `factoryLegal` fixture with ONIX as player
+  lead matches the quarantined species formula with **0-tick residual**;
+  the formula is species-correct on 4 species and the canonical anchor
+  route carries its own +6 (mechanism still unnamed). (2) DESTIN's real
+  bench probed: GROVYLE slot 0 (real opener, previously unrecorded) /
+  MURKROW slot 1 / PIDGEOTTO slot 2; real send-out order
+  GROVYLE→PIDGEOTTO→MURKROW — the switch-in flip needs the real AI
+  replacement rule, not next-index.
+- **Round 10 dispatched (final work round before wind-down):** main M10
+  — un-quarantine by route discrimination (species formula on
+  staged/generated intros, canonical keeps its calibrated flat lag;
+  715/715 hard), then MAGNETON affine-tint isolation (+ shadow verdict
+  if unblocked), then 444/536. Side S10 — ported switch-policy vs the
+  two canonical replacements (PIDGEOTTO at turn 5, MURKROW at turn 13)
+  from committed evidence, honest-stop if inputs unreconstructable.
+- **Notes:** wind-down after round 10: fold check, final gate, #56/#39
+  trims, session report.
+
+---
 ## 768 — [SUPERVISOR 2026-07-31 ~03:15] Round-8 regression QUARANTINED (715/715 restored); rank-2 groundwork merged; round 9: faint-half flip + discriminating probes
 
 - **State:** union gate green **558 files / 5677 tests + 1 deliberate
@@ -91,55 +121,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** the quarantine decision priority: committed acceptance pins
   outrank open evidence traces; no formula ships while its 4th data
   point contradicts it without a mechanism.
-
----
-## 767 — [BOUNDED MAIN WORKER 2026-07-31 ~03:15] #56: species-keyed ready lag applied, MAGNETON app-side proof built, ONIX regression found
-
-- **State:** YOSHI **699/751** (up from 650/751 — real personalities +
-  species-keyed ready lag both landed). MAGNETON app-side proof built:
-  **424/751** (new; exact 0..423, diverges 424..750 with no recovery —
-  masks a clean shadow-branch check, see below). GROVYLE
-  `battle-command-generated-off` **128/128** unchanged. GROVYLE
-  `interactive-generated-intro-off` **699/715, regressed from 715/715**
-  (honest, characterized — not silently fixed, see Did). Battle-2 insurance
-  pins unaffected: `battle2-turn1-rockslide` **191/191**,
-  `battle2-action-menu-dense` **209/209**. `npx tsc --noEmit` clean; focused
-  suite (`cryDurationsExtraction`, `factoryBattleStartIntro`,
-  `executableFrontierRatchet`, `factoryRoundBattleOrchestrator`) **44/44**
-  green. Full `npm test`/`npm run build` **not run this step** per the brief
-  (side worker live concurrently).
-- **Did:** (1) `GENERATED_PLAYER_READY_LAG` (flat 185) replaced with
-  `generatedPlayerReadyLag(state)` keyed off the player's own active species
-  (`98 + cryDurationTicks(playerLeadSpecies) + generatedPlayerVisualLag`),
-  per docs/intro-cry-shadow-evidence.md Part 1. Settled the "98 vs 99"
-  residual by fixing `cry-durations.json`'s extractor
-  (`Math.round`→`Math.ceil`, matching the real per-VBlank "still playing"
-  poll) and regenerating the 376-species file — invariant for the already-
-  validated opponent dispatch-delay species, resolves DELCATTY's own +1.
-  (2) Built the MAGNETON `AppStage` (`generatedBattleStartIntroMagnetonStage`,
-  `tools/compare/appTrace.ts`) + compare trace
-  (`factory-arbitrary-intro-magneton-off.json`), reproducing trainerId 109/
-  RICARDO exactly. (3) Staged real ROM personalities (from
-  `bin/oracle lab`'s own dense `state.parties`) in both the YOSHI and
-  MAGNETON stages, closing the round-6 gender-icon residual. (4) Found (not
-  fixed) a **new regression**: `interactive-generated-intro-off`'s real
-  canonical Battle-1 lead (ONIX) needs ready-lag 185, but the 3-species
-  formula predicts 179 — a clean 6-tick miss that survived several
-  hypotheses (extraction bug, line-length, floor/max term). Left
-  precisely characterized rather than force-fit. Full write-up:
-  `docs/trainer-pic-off-window-scout.md` §D "Round 7 resolution".
-- **Next:** ISSUES #56 — item 1 has a real regression (ONIX/canonical-
-  route ready-lag) needing a 5th data point or a source read of
-  `battlerAnimsDone`; item 3's MAGNETON shadow-branch check is blocked by
-  an earlier, unrelated affine-emerge/tint divergence in
-  `drawGeneratedOpponentRelease` (first at handoff+19, well before the
-  shadow's own handoff+104 onset) that needs isolating against a second
-  species; item 2 (frames 444/536) untouched this round — no budget left
-  after the above.
-- **Notes:** `tools/extract/extract-cry-durations.ts` and
-  `src/data/gen/cry-durations.json` are normally side-lane files; touched
-  here because task 1 required the ceil fix to reconcile the three
-  triangulated species — flagged for the supervisor's awareness of the
-  lane boundary, not hidden.
-
----
