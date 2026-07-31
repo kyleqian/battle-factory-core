@@ -1,3 +1,40 @@
+## 776 — [SUPERVISOR FINAL WIND-DOWN 2026-07-31 ~04:50] Session CLOSED: 12 rounds / 24 workers / 0 failed steps. Gate 5 ticked; #39 ranks 1-2 retired + rank-3 groundwork; #56 items 1+3 resolved
+
+- **State:** master green at FINAL gate **561 files / 5698 tests + 1
+  deliberate animation-lane skip**, production build clean, tree clean
+  at this commit. `animation-main` fold delta **0** throughout. Only the
+  permanent `.worktrees/animation-main` remains; no orphan branches.
+  **DEFERRED.md empty all session — no open deferred questions.**
+- **Round 12 (verified):** M12 extracted `gEnemyMonElevation` (61
+  species) and applied the solved origin rule at all three
+  settled-opponent draw sites + made the elevated shadow persist into
+  the command phase — supervisor re-ran **MAGNETON 424→703/751** and
+  **YOSHI 699/751 held**; shadow branch **verified**; #56 item 3 marked
+  RESOLVED. S12 banked rank-3 (turn-5 KO → PIDGEOTTO switch-in → Sitrus)
+  equivalence for BOTH halves (6/6; Sitrus heal flows through the
+  already-ported `HOLD_EFFECT_RESTORE_HP` + generic
+  `resolveBattleStringLines`) with two findings: **#57 filed** (shared
+  staging helper drops caller maxHP/item) and the inventory's "generic
+  item projection missing" note **corrected** (only presentation-TIMING
+  projection remains for the rank-3 flip).
+- **Session totals (2026-07-30 22:10 → 07-31 04:50, 12 rounds, 24
+  workers, 0 failed steps):** GATE 5 TICKED on its audited evidence
+  chain (entry 772); #39 ranks 1 and 2 fully retired + rank-3
+  equivalence banked; #56 items 1 (route-discriminated ready lag) and 3
+  (elevation rule) resolved; #55/#57 filed; one worker pin-regression
+  caught → quarantined → probe-discriminated → properly un-quarantined;
+  suite 5586 → 5698 tests.
+- **Next session (ordered, per user's Gate 5 → #39 → Gate 6):**
+  (i) #39 rank-3 flip (checklist banked in entry 775 + S12's final
+  report; needs the presentation-timing projection named there);
+  (ii) #57 small fix (then retire rank-3's local staging workaround);
+  (iii) #56 remainder (frames 444/536 + idle-bounce family; canonical
+  +6 route term); (iv) ranks 4-9; (v) Gate 6 breadth.
+- **Notes:** papercuts banked; ledger numbering instruction held for
+  rounds 10-12 (no new collisions); no harness asks outstanding. This
+  entry supersedes 772/774 as the resume point.
+
+---
 ## 775 — [BOUNDED MAIN WORKER 2026-07-31 ~05:05] #56 item 3 FIXED: gEnemyMonElevation extracted + applied; MAGNETON 424→703/751
 
 - **State:** `npx tsc --noEmit` clean; focused suite 520/520 green (incl. new

@@ -13,6 +13,62 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 779 — [BOUNDED MAIN WORKER 2026-07-31 ~09:45] #39 rank-3 FULLY RETIRED: Sitrus heal content flipped (half 2 of 2) + #57 remainder closed
+
+- **State:** `npx tsc --noEmit` clean; focused suite (turn5Resolution
+  AdapterEquivalence, turn13ResolutionAdapterEquivalence, battleScene,
+  executableFrontierRatchet, battleMenu, battleMenuIdle, fightSubmenu,
+  battleSetup, destinCanonicalReplacements, stagePlayerHitChainMaxHpItem)
+  **514/514 green**, no new ratchet barriers, no new canonical-recording
+  imports. Tree clean at this commit. Full `npm test`/`npm run build`
+  intentionally not run (side worktrees `side-20260731-090707` and
+  `side-20260731-093409` both live concurrently, per brief, precedent
+  entries 775/777).
+- **Did (2 commits):** (1) **#57 remainder** (`14c4295b`): swapped
+  `turn5ResolutionAdapter.ts`'s `stageTurn5KoHitChainToTerminalMachineState`
+  off its own local `battler()`/`createBattleScriptRulesContext`/
+  `createBattleScriptStatusRulesExecution`/`stepBattleScriptMachine` loop
+  onto the now-fixed shared `stagePlayerHitChainToTerminalMachineState`
+  (`387a34a1`) — deleted ~120 lines of local workaround; every existing
+  equivalence test stayed green unchanged, proving the swap safe. (2)
+  **Sitrus half flip** (`54278249`): `battleScene.ts`'s
+  `TURN5_SITRUS_HEAL_HP_START`/`_END` and `TURN5_SITRUS_HEAL_LINE1`/`_LINE2`
+  now source from `resolveTurn5SitrusAdapter()` (exported, were unexported
+  hand literals) instead of independently re-stated constants; the
+  presentation-TIMING curves (`turn5SitrusHealTextVisibleChars`,
+  `turn5SitrusOnixHp`'s animation shape, `turn5SitrusRingMatrix`,
+  `turn5SitrusResettledBounceTick`) are untouched, still their own
+  oracle-pixel-fit closed forms — only the content/keying changed, per the
+  brief's own explicit boundary. `TURN5_PRESENTATION_TIMING_NOT_STAGED`
+  deleted; the equivalence test's "documented gap" block replaced with real
+  pins comparing `battleScene.ts`'s exported constants against a fresh,
+  independently-computed `resolveTurn5SitrusAdapter()` call in the test
+  (rank-1/2's own "pin the live production path" convention). No new
+  turn/battle-number branch added; `SWITCHIN_SENTOUT_TEXT_START_TICK` stays
+  the absolute anchor half 1 left.
+- **All mandated pins hold exactly** (oracle-verified, entry-777
+  baselines): turn5-rockslide 256/256, turn5-faint 110/110, turn5-switchin
+  241/241, turn5-sitrus-a/b/c/d 110/82/181/133, turn5-endeavor 254/254,
+  turn5-menu 42/42, turn5-healthbox 55/55, turn5-sentout 141/141; insurance
+  pins turn13-dragonbreath-faint 141/141, turn13-switchin 242/242,
+  turn13-sandattack 190/190, interactive-generated-intro-off 715/715,
+  battle-command-generated-off 128/128.
+- **Docs:** `docs/battle-scene-retirement-inventory.md` rank-3 row and its
+  "Blocked work" item both updated to RETIRED/RESOLVED, citing `5db34996`
+  + `54278249`. #39/#57 in ISSUES.md deliberately left untouched per this
+  step's own brief — **#57 remainder is closed**; supervisor deletes the
+  entry after verification. #39 rank-3 is now fully retired (both halves);
+  the still-open remainder is `turn5KoDismissElapsed`/`turn5Resolved`'s own
+  mirroring (unchanged this step, same shape as rank 2's own analogous open
+  note — see the inventory row).
+- **Next:** ranks 4-9 (rank 4 next per the inventory's own recommended
+  order: Turns 6-8 Pidgeotto loop, blocked on a generic Scene-OFF stat/
+  no-effect/item controller presentation — see the inventory's "Blocked
+  work" section); #56 remainder (frames 444/536 + idle-bounce family) is
+  S2's own live track; Gate 6 breadth after.
+- **Notes:** no papercuts this step.
+
+---
 ## 778 — [SUPERVISOR 2026-07-31 round 1] M1 (#39 rank-3 half 1) + S1 (#57 core fix) both verified and merged; round 2 dispatching
 
 - **State:** master = M1's flip + S1's `387a34a1` merged (`b9fad3f7`);
@@ -106,40 +162,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no papercuts beyond the one fixed above (banked in the
   commit, not PAPERCUTS.md — a real bug in committed data, not dev-loop
   friction).
-
----
-## 776 — [SUPERVISOR FINAL WIND-DOWN 2026-07-31 ~04:50] Session CLOSED: 12 rounds / 24 workers / 0 failed steps. Gate 5 ticked; #39 ranks 1-2 retired + rank-3 groundwork; #56 items 1+3 resolved
-
-- **State:** master green at FINAL gate **561 files / 5698 tests + 1
-  deliberate animation-lane skip**, production build clean, tree clean
-  at this commit. `animation-main` fold delta **0** throughout. Only the
-  permanent `.worktrees/animation-main` remains; no orphan branches.
-  **DEFERRED.md empty all session — no open deferred questions.**
-- **Round 12 (verified):** M12 extracted `gEnemyMonElevation` (61
-  species) and applied the solved origin rule at all three
-  settled-opponent draw sites + made the elevated shadow persist into
-  the command phase — supervisor re-ran **MAGNETON 424→703/751** and
-  **YOSHI 699/751 held**; shadow branch **verified**; #56 item 3 marked
-  RESOLVED. S12 banked rank-3 (turn-5 KO → PIDGEOTTO switch-in → Sitrus)
-  equivalence for BOTH halves (6/6; Sitrus heal flows through the
-  already-ported `HOLD_EFFECT_RESTORE_HP` + generic
-  `resolveBattleStringLines`) with two findings: **#57 filed** (shared
-  staging helper drops caller maxHP/item) and the inventory's "generic
-  item projection missing" note **corrected** (only presentation-TIMING
-  projection remains for the rank-3 flip).
-- **Session totals (2026-07-30 22:10 → 07-31 04:50, 12 rounds, 24
-  workers, 0 failed steps):** GATE 5 TICKED on its audited evidence
-  chain (entry 772); #39 ranks 1 and 2 fully retired + rank-3
-  equivalence banked; #56 items 1 (route-discriminated ready lag) and 3
-  (elevation rule) resolved; #55/#57 filed; one worker pin-regression
-  caught → quarantined → probe-discriminated → properly un-quarantined;
-  suite 5586 → 5698 tests.
-- **Next session (ordered, per user's Gate 5 → #39 → Gate 6):**
-  (i) #39 rank-3 flip (checklist banked in entry 775 + S12's final
-  report; needs the presentation-timing projection named there);
-  (ii) #57 small fix (then retire rank-3's local staging workaround);
-  (iii) #56 remainder (frames 444/536 + idle-bounce family; canonical
-  +6 route term); (iv) ranks 4-9; (v) Gate 6 breadth.
-- **Notes:** papercuts banked; ledger numbering instruction held for
-  rounds 10-12 (no new collisions); no harness asks outstanding. This
-  entry supersedes 772/774 as the resume point.
