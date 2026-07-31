@@ -1,3 +1,25 @@
+## 748 — [BOUNDED MAIN WORKER 2026-07-30 ~17:03] Slice 7 COMPLETE at honest HAUNTER checkpoint
+
+- **State:** landed in `15e9ef33` + `9a94caab`; focused routing/ratchet
+  acceptance **2 files / 20 tests**, full gate green at **550 files / 5579
+  tests + 1 deliberate animation-lane skip**, production build clean.
+- **Did:** the explicit-OFF real-anchor trace drafts HAUNTER/ONIX/BAYLEEF,
+  traverses both rooms and generated intro, selects SHADOW PUNCH, and proves
+  release/name, action menu, move menu, and use-message exact **4/4**. The
+  existing different-lead test proves ONIX's species/moves/PP and move-slot-2
+  decision replace HAUNTER without adapter changes; a new automated contract
+  pins normal dev startup and reset to the generated default.
+- **Next:** supervisor decides whether the newly exposed FURY CUTTER response
+  remainder warrants another bounded slice before #53 bookkeeping.
+- **Notes:** **Yes, #53's user-visible ONIX/ROCK-SLIDE canonical-railroad
+  symptom is gone**: the drafted HAUNTER and selected SHADOW PUNCH own the
+  live turn and next request. Trace is honestly **4/6**: frames 2263/2274
+  each differ by exactly **27px**, solely ROM HAUNTER HP **137/138** versus
+  app **138/138** after FURY CUTTER; opponent HP and HAUNTER PP **19/20** are
+  aligned. All **25/25** immutable rows exact; no appStage, existing capture
+  change, new barrier, battle/turn/tick branch, issue edit, or Scene-ON work.
+
+---
 ## 747 — [BOUNDED MAIN WORKER 2026-07-30 ~15:36] Slice 6 complete: orchestrator-owned endings
 
 - **State:** landed in `cca9d54c` + `429c170b`; focused acceptance **6 files /
