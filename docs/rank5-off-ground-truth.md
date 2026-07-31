@@ -25,6 +25,159 @@ turn10-menu, turn11-featherdance, turn11-rockslide, turn11-menu,
 turn12-aerialace, turn12-rockslide-miss, turn12-menu — flagged for whoever
 picks up the next slice, not silently dropped.
 
+## Slice 2 — turn10-rockslide banked, turn10-aerialace settle extended
+
+New session, same 55-minute bounded-worker contract. Picked up exactly where
+the "Remaining work" section below (as it stood before this slice) left off.
+Banked **turn10-rockslide** (the biggest of the nine windows) plus widened
+**turn10-aerialace-off.json**'s own settle per item 3 of the assigned brief.
+See the bottom of this doc for the up-to-date "Remaining work" after this
+slice.
+
+### Methodology change for this slice: scout-then-pin, made cheap by reusing existing ON dossiers
+
+`turn10-rockslide.json` and `turn10-aerialace.json` share **byte-identical
+`segments`** (both sum to 13306 frames, 92 segments) — they are the same
+underlying turn-10 replay, just pinning different sub-ranges. Since button
+presses are literal fixed-frame-offset script positions (unaffected by scene
+mode), the last player input in this file fires at frame 12304-12306 (an
+`A` press), after which a **1000-frame stretch with zero further input**
+carries both AERIAL_ACE and ROCK_SLIDE to completion and back to a settled
+turn-11 menu — this is the actual 961-tick-wide dynamic content the brief
+flagged.
+
+Rather than blind-guess a shifted dense range, ran one **coarse stride-4
+scratch scout** (uncommitted, `/tmp` only) over the full no-input tail
+(12306-13306, 250 captures) against the OFF oracle, then cross-referenced
+every sha transition against `docs/turn10-notes.md` — the existing ON-era
+dossier for this exact window, which already cites specific shas at specific
+ON ticks (kickoff-text-settle, message-transition shas, HP-drain windows,
+the "It's super effective!" hold, the settled turn-11-menu sha, and even a
+documented single-tick idle-bob blip). Every one of those cited shas turned
+up byte-identical in the OFF scout, just earlier — turning "scout landmarks"
+into a direct byte-for-byte cross-check instead of a guess, and pinpointing
+exactly where to place the dense stride-1 windows before spending any oracle
+budget on them.
+
+### turn10-rockslide-off.json + turn10-rockslide-off-b.json (Onix ROCK_SLIDE, Pidgeotto ← target)
+
+Commands:
+```sh
+bin/oracle run tools/compare/traces/turn10-rockslide-off.json -o <dir>
+bin/oracle run tools/compare/traces/turn10-rockslide-off-b.json -o <dir>
+```
+
+Sibling: `turn10-rockslide.json` (ON-era, captureFrames span 12345-13306).
+Split into two OFF files because the actual dynamic range found by the scout
+(12546-12930, see below) is 385 ticks — over the oracle's 256-per-request
+cap — same precedent as `turn9-quickattack-b`:
+
+| New file | Capture range (stride) | Oracle captures |
+| --- | --- | --- |
+| `turn10-rockslide-off.json` | 12546–12800 (1) | 255 |
+| `turn10-rockslide-off-b.json` | 12800–12930 (1) | 131 |
+
+- **12546–12561**: ROCK_SLIDE's message-box-open transition, changing sha
+  almost every frame. The exact 4-sha sequence `739aa4ce2f99`→`0b067c2ab6fb`→
+  `c780691a9702`→`b1c3ca06760f` at OFF ticks **12543-12546** (captured in the
+  widened aerialace trace, see below — this transition's start overlaps that
+  file's tail) is **byte-identical** to `docs/turn10-notes.md`'s own cited
+  "message-box transition into 'ONIX used ROCK SLIDE!'" sequence, there cited
+  at **ON ticks 12562-12565** — same 4 shas, same order, landing here ~19
+  ticks earlier.
+- **12562–12605**: kickoff text held flat (`6a8a21d232da`, 44 ticks) — this
+  sha is **byte-identical** to the ON dossier's own citation for "ROCK_SLIDE
+  kickoff text holds through the impact animation" (there ON ticks
+  ~12581-12587before the animation). **No rock-prop content appears** in
+  this held span — under OFF the hold runs straight into the generic
+  wobble/HP-drain below instead of the ON dossier's own much longer
+  "12588-~12780" span (which is padded out by ROCK_SLIDE's own rock-prop
+  drop animation, class c) — confirming the class-(c)-absence rule for
+  ROCK_SLIDE a second time (turn9-rockslide-off was the first), this turn's
+  own spot-check.
+- **12606–12645**: generic healthbox-wobble/flicker four-way alternation
+  (`317f6f46998e`/`699a05c5413b`/`3d5792280445`/`d2d13e0e77b9`, then
+  `fa297869b83d`/`6a8a21d232da`) — Scene-agnostic, same shape as previously
+  documented in this arc.
+- **12646–12689**: HP-drain (Pidgeotto), changing sha nearly every frame —
+  ordinary drain cadence.
+- **12689–12765**: flat (`54cbcb4fc2a4` held 76 ticks) — "It's super
+  effective!" result text settled, same duration order-of-magnitude as
+  turn9-rockslide's own 76-tick hold at the mirrored point in that turn.
+- **12766**: `25874032e009` — text-clear begins; **byte-identical** to the ON
+  dossier's own citation for this exact step ("secondary-effect/turn-end,
+  text clears"), there cited at ON tick 12878/12892 — lands here ~112-126
+  ticks earlier.
+- **12773**: `e28bc5375a15` — settled "What will ONIX do?" turn-11 menu;
+  **byte-identical** to the ON dossier's own citation (ON ticks
+  12899/12901/13306) — the largest compression yet in this arc, up to ~533
+  ticks earlier depending which ON citation is used as the reference point,
+  continuing the compounding-compression pattern the previous slice
+  documented (compression grows the further into a turn/no-input stretch the
+  content sits).
+- **12774**: `63e2d272402d` — one-tick blip; **byte-identical** to the ON
+  dossier's own cited "single-tick pixel blip at turn-11 menu rest...
+  consistent with... Onix on-field idle-bob sprite animation," there at ON
+  tick 12900. Confirms this pre-existing Scene-agnostic mechanism reproduces
+  under OFF too.
+- **12775–12930** (spanning the rest of `-off.json` plus all of `-off-b.json`):
+  the idle-bob cycle continues cleanly — the same four shas
+  (`e28bc5375a15`/`fdfbd14d06b5`/`4cb8009fcb8f`/`63e2d272402d`) repeat with a
+  ~36-37-tick period, plus rare single-tick anomalies (`ca8165a07a63`,
+  `a57fbc581b11`) consistent with a second, slower periodic element. No new
+  narrative content appears anywhere in this span — a strong settle
+  confirmation (3+ full bob cycles captured in `-off-b.json` alone), unlike
+  the ON pin's own sparse tail sampling (12930/12937/.../13306) which could
+  easily have aliased onto the same phase of the bob cycle by luck.
+- **Desync verdict: none.** Every distinctive sha the ON dossier names for
+  this window reproduces byte-identical under OFF, only shifted earlier
+  (19 to ~530 ticks depending how deep into the no-input stretch); no
+  move-specific ROCK_SLIDE content (rock-prop animation) appears anywhere —
+  confirms the class-(c)-absence rule for ROCK_SLIDE a second time this
+  program.
+- **App baseline**: `turn10-rockslide-off.json` → **19/255**;
+  `turn10-rockslide-off-b.json` → **0/131**. Both low as expected (app still
+  runs ON-fit class-c/timing code); not chased.
+- **Determinism**: `turn10-rockslide-off.json` re-run twice back-to-back,
+  **0/255 sha mismatches**.
+- **Range-choice rationale**: the scout showed the window's actual content
+  fully settles by OFF tick ~12773, while the ON pin's own captureFrames
+  reach out to 13306 — 533 ticks of the ON pin's own range is dead idle-bob
+  cycling with zero new content once cross-referenced. The dense pins
+  deliberately stop at 12930 (3+ confirmed bob cycles) rather than chasing
+  the ON pin's own endpoint. Starting point 12546 was chosen because that's
+  exactly where AERIAL_ACE's own settled result text (`0802bec48f53`, see
+  below) transitions into ROCK_SLIDE's kickoff — i.e. the natural boundary
+  between the two moves' own windows, found precisely (not guessed) from the
+  widened aerialace trace's own tail.
+
+### turn10-aerialace-off.json — settle extended (item 3)
+
+Command: `bin/oracle run tools/compare/traces/turn10-aerialace-off.json -o <dir>`
+
+Widened this file's own `captureFrames` from 12345-12460 (116 captures, its
+state at the end of the previous slice) to **12345-12550 (206 captures)** —
+still dense stride-1, still under the 256 cap — specifically to reach past
+the point flagged as "still mid-transition" last time.
+
+- **12461**: settles to `0802bec48f53` — **byte-identical** to the ON
+  dossier's own cited sha for "'It's not very effective..' text holds," there
+  at ON tick 12540. Lands here **79 ticks earlier** (12461 vs 12540).
+- **12461–12542**: holds flat (82 ticks) — the settle the previous slice
+  asked for; comparable order-of-magnitude to the ON dossier's own measured
+  hold span (12470-12540, ~70 ticks).
+- **12543–12546**: transitions into ROCK_SLIDE's own kickoff box-open —
+  the exact 4-sha sequence cited above (byte-identical to the ON dossier's
+  12562-12565 citation), confirming this is genuinely AERIAL_ACE's own
+  settle-then-handoff, not an artifact of an arbitrarily-chosen cutoff.
+- **Settle tick recorded**: **OFF tick 12461**, sha `0802bec48f53`, holding
+  through **12542** (82 ticks) before ROCK_SLIDE's box-open begins.
+- **App baseline**: **82/206 frames matched** (up from 19/116 pre-extension —
+  expected, the added range is mostly a long flat hold the app already
+  happens to render close to correctly at those exact frames; not chased,
+  still an honest low-context number for the window as a whole).
+- **Determinism**: re-ran twice back-to-back, **0/206 sha mismatches**.
+
 New files, each built from its ON-era sibling's **unmodified `segments`**
 (verbatim button stream — no input-timing edits, per the hard constraint)
 plus `"oracleProfile": "battle-scene-off"`, `"appRoute": "canonical-recorded"`,
