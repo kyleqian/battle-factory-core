@@ -150,7 +150,12 @@ turn-7/8 FEATHER_DANCE staged+flipped; `0769ccc6` stat-fall banner
 reads each turn's own staged stat; `40c969e5`+`ef971686` BIND
 kickoff/miss onto staged facts (on-hit trap-start staged as kernel-only
 receipt — the canonical line always misses; `{message,missMessage}`
-bridge + additive entryLabel param landed). Rank-5 unblock evidence
+bridge + additive entryLabel param landed). Rank 9 is **fully
+retired** (2026-07-31, `3f850e37`): postwin fade + WIN-flip census
+moved onto `terminalResolution`, four legacy Turn-17 clock mirrors +
+dead `turn17.ts` deleted (`turn17MenuRedrawElapsed`'s live redraw
+anchor rehomed as `FightSubmenuState.menuRedrawElapsed`). Rank-5
+unblock evidence
 banked (`docs/rank5-effect-visibility-scout.md`, policy PROPOSED — see
 inventory row 5; adoption is a next-session start decision). Earlier
 progress:

@@ -4,6 +4,53 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+> **STANDING ARRANGEMENT (user directive, 2026-07-26):** the animation
+> program runs under its own supervisor (`./run-supervisor.sh --lane
+> animation`, guide `ANIMATION_SUPERVISOR.md`) in the persistent
+> `.worktrees/animation-main` worktree on branch `animation-main`. Main
+> supervisor: never brief animation work; fold `animation-main` into
+> `master` at orient when it has new commits (details in SUPERVISOR.md's
+> parallel-workers note). This replaces the temporary animation pause —
+> entry 468's animation items are the animation supervisor's backlog now.
+
+## 791 — [SUPERVISOR FINAL CLOSE 2026-07-31] Bonus round 8 verified: rank 9 ALSO retired. Session: 8 rounds / 15 workers / 0 failed steps; ranks 3, 4, 9 all fully retired today
+
+- **State:** master green at the definitive FINAL gate **5736 tests
+  passed + 1 deliberate animation-lane skip** (supersedes entry 789's
+  5739 gate; −3 = M8's deleted turn17 self-tests, accounted), build
+  clean, tree clean at this commit.
+  Supervisor independently re-ran turn17-rung7a **255/255**, rung8b
+  **118/118**, turn13-switchin **242/242** post-M8. `turn17.ts` deleted;
+  animation fold delta 0 at this close (folded `555bab3f` earlier at
+  `e36a17c6`). Only permanent `.worktrees/animation-main` remains; no
+  orphan branches; **DEFERRED.md empty all session.**
+- **Bonus round 8 (M8, verified):** rank 9 fully retired (`3f850e37`) —
+  postwin fade + WIN-flip census now read `state.terminalResolution`;
+  four legacy Turn-17 clock mirrors + dead `turn17.ts` deleted. M8
+  caught mid-ladder that `turn17MenuRedrawElapsed` was NOT a pure
+  mirror (redraw anchor during the pre-terminalResolution gap; naive
+  deletion broke rung7a to 0/255 and the pins caught it) and rehomed it
+  as `FightSubmenuState.menuRedrawElapsed`. Supervisor follow-up
+  `712ab295` closed the LAST of the appRoute papercut class
+  (turn17-rung1..6): rung2-6b exact (221/143/200/113/255/41);
+  **rung1 90/118 is PRE-EXISTING** (identical against pre-M8 src via
+  discrimination run), previously hidden behind the crash — its 28
+  frames are un-characterized next-session work.
+- **Ledger repair:** M8's edit displaced the STANDING ARRANGEMENT
+  blockquote below its entry; supervisor restored it to the ledger top.
+- **Next session (ordered; refines entry 789's list):** (i) rank-5
+  OFF-pin policy adopt-or-reject (inventory row 5); (ii) #56 frame-444
+  described fix behind a 751-frame regression + frame-536 probe
+  extension; (iii) animation handoff: five anim tables into
+  src/data/gen/ (side lane); (iv) characterize turn17-rung1's 28
+  newly-visible frames; (v) rank 6 (turns 1-4) — the largest remaining
+  #39 window family; (vi) #56 +6 route term. #55 stays parked.
+- **Notes:** remaining #39 inventory: ranks 5 (policy-gated), 6, 7
+  (two-turn owner), 8 (burn/end-turn projection) + the state-field
+  chain (turnNResolved/PP reconstruction). This entry supersedes
+  789/790 as the resume point.
+
+---
 ## 790 — [BOUNDED MAIN WORKER 2026-07-31 ~13:05] #39 rank 9 (postwin owner handoff) FULLY retired: postwin fade + WIN-flip census moved onto `terminalResolution`, four legacy Turn-17 clock mirrors + dead `turn17.ts` deleted
 
 - **State:** `npx tsc --noEmit` clean; focused suite (48 files touching
@@ -80,14 +127,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   frames 444/536 and +6 route term remain parked per entry 789.
 
 ---
-> **STANDING ARRANGEMENT (user directive, 2026-07-26):** the animation
-> program runs under its own supervisor (`./run-supervisor.sh --lane
-> animation`, guide `ANIMATION_SUPERVISOR.md`) in the persistent
-> `.worktrees/animation-main` worktree on branch `animation-main`. Main
-> supervisor: never brief animation work; fold `animation-main` into
-> `master` at orient when it has new commits (details in SUPERVISOR.md's
-> parallel-workers note). This replaces the temporary animation pause —
-> entry 468's animation items are the animation supervisor's backlog now.
 
 ## 789 — [SUPERVISOR FINAL WIND-DOWN 2026-07-31] Session CLOSED: 7 rounds / 14 workers / 0 failed steps. #39 ranks 3+4 FULLY retired; #57+#58 closed+deleted; #56 two probes resolved/sharpened; rank-5 policy PROPOSED
 
@@ -134,53 +173,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   evidence. Sonnet side workers ran the full suite in their own
   worktrees despite briefs 3x (harmless, own node_modules; no action).
   This entry supersedes 788/787 as the resume point.
-
----
-## 788 — [BOUNDED MAIN WORKER 2026-07-31 ~12:10] #39 rank-4 slice 5 (final rank-4 slice) landed: turn-8 BIND kickoff+miss flipped
-
-- **State:** `npx tsc --noEmit` clean; focused suite (new
-  turn8BindPresentationStaging, turn78FeatherDancePresentationStaging,
-  turn67RockSlidePresentationStagingEquivalence, executableFrontierRatchet,
-  turn13/turn5ResolutionAdapterEquivalence, battle2CommandAdapterEquivalence,
-  battleScene, battleMenu, battleMenuIdle, fightSubmenu, battleSetup,
-  destinCanonicalReplacements — 13 files) **559/559 green**, no new ratchet
-  barriers, no new canonical-recording imports. Tree clean at this commit.
-  Full `npm test`/`npm run build` intentionally not run (side worktree live
-  concurrently, per brief).
-- **Did (3 commits):** (1)+(2) additive infra: `turn1RockSlidePresentationStaging.ts`'s
-  shared `stagePlayerHitChainToTerminalMachineState` gained an optional
-  `entryLabel` param (defaults to the existing hardcoded entry, every
-  pre-existing caller unaffected) plus `B_WAIT_TIME_SHORT` resolution (BIND's
-  own miss branch is the first player-attacker chain to reach a `pause
-  B_WAIT_TIME_SHORT` step); `presentationEventWindowBridge.ts` gained the
-  scout-scoped third bridge shape, `resolveMoveMissedKickoffPresentationWindowContent`
-  (`{message, missMessage}`, keyed on `BattleScript_PrintMoveMissed`/
-  `BattleScript_MoveMissed` — a miss re-labels the SAME fixed
-  `STRINGID_USEDMOVE` kickoff message under a different `sourceLabel` than a
-  hit does). New `turn8BindPresentationStaging.ts` stages Onix's real turn-8
-  BIND through `BattleScript_EffectTrap` (not the generic hit-chain entry)
-  via the shared helper: the canonical MISS uses the real seed carried
-  forward from `turn78FeatherDancePresentationStaging.ts`'s own turn-8
-  post-roll value (680271464 → 3780969147, byte-identical to
-  `docs/turn8-notes.md` §3's tick-9844 row); the on-hit trap-start branch is
-  staged too but only as a kernel-only receipt (arbitrary already-documented
-  seed, honestly labeled as NOT turn 8's real outcome — no renderer consumes
-  it, the canonical line always misses). (3) flipped `TURN8_BIND_LINE1/2`/
-  `TURN8_MISS_LINE1/2` in `battleScene.ts` onto the staged resolvers —
-  byte-identical text, both stay exported at their existing names
-  (`TURN8_MISS_LINE1/2` still reused verbatim by turns 12/14's own miss
-  windows).
-- **All mandated pins hold exact:** turn8-bind-a **256/256**, turn8-bind-b
-  **66/66**, turn8-feathers 162/162, turn7-feathers 145/145, turn6-statfall
-  127/127, turn6-featherdance 90/90, turn7-rockslide-a/d 256/19. Insurance:
-  turn5-rockslide 256/256, turn13-sandattack 190/190,
-  interactive-generated-intro-off 715/715, battle-command-generated-off
-  128/128.
-- **Rank 4 (`docs/rank4-prep-scout.md`) is now fully closed** — all 5 slices
-  landed across this and prior sessions.
-- **Next:** rank 4 has no remaining slices. Per entry 787, rank-5's Scene-OFF
-  effect-visibility policy (PROPOSED, `docs/` scout `350424ed`) is queued for
-  adoption at a future session's start; #56's frames 444/536 OAM probe (S7)
-  may still be in flight in a side worktree. No papercuts beyond what prior
-  entries already banked.
-

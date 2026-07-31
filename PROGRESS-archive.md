@@ -1,3 +1,52 @@
+## 788 — [BOUNDED MAIN WORKER 2026-07-31 ~12:10] #39 rank-4 slice 5 (final rank-4 slice) landed: turn-8 BIND kickoff+miss flipped
+
+- **State:** `npx tsc --noEmit` clean; focused suite (new
+  turn8BindPresentationStaging, turn78FeatherDancePresentationStaging,
+  turn67RockSlidePresentationStagingEquivalence, executableFrontierRatchet,
+  turn13/turn5ResolutionAdapterEquivalence, battle2CommandAdapterEquivalence,
+  battleScene, battleMenu, battleMenuIdle, fightSubmenu, battleSetup,
+  destinCanonicalReplacements — 13 files) **559/559 green**, no new ratchet
+  barriers, no new canonical-recording imports. Tree clean at this commit.
+  Full `npm test`/`npm run build` intentionally not run (side worktree live
+  concurrently, per brief).
+- **Did (3 commits):** (1)+(2) additive infra: `turn1RockSlidePresentationStaging.ts`'s
+  shared `stagePlayerHitChainToTerminalMachineState` gained an optional
+  `entryLabel` param (defaults to the existing hardcoded entry, every
+  pre-existing caller unaffected) plus `B_WAIT_TIME_SHORT` resolution (BIND's
+  own miss branch is the first player-attacker chain to reach a `pause
+  B_WAIT_TIME_SHORT` step); `presentationEventWindowBridge.ts` gained the
+  scout-scoped third bridge shape, `resolveMoveMissedKickoffPresentationWindowContent`
+  (`{message, missMessage}`, keyed on `BattleScript_PrintMoveMissed`/
+  `BattleScript_MoveMissed` — a miss re-labels the SAME fixed
+  `STRINGID_USEDMOVE` kickoff message under a different `sourceLabel` than a
+  hit does). New `turn8BindPresentationStaging.ts` stages Onix's real turn-8
+  BIND through `BattleScript_EffectTrap` (not the generic hit-chain entry)
+  via the shared helper: the canonical MISS uses the real seed carried
+  forward from `turn78FeatherDancePresentationStaging.ts`'s own turn-8
+  post-roll value (680271464 → 3780969147, byte-identical to
+  `docs/turn8-notes.md` §3's tick-9844 row); the on-hit trap-start branch is
+  staged too but only as a kernel-only receipt (arbitrary already-documented
+  seed, honestly labeled as NOT turn 8's real outcome — no renderer consumes
+  it, the canonical line always misses). (3) flipped `TURN8_BIND_LINE1/2`/
+  `TURN8_MISS_LINE1/2` in `battleScene.ts` onto the staged resolvers —
+  byte-identical text, both stay exported at their existing names
+  (`TURN8_MISS_LINE1/2` still reused verbatim by turns 12/14's own miss
+  windows).
+- **All mandated pins hold exact:** turn8-bind-a **256/256**, turn8-bind-b
+  **66/66**, turn8-feathers 162/162, turn7-feathers 145/145, turn6-statfall
+  127/127, turn6-featherdance 90/90, turn7-rockslide-a/d 256/19. Insurance:
+  turn5-rockslide 256/256, turn13-sandattack 190/190,
+  interactive-generated-intro-off 715/715, battle-command-generated-off
+  128/128.
+- **Rank 4 (`docs/rank4-prep-scout.md`) is now fully closed** — all 5 slices
+  landed across this and prior sessions.
+- **Next:** rank 4 has no remaining slices. Per entry 787, rank-5's Scene-OFF
+  effect-visibility policy (PROPOSED, `docs/` scout `350424ed`) is queued for
+  adoption at a future session's start; #56's frames 444/536 OAM probe (S7)
+  may still be in flight in a side worktree. No papercuts beyond what prior
+  entries already banked.
+
+---
 ## 787 — [SUPERVISOR 2026-07-31 rounds 5-6] #58 fully closed+deleted; rank-4 slices 2+3 landed; rank-5 evidence banked (policy PROPOSED); round 7 = BIND + 444/536 probe
 
 - **State:** master = M5 (#58 retire, `20b12d38`) + M6 (slices 3+2,

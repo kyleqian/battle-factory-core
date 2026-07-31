@@ -572,3 +572,15 @@ content) requires ad-hoc PNG-decoding scripts every time; two workers
 rebuilt the same throwaway tooling in one session (~10 min each). A small
 `tools/compare/inspect-frame.ts` (decode two PNGs, print diff bbox + region
 crops) would pay for itself immediately. (2026-07-31, bumped x1)
+
+## Compare traces without an explicit `appRoute` silently route wrong
+
+A trace missing `appRoute` defaults to `"generated-orchestrator"`, which for
+canonical-recorded traces means wholesale mismatch (0/N) or an outright
+crash on an unported resolver — misread as a renderer bug every time.
+Recurred FOUR times on 2026-07-31 alone (turn5 ×10, turn6/7/8 ×10+3,
+turn17-rung ×7 — 20 traces fixed across four commits; ~5-15 min lost per
+recurrence diagnosing "why is everything diverging"). All committed traces
+now carry the field, but nothing stops a new trace from omitting it: a
+compare-time lint (warn or fail when a trace lacks `appRoute`) would kill
+the class permanently. (2026-07-31)
