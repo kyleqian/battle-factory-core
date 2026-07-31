@@ -13,6 +13,56 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 796 — [bounded worker, 2026-07-31 ~16:40] ISSUES #56 item 2: frame 536 RESOLVED (Part B); frame 444 fix blocked by new MAGNETON regression (Part A, not landed)
+
+- **State:** master green — tsc clean, focused vitest (factoryBattleStartIntro
+  5/battleScene 247/battleMenu 121) green, ratchet 6/6, full `npm test`
+  **567 files / 5720 passed + 1 skipped** (+1 over baseline, the new Part B
+  pin), build clean. Two commits: `2bf68ac1` (Part A, docs-only) +
+  `7467636e` (Part B, fix).
+- **Part B (landed, `7467636e`):** extended the OAM RAM probe
+  (`dump-issue56-frames-444-536-oam.py`, same script, wider range) past
+  app-relative 542 — real onset for the player status-bar/icons pins
+  exactly at app-relative **550**. Not a new species term: matches the
+  ALREADY-EXISTING, already-4-species-proven `generatedPlayerVisualClock`
+  rebasing exactly (frames 537+ in this same trace already use it,
+  unmodified, and already matched oracle). Root cause was a call-site
+  bug: `renderGeneratedBattleStartOpponentRelease`'s own pre-player-release
+  `drawBallIcons` calls used the raw opponent-handoff clock instead of the
+  same rebased clock the player-release compositor already uses.
+  `drawBallIcons` gained an optional `playerClock` param (every other call
+  site untouched); new exported `generatedPlayerVisualTAtOpponentHandoff`
+  wraps the existing rebasing (no duplicated logic). **YOSHI 699/751 →
+  700/751** (frame 536 flips, mismatch-list diff confirms nothing else
+  moved); `interactive-generated-intro-off` 715/715, `battle-command
+  -generated-off` 128/128, `factory-arbitrary-intro-magneton-off` 703/751
+  all held exactly; `turn9-rockslide-off` 256/256 + `turn10-aerialace-off`
+  206/206 insurance canaries held. Tier-1 pin added, ablation-verified
+  (fails without the fix, passes with it).
+- **Part A (investigated, NOT landed, `2bf68ac1`):** re-derived the
+  `opponentSummaryExitElapsed` special case's original fitted window via
+  `git log -S` (commit `0c4dab29`, frame 1492 of `interactive-generated
+  -intro-off`). Removing it reproduces YOSHI's frame-444 targeted 4 pixels
+  exactly (RAM-confirmed root cause from the prior round) but regresses
+  that original window (715/715 → 714/715) exactly as the brief warned.
+  Narrowing to `isCanonicalAnchorIntro` (the same discriminator
+  `generatedPlayerReadyLag` already uses) restores 715/715 but surfaces a
+  **new** regression: `factory-arbitrary-intro-magneton-off`'s own
+  analogous frame 437 flips from pixel-exact to a 10px mismatch, in the
+  OPPOSITE direction from YOSHI's own evidence — `isCanonicalAnchorIntro`
+  is not the real discriminator. Reverted to the original unmodified
+  special case; frame 444 also carries a second, separate, previously-
+  flagged (`docs/issue56-residual-probe.md` Q1) materialize-column-shift
+  defect never in scope of this fix. Full finding recorded in
+  `docs/issue56-frames-444-536-oam-probe.md`'s Round 2 section.
+- **Next:** #56 item 2 remainder — a MAGNETON-side RAM probe of
+  `gSprites[6]` around its own frame 437 (mirroring this round's own
+  YOSHI-side technique) to find frame 444's real discriminator, plus its
+  separate materialize-column-shift defect. Then turn17-rung1's 28 frames,
+  rank 6, idle-bounce phase attribution (parallel side-lane territory).
+- **PAPERCUT:** none.
+
+---
 ## 795 — [round 3, 2026-07-31 ~15:50, supervisor-verified] Turns 11-12 flipped OFF (M11) — rank-5's four move windows ALL flipped; idle-bounce phase ROOT-CAUSED, verdict (b) (S11)
 
 - **State:** master green — tsc clean, focused vitest (battleScene 247/
@@ -109,40 +159,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** M11 turns 11-12 flip (+ turn11-menu retirement); S11
   idle-bounce phase attribution probe (briefs ready). Then #56
   444/536, turn17-rung1's 28 frames.
-
----
-## 793 — [SUPERVISOR round 1, evening session 2026-07-31 ~14:30] Rank-5 execution OPEN: turn-9 flipped OFF (M9), ALL nine move/result OFF windows banked (S9)
-
-- **State:** master green on the M9+S9 union (full gate re-run by
-  supervisor — see commit); `battleScene.ts` turn-9 class-(c) bodies
-  deleted, class-(b) re-timed OFF; 8 new OFF traces banked. Only
-  `.worktrees/animation-main` remains; DEFERRED.md empty.
-- **M9 (verified, `8802fcb6`):** turn-9 OFF flip per adopted Option A.
-  turn9-rockslide-off **256/256**, turn9-quickattack-b-off **231/231**
-  (supervisor re-ran both); turn9-quickattack-off **177/233** — all 56
-  misses in ticks 10818-10873 PRE-move idle-bounce, supervisor-verified
-  from the manifest and git-stash-proven pre-existing (not a slice
-  regression). Legacy ON pins turn9-{quickattack,quickattack-b,rockslide}
-  .json retired + clone-mask test + 3 stale scratch drivers deleted;
-  test delta 5736→5719 fully accounted (33 ON-era turn-9 fixtures out,
-  16 OFF pins in). Insurance pins all held (256/242/256/715/128).
-  turn9-menu.json still 111/111.
-- **S9 (verified, merged `9544776b`):** all NINE rank-5 move/result OFF
-  windows now banked (turn10-rockslide split a/b 255+131,
-  turn11-featherdance 191, turn11-rockslide 256, turn12-aerialace 247,
-  turn12-rockslide-miss 256), turn10-aerialace settle extended (206),
-  turn10-menu-off banked (83). Zero desync anywhere; determinism 0/255.
-  Supervisor re-ran turn11-featherdance-off in-worktree: 189/191 as
-  reported. Turn-12 miss case shows compression tracks stripped
-  animation content, not elapsed ticks (~19-29 vs 112-138 ticks).
-- **NEW named residual class (two independent hits this round):**
-  pre-move/menu **idle-bounce phase misalignment** inherited from
-  upstream turns 1-8 — owns turn9-quickattack-off's 56 frames and
-  blocked S9 from pinning turn9/11/12-menu OFF traces (concrete
-  tick/sha data + hypothesis in `docs/rank5-off-ground-truth.md`).
-  Needs its own attribution probe before rank-5 can close fully.
-- **Next:** (a) M10 turn-10 OFF flip (brief ready); (b) S10 five-table
-  animation-handoff extraction (brief ready); then turns 11-12 flip,
-  idle-bounce phase probe, #56 444/536, turn17-rung1's 28 frames.
 
 ---
