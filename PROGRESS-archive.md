@@ -1,3 +1,30 @@
+## 782 — [SUPERVISOR 2026-07-31 round 3] M3 (#56 idle-bounce falsification banked) + S4 (rank-4 groundwork + NEW #58) verified and merged
+
+- **State:** master = M3 (test+docs only, verified no production change;
+  instrument test re-run 3/3 by supervisor) + S4's `1c015a37` merged
+  (`7ddaa69c`); S4's 20 preview-equivalence tests + ratchet re-run green
+  in-worktree by supervisor before merge; worktree/branch cleaned. Union
+  gate for this round runs with round 4 (docs-and-new-files-only delta
+  since the last green gate).
+- **M3 (#56 idle-bounce):** decisive instrument = the probe doc's third
+  branch — deltas UNEQUAL (+67 YOSHI vs +139 MAGNETON), flat-constant
+  app bug falsified, `BATTLE_COMMAND_ACTION_ENTER_DELAY` ruled out on
+  magnitude; NO production change (correct per decision rule). Banked:
+  committed instrument test + a narrower reversed-order gap lead (doc Q2
+  addendum). All four dense pins reconfirmed unchanged.
+- **S4 (rank-4 groundwork):** turn-6/7 ROCK_SLIDE-tail preview adapter
+  equivalence-proven (156→113, 113→82; attack lines via STRINGID_
+  USEDMOVE). **Found #58** (filed): shared staging helper also drops
+  `statStages` — live-proven 156→71 wrong damage vs real 156→113;
+  same class as #57, same fix recipe.
+- **Docs:** #58 filed; #56 item 2 rewritten (idle-bounce closed
+  no-app-bug; 444/536 + reversed-gap lead + item-1 +6 route term remain).
+- **Next:** round 4 — M4 = rank-4 slice-1 flip (consume S4's adapter);
+  S5 = #58 fix (additive statStages threading + pin, existing callers
+  bit-identical). Then retire the preview's local pipeline (recipe
+  `14c4295b`), then remaining rank-4 slices / Gate 6 breadth.
+
+---
 ## 781 — [BOUNDED MAIN WORKER 2026-07-31 ~10:00] #56 item 2 CLOSED (no fix): decisive instrument ran, flat-constant hypothesis falsified
 
 - **State:** `npx tsc --noEmit` clean; focused suite (issue56ActionMenuHandoffFrame,
