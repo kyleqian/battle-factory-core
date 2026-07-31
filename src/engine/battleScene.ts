@@ -666,13 +666,105 @@ import { drawTileBg as drawExtractedTileBg } from "./bg.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthbox, PLAYER_HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
 import { magbySendOutAnimation } from "./magbySendOut.ts";
 import { kabutoHSlideWobble, KABUTO_FRONT_ANIM_END_OFFSET, KABUTO_FRONT_ANIM_START_OFFSET } from "./kabutoSendOut.ts";
-import {
-  ACTION_MENU_BLANK_START_OFFSET,
-  ACTION_MENU_BLANK_END_OFFSET,
-  BATTLE2_ACTION_MENU_MODEL,
-  actionMenuAge,
-  actionMenuBounceTick,
-} from "./battle2ActionMenu.ts";
+/**
+ * Battle 2's action-menu handoff timing (formerly battle2ActionMenu.ts,
+ * retired at the #39 rank-1 flip -- docs/battle-scene-retirement-
+ * inventory.md). `PlayerHandleChooseAction` is scheduled from the
+ * encounter's send-out handoff. Battle 2 clears B_WIN_MSG at handoff+325,
+ * waits six displayed frames for the off-screen BG0 DMA, and reveals the
+ * input-ready action menu at handoff+331.
+ */
+export const ACTION_MENU_BLANK_START_OFFSET = 325;
+export const ACTION_MENU_BLANK_END_OFFSET = 330;
+export const ACTION_MENU_REVEAL_OFFSET = 331;
+
+/**
+ * Battle 2's ONIX/KABUTO identity + HP, RAM-probed
+ * (docs/battle2-party-ground-truth.md) -- confirmed correct for this send-
+ * out/rock-slide-visual content (FINDING 2: legacy gender "male"/"male" is
+ * right, unlike the personality-less kernel default a stand-in config would
+ * derive). The #39 rank-1 flip sources the command-turn's own request/field
+ * from the live kernel (battle2CommandAdapter.ts) instead of this fixture;
+ * this object remains the correct source for the surrounding send-out/rock-
+ * sprite windows that flip did not touch.
+ */
+export const BATTLE2_ACTION_MENU_MODEL = {
+  encounter: "jenson",
+  promptBattler: "ONIX",
+  options: ["FIGHT", "BAG", "POKéMON", "RUN"],
+  cursor: 0,
+  player: {
+    species: 95,
+    name: "ONIX",
+    level: 50,
+    hp: 117,
+    maxHP: 117,
+    gender: "male" as const,
+  },
+  opponent: {
+    species: 140,
+    name: "KABUTO",
+    level: 50,
+    hp: 91,
+    maxHP: 91,
+    gender: "male" as const,
+  },
+} as const;
+
+function actionMenuAge(t: number, handoffTick: number): number {
+  return t - handoffTick;
+}
+
+export function actionMenuInputReady(t: number, handoffTick: number): boolean {
+  return actionMenuAge(t, handoffTick) >= ACTION_MENU_REVEAL_OFFSET;
+}
+
+/** Rebase a later encounter's action-menu bounce onto Battle 1's proven epoch. */
+export function actionMenuBounceTick(t: number, handoffTick: number): number {
+  return 1748 + actionMenuAge(t, handoffTick) - ACTION_MENU_REVEAL_OFFSET;
+}
+
+/**
+ * Source/RAM-pinned on-demand Random() calls before the first turn. These
+ * are cumulative counts from the stable pre-menu seed, not per-VBlank calls:
+ * the frontier-battle ownership gate remains closed throughout.
+ */
+export function battle2PreTurnRngCalls(t: number, handoffTick: number): number {
+  const age = actionMenuAge(t, handoffTick);
+  if (age >= 330) return 8;
+  if (age >= 328) return 3;
+  if (age >= 324) return 1;
+  return 0;
+}
+
+/**
+ * Battle 2 turn 1's ROCK SLIDE mechanism/RNG timing (formerly
+ * battle2Turn1.ts, retired at the #39 rank-1 flip). Anchored to the real
+ * A-confirm edge, never to an absolute trace tick. Canonical frame citations
+ * are the accepted confirm=33071 replay in docs/battle2-opening-notes.md.
+ * Battle 1's ROCK SLIDE mechanisms begin 380 frames later because GROVYLE
+ * uses DOUBLE TEAM first; supplying this rebased press to the existing pure
+ * rock/shake/hit/drain helpers preserves their proven internal clocks while
+ * placing the direct, ONIX-first animation on Battle 2's timeline.
+ */
+export const BATTLE2_ROCK_SLIDE_REUSE_SHIFT = 380;
+
+export function battle2RockSlideMechanismPressTick(confirmTick: number): number {
+  return confirmTick - BATTLE2_ROCK_SLIDE_REUSE_SHIFT;
+}
+
+const BATTLE2_TURN1_ACCURACY_RNG_DELAY = 11; // call at 33082
+const BATTLE2_TURN1_SPREAD_RNG_DELAY = 38; // call at 33109
+const BATTLE2_TURN1_SECONDARY_RNG_DELAY = 252; // call at 33323
+
+/** Source/RAM-pinned cumulative Random() call count consumed by ONIX's ROCK SLIDE (accuracy, damage spread, secondary-effect check) as of `frame`. */
+export function battle2Turn1RngCalls(frame: number, confirmTick: number): number {
+  const age = frame - confirmTick;
+  if (age >= BATTLE2_TURN1_SECONDARY_RNG_DELAY) return 3;
+  if (age >= BATTLE2_TURN1_SPREAD_RNG_DELAY) return 2;
+  if (age >= BATTLE2_TURN1_ACCURACY_RNG_DELAY) return 1;
+  return 0;
+}
 import type {
   BattleCommandPresentationPhase,
   BattleCommandPresentationState,
@@ -694,9 +786,10 @@ import {
   drawStandardWindowText,
 } from "./prebattleRoomRender.ts";
 import {
-  battle2RockSlideMechanismPressTick,
-  battle2Turn1State,
-} from "./battle2Turn1.ts";
+  createBattle2CommandAdapterCommand,
+  createBattle2CommandAdapterResolution,
+  stageBattle2Turn1Kernel,
+} from "./battle2CommandAdapter.ts";
 import { drawMode0Objects, drawMode0Ppu, mgbaDarkenColor, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import { compositeSemiTransparentObjPixel } from "./sprites.ts";
 import { fakeTearsControllerDisplayAtAge } from "./fakeTearsControllerPresentation.ts";
@@ -6774,10 +6867,21 @@ function drawBattle2ActionMenuWindow(
 }
 
 /**
- * Equivalence adapter for the legacy Battle-2 controller. The handoff age
- * activates `action-enter`; every later phase clock is relative to the
- * corresponding legacy open/close event. The typed renderer receives no
- * encounter, turn, scene-elapsed, or trace-tick selector.
+ * Real kernel-staged Battle 2 turn 1 (ISSUES #39 rank 1 flip,
+ * battle2CommandAdapter.ts): computed once and reused by both the command
+ * and resolution phases below, matching the kernel's own idempotent replay.
+ */
+const BATTLE2_TURN1_KERNEL = stageBattle2Turn1Kernel();
+
+/**
+ * Battle-2 controller command phase, driven by the real kernel
+ * (battle2CommandAdapter.ts) instead of a hand-built fixture. The handoff
+ * age activates `action-enter`; every later phase clock is relative to the
+ * corresponding legacy open/close event -- that lifecycle clock (phase/
+ * phaseElapsed) and the live FIGHT cursor stay legacy-owned (A-confirm
+ * timing remains on the established predecessor until a later slice owns
+ * that semantic handoff); the request/field/legal-decision facts come from
+ * the kernel.
  */
 function battle2CommandPresentationForRender(
   age: number,
@@ -6813,57 +6917,14 @@ function battle2CommandPresentationForRender(
     }
   }
 
-  const legalMoveBySlot = Object.freeze([
-    Object.freeze({ kind: "use-move", moveSlot: 0, targetBattler: 1 }),
-    Object.freeze({ kind: "use-move", moveSlot: 1, targetBattler: 1 }),
-    Object.freeze({ kind: "use-move", moveSlot: 2, targetBattler: 1 }),
-    Object.freeze({ kind: "use-move", moveSlot: 3, targetBattler: 1 }),
-  ] as const);
-  const legalSwitchPartyIndexes = Object.freeze([1, 2] as const);
+  const command = createBattle2CommandAdapterCommand(BATTLE2_TURN1_KERNEL, sm.cursor);
   return Object.freeze({
-    request: Object.freeze({
-      kind: "command",
-      requestId: 0,
-      side: "player",
-      battler: 0,
-      legalDecisions: Object.freeze([
-        ...legalMoveBySlot,
-        Object.freeze({ kind: "switch", partyIndex: 1 }),
-        Object.freeze({ kind: "switch", partyIndex: 2 }),
-      ]),
-    }),
+    ...command,
     lifecycle: Object.freeze({ phase, phaseElapsed }),
     // The legacy equivalence caller supplies its already-proven bounce
     // overlay separately; this typed adapter only dispatches window chrome.
     idleBounceElapsed: 0,
-    field: Object.freeze({
-      player: Object.freeze({
-        side: "player",
-        battler: 0,
-        partyIndex: 0,
-        ...BATTLE2_ACTION_MENU_MODEL.player,
-        status: "none",
-        moveIds: sm.activeMonMoveset.moveIds,
-        currentPP: sm.activeMonMoveset.maxPP,
-        ppBonuses: 0,
-      }),
-      opponent: Object.freeze({
-        side: "trainer",
-        battler: 1,
-        partyIndex: 0,
-        ...BATTLE2_ACTION_MENU_MODEL.opponent,
-        status: "none",
-        moveIds: Object.freeze([72, 246, 28, 182] as const),
-        currentPP: Object.freeze([10, 5, 15, 10] as const),
-        ppBonuses: 0,
-      }),
-    }),
-    actionCursor: BATTLE2_ACTION_MENU_MODEL.cursor,
-    fightCursor: sm.cursor,
     fightDisplayCursor: sm.displayCursor,
-    legalMoveBySlot,
-    legalSwitchPartyIndexes,
-    pendingDecision: null,
   });
 }
 
@@ -6945,6 +7006,25 @@ function battle2Turn1BounceTick(
   return actionMenuBounceTick(t, handoffTick) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
 }
 
+/**
+ * ONIX's ROCK SLIDE HP boundary for KABUTO, sourced from the real kernel
+ * resolution (battle2CommandAdapter.ts) instead of formerly-hardcoded
+ * battle2Turn1.ts constants -- same `{from, to}` shape every other turn
+ * window's own `rockSlideOpponentHp` boundary constant uses.
+ */
+const BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP = (() => {
+  const resolution = createBattle2CommandAdapterResolution(BATTLE2_TURN1_KERNEL);
+  const hpCommand = resolution.segments[0]!.commands.find(
+    (command) => command.type === "hp" && command.battler === 1,
+  );
+  if (!hpCommand || hpCommand.type !== "hp") {
+    throw new Error(
+      "battle2CommandAdapter: expected KABUTO's ROCK SLIDE hp command",
+    );
+  }
+  return { from: hpCommand.from, to: hpCommand.to };
+})();
+
 function drawBattle2RockSlideAttack(
   fb: Uint8Array,
   t: number,
@@ -6957,8 +7037,13 @@ function drawBattle2RockSlideAttack(
     t < confirmTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY
       ? menuIdleBounce(battle2Turn1BounceTick(t, handoffTick))
       : { onixY2: 0, healthboxY2: 0 };
-  const turn = battle2Turn1State(t, confirmTick);
-  const kabutoContent = kabutoHealthboxContentForHp(turn.kabutoDisplayHp);
+  const kabutoDisplayHp = rockSlideOpponentHp(
+    t,
+    mechanismPress,
+    BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP.from,
+    BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP.to,
+  );
+  const kabutoContent = kabutoHealthboxContentForHp(kabutoDisplayHp);
 
   drawStaticBgShiftedY(fb, shiftY);
   if (!rockSlideMonBlinkInvisible(t, mechanismPress)) {

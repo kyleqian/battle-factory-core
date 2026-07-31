@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   BATTLE2_ACTION_MENU_MODEL,
-} from "../src/engine/battle2ActionMenu.ts";
+} from "../src/engine/battleScene.ts";
 import {
   BATTLE_COMMAND_ACTION_ENTER_DELAY,
   BATTLE_COMMAND_ACTION_LABELS,

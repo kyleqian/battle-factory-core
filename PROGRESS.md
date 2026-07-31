@@ -13,6 +13,69 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 765 — [BOUNDED MAIN WORKER 2026-07-31 ~02:45] #39 rank-1 FLIPPED: Battle-2 command turn now kernel-driven; three legacy fixture files deleted
+
+- **State:** all six mandated pins hold at their recorded counts:
+  `battle2-turn1-rockslide.json` **191/191**, `battle2-action-menu-dense.json`
+  **209/209**, `battle2-off-turn1-staged.json` **16/16**,
+  `battle-command-generated-off.json` **128/128**,
+  `interactive-generated-intro-off.json` **715/715**; ground-truth-only
+  `battle2-off-turn1.json` unchanged at its known-incomplete **38/179**
+  (never committed to app acceptance, docs/battle-resolution-seam-
+  design.md:452). `npx tsc --noEmit` clean. Focused suite (every touched
+  module + `executableFrontierRatchet`) **537/537 green**
+  (`battle2CommandAdapterEquivalence` 13, `battle2ActionMenu` 8,
+  `battle2Turn1` 3, `battle2PartyGroundTruth` 6, `battleCommandPresentation`
+  32, `battleTurnPortability` 5, `executableFrontierRatchet` 6,
+  `battle2OffKernelSeamScout` 2, `battleScene` 276,
+  `factoryRoundBattleOrchestrator` 30, + 4 more). Full `npm test`/`npm run
+  build` **not run this step** per the brief (side worker live concurrently).
+- **Did:** redirected `battle2CommandPresentationForRender`'s field/request
+  construction and `drawBattle2RockSlideAttack`'s HP sourcing
+  (`battleScene.ts`) from the `BATTLE2_ACTION_MENU_MODEL`/`battle2Turn1.ts`
+  fixtures to the real kernel via the promoted adapter (`battle2CommandAdapter
+  .ts`, renamed from `...Preview.ts` — production now, not a proof). Added
+  the real RAM-probed personalities (ONIX 1205102525, KABUTO 2507133325) and
+  player bench (`playerBenchHp:[138,153]`, MAGBY/BAYLEEF override) to the
+  kernel config per docs/battle2-party-ground-truth.md's two FINDINGs — both
+  now closed, evidenced in the new equivalence test and
+  `battle2PartyGroundTruth.test.ts`'s updated "fixed" assertions. Deleted
+  `battle2Turn1.ts`/`battle2ActionMenu.ts`/`battle2OffScenario.ts`; relocated
+  their still-needed timing/RNG-advancement helpers
+  (`battle2Turn1RngCalls`+delays, `battle2RockSlideMechanismPressTick`,
+  `actionMenu*`/`battle2PreTurnRngCalls`, `BATTLE2_ACTION_MENU_MODEL`,
+  `BATTLE2_OFF_TURN1_COMMAND_DURATIONS`) into `battleScene.ts`/
+  `battle2CommandAdapter.ts` rather than dropping them — core.ts's RNG-
+  advancement loop (accuracy/spread/secondary Random() calls) is unchanged,
+  only its source module moved. Dropped genuinely dead code that no renderer
+  or RNG loop ever consumed: the `state.battle2Turn1` EngineState field
+  (only read by its own now-rewritten test), `battle2RockSlideDamage`,
+  `battle2Turn1Order`, `advanceBattle2PreTurnRng` (all unused outside their
+  own tests). Kept the ROCK_SLIDE rock-sprite visual's private draw
+  primitives untouched (no generic move-visual owner yet, per brief). Rock-
+  sprite HP-drain boundary now reads `{from:91,to:63}` off the adapter's
+  resolution instead of the deleted `BATTLE2_KABUTO_START_HP`/`END_HP`
+  constants. Rewrote `tests/battle2CommandAdapterPreviewEquivalence.test.ts`
+  as `tests/battle2CommandAdapterEquivalence.test.ts` (production-path pin,
+  not a pre-flip proof) and updated the 5 dependent test files' imports.
+- **Next:** ISSUES #39's rank-1 row (docs/battle-scene-retirement-
+  inventory.md) is retired — supervisor should trim #39's text to drop the
+  rank-1 window from the worklist (rank 2, Turn-13 DRAGON_BREATH→faint→
+  Murkrow switch-in, is next per the inventory's stated order) and update
+  the retirement-inventory doc's rank-1 row/ref-count census (not touched
+  this step, out of scope for a main worker per the brief).
+- **Notes:** PAPERCUT: the acceptance list's "battle2-off-turn1.json (179)"
+  and "battle2-turn1-rockslide.json (191)" traces both lack `oracleProfile`/
+  `appRoute` fields (pre-existing; unrelated to this step), so plain `npm
+  run compare -- <trace>` silently uses the wrong default route
+  (`generated-orchestrator`) and either crashes (pre-existing, unrelated
+  `STRINGID_PKMNSITEMRESTOREDHEALTH` bug, reproduces identically on master)
+  or diffs wrong. Verified both via scratch copies with `"appRoute":
+  "canonical-recorded"` added (not committed) — ~10 min lost chasing this.
+  Worth a real fix (add the field to the two committed trace files) in a
+  future docs/tooling pass.
+
+---
 ## 764 — [SUPERVISOR 2026-07-31 ~01:55] GATE 5 TICKED; #56 filed; round 7: #39 rank-1 flip (main) + #56 evidence pack (side)
 
 - **State:** union gate green **557 files / 5676 tests + 1 deliberate
@@ -91,39 +154,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   ready for the next round to pick up directly).
 - **Notes:** `GENERATED_OPPONENT_SHADOW_DELAY`(104) is still untested
   against any app-side pixel comparison after this round.
-
----
-## 762 — [SUPERVISOR 2026-07-31 ~01:10] Round 5 verified: cry-duration mechanism proven (YOSHI 650/751, GROVYLE pins intact); #39 adapter merged after supervisor type-fix; round 6 dispatched
-
-- **State:** union green — suite **556 files / 5670 tests + 1 deliberate
-  animation-lane skip**, build clean after supervisor fix `18c3299c`.
-  Supervisor personally re-ran: YOSHI **650/751**,
-  `battle-command-generated-off` **128/128**,
-  `interactive-generated-intro-off` **715/715**.
-- **Round-5 outcomes:** (1) M5 identified the dispatch-delay mechanism —
-  `Intro_TryShinyAnimShowHealthbox` blocks on `IsCryPlayingOrClearCrySongs`,
-  so the wait is the opponent's cry duration. Extracted
-  `src/data/gen/cry-durations.json` (376 species, isolated extractor
-  test); MAGNETON (+111) and COMBUSKEN (+125) matched the GROVYLE-baseline
-  prediction exactly; species-keyed function replaced both fixed constants
-  plus the coupled `GENERATED_PLAYER_VISUAL_DELAY`. Three named YOSHI
-  residuals remain (444, 536, 652-750) + the reachable-but-unexercised
-  `GENERATED_OPPONENT_SHADOW_DELAY` (MAGNETON is the live case). (2) S5
-  banked the #39 rank-1 typed adapter + equivalence proofs (new files
-  only) with three FINDINGs (hardcoded move-target legality, unproven
-  gender/personality, no generic move-visual owner) and a concrete flip
-  checklist.
-- **Supervisor fix:** S5's files had two type errors `npm run build`
-  catches but vitest does not (tuple-vs-number[] cast; a vacuous
-  "flinch" event-kind comparison — no such kind exists). Fixed minimally
-  (`as const` tuples; assert no FLINCH messageId instead) in `18c3299c`.
-  Worker-brief lesson: focused runs must include `npx tsc --noEmit` for
-  new src/test files — added to future side briefs.
-- **Round 6 dispatched:** main M6 — isolate/fix the 652-750 family, then
-  536/444, then build the MAGNETON app-side comparison (second
-  arbitrary-species proof; exercises the shadow path); GROVYLE pins must
-  hold. Side S6 — battle-2 party ground-truth probe (personalities,
-  genders, bench legality) to discharge the flip's FINDINGs 1-2.
-- **Next:** after M6, supervisor ticks Gate 5 (per entry-760 intent — the
-  delay mechanism is now fixed and proven on two species) and the main
-  lane moves to the #39 rank-1 flip consuming S5+S6.

@@ -112,8 +112,11 @@ import {
 import { renderBattleRoomEntryScene } from "./battleRoomRender.ts";
 import { applyBattleTransitionOverlay, exitFadeY } from "./battleTransition.ts";
 import {
+  actionMenuInputReady,
   advanceBattleScene,
   applyTurn17PostwinFastFade,
+  battle2PreTurnRngCalls,
+  battle2Turn1RngCalls,
   DRAGONBREATH_MENU_REDRAW_DELAY,
   INITIAL_BATTLE_SCENE_STATE,
   renderBattleScene,
@@ -149,15 +152,6 @@ import {
   advanceSceneOnMovePresentation,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
-import {
-  actionMenuInputReady,
-  battle2PreTurnRngCalls,
-} from "./battle2ActionMenu.ts";
-import {
-  battle2Turn1RngCalls,
-  battle2Turn1State,
-  type Battle2Turn1State,
-} from "./battle2Turn1.ts";
 import {
   advancePartySelect,
   CANONICAL_FORCED_SWITCH_PARTY,
@@ -316,8 +310,6 @@ export interface EngineState {
   rngValue: number;
   /** gBattleControllerExecFlags, modeled through Battle 2 choose-action. */
   battleControllerExecFlags: number;
-  /** Confirm-relative hidden state for Battle 2's bounded first ROCK SLIDE. */
-  battle2Turn1: Battle2Turn1State | null;
   /**
    * Pure generic round rules, opt-in through createInitialState's scenario
    * injection. The canonical pixel path remains unwired and therefore null.
@@ -387,7 +379,6 @@ export function createInitialState(
     rngMode: "vblank",
     rngValue: ANCHOR_RNG_VALUE,
     battleControllerExecFlags: 0,
-    battle2Turn1: null,
     roundController: options.battleScenario
       ? createRoundController(options.battleScenario)
       : null,
@@ -425,7 +416,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   let postwin: PostwinState | null = state.postwin;
   let battleSetup: BattleSetupState | null = state.battleSetup;
   let battleControllerExecFlags = state.battleControllerExecFlags ?? 0;
-  let battle2Turn1 = state.battle2Turn1 ?? null;
   let battle1OpponentConstructionRngValues =
     state.battle1OpponentConstructionRngValues ?? [];
   let roundController = state.roundController;
@@ -1512,7 +1502,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       for (let i = previousTurnCalls; i < nextTurnCalls; i += 1) {
         rngValue = advanceRngValue(rngValue);
       }
-      battle2Turn1 = battle2Turn1State(sceneT, confirmTick);
     }
     if (
       battle2HandoffTick !== null &&
@@ -1540,7 +1529,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       rngMode,
       rngValue,
       battleControllerExecFlags,
-      battle2Turn1,
     };
   }
 

@@ -10,7 +10,7 @@ import type { Trace } from "./oracleClient.ts";
 import { createInitialState, render, tick } from "../../src/engine/core.ts";
 import type { EngineState } from "../../src/engine/core.ts";
 import { traceAdvances } from "./traceReplay.ts";
-import { BATTLE2_OFF_TURN1_COMMAND_DURATIONS } from "../../src/engine/battle2OffScenario.ts";
+import { BATTLE2_OFF_TURN1_COMMAND_DURATIONS } from "../../src/engine/battle2CommandAdapter.ts";
 import { createFactoryFullTurnBattleState } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import { stageFactoryFullTurnBattle } from "../../src/engine/stagedBattleTurn.ts";
 import {

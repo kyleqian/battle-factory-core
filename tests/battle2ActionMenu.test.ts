@@ -3,17 +3,13 @@ import {
   ACTION_MENU_BLANK_END_OFFSET,
   ACTION_MENU_BLANK_START_OFFSET,
   ACTION_MENU_REVEAL_OFFSET,
-  BATTLE2_ACTION_MENU_MODEL,
-  actionMenuBounceTick,
-  actionMenuInputReady,
-  advanceBattle2PreTurnRng,
-  battle2PreTurnRngCalls,
-} from "../src/engine/battle2ActionMenu.ts";
-import {
   INITIAL_BATTLE_SCENE_STATE,
   KABUTO_SENDOUT_BATTLER,
   ONIX_MENU_BATTLER,
   TICK0,
+  actionMenuBounceTick,
+  actionMenuInputReady,
+  battle2PreTurnRngCalls,
   sendOutHandoffTick,
 } from "../src/engine/battleScene.ts";
 import {
@@ -47,30 +43,22 @@ describe("Battle 2 first action-menu controller boundaries", () => {
 });
 describe("Battle 2 encounter-driven menu model", () => {
   it("composes JENSON's KABUTO against the healed rental ONIX", () => {
-    expect(BATTLE2_ACTION_MENU_MODEL).toEqual({
-      encounter: "jenson",
-      promptBattler: "ONIX",
-      options: ["FIGHT", "BAG", "POKéMON", "RUN"],
-      cursor: 0,
-      player: {
-        species: 95,
-        name: "ONIX",
-        level: 50,
-        hp: 117,
-        maxHP: 117,
-        gender: "male",
-      },
-      opponent: {
-        species: 140,
-        name: "KABUTO",
-        level: 50,
-        hp: 91,
-        maxHP: 91,
-        gender: "male",
-      },
+    expect(ONIX_MENU_BATTLER).toEqual({
+      species: 95,
+      name: "ONIX",
+      level: 50,
+      hp: 117,
+      maxHP: 117,
+      gender: "male",
     });
-    expect(ONIX_MENU_BATTLER).toBe(BATTLE2_ACTION_MENU_MODEL.player);
-    expect(KABUTO_SENDOUT_BATTLER).toBe(BATTLE2_ACTION_MENU_MODEL.opponent);
+    expect(KABUTO_SENDOUT_BATTLER).toEqual({
+      species: 140,
+      name: "KABUTO",
+      level: 50,
+      hp: 91,
+      maxHP: 91,
+      gender: "male",
+    });
   });
 });
 
@@ -87,9 +75,6 @@ describe("Battle 2 pre-first-turn RNG and exec state", () => {
     expect(battle2PreTurnRngCalls(handoffTick + 328, handoffTick)).toBe(3);
     expect(battle2PreTurnRngCalls(handoffTick + 329, handoffTick)).toBe(3);
     expect(battle2PreTurnRngCalls(handoffTick + 330, handoffTick)).toBe(8);
-    expect(advanceBattle2PreTurnRng(seed, 1)).toBe(4229780657);
-    expect(advanceBattle2PreTurnRng(seed, 3)).toBe(2960830979);
-    expect(advanceBattle2PreTurnRng(seed, 8)).toBe(3530724670);
   });
 
   it("advances only on demand in core and raises execFlags at reveal", () => {

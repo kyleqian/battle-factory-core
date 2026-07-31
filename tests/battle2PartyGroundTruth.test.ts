@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { getMonGender } from "../src/engine/monGender.ts";
 import { natureFromPersonality } from "../src/engine/opponentGen.ts";
-import { BATTLE2_TURN1_KERNEL_CONFIG } from "../src/engine/battle2CommandAdapterPreview.ts";
-import { BATTLE2_ACTION_MENU_MODEL } from "../src/engine/battle2ActionMenu.ts";
+import {
+  BATTLE2_TURN1_KERNEL_CONFIG,
+  createBattle2CommandAdapterCommand,
+} from "../src/engine/battle2CommandAdapter.ts";
+import { BATTLE2_ACTION_MENU_MODEL } from "../src/engine/battleScene.ts";
 import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import naturesData from "../src/data/gen/natures.json" with { type: "json" };
 
@@ -63,24 +66,23 @@ describe("battle2PartyGroundTruth: ISSUES #39 rank-1 personality/gender/bench ev
     });
   });
 
-  it("FINDING 2 verdict: the staged kernel config's personality-less defaults derive the wrong gender for both mons -- the ROM says 'male'/'male', not 'female'/'female'", () => {
-    expect(BATTLE2_TURN1_KERNEL_CONFIG.player).not.toHaveProperty("personality");
-    expect(BATTLE2_TURN1_KERNEL_CONFIG.trainer).not.toHaveProperty("personality");
+  it("FINDING 2 fixed: the production kernel config now carries the real RAM-probed personalities and derives 'male'/'male', not the personality-less default's 'female'/'female'", () => {
+    expect(BATTLE2_TURN1_KERNEL_CONFIG.player.personality).toBe(1205102525);
+    expect(BATTLE2_TURN1_KERNEL_CONFIG.trainer.personality).toBe(2507133325);
+    // The personality-less default this config used to fall back to (pre-flip
+    // gap) would have derived female for both -- keep that contrast on record.
     expect(getMonGender(127, 0)).toBe("female");
     expect(getMonGender(31, 0)).toBe("female");
   });
 
-  it("FINDING 1 verdict: the probed player bench (MAGBY 138/138 at partyIndex 1, BAYLEEF 153/153 at partyIndex 2, both alive and non-egg) makes the legacy fixture's two hardcoded switch decisions (battleScene.ts:6831-6832) legal -- the staged kernel config just never modeled a bench to source them from", () => {
+  it("FINDING 1 fixed: the production kernel config now carries the real player bench (MAGBY 138/138 at partyIndex 1, BAYLEEF 153/153 at partyIndex 2), so the live command adapter derives both switch decisions from kernel data instead of a battleScene.ts literal", () => {
     // docs/battle2-party-ground-truth.md §4: legalCommandDecisions admits a
     // switch iff partyIndex !== active && species !== 0 && !isEgg && hp !== 0.
-    const probedPlayerBench = [
-      { partyIndex: 1, species: "SPECIES_MAGBY", hp: 138, isEgg: false },
-      { partyIndex: 2, species: "SPECIES_BAYLEEF", hp: 153, isEgg: false },
-    ];
-    const legalSwitches = probedPlayerBench
-      .filter((bench) => bench.species !== "SPECIES_NONE" && !bench.isEgg && bench.hp !== 0)
-      .map((bench) => ({ kind: "switch" as const, partyIndex: bench.partyIndex }));
-    expect(legalSwitches).toEqual([
+    expect(BATTLE2_TURN1_KERNEL_CONFIG.playerBenchHp).toEqual([138, 153]);
+    const command = createBattle2CommandAdapterCommand();
+    expect(
+      command.request.legalDecisions.filter((decision) => decision.kind === "switch"),
+    ).toEqual([
       { kind: "switch", partyIndex: 1 },
       { kind: "switch", partyIndex: 2 },
     ]);

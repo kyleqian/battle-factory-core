@@ -1,3 +1,39 @@
+## 762 — [SUPERVISOR 2026-07-31 ~01:10] Round 5 verified: cry-duration mechanism proven (YOSHI 650/751, GROVYLE pins intact); #39 adapter merged after supervisor type-fix; round 6 dispatched
+
+- **State:** union green — suite **556 files / 5670 tests + 1 deliberate
+  animation-lane skip**, build clean after supervisor fix `18c3299c`.
+  Supervisor personally re-ran: YOSHI **650/751**,
+  `battle-command-generated-off` **128/128**,
+  `interactive-generated-intro-off` **715/715**.
+- **Round-5 outcomes:** (1) M5 identified the dispatch-delay mechanism —
+  `Intro_TryShinyAnimShowHealthbox` blocks on `IsCryPlayingOrClearCrySongs`,
+  so the wait is the opponent's cry duration. Extracted
+  `src/data/gen/cry-durations.json` (376 species, isolated extractor
+  test); MAGNETON (+111) and COMBUSKEN (+125) matched the GROVYLE-baseline
+  prediction exactly; species-keyed function replaced both fixed constants
+  plus the coupled `GENERATED_PLAYER_VISUAL_DELAY`. Three named YOSHI
+  residuals remain (444, 536, 652-750) + the reachable-but-unexercised
+  `GENERATED_OPPONENT_SHADOW_DELAY` (MAGNETON is the live case). (2) S5
+  banked the #39 rank-1 typed adapter + equivalence proofs (new files
+  only) with three FINDINGs (hardcoded move-target legality, unproven
+  gender/personality, no generic move-visual owner) and a concrete flip
+  checklist.
+- **Supervisor fix:** S5's files had two type errors `npm run build`
+  catches but vitest does not (tuple-vs-number[] cast; a vacuous
+  "flinch" event-kind comparison — no such kind exists). Fixed minimally
+  (`as const` tuples; assert no FLINCH messageId instead) in `18c3299c`.
+  Worker-brief lesson: focused runs must include `npx tsc --noEmit` for
+  new src/test files — added to future side briefs.
+- **Round 6 dispatched:** main M6 — isolate/fix the 652-750 family, then
+  536/444, then build the MAGNETON app-side comparison (second
+  arbitrary-species proof; exercises the shadow path); GROVYLE pins must
+  hold. Side S6 — battle-2 party ground-truth probe (personalities,
+  genders, bench legality) to discharge the flip's FINDINGs 1-2.
+- **Next:** after M6, supervisor ticks Gate 5 (per entry-760 intent — the
+  delay mechanism is now fixed and proven on two species) and the main
+  lane moves to the #39 rank-1 flip consuming S5+S6.
+
+---
 ## 761 — [BOUNDED MAIN WORKER 2026-07-31 ~00:50] Species-dependent dispatch delay: mechanism named, cry-duration-modeled, fixed; YOSHI 650/751
 
 - **State:** new `tools/extract/extract-cry-durations.ts` →

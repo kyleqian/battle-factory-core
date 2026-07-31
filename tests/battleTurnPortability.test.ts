@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BATTLE2_OFF_TURN1_COMMAND_DURATIONS } from "../src/engine/battle2OffScenario.ts";
+import { BATTLE2_OFF_TURN1_COMMAND_DURATIONS } from "../src/engine/battle2CommandAdapter.ts";
 import { createBattleCommandPresentation } from "../src/engine/battleCommandPresentation.ts";
 import { createBattleResolutionPresentation } from "../src/engine/battleResolutionPresentation.ts";
 import { createFactoryFullTurnBattleState } from "../src/engine/factoryBattleScriptFullTurnDecision.ts";
