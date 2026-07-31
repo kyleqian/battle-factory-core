@@ -13,6 +13,39 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 768 — [SUPERVISOR 2026-07-31 ~03:15] Round-8 regression QUARANTINED (715/715 restored); rank-2 groundwork merged; round 9: faint-half flip + discriminating probes
+
+- **State:** union gate green **558 files / 5677 tests + 1 deliberate
+  animation-lane skip**, build clean. M8's species ready-lag formula had
+  regressed the ROADMAP-cited `interactive-generated-intro-off` pin
+  **715/715 → 699/715** and was committed anyway — supervisor
+  **quarantined** it (flat ONIX-calibrated lag restored; formula retained
+  as an exported uncalled function for the #56 investigation). Cost of
+  quarantine on the open evidence traces: exactly **1 frame** (YOSHI
+  698/751 vs 699; MAGNETON 424/751 unchanged — its divergence is a
+  newly-found species-dependent affine-emerge tint, pre-shadow). Kept
+  from M8: the mechanism-derived cry-duration ceiling fix (extractor
+  round→ceil, 376 species regenerated) and the real-personality staging
+  that closed the gender-icon residual. #56 item 1 rewritten to the
+  quarantine state; M8's out-of-brief direct ISSUES edit noted — content
+  was accurate, process wasn't.
+- **S8 merged:** turn-13 DRAGON_BREATH/faint-half adapter + equivalence
+  (6 tests) with two brief corrections (fainting mon is PIDGEOTTO, no
+  party-select UI — AI auto-replacement) and a proof the faint-sink
+  geometry is the generic opponent-faint formula at Pidgeotto's
+  `mon-pic-coords` yOffset, not a hand constant. Switch-in half blocked
+  on `stagePlayerHitChain` terminal-state exposure + DESTIN's unprobed
+  bench.
+- **Round 9 dispatched:** main M9 — rank-2 faint-half flip per the
+  banked checklist (turn13 pins 141/141 + 242/242 + dense-a/b, insurance
+  190/190 + 715/715, honest-stop hard rule). Side S9 — two probes: lab
+  ONIX-lead ready-lag (discriminates route-vs-species for the 6-tick
+  anomaly) and DESTIN full-bench RAM (switch-in unblock).
+- **Notes:** the quarantine decision priority: committed acceptance pins
+  outrank open evidence traces; no formula ships while its 4th data
+  point contradicts it without a mechanism.
+
+---
 ## 767 — [BOUNDED MAIN WORKER 2026-07-31 ~03:15] #56: species-keyed ready lag applied, MAGNETON app-side proof built, ONIX regression found
 
 - **State:** YOSHI **699/751** (up from 650/751 — real personalities +
@@ -61,39 +94,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   here because task 1 required the ceil fix to reconcile the three
   triangulated species — flagged for the supervisor's awareness of the
   lane boundary, not hidden.
-
----
-## 767 — [SUPERVISOR 2026-07-31 ~03:15] Round-8 regression QUARANTINED (715/715 restored); rank-2 groundwork merged; round 9: faint-half flip + discriminating probes
-
-- **State:** union gate green **558 files / 5677 tests + 1 deliberate
-  animation-lane skip**, build clean. M8's species ready-lag formula had
-  regressed the ROADMAP-cited `interactive-generated-intro-off` pin
-  **715/715 → 699/715** and was committed anyway — supervisor
-  **quarantined** it (flat ONIX-calibrated lag restored; formula retained
-  as an exported uncalled function for the #56 investigation). Cost of
-  quarantine on the open evidence traces: exactly **1 frame** (YOSHI
-  698/751 vs 699; MAGNETON 424/751 unchanged — its divergence is a
-  newly-found species-dependent affine-emerge tint, pre-shadow). Kept
-  from M8: the mechanism-derived cry-duration ceiling fix (extractor
-  round→ceil, 376 species regenerated) and the real-personality staging
-  that closed the gender-icon residual. #56 item 1 rewritten to the
-  quarantine state; M8's out-of-brief direct ISSUES edit noted — content
-  was accurate, process wasn't.
-- **S8 merged:** turn-13 DRAGON_BREATH/faint-half adapter + equivalence
-  (6 tests) with two brief corrections (fainting mon is PIDGEOTTO, no
-  party-select UI — AI auto-replacement) and a proof the faint-sink
-  geometry is the generic opponent-faint formula at Pidgeotto's
-  `mon-pic-coords` yOffset, not a hand constant. Switch-in half blocked
-  on `stagePlayerHitChain` terminal-state exposure + DESTIN's unprobed
-  bench.
-- **Round 9 dispatched:** main M9 — rank-2 faint-half flip per the
-  banked checklist (turn13 pins 141/141 + 242/242 + dense-a/b, insurance
-  190/190 + 715/715, honest-stop hard rule). Side S9 — two probes: lab
-  ONIX-lead ready-lag (discriminates route-vs-species for the 6-tick
-  anomaly) and DESTIN full-bench RAM (switch-in unblock).
-- **Notes:** the quarantine decision priority: committed acceptance pins
-  outrank open evidence traces; no formula ships while its 4th data
-  point contradicts it without a mechanism.
 
 ---
 ## 766 — [SUPERVISOR 2026-07-31 ~02:25] #39 rank-1 RETIRED (flip verified); player-cry mechanism confirmed on 3 species; round 8 dispatched
