@@ -16,19 +16,6 @@ one without a user decision, and do not count them as backlog.
 
 # Open
 
-## #58 — [core fixed 2026-07-31, `594442e6`] retire `turn67RockSlidePresentationStaging.ts`'s local staging pipeline
-
-**Open remainder only:** the shared helper now threads caller-supplied
-`statStages` (pinned by `tests/stagePlayerHitChainStatStages.test.ts`:
-real turn-6 fixture, stage-4 ATK → 156→113 at the real recorded RNG,
-omitted-case prior behavior byte-identical). Still open:
-`turn67RockSlidePresentationStaging.ts` (promoted in `174cc388`)
-predates the fix and still stages through its own local pipeline — swap
-it onto `stagePlayerHitChainToTerminalMachineState` and delete the
-local workaround, proven by its 14 equivalence tests staying
-byte-identical-green. Identical recipe to #57's `14c4295b`. Delete this
-entry when that lands.
-
 ## #56 — Arbitrary-trainer intro: residuals, ONIX ready-lag regression, MAGNETON shadow coverage
 
 **Symptom:** the public dense arbitrary-trainer intro comparison
