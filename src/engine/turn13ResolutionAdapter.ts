@@ -1,11 +1,13 @@
 /**
- * ISSUES #39 rank-2 groundwork (docs/battle-scene-retirement-inventory.md
- * rank-2 row): equivalence-proof-first preview for the Turn-13 DRAGON_BREATH
- * -> Pidgeotto faint -> DESTIN's forced Murkrow switch-in window
+ * ISSUES #39 rank-2 flip (docs/battle-scene-retirement-inventory.md rank-2
+ * row): the DRAGON_BREATH -> Pidgeotto faint half of the Turn-13 window
  * (`battleScene.ts:13303-14123`, excluding the already-semantic SAND_ATTACK
- * half, plus replacement helpers `10272-10470`). Banks typed facts a later
- * flip would wire into that dispatcher; this file changes no existing
- * render call.
+ * half, plus replacement helpers `10272-10470`) now sources its HP,
+ * kickoff/faint text, and faint-sink geometry from this adapter instead of
+ * three separate direct imports of the staging module plus a hand-fit sink
+ * constant. Formerly a preview proof
+ * (`turn13ResolutionAdapterPreview.ts`/`turn13ResolutionAdapterPreviewEquivalence.test.ts`);
+ * `drawDragonBreathKoWindow`/`drawFaintedOpponentWindow` now consume it live.
  *
  * Reuses entry 751's staged real kernel hit chain
  * (`turn13DragonBreathPresentationStaging.ts`, `77cb49d0`) for the HP/faint
@@ -66,7 +68,7 @@ function frontYOffset(speciesSymbol: string): number {
   const entry = (monPicCoordsData as MonPicCoordsAsset).front[speciesSymbol];
   if (entry === undefined) {
     throw new Error(
-      `turn13ResolutionAdapterPreview: mon-pic-coords.json has no front entry for ${speciesSymbol}`,
+      `turn13ResolutionAdapter: mon-pic-coords.json has no front entry for ${speciesSymbol}`,
     );
   }
   return entry.yOffset;
@@ -91,7 +93,7 @@ export function opponentFaintSinkGeometry(yOffset: number): Turn13FaintSinkGeome
   return Object.freeze({ steps, healthboxVanishFrame, minimumFrames: healthboxVanishFrame + 2 });
 }
 
-export type Turn13ResolutionAdapterPreview = Readonly<{
+export type Turn13ResolutionAdapter = Readonly<{
   hp: Readonly<{ from: number; to: number }>;
   kickoffLines: readonly string[];
   faintLines: readonly string[];
@@ -101,12 +103,12 @@ export type Turn13ResolutionAdapterPreview = Readonly<{
 }>;
 
 /**
- * The typed resolution facts this window's legacy dispatcher
+ * The typed resolution facts this window's dispatcher
  * (`drawDragonBreathKoWindow`/`drawFaintedOpponentWindow`, `battleScene.ts`)
  * consumes for its DRAGON_BREATH/faint half, all sourced from entry 751's
  * staged kernel hit chain -- no fabricated content, no turn-number key.
  */
-export function resolveTurn13ResolutionAdapterPreview(): Turn13ResolutionAdapterPreview {
+export function resolveTurn13ResolutionAdapter(): Turn13ResolutionAdapter {
   const content = resolveTurn13DragonBreathWindowContent();
   return Object.freeze({
     hp: resolveTurn13DragonBreathHpEndpoints(),
@@ -120,7 +122,7 @@ export function resolveTurn13ResolutionAdapterPreview(): Turn13ResolutionAdapter
 
 /**
  * Named gap marker (docs/battle-scene-retirement-inventory.md rank-2's own
- * "Missing bridge" column): this preview does not own the forced-switch
+ * "Missing bridge" column): this adapter does not own the forced-switch
  * decision, the Murkrow switch-in, or the turn-14 handoff. See this
  * module's own top doc for exactly what is missing and why.
  */

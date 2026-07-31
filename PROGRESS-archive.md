@@ -1,3 +1,31 @@
+## 766 — [SUPERVISOR 2026-07-31 ~02:25] #39 rank-1 RETIRED (flip verified); player-cry mechanism confirmed on 3 species; round 8 dispatched
+
+- **State:** union gate green **557 files / 5671 tests + 1 deliberate
+  animation-lane skip** (net delta = deleted legacy fixture tests), build
+  clean. M7's flip verified: legacy files gone, supervisor personally
+  re-ran `battle2-turn1-rockslide` **191/191** and
+  `battle2-action-menu-dense` **209/209** (worker verified 16/16, 128/128,
+  715/715, ground-truth 38/179 unchanged). S7 merged: player-cry
+  triangulation (GRIMER/KADABRA/DELCATTY → `readyLag = 98 + cryDuration`
+  within 1 tick — round-6's 8-tick miss was a wrong anchor) + committed
+  MAGNETON/RICARDO fixture with landmark map incl. pixel-confirmed
+  shadow-elevation frame 1687.
+- **Supervisor actions:** #39 issue text + inventory rank-1 row marked
+  retired; `battle2-turn1-rockslide.json` given explicit
+  `appRoute: canonical-recorded` (fixes the wrong-route crash from the
+  M7 papercut); PAPERCUTS bumped (pixel-inspection helper).
+- **Round 8 dispatched:** main M8 — implement species-keyed player ready
+  lag (canonical route untouched; GRANBULL flat-286 flagged as a separate
+  path), build the MAGNETON app-side comparison (second arbitrary-species
+  proof; first shadow-path exercise), stage real personalities in the
+  staged stages (gender-icon residual), then frames 444/536. Side S8 —
+  #39 rank-2 (turn-13 DRAGON_BREATH→faint→switch-in) equivalence
+  groundwork, new-files-only, tsc mandatory.
+- **Notes:** GRANBULL flat-286 non-reconciliation is recorded in
+  `docs/intro-cry-shadow-evidence.md` — treat as a flag on the canonical
+  path, not a defect claim.
+
+---
 ## 765 — [BOUNDED MAIN WORKER 2026-07-31 ~02:45] #39 rank-1 FLIPPED: Battle-2 command turn now kernel-driven; three legacy fixture files deleted
 
 - **State:** all six mandated pins hold at their recorded counts:

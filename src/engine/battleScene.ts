@@ -817,11 +817,7 @@ import {
   resolveTurn13AccFellLines,
   resolveTurn13SandAttackKickoffLines,
 } from "./turn13SandAttackPresentationStaging.ts";
-import {
-  resolveTurn13DragonBreathFaintLines,
-  resolveTurn13DragonBreathHpEndpoints,
-  resolveTurn13DragonBreathKickoffLines,
-} from "./turn13DragonBreathPresentationStaging.ts";
+import { resolveTurn13ResolutionAdapter } from "./turn13ResolutionAdapter.ts";
 import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
@@ -9315,11 +9311,6 @@ export function grovyleFaintSinkRowsAndY2(t: number, startTick: number = GROVYLE
 /** Grovyle's own opponent healthbox vanishes entirely 2 ticks after the sink's own last visible erase-step (`GROVYLE_FAINT_SINK_START_TICK + 2*GROVYLE_FAINT_SINK_STEPS + 3` = 6521) - pixel-confirmed this session (dense oracle sweep of the healthbox's own crop: byte-identical bare background from tick 6521 on, a 7064px whole-healthbox-region diff the tick before). A distinct UI element from the sprite sink above (different screen region), not itemized in docs/faint-switch-notes.md §3/§7 - this session's own re-probe answers the brief's own "what happens to Grovyle's healthbox" question directly. */
 const GROVYLE_HEALTHBOX_VANISH_TICK = GROVYLE_FAINT_SINK_START_TICK + 19; // 6521
 
-/** `faintSinkStartTick + 2*steps + 3` - the same "healthbox vanishes 2 ticks after the sink's own last visible erase-step" formula `GROVYLE_HEALTHBOX_VANISH_TICK` bakes in for Grovyle (`19 = 2*8+3`), generalized for reuse. S7/S8 turn 13 rung 3: oracle-pixel-confirmed for Pidgeotto (`S=15960, n=7` gives 15977, matching the fresh sha transition to `02e2544a49ca`, the same sha docs/turn13-notes.md §4 already cites for "healthbox gone" at 15978). */
-function faintHealthboxVanishTick(startTick: number, steps: number): number {
-  return startTick + 2 * steps + 3;
-}
-
 /** Same tile-grid walk as `drawSpriteSheet`, but only the top `keptRows` of `tileset.rows` (the faint sink's own progressive bottom-up erase, `grovyleFaintSinkRowsAndY2`) - `oy` already includes any `y2` shift, same convention every other sprite draw in this file uses. */
 function drawSpriteSheetTopRows(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, keptRows: number): void {
   for (let ty = 0; ty < keptRows && ty < tileset.rows; ty += 1) {
@@ -13919,14 +13910,28 @@ export const TURN13_DRAGONBREATH_PRESS_TICK = 15516; // dragonBreathTextStartTic
  * before actually pressing" shape.
  */
 export const TURN13_DRAGONBREATH_MENU_REDRAW_DELAY = TURN13_SWITCHIN_MENU_REDRAW_TICK - TURN13_DRAGONBREATH_PRESS_TICK;
-const TURN13_DRAGONBREATH_HP = resolveTurn13DragonBreathHpEndpoints();
+
+/**
+ * ISSUES #39 rank-2 flip: the single real-kernel fact source for this
+ * window's HP/text/faint-sink geometry (`turn13ResolutionAdapter.ts`),
+ * replacing three separate direct staging-module imports plus a hand-fit
+ * sink constant.
+ */
+const TURN13_RESOLUTION = resolveTurn13ResolutionAdapter();
+const TURN13_DRAGONBREATH_HP = TURN13_RESOLUTION.hp;
 const [
   TURN13_DRAGONBREATH_KICKOFF_LINE1,
   TURN13_DRAGONBREATH_KICKOFF_LINE2,
-] = resolveTurn13DragonBreathKickoffLines();
+] = TURN13_RESOLUTION.kickoffLines;
 export const TURN13_FAINT_SINK_START_TICK = 15960; // S - oracle-pixel-bisected (first sink-visible sha change at render 15962, matching S+2 under grovyleFaintSinkRowsAndY2's own d=t-1-S formula), matches docs/turn13-notes.md §7's own RAM-derived value exactly
-export const TURN13_FAINT_SINK_STEPS = 7; // n = 8 - floor(yOffset/8), Pidgeotto yOffset=11 (mon-pic-coords.json)
-export const TURN13_HEALTHBOX_VANISH_TICK = faintHealthboxVanishTick(TURN13_FAINT_SINK_START_TICK, TURN13_FAINT_SINK_STEPS); // 15977, oracle-pixel-confirmed (sha transitions to 02e2544a49ca, docs/turn13-notes.md §4's own "healthbox gone" citation) at exactly this tick
+// steps/healthboxVanishFrame: createBattleResolutionPresentation's own
+// generic opponent-faint-timing formula (opponentFaintSinkGeometry,
+// turn13ResolutionAdapter.ts), evaluated at Pidgeotto's real front-pic
+// yOffset=11 (mon-pic-coords.json) -- proven equal to the former hand-fit
+// TURN13_FAINT_SINK_STEPS=7/TURN13_HEALTHBOX_VANISH_TICK=15977 constants by
+// turn13ResolutionAdapterEquivalence.test.ts, not independently re-derived.
+export const TURN13_FAINT_SINK_STEPS = TURN13_RESOLUTION.faintSink.steps;
+export const TURN13_HEALTHBOX_VANISH_TICK = TURN13_FAINT_SINK_START_TICK + TURN13_RESOLUTION.faintSink.healthboxVanishFrame;
 
 /** Same `pressTick+318`-relative anchor `drawDragonBreathScene` (turn 2's own DRAGON_BREATH) uses for Grovyle's own target hit-flash (`rockSlideMonBlinkInvisible`/`rockSlideHealthboxWobbleY2`, both already generic, reused verbatim - see `DRAGONBREATH_HIT_FLASH_OFFSET`'s own module doc) - re-anchored to `TURN13_DRAGONBREATH_PRESS_TICK`. Oracle-pixel-confirmed this session: omitting this (drawing Pidgeotto solid throughout) regressed a ~1085px diff at 15855-15863, isolated by `npm run compare` to exactly Pidgeotto's own on-field sprite - the SAME blink window turn 2's own target already exercises, not a new mechanism. */
 const TURN13_HIT_FLASH_PRESS_TICK = TURN13_DRAGONBREATH_PRESS_TICK + DRAGONBREATH_HIT_FLASH_OFFSET;
@@ -14014,7 +14019,7 @@ function drawDragonBreathKoWindow(
 const [
   TURN13_DRAGONBREATH_FAINT_LINE1,
   TURN13_DRAGONBREATH_FAINT_LINE2,
-] = resolveTurn13DragonBreathFaintLines();
+] = TURN13_RESOLUTION.faintLines;
 const TURN13_DRAGONBREATH_FAINT_TEXT_TOTAL =
   TURN13_DRAGONBREATH_FAINT_LINE1.length
   + TURN13_DRAGONBREATH_FAINT_LINE2.length;
@@ -14139,9 +14144,9 @@ function drawFaintedOpponentWindow(
  * `pidgeottoHealthboxVisible` (default `true`) - both every pre-existing
  * call site unaffected - let DRAGON_BREATH's own faint drive Pidgeotto's
  * on-field sprite through its sink erase and suppress its healthbox
- * entirely past `faintHealthboxVanishTick`, the same "generalize a
- * hardcoded value into a defaulted param" idiom every other reused
- * mechanism in this file already uses.
+ * entirely past its own vanish tick (`TURN13_HEALTHBOX_VANISH_TICK`), the
+ * same "generalize a hardcoded value into a defaulted param" idiom every
+ * other reused mechanism in this file already uses.
  */
 function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = turn5SitrusOnixHp(t), onixX2: number = 0, onixInvisible: boolean = false, healthboxY2Override?: number, onixY2Extra: number = 0, darken: boolean = false, pidgeottoX2: number = 0, pidgeottoSink: { keptRows: number; y2: number } | null = null, pidgeottoHealthboxVisible: boolean = true): void {
   drawTurn5RockSlideAttack(fb, t, bounceTick, beforeMonSprite, onixX2, onixInvisible, onixY2Extra, darken);
