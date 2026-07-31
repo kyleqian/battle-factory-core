@@ -813,6 +813,7 @@ import {
   resolveTurn8FeatherDanceKickoffLines,
   resolveTurn8FeatherDanceWindowContent,
 } from "./turn78FeatherDancePresentationStaging.ts";
+import { resolveTurn8BindKickoffLines, resolveTurn8MissLines } from "./turn8BindPresentationStaging.ts";
 import { resolveTurn3RockSlideHpEndpoints } from "./turn3RockSlidePresentationStaging.ts";
 import {
   resolveTurn6RockSlideAttackLines,
@@ -2266,6 +2267,26 @@ const [TURN7_ATKFELL_KICKOFF_LINE1, TURN7_ATKFELL_KICKOFF_LINE2] = resolveTurn7A
  */
 const [TURN8_FEATHERDANCE_KICKOFF_LINE1, TURN8_FEATHERDANCE_KICKOFF_LINE2] = resolveTurn8FeatherDanceKickoffLines();
 const [TURN8_ATKFELL_KICKOFF_LINE1, TURN8_ATKFELL_KICKOFF_LINE2] = resolveTurn8AtkFellLines();
+
+/**
+ * ISSUES #39 rank-4 slice 5 (final rank-4 slice, `docs/rank4-prep-scout.md`
+ * §2.4/§3 item 5): turn 8's own BIND kickoff + miss text ("ONIX used\nBIND!"
+ * / "ONIX's\nattack missed!"), now re-derived from
+ * `turn8BindPresentationStaging.ts`'s own staged real `BattleScript_EffectTrap`
+ * event stream (the canonical MISS) via `presentationEventWindowBridge.ts`'s
+ * new `resolveMoveMissedKickoffPresentationWindowContent` bridge --
+ * byte-identical content (same `STRINGID_USEDMOVE`/`STRINGID_ATTACKMISSED`
+ * templates), but now identified from provenance
+ * (`BattleScript_PrintMoveMissed`/`BattleScript_MoveMissed`), not bare
+ * literals. Both stay exported and defined here (moved up from their old
+ * literal definitions further down this file) -- `TURN8_BIND_LINE1/2` is
+ * this window's own only call site, but `TURN8_MISS_LINE1/2` is also reused
+ * verbatim by turn 12's own ROCK_SLIDE-miss window and turn 14's own
+ * STATUS3_ON_AIR auto-miss window, same "no literal dies" rule already
+ * established for `TURN6_ATKFELL_LINE1/2` etc.
+ */
+export const [TURN8_BIND_LINE1, TURN8_BIND_LINE2] = resolveTurn8BindKickoffLines();
+export const [TURN8_MISS_LINE1, TURN8_MISS_LINE2] = resolveTurn8MissLines();
 
 /**
  * ISSUES #39 rank-4 slice 2 (`docs/rank4-prep-scout.md` slice 2): the
@@ -11556,14 +11577,14 @@ function drawTurn8FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: 
 /**
  * `STRINGID_USEDMOVE` resolved for Onix's own turn 8: "ONIX used\nBIND!"
  * (docs/turn8-notes.md §5, pixel-confirmed `fa8e70f4e678` at tick 9880).
- * Delay fit directly against `battle1-turn8-dense.json`'s own real script
- * (this turn's real confirm pressTick is 9425 - the confirm press occupies
- * frames 9424-9425, same `+1` registration convention every prior turn's
- * pressTick already follows): the fresh sweep's first tick of this
- * transition is 9846 (`9846-9425=421`).
+ * `TURN8_BIND_LINE1/2` themselves are now defined above (ISSUES #39 rank-4
+ * slice 5, `resolveTurn8BindKickoffLines()`), not here. Delay fit directly
+ * against `battle1-turn8-dense.json`'s own real script (this turn's real
+ * confirm pressTick is 9425 - the confirm press occupies frames 9424-9425,
+ * same `+1` registration convention every prior turn's pressTick already
+ * follows): the fresh sweep's first tick of this transition is 9846
+ * (`9846-9425=421`).
  */
-export const TURN8_BIND_LINE1 = "ONIX used";
-export const TURN8_BIND_LINE2 = "BIND!";
 export const TURN8_BIND_TEXT_TOTAL = TURN8_BIND_LINE1.length + TURN8_BIND_LINE2.length;
 export const TURN8_BIND_TEXT_DELAY = 421;
 
@@ -11596,12 +11617,12 @@ export function turn8BindTextVisibleChars(t: number, pressTick: number): number 
  * player's own mon, no "Foe " prefix): "ONIX's\nattack missed!" - BIND's own
  * accuracy check misses (docs/turn8-notes.md §3/§5, the FIRST miss this
  * engine ever renders - no move animation plays, the battle script branches
- * straight from the kickoff text to this message). Delay fit the same way as
+ * straight from the kickoff text to this message). `TURN8_MISS_LINE1/2`
+ * themselves are now defined above (ISSUES #39 rank-4 slice 5,
+ * `resolveTurn8MissLines()`), not here. Delay fit the same way as
  * `TURN8_BIND_TEXT_DELAY`: the fresh sweep's first tick of this transition
  * is 9896 (`9896-9425=471`).
  */
-export const TURN8_MISS_LINE1 = "ONIX’s";
-export const TURN8_MISS_LINE2 = "attack missed!";
 export const TURN8_MISS_TEXT_TOTAL = TURN8_MISS_LINE1.length + TURN8_MISS_LINE2.length;
 export const TURN8_MISS_TEXT_DELAY = 471;
 
