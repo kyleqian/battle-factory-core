@@ -1,3 +1,63 @@
+## 785 — [BOUNDED MAIN WORKER 2026-07-31 ~11:10] #58 fully closed (remainder retired); rank-4 slice 2 honest-stop on the verified blocker
+
+- **State:** `npx tsc --noEmit` clean; focused suite (turn67RockSlide
+  PresentationStagingEquivalence, executableFrontierRatchet, stagePlayer
+  HitChainStatStages, stagePlayerHitChainMaxHpItem, turn5/turn13
+  ResolutionAdapterEquivalence, battleScene — 7 files) **314/314 green**,
+  no new ratchet barriers, no new canonical-recording imports. Tree clean
+  at this commit. Full `npm test`/`npm run build` intentionally not run
+  (side worktree live concurrently, per brief).
+- **Did (1 commit, part 1 only):** swapped `turn67RockSlide
+  PresentationStaging.ts`'s local `battler()`/`createBattleScriptRulesContext`/
+  `createBattleScriptStatusRulesExecution`/`stepBattleScriptMachine` pipeline
+  onto the shared `stagePlayerHitChainToTerminalMachineState` (now that
+  `594442e6` threads `statStages` through it) and deleted the ~150-line
+  local workaround — identical recipe to #57's `14c4295b`. **#58 remainder
+  closed** (per brief, ISSUES.md itself intentionally not edited this step).
+- **Baseline-first pins, all exact, unchanged before/after the swap:**
+  rank-4 — turn6-featherdance 90/90, turn6-feathers 235/235,
+  turn6-rockslide-a/b 255/105, turn7-rockslide-a/b/c/d 256/256/256/19,
+  turn8-bind-a/b 256/66. Insurance — turn5-rockslide 256/256, turn5-switchin
+  241/241, turn5-sitrus-c 181/181, turn13-sandattack 190/190,
+  interactive-generated-intro-off 715/715, battle-command-generated-off
+  128/128.
+- **Rank-4 slice 2 (stat-fall banner): investigated, NOT landed — honest
+  stop.** Verified the scout's §2.3 claim live and found it's slightly
+  *broader* than scoped: `drawStatDecreaseBannerForBattler` (the
+  hardcoded-`attack`-palette convenience wrapper `drawTurn6StatFallBanner`
+  calls) has **four** real callers, not three — turn 6/7/8's own
+  `drawTurn{6,7,8}FeatherDanceKickoffText` (`battleScene.ts:11017,11284,11483`)
+  *and* a fourth, separate generic opponent-attacker FEATHER_DANCE window
+  (`:30180`) — all correct-by-construction (FEATHER_DANCE only ever drops
+  ATK) but none enforced from a kernel fact. Confirmed the bridge itself is
+  ready: `turn6FeatherDancePresentationStaging.ts`'s
+  `resolveTurn6FeatherDanceWindowContent()` already exposes a real
+  `statChange:{battler,stat,from,to}` (used today only for the TEXT, not
+  the banner), and production already has a *working* precedent for a
+  non-attack palette (FAKE_TEARS's own caller, `:23215`, passes
+  `statAnimBanner.palettes.spDefense` explicitly through the lower-level
+  `drawStatDecreaseBannerForBattlerPalette`). The blocker is real: turns 7
+  and 8 have no staged FEATHER_DANCE module of their own yet (rank-4 slice
+  3, unstarted) to source a genuinely-their-own fact from, so threading a
+  real per-call value through the shared wrapper's signature — even scoped
+  to turn 6's own call site only — means deciding whether turn 7/8's two
+  other call sites keep passing today's implicit literal explicitly (cheap,
+  but bakes in the "safe not real" gap the scout already named) or wait for
+  slice 3. That is a design call, not a mechanical one, and the remaining
+  session time did not leave room to land it (new equivalence test +
+  `turn6-statfall.json` 127/127 oracle proof) safely. No source touched for
+  this half; nothing committed or left uncommitted.
+- **Next:** rank-4 slice 2 — either accept turn 7/8's own call sites
+  passing today's literal explicitly (unblocks turn 6's real wiring now,
+  documented same "safe not real" gap the TEXT already has) or land rank-4
+  slice 3 first (turn 7/8's own `turn{7,8}FeatherDancePresentationStaging.ts`,
+  `turn11FeatherDancePresentationStaging.ts`'s own precedent) so all three
+  callers get real per-turn facts together. Then slice 4 (already flipped
+  as part of slice 1, see `PROGRESS-archive.md` entry 783), slice 5 (BIND,
+  needs the `{message, missMessage}` bridge shape + entry-label parameter,
+  §2.4).
+
+---
 ## 784 — [SUPERVISOR 2026-07-31 round 4] M4 (rank-4 slice 1) + S5 (#58 core fix) verified and merged; round 5 dispatching
 
 - **State:** master = M4's three commits + S5's `594442e6` merged
