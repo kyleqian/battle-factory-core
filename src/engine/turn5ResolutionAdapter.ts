@@ -66,39 +66,26 @@
  * exported, so the test pins literal values with line citations, the same
  * shape rank 2's own switch-in test used for `MURKROW_LEVEL`/hp-142).
  *
- * NOT reused here: `turn1RockSlidePresentationStaging.ts`'s own shared
- * `stagePlayerHitChainToTerminalMachineState` wrapper. Live-probed this
- * session: its own local `battler()` normalizer silently drops
- * `maxHP`/`item` from its `Partial<BattleScriptRulesBattler>` input (every
- * caller's `changes.maxHP`/`changes.item` is discarded; `item` is
+ * ISSUES #57 (`387a34a1`): this module now REUSES
+ * `turn1RockSlidePresentationStaging.ts`'s own shared
+ * `stagePlayerHitChainToTerminalMachineState` wrapper instead of a local
+ * staging pipeline. That helper's `battler()` normalizer used to silently
+ * drop `maxHP`/`item` from its `Partial<BattleScriptRulesBattler>` input
+ * (every caller's `changes.maxHP`/`changes.item` was discarded; `item` was
  * hardcoded `0`), so `createBattleScriptRulesContext`'s own `maxHP:
- * battler.maxHP ?? battler.hp` default silently collapses to Onix's
- * CURRENT hp (1) instead of its real 117 -- which would wrongly fail the
- * Sitrus gate (`hp <= maxHP/2`). This is a real, pre-existing gap in that
- * shared helper (rank 2's own switch-in adapter never triggered it: it
- * never reads the attacker's own maxHP/item back). Fixing it is out of
- * this slice's scope (an existing file); this module instead builds its
- * own local staging pipeline -- the SAME idiom
- * `turn5FaintPresentationStaging.ts`/`turn5EndeavorPresentationStaging.ts`
- * already use (their own local `battler()` + direct
+ * battler.maxHP ?? battler.hp` default would have silently collapsed to
+ * Onix's CURRENT hp (1) instead of its real 117 -- wrongly failing the
+ * Sitrus gate (`hp <= maxHP/2`). `387a34a1` fixed that gap directly in the
+ * shared helper (now forwards `maxHP`/`item` verbatim, pinned by
+ * `tests/stagePlayerHitChainMaxHpItem.test.ts`), so this module's own former
+ * local workaround (its own `battler()` + direct
  * `createBattleScriptRulesContext`/`createBattleScriptStatusRulesExecution`/
- * `stepBattleScriptMachine` loop), just with `maxHP`/`item` actually
- * forwarded.
+ * `stepBattleScriptMachine` loop) is retired in favor of the shared seam.
  */
-import {
-  createBattleScriptRulesContext,
-  createBattleScriptStatusRulesExecution,
-  type BattleScriptRulesBattler,
-  type BattleScriptRulesContext,
-  type BattleScriptStatusRulesExternalPorts,
-} from "./battleScriptRulesContext.ts";
-import { loadBattleScriptProgram, type BattleScriptProgram } from "./battleScriptProgram.ts";
-import {
-  acknowledgeBattleScriptMachineController,
-  stepBattleScriptMachine,
-  type BattleScriptMachineState,
-  type BattleScriptOpcodeHandlers,
-} from "./battleScriptMachine.ts";
+import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import type { BattleScriptProgram } from "./battleScriptProgram.ts";
+import type { BattleScriptMachineState, BattleScriptOpcodeHandlers } from "./battleScriptMachine.ts";
+import { stagePlayerHitChainToTerminalMachineState } from "./turn1RockSlidePresentationStaging.ts";
 import { runBattleScriptFaintedActionsOrchestration } from "./battleScriptFaintedActionsOrchestration.ts";
 import { runBattleEndTurnOrchestration } from "./battleEndTurnOrchestration.ts";
 import { resolveBattleNameWithPrefix, resolveBattleStringLines } from "./battleStringResolver.ts";
@@ -198,75 +185,6 @@ const TURN5_PARTY = Object.freeze({
   ]),
 });
 
-const PROGRAM = loadBattleScriptProgram();
-/** turn5FaintPresentationStaging.ts's own real entry label for a single hit chain. */
-const ENTRY_LABEL = "BattleScript_HitFromAtkCanceler";
-const B_WAIT_TIME_LONG = 64;
-
-/** Forwards `maxHP`/`item` unlike turn1RockSlidePresentationStaging.ts's own local normalizer -- see this module's top doc. */
-function battler(changes: Partial<BattleScriptRulesBattler>): BattleScriptRulesBattler {
-  return Object.freeze({
-    side: changes.side ?? 0,
-    ability: 0,
-    hp: changes.hp ?? 0,
-    maxHP: changes.maxHP,
-    moves: changes.moves ?? Object.freeze([0, 0, 0, 0] as const),
-    pp: changes.pp ?? Object.freeze([0, 0, 0, 0] as const),
-    status1: 0,
-    status2: 0,
-    status3: 0,
-    substituteHP: 0,
-    rolloutTimer: 0,
-    furyCutterCounter: 0,
-    truantCounter: 0,
-    rechargeTimer: 0,
-    flinchImmobility: 0,
-    disabledMove: 0,
-    usedDisabledMove: 0,
-    tauntTimer: 0,
-    usedTauntedMove: 0,
-    usedImprisonedMove: 0,
-    item: changes.item ?? 0,
-    statStages: [6, 6, 6, 6, 6, 6, 6, 6],
-    types: changes.types ?? (["TYPE_NORMAL", "TYPE_NORMAL"] as const),
-    species: changes.species ?? 0,
-    attack: changes.attack ?? 0,
-    defense: changes.defense ?? 0,
-    spAttack: changes.spAttack ?? 0,
-    spDefense: changes.spDefense ?? 0,
-    level: changes.level ?? 50,
-    friendship: 0,
-    partyIndex: changes.partyIndex ?? 0,
-  });
-}
-
-function externalPorts(): BattleScriptStatusRulesExternalPorts {
-  return Object.freeze({
-    isControllerIdle: () => true,
-    prepareMessage: (_context, operand) =>
-      operand.expression.startsWith("STRINGID_")
-        ? Object.freeze({ kind: "message" as const, messageId: operand.expression, substitutions: Object.freeze([]) })
-        : null,
-    prepareSelectionMessage: () => null,
-    prepareSelectionMessageFromTable: () => null,
-    resolveAttackerBattler: () => null,
-    resolveBattlerAtPosition: () => null,
-    resolveHalfwordOperand: (_context, operand) =>
-      operand.expression === "B_WAIT_TIME_LONG" ? B_WAIT_TIME_LONG : null,
-    resolveByteOperand: () => null,
-  });
-}
-
-function acknowledgePendingControllers(
-  state: BattleScriptMachineState<BattleScriptRulesContext>,
-): BattleScriptMachineState<BattleScriptRulesContext> {
-  let next = state;
-  for (const pendingBattler of state.scheduler.pendingControllerBattlers) {
-    next = acknowledgeBattleScriptMachineController(next, pendingBattler);
-  }
-  return next;
-}
-
 export type Turn5ResolutionAdapterMachineState = Readonly<{
   program: BattleScriptProgram;
   handlers: BattleScriptOpcodeHandlers<BattleScriptRulesContext>;
@@ -284,47 +202,34 @@ export type Turn5ResolutionAdapterMachineState = Readonly<{
  * script itself -- same non-interference rank 2's own module doc notes).
  */
 export function stageTurn5KoHitChainToTerminalMachineState(): Turn5ResolutionAdapterMachineState {
-  const onix = battler({
-    side: 0,
-    hp: 1,
-    maxHP: 117,
-    species: SPECIES_ONIX,
-    attack: 51,
-    defense: 187,
-    spAttack: 36,
-    spDefense: 72,
-    types: ["TYPE_ROCK", "TYPE_GROUND"],
-    moves: [STAGED_MOVE, 0, 0, 0],
-    pp: [10, 0, 0, 0],
-    item: ITEM_SITRUS_BERRY,
-  });
-  const grovyle = battler({
-    side: 1,
-    hp: 1,
-    species: SPECIES_GROVYLE,
-    attack: 103,
-    defense: 56,
-    spAttack: 91,
-    spDefense: 71,
-    types: ["TYPE_GRASS", "TYPE_GRASS"],
-    partyIndex: 0,
-  });
-
-  const rulesContext = createBattleScriptRulesContext({
-    battlers: [onix, grovyle, battler({ side: 0 }), battler({ side: 1 })],
-    selectorRoles: { attacker: 0, target: 1, effectBattler: 1, fainted: null },
-    scriptingBattler: 0,
-    atkCancelerTracker: 0,
-    battleOutcome: 0,
+  return stagePlayerHitChainToTerminalMachineState({
+    attacker: {
+      hp: 1,
+      maxHP: 117,
+      species: SPECIES_ONIX,
+      attack: 51,
+      defense: 187,
+      spAttack: 36,
+      spDefense: 72,
+      types: ["TYPE_ROCK", "TYPE_GROUND"],
+      moves: [STAGED_MOVE, 0, 0, 0],
+      pp: [10, 0, 0, 0],
+      item: ITEM_SITRUS_BERRY,
+    },
+    target: {
+      hp: 1,
+      species: SPECIES_GROVYLE,
+      attack: 103,
+      defense: 56,
+      spAttack: 91,
+      spDefense: 71,
+      types: ["TYPE_GRASS", "TYPE_GRASS"],
+      partyIndex: 0,
+    },
     currentMove: STAGED_MOVE,
     currentMovePosition: 0,
-    moveResultFlags: 0,
-    dmgMultiplier: 1,
-    critMultiplier: 1,
     moveEffectByte: 0,
-    missType: 0,
-    hitMarker: 0,
-    multiHitCounter: 0,
+    rngSeed: KO_HIT_SEED,
     party: TURN5_PARTY,
     battleTopology: {
       battlersCount: 2,
@@ -332,31 +237,6 @@ export function stageTurn5KoHitChainToTerminalMachineState(): Turn5ResolutionAda
       battlerPositions: [0, 1, 0xff, 0xff],
     },
   });
-
-  const execution = createBattleScriptStatusRulesExecution(PROGRAM, ENTRY_LABEL, rulesContext, KO_HIT_SEED, externalPorts());
-  let state = execution.state;
-  for (let budget = 0; budget < 512; budget += 1) {
-    const stepped = stepBattleScriptMachine(PROGRAM, state, execution.handlers);
-    if (stepped.kind === "halted" && stepped.state.haltReason?.kind === "terminal") {
-      return Object.freeze({ program: PROGRAM, handlers: execution.handlers, state: stepped.state });
-    }
-    if (stepped.kind === "blocked") {
-      const acknowledged = acknowledgePendingControllers(state);
-      if (acknowledged === state) {
-        throw new Error("turn5ResolutionAdapter: Battle Script blocked without a safe controller acknowledgement");
-      }
-      state = acknowledged;
-      continue;
-    }
-    if (stepped.kind !== "advanced" && stepped.kind !== "scheduler-progressed") {
-      throw new Error(
-        `turn5ResolutionAdapter: staged KO hit chain stopped unexpectedly (${stepped.kind}) `
-          + "before its own script completed",
-      );
-    }
-    state = stepped.state;
-  }
-  throw new Error("turn5ResolutionAdapter: staged hit chain did not reach its own script end in budget");
 }
 
 export type Turn5SwitchInAdapter = Readonly<{
