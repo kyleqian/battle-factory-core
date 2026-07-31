@@ -3,6 +3,7 @@ import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { 
 import naturesData from "../src/data/gen/natures.json" with { type: "json" };
 import type { FactoryRentalRecord } from "../src/engine/battleScenario.ts";
 import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
+import { getLevel50InitialRentalFixedIv } from "../src/engine/factoryRentalGeneration.ts";
 import {
   advanceFactoryBattleStartIntro,
   createFactoryBattleStartIntro,
@@ -21,7 +22,9 @@ import {
   generatedBattleStartCommandReady,
   generatedBattleStartPlayerReleaseStarted,
   generatedBattleIntroSourceClock,
+  generatedPlayerVisualTAtOpponentHandoff,
   opponentSummaryExitElapsed,
+  renderGeneratedBattleStartOpponentRelease,
   renderGeneratedBattleStartPreSendOut,
 } from "../src/engine/battleScene.ts";
 
@@ -95,6 +98,91 @@ describe("generated Factory pre-send-out intro lifecycle", () => {
       "jenson",
       "canonical-recorded",
     )).toBe(31);
+  });
+
+  it("keeps the player summary bar/icon fade anchored on the player's own throw-visible clock during the opponent-release phase, not the raw opponent-handoff clock (ISSUES #56 item 2 frame 536: RAM proved zero movement on the player status-bar/icons through app-relative 542, while a raw-clock-anchored fade would already have started at 536)", () => {
+    // Mirrors tools/probe/analyze-issue56-frames-444-536-app-series.ts's own
+    // YOSHI stage construction (COMBUSKEN opponent, GRIMER player lead) -
+    // the one already-verified fixture whose dispatch delay (125, cry-
+    // duration-derived) pushes the render-dispatch switch to the player-
+    // release compositor late enough (raw t=1576) that the raw opponent-
+    // handoff clock crosses the old flat PLAYER_SUMMARY_FADE_START_TICK
+    // (1574) one tick BEFORE that switch - the exact window this bug lived
+    // in.
+    const natureByName2 = new Map(naturesData.natures.map((row) => [row.name, row.index]));
+    function generatedCommandRecord(setId: number, exactPersonality?: number): FactoryRentalRecord {
+      const set = frontierMonsData.entries[setId]!;
+      const personality = exactPersonality ?? natureByName2.get(set.nature)!;
+      const input = {
+        setId,
+        personality,
+        fixedIv: getLevel50InitialRentalFixedIv(0, false),
+        abilitySlot: (personality & 1) as 0 | 1,
+        otId: PLAYER_TRAINER_ID,
+      };
+      return Object.freeze({
+        ...input,
+        abilitySlot: createFactoryCorpusPartyMember(input).abilitySlot,
+      });
+    }
+    const playerRentalRecords = [
+      generatedCommandRecord(110, 2737562574),
+      generatedCommandRecord(130, 3230415900),
+      generatedCommandRecord(150, 391062422),
+    ] as const;
+    let orchestrator = createFactoryRoundBattleOrchestrator({
+      id: "factory-arbitrary-intro-yoshi-off-pin",
+      rngValue: 42,
+      factoryWinStreak: 0,
+      playerTrainerId: PLAYER_TRAINER_ID,
+      battleTowerLevel50WinStreak: 0,
+      facilityState: { rentsCount: 0 },
+      rentals: {
+        type: "currentRecords",
+        playerRentalRecords,
+        savedRentalRecords: [
+          ...playerRentalRecords,
+          generatedCommandRecord(115),
+          generatedCommandRecord(135),
+          generatedCommandRecord(145),
+        ],
+      },
+    });
+    const generated = factoryBattleStartPresentationForState(orchestrator)!;
+    let state = createFactoryBattleStartIntro(generated, false);
+    while (state.elapsed < 370) state = advanceFactoryBattleStartIntro(state);
+    state = advanceFactoryBattleStartIntro(state, new Set(["A"]));
+    while (!generatedBattleStartOpponentReleaseStarted(state)) {
+      state = advanceFactoryBattleStartIntro(state);
+    }
+    function render(): Uint8Array {
+      const frame = new Uint8Array(240 * 160 * 4);
+      renderGeneratedBattleStartOpponentRelease(frame, state);
+      return frame;
+    }
+    let sawRawClockPastThreshold = false;
+    let previousFrame: Uint8Array | null = null;
+    while (!generatedBattleStartPlayerReleaseStarted(state)) {
+      const t = generatedBattleIntroSourceClock(state.elapsed);
+      const playerVisualT = generatedPlayerVisualTAtOpponentHandoff(state, t)!;
+      if (t >= 1574) {
+        // The exact regression window: the raw clock has crossed the old
+        // flat threshold, but the player's own throw-visible clock has not,
+        // and this fixture's own materialize/ball-open animations have
+        // already settled by here - so the WHOLE frame (not just the
+        // player-icon row, empirically the first-diverging region under the
+        // pre-fix raw-clock bug) must render byte-identically tick to tick.
+        expect(playerVisualT).toBeLessThan(1574);
+        const frame = render();
+        if (previousFrame !== null) {
+          sawRawClockPastThreshold = true;
+          expect(Array.from(frame)).toEqual(Array.from(previousFrame));
+        }
+        previousFrame = frame;
+      }
+      state = advanceFactoryBattleStartIntro(state);
+    }
+    expect(sawRawClockPastThreshold).toBe(true);
   });
 
   it("uses one BeginBattleIntro-relative clock through slide, printer, and A gate", () => {

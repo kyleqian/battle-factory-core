@@ -233,7 +233,7 @@ this doc, `tools/probe/dump-issue56-frames-444-536-oam.py`,
 dump (`/tmp/issue56-oam-yoshi.json`) and pixel captures (`/tmp/issue56-frames-probe/`)
 are not committed, reproducible from the command lines above.
 
-## Round 2 (2026-07-31, main lane): Part A investigated - RAM/pixel-verified sub-fix found, but a new MAGNETON regression blocks landing it
+## Round 2 (2026-07-31, main lane): Part A investigated - RAM/pixel-verified sub-fix found, but a new MAGNETON regression blocks landing it; Part B resolved cleanly (534->536->550 pinned, real onset matches the ALREADY-EXISTING sibling mechanism, no new term needed)
 
 ### Part A — the described fix, RAM/pixel-verified for its own targeted 4 pixels, but NOT landed
 
@@ -299,3 +299,75 @@ find the real per-fixture/species discriminator — not attempted this round
 remains an open, two-defect residual (status-bar widget sub-fix pinned
 here but not shipped, pending the discriminator fix; materialize column
 shift undiagnosed).
+
+### Part B — real onset pinned exactly, matches the EXISTING sibling mechanism, landed clean
+
+**Extended probe** (`dump-issue56-frames-444-536-oam.py`, same script, no
+code change needed — just a wider range): `1696:1746` (app-relative
+525-575, well past the original window's 542 cutoff). `slot5` (player bar)
+and `slots 54-59` (player icons) `x2` stay flat 0 through app-relative
+**549**, then move every tick from app-relative **550** onward (`slot5.x2:
+-2, -4, -6, ...`, `-2`/tick, exactly `playerSummaryBarExitDx`'s own
+formula shape). **Real onset: app-relative 550** — RAM ground truth, not a
+prediction.
+
+**Triangulation: not a new species term — the real onset matches the
+ALREADY-EXISTING, already-oracle-validated `generatedPlayerVisualClock`
+rebasing exactly**, no new fitted constant needed. Confirmed two ways:
+
+1. Frames **537 onward** in this same trace already use this exact
+   mechanism (`renderGeneratedBattleStartPlayerRelease`'s own
+   `playerVisualT`, unmodified) and were **already pixel-matching the
+   oracle** before this round's fix (only 444 and 536 were in YOSHI's
+   699/751 mismatch list) — direct evidence the formula is already right,
+   confirmed via `npm run compare`'s own per-frame output, not assumed.
+2. Extending `analyze-issue56-frames-444-536-app-series.ts` with a local
+   replica of the rebasing chain (`generatedPlayerVisualClockLocal` +
+   `generatedPlayerDispatchDelayLocal`/`generatedPlayerVisualLagLocal`,
+   COMBUSKEN dispatch delay 125, GRIMER visual lag 13) against the real
+   `render()` output pinpoints the actual bug: `renderGeneratedBattleStart
+   OpponentRelease`'s own pre-player-release `drawBallIcons` calls passed
+   the **raw** opponent-handoff clock `t` instead of the same rebased
+   `playerVisualT` clock the player-release compositor already uses — a
+   call-site inconsistency, not a missing mechanism. At YOSHI's frame 536
+   (raw `t=1575 ≥ PLAYER_SUMMARY_FADE_START_TICK=1574`), the rebased
+   `playerVisualT` is only 1560 — nowhere near the threshold — confirming
+   the raw clock crossed the flat threshold a full ~14 ticks before the
+   real (rebased) onset for this fixture.
+
+**Fix implemented and landed** (`src/engine/battleScene.ts`): `drawBallIcons`
+gained an optional `playerClock` parameter (defaults to `t`, so every
+other call site — the pre-handoff `renderGeneratedBattleStartPreSendOut`
+call and the already-correct `renderGeneratedBattleStartPlayerRelease`
+call — is untouched) used for the player-side fade/exit computations only
+(`playerSummaryFadeEva`/`playerSummaryBarExitDx`/`playerBarExitTableActive`/
+`playerSummaryIconExitDx`); the opponent-side computations still use the
+raw `t` they already had right. New exported helper
+`generatedPlayerVisualTAtOpponentHandoff(state, t)` wraps the same
+rebasing `renderGeneratedBattleStartPlayerRelease` already does (dedup'd,
+not duplicated), wired into both `drawBallIcons` calls inside
+`renderGeneratedBattleStartOpponentRelease` via `playerClock`.
+
+**Regression, full set:** YOSHI 699/751 → **700/751** (frame 536 flips;
+mismatch-list diff confirms it is the *only* change — no new mismatch, no
+lost match). `interactive-generated-intro-off` **715/715** held.
+`battle-command-generated-off` **128/128** held. `factory-arbitrary-intro-
+magneton-off` **703/751** held exactly (mismatch list byte-identical
+before/after — this fixture's own dispatch delay never lets its raw clock
+outrun its rebased one within this window, so the bug this fix closes was
+never reachable there). `turn9-rockslide-off` **256/256**,
+`turn10-aerialace-off` **206/206** (insurance canaries) held. Tier-1 pin
+added (`tests/factoryBattleStartIntro.test.ts`): built the same
+COMBUSKEN/GRIMER orchestrator this doc's own probe script uses, walked the
+`t ≥ 1574 && playerVisualT < 1574` window, and asserted **whole-frame**
+byte-identity tick-to-tick (verified this specific assertion both fails
+without the fix — diff first appears at px(155,88), the same region this
+doc's Frame 536 section already named — and passes with it, by temporarily
+reverting just the two `playerClock:` call sites and re-running).
+
+### Updated summary for the supervisor
+
+| Frame | Verdict this round | Confidence |
+| --- | --- | --- |
+| 444 | **Partially resolved, not landed.** The status-bar/icon widget sub-fix is RAM/pixel-confirmed exact for its own 4 targeted pixels, but a second, separate, previously-flagged materialize-column-shift defect remains at the same frame, AND narrowing the widget fix to `isCanonicalAnchorIntro` newly regresses MAGNETON's own analogous frame 437 (opposite-direction pixel evidence) — reverted; needs a MAGNETON-side RAM probe to find the real discriminator. | High for the sub-fix itself; frame-level fix still blocked |
+| 536 | **RESOLVED and landed.** Real onset RAM-pinned at app-relative 550, exactly matching the existing `generatedPlayerVisualClock` mechanism already proven on 4 species elsewhere in this run — a call-site bug (unrebased clock), not a new term. YOSHI 699→700/751, all insurance held. | High — RAM-pinned onset, oracle-verified fix, ablation-tested Tier-1 pin |

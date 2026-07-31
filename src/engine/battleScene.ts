@@ -3938,6 +3938,15 @@ function drawBallIcons(
     opponent: boolean;
     player: boolean;
     playerEvaOffset?: number;
+    // The player-side fade/exit (eva, bar/icon exit dx) fires on Brendan's
+    // own throw-start clock (`PLAYER_SUMMARY_FADE_START_TICK`), which for a
+    // generated/staged route is `playerVisualT`
+    // (`generatedPlayerVisualClock`), not the raw opponent-handoff-relative
+    // `t` - see ISSUES #56 item 2 (docs/issue56-frames-444-536-oam-probe.md).
+    // Defaults to `t` for every call site that already passes the correctly
+    // rebased clock as `t` itself (or is far enough pre-handoff that the
+    // distinction never fires).
+    playerClock?: number;
     summaries?: Readonly<{
       player: readonly PartyBallState[];
       opponent: readonly PartyBallState[];
@@ -3945,11 +3954,12 @@ function drawBallIcons(
   } = { opponent: true, player: true },
 ): void {
   const bars = ballStatusBarPositions(t);
-  const basePlayerEva = playerSummaryFadeEva(t);
+  const playerT = sides.playerClock ?? t;
+  const basePlayerEva = playerSummaryFadeEva(playerT);
   const playerEva = basePlayerEva === null
     ? null
     : Math.max(0, Math.min(16, basePlayerEva + (sides.playerEvaOffset ?? 0)));
-  const barExitDx = playerSummaryBarExitDx(t);
+  const barExitDx = playerSummaryBarExitDx(playerT);
   // `Task_HidePartyStatusSummary_BattleStart_2`'s own `tBlend==-1` case
   // (battle_interface.c:1746) destroys the player bar+icon sprites outright
   // the instant the fade bottoms out (RAM-confirmed: RAM tick 1605, first
@@ -3966,7 +3976,7 @@ function drawBallIcons(
   if (sides.opponent && bars.opponent.visible) drawBallStatusBar(fb, bars.opponent.x, 40, true);
   if (sides.player && bars.player.visible && playerSummaryAlive) {
     const barX = bars.player.x + barExitDx;
-    if (playerEva !== null && playerBarExitTableActive(t)) drawPlayerSummaryBarExit(fb, barX, playerEva);
+    if (playerEva !== null && playerBarExitTableActive(playerT)) drawPlayerSummaryBarExit(fb, barX, playerEva);
     else drawBallStatusBar(fb, barX, 96, false, playerEva);
   }
   let playerIconIndex = 0;
@@ -3980,7 +3990,7 @@ function drawBallIcons(
     const tile = ballDisplay.tileset.tiles[ballStateTileIndex(icon.state)];
     if (!tile) continue;
     const eva = icon.y === 88 ? playerEva : null;
-    const iconExitDx = icon.y === 88 ? playerSummaryIconExitDx(t, playerIconIndex) : 0;
+    const iconExitDx = icon.y === 88 ? playerSummaryIconExitDx(playerT, playerIconIndex) : 0;
     if (icon.y === 88) playerIconIndex += 1;
     for (let py = 0; py < 8; py += 1) {
       for (let px = 0; px < 8; px += 1) {
@@ -4383,6 +4393,11 @@ export function renderGeneratedBattleStartOpponentRelease(
   const textTotal = line1.length + line2.length;
   const handoffTick =
     textStartTick + textTotal - 1 + SENDOUT_HANDOFF_LAG;
+  // Needed so the player-side ball-icon fade/exit (drawBallIcons's
+  // `playerClock`) doesn't fire early on the raw opponent-handoff clock
+  // before this compositor hands off to the player-release one - see
+  // `generatedPlayerVisualTAtOpponentHandoff`'s own doc comment.
+  const playerVisualT = generatedPlayerVisualTAtOpponentHandoff(state, t)!;
 
   if (t < handoffTick) {
     drawSettledScene(fb, "destin", state.command.opponentTrainer);
@@ -4463,12 +4478,14 @@ export function renderGeneratedBattleStartOpponentRelease(
     drawBallIcons(fb, t, {
       opponent: true,
       player: true,
+      playerClock: playerVisualT,
       summaries: state.command.partySummaries,
     });
   } else {
     drawBallIcons(fb, t, {
       opponent: false,
       player: true,
+      playerClock: playerVisualT,
       summaries: state.command.partySummaries,
     });
     drawOpponentSummaryExit(
@@ -4508,6 +4525,38 @@ function generatedPlayerVisualClock(
 ): number {
   return t - (handoffTick + dispatchDelay + visualLag)
     + BRENDAN_THROW_START_TICK;
+}
+
+/**
+ * ISSUES #56 item 2 (`docs/issue56-frames-444-536-oam-probe.md`): the same
+ * `generatedPlayerVisualClock` rebasing `renderGeneratedBattleStartPlayerRelease`
+ * already uses (oracle-proven exact across GRIMER/KADABRA/DELCATTY/ONIX,
+ * `docs/trainer-pic-off-window-scout.md` rounds 5-10), exposed for
+ * `renderGeneratedBattleStartOpponentRelease`'s own pre-player-release
+ * `drawBallIcons` calls too - the player-side status-bar/icon fade+exit
+ * (`playerSummaryFadeEva` et al., anchored on `BRENDAN_THROW_START_TICK`)
+ * fires on the player's own throw-visible clock, never the raw opponent-
+ * handoff-relative `t` those calls previously used. The RAM probe's own
+ * extended window falsified the flat-clock assumption and pinned the real
+ * onset for `factory-arbitrary-intro-yoshi-off` at exactly the tick this
+ * formula already predicts (app-relative 550/551 - the frame-537+ portion
+ * of this same trace was already using this exact formula, unmodified, and
+ * already matched the oracle there). Returns `null` before the opponent
+ * handoff (mirrors `generatedBattleStartOpponentHandoffTick`).
+ */
+export function generatedPlayerVisualTAtOpponentHandoff(
+  state: FactoryBattleStartIntroState,
+  t: number,
+): number | null {
+  const handoffTick = generatedBattleStartOpponentHandoffTick(state);
+  if (handoffTick === null) return null;
+  const [playerLine] = state.command.text.playerSendOut;
+  return generatedPlayerVisualClock(
+    t,
+    handoffTick,
+    generatedPlayerDispatchDelay(state),
+    generatedPlayerVisualLag(playerLine.length),
+  );
 }
 
 function drawGeneratedPlayerMaterialize(

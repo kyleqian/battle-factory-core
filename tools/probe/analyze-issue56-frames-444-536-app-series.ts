@@ -35,7 +35,47 @@ import {
   playerSummaryFadeEva,
   playerSummaryIconExitDx,
   playerSummaryBarExitDx,
+  BRENDAN_THROW_START_TICK,
 } from "../../src/engine/battleMenu.ts";
+import cryDurationsAsset from "../../src/data/gen/cry-durations.json" with { type: "json" };
+
+// --- local replica of the already-proven, already-oracle-validated
+// dispatch/visual-lag rebasing chain (battleScene.ts:4144-4185/4503-4511) -
+// read-only reproduction to test whether frame 536's real onset matches this
+// EXISTING mechanism applied at the (currently un-rebased) opponent-release
+// ball-icon call site, not a new species term. ---
+const CRY_DURATION_TICKS_BY_SPECIES: ReadonlyMap<number, number> = new Map(
+  (cryDurationsAsset as { species: { id: number; durationTicks: number }[] }).species.map(
+    (row) => [row.id, row.durationTicks],
+  ),
+);
+const GROVYLE_SPECIES_ID = 278;
+const GROVYLE_CRY_DURATION_TICKS = CRY_DURATION_TICKS_BY_SPECIES.get(GROVYLE_SPECIES_ID)!;
+const SENDOUT_HANDOFF_LAG = 3;
+function cryDurationTicks(speciesId: number): number {
+  return CRY_DURATION_TICKS_BY_SPECIES.get(speciesId) ?? 0;
+}
+function generatedPlayerDispatchDelayLocal(opponentSpeciesId: number): number {
+  return 101 + (cryDurationTicks(opponentSpeciesId) - GROVYLE_CRY_DURATION_TICKS);
+}
+function generatedPlayerVisualLagLocal(playerLineLength: number): number {
+  return playerLineLength - 1 + SENDOUT_HANDOFF_LAG;
+}
+function generatedPlayerVisualClockLocal(
+  t: number,
+  handoffTick: number,
+  dispatchDelay: number,
+  visualLag: number,
+): number {
+  return t - (handoffTick + dispatchDelay + visualLag) + BRENDAN_THROW_START_TICK;
+}
+// COMBUSKEN (this fixture's own opponent species) and GRIMER ("Go! GRIMER!",
+// 11 chars, this fixture's own player lead) - both already established
+// facts (docs/trainer-pic-off-window-scout.md round 5/7), not re-derived
+// here.
+const COMBUSKEN_SPECIES_ID = 281;
+const DISPATCH_DELAY = generatedPlayerDispatchDelayLocal(COMBUSKEN_SPECIES_ID);
+const VISUAL_LAG = generatedPlayerVisualLagLocal("Go! GRIMER!".length);
 
 // --- verbatim copy of appTrace.ts's generatedCommandRecord/YOSHI stage ---
 const generatedNatureByName = new Map(
@@ -154,7 +194,7 @@ const traceJson = JSON.parse(
 ) as { segments: { frames: number; buttons?: string[] }[] };
 
 const WINDOW_444 = { start: 429, end: 452 };
-const WINDOW_536 = { start: 525, end: 545 };
+const WINDOW_536 = { start: 525, end: 575 };
 
 function inWindow(frame: number): boolean {
   return (frame >= WINDOW_444.start && frame <= WINDOW_444.end)
@@ -162,13 +202,26 @@ function inWindow(frame: number): boolean {
 }
 
 let state = buildYoshiState();
-console.log("frame,elapsed,t,local,coeff,accumulator,y2,px158_40,px160_40,px155_88,px158_88,px168_88,eva,iconExitDx0,barExitDx,opp144_40,opp160_60");
+console.log("frame,elapsed,t,rebasedPlayerVisualT,local,coeff,accumulator,y2,px158_40,px160_40,px155_88,px158_88,px168_88,eva,iconExitDx0,barExitDx,opp144_40,opp160_60");
 if (inWindow(0)) logFrame(0);
 
 function logFrame(frame: number): void {
   const intro = state.factoryRoundBattleOrchestrator?.battleStartIntro;
   const elapsed = intro?.elapsed ?? -1;
   const t = generatedBattleIntroSourceClock(elapsed);
+  // handoffTick for this fixture in absolute-clock units, same conversion
+  // HANDOFF_FRAME uses above (app-relative 412 -> its own `t`, read off the
+  // frame-444 window's own logged `t` column at frame 412 - hardcoded here
+  // via the same fixed relationship: t(frame) - frame is constant across
+  // this whole trace once the intro has begun, since `elapsed` increments
+  // 1:1 with `advance.frame` past that point).
+  const handoffTickAbs = t - (frame - HANDOFF_FRAME);
+  const rebasedPlayerVisualT = generatedPlayerVisualClockLocal(
+    t,
+    handoffTickAbs,
+    DISPATCH_DELAY,
+    VISUAL_LAG,
+  );
   const mf = materializeFacts(frame);
   const rgba = render(state);
   const summaries = intro?.command.partySummaries;
@@ -182,6 +235,7 @@ function logFrame(frame: number): void {
     frame,
     elapsed,
     t,
+    rebasedPlayerVisualT,
     mf ? mf.local : "",
     mf ? mf.coeff : "",
     mf ? mf.accumulator : "",
