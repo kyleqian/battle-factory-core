@@ -1,3 +1,51 @@
+## 786 — [BOUNDED MAIN WORKER 2026-07-31 ~11:50] #39 rank-4 slice 3 (turn-7/8 FEATHER_DANCE) + slice 2 (stat-fall banner) both landed
+
+- **State:** `npx tsc --noEmit` clean; focused suite (turn78/turn67/turn6/
+  turn11 FeatherDance*, executableFrontierRatchet, battleScene, battleMenu,
+  battleMenuIdle, battle2CommandAdapterEquivalence, fightSubmenu,
+  battleSetup, destinCanonicalReplacements, turn13/turn5ResolutionAdapter
+  Equivalence — 14 files) **567/567 green**, no new ratchet barriers, no
+  new canonical-recording imports. Tree clean at this commit. Full
+  `npm test`/`npm run build` intentionally not run (side worktree
+  `side-20260731-102516` live concurrently, per brief).
+- **Did (3 commits):** (1) new `turn78FeatherDancePresentationStaging.ts`
+  — ONE parameterized module (not two files, per the supervisor's own
+  sequencing note) staging turn 7's (ATK 4→2) and turn 8's (ATK 2→0, floor
+  hit but ordinary "harshly fell!" still plays) real FEATHER_DANCE kickoffs,
+  RNG seeds carried forward from each preceding turn's own final ledger
+  value and cross-checked by LCG inversion both directions. (2) flipped
+  `drawTurn7/8FeatherDanceKickoffText` off turn 6's borrowed
+  `TURN6_FEATHERDANCE_LINE1/2`/`TURN6_ATKFELL_LINE1/2` onto their own
+  resolved constants (byte-identical text, real provenance now). (3) slice
+  2: `drawStatDecreaseBannerForBattler`'s hardcoded-`attack` default is
+  gone — `drawTurn6StatFallBanner` (shared by all 3 canonical windows) now
+  takes an explicit palette param, each turn passing its own real
+  `resolveTurnNFeatherDanceWindowContent().statChange.stat`-derived fact
+  (narrow assert-attack guard, not a 7-stat translation table the window's
+  real domain never needs). The 4th caller (`:30243`, animation-lane-owned
+  `sceneOnFeatherDanceView` view) stays an explicit literal with a one-line
+  cite — genuinely blocked by lane ownership, not laziness.
+  Also fixed the same appRoute-missing papercut (class `e3a7f486`) on
+  `turn7-feathers.json`/`turn8-feathers.json`/`turn6-statfall.json`, the
+  three dense traces this step's own windows needed to get an oracle read
+  at all.
+- **All mandated pins hold exact:** turn6-featherdance 90/90, turn6-feathers
+  235/235, turn6-rockslide-a/b 255/105, turn7-rockslide-a/b/c/d
+  256/256/256/19, turn8-bind-a/b 256/66. New: turn7-feathers 145/145,
+  turn8-feathers 162/162, turn6-statfall 127/127 (matches
+  `docs/rank4-prep-scout.md` §3's own predicted number exactly). Insurance:
+  turn5-rockslide 256/256, turn5-switchin 241/241, turn13-sandattack
+  190/190, interactive-generated-intro-off 715/715, battle-command-
+  generated-off 128/128; turn6/7/8-menu 44/93/88 spot-checked.
+- **Next:** rank-4 slice 5 (turn-8 BIND kickoff+miss) is the only remaining
+  slice — needs a new `{message, missMessage}` bridge shape +
+  `stagePlayerHitChainToTerminalMachineState`'s `ENTRY_LABEL` made a
+  parameter (or a local hand-rolled pipeline, turn6 FEATHER_DANCE's own
+  precedent), both scoped in `docs/rank4-prep-scout.md` §2.4/§3 item 5.
+- **Notes:** no papercuts beyond the appRoute ones fixed above (banked
+  into the commits, not left as friction).
+
+---
 ## 785 — [BOUNDED MAIN WORKER 2026-07-31 ~11:10] #58 fully closed (remainder retired); rank-4 slice 2 honest-stop on the verified blocker
 
 - **State:** `npx tsc --noEmit` clean; focused suite (turn67RockSlide

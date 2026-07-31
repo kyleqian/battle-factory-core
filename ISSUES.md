@@ -34,11 +34,19 @@ characterized in `docs/trainer-pic-off-window-scout.md` §D. Remainder:
    calibrated flat lag on the canonical anchor. 715/715 held, YOSHI
    699/751, 128/128 held. Open remainder: the canonical route's +6 has
    no named mechanism (route term documented at the code site).
-2. **Isolated frames 444 and 536** (trainer-exit/shadow region;
-   opponent healthbox/summary region) — pixel-proven single-tick 2-3px
-   sub-step misalignments in per-tick animation tables
-   (`docs/issue56-residual-probe.md` Q1, 2026-07-31); named next step is
-   an OAM RAM read of the specific sprite. The idle-menu-bounce family
+2. **Isolated frames 444 and 536** — OAM RAM probe complete
+   (`docs/issue56-frames-444-536-oam-probe.md`, 2026-07-31). Frame 444
+   RESOLVED to the exact sub-step: `opponentSummaryExitElapsed`'s
+   `generated-initial-release && rawElapsed === 31` special case
+   (`battleScene.ts:6739-6752`) skips a one-tick OBJ-VRAM freeze the
+   ordinary formula models and RAM confirms; described fix = remove/
+   narrow the special case (reproduces all 4 sampled diff pixels), but
+   the override's original purpose was not re-derived — needs a full
+   751-frame regression before landing. Frame 536 model FALSIFIED
+   sharper: RAM shows the player summary sprites flat through
+   app-relative 542 while the app fades at 536 — likely a missing
+   species-lead-dependent term in `PLAYER_SUMMARY_FADE_START_TICK`;
+   next step: extend the probe window to pin the real onset. The idle-menu-bounce family
    is **closed as no-app-bug** (2026-07-31, `432e16aa`): the oscillator
    is RAM-proven exact and species-independent, and the decisive
    instrument falsified a constant-offset app bug (deltas +67 YOSHI vs
@@ -136,12 +144,15 @@ STAGED` deleted), and the adapter swapped onto the #57-fixed shared
 staging helper (`14c4295b`, ~120-line local workaround deleted). All
 nine turn5 pins + five insurance pins held at every step;
 `turn5KoDismissElapsed`/`turn5Resolved` mirroring remains (unchanged
-consumers, same as turn13's). Rank 4 slices 1-3 flipped (2026-07-31:
-`174cc388` ROCK_SLIDE tails; `441ddf83`+`6aba6662` turn-7/8
-FEATHER_DANCE staged+flipped; `0769ccc6` stat-fall banner reads each
-turn's own staged stat). Rank-4 remainder: slice 5 BIND only. Rank-5
-unblock evidence banked (`docs/rank5-effect-visibility-scout.md`,
-policy PROPOSED — see inventory row 5). Earlier
+consumers, same as turn13's). Rank 4 is **fully retired** (2026-07-31,
+all 5 slices): `174cc388` ROCK_SLIDE tails; `441ddf83`+`6aba6662`
+turn-7/8 FEATHER_DANCE staged+flipped; `0769ccc6` stat-fall banner
+reads each turn's own staged stat; `40c969e5`+`ef971686` BIND
+kickoff/miss onto staged facts (on-hit trap-start staged as kernel-only
+receipt — the canonical line always misses; `{message,missMessage}`
+bridge + additive entryLabel param landed). Rank-5 unblock evidence
+banked (`docs/rank5-effect-visibility-scout.md`, policy PROPOSED — see
+inventory row 5; adoption is a next-session start decision). Earlier
 progress:
 `turn13-sandattack.json`'s complete captured
 SAND_ATTACK content now resolves its kickoff and opponent-target accuracy-fall

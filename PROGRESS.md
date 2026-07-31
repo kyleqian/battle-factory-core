@@ -13,6 +13,53 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 789 — [SUPERVISOR FINAL WIND-DOWN 2026-07-31] Session CLOSED: 7 rounds / 14 workers / 0 failed steps. #39 ranks 3+4 FULLY retired; #57+#58 closed+deleted; #56 two probes resolved/sharpened; rank-5 policy PROPOSED
+
+- **State:** master green at FINAL gate **5739 tests passed + 1
+  deliberate animation-lane skip**, production build clean, tree clean
+  at this commit. `animation-main` folded at wind-down (`e36a17c6`,
+  one commit `555bab3f` — the orient-time delta was 0; the re-check
+  caught it again). Only the permanent `.worktrees/animation-main`
+  remains; no orphan branches. **DEFERRED.md empty all session.**
+- **Session totals (2026-07-31 ~08:55 → ~11:40, 7 rounds, 14 workers
+  M1-M7 + S1-S7, 0 failed steps; two honest stops both converted to
+  landed work next round):**
+  - **#39 rank 3 FULLY retired** (KO/switch-in `5db34996`, Sitrus
+    `54278249`) and **rank 4 FULLY retired, all 5 slices**
+    (`174cc388`, `441ddf83`+`6aba6662`, `0769ccc6`,
+    `40c969e5`+`ef971686`). Every dense pin held at every rung.
+  - **#57 closed+deleted** (`387a34a1` core + `14c4295b` retire) and
+    **#58 found+filed+closed+deleted same-session** (`594442e6` core +
+    `20b12d38` retire) — the shared staging helper now threads
+    maxHP/item/statStages + entryLabel, all additive, all pinned.
+  - **#56:** idle-bounce family closed no-app-bug (decisive instrument
+    `432e16aa`: deltas +67/+139 unequal — falsified); frame 444
+    resolved to exact sub-step with described fix (needs 751-frame
+    regression); frame 536 model falsified sharper (RAM flat through
+    542; species-lead term suspected). +6 route term untouched.
+  - **Rank-5 unblocked by evidence** (`350424ed`): OFF gates only the
+    move-anim script; committed turn9-12 pins are profile-less (=ON,
+    never run vs this lane's oracle). Policy PROPOSED, NOT adopted.
+  - Papercut class closed at breadth: appRoute added to 13 traces
+    (`9929caf1` turn5, `e3a7f486` turn6/7/8, +3 in M6).
+- **Next session (ordered):** (i) adopt-or-reject the rank-5 OFF-pin
+  policy (inventory row 5 — it retires/replaces ON-profile pins; user
+  or next supervisor decides at start); (ii) #56 frame-444 described
+  fix behind a 751-frame regression + frame-536 probe extension;
+  (iii) animation handoff: extract the five anim tables into
+  `src/data/gen/` (side lane; ANIMATION_PROGRESS "For the main
+  program" note — blocks animation rung 2); (iv) rank 6 (turns 1-4)
+  or rank 9 postwin-mirror removal per inventory; (v) #56 +6 route
+  term; #55 stays a parked boundary record.
+- **Notes:** notification/monitor timestamps unreliable all session
+  (spurious early "completed", clock-skewed monitor lines, one
+  shared-log collision when two launchers started the same second) —
+  policy that held: act only on fresh-shell `kill -0` + branch/log
+  evidence. Sonnet side workers ran the full suite in their own
+  worktrees despite briefs 3x (harmless, own node_modules; no action).
+  This entry supersedes 788/787 as the resume point.
+
+---
 ## 788 — [BOUNDED MAIN WORKER 2026-07-31 ~12:10] #39 rank-4 slice 5 (final rank-4 slice) landed: turn-8 BIND kickoff+miss flipped
 
 - **State:** `npx tsc --noEmit` clean; focused suite (new
@@ -89,51 +136,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   ledger-ordering bug (785 mis-appended below 784).
 - **Next:** round 7 live — M7 = rank-4 slice 5 (BIND ladder, entry 788);
   S7 = #56 frames 444/536 OAM probe (new-files-only). Then wind-down.
-
----
-## 786 — [BOUNDED MAIN WORKER 2026-07-31 ~11:50] #39 rank-4 slice 3 (turn-7/8 FEATHER_DANCE) + slice 2 (stat-fall banner) both landed
-
-- **State:** `npx tsc --noEmit` clean; focused suite (turn78/turn67/turn6/
-  turn11 FeatherDance*, executableFrontierRatchet, battleScene, battleMenu,
-  battleMenuIdle, battle2CommandAdapterEquivalence, fightSubmenu,
-  battleSetup, destinCanonicalReplacements, turn13/turn5ResolutionAdapter
-  Equivalence — 14 files) **567/567 green**, no new ratchet barriers, no
-  new canonical-recording imports. Tree clean at this commit. Full
-  `npm test`/`npm run build` intentionally not run (side worktree
-  `side-20260731-102516` live concurrently, per brief).
-- **Did (3 commits):** (1) new `turn78FeatherDancePresentationStaging.ts`
-  — ONE parameterized module (not two files, per the supervisor's own
-  sequencing note) staging turn 7's (ATK 4→2) and turn 8's (ATK 2→0, floor
-  hit but ordinary "harshly fell!" still plays) real FEATHER_DANCE kickoffs,
-  RNG seeds carried forward from each preceding turn's own final ledger
-  value and cross-checked by LCG inversion both directions. (2) flipped
-  `drawTurn7/8FeatherDanceKickoffText` off turn 6's borrowed
-  `TURN6_FEATHERDANCE_LINE1/2`/`TURN6_ATKFELL_LINE1/2` onto their own
-  resolved constants (byte-identical text, real provenance now). (3) slice
-  2: `drawStatDecreaseBannerForBattler`'s hardcoded-`attack` default is
-  gone — `drawTurn6StatFallBanner` (shared by all 3 canonical windows) now
-  takes an explicit palette param, each turn passing its own real
-  `resolveTurnNFeatherDanceWindowContent().statChange.stat`-derived fact
-  (narrow assert-attack guard, not a 7-stat translation table the window's
-  real domain never needs). The 4th caller (`:30243`, animation-lane-owned
-  `sceneOnFeatherDanceView` view) stays an explicit literal with a one-line
-  cite — genuinely blocked by lane ownership, not laziness.
-  Also fixed the same appRoute-missing papercut (class `e3a7f486`) on
-  `turn7-feathers.json`/`turn8-feathers.json`/`turn6-statfall.json`, the
-  three dense traces this step's own windows needed to get an oracle read
-  at all.
-- **All mandated pins hold exact:** turn6-featherdance 90/90, turn6-feathers
-  235/235, turn6-rockslide-a/b 255/105, turn7-rockslide-a/b/c/d
-  256/256/256/19, turn8-bind-a/b 256/66. New: turn7-feathers 145/145,
-  turn8-feathers 162/162, turn6-statfall 127/127 (matches
-  `docs/rank4-prep-scout.md` §3's own predicted number exactly). Insurance:
-  turn5-rockslide 256/256, turn5-switchin 241/241, turn13-sandattack
-  190/190, interactive-generated-intro-off 715/715, battle-command-
-  generated-off 128/128; turn6/7/8-menu 44/93/88 spot-checked.
-- **Next:** rank-4 slice 5 (turn-8 BIND kickoff+miss) is the only remaining
-  slice — needs a new `{message, missMessage}` bridge shape +
-  `stagePlayerHitChainToTerminalMachineState`'s `ENTRY_LABEL` made a
-  parameter (or a local hand-rolled pipeline, turn6 FEATHER_DANCE's own
-  precedent), both scoped in `docs/rank4-prep-scout.md` §2.4/§3 item 5.
-- **Notes:** no papercuts beyond the appRoute ones fixed above (banked
-  into the commits, not left as friction).
