@@ -22,38 +22,23 @@
  * `battleScene.ts`'s own already-committed `TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP`
  * / `TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP` literals (see the equivalence test).
  *
- * ## Correction to `docs/rank4-prep-scout.md` §1.2's own claim
+ * ## ISSUES #58 remainder (retired 2026-07-31)
  *
- * §1.2 says the ROCK_SLIDE tail "reaches a clean terminal state through the
- * **existing, unmodified** `stagePlayerHitChainToTerminalMachineState`" and
- * flags only that its scratch probe used an arbitrary seed, so "the damage
- * value it produced is not the real 43." True as far as it goes, but
- * incomplete: **even with the real seed, that shared helper cannot reproduce
- * the real damage at all**, for a second, unrelated reason the scout doc's
- * own scratch probe did not surface. `stagePlayerHitChainToTerminalMachineState`
- * (`turn1RockSlidePresentationStaging.ts:223`) delegates to that same file's
- * own local, unexported `battler()` normalizer, which hardcodes
- * `statStages: [6, 6, 6, 6, 6, 6, 6, 6]` **regardless of the caller's input**
- * (`turn1RockSlidePresentationStaging.ts:116`, `turn4RockSlidePresentationStaging.ts:114`
- * -- neither reads `changes.statStages`). By the time ROCK_SLIDE fires on
- * either turn 6 or turn 7, Onix's ATK stat stage is NOT neutral -- Pidgeotto's
- * own earlier FEATHER_DANCE use that same turn already dropped it to 4 (turn
- * 6) or 2 (turn 7, cumulative) -- and `calculateBattleScriptBaseDamageForCurrentMove`
- * (`battleScriptHitChainOpcode.ts:1442-1449`, `toDamageCalcStatStages`) reads
- * `battler.statStages[1]` (`STAT_ATK`) straight into the real damage formula.
- * Live-verified this session (not asserted): staging turn 6's own real seed
- * through the shared helper's hardcoded-neutral path computes Pidgeotto's HP
- * as 156 -> 71 (-85 damage) -- not the real 156 -> 113 (-43). Only threading
- * the real, non-neutral stat stage through a LOCAL pipeline reproduces the
- * real 43/31 exactly (both confirmed below). This is the identical class of
- * silent-drop rank 3's own groundwork (`2fa31c96`) already found on this
- * exact shared helper for `maxHP`/`item` -- confirmed here for `statStages`
- * too, still unfixed. Per this session's own new-files-only constraint the
- * shared helper is not edited; instead this module builds its own local
- * `battler()`/`externalPorts()` pipeline, mirroring
- * `turn6FeatherDancePresentationStaging.ts`'s own already-correct pattern
- * (`changes.statStages ?? default`), the same choice rank 3 made for its own
- * silent-drop discovery.
+ * This module used to build its own local `battler()`/`externalPorts()`
+ * staging pipeline instead of reusing `turn1RockSlidePresentationStaging.ts`'s
+ * shared `stagePlayerHitChainToTerminalMachineState`, because that shared
+ * helper's own `battler()` normalizer silently hardcoded
+ * `statStages: [6, 6, 6, 6, 6, 6, 6, 6]` regardless of the caller's input --
+ * live-verified at the time: staging turn 6's own real seed through the
+ * shared helper's hardcoded-neutral path computed Pidgeotto's HP as 156 -> 71
+ * (-85 damage), not the real 156 -> 113 (-43), because Onix's ATK stage is
+ * NOT neutral by the time ROCK_SLIDE fires (already dropped by that turn's
+ * own FEATHER_DANCE). ISSUES #58's core fix (`594442e6`) threads
+ * caller-supplied `statStages` through the shared helper's own `battler()`
+ * verbatim (same fix shape as `387a34a1`'s `maxHP`/`item` threading for
+ * ISSUES #57), pinned by `tests/stagePlayerHitChainStatStages.test.ts`. This
+ * module now reuses that shared helper directly; its former local pipeline
+ * is retired.
  *
  * ## RNG seeds (real, not found-to-work)
  *
@@ -91,20 +76,8 @@
  * `battleScene.ts:7460-7490` -- as a cross-rank blocker shared with ranks 1
  * and 6, not solvable from inside this module alone.
  */
-import {
-  createBattleScriptRulesContext,
-  createBattleScriptStatusRulesExecution,
-  type BattleScriptRulesBattler,
-  type BattleScriptStatusRulesExternalPorts,
-} from "./battleScriptRulesContext.ts";
-import { loadBattleScriptProgram } from "./battleScriptProgram.ts";
-import {
-  acknowledgeBattleScriptMachineController,
-  stepBattleScriptMachine,
-  type BattleScriptMachineState,
-} from "./battleScriptMachine.ts";
-import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import type { BattleScriptSemanticEvent } from "./battleScriptEvents.ts";
+import { stagePlayerHitChainToTerminalMachineState } from "./turn1RockSlidePresentationStaging.ts";
 import {
   resolveRockSlidePresentationWindowContent,
   type RockSlidePresentationWindowContent,
@@ -119,9 +92,6 @@ function speciesDisplayName(speciesId: number): string {
   return entry.name;
 }
 
-const PROGRAM = loadBattleScriptProgram();
-const ENTRY_LABEL = "BattleScript_HitFromAtkCanceler";
-const B_WAIT_TIME_LONG = 64;
 /** src/data/gen/moves.json MOVE_ROCK_SLIDE -- the real move both tails use. */
 const MOVE_ROCK_SLIDE = 157;
 /** src/data/gen/species-names.json array index (== the real numeric species id), matching every sibling module. */
@@ -148,59 +118,6 @@ const TURN7_PIDGEOTTO_PRE_HIT_HP = 113;
 const TURN7_ONIX_ATK_STAGE_ENTERING = 2;
 const TURN7_ONIX_ROCK_SLIDE_PP_BEFORE = 5;
 
-function battler(changes: Partial<BattleScriptRulesBattler>): BattleScriptRulesBattler {
-  return Object.freeze({
-    side: changes.side ?? 0,
-    ability: 0,
-    hp: changes.hp ?? 0,
-    moves: changes.moves ?? Object.freeze([0, 0, 0, 0] as const),
-    pp: changes.pp ?? Object.freeze([0, 0, 0, 0] as const),
-    status1: 0,
-    status2: 0,
-    status3: 0,
-    substituteHP: 0,
-    rolloutTimer: 0,
-    furyCutterCounter: 0,
-    truantCounter: 0,
-    rechargeTimer: 0,
-    flinchImmobility: 0,
-    disabledMove: 0,
-    usedDisabledMove: 0,
-    tauntTimer: 0,
-    usedTauntedMove: 0,
-    usedImprisonedMove: 0,
-    item: 0,
-    /** The fix this module's own top doc explains: forward the caller's real stat stages instead of collapsing them to neutral. */
-    statStages: changes.statStages ?? [6, 6, 6, 6, 6, 6, 6, 6],
-    types: changes.types ?? (["TYPE_NORMAL", "TYPE_NORMAL"] as const),
-    species: changes.species ?? 0,
-    attack: changes.attack ?? 0,
-    defense: changes.defense ?? 0,
-    spAttack: changes.spAttack ?? 0,
-    spDefense: changes.spDefense ?? 0,
-    level: changes.level ?? 50,
-    friendship: 0,
-    partyIndex: 0,
-  });
-}
-
-function externalPorts(): BattleScriptStatusRulesExternalPorts {
-  return Object.freeze({
-    isControllerIdle: () => true,
-    prepareMessage: (_context, operand) =>
-      operand.expression.startsWith("STRINGID_")
-        ? Object.freeze({ kind: "message" as const, messageId: operand.expression, substitutions: Object.freeze([]) })
-        : null,
-    prepareSelectionMessage: () => null,
-    prepareSelectionMessageFromTable: () => null,
-    resolveAttackerBattler: () => null,
-    resolveBattlerAtPosition: () => null,
-    resolveHalfwordOperand: (_context, operand) =>
-      operand.expression === "B_WAIT_TIME_LONG" ? B_WAIT_TIME_LONG : null,
-    resolveByteOperand: () => null,
-  });
-}
-
 export type RockSlideTailHitChainResult = Readonly<{
   events: readonly BattleScriptSemanticEvent[];
   targetHpAfter: number;
@@ -216,90 +133,41 @@ function stageRockSlideTail(input: Readonly<{
   pidgeottoPreHitHp: number;
   rngSeed: number;
 }>): RockSlideTailHitChainResult {
-  const onix = battler({
-    side: 0,
-    hp: input.onixHp,
-    species: SPECIES_ONIX,
-    attack: 51,
-    defense: 187,
-    spAttack: 36,
-    spDefense: 72,
-    types: ["TYPE_ROCK", "TYPE_GROUND"],
-    moves: [MOVE_ROCK_SLIDE, 20, 225, 201], // ROCK_SLIDE, BIND, DRAGON_BREATH, SANDSTORM (docs/turn6-notes.md §4)
-    pp: [input.onixRockSlidePpBefore, 20, 20, 10],
-    statStages: [6, input.onixAtkStageEntering, 6, 6, 6, 6, 6, 6],
-  });
-  const pidgeotto = battler({
-    side: 1,
-    hp: input.pidgeottoPreHitHp,
-    species: SPECIES_PIDGEOTTO,
-    attack: 98,
-    defense: 61,
-    spAttack: 56,
-    spDefense: 56,
-    types: ["TYPE_NORMAL", "TYPE_FLYING"],
-    moves: [332, 98, 297, 28], // AERIAL_ACE, QUICK_ATTACK, FEATHER_DANCE, SAND_ATTACK
-    pp: [20, 30, 14, 15],
-    statStages: [6, 6, 6, 6, 6, 6, 6, 6],
-  });
-
-  const rulesContext = createBattleScriptRulesContext({
-    battlers: [onix, pidgeotto, battler({ side: 0 }), battler({ side: 1 })],
-    selectorRoles: { attacker: 0, target: 1, effectBattler: 1, fainted: null },
-    scriptingBattler: 0,
-    atkCancelerTracker: 0,
-    battleOutcome: 0,
+  const { state } = stagePlayerHitChainToTerminalMachineState({
+    attacker: {
+      hp: input.onixHp,
+      species: SPECIES_ONIX,
+      attack: 51,
+      defense: 187,
+      spAttack: 36,
+      spDefense: 72,
+      types: ["TYPE_ROCK", "TYPE_GROUND"],
+      moves: [MOVE_ROCK_SLIDE, 20, 225, 201], // ROCK_SLIDE, BIND, DRAGON_BREATH, SANDSTORM (docs/turn6-notes.md §4)
+      pp: [input.onixRockSlidePpBefore, 20, 20, 10],
+      statStages: [6, input.onixAtkStageEntering, 6, 6, 6, 6, 6, 6],
+    },
+    target: {
+      hp: input.pidgeottoPreHitHp,
+      species: SPECIES_PIDGEOTTO,
+      attack: 98,
+      defense: 61,
+      spAttack: 56,
+      spDefense: 56,
+      types: ["TYPE_NORMAL", "TYPE_FLYING"],
+      moves: [332, 98, 297, 28], // AERIAL_ACE, QUICK_ATTACK, FEATHER_DANCE, SAND_ATTACK
+      pp: [20, 30, 14, 15],
+    },
     currentMove: MOVE_ROCK_SLIDE,
     currentMovePosition: 0,
-    moveResultFlags: 0,
-    dmgMultiplier: 1,
-    critMultiplier: 1,
     moveEffectByte: 0,
-    missType: 0,
-    hitMarker: 0,
-    multiHitCounter: 0,
+    rngSeed: input.rngSeed,
   });
-
-  const ports = externalPorts();
-  const execution = createBattleScriptStatusRulesExecution(PROGRAM, ENTRY_LABEL, rulesContext, input.rngSeed, ports);
-  let state = execution.state;
-  for (let budget = 0; budget < 512; budget += 1) {
-    const stepped = stepBattleScriptMachine(PROGRAM, state, execution.handlers);
-    if (stepped.kind === "halted" && stepped.state.haltReason?.kind === "terminal") {
-      return Object.freeze({
-        events: stepped.state.events,
-        targetHpAfter: stepped.state.rulesContext.battlers[1]!.hp,
-        rngValueAfter: stepped.state.rng.value,
-        attackerAtkStageEntering: input.onixAtkStageEntering,
-      });
-    }
-    if (stepped.kind === "blocked") {
-      const acknowledged = acknowledgePendingControllers(state);
-      if (acknowledged === state) {
-        throw new Error("turn67RockSlidePresentationStaging: Battle Script blocked without a safe controller acknowledgement");
-      }
-      state = acknowledged;
-      continue;
-    }
-    if (stepped.kind !== "advanced" && stepped.kind !== "scheduler-progressed") {
-      throw new Error(
-        `turn67RockSlidePresentationStaging: staged ROCK_SLIDE hit chain stopped unexpectedly (${stepped.kind}) `
-          + "before its own script completed",
-      );
-    }
-    state = stepped.state;
-  }
-  throw new Error("turn67RockSlidePresentationStaging: staged hit chain did not reach its own script end in budget");
-}
-
-function acknowledgePendingControllers(
-  state: BattleScriptMachineState<BattleScriptRulesContext>,
-): BattleScriptMachineState<BattleScriptRulesContext> {
-  let next = state;
-  for (const b of state.scheduler.pendingControllerBattlers) {
-    next = acknowledgeBattleScriptMachineController(next, b);
-  }
-  return next;
+  return Object.freeze({
+    events: state.events,
+    targetHpAfter: state.rulesContext.battlers[1]!.hp,
+    rngValueAfter: state.rng.value,
+    attackerAtkStageEntering: input.onixAtkStageEntering,
+  });
 }
 
 /**
