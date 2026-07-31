@@ -4,6 +4,82 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 790 — [BOUNDED MAIN WORKER 2026-07-31 ~13:05] #39 rank 9 (postwin owner handoff) FULLY retired: postwin fade + WIN-flip census moved onto `terminalResolution`, four legacy Turn-17 clock mirrors + dead `turn17.ts` deleted
+
+- **State:** `npx tsc --noEmit` clean; focused suite (48 files touching
+  `battleMenu.ts`/`battleScene.ts`/`core.ts` across two sweeps: turn17,
+  postwin, battleScene, fightSubmenu, battleMenu, battleMenuIdle,
+  battleSetup, executableFrontierRatchet — 527/527 — plus 40 more files
+  incl. factoryRoundBattleOrchestrator, turn5/13ResolutionAdapter
+  Equivalence, turn67/78/8 presentation staging — 475/475) **1002/1002
+  green**, no new ratchet barriers, no new canonical-recording imports.
+  Tree clean at this commit. Full `npm test`/`npm run build` intentionally
+  not run per brief (supervisor runs the final gate).
+- **Rung 1 (census, committed):** every reader of `turn17MenuRedrawElapsed`/
+  `turn17KoDismissElapsed`/`turn17OutcomeDismissElapsed`/
+  `turn17LossDismissElapsed` was `applyTurn17PostwinFastFade`
+  (`battleScene.ts:15768-15862`, the postwin presenter) and
+  `advanceBattleScene`'s WIN-flip census (`battleScene.ts:2676-2713`,
+  reading the KO-dismiss mirror to compute the wholly-unread
+  `battleOutcome` field) — both in the postwin-clock family, no consumer
+  outside it. `turn17.ts` (`turn17DispatchState`/`Turn17DispatchState`,
+  RNG crit/damage-roll modeling) was dead: zero production imports, only
+  its own test file.
+- **Rung 2 (handoff):** `applyTurn17PostwinFastFade` and
+  `advanceBattleScene` now read `state.terminalResolution`'s
+  `faintDismissElapsed`/`resultDismissElapsed`/`menuRedrawElapsed` — the
+  exact typed object `drawTurn16FightSubmenuWindow` (the retired
+  result/loss renderer) already consumes, per the brief's "no turn-number
+  inspection" instruction. **Scope discovery:** `turn17MenuRedrawElapsed`
+  was NOT a simple mirror — it is the sole holder of the turn-16-confirm
+  +delay redraw anchor for the tick gap between the turn-16→17 menu
+  reopen and turn 17's OWN confirmation (which is when `terminalResolution`
+  first becomes constructible; confirmed empirically — naively seeding
+  it from `terminalResolution?.menuRedrawElapsed` produced turn17-rung7a
+  **0/255**). Fix: the anchor now travels on the fresh `FightSubmenuState`
+  itself (`battleMenu.ts`'s `menuRedrawElapsed` field, threaded through
+  the existing `openFightSubmenu` optional param and the state's own
+  `...state` spread idiom every other submenu field already uses) instead
+  of a floating `BattleSceneState` field — same pattern as
+  `activeMonMoveset`'s own doc.
+- **Rung 3 (deletion):** all four `BattleSceneState` fields (type decl,
+  `INITIAL_BATTLE_SCENE_STATE` defaults, `advanceBattleScene`'s copy-through)
+  and their three `core.ts` write sites plus the `turn17MenuRedrawElapsed`
+  carry-variable are gone; `src/engine/turn17.ts` deleted along with its
+  three self-tests in `tests/turn17.test.ts` (11 tests remain, was 14).
+  Five other test files updated to read/construct `terminalResolution`
+  (or the new `fightSubmenu.menuRedrawElapsed`) instead of the deleted
+  fields: `battleScene.test.ts`, `fightSubmenu.test.ts`, `battleMenu.test.ts`,
+  `postwin.test.ts`, `turn17.test.ts`.
+- **All mandated pins hold exact (fresh baseline == post-change):**
+  turn17-rung7a/b **255/147**, turn17-rung8a/b **255/118**; insurance
+  turn5-rockslide **256/256**, turn13-switchin **242/242**, turn8-bind-a
+  **256/256**, interactive-generated-intro-off **715/715**,
+  battle-command-generated-off **128/128**.
+- **Papercut discovered (not fixed, out of scope):** `turn17-rung1`
+  through `turn17-rung6a/b.json` have no `appRoute` field and now crash
+  (`STRINGID_PKMNSITEMRESTOREDHEALTH` placeholder) under `npm run compare`
+  because the default flipped to `"generated-orchestrator"` — same
+  papercut class entry 789 already fixed on 13 other traces, just missed
+  on these six. Confirmed pre-existing (identical crash before any edit
+  this session, unrelated code path — these fail before turn 16/17 logic
+  ever runs) and unrelated to rank 9's fields; the one vitest test that
+  replays `turn17-rung1.json`'s segments forces `appRoute:
+  "canonical-recorded"` explicitly and is green. ~5 min lost diagnosing;
+  PAPERCUT: turn17-rung1..rung6 traces need an explicit `appRoute` field
+  (same class as entry 789's 13-trace fix), ~5min.
+- **Inventory updated:** `docs/battle-scene-retirement-inventory.md` row 9
+  marked RETIRED, row 8's stale `turn17.ts` citation removed, the
+  "Postwin owner handoff" blocked-work bullet marked RESOLVED. ISSUES.md
+  untouched per brief (supervisor's to update).
+- **Next:** #39 rank 9 is fully closed — the only remaining inventory rows
+  are 5 (Scene-OFF effect-visibility policy, PROPOSED not adopted), 6
+  (turns 1-4), 7 (FLY two-turn lifecycle), and 8 (burn/end-turn event
+  projection, now with a fixed stale citation). The appRoute papercut on
+  turn17-rung1..6 is a same-class quick fix for a future session. #56's
+  frames 444/536 and +6 route term remain parked per entry 789.
+
+---
 > **STANDING ARRANGEMENT (user directive, 2026-07-26):** the animation
 > program runs under its own supervisor (`./run-supervisor.sh --lane
 > animation`, guide `ANIMATION_SUPERVISOR.md`) in the persistent
@@ -108,31 +184,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   may still be in flight in a side worktree. No papercuts beyond what prior
   entries already banked.
 
----
-## 787 — [SUPERVISOR 2026-07-31 rounds 5-6] #58 fully closed+deleted; rank-4 slices 2+3 landed; rank-5 evidence banked (policy PROPOSED); round 7 = BIND + 444/536 probe
-
-- **State:** master = M5 (#58 retire, `20b12d38`) + M6 (slices 3+2,
-  `441ddf83`/`6aba6662`/`0769ccc6`) + S6's rank-5 scout merged
-  (`da28661b`); union gate running at commit time — result in the
-  wind-down entry. Supervisor independently re-ran turn6-featherdance
-  90/90, turn7-rockslide-d 19/19 (post-M5), turn7-feathers 145/145,
-  turn8-feathers 162/162, turn6-statfall 127/127, turn8-bind-b 66/66
-  (post-M6). Worktrees/branches cleaned; only `animation-main` remains.
-- **Headline:** #58 closed and DELETED same-session it was found
-  (filed round 3 → core fixed round 4 → retired round 5). Rank 4 is
-  slices 1-2-3 done, BIND (slice 5) the only remainder. M6 also landed
-  slice 2 after slice 3 unblocked it — the supervisor's sequencing call
-  (stage 7/8 first, then the wrapper flip is mechanical) held.
-- **Rank-5 (S6, `350424ed`):** Scene-OFF effect-visibility census —
-  source rule + oracle confirmation + the finding that all committed
-  turn9-12 pins are profile-less (= Scene-ON, never run against this
-  lane's oracle). Policy PROPOSED (class-(c) move bodies empty under
-  OFF; re-time generic choreography on fresh OFF pins), endorsed as
-  recommended plan; ADOPTION deliberately left to next session's start
-  (it retires/replaces committed ON-profile pins — inventory row 5).
-- **Also:** M5's slice-2 honest stop (4-caller wrapper) converted into
-  M6's ladder — zero wasted work; M6 fixed the appRoute papercut class
-  on three more traces (`turn7/8-feathers`, `turn6-statfall`) and a
-  ledger-ordering bug (785 mis-appended below 784).
-- **Next:** round 7 live — M7 = rank-4 slice 5 (BIND ladder, entry 788);
-  S7 = #56 frames 444/536 OAM probe (new-files-only). Then wind-down.

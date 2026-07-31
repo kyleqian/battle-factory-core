@@ -1,13 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  TURN17_FAINT_ATTACK_ANIMATION_AGE,
-  TURN17_FAINT_ATTACK_CRIT_ROLL_AGE,
-  TURN17_FAINT_ATTACK_DAMAGE_ROLL_AGE,
-  TURN17_FAINT_ATTACK_CURRENT_MOVE_AGE,
-  TURN17_MURKROW_OWNS_AGE,
-  turn17DispatchState,
-} from "../src/engine/turn17.ts";
-import {
   INITIAL_BATTLE_SCENE_STATE,
   TURN17_FIRE_PUNCH_CONFIRM_TO_EPOCH_DELAY,
   TURN17_FIRST_OUTCOME_RENDER_DELAY,
@@ -37,36 +29,6 @@ import {
   createBattleTerminalResolutionPresentation,
   storeBattleTerminalPresentationDismiss,
 } from "../src/engine/battleResolutionPresentation.ts";
-
-describe("turn 17 confirmation-relative dispatch", () => {
-  it("pins MURKROW-first ownership and currentMove writes", () => {
-    expect(turn17DispatchState(TURN17_MURKROW_OWNS_AGE - 1)).toMatchObject({
-      attacker: "MAGBY",
-      currentMove: null,
-    });
-    expect(turn17DispatchState(TURN17_MURKROW_OWNS_AGE).attacker).toBe("MURKROW");
-    expect(turn17DispatchState(TURN17_FAINT_ATTACK_CURRENT_MOVE_AGE).currentMove).toBe("FAINT_ATTACK");
-  });
-
-  it("pins the no-accuracy RNG shape, no-crit result, and source/RAM 52 damage", () => {
-    expect(turn17DispatchState(TURN17_FAINT_ATTACK_CRIT_ROLL_AGE - 1).rngCallsConsumed).toBe(0);
-    expect(turn17DispatchState(TURN17_FAINT_ATTACK_CRIT_ROLL_AGE)).toMatchObject({
-      criticalHit: false,
-      rngCallsConsumed: 1,
-      rngValue: 1936653909,
-    });
-    expect(turn17DispatchState(TURN17_FAINT_ATTACK_DAMAGE_ROLL_AGE)).toMatchObject({
-      damage: 52,
-      rngCallsConsumed: 2,
-      rngValue: 1115590820,
-    });
-  });
-
-  it("stops pre-animation ownership one tick before age 52", () => {
-    expect(turn17DispatchState(TURN17_FAINT_ATTACK_ANIMATION_AGE - 1).animationOwned).toBe(false);
-    expect(turn17DispatchState(TURN17_FAINT_ATTACK_ANIMATION_AGE).animationOwned).toBe(true);
-  });
-});
 
 describe("turn 17 faint hold and outcome latency", () => {
   const confirmElapsed = 10_000;
@@ -107,7 +69,6 @@ describe("turn 17 faint hold and outcome latency", () => {
         turn13Resolved: true,
         turn14Resolved: true,
         turn16Resolved: true,
-        turn17MenuRedrawElapsed: confirmElapsed - 100,
         terminalResolution,
         fightSubmenu: {
           ...CLOSED_FIGHT_SUBMENU_STATE,
@@ -127,19 +88,19 @@ describe("turn 17 faint hold and outcome latency", () => {
 
   it("drops an early A edge and never auto-dismisses on idle", () => {
     const early = tick(battleStateAt(eligibleElapsed - 2), new Set(["A"]));
-    expect(early.battleScene!.turn17KoDismissElapsed).toBeNull();
+    expect(early.battleScene!.terminalResolution!.faintDismissElapsed).toBeNull();
 
     let idle = battleStateAt(eligibleElapsed + 500);
     for (let i = 0; i < 40; i += 1) idle = tick(idle, new Set());
-    expect(idle.battleScene!.turn17KoDismissElapsed).toBeNull();
+    expect(idle.battleScene!.terminalResolution!.faintDismissElapsed).toBeNull();
   });
 
   it("registers the eligible A edge once, at that edge's relative elapsed", () => {
     let state = tick(battleStateAt(eligibleElapsed - 1), new Set(["A"]));
-    expect(state.battleScene!.turn17KoDismissElapsed).toBe(eligibleElapsed);
+    expect(state.battleScene!.terminalResolution!.faintDismissElapsed).toBe(eligibleElapsed);
     state = tick(state, new Set());
     state = tick(state, new Set(["A"]));
-    expect(state.battleScene!.turn17KoDismissElapsed).toBe(eligibleElapsed);
+    expect(state.battleScene!.terminalResolution!.faintDismissElapsed).toBe(eligibleElapsed);
   });
 
   it("flips WIN at dismiss+17 but keeps the old-render boundary through +25", () => {
@@ -163,7 +124,20 @@ describe("turn 17 faint hold and outcome latency", () => {
     const before = {
       ...INITIAL_BATTLE_SCENE_STATE,
       elapsed: 116,
-      turn17KoDismissElapsed: 100,
+      terminalResolution: storeBattleTerminalPresentationDismiss(
+        createBattleTerminalResolutionPresentation({
+          pendingBoundary: Object.freeze({
+            kind: "terminal",
+            outcome: "player-win",
+          }),
+          resultLines: ["Player defeated", "BUG CATCHER DESTIN!"],
+          opponentLossLines: ["PLEASE I NEED", "SOME WATER"],
+          confirmElapsed: 2,
+          menuRedrawElapsed: 1,
+        }),
+        "faint",
+        100,
+      ),
       battleOutcome: 0 as const,
     };
     const after = advanceBattleScene(before);
@@ -196,7 +170,6 @@ describe("turn 17 faint hold and outcome latency", () => {
       ...battleStateAt(faintDismiss + TURN17_OUTCOME_INPUT_READY_DELAY - 2),
       battleScene: {
         ...battleStateAt(faintDismiss + TURN17_OUTCOME_INPUT_READY_DELAY - 2).battleScene!,
-        turn17KoDismissElapsed: faintDismiss,
         terminalResolution: storeBattleTerminalPresentationDismiss(
           battleStateAt(faintDismiss + TURN17_OUTCOME_INPUT_READY_DELAY - 2)
             .battleScene!.terminalResolution!,
@@ -206,7 +179,7 @@ describe("turn 17 faint hold and outcome latency", () => {
       },
     };
     const early = tick(base, new Set(["A"]));
-    expect(early.battleScene!.turn17OutcomeDismissElapsed).toBeNull();
+    expect(early.battleScene!.terminalResolution!.resultDismissElapsed).toBeNull();
 
     let idle: ReturnType<typeof createInitialState> = {
       ...base,
@@ -216,7 +189,7 @@ describe("turn 17 faint hold and outcome latency", () => {
       },
     };
     for (let i = 0; i < 40; i += 1) idle = tick(idle, new Set());
-    expect(idle.battleScene!.turn17OutcomeDismissElapsed).toBeNull();
+    expect(idle.battleScene!.terminalResolution!.resultDismissElapsed).toBeNull();
   });
 
   it("registers the real second A once and freezes that outcome pose", () => {
@@ -225,7 +198,6 @@ describe("turn 17 faint hold and outcome latency", () => {
       ...battleStateAt(faintDismiss + TURN17_OUTCOME_INPUT_READY_DELAY - 1),
       battleScene: {
         ...battleStateAt(faintDismiss + TURN17_OUTCOME_INPUT_READY_DELAY - 1).battleScene!,
-        turn17KoDismissElapsed: faintDismiss,
         terminalResolution: storeBattleTerminalPresentationDismiss(
           battleStateAt(faintDismiss + TURN17_OUTCOME_INPUT_READY_DELAY - 1)
             .battleScene!.terminalResolution!,
@@ -236,10 +208,10 @@ describe("turn 17 faint hold and outcome latency", () => {
     };
     state = tick(state, new Set(["A"]));
     const outcomeDismiss = faintDismiss + TURN17_OUTCOME_INPUT_READY_DELAY;
-    expect(state.battleScene!.turn17OutcomeDismissElapsed).toBe(outcomeDismiss);
+    expect(state.battleScene!.terminalResolution!.resultDismissElapsed).toBe(outcomeDismiss);
     state = tick(state, new Set());
     state = tick(state, new Set(["A"]));
-    expect(state.battleScene!.turn17OutcomeDismissElapsed).toBe(outcomeDismiss);
+    expect(state.battleScene!.terminalResolution!.resultDismissElapsed).toBe(outcomeDismiss);
 
     const frozen = turn17OutcomeMessageState(
       outcomeDismiss + 20,

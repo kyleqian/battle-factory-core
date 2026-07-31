@@ -177,6 +177,7 @@ const TURN2_FIGHT_SUBMENU_STATE = {
   confirmElapsed: TURN2_PRESS_TICK - TICK0,
   activeMonMoveset: rentalMoveset("ONIX"),
   reopenedFromClose: false,
+  menuRedrawElapsed: null,
 };
 /** Same as `pixelAtSentOut`, but with turn 2's own FIGHT submenu already confirmed on ENDEAVOR (cursor slot 2) - the state `drawTurn2KickoffText`/`drawEndeavorSquish` render under (S7 slice E1d-retry, §15b). */
 function pixelAtTurn2(t: number, x: number, y: number): [number, number, number] {
@@ -196,6 +197,7 @@ const TURN4_FIGHT_SUBMENU_STATE = {
   confirmElapsed: TURN4_PRESS_TICK - TICK0,
   activeMonMoveset: rentalMoveset("ONIX"),
   reopenedFromClose: false,
+  menuRedrawElapsed: null,
 };
 /** turn 5's own real reopen press tick (`docs/turn3-residual-probe-notes.md` "The extremum class, probed", tick 5927) - the FIGHT submenu just reopened (cursor persisted at slot 0, ROCK_SLIDE), confirm not yet registered. */
 const TURN5_REOPEN_TICK = 5927;
@@ -207,6 +209,7 @@ const TURN5_REOPEN_FIGHT_SUBMENU_STATE = {
   confirmElapsed: null,
   activeMonMoveset: rentalMoveset("ONIX"),
   reopenedFromClose: false,
+  menuRedrawElapsed: null,
 };
 /** Same shape as `pixelAtTurn4`, but for turn 5's own reopen DMA-wait window (`turn4Resolved: true`, no confirm yet) - the state `drawActionMenuIdleWindow`'s bounce-tick selection renders under (PROGRESS #183/cleanup, tick 5927). */
 function pixelAtTurn5Reopen(t: number, x: number, y: number): [number, number, number] {
@@ -491,7 +494,7 @@ describe("battleScene: send-out A-press #3 registration + text cadence (docs/bat
   it("state advance preserves sendOutPressElapsed once set, and elapsed keeps incrementing regardless", () => {
     let state: BattleSceneState = { ...INITIAL_BATTLE_SCENE_STATE, sendOutPressElapsed: 380 };
     state = advanceBattleScene(state);
-    expect(state).toEqual({ elapsed: 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false, turn16Resolved: false, turn17MenuRedrawElapsed: null, turn17KoDismissElapsed: null, turn17OutcomeDismissElapsed: null, turn17LossDismissElapsed: null, battleOutcome: 0, terminalResolution: null, turn15PartySelect: undefined });
+    expect(state).toEqual({ elapsed: 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false, turn16Resolved: false, battleOutcome: 0, terminalResolution: null, turn15PartySelect: undefined });
   });
 });
 
@@ -1668,6 +1671,7 @@ describe("S7 slice K: the KO-text dismiss gate (turn5KoDismissElapsed) - both br
           confirmElapsed: 5959 - TICK0,
           activeMonMoveset: rentalMoveset("ONIX"),
           reopenedFromClose: false,
+          menuRedrawElapsed: null,
         },
         turn1Resolved: true,
         turn2Resolved: true,
@@ -2688,6 +2692,7 @@ describe("S7/S8 turn 13 rung 3 (docs/turn13-notes.md §4/§5/§7): DRAGON_BREATH
           confirmElapsed: 15419 - TICK0,
           activeMonMoveset: rentalMoveset("ONIX"),
           reopenedFromClose: false,
+          menuRedrawElapsed: null,
         },
         turn1Resolved: true,
         turn2Resolved: true,

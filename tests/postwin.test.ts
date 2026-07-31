@@ -129,8 +129,6 @@ describe("S8 Battle-1 postwin transition", () => {
           confirmElapsed: 2,
         },
         turn16Resolved: true,
-        turn17KoDismissElapsed: outcomeDismiss - 100,
-        turn17OutcomeDismissElapsed: outcomeDismiss,
         terminalResolution,
       },
     };
@@ -151,17 +149,17 @@ describe("S8 Battle-1 postwin transition", () => {
       new Set(["A"]),
     );
     expect(early.postwin).toBeNull();
-    expect(early.battleScene!.turn17LossDismissElapsed).toBeNull();
+    expect(early.battleScene!.terminalResolution!.lossDismissElapsed).toBeNull();
 
     let accepted = tick(
       lossQuoteState(outcomeDismiss + TURN17_LOSS_INPUT_READY_DELAY - 1),
       new Set(["A"]),
     );
     const edge = outcomeDismiss + TURN17_LOSS_INPUT_READY_DELAY;
-    expect(accepted.battleScene!.turn17LossDismissElapsed).toBe(edge);
+    expect(accepted.battleScene!.terminalResolution!.lossDismissElapsed).toBe(edge);
     expect(accepted.postwin).toEqual(INITIAL_POSTWIN_STATE);
     accepted = tick(accepted, new Set(["A"]));
-    expect(accepted.battleScene!.turn17LossDismissElapsed).toBe(edge);
+    expect(accepted.battleScene!.terminalResolution!.lossDismissElapsed).toBe(edge);
   });
 
   it("uses the generated opponent held by the round controller for scouting", () => {

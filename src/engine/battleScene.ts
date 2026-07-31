@@ -2604,31 +2604,6 @@ export interface BattleSceneState {
    */
   turn16Resolved?: boolean;
   /**
-   * Turn-16-confirm-relative action-menu redraw anchor retained across the
-   * fresh FightSubmenuState created for turn 17. This keeps the underlying
-   * bounce continuous without an absolute battle tick.
-   */
-  turn17MenuRedrawElapsed?: number | null;
-  /**
-   * Turn 17's opponent-faint message dismiss edge, in battle-scene elapsed
-   * coordinates.  This is set only by a fresh A edge after the faint
-   * controller's own input-ready epoch; delaying that edge delays every
-   * post-dismiss boundary by the same amount.
-   */
-  turn17KoDismissElapsed?: number | null;
-  /**
-   * The separately input-gated "Player defeated..." dismiss edge. It is
-   * one-shot and freezes the outcome framebuffer until trainer-slide
-   * ownership begins at its own relative +28 boundary.
-   */
-  turn17OutcomeDismissElapsed?: number | null;
-  /**
-   * The no-cursor DESTIN loss-quote dismiss edge.  Stored only after its
-   * PAUSE_UNTIL_PRESS controller enters WAIT; S8's postwin clocks are
-   * derived exclusively from this edge.
-   */
-  turn17LossDismissElapsed?: number | null;
-  /**
    * RAM-equivalent gBattleOutcome for the first battle.  The WIN write is
    * intentionally state-only during this slice: the old faint message
    * remains frozen until the later outcome renderer takes ownership.
@@ -2665,10 +2640,6 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn13Resolved: false,
   turn14Resolved: false,
   turn16Resolved: false,
-  turn17MenuRedrawElapsed: null,
-  turn17KoDismissElapsed: null,
-  turn17OutcomeDismissElapsed: null,
-  turn17LossDismissElapsed: null,
   battleOutcome: 0,
   terminalResolution: null,
 };
@@ -2677,7 +2648,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
   const elapsed = state.elapsed + 1;
   const postDismiss = turn17PostDismissState(
     elapsed,
-    state.turn17KoDismissElapsed ?? null,
+    state.terminalResolution?.faintDismissElapsed ?? null,
   );
   return {
     elapsed,
@@ -2701,10 +2672,6 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn13Resolved: state.turn13Resolved,
     turn14Resolved: state.turn14Resolved,
     turn16Resolved: state.turn16Resolved ?? false,
-    turn17MenuRedrawElapsed: state.turn17MenuRedrawElapsed ?? null,
-    turn17KoDismissElapsed: state.turn17KoDismissElapsed ?? null,
-    turn17OutcomeDismissElapsed: state.turn17OutcomeDismissElapsed ?? null,
-    turn17LossDismissElapsed: state.turn17LossDismissElapsed ?? null,
     battleOutcome:
       postDismiss === null ? (state.battleOutcome ?? 0) : postDismiss.battleOutcome,
     terminalResolution: state.terminalResolution ?? null,
@@ -15778,23 +15745,28 @@ export function applyTurn17PostwinFastFade(
   }
 
   const party = state.turn15PartySelect;
-  const confirmElapsed = state.fightSubmenu.confirmElapsed;
-  const koDismissElapsed = state.turn17KoDismissElapsed ?? null;
-  const outcomeDismissElapsed = state.turn17OutcomeDismissElapsed ?? null;
-  if (!party || party.sendOutElapsed === null || confirmElapsed === null
-      || koDismissElapsed === null || outcomeDismissElapsed === null) {
+  const terminalResolution = state.terminalResolution ?? null;
+  if (!party || party.sendOutElapsed === null || terminalResolution === null
+      || terminalResolution.faintDismissElapsed === null
+      || terminalResolution.resultDismissElapsed === null) {
     throw new Error("postwin fade requires the settled Turn 17 battle state");
   }
+  const {
+    confirmElapsed,
+    menuRedrawElapsed,
+    faintDismissElapsed,
+    resultDismissElapsed,
+  } = terminalResolution;
 
   const t = TICK0 + state.elapsed;
   const confirmTick = TICK0 + confirmElapsed;
-  const redrawTick = TICK0 + (state.turn17MenuRedrawElapsed ?? 0);
+  const redrawTick = TICK0 + menuRedrawElapsed;
   const freezeTick = confirmTick + TURN16_BOUNCE_FREEZE_DELAY;
   const bounceTick = 1748 + freezeTick - redrawTick + 1;
   const animationAge = t - (confirmTick + TURN16_FAINT_ATTACK_ANIM_DELAY);
   const frozenAnimationAge = Math.min(
     animationAge,
-    koDismissElapsed - confirmElapsed - TURN16_FAINT_ATTACK_ANIM_DELAY,
+    faintDismissElapsed - confirmElapsed - TURN16_FAINT_ATTACK_ANIM_DELAY,
   );
   const targetHp = { startHp: 79, endHp: 27 };
   const resolution = faintAttackResolutionState(frozenAnimationAge, targetHp);
@@ -15825,7 +15797,7 @@ export function applyTurn17PostwinFastFade(
   }
   const trainerLoss = turn17TrainerLossState(
     state.elapsed,
-    outcomeDismissElapsed,
+    resultDismissElapsed,
     state.trainerPresentation,
   );
   if (trainerLoss !== null) {

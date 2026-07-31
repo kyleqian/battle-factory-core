@@ -1,3 +1,33 @@
+## 787 — [SUPERVISOR 2026-07-31 rounds 5-6] #58 fully closed+deleted; rank-4 slices 2+3 landed; rank-5 evidence banked (policy PROPOSED); round 7 = BIND + 444/536 probe
+
+- **State:** master = M5 (#58 retire, `20b12d38`) + M6 (slices 3+2,
+  `441ddf83`/`6aba6662`/`0769ccc6`) + S6's rank-5 scout merged
+  (`da28661b`); union gate running at commit time — result in the
+  wind-down entry. Supervisor independently re-ran turn6-featherdance
+  90/90, turn7-rockslide-d 19/19 (post-M5), turn7-feathers 145/145,
+  turn8-feathers 162/162, turn6-statfall 127/127, turn8-bind-b 66/66
+  (post-M6). Worktrees/branches cleaned; only `animation-main` remains.
+- **Headline:** #58 closed and DELETED same-session it was found
+  (filed round 3 → core fixed round 4 → retired round 5). Rank 4 is
+  slices 1-2-3 done, BIND (slice 5) the only remainder. M6 also landed
+  slice 2 after slice 3 unblocked it — the supervisor's sequencing call
+  (stage 7/8 first, then the wrapper flip is mechanical) held.
+- **Rank-5 (S6, `350424ed`):** Scene-OFF effect-visibility census —
+  source rule + oracle confirmation + the finding that all committed
+  turn9-12 pins are profile-less (= Scene-ON, never run against this
+  lane's oracle). Policy PROPOSED (class-(c) move bodies empty under
+  OFF; re-time generic choreography on fresh OFF pins), endorsed as
+  recommended plan; ADOPTION deliberately left to next session's start
+  (it retires/replaces committed ON-profile pins — inventory row 5).
+- **Also:** M5's slice-2 honest stop (4-caller wrapper) converted into
+  M6's ladder — zero wasted work; M6 fixed the appRoute papercut class
+  on three more traces (`turn7/8-feathers`, `turn6-statfall`) and a
+  ledger-ordering bug (785 mis-appended below 784).
+- **Next:** round 7 live — M7 = rank-4 slice 5 (BIND ladder, entry 788);
+  S7 = #56 frames 444/536 OAM probe (new-files-only). Then wind-down.
+
+---
+
 ## 786 — [BOUNDED MAIN WORKER 2026-07-31 ~11:50] #39 rank-4 slice 3 (turn-7/8 FEATHER_DANCE) + slice 2 (stat-fall banner) both landed
 
 - **State:** `npx tsc --noEmit` clean; focused suite (turn78/turn67/turn6/

@@ -974,7 +974,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       );
       battleScene = {
         ...battleScene,
-        turn17KoDismissElapsed: battleScene.elapsed + 1,
         terminalResolution,
       };
     }
@@ -999,7 +998,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       );
       battleScene = {
         ...battleScene,
-        turn17OutcomeDismissElapsed: battleScene.elapsed + 1,
         terminalResolution,
       };
     }
@@ -1024,7 +1022,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       );
       battleScene = {
         ...battleScene,
-        turn17LossDismissElapsed: battleScene.elapsed + 1,
         terminalResolution,
       };
       const opponentRecords =
@@ -1099,7 +1096,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let turn13Resolved = battleScene.turn13Resolved;
     let turn14Resolved = battleScene.turn14Resolved;
     let turn16Resolved = battleScene.turn16Resolved ?? false;
-    let turn17MenuRedrawElapsed = battleScene.turn17MenuRedrawElapsed ?? null;
     let terminalResolution = battleScene.terminalResolution ?? null;
     if (fightSubmenu.openElapsed === null) {
       const actionReady = battle2HandoffTick === null
@@ -1424,20 +1420,23 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN16_FIRE_PUNCH_MENU_REDRAW_DELAY
     ) {
       // Turn 16's confirmation-relative FIRE_PUNCH/burn tail has created a
-      // fresh action controller. Preserve that redraw anchor before
-      // replacing the old confirmed submenu with turn 17's own state.
-      turn17MenuRedrawElapsed = fightSubmenu.confirmElapsed + TURN16_FIRE_PUNCH_MENU_REDRAW_DELAY;
+      // fresh action controller. Preserve that redraw anchor - on the fresh
+      // submenu itself, since it must survive until THIS submenu's own
+      // confirmation seeds the terminal resolution below - before replacing
+      // the old confirmed submenu with turn 17's own state.
       fightSubmenu = openFightSubmenu(
         battleScene.elapsed + 1,
         fightSubmenu.activeMonMoveset,
         fightSubmenu.cursor,
+        false,
+        fightSubmenu.confirmElapsed + TURN16_FIRE_PUNCH_MENU_REDRAW_DELAY,
       );
       turn16Resolved = true;
     }
     if (
       terminalResolution === null
       && turn16Resolved
-      && turn17MenuRedrawElapsed !== null
+      && fightSubmenu.menuRedrawElapsed !== null
       && priorFightConfirmElapsed === null
       && fightSubmenu.confirmElapsed !== null
     ) {
@@ -1457,7 +1456,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         ],
         opponentLossLines: trainer.speechLose,
         confirmElapsed: fightSubmenu.confirmElapsed,
-        menuRedrawElapsed: turn17MenuRedrawElapsed,
+        menuRedrawElapsed: fightSubmenu.menuRedrawElapsed,
       });
     }
     battleScene = {
@@ -1478,7 +1477,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn13Resolved,
       turn14Resolved,
       turn16Resolved,
-      turn17MenuRedrawElapsed,
       terminalResolution,
     };
     const previousBattle2RngCalls = battle2HandoffTick === null

@@ -93,17 +93,18 @@ describe("battleMenu: FightSubmenuState open/close/display-lag", () => {
       confirmElapsed: null,
       activeMonMoveset: ONIX_MOVESET,
       reopenedFromClose: false,
+      menuRedrawElapsed: null,
     });
   });
 
   it("openFightSubmenu sets openElapsed and resets cursor/displayCursor to ROCK_SLIDE", () => {
     const state = openFightSubmenu(847, ONIX_MOVESET);
-    expect(state).toEqual({ openElapsed: 847, cursor: 0, displayCursor: 0, closeElapsed: null, confirmElapsed: null, activeMonMoveset: ONIX_MOVESET, reopenedFromClose: false });
+    expect(state).toEqual({ openElapsed: 847, cursor: 0, displayCursor: 0, closeElapsed: null, confirmElapsed: null, activeMonMoveset: ONIX_MOVESET, reopenedFromClose: false, menuRedrawElapsed: null });
   });
 
   it("openFightSubmenu's optional initialCursor persists the prior turn's own cursor position (S7 slice F, docs/battle-turn-notes.md §13: turn 3's reopen rests on slot 2, DRAGON_BREATH, where turn 2's own confirm left it)", () => {
     const state = openFightSubmenu(3846, ONIX_MOVESET, 2);
-    expect(state).toEqual({ openElapsed: 3846, cursor: 2, displayCursor: 2, closeElapsed: null, confirmElapsed: null, activeMonMoveset: ONIX_MOVESET, reopenedFromClose: false });
+    expect(state).toEqual({ openElapsed: 3846, cursor: 2, displayCursor: 2, closeElapsed: null, confirmElapsed: null, activeMonMoveset: ONIX_MOVESET, reopenedFromClose: false, menuRedrawElapsed: null });
   });
 
   it("closeFightSubmenu is a no-op if not open, or already closing", () => {
@@ -202,16 +203,20 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
     }
     expect(atOpen!.battleScene).toMatchObject({
       turn16Resolved: true,
-      turn17MenuRedrawElapsed: 21725 - SCENE_TICK0,
+      terminalResolution: null,
       fightSubmenu: {
         openElapsed: 21774 - SCENE_TICK0,
         confirmElapsed: null,
         cursor: 0,
+        menuRedrawElapsed: 21725 - SCENE_TICK0,
       },
     });
     expect(atConfirm!.battleScene!.fightSubmenu.confirmElapsed).toBe(21802 - SCENE_TICK0);
-    expect(atOpen!.battleScene!.turn17MenuRedrawElapsed).toBe(
+    expect(atOpen!.battleScene!.fightSubmenu.menuRedrawElapsed).toBe(
       20774 - SCENE_TICK0 + TURN16_FIRE_PUNCH_MENU_REDRAW_DELAY,
+    );
+    expect(atConfirm!.battleScene!.terminalResolution!.menuRedrawElapsed).toBe(
+      21725 - SCENE_TICK0,
     );
   });
 
@@ -422,6 +427,7 @@ function stateAtTurn3Reopen(firstTickAbsolute: number): EngineState {
         confirmElapsed: TURN2_PRESS_TICK - SCENE_TICK0,
         activeMonMoveset: rentalMoveset("ONIX"),
         reopenedFromClose: false,
+        menuRedrawElapsed: null,
       },
       turn1Resolved: true,
       turn2Resolved: false,
@@ -545,6 +551,7 @@ function stateAtTurn3Confirm(): EngineState {
         confirmElapsed: 3891 - SCENE_TICK0,
         activeMonMoveset: ONIX_MOVESET,
         reopenedFromClose: false,
+        menuRedrawElapsed: null,
       },
       turn1Resolved: true,
       turn2Resolved: true,
@@ -708,6 +715,7 @@ function stateAtTurn4Confirm(): EngineState {
         confirmElapsed: 4925 - SCENE_TICK0,
         activeMonMoveset: ONIX_MOVESET,
         reopenedFromClose: false,
+        menuRedrawElapsed: null,
       },
       turn1Resolved: true,
       turn2Resolved: true,
@@ -738,6 +746,7 @@ function stateAtTurn5Confirm(): EngineState {
         confirmElapsed: 5959 - SCENE_TICK0,
         activeMonMoveset: ONIX_MOVESET,
         reopenedFromClose: false,
+        menuRedrawElapsed: null,
       },
       turn1Resolved: true,
       turn2Resolved: true,
@@ -829,6 +838,7 @@ function stateAtTurn5SitrusConfirm(): EngineState {
         confirmElapsed: 5959 - SCENE_TICK0,
         activeMonMoveset: ONIX_MOVESET,
         reopenedFromClose: false,
+        menuRedrawElapsed: null,
       },
       turn1Resolved: true,
       turn2Resolved: true,
