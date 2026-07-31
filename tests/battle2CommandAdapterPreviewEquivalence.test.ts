@@ -203,8 +203,14 @@ describe("battle2CommandAdapterPreview: #39 rank 1 kernel-to-typed-owner equival
 
     it("is a non-critical, non-flinching, single-target hit -- matching battle2Turn1.ts's own fixed critMultiplier:1/flinched:false model", () => {
       const kernel = stageBattle2Turn1Kernel();
+      // There is no dedicated flinch event kind; a flinch surfaces as the
+      // "flinched!" message on the flinched mon's action. Assert none printed.
       expect(
-        kernel.transition.events.some((event) => event.payload.kind === "flinch"),
+        kernel.transition.events.some(
+          (event) =>
+            event.payload.kind === "message" &&
+            event.payload.messageId.includes("FLINCH"),
+        ),
       ).toBe(false);
     });
   });

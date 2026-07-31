@@ -40,8 +40,8 @@ export const BATTLE2_TURN1_KERNEL_CONFIG: FactoryFullTurnConfig = Object.freeze(
   player: Object.freeze({
     species: 95,
     moveId: 157,
-    moves: [157, 20, 225, 201],
-    pp: [10, 20, 20, 10],
+    moves: [157, 20, 225, 201] as const,
+    pp: [10, 20, 20, 10] as const,
     ability: 5,
     item: 142,
     friendship: 0,
@@ -52,13 +52,13 @@ export const BATTLE2_TURN1_KERNEL_CONFIG: FactoryFullTurnConfig = Object.freeze(
     speed: 76,
     hp: 117,
     maxHp: 117,
-    types: ["TYPE_ROCK", "TYPE_GROUND"],
+    types: ["TYPE_ROCK", "TYPE_GROUND"] as const,
   }),
   trainer: Object.freeze({
     species: 140,
     moveId: 72,
-    moves: [72, 246, 28, 182],
-    pp: [10, 5, 15, 10],
+    moves: [72, 246, 28, 182] as const,
+    pp: [10, 5, 15, 10] as const,
     ability: 4,
     item: 142,
     friendship: 0,
@@ -69,9 +69,9 @@ export const BATTLE2_TURN1_KERNEL_CONFIG: FactoryFullTurnConfig = Object.freeze(
     speed: 61,
     hp: 91,
     maxHp: 91,
-    types: ["TYPE_ROCK", "TYPE_WATER"],
+    types: ["TYPE_ROCK", "TYPE_WATER"] as const,
   }),
-}) as FactoryFullTurnConfig;
+});
 
 export const BATTLE2_TURN1_PLAYER_ROCK_SLIDE = Object.freeze({
   kind: "use-move" as const,
