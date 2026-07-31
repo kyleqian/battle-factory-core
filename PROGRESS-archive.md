@@ -1,3 +1,35 @@
+## 780 — [SUPERVISOR 2026-07-31 round 2] M2 (#39 rank-3 complete + #57 closed), S2 (#56 probe), S3 (rank-4 scout) all verified and merged
+
+- **State:** master = M2's three commits + S2 (`45220c2f`, #56 evidence
+  probe) + S3 (`08d49fe0`, rank-4 prep-scout) merged (`7abe977c`,
+  `df6234df`); union `npm test`+`npm run build` gate running at commit
+  time — result in the next entry if not amended here. Supervisor
+  independently re-ran: turn5-sitrus-a **110/110**, turn5-sitrus-d
+  **133/133**, turn5-rockslide **256/256** post-M2; equivalence test
+  checked non-self-referential (hard-value anchors both sides). Both
+  merged side worktrees/branches cleaned; only `animation-main` remains.
+- **Headline:** **#39 rank 3 fully retired and #57 fully closed** (entry
+  deleted). Retirement inventory rank-3 row updated by M2; #39 prose
+  updated by supervisor.
+- **S2's #56 evidence (docs/issue56-residual-probe.md):** idle-bounce
+  oscillator RAM-proven exact + species-independent — residual is a pure
+  phase offset; decisive instrument step named (instrument
+  `idleBounceElapsed` start frame; leading suspect
+  `BATTLE_COMMAND_ACTION_ENTER_DELAY`'s flat 6-tick,
+  `battleCommandPresentation.ts:126`). Frames 444/536 = single-tick 2-3px
+  sub-step misalignments (site named, sub-step not isolated). +6 route
+  term: `BATTLE_TYPE_FIRST_BATTLE` falsified; two candidates remain.
+- **S3's rank-4 scout (docs/rank4-prep-scout.md):** corrected inventory
+  warning — stat-down bridge already generalizes ATK/ACC; turns-6/7
+  ROCK_SLIDE tails stage through the existing helper with ZERO new
+  surface (recommended first slice); BIND needs a `{message,
+  missMessage}` bridge shape + entry-label fix.
+- **Next:** round 3 — M3 = #56 idle-bounce instrument-then-fix (S2's
+  named decisive step). Then rank-4 slice 1 (ROCK_SLIDE tails) per the
+  scout. Side workers' harmless full-suite runs in own worktrees noted
+  (twice despite brief; no action).
+
+---
 ## 779 — [BOUNDED MAIN WORKER 2026-07-31 ~09:45] #39 rank-3 FULLY RETIRED: Sitrus heal content flipped (half 2 of 2) + #57 remainder closed
 
 - **State:** `npx tsc --noEmit` clean; focused suite (turn5Resolution
