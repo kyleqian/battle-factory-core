@@ -61,6 +61,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   separate materialize-column-shift defect. Then turn17-rung1's 28 frames,
   rank 6, idle-bounce phase attribution (parallel side-lane territory).
 - **PAPERCUT:** none.
+- **SUPERVISOR ADDENDUM (round-4 verify + S12):** supervisor re-ran
+  YOSHI **700/751**, MAGNETON **703/751**, intro **715/715** — all as
+  reported; ISSUES #56 updated (536 clause resolved/deleted, 444
+  remainder sharpened to the discriminator probe). **S12 (verified,
+  merged): turn17-rung1's 28 frames ROOT-CAUSED** —
+  `docs/turn17-rung1-residual-notes.md`: one contiguous input-bounded
+  cluster (21774-21801, supervisor re-ran 90/118 + confirmed
+  contiguity from the manifest) caused by
+  `drawTurn16FightSubmenuWindow`'s `confirmElapsed === null` fallback
+  hardcoding `turn1..14Resolved=false` (wrong PP 15/15 vs 14/15) and
+  gating off `drawTurn16PostSwitchField`'s HP/status overrides (wrong
+  HP 138/138 vs 79/138, garbled BRN badge); rung2-6b re-verified all
+  exact (221/143/200/113/255/41). Named fix = thread real state
+  through both call sites; dispatched as round-5 M13. S12's step 1
+  (appRoute) was a no-op — `712ab295` had already fixed it
+  pre-session; supervisor's brief cited the stale entry-790 note.
+- **Round 5 (launched ~17:00):** M13 turn17-rung1 fix; S13 rank-6
+  turns 1-4 OFF ground-truth prep scout (policy deliberately NOT
+  presupposed — banks evidence for next session's rank-6 opener, same
+  two-step as rank 5's own S8/S9 prep).
 
 ---
 ## 795 — [round 3, 2026-07-31 ~15:50, supervisor-verified] Turns 11-12 flipped OFF (M11) — rank-5's four move windows ALL flipped; idle-bounce phase ROOT-CAUSED, verdict (b) (S11)

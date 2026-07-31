@@ -20,7 +20,7 @@ one without a user decision, and do not count them as backlog.
 
 **Symptom:** the public dense arbitrary-trainer intro comparison
 (`factory-arbitrary-intro-yoshi-off`, YOSHI/COMBUSKEN) now stands at
-**699/751** (up from 650/751, round 7 2026-07-31) with every divergent frame
+**700/751** (up from 650/751; frame 536 fixed 2026-07-31 evening) with every divergent frame
 characterized in `docs/trainer-pic-off-window-scout.md` §D. Remainder:
 
 1. **RESOLVED by route discrimination (2026-07-31).** The species
@@ -34,19 +34,26 @@ characterized in `docs/trainer-pic-off-window-scout.md` §D. Remainder:
    calibrated flat lag on the canonical anchor. 715/715 held, YOSHI
    699/751, 128/128 held. Open remainder: the canonical route's +6 has
    no named mechanism (route term documented at the code site).
-2. **Isolated frames 444 and 536** — OAM RAM probe complete
-   (`docs/issue56-frames-444-536-oam-probe.md`, 2026-07-31). Frame 444
-   RESOLVED to the exact sub-step: `opponentSummaryExitElapsed`'s
-   `generated-initial-release && rawElapsed === 31` special case
-   (`battleScene.ts:6739-6752`) skips a one-tick OBJ-VRAM freeze the
-   ordinary formula models and RAM confirms; described fix = remove/
-   narrow the special case (reproduces all 4 sampled diff pixels), but
-   the override's original purpose was not re-derived — needs a full
-   751-frame regression before landing. Frame 536 model FALSIFIED
-   sharper: RAM shows the player summary sprites flat through
-   app-relative 542 while the app fades at 536 — likely a missing
-   species-lead-dependent term in `PLAYER_SUMMARY_FADE_START_TICK`;
-   next step: extend the probe window to pin the real onset. The idle-menu-bounce family
+2. **Isolated frame 444** (536 RESOLVED 2026-07-31, `7467636e`: real
+   onset app-relative 550; root cause was a call-site bug —
+   `renderGeneratedBattleStartOpponentRelease`'s pre-player-release
+   `drawBallIcons` used the raw opponent-handoff clock instead of the
+   already-proven rebased `generatedPlayerVisualClock`; YOSHI now
+   **700/751**, ablation-verified Tier-1 pin added). Frame 444 remains:
+   root cause still the RAM-confirmed one-tick OBJ-VRAM freeze skipped
+   by `opponentSummaryExitElapsed`'s `generated-initial-release &&
+   rawElapsed === 31` special case, but the described fix is
+   REGRESSION-BLOCKED (2026-07-31, `2bf68ac1`, probe doc Round 2):
+   plain removal regresses the case's original fitted window
+   (`interactive-generated-intro-off` 715/715 → 714/715, fitted at
+   frame 1492 per `git log -S` → `0c4dab29`); narrowing to
+   `isCanonicalAnchorIntro` restores 715/715 but flips MAGNETON's
+   analogous frame 437 to a 10px mismatch in the OPPOSITE direction —
+   not the real discriminator. Next: MAGNETON-side `gSprites[6]` RAM
+   probe around its frame 437 (mirror of the YOSHI technique) to find
+   the true discriminator; frame 444 also carries a second, separate
+   materialize-column-shift defect (`docs/issue56-residual-probe.md`
+   Q1) never in this fix's scope. The idle-menu-bounce family
    is **closed as no-app-bug** (2026-07-31, `432e16aa`): the oscillator
    is RAM-proven exact and species-independent, and the decisive
    instrument falsified a constant-offset app bug (deltas +67 YOSHI vs
