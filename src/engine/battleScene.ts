@@ -4248,6 +4248,33 @@ export function generatedBattleStartCommandReady(
  * Species-independent opponent ReleaseMonFromBall projection. This is the
  * same affine-emerge/tint ramp used by the typed Slice-5 switch-in view;
  * Battle Scene OFF skips the later species front-animation callback.
+ *
+ * #56 item 3 investigation (2026-07-31): the "species-independent" claim
+ * above does NOT extend to the vertical anchor. A joint (accumulator,
+ * y-offset) brute-force sweep of MAGNETON's own dense captures
+ * (`factory-arbitrary-intro-magneton-off.json`, `coords.yOffset=8`) against
+ * this window's first 12 materialize ticks lands exactly (zero missing-tint
+ * pixels, every tick) on `origin.y` WITHOUT the species resting-Y offset
+ * (base 8, not `8 + yOffset`) - i.e. `MATERIALIZE_Y2_TABLE`/accumulator
+ * unchanged, only the anchor stripped of `coords.yOffset`. But the SAME
+ * change regresses the already-validated COMBUSKEN case
+ * (`factory-arbitrary-intro-yoshi-off`, `yOffset=1`: 699/751 -> 662/751,
+ * new divergence from the very first materialize tick) - so "subtract
+ * yOffset" is not the universal rule either; COMBUSKEN's materialize wants
+ * the offset-INCLUSIVE origin (today's code, unmodified below) and
+ * MAGNETON wants it excluded, which cannot both be `8 +/- yOffset` for a
+ * single constant relationship. Left AS-IS (species-offset-inclusive
+ * origin, matching the validated COMBUSKEN/GRIMER precedent) rather than
+ * ship a two-point curve-fit that regresses a held pin. MAGNETON's own
+ * materialize divergence (handoff+19 through the coeff-hits-zero cutoff,
+ * app-relative 424-461) is therefore NOT fixed, but is now precisely
+ * bounded: `tools/compare/scratch/materialize_2d_bruteforce.mjs`'s own
+ * per-species-independent-vs-not question needs a THIRD species (or a RAM
+ * read of `sprite->pos1`/`pos2` during a MAGNETON-class short-sprite
+ * materialize) to distinguish real per-species geometry from a
+ * `coords.height`-keyed term (MAGNETON height 48 vs COMBUSKEN's 64 - the
+ * two data points available correlate yOffset with height, not with a
+ * clean additive rule) before a general fix is safe.
  */
 function drawGeneratedOpponentRelease(
   fb: Uint8Array,
