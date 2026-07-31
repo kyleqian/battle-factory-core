@@ -267,6 +267,116 @@ animation-gated content starts:**
   didn't reproduce past the second sha change — a smaller settle-confirmation
   than turn 10 got, flagged here for honesty, not fabricated as equally deep).
 
+### turn12-aerialace-off.json + turn12-rockslide-miss-off.json (Pidgeotto AERIAL_ACE / Onix ROCK_SLIDE — a MISS this turn)
+
+Commands:
+```sh
+bin/oracle run tools/compare/traces/turn12-aerialace-off.json -o <dir>
+bin/oracle run tools/compare/traces/turn12-rockslide-miss-off.json -o <dir>
+```
+
+Siblings: `turn12-aerialace.json` (ON range 14383-14629) and
+`turn12-rockslide-miss.json` (ON range 14625-15374, sparse). Both share
+byte-identical `segments` (15374 total, 100 segments); last button fires at
+14372-14374, then the usual 1000-tick no-input stretch. `docs/turn12-notes.md`
+is this turn's own detailed ON dossier, and per its own RAM-proven finding
+turn 12's ROCK_SLIDE **misses** — a genuinely different content shape from
+turns 9-11 (miss skips crit/spread/secondary rolls **and**, per the dossier's
+own probe, "zero active rocks, zero shakes, zero [animation-driver reads]"
+even under ON), making this the cleanest possible spot-check for whether
+compression tracks animation content or just elapsed ticks.
+
+| New file | Capture range (stride) | Oracle captures |
+| --- | --- | --- |
+| `turn12-aerialace-off.json` | 14374–14620 (1) | 247 |
+| `turn12-rockslide-miss-off.json` | 14620–14875 (1) | 256 |
+
+- **14376**: `713aa10cfa28` — **byte-identical** to the ON dossier's own
+  "submenu open, settled... / confirm-press transient" citation (ON
+  14346-14383) — lands inside the ON pin's own range, effectively **zero
+  shift** this early.
+- **14384–14411**: AERIAL_ACE kickoff-text typing letter-by-letter.
+- **14412**: settles to `ca8bf06021b4` — **byte-identical** to the ON
+  dossier's own citation for "kickoff text held, through a hit-flash flicker
+  and into the HP-drain onset" (ON 14412) — **same absolute tick**, zero
+  shift.
+- **14456–14485**: hit-flash-flicker alternation
+  (`b30f960778d7`/`f39e1ff2b572`/`b48f58d68894`/`36b855becaef`, plus
+  `5a8c1fbe5723`/`ca8bf06021b4` recurring) — matches the ON dossier's own
+  cited hit-flash shape (Onix's sprite recolored orange/inverted) — this is
+  the shared `Cmd_hitanimation`-family reaction (already confirmed
+  Scene-agnostic in turn 9), **not** AERIAL_ACE's own move-specific content;
+  no lunge/clone/slice/field-darken appears, matching `docs/
+  aerial-ace-notes.md`'s prediction and turn10-aerialace-off's own prior
+  confirmation — **this turn's own spot-check, as the brief asked for**.
+- **14500**: `5b1e7929cda0` — **byte-identical** to the ON dossier's own
+  "HP-drain (Onix)... settles" citation (ON 14519-14524) — **19-24 ticks
+  earlier**.
+- **14529**: `376db54b61d2` — **byte-identical** to the ON dossier's own
+  ""It's not very effective.." held" citation (ON 14552-14629, 78-tick hold)
+  — **23 ticks earlier**; holds here through **14610** (82 ticks), matching
+  the ON dossier's own hold duration closely.
+- **14620**: transitions toward ROCK_SLIDE's own kickoff.
+- **App baseline**: **120/247 frames matched** — notably higher than the
+  turn 9-11 hit-move windows, because AERIAL_ACE's own animation body was
+  already largely stripped from the app's rendering at these frames by
+  coincidence of the app's current timing constants; not chased.
+- **Determinism**: re-ran twice back-to-back, **0/247 sha mismatches**.
+
+**turn12-rockslide-miss-off.json — the miss (near-zero extra compression, confirming compression tracks stripped animation content, not raw elapsed ticks):**
+- **14620–14629**: message-box transition + kickoff-text typing into "ONIX
+  used ROCK SLIDE!".
+- **14630**: settles to `760b178a4259` — **byte-identical** to the ON
+  dossier's own ""ONIX used ROCK SLIDE!" held (the miss — no further
+  rolls)" citation (ON 14649-14685) — **19-55 ticks earlier**; holds through
+  **14666** (37 ticks), close to the ON dossier's own 36-tick hold.
+- **14667–14685**: transition into "ONIX's attack missed!".
+- **14686**: settles to `1aabdcb03ee5` — **byte-identical** to the ON
+  dossier's own headline ""ONIX's attack missed!" held" citation (ON
+  14705-14780) — **19 ticks earlier**; holds through **14761** (75 ticks),
+  matching the ON dossier's own 75-tick hold **almost exactly** — the
+  tightest hold-duration match in this program, because a miss has no
+  animation content at all for OFF to strip out of the hold.
+- **14762**: `0e26952eb6a2` — **byte-identical** to the ON dossier's own
+  "turn-13 resettle transition" first sub-frame citation (ON 14781-14789) —
+  **19 ticks earlier**.
+- **14769-14771**: `882e3c818195`/`5646ba2c6ca9` cycle onset — **byte-identical**
+  to the ON dossier's own "turn-13 menu settled" citation (ON 14790-14798) —
+  **~19-29 ticks earlier**, by far the **smallest** final-settle compression
+  measured in this program (turns 10-11 showed 112-138 ticks at the
+  equivalent point). Directly confirms the mechanism: compression tracks how
+  much class-c/animation-gated content the ON profile actually plays for
+  that specific outcome, not a fixed drift-per-tick — a miss has almost none
+  of it, so almost nothing compresses away.
+- **14780–14874**: idle-menu cycling continues
+  (`f3d4f434717a`/`bd3cee3f4041`/`5646ba2c6ca9`/`882e3c818195`, plus rare
+  `66a569d21ce7`) — **byte-identical** to the ON dossier's own "turn-13 menu
+  idle, cycling... among 882e3c818195/bd3cee3f4041/5646ba2c6ca9/f3d4f434717a"
+  citation — same 4 shas, confirming the idle loop is Scene-agnostic here
+  too.
+- **Desync verdict: none.** Every distinctive sha the ON dossier names
+  reproduces byte-identical under OFF. **No move-specific content appears
+  for either half of this turn** — AERIAL_ACE's hit-flash is the shared
+  generic reaction (not its own class-c body), and ROCK_SLIDE's miss plays
+  zero rock/shake content under ON already, so OFF has nothing extra to
+  strip; this turn is the cleanest confirmation yet that the class-(c)-
+  absence rule and the compounding-compression pattern are two faces of the
+  same mechanism.
+- **App baseline**: **75/256 frames matched**.
+- **Determinism**: re-ran twice back-to-back, **0/256 sha mismatches**.
+- **Range-choice rationale**: `docs/turn12-notes.md`'s own dense per-tick
+  citations (plus a §3 "engine-readiness probe" table of fixed
+  pressTick-relative delay constants) again made this mostly a byte-for-byte
+  cross-check. `turn12-aerialace-off.json`'s range (14374-14620) and
+  `turn12-rockslide-miss-off.json`'s range (14620-14875, 256, the cap) meet
+  at the natural AERIAL_ACE→ROCK_SLIDE kickoff boundary, same convention as
+  every other window this slice. The rockslide-miss file's tail (14780-14875,
+  ~1.3 idle-cycle periods at this turn's own ~72-tick period) is a shorter
+  settle-confirmation than turn 10's 3+-cycle `-b` file — flagged as a
+  leaner check, not fabricated as equally deep, consistent with this
+  slice's time budget favoring breadth (covering all remaining windows)
+  over redundant depth on an already-well-established mechanism.
+
 ### turn10-aerialace-off.json — settle extended (item 3)
 
 Command: `bin/oracle run tools/compare/traces/turn10-aerialace-off.json -o <dir>`
