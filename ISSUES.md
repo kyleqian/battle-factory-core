@@ -155,9 +155,11 @@ retired** (2026-07-31, `3f850e37`): postwin fade + WIN-flip census
 moved onto `terminalResolution`, four legacy Turn-17 clock mirrors +
 dead `turn17.ts` deleted (`turn17MenuRedrawElapsed`'s live redraw
 anchor rehomed as `FightSubmenuState.menuRedrawElapsed`). Rank-5
-unblock evidence
-banked (`docs/rank5-effect-visibility-scout.md`, policy PROPOSED — see
-inventory row 5; adoption is a next-session start decision). Earlier
+policy ADOPTED (user decision 2026-07-31; evidence
+`docs/rank5-effect-visibility-scout.md`, plan in inventory row 5):
+delete class-(c) move bodies on the OFF route, re-time class-(b)
+choreography against fresh explicit-`oracleProfile` OFF pins, retiring
+the legacy ON-profile turn9-12 pins as rank 5 executes. Earlier
 progress:
 `turn13-sandattack.json`'s complete captured
 SAND_ATTACK content now resolves its kickoff and opponent-target accuracy-fall
