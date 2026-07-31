@@ -138,7 +138,7 @@ import {
   TURN14_DRAGONBREATH_MENU_REDRAW_DELAY,
   TURN16_FIRE_PUNCH_MENU_REDRAW_DELAY,
   turn5RockSlideKoDismissEligible,
-  turn13KoDismissEligible,
+  opponentFaintDismissEligible,
   turn15KoDismissEligible,
   turn17KoDismissEligible,
   turn17LossDismissEligible,
@@ -914,20 +914,17 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     ) {
       battleScene = { ...battleScene, turn5KoDismissElapsed: battleScene.elapsed + 1 };
     }
-    // S7/S8 turn 13 rung 3 (docs/turn13-notes.md §4/§7): Pidgeotto's own
-    // DRAGON_BREATH-faint KO-text dismiss - mirrors the `turn5KoDismissElapsed`
-    // block above EXACTLY (same gating shape, same "created directly, same
-    // tick already reflects it" idiom). Gated on `turn12Resolved` (we can
-    // only be inside turn 13's own window once turn 12's reopen has
-    // happened) rather than any turn13Resolved flag (that flag doesn't
-    // exist yet - the reopen-for-turn-14 transition is a later rung's job).
+    // The staged damage/faint receipt owns this opponent KO-text dismiss.
+    // Eligibility is the message controller's settled-cursor boundary, so
+    // the input gate needs no turn-resolution flag. The one-shot field is
+    // presentation-semantic and the same edge drives the existing switch-in
+    // continuation.
     if (
-      battleScene.turn12Resolved &&
-      battleScene.turn13KoDismissElapsed === null &&
+      battleScene.opponentFaintDismissElapsed === null &&
       newKeys.has("A") &&
-      turn13KoDismissEligible(SCENE_TICK0 + battleScene.elapsed + 1)
+      opponentFaintDismissEligible(SCENE_TICK0 + battleScene.elapsed + 1)
     ) {
-      battleScene = { ...battleScene, turn13KoDismissElapsed: battleScene.elapsed + 1 };
+      battleScene = { ...battleScene, opponentFaintDismissElapsed: battleScene.elapsed + 1 };
     }
     // Turn 15's player-side faint is the first forced party-select path.
     // Register the same A edge that dismisses the fully printed ONIX text;

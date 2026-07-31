@@ -725,6 +725,11 @@ import {
   resolveTurn13SandAttackKickoffLines,
 } from "./turn13SandAttackPresentationStaging.ts";
 import {
+  resolveTurn13DragonBreathFaintLines,
+  resolveTurn13DragonBreathHpEndpoints,
+  resolveTurn13DragonBreathKickoffLines,
+} from "./turn13DragonBreathPresentationStaging.ts";
+import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
   sceneOnDragonBreathView,
@@ -2398,21 +2403,12 @@ export interface BattleSceneState {
    */
   turn12Resolved: boolean;
   /**
-   * S7/S8 turn 13 rung 3 (docs/turn13-notes.md §4/§7): `elapsed` value of
-   * the KO-text dismiss A-press for Pidgeotto's own DRAGON_BREATH faint
-   * (`TICK0 + turn13KoDismissElapsed` is the actual trace tick), `null`
-   * before - mirrors `turn5KoDismissElapsed`'s own pattern EXACTLY (same
-   * "created directly, same tick already reflects it" idiom, same "tick()
-   * must never auto-advance past this point on its own" rule, gated by
-   * `turn13KoDismissEligible`). As with `turn5KoDismissElapsed`, the render
-   * path itself does NOT consult this field (turn5's own precedent: the
-   * fainted-text-hold window renders as a pure function of `t`, since the
-   * committed trace's own button always lands at the right real-world
-   * tick) - this field exists for state-machine correctness (so a future
-   * `turn13Resolved`-style reopen-gate transition can require the real
-   * press, not just elapsed time), matching the established idiom.
+   * Presentation-relative dismiss edge for the active opponent-faint
+   * receipt. It is written only after that receipt's text controller reaches
+   * its input-ready cursor epoch; render freezes that exact cursor pose and
+   * the existing switch-in continuation consumes the same edge.
    */
-  turn13KoDismissElapsed: number | null;
+  opponentFaintDismissElapsed: number | null;
   /**
    * S7/S8 turn 14 (docs/turn14-notes.md): `true` once turn 13's own whole
    * DRAGON_BREATH-faint/MURKROW-switch-in resolution has redrawn the
@@ -2499,7 +2495,7 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn10Resolved: false,
   turn11Resolved: false,
   turn12Resolved: false,
-  turn13KoDismissElapsed: null,
+  opponentFaintDismissElapsed: null,
   turn13Resolved: false,
   turn14Resolved: false,
   turn16Resolved: false,
@@ -2535,7 +2531,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn10Resolved: state.turn10Resolved,
     turn11Resolved: state.turn11Resolved,
     turn12Resolved: state.turn12Resolved,
-    turn13KoDismissElapsed: state.turn13KoDismissElapsed,
+    opponentFaintDismissElapsed: state.opponentFaintDismissElapsed,
     turn13Resolved: state.turn13Resolved,
     turn14Resolved: state.turn14Resolved,
     turn16Resolved: state.turn16Resolved ?? false,
@@ -7164,7 +7160,7 @@ function drawFightSubmenuWindow(
   turn11Resolved: boolean = false,
   turn12Resolved: boolean = false,
   turn13Resolved: boolean = false,
-  turn13KoDismissTick: number | null = null,
+  opponentFaintDismissTick: number | null = null,
   turn14Resolved: boolean = false,
   trainerPresentation?: FactoryTrainerPresentation,
 ): void {
@@ -7195,7 +7191,7 @@ function drawFightSubmenuWindow(
       fb,
       t,
       sm,
-      turn13KoDismissTick,
+      opponentFaintDismissTick,
       trainerPresentation,
     );
     return;
@@ -10454,7 +10450,12 @@ function drawTurn13SwitchinWindow(
     // (a first attempt dropped the cursor entirely here, regressing a
     // constant 37px diff, exactly one glyph's worth, isolated to the
     // cursor's own bbox at every sampled tick 16847-16946).
-    drawMessageTextLines(fb, TURN13_FAINTED_LINE1, TURN13_FAINTED_LINE2, TURN13_FAINTED_TEXT_TOTAL);
+    drawMessageTextLines(
+      fb,
+      TURN13_DRAGONBREATH_FAINT_LINE1,
+      TURN13_DRAGONBREATH_FAINT_LINE2,
+      TURN13_DRAGONBREATH_FAINT_TEXT_TOTAL,
+    );
     const cursor = cursorState(koDismissTick, cursorStart);
     if (cursor.visible) drawCursor(fb, cursor.yOffset, TURN13_FAINTED_CURSOR_X);
     return;
@@ -13660,7 +13661,7 @@ function drawTurn13SandAttackWindow(
   trainerPresentation?: FactoryTrainerPresentation,
 ): void {
   if (t >= dragonBreathTextStartTick(TURN13_DRAGONBREATH_PRESS_TICK)) {
-    drawTurn13DragonBreathWindow(
+    drawDragonBreathKoWindow(
       fb,
       t,
       pressTick,
@@ -13701,7 +13702,7 @@ function drawTurn13SandAttackWindow(
  * for that mechanism's own unresolved sampler defect; this window just
  * shows the static field base underneath the held text for that span,
  * excluded from this session's own `captureFrames`. Once `t` reaches the
- * fainted-message's own start tick, hands off to `drawTurn13FaintedWindow`
+ * fainted-message's own start tick, hands off to `drawFaintedOpponentWindow`
  * (docs/turn13-notes.md §4's own "the fainted message hasn't started
  * printing yet" / "starts by 15980" boundary, oracle-bisected exact to
  * 15979 this session).
@@ -13724,8 +13725,11 @@ export const TURN13_DRAGONBREATH_PRESS_TICK = 15516; // dragonBreathTextStartTic
  * before actually pressing" shape.
  */
 export const TURN13_DRAGONBREATH_MENU_REDRAW_DELAY = TURN13_SWITCHIN_MENU_REDRAW_TICK - TURN13_DRAGONBREATH_PRESS_TICK;
-const TURN13_PIDGEOTTO_STARTING_HP = 16;
-const TURN13_PIDGEOTTO_FAINT_HP = 0;
+const TURN13_DRAGONBREATH_HP = resolveTurn13DragonBreathHpEndpoints();
+const [
+  TURN13_DRAGONBREATH_KICKOFF_LINE1,
+  TURN13_DRAGONBREATH_KICKOFF_LINE2,
+] = resolveTurn13DragonBreathKickoffLines();
 export const TURN13_FAINT_SINK_START_TICK = 15960; // S - oracle-pixel-bisected (first sink-visible sha change at render 15962, matching S+2 under grovyleFaintSinkRowsAndY2's own d=t-1-S formula), matches docs/turn13-notes.md §7's own RAM-derived value exactly
 export const TURN13_FAINT_SINK_STEPS = 7; // n = 8 - floor(yOffset/8), Pidgeotto yOffset=11 (mon-pic-coords.json)
 export const TURN13_HEALTHBOX_VANISH_TICK = faintHealthboxVanishTick(TURN13_FAINT_SINK_START_TICK, TURN13_FAINT_SINK_STEPS); // 15977, oracle-pixel-confirmed (sha transitions to 02e2544a49ca, docs/turn13-notes.md §4's own "healthbox gone" citation) at exactly this tick
@@ -13733,7 +13737,7 @@ export const TURN13_HEALTHBOX_VANISH_TICK = faintHealthboxVanishTick(TURN13_FAIN
 /** Same `pressTick+318`-relative anchor `drawDragonBreathScene` (turn 2's own DRAGON_BREATH) uses for Grovyle's own target hit-flash (`rockSlideMonBlinkInvisible`/`rockSlideHealthboxWobbleY2`, both already generic, reused verbatim - see `DRAGONBREATH_HIT_FLASH_OFFSET`'s own module doc) - re-anchored to `TURN13_DRAGONBREATH_PRESS_TICK`. Oracle-pixel-confirmed this session: omitting this (drawing Pidgeotto solid throughout) regressed a ~1085px diff at 15855-15863, isolated by `npm run compare` to exactly Pidgeotto's own on-field sprite - the SAME blink window turn 2's own target already exercises, not a new mechanism. */
 const TURN13_HIT_FLASH_PRESS_TICK = TURN13_DRAGONBREATH_PRESS_TICK + DRAGONBREATH_HIT_FLASH_OFFSET;
 
-function drawTurn13DragonBreathWindow(
+function drawDragonBreathKoWindow(
   fb: Uint8Array,
   t: number,
   sandAttackPressTick: number,
@@ -13742,7 +13746,7 @@ function drawTurn13DragonBreathWindow(
 ): void {
   const dbPressTick = TURN13_DRAGONBREATH_PRESS_TICK;
   if (t >= turn13FaintedTextStartTick(dbPressTick)) {
-    drawTurn13FaintedWindow(
+    drawFaintedOpponentWindow(
       fb,
       t,
       dbPressTick,
@@ -13753,7 +13757,12 @@ function drawTurn13DragonBreathWindow(
     return;
   }
   const frozenBounceTick = turn13KickoffBounceTick(t, sandAttackPressTick);
-  const hp = dragonBreathGrovyleHp(t, dbPressTick, TURN13_PIDGEOTTO_STARTING_HP, TURN13_PIDGEOTTO_FAINT_HP);
+  const hp = dragonBreathGrovyleHp(
+    t,
+    dbPressTick,
+    TURN13_DRAGONBREATH_HP.from,
+    TURN13_DRAGONBREATH_HP.to,
+  );
   const sink =
     t >= TURN13_FAINT_SINK_START_TICK
       ? grovyleFaintSinkRowsAndY2(t, TURN13_FAINT_SINK_START_TICK, TURN13_FAINT_SINK_STEPS)
@@ -13767,7 +13776,12 @@ function drawTurn13DragonBreathWindow(
     if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, pidgeottoHealthboxContentForHp(hp));
   }
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-  drawMessageTextLines(fb, ROCK_SLIDE_LINE1, DRAGONBREATH_KICKOFF_LINE2, dragonBreathTextVisibleChars(t, dbPressTick));
+  drawMessageTextLines(
+    fb,
+    TURN13_DRAGONBREATH_KICKOFF_LINE1,
+    TURN13_DRAGONBREATH_KICKOFF_LINE2,
+    dragonBreathTextVisibleChars(t, dbPressTick),
+  );
 }
 
 /**
@@ -13796,16 +13810,20 @@ function drawTurn13DragonBreathWindow(
  * same class of trap this dossier chain's own "KNOWN TRAPS" keeps
  * flagging). The live wait-cursor ALONE is what produces the dossier's own
  * cited 4 distinct cycling shas. The KO-gated hold itself needs NO special-case press-driven
- * freeze: `turn13KoDismissElapsed` (core.ts) exists for state-machine
+ * freeze: `opponentFaintDismissElapsed` (core.ts) exists for state-machine
  * correctness only, mirroring `turn5KoDismissElapsed`'s own precedent that
  * the render path stays a pure function of `t` - the "locks... holds
  * through 16824" shape docs/turn13-notes.md §4 cites falls out naturally
  * from the live cursor's own 9-tick phase boundaries (16819-16827 all share
  * one phase), not a press-triggered freeze.
  */
-export const TURN13_FAINTED_LINE1 = "Foe PIDGEOTTO";
-export const TURN13_FAINTED_LINE2 = "fainted!";
-const TURN13_FAINTED_TEXT_TOTAL = TURN13_FAINTED_LINE1.length + TURN13_FAINTED_LINE2.length;
+const [
+  TURN13_DRAGONBREATH_FAINT_LINE1,
+  TURN13_DRAGONBREATH_FAINT_LINE2,
+] = resolveTurn13DragonBreathFaintLines();
+const TURN13_DRAGONBREATH_FAINT_TEXT_TOTAL =
+  TURN13_DRAGONBREATH_FAINT_LINE1.length
+  + TURN13_DRAGONBREATH_FAINT_LINE2.length;
 const TURN13_FAINTED_TEXT_DELAY = 463; // dbPressTick+463 = 15979, oracle-bisected exact (chars=1 first appears at render tick 15979; 15978 still shows the old DRAGON_BREATH text)
 export function turn13FaintedTextStartTick(pressTick: number): number {
   return pressTick + TURN13_FAINTED_TEXT_DELAY;
@@ -13813,20 +13831,22 @@ export function turn13FaintedTextStartTick(pressTick: number): number {
 export function turn13FaintedTextVisibleChars(t: number, pressTick: number): number {
   const start = turn13FaintedTextStartTick(pressTick);
   if (t < start) return 0;
-  return Math.min(TURN13_FAINTED_TEXT_TOTAL, t - start + 1);
+  return Math.min(TURN13_DRAGONBREATH_FAINT_TEXT_TOTAL, t - start + 1);
 }
-const TURN13_FAINTED_CURSOR_X = LINE2_ORIGIN.x + measureText(font, charmap, TURN13_FAINTED_LINE2);
-const TURN13_FAINTED_CURSOR_START_DELAY = TURN13_FAINTED_TEXT_DELAY + TURN13_FAINTED_TEXT_TOTAL + 1; // 485 -> trace tick 16001, oracle-pixel-confirmed this session: the naive "+1 after last glyph" tick (16000) put every one of cursorState's own perpetual-cycle phase transitions exactly 1 tick early (npm run compare isolated two mismatches, 16810 and 16819, both exactly at a phase-boundary tick) - one more tick of render lag than TURN5_FAINTED_CURSOR_START_DELAY's own convention, consistent with this being a re-anchored instance of a generic mechanism, not a byte-identical constant
+const TURN13_FAINTED_CURSOR_X =
+  LINE2_ORIGIN.x
+  + measureText(font, charmap, TURN13_DRAGONBREATH_FAINT_LINE2);
+const TURN13_FAINTED_CURSOR_START_DELAY = TURN13_FAINTED_TEXT_DELAY + TURN13_DRAGONBREATH_FAINT_TEXT_TOTAL + 1; // 485 -> trace tick 16001, oracle-pixel-confirmed this session: the naive "+1 after last glyph" tick (16000) put every one of cursorState's own perpetual-cycle phase transitions exactly 1 tick early (npm run compare isolated two mismatches, 16810 and 16819, both exactly at a phase-boundary tick) - one more tick of render lag than TURN5_FAINTED_CURSOR_START_DELAY's own convention, consistent with this being a re-anchored instance of a generic mechanism, not a byte-identical constant
 
 
-/** Trace tick `t` is eligible to register turn 13's own KO-text dismiss A-press - same "message settled" gate `turn5RockSlideKoDismissEligible`/`sendOutPressEligible` already establish, re-anchored to this turn's own cursor start. */
-export function turn13KoDismissEligible(t: number): boolean {
+/** The staged opponent-faint receipt accepts dismissal once its text cursor is settled. */
+export function opponentFaintDismissEligible(t: number): boolean {
   return t >= TURN13_DRAGONBREATH_PRESS_TICK + TURN13_FAINTED_CURSOR_START_DELAY;
 }
 
 /**
  * S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6/§7): `koDismissTick` (the
- * real `TICK0 + turn13KoDismissElapsed` trace tick, `null` before the press
+ * real `TICK0 + opponentFaintDismissElapsed` trace tick, `null` before the press
  * registers) - once set, this is the FIRST place this dossier's own render
  * path actually consults a KO-dismiss elapsed field (every earlier "the
  * render path does NOT consult this field" precedent, `turn5KoDismissElapsed`'s
@@ -13846,7 +13866,7 @@ export function turn13KoDismissEligible(t: number): boolean {
  * "committed trace's own button always lands at the right real-world tick"
  * convention every other post-press window in this file already relies on.
  */
-function drawTurn13FaintedWindow(
+function drawFaintedOpponentWindow(
   fb: Uint8Array,
   t: number,
   pressTick: number,
@@ -13866,9 +13886,14 @@ function drawTurn13FaintedWindow(
     );
     return;
   }
-  drawTurn13FieldBase(fb, t, frozenBounceTick, undefined, undefined, 0, false, 0, TURN13_PIDGEOTTO_FAINT_HP, { keptRows: 0, y2: TURN13_FAINT_SINK_STEPS * 8 }, false);
+  drawTurn13FieldBase(fb, t, frozenBounceTick, undefined, undefined, 0, false, 0, TURN13_DRAGONBREATH_HP.to, { keptRows: 0, y2: TURN13_FAINT_SINK_STEPS * 8 }, false);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-  drawMessageTextLines(fb, TURN13_FAINTED_LINE1, TURN13_FAINTED_LINE2, turn13FaintedTextVisibleChars(t, pressTick));
+  drawMessageTextLines(
+    fb,
+    TURN13_DRAGONBREATH_FAINT_LINE1,
+    TURN13_DRAGONBREATH_FAINT_LINE2,
+    turn13FaintedTextVisibleChars(t, pressTick),
+  );
   const cursorStart = pressTick + TURN13_FAINTED_CURSOR_START_DELAY;
   const cursorT = koDismissTick !== null ? Math.min(t, koDismissTick) : t;
   const cursor = cursorState(cursorT, cursorStart);
@@ -16694,7 +16719,7 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
       state.turn11Resolved,
       state.turn12Resolved,
       state.turn13Resolved,
-      state.turn13KoDismissElapsed === null ? null : TICK0 + state.turn13KoDismissElapsed,
+      state.opponentFaintDismissElapsed === null ? null : TICK0 + state.opponentFaintDismissElapsed,
       state.turn14Resolved,
       state.trainerPresentation,
     );

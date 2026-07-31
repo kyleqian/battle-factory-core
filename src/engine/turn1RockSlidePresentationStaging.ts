@@ -75,6 +75,7 @@ function speciesDisplayName(speciesId: number): string {
 
 const PROGRAM = loadBattleScriptProgram();
 const ENTRY_LABEL = "BattleScript_HitFromAtkCanceler";
+const B_WAIT_TIME_LONG = 64;
 /** src/data/gen/moves.json MOVE_ROCK_SLIDE -- the real move this window uses, not a substitute. */
 const MOVE_ROCK_SLIDE = 157;
 /** src/data/gen/moves.json MOVE_DOUBLE_TEAM -- the turn-kickoff phase's own real move (Grovyle's own evasion-rise). */
@@ -133,7 +134,8 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
     prepareSelectionMessageFromTable: () => null,
     resolveAttackerBattler: () => null,
     resolveBattlerAtPosition: () => null,
-    resolveHalfwordOperand: () => null,
+    resolveHalfwordOperand: (_context, operand) =>
+      operand.expression === "B_WAIT_TIME_LONG" ? B_WAIT_TIME_LONG : null,
     resolveByteOperand: () => null,
   });
 }
@@ -147,6 +149,93 @@ export type Turn1RockSlideHitChainResult = Readonly<{
 }>;
 
 /**
+ * Reusable single-hit staging seam. `BattleScript_HitFromAtkCanceler`
+ * is the common source entry for ordinary damaging moves
+ * (`data/battle_scripts_1.s:236-260`); the move row, normalized battlers,
+ * move-effect byte, and RNG cursor determine the concrete semantic stream.
+ * Keeping this helper here preserves the already-proven controller
+ * acknowledgement loop while letting sibling presentation windows consume
+ * the same source program without copying a turn-specific interpreter.
+ */
+export type StagePlayerHitChainInput = Readonly<{
+  attacker: Partial<BattleScriptRulesBattler>;
+  target: Partial<BattleScriptRulesBattler>;
+  currentMove: number;
+  currentMovePosition: 0 | 1 | 2 | 3;
+  moveEffectByte: number;
+  rngSeed: number;
+}>;
+
+export type StagedPlayerHitChainResult = Readonly<{
+  events: readonly BattleScriptSemanticEvent[];
+  rngValueAfter: number;
+  attacker: BattleScriptRulesBattler;
+  target: BattleScriptRulesBattler;
+}>;
+
+export function stagePlayerHitChain(
+  input: StagePlayerHitChainInput,
+): StagedPlayerHitChainResult {
+  const attacker = battler({ ...input.attacker, side: 0 });
+  const target = battler({ ...input.target, side: 1 });
+  const rulesContext = createBattleScriptRulesContext({
+    battlers: [attacker, target, battler({ side: 0 }), battler({ side: 1 })],
+    selectorRoles: { attacker: 0, target: 1, effectBattler: 1, fainted: null },
+    scriptingBattler: 0,
+    atkCancelerTracker: 0,
+    battleOutcome: 0,
+    currentMove: input.currentMove,
+    currentMovePosition: input.currentMovePosition,
+    moveResultFlags: 0,
+    dmgMultiplier: 1,
+    critMultiplier: 1,
+    moveEffectByte: input.moveEffectByte,
+    missType: 0,
+    hitMarker: 0,
+    multiHitCounter: 0,
+  });
+
+  const execution = createBattleScriptStatusRulesExecution(
+    PROGRAM,
+    ENTRY_LABEL,
+    rulesContext,
+    input.rngSeed,
+    externalPorts(),
+  );
+  let state = execution.state;
+  for (let budget = 0; budget < 512; budget += 1) {
+    const stepped = stepBattleScriptMachine(PROGRAM, state, execution.handlers);
+    if (stepped.kind === "halted" && stepped.state.haltReason?.kind === "terminal") {
+      return Object.freeze({
+        events: stepped.state.events,
+        rngValueAfter: stepped.state.rng.value,
+        attacker: stepped.state.rulesContext.battlers[0],
+        target: stepped.state.rulesContext.battlers[1],
+      });
+    }
+    if (stepped.kind === "blocked") {
+      const acknowledged = acknowledgePendingControllers(state);
+      if (acknowledged === state) {
+        throw new Error(
+          "stagePlayerHitChain: Battle Script blocked without a safe controller acknowledgement "
+            + JSON.stringify(stepped.reason),
+        );
+      }
+      state = acknowledged;
+      continue;
+    }
+    if (stepped.kind !== "advanced" && stepped.kind !== "scheduler-progressed") {
+      throw new Error(
+        `stagePlayerHitChain: staged hit chain stopped unexpectedly (${stepped.kind}) `
+          + "before its own script completed",
+      );
+    }
+    state = stepped.state;
+  }
+  throw new Error("stagePlayerHitChain: staged hit chain did not reach its own script end in budget");
+}
+
+/**
  * Runs the ONIX ROCK_SLIDE -> GROVYLE hit chain (143 HP, non-lethal, real
  * move/real stats) from `BattleScript_HitFromAtkCanceler` to the script's own
  * `end`, returning every semantic event the registered opcodes emitted along
@@ -156,80 +245,41 @@ export type Turn1RockSlideHitChainResult = Readonly<{
  * local machine instance.
  */
 export function stageTurn1RockSlideHitChain(): Turn1RockSlideHitChainResult {
-  const onix = battler({
-    side: 0,
-    hp: 143,
-    species: SPECIES_ONIX,
-    attack: 51,
-    defense: 187,
-    spAttack: 36,
-    spDefense: 72,
-    types: ["TYPE_ROCK", "TYPE_GROUND"],
-    moves: [MOVE_ROCK_SLIDE, 0, 0, 0],
-    pp: [10, 0, 0, 0],
-  });
-  const grovyle = battler({
-    side: 1,
-    hp: GROVYLE_PRE_HIT_HP,
-    species: SPECIES_GROVYLE,
-    attack: 103,
-    defense: 56,
-    spAttack: 91,
-    spDefense: 71,
-    types: ["TYPE_GRASS", "TYPE_GRASS"],
-  });
-
-  const rulesContext = createBattleScriptRulesContext({
-    battlers: [onix, grovyle, battler({ side: 0 }), battler({ side: 1 })],
-    selectorRoles: { attacker: 0, target: 1, effectBattler: 1, fainted: null },
-    scriptingBattler: 0,
-    atkCancelerTracker: 0,
-    battleOutcome: 0,
+  const result = stagePlayerHitChain({
+    attacker: {
+      hp: 143,
+      species: SPECIES_ONIX,
+      attack: 51,
+      defense: 187,
+      spAttack: 36,
+      spDefense: 72,
+      types: ["TYPE_ROCK", "TYPE_GROUND"],
+      moves: [MOVE_ROCK_SLIDE, 0, 0, 0],
+      pp: [10, 0, 0, 0],
+    },
+    target: {
+      hp: GROVYLE_PRE_HIT_HP,
+      species: SPECIES_GROVYLE,
+      attack: 103,
+      defense: 56,
+      spAttack: 91,
+      spDefense: 71,
+      types: ["TYPE_GRASS", "TYPE_GRASS"],
+    },
     currentMove: MOVE_ROCK_SLIDE,
     currentMovePosition: 0,
-    moveResultFlags: 0,
-    dmgMultiplier: 1,
-    critMultiplier: 1,
     moveEffectByte: 0,
-    missType: 0,
-    hitMarker: 0,
-    multiHitCounter: 0,
+    rngSeed: STAGED_RNG_SEED,
   });
-
-  const ports = externalPorts();
-  const execution = createBattleScriptStatusRulesExecution(PROGRAM, ENTRY_LABEL, rulesContext, STAGED_RNG_SEED, ports);
-  let state = execution.state;
-  for (let budget = 0; budget < 512; budget += 1) {
-    const stepped = stepBattleScriptMachine(PROGRAM, state, execution.handlers);
-    if (stepped.kind === "halted" && stepped.state.haltReason?.kind === "terminal") {
-      const opponent = stepped.state.rulesContext.battlers[1];
-      return {
-        events: stepped.state.events,
-        targetHpAfter: opponent.hp,
-        opponent: Object.freeze({
-          species: opponent.species,
-          level: opponent.level,
-          maxHP: opponent.maxHP,
-        }),
-      };
-    }
-    if (stepped.kind === "blocked") {
-      const acknowledged = acknowledgePendingControllers(state);
-      if (acknowledged === state) {
-        throw new Error("turn1RockSlidePresentationStaging: Battle Script blocked without a safe controller acknowledgement");
-      }
-      state = acknowledged;
-      continue;
-    }
-    if (stepped.kind !== "advanced" && stepped.kind !== "scheduler-progressed") {
-      throw new Error(
-        `turn1RockSlidePresentationStaging: staged ROCK_SLIDE hit chain stopped unexpectedly (${stepped.kind}) `
-          + "before its own script completed",
-      );
-    }
-    state = stepped.state;
-  }
-  throw new Error("turn1RockSlidePresentationStaging: staged hit chain did not reach its own script end in budget");
+  return {
+    events: result.events,
+    targetHpAfter: result.target.hp,
+    opponent: Object.freeze({
+      species: result.target.species!,
+      level: result.target.level!,
+      maxHP: result.target.maxHP!,
+    }),
+  };
 }
 
 function acknowledgePendingControllers(
