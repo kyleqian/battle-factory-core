@@ -13,6 +13,56 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 781 — [BOUNDED MAIN WORKER 2026-07-31 ~10:00] #56 item 2 CLOSED (no fix): decisive instrument ran, flat-constant hypothesis falsified
+
+- **State:** `npx tsc --noEmit` clean; focused suite (issue56ActionMenuHandoffFrame,
+  executableFrontierRatchet, battleCommandPresentation, battleMenu,
+  battleMenuIdle, factoryBattleStartIntroAckAlignment,
+  factoryRoundBattleOrchestrator) **212/212 green**, no new ratchet
+  barriers, no new canonical-recording imports. Tree clean at this
+  commit. Full `npm test`/`npm run build` intentionally not run (side
+  worktree `side-20260731-094832` live concurrently, per brief,
+  precedent entries 775/777/779). All four mandated pins independently
+  reconfirmed via `npm run compare` (no production code touched, so
+  unchanged as expected): `factory-arbitrary-intro-yoshi-off`
+  **699/751**, `factory-arbitrary-intro-magneton-off` **703/751**,
+  `interactive-generated-intro-off` **715/715**,
+  `battle-command-generated-off` **128/128**.
+- **Did:** ran S2's own named decisive step verbatim
+  (`docs/issue56-residual-probe.md` Q2's "what fact would decide it"):
+  new committed test `tests/issue56ActionMenuHandoffFrame.test.ts` drives
+  `beginFactoryRoundBattleStartIntro`/`advanceFactoryRoundBattleStartIntro`
+  tick-by-tick for the real YOSHI/MAGNETON tuples and logs the
+  app-relative frame where `battleCommandPresentation.lifecycle.phase`
+  first reads `"action-menu"`: **678** (YOSHI) and **689** (MAGNETON).
+  Compared against the probe's RAM-fitted `n0` (611/550): deltas **+67**
+  and **+139** — NOT equal (off by 72), so neither "no change needed" nor
+  "one flat constant explains both" holds; the named leading suspect
+  (`BATTLE_COMMAND_ACTION_ENTER_DELAY`'s flat 6-tick) is independently
+  ruled out on magnitude alone (max possible contribution is 6, an order
+  of magnitude short of either delta). Per the brief's own decision rule:
+  **no production code changed** — banked the falsification instead of
+  guessing.
+- **Docs:** `docs/issue56-residual-probe.md` extended with the instrument
+  result, an updated Q2 summary-table row (CLOSED, no fix), and a named
+  follow-up observation for whoever picks this class of question up next:
+  the RAM-fitted `n0` gap between species (611−550=61, tracks the known
+  cry-duration-driven ready-lag spread) is much larger than the app's own
+  action-menu-handoff gap between the same two fixtures (689−678=11) — a
+  ~50-tick discrepancy in the *inter-species gap itself*, not chased this
+  step (out of this step's scope, which was the idle-bounce phase-offset
+  question specifically), but concrete and falsifiable.
+- **Next:** #56 item 2 is closed (no more idle-bounce-phase-offset work
+  to schedule). Remaining #56 items: item 2's own frames 444/536 (single-
+  tick 2-3px sub-step misalignments, site named not sub-step-isolated,
+  lowest priority per the probe) and item 1's leftover +6 canonical route
+  term (two undistinguished candidates, docs/onix-readylag-destin-bench-
+  probes.md). Rank-4 slice 1 (ROCK_SLIDE tails, `docs/rank4-prep-scout.md`)
+  is the next substantive track. The newly-named inter-species ready-lag
+  gap (above) is a fresh, separate lead if anyone wants it.
+- **Notes:** no papercuts this step.
+
+---
 ## 780 — [SUPERVISOR 2026-07-31 round 2] M2 (#39 rank-3 complete + #57 closed), S2 (#56 probe), S3 (rank-4 scout) all verified and merged
 
 - **State:** master = M2's three commits + S2 (`45220c2f`, #56 evidence
@@ -100,33 +150,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   S2's own live track; Gate 6 breadth after.
 - **Notes:** no papercuts this step.
 
----
-## 778 — [SUPERVISOR 2026-07-31 round 1] M1 (#39 rank-3 half 1) + S1 (#57 core fix) both verified and merged; round 2 dispatching
-
-- **State:** master = M1's flip + S1's `387a34a1` merged (`b9fad3f7`);
-  full union `npm test` + `npm run build` gate running at commit time —
-  result recorded in the next entry if not amended here. Supervisor
-  independently re-ran: turn5-switchin **241/241**, turn5-faint
-  **110/110**, turn5-sitrus-c **181/181**, and post-merge
-  turn13-dragonbreath-faint **141/141** + turn13-switchin **242/242**
-  (the maxHP values S1 un-dropped change no pixels). Trace rewrite in
-  `9929caf1` checked semantically (`turn5-sitrus-c` old==new modulo
-  `appRoute` + pretty-print).
-- **Verified worker deviations (both accepted on checked evidence):**
-  M1's `turn5KoDismissElapsed` narrowing (36b60ec5 truly touches no
-  dismiss-elapsed code — my brief overstated the model; field is
-  state-only, never render-read) and S1's wider focused suite (11
-  files/65 tests). S1 finding worth keeping: turn13 staging already
-  supplied maxHP 117/156 that the pre-fix helper silently dropped.
-- **Docs:** #57 trimmed to its open remainder (swap
-  `turn5ResolutionAdapter.ts`'s local staging onto the fixed helper);
-  #39 + inventory rank-3 row updated to half-1-retired.
-- **Next:** M2 = rank-3 half 2 (Sitrus presentation-timing projection +
-  #57 remainder swap). S2 (live) = #56 residual evidence probe
-  (new-files-only). Then ranks 4-9 / Gate 6 breadth as time allows.
-- **Notes:** launcher/monitor notification timestamps proved unreliable
-  this session (spurious early "completed" + clock-skewed monitor
-  events); policy adopted: act only on `kill -0` from a fresh shell.
-  Both round-1 launchers also named the SAME raw JSONL log
-  (`...085850.jsonl`, both launched the same second) — worker events
-  interleave in it; read with session_id filters.

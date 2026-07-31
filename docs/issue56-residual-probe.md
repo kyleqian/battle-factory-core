@@ -281,13 +281,69 @@ specific appended segments to check whether its own `A`-press (or the
 oracle's own message-box landmarks the same way the YOSHI ack-handoff bug
 was found. Both are named, concrete next steps, not vague.
 
+## Question 2 follow-up — the decisive instrument (2026-07-31, main lane)
+
+Ran the decisive step named above verbatim: `tests/issue56ActionMenuHandoffFrame.test.ts`
+drives `beginFactoryRoundBattleStartIntro` + `advanceFactoryRoundBattleStartIntro`
+tick-by-tick for both fixtures' real tuples (same construction as
+`tools/compare/appTrace.ts`'s own stage functions — real `factoryLegal`
+rental generation, not synthetic party injection) and logs the first
+app-relative frame at which `battleCommandPresentation.lifecycle.phase`
+reads `"action-menu"`.
+
+| Fixture | App action-menu frame | RAM-fitted `n0` | Delta |
+| --- | --- | --- | --- |
+| YOSHI (GRIMER) | **678** | 611 | **+67** |
+| MAGNETON (DELCATTY) | **689** | 550 | **+139** |
+
+(678 and 689 independently corroborate this step's own earlier pixel
+characterization above: YOSHI's "command-ready transition boundary" was
+already located at app-relative 678-685, and MAGNETON's analogous edge at
+689-695 — the instrument lands exactly on the first frame of each.)
+
+**Verdict: the third branch of the decision rule.** The deltas are not
+equal (67 vs 139, off by 72) and neither is 0 — so neither "no code
+change needed" nor "a single flat constant explains both" holds. The
+named leading suspect (`BATTLE_COMMAND_ACTION_ENTER_DELAY`'s flat 6-tick)
+is independently ruled out on magnitude alone: it could only ever account
+for up to 6 ticks, an order of magnitude short of either delta. Per this
+doc's own stated decision rule, **no production fix follows from this
+instrument** — banking the falsification with the numbers above rather
+than guessing. All four mandated pins reconfirmed unchanged (no
+production code touched): `factory-arbitrary-intro-yoshi-off` 699/751,
+`factory-arbitrary-intro-magneton-off` 703/751,
+`interactive-generated-intro-off` 715/715, `battle-command-generated-off`
+128/128.
+
+**What would explain a 72-tick delta-of-deltas (not chased further this
+step, named for whoever picks this up next):** the RAM-fitted `n0` gap
+between species (611−550=61) is itself close to the known
+`generatedPlayerReadyLagSpeciesFormula` cry-duration-driven spread, i.e.
+real hardware's bounce-zero point moves by species roughly as expected.
+But the app's own action-menu-handoff gap between the same two fixtures
+is only 689−678=11 ticks — nowhere near 61. That ~50-tick discrepancy in
+the *inter-species gap itself* (not just the individual deltas) is the
+concrete, falsifiable next question: it suggests the app's generated-intro
+species ready-lag term is not fully reproducing the real per-species
+spread for at least one of these two tuples, upstream of anything
+`idleBounceElapsed`-related. Needs its own dedicated instrument (compare
+each fixture's modeled `generatedPlayerReadyLag`-equivalent tick count
+against a fresh RAM read of the real command-ready frame per fixture) —
+out of scope for this step's brief, which was scoped to the idle-bounce
+phase-offset question specifically.
+
 ## Summary for the supervisor
 
 | Question | Verdict | Confidence |
 | --- | --- | --- |
 | Q1 (444/536) | Genuine single-tick, single-column (~2-3px) sub-step misalignment in a per-tick animation table; not a color/duration bug. Draw site named, exact sub-step not isolated. | Medium — pixel-proven, not RAM-proven |
-| Q2 (idle-bounce) | `menuIdleBounce` itself is proven exactly correct (RAM-verified, 2 species, tick-exact outside a startup edge). Residual is a pure phase offset, mostly or entirely explained by the already-correct species-dependent ready-lag anchor; whether a small residual CONSTANT bug remains on top (candidate: `BATTLE_COMMAND_ACTION_ENTER_DELAY`) is undetermined. | High on the mechanism, open on the exact fix |
+| Q2 (idle-bounce) | **CLOSED, no fix.** `menuIdleBounce` itself is proven exactly correct (RAM-verified, 2 species, tick-exact outside a startup edge). The decisive instrument (below) found app-vs-`n0` deltas of +67 (YOSHI) and +139 (MAGNETON) — unequal, falsifying the flat-constant hypothesis (`BATTLE_COMMAND_ACTION_ENTER_DELAY` ruled out on magnitude alone). No production fix follows; a new, narrower question (inter-species ready-lag gap, 11 app ticks vs 61 RAM ticks) is named for whoever picks this up next. | High — RAM-proven mechanism, decisively falsified fix hypothesis |
 | Q3 (+6 route term) | Confirmed route-specific (not species-specific) per existing Probe 1. One candidate mechanism (ROM `BATTLE_TYPE_FIRST_BATTLE` branch) checked and falsified this step. Real-vs-staged frame-count gap (ISSUES #55-shaped) vs a `battle1-intro.json` trace-alignment bug remain the two live candidates, undistinguished. | Low — two candidates, no discriminating evidence yet |
 
-No production code, existing docs, or existing traces were modified. New
-files: this doc, `tools/probe/dump-arbitrary-intro-bounce-driver.py`.
+Original round: no production code, existing docs, or existing traces were
+modified; new files were this doc and
+`tools/probe/dump-arbitrary-intro-bounce-driver.py`. Follow-up round
+(2026-07-31, main lane, above): this doc extended with the decisive
+instrument's result; new committed file
+`tests/issue56ActionMenuHandoffFrame.test.ts`; still no other production
+code or existing traces modified.

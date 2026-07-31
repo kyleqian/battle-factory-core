@@ -1,3 +1,34 @@
+## 778 — [SUPERVISOR 2026-07-31 round 1] M1 (#39 rank-3 half 1) + S1 (#57 core fix) both verified and merged; round 2 dispatching
+
+- **State:** master = M1's flip + S1's `387a34a1` merged (`b9fad3f7`);
+  full union `npm test` + `npm run build` gate running at commit time —
+  result recorded in the next entry if not amended here. Supervisor
+  independently re-ran: turn5-switchin **241/241**, turn5-faint
+  **110/110**, turn5-sitrus-c **181/181**, and post-merge
+  turn13-dragonbreath-faint **141/141** + turn13-switchin **242/242**
+  (the maxHP values S1 un-dropped change no pixels). Trace rewrite in
+  `9929caf1` checked semantically (`turn5-sitrus-c` old==new modulo
+  `appRoute` + pretty-print).
+- **Verified worker deviations (both accepted on checked evidence):**
+  M1's `turn5KoDismissElapsed` narrowing (36b60ec5 truly touches no
+  dismiss-elapsed code — my brief overstated the model; field is
+  state-only, never render-read) and S1's wider focused suite (11
+  files/65 tests). S1 finding worth keeping: turn13 staging already
+  supplied maxHP 117/156 that the pre-fix helper silently dropped.
+- **Docs:** #57 trimmed to its open remainder (swap
+  `turn5ResolutionAdapter.ts`'s local staging onto the fixed helper);
+  #39 + inventory rank-3 row updated to half-1-retired.
+- **Next:** M2 = rank-3 half 2 (Sitrus presentation-timing projection +
+  #57 remainder swap). S2 (live) = #56 residual evidence probe
+  (new-files-only). Then ranks 4-9 / Gate 6 breadth as time allows.
+- **Notes:** launcher/monitor notification timestamps proved unreliable
+  this session (spurious early "completed" + clock-skewed monitor
+  events); policy adopted: act only on `kill -0` from a fresh shell.
+  Both round-1 launchers also named the SAME raw JSONL log
+  (`...085850.jsonl`, both launched the same second) — worker events
+  interleave in it; read with session_id filters.
+
+---
 ## 777 — [BOUNDED MAIN WORKER 2026-07-31 ~05:45] #39 rank-3 flip, half 1 of 2 DONE: adapter promoted, faint-sink geometry + PIDGEOTTO switch-in literals flipped; Sitrus half deliberately deferred
 
 - **State:** `npx tsc --noEmit` clean; focused suite (turn5Resolution
