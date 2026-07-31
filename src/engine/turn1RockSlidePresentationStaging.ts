@@ -113,7 +113,8 @@ function battler(changes: Partial<BattleScriptRulesBattler>): BattleScriptRulesB
     usedImprisonedMove: 0,
     /** ISSUES #57: forward a caller-supplied item verbatim instead of collapsing it to 0. */
     item: changes.item ?? 0,
-    statStages: [6, 6, 6, 6, 6, 6, 6, 6],
+    /** ISSUES #58: forward caller-supplied statStages verbatim instead of hardcoding all-neutral. */
+    statStages: changes.statStages ?? [6, 6, 6, 6, 6, 6, 6, 6],
     types: changes.types ?? (["TYPE_NORMAL", "TYPE_NORMAL"] as const),
     species: changes.species ?? 0,
     attack: changes.attack ?? 0,
