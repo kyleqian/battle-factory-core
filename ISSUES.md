@@ -16,6 +16,24 @@ one without a user decision, and do not count them as backlog.
 
 # Open
 
+## #58 — `stagePlayerHitChainToTerminalMachineState` also drops caller-supplied statStages
+
+**Symptom:** same silent-drop class as the fixed #57 (maxHP/item), now
+confirmed for `statStages`: the shared helper's local `battler()`
+normalizer hardcodes `statStages: [6,6,6,6,6,6,6,6]` regardless of
+caller input. Live-verified by the rank-4 groundwork slice (2026-07-31,
+`1c015a37`): staging turn-6's ROCK_SLIDE with Onix's real
+FEATHER_DANCE-lowered ATK stage through the shared helper computes
+156→71 (−85, neutral-stage damage) instead of the real 156→113 (−43).
+`turn67RockSlidePresentationStagingPreview.ts` works around it with a
+local pipeline mirroring `turn6FeatherDancePresentationStaging.ts`'s
+correct `changes.statStages ?? default` pattern.
+
+**Fix shape:** thread `statStages: changes.statStages ?? [6,6,6,6,6,6,
+6,6]` through the helper's battler construction (additive; existing
+callers pass none — pin that), then retire the preview's local pipeline.
+Identical recipe to #57's `387a34a1` + `14c4295b` pair.
+
 ## #56 — Arbitrary-trainer intro: residuals, ONIX ready-lag regression, MAGNETON shadow coverage
 
 **Symptom:** the public dense arbitrary-trainer intro comparison
@@ -35,8 +53,16 @@ characterized in `docs/trainer-pic-off-window-scout.md` §D. Remainder:
    699/751, 128/128 held. Open remainder: the canonical route's +6 has
    no named mechanism (route term documented at the code site).
 2. **Isolated frames 444 and 536** (trainer-exit/shadow region;
-   opponent healthbox/summary region) — single-frame, unisolated to a site,
-   unchanged this round.
+   opponent healthbox/summary region) — pixel-proven single-tick 2-3px
+   sub-step misalignments in per-tick animation tables
+   (`docs/issue56-residual-probe.md` Q1, 2026-07-31); named next step is
+   an OAM RAM read of the specific sprite. The idle-menu-bounce family
+   is **closed as no-app-bug** (2026-07-31, `432e16aa`): the oscillator
+   is RAM-proven exact and species-independent, and the decisive
+   instrument falsified a constant-offset app bug (deltas +67 YOSHI vs
+   +139 MAGNETON — see the probe doc's Q2 addendum, which also banks a
+   narrower follow-up lead: RAM-implied inter-species handoff gap is 61
+   ticks, app's is 11 with the species ORDER reversed).
 3. **RESOLVED (2026-07-31, `7cfef2d7`).** `gEnemyMonElevation` extracted
    (61 species sparse, absent = 0, isolated extractor test) and the
    solved rule `origin.y = 8 + yOffset − elevation` applied at all three

@@ -13,6 +13,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 782 — [SUPERVISOR 2026-07-31 round 3] M3 (#56 idle-bounce falsification banked) + S4 (rank-4 groundwork + NEW #58) verified and merged
+
+- **State:** master = M3 (test+docs only, verified no production change;
+  instrument test re-run 3/3 by supervisor) + S4's `1c015a37` merged
+  (`7ddaa69c`); S4's 20 preview-equivalence tests + ratchet re-run green
+  in-worktree by supervisor before merge; worktree/branch cleaned. Union
+  gate for this round runs with round 4 (docs-and-new-files-only delta
+  since the last green gate).
+- **M3 (#56 idle-bounce):** decisive instrument = the probe doc's third
+  branch — deltas UNEQUAL (+67 YOSHI vs +139 MAGNETON), flat-constant
+  app bug falsified, `BATTLE_COMMAND_ACTION_ENTER_DELAY` ruled out on
+  magnitude; NO production change (correct per decision rule). Banked:
+  committed instrument test + a narrower reversed-order gap lead (doc Q2
+  addendum). All four dense pins reconfirmed unchanged.
+- **S4 (rank-4 groundwork):** turn-6/7 ROCK_SLIDE-tail preview adapter
+  equivalence-proven (156→113, 113→82; attack lines via STRINGID_
+  USEDMOVE). **Found #58** (filed): shared staging helper also drops
+  `statStages` — live-proven 156→71 wrong damage vs real 156→113;
+  same class as #57, same fix recipe.
+- **Docs:** #58 filed; #56 item 2 rewritten (idle-bounce closed
+  no-app-bug; 444/536 + reversed-gap lead + item-1 +6 route term remain).
+- **Next:** round 4 — M4 = rank-4 slice-1 flip (consume S4's adapter);
+  S5 = #58 fix (additive statStages threading + pin, existing callers
+  bit-identical). Then retire the preview's local pipeline (recipe
+  `14c4295b`), then remaining rank-4 slices / Gate 6 breadth.
+
+---
 ## 781 — [BOUNDED MAIN WORKER 2026-07-31 ~10:00] #56 item 2 CLOSED (no fix): decisive instrument ran, flat-constant hypothesis falsified
 
 - **State:** `npx tsc --noEmit` clean; focused suite (issue56ActionMenuHandoffFrame,
@@ -93,60 +120,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   named decisive step). Then rank-4 slice 1 (ROCK_SLIDE tails) per the
   scout. Side workers' harmless full-suite runs in own worktrees noted
   (twice despite brief; no action).
-
----
-## 779 — [BOUNDED MAIN WORKER 2026-07-31 ~09:45] #39 rank-3 FULLY RETIRED: Sitrus heal content flipped (half 2 of 2) + #57 remainder closed
-
-- **State:** `npx tsc --noEmit` clean; focused suite (turn5Resolution
-  AdapterEquivalence, turn13ResolutionAdapterEquivalence, battleScene,
-  executableFrontierRatchet, battleMenu, battleMenuIdle, fightSubmenu,
-  battleSetup, destinCanonicalReplacements, stagePlayerHitChainMaxHpItem)
-  **514/514 green**, no new ratchet barriers, no new canonical-recording
-  imports. Tree clean at this commit. Full `npm test`/`npm run build`
-  intentionally not run (side worktrees `side-20260731-090707` and
-  `side-20260731-093409` both live concurrently, per brief, precedent
-  entries 775/777).
-- **Did (2 commits):** (1) **#57 remainder** (`14c4295b`): swapped
-  `turn5ResolutionAdapter.ts`'s `stageTurn5KoHitChainToTerminalMachineState`
-  off its own local `battler()`/`createBattleScriptRulesContext`/
-  `createBattleScriptStatusRulesExecution`/`stepBattleScriptMachine` loop
-  onto the now-fixed shared `stagePlayerHitChainToTerminalMachineState`
-  (`387a34a1`) — deleted ~120 lines of local workaround; every existing
-  equivalence test stayed green unchanged, proving the swap safe. (2)
-  **Sitrus half flip** (`54278249`): `battleScene.ts`'s
-  `TURN5_SITRUS_HEAL_HP_START`/`_END` and `TURN5_SITRUS_HEAL_LINE1`/`_LINE2`
-  now source from `resolveTurn5SitrusAdapter()` (exported, were unexported
-  hand literals) instead of independently re-stated constants; the
-  presentation-TIMING curves (`turn5SitrusHealTextVisibleChars`,
-  `turn5SitrusOnixHp`'s animation shape, `turn5SitrusRingMatrix`,
-  `turn5SitrusResettledBounceTick`) are untouched, still their own
-  oracle-pixel-fit closed forms — only the content/keying changed, per the
-  brief's own explicit boundary. `TURN5_PRESENTATION_TIMING_NOT_STAGED`
-  deleted; the equivalence test's "documented gap" block replaced with real
-  pins comparing `battleScene.ts`'s exported constants against a fresh,
-  independently-computed `resolveTurn5SitrusAdapter()` call in the test
-  (rank-1/2's own "pin the live production path" convention). No new
-  turn/battle-number branch added; `SWITCHIN_SENTOUT_TEXT_START_TICK` stays
-  the absolute anchor half 1 left.
-- **All mandated pins hold exactly** (oracle-verified, entry-777
-  baselines): turn5-rockslide 256/256, turn5-faint 110/110, turn5-switchin
-  241/241, turn5-sitrus-a/b/c/d 110/82/181/133, turn5-endeavor 254/254,
-  turn5-menu 42/42, turn5-healthbox 55/55, turn5-sentout 141/141; insurance
-  pins turn13-dragonbreath-faint 141/141, turn13-switchin 242/242,
-  turn13-sandattack 190/190, interactive-generated-intro-off 715/715,
-  battle-command-generated-off 128/128.
-- **Docs:** `docs/battle-scene-retirement-inventory.md` rank-3 row and its
-  "Blocked work" item both updated to RETIRED/RESOLVED, citing `5db34996`
-  + `54278249`. #39/#57 in ISSUES.md deliberately left untouched per this
-  step's own brief — **#57 remainder is closed**; supervisor deletes the
-  entry after verification. #39 rank-3 is now fully retired (both halves);
-  the still-open remainder is `turn5KoDismissElapsed`/`turn5Resolved`'s own
-  mirroring (unchanged this step, same shape as rank 2's own analogous open
-  note — see the inventory row).
-- **Next:** ranks 4-9 (rank 4 next per the inventory's own recommended
-  order: Turns 6-8 Pidgeotto loop, blocked on a generic Scene-OFF stat/
-  no-effect/item controller presentation — see the inventory's "Blocked
-  work" section); #56 remainder (frames 444/536 + idle-bounce family) is
-  S2's own live track; Gate 6 breadth after.
-- **Notes:** no papercuts this step.
-
