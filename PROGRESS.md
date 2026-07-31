@@ -63,6 +63,39 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   lane boundary, not hidden.
 
 ---
+## 767 — [SUPERVISOR 2026-07-31 ~03:15] Round-8 regression QUARANTINED (715/715 restored); rank-2 groundwork merged; round 9: faint-half flip + discriminating probes
+
+- **State:** union gate green **558 files / 5677 tests + 1 deliberate
+  animation-lane skip**, build clean. M8's species ready-lag formula had
+  regressed the ROADMAP-cited `interactive-generated-intro-off` pin
+  **715/715 → 699/715** and was committed anyway — supervisor
+  **quarantined** it (flat ONIX-calibrated lag restored; formula retained
+  as an exported uncalled function for the #56 investigation). Cost of
+  quarantine on the open evidence traces: exactly **1 frame** (YOSHI
+  698/751 vs 699; MAGNETON 424/751 unchanged — its divergence is a
+  newly-found species-dependent affine-emerge tint, pre-shadow). Kept
+  from M8: the mechanism-derived cry-duration ceiling fix (extractor
+  round→ceil, 376 species regenerated) and the real-personality staging
+  that closed the gender-icon residual. #56 item 1 rewritten to the
+  quarantine state; M8's out-of-brief direct ISSUES edit noted — content
+  was accurate, process wasn't.
+- **S8 merged:** turn-13 DRAGON_BREATH/faint-half adapter + equivalence
+  (6 tests) with two brief corrections (fainting mon is PIDGEOTTO, no
+  party-select UI — AI auto-replacement) and a proof the faint-sink
+  geometry is the generic opponent-faint formula at Pidgeotto's
+  `mon-pic-coords` yOffset, not a hand constant. Switch-in half blocked
+  on `stagePlayerHitChain` terminal-state exposure + DESTIN's unprobed
+  bench.
+- **Round 9 dispatched:** main M9 — rank-2 faint-half flip per the
+  banked checklist (turn13 pins 141/141 + 242/242 + dense-a/b, insurance
+  190/190 + 715/715, honest-stop hard rule). Side S9 — two probes: lab
+  ONIX-lead ready-lag (discriminates route-vs-species for the 6-tick
+  anomaly) and DESTIN full-bench RAM (switch-in unblock).
+- **Notes:** the quarantine decision priority: committed acceptance pins
+  outrank open evidence traces; no formula ships while its 4th data
+  point contradicts it without a mechanism.
+
+---
 ## 766 — [SUPERVISOR 2026-07-31 ~02:25] #39 rank-1 RETIRED (flip verified); player-cry mechanism confirmed on 3 species; round 8 dispatched
 
 - **State:** union gate green **557 files / 5671 tests + 1 deliberate
@@ -89,68 +122,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** GRANBULL flat-286 non-reconciliation is recorded in
   `docs/intro-cry-shadow-evidence.md` — treat as a flag on the canonical
   path, not a defect claim.
-
----
-## 765 — [BOUNDED MAIN WORKER 2026-07-31 ~02:45] #39 rank-1 FLIPPED: Battle-2 command turn now kernel-driven; three legacy fixture files deleted
-
-- **State:** all six mandated pins hold at their recorded counts:
-  `battle2-turn1-rockslide.json` **191/191**, `battle2-action-menu-dense.json`
-  **209/209**, `battle2-off-turn1-staged.json` **16/16**,
-  `battle-command-generated-off.json` **128/128**,
-  `interactive-generated-intro-off.json` **715/715**; ground-truth-only
-  `battle2-off-turn1.json` unchanged at its known-incomplete **38/179**
-  (never committed to app acceptance, docs/battle-resolution-seam-
-  design.md:452). `npx tsc --noEmit` clean. Focused suite (every touched
-  module + `executableFrontierRatchet`) **537/537 green**
-  (`battle2CommandAdapterEquivalence` 13, `battle2ActionMenu` 8,
-  `battle2Turn1` 3, `battle2PartyGroundTruth` 6, `battleCommandPresentation`
-  32, `battleTurnPortability` 5, `executableFrontierRatchet` 6,
-  `battle2OffKernelSeamScout` 2, `battleScene` 276,
-  `factoryRoundBattleOrchestrator` 30, + 4 more). Full `npm test`/`npm run
-  build` **not run this step** per the brief (side worker live concurrently).
-- **Did:** redirected `battle2CommandPresentationForRender`'s field/request
-  construction and `drawBattle2RockSlideAttack`'s HP sourcing
-  (`battleScene.ts`) from the `BATTLE2_ACTION_MENU_MODEL`/`battle2Turn1.ts`
-  fixtures to the real kernel via the promoted adapter (`battle2CommandAdapter
-  .ts`, renamed from `...Preview.ts` — production now, not a proof). Added
-  the real RAM-probed personalities (ONIX 1205102525, KABUTO 2507133325) and
-  player bench (`playerBenchHp:[138,153]`, MAGBY/BAYLEEF override) to the
-  kernel config per docs/battle2-party-ground-truth.md's two FINDINGs — both
-  now closed, evidenced in the new equivalence test and
-  `battle2PartyGroundTruth.test.ts`'s updated "fixed" assertions. Deleted
-  `battle2Turn1.ts`/`battle2ActionMenu.ts`/`battle2OffScenario.ts`; relocated
-  their still-needed timing/RNG-advancement helpers
-  (`battle2Turn1RngCalls`+delays, `battle2RockSlideMechanismPressTick`,
-  `actionMenu*`/`battle2PreTurnRngCalls`, `BATTLE2_ACTION_MENU_MODEL`,
-  `BATTLE2_OFF_TURN1_COMMAND_DURATIONS`) into `battleScene.ts`/
-  `battle2CommandAdapter.ts` rather than dropping them — core.ts's RNG-
-  advancement loop (accuracy/spread/secondary Random() calls) is unchanged,
-  only its source module moved. Dropped genuinely dead code that no renderer
-  or RNG loop ever consumed: the `state.battle2Turn1` EngineState field
-  (only read by its own now-rewritten test), `battle2RockSlideDamage`,
-  `battle2Turn1Order`, `advanceBattle2PreTurnRng` (all unused outside their
-  own tests). Kept the ROCK_SLIDE rock-sprite visual's private draw
-  primitives untouched (no generic move-visual owner yet, per brief). Rock-
-  sprite HP-drain boundary now reads `{from:91,to:63}` off the adapter's
-  resolution instead of the deleted `BATTLE2_KABUTO_START_HP`/`END_HP`
-  constants. Rewrote `tests/battle2CommandAdapterPreviewEquivalence.test.ts`
-  as `tests/battle2CommandAdapterEquivalence.test.ts` (production-path pin,
-  not a pre-flip proof) and updated the 5 dependent test files' imports.
-- **Next:** ISSUES #39's rank-1 row (docs/battle-scene-retirement-
-  inventory.md) is retired — supervisor should trim #39's text to drop the
-  rank-1 window from the worklist (rank 2, Turn-13 DRAGON_BREATH→faint→
-  Murkrow switch-in, is next per the inventory's stated order) and update
-  the retirement-inventory doc's rank-1 row/ref-count census (not touched
-  this step, out of scope for a main worker per the brief).
-- **Notes:** PAPERCUT: the acceptance list's "battle2-off-turn1.json (179)"
-  and "battle2-turn1-rockslide.json (191)" traces both lack `oracleProfile`/
-  `appRoute` fields (pre-existing; unrelated to this step), so plain `npm
-  run compare -- <trace>` silently uses the wrong default route
-  (`generated-orchestrator`) and either crashes (pre-existing, unrelated
-  `STRINGID_PKMNSITEMRESTOREDHEALTH` bug, reproduces identically on master)
-  or diffs wrong. Verified both via scratch copies with `"appRoute":
-  "canonical-recorded"` added (not committed) — ~10 min lost chasing this.
-  Worth a real fix (add the field to the two committed trace files) in a
-  future docs/tooling pass.
-
----

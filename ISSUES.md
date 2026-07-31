@@ -23,22 +23,24 @@ one without a user decision, and do not count them as backlog.
 **699/751** (up from 650/751, round 7 2026-07-31) with every divergent frame
 characterized in `docs/trainer-pic-off-window-scout.md` §D. Remainder:
 
-1. **DONE (round 7):** `GENERATED_PLAYER_READY_LAG` is now species-keyed
-   (`generatedPlayerReadyLag`, `battleScene.ts`), confirmed exact (within
-   the WAV-ceiling-rounding fix) on three independent `factoryLegal`
-   fixtures (GRIMER/KADABRA/DELCATTY). **New regression found by the same
-   change:** `interactive-generated-intro-off` (the real canonical Battle-1
-   recording, player lead ONIX) dropped from **715/715 to 699/715** — a 4th
-   data point that disagrees with the 3-species formula by a clean 6 ticks
-   (predicts 179, needs 185). Root cause not found (extraction, line-length,
-   and simple floor/max hypotheses all ruled out — see §D round 7's own
-   write-up). This is the canonical-route reconciliation gap the round-6/7
-   briefs anticipated (previously misattributed to GRANBULL/
-   `battle-command-generated-off`, which turns out not to exercise this
-   mechanism at all since it bypasses the generic intro state machine
-   entirely). Needs a 5th data point or a source-level look at
-   `battle_controller_player.c`'s `battlerAnimsDone` term before touching
-   the formula further.
+1. **Player ready lag — species formula QUARANTINED (supervisor,
+   2026-07-31).** The 3-species formula
+   (`generatedPlayerReadyLagSpeciesFormula`, retained-not-called in
+   `battleScene.ts`) is exact for GRIMER/KADABRA/DELCATTY but disagrees
+   with the 4th data point — the canonical ONIX pin — by a clean 6 ticks
+   (predicts 179; the ROADMAP-cited 715/715
+   `interactive-generated-intro-off` acceptance needs 185). It briefly
+   shipped and regressed that pin to 699/715; production now keeps the
+   flat ONIX-calibrated lag (pin restored 715/715; YOSHI cost is exactly
+   1 frame: 698 vs 699). Root cause unknown — extraction, line-length,
+   and floor/max hypotheses ruled out; GRANBULL/
+   `battle-command-generated-off` turns out not to exercise this state
+   machine at all. Needs a 5th data point or a source-level look at
+   `battle_controller_player.c`'s `battlerAnimsDone` term before the
+   formula can be trusted generally. The cry-duration ceiling fix
+   (extractor `Math.round`→`Math.ceil`, regenerated for 376 species) is
+   KEPT — it is mechanism-derived and invariant for the opponent-side
+   dispatch formula's three validated species.
 2. **Isolated frames 444 and 536** (trainer-exit/shadow region;
    opponent healthbox/summary region) — single-frame, unisolated to a site,
    unchanged this round.
