@@ -1,471 +1,472 @@
 {
-  "segments": [
-    {
-      "frames": 2,
-      "buttons": [
-        "A"
-      ]
-    },
-    {
-      "frames": 28,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "DOWN"
-      ]
-    },
-    {
-      "frames": 4,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "A"
-      ]
-    },
-    {
-      "frames": 36,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "RIGHT"
-      ]
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "A"
-      ]
-    },
-    {
-      "frames": 28,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "DOWN"
-      ]
-    },
-    {
-      "frames": 4,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "A"
-      ]
-    },
-    {
-      "frames": 36,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "RIGHT"
-      ]
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "A"
-      ]
-    },
-    {
-      "frames": 28,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "DOWN"
-      ]
-    },
-    {
-      "frames": 4,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "A"
-      ]
-    },
-    {
-      "frames": 70,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "A"
-      ]
-    },
-    {
-      "frames": 130,
-      "buttons": []
-    },
-    {
-      "frames": 8,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "A"
-      ]
-    },
-    {
-      "frames": 96,
-      "buttons": []
-    },
-    {
-      "frames": 24,
-      "buttons": []
-    },
-    {
-      "frames": 162,
-      "buttons": []
-    },
-    {
-      "frames": 54,
-      "buttons": []
-    },
-    {
-      "frames": 100,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "A"
-      ]
-    },
-    {
-      "frames": 196,
-      "buttons": []
-    },
-    {
-      "frames": 14,
-      "buttons": []
-    },
-    {
-      "frames": 210,
-      "buttons": []
-    },
-    {
-      "frames": 60,
-      "buttons": []
-    },
-    {
-      "frames": 100,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "A"
-      ]
-    },
-    {
-      "frames": 144,
-      "buttons": []
-    },
-    {
-      "frames": 180,
-      "buttons": []
-    },
-    {
-      "frames": 60,
-      "buttons": []
-    },
-    {
-      "frames": 80,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "A"
-      ]
-    },
-    {
-      "frames": 30,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "A"
-      ]
-    },
-    {
-      "frames": 980,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "A"
-      ]
-    },
-    {
-      "frames": 30,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "DOWN"
-      ]
-    },
-    {
-      "frames": 10,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "A"
-      ]
-    },
-    {
-      "frames": 900,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "A"
-      ]
-    },
-    {
-      "frames": 30,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "UP"
-      ]
-    },
-    {
-      "frames": 10,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "A"
-      ]
-    },
-    {
-      "frames": 1000,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "A"
-      ]
-    },
-    {
-      "frames": 30,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "A"
-      ]
-    },
-    {
-      "frames": 1000,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "A"
-      ]
-    },
-    {
-      "frames": 30,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "A"
-      ]
-    },
-    {
-      "frames": 600,
-      "buttons": []
-    },
-    {
-      "frames": 2,
-      "buttons": [
-        "A"
-      ]
-    },
-    {
-      "frames": 26,
-      "buttons": []
-    },
-    {
-      "frames": 240,
-      "buttons": []
-    },
-    {
-      "frames": 252,
-      "buttons": []
-    },
-    {
-      "frames": 240,
-      "buttons": []
-    }
-  ],
-  "captureFrames": [
-    7180,
-    7181,
-    7182,
-    7183,
-    7184,
-    7185,
-    7186,
-    7187,
-    7188,
-    7189,
-    7190,
-    7191,
-    7192,
-    7193,
-    7194,
-    7195,
-    7196,
-    7197,
-    7198,
-    7199,
-    7200,
-    7201,
-    7202,
-    7203,
-    7204,
-    7205,
-    7206,
-    7207,
-    7208,
-    7209,
-    7210,
-    7211,
-    7212,
-    7213,
-    7214,
-    7215,
-    7216,
-    7217,
-    7218,
-    7219,
-    7220,
-    7221,
-    7222,
-    7223,
-    7224,
-    7225,
-    7226,
-    7227,
-    7228,
-    7229,
-    7230,
-    7231,
-    7232,
-    7233,
-    7234,
-    7235,
-    7236,
-    7237,
-    7238,
-    7239,
-    7240,
-    7241,
-    7242,
-    7243,
-    7244,
-    7245,
-    7246,
-    7247,
-    7248,
-    7249,
-    7250,
-    7251,
-    7252,
-    7253,
-    7254,
-    7255,
-    7256,
-    7257,
-    7258,
-    7259,
-    7260,
-    7261,
-    7262,
-    7263,
-    7264,
-    7265,
-    7266,
-    7267,
-    7268,
-    7269,
-    7270,
-    7271,
-    7272,
-    7273,
-    7274,
-    7275,
-    7276,
-    7277,
-    7278,
-    7279,
-    7280,
-    7281,
-    7282,
-    7283,
-    7284,
-    7285,
-    7286,
-    7287,
-    7288,
-    7289,
-    7290,
-    7291,
-    7292,
-    7293,
-    7294,
-    7295,
-    7296,
-    7297,
-    7298,
-    7299,
-    7300,
-    7301,
-    7302,
-    7303,
-    7304,
-    7305,
-    7306,
-    7307,
-    7308,
-    7309,
-    7310,
-    7311,
-    7312
-  ]
+ "appRoute": "canonical-recorded",
+ "segments": [
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 28,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 4,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 36,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "RIGHT"
+   ]
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 28,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 4,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 36,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "RIGHT"
+   ]
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 28,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 4,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 70,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 130,
+   "buttons": []
+  },
+  {
+   "frames": 8,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 96,
+   "buttons": []
+  },
+  {
+   "frames": 24,
+   "buttons": []
+  },
+  {
+   "frames": 162,
+   "buttons": []
+  },
+  {
+   "frames": 54,
+   "buttons": []
+  },
+  {
+   "frames": 100,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 196,
+   "buttons": []
+  },
+  {
+   "frames": 14,
+   "buttons": []
+  },
+  {
+   "frames": 210,
+   "buttons": []
+  },
+  {
+   "frames": 60,
+   "buttons": []
+  },
+  {
+   "frames": 100,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 144,
+   "buttons": []
+  },
+  {
+   "frames": 180,
+   "buttons": []
+  },
+  {
+   "frames": 60,
+   "buttons": []
+  },
+  {
+   "frames": 80,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 30,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 980,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 30,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 10,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 900,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 30,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "UP"
+   ]
+  },
+  {
+   "frames": 10,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1000,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 30,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1000,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 30,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 600,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 26,
+   "buttons": []
+  },
+  {
+   "frames": 240,
+   "buttons": []
+  },
+  {
+   "frames": 252,
+   "buttons": []
+  },
+  {
+   "frames": 240,
+   "buttons": []
+  }
+ ],
+ "captureFrames": [
+  7180,
+  7181,
+  7182,
+  7183,
+  7184,
+  7185,
+  7186,
+  7187,
+  7188,
+  7189,
+  7190,
+  7191,
+  7192,
+  7193,
+  7194,
+  7195,
+  7196,
+  7197,
+  7198,
+  7199,
+  7200,
+  7201,
+  7202,
+  7203,
+  7204,
+  7205,
+  7206,
+  7207,
+  7208,
+  7209,
+  7210,
+  7211,
+  7212,
+  7213,
+  7214,
+  7215,
+  7216,
+  7217,
+  7218,
+  7219,
+  7220,
+  7221,
+  7222,
+  7223,
+  7224,
+  7225,
+  7226,
+  7227,
+  7228,
+  7229,
+  7230,
+  7231,
+  7232,
+  7233,
+  7234,
+  7235,
+  7236,
+  7237,
+  7238,
+  7239,
+  7240,
+  7241,
+  7242,
+  7243,
+  7244,
+  7245,
+  7246,
+  7247,
+  7248,
+  7249,
+  7250,
+  7251,
+  7252,
+  7253,
+  7254,
+  7255,
+  7256,
+  7257,
+  7258,
+  7259,
+  7260,
+  7261,
+  7262,
+  7263,
+  7264,
+  7265,
+  7266,
+  7267,
+  7268,
+  7269,
+  7270,
+  7271,
+  7272,
+  7273,
+  7274,
+  7275,
+  7276,
+  7277,
+  7278,
+  7279,
+  7280,
+  7281,
+  7282,
+  7283,
+  7284,
+  7285,
+  7286,
+  7287,
+  7288,
+  7289,
+  7290,
+  7291,
+  7292,
+  7293,
+  7294,
+  7295,
+  7296,
+  7297,
+  7298,
+  7299,
+  7300,
+  7301,
+  7302,
+  7303,
+  7304,
+  7305,
+  7306,
+  7307,
+  7308,
+  7309,
+  7310,
+  7311,
+  7312
+ ]
 }
