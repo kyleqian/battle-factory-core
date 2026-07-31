@@ -36,6 +36,7 @@ import {
   createFactoryRoundBattleOrchestrator,
 } from "../../src/engine/factoryRoundBattleOrchestrator.ts";
 import type { FactoryRentalRecord } from "../../src/engine/battleScenario.ts";
+import { getLevel50InitialRentalFixedIv } from "../../src/engine/factoryRentalGeneration.ts";
 
 export interface AppCapture {
   frame: number;
@@ -74,13 +75,13 @@ const generatedNatureByName = new Map(
   naturesData.natures.map((row) => [row.name, row.index]),
 );
 
-function generatedCommandRecord(setId: number): FactoryRentalRecord {
+function generatedCommandRecord(setId: number, fixedIv: number = 31): FactoryRentalRecord {
   const set = frontierMonsData.entries[setId]!;
   const personality = generatedNatureByName.get(set.nature)!;
   const input = {
     setId,
     personality,
-    fixedIv: 31,
+    fixedIv,
     abilitySlot: (personality & 1) as 0 | 1,
     otId: 0x89ab_cdef,
   };
@@ -137,11 +138,21 @@ function generatedBattleCommandStage(state: EngineState): EngineState {
 // non-reversed workflow: the tuple is read off the generator, not chosen to
 // match a known trainer) — neither DESTIN(50) nor JENSON(58) nor the
 // SHIZUKA(110) mapping fixture, and outside all three casts.
+// `factoryLegal` mode runs the real Factory rental-generation pipeline (no
+// mechanicLab `overrides.parties` stat injection, unlike
+// `generatedBattleCommandStage` above), so the player's initial rentals must
+// carry the ROM's own challenge-0 fixed IV (`GetFactoryMonFixedIV` via
+// `getLevel50InitialRentalFixedIv`, factory-round-policy.json's own
+// `rentalSelection.fixedIvs[0].regular`), not the mechanicLab-fixture-only
+// IV=31 `generatedCommandRecord`'s default preserves for that other stage.
+const FACTORY_LEGAL_CHALLENGE0_INITIAL_RENTAL_FIXED_IV =
+  getLevel50InitialRentalFixedIv(0, false);
+
 function generatedBattleStartIntroArbitraryStage(state: EngineState): EngineState {
   const playerRentalRecords = [
-    generatedCommandRecord(110),
-    generatedCommandRecord(130),
-    generatedCommandRecord(150),
+    generatedCommandRecord(110, FACTORY_LEGAL_CHALLENGE0_INITIAL_RENTAL_FIXED_IV),
+    generatedCommandRecord(130, FACTORY_LEGAL_CHALLENGE0_INITIAL_RENTAL_FIXED_IV),
+    generatedCommandRecord(150, FACTORY_LEGAL_CHALLENGE0_INITIAL_RENTAL_FIXED_IV),
   ] as const;
   let orchestrator = createFactoryRoundBattleOrchestrator({
     id: "factory-arbitrary-intro-yoshi-off",
@@ -155,9 +166,9 @@ function generatedBattleStartIntroArbitraryStage(state: EngineState): EngineStat
       playerRentalRecords,
       savedRentalRecords: [
         ...playerRentalRecords,
-        generatedCommandRecord(115),
-        generatedCommandRecord(135),
-        generatedCommandRecord(145),
+        generatedCommandRecord(115, FACTORY_LEGAL_CHALLENGE0_INITIAL_RENTAL_FIXED_IV),
+        generatedCommandRecord(135, FACTORY_LEGAL_CHALLENGE0_INITIAL_RENTAL_FIXED_IV),
+        generatedCommandRecord(145, FACTORY_LEGAL_CHALLENGE0_INITIAL_RENTAL_FIXED_IV),
       ],
     },
   });
