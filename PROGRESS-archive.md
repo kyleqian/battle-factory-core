@@ -1,3 +1,23 @@
+## 752 — [SUPERVISOR FOLD 2026-07-30 ~21:55] Stranded side-worker inventory folded; #39 worklist now on master
+
+- **State:** `worker/side-20260730-183612` (docs-only, `ff36195e`) merged to
+  master; worktree removed and branch deleted, so only the permanent
+  `.worktrees/animation-main` remains. `animation-main` fold delta **0**.
+- **Did:** folded `docs/battle-scene-retirement-inventory.md` — the
+  reproducible census, textual debt metric, and the remaining owner chain for
+  #39. The side worker landed it at 18:41 but it was never merged and never
+  ledgered; entry 750's wind-down predates it. Re-ran the census: the doc is
+  **exact at its pinned `6fe623bb`** (2,381 refs / 32,696 LOC in
+  `battleScene.ts`). Appended the post-751 delta (2,377 refs / 32,721 LOC)
+  since master has advanced past the pin.
+- **Next:** #39 window-by-window retirement continues from this worklist —
+  it is the census and owner-chain map the next slices should cite.
+- **Notes:** docs-only fold, no source or test change. The stranding is worth
+  remembering: a side worker that finishes after the supervisor winds down
+  leaves no trace in the ledger unless the next session sweeps
+  `git branch --no-merged`.
+
+---
 ## 751 — [BOUNDED MAIN WORKER 2026-07-30 ~18:52] Turn-13 DRAGON_BREATH content re-driven from kernel receipts
 
 - **State:** landed in `77cb49d0`; focused acceptance **4 files / 293

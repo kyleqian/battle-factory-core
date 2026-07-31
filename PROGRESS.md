@@ -13,6 +13,38 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 755 — [SUPERVISOR 2026-07-30 ~22:55] Gate-5 audit merged (6/11 discharged); two scope decisions; round 2 on the three small blockers
+
+- **State:** union gate green **551 files / 5586 tests + 1 deliberate
+  animation-lane skip**, build clean. Entry 754's mapping probe
+  supervisor-re-verified by an independent enumerated probe (species
+  populate at 1197, checkpoint predicate at 1885, frame 1887 pixel-equal
+  to post-checkpoint frame 0). `docs/gate5-acceptance-audit.md` merged
+  (side branch, worktree removed).
+- **Audit verdicts:** (e)(f)(g)(h)(i)(k) DISCHARGED with citations;
+  PARTIAL: (a) anchor-draft receipt link missing, (c)/(j.1) CBM/CV table
+  breadth behind named barriers, (d) commentary has zero ROM ground truth,
+  (j.6) no factory-AI barrier ratchet pin.
+- **Supervisor decisions (reversible, recorded):** (1) Gate 5's "run the
+  native Factory AI" is satisfied by the ported subset with named,
+  tested-to-halt barriers as the boundary once the (j.6) ratchet pin
+  exists; remaining ~70+ CBM / ~55+ CV handlers are Gate-6 breadth-manifest
+  work, per the user's Gate 5 → #39 → Gate 6 ordering. (2) Battles-3-7
+  opponent-identity oracle receipts are not required for Gate 5 — ROADMAP's
+  S8 reset explicitly declined sequential per-battle receipts (audit
+  item 5).
+- **Next:** round 2 dispatched — main: audit items 2+3 (anchor-draft
+  receipt-link test at the real anchor cursor; factoryAi barrier-count
+  ratchet entries); side: audit item 1 via the NON-REVERSED preview_report
+  workflow (verify commentary against each sampled seed's actual generated
+  party — no seed search, no harness ask). After those: the §C consumer
+  step (public dense arbitrary-trainer intro comparison) is the remaining
+  Gate-5 headline.
+- **Notes:** both round-1 workers ran full suites despite briefs saying not
+  to (no harm — different trees); round-2 briefs repeat the instruction
+  with the reason inline.
+
+---
 ## 754 — [BOUNDED MAIN WORKER 2026-07-30 ~22:40] Pre-checkpoint intro-window mapping probe: offset 0, deterministic, feasibility verdict recorded
 
 - **State:** docs-only (`docs/trainer-pic-off-window-scout.md` §C added).
@@ -87,23 +119,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   records** (#38/#18/#5). The settled entries stay because ROADMAP acceptance
   lines cite them by number as the reason specific pixel diffs are accepted;
   deleting them would orphan those citations.
-
----
-## 752 — [SUPERVISOR FOLD 2026-07-30 ~21:55] Stranded side-worker inventory folded; #39 worklist now on master
-
-- **State:** `worker/side-20260730-183612` (docs-only, `ff36195e`) merged to
-  master; worktree removed and branch deleted, so only the permanent
-  `.worktrees/animation-main` remains. `animation-main` fold delta **0**.
-- **Did:** folded `docs/battle-scene-retirement-inventory.md` — the
-  reproducible census, textual debt metric, and the remaining owner chain for
-  #39. The side worker landed it at 18:41 but it was never merged and never
-  ledgered; entry 750's wind-down predates it. Re-ran the census: the doc is
-  **exact at its pinned `6fe623bb`** (2,381 refs / 32,696 LOC in
-  `battleScene.ts`). Appended the post-751 delta (2,377 refs / 32,721 LOC)
-  since master has advanced past the pin.
-- **Next:** #39 window-by-window retirement continues from this worklist —
-  it is the census and owner-chain map the next slices should cite.
-- **Notes:** docs-only fold, no source or test change. The stranding is worth
-  remembering: a side worker that finishes after the supervisor winds down
-  leaves no trace in the ledger unless the next session sweeps
-  `git branch --no-merged`.
