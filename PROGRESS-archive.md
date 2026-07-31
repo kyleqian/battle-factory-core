@@ -1,3 +1,53 @@
+## 781 — [BOUNDED MAIN WORKER 2026-07-31 ~10:00] #56 item 2 CLOSED (no fix): decisive instrument ran, flat-constant hypothesis falsified
+
+- **State:** `npx tsc --noEmit` clean; focused suite (issue56ActionMenuHandoffFrame,
+  executableFrontierRatchet, battleCommandPresentation, battleMenu,
+  battleMenuIdle, factoryBattleStartIntroAckAlignment,
+  factoryRoundBattleOrchestrator) **212/212 green**, no new ratchet
+  barriers, no new canonical-recording imports. Tree clean at this
+  commit. Full `npm test`/`npm run build` intentionally not run (side
+  worktree `side-20260731-094832` live concurrently, per brief,
+  precedent entries 775/777/779). All four mandated pins independently
+  reconfirmed via `npm run compare` (no production code touched, so
+  unchanged as expected): `factory-arbitrary-intro-yoshi-off`
+  **699/751**, `factory-arbitrary-intro-magneton-off` **703/751**,
+  `interactive-generated-intro-off` **715/715**,
+  `battle-command-generated-off` **128/128**.
+- **Did:** ran S2's own named decisive step verbatim
+  (`docs/issue56-residual-probe.md` Q2's "what fact would decide it"):
+  new committed test `tests/issue56ActionMenuHandoffFrame.test.ts` drives
+  `beginFactoryRoundBattleStartIntro`/`advanceFactoryRoundBattleStartIntro`
+  tick-by-tick for the real YOSHI/MAGNETON tuples and logs the
+  app-relative frame where `battleCommandPresentation.lifecycle.phase`
+  first reads `"action-menu"`: **678** (YOSHI) and **689** (MAGNETON).
+  Compared against the probe's RAM-fitted `n0` (611/550): deltas **+67**
+  and **+139** — NOT equal (off by 72), so neither "no change needed" nor
+  "one flat constant explains both" holds; the named leading suspect
+  (`BATTLE_COMMAND_ACTION_ENTER_DELAY`'s flat 6-tick) is independently
+  ruled out on magnitude alone (max possible contribution is 6, an order
+  of magnitude short of either delta). Per the brief's own decision rule:
+  **no production code changed** — banked the falsification instead of
+  guessing.
+- **Docs:** `docs/issue56-residual-probe.md` extended with the instrument
+  result, an updated Q2 summary-table row (CLOSED, no fix), and a named
+  follow-up observation for whoever picks this class of question up next:
+  the RAM-fitted `n0` gap between species (611−550=61, tracks the known
+  cry-duration-driven ready-lag spread) is much larger than the app's own
+  action-menu-handoff gap between the same two fixtures (689−678=11) — a
+  ~50-tick discrepancy in the *inter-species gap itself*, not chased this
+  step (out of this step's scope, which was the idle-bounce phase-offset
+  question specifically), but concrete and falsifiable.
+- **Next:** #56 item 2 is closed (no more idle-bounce-phase-offset work
+  to schedule). Remaining #56 items: item 2's own frames 444/536 (single-
+  tick 2-3px sub-step misalignments, site named not sub-step-isolated,
+  lowest priority per the probe) and item 1's leftover +6 canonical route
+  term (two undistinguished candidates, docs/onix-readylag-destin-bench-
+  probes.md). Rank-4 slice 1 (ROCK_SLIDE tails, `docs/rank4-prep-scout.md`)
+  is the next substantive track. The newly-named inter-species ready-lag
+  gap (above) is a fresh, separate lead if anyone wants it.
+- **Notes:** no papercuts this step.
+
+---
 ## 780 — [SUPERVISOR 2026-07-31 round 2] M2 (#39 rank-3 complete + #57 closed), S2 (#56 probe), S3 (rank-4 scout) all verified and merged
 
 - **State:** master = M2's three commits + S2 (`45220c2f`, #56 evidence

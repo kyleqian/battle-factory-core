@@ -13,6 +13,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 784 — [SUPERVISOR 2026-07-31 round 4] M4 (rank-4 slice 1) + S5 (#58 core fix) verified and merged; round 5 dispatching
+
+- **State:** master = M4's three commits + S5's `594442e6` merged
+  (`8cc0ccaa`); union `npm test`+`npm run build` gate running at commit
+  time — result in the next entry if not amended. Supervisor
+  independently re-ran turn6-rockslide-a **255/255**, turn7-rockslide-b
+  **256/256**, turn8-bind-a **256/256** post-M4, and the statStages +
+  renamed turn67 equivalence tests **16/16** post-merge (S5 pre-verified
+  34/34 in-worktree incl. ratchet before merge). Worktree/branch
+  cleaned; only `animation-main` remains.
+- **Headline:** rank-4 slice 1 flipped (`174cc388`) and #58's core
+  threading fixed same-round (S5, 3.6 min, real-fixture pin 156→113 at
+  recorded RNG). #58 trimmed to its retire-the-local-pipeline remainder;
+  #39 rank-4 prose updated. M4 also fixed the same appRoute trace-gap
+  class for all ten turn6/7/8 traces (`e3a7f486`, third recurrence —
+  turn5 `9929caf1`, turn13 `bd1d6beb` precedents).
+- **Next:** round 5 — M5 = #58 remainder retire (recipe `14c4295b`)
+  then rank-4 slice 2 (stat-fall banner) as time allows; S6 = rank-5
+  policy-evidence scout (Scene-OFF effect visibility for turns 9-12 —
+  the inventory's blocked-work item; evidence + proposal doc,
+  new-files-only, no policy decision made unilaterally).
+
+---
 ## 783 — [BOUNDED MAIN WORKER 2026-07-31 ~10:10] #39 rank-4 slice 1 landed: turn-6/7 ROCK_SLIDE tails flipped
 
 - **State:** `npx tsc --noEmit` clean; focused suite (renamed
@@ -80,53 +103,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   S5 = #58 fix (additive statStages threading + pin, existing callers
   bit-identical). Then retire the preview's local pipeline (recipe
   `14c4295b`), then remaining rank-4 slices / Gate 6 breadth.
-
----
-## 781 — [BOUNDED MAIN WORKER 2026-07-31 ~10:00] #56 item 2 CLOSED (no fix): decisive instrument ran, flat-constant hypothesis falsified
-
-- **State:** `npx tsc --noEmit` clean; focused suite (issue56ActionMenuHandoffFrame,
-  executableFrontierRatchet, battleCommandPresentation, battleMenu,
-  battleMenuIdle, factoryBattleStartIntroAckAlignment,
-  factoryRoundBattleOrchestrator) **212/212 green**, no new ratchet
-  barriers, no new canonical-recording imports. Tree clean at this
-  commit. Full `npm test`/`npm run build` intentionally not run (side
-  worktree `side-20260731-094832` live concurrently, per brief,
-  precedent entries 775/777/779). All four mandated pins independently
-  reconfirmed via `npm run compare` (no production code touched, so
-  unchanged as expected): `factory-arbitrary-intro-yoshi-off`
-  **699/751**, `factory-arbitrary-intro-magneton-off` **703/751**,
-  `interactive-generated-intro-off` **715/715**,
-  `battle-command-generated-off` **128/128**.
-- **Did:** ran S2's own named decisive step verbatim
-  (`docs/issue56-residual-probe.md` Q2's "what fact would decide it"):
-  new committed test `tests/issue56ActionMenuHandoffFrame.test.ts` drives
-  `beginFactoryRoundBattleStartIntro`/`advanceFactoryRoundBattleStartIntro`
-  tick-by-tick for the real YOSHI/MAGNETON tuples and logs the
-  app-relative frame where `battleCommandPresentation.lifecycle.phase`
-  first reads `"action-menu"`: **678** (YOSHI) and **689** (MAGNETON).
-  Compared against the probe's RAM-fitted `n0` (611/550): deltas **+67**
-  and **+139** — NOT equal (off by 72), so neither "no change needed" nor
-  "one flat constant explains both" holds; the named leading suspect
-  (`BATTLE_COMMAND_ACTION_ENTER_DELAY`'s flat 6-tick) is independently
-  ruled out on magnitude alone (max possible contribution is 6, an order
-  of magnitude short of either delta). Per the brief's own decision rule:
-  **no production code changed** — banked the falsification instead of
-  guessing.
-- **Docs:** `docs/issue56-residual-probe.md` extended with the instrument
-  result, an updated Q2 summary-table row (CLOSED, no fix), and a named
-  follow-up observation for whoever picks this class of question up next:
-  the RAM-fitted `n0` gap between species (611−550=61, tracks the known
-  cry-duration-driven ready-lag spread) is much larger than the app's own
-  action-menu-handoff gap between the same two fixtures (689−678=11) — a
-  ~50-tick discrepancy in the *inter-species gap itself*, not chased this
-  step (out of this step's scope, which was the idle-bounce phase-offset
-  question specifically), but concrete and falsifiable.
-- **Next:** #56 item 2 is closed (no more idle-bounce-phase-offset work
-  to schedule). Remaining #56 items: item 2's own frames 444/536 (single-
-  tick 2-3px sub-step misalignments, site named not sub-step-isolated,
-  lowest priority per the probe) and item 1's leftover +6 canonical route
-  term (two undistinguished candidates, docs/onix-readylag-destin-bench-
-  probes.md). Rank-4 slice 1 (ROCK_SLIDE tails, `docs/rank4-prep-scout.md`)
-  is the next substantive track. The newly-named inter-species ready-lag
-  gap (above) is a fresh, separate lead if anyone wants it.
-- **Notes:** no papercuts this step.

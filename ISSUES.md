@@ -16,23 +16,18 @@ one without a user decision, and do not count them as backlog.
 
 # Open
 
-## #58 — `stagePlayerHitChainToTerminalMachineState` also drops caller-supplied statStages
+## #58 — [core fixed 2026-07-31, `594442e6`] retire `turn67RockSlidePresentationStaging.ts`'s local staging pipeline
 
-**Symptom:** same silent-drop class as the fixed #57 (maxHP/item), now
-confirmed for `statStages`: the shared helper's local `battler()`
-normalizer hardcodes `statStages: [6,6,6,6,6,6,6,6]` regardless of
-caller input. Live-verified by the rank-4 groundwork slice (2026-07-31,
-`1c015a37`): staging turn-6's ROCK_SLIDE with Onix's real
-FEATHER_DANCE-lowered ATK stage through the shared helper computes
-156→71 (−85, neutral-stage damage) instead of the real 156→113 (−43).
-`turn67RockSlidePresentationStagingPreview.ts` works around it with a
-local pipeline mirroring `turn6FeatherDancePresentationStaging.ts`'s
-correct `changes.statStages ?? default` pattern.
-
-**Fix shape:** thread `statStages: changes.statStages ?? [6,6,6,6,6,6,
-6,6]` through the helper's battler construction (additive; existing
-callers pass none — pin that), then retire the preview's local pipeline.
-Identical recipe to #57's `387a34a1` + `14c4295b` pair.
+**Open remainder only:** the shared helper now threads caller-supplied
+`statStages` (pinned by `tests/stagePlayerHitChainStatStages.test.ts`:
+real turn-6 fixture, stage-4 ATK → 156→113 at the real recorded RNG,
+omitted-case prior behavior byte-identical). Still open:
+`turn67RockSlidePresentationStaging.ts` (promoted in `174cc388`)
+predates the fix and still stages through its own local pipeline — swap
+it onto `stagePlayerHitChainToTerminalMachineState` and delete the
+local workaround, proven by its 14 equivalence tests staying
+byte-identical-green. Identical recipe to #57's `14c4295b`. Delete this
+entry when that lands.
 
 ## #56 — Arbitrary-trainer intro: residuals, ONIX ready-lag regression, MAGNETON shadow coverage
 
@@ -154,9 +149,13 @@ STAGED` deleted), and the adapter swapped onto the #57-fixed shared
 staging helper (`14c4295b`, ~120-line local workaround deleted). All
 nine turn5 pins + five insurance pins held at every step;
 `turn5KoDismissElapsed`/`turn5Resolved` mirroring remains (unchanged
-consumers, same as turn13's). Rank 4 prep-scout banked
-(`docs/rank4-prep-scout.md`: ROCK_SLIDE tails first — zero new staging
-surface; stat-down bridge already generalizes to ATK-falls). Earlier
+consumers, same as turn13's). Rank 4 slice 1 flipped (2026-07-31,
+`174cc388`: turn-6/7 ROCK_SLIDE HP endpoints + attack lines onto the
+promoted `turn67RockSlidePresentationStaging.ts`; all ten rank-4 pins +
+insurance held). Rank-4 remainder per `docs/rank4-prep-scout.md`:
+slice 2 (stat-fall banner caller/naming mismatch), slice 3 (turn-7/8
+FEATHER_DANCE repeat sites), BIND (`{message, missMessage}` bridge +
+entry-label fix); plus #58's retire step. Earlier
 progress:
 `turn13-sandattack.json`'s complete captured
 SAND_ATTACK content now resolves its kickoff and opponent-target accuracy-fall
