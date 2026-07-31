@@ -4161,10 +4161,22 @@ const GENERATED_OPPONENT_SHADOW_DELAY = 104;
  * (docs/intro-cry-shadow-evidence.md Part 1): GRIMER, KADABRA, and DELCATTY
  * all reproduce their observed ready tick via
  * `GENERATED_PLAYER_READY_LAG_BASELINE + cryDurationTicks(playerLeadSpecies)`.
+ *
+ * QUARANTINED (supervisor, 2026-07-31, ISSUES #56 item 1): the species
+ * formula holds for GRIMER/KADABRA/DELCATTY but disagrees with the
+ * canonical-route ONIX pin by a clean 6 ticks (predicts 179, the committed
+ * 715/715 `interactive-generated-intro-off` acceptance needs 185), and the
+ * discrepancy has no identified mechanism (extraction, line-length, and
+ * floor/max terms ruled out). Until root-caused, production keeps the flat
+ * ONIX-calibrated lag so the ROADMAP-cited pin stays green; the formula
+ * below is retained for the #56 investigation, not called.
  */
 const GENERATED_PLAYER_READY_LAG_BASELINE = 98;
+const GENERATED_PLAYER_READY_LAG = 286 - GENERATED_PLAYER_DISPATCH_BASELINE_DELAY;
 
-function generatedPlayerReadyLag(state: FactoryBattleStartIntroState): number {
+export function generatedPlayerReadyLagSpeciesFormula(
+  state: FactoryBattleStartIntroState,
+): number {
   const [playerLine] = state.command.text.playerSendOut;
   return generatedPlayerVisualLag(playerLine.length)
     + GENERATED_PLAYER_READY_LAG_BASELINE
@@ -4210,7 +4222,7 @@ export function generatedBattleStartCommandReady(
   const handoffTick = generatedBattleStartOpponentHandoffTick(state);
   return handoffTick !== null
     && generatedBattleIntroSourceClock(state.elapsed)
-      >= handoffTick + generatedPlayerDispatchDelay(state) + generatedPlayerReadyLag(state);
+      >= handoffTick + generatedPlayerDispatchDelay(state) + GENERATED_PLAYER_READY_LAG;
 }
 
 /**
