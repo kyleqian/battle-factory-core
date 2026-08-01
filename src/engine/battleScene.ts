@@ -858,6 +858,10 @@ import {
   type Turn6CompletedResolutionNextCommandHandoff,
 } from "./turn6ResolutionAdapter.ts";
 import {
+  isTurn7NextCommandHandoffReady,
+  type Turn7CompletedResolutionNextCommandHandoff,
+} from "./turn7ResolutionAdapter.ts";
+import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
   sceneOnDragonBreathView,
@@ -2475,18 +2479,8 @@ export interface BattleSceneState {
   turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null;
   /** Completed turn-6 receipt for the following FIGHT command. */
   turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null;
-  /**
-   * S7 slice P (docs/turn8-notes.md, docs/battle-turn-notes.md §33): `true`
-   * once turn 7's whole ROCK_SLIDE resolution has redrawn the settled
-   * action menu (`TURN7_ROCKSLIDE_REOPEN_GATE_DELAY` past turn 7's own real
-   * confirm) AND a fresh A-press has reopened FIGHT for turn 8 - same
-   * "created directly" idiom as the earlier completion boundaries. Turn 8 is
-   * the winning line's own divergence turn: one `RIGHT` press moves the
-   * cursor onto BIND (slot 1) instead of ROCK_SLIDE - distinguishes turn 8's
-   * own dwell (PP 4/10, ROCK_SLIDE's 6th slot-0 decrement, frozen unused
-   * this turn) from turn 7's (PP 5/10).
-   */
-  turn7Resolved: boolean;
+  /** Completed turn-7 receipt for the following FIGHT command. */
+  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null;
   /**
    * S7 slice R (docs/turn9-notes.md, docs/battle-turn-notes.md §35): `true`
    * once turn 8's own BIND-miss resolution has redrawn the settled action
@@ -2581,7 +2575,7 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn4Resolved: false,
   turn5NextCommandHandoff: null,
   turn6NextCommandHandoff: null,
-  turn7Resolved: false,
+  turn7NextCommandHandoff: null,
   turn8Resolved: false,
   turn9Resolved: false,
   turn10Resolved: false,
@@ -2611,7 +2605,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn4Resolved: state.turn4Resolved,
     turn5NextCommandHandoff: state.turn5NextCommandHandoff,
     turn6NextCommandHandoff: state.turn6NextCommandHandoff,
-    turn7Resolved: state.turn7Resolved,
+    turn7NextCommandHandoff: state.turn7NextCommandHandoff,
     turn8Resolved: state.turn8Resolved,
     turn9Resolved: state.turn9Resolved,
     turn10Resolved: state.turn10Resolved,
@@ -7449,7 +7443,7 @@ function drawFightSubmenuWindow(
   turn4Resolved: boolean = false,
   turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null = null,
   turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null = null,
-  turn7Resolved: boolean = false,
+  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null = null,
   turn8Resolved: boolean = false,
   turn9Resolved: boolean = false,
   turn10Resolved: boolean = false,
@@ -7468,6 +7462,7 @@ function drawFightSubmenuWindow(
       resolutionOwner.resolution,
       turn5NextCommandHandoff,
       turn6NextCommandHandoff,
+      turn7NextCommandHandoff,
       turn13NextCommandHandoff,
     );
     return;
@@ -7479,6 +7474,7 @@ function drawFightSubmenuWindow(
       sm,
       turn5NextCommandHandoff,
       turn6NextCommandHandoff,
+      turn7NextCommandHandoff,
       turn13NextCommandHandoff,
     );
     return;
@@ -7499,6 +7495,7 @@ function drawFightSubmenuWindow(
       sm,
       turn5NextCommandHandoff,
       turn6NextCommandHandoff,
+      turn7NextCommandHandoff,
       opponentFaintDismissTick,
       trainerPresentation,
     );
@@ -7510,7 +7507,7 @@ function drawFightSubmenuWindow(
     // rests on ROCK_SLIDE from turn 11's own confirm) - its own dedicated
     // dispatcher, same "genuinely different PP/text" reason `turn10Resolved`'s
     // own branch below already established for turn 11.
-    drawTurn12FightSubmenuWindow(fb, t, sm, turn5NextCommandHandoff, turn6NextCommandHandoff);
+    drawTurn12FightSubmenuWindow(fb, t, sm, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff);
     return;
   }
   if (turn10Resolved) {
@@ -7519,7 +7516,7 @@ function drawFightSubmenuWindow(
     // already rests on ROCK_SLIDE from turn 10's own confirm) - its own
     // dedicated dispatcher, same "genuinely different PP/text" reason
     // `turn9Resolved`'s own branch below already established for turn 10.
-    drawTurn11FightSubmenuWindow(fb, t, sm, turn5NextCommandHandoff, turn6NextCommandHandoff);
+    drawTurn11FightSubmenuWindow(fb, t, sm, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff);
     return;
   }
   if (turn9Resolved) {
@@ -7528,22 +7525,29 @@ function drawFightSubmenuWindow(
     // ROCK_SLIDE from turn 9's own confirm) - its own dedicated dispatcher,
     // same "genuinely different PP/text" reason `turn8Resolved`'s own branch
     // below already established for turn 9.
-    drawTurn10FightSubmenuWindow(fb, t, sm, turn5NextCommandHandoff, turn6NextCommandHandoff);
+    drawTurn10FightSubmenuWindow(fb, t, sm, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff);
     return;
   }
   if (turn8Resolved) {
     // S7 slice R: turn 9 is the winning line's own reconvergence turn - one
     // LEFT press moves the cursor off BIND back onto ROCK_SLIDE - its own
     // dedicated dispatcher, same "genuinely different PP/text" reason
-    // `turn7Resolved`'s own branch below already established for turn 8.
-    drawTurn9FightSubmenuWindow(fb, t, sm, turn5NextCommandHandoff, turn6NextCommandHandoff);
+    // The completed turn-7 handoff branch below already establishes turn 8.
+    drawTurn9FightSubmenuWindow(fb, t, sm, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff);
     return;
   }
-  if (turn7Resolved) {
+  if (isTurn7NextCommandHandoffReady(turn7NextCommandHandoff)) {
     // S7 slice P: turn 8 is the winning line's own divergence turn - one
     // RIGHT press onto BIND instead of ROCK_SLIDE, its own dedicated
     // dispatcher, following the completed turn-6 handoff's turn-7 branch.
-    drawTurn8FightSubmenuWindow(fb, t, sm, turn5NextCommandHandoff, turn6NextCommandHandoff);
+    drawTurn8FightSubmenuWindow(
+      fb,
+      t,
+      sm,
+      turn5NextCommandHandoff,
+      turn6NextCommandHandoff,
+      turn7NextCommandHandoff,
+    );
     return;
   }
   if (isTurn6NextCommandHandoffReady(turn6NextCommandHandoff)) {
@@ -7775,7 +7779,7 @@ function drawFightSubmenuChrome(
   turn4Resolved: boolean = false,
   turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null = null,
   turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null = null,
-  turn7Resolved: boolean = false,
+  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null = null,
   turn8Resolved: boolean = false,
   turn9Resolved: boolean = false,
   turn10Resolved: boolean = false,
@@ -7785,7 +7789,7 @@ function drawFightSubmenuChrome(
   lockedActionResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null = null,
   followingResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null = null,
 ): void {
-  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7Resolved, turn8Resolved, turn9Resolved, turn10Resolved, turn11Resolved, turn12Resolved, turn13NextCommandHandoff, lockedActionResolution, followingResolution);
+  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, turn8Resolved, turn9Resolved, turn10Resolved, turn11Resolved, turn12Resolved, turn13NextCommandHandoff, lockedActionResolution, followingResolution);
   drawFightSubmenuChromeFromLiveState(
     fb,
     displayCursor,
@@ -11535,9 +11539,9 @@ function drawTurn7RockSlideWindow(fb: Uint8Array, t: number): void {
  * own reopen, then one `RIGHT` press moves it onto BIND (slot 1, `moveFightCursor`'s
  * existing `cursor^1` grid arithmetic, unchanged - turn 8 is simply the
  * first time this engine actually EXERCISES that generic nav for a real
- * confirm rather than just browsing). PP read 4/10 (`turn7Resolved` passed
- * as the moveset's 6th independent slot-0 decrement, ROCK_SLIDE frozen
- * unused this turn). Structurally identical to `drawTurn7FightSubmenuWindow` -
+ * confirm rather than just browsing). The completed turn-7 handoff supplies
+ * PP 4/10; ROCK_SLIDE is frozen and unused this turn. Structurally identical
+ * to `drawTurn7FightSubmenuWindow` -
  * reuses `drawTurn7RockSlideTurnEndSettledMenu` UNCHANGED for the pre-open/
  * DMA-wait/browsing phases (turn 8's own reopen browses the SAME settled
  * scene turn 7's own ROCK_SLIDE left behind - nothing has changed yet) -
@@ -11581,6 +11585,7 @@ function drawTurn8FightSubmenuWindow(
   sm: FightSubmenuState,
   turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
   turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
+  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff,
 ): void {
   // Same "NOT the plain idle window, the already-redrawn turn's own
   // resettled-menu function" rule `drawTurn7FightSubmenuWindow` established -
@@ -11609,7 +11614,7 @@ function drawTurn8FightSubmenuWindow(
   drawTurn8FieldBase(fb, t, bounceTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
-  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, turn5NextCommandHandoff, turn6NextCommandHandoff, true);
+  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff);
 }
 
 /**
@@ -12386,6 +12391,7 @@ function drawTurn9FightSubmenuWindow(
   sm: FightSubmenuState,
   turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
   turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
+  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
 ): void {
   if (sm.openElapsed === null) {
     drawTurn8TurnEndSettledMenu(fb, t, TURN8_BIND_PRESS_TICK);
@@ -12418,7 +12424,7 @@ function drawTurn9FightSubmenuWindow(
   drawTurn9FieldBase(fb, t, bounceTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
-  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, turn5NextCommandHandoff, turn6NextCommandHandoff, true, true);
+  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, true);
 }
 
 /**
@@ -12974,6 +12980,7 @@ function drawTurn10FightSubmenuWindow(
   sm: FightSubmenuState,
   turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
   turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
+  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
 ): void {
   if (sm.openElapsed === null) {
     drawTurn9TurnEndSettledMenu(fb, t);
@@ -12996,7 +13003,7 @@ function drawTurn10FightSubmenuWindow(
   drawTurn10FieldBase(fb, t, bounceTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
-  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, turn5NextCommandHandoff, turn6NextCommandHandoff, true, true, true);
+  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, true, true);
 }
 
 /**
@@ -13310,6 +13317,7 @@ function drawTurn11FightSubmenuWindow(
   sm: FightSubmenuState,
   turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
   turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
+  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
 ): void {
   if (sm.openElapsed === null) {
     drawTurn10RockSlideTurnEndSettledMenu(fb, t);
@@ -13332,7 +13340,7 @@ function drawTurn11FightSubmenuWindow(
   drawTurn11FieldBase(fb, t, bounceTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
-  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, turn5NextCommandHandoff, turn6NextCommandHandoff, true, true, true, true);
+  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, true, true, true);
 }
 
 /**
@@ -13551,6 +13559,7 @@ function drawTurn12FightSubmenuWindow(
   sm: FightSubmenuState,
   turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
   turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
+  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
 ): void {
   if (sm.openElapsed === null) {
     drawTurn11RockSlideTurnEndSettledMenu(fb, t);
@@ -13573,7 +13582,7 @@ function drawTurn12FightSubmenuWindow(
   drawTurn12FieldBase(fb, t, bounceTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
-  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, turn5NextCommandHandoff, turn6NextCommandHandoff, true, true, true, true, true);
+  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, true, true, true, true);
 }
 
 /**
@@ -13644,6 +13653,7 @@ function drawTurn13FightSubmenuWindow(
   sm: FightSubmenuState,
   turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
   turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
+  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
   koDismissTick: number | null,
   trainerPresentation?: FactoryTrainerPresentation,
 ): void {
@@ -13684,7 +13694,7 @@ function drawTurn13FightSubmenuWindow(
   drawTurn13FieldBase(fb, t, bounceTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
-  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, turn5NextCommandHandoff, turn6NextCommandHandoff, true, true, true, true, true, true);
+  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, true, true, true, true, true);
 }
 
 /**
@@ -15072,6 +15082,7 @@ function drawTurn14FightSubmenuWindow(
   sm: FightSubmenuState,
   turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
   turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
+  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
   turn13NextCommandHandoff: Turn13CompletedResolutionNextCommandHandoff | null,
 ): void {
   const revealTick = sm.openElapsed === null ? -Infinity : TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
@@ -15095,7 +15106,7 @@ function drawTurn14FightSubmenuWindow(
   drawTurn5SitrusSettledMenuChrome(fb);
   // The handoff owns turn 13's already-completed PP and persisted slot before
   // the retained charge receipt advances to its locked strike segment.
-  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, turn5NextCommandHandoff, turn6NextCommandHandoff, true, true, true, true, true, true, turn13NextCommandHandoff);
+  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, true, true, true, true, true, turn13NextCommandHandoff);
 }
 
 // --- S7/S8 turn 15 (docs/turn15-notes.md): Murkrow's FLY strike-half kickoff
@@ -15531,6 +15542,7 @@ function drawTurn15FightSubmenuWindow(
   resolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState,
   turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
   turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
+  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
   turn13NextCommandHandoff: Turn13CompletedResolutionNextCommandHandoff | null,
 ): void {
   const revealTick = sm.openElapsed === null ? -Infinity : TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
@@ -15552,7 +15564,7 @@ function drawTurn15FightSubmenuWindow(
   drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick, true);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
-  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, turn5NextCommandHandoff, turn6NextCommandHandoff, true, true, true, true, true, true, turn13NextCommandHandoff, resolution);
+  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, true, true, true, true, true, turn13NextCommandHandoff, resolution);
 }
 
 type PartyChromeFrame = { palette: number[]; indices: string };
@@ -16799,7 +16811,7 @@ function drawTurn16FightSubmenuWindow(
       false,
       null,
       null,
-      false,
+      null,
       false,
       false,
       false,
@@ -16933,7 +16945,7 @@ function drawTurn16FightSubmenuWindow(
     false,
     null,
     null,
-    false,
+    null,
     false,
     false,
     false,
@@ -17123,7 +17135,7 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
       state.turn4Resolved,
       state.turn5NextCommandHandoff,
       state.turn6NextCommandHandoff,
-      state.turn7Resolved,
+      state.turn7NextCommandHandoff,
       state.turn8Resolved,
       state.turn9Resolved,
       state.turn10Resolved,

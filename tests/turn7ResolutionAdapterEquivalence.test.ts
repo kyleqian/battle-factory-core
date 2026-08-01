@@ -21,21 +21,21 @@ describe("turn7ResolutionAdapter: #39 completed-turn-7/next-command handoff proo
     expect(resolveTurn7CompletedResolutionNextCommandHandoff().persistedMoveSlot).toBe(0);
   });
 
-  it("owns exactly the old turn-7-resolved PP receipt without depending on staged move composition", () => {
+  it("owns exactly the live turn-7 PP receipt without depending on staged move composition", () => {
     const onix = rentalMoveset("ONIX");
     const turn5Handoff = resolveTurn5CompletedResolutionNextCommandHandoff();
     const turn6Handoff = resolveTurn6CompletedResolutionNextCommandHandoff();
     const handoff = resolveTurn7CompletedResolutionNextCommandHandoff();
-    const oldFlagReceipt = currentPPForActiveMon(
+    const liveReceipt = currentPPForActiveMon(
       onix,
       true, true, true, true,
       turn5Handoff,
       turn6Handoff,
-      true,
+      handoff,
     );
 
-    expect(oldFlagReceipt).toEqual([4, 20, 19, 10]);
-    expect(handoff.playerPp).toEqual(oldFlagReceipt);
+    expect(liveReceipt).toEqual([4, 20, 19, 10]);
+    expect(handoff.playerPp).toEqual(liveReceipt);
     expect(handoff.playerPp).toEqual([4, 20, 19, 10]);
     expect(Object.isFrozen(handoff)).toBe(true);
     expect(Object.isFrozen(handoff.playerPp)).toBe(true);
@@ -47,15 +47,15 @@ describe("turn7ResolutionAdapter: #39 completed-turn-7/next-command handoff proo
       moveIds: [157, 349, 288, 201],
       maxPP: [10, 15, 20, 10],
     } as const;
-    const oldFlagReceipt = currentPPForActiveMon(
+    const liveReceipt = currentPPForActiveMon(
       genericMoveset,
       true, true, true, true,
       resolveTurn5CompletedResolutionNextCommandHandoff(),
       resolveTurn6CompletedResolutionNextCommandHandoff(),
-      true,
+      resolveTurn7CompletedResolutionNextCommandHandoff(),
     );
 
-    expect(oldFlagReceipt).toEqual([4, 15, 19, 10]);
-    expect(resolveTurn7CompletedResolutionNextCommandHandoff().playerPp[0]).toBe(oldFlagReceipt[0]);
+    expect(liveReceipt).toEqual([4, 15, 19, 10]);
+    expect(resolveTurn7CompletedResolutionNextCommandHandoff().playerPp[0]).toBe(liveReceipt[0]);
   });
 });

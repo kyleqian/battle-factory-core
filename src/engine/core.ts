@@ -169,6 +169,10 @@ import {
   isTurn6NextCommandHandoffReady,
   resolveTurn6CompletedResolutionNextCommandHandoff,
 } from "./turn6ResolutionAdapter.ts";
+import {
+  isTurn7NextCommandHandoffReady,
+  resolveTurn7CompletedResolutionNextCommandHandoff,
+} from "./turn7ResolutionAdapter.ts";
 import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "./turn16FirePunchResolutionAdapter.ts";
 import {
   advanceBattleSceneForcedPartySelect,
@@ -1091,7 +1095,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let turn4Resolved = battleScene.turn4Resolved;
     let turn5NextCommandHandoff = battleScene.turn5NextCommandHandoff;
     let turn6NextCommandHandoff = battleScene.turn6NextCommandHandoff;
-    let turn7Resolved = battleScene.turn7Resolved;
+    let turn7NextCommandHandoff = battleScene.turn7NextCommandHandoff;
     let turn8Resolved = battleScene.turn8Resolved;
     let turn9Resolved = battleScene.turn9Resolved;
     let turn10Resolved = battleScene.turn10Resolved;
@@ -1289,7 +1293,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       );
     } else if (
       isTurn6NextCommandHandoffReady(turn6NextCommandHandoff) &&
-      !turn7Resolved &&
+      !isTurn7NextCommandHandoffReady(turn7NextCommandHandoff) &&
       fightSubmenu.confirmElapsed !== null &&
       newKeys.has("A") &&
       sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN7_ROCKSLIDE_REOPEN_GATE_DELAY
@@ -1301,10 +1305,14 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // persisted at slot 0 (ROCK_SLIDE, unchanged) - the winning line's own
       // divergence happens via the nav branch above (one RIGHT press onto
       // BIND), not at reopen.
-      fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen));
-      turn7Resolved = true;
+      turn7NextCommandHandoff = resolveTurn7CompletedResolutionNextCommandHandoff();
+      fightSubmenu = openFightSubmenu(
+        battleScene.elapsed + 1,
+        activeMonMoveset(draftScreen),
+        turn7NextCommandHandoff.persistedMoveSlot,
+      );
     } else if (
-      turn7Resolved &&
+      isTurn7NextCommandHandoffReady(turn7NextCommandHandoff) &&
       !turn8Resolved &&
       fightSubmenu.confirmElapsed !== null &&
       newKeys.has("A") &&
@@ -1511,7 +1519,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn4Resolved,
       turn5NextCommandHandoff,
       turn6NextCommandHandoff,
-      turn7Resolved,
+      turn7NextCommandHandoff,
       turn8Resolved,
       turn9Resolved,
       turn10Resolved,

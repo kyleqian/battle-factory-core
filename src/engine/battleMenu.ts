@@ -25,6 +25,7 @@ import { rentalMoveset, type ActiveMonMoveset } from "./battleSetup.ts";
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
 import type { Turn5CompletedResolutionNextCommandHandoff } from "./turn5ResolutionAdapter.ts";
 import type { Turn6CompletedResolutionNextCommandHandoff } from "./turn6ResolutionAdapter.ts";
+import type { Turn7CompletedResolutionNextCommandHandoff } from "./turn7ResolutionAdapter.ts";
 import type { Turn13CompletedResolutionNextCommandHandoff } from "./turn13ResolutionAdapter.ts";
 
 /** `sText_GoPkmn` resolved for this save's rental pool (single line, fits `B_WIN_MSG`'s line 1 - never wraps to line 2). */
@@ -2567,7 +2568,7 @@ export function currentPPForActiveMon(
   turn4Resolved: boolean = false,
   turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null = null,
   turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null = null,
-  turn7Resolved: boolean = false,
+  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null = null,
   turn8Resolved: boolean = false,
   turn9Resolved: boolean = false,
   turn10Resolved: boolean = false,
@@ -2585,9 +2586,8 @@ export function currentPPForActiveMon(
   // S7 slice O (docs/turn7-notes.md §4): turn 6's own ROCK_SLIDE (Onix vs.
   // Pidgeotto) is a 5th slot-0 use, matching turn7-notes' own "PP 5/10
   // displayed" ledger at turn 7's own reopen.
-  // S7 slice P (docs/turn8-notes.md §4): turn 7's own ROCK_SLIDE is a 6th
-  // slot-0 use, matching turn8-notes' own "ROCK_SLIDE sits frozen at 4/10
-  // through this turn" ledger at turn 8's own reopen.
+  // The completed turn-7 handoff owns ROCK_SLIDE's sixth use and the
+  // resulting 4/10 receipt at turn 8's reopen.
   // S7 slice R (docs/turn9-notes.md §4): turn 8's own BIND (a miss still
   // decrements PP, same rule ROCK_SLIDE's own misses would follow) is a
   // FIRST slot-1 use, matching turn9-notes' own "BIND(20) 19/20 (unchanged)"
@@ -2611,8 +2611,7 @@ export function currentPPForActiveMon(
     (turn1Resolved ? 1 : 0) +
     (turn3Resolved ? 1 : 0) +
     (turn4Resolved ? 1 : 0);
-  const slot0UsesAfterTurn6 =
-    (turn7Resolved ? 1 : 0) +
+  const slot0UsesAfterTurn7 =
     (turn9Resolved ? 1 : 0) +
     (turn10Resolved ? 1 : 0) +
     (turn11Resolved ? 1 : 0) +
@@ -2622,7 +2621,8 @@ export function currentPPForActiveMon(
   // untouched slots (Tier-1 callers deliberately vary BIND max PP), while
   // the live Onix boundary receives its canonical receipts.
   const ppBeforeLaterTurns = [
-    turn6NextCommandHandoff?.playerPp[0]
+    turn7NextCommandHandoff?.playerPp[0]
+      ?? turn6NextCommandHandoff?.playerPp[0]
       ?? turn5NextCommandHandoff?.playerPp[0]
       ?? a - slot0UsesBeforeTurn5,
     b,
@@ -2635,7 +2635,7 @@ export function currentPPForActiveMon(
     ?.afterRules.rulesContext.battlers[0]!.pp;
   if (followingPlayerPp !== undefined) return followingPlayerPp;
   return [
-    ppBeforeLaterTurns[0] - slot0UsesAfterTurn6,
+    ppBeforeLaterTurns[0] - slot0UsesAfterTurn7,
     turn8Resolved ? ppBeforeLaterTurns[1] - 1 : ppBeforeLaterTurns[1],
     resolvedPlayerPp?.[2] ?? turn13NextCommandHandoff?.dragonBreathPp.current ?? ppBeforeLaterTurns[2],
     ppBeforeLaterTurns[3],
