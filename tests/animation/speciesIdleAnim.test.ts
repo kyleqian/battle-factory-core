@@ -24,6 +24,11 @@ import {
   SHRINK_GROW_FRONT_SPECIES,
   SHRINK_GROW_INITIALIZERS,
   SHRINK_GROW_OUTSIDE_FACTORY_FRONT_SPECIES,
+  swingConvexFrameAtTick,
+  SWING_CONVEX_FACTORY_FRONT_SPECIES,
+  SWING_CONVEX_FRONT_SPECIES,
+  SWING_CONVEX_INITIALIZERS,
+  SWING_CONVEX_OUTSIDE_FACTORY_FRONT_SPECIES,
   growVibrateFrameAtTick,
   GROW_VIBRATE_FACTORY_FRONT_SPECIES,
   GROW_VIBRATE_FRONT_SPECIES,
@@ -221,6 +226,12 @@ import wartortleRunB from "../../tools/compare/fixtures/sendout-front-wartortle-
 import gligarScenario from "../../tools/compare/fixtures/sendout-front-gligar.json" with { type: "json" };
 import gligarRunA from "../../tools/compare/fixtures/sendout-front-gligar-run-a.json" with { type: "json" };
 import gligarRunB from "../../tools/compare/fixtures/sendout-front-gligar-run-b.json" with { type: "json" };
+import weepinbellScenario from "../../tools/compare/fixtures/sendout-front-weepinbell.json" with { type: "json" };
+import weepinbellRunA from "../../tools/compare/fixtures/sendout-front-weepinbell-run-a.json" with { type: "json" };
+import weepinbellRunB from "../../tools/compare/fixtures/sendout-front-weepinbell-run-b.json" with { type: "json" };
+import banetteScenario from "../../tools/compare/fixtures/sendout-front-banette.json" with { type: "json" };
+import banetteRunA from "../../tools/compare/fixtures/sendout-front-banette-run-a.json" with { type: "json" };
+import banetteRunB from "../../tools/compare/fixtures/sendout-front-banette-run-b.json" with { type: "json" };
 import {
   KABUTO_FRONT_ANIM_START_OFFSET,
   kabutoHSlideWobble,
@@ -417,6 +428,18 @@ const gligarRawA = readFileSync(
 );
 const gligarRawB = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-gligar-run-b.json", import.meta.url),
+);
+const weepinbellRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-weepinbell-run-a.json", import.meta.url),
+);
+const weepinbellRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-weepinbell-run-b.json", import.meta.url),
+);
+const banetteRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-banette-run-a.json", import.meta.url),
+);
+const banetteRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-banette-run-b.json", import.meta.url),
 );
 
 describe("speciesIdleAnim", () => {
@@ -4275,6 +4298,211 @@ describe("speciesIdleAnim", () => {
         "WIGGLYTUFF", "VIGOROTH", "BEEDRILL", "DUSCLOPS", "EKANS", "ALTARIA",
         "PIKACHU", "RAIKOU", "WEEDLE", "NINJASK", "DITTO", "REGIROCK",
         "WARTORTLE", "NIDORINO", "KOFFING", "RHYDON", "SLOWKING", "GLIGAR",
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("swingConvexFrameAtTick (normal source lifecycle)", () => {
+    it("pins the complete six-selector census, four Factory siblings, and two outside mappings", () => {
+      const speciesSelectors = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
+      const generated = Object.entries(speciesSelectors)
+        .filter(([, family]) => family === "ANIM_SWING_CONVEX")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(SWING_CONVEX_FRONT_SPECIES).toEqual(generated);
+      expect(SWING_CONVEX_FRONT_SPECIES).toEqual([
+        "WEEPINBELL", "GOLDEEN", "MEW", "MANTINE", "BANETTE", "JIRACHI",
+      ]);
+      expect(SWING_CONVEX_FACTORY_FRONT_SPECIES).toEqual([
+        "WEEPINBELL", "GOLDEEN", "MANTINE", "BANETTE",
+      ]);
+      expect(SWING_CONVEX_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(SWING_CONVEX_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual(["MEW", "JIRACHI"]);
+      expect(SWING_CONVEX_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => !factorySpecies.has(species)),
+      );
+      for (const species of SWING_CONVEX_FRONT_SPECIES) {
+        expect(speciesSelectors[species]).toBe("ANIM_SWING_CONVEX");
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("accepts only normal data=100/runs=1 and keeps both fast selectors distinct", () => {
+      expect(SWING_CONVEX_INITIALIZERS).toEqual({
+        normal: {
+          selector: "ANIM_SWING_CONVEX", data: 100, runs: 1, accepted: true,
+        },
+        fast: {
+          selector: "ANIM_SWING_CONVEX_FAST", data: 50, runs: 2, accepted: false,
+        },
+        fastShort: {
+          selector: "ANIM_SWING_CONVEX_FAST_SHORT",
+          data: 50,
+          runs: 1,
+          unused: true,
+          accepted: false,
+        },
+      });
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
+    });
+
+    it("pins all 101 active callbacks and reuses the accepted shared swing lifecycle", () => {
+      const active = Array.from({ length: 101 }, (_, tick) => {
+        const index = Math.trunc((tick * 256) / 100);
+        const sine10 = Math.floor((10 * GBA_SINE_TABLE_256[index & 0xff]!) / 256);
+        const sine3276 = Math.floor((3276 * GBA_SINE_TABLE_256[index & 0xff]!) / 256);
+        const frame = swingConvexFrameAtTick(tick);
+        expect(frame, `tick ${tick}`).toEqual({
+          x2: -sine10 + 0,
+          y2: 0,
+          data2: tick + 1,
+          animRotation: 0,
+          animDelay: 0,
+          animRuns: 1,
+          animSpeed: 0,
+          animData: 100,
+          index,
+          xScale: 256,
+          yScale: 256,
+          affineRotation: -sine3276 + 0,
+          startedAffine: tick === 0,
+          normalFrontDontFlip: true,
+          tryFlipXCalls: 2,
+          resetSpriteAfterAnim: false,
+          callback: "SwingConvex",
+          affineMode: "double",
+        });
+        const concave = swingConcaveFrameAtTick(tick)!;
+        expect(frame!.x2, `shared x2 tick ${tick}`).toBe(concave.x2);
+        expect(frame!.affineRotation, `opposite rotation tick ${tick}`).toBe(
+          -concave.affineRotation + 0,
+        );
+        return frame!;
+      });
+      expect(active).toHaveLength(101);
+      expect([0, 25, 50, 75, 100].map((tick) => [
+        tick,
+        active[tick]!.index,
+        active[tick]!.x2,
+        active[tick]!.affineRotation,
+      ])).toEqual([
+        [0, 0, 0, 0],
+        [25, 64, -10, -3276],
+        [50, 128, 0, 0],
+        [75, 192, 10, 3276],
+        [100, 256, 0, 0],
+      ]);
+    });
+
+    it("pins tick 101 identity/x2/reset/WaitAnimEnd cleanup and stable settled state", () => {
+      expect(swingConvexFrameAtTick(101)).toEqual({
+        x2: 0,
+        y2: 0,
+        data2: 102,
+        animRotation: 0,
+        animDelay: 0,
+        animRuns: 1,
+        animSpeed: 0,
+        animData: 100,
+        index: null,
+        xScale: 256,
+        yScale: 256,
+        affineRotation: 0,
+        startedAffine: false,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      });
+      expect(swingConvexFrameAtTick(102)).toEqual(swingConvexFrameAtTick(101));
+      expect(swingConvexFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      [70, weepinbellScenario],
+      [378, banetteScenario],
+    ] as const)("stages a complete legal Scene-ON party for opponent species %i", (species, scenario) => {
+      expect(scenario.mode).toBe("mechanicLab");
+      expect(scenario.profile).toBe("battle-scene-on");
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(species);
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "WEEPINBELL", weepinbellRunA, weepinbellRunB, weepinbellRawA, weepinbellRawB, 70,
+        "a7ae6c5bf088e3a523a0da3cf178eac2024e3e7a1ed02d336a4df831ee44b12e",
+      ],
+      [
+        "BANETTE", banetteRunA, banetteRunB, banetteRawA, banetteRawB, 378,
+        "95b70a54be18eaa93e3cb8a2a4d4a2ce19e1b261f03ff82a1628fcae87c25dfb",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species, runA, runB, rawA, rawB, data2, rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_SWING_CONVEX");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex: 6,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("preserves every previously accepted representative and terminal sibling family", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of [
+        "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN",
+        "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN", "KADABRA", "REGISTEEL",
+        "SQUIRTLE", "SHUCKLE", "SEADRA", "MARSHTOMP", "CHARMANDER", "DELIBIRD",
+        "MANKEY", "WYNAUT", "VILEPLUME", "LOUDRED", "JIGGLYPUFF", "GYARADOS",
+        "BLASTOISE", "BAGON", "SEAKING", "SHUPPET", "BUTTERFREE", "CHIMECHO",
+        "WIGGLYTUFF", "VIGOROTH", "BEEDRILL", "DUSCLOPS", "EKANS", "ALTARIA",
+        "PIKACHU", "RAIKOU", "WEEDLE", "NINJASK", "DITTO", "REGIROCK",
+        "WARTORTLE", "NIDORINO", "KOFFING", "RHYDON", "SLOWKING", "GLIGAR",
+        "WEEPINBELL", "GOLDEEN", "MANTINE", "BANETTE",
       ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }

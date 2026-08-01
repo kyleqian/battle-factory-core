@@ -1,5 +1,40 @@
 # Animation coverage
 
+## Front `ANIM_SWING_CONVEX` Factory family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2w is exact for the normal lifecycle and all **4
+Factory-reachable acceptance siblings**: WEEPINBELL, GOLDEEN, MANTINE,
+BANETTE. The complete generated census is **6 selector mappings**; MEW and
+JIRACHI are source-derived outside-Factory mappings only, with no fresh
+outside-Factory acceptance claim. WEEPINBELL is the representative and BANETTE
+the terminal Factory sibling. Move coverage stays **107 exact / 0 partial / 0
+staged / 169 unsupported** and `ANIMATION_COVERAGE.json` remains byte-identical
+at SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:911-939,1038-1059,
+2552-2589,3855-3871` proves task-zeroed data, `InitAnimData` defaults, normal
+front `sDontFlip=TRUE`, and the duration-100/single-run initializer. All **101
+active callbacks** (data2=0..100) pin C-truncated indices, GBA sine x2 writes,
+negative affine rotation, both no-op `TryFlipX` calls, and tick-0 affine start.
+Tick 101 restores identity/x2=0, calls `ResetSpriteAfterAnim`, installs
+`WaitAnimEnd`, and increments data2 to 102. The shared reducer regression-pins
+the accepted concave lifecycle; `ANIM_SWING_CONVEX_FAST` (50 x 2) and unused
+`ANIM_SWING_CONVEX_FAST_SHORT` (50 x 1) remain explicitly unaccepted. Fresh
+complete legal Scene-ON parties settle both selected species at x2=0/y2=0,
+animNum=1/`SpriteCallbackDummy`; paired raw outputs are byte-identical with no
+EOF newline: WEEPINBELL SHA-256
+`a7ae6c5bf088e3a523a0da3cf178eac2024e3e7a1ed02d336a4df831ee44b12e`,
+BANETTE `95b70a54be18eaa93e3cb8a2a4d4a2ce19e1b261f03ff82a1628fcae87c25dfb`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per legal party and paired raw `cmp`; focused
+family plus both ratchets **204/204**; `npx tsc --noEmit` and diff checks green;
+exactly one complete `npm test` is green at **572 files, 5,926 passed + 1
+skipped**; production build is green (**534 modules transformed**). The next
+source-ranked generated census family is **`ANIM_BOUNCE_ROTATE_TO_SIDES`**
+(5 mappings / 5 Factory / 0 outside): MAROWAK, MAGIKARP, SEEDOT, MEDITITE,
+ILLUMISE.
+
 ## Front `ANIM_SHRINK_GROW` terminal family accepted (2026-08-01)
 
 **Verdict / counts:** rung 2v is exact for all **6 selector mappings / 6

@@ -56,6 +56,7 @@ export type SpeciesFrontAnimFamily =
   | "H_SHAKE"
   | "RAPID_H_HOPS"
   | "SHRINK_GROW"
+  | "SWING_CONVEX"
   | "SWING_CONCAVE"
   | "V_JUMPS_SMALL"
   | "V_SLIDE"
@@ -82,6 +83,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "H_SHAKE",
   "RAPID_H_HOPS",
   "SHRINK_GROW",
+  "SWING_CONVEX",
   "SWING_CONCAVE",
   "V_JUMPS_SMALL",
   "V_SLIDE",
@@ -461,6 +463,23 @@ export const SHRINK_GROW_FACTORY_FRONT_SPECIES: readonly string[] = Object.freez
 /** There are no normal shrink/grow mappings outside the Factory rental pool. */
 export const SHRINK_GROW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   SHRINK_GROW_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All 6 source selector mappings for the normal front `ANIM_SWING_CONVEX`. */
+export const SWING_CONVEX_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_SWING_CONVEX")
+    .map(([species]) => species),
+);
+
+/** The four normal SwingConvex mappings reachable through Factory rentals. */
+export const SWING_CONVEX_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  SWING_CONVEX_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** The two source mappings absent from the Factory rental pool. */
+export const SWING_CONVEX_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  SWING_CONVEX_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 export interface SpeciesIdleOffset {
@@ -975,7 +994,8 @@ export interface GrowVibrateFrame extends SpeciesIdleOffset {
   readonly affineMode: "double" | "normal";
 }
 
-export interface SwingConcaveFrame extends SpeciesIdleOffset {
+export interface SwingFrame<Callback extends "SwingConcave" | "SwingConvex">
+  extends SpeciesIdleOffset {
   readonly data2: number;
   readonly animRotation: number;
   readonly animDelay: number;
@@ -990,9 +1010,12 @@ export interface SwingConcaveFrame extends SpeciesIdleOffset {
   readonly normalFrontDontFlip: true;
   readonly tryFlipXCalls: 2;
   readonly resetSpriteAfterAnim: boolean;
-  readonly callback: "SwingConcave" | "WaitAnimEnd";
+  readonly callback: Callback | "WaitAnimEnd";
   readonly affineMode: "double" | "normal";
 }
+
+export type SwingConcaveFrame = SwingFrame<"SwingConcave">;
+export type SwingConvexFrame = SwingFrame<"SwingConvex">;
 
 export interface VerticalSlideFrame extends SpeciesIdleOffset {
   readonly data0: 40;
@@ -1040,6 +1063,26 @@ export interface HorizontalJumpsVerticalStretchFrame extends SpeciesIdleOffset {
 
 const SWING_CONCAVE_DURATION = 100;
 
+/**
+ * The normal, fast, and unused fast-short selectors all share `SwingConvex`.
+ * This rung accepts only the normal single-run duration-100 initializer.
+ */
+export const SWING_CONVEX_INITIALIZERS = Object.freeze({
+  normal: Object.freeze({
+    selector: "ANIM_SWING_CONVEX", data: 100, runs: 1, accepted: true,
+  }),
+  fast: Object.freeze({
+    selector: "ANIM_SWING_CONVEX_FAST", data: 50, runs: 2, accepted: false,
+  }),
+  fastShort: Object.freeze({
+    selector: "ANIM_SWING_CONVEX_FAST_SHORT",
+    data: 50,
+    runs: 1,
+    unused: true,
+    accepted: false,
+  }),
+} as const);
+
 function tryFlipX(x2: number, dontFlip: boolean): number {
   return dontFlip ? x2 : -x2;
 }
@@ -1056,7 +1099,11 @@ function tryFlipX(x2: number, dontFlip: boolean): number {
  * observes the strict data2 > data guard, restores identity/x2/normal affine
  * state, installs `WaitAnimEnd`, and still performs the final data2 increment.
  */
-export function swingConcaveFrameAtTick(ticksSinceStart: number): SwingConcaveFrame | null {
+function swingFrameAtTick<Callback extends "SwingConcave" | "SwingConvex">(
+  ticksSinceStart: number,
+  callback: Callback,
+  rotationSign: 1 | -1,
+): SwingFrame<Callback> | null {
   if (ticksSinceStart < 0) return null;
 
   // `InitAnimData`, called by `AddNewAnim`, is the source of these defaults.
@@ -1102,7 +1149,7 @@ export function swingConcaveFrameAtTick(ticksSinceStart: number): SwingConcaveFr
 
     const index = Math.trunc((data2 * 256) / animData);
     x2 = -gbaSin(index, 10) + 0;
-    const affineRotation = gbaSin(index, 3276);
+    const affineRotation = rotationSign * gbaSin(index, 3276) + 0;
     data2 += 1;
     x2 = tryFlipX(x2, true);
 
@@ -1124,13 +1171,30 @@ export function swingConcaveFrameAtTick(ticksSinceStart: number): SwingConcaveFr
         normalFrontDontFlip: true,
         tryFlipXCalls: 2,
         resetSpriteAfterAnim: false,
-        callback: "SwingConcave",
+        callback,
         affineMode: "double",
       };
     }
   }
 
-  throw new Error("unreachable SwingConcave reducer state");
+  throw new Error(`unreachable ${callback} reducer state`);
+}
+
+export function swingConcaveFrameAtTick(ticksSinceStart: number): SwingConcaveFrame | null {
+  return swingFrameAtTick(ticksSinceStart, "SwingConcave", 1);
+}
+
+/**
+ * Source-order port of the normal `Anim_SwingConvex` initializer and shared
+ * `SwingConvex` lifecycle (`pokemon_animation.c:1038-1059,2552-2589,
+ * 3855-3871`) on the normal opponent-front path. It reuses the exact swing
+ * callback reducer accepted for `SwingConcave`; only the affine rotation
+ * write changes sign. Tick 0 starts affine mode, ticks 0..100 are active, and
+ * tick 101 restores identity/x2, resets the sprite, installs `WaitAnimEnd`,
+ * and performs the callback's final data2 increment.
+ */
+export function swingConvexFrameAtTick(ticksSinceStart: number): SwingConvexFrame | null {
+  return swingFrameAtTick(ticksSinceStart, "SwingConvex", -1);
 }
 
 const VERTICAL_SLIDE_DURATION = 40;
@@ -2543,6 +2607,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = shrinkGrowFrameAtTick(49);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_ShrinkGrow did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "SWING_CONVEX": {
+      const terminal = swingConvexFrameAtTick(101);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_SwingConvex did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
