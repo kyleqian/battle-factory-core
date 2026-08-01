@@ -51,6 +51,7 @@ import { resolveTurn13CompletedResolutionNextCommandHandoff } from "../src/engin
 import { resolveTurn5CompletedResolutionNextCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
 import { resolveTurn6CompletedResolutionNextCommandHandoff } from "../src/engine/turn6ResolutionAdapter.ts";
 import { resolveTurn7CompletedResolutionNextCommandHandoff } from "../src/engine/turn7ResolutionAdapter.ts";
+import { resolveTurn8CompletedResolutionNextCommandHandoff } from "../src/engine/turn8ResolutionAdapter.ts";
 import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "../src/engine/turn16FirePunchResolutionAdapter.ts";
 import {
   beginBattleSceneForcedPartySelect,
@@ -150,7 +151,7 @@ function stateAtTick(firstTickAbsolute: number): EngineState {
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
-    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null },
+    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null },
   };
 }
 
@@ -177,7 +178,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
         turn5NextCommandHandoff: resolveTurn5CompletedResolutionNextCommandHandoff(),
         turn6NextCommandHandoff: resolveTurn6CompletedResolutionNextCommandHandoff(),
         turn7NextCommandHandoff: resolveTurn7CompletedResolutionNextCommandHandoff(),
-        turn8Resolved: true,
+        turn8NextCommandHandoff: resolveTurn8CompletedResolutionNextCommandHandoff(),
         turn9Resolved: true,
         turn10Resolved: true,
         turn11Resolved: true,
@@ -293,7 +294,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
       null,
       null,
       null,
-      false,
+      null,
       false,
       false,
       false,
@@ -530,7 +531,7 @@ function stateAtTurn3Reopen(firstTickAbsolute: number): EngineState {
       turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null,
     turn6NextCommandHandoff: null,
     turn7NextCommandHandoff: null,
-    turn8Resolved: false,
+    turn8NextCommandHandoff: null,
     turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
     turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null,
     },
@@ -653,7 +654,7 @@ function stateAtTurn3Confirm(): EngineState {
       turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null,
     turn6NextCommandHandoff: null,
     turn7NextCommandHandoff: null,
-    turn8Resolved: false,
+    turn8NextCommandHandoff: null,
     turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
     turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null,
     },
@@ -825,7 +826,7 @@ function stateAtTurn4Confirm(): EngineState {
       turn4Resolved: false, turn5NextCommandHandoff: null,
     turn6NextCommandHandoff: null,
     turn7NextCommandHandoff: null,
-    turn8Resolved: false,
+    turn8NextCommandHandoff: null,
     turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
     turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null,
     },
@@ -855,7 +856,7 @@ function stateAtTurn5Confirm(): EngineState {
       turn4Resolved: true, turn5NextCommandHandoff: null,
     turn6NextCommandHandoff: null,
     turn7NextCommandHandoff: null,
-    turn8Resolved: false,
+    turn8NextCommandHandoff: null,
     turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
     turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null,
     },
@@ -946,7 +947,7 @@ function stateAtTurn5SitrusConfirm(): EngineState {
       turn4Resolved: true, turn5NextCommandHandoff: null,
     turn6NextCommandHandoff: null,
     turn7NextCommandHandoff: null,
-    turn8Resolved: false,
+    turn8NextCommandHandoff: null,
     turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
     turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null,
     },

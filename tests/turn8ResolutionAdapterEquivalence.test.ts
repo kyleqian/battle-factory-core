@@ -22,20 +22,20 @@ describe("turn8ResolutionAdapter: #39 completed-turn-8/next-command handoff proo
     expect(resolveTurn8CompletedResolutionNextCommandHandoff().persistedMoveSlot).toBe(1);
   });
 
-  it("owns exactly the completed turn-8 PP receipt supplied by the live flag without staged move composition", () => {
+  it("owns exactly the completed turn-8 PP receipt consumed by the live submenu without staged move composition", () => {
     const onix = rentalMoveset("ONIX");
     const handoff = resolveTurn8CompletedResolutionNextCommandHandoff();
-    const liveFlagReceipt = currentPPForActiveMon(
+    const liveReceipt = currentPPForActiveMon(
       onix,
       true, true, true, true,
       resolveTurn5CompletedResolutionNextCommandHandoff(),
       resolveTurn6CompletedResolutionNextCommandHandoff(),
       resolveTurn7CompletedResolutionNextCommandHandoff(),
-      true,
+      handoff,
     );
 
-    expect(liveFlagReceipt).toEqual([4, 19, 19, 10]);
-    expect(handoff.playerPp).toEqual(liveFlagReceipt);
+    expect(liveReceipt).toEqual([4, 19, 19, 10]);
+    expect(handoff.playerPp).toEqual(liveReceipt);
     expect(handoff.playerPp).toEqual([4, 19, 19, 10]);
     expect(Object.isFrozen(handoff)).toBe(true);
     expect(Object.isFrozen(handoff.playerPp)).toBe(true);
@@ -47,17 +47,17 @@ describe("turn8ResolutionAdapter: #39 completed-turn-8/next-command handoff proo
       moveIds: [157, 20, 288, 201],
       maxPP: [10, 15, 20, 10],
     } as const;
-    const liveFlagReceipt = currentPPForActiveMon(
+    const liveReceipt = currentPPForActiveMon(
       genericMoveset,
       true, true, true, true,
       resolveTurn5CompletedResolutionNextCommandHandoff(),
       resolveTurn6CompletedResolutionNextCommandHandoff(),
       resolveTurn7CompletedResolutionNextCommandHandoff(),
-      true,
+      resolveTurn8CompletedResolutionNextCommandHandoff(),
     );
 
-    expect(liveFlagReceipt).toEqual([4, 14, 19, 10]);
-    expect(liveFlagReceipt[1]).toBe(genericMoveset.maxPP[1] - 1);
+    expect(liveReceipt).toEqual([4, 14, 19, 10]);
+    expect(liveReceipt[1]).toBe(genericMoveset.maxPP[1] - 1);
     expect(resolveTurn8CompletedResolutionNextCommandHandoff().playerPp[1]).toBe(19);
   });
 });

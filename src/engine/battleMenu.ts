@@ -26,6 +26,7 @@ import type { BattleResolutionPresentationState } from "./battleResolutionPresen
 import type { Turn5CompletedResolutionNextCommandHandoff } from "./turn5ResolutionAdapter.ts";
 import type { Turn6CompletedResolutionNextCommandHandoff } from "./turn6ResolutionAdapter.ts";
 import type { Turn7CompletedResolutionNextCommandHandoff } from "./turn7ResolutionAdapter.ts";
+import type { Turn8CompletedResolutionNextCommandHandoff } from "./turn8ResolutionAdapter.ts";
 import type { Turn13CompletedResolutionNextCommandHandoff } from "./turn13ResolutionAdapter.ts";
 
 /** `sText_GoPkmn` resolved for this save's rental pool (single line, fits `B_WIN_MSG`'s line 1 - never wraps to line 2). */
@@ -2569,7 +2570,7 @@ export function currentPPForActiveMon(
   turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null = null,
   turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null = null,
   turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null = null,
-  turn8Resolved: boolean = false,
+  turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null = null,
   turn9Resolved: boolean = false,
   turn10Resolved: boolean = false,
   turn11Resolved: boolean = false,
@@ -2616,16 +2617,20 @@ export function currentPPForActiveMon(
     (turn10Resolved ? 1 : 0) +
     (turn11Resolved ? 1 : 0) +
     (turn12Resolved ? 1 : 0);
-  // The handoffs own full canonical tuples, but their audited consumer here
-  // is slot 0. Preserve this helper's existing generic-moveset behavior for
-  // untouched slots (Tier-1 callers deliberately vary BIND max PP), while
-  // the live Onix boundary receives its canonical receipts.
+  // The handoffs own full canonical tuples. This consumer reconstructs each
+  // selected slot against the supplied moveset, preserving its existing
+  // generic-moveset behavior while the live Onix boundary receives the
+  // canonical receipt. Turn 8's typed slot-1 receipt therefore contributes
+  // its real one BIND use rather than a turn-resolution mirror.
+  const turn8BindUses = turn8NextCommandHandoff === null
+    ? 0
+    : rentalMoveset("ONIX").maxPP[1] - turn8NextCommandHandoff.playerPp[1];
   const ppBeforeLaterTurns = [
     turn7NextCommandHandoff?.playerPp[0]
       ?? turn6NextCommandHandoff?.playerPp[0]
       ?? turn5NextCommandHandoff?.playerPp[0]
       ?? a - slot0UsesBeforeTurn5,
-    b,
+    b - turn8BindUses,
     c - (turn2Resolved ? 1 : 0),
     d,
   ] as const;
@@ -2636,7 +2641,7 @@ export function currentPPForActiveMon(
   if (followingPlayerPp !== undefined) return followingPlayerPp;
   return [
     ppBeforeLaterTurns[0] - slot0UsesAfterTurn7,
-    turn8Resolved ? ppBeforeLaterTurns[1] - 1 : ppBeforeLaterTurns[1],
+    ppBeforeLaterTurns[1],
     resolvedPlayerPp?.[2] ?? turn13NextCommandHandoff?.dragonBreathPp.current ?? ppBeforeLaterTurns[2],
     ppBeforeLaterTurns[3],
   ];
