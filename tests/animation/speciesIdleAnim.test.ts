@@ -194,6 +194,12 @@ import pikachuRunB from "../../tools/compare/fixtures/sendout-front-pikachu-run-
 import raikouScenario from "../../tools/compare/fixtures/sendout-front-raikou.json" with { type: "json" };
 import raikouRunA from "../../tools/compare/fixtures/sendout-front-raikou-run-a.json" with { type: "json" };
 import raikouRunB from "../../tools/compare/fixtures/sendout-front-raikou-run-b.json" with { type: "json" };
+import weedleScenario from "../../tools/compare/fixtures/sendout-front-weedle.json" with { type: "json" };
+import weedleRunA from "../../tools/compare/fixtures/sendout-front-weedle-run-a.json" with { type: "json" };
+import weedleRunB from "../../tools/compare/fixtures/sendout-front-weedle-run-b.json" with { type: "json" };
+import ninjaskScenario from "../../tools/compare/fixtures/sendout-front-ninjask.json" with { type: "json" };
+import ninjaskRunA from "../../tools/compare/fixtures/sendout-front-ninjask-run-a.json" with { type: "json" };
+import ninjaskRunB from "../../tools/compare/fixtures/sendout-front-ninjask-run-b.json" with { type: "json" };
 import {
   KABUTO_FRONT_ANIM_START_OFFSET,
   kabutoHSlideWobble,
@@ -354,6 +360,18 @@ const raikouRawA = readFileSync(
 );
 const raikouRawB = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-raikou-run-b.json", import.meta.url),
+);
+const weedleRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-weedle-run-a.json", import.meta.url),
+);
+const weedleRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-weedle-run-b.json", import.meta.url),
+);
+const ninjaskRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-ninjask-run-a.json", import.meta.url),
+);
+const ninjaskRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-ninjask-run-b.json", import.meta.url),
 );
 
 describe("speciesIdleAnim", () => {
@@ -3766,6 +3784,72 @@ describe("speciesIdleAnim", () => {
       });
       expect(horizontalSlideSlowFrameAtTick(82)).toEqual(horizontalSlideSlowFrameAtTick(81));
       expect(horizontalSlideSlowFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      [13, weedleScenario],
+      [302, ninjaskScenario],
+    ] as const)("stages a complete legal Scene-ON party for opponent species %i", (species, scenario) => {
+      expect(scenario.mode).toBe("mechanicLab");
+      expect(scenario.profile).toBe("battle-scene-on");
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(species);
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "WEEDLE", weedleRunA, weedleRunB, weedleRawA, weedleRawB, 13, 6,
+        "ddf75e4d3e1dad7197ca10ddae1cb595c732d84c4abb5af3e60bd24906d120dd",
+      ],
+      [
+        "NINJASK", ninjaskRunA, ninjaskRunB, ninjaskRawA, ninjaskRawB, 302, 17,
+        "830d8fbd9726a2c15d951a66350390d444737c5872723bb17ab7c847f39bab45",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species, runA, runB, rawA, rawB, data2, animCmdIndex, rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_H_SLIDE_SLOW");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
     });
 
     it("preserves every previously accepted representative and sibling family", () => {
