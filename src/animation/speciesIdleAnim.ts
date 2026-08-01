@@ -44,6 +44,7 @@ import selectorTables from "../data/gen/send-out-anim-selector-tables.json" with
 export type SpeciesFrontAnimFamily =
   | "BOUNCE_ROTATE_TO_SIDES_SMALL"
   | "BOUNCE_ROTATE_TO_SIDES_SLOW"
+  | "CIRCULAR_STRETCH_TWICE"
   | "GROW_VIBRATE"
   | "FLASH_YELLOW"
   | "H_JUMPS"
@@ -68,6 +69,7 @@ const FRONT_ANIM_PREFIX = "ANIM_";
 const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "BOUNCE_ROTATE_TO_SIDES_SMALL",
   "BOUNCE_ROTATE_TO_SIDES_SLOW",
+  "CIRCULAR_STRETCH_TWICE",
   "GROW_VIBRATE",
   "FLASH_YELLOW",
   "H_JUMPS",
@@ -425,6 +427,23 @@ export const H_SLIDE_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Obj
   H_SLIDE_SLOW_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
+/** All 6 source selector mappings for `ANIM_CIRCULAR_STRETCH_TWICE`. */
+export const CIRCULAR_STRETCH_TWICE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_CIRCULAR_STRETCH_TWICE")
+    .map(([species]) => species),
+);
+
+/** Every circular-stretch-twice mapping is reachable through Factory rentals. */
+export const CIRCULAR_STRETCH_TWICE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  CIRCULAR_STRETCH_TWICE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no circular-stretch-twice mappings outside the Factory rental pool. */
+export const CIRCULAR_STRETCH_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  CIRCULAR_STRETCH_TWICE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
 export interface SpeciesIdleOffset {
   readonly x2: number;
   readonly y2: number;
@@ -433,6 +452,10 @@ export interface SpeciesIdleOffset {
 function gbaSin(index: number, amplitude: number): number {
   const v = GBA_SINE_TABLE_256[((index % 256) + 256) % 256]!;
   return Math.floor((amplitude * v) / 256);
+}
+
+function gbaCos(index: number, amplitude: number): number {
+  return gbaSin(index + 64, amplitude);
 }
 
 const RAPID_H_HOPS_ACCUMULATOR_STEP = 24;
@@ -770,6 +793,22 @@ export interface HorizontalSlideFrame extends SpeciesIdleOffset {
   readonly normalFrontDontFlip: true;
   readonly tryFlipXCalls: 2;
   readonly callback: "HorizontalSlide" | "WaitAnimEnd";
+}
+
+export interface CircularStretchTwiceFrame extends SpeciesIdleOffset {
+  readonly data0: 0;
+  readonly data2: number;
+  readonly data4: number;
+  readonly data5: number;
+  readonly index: number | null;
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly affineRotation: 0;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "Anim_CircularStretchTwice" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
 }
 
 export interface HorizontalJumpsFrame extends SpeciesIdleOffset {
@@ -1917,6 +1956,68 @@ export function horizontalSlideSlowFrameAtTick(
   };
 }
 
+const CIRCULAR_STRETCH_TWICE_DURATION = 40;
+
+/**
+ * Source-order port of `Anim_CircularStretchTwice`
+ * (`pokemon_animation.c:911-939,1087-1109`) on the opponent-front path.
+ * `Task_HandleMonAnimation` zeroes data0/data2..data7 and sets
+ * `sDontFlip=TRUE`. Tick 0 enters affine mode before its first write. Active
+ * ticks 0..40 use C-truncated division before the `% 256`, store the GBA
+ * sine/cosine scales in data4/data5, and write them without front-side
+ * negation. Tick 41 writes identity affine, resets the sprite to normal
+ * affine mode, installs `WaitAnimEnd`, and still increments data2 to 42.
+ */
+export function circularStretchTwiceFrameAtTick(
+  ticksSinceStart: number,
+): CircularStretchTwiceFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  if (ticksSinceStart > CIRCULAR_STRETCH_TWICE_DURATION) {
+    return {
+      x2: 0,
+      y2: 0,
+      data0: 0,
+      data2: CIRCULAR_STRETCH_TWICE_DURATION + 2,
+      data4: 256,
+      data5: 288,
+      index: null,
+      xScale: 256,
+      yScale: 256,
+      affineRotation: 0,
+      startedAffine: false,
+      normalFrontDontFlip: true,
+      resetSpriteAfterAnim: true,
+      callback: "WaitAnimEnd",
+      affineMode: "normal",
+    };
+  }
+
+  const data2BeforeIncrement = ticksSinceStart;
+  const index = Math.trunc(
+    (data2BeforeIncrement * 512) / CIRCULAR_STRETCH_TWICE_DURATION,
+  ) % 256;
+  const data4 = gbaSin(index, 32) + 256;
+  const data5 = gbaCos(index, 32) + 256;
+  return {
+    x2: 0,
+    y2: 0,
+    data0: 0,
+    data2: data2BeforeIncrement + 1,
+    data4,
+    data5,
+    index,
+    xScale: data4,
+    yScale: data5,
+    affineRotation: 0,
+    startedAffine: data2BeforeIncrement === 0,
+    normalFrontDontFlip: true,
+    resetSpriteAfterAnim: false,
+    callback: "Anim_CircularStretchTwice",
+    affineMode: "double",
+  };
+}
+
 /**
  * Source-order port of `Anim_HorizontalSlideWobble`
  * (`pokemon_animation.c:911-939,1803-1833`). `Task_HandleMonAnimation`
@@ -2301,6 +2402,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = bounceRotateToSidesSlowFrameAtTick(167);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_BounceRotateToSides_Slow did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "CIRCULAR_STRETCH_TWICE": {
+      const terminal = circularStretchTwiceFrameAtTick(41);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_CircularStretchTwice did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }

@@ -15,6 +15,10 @@ import {
   BOUNCE_ROTATE_TO_SIDES_SLOW_FRONT_SPECIES,
   BOUNCE_ROTATE_TO_SIDES_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES,
   BOUNCE_ROTATE_TO_SIDES_VARIANTS,
+  circularStretchTwiceFrameAtTick,
+  CIRCULAR_STRETCH_TWICE_FACTORY_FRONT_SPECIES,
+  CIRCULAR_STRETCH_TWICE_FRONT_SPECIES,
+  CIRCULAR_STRETCH_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES,
   growVibrateFrameAtTick,
   GROW_VIBRATE_FACTORY_FRONT_SPECIES,
   GROW_VIBRATE_FRONT_SPECIES,
@@ -200,6 +204,12 @@ import weedleRunB from "../../tools/compare/fixtures/sendout-front-weedle-run-b.
 import ninjaskScenario from "../../tools/compare/fixtures/sendout-front-ninjask.json" with { type: "json" };
 import ninjaskRunA from "../../tools/compare/fixtures/sendout-front-ninjask-run-a.json" with { type: "json" };
 import ninjaskRunB from "../../tools/compare/fixtures/sendout-front-ninjask-run-b.json" with { type: "json" };
+import dittoScenario from "../../tools/compare/fixtures/sendout-front-ditto.json" with { type: "json" };
+import dittoRunA from "../../tools/compare/fixtures/sendout-front-ditto-run-a.json" with { type: "json" };
+import dittoRunB from "../../tools/compare/fixtures/sendout-front-ditto-run-b.json" with { type: "json" };
+import regirockScenario from "../../tools/compare/fixtures/sendout-front-regirock.json" with { type: "json" };
+import regirockRunA from "../../tools/compare/fixtures/sendout-front-regirock-run-a.json" with { type: "json" };
+import regirockRunB from "../../tools/compare/fixtures/sendout-front-regirock-run-b.json" with { type: "json" };
 import {
   KABUTO_FRONT_ANIM_START_OFFSET,
   kabutoHSlideWobble,
@@ -372,6 +382,18 @@ const ninjaskRawA = readFileSync(
 );
 const ninjaskRawB = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-ninjask-run-b.json", import.meta.url),
+);
+const dittoRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-ditto-run-a.json", import.meta.url),
+);
+const dittoRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-ditto-run-b.json", import.meta.url),
+);
+const regirockRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-regirock-run-a.json", import.meta.url),
+);
+const regirockRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-regirock-run-b.json", import.meta.url),
 );
 
 describe("speciesIdleAnim", () => {
@@ -3862,6 +3884,177 @@ describe("speciesIdleAnim", () => {
         "BLASTOISE", "BAGON", "SEAKING", "SHUPPET", "BUTTERFREE", "CHIMECHO",
         "WIGGLYTUFF", "VIGOROTH", "BEEDRILL", "DUSCLOPS", "EKANS", "ALTARIA",
         "PIKACHU", "RAIKOU", "WEEDLE", "NINJASK",
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("circularStretchTwiceFrameAtTick (source lifecycle)", () => {
+    it("derives exactly all 6 selector mappings as Factory-reachable with zero outside", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_CIRCULAR_STRETCH_TWICE")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(CIRCULAR_STRETCH_TWICE_FRONT_SPECIES).toEqual(generated);
+      expect(CIRCULAR_STRETCH_TWICE_FRONT_SPECIES).toEqual([
+        "DITTO", "MUDKIP", "SWELLOW", "WAILMER", "MINUN", "REGIROCK",
+      ]);
+      expect(CIRCULAR_STRETCH_TWICE_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(CIRCULAR_STRETCH_TWICE_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(CIRCULAR_STRETCH_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of CIRCULAR_STRETCH_TWICE_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins Task_HandleMonAnimation's zeroed data boundary", () => {
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
+    });
+
+    it("pins every active callback's C-truncated sine/cosine affine writes", () => {
+      const active = Array.from({ length: 41 }, (_, tick) => {
+        const index = Math.trunc((tick * 512) / 40) % 256;
+        const data4 = Math.floor((32 * GBA_SINE_TABLE_256[index]!) / 256) + 256;
+        const data5 = Math.floor((32 * GBA_SINE_TABLE_256[(index + 64) % 256]!) / 256) + 256;
+        const frame = circularStretchTwiceFrameAtTick(tick);
+        expect(frame, `tick ${tick}`).toEqual({
+          x2: 0,
+          y2: 0,
+          data0: 0,
+          data2: tick + 1,
+          data4,
+          data5,
+          index,
+          xScale: data4,
+          yScale: data5,
+          affineRotation: 0,
+          startedAffine: tick === 0,
+          normalFrontDontFlip: true,
+          resetSpriteAfterAnim: false,
+          callback: "Anim_CircularStretchTwice",
+          affineMode: "double",
+        });
+        return frame!;
+      });
+      expect(active).toHaveLength(41);
+      expect([0, 5, 10, 15, 20, 25, 30, 35, 40].map((tick) => [
+        tick, active[tick]!.index, active[tick]!.xScale, active[tick]!.yScale,
+      ])).toEqual([
+        [0, 0, 256, 288],
+        [5, 64, 288, 256],
+        [10, 128, 256, 224],
+        [15, 192, 224, 256],
+        [20, 0, 256, 288],
+        [25, 64, 288, 256],
+        [30, 128, 256, 224],
+        [35, 192, 224, 256],
+        [40, 0, 256, 288],
+      ]);
+    });
+
+    it("pins tick 41 identity/reset/WaitAnimEnd cleanup and stable settled state", () => {
+      expect(circularStretchTwiceFrameAtTick(41)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 0,
+        data2: 42,
+        data4: 256,
+        data5: 288,
+        index: null,
+        xScale: 256,
+        yScale: 256,
+        affineRotation: 0,
+        startedAffine: false,
+        normalFrontDontFlip: true,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      });
+      expect(circularStretchTwiceFrameAtTick(42)).toEqual(circularStretchTwiceFrameAtTick(41));
+      expect(circularStretchTwiceFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      [132, dittoScenario],
+      [401, regirockScenario],
+    ] as const)("stages a complete legal Scene-ON party for opponent species %i", (species, scenario) => {
+      expect(scenario.mode).toBe("mechanicLab");
+      expect(scenario.profile).toBe("battle-scene-on");
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(species);
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "DITTO", dittoRunA, dittoRunB, dittoRawA, dittoRawB, 132, 3,
+        "26cae4ff0244a36a7cb6dbea0e7cfbe94b506ec4a86bea200f5032c433dc595e",
+      ],
+      [
+        "REGIROCK", regirockRunA, regirockRunB, regirockRawA, regirockRawB, 401, 4,
+        "5d2e0fb67df2033d4868db97e13f5bf473d34c9b5a498a4da42d90847cb7c7d3",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species, runA, runB, rawA, rawB, data2, animCmdIndex, rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_CIRCULAR_STRETCH_TWICE");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("preserves every previously accepted representative and sibling family", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of [
+        "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN",
+        "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN", "KADABRA", "REGISTEEL",
+        "SQUIRTLE", "SHUCKLE", "SEADRA", "MARSHTOMP", "CHARMANDER", "DELIBIRD",
+        "MANKEY", "WYNAUT", "VILEPLUME", "LOUDRED", "JIGGLYPUFF", "GYARADOS",
+        "BLASTOISE", "BAGON", "SEAKING", "SHUPPET", "BUTTERFREE", "CHIMECHO",
+        "WIGGLYTUFF", "VIGOROTH", "BEEDRILL", "DUSCLOPS", "EKANS", "ALTARIA",
+        "PIKACHU", "RAIKOU", "WEEDLE", "NINJASK", "DITTO", "REGIROCK",
       ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }
