@@ -1,3 +1,11 @@
+## 817 — [bounded worker, 2026-08-01] rank-8 exact owner mirrors retired
+
+- Archived from the live ledger. `d410cfe5` staged the MAGBY/MURKROW
+  Scene-OFF full turn through the production reducer at its exact eight-call
+  RNG cursor and deleted `turn16Resolved` plus the submenu redraw mirror;
+  clean-`60acda9c` replay byte-identical (2,163 captures). Full live-entry
+  detail remains in git history.
+
 ## 816 — [bounded worker, 2026-08-01] rank-7 exact owner mirrors retired
 
 - Archived from the live ledger. `1f276c95` + `c0821a65` retained one

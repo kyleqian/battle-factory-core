@@ -43,7 +43,8 @@ Per entry:
 - **Cost each:** ~10 min.
 - **Workaround:** confirm the JSONL mtime, clean tree, and committed checkpoint
   before terminating the wedged child; the launcher should explicitly close
-  Codex stdin and distinguish signal exits from authentication failures.
+  Codex stdin. (Postflight now names cap/signal exits distinctly instead of
+  mislabeling them as authentication failures, 2026-08-01.)
 
 ## Shell command substitution mutates inline worker briefs
 
@@ -414,24 +415,6 @@ Per entry:
 - **Workaround:** none yet; the turn dossiers record boundary shas but not
   the LCG cursor — worth adding to the next dossier retrofit pass.
 
-## Dense-comparator harness reports only the first mismatched frame's bbox
-
-- **What:** the portable dense comparators (`growthPortable.ts`,
-  `futureSightPortable.ts` and siblings) print a whole-window match count
-  but bbox/px-dump only the FIRST diff frame — a window carrying two
-  distinct defect families read as one "confined to the attacker box"
-  residual until a bespoke per-frame scratch sweep separated them
-  (2026-07-25 FUTURE_SIGHT rung 5). Two prior workers also hand-wrote
-  throwaway PNG-diff/crop scripts for the same need (GROWTH rungs 4-5).
-- **Hits:** 3 (same session).
-- **Cost each:** ~10-15 min of bespoke scratch scripting per residual hunt.
-- **Workaround:** partially fixed 2026-07-28: `npm run compare` now prints a
-  per-frame `bbox=` for every DIFF frame, and `tools/compare/diffBounds.ts`
-  exports `boundsForPixelIndices` for reuse. Remainder: the portable
-  mGBA-probe comparators (`growthPortable.ts` siblings) still bbox-dump only
-  their first diff frame — import `diffBounds.ts` there, or copy
-  `tools/compare/scratch/future-sight-per-frame-bbox.ts`.
-
 ## Mash-rep counts for staged multi-turn fixtures don't transfer between move-animation classes
 
 - **What:** every staged mechanicLab fixture that needs "exactly N real
@@ -463,23 +446,6 @@ Per entry:
   header with a shell heredoc or targeted `sed` instead of whole-block
   patch matching; supervisors already rotate this way.
 
-## Side-lane worktrees base on a live main worker's intermediate commits
-
-- **What:** `run-subagent.sh --lane side` creates its worktree from current
-  `HEAD`, which during a live main-lane step is the main worker's latest
-  *intermediate* commit — a state the worker itself may fix two commits
-  later. A side worker then inherits transiently-red tests it must diagnose
-  as "pre-existing failures" (they are neither pre-existing nor its own).
-- **Hits:** 1 (receipts-B/C worker based on `1ddfc68` mid-reveals-step,
-  2026-07-29; two red suites later fixed by the same main step's
-  `beb383cf`).
-- **Cost each:** ~5 min worker diagnosis + supervisor cross-check.
-- **Workaround:** supervisors launching a side worker while main is
-  mid-step should name the last *supervisor-verified* green commit in the
-  brief ("failures beyond commit X are not yours"), or hold side launches
-  until the main step lands; a launcher `--base <ref>` option would fix it
-  mechanically.
-
 ## Concurrent per-lane full-suite/build runs starve host memory (2026-07-29)
 
 - **What:** two lanes running `npm test`/`npm run build` simultaneously
@@ -499,29 +465,6 @@ Per entry:
   launching two workers whose acceptance both requires a full-suite run at
   the same wall-clock window, and treat a contended full-suite claim as
   unverified until rerun serially.
-
-## Parallel `npm run compare` invocations race over `tools/compare/out/latest` (2026-07-29)
-
-- **What:** every compare run writes its artifacts to
-  `tools/compare/out/latest`; a worker running two comparisons in parallel
-  (or a supervisor spot-checking while a worker compares) has the second
-  run clobber the first's output mid-read, producing confusing artifact
-  mismatches.
-- **Hits:** 2 (Slice-5 worker, 2026-07-29; routing Slice-2 worker, 2026-07-30).
-- **Cost each:** ~1-5 min.
-- **Workaround:** run compares serially within a step; treat
-  `out/latest` as valid only immediately after its own run. A per-run
-  output dir (timestamp/PID suffix) would fix it mechanically.
-
-## `bin/oracle lab` floods the session when only an artifact path is needed
-
-- **What:** the default `bin/oracle lab` output prints the full run detail
-  even when the caller only needs the output screenshot/manifest path,
-  drowning a worker transcript.
-- **Hits:** 1 (2026-07-29, Slice 6 Part B worker).
-- **Cost each:** ~1 min.
-- **Workaround:** redirect stdout and read the manifest from the `-o` dir;
-  a `--quiet`/path-only flag would be the real fix (harness-side).
 
 ## mGBA probe wrapper leaves multi-MB logs beside committed receipts
 
@@ -546,17 +489,6 @@ Per entry:
   tables (or rental set IDs); a lab-side name/ID sanity echo would be the
   real fix (harness-side).
 
-## `audit-switchin-entryhooks-off.py` mislabels stat-stage indexes
-
-- **What:** the probe's output labels stat-stage index 0 as `attackStages`,
-  but index 0 is HP; Attack is index 1. A worker chasing Intimidate's cut
-  read the wrong column until raw RAM cross-checking exposed it.
-- **Hits:** 1 (2026-07-30, Gate-6 R12b worker; ~4 min lost).
-- **Cost each:** ~4 min.
-- **Workaround:** trust only raw stage-array dumps with explicit index
-  arithmetic; fixing the probe's label map is a two-line change next time
-  it is regenerated.
-
 ## Ability-census exact-set pins are line-number-sensitive (2026-07-30)
 
 - **What:** the parity-census ratchet pins engine ability/item reference
@@ -569,34 +501,3 @@ Per entry:
   cheap; otherwise regenerate the census pin set in the same commit (the
   documented line-drift recipe) rather than contorting the edit.
 
-## Cap-killed Codex worker prints "exited unauthenticated — log in and retry"
-
-- **What:** when the launcher kills a worker at its `--cap-minutes`
-  ceiling, the digest tail appends `codex worker exited unauthenticated —
-  log in with the codex CLI and retry` even though authentication is fine
-  (the very next launch succeeds). The line mis-directs triage toward
-  re-auth when the real event is an ordinary cap timeout (exit 124).
-- **Hits:** 1 (Slice-7 flip worker, 2026-07-30 16:38).
-- **Cost each:** ~3 min.
-- **Workaround:** on exit 124, read the `=== worker FAILED (killed before
-  turn completion) ===` marker and the branch's committed state first; test
-  auth by simply launching the continuation worker.
-
-## No pixel-inspection helper in tools/compare
-Isolating pixel-diff root causes (which sprite/region changed, exact bbox
-content) requires ad-hoc PNG-decoding scripts every time; two workers
-rebuilt the same throwaway tooling in one session (~10 min each). A small
-`tools/compare/inspect-frame.ts` (decode two PNGs, print diff bbox + region
-crops) would pay for itself immediately. (2026-07-31, bumped x1)
-
-## Compare traces without an explicit `appRoute` silently route wrong
-
-A trace missing `appRoute` defaults to `"generated-orchestrator"`, which for
-canonical-recorded traces means wholesale mismatch (0/N) or an outright
-crash on an unported resolver — misread as a renderer bug every time.
-Recurred FOUR times on 2026-07-31 alone (turn5 ×10, turn6/7/8 ×10+3,
-turn17-rung ×7 — 20 traces fixed across four commits; ~5-15 min lost per
-recurrence diagnosing "why is everything diverging"). All committed traces
-now carry the field, but nothing stops a new trace from omitting it: a
-compare-time lint (warn or fail when a trace lacks `appRoute`) would kill
-the class permanently. (2026-07-31)

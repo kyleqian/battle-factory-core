@@ -13,6 +13,39 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 820 — [solo session, 2026-08-01] papercut burn-down: eight dev-loop fixes landed (run + harness)
+
+- **State:** tooling-only session, no engine/runtime behavior changed. Full
+  `npm test` is green (**572 files, 5,736 passed + 1 skipped**, +7 new
+  tooling tests) and production build is green.
+- **Did:** (1) missing-`appRoute` compares now print a pointed notice and
+  `tests/compareTraceAppRoute.test.ts` exact-set-pins the 66 legacy traces
+  (shrink-only) with valid-value checking; (2) default compare output is a
+  fresh `tools/compare/out/run-*` dir per invocation with an `out/latest`
+  symlink to the newest run (parallel compares can no longer clobber each
+  other) plus pruning beyond 12; (3) new `npm run inspect-frame` —
+  `tools/compare/inspect-frame.ts` prints diff count/bbox, 8-connected
+  per-cluster bboxes (`clusterPixelIndices` in `diffBounds.ts`), RGB
+  samples, and writes diff/crop PNGs; (4) 13 portable comparators now print
+  per-frame diff bboxes capped at 32 lines (3 others already did); (5) the
+  switchin-entryhooks and magic-coat probes dump the full labeled
+  `statStages[]` (old `attackStages` read index 0 = HP; magic-coat's 0x3A
+  was the last nickname byte, not a stage at all); (6) `run-subagent.sh`
+  postflight names cap/deadline (124) and signal (>=128) exits instead of
+  mislabeling them as auth failures; (7) `run-subagent.sh --base REF` pins
+  a side/animation worktree to a named green commit; (8) `bin/oracle
+  run|lab --quiet` prints only the manifest path, and the run's client
+  gained the harness's `preCheckpointCaptures` file extraction. Harness
+  side: `bin/oracle` gained the same `--quiet`, and `_template`'s launcher
+  + compare runner carry the same three fixes.
+- **Next:** unchanged from entry 819 — publish the typed turn-13
+  completed-resolution/next-command handoff, then retire `turn13Resolved`.
+- **Notes:** PAPERCUTS.md pruned by 8 fixed entries per its delete-on-fix
+  policy. Verification: `growthPortable` reran **63/63 exact** post-codemod;
+  `anchor.json` compare passed 1/1 through a fresh `run-*` dir with the
+  `latest` symlink migrated from the legacy directory; the launcher's
+  `--base` guard and help text exercised directly.
+
 ## 819 — [bounded worker, 2026-08-01] rank-2 predecessor audit checkpoint
 
 - **State:** evidence checkpoint `14e4fe59`; no production change. Tier-1
@@ -54,25 +87,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no mechanics/RNG/AI/outcome, animation, trace/capture list,
   ratchet/barrier, recording import, or prohibited selector changed.
 
-## 817 — [bounded worker, 2026-08-01] rank-8 exact owner mirrors retired
-
-- **State:** implementation `d410cfe5`; focused exact/owner/terminal suites
-  are **443/443**, generic seven-battle/round regressions are **69/69**, the
-  executable ratchet is **6/6**, full `npm test` is green (**571 files,
-  5,728 passed + 1 skipped**), and production build + standalone TypeScript
-  build are green.
-- **Did:** staged the documented MAGBY/MURKROW Scene-OFF full turn through the
-  production reducer at its exact eight-call RNG cursor. Its immutable
-  resolution now owns damage, PP, burn text/status-icon receipt, residual,
-  and next-command facts; the compatibility owner carries its relative redraw
-  edge into the existing terminal owner. Deleted `turn16Resolved` and the
-  submenu redraw mirror. Clean-`60acda9c` app replay is byte-identical for all
-  requested rungs plus delayed/rung-6b insurance (**2,163 captures**); census
-  fell **2,506→2,496 refs**, **33,125→33,124 LOC**.
-- **Next:** supervisor selects the next earlier #39 mirror/dispatcher slice;
-  do not extend the canonical Battle-2 march.
-- **Notes:** supervisor's starting union was green at **570 files / 5,726
-  passed + 1 skipped** with build green; merged recharge/Bide hardening and
-  OFF opponent-recharge evidence remain intact. No mechanics/RNG/AI/outcome,
-  animation, trace/capture list, ratchet/barrier, recording import, or
-  prohibited selector changed.
