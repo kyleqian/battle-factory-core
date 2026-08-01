@@ -25,6 +25,14 @@ import {
   resolveBattleStringLines,
   resolveMoveNameExclaim,
 } from "./battleStringResolver.ts";
+import frontierHeldItemsData from "../data/gen/battle-frontier-held-items.json" with { type: "json" };
+
+const FACTORY_ITEM_NAME_BY_ID = new Map(
+  (frontierHeldItemsData.entries as readonly Readonly<{
+    itemId: number;
+    displayName: string;
+  }>[]).map(({ itemId, displayName }) => [itemId, displayName]),
+);
 
 export type BattleStatName = Extract<
   BattleScriptSemanticEventPayload,
@@ -332,6 +340,14 @@ function fieldBattler(
   return battler === 0 ? field.player : field.opponent;
 }
 
+function factoryItemDisplayName(itemId: number): string {
+  const name = FACTORY_ITEM_NAME_BY_ID.get(itemId);
+  if (name === undefined) {
+    throw new Error(`battle resolution cannot resolve Factory held item ${itemId}`);
+  }
+  return name;
+}
+
 function sourceLabelOf(event: BattleKernelSemanticEvent): string {
   if (!event.provenance) {
     throw new Error(
@@ -396,6 +412,8 @@ function messageLines(
   lastFaintBattler: 0 | 1 | null,
   pendingStatusMessageBattler: 0 | 1 | null,
   lastMoveAttacker: 0 | 1 | null,
+  pendingHeldItemEffectBattler: 0 | 1 | null,
+  heldItems: readonly [number, number],
   actionSnapshot: BattleScriptActionMessageSnapshot | null,
   opponentTrainer: Readonly<{ className: string; name: string }> | null,
 ): readonly string[] {
@@ -552,6 +570,24 @@ function messageLines(
       nickname: displayed.name,
     });
   }
+  if (pendingHeldItemEffectBattler !== null) {
+    const displayed = fieldBattler(field, pendingHeldItemEffectBattler);
+    // Every source held-item result script presents B_ANIM_HELD_ITEM_EFFECT
+    // for the same BS_ATTACKER/BS_SCRIPTING battler before printing its text.
+    // Preserve that typed controller receipt as gBattleScripting.battler's
+    // presentation owner; do not rediscover the owner from a move or species.
+    resolvers.B_SCR_ACTIVE_NAME_WITH_PREFIX = () => resolveBattleNameWithPrefix({
+      side: pendingHeldItemEffectBattler === 0 ? "player" : "opponent",
+      isTrainerBattle: true,
+      nickname: displayed.name,
+    });
+    // gLastUsedItem is the item which fired, before the later removeitem
+    // controller receipt consumes it. `heldItems` starts at the segment's
+    // reducer boundary and follows any typed item writes in event order.
+    resolvers.B_LAST_ITEM = () => factoryItemDisplayName(
+      heldItems[pendingHeldItemEffectBattler],
+    );
+  }
   return resolveBattleStringLines(messageId, resolvers);
 }
 
@@ -606,6 +642,11 @@ export function projectBattleResolutionCommands(
   let lastFaintBattler: 0 | 1 | null = null;
   let pendingStatusMessageBattler: 0 | 1 | null = null;
   let lastMoveAttacker: 0 | 1 | null = null;
+  let pendingHeldItemEffectBattler: 0 | 1 | null = null;
+  const heldItems = [
+    beforeRules.battlers[0]!.item,
+    beforeRules.battlers[1]!.item,
+  ] as [number, number];
   let usedMoveInstructionExecution: number | null = null;
   const zeroHpBattlers = new Set<0 | 1>();
   const fieldArt = createBattleCommandFieldArtView(field);
@@ -663,6 +704,8 @@ export function projectBattleResolutionCommands(
           lastFaintBattler,
           pendingStatusMessageBattler,
           lastMoveAttacker,
+          pendingHeldItemEffectBattler,
+          heldItems,
           actionSnapshot,
           opponentTrainer,
         ),
@@ -674,6 +717,17 @@ export function projectBattleResolutionCommands(
         timing: MESSAGE_TIMING,
       }));
       pendingStatusMessageBattler = null;
+      pendingHeldItemEffectBattler = null;
+      continue;
+    }
+    if (
+      payload.kind === "animation"
+      && payload.animationId === "HELD_ITEM_EFFECT"
+    ) {
+      pendingHeldItemEffectBattler = singlesBattler(
+        payload.battler ?? -1,
+        "held-item effect animation",
+      );
       continue;
     }
     if (
@@ -776,6 +830,11 @@ export function projectBattleResolutionCommands(
         after: payload.status1,
         timing: STATUS_TIMING,
       }));
+      continue;
+    }
+    if (payload.kind === "set-battler-item") {
+      const battler = singlesBattler(payload.battler, "held-item update");
+      heldItems[battler] = payload.item;
       continue;
     }
     if (payload.kind === "status-icon-update") {
