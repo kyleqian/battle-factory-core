@@ -410,6 +410,23 @@ the forced `PartySelectState` and delete `turn14Resolved` dispatch plus
 count was claimed because those historical pins are ON-profile and this lane
 was restricted to OFF.
 
+**Rank-8 Scene-OFF status-icon receipt landed (2026-08-01, `80c5d6af`):**
+the generic resolution presenter now keeps `set-battler-status-data` as the
+logical raw write and projects the existing `status-icon-update` as an
+immutable one-callback `status-icon` command (`battler`, `status1`, `status2`,
+and event sequence). The displayed healthbox status and the round controller's
+`displayedStatus1` commit only when that receipt completes. The text resolver
+gets `B_EFF_NAME_WITH_PREFIX` from the immediately pending raw status target,
+not a move/species inference. A legal generated Factory route proves the
+nonterminal burn order through the real command/presentation seam and next
+request; the Scene-OFF event list deliberately contains no status-animation
+receipt. The authoritative oracle evidence remains the already-verified
+**42 captures / 42 capture-states** in
+`docs/fire-punch-burn-lifecycle-off-evidence.md`, not a new pixel claim.
+Legacy Turn-16/old-Turn-17 dispatch retirement remains open; no canonical
+battle/turn/tick branch, mechanics/RNG/AI/round change, trace/capture-list,
+animation change, recording import, or ratchet move was added.
+
 ## #61 — Scene-OFF FIGHT reveal needs a source-owned DMA-ready event, not a fixed delay
 
 **Bounded evidence (2026-07-31, `bc988ef9`):** the reproducible OFF-profile

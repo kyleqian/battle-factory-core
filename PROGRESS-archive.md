@@ -1,3 +1,10 @@
+## 811 — [bounded worker, 2026-08-01] generic MOVEEND sprite-visibility round seam landed
+
+- Archived from the live ledger. `8ee8cbe7` projected the source-owned
+  sprite-visibility receipt through the generic round seam, with focused
+  coverage and the full suite green. Full live-entry detail remains in git
+  history.
+
 ## 810 — [bounded worker, 2026-08-01] ISSUES #56 ready-tail verdict
 
 - Archived from the live ledger. Evidence commit `e497c7d6` proved the

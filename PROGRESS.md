@@ -13,6 +13,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 814 — [bounded main worker, 2026-08-01] rank-8 Scene-OFF status-icon receipt landed
+
+- **State:** implementation `80c5d6af`; targeted resolver/presentation/round
+  seam tests are green, as is `npm run build`. Full `npm test` and final
+  clean-tree verification are next.
+- **Did:** projected the existing `status-icon-update` kernel receipt into an
+  immutable, one-controller-callback `status-icon` command. The raw
+  `set-battler-status-data` write remains logical; the render field and
+  round `displayedStatus1` now change only after the icon command completes.
+  The generic message context reads `B_EFF_NAME_WITH_PREFIX` from the pending
+  raw status receipt, so burn text never infers a target from a move/species.
+  A legal generated Factory round proves FIRE_PUNCH's status write → burn
+  text → icon receipt → nonterminal next-command handoff, plus a generic
+  status clear is pinned at the renderer boundary.
+- **Next:** run the required full suite, then record its result and commit the
+  ledger/docs update. Keep rank 8 scoped to generic semantic presentation;
+  do not resume the retired canonical Battle-2 march or claim a new pixel
+  comparison.
+- **Notes:** the authoritative Scene-OFF oracle checkpoint remains the already
+  verified **42 captures / 42 capture-states** in
+  `docs/fire-punch-burn-lifecycle-off-evidence.md`; this semantic slice adds
+  no pixel claim and no fabricated Scene-OFF status-animation receipt. No
+  mechanics/RNG/AI/round outcomes, animation code/ledgers, ratchets, or
+  oracle trace/capture lists changed.
+
 ## 813 — [bounded worker, 2026-08-01] rank-7 opponent-FLY receipt bridge landed
 
 - **State:** implementation `30b61236`; focused adapter/selector/scene suites
@@ -64,23 +89,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   was claimed for this semantic controller slice.
 - **PAPERCUT:** Vitest's `--maxWorkers` conflicts with this repo's forks-pool
   settings, ~2 minutes lost before using the project command unchanged.
-
-## 811 — [bounded worker, 2026-08-01] generic MOVEEND sprite-visibility round seam landed
-
-- **State:** implementation commit `8ee8cbe7`; focused resolution/portability/
-  locked-move/orchestrator suites are green (**65/65**), full `npm test` is
-  green (**567 files, 5712 passed + 1 skipped**), and production build is
-  green.
-- **Did:** projected the existing typed `set-battler-sprite-visibility`
-  receipt into a generic one-callback `sprite-visibility` resolution command,
-  persistent render-view state, and `battlePresentationBoundaries`. A staged
-  real full-turn player FLY hides through the intervening opponent action and
-  restores from its locked continuation in the seven-battle round seam;
-  opponent FLY is pinned through the inverse kernel path. Ordinary visible
-  pass-through receipts leave the legacy nine-command adapter unchanged.
-- **Next:** rank 7 still needs a generic two-turn action grouping plus exact
-  Turn-14/15 legacy renderer handoff and `turn15PartySelect` mirror retirement;
-  this slice deliberately did not claim those pixel windows.
-- **Notes:** no rule/RNG/damage/order/round/Scene-ON changes, canonical branch,
-  recording import, unsupported barrier, or executable-frontier ratchet move.
-- **PAPERCUT:** none.
