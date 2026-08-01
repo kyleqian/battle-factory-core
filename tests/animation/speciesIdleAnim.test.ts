@@ -3,7 +3,14 @@ import probe from "../../src/data/gen/onix-front-idle-probe.json" with { type: "
 import {
   rapidHorizontalHopsOffsetAtTick,
   speciesFrontIdleRestOffset,
+  verticalSquishBounceFrameAtTick,
+  V_SQUISH_AND_BOUNCE_FRONT_SPECIES,
 } from "../../src/animation/speciesIdleAnim.ts";
+import selectorTables from "../../src/data/gen/send-out-anim-selector-tables.json" with { type: "json" };
+import bayleefRunA from "../../tools/compare/fixtures/sendout-front-bayleef-run-a.json" with { type: "json" };
+import bayleefRunB from "../../tools/compare/fixtures/sendout-front-bayleef-run-b.json" with { type: "json" };
+import magbyRunA from "../../tools/compare/fixtures/sendout-front-magby-run-a.json" with { type: "json" };
+import magbyRunB from "../../tools/compare/fixtures/sendout-front-magby-run-b.json" with { type: "json" };
 
 describe("speciesIdleAnim", () => {
   describe("rapidHorizontalHopsOffsetAtTick (Anim_RapidHorizontalHops port)", () => {
@@ -46,9 +53,77 @@ describe("speciesIdleAnim", () => {
       }
     });
 
-    it("returns null for species whose own front-anim family isn't ported", () => {
+    it("dispatches the complete generated 50-species V_SQUISH_AND_BOUNCE family", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_V_SQUISH_AND_BOUNCE")
+        .map(([species]) => species);
+      expect(V_SQUISH_AND_BOUNCE_FRONT_SPECIES).toEqual(generated);
+      expect(V_SQUISH_AND_BOUNCE_FRONT_SPECIES).toHaveLength(50);
+      expect(V_SQUISH_AND_BOUNCE_FRONT_SPECIES).toContain("BAYLEEF");
+      expect(V_SQUISH_AND_BOUNCE_FRONT_SPECIES).toContain("MAGBY");
+      for (const species of V_SQUISH_AND_BOUNCE_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("returns null for generated species whose front-anim family isn't ported", () => {
       expect(speciesFrontIdleRestOffset("CHARMELEON")).toBeNull();
       expect(speciesFrontIdleRestOffset("GROVYLE")).toBeNull();
+    });
+  });
+
+  describe("verticalSquishBounceFrameAtTick (Anim_VerticalSquishBounce port)", () => {
+    it("ports the source accumulators, sine arithmetic, and affine writes", () => {
+      expect(verticalSquishBounceFrameAtTick(0)).toEqual({
+        x2: 0, y2: 0, data2: 1, data3: 0, data4: 8,
+        xScale: 256, yScale: 256,
+        callback: "VerticalSquishBounce", affineMode: "double",
+      });
+      expect(verticalSquishBounceFrameAtTick(8)).toMatchObject({
+        y2: 4, data2: 9, data3: 0, data4: 72, xScale: 224, yScale: 288,
+      });
+      expect(verticalSquishBounceFrameAtTick(24)).toMatchObject({
+        y2: -10, data2: 25, data3: 64, data4: 200, xScale: 288, yScale: 224,
+      });
+      expect(verticalSquishBounceFrameAtTick(48)).toMatchObject({
+        y2: -1, data2: 49, data3: 120, data4: 136,
+      });
+    });
+
+    it("ports the terminal cleanup before WaitAnimEnd hands off to SpriteCallbackDummy", () => {
+      expect(verticalSquishBounceFrameAtTick(49)).toEqual({
+        x2: 0, y2: 0, data2: 49, data3: 120, data4: 136,
+        xScale: 256, yScale: 256,
+        callback: "WaitAnimEnd", affineMode: "normal",
+      });
+      expect(verticalSquishBounceFrameAtTick(50)).toEqual(verticalSquishBounceFrameAtTick(49));
+      expect(verticalSquishBounceFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      ["BAYLEEF", bayleefRunA, bayleefRunB, 1],
+      ["MAGBY", magbyRunA, magbyRunB, 1],
+    ] as const)("matches two byte-identical fresh settled %s RAM receipts", (species, runA, runB, animNum) => {
+      // Deep equality is the hermetic counterpart to the generation-time
+      // `cmp`: these independently launched Scene-ON emulator runs stay
+      // byte-identical in the committed evidence.
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_V_SQUISH_AND_BOUNCE");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
     });
   });
 });

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Idle-bob enumeration rung 1: probe the send-out species front-anim callback
+"""Send-out front-animation probe: read the settled battler sprite callback
 directly by BATTLER INDEX (`gBattlerSpriteIds[0]`/`[1]`), not
 `gBattleAnimAttacker`/`gBattleAnimTarget` (those are stale/zeroed until
 `DoMoveAnim` runs, `battle_anim.c:201-206` - the earlier DRAGON_RAGE full-move
@@ -9,8 +9,9 @@ sidesteps that entirely).
 
 Reads `struct Sprite.callback` (offset 0x1C, `include/sprite.h:202`) as a
 function pointer (thumb-bit masked) plus x2/y2/animNum/animCmdIndex/data[2]
-(the accumulator `Anim_RapidHorizontalHops` itself uses, `pokemon_animation.c
-:3567-3599`) for BOTH battler slots, every tick from send-out. Addresses
+for BOTH battler slots. This began as the ONIX `ANIM_RAPID_H_HOPS` probe and
+is intentionally species-generic for the generated front-selector families.
+Addresses
 (`nm reference/pokeemerald/pokeemerald.elf`; `Anim_RapidHorizontalHops`/
 `WaitAnimEnd` are `static` so absent from the map):
   Anim_RapidHorizontalHops = 0x08182b24
@@ -70,6 +71,8 @@ SPRITE_ANIM_CMD_INDEX_OFF = 0x2B
 SPRITE_DATA_OFF = 0x2E
 
 SYMBOLS = {
+    0x08180714: "VerticalSquishBounce",
+    0x0818080C: "Anim_VerticalSquishBounce",
     0x08182B24: "Anim_RapidHorizontalHops",
     0x08184D88: "WaitAnimEnd",
     0x08007428: "SpriteCallbackDummy",

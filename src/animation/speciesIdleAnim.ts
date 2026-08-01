@@ -1,4 +1,5 @@
 import { GBA_SINE_TABLE_256 } from "../engine/battleMenu.ts";
+import selectorTables from "../data/gen/send-out-anim-selector-tables.json" with { type: "json" };
 
 /**
  * Species send-out front-sprite animation port (`pokemon_animation.c`).
@@ -39,12 +40,26 @@ import { GBA_SINE_TABLE_256 } from "../engine/battleMenu.ts";
  * window actually needs is RAM-confirmed.
  */
 
-export type SpeciesFrontAnimFamily = "RAPID_H_HOPS";
+export type SpeciesFrontAnimFamily = "RAPID_H_HOPS" | "V_SQUISH_AND_BOUNCE";
 
-/** `sMonFrontAnimIdsTable[species - 1]` (`pokemon.c:1405-...`) - only the entries a committed dense window actually needs (idle-motion enumeration rung 1's own stop-threshold rule). */
-const SPECIES_FRONT_ANIM_FAMILY: Readonly<Partial<Record<string, SpeciesFrontAnimFamily>>> = Object.freeze({
-  ONIX: "RAPID_H_HOPS",
-});
+const FRONT_ANIM_PREFIX = "ANIM_";
+const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
+  "RAPID_H_HOPS",
+  "V_SQUISH_AND_BOUNCE",
+]);
+
+const generatedFrontAnimIds = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
+
+/**
+ * Complete Factory-reachable `ANIM_V_SQUISH_AND_BOUNCE` front family,
+ * derived from the generated `sMonFrontAnimIdsTable` extraction. Keep this
+ * named export derived: a second literal species map would drift from source.
+ */
+export const V_SQUISH_AND_BOUNCE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_V_SQUISH_AND_BOUNCE")
+    .map(([species]) => species),
+);
 
 export interface SpeciesIdleOffset {
   readonly x2: number;
@@ -105,6 +120,78 @@ export function rapidHorizontalHopsOffsetAtTick(ticksSinceStart: number): Specie
   return rapidHorizontalHopsOffsetAtAccumulator(accumulator);
 }
 
+export interface VerticalSquishBounceFrame extends SpeciesIdleOffset {
+  readonly data2: number;
+  readonly data3: number;
+  readonly data4: number;
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly callback: "VerticalSquishBounce" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+const VERTICAL_SQUISH_BOUNCE_DURATION = 16;
+
+/**
+ * Source-order port of `Anim_VerticalSquishBounce` /
+ * `VerticalSquishBounce` (`pokemon_animation.c:1834-1876`). The returned
+ * frame is the state after the callback for `ticksSinceStart` has run. Tick
+ * 49 is the terminal cleanup callback: affine identity, y2=0, normal affine
+ * mode, and `WaitAnimEnd`. The later OAM-frame completion changes only the
+ * callback to `SpriteCallbackDummy`, so the terminal positional result is
+ * already final here.
+ */
+export function verticalSquishBounceFrameAtTick(
+  ticksSinceStart: number,
+): VerticalSquishBounceFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let data3 = 0;
+  let data4 = 0;
+  let y2 = 0;
+  let xScale = 256;
+  let yScale = 256;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (data2 > VERTICAL_SQUISH_BOUNCE_DURATION * 3) {
+      return {
+        x2: 0,
+        y2: 0,
+        data2,
+        data3,
+        data4,
+        xScale: 256,
+        yScale: 256,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      };
+    }
+
+    yScale = gbaSin(data4, 32) + 256;
+    if (data2 > VERTICAL_SQUISH_BOUNCE_DURATION && data2 < VERTICAL_SQUISH_BOUNCE_DURATION * 2) {
+      data3 += Math.trunc(128 / VERTICAL_SQUISH_BOUNCE_DURATION);
+    }
+    const posY = yScale > 256 ? Math.trunc((256 - yScale) / 8) : 0;
+    y2 = -gbaSin(data3, 10) - posY + 0;
+    xScale = 256 - gbaSin(data4, 32);
+    data2 += 1;
+    data4 = (data4 + Math.trunc(128 / VERTICAL_SQUISH_BOUNCE_DURATION)) & 0xff;
+  }
+
+  return {
+    x2: 0,
+    y2,
+    data2,
+    data3,
+    data4,
+    xScale,
+    yScale,
+    callback: "VerticalSquishBounce",
+    affineMode: "double",
+  };
+}
+
 function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffset {
   switch (family) {
     case "RAPID_H_HOPS": {
@@ -116,6 +203,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
         last = offset;
         tick += 1;
       }
+    }
+    case "V_SQUISH_AND_BOUNCE": {
+      const terminal = verticalSquishBounceFrameAtTick(49);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_VerticalSquishBounce did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
     }
   }
 }
@@ -138,7 +232,9 @@ function terminalOffsetForFamily(family: SpeciesFrontAnimFamily): SpeciesIdleOff
  * species' own front-anim family isn't ported yet.
  */
 export function speciesFrontIdleRestOffset(species: string): SpeciesIdleOffset | null {
-  const family = SPECIES_FRONT_ANIM_FAMILY[species];
-  if (!family) return null;
+  const generatedFamily = generatedFrontAnimIds[species];
+  if (!generatedFamily?.startsWith(FRONT_ANIM_PREFIX)) return null;
+  const family = generatedFamily.slice(FRONT_ANIM_PREFIX.length) as SpeciesFrontAnimFamily;
+  if (!PORTED_FRONT_FAMILIES.has(family)) return null;
   return terminalOffsetForFamily(family);
 }
