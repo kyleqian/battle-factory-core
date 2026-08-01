@@ -16,33 +16,6 @@ one without a user decision, and do not count them as backlog.
 
 # Open
 
-## #59 — Generated route: opponent FEATHER_DANCE crashes at move resolution (user-reported 2026-07-31)
-
-**Symptom:** in free play on the generated route, opponent Pidgeotto using
-FEATHER_DANCE on the player's QUILAVA crashes at/just after move
-resolution (user report, 2026-07-31 evening; exact halt text not
-captured).
-
-**Why it's a sharp case:** Pidgeotto+FEATHER_DANCE is the canonical
-battle's own attacker/move pair — but the canonical instances (turns 6-8,
-11) run through per-turn staging modules
-(`turn6/78/11FeatherDancePresentationStaging.ts`), which the generated
-route never uses. Only the route and target differ, so the gap is in the
-generic path: either an unregistered operand in the stat-change opcode
-family (`battleScriptStatbuffchangeOpcode.ts` has pinned
-unsupported-branch halts for unregistered `Cmd_playanimation` animTypes
-and `Cmd_jumpifstatus2` masks — a plausible first suspect since
-EFFECT_ATTACK_DOWN_2's script calls `playstatchangeanimation`), or the
-generated route's presentation for an opponent-initiated stat-fall on the
-player's mon having no owner.
-
-**Next:** census the FEATHER_DANCE (EFFECT_ATTACK_DOWN_2) script path on
-the generated route — stage the matchup via `mechanicLab`
-`overrides.parties` (constrain the opponent to FEATHER_DANCE only),
-reproduce the halt, register/port the exact missing branch with a Tier-1
-pin. The fix should cover the whole opponent-side stat-drop family, not
-just this matchup.
-
 ## #56 — Arbitrary-trainer intro: residuals, ONIX ready-lag regression, MAGNETON shadow coverage
 
 **Symptom:** the public dense arbitrary-trainer intro comparison

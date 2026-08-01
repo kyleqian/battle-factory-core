@@ -64,6 +64,50 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   30/30 — all green, no regressions.
 - **Next:** supervisor picks the next step; #56 frame-444 MAGNETON regression
   and the idle-bounce phase family remain open per their own entries.
+- **SUPERVISOR WIND-DOWN (session close 2026-07-31 ~18:00; this
+  addendum supersedes all of today's evening entries as the resume
+  point):**
+  - **Session totals: 6 rounds (5 paired + 1 bonus) / 11 workers
+    (M9-M14, S9-S13) / 0 failed steps.** Final gate run by supervisor
+    on this tree: **5722 passed + 1 deliberate skip / 567 files**,
+    build clean, ratchet 6/6, tree clean at this commit. DEFERRED.md
+    empty ALL session. Animation fold delta **0** at orient AND at
+    wind-down (animation-main still at `555bab3f`); only the permanent
+    `.worktrees/animation-main` remains; no orphan branches.
+  - **Headline: #39 rank-5 EXECUTED same-day** (user's Option A,
+    adopted this morning): turns 9-12 all Scene-OFF-owned (`8802fcb6`,
+    `329f8320`, `59a3fa7d`), 8 OFF windows EXACT, 11 legacy ON pins
+    retired, residuals all ONE root-caused mechanism (idle-bounce
+    phase; verdict (b) — closes with ranks 6-8 OFF re-timing;
+    `TURN8_MENU_REDRAW_DELAY` real OFF ≈434 banked; S13 measured the
+    same overcount at turns 1-4: 429/285/525/427 vs ON-fit
+    664/391/669/661).
+  - **Also landed:** #56 frame 536 FIXED (YOSHI 700/751; 444
+    regression-blocked w/ MAGNETON-probe lead banked); turn17-rung1
+    90/118 → **112/118** (last 6 frames = phase family; S12's doc
+    corrected in place); five-table animation handoff EXTRACTED
+    (animation rung 2 unblocked); rank-6 turns 1-4 OFF ground truth
+    banked (10 traces, zero desync); **#59 user-reported FEATHER_DANCE
+    crash FIXED same-day** (entry deleted per lifecycle; generic
+    opponent-side stat-drop family, presentation-side).
+  - **User reports this session (both addressed):** missing send-out
+    ball animation = the known send-out intro program (rung 1 landed
+    today; animation lane's top priority, and note Scene OFF does NOT
+    suppress send-outs in the real game — OFF windows need it too);
+    FEATHER_DANCE crash = fixed above.
+  - **Next session (ordered):** (i) **rank-6 pin policy question for
+    the user** (same shape as rank-5's: adopt Scene-OFF pins for turns
+    1-4 and retire their ON pins as rank 6 executes? Turns 1-4 are the
+    app's most deeply ON-fit region and their ON pins all pass today;
+    the S13 doc + 10 banked OFF traces make execution turnkey on
+    adoption) — then rank-6 execution, which ALSO closes the phase
+    family's turn-1-4 share; (ii) #56 frame-444 MAGNETON-side
+    `gSprites[6]` RAM probe → real discriminator → land the fix behind
+    the 751-frame regression; (iii) turn9/11/12-menu OFF pins once
+    phase closes (S9 landmark data banked); (iv) #56 +6 route term;
+    (v) rank 7 (FLY) / rank 8 (burn projection) inventory rows. #55
+    parked. No DEFERRED entries — the rank-6 policy question is a
+    start-of-work decision, not a blocker (rank-5 precedent).
 
 ---
 ## 797 — [bounded worker, 2026-07-31 ~17:15] turn17-rung1's 28-frame residual FIXED — 90/118 → 112/118; remaining 6 frames re-attributed to the already-tracked idle-bounce phase family
