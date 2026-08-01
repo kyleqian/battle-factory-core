@@ -223,14 +223,25 @@ describe("Supervisor and worker launcher profiles", () => {
     expect(configFrom(lowered.stdout).worker_effort).toBe("high");
   });
 
-  it("lets a hybrid supervisor route both Terra/high and Sol/high workers", () => {
+  it("routes ordinary Codex workers only as Terra/max, Luna/max, or Sol/high", () => {
     const terra = runLauncher(
       "tools/run-subagent.sh",
       [
         "--model",
         "gpt-5.6-terra",
         "--effort",
-        "high",
+        "max",
+        "--print-config",
+      ],
+      { POKEBENCH_WORKER_PROVIDER: "codex" },
+    );
+    const luna = runLauncher(
+      "tools/run-subagent.sh",
+      [
+        "--model",
+        "gpt-5.6-luna",
+        "--effort",
+        "max",
         "--print-config",
       ],
       { POKEBENCH_WORKER_PROVIDER: "codex" },
@@ -251,7 +262,13 @@ describe("Supervisor and worker launcher profiles", () => {
     expect(configFrom(terra.stdout)).toMatchObject({
       worker_provider: "codex",
       worker_model: "gpt-5.6-terra",
-      worker_effort: "high",
+      worker_effort: "max",
+    });
+    expect(luna.status).toBe(0);
+    expect(configFrom(luna.stdout)).toMatchObject({
+      worker_provider: "codex",
+      worker_model: "gpt-5.6-luna",
+      worker_effort: "max",
     });
     expect(sol.status).toBe(0);
     expect(configFrom(sol.stdout)).toMatchObject({
@@ -261,7 +278,7 @@ describe("Supervisor and worker launcher profiles", () => {
     });
   });
 
-  it("rejects sub-high effort in every ordinary Codex workflow", () => {
+  it("rejects effort that does not match the ordinary Codex model", () => {
     const directWorker = runLauncher("tools/run-subagent.sh", [
       "--provider",
       "codex",
@@ -290,19 +307,122 @@ describe("Supervisor and worker launcher profiles", () => {
 
     expect(directWorker.status).toBe(2);
     expect(directWorker.stderr).toContain(
-      "ordinary Codex worker effort is fixed at high",
+      "ordinary Codex model 'gpt-5.6-sol' requires effort 'high'",
     );
     expect(codexSupervisor.status).toBe(2);
     expect(codexSupervisor.stderr).toContain(
-      "ordinary Codex supervisor effort is fixed at high",
+      "ordinary Codex model 'gpt-5.6-sol' requires effort 'high'",
     );
     expect(hybridWorkerOverride.status).toBe(2);
     expect(hybridWorkerOverride.stderr).toContain(
-      "ordinary Codex worker effort is fixed at high",
+      "ordinary Codex worker model 'gpt-5.6-sol' requires effort 'high'",
     );
     expect(maxWorker.status).toBe(2);
     expect(maxWorker.stderr).toContain(
       "max-mode worker effort must be high or xhigh",
+    );
+  });
+
+  it("defaults Terra and Luna to max and rejects lower effort", () => {
+    for (const model of ["gpt-5.6-terra", "gpt-5.6-luna"]) {
+      const implicit = runLauncher("tools/run-subagent.sh", [
+        "--provider",
+        "codex",
+        "--model",
+        model,
+        "--print-config",
+      ]);
+      const lowered = runLauncher("tools/run-subagent.sh", [
+        "--provider",
+        "codex",
+        "--model",
+        model,
+        "--effort",
+        "high",
+        "--print-config",
+      ]);
+
+      expect(implicit.status).toBe(0);
+      expect(configFrom(implicit.stdout).worker_effort).toBe("max");
+      expect(lowered.status).toBe(2);
+      expect(lowered.stderr).toContain(
+        `ordinary Codex model '${model}' requires effort 'max'`,
+      );
+    }
+  });
+
+  it("keeps ordinary Sol fixed at high", () => {
+    const raised = runLauncher("tools/run-subagent.sh", [
+      "--provider",
+      "codex",
+      "--model",
+      "gpt-5.6-sol",
+      "--effort",
+      "max",
+      "--print-config",
+    ]);
+
+    expect(raised.status).toBe(2);
+    expect(raised.stderr).toContain(
+      "ordinary Codex model 'gpt-5.6-sol' requires effort 'high'",
+    );
+  });
+
+  it("resolves hybrid worker environment overrides through the same matrix", () => {
+    for (const model of ["gpt-5.6-terra", "gpt-5.6-luna"]) {
+      const result = runLauncher(
+        "run-supervisor.sh",
+        ["--hybrid", "--print-config"],
+        { WORKER_MODEL: model },
+      );
+
+      expect(result.status).toBe(0);
+      expect(configFrom(result.stdout)).toMatchObject({
+        worker_model: model,
+        worker_effort: "max",
+      });
+    }
+  });
+
+  it("applies the same Terra/max and Luna/max policy to Codex supervisors", () => {
+    for (const model of ["gpt-5.6-terra", "gpt-5.6-luna"]) {
+      const result = runLauncher("run-supervisor.sh", [
+        "--provider",
+        "codex",
+        "--model",
+        model,
+        "--print-config",
+      ]);
+
+      expect(result.status).toBe(0);
+      expect(configFrom(result.stdout)).toMatchObject({
+        supervisor_model: model,
+        supervisor_effort: "max",
+      });
+    }
+  });
+
+  it("rejects unsupported ordinary Codex models", () => {
+    const worker = runLauncher("tools/run-subagent.sh", [
+      "--provider",
+      "codex",
+      "--model",
+      "gpt-5.6-other",
+      "--print-config",
+    ]);
+    const supervisor = runLauncher("run-supervisor.sh", [
+      "--provider",
+      "codex",
+      "--model",
+      "gpt-5.6-other",
+      "--print-config",
+    ]);
+
+    expect(worker.status).toBe(2);
+    expect(worker.stderr).toContain("unsupported ordinary Codex worker model");
+    expect(supervisor.status).toBe(2);
+    expect(supervisor.stderr).toContain(
+      "unsupported ordinary Codex supervisor model",
     );
   });
 

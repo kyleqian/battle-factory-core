@@ -24,8 +24,8 @@ The launcher supports three first-class profiles:
 `-H` / `--hybrid` is shorthand for
 `--provider claude --worker-provider codex`.
 Worker provider and worker tier are independent of the supervisor model:
-the hybrid Fable supervisor chooses Terra/high or Sol/high for each brief and
-passes that model choice to `tools/run-subagent.sh`.
+the hybrid Fable supervisor chooses Terra/max, Luna/max, or Sol/high for each
+brief and passes that exact pair to `tools/run-subagent.sh`.
 
 Read `AGENTS.md`, the authoritative reset at the start of ROADMAP Stage 8, and
 S10's **Executable-frontier reset** (the current stage's ordered next steps and
@@ -81,22 +81,19 @@ edit.
    before launching the worker** (AGENTS.md's commit discipline applies to
    you too; any session can be killed at any moment, and the next one resumes
    from git alone).
-   **Whenever the worker provider is Codex — including `--hybrid` — effort
-   is high and the supervisor chooses the model explicitly:**
-   - `gpt-5.6-terra` / `high`: bounded read-heavy probes, deterministic
-     extraction, or mechanical documentation with little architecture
-     judgment.
-   - `gpt-5.6-sol` / `high` (launcher default): implementation,
-     verification, cross-layer architecture, ambiguous ownership/timing
-     evidence, or evidence-driven repair.
+   **Whenever the worker provider is ordinary Codex — including `--hybrid`
+   — the supervisor chooses one exact, mechanically enforced pair:**
+   - `gpt-5.6-terra` / `max`;
+   - `gpt-5.6-luna` / `max`, if Luna is available;
+   - `gpt-5.6-sol` / `high` (launcher default).
+   No other ordinary Codex model or effort pairing is allowed. In particular,
+   never lower Terra or Luna below max, and never raise Sol above high.
    The ordinary Codex profile keeps the supervisor at Sol/high; the hybrid
    profile keeps it at Claude Fable while retaining this worker routing.
-   Outside max mode, both Codex supervisor and worker launchers mechanically
-   reject every effort other than high. `./run-supervisor.sh --max-mode`
-   selects the Codex provider automatically and switches to an all-Sol
+   `./run-supervisor.sh --max-mode` remains the separate all-Sol
    profile: the supervisor runs Sol/ultra, every worker is locked to Sol, and
    workers default to xhigh (the worker ceiling) while permitting high.
-   Max mode rejects both the hybrid profile and a Terra worker override.
+   Max mode rejects both the hybrid profile and every non-Sol worker override.
    Before every battle-lane brief, apply the **novelty gate**: name the new
    reusable mechanism, unique screen, or generic state transition it adds.
    "The next canonical Battle 2 turn/window" is not a mechanism and must not
@@ -134,7 +131,8 @@ edit.
    `--model` and `--effort` per step, for example:
 
    ```sh
-   ./tools/run-subagent.sh --model gpt-5.6-terra --effort high --brief-file /tmp/scout.txt
+   ./tools/run-subagent.sh --model gpt-5.6-terra --effort max --brief-file /tmp/scout.txt
+   ./tools/run-subagent.sh --model gpt-5.6-luna --effort max --brief-file /tmp/alternate.txt
    ./tools/run-subagent.sh --model gpt-5.6-sol --effort high --brief-file /tmp/implementation.txt
    ```
 

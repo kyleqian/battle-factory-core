@@ -5,8 +5,8 @@
 # default remains the original Claude flow (claude-fable-5 supervisor,
 # claude-sonnet-5 workers). Pass --provider codex for the Codex profile
 # (gpt-5.6-sol/high supervisor; Codex-only worker routing defaults to
-# gpt-5.6-sol/high and may choose Terra/high for bounded probes or Sol/high
-# for architecture-heavy/repair work). Pass --hybrid for the mixed profile:
+# gpt-5.6-sol/high and may choose Terra/max, Luna/max, or Sol/high). Pass
+# --hybrid for the mixed profile:
 # a Claude Fable supervisor with the same tiered Codex worker routing. Pass
 # --max-mode for the all-Sol profile: a Sol/ultra supervisor with Sol/xhigh
 # workers.
@@ -33,6 +33,7 @@
 #   ./run-supervisor.sh -h            # help
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
+source tools/codex-model-policy.sh
 
 # Recursion guard: supervisors aren't nested, and workers never spawn agents.
 if [[ -n "${POKEBENCH_ROLE:-}" ]]; then
@@ -60,7 +61,8 @@ Usage: ./run-supervisor.sh [options]
   -M, --max-mode        Codex all-Sol profile: Sol/ultra supervisor and
                         Sol/xhigh workers (also selects --provider codex)
   -m, --model NAME      supervisor model (provider default)
-  -e, --effort EFFORT   Codex supervisor reasoning effort (default high)
+  -e, --effort EFFORT   Codex supervisor reasoning effort
+                        (ordinary Terra/Luna=max; ordinary Sol=high)
       --log FILE        raw JSONL log for --headless (provider default)
       --print-config    print the resolved profile without launching
   -h, --help            show this help
@@ -227,15 +229,20 @@ case "$PROVIDER" in
     ;;
   codex)
     MODEL="${MODEL:-gpt-5.6-sol}"
-    REASONING_EFFORT="${REASONING_EFFORT:-high}"
     if [[ "$MAX_MODE" == "1" ]]; then
+      REASONING_EFFORT="${REASONING_EFFORT:-ultra}"
       if [[ "$MODEL" != "gpt-5.6-sol" || "$REASONING_EFFORT" != "ultra" ]]; then
         echo "run-supervisor: invalid max-mode profile (expected gpt-5.6-sol/ultra)" >&2
         exit 2
       fi
     else
-      if [[ "$REASONING_EFFORT" != "high" ]]; then
-        echo "run-supervisor: ordinary Codex supervisor effort is fixed at high (got '$REASONING_EFFORT')" >&2
+      if ! REQUIRED_CODEX_EFFORT="$(pokebench_codex_ordinary_effort "$MODEL")"; then
+        echo "run-supervisor: unsupported ordinary Codex supervisor model '$MODEL' (allowed: gpt-5.6-terra, gpt-5.6-luna, gpt-5.6-sol)" >&2
+        exit 2
+      fi
+      REASONING_EFFORT="${REASONING_EFFORT:-$REQUIRED_CODEX_EFFORT}"
+      if [[ "$REASONING_EFFORT" != "$REQUIRED_CODEX_EFFORT" ]]; then
+        echo "run-supervisor: ordinary Codex model '$MODEL' requires effort '$REQUIRED_CODEX_EFFORT' (got '$REASONING_EFFORT')" >&2
         exit 2
       fi
     fi
@@ -286,11 +293,18 @@ if [[ "$MAX_MODE" == "1" ]]; then
   export WORKER_PROVIDER=codex
   export WORKER_MODEL=gpt-5.6-sol
   export WORKER_REASONING_EFFORT=xhigh
-elif [[ "$WORKER_PROVIDER" == "codex" \
-      && -n "${WORKER_REASONING_EFFORT:-}" \
-      && "$WORKER_REASONING_EFFORT" != "high" ]]; then
-  echo "run-supervisor: ordinary Codex worker effort is fixed at high (got '$WORKER_REASONING_EFFORT')" >&2
-  exit 2
+elif [[ "$WORKER_PROVIDER" == "codex" ]]; then
+  WORKER_MODEL="${WORKER_MODEL:-gpt-5.6-sol}"
+  if ! REQUIRED_WORKER_EFFORT="$(pokebench_codex_ordinary_effort "$WORKER_MODEL")"; then
+    echo "run-supervisor: unsupported ordinary Codex worker model '$WORKER_MODEL' (allowed: gpt-5.6-terra, gpt-5.6-luna, gpt-5.6-sol)" >&2
+    exit 2
+  fi
+  WORKER_REASONING_EFFORT="${WORKER_REASONING_EFFORT:-$REQUIRED_WORKER_EFFORT}"
+  if [[ "$WORKER_REASONING_EFFORT" != "$REQUIRED_WORKER_EFFORT" ]]; then
+    echo "run-supervisor: ordinary Codex worker model '$WORKER_MODEL' requires effort '$REQUIRED_WORKER_EFFORT' (got '$WORKER_REASONING_EFFORT')" >&2
+    exit 2
+  fi
+  export WORKER_MODEL WORKER_REASONING_EFFORT
 fi
 if [[ "$PRINT_CONFIG" == "1" ]]; then
   if [[ "$PROVIDER" == "claude" ]]; then
@@ -375,7 +389,7 @@ if [[ "$WORKER_PROVIDER" == "codex" ]]; then
   if [[ "$MAX_MODE" == "1" ]]; then
     WORKER_ROUTING_NOTE="Codex max mode is active: use only gpt-5.6-sol workers. The launcher defaults them to xhigh and rejects Terra or any other worker model; do not override that all-Sol routing."
   else
-    WORKER_ROUTING_NOTE="Workers are Codex at high effort. Choose the model by task: --model gpt-5.6-terra --effort high only for bounded probes, extraction, or mechanical docs; --model gpt-5.6-sol --effort high for implementation, cross-layer architecture, or evidence-driven repair."
+    WORKER_ROUTING_NOTE="Ordinary Codex workers must use one exact pair: gpt-5.6-terra/max, gpt-5.6-luna/max, or gpt-5.6-sol/high. The launcher defaults to Sol/high and rejects every other model/effort pairing."
   fi
 else
   WORKER_ROUTING_NOTE="Workers are Claude on the launcher's default claude-sonnet-5 profile unless a step explicitly overrides the worker model."

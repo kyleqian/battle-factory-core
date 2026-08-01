@@ -3,8 +3,9 @@
 #
 # Launches one fresh headless worker. The default remains the original Claude
 # worker (claude-sonnet-5); a Codex supervisor automatically selects the Codex
-# worker profile (gpt-5.6-sol at high effort). Codex max mode instead locks
-# workers to gpt-5.6-sol and defaults them to xhigh. The transcript is
+# worker profile (gpt-5.6-sol at high effort). Ordinary Codex routing permits
+# exactly Terra/max, Luna/max, or Sol/high. Codex max mode remains the separate
+# all-Sol profile and defaults workers to xhigh. The transcript is
 # summarized to a fixed-size handoff and retained in the log file named below.
 # Killing a worker at any point is safe —
 # workers follow AGENTS.md's commit-often discipline, so the next step resumes
@@ -17,7 +18,7 @@
 #     -p, --provider NAME   claude (default) or codex
 #     -M, --max-mode        Codex Sol/xhigh worker profile
 #     -m, --model NAME      worker model (provider default)
-#     -e, --effort EFFORT   Codex reasoning effort (high; max mode also xhigh)
+#     -e, --effort EFFORT   Codex reasoning effort (Terra/Luna=max; Sol=high)
 #     -w, --worktree        alias for --lane side
 #         --animation-worktree
 #                           alias for --lane animation
@@ -44,6 +45,7 @@
 # relaunch).
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
+source tools/codex-model-policy.sh
 
 # Recursion guard: workers must never spawn agents. Every launcher exports
 # POKEBENCH_ROLE to its agent, and the agent's shells inherit it — so a worker
@@ -62,7 +64,8 @@ Usage: tools/run-subagent.sh [options] "step brief for the worker"
   -M, --max-mode        Codex all-Sol profile: fixes the model at
                         gpt-5.6-sol and defaults effort to xhigh
   -m, --model NAME      worker model (provider default)
-  -e, --effort EFFORT   Codex reasoning effort (high; max mode also xhigh)
+  -e, --effort EFFORT   Codex reasoning effort (Terra/Luna=max; Sol=high;
+                        max mode also permits Sol/xhigh)
   -w, --worktree        alias for --lane side
       --animation-worktree
                         alias for --lane animation
@@ -199,9 +202,13 @@ case "$PROVIDER" in
         exit 2
       fi
     else
-      REASONING_EFFORT="${REASONING_EFFORT:-high}"
-      if [[ "$REASONING_EFFORT" != "high" ]]; then
-        echo "run-subagent: ordinary Codex worker effort is fixed at high (got '$REASONING_EFFORT')" >&2
+      if ! REQUIRED_CODEX_EFFORT="$(pokebench_codex_ordinary_effort "$MODEL")"; then
+        echo "run-subagent: unsupported ordinary Codex worker model '$MODEL' (allowed: gpt-5.6-terra, gpt-5.6-luna, gpt-5.6-sol)" >&2
+        exit 2
+      fi
+      REASONING_EFFORT="${REASONING_EFFORT:-$REQUIRED_CODEX_EFFORT}"
+      if [[ "$REASONING_EFFORT" != "$REQUIRED_CODEX_EFFORT" ]]; then
+        echo "run-subagent: ordinary Codex model '$MODEL' requires effort '$REQUIRED_CODEX_EFFORT' (got '$REASONING_EFFORT')" >&2
         exit 2
       fi
     fi

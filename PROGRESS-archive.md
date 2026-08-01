@@ -1,3 +1,46 @@
+## 803 — [bounded worker, 2026-07-31 ~night] ISSUES #39 rank-6 slice 2 (turn 2) LANDED — third attempt, both blockers root-caused
+
+- **State:** master at `4c793748` — tree clean, tsc/build clean, focused
+  vitest (battleScene 227/battleMenu 121/fightSubmenu 57/
+  factoryBattleStartIntro 5/executableFrontierRatchet 6) 416/416 passed (20
+  fewer than 802's baseline — obsolete ON-fit pixel pins for now-deleted
+  class-(c) mechanisms removed, surviving class-(b) pins re-derived at their
+  new OFF ticks). One commit (code+tests+traces); this docs commit follows.
+- **Did:** restored attempt 2's salvaged 16-edit plumbing (banked in
+  entry 802) plus a missing prerequisite the salvage didn't capture — six
+  `turn2SubmenuBounceTick`/`turn2KickoffBounceTick` call sites in
+  `battleScene.ts` still needed the explicit OFF `redrawDelay` override
+  (only the two function definitions were salvaged). That restored the
+  documented 210/256 plateau, then root-caused the real blocker as TWO bugs,
+  not one: (1) Onix's own hit-flash **flicker** (`endeavorOnixInvisible`) is
+  class (b) and survives — missing entirely from both prior attempts'
+  analysis, paired with the already-known healthbox wobble via the identical
+  hit-flash anchor+1 (RAM-confirmed both first flip RAM tick 3026/3027,
+  mirroring the ON fit's own 118/119); fixed via `eraseSpriteFootprint`. (2)
+  `drawMenuHealthboxPlayer(fb,0,dy)` never erased the nominal position
+  before drawing translated content — safe everywhere else (always over a
+  fresh background) but wrong against `menuIdleBase`'s flat harvest; fixed
+  with a new `drawMenuHealthboxPlayerWobble` primitive (erase-then-redraw,
+  same shape `drawOpponentHealthboxWobble` already uses). Also found the
+  ENDEAVOR/DRAGON_BREATH text handoff has zero blank ticks (both delays are
+  155, a same-frame swap) — the two prior attempts' own "156"/"blank tick"
+  claim was an off-by-one, corrected via direct oracle pixel comparison.
+  Acceptance: `turn2-endeavor-off.json` 256/256, `turn2-dragonbreath-
+  off.json` 237/237, both EXACT; insurance `turn5-rockslide.json`/`turn8-
+  bind-a.json` 256/256 each, zero regression. Retired
+  `turn2-{endeavor,endeavor-drain,dragonbreath}.json`; kept
+  `turn2-dragonbreath-projectiles.json` (ISSUES #60 domain). Tier-1 pin
+  added (re-timed "S7 slice E1 tail" wobble+flicker block) per AGENTS.md's
+  negative-dy-blit rule.
+- **Next:** rank-6 slices 3/4 (turns 3-4) remain fully unstarted, next in
+  order. Turns 5-8 remain explicitly out of rank-6's scope per the adopted
+  policy.
+- **PAPERCUT:** the salvaged-edits JSON from entry 802 was incomplete (16
+  edits captured, but 6 call-site edits for the bounce-fix were missing) —
+  cost ~10 minutes reconstructing them by comparing old/new call-site
+  argument counts. Future salvage-and-reapply should diff the FULL file
+  against a known-good base rather than trusting a partial edit list.
+
 ## 802 — [bounded worker, 2026-07-31 ~night] ISSUES #39 rank-6 slice 2 (turn 2) RETRY — every timing constant now pinned, still NOT landed — new blocker found, reverted
 
 - **State:** master unchanged from `01eac159` (slice 1) — tree is clean,
