@@ -1,5 +1,34 @@
 # Animation coverage
 
+## Front `ANIM_H_SLIDE_SLOW` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2t is exact for all **7 selector mappings / 7
+Factory-reachable species**, with **zero outside-Factory mappings**: WEEDLE,
+PARAS, GRIMER, EXEGGCUTE, MR_MIME, SUDOWOODO, NINJASK. WEEDLE is the
+representative and NINJASK the sibling; every prior accepted front family
+remains regression-pinned. Move coverage stays **107 exact / 0 partial / 0
+staged / 169 unsupported** and `ANIMATION_COVERAGE.json` remains byte-identical
+at SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:911-939,1131-1153,
+3665-3669,4118-4122` proves task-zeroed data, slow initializer data0=80,
+normal-front `sDontFlip=TRUE`, both `TryFlipX` no-ops, and all **81 active
+callbacks** (data2=0..80) with C-truncated `(data2*384/80)%256` indices and
+amplitude-6 GBA sine x2 writes. Tick 81 clears x2, installs `WaitAnimEnd`, and
+increments data2 to 82. The distinct normal data0=40 and fast data0=20
+initializers remain explicitly unaccepted. Fresh complete legal Scene-ON
+parties settle both species at x2=0/y2=0/animNum=1/`SpriteCallbackDummy`.
+Paired raw outputs are byte-identical with no EOF newline: WEEDLE SHA-256
+`ddf75e4d3e1dad7197ca10ddae1cb595c732d84c4abb5af3e60bd24906d120dd`,
+NINJASK `830d8fbd9726a2c15d951a66350390d444737c5872723bb17ab7c847f39bab45`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per legal party; raw `cmp`; focused family plus
+both ratchets **177/177**; TypeScript no-emit and diff checks green; exactly one
+full `npm test` **567 files, 5869 passed + 1 skipped** and one `npm run build`
+green. The next generated-census/source-ranked front family is
+**`ANIM_CIRCULAR_STRETCH_TWICE`** (6 Factory species).
+
 ## Front `ANIM_FLASH_YELLOW` terminal family accepted (2026-08-01)
 
 **Verdict / counts:** rung 2s is exact for all **7 selector mappings / 7
