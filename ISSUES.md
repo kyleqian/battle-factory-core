@@ -210,76 +210,47 @@ turn-1 pins retired (`git rm`). Turn-2 boundary insurance traces
 (`turn2-endeavor.json`/`turn2-dragonbreath.json`) were found ALREADY
 red on master pre-change (a pre-existing, unrelated generated-route
 crash — confirmed byte-identical via `git stash`, not a regression
-from this slice). **Slice 2 (turn 2) attempted twice (2026-07-31 evening, 2026-07-31 night),
-NEITHER landed — reverted to slice 1's clean state both times, no commit.**
-Real findings banked here so the next attempt doesn't re-derive them.
-**Fully resolved by the night attempt** (items 1 and 3-4 of the evening
-attempt's own list): (1) the cross-turn bounce bug (`turn2SubmenuBounceTick`/
-`turn2KickoffBounceTick` hardcoding `ROCK_SLIDE_MENU_REDRAW_DELAY`=664
-instead of slice 1's OFF 429) — fix verified, a defaulted `redrawDelay`
-param threaded through both functions plus their six turn-2-only call
-sites, same idiom slice 1 used for `statsBannerEva`. (3)+(4) EVERY
-DRAGON_BREATH/ENDEAVOR OFF timing constant is now pinned exactly
-(pressTick=2945), the RAM-probe recommendation the evening attempt made
-paid off in one pass (`tools/probe/dump-turn2-dragonbreath-off.py`, kept,
-committed): ENDEAVOR HP-drain start delay 116 (RAM sentinel tick 3061);
-ENDEAVOR-to-DRAGON_BREATH blank seam at delay 155/156 (a single blank
-tick, not ROCK_SLIDE's 7-tick gap); DRAGON_BREATH hit-flash anchor 219
-(ON 318, pixel-confirmed first-differing frame 3165 via a `bin/oracle
-run` + PIL scout); DRAGON_BREATH HP-drain start delay 254 (ON 353, RAM
-sentinel tick 3199, "probe-exact" same as `ROCK_SLIDE_HP_DRAIN_START_
-DELAY`'s own convention); DRAGON_BREATH text-clear delay 285 and
-menu-redraw delay 292 (ON 384/391, pixel-confirmed via a dense sha scout
-+ PIL diff: an 856px glyph-only change at render 3230, a 5983px hard-cut
-swap at render 3237 — matches turn 1's own "~6000px" redraw magnitude
-and its 7-tick clear-to-redraw gap almost exactly, close to `docs/
-rank6-off-ground-truth.md` §5's ~285 estimate). Also independently
-RAM/pixel-confirmed: Grovyle's own sprite `x2`/`y2` and OBJ palette
-entry 1 stay flat throughout 3090-3260, confirming DRAGON_BREATH's own
-target shake (`AnimTask_ShakeMon2`) and red-fade blend
-(`AnimTask_BlendBattleAnimPal`) — NOT just the fire-projectile stream —
-are class (c) for turn 2, same as the projectiles; both plus their call
-site were deleted (`dragonBreathShakeX2`/`dragonBreathBlendCoeff` and
-their six constants), not just skipped.
-**Still NOT landed — a NEW, deeper blocker surfaced correcting item (2)
-of the evening attempt's own claim**: `drawEndeavorSquish`'s body is
-**not** entirely class (c) for turn 2 as previously stated. Onix's own
-generic post-hit healthbox wobble (`endeavorHealthboxBounceY2`, the
-SAME "class (b) wobble survives, class (c) shake/squish doesn't" split
-ROCK_SLIDE's and DRAGON_BREATH's own hit-flash pairs already establish)
-is RAM/pixel-confirmed STILL ACTIVE under OFF (`healthbox0Y2` alternates
-+1/-1 for 20 ticks starting render 3027, i.e. OFF anchor 81 vs ON 118) —
-skipping `drawEndeavorSquish` entirely (the evening attempt's own
-recommended treatment) therefore under-renders this window. Re-adding
-just the wobble (via a direct `drawMenuHealthboxPlayer(fb, 0, wobbleY2)`
-call, since `drawPlayerHealthboxHpOverlay`'s own no-op-at-full-HP guard
-never fires here — Onix's hp is still the anchor value throughout this
-whole wobble span, the drain starts 35 ticks later) reduced most
-mismatching frames from ~1700-3200px to a 103px residual, BUT frames
-where `wobbleY2` is specifically **-1** (not +1) still show a much larger
-~1767px diff spanning the ENTIRE upper playfield (both mons' own
-regions, not just the player healthbox) — i.e. calling
-`drawMenuHealthboxPlayer(fb, 0, -1)` as an overdraw on top of
-`drawActionMenuIdleContent`'s own flat harvest does something visibly
-wrong well outside the healthbox's own bounding box. NOT root-caused
-this session (out of time) — leads for the next attempt: (a) check
-whether `drawMenuHealthboxPlayer`'s own sprite-blit treats negative `dy`
-differently than `drawEndeavorSquish`'s OWN unconditional call to the
-same function with the same possibly-negative value (which presumably
-already passes turn 3/turn 5's own still-ON acceptance, so the function
-itself is unlikely to be broken in isolation — more likely an
-interaction specific to OVERDRAWING it on top of the flat harvest rather
-than building the frame from primitives the way `drawEndeavorSquish`
-does); (b) the even-parity 103px residual (present at `wobbleY2`=+1
-frames too) suggests a further small pixel-alignment issue beyond just
-"which frames get the overdraw call" — not yet isolated. Given neither
-trace reached 256/256, this attempt's own `src/` edits were reverted in
-full (including the otherwise-solid item-1 bounce fix and all the newly
-pinned constants above) per the brief's own hard rule — a half-flipped
-turn is not a landing. The RAM probe script
-(`tools/probe/dump-turn2-dragonbreath-off.py`) IS kept/committed (no
-`src/` risk) since it's what found every constant above in one pass and
-will save the next attempt real time. Earlier
+from this slice). **Slice 2 (turn 2) executed 2026-07-31 night (`4c793748`,
+third attempt after two reverted investigations):** ENDEAVOR's attacker
+squish/blend/droplets/hitsplat/target-shake and DRAGON_BREATH's own
+target-shake/red-fade-blend/fire-projectile stream (all class c) deleted
+from turn 2's own window; the cross-turn bounce bug (`turn2SubmenuBounceTick`/
+`turn2KickoffBounceTick` hardcoding ON's `ROCK_SLIDE_MENU_REDRAW_DELAY`=664
+instead of slice 1's OFF 429) fixed via a defaulted `redrawDelay` param
+threaded through both functions plus their six turn-2-only call sites; every
+surviving class-(b) ENDEAVOR/DRAGON_BREATH OFF timing constant pinned exactly
+against a fresh RAM probe (`tools/probe/dump-turn2-dragonbreath-off.py`,
+pressTick=2945): ENDEAVOR HP-drain start 116, healthbox-wobble anchor 81,
+ENDEAVOR-to-DRAGON_BREATH text handoff 155/155 (a same-frame swap, NOT a
+blank tick — the two prior attempts' own "156"/"single blank tick" claim was
+an off-by-one in their own pixel scout, corrected here via direct oracle
+comparison), DRAGON_BREATH hit-flash anchor 219, HP-drain start 254,
+text-clear 285, menu-redraw 292. The blocker that stalled both prior
+attempts (a ~1767px corruption on `wobbleY2`=-1 frames) root-caused as TWO
+separate bugs, not one: (1) Onix's own hit-flash **flicker**
+(`endeavorOnixInvisible`, class b, paired with the wobble via the identical
+hit-flash anchor +1 — RAM-confirmed both signals first flip on RAM tick
+3026/3027, the exact 118/119 relationship the ON fit already shows) was
+missing entirely — the prior attempts' own analysis never considered it,
+and the corruption was never actually about the wobble's sign, just
+coincidentally correlated with it (both start the same RAM tick); fixed via
+`eraseSpriteFootprint` (an existing shared primitive) whenever the flicker
+is active. (2) `drawMenuHealthboxPlayer(fb, 0, dy)`'s translated-content
+blit never erases the nominal (dy=0) position first — safe at every
+existing call site (always composited over a fresh plain background) but
+wrong here, the first caller compositing on top of `menuIdleBase`'s flat
+harvest (which bakes the healthbox in at dy=0 already) — a real negative-dy
+blit bug (the 103px even-parity residual both prior attempts flagged but
+didn't isolate), fixed with a new `drawMenuHealthboxPlayerWobble` primitive
+using the same erase-then-redraw two-pass shape `drawOpponentHealthboxWobble`
+already established for the opposite side. Both fixes are pinned by a
+Tier-1 test (re-timed "S7 slice E1 tail" block, AGENTS.md's negative-dy-blit
+rule). Acceptance: `turn2-endeavor-off.json` 256/256, `turn2-dragonbreath-
+off.json` 237/237, both EXACT; insurance `turn5-rockslide.json`/`turn8-
+bind-a.json` 256/256 each, zero regression on `drawEndeavorSquish`'s/
+`drawMenuHealthboxPlayer`'s still-ON callers. `turn2-{endeavor,endeavor-
+drain,dragonbreath}.json` retired (`git rm`); `turn2-dragonbreath-
+projectiles.json` kept (ISSUES #60 domain, untouched). Earlier
 progress:
 `turn13-sandattack.json`'s complete captured
 SAND_ATTACK content now resolves its kickoff and opponent-target accuracy-fall
@@ -305,6 +276,13 @@ events as a proof of the seam; that conversion, window by window, is the
 retirement path. AGENTS.md already forbids adding new turn-keyed branches.
 
 ## #60 — `turn2-endeavor.json`/`turn2-dragonbreath.json` already red on master, unrelated to the canonical dispatcher
+
+**Repro note (2026-07-31 night):** both named traces were retired by rank-6
+slice 2's landing (`4c793748`, superseded by `turn2-endeavor-off.json`/
+`turn2-dragonbreath-off.json`, unrelated to this entry's own generated-route
+bug). To reproduce: `git show 01eac159:tools/compare/traces/turn2-
+endeavor.json > /tmp/t.json` (or `...turn2-dragonbreath.json`), then `npm
+run compare -- /tmp/t.json`.
 
 **Discovered** 2026-07-31 (rank-6 slice 1's own boundary-insurance check).
 Both traces render through `core.ts`'s `renderWithoutFactoryTerminal` ->

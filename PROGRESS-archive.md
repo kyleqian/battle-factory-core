@@ -1,3 +1,99 @@
+## 798 — [bounded worker, 2026-07-31 ~17:50] ISSUES #59 FIXED: generated-route opponent stat-drop crash — presentation-seam gap, not kernel
+
+- **State:** master green — tsc clean, focused vitest (battleResolutionPresentation
+  17, battleScene 247, battleMenu 121, battleCommandGeneratedOffEvidence 2,
+  factoryRoundBattleOrchestrator 30, fightSubmenu 57, factoryBattleStartIntro 5)
+  green, ratchet 6/6 (unchanged — presentation-only fix, no kernel barrier
+  moved), full `npm test` **567 files / 5722 passed + 1 skipped** (+1 over
+  797's baseline), build clean.
+- **Root cause was presentation, not kernel.** EFFECT_ATTACK_DOWN_2's real
+  script (`BattleScript_EffectAttackDown2` -> `EffectStatDown`) only calls
+  `statbuffchange`/`playanimation(B_ANIM_STATS_CHANGE)`/`jumpifstatus2
+  (STATUS2_SUBSTITUTE)` — all already registered generically (confirmed by
+  source read + existing TAIL_WHIP/Swords Dance kernel tests; no kernel gap,
+  no new kernel test needed). The real halt: `renderBattleResolutionSceneOffView`
+  (`battleScene.ts`) — the generated route's actual production render path
+  (`core.ts` `renderWithoutFactoryTerminal` -> `battleResolutionPresentation`
+  -> `drawScene`) — hard-asserted its `"stat"` effect branch to exactly
+  `battler===0 && stat==="accuracy" && decreasing` (the turn13 SAND_ATTACK
+  precedent only), throwing `Scene OFF typed stat adapter cannot draw battler
+  ${b} ${stat} ${from}->${to}` for every other stat. Any opponent-inflicted
+  non-accuracy stat drop on the player's battler (FEATHER_DANCE's ATK, or any
+  other stat-down move) crashed there — the generated route never runs the
+  turn-keyed canonical staging modules (`turn6/78/11FeatherDancePresentation
+  Staging.ts`) that only cover the fixed canonical battle.
+- **Reproduced first (STEP 1):** a hand-authored `{battler:0, stat:"attack",
+  from:6, to:4}` stat-stage-change event (FEATHER_DANCE's real ATK-2 shape)
+  fed through the real `projectBattleResolutionCommands` ->
+  `createBattleResolutionPresentationRenderView` -> `renderBattleResolutionSceneOffView`
+  pipeline threw exactly `Scene OFF typed stat adapter cannot draw battler 0
+  attack 6->4` pre-fix — confirmed by running the assertion before touching
+  source.
+- **Fix:** generalized the guard to `battler !== 0 || not-decreasing` (a rise,
+  or a drop on the OPPONENT's own battler, still barriers — deliberately out
+  of scope); replaced the hardcoded-Onix-sprite `drawTurn13SandAttackAccBanner`
+  draw with the already-generic `drawStatDecreaseBannerForBattlerPalette`
+  primitive (same one turn6/turn13/Shuckle callers already use), parameterized
+  by the real battler's own live field-art sprite tileset + corner
+  (`view.fieldArt.player.pic.tileset`/`.origin`, per-species already) and a
+  new `statAnimBannerDecreasePalette(stat)` lookup into the already-extracted
+  7-palette `stat-anim-banner.json` asset. No turn-keyed or species-keyed
+  branch added.
+- **Family coverage:** covers every stat a legal opponent stat-down move can
+  name landing on the player's battler, not a FEATHER_DANCE special case —
+  Tier-1 pinned in `tests/battleResolutionPresentation.test.ts` with both ATK
+  (FEATHER_DANCE's real shape) and SPECIAL_DEFENSE (proving the family), plus
+  regression coverage that a rise and an opponent-target drop still barrier.
+- **Canaries** (re-run fresh): battleScene.test.ts 247/247,
+  battleCommandGeneratedOffEvidence.test.ts 2/2, factoryRoundBattleOrchestrator.test.ts
+  30/30 — all green, no regressions.
+- **Next:** supervisor picks the next step; #56 frame-444 MAGNETON regression
+  and the idle-bounce phase family remain open per their own entries.
+- **SUPERVISOR WIND-DOWN (session close 2026-07-31 ~18:00; this
+  addendum supersedes all of today's evening entries as the resume
+  point):**
+  - **Session totals: 6 rounds (5 paired + 1 bonus) / 11 workers
+    (M9-M14, S9-S13) / 0 failed steps.** Final gate run by supervisor
+    on this tree: **5722 passed + 1 deliberate skip / 567 files**,
+    build clean, ratchet 6/6, tree clean at this commit. DEFERRED.md
+    empty ALL session. Animation fold delta **0** at orient AND at
+    wind-down (animation-main still at `555bab3f`); only the permanent
+    `.worktrees/animation-main` remains; no orphan branches.
+  - **Headline: #39 rank-5 EXECUTED same-day** (user's Option A,
+    adopted this morning): turns 9-12 all Scene-OFF-owned (`8802fcb6`,
+    `329f8320`, `59a3fa7d`), 8 OFF windows EXACT, 11 legacy ON pins
+    retired, residuals all ONE root-caused mechanism (idle-bounce
+    phase; verdict (b) — closes with ranks 6-8 OFF re-timing;
+    `TURN8_MENU_REDRAW_DELAY` real OFF ≈434 banked; S13 measured the
+    same overcount at turns 1-4: 429/285/525/427 vs ON-fit
+    664/391/669/661).
+  - **Also landed:** #56 frame 536 FIXED (YOSHI 700/751; 444
+    regression-blocked w/ MAGNETON-probe lead banked); turn17-rung1
+    90/118 → **112/118** (last 6 frames = phase family; S12's doc
+    corrected in place); five-table animation handoff EXTRACTED
+    (animation rung 2 unblocked); rank-6 turns 1-4 OFF ground truth
+    banked (10 traces, zero desync); **#59 user-reported FEATHER_DANCE
+    crash FIXED same-day** (entry deleted per lifecycle; generic
+    opponent-side stat-drop family, presentation-side).
+  - **User reports this session (both addressed):** missing send-out
+    ball animation = the known send-out intro program (rung 1 landed
+    today; animation lane's top priority, and note Scene OFF does NOT
+    suppress send-outs in the real game — OFF windows need it too);
+    FEATHER_DANCE crash = fixed above.
+  - **Next session (ordered):** (i) **rank-6 pin policy question for
+    the user** (same shape as rank-5's: adopt Scene-OFF pins for turns
+    1-4 and retire their ON pins as rank 6 executes? Turns 1-4 are the
+    app's most deeply ON-fit region and their ON pins all pass today;
+    the S13 doc + 10 banked OFF traces make execution turnkey on
+    adoption) — then rank-6 execution, which ALSO closes the phase
+    family's turn-1-4 share; (ii) #56 frame-444 MAGNETON-side
+    `gSprites[6]` RAM probe → real discriminator → land the fix behind
+    the 751-frame regression; (iii) turn9/11/12-menu OFF pins once
+    phase closes (S9 landmark data banked); (iv) #56 +6 route term;
+    (v) rank 7 (FLY) / rank 8 (burn projection) inventory rows. #55
+    parked. No DEFERRED entries — the rank-6 policy question is a
+    start-of-work decision, not a blocker (rank-5 precedent).
+
 ## 799 — [bounded worker, 2026-07-31 ~18:05] ISSUES #56 item 2: MAGNETON-side RAM probe run — discriminator NOT pinned clean, no fix landed (probe-only step)
 
 - **State:** master green — tsc clean, focused vitest (factoryBattleStartIntro
