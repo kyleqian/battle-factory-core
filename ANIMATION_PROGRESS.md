@@ -1,5 +1,34 @@
 # Animation coverage
 
+## Front `ANIM_H_JUMPS_V_STRETCH` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2j is exact for all **10 selector mappings / 10
+Factory-reachable species**, with **zero outside-Factory mappings**. MANKEY is
+the representative and WYNAUT the sibling; all prior front families remain
+regression-pinned. Move coverage stays **107 exact / 0 partial / 0 staged / 169
+unsupported** and `ANIMATION_COVERAGE.json` is byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:911-939,1031-1064,
+2755-2868,3805-3815` proves the normal-front `sDontFlip=TRUE` path,
+`AddNewAnim` defaults, and the single-run data=-1/runs=1 distinction from
+`_Twice`'s data=1/runs=2. The source-order reducer pins affine start; `_0`
+active ticks 0-10 and strict transition 11; `_1` active ticks 12-60 and
+transition 61; `_2` active ticks 62-72; then tick 73's x2/y2/identity-affine/
+`ResetSpriteAfterAnim`/`WaitAnimEnd` cleanup and final data2 increment to 144.
+Every C-truncated jump, sine, scale, counter, phase reset, and normal-front
+`TryFlipX` boundary is pinned. Fresh complete legal Scene-ON parties settle
+both species at x2=0/y2=0/animNum=1/`SpriteCallbackDummy`. Paired direct raw
+outputs are byte-identical with no EOF newline: MANKEY SHA-256
+`dd828c5122f1693d1a947794c315648eb3fd1edbb15b0d988667d9de8ffb5161`,
+WYNAUT `0998becc3884e86138b282f1a17b153827575583adeac15283618a98b2bc9d61`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per party; raw `cmp`; focused family/boundary/
+ratchet tests **81/81**; exactly one full `npm test` **567 files, 5773 passed +
+1 skipped** and `npm run build` green. The next generated-census/source-ranked
+front family is **`ANIM_BOUNCE_ROTATE_TO_SIDES_SLOW`** (9 Factory species).
+
 ## Front `ANIM_V_JUMPS_SMALL` terminal family accepted (2026-08-01)
 
 **Verdict / counts:** rung 2i is exact for all **10 selector mappings / 10
