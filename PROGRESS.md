@@ -15,10 +15,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 809 — [bounded worker, 2026-07-31 ~night] ISSUES #56 item 2 raw-clock/discriminator checkpoint; no unsafe presentation fit landed
 
-- **State:** evidence+Tier-1 checkpoint follows in this commit; production
-  `src/` is intentionally unchanged. Baseline full suite was green
-  (**567 files, 5708 passed + 1 skipped**); focused
-  `factoryBattleStartIntro` is green (**6/6**).
+- **State:** evidence commit `822522c7`; production `src/` is intentionally
+  unchanged. Focused factoryBattleStartIntro/issue56ActionMenuHandoffFrame/
+  battleScene/ratchet is **241/241**; full `npm test` is green (**567 files,
+  5709 passed + 1 skipped**) and build is green.
 - **Did:** RAM-valid OAM/task receipt pins interactive-generated-intro-off's
   real abs-1492 summary destroy to semantic handoff source `t=1459`, so
   `rawElapsed=31` exactly. Extended the reusable probe with source task and
@@ -32,10 +32,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   receipt that distinguishes the two synced cases before a typed per-widget
   bar/icon lifecycle can be populated; frame-444's separate materialize
   column shift remains out of this branch.
-- **Notes:** removing the current special case still makes the exact
-  interactive 1492 neighborhood fall **9/9 → 8/9** (3px at 165,42–167,43),
-  while it improves YOSHI's bar subregion; this is why no behavior change
-  was committed. No ratchet pin moved and no unsupported branch was added.
+- **Notes:** fresh dense holds: interactive **715/715**, command **128/128**,
+  YOSHI **700/751** (444 neighborhood **10/11**, 536 **16/16**), MAGNETON
+  **703/751** (437 **11/11**). Removing the special case makes interactive
+  1492 **9/9 → 8/9** (3px at 165,42–167,43), while improving YOSHI's bar
+  subregion; no behavior change is honest. No ratchet pin moved and no
+  unsupported branch was added.
 - **PAPERCUT:** none.
 
 ## 808 — [bounded worker, 2026-07-31 ~night] ISSUES #61 DMA reveal boundary characterized; no unsafe global fix landed
