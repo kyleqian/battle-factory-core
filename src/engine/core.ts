@@ -157,6 +157,10 @@ import {
   partySendOutBattleMenuReady,
 } from "./partySelect.ts";
 import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "./turn15FlyResolutionAdapter.ts";
+import {
+  isTurn13NextCommandHandoffReady,
+  resolveTurn13CompletedResolutionNextCommandHandoff,
+} from "./turn13ResolutionAdapter.ts";
 import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "./turn16FirePunchResolutionAdapter.ts";
 import {
   advanceBattleSceneForcedPartySelect,
@@ -1085,7 +1089,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let turn10Resolved = battleScene.turn10Resolved;
     let turn11Resolved = battleScene.turn11Resolved;
     let turn12Resolved = battleScene.turn12Resolved;
-    let turn13Resolved = battleScene.turn13Resolved;
+    let turn13NextCommandHandoff = battleScene.turn13NextCommandHandoff;
     let lockedActionOwner = battleScene.resolutionOwner ?? null;
     let terminalResolution = battleScene.terminalResolution ?? null;
     if (fightSubmenu.openElapsed === null) {
@@ -1368,7 +1372,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn12Resolved = true;
     } else if (
       turn12Resolved &&
-      !turn13Resolved &&
+      !isTurn13NextCommandHandoffReady(turn13NextCommandHandoff) &&
       fightSubmenu.confirmElapsed !== null &&
       newKeys.has("A") &&
       sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN13_DRAGONBREATH_MENU_REDRAW_DELAY
@@ -1381,13 +1385,17 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // confirm left it) - no further nav needed, docs/turn14-notes.md's
       // own "cursor persisted... NO DOWN press this turn" ledger. Mirrors
       // `turn12Resolved`'s own branch exactly, per the brief.
-      fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen), 2);
-      turn13Resolved = true;
+      turn13NextCommandHandoff = resolveTurn13CompletedResolutionNextCommandHandoff();
+      fightSubmenu = openFightSubmenu(
+        battleScene.elapsed + 1,
+        activeMonMoveset(draftScreen),
+        turn13NextCommandHandoff.persistedMoveSlot,
+      );
       lockedActionOwner = createBattleSceneResolutionOwner(
         CANONICAL_OPPONENT_FLY_RESOLUTION.chargeResolution,
       );
     } else if (
-      turn13Resolved &&
+      isTurn13NextCommandHandoffReady(turn13NextCommandHandoff) &&
       lockedActionOwner?.resolution.segmentIndex === 0 &&
       fightSubmenu.confirmElapsed !== null &&
       newKeys.has("A") &&
@@ -1399,8 +1407,8 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // confirm) - a fresh A-press reopens FIGHT for turn 15, cursor
       // persisted at slot 2 (DRAGON_BREATH, unchanged since turn 13/14) -
       // no further nav needed, docs/turn15-notes.md's own "cursor
-      // persisted... no nav" ledger. Mirrors `turn13Resolved`'s own branch
-      // exactly, per the brief.
+      // persisted... no nav" ledger. The typed turn-13 handoff remains the
+      // predecessor guard through this retained FLY-charge window.
       fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen), 2);
       lockedActionOwner = createBattleSceneResolutionOwner(
         CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution,
@@ -1493,7 +1501,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn10Resolved,
       turn11Resolved,
       turn12Resolved,
-      turn13Resolved,
+      turn13NextCommandHandoff,
       resolutionOwner: lockedActionOwner,
       terminalResolution,
     };

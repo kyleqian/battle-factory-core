@@ -47,6 +47,7 @@ import {
   CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
 } from "../src/engine/partySelect.ts";
 import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "../src/engine/turn15FlyResolutionAdapter.ts";
+import { resolveTurn13CompletedResolutionNextCommandHandoff } from "../src/engine/turn13ResolutionAdapter.ts";
 import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "../src/engine/turn16FirePunchResolutionAdapter.ts";
 import {
   beginBattleSceneForcedPartySelect,
@@ -146,7 +147,7 @@ function stateAtTick(firstTickAbsolute: number): EngineState {
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
-    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false },
+    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null },
   };
 }
 
@@ -155,6 +156,41 @@ function press(state: EngineState, buttons: GbaButton[]): EngineState {
 }
 
 describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gating, 1-tick lag, B-close resume)", () => {
+  it("installs the typed turn-13 handoff and its FLY owner together before reopening FIGHT on the persisted DRAGON_BREATH slot", () => {
+    const initial = createInitialState({ appRoute: "canonical-recorded" });
+    const turn13Confirmed = confirmFightMove(openFightSubmenu(1, ONIX_MOVESET, 2), 1);
+    const state = tick({
+      ...initial,
+      draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
+      battleScene: {
+        ...INITIAL_BATTLE_SCENE_STATE,
+        elapsed: 20_000,
+        sendOutPressElapsed: 380,
+        fightSubmenu: turn13Confirmed,
+        turn1Resolved: true,
+        turn2Resolved: true,
+        turn3Resolved: true,
+        turn4Resolved: true,
+        turn5Resolved: true,
+        turn6Resolved: true,
+        turn7Resolved: true,
+        turn8Resolved: true,
+        turn9Resolved: true,
+        turn10Resolved: true,
+        turn11Resolved: true,
+        turn12Resolved: true,
+      },
+    }, new Set(["A"]));
+
+    expect(state.battleScene!.turn13NextCommandHandoff).toEqual(
+      resolveTurn13CompletedResolutionNextCommandHandoff(),
+    );
+    expect(state.battleScene!.fightSubmenu.cursor).toBe(2);
+    expect(state.battleScene!.resolutionOwner?.resolution).toBe(
+      CANONICAL_OPPONENT_FLY_RESOLUTION.chargeResolution,
+    );
+  });
+
   it("completed forced SEND OUT resets the stale turn-15 choice and the next A opens ordinary FIGHT with MAGBY's real moveset", () => {
     const initial = createInitialState({ appRoute: "canonical-recorded" });
     const staleTurn15Choice = confirmFightMove(openFightSubmenu(19000, ONIX_MOVESET, 2), 19030);
@@ -259,7 +295,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
       false,
       false,
       false,
-      false,
+      null,
       null,
       CANONICAL_FIRE_PUNCH_RESOLUTION.resolution,
     )[0]).toBe(14);
@@ -493,7 +529,7 @@ function stateAtTurn3Reopen(firstTickAbsolute: number): EngineState {
     turn7Resolved: false,
     turn8Resolved: false,
     turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
-    turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false,
+    turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null,
     },
   };
 }
@@ -616,7 +652,7 @@ function stateAtTurn3Confirm(): EngineState {
     turn7Resolved: false,
     turn8Resolved: false,
     turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
-    turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false,
+    turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null,
     },
   };
 }
@@ -788,7 +824,7 @@ function stateAtTurn4Confirm(): EngineState {
     turn7Resolved: false,
     turn8Resolved: false,
     turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
-    turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false,
+    turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null,
     },
   };
 }
@@ -818,7 +854,7 @@ function stateAtTurn5Confirm(): EngineState {
     turn7Resolved: false,
     turn8Resolved: false,
     turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
-    turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false,
+    turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null,
     },
   };
 }
@@ -909,7 +945,7 @@ function stateAtTurn5SitrusConfirm(): EngineState {
     turn7Resolved: false,
     turn8Resolved: false,
     turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
-    turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false,
+    turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null,
     },
   };
 }

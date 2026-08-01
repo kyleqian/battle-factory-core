@@ -127,17 +127,18 @@ describe("turn13ResolutionAdapter: #39 rank-2 kernel-to-typed-owner equivalence 
 
     it("owns the turn-14 submenu's post-turn-13 DRAGON_BREATH PP receipt, not the already-completed FLY charge owner", () => {
       const onix = rentalMoveset("ONIX");
-      const legacyPredecessorPp = currentPPForActiveMon(
+      const handoff = resolveTurn13CompletedResolutionNextCommandHandoff();
+      const predecessorPp = currentPPForActiveMon(
         onix,
         true, true, true, true, true, true, true,
-        true, true, true, true, true, true,
+        true, true, true, true, true,
+        handoff,
       )[2];
       const chargeOwnerPp = CANONICAL_OPPONENT_FLY_RESOLUTION
         .chargeResolution.segments[0]!.afterRules.rulesContext.battlers[0]!.pp[2];
-      const handoff = resolveTurn13CompletedResolutionNextCommandHandoff();
 
-      expect(legacyPredecessorPp).toBe(18);
-      expect(handoff.dragonBreathPp).toEqual({ current: legacyPredecessorPp, max: 20 });
+      expect(predecessorPp).toBe(18);
+      expect(handoff.dragonBreathPp).toEqual({ current: predecessorPp, max: 20 });
       expect(chargeOwnerPp).toBe(17);
       expect(handoff.dragonBreathPp.current).not.toBe(chargeOwnerPp);
     });

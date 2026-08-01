@@ -23,6 +23,7 @@
 
 import { rentalMoveset, type ActiveMonMoveset } from "./battleSetup.ts";
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
+import type { Turn13CompletedResolutionNextCommandHandoff } from "./turn13ResolutionAdapter.ts";
 
 /** `sText_GoPkmn` resolved for this save's rental pool (single line, fits `B_WIN_MSG`'s line 1 - never wraps to line 2). */
 export const GO_TEXT = "Go! ONIX!";
@@ -2570,7 +2571,7 @@ export function currentPPForActiveMon(
   turn10Resolved: boolean = false,
   turn11Resolved: boolean = false,
   turn12Resolved: boolean = false,
-  turn13Resolved: boolean = false,
+  turn13NextCommandHandoff: Turn13CompletedResolutionNextCommandHandoff | null = null,
   lockedActionResolution: BattleResolutionPresentationState | null = null,
   followingResolution: BattleResolutionPresentationState | null = null,
 ): readonly [number, number, number, number] {
@@ -2616,12 +2617,11 @@ export function currentPPForActiveMon(
     (turn10Resolved ? 1 : 0) +
     (turn11Resolved ? 1 : 0) +
     (turn12Resolved ? 1 : 0);
-  // S7/S8 turn 14 (docs/turn14-notes.md §3): `turn13Resolved` adds a SECOND
-  // slot-2 decrement - turn 13 also used DRAGON_BREATH (re-targeted at
-  // Pidgeotto), so by turn 14's own reopen it's been used twice (turns 2
-  // and 13, PP 20->18), matching docs/turn14-notes.md's own "PP shows
-  // 18/20 for DRAGON_BREATH" ledger exactly.
-  const slot2Uses = (turn2Resolved ? 1 : 0) + (turn13Resolved ? 1 : 0);
+  // The normal turn-2 decrement remains local. Turn 13's separate
+  // post-DRAGON_BREATH receipt is carried by its completed-resolution
+  // handoff, so the following submenu never needs to infer it from a later
+  // retained FLY owner.
+  const slot2Uses = turn2Resolved ? 1 : 0;
   const resolvedPlayerPp = lockedActionResolution?.segments[0]
     ?.afterRules.rulesContext.battlers[0]!.pp;
   const followingPlayerPp = followingResolution?.segments.at(-1)
@@ -2630,7 +2630,7 @@ export function currentPPForActiveMon(
   return [
     a - slot0Uses,
     turn8Resolved ? b - 1 : b,
-    resolvedPlayerPp?.[2] ?? c - slot2Uses,
+    resolvedPlayerPp?.[2] ?? turn13NextCommandHandoff?.dragonBreathPp.current ?? c - slot2Uses,
     d,
   ];
 }
