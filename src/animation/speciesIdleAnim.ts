@@ -47,6 +47,7 @@ export type SpeciesFrontAnimFamily =
   | "BOUNCE_ROTATE_TO_SIDES_SLOW"
   | "CIRCULAR_STRETCH_TWICE"
   | "GROW_VIBRATE"
+  | "GROW_IN_STAGES"
   | "FLASH_YELLOW"
   | "FLICKER_INCREASING"
   | "H_JUMPS"
@@ -80,6 +81,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "BOUNCE_ROTATE_TO_SIDES_SLOW",
   "CIRCULAR_STRETCH_TWICE",
   "GROW_VIBRATE",
+  "GROW_IN_STAGES",
   "FLASH_YELLOW",
   "FLICKER_INCREASING",
   "H_JUMPS",
@@ -360,6 +362,23 @@ export const FLICKER_INCREASING_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[]
       (species) => !factoryFrontSpecies.has(species),
     ),
   );
+
+/** All source selector mappings for `ANIM_GROW_IN_STAGES`. */
+export const GROW_IN_STAGES_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_GROW_IN_STAGES")
+    .map(([species]) => species),
+);
+
+/** The Factory-reachable staged-growth mappings (GENGAR and QWILFISH). */
+export const GROW_IN_STAGES_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  GROW_IN_STAGES_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** The staged-growth mappings outside the Factory pool (LUGIA). */
+export const GROW_IN_STAGES_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  GROW_IN_STAGES_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
 
 /** All 5 source selector mappings for the normal `ANIM_BOUNCE_ROTATE_TO_SIDES`. */
 export const BOUNCE_ROTATE_TO_SIDES_FRONT_SPECIES: readonly string[] = Object.freeze(
@@ -1236,6 +1255,41 @@ export interface FlickerIncreasingFrame extends SpeciesIdleOffset {
   readonly callback: "Anim_FlickerIncreasing" | "WaitAnimEnd";
 }
 
+export interface GrowInStagesFrame extends SpeciesIdleOffset {
+  readonly data0: 0;
+  readonly data2Before: number;
+  readonly data5Before: number;
+  readonly data6Before: number;
+  readonly data7Before: number;
+  readonly data2: 1;
+  readonly data5: number;
+  readonly data6: number;
+  readonly data7: number;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXCalls: 2;
+  readonly delayBranch: boolean;
+  readonly cScaleOffset: number | null;
+  readonly sineFunction: "Sin" | "Cos" | null;
+  readonly sineIndex: number | null;
+  readonly sineValue: number | null;
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly affineWriteCount: 0 | 1 | 2;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "Anim_GrowInStages" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+/** `InitAnimData`, called by `AddNewAnim`, source defaults adjacent to this family. */
+export const ADD_NEW_ANIM_DEFAULTS = Object.freeze({
+  rotation: 0,
+  delay: 0,
+  runs: 1,
+  speed: 0,
+  data: 0,
+});
+
 const SWING_CONCAVE_DURATION = 100;
 
 /**
@@ -1805,6 +1859,135 @@ export function flickerIncreasingFrameAtTick(
   }
 
   throw new Error("unreachable FlickerIncreasing reducer state");
+}
+
+/**
+ * Source-order normal-front port of `Anim_GrowInStages`
+ * (`pokemon_animation.c:911-939,1037-1059,3198-3267,5540-5544` and
+ * `trig.c:514-518`). The task zeroes data2/data5/data6/data7 before callback
+ * zero. Both `TryFlipX` calls are retained as normal-front no-ops. In
+ * particular, the stage-3 delay decrements without an affine write, and the
+ * terminal callback preserves the source's reset/callback assignment before
+ * its cosine, data7 increment, and second identity affine write.
+ */
+export function growInStagesFrameAtTick(
+  ticksSinceStart: number,
+): GrowInStagesFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let data5 = 0;
+  let data6 = 0;
+  let data7 = 0;
+  let xScale = 256;
+  let yScale = 256;
+  let terminal: GrowInStagesFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (terminal !== null) return terminal;
+
+    const data2Before = data2;
+    const data5Before = data5;
+    const data6Before = data6;
+    const data7Before = data7;
+    const startedAffine = data2 === 0;
+    if (startedAffine) {
+      data5 = 0;
+      data6 = 0;
+      data7 = 0;
+      data2 += 1;
+    }
+
+    const delayBranch = data6 > 0;
+    let cScaleOffset: number | null = null;
+    let sineFunction: "Sin" | "Cos" | null = null;
+    let sineIndex: number | null = null;
+    let sineValue: number | null = null;
+    let affineWriteCount: 0 | 1 | 2 = 0;
+    let resetSpriteAfterAnim = false;
+    let callback: GrowInStagesFrame["callback"] = "Anim_GrowInStages";
+    let affineMode: GrowInStagesFrame["affineMode"] = "double";
+
+    if (delayBranch) {
+      data6 -= 1;
+      if (data5 !== 3) {
+        cScaleOffset = Math.trunc((8 * data6) / 20);
+        sineFunction = "Sin";
+        sineIndex = data7 - cScaleOffset;
+        sineValue = gbaSin(sineIndex, 64);
+        xScale = 256 - sineValue;
+        yScale = 256 - sineValue;
+        affineWriteCount = 1;
+      }
+    } else {
+      if (data5 === 3) {
+        if (data7 > 63) {
+          data7 = 64;
+          xScale = 256;
+          yScale = 256;
+          affineWriteCount = 1;
+          resetSpriteAfterAnim = true;
+          callback = "WaitAnimEnd";
+          affineMode = "normal";
+        }
+        sineFunction = "Cos";
+        sineIndex = data7;
+        sineValue = gbaCos(data7, 64);
+      } else {
+        sineFunction = "Sin";
+        sineIndex = data7;
+        sineValue = gbaSin(data7, 64);
+        if (data7 > 63) {
+          data5 = 3;
+          data6 = 10;
+          data7 = 0;
+        } else if (sineValue > 48 && data5 === 1) {
+          data5 = 2;
+          data6 = 20;
+        } else if (sineValue > 16 && data5 === 0) {
+          data5 = 1;
+          data6 = 20;
+        }
+      }
+
+      data7 += 2;
+      xScale = 256 - sineValue;
+      yScale = 256 - sineValue;
+      affineWriteCount = affineWriteCount === 1 ? 2 : 1;
+    }
+
+    const frame: GrowInStagesFrame = {
+      x2: 0,
+      y2: 0,
+      data0: 0,
+      data2Before,
+      data5Before,
+      data6Before,
+      data7Before,
+      data2: 1,
+      data5,
+      data6,
+      data7,
+      startedAffine,
+      normalFrontDontFlip: true,
+      tryFlipXCalls: 2,
+      delayBranch,
+      cScaleOffset,
+      sineFunction,
+      sineIndex,
+      sineValue,
+      xScale,
+      yScale,
+      affineWriteCount,
+      resetSpriteAfterAnim,
+      callback,
+      affineMode,
+    };
+    if (callback === "WaitAnimEnd") terminal = frame;
+    if (tick === ticksSinceStart) return frame;
+  }
+
+  throw new Error("unreachable GrowInStages reducer state");
 }
 
 export type BounceRotateToSidesTableEntry = readonly [
@@ -3116,6 +3299,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = flickerIncreasingFrameAtTick(65);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_FlickerIncreasing did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "GROW_IN_STAGES": {
+      const terminal = growInStagesFrameAtTick(114);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_GrowInStages did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }

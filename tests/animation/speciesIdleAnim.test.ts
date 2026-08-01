@@ -45,6 +45,11 @@ import {
   FLICKER_INCREASING_FACTORY_FRONT_SPECIES,
   FLICKER_INCREASING_FRONT_SPECIES,
   FLICKER_INCREASING_OUTSIDE_FACTORY_FRONT_SPECIES,
+  growInStagesFrameAtTick,
+  GROW_IN_STAGES_FACTORY_FRONT_SPECIES,
+  GROW_IN_STAGES_FRONT_SPECIES,
+  GROW_IN_STAGES_OUTSIDE_FACTORY_FRONT_SPECIES,
+  ADD_NEW_ANIM_DEFAULTS,
   horizontalJumpsFrameAtTick,
   H_JUMPS_FACTORY_FRONT_SPECIES,
   H_JUMPS_FRONT_SPECIES,
@@ -289,6 +294,12 @@ import haunterRunB from "../../tools/compare/fixtures/sendout-front-haunter-run-
 import kecleonScenario from "../../tools/compare/fixtures/sendout-front-kecleon.json" with { type: "json" };
 import kecleonRunA from "../../tools/compare/fixtures/sendout-front-kecleon-run-a.json" with { type: "json" };
 import kecleonRunB from "../../tools/compare/fixtures/sendout-front-kecleon-run-b.json" with { type: "json" };
+import gengarScenario from "../../tools/compare/fixtures/sendout-front-gengar.json" with { type: "json" };
+import gengarRunA from "../../tools/compare/fixtures/sendout-front-gengar-run-a.json" with { type: "json" };
+import gengarRunB from "../../tools/compare/fixtures/sendout-front-gengar-run-b.json" with { type: "json" };
+import lugiaScenario from "../../tools/compare/fixtures/sendout-front-lugia.json" with { type: "json" };
+import lugiaRunA from "../../tools/compare/fixtures/sendout-front-lugia-run-a.json" with { type: "json" };
+import lugiaRunB from "../../tools/compare/fixtures/sendout-front-lugia-run-b.json" with { type: "json" };
 import {
   KABUTO_FRONT_ANIM_START_OFFSET,
   kabutoHSlideWobble,
@@ -563,6 +574,18 @@ const kecleonRawA = readFileSync(
 );
 const kecleonRawB = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-kecleon-run-b.json", import.meta.url),
+);
+const gengarRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-gengar-run-a.json", import.meta.url),
+);
+const gengarRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-gengar-run-b.json", import.meta.url),
+);
+const lugiaRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-lugia-run-a.json", import.meta.url),
+);
+const lugiaRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-lugia-run-b.json", import.meta.url),
 );
 
 describe("speciesIdleAnim", () => {
@@ -5989,7 +6012,7 @@ describe("speciesIdleAnim", () => {
       });
     });
 
-    it("regression-pins ROTATE_UP_TO_SIDES and does not broaden GROW_IN_STAGES", () => {
+    it("regression-pins ROTATE_UP_TO_SIDES and identifies the next staged-growth census", () => {
       expect(rotateUpToSidesFrameAtTick(32)).toMatchObject({
         x2: 0,
         y2: 0,
@@ -6001,8 +6024,152 @@ describe("speciesIdleAnim", () => {
       expect(speciesFrontIdleRestOffset("HARIYAMA")).toEqual({ x2: 0, y2: 0 });
       for (const species of ["GENGAR", "QWILFISH", "LUGIA"] as const) {
         expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_GROW_IN_STAGES");
-        expect(speciesFrontIdleRestOffset(species)).toBeNull();
+        expect(GROW_IN_STAGES_FRONT_SPECIES).toContain(species);
       }
+    });
+  });
+
+  describe("growInStagesFrameAtTick (Anim_GrowInStages source lifecycle)", () => {
+    it("derives the exact 3/2/1 selector census and batch-pins QWILFISH", () => {
+      const selectors = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
+      const generated = Object.entries(selectors)
+        .filter(([, family]) => family === "ANIM_GROW_IN_STAGES")
+        .map(([species]) => species);
+      expect(GROW_IN_STAGES_FRONT_SPECIES).toEqual(generated);
+      expect(GROW_IN_STAGES_FRONT_SPECIES).toEqual(["GENGAR", "QWILFISH", "LUGIA"]);
+      expect(GROW_IN_STAGES_FACTORY_FRONT_SPECIES).toEqual(["GENGAR", "QWILFISH"]);
+      expect(GROW_IN_STAGES_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual(["LUGIA"]);
+      for (const species of generated) {
+        expect(selectors[species]).toBe("ANIM_GROW_IN_STAGES");
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins all 115 callbacks, GBA trig writes, affine state, and normal-front flips", () => {
+      expect(ADD_NEW_ANIM_DEFAULTS).toEqual({ rotation: 0, delay: 0, runs: 1, speed: 0, data: 0 });
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual(
+        expect.arrayContaining([0, 2, 5, 6, 7]),
+      );
+      const callbacks = Array.from({ length: 115 }, (_, tick) => growInStagesFrameAtTick(tick)!);
+      expect(callbacks).toHaveLength(115);
+      for (const [tick, frame] of callbacks.entries()) {
+        expect(frame.data0, `data0 tick ${tick}`).toBe(0);
+        expect(frame.data2, `data2 tick ${tick}`).toBe(1);
+        expect(frame.normalFrontDontFlip, `dontFlip tick ${tick}`).toBe(true);
+        expect(frame.tryFlipXCalls, `TryFlipX tick ${tick}`).toBe(2);
+        expect(frame.x2, `x2 tick ${tick}`).toBe(0);
+        expect(frame.y2, `y2 tick ${tick}`).toBe(0);
+        if (frame.sineValue !== null) {
+          const trigIndex = frame.sineFunction === "Cos" ? frame.sineIndex! + 64 : frame.sineIndex!;
+          const tableValue = GBA_SINE_TABLE_256[((trigIndex % 256) + 256) % 256]!;
+          expect(frame.sineValue, `GBA trig tick ${tick}`).toBe(Math.floor((64 * tableValue) / 256));
+        }
+        if (frame.affineWriteCount > 0) {
+          expect(frame.xScale, `xScale tick ${tick}`).toBe(256 - frame.sineValue!);
+          expect(frame.yScale, `yScale tick ${tick}`).toBe(frame.xScale);
+        }
+      }
+      expect(createHash("sha256").update(JSON.stringify(callbacks)).digest("hex")).toBe(
+        "2c17c901ebcd059f834a9ed04a454d4c1aab97d7d69f0774d1523ffaeb417fb8",
+      );
+    });
+
+    it("pins every strict stage transition and source-order delay decrement boundary", () => {
+      expect(growInStagesFrameAtTick(0)).toMatchObject({
+        data2Before: 0, data5: 0, data6: 0, data7: 2, startedAffine: true,
+        sineFunction: "Sin", sineIndex: 0, sineValue: 0, xScale: 256,
+      });
+      expect(growInStagesFrameAtTick(5)).toMatchObject({ data5: 0, data7: 12, sineValue: 15 });
+      expect(growInStagesFrameAtTick(6)).toMatchObject({ data5: 1, data6: 20, data7: 14, sineValue: 18 });
+      expect(growInStagesFrameAtTick(26)).toMatchObject({ data5: 1, data6: 0, data7: 14, delayBranch: true });
+      expect(growInStagesFrameAtTick(37)).toMatchObject({ data5: 1, data7: 36, sineValue: 47 });
+      expect(growInStagesFrameAtTick(38)).toMatchObject({ data5: 2, data6: 20, data7: 38, sineValue: 49 });
+      expect(growInStagesFrameAtTick(58)).toMatchObject({ data5: 2, data6: 0, data7: 38, delayBranch: true });
+      expect(growInStagesFrameAtTick(71)).toMatchObject({ data5: 2, data7: 64, sineValue: 63 });
+      expect(growInStagesFrameAtTick(72)).toMatchObject({ data5: 3, data6: 10, data7: 2, sineValue: 64, xScale: 192 });
+      for (let tick = 73; tick <= 82; tick += 1) {
+        expect(growInStagesFrameAtTick(tick), `stage-3 delay tick ${tick}`).toMatchObject({
+          data5: 3, data6: 82 - tick, data7: 2, delayBranch: true,
+          sineFunction: null, sineIndex: null, sineValue: null,
+          affineWriteCount: 0, xScale: 192, yScale: 192,
+        });
+      }
+      expect(growInStagesFrameAtTick(83)).toMatchObject({ data5: 3, data7: 4, sineFunction: "Cos", sineIndex: 2, sineValue: 63 });
+    });
+
+    it("pins C truncation for every 20-callback scale delay", () => {
+      for (const [start, heldData7] of [[7, 14], [39, 38]] as const) {
+        for (let offset = 0; offset < 20; offset += 1) {
+          const remaining = 19 - offset;
+          const cScaleOffset = Math.trunc((8 * remaining) / 20);
+          expect(growInStagesFrameAtTick(start + offset)).toMatchObject({
+            data6: remaining,
+            cScaleOffset,
+            sineIndex: heldData7 - cScaleOffset,
+            delayBranch: true,
+            affineWriteCount: 1,
+          });
+        }
+      }
+    });
+
+    it("does not terminate before tick 114 and preserves terminal source ordering stably", () => {
+      expect(Array.from({ length: 114 }, (_, tick) => growInStagesFrameAtTick(tick)!)
+        .every(({ callback }) => callback === "Anim_GrowInStages")).toBe(true);
+      const terminal = growInStagesFrameAtTick(114)!;
+      expect(terminal).toMatchObject({
+        data5: 3, data6: 0, data7Before: 64, data7: 66,
+        sineFunction: "Cos", sineIndex: 64, sineValue: 0,
+        xScale: 256, yScale: 256, affineWriteCount: 2,
+        resetSpriteAfterAnim: true, callback: "WaitAnimEnd", affineMode: "normal",
+      });
+      expect(growInStagesFrameAtTick(115)).toEqual(terminal);
+      expect(growInStagesFrameAtTick(1000)).toEqual(terminal);
+      expect(growInStagesFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      ["GENGAR", gengarScenario, 94],
+      ["LUGIA", lugiaScenario, 249],
+    ] as const)("stages a complete legal three-mon %s Scene-ON party", (_species, scenario, speciesId) => {
+      expect(scenario).toMatchObject({ mode: "mechanicLab", profile: "battle-scene-on", level: 50, challengeNum: 0, trainerId: 50 });
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(speciesId);
+      for (const setId of [...scenario.playerSetIds, ...scenario.opponentSetIds]) {
+        expect(setId).toBeGreaterThanOrEqual(110);
+        expect(setId).toBeLessThanOrEqual(199);
+      }
+      for (const mon of [...scenario.overrides.parties.player, ...scenario.overrides.parties.opponent]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({ item: expect.any(Number), abilitySlot: expect.any(Number), friendship: expect.any(Number), gender: expect.any(String), shiny: expect.any(Boolean) }));
+      }
+    });
+
+    it.each([
+      ["GENGAR", gengarRunA, gengarRunB, gengarRawA, gengarRawB, 94, 2, 372, "b1a87f64c1c95e92d52e09a9e7d6937f1e4b28ea98cbb8bed5c6de6c42d4277e"],
+      ["LUGIA", lugiaRunA, lugiaRunB, lugiaRawA, lugiaRawB, 249, 1, 373, "5c965e88720ddd92cc03b60f165942999ee5d4c8c205b86752dcdcad417eeca8"],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (species, runA, runB, rawA, rawB, speciesId, animCmdIndex, rawBytes, rawSha256) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA).toHaveLength(rawBytes);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_GROW_IN_STAGES");
+      expect(runA.ticks[0]!.battler1).toMatchObject({ x2: 0, y2: 0, animNum: 1, animCmdIndex, data2: speciesId, callback: "0x8007428", callbackSymbol: "SpriteCallbackDummy" });
+    });
+
+    it("regression-pins FLICKER_INCREASING and leaves adjacent unused selectors unported", () => {
+      expect(flickerIncreasingFrameAtTick(65)).toMatchObject({ data2: 11, invisible: false, callback: "WaitAnimEnd" });
+      expect(speciesFrontIdleRestOffset("HAUNTER")).toEqual({ x2: 0, y2: 0 });
+      const selectorValues = Object.values(selectorTables.frontAnimIds.species);
+      expect(selectorValues).not.toContain("ANIM_V_SPRING");
+      expect(selectorValues).not.toContain("ANIM_V_REPEATED_SPRING");
+      expect(selectorValues).not.toContain("ANIM_SPRING_RISING");
     });
   });
 });
