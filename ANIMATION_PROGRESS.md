@@ -1,5 +1,31 @@
 # Animation coverage
 
+## Front `ANIM_V_JUMPS_SMALL` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2i is exact for all **10 selector mappings / 10
+Factory-reachable species**, with **zero outside-Factory mappings**. CHARMANDER
+is the representative and DELIBIRD the sibling; every prior accepted front
+family remains regression-pinned. Move coverage stays **107 exact / 0 partial
+/ 0 staged / 169 unsupported** and `ANIMATION_COVERAGE.json` is byte-identical
+at SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:1181-1208,3768-3773`
+proves and is ported in source order: data0=3; accumulator step 12; all 33
+active callbacks (0..384); C signed-division branches; counter-256 adjustment;
+GBA u8 sine indices; data0*2/data0*3 amplitudes; then tick 33's strict
+counter>384 x2/y2/`WaitAnimEnd` cleanup and final increment to data2=408.
+Fresh complete legal Scene-ON parties settle both species at
+x2=0/y2=0/animNum=1/`SpriteCallbackDummy`. Paired direct raw outputs are
+byte-identical with no EOF newline: CHARMANDER SHA-256
+`11290c70ee4cef6463fa4878ad94c665f080c6ae2cd03fe4b41354add0227518`,
+DELIBIRD `ab44bf5b7111e37d8f491e24a1f0aa0ce6a331d7220ae231f74d3c9741626661`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per party; raw `cmp`; focused family/boundary/
+ratchet tests **71/71**; exactly one full `npm test` **567 files, 5763 passed +
+1 skipped** and `npm run build` green. The next generated-census/source-ranked
+front family is **`ANIM_H_JUMPS_V_STRETCH`** (10 Factory species).
+
 ## Front `ANIM_V_SLIDE` terminal family accepted (2026-08-01)
 
 **Verdict / counts:** rung 2h is exact for all **10 selector mappings / 10

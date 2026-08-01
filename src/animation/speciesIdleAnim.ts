@@ -46,6 +46,7 @@ export type SpeciesFrontAnimFamily =
   | "H_SHAKE"
   | "RAPID_H_HOPS"
   | "SWING_CONCAVE"
+  | "V_JUMPS_SMALL"
   | "V_SLIDE"
   | "V_SQUISH_AND_BOUNCE"
   | "V_SQUISH_AND_BOUNCE_SLOW"
@@ -58,6 +59,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "H_SHAKE",
   "RAPID_H_HOPS",
   "SWING_CONCAVE",
+  "V_JUMPS_SMALL",
   "V_SLIDE",
   "V_SQUISH_AND_BOUNCE",
   "V_SQUISH_AND_BOUNCE_SLOW",
@@ -189,6 +191,23 @@ export const V_SLIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
 /** There are no `ANIM_V_SLIDE` selector mappings outside the Factory pool. */
 export const V_SLIDE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   V_SLIDE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All 10 source selector mappings for `ANIM_V_JUMPS_SMALL`. */
+export const V_JUMPS_SMALL_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_V_JUMPS_SMALL")
+    .map(([species]) => species),
+);
+
+/** Every `ANIM_V_JUMPS_SMALL` mapping is reachable through Factory rentals. */
+export const V_JUMPS_SMALL_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  V_JUMPS_SMALL_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no `ANIM_V_JUMPS_SMALL` selector mappings outside the Factory pool. */
+export const V_JUMPS_SMALL_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  V_JUMPS_SMALL_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 export interface SpeciesIdleOffset {
@@ -477,6 +496,17 @@ export interface VerticalSlideFrame extends SpeciesIdleOffset {
   readonly callback: "VerticalSlide" | "WaitAnimEnd";
 }
 
+export interface VerticalJumpsSmallFrame extends SpeciesIdleOffset {
+  readonly data0: 3;
+  readonly data2: number;
+  readonly counter: number;
+  readonly divCounter: 0 | 1 | 2 | 3 | null;
+  readonly adjustedCounter: number | null;
+  readonly sineIndex: number | null;
+  readonly amplitude: 6 | 9 | null;
+  readonly callback: "VerticalJumps" | "WaitAnimEnd";
+}
+
 const SWING_CONCAVE_DURATION = 100;
 
 function tryFlipX(x2: number, dontFlip: boolean): number {
@@ -630,6 +660,74 @@ export function verticalSlideFrameAtTick(ticksSinceStart: number): VerticalSlide
   }
 
   throw new Error("unreachable VerticalSlide reducer state");
+}
+
+const VERTICAL_JUMPS_SMALL_AMPLITUDE = 3;
+const VERTICAL_JUMPS_ACCUMULATOR_STEP = 12;
+const VERTICAL_JUMPS_ACCUMULATOR_LIMIT = 384;
+
+/**
+ * Source-order port of `Anim_VerticalJumps_Small` / `VerticalJumps`
+ * (`pokemon_animation.c:1181-1208,3768-3773`). The initializer sets data0=3
+ * and invokes `VerticalJumps` immediately. Active ticks 0..32 preserve C's
+ * signed division branch selection, counter adjustment, and the `u8` sine
+ * argument conversion; branches 0/1 use data0*2 amplitude and branches 2/3
+ * use data0*3. Tick 33 observes the strict counter > 384 guard, clears both
+ * x2/y2, installs `WaitAnimEnd`, and still performs the final data2 += 12.
+ */
+export function verticalJumpsSmallFrameAtTick(
+  ticksSinceStart: number,
+): VerticalJumpsSmallFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let y2 = 0;
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    const counter = data2;
+    if (counter > VERTICAL_JUMPS_ACCUMULATOR_LIMIT) {
+      data2 += VERTICAL_JUMPS_ACCUMULATOR_STEP;
+      return {
+        x2: 0,
+        y2: 0,
+        data0: VERTICAL_JUMPS_SMALL_AMPLITUDE,
+        data2,
+        counter,
+        divCounter: null,
+        adjustedCounter: null,
+        sineIndex: null,
+        amplitude: null,
+        callback: "WaitAnimEnd",
+      };
+    }
+
+    // C signed division truncates toward zero. The callback's reachable
+    // counter is non-negative, but keep the source operation explicit.
+    const divCounter = Math.trunc(counter / 128) as 0 | 1 | 2 | 3;
+    const adjustedCounter = divCounter < 2 ? counter : counter - 256;
+    const sineIndex = divCounter < 2 ? counter % 128 : adjustedCounter & 0xff;
+    const amplitude = divCounter < 2
+      ? VERTICAL_JUMPS_SMALL_AMPLITUDE * 2 as 6
+      : VERTICAL_JUMPS_SMALL_AMPLITUDE * 3 as 9;
+    y2 = -gbaSin(sineIndex, amplitude) + 0;
+    data2 += VERTICAL_JUMPS_ACCUMULATOR_STEP;
+
+    if (tick === ticksSinceStart) {
+      return {
+        x2: 0,
+        y2,
+        data0: VERTICAL_JUMPS_SMALL_AMPLITUDE,
+        data2,
+        counter,
+        divCounter,
+        adjustedCounter,
+        sineIndex,
+        amplitude,
+        callback: "VerticalJumps",
+      };
+    }
+  }
+
+  throw new Error("unreachable VerticalJumps small reducer state");
 }
 
 const GROW_VIBRATE_DURATION = 40;
@@ -813,6 +911,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = swingConcaveFrameAtTick(101);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_SwingConcave did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "V_JUMPS_SMALL": {
+      const terminal = verticalJumpsSmallFrameAtTick(33);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_VerticalJumps_Small did not reach its source terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }

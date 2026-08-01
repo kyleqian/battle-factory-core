@@ -18,6 +18,7 @@ import {
   SWING_CONCAVE_FRONT_SPECIES,
   SWING_CONCAVE_OUTSIDE_FACTORY_FRONT_SPECIES,
   verticalSlideFrameAtTick,
+  verticalJumpsSmallFrameAtTick,
   verticalShakeFrameAtTick,
   verticalSquishBounceFrameAtTick,
   verticalSquishBounceSlowFrameAtTick,
@@ -27,6 +28,9 @@ import {
   V_SHAKE_FACTORY_FRONT_SPECIES,
   V_SHAKE_FRONT_SPECIES,
   V_SHAKE_OUTSIDE_FACTORY_FRONT_SPECIES,
+  V_JUMPS_SMALL_FACTORY_FRONT_SPECIES,
+  V_JUMPS_SMALL_FRONT_SPECIES,
+  V_JUMPS_SMALL_OUTSIDE_FACTORY_FRONT_SPECIES,
   V_SLIDE_FACTORY_FRONT_SPECIES,
   V_SLIDE_FRONT_SPECIES,
   V_SLIDE_OUTSIDE_FACTORY_FRONT_SPECIES,
@@ -68,6 +72,12 @@ import seadraRunB from "../../tools/compare/fixtures/sendout-front-seadra-run-b.
 import marshtompScenario from "../../tools/compare/fixtures/sendout-front-marshtomp.json" with { type: "json" };
 import marshtompRunA from "../../tools/compare/fixtures/sendout-front-marshtomp-run-a.json" with { type: "json" };
 import marshtompRunB from "../../tools/compare/fixtures/sendout-front-marshtomp-run-b.json" with { type: "json" };
+import charmanderScenario from "../../tools/compare/fixtures/sendout-front-charmander.json" with { type: "json" };
+import charmanderRunA from "../../tools/compare/fixtures/sendout-front-charmander-run-a.json" with { type: "json" };
+import charmanderRunB from "../../tools/compare/fixtures/sendout-front-charmander-run-b.json" with { type: "json" };
+import delibirdScenario from "../../tools/compare/fixtures/sendout-front-delibird.json" with { type: "json" };
+import delibirdRunA from "../../tools/compare/fixtures/sendout-front-delibird-run-a.json" with { type: "json" };
+import delibirdRunB from "../../tools/compare/fixtures/sendout-front-delibird-run-b.json" with { type: "json" };
 
 const squirtleRawA = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-squirtle-run-a.json", import.meta.url),
@@ -92,6 +102,18 @@ const marshtompRawA = readFileSync(
 );
 const marshtompRawB = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-marshtomp-run-b.json", import.meta.url),
+);
+const charmanderRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-charmander-run-a.json", import.meta.url),
+);
+const charmanderRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-charmander-run-b.json", import.meta.url),
+);
+const delibirdRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-delibird-run-a.json", import.meta.url),
+);
+const delibirdRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-delibird-run-b.json", import.meta.url),
 );
 
 describe("speciesIdleAnim", () => {
@@ -1014,6 +1036,174 @@ describe("speciesIdleAnim", () => {
         "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN",
         "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN", "KADABRA", "REGISTEEL",
         "SQUIRTLE", "SHUCKLE",
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("verticalJumpsSmallFrameAtTick (Anim_VerticalJumps_Small / VerticalJumps port)", () => {
+    it("derives all 10 selector mappings as Factory-reachable with no outside mappings", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_V_JUMPS_SMALL")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(V_JUMPS_SMALL_FRONT_SPECIES).toEqual(generated);
+      expect(V_JUMPS_SMALL_FRONT_SPECIES).toEqual([
+        "CHARMANDER", "MEOWTH", "PORYGON", "CYNDAQUIL", "LEDYBA",
+        "CLEFFA", "SUNKERN", "REMORAID", "DELIBIRD", "LARVITAR",
+      ]);
+      expect(V_JUMPS_SMALL_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(V_JUMPS_SMALL_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(V_JUMPS_SMALL_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of V_JUMPS_SMALL_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins data0, C division branches, u8 sine indices, amplitudes, and x2/y2 at every active callback", () => {
+      const activeBoundaries = [
+        [0,0,0,0,6,0,0],[12,0,12,12,6,0,-1],[24,0,24,24,6,0,-3],
+        [36,0,36,36,6,0,-4],[48,0,48,48,6,0,-5],[60,0,60,60,6,0,-5],
+        [72,0,72,72,6,0,-5],[84,0,84,84,6,0,-5],[96,0,96,96,6,0,-4],
+        [108,0,108,108,6,0,-2],[120,0,120,120,6,0,-1],[132,1,132,4,6,0,0],
+        [144,1,144,16,6,0,-2],[156,1,156,28,6,0,-3],[168,1,168,40,6,0,-4],
+        [180,1,180,52,6,0,-5],[192,1,192,64,6,0,-6],[204,1,204,76,6,0,-5],
+        [216,1,216,88,6,0,-4],[228,1,228,100,6,0,-3],[240,1,240,112,6,0,-2],
+        [252,1,252,124,6,0,0],[264,2,8,8,9,0,-1],[276,2,20,20,9,0,-4],
+        [288,2,32,32,9,0,-6],[300,2,44,44,9,0,-7],[312,2,56,56,9,0,-8],
+        [324,2,68,68,9,0,-8],[336,2,80,80,9,0,-8],[348,2,92,92,9,0,-6],
+        [360,2,104,104,9,0,-4],[372,2,116,116,9,0,-2],[384,3,128,128,9,0,0],
+      ] as const;
+      expect(activeBoundaries).toHaveLength(33);
+      for (const [tick, [counter, divCounter, adjustedCounter, sineIndex, amplitude, x2, y2]]
+        of activeBoundaries.entries()) {
+        expect(verticalJumpsSmallFrameAtTick(tick)).toEqual({
+          x2,
+          y2,
+          data0: 3,
+          data2: counter + 12,
+          counter,
+          divCounter,
+          adjustedCounter,
+          sineIndex,
+          amplitude,
+          callback: "VerticalJumps",
+        });
+      }
+    });
+
+    it("uses the strict counter > 384 guard and pins terminal cleanup plus the final increment", () => {
+      expect(verticalJumpsSmallFrameAtTick(32)).toMatchObject({
+        x2: 0,
+        y2: 0,
+        data2: 396,
+        counter: 384,
+        divCounter: 3,
+        adjustedCounter: 128,
+        sineIndex: 128,
+        amplitude: 9,
+        callback: "VerticalJumps",
+      });
+      expect(verticalJumpsSmallFrameAtTick(33)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 3,
+        data2: 408,
+        counter: 396,
+        divCounter: null,
+        adjustedCounter: null,
+        sineIndex: null,
+        amplitude: null,
+        callback: "WaitAnimEnd",
+      });
+      expect(verticalJumpsSmallFrameAtTick(34)).toEqual(verticalJumpsSmallFrameAtTick(33));
+      expect(verticalJumpsSmallFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      [4, charmanderScenario],
+      [225, delibirdScenario],
+    ] as const)("stages a complete legal Scene-ON party for opponent species %i", (species, scenario) => {
+      expect(scenario.mode).toBe("mechanicLab");
+      expect(scenario.profile).toBe("battle-scene-on");
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(species);
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "CHARMANDER", charmanderRunA, charmanderRunB, charmanderRawA, charmanderRawB, 2, 4,
+        "11290c70ee4cef6463fa4878ad94c665f080c6ae2cd03fe4b41354add0227518",
+      ],
+      [
+        "DELIBIRD", delibirdRunA, delibirdRunB, delibirdRawA, delibirdRawB, 3, 225,
+        "ab44bf5b7111e37d8f491e24a1f0aa0ce6a331d7220ae231f74d3c9741626661",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species,
+      runA,
+      runB,
+      rawA,
+      rawB,
+      animCmdIndex,
+      data2,
+      rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_V_JUMPS_SMALL");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("preserves every previously accepted front family", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of [
+        "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN",
+        "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN", "KADABRA", "REGISTEEL",
+        "SQUIRTLE", "SHUCKLE", "SEADRA", "MARSHTOMP",
       ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }
