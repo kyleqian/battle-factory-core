@@ -161,6 +161,12 @@ import wigglytuffRunB from "../../tools/compare/fixtures/sendout-front-wigglytuf
 import vigorothScenario from "../../tools/compare/fixtures/sendout-front-vigoroth.json" with { type: "json" };
 import vigorothRunA from "../../tools/compare/fixtures/sendout-front-vigoroth-run-a.json" with { type: "json" };
 import vigorothRunB from "../../tools/compare/fixtures/sendout-front-vigoroth-run-b.json" with { type: "json" };
+import beedrillScenario from "../../tools/compare/fixtures/sendout-front-beedrill.json" with { type: "json" };
+import beedrillRunA from "../../tools/compare/fixtures/sendout-front-beedrill-run-a.json" with { type: "json" };
+import beedrillRunB from "../../tools/compare/fixtures/sendout-front-beedrill-run-b.json" with { type: "json" };
+import dusclopsScenario from "../../tools/compare/fixtures/sendout-front-dusclops.json" with { type: "json" };
+import dusclopsRunA from "../../tools/compare/fixtures/sendout-front-dusclops-run-a.json" with { type: "json" };
+import dusclopsRunB from "../../tools/compare/fixtures/sendout-front-dusclops-run-b.json" with { type: "json" };
 import {
   KABUTO_FRONT_ANIM_START_OFFSET,
   kabutoHSlideWobble,
@@ -285,6 +291,18 @@ const vigorothRawA = readFileSync(
 );
 const vigorothRawB = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-vigoroth-run-b.json", import.meta.url),
+);
+const beedrillRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-beedrill-run-a.json", import.meta.url),
+);
+const beedrillRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-beedrill-run-b.json", import.meta.url),
+);
+const dusclopsRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-dusclops-run-a.json", import.meta.url),
+);
+const dusclopsRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-dusclops-run-b.json", import.meta.url),
 );
 
 describe("speciesIdleAnim", () => {
@@ -3106,6 +3124,81 @@ describe("speciesIdleAnim", () => {
       });
       expect(horizontalVibrateFrameAtTick(42)).toEqual(horizontalVibrateFrameAtTick(41));
       expect(horizontalVibrateFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      [15, beedrillScenario],
+      [362, dusclopsScenario],
+    ] as const)("stages a complete legal Scene-ON party for opponent species %i", (species, scenario) => {
+      expect(scenario.mode).toBe("mechanicLab");
+      expect(scenario.profile).toBe("battle-scene-on");
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(species);
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "BEEDRILL", beedrillRunA, beedrillRunB,
+        beedrillRawA, beedrillRawB, 15, 4,
+        "4657eaa59c66c769b56a4f1db250b3ba24ee7b1789e7a7d0c01db99fe0cd98ca",
+      ],
+      [
+        "DUSCLOPS", dusclopsRunA, dusclopsRunB,
+        dusclopsRawA, dusclopsRawB, 362, 4,
+        "b13802454ef9b92cf94aa210d4027f2ce67a12ae96dc7ca252c044782561f3f3",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species,
+      runA,
+      runB,
+      rawA,
+      rawB,
+      data2,
+      animCmdIndex,
+      rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_H_VIBRATE");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
     });
 
     it("preserves every previously accepted representative and sibling family", () => {
