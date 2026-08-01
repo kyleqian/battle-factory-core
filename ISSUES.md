@@ -386,9 +386,8 @@ AI/reducer receipt as a second immutable resolution segment. Fixed generated
 Taillow FLY proves charge text, hide through the opponent action, locked no-PP
 FLY text, restoration, and request 4; fresh seam coverage also pins
 Assist-called FLY and opponent ownership. Thus rank 7's typed two-turn group
-is closed. Exact Turn-14/15 legacy-renderer handoff and `turn15PartySelect`
-mirror retirement remain open. No canonical turn/tick branch, mechanics/RNG/
-AI/round change, Scene-ON edit, ratchet, or barrier was added.
+is closed. The later owner handoff below also retires its exact renderer
+mirrors.
 
 **Rank-7 opponent-owner bridge landed (2026-08-01, `30b61236`, `fea91d54`):** a new
 source-driven adapter stages the exact Onix/Murkrow boundary under Scene OFF
@@ -405,13 +404,23 @@ appends the untouched strike receipt; no second PP write occurs, visibility
 restores from the immutable first segment, and a typed forced request advances
 the existing generic `PartySelectState` directly. The old one-segment selector
 guard is gone. Scene ON/OFF logical outcomes and the seven-battle cursor
-regression are pinned. Remaining rank-7 debt is only the legacy exact-renderer
-dispatch/mirror retirement: delete `turn14Resolved` and `turn15PartySelect`
-without changing the historical exact pins. Existing exact evidence remains
-charge **213**, strike **256**, selector **200/200**, send-out
-**43/46/16/144/195**; `fea91d54` makes no new pixel claim and adds no timing,
-move, species, request-number, battle-number, turn-number, or absolute-tick
-selector.
+regression are pinned. `8caad013` additionally hardens recharge and Bide
+action snapshots, and merged OFF evidence `adfb746c`/`49e18075` records the
+124-capture inverse lifecycle.
+
+**Rank-7 exact owner mirrors retired (2026-08-01, `1f276c95`, `c0821a65`):**
+the canonical adapter now appends the strike to the same immutable charge
+resolution identity. A typed compatibility owner carries that resolution and
+only its published forced selector; segment ownership selects charge versus
+strike presentation, and the source receipt supplies PP. `turn14Resolved` and
+`turn15PartySelect` are deleted from production and tests. Differential app
+replay against clean `8caad013` preserved every ordinary and +30 delayed
+historical capture byte-for-byte: charge **213**, strike **256**, selector
+**200/200**, five send-out rungs **43/46/16/144/195** and their delayed twins,
+**1,496 captures** total. The reproducible census falls **2,526→2,506 refs**
+and **33,135→33,125 LOC**. No mechanics/RNG/AI/outcome, animation, trace or
+capture list, ratchet/barrier, recording import, or prohibited selector was
+added. Rank 7 is closed; #39 remains open at rank 8 and earlier mirror debt.
 
 **Rank-8 Scene-OFF status-icon receipt landed (2026-08-01, `80c5d6af`):**
 the generic resolution presenter now keeps `set-battler-status-data` as the

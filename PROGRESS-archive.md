@@ -1,3 +1,9 @@
+## 813 — [bounded worker, 2026-08-01] rank-7 opponent-FLY receipt bridge landed
+
+- Archived from the live ledger. `30b61236` staged the inverse opponent-FLY
+  receipts and genuine forced request under Scene OFF; full live-entry detail
+  remains in git history.
+
 ## 812 — [bounded worker, 2026-08-01] rank-7 Scene-OFF locked-action grouping landed
 
 - Archived from the live ledger. `b464a6e7`/`72546da6` established explicit

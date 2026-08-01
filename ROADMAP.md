@@ -944,6 +944,13 @@ forbids new turn-keyed branches), so its slices fill gaps around Gate-5 work
 rather than blocking it. Gate 6's breadth sweep depends on Gate 5 landing
 first and follows it.
 
+**#39 rank-7 completion (2026-08-01, `1f276c95` + `c0821a65`):** the
+opponent-owned locked action now retains one immutable charge/strike
+resolution identity through its genuine intervening command and owns the
+published forced selector through send-out. The exact renderer's
+`turn14Resolved` and `turn15PartySelect` mirrors are deleted; all ordinary
+and delayed historical pins held by differential replay. Rank 8 is next.
+
 Build the rules engine from the pinned source's actual structure: generated
 tables plus a typed Battle Script IR/interpreter and source-mapped item,
 ability, end-turn, AI, and switching hooks. Do not grow a collection of

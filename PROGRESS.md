@@ -13,6 +13,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 816 — [bounded worker, 2026-08-01] rank-7 exact owner mirrors retired
+
+- **State:** implementation `1f276c95` + `c0821a65`; focused exact/owner/
+  selector/round/ratchet suites are **480/480** and TypeScript is green.
+- **Did:** the historical charge/miss and locked-strike/faint route now keeps
+  the same immutable two-segment resolution identity as the live orchestrator;
+  that owner supplies PP and dispatch phase, publishes request 4, and owns the
+  forced selector through send-out. Deleted `turn14Resolved` and
+  `turn15PartySelect` from production and tests. Ordinary and +30 delayed app
+  replays are byte-identical to `8caad013` across all 13 historical pins
+  (**1,496 captures**); census fell **2,526→2,506 refs**, **33,135→33,125 LOC**.
+- **Next:** resume #39 at rank 8's Turn-16/old-Turn-17 prefix; do not extend
+  the canonical Battle-2 march.
+- **Notes:** `8caad013` also hardens retained recharge/Bide action snapshots;
+  merged OFF evidence `adfb746c`/`49e18075` pins the opponent-FLY lifecycle
+  (124 captures, manifest SHA-256 `afadb6a2e3682b87dc6433de7f9726187d995f2d25cdc4c5941ebae2f49a07d3`).
+  No mechanics/RNG/AI/outcome, animation, trace/capture list, ratchet,
+  barrier, recording import, or timing/move/species/request/battle/turn/tick
+  selector changed. Final full suite/build pending this entry's docs commit.
+
 ## 815 — [bounded worker, 2026-08-01] rank-7 opponent locked-action owner landed
 
 - **State:** implementation `fea91d54`, documentation `2b94e1ea`; focused
@@ -63,31 +83,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   status-animation receipt. No
   mechanics/RNG/AI/round outcomes, animation code/ledgers, ratchets, or
   oracle trace/capture lists changed.
-
-## 813 — [bounded worker, 2026-08-01] rank-7 opponent-FLY receipt bridge landed
-
-- **State:** implementation `30b61236`; focused adapter/selector/scene suites
-  are **244/244**, full `npm test` is green (**569 files, 5719 passed + 1
-  skipped**), and production build is green.
-- **Did:** staged canonical Onix/Murkrow from the real turn-14 boundary through
-  the full-turn reducer under Scene OFF. Two genuine player requests now own
-  separate immutable charge/miss and locked-strike/faint resolutions; the
-  exact legacy renderer reads charge, strike, and faint lines from those
-  receipts, and core constructs the selector from the published forced request
-  (**request 4, legal slots 1/2**) instead of synthetic request 0.
-- **Next:** retain an opponent-owned locked-action presentation owner across
-  the intervening player command, then let that owner directly advance the
-  forced `PartySelectState`; only then delete `turn14Resolved` dispatch and
-  `turn15PartySelect`. Acceptance stays the existing exact windows: charge
-  **213**, strike **256**, selector **200/200**, send-out
-  **43/46/16/144/195**; add a fresh short explicit-OFF owner trace rather than
-  extending the canonical march.
-- **Notes:** no new oracle pixel count is claimed: the listed exact pins are
-  historical ON-profile evidence and this main-lane session was restricted to
-  OFF. The bridge found the structural asymmetry honestly: player-owned FLY's
-  continuation publishes only a trainer command and can append immediately;
-  opponent-owned FLY publishes a real player command that the current round
-  presenter releases before the locked strike. No mechanics/RNG/AI/round,
-  animation, ratchet, barrier, trace, capture-list, or timing change.
-- **PAPERCUT:** overlapping full-suite runs saturated Vitest workers; the
-  required full suite remained green but took ~8 minutes.
