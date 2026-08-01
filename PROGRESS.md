@@ -15,8 +15,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 816 — [bounded worker, 2026-08-01] rank-7 exact owner mirrors retired
 
-- **State:** implementation `1f276c95` + `c0821a65`; focused exact/owner/
-  selector/round/ratchet suites are **480/480** and TypeScript is green.
+- **State:** implementation `1f276c95` + `c0821a65`, docs `574354a4`;
+  focused exact/owner/selector/round/ratchet suites are **480/480**, full
+  `npm test` is green (**570 files, 5,726 passed + 1 skipped**), and the
+  production build is green.
 - **Did:** the historical charge/miss and locked-strike/faint route now keeps
   the same immutable two-segment resolution identity as the live orchestrator;
   that owner supplies PP and dispatch phase, publishes request 4, and owns the
@@ -31,7 +33,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (124 captures, manifest SHA-256 `afadb6a2e3682b87dc6433de7f9726187d995f2d25cdc4c5941ebae2f49a07d3`).
   No mechanics/RNG/AI/outcome, animation, trace/capture list, ratchet,
   barrier, recording import, or timing/move/species/request/battle/turn/tick
-  selector changed. Final full suite/build pending this entry's docs commit.
+  selector changed.
 
 ## 815 — [bounded worker, 2026-08-01] rank-7 opponent locked-action owner landed
 
