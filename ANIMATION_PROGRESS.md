@@ -1,5 +1,241 @@
 # Animation coverage
 
+## Front `ANIM_H_JUMPS_V_STRETCH_TWICE` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** exact for the complete generated selector census: all
+**2 mappings / 2 Factory-reachable species / 0 outside-Factory mappings** —
+SHARPEDO and SPOINK. SHARPEDO is the representative and SPOINK the terminal
+sibling. The accepted single-run horizontal-jumps/vertical-stretch reducer is
+now parameterized for Single data=-1/runs=1 and Twice data=1/runs=2; no
+adjacent selector or unsupported barrier was added. Move coverage remains
+**107 exact / 0 partial / 0 staged / 169 unsupported** and
+`ANIMATION_COVERAGE.json` is unchanged at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,1037-1075,
+2755-2868,3805-3815,5540-5544` and `trig.c:514-518` prove task-zeroed sprite
+data, `AddNewAnim` defaults, `ResetSpriteAfterAnim`, GBA sine semantics, the
+shared callbacks, the Twice overrides, and stable `WaitAnimEnd`. All **157
+callbacks** (ticks 0..156) pin both normal-front no-op `TryFlipX` calls,
+affine/C-truncated sine and scale writes, every data2/data3/data4 update, and
+strict guards: `_0->_1` at 11/94, `_1->_2` at 61/144, tick 73 decrements runs
+2->1 and sets delay=10/data3=data4=0 before the shared tail carries data2 to
+12, ticks 74..83 count delay to zero, and tick 156 sees `_2` counter=132,
+resets offsets/affine state, increments data2 to 144, and installs
+`WaitAnimEnd`. The accepted Single tick-73 terminal remains regression-pinned.
+Fresh complete legal Scene-ON parties settle both species at x2=0/y2=0,
+animNum=1/`SpriteCallbackDummy`; paired raw receipts are byte-identical with no
+EOF newline: SHARPEDO SHA-256
+`beddd02c936693a4e82573b7f4ab965aa0e128af8eb72cf78945e60777864dcf`,
+SPOINK `f5c33bc034669fa7a53240a02bbb7a630f5d1d17f8405baeab87770d03e3eb7b`.
+
+**Verification / next:** focused species-idle family plus both ratchets are
+**244/244**; `npx tsc --noEmit` and diff checks are green; the single
+post-change full `npm test` is green at **572 files, 5,966 passed + 1
+skipped**; production build is green (**534 modules transformed**). The next
+source-ranked generated census family is **`ANIM_ROTATE_UP_TO_SIDES`** (1
+mapping / 1 Factory / 0 outside): HARIYAMA.
+
+## Front `ANIM_V_JUMPS_BIG` Factory family accepted (2026-08-01)
+
+**Verdict / counts:** exact for the complete generated selector census: all
+**5 mappings / 5 Factory-reachable species / 0 outside-Factory mappings** —
+PICHU, FLAAFFY, GIRAFARIG, SWAMPERT, TAILLOW. PICHU is the representative and
+TAILLOW the terminal sibling. The shared source-derived `VerticalJumps` reducer
+now parameterizes Big data0=4 and accepted Small data0=3; Small is
+regression-pinned and `ANIM_H_JUMPS_V_STRETCH_TWICE` remains unaccepted. No
+unsupported-branch barrier was added. Move coverage remains **107 exact / 0
+partial / 0 staged / 169 unsupported**; `ANIMATION_COVERAGE.json` is unchanged
+at SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / evidence / verification:** `pokemon_animation.c:911-939,
+1181-1215,5540-5544` and `trig.c:514-518` prove task-zeroed data2, the immediate
+Big callback, shared signed/C-truncated arithmetic, GBA u8 sine lookup, strict
+cleanup, and stable `WaitAnimEnd`. All **33 active callbacks** pin counters
+0..384 by 12, phase transitions at 0/132/264/384, amplitudes 8 then 12, and the
+counter-=256/u8-index boundaries; tick 33 observes counter 396 > 384, clears
+x2/y2, increments data2 to 408, installs `WaitAnimEnd`, and stays stable.
+Fresh complete legal challenge-0 Scene-ON parties (all set IDs 110..199) and
+unchanged `dump-onix-front-idle-anim.py` runs are paired byte-identical with no
+EOF newline: PICHU SHA-256
+`cde69635974e4c6a55e7bad360e38a1507db9405f164851cb522ff4ddfb27d1f`,
+TAILLOW `c286b13cef798ca9c35f5638852d138363ac4455ab8dc016935bb36379839190`.
+Focused family plus both ratchets are **234/234**; `npx tsc --noEmit` is green;
+the single post-change full `npm test` is green at **572 files, 5,956 passed +
+1 skipped**; production build is green (**534 modules transformed**). Next:
+**`ANIM_H_JUMPS_V_STRETCH_TWICE`** (2 mappings / 2 Factory / 0 outside):
+SHARPEDO, SPOINK.
+
+## Front `ANIM_V_JUMPS_H_JUMPS` Factory family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2y is exact for the complete generated selector
+census: all **5 mappings / 5 Factory-reachable species / 0 outside-Factory
+mappings** — BULBASAUR, VENONAT, PSYDUCK, COMBUSKEN, DUSTOX. BULBASAUR is
+the representative and DUSTOX the terminal sibling. `ANIM_V_JUMPS_BIG`,
+`ANIM_H_JUMPS_V_STRETCH_TWICE`, and every other selector remain unaccepted;
+no unsupported-branch barrier was added. Move coverage stays **107 exact / 0
+partial / 0 staged / 169 unsupported** and `ANIMATION_COVERAGE.json` remains
+byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:911-939,1217-1255,
+5540-5544` and `trig.c:514-518` prove task-zeroed data2=0, the ordinary
+opponent-front callback, signed sine arithmetic, cleanup, `WaitAnimEnd`, and
+task restoration. All **65 active callbacks** pin counters 0..768 by 12,
+including divCounter transitions at 0/132/264/384/516/648/768, case 2's
+y-only local-counter rewrite, C-truncated x segments, and divCounter 6's
+carried x2=1. Tick 65 observes counter 780 (>768), clears x2/y2, installs
+`WaitAnimEnd`, increments data2 to 792, and stays stable thereafter. Fresh
+complete legal challenge-0 Scene-ON parties (all set IDs in 110..199) settle
+both species at x2=0/y2=0/animNum=1/`SpriteCallbackDummy`; paired raw receipts
+are byte-identical with no EOF newline: BULBASAUR SHA-256
+`f91cf65e2d71626c37f7421be61fbc1c909147ceed981b01f0adf51da541f1d8`,
+DUSTOX `e076416a1cc08913fac56b5b54b1069e93707c0da353d07ccc6b7e3a002d802f`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per corrected legal party and paired raw
+`cmp`; focused family plus both ratchets **224/224**; `npx tsc --noEmit` and
+diff checks green; exactly one post-change complete `npm test` is green at
+**572 files, 5,946 passed + 1 skipped**; production build is green (**534
+modules transformed**). The next source-ranked generated census family is
+**`ANIM_V_JUMPS_BIG`** (5 mappings / 5 Factory / 0 outside): PICHU, FLAAFFY,
+GIRAFARIG, SWAMPERT, TAILLOW.
+
+## Front `ANIM_BOUNCE_ROTATE_TO_SIDES` Factory family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2x is exact for the complete normal selector census:
+all **5 mappings / 5 Factory-reachable species / 0 outside-Factory mappings** —
+MAROWAK, MAGIKARP, SEEDOT, MEDITITE, ILLUMISE. MAROWAK is the representative
+and ILLUMISE the terminal sibling. `ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW`
+and every other selector remain unaccepted; accepted Small and Slow behavior
+is regression-pinned. Move coverage stays **107 exact / 0 partial / 0 staged /
+169 unsupported** and `ANIMATION_COVERAGE.json` remains byte-identical at
+SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:911-939,1031-1077,
+1915-2001,3679-3699` proves task-zeroed data6=0, `AddNewAnim` defaults, normal
+rotation=4096/table 0, all seven normal-speed legs, both normal-front no-op
+`TryFlipX` calls, and the distinct Small/Slow/SmallSlow initializers. All **87
+active callbacks** (ticks 0..86) pin C-truncated sine/interpolation, u16 affine
+rotation, tick-0 affine start, and every leg boundary. Tick 87 consumes the
+sentinel, writes identity/x2=y2=0, calls `ResetSpriteAfterAnim`, installs
+`WaitAnimEnd`, and remains stable at tick 88. Fresh complete legal Scene-ON
+parties settle both selected species at x2=0/y2=0/animNum=1/
+`SpriteCallbackDummy`; paired raw receipts are byte-identical with no EOF
+newline: MAROWAK SHA-256
+`da3153df7028f1d0849cbd161241f034ddfc31e5ca86ee5594791b5df42f6711`,
+ILLUMISE `01939c8d337ecac2ac184e8df5a4975b176178f8cb1a3748485de81690dd553c`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per legal party and paired raw `cmp`; focused
+family plus both ratchets **214/214**; `npx tsc --noEmit` and diff checks green;
+exactly one complete `npm test` is green at **572 files, 5,936 passed + 1
+skipped**; production build is green (**534 modules transformed**). The next
+source-ranked generated census family is **`ANIM_V_JUMPS_H_JUMPS`** (5
+mappings / 5 Factory / 0 outside): BULBASAUR, VENONAT, PSYDUCK, COMBUSKEN,
+DUSTOX.
+
+## Front `ANIM_SWING_CONVEX` Factory family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2w is exact for the normal lifecycle and all **4
+Factory-reachable acceptance siblings**: WEEPINBELL, GOLDEEN, MANTINE,
+BANETTE. The complete generated census is **6 selector mappings**; MEW and
+JIRACHI are source-derived outside-Factory mappings only, with no fresh
+outside-Factory acceptance claim. WEEPINBELL is the representative and BANETTE
+the terminal Factory sibling. Move coverage stays **107 exact / 0 partial / 0
+staged / 169 unsupported** and `ANIMATION_COVERAGE.json` remains byte-identical
+at SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:911-939,1038-1059,
+2552-2589,3855-3871` proves task-zeroed data, `InitAnimData` defaults, normal
+front `sDontFlip=TRUE`, and the duration-100/single-run initializer. All **101
+active callbacks** (data2=0..100) pin C-truncated indices, GBA sine x2 writes,
+negative affine rotation, both no-op `TryFlipX` calls, and tick-0 affine start.
+Tick 101 restores identity/x2=0, calls `ResetSpriteAfterAnim`, installs
+`WaitAnimEnd`, and increments data2 to 102. The shared reducer regression-pins
+the accepted concave lifecycle; `ANIM_SWING_CONVEX_FAST` (50 x 2) and unused
+`ANIM_SWING_CONVEX_FAST_SHORT` (50 x 1) remain explicitly unaccepted. Fresh
+complete legal Scene-ON parties settle both selected species at x2=0/y2=0,
+animNum=1/`SpriteCallbackDummy`; paired raw outputs are byte-identical with no
+EOF newline: WEEPINBELL SHA-256
+`a7ae6c5bf088e3a523a0da3cf178eac2024e3e7a1ed02d336a4df831ee44b12e`,
+BANETTE `95b70a54be18eaa93e3cb8a2a4d4a2ce19e1b261f03ff82a1628fcae87c25dfb`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per legal party and paired raw `cmp`; focused
+family plus both ratchets **204/204**; `npx tsc --noEmit` and diff checks green;
+exactly one complete `npm test` is green at **572 files, 5,926 passed + 1
+skipped**; production build is green (**534 modules transformed**). The next
+source-ranked generated census family is **`ANIM_BOUNCE_ROTATE_TO_SIDES`**
+(5 mappings / 5 Factory / 0 outside): MAROWAK, MAGIKARP, SEEDOT, MEDITITE,
+ILLUMISE.
+
+## Front `ANIM_SHRINK_GROW` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2v is exact for all **6 selector mappings / 6
+Factory-reachable species**, with **zero outside-Factory mappings**: WARTORTLE,
+NIDORINO, KOFFING, RHYDON, SLOWKING, GLIGAR. WARTORTLE is the representative
+and GLIGAR the terminal sibling; all six selectors are batch-pinned and every
+prior accepted front family remains regression-pinned. Move coverage stays
+**107 exact / 0 partial / 0 staged / 169 unsupported** and
+`ANIMATION_COVERAGE.json` remains byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+Follow-up verification repair: the dynamic selector census now crosses an
+explicit read-only `Record<string, string>` boundary; assertions and production
+animation code are unchanged.
+
+**Source boundary / evidence:** `pokemon_animation.c:911-939,1878-1912`
+proves task-zeroed data, normal-front `sDontFlip=TRUE`, tick-0 affine start,
+and the normal `(data6,data7)=(8,3)` initializer. All **49 active callbacks**
+(data2=0..48) pin u8-masked phase advance, GBA sine x/y scales, C-truncated
+positive-sine y compensation, and y2=0..4. Tick 49 restores identity/y2=0,
+calls `ResetSpriteAfterAnim`, and installs `WaitAnimEnd` without incrementing
+data2/data4 (49/136). Distinct `ANIM_SHRINK_GROW_FAST` `(8,5)` and
+`ANIM_SHRINK_GROW_SLOW` `(4,3)` selectors remain explicitly unaccepted.
+Fresh complete legal Scene-ON parties settle both selected species at
+x2=0/y2=0/animNum=1/`SpriteCallbackDummy`; paired raw outputs are byte-identical
+with no EOF newline: WARTORTLE SHA-256
+`e4c09e7b1c413acc21745c649e7bb493ea87ff51d648181ae77bf7d6f2466005`,
+GLIGAR `5dbf9079a53eb71470f474107391fc9f05ad9cf6604d1d807b561729b6d820d6`.
+
+**Commands / next:** the preceding acceptance evidence remains the unchanged
+`dump-onix-front-idle-anim.py` via `tools/run-mgba-probe.py` twice per legal
+party and paired raw outputs cited above. This repair independently verified
+the focused family plus both ratchets at **195/195**, `npx tsc --noEmit` green,
+exactly one complete `npm test` at **572 files, 5,917 passed + 1 skipped**, and
+one `npm run build` green (**534 modules transformed**). The next source-ranked
+generated census family is **`ANIM_SWING_CONVEX`** (6 selector mappings / 4
+Factory / 2 outside): WEEPINBELL, GOLDEEN, MEW, MANTINE, BANETTE, JIRACHI.
+
+## Front `ANIM_CIRCULAR_STRETCH_TWICE` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2u is exact for all **6 selector mappings / 6
+Factory-reachable species**, with **zero outside-Factory mappings**: DITTO,
+MUDKIP, SWELLOW, WAILMER, MINUN, REGIROCK. DITTO is the representative and
+REGIROCK the terminal sibling; every prior accepted front family remains
+regression-pinned. Move coverage stays **107 exact / 0 partial / 0 staged / 169
+unsupported** and `ANIMATION_COVERAGE.json` remains byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:911-939,1087-1109`
+proves task-zeroed data, normal-front `sDontFlip=TRUE`, tick-0 affine start,
+and all **41 active callbacks** (data2=0..40) with C-truncated
+`(data2*512/40)%256` indices and amplitude-32 GBA sine/cosine scales in
+data4/data5. Tick 41 writes identity affine, calls `ResetSpriteAfterAnim`,
+installs `WaitAnimEnd`, and increments data2 to 42. Fresh complete legal
+Scene-ON parties settle both species at x2=0/y2=0/animNum=1/
+`SpriteCallbackDummy`. Paired raw outputs are byte-identical with no EOF
+newline: DITTO SHA-256
+`26cae4ff0244a36a7cb6dbea0e7cfbe94b506ec4a86bea200f5032c433dc595e`,
+REGIROCK `5d2e0fb67df2033d4868db97e13f5bf473d34c9b5a498a4da42d90847cb7c7d3`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per legal party; raw `cmp`; focused family plus
+both ratchets **186/186**; TypeScript no-emit and diff checks green; exactly one
+full `npm test` and one `npm run build` green. The next source-ranked generated
+census family is **`ANIM_SHRINK_GROW`** (6/6 Factory species, zero outside):
+WARTORTLE, NIDORINO, KOFFING, RHYDON, SLOWKING, GLIGAR.
+
 ## Front `ANIM_H_SLIDE_SLOW` terminal family accepted (2026-08-01)
 
 **Verdict / counts:** rung 2t is exact for all **7 selector mappings / 7

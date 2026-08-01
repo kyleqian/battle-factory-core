@@ -42,8 +42,10 @@ import selectorTables from "../data/gen/send-out-anim-selector-tables.json" with
  */
 
 export type SpeciesFrontAnimFamily =
+  | "BOUNCE_ROTATE_TO_SIDES"
   | "BOUNCE_ROTATE_TO_SIDES_SMALL"
   | "BOUNCE_ROTATE_TO_SIDES_SLOW"
+  | "CIRCULAR_STRETCH_TWICE"
   | "GROW_VIBRATE"
   | "FLASH_YELLOW"
   | "H_JUMPS"
@@ -52,10 +54,15 @@ export type SpeciesFrontAnimFamily =
   | "H_STRETCH"
   | "H_VIBRATE"
   | "H_JUMPS_V_STRETCH"
+  | "H_JUMPS_V_STRETCH_TWICE"
   | "H_SHAKE"
   | "RAPID_H_HOPS"
+  | "SHRINK_GROW"
+  | "SWING_CONVEX"
   | "SWING_CONCAVE"
+  | "V_JUMPS_BIG"
   | "V_JUMPS_SMALL"
+  | "V_JUMPS_H_JUMPS"
   | "V_SLIDE"
   | "V_SLIDE_WOBBLE"
   | "V_SQUISH_AND_BOUNCE"
@@ -66,8 +73,10 @@ export type SpeciesFrontAnimFamily =
 
 const FRONT_ANIM_PREFIX = "ANIM_";
 const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
+  "BOUNCE_ROTATE_TO_SIDES",
   "BOUNCE_ROTATE_TO_SIDES_SMALL",
   "BOUNCE_ROTATE_TO_SIDES_SLOW",
+  "CIRCULAR_STRETCH_TWICE",
   "GROW_VIBRATE",
   "FLASH_YELLOW",
   "H_JUMPS",
@@ -76,10 +85,15 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "H_STRETCH",
   "H_VIBRATE",
   "H_JUMPS_V_STRETCH",
+  "H_JUMPS_V_STRETCH_TWICE",
   "H_SHAKE",
   "RAPID_H_HOPS",
+  "SHRINK_GROW",
+  "SWING_CONVEX",
   "SWING_CONCAVE",
+  "V_JUMPS_BIG",
   "V_JUMPS_SMALL",
+  "V_JUMPS_H_JUMPS",
   "V_SLIDE",
   "V_SLIDE_WOBBLE",
   "V_SQUISH_AND_BOUNCE",
@@ -232,6 +246,40 @@ export const V_JUMPS_SMALL_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Ob
   V_JUMPS_SMALL_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
+/** All 5 source selector mappings for `ANIM_V_JUMPS_BIG`. */
+export const V_JUMPS_BIG_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_V_JUMPS_BIG")
+    .map(([species]) => species),
+);
+
+/** Every `ANIM_V_JUMPS_BIG` mapping is reachable through Factory rentals. */
+export const V_JUMPS_BIG_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  V_JUMPS_BIG_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no `ANIM_V_JUMPS_BIG` selector mappings outside the Factory pool. */
+export const V_JUMPS_BIG_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  V_JUMPS_BIG_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All 5 source selector mappings for `ANIM_V_JUMPS_H_JUMPS`. */
+export const V_JUMPS_H_JUMPS_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_V_JUMPS_H_JUMPS")
+    .map(([species]) => species),
+);
+
+/** Every vertical-jumps/horizontal-jumps mapping is Factory-reachable. */
+export const V_JUMPS_H_JUMPS_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  V_JUMPS_H_JUMPS_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no mappings for this family outside the Factory rental pool. */
+export const V_JUMPS_H_JUMPS_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  V_JUMPS_H_JUMPS_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
 /** All 10 source selector mappings for `ANIM_H_JUMPS_V_STRETCH`. */
 export const H_JUMPS_V_STRETCH_FRONT_SPECIES: readonly string[] = Object.freeze(
   Object.entries(generatedFrontAnimIds)
@@ -248,6 +296,46 @@ export const H_JUMPS_V_STRETCH_FACTORY_FRONT_SPECIES: readonly string[] = Object
 export const H_JUMPS_V_STRETCH_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   H_JUMPS_V_STRETCH_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
+
+/** All 2 source selector mappings for `ANIM_H_JUMPS_V_STRETCH_TWICE`. */
+export const H_JUMPS_V_STRETCH_TWICE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_H_JUMPS_V_STRETCH_TWICE")
+    .map(([species]) => species),
+);
+
+/** Every twice horizontal-jumps/vertical-stretch mapping is Factory-reachable. */
+export const H_JUMPS_V_STRETCH_TWICE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_JUMPS_V_STRETCH_TWICE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no twice mappings outside the Factory rental pool. */
+export const H_JUMPS_V_STRETCH_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
+  Object.freeze(
+    H_JUMPS_V_STRETCH_TWICE_FRONT_SPECIES.filter(
+      (species) => !factoryFrontSpecies.has(species),
+    ),
+  );
+
+/** All 5 source selector mappings for the normal `ANIM_BOUNCE_ROTATE_TO_SIDES`. */
+export const BOUNCE_ROTATE_TO_SIDES_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_BOUNCE_ROTATE_TO_SIDES")
+    .map(([species]) => species),
+);
+
+/** Every normal bounce/rotate selector mapping is Factory-reachable. */
+export const BOUNCE_ROTATE_TO_SIDES_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  BOUNCE_ROTATE_TO_SIDES_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no normal bounce/rotate mappings outside the Factory pool. */
+export const BOUNCE_ROTATE_TO_SIDES_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
+  Object.freeze(
+    BOUNCE_ROTATE_TO_SIDES_FRONT_SPECIES.filter(
+      (species) => !factoryFrontSpecies.has(species),
+    ),
+  );
 
 /** All 9 source selector mappings for `ANIM_BOUNCE_ROTATE_TO_SIDES_SLOW`. */
 export const BOUNCE_ROTATE_TO_SIDES_SLOW_FRONT_SPECIES: readonly string[] = Object.freeze(
@@ -425,6 +513,57 @@ export const H_SLIDE_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Obj
   H_SLIDE_SLOW_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
+/** All 6 source selector mappings for `ANIM_CIRCULAR_STRETCH_TWICE`. */
+export const CIRCULAR_STRETCH_TWICE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_CIRCULAR_STRETCH_TWICE")
+    .map(([species]) => species),
+);
+
+/** Every circular-stretch-twice mapping is reachable through Factory rentals. */
+export const CIRCULAR_STRETCH_TWICE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  CIRCULAR_STRETCH_TWICE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no circular-stretch-twice mappings outside the Factory rental pool. */
+export const CIRCULAR_STRETCH_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  CIRCULAR_STRETCH_TWICE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All 6 source selector mappings for the normal front `ANIM_SHRINK_GROW`. */
+export const SHRINK_GROW_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_SHRINK_GROW")
+    .map(([species]) => species),
+);
+
+/** Every normal shrink/grow mapping is reachable through Factory rentals. */
+export const SHRINK_GROW_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  SHRINK_GROW_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no normal shrink/grow mappings outside the Factory rental pool. */
+export const SHRINK_GROW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  SHRINK_GROW_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All 6 source selector mappings for the normal front `ANIM_SWING_CONVEX`. */
+export const SWING_CONVEX_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_SWING_CONVEX")
+    .map(([species]) => species),
+);
+
+/** The four normal SwingConvex mappings reachable through Factory rentals. */
+export const SWING_CONVEX_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  SWING_CONVEX_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** The two source mappings absent from the Factory rental pool. */
+export const SWING_CONVEX_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  SWING_CONVEX_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
 export interface SpeciesIdleOffset {
   readonly x2: number;
   readonly y2: number;
@@ -433,6 +572,10 @@ export interface SpeciesIdleOffset {
 function gbaSin(index: number, amplitude: number): number {
   const v = GBA_SINE_TABLE_256[((index % 256) + 256) % 256]!;
   return Math.floor((amplitude * v) / 256);
+}
+
+function gbaCos(index: number, amplitude: number): number {
+  return gbaSin(index + 64, amplitude);
 }
 
 const RAPID_H_HOPS_ACCUMULATOR_STEP = 24;
@@ -772,6 +915,58 @@ export interface HorizontalSlideFrame extends SpeciesIdleOffset {
   readonly callback: "HorizontalSlide" | "WaitAnimEnd";
 }
 
+export interface CircularStretchTwiceFrame extends SpeciesIdleOffset {
+  readonly data0: 0;
+  readonly data2: number;
+  readonly data4: number;
+  readonly data5: number;
+  readonly index: number | null;
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly affineRotation: 0;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "Anim_CircularStretchTwice" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+/**
+ * The three selectors share `ShrinkGrow`, but their initializers establish
+ * different run counts or phase steps. Only the normal front selector is
+ * accepted by this rung; FAST and SLOW remain independently unaccepted.
+ */
+export const SHRINK_GROW_INITIALIZERS = Object.freeze({
+  normal: Object.freeze({
+    selector: "ANIM_SHRINK_GROW", data6: 8, data7: 3, accepted: true,
+  }),
+  fast: Object.freeze({
+    selector: "ANIM_SHRINK_GROW_FAST", data6: 8, data7: 5, accepted: false,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_SHRINK_GROW_SLOW", data6: 4, data7: 3, accepted: false,
+  }),
+} as const);
+
+export interface ShrinkGrowFrame extends SpeciesIdleOffset {
+  readonly data0: 0;
+  readonly data2: number;
+  readonly data4: number;
+  readonly data6: 8;
+  readonly data7: 3;
+  readonly phaseIndex: number | null;
+  readonly yScaleBeforePosition: number | null;
+  readonly posY: number | null;
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly affineRotation: 0;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "Anim_ShrinkGrow" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
 export interface HorizontalJumpsFrame extends SpeciesIdleOffset {
   readonly data0: 0;
   readonly data2: number;
@@ -782,6 +977,20 @@ export interface HorizontalJumpsFrame extends SpeciesIdleOffset {
   readonly normalFrontDontFlip: true;
   readonly tryFlipXCalls: 2;
   readonly callback: "Anim_HorizontalJumps" | "WaitAnimEnd";
+}
+
+export interface VerticalJumpsHorizontalJumpsFrame extends SpeciesIdleOffset {
+  readonly data0: 0;
+  readonly data2: number;
+  /** The source `counter` value before case 2 can rewrite its local copy. */
+  readonly counter: number;
+  readonly divCounter: 0 | 1 | 2 | 3 | 4 | 5 | 6 | null;
+  /** Counter used by the final y2 sine write; case 2 alone rewrites it to 0. */
+  readonly yCounter: number | null;
+  readonly remainder: number | null;
+  readonly x2Written: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly callback: "Anim_VerticalJumpsHorizontalJumps" | "WaitAnimEnd";
 }
 
 /**
@@ -881,7 +1090,8 @@ export interface GrowVibrateFrame extends SpeciesIdleOffset {
   readonly affineMode: "double" | "normal";
 }
 
-export interface SwingConcaveFrame extends SpeciesIdleOffset {
+export interface SwingFrame<Callback extends "SwingConcave" | "SwingConvex">
+  extends SpeciesIdleOffset {
   readonly data2: number;
   readonly animRotation: number;
   readonly animDelay: number;
@@ -896,9 +1106,12 @@ export interface SwingConcaveFrame extends SpeciesIdleOffset {
   readonly normalFrontDontFlip: true;
   readonly tryFlipXCalls: 2;
   readonly resetSpriteAfterAnim: boolean;
-  readonly callback: "SwingConcave" | "WaitAnimEnd";
+  readonly callback: Callback | "WaitAnimEnd";
   readonly affineMode: "double" | "normal";
 }
+
+export type SwingConcaveFrame = SwingFrame<"SwingConcave">;
+export type SwingConvexFrame = SwingFrame<"SwingConvex">;
 
 export interface VerticalSlideFrame extends SpeciesIdleOffset {
   readonly data0: 40;
@@ -909,32 +1122,35 @@ export interface VerticalSlideFrame extends SpeciesIdleOffset {
   readonly callback: "VerticalSlide" | "WaitAnimEnd";
 }
 
-export interface VerticalJumpsSmallFrame extends SpeciesIdleOffset {
-  readonly data0: 3;
+export interface VerticalJumpsFrame extends SpeciesIdleOffset {
+  readonly data0: 3 | 4;
   readonly data2: number;
   readonly counter: number;
   readonly divCounter: 0 | 1 | 2 | 3 | null;
   readonly adjustedCounter: number | null;
   readonly sineIndex: number | null;
-  readonly amplitude: 6 | 9 | null;
+  readonly amplitude: 6 | 8 | 9 | 12 | null;
   readonly callback: "VerticalJumps" | "WaitAnimEnd";
 }
+
+export type VerticalJumpsSmallFrame = VerticalJumpsFrame & { readonly data0: 3 };
+export type VerticalJumpsBigFrame = VerticalJumpsFrame & { readonly data0: 4 };
 
 export interface HorizontalJumpsVerticalStretchFrame extends SpeciesIdleOffset {
   readonly data2: number;
   readonly data3: number;
   readonly data4: number;
   readonly animRotation: 0;
-  readonly animDelay: 0;
-  readonly animRuns: 1;
+  readonly animDelay: number;
+  readonly animRuns: number;
   readonly animSpeed: 0;
-  readonly animData: -1;
+  readonly animData: -1 | 1;
   readonly counter: number;
   readonly xScale: number;
   readonly yScale: number;
   readonly startedAffine: boolean;
   readonly normalFrontDontFlip: true;
-  readonly tryFlipXCalls: 2;
+  readonly tryFlipXCalls: 0 | 2;
   readonly resetSpriteAfterAnim: boolean;
   readonly callback:
     | "HorizontalJumpsVerticalStretch_0"
@@ -945,6 +1161,26 @@ export interface HorizontalJumpsVerticalStretchFrame extends SpeciesIdleOffset {
 }
 
 const SWING_CONCAVE_DURATION = 100;
+
+/**
+ * The normal, fast, and unused fast-short selectors all share `SwingConvex`.
+ * This rung accepts only the normal single-run duration-100 initializer.
+ */
+export const SWING_CONVEX_INITIALIZERS = Object.freeze({
+  normal: Object.freeze({
+    selector: "ANIM_SWING_CONVEX", data: 100, runs: 1, accepted: true,
+  }),
+  fast: Object.freeze({
+    selector: "ANIM_SWING_CONVEX_FAST", data: 50, runs: 2, accepted: false,
+  }),
+  fastShort: Object.freeze({
+    selector: "ANIM_SWING_CONVEX_FAST_SHORT",
+    data: 50,
+    runs: 1,
+    unused: true,
+    accepted: false,
+  }),
+} as const);
 
 function tryFlipX(x2: number, dontFlip: boolean): number {
   return dontFlip ? x2 : -x2;
@@ -962,7 +1198,11 @@ function tryFlipX(x2: number, dontFlip: boolean): number {
  * observes the strict data2 > data guard, restores identity/x2/normal affine
  * state, installs `WaitAnimEnd`, and still performs the final data2 increment.
  */
-export function swingConcaveFrameAtTick(ticksSinceStart: number): SwingConcaveFrame | null {
+function swingFrameAtTick<Callback extends "SwingConcave" | "SwingConvex">(
+  ticksSinceStart: number,
+  callback: Callback,
+  rotationSign: 1 | -1,
+): SwingFrame<Callback> | null {
   if (ticksSinceStart < 0) return null;
 
   // `InitAnimData`, called by `AddNewAnim`, is the source of these defaults.
@@ -1008,7 +1248,7 @@ export function swingConcaveFrameAtTick(ticksSinceStart: number): SwingConcaveFr
 
     const index = Math.trunc((data2 * 256) / animData);
     x2 = -gbaSin(index, 10) + 0;
-    const affineRotation = gbaSin(index, 3276);
+    const affineRotation = rotationSign * gbaSin(index, 3276) + 0;
     data2 += 1;
     x2 = tryFlipX(x2, true);
 
@@ -1030,13 +1270,30 @@ export function swingConcaveFrameAtTick(ticksSinceStart: number): SwingConcaveFr
         normalFrontDontFlip: true,
         tryFlipXCalls: 2,
         resetSpriteAfterAnim: false,
-        callback: "SwingConcave",
+        callback,
         affineMode: "double",
       };
     }
   }
 
-  throw new Error("unreachable SwingConcave reducer state");
+  throw new Error(`unreachable ${callback} reducer state`);
+}
+
+export function swingConcaveFrameAtTick(ticksSinceStart: number): SwingConcaveFrame | null {
+  return swingFrameAtTick(ticksSinceStart, "SwingConcave", 1);
+}
+
+/**
+ * Source-order port of the normal `Anim_SwingConvex` initializer and shared
+ * `SwingConvex` lifecycle (`pokemon_animation.c:1038-1059,2552-2589,
+ * 3855-3871`) on the normal opponent-front path. It reuses the exact swing
+ * callback reducer accepted for `SwingConcave`; only the affine rotation
+ * write changes sign. Tick 0 starts affine mode, ticks 0..100 are active, and
+ * tick 101 restores identity/x2, resets the sprite, installs `WaitAnimEnd`,
+ * and performs the callback's final data2 increment.
+ */
+export function swingConvexFrameAtTick(ticksSinceStart: number): SwingConvexFrame | null {
+  return swingFrameAtTick(ticksSinceStart, "SwingConvex", -1);
 }
 
 const VERTICAL_SLIDE_DURATION = 40;
@@ -1099,22 +1356,23 @@ export function verticalSlideFrameAtTick(ticksSinceStart: number): VerticalSlide
   throw new Error("unreachable VerticalSlide reducer state");
 }
 
-const VERTICAL_JUMPS_SMALL_AMPLITUDE = 3;
 const VERTICAL_JUMPS_ACCUMULATOR_STEP = 12;
 const VERTICAL_JUMPS_ACCUMULATOR_LIMIT = 384;
 
 /**
- * Source-order port of `Anim_VerticalJumps_Small` / `VerticalJumps`
- * (`pokemon_animation.c:1181-1208,3768-3773`). The initializer sets data0=3
- * and invokes `VerticalJumps` immediately. Active ticks 0..32 preserve C's
- * signed division branch selection, counter adjustment, and the `u8` sine
- * argument conversion; branches 0/1 use data0*2 amplitude and branches 2/3
- * use data0*3. Tick 33 observes the strict counter > 384 guard, clears both
- * x2/y2, installs `WaitAnimEnd`, and still performs the final data2 += 12.
+ * Shared source-order port of `VerticalJumps`
+ * (`pokemon_animation.c:1181-1208`). Both accepted initializers immediately
+ * invoke this callback: Big sets data0=4 (`:1210-1215`) and Small sets data0=3
+ * (`:3768-3773`). Active ticks 0..32 preserve C's signed division, the
+ * counter-=256 branch, and u8 sine-index conversion. Tick 33 observes the
+ * strict counter > 384 guard, clears x2/y2, installs `WaitAnimEnd`, and still
+ * performs data2 += 12. `Task_HandleMonAnimation` zeroes data2 first
+ * (`:911-939`); `WaitAnimEnd` remains stable until animEnded (`:5540-5544`).
  */
-export function verticalJumpsSmallFrameAtTick(
+function verticalJumpsFrameAtTick(
   ticksSinceStart: number,
-): VerticalJumpsSmallFrame | null {
+  data0: 3 | 4,
+): VerticalJumpsFrame | null {
   if (ticksSinceStart < 0) return null;
 
   let data2 = 0;
@@ -1126,7 +1384,7 @@ export function verticalJumpsSmallFrameAtTick(
       return {
         x2: 0,
         y2: 0,
-        data0: VERTICAL_JUMPS_SMALL_AMPLITUDE,
+        data0,
         data2,
         counter,
         divCounter: null,
@@ -1143,8 +1401,8 @@ export function verticalJumpsSmallFrameAtTick(
     const adjustedCounter = divCounter < 2 ? counter : counter - 256;
     const sineIndex = divCounter < 2 ? counter % 128 : adjustedCounter & 0xff;
     const amplitude = divCounter < 2
-      ? VERTICAL_JUMPS_SMALL_AMPLITUDE * 2 as 6
-      : VERTICAL_JUMPS_SMALL_AMPLITUDE * 3 as 9;
+      ? data0 * 2 as 6 | 8
+      : data0 * 3 as 9 | 12;
     y2 = -gbaSin(sineIndex, amplitude) + 0;
     data2 += VERTICAL_JUMPS_ACCUMULATOR_STEP;
 
@@ -1152,7 +1410,7 @@ export function verticalJumpsSmallFrameAtTick(
       return {
         x2: 0,
         y2,
-        data0: VERTICAL_JUMPS_SMALL_AMPLITUDE,
+        data0,
         data2,
         counter,
         divCounter,
@@ -1164,7 +1422,19 @@ export function verticalJumpsSmallFrameAtTick(
     }
   }
 
-  throw new Error("unreachable VerticalJumps small reducer state");
+  throw new Error("unreachable VerticalJumps reducer state");
+}
+
+export function verticalJumpsSmallFrameAtTick(
+  ticksSinceStart: number,
+): VerticalJumpsSmallFrame | null {
+  return verticalJumpsFrameAtTick(ticksSinceStart, 3) as VerticalJumpsSmallFrame | null;
+}
+
+export function verticalJumpsBigFrameAtTick(
+  ticksSinceStart: number,
+): VerticalJumpsBigFrame | null {
+  return verticalJumpsFrameAtTick(ticksSinceStart, 4) as VerticalJumpsBigFrame | null;
 }
 
 /**
@@ -1181,17 +1451,18 @@ export function verticalJumpsSmallFrameAtTick(
  * transitions and strict guards are represented exactly, including their data2
  * resets and the terminal `_2` increment after `ResetSpriteAfterAnim`.
  */
-export function horizontalJumpsVerticalStretchFrameAtTick(
+function horizontalJumpsVerticalStretchVariantFrameAtTick(
   ticksSinceStart: number,
+  initializer: { readonly animData: -1 | 1; readonly animRuns: 1 | 2 },
 ): HorizontalJumpsVerticalStretchFrame | null {
   if (ticksSinceStart < 0) return null;
 
   // `InitAnimData` defaults, followed by the single-run initializer override.
   const animRotation = 0;
   let animDelay = 0;
-  const animRuns = 1;
+  let animRuns = initializer.animRuns;
   const animSpeed = 0;
-  const animData = -1;
+  const animData = initializer.animData;
   let data2 = 0;
   let data3 = 0;
   let data4 = 0;
@@ -1206,11 +1477,13 @@ export function horizontalJumpsVerticalStretchFrameAtTick(
     const startedAffine = tick === 0;
     let counter = data2;
     let resetSpriteAfterAnim = false;
+    let tryFlipXCalls: 0 | 2 = 0;
 
     if (callback === "HorizontalJumpsVerticalStretch_0") {
       if (animDelay !== 0) {
         animDelay -= 1;
       } else {
+        tryFlipXCalls = 2;
         x2 = tryFlipX(x2, true);
         counter = data2;
         if (data2 > 128) {
@@ -1226,6 +1499,7 @@ export function horizontalJumpsVerticalStretchFrameAtTick(
         x2 = tryFlipX(x2, true);
       }
     } else if (callback === "HorizontalJumpsVerticalStretch_1") {
+      tryFlipXCalls = 2;
       x2 = tryFlipX(x2, true);
       counter = data2;
       if (data2 > 48) {
@@ -1249,13 +1523,21 @@ export function horizontalJumpsVerticalStretchFrameAtTick(
       }
       x2 = tryFlipX(x2, true);
     } else if (callback === "HorizontalJumpsVerticalStretch_2") {
+      tryFlipXCalls = 2;
       x2 = tryFlipX(x2, true);
       counter = data2;
       if (counter > 128) {
-        // `animRuns` is the AddNewAnim default 1, so the repeat branch used by
-        // `_Twice` is unreachable for this family.
-        resetSpriteAfterAnim = true;
-        callback = "WaitAnimEnd";
+        if (animRuns > 1) {
+          animRuns -= 1;
+          animDelay = 10;
+          data3 = 0;
+          data2 = 0;
+          data4 = 0;
+          callback = "HorizontalJumpsVerticalStretch_0";
+        } else {
+          resetSpriteAfterAnim = true;
+          callback = "WaitAnimEnd";
+        }
         x2 = 0;
         y2 = 0;
       } else {
@@ -1274,7 +1556,7 @@ export function horizontalJumpsVerticalStretchFrameAtTick(
         data3,
         data4,
         animRotation,
-        animDelay: 0,
+        animDelay,
         animRuns,
         animSpeed,
         animData,
@@ -1283,7 +1565,7 @@ export function horizontalJumpsVerticalStretchFrameAtTick(
         yScale,
         startedAffine,
         normalFrontDontFlip: true,
-        tryFlipXCalls: 2,
+        tryFlipXCalls,
         resetSpriteAfterAnim,
         callback,
         affineMode: resetSpriteAfterAnim ? "normal" : "double",
@@ -1292,6 +1574,33 @@ export function horizontalJumpsVerticalStretchFrameAtTick(
   }
 
   throw new Error("unreachable HorizontalJumpsVerticalStretch reducer state");
+}
+
+export function horizontalJumpsVerticalStretchFrameAtTick(
+  ticksSinceStart: number,
+): HorizontalJumpsVerticalStretchFrame | null {
+  return horizontalJumpsVerticalStretchVariantFrameAtTick(
+    ticksSinceStart,
+    { animData: -1, animRuns: 1 },
+  );
+}
+
+/**
+ * Source-order port of `Anim_HorizontalJumpsVerticalStretch_Twice`
+ * (`pokemon_animation.c:3805-3815`) through the callbacks shared with the
+ * accepted single-run family (`:2755-2868`). The initializer differs only by
+ * selecting data=1/runs=2. At the first `_2` terminal edge the shared tail
+ * carries data2 from the reset value 0 to 12, while delay=10 suppresses the
+ * next ten `_0` bodies; the second pass then finishes through the ordinary
+ * `ResetSpriteAfterAnim` / `WaitAnimEnd` path.
+ */
+export function horizontalJumpsVerticalStretchTwiceFrameAtTick(
+  ticksSinceStart: number,
+): HorizontalJumpsVerticalStretchFrame | null {
+  return horizontalJumpsVerticalStretchVariantFrameAtTick(
+    ticksSinceStart,
+    { animData: 1, animRuns: 2 },
+  );
 }
 
 export type BounceRotateToSidesTableEntry = readonly [
@@ -1356,7 +1665,7 @@ export interface BounceRotateToSidesFrame extends SpeciesIdleOffset {
   readonly affineMode: "double" | "normal";
 }
 
-function bounceRotateToSidesFrameAtTick(
+function bounceRotateToSidesVariantFrameAtTick(
   ticksSinceStart: number,
   variant: (typeof BOUNCE_ROTATE_TO_SIDES_VARIANTS)[keyof typeof BOUNCE_ROTATE_TO_SIDES_VARIANTS],
 ): BounceRotateToSidesFrame | null {
@@ -1472,6 +1781,21 @@ function bounceRotateToSidesFrameAtTick(
 }
 
 /**
+ * Exact source-order normal `Anim_BounceRotateToSides` lifecycle. The
+ * task-zeroed `data6=0` selects table 0, while `AddNewAnim` defaults are
+ * followed by the normal initializer's rotation 4096. Active ticks are
+ * 0..86; tick 87 consumes the zero-duration sentinel.
+ */
+export function bounceRotateToSidesFrameAtTick(
+  ticksSinceStart: number,
+): BounceRotateToSidesFrame | null {
+  return bounceRotateToSidesVariantFrameAtTick(
+    ticksSinceStart,
+    BOUNCE_ROTATE_TO_SIDES_VARIANTS.normal,
+  );
+}
+
+/**
  * Exact source-order normal `Anim_BounceRotateToSides_Slow` lifecycle:
  * initializer -> normal rotation-4096 initializer -> shared callback. Active
  * ticks are 0..166; tick 167 consumes the zero-duration sentinel and performs
@@ -1480,7 +1804,10 @@ function bounceRotateToSidesFrameAtTick(
 export function bounceRotateToSidesSlowFrameAtTick(
   ticksSinceStart: number,
 ): BounceRotateToSidesFrame | null {
-  return bounceRotateToSidesFrameAtTick(ticksSinceStart, BOUNCE_ROTATE_TO_SIDES_VARIANTS.slow);
+  return bounceRotateToSidesVariantFrameAtTick(
+    ticksSinceStart,
+    BOUNCE_ROTATE_TO_SIDES_VARIANTS.slow,
+  );
 }
 
 /**
@@ -1492,14 +1819,17 @@ export function bounceRotateToSidesSlowFrameAtTick(
 export function bounceRotateToSidesSmallFrameAtTick(
   ticksSinceStart: number,
 ): BounceRotateToSidesFrame | null {
-  return bounceRotateToSidesFrameAtTick(ticksSinceStart, BOUNCE_ROTATE_TO_SIDES_VARIANTS.small);
+  return bounceRotateToSidesVariantFrameAtTick(
+    ticksSinceStart,
+    BOUNCE_ROTATE_TO_SIDES_VARIANTS.small,
+  );
 }
 
 /** Source sibling retained explicitly: small rotation with the slow table. */
 export function bounceRotateToSidesSmallSlowFrameAtTick(
   ticksSinceStart: number,
 ): BounceRotateToSidesFrame | null {
-  return bounceRotateToSidesFrameAtTick(
+  return bounceRotateToSidesVariantFrameAtTick(
     ticksSinceStart,
     BOUNCE_ROTATE_TO_SIDES_VARIANTS.smallSlow,
   );
@@ -1917,6 +2247,140 @@ export function horizontalSlideSlowFrameAtTick(
   };
 }
 
+const CIRCULAR_STRETCH_TWICE_DURATION = 40;
+
+/**
+ * Source-order port of `Anim_CircularStretchTwice`
+ * (`pokemon_animation.c:911-939,1087-1109`) on the opponent-front path.
+ * `Task_HandleMonAnimation` zeroes data0/data2..data7 and sets
+ * `sDontFlip=TRUE`. Tick 0 enters affine mode before its first write. Active
+ * ticks 0..40 use C-truncated division before the `% 256`, store the GBA
+ * sine/cosine scales in data4/data5, and write them without front-side
+ * negation. Tick 41 writes identity affine, resets the sprite to normal
+ * affine mode, installs `WaitAnimEnd`, and still increments data2 to 42.
+ */
+export function circularStretchTwiceFrameAtTick(
+  ticksSinceStart: number,
+): CircularStretchTwiceFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  if (ticksSinceStart > CIRCULAR_STRETCH_TWICE_DURATION) {
+    return {
+      x2: 0,
+      y2: 0,
+      data0: 0,
+      data2: CIRCULAR_STRETCH_TWICE_DURATION + 2,
+      data4: 256,
+      data5: 288,
+      index: null,
+      xScale: 256,
+      yScale: 256,
+      affineRotation: 0,
+      startedAffine: false,
+      normalFrontDontFlip: true,
+      resetSpriteAfterAnim: true,
+      callback: "WaitAnimEnd",
+      affineMode: "normal",
+    };
+  }
+
+  const data2BeforeIncrement = ticksSinceStart;
+  const index = Math.trunc(
+    (data2BeforeIncrement * 512) / CIRCULAR_STRETCH_TWICE_DURATION,
+  ) % 256;
+  const data4 = gbaSin(index, 32) + 256;
+  const data5 = gbaCos(index, 32) + 256;
+  return {
+    x2: 0,
+    y2: 0,
+    data0: 0,
+    data2: data2BeforeIncrement + 1,
+    data4,
+    data5,
+    index,
+    xScale: data4,
+    yScale: data5,
+    affineRotation: 0,
+    startedAffine: data2BeforeIncrement === 0,
+    normalFrontDontFlip: true,
+    resetSpriteAfterAnim: false,
+    callback: "Anim_CircularStretchTwice",
+    affineMode: "double",
+  };
+}
+
+const SHRINK_GROW_NORMAL_ACTIVE_LIMIT =
+  Math.trunc(128 / SHRINK_GROW_INITIALIZERS.normal.data6)
+  * SHRINK_GROW_INITIALIZERS.normal.data7;
+
+/**
+ * Source-order port of the normal `Anim_ShrinkGrow` initializer and shared
+ * `ShrinkGrow` callback (`pokemon_animation.c:911-939,1878-1912`) on the
+ * opponent-front path. `Task_HandleMonAnimation` zeroes data0/data2..data7
+ * and sets `sDontFlip=TRUE`. Tick 0 starts affine mode and installs the normal
+ * `(data6,data7)=(8,3)` parameters before entering `ShrinkGrow`. Active ticks
+ * 0..48 use the exact GBA sine table, C signed division for the positive-sine
+ * vertical compensation, and u8-masked phase advance. Tick 49 observes the
+ * strict limit, restores identity and y2=0, resets the affine state, and
+ * installs `WaitAnimEnd` without incrementing data2 or data4.
+ */
+export function shrinkGrowFrameAtTick(ticksSinceStart: number): ShrinkGrowFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  const data6 = SHRINK_GROW_INITIALIZERS.normal.data6;
+  const data7 = SHRINK_GROW_INITIALIZERS.normal.data7;
+  if (ticksSinceStart > SHRINK_GROW_NORMAL_ACTIVE_LIMIT) {
+    const activeCallbacks = SHRINK_GROW_NORMAL_ACTIVE_LIMIT + 1;
+    return {
+      x2: 0,
+      y2: 0,
+      data0: 0,
+      data2: activeCallbacks,
+      data4: (activeCallbacks * data6) & 0xff,
+      data6,
+      data7,
+      phaseIndex: null,
+      yScaleBeforePosition: null,
+      posY: null,
+      xScale: 256,
+      yScale: 256,
+      affineRotation: 0,
+      startedAffine: false,
+      normalFrontDontFlip: true,
+      resetSpriteAfterAnim: true,
+      callback: "WaitAnimEnd",
+      affineMode: "normal",
+    };
+  }
+
+  const phaseIndex = (ticksSinceStart * data6) & 0xff;
+  const yScaleBeforePosition = gbaSin(phaseIndex, 32) + 256;
+  const posY = yScaleBeforePosition > 256
+    ? Math.trunc((256 - yScaleBeforePosition) / 8)
+    : 0;
+  const xScale = gbaSin(phaseIndex, 48) + 256;
+  return {
+    x2: 0,
+    y2: -posY + 0,
+    data0: 0,
+    data2: ticksSinceStart + 1,
+    data4: (phaseIndex + data6) & 0xff,
+    data6,
+    data7,
+    phaseIndex,
+    yScaleBeforePosition,
+    posY,
+    xScale,
+    yScale: yScaleBeforePosition,
+    affineRotation: 0,
+    startedAffine: ticksSinceStart === 0,
+    normalFrontDontFlip: true,
+    resetSpriteAfterAnim: false,
+    callback: "Anim_ShrinkGrow",
+    affineMode: "double",
+  };
+}
+
 /**
  * Source-order port of `Anim_HorizontalSlideWobble`
  * (`pokemon_animation.c:911-939,1803-1833`). `Task_HandleMonAnimation`
@@ -2034,6 +2498,104 @@ export function horizontalJumpsFrameAtTick(
   }
 
   throw new Error("unreachable HorizontalJumps reducer state");
+}
+
+const VERTICAL_JUMPS_HORIZONTAL_JUMPS_STEP = 12;
+const VERTICAL_JUMPS_HORIZONTAL_JUMPS_LIMIT = 768;
+
+/**
+ * Source-order opponent-front port of `Anim_VerticalJumpsHorizontalJumps`
+ * (`pokemon_animation.c:911-939,1217-1255`). `Task_HandleMonAnimation`
+ * zeroes data2 before installing this callback. Counters 0..768 in steps of
+ * 12 are active and use the ROM's `Sin` helper (`trig.c:514-518`, signed
+ * multiply followed by arithmetic `>> 8`); counter 780 satisfies the strict
+ * `> 768` guard, clears x2/y2, installs `WaitAnimEnd`, and increments data2.
+ *
+ * The switch is intentionally stateful: case 2 rewrites only its local
+ * counter before y2, while switch ranges without an x2 assignment retain the
+ * preceding callback's x2. That includes divCounter 6 at counter 768.
+ * `WaitAnimEnd` then restores `SpriteCallbackDummy` once the OAM anim ends
+ * (`pokemon_animation.c:5540-5544`) without changing these fields.
+ */
+export function verticalJumpsHorizontalJumpsFrameAtTick(
+  ticksSinceStart: number,
+): VerticalJumpsHorizontalJumpsFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let x2 = 0;
+  let y2 = 0;
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    const counter = data2;
+    if (counter > VERTICAL_JUMPS_HORIZONTAL_JUMPS_LIMIT) {
+      x2 = 0;
+      y2 = 0;
+      data2 += VERTICAL_JUMPS_HORIZONTAL_JUMPS_STEP;
+      return {
+        x2,
+        y2,
+        data0: 0,
+        data2,
+        counter,
+        divCounter: null,
+        yCounter: null,
+        remainder: null,
+        x2Written: true,
+        normalFrontDontFlip: true,
+        callback: "WaitAnimEnd",
+      };
+    }
+
+    const divCounter = Math.trunc(counter / 128) as 0 | 1 | 2 | 3 | 4 | 5 | 6;
+    let yCounter = counter;
+    let x2Written = false;
+    switch (divCounter) {
+      case 0:
+      case 1:
+        x2 = 0;
+        x2Written = true;
+        break;
+      case 2:
+        yCounter = 0;
+        break;
+      case 3:
+        x2 = Math.trunc(-((counter % 128) * 8) / 128) + 0;
+        x2Written = true;
+        break;
+      case 4:
+        x2 = Math.trunc((counter % 128) / 8) - 8;
+        x2Written = true;
+        break;
+      case 5:
+        x2 = Math.trunc(-((counter % 128) * 8) / 128) + 8;
+        x2Written = true;
+        break;
+      case 6:
+        break;
+    }
+
+    const remainder = yCounter % 128;
+    y2 = -gbaSin(remainder, 8) + 0;
+    data2 += VERTICAL_JUMPS_HORIZONTAL_JUMPS_STEP;
+
+    if (tick === ticksSinceStart) {
+      return {
+        x2,
+        y2,
+        data0: 0,
+        data2,
+        counter,
+        divCounter,
+        yCounter,
+        remainder,
+        x2Written,
+        normalFrontDontFlip: true,
+        callback: "Anim_VerticalJumpsHorizontalJumps",
+      };
+    }
+  }
+
+  throw new Error("unreachable VerticalJumpsHorizontalJumps reducer state");
 }
 
 /**
@@ -2290,6 +2852,13 @@ export function flashYellowFrameAtTick(
 
 function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffset {
   switch (family) {
+    case "BOUNCE_ROTATE_TO_SIDES": {
+      const terminal = bounceRotateToSidesFrameAtTick(87);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_BounceRotateToSides did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
     case "BOUNCE_ROTATE_TO_SIDES_SMALL": {
       const terminal = bounceRotateToSidesSmallFrameAtTick(87);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
@@ -2301,6 +2870,27 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = bounceRotateToSidesSlowFrameAtTick(167);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_BounceRotateToSides_Slow did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "CIRCULAR_STRETCH_TWICE": {
+      const terminal = circularStretchTwiceFrameAtTick(41);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_CircularStretchTwice did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "SHRINK_GROW": {
+      const terminal = shrinkGrowFrameAtTick(49);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_ShrinkGrow did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "SWING_CONVEX": {
+      const terminal = swingConvexFrameAtTick(101);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_SwingConvex did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
@@ -2360,6 +2950,15 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
+    case "H_JUMPS_V_STRETCH_TWICE": {
+      const terminal = horizontalJumpsVerticalStretchTwiceFrameAtTick(156);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error(
+          "Anim_HorizontalJumpsVerticalStretch_Twice did not reach terminal cleanup",
+        );
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
     case "H_SHAKE": {
       const terminal = horizontalShakeFrameAtTick(39);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
@@ -2384,10 +2983,26 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
+    case "V_JUMPS_BIG": {
+      const terminal = verticalJumpsBigFrameAtTick(33);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_VerticalJumps_Big did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
     case "V_JUMPS_SMALL": {
       const terminal = verticalJumpsSmallFrameAtTick(33);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_VerticalJumps_Small did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "V_JUMPS_H_JUMPS": {
+      const terminal = verticalJumpsHorizontalJumpsFrameAtTick(65);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error(
+          "Anim_VerticalJumpsHorizontalJumps did not reach its source terminal cleanup",
+        );
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }

@@ -4,10 +4,14 @@ import { createHash } from "node:crypto";
 import probe from "../../src/data/gen/onix-front-idle-probe.json" with { type: "json" };
 import { GBA_SINE_TABLE_256 } from "../../src/engine/battleMenu.ts";
 import {
+  bounceRotateToSidesFrameAtTick,
   bounceRotateToSidesSmallFrameAtTick,
   bounceRotateToSidesSmallSlowFrameAtTick,
   bounceRotateToSidesSlowFrameAtTick,
   BOUNCE_ROTATE_TO_SIDES_DATA,
+  BOUNCE_ROTATE_TO_SIDES_FACTORY_FRONT_SPECIES,
+  BOUNCE_ROTATE_TO_SIDES_FRONT_SPECIES,
+  BOUNCE_ROTATE_TO_SIDES_OUTSIDE_FACTORY_FRONT_SPECIES,
   BOUNCE_ROTATE_TO_SIDES_SMALL_FACTORY_FRONT_SPECIES,
   BOUNCE_ROTATE_TO_SIDES_SMALL_FRONT_SPECIES,
   BOUNCE_ROTATE_TO_SIDES_SMALL_OUTSIDE_FACTORY_FRONT_SPECIES,
@@ -15,6 +19,20 @@ import {
   BOUNCE_ROTATE_TO_SIDES_SLOW_FRONT_SPECIES,
   BOUNCE_ROTATE_TO_SIDES_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES,
   BOUNCE_ROTATE_TO_SIDES_VARIANTS,
+  circularStretchTwiceFrameAtTick,
+  CIRCULAR_STRETCH_TWICE_FACTORY_FRONT_SPECIES,
+  CIRCULAR_STRETCH_TWICE_FRONT_SPECIES,
+  CIRCULAR_STRETCH_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES,
+  shrinkGrowFrameAtTick,
+  SHRINK_GROW_FACTORY_FRONT_SPECIES,
+  SHRINK_GROW_FRONT_SPECIES,
+  SHRINK_GROW_INITIALIZERS,
+  SHRINK_GROW_OUTSIDE_FACTORY_FRONT_SPECIES,
+  swingConvexFrameAtTick,
+  SWING_CONVEX_FACTORY_FRONT_SPECIES,
+  SWING_CONVEX_FRONT_SPECIES,
+  SWING_CONVEX_INITIALIZERS,
+  SWING_CONVEX_OUTSIDE_FACTORY_FRONT_SPECIES,
   growVibrateFrameAtTick,
   GROW_VIBRATE_FACTORY_FRONT_SPECIES,
   GROW_VIBRATE_FRONT_SPECIES,
@@ -47,9 +65,13 @@ import {
   H_SLIDE_WOBBLE_FRONT_SPECIES,
   H_SLIDE_WOBBLE_OUTSIDE_FACTORY_FRONT_SPECIES,
   horizontalJumpsVerticalStretchFrameAtTick,
+  horizontalJumpsVerticalStretchTwiceFrameAtTick,
   H_JUMPS_V_STRETCH_FACTORY_FRONT_SPECIES,
   H_JUMPS_V_STRETCH_FRONT_SPECIES,
   H_JUMPS_V_STRETCH_OUTSIDE_FACTORY_FRONT_SPECIES,
+  H_JUMPS_V_STRETCH_TWICE_FACTORY_FRONT_SPECIES,
+  H_JUMPS_V_STRETCH_TWICE_FRONT_SPECIES,
+  H_JUMPS_V_STRETCH_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES,
   horizontalShakeFrameAtTick,
   H_SHAKE_FACTORY_FRONT_SPECIES,
   H_SHAKE_FRONT_SPECIES,
@@ -63,6 +85,7 @@ import {
   verticalSlideFrameAtTick,
   verticalSlideWobbleFrameAtTick,
   verticalJumpsSmallFrameAtTick,
+  verticalJumpsBigFrameAtTick,
   verticalShakeFrameAtTick,
   verticalShakeTwiceFrameAtTick,
   verticalSquishBounceFrameAtTick,
@@ -79,6 +102,13 @@ import {
   V_JUMPS_SMALL_FACTORY_FRONT_SPECIES,
   V_JUMPS_SMALL_FRONT_SPECIES,
   V_JUMPS_SMALL_OUTSIDE_FACTORY_FRONT_SPECIES,
+  V_JUMPS_BIG_FACTORY_FRONT_SPECIES,
+  V_JUMPS_BIG_FRONT_SPECIES,
+  V_JUMPS_BIG_OUTSIDE_FACTORY_FRONT_SPECIES,
+  verticalJumpsHorizontalJumpsFrameAtTick,
+  V_JUMPS_H_JUMPS_FACTORY_FRONT_SPECIES,
+  V_JUMPS_H_JUMPS_FRONT_SPECIES,
+  V_JUMPS_H_JUMPS_OUTSIDE_FACTORY_FRONT_SPECIES,
   V_SLIDE_FACTORY_FRONT_SPECIES,
   V_SLIDE_FRONT_SPECIES,
   V_SLIDE_OUTSIDE_FACTORY_FRONT_SPECIES,
@@ -200,6 +230,48 @@ import weedleRunB from "../../tools/compare/fixtures/sendout-front-weedle-run-b.
 import ninjaskScenario from "../../tools/compare/fixtures/sendout-front-ninjask.json" with { type: "json" };
 import ninjaskRunA from "../../tools/compare/fixtures/sendout-front-ninjask-run-a.json" with { type: "json" };
 import ninjaskRunB from "../../tools/compare/fixtures/sendout-front-ninjask-run-b.json" with { type: "json" };
+import dittoScenario from "../../tools/compare/fixtures/sendout-front-ditto.json" with { type: "json" };
+import dittoRunA from "../../tools/compare/fixtures/sendout-front-ditto-run-a.json" with { type: "json" };
+import dittoRunB from "../../tools/compare/fixtures/sendout-front-ditto-run-b.json" with { type: "json" };
+import regirockScenario from "../../tools/compare/fixtures/sendout-front-regirock.json" with { type: "json" };
+import regirockRunA from "../../tools/compare/fixtures/sendout-front-regirock-run-a.json" with { type: "json" };
+import regirockRunB from "../../tools/compare/fixtures/sendout-front-regirock-run-b.json" with { type: "json" };
+import wartortleScenario from "../../tools/compare/fixtures/sendout-front-wartortle.json" with { type: "json" };
+import wartortleRunA from "../../tools/compare/fixtures/sendout-front-wartortle-run-a.json" with { type: "json" };
+import wartortleRunB from "../../tools/compare/fixtures/sendout-front-wartortle-run-b.json" with { type: "json" };
+import gligarScenario from "../../tools/compare/fixtures/sendout-front-gligar.json" with { type: "json" };
+import gligarRunA from "../../tools/compare/fixtures/sendout-front-gligar-run-a.json" with { type: "json" };
+import gligarRunB from "../../tools/compare/fixtures/sendout-front-gligar-run-b.json" with { type: "json" };
+import weepinbellScenario from "../../tools/compare/fixtures/sendout-front-weepinbell.json" with { type: "json" };
+import weepinbellRunA from "../../tools/compare/fixtures/sendout-front-weepinbell-run-a.json" with { type: "json" };
+import weepinbellRunB from "../../tools/compare/fixtures/sendout-front-weepinbell-run-b.json" with { type: "json" };
+import banetteScenario from "../../tools/compare/fixtures/sendout-front-banette.json" with { type: "json" };
+import banetteRunA from "../../tools/compare/fixtures/sendout-front-banette-run-a.json" with { type: "json" };
+import banetteRunB from "../../tools/compare/fixtures/sendout-front-banette-run-b.json" with { type: "json" };
+import marowakScenario from "../../tools/compare/fixtures/sendout-front-marowak.json" with { type: "json" };
+import marowakRunA from "../../tools/compare/fixtures/sendout-front-marowak-run-a.json" with { type: "json" };
+import marowakRunB from "../../tools/compare/fixtures/sendout-front-marowak-run-b.json" with { type: "json" };
+import illumiseScenario from "../../tools/compare/fixtures/sendout-front-illumise.json" with { type: "json" };
+import illumiseRunA from "../../tools/compare/fixtures/sendout-front-illumise-run-a.json" with { type: "json" };
+import illumiseRunB from "../../tools/compare/fixtures/sendout-front-illumise-run-b.json" with { type: "json" };
+import bulbasaurScenario from "../../tools/compare/fixtures/sendout-front-bulbasaur.json" with { type: "json" };
+import bulbasaurRunA from "../../tools/compare/fixtures/sendout-front-bulbasaur-run-a.json" with { type: "json" };
+import bulbasaurRunB from "../../tools/compare/fixtures/sendout-front-bulbasaur-run-b.json" with { type: "json" };
+import dustoxScenario from "../../tools/compare/fixtures/sendout-front-dustox.json" with { type: "json" };
+import dustoxRunA from "../../tools/compare/fixtures/sendout-front-dustox-run-a.json" with { type: "json" };
+import dustoxRunB from "../../tools/compare/fixtures/sendout-front-dustox-run-b.json" with { type: "json" };
+import pichuScenario from "../../tools/compare/fixtures/sendout-front-pichu.json" with { type: "json" };
+import pichuRunA from "../../tools/compare/fixtures/sendout-front-pichu-run-a.json" with { type: "json" };
+import pichuRunB from "../../tools/compare/fixtures/sendout-front-pichu-run-b.json" with { type: "json" };
+import taillowScenario from "../../tools/compare/fixtures/sendout-front-taillow.json" with { type: "json" };
+import taillowRunA from "../../tools/compare/fixtures/sendout-front-taillow-run-a.json" with { type: "json" };
+import taillowRunB from "../../tools/compare/fixtures/sendout-front-taillow-run-b.json" with { type: "json" };
+import sharpedoScenario from "../../tools/compare/fixtures/sendout-front-sharpedo.json" with { type: "json" };
+import sharpedoRunA from "../../tools/compare/fixtures/sendout-front-sharpedo-run-a.json" with { type: "json" };
+import sharpedoRunB from "../../tools/compare/fixtures/sendout-front-sharpedo-run-b.json" with { type: "json" };
+import spoinkScenario from "../../tools/compare/fixtures/sendout-front-spoink.json" with { type: "json" };
+import spoinkRunA from "../../tools/compare/fixtures/sendout-front-spoink-run-a.json" with { type: "json" };
+import spoinkRunB from "../../tools/compare/fixtures/sendout-front-spoink-run-b.json" with { type: "json" };
 import {
   KABUTO_FRONT_ANIM_START_OFFSET,
   kabutoHSlideWobble,
@@ -373,6 +445,90 @@ const ninjaskRawA = readFileSync(
 const ninjaskRawB = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-ninjask-run-b.json", import.meta.url),
 );
+const dittoRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-ditto-run-a.json", import.meta.url),
+);
+const dittoRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-ditto-run-b.json", import.meta.url),
+);
+const regirockRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-regirock-run-a.json", import.meta.url),
+);
+const regirockRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-regirock-run-b.json", import.meta.url),
+);
+const wartortleRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-wartortle-run-a.json", import.meta.url),
+);
+const wartortleRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-wartortle-run-b.json", import.meta.url),
+);
+const gligarRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-gligar-run-a.json", import.meta.url),
+);
+const gligarRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-gligar-run-b.json", import.meta.url),
+);
+const weepinbellRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-weepinbell-run-a.json", import.meta.url),
+);
+const weepinbellRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-weepinbell-run-b.json", import.meta.url),
+);
+const banetteRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-banette-run-a.json", import.meta.url),
+);
+const banetteRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-banette-run-b.json", import.meta.url),
+);
+const marowakRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-marowak-run-a.json", import.meta.url),
+);
+const marowakRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-marowak-run-b.json", import.meta.url),
+);
+const illumiseRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-illumise-run-a.json", import.meta.url),
+);
+const illumiseRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-illumise-run-b.json", import.meta.url),
+);
+const bulbasaurRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-bulbasaur-run-a.json", import.meta.url),
+);
+const bulbasaurRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-bulbasaur-run-b.json", import.meta.url),
+);
+const dustoxRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-dustox-run-a.json", import.meta.url),
+);
+const dustoxRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-dustox-run-b.json", import.meta.url),
+);
+const pichuRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-pichu-run-a.json", import.meta.url),
+);
+const pichuRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-pichu-run-b.json", import.meta.url),
+);
+const taillowRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-taillow-run-a.json", import.meta.url),
+);
+const taillowRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-taillow-run-b.json", import.meta.url),
+);
+const sharpedoRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-sharpedo-run-a.json", import.meta.url),
+);
+const sharpedoRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-sharpedo-run-b.json", import.meta.url),
+);
+const spoinkRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-spoink-run-a.json", import.meta.url),
+);
+const spoinkRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-spoink-run-b.json", import.meta.url),
+);
 
 describe("speciesIdleAnim", () => {
   describe("rapidHorizontalHopsOffsetAtTick (Anim_RapidHorizontalHops port)", () => {
@@ -430,7 +586,7 @@ describe("speciesIdleAnim", () => {
 
     it("returns null for generated species whose front-anim family isn't ported", () => {
       expect(speciesFrontIdleRestOffset("CHARMELEON")).toBeNull();
-      expect(speciesFrontIdleRestOffset("WARTORTLE")).toBeNull();
+      expect(speciesFrontIdleRestOffset("VENUSAUR")).toBeNull();
     });
 
     it("dispatches the complete generated 32-species V_STRETCH family", () => {
@@ -1741,6 +1897,321 @@ describe("speciesIdleAnim", () => {
       ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }
+    });
+  });
+
+  describe("horizontalJumpsVerticalStretchTwiceFrameAtTick (shared twice lifecycle)", () => {
+    it("derives exactly SHARPEDO and SPOINK as Factory mappings with no outside mappings", () => {
+      const speciesSelectors = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
+      const generated = Object.entries(speciesSelectors)
+        .filter(([, family]) => family === "ANIM_H_JUMPS_V_STRETCH_TWICE")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(H_JUMPS_V_STRETCH_TWICE_FRONT_SPECIES).toEqual(generated);
+      expect(H_JUMPS_V_STRETCH_TWICE_FRONT_SPECIES).toEqual(["SHARPEDO", "SPOINK"]);
+      expect(H_JUMPS_V_STRETCH_TWICE_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(H_JUMPS_V_STRETCH_TWICE_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(H_JUMPS_V_STRETCH_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of generated) {
+        expect(speciesSelectors[species]).toBe("ANIM_H_JUMPS_V_STRETCH_TWICE");
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins every callback tick 0..156, both normal-front flips, affine state, and repeat delay", () => {
+      const frames = Array.from(
+        { length: 157 },
+        (_, tick) => horizontalJumpsVerticalStretchTwiceFrameAtTick(tick)!,
+      );
+      expect(frames).toHaveLength(157);
+      for (const [tick, frame] of frames.entries()) {
+        expect(frame, `tick ${tick}`).not.toBeNull();
+        expect(frame, `tick ${tick}`).toMatchObject({
+          animRotation: 0,
+          animRuns: tick < 73 ? 2 : 1,
+          animSpeed: 0,
+          animData: 1,
+          startedAffine: tick === 0,
+          normalFrontDontFlip: true,
+          tryFlipXCalls: tick >= 74 && tick <= 83 ? 0 : 2,
+          resetSpriteAfterAnim: tick === 156,
+          affineMode: tick === 156 ? "normal" : "double",
+        });
+      }
+      expect(frames.map(({ callback }) => callback)).toEqual([
+        ...Array(11).fill("HorizontalJumpsVerticalStretch_0"),
+        ...Array(50).fill("HorizontalJumpsVerticalStretch_1"),
+        ...Array(12).fill("HorizontalJumpsVerticalStretch_2"),
+        ...Array(21).fill("HorizontalJumpsVerticalStretch_0"),
+        ...Array(50).fill("HorizontalJumpsVerticalStretch_1"),
+        ...Array(12).fill("HorizontalJumpsVerticalStretch_2"),
+        "WaitAnimEnd",
+      ]);
+    });
+
+    it("pins C-truncated jump and stretch writes across both passes", () => {
+      const sin = (index: number, amplitude: number) =>
+        (amplitude * GBA_SINE_TABLE_256[index & 0xff]!) >> 8;
+
+      for (const [startTick, counters] of [
+        [0, Array.from({ length: 11 }, (_, index) => index * 12)],
+        [84, Array.from({ length: 10 }, (_, index) => 12 + index * 12)],
+      ] as const) {
+        for (const [offset, counter] of counters.entries()) {
+          expect(horizontalJumpsVerticalStretchTwiceFrameAtTick(startTick + offset))
+            .toMatchObject({
+              x2: Math.trunc((8 * counter) / 128) + 0,
+              y2: -sin(counter % 128, 8) + 0,
+              data2: counter + 12,
+              data3: 0,
+              data4: 0,
+              animDelay: 0,
+              counter,
+              xScale: 256,
+              yScale: 256,
+              callback: "HorizontalJumpsVerticalStretch_0",
+            });
+        }
+      }
+
+      for (const startTick of [12, 95] as const) {
+        for (let counter = 0; counter <= 48; counter += 1) {
+          const data4Before = (counter * 8) & 0xff;
+          const data3 = counter < 16 ? 0 : counter <= 31 ? (counter - 15) * 8 : 128;
+          const x2 = counter < 16 ? 7 : counter <= 31 ? 7 - (counter - 15) : -9;
+          const yScale = sin(data4Before, 64) + 256;
+          const yDelta = yScale > 256 ? Math.trunc((256 - yScale) / 8) : 0;
+          expect(horizontalJumpsVerticalStretchTwiceFrameAtTick(startTick + counter))
+            .toMatchObject({
+              x2,
+              y2: -sin(data3, 20) - yDelta + 0,
+              data2: counter + 1,
+              data3,
+              data4: (data4Before + 8) & 0xff,
+              animDelay: 0,
+              counter,
+              xScale: 256 - sin(data4Before, 32),
+              yScale,
+              callback: "HorizontalJumpsVerticalStretch_1",
+            });
+        }
+      }
+
+      for (const startTick of [62, 145] as const) {
+        for (let offset = 0; offset < 11; offset += 1) {
+          const counter = offset * 12;
+          expect(horizontalJumpsVerticalStretchTwiceFrameAtTick(startTick + offset))
+            .toMatchObject({
+              x2: Math.trunc((counter * 8) / 128) - 8,
+              y2: -sin(counter % 128, 8) + 0,
+              data2: counter + 12,
+              data3: 128,
+              data4: 136,
+              counter,
+              xScale: 256,
+              yScale: 256,
+              callback: "HorizontalJumpsVerticalStretch_2",
+            });
+        }
+      }
+    });
+
+    it("pins both strict callback guards, the repeat carry, and all ten delay callbacks", () => {
+      for (const tick of [11, 94] as const) {
+        expect(horizontalJumpsVerticalStretchTwiceFrameAtTick(tick)).toMatchObject({
+          x2: 7,
+          y2: -1,
+          data2: 0,
+          data3: 0,
+          data4: 0,
+          animDelay: 0,
+          counter: 132,
+          callback: "HorizontalJumpsVerticalStretch_1",
+        });
+      }
+      for (const tick of [61, 144] as const) {
+        expect(horizontalJumpsVerticalStretchTwiceFrameAtTick(tick)).toMatchObject({
+          x2: -9,
+          y2: 0,
+          data2: 0,
+          data3: 128,
+          data4: 136,
+          animDelay: 0,
+          counter: 49,
+          xScale: 256,
+          yScale: 256,
+          callback: "HorizontalJumpsVerticalStretch_2",
+        });
+      }
+      expect(horizontalJumpsVerticalStretchTwiceFrameAtTick(73)).toEqual({
+        x2: 0,
+        y2: 0,
+        data2: 12,
+        data3: 0,
+        data4: 0,
+        animRotation: 0,
+        animDelay: 10,
+        animRuns: 1,
+        animSpeed: 0,
+        animData: 1,
+        counter: 132,
+        xScale: 256,
+        yScale: 256,
+        startedAffine: false,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        resetSpriteAfterAnim: false,
+        callback: "HorizontalJumpsVerticalStretch_0",
+        affineMode: "double",
+      });
+      for (let tick = 74; tick <= 83; tick += 1) {
+        expect(horizontalJumpsVerticalStretchTwiceFrameAtTick(tick)).toMatchObject({
+          x2: 0,
+          y2: 0,
+          data2: 12,
+          data3: 0,
+          data4: 0,
+          animDelay: 83 - tick,
+          animRuns: 1,
+          counter: 12,
+          tryFlipXCalls: 0,
+          callback: "HorizontalJumpsVerticalStretch_0",
+        });
+      }
+    });
+
+    it("resets on tick 156 after counter 132, increments to 144, and stays in WaitAnimEnd", () => {
+      expect(horizontalJumpsVerticalStretchTwiceFrameAtTick(156)).toEqual({
+        x2: 0,
+        y2: 0,
+        data2: 144,
+        data3: 128,
+        data4: 136,
+        animRotation: 0,
+        animDelay: 0,
+        animRuns: 1,
+        animSpeed: 0,
+        animData: 1,
+        counter: 132,
+        xScale: 256,
+        yScale: 256,
+        startedAffine: false,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      });
+      expect(horizontalJumpsVerticalStretchTwiceFrameAtTick(157)).toEqual(
+        horizontalJumpsVerticalStretchTwiceFrameAtTick(156),
+      );
+      expect(horizontalJumpsVerticalStretchTwiceFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      [331, sharpedoScenario, 1, 100, 162, 266],
+      [351, spoinkScenario, 0, 50, 110, 199],
+    ] as const)("stages a complete legal Scene-ON party for opponent species %i", (
+      species, scenario, challengeNum, trainerId, rangeStart, rangeEnd,
+    ) => {
+      expect(scenario).toMatchObject({
+        mode: "mechanicLab",
+        profile: "battle-scene-on",
+        level: 50,
+        challengeNum,
+        trainerId,
+      });
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(species);
+      for (const setId of [...scenario.playerSetIds, ...scenario.opponentSetIds]) {
+        expect(setId).toBeGreaterThanOrEqual(rangeStart);
+        expect(setId).toBeLessThanOrEqual(rangeEnd);
+      }
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "SHARPEDO", sharpedoRunA, sharpedoRunB, sharpedoRawA, sharpedoRawB, 8, 331,
+        "beddd02c936693a4e82573b7f4ab965aa0e128af8eb72cf78945e60777864dcf",
+      ],
+      [
+        "SPOINK", spoinkRunA, spoinkRunB, spoinkRawA, spoinkRawB, 10, 351,
+        "f5c33bc034669fa7a53240a02bbb7a630f5d1d17f8405baeab87770d03e3eb7b",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species, runA, runB, rawA, rawB, animCmdIndex, data2, rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe(
+        "ANIM_H_JUMPS_V_STRETCH_TWICE",
+      );
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("regression-pins the single-run tick-73 terminal and does not broaden the next selector", () => {
+      expect(horizontalJumpsVerticalStretchFrameAtTick(73)).toMatchObject({
+        x2: 0,
+        y2: 0,
+        data2: 144,
+        animDelay: 0,
+        animRuns: 1,
+        animData: -1,
+        counter: 132,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      });
+      for (const species of [
+        ...H_JUMPS_V_STRETCH_FRONT_SPECIES,
+        ...H_JUMPS_V_STRETCH_TWICE_FRONT_SPECIES,
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+      expect(selectorTables.frontAnimIds.species.HARIYAMA).toBe("ANIM_ROTATE_UP_TO_SIDES");
+      expect(speciesFrontIdleRestOffset("HARIYAMA")).toBeNull();
     });
   });
 
@@ -3865,6 +4336,1267 @@ describe("speciesIdleAnim", () => {
       ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }
+    });
+  });
+
+  describe("circularStretchTwiceFrameAtTick (source lifecycle)", () => {
+    it("derives exactly all 6 selector mappings as Factory-reachable with zero outside", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_CIRCULAR_STRETCH_TWICE")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(CIRCULAR_STRETCH_TWICE_FRONT_SPECIES).toEqual(generated);
+      expect(CIRCULAR_STRETCH_TWICE_FRONT_SPECIES).toEqual([
+        "DITTO", "MUDKIP", "SWELLOW", "WAILMER", "MINUN", "REGIROCK",
+      ]);
+      expect(CIRCULAR_STRETCH_TWICE_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(CIRCULAR_STRETCH_TWICE_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(CIRCULAR_STRETCH_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of CIRCULAR_STRETCH_TWICE_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins Task_HandleMonAnimation's zeroed data boundary", () => {
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
+    });
+
+    it("pins every active callback's C-truncated sine/cosine affine writes", () => {
+      const active = Array.from({ length: 41 }, (_, tick) => {
+        const index = Math.trunc((tick * 512) / 40) % 256;
+        const data4 = Math.floor((32 * GBA_SINE_TABLE_256[index]!) / 256) + 256;
+        const data5 = Math.floor((32 * GBA_SINE_TABLE_256[(index + 64) % 256]!) / 256) + 256;
+        const frame = circularStretchTwiceFrameAtTick(tick);
+        expect(frame, `tick ${tick}`).toEqual({
+          x2: 0,
+          y2: 0,
+          data0: 0,
+          data2: tick + 1,
+          data4,
+          data5,
+          index,
+          xScale: data4,
+          yScale: data5,
+          affineRotation: 0,
+          startedAffine: tick === 0,
+          normalFrontDontFlip: true,
+          resetSpriteAfterAnim: false,
+          callback: "Anim_CircularStretchTwice",
+          affineMode: "double",
+        });
+        return frame!;
+      });
+      expect(active).toHaveLength(41);
+      expect([0, 5, 10, 15, 20, 25, 30, 35, 40].map((tick) => [
+        tick, active[tick]!.index, active[tick]!.xScale, active[tick]!.yScale,
+      ])).toEqual([
+        [0, 0, 256, 288],
+        [5, 64, 288, 256],
+        [10, 128, 256, 224],
+        [15, 192, 224, 256],
+        [20, 0, 256, 288],
+        [25, 64, 288, 256],
+        [30, 128, 256, 224],
+        [35, 192, 224, 256],
+        [40, 0, 256, 288],
+      ]);
+    });
+
+    it("pins tick 41 identity/reset/WaitAnimEnd cleanup and stable settled state", () => {
+      expect(circularStretchTwiceFrameAtTick(41)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 0,
+        data2: 42,
+        data4: 256,
+        data5: 288,
+        index: null,
+        xScale: 256,
+        yScale: 256,
+        affineRotation: 0,
+        startedAffine: false,
+        normalFrontDontFlip: true,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      });
+      expect(circularStretchTwiceFrameAtTick(42)).toEqual(circularStretchTwiceFrameAtTick(41));
+      expect(circularStretchTwiceFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      [132, dittoScenario],
+      [401, regirockScenario],
+    ] as const)("stages a complete legal Scene-ON party for opponent species %i", (species, scenario) => {
+      expect(scenario.mode).toBe("mechanicLab");
+      expect(scenario.profile).toBe("battle-scene-on");
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(species);
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "DITTO", dittoRunA, dittoRunB, dittoRawA, dittoRawB, 132, 3,
+        "26cae4ff0244a36a7cb6dbea0e7cfbe94b506ec4a86bea200f5032c433dc595e",
+      ],
+      [
+        "REGIROCK", regirockRunA, regirockRunB, regirockRawA, regirockRawB, 401, 4,
+        "5d2e0fb67df2033d4868db97e13f5bf473d34c9b5a498a4da42d90847cb7c7d3",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species, runA, runB, rawA, rawB, data2, animCmdIndex, rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_CIRCULAR_STRETCH_TWICE");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("preserves every previously accepted representative and sibling family", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of [
+        "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN",
+        "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN", "KADABRA", "REGISTEEL",
+        "SQUIRTLE", "SHUCKLE", "SEADRA", "MARSHTOMP", "CHARMANDER", "DELIBIRD",
+        "MANKEY", "WYNAUT", "VILEPLUME", "LOUDRED", "JIGGLYPUFF", "GYARADOS",
+        "BLASTOISE", "BAGON", "SEAKING", "SHUPPET", "BUTTERFREE", "CHIMECHO",
+        "WIGGLYTUFF", "VIGOROTH", "BEEDRILL", "DUSCLOPS", "EKANS", "ALTARIA",
+        "PIKACHU", "RAIKOU", "WEEDLE", "NINJASK", "DITTO", "REGIROCK",
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("shrinkGrowFrameAtTick (source lifecycle)", () => {
+    it("derives exactly all 6 selector mappings as Factory-reachable with zero outside", () => {
+      const speciesSelectors = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
+      const generated = Object.entries(speciesSelectors)
+        .filter(([, family]) => family === "ANIM_SHRINK_GROW")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(SHRINK_GROW_FRONT_SPECIES).toEqual(generated);
+      expect(SHRINK_GROW_FRONT_SPECIES).toEqual([
+        "WARTORTLE", "NIDORINO", "KOFFING", "RHYDON", "SLOWKING", "GLIGAR",
+      ]);
+      expect(SHRINK_GROW_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(SHRINK_GROW_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(SHRINK_GROW_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of SHRINK_GROW_FRONT_SPECIES) {
+        expect(speciesSelectors[species]).toBe("ANIM_SHRINK_GROW");
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("accepts only normal (8,3) and keeps FAST/SLOW initializers distinct", () => {
+      expect(SHRINK_GROW_INITIALIZERS).toEqual({
+        normal: {
+          selector: "ANIM_SHRINK_GROW", data6: 8, data7: 3, accepted: true,
+        },
+        fast: {
+          selector: "ANIM_SHRINK_GROW_FAST", data6: 8, data7: 5, accepted: false,
+        },
+        slow: {
+          selector: "ANIM_SHRINK_GROW_SLOW", data6: 4, data7: 3, accepted: false,
+        },
+      });
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
+    });
+
+    it("pins every active callback's affine and compensated-position writes", () => {
+      const active = Array.from({ length: 49 }, (_, tick) => {
+        const phaseIndex = (tick * 8) & 0xff;
+        const yScaleBeforePosition =
+          Math.floor((32 * GBA_SINE_TABLE_256[phaseIndex]!) / 256) + 256;
+        const posY = yScaleBeforePosition > 256
+          ? Math.trunc((256 - yScaleBeforePosition) / 8)
+          : 0;
+        const xScale = Math.floor((48 * GBA_SINE_TABLE_256[phaseIndex]!) / 256) + 256;
+        const frame = shrinkGrowFrameAtTick(tick);
+        expect(frame, `tick ${tick}`).toEqual({
+          x2: 0,
+          y2: -posY + 0,
+          data0: 0,
+          data2: tick + 1,
+          data4: (phaseIndex + 8) & 0xff,
+          data6: 8,
+          data7: 3,
+          phaseIndex,
+          yScaleBeforePosition,
+          posY,
+          xScale,
+          yScale: yScaleBeforePosition,
+          affineRotation: 0,
+          startedAffine: tick === 0,
+          normalFrontDontFlip: true,
+          resetSpriteAfterAnim: false,
+          callback: "Anim_ShrinkGrow",
+          affineMode: "double",
+        });
+        return frame!;
+      });
+      expect(active).toHaveLength(49);
+      expect([0, 8, 16, 24, 32, 40, 48].map((tick) => [
+        tick,
+        active[tick]!.phaseIndex,
+        active[tick]!.xScale,
+        active[tick]!.yScale,
+        active[tick]!.y2,
+      ])).toEqual([
+        [0, 0, 256, 256, 0],
+        [8, 64, 304, 288, 4],
+        [16, 128, 256, 256, 0],
+        [24, 192, 208, 224, 0],
+        [32, 0, 256, 256, 0],
+        [40, 64, 304, 288, 4],
+        [48, 128, 256, 256, 0],
+      ]);
+    });
+
+    it("pins tick 49 identity/y2/reset/WaitAnimEnd cleanup and stable settled state", () => {
+      expect(shrinkGrowFrameAtTick(49)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 0,
+        data2: 49,
+        data4: 136,
+        data6: 8,
+        data7: 3,
+        phaseIndex: null,
+        yScaleBeforePosition: null,
+        posY: null,
+        xScale: 256,
+        yScale: 256,
+        affineRotation: 0,
+        startedAffine: false,
+        normalFrontDontFlip: true,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      });
+      expect(shrinkGrowFrameAtTick(50)).toEqual(shrinkGrowFrameAtTick(49));
+      expect(shrinkGrowFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      [8, wartortleScenario],
+      [207, gligarScenario],
+    ] as const)("stages a complete legal Scene-ON party for opponent species %i", (species, scenario) => {
+      expect(scenario.mode).toBe("mechanicLab");
+      expect(scenario.profile).toBe("battle-scene-on");
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(species);
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "WARTORTLE", wartortleRunA, wartortleRunB, wartortleRawA, wartortleRawB, 8, 2,
+        "e4c09e7b1c413acc21745c649e7bb493ea87ff51d648181ae77bf7d6f2466005",
+      ],
+      [
+        "GLIGAR", gligarRunA, gligarRunB, gligarRawA, gligarRawB, 207, 1,
+        "5dbf9079a53eb71470f474107391fc9f05ad9cf6604d1d807b561729b6d820d6",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species, runA, runB, rawA, rawB, data2, animCmdIndex, rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_SHRINK_GROW");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("preserves every previously accepted representative and terminal sibling family", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of [
+        "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN",
+        "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN", "KADABRA", "REGISTEEL",
+        "SQUIRTLE", "SHUCKLE", "SEADRA", "MARSHTOMP", "CHARMANDER", "DELIBIRD",
+        "MANKEY", "WYNAUT", "VILEPLUME", "LOUDRED", "JIGGLYPUFF", "GYARADOS",
+        "BLASTOISE", "BAGON", "SEAKING", "SHUPPET", "BUTTERFREE", "CHIMECHO",
+        "WIGGLYTUFF", "VIGOROTH", "BEEDRILL", "DUSCLOPS", "EKANS", "ALTARIA",
+        "PIKACHU", "RAIKOU", "WEEDLE", "NINJASK", "DITTO", "REGIROCK",
+        "WARTORTLE", "NIDORINO", "KOFFING", "RHYDON", "SLOWKING", "GLIGAR",
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("swingConvexFrameAtTick (normal source lifecycle)", () => {
+    it("pins the complete six-selector census, four Factory siblings, and two outside mappings", () => {
+      const speciesSelectors = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
+      const generated = Object.entries(speciesSelectors)
+        .filter(([, family]) => family === "ANIM_SWING_CONVEX")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(SWING_CONVEX_FRONT_SPECIES).toEqual(generated);
+      expect(SWING_CONVEX_FRONT_SPECIES).toEqual([
+        "WEEPINBELL", "GOLDEEN", "MEW", "MANTINE", "BANETTE", "JIRACHI",
+      ]);
+      expect(SWING_CONVEX_FACTORY_FRONT_SPECIES).toEqual([
+        "WEEPINBELL", "GOLDEEN", "MANTINE", "BANETTE",
+      ]);
+      expect(SWING_CONVEX_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(SWING_CONVEX_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual(["MEW", "JIRACHI"]);
+      expect(SWING_CONVEX_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => !factorySpecies.has(species)),
+      );
+      for (const species of SWING_CONVEX_FRONT_SPECIES) {
+        expect(speciesSelectors[species]).toBe("ANIM_SWING_CONVEX");
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("accepts only normal data=100/runs=1 and keeps both fast selectors distinct", () => {
+      expect(SWING_CONVEX_INITIALIZERS).toEqual({
+        normal: {
+          selector: "ANIM_SWING_CONVEX", data: 100, runs: 1, accepted: true,
+        },
+        fast: {
+          selector: "ANIM_SWING_CONVEX_FAST", data: 50, runs: 2, accepted: false,
+        },
+        fastShort: {
+          selector: "ANIM_SWING_CONVEX_FAST_SHORT",
+          data: 50,
+          runs: 1,
+          unused: true,
+          accepted: false,
+        },
+      });
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
+    });
+
+    it("pins all 101 active callbacks and reuses the accepted shared swing lifecycle", () => {
+      const active = Array.from({ length: 101 }, (_, tick) => {
+        const index = Math.trunc((tick * 256) / 100);
+        const sine10 = Math.floor((10 * GBA_SINE_TABLE_256[index & 0xff]!) / 256);
+        const sine3276 = Math.floor((3276 * GBA_SINE_TABLE_256[index & 0xff]!) / 256);
+        const frame = swingConvexFrameAtTick(tick);
+        expect(frame, `tick ${tick}`).toEqual({
+          x2: -sine10 + 0,
+          y2: 0,
+          data2: tick + 1,
+          animRotation: 0,
+          animDelay: 0,
+          animRuns: 1,
+          animSpeed: 0,
+          animData: 100,
+          index,
+          xScale: 256,
+          yScale: 256,
+          affineRotation: -sine3276 + 0,
+          startedAffine: tick === 0,
+          normalFrontDontFlip: true,
+          tryFlipXCalls: 2,
+          resetSpriteAfterAnim: false,
+          callback: "SwingConvex",
+          affineMode: "double",
+        });
+        const concave = swingConcaveFrameAtTick(tick)!;
+        expect(frame!.x2, `shared x2 tick ${tick}`).toBe(concave.x2);
+        expect(frame!.affineRotation, `opposite rotation tick ${tick}`).toBe(
+          -concave.affineRotation + 0,
+        );
+        return frame!;
+      });
+      expect(active).toHaveLength(101);
+      expect([0, 25, 50, 75, 100].map((tick) => [
+        tick,
+        active[tick]!.index,
+        active[tick]!.x2,
+        active[tick]!.affineRotation,
+      ])).toEqual([
+        [0, 0, 0, 0],
+        [25, 64, -10, -3276],
+        [50, 128, 0, 0],
+        [75, 192, 10, 3276],
+        [100, 256, 0, 0],
+      ]);
+    });
+
+    it("pins tick 101 identity/x2/reset/WaitAnimEnd cleanup and stable settled state", () => {
+      expect(swingConvexFrameAtTick(101)).toEqual({
+        x2: 0,
+        y2: 0,
+        data2: 102,
+        animRotation: 0,
+        animDelay: 0,
+        animRuns: 1,
+        animSpeed: 0,
+        animData: 100,
+        index: null,
+        xScale: 256,
+        yScale: 256,
+        affineRotation: 0,
+        startedAffine: false,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      });
+      expect(swingConvexFrameAtTick(102)).toEqual(swingConvexFrameAtTick(101));
+      expect(swingConvexFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      [70, weepinbellScenario],
+      [378, banetteScenario],
+    ] as const)("stages a complete legal Scene-ON party for opponent species %i", (species, scenario) => {
+      expect(scenario.mode).toBe("mechanicLab");
+      expect(scenario.profile).toBe("battle-scene-on");
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(species);
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "WEEPINBELL", weepinbellRunA, weepinbellRunB, weepinbellRawA, weepinbellRawB, 70,
+        "a7ae6c5bf088e3a523a0da3cf178eac2024e3e7a1ed02d336a4df831ee44b12e",
+      ],
+      [
+        "BANETTE", banetteRunA, banetteRunB, banetteRawA, banetteRawB, 378,
+        "95b70a54be18eaa93e3cb8a2a4d4a2ce19e1b261f03ff82a1628fcae87c25dfb",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species, runA, runB, rawA, rawB, data2, rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_SWING_CONVEX");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex: 6,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("preserves every previously accepted representative and terminal sibling family", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of [
+        "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN",
+        "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN", "KADABRA", "REGISTEEL",
+        "SQUIRTLE", "SHUCKLE", "SEADRA", "MARSHTOMP", "CHARMANDER", "DELIBIRD",
+        "MANKEY", "WYNAUT", "VILEPLUME", "LOUDRED", "JIGGLYPUFF", "GYARADOS",
+        "BLASTOISE", "BAGON", "SEAKING", "SHUPPET", "BUTTERFREE", "CHIMECHO",
+        "WIGGLYTUFF", "VIGOROTH", "BEEDRILL", "DUSCLOPS", "EKANS", "ALTARIA",
+        "PIKACHU", "RAIKOU", "WEEDLE", "NINJASK", "DITTO", "REGIROCK",
+        "WARTORTLE", "NIDORINO", "KOFFING", "RHYDON", "SLOWKING", "GLIGAR",
+        "WEEPINBELL", "GOLDEEN", "MANTINE", "BANETTE",
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("bounceRotateToSidesFrameAtTick (normal source lifecycle)", () => {
+    it("derives exactly five Factory mappings and no outside mappings", () => {
+      const speciesSelectors = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
+      const generated = Object.entries(speciesSelectors)
+        .filter(([, family]) => family === "ANIM_BOUNCE_ROTATE_TO_SIDES")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(BOUNCE_ROTATE_TO_SIDES_FRONT_SPECIES).toEqual(generated);
+      expect(BOUNCE_ROTATE_TO_SIDES_FRONT_SPECIES).toEqual([
+        "MAROWAK", "MAGIKARP", "SEEDOT", "MEDITITE", "ILLUMISE",
+      ]);
+      expect(BOUNCE_ROTATE_TO_SIDES_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(BOUNCE_ROTATE_TO_SIDES_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(BOUNCE_ROTATE_TO_SIDES_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of BOUNCE_ROTATE_TO_SIDES_FRONT_SPECIES) {
+        expect(speciesSelectors[species]).toBe("ANIM_BOUNCE_ROTATE_TO_SIDES");
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins AddNewAnim defaults, task-zeroed data6, source table, and distinct variants", () => {
+      expect(BOUNCE_ROTATE_TO_SIDES_DATA).toEqual([
+        [
+          [0, 8, 8], [8, -8, 12], [-8, 8, 12], [8, -8, 12],
+          [-8, 8, 12], [8, -8, 12], [-8, 0, 12], [0, 0, 0],
+        ],
+        [
+          [0, 8, 16], [8, -8, 24], [-8, 8, 24], [8, -8, 24],
+          [-8, 8, 24], [8, -8, 24], [-8, 0, 24], [0, 0, 0],
+        ],
+      ]);
+      expect(BOUNCE_ROTATE_TO_SIDES_VARIANTS).toEqual({
+        normal: { data6: 0, rotation: 4096 },
+        small: { data6: 0, rotation: 2048 },
+        slow: { data6: 1, rotation: 4096 },
+        smallSlow: { data6: 1, rotation: 2048 },
+      });
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toContain(6);
+      expect(bounceRotateToSidesFrameAtTick(0)).toEqual({
+        x2: 0,
+        y2: 0,
+        data2: 1,
+        data3: 1,
+        data4: 0,
+        data6: 0,
+        animRotation: 4096,
+        animDelay: 0,
+        animRuns: 1,
+        animSpeed: 0,
+        animData: 0,
+        legIndex: 0,
+        legStartX: 0,
+        legEndX: 8,
+        legDuration: 8,
+        legProgress: 0,
+        affineRotationU16: 0,
+        xScale: 256,
+        yScale: 256,
+        startedAffine: true,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        resetSpriteAfterAnim: false,
+        callback: "BounceRotateToSides",
+        affineMode: "double",
+      });
+    });
+
+    it("pins all 87 active callbacks with C truncation, u16 rotation, and seven boundaries", () => {
+      let tick = 0;
+      for (let legIndex = 0; legIndex < 7; legIndex += 1) {
+        const [startX, endX, duration] = BOUNCE_ROTATE_TO_SIDES_DATA[0]![legIndex]!;
+        for (let progress = 0; progress <= duration; progress += 1) {
+          const expectedX = Math.trunc(((endX - startX) * progress) / duration) + startX;
+          const sineIndex = Math.trunc((progress * 128) / duration);
+          const expectedY = -Math.floor((10 * GBA_SINE_TABLE_256[sineIndex]!) / 256) + 0;
+          const frame = bounceRotateToSidesFrameAtTick(tick);
+          expect(frame, `tick ${tick}`).toMatchObject({
+            x2: expectedX,
+            y2: expectedY,
+            data2: 1,
+            data3: progress === duration ? 0 : progress + 1,
+            data4: progress === duration ? legIndex + 1 : legIndex,
+            data6: 0,
+            animRotation: 4096,
+            animDelay: 0,
+            animRuns: 1,
+            animSpeed: 0,
+            animData: 0,
+            legIndex,
+            legStartX: startX,
+            legEndX: endX,
+            legDuration: duration,
+            legProgress: progress,
+            affineRotationU16: Math.trunc((-(4096 * expectedX)) / 8) & 0xffff,
+            xScale: 256,
+            yScale: 256,
+            startedAffine: tick === 0,
+            normalFrontDontFlip: true,
+            tryFlipXCalls: 2,
+            resetSpriteAfterAnim: false,
+            callback: "BounceRotateToSides",
+            affineMode: "double",
+          });
+          tick += 1;
+        }
+      }
+      expect(tick).toBe(87);
+      expect([8, 21, 34, 47, 60, 73, 86].map((boundary) => {
+        const frame = bounceRotateToSidesFrameAtTick(boundary)!;
+        return [boundary, frame.legIndex, frame.legProgress, frame.x2, frame.y2,
+          frame.data3, frame.data4, frame.affineRotationU16];
+      })).toEqual([
+        [8, 0, 8, 8, 0, 0, 1, 61440],
+        [21, 1, 12, -8, 0, 0, 2, 4096],
+        [34, 2, 12, 8, 0, 0, 3, 61440],
+        [47, 3, 12, -8, 0, 0, 4, 4096],
+        [60, 4, 12, 8, 0, 0, 5, 61440],
+        [73, 5, 12, -8, 0, 0, 6, 4096],
+        [86, 6, 12, 0, 0, 0, 7, 0],
+      ]);
+    });
+
+    it("pins sentinel identity/reset/WaitAnimEnd and stable post-terminal state", () => {
+      expect(bounceRotateToSidesFrameAtTick(87)).toEqual({
+        x2: 0,
+        y2: 0,
+        data2: 1,
+        data3: 0,
+        data4: 7,
+        data6: 0,
+        animRotation: 4096,
+        animDelay: 0,
+        animRuns: 1,
+        animSpeed: 0,
+        animData: 0,
+        legIndex: 7,
+        legStartX: 0,
+        legEndX: 0,
+        legDuration: 0,
+        legProgress: 0,
+        affineRotationU16: 0,
+        xScale: 256,
+        yScale: 256,
+        startedAffine: false,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      });
+      expect(bounceRotateToSidesFrameAtTick(88)).toEqual(bounceRotateToSidesFrameAtTick(87));
+      expect(bounceRotateToSidesFrameAtTick(-1)).toBeNull();
+    });
+
+    it("preserves Small, Slow, and unaccepted SmallSlow variant behavior", () => {
+      expect(bounceRotateToSidesSmallFrameAtTick(0)).toMatchObject({
+        data6: 0, animRotation: 2048, animData: 0, legDuration: 8,
+      });
+      expect(bounceRotateToSidesSlowFrameAtTick(0)).toMatchObject({
+        data6: 1, animRotation: 4096, animData: 1, legDuration: 16,
+      });
+      expect(bounceRotateToSidesSmallSlowFrameAtTick(0)).toMatchObject({
+        data6: 1, animRotation: 2048, animData: 1, legDuration: 16,
+      });
+      expect(bounceRotateToSidesSmallFrameAtTick(87)!.callback).toBe("WaitAnimEnd");
+      expect(bounceRotateToSidesSlowFrameAtTick(167)!.callback).toBe("WaitAnimEnd");
+      expect(bounceRotateToSidesSmallSlowFrameAtTick(167)!.callback).toBe("WaitAnimEnd");
+    });
+
+    it.each([
+      [105, marowakScenario],
+      [314, illumiseScenario],
+    ] as const)("stages a complete legal Scene-ON party for opponent species %i", (species, scenario) => {
+      expect(scenario.mode).toBe("mechanicLab");
+      expect(scenario.profile).toBe("battle-scene-on");
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(species);
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "MAROWAK", marowakRunA, marowakRunB, marowakRawA, marowakRawB, 5, 105,
+        "da3153df7028f1d0849cbd161241f034ddfc31e5ca86ee5594791b5df42f6711",
+      ],
+      [
+        "ILLUMISE", illumiseRunA, illumiseRunB, illumiseRawA, illumiseRawB, 2, 314,
+        "01939c8d337ecac2ac184e8df5a4975b176178f8cb1a3748485de81690dd553c",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species, runA, runB, rawA, rawB, animCmdIndex, data2, rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_BOUNCE_ROTATE_TO_SIDES");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("preserves the prior accepted families and accepts only the five normal selectors", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of [
+        "JIGGLYPUFF", "GYARADOS", "VILEPLUME", "LOUDRED",
+        "WEEPINBELL", "GOLDEEN", "MANTINE", "BANETTE",
+        "MAROWAK", "MAGIKARP", "SEEDOT", "MEDITITE", "ILLUMISE",
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+      expect(BOUNCE_ROTATE_TO_SIDES_FRONT_SPECIES).not.toContain("CLEFABLE");
+      expect(selectorTables.frontAnimIds.species.CLEFABLE).toBe(
+        "ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW",
+      );
+    });
+  });
+
+  describe("verticalJumpsHorizontalJumpsFrameAtTick (ordinary opponent-front lifecycle)", () => {
+    it("derives exactly five Factory mappings and no outside mappings", () => {
+      const speciesSelectors = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
+      const generated = Object.entries(speciesSelectors)
+        .filter(([, family]) => family === "ANIM_V_JUMPS_H_JUMPS")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(V_JUMPS_H_JUMPS_FRONT_SPECIES).toEqual(generated);
+      expect(V_JUMPS_H_JUMPS_FRONT_SPECIES).toEqual([
+        "BULBASAUR", "VENONAT", "PSYDUCK", "COMBUSKEN", "DUSTOX",
+      ]);
+      expect(V_JUMPS_H_JUMPS_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(V_JUMPS_H_JUMPS_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(V_JUMPS_H_JUMPS_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of V_JUMPS_H_JUMPS_FRONT_SPECIES) {
+        expect(speciesSelectors[species]).toBe("ANIM_V_JUMPS_H_JUMPS");
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("starts with task-zeroed data2 and the ordinary source callback", () => {
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toContain(2);
+      expect(verticalJumpsHorizontalJumpsFrameAtTick(0)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 0,
+        data2: 12,
+        counter: 0,
+        divCounter: 0,
+        yCounter: 0,
+        remainder: 0,
+        x2Written: true,
+        normalFrontDontFlip: true,
+        callback: "Anim_VerticalJumpsHorizontalJumps",
+      });
+    });
+
+    it("pins all 65 active callbacks from counter 0 through 768", () => {
+      let expectedX = 0;
+      for (let tick = 0; tick < 65; tick += 1) {
+        const counter = tick * 12;
+        const divCounter = Math.trunc(counter / 128) as 0 | 1 | 2 | 3 | 4 | 5 | 6;
+        let yCounter = counter;
+        let x2Written = false;
+        switch (divCounter) {
+          case 0:
+          case 1:
+            expectedX = 0;
+            x2Written = true;
+            break;
+          case 2:
+            yCounter = 0;
+            break;
+          case 3:
+            expectedX = Math.trunc(-((counter % 128) * 8) / 128) + 0;
+            x2Written = true;
+            break;
+          case 4:
+            expectedX = Math.trunc((counter % 128) / 8) - 8;
+            x2Written = true;
+            break;
+          case 5:
+            expectedX = Math.trunc(-((counter % 128) * 8) / 128) + 8;
+            x2Written = true;
+            break;
+          case 6:
+            break;
+        }
+        const remainder = yCounter % 128;
+        const expectedY = -Math.floor((8 * GBA_SINE_TABLE_256[remainder]!) / 256) + 0;
+        expect(verticalJumpsHorizontalJumpsFrameAtTick(tick), `counter ${counter}`).toEqual({
+          x2: expectedX,
+          y2: expectedY,
+          data0: 0,
+          data2: counter + 12,
+          counter,
+          divCounter,
+          yCounter,
+          remainder,
+          x2Written,
+          normalFrontDontFlip: true,
+          callback: "Anim_VerticalJumpsHorizontalJumps",
+        });
+      }
+    });
+
+    it("pins every divCounter transition, C truncation, and x2 carry edge", () => {
+      expect([0, 11, 22, 32, 43, 54, 64].map((tick) => {
+        const frame = verticalJumpsHorizontalJumpsFrameAtTick(tick)!;
+        return [tick, frame.counter, frame.divCounter, frame.x2, frame.y2,
+          frame.yCounter, frame.x2Written];
+      })).toEqual([
+        [0, 0, 0, 0, 0, 0, true],
+        [11, 132, 1, 0, 0, 132, true],
+        [22, 264, 2, 0, 0, 0, false],
+        [32, 384, 3, 0, 0, 384, true],
+        [43, 516, 4, -8, 0, 516, true],
+        [54, 648, 5, 8, -1, 648, true],
+        [64, 768, 6, 1, 0, 768, false],
+      ]);
+      expect(verticalJumpsHorizontalJumpsFrameAtTick(33)).toMatchObject({
+        counter: 396, x2: 0,
+      });
+      expect(verticalJumpsHorizontalJumpsFrameAtTick(55)).toMatchObject({
+        counter: 660, x2: 7,
+      });
+      expect(Array.from({ length: 10 }, (_, offset) =>
+        verticalJumpsHorizontalJumpsFrameAtTick(22 + offset)!.y2,
+      )).toEqual(Array(10).fill(0));
+    });
+
+    it("cleans up only after 768 and remains stable after WaitAnimEnd", () => {
+      expect(verticalJumpsHorizontalJumpsFrameAtTick(64)).toMatchObject({
+        counter: 768,
+        data2: 780,
+        x2: 1,
+        y2: 0,
+        callback: "Anim_VerticalJumpsHorizontalJumps",
+      });
+      expect(verticalJumpsHorizontalJumpsFrameAtTick(65)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 0,
+        data2: 792,
+        counter: 780,
+        divCounter: null,
+        yCounter: null,
+        remainder: null,
+        x2Written: true,
+        normalFrontDontFlip: true,
+        callback: "WaitAnimEnd",
+      });
+      expect(verticalJumpsHorizontalJumpsFrameAtTick(66)).toEqual(
+        verticalJumpsHorizontalJumpsFrameAtTick(65),
+      );
+      expect(verticalJumpsHorizontalJumpsFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      [1, bulbasaurScenario],
+      [294, dustoxScenario],
+    ] as const)("stages a complete legal Scene-ON party for opponent species %i", (
+      species, scenario,
+    ) => {
+      expect(scenario).toMatchObject({
+        mode: "mechanicLab",
+        profile: "battle-scene-on",
+        level: 50,
+        challengeNum: 0,
+        trainerId: 50,
+      });
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(species);
+      for (const setId of [...scenario.playerSetIds, ...scenario.opponentSetIds]) {
+        expect(setId).toBeGreaterThanOrEqual(110);
+        expect(setId).toBeLessThanOrEqual(199);
+      }
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "BULBASAUR", bulbasaurRunA, bulbasaurRunB, bulbasaurRawA, bulbasaurRawB, 2, 1,
+        "f91cf65e2d71626c37f7421be61fbc1c909147ceed981b01f0adf51da541f1d8",
+      ],
+      [
+        "DUSTOX", dustoxRunA, dustoxRunB, dustoxRawA, dustoxRawB, 14, 294,
+        "e076416a1cc08913fac56b5b54b1069e93707c0da353d07ccc6b7e3a002d802f",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species, runA, runB, rawA, rawB, animCmdIndex, data2, rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_V_JUMPS_H_JUMPS");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("preserves accepted families through the subsequently accepted Big and Twice selectors", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of [
+        "MAROWAK", "MAGIKARP", "SEEDOT", "MEDITITE", "ILLUMISE",
+        "BULBASAUR", "VENONAT", "PSYDUCK", "COMBUSKEN", "DUSTOX",
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+      expect(selectorTables.frontAnimIds.species.PICHU).toBe("ANIM_V_JUMPS_BIG");
+      expect(selectorTables.frontAnimIds.species.SHARPEDO).toBe(
+        "ANIM_H_JUMPS_V_STRETCH_TWICE",
+      );
+      expect(speciesFrontIdleRestOffset("PICHU")).toEqual({ x2: 0, y2: 0 });
+      expect(speciesFrontIdleRestOffset("SHARPEDO")).toEqual({ x2: 0, y2: 0 });
+    });
+  });
+
+  describe("verticalJumpsBigFrameAtTick (Anim_VerticalJumps_Big / shared VerticalJumps port)", () => {
+    it("derives exactly five Factory mappings and no outside mappings", () => {
+      const speciesSelectors = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
+      const generated = Object.entries(speciesSelectors)
+        .filter(([, family]) => family === "ANIM_V_JUMPS_BIG")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(V_JUMPS_BIG_FRONT_SPECIES).toEqual(generated);
+      expect(V_JUMPS_BIG_FRONT_SPECIES).toEqual([
+        "PICHU", "FLAAFFY", "GIRAFARIG", "SWAMPERT", "TAILLOW",
+      ]);
+      expect(V_JUMPS_BIG_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(V_JUMPS_BIG_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(V_JUMPS_BIG_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of V_JUMPS_BIG_FRONT_SPECIES) {
+        expect(speciesSelectors[species]).toBe("ANIM_V_JUMPS_BIG");
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins all 33 active callbacks, C branch arithmetic, u8 sine conversion, and amplitudes", () => {
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toContain(2);
+      for (let tick = 0; tick < 33; tick += 1) {
+        const counter = tick * 12;
+        const divCounter = Math.trunc(counter / 128) as 0 | 1 | 2 | 3;
+        const adjustedCounter = divCounter < 2 ? counter : counter - 256;
+        const sineIndex = divCounter < 2 ? counter % 128 : adjustedCounter & 0xff;
+        const amplitude = divCounter < 2 ? 8 : 12;
+        const y2 = -((amplitude * GBA_SINE_TABLE_256[sineIndex]!) >> 8) + 0;
+        expect(verticalJumpsBigFrameAtTick(tick), `counter ${counter}`).toEqual({
+          x2: 0,
+          y2,
+          data0: 4,
+          data2: counter + 12,
+          counter,
+          divCounter,
+          adjustedCounter,
+          sineIndex,
+          amplitude,
+          callback: "VerticalJumps",
+        });
+      }
+    });
+
+    it("pins every phase edge, including the counter-=256 and signed sine boundaries", () => {
+      expect([0, 10, 11, 21, 22, 31, 32].map((tick) => {
+        const frame = verticalJumpsBigFrameAtTick(tick)!;
+        return [tick, frame.counter, frame.divCounter, frame.adjustedCounter,
+          frame.sineIndex, frame.amplitude, frame.y2];
+      })).toEqual([
+        [0, 0, 0, 0, 0, 8, 0],
+        [10, 120, 0, 120, 120, 8, -1],
+        [11, 132, 1, 132, 4, 8, 0],
+        [21, 252, 1, 252, 124, 8, 0],
+        [22, 264, 2, 8, 8, 12, -2],
+        [31, 372, 2, 116, 116, 12, -3],
+        [32, 384, 3, 128, 128, 12, 0],
+      ]);
+      expect(verticalJumpsBigFrameAtTick(27)).toMatchObject({
+        counter: 324,
+        adjustedCounter: 68,
+        sineIndex: 68,
+        amplitude: 12,
+        y2: -11,
+      });
+    });
+
+    it("cleans up only after counter 384, increments to 408, and stays stable in WaitAnimEnd", () => {
+      expect(verticalJumpsBigFrameAtTick(32)).toMatchObject({
+        counter: 384,
+        data2: 396,
+        callback: "VerticalJumps",
+      });
+      expect(verticalJumpsBigFrameAtTick(33)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 4,
+        data2: 408,
+        counter: 396,
+        divCounter: null,
+        adjustedCounter: null,
+        sineIndex: null,
+        amplitude: null,
+        callback: "WaitAnimEnd",
+      });
+      expect(verticalJumpsBigFrameAtTick(34)).toEqual(verticalJumpsBigFrameAtTick(33));
+      expect(verticalJumpsBigFrameAtTick(-1)).toBeNull();
+    });
+
+    it("regression-pins the accepted Small initializer on the same shared reducer", () => {
+      expect([0, 11, 22, 32, 33].map((tick) => verticalJumpsSmallFrameAtTick(tick)))
+        .toEqual([
+          { x2: 0, y2: 0, data0: 3, data2: 12, counter: 0, divCounter: 0,
+            adjustedCounter: 0, sineIndex: 0, amplitude: 6, callback: "VerticalJumps" },
+          { x2: 0, y2: 0, data0: 3, data2: 144, counter: 132, divCounter: 1,
+            adjustedCounter: 132, sineIndex: 4, amplitude: 6, callback: "VerticalJumps" },
+          { x2: 0, y2: -1, data0: 3, data2: 276, counter: 264, divCounter: 2,
+            adjustedCounter: 8, sineIndex: 8, amplitude: 9, callback: "VerticalJumps" },
+          { x2: 0, y2: 0, data0: 3, data2: 396, counter: 384, divCounter: 3,
+            adjustedCounter: 128, sineIndex: 128, amplitude: 9, callback: "VerticalJumps" },
+          { x2: 0, y2: 0, data0: 3, data2: 408, counter: 396, divCounter: null,
+            adjustedCounter: null, sineIndex: null, amplitude: null, callback: "WaitAnimEnd" },
+        ]);
+    });
+
+    it.each([
+      [172, pichuScenario],
+      [304, taillowScenario],
+    ] as const)("stages a complete legal Scene-ON party for opponent species %i", (
+      species, scenario,
+    ) => {
+      expect(scenario).toMatchObject({
+        mode: "mechanicLab",
+        profile: "battle-scene-on",
+        level: 50,
+        challengeNum: 0,
+        trainerId: 50,
+      });
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(species);
+      for (const setId of [...scenario.playerSetIds, ...scenario.opponentSetIds]) {
+        expect(setId).toBeGreaterThanOrEqual(110);
+        expect(setId).toBeLessThanOrEqual(199);
+      }
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "PICHU", pichuRunA, pichuRunB, pichuRawA, pichuRawB, 4, 172,
+        "cde69635974e4c6a55e7bad360e38a1507db9405f164851cb522ff4ddfb27d1f",
+      ],
+      [
+        "TAILLOW", taillowRunA, taillowRunB, taillowRawA, taillowRawB, 8, 304,
+        "c286b13cef798ca9c35f5638852d138363ac4455ab8dc016935bb36379839190",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species, runA, runB, rawA, rawB, animCmdIndex, data2, rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_V_JUMPS_BIG");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("preserves Small and Big while recognizing the subsequently accepted Twice selector", () => {
+      for (const species of [...V_JUMPS_SMALL_FRONT_SPECIES, ...V_JUMPS_BIG_FRONT_SPECIES]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+      expect(selectorTables.frontAnimIds.species.SHARPEDO).toBe(
+        "ANIM_H_JUMPS_V_STRETCH_TWICE",
+      );
+      expect(speciesFrontIdleRestOffset("SHARPEDO")).toEqual({ x2: 0, y2: 0 });
     });
   });
 });
