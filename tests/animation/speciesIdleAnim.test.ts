@@ -65,9 +65,13 @@ import {
   H_SLIDE_WOBBLE_FRONT_SPECIES,
   H_SLIDE_WOBBLE_OUTSIDE_FACTORY_FRONT_SPECIES,
   horizontalJumpsVerticalStretchFrameAtTick,
+  horizontalJumpsVerticalStretchTwiceFrameAtTick,
   H_JUMPS_V_STRETCH_FACTORY_FRONT_SPECIES,
   H_JUMPS_V_STRETCH_FRONT_SPECIES,
   H_JUMPS_V_STRETCH_OUTSIDE_FACTORY_FRONT_SPECIES,
+  H_JUMPS_V_STRETCH_TWICE_FACTORY_FRONT_SPECIES,
+  H_JUMPS_V_STRETCH_TWICE_FRONT_SPECIES,
+  H_JUMPS_V_STRETCH_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES,
   horizontalShakeFrameAtTick,
   H_SHAKE_FACTORY_FRONT_SPECIES,
   H_SHAKE_FRONT_SPECIES,
@@ -262,6 +266,12 @@ import pichuRunB from "../../tools/compare/fixtures/sendout-front-pichu-run-b.js
 import taillowScenario from "../../tools/compare/fixtures/sendout-front-taillow.json" with { type: "json" };
 import taillowRunA from "../../tools/compare/fixtures/sendout-front-taillow-run-a.json" with { type: "json" };
 import taillowRunB from "../../tools/compare/fixtures/sendout-front-taillow-run-b.json" with { type: "json" };
+import sharpedoScenario from "../../tools/compare/fixtures/sendout-front-sharpedo.json" with { type: "json" };
+import sharpedoRunA from "../../tools/compare/fixtures/sendout-front-sharpedo-run-a.json" with { type: "json" };
+import sharpedoRunB from "../../tools/compare/fixtures/sendout-front-sharpedo-run-b.json" with { type: "json" };
+import spoinkScenario from "../../tools/compare/fixtures/sendout-front-spoink.json" with { type: "json" };
+import spoinkRunA from "../../tools/compare/fixtures/sendout-front-spoink-run-a.json" with { type: "json" };
+import spoinkRunB from "../../tools/compare/fixtures/sendout-front-spoink-run-b.json" with { type: "json" };
 import {
   KABUTO_FRONT_ANIM_START_OFFSET,
   kabutoHSlideWobble,
@@ -506,6 +516,18 @@ const taillowRawA = readFileSync(
 );
 const taillowRawB = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-taillow-run-b.json", import.meta.url),
+);
+const sharpedoRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-sharpedo-run-a.json", import.meta.url),
+);
+const sharpedoRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-sharpedo-run-b.json", import.meta.url),
+);
+const spoinkRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-spoink-run-a.json", import.meta.url),
+);
+const spoinkRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-spoink-run-b.json", import.meta.url),
 );
 
 describe("speciesIdleAnim", () => {
@@ -1875,6 +1897,321 @@ describe("speciesIdleAnim", () => {
       ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }
+    });
+  });
+
+  describe("horizontalJumpsVerticalStretchTwiceFrameAtTick (shared twice lifecycle)", () => {
+    it("derives exactly SHARPEDO and SPOINK as Factory mappings with no outside mappings", () => {
+      const speciesSelectors = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
+      const generated = Object.entries(speciesSelectors)
+        .filter(([, family]) => family === "ANIM_H_JUMPS_V_STRETCH_TWICE")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(H_JUMPS_V_STRETCH_TWICE_FRONT_SPECIES).toEqual(generated);
+      expect(H_JUMPS_V_STRETCH_TWICE_FRONT_SPECIES).toEqual(["SHARPEDO", "SPOINK"]);
+      expect(H_JUMPS_V_STRETCH_TWICE_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(H_JUMPS_V_STRETCH_TWICE_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(H_JUMPS_V_STRETCH_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of generated) {
+        expect(speciesSelectors[species]).toBe("ANIM_H_JUMPS_V_STRETCH_TWICE");
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins every callback tick 0..156, both normal-front flips, affine state, and repeat delay", () => {
+      const frames = Array.from(
+        { length: 157 },
+        (_, tick) => horizontalJumpsVerticalStretchTwiceFrameAtTick(tick)!,
+      );
+      expect(frames).toHaveLength(157);
+      for (const [tick, frame] of frames.entries()) {
+        expect(frame, `tick ${tick}`).not.toBeNull();
+        expect(frame, `tick ${tick}`).toMatchObject({
+          animRotation: 0,
+          animRuns: tick < 73 ? 2 : 1,
+          animSpeed: 0,
+          animData: 1,
+          startedAffine: tick === 0,
+          normalFrontDontFlip: true,
+          tryFlipXCalls: tick >= 74 && tick <= 83 ? 0 : 2,
+          resetSpriteAfterAnim: tick === 156,
+          affineMode: tick === 156 ? "normal" : "double",
+        });
+      }
+      expect(frames.map(({ callback }) => callback)).toEqual([
+        ...Array(11).fill("HorizontalJumpsVerticalStretch_0"),
+        ...Array(50).fill("HorizontalJumpsVerticalStretch_1"),
+        ...Array(12).fill("HorizontalJumpsVerticalStretch_2"),
+        ...Array(21).fill("HorizontalJumpsVerticalStretch_0"),
+        ...Array(50).fill("HorizontalJumpsVerticalStretch_1"),
+        ...Array(12).fill("HorizontalJumpsVerticalStretch_2"),
+        "WaitAnimEnd",
+      ]);
+    });
+
+    it("pins C-truncated jump and stretch writes across both passes", () => {
+      const sin = (index: number, amplitude: number) =>
+        (amplitude * GBA_SINE_TABLE_256[index & 0xff]!) >> 8;
+
+      for (const [startTick, counters] of [
+        [0, Array.from({ length: 11 }, (_, index) => index * 12)],
+        [84, Array.from({ length: 10 }, (_, index) => 12 + index * 12)],
+      ] as const) {
+        for (const [offset, counter] of counters.entries()) {
+          expect(horizontalJumpsVerticalStretchTwiceFrameAtTick(startTick + offset))
+            .toMatchObject({
+              x2: Math.trunc((8 * counter) / 128) + 0,
+              y2: -sin(counter % 128, 8) + 0,
+              data2: counter + 12,
+              data3: 0,
+              data4: 0,
+              animDelay: 0,
+              counter,
+              xScale: 256,
+              yScale: 256,
+              callback: "HorizontalJumpsVerticalStretch_0",
+            });
+        }
+      }
+
+      for (const startTick of [12, 95] as const) {
+        for (let counter = 0; counter <= 48; counter += 1) {
+          const data4Before = (counter * 8) & 0xff;
+          const data3 = counter < 16 ? 0 : counter <= 31 ? (counter - 15) * 8 : 128;
+          const x2 = counter < 16 ? 7 : counter <= 31 ? 7 - (counter - 15) : -9;
+          const yScale = sin(data4Before, 64) + 256;
+          const yDelta = yScale > 256 ? Math.trunc((256 - yScale) / 8) : 0;
+          expect(horizontalJumpsVerticalStretchTwiceFrameAtTick(startTick + counter))
+            .toMatchObject({
+              x2,
+              y2: -sin(data3, 20) - yDelta + 0,
+              data2: counter + 1,
+              data3,
+              data4: (data4Before + 8) & 0xff,
+              animDelay: 0,
+              counter,
+              xScale: 256 - sin(data4Before, 32),
+              yScale,
+              callback: "HorizontalJumpsVerticalStretch_1",
+            });
+        }
+      }
+
+      for (const startTick of [62, 145] as const) {
+        for (let offset = 0; offset < 11; offset += 1) {
+          const counter = offset * 12;
+          expect(horizontalJumpsVerticalStretchTwiceFrameAtTick(startTick + offset))
+            .toMatchObject({
+              x2: Math.trunc((counter * 8) / 128) - 8,
+              y2: -sin(counter % 128, 8) + 0,
+              data2: counter + 12,
+              data3: 128,
+              data4: 136,
+              counter,
+              xScale: 256,
+              yScale: 256,
+              callback: "HorizontalJumpsVerticalStretch_2",
+            });
+        }
+      }
+    });
+
+    it("pins both strict callback guards, the repeat carry, and all ten delay callbacks", () => {
+      for (const tick of [11, 94] as const) {
+        expect(horizontalJumpsVerticalStretchTwiceFrameAtTick(tick)).toMatchObject({
+          x2: 7,
+          y2: -1,
+          data2: 0,
+          data3: 0,
+          data4: 0,
+          animDelay: 0,
+          counter: 132,
+          callback: "HorizontalJumpsVerticalStretch_1",
+        });
+      }
+      for (const tick of [61, 144] as const) {
+        expect(horizontalJumpsVerticalStretchTwiceFrameAtTick(tick)).toMatchObject({
+          x2: -9,
+          y2: 0,
+          data2: 0,
+          data3: 128,
+          data4: 136,
+          animDelay: 0,
+          counter: 49,
+          xScale: 256,
+          yScale: 256,
+          callback: "HorizontalJumpsVerticalStretch_2",
+        });
+      }
+      expect(horizontalJumpsVerticalStretchTwiceFrameAtTick(73)).toEqual({
+        x2: 0,
+        y2: 0,
+        data2: 12,
+        data3: 0,
+        data4: 0,
+        animRotation: 0,
+        animDelay: 10,
+        animRuns: 1,
+        animSpeed: 0,
+        animData: 1,
+        counter: 132,
+        xScale: 256,
+        yScale: 256,
+        startedAffine: false,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        resetSpriteAfterAnim: false,
+        callback: "HorizontalJumpsVerticalStretch_0",
+        affineMode: "double",
+      });
+      for (let tick = 74; tick <= 83; tick += 1) {
+        expect(horizontalJumpsVerticalStretchTwiceFrameAtTick(tick)).toMatchObject({
+          x2: 0,
+          y2: 0,
+          data2: 12,
+          data3: 0,
+          data4: 0,
+          animDelay: 83 - tick,
+          animRuns: 1,
+          counter: 12,
+          tryFlipXCalls: 0,
+          callback: "HorizontalJumpsVerticalStretch_0",
+        });
+      }
+    });
+
+    it("resets on tick 156 after counter 132, increments to 144, and stays in WaitAnimEnd", () => {
+      expect(horizontalJumpsVerticalStretchTwiceFrameAtTick(156)).toEqual({
+        x2: 0,
+        y2: 0,
+        data2: 144,
+        data3: 128,
+        data4: 136,
+        animRotation: 0,
+        animDelay: 0,
+        animRuns: 1,
+        animSpeed: 0,
+        animData: 1,
+        counter: 132,
+        xScale: 256,
+        yScale: 256,
+        startedAffine: false,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      });
+      expect(horizontalJumpsVerticalStretchTwiceFrameAtTick(157)).toEqual(
+        horizontalJumpsVerticalStretchTwiceFrameAtTick(156),
+      );
+      expect(horizontalJumpsVerticalStretchTwiceFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      [331, sharpedoScenario, 1, 100, 162, 266],
+      [351, spoinkScenario, 0, 50, 110, 199],
+    ] as const)("stages a complete legal Scene-ON party for opponent species %i", (
+      species, scenario, challengeNum, trainerId, rangeStart, rangeEnd,
+    ) => {
+      expect(scenario).toMatchObject({
+        mode: "mechanicLab",
+        profile: "battle-scene-on",
+        level: 50,
+        challengeNum,
+        trainerId,
+      });
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(species);
+      for (const setId of [...scenario.playerSetIds, ...scenario.opponentSetIds]) {
+        expect(setId).toBeGreaterThanOrEqual(rangeStart);
+        expect(setId).toBeLessThanOrEqual(rangeEnd);
+      }
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "SHARPEDO", sharpedoRunA, sharpedoRunB, sharpedoRawA, sharpedoRawB, 8, 331,
+        "beddd02c936693a4e82573b7f4ab965aa0e128af8eb72cf78945e60777864dcf",
+      ],
+      [
+        "SPOINK", spoinkRunA, spoinkRunB, spoinkRawA, spoinkRawB, 10, 351,
+        "f5c33bc034669fa7a53240a02bbb7a630f5d1d17f8405baeab87770d03e3eb7b",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species, runA, runB, rawA, rawB, animCmdIndex, data2, rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe(
+        "ANIM_H_JUMPS_V_STRETCH_TWICE",
+      );
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("regression-pins the single-run tick-73 terminal and does not broaden the next selector", () => {
+      expect(horizontalJumpsVerticalStretchFrameAtTick(73)).toMatchObject({
+        x2: 0,
+        y2: 0,
+        data2: 144,
+        animDelay: 0,
+        animRuns: 1,
+        animData: -1,
+        counter: 132,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      });
+      for (const species of [
+        ...H_JUMPS_V_STRETCH_FRONT_SPECIES,
+        ...H_JUMPS_V_STRETCH_TWICE_FRONT_SPECIES,
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+      expect(selectorTables.frontAnimIds.species.HARIYAMA).toBe("ANIM_ROTATE_UP_TO_SIDES");
+      expect(speciesFrontIdleRestOffset("HARIYAMA")).toBeNull();
     });
   });
 

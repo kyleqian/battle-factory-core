@@ -54,6 +54,7 @@ export type SpeciesFrontAnimFamily =
   | "H_STRETCH"
   | "H_VIBRATE"
   | "H_JUMPS_V_STRETCH"
+  | "H_JUMPS_V_STRETCH_TWICE"
   | "H_SHAKE"
   | "RAPID_H_HOPS"
   | "SHRINK_GROW"
@@ -84,6 +85,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "H_STRETCH",
   "H_VIBRATE",
   "H_JUMPS_V_STRETCH",
+  "H_JUMPS_V_STRETCH_TWICE",
   "H_SHAKE",
   "RAPID_H_HOPS",
   "SHRINK_GROW",
@@ -294,6 +296,26 @@ export const H_JUMPS_V_STRETCH_FACTORY_FRONT_SPECIES: readonly string[] = Object
 export const H_JUMPS_V_STRETCH_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   H_JUMPS_V_STRETCH_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
+
+/** All 2 source selector mappings for `ANIM_H_JUMPS_V_STRETCH_TWICE`. */
+export const H_JUMPS_V_STRETCH_TWICE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_H_JUMPS_V_STRETCH_TWICE")
+    .map(([species]) => species),
+);
+
+/** Every twice horizontal-jumps/vertical-stretch mapping is Factory-reachable. */
+export const H_JUMPS_V_STRETCH_TWICE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_JUMPS_V_STRETCH_TWICE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no twice mappings outside the Factory rental pool. */
+export const H_JUMPS_V_STRETCH_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
+  Object.freeze(
+    H_JUMPS_V_STRETCH_TWICE_FRONT_SPECIES.filter(
+      (species) => !factoryFrontSpecies.has(species),
+    ),
+  );
 
 /** All 5 source selector mappings for the normal `ANIM_BOUNCE_ROTATE_TO_SIDES`. */
 export const BOUNCE_ROTATE_TO_SIDES_FRONT_SPECIES: readonly string[] = Object.freeze(
@@ -1119,16 +1141,16 @@ export interface HorizontalJumpsVerticalStretchFrame extends SpeciesIdleOffset {
   readonly data3: number;
   readonly data4: number;
   readonly animRotation: 0;
-  readonly animDelay: 0;
-  readonly animRuns: 1;
+  readonly animDelay: number;
+  readonly animRuns: number;
   readonly animSpeed: 0;
-  readonly animData: -1;
+  readonly animData: -1 | 1;
   readonly counter: number;
   readonly xScale: number;
   readonly yScale: number;
   readonly startedAffine: boolean;
   readonly normalFrontDontFlip: true;
-  readonly tryFlipXCalls: 2;
+  readonly tryFlipXCalls: 0 | 2;
   readonly resetSpriteAfterAnim: boolean;
   readonly callback:
     | "HorizontalJumpsVerticalStretch_0"
@@ -1429,17 +1451,18 @@ export function verticalJumpsBigFrameAtTick(
  * transitions and strict guards are represented exactly, including their data2
  * resets and the terminal `_2` increment after `ResetSpriteAfterAnim`.
  */
-export function horizontalJumpsVerticalStretchFrameAtTick(
+function horizontalJumpsVerticalStretchVariantFrameAtTick(
   ticksSinceStart: number,
+  initializer: { readonly animData: -1 | 1; readonly animRuns: 1 | 2 },
 ): HorizontalJumpsVerticalStretchFrame | null {
   if (ticksSinceStart < 0) return null;
 
   // `InitAnimData` defaults, followed by the single-run initializer override.
   const animRotation = 0;
   let animDelay = 0;
-  const animRuns = 1;
+  let animRuns = initializer.animRuns;
   const animSpeed = 0;
-  const animData = -1;
+  const animData = initializer.animData;
   let data2 = 0;
   let data3 = 0;
   let data4 = 0;
@@ -1454,11 +1477,13 @@ export function horizontalJumpsVerticalStretchFrameAtTick(
     const startedAffine = tick === 0;
     let counter = data2;
     let resetSpriteAfterAnim = false;
+    let tryFlipXCalls: 0 | 2 = 0;
 
     if (callback === "HorizontalJumpsVerticalStretch_0") {
       if (animDelay !== 0) {
         animDelay -= 1;
       } else {
+        tryFlipXCalls = 2;
         x2 = tryFlipX(x2, true);
         counter = data2;
         if (data2 > 128) {
@@ -1474,6 +1499,7 @@ export function horizontalJumpsVerticalStretchFrameAtTick(
         x2 = tryFlipX(x2, true);
       }
     } else if (callback === "HorizontalJumpsVerticalStretch_1") {
+      tryFlipXCalls = 2;
       x2 = tryFlipX(x2, true);
       counter = data2;
       if (data2 > 48) {
@@ -1497,13 +1523,21 @@ export function horizontalJumpsVerticalStretchFrameAtTick(
       }
       x2 = tryFlipX(x2, true);
     } else if (callback === "HorizontalJumpsVerticalStretch_2") {
+      tryFlipXCalls = 2;
       x2 = tryFlipX(x2, true);
       counter = data2;
       if (counter > 128) {
-        // `animRuns` is the AddNewAnim default 1, so the repeat branch used by
-        // `_Twice` is unreachable for this family.
-        resetSpriteAfterAnim = true;
-        callback = "WaitAnimEnd";
+        if (animRuns > 1) {
+          animRuns -= 1;
+          animDelay = 10;
+          data3 = 0;
+          data2 = 0;
+          data4 = 0;
+          callback = "HorizontalJumpsVerticalStretch_0";
+        } else {
+          resetSpriteAfterAnim = true;
+          callback = "WaitAnimEnd";
+        }
         x2 = 0;
         y2 = 0;
       } else {
@@ -1522,7 +1556,7 @@ export function horizontalJumpsVerticalStretchFrameAtTick(
         data3,
         data4,
         animRotation,
-        animDelay: 0,
+        animDelay,
         animRuns,
         animSpeed,
         animData,
@@ -1531,7 +1565,7 @@ export function horizontalJumpsVerticalStretchFrameAtTick(
         yScale,
         startedAffine,
         normalFrontDontFlip: true,
-        tryFlipXCalls: 2,
+        tryFlipXCalls,
         resetSpriteAfterAnim,
         callback,
         affineMode: resetSpriteAfterAnim ? "normal" : "double",
@@ -1540,6 +1574,33 @@ export function horizontalJumpsVerticalStretchFrameAtTick(
   }
 
   throw new Error("unreachable HorizontalJumpsVerticalStretch reducer state");
+}
+
+export function horizontalJumpsVerticalStretchFrameAtTick(
+  ticksSinceStart: number,
+): HorizontalJumpsVerticalStretchFrame | null {
+  return horizontalJumpsVerticalStretchVariantFrameAtTick(
+    ticksSinceStart,
+    { animData: -1, animRuns: 1 },
+  );
+}
+
+/**
+ * Source-order port of `Anim_HorizontalJumpsVerticalStretch_Twice`
+ * (`pokemon_animation.c:3805-3815`) through the callbacks shared with the
+ * accepted single-run family (`:2755-2868`). The initializer differs only by
+ * selecting data=1/runs=2. At the first `_2` terminal edge the shared tail
+ * carries data2 from the reset value 0 to 12, while delay=10 suppresses the
+ * next ten `_0` bodies; the second pass then finishes through the ordinary
+ * `ResetSpriteAfterAnim` / `WaitAnimEnd` path.
+ */
+export function horizontalJumpsVerticalStretchTwiceFrameAtTick(
+  ticksSinceStart: number,
+): HorizontalJumpsVerticalStretchFrame | null {
+  return horizontalJumpsVerticalStretchVariantFrameAtTick(
+    ticksSinceStart,
+    { animData: 1, animRuns: 2 },
+  );
 }
 
 export type BounceRotateToSidesTableEntry = readonly [
@@ -2886,6 +2947,15 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = horizontalJumpsVerticalStretchFrameAtTick(73);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_HorizontalJumpsVerticalStretch did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "H_JUMPS_V_STRETCH_TWICE": {
+      const terminal = horizontalJumpsVerticalStretchTwiceFrameAtTick(156);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error(
+          "Anim_HorizontalJumpsVerticalStretch_Twice did not reach terminal cleanup",
+        );
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
