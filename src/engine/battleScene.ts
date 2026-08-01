@@ -457,7 +457,6 @@ import {
   turnKickoffBounceTick,
   TURN_KICKOFF_LINE1,
   TURN_KICKOFF_LINE2,
-  doubleTeamCloneOffsets,
   statsBannerEva,
   statsBannerBg1Y,
   STAT_ROSE_LINE1,
@@ -476,7 +475,6 @@ import {
   rockSlideMonShakeY2,
   ROCK_SLIDE_ANIMATION_PROFILE,
   HIT_FLASH_RAM_ANCHOR_DELAY,
-  STATS_BANNER_END_DELAY,
   rockSlideOpponentHp,
   rockSlideResettledBounceTick,
   TURN2_KICKOFF_LINE2,
@@ -6269,26 +6267,14 @@ function blendedTile(
 }
 
 /**
- * S7 slice B (docs/battle-menu-notes.md §10): DOUBLE_TEAM's clone animation
- * (ticks `pressTick`+47..+174) + the post-clone gap (+175..+207, no code
- * needed - the plain `drawTurnKickoffText` base already shows Grovyle
- * normally, matching the oracle's own frozen-baseline pixels there exactly)
- * + the generic stat-change banner (+208..+274). Both mechanisms erase
- * Grovyle's real-sprite footprint and redraw a blended copy in its place;
- * neither window overlaps the other or the gap, so the caller just tries
- * clones first, then the banner, then falls back to whatever the base scene
- * already drew (plain Grovyle).
+ * ISSUES #39 rank-6 slices 1/4: DOUBLE_TEAM's own clone-blend content
+ * (`drawDoubleTeamClones`, formerly this section's own S7 slice B) is class
+ * (c) - RAM-confirmed absent under Scene OFF for both turns 1 and 4 (this
+ * whole battle's only two DOUBLE_TEAM windows) - deleted entirely, along
+ * with its now-uncalled helpers (`getDoubleTeamClonePalette`,
+ * `eraseGrovyleFootprint`). Only the generic stat-change banner
+ * (`drawStatsBanner` below) survives.
  */
-
-/** DOUBLE_TEAM's clone palette - Grovyle's own front-sprite palette blended 11/16 toward RGB_BLACK (`BlendPalette(r3, 16, 11, RGB_BLACK)`, `AnimTask_DoubleTeam`, docs/battle-move-anim-notes.md §3) - the darkened "afterimage" tint. Lazily computed once. */
-let doubleTeamClonePaletteCache: RgbColor[] | null = null;
-function getDoubleTeamClonePalette(): RgbColor[] {
-  if (doubleTeamClonePaletteCache) return doubleTeamClonePaletteCache;
-  doubleTeamClonePaletteCache = grovyleFrontSprite.palette.map((c) =>
-    c ? { r: blendComponentToward(c.r, 0, 11), g: blendComponentToward(c.g, 0, 11), b: blendComponentToward(c.b, 0, 11) } : c,
-  );
-  return doubleTeamClonePaletteCache;
-}
 
 let onixDoubleTeamClonePaletteCache: RgbColor[] | null = null;
 function getOnixDoubleTeamClonePalette(): RgbColor[] {
@@ -6331,34 +6317,6 @@ function turn10BgDarkPalette(): RgbColor[][] {
   if (turn10BgDarkPaletteCache) return turn10BgDarkPaletteCache;
   turn10BgDarkPaletteCache = battleBg.palette.map((bank, i) => (i === 0 ? darkenPaletteToward10(bank) : bank));
   return turn10BgDarkPaletteCache;
-}
-
-/**
- * Erases Grovyle's own real-sprite footprint (only the settled tileset's
- * opaque pixels, not the whole bounding box) back to the true field
- * background (`healthboxBackgroundColorAt`) - the target-hide half of
- * `monbg ANIM_ATK_PARTNER` (docs/battle-move-anim-notes.md §2, the
- * `ANIM_DEF_PARTNER` analogue §9.3 already documented for ROCK_SLIDE's own
- * target-hide), needed before drawing either the clone pair or the
- * stat-banner's own blended copy in its place.
- */
-function eraseGrovyleFootprint(fb: Uint8Array): void {
-  const { tileset } = grovyleFrontSprite;
-  for (let ty = 0; ty < tileset.rows; ty += 1) {
-    for (let tx = 0; tx < tileset.columns; tx += 1) {
-      const tile = tileset.tiles[ty * tileset.columns + tx];
-      if (!tile) continue;
-      for (let py = 0; py < 8; py += 1) {
-        for (let px = 0; px < 8; px += 1) {
-          if (tile[py * 8 + px] === 0) continue;
-          const x = GROVYLE_CORNER.x + tx * 8 + px;
-          const y = GROVYLE_CORNER.y + ty * 8 + py;
-          const bg = healthboxBackgroundColorAt(x, y);
-          if (bg) setPixel(fb, x, y, bg);
-        }
-      }
-    }
-  }
 }
 
 /** Same tile-grid iteration as `drawSpriteSheet`, but through `blendedTile` (explicit `eva`/`evb`, not necessarily summing to 16 - the clone window's own flat 12/8 doesn't). */
@@ -6407,72 +6365,6 @@ function isOpponentHealthboxOpaqueAt(x: number, y: number): boolean {
   const ly = y - HEALTHBOX_FRAME_ORIGIN.y;
   if (lx < 0 || lx >= width || ly < 0 || ly >= height) return false;
   return pixels[ly * width + lx] != null;
-}
-
-/**
- * DOUBLE_TEAM's two afterimage clones - struct-copies of Grovyle's own
- * rendered sprite (`CloneBattlerSpriteWithBlend`), each with its OWN
- * independent `x2` horizontal motion (`doubleTeamCloneOffsets`,
- * `battleMenu.ts` - NOT a mirrored `±offset` pair, see that function's own
- * doc comment for why), the darkened palette, flat `eva=12/evb=8` blend
- * (mind #112's OBJ-vs-OBJ target-2 lesson - `blendedTile` already resolves
- * target-2 from the plain background, not whatever's already in `fb`). Real
- * sprite hidden for the whole visible window. Returns whether the window is
- * active (so the caller can fall through to the stat banner otherwise).
- *
- * **`frontClone` - S7 slice I follow-up (docs/battle-turn-notes.md §22
- * resolution): the two clones tie EXACTLY on real hardware's sprite-sort key**
- * (`SortSprites`, `reference/pokeemerald/src/sprite.c:371-467`: both clones are
- * raw `gSprites[i] = gSprites[spriteId]` copies of Grovyle's own sprite via
- * `CloneBattlerSpriteWithBlend`, so `oam.priority`, `subpriority`, AND `oam.y`
- * are bit-identical between them) - the tie is broken by their relative
- * position in the persistent, frame-to-frame-stable `sSpriteOrder` array
- * (`EWRAM_DATA static`, address `0x020217F4`, same symbol this run's own
- * `rockSlideDrawOrder` already uses for the analogous rock-vs-rock tie, S7
- * slice C/11.1), which is NOT a pure function of slot number - it's whatever
- * order history left the two slots in. RAM-probed directly both turns (this
- * session): turn 1's clones land in slots 3 (phase-0, "A", allocated first)
- * and 4 (phase-128, "B", allocated second) - `sSpriteOrder` at RAM tick 1971
- * (turn 1's own n=8) has slot 4 BEFORE slot 3 (positions 8/9), i.e. B ends up
- * with the lower final OAM index and renders in front. Turn 4's clones land
- * in the SAME two slots (3/4 - the free-slot pool is otherwise identical by
- * turn 4), but `sSpriteOrder` at RAM tick 4977 (turn 4's own n=8) has slot 3
- * BEFORE slot 4 (positions 8/9) - the tie order has flipped, so A is now
- * front. This engine draws in plain sequential order (no OAM/z-order
- * simulation), so "front" = drawn LAST (`blendedTile`'s own target-2 always
- * reads the static background, never the other clone's already-drawn pixel,
- * so the second draw call cleanly overwrites the first in any overlap - real
- * hardware's front-sprite-wins-the-overlap is reproduced exactly by
- * last-write-wins here). Confirmed to close the tick-4978 residual (728px,
- * `x=145-205,y=17-70`) that made turn 4's app render exactly reproduce turn
- * 1's oracle (not turn 4's own) before this fix.
- *
- * **Honest scope**: this flips a hardcoded boolean per turn (`turn3Resolved`
- * at the call site), RAM-verified for both turns actually shipped, NOT a
- * general `sSpriteOrder`/`SortSprites` simulation (unlike the rock-stacking
- * fix, which needed one because 20 rocks churn through slots continuously -
- * these two clones tie only against EACH OTHER, once per turn, and stay tied
- * for their whole lifetime, so a single RAM-confirmed fact per turn fully
- * determines the whole window). A future turn whose clones land in different
- * slots, or where the tie order changes mid-window, would need the real
- * simulation - flagged here rather than assumed to generalize silently.
- */
-function drawDoubleTeamClones(fb: Uint8Array, t: number, pressTick: number, frontClone: "a" | "b" = "b"): boolean {
-  const offsets = doubleTeamCloneOffsets(t, pressTick);
-  if (offsets === null) return false;
-  eraseGrovyleFootprint(fb);
-  const palette = getDoubleTeamClonePalette();
-  const { tileset } = grovyleFrontSprite;
-  const drawA = () => drawSpriteSheetBlended(fb, tileset, palette, GROVYLE_CORNER.x + offsets.a, GROVYLE_CORNER.y, 12, 8, isOpponentHealthboxOpaqueAt);
-  const drawB = () => drawSpriteSheetBlended(fb, tileset, palette, GROVYLE_CORNER.x + offsets.b, GROVYLE_CORNER.y, 12, 8, isOpponentHealthboxOpaqueAt);
-  if (frontClone === "a") {
-    drawB();
-    drawA();
-  } else {
-    drawA();
-    drawB();
-  }
-  return true;
 }
 
 /** BG1's own period for the stat-anim banner: a single 32x32 screen block (`extract-stat-anim.ts`'s own header note - `increase.bin`/`decrease.bin` are each exactly one block, no second-block row offset needed, same situation as `entrySlidePixel`'s BG1 above). */
@@ -6536,9 +6428,9 @@ function drawStatsBanner(
   fb: Uint8Array,
   t: number,
   pressTick: number,
-  startDelay?: number,
-  endDelay?: number,
-  bg1YAnchorDelay?: number,
+  startDelay: number,
+  endDelay: number,
+  bg1YAnchorDelay: number,
 ): boolean {
   const eva = statsBannerEva(t, pressTick, startDelay, endDelay);
   if (eva === null) return false;
@@ -7526,7 +7418,7 @@ function drawActionMenuIdleWindow(fb: Uint8Array, t: number, turn1Resolved: bool
       ? turn4RockSlideResettledBounceTick(t)
       : turn5SubmenuBounceTick(t)
     : turn3Resolved
-      ? turn4SubmenuBounceTick(t)
+      ? turn4SubmenuBounceTick(t, TURN3_OFF_ROCKSLIDE_MENU_REDRAW_DELAY)
       : turn2Resolved
         ? turn3SubmenuBounceTick(t, TURN2_OFF_DRAGONBREATH_MENU_REDRAW_DELAY)
         : turn1Resolved
@@ -7727,14 +7619,14 @@ function drawFightSubmenuWindow(
         return;
       }
       // ISSUES #39 rank-6 slice 1: turn 1 is now Scene-OFF-owned - DOUBLE_TEAM's
-      // own clone-blend (`drawDoubleTeamClones`) is class (c), never renders
+      // own clone-blend (formerly `drawDoubleTeamClones`, deleted entirely in
+      // rank-6 slice 4 once turn 4 also flipped) is class (c), never renders
       // under `HITMARKER_NO_ANIMATIONS` (RAM-confirmed absent the whole
       // window, `TURN1_OFF_ROCKSLIDE_ANIMATION_PROFILE`'s own doc comment
-      // above), so this branch no longer calls it; the generic stat-change
+      // above), so this branch never calls it; the generic stat-change
       // banner is exempt from that substitution and re-times via the
       // `TURN1_OFF_STATS_BANNER_*` constants instead of the shared ON-fit
-      // ones (turn 4's own still-ON `drawStatsBanner`/`drawDoubleTeamClones`
-      // call site, S7 slice I's window, is untouched).
+      // ones.
       if (t - pressTick > TURN1_OFF_STATS_BANNER_END_DELAY) {
         drawRockSlideWindow(fb, t, pressTick);
         return;
@@ -7764,7 +7656,7 @@ function drawFightSubmenuWindow(
     const confirmWaitBounceTick = turn4Resolved
       ? turn5KickoffBounceTick(t, pressTick)
       : turn3Resolved
-        ? turn4KickoffBounceTick(t, pressTick)
+        ? turn4KickoffBounceTick(t, pressTick, TURN3_OFF_ROCKSLIDE_MENU_REDRAW_DELAY)
         : turn2Resolved
           ? turn3KickoffBounceTick(t, pressTick, TURN2_OFF_DRAGONBREATH_MENU_REDRAW_DELAY)
           : turn1Resolved
@@ -7795,7 +7687,7 @@ function drawFightSubmenuWindow(
   const idleWaitBounceTick = turn4Resolved
     ? turn5SubmenuBounceTick(t)
     : turn3Resolved
-      ? turn4SubmenuBounceTick(t)
+      ? turn4SubmenuBounceTick(t, TURN3_OFF_ROCKSLIDE_MENU_REDRAW_DELAY)
       : turn2Resolved
         ? turn3SubmenuBounceTick(t, TURN2_OFF_DRAGONBREATH_MENU_REDRAW_DELAY)
         : turn1Resolved
@@ -9167,93 +9059,78 @@ function drawTurn3RockSlideWindow(fb: Uint8Array, t: number): void {
  */
 const TURN4_CONFIRM_PRESS_TICK = 4925;
 
-/** S7 slice I: turn 4's own reopened submenu's bounce overlay - composes turn 3's own ROCK_SLIDE-resolution resettled remap (`turn3RockSlideResettledBounceTick`, reset at `TURN3_ROCKSLIDE_MENU_REDRAW_DELAY`) with the same `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` DMA-wait correction `turn2SubmenuBounceTick`/`turn3SubmenuBounceTick` already established, one level up the same chain - reopening FIGHT doesn't reset the underlying bounce task any more than turns 2/3's own reopens did. */
-function turn4SubmenuBounceTick(t: number): number {
-  return turn3RockSlideResettledBounceTick(t) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
-}
-
 /**
- * S7 slice I: same "frozen plateau needs a pixel-fit, not the naive live-
- * formula-at-freeze-tick reading" caveat `TURN1/2_KICKOFF_FROZEN_BOUNCE_
- * TICK`'s own docs already flag (turn 3's own case coincided by luck, this
- * one doesn't). Grid-searched directly against a real oracle frame (`npm
- * run compare` on a single-tick scratch trace at 4928, `TURN4_CONFIRM_PRESS_
- * TICK+FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`): candidates
- * `turn4SubmenuBounceTick(TURN4_CONFIRM_PRESS_TICK - d)` for `d` in
- * `[9..15]` are ALL exact 0-diff (a 7-tick-wide plateau, same shape §11's
- * own `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` doc describes), `d` outside that
- * range diverges (`d=8`/`d=7`: 769px isolated to the Onix silhouette;
- * `d=0`: 2360px, both Onix+healthbox) - `d=12` picked as the plateau's
- * center, matching `FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`'s own doc convention.
- */
-const TURN4_KICKOFF_FROZEN_BOUNCE_TICK = turn4SubmenuBounceTick(TURN4_CONFIRM_PRESS_TICK - 12);
-
-function turn4KickoffBounceTick(t: number, pressTick: number): number {
-  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return turn4SubmenuBounceTick(t);
-  return TURN4_KICKOFF_FROZEN_BOUNCE_TICK;
-}
-
-/**
- * S7 slice I: turn 4's own kickoff message, "Foe GROVYLE used\nDOUBLE TEAM!"
- * - the SAME move as turn 1's own (`gCurrentMove`->104 at RAM tick 4931,
- * `TURN4_CONFIRM_PRESS_TICK`+6, matching turn 3's own ENDEAVOR write's
- * identical +6 offset from ITS press). Unlike turn 3 (whose own ROCK_SLIDE
- * half needed a SYNTHETIC press-tick anchor because ENDEAVOR's own
- * resolution time differs from DOUBLE_TEAM's), turn 4's own preceding move
- * IS DOUBLE_TEAM again - this session's own fresh RAM probe (`tools/probe/
- * ram-probe.py`) confirms every one of turn 1's own `pressTick`-relative
- * DOUBLE_TEAM anchors reproduces EXACTLY at `TURN4_CONFIRM_PRESS_TICK`(4925,
- * a REAL press, not synthetic) plus the SAME offset turn 1's own v5 table
- * (§9) uses: evasion-stage flip 4925+40=**4965** (RAM-exact), accuracy roll
- * 4925+391=**5316**, crit roll 4925+415=**5340**, damage-lock
- * 4925+418=**5343** - all four bit-exact against a fresh oracle probe, no
- * fitting needed - so `drawDoubleTeamClones`/`drawStatsBanner` (both already
- * pure `pressTick`-relative functions with no bounce-tick or HP dependency)
- * are reused with ZERO code changes. Only the base battlefield draw needed a
- * turn-4-specific wrapper: turn 1's own `drawTurnKickoffText` hardcodes
- * `turnKickoffBounceTick` and draws Grovyle/Onix at full HP (correct for
- * turn 1, where neither has taken damage yet) - turn 4's own window has
- * Grovyle at 41 and Onix at 88 for its entire span (ROCK_SLIDE hasn't
- * started draining Grovyle yet), so this passes `turn4KickoffBounceTick` and
- * both real HPs through `drawActionMenuIdleContent`'s own existing params
- * instead. Hands off into `drawTurn4RockSlideWindow` past
- * `STATS_BANNER_END_DELAY`, the same shape turn 1's own dispatcher
- * (`drawFightSubmenuWindow`) used inline.
+ * S7 slice I: turn 4's own reopened submenu's bounce overlay - composes turn 3's own ROCK_SLIDE-resolution resettled remap (`turn3RockSlideResettledBounceTick`, reset at `TURN3_ROCKSLIDE_MENU_REDRAW_DELAY`) with the same `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` DMA-wait correction `turn2SubmenuBounceTick`/`turn3SubmenuBounceTick` already established, one level up the same chain - reopening FIGHT doesn't reset the underlying bounce task any more than turns 2/3's own reopens did.
  *
- * Presentation-seam wiring (`docs/presentation-seam-scout.md` §11.3 step 2):
- * the held text itself now reads `TURN4_DOUBLETEAM_KICKOFF_LINE1/2` (resolved
- * from this window's own staged real event stream) instead of the raw
- * `TURN_KICKOFF_LINE1`/`LINE2` literals -- `drawDoubleTeamClones`/
- * `drawStatsBanner`'s own choreography stays byte-for-byte unchanged (no
- * kernel-timestamp input needed for either, §8.4 Option A).
+ * ISSUES #39 rank-6 slice 4: `redrawDelay` defaults to the unchanged ON-fit
+ * `TURN3_ROCKSLIDE_MENU_REDRAW_DELAY` (turn 4's own bounce chain was still
+ * hardcoding this ON value with no override at all, the same cross-turn bug
+ * slices 2/3 each found one epoch upstream) - every call site in this
+ * turn's OWN window passes `TURN3_OFF_ROCKSLIDE_MENU_REDRAW_DELAY` (slice
+ * 3's own OFF re-timing) explicitly instead.
  */
+function turn4SubmenuBounceTick(t: number, redrawDelay: number = TURN3_ROCKSLIDE_MENU_REDRAW_DELAY): number {
+  return turn3RockSlideResettledBounceTick(t, redrawDelay) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+}
+
+/**
+ * ISSUES #39 rank-6 slice 4: same "frozen plateau needs its own fresh
+ * pixel-fit, not assumed to reuse another turn's own anchor" caveat slice 3
+ * flagged (this session's own lesson (b)) - turn 4's own case does NOT
+ * match slice 3's own `pressTick+9` finding (tried first and rejected: a
+ * flat 2360px Onix+healthbox residual the whole freeze window, byte-for-
+ * byte the same magnitude the ON-era doc's own `d=0` citation named for
+ * exactly this failure mode). Grid-searched directly against a real oracle
+ * frame (`npm run compare` on a single-tick scratch trace at 4930, deep in
+ * the frozen window): candidates `turn4SubmenuBounceTick(pressTick - d,
+ * redrawDelay)` for `d` in `[7..15]` are ALL exact 0-diff (a 9-tick-wide
+ * plateau, the same shape §11's own `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` doc
+ * describes), `d` outside that range diverges (`d=6`: 769px; `d=16`:
+ * 1591px; `d=25`: back to the same 2360px failure) - `d=11` picked as the
+ * plateau's center, matching `FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`'s own doc
+ * convention.
+ */
+function turn4KickoffBounceTick(t: number, pressTick: number, redrawDelay: number = TURN3_ROCKSLIDE_MENU_REDRAW_DELAY): number {
+  const freezeTick = pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY;
+  if (t < freezeTick) return turn4SubmenuBounceTick(t, redrawDelay);
+  return turn4SubmenuBounceTick(pressTick - 11, redrawDelay);
+}
+
+/**
+ * ISSUES #39 rank-6 slice 4: turn 4's own DOUBLE_TEAM-half Scene-OFF
+ * re-timing, same treatment slice 1 established for turn 1's own DOUBLE_TEAM
+ * half - `drawDoubleTeamClones`'s entire clone-blend content is class (c),
+ * RAM/pixel-confirmed absent the whole window (fresh combined probe,
+ * `tools/probe/dump-turn4-doubleteam-off.py` against `turn4-doubleteam-
+ * off.json`'s own segments) - never called here; the idle content underneath
+ * renders unchanged instead. The generic stat-change banner
+ * (`drawStatsBanner`) survives (class b), re-anchored to turn 4's own OFF
+ * ticks - RAM-confirmed EXACTLY the SAME offsets turn 1's own OFF window
+ * uses (`TURN4_OFF_STATS_BANNER_*` == `TURN1_OFF_STATS_BANNER_*`
+ * numerically: 80/146/83), a second independent confirmation this whole
+ * DOUBLE_TEAM choreography is fixed post-kickoff overhead, not turn-
+ * specific (the same "no fitting needed" finding the ON-era doc already
+ * made for its own four RAM anchors). Hands off into `drawTurn4RockSlideWindow`
+ * past `TURN4_OFF_STATS_BANNER_END_DELAY`, the same shape turn 1's own
+ * dispatcher (`drawFightSubmenuWindow`) uses inline.
+ */
+const TURN4_OFF_STATS_BANNER_START_DELAY = 80; // RAM tick 5005 (BLDALPHA first write) - pressTick(4925), same relative offset as turn 1's own
+const TURN4_OFF_STATS_BANNER_END_DELAY = 146; // RAM tick 5071 (BLDALPHA back to 0) - pressTick(4925), same relative offset as turn 1's own
+const TURN4_OFF_STATS_BANNER_BG1_Y_ANCHOR_DELAY = 83; // RAM tick 5008 (BG1_Y's own first +3 write) - pressTick(4925), same relative offset as turn 1's own
+const TURN4_OFF_STAT_ROSE_TEXT_DELAY = 156; // banner end(146) + the same 10-tick gap turn 1's own OFF schedule establishes; sha-confirmed hard cut at render 5081 (pressTick+156)
+
 function drawTurn4KickoffText(fb: Uint8Array, t: number, pressTick: number): void {
-  if (t - pressTick > STATS_BANNER_END_DELAY) {
+  if (t - pressTick > TURN4_OFF_STATS_BANNER_END_DELAY) {
     drawTurn4RockSlideWindow(fb, t);
     return;
   }
-  const bounceTick = turn4KickoffBounceTick(t, pressTick);
+  const bounceTick = turn4KickoffBounceTick(t, pressTick, TURN3_OFF_ROCKSLIDE_MENU_REDRAW_DELAY);
   drawActionMenuIdleContent(fb, bounceTick, true, true, anchorPlayerAfterTurn3Hp, true);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawMessageTextLines(fb, TURN4_DOUBLETEAM_KICKOFF_LINE1, TURN4_DOUBLETEAM_KICKOFF_LINE2, turnKickoffTextVisibleChars(t, pressTick));
-  if (!drawDoubleTeamClones(fb, t, pressTick, "a")) drawStatsBanner(fb, t, pressTick);
+  drawStatsBanner(fb, t, pressTick, TURN4_OFF_STATS_BANNER_START_DELAY, TURN4_OFF_STATS_BANNER_END_DELAY, TURN4_OFF_STATS_BANNER_BG1_Y_ANCHOR_DELAY);
 }
 
-/**
- * S7 slice I: text-clear/menu-redraw do NOT land at turn 1's own unchanged
- * `ROCK_SLIDE_TEXT_CLEAR_DELAY`(657)/`ROCK_SLIDE_MENU_REDRAW_DELAY`(664) -
- * pixel-confirmed this session (dense `bin/oracle run` sweep, ticks
- * 5290-5330/5550-5610): the message box goes blank at tick 5580 (689px, the
- * SAME magnitude as turn 1's/turn 3's own text-clear bbox) and hard-cuts to
- * the resettled menu at tick 5586 (5983px, the SAME whole-bottom-half swap
- * every prior turn's own boundary shows). Both **LESS** than turn 1's own
- * naive prediction (unlike turn 3's own `+5`) - turn 4's own HP-drain diff
- * is 40 (41->1), 2 LESS than turn 1's 42 (143->101), consistent with slice
- * H's own finding that this whole post-drain tail is anchored to the
- * drain's own completion tick, not `pressTick` directly (a smaller diff
- * drains faster, so the tail lands earlier, not later).
- */
-const TURN4_ROCKSLIDE_TEXT_CLEAR_DELAY = 655; // pressTick+655 = 5580 (message box blanks, box stays)
 /**
  * Exported for core.ts's own turn-4 reopen gate (S7 slice J) - unlike
  * `TURN3_ROCKSLIDE_REOPEN_GATE_DELAY` (which needed the synthetic-anchor
@@ -9262,48 +9139,92 @@ const TURN4_ROCKSLIDE_TEXT_CLEAR_DELAY = 655; // pressTick+655 = 5580 (message b
  * press (`TURN4_CONFIRM_PRESS_TICK`) - so this delay is directly usable as
  * the reopen gate, the same way `ROCK_SLIDE_MENU_REDRAW_DELAY`/
  * `DRAGONBREATH_MENU_REDRAW_DELAY` already are for turns 1->2/2->3.
+ *
+ * ISSUES #39 rank-6 slice 4: kept at its ON-fit value - a LOGICAL core.ts
+ * gate (turn 5's own real reopen press timing), not rendering, same
+ * "logic gate stays put, only the rendered pixels move earlier" split
+ * slices 1/3 already established for `ROCK_SLIDE_MENU_REDRAW_DELAY`/
+ * `TURN3_ROCKSLIDE_MENU_REDRAW_DELAY`. Turn 5's own still-ON bounce chain
+ * (`turn5SubmenuBounceTick`) also still composes from this default -
+ * `TURN4_OFF_ROCKSLIDE_MENU_REDRAW_DELAY` below is turn 4's own rendering-
+ * only sibling, passed explicitly at turn 4's own call sites only.
  */
-export const TURN4_ROCKSLIDE_MENU_REDRAW_DELAY = 661; // pressTick+661 = 5586 (hard cut to the resettled action menu)
+export const TURN4_ROCKSLIDE_MENU_REDRAW_DELAY = 661; // pressTick+661 = 5586 (hard cut to the resettled action menu) - ON-fit
 
 /**
- * S7 slice I: the battlefield base + rocks + shake + Grovyle's own HP drain
- * for turn 4's ROCK_SLIDE window - identical shape to turn 1's/turn 3's own
- * `drawRockSlideAttack`/`drawTurn3RockSlideAttack`, parameterized by
- * `TURN4_CONFIRM_PRESS_TICK` (a REAL press, no synthetic anchor needed - see
- * `drawTurn4KickoffText`'s own doc) and turn 4's own HP endpoints, now the
- * staged `TURN4_ROCKSLIDE_HP` pair (41 -> 1 - a 1-HP survival, not a faint,
- * §13's own ledger; `turn4RockSlidePresentationStaging.ts`'s own doc).
+ * ISSUES #39 rank-6 slice 4: turn 4's own ROCK_SLIDE-half Scene-OFF
+ * re-timing, same treatment turns 1/3 established (camera shake/target
+ * shake/falling-rock props all class c, deleted; generic hit-flash pair
+ * class b, survives, re-anchored). All pixel/RAM-confirmed this session
+ * against `turn4-rockslide-off.json` (a fresh `bin/oracle run` dense sweep
+ * plus the combined RAM probe, `tools/probe/dump-turn4-doubleteam-off.py`):
+ * hit-flash anchor (RAM tick 5252, first flip render 5253 - the SAME 327
+ * relative offset turn 1's own OFF window uses, a second independent
+ * confirmation), HP-drain start (RAM tick 5287 sentinel, same 362 relative
+ * offset turn 1's own OFF window uses), text-clear (frame 5345, whole
+ * message-box-blank diff) and menu-redraw (frame 5352, whole-bottom-half
+ * swap) - `TURN4_OFF_ROCKSLIDE_MENU_REDRAW_DELAY`(427) matches
+ * `docs/rank6-off-ground-truth.md` §5's own ~427 estimate exactly, and both
+ * boundaries land 2 ticks earlier than turn 1's own OFF pair (422/429),
+ * matching this window's own smaller HP-drain diff (40 vs turn 1's 42 - "a
+ * smaller diff drains faster, so the tail lands earlier" finding the ON-era
+ * doc already made for this exact turn).
+ */
+const TURN4_OFF_ROCKSLIDE_TEXT_DELAY = 265; // "ONIX used\nROCK SLIDE!" hard-cuts in, same 265 relative offset turn 1's own OFF window uses
+const TURN4_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY = 362; // RAM tick 5287 (bar1Curr's own start sentinel) - pressTick(4925), probe-exact
+const TURN4_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY = 420; // sha tick 5345 (message box blanks, box stays)
+const TURN4_OFF_ROCKSLIDE_MENU_REDRAW_DELAY = 427; // sha tick 5352 (hard cut to the resettled action menu)
+const TURN4_OFF_ROCKSLIDE_ANIMATION_PROFILE = {
+  ...ROCK_SLIDE_ANIMATION_PROFILE,
+  hitFlashAnchorAge: 327, // RAM tick 5252 (healthbox wobble's own first +1 write) - pressTick(4925)
+};
+
+/**
+ * ISSUES #39 rank-6 slice 4: the battlefield base + Grovyle's own HP drain
+ * for turn 4's OFF ROCK_SLIDE window - same shape turns 1/3's own
+ * `drawRockSlideAttack`/`drawTurn3RockSlideAttack` establish: the camera
+ * shake (`rockSlideBg3Y`), Grovyle's own target shake
+ * (`rockSlideMonShakeY2`), and the falling-rock props
+ * (`rockSlideDrawOrder`/`rockSlideRockState`) are all class (c),
+ * RAM-confirmed absent the whole window (this window's own doc above) -
+ * dropped entirely. The generic hit-flash pair
+ * (`rockSlideHealthboxWobbleY2`/`rockSlideMonBlinkInvisible`) survives via
+ * `TURN4_OFF_ROCKSLIDE_ANIMATION_PROFILE`'s override.
  */
 function drawTurn4RockSlideAttack(fb: Uint8Array, t: number): void {
   const pressTick = TURN4_CONFIRM_PRESS_TICK;
-  const shiftY = rockSlideBg3Y(t, pressTick);
-  drawStaticBgShiftedY(fb, shiftY);
-  if (!rockSlideMonBlinkInvisible(t, pressTick)) {
-    drawSpriteSheet(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y + rockSlideMonShakeY2(t, pressTick));
+  drawStaticBgShiftedY(fb, 0);
+  if (!rockSlideMonBlinkInvisible(t, pressTick, TURN4_OFF_ROCKSLIDE_ANIMATION_PROFILE)) {
+    drawSpriteSheet(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y);
   }
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
-  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
-  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN4_ROCKSLIDE_HP.from, TURN4_ROCKSLIDE_HP.to);
+  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick, TURN4_OFF_ROCKSLIDE_ANIMATION_PROFILE);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN4_ROCKSLIDE_HP.from, TURN4_ROCKSLIDE_HP.to, TURN4_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
   const opponentContent = opponentHealthboxContentForHp(opponentHp);
   drawSendOutHealthbox(fb, 0, opponentContent);
   if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
   drawMenuHealthboxPlayer(fb, 0);
-  drawMenuIdleBounceOverlay(fb, turn4KickoffBounceTick(t, TURN4_CONFIRM_PRESS_TICK));
-  for (const i of rockSlideDrawOrder(t, pressTick)) {
-    const rock = rockSlideRockState(i, t, pressTick);
-    if (!rock) continue;
-    drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
-  }
+  drawMenuIdleBounceOverlay(fb, turn4KickoffBounceTick(t, TURN4_CONFIRM_PRESS_TICK, TURN3_OFF_ROCKSLIDE_MENU_REDRAW_DELAY));
 }
 
-/** S7 slice I: same "resettled menu re-initializes its own bounce phase fresh at redraw" formula as `turn3RockSlideResettledBounceTick`, keyed off turn 4's own `TURN4_ROCKSLIDE_MENU_REDRAW_DELAY`. */
-function turn4RockSlideResettledBounceTick(t: number): number {
-  return t - (TURN4_CONFIRM_PRESS_TICK + TURN4_ROCKSLIDE_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
+/**
+ * S7 slice I: same "resettled menu re-initializes its own bounce phase
+ * fresh at redraw" formula as `turn3RockSlideResettledBounceTick`, keyed
+ * off turn 4's own menu-redraw delay. `redrawDelay` defaults to the
+ * unchanged ON-fit `TURN4_ROCKSLIDE_MENU_REDRAW_DELAY` (ISSUES #39 rank-6
+ * slice 4): turn 5's own still-ON `turn5SubmenuBounceTick` calls this with
+ * no override and must keep composing from the ON-fit redraw - turn 4's OWN
+ * rendering below passes `TURN4_OFF_ROCKSLIDE_MENU_REDRAW_DELAY` explicitly,
+ * same "override at the turn's own call site only" idiom slice 3
+ * established for `turn3RockSlideResettledBounceTick`.
+ */
+function turn4RockSlideResettledBounceTick(t: number, redrawDelay: number = TURN4_ROCKSLIDE_MENU_REDRAW_DELAY): number {
+  return t - (TURN4_CONFIRM_PRESS_TICK + redrawDelay) + (MENU_IDLE_BLANK_END_TICK + 1);
 }
 
 /** S7 slice I: turn 4's own turn-end resettled action menu - same shape as `drawTurn3RockSlideTurnEndSettledMenu`, keyed off Grovyle's real settled HP (1, a 1-HP survival, now the staged `TURN4_ROCKSLIDE_HP.to`) and Onix's own (unchanged this turn, 88). */
 function drawTurn4RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number): void {
-  const bounceTick = turn4RockSlideResettledBounceTick(t);
+  const bounceTick = turn4RockSlideResettledBounceTick(t, TURN4_OFF_ROCKSLIDE_MENU_REDRAW_DELAY);
   drawActionMenuIdleContent(fb, bounceTick, false);
   drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(TURN4_ROCKSLIDE_HP.to));
   drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurn3Hp, menuIdleBounce(bounceTick).healthboxY2);
@@ -9326,14 +9247,14 @@ function drawTurn4RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number): void {
  */
 function drawTurn4RockSlideWindow(fb: Uint8Array, t: number): void {
   const pressTick = TURN4_CONFIRM_PRESS_TICK;
-  const redrawTick = pressTick + TURN4_ROCKSLIDE_MENU_REDRAW_DELAY;
+  const redrawTick = pressTick + TURN4_OFF_ROCKSLIDE_MENU_REDRAW_DELAY;
   if (t >= redrawTick) {
     drawTurn4RockSlideTurnEndSettledMenu(fb, t);
     return;
   }
-  const statRoseStart = statRoseTextStartTick(pressTick);
-  const rockSlideStart = rockSlideTextStartTick(pressTick);
-  const textClearTick = pressTick + TURN4_ROCKSLIDE_TEXT_CLEAR_DELAY;
+  const statRoseStart = statRoseTextStartTick(pressTick, TURN4_OFF_STAT_ROSE_TEXT_DELAY);
+  const rockSlideStart = rockSlideTextStartTick(pressTick, TURN4_OFF_ROCKSLIDE_TEXT_DELAY);
+  const textClearTick = pressTick + TURN4_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY;
   drawTurn4RockSlideAttack(fb, t);
   drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurn3Hp);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
@@ -9348,11 +9269,11 @@ function drawTurn4RockSlideWindow(fb: Uint8Array, t: number): void {
     } else if (t < rockSlideStart) {
       line1 = STAT_ROSE_LINE1;
       line2 = STAT_ROSE_LINE2;
-      chars = statRoseTextVisibleChars(t, pressTick);
+      chars = statRoseTextVisibleChars(t, pressTick, TURN4_OFF_STAT_ROSE_TEXT_DELAY);
     } else {
       line1 = TURN1_ROCKSLIDE_ATTACK_LINE1;
       line2 = TURN1_ROCKSLIDE_ATTACK_LINE2;
-      chars = rockSlideTextVisibleChars(t, pressTick);
+      chars = rockSlideTextVisibleChars(t, pressTick, TURN4_OFF_ROCKSLIDE_TEXT_DELAY);
     }
     drawMessageTextLines(fb, line1, line2, chars);
   }
@@ -9400,14 +9321,15 @@ function turn5SubmenuBounceTick(t: number): number {
 
 /**
  * S7 slice J: same "frozen plateau needs a pixel-fit, not the naive live-
- * formula-at-freeze-tick reading" caveat `TURN1/2/4_KICKOFF_FROZEN_BOUNCE_
- * TICK`'s own docs already flag. Grid-searched directly against a real
- * oracle frame (`npm run compare` on a single-tick scratch trace at
+ * formula-at-freeze-tick reading" caveat `TURN1/2_KICKOFF_FROZEN_BOUNCE_
+ * TICK`'s own docs (and, one epoch earlier, `turn4KickoffBounceTick`'s own
+ * live-recomputed plateau, ISSUES #39 rank-6 slice 4) already flag. Grid-
+ * searched directly against a real oracle frame (`npm run compare` on a
+ * single-tick scratch trace at
  * `TURN5_CONFIRM_PRESS_TICK+FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`=5962):
  * candidates `turn5SubmenuBounceTick(TURN5_CONFIRM_PRESS_TICK - d)` for `d`
  * in `[-4..4]` are ALL exact 0-diff (a 9-tick-wide plateau, the same shape
- * `TURN4_KICKOFF_FROZEN_BOUNCE_TICK`'s own doc found one epoch earlier,
- * just centered differently), `d` outside that range diverges (`d=-5`/`d=5`:
+ * turn 4's own plateau one epoch earlier), `d` outside that range diverges (`d=-5`/`d=5`:
  * 769px isolated to the Onix silhouette; `d>=14`: 2360px, both Onix+
  * healthbox) - `d=0` picked as the plateau's center (i.e. the live formula
  * evaluated AT the freeze moment itself happens to be correct here, the

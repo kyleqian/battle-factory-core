@@ -13,6 +13,53 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 805 — [bounded worker, 2026-07-31 ~night] ISSUES #39 rank-6 slice 4 (turn 4, FINAL) LANDED — rank 6 FULLY EXECUTED
+
+- **State:** master HEAD is this session's own commit (src+tests+traces) —
+  tree clean, `npx tsc --noEmit` clean, `npm run build` clean, focused
+  vitest (battleScene 226/battleMenu 121/fightSubmenu 57/
+  factoryBattleStartIntro 5/executableFrontierRatchet 6) 415/415 passed (one
+  fewer than 804's baseline — the turn-4-only clone-z-order pin removed,
+  content it tested no longer renders under OFF). Docs commit (this one)
+  follows.
+- **Did:** flipped turn 4's whole DOUBLE_TEAM+ROCK_SLIDE window to
+  Scene-OFF, same class-(c)-delete/class-(b)-retime recipe slices 1-3
+  established (full mechanism detail in ISSUES #39's own rank-6 paragraph).
+  Every one of turn 4's own OFF timing constants landed EXACTLY the SAME
+  numeric value as turn 1's own OFF window (80/146/83/156/327/362) — a
+  second independent confirmation the whole DOUBLE_TEAM+ROCK_SLIDE
+  choreography is fixed post-kickoff overhead; only the two post-drain tail
+  boundaries (420/427) differ, tracking this turn's own smaller HP-drain
+  diff. `drawDoubleTeamClones` (DOUBLE_TEAM never recurs after turn 4) is
+  fully DELETED, not just call-site-edited — a genuine class-(c) mechanism
+  removal — along with its now-dead helpers and four now-fully-dead
+  ON-fit default params/constants slice 1 had introduced exclusively for
+  turn 4's own sake. Found the SAME cross-turn bounce-chain bug slices 2-3
+  each found one epoch upstream, one epoch further (turn 4's own
+  `turn4SubmenuBounceTick`/`turn4KickoffBounceTick` still hardcoding turn
+  3's ON-fit redraw delay with no override param at all), fixed via the
+  same defaulted-param idiom. The frozen bounce-tick plateau needed its own
+  fresh oracle-pixel grid search (this session's own lesson (b) — turn 4's
+  case does NOT match slice 3's own `pressTick+9` finding; real hardware
+  freezes turn 4's own confirm-wait bounce at `pressTick-11`, a 9-tick-wide
+  plateau, grid-search-confirmed). Acceptance: `turn4-doubleteam-off.json`
+  **256/256 EXACT**, `turn4-rockslide-off.json` **256/256 EXACT** — both
+  fully exact, no residual at all; insurance `turn5-rockslide.json`/`turn8-
+  bind-a.json` 256/256 each, zero regression; turns 1-3's own OFF traces
+  re-verified zero regression (turn 3's own pre-existing ISSUES #61
+  residual unchanged). Retired `turn4-{menu,doubleteam,rockslide}.json`
+  (`git rm`). Re-pinned `tests/fightSubmenu.test.ts`'s two turn-4-reopen
+  tests at the fresh OFF trace and `tests/battleScene.test.ts`'s turn-4
+  describe block (clone-z-order pin removed — dead content; stat-rose-text
+  pin re-timed).
+- **Next:** rank 6 (turns 1-4) is now FULLY EXECUTED — nothing left in this
+  rank. The idle-bounce phase family's turn-1-4 share is CLOSED
+  (`docs/idle-bounce-phase-attribution.md` verdict (b)); its remaining
+  share is turns 5-8, which is its own future rank/policy question for the
+  supervisor, not started here. `docs/battle-scene-retirement-inventory.md`
+  names what's next in the broader #39 retirement order.
+- **PAPERCUT:** none this session.
+
 ## 804 — [bounded worker, 2026-07-31 ~night] ISSUES #39 rank-6 slice 3 (turn 3) LANDED — fallback invoked, turn 4 not attempted
 
 - **State:** master HEAD is this session's own commit (src+tests+traces) —

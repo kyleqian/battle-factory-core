@@ -546,13 +546,13 @@ describe("battleMenu: stat-change banner BG1 scroll (docs/battle-menu-notes.md Â
   });
 
   it("flat 0 before the ramp, then +3/tick, matching RAM tick t-1's own gBattle_BG1_Y value exactly (dump-registers.py-class register probe, ticks 2120-2193)", () => {
-    expect(statsBannerBg1Y(2130, pressTick)).toBe(0); // RAM tick 2129 (still 0)
-    expect(statsBannerBg1Y(2131, pressTick)).toBe(3); // RAM tick 2130 (first +3)
-    expect(statsBannerBg1Y(2132, pressTick)).toBe(6); // RAM tick 2131
-    expect(statsBannerBg1Y(2140, pressTick)).toBe(30); // RAM tick 2139
-    expect(statsBannerBg1Y(2150, pressTick)).toBe(60); // RAM tick 2149
-    expect(statsBannerBg1Y(2160, pressTick)).toBe(90); // RAM tick 2159
-    expect(statsBannerBg1Y(2190, pressTick)).toBe(180); // holds at the ramp's own max past teardown
+    expect(statsBannerBg1Y(2130, pressTick, STATS_BANNER_BG1_Y_ANCHOR_DELAY)).toBe(0); // RAM tick 2129 (still 0)
+    expect(statsBannerBg1Y(2131, pressTick, STATS_BANNER_BG1_Y_ANCHOR_DELAY)).toBe(3); // RAM tick 2130 (first +3)
+    expect(statsBannerBg1Y(2132, pressTick, STATS_BANNER_BG1_Y_ANCHOR_DELAY)).toBe(6); // RAM tick 2131
+    expect(statsBannerBg1Y(2140, pressTick, STATS_BANNER_BG1_Y_ANCHOR_DELAY)).toBe(30); // RAM tick 2139
+    expect(statsBannerBg1Y(2150, pressTick, STATS_BANNER_BG1_Y_ANCHOR_DELAY)).toBe(60); // RAM tick 2149
+    expect(statsBannerBg1Y(2160, pressTick, STATS_BANNER_BG1_Y_ANCHOR_DELAY)).toBe(90); // RAM tick 2159
+    expect(statsBannerBg1Y(2190, pressTick, STATS_BANNER_BG1_Y_ANCHOR_DELAY)).toBe(180); // holds at the ramp's own max past teardown
   });
 });
 

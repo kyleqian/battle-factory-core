@@ -281,7 +281,74 @@ worse, even - on unmodified master, unrelated to this window's own
 ENDEAVOR/ROCK_SLIDE content), `turn3-rockslide-off.json` 161/161 EXACT;
 insurance `turn5-rockslide.json`/`turn8-bind-a.json` 256/256 each, zero
 regression. `turn3-{menu,endeavor,rockslide}.json` retired (`git rm`).
-Slice 4 (turn 4) remains next; rank 6 is not yet fully executed. Earlier
+**Slice 4 (turn 4, FINAL) executed 2026-07-31 night:** DOUBLE_TEAM's
+clone-blend (`drawDoubleTeamClones`) and ROCK_SLIDE's camera-shake/target-
+shake/falling-rock props (all class c) deleted from turn 4's own window,
+same treatment slices 1-3 established; the generic stat-change banner and
+the generic ROCK_SLIDE hit-flash pair (class b) survive, re-timed against a
+fresh combined RAM probe (`tools/probe/dump-turn4-doubleteam-off.py`,
+pressTick=4925) plus a dense `bin/oracle run`/sha scout for the text-
+handoff/menu-redraw boundaries. Every one of turn 4's own OFF timing
+constants (stat-banner start/end/BG1-Y-anchor, stat-rose-text delay,
+ROCK_SLIDE hit-flash anchor age, HP-drain start) landed EXACTLY the SAME
+numeric value as turn 1's own OFF window (80/146/83/156/327/362) - a second
+independent confirmation this whole DOUBLE_TEAM+ROCK_SLIDE choreography is
+fixed post-kickoff overhead, not turn-specific; only the two post-drain
+tail boundaries (text-clear 420, menu-redraw 427) differ from turn 1's own
+(422/429), tracking this turn's own smaller HP-drain diff (40 vs 42) per
+the ON-era doc's own already-established "smaller diff drains faster"
+finding. `drawDoubleTeamClones` itself, along with its now-solely-used
+helpers (`getDoubleTeamClonePalette`, `eraseGrovyleFootprint`), is fully
+DELETED (DOUBLE_TEAM never recurs after turn 4 in this canonical battle,
+so it has zero remaining callers) - a genuine class-(c) mechanism removal,
+not just a call-site edit. The four shared functions slice 1 gave optional-
+override params to exclusively for turn 4's own sake
+(`statsBannerEva`/`statsBannerBg1Y`/`statRoseTextStartTick`/
+`statRoseTextVisibleChars`) had those defaults removed (now required
+params) once turn 4 also flipped, since no caller anywhere in the program
+still needs the ON-fit default; their now-dead ON-fit module constants
+(`STATS_BANNER_START_DELAY`/`STATS_BANNER_END_DELAY`/`STAT_ROSE_TEXT_
+DELAY`) were deleted outright. The SAME cross-turn bounce-chain bug slices
+2-3 each found one epoch upstream recurred one epoch further: turn 4's own
+reopened-submenu/confirm-wait bounce chain
+(`turn4SubmenuBounceTick`/`turn4KickoffBounceTick`) still hardcoded turn
+3's ON-fit `TURN3_ROCKSLIDE_MENU_REDRAW_DELAY`(669) with no override
+parameter at all - fixed via the same defaulted-param idiom, threaded
+through the three generic-dispatcher call sites, now passing slice 3's own
+OFF value (525) explicitly. The FROZEN plateau needed its own fresh grid
+search (this session's own lesson (b): turn 4's case does NOT match slice
+3's own `pressTick+9` finding, tried first and rejected - real hardware
+freezes turn 4's own confirm-wait bounce at `pressTick-11`, a 9-tick-wide
+plateau `[pressTick-15..pressTick-7]`, oracle-pixel grid-search-confirmed).
+Acceptance: `turn4-doubleteam-off.json` **256/256 EXACT**, `turn4-rockslide-
+off.json` **256/256 EXACT** (both fully exact, no residual); insurance
+`turn5-rockslide.json`/`turn8-bind-a.json` 256/256 each, zero regression;
+turns 1-3's own OFF traces re-verified zero regression too (turn3's own
+ISSUES #61 residual unchanged, confirmed pre-existing not touched by this
+slice). `turn4-{menu,doubleteam,rockslide}.json` retired (`git rm`).
+Re-pinned `tests/fightSubmenu.test.ts`'s two turn-4-reopen tests at the
+fresh OFF trace (`turn4-doubleteam-off.json` replacing the retired
+`turn4-menu.json`, byte-identical segments) and `tests/battleScene.test.ts`'s
+own turn-4 describe block (the turn-4-only clone-z-order pin tested content
+that no longer renders under OFF - removed rather than re-pinned, since
+there is nothing left to pin; the stat-rose-text-phase pin re-timed at the
+fresh OFF boundary).
+
+**Rank 6 is FULLY EXECUTED** (2026-07-31, all four slices): turn 1
+`01eac159`, turn 2 `4c793748`, turn 3 `2e567316`, turn 4 this landing
+commit. Every one of the ten `docs/rank6-off-ground-truth.md`-banked OFF
+traces across all four turns now renders EXACT or with only the one
+pre-existing, unrelated #61 residual (turn 3); every insurance trace held
+zero regression at every slice. The idle-bounce phase family's turn-1-4
+share (`docs/idle-bounce-phase-attribution.md` verdict (b), predicted
+2026-07-31 evening) is now CLOSED: all four turns' own
+`TURNn_..._MENU_REDRAW_DELAY`-shaped overcounts are re-timed against fresh
+OFF ground truth, matching that doc's own predicted ~22-35% reduction
+shape at every rung (turn 1: 429/664≈65% of ON, turn 2: 292/391≈75%, turn
+3: 525/669≈78%, turn 4: 427/661≈65%). The remaining phase-family share is
+turns 5-8 (their own future rank/policy, not started here).
+
+Earlier
 progress:
 `turn13-sandattack.json`'s complete captured
 SAND_ATTACK content now resolves its kickoff and opponent-target accuracy-fall

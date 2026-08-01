@@ -679,13 +679,17 @@ describe("battleMenu/battleScene: turn 3's ROCK_SLIDE resolution (S7 slice H, do
 });
 
 describe("battleMenu/battleScene: turn 4's FIGHT-submenu reopen (S7 slice I, docs/battle-turn-notes.md §13/§22)", () => {
-  it("replaying turn4-menu.json's own committed button script (reopen, NO nav needed, confirm) lands turn 4's own confirm at tick 4925, cursor persisted at 0 (ROCK_SLIDE, unchanged since turn 3), turn3Resolved flips true", () => {
-    const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn4-menu.json", import.meta.url), "utf8")) as {
+  it("replaying turn4-doubleteam-off.json's own committed button script (reopen, NO nav needed, confirm - byte-identical segments to the retired turn4-menu.json, ISSUES #39 rank-6 slice 4) lands turn 4's own confirm at tick 4925, cursor persisted at 0 (ROCK_SLIDE, unchanged since turn 3), turn3Resolved flips true", () => {
+    const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn4-doubleteam-off.json", import.meta.url), "utf8")) as {
       segments: { frames: number; buttons?: GbaButton[] }[];
     };
     let state = createInitialState({ appRoute: "canonical-recorded" });
-    for (const seg of trace.segments) {
-      for (let i = 0; i < seg.frames; i += 1) state = press(state, seg.buttons ?? []);
+    const target = 4934 - SCENE_TICK0; // turn4-menu.json's own committed capture-range end; the retiring trace's segments continue well past this (through turn 5's own reopen), unlike the deleted turn4-menu.json which stopped here
+    outer: for (const seg of trace.segments) {
+      for (let i = 0; i < seg.frames; i += 1) {
+        state = press(state, seg.buttons ?? []);
+        if (state.battleScene !== null && state.battleScene.elapsed >= target) break outer;
+      }
     }
     // 4893, not 4892: the "last frame of the 2-frame hold" convention every
     // other CONFIRM/OPEN press tick in this dossier already uses (`newKeys`
@@ -723,8 +727,8 @@ describe("battleMenu/battleScene: turn 4's FIGHT-submenu reopen (S7 slice I, doc
     expect(currentPPForActiveMon(moveset, true, false, false)[0]).toBe(9);
   });
 
-  it("engine state stays well-formed and deterministic through the reopen/confirm-registration window - pixel parity lives in tools/compare/traces/turn4-menu.json (44/44, 0 diff)", () => {
-    const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn4-menu.json", import.meta.url), "utf8")) as {
+  it("engine state stays well-formed and deterministic through the reopen/confirm-registration window - pixel parity lives in tools/compare/traces/turn4-doubleteam-off.json (256/256, 0 diff)", () => {
+    const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn4-doubleteam-off.json", import.meta.url), "utf8")) as {
       segments: { frames: number; buttons?: GbaButton[] }[];
     };
     function replay(): EngineState {

@@ -1295,18 +1295,6 @@ export function doubleTeamCloneOffsets(t: number, pressTick: number): { a: numbe
 export const DOUBLE_TEAM_VISIBLE_START_DELAY = 47;
 export const DOUBLE_TEAM_VISIBLE_END_DELAY = 174;
 
-/** First/last trace tick of the stat-change banner's own register-active
- * window (`General_StatsChange`/`StatsChangeAnimation_Step1-3`,
- * `src/battle_anim_utility_funcs.c:415-628`) - `BLDCNT`/`BLDALPHA` first
- * write at `+208` (2127, `eva=0/evb=16`) and both zero out at `+274` (2193,
- * this slice's own committed-trace end tick). RAM/register-exact, no render
- * lag (unlike the clone window above): this session's dense diff shows the
- * first PIXEL-visible tick is `+213` (2132, `eva=1`) purely because `eva=0`
- * is a mathematical no-op, not a lag - `statsBannerEva` naturally reproduces
- * that by construction. */
-export const STATS_BANNER_START_DELAY = 208;
-export const STATS_BANNER_END_DELAY = 274;
-
 /**
  * `BLDALPHA`'s `eva` at trace tick `t` (`evb = 16 - eva` throughout - unlike
  * the clone window's flat 12/8, this session's stride-1 register re-probe
@@ -1327,8 +1315,8 @@ export const STATS_BANNER_END_DELAY = 274;
 export function statsBannerEva(
   t: number,
   pressTick: number,
-  startDelay: number = STATS_BANNER_START_DELAY,
-  endDelay: number = STATS_BANNER_END_DELAY,
+  startDelay: number,
+  endDelay: number,
 ): number | null {
   const start = pressTick + startDelay;
   const end = pressTick + endDelay;
@@ -1374,7 +1362,7 @@ export function statsBannerEva(
  */
 export const STATS_BANNER_BG1_Y_ANCHOR_DELAY = 211;
 
-export function statsBannerBg1Y(t: number, pressTick: number, anchorDelay: number = STATS_BANNER_BG1_Y_ANCHOR_DELAY): number {
+export function statsBannerBg1Y(t: number, pressTick: number, anchorDelay: number): number {
   const d = t - (pressTick + anchorDelay);
   return Math.max(0, Math.min(180, 3 * d));
 }
@@ -1652,15 +1640,12 @@ export const STAT_ROSE_LINE1 = "Foe GROVYLE’s evasiveness";
 export const STAT_ROSE_LINE2 = "rose!";
 export const STAT_ROSE_TEXT_TOTAL = STAT_ROSE_LINE1.length + STAT_ROSE_LINE2.length;
 
-/** Ticks from the A-confirm press to this textbox's own clear+first-glyph tick (RAM/pixel-confirmed 2203, same "clear and draw in the same tick" convention as `TURN_KICKOFF_LINE1`). */
-export const STAT_ROSE_TEXT_DELAY = 284;
-
-export function statRoseTextStartTick(pressTick: number, delay: number = STAT_ROSE_TEXT_DELAY): number {
+export function statRoseTextStartTick(pressTick: number, delay: number): number {
   return pressTick + delay;
 }
 
 /** Visible character count (0..STAT_ROSE_TEXT_TOTAL) at absolute trace tick `t` - same 1-tick/char-including-spaces mechanism as `turnKickoffTextVisibleChars`. */
-export function statRoseTextVisibleChars(t: number, pressTick: number, delay: number = STAT_ROSE_TEXT_DELAY): number {
+export function statRoseTextVisibleChars(t: number, pressTick: number, delay: number): number {
   const start = statRoseTextStartTick(pressTick, delay);
   if (t < start) return 0;
   return Math.min(STAT_ROSE_TEXT_TOTAL, t - start + 1);

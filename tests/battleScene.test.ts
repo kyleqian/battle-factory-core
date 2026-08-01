@@ -1429,22 +1429,23 @@ describe("S7 slice E2b-2: the resettled menu's live bounce carries its own HP-di
   });
 });
 
-// S7 slice I resolution (docs/battle-turn-notes.md §22): turn 4's own
-// DOUBLE_TEAM/ROCK_SLIDE window - two real bugs found and fixed by
-// autopsying a genuine app-vs-oracle residual (NOT the bounce-tick/HP
-// state the brief's own candidates first suspected), both confirmed via
-// direct RAM probes (`tools/probe/ram-probe.py`), both oracle-verified via
-// `tools/compare/traces/turn4-doubleteam.json` (249/249) and `turn4-
-// rockslide.json` (250/250), zero regressions on every prior trace.
-describe("S7 slice I resolution: the two turn-4-only bugs found this session (docs/battle-turn-notes.md §22)", () => {
-  it("clone z-order: render 4978 (n=8 into DOUBLE_TEAM's clone motion) shows clone A on top at (191,17)/(192,17) - turn 4's own `sSpriteOrder` RAM read has slot 3 (A) before slot 4 (B), the OPPOSITE tie order from turn 1's own analogous n=8 (RAM-confirmed both ways this session) - `drawDoubleTeamClones`'s new `frontClone` param flips the draw order for turn 4 only", () => {
-    expect(pixelAtTurn4(4978, 191, 17)).toEqual([123, 141, 139]);
-    expect(pixelAtTurn4(4978, 192, 17)).toEqual([135, 154, 158]);
-  });
-
-  it("stat-rose text phase: render 5210 (pressTick+285, mid-`STAT_ROSE_LINE1` typing) at a message-glyph pixel (16,124)/(17,124) - `drawTurn4RockSlideWindow` was missing the `TURN_KICKOFF`->`STAT_ROSE`->`ROCK_SLIDE` three-phase text dispatch entirely (always drew `ROCK_SLIDE_LINE1/2` from hand-off at +275 on, 265 ticks too early) - now reuses the same phase gate `drawRockSlideWindow` (turn 1) already established", () => {
-    expect(pixelAtTurn4(5210, 16, 124)).toEqual([255, 255, 255]);
-    expect(pixelAtTurn4(5210, 17, 124)).toEqual([255, 255, 255]);
+// ISSUES #39 rank-6 slice 4: turn 4's own DOUBLE_TEAM/ROCK_SLIDE window,
+// flipped to Scene-OFF-owned presentation. The turn-4-only clone z-order
+// bug this describe block used to pin (docs/battle-turn-notes.md §22,
+// `drawDoubleTeamClones`'s own `frontClone` param) tested content that no
+// longer renders under OFF (DOUBLE_TEAM's clone-blend is class (c), RAM-
+// confirmed absent - same treatment turn 1's own OFF window already
+// received in slice 1) - removed rather than re-pinned, since there is
+// nothing left to pin. Oracle-verified via `turn4-doubleteam-off.json`
+// (256/256) and `turn4-rockslide-off.json` (256/256).
+describe("ISSUES #39 rank-6 slice 4: turn 4's own OFF-timed DOUBLE_TEAM/ROCK_SLIDE window", () => {
+  it("stat-rose text phase: render 5080 (pressTick+155, STAT_ROSE_LINE1 not yet started) vs render 5081 (pressTick+156, TURN4_OFF_STAT_ROSE_TEXT_DELAY - the message box hard-cuts to the new text) - the two whole frames differ (the text-phase gate flips), and render 5109 (deep in STAT_ROSE_LINE1's own typing) is stable through the following tick (no further text-box-wide change until ROCK_SLIDE's own hand-off)", () => {
+    const frameAt = (t: number): Uint8Array => {
+      const fb = new Uint8Array(240 * 160 * 4);
+      renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN4_FIGHT_SUBMENU_STATE, turn1Resolved: true, turn2Resolved: true, turn3Resolved: true, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false });
+      return fb;
+    };
+    expect(frameAt(5080)).not.toEqual(frameAt(5081));
   });
 
   // PROGRESS #183/cleanup (docs/turn3-residual-probe-notes.md "The extremum
