@@ -26,7 +26,7 @@ SHUPPET `3f180c13952503be637c5aaa329a8121ef3eaf0d1098c664e15fe381d11502ef`.
 **Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
 `tools/run-mgba-probe.py` twice per legal party; raw `cmp`; focused family plus
 both ratchets **120/120**; TypeScript no-emit and diff checks green; exactly one
-full `npm test` **567 files, 5811 passed + 1 skipped** and one `npm run build`
+full `npm test` **567 files, 5812 passed + 1 skipped** and one `npm run build`
 green. The next source-ranked generated census family is
 **`ANIM_H_SLIDE_WOBBLE`** (8 Factory species).
 
