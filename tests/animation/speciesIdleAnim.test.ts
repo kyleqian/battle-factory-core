@@ -5386,7 +5386,7 @@ describe("speciesIdleAnim", () => {
       expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
     });
 
-    it("preserves accepted families without broadening adjacent selectors", () => {
+    it("preserves accepted families through the subsequently accepted Big and Twice selectors", () => {
       expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
       for (const species of [
         "MAROWAK", "MAGIKARP", "SEEDOT", "MEDITITE", "ILLUMISE",
@@ -5399,7 +5399,7 @@ describe("speciesIdleAnim", () => {
         "ANIM_H_JUMPS_V_STRETCH_TWICE",
       );
       expect(speciesFrontIdleRestOffset("PICHU")).toEqual({ x2: 0, y2: 0 });
-      expect(speciesFrontIdleRestOffset("SHARPEDO")).toBeNull();
+      expect(speciesFrontIdleRestOffset("SHARPEDO")).toEqual({ x2: 0, y2: 0 });
     });
   });
 
@@ -5589,14 +5589,14 @@ describe("speciesIdleAnim", () => {
       expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
     });
 
-    it("accepts only Big while preserving Small and rejecting the adjacent Twice selector", () => {
+    it("preserves Small and Big while recognizing the subsequently accepted Twice selector", () => {
       for (const species of [...V_JUMPS_SMALL_FRONT_SPECIES, ...V_JUMPS_BIG_FRONT_SPECIES]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }
       expect(selectorTables.frontAnimIds.species.SHARPEDO).toBe(
         "ANIM_H_JUMPS_V_STRETCH_TWICE",
       );
-      expect(speciesFrontIdleRestOffset("SHARPEDO")).toBeNull();
+      expect(speciesFrontIdleRestOffset("SHARPEDO")).toEqual({ x2: 0, y2: 0 });
     });
   });
 });
