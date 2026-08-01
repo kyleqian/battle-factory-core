@@ -1,5 +1,30 @@
 # Animation coverage
 
+## Front `ANIM_V_STRETCH` terminal family accepted (2026-07-31)
+
+**Verdict:** rung 2b is complete for the generated 32-species Factory front
+family. `speciesIdleAnim.ts` derives dispatch from
+`send-out-anim-selector-tables.json` and ports `Anim_VerticalStretch`'s 41
+active callbacks, both `sDontFlip` affine branches, C-truncated y2 arithmetic,
+and tick-41 identity/y2/affine cleanup before `WaitAnimEnd`. The accepted
+`ANIM_V_SQUISH_AND_BOUNCE` family and ONIX `ANIM_RAPID_H_HOPS` behavior remain
+pinned without change.
+
+**Evidence:** complete legal Scene-ON parties settle opponent-front QUILAVA
+and HOUNDOUR at **x2=0 / y2=0 / animNum=1 / SpriteCallbackDummy**. Two fresh
+RAM-probe runs per species are byte-identical: QUILAVA receipt SHA-256
+`8a2293ce042d30d3c097a4f127f911ca8a2e3e60db426392a2c02262130add56`,
+HOUNDOUR `613b110bfc757ef5fce03ca6a8098d03c80ce189aa45bafcae033b844e7b89f0`.
+Tier-1 pins source arithmetic, generated dispatch/all 32 species, both paired
+receipts, and both prior-family regressions. Full gates are green: **567 files,
+5716 passed + 1 skipped**, plus the production build.
+
+**Coverage / next:** `ANIMATION_COVERAGE.json` remains byte-identical and
+`npm run animation:coverage` remains **107 exact / 0 partial / 0 staged / 169
+unsupported**. Continue the ordered front-family terminal ladder; no move
+track, probe change, gameplay, engine seam, boundary, barrier, RNG, turn,
+damage, or facility state changed.
+
 ## Front `ANIM_V_SQUISH_AND_BOUNCE` terminal family accepted (2026-07-31)
 
 **Verdict:** rung 2a is complete for the generated 50-species Factory front
