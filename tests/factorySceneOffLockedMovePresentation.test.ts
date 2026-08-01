@@ -310,6 +310,12 @@ describe("Scene-OFF locked-move resolution composition", () => {
     });
     const completedCharge = completedNextCommandHandoff(chargeResolution);
     const intervening = submitMove(charge.transition.state, "player", 0);
+    expect(() => appendBattleResolutionLockedActionContinuation({
+      resolution: completedCharge,
+      transition: intervening.transition,
+      fieldBoundary: createBattleResolutionPresentationRenderView(completedCharge).field,
+      lockedAction: { battler: 1, currentMove: FLY, currentMovePosition: 1 },
+    })).toThrow("no immutable matching action snapshot");
     const resolution = appendBattleResolutionLockedActionContinuation({
       resolution: completedCharge,
       transition: intervening.transition,

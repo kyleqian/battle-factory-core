@@ -1084,6 +1084,34 @@ export type AppendBattleResolutionLockedActionContinuationInput = Readonly<{
   lockedAction: BattleResolutionLockedActionIdentity;
 }>;
 
+/**
+ * `Cmd_printstring` freezes the action globals at every action-owned message.
+ * A continuation need not print `STRINGID_USEDMOVE`: recharge and Bide-family
+ * paths print their own source strings. The frozen action tuple is therefore
+ * the narrow receipt that proves this driven transition resumed the retained
+ * action rather than merely containing another battler's result text.
+ */
+function matchesRetainedLockedActionSnapshot(
+  snapshot: BattleScriptActionMessageSnapshot | undefined,
+  lockedAction: BattleResolutionLockedActionIdentity,
+): boolean {
+  return snapshot !== undefined
+    && Object.isFrozen(snapshot)
+    && snapshot.attacker === lockedAction.battler
+    && snapshot.currentMove === lockedAction.currentMove
+    && snapshot.currentMovePosition === lockedAction.currentMovePosition;
+}
+
+function hasRetainedLockedActionReceipt(
+  events: readonly BattleKernelSemanticEvent[],
+  lockedAction: BattleResolutionLockedActionIdentity,
+): boolean {
+  return events.some(({ payload }) =>
+    payload.kind === "message"
+    && matchesRetainedLockedActionSnapshot(payload.actionSnapshot, lockedAction)
+  );
+}
+
 function appendResolutionSegment(
   resolution: BattleResolutionPresentationState,
   transition: BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>,
@@ -1215,18 +1243,10 @@ export function appendBattleResolutionLockedActionContinuation(
   if (pendingBattler === lockedAction.battler) {
     throw new Error("locked action continuation must cross the opposing battler's command");
   }
-  const ownedAction = transition.events.find(({ payload }) =>
-    payload.kind === "message"
-    && payload.actionSnapshot?.attacker === lockedAction.battler
-    && payload.actionSnapshot.currentMove === lockedAction.currentMove
-    && payload.actionSnapshot.currentMovePosition
-      === lockedAction.currentMovePosition
-  );
-  if (
-    ownedAction?.payload.kind !== "message"
-    || ownedAction.payload.actionSnapshot === undefined
-  ) {
-    throw new Error("locked action continuation receipt does not match its retained action identity");
+  if (!hasRetainedLockedActionReceipt(transition.events, lockedAction)) {
+    throw new Error(
+      "locked action continuation receipt has no immutable matching action snapshot",
+    );
   }
   const segment = appendResolutionSegment(resolution, transition, fieldBoundary);
   return Object.freeze({
