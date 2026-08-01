@@ -1,5 +1,35 @@
 # Animation coverage
 
+## Front `ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2l is exact for all **8 selector mappings / 8
+Factory-reachable species**, with **zero outside-Factory mappings**. JIGGLYPUFF
+is the representative and GYARADOS the sibling; every prior accepted front
+family remains regression-pinned. Move coverage stays **107 exact / 0 partial /
+0 staged / 169 unsupported** and `ANIMATION_COVERAGE.json` is byte-identical at
+SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:911-939,1003-1077,
+1915-2001,3679-3699` proves the normal-front `sDontFlip=TRUE` path,
+`AddNewAnim` defaults, Small rotation=2048/data6/data=0, the normal-speed table,
+affine start, both `TryFlipX` calls, and all 87 active writes across the 8-tick
+first leg plus six 12-tick legs. The generalized source-order reducer pins C
+signed truncation, u16 rotation, every x2/y2/affine write and leg/reset
+transition, then tick 87's identity/x2/y2/`ResetSpriteAfterAnim`/`WaitAnimEnd`
+cleanup. Slow remains rotation=4096/data=1 and SmallSlow remains
+rotation=2048/data=1. Fresh complete legal Scene-ON parties settle both species
+at x2=0/y2=0/animNum=1/`SpriteCallbackDummy`. Paired direct raw outputs are
+byte-identical with no EOF newline: JIGGLYPUFF SHA-256
+`bb3d61bffa2354eac237e0bbdf6ed46ae03a14420ce80da7477ec40d5c0a1ba2`,
+GYARADOS `2642520d74a64f6b47f6cd472e2e9d5e20d75a32e6416c44e218bfd79cdcee74`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per legal party; raw `cmp`; focused family/
+boundary-ratchet tests **102/102**; TypeScript no-emit and diff checks green;
+exactly one full `npm test` **567 files, 5794 passed + 1 skipped** and one
+`npm run build` green. The next generated-census/source-ranked front family is
+**`ANIM_V_SHAKE_TWICE`** (8 Factory species).
+
 ## Front `ANIM_BOUNCE_ROTATE_TO_SIDES_SLOW` terminal family accepted (2026-08-01)
 
 **Verdict / counts:** rung 2k is exact for all **9 selector mappings / 9
