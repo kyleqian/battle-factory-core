@@ -69,7 +69,6 @@ const LEGACY_TRACES_WITHOUT_APP_ROUTE = new Set([
   "summary-page-transition-install.json",
   "summary-skills-to-battle-moves.json",
   "summary-skills-to-info.json",
-  "turn14-fly-miss.json",
   "turn15-sendout-rung2-delayed.json",
   "turn15-sendout-rung2.json",
   "turn15-sendout-rung3-delayed.json",
