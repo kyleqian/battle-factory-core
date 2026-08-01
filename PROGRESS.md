@@ -17,7 +17,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 - **State:** implementation `88fd05f6`; focused owner/menu/scene/ratchet
   suites are **452/452**, standalone TypeScript is green, full `npm test` is
-  green (**571 files, 5,727 passed + 1 skipped**) and production build is
+  green (**571 files, 5,728 passed + 1 skipped**) and production build is
   green.
 - **Did:** mapped both rank-3 mirrors. `turn5KoDismissElapsed` had one writer,
   only its own one-shot guard as a reader, and zero render/continuation/PP/
