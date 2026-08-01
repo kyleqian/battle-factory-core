@@ -1,3 +1,9 @@
+## 816 — [bounded worker, 2026-08-01] rank-7 exact owner mirrors retired
+
+- Archived from the live ledger. `1f276c95` + `c0821a65` retained one
+  charge/strike resolution identity and retired `turn14Resolved` plus
+  `turn15PartySelect`; full live-entry detail remains in git history.
+
 ## 815 — [bounded worker, 2026-08-01] rank-7 opponent locked-action owner landed
 
 - Archived from the live ledger. `fea91d54` retained a completed locked action

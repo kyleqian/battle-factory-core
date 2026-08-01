@@ -971,6 +971,15 @@ pins plus +30 delayed-dismiss variants are byte-identical to clean
 its turn-6 dispatch, PP, and next-reopen consumers need a typed terminal/
 next-command owner before that predecessor can retire.
 
+**#39 rank-2 predecessor checkpoint (2026-08-01):** the analogous
+`turn13Resolved` mirror cannot yet retire. Its existing FLY owner represents
+the already-completed following charge (DRAGON_BREATH **17/20**), not the
+post-turn-13 next-command boundary (**18/20**), and does not own that
+boundary's redraw readiness or persisted slot. The adjacent opponent-faint
+dismiss edge remains live in cursor freeze and switch-in continuation. The
+bounded census and Tier-1 proof are in
+`docs/rank2-turn13resolved-predecessor-audit.md`; no runtime behavior changed.
+
 Build the rules engine from the pinned source's actual structure: generated
 tables plus a typed Battle Script IR/interpreter and source-mapped item,
 ability, end-turn, AI, and switching hooks. Do not grow a collection of

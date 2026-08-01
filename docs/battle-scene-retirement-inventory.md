@@ -66,7 +66,7 @@ The state-field census is complete:
 | `turn1Resolved` … `turn4Resolved` | 2280-2286 | first four menu/result epochs; threaded through menu base, bounce, PP and dispatch |
 | `turn5Resolved` | 2475 | Pidgeotto/Sitrus next-command boundary; still read by turn-6 dispatch, PP reconstruction, and the next reopen gate |
 | `turn6Resolved` … `turn12Resolved` | 2328-2399 | repeated Pidgeotto action/result/menu epochs |
-| `turn13KoDismissElapsed`, `turn13Resolved` | 2415-2436 | Pidgeotto KO and Murkrow switch-in predecessor; FLY charge/strike ownership is now semantic |
+| `opponentFaintDismissElapsed`, `turn13Resolved` | 2559-2575 | Pidgeotto KO and Murkrow switch-in predecessor; the dismiss edge is live, while the next-command handoff/PP owner is still missing (bounded audit: `rank2-turn13resolved-predecessor-audit.md`) |
 | ~~`turn14Resolved`, `turn15PartySelect`~~ | **retired `c0821a65`** | replaced by one retained two-segment resolution identity and its request-owned selector |
 | ~~`turn16Resolved`, `FightSubmenuState.menuRedrawElapsed`, and the four old Turn-17 clocks~~ | **retired `3f850e37` + `d410cfe5` / ranks 9 + 8** | following-resolution owner keeps the pre-terminal redraw edge; terminal owner keeps the faint/result/loss clocks |
 

@@ -170,6 +170,13 @@ nine turn5 pins + five insurance pins held at every step. The dead
 its own one-shot guard, while render/continuation already consumed the staged
 lifecycle. `turn5Resolved` remains because turn-6 dispatch, PP reconstruction,
 and the next reopen gate still read it (same predecessor class as turn13's).
+**Rank-2 predecessor audit (2026-08-01):** `turn13Resolved` is not safely
+replaceable by the existing FLY owner. The predecessor submenu requires
+DRAGON_BREATH **18/20**, while that already-completed charge resolution carries
+**17/20**; the adapter also lacks typed redraw/input-ready and persisted-slot
+facts. Its adjacent `opponentFaintDismissElapsed` is live in cursor freeze and
+switch-in continuation. Exact census and Tier-1 pin:
+`docs/rank2-turn13resolved-predecessor-audit.md`. No runtime field retired.
 Rank 4 is **fully retired** (2026-07-31,
 all 5 slices): `174cc388` ROCK_SLIDE tails; `441ddf83`+`6aba6662`
 turn-7/8 FEATHER_DANCE staged+flipped; `0769ccc6` stat-fall banner

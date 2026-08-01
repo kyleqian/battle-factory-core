@@ -13,6 +13,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 819 — [bounded worker, 2026-08-01] rank-2 predecessor audit checkpoint
+
+- **State:** no production change; Tier-1 predecessor pin is green, standalone
+  TypeScript is green, full `npm test` is green (**571 files, 5,729 passed +
+  1 skipped**), and production build is green.
+- **Did:** mapped `turn13Resolved` and its adjacent KO-dismiss lifecycle. The
+  mirror cannot use the current FLY owner: the predecessor command needs
+  DRAGON_BREATH **18/20**, while that already-completed following charge owns
+  **17/20**. Typed redraw readiness and persisted-slot facts are also absent.
+  `opponentFaintDismissElapsed` is live in cursor freeze and switch-in.
+- **Next:** first publish a typed turn-13 completed-resolution/next-command
+  handoff owning PP, persisted slot, and redraw/input readiness; only then
+  retire `turn13Resolved`. Keep the variable dismiss edge until its lifecycle
+  owns it.
+- **Notes:** Tier-1 pins the 18-versus-17 boundary; full audit is in
+  `docs/rank2-turn13resolved-predecessor-audit.md`. No mechanics/RNG/AI/
+  outcome, runtime presentation, animation, trace/capture list, ratchet,
+  barrier, recording import, or prohibited selector changed.
+
 ## 818 — [bounded worker, 2026-08-01] rank-3 dead KO-dismiss mirror retired
 
 - **State:** implementation `88fd05f6`; focused owner/menu/scene/ratchet
@@ -56,25 +75,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   OFF opponent-recharge evidence remain intact. No mechanics/RNG/AI/outcome,
   animation, trace/capture list, ratchet/barrier, recording import, or
   prohibited selector changed.
-
-## 816 — [bounded worker, 2026-08-01] rank-7 exact owner mirrors retired
-
-- **State:** implementation `1f276c95` + `c0821a65`, docs `574354a4`;
-  focused exact/owner/selector/round/ratchet suites are **480/480**, full
-  `npm test` is green (**570 files, 5,726 passed + 1 skipped**), and the
-  production build is green.
-- **Did:** the historical charge/miss and locked-strike/faint route now keeps
-  the same immutable two-segment resolution identity as the live orchestrator;
-  that owner supplies PP and dispatch phase, publishes request 4, and owns the
-  forced selector through send-out. Deleted `turn14Resolved` and
-  `turn15PartySelect` from production and tests. Ordinary and +30 delayed app
-  replays are byte-identical to `8caad013` across all 13 historical pins
-  (**1,496 captures**); census fell **2,526→2,506 refs**, **33,135→33,125 LOC**.
-- **Next:** resume #39 at rank 8's Turn-16/old-Turn-17 prefix; do not extend
-  the canonical Battle-2 march.
-- **Notes:** `8caad013` also hardens retained recharge/Bide action snapshots;
-  merged OFF evidence `adfb746c`/`49e18075` pins the opponent-FLY lifecycle
-  (124 captures, manifest SHA-256 `afadb6a2e3682b87dc6433de7f9726187d995f2d25cdc4c5941ebae2f49a07d3`).
-  No mechanics/RNG/AI/outcome, animation, trace/capture list, ratchet,
-  barrier, recording import, or timing/move/species/request/battle/turn/tick
-  selector changed.
