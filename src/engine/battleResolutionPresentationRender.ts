@@ -203,6 +203,7 @@ function applyCompletedCommand(
     || command.type === "stat"
     || command.type === "faint"
     || command.type === "party-summary"
+    || command.type === "sprite-visibility"
     || command.type === "turn-end"
   ) return field;
   if (command.type === "switch-in") {
@@ -264,6 +265,7 @@ export function battleResolutionCommandDuration(
     case "status":
     case "faint":
     case "switch-in":
+    case "sprite-visibility":
       return command.timing.minimumFrames;
     case "party-summary":
       return 1;
@@ -335,6 +337,7 @@ export function createBattleResolutionPresentationRenderView(
   let switchIn: BattleResolutionPresentationRenderView["switchIn"] = null;
   let partySummary: BattleResolutionPresentationRenderView["partySummary"] = null;
   const fainted = new Set<0 | 1>();
+  const spriteVisibility = new Map<0 | 1, boolean>([[0, true], [1, true]]);
   const confirmHandoff = state.confirmHandoff === null
     ? null
     : Object.freeze({
@@ -392,6 +395,9 @@ export function createBattleResolutionPresentationRenderView(
     if (completed.type === "message") latestMessage = completed.lines;
     if (completed.type === "faint") fainted.add(completed.battler);
     if (completed.type === "switch-in") fainted.delete(completed.battler);
+    if (completed.type === "sprite-visibility") {
+      spriteVisibility.set(completed.battler, completed.visible);
+    }
     if (completed.type === "party-summary") {
       partySummary = completed.visible
         ? Object.freeze({ battler: completed.battler, states: completed.states })
@@ -526,6 +532,8 @@ export function createBattleResolutionPresentationRenderView(
     } else if (command.type === "switch-in") {
       field = replaceFieldBattler(field, command.battler, command.incoming);
       fainted.delete(command.battler);
+    } else if (command.type === "sprite-visibility") {
+      spriteVisibility.set(command.battler, command.visible);
     }
   } else if (
     state.lifecycle.phase !== "confirm-handoff"
@@ -578,7 +586,8 @@ export function createBattleResolutionPresentationRenderView(
     effect,
     visibility: Object.freeze({
       player: Object.freeze({
-        sprite: !fainted.has(0)
+        sprite: (spriteVisibility.get(0) ?? true)
+          && !fainted.has(0)
           && !(playerHit?.targetInvisible ?? false)
           && !(
             playerFaint?.sink.type === "player-pixel-rows"
@@ -589,7 +598,8 @@ export function createBattleResolutionPresentationRenderView(
           && (playerFaint?.healthboxVisible ?? true),
       }),
       opponent: Object.freeze({
-        sprite: !fainted.has(1)
+        sprite: (spriteVisibility.get(1) ?? true)
+          && !fainted.has(1)
           && !(opponentHit?.targetInvisible ?? false)
           && !(
             opponentFaint?.sink.type === "opponent-tile-rows"

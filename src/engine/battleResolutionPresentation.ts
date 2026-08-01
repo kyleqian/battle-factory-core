@@ -56,6 +56,7 @@ export type BattleFaintTiming =
       healthboxVanishFrame: number;
     }>;
 export type BattleSwitchInTiming = Readonly<{ minimumFrames: 1 }>;
+export type BattleSpriteVisibilityTiming = Readonly<{ minimumFrames: 1 }>;
 export type BattleTurnEndTiming = Readonly<{ minimumFrames: 8 }>;
 
 export type BattleResolutionPresentationCommand =
@@ -126,6 +127,13 @@ export type BattleResolutionPresentationCommand =
       toPartyIndex: BattlePartyIndex;
       incoming: BattleCommandFieldBattler;
       timing: BattleSwitchInTiming;
+    }>
+  | Readonly<{
+      type: "sprite-visibility";
+      eventSequence: number;
+      battler: 0 | 1;
+      visible: boolean;
+      timing: BattleSpriteVisibilityTiming;
     }>
   | Readonly<{
       type: "turn-end";
@@ -481,6 +489,20 @@ function messageLines(
       `out ${incoming.name}!`,
     ]);
   }
+  if (lastMoveAttacker !== null) {
+    const displayed = fieldBattler(field, lastMoveAttacker);
+    return resolveBattleStringLines(messageId, {
+      // Some effect scripts print their action-specific result after a
+      // controller PP receipt without STRINGID_USEDMOVE (two-turn charge is
+      // one source example). Supplying the already-owned attacker token is
+      // generic; templates that do not reference it ignore it.
+      B_ATK_NAME_WITH_PREFIX: () => resolveBattleNameWithPrefix({
+        side: lastMoveAttacker === 0 ? "player" : "opponent",
+        isTrainerBattle: true,
+        nickname: displayed.name,
+      }),
+    });
+  }
   return resolveBattleStringLines(messageId);
 }
 
@@ -547,6 +569,10 @@ export function projectBattleResolutionCommands(
     }
     lastSequence = event.sequence;
     const payload = event.payload;
+    if (payload.kind === "set-battler-pp-data") {
+      lastMoveAttacker = singlesBattler(payload.battler, "PP update");
+      continue;
+    }
     if (payload.kind === "message") {
       sourceLabelOf(event);
       if (payload.messageId === "STRINGID_USEDMOVE") {
@@ -681,6 +707,18 @@ export function projectBattleResolutionCommands(
         before: beforeRules.battlers[battler]!.status1,
         after: payload.status1,
         timing: STATUS_TIMING,
+      }));
+      continue;
+    }
+    if (payload.kind === "set-battler-sprite-visibility") {
+      commands.push(Object.freeze({
+        type: "sprite-visibility",
+        eventSequence: event.sequence,
+        battler: singlesBattler(payload.battler, "sprite visibility"),
+        visible: !payload.invisible,
+        // BtlController_EmitSpriteInvisibility is one controller callback;
+        // the receipt itself owns the relative display edge.
+        timing: Object.freeze({ minimumFrames: 1 as const }),
       }));
       continue;
     }

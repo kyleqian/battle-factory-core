@@ -1107,6 +1107,8 @@ function commitCompletedResolutionCommand(
         ? false
         : command.type === "switch-in" && command.battler === battler
           ? true
+          : command.type === "sprite-visibility" && command.battler === battler
+            ? command.visible
           : boundary.spriteVisible,
     idleEpoch:
       command.type === "switch-in" && command.battler === battler

@@ -468,6 +468,81 @@ describe("battle resolution presentation receipt ownership", () => {
     expect(firstBlink.visibility.opponent.sprite).toBe(false);
   });
 
+  it("projects typed sprite visibility receipts with relative duration and persistent render state", () => {
+    const resolution = createBattleResolutionPresentation(inputFor([
+      event(0, {
+        kind: "set-battler-sprite-visibility",
+        battler: 0,
+        invisible: false,
+      }),
+      event(1, {
+        kind: "set-battler-sprite-visibility",
+        battler: 1,
+        invisible: true,
+      }),
+      event(2, {
+        kind: "message",
+        messageId: "STRINGID_BUTNOTHINGHAPPENED",
+        substitutions: [],
+      }),
+      event(3, {
+        kind: "set-battler-sprite-visibility",
+        battler: 1,
+        invisible: false,
+      }),
+    ], NEXT_COMMAND));
+
+    expect(resolution.segments[0]!.commands).toMatchObject([
+      {
+        type: "sprite-visibility",
+        eventSequence: 0,
+        battler: 0,
+        visible: true,
+        timing: { minimumFrames: 1 },
+      },
+      {
+        type: "sprite-visibility",
+        eventSequence: 1,
+        battler: 1,
+        visible: false,
+        timing: { minimumFrames: 1 },
+      },
+      { type: "message" },
+      {
+        type: "sprite-visibility",
+        eventSequence: 3,
+        battler: 1,
+        visible: true,
+        timing: { minimumFrames: 1 },
+      },
+      { type: "turn-end" },
+    ]);
+    expect(battleResolutionCommandDuration(
+      resolution.segments[0]!.commands[1]!,
+      resolution.field,
+    )).toBe(1);
+    expect(isBattleResolutionCommandComplete(atRenderClock(resolution, 1, 0)))
+      .toBe(true);
+
+    // The ordinary visible receipt is a pass-through and never hides player.
+    expect(createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, 0, 0),
+    ).visibility.player.sprite).toBe(true);
+    expect(createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, 1, 0),
+    ).visibility.opponent.sprite).toBe(false);
+    // The following command observes the persistent hidden state.
+    expect(createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, 2, 0),
+    ).visibility.opponent.sprite).toBe(false);
+    expect(createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, 3, 0),
+    ).visibility.opponent.sprite).toBe(true);
+    expect(createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, 4, 0),
+    ).visibility.opponent.sprite).toBe(true);
+  });
+
   it("retains a genuine player forced-switch boundary behind a button-gated faint lifecycle", () => {
     const forced = Object.freeze({
       kind: "decision-required" as const,
