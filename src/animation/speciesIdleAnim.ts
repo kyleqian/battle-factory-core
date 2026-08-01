@@ -60,6 +60,7 @@ export type SpeciesFrontAnimFamily =
   | "SWING_CONVEX"
   | "SWING_CONCAVE"
   | "V_JUMPS_SMALL"
+  | "V_JUMPS_H_JUMPS"
   | "V_SLIDE"
   | "V_SLIDE_WOBBLE"
   | "V_SQUISH_AND_BOUNCE"
@@ -88,6 +89,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "SWING_CONVEX",
   "SWING_CONCAVE",
   "V_JUMPS_SMALL",
+  "V_JUMPS_H_JUMPS",
   "V_SLIDE",
   "V_SLIDE_WOBBLE",
   "V_SQUISH_AND_BOUNCE",
@@ -238,6 +240,23 @@ export const V_JUMPS_SMALL_FACTORY_FRONT_SPECIES: readonly string[] = Object.fre
 /** There are no `ANIM_V_JUMPS_SMALL` selector mappings outside the Factory pool. */
 export const V_JUMPS_SMALL_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   V_JUMPS_SMALL_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All 5 source selector mappings for `ANIM_V_JUMPS_H_JUMPS`. */
+export const V_JUMPS_H_JUMPS_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_V_JUMPS_H_JUMPS")
+    .map(([species]) => species),
+);
+
+/** Every vertical-jumps/horizontal-jumps mapping is Factory-reachable. */
+export const V_JUMPS_H_JUMPS_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  V_JUMPS_H_JUMPS_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no mappings for this family outside the Factory rental pool. */
+export const V_JUMPS_H_JUMPS_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  V_JUMPS_H_JUMPS_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /** All 10 source selector mappings for `ANIM_H_JUMPS_V_STRETCH`. */
@@ -917,6 +936,20 @@ export interface HorizontalJumpsFrame extends SpeciesIdleOffset {
   readonly normalFrontDontFlip: true;
   readonly tryFlipXCalls: 2;
   readonly callback: "Anim_HorizontalJumps" | "WaitAnimEnd";
+}
+
+export interface VerticalJumpsHorizontalJumpsFrame extends SpeciesIdleOffset {
+  readonly data0: 0;
+  readonly data2: number;
+  /** The source `counter` value before case 2 can rewrite its local copy. */
+  readonly counter: number;
+  readonly divCounter: 0 | 1 | 2 | 3 | 4 | 5 | 6 | null;
+  /** Counter used by the final y2 sine write; case 2 alone rewrites it to 0. */
+  readonly yCounter: number | null;
+  readonly remainder: number | null;
+  readonly x2Written: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly callback: "Anim_VerticalJumpsHorizontalJumps" | "WaitAnimEnd";
 }
 
 /**
@@ -2371,6 +2404,104 @@ export function horizontalJumpsFrameAtTick(
   throw new Error("unreachable HorizontalJumps reducer state");
 }
 
+const VERTICAL_JUMPS_HORIZONTAL_JUMPS_STEP = 12;
+const VERTICAL_JUMPS_HORIZONTAL_JUMPS_LIMIT = 768;
+
+/**
+ * Source-order opponent-front port of `Anim_VerticalJumpsHorizontalJumps`
+ * (`pokemon_animation.c:911-939,1217-1255`). `Task_HandleMonAnimation`
+ * zeroes data2 before installing this callback. Counters 0..768 in steps of
+ * 12 are active and use the ROM's `Sin` helper (`trig.c:514-518`, signed
+ * multiply followed by arithmetic `>> 8`); counter 780 satisfies the strict
+ * `> 768` guard, clears x2/y2, installs `WaitAnimEnd`, and increments data2.
+ *
+ * The switch is intentionally stateful: case 2 rewrites only its local
+ * counter before y2, while switch ranges without an x2 assignment retain the
+ * preceding callback's x2. That includes divCounter 6 at counter 768.
+ * `WaitAnimEnd` then restores `SpriteCallbackDummy` once the OAM anim ends
+ * (`pokemon_animation.c:5540-5544`) without changing these fields.
+ */
+export function verticalJumpsHorizontalJumpsFrameAtTick(
+  ticksSinceStart: number,
+): VerticalJumpsHorizontalJumpsFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let x2 = 0;
+  let y2 = 0;
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    const counter = data2;
+    if (counter > VERTICAL_JUMPS_HORIZONTAL_JUMPS_LIMIT) {
+      x2 = 0;
+      y2 = 0;
+      data2 += VERTICAL_JUMPS_HORIZONTAL_JUMPS_STEP;
+      return {
+        x2,
+        y2,
+        data0: 0,
+        data2,
+        counter,
+        divCounter: null,
+        yCounter: null,
+        remainder: null,
+        x2Written: true,
+        normalFrontDontFlip: true,
+        callback: "WaitAnimEnd",
+      };
+    }
+
+    const divCounter = Math.trunc(counter / 128) as 0 | 1 | 2 | 3 | 4 | 5 | 6;
+    let yCounter = counter;
+    let x2Written = false;
+    switch (divCounter) {
+      case 0:
+      case 1:
+        x2 = 0;
+        x2Written = true;
+        break;
+      case 2:
+        yCounter = 0;
+        break;
+      case 3:
+        x2 = Math.trunc(-((counter % 128) * 8) / 128) + 0;
+        x2Written = true;
+        break;
+      case 4:
+        x2 = Math.trunc((counter % 128) / 8) - 8;
+        x2Written = true;
+        break;
+      case 5:
+        x2 = Math.trunc(-((counter % 128) * 8) / 128) + 8;
+        x2Written = true;
+        break;
+      case 6:
+        break;
+    }
+
+    const remainder = yCounter % 128;
+    y2 = -gbaSin(remainder, 8) + 0;
+    data2 += VERTICAL_JUMPS_HORIZONTAL_JUMPS_STEP;
+
+    if (tick === ticksSinceStart) {
+      return {
+        x2,
+        y2,
+        data0: 0,
+        data2,
+        counter,
+        divCounter,
+        yCounter,
+        remainder,
+        x2Written,
+        normalFrontDontFlip: true,
+        callback: "Anim_VerticalJumpsHorizontalJumps",
+      };
+    }
+  }
+
+  throw new Error("unreachable VerticalJumpsHorizontalJumps reducer state");
+}
+
 /**
  * Source-order port of `Anim_HorizontalVibrate`
  * (`pokemon_animation.c:911-939,1110-1129`). The front-animation task leaves
@@ -2751,6 +2882,15 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = verticalJumpsSmallFrameAtTick(33);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_VerticalJumps_Small did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "V_JUMPS_H_JUMPS": {
+      const terminal = verticalJumpsHorizontalJumpsFrameAtTick(65);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error(
+          "Anim_VerticalJumpsHorizontalJumps did not reach its source terminal cleanup",
+        );
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }

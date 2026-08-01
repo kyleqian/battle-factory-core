@@ -97,6 +97,10 @@ import {
   V_JUMPS_SMALL_FACTORY_FRONT_SPECIES,
   V_JUMPS_SMALL_FRONT_SPECIES,
   V_JUMPS_SMALL_OUTSIDE_FACTORY_FRONT_SPECIES,
+  verticalJumpsHorizontalJumpsFrameAtTick,
+  V_JUMPS_H_JUMPS_FACTORY_FRONT_SPECIES,
+  V_JUMPS_H_JUMPS_FRONT_SPECIES,
+  V_JUMPS_H_JUMPS_OUTSIDE_FACTORY_FRONT_SPECIES,
   V_SLIDE_FACTORY_FRONT_SPECIES,
   V_SLIDE_FRONT_SPECIES,
   V_SLIDE_OUTSIDE_FACTORY_FRONT_SPECIES,
@@ -242,6 +246,12 @@ import marowakRunB from "../../tools/compare/fixtures/sendout-front-marowak-run-
 import illumiseScenario from "../../tools/compare/fixtures/sendout-front-illumise.json" with { type: "json" };
 import illumiseRunA from "../../tools/compare/fixtures/sendout-front-illumise-run-a.json" with { type: "json" };
 import illumiseRunB from "../../tools/compare/fixtures/sendout-front-illumise-run-b.json" with { type: "json" };
+import bulbasaurScenario from "../../tools/compare/fixtures/sendout-front-bulbasaur.json" with { type: "json" };
+import bulbasaurRunA from "../../tools/compare/fixtures/sendout-front-bulbasaur-run-a.json" with { type: "json" };
+import bulbasaurRunB from "../../tools/compare/fixtures/sendout-front-bulbasaur-run-b.json" with { type: "json" };
+import dustoxScenario from "../../tools/compare/fixtures/sendout-front-dustox.json" with { type: "json" };
+import dustoxRunA from "../../tools/compare/fixtures/sendout-front-dustox-run-a.json" with { type: "json" };
+import dustoxRunB from "../../tools/compare/fixtures/sendout-front-dustox-run-b.json" with { type: "json" };
 import {
   KABUTO_FRONT_ANIM_START_OFFSET,
   kabutoHSlideWobble,
@@ -463,6 +473,18 @@ const illumiseRawA = readFileSync(
 const illumiseRawB = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-illumise-run-b.json", import.meta.url),
 );
+const bulbasaurRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-bulbasaur-run-a.json", import.meta.url),
+);
+const bulbasaurRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-bulbasaur-run-b.json", import.meta.url),
+);
+const dustoxRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-dustox-run-a.json", import.meta.url),
+);
+const dustoxRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-dustox-run-b.json", import.meta.url),
+);
 
 describe("speciesIdleAnim", () => {
   describe("rapidHorizontalHopsOffsetAtTick (Anim_RapidHorizontalHops port)", () => {
@@ -520,7 +542,7 @@ describe("speciesIdleAnim", () => {
 
     it("returns null for generated species whose front-anim family isn't ported", () => {
       expect(speciesFrontIdleRestOffset("CHARMELEON")).toBeNull();
-      expect(speciesFrontIdleRestOffset("BULBASAUR")).toBeNull();
+      expect(speciesFrontIdleRestOffset("VENUSAUR")).toBeNull();
     });
 
     it("dispatches the complete generated 32-species V_STRETCH family", () => {
@@ -4783,6 +4805,242 @@ describe("speciesIdleAnim", () => {
       expect(selectorTables.frontAnimIds.species.CLEFABLE).toBe(
         "ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW",
       );
+    });
+  });
+
+  describe("verticalJumpsHorizontalJumpsFrameAtTick (ordinary opponent-front lifecycle)", () => {
+    it("derives exactly five Factory mappings and no outside mappings", () => {
+      const speciesSelectors = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
+      const generated = Object.entries(speciesSelectors)
+        .filter(([, family]) => family === "ANIM_V_JUMPS_H_JUMPS")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(V_JUMPS_H_JUMPS_FRONT_SPECIES).toEqual(generated);
+      expect(V_JUMPS_H_JUMPS_FRONT_SPECIES).toEqual([
+        "BULBASAUR", "VENONAT", "PSYDUCK", "COMBUSKEN", "DUSTOX",
+      ]);
+      expect(V_JUMPS_H_JUMPS_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(V_JUMPS_H_JUMPS_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(V_JUMPS_H_JUMPS_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of V_JUMPS_H_JUMPS_FRONT_SPECIES) {
+        expect(speciesSelectors[species]).toBe("ANIM_V_JUMPS_H_JUMPS");
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("starts with task-zeroed data2 and the ordinary source callback", () => {
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toContain(2);
+      expect(verticalJumpsHorizontalJumpsFrameAtTick(0)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 0,
+        data2: 12,
+        counter: 0,
+        divCounter: 0,
+        yCounter: 0,
+        remainder: 0,
+        x2Written: true,
+        normalFrontDontFlip: true,
+        callback: "Anim_VerticalJumpsHorizontalJumps",
+      });
+    });
+
+    it("pins all 65 active callbacks from counter 0 through 768", () => {
+      let expectedX = 0;
+      for (let tick = 0; tick < 65; tick += 1) {
+        const counter = tick * 12;
+        const divCounter = Math.trunc(counter / 128) as 0 | 1 | 2 | 3 | 4 | 5 | 6;
+        let yCounter = counter;
+        let x2Written = false;
+        switch (divCounter) {
+          case 0:
+          case 1:
+            expectedX = 0;
+            x2Written = true;
+            break;
+          case 2:
+            yCounter = 0;
+            break;
+          case 3:
+            expectedX = Math.trunc(-((counter % 128) * 8) / 128) + 0;
+            x2Written = true;
+            break;
+          case 4:
+            expectedX = Math.trunc((counter % 128) / 8) - 8;
+            x2Written = true;
+            break;
+          case 5:
+            expectedX = Math.trunc(-((counter % 128) * 8) / 128) + 8;
+            x2Written = true;
+            break;
+          case 6:
+            break;
+        }
+        const remainder = yCounter % 128;
+        const expectedY = -Math.floor((8 * GBA_SINE_TABLE_256[remainder]!) / 256) + 0;
+        expect(verticalJumpsHorizontalJumpsFrameAtTick(tick), `counter ${counter}`).toEqual({
+          x2: expectedX,
+          y2: expectedY,
+          data0: 0,
+          data2: counter + 12,
+          counter,
+          divCounter,
+          yCounter,
+          remainder,
+          x2Written,
+          normalFrontDontFlip: true,
+          callback: "Anim_VerticalJumpsHorizontalJumps",
+        });
+      }
+    });
+
+    it("pins every divCounter transition, C truncation, and x2 carry edge", () => {
+      expect([0, 11, 22, 32, 43, 54, 64].map((tick) => {
+        const frame = verticalJumpsHorizontalJumpsFrameAtTick(tick)!;
+        return [tick, frame.counter, frame.divCounter, frame.x2, frame.y2,
+          frame.yCounter, frame.x2Written];
+      })).toEqual([
+        [0, 0, 0, 0, 0, 0, true],
+        [11, 132, 1, 0, 0, 132, true],
+        [22, 264, 2, 0, 0, 0, false],
+        [32, 384, 3, 0, 0, 384, true],
+        [43, 516, 4, -8, 0, 516, true],
+        [54, 648, 5, 8, -1, 648, true],
+        [64, 768, 6, 1, 0, 768, false],
+      ]);
+      expect(verticalJumpsHorizontalJumpsFrameAtTick(33)).toMatchObject({
+        counter: 396, x2: 0,
+      });
+      expect(verticalJumpsHorizontalJumpsFrameAtTick(55)).toMatchObject({
+        counter: 660, x2: 7,
+      });
+      expect(Array.from({ length: 10 }, (_, offset) =>
+        verticalJumpsHorizontalJumpsFrameAtTick(22 + offset)!.y2,
+      )).toEqual(Array(10).fill(0));
+    });
+
+    it("cleans up only after 768 and remains stable after WaitAnimEnd", () => {
+      expect(verticalJumpsHorizontalJumpsFrameAtTick(64)).toMatchObject({
+        counter: 768,
+        data2: 780,
+        x2: 1,
+        y2: 0,
+        callback: "Anim_VerticalJumpsHorizontalJumps",
+      });
+      expect(verticalJumpsHorizontalJumpsFrameAtTick(65)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 0,
+        data2: 792,
+        counter: 780,
+        divCounter: null,
+        yCounter: null,
+        remainder: null,
+        x2Written: true,
+        normalFrontDontFlip: true,
+        callback: "WaitAnimEnd",
+      });
+      expect(verticalJumpsHorizontalJumpsFrameAtTick(66)).toEqual(
+        verticalJumpsHorizontalJumpsFrameAtTick(65),
+      );
+      expect(verticalJumpsHorizontalJumpsFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      [1, bulbasaurScenario],
+      [294, dustoxScenario],
+    ] as const)("stages a complete legal Scene-ON party for opponent species %i", (
+      species, scenario,
+    ) => {
+      expect(scenario).toMatchObject({
+        mode: "mechanicLab",
+        profile: "battle-scene-on",
+        level: 50,
+        challengeNum: 0,
+        trainerId: 50,
+      });
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(species);
+      for (const setId of [...scenario.playerSetIds, ...scenario.opponentSetIds]) {
+        expect(setId).toBeGreaterThanOrEqual(110);
+        expect(setId).toBeLessThanOrEqual(199);
+      }
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "BULBASAUR", bulbasaurRunA, bulbasaurRunB, bulbasaurRawA, bulbasaurRawB, 2, 1,
+        "f91cf65e2d71626c37f7421be61fbc1c909147ceed981b01f0adf51da541f1d8",
+      ],
+      [
+        "DUSTOX", dustoxRunA, dustoxRunB, dustoxRawA, dustoxRawB, 14, 294,
+        "e076416a1cc08913fac56b5b54b1069e93707c0da353d07ccc6b7e3a002d802f",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species, runA, runB, rawA, rawB, animCmdIndex, data2, rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_V_JUMPS_H_JUMPS");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("preserves accepted families without broadening adjacent selectors", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of [
+        "MAROWAK", "MAGIKARP", "SEEDOT", "MEDITITE", "ILLUMISE",
+        "BULBASAUR", "VENONAT", "PSYDUCK", "COMBUSKEN", "DUSTOX",
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+      expect(selectorTables.frontAnimIds.species.PICHU).toBe("ANIM_V_JUMPS_BIG");
+      expect(selectorTables.frontAnimIds.species.SHARPEDO).toBe(
+        "ANIM_H_JUMPS_V_STRETCH_TWICE",
+      );
+      expect(speciesFrontIdleRestOffset("PICHU")).toBeNull();
+      expect(speciesFrontIdleRestOffset("SHARPEDO")).toBeNull();
     });
   });
 });
