@@ -32,8 +32,16 @@ characterized in `docs/trainer-pic-off-window-scout.md` §D. Remainder:
    `isCanonicalAnchorIntro` (`adoptedInitialOpponent !== undefined &&
    battleIndex === 0`): species formula on staged/generated intros,
    calibrated flat lag on the canonical anchor. 715/715 held, YOSHI
-   699/751, 128/128 held. Open remainder: the canonical route's +6 has
-   no named mechanism (route term documented at the code site).
+   699/751, 128/128 held. The +6 is now RAM-NAMED (2026-07-31 evening,
+   `docs/issue56-plus6-route-term.md`): species formula confirmed exact
+   at `PlayerBufferExecCompleted` (tick 1738, 1-tick rounding class),
+   then +3 `CHOOSEACTION`-dispatch idle gap + +3 opponent Factory-AI
+   action-resolution latency = 1744 — a real post-completion mechanism,
+   not a fudge. Constant stays as-is. Open remainder: measure the same
+   `gBattleControllerExecFlags` boundary on a staged `factoryLegal`
+   fixture to learn whether the 3+3 tail is universal (then fold into
+   the shared formula) or canonical-route-specific (then keep the
+   route term with this doc as its derivation).
 2. **Isolated frame 444** (536 RESOLVED 2026-07-31, `7467636e`: real
    onset app-relative 550; root cause was a call-site bug —
    `renderGeneratedBattleStartOpponentRelease`'s pre-player-release
@@ -49,11 +57,18 @@ characterized in `docs/trainer-pic-off-window-scout.md` §D. Remainder:
    frame 1492 per `git log -S` → `0c4dab29`); narrowing to
    `isCanonicalAnchorIntro` restores 715/715 but flips MAGNETON's
    analogous frame 437 to a 10px mismatch in the OPPOSITE direction —
-   not the real discriminator. Next: MAGNETON-side `gSprites[6]` RAM
-   probe around its frame 437 (mirror of the YOSHI technique) to find
-   the true discriminator; frame 444 also carries a second, separate
-   materialize-column-shift defect (`docs/issue56-residual-probe.md`
-   Q1) never in this fix's scope. The idle-menu-bounce family
+   not the real discriminator. MAGNETON-side probe RUN (2026-07-31
+   evening, probe doc Round 3, `11933483`): new structural fact —
+   MAGNETON's bar and icon widgets destroy on TWO different ticks (bar
+   first) while YOSHI and intro-off destroy in sync, so
+   `opponentSummaryExitElapsed`'s single shared `elapsed` clock
+   structurally cannot make MAGNETON pixel-exact both ways; intro-off's
+   real destroy tick RAM-confirmed at abs-1492 but its `rawElapsed`
+   there is unresolved (~5-7-frame app-side anchor disagreement). Next:
+   pin intro-off's real `handoffTick`/`rawElapsed` at abs-1492, then
+   revisit the discriminator with the three-fixture table; frame 444
+   also carries a second, separate materialize-column-shift defect
+   (`docs/issue56-residual-probe.md` Q1) never in this fix's scope. The idle-menu-bounce family
    is **closed as no-app-bug** (2026-07-31, `432e16aa`): the oscillator
    is RAM-proven exact and species-independent, and the decisive
    instrument falsified a constant-offset app bug (deltas +67 YOSHI vs

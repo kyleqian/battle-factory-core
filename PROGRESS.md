@@ -44,6 +44,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Frame 444 also still carries the separate, out-of-scope materialize-
   column-shift defect (`docs/issue56-residual-probe.md` Q1).
 - **PAPERCUT:** none.
+- **SUPERVISOR TRUE FINAL (bonus round 7 verified, ~18:30; this
+  addendum + entry 798's wind-down are the joint resume point):**
+  session ends at **7 rounds / 13 workers (M9-M15, S9-S14) / 0 failed
+  steps**. M15 verified (probe-only per its brief's no-regression-trade
+  rule; supervisor confirmed commit `11933483` docs/probe-only).
+  **S14 (verified, merged): #56's +6 route term RAM-NAMED, verdict
+  (a)** — species ready-lag formula confirmed exact at
+  `PlayerBufferExecCompleted` (1738); the +6 = 3-tick CHOOSEACTION
+  dispatch gap + 3-tick opponent-AI resolution (1744); constant stays;
+  universality check on a staged fixture is the named fold-in
+  gate (`docs/issue56-plus6-route-term.md`). ISSUES #56 items 1+2
+  updated with both results. Final gate on THIS union in the commit
+  message. Next-session ordered list: unchanged from entry 798's
+  wind-down EXCEPT (ii) is now two named sub-steps (intro-off
+  rawElapsed pin -> discriminator; +6 universality probe) and (iv) is
+  DONE pending that universality fold-in decision.
 
 ## 798 — [bounded worker, 2026-07-31 ~17:50] ISSUES #59 FIXED: generated-route opponent stat-drop crash — presentation-seam gap, not kernel
 
