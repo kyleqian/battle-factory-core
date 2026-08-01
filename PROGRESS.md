@@ -15,7 +15,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 819 — [bounded worker, 2026-08-01] rank-2 predecessor audit checkpoint
 
-- **State:** no production change; Tier-1 predecessor pin is green, standalone
+- **State:** evidence checkpoint `14e4fe59`; no production change. Tier-1
+  predecessor pin is green, standalone
   TypeScript is green, full `npm test` is green (**571 files, 5,729 passed +
   1 skipped**), and production build is green.
 - **Did:** mapped `turn13Resolved` and its adjacent KO-dismiss lifecycle. The
