@@ -24,6 +24,11 @@ import {
   H_JUMPS_FRONT_SPECIES,
   H_JUMPS_OUTSIDE_FACTORY_FRONT_SPECIES,
   horizontalVibrateFrameAtTick,
+  horizontalStretchFrameAtTick,
+  HORIZONTAL_STRETCH_VARIANTS,
+  H_STRETCH_FACTORY_FRONT_SPECIES,
+  H_STRETCH_FRONT_SPECIES,
+  H_STRETCH_OUTSIDE_FACTORY_FRONT_SPECIES,
   HORIZONTAL_VIBRATE_VARIANTS,
   H_VIBRATE_FACTORY_FRONT_SPECIES,
   H_VIBRATE_FRONT_SPECIES,
@@ -3210,6 +3215,144 @@ describe("speciesIdleAnim", () => {
         "MANKEY", "WYNAUT", "VILEPLUME", "LOUDRED", "JIGGLYPUFF", "GYARADOS",
         "BLASTOISE", "BAGON", "SEAKING", "SHUPPET", "BUTTERFREE", "CHIMECHO",
         "WIGGLYTUFF", "VIGOROTH", "BEEDRILL", "DUSCLOPS",
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("horizontalStretchFrameAtTick (source lifecycle)", () => {
+    it("derives exactly all 7 selector mappings as Factory-reachable with zero outside", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_H_STRETCH")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(H_STRETCH_FRONT_SPECIES).toEqual(generated);
+      expect(H_STRETCH_FRONT_SPECIES).toEqual([
+        "EKANS", "HITMONLEE", "QUAGSIRE", "SNEASEL", "TYROGUE", "TORCHIC", "ALTARIA",
+      ]);
+      expect(H_STRETCH_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(H_STRETCH_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(H_STRETCH_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of H_STRETCH_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("keeps the three HorizontalStretchFar back selectors distinct and unaccepted", () => {
+      expect(HORIZONTAL_STRETCH_VARIANTS).toEqual({
+        front: { selector: "ANIM_H_STRETCH", accepted: true },
+        far: { selector: "ANIM_H_STRETCH_FAR", accepted: false },
+        farTwice: { selector: "ANIM_H_STRETCH_FAR_TWICE", accepted: false },
+        farSlow: { selector: "ANIM_H_STRETCH_FAR_SLOW", accepted: false },
+      });
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
+    });
+
+    it("pins all 41 active callbacks in exact source order", () => {
+      let data7 = 0;
+      const sin = (index: number, amplitude: number) =>
+        Math.floor((amplitude * GBA_SINE_TABLE_256[index & 0xff]!) / 256);
+      const active = Array.from({ length: 41 }, (_, tick) => {
+        const index2 = Math.trunc((tick * 128) / 40);
+        let index1 = 0;
+        if (tick >= 10 && tick <= 29) {
+          data7 = (data7 + 51) & 0xffff;
+          if (data7 >= 0x8000) data7 -= 0x10000;
+          index1 = data7 & 0xff;
+        }
+        const data4 = (256 - sin(index2, 40)) - sin(index1, 16);
+        const data5 = sin(index2, 16) + 256;
+        const frame = horizontalStretchFrameAtTick(tick)!;
+        expect(frame, `tick ${tick}`).toEqual({
+          x2: 0,
+          y2: 0,
+          data0: 0,
+          data2: tick + 1,
+          data4,
+          data5,
+          data7,
+          index1,
+          index2,
+          xScale: data4,
+          yScale: data5,
+          affineRotation: 0,
+          startedAffine: tick === 0,
+          normalFrontDontFlip: true,
+          resetSpriteAfterAnim: false,
+          callback: "Anim_HorizontalStretch",
+          affineMode: "double",
+        });
+        return frame;
+      });
+
+      expect(active).toHaveLength(41);
+      expect(active[0]!.startedAffine).toBe(true);
+      expect(active.slice(1).every(({ startedAffine }) => !startedAffine)).toBe(true);
+    });
+
+    it("pins data2=9/10/29/30 modulation boundaries and local index1 reset", () => {
+      expect([9, 10, 29, 30].map((tick) => {
+        const frame = horizontalStretchFrameAtTick(tick)!;
+        return [tick, frame.data7, frame.index1, frame.index2, frame.data4, frame.data5];
+      })).toEqual([
+        [9, 0, 0, 28, 231, 266],
+        [10, 51, 51, 32, 213, 267],
+        [29, 1020, 252, 92, 228, 268],
+        [30, 1020, 0, 96, 228, 267],
+      ]);
+    });
+
+    it("pins s16 data7 wrap followed by the source u8 index mask", () => {
+      expect(horizontalStretchFrameAtTick(10, 32760)).toMatchObject({
+        data7: -32725,
+        index1: 43,
+        index2: 32,
+        data4: 215,
+        data5: 267,
+        xScale: 215,
+        yScale: 267,
+        affineRotation: 0,
+      });
+    });
+
+    it("pins tick 41 identity affine, reset, WaitAnimEnd, and data2 increment to 42", () => {
+      expect(horizontalStretchFrameAtTick(41)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 0,
+        data2: 42,
+        data4: 256,
+        data5: 256,
+        data7: 1020,
+        index1: null,
+        index2: null,
+        xScale: 256,
+        yScale: 256,
+        affineRotation: 0,
+        startedAffine: false,
+        normalFrontDontFlip: true,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      });
+      expect(horizontalStretchFrameAtTick(42)).toEqual(horizontalStretchFrameAtTick(41));
+      expect(horizontalStretchFrameAtTick(-1)).toBeNull();
+    });
+
+    it("preserves every previously accepted representative and sibling family", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of [
+        "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN",
+        "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN", "KADABRA", "REGISTEEL",
+        "SQUIRTLE", "SHUCKLE", "SEADRA", "MARSHTOMP", "CHARMANDER", "DELIBIRD",
+        "MANKEY", "WYNAUT", "VILEPLUME", "LOUDRED", "JIGGLYPUFF", "GYARADOS",
+        "BLASTOISE", "BAGON", "SEAKING", "SHUPPET", "BUTTERFREE", "CHIMECHO",
+        "WIGGLYTUFF", "VIGOROTH", "BEEDRILL", "DUSCLOPS", "EKANS", "ALTARIA",
       ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }

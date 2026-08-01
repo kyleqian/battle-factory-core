@@ -47,6 +47,7 @@ export type SpeciesFrontAnimFamily =
   | "GROW_VIBRATE"
   | "H_JUMPS"
   | "H_SLIDE_WOBBLE"
+  | "H_STRETCH"
   | "H_VIBRATE"
   | "H_JUMPS_V_STRETCH"
   | "H_SHAKE"
@@ -68,6 +69,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "GROW_VIBRATE",
   "H_JUMPS",
   "H_SLIDE_WOBBLE",
+  "H_STRETCH",
   "H_VIBRATE",
   "H_JUMPS_V_STRETCH",
   "H_SHAKE",
@@ -366,6 +368,23 @@ export const H_VIBRATE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
 /** There are no normal horizontal-vibrate mappings outside the Factory pool. */
 export const H_VIBRATE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   H_VIBRATE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All 7 source selector mappings for the normal front `ANIM_H_STRETCH`. */
+export const H_STRETCH_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_H_STRETCH")
+    .map(([species]) => species),
+);
+
+/** Every normal horizontal-stretch mapping is Factory-reachable. */
+export const H_STRETCH_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_STRETCH_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no normal horizontal-stretch mappings outside the Factory pool. */
+export const H_STRETCH_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_STRETCH_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 export interface SpeciesIdleOffset {
@@ -726,6 +745,35 @@ export interface HorizontalVibrateFrame extends SpeciesIdleOffset {
   readonly sign: 1 | -1 | null;
   readonly amplitude: 6;
   readonly callback: "Anim_HorizontalVibrate" | "WaitAnimEnd";
+}
+
+/**
+ * The back-sprite selectors share only a name prefix with this front callback;
+ * their `HorizontalStretchFar` implementation is a distinct source family.
+ */
+export const HORIZONTAL_STRETCH_VARIANTS = Object.freeze({
+  front: Object.freeze({ selector: "ANIM_H_STRETCH", accepted: true }),
+  far: Object.freeze({ selector: "ANIM_H_STRETCH_FAR", accepted: false }),
+  farTwice: Object.freeze({ selector: "ANIM_H_STRETCH_FAR_TWICE", accepted: false }),
+  farSlow: Object.freeze({ selector: "ANIM_H_STRETCH_FAR_SLOW", accepted: false }),
+} as const);
+
+export interface HorizontalStretchFrame extends SpeciesIdleOffset {
+  readonly data0: 0;
+  readonly data2: number;
+  readonly data4: number;
+  readonly data5: number;
+  readonly data7: number;
+  readonly index1: number | null;
+  readonly index2: number | null;
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly affineRotation: 0;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "Anim_HorizontalStretch" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
 }
 
 export interface HorizontalShakeFrame extends SpeciesIdleOffset {
@@ -1917,6 +1965,102 @@ export function horizontalVibrateFrameAtTick(
   throw new Error("unreachable HorizontalVibrate reducer state");
 }
 
+const HORIZONTAL_STRETCH_DURATION = 40;
+
+function toS16(value: number): number {
+  const wrapped = value & 0xffff;
+  return wrapped >= 0x8000 ? wrapped - 0x10000 : wrapped;
+}
+
+/**
+ * Source-order port of `Anim_HorizontalStretch`
+ * (`pokemon_animation.c:911-939,1562-1595`) on the normal opponent-front
+ * path. The front-animation task starts data0/data2..data7 at zero and sets
+ * `sDontFlip=TRUE`. Tick 0 enters affine mode. Active ticks 0..40 preserve
+ * the callback-local zero `index1` outside data2=10..29, the s16 data7
+ * addition and u8 mask inside that band, exact GBA sine arithmetic, and the
+ * signed affine scales written by `SetAffineData`. Tick 41 writes identity,
+ * resets the sprite to normal affine mode, installs `WaitAnimEnd`, then still
+ * increments data2 to 42.
+ *
+ * `initialData7` is an arithmetic-test seam only: production dispatch uses
+ * the task-zeroed default. It lets Tier 1 exercise the source's s16 wrap even
+ * though the reachable 20 increments end at 1020.
+ */
+export function horizontalStretchFrameAtTick(
+  ticksSinceStart: number,
+  initialData7 = 0,
+): HorizontalStretchFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let data4 = 0;
+  let data5 = 0;
+  let data7 = toS16(initialData7);
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    const startedAffine = data2 === 0;
+    if (data2 > HORIZONTAL_STRETCH_DURATION) {
+      data2 = toS16(data2 + 1);
+      return {
+        x2: 0,
+        y2: 0,
+        data0: 0,
+        data2,
+        data4,
+        data5,
+        data7,
+        index1: null,
+        index2: null,
+        xScale: 256,
+        yScale: 256,
+        affineRotation: 0,
+        startedAffine: false,
+        normalFrontDontFlip: true,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      };
+    }
+
+    const index2 = Math.trunc((data2 * 128) / HORIZONTAL_STRETCH_DURATION);
+    let index1 = 0;
+    if (data2 >= 10 && data2 <= 29) {
+      data7 = toS16(data7 + 51);
+      index1 = data7 & 0xff;
+    }
+
+    // Normal opponent-front path: Task_HandleMonAnimation sets sDontFlip.
+    data4 = toS16((256 - gbaSin(index2, 40)) - gbaSin(index1, 16));
+    data5 = toS16(gbaSin(index2, 16) + 256);
+    data2 = toS16(data2 + 1);
+
+    if (tick === ticksSinceStart) {
+      return {
+        x2: 0,
+        y2: 0,
+        data0: 0,
+        data2,
+        data4,
+        data5,
+        data7,
+        index1,
+        index2,
+        xScale: data4,
+        yScale: data5,
+        affineRotation: 0,
+        startedAffine,
+        normalFrontDontFlip: true,
+        resetSpriteAfterAnim: false,
+        callback: "Anim_HorizontalStretch",
+        affineMode: "double",
+      };
+    }
+  }
+
+  throw new Error("unreachable HorizontalStretch reducer state");
+}
+
 function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffset {
   switch (family) {
     case "BOUNCE_ROTATE_TO_SIDES_SMALL": {
@@ -1958,6 +2102,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = horizontalSlideWobbleFrameAtTick(101);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_HorizontalSlideWobble did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "H_STRETCH": {
+      const terminal = horizontalStretchFrameAtTick(41);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_HorizontalStretch did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
