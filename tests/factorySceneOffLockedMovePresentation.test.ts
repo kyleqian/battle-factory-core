@@ -4,6 +4,7 @@ import naturesData from "../src/data/gen/natures.json" with { type: "json" };
 import { createBattleCommandPresentation } from "../src/engine/battleCommandPresentation.ts";
 import {
   appendBattleResolutionActionContinuation,
+  appendBattleResolutionLockedActionContinuation,
   createBattleResolutionPresentation,
   type BattleResolutionPresentationState,
 } from "../src/engine/battleResolutionPresentation.ts";
@@ -295,21 +296,36 @@ describe("Scene-OFF locked-move resolution composition", () => {
     });
     const firstPlayer = submitMove(initial, "player", 0);
     const charge = submitMove(firstPlayer.transition.state, "trainer", 0);
-    const intervening = submitMove(charge.transition.state, "player", 0);
-    const sourceRequest = commandRequest(charge.transition.state, "player");
-    const resolution = createBattleResolutionPresentation({
-      sourceRequest,
-      sourceDecision: intervening.decision,
-      beforeRules: charge.transition.state.rules,
-      transition: intervening.transition,
+    const chargeResolution = createBattleResolutionPresentation({
+      sourceRequest: firstPlayer.request,
+      sourceDecision: firstPlayer.decision,
+      beforeRules: initial.rules,
+      transition: charge.transition,
       fieldBoundary: createBattleCommandPresentation(
-        sourceRequest,
-        charge.transition.state.rules.rulesContext,
+        firstPlayer.request,
+        initial.rules.rulesContext,
         0,
       ).field,
       confirmHandoff: { fightDisplayCursor: 0, idleBounceElapsed: 0 },
     });
+    const completedCharge = completedNextCommandHandoff(chargeResolution);
+    const intervening = submitMove(charge.transition.state, "player", 0);
+    const resolution = appendBattleResolutionLockedActionContinuation({
+      resolution: completedCharge,
+      transition: intervening.transition,
+      fieldBoundary: createBattleResolutionPresentationRenderView(completedCharge).field,
+      lockedAction: { battler: 1, currentMove: FLY, currentMovePosition: 0 },
+    });
     const lockedMove = usedMoveEvent(intervening.transition.events, 1);
+    expect(resolution.resolutionId).toBe(chargeResolution.resolutionId);
+    expect(resolution.segments).toHaveLength(2);
+    expect(resolution.segments[0]).toBe(chargeResolution.segments[0]);
+    expect(resolution.segments[1]!.events).toBe(intervening.transition.events);
+    expect(resolution.resolutionId.requestId).not.toBe(
+      commandRequest(charge.transition.state, "player").requestId,
+    );
+    expect(Object.isFrozen(resolution.segments)).toBe(true);
+    expect(Object.isFrozen(resolution.segments[0])).toBe(true);
     expect(lockedMove.actionSnapshot).toEqual({
       attacker: 1,
       currentMove: FLY,
@@ -318,7 +334,7 @@ describe("Scene-OFF locked-move resolution composition", () => {
     expect(intervening.transition.events.some(({ payload }) =>
       payload.kind === "set-battler-pp-data" && payload.battler === 1
     )).toBe(false);
-    expect(resolution.segments[0]!.commands).toContainEqual(expect.objectContaining({
+    expect(resolution.segments[1]!.commands).toContainEqual(expect.objectContaining({
       type: "message",
       lines: ["Foe TAILLOW used", "FLY!"],
     }));

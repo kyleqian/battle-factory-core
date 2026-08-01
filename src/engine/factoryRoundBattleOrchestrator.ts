@@ -42,10 +42,12 @@ import {
 } from "./battleDecisionBoundary.ts";
 import {
   appendBattleResolutionActionContinuation,
+  appendBattleResolutionLockedActionContinuation,
   advanceBattleResolutionConfirmHandoff,
   appendBattleResolutionContinuation,
   createBattleResolutionPresentation,
   type BattleResolutionPresentationCommand,
+  type BattleResolutionLockedActionIdentity,
   type BattleResolutionPresentationState,
 } from "./battleResolutionPresentation.ts";
 import {
@@ -70,6 +72,7 @@ import { mapStatus1ToBattleStatus } from "./battleResolutionAdapter.ts";
 import {
   createFreshFactoryBattle,
 } from "./factoryBattleStart.ts";
+import { BATTLE_SCRIPT_STATUS2_MASKS } from "./battleScriptSourceConstants.ts";
 import {
   reduceFactoryFullTurnDecision,
   type FactoryFullTurnDecisionRules,
@@ -230,6 +233,11 @@ export type FactoryBattleDriveReceipt = Readonly<{
   boundary: BattleBoundary;
 }>;
 
+export type FactoryRetainedLockedActionPresentationOwner = Readonly<{
+  action: BattleResolutionLockedActionIdentity;
+  resolution: BattleResolutionPresentationState;
+}>;
+
 export type FactoryRoundBattleOrchestratorState = Readonly<{
   config: FactoryRoundBattleOrchestratorConfig;
   facilityState: FactoryFacilityState;
@@ -243,6 +251,13 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
   battleCommandPresentation: BattleCommandPresentationState | null;
   /** Submitted command lifecycle, retained until its visible resolution ends. */
   battleResolutionPresentation: BattleResolutionPresentationState | null;
+  /**
+   * An opposing locked action may outlive its charge presentation while the
+   * player owns a real intervening command request. Its battler/move/slot
+   * identity reclaims the immutable resolution after that command submits.
+   */
+  retainedLockedActionPresentationOwner:
+    FactoryRetainedLockedActionPresentationOwner | null;
   /** Adjacent voluntary selector while the command UI owns party-handoff. */
   battlePartySelect: BattlePartySelectState | null;
   /** Request-owned forced selector, created only on faint-message dismissal. */
@@ -502,6 +517,7 @@ export function createFactoryRoundBattleOrchestrator(
     battle: null,
     battleCommandPresentation: null,
     battleResolutionPresentation: null,
+    retainedLockedActionPresentationOwner: null,
     battlePartySelect: null,
     battleForcedPartySelect: null,
     moveSelectionCursors: RESET_MOVE_SELECTION_CURSORS,
@@ -643,6 +659,7 @@ function startCurrentBattle(
     battle: started,
     battleCommandPresentation,
     battleResolutionPresentation: null,
+    retainedLockedActionPresentationOwner: null,
     battlePartySelect: null,
     battleForcedPartySelect: null,
     moveSelectionCursors,
@@ -785,6 +802,7 @@ function finishBattle(
     battle: null,
     battleCommandPresentation: null,
     battleResolutionPresentation: null,
+    retainedLockedActionPresentationOwner: null,
     battlePartySelect: null,
     battleForcedPartySelect: null,
     battlePresentationBoundaries: null,
@@ -832,7 +850,7 @@ function createBattlePresentationBoundaries(
       field,
       displayedHp: field.hp,
       displayedStatus1: active.status1,
-      spriteVisible: true,
+      spriteVisible: prior === undefined || switched ? true : prior.spriteVisible,
       idleEpoch: prior === undefined || switched ? 0 : prior.idleEpoch,
       moveCursor: switched ? 0 : cursors[battler]!,
     });
@@ -963,6 +981,7 @@ function installDriveReceiptImmediately(
     battle: receipt.battle,
     battleCommandPresentation,
     battleResolutionPresentation: null,
+    retainedLockedActionPresentationOwner: null,
     battlePartySelect: null,
     battleForcedPartySelect: null,
     moveSelectionCursors,
@@ -1070,25 +1089,64 @@ function beginCommandResolution(
   const receipt = driveTrainerBoundary(state, transition, history, {
     stopAtFollowupTrainerBoundary: true,
   });
-  const resolution = createBattleResolutionPresentation({
-    sourceRequest: presentation.request,
-    sourceDecision: presentation.pendingDecision,
-    beforeRules: state.battle.rules,
-    transition: transitionFromDriveReceipt(receipt),
-    fieldBoundary: presentation.field,
-    confirmHandoff: Object.freeze({
-      fightDisplayCursor: presentation.fightDisplayCursor,
-      idleBounceElapsed: presentation.idleBounceElapsed,
-    }),
-    opponentTrainer: factoryTrainerPresentationForOpponent(
-      state.round.rules.currentOpponent,
-    ),
-  });
+  const retained = state.retainedLockedActionPresentationOwner;
+  const drivenTransition = transitionFromDriveReceipt(receipt);
+  let resolution: BattleResolutionPresentationState;
+  if (retained === null) {
+    resolution = createBattleResolutionPresentation({
+      sourceRequest: presentation.request,
+      sourceDecision: presentation.pendingDecision,
+      beforeRules: state.battle.rules,
+      transition: drivenTransition,
+      fieldBoundary: presentation.field,
+      confirmHandoff: Object.freeze({
+        fightDisplayCursor: presentation.fightDisplayCursor,
+        idleBounceElapsed: presentation.idleBounceElapsed,
+      }),
+      opponentTrainer: factoryTrainerPresentationForOpponent(
+        state.round.rules.currentOpponent,
+      ),
+    });
+  } else {
+    if (
+      retained.resolution.pendingBattle !== state.battle
+      || retained.resolution.pendingBoundary.kind !== "decision-required"
+      || retained.resolution.pendingBoundary.request.kind !== "command"
+      || retained.resolution.pendingBoundary.request.requestId
+        !== presentation.request.requestId
+      || retained.resolution.pendingBoundary.request.side
+        !== presentation.request.side
+      || retained.resolution.pendingBoundary.request.battler
+        !== presentation.request.battler
+    ) {
+      return fail("retained locked action owner does not match the intervening command");
+    }
+    const rules = state.battle.rules.rulesContext;
+    const action = retained.action;
+    const activeLock = rules.battlers[action.battler]!.status2 & (
+      BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
+      | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_RECHARGE
+    );
+    if (
+      activeLock === 0
+      || rules.lockedMoves[action.battler] !== action.currentMove
+      || rules.chosenMovePositions[action.battler] !== action.currentMovePosition
+    ) {
+      return fail("retained locked action identity no longer matches the kernel");
+    }
+    resolution = appendBattleResolutionLockedActionContinuation({
+      resolution: retained.resolution,
+      transition: drivenTransition,
+      fieldBoundary: presentation.field,
+      lockedAction: action,
+    });
+  }
   return Object.freeze({
     ...state,
     battle: receipt.battle,
     battleCommandPresentation: null,
     battleResolutionPresentation: resolution,
+    retainedLockedActionPresentationOwner: null,
     battlePartySelect: null,
     battleForcedPartySelect: null,
     battlePresentationBoundaries: applyReceiptPpToBoundaries(
@@ -1215,7 +1273,6 @@ function settledCommandForResolutionHandoff(
       boundary.partyIndex !== field.partyIndex
       || boundary.displayedHp !== field.hp
       || boundary.displayedStatus1 !== active.status1
-      || !boundary.spriteVisible
     ) {
       return fail(
         `resolution handoff battler ${battler} display does not match the genuine next boundary`,
@@ -1235,6 +1292,43 @@ function settledCommandForResolutionHandoff(
       boundaries,
     ),
   });
+}
+
+function retainedLockedActionOwnerAtCommandBoundary(
+  resolution: BattleResolutionPresentationState,
+): FactoryRetainedLockedActionPresentationOwner | null {
+  const pending = resolution.pendingBoundary;
+  if (
+    pending.kind !== "decision-required"
+    || pending.request.kind !== "command"
+  ) return null;
+  const rules = resolution.pendingBattle.rules.rulesContext;
+  for (const battler of [0, 1] as const) {
+    if (battler === pending.request.battler) continue;
+    const statusLock = rules.battlers[battler]!.status2 & (
+      BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
+      | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_RECHARGE
+    );
+    const currentMove = rules.lockedMoves[battler]!;
+    const currentMovePosition = rules.chosenMovePositions[battler]!;
+    if (statusLock === 0 || currentMove === 0) continue;
+    if (
+      !Number.isInteger(currentMovePosition)
+      || currentMovePosition < 0
+      || currentMovePosition > 3
+    ) {
+      return fail(`locked battler ${battler} has invalid move position ${currentMovePosition}`);
+    }
+    return Object.freeze({
+      action: Object.freeze({
+        battler,
+        currentMove,
+        currentMovePosition: currentMovePosition as 0 | 1 | 2 | 3,
+      }),
+      resolution,
+    });
+  }
+  return null;
 }
 
 /**
@@ -1401,7 +1495,6 @@ export function advanceFactoryRoundBattleResolution(
       return fail("forced-party handoff has no request-owned selector");
     }
     if (selector.sendOutElapsed !== null) {
-      if (resolution.segments.length !== 1) return state;
       const history = state.aiHistory;
       if (history === null) {
         return fail("forced-party continuation requires live AI history");
@@ -1581,6 +1674,8 @@ export function advanceFactoryRoundBattleResolution(
     battle: resolution.pendingBattle,
     battleCommandPresentation: handoff.presentation,
     battleResolutionPresentation: null,
+    retainedLockedActionPresentationOwner:
+      retainedLockedActionOwnerAtCommandBoundary(advanced),
     battlePresentationBoundaries: handoff.boundaries,
   });
 }

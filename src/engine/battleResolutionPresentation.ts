@@ -1070,6 +1070,20 @@ export type AppendBattleResolutionActionContinuationInput = Readonly<{
   fieldBoundary: BattleResolutionDisplayedField;
 }>;
 
+export type BattleResolutionLockedActionIdentity = Readonly<{
+  battler: 0 | 1;
+  currentMove: number;
+  currentMovePosition: 0 | 1 | 2 | 3;
+}>;
+
+export type AppendBattleResolutionLockedActionContinuationInput = Readonly<{
+  resolution: BattleResolutionPresentationState;
+  transition: BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>;
+  /** The completed charge segment's frozen display field. */
+  fieldBoundary: BattleResolutionDisplayedField;
+  lockedAction: BattleResolutionLockedActionIdentity;
+}>;
+
 function appendResolutionSegment(
   resolution: BattleResolutionPresentationState,
   transition: BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>,
@@ -1167,6 +1181,60 @@ export function appendBattleResolutionActionContinuation(
       phase: "presenting" as const,
       phaseElapsed: 0,
     }),
+    field: fieldBoundary,
+    pendingBoundary: transition.state.boundary,
+    pendingBattle: transition.state,
+    forcedRequest:
+      transition.state.boundary.kind === "decision-required"
+      && transition.state.boundary.request.kind === "forced-switch"
+      && transition.state.boundary.request.side === "player"
+        ? transition.state.boundary.request
+        : null,
+  });
+}
+
+/**
+ * Reclaims a resolution owner after the opposing battler's locked action has
+ * survived a genuine command request. The command request remains a distinct
+ * kernel/UI identity; only the immutable charge and strike presentation
+ * segments share an owner.
+ */
+export function appendBattleResolutionLockedActionContinuation(
+  input: AppendBattleResolutionLockedActionContinuationInput,
+): BattleResolutionPresentationState {
+  const { resolution, transition, fieldBoundary, lockedAction } = input;
+  const pending = resolution.pendingBoundary;
+  if (
+    resolution.forcedRequest !== null
+    || pending.kind !== "decision-required"
+    || pending.request.kind !== "command"
+  ) {
+    throw new Error("locked action continuation requires a genuine command boundary");
+  }
+  const pendingBattler = pending.request.battler;
+  if (pendingBattler === lockedAction.battler) {
+    throw new Error("locked action continuation must cross the opposing battler's command");
+  }
+  const ownedAction = transition.events.find(({ payload }) =>
+    payload.kind === "message"
+    && payload.actionSnapshot?.attacker === lockedAction.battler
+    && payload.actionSnapshot.currentMove === lockedAction.currentMove
+    && payload.actionSnapshot.currentMovePosition
+      === lockedAction.currentMovePosition
+  );
+  if (
+    ownedAction?.payload.kind !== "message"
+    || ownedAction.payload.actionSnapshot === undefined
+  ) {
+    throw new Error("locked action continuation receipt does not match its retained action identity");
+  }
+  const segment = appendResolutionSegment(resolution, transition, fieldBoundary);
+  return Object.freeze({
+    ...resolution,
+    segments: Object.freeze([...resolution.segments, segment]),
+    segmentIndex: resolution.segments.length,
+    commandIndex: 0,
+    lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 0 }),
     field: fieldBoundary,
     pendingBoundary: transition.state.boundary,
     pendingBattle: transition.state,
