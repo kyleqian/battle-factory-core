@@ -46,6 +46,7 @@ export type SpeciesFrontAnimFamily =
   | "H_SHAKE"
   | "RAPID_H_HOPS"
   | "SWING_CONCAVE"
+  | "V_SLIDE"
   | "V_SQUISH_AND_BOUNCE"
   | "V_SQUISH_AND_BOUNCE_SLOW"
   | "V_STRETCH"
@@ -57,6 +58,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "H_SHAKE",
   "RAPID_H_HOPS",
   "SWING_CONCAVE",
+  "V_SLIDE",
   "V_SQUISH_AND_BOUNCE",
   "V_SQUISH_AND_BOUNCE_SLOW",
   "V_STRETCH",
@@ -170,6 +172,23 @@ export const SWING_CONCAVE_FACTORY_FRONT_SPECIES: readonly string[] = Object.fre
 /** There are no `ANIM_SWING_CONCAVE` selector mappings outside the Factory pool. */
 export const SWING_CONCAVE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   SWING_CONCAVE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All 10 source selector mappings for `ANIM_V_SLIDE`. */
+export const V_SLIDE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_V_SLIDE")
+    .map(([species]) => species),
+);
+
+/** Every `ANIM_V_SLIDE` mapping is reachable through Factory rentals. */
+export const V_SLIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  V_SLIDE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no `ANIM_V_SLIDE` selector mappings outside the Factory pool. */
+export const V_SLIDE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  V_SLIDE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 export interface SpeciesIdleOffset {
@@ -449,6 +468,15 @@ export interface SwingConcaveFrame extends SpeciesIdleOffset {
   readonly affineMode: "double" | "normal";
 }
 
+export interface VerticalSlideFrame extends SpeciesIdleOffset {
+  readonly data0: 40;
+  readonly data2: number;
+  readonly index: number | null;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXCalls: 2;
+  readonly callback: "VerticalSlide" | "WaitAnimEnd";
+}
+
 const SWING_CONCAVE_DURATION = 100;
 
 function tryFlipX(x2: number, dontFlip: boolean): number {
@@ -542,6 +570,66 @@ export function swingConcaveFrameAtTick(ticksSinceStart: number): SwingConcaveFr
   }
 
   throw new Error("unreachable SwingConcave reducer state");
+}
+
+const VERTICAL_SLIDE_DURATION = 40;
+
+/**
+ * Source-order port of `Anim_VerticalSlide` / `VerticalSlide`
+ * (`pokemon_animation.c:1156-1180`) on the normal opponent-front path.
+ * The initializer sets data0=40 and invokes `VerticalSlide` immediately.
+ * `Task_HandleMonAnimation` has already set `sDontFlip=TRUE`, so both
+ * source-order `TryFlipX` calls execute without changing x2. Active ticks
+ * 0..40 use C-truncated index arithmetic and write the negated sine to y2;
+ * tick 41 observes the strict data2 > data0 guard, clears y2, installs
+ * `WaitAnimEnd`, performs the final data2 increment, and executes the second
+ * `TryFlipX` call.
+ */
+export function verticalSlideFrameAtTick(ticksSinceStart: number): VerticalSlideFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let x2 = 0;
+  let y2 = 0;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    x2 = tryFlipX(x2, true);
+    if (data2 > VERTICAL_SLIDE_DURATION) {
+      y2 = 0;
+      data2 += 1;
+      x2 = tryFlipX(x2, true);
+      return {
+        x2,
+        y2,
+        data0: VERTICAL_SLIDE_DURATION,
+        data2,
+        index: null,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        callback: "WaitAnimEnd",
+      };
+    }
+
+    const index = Math.trunc((data2 * 384) / VERTICAL_SLIDE_DURATION) % 256;
+    y2 = -gbaSin(index, 6) + 0;
+    data2 += 1;
+    x2 = tryFlipX(x2, true);
+
+    if (tick === ticksSinceStart) {
+      return {
+        x2,
+        y2,
+        data0: VERTICAL_SLIDE_DURATION,
+        data2,
+        index,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        callback: "VerticalSlide",
+      };
+    }
+  }
+
+  throw new Error("unreachable VerticalSlide reducer state");
 }
 
 const GROW_VIBRATE_DURATION = 40;
@@ -725,6 +813,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = swingConcaveFrameAtTick(101);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_SwingConcave did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "V_SLIDE": {
+      const terminal = verticalSlideFrameAtTick(41);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_VerticalSlide did not reach its source terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }

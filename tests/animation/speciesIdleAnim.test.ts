@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import probe from "../../src/data/gen/onix-front-idle-probe.json" with { type: "json" };
 import {
   growVibrateFrameAtTick,
@@ -16,6 +17,7 @@ import {
   SWING_CONCAVE_FACTORY_FRONT_SPECIES,
   SWING_CONCAVE_FRONT_SPECIES,
   SWING_CONCAVE_OUTSIDE_FACTORY_FRONT_SPECIES,
+  verticalSlideFrameAtTick,
   verticalShakeFrameAtTick,
   verticalSquishBounceFrameAtTick,
   verticalSquishBounceSlowFrameAtTick,
@@ -25,6 +27,9 @@ import {
   V_SHAKE_FACTORY_FRONT_SPECIES,
   V_SHAKE_FRONT_SPECIES,
   V_SHAKE_OUTSIDE_FACTORY_FRONT_SPECIES,
+  V_SLIDE_FACTORY_FRONT_SPECIES,
+  V_SLIDE_FRONT_SPECIES,
+  V_SLIDE_OUTSIDE_FACTORY_FRONT_SPECIES,
   V_STRETCH_FRONT_SPECIES,
 } from "../../src/animation/speciesIdleAnim.ts";
 import frontierMons from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
@@ -57,6 +62,12 @@ import squirtleRunA from "../../tools/compare/fixtures/sendout-front-squirtle-ru
 import squirtleRunB from "../../tools/compare/fixtures/sendout-front-squirtle-run-b.json" with { type: "json" };
 import shuckleRunA from "../../tools/compare/fixtures/sendout-front-shuckle-run-a.json" with { type: "json" };
 import shuckleRunB from "../../tools/compare/fixtures/sendout-front-shuckle-run-b.json" with { type: "json" };
+import seadraScenario from "../../tools/compare/fixtures/sendout-front-seadra.json" with { type: "json" };
+import seadraRunA from "../../tools/compare/fixtures/sendout-front-seadra-run-a.json" with { type: "json" };
+import seadraRunB from "../../tools/compare/fixtures/sendout-front-seadra-run-b.json" with { type: "json" };
+import marshtompScenario from "../../tools/compare/fixtures/sendout-front-marshtomp.json" with { type: "json" };
+import marshtompRunA from "../../tools/compare/fixtures/sendout-front-marshtomp-run-a.json" with { type: "json" };
+import marshtompRunB from "../../tools/compare/fixtures/sendout-front-marshtomp-run-b.json" with { type: "json" };
 
 const squirtleRawA = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-squirtle-run-a.json", import.meta.url),
@@ -69,6 +80,18 @@ const shuckleRawA = readFileSync(
 );
 const shuckleRawB = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-shuckle-run-b.json", import.meta.url),
+);
+const seadraRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-seadra-run-a.json", import.meta.url),
+);
+const seadraRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-seadra-run-b.json", import.meta.url),
+);
+const marshtompRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-marshtomp-run-a.json", import.meta.url),
+);
+const marshtompRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-marshtomp-run-b.json", import.meta.url),
 );
 
 describe("speciesIdleAnim", () => {
@@ -836,6 +859,161 @@ describe("speciesIdleAnim", () => {
       for (const species of [
         "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN",
         "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN", "KADABRA", "REGISTEEL",
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("verticalSlideFrameAtTick (Anim_VerticalSlide / VerticalSlide port)", () => {
+    it("derives all 10 selector mappings as Factory-reachable with no outside mappings", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_V_SLIDE")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(V_SLIDE_FRONT_SPECIES).toEqual(generated);
+      expect(V_SLIDE_FRONT_SPECIES).toHaveLength(10);
+      expect(V_SLIDE_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(V_SLIDE_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(V_SLIDE_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      expect(V_SLIDE_FACTORY_FRONT_SPECIES).toContain("SEADRA");
+      expect(V_SLIDE_FACTORY_FRONT_SPECIES).toContain("MARSHTOMP");
+      for (const species of V_SLIDE_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins data0=40, C index arithmetic, both normal-front flips, and negated-sine y2 at every active callback", () => {
+      const activeIndexAndY2 = [
+        [0,0],[9,-1],[19,-2],[28,-3],[38,-4],[48,-5],[57,-5],[67,-5],[76,-5],
+        [86,-5],[96,-4],[105,-3],[115,-1],[124,0],[134,1],[144,3],[153,4],
+        [163,5],[172,6],[182,6],[192,6],[201,6],[211,6],[220,5],[230,4],[240,3],
+        [249,2],[3,0],[12,-1],[22,-3],[32,-4],[41,-5],[51,-5],[60,-5],[70,-5],
+        [80,-5],[89,-4],[99,-3],[108,-2],[118,-1],[128,0],
+      ] as const;
+      expect(activeIndexAndY2).toHaveLength(41);
+      for (const [tick, [index, y2]] of activeIndexAndY2.entries()) {
+        expect(verticalSlideFrameAtTick(tick)).toEqual({
+          x2: 0,
+          y2,
+          data0: 40,
+          data2: tick + 1,
+          index,
+          normalFrontDontFlip: true,
+          tryFlipXCalls: 2,
+          callback: "VerticalSlide",
+        });
+      }
+    });
+
+    it("uses the strict >duration guard and pins y2/WaitAnimEnd cleanup plus the final data2 increment", () => {
+      expect(verticalSlideFrameAtTick(40)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 40,
+        data2: 41,
+        index: 128,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        callback: "VerticalSlide",
+      });
+      expect(verticalSlideFrameAtTick(41)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 40,
+        data2: 42,
+        index: null,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        callback: "WaitAnimEnd",
+      });
+      expect(verticalSlideFrameAtTick(42)).toEqual(verticalSlideFrameAtTick(41));
+      expect(verticalSlideFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      [117, seadraScenario],
+      [284, marshtompScenario],
+    ] as const)("stages a complete legal Scene-ON party for opponent species %i", (species, scenario) => {
+      expect(scenario.mode).toBe("mechanicLab");
+      expect(scenario.profile).toBe("battle-scene-on");
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(species);
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "SEADRA", seadraRunA, seadraRunB, seadraRawA, seadraRawB, 4, 117,
+        "c70a070b61918ed2e3c0f1bbe3b1be778d63ee29865a13176f1683ab5e17963a",
+      ],
+      [
+        "MARSHTOMP", marshtompRunA, marshtompRunB, marshtompRawA, marshtompRawB, 8, 284,
+        "f29ff01ed2a5fc6b732da0955e4029559063e0a2acc7db7b9fbbfaa84ca1ec68",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species,
+      runA,
+      runB,
+      rawA,
+      rawB,
+      animCmdIndex,
+      data2,
+      rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_V_SLIDE");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("preserves every previously accepted front family", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of [
+        "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN",
+        "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN", "KADABRA", "REGISTEEL",
+        "SQUIRTLE", "SHUCKLE",
       ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }
