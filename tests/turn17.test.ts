@@ -71,8 +71,8 @@ describe("turn 17 faint hold and outcome latency", () => {
         resolutionOwner: Object.freeze({
           resolution: CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution,
           forcedPartySelect: null,
+          followingPresentation: null,
         }),
-        turn16Resolved: true,
         terminalResolution,
         fightSubmenu: {
           ...CLOSED_FIGHT_SUBMENU_STATE,

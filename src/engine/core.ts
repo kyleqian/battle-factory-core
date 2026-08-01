@@ -158,10 +158,13 @@ import {
   partySendOutBattleMenuReady,
 } from "./partySelect.ts";
 import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "./turn15FlyResolutionAdapter.ts";
+import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "./turn16FirePunchResolutionAdapter.ts";
 import {
   advanceBattleSceneForcedPartySelect,
+  beginBattleSceneFollowingResolution,
   beginBattleSceneForcedPartySelect,
   createBattleSceneResolutionOwner,
+  storeBattleSceneFollowingResolutionMenuRedraw,
 } from "./battleSceneResolutionOwner.ts";
 import {
   advanceFightSubmenuDisplay,
@@ -1103,7 +1106,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let turn12Resolved = battleScene.turn12Resolved;
     let turn13Resolved = battleScene.turn13Resolved;
     let lockedActionOwner = battleScene.resolutionOwner ?? null;
-    let turn16Resolved = battleScene.turn16Resolved ?? false;
     let terminalResolution = battleScene.terminalResolution ?? null;
     if (fightSubmenu.openElapsed === null) {
       const actionReady = battle2HandoffTick === null
@@ -1423,8 +1425,9 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution,
       );
     } else if (
-      lockedActionOwner?.resolution.segmentIndex === 1 &&
-      !turn16Resolved &&
+      lockedActionOwner !== null &&
+      lockedActionOwner.followingPresentation !== null &&
+      lockedActionOwner.followingPresentation.menuRedrawElapsed === null &&
       partySendOutElapsed !== null &&
       partySendOutElapsed !== undefined &&
       partySendOutBattleMenuReady(partySendOutElapsed) &&
@@ -1437,19 +1440,41 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // submenu itself, since it must survive until THIS submenu's own
       // confirmation seeds the terminal resolution below - before replacing
       // the old confirmed submenu with turn 17's own state.
+      const menuRedrawElapsed =
+        fightSubmenu.confirmElapsed + TURN16_FIRE_PUNCH_MENU_REDRAW_DELAY;
       fightSubmenu = openFightSubmenu(
         battleScene.elapsed + 1,
         fightSubmenu.activeMonMoveset,
         fightSubmenu.cursor,
         false,
-        fightSubmenu.confirmElapsed + TURN16_FIRE_PUNCH_MENU_REDRAW_DELAY,
       );
-      turn16Resolved = true;
+      lockedActionOwner = storeBattleSceneFollowingResolutionMenuRedraw(
+        lockedActionOwner,
+        menuRedrawElapsed,
+      );
     }
     if (
+      lockedActionOwner !== null
+      && lockedActionOwner.followingPresentation === null
+      && lockedActionOwner.forcedPartySelect !== null
+      && lockedActionOwner.forcedPartySelect.sendOutElapsed !== null
+      && partySendOutElapsed !== null
+      && partySendOutElapsed !== undefined
+      && partySendOutBattleMenuReady(partySendOutElapsed)
+      && priorFightConfirmElapsed === null
+      && fightSubmenu.confirmElapsed !== null
+    ) {
+      lockedActionOwner = beginBattleSceneFollowingResolution(
+        lockedActionOwner,
+        CANONICAL_FIRE_PUNCH_RESOLUTION.resolution,
+        fightSubmenu.confirmElapsed,
+      );
+    }
+    const followingPresentation = lockedActionOwner?.followingPresentation ?? null;
+    if (
       terminalResolution === null
-      && turn16Resolved
-      && fightSubmenu.menuRedrawElapsed !== null
+      && followingPresentation?.menuRedrawElapsed !== null
+      && followingPresentation?.menuRedrawElapsed !== undefined
       && priorFightConfirmElapsed === null
       && fightSubmenu.confirmElapsed !== null
     ) {
@@ -1469,7 +1494,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         ],
         opponentLossLines: trainer.speechLose,
         confirmElapsed: fightSubmenu.confirmElapsed,
-        menuRedrawElapsed: fightSubmenu.menuRedrawElapsed,
+        menuRedrawElapsed: followingPresentation.menuRedrawElapsed,
       });
     }
     battleScene = {
@@ -1489,7 +1514,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn12Resolved,
       turn13Resolved,
       resolutionOwner: lockedActionOwner,
-      turn16Resolved,
       terminalResolution,
     };
     const previousBattle2RngCalls = battle2HandoffTick === null

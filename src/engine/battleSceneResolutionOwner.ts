@@ -15,12 +15,28 @@ import {
 export type BattleSceneResolutionOwner = Readonly<{
   resolution: BattleResolutionPresentationState;
   forcedPartySelect: PartySelectState | null;
+  followingPresentation: BattleSceneFollowingResolutionPresentation | null;
+}>;
+
+/**
+ * Presentation-local clocks for the next immutable reducer resolution after
+ * a forced switch. The resolution owns facts; these relative edges own only
+ * the already-exact compatibility window's controller timing.
+ */
+export type BattleSceneFollowingResolutionPresentation = Readonly<{
+  resolution: BattleResolutionPresentationState;
+  confirmElapsed: number;
+  menuRedrawElapsed: number | null;
 }>;
 
 export function createBattleSceneResolutionOwner(
   resolution: BattleResolutionPresentationState,
 ): BattleSceneResolutionOwner {
-  return Object.freeze({ resolution, forcedPartySelect: null });
+  return Object.freeze({
+    resolution,
+    forcedPartySelect: null,
+    followingPresentation: null,
+  });
 }
 
 export function beginBattleSceneForcedPartySelect(
@@ -40,6 +56,7 @@ export function beginBattleSceneForcedPartySelect(
       playerRentalRecords,
       playerParty,
     ),
+    followingPresentation: owner.followingPresentation,
   });
 }
 
@@ -68,5 +85,46 @@ export function advanceBattleSceneForcedPartySelect(
   return Object.freeze({
     resolution: owner.resolution,
     forcedPartySelect: advancePartySelect(selector, newKeys),
+    followingPresentation: owner.followingPresentation,
+  });
+}
+
+export function beginBattleSceneFollowingResolution(
+  owner: BattleSceneResolutionOwner,
+  resolution: BattleResolutionPresentationState,
+  confirmElapsed: number,
+): BattleSceneResolutionOwner {
+  if (owner.followingPresentation !== null) return owner;
+  if (
+    owner.forcedPartySelect === null
+    || owner.forcedPartySelect.sendOutElapsed === null
+  ) {
+    throw new Error("battle-scene following resolution requires a completed forced-switch choice");
+  }
+  return Object.freeze({
+    ...owner,
+    followingPresentation: Object.freeze({
+      resolution,
+      confirmElapsed,
+      menuRedrawElapsed: null,
+    }),
+  });
+}
+
+export function storeBattleSceneFollowingResolutionMenuRedraw(
+  owner: BattleSceneResolutionOwner,
+  menuRedrawElapsed: number,
+): BattleSceneResolutionOwner {
+  const presentation = owner.followingPresentation;
+  if (presentation === null) {
+    throw new Error("battle-scene following resolution has not begun");
+  }
+  if (presentation.menuRedrawElapsed !== null) return owner;
+  return Object.freeze({
+    ...owner,
+    followingPresentation: Object.freeze({
+      ...presentation,
+      menuRedrawElapsed,
+    }),
   });
 }

@@ -1044,7 +1044,7 @@ describe("ISSUES #24 (docs/battle-menu-notes.md §8d): the onix-bounce two-state
     // Same reachable state `core.ts` produces at trace tick 2901 (openFightSubmenu
     // just fired this tick, cursor still at its post-reopen default 0, no confirm yet).
     const sm = openFightSubmenu(1861, moveset);
-    expect(sm).toEqual({ openElapsed: 1861, cursor: 0, displayCursor: 0, closeElapsed: null, confirmElapsed: null, activeMonMoveset: moveset, reopenedFromClose: false, menuRedrawElapsed: null });
+    expect(sm).toEqual({ openElapsed: 1861, cursor: 0, displayCursor: 0, closeElapsed: null, confirmElapsed: null, activeMonMoveset: moveset, reopenedFromClose: false });
     expect(turn2SubmenuBounceTick(2901)).toBe(2064);
     expect(menuIdleBounce(turn2SubmenuBounceTick(2901)).onixY2).toBe(1); // FIXED: y1 state (0 or 1), matches RAM
     // The bug this closes: the naive "plain t" formula (correct for turn 1's
@@ -1069,7 +1069,7 @@ describe("ISSUES #24 (docs/battle-menu-notes.md §8d): the onix-bounce two-state
 
   it("ticks 3465/3721 (turn2-dragonbreath.json): turn 2's OWN confirm (pressTick 2945, DRAGON_BREATH) has long since redrawn the resettled turn-3 menu by these ticks - `dragonBreathResettledBounceTick`'s own anchor (battleScene.ts, unchanged by this fix) already lands the rare sine peak correctly, matching RAM", () => {
     const sm = confirmFightMove(openFightSubmenu(1861, moveset, 2), 1905);
-    expect(sm).toEqual({ openElapsed: 1861, cursor: 2, displayCursor: 2, closeElapsed: null, confirmElapsed: 1905, activeMonMoveset: moveset, reopenedFromClose: false, menuRedrawElapsed: null });
+    expect(sm).toEqual({ openElapsed: 1861, cursor: 2, displayCursor: 2, closeElapsed: null, confirmElapsed: 1905, activeMonMoveset: moveset, reopenedFromClose: false });
     // dragonBreathResettledBounceTick(t, pressTick=2945) = t - (2945+391) + (MENU_IDLE_BLANK_END_TICK+1)
     const dragonBreathResettledBounceTick = (t: number): number => t - (2945 + 391) + (MENU_IDLE_BLANK_END_TICK + 1);
     expect(dragonBreathResettledBounceTick(3465)).toBe(1877); // the same rare-peak tick already pinned in battleMenuIdle.test.ts

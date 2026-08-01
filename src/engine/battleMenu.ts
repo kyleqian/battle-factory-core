@@ -984,14 +984,6 @@ export interface FightSubmenuState {
    * bounce edge). Only meaningful while `openElapsed !== null`.
    */
   reopenedFromClose: boolean;
-  /**
-   * The predecessor submenu's own confirmation-relative action-menu redraw
-   * anchor, carried forward only across a turn-boundary reopen that will
-   * later seed a terminal resolution's `menuRedrawElapsed` (the fresh
-   * submenu itself has no redraw anchor of its own yet - it is still
-   * waiting on its own confirmation). `null` for every ordinary open.
-   */
-  menuRedrawElapsed: number | null;
 }
 
 /** Never actually rendered (the FIGHT submenu's own text only draws once `openElapsed` is set - see `drawFightSubmenuChrome`) - a placeholder so this state stays a plain, always-fully-populated object like every other field here. `openFightSubmenu` always sets the real value. */
@@ -1005,7 +997,6 @@ export const CLOSED_FIGHT_SUBMENU_STATE: FightSubmenuState = {
   confirmElapsed: null,
   activeMonMoveset: PLACEHOLDER_MOVESET,
   reopenedFromClose: false,
-  menuRedrawElapsed: null,
 };
 
 /** A-press on the settled action menu (FIGHT already highlighted - the only case this slice models, §11's own scope) opens the submenu fresh, cursor at `initialCursor` (default 0, ROCK_SLIDE's `gMoveSelectionCursor` zero-init - turn 1's own first open, and turn 2's reopen, both coincidentally rest here). S7 slice F (docs/battle-turn-notes.md §13): turn 3's own reopen passes `initialCursor=2` instead - `gMoveSelectionCursor` genuinely PERSISTS across turns (RAM-confirmed: reads 2, DRAGON_BREATH, at turn 3's reopen, turn 2's own confirmed slot), it isn't always re-zeroed. `activeMonMoveset` is threaded in by the caller (core.ts), derived fresh from the draft screen's own confirmed picks each time - S8 engine dependency, see `battleSetup.ts`. `reopenedFromClose` (ISSUES #25, default false) - see `FightSubmenuState`'s own doc. */
@@ -1014,9 +1005,8 @@ export function openFightSubmenu(
   activeMonMoveset: ActiveMonMoveset,
   initialCursor: FightSubmenuSlot = 0,
   reopenedFromClose: boolean = false,
-  menuRedrawElapsed: number | null = null,
 ): FightSubmenuState {
-  return { openElapsed: elapsed, cursor: initialCursor, displayCursor: initialCursor, closeElapsed: null, confirmElapsed: null, activeMonMoveset, reopenedFromClose, menuRedrawElapsed };
+  return { openElapsed: elapsed, cursor: initialCursor, displayCursor: initialCursor, closeElapsed: null, confirmElapsed: null, activeMonMoveset, reopenedFromClose };
 }
 
 /** B-press while the submenu is open and not already closing - starts the close DMA-wait. No-op (returns `state` unchanged) if not open or already closing, so callers can call this unconditionally on a B-press. */
@@ -2582,7 +2572,7 @@ export function currentPPForActiveMon(
   turn12Resolved: boolean = false,
   turn13Resolved: boolean = false,
   lockedActionResolution: BattleResolutionPresentationState | null = null,
-  turn16Resolved: boolean = false,
+  followingResolution: BattleResolutionPresentationState | null = null,
 ): readonly [number, number, number, number] {
   const [a, b, c, d] = moveset.maxPP;
   // S7 slice N (docs/turn6-notes.md §4): turn 5's own ROCK_SLIDE (Onix's
@@ -2634,11 +2624,11 @@ export function currentPPForActiveMon(
   const slot2Uses = (turn2Resolved ? 1 : 0) + (turn13Resolved ? 1 : 0);
   const resolvedPlayerPp = lockedActionResolution?.segments[0]
     ?.afterRules.rulesContext.battlers[0]!.pp;
-  // MAGBY becomes active only after turn 15's forced switch. Its slot-0
-  // FIRE_PUNCH is used once on turn 16 before the turn-17 reopen.
-  const activeSlot0Uses = moveset.moveIds[0] === 7 && turn16Resolved ? 1 : slot0Uses;
+  const followingPlayerPp = followingResolution?.segments.at(-1)
+    ?.afterRules.rulesContext.battlers[0]!.pp;
+  if (followingPlayerPp !== undefined) return followingPlayerPp;
   return [
-    a - activeSlot0Uses,
+    a - slot0Uses,
     turn8Resolved ? b - 1 : b,
     resolvedPlayerPp?.[2] ?? c - slot2Uses,
     d,

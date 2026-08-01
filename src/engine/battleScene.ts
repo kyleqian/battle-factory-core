@@ -804,7 +804,12 @@ import {
   resolveTurn6FeatherDanceWindowContent,
 } from "./turn6FeatherDancePresentationStaging.ts";
 import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "./turn15FlyResolutionAdapter.ts";
-import type { BattleSceneResolutionOwner } from "./battleSceneResolutionOwner.ts";
+import { mapStatus1ToBattleStatus } from "./battleResolutionAdapter.ts";
+import type {
+  BattleSceneFollowingResolutionPresentation,
+  BattleSceneResolutionOwner,
+} from "./battleSceneResolutionOwner.ts";
+import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "./turn16FirePunchResolutionAdapter.ts";
 import {
   resolveTurn7AtkFellLines,
   resolveTurn7FeatherDanceKickoffLines,
@@ -2589,13 +2594,6 @@ export interface BattleSceneState {
   /** Immutable retained-action resolution plus its request-owned selector. */
   resolutionOwner?: BattleSceneResolutionOwner | null;
   /**
-   * True once turn 16's FIRE_PUNCH/burn tail has redrawn the action menu
-   * and the player opens FIGHT for turn 17. Optional only so older direct
-   * render fixtures remain source-compatible; live engine state always
-   * carries it explicitly.
-   */
-  turn16Resolved?: boolean;
-  /**
    * RAM-equivalent gBattleOutcome for the first battle.  The WIN write is
    * intentionally state-only during this slice: the old faint message
    * remains frozen until the later outcome renderer takes ownership.
@@ -2629,7 +2627,6 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   opponentFaintDismissElapsed: null,
   turn13Resolved: false,
   resolutionOwner: null,
-  turn16Resolved: false,
   battleOutcome: 0,
   terminalResolution: null,
 };
@@ -2661,7 +2658,6 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     opponentFaintDismissElapsed: state.opponentFaintDismissElapsed,
     turn13Resolved: state.turn13Resolved,
     resolutionOwner: state.resolutionOwner ?? null,
-    turn16Resolved: state.turn16Resolved ?? false,
     battleOutcome:
       postDismiss === null ? (state.battleOutcome ?? 0) : postDismiss.battleOutcome,
     terminalResolution: state.terminalResolution ?? null,
@@ -7808,9 +7804,9 @@ function drawFightSubmenuChrome(
   turn12Resolved: boolean = false,
   turn13Resolved: boolean = false,
   lockedActionResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null = null,
-  turn16Resolved: boolean = false,
+  followingResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null = null,
 ): void {
-  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved, turn7Resolved, turn8Resolved, turn9Resolved, turn10Resolved, turn11Resolved, turn12Resolved, turn13Resolved, lockedActionResolution, turn16Resolved);
+  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved, turn7Resolved, turn8Resolved, turn9Resolved, turn10Resolved, turn11Resolved, turn12Resolved, turn13Resolved, lockedActionResolution, followingResolution);
   drawFightSubmenuChromeFromLiveState(
     fb,
     displayCursor,
@@ -16555,6 +16551,7 @@ function drawTurn16FightSubmenuWindow(
   t: number,
   sm: FightSubmenuState,
   partyElapsed: number,
+  followingPresentation: BattleSceneFollowingResolutionPresentation | null,
   terminalResolution: BattleTerminalResolutionPresentationState | null,
   trainerPresentation?: FactoryTrainerPresentation,
 ): void {
@@ -16780,22 +16777,21 @@ function drawTurn16FightSubmenuWindow(
       false,
       false,
       null,
-      true,
+      followingPresentation?.resolution ?? null,
     );
     return;
   }
 
-  // `menuRedrawElapsed` is only ever set (non-null) by the turn-16-resolve
-  // reopen (core.ts threads turn 17's real menu-redraw anchor through
-  // `openFightSubmenu`) - an ordinary fresh FIGHT open (turn 16's own,
-  // pre-confirm) always leaves it null. This is the only signal available
-  // here that distinguishes "MAGBY hasn't acted yet" (full HP, no burn, PP
-  // untouched - correct defaults) from "MAGBY already used FIRE PUNCH on
-  // turn 16, this is turn 17's reopen, not yet reconfirmed" (settled
-  // 79/138 HP, MURKROW burned, PP down one) while `sm.confirmElapsed` is
-  // still null for either case.
-  const isTurn17Reopen = sm.menuRedrawElapsed !== null;
-  const settledPreConfirm = isTurn17Reopen && sm.confirmElapsed === null;
+  const isNextCommand = followingPresentation?.menuRedrawElapsed !== null
+    && followingPresentation?.menuRedrawElapsed !== undefined;
+  const settledPreConfirm = isNextCommand && sm.confirmElapsed === null;
+  const resolvedTurn = CANONICAL_FIRE_PUNCH_RESOLUTION;
+  const resolvedOpponentStatus = mapStatus1ToBattleStatus(
+    resolvedTurn.opponentStatus1,
+  );
+  if (resolvedOpponentStatus !== "burn") {
+    throw new Error("canonical FIRE_PUNCH resolution lost its burn status-icon receipt");
+  }
 
   if (t < revealTick) {
     drawTurn16PostSwitchField(
@@ -16805,10 +16801,12 @@ function drawTurn16FightSubmenuWindow(
       t,
       undefined,
       undefined,
-      settledPreConfirm ? { hp: 58, status: "burn" } : null,
+      settledPreConfirm
+        ? { hp: resolvedTurn.opponentResidualHp.to, status: resolvedOpponentStatus }
+        : null,
       undefined,
       undefined,
-      settledPreConfirm ? 79 : null,
+      settledPreConfirm ? resolvedTurn.playerHp.to : null,
     );
     drawTurn15MagbySettledMenuChrome(fb);
     return;
@@ -16838,11 +16836,15 @@ function drawTurn16FightSubmenuWindow(
     turn17BounceTick ?? partySendOutMenuBounceTick(bouncePartyElapsed),
     t,
     ownedAnimationAge,
+    ownedAnimationAge === null
+      ? undefined
+      : { startHp: resolvedTurn.playerHp.from, endHp: resolvedTurn.playerHp.to },
+    settledPreConfirm
+      ? { hp: resolvedTurn.opponentResidualHp.to, status: resolvedOpponentStatus }
+      : null,
     undefined,
-    settledPreConfirm ? { hp: 58, status: "burn" } : null,
     undefined,
-    undefined,
-    settledPreConfirm ? 79 : null,
+    settledPreConfirm ? resolvedTurn.playerHp.to : null,
   );
 
   if (ownedAnimationAge !== null && faintAttackResolutionState(ownedAnimationAge).message === "FIRE_PUNCH") {
@@ -16851,8 +16853,8 @@ function drawTurn16FightSubmenuWindow(
     if (resolution.message === "FIRE_PUNCH") {
       drawMessageTextLines(
         fb,
-        TURN16_FIRE_PUNCH_LINE1,
-        TURN16_FIRE_PUNCH_LINE2,
+        resolvedTurn.firePunchLines[0]!,
+        resolvedTurn.firePunchLines[1]!,
         turn15SimpleVisibleChars(
           t,
           confirmTick! + TURN16_FAINT_ATTACK_ANIM_DELAY + FIRE_PUNCH_TEXT_AGE,
@@ -16860,7 +16862,7 @@ function drawTurn16FightSubmenuWindow(
         ),
       );
     } else if (resolution.message === "BURNED") {
-      const line = "Foe MURKROW was burned!";
+      const line = resolvedTurn.burnedLines[0]!;
       drawMessageTextLines(
         fb,
         line,
@@ -16868,8 +16870,8 @@ function drawTurn16FightSubmenuWindow(
         Math.min(line.length, firePunchAge! - FIRE_PUNCH_BURN_MESSAGE_AGE + 1),
       );
     } else if (resolution.message === "BURN_RESIDUAL") {
-      const line1 = "Foe MURKROW is hurt";
-      const line2 = "by its burn!";
+      const line1 = resolvedTurn.residualLines[0]!;
+      const line2 = resolvedTurn.residualLines[1]!;
       drawMessageTextLines(
         fb,
         line1,
@@ -16886,8 +16888,8 @@ function drawTurn16FightSubmenuWindow(
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     drawMessageTextLines(
       fb,
-      TURN16_FAINT_ATTACK_LINE1,
-      TURN16_FAINT_ATTACK_LINE2,
+      resolvedTurn.faintAttackLines[0]!,
+      resolvedTurn.faintAttackLines[1]!,
       turn15SimpleVisibleChars(t, confirmTick + TURN16_FAINT_ATTACK_TEXT_DELAY, TURN16_FAINT_ATTACK_TEXT_TOTAL),
     );
     return;
@@ -16913,7 +16915,7 @@ function drawTurn16FightSubmenuWindow(
     false,
     false,
     null,
-    isTurn17Reopen,
+    isNextCommand ? followingPresentation.resolution : null,
   );
 }
 
@@ -16946,6 +16948,7 @@ function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, pa
         TICK0 + state.elapsed,
         state.fightSubmenu,
         party.sendOutElapsed,
+        state.resolutionOwner?.followingPresentation ?? null,
         state.terminalResolution ?? null,
         state.trainerPresentation,
       );
