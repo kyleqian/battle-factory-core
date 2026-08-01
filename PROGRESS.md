@@ -13,6 +13,44 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 801 — [bounded worker, 2026-07-31 ~19:35] ISSUES #39 rank-6 slice 2 (turn 2) NOT landed — investigated and reverted, findings banked
+
+- **State:** master unchanged from `01eac159` (slice 1) — tree is clean,
+  tsc/build clean, focused vitest (battleScene 247/battleMenu
+  121/factoryBattleStartIntro 5/fightSubmenu 57/executableFrontierRatchet 6)
+  436/436 passed. No commit this session (nothing reached green).
+- **Did:** attempted rank-6 slice 2 (turn 2, ENDEAVOR+DRAGON_BREATH) per
+  the same brief-ordered plan as slice 1. Deep RAM/pixel investigation
+  against the already-banked `turn2-endeavor-off.json`/
+  `turn2-dragonbreath-off.json` fixtures found real, verified facts —
+  including a genuine cross-turn bug (`turn2SubmenuBounceTick`/
+  `turn2KickoffBounceTick` in `battleMenu.ts` still default to
+  `ROCK_SLIDE_MENU_REDRAW_DELAY`=664, not slice 1's OFF value 429, which
+  desyncs turn 2's whole idle-bounce phase) and confirmation that
+  `drawEndeavorSquish`'s entire body is class (c) but shared with
+  turn 3 (in scope) and turn 5 (out of scope) — plus four of roughly
+  seven needed OFF constants pixel/RAM-pinned. Full detail (exact ticks,
+  exact delay values, what's still missing) is in **ISSUES #39**'s own
+  slice-2 paragraph, not re-narrated here. Ran out of session time before
+  reaching turn 2's own 256/256 + 237/237 acceptance, so **reverted all
+  `src/` edits** (`git checkout`) rather than commit a half-flipped turn —
+  per the brief's own hard rule, a half-flipped turn is not a success.
+- **Next:** re-attempt rank-6 slice 2 starting from ISSUES #39's slice-2
+  paragraph (don't re-derive the bounce-phase bug or the constants already
+  found) — write a combined RAM probe (`tools/probe/dump-turn1-rockslide-off.py`'s
+  own shape, retargeted at turn 2's battler 1 healthbar/sprite state and
+  the message-box text pointer across `turn2-dragonbreath-off.json`'s
+  3149-3385 window) rather than pixel-cropping blind, which is what ate
+  this session's time budget. Turns 3 and 4 (rank-6 slices 3/4) remain
+  fully unstarted, still next in order after turn 2 lands.
+- **PAPERCUT:** pixel-crop bisection against raw oracle PNGs (no RAM
+  read) is slow and error-prone for finding exact per-tick delay
+  constants (mis-cropped a healthbox region twice this session, costing
+  real time) — a small reusable "combined RAM dump for a given trace's
+  battler/text/BG state across a tick range" probe helper (generalizing
+  `dump-turn1-rockslide-off.py`) would pay for itself across every
+  remaining rank-6/7/8 slice, ~20-30 min lost this session alone.
+
 ## 800 — [bounded worker, 2026-07-31 ~19:05] ISSUES #39 rank-6 slice 1 EXECUTED: turn 1 flipped to Scene-OFF-owned presentation
 
 - **State:** master green — tsc clean, build clean, focused vitest

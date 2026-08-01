@@ -210,7 +210,51 @@ turn-1 pins retired (`git rm`). Turn-2 boundary insurance traces
 (`turn2-endeavor.json`/`turn2-dragonbreath.json`) were found ALREADY
 red on master pre-change (a pre-existing, unrelated generated-route
 crash — confirmed byte-identical via `git stash`, not a regression
-from this slice). Earlier
+from this slice). **Slice 2 (turn 2) attempted 2026-07-31 evening, NOT
+landed — reverted to slice 1's clean state, no commit.** Real findings
+banked here so the next attempt doesn't re-derive them: (1) a genuine
+cross-turn bug, independent of turn 2's own content — `turn2SubmenuBounceTick`/
+`turn2KickoffBounceTick` (`battleMenu.ts`) hardcode `rockSlideResettledBounceTick`'s
+default `redrawDelay` (`ROCK_SLIDE_MENU_REDRAW_DELAY`=664, the ON value),
+not slice 1's new `TURN1_OFF_ROCKSLIDE_MENU_REDRAW_DELAY`=429 — this
+desyncs the idle-bounce phase for turn 2's whole reopen/dwell window
+(oracle-confirmed: `turn2-endeavor-off.json` frame 2901 mismatches on
+unmodified master, matching the doc comment's own "1-in-256 sine-table
+peak" citation at that exact tick); fix is a defaulted `redrawDelay` param
+threaded through both functions' turn-2-only call sites, same idiom slice
+1 used for `statsBannerEva`. (2) `drawEndeavorSquish`'s entire body
+(attacker squish/blend, target shake/hitsplat/flicker/healthbox-bounce) is
+class (c) for turn 2 (pixel-confirmed: oracle frames 3000-3026 mismatch
+under the current ON-fit call, matching cleanly once the call is skipped)
+— but this function is SHARED with turn 3 (in scope) and turn 5 (out of
+scope, must stay byte-exact ON), so it needs the same override-param
+treatment as `drawStatsBanner`, not a body edit. (3) RAM/pixel-probed OFF
+constants for ENDEAVOR's own half (pressTick=2945): HP-drain start delay
+116 (replaces ON's 153, i.e. Onix's `endeavorOnixHp` starts draining at
+tick 3061, first visible drop at 3062); the held ENDEAVOR text goes blank
+at tick 3100 (delay 155, needs a NEW clear-delay constant — the current
+code has no blank state between ENDEAVOR's held text and DRAGON_BREATH's
+first character, unlike ROCK_SLIDE's own clear/redraw pair); DRAGON_BREATH's
+own first character renders at tick 3101 (delay 156, an override on
+`dragonBreathTextStartTick`/`dragonBreathTextVisibleChars`, default 192,
+shared with turn 13 out of scope). (4) NOT yet found: DRAGON_BREATH's own
+OFF hit-flash offset (ON `DRAGONBREATH_HIT_FLASH_ANCHOR_DELAY`=318; a
+first alternation was seen near tick 3166 in one crop but not confirmed
+against a correctly-located healthbox region), HP-drain start delay (ON
+`DRAGONBREATH_HP_DRAIN_START_DELAY`=353; not found — probe crop was
+mis-positioned, see next attempt's own fresh crop), text-clear delay (ON
+`DRAGONBREATH_TEXT_CLEAR_DELAY`=384), and menu-redraw delay (ON
+`DRAGONBREATH_MENU_REDRAW_DELAY`=391, needed both for `drawTurn2KickoffText`'s
+own settle branch and for `dragonBreathResettledBounceTick`'s default —
+by tick 3385 the real oracle already shows the fully-resettled 4-option
+action menu, i.e. `turn2Resolved`'s own presentation-layer settle
+happens well before 3385). Recommended next step: a combined RAM probe
+script (`tools/probe/dump-turn1-rockslide-off.py`'s own shape) reading
+Grovyle's (battler 1) healthbar curr value, sprite flags/x2/y2, and the
+message-box state directly from RAM across `turn2-dragonbreath-off.json`'s
+own 3149-3385 window, rather than pixel-cropping blind — would have
+found all four remaining DRAGON_BREATH constants in one pass instead of
+the manual bisection this attempt spent its time budget on. Earlier
 progress:
 `turn13-sandattack.json`'s complete captured
 SAND_ATTACK content now resolves its kickoff and opponent-target accuracy-fall
