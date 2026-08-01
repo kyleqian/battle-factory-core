@@ -55,6 +55,7 @@ export type SpeciesFrontAnimFamily =
   | "H_JUMPS_V_STRETCH"
   | "H_SHAKE"
   | "RAPID_H_HOPS"
+  | "SHRINK_GROW"
   | "SWING_CONCAVE"
   | "V_JUMPS_SMALL"
   | "V_SLIDE"
@@ -80,6 +81,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "H_JUMPS_V_STRETCH",
   "H_SHAKE",
   "RAPID_H_HOPS",
+  "SHRINK_GROW",
   "SWING_CONCAVE",
   "V_JUMPS_SMALL",
   "V_SLIDE",
@@ -442,6 +444,23 @@ export const CIRCULAR_STRETCH_TWICE_FACTORY_FRONT_SPECIES: readonly string[] = O
 /** There are no circular-stretch-twice mappings outside the Factory rental pool. */
 export const CIRCULAR_STRETCH_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   CIRCULAR_STRETCH_TWICE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All 6 source selector mappings for the normal front `ANIM_SHRINK_GROW`. */
+export const SHRINK_GROW_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_SHRINK_GROW")
+    .map(([species]) => species),
+);
+
+/** Every normal shrink/grow mapping is reachable through Factory rentals. */
+export const SHRINK_GROW_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  SHRINK_GROW_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no normal shrink/grow mappings outside the Factory rental pool. */
+export const SHRINK_GROW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  SHRINK_GROW_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 export interface SpeciesIdleOffset {
@@ -808,6 +827,42 @@ export interface CircularStretchTwiceFrame extends SpeciesIdleOffset {
   readonly normalFrontDontFlip: true;
   readonly resetSpriteAfterAnim: boolean;
   readonly callback: "Anim_CircularStretchTwice" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+/**
+ * The three selectors share `ShrinkGrow`, but their initializers establish
+ * different run counts or phase steps. Only the normal front selector is
+ * accepted by this rung; FAST and SLOW remain independently unaccepted.
+ */
+export const SHRINK_GROW_INITIALIZERS = Object.freeze({
+  normal: Object.freeze({
+    selector: "ANIM_SHRINK_GROW", data6: 8, data7: 3, accepted: true,
+  }),
+  fast: Object.freeze({
+    selector: "ANIM_SHRINK_GROW_FAST", data6: 8, data7: 5, accepted: false,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_SHRINK_GROW_SLOW", data6: 4, data7: 3, accepted: false,
+  }),
+} as const);
+
+export interface ShrinkGrowFrame extends SpeciesIdleOffset {
+  readonly data0: 0;
+  readonly data2: number;
+  readonly data4: number;
+  readonly data6: 8;
+  readonly data7: 3;
+  readonly phaseIndex: number | null;
+  readonly yScaleBeforePosition: number | null;
+  readonly posY: number | null;
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly affineRotation: 0;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "Anim_ShrinkGrow" | "WaitAnimEnd";
   readonly affineMode: "double" | "normal";
 }
 
@@ -2018,6 +2073,78 @@ export function circularStretchTwiceFrameAtTick(
   };
 }
 
+const SHRINK_GROW_NORMAL_ACTIVE_LIMIT =
+  Math.trunc(128 / SHRINK_GROW_INITIALIZERS.normal.data6)
+  * SHRINK_GROW_INITIALIZERS.normal.data7;
+
+/**
+ * Source-order port of the normal `Anim_ShrinkGrow` initializer and shared
+ * `ShrinkGrow` callback (`pokemon_animation.c:911-939,1878-1912`) on the
+ * opponent-front path. `Task_HandleMonAnimation` zeroes data0/data2..data7
+ * and sets `sDontFlip=TRUE`. Tick 0 starts affine mode and installs the normal
+ * `(data6,data7)=(8,3)` parameters before entering `ShrinkGrow`. Active ticks
+ * 0..48 use the exact GBA sine table, C signed division for the positive-sine
+ * vertical compensation, and u8-masked phase advance. Tick 49 observes the
+ * strict limit, restores identity and y2=0, resets the affine state, and
+ * installs `WaitAnimEnd` without incrementing data2 or data4.
+ */
+export function shrinkGrowFrameAtTick(ticksSinceStart: number): ShrinkGrowFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  const data6 = SHRINK_GROW_INITIALIZERS.normal.data6;
+  const data7 = SHRINK_GROW_INITIALIZERS.normal.data7;
+  if (ticksSinceStart > SHRINK_GROW_NORMAL_ACTIVE_LIMIT) {
+    const activeCallbacks = SHRINK_GROW_NORMAL_ACTIVE_LIMIT + 1;
+    return {
+      x2: 0,
+      y2: 0,
+      data0: 0,
+      data2: activeCallbacks,
+      data4: (activeCallbacks * data6) & 0xff,
+      data6,
+      data7,
+      phaseIndex: null,
+      yScaleBeforePosition: null,
+      posY: null,
+      xScale: 256,
+      yScale: 256,
+      affineRotation: 0,
+      startedAffine: false,
+      normalFrontDontFlip: true,
+      resetSpriteAfterAnim: true,
+      callback: "WaitAnimEnd",
+      affineMode: "normal",
+    };
+  }
+
+  const phaseIndex = (ticksSinceStart * data6) & 0xff;
+  const yScaleBeforePosition = gbaSin(phaseIndex, 32) + 256;
+  const posY = yScaleBeforePosition > 256
+    ? Math.trunc((256 - yScaleBeforePosition) / 8)
+    : 0;
+  const xScale = gbaSin(phaseIndex, 48) + 256;
+  return {
+    x2: 0,
+    y2: -posY + 0,
+    data0: 0,
+    data2: ticksSinceStart + 1,
+    data4: (phaseIndex + data6) & 0xff,
+    data6,
+    data7,
+    phaseIndex,
+    yScaleBeforePosition,
+    posY,
+    xScale,
+    yScale: yScaleBeforePosition,
+    affineRotation: 0,
+    startedAffine: ticksSinceStart === 0,
+    normalFrontDontFlip: true,
+    resetSpriteAfterAnim: false,
+    callback: "Anim_ShrinkGrow",
+    affineMode: "double",
+  };
+}
+
 /**
  * Source-order port of `Anim_HorizontalSlideWobble`
  * (`pokemon_animation.c:911-939,1803-1833`). `Task_HandleMonAnimation`
@@ -2409,6 +2536,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = circularStretchTwiceFrameAtTick(41);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_CircularStretchTwice did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "SHRINK_GROW": {
+      const terminal = shrinkGrowFrameAtTick(49);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_ShrinkGrow did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }

@@ -19,6 +19,11 @@ import {
   CIRCULAR_STRETCH_TWICE_FACTORY_FRONT_SPECIES,
   CIRCULAR_STRETCH_TWICE_FRONT_SPECIES,
   CIRCULAR_STRETCH_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES,
+  shrinkGrowFrameAtTick,
+  SHRINK_GROW_FACTORY_FRONT_SPECIES,
+  SHRINK_GROW_FRONT_SPECIES,
+  SHRINK_GROW_INITIALIZERS,
+  SHRINK_GROW_OUTSIDE_FACTORY_FRONT_SPECIES,
   growVibrateFrameAtTick,
   GROW_VIBRATE_FACTORY_FRONT_SPECIES,
   GROW_VIBRATE_FRONT_SPECIES,
@@ -210,6 +215,12 @@ import dittoRunB from "../../tools/compare/fixtures/sendout-front-ditto-run-b.js
 import regirockScenario from "../../tools/compare/fixtures/sendout-front-regirock.json" with { type: "json" };
 import regirockRunA from "../../tools/compare/fixtures/sendout-front-regirock-run-a.json" with { type: "json" };
 import regirockRunB from "../../tools/compare/fixtures/sendout-front-regirock-run-b.json" with { type: "json" };
+import wartortleScenario from "../../tools/compare/fixtures/sendout-front-wartortle.json" with { type: "json" };
+import wartortleRunA from "../../tools/compare/fixtures/sendout-front-wartortle-run-a.json" with { type: "json" };
+import wartortleRunB from "../../tools/compare/fixtures/sendout-front-wartortle-run-b.json" with { type: "json" };
+import gligarScenario from "../../tools/compare/fixtures/sendout-front-gligar.json" with { type: "json" };
+import gligarRunA from "../../tools/compare/fixtures/sendout-front-gligar-run-a.json" with { type: "json" };
+import gligarRunB from "../../tools/compare/fixtures/sendout-front-gligar-run-b.json" with { type: "json" };
 import {
   KABUTO_FRONT_ANIM_START_OFFSET,
   kabutoHSlideWobble,
@@ -395,6 +406,18 @@ const regirockRawA = readFileSync(
 const regirockRawB = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-regirock-run-b.json", import.meta.url),
 );
+const wartortleRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-wartortle-run-a.json", import.meta.url),
+);
+const wartortleRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-wartortle-run-b.json", import.meta.url),
+);
+const gligarRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-gligar-run-a.json", import.meta.url),
+);
+const gligarRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-gligar-run-b.json", import.meta.url),
+);
 
 describe("speciesIdleAnim", () => {
   describe("rapidHorizontalHopsOffsetAtTick (Anim_RapidHorizontalHops port)", () => {
@@ -452,7 +475,7 @@ describe("speciesIdleAnim", () => {
 
     it("returns null for generated species whose front-anim family isn't ported", () => {
       expect(speciesFrontIdleRestOffset("CHARMELEON")).toBeNull();
-      expect(speciesFrontIdleRestOffset("WARTORTLE")).toBeNull();
+      expect(speciesFrontIdleRestOffset("BULBASAUR")).toBeNull();
     });
 
     it("dispatches the complete generated 32-species V_STRETCH family", () => {
@@ -4055,6 +4078,202 @@ describe("speciesIdleAnim", () => {
         "BLASTOISE", "BAGON", "SEAKING", "SHUPPET", "BUTTERFREE", "CHIMECHO",
         "WIGGLYTUFF", "VIGOROTH", "BEEDRILL", "DUSCLOPS", "EKANS", "ALTARIA",
         "PIKACHU", "RAIKOU", "WEEDLE", "NINJASK", "DITTO", "REGIROCK",
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("shrinkGrowFrameAtTick (source lifecycle)", () => {
+    it("derives exactly all 6 selector mappings as Factory-reachable with zero outside", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_SHRINK_GROW")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(SHRINK_GROW_FRONT_SPECIES).toEqual(generated);
+      expect(SHRINK_GROW_FRONT_SPECIES).toEqual([
+        "WARTORTLE", "NIDORINO", "KOFFING", "RHYDON", "SLOWKING", "GLIGAR",
+      ]);
+      expect(SHRINK_GROW_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(SHRINK_GROW_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(SHRINK_GROW_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of SHRINK_GROW_FRONT_SPECIES) {
+        expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_SHRINK_GROW");
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("accepts only normal (8,3) and keeps FAST/SLOW initializers distinct", () => {
+      expect(SHRINK_GROW_INITIALIZERS).toEqual({
+        normal: {
+          selector: "ANIM_SHRINK_GROW", data6: 8, data7: 3, accepted: true,
+        },
+        fast: {
+          selector: "ANIM_SHRINK_GROW_FAST", data6: 8, data7: 5, accepted: false,
+        },
+        slow: {
+          selector: "ANIM_SHRINK_GROW_SLOW", data6: 4, data7: 3, accepted: false,
+        },
+      });
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
+    });
+
+    it("pins every active callback's affine and compensated-position writes", () => {
+      const active = Array.from({ length: 49 }, (_, tick) => {
+        const phaseIndex = (tick * 8) & 0xff;
+        const yScaleBeforePosition =
+          Math.floor((32 * GBA_SINE_TABLE_256[phaseIndex]!) / 256) + 256;
+        const posY = yScaleBeforePosition > 256
+          ? Math.trunc((256 - yScaleBeforePosition) / 8)
+          : 0;
+        const xScale = Math.floor((48 * GBA_SINE_TABLE_256[phaseIndex]!) / 256) + 256;
+        const frame = shrinkGrowFrameAtTick(tick);
+        expect(frame, `tick ${tick}`).toEqual({
+          x2: 0,
+          y2: -posY + 0,
+          data0: 0,
+          data2: tick + 1,
+          data4: (phaseIndex + 8) & 0xff,
+          data6: 8,
+          data7: 3,
+          phaseIndex,
+          yScaleBeforePosition,
+          posY,
+          xScale,
+          yScale: yScaleBeforePosition,
+          affineRotation: 0,
+          startedAffine: tick === 0,
+          normalFrontDontFlip: true,
+          resetSpriteAfterAnim: false,
+          callback: "Anim_ShrinkGrow",
+          affineMode: "double",
+        });
+        return frame!;
+      });
+      expect(active).toHaveLength(49);
+      expect([0, 8, 16, 24, 32, 40, 48].map((tick) => [
+        tick,
+        active[tick]!.phaseIndex,
+        active[tick]!.xScale,
+        active[tick]!.yScale,
+        active[tick]!.y2,
+      ])).toEqual([
+        [0, 0, 256, 256, 0],
+        [8, 64, 304, 288, 4],
+        [16, 128, 256, 256, 0],
+        [24, 192, 208, 224, 0],
+        [32, 0, 256, 256, 0],
+        [40, 64, 304, 288, 4],
+        [48, 128, 256, 256, 0],
+      ]);
+    });
+
+    it("pins tick 49 identity/y2/reset/WaitAnimEnd cleanup and stable settled state", () => {
+      expect(shrinkGrowFrameAtTick(49)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 0,
+        data2: 49,
+        data4: 136,
+        data6: 8,
+        data7: 3,
+        phaseIndex: null,
+        yScaleBeforePosition: null,
+        posY: null,
+        xScale: 256,
+        yScale: 256,
+        affineRotation: 0,
+        startedAffine: false,
+        normalFrontDontFlip: true,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      });
+      expect(shrinkGrowFrameAtTick(50)).toEqual(shrinkGrowFrameAtTick(49));
+      expect(shrinkGrowFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      [8, wartortleScenario],
+      [207, gligarScenario],
+    ] as const)("stages a complete legal Scene-ON party for opponent species %i", (species, scenario) => {
+      expect(scenario.mode).toBe("mechanicLab");
+      expect(scenario.profile).toBe("battle-scene-on");
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(species);
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "WARTORTLE", wartortleRunA, wartortleRunB, wartortleRawA, wartortleRawB, 8, 2,
+        "e4c09e7b1c413acc21745c649e7bb493ea87ff51d648181ae77bf7d6f2466005",
+      ],
+      [
+        "GLIGAR", gligarRunA, gligarRunB, gligarRawA, gligarRawB, 207, 1,
+        "5dbf9079a53eb71470f474107391fc9f05ad9cf6604d1d807b561729b6d820d6",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species, runA, runB, rawA, rawB, data2, animCmdIndex, rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_SHRINK_GROW");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("preserves every previously accepted representative and terminal sibling family", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of [
+        "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN",
+        "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN", "KADABRA", "REGISTEEL",
+        "SQUIRTLE", "SHUCKLE", "SEADRA", "MARSHTOMP", "CHARMANDER", "DELIBIRD",
+        "MANKEY", "WYNAUT", "VILEPLUME", "LOUDRED", "JIGGLYPUFF", "GYARADOS",
+        "BLASTOISE", "BAGON", "SEAKING", "SHUPPET", "BUTTERFREE", "CHIMECHO",
+        "WIGGLYTUFF", "VIGOROTH", "BEEDRILL", "DUSCLOPS", "EKANS", "ALTARIA",
+        "PIKACHU", "RAIKOU", "WEEDLE", "NINJASK", "DITTO", "REGIROCK",
+        "WARTORTLE", "NIDORINO", "KOFFING", "RHYDON", "SLOWKING", "GLIGAR",
       ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }
