@@ -1,3 +1,62 @@
+## 799 — [bounded worker, 2026-07-31 ~18:05] ISSUES #56 item 2: MAGNETON-side RAM probe run — discriminator NOT pinned clean, no fix landed (probe-only step)
+
+- **State:** master green — tsc clean, focused vitest (factoryBattleStartIntro
+  5/battleScene 247/battleMenu 121/ratchet 6) 379/379 passed, no `src/`
+  changes so canaries untouched. One commit (docs/probe-script only).
+- **Did:** generalized `tools/probe/dump-issue56-frames-444-536-oam.py` to
+  also drive flat button-segment fixtures (not just `BattleLab` requests),
+  then RAM-probed MAGNETON's own frame 437 and, to resolve the paradox,
+  `interactive-generated-intro-off`'s own historically-fitted frame 1492
+  (new `tools/probe/analyze-issue56-introoff-app-series.ts` for the app
+  side). New fact: **MAGNETON's bar and icon widgets destroy on two
+  different ticks (bar first); YOSHI and `interactive-generated-intro-off`
+  both destroy them in sync** — `opponentSummaryExitElapsed`'s single shared
+  `elapsed` clock structurally cannot make both pixel-exact simultaneously
+  for MAGNETON. RAM also directly confirms abs-frame-1492 as intro-off's
+  real destroy tick (matches the `git log -S 0c4dab29` citation exactly).
+  But the exact `rawElapsed` value at that tick was NOT pinned (app-side
+  pixel probe disagreed with a `handoffTick≈1462` estimate by ~5-7 frames,
+  unresolved this step) — without it, can't confirm why intro-off wants the
+  opposite special-case behavior from YOSHI despite an identical RAM shape.
+  Full evidence table + ruled-out candidates (cry-duration linear/ordered,
+  `isCanonicalAnchorIntro`) in `docs/issue56-frames-444-536-oam-probe.md`
+  Round 3. Per this step's brief, **no fix landed** — a fix that only fits
+  2 of 3 fixtures would trade one regression for another.
+- **Next:** pin `interactive-generated-intro-off`'s real `handoffTick`
+  directly (temporarily instrument `generatedBattleStartOpponentHandoffTick`
+  read-only, or find another anchor) to compute `rawElapsed` at its
+  RAM-confirmed abs-1492 destroy tick — the doc's own named next step.
+  Frame 444 also still carries the separate, out-of-scope materialize-
+  column-shift defect (`docs/issue56-residual-probe.md` Q1).
+- **PAPERCUT:** none.
+- **USER DECISION (in-session, ~18:50): rank-6 Scene-OFF pin policy
+  ADOPTED** — same Option-A shape as rank 5: the 10 banked
+  `battle-scene-off` traces (`docs/rank6-off-ground-truth.md`) become
+  turns 1-4's acceptance pins; re-time class-(b)/delete class-(c) on
+  the OFF route; retire the legacy ON turns 1-4 pins as rank 6
+  executes. Execution is next session's opener (slice recipe =
+  rank 5's, commits `8802fcb6`/`329f8320`/`59a3fa7d`). Scope note: the
+  decision covers turns 1-4 (rank 6) only — turns 5-8's own ON pins
+  (incl. insurance pins turn5-rockslide/turn8-bind-a) are NOT covered
+  and need their own question when their re-timing comes up (the
+  phase-family fix ultimately wants turns 1-8).
+- **SUPERVISOR TRUE FINAL (bonus round 7 verified, ~18:30; this
+  addendum + entry 798's wind-down are the joint resume point):**
+  session ends at **7 rounds / 13 workers (M9-M15, S9-S14) / 0 failed
+  steps**. M15 verified (probe-only per its brief's no-regression-trade
+  rule; supervisor confirmed commit `11933483` docs/probe-only).
+  **S14 (verified, merged): #56's +6 route term RAM-NAMED, verdict
+  (a)** — species ready-lag formula confirmed exact at
+  `PlayerBufferExecCompleted` (1738); the +6 = 3-tick CHOOSEACTION
+  dispatch gap + 3-tick opponent-AI resolution (1744); constant stays;
+  universality check on a staged fixture is the named fold-in
+  gate (`docs/issue56-plus6-route-term.md`). ISSUES #56 items 1+2
+  updated with both results. Final gate on THIS union in the commit
+  message. Next-session ordered list: unchanged from entry 798's
+  wind-down EXCEPT (ii) is now two named sub-steps (intro-off
+  rawElapsed pin -> discriminator; +6 universality probe) and (iv) is
+  DONE pending that universality fold-in decision.
+
 ## 797 — [bounded worker, 2026-07-31 ~17:15] turn17-rung1's 28-frame residual FIXED — 90/118 → 112/118; remaining 6 frames re-attributed to the already-tracked idle-bounce phase family
 
 - **State:** master green — tsc clean, focused vitest (fightSubmenu 57/
