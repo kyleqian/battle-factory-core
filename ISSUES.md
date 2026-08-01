@@ -5,14 +5,15 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-**Two kinds of entry live here — do not confuse them.** Only `#39` below is
-open, actionable debt. `#38`, `#18`, and `#5` are **settled records, not
-work**: each was investigated to root cause and then parked or accepted by
-decision. They stay because ROADMAP acceptance lines cite them by number as
-the recorded reason specific pixel diffs are accepted (`#5` at ROADMAP:127,
-142, 150, 163, 175; `#18` at :176; `#38` at :503) — deleting them would
-orphan those citations and lose the *why* behind a green tick. Do not reopen
-one without a user decision, and do not count them as backlog.
+**Two kinds of entry live here — do not confuse them.** `#39`, `#55`, `#56`,
+`#61`, and `#62` are open, actionable debt. `#38`, `#18`, and `#5` are
+**settled records, not work**: each was investigated to root cause and then
+parked or accepted by decision. They stay because ROADMAP acceptance lines
+cite them by number as the recorded reason specific pixel diffs are accepted
+(`#5` at ROADMAP:127, 142, 150, 163, 175; `#18` at :176; `#38` at :503) —
+deleting them would orphan those citations and lose the *why* behind a green
+tick. Do not reopen one without a user decision, and do not count them as
+backlog.
 
 # Open
 
@@ -23,25 +24,19 @@ one without a user decision, and do not count them as backlog.
 **700/751** (up from 650/751; frame 536 fixed 2026-07-31 evening) with every divergent frame
 characterized in `docs/trainer-pic-off-window-scout.md` §D. Remainder:
 
-1. **RESOLVED by route discrimination (2026-07-31).** The species
-   formula is proven exact on FOUR species via `factoryLegal` fixtures
-   (GRIMER/KADABRA/DELCATTY/lab-ONIX at 0-tick residual —
-   `docs/onix-readylag-destin-bench-probes.md` probe 1); the 6-tick
-   surplus is ROUTE-specific to the canonical anchor intro. Production
-   now discriminates on the existing route-level fact
-   `isCanonicalAnchorIntro` (`adoptedInitialOpponent !== undefined &&
-   battleIndex === 0`): species formula on staged/generated intros,
-   calibrated flat lag on the canonical anchor. 715/715 held, YOSHI
-   699/751, 128/128 held. The +6 is now RAM-NAMED (2026-07-31 evening,
-   `docs/issue56-plus6-route-term.md`): species formula confirmed exact
-   at `PlayerBufferExecCompleted` (tick 1738, 1-tick rounding class),
-   then +3 `CHOOSEACTION`-dispatch idle gap + +3 opponent Factory-AI
-   action-resolution latency = 1744 — a real post-completion mechanism,
-   not a fudge. Constant stays as-is. Open remainder: measure the same
-   `gBattleControllerExecFlags` boundary on a staged `factoryLegal`
-   fixture to learn whether the 3+3 tail is universal (then fold into
-   the shared formula) or canonical-route-specific (then keep the
-   route term with this doc as its derivation).
+1. **RESOLVED non-universal; route term retained (2026-08-01).** The
+   species formula remains proven on GRIMER/KADABRA/DELCATTY/lab-ONIX.
+   Reusable Scene-OFF RAM evidence now names the complete controller tail:
+   canonical ONIX is completion **1738** → both `CHOOSEACTION` bits **1741**
+   → player-only **1744** (+3/+3); staged YOSHI is **1847→1850→1853**
+   (+3/+3), but the committed same-player-species staged ONIX fixture is
+   **1885→1888→1890** (+3/+2). Thus the dispatch/AI-resolution mechanism is
+   shared, while its duration is decision-dependent—not one universal six-
+   tick constant. `isCanonicalAnchorIntro`'s existing calibrated route term
+   stays; no species/trainer/tick selector or speculative production change
+   was added. Reproducer and interpretation:
+   `docs/issue56-plus6-route-term.md` main-lane follow-up and
+   `tools/probe/dump-canonical-anchor-readylag-ram.py`.
 2. **Isolated frame 444** (536 RESOLVED 2026-07-31, `7467636e`: real
    onset app-relative 550; root cause was a call-site bug —
    `renderGeneratedBattleStartOpponentRelease`'s pre-player-release
@@ -62,12 +57,18 @@ characterized in `docs/trainer-pic-off-window-scout.md` §D. Remainder:
    MAGNETON's bar and icon widgets destroy on TWO different ticks (bar
    first) while YOSHI and intro-off destroy in sync, so
    `opponentSummaryExitElapsed`'s single shared `elapsed` clock
-   structurally cannot make MAGNETON pixel-exact both ways; intro-off's
-   real destroy tick RAM-confirmed at abs-1492 but its `rawElapsed`
-   there is unresolved (~5-7-frame app-side anchor disagreement). Next:
-   pin intro-off's real `handoffTick`/`rawElapsed` at abs-1492, then
-   revisit the discriminator with the three-fixture table; frame 444
-   also carries a second, separate materialize-column-shift defect
+   structurally cannot make MAGNETON pixel-exact both ways. **Round 4
+   checkpoint (2026-07-31):** intro-off's semantic handoff is now pinned
+   at source `t=1459`; at its RAM-confirmed abs-1492 destruction,
+   `rawElapsed=31` exactly. Its task state (`Task_HidePartyStatusSummary`
+   terminal `data[15]=-1`) and pending `gMain.oamBuffer` exit rows are
+   identical to YOSHI's synced raw-31 terminal state, yet those two want
+   opposite bar display-tail clocks. So raw elapsed, current source-task
+   readiness, and pending OAM cannot safely discriminate; no per-route/
+   species/tick fit was landed. MAGNETON's split does justify a future
+   typed per-widget bar/icon lifecycle, but it needs a source-owned
+   hardware-OAM/display-latch readiness event first. Frame 444 also carries
+   a second, separate materialize-column-shift defect
    (`docs/issue56-residual-probe.md` Q1) never in this fix's scope. The idle-menu-bounce family
    is **closed as no-app-bug** (2026-07-31, `432e16aa`): the oscillator
    is RAM-proven exact and species-independent, and the decisive
@@ -164,9 +165,19 @@ level/healthbox/sent-out adapter-derived), Sitrus heal half `54278249`
 adapter-derived, timing curves kept, `TURN5_PRESENTATION_TIMING_NOT_
 STAGED` deleted), and the adapter swapped onto the #57-fixed shared
 staging helper (`14c4295b`, ~120-line local workaround deleted). All
-nine turn5 pins + five insurance pins held at every step;
-`turn5KoDismissElapsed`/`turn5Resolved` mirroring remains (unchanged
-consumers, same as turn13's). Rank 4 is **fully retired** (2026-07-31,
+nine turn5 pins + five insurance pins held at every step. The dead
+`turn5KoDismissElapsed` mirror is retired (`88fd05f6`): its sole reader was
+its own one-shot guard, while render/continuation already consumed the staged
+lifecycle. `turn5Resolved` remains because turn-6 dispatch, PP reconstruction,
+and the next reopen gate still read it (same predecessor class as turn13's).
+**Rank-2 predecessor audit (2026-08-01):** `turn13Resolved` is not safely
+replaceable by the existing FLY owner. The predecessor submenu requires
+DRAGON_BREATH **18/20**, while that already-completed charge resolution carries
+**17/20**; the adapter also lacks typed redraw/input-ready and persisted-slot
+facts. Its adjacent `opponentFaintDismissElapsed` is live in cursor freeze and
+switch-in continuation. Exact census and Tier-1 pin:
+`docs/rank2-turn13resolved-predecessor-audit.md`. No runtime field retired.
+Rank 4 is **fully retired** (2026-07-31,
 all 5 slices): `174cc388` ROCK_SLIDE tails; `441ddf83`+`6aba6662`
 turn-7/8 FEATHER_DANCE staged+flipped; `0769ccc6` stat-fall banner
 reads each turn's own staged stat; `40c969e5`+`ef971686` BIND
@@ -176,7 +187,8 @@ bridge + additive entryLabel param landed). Rank 9 is **fully
 retired** (2026-07-31, `3f850e37`): postwin fade + WIN-flip census
 moved onto `terminalResolution`, four legacy Turn-17 clock mirrors +
 dead `turn17.ts` deleted (`turn17MenuRedrawElapsed`'s live redraw
-anchor rehomed as `FightSubmenuState.menuRedrawElapsed`). Rank-5
+anchor was rehomed as `FightSubmenuState.menuRedrawElapsed`, then retired by
+rank 8 in favor of the following-resolution owner's relative redraw edge). Rank-5
 policy ADOPTED (user decision 2026-07-31; evidence
 `docs/rank5-effect-visibility-scout.md`, plan in inventory row 5):
 delete class-(c) move bodies on the OFF route, re-time class-(b)
@@ -373,61 +385,136 @@ ROADMAP S10 §3 requires one already-exact window to be re-driven from semantic
 events as a proof of the seam; that conversion, window by window, is the
 retirement path. AGENTS.md already forbids adding new turn-keyed branches.
 
-## #60 — `turn2-endeavor.json`/`turn2-dragonbreath.json` already red on master, unrelated to the canonical dispatcher
+**Rank-7 locked-action grouping landed (2026-08-01, `b464a6e7`,
+`72546da6`):** Factory fresh start now owns the source option boundary:
+`battleScene: "off"` initializes `HITMARKER_NO_ANIMATIONS` exactly once while
+standalone callers choose explicitly. The generated round route selects OFF.
+Full-turn message receipts freeze Cmd_printstring's attacker/current move/move
+position, so `STRINGID_USEDMOVE` never needs to discover a same-action PP
+receipt; snapshot-less staged fixtures retain their old compatibility bridge.
+The driver stops at a real follow-up trainer command and appends that untouched
+AI/reducer receipt as a second immutable resolution segment. Fixed generated
+Taillow FLY proves charge text, hide through the opponent action, locked no-PP
+FLY text, restoration, and request 4; fresh seam coverage also pins
+Assist-called FLY and opponent ownership. Thus rank 7's typed two-turn group
+is closed. The later owner handoff below also retires its exact renderer
+mirrors.
 
-**Repro note (2026-07-31 night):** both named traces were retired by rank-6
-slice 2's landing (`4c793748`, superseded by `turn2-endeavor-off.json`/
-`turn2-dragonbreath-off.json`, unrelated to this entry's own generated-route
-bug). To reproduce: `git show 01eac159:tools/compare/traces/turn2-
-endeavor.json > /tmp/t.json` (or `...turn2-dragonbreath.json`), then `npm
-run compare -- /tmp/t.json`.
+**Rank-7 opponent-owner bridge landed (2026-08-01, `30b61236`, `fea91d54`):** a new
+source-driven adapter stages the exact Onix/Murkrow boundary under Scene OFF
+through the production full-turn reducer. It publishes the charge/hide/
+airborne-miss receipt, then preserves the real intervening player request and
+publishes the locked strike/restoration/4→0/faint/forced-request receipt. The
+legacy exact renderer now consumes the charge, strike, and faint lines from
+those typed commands, and core constructs its forced selector from genuine
+request **4** (legal slots **1/2**) rather than `CANONICAL_FORCED_SWITCH_REQUEST`
+request 0. The live round presenter now retains that charge resolution under
+the generic locked battler/current-move/PP-slot identity while the genuine
+player request owns its own command UI. Submission reclaims the owner and
+appends the untouched strike receipt; no second PP write occurs, visibility
+restores from the immutable first segment, and a typed forced request advances
+the existing generic `PartySelectState` directly. The old one-segment selector
+guard is gone. Scene ON/OFF logical outcomes and the seven-battle cursor
+regression are pinned. `8caad013` additionally hardens recharge and Bide
+action snapshots, and merged OFF evidence `adfb746c`/`49e18075` records the
+124-capture inverse lifecycle.
 
-**Discovered** 2026-07-31 (rank-6 slice 1's own boundary-insurance check).
-Both traces render through `core.ts`'s `renderWithoutFactoryTerminal` ->
-`renderBattleResolutionPresentation` -> `renderBattleResolutionSceneOffView`
-(the GENERATED-route presentation adapter, not the canonical Battle 1
-turn-by-turn dispatcher in `battleScene.ts`'s `renderBattleScene`) — an
-unexpected route for traces that look like plain canonical-battle turn-2
-windows. `turn2-endeavor.json` throws `Scene OFF typed stat adapter cannot
-draw battler 1 evasion 7->8` (the `view.effect.battler !== 0 || to >=
-from` guard #59 left in place, `battleScene.ts` ~32759 — a RISE on the
-opponent's own battler, a case #59's fix never claimed to cover).
-`turn2-dragonbreath.json` doesn't throw but renders 0/237, large diffs
-throughout. **Confirmed pre-existing, not a regression**: `git stash`
-against rank-6 slice 1's own changes reproduces byte-identical output
-(same error, same line-shifted-only stack trace; same diff-by-diff summary)
-on master at `f0621d47`. Not investigated further this step (out of the
-canonical-turn-1 window this step owns) — leads for whoever picks it up:
-why a canonical-battle-shaped trace with no `appRoute`/`oracleProfile`
-field takes the generated-route path at all, and whether #59's own guard
-needs a battler-1/rising case the way its own drop-only fix didn't attempt.
+**Rank-7 exact owner mirrors retired (2026-08-01, `1f276c95`, `c0821a65`):**
+the canonical adapter now appends the strike to the same immutable charge
+resolution identity. A typed compatibility owner carries that resolution and
+only its published forced selector; segment ownership selects charge versus
+strike presentation, and the source receipt supplies PP. `turn14Resolved` and
+`turn15PartySelect` are deleted from production and tests. Differential app
+replay against clean `8caad013` preserved every ordinary and +30 delayed
+historical capture byte-for-byte: charge **213**, strike **256**, selector
+**200/200**, five send-out rungs **43/46/16/144/195** and their delayed twins,
+**1,496 captures** total. The reproducible census falls **2,526→2,506 refs**
+and **33,135→33,125 LOC**. No mechanics/RNG/AI/outcome, animation, trace or
+capture list, ratchet/barrier, recording import, or prohibited selector was
+added. Rank 7 is closed; #39 remains open at rank 8 and earlier mirror debt.
 
-## #61 — turn 3's own reopen shows the FIGHT submenu one tick early (frame 3852) vs. the real ONIX action-menu dwell
+**Rank-8 Scene-OFF status-icon receipt landed (2026-08-01, `80c5d6af`):**
+the generic resolution presenter now keeps `set-battler-status-data` as the
+logical raw write and projects the existing `status-icon-update` as an
+immutable one-callback `status-icon` command (`battler`, `status1`, `status2`,
+and event sequence). The displayed healthbox status and the round controller's
+`displayedStatus1` commit only when that receipt completes. The text resolver
+gets `B_EFF_NAME_WITH_PREFIX` from the immediately pending raw status target,
+not a move/species inference. A legal generated Factory route proves the
+nonterminal burn order through the real command/presentation seam and next
+request; the Scene-OFF event list deliberately contains no status-animation
+receipt. The authoritative oracle evidence remains the already-verified
+**42 captures / 42 capture-states** in
+`docs/fire-punch-burn-lifecycle-off-evidence.md`, not a new pixel claim.
+**Rank-8 exact owner mirrors retired (2026-08-01, `d410cfe5`):** the exact
+post-switch MAGBY/MURKROW boundary now runs through the production full-turn
+reducer at the documented eight-call RNG cursor. Its immutable resolution
+owns FAINT ATTACK damage, FIRE PUNCH damage/PP, raw burn, burn text, the
+one-callback status-icon receipt, residual damage, and genuine next command.
+The compatibility owner retains that following resolution and its relative
+redraw edge until the already-typed terminal owner begins. Deleted
+`turn16Resolved` and `FightSubmenuState.menuRedrawElapsed`; no replacement
+episode selector was added. Clean-`60acda9c` differential app replay held the
+requested Turn-16/Turn-17 rungs byte-for-byte (**2,041 captures**), plus the
+delayed Turn-16 rung and Turn-17 rung 6b (**2,163 total**). Census falls
+**2,506→2,496 refs / 33,125→33,124 LOC**. Rank 8 is closed; #39 remains open
+only for the earlier mirror/dispatcher debt inventoried in
+`docs/battle-scene-retirement-inventory.md`.
 
-**Discovered** 2026-07-31 (rank-6 slice 3's own acceptance run against
-`turn3-endeavor-off.json`). At the single tick 3852 (6 ticks past turn 3's
-own reopen A-press, 3846-3847), the oracle still shows the top-level
-"What will ONIX do?" action menu, while the app has already switched to the
-FIGHT submenu's move list (ROCK SLIDE/DRAGONBREATH/BIND/SANDSTORM). Every
-other tick in the window (3846-4260, both `turn3-endeavor-off.json` and
-`turn3-rockslide-off.json`) is exact. **Confirmed pre-existing, not a rank-6
-regression**: `git stash` against this slice's own changes reproduces the
-same mismatch on master at `594c40c7` (in fact worse — 8047px there vs
-7278px after this slice's own fixes, since this slice's bounce-chain
-corrections happened to also tighten this exact frame's sprite/healthbox
-area). Root cause not isolated this session (out of time) — the generic
-`sm.openElapsed`/`FIGHT_SUBMENU_OPEN_DELAY`/`revealTick` mechanism
-(`battleScene.ts`, ~11 call sites) governs the action-menu-vs-submenu
-reveal boundary and is shared by every turn's own reopen; turn 3's own
-reopen (a 2-frame A-press at 3846-3847, then a 30-tick dwell, then a
-2-frame UP-nav, then confirm at 3891) is the first reopen sequence dense
-enough to sample the exact `revealTick` boundary tick itself, so this may
-be a `t >= revealTick` vs `t > revealTick` off-by-one that every other
-turn's own reopen simply never landed a test frame on. Leads for whoever
-picks it up: check `sm.openElapsed`'s own setter (`battleMenu.ts`) against
-the real hardware's own reveal boundary directly (RAM probe, not pixel
-inference), and grep the ~11 `revealTick` call sites before changing the
-shared comparison (turn 1/2/4's own reopens must not regress).
+## #61 — Scene-OFF FIGHT reveal needs a source-owned DMA-ready event, not a fixed delay
+
+**Bounded evidence (2026-07-31, `bc988ef9`):** the reproducible OFF-profile
+watch specs and full source/RAM analysis live in
+`docs/issue61-fight-submenu-reveal-boundary.md`. The real player controller
+reveals the move list only when `HandleChooseMoveAfterDma3` observes the BG
+copy queue idle, writes `gBattle_BG0_Y=320`, and installs
+`HandleInputChooseMove`. Initial, turn-2, and turn-4 openings cross after one
+DMA-busy poll; turn 3 crosses after two because its busy bitfield remains
+nonzero for one extra poll. Pixels agree: the oracle keeps the action menu at
+frame 3852 and reveals on 3853, while the app reveals at 3852. Every other
+turn-3 capture is exact, and all committed turn-1/2/4 OFF insurance traces
+remain exact.
+
+**Rejected fix:** globally changing `t < revealTick` to `t <= revealTick`, or
+increasing `FIGHT_SUBMENU_OPEN_DELAY`, fixes turn 3 but makes the other exact
+openings one frame late. Do not add a turn-3/tick/cursor exception.
+
+**Next:** the generic command-presentation owner must expose a source-derived
+DMA-ready reveal event (or a faithful bounded BG-copy queue model); both
+legacy Scene-OFF renderers and their input gate must consume that one semantic
+transition. Acceptance is turn 3 **255/255**, every committed turn-1/2/4 OFF
+trace unchanged, synthetic initial/reopen boundary tests, and no new
+battle/turn/absolute-tick routing.
+
+## #62 — Retired turn-2-shaped reproducers remain pixel-red on the generated OFF route after #60's crash fix
+
+**Bounded evidence (2026-07-31, `f1bc60a2`):** recovered the deleted
+`turn2-endeavor.json` and `turn2-dragonbreath.json` byte-for-byte from
+`01eac159` into a fresh `/tmp` directory, then added explicit
+`oracleProfile: battle-scene-off` only to scratch copies so the main-lane
+oracle contract was unambiguous. Both now execute through
+`renderWithoutFactoryTerminal` -> `renderBattleResolutionPresentation` ->
+`renderBattleResolutionSceneOffView` without throwing, including the exact
+battler-1 EVASION 7→8 rise that defined #60. Pixel results remain separately
+red: Endeavor **0/77** (captures 2894–2999) and Dragon Breath **0/237**
+(captures 3121–3846).
+
+**Why this is not #60:** Dragon Breath was already **0/237** before the stat
+adapter changed (the old #60 evidence pinned that on `f0621d47`), and its
+recovered capture window never exercised the former battler-1-rise throw.
+The adapter change is confined to typed stat-banner direction, palette, and
+affected-battler geometry; it does not alter routing, turn timing, damage,
+RNG, order, or DRAGON_BREATH presentation. Endeavor's now-visible red frames
+likewise begin only after removing the crash barrier. These retired,
+profile-less inputs are reproducers, not canonical fixtures; their explicit
+OFF successors from rank 6 remain the accepted exact windows.
+
+**Next if prioritized:** first decide whether old profile-less inputs are
+supposed to select the generated default route or the historical canonical
+route. Only then characterize the remaining idle-bounce/field-art/timing
+families with a short explicit-OFF probe. Do not revive either deleted trace,
+extend the canonical Battle-2 march, or fit the residual with trace/tick
+special cases.
 
 # Settled records (not open work — see the note at the top of this file)
 

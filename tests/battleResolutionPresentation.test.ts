@@ -20,6 +20,7 @@ import {
 import {
   renderBattleResolutionSceneOffView,
   renderSceneOffTurnView,
+  sceneOffStatStageBannerView,
 } from "../src/engine/battleScene.ts";
 import {
   createBattleState,
@@ -209,6 +210,26 @@ function damageResolution(): BattleResolutionPresentationState {
 }
 
 describe("battle resolution presentation receipt ownership", () => {
+  it("uses a frozen Cmd_printstring action snapshot when a locked action has no PP receipt", () => {
+    const resolution = createBattleResolutionPresentation(inputFor([
+      event(0, {
+        kind: "message",
+        messageId: "STRINGID_USEDMOVE",
+        substitutions: [],
+        actionSnapshot: {
+          attacker: 0,
+          currentMove: 19, // FLY, not the displayed slot-0 ROCK SLIDE.
+          currentMovePosition: 2,
+        },
+      }),
+    ], NEXT_COMMAND));
+
+    expect(resolution.segments[0]!.commands).toMatchObject([
+      { type: "message", lines: ["ONIX used", "FLY!"] },
+      { type: "turn-end" },
+    ]);
+  });
+
   it("resolves a no-effect defender from the preceding semantic move owner", () => {
     const resolution = createBattleResolutionPresentation(inputFor([
       event(0, {
@@ -465,6 +486,81 @@ describe("battle resolution presentation receipt ownership", () => {
       targetInvisible: true,
     });
     expect(firstBlink.visibility.opponent.sprite).toBe(false);
+  });
+
+  it("projects typed sprite visibility receipts with relative duration and persistent render state", () => {
+    const resolution = createBattleResolutionPresentation(inputFor([
+      event(0, {
+        kind: "set-battler-sprite-visibility",
+        battler: 0,
+        invisible: false,
+      }),
+      event(1, {
+        kind: "set-battler-sprite-visibility",
+        battler: 1,
+        invisible: true,
+      }),
+      event(2, {
+        kind: "message",
+        messageId: "STRINGID_BUTNOTHINGHAPPENED",
+        substitutions: [],
+      }),
+      event(3, {
+        kind: "set-battler-sprite-visibility",
+        battler: 1,
+        invisible: false,
+      }),
+    ], NEXT_COMMAND));
+
+    expect(resolution.segments[0]!.commands).toMatchObject([
+      {
+        type: "sprite-visibility",
+        eventSequence: 0,
+        battler: 0,
+        visible: true,
+        timing: { minimumFrames: 1 },
+      },
+      {
+        type: "sprite-visibility",
+        eventSequence: 1,
+        battler: 1,
+        visible: false,
+        timing: { minimumFrames: 1 },
+      },
+      { type: "message" },
+      {
+        type: "sprite-visibility",
+        eventSequence: 3,
+        battler: 1,
+        visible: true,
+        timing: { minimumFrames: 1 },
+      },
+      { type: "turn-end" },
+    ]);
+    expect(battleResolutionCommandDuration(
+      resolution.segments[0]!.commands[1]!,
+      resolution.field,
+    )).toBe(1);
+    expect(isBattleResolutionCommandComplete(atRenderClock(resolution, 1, 0)))
+      .toBe(true);
+
+    // The ordinary visible receipt is a pass-through and never hides player.
+    expect(createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, 0, 0),
+    ).visibility.player.sprite).toBe(true);
+    expect(createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, 1, 0),
+    ).visibility.opponent.sprite).toBe(false);
+    // The following command observes the persistent hidden state.
+    expect(createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, 2, 0),
+    ).visibility.opponent.sprite).toBe(false);
+    expect(createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, 3, 0),
+    ).visibility.opponent.sprite).toBe(true);
+    expect(createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, 4, 0),
+    ).visibility.opponent.sprite).toBe(true);
   });
 
   it("retains a genuine player forced-switch boundary behind a button-gated faint lifecycle", () => {
@@ -860,7 +956,7 @@ describe("battle resolution typed Scene-OFF renderer", () => {
     )).toBe(true);
   });
 
-  it("projects stat/status effects and commits a status icon only after its command", () => {
+  it("projects stat effects and defers status display to the typed status-icon receipt", () => {
     const statResolution = createBattleResolutionPresentation(inputFor([
       event(0, {
         kind: "stat-stage-change",
@@ -917,9 +1013,44 @@ describe("battle resolution typed Scene-OFF renderer", () => {
       event(0, {
         kind: "set-battler-status-data",
         battler: 1,
-        status1: 1 << 3,
+        status1: 1 << 4,
+      }),
+      event(1, {
+        kind: "message",
+        messageId: "STRINGID_PKMNWASBURNED",
+        substitutions: [],
+      }),
+      event(2, {
+        kind: "status-icon-update",
+        battler: 1,
+        status1: 1 << 4,
+        status2: 0,
       }),
     ], NEXT_COMMAND));
+    const [rawStatus, burnMessage, statusIcon] = statusResolution.segments[0]!.commands;
+    expect([rawStatus, burnMessage, statusIcon].map((command) => command!.type))
+      .toEqual(["status", "message", "status-icon"]);
+    expect(rawStatus).toMatchObject({ type: "status", eventSequence: 0 });
+    expect(burnMessage).toMatchObject({
+      type: "message",
+      eventSequence: 1,
+      lines: ["Foe KABUTO was burned!"],
+    });
+    expect(statusIcon).toMatchObject({
+      type: "status-icon",
+      eventSequence: 2,
+      battler: 1,
+      status1: 1 << 4,
+      status2: 0,
+      timing: { minimumFrames: 1 },
+    });
+    if (statusIcon?.type !== "status-icon") throw new Error("expected a typed status-icon receipt");
+    expect(Object.isFrozen(statusResolution.segments[0]!.commands)).toBe(true);
+    expect(Object.isFrozen(statusIcon)).toBe(true);
+    expect(Object.isFrozen(statusIcon.timing)).toBe(true);
+    expect(
+      battleResolutionCommandDuration(statusIcon, statusResolution.field),
+    ).toBe(1);
     expect(
       createBattleResolutionPresentationRenderView(
         atRenderClock(statusResolution, 0, 4),
@@ -929,67 +1060,168 @@ describe("battle resolution typed Scene-OFF renderer", () => {
       createBattleResolutionPresentationRenderView(
         atRenderClock(statusResolution, 1, 0),
       ).field.opponent.status,
-    ).toBe("poison");
+    ).toBe("none");
+    expect(
+      createBattleResolutionPresentationRenderView(
+        atRenderClock(statusResolution, 2, 0),
+      ).field.opponent.status,
+    ).toBe("none");
+    expect(
+      createBattleResolutionPresentationRenderView(
+        atRenderClock(statusResolution, 3, 0),
+      ).field.opponent.status,
+    ).toBe("burn");
+
+    const clearResolution = createBattleResolutionPresentation(inputFor([
+      event(0, {
+        kind: "set-battler-status-data",
+        battler: 1,
+        status1: 0,
+      }),
+      event(1, {
+        kind: "status-icon-update",
+        battler: 1,
+        status1: 0,
+        status2: 0,
+      }),
+    ], NEXT_COMMAND));
+    const clearFromBurn = Object.freeze({
+      ...clearResolution,
+      field: Object.freeze({
+        ...clearResolution.field,
+        opponent: Object.freeze({
+          ...clearResolution.field.opponent,
+          status: "burn" as const,
+        }),
+      }),
+    });
+    expect(
+      createBattleResolutionPresentationRenderView(
+        atRenderClock(clearFromBurn, 1, 0),
+      ).field.opponent.status,
+    ).toBe("burn");
+    expect(
+      createBattleResolutionPresentationRenderView(
+        atRenderClock(clearFromBurn, 2, 0),
+      ).field.opponent.status,
+    ).toBe("none");
   });
 
-  it("ISSUES #59: opponent-side stat-drop family renders through the real generated-route Scene-OFF adapter without crashing", () => {
-    // FEATHER_DANCE's own real shape (EFFECT_ATTACK_DOWN_2, sharply falls):
-    // opponent-inflicted, ATK, 6 -> 4, landing on the PLAYER's own battler
-    // (battler 0). Before this fix, `renderBattleResolutionSceneOffView`
-    // only recognized stat==="accuracy" here (the turn13 SAND_ATTACK
-    // precedent) and threw `Scene OFF typed stat adapter cannot draw
-    // battler 0 attack 6->4` for every other stat -- reachable from the
-    // real production render path (core.ts's `renderWithoutFactoryTerminal`
-    // -> `battleResolutionPresentation` -> `drawScene`), i.e. any generated-
-    // route battle, not just the canonical fixed trace.
+  it("ISSUES #59/#60: supports rise/drop on either battler through the generated-route Scene-OFF adapter", () => {
+    const cases = [
+      { battler: 0 as const, stat: "attack" as const, from: 6, to: 4, direction: "decrease" as const },
+      { battler: 0 as const, stat: "special-defense" as const, from: 6, to: 7, direction: "increase" as const },
+      { battler: 1 as const, stat: "defense" as const, from: 6, to: 5, direction: "decrease" as const },
+      // #60's exact novelty gate: the opponent's own DOUBLE_TEAM receipt.
+      { battler: 1 as const, stat: "evasion" as const, from: 7, to: 8, direction: "increase" as const },
+    ];
+
+    for (const testCase of cases) {
+      const resolution = createBattleResolutionPresentation(inputFor([
+        event(0, {
+          kind: "stat-stage-change",
+          battler: testCase.battler,
+          stat: testCase.stat,
+          from: testCase.from,
+          to: testCase.to,
+        }),
+      ], NEXT_COMMAND));
+      const view = createBattleResolutionPresentationRenderView(
+        atRenderClock(resolution, 0, 12),
+      );
+      expect(view.effect).toMatchObject({
+        type: "stat",
+        battler: testCase.battler,
+        stat: testCase.stat,
+        from: testCase.from,
+        to: testCase.to,
+        age: 12,
+      });
+      if (view.effect?.type !== "stat") throw new Error("expected typed stat effect");
+      expect(sceneOffStatStageBannerView(view.effect)).toMatchObject({
+        battler: testCase.battler,
+        stat: testCase.stat,
+        direction: testCase.direction,
+      });
+
+      const baseline = new Uint8Array(240 * 160 * 4);
+      renderBattleResolutionSceneOffView(baseline, { ...view, effect: null });
+      const first = new Uint8Array(240 * 160 * 4);
+      const second = new Uint8Array(240 * 160 * 4);
+      renderBattleResolutionSceneOffView(first, view);
+      renderBattleResolutionSceneOffView(second, view);
+      expect(first.every((value, index) => value === second[index])).toBe(true);
+
+      const art = testCase.battler === 0
+        ? view.fieldArt.player
+        : view.fieldArt.opponent;
+      const changedPixels: number[] = [];
+      for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+        const offset = pixel * 4;
+        if (
+          first[offset] !== baseline[offset]
+          || first[offset + 1] !== baseline[offset + 1]
+          || first[offset + 2] !== baseline[offset + 2]
+        ) changedPixels.push(pixel);
+      }
+      expect(changedPixels.length).toBeGreaterThan(0);
+      expect(changedPixels.every((pixel) => {
+        const x = pixel % 240;
+        const y = Math.floor(pixel / 240);
+        return x >= art.origin.x
+          && x < art.origin.x + art.pic.tileset.columns * 8
+          && y >= art.origin.y
+          && y < art.origin.y + art.pic.tileset.rows * 8;
+      })).toBe(true);
+    }
+  });
+
+  it("ISSUES #60: renders every command completion edge of an opponent rise deterministically", () => {
     const resolution = createBattleResolutionPresentation(inputFor([
-      event(0, { kind: "stat-stage-change", battler: 0, stat: "attack", from: 6, to: 4 }),
-      event(1, { kind: "message", messageId: "STRINGID_DEFENDERSSTATFELL", substitutions: [] }),
+      event(0, { kind: "stat-stage-change", battler: 1, stat: "evasion", from: 7, to: 8 }),
+      event(1, { kind: "message", messageId: "STRINGID_DEFENDERSSTATROSE", substitutions: [] }),
     ], NEXT_COMMAND));
-    const view = createBattleResolutionPresentationRenderView(
-      atRenderClock(resolution, 0, 12),
+    const commands = resolution.segments[0]!.commands;
+    for (let commandIndex = 0; commandIndex < commands.length; commandIndex += 1) {
+      const duration = battleResolutionCommandDuration(
+        commands[commandIndex]!,
+        resolution.field,
+      );
+      for (const age of new Set([0, duration - 1])) {
+        const view = createBattleResolutionPresentationRenderView(
+          atRenderClock(resolution, commandIndex, age),
+        );
+        const first = new Uint8Array(240 * 160 * 4);
+        const second = new Uint8Array(240 * 160 * 4);
+        renderBattleResolutionSceneOffView(first, view);
+        renderBattleResolutionSceneOffView(second, view);
+        expect(first.every((value, index) => value === second[index])).toBe(true);
+      }
+    }
+    const complete = createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, commands.length, 0, "next-command-handoff"),
     );
-    expect(view.effect).toEqual({
-      type: "stat", battler: 0, stat: "attack", from: 6, to: 4, age: 12,
-    });
-    const fb = new Uint8Array(240 * 160 * 4);
-    const blank = fb.slice();
-    expect(() => renderBattleResolutionSceneOffView(fb, view)).not.toThrow();
-    expect(fb.some((value, index) => value !== blank[index])).toBe(true);
+    expect(() => renderBattleResolutionSceneOffView(
+      new Uint8Array(240 * 160 * 4),
+      complete,
+    )).not.toThrow();
+  });
 
-    // Family coverage, not a FEATHER_DANCE special case: a different stat
-    // (e.g. FAKE_TEARS' own SPECIAL_DEFENSE drop) draws the same way.
-    const spDefResolution = createBattleResolutionPresentation(inputFor([
-      event(0, { kind: "stat-stage-change", battler: 0, stat: "special-defense", from: 6, to: 5 }),
-    ], NEXT_COMMAND));
-    const spDefView = createBattleResolutionPresentationRenderView(
-      atRenderClock(spDefResolution, 0, 12),
-    );
-    expect(() =>
-      renderBattleResolutionSceneOffView(new Uint8Array(240 * 160 * 4), spDefView)
-    ).not.toThrow();
-
-    // Out-of-scope shapes (a rise, or a drop on the OPPONENT's own battler)
-    // still barrier -- this fix widens the family, it does not remove the guard.
-    const riseResolution = createBattleResolutionPresentation(inputFor([
-      event(0, { kind: "stat-stage-change", battler: 0, stat: "attack", from: 6, to: 7 }),
-    ], NEXT_COMMAND));
-    const riseView = createBattleResolutionPresentationRenderView(
-      atRenderClock(riseResolution, 0, 12),
-    );
-    expect(() =>
-      renderBattleResolutionSceneOffView(new Uint8Array(240 * 160 * 4), riseView)
-    ).toThrow(/Scene OFF typed stat adapter cannot draw battler 0 attack 6->7/);
-
-    const opponentDropResolution = createBattleResolutionPresentation(inputFor([
-      event(0, { kind: "stat-stage-change", battler: 1, stat: "attack", from: 6, to: 5 }),
-    ], NEXT_COMMAND));
-    const opponentDropView = createBattleResolutionPresentationRenderView(
-      atRenderClock(opponentDropResolution, 0, 12),
-    );
-    expect(() =>
-      renderBattleResolutionSceneOffView(new Uint8Array(240 * 160 * 4), opponentDropView)
-    ).toThrow(/Scene OFF typed stat adapter cannot draw battler 1 attack 6->5/);
+  it("ISSUES #60: rejects malformed or directionless stat banner endpoints", () => {
+    for (const [from, to] of [[6, 6], [-1, 1], [11, 13]]) {
+      const resolution = createBattleResolutionPresentation(inputFor([
+        event(0, { kind: "stat-stage-change", battler: 1, stat: "evasion", from, to }),
+      ], NEXT_COMMAND));
+      const view = createBattleResolutionPresentationRenderView(
+        atRenderClock(resolution, 0, 12),
+      );
+      expect(() => renderBattleResolutionSceneOffView(
+        new Uint8Array(240 * 160 * 4),
+        view,
+      )).toThrow(
+        `Scene OFF typed stat adapter cannot draw battler 1 evasion ${from}->${to}`,
+      );
+    }
   });
 
   it("owns exactly six blank next-command handoff frames", () => {

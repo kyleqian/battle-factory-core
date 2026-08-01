@@ -442,6 +442,11 @@ describe("source-complete B_SCR_OP_TRYSWAPITEMS registration", () => {
       kind: "message",
       messageId: "STRINGID_PKMNOBTAINEDXYOBTAINEDZ",
       substitutions: ["LEFTOVERS", "CHOICE BAND"],
+      actionSnapshot: {
+        attacker: 0,
+        currentMove: 271, // Trick
+        currentMovePosition: 0,
+      },
     });
     // One accuracy roll for Trick plus Tackle's four standard hit-chain
     // rolls; the direct opcode test above proves tryswapitems adds none.

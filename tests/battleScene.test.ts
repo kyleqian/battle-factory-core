@@ -144,7 +144,7 @@ import { turn6FeatherSprites, turn7FeatherSprites, turn8FeatherSprites, compareF
 
 function pixelAt(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: null, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: null, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -152,7 +152,7 @@ function pixelAt(t: number, x: number, y: number): [number, number, number] {
 /** Same as `pixelAt`, but with the send-out A-press already registered at trace tick 1420 (`sendOutPressElapsed = 380`, matching the §7.2/§7.3 tests above). */
 function pixelAtSentOut(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -167,12 +167,11 @@ const TURN2_FIGHT_SUBMENU_STATE = {
   confirmElapsed: TURN2_PRESS_TICK - TICK0,
   activeMonMoveset: rentalMoveset("ONIX"),
   reopenedFromClose: false,
-  menuRedrawElapsed: null,
 };
 /** Same as `pixelAtSentOut`, but with turn 2's own FIGHT submenu already confirmed on ENDEAVOR (cursor slot 2) - the state `drawTurn2KickoffText`/`drawEndeavorSquish` render under (S7 slice E1d-retry, §15b). */
 function pixelAtTurn2(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN2_FIGHT_SUBMENU_STATE, turn1Resolved: true, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN2_FIGHT_SUBMENU_STATE, turn1Resolved: true, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -187,7 +186,6 @@ const TURN4_FIGHT_SUBMENU_STATE = {
   confirmElapsed: TURN4_PRESS_TICK - TICK0,
   activeMonMoveset: rentalMoveset("ONIX"),
   reopenedFromClose: false,
-  menuRedrawElapsed: null,
 };
 /** turn 5's own real reopen press tick (`docs/turn3-residual-probe-notes.md` "The extremum class, probed", tick 5927) - the FIGHT submenu just reopened (cursor persisted at slot 0, ROCK_SLIDE), confirm not yet registered. */
 const TURN5_REOPEN_TICK = 5927;
@@ -199,12 +197,11 @@ const TURN5_REOPEN_FIGHT_SUBMENU_STATE = {
   confirmElapsed: null,
   activeMonMoveset: rentalMoveset("ONIX"),
   reopenedFromClose: false,
-  menuRedrawElapsed: null,
 };
 /** Same shape as `pixelAtTurn4`, but for turn 5's own reopen DMA-wait window (`turn4Resolved: true`, no confirm yet) - the state `drawActionMenuIdleWindow`'s bounce-tick selection renders under (PROGRESS #183/cleanup, tick 5927). */
 function pixelAtTurn5Reopen(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN5_REOPEN_FIGHT_SUBMENU_STATE, turn1Resolved: true, turn2Resolved: true, turn3Resolved: true, turn4Resolved: true, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN5_REOPEN_FIGHT_SUBMENU_STATE, turn1Resolved: true, turn2Resolved: true, turn3Resolved: true, turn4Resolved: true, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -212,7 +209,7 @@ function pixelAtTurn5Reopen(t: number, x: number, y: number): [number, number, n
 /** Same as `pixelAtTurn2`, but turns 1-3 all resolved and the FIGHT submenu confirmed on turn 4's own ROCK_SLIDE (slot 0) - the state `drawTurn4KickoffText`/`drawTurn4RockSlideWindow` render under (S7 slice I resolution, docs/battle-turn-notes.md §22). */
 function pixelAtTurn4(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN4_FIGHT_SUBMENU_STATE, turn1Resolved: true, turn2Resolved: true, turn3Resolved: true, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN4_FIGHT_SUBMENU_STATE, turn1Resolved: true, turn2Resolved: true, turn3Resolved: true, turn4Resolved: false, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -484,7 +481,7 @@ describe("battleScene: send-out A-press #3 registration + text cadence (docs/bat
   it("state advance preserves sendOutPressElapsed once set, and elapsed keeps incrementing regardless", () => {
     let state: BattleSceneState = { ...INITIAL_BATTLE_SCENE_STATE, sendOutPressElapsed: 380 };
     state = advanceBattleScene(state);
-    expect(state).toEqual({ elapsed: 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false, turn16Resolved: false, battleOutcome: 0, terminalResolution: null, turn15PartySelect: undefined });
+    expect(state).toEqual({ elapsed: 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, resolutionOwner: null, battleOutcome: 0, terminalResolution: null });
   });
 });
 
@@ -1021,7 +1018,7 @@ describe("battleScene: S7 slice B - DOUBLE_TEAM clone vs. opponent healthbox z-o
 
     const submenu = confirmFightMove(openFightSubmenu(0, rentalMoveset("ONIX")), 879); // pressTick = TICK0+879 = 1919
     const fb = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb, { elapsed: 2075 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false });
+    renderBattleScene(fb, { elapsed: 2075 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false });
     const o = (25 * 240 + 104) * 4;
     expect([fb[o]!, fb[o + 1]!, fb[o + 2]!]).toEqual([expected.r, expected.g, expected.b]);
   });
@@ -1046,11 +1043,11 @@ describe("battleScene: S7 slice B - stat-change banner as a real scrolling BG1 (
     const o = (y * 240 + x) * 4;
 
     const fb2010 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb2010, { elapsed: 2010 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false });
+    renderBattleScene(fb2010, { elapsed: 2010 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false });
     const at2010: [number, number, number] = [fb2010[o]!, fb2010[o + 1]!, fb2010[o + 2]!];
 
     const fb2030 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb2030, { elapsed: 2030 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false });
+    renderBattleScene(fb2030, { elapsed: 2030 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false });
     const at2030: [number, number, number] = [fb2030[o]!, fb2030[o + 1]!, fb2030[o + 2]!];
 
     expect(at2010).toEqual([69, 160, 99]);
@@ -1082,11 +1079,11 @@ describe("battleScene: S7 slice C - Rock Slide's shaken BG3 vs. the player healt
     const o = (y * 240 + x) * 4;
 
     const fbUnshifted = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fbUnshifted, { elapsed: 2348 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false }); // rockSlideBg3Y === 0 here
+    renderBattleScene(fbUnshifted, { elapsed: 2348 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false }); // rockSlideBg3Y === 0 here
     const atUnshifted: [number, number, number] = [fbUnshifted[o]!, fbUnshifted[o + 1]!, fbUnshifted[o + 2]!];
 
     const fbShaken = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fbShaken, { elapsed: 2349 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false }); // rockSlideBg3Y === -7 here
+    renderBattleScene(fbShaken, { elapsed: 2349 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false }); // rockSlideBg3Y === -7 here
     const atShaken: [number, number, number] = [fbShaken[o]!, fbShaken[o + 1]!, fbShaken[o + 2]!];
 
     expect(atUnshifted).toEqual([255, 255, 255]);
@@ -1442,7 +1439,7 @@ describe("ISSUES #39 rank-6 slice 4: turn 4's own OFF-timed DOUBLE_TEAM/ROCK_SLI
   it("stat-rose text phase: render 5080 (pressTick+155, STAT_ROSE_LINE1 not yet started) vs render 5081 (pressTick+156, TURN4_OFF_STAT_ROSE_TEXT_DELAY - the message box hard-cuts to the new text) - the two whole frames differ (the text-phase gate flips), and render 5109 (deep in STAT_ROSE_LINE1's own typing) is stable through the following tick (no further text-box-wide change until ROCK_SLIDE's own hand-off)", () => {
     const frameAt = (t: number): Uint8Array => {
       const fb = new Uint8Array(240 * 160 * 4);
-      renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN4_FIGHT_SUBMENU_STATE, turn1Resolved: true, turn2Resolved: true, turn3Resolved: true, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false });
+      renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN4_FIGHT_SUBMENU_STATE, turn1Resolved: true, turn2Resolved: true, turn3Resolved: true, turn4Resolved: false, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false });
       return fb;
     };
     expect(frameAt(5080)).not.toEqual(frameAt(5081));
@@ -1518,12 +1515,11 @@ describe("S7 slice K: grovyleFaintSinkRowsAndY2 (docs/faint-switch-notes.md §7a
   });
 });
 
-// S7 slice K's headline finding (docs/battle-turn-notes.md §24, docs/
-// battle-turn-notes.md §13's own control-run evidence): this engine's FIRST
-// input-gated battle text. Both branches pinned directly against core.ts's
-// tick() - idle input never advances it (arbitrarily long), only the A edge
-// while eligible does.
-describe("S7 slice K: the KO-text dismiss gate (turn5KoDismissElapsed) - both branches", () => {
+// ISSUES #39 rank-3 mirror retirement: the old dismiss timestamp was never
+// consumed by rendering or continuation. The immutable staged KO -> switch-in
+// -> Sitrus -> next-command lifecycle owns the facts; this compatibility
+// window remains a pure presentation clock.
+describe("rank-3 turn-5 KO dismiss mirror retirement", () => {
   function stateAtTurn5Confirm(): { battleScene: BattleSceneState } {
     return {
       battleScene: {
@@ -1537,19 +1533,17 @@ describe("S7 slice K: the KO-text dismiss gate (turn5KoDismissElapsed) - both br
           confirmElapsed: 5959 - TICK0,
           activeMonMoveset: rentalMoveset("ONIX"),
           reopenedFromClose: false,
-          menuRedrawElapsed: null,
         },
         turn1Resolved: true,
         turn2Resolved: true,
         turn3Resolved: true,
         turn4Resolved: true,
-        turn5KoDismissElapsed: null,
         turn5Resolved: false,
       turn6Resolved: false,
       turn7Resolved: false,
       turn8Resolved: false,
       turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
-      turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false,
+      turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false,
       },
     };
   }
@@ -1560,36 +1554,20 @@ describe("S7 slice K: the KO-text dismiss gate (turn5KoDismissElapsed) - both br
     expect(turn5RockSlideKoDismissEligible(7000)).toBe(true);
   });
 
-  it("idle branch: hundreds of idle ticks well past the eligible tick never set turn5KoDismissElapsed - a naive fixed-delay auto-advance would be wrong here, unlike every other move-text window in this dossier", () => {
-    const state = stateAtTurn5Confirm();
-    let scene = state.battleScene;
-    for (let i = 0; i < 700; i += 1) scene = advanceBattleScene(scene); // idle past tick 6659, well past 6543 AND this trace's own 6587 stopping boundary
-    expect(scene.turn5KoDismissElapsed).toBeNull();
+  it.each([6561, 6591])("the historical dismiss A edge at trace tick %i is presentation-inert and produces exactly the same battle state as idle", (pressTick) => {
+    let state: EngineState = { ...createInitialState(), battleScene: stateAtTurn5Confirm().battleScene };
+    for (let i = 0; i < pressTick - 1 - 5959; i += 1) state = tick(state, new Set());
+    expect(state.battleScene!.elapsed).toBe(pressTick - 1 - TICK0);
+    const idle = tick(state, new Set());
+    const pressed = tick(state, new Set(["A"]));
+    expect(pressed.battleScene).toEqual(idle.battleScene);
   });
 
-  it("A-press branch (core.ts's tick(), not just advanceBattleScene): idling up to the eligible tick then pressing A sets turn5KoDismissElapsed exactly once, on that same edge, and it's stable afterward - the real committed groundtruth trace's own equivalent press (turn5-faint.json's segment at frames 6560-6561, well past this eligible tick) is what tools/compare/traces/turn5-faint.json's own 110/110 pixel match verifies end to end; this test isolates the STATE MACHINE edge itself", () => {
-    let state: EngineState = { ...createInitialState(), battleScene: stateAtTurn5Confirm().battleScene };
-    // Idle from trace tick 5960 through 6542 (one tick before eligible).
-    for (let i = 0; i < 6542 - 5959; i += 1) state = tick(state, new Set());
-    expect(state.battleScene!.elapsed).toBe(6542 - TICK0);
-    expect(state.battleScene!.turn5KoDismissElapsed).toBeNull();
-    // One more idle tick reaches the eligible tick itself - still no press yet.
-    state = tick(state, new Set());
-    expect(state.battleScene!.elapsed).toBe(6543 - TICK0);
-    expect(state.battleScene!.turn5KoDismissElapsed).toBeNull();
-    // Now press A - registers on this same edge (not deferred, not dropped).
-    state = tick(state, new Set(["A"]));
-    expect(state.battleScene!.turn5KoDismissElapsed).not.toBeNull();
-    const dismissedAt = state.battleScene!.turn5KoDismissElapsed;
-    // Further idle ticks don't change it once set.
-    for (let i = 0; i < 20; i += 1) state = tick(state, new Set());
-    expect(state.battleScene!.turn5KoDismissElapsed).toBe(dismissedAt);
-  });
-
-  it("an early A press (long before the fainted text's own cursor tick) is simply dropped, same 'gate stays closed' precedent every other press-gated window in this dossier already established", () => {
-    let state: EngineState = { ...createInitialState(), battleScene: stateAtTurn5Confirm().battleScene };
-    state = tick(state, new Set(["A"])); // trace tick 5960 - nowhere near eligible (6543)
-    expect(state.battleScene!.turn5KoDismissElapsed).toBeNull();
+  it("an early A edge is likewise presentation-inert", () => {
+    const state: EngineState = { ...createInitialState(), battleScene: stateAtTurn5Confirm().battleScene };
+    expect(tick(state, new Set(["A"])).battleScene).toEqual(
+      tick(state, new Set()).battleScene,
+    );
   });
 });
 
@@ -2388,13 +2366,11 @@ describe("S7/S8 turn 13 rung 3 (docs/turn13-notes.md §4/§5/§7): DRAGON_BREATH
           confirmElapsed: 15419 - TICK0,
           activeMonMoveset: rentalMoveset("ONIX"),
           reopenedFromClose: false,
-          menuRedrawElapsed: null,
         },
         turn1Resolved: true,
         turn2Resolved: true,
         turn3Resolved: true,
         turn4Resolved: true,
-        turn5KoDismissElapsed: 6561 - TICK0,
         turn5Resolved: true,
         turn6Resolved: true,
         turn7Resolved: true,
@@ -2403,19 +2379,19 @@ describe("S7/S8 turn 13 rung 3 (docs/turn13-notes.md §4/§5/§7): DRAGON_BREATH
         turn10Resolved: true,
         turn11Resolved: true,
         turn12Resolved: true,
-        opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false,
+        opponentFaintDismissElapsed: null, turn13Resolved: false,
       },
     };
   }
 
-  it("idle branch: idling hundreds of ticks past the eligible tick never sets opponentFaintDismissElapsed on its own - the same 'tick() must never auto-advance a KO-gated hold' rule turn5KoDismissElapsed's own precedent establishes", () => {
+  it("idle branch: idling hundreds of ticks past the eligible tick never sets opponentFaintDismissElapsed on its own", () => {
     const state = stateAtTurn13Confirm();
     let scene = state.battleScene;
     for (let i = 0; i < 700; i += 1) scene = advanceBattleScene(scene); // idle well past 16001 (the eligible tick) and past 16824 (this rung's own trace boundary)
     expect(scene.opponentFaintDismissElapsed).toBeNull();
   });
 
-  it("A-press branch (core.ts's tick()): idling up to the eligible tick then pressing A sets opponentFaintDismissElapsed exactly once, on that same edge, and it's stable afterward - mirrors turn5KoDismissElapsed's own A-press test EXACTLY, per the brief's own 'mirroring turn5KoDismissElapsed's pattern EXACTLY' instruction", () => {
+  it("A-press branch (core.ts's tick()): idling up to the eligible tick then pressing A sets opponentFaintDismissElapsed exactly once, on that same edge, and it's stable afterward", () => {
     let state: EngineState = { ...createInitialState(), battleScene: stateAtTurn13Confirm().battleScene };
     const eligibleTick = TURN13_DRAGONBREATH_PRESS_TICK + 485; // 16001
     const startElapsed = 15419 - TICK0;
@@ -2433,7 +2409,7 @@ describe("S7/S8 turn 13 rung 3 (docs/turn13-notes.md §4/§5/§7): DRAGON_BREATH
     expect(startElapsed).toBeLessThan(eligibleTick - TICK0); // sanity: the confirm precedes the eligible tick
   });
 
-  it("an early A press (long before the fainted text's own cursor tick) is simply dropped, same 'gate stays closed' precedent turn5KoDismissElapsed already established", () => {
+  it("an early A press (long before the fainted text's own cursor tick) is simply dropped", () => {
     let state: EngineState = { ...createInitialState(), battleScene: stateAtTurn13Confirm().battleScene };
     state = tick(state, new Set(["A"])); // trace tick 15420 - nowhere near eligible (16001)
     expect(state.battleScene!.opponentFaintDismissElapsed).toBeNull();

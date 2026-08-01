@@ -370,6 +370,7 @@ describe("Gate-6 R12b and R11 entry/item interactions", () => {
     const result = initializeFreshFactoryBattle({
       requestId: 1,
       rngSeed: 3,
+      battleScene: "on",
       playerParty: corpusParty(MACHAMP_SET, ITEM_WHITE_HERB),
       opponentParty: corpusParty(GRANBULL_SET),
     });
@@ -472,6 +473,7 @@ describe("Gate-6 R13 Keen Eye stat-drop specificity", () => {
     const entry = initializeFreshFactoryBattle({
       requestId: 13,
       rngSeed: 3,
+      battleScene: "on",
       playerParty: corpusParty(PIDGEOT_SET),
       opponentParty: corpusParty(GRANBULL_SET),
     });

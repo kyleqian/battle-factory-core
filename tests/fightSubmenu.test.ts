@@ -42,7 +42,16 @@ import { menuIdleBounce } from "../src/engine/battleMenu.ts";
 import { createInitialState, render, tick, type EngineState } from "../src/engine/core.ts";
 import { rockSlideOpponentHp, currentPPForActiveMon } from "../src/engine/battleMenu.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
-import { INITIAL_PARTY_SELECT_STATE } from "../src/engine/partySelect.ts";
+import {
+  CANONICAL_FORCED_SWITCH_PARTY,
+  CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
+} from "../src/engine/partySelect.ts";
+import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "../src/engine/turn15FlyResolutionAdapter.ts";
+import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "../src/engine/turn16FirePunchResolutionAdapter.ts";
+import {
+  beginBattleSceneForcedPartySelect,
+  createBattleSceneResolutionOwner,
+} from "../src/engine/battleSceneResolutionOwner.ts";
 import type { GbaButton } from "../src/input.ts";
 
 /** Onix's real moveset (`battleSetup.ts`'s own rental-pool lookup) - every `openFightSubmenu` call below needs this now that it threads the S8 `activeMonMoveset` plumbing (docs/battle-menu-notes.md §13c) through explicitly, rather than each test re-deriving it from a fully-played draft screen. */
@@ -93,18 +102,17 @@ describe("battleMenu: FightSubmenuState open/close/display-lag", () => {
       confirmElapsed: null,
       activeMonMoveset: ONIX_MOVESET,
       reopenedFromClose: false,
-      menuRedrawElapsed: null,
     });
   });
 
   it("openFightSubmenu sets openElapsed and resets cursor/displayCursor to ROCK_SLIDE", () => {
     const state = openFightSubmenu(847, ONIX_MOVESET);
-    expect(state).toEqual({ openElapsed: 847, cursor: 0, displayCursor: 0, closeElapsed: null, confirmElapsed: null, activeMonMoveset: ONIX_MOVESET, reopenedFromClose: false, menuRedrawElapsed: null });
+    expect(state).toEqual({ openElapsed: 847, cursor: 0, displayCursor: 0, closeElapsed: null, confirmElapsed: null, activeMonMoveset: ONIX_MOVESET, reopenedFromClose: false });
   });
 
   it("openFightSubmenu's optional initialCursor persists the prior turn's own cursor position (S7 slice F, docs/battle-turn-notes.md §13: turn 3's reopen rests on slot 2, DRAGON_BREATH, where turn 2's own confirm left it)", () => {
     const state = openFightSubmenu(3846, ONIX_MOVESET, 2);
-    expect(state).toEqual({ openElapsed: 3846, cursor: 2, displayCursor: 2, closeElapsed: null, confirmElapsed: null, activeMonMoveset: ONIX_MOVESET, reopenedFromClose: false, menuRedrawElapsed: null });
+    expect(state).toEqual({ openElapsed: 3846, cursor: 2, displayCursor: 2, closeElapsed: null, confirmElapsed: null, activeMonMoveset: ONIX_MOVESET, reopenedFromClose: false });
   });
 
   it("closeFightSubmenu is a no-op if not open, or already closing", () => {
@@ -138,7 +146,7 @@ function stateAtTick(firstTickAbsolute: number): EngineState {
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
-    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false },
+    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false },
   };
 }
 
@@ -150,6 +158,13 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
   it("completed forced SEND OUT resets the stale turn-15 choice and the next A opens ordinary FIGHT with MAGBY's real moveset", () => {
     const initial = createInitialState({ appRoute: "canonical-recorded" });
     const staleTurn15Choice = confirmFightMove(openFightSubmenu(19000, ONIX_MOVESET, 2), 19030);
+    const resolutionOwner = beginBattleSceneForcedPartySelect(
+      createBattleSceneResolutionOwner(
+        CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution,
+      ),
+      CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
+      CANONICAL_FORCED_SWITCH_PARTY,
+    );
     let state: EngineState = {
       ...initial,
       battleScene: {
@@ -157,19 +172,22 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
         elapsed: 20000,
         sendOutPressElapsed: 380,
         fightSubmenu: staleTurn15Choice,
-        turn14Resolved: true,
-        turn15PartySelect: {
-          ...INITIAL_PARTY_SELECT_STATE,
-          elapsed: 500,
-          cursor: "magby",
-          submenuOpen: true,
-          sendOutElapsed: 310,
-        },
+        resolutionOwner: Object.freeze({
+          resolution: resolutionOwner.resolution,
+          followingPresentation: null,
+          forcedPartySelect: {
+            ...resolutionOwner.forcedPartySelect!,
+            elapsed: 500,
+            cursor: "magby",
+            submenuOpen: true,
+            sendOutElapsed: 310,
+          },
+        }),
       },
     };
 
     state = press(state, []);
-    expect(state.battleScene!.turn15PartySelect!.sendOutElapsed).toBe(311);
+    expect(state.battleScene!.resolutionOwner!.forcedPartySelect!.sendOutElapsed).toBe(311);
     expect(state.battleScene!.fightSubmenu).toMatchObject({
       openElapsed: null,
       confirmElapsed: null,
@@ -202,17 +220,22 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
       }
     }
     expect(atOpen!.battleScene).toMatchObject({
-      turn16Resolved: true,
       terminalResolution: null,
+      resolutionOwner: {
+        followingPresentation: {
+          resolution: CANONICAL_FIRE_PUNCH_RESOLUTION.resolution,
+          confirmElapsed: 20774 - SCENE_TICK0,
+          menuRedrawElapsed: 21725 - SCENE_TICK0,
+        },
+      },
       fightSubmenu: {
         openElapsed: 21774 - SCENE_TICK0,
         confirmElapsed: null,
         cursor: 0,
-        menuRedrawElapsed: 21725 - SCENE_TICK0,
       },
     });
     expect(atConfirm!.battleScene!.fightSubmenu.confirmElapsed).toBe(21802 - SCENE_TICK0);
-    expect(atOpen!.battleScene!.fightSubmenu.menuRedrawElapsed).toBe(
+    expect(atOpen!.battleScene!.resolutionOwner!.followingPresentation!.menuRedrawElapsed).toBe(
       20774 - SCENE_TICK0 + TURN16_FIRE_PUNCH_MENU_REDRAW_DELAY,
     );
     expect(atConfirm!.battleScene!.terminalResolution!.menuRedrawElapsed).toBe(
@@ -237,8 +260,8 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
       false,
       false,
       false,
-      false,
-      true,
+      null,
+      CANONICAL_FIRE_PUNCH_RESOLUTION.resolution,
     )[0]).toBe(14);
   });
 
@@ -263,7 +286,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
       }
     }
     expect(atGap!.battleScene!.fightSubmenu.confirmElapsed).toBeNull();
-    expect(atGap!.battleScene!.fightSubmenu.menuRedrawElapsed).not.toBeNull();
+    expect(atGap!.battleScene!.resolutionOwner!.followingPresentation!.menuRedrawElapsed).not.toBeNull();
     const fb = render(atGap!);
     const pixelAt = (x: number, y: number): [number, number, number] => {
       const o = (y * 240 + x) * 4;
@@ -462,16 +485,15 @@ function stateAtTurn3Reopen(firstTickAbsolute: number): EngineState {
         confirmElapsed: TURN2_PRESS_TICK - SCENE_TICK0,
         activeMonMoveset: rentalMoveset("ONIX"),
         reopenedFromClose: false,
-        menuRedrawElapsed: null,
       },
       turn1Resolved: true,
       turn2Resolved: false,
-      turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false,
+      turn3Resolved: false, turn4Resolved: false, turn5Resolved: false,
     turn6Resolved: false,
     turn7Resolved: false,
     turn8Resolved: false,
     turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
-    turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false,
+    turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false,
     },
   };
 }
@@ -586,16 +608,15 @@ function stateAtTurn3Confirm(): EngineState {
         confirmElapsed: 3891 - SCENE_TICK0,
         activeMonMoveset: ONIX_MOVESET,
         reopenedFromClose: false,
-        menuRedrawElapsed: null,
       },
       turn1Resolved: true,
       turn2Resolved: true,
-      turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false,
+      turn3Resolved: false, turn4Resolved: false, turn5Resolved: false,
     turn6Resolved: false,
     turn7Resolved: false,
     turn8Resolved: false,
     turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
-    turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false,
+    turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false,
     },
   };
 }
@@ -758,17 +779,16 @@ function stateAtTurn4Confirm(): EngineState {
         confirmElapsed: 4925 - SCENE_TICK0,
         activeMonMoveset: ONIX_MOVESET,
         reopenedFromClose: false,
-        menuRedrawElapsed: null,
       },
       turn1Resolved: true,
       turn2Resolved: true,
       turn3Resolved: true,
-      turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false,
+      turn4Resolved: false, turn5Resolved: false,
     turn6Resolved: false,
     turn7Resolved: false,
     turn8Resolved: false,
     turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
-    turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false,
+    turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false,
     },
   };
 }
@@ -789,17 +809,16 @@ function stateAtTurn5Confirm(): EngineState {
         confirmElapsed: 5959 - SCENE_TICK0,
         activeMonMoveset: ONIX_MOVESET,
         reopenedFromClose: false,
-        menuRedrawElapsed: null,
       },
       turn1Resolved: true,
       turn2Resolved: true,
       turn3Resolved: true,
-      turn4Resolved: true, turn5KoDismissElapsed: null, turn5Resolved: false,
+      turn4Resolved: true, turn5Resolved: false,
     turn6Resolved: false,
     turn7Resolved: false,
     turn8Resolved: false,
     turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
-    turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false,
+    turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false,
     },
   };
 }
@@ -881,17 +900,16 @@ function stateAtTurn5SitrusConfirm(): EngineState {
         confirmElapsed: 5959 - SCENE_TICK0,
         activeMonMoveset: ONIX_MOVESET,
         reopenedFromClose: false,
-        menuRedrawElapsed: null,
       },
       turn1Resolved: true,
       turn2Resolved: true,
       turn3Resolved: true,
-      turn4Resolved: true, turn5KoDismissElapsed: 6561 - SCENE_TICK0, turn5Resolved: false,
+      turn4Resolved: true, turn5Resolved: false,
     turn6Resolved: false,
     turn7Resolved: false,
     turn8Resolved: false,
     turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
-    turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false,
+    turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false,
     },
   };
 }

@@ -84,8 +84,30 @@ def write_capture_result(result: object, output_name: str, *, quiet: bool = Fals
         manifest["captures"].append(
             {key: value for key, value in capture.items() if key != "pngBase64"} | {"file": filename}
         )
-    (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
-    if not quiet:
+    # battleLab.preCheckpointCaptures (Battle Lab's preCheckpointCaptureFrames/
+    # preCheckpointCaptureAllFrames) is a second, separate capture list this
+    # function otherwise wouldn't know about — without this, its pngBase64
+    # fields would stay embedded in manifest.json and the stdout dump below
+    # instead of becoming files, same as the plain captures array above.
+    battle_lab = result.get("battleLab")
+    pre_checkpoint_captures = (
+        battle_lab.get("preCheckpointCaptures") if isinstance(battle_lab, dict) else None
+    )
+    if isinstance(pre_checkpoint_captures, list) and pre_checkpoint_captures:
+        manifest_battle_lab = dict(manifest["battleLab"])
+        manifest_battle_lab["preCheckpointCaptures"] = []
+        for capture in pre_checkpoint_captures:
+            filename = f"pre-checkpoint-frame-{capture['frame']:05d}.png"
+            (output / filename).write_bytes(base64.b64decode(capture["pngBase64"]))
+            manifest_battle_lab["preCheckpointCaptures"].append(
+                {key: value for key, value in capture.items() if key != "pngBase64"} | {"file": filename}
+            )
+        manifest["battleLab"] = manifest_battle_lab
+    manifest_path = output / "manifest.json"
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
+    if quiet:
+        print(manifest_path)
+    else:
         print(json.dumps(manifest, indent=2))
 
 
@@ -155,7 +177,7 @@ def main() -> None:
         "--quiet",
         "-q",
         action="store_true",
-        help="write captures and manifest without printing the manifest",
+        help="write captures and manifest, printing only the manifest path",
     )
     run.set_defaults(function=command_run)
     lab = commands.add_parser(
@@ -173,7 +195,7 @@ def main() -> None:
         "--quiet",
         "-q",
         action="store_true",
-        help="write captures and manifest without printing the manifest",
+        help="write captures and manifest, printing only the manifest path",
     )
     lab.set_defaults(function=command_lab)
     symbols = commands.add_parser("symbols", help="look up linker-map symbol addresses")

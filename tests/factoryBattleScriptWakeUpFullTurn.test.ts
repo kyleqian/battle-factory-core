@@ -94,6 +94,11 @@ describe("Factory full-turn sleep expiry", () => {
         kind: "message",
         messageId: "STRINGID_PKMNWOKEUP",
         substitutions: [],
+        actionSnapshot: {
+          attacker: 0,
+          currentMove: TACKLE,
+          currentMovePosition: 0,
+        },
       },
     }));
     expect(completedTurn.events).toContainEqual(expect.objectContaining({

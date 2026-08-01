@@ -128,7 +128,6 @@ describe("S8 Battle-1 postwin transition", () => {
           openElapsed: 1,
           confirmElapsed: 2,
         },
-        turn16Resolved: true,
         terminalResolution,
       },
     };

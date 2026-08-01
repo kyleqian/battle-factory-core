@@ -38,6 +38,7 @@ import {
   FACTORY_RUN_AWAY_NOOP_INVARIANT,
   type FactoryFullTurnDecisionRules,
 } from "./factoryBattleScriptFullTurnDecision.ts";
+import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import { randomU16 } from "./opponentGen.ts";
 import { effectiveSpeed } from "./turnOrder.ts";
 
@@ -75,9 +76,18 @@ const HELD_ITEM_BY_ID = new Map(
   (frontierHeldItemsData.entries as readonly HeldItemRow[]).map((row) => [row.itemId, row]),
 );
 
+/** SaveBlock2's `optionsBattleSceneOff` projected at BattleStartClearSetData. */
+export type FactoryBattleScene = "on" | "off";
+
 export type FactoryFreshBattleConfig = Readonly<{
   requestId: number;
   rngSeed: number;
+  /**
+   * BattleStartClearSetData clears gHitMarker and then derives
+   * HITMARKER_NO_ANIMATIONS from this option exactly once
+   * (battle_main.c:3080-3091). It is presentation-only after this seam.
+   */
+  battleScene: FactoryBattleScene;
   /**
    * Source-owned draws between the supplied facility cursor and
    * BattleStartClearSetData. Anchor adapters may pin this from live RAM;
@@ -386,7 +396,12 @@ export function initializeFreshFactoryBattle(
     critMultiplier: 1,
     moveEffectByte: 0,
     missType: 0,
-    hitMarker: 0,
+    // `gHitMarker = 0` followed by the non-link, non-recorded option branch
+    // at battle_main.c:3081-3091. Factory singles are neither link nor
+    // recorded, so the typed fresh-start option is the entire source input.
+    hitMarker: config.battleScene === "off"
+      ? BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS
+      : 0,
     multiHitCounter: 0,
     moveHistory: {
       lastPrintedMoves: [0, 0, 0, 0],

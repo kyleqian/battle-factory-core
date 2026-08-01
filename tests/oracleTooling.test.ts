@@ -31,7 +31,7 @@ describe("bin/oracle output controls", () => {
     }
   });
 
-  it("quiet mode still writes the manifest and suppresses only stdout", () => {
+  it("quiet mode still writes the manifest, printing only its path", () => {
     const root = mkdtempSync(join(tmpdir(), "oracle-cli-quiet-"));
     const script = [
       "import runpy, sys",
@@ -49,7 +49,9 @@ describe("bin/oracle output controls", () => {
     );
 
     expect(result.status, result.stderr).toBe(0);
-    expect(result.stdout).toBe("");
+    // Path-only stdout: scripts and worker transcripts get the artifact
+    // location without the manifest dump (PAPERCUTS 2026-07-29).
+    expect(result.stdout).toBe(`${join(root, "manifest.json")}\n`);
     expect(JSON.parse(readFileSync(join(root, "manifest.json"), "utf8"))).toEqual({
       schemaVersion: 1,
       captures: [],

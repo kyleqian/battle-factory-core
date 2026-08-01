@@ -944,6 +944,42 @@ forbids new turn-keyed branches), so its slices fill gaps around Gate-5 work
 rather than blocking it. Gate 6's breadth sweep depends on Gate 5 landing
 first and follows it.
 
+**#39 rank-7 completion (2026-08-01, `1f276c95` + `c0821a65`):** the
+opponent-owned locked action now retains one immutable charge/strike
+resolution identity through its genuine intervening command and owns the
+published forced selector through send-out. The exact renderer's
+`turn14Resolved` and `turn15PartySelect` mirrors are deleted; all ordinary
+and delayed historical pins held by differential replay. Rank 8 is next.
+
+**#39 rank-8 completion (2026-08-01, `d410cfe5`):** the source-derived
+MAGBY/MURKROW Scene-OFF full turn is an immutable generic resolution whose
+commands own both HP changes, FIRE PUNCH PP, burn/status-icon sequencing,
+residual damage, and the next command. Its compatibility presentation owns
+the confirmation-relative redraw edge until the existing typed terminal owner
+takes over. `turn16Resolved` and the old submenu redraw mirror are deleted;
+all requested Turn-16/Turn-17 rungs and delayed-input insurance are
+byte-identical to clean `60acda9c` (**2,163 captures**). Rank 8 is closed;
+continue only with earlier #39 mirrors, never a canonical Battle-2 march.
+
+**#39 rank-3 mirror follow-up (2026-08-01, `88fd05f6`):** the
+`turn5KoDismissElapsed` census found one producer and only its own one-shot
+guard as a reader; render, continuation, PP, and requests never consumed it.
+The dead field/branch is deleted while the immutable staged KO→switch-in→
+Sitrus→next-command lifecycle remains authoritative. All rank-3 and insurance
+pins plus +30 delayed-dismiss variants are byte-identical to clean
+`7d65832d` (**3,505 captures total**). `turn5Resolved` remains deliberately:
+its turn-6 dispatch, PP, and next-reopen consumers need a typed terminal/
+next-command owner before that predecessor can retire.
+
+**#39 rank-2 predecessor checkpoint (2026-08-01):** the analogous
+`turn13Resolved` mirror cannot yet retire. Its existing FLY owner represents
+the already-completed following charge (DRAGON_BREATH **17/20**), not the
+post-turn-13 next-command boundary (**18/20**), and does not own that
+boundary's redraw readiness or persisted slot. The adjacent opponent-faint
+dismiss edge remains live in cursor freeze and switch-in continuation. The
+bounded census and Tier-1 proof are in
+`docs/rank2-turn13resolved-predecessor-audit.md`; no runtime behavior changed.
+
 Build the rules engine from the pinned source's actual structure: generated
 tables plus a typed Battle Script IR/interpreter and source-mapped item,
 ability, end-turn, AI, and switching hooks. Do not grow a collection of

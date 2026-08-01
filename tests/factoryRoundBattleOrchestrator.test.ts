@@ -2,8 +2,19 @@ import { describe, expect, it } from "vitest";
 import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import naturesData from "../src/data/gen/natures.json" with { type: "json" };
 import type { FactoryRentalRecord } from "../src/engine/battleScenario.ts";
-import type { BattleSubmittedDecision } from "../src/engine/battleDecisionBoundary.ts";
+import type { BattleState, BattleSubmittedDecision } from "../src/engine/battleDecisionBoundary.ts";
+import { createBattleCommandPresentation } from "../src/engine/battleCommandPresentation.ts";
+import { createFactoryAiBattleHistory } from "../src/engine/factoryAiLiveDriver.ts";
+import { createBattleResolutionPresentation } from "../src/engine/battleResolutionPresentation.ts";
+import { createBattleResolutionPresentationRenderView } from "../src/engine/battleResolutionPresentationRender.ts";
+import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "../src/engine/battleScriptSourceConstants.ts";
 import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
+import { createFreshFactoryBattle } from "../src/engine/factoryBattleStart.ts";
+import {
+  submitFactoryFullTurnDecision,
+  type FactoryFullTurnDecisionRules,
+} from "../src/engine/factoryBattleScriptFullTurnDecision.ts";
+import type { BattleScriptPartyState } from "../src/engine/battleScriptRulesContext.ts";
 import { createInitialState, render, tick } from "../src/engine/core.ts";
 import {
   advanceFactoryRoundBattleCommand,
@@ -24,18 +35,19 @@ import {
   POSTWIN_SWAP_INPUT_READY_DELAY,
 } from "../src/engine/postwin.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
+import { resolveTurn15FlyResolutionAdapter } from "../src/engine/turn15FlyResolutionAdapter.ts";
 
 const RNG_SEED = 4;
 const PLAYER_TRAINER_ID = 0x89ab_cdef;
 const natureByName = new Map(naturesData.natures.map((row) => [row.name, row.index]));
 
-function record(setId: number): FactoryRentalRecord {
+function record(setId: number, fixedIv = 31): FactoryRentalRecord {
   const set = frontierMonsData.entries[setId]!;
   const personality = natureByName.get(set.nature)!;
   const input = {
     setId,
     personality,
-    fixedIv: 31,
+    fixedIv,
     abilitySlot: (personality & 1) as 0 | 1,
     otId: PLAYER_TRAINER_ID,
   };
@@ -73,6 +85,232 @@ function createStartedGeneratedBattle(
     },
   });
   return acknowledgeAndAdvance(state);
+}
+
+function createStartedGeneratedFlyBattle(): FactoryRoundBattleOrchestratorState {
+  const playerRecords = [record(44), record(8), record(300)] as const;
+  const state = createFactoryRoundBattleOrchestrator({
+    id: "generated-scene-off-fly-round",
+    rngValue: 0,
+    factoryWinStreak: 0,
+    playerTrainerId: PLAYER_TRAINER_ID,
+    battleTowerLevel50WinStreak: 0,
+    facilityState: { rentsCount: 0 },
+    rentals: {
+      type: "currentRecords",
+      playerRentalRecords: playerRecords,
+      savedRentalRecords: [...playerRecords, record(1), record(2), record(3)],
+    },
+  });
+  return acknowledgeAndAdvance(state);
+}
+
+/**
+ * A legal generated-round seed whose ordinary player FIRE_PUNCH applies burn
+ * to the generated WAILMER. This is a production round-controller seam, not
+ * a battle-number recording: its result is owned by the live kernel and AI.
+ */
+function createStartedSceneOffStatusIconBurnBattle(): FactoryRoundBattleOrchestratorState {
+  const playerRecords = [record(149), record(300), record(301)] as const;
+  const state = createFactoryRoundBattleOrchestrator({
+    id: "scene-off-status-icon-burn",
+    rngValue: 3359,
+    factoryWinStreak: 0,
+    playerTrainerId: PLAYER_TRAINER_ID,
+    battleTowerLevel50WinStreak: 0,
+    facilityState: { rentsCount: 0 },
+    rentals: {
+      type: "currentRecords",
+      playerRentalRecords: playerRecords,
+      savedRentalRecords: [...playerRecords, record(302), record(303), record(304)],
+    },
+  });
+  return acknowledgeAndAdvance(state);
+}
+
+function createOpponentLockedFlyPresentationBattle(): FactoryRoundBattleOrchestratorState {
+  const playerRecords = [record(156, 3), record(149, 3), record(180, 3)] as const;
+  const carrier = acknowledgeAndAdvance(createFactoryRoundBattleOrchestrator({
+    id: "opponent-locked-action-owner",
+    rngValue: 26,
+    factoryWinStreak: 0,
+    playerTrainerId: PLAYER_TRAINER_ID,
+    battleTowerLevel50WinStreak: 0,
+    facilityState: { rentsCount: 0 },
+    rentals: {
+      type: "currentRecords",
+      playerRentalRecords: playerRecords,
+      savedRentalRecords: [...playerRecords, record(1), record(2), record(3)],
+    },
+  }));
+  expect(carrier.opponentGenerations[0]?.opponents.map(({ setId }) => setId))
+    .toEqual([196, 184, 143]);
+  const resolution = resolveTurn15FlyResolutionAdapter().chargeResolution;
+  const fields = [resolution.field.player, resolution.field.opponent] as const;
+  const moveSelectionCursors = Object.freeze([2, 1, 0, 0] as const);
+  const battlePresentationBoundaries = Object.freeze(fields.map((field, battler) =>
+    Object.freeze({
+      battler: battler as 0 | 1,
+      partyIndex: field.partyIndex,
+      field,
+      displayedHp: field.hp,
+      displayedStatus1:
+        resolution.segments[0]!.beforeRules.rulesContext.battlers[battler]!.status1,
+      spriteVisible: true,
+      idleEpoch: 0,
+      moveCursor: moveSelectionCursors[battler]!,
+    })
+  )) as FactoryRoundBattleOrchestratorState["battlePresentationBoundaries"];
+  return Object.freeze({
+    ...carrier,
+    battle: resolution.pendingBattle,
+    battleCommandPresentation: null,
+    battleResolutionPresentation: resolution,
+    retainedLockedActionPresentationOwner: null,
+    battlePartySelect: null,
+    battleForcedPartySelect: null,
+    moveSelectionCursors,
+    battlePresentationBoundaries,
+    aiHistory: createFactoryAiBattleHistory(
+      resolution.pendingBattle.rules.rulesContext,
+    ),
+    facilityRngCalls:
+      carrier.activeBattleCallStart! + resolution.pendingBattle.rng.calls,
+  });
+}
+
+/**
+ * Source-shaped full parties for the retained-owner seam tests. Their active
+ * records are legal Factory sets; the high staged HP merely keeps both sides
+ * alive long enough to isolate the lock handoff from a faint boundary.
+ */
+function durableLockedActionParty(activeSetId: number): BattleScriptPartyState {
+  const member = (setId: number) => Object.freeze({
+    ...createFactoryCorpusPartyMember(record(setId, 3)),
+    hp: 5_000,
+    maxHP: 5_000,
+  });
+  return Object.freeze([
+    member(activeSetId),
+    member(300),
+    member(301),
+    member(302),
+    member(303),
+    member(304),
+  ]) as unknown as BattleScriptPartyState;
+}
+
+function submitStagedLockedActionMove(
+  state: BattleState<FactoryFullTurnDecisionRules>,
+  side: "player" | "trainer",
+  moveSlot: 0 | 1 | 2 | 3,
+) {
+  if (
+    state.boundary.kind !== "decision-required"
+    || state.boundary.request.kind !== "command"
+    || state.boundary.request.side !== side
+  ) {
+    throw new Error(`expected staged ${side} command boundary`);
+  }
+  const request = state.boundary.request;
+  const decision = request.legalDecisions.find((candidate) =>
+    candidate.kind === "use-move" && candidate.moveSlot === moveSlot,
+  );
+  if (decision === undefined || decision.kind !== "use-move") {
+    throw new Error(`expected legal staged ${side} move slot ${moveSlot}`);
+  }
+  const transition = submitFactoryFullTurnDecision(state, {
+    requestId: request.requestId,
+    side,
+    decision,
+  });
+  if (transition.kind !== "decision-required") {
+    throw new Error(`staged ${side} move did not reach a continuation boundary`);
+  }
+  return Object.freeze({ request, decision, transition });
+}
+
+/**
+ * Enters the public orchestrator at a real source-derived post-charge player
+ * request. The carrier's generated round owns only the surrounding Factory
+ * controller/AI; the staged battle and resolution are ordinary full-turn
+ * kernel receipts, so the retained-owner seam is driven exactly as production
+ * drives its subsequent player command.
+ */
+function createOpponentLockedActionPresentationBattle(input: Readonly<{
+  opponentSetId: number;
+  opponentMoveSlot: 0 | 1 | 2 | 3;
+}>): Readonly<{
+  state: FactoryRoundBattleOrchestratorState;
+  chargeResolution: ReturnType<typeof createBattleResolutionPresentation>;
+}> {
+  const initial = createFreshFactoryBattle({
+    requestId: 1,
+    rngSeed: 0,
+    battleScene: "off",
+    playerParty: durableLockedActionParty(8), // Metapod's Harden is non-terminal.
+    opponentParty: durableLockedActionParty(input.opponentSetId),
+  });
+  const player = submitStagedLockedActionMove(initial, "player", 0);
+  const charge = submitStagedLockedActionMove(
+    player.transition.state,
+    "trainer",
+    input.opponentMoveSlot,
+  );
+  const chargeResolution = createBattleResolutionPresentation({
+    sourceRequest: player.request,
+    sourceDecision: player.decision,
+    beforeRules: initial.rules,
+    transition: charge.transition,
+    fieldBoundary: createBattleCommandPresentation(
+      player.request,
+      initial.rules.rulesContext,
+      player.decision.moveSlot,
+    ).field,
+    confirmHandoff: { fightDisplayCursor: player.decision.moveSlot, idleBounceElapsed: 0 },
+  });
+  if (
+    chargeResolution.pendingBoundary.kind !== "decision-required"
+    || chargeResolution.pendingBoundary.request.kind !== "command"
+    || chargeResolution.pendingBoundary.request.side !== "player"
+  ) {
+    throw new Error("staged opponent lock did not publish its intervening player command");
+  }
+  const carrier = createStartedGeneratedBattle(RNG_SEED);
+  const fields = [chargeResolution.field.player, chargeResolution.field.opponent] as const;
+  const moveSelectionCursors = Object.freeze([0, 0, 0, 0] as const);
+  const battlePresentationBoundaries = Object.freeze(fields.map((field, battler) =>
+    Object.freeze({
+      battler: battler as 0 | 1,
+      partyIndex: field.partyIndex,
+      field,
+      displayedHp: field.hp,
+      displayedStatus1:
+        chargeResolution.segments[0]!.beforeRules.rulesContext.battlers[battler]!.status1,
+      spriteVisible: true,
+      idleEpoch: 0,
+      moveCursor: moveSelectionCursors[battler]!,
+    })
+  )) as FactoryRoundBattleOrchestratorState["battlePresentationBoundaries"];
+  return Object.freeze({
+    state: Object.freeze({
+      ...carrier,
+      battle: chargeResolution.pendingBattle,
+      battleCommandPresentation: null,
+      battleResolutionPresentation: chargeResolution,
+      retainedLockedActionPresentationOwner: null,
+      battlePartySelect: null,
+      battleForcedPartySelect: null,
+      moveSelectionCursors,
+      battlePresentationBoundaries,
+      aiHistory: createFactoryAiBattleHistory(
+        chargeResolution.pendingBattle.rules.rulesContext,
+      ),
+      facilityRngCalls:
+        carrier.activeBattleCallStart! + chargeResolution.pendingBattle.rng.calls,
+    }),
+    chargeResolution,
+  });
 }
 
 function advanceCommandToPhase(
@@ -184,6 +422,502 @@ function driveGeneratedRoundToCompletion(
 }
 
 describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
+  it("selects Battle Scene OFF at the generated fresh-battle seam without changing facility state", () => {
+    const state = createStartedGeneratedBattle(RNG_SEED);
+    expect(state.battle?.rules.rulesContext.hitMarker).toBe(
+      BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS,
+    );
+    expect(state.facilityState).toEqual({ rentsCount: 0 });
+    expect(state.battle?.boundary).toMatchObject({
+      kind: "decision-required",
+      request: { kind: "command", side: "player", battler: 0 },
+    });
+  });
+
+  it("ISSUES #39: Scene-OFF burn keeps the live status logical until its generic status-icon controller receipt", () => {
+    let state = createStartedSceneOffStatusIconBurnBattle();
+    expect(state.round.rules.currentOpponent.rentalRecords?.map(({ setId }) => setId))
+      .toEqual([170, 122, 133]);
+    expect(state.battle?.rules.rulesContext.hitMarker).toBe(
+      BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS,
+    );
+
+    state = advanceCommandToPhase(state, "action-menu");
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+    state = advanceCommandToPhase(state, "fight-menu");
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+
+    const resolution = state.battleResolutionPresentation;
+    if (resolution === null) throw new Error("expected the live burn resolution");
+    const events = resolution.segments[0]!.events;
+    const rawStatusEventIndex = events.findIndex(({ payload }) =>
+      payload.kind === "set-battler-status-data"
+      && payload.battler === 1
+      && payload.status1 === (1 << 4)
+    );
+    const burnTextEventIndex = events.findIndex(({ payload }, index) =>
+      index > rawStatusEventIndex
+      && payload.kind === "message"
+      && payload.messageId === "STRINGID_PKMNWASBURNED"
+    );
+    const statusIconEventIndex = events.findIndex(({ payload }, index) =>
+      index > burnTextEventIndex
+      && payload.kind === "status-icon-update"
+      && payload.battler === 1
+      && payload.status1 === (1 << 4)
+      && payload.status2 === 0
+    );
+    expect(rawStatusEventIndex).toBeGreaterThanOrEqual(0);
+    expect(burnTextEventIndex).toBeGreaterThan(rawStatusEventIndex);
+    expect(statusIconEventIndex).toBeGreaterThan(burnTextEventIndex);
+    expect(events.some(({ payload }) => payload.kind === "status-animation")).toBe(false);
+
+    const commands = resolution.segments[0]!.commands;
+    const rawStatusCommandIndex = commands.findIndex((command) =>
+      command.type === "status" && command.eventSequence === events[rawStatusEventIndex]!.sequence
+    );
+    const burnMessageCommandIndex = commands.findIndex((command) =>
+      command.type === "message" && command.eventSequence === events[burnTextEventIndex]!.sequence
+    );
+    const statusIconCommandIndex = commands.findIndex((command) =>
+      command.type === "status-icon" && command.eventSequence === events[statusIconEventIndex]!.sequence
+    );
+    expect(rawStatusCommandIndex).toBeGreaterThanOrEqual(0);
+    expect(burnMessageCommandIndex).toBeGreaterThan(rawStatusCommandIndex);
+    expect(statusIconCommandIndex).toBeGreaterThan(burnMessageCommandIndex);
+    expect(commands[burnMessageCommandIndex]).toMatchObject({
+      type: "message",
+      lines: ["Foe WAILMER was burned!"],
+    });
+    expect(commands[statusIconCommandIndex]).toMatchObject({
+      type: "status-icon",
+      battler: 1,
+      status1: 1 << 4,
+      status2: 0,
+      timing: { minimumFrames: 1 },
+    });
+
+    for (
+      let budget = 0;
+      budget < 2_000
+        && (
+          state.battleResolutionPresentation?.lifecycle.phase !== "presenting"
+          || state.battleResolutionPresentation.commandIndex !== rawStatusCommandIndex
+        );
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state);
+    }
+    expect(state.battleResolutionPresentation?.commandIndex).toBe(rawStatusCommandIndex);
+    expect(state.battle?.rules.rulesContext.battlers[1].status1).toBe(1 << 4);
+    expect(state.battlePresentationBoundaries?.[1].displayedStatus1).toBe(0);
+
+    for (
+      let budget = 0;
+      budget < 128 && state.battleResolutionPresentation?.commandIndex === rawStatusCommandIndex;
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state);
+    }
+    expect(state.battleResolutionPresentation?.commandIndex).toBe(rawStatusCommandIndex + 1);
+    expect(state.battlePresentationBoundaries?.[1].displayedStatus1).toBe(0);
+
+    for (
+      let budget = 0;
+      budget < 512 && state.battleResolutionPresentation?.commandIndex !== statusIconCommandIndex;
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state);
+    }
+    expect(state.battleResolutionPresentation?.commandIndex).toBe(statusIconCommandIndex);
+    expect(state.battlePresentationBoundaries?.[1].displayedStatus1).toBe(0);
+
+    for (
+      let budget = 0;
+      budget < 16 && state.battleResolutionPresentation?.commandIndex === statusIconCommandIndex;
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state);
+    }
+    expect(state.battleResolutionPresentation?.commandIndex).toBe(statusIconCommandIndex + 1);
+    expect(state.battlePresentationBoundaries?.[1].displayedStatus1).toBe(1 << 4);
+
+    state = advanceResolutionToNextCommand(state);
+    expect(state.battleCommandPresentation?.request).toMatchObject({
+      kind: "command",
+      requestId: 3,
+      side: "player",
+      battler: 0,
+    });
+    expect(state.battlePresentationBoundaries?.[1].displayedStatus1)
+      .toBe(state.battle?.rules.rulesContext.battlers[1].status1);
+  });
+
+  it("drives an unmodified generated FLY round receipt through charge, lock, restoration, and the next player command", () => {
+    let state = createStartedGeneratedFlyBattle();
+    state = advanceCommandToPhase(state, "action-menu");
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+    state = advanceCommandToPhase(state, "fight-menu");
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+
+    const chargeResolution = state.battleResolutionPresentation;
+    if (chargeResolution === null) throw new Error("expected the generated FLY resolution");
+    const chargeEvents = chargeResolution.segments[0]!.events;
+    const hidden = chargeEvents.findIndex(({ payload }) =>
+      payload.kind === "set-battler-sprite-visibility"
+      && payload.battler === 0
+      && payload.invisible
+    );
+    const interveningOpponentMove = chargeEvents.findIndex(({ payload }, index) =>
+      index > hidden
+      && payload.kind === "message"
+      && payload.messageId === "STRINGID_USEDMOVE"
+      && payload.actionSnapshot?.attacker === 1
+    );
+    expect(state.battle?.rules.rulesContext.hitMarker).toBe(
+      BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS,
+    );
+    expect(hidden).toBeGreaterThanOrEqual(0);
+    expect(interveningOpponentMove).toBeGreaterThan(hidden);
+    expect(chargeResolution.pendingBoundary).toMatchObject({
+      kind: "decision-required",
+      request: { kind: "command", requestId: 3, side: "trainer", battler: 1 },
+    });
+
+    for (
+      let budget = 0;
+      budget < 2_000
+        && state.battleResolutionPresentation?.segments.length !== 2;
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state);
+    }
+    const resolution = state.battleResolutionPresentation;
+    if (resolution === null || resolution.segments.length !== 2) {
+      throw new Error("expected the locked FLY continuation presentation segment");
+    }
+    const lockedEvents = resolution.segments[1]!.events;
+    const lockedPlayerMove = lockedEvents.findIndex(({ payload }) =>
+      payload.kind === "message"
+      && payload.messageId === "STRINGID_USEDMOVE"
+      && payload.actionSnapshot?.attacker === 0
+      && payload.actionSnapshot.currentMove === 19
+    );
+    const restored = lockedEvents.findIndex(({ payload }, index) =>
+      index > lockedPlayerMove
+      && payload.kind === "set-battler-sprite-visibility"
+      && payload.battler === 0
+      && !payload.invisible
+    );
+    expect(resolution.segments[1]!.events[0]!.sequence).toBeGreaterThan(
+      resolution.segments[0]!.events.at(-1)!.sequence,
+    );
+    expect(lockedPlayerMove).toBeGreaterThanOrEqual(0);
+    expect(restored).toBeGreaterThan(lockedPlayerMove);
+    const lockedPayload = lockedEvents[lockedPlayerMove]!.payload;
+    if (lockedPayload.kind !== "message") throw new Error("locked FLY receipt did not narrow");
+    expect(lockedPayload.actionSnapshot).toEqual({
+      attacker: 0,
+      currentMove: 19,
+      currentMovePosition: 0,
+    });
+    expect(lockedEvents.slice(lockedPlayerMove + 1).some(({ payload }) =>
+      payload.kind === "set-battler-pp-data" && payload.battler === 0
+    )).toBe(false);
+    expect(resolution.pendingBoundary).toMatchObject({
+      kind: "decision-required",
+      request: { kind: "command", requestId: 4, side: "player", battler: 0 },
+    });
+
+    const commands = resolution.segments[1]!.commands;
+    const lockedCommand = commands.findIndex((command) =>
+      command.type === "message"
+      && command.lines[0] === "TAILLOW used"
+      && command.lines[1] === "FLY!"
+    );
+    const restoredCommand = commands.findIndex((command, index) =>
+      index > lockedCommand
+      && command.type === "sprite-visibility"
+      && command.battler === 0
+      && command.visible
+    );
+    expect(lockedCommand).toBeGreaterThanOrEqual(0);
+    expect(restoredCommand).toBeGreaterThan(lockedCommand);
+    expect(createBattleResolutionPresentationRenderView(Object.freeze({
+      ...resolution,
+      segmentIndex: 1,
+      commandIndex: lockedCommand,
+      lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 0 }),
+      confirmHandoff: null,
+    })).visibility.player.sprite).toBe(false);
+    expect(createBattleResolutionPresentationRenderView(Object.freeze({
+      ...resolution,
+      segmentIndex: 1,
+      commandIndex: restoredCommand,
+      lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 0 }),
+      confirmHandoff: null,
+    })).visibility.player.sprite).toBe(true);
+
+    for (
+      let budget = 0;
+      budget < 2_000 && state.battleResolutionPresentation !== null;
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state);
+    }
+    expect(state.battleResolutionPresentation).toBeNull();
+    expect(state.battleCommandPresentation?.request).toMatchObject({
+      kind: "command", requestId: 4, side: "player", battler: 0,
+    });
+    expect(state.facilityState).toEqual({ rentsCount: 0 });
+  });
+
+  it("retains an opponent locked-action owner across its genuine intervening command and hands the forced request to PartySelectState", () => {
+    let state = createOpponentLockedFlyPresentationBattle();
+    const chargeResolution = state.battleResolutionPresentation!;
+    const chargeSegment = chargeResolution.segments[0]!;
+    const opponentPpAfterCharge =
+      chargeResolution.pendingBattle.rules.rulesContext.battlers[1]!.pp[1];
+
+    state = advanceResolutionToNextCommand(state);
+    const interveningRequest = state.battleCommandPresentation!.request;
+    const owner = state.retainedLockedActionPresentationOwner;
+    expect(interveningRequest).toEqual(chargeResolution.pendingBoundary.kind === "decision-required"
+      ? chargeResolution.pendingBoundary.request
+      : null);
+    expect(interveningRequest).toMatchObject({
+      kind: "command", requestId: 3, side: "player", battler: 0,
+    });
+    expect(owner).toMatchObject({
+      action: { battler: 1, currentMove: 19, currentMovePosition: 1 },
+    });
+    expect(owner?.resolution.resolutionId).toBe(chargeResolution.resolutionId);
+    expect(owner?.resolution.segments[0]).toBe(chargeSegment);
+    expect(owner?.resolution.pendingBattle).toBe(chargeResolution.pendingBattle);
+    expect(state.battlePresentationBoundaries?.[1].spriteVisible).toBe(false);
+
+    state = advanceCommandToPhase(state, "action-menu");
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+    state = advanceCommandToPhase(state, "fight-menu");
+    expect(state.retainedLockedActionPresentationOwner).toBe(owner);
+    expect(state.battleCommandPresentation?.request).toEqual(interveningRequest);
+    expect(state.battleCommandPresentation?.fightCursor).toBe(2);
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+
+    const strikeResolution = state.battleResolutionPresentation;
+    if (strikeResolution === null) throw new Error("expected retained locked strike");
+    expect(state.retainedLockedActionPresentationOwner).toBeNull();
+    expect(strikeResolution.resolutionId).toBe(chargeResolution.resolutionId);
+    expect(strikeResolution.resolutionId.requestId)
+      .not.toBe(interveningRequest.requestId);
+    expect(strikeResolution.segments).toHaveLength(2);
+    expect(strikeResolution.segments[0]).toBe(chargeSegment);
+    expect(Object.isFrozen(strikeResolution.segments)).toBe(true);
+    expect(Object.isFrozen(strikeResolution.segments[0])).toBe(true);
+    const strikeEvents = strikeResolution.segments[1]!.events;
+    const strike = strikeEvents.findIndex(({ payload }) =>
+      payload.kind === "message"
+      && payload.messageId === "STRINGID_USEDMOVE"
+      && payload.actionSnapshot?.attacker === 1
+    );
+    const restored = strikeEvents.findIndex(({ payload }, index) =>
+      index > strike
+      && payload.kind === "set-battler-sprite-visibility"
+      && payload.battler === 1
+      && !payload.invisible
+    );
+    expect(strikeEvents[strike]?.payload).toMatchObject({
+      actionSnapshot: { attacker: 1, currentMove: 19, currentMovePosition: 1 },
+    });
+    expect(restored).toBeGreaterThan(strike);
+    expect(strikeEvents.some(({ payload }) =>
+      payload.kind === "set-battler-pp-data" && payload.battler === 1
+    )).toBe(false);
+    expect(state.battle?.rules.rulesContext.battlers[1]!.pp[1])
+      .toBe(opponentPpAfterCharge);
+    const forcedRequest = strikeResolution.forcedRequest;
+    expect(forcedRequest).toMatchObject({
+      kind: "forced-switch",
+      requestId: 4,
+      side: "player",
+      battler: 0,
+      faintedPartyIndex: 0,
+      legalPartyIndexes: [1, 2],
+    });
+
+    for (
+      let budget = 0;
+      budget < 2_000 && state.battleForcedPartySelect === null;
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state, new Set(["A"]));
+    }
+    expect(state.battleForcedPartySelect?.request).toEqual(forcedRequest);
+    expect(state.battleResolutionPresentation?.lifecycle.phase)
+      .toBe("forced-party-handoff");
+    for (
+      let budget = 0;
+      budget < 400 && state.battleForcedPartySelect!.elapsed < 140;
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state);
+    }
+    state = advanceFactoryRoundBattleResolution(state, new Set(["DOWN"]));
+    state = advanceFactoryRoundBattleResolution(state, new Set(["A"]));
+    expect(state.battleForcedPartySelect?.submenuOpen).toBe(true);
+    state = advanceFactoryRoundBattleResolution(state, new Set(["A"]));
+    expect(state.battleForcedPartySelect?.sendOutElapsed).toBe(0);
+    state = advanceFactoryRoundBattleResolution(state);
+    expect(state.battleResolutionPresentation?.lifecycle.phase)
+      .toBe("presenting-switch-in");
+    expect(state.battleResolutionPresentation?.segments).toHaveLength(3);
+    expect(state.battleResolutionPresentation?.forcedRequest).toBeNull();
+
+    for (
+      let budget = 0;
+      budget < 2_000 && state.battleCommandPresentation === null;
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state);
+    }
+    expect(state.battleCommandPresentation?.request).toMatchObject({
+      kind: "command", side: "player", battler: 0,
+    });
+    expect(state.battle?.rules.rulesContext.battlers[0].partyIndex).toBe(1);
+    expect(state.battleForcedPartySelect).toBeNull();
+  });
+
+  it("reclaims an opponent recharge owner from its immutable must-recharge snapshot without a second PP write", () => {
+    const staged = createOpponentLockedActionPresentationBattle({
+      // Aerodactyl's legal Factory set has HYPER_BEAM in source slot 0.
+      opponentSetId: 531,
+      opponentMoveSlot: 0,
+    });
+    let state = staged.state;
+    const chargeSegment = staged.chargeResolution.segments[0]!;
+    const opponentPpAfterCharge =
+      staged.chargeResolution.pendingBattle.rules.rulesContext.battlers[1]!.pp[0];
+
+    state = advanceResolutionToNextCommand(state);
+    const interveningRequest = state.battleCommandPresentation!.request;
+    expect(interveningRequest).toMatchObject({
+      kind: "command", requestId: 3, side: "player", battler: 0,
+    });
+    expect(state.retainedLockedActionPresentationOwner).toMatchObject({
+      action: { battler: 1, currentMove: 63, currentMovePosition: 0 },
+    });
+
+    state = advanceCommandToPhase(state, "action-menu");
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+    state = advanceCommandToPhase(state, "fight-menu");
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+
+    const resolution = state.battleResolutionPresentation;
+    if (resolution === null) throw new Error("expected retained recharge resolution");
+    expect(resolution.resolutionId).toBe(staged.chargeResolution.resolutionId);
+    expect(resolution.resolutionId.requestId).not.toBe(interveningRequest.requestId);
+    expect(resolution.segments).toHaveLength(2);
+    expect(resolution.segments[0]).toBe(chargeSegment);
+    expect(Object.isFrozen(resolution.segments)).toBe(true);
+    const recharge = resolution.segments[1]!.events.find(({ payload }) =>
+      payload.kind === "message"
+      && payload.messageId === "STRINGID_PKMNMUSTRECHARGE"
+      && payload.actionSnapshot?.attacker === 1
+      && payload.actionSnapshot.currentMove === 63
+      && payload.actionSnapshot.currentMovePosition === 0,
+    );
+    if (recharge?.payload.kind !== "message") {
+      throw new Error("expected immutable opponent recharge receipt");
+    }
+    expect(Object.isFrozen(recharge.payload.actionSnapshot)).toBe(true);
+    expect(resolution.segments[1]!.events.some(({ payload }) =>
+      payload.kind === "set-battler-pp-data" && payload.battler === 1
+    )).toBe(false);
+    expect(state.battle?.rules.rulesContext.battlers[1]!.pp[0]).toBe(opponentPpAfterCharge);
+    expect(resolution.pendingBoundary).toMatchObject({
+      kind: "decision-required",
+      request: { kind: "command", requestId: 4, side: "player", battler: 0 },
+    });
+    expect(state.facilityRngCalls).toBe(
+      state.activeBattleCallStart! + state.battle!.rng.calls,
+    );
+
+    state = advanceResolutionToNextCommand(state);
+    expect(state.battleCommandPresentation?.request).toMatchObject({
+      kind: "command", requestId: 4, side: "player", battler: 0,
+    });
+    expect(state.retainedLockedActionPresentationOwner).toBeNull();
+  });
+
+  it("reclaims an opponent Bide owner from its non-USEDMOVE action snapshot and returns the next real command", () => {
+    const staged = createOpponentLockedActionPresentationBattle({
+      // Seedot's legal Factory set has BIDE in source slot 1.
+      opponentSetId: 18,
+      opponentMoveSlot: 1,
+    });
+    let state = staged.state;
+    const chargeSegment = staged.chargeResolution.segments[0]!;
+    const opponentPpAfterCharge =
+      staged.chargeResolution.pendingBattle.rules.rulesContext.battlers[1]!.pp[1];
+
+    state = advanceResolutionToNextCommand(state);
+    const interveningRequest = state.battleCommandPresentation!.request;
+    expect(interveningRequest).toMatchObject({
+      kind: "command", requestId: 3, side: "player", battler: 0,
+    });
+    expect(state.retainedLockedActionPresentationOwner).toMatchObject({
+      action: { battler: 1, currentMove: 117, currentMovePosition: 1 },
+    });
+
+    state = advanceCommandToPhase(state, "action-menu");
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+    state = advanceCommandToPhase(state, "fight-menu");
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+
+    const resolution = state.battleResolutionPresentation;
+    if (resolution === null) throw new Error("expected retained Bide resolution");
+    expect(resolution.resolutionId).toBe(staged.chargeResolution.resolutionId);
+    expect(resolution.resolutionId.requestId).not.toBe(interveningRequest.requestId);
+    expect(resolution.segments).toHaveLength(2);
+    expect(resolution.segments[0]).toBe(chargeSegment);
+    const bideMessages = resolution.segments[1]!.events.filter(({ payload }) =>
+      payload.kind === "message" && payload.actionSnapshot?.attacker === 1,
+    );
+    expect(bideMessages).toHaveLength(1);
+    expect(bideMessages[0]?.payload).toMatchObject({
+      kind: "message",
+      messageId: "STRINGID_PKMNSTORINGENERGY",
+      actionSnapshot: { attacker: 1, currentMove: 117, currentMovePosition: 1 },
+    });
+    const bidePayload = bideMessages[0]!.payload;
+    if (bidePayload.kind !== "message") throw new Error("expected Bide message receipt");
+    expect(Object.isFrozen(bidePayload.actionSnapshot)).toBe(true);
+    expect(resolution.segments[1]!.events.some(({ payload }) =>
+      payload.kind === "message"
+      && payload.messageId === "STRINGID_USEDMOVE"
+      && payload.actionSnapshot?.attacker === 1
+    )).toBe(false);
+    expect(resolution.segments[1]!.events.some(({ payload }) =>
+      payload.kind === "set-battler-pp-data" && payload.battler === 1
+    )).toBe(false);
+    expect(state.battle?.rules.rulesContext.battlers[1]!.pp[1]).toBe(opponentPpAfterCharge);
+    expect(resolution.pendingBoundary).toMatchObject({
+      kind: "decision-required",
+      request: { kind: "command", requestId: 4, side: "player", battler: 0 },
+    });
+    expect(state.facilityRngCalls).toBe(
+      state.activeBattleCallStart! + state.battle!.rng.calls,
+    );
+
+    state = advanceResolutionToNextCommand(state);
+    expect(state.battleCommandPresentation?.request).toMatchObject({
+      kind: "command", requestId: 4, side: "player", battler: 0,
+    });
+    expect(state.retainedLockedActionPresentationOwner).toMatchObject({
+      action: { battler: 1, currentMove: 117, currentMovePosition: 1 },
+    });
+  });
+
   it("cancels POKéMON back to the same action request and cursor", () => {
     let state = createStartedGeneratedBattle(RNG_SEED);
     state = advanceCommandToPhase(state, "action-menu");
@@ -374,6 +1108,7 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expect(state.battleResolutionPresentation).toBeNull();
     expect(state.round.rules.phase).toBe("presentingBattleWin");
     expect(state.round.rules.lastBattle?.outcome).toBe("win");
+    expect(state.retainedLockedActionPresentationOwner).toBeNull();
     const opponentSetIds =
       state.round.rules.currentOpponent.rentalRecords!.map(({ setId }) => setId);
     expect(opponentSetIds).not.toEqual(POSTWIN_OPPONENT_RENTAL_IDS);
@@ -820,6 +1555,7 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expect(state.round.rules.phase).toBe("roundComplete");
     expect(state.round.rules.battleIndex).toBe(6);
     expect(state.round.rules.lastBattle?.outcome).toBe("win");
+    expect(state.retainedLockedActionPresentationOwner).toBeNull();
     expect(state.opponentGenerations).toHaveLength(7);
     expect(state.rngSegments.filter((segment) => segment.kind === "battle")).toHaveLength(7);
     // ShouldSwitch's new draws shift later battle/generation streams:

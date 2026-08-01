@@ -178,6 +178,20 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
         timing: { minimumFrames: 28 },
       },
       {
+        type: "sprite-visibility",
+        eventSequence: 7,
+        battler: 0,
+        visible: true,
+        timing: { minimumFrames: 1 },
+      },
+      {
+        type: "sprite-visibility",
+        eventSequence: 8,
+        battler: 1,
+        visible: true,
+        timing: { minimumFrames: 1 },
+      },
+      {
         type: "message",
         eventSequence: 9,
         lines: ["Foe KABUTO used", "SAND-ATTACK!"],
@@ -199,6 +213,20 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
         lines: ["ONIX’s accuracy", "fell!"],
         advance: "automatic",
         timing: { minimumFrames: 24 },
+      },
+      {
+        type: "sprite-visibility",
+        eventSequence: 15,
+        battler: 1,
+        visible: true,
+        timing: { minimumFrames: 1 },
+      },
+      {
+        type: "sprite-visibility",
+        eventSequence: 16,
+        battler: 0,
+        visible: true,
+        timing: { minimumFrames: 1 },
       },
       { type: "turn-end", timing: { minimumFrames: 8 } },
     ]);

@@ -115,6 +115,7 @@ describe("fresh Factory whole-battle integration (Gate-5 rungs 4/6)", () => {
     let state = requireStarted(createFreshFactoryBattle({
       requestId: 1,
       rngSeed: RNG_SEED,
+      battleScene: "on",
       playerParty: playerKernelParty,
       opponentParty: opponentKernelParty,
     }));

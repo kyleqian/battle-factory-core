@@ -16,6 +16,7 @@ import type {
 } from "./battleDecisionBoundary.ts";
 import type { FactoryFullTurnDecisionRules } from "./factoryBattleScriptFullTurnDecision.ts";
 import type {
+  BattleScriptActionMessageSnapshot,
   BattleScriptSemanticEventPayload,
 } from "./battleScriptEvents.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
@@ -41,6 +42,7 @@ export type BattleHitAnimationTiming = Readonly<{
 export type BattleHpTiming = Readonly<{ minimumFrames: 28 }>;
 export type BattleStatTiming = Readonly<{ minimumFrames: 32 }>;
 export type BattleStatusTiming = Readonly<{ minimumFrames: 32 }>;
+export type BattleStatusIconTiming = Readonly<{ minimumFrames: 1 }>;
 export type BattleFaintTiming =
   | Readonly<{
       minimumFrames: number;
@@ -56,6 +58,7 @@ export type BattleFaintTiming =
       healthboxVanishFrame: number;
     }>;
 export type BattleSwitchInTiming = Readonly<{ minimumFrames: 1 }>;
+export type BattleSpriteVisibilityTiming = Readonly<{ minimumFrames: 1 }>;
 export type BattleTurnEndTiming = Readonly<{ minimumFrames: 8 }>;
 
 export type BattleResolutionPresentationCommand =
@@ -105,6 +108,15 @@ export type BattleResolutionPresentationCommand =
       timing: BattleStatusTiming;
     }>
   | Readonly<{
+      /** BtlController_EmitStatusIconUpdate's distinct healthbox display receipt. */
+      type: "status-icon";
+      eventSequence: number;
+      battler: 0 | 1;
+      status1: number;
+      status2: number;
+      timing: BattleStatusIconTiming;
+    }>
+  | Readonly<{
       type: "faint";
       eventSequence: number;
       battler: 0 | 1;
@@ -126,6 +138,13 @@ export type BattleResolutionPresentationCommand =
       toPartyIndex: BattlePartyIndex;
       incoming: BattleCommandFieldBattler;
       timing: BattleSwitchInTiming;
+    }>
+  | Readonly<{
+      type: "sprite-visibility";
+      eventSequence: number;
+      battler: 0 | 1;
+      visible: boolean;
+      timing: BattleSpriteVisibilityTiming;
     }>
   | Readonly<{
       type: "turn-end";
@@ -194,6 +213,8 @@ export function storeBattleTerminalPresentationDismiss(
 }
 
 export type BattleResolutionSegment = Readonly<{
+  /** Display field at this segment's real reducer boundary. */
+  field: BattleResolutionDisplayedField;
   beforeRules: FactoryFullTurnDecisionRules;
   afterRules: FactoryFullTurnDecisionRules;
   events: readonly BattleKernelSemanticEvent[];
@@ -287,6 +308,15 @@ const SCENE_OFF_MOVE_PAUSE_FRAMES = 32;
 const HP_TIMING = Object.freeze({ minimumFrames: 28 } as const);
 const STAT_TIMING = Object.freeze({ minimumFrames: 32 } as const);
 const STATUS_TIMING = Object.freeze({ minimumFrames: 32 } as const);
+/**
+ * Cmd_updatestatusicon emits one controller request and waits for it
+ * (battle_script_commands.c:7699-7730). Its player/opponent controller
+ * handlers copy the healthbox status tile on that callback, then install the
+ * ordinary completion callback (battle_controller_{player,opponent}.c:
+ * 1712-1722 / 2755-2765). The display edge is therefore the receipt's own
+ * one callback, independent of any skipped Scene-OFF status animation.
+ */
+const STATUS_ICON_TIMING = Object.freeze({ minimumFrames: 1 } as const);
 const SWITCH_IN_TIMING = Object.freeze({ minimumFrames: 1 } as const);
 const TURN_END_TIMING = Object.freeze({ minimumFrames: 8 } as const);
 
@@ -334,6 +364,12 @@ function nextHitAnimation(
   return null;
 }
 
+/**
+ * Compatibility only for staged/synthetic message receipts that intentionally
+ * lack the production Cmd_printstring action snapshot. Real full-turn
+ * STRINGID_USEDMOVE receipts never need to discover a later PP controller
+ * event, which is absent for a locked continuation.
+ */
 function ppEventAfter(
   events: readonly BattleKernelSemanticEvent[],
   messageIndex: number,
@@ -358,7 +394,9 @@ function messageLines(
     { kind: "stat-stage-change" }
   > | null,
   lastFaintBattler: 0 | 1 | null,
+  pendingStatusMessageBattler: 0 | 1 | null,
   lastMoveAttacker: 0 | 1 | null,
+  actionSnapshot: BattleScriptActionMessageSnapshot | null,
   opponentTrainer: Readonly<{ className: string; name: string }> | null,
 ): readonly string[] {
   if (event.payload.kind !== "message") {
@@ -366,8 +404,10 @@ function messageLines(
   }
   const { messageId } = event.payload;
   if (messageId === "STRINGID_USEDMOVE") {
-    const pp = ppEventAfter(events, eventIndex);
-    const battler = singlesBattler(pp.battler, "used-move message");
+    const pp = actionSnapshot === null ? ppEventAfter(events, eventIndex) : null;
+    const battler = actionSnapshot === null
+      ? singlesBattler(pp!.battler, "used-move message")
+      : singlesBattler(actionSnapshot.attacker, "used-move action snapshot");
     const displayed = fieldBattler(field, battler);
     return resolveBattleStringLines(messageId, {
       B_ATK_NAME_WITH_PREFIX: () => resolveBattleNameWithPrefix({
@@ -375,7 +415,13 @@ function messageLines(
         isTrainerBattle: true,
         nickname: displayed.name,
       }),
-      B_BUFF2: () => resolveMoveNameExclaim(displayed.moveIds[pp.movePosition]!),
+      // Cmd_attackstring/Cmd_printstring sees gCurrentMove, not the move in
+      // the PP-owning slot. This distinction is observable for Assist-called
+      // FLY: the source slot is Assist, while the locked continuation prints
+      // FLY and emits no second PP update.
+      B_BUFF2: () => resolveMoveNameExclaim(
+        actionSnapshot?.currentMove ?? displayed.moveIds[pp!.movePosition]!,
+      ),
     });
   }
   if (messageId === "STRINGID_ITDOESNTAFFECT") {
@@ -481,7 +527,32 @@ function messageLines(
       `out ${incoming.name}!`,
     ]);
   }
-  return resolveBattleStringLines(messageId);
+  const resolvers: Record<string, () => string> = {};
+  if (lastMoveAttacker !== null) {
+    const displayed = fieldBattler(field, lastMoveAttacker);
+    // Some effect scripts print their action-specific result after a
+    // controller PP receipt without STRINGID_USEDMOVE (two-turn charge is
+    // one source example). Supplying the already-owned attacker token is
+    // generic; templates that do not reference it ignore it.
+    resolvers.B_ATK_NAME_WITH_PREFIX = () => resolveBattleNameWithPrefix({
+      side: lastMoveAttacker === 0 ? "player" : "opponent",
+      isTrainerBattle: true,
+      nickname: displayed.name,
+    });
+  }
+  if (pendingStatusMessageBattler !== null) {
+    const displayed = fieldBattler(field, pendingStatusMessageBattler);
+    // SetMoveEffect's raw REQUEST_STATUS_BATTLE receipt precedes its result
+    // text. Keep that target only until the next text receipt, so a
+    // B_EFF_NAME_WITH_PREFIX template is sourced from the status write—not
+    // inferred from a move, species, or later battle state.
+    resolvers.B_EFF_NAME_WITH_PREFIX = () => resolveBattleNameWithPrefix({
+      side: pendingStatusMessageBattler === 0 ? "player" : "opponent",
+      isTrainerBattle: true,
+      nickname: displayed.name,
+    });
+  }
+  return resolveBattleStringLines(messageId, resolvers);
 }
 
 function partyBallStates(
@@ -533,6 +604,7 @@ export function projectBattleResolutionCommands(
     { kind: "stat-stage-change" }
   > | null = null;
   let lastFaintBattler: 0 | 1 | null = null;
+  let pendingStatusMessageBattler: 0 | 1 | null = null;
   let lastMoveAttacker: 0 | 1 | null = null;
   let usedMoveInstructionExecution: number | null = null;
   const zeroHpBattlers = new Set<0 | 1>();
@@ -547,14 +619,32 @@ export function projectBattleResolutionCommands(
     }
     lastSequence = event.sequence;
     const payload = event.payload;
+    if (payload.kind === "set-battler-pp-data") {
+      lastMoveAttacker = singlesBattler(payload.battler, "PP update");
+      continue;
+    }
     if (payload.kind === "message") {
       sourceLabelOf(event);
+      const actionSnapshot = payload.actionSnapshot ?? null;
+      if (actionSnapshot !== null) {
+        // The full-turn receipt is frozen at Cmd_printstring time. Keeping
+        // this current message's source owner also makes generic subsequent
+        // attacker templates independent of controller PP timing.
+        lastMoveAttacker = singlesBattler(
+          actionSnapshot.attacker,
+          "message action snapshot",
+        );
+      }
       if (payload.messageId === "STRINGID_USEDMOVE") {
         usedMoveInstructionExecution = instructionExecutionOf(event);
-        lastMoveAttacker = singlesBattler(
-          ppEventAfter(events, index).battler,
-          "used-move message",
-        );
+        if (actionSnapshot === null) {
+          // Synthetic fixtures that predate the frozen snapshot retain the
+          // former PP-receipt bridge deliberately.
+          lastMoveAttacker = singlesBattler(
+            ppEventAfter(events, index).battler,
+            "used-move message",
+          );
+        }
       }
       const switchInBattler = payload.messageId === "STRINGID_SWITCHINMON"
         ? ([...pendingSwitch.keys()].at(-1) ?? null)
@@ -571,7 +661,9 @@ export function projectBattleResolutionCommands(
           afterField,
           lastStatChange,
           lastFaintBattler,
+          pendingStatusMessageBattler,
           lastMoveAttacker,
+          actionSnapshot,
           opponentTrainer,
         ),
         advance:
@@ -581,6 +673,7 @@ export function projectBattleResolutionCommands(
             : "automatic",
         timing: MESSAGE_TIMING,
       }));
+      pendingStatusMessageBattler = null;
       continue;
     }
     if (
@@ -674,6 +767,7 @@ export function projectBattleResolutionCommands(
     }
     if (payload.kind === "set-battler-status-data") {
       const battler = singlesBattler(payload.battler, "status change");
+      pendingStatusMessageBattler = battler;
       commands.push(Object.freeze({
         type: "status",
         eventSequence: event.sequence,
@@ -681,6 +775,30 @@ export function projectBattleResolutionCommands(
         before: beforeRules.battlers[battler]!.status1,
         after: payload.status1,
         timing: STATUS_TIMING,
+      }));
+      continue;
+    }
+    if (payload.kind === "status-icon-update") {
+      pendingStatusMessageBattler = null;
+      commands.push(Object.freeze({
+        type: "status-icon",
+        eventSequence: event.sequence,
+        battler: singlesBattler(payload.battler, "status icon update"),
+        status1: payload.status1,
+        status2: payload.status2,
+        timing: STATUS_ICON_TIMING,
+      }));
+      continue;
+    }
+    if (payload.kind === "set-battler-sprite-visibility") {
+      commands.push(Object.freeze({
+        type: "sprite-visibility",
+        eventSequence: event.sequence,
+        battler: singlesBattler(payload.battler, "sprite visibility"),
+        visible: !payload.invisible,
+        // BtlController_EmitSpriteInvisibility is one controller callback;
+        // the receipt itself owns the relative display edge.
+        timing: Object.freeze({ minimumFrames: 1 as const }),
       }));
       continue;
     }
@@ -828,6 +946,7 @@ export function createBattleResolutionPresentation(
     opponent: input.fieldBoundary.opponent,
   });
   const segment = Object.freeze({
+    field,
     beforeRules: input.beforeRules,
     afterRules: input.transition.state.rules,
     events: input.transition.events,
@@ -944,6 +1063,85 @@ export type AppendBattleResolutionContinuationInput = Readonly<{
   fieldBoundary: BattleResolutionDisplayedField;
 }>;
 
+export type AppendBattleResolutionActionContinuationInput = Readonly<{
+  resolution: BattleResolutionPresentationState;
+  transition: BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>;
+  /** The completed prior segment's frozen display field. */
+  fieldBoundary: BattleResolutionDisplayedField;
+}>;
+
+export type BattleResolutionLockedActionIdentity = Readonly<{
+  battler: 0 | 1;
+  currentMove: number;
+  currentMovePosition: 0 | 1 | 2 | 3;
+}>;
+
+export type AppendBattleResolutionLockedActionContinuationInput = Readonly<{
+  resolution: BattleResolutionPresentationState;
+  transition: BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>;
+  /** The completed charge segment's frozen display field. */
+  fieldBoundary: BattleResolutionDisplayedField;
+  lockedAction: BattleResolutionLockedActionIdentity;
+}>;
+
+/**
+ * `Cmd_printstring` freezes the action globals at every action-owned message.
+ * A continuation need not print `STRINGID_USEDMOVE`: recharge and Bide-family
+ * paths print their own source strings. The frozen action tuple is therefore
+ * the narrow receipt that proves this driven transition resumed the retained
+ * action rather than merely containing another battler's result text.
+ */
+function matchesRetainedLockedActionSnapshot(
+  snapshot: BattleScriptActionMessageSnapshot | undefined,
+  lockedAction: BattleResolutionLockedActionIdentity,
+): boolean {
+  return snapshot !== undefined
+    && Object.isFrozen(snapshot)
+    && snapshot.attacker === lockedAction.battler
+    && snapshot.currentMove === lockedAction.currentMove
+    && snapshot.currentMovePosition === lockedAction.currentMovePosition;
+}
+
+function hasRetainedLockedActionReceipt(
+  events: readonly BattleKernelSemanticEvent[],
+  lockedAction: BattleResolutionLockedActionIdentity,
+): boolean {
+  return events.some(({ payload }) =>
+    payload.kind === "message"
+    && matchesRetainedLockedActionSnapshot(payload.actionSnapshot, lockedAction)
+  );
+}
+
+function appendResolutionSegment(
+  resolution: BattleResolutionPresentationState,
+  transition: BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>,
+  fieldBoundary: BattleResolutionDisplayedField,
+): BattleResolutionSegment {
+  const priorSequence = resolution.segments
+    .flatMap((segment) => segment.events)
+    .at(-1)?.sequence ?? -1;
+  const firstSequence = transition.events[0]?.sequence;
+  if (firstSequence !== undefined && firstSequence <= priorSequence) {
+    throw new Error(
+      `battle resolution continuation event sequence ${firstSequence} is not after ${priorSequence}`,
+    );
+  }
+  return Object.freeze({
+    field: fieldBoundary,
+    beforeRules: resolution.pendingBattle.rules,
+    afterRules: transition.state.rules,
+    events: transition.events,
+    commands: projectBattleResolutionCommands(
+      transition.events,
+      resolution.pendingBattle.rules.rulesContext,
+      transition.state.rules.rulesContext,
+      fieldBoundary,
+      fieldAfter(transition),
+      resolution.opponentTrainer,
+    ),
+  });
+}
+
 /**
  * Appends the genuine forced-switch submission receipt without minting a
  * second resolution identity. Presentation may continue to hold the forced
@@ -963,28 +1161,7 @@ export function appendBattleResolutionContinuation(
   ) {
     throw new Error("battle resolution continuation does not match its pending boundary");
   }
-  const priorSequence = resolution.segments
-    .flatMap((segment) => segment.events)
-    .at(-1)?.sequence ?? -1;
-  const firstSequence = transition.events[0]?.sequence;
-  if (firstSequence !== undefined && firstSequence <= priorSequence) {
-    throw new Error(
-      `battle resolution continuation event sequence ${firstSequence} is not after ${priorSequence}`,
-    );
-  }
-  const segment = Object.freeze({
-    beforeRules: resolution.pendingBattle.rules,
-    afterRules: transition.state.rules,
-    events: transition.events,
-    commands: projectBattleResolutionCommands(
-      transition.events,
-      resolution.pendingBattle.rules.rulesContext,
-      transition.state.rules.rulesContext,
-      fieldBoundary,
-      fieldAfter(transition),
-      resolution.opponentTrainer,
-    ),
-  });
+  const segment = appendResolutionSegment(resolution, transition, fieldBoundary);
   return Object.freeze({
     ...resolution,
     segments: Object.freeze([...resolution.segments, segment]),
@@ -994,8 +1171,98 @@ export function appendBattleResolutionContinuation(
       phase: "presenting-switch-in" as const,
       phaseElapsed: 0,
     }),
+    field: fieldBoundary,
     pendingBoundary: transition.state.boundary,
     pendingBattle: transition.state,
     forcedRequest: null,
+  });
+}
+
+/**
+ * Groups the automatic follow-up after a multi-turn player action without
+ * pretending its two reducer passes were one event list. After the charge
+ * turn, HandleTurnActionSelectionState has auto-confirmed the player's locked
+ * action and published only the real trainer command. The round controller
+ * drives that command, then appends its untouched receipt as a new segment.
+ */
+export function appendBattleResolutionActionContinuation(
+  input: AppendBattleResolutionActionContinuationInput,
+): BattleResolutionPresentationState {
+  const { resolution, transition, fieldBoundary } = input;
+  if (resolution.forcedRequest !== null) {
+    throw new Error("automatic action continuation cannot replace a forced-switch receipt");
+  }
+  if (
+    resolution.pendingBoundary.kind !== "decision-required"
+    || resolution.pendingBoundary.request.kind !== "command"
+    || resolution.pendingBoundary.request.side !== "trainer"
+  ) {
+    throw new Error("automatic action continuation requires a genuine trainer command boundary");
+  }
+  const segment = appendResolutionSegment(resolution, transition, fieldBoundary);
+  return Object.freeze({
+    ...resolution,
+    segments: Object.freeze([...resolution.segments, segment]),
+    segmentIndex: resolution.segments.length,
+    commandIndex: 0,
+    lifecycle: Object.freeze({
+      phase: "presenting" as const,
+      phaseElapsed: 0,
+    }),
+    field: fieldBoundary,
+    pendingBoundary: transition.state.boundary,
+    pendingBattle: transition.state,
+    forcedRequest:
+      transition.state.boundary.kind === "decision-required"
+      && transition.state.boundary.request.kind === "forced-switch"
+      && transition.state.boundary.request.side === "player"
+        ? transition.state.boundary.request
+        : null,
+  });
+}
+
+/**
+ * Reclaims a resolution owner after the opposing battler's locked action has
+ * survived a genuine command request. The command request remains a distinct
+ * kernel/UI identity; only the immutable charge and strike presentation
+ * segments share an owner.
+ */
+export function appendBattleResolutionLockedActionContinuation(
+  input: AppendBattleResolutionLockedActionContinuationInput,
+): BattleResolutionPresentationState {
+  const { resolution, transition, fieldBoundary, lockedAction } = input;
+  const pending = resolution.pendingBoundary;
+  if (
+    resolution.forcedRequest !== null
+    || pending.kind !== "decision-required"
+    || pending.request.kind !== "command"
+  ) {
+    throw new Error("locked action continuation requires a genuine command boundary");
+  }
+  const pendingBattler = pending.request.battler;
+  if (pendingBattler === lockedAction.battler) {
+    throw new Error("locked action continuation must cross the opposing battler's command");
+  }
+  if (!hasRetainedLockedActionReceipt(transition.events, lockedAction)) {
+    throw new Error(
+      "locked action continuation receipt has no immutable matching action snapshot",
+    );
+  }
+  const segment = appendResolutionSegment(resolution, transition, fieldBoundary);
+  return Object.freeze({
+    ...resolution,
+    segments: Object.freeze([...resolution.segments, segment]),
+    segmentIndex: resolution.segments.length,
+    commandIndex: 0,
+    lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 0 }),
+    field: fieldBoundary,
+    pendingBoundary: transition.state.boundary,
+    pendingBattle: transition.state,
+    forcedRequest:
+      transition.state.boundary.kind === "decision-required"
+      && transition.state.boundary.request.kind === "forced-switch"
+      && transition.state.boundary.request.side === "player"
+        ? transition.state.boundary.request
+        : null,
   });
 }

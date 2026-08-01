@@ -38,7 +38,8 @@ def main() -> None:
             "sRandCount": u32(SRANDCOUNT), "gRngValue": u32(s["gRngValue"]),
             "weather": u32(s["gBattleWeather"]), "lastUsedAbility": emu.read_u8(s["gLastUsedAbility"]),
             "abilities": [emu.read_u8(mons + MON_SIZE * i + 0x20) for i in range(2)],
-            "attackStages": [emu.read_u8(mons + MON_SIZE * i + 0x18) for i in range(2)],
+            # BattlePokemon.statStages[] @0x18, index order HP,ATK,DEF,SPEED,SPATK,SPDEF,ACC,EVA (6 = neutral)
+            "statStages": [[emu.read_u8(mons + MON_SIZE * i + 0x18 + stat) for stat in range(8)] for i in range(2)],
             "controllerA": [[emu.read_u8(buffers + 0x200 * i + j) for j in range(4)] for i in range(2)],
             "displayedStringRaw": [emu.read_u8(s["gDisplayedStringBattle"] + i) for i in range(48)],
         }

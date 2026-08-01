@@ -523,3 +523,74 @@ the explanation entirely, narrowing further toward whatever RAM signal
 at `generatedBattleStartOpponentHandoffTick`'s own comment,
 `battleScene.ts:4129-4154`) actually drives the real per-fixture teardown
 tick.
+
+## Round 4 (2026-07-31, main lane): interactive handoff/rawElapsed pinned; existing source lifecycle cannot safely discriminate
+
+### Required raw-clock receipt
+
+The remaining missing number is now pinned with both halves of the receipt:
+
+1. The existing Battle Scene OFF OAM probe was re-run through
+   `tools/run-mgba-probe.py` on the exact composed interactive trace. It
+   again wrote valid JSON before the known teardown SIGSEGV and confirms the
+   source bar plus icons destroy at absolute **1492**.
+2. The app replays that same input route hermetically in
+   `tests/factoryBattleStartIntro.test.ts`, rather than estimating from the
+   trainer-exit comment. It reaches the generated opponent-release semantic
+   handoff at output frame **1460**, `elapsed=411`, source `t=1459`; at
+   absolute/frame **1492**, it is `elapsed=443`, `t=1491`.
+
+Therefore the real destroy receipt is:
+
+```
+rawElapsed = 1491 - 1459 - 1 = 31
+```
+
+This closes the round-3 unknown: the interactive fixture is synced and
+destroys at the same `rawElapsed=31` as YOSHI, not at MAGNETON's bar-early
+`rawElapsed=30` boundary.
+
+### Source task/OAM discriminator check
+
+The probe now also reads the source-owned status-summary task state
+(`gTasks`, `gBattlerStatusSummaryTaskId`, `gBattleSpritesDataPtr`) and the
+pending `gMain.oamBuffer`, all from the source layouts in `task.h`,
+`battle.h`, and `main.h`. At YOSHI's abs **1615** / app-relative 444 and
+interactive's abs **1492**, the snapshots are byte-for-byte equivalent for
+the relevant lifecycle facts:
+
+- opponent task id **1** is active with `data[1]=6` (bar),
+  `data[3..8]=53..48` (icons), `data[10]=1` (battle-start),
+  `data[11]=31`, and `data[15]=-1` (terminal destroy callback);
+- `field_9_x1C=1`, while the player summary remains shown;
+- the pending OAM rows for the outgoing opponent bar are the same exit
+  subsprites at indices 18–23: x `136,104,72,40,8,488`, y 40, palette 8.
+
+MAGNETON also reaches that same terminal task/OAM snapshot at abs 1615; its
+bar became unavailable one source callback earlier while its icons remained
+visible through that callback, which is the separately established split
+widget fact. The complete three-fixture table is now:
+
+| Fixture | Bar destroy | Icon destroy | `rawElapsed` at relevant destroy | Current special-case requirement |
+| --- | --- | --- | --- | --- |
+| YOSHI | app 444 | app 444 | 31 | remove/hold the bar one display step |
+| interactive generated intro | abs 1492 | abs 1492 | 31 | retain/advance the bar one display step |
+| MAGNETON | app 436 | app 437 | bar 30 / icons 31 | retain/advance at the shared old scalar |
+
+This falsifies the safe discriminator proposed by the brief: YOSHI and the
+interactive fixture have identical modeled semantic handoff, raw clock,
+source task readiness, and pending OAM state at their terminal frames, yet
+their bar pixels require opposite display-tail clocks. Choosing either from
+species, trainer, route identity, or an absolute-frame/parity lookup would
+only disguise the gap and is explicitly disallowed. The MAGNETON split does
+justify a future typed bar/icon lifecycle, but no source-owned readiness
+signal currently available to the TypeScript presentation can populate it
+without guessing.
+
+**Verdict: evidence checkpoint only; no production lifecycle was landed.**
+The next safe investigation, if this residual is revisited, is to capture
+the *hardware* OAM/transfer-latch state (not only the post-callback pending
+`gMain.oamBuffer`) around all three terminal frames and expose a generic
+display-readiness event only if it distinguishes the two synced cases. Until
+then, the one-frame YOSHI status-bar improvement cannot be made while
+honestly preserving the exact interactive and MAGNETON pins.

@@ -9,7 +9,11 @@ import type {
   BattleState,
 } from "../src/engine/battleDecisionBoundary.ts";
 import type { FactoryFullTurnDecisionRules } from "../src/engine/factoryBattleScriptFullTurnDecision.ts";
-import { BATTLE_SCRIPT_STATUS2_MASKS } from "../src/engine/battleScriptSourceConstants.ts";
+import { createBattleScriptRulesContext } from "../src/engine/battleScriptRulesContext.ts";
+import {
+  BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS,
+  BATTLE_SCRIPT_STATUS2_MASKS,
+} from "../src/engine/battleScriptSourceConstants.ts";
 
 const FLY = 19;
 const THRASH = 37;
@@ -147,6 +151,125 @@ function expectFinishedLockedActionAttribution(
 }
 
 describe("factory full-turn locked move attribution", () => {
+  it("keeps opponent FLY's locked outcome identical with Battle Scene ON and OFF", () => {
+    const run = (scene: "on" | "off") => {
+      const base = config(SPLASH);
+      const source = {
+        ...base,
+        trainer: {
+          ...base.trainer,
+          moveId: FLY,
+          moves: [FLY, 0, 0, 0] as const,
+          pp: [20, 0, 0, 0] as const,
+        },
+      };
+      const created = createFactoryFullTurnBattleState(source);
+      const initial = scene === "on" ? created : Object.freeze({
+        ...created,
+        rules: Object.freeze({
+          ...created.rules,
+          rulesContext: createBattleScriptRulesContext({
+            ...created.rules.rulesContext,
+            hitMarker: BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS,
+          }),
+        }),
+      });
+      const player = submitFactoryFullTurnDecision(initial, {
+        requestId: 1,
+        side: "player",
+        decision: { kind: "use-move", moveSlot: CALLER_SLOT, targetBattler: 0 },
+      });
+      if (player.kind !== "decision-required") throw new Error("expected trainer command");
+      const charge = submitFactoryFullTurnDecision(player.state, {
+        requestId: 2,
+        side: "trainer",
+        decision: { kind: "use-move", moveSlot: 0, targetBattler: 0 },
+      });
+      if (charge.kind !== "decision-required") throw new Error("expected intervening command");
+      const strike = submitFactoryFullTurnDecision(charge.state, {
+        requestId: 3,
+        side: "player",
+        decision: { kind: "use-move", moveSlot: CALLER_SLOT, targetBattler: 0 },
+      });
+      if (strike.kind !== "decision-required") throw new Error("expected post-strike boundary");
+      return strike.state;
+    };
+    const sceneOn = run("on");
+    const sceneOff = run("off");
+    expect(sceneOff.rng).toEqual(sceneOn.rng);
+    expect(sceneOff.boundary).toEqual(sceneOn.boundary);
+    expect({
+      ...sceneOff.rules.rulesContext,
+      hitMarker: sceneOff.rules.rulesContext.hitMarker
+        & ~BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS,
+    }).toEqual(sceneOn.rules.rulesContext);
+  });
+
+  it("opponent FLY hides before the intervening player action and restores on its locked continuation", () => {
+    const base = config(SPLASH);
+    const source = {
+      ...base,
+      trainer: {
+        ...base.trainer,
+        moveId: FLY,
+        moves: [FLY, 0, 0, 0] as const,
+        pp: [20, 0, 0, 0] as const,
+      },
+    };
+    const initial = createFactoryFullTurnBattleState(source);
+    const sceneOff = Object.freeze({
+      ...initial,
+      rules: Object.freeze({
+        ...initial.rules,
+        rulesContext: createBattleScriptRulesContext({
+          ...initial.rules.rulesContext,
+          hitMarker: BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS,
+        }),
+      }),
+    });
+    const afterPlayer = submitFactoryFullTurnDecision(sceneOff, {
+      requestId: 1,
+      side: "player",
+      decision: { kind: "use-move", moveSlot: CALLER_SLOT, targetBattler: 0 },
+    });
+    if (afterPlayer.kind !== "decision-required") {
+      throw new Error("expected opponent FLY command");
+    }
+    const charge = submitFactoryFullTurnDecision(afterPlayer.state, {
+      requestId: 2,
+      side: "trainer",
+      decision: { kind: "use-move", moveSlot: 0, targetBattler: 0 },
+    });
+    if (charge.kind !== "decision-required") {
+      throw new Error("expected player request while opponent FLY is locked");
+    }
+    const hideIndex = charge.events.findIndex(({ payload }) =>
+      payload.kind === "set-battler-sprite-visibility"
+      && payload.battler === 1
+      && payload.invisible
+    );
+    const interveningPlayerAction = charge.events.findIndex((event, index) =>
+      index > hideIndex
+      && event.payload.kind === "message"
+      && event.payload.messageId === "STRINGID_USEDMOVE"
+    );
+    expect(hideIndex).toBeGreaterThanOrEqual(0);
+    expect(interveningPlayerAction).toBeGreaterThan(hideIndex);
+
+    const continuation = submitFactoryFullTurnDecision(charge.state, {
+      requestId: 3,
+      side: "player",
+      decision: { kind: "use-move", moveSlot: CALLER_SLOT, targetBattler: 0 },
+    });
+    expect(continuation.events).toContainEqual(expect.objectContaining({
+      payload: {
+        kind: "set-battler-sprite-visibility",
+        battler: 1,
+        invisible: false,
+      },
+    }));
+  });
+
   it("Assist-called Fly resumes from gLockedMoves while Assist's slot remains the sole PP owner", () => {
     const firstTurn = runFirstTurn(config(ASSIST, 0, FLY));
     expect(firstTurn.rules.rulesContext.lockedMoves[0]).toBe(FLY);

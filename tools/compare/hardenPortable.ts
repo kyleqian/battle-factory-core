@@ -58,7 +58,7 @@ const stage = createSceneOnMovePresentation({
 });
 let componentMatches = 0, framebufferMatches = 0;
 const componentDiffs: string[] = [];
-let firstFramebufferDiff: string | null = null;
+const framebufferDiffLines: string[] = [];
 const metalPalette = (hardenAsset as { metal: { palette: readonly { r: number; g: number; b: number }[] } }).metal.palette;
 const carrierPalette = fixture.attacker.geometry.side === "player"
   ? (hardenAsset as { relicanthBack: { palette: readonly { r: number; g: number; b: number }[] } }).relicanthBack.palette
@@ -157,14 +157,19 @@ for (let frame = fixture.denseWindow.startFrame; frame <= fixture.denseWindow.en
     maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
   }
   if (exact) framebufferMatches += 1;
-  else if (firstFramebufferDiff === null) {
-    firstFramebufferDiff = `first framebuffer diff at frame ${frame}: ${count}px bbox ${minX},${minY}-${maxX},${maxY}`;
+  else {
+    framebufferDiffLines.push(`framebuffer diff at frame ${frame}: ${count}px bbox ${minX},${minY}-${maxX},${maxY}`);
   }
 }
 const total = fixture.denseWindow.endFrame - fixture.denseWindow.startFrame + 1;
 console.log(`HARDEN component ${componentMatches}/${total}; framebuffer ${framebufferMatches}/${total}`);
 if (componentMatches !== total || framebufferMatches !== total) {
-  if (firstFramebufferDiff) console.error(firstFramebufferDiff);
+  if (framebufferDiffLines.length) {
+    console.error(framebufferDiffLines.slice(0, 32).join("\n"));
+    if (framebufferDiffLines.length > 32) {
+      console.error(`...and ${framebufferDiffLines.length - 32} more framebuffer diff frames`);
+    }
+  }
   if (componentDiffs.length) console.error(componentDiffs.slice(0, 10).join("\n"));
   console.error(`scratch: ${scratch}`);
   process.exit(1);

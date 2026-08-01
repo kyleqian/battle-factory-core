@@ -1,3 +1,127 @@
+## 817 — [bounded worker, 2026-08-01] rank-8 exact owner mirrors retired
+
+- Archived from the live ledger. `d410cfe5` staged the MAGBY/MURKROW
+  Scene-OFF full turn through the production reducer at its exact eight-call
+  RNG cursor and deleted `turn16Resolved` plus the submenu redraw mirror;
+  clean-`60acda9c` replay byte-identical (2,163 captures). Full live-entry
+  detail remains in git history.
+
+## 816 — [bounded worker, 2026-08-01] rank-7 exact owner mirrors retired
+
+- Archived from the live ledger. `1f276c95` + `c0821a65` retained one
+  charge/strike resolution identity and retired `turn14Resolved` plus
+  `turn15PartySelect`; full live-entry detail remains in git history.
+
+## 815 — [bounded worker, 2026-08-01] rank-7 opponent locked-action owner landed
+
+- Archived from the live ledger. `fea91d54` retained a completed locked action
+  across an intervening command and advanced its typed forced selector through
+  switch-in; full live-entry detail remains in git history.
+
+## 814 — [supervisor + bounded workers, 2026-08-01] rank-8 Scene-OFF status-icon receipt landed
+
+- Archived from the live ledger. `80c5d6af` projected the one-callback
+  status-icon receipt; `22421ee6` added primary-status-clear evidence. Full
+  live-entry detail remains in git history.
+
+## 813 — [bounded worker, 2026-08-01] rank-7 opponent-FLY receipt bridge landed
+
+- Archived from the live ledger. `30b61236` staged the inverse opponent-FLY
+  receipts and genuine forced request under Scene OFF; full live-entry detail
+  remains in git history.
+
+## 812 — [bounded worker, 2026-08-01] rank-7 Scene-OFF locked-action grouping landed
+
+- Archived from the live ledger. `b464a6e7`/`72546da6` established explicit
+  Scene-OFF fresh battles and immutable player-owned locked-action segments;
+  full live-entry detail remains in git history.
+
+## 811 — [bounded worker, 2026-08-01] generic MOVEEND sprite-visibility round seam landed
+
+- Archived from the live ledger. `8ee8cbe7` projected the source-owned
+  sprite-visibility receipt through the generic round seam, with focused
+  coverage and the full suite green. Full live-entry detail remains in git
+  history.
+
+## 810 — [bounded worker, 2026-08-01] ISSUES #56 ready-tail verdict
+
+- Archived from the live ledger. Evidence commit `e497c7d6` proved the
+  action-menu ready tail is AI-decision-dependent, not a universal +6; #56
+  item 2 remains at the hardware-OAM/display-latch discriminator. Full
+  live-entry detail remains in git history.
+
+## 809 — [bounded worker, 2026-07-31 ~night] ISSUES #56 item 2 raw-clock/discriminator checkpoint
+
+- Archived from the live ledger. Evidence commit `822522c7` pinned the
+  raw-31 handoff and showed current task/OAM facts cannot distinguish the
+  conflicting YOSHI/interactive bar tails; #56 item 2 remains open. Full
+  live-entry detail remains in git history.
+
+## 808 — [bounded worker, 2026-07-31 ~night] ISSUES #61 DMA reveal boundary characterized
+
+- Archived from the live ledger. Evidence commit `bc988ef9` proved the
+  generic DMA/BG-copy-ready boundary and rejected a regressive fixed delay;
+  #61 remains open. Full live-entry detail remains in git history.
+
+## 807 — [bounded worker, 2026-07-31 ~night] ISSUES #60 typed Scene-OFF stat adapter crash fixed
+
+- Archived from the live ledger. `f1bc60a2` widened the typed Scene-OFF stat
+  banner to battler 0/1 × rise/drop and fixed the exact battler-1 EVASION
+  7→8 crash. Full live-entry detail remains in git history.
+
+## 806 — [supervisor tooling, 2026-07-31 ~night] ordinary Codex model/effort policy enforced
+
+- Archived from the live ledger. `c4d5b8dd` limits ordinary Codex launches
+  to Terra/max, Luna/max, or Sol/high; the recorded full suite was 567 files,
+  5706 passed + 1 skipped, with build green. Full live-entry detail remains
+  in git history.
+
+## 805 — [bounded worker, 2026-07-31 ~night] ISSUES #39 rank-6 slice 4 landed
+
+- Archived from the live ledger. `40414e55` moved turn 4's
+  DOUBLE_TEAM/ROCK_SLIDE window to Scene-OFF-owned presentation; its docs
+  receipt is `67a95503`. Both fresh OFF pins were 256/256 exact and rank 6
+  (turns 1–4) was complete. Full live-entry detail remains in git history.
+
+## 804 — [bounded worker, 2026-07-31 ~night] ISSUES #39 rank-6 slice 3 (turn 3) LANDED — fallback invoked, turn 4 not attempted
+
+- **State:** master HEAD is this session's own commit (src+tests+traces) —
+  tree clean, `npx tsc --noEmit` clean, `npm run build` clean, focused
+  vitest (battleScene 227/battleMenu 121/fightSubmenu 57/
+  factoryBattleStartIntro 5/executableFrontierRatchet 6) 416/416 passed. Docs
+  commit (this one) follows.
+- **Did:** flipped turn 3's whole ENDEAVOR+ROCK_SLIDE window to Scene-OFF,
+  same class-(c)-delete/class-(b)-retime recipe slices 1-2 established (full
+  mechanism detail in ISSUES #39's own rank-6 paragraph — not renarrated
+  here). New finding beyond the recipe: turn 3's own cross-turn bounce chain
+  (`turn3SubmenuBounceTick`/`turn3KickoffBounceTick`) still hardcoded turn
+  2's ON-fit redraw delay, AND its frozen-bounce plateau (previously a
+  module constant that only coincidentally matched the live formula under
+  ON) needed a fresh oracle-pixel grid search — real hardware freezes at
+  `pressTick+9`, not the naive `pressTick+FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`
+  continuation. Acceptance: `turn3-endeavor-off.json` **254/255** (one
+  residual — ISSUES #61, a pre-existing action-menu/submenu reveal-boundary
+  bug confirmed present, worse even, on unmodified master, unrelated to this
+  window's own content), `turn3-rockslide-off.json` **161/161** EXACT;
+  insurance `turn5-rockslide.json`/`turn8-bind-a.json` 256/256 each, zero
+  regression. Retired `turn3-{menu,endeavor,rockslide}.json` (`git rm`).
+  Re-pinned `tests/fightSubmenu.test.ts`'s two turn-3 tests at the fresh OFF
+  ticks (4043/4205/4212 replacing dead ON 4080/4349/4356) and redirected its
+  button-script loader from the retired `turn3-menu.json` to
+  `turn3-endeavor-off.json` (byte-identical segments).
+- **Next:** turn 4 (rank-6 slice 4, DOUBLE_TEAM+ROCK_SLIDE) is next in
+  order — fallback invoked this session (turn-4 attempt would have exceeded
+  the session's own time budget after slice 3's bounce-chain investigation
+  ran long); a clean turn-3-only landing per the brief's own fallback
+  clause. Expect the SAME cross-turn bounce-chain fix pattern for
+  `turn4SubmenuBounceTick`/`turn4KickoffBounceTick` (chained off THIS
+  slice's own `TURN3_OFF_ROCKSLIDE_MENU_REDRAW_DELAY`=525) plus a fresh
+  frozen-plateau grid search for turn 4's own confirm-wait window - budget
+  time for both up front, not just the recipe's class-(c)/(b) split.
+- **PAPERCUT:** none beyond ISSUES #61's own discovery.
+
+---
+
 ## 803 — [bounded worker, 2026-07-31 ~night] ISSUES #39 rank-6 slice 2 (turn 2) LANDED — third attempt, both blockers root-caused
 
 - **State:** master at `4c793748` — tree clean, tsc/build clean, focused

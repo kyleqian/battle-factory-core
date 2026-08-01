@@ -130,7 +130,7 @@ let componentMatches = 0;
 let framebufferMatches = 0;
 const componentDiffs: string[] = [];
 const framebufferDiffs: string[] = [];
-let firstFramebufferDiff: string | null = null;
+const framebufferDiffLines: string[] = [];
 for (
   let frame = fixture.denseWindow.startFrame;
   frame <= fixture.denseWindow.endFrame;
@@ -363,8 +363,8 @@ for (
   } else {
     const summary = `${frame}:${count}:${minX},${minY}-${maxX},${maxY}`;
     framebufferDiffs.push(summary);
-    if (firstFramebufferDiff === null) {
-      firstFramebufferDiff = `first framebuffer diff ${summary}`;
+    {
+      framebufferDiffLines.push(`first framebuffer diff ${summary}`);
     }
   }
 }
@@ -376,7 +376,12 @@ console.log(
   + ` framebuffer ${framebufferMatches}/${total}`,
 );
 if (componentMatches !== total || framebufferMatches !== total) {
-  if (firstFramebufferDiff) console.error(firstFramebufferDiff);
+  if (framebufferDiffLines.length) {
+    console.error(framebufferDiffLines.slice(0, 32).join("\n"));
+    if (framebufferDiffLines.length > 32) {
+      console.error(`...and ${framebufferDiffLines.length - 32} more framebuffer diff frames`);
+    }
+  }
   if (framebufferDiffs.length) {
     console.error(`framebuffer mismatches ${framebufferDiffs.join(" ")}`);
   }

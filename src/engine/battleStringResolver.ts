@@ -74,7 +74,12 @@ export function resolveMoveNameExclaim(moveId: number): string {
   return `${entry.name}!`;
 }
 
-/** One resolver function per `{TOKEN}` placeholder this call site's template(s) actually use. */
+/**
+ * One resolver function per source text substitution this call site's
+ * template(s) actually use. Most are `B_TXT_*` placeholders; a few
+ * nickname substitutions (notably `B_EFF_NAME_WITH_PREFIX`, charmap.txt:368)
+ * are encoded as zero-argument text controls instead.
+ */
 export type BattleStringPlaceholderResolvers = Readonly<Record<string, () => string>>;
 
 const LINE_BREAK_CODES = new Set(["\\n", "\\l", "\\p"]);
@@ -148,7 +153,18 @@ export function resolveBattleStringLines(
       lines.push(current);
       current = "";
     } else {
-      throw new Error(`battleStringResolver: unsupported control segment {${segment.name}} in ${messageId}`);
+      // `B_EFF_NAME_WITH_PREFIX` is a source nickname substitution encoded
+      // as its own zero-argument text control (charmap.txt:368), not a
+      // B_TXT placeholder. Treat a supplied zero-argument resolver exactly
+      // like a placeholder; actual controls such as {WAIT_SE} remain
+      // unsupported until their timing behavior is explicitly modeled.
+      const resolve = segment.args.length === 0
+        ? resolvers[segment.name]
+        : undefined;
+      if (!resolve) {
+        throw new Error(`battleStringResolver: unsupported control segment {${segment.name}} in ${messageId}`);
+      }
+      current += resolve();
     }
   }
   if (current !== "") lines.push(current);

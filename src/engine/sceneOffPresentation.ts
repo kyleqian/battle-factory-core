@@ -297,10 +297,14 @@ export function createBattleKernelTurnPresentation(
     } else if (
       resolutionCommand?.type === "move-animation"
       || resolutionCommand?.type === "hit-animation"
+      || resolutionCommand?.type === "sprite-visibility"
     ) {
       // The legacy canonical adapter already includes these controller waits
       // in its immutable per-command durations. Typed animation commands are
-      // consumed only by the generated resolution lifecycle.
+      // consumed only by the generated resolution lifecycle. Sprite
+      // visibility likewise belongs to that lifecycle's persistent battler
+      // boundaries; ignoring ordinary visible pass-through receipts here
+      // preserves the compatibility adapter's established command vector.
     } else if (resolutionCommand !== undefined) {
       throw new Error(
         `Scene OFF compatibility projection does not yet render ${resolutionCommand.type} commands`,

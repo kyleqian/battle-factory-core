@@ -1,5 +1,6 @@
 import { advanceRngValue } from "./rng.ts";
 import type {
+  BattleScriptActionMessageSnapshot,
   BattleScriptBattlerId,
   BattleScriptEventProvenance,
   BattleScriptSelectionMessageSnapshot,
@@ -670,7 +671,13 @@ function freezeEventPayload(
 ): BattleScriptSemanticEventPayload {
   switch (payload.kind) {
     case "message":
-      return Object.freeze({ ...payload, substitutions: Object.freeze([...payload.substitutions]) });
+      return Object.freeze({
+        ...payload,
+        substitutions: Object.freeze([...payload.substitutions]),
+        ...(payload.actionSnapshot === undefined
+          ? {}
+          : { actionSnapshot: createBattleScriptActionMessageSnapshot(payload.actionSnapshot) }),
+      });
     case "selection-message":
       return Object.freeze({
         ...payload,
@@ -716,6 +723,23 @@ function freezeEventPayload(
     case "outcome":
       return Object.freeze({ ...payload });
   }
+}
+
+export function createBattleScriptActionMessageSnapshot(
+  snapshot: BattleScriptActionMessageSnapshot,
+): BattleScriptActionMessageSnapshot {
+  if (
+    !isBattleScriptBattlerId(snapshot.attacker)
+    || !Number.isSafeInteger(snapshot.currentMove)
+    || snapshot.currentMove < 0
+    || snapshot.currentMove > 0xffff
+    || !Number.isSafeInteger(snapshot.currentMovePosition)
+    || snapshot.currentMovePosition < 0
+    || snapshot.currentMovePosition > 3
+  ) {
+    throw new Error("battle action message snapshot is invalid");
+  }
+  return Object.freeze({ ...snapshot });
 }
 
 function assertIntegerInRange(

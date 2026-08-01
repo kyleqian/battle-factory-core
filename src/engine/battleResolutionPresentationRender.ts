@@ -193,16 +193,20 @@ function applyCompletedCommand(
   if (command.type === "hp") {
     return withDisplayedHp(field, command.battler, command.to);
   }
-  if (command.type === "status") {
-    return withDisplayedStatus(field, command.battler, command.after);
+  if (command.type === "status-icon") {
+    return withDisplayedStatus(field, command.battler, command.status1);
   }
   if (
     command.type === "message"
     || command.type === "move-animation"
     || command.type === "hit-animation"
     || command.type === "stat"
+    // The raw status write is logical battle state. The later
+    // status-icon controller receipt owns the visible healthbox transition.
+    || command.type === "status"
     || command.type === "faint"
     || command.type === "party-summary"
+    || command.type === "sprite-visibility"
     || command.type === "turn-end"
   ) return field;
   if (command.type === "switch-in") {
@@ -262,8 +266,10 @@ export function battleResolutionCommandDuration(
         BATTLE_RESOLUTION_STAT_CHANGE_FRAMES,
       );
     case "status":
+    case "status-icon":
     case "faint":
     case "switch-in":
+    case "sprite-visibility":
       return command.timing.minimumFrames;
     case "party-summary":
       return 1;
@@ -335,6 +341,17 @@ export function createBattleResolutionPresentationRenderView(
   let switchIn: BattleResolutionPresentationRenderView["switchIn"] = null;
   let partySummary: BattleResolutionPresentationRenderView["partySummary"] = null;
   const fainted = new Set<0 | 1>();
+  const spriteVisibility = new Map<0 | 1, boolean>([[0, true], [1, true]]);
+  // Visibility receipts are controller-owned persistent state. A later
+  // automatic locked-action segment starts from the finished prior segment,
+  // not from an invented visible baseline.
+  for (let segmentIndex = 0; segmentIndex < state.segmentIndex; segmentIndex += 1) {
+    for (const completed of state.segments[segmentIndex]!.commands) {
+      if (completed.type === "sprite-visibility") {
+        spriteVisibility.set(completed.battler, completed.visible);
+      }
+    }
+  }
   const confirmHandoff = state.confirmHandoff === null
     ? null
     : Object.freeze({
@@ -392,6 +409,9 @@ export function createBattleResolutionPresentationRenderView(
     if (completed.type === "message") latestMessage = completed.lines;
     if (completed.type === "faint") fainted.add(completed.battler);
     if (completed.type === "switch-in") fainted.delete(completed.battler);
+    if (completed.type === "sprite-visibility") {
+      spriteVisibility.set(completed.battler, completed.visible);
+    }
     if (completed.type === "party-summary") {
       partySummary = completed.visible
         ? Object.freeze({ battler: completed.battler, states: completed.states })
@@ -526,6 +546,8 @@ export function createBattleResolutionPresentationRenderView(
     } else if (command.type === "switch-in") {
       field = replaceFieldBattler(field, command.battler, command.incoming);
       fainted.delete(command.battler);
+    } else if (command.type === "sprite-visibility") {
+      spriteVisibility.set(command.battler, command.visible);
     }
   } else if (
     state.lifecycle.phase !== "confirm-handoff"
@@ -578,7 +600,8 @@ export function createBattleResolutionPresentationRenderView(
     effect,
     visibility: Object.freeze({
       player: Object.freeze({
-        sprite: !fainted.has(0)
+        sprite: (spriteVisibility.get(0) ?? true)
+          && !fainted.has(0)
           && !(playerHit?.targetInvisible ?? false)
           && !(
             playerFaint?.sink.type === "player-pixel-rows"
@@ -589,7 +612,8 @@ export function createBattleResolutionPresentationRenderView(
           && (playerFaint?.healthboxVisible ?? true),
       }),
       opponent: Object.freeze({
-        sprite: !fainted.has(1)
+        sprite: (spriteVisibility.get(1) ?? true)
+          && !fainted.has(1)
           && !(opponentHit?.targetInvisible ?? false)
           && !(
             opponentFaint?.sink.type === "opponent-tile-rows"

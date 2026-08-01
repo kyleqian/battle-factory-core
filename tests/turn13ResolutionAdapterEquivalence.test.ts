@@ -14,6 +14,9 @@ import {
   turn13FaintedTextStartTick,
   turn13FaintedTextVisibleChars,
 } from "../src/engine/battleScene.ts";
+import { currentPPForActiveMon } from "../src/engine/battleMenu.ts";
+import { rentalMoveset } from "../src/engine/battleSetup.ts";
+import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "../src/engine/turn15FlyResolutionAdapter.ts";
 
 /**
  * ISSUES #39 rank-2 regression pin (docs/battle-scene-retirement-
@@ -109,6 +112,20 @@ describe("turn13ResolutionAdapter: #39 rank-2 kernel-to-typed-owner equivalence 
   describe("documented gap: the turn-14 dispatcher/slot-2 PP mirroring are NOT staged here", () => {
     it("is named as an explicit, exported marker, not a silently-green omission", () => {
       expect(TURN13_TURN14_HANDOFF_NOT_STAGED).toBe(true);
+    });
+
+    it("cannot substitute the already-completed FLY charge owner for the predecessor PP receipt", () => {
+      const onix = rentalMoveset("ONIX");
+      const predecessorPp = currentPPForActiveMon(
+        onix,
+        true, true, true, true, true, true, true,
+        true, true, true, true, true, true,
+      )[2];
+      const chargeOwnerPp = CANONICAL_OPPONENT_FLY_RESOLUTION
+        .chargeResolution.segments[0]!.afterRules.rulesContext.battlers[0]!.pp[2];
+
+      expect(predecessorPp).toBe(18);
+      expect(chargeOwnerPp).toBe(17);
     });
   });
 });

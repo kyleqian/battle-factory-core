@@ -771,6 +771,7 @@ import {
 } from "./battleCommandPresentationRender.ts";
 import type { BattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
 import type {
+  BattleResolutionRenderEffect,
   BattleResolutionPresentationRenderView,
 } from "./battleResolutionPresentationRender.ts";
 import type {
@@ -802,6 +803,13 @@ import {
   resolveTurn6FeatherDanceKickoffLines,
   resolveTurn6FeatherDanceWindowContent,
 } from "./turn6FeatherDancePresentationStaging.ts";
+import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "./turn15FlyResolutionAdapter.ts";
+import { mapStatus1ToBattleStatus } from "./battleResolutionAdapter.ts";
+import type {
+  BattleSceneFollowingResolutionPresentation,
+  BattleSceneResolutionOwner,
+} from "./battleSceneResolutionOwner.ts";
+import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "./turn16FirePunchResolutionAdapter.ts";
 import {
   resolveTurn7AtkFellLines,
   resolveTurn7FeatherDanceKickoffLines,
@@ -2453,24 +2461,6 @@ export interface BattleSceneState {
   /** S7 slice J (docs/battle-turn-notes.md §13/§23): `true` once turn 4's whole ROCK_SLIDE resolution has redrawn the settled action menu (`TURN4_ROCKSLIDE_MENU_REDRAW_DELAY` past turn 4's own real confirm) AND a fresh A-press has reopened FIGHT for turn 5 - same "created directly" idiom as `turn1Resolved`/`turn2Resolved`/`turn3Resolved`. Turn 5's reopen persists the cursor at slot 0 (ROCK_SLIDE, unchanged since turn 3) - no nav needed, §13's own ledger. Distinguishes turn 5's own ENDEAVOR resolution (Grovyle's fatal-to-1 hit on Onix) from turn 4's DOUBLE_TEAM+ROCK_SLIDE one (both confirm at cursor 0). */
   turn4Resolved: boolean;
   /**
-   * S7 slice K (docs/battle-turn-notes.md §24, docs/faint-switch-notes.md
-   * §3b/§7a): `elapsed` value of the KO-text dismiss A-press once registered
-   * (`TICK0 + turn5KoDismissElapsed` is the actual trace tick), `null`
-   * before - same "created directly, same tick already reflects it" idiom as
-   * `sendOutPressElapsed`. This is this engine's FIRST input-gated BATTLE
-   * TEXT (as opposed to a menu re-open): once Onix's ROCK_SLIDE faints
-   * Grovyle, "Foe GROVYLE fainted!" prints automatically (no button needed -
-   * same auto-advance every other move-use text in this dossier already
-   * has), then HOLDS INDEFINITELY (idle-cursor bounce only, `cursorState`
-   * re-anchored - see `TURN5_FAINTED_CURSOR_START_DELAY`) until the player
-   * presses A - a real, oracle-proven difference from every other text
-   * window (`docs/battle-turn-notes.md` §13's own control-run finding: 2996
-   * idle ticks with zero further state change). `tick()` must never
-   * auto-advance past this point on its own; only the `A` edge (gated by
-   * `turn5RockSlideKoDismissEligible`) sets this field.
-   */
-  turn5KoDismissElapsed: number | null;
-  /**
    * S7 slice N (docs/turn6-notes.md, docs/battle-turn-notes.md §19-24's own
    * "parameterize, don't rebuild" pattern): `true` once turn 5's whole
    * faint/switch-in/Sitrus-heal sequence has settled the turn-6 action menu
@@ -2583,23 +2573,8 @@ export interface BattleSceneState {
    * exactly (the brief's own instruction).
    */
   turn13Resolved: boolean;
-  /**
-   * S7/S8 turn 15 (docs/turn15-notes.md): `true` once turn 14's own whole
-   * DRAGON_BREATH-auto-miss resolution has redrawn the settled action menu
-   * (`TURN14_DRAGONBREATH_MENU_REDRAW_DELAY` past turn 14's own real
-   * confirm) AND a fresh A-press has reopened FIGHT for turn 15, cursor
-   * persisted at slot 2 (DRAGON_BREATH, unchanged since turn 13/14) - no
-   * `DOWN` nav needed. Mirrors `turn13Resolved`'s own pattern exactly (the
-   * brief's own instruction).
-   */
-  turn14Resolved: boolean;
-  /**
-   * True once turn 16's FIRE_PUNCH/burn tail has redrawn the action menu
-   * and the player opens FIGHT for turn 17. Optional only so older direct
-   * render fixtures remain source-compatible; live engine state always
-   * carries it explicitly.
-   */
-  turn16Resolved?: boolean;
+  /** Immutable retained-action resolution plus its request-owned selector. */
+  resolutionOwner?: BattleSceneResolutionOwner | null;
   /**
    * RAM-equivalent gBattleOutcome for the first battle.  The WIN write is
    * intentionally state-only during this slice: the old faint message
@@ -2612,8 +2587,6 @@ export interface BattleSceneState {
    * does not inspect a turn-resolution flag.
    */
   terminalResolution?: BattleTerminalResolutionPresentationState | null;
-  /** Forced player-switch menu, created only by the real turn-15 faint-text A press. */
-  turn15PartySelect?: import("./partySelect.ts").PartySelectState | null;
 }
 
 export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
@@ -2624,7 +2597,6 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn2Resolved: false,
   turn3Resolved: false,
   turn4Resolved: false,
-  turn5KoDismissElapsed: null,
   turn5Resolved: false,
   turn6Resolved: false,
   turn7Resolved: false,
@@ -2635,8 +2607,7 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn12Resolved: false,
   opponentFaintDismissElapsed: null,
   turn13Resolved: false,
-  turn14Resolved: false,
-  turn16Resolved: false,
+  resolutionOwner: null,
   battleOutcome: 0,
   terminalResolution: null,
 };
@@ -2656,7 +2627,6 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn2Resolved: state.turn2Resolved,
     turn3Resolved: state.turn3Resolved,
     turn4Resolved: state.turn4Resolved,
-    turn5KoDismissElapsed: state.turn5KoDismissElapsed,
     turn5Resolved: state.turn5Resolved,
     turn6Resolved: state.turn6Resolved,
     turn7Resolved: state.turn7Resolved,
@@ -2667,12 +2637,10 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn12Resolved: state.turn12Resolved,
     opponentFaintDismissElapsed: state.opponentFaintDismissElapsed,
     turn13Resolved: state.turn13Resolved,
-    turn14Resolved: state.turn14Resolved,
-    turn16Resolved: state.turn16Resolved ?? false,
+    resolutionOwner: state.resolutionOwner ?? null,
     battleOutcome:
       postDismiss === null ? (state.battleOutcome ?? 0) : postDismiss.battleOutcome,
     terminalResolution: state.terminalResolution ?? null,
-    turn15PartySelect: state.turn15PartySelect,
   };
 }
 
@@ -6451,11 +6419,11 @@ function drawStatIncreaseBannerForBattler(
   corner: Readonly<{ x: number; y: number }>,
   eva: number,
   bg1Y: number,
+  bgPalette: RgbColor[] = statAnimBanner.palettes.evasion,
 ): void {
   const evb = 16 - eva;
   const bgTileset = statAnimBanner.tileset;
   const bgTilemap = statAnimBanner.tilemaps.increase;
-  const bgPalette = statAnimBanner.palettes.evasion;
   for (let ty = 0; ty < tileset.rows; ty += 1) {
     for (let tx = 0; tx < tileset.columns; tx += 1) {
       const tile = tileset.tiles[ty * tileset.columns + tx];
@@ -6537,9 +6505,9 @@ function drawStatDecreaseBannerForBattlerPalette(
 }
 
 /**
- * ISSUES #59: the generated route's typed Scene-OFF stat adapter
+ * ISSUES #59/#60: the generated route's typed Scene-OFF stat adapter
  * (`renderBattleResolutionSceneOffView` below) needs a real palette for
- * every stat a legal stat-down move can name, not just FEATHER_DANCE's own
+ * every stat a legal stat-change move can name, not just FEATHER_DANCE's own
  * fixed ATK (`assertFeatherDanceAttackStatPalette` above, which stays
  * scoped to the retired canonical turn-6/7/8 window per its own doc).
  * `stat-anim-banner.json` already extracts all seven palettes
@@ -6547,7 +6515,7 @@ function drawStatDecreaseBannerForBattlerPalette(
  * data. `BattleStatName`'s two hyphenated members are the only ones that
  * don't match their palette key verbatim.
  */
-function statAnimBannerDecreasePalette(stat: BattleStatName): RgbColor[] {
+function statAnimBannerPalette(stat: BattleStatName): RgbColor[] {
   switch (stat) {
     case "attack": return statAnimBanner.palettes.attack;
     case "defense": return statAnimBanner.palettes.defense;
@@ -6557,6 +6525,58 @@ function statAnimBannerDecreasePalette(stat: BattleStatName): RgbColor[] {
     case "accuracy": return statAnimBanner.palettes.accuracy;
     case "evasion": return statAnimBanner.palettes.evasion;
   }
+}
+
+type SceneOffStatEffect = Extract<
+  BattleResolutionRenderEffect,
+  { type: "stat" }
+>;
+
+export interface SceneOffStatStageBannerView {
+  readonly battler: 0 | 1;
+  readonly direction: "increase" | "decrease";
+  readonly stat: BattleStatName;
+  readonly eva: number | null;
+  readonly bg1Y: number;
+}
+
+/**
+ * Pure typed adapter from one source-owned stat-stage receipt to the generic
+ * Scene-OFF banner state. Stat stages are source `gBattleMons` values in
+ * 0..12. An actual controller animation always has a direction; at-bound
+ * no-op receipts take the source's separate "won't change" message path and
+ * must never be presented as a stat banner.
+ */
+export function sceneOffStatStageBannerView(
+  effect: SceneOffStatEffect,
+): SceneOffStatStageBannerView {
+  if (
+    !Number.isInteger(effect.from)
+    || !Number.isInteger(effect.to)
+    || effect.from < 0
+    || effect.from > 12
+    || effect.to < 0
+    || effect.to > 12
+    || effect.from === effect.to
+  ) {
+    throw new Error(
+      `Scene OFF typed stat adapter cannot draw battler ${effect.battler} ${effect.stat} ${effect.from}->${effect.to}`,
+    );
+  }
+  const direction = effect.to > effect.from ? "increase" : "decrease";
+  // One typed command frame advances two source controller ticks after its
+  // setup age. Mild increase/decrease banners share the blend cadence; the
+  // source direction selects the BG1 tilemap, horizontal phase, and signed
+  // vertical scroll.
+  const sourceAge = effect.age * 2 + 94;
+  const decreaseBg1Y = turn13SandAttackAccBg1Y(sourceAge, 0);
+  return Object.freeze({
+    battler: effect.battler,
+    direction,
+    stat: effect.stat,
+    eva: turn13SandAttackAccEva(sourceAge, 0),
+    bg1Y: direction === "increase" ? -decreaseBg1Y : decreaseBg1Y,
+  });
 }
 
 const OPP_SUMMARY_ICON_BASE = { x: 26, y: 32 };
@@ -7455,24 +7475,19 @@ function drawFightSubmenuWindow(
   turn12Resolved: boolean = false,
   turn13Resolved: boolean = false,
   opponentFaintDismissTick: number | null = null,
-  turn14Resolved: boolean = false,
+  resolutionOwner: BattleSceneResolutionOwner | null = null,
   trainerPresentation?: FactoryTrainerPresentation,
 ): void {
-  if (turn14Resolved) {
-    // S7/S8 (docs/turn15-notes.md): turn 15 is Murkrow's own FLY strike
-    // half (Onix's own re-selected DRAGON_BREATH never executes - Murkrow
-    // acts first and faints Onix outright) - its own dedicated dispatcher,
-    // same "genuinely different PP/text" reason `turn12Resolved`'s own
-    // branch below already established for turn 13.
-    drawTurn15FightSubmenuWindow(fb, t, sm);
+  if (resolutionOwner?.resolution.segmentIndex === 1) {
+    drawTurn15FightSubmenuWindow(fb, t, sm, resolutionOwner.resolution);
+    return;
+  }
+  if (resolutionOwner?.resolution.segmentIndex === 0) {
+    drawTurn14FightSubmenuWindow(fb, t, sm);
     return;
   }
   if (turn13Resolved) {
-    // S7/S8 (docs/turn14-notes.md): turn 14 is the FLY charge turn - its
-    // own dedicated dispatcher, same "genuinely different PP/text" reason
-    // `turn12Resolved`'s own branch below already established for turn 13.
-    drawTurn14FightSubmenuWindow(fb, t, sm);
-    return;
+    throw new Error("resolved turn-13 handoff has no retained action presentation owner");
   }
   if (turn12Resolved) {
     // S7/S8 (docs/turn13-notes.md): turn 13 is the winning line's own FIFTH
@@ -7768,10 +7783,10 @@ function drawFightSubmenuChrome(
   turn11Resolved: boolean = false,
   turn12Resolved: boolean = false,
   turn13Resolved: boolean = false,
-  turn14Resolved: boolean = false,
-  turn16Resolved: boolean = false,
+  lockedActionResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null = null,
+  followingResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null = null,
 ): void {
-  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved, turn7Resolved, turn8Resolved, turn9Resolved, turn10Resolved, turn11Resolved, turn12Resolved, turn13Resolved, turn14Resolved, turn16Resolved);
+  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved, turn7Resolved, turn8Resolved, turn9Resolved, turn10Resolved, turn11Resolved, turn12Resolved, turn13Resolved, lockedActionResolution, followingResolution);
   drawFightSubmenuChromeFromLiveState(
     fb,
     displayCursor,
@@ -10065,10 +10080,10 @@ function turn5FaintedCursorYOffset(t: number, start: number): number {
  * Eligible` already established for the S6 intro's analogous press) - the
  * player must press A to advance past this point; idle ticks alone never
  * do (docs/battle-turn-notes.md §13's own control-run finding: 2996 idle
- * ticks, zero further state change). `core.ts`'s `tick()` uses this to gate
- * `turn5KoDismissElapsed` - see that field's own doc for why a naive
- * fixed-delay auto-advance (every OTHER text window in this dossier's own
- * shape) would be wrong here.
+ * ticks, zero further state change). The immutable staged faint/switch/item
+ * lifecycle owns the content and continuation facts. This exported boundary
+ * remains a presentation evidence pin only; no battle-state mirror consumes
+ * the dismiss edge.
  */
 export function turn5RockSlideKoDismissEligible(t: number): boolean {
   return t >= TURN5_ROCKSLIDE_PRESS_TICK + TURN5_FAINTED_CURSOR_START_DELAY;
@@ -14069,7 +14084,7 @@ function drawDragonBreathKoWindow(
  * flagging). The live wait-cursor ALONE is what produces the dossier's own
  * cited 4 distinct cycling shas. The KO-gated hold itself needs NO special-case press-driven
  * freeze: `opponentFaintDismissElapsed` (core.ts) exists for state-machine
- * correctness only, mirroring `turn5KoDismissElapsed`'s own precedent that
+ * correctness only; the earlier turn-5 compatibility window established that
  * the render path stays a pure function of `t` - the "locks... holds
  * through 16824" shape docs/turn13-notes.md §4 cites falls out naturally
  * from the live cursor's own 9-tick phase boundaries (16819-16827 all share
@@ -14106,9 +14121,8 @@ export function opponentFaintDismissEligible(t: number): boolean {
  * S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6/§7): `koDismissTick` (the
  * real `TICK0 + opponentFaintDismissElapsed` trace tick, `null` before the press
  * registers) - once set, this is the FIRST place this dossier's own render
- * path actually consults a KO-dismiss elapsed field (every earlier "the
- * render path does NOT consult this field" precedent, `turn5KoDismissElapsed`'s
- * own module doc included, held only because those windows' committed
+ * path actually consults a KO-dismiss elapsed field (the earlier turn-5
+ * window never consumed its former mirror because its committed
  * traces always dismissed immediately upon eligibility; THIS turn's own
  * script deliberately idles ~819 ticks past eligibility before pressing -
  * `battle1-turn13-dense-a.json`'s own segment 105, a 1400-frame idle - so
@@ -14883,8 +14897,8 @@ function turn14MurkrowInvisible(t: number): boolean {
 }
 
 /** "Foe MURKROW flew\nup high!" (`gFirstTurnOfTwoStringIds[B_MSG_TURN1_FLY]`) uses the ordinary one-character-per-frame printer, but its first visible glyph is render tick 17823. Fresh per-glyph diffs show the former 17822 anchor led the oracle by exactly one character (the three space ticks were consequently already exact); the completed string remains exact at 17846. */
-export const TURN14_FLYUP_LINE1 = "Foe MURKROW flew";
-export const TURN14_FLYUP_LINE2 = "up high!";
+export const TURN14_FLYUP_LINE1 = CANONICAL_OPPONENT_FLY_RESOLUTION.chargeLines[0]!;
+export const TURN14_FLYUP_LINE2 = CANONICAL_OPPONENT_FLY_RESOLUTION.chargeLines[1]!;
 const TURN14_FLYUP_TEXT_TOTAL = TURN14_FLYUP_LINE1.length + TURN14_FLYUP_LINE2.length;
 const TURN14_FLYUP_TEXT_START_TICK = 17823;
 
@@ -14928,7 +14942,7 @@ const TURN14_MENU_REDRAW_RESET_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - TURN14_ME
  * `TURN14_MENU_REDRAW_TICK`, reached from turn 14's own real confirm press
  * `TURN14_DRAGONBREATH_PRESS_TICK`) - mirrors `TURN13_DRAGONBREATH_MENU_
  * REDRAW_DELAY`'s own formula shape exactly (redraw tick minus that turn's
- * own confirm press), gating core.ts's new `turn14Resolved`-setting reopen
+ * own confirm press), gating core.ts's retained-action owner handoff
  * branch. The real reopen press (18956 in the canonical trace) lands well
  * after this threshold, same "armed well in advance of the real press"
  * shape every prior turn-epoch delay already shows.
@@ -15031,9 +15045,8 @@ function drawTurn14FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmen
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
   // turn13Resolved must be true here (turn 13 has already resolved by this
-  // reopen) while turn14Resolved stays at its default false (this turn's
-  // own confirm hasn't happened yet) - matches the (N-1)-trues pattern
-  // every other turnN's own analogous call already establishes.
+  // reopen) before the retained charge receipt has advanced to its locked
+  // strike segment.
   drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true, true, true, true, true, true, true);
 }
 
@@ -15048,8 +15061,8 @@ function drawTurn14FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmen
 // 19003's own RNG-already-resolved accuracy roll). ---
 
 /** "Foe MURKROW used\nFLY!" - reuses `TURN14_FLYUP_LINE1`'s own string shape (no new asset), FLY's own display name for line 2. Oracle-pixel-bisected exact (dense sha-transition probe, boundary (i) this session): first char 19007, 20 total chars (16+4) - independently confirmed by BOTH of the space characters producing a "no visible change" repeat tick exactly where the formula predicts (chars 3->4, the space after "Foe", at ticks 19009/19010; chars 11->12, the space after "MURKROW", at ticks 19017/19018) - not just fit to the settle tick. */
-export const TURN15_FLY_STRIKE_LINE1 = "Foe MURKROW used";
-export const TURN15_FLY_STRIKE_LINE2 = "FLY!";
+export const TURN15_FLY_STRIKE_LINE1 = CANONICAL_OPPONENT_FLY_RESOLUTION.strikeLines[0]!;
+export const TURN15_FLY_STRIKE_LINE2 = CANONICAL_OPPONENT_FLY_RESOLUTION.strikeLines[1]!;
 const TURN15_FLY_STRIKE_TEXT_TOTAL = TURN15_FLY_STRIKE_LINE1.length + TURN15_FLY_STRIKE_LINE2.length;
 const TURN15_FLY_STRIKE_TEXT_START_TICK = 19007;
 
@@ -15395,8 +15408,8 @@ const TURN15_ONIX_HEALTHBOX_VANISH_TICK = 19326;
  * "hard cut, no blank gap" convention boundary (i)'s own kickoff-text
  * transition already established (§7).
  */
-const TURN15_FAINTED_LINE1 = "ONIX";
-const TURN15_FAINTED_LINE2 = "fainted!";
+const TURN15_FAINTED_LINE1 = CANONICAL_OPPONENT_FLY_RESOLUTION.faintLines[0]!;
+const TURN15_FAINTED_LINE2 = CANONICAL_OPPONENT_FLY_RESOLUTION.faintLines[1]!;
 const TURN15_FAINTED_TEXT_TOTAL = TURN15_FAINTED_LINE1.length + TURN15_FAINTED_LINE2.length;
 const TURN15_FAINTED_TEXT_START_TICK = 19328;
 /** Identical line2 content ("fainted!") to every prior faint text in this dossier gives an identical cursor X - reused directly rather than recomputed. */
@@ -15449,8 +15462,8 @@ function drawTurn15FlyStrikeWindow(fb: Uint8Array, t: number, pressTick: number)
 
 /**
  * S7/S8 (docs/turn15-notes.md): turn 14's own whole DRAGON_BREATH-auto-miss
- * resolution has redrawn the settled action menu by now (`core.ts`'s own
- * `turn14Resolved` gate) - cursor persisted at slot 2 (DRAGON_BREATH,
+ * resolution has redrawn the settled action menu by now (the retained
+ * charge owner has advanced to its strike segment) - cursor persisted at slot 2 (DRAGON_BREATH,
  * unchanged since turn 13/14, NO `DOWN` nav this turn). Structurally
  * identical to `drawTurn14FightSubmenuWindow` (reuses `drawTurn13Switchin
  * FieldBase` throughout, Murkrow held invisible - no fresh switch-in regime
@@ -15463,7 +15476,12 @@ function drawTurn15FlyStrikeWindow(fb: Uint8Array, t: number, pressTick: number)
  * level deeper than turn 13's did (docs/turn13-bounce-notes.md §10c), and
  * turn 15 is downstream of THAT reset, not turn 13's.
  */
-function drawTurn15FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState): void {
+function drawTurn15FightSubmenuWindow(
+  fb: Uint8Array,
+  t: number,
+  sm: FightSubmenuState,
+  resolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState,
+): void {
   const revealTick = sm.openElapsed === null ? -Infinity : TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
   if (sm.openElapsed === null || t < revealTick) {
     const shiftedBounceTick = t + TURN14_MENU_REDRAW_RESET_SHIFT;
@@ -15483,7 +15501,7 @@ function drawTurn15FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmen
   drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick, true);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
-  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true, true, true, true, true, true, true, true);
+  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true, true, true, true, true, true, true, resolution);
 }
 
 type PartyChromeFrame = { palette: number[]; indices: string };
@@ -15635,7 +15653,7 @@ export function applyTurn17PostwinFastFade(
     return;
   }
 
-  const party = state.turn15PartySelect;
+  const party = state.resolutionOwner?.forcedPartySelect;
   const terminalResolution = state.terminalResolution ?? null;
   if (!party || party.sendOutElapsed === null || terminalResolution === null
       || terminalResolution.faintDismissElapsed === null
@@ -16512,6 +16530,7 @@ function drawTurn16FightSubmenuWindow(
   t: number,
   sm: FightSubmenuState,
   partyElapsed: number,
+  followingPresentation: BattleSceneFollowingResolutionPresentation | null,
   terminalResolution: BattleTerminalResolutionPresentationState | null,
   trainerPresentation?: FactoryTrainerPresentation,
 ): void {
@@ -16736,23 +16755,18 @@ function drawTurn16FightSubmenuWindow(
       false,
       false,
       false,
-      false,
-      true,
+      null,
+      followingPresentation?.resolution ?? null,
     );
     return;
   }
 
-  // `menuRedrawElapsed` is only ever set (non-null) by the turn-16-resolve
-  // reopen (core.ts threads turn 17's real menu-redraw anchor through
-  // `openFightSubmenu`) - an ordinary fresh FIGHT open (turn 16's own,
-  // pre-confirm) always leaves it null. This is the only signal available
-  // here that distinguishes "MAGBY hasn't acted yet" (full HP, no burn, PP
-  // untouched - correct defaults) from "MAGBY already used FIRE PUNCH on
-  // turn 16, this is turn 17's reopen, not yet reconfirmed" (settled
-  // 79/138 HP, MURKROW burned, PP down one) while `sm.confirmElapsed` is
-  // still null for either case.
-  const isTurn17Reopen = sm.menuRedrawElapsed !== null;
-  const settledPreConfirm = isTurn17Reopen && sm.confirmElapsed === null;
+  const isNextCommand = followingPresentation?.menuRedrawElapsed !== null
+    && followingPresentation?.menuRedrawElapsed !== undefined;
+  const settledPreConfirm = isNextCommand && sm.confirmElapsed === null;
+  const resolvedTurn = CANONICAL_FIRE_PUNCH_RESOLUTION;
+  const resolvedOpponentStatus = mapStatus1ToBattleStatus(resolvedTurn.opponentStatus1);
+  if (resolvedOpponentStatus !== "burn") throw new Error("canonical FIRE_PUNCH resolution lost its burn status-icon receipt");
 
   if (t < revealTick) {
     drawTurn16PostSwitchField(
@@ -16762,10 +16776,12 @@ function drawTurn16FightSubmenuWindow(
       t,
       undefined,
       undefined,
-      settledPreConfirm ? { hp: 58, status: "burn" } : null,
+      settledPreConfirm
+        ? { hp: resolvedTurn.opponentResidualHp.to, status: resolvedOpponentStatus }
+        : null,
       undefined,
       undefined,
-      settledPreConfirm ? 79 : null,
+      settledPreConfirm ? resolvedTurn.playerHp.to : null,
     );
     drawTurn15MagbySettledMenuChrome(fb);
     return;
@@ -16795,11 +16811,15 @@ function drawTurn16FightSubmenuWindow(
     turn17BounceTick ?? partySendOutMenuBounceTick(bouncePartyElapsed),
     t,
     ownedAnimationAge,
+    ownedAnimationAge === null
+      ? undefined
+      : { startHp: resolvedTurn.playerHp.from, endHp: resolvedTurn.playerHp.to },
+    settledPreConfirm
+      ? { hp: resolvedTurn.opponentResidualHp.to, status: resolvedOpponentStatus }
+      : null,
     undefined,
-    settledPreConfirm ? { hp: 58, status: "burn" } : null,
     undefined,
-    undefined,
-    settledPreConfirm ? 79 : null,
+    settledPreConfirm ? resolvedTurn.playerHp.to : null,
   );
 
   if (ownedAnimationAge !== null && faintAttackResolutionState(ownedAnimationAge).message === "FIRE_PUNCH") {
@@ -16808,8 +16828,8 @@ function drawTurn16FightSubmenuWindow(
     if (resolution.message === "FIRE_PUNCH") {
       drawMessageTextLines(
         fb,
-        TURN16_FIRE_PUNCH_LINE1,
-        TURN16_FIRE_PUNCH_LINE2,
+        resolvedTurn.firePunchLines[0]!,
+        resolvedTurn.firePunchLines[1]!,
         turn15SimpleVisibleChars(
           t,
           confirmTick! + TURN16_FAINT_ATTACK_ANIM_DELAY + FIRE_PUNCH_TEXT_AGE,
@@ -16817,7 +16837,7 @@ function drawTurn16FightSubmenuWindow(
         ),
       );
     } else if (resolution.message === "BURNED") {
-      const line = "Foe MURKROW was burned!";
+      const line = resolvedTurn.burnedLines[0]!;
       drawMessageTextLines(
         fb,
         line,
@@ -16825,8 +16845,8 @@ function drawTurn16FightSubmenuWindow(
         Math.min(line.length, firePunchAge! - FIRE_PUNCH_BURN_MESSAGE_AGE + 1),
       );
     } else if (resolution.message === "BURN_RESIDUAL") {
-      const line1 = "Foe MURKROW is hurt";
-      const line2 = "by its burn!";
+      const line1 = resolvedTurn.residualLines[0]!;
+      const line2 = resolvedTurn.residualLines[1]!;
       drawMessageTextLines(
         fb,
         line1,
@@ -16843,8 +16863,8 @@ function drawTurn16FightSubmenuWindow(
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     drawMessageTextLines(
       fb,
-      TURN16_FAINT_ATTACK_LINE1,
-      TURN16_FAINT_ATTACK_LINE2,
+      resolvedTurn.faintAttackLines[0]!,
+      resolvedTurn.faintAttackLines[1]!,
       turn15SimpleVisibleChars(t, confirmTick + TURN16_FAINT_ATTACK_TEXT_DELAY, TURN16_FAINT_ATTACK_TEXT_TOTAL),
     );
     return;
@@ -16869,8 +16889,8 @@ function drawTurn16FightSubmenuWindow(
     false,
     false,
     false,
-    false,
-    isTurn17Reopen,
+    null,
+    isNextCommand ? followingPresentation.resolution : null,
   );
 }
 
@@ -16903,6 +16923,7 @@ function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, pa
         TICK0 + state.elapsed,
         state.fightSubmenu,
         party.sendOutElapsed,
+        state.resolutionOwner?.followingPresentation ?? null,
         state.terminalResolution ?? null,
         state.trainerPresentation,
       );
@@ -16965,7 +16986,8 @@ function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, pa
 /** Renders the full battle-scene-assembly frame for `state` (elapsed since TICK0). */
 export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void {
   const t = TICK0 + state.elapsed;
-  if (state.turn15PartySelect && drawTurn15PartySelectWindow(fb, state, state.turn15PartySelect)) return;
+  const forcedPartySelect = state.resolutionOwner?.forcedPartySelect;
+  if (forcedPartySelect && drawTurn15PartySelectWindow(fb, state, forcedPartySelect)) return;
   const win = windowRange(t);
   if (!win) return; // solid black
   if (t < SLIDE_END_TICK) {
@@ -17058,7 +17080,7 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
       state.turn12Resolved,
       state.turn13Resolved,
       state.opponentFaintDismissElapsed === null ? null : TICK0 + state.opponentFaintDismissElapsed,
-      state.turn14Resolved,
+      state.resolutionOwner ?? null,
       state.trainerPresentation,
     );
     return;
@@ -32733,35 +32755,34 @@ export function renderBattleResolutionSceneOffView(
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
 
   if (view.effect?.type === "stat") {
-    // ISSUES #59: covers the whole opponent-side stat-drop family (any of
-    // the 7 stats a legal stat-down move can name, landing on the player's
-    // own battler) via the same generic banner primitive
-    // (`drawStatDecreaseBannerForBattlerPalette`) the turn-6/13 canonical
-    // windows already use, parameterized by this battler's own live
-    // field-art sprite/corner instead of a hardcoded species. A rise, or a
-    // drop on the OPPONENT's own battler (battler 1), is still genuinely
-    // out of this family and still barriers.
-    if (
-      view.effect.battler !== 0
-      || view.effect.to >= view.effect.from
-    ) {
-      throw new Error(
-        `Scene OFF typed stat adapter cannot draw battler ${view.effect.battler} ${view.effect.stat} ${view.effect.from}->${view.effect.to}`,
-      );
-    }
-    // Existing exact Scene-OFF controller adapter: one typed command frame
-    // advances two source animation ticks after the controller's setup age.
-    const sourceAge = view.effect.age * 2 + 94;
-    const eva = turn13SandAttackAccEva(sourceAge, 0);
-    if (eva !== null) {
-      drawStatDecreaseBannerForBattlerPalette(
-        fb,
-        view.fieldArt.player.pic.tileset as Tileset,
-        view.fieldArt.player.origin,
-        eva,
-        turn13SandAttackAccBg1Y(sourceAge, 0),
-        statAnimBannerDecreasePalette(view.effect.stat),
-      );
+    // ISSUES #59/#60: source direction and the affected singles battler are
+    // both typed facts. Use that battler's live art/mask instead of assuming
+    // a player-side drop; the same seven extracted palettes serve both source
+    // tilemaps.
+    const banner = sceneOffStatStageBannerView(view.effect);
+    if (banner.eva !== null) {
+      const art = banner.battler === 0
+        ? view.fieldArt.player
+        : view.fieldArt.opponent;
+      if (banner.direction === "increase") {
+        drawStatIncreaseBannerForBattler(
+          fb,
+          art.pic.tileset as Tileset,
+          art.origin,
+          banner.eva,
+          banner.bg1Y,
+          statAnimBannerPalette(banner.stat),
+        );
+      } else {
+        drawStatDecreaseBannerForBattlerPalette(
+          fb,
+          art.pic.tileset as Tileset,
+          art.origin,
+          banner.eva,
+          banner.bg1Y,
+          statAnimBannerPalette(banner.stat),
+        );
+      }
     }
   }
   // A status controller's lasting visible result is the healthbox icon. The

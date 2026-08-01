@@ -6,8 +6,9 @@ restarting the shared, intentionally serialized Oracle services.
 ## Quiet capture output
 
 `bin/oracle run` and `bin/oracle lab` accept `--quiet` (`-q`). Captures and
-`manifest.json` are still written normally; only the full manifest on stdout
-is suppressed.
+`manifest.json` are still written normally; instead of the full manifest,
+stdout carries exactly one line — the manifest path — so scripts and worker
+transcripts get the artifact location without the dump.
 
 ```sh
 bin/oracle run trace.json -o /tmp/oracle-capture --quiet
