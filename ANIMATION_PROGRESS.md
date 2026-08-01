@@ -1,5 +1,31 @@
 # Animation coverage
 
+## Front `ANIM_V_SLIDE` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2h is exact for all **10 selector mappings / 10
+Factory-reachable species**, with **zero outside-Factory mappings**. SEADRA is
+the representative and MARSHTOMP the sibling; every prior accepted front
+family remains regression-pinned. Move coverage stays **107 exact / 0 partial
+/ 0 staged / 169 unsupported** and `ANIMATION_COVERAGE.json` is byte-identical
+at SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:910-939,1038-1042,
+1156-1180` proves and is ported in source order: normal-front
+`sDontFlip=TRUE`; data0=40; both `TryFlipX` calls; all 41 active C-index and
+negated-sine y2 writes; then tick 41's strict `data2 > data0` guard,
+y2/`WaitAnimEnd` cleanup, second flip and final data2 increment. Fresh complete
+legal Scene-ON parties settle both species at x2=0/y2=0/animNum=1/
+`SpriteCallbackDummy`. Paired direct raw outputs are byte-identical with no
+EOF newline: SEADRA SHA-256
+`c70a070b61918ed2e3c0f1bbe3b1be778d63ee29865a13176f1683ab5e17963a`,
+MARSHTOMP `f29ff01ed2a5fc6b732da0955e4029559063e0a2acc7db7b9fbbfaa84ca1ec68`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per party; raw `cmp`; focused family/boundary/
+ratchet tests **63/63**; exactly one full `npm test` **567 files, 5755 passed +
+1 skipped** and `npm run build` green. Among the remaining 10-species census
+tie, the source-ranked next family is **`ANIM_V_JUMPS_SMALL`**.
+
 ## Front `ANIM_SWING_CONCAVE` terminal family accepted (2026-08-01)
 
 **Verdict / counts:** rung 2g is exact for all **11 selector mappings / 11
