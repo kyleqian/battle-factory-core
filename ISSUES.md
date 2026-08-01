@@ -374,14 +374,21 @@ ROADMAP S10 §3 requires one already-exact window to be re-driven from semantic
 events as a proof of the seam; that conversion, window by window, is the
 retirement path. AGENTS.md already forbids adding new turn-keyed branches.
 
-**Rank-7 visibility sub-slice landed (2026-08-01, `8ee8cbe7`):** the generic
-resolution command union, relative-duration renderer, and persistent round
-battler boundaries now consume MOVEEND's existing typed sprite hide/restore
-receipts. Real staged full-turn FLY proves player hide through an intervening
-opponent action and locked restoration in the seven-battle seam; opponent FLY
-is also kernel-pinned. This narrows rank 7 only: the typed two-turn action
-grouping, exact Turn-14/15 legacy renderer handoff, and `turn15PartySelect`
-mirror remain open. No canonical turn/tick branch was removed or added.
+**Rank-7 locked-action grouping landed (2026-08-01, `b464a6e7`,
+`72546da6`):** Factory fresh start now owns the source option boundary:
+`battleScene: "off"` initializes `HITMARKER_NO_ANIMATIONS` exactly once while
+standalone callers choose explicitly. The generated round route selects OFF.
+Full-turn message receipts freeze Cmd_printstring's attacker/current move/move
+position, so `STRINGID_USEDMOVE` never needs to discover a same-action PP
+receipt; snapshot-less staged fixtures retain their old compatibility bridge.
+The driver stops at a real follow-up trainer command and appends that untouched
+AI/reducer receipt as a second immutable resolution segment. Fixed generated
+Taillow FLY proves charge text, hide through the opponent action, locked no-PP
+FLY text, restoration, and request 4; fresh seam coverage also pins
+Assist-called FLY and opponent ownership. Thus rank 7's typed two-turn group
+is closed. Exact Turn-14/15 legacy-renderer handoff and `turn15PartySelect`
+mirror retirement remain open. No canonical turn/tick branch, mechanics/RNG/
+AI/round change, Scene-ON edit, ratchet, or barrier was added.
 
 ## #61 — Scene-OFF FIGHT reveal needs a source-owned DMA-ready event, not a fixed delay
 

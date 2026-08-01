@@ -13,6 +13,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 812 — [bounded worker, 2026-08-01] rank-7 Scene-OFF locked-action grouping landed
+
+- **State:** implementation `b464a6e7` plus receipt-pin follow-up `72546da6`;
+  focused suites are **74/74** plus **16/16** snapshot regressions, full
+  `npm test` is green (**568 files, 5718 passed + 1 skipped**), and production
+  build is green.
+- **Did:** made `battleScene` an explicit fresh-battle option, source-initialized
+  `HITMARKER_NO_ANIMATIONS` once for OFF, and selected OFF in the generated
+  round route. Full-turn `Cmd_printstring` receipts now freeze attacker/current
+  move/source position, so used-move text no longer depends on a later PP
+  receipt. The round driver preserves each source-published locked pass as an
+  immutable segment; the fixed generated Taillow FLY route proves charge,
+  hide, opponent action, no-PP locked FLY text, restoration, and request 4.
+- **Next:** rank 7's remaining work is only exact Turn-14/15 legacy-renderer
+  handoff and `turn15PartySelect` mirror retirement; do not reintroduce a
+  canonical turn/tick branch.
+- **Notes:** ON code/ledgers, mechanics, RNG, AI, round advancement, barriers,
+  and ratchets are unchanged. Scene ON/OFF state equivalence is pinned aside
+  from presentation receipts/timing; Assist/player and opponent FLY ownership
+  are covered at the production fresh-battle seam. No new dense pixel trace
+  was claimed for this semantic controller slice.
+- **PAPERCUT:** Vitest's `--maxWorkers` conflicts with this repo's forks-pool
+  settings, ~2 minutes lost before using the project command unchanged.
+
 ## 811 — [bounded worker, 2026-08-01] generic MOVEEND sprite-visibility round seam landed
 
 - **State:** implementation commit `8ee8cbe7`; focused resolution/portability/
@@ -50,31 +74,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   YOSHI **700/751**, MAGNETON **703/751**. The ready-lag branch is retained;
   no route/species/trainer/tick selector, ratchet move, unsupported branch,
   or production change was added.
-- **PAPERCUT:** none.
-
-## 809 — [bounded worker, 2026-07-31 ~night] ISSUES #56 item 2 raw-clock/discriminator checkpoint; no unsafe presentation fit landed
-
-- **State:** evidence commit `822522c7`; production `src/` is intentionally
-  unchanged. Focused factoryBattleStartIntro/issue56ActionMenuHandoffFrame/
-  battleScene/ratchet is **241/241**; full `npm test` is green (**567 files,
-  5709 passed + 1 skipped**) and build is green.
-- **Did:** RAM-valid OAM/task receipt pins interactive-generated-intro-off's
-  real abs-1492 summary destroy to semantic handoff source `t=1459`, so
-  `rawElapsed=31` exactly. Extended the reusable probe with source task and
-  pending-OAM reads; at YOSHI's and interactive's terminal frames those
-  source-owned lifecycle facts are identical even though their bar pixels
-  require opposite tail clocks. MAGNETON remains genuinely bar/icon split.
-  Added a hermetic route-replay Tier-1 pin for the handoff arithmetic and
-  updated #56/docs with the non-landable verdict.
-- **Next:** do not add a route/species/absolute-tick selector. A future
-  #56 item-2 attempt needs a validated *hardware OAM/display-transfer latch*
-  receipt that distinguishes the two synced cases before a typed per-widget
-  bar/icon lifecycle can be populated; frame-444's separate materialize
-  column shift remains out of this branch.
-- **Notes:** fresh dense holds: interactive **715/715**, command **128/128**,
-  YOSHI **700/751** (444 neighborhood **10/11**, 536 **16/16**), MAGNETON
-  **703/751** (437 **11/11**). Removing the special case makes interactive
-  1492 **9/9 → 8/9** (3px at 165,42–167,43), while improving YOSHI's bar
-  subregion; no behavior change is honest. No ratchet pin moved and no
-  unsupported branch was added.
 - **PAPERCUT:** none.

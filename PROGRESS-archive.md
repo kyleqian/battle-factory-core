@@ -1,3 +1,10 @@
+## 809 — [bounded worker, 2026-07-31 ~night] ISSUES #56 item 2 raw-clock/discriminator checkpoint
+
+- Archived from the live ledger. Evidence commit `822522c7` pinned the
+  raw-31 handoff and showed current task/OAM facts cannot distinguish the
+  conflicting YOSHI/interactive bar tails; #56 item 2 remains open. Full
+  live-entry detail remains in git history.
+
 ## 808 — [bounded worker, 2026-07-31 ~night] ISSUES #61 DMA reveal boundary characterized
 
 - Archived from the live ledger. Evidence commit `bc988ef9` proved the
