@@ -1,5 +1,37 @@
 # Animation coverage
 
+## Front `ANIM_SHRINK_GROW` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2v is exact for all **6 selector mappings / 6
+Factory-reachable species**, with **zero outside-Factory mappings**: WARTORTLE,
+NIDORINO, KOFFING, RHYDON, SLOWKING, GLIGAR. WARTORTLE is the representative
+and GLIGAR the terminal sibling; all six selectors are batch-pinned and every
+prior accepted front family remains regression-pinned. Move coverage stays
+**107 exact / 0 partial / 0 staged / 169 unsupported** and
+`ANIMATION_COVERAGE.json` remains byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:911-939,1878-1912`
+proves task-zeroed data, normal-front `sDontFlip=TRUE`, tick-0 affine start,
+and the normal `(data6,data7)=(8,3)` initializer. All **49 active callbacks**
+(data2=0..48) pin u8-masked phase advance, GBA sine x/y scales, C-truncated
+positive-sine y compensation, and y2=0..4. Tick 49 restores identity/y2=0,
+calls `ResetSpriteAfterAnim`, and installs `WaitAnimEnd` without incrementing
+data2/data4 (49/136). Distinct `ANIM_SHRINK_GROW_FAST` `(8,5)` and
+`ANIM_SHRINK_GROW_SLOW` `(4,3)` selectors remain explicitly unaccepted.
+Fresh complete legal Scene-ON parties settle both selected species at
+x2=0/y2=0/animNum=1/`SpriteCallbackDummy`; paired raw outputs are byte-identical
+with no EOF newline: WARTORTLE SHA-256
+`e4c09e7b1c413acc21745c649e7bb493ea87ff51d648181ae77bf7d6f2466005`,
+GLIGAR `5dbf9079a53eb71470f474107391fc9f05ad9cf6604d1d807b561729b6d820d6`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per legal party; raw `cmp`; focused family plus
+both ratchets **195/195**; TypeScript no-emit and diff checks green; exactly one
+full `npm test` and one `npm run build` green. The next source-ranked generated
+census family is **`ANIM_SWING_CONVEX`** (6 selector mappings / 4 Factory / 2
+outside): WEEPINBELL, GOLDEEN, MEW, MANTINE, BANETTE, JIRACHI.
+
 ## Front `ANIM_CIRCULAR_STRETCH_TWICE` terminal family accepted (2026-08-01)
 
 **Verdict / counts:** rung 2u is exact for all **6 selector mappings / 6
