@@ -41,6 +41,7 @@ import {
   type BattleSubmittedDecision,
 } from "./battleDecisionBoundary.ts";
 import {
+  appendBattleResolutionActionContinuation,
   advanceBattleResolutionConfirmHandoff,
   appendBattleResolutionContinuation,
   createBattleResolutionPresentation,
@@ -616,6 +617,9 @@ function startCurrentBattle(
   const started = createFreshFactoryBattle({
     requestId: state.nextBattleRequestId,
     rngSeed: state.round.rules.rngValue,
+    // The production Factory round route is the Battle Scene OFF contract.
+    // Standalone fresh-kernel callers choose their own explicit option.
+    battleScene: "off",
     preCommandRngCalls: state.pendingBattlePreCommandRngCalls,
     playerParty: asBattleScriptParty(player),
     opponentParty: asBattleScriptParty(asKernelParty(opponentRecords)),
@@ -871,6 +875,7 @@ function driveTrainerBoundary(
   state: FactoryRoundBattleOrchestratorState,
   transition: BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>,
   history: FactoryAiBattleHistory,
+  options: Readonly<{ stopAtFollowupTrainerBoundary?: boolean }> = {},
 ): FactoryBattleDriveReceipt {
   let nextBattle = transition.state;
   let nextHistory = history;
@@ -892,6 +897,16 @@ function driveTrainerBoundary(
     events = appendDriveEvents(events, ai.transition.events);
     nextBattle = ai.transition.state;
     nextHistory = ai.history;
+    // A player multi-turn lock is source-published as another trainer
+    // command after the first trainer action. Keep each actual reducer pass
+    // as its own presentation segment instead of flattening it into the
+    // charge receipt; the later generic continuation owns the next pass.
+    if (
+      options.stopAtFollowupTrainerBoundary === true
+      && nextBattle.boundary.kind === "decision-required"
+      && nextBattle.boundary.request.kind === "command"
+      && nextBattle.boundary.request.side === "trainer"
+    ) break;
   }
   if (nextBattle.boundary.kind === "machine-barrier") {
     return fail(`battle kernel reached ${JSON.stringify({
@@ -902,8 +917,14 @@ function driveTrainerBoundary(
       opponentHp: nextBattle.rules.rulesContext.party.opponent.slice(0, 3).map((member) => member.hp),
     })}`);
   }
+  const stoppedAtFollowupTrainerBoundary =
+    options.stopAtFollowupTrainerBoundary === true
+    && nextBattle.boundary.kind === "decision-required"
+    && nextBattle.boundary.request.kind === "command"
+    && nextBattle.boundary.request.side === "trainer";
   if (
     nextBattle.boundary.kind !== "terminal"
+    && !stoppedAtFollowupTrainerBoundary
     && (
       nextBattle.boundary.kind !== "decision-required"
       || nextBattle.boundary.request.side !== "player"
@@ -985,6 +1006,27 @@ function transitionFromDriveReceipt(
   });
 }
 
+function transitionAtPublishedTrainerBoundary(
+  battle: BattleState<FactoryFullTurnDecisionRules>,
+): BattleDecisionTransitionResult<FactoryFullTurnDecisionRules> {
+  if (
+    battle.boundary.kind !== "decision-required"
+    || battle.boundary.request.kind !== "command"
+    || battle.boundary.request.side !== "trainer"
+  ) {
+    return fail("automatic action continuation requires a published trainer command boundary");
+  }
+  // No semantic event is minted here. `driveTrainerBoundary` starts at this
+  // real reducer boundary and appends only the live Factory-AI submission's
+  // untouched receipt.
+  return Object.freeze({
+    kind: "decision-required" as const,
+    state: battle,
+    events: Object.freeze([]),
+    nextRequest: battle.boundary.request,
+  });
+}
+
 function applyReceiptPpToBoundaries(
   boundaries: FactoryBattlePresentationBoundaries,
   events: readonly BattleKernelSemanticEvent[],
@@ -1025,7 +1067,9 @@ function beginCommandResolution(
   if (state.battlePresentationBoundaries === null) {
     return fail("command resolution requires controller battler boundaries");
   }
-  const receipt = driveTrainerBoundary(state, transition, history);
+  const receipt = driveTrainerBoundary(state, transition, history, {
+    stopAtFollowupTrainerBoundary: true,
+  });
   const resolution = createBattleResolutionPresentation({
     sourceRequest: presentation.request,
     sourceDecision: presentation.pendingDecision,
@@ -1486,6 +1530,45 @@ export function advanceFactoryRoundBattleResolution(
     return Object.freeze({
       ...state,
       battleResolutionPresentation: advanced,
+    });
+  }
+  if (
+    resolution.pendingBoundary.kind === "decision-required"
+    && resolution.pendingBoundary.request.kind === "command"
+    && resolution.pendingBoundary.request.side === "trainer"
+  ) {
+    if (state.battle !== resolution.pendingBattle) {
+      return fail("automatic action continuation lost its retained battle boundary");
+    }
+    if (state.aiHistory === null) {
+      return fail("automatic action continuation requires live AI history");
+    }
+    const receipt = driveTrainerBoundary(
+      state,
+      transitionAtPublishedTrainerBoundary(resolution.pendingBattle),
+      state.aiHistory,
+      { stopAtFollowupTrainerBoundary: true },
+    );
+    const appended = appendBattleResolutionActionContinuation({
+      resolution: advanced,
+      transition: transitionFromDriveReceipt(receipt),
+      fieldBoundary: createBattleResolutionPresentationRenderView(advanced).field,
+    });
+    return Object.freeze({
+      ...state,
+      battle: receipt.battle,
+      battleResolutionPresentation: appended,
+      battlePresentationBoundaries: applyReceiptPpToBoundaries(
+        boundaries,
+        receipt.events,
+      ),
+      moveSelectionCursors: resetMoveSelectionCursorsForSwitchIns(
+        state.moveSelectionCursors,
+        resolution.pendingBattle,
+        receipt.battle,
+      ),
+      aiHistory: receipt.history,
+      facilityRngCalls: state.activeBattleCallStart! + receipt.battle.rng.calls,
     });
   }
   const handoff = settledCommandForResolutionHandoff(

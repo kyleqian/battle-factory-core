@@ -14,6 +14,7 @@ import {
 import type {
   BattleScriptPartyState,
 } from "../src/engine/battleScriptRulesContext.ts";
+import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "../src/engine/battleScriptSourceConstants.ts";
 import { randomU16 } from "../src/engine/opponentGen.ts";
 
 const natureByName = new Map(naturesData.natures.map((row) => [row.name, row.index]));
@@ -48,6 +49,66 @@ function requireInitialized(result: ReturnType<typeof initializeFreshFactoryBatt
 }
 
 describe("fresh Factory battle initializer (Gate-5 rungs 2-3)", () => {
+  it("owns the Scene-OFF marker at fresh start and leaves the full-turn logical receipt unchanged", () => {
+    const corpusParty = party(299);
+    const quickClawParty = Object.freeze([
+      Object.freeze({
+        ...corpusParty[0],
+        moves: Object.freeze([70, 0, 0, 0] as const),
+        pp: Object.freeze([15, 0, 0, 0] as const),
+      }),
+      ...corpusParty.slice(1),
+    ]) as unknown as BattleScriptPartyState;
+    const play = (battleScene: "on" | "off") => {
+      const initial = createFreshFactoryBattle({
+        requestId: 1,
+        rngSeed: 3,
+        battleScene,
+        playerParty: quickClawParty,
+        opponentParty: party(300),
+      });
+      const afterPlayer = submitFactoryFullTurnDecision(initial, {
+        requestId: 1,
+        side: "player",
+        decision: { kind: "use-move", moveSlot: 0, targetBattler: 1 },
+      });
+      if (afterPlayer.kind !== "decision-required") {
+        throw new Error("expected trainer command after the player move");
+      }
+      return Object.freeze({
+        initial,
+        transition: submitFactoryFullTurnDecision(afterPlayer.state, {
+          requestId: 2,
+          side: "trainer",
+          decision: { kind: "use-move", moveSlot: 2, targetBattler: 0 },
+        }),
+      });
+    };
+
+    const on = play("on");
+    const off = play("off");
+    expect(on.initial.rules.rulesContext.hitMarker).toBe(0);
+    expect(off.initial.rules.rulesContext.hitMarker).toBe(
+      BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS,
+    );
+    // BattleStartClearSetData owns the one presentation bit. The option may
+    // remove MOVE_ANIMATION receipts, but cannot perturb the selection order,
+    // damage/state outcome, or any random draw.
+    expect(off.transition.state.rng).toEqual(on.transition.state.rng);
+    expect(off.transition.state.boundary).toEqual(on.transition.state.boundary);
+    expect(off.transition.state.rules.turnOrder).toEqual(on.transition.state.rules.turnOrder);
+    expect({
+      ...off.transition.state.rules.rulesContext,
+      hitMarker: 0,
+    }).toEqual(on.transition.state.rules.rulesContext);
+    expect(on.transition.events.some(({ payload }) =>
+      payload.kind === "animation" && payload.animationId === "MOVE_ANIMATION"
+    )).toBe(true);
+    expect(off.transition.events.some(({ payload }) =>
+      payload.kind === "animation" && payload.animationId === "MOVE_ANIMATION"
+    )).toBe(false);
+  });
+
   it("publishes the first player command with source-fresh tracked state and exactly draws A then B", () => {
     const seed = 3;
     const drawA = randomU16(seed);
@@ -57,6 +118,7 @@ describe("fresh Factory battle initializer (Gate-5 rungs 2-3)", () => {
     const state = requireStarted(createFreshFactoryBattle({
       requestId: 40,
       rngSeed: seed,
+      battleScene: "on",
       playerParty,
       opponentParty,
     }));
@@ -111,6 +173,7 @@ describe("fresh Factory battle initializer (Gate-5 rungs 2-3)", () => {
     const state = createFreshFactoryBattle({
       requestId: 41,
       rngSeed: seed,
+      battleScene: "on",
       preCommandRngCalls: 33,
       playerParty: party(300),
       opponentParty: party(301),
@@ -134,6 +197,7 @@ describe("fresh Factory battle initializer (Gate-5 rungs 2-3)", () => {
     const state = requireStarted(createFreshFactoryBattle({
       requestId: 1,
       rngSeed: 3,
+      battleScene: "on",
       playerParty: quickClawParty, // Magcargo set 299 carries Quick Claw.
       opponentParty: party(300),
     }));
@@ -160,6 +224,7 @@ describe("fresh Factory battle initializer (Gate-5 rungs 2-3)", () => {
     const result = requireInitialized(initializeFreshFactoryBattle({
       requestId: 1,
       rngSeed: 3,
+      battleScene: "on",
       playerParty: party(53, 0), // Ekans, ability slot 0 = Intimidate.
       opponentParty: party(300),
     }));
@@ -193,12 +258,14 @@ describe("fresh Factory battle initializer (Gate-5 rungs 2-3)", () => {
     const first = requireInitialized(initializeFreshFactoryBattle({
       requestId: 1,
       rngSeed: 3,
+      battleScene: "on",
       playerParty: groudonParty,
       opponentParty: party(53, 0), // Ekans: Intimidate, slower than the constructed Groudon.
     }));
     const replay = requireInitialized(initializeFreshFactoryBattle({
       requestId: 1,
       rngSeed: 3,
+      battleScene: "on",
       playerParty: groudonParty,
       opponentParty: party(53, 0),
     }));
@@ -218,6 +285,7 @@ describe("fresh Factory battle initializer (Gate-5 rungs 2-3)", () => {
     const result = requireInitialized(initializeFreshFactoryBattle({
       requestId: 1,
       rngSeed: 3,
+      battleScene: "on",
       playerParty: party(436, 0), // Porygon2 set 1, ability slot 0 = Trace.
       opponentParty: party(53, 0), // copies Intimidate only after pending Intimidate resolves.
     }));
@@ -235,6 +303,7 @@ describe("fresh Factory battle initializer (Gate-5 rungs 2-3)", () => {
     const result = requireInitialized(initializeFreshFactoryBattle({
       requestId: 1,
       rngSeed: 3,
+      battleScene: "on",
       playerParty: party(48, 0), // Kirlia carries White Herb; slot 0 is Synchronize.
       opponentParty: party(53, 0), // Ekans Intimidate lowers Kirlia before the item pass.
     }));
@@ -275,6 +344,7 @@ describe("fresh Factory battle initializer (Gate-5 rungs 2-3)", () => {
     const result = initializeFreshFactoryBattle({
       requestId: 1,
       rngSeed: receiptSeed,
+      battleScene: "on",
       playerParty: equalSpeedWhiteHerbLead(),
       opponentParty: equalSpeedWhiteHerbLead(),
     });

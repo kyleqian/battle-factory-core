@@ -17,6 +17,17 @@ export type BattleScriptBattlerId = 0 | 1 | 2 | 3;
  */
 export type BattleScriptTextBufferSnapshot = readonly string[];
 
+/**
+ * The action globals readable by Cmd_printstring. The full-turn reducer
+ * freezes this at the print receipt so presentation never has to rediscover
+ * an attacker or move after a later controller/script mutation.
+ */
+export type BattleScriptActionMessageSnapshot = Readonly<{
+  attacker: BattleScriptBattlerId;
+  currentMove: number;
+  currentMovePosition: number;
+}>;
+
 export type BattleScriptSelectionMessageSnapshot = Readonly<{
   currentMove: number;
   originallyUsedMove: number;
@@ -52,6 +63,8 @@ export type BattleScriptSemanticEventPayload =
     kind: "message";
     messageId: string;
     substitutions: readonly string[];
+    /** Optional for synthetic/staged receipts that predate the full-turn seam. */
+    actionSnapshot?: BattleScriptActionMessageSnapshot;
   }>
   | Readonly<{
     kind: "selection-message";

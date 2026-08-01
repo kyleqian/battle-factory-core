@@ -3,16 +3,9 @@ import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { 
 import naturesData from "../src/data/gen/natures.json" with { type: "json" };
 import type { FactoryRentalRecord } from "../src/engine/battleScenario.ts";
 import type { BattleSubmittedDecision } from "../src/engine/battleDecisionBoundary.ts";
-import { createBattleCommandPresentation } from "../src/engine/battleCommandPresentation.ts";
-import { createBattleResolutionPresentation } from "../src/engine/battleResolutionPresentation.ts";
 import { createBattleResolutionPresentationRenderView } from "../src/engine/battleResolutionPresentationRender.ts";
-import { createBattleScriptRulesContext } from "../src/engine/battleScriptRulesContext.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "../src/engine/battleScriptSourceConstants.ts";
 import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
-import {
-  createFactoryFullTurnBattleState,
-  submitFactoryFullTurnDecision,
-} from "../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import { createInitialState, render, tick } from "../src/engine/core.ts";
 import {
   advanceFactoryRoundBattleCommand,
@@ -84,6 +77,24 @@ function createStartedGeneratedBattle(
   return acknowledgeAndAdvance(state);
 }
 
+function createStartedGeneratedFlyBattle(): FactoryRoundBattleOrchestratorState {
+  const playerRecords = [record(44), record(8), record(300)] as const;
+  const state = createFactoryRoundBattleOrchestrator({
+    id: "generated-scene-off-fly-round",
+    rngValue: 0,
+    factoryWinStreak: 0,
+    playerTrainerId: PLAYER_TRAINER_ID,
+    battleTowerLevel50WinStreak: 0,
+    facilityState: { rentsCount: 0 },
+    rentals: {
+      type: "currentRecords",
+      playerRentalRecords: playerRecords,
+      savedRentalRecords: [...playerRecords, record(1), record(2), record(3)],
+    },
+  });
+  return acknowledgeAndAdvance(state);
+}
+
 function advanceCommandToPhase(
   state: FactoryRoundBattleOrchestratorState,
   phase: NonNullable<
@@ -116,140 +127,6 @@ function advanceResolutionToNextCommand(
   expect(next.battleResolutionPresentation).toBeNull();
   expect(next.battleCommandPresentation).not.toBeNull();
   return next;
-}
-
-function createStagedSceneOffFlyResolution(): FactoryRoundBattleOrchestratorState {
-  const initial = createFactoryFullTurnBattleState({
-    requestId: 1,
-    rngSeed: 0,
-    player: {
-      species: 113,
-      moveId: 19,
-      moves: [0, 0, 19, 0],
-      pp: [0, 0, 20, 0],
-      attack: 80,
-      defense: 500,
-      spAttack: 80,
-      spDefense: 500,
-      speed: 100,
-      hp: 5_000,
-      maxHp: 5_000,
-    },
-    trainer: {
-      species: 129,
-      moveId: 150,
-      moves: [150, 0, 0, 0],
-      pp: [40, 0, 0, 0],
-      attack: 20,
-      defense: 500,
-      spAttack: 20,
-      spDefense: 500,
-      speed: 50,
-      hp: 5_000,
-      maxHp: 5_000,
-    },
-  });
-  if (
-    initial.boundary.kind !== "decision-required"
-    || initial.boundary.request.kind !== "command"
-  ) throw new Error("staged FLY battle has no initial command");
-  const sourceRequest = initial.boundary.request;
-  // The ROM sets this option-derived presentation bit before executing a
-  // Scene-OFF move. Staging it here activates MOVEEND_ATTACKER_INVISIBLE;
-  // the full-turn reducer remains the unmodified production reducer.
-  const sceneOffInitial = Object.freeze({
-    ...initial,
-    rules: Object.freeze({
-      ...initial.rules,
-      rulesContext: createBattleScriptRulesContext({
-        ...initial.rules.rulesContext,
-        hitMarker: (
-          initial.rules.rulesContext.hitMarker
-          | BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS
-        ) >>> 0,
-      }),
-    }),
-  });
-  const afterPlayer = submitFactoryFullTurnDecision(sceneOffInitial, {
-    requestId: 1,
-    side: "player",
-    decision: { kind: "use-move", moveSlot: 2, targetBattler: 1 },
-  });
-  if (afterPlayer.kind !== "decision-required") {
-    throw new Error("staged FLY battle has no first trainer command");
-  }
-  const chargeTurn = submitFactoryFullTurnDecision(afterPlayer.state, {
-    requestId: 2,
-    side: "trainer",
-    decision: { kind: "use-move", moveSlot: 0, targetBattler: 1 },
-  });
-  if (chargeTurn.kind !== "decision-required") {
-    throw new Error("staged FLY charge has no locked-continuation trainer command");
-  }
-  const continuation = submitFactoryFullTurnDecision(chargeTurn.state, {
-    requestId: 3,
-    side: "trainer",
-    decision: { kind: "use-move", moveSlot: 0, targetBattler: 1 },
-  });
-  if (continuation.kind !== "decision-required") {
-    throw new Error("staged FLY continuation did not reach the next command");
-  }
-  const restoration = continuation.events.find(({ payload }) =>
-    payload.kind === "set-battler-sprite-visibility"
-    && payload.battler === 0
-    && !payload.invisible
-  );
-  if (restoration === undefined) {
-    throw new Error("staged FLY continuation emitted no restoration receipt");
-  }
-  const transition = Object.freeze({
-    ...continuation,
-    // This presentation fixture is intentionally bounded to the complete
-    // charge turn plus the locked continuation's source restoration edge.
-    // Both parts are unmodified real full-turn receipts; unrelated strike
-    // damage/text presentation remains outside this visibility-seam proof.
-    events: Object.freeze([...chargeTurn.events, restoration]),
-  });
-  const fieldBoundary = createBattleCommandPresentation(
-    sourceRequest,
-    sceneOffInitial.rules.rulesContext,
-    2,
-  ).field;
-  const presentation = createBattleResolutionPresentation({
-    sourceRequest,
-    sourceDecision: { kind: "use-move", moveSlot: 2, targetBattler: 1 },
-    beforeRules: sceneOffInitial.rules,
-    transition,
-    fieldBoundary,
-    confirmHandoff: { fightDisplayCursor: 2, idleBounceElapsed: 0 },
-  });
-  const presenting = Object.freeze({
-    ...presentation,
-    confirmHandoff: null,
-    lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 0 }),
-  });
-  const carrier = createStartedGeneratedBattle(RNG_SEED);
-  const fields = [presentation.field.player, presentation.field.opponent] as const;
-  const boundaries = Object.freeze(carrier.battlePresentationBoundaries!.map(
-    (boundary, battler) => Object.freeze({
-      ...boundary,
-      partyIndex: fields[battler]!.partyIndex,
-      field: fields[battler]!,
-      displayedHp: fields[battler]!.hp,
-      displayedStatus1:
-        sceneOffInitial.rules.rulesContext.battlers[battler]!.status1,
-      spriteVisible: true,
-      moveCursor: battler === 0 ? 2 as const : 0 as const,
-    }),
-  )) as FactoryRoundBattleOrchestratorState["battlePresentationBoundaries"];
-  return Object.freeze({
-    ...carrier,
-    battle: transition.state,
-    battleCommandPresentation: null,
-    battleResolutionPresentation: presenting,
-    battlePresentationBoundaries: boundaries,
-    moveSelectionCursors: Object.freeze([2, 0, 0, 0] as const),
-  });
 }
 
 function choosePlayerDecision(
@@ -327,89 +204,135 @@ function driveGeneratedRoundToCompletion(
 }
 
 describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
-  it("renders and persists a real Scene-OFF FLY hide through the opponent action, then restores it", () => {
-    let state = createStagedSceneOffFlyResolution();
-    const resolution = state.battleResolutionPresentation!;
-    const events = resolution.segments[0]!.events;
-    const commands = resolution.segments[0]!.commands;
-    const hidden = commands.findIndex((command) =>
-      command.type === "sprite-visibility"
-      && command.battler === 0
-      && !command.visible
+  it("selects Battle Scene OFF at the generated fresh-battle seam without changing facility state", () => {
+    const state = createStartedGeneratedBattle(RNG_SEED);
+    expect(state.battle?.rules.rulesContext.hitMarker).toBe(
+      BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS,
     );
-    const restored = commands.findIndex((command, index) =>
+    expect(state.facilityState).toEqual({ rentsCount: 0 });
+    expect(state.battle?.boundary).toMatchObject({
+      kind: "decision-required",
+      request: { kind: "command", side: "player", battler: 0 },
+    });
+  });
+
+  it("drives an unmodified generated FLY round receipt through charge, lock, restoration, and the next player command", () => {
+    let state = createStartedGeneratedFlyBattle();
+    state = advanceCommandToPhase(state, "action-menu");
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+    state = advanceCommandToPhase(state, "fight-menu");
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+
+    const chargeResolution = state.battleResolutionPresentation;
+    if (chargeResolution === null) throw new Error("expected the generated FLY resolution");
+    const chargeEvents = chargeResolution.segments[0]!.events;
+    const hidden = chargeEvents.findIndex(({ payload }) =>
+      payload.kind === "set-battler-sprite-visibility"
+      && payload.battler === 0
+      && payload.invisible
+    );
+    const interveningOpponentMove = chargeEvents.findIndex(({ payload }, index) =>
       index > hidden
+      && payload.kind === "message"
+      && payload.messageId === "STRINGID_USEDMOVE"
+      && payload.actionSnapshot?.attacker === 1
+    );
+    expect(state.battle?.rules.rulesContext.hitMarker).toBe(
+      BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS,
+    );
+    expect(hidden).toBeGreaterThanOrEqual(0);
+    expect(interveningOpponentMove).toBeGreaterThan(hidden);
+    expect(chargeResolution.pendingBoundary).toMatchObject({
+      kind: "decision-required",
+      request: { kind: "command", requestId: 3, side: "trainer", battler: 1 },
+    });
+
+    for (
+      let budget = 0;
+      budget < 2_000
+        && state.battleResolutionPresentation?.segments.length !== 2;
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state);
+    }
+    const resolution = state.battleResolutionPresentation;
+    if (resolution === null || resolution.segments.length !== 2) {
+      throw new Error("expected the locked FLY continuation presentation segment");
+    }
+    const lockedEvents = resolution.segments[1]!.events;
+    const lockedPlayerMove = lockedEvents.findIndex(({ payload }) =>
+      payload.kind === "message"
+      && payload.messageId === "STRINGID_USEDMOVE"
+      && payload.actionSnapshot?.attacker === 0
+      && payload.actionSnapshot.currentMove === 19
+    );
+    const restored = lockedEvents.findIndex(({ payload }, index) =>
+      index > lockedPlayerMove
+      && payload.kind === "set-battler-sprite-visibility"
+      && payload.battler === 0
+      && !payload.invisible
+    );
+    expect(resolution.segments[1]!.events[0]!.sequence).toBeGreaterThan(
+      resolution.segments[0]!.events.at(-1)!.sequence,
+    );
+    expect(lockedPlayerMove).toBeGreaterThanOrEqual(0);
+    expect(restored).toBeGreaterThan(lockedPlayerMove);
+    const lockedPayload = lockedEvents[lockedPlayerMove]!.payload;
+    if (lockedPayload.kind !== "message") throw new Error("locked FLY receipt did not narrow");
+    expect(lockedPayload.actionSnapshot).toEqual({
+      attacker: 0,
+      currentMove: 19,
+      currentMovePosition: 0,
+    });
+    expect(lockedEvents.slice(lockedPlayerMove + 1).some(({ payload }) =>
+      payload.kind === "set-battler-pp-data" && payload.battler === 0
+    )).toBe(false);
+    expect(resolution.pendingBoundary).toMatchObject({
+      kind: "decision-required",
+      request: { kind: "command", requestId: 4, side: "player", battler: 0 },
+    });
+
+    const commands = resolution.segments[1]!.commands;
+    const lockedCommand = commands.findIndex((command) =>
+      command.type === "message"
+      && command.lines[0] === "TAILLOW used"
+      && command.lines[1] === "FLY!"
+    );
+    const restoredCommand = commands.findIndex((command, index) =>
+      index > lockedCommand
       && command.type === "sprite-visibility"
       && command.battler === 0
       && command.visible
     );
-    const interveningOpponentAction = commands.findIndex((command, index) =>
-      index > hidden
-      && index < restored
-      && command.type === "message"
-      && command.lines[0] === "Foe MAGIKARP used"
-    );
-    expect(hidden).toBeGreaterThanOrEqual(0);
-    expect(interveningOpponentAction).toBeGreaterThan(hidden);
-    expect(restored).toBeGreaterThan(interveningOpponentAction);
-    const hiddenCommand = commands[hidden]!;
-    const restoredCommand = commands[restored]!;
-    if (
-      hiddenCommand.type !== "sprite-visibility"
-      || restoredCommand.type !== "sprite-visibility"
-    ) throw new Error("staged FLY visibility indexes did not narrow");
-    expect(events.find(({ sequence }) =>
-      sequence === hiddenCommand.eventSequence
-    )?.payload).toEqual({
-      kind: "set-battler-sprite-visibility",
-      battler: 0,
-      invisible: true,
-    });
-    expect(events.find(({ sequence }) =>
-      sequence === restoredCommand.eventSequence
-    )?.payload).toEqual({
-      kind: "set-battler-sprite-visibility",
-      battler: 0,
-      invisible: false,
-    });
+    expect(lockedCommand).toBeGreaterThanOrEqual(0);
+    expect(restoredCommand).toBeGreaterThan(lockedCommand);
+    expect(createBattleResolutionPresentationRenderView(Object.freeze({
+      ...resolution,
+      segmentIndex: 1,
+      commandIndex: lockedCommand,
+      lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 0 }),
+      confirmHandoff: null,
+    })).visibility.player.sprite).toBe(false);
+    expect(createBattleResolutionPresentationRenderView(Object.freeze({
+      ...resolution,
+      segmentIndex: 1,
+      commandIndex: restoredCommand,
+      lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 0 }),
+      confirmHandoff: null,
+    })).visibility.player.sprite).toBe(true);
 
-    state = Object.freeze({
-      ...state,
-      battleResolutionPresentation: Object.freeze({
-        ...resolution,
-        commandIndex: hidden,
-        lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 0 }),
-      }),
+    for (
+      let budget = 0;
+      budget < 2_000 && state.battleResolutionPresentation !== null;
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state);
+    }
+    expect(state.battleResolutionPresentation).toBeNull();
+    expect(state.battleCommandPresentation?.request).toMatchObject({
+      kind: "command", requestId: 4, side: "player", battler: 0,
     });
-    state = advanceFactoryRoundBattleResolution(state);
-    expect(state.battlePresentationBoundaries?.[0].spriteVisible).toBe(false);
-
-    state = Object.freeze({
-      ...state,
-      battleResolutionPresentation: Object.freeze({
-        ...state.battleResolutionPresentation!,
-        commandIndex: interveningOpponentAction,
-        lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 0 }),
-      }),
-    });
-    expect(createBattleResolutionPresentationRenderView(
-      state.battleResolutionPresentation!,
-    ).visibility.player.sprite).toBe(false);
-    expect(state.battlePresentationBoundaries?.[0].spriteVisible).toBe(false);
-
-    state = Object.freeze({
-      ...state,
-      battleResolutionPresentation: Object.freeze({
-        ...state.battleResolutionPresentation!,
-        commandIndex: restored,
-        lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 0 }),
-      }),
-    });
-    expect(createBattleResolutionPresentationRenderView(
-      state.battleResolutionPresentation!,
-    ).visibility.player.sprite).toBe(true);
-    state = advanceFactoryRoundBattleResolution(state);
-    expect(state.battlePresentationBoundaries?.[0].spriteVisible).toBe(true);
+    expect(state.facilityState).toEqual({ rentsCount: 0 });
   });
 
   it("cancels POKéMON back to the same action request and cursor", () => {

@@ -338,6 +338,16 @@ export function createBattleResolutionPresentationRenderView(
   let partySummary: BattleResolutionPresentationRenderView["partySummary"] = null;
   const fainted = new Set<0 | 1>();
   const spriteVisibility = new Map<0 | 1, boolean>([[0, true], [1, true]]);
+  // Visibility receipts are controller-owned persistent state. A later
+  // automatic locked-action segment starts from the finished prior segment,
+  // not from an invented visible baseline.
+  for (let segmentIndex = 0; segmentIndex < state.segmentIndex; segmentIndex += 1) {
+    for (const completed of state.segments[segmentIndex]!.commands) {
+      if (completed.type === "sprite-visibility") {
+        spriteVisibility.set(completed.battler, completed.visible);
+      }
+    }
+  }
   const confirmHandoff = state.confirmHandoff === null
     ? null
     : Object.freeze({

@@ -210,6 +210,26 @@ function damageResolution(): BattleResolutionPresentationState {
 }
 
 describe("battle resolution presentation receipt ownership", () => {
+  it("uses a frozen Cmd_printstring action snapshot when a locked action has no PP receipt", () => {
+    const resolution = createBattleResolutionPresentation(inputFor([
+      event(0, {
+        kind: "message",
+        messageId: "STRINGID_USEDMOVE",
+        substitutions: [],
+        actionSnapshot: {
+          attacker: 0,
+          currentMove: 19, // FLY, not the displayed slot-0 ROCK SLIDE.
+          currentMovePosition: 2,
+        },
+      }),
+    ], NEXT_COMMAND));
+
+    expect(resolution.segments[0]!.commands).toMatchObject([
+      { type: "message", lines: ["ONIX used", "FLY!"] },
+      { type: "turn-end" },
+    ]);
+  });
+
   it("resolves a no-effect defender from the preceding semantic move owner", () => {
     const resolution = createBattleResolutionPresentation(inputFor([
       event(0, {

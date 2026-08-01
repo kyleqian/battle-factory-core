@@ -757,6 +757,19 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
         kind: "message" as const,
         messageId: operand.expression,
         substitutions: Object.freeze(substitutions),
+        // Cmd_printstring/Cmd_attackstring reads these globals before a later
+        // action can overwrite them. In particular, a locked continuation
+        // may print its actual gCurrentMove without issuing another PP
+        // controller receipt (battle_script_commands.c:915-1006,1191-1203).
+        ...(rules.selectorRoles.attacker === null
+          ? {}
+          : {
+              actionSnapshot: Object.freeze({
+                attacker: rules.selectorRoles.attacker,
+                currentMove: rules.currentMove,
+                currentMovePosition: rules.currentMovePosition,
+              }),
+            }),
       });
     },
     prepareSelectionMessage: () => null,

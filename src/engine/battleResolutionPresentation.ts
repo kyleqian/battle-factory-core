@@ -16,6 +16,7 @@ import type {
 } from "./battleDecisionBoundary.ts";
 import type { FactoryFullTurnDecisionRules } from "./factoryBattleScriptFullTurnDecision.ts";
 import type {
+  BattleScriptActionMessageSnapshot,
   BattleScriptSemanticEventPayload,
 } from "./battleScriptEvents.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
@@ -202,6 +203,8 @@ export function storeBattleTerminalPresentationDismiss(
 }
 
 export type BattleResolutionSegment = Readonly<{
+  /** Display field at this segment's real reducer boundary. */
+  field: BattleResolutionDisplayedField;
   beforeRules: FactoryFullTurnDecisionRules;
   afterRules: FactoryFullTurnDecisionRules;
   events: readonly BattleKernelSemanticEvent[];
@@ -342,6 +345,12 @@ function nextHitAnimation(
   return null;
 }
 
+/**
+ * Compatibility only for staged/synthetic message receipts that intentionally
+ * lack the production Cmd_printstring action snapshot. Real full-turn
+ * STRINGID_USEDMOVE receipts never need to discover a later PP controller
+ * event, which is absent for a locked continuation.
+ */
 function ppEventAfter(
   events: readonly BattleKernelSemanticEvent[],
   messageIndex: number,
@@ -367,6 +376,7 @@ function messageLines(
   > | null,
   lastFaintBattler: 0 | 1 | null,
   lastMoveAttacker: 0 | 1 | null,
+  actionSnapshot: BattleScriptActionMessageSnapshot | null,
   opponentTrainer: Readonly<{ className: string; name: string }> | null,
 ): readonly string[] {
   if (event.payload.kind !== "message") {
@@ -374,8 +384,10 @@ function messageLines(
   }
   const { messageId } = event.payload;
   if (messageId === "STRINGID_USEDMOVE") {
-    const pp = ppEventAfter(events, eventIndex);
-    const battler = singlesBattler(pp.battler, "used-move message");
+    const pp = actionSnapshot === null ? ppEventAfter(events, eventIndex) : null;
+    const battler = actionSnapshot === null
+      ? singlesBattler(pp!.battler, "used-move message")
+      : singlesBattler(actionSnapshot.attacker, "used-move action snapshot");
     const displayed = fieldBattler(field, battler);
     return resolveBattleStringLines(messageId, {
       B_ATK_NAME_WITH_PREFIX: () => resolveBattleNameWithPrefix({
@@ -383,7 +395,13 @@ function messageLines(
         isTrainerBattle: true,
         nickname: displayed.name,
       }),
-      B_BUFF2: () => resolveMoveNameExclaim(displayed.moveIds[pp.movePosition]!),
+      // Cmd_attackstring/Cmd_printstring sees gCurrentMove, not the move in
+      // the PP-owning slot. This distinction is observable for Assist-called
+      // FLY: the source slot is Assist, while the locked continuation prints
+      // FLY and emits no second PP update.
+      B_BUFF2: () => resolveMoveNameExclaim(
+        actionSnapshot?.currentMove ?? displayed.moveIds[pp!.movePosition]!,
+      ),
     });
   }
   if (messageId === "STRINGID_ITDOESNTAFFECT") {
@@ -575,12 +593,26 @@ export function projectBattleResolutionCommands(
     }
     if (payload.kind === "message") {
       sourceLabelOf(event);
+      const actionSnapshot = payload.actionSnapshot ?? null;
+      if (actionSnapshot !== null) {
+        // The full-turn receipt is frozen at Cmd_printstring time. Keeping
+        // this current message's source owner also makes generic subsequent
+        // attacker templates independent of controller PP timing.
+        lastMoveAttacker = singlesBattler(
+          actionSnapshot.attacker,
+          "message action snapshot",
+        );
+      }
       if (payload.messageId === "STRINGID_USEDMOVE") {
         usedMoveInstructionExecution = instructionExecutionOf(event);
-        lastMoveAttacker = singlesBattler(
-          ppEventAfter(events, index).battler,
-          "used-move message",
-        );
+        if (actionSnapshot === null) {
+          // Synthetic fixtures that predate the frozen snapshot retain the
+          // former PP-receipt bridge deliberately.
+          lastMoveAttacker = singlesBattler(
+            ppEventAfter(events, index).battler,
+            "used-move message",
+          );
+        }
       }
       const switchInBattler = payload.messageId === "STRINGID_SWITCHINMON"
         ? ([...pendingSwitch.keys()].at(-1) ?? null)
@@ -598,6 +630,7 @@ export function projectBattleResolutionCommands(
           lastStatChange,
           lastFaintBattler,
           lastMoveAttacker,
+          actionSnapshot,
           opponentTrainer,
         ),
         advance:
@@ -866,6 +899,7 @@ export function createBattleResolutionPresentation(
     opponent: input.fieldBoundary.opponent,
   });
   const segment = Object.freeze({
+    field,
     beforeRules: input.beforeRules,
     afterRules: input.transition.state.rules,
     events: input.transition.events,
@@ -982,6 +1016,43 @@ export type AppendBattleResolutionContinuationInput = Readonly<{
   fieldBoundary: BattleResolutionDisplayedField;
 }>;
 
+export type AppendBattleResolutionActionContinuationInput = Readonly<{
+  resolution: BattleResolutionPresentationState;
+  transition: BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>;
+  /** The completed prior segment's frozen display field. */
+  fieldBoundary: BattleResolutionDisplayedField;
+}>;
+
+function appendResolutionSegment(
+  resolution: BattleResolutionPresentationState,
+  transition: BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>,
+  fieldBoundary: BattleResolutionDisplayedField,
+): BattleResolutionSegment {
+  const priorSequence = resolution.segments
+    .flatMap((segment) => segment.events)
+    .at(-1)?.sequence ?? -1;
+  const firstSequence = transition.events[0]?.sequence;
+  if (firstSequence !== undefined && firstSequence <= priorSequence) {
+    throw new Error(
+      `battle resolution continuation event sequence ${firstSequence} is not after ${priorSequence}`,
+    );
+  }
+  return Object.freeze({
+    field: fieldBoundary,
+    beforeRules: resolution.pendingBattle.rules,
+    afterRules: transition.state.rules,
+    events: transition.events,
+    commands: projectBattleResolutionCommands(
+      transition.events,
+      resolution.pendingBattle.rules.rulesContext,
+      transition.state.rules.rulesContext,
+      fieldBoundary,
+      fieldAfter(transition),
+      resolution.opponentTrainer,
+    ),
+  });
+}
+
 /**
  * Appends the genuine forced-switch submission receipt without minting a
  * second resolution identity. Presentation may continue to hold the forced
@@ -1001,28 +1072,7 @@ export function appendBattleResolutionContinuation(
   ) {
     throw new Error("battle resolution continuation does not match its pending boundary");
   }
-  const priorSequence = resolution.segments
-    .flatMap((segment) => segment.events)
-    .at(-1)?.sequence ?? -1;
-  const firstSequence = transition.events[0]?.sequence;
-  if (firstSequence !== undefined && firstSequence <= priorSequence) {
-    throw new Error(
-      `battle resolution continuation event sequence ${firstSequence} is not after ${priorSequence}`,
-    );
-  }
-  const segment = Object.freeze({
-    beforeRules: resolution.pendingBattle.rules,
-    afterRules: transition.state.rules,
-    events: transition.events,
-    commands: projectBattleResolutionCommands(
-      transition.events,
-      resolution.pendingBattle.rules.rulesContext,
-      transition.state.rules.rulesContext,
-      fieldBoundary,
-      fieldAfter(transition),
-      resolution.opponentTrainer,
-    ),
-  });
+  const segment = appendResolutionSegment(resolution, transition, fieldBoundary);
   return Object.freeze({
     ...resolution,
     segments: Object.freeze([...resolution.segments, segment]),
@@ -1032,8 +1082,52 @@ export function appendBattleResolutionContinuation(
       phase: "presenting-switch-in" as const,
       phaseElapsed: 0,
     }),
+    field: fieldBoundary,
     pendingBoundary: transition.state.boundary,
     pendingBattle: transition.state,
     forcedRequest: null,
+  });
+}
+
+/**
+ * Groups the automatic follow-up after a multi-turn player action without
+ * pretending its two reducer passes were one event list. After the charge
+ * turn, HandleTurnActionSelectionState has auto-confirmed the player's locked
+ * action and published only the real trainer command. The round controller
+ * drives that command, then appends its untouched receipt as a new segment.
+ */
+export function appendBattleResolutionActionContinuation(
+  input: AppendBattleResolutionActionContinuationInput,
+): BattleResolutionPresentationState {
+  const { resolution, transition, fieldBoundary } = input;
+  if (resolution.forcedRequest !== null) {
+    throw new Error("automatic action continuation cannot replace a forced-switch receipt");
+  }
+  if (
+    resolution.pendingBoundary.kind !== "decision-required"
+    || resolution.pendingBoundary.request.kind !== "command"
+    || resolution.pendingBoundary.request.side !== "trainer"
+  ) {
+    throw new Error("automatic action continuation requires a genuine trainer command boundary");
+  }
+  const segment = appendResolutionSegment(resolution, transition, fieldBoundary);
+  return Object.freeze({
+    ...resolution,
+    segments: Object.freeze([...resolution.segments, segment]),
+    segmentIndex: resolution.segments.length,
+    commandIndex: 0,
+    lifecycle: Object.freeze({
+      phase: "presenting" as const,
+      phaseElapsed: 0,
+    }),
+    field: fieldBoundary,
+    pendingBoundary: transition.state.boundary,
+    pendingBattle: transition.state,
+    forcedRequest:
+      transition.state.boundary.kind === "decision-required"
+      && transition.state.boundary.request.kind === "forced-switch"
+      && transition.state.boundary.request.side === "player"
+        ? transition.state.boundary.request
+        : null,
   });
 }
