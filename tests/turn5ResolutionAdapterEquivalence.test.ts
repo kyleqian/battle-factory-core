@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  isTurn5NextCommandHandoffReady,
+  resolveTurn5CompletedResolutionNextCommandHandoff,
   resolveTurn5FaintSinkGeometry,
   resolveTurn5SitrusAdapter,
   resolveTurn5SwitchInAdapter,
 } from "../src/engine/turn5ResolutionAdapter.ts";
+import { currentPPForActiveMon } from "../src/engine/battleMenu.ts";
+import { rentalMoveset } from "../src/engine/battleSetup.ts";
 import {
   GROVYLE_FAINT_SINK_START_TICK,
   GROVYLE_FAINT_SINK_STEPS,
@@ -111,4 +115,33 @@ describe("turn5ResolutionAdapter: #39 rank-3 kernel-to-typed-owner equivalence (
       );
     },
   );
+
+  describe("completed-resolution/next-command handoff (rank-2 predecessor retirement proof)", () => {
+    it("publishes the core guard's settled redraw and input-ready facts for the following FIGHT reopen", () => {
+      const handoff = resolveTurn5CompletedResolutionNextCommandHandoff();
+
+      expect(handoff.nextCommand).toEqual({ redraw: "settled", input: "ready" });
+      expect(isTurn5NextCommandHandoffReady(handoff)).toBe(true);
+      expect(isTurn5NextCommandHandoffReady(null)).toBe(false);
+    });
+
+    it("publishes the persisted ROCK_SLIDE slot required by the turn-6 FIGHT dispatcher", () => {
+      const handoff = resolveTurn5CompletedResolutionNextCommandHandoff();
+
+      expect(handoff.persistedMoveSlot).toBe(0);
+    });
+
+    it("owns exactly the post-turn-5 menu PP receipt the legacy resolved-flag formula supplied", () => {
+      const onix = rentalMoveset("ONIX");
+      const handoff = resolveTurn5CompletedResolutionNextCommandHandoff();
+      const legacyPredecessorPp = currentPPForActiveMon(
+        onix,
+        true, true, true, true, true,
+      );
+
+      expect(legacyPredecessorPp).toEqual([6, 20, 19, 10]);
+      expect(handoff.playerPp).toEqual(legacyPredecessorPp);
+      expect(handoff.playerPp).toEqual([6, 20, 19, 10]);
+    });
+  });
 });

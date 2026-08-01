@@ -93,6 +93,7 @@ import { stagePlayerHitChainToTerminalMachineState } from "./turn1RockSlidePrese
 import { runBattleScriptFaintedActionsOrchestration } from "./battleScriptFaintedActionsOrchestration.ts";
 import { runBattleEndTurnOrchestration } from "./battleEndTurnOrchestration.ts";
 import { resolveBattleNameWithPrefix, resolveBattleStringLines } from "./battleStringResolver.ts";
+import { rentalMoveset } from "./battleSetup.ts";
 import {
   frontYOffset,
   opponentFaintSinkGeometry,
@@ -335,4 +336,55 @@ export function resolveTurn5SitrusAdapter(): Turn5SitrusAdapter {
     healLines,
     itemConsumed: onix.item === 0,
   });
+}
+
+/**
+ * Typed predecessor receipt for the next FIGHT command after turn 5.
+ *
+ * This deliberately does not project from this module's staged hit chain:
+ * that chain substitutes STRENGTH and starts its local PP at `[10, 0, 0, 0]`
+ * so it is useful for the already-owned KO/switch/Sitrus content, but not for
+ * the real cumulative menu receipt. The immutable tuple below is the
+ * completed canonical command boundary: ROCK_SLIDE has four prior uses
+ * (turns 1, 3, 4, and 5), and DRAGON_BREATH has its one prior turn-2 use.
+ * Switch-in and Sitrus facts remain in their existing dedicated adapters.
+ */
+export type Turn5CompletedResolutionNextCommandHandoff = Readonly<{
+  /** Exact post-turn-5 player PP for `[ROCK_SLIDE, BIND, DRAGON_BREATH, SANDSTORM]`. */
+  playerPp: readonly [number, number, number, number];
+  /** `gMoveSelectionCursor` retained from turn 5's ROCK_SLIDE command. */
+  persistedMoveSlot: 0;
+  /** The following FIGHT reopen is visually settled and may accept input. */
+  nextCommand: Readonly<{
+    redraw: "settled";
+    input: "ready";
+  }>;
+}>;
+
+/**
+ * Publishes turn 5's completed-command facts independently of the staged
+ * content adapter. The existing live menu formula is the evidence for this
+ * four-command cumulative receipt; it must not be inferred from adapter
+ * presence or from a later turn's resolution owner.
+ */
+export function resolveTurn5CompletedResolutionNextCommandHandoff(): Turn5CompletedResolutionNextCommandHandoff {
+  const [rockSlide, bind, dragonBreath, sandstorm] = rentalMoveset("ONIX").maxPP;
+  return Object.freeze({
+    playerPp: Object.freeze([
+      rockSlide - 4,
+      bind,
+      dragonBreath - 1,
+      sandstorm,
+    ]) as readonly [number, number, number, number],
+    persistedMoveSlot: 0 as const,
+    nextCommand: Object.freeze({ redraw: "settled" as const, input: "ready" as const }),
+  });
+}
+
+/** Typed gate shared by the core's next-FIGHT reopen and its dispatcher. */
+export function isTurn5NextCommandHandoffReady(
+  handoff: Turn5CompletedResolutionNextCommandHandoff | null | undefined,
+): handoff is Turn5CompletedResolutionNextCommandHandoff {
+  return handoff?.nextCommand.redraw === "settled"
+    && handoff.nextCommand.input === "ready";
 }
