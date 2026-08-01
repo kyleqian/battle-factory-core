@@ -771,6 +771,7 @@ import {
 } from "./battleCommandPresentationRender.ts";
 import type { BattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
 import type {
+  BattleResolutionRenderEffect,
   BattleResolutionPresentationRenderView,
 } from "./battleResolutionPresentationRender.ts";
 import type {
@@ -6451,11 +6452,11 @@ function drawStatIncreaseBannerForBattler(
   corner: Readonly<{ x: number; y: number }>,
   eva: number,
   bg1Y: number,
+  bgPalette: RgbColor[] = statAnimBanner.palettes.evasion,
 ): void {
   const evb = 16 - eva;
   const bgTileset = statAnimBanner.tileset;
   const bgTilemap = statAnimBanner.tilemaps.increase;
-  const bgPalette = statAnimBanner.palettes.evasion;
   for (let ty = 0; ty < tileset.rows; ty += 1) {
     for (let tx = 0; tx < tileset.columns; tx += 1) {
       const tile = tileset.tiles[ty * tileset.columns + tx];
@@ -6537,9 +6538,9 @@ function drawStatDecreaseBannerForBattlerPalette(
 }
 
 /**
- * ISSUES #59: the generated route's typed Scene-OFF stat adapter
+ * ISSUES #59/#60: the generated route's typed Scene-OFF stat adapter
  * (`renderBattleResolutionSceneOffView` below) needs a real palette for
- * every stat a legal stat-down move can name, not just FEATHER_DANCE's own
+ * every stat a legal stat-change move can name, not just FEATHER_DANCE's own
  * fixed ATK (`assertFeatherDanceAttackStatPalette` above, which stays
  * scoped to the retired canonical turn-6/7/8 window per its own doc).
  * `stat-anim-banner.json` already extracts all seven palettes
@@ -6547,7 +6548,7 @@ function drawStatDecreaseBannerForBattlerPalette(
  * data. `BattleStatName`'s two hyphenated members are the only ones that
  * don't match their palette key verbatim.
  */
-function statAnimBannerDecreasePalette(stat: BattleStatName): RgbColor[] {
+function statAnimBannerPalette(stat: BattleStatName): RgbColor[] {
   switch (stat) {
     case "attack": return statAnimBanner.palettes.attack;
     case "defense": return statAnimBanner.palettes.defense;
@@ -6557,6 +6558,58 @@ function statAnimBannerDecreasePalette(stat: BattleStatName): RgbColor[] {
     case "accuracy": return statAnimBanner.palettes.accuracy;
     case "evasion": return statAnimBanner.palettes.evasion;
   }
+}
+
+type SceneOffStatEffect = Extract<
+  BattleResolutionRenderEffect,
+  { type: "stat" }
+>;
+
+export interface SceneOffStatStageBannerView {
+  readonly battler: 0 | 1;
+  readonly direction: "increase" | "decrease";
+  readonly stat: BattleStatName;
+  readonly eva: number | null;
+  readonly bg1Y: number;
+}
+
+/**
+ * Pure typed adapter from one source-owned stat-stage receipt to the generic
+ * Scene-OFF banner state. Stat stages are source `gBattleMons` values in
+ * 0..12. An actual controller animation always has a direction; at-bound
+ * no-op receipts take the source's separate "won't change" message path and
+ * must never be presented as a stat banner.
+ */
+export function sceneOffStatStageBannerView(
+  effect: SceneOffStatEffect,
+): SceneOffStatStageBannerView {
+  if (
+    !Number.isInteger(effect.from)
+    || !Number.isInteger(effect.to)
+    || effect.from < 0
+    || effect.from > 12
+    || effect.to < 0
+    || effect.to > 12
+    || effect.from === effect.to
+  ) {
+    throw new Error(
+      `Scene OFF typed stat adapter cannot draw battler ${effect.battler} ${effect.stat} ${effect.from}->${effect.to}`,
+    );
+  }
+  const direction = effect.to > effect.from ? "increase" : "decrease";
+  // One typed command frame advances two source controller ticks after its
+  // setup age. Mild increase/decrease banners share the blend cadence; the
+  // source direction selects the BG1 tilemap, horizontal phase, and signed
+  // vertical scroll.
+  const sourceAge = effect.age * 2 + 94;
+  const decreaseBg1Y = turn13SandAttackAccBg1Y(sourceAge, 0);
+  return Object.freeze({
+    battler: effect.battler,
+    direction,
+    stat: effect.stat,
+    eva: turn13SandAttackAccEva(sourceAge, 0),
+    bg1Y: direction === "increase" ? -decreaseBg1Y : decreaseBg1Y,
+  });
 }
 
 const OPP_SUMMARY_ICON_BASE = { x: 26, y: 32 };
@@ -32733,35 +32786,34 @@ export function renderBattleResolutionSceneOffView(
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
 
   if (view.effect?.type === "stat") {
-    // ISSUES #59: covers the whole opponent-side stat-drop family (any of
-    // the 7 stats a legal stat-down move can name, landing on the player's
-    // own battler) via the same generic banner primitive
-    // (`drawStatDecreaseBannerForBattlerPalette`) the turn-6/13 canonical
-    // windows already use, parameterized by this battler's own live
-    // field-art sprite/corner instead of a hardcoded species. A rise, or a
-    // drop on the OPPONENT's own battler (battler 1), is still genuinely
-    // out of this family and still barriers.
-    if (
-      view.effect.battler !== 0
-      || view.effect.to >= view.effect.from
-    ) {
-      throw new Error(
-        `Scene OFF typed stat adapter cannot draw battler ${view.effect.battler} ${view.effect.stat} ${view.effect.from}->${view.effect.to}`,
-      );
-    }
-    // Existing exact Scene-OFF controller adapter: one typed command frame
-    // advances two source animation ticks after the controller's setup age.
-    const sourceAge = view.effect.age * 2 + 94;
-    const eva = turn13SandAttackAccEva(sourceAge, 0);
-    if (eva !== null) {
-      drawStatDecreaseBannerForBattlerPalette(
-        fb,
-        view.fieldArt.player.pic.tileset as Tileset,
-        view.fieldArt.player.origin,
-        eva,
-        turn13SandAttackAccBg1Y(sourceAge, 0),
-        statAnimBannerDecreasePalette(view.effect.stat),
-      );
+    // ISSUES #59/#60: source direction and the affected singles battler are
+    // both typed facts. Use that battler's live art/mask instead of assuming
+    // a player-side drop; the same seven extracted palettes serve both source
+    // tilemaps.
+    const banner = sceneOffStatStageBannerView(view.effect);
+    if (banner.eva !== null) {
+      const art = banner.battler === 0
+        ? view.fieldArt.player
+        : view.fieldArt.opponent;
+      if (banner.direction === "increase") {
+        drawStatIncreaseBannerForBattler(
+          fb,
+          art.pic.tileset as Tileset,
+          art.origin,
+          banner.eva,
+          banner.bg1Y,
+          statAnimBannerPalette(banner.stat),
+        );
+      } else {
+        drawStatDecreaseBannerForBattlerPalette(
+          fb,
+          art.pic.tileset as Tileset,
+          art.origin,
+          banner.eva,
+          banner.bg1Y,
+          statAnimBannerPalette(banner.stat),
+        );
+      }
     }
   }
   // A status controller's lasting visible result is the healthbox icon. The
