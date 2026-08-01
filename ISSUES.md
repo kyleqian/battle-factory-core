@@ -194,7 +194,12 @@ get their own OFF re-timing under ranks 6-8, predicted constant
 banked, not a rank-5 blocker). Eleven legacy ON turn9-12 pins retired
 (turn9-menu.json 111/111 + turn12-menu.json 46/46 remain until the
 phase family closes and their OFF pins can be banked — S9's landmark
-data for them is in `docs/rank5-off-ground-truth.md`). Earlier
+data for them is in `docs/rank5-off-ground-truth.md`). **Rank-6 policy
+ADOPTED (user decision 2026-07-31 evening, recorded in PROGRESS 799
+addendum):** same shape for turns 1-4 — acceptance moves to the 10
+banked OFF pins (`docs/rank6-off-ground-truth.md`), legacy ON turns
+1-4 pins retire as rank 6 executes; turns 5-8 pins deliberately NOT
+covered by this decision. Earlier
 progress:
 `turn13-sandattack.json`'s complete captured
 SAND_ATTACK content now resolves its kickoff and opponent-target accuracy-fall

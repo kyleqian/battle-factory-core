@@ -44,6 +44,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Frame 444 also still carries the separate, out-of-scope materialize-
   column-shift defect (`docs/issue56-residual-probe.md` Q1).
 - **PAPERCUT:** none.
+- **USER DECISION (in-session, ~18:50): rank-6 Scene-OFF pin policy
+  ADOPTED** — same Option-A shape as rank 5: the 10 banked
+  `battle-scene-off` traces (`docs/rank6-off-ground-truth.md`) become
+  turns 1-4's acceptance pins; re-time class-(b)/delete class-(c) on
+  the OFF route; retire the legacy ON turns 1-4 pins as rank 6
+  executes. Execution is next session's opener (slice recipe =
+  rank 5's, commits `8802fcb6`/`329f8320`/`59a3fa7d`). Scope note: the
+  decision covers turns 1-4 (rank 6) only — turns 5-8's own ON pins
+  (incl. insurance pins turn5-rockslide/turn8-bind-a) are NOT covered
+  and need their own question when their re-timing comes up (the
+  phase-family fix ultimately wants turns 1-8).
 - **SUPERVISOR TRUE FINAL (bonus round 7 verified, ~18:30; this
   addendum + entry 798's wind-down are the joint resume point):**
   session ends at **7 rounds / 13 workers (M9-M15, S9-S14) / 0 failed
