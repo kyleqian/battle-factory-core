@@ -81,6 +81,7 @@ import {
   verticalSlideFrameAtTick,
   verticalSlideWobbleFrameAtTick,
   verticalJumpsSmallFrameAtTick,
+  verticalJumpsBigFrameAtTick,
   verticalShakeFrameAtTick,
   verticalShakeTwiceFrameAtTick,
   verticalSquishBounceFrameAtTick,
@@ -97,6 +98,9 @@ import {
   V_JUMPS_SMALL_FACTORY_FRONT_SPECIES,
   V_JUMPS_SMALL_FRONT_SPECIES,
   V_JUMPS_SMALL_OUTSIDE_FACTORY_FRONT_SPECIES,
+  V_JUMPS_BIG_FACTORY_FRONT_SPECIES,
+  V_JUMPS_BIG_FRONT_SPECIES,
+  V_JUMPS_BIG_OUTSIDE_FACTORY_FRONT_SPECIES,
   verticalJumpsHorizontalJumpsFrameAtTick,
   V_JUMPS_H_JUMPS_FACTORY_FRONT_SPECIES,
   V_JUMPS_H_JUMPS_FRONT_SPECIES,
@@ -252,6 +256,12 @@ import bulbasaurRunB from "../../tools/compare/fixtures/sendout-front-bulbasaur-
 import dustoxScenario from "../../tools/compare/fixtures/sendout-front-dustox.json" with { type: "json" };
 import dustoxRunA from "../../tools/compare/fixtures/sendout-front-dustox-run-a.json" with { type: "json" };
 import dustoxRunB from "../../tools/compare/fixtures/sendout-front-dustox-run-b.json" with { type: "json" };
+import pichuScenario from "../../tools/compare/fixtures/sendout-front-pichu.json" with { type: "json" };
+import pichuRunA from "../../tools/compare/fixtures/sendout-front-pichu-run-a.json" with { type: "json" };
+import pichuRunB from "../../tools/compare/fixtures/sendout-front-pichu-run-b.json" with { type: "json" };
+import taillowScenario from "../../tools/compare/fixtures/sendout-front-taillow.json" with { type: "json" };
+import taillowRunA from "../../tools/compare/fixtures/sendout-front-taillow-run-a.json" with { type: "json" };
+import taillowRunB from "../../tools/compare/fixtures/sendout-front-taillow-run-b.json" with { type: "json" };
 import {
   KABUTO_FRONT_ANIM_START_OFFSET,
   kabutoHSlideWobble,
@@ -484,6 +494,18 @@ const dustoxRawA = readFileSync(
 );
 const dustoxRawB = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-dustox-run-b.json", import.meta.url),
+);
+const pichuRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-pichu-run-a.json", import.meta.url),
+);
+const pichuRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-pichu-run-b.json", import.meta.url),
+);
+const taillowRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-taillow-run-a.json", import.meta.url),
+);
+const taillowRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-taillow-run-b.json", import.meta.url),
 );
 
 describe("speciesIdleAnim", () => {
@@ -5039,7 +5061,204 @@ describe("speciesIdleAnim", () => {
       expect(selectorTables.frontAnimIds.species.SHARPEDO).toBe(
         "ANIM_H_JUMPS_V_STRETCH_TWICE",
       );
-      expect(speciesFrontIdleRestOffset("PICHU")).toBeNull();
+      expect(speciesFrontIdleRestOffset("PICHU")).toEqual({ x2: 0, y2: 0 });
+      expect(speciesFrontIdleRestOffset("SHARPEDO")).toBeNull();
+    });
+  });
+
+  describe("verticalJumpsBigFrameAtTick (Anim_VerticalJumps_Big / shared VerticalJumps port)", () => {
+    it("derives exactly five Factory mappings and no outside mappings", () => {
+      const speciesSelectors = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
+      const generated = Object.entries(speciesSelectors)
+        .filter(([, family]) => family === "ANIM_V_JUMPS_BIG")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(V_JUMPS_BIG_FRONT_SPECIES).toEqual(generated);
+      expect(V_JUMPS_BIG_FRONT_SPECIES).toEqual([
+        "PICHU", "FLAAFFY", "GIRAFARIG", "SWAMPERT", "TAILLOW",
+      ]);
+      expect(V_JUMPS_BIG_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(V_JUMPS_BIG_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(V_JUMPS_BIG_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of V_JUMPS_BIG_FRONT_SPECIES) {
+        expect(speciesSelectors[species]).toBe("ANIM_V_JUMPS_BIG");
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins all 33 active callbacks, C branch arithmetic, u8 sine conversion, and amplitudes", () => {
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toContain(2);
+      for (let tick = 0; tick < 33; tick += 1) {
+        const counter = tick * 12;
+        const divCounter = Math.trunc(counter / 128) as 0 | 1 | 2 | 3;
+        const adjustedCounter = divCounter < 2 ? counter : counter - 256;
+        const sineIndex = divCounter < 2 ? counter % 128 : adjustedCounter & 0xff;
+        const amplitude = divCounter < 2 ? 8 : 12;
+        const y2 = -((amplitude * GBA_SINE_TABLE_256[sineIndex]!) >> 8) + 0;
+        expect(verticalJumpsBigFrameAtTick(tick), `counter ${counter}`).toEqual({
+          x2: 0,
+          y2,
+          data0: 4,
+          data2: counter + 12,
+          counter,
+          divCounter,
+          adjustedCounter,
+          sineIndex,
+          amplitude,
+          callback: "VerticalJumps",
+        });
+      }
+    });
+
+    it("pins every phase edge, including the counter-=256 and signed sine boundaries", () => {
+      expect([0, 10, 11, 21, 22, 31, 32].map((tick) => {
+        const frame = verticalJumpsBigFrameAtTick(tick)!;
+        return [tick, frame.counter, frame.divCounter, frame.adjustedCounter,
+          frame.sineIndex, frame.amplitude, frame.y2];
+      })).toEqual([
+        [0, 0, 0, 0, 0, 8, 0],
+        [10, 120, 0, 120, 120, 8, -1],
+        [11, 132, 1, 132, 4, 8, 0],
+        [21, 252, 1, 252, 124, 8, 0],
+        [22, 264, 2, 8, 8, 12, -2],
+        [31, 372, 2, 116, 116, 12, -3],
+        [32, 384, 3, 128, 128, 12, 0],
+      ]);
+      expect(verticalJumpsBigFrameAtTick(27)).toMatchObject({
+        counter: 324,
+        adjustedCounter: 68,
+        sineIndex: 68,
+        amplitude: 12,
+        y2: -11,
+      });
+    });
+
+    it("cleans up only after counter 384, increments to 408, and stays stable in WaitAnimEnd", () => {
+      expect(verticalJumpsBigFrameAtTick(32)).toMatchObject({
+        counter: 384,
+        data2: 396,
+        callback: "VerticalJumps",
+      });
+      expect(verticalJumpsBigFrameAtTick(33)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 4,
+        data2: 408,
+        counter: 396,
+        divCounter: null,
+        adjustedCounter: null,
+        sineIndex: null,
+        amplitude: null,
+        callback: "WaitAnimEnd",
+      });
+      expect(verticalJumpsBigFrameAtTick(34)).toEqual(verticalJumpsBigFrameAtTick(33));
+      expect(verticalJumpsBigFrameAtTick(-1)).toBeNull();
+    });
+
+    it("regression-pins the accepted Small initializer on the same shared reducer", () => {
+      expect([0, 11, 22, 32, 33].map((tick) => verticalJumpsSmallFrameAtTick(tick)))
+        .toEqual([
+          { x2: 0, y2: 0, data0: 3, data2: 12, counter: 0, divCounter: 0,
+            adjustedCounter: 0, sineIndex: 0, amplitude: 6, callback: "VerticalJumps" },
+          { x2: 0, y2: 0, data0: 3, data2: 144, counter: 132, divCounter: 1,
+            adjustedCounter: 132, sineIndex: 4, amplitude: 6, callback: "VerticalJumps" },
+          { x2: 0, y2: -1, data0: 3, data2: 276, counter: 264, divCounter: 2,
+            adjustedCounter: 8, sineIndex: 8, amplitude: 9, callback: "VerticalJumps" },
+          { x2: 0, y2: 0, data0: 3, data2: 396, counter: 384, divCounter: 3,
+            adjustedCounter: 128, sineIndex: 128, amplitude: 9, callback: "VerticalJumps" },
+          { x2: 0, y2: 0, data0: 3, data2: 408, counter: 396, divCounter: null,
+            adjustedCounter: null, sineIndex: null, amplitude: null, callback: "WaitAnimEnd" },
+        ]);
+    });
+
+    it.each([
+      [172, pichuScenario],
+      [304, taillowScenario],
+    ] as const)("stages a complete legal Scene-ON party for opponent species %i", (
+      species, scenario,
+    ) => {
+      expect(scenario).toMatchObject({
+        mode: "mechanicLab",
+        profile: "battle-scene-on",
+        level: 50,
+        challengeNum: 0,
+        trainerId: 50,
+      });
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(species);
+      for (const setId of [...scenario.playerSetIds, ...scenario.opponentSetIds]) {
+        expect(setId).toBeGreaterThanOrEqual(110);
+        expect(setId).toBeLessThanOrEqual(199);
+      }
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "PICHU", pichuRunA, pichuRunB, pichuRawA, pichuRawB, 4, 172,
+        "cde69635974e4c6a55e7bad360e38a1507db9405f164851cb522ff4ddfb27d1f",
+      ],
+      [
+        "TAILLOW", taillowRunA, taillowRunB, taillowRawA, taillowRawB, 8, 304,
+        "c286b13cef798ca9c35f5638852d138363ac4455ab8dc016935bb36379839190",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species, runA, runB, rawA, rawB, animCmdIndex, data2, rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_V_JUMPS_BIG");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("accepts only Big while preserving Small and rejecting the adjacent Twice selector", () => {
+      for (const species of [...V_JUMPS_SMALL_FRONT_SPECIES, ...V_JUMPS_BIG_FRONT_SPECIES]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+      expect(selectorTables.frontAnimIds.species.SHARPEDO).toBe(
+        "ANIM_H_JUMPS_V_STRETCH_TWICE",
+      );
       expect(speciesFrontIdleRestOffset("SHARPEDO")).toBeNull();
     });
   });
