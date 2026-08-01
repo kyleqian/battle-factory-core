@@ -23,21 +23,21 @@ describe("turn9ResolutionAdapter: #39 completed-turn-9/next-command handoff proo
     expect(resolveTurn9CompletedResolutionNextCommandHandoff().persistedMoveSlot).toBe(0);
   });
 
-  it("owns exactly the completed turn-9 PP receipt supplied by the live boolean path without staged move composition", () => {
+  it("owns exactly the completed turn-9 PP receipt consumed by the live submenu without staged move composition", () => {
     const onix = rentalMoveset("ONIX");
     const handoff = resolveTurn9CompletedResolutionNextCommandHandoff();
-    const liveBooleanReceipt = currentPPForActiveMon(
+    const liveReceipt = currentPPForActiveMon(
       onix,
       true, true, true, true,
       resolveTurn5CompletedResolutionNextCommandHandoff(),
       resolveTurn6CompletedResolutionNextCommandHandoff(),
       resolveTurn7CompletedResolutionNextCommandHandoff(),
       resolveTurn8CompletedResolutionNextCommandHandoff(),
-      true,
+      handoff,
     );
 
-    expect(liveBooleanReceipt).toEqual([3, 19, 19, 10]);
-    expect(handoff.playerPp).toEqual(liveBooleanReceipt);
+    expect(liveReceipt).toEqual([3, 19, 19, 10]);
+    expect(handoff.playerPp).toEqual(liveReceipt);
     expect(handoff.playerPp).toEqual([3, 19, 19, 10]);
     expect(Object.isFrozen(handoff)).toBe(true);
     expect(Object.isFrozen(handoff.playerPp)).toBe(true);
@@ -49,18 +49,18 @@ describe("turn9ResolutionAdapter: #39 completed-turn-9/next-command handoff proo
       moveIds: [157, 20, 288, 201],
       maxPP: [10, 15, 20, 10],
     } as const;
-    const liveBooleanReceipt = currentPPForActiveMon(
+    const liveReceipt = currentPPForActiveMon(
       genericMoveset,
       true, true, true, true,
       resolveTurn5CompletedResolutionNextCommandHandoff(),
       resolveTurn6CompletedResolutionNextCommandHandoff(),
       resolveTurn7CompletedResolutionNextCommandHandoff(),
       resolveTurn8CompletedResolutionNextCommandHandoff(),
-      true,
+      resolveTurn9CompletedResolutionNextCommandHandoff(),
     );
 
-    expect(liveBooleanReceipt).toEqual([3, 14, 19, 10]);
-    expect(liveBooleanReceipt[0]).toBe(genericMoveset.maxPP[0] - 7);
+    expect(liveReceipt).toEqual([3, 14, 19, 10]);
+    expect(liveReceipt[0]).toBe(genericMoveset.maxPP[0] - 7);
     expect(resolveTurn9CompletedResolutionNextCommandHandoff().playerPp[0]).toBe(3);
   });
 });
