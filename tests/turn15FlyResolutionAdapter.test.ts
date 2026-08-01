@@ -28,6 +28,10 @@ describe("Turn-14/15 typed FLY presentation bridge", () => {
       type: "message",
       lines: ["ONIX’s", "attack missed!"],
     }));
+    expect(
+      adapter.chargeResolution.segments[0]!.afterRules.rulesContext
+        .battlers[0]!.pp[2],
+    ).toBe(17);
 
     const strikeText = adapter.strikeCommands.findIndex((command) =>
       command.type === "message"

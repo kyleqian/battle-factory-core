@@ -22,6 +22,7 @@
 // including a pixel-silent-but-charged space at 1566, 1572+ holds static.
 
 import { rentalMoveset, type ActiveMonMoveset } from "./battleSetup.ts";
+import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
 
 /** `sText_GoPkmn` resolved for this save's rental pool (single line, fits `B_WIN_MSG`'s line 1 - never wraps to line 2). */
 export const GO_TEXT = "Go! ONIX!";
@@ -2580,7 +2581,7 @@ export function currentPPForActiveMon(
   turn11Resolved: boolean = false,
   turn12Resolved: boolean = false,
   turn13Resolved: boolean = false,
-  turn14Resolved: boolean = false,
+  lockedActionResolution: BattleResolutionPresentationState | null = null,
   turn16Resolved: boolean = false,
 ): readonly [number, number, number, number] {
   const [a, b, c, d] = moveset.maxPP;
@@ -2630,16 +2631,18 @@ export function currentPPForActiveMon(
   // Pidgeotto), so by turn 14's own reopen it's been used twice (turns 2
   // and 13, PP 20->18), matching docs/turn14-notes.md's own "PP shows
   // 18/20 for DRAGON_BREATH" ledger exactly.
-  // S7/S8 turn 15 (docs/turn15-notes.md §4): `turn14Resolved` adds a THIRD
-  // slot-2 decrement - turn 14's own DRAGON_BREATH (auto-missed vs.
-  // airborne Murkrow, still PP-consuming per the established "a miss still
-  // decrements PP" rule) is a 3rd use (turns 2, 13, 14; PP 20->17), matching
-  // docs/turn15-notes.md's own "PP shows 17/20" ledger exactly.
-  const slot2Uses = (turn2Resolved ? 1 : 0) + (turn13Resolved ? 1 : 0) + (turn14Resolved ? 1 : 0);
+  const slot2Uses = (turn2Resolved ? 1 : 0) + (turn13Resolved ? 1 : 0);
+  const resolvedPlayerPp = lockedActionResolution?.segments[0]
+    ?.afterRules.rulesContext.battlers[0]!.pp;
   // MAGBY becomes active only after turn 15's forced switch. Its slot-0
   // FIRE_PUNCH is used once on turn 16 before the turn-17 reopen.
   const activeSlot0Uses = moveset.moveIds[0] === 7 && turn16Resolved ? 1 : slot0Uses;
-  return [a - activeSlot0Uses, turn8Resolved ? b - 1 : b, c - slot2Uses, d];
+  return [
+    a - activeSlot0Uses,
+    turn8Resolved ? b - 1 : b,
+    resolvedPlayerPp?.[2] ?? c - slot2Uses,
+    d,
+  ];
 }
 
 export function getCurrentPPToMaxPPState(currentPP: number, maxPP: number): 0 | 1 | 2 | 3 {

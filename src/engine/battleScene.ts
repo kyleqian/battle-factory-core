@@ -804,6 +804,7 @@ import {
   resolveTurn6FeatherDanceWindowContent,
 } from "./turn6FeatherDancePresentationStaging.ts";
 import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "./turn15FlyResolutionAdapter.ts";
+import type { BattleSceneResolutionOwner } from "./battleSceneResolutionOwner.ts";
 import {
   resolveTurn7AtkFellLines,
   resolveTurn7FeatherDanceKickoffLines,
@@ -2585,16 +2586,8 @@ export interface BattleSceneState {
    * exactly (the brief's own instruction).
    */
   turn13Resolved: boolean;
-  /**
-   * S7/S8 turn 15 (docs/turn15-notes.md): `true` once turn 14's own whole
-   * DRAGON_BREATH-auto-miss resolution has redrawn the settled action menu
-   * (`TURN14_DRAGONBREATH_MENU_REDRAW_DELAY` past turn 14's own real
-   * confirm) AND a fresh A-press has reopened FIGHT for turn 15, cursor
-   * persisted at slot 2 (DRAGON_BREATH, unchanged since turn 13/14) - no
-   * `DOWN` nav needed. Mirrors `turn13Resolved`'s own pattern exactly (the
-   * brief's own instruction).
-   */
-  turn14Resolved: boolean;
+  /** Immutable retained-action resolution plus its request-owned selector. */
+  resolutionOwner?: BattleSceneResolutionOwner | null;
   /**
    * True once turn 16's FIRE_PUNCH/burn tail has redrawn the action menu
    * and the player opens FIGHT for turn 17. Optional only so older direct
@@ -2614,8 +2607,6 @@ export interface BattleSceneState {
    * does not inspect a turn-resolution flag.
    */
   terminalResolution?: BattleTerminalResolutionPresentationState | null;
-  /** Forced player-switch menu, created only by the real turn-15 faint-text A press. */
-  turn15PartySelect?: import("./partySelect.ts").PartySelectState | null;
 }
 
 export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
@@ -2637,7 +2628,7 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn12Resolved: false,
   opponentFaintDismissElapsed: null,
   turn13Resolved: false,
-  turn14Resolved: false,
+  resolutionOwner: null,
   turn16Resolved: false,
   battleOutcome: 0,
   terminalResolution: null,
@@ -2669,12 +2660,11 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn12Resolved: state.turn12Resolved,
     opponentFaintDismissElapsed: state.opponentFaintDismissElapsed,
     turn13Resolved: state.turn13Resolved,
-    turn14Resolved: state.turn14Resolved,
+    resolutionOwner: state.resolutionOwner ?? null,
     turn16Resolved: state.turn16Resolved ?? false,
     battleOutcome:
       postDismiss === null ? (state.battleOutcome ?? 0) : postDismiss.battleOutcome,
     terminalResolution: state.terminalResolution ?? null,
-    turn15PartySelect: state.turn15PartySelect,
   };
 }
 
@@ -7509,24 +7499,19 @@ function drawFightSubmenuWindow(
   turn12Resolved: boolean = false,
   turn13Resolved: boolean = false,
   opponentFaintDismissTick: number | null = null,
-  turn14Resolved: boolean = false,
+  resolutionOwner: BattleSceneResolutionOwner | null = null,
   trainerPresentation?: FactoryTrainerPresentation,
 ): void {
-  if (turn14Resolved) {
-    // S7/S8 (docs/turn15-notes.md): turn 15 is Murkrow's own FLY strike
-    // half (Onix's own re-selected DRAGON_BREATH never executes - Murkrow
-    // acts first and faints Onix outright) - its own dedicated dispatcher,
-    // same "genuinely different PP/text" reason `turn12Resolved`'s own
-    // branch below already established for turn 13.
-    drawTurn15FightSubmenuWindow(fb, t, sm);
+  if (resolutionOwner?.resolution.segmentIndex === 1) {
+    drawTurn15FightSubmenuWindow(fb, t, sm, resolutionOwner.resolution);
+    return;
+  }
+  if (resolutionOwner?.resolution.segmentIndex === 0) {
+    drawTurn14FightSubmenuWindow(fb, t, sm);
     return;
   }
   if (turn13Resolved) {
-    // S7/S8 (docs/turn14-notes.md): turn 14 is the FLY charge turn - its
-    // own dedicated dispatcher, same "genuinely different PP/text" reason
-    // `turn12Resolved`'s own branch below already established for turn 13.
-    drawTurn14FightSubmenuWindow(fb, t, sm);
-    return;
+    throw new Error("resolved turn-13 handoff has no retained action presentation owner");
   }
   if (turn12Resolved) {
     // S7/S8 (docs/turn13-notes.md): turn 13 is the winning line's own FIFTH
@@ -7822,10 +7807,10 @@ function drawFightSubmenuChrome(
   turn11Resolved: boolean = false,
   turn12Resolved: boolean = false,
   turn13Resolved: boolean = false,
-  turn14Resolved: boolean = false,
+  lockedActionResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null = null,
   turn16Resolved: boolean = false,
 ): void {
-  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved, turn7Resolved, turn8Resolved, turn9Resolved, turn10Resolved, turn11Resolved, turn12Resolved, turn13Resolved, turn14Resolved, turn16Resolved);
+  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved, turn7Resolved, turn8Resolved, turn9Resolved, turn10Resolved, turn11Resolved, turn12Resolved, turn13Resolved, lockedActionResolution, turn16Resolved);
   drawFightSubmenuChromeFromLiveState(
     fb,
     displayCursor,
@@ -14982,7 +14967,7 @@ const TURN14_MENU_REDRAW_RESET_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - TURN14_ME
  * `TURN14_MENU_REDRAW_TICK`, reached from turn 14's own real confirm press
  * `TURN14_DRAGONBREATH_PRESS_TICK`) - mirrors `TURN13_DRAGONBREATH_MENU_
  * REDRAW_DELAY`'s own formula shape exactly (redraw tick minus that turn's
- * own confirm press), gating core.ts's new `turn14Resolved`-setting reopen
+ * own confirm press), gating core.ts's retained-action owner handoff
  * branch. The real reopen press (18956 in the canonical trace) lands well
  * after this threshold, same "armed well in advance of the real press"
  * shape every prior turn-epoch delay already shows.
@@ -15085,9 +15070,8 @@ function drawTurn14FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmen
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
   // turn13Resolved must be true here (turn 13 has already resolved by this
-  // reopen) while turn14Resolved stays at its default false (this turn's
-  // own confirm hasn't happened yet) - matches the (N-1)-trues pattern
-  // every other turnN's own analogous call already establishes.
+  // reopen) before the retained charge receipt has advanced to its locked
+  // strike segment.
   drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true, true, true, true, true, true, true);
 }
 
@@ -15503,8 +15487,8 @@ function drawTurn15FlyStrikeWindow(fb: Uint8Array, t: number, pressTick: number)
 
 /**
  * S7/S8 (docs/turn15-notes.md): turn 14's own whole DRAGON_BREATH-auto-miss
- * resolution has redrawn the settled action menu by now (`core.ts`'s own
- * `turn14Resolved` gate) - cursor persisted at slot 2 (DRAGON_BREATH,
+ * resolution has redrawn the settled action menu by now (the retained
+ * charge owner has advanced to its strike segment) - cursor persisted at slot 2 (DRAGON_BREATH,
  * unchanged since turn 13/14, NO `DOWN` nav this turn). Structurally
  * identical to `drawTurn14FightSubmenuWindow` (reuses `drawTurn13Switchin
  * FieldBase` throughout, Murkrow held invisible - no fresh switch-in regime
@@ -15517,7 +15501,12 @@ function drawTurn15FlyStrikeWindow(fb: Uint8Array, t: number, pressTick: number)
  * level deeper than turn 13's did (docs/turn13-bounce-notes.md §10c), and
  * turn 15 is downstream of THAT reset, not turn 13's.
  */
-function drawTurn15FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState): void {
+function drawTurn15FightSubmenuWindow(
+  fb: Uint8Array,
+  t: number,
+  sm: FightSubmenuState,
+  resolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState,
+): void {
   const revealTick = sm.openElapsed === null ? -Infinity : TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
   if (sm.openElapsed === null || t < revealTick) {
     const shiftedBounceTick = t + TURN14_MENU_REDRAW_RESET_SHIFT;
@@ -15537,7 +15526,7 @@ function drawTurn15FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmen
   drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick, true);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
-  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true, true, true, true, true, true, true, true);
+  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true, true, true, true, true, true, true, resolution, true);
 }
 
 type PartyChromeFrame = { palette: number[]; indices: string };
@@ -15689,7 +15678,7 @@ export function applyTurn17PostwinFastFade(
     return;
   }
 
-  const party = state.turn15PartySelect;
+  const party = state.resolutionOwner?.forcedPartySelect;
   const terminalResolution = state.terminalResolution ?? null;
   if (!party || party.sendOutElapsed === null || terminalResolution === null
       || terminalResolution.faintDismissElapsed === null
@@ -16790,7 +16779,7 @@ function drawTurn16FightSubmenuWindow(
       false,
       false,
       false,
-      false,
+      null,
       true,
     );
     return;
@@ -16923,7 +16912,7 @@ function drawTurn16FightSubmenuWindow(
     false,
     false,
     false,
-    false,
+    null,
     isTurn17Reopen,
   );
 }
@@ -17019,7 +17008,8 @@ function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, pa
 /** Renders the full battle-scene-assembly frame for `state` (elapsed since TICK0). */
 export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void {
   const t = TICK0 + state.elapsed;
-  if (state.turn15PartySelect && drawTurn15PartySelectWindow(fb, state, state.turn15PartySelect)) return;
+  const forcedPartySelect = state.resolutionOwner?.forcedPartySelect;
+  if (forcedPartySelect && drawTurn15PartySelectWindow(fb, state, forcedPartySelect)) return;
   const win = windowRange(t);
   if (!win) return; // solid black
   if (t < SLIDE_END_TICK) {
@@ -17112,7 +17102,7 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
       state.turn12Resolved,
       state.turn13Resolved,
       state.opponentFaintDismissElapsed === null ? null : TICK0 + state.opponentFaintDismissElapsed,
-      state.turn14Resolved,
+      state.resolutionOwner ?? null,
       state.trainerPresentation,
     );
     return;

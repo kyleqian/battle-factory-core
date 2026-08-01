@@ -153,13 +153,16 @@ import {
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
-  advancePartySelect,
   CANONICAL_FORCED_SWITCH_PARTY,
   CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
-  createPartySelectStateFromForcedSwitch,
   partySendOutBattleMenuReady,
 } from "./partySelect.ts";
 import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "./turn15FlyResolutionAdapter.ts";
+import {
+  advanceBattleSceneForcedPartySelect,
+  beginBattleSceneForcedPartySelect,
+  createBattleSceneResolutionOwner,
+} from "./battleSceneResolutionOwner.ts";
 import {
   advanceFightSubmenuDisplay,
   closeFightSubmenu,
@@ -916,26 +919,30 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     ) {
       battleScene = { ...battleScene, opponentFaintDismissElapsed: battleScene.elapsed + 1 };
     }
-    // Turn 15's player-side faint is the first forced party-select path.
-    // Register the same A edge that dismisses the fully printed ONIX text;
-    // subsequent DOWN/A edges are reduced independently by partySelect.ts.
+    const resolutionOwner = battleScene.resolutionOwner ?? null;
+    const forcedPartySelect = resolutionOwner?.forcedPartySelect ?? null;
     if (
-      battleScene.turn14Resolved &&
-      battleScene.turn15PartySelect === undefined &&
+      resolutionOwner !== null &&
+      resolutionOwner.resolution.forcedRequest !== null &&
+      forcedPartySelect === null &&
       newKeys.has("A") &&
       turn15KoDismissEligible(SCENE_TICK0 + battleScene.elapsed + 1)
     ) {
       battleScene = {
         ...battleScene,
-        turn15PartySelect: createPartySelectStateFromForcedSwitch(
-          CANONICAL_OPPONENT_FLY_RESOLUTION.forcedRequest,
+        resolutionOwner: beginBattleSceneForcedPartySelect(
+          resolutionOwner,
           CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
           CANONICAL_FORCED_SWITCH_PARTY,
         ),
       };
-    } else if (battleScene.turn15PartySelect) {
-      const previousParty = battleScene.turn15PartySelect;
-      const nextParty = advancePartySelect(previousParty, newKeys);
+    } else if (resolutionOwner !== null && forcedPartySelect !== null) {
+      const previousParty = forcedPartySelect;
+      const nextOwner = advanceBattleSceneForcedPartySelect(
+        resolutionOwner,
+        newKeys,
+      );
+      const nextParty = nextOwner.forcedPartySelect!;
       // The completed SEND OUT creates a fresh PlayerHandleChooseAction
       // controller. Reset the stale, already-confirmed turn-15 submenu at
       // that relative boundary and carry MAGBY's real moveset into the
@@ -951,7 +958,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       battleScene = {
         ...battleScene,
         fightSubmenu,
-        turn15PartySelect: nextParty,
+        resolutionOwner: nextOwner,
       };
     }
     // Turn 17's opponent-faint text is a genuine input gate.  Register only
@@ -1074,7 +1081,8 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
             battleScene.trainerPresentation,
           )
         : null;
-    const partySendOutElapsed = battleScene.turn15PartySelect?.sendOutElapsed;
+    const partySendOutElapsed = battleScene.resolutionOwner
+      ?.forcedPartySelect?.sendOutElapsed;
     const currentActiveMoveset = () =>
       partySendOutElapsed !== null &&
       partySendOutElapsed !== undefined &&
@@ -1094,7 +1102,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let turn11Resolved = battleScene.turn11Resolved;
     let turn12Resolved = battleScene.turn12Resolved;
     let turn13Resolved = battleScene.turn13Resolved;
-    let turn14Resolved = battleScene.turn14Resolved;
+    let lockedActionOwner = battleScene.resolutionOwner ?? null;
     let turn16Resolved = battleScene.turn16Resolved ?? false;
     let terminalResolution = battleScene.terminalResolution ?? null;
     if (fightSubmenu.openElapsed === null) {
@@ -1392,9 +1400,12 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // `turn12Resolved`'s own branch exactly, per the brief.
       fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen), 2);
       turn13Resolved = true;
+      lockedActionOwner = createBattleSceneResolutionOwner(
+        CANONICAL_OPPONENT_FLY_RESOLUTION.chargeResolution,
+      );
     } else if (
       turn13Resolved &&
-      !turn14Resolved &&
+      lockedActionOwner?.resolution.segmentIndex === 0 &&
       fightSubmenu.confirmElapsed !== null &&
       newKeys.has("A") &&
       sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN14_DRAGONBREATH_MENU_REDRAW_DELAY
@@ -1408,9 +1419,11 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // persisted... no nav" ledger. Mirrors `turn13Resolved`'s own branch
       // exactly, per the brief.
       fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen), 2);
-      turn14Resolved = true;
+      lockedActionOwner = createBattleSceneResolutionOwner(
+        CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution,
+      );
     } else if (
-      turn14Resolved &&
+      lockedActionOwner?.resolution.segmentIndex === 1 &&
       !turn16Resolved &&
       partySendOutElapsed !== null &&
       partySendOutElapsed !== undefined &&
@@ -1475,7 +1488,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn11Resolved,
       turn12Resolved,
       turn13Resolved,
-      turn14Resolved,
+      resolutionOwner: lockedActionOwner,
       turn16Resolved,
       terminalResolution,
     };

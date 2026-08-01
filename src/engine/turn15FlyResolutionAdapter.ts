@@ -88,7 +88,7 @@ function stageInitialBattle(): BattleState<FactoryFullTurnDecisionRules> {
       species: 95,
       moveId: DRAGON_BREATH,
       moves: [157, 20, DRAGON_BREATH, 201],
-      pp: [0, 19, 17, 10],
+      pp: [0, 19, 18, 10],
       ability: 5,
       abilityNum: 1,
       attack: 51,
