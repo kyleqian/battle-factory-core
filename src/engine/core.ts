@@ -140,7 +140,6 @@ import {
   TURN13_DRAGONBREATH_MENU_REDRAW_DELAY,
   TURN14_DRAGONBREATH_MENU_REDRAW_DELAY,
   TURN16_FIRE_PUNCH_MENU_REDRAW_DELAY,
-  turn5RockSlideKoDismissEligible,
   opponentFaintDismissEligible,
   turn15KoDismissEligible,
   turn17KoDismissEligible,
@@ -891,24 +890,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     // `elapsed` state (battleScene.ts module doc), not a phase transition.
     if (battleScene.sendOutPressElapsed === null && newKeys.has("A") && sendOutPressEligible(SCENE_TICK0 + battleScene.elapsed)) {
       battleScene = { ...battleScene, sendOutPressElapsed: battleScene.elapsed };
-    }
-    // S7 slice K (docs/battle-turn-notes.md §24): this engine's FIRST
-    // input-gated BATTLE TEXT (as opposed to a menu re-open) - turn 5's own
-    // "Foe GROVYLE fainted!" message holds indefinitely (see `turn5KoDismiss
-    // Elapsed`'s own doc) until the player presses A while the fainted
-    // text's own wait-cursor is showing. Uses the same `elapsed+1` ("last
-    // frame of the press") convention as `confirmFightMove`/`openFightSubmenu`
-    // below (not `sendOutPressElapsed`'s own bare `elapsed`) since this is a
-    // real button-press anchor in the same family as those, oracle-confirmed
-    // against the committed groundtruth trace's own A-press (frames
-    // 6560-6561).
-    if (
-      battleScene.turn4Resolved &&
-      battleScene.turn5KoDismissElapsed === null &&
-      newKeys.has("A") &&
-      turn5RockSlideKoDismissEligible(SCENE_TICK0 + battleScene.elapsed + 1)
-    ) {
-      battleScene = { ...battleScene, turn5KoDismissElapsed: battleScene.elapsed + 1 };
     }
     // The staged damage/faint receipt owns this opponent KO-text dismiss.
     // Eligibility is the message controller's settled-cursor boundary, so

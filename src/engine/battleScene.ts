@@ -2461,24 +2461,6 @@ export interface BattleSceneState {
   /** S7 slice J (docs/battle-turn-notes.md §13/§23): `true` once turn 4's whole ROCK_SLIDE resolution has redrawn the settled action menu (`TURN4_ROCKSLIDE_MENU_REDRAW_DELAY` past turn 4's own real confirm) AND a fresh A-press has reopened FIGHT for turn 5 - same "created directly" idiom as `turn1Resolved`/`turn2Resolved`/`turn3Resolved`. Turn 5's reopen persists the cursor at slot 0 (ROCK_SLIDE, unchanged since turn 3) - no nav needed, §13's own ledger. Distinguishes turn 5's own ENDEAVOR resolution (Grovyle's fatal-to-1 hit on Onix) from turn 4's DOUBLE_TEAM+ROCK_SLIDE one (both confirm at cursor 0). */
   turn4Resolved: boolean;
   /**
-   * S7 slice K (docs/battle-turn-notes.md §24, docs/faint-switch-notes.md
-   * §3b/§7a): `elapsed` value of the KO-text dismiss A-press once registered
-   * (`TICK0 + turn5KoDismissElapsed` is the actual trace tick), `null`
-   * before - same "created directly, same tick already reflects it" idiom as
-   * `sendOutPressElapsed`. This is this engine's FIRST input-gated BATTLE
-   * TEXT (as opposed to a menu re-open): once Onix's ROCK_SLIDE faints
-   * Grovyle, "Foe GROVYLE fainted!" prints automatically (no button needed -
-   * same auto-advance every other move-use text in this dossier already
-   * has), then HOLDS INDEFINITELY (idle-cursor bounce only, `cursorState`
-   * re-anchored - see `TURN5_FAINTED_CURSOR_START_DELAY`) until the player
-   * presses A - a real, oracle-proven difference from every other text
-   * window (`docs/battle-turn-notes.md` §13's own control-run finding: 2996
-   * idle ticks with zero further state change). `tick()` must never
-   * auto-advance past this point on its own; only the `A` edge (gated by
-   * `turn5RockSlideKoDismissEligible`) sets this field.
-   */
-  turn5KoDismissElapsed: number | null;
-  /**
    * S7 slice N (docs/turn6-notes.md, docs/battle-turn-notes.md §19-24's own
    * "parameterize, don't rebuild" pattern): `true` once turn 5's whole
    * faint/switch-in/Sitrus-heal sequence has settled the turn-6 action menu
@@ -2615,7 +2597,6 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn2Resolved: false,
   turn3Resolved: false,
   turn4Resolved: false,
-  turn5KoDismissElapsed: null,
   turn5Resolved: false,
   turn6Resolved: false,
   turn7Resolved: false,
@@ -2646,7 +2627,6 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn2Resolved: state.turn2Resolved,
     turn3Resolved: state.turn3Resolved,
     turn4Resolved: state.turn4Resolved,
-    turn5KoDismissElapsed: state.turn5KoDismissElapsed,
     turn5Resolved: state.turn5Resolved,
     turn6Resolved: state.turn6Resolved,
     turn7Resolved: state.turn7Resolved,
@@ -10100,10 +10080,10 @@ function turn5FaintedCursorYOffset(t: number, start: number): number {
  * Eligible` already established for the S6 intro's analogous press) - the
  * player must press A to advance past this point; idle ticks alone never
  * do (docs/battle-turn-notes.md §13's own control-run finding: 2996 idle
- * ticks, zero further state change). `core.ts`'s `tick()` uses this to gate
- * `turn5KoDismissElapsed` - see that field's own doc for why a naive
- * fixed-delay auto-advance (every OTHER text window in this dossier's own
- * shape) would be wrong here.
+ * ticks, zero further state change). The immutable staged faint/switch/item
+ * lifecycle owns the content and continuation facts. This exported boundary
+ * remains a presentation evidence pin only; no battle-state mirror consumes
+ * the dismiss edge.
  */
 export function turn5RockSlideKoDismissEligible(t: number): boolean {
   return t >= TURN5_ROCKSLIDE_PRESS_TICK + TURN5_FAINTED_CURSOR_START_DELAY;
@@ -14104,7 +14084,7 @@ function drawDragonBreathKoWindow(
  * flagging). The live wait-cursor ALONE is what produces the dossier's own
  * cited 4 distinct cycling shas. The KO-gated hold itself needs NO special-case press-driven
  * freeze: `opponentFaintDismissElapsed` (core.ts) exists for state-machine
- * correctness only, mirroring `turn5KoDismissElapsed`'s own precedent that
+ * correctness only; the earlier turn-5 compatibility window established that
  * the render path stays a pure function of `t` - the "locks... holds
  * through 16824" shape docs/turn13-notes.md §4 cites falls out naturally
  * from the live cursor's own 9-tick phase boundaries (16819-16827 all share
@@ -14141,9 +14121,8 @@ export function opponentFaintDismissEligible(t: number): boolean {
  * S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6/§7): `koDismissTick` (the
  * real `TICK0 + opponentFaintDismissElapsed` trace tick, `null` before the press
  * registers) - once set, this is the FIRST place this dossier's own render
- * path actually consults a KO-dismiss elapsed field (every earlier "the
- * render path does NOT consult this field" precedent, `turn5KoDismissElapsed`'s
- * own module doc included, held only because those windows' committed
+ * path actually consults a KO-dismiss elapsed field (the earlier turn-5
+ * window never consumed its former mirror because its committed
  * traces always dismissed immediately upon eligibility; THIS turn's own
  * script deliberately idles ~819 ticks past eligibility before pressing -
  * `battle1-turn13-dense-a.json`'s own segment 105, a 1400-frame idle - so

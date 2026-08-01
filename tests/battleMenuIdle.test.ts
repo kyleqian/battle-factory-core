@@ -86,7 +86,7 @@ describe("battleMenu: idle window render matches its own committed pixel-harvest
   /** Renders `t` exactly ONCE (unlike `pixelAtSentOut`, which re-renders per call - too slow for a full-rect scan) and checks every pixel of `asset`'s rect against it. */
   function assertRectMatches(t: number, asset: { x: number; y: number; width: number; height: number; pixels: number[] }) {
     const fb = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false });
+    renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false });
     const { x, y, width, height, pixels } = asset;
     for (let py = 0; py < height; py += 1) {
       for (let px = 0; px < width; px += 1) {
