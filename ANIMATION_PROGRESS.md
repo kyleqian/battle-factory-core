@@ -1,5 +1,39 @@
 # Animation coverage
 
+## Front `ANIM_BOUNCE_ROTATE_TO_SIDES` Factory family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2x is exact for the complete normal selector census:
+all **5 mappings / 5 Factory-reachable species / 0 outside-Factory mappings** —
+MAROWAK, MAGIKARP, SEEDOT, MEDITITE, ILLUMISE. MAROWAK is the representative
+and ILLUMISE the terminal sibling. `ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW`
+and every other selector remain unaccepted; accepted Small and Slow behavior
+is regression-pinned. Move coverage stays **107 exact / 0 partial / 0 staged /
+169 unsupported** and `ANIMATION_COVERAGE.json` remains byte-identical at
+SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:911-939,1031-1077,
+1915-2001,3679-3699` proves task-zeroed data6=0, `AddNewAnim` defaults, normal
+rotation=4096/table 0, all seven normal-speed legs, both normal-front no-op
+`TryFlipX` calls, and the distinct Small/Slow/SmallSlow initializers. All **87
+active callbacks** (ticks 0..86) pin C-truncated sine/interpolation, u16 affine
+rotation, tick-0 affine start, and every leg boundary. Tick 87 consumes the
+sentinel, writes identity/x2=y2=0, calls `ResetSpriteAfterAnim`, installs
+`WaitAnimEnd`, and remains stable at tick 88. Fresh complete legal Scene-ON
+parties settle both selected species at x2=0/y2=0/animNum=1/
+`SpriteCallbackDummy`; paired raw receipts are byte-identical with no EOF
+newline: MAROWAK SHA-256
+`da3153df7028f1d0849cbd161241f034ddfc31e5ca86ee5594791b5df42f6711`,
+ILLUMISE `01939c8d337ecac2ac184e8df5a4975b176178f8cb1a3748485de81690dd553c`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per legal party and paired raw `cmp`; focused
+family plus both ratchets **214/214**; `npx tsc --noEmit` and diff checks green;
+exactly one complete `npm test` is green at **572 files, 5,936 passed + 1
+skipped**; production build is green (**534 modules transformed**). The next
+source-ranked generated census family is **`ANIM_V_JUMPS_H_JUMPS`** (5
+mappings / 5 Factory / 0 outside): BULBASAUR, VENONAT, PSYDUCK, COMBUSKEN,
+DUSTOX.
+
 ## Front `ANIM_SWING_CONVEX` Factory family accepted (2026-08-01)
 
 **Verdict / counts:** rung 2w is exact for the normal lifecycle and all **4
