@@ -72,6 +72,54 @@ once into `HandleInputChooseMove`. The other three openings cross after one
 poll. Dense pixel comparison agrees: turn 3's oracle keeps the action menu
 through frame 3852 and reveals on 3853, whereas the app reveals on 3852.
 
+## Queue-slot follow-up (2026-08-01)
+
+The initial watch intentionally exposed only the cursor and BG-owned busy
+bits. `tools/probe/dump-issue61-dma-queue.py` now reads the source
+`sDma3Requests[128]` ring directly (`0x03000010`, 16-byte
+`struct Dma3Request` entries), so a queue model can be judged against the
+actual request contents rather than a cursor-value fit. Reproduce with:
+
+```sh
+probe_dir=$(mktemp -d)
+python3 tools/run-mgba-probe.py "$probe_dir/turn3-queue.json" -- \
+  tools/probe/dump-issue61-dma-queue.py \
+  tools/probe/specs/issue61-fight-reveal-queue-watch.json \
+  "$probe_dir/turn3-queue.json"
+python3 tools/run-mgba-probe.py "$probe_dir/turn4-queue.json" -- \
+  tools/probe/dump-issue61-dma-queue.py \
+  tools/probe/specs/issue61-turn4-fight-reveal-queue-watch.json \
+  "$probe_dir/turn4-queue.json"
+```
+
+All four source openings enqueue the same `InitMoveSelectionsVarsAndStrings`
+copy batches: **9**, then **11**, then **6** requests, with the same ordered
+sizes and destinations (`4096`-byte window tiles, `512`-byte window tiles,
+and the final `256/4096/512` cursor/PP/type batch). Each batch is below
+`ProcessDma3Requests`'s 40-KiB cap. The observed cursor progress is:
+
+| Opening | queue cursor after the 9 / 11 / 6 batches | first callback result |
+| --- | --- | --- |
+| initial | `107 -> 116 -> 127 -> 5` | queue already drained; ready |
+| turn 2 | `106 -> 115 -> 126 -> 4` | queue already drained; ready |
+| turn 3 | `76 -> 85 -> 96 -> 102` | first poll precedes final VBlank drain; busy |
+| turn 4 | `44 -> 53 -> 64 -> 70` | queue already drained; ready |
+
+At turn 3 snapshot 3851, the six final requests have drained
+(`requests=[]`, cursor `102`), but `HandleChooseMoveAfterDma3` is still
+installed and the busy bits are stale. Therefore its first poll ran before
+that VBlank drain; the following frame clears the bits and crosses. This
+is an execution-phase ordering difference between the controller callback
+and VBlank, not a different move-window payload, a cursor slot, or a
+different number/size of BG copies.
+
+The current native command state has neither a source scheduler/VBlank-phase
+owner nor an input to recover that phase. A queue-byte/count threshold would
+be an invented fit: it would treat identical `9/11/6` batches differently
+without a source-owned causal signal. The next legitimate implementation
+step is to derive and expose that generic controller-versus-VBlank ordering
+event; until then, #61 must remain a one-frame bounded residual.
+
 ## Bounded verdict
 
 Changing all duplicated Scene-OFF branches from `t < revealTick` to

@@ -13,6 +13,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 823 — [bounded MAIN worker, 2026-08-01] #61 DMA queue evidence checkpoint
+
+- **State:** no production behavior change. The full source queue proves the
+  required two-poll shape cannot honestly be derived from the current
+  high-level state; final green verification is running.
+- **Did:** added a narrow mGBA queue-slot probe and captured all four OFF
+  openings. Each emits the same source `9/11/6` BG-copy batches; turn 3 alone
+  checks before the final VBlank drain. The missing fact is generic
+  controller/VBlank ordering, not a turn, tick, move cursor, or queue-size
+  distinction. Recorded the reproducible evidence in the #61 dossier.
+- **Next:** stop this implementation slice at the green evidence checkpoint.
+  A future owner must first derive a source-backed controller/VBlank-phase
+  event before wiring one DMA-ready reveal transition to render and input.
+- **Notes:** no mechanics/RNG/AI/outcome, animation, trace/capture list,
+  ratchet/barrier, recording import, or prohibited selector changed.
+
 ## 822 — [bounded MAIN worker, 2026-08-01] rank-2 turn-13 predecessor handoff retired
 
 - **State:** implementation `53472f3d` + `79885140`; the typed adapter
@@ -53,36 +69,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   redraw/input readiness), then retire `turn13Resolved`. Side lane: the
   rung-1 five-table extraction.
 - **Notes:** session deadline 15:32; supervisor session, hybrid profile.
-
-## 820 — [solo session, 2026-08-01] papercut burn-down: eight dev-loop fixes landed (run + harness)
-
-- **State:** tooling-only session, no engine/runtime behavior changed. Full
-  `npm test` is green (**572 files, 5,736 passed + 1 skipped**, +7 new
-  tooling tests) and production build is green.
-- **Did:** (1) missing-`appRoute` compares now print a pointed notice and
-  `tests/compareTraceAppRoute.test.ts` exact-set-pins the 66 legacy traces
-  (shrink-only) with valid-value checking; (2) default compare output is a
-  fresh `tools/compare/out/run-*` dir per invocation with an `out/latest`
-  symlink to the newest run (parallel compares can no longer clobber each
-  other) plus pruning beyond 12; (3) new `npm run inspect-frame` —
-  `tools/compare/inspect-frame.ts` prints diff count/bbox, 8-connected
-  per-cluster bboxes (`clusterPixelIndices` in `diffBounds.ts`), RGB
-  samples, and writes diff/crop PNGs; (4) 13 portable comparators now print
-  per-frame diff bboxes capped at 32 lines (3 others already did); (5) the
-  switchin-entryhooks and magic-coat probes dump the full labeled
-  `statStages[]` (old `attackStages` read index 0 = HP; magic-coat's 0x3A
-  was the last nickname byte, not a stage at all); (6) `run-subagent.sh`
-  postflight names cap/deadline (124) and signal (>=128) exits instead of
-  mislabeling them as auth failures; (7) `run-subagent.sh --base REF` pins
-  a side/animation worktree to a named green commit; (8) `bin/oracle
-  run|lab --quiet` prints only the manifest path, and the run's client
-  gained the harness's `preCheckpointCaptures` file extraction. Harness
-  side: `bin/oracle` gained the same `--quiet`, and `_template`'s launcher
-  + compare runner carry the same three fixes.
-- **Next:** unchanged from entry 819 — publish the typed turn-13
-  completed-resolution/next-command handoff, then retire `turn13Resolved`.
-- **Notes:** PAPERCUTS.md pruned by 8 fixed entries per its delete-on-fix
-  policy. Verification: `growthPortable` reran **63/63 exact** post-codemod;
-  `anchor.json` compare passed 1/1 through a fresh `run-*` dir with the
-  `latest` symlink migrated from the legacy directory; the launcher's
-  `--base` guard and help text exercised directly.

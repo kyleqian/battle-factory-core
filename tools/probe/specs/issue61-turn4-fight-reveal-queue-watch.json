@@ -1,0 +1,5 @@
+{
+  "trace": "../../compare/traces/turn4-doubleteam-off.json",
+  "oracleProfile": "battle-scene-off",
+  "queueTicks": [4894, 4895, 4896, 4897]
+}

@@ -467,16 +467,23 @@ frame 3852 and reveals on 3853, while the app reveals at 3852. Every other
 turn-3 capture is exact, and all committed turn-1/2/4 OFF insurance traces
 remain exact.
 
+**Queue-slot follow-up (2026-08-01):** a fresh full-ring probe, documented
+in the same dossier, proves all four openings enqueue the identical source
+`9/11/6` request batches and byte sizes. Turn 3 alone polls before the final
+VBlank drain; at its next snapshot the queue is empty but the callback/busy
+bits have not yet advanced. The missing causal fact is generic
+controller-versus-VBlank scheduling phase, not window content, request count,
+move cursor, or a delay. A queue-size threshold would be a fitted exception.
+
 **Rejected fix:** globally changing `t < revealTick` to `t <= revealTick`, or
 increasing `FIGHT_SUBMENU_OPEN_DELAY`, fixes turn 3 but makes the other exact
 openings one frame late. Do not add a turn-3/tick/cursor exception.
 
-**Next:** the generic command-presentation owner must expose a source-derived
-DMA-ready reveal event (or a faithful bounded BG-copy queue model); both
-legacy Scene-OFF renderers and their input gate must consume that one semantic
-transition. Acceptance is turn 3 **255/255**, every committed turn-1/2/4 OFF
-trace unchanged, synthetic initial/reopen boundary tests, and no new
-battle/turn/absolute-tick routing.
+**Next:** first derive a source-backed generic controller/VBlank-ordering
+event. Only then may the command-presentation owner expose DMA-ready reveal
+to both legacy Scene-OFF renderers and the input gate. Acceptance remains turn
+3 **255/255**, every committed turn-1/2/4 OFF trace unchanged, synthetic
+initial/reopen boundaries, and no battle/turn/absolute-tick routing.
 
 ## #62 — Retired turn-2-shaped reproducers remain pixel-red on the generated OFF route after #60's crash fix
 

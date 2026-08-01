@@ -1,0 +1,9 @@
+{
+  "trace": "../../compare/traces/turn3-endeavor-off.json",
+  "oracleProfile": "battle-scene-off",
+  "queueTicks": [
+    1888, 1889, 1890, 1891,
+    2902, 2903, 2904, 2905,
+    3848, 3849, 3850, 3851, 3852
+  ]
+}

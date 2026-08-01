@@ -1,3 +1,16 @@
+## 820 — [solo session, 2026-08-01] papercut burn-down: eight dev-loop fixes landed (run + harness)
+
+- **State:** tooling-only session, no engine/runtime behavior changed. Full
+  `npm test` was green (**572 files, 5,736 passed + 1 skipped**, +7 new
+  tooling tests) and production build was green.
+- **Did:** improved missing-route compare diagnostics, isolated/pruned compare
+  output directories, added frame inspection and comparator bboxes, corrected
+  two probe field dumps, clarified launcher exits, added `--base`, and added
+  quiet oracle output/pre-checkpoint extraction in the run plus harness.
+- **Next:** publish the typed turn-13 completed-resolution/next-command
+  handoff, then retire `turn13Resolved`.
+- **Notes:** `growthPortable` reran **63/63 exact** and anchor remained exact.
+
 ## 819 — [bounded worker, 2026-08-01] rank-2 predecessor audit checkpoint
 
 - **State:** evidence checkpoint `14e4fe59`; no production change. Tier-1
