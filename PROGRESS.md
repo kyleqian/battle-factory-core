@@ -13,6 +13,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 811 — [bounded worker, 2026-08-01] generic MOVEEND sprite-visibility round seam landed
+
+- **State:** implementation commit `8ee8cbe7`; focused resolution/portability/
+  locked-move/orchestrator suites are green (**65/65**), full `npm test` is
+  green (**567 files, 5712 passed + 1 skipped**), and production build is
+  green.
+- **Did:** projected the existing typed `set-battler-sprite-visibility`
+  receipt into a generic one-callback `sprite-visibility` resolution command,
+  persistent render-view state, and `battlePresentationBoundaries`. A staged
+  real full-turn player FLY hides through the intervening opponent action and
+  restores from its locked continuation in the seven-battle round seam;
+  opponent FLY is pinned through the inverse kernel path. Ordinary visible
+  pass-through receipts leave the legacy nine-command adapter unchanged.
+- **Next:** rank 7 still needs a generic two-turn action grouping plus exact
+  Turn-14/15 legacy renderer handoff and `turn15PartySelect` mirror retirement;
+  this slice deliberately did not claim those pixel windows.
+- **Notes:** no rule/RNG/damage/order/round/Scene-ON changes, canonical branch,
+  recording import, unsupported barrier, or executable-frontier ratchet move.
+- **PAPERCUT:** none.
+
 ## 810 — [bounded worker, 2026-08-01] ISSUES #56 item 1 staged ready-tail verdict: duration is non-universal
 
 - **State:** evidence commit `e497c7d6`; production `src/` is intentionally
@@ -58,29 +78,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   subregion; no behavior change is honest. No ratchet pin moved and no
   unsupported branch was added.
 - **PAPERCUT:** none.
-
-## 808 — [bounded worker, 2026-07-31 ~night] ISSUES #61 DMA reveal boundary characterized; no unsafe global fix landed
-
-- **State:** evidence commit `bc988ef9`; production code/tests unchanged,
-  focused battle-menu/fight-submenu/command-presentation/battle-scene/ratchet
-  suites green (**442/442**) and `npm run build` green. The worker process
-  stalled after completing its turn and was terminated by the supervisor;
-  committed evidence and the main tree remained clean.
-- **Did:** committed two reproducible Battle Scene OFF RAM-watch specs and
-  `docs/issue61-fight-submenu-reveal-boundary.md`. Source + RAM prove the
-  reveal is the generic `HandleChooseMoveAfterDma3`/BG-copy-ready transition:
-  initial, turn-2, and turn-4 openings need one busy poll, while turn 3 needs
-  two. A global `<`/`<=` or delay change would repair frame 3852 but regress
-  already-exact windows, so no turn/tick exception or speculative constant
-  was added.
-- **Next:** implement one command-presentation-owned DMA-ready reveal event
-  (or faithful bounded BG-copy queue model), route legacy Scene-OFF renderers
-  and input gating through it, then require turn 3 **255/255** with turns
-  1/2/4 unchanged. If not taken immediately, continue #56 item 2; #62 stays
-  separate retired-trace pixel debt.
-- **Notes:** insurance remained exact for every committed turn-1/2/4 OFF
-  trace; turn 3 remains the same single mismatch. No ratchet pin moved and no
-  unsupported branch was added. No `animation-main` fold existed at orient;
-  new animation commits arrived later and remain intentionally unfolded.
-- **PAPERCUT:** Codex `exec` waited on already-closed stdin after the final
-  tool event; ~10 minutes lost before the supervisor terminated the child.

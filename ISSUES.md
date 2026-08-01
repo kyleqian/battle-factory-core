@@ -374,6 +374,15 @@ ROADMAP S10 §3 requires one already-exact window to be re-driven from semantic
 events as a proof of the seam; that conversion, window by window, is the
 retirement path. AGENTS.md already forbids adding new turn-keyed branches.
 
+**Rank-7 visibility sub-slice landed (2026-08-01, `8ee8cbe7`):** the generic
+resolution command union, relative-duration renderer, and persistent round
+battler boundaries now consume MOVEEND's existing typed sprite hide/restore
+receipts. Real staged full-turn FLY proves player hide through an intervening
+opponent action and locked restoration in the seven-battle seam; opponent FLY
+is also kernel-pinned. This narrows rank 7 only: the typed two-turn action
+grouping, exact Turn-14/15 legacy renderer handoff, and `turn15PartySelect`
+mirror remain open. No canonical turn/tick branch was removed or added.
+
 ## #61 — Scene-OFF FIGHT reveal needs a source-owned DMA-ready event, not a fixed delay
 
 **Bounded evidence (2026-07-31, `bc988ef9`):** the reproducible OFF-profile

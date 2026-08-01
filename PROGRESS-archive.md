@@ -1,3 +1,9 @@
+## 808 — [bounded worker, 2026-07-31 ~night] ISSUES #61 DMA reveal boundary characterized
+
+- Archived from the live ledger. Evidence commit `bc988ef9` proved the
+  generic DMA/BG-copy-ready boundary and rejected a regressive fixed delay;
+  #61 remains open. Full live-entry detail remains in git history.
+
 ## 807 — [bounded worker, 2026-07-31 ~night] ISSUES #60 typed Scene-OFF stat adapter crash fixed
 
 - Archived from the live ledger. `f1bc60a2` widened the typed Scene-OFF stat
