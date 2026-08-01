@@ -48,6 +48,7 @@ export type SpeciesFrontAnimFamily =
   | "CIRCULAR_STRETCH_TWICE"
   | "GROW_VIBRATE"
   | "FLASH_YELLOW"
+  | "FLICKER_INCREASING"
   | "H_JUMPS"
   | "H_SLIDE_SLOW"
   | "H_SLIDE_WOBBLE"
@@ -57,6 +58,7 @@ export type SpeciesFrontAnimFamily =
   | "H_JUMPS_V_STRETCH_TWICE"
   | "H_SHAKE"
   | "RAPID_H_HOPS"
+  | "ROTATE_UP_TO_SIDES"
   | "SHRINK_GROW"
   | "SWING_CONVEX"
   | "SWING_CONCAVE"
@@ -79,6 +81,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "CIRCULAR_STRETCH_TWICE",
   "GROW_VIBRATE",
   "FLASH_YELLOW",
+  "FLICKER_INCREASING",
   "H_JUMPS",
   "H_SLIDE_SLOW",
   "H_SLIDE_WOBBLE",
@@ -88,6 +91,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "H_JUMPS_V_STRETCH_TWICE",
   "H_SHAKE",
   "RAPID_H_HOPS",
+  "ROTATE_UP_TO_SIDES",
   "SHRINK_GROW",
   "SWING_CONVEX",
   "SWING_CONCAVE",
@@ -313,6 +317,46 @@ export const H_JUMPS_V_STRETCH_TWICE_FACTORY_FRONT_SPECIES: readonly string[] = 
 export const H_JUMPS_V_STRETCH_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
   Object.freeze(
     H_JUMPS_V_STRETCH_TWICE_FRONT_SPECIES.filter(
+      (species) => !factoryFrontSpecies.has(species),
+    ),
+  );
+
+/** The sole source selector mapping for `ANIM_ROTATE_UP_TO_SIDES`. */
+export const ROTATE_UP_TO_SIDES_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_ROTATE_UP_TO_SIDES")
+    .map(([species]) => species),
+);
+
+/** The complete Factory-reachable rotate-up-to-sides family (HARIYAMA). */
+export const ROTATE_UP_TO_SIDES_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  ROTATE_UP_TO_SIDES_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no rotate-up-to-sides mappings outside the Factory pool. */
+export const ROTATE_UP_TO_SIDES_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
+  Object.freeze(
+    ROTATE_UP_TO_SIDES_FRONT_SPECIES.filter(
+      (species) => !factoryFrontSpecies.has(species),
+    ),
+  );
+
+/** All source selector mappings for `ANIM_FLICKER_INCREASING`. */
+export const FLICKER_INCREASING_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_FLICKER_INCREASING")
+    .map(([species]) => species),
+);
+
+/** Every increasing-flicker mapping is Factory-reachable. */
+export const FLICKER_INCREASING_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  FLICKER_INCREASING_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no increasing-flicker mappings outside the Factory pool. */
+export const FLICKER_INCREASING_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
+  Object.freeze(
+    FLICKER_INCREASING_FRONT_SPECIES.filter(
       (species) => !factoryFrontSpecies.has(species),
     ),
   );
@@ -1160,6 +1204,38 @@ export interface HorizontalJumpsVerticalStretchFrame extends SpeciesIdleOffset {
   readonly affineMode: "double" | "normal";
 }
 
+export interface RotateUpToSidesFrame extends SpeciesIdleOffset {
+  readonly data0: 0;
+  readonly data2: 1;
+  readonly data7: number;
+  readonly sineIndex: number | null;
+  readonly ySineIndex: number | null;
+  readonly rotationSigned: number | null;
+  readonly rotationU16: number;
+  readonly affineRotationU16: number;
+  readonly xScale: 256;
+  readonly yScale: 256;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXCalls: 2;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "Anim_RotateUpToSides" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+export interface FlickerIncreasingFrame extends SpeciesIdleOffset {
+  readonly data0: 0;
+  readonly data2Before: number;
+  readonly data7Before: number;
+  readonly data2: number;
+  readonly data7: number;
+  readonly resetData7AtStart: boolean;
+  readonly equalityBranch: boolean;
+  readonly invisible: boolean;
+  readonly terminalGuard: boolean;
+  readonly callback: "Anim_FlickerIncreasing" | "WaitAnimEnd";
+}
+
 const SWING_CONCAVE_DURATION = 100;
 
 /**
@@ -1601,6 +1677,134 @@ export function horizontalJumpsVerticalStretchTwiceFrameAtTick(
     ticksSinceStart,
     { animData: 1, animRuns: 2 },
   );
+}
+
+/**
+ * Source-order port of `Anim_RotateUpToSides`
+ * (`pokemon_animation.c:911-939,1037-1059,2918-2951,5540-5544`). The first
+ * callback starts affine mode exactly once. Active callbacks consume data7
+ * 0..248 in steps of eight; the next callback observes the strict `> 254`
+ * guard at data7=256, restores identity offsets/affine state, resets the
+ * sprite, and installs stable `WaitAnimEnd`. Both source-order `TryFlipX`
+ * calls are preserved and are no-ops for the ordinary opponent-front sprite.
+ */
+export function rotateUpToSidesFrameAtTick(
+  ticksSinceStart: number,
+): RotateUpToSidesFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  const terminalTick = 32;
+  if (ticksSinceStart >= terminalTick) {
+    return {
+      x2: 0,
+      y2: 0,
+      data0: 0,
+      data2: 1,
+      data7: 256,
+      sineIndex: null,
+      ySineIndex: null,
+      rotationSigned: null,
+      rotationU16: 0,
+      affineRotationU16: 0,
+      xScale: 256,
+      yScale: 256,
+      startedAffine: false,
+      normalFrontDontFlip: true,
+      tryFlipXCalls: 2,
+      resetSpriteAfterAnim: true,
+      callback: "WaitAnimEnd",
+      affineMode: "normal",
+    };
+  }
+
+  const data7 = ticksSinceStart * 8;
+  const sineIndex = data7;
+  const ySineIndex = data7 % 128;
+  const rotationSigned = gbaSin(sineIndex, 32);
+  // `u16 rotation = Sin(...)`, followed by `rotation << 8` and conversion
+  // back to the u16 HandleSetAffineData parameter.
+  const rotationU16 = rotationSigned & 0xffff;
+  const affineRotationU16 = (rotationU16 << 8) & 0xffff;
+  return {
+    x2: -gbaSin(sineIndex, 16) + 0,
+    y2: -gbaSin(ySineIndex, 16) + 0,
+    data0: 0,
+    data2: 1,
+    data7: data7 + 8,
+    sineIndex,
+    ySineIndex,
+    rotationSigned,
+    rotationU16,
+    affineRotationU16,
+    xScale: 256,
+    yScale: 256,
+    startedAffine: ticksSinceStart === 0,
+    normalFrontDontFlip: true,
+    tryFlipXCalls: 2,
+    resetSpriteAfterAnim: false,
+    callback: "Anim_RotateUpToSides",
+    affineMode: "double",
+  };
+}
+
+/**
+ * Source-order port of `Anim_FlickerIncreasing`
+ * (`pokemon_animation.c:911-939,2949-2974,5540-5544`). The front-animation
+ * task supplies zeroed data2/data7. Tick 0 first resets data7, then takes the
+ * equality branch and advances data2 to one while visible. Each phase n=1..10
+ * performs n invisible callbacks followed by its visible equality callback;
+ * the phase-10 equality callback advances data2 to 11, then the strict
+ * `data2 > 10` guard installs stable `WaitAnimEnd` and forces visibility.
+ * This callback neither allocates `sAnims` state nor touches sprite offsets.
+ */
+export function flickerIncreasingFrameAtTick(
+  ticksSinceStart: number,
+): FlickerIncreasingFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let data7 = 0;
+  let invisible = false;
+  let terminal: FlickerIncreasingFrame | null = null;
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (terminal !== null) return terminal;
+
+    const data2Before = data2;
+    const data7Before = data7;
+    const resetData7AtStart = data2 === 0;
+    if (resetData7AtStart) data7 = 0;
+
+    const equalityBranch = data2 === data7;
+    if (equalityBranch) {
+      data7 = 0;
+      data2 += 1;
+      invisible = false;
+    } else {
+      data7 += 1;
+      invisible = true;
+    }
+
+    const terminalGuard = data2 > 10;
+    if (terminalGuard) invisible = false;
+    const frame: FlickerIncreasingFrame = {
+      x2: 0,
+      y2: 0,
+      data0: 0,
+      data2Before,
+      data7Before,
+      data2,
+      data7,
+      resetData7AtStart,
+      equalityBranch,
+      invisible,
+      terminalGuard,
+      callback: terminalGuard ? "WaitAnimEnd" : "Anim_FlickerIncreasing",
+    };
+    if (terminalGuard) terminal = frame;
+    if (tick === ticksSinceStart) return frame;
+  }
+
+  throw new Error("unreachable FlickerIncreasing reducer state");
 }
 
 export type BounceRotateToSidesTableEntry = readonly [
@@ -2908,6 +3112,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
+    case "FLICKER_INCREASING": {
+      const terminal = flickerIncreasingFrameAtTick(65);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_FlickerIncreasing did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
     case "H_JUMPS": {
       const terminal = horizontalJumpsFrameAtTick(43);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
@@ -2975,6 +3186,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
         last = offset;
         tick += 1;
       }
+    }
+    case "ROTATE_UP_TO_SIDES": {
+      const terminal = rotateUpToSidesFrameAtTick(32);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_RotateUpToSides did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
     }
     case "SWING_CONCAVE": {
       const terminal = swingConcaveFrameAtTick(101);
