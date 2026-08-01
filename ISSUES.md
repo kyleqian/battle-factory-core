@@ -172,6 +172,13 @@ lifecycle. The typed completed-turn-5/next-command handoff retired
 **[6,20,19,10]**, persisted slot 0, and settled/ready facts for turn-6
 dispatch, PP reconstruction, and the turn-7 reopen guard. The existing adapter
 continues to own switch/Sitrus content.
+The matching typed completed-turn-6/next-command handoff retired
+`turn6Resolved` (`80b2767a` + `c6f3cdd4`): it publishes canonical PP
+**[5,20,19,10]**, persisted slot 0, and settled/ready facts directly rather
+than treating either FEATHER_DANCE/ROCK_SLIDE stage as combined completion.
+It now owns turn-7 dispatch, PP reconstruction, and the turn-8 reopen guard.
+Clean-`80b2767a` app replays held all required primary, boundary, reader, and
+upstream windows byte-identical (**1,461/1,461 raw RGBA captures**).
 Rank 4 is **fully retired** (2026-07-31,
 all 5 slices): `174cc388` ROCK_SLIDE tails; `441ddf83`+`6aba6662`
 turn-7/8 FEATHER_DANCE staged+flipped; `0769ccc6` stat-fall banner

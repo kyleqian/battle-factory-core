@@ -13,6 +13,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 825 — [bounded MAIN worker, 2026-08-01] turn-6 predecessor handoff retired
+
+- **State:** proof `80b2767a`, implementation `c6f3cdd4`; source/test census
+  has no `turn6Resolved` reference.
+- **Did:** published the immutable completed-turn-6/next-command handoff with
+  canonical PP **[5,20,19,10]**, persisted slot 0, and settled/ready facts;
+  moved turn-7 dispatch, slot-0 PP reconstruction, and the turn-8 reopen
+  guard onto it without composing FEATHER_DANCE/ROCK_SLIDE stages.
+- **Next:** take only the next separately scoped #39 owner-chain slice; do not
+  batch `turn7Resolved` or another field into this completed retirement.
+- **Notes:** clean-`80b2767a` differential app replay is byte-identical across
+  the requested turn-6 primary/boundary, turn-7 reader, and turn-5 upstream
+  windows (**1,461/1,461 raw RGBA captures**). Full `npm test` and
+  `npm run build` green. No trace/capture-list, timing/presentation,
+  ratchet/barrier, recording-import, or prohibited selector change.
+
 ## 824 — [bounded MAIN worker, 2026-08-01] rank-3 turn-5 predecessor handoff retired
 
 - **State:** implementation `73cb7455` + `891a44d7` + `97de11a4`; source and
@@ -48,22 +64,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `npm run build` green. No mechanics/RNG/AI/outcome, animation,
   trace/capture-list, ratchet/barrier, recording import, or prohibited
   selector changed.
-
-## 822 — [bounded MAIN worker, 2026-08-01] rank-2 turn-13 predecessor handoff retired
-
-- **State:** implementation `53472f3d` + `79885140`; the typed adapter
-  handoff now replaces `turn13Resolved` and the source/test census is clean.
-- **Did:** published the immutable post-turn-13/next-command handoff with
-  DRAGON_BREATH **18/20**, persisted slot 2, and typed settled/ready
-  redraw-input facts. Swapped the following FIGHT reopen gate, dispatcher
-  threading/rejection, and turn-14 submenu PP reconstruction; the FLY owner
-  remains its distinct post-turn-14 **17/20** owner. Kept
-  `opponentFaintDismissElapsed` and `turn5Resolved` untouched.
-- **Next:** resume the remaining roadmap/#39 inventory from its next bounded
-  lifecycle slice; the separate turn-5 predecessor class remains open.
-- **Notes:** Tier-1 proof/consumer suites green; full `npm test` **572 files,
-  5,902 passed + 1 skipped**, and build green. OFF compares: 141/141,
-  242/242, dense-b 223/223, turn13-sandattack 190/190; dense-a remains its
-  parent-identical parked #23 result (204/256 on `41409b24` and here).
-  `turn13-menu` remains 56/57; `turn14-fly-miss` aborts on the same preexisting
-  unresolved item-restored-health placeholder in parent `41409b24`.

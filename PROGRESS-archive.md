@@ -1,3 +1,22 @@
+## 822 — [bounded MAIN worker, 2026-08-01] rank-2 turn-13 predecessor handoff retired
+
+- **State:** implementation `53472f3d` + `79885140`; the typed adapter
+  handoff now replaces `turn13Resolved` and the source/test census is clean.
+- **Did:** published the immutable post-turn-13/next-command handoff with
+  DRAGON_BREATH **18/20**, persisted slot 2, and typed settled/ready
+  redraw-input facts. Swapped the following FIGHT reopen gate, dispatcher
+  threading/rejection, and turn-14 submenu PP reconstruction; the FLY owner
+  remains its distinct post-turn-14 **17/20** owner. Kept
+  `opponentFaintDismissElapsed` and `turn5Resolved` untouched.
+- **Next:** resume the remaining roadmap/#39 inventory from its next bounded
+  lifecycle slice; the separate turn-5 predecessor class remains open.
+- **Notes:** Tier-1 proof/consumer suites green; full `npm test` **572 files,
+  5,902 passed + 1 skipped**, and build green. OFF compares: 141/141,
+  242/242, dense-b 223/223, turn13-sandattack 190/190; dense-a remains its
+  parent-identical parked #23 result (204/256 on `41409b24` and here).
+  `turn13-menu` remains 56/57; `turn14-fly-miss` aborts on the same preexisting
+  unresolved item-restored-health placeholder in parent `41409b24`.
+
 ## 820 — [solo session, 2026-08-01] papercut burn-down: eight dev-loop fixes landed (run + harness)
 
 - **State:** tooling-only session, no engine/runtime behavior changed. Full
