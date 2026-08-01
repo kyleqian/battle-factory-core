@@ -13,6 +13,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 838 — [bounded MAIN worker, 2026-08-01] turn-1 handoff proof checkpoint
+
+- **State:** immutable receipt proof is green; consumer migration has not
+  started, so `turn1Resolved` remains live until the next committed step.
+- **Did:** added `turn1ResolutionAdapter.ts` and its equivalence suite. The
+  receipt owns PP **[9,20,20,10]**, slot 0, HP **117/101**, settled/ready
+  facts, and the runtime-relative `HandleInputChooseAction` →
+  `DoBounceEffect` epoch (192/128 seeds, delta 7, amplitude 1).
+- **Next:** publish that receipt at the modeled reset (not the later FIGHT
+  reopen), migrate every turn-1 HP/PP/bounce/core consumer, then run the
+  1,162-capture clean-parent differential set.
+- **Notes:** focused proof **4/4** and `npx tsc --noEmit` are green. No
+  trace, timing, oracle, or presentation change in this checkpoint.
+
 ## 837 — [supervisor, 2026-08-01 16:40] turns 9-12 COMPLETE; #61 parked (settled record); ON oracle restarted
 
 - **State:** turn-12 verified: census empty, spot compares
