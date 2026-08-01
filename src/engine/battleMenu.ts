@@ -23,6 +23,7 @@
 
 import { rentalMoveset, type ActiveMonMoveset } from "./battleSetup.ts";
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
+import type { Turn5CompletedResolutionNextCommandHandoff } from "./turn5ResolutionAdapter.ts";
 import type { Turn13CompletedResolutionNextCommandHandoff } from "./turn13ResolutionAdapter.ts";
 
 /** `sText_GoPkmn` resolved for this save's rental pool (single line, fits `B_WIN_MSG`'s line 1 - never wraps to line 2). */
@@ -2563,7 +2564,7 @@ export function currentPPForActiveMon(
   turn2Resolved: boolean = false,
   turn3Resolved: boolean = false,
   turn4Resolved: boolean = false,
-  turn5Resolved: boolean = false,
+  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null = null,
   turn6Resolved: boolean = false,
   turn7Resolved: boolean = false,
   turn8Resolved: boolean = false,
@@ -2576,11 +2577,10 @@ export function currentPPForActiveMon(
   followingResolution: BattleResolutionPresentationState | null = null,
 ): readonly [number, number, number, number] {
   const [a, b, c, d] = moveset.maxPP;
-  // S7 slice N (docs/turn6-notes.md §4): turn 5's own ROCK_SLIDE (Onix's
-  // fatal hit on Grovyle) is a 4th slot-0 use, read directly from the
-  // dossier's own PP ledger (6/10 before turn 6's own confirm) - the same
-  // independent-decrement shape turn3Resolved/turn4Resolved already
-  // established.
+  // Turn 5's own ROCK_SLIDE is carried by its completed-resolution handoff,
+  // not reconstructed from a resolution flag. The receipt includes the
+  // earlier turn-2 DRAGON_BREATH deduction too, so later PP reconstruction
+  // starts from its full immutable tuple rather than re-counting it.
   // S7 slice O (docs/turn7-notes.md §4): turn 6's own ROCK_SLIDE (Onix vs.
   // Pidgeotto) is a 5th slot-0 use, matching turn7-notes' own "PP 5/10
   // displayed" ledger at turn 7's own reopen.
@@ -2606,32 +2606,33 @@ export function currentPPForActiveMon(
   // S7/S8 (docs/turn13-notes.md §3): turn 12's own ROCK_SLIDE (a miss, still
   // PP-decrementing) is a 10th slot-0 use, matching turn13-notes' own
   // "ROCK_SLIDE 0/10 (exhausted, confirmed)" ledger at turn 13's own reopen.
-  const slot0Uses =
+  const slot0UsesBeforeTurn5 =
     (turn1Resolved ? 1 : 0) +
     (turn3Resolved ? 1 : 0) +
-    (turn4Resolved ? 1 : 0) +
-    (turn5Resolved ? 1 : 0) +
+    (turn4Resolved ? 1 : 0);
+  const slot0UsesAfterTurn5 =
     (turn6Resolved ? 1 : 0) +
     (turn7Resolved ? 1 : 0) +
     (turn9Resolved ? 1 : 0) +
     (turn10Resolved ? 1 : 0) +
     (turn11Resolved ? 1 : 0) +
     (turn12Resolved ? 1 : 0);
-  // The normal turn-2 decrement remains local. Turn 13's separate
-  // post-DRAGON_BREATH receipt is carried by its completed-resolution
-  // handoff, so the following submenu never needs to infer it from a later
-  // retained FLY owner.
-  const slot2Uses = turn2Resolved ? 1 : 0;
+  const ppBeforeLaterTurns = turn5NextCommandHandoff?.playerPp ?? [
+    a - slot0UsesBeforeTurn5,
+    b,
+    c - (turn2Resolved ? 1 : 0),
+    d,
+  ] as const;
   const resolvedPlayerPp = lockedActionResolution?.segments[0]
     ?.afterRules.rulesContext.battlers[0]!.pp;
   const followingPlayerPp = followingResolution?.segments.at(-1)
     ?.afterRules.rulesContext.battlers[0]!.pp;
   if (followingPlayerPp !== undefined) return followingPlayerPp;
   return [
-    a - slot0Uses,
-    turn8Resolved ? b - 1 : b,
-    resolvedPlayerPp?.[2] ?? turn13NextCommandHandoff?.dragonBreathPp.current ?? c - slot2Uses,
-    d,
+    ppBeforeLaterTurns[0] - slot0UsesAfterTurn5,
+    turn8Resolved ? ppBeforeLaterTurns[1] - 1 : ppBeforeLaterTurns[1],
+    resolvedPlayerPp?.[2] ?? turn13NextCommandHandoff?.dragonBreathPp.current ?? ppBeforeLaterTurns[2],
+    ppBeforeLaterTurns[3],
   ];
 }
 

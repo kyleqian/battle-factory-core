@@ -131,16 +131,16 @@ describe("turn5ResolutionAdapter: #39 rank-3 kernel-to-typed-owner equivalence (
       expect(handoff.persistedMoveSlot).toBe(0);
     });
 
-    it("owns exactly the post-turn-5 menu PP receipt the legacy resolved-flag formula supplied", () => {
+    it("owns exactly the post-turn-5 menu PP receipt consumed by the live submenu", () => {
       const onix = rentalMoveset("ONIX");
       const handoff = resolveTurn5CompletedResolutionNextCommandHandoff();
-      const legacyPredecessorPp = currentPPForActiveMon(
+      const receiptPp = currentPPForActiveMon(
         onix,
-        true, true, true, true, true,
+        true, true, true, true, handoff,
       );
 
-      expect(legacyPredecessorPp).toEqual([6, 20, 19, 10]);
-      expect(handoff.playerPp).toEqual(legacyPredecessorPp);
+      expect(receiptPp).toEqual([6, 20, 19, 10]);
+      expect(handoff.playerPp).toEqual(receiptPp);
       expect(handoff.playerPp).toEqual([6, 20, 19, 10]);
     });
   });

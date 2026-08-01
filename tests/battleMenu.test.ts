@@ -93,6 +93,7 @@ import {
   rockSlideTextStartTick,
   moveFightCursor,
 } from "../src/engine/battleMenu.ts";
+import { resolveTurn5CompletedResolutionNextCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
 import {
   renderBattleScene,
   TICK0,
@@ -132,7 +133,7 @@ import {
 /** Same rig as tests/battleScene.test.ts's `pixelAtSentOut` - send-out A-press already registered at trace tick 1420 (sendOutPressElapsed=380), the fixed script every committed trace in this window shares. */
 function pixelAtSentOut(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -184,16 +185,16 @@ describe("battleMenu: rendered pixels (oracle-pinned, tools/compare/traces/menu-
   it("renders byte-identical frames across the silent space tick (1565 -> 1566)", () => {
     const fb1 = new Uint8Array(240 * 160 * 4);
     const fb2 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb1, { elapsed: 1565 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
-    renderBattleScene(fb2, { elapsed: 1566 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
+    renderBattleScene(fb1, { elapsed: 1565 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
+    renderBattleScene(fb2, { elapsed: 1566 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
     expect(fb2).toEqual(fb1);
   });
 
   it("renders byte-identical frames once static (1571 -> 1572)", () => {
     const fb1 = new Uint8Array(240 * 160 * 4);
     const fb2 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb1, { elapsed: 1571 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
-    renderBattleScene(fb2, { elapsed: 1572 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
+    renderBattleScene(fb1, { elapsed: 1571 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
+    renderBattleScene(fb2, { elapsed: 1572 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
     expect(fb2).toEqual(fb1);
   });
 });
@@ -693,7 +694,7 @@ describe("battleMenu: S7 slice O - turn 7's own FEATHER_DANCE/ROCK_SLIDE (Onix v
 
   it("currentPPForActiveMon: ROCK_SLIDE (slot 0) reads 5/10 once turn6Resolved (used turns 1, 3, 4, 5 AND 6) - matches turn7-notes.md's own 'PP 5/10 displayed' ledger", () => {
     const moveset = { moveIds: [157, 349, 288, 201], maxPP: [10, 15, 20, 10] } as const;
-    expect(currentPPForActiveMon(moveset, true, true, true, true, true, true)).toEqual([5, 15, 19, 10]);
+    expect(currentPPForActiveMon(moveset, true, true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), true)).toEqual([5, 15, 19, 10]);
   });
 
   it("S7 slice P: TURN7_ROCKSLIDE_REOPEN_GATE_DELAY opens the turn-7-to-8 reopen gate at the settled turn-7 menu's own redraw tick (9144 = TURN7_ROCKSLIDE_PRESS_TICK+738), safely before the real reopen press (9381)", () => {
@@ -702,9 +703,9 @@ describe("battleMenu: S7 slice O - turn 7's own FEATHER_DANCE/ROCK_SLIDE (Onix v
 
   it("S7 slice P: currentPPForActiveMon reads 4/10 once turn7Resolved (used turns 1, 3, 4, 5, 6 AND 7) - matches turn8-notes.md §4's own 'ROCK_SLIDE sits frozen at 4/10' ledger; BIND (slot 1) is untouched by this ledger, still fresh", () => {
     const moveset = { moveIds: [157, 20, 288, 201], maxPP: [10, 20, 20, 10] } as const;
-    expect(currentPPForActiveMon(moveset, true, true, true, true, true, true, true)).toEqual([4, 20, 19, 10]);
+    expect(currentPPForActiveMon(moveset, true, true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), true, true)).toEqual([4, 20, 19, 10]);
     // Sanity: turn6Resolved alone (pre-turn-8) still reads 5/10, unaffected.
-    expect(currentPPForActiveMon(moveset, true, true, true, true, true, true, false)[0]).toBe(5);
+    expect(currentPPForActiveMon(moveset, true, true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), true, false)[0]).toBe(5);
   });
 
   it("S7 slice P: moveFightCursor's existing cursor^1 grid arithmetic moves RIGHT from ROCK_SLIDE (0) onto BIND (1) - the winning line's own divergence turn, no new nav code needed", () => {
@@ -714,9 +715,9 @@ describe("battleMenu: S7 slice O - turn 7's own FEATHER_DANCE/ROCK_SLIDE (Onix v
 
   it("S7 slice R: currentPPForActiveMon reads BIND 19/20 once turn8Resolved (a miss still decrements PP) - matches turn9-notes.md §4's own 'BIND(20) 19/20 (unchanged)' ledger; ROCK_SLIDE (slot 0) stays frozen at 4/10, independent of this new slot-1 decrement", () => {
     const moveset = { moveIds: [157, 20, 288, 201], maxPP: [10, 20, 20, 10] } as const;
-    expect(currentPPForActiveMon(moveset, true, true, true, true, true, true, true, true)).toEqual([4, 19, 19, 10]);
+    expect(currentPPForActiveMon(moveset, true, true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), true, true, true)).toEqual([4, 19, 19, 10]);
     // Sanity: turn7Resolved alone (pre-turn-9) still reads BIND at full 20/20.
-    expect(currentPPForActiveMon(moveset, true, true, true, true, true, true, true, false)[1]).toBe(20);
+    expect(currentPPForActiveMon(moveset, true, true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), true, true, false)[1]).toBe(20);
   });
 
   it("S7 slice R: TURN8_MENU_REDRAW_DELAY doubles as the turn-8-to-9 reopen gate delay (directly usable, same 'no synthetic anchor needed' reason TURN4_ROCKSLIDE_MENU_REDRAW_DELAY already established) - opens at turn 8's own real redraw tick (9997 = TURN8_BIND_PRESS_TICK+572)", () => {
@@ -779,30 +780,30 @@ describe("battleMenu: S7 slice O - turn 7's own FEATHER_DANCE/ROCK_SLIDE (Onix v
 
   it("S7 slice R rung (a): currentPPForActiveMon reads ROCK_SLIDE 3/10 once turn9Resolved (turn 9's own confirmed ROCK_SLIDE is a 7th slot-0 use) - matches turn10-notes.md §4's own 'ROCK_SLIDE(157) 3/10' ledger; BIND (slot 1) stays frozen at 19/20, independent of this new slot-0 decrement", () => {
     const moveset = { moveIds: [157, 20, 288, 201], maxPP: [10, 20, 20, 10] } as const;
-    expect(currentPPForActiveMon(moveset, true, true, true, true, true, true, true, true, true)).toEqual([3, 19, 19, 10]);
+    expect(currentPPForActiveMon(moveset, true, true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), true, true, true, true)).toEqual([3, 19, 19, 10]);
     // Sanity: turn8Resolved alone (pre-turn-10) still reads ROCK_SLIDE at 4/10.
-    expect(currentPPForActiveMon(moveset, true, true, true, true, true, true, true, true, false)[0]).toBe(4);
+    expect(currentPPForActiveMon(moveset, true, true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), true, true, true, false)[0]).toBe(4);
   });
 
   it("S7 slice R rung 1: currentPPForActiveMon reads ROCK_SLIDE 2/10 once turn10Resolved (turn 10's own confirmed ROCK_SLIDE is an 8th slot-0 use) - matches turn11-notes.md §4's own 'ROCK_SLIDE(157) 2/10' ledger; BIND (slot 1) stays frozen at 19/20, independent of this new slot-0 decrement", () => {
     const moveset = { moveIds: [157, 20, 288, 201], maxPP: [10, 20, 20, 10] } as const;
-    expect(currentPPForActiveMon(moveset, true, true, true, true, true, true, true, true, true, true)).toEqual([2, 19, 19, 10]);
+    expect(currentPPForActiveMon(moveset, true, true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), true, true, true, true, true)).toEqual([2, 19, 19, 10]);
     // Sanity: turn9Resolved alone (pre-turn-11) still reads ROCK_SLIDE at 3/10.
-    expect(currentPPForActiveMon(moveset, true, true, true, true, true, true, true, true, true, false)[0]).toBe(3);
+    expect(currentPPForActiveMon(moveset, true, true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), true, true, true, true, false)[0]).toBe(3);
   });
 
   it("S7/S8: currentPPForActiveMon reads ROCK_SLIDE 1/10 once turn11Resolved (turn 11's own confirmed ROCK_SLIDE is a 9th slot-0 use) - matches turn12-notes.md §4's own 'ROCK_SLIDE(157) 1/10' entering-turn-12 ledger; BIND (slot 1) stays frozen at 19/20, independent of this new slot-0 decrement", () => {
     const moveset = { moveIds: [157, 20, 288, 201], maxPP: [10, 20, 20, 10] } as const;
-    expect(currentPPForActiveMon(moveset, true, true, true, true, true, true, true, true, true, true, true)).toEqual([1, 19, 19, 10]);
+    expect(currentPPForActiveMon(moveset, true, true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), true, true, true, true, true, true)).toEqual([1, 19, 19, 10]);
     // Sanity: turn10Resolved alone (pre-turn-12) still reads ROCK_SLIDE at 2/10.
-    expect(currentPPForActiveMon(moveset, true, true, true, true, true, true, true, true, true, true, false)[0]).toBe(2);
+    expect(currentPPForActiveMon(moveset, true, true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), true, true, true, true, true, false)[0]).toBe(2);
   });
 
   it("S7/S8: currentPPForActiveMon reads ROCK_SLIDE 0/10 (exhausted) once turn12Resolved (turn 12's own confirmed ROCK_SLIDE miss is a 10th slot-0 use) - matches turn13-notes.md §3's own 'ROCK_SLIDE 0/10 (exhausted, confirmed)' entering-turn-13 ledger; BIND (slot 1, 19/20) and DRAGON_BREATH (slot 2, 19/20) stay at their own already-used PP, independent of this new slot-0 decrement", () => {
     const moveset = { moveIds: [157, 20, 225, 201], maxPP: [10, 20, 20, 10] } as const;
-    expect(currentPPForActiveMon(moveset, true, true, true, true, true, true, true, true, true, true, true, true)).toEqual([0, 19, 19, 10]);
+    expect(currentPPForActiveMon(moveset, true, true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), true, true, true, true, true, true, true)).toEqual([0, 19, 19, 10]);
     // Sanity: turn11Resolved alone (pre-turn-13) still reads ROCK_SLIDE at 1/10.
-    expect(currentPPForActiveMon(moveset, true, true, true, true, true, true, true, true, true, true, true, false)[0]).toBe(1);
+    expect(currentPPForActiveMon(moveset, true, true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), true, true, true, true, true, true, false)[0]).toBe(1);
   });
 
   it("S7/S8 (docs/turn13-notes.md §3): moveFightCursor's own 2x2-grid DOWN press moves ROCK_SLIDE (0, top-left) onto DRAGON_BREATH (2, bottom-left) - the double-decrement the dossier root-caused as a plain row move, no new nav code needed", () => {
