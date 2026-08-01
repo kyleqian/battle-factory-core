@@ -1,5 +1,40 @@
 # Animation coverage
 
+## Front `ANIM_V_JUMPS_H_JUMPS` Factory family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2y is exact for the complete generated selector
+census: all **5 mappings / 5 Factory-reachable species / 0 outside-Factory
+mappings** — BULBASAUR, VENONAT, PSYDUCK, COMBUSKEN, DUSTOX. BULBASAUR is
+the representative and DUSTOX the terminal sibling. `ANIM_V_JUMPS_BIG`,
+`ANIM_H_JUMPS_V_STRETCH_TWICE`, and every other selector remain unaccepted;
+no unsupported-branch barrier was added. Move coverage stays **107 exact / 0
+partial / 0 staged / 169 unsupported** and `ANIMATION_COVERAGE.json` remains
+byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:911-939,1217-1255,
+5540-5544` and `trig.c:514-518` prove task-zeroed data2=0, the ordinary
+opponent-front callback, signed sine arithmetic, cleanup, `WaitAnimEnd`, and
+task restoration. All **65 active callbacks** pin counters 0..768 by 12,
+including divCounter transitions at 0/132/264/384/516/648/768, case 2's
+y-only local-counter rewrite, C-truncated x segments, and divCounter 6's
+carried x2=1. Tick 65 observes counter 780 (>768), clears x2/y2, installs
+`WaitAnimEnd`, increments data2 to 792, and stays stable thereafter. Fresh
+complete legal challenge-0 Scene-ON parties (all set IDs in 110..199) settle
+both species at x2=0/y2=0/animNum=1/`SpriteCallbackDummy`; paired raw receipts
+are byte-identical with no EOF newline: BULBASAUR SHA-256
+`f91cf65e2d71626c37f7421be61fbc1c909147ceed981b01f0adf51da541f1d8`,
+DUSTOX `e076416a1cc08913fac56b5b54b1069e93707c0da353d07ccc6b7e3a002d802f`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per corrected legal party and paired raw
+`cmp`; focused family plus both ratchets **224/224**; `npx tsc --noEmit` and
+diff checks green; exactly one post-change complete `npm test` is green at
+**572 files, 5,946 passed + 1 skipped**; production build is green (**534
+modules transformed**). The next source-ranked generated census family is
+**`ANIM_V_JUMPS_BIG`** (5 mappings / 5 Factory / 0 outside): PICHU, FLAAFFY,
+GIRAFARIG, SWAMPERT, TAILLOW.
+
 ## Front `ANIM_BOUNCE_ROTATE_TO_SIDES` Factory family accepted (2026-08-01)
 
 **Verdict / counts:** rung 2x is exact for the complete normal selector census:
