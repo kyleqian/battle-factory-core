@@ -932,6 +932,66 @@ describe("battle resolution typed Scene-OFF renderer", () => {
     ).toBe("poison");
   });
 
+  it("ISSUES #59: opponent-side stat-drop family renders through the real generated-route Scene-OFF adapter without crashing", () => {
+    // FEATHER_DANCE's own real shape (EFFECT_ATTACK_DOWN_2, sharply falls):
+    // opponent-inflicted, ATK, 6 -> 4, landing on the PLAYER's own battler
+    // (battler 0). Before this fix, `renderBattleResolutionSceneOffView`
+    // only recognized stat==="accuracy" here (the turn13 SAND_ATTACK
+    // precedent) and threw `Scene OFF typed stat adapter cannot draw
+    // battler 0 attack 6->4` for every other stat -- reachable from the
+    // real production render path (core.ts's `renderWithoutFactoryTerminal`
+    // -> `battleResolutionPresentation` -> `drawScene`), i.e. any generated-
+    // route battle, not just the canonical fixed trace.
+    const resolution = createBattleResolutionPresentation(inputFor([
+      event(0, { kind: "stat-stage-change", battler: 0, stat: "attack", from: 6, to: 4 }),
+      event(1, { kind: "message", messageId: "STRINGID_DEFENDERSSTATFELL", substitutions: [] }),
+    ], NEXT_COMMAND));
+    const view = createBattleResolutionPresentationRenderView(
+      atRenderClock(resolution, 0, 12),
+    );
+    expect(view.effect).toEqual({
+      type: "stat", battler: 0, stat: "attack", from: 6, to: 4, age: 12,
+    });
+    const fb = new Uint8Array(240 * 160 * 4);
+    const blank = fb.slice();
+    expect(() => renderBattleResolutionSceneOffView(fb, view)).not.toThrow();
+    expect(fb.some((value, index) => value !== blank[index])).toBe(true);
+
+    // Family coverage, not a FEATHER_DANCE special case: a different stat
+    // (e.g. FAKE_TEARS' own SPECIAL_DEFENSE drop) draws the same way.
+    const spDefResolution = createBattleResolutionPresentation(inputFor([
+      event(0, { kind: "stat-stage-change", battler: 0, stat: "special-defense", from: 6, to: 5 }),
+    ], NEXT_COMMAND));
+    const spDefView = createBattleResolutionPresentationRenderView(
+      atRenderClock(spDefResolution, 0, 12),
+    );
+    expect(() =>
+      renderBattleResolutionSceneOffView(new Uint8Array(240 * 160 * 4), spDefView)
+    ).not.toThrow();
+
+    // Out-of-scope shapes (a rise, or a drop on the OPPONENT's own battler)
+    // still barrier -- this fix widens the family, it does not remove the guard.
+    const riseResolution = createBattleResolutionPresentation(inputFor([
+      event(0, { kind: "stat-stage-change", battler: 0, stat: "attack", from: 6, to: 7 }),
+    ], NEXT_COMMAND));
+    const riseView = createBattleResolutionPresentationRenderView(
+      atRenderClock(riseResolution, 0, 12),
+    );
+    expect(() =>
+      renderBattleResolutionSceneOffView(new Uint8Array(240 * 160 * 4), riseView)
+    ).toThrow(/Scene OFF typed stat adapter cannot draw battler 0 attack 6->7/);
+
+    const opponentDropResolution = createBattleResolutionPresentation(inputFor([
+      event(0, { kind: "stat-stage-change", battler: 1, stat: "attack", from: 6, to: 5 }),
+    ], NEXT_COMMAND));
+    const opponentDropView = createBattleResolutionPresentationRenderView(
+      atRenderClock(opponentDropResolution, 0, 12),
+    );
+    expect(() =>
+      renderBattleResolutionSceneOffView(new Uint8Array(240 * 160 * 4), opponentDropView)
+    ).toThrow(/Scene OFF typed stat adapter cannot draw battler 1 attack 6->5/);
+  });
+
   it("owns exactly six blank next-command handoff frames", () => {
     const resolution = damageResolution();
     const handoff5 = atRenderClock(

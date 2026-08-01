@@ -13,6 +13,59 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 798 — [bounded worker, 2026-07-31 ~17:50] ISSUES #59 FIXED: generated-route opponent stat-drop crash — presentation-seam gap, not kernel
+
+- **State:** master green — tsc clean, focused vitest (battleResolutionPresentation
+  17, battleScene 247, battleMenu 121, battleCommandGeneratedOffEvidence 2,
+  factoryRoundBattleOrchestrator 30, fightSubmenu 57, factoryBattleStartIntro 5)
+  green, ratchet 6/6 (unchanged — presentation-only fix, no kernel barrier
+  moved), full `npm test` **567 files / 5722 passed + 1 skipped** (+1 over
+  797's baseline), build clean.
+- **Root cause was presentation, not kernel.** EFFECT_ATTACK_DOWN_2's real
+  script (`BattleScript_EffectAttackDown2` -> `EffectStatDown`) only calls
+  `statbuffchange`/`playanimation(B_ANIM_STATS_CHANGE)`/`jumpifstatus2
+  (STATUS2_SUBSTITUTE)` — all already registered generically (confirmed by
+  source read + existing TAIL_WHIP/Swords Dance kernel tests; no kernel gap,
+  no new kernel test needed). The real halt: `renderBattleResolutionSceneOffView`
+  (`battleScene.ts`) — the generated route's actual production render path
+  (`core.ts` `renderWithoutFactoryTerminal` -> `battleResolutionPresentation`
+  -> `drawScene`) — hard-asserted its `"stat"` effect branch to exactly
+  `battler===0 && stat==="accuracy" && decreasing` (the turn13 SAND_ATTACK
+  precedent only), throwing `Scene OFF typed stat adapter cannot draw battler
+  ${b} ${stat} ${from}->${to}` for every other stat. Any opponent-inflicted
+  non-accuracy stat drop on the player's battler (FEATHER_DANCE's ATK, or any
+  other stat-down move) crashed there — the generated route never runs the
+  turn-keyed canonical staging modules (`turn6/78/11FeatherDancePresentation
+  Staging.ts`) that only cover the fixed canonical battle.
+- **Reproduced first (STEP 1):** a hand-authored `{battler:0, stat:"attack",
+  from:6, to:4}` stat-stage-change event (FEATHER_DANCE's real ATK-2 shape)
+  fed through the real `projectBattleResolutionCommands` ->
+  `createBattleResolutionPresentationRenderView` -> `renderBattleResolutionSceneOffView`
+  pipeline threw exactly `Scene OFF typed stat adapter cannot draw battler 0
+  attack 6->4` pre-fix — confirmed by running the assertion before touching
+  source.
+- **Fix:** generalized the guard to `battler !== 0 || not-decreasing` (a rise,
+  or a drop on the OPPONENT's own battler, still barriers — deliberately out
+  of scope); replaced the hardcoded-Onix-sprite `drawTurn13SandAttackAccBanner`
+  draw with the already-generic `drawStatDecreaseBannerForBattlerPalette`
+  primitive (same one turn6/turn13/Shuckle callers already use), parameterized
+  by the real battler's own live field-art sprite tileset + corner
+  (`view.fieldArt.player.pic.tileset`/`.origin`, per-species already) and a
+  new `statAnimBannerDecreasePalette(stat)` lookup into the already-extracted
+  7-palette `stat-anim-banner.json` asset. No turn-keyed or species-keyed
+  branch added.
+- **Family coverage:** covers every stat a legal opponent stat-down move can
+  name landing on the player's battler, not a FEATHER_DANCE special case —
+  Tier-1 pinned in `tests/battleResolutionPresentation.test.ts` with both ATK
+  (FEATHER_DANCE's real shape) and SPECIAL_DEFENSE (proving the family), plus
+  regression coverage that a rise and an opponent-target drop still barrier.
+- **Canaries** (re-run fresh): battleScene.test.ts 247/247,
+  battleCommandGeneratedOffEvidence.test.ts 2/2, factoryRoundBattleOrchestrator.test.ts
+  30/30 — all green, no regressions.
+- **Next:** supervisor picks the next step; #56 frame-444 MAGNETON regression
+  and the idle-bounce phase family remain open per their own entries.
+
+---
 ## 797 — [bounded worker, 2026-07-31 ~17:15] turn17-rung1's 28-frame residual FIXED — 90/118 → 112/118; remaining 6 frames re-attributed to the already-tracked idle-bounce phase family
 
 - **State:** master green — tsc clean, focused vitest (fightSubmenu 57/
@@ -160,70 +213,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   turns 1-4 OFF ground-truth prep scout (policy deliberately NOT
   presupposed — banks evidence for next session's rank-6 opener, same
   two-step as rank 5's own S8/S9 prep).
-
----
-## 795 — [round 3, 2026-07-31 ~15:50, supervisor-verified] Turns 11-12 flipped OFF (M11) — rank-5's four move windows ALL flipped; idle-bounce phase ROOT-CAUSED, verdict (b) (S11)
-
-- **State:** master green — tsc clean, focused vitest (battleScene 247/
-  battleMenu 121/turn11FeatherDancePresentationStaging 10) green,
-  ratchet 6/6, full `npm test` **567 files / 5719 passed + 1 skipped**
-  (5735 − 16 deleted AERIAL_ACE-helper tests = 5719, exact), build
-  clean. Full derivation for every constant in the commit message.
-- **M11 (verified, `59a3fa7d`):** turn11-featherdance-off **189/191**
-  (2 pre-existing idle-bounce-phase frames at 13340-13341, attributed:
-  sub-pixel Onix-sprite/healthbox edge offset, no new content, code
-  for this window untouched this slice); turn11-rockslide-off
-  **256/256**; turn12-aerialace-off **246/247** (same idle-bounce-phase
-  signature recurs at frame 14374, same attribution); turn12-rockslide
-  -miss-off **256/256**. Turn-9/10 OFF pins + all 5 insurance pins held
-  exact. **turn9-menu 111/111 and turn12-menu 46/46 BOTH held
-  unaffected** — unlike turn11-menu's own slice-2 collateral, no
-  analogous regression hit turn12-menu here. Retired legacy ON pins
-  turn11-{featherdance,rockslide}.json, turn12-{aerialace,rockslide
-  -miss}.json, turn11-menu.json (45/56, slice-2 collateral, authorized).
-  Class-(c) AERIAL_ACE helpers shared with turn 10 (lunge/clones/slice/
-  Onix-shake/palette-darken + their own sub-helpers/constants) died
-  with turn 12 as last consumer — `drawTurn10AerialAceCloneWinsOverField`/
-  `cuttingSliceFrameTileset` survive (2nd caller in the generic Scene-ON
-  `renderSceneOnMovePresentation` adapter). The ROCK_SLIDE rock-prop
-  loop (`rockSlideRockState`/`drawRockSprite`/`rockSlideBg3Y`/
-  `rockSlideMonShakeY2`) does **NOT** die despite losing turn 11 —
-  turns 1-8's own still-ON windows + that same adapter keep it alive
-  (correcting the brief's own anticipation, verified via grep). Turn 11
-  FEATHER_DANCE needed no code changes: zero class-(c) content
-  pre-slice (Onix's floored ATK stat short-circuits the animation
-  step).
-- **Rank-5 status:** all four move windows (turns 9/10/11/12) now
-  Scene-OFF-owned. Remaining: the idle-bounce PHASE misalignment
-  residual class (turn9-quickattack-off's 56 frames, turn11-
-  featherdance-off's 2, turn12-aerialace-off's 1; blocks turn9/11/12
-  -menu's own OFF pins) — parallel side-worker territory, untouched
-  here.
-- **Next:** idle-bounce phase attribution probe (may unlock turn9/12
-  -menu OFF pins); then #56 444/536, turn17-rung1's 28 frames, rank 6.
-- **PAPERCUT:** none — every new OFF-fit constant this slice decomposed
-  cleanly from the already-established fixed −107 hit-reaction-chain
-  shift (turns 9/10) plus each window's own compression, confirming
-  first-try or near-first-try; no blind bisection needed.
-- **SUPERVISOR ADDENDUM (round-3 verify + S11):** supervisor re-ran all
-  four M11 compares (256/256, 256/256, 246/247, 189/191 — frame
-  14374's diff signature byte-matches the known family bbox/px) and
-  the full union gate after merging S11 (`03a7c408`). **S11 (verified,
-  `34d2eda1`): idle-bounce phase ROOT-CAUSED, verdict (b)** — the
-  oscillator (`menuIdleBounce`) is RAM-exact; the app seeds turn-9's
-  bounce reset at t=10000 vs real RAM t=9859 (−141) because upstream
-  `TURN8_MENU_REDRAW_DELAY` is still ON-fit (572; real OFF ≈434 —
-  9859−9425 exactly). Per-turn constants family, not one shared value
-  → closes as turns 1-8 get OFF re-timing under ranks 6-8; predicted
-  constant banked in `docs/idle-bounce-phase-attribution.md`. NOT a
-  rank-5 blocker: ISSUES #39 + inventory row 5 updated to FLIPPED with
-  the residual named. Note: M11 wrote this ledger entry itself despite
-  the brief reserving PROGRESS.md for the supervisor — content was
-  accurate and is kept (retitled/amended); contract slip noted for the
-  next brief's wording.
-- **Next:** round 4 — M12 #56 frame-444 fix + frame-536 onset pin;
-  S12 turn17-rung1 appRoute papercut fix + 28-frame characterization.
-  Then wind-down candidates: #56 +6 route term probe, rank-6 prep
-  scout.
 
 ---

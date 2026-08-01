@@ -1,3 +1,69 @@
+## 795 — [round 3, 2026-07-31 ~15:50, supervisor-verified] Turns 11-12 flipped OFF (M11) — rank-5's four move windows ALL flipped; idle-bounce phase ROOT-CAUSED, verdict (b) (S11)
+
+- **State:** master green — tsc clean, focused vitest (battleScene 247/
+  battleMenu 121/turn11FeatherDancePresentationStaging 10) green,
+  ratchet 6/6, full `npm test` **567 files / 5719 passed + 1 skipped**
+  (5735 − 16 deleted AERIAL_ACE-helper tests = 5719, exact), build
+  clean. Full derivation for every constant in the commit message.
+- **M11 (verified, `59a3fa7d`):** turn11-featherdance-off **189/191**
+  (2 pre-existing idle-bounce-phase frames at 13340-13341, attributed:
+  sub-pixel Onix-sprite/healthbox edge offset, no new content, code
+  for this window untouched this slice); turn11-rockslide-off
+  **256/256**; turn12-aerialace-off **246/247** (same idle-bounce-phase
+  signature recurs at frame 14374, same attribution); turn12-rockslide
+  -miss-off **256/256**. Turn-9/10 OFF pins + all 5 insurance pins held
+  exact. **turn9-menu 111/111 and turn12-menu 46/46 BOTH held
+  unaffected** — unlike turn11-menu's own slice-2 collateral, no
+  analogous regression hit turn12-menu here. Retired legacy ON pins
+  turn11-{featherdance,rockslide}.json, turn12-{aerialace,rockslide
+  -miss}.json, turn11-menu.json (45/56, slice-2 collateral, authorized).
+  Class-(c) AERIAL_ACE helpers shared with turn 10 (lunge/clones/slice/
+  Onix-shake/palette-darken + their own sub-helpers/constants) died
+  with turn 12 as last consumer — `drawTurn10AerialAceCloneWinsOverField`/
+  `cuttingSliceFrameTileset` survive (2nd caller in the generic Scene-ON
+  `renderSceneOnMovePresentation` adapter). The ROCK_SLIDE rock-prop
+  loop (`rockSlideRockState`/`drawRockSprite`/`rockSlideBg3Y`/
+  `rockSlideMonShakeY2`) does **NOT** die despite losing turn 11 —
+  turns 1-8's own still-ON windows + that same adapter keep it alive
+  (correcting the brief's own anticipation, verified via grep). Turn 11
+  FEATHER_DANCE needed no code changes: zero class-(c) content
+  pre-slice (Onix's floored ATK stat short-circuits the animation
+  step).
+- **Rank-5 status:** all four move windows (turns 9/10/11/12) now
+  Scene-OFF-owned. Remaining: the idle-bounce PHASE misalignment
+  residual class (turn9-quickattack-off's 56 frames, turn11-
+  featherdance-off's 2, turn12-aerialace-off's 1; blocks turn9/11/12
+  -menu's own OFF pins) — parallel side-worker territory, untouched
+  here.
+- **Next:** idle-bounce phase attribution probe (may unlock turn9/12
+  -menu OFF pins); then #56 444/536, turn17-rung1's 28 frames, rank 6.
+- **PAPERCUT:** none — every new OFF-fit constant this slice decomposed
+  cleanly from the already-established fixed −107 hit-reaction-chain
+  shift (turns 9/10) plus each window's own compression, confirming
+  first-try or near-first-try; no blind bisection needed.
+- **SUPERVISOR ADDENDUM (round-3 verify + S11):** supervisor re-ran all
+  four M11 compares (256/256, 256/256, 246/247, 189/191 — frame
+  14374's diff signature byte-matches the known family bbox/px) and
+  the full union gate after merging S11 (`03a7c408`). **S11 (verified,
+  `34d2eda1`): idle-bounce phase ROOT-CAUSED, verdict (b)** — the
+  oscillator (`menuIdleBounce`) is RAM-exact; the app seeds turn-9's
+  bounce reset at t=10000 vs real RAM t=9859 (−141) because upstream
+  `TURN8_MENU_REDRAW_DELAY` is still ON-fit (572; real OFF ≈434 —
+  9859−9425 exactly). Per-turn constants family, not one shared value
+  → closes as turns 1-8 get OFF re-timing under ranks 6-8; predicted
+  constant banked in `docs/idle-bounce-phase-attribution.md`. NOT a
+  rank-5 blocker: ISSUES #39 + inventory row 5 updated to FLIPPED with
+  the residual named. Note: M11 wrote this ledger entry itself despite
+  the brief reserving PROGRESS.md for the supervisor — content was
+  accurate and is kept (retitled/amended); contract slip noted for the
+  next brief's wording.
+- **Next:** round 4 — M12 #56 frame-444 fix + frame-536 onset pin;
+  S12 turn17-rung1 appRoute papercut fix + 28-frame characterization.
+  Then wind-down candidates: #56 +6 route term probe, rank-6 prep
+  scout.
+
+
+---
 ## 794 — [SUPERVISOR round 2, 2026-07-31 ~14:50] Turn-10 flipped OFF at EXACT acceptance (M10); animation-handoff five-table extraction landed (S10)
 
 - **State:** master green on the M10+S10 union (full gate in commit

@@ -779,6 +779,7 @@ import type {
   BattleResolutionPresentationRenderView,
 } from "./battleResolutionPresentationRender.ts";
 import type {
+  BattleStatName,
   BattleTerminalResolutionPresentationState,
 } from "./battleResolutionPresentation.ts";
 import {
@@ -6636,6 +6637,29 @@ function drawStatDecreaseBannerForBattlerPalette(
         }
       }
     }
+  }
+}
+
+/**
+ * ISSUES #59: the generated route's typed Scene-OFF stat adapter
+ * (`renderBattleResolutionSceneOffView` below) needs a real palette for
+ * every stat a legal stat-down move can name, not just FEATHER_DANCE's own
+ * fixed ATK (`assertFeatherDanceAttackStatPalette` above, which stays
+ * scoped to the retired canonical turn-6/7/8 window per its own doc).
+ * `stat-anim-banner.json` already extracts all seven palettes
+ * (`extract-stat-anim.ts`); this is a bare name-to-asset-key lookup, no new
+ * data. `BattleStatName`'s two hyphenated members are the only ones that
+ * don't match their palette key verbatim.
+ */
+function statAnimBannerDecreasePalette(stat: BattleStatName): RgbColor[] {
+  switch (stat) {
+    case "attack": return statAnimBanner.palettes.attack;
+    case "defense": return statAnimBanner.palettes.defense;
+    case "speed": return statAnimBanner.palettes.speed;
+    case "special-attack": return statAnimBanner.palettes.spAttack;
+    case "special-defense": return statAnimBanner.palettes.spDefense;
+    case "accuracy": return statAnimBanner.palettes.accuracy;
+    case "evasion": return statAnimBanner.palettes.evasion;
   }
 }
 
@@ -32679,9 +32703,16 @@ export function renderBattleResolutionSceneOffView(
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
 
   if (view.effect?.type === "stat") {
+    // ISSUES #59: covers the whole opponent-side stat-drop family (any of
+    // the 7 stats a legal stat-down move can name, landing on the player's
+    // own battler) via the same generic banner primitive
+    // (`drawStatDecreaseBannerForBattlerPalette`) the turn-6/13 canonical
+    // windows already use, parameterized by this battler's own live
+    // field-art sprite/corner instead of a hardcoded species. A rise, or a
+    // drop on the OPPONENT's own battler (battler 1), is still genuinely
+    // out of this family and still barriers.
     if (
       view.effect.battler !== 0
-      || view.effect.stat !== "accuracy"
       || view.effect.to >= view.effect.from
     ) {
       throw new Error(
@@ -32693,7 +32724,14 @@ export function renderBattleResolutionSceneOffView(
     const sourceAge = view.effect.age * 2 + 94;
     const eva = turn13SandAttackAccEva(sourceAge, 0);
     if (eva !== null) {
-      drawTurn13SandAttackAccBanner(fb, sourceAge, 0, eva);
+      drawStatDecreaseBannerForBattlerPalette(
+        fb,
+        view.fieldArt.player.pic.tileset as Tileset,
+        view.fieldArt.player.origin,
+        eva,
+        turn13SandAttackAccBg1Y(sourceAge, 0),
+        statAnimBannerDecreasePalette(view.effect.stat),
+      );
     }
   }
   // A status controller's lasting visible result is the healthbox icon. The
