@@ -1,5 +1,35 @@
 # Animation coverage
 
+## Front `ANIM_H_SLIDE_WOBBLE` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2o is exact for all **8 selector mappings / 8
+Factory-reachable species**, with **zero outside-Factory mappings**: BUTTERFREE,
+GOLBAT, CLOYSTER, KABUTO, BALTOY, LUVDISC, CASTFORM, CHIMECHO. BUTTERFREE is
+the representative and CHIMECHO the sibling; every prior accepted front family
+remains regression-pinned. Move coverage stays **107 exact / 0 partial / 0
+staged / 169 unsupported** and `ANIMATION_COVERAGE.json` is byte-identical at
+SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:911-939,1803-1833`
+proves Task-zeroed data0/data2..data7, normal-front `sDontFlip=TRUE`, both
+`TryFlipX` no-ops, tick-0 affine start, C-truncated index/var arithmetic, var's
+u8 mask, every GBA sine x2 and signed-s16-to-u16 affine-rotation write, data2
+increment order, and tick-101 identity/x2/reset/`WaitAnimEnd` cleanup after
+**101 active callbacks (ticks 0..100)**. The shared slide-wobble reducer is
+also pinned callback-for-callback against the existing source-faithful KABUTO
+presentation reducer. Fresh complete legal Scene-ON parties settle both species
+at x2=0/y2=0/animNum=1/`SpriteCallbackDummy`. Paired direct raw outputs are
+byte-identical with no EOF newline: BUTTERFREE SHA-256
+`6e578f80ba3c04fe2048ff3ecc0ae2788dce350239907594d7bd01c30ea4961d`,
+CHIMECHO `a6bda637cc6e6993afce75b7f934113a1ffd5db5d5cd44f77072114c6929a2be`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per legal party; raw `cmp`; focused family plus
+both ratchets **130/130**; TypeScript no-emit and diff checks green; exactly one
+full `npm test` **567 files, 5822 passed + 1 skipped** and one `npm run build`
+green. The next source-ranked generated census family is **`ANIM_H_JUMPS`**
+(8 Factory species).
+
 ## Front `ANIM_V_SLIDE_WOBBLE` terminal family accepted (2026-08-01)
 
 **Verdict / counts:** rung 2n is exact for all **8 selector mappings / 8
