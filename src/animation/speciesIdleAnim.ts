@@ -48,6 +48,7 @@ export type SpeciesFrontAnimFamily =
   | "CIRCULAR_STRETCH_TWICE"
   | "GROW_VIBRATE"
   | "FLASH_YELLOW"
+  | "FLICKER_INCREASING"
   | "H_JUMPS"
   | "H_SLIDE_SLOW"
   | "H_SLIDE_WOBBLE"
@@ -80,6 +81,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "CIRCULAR_STRETCH_TWICE",
   "GROW_VIBRATE",
   "FLASH_YELLOW",
+  "FLICKER_INCREASING",
   "H_JUMPS",
   "H_SLIDE_SLOW",
   "H_SLIDE_WOBBLE",
@@ -335,6 +337,26 @@ export const ROTATE_UP_TO_SIDES_FACTORY_FRONT_SPECIES: readonly string[] = Objec
 export const ROTATE_UP_TO_SIDES_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
   Object.freeze(
     ROTATE_UP_TO_SIDES_FRONT_SPECIES.filter(
+      (species) => !factoryFrontSpecies.has(species),
+    ),
+  );
+
+/** All source selector mappings for `ANIM_FLICKER_INCREASING`. */
+export const FLICKER_INCREASING_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_FLICKER_INCREASING")
+    .map(([species]) => species),
+);
+
+/** Every increasing-flicker mapping is Factory-reachable. */
+export const FLICKER_INCREASING_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  FLICKER_INCREASING_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no increasing-flicker mappings outside the Factory pool. */
+export const FLICKER_INCREASING_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
+  Object.freeze(
+    FLICKER_INCREASING_FRONT_SPECIES.filter(
       (species) => !factoryFrontSpecies.has(species),
     ),
   );
@@ -1201,6 +1223,19 @@ export interface RotateUpToSidesFrame extends SpeciesIdleOffset {
   readonly affineMode: "double" | "normal";
 }
 
+export interface FlickerIncreasingFrame extends SpeciesIdleOffset {
+  readonly data0: 0;
+  readonly data2Before: number;
+  readonly data7Before: number;
+  readonly data2: number;
+  readonly data7: number;
+  readonly resetData7AtStart: boolean;
+  readonly equalityBranch: boolean;
+  readonly invisible: boolean;
+  readonly terminalGuard: boolean;
+  readonly callback: "Anim_FlickerIncreasing" | "WaitAnimEnd";
+}
+
 const SWING_CONCAVE_DURATION = 100;
 
 /**
@@ -1710,6 +1745,66 @@ export function rotateUpToSidesFrameAtTick(
     callback: "Anim_RotateUpToSides",
     affineMode: "double",
   };
+}
+
+/**
+ * Source-order port of `Anim_FlickerIncreasing`
+ * (`pokemon_animation.c:911-939,2949-2974,5540-5544`). The front-animation
+ * task supplies zeroed data2/data7. Tick 0 first resets data7, then takes the
+ * equality branch and advances data2 to one while visible. Each phase n=1..10
+ * performs n invisible callbacks followed by its visible equality callback;
+ * the phase-10 equality callback advances data2 to 11, then the strict
+ * `data2 > 10` guard installs stable `WaitAnimEnd` and forces visibility.
+ * This callback neither allocates `sAnims` state nor touches sprite offsets.
+ */
+export function flickerIncreasingFrameAtTick(
+  ticksSinceStart: number,
+): FlickerIncreasingFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let data7 = 0;
+  let invisible = false;
+  let terminal: FlickerIncreasingFrame | null = null;
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (terminal !== null) return terminal;
+
+    const data2Before = data2;
+    const data7Before = data7;
+    const resetData7AtStart = data2 === 0;
+    if (resetData7AtStart) data7 = 0;
+
+    const equalityBranch = data2 === data7;
+    if (equalityBranch) {
+      data7 = 0;
+      data2 += 1;
+      invisible = false;
+    } else {
+      data7 += 1;
+      invisible = true;
+    }
+
+    const terminalGuard = data2 > 10;
+    if (terminalGuard) invisible = false;
+    const frame: FlickerIncreasingFrame = {
+      x2: 0,
+      y2: 0,
+      data0: 0,
+      data2Before,
+      data7Before,
+      data2,
+      data7,
+      resetData7AtStart,
+      equalityBranch,
+      invisible,
+      terminalGuard,
+      callback: terminalGuard ? "WaitAnimEnd" : "Anim_FlickerIncreasing",
+    };
+    if (terminalGuard) terminal = frame;
+    if (tick === ticksSinceStart) return frame;
+  }
+
+  throw new Error("unreachable FlickerIncreasing reducer state");
 }
 
 export type BounceRotateToSidesTableEntry = readonly [
@@ -3014,6 +3109,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = flashYellowFrameAtTick(56);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_FlashYellow did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "FLICKER_INCREASING": {
+      const terminal = flickerIncreasingFrameAtTick(65);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_FlickerIncreasing did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }

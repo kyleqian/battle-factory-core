@@ -41,6 +41,10 @@ import {
   FLASH_YELLOW_FACTORY_FRONT_SPECIES,
   FLASH_YELLOW_FRONT_SPECIES,
   FLASH_YELLOW_OUTSIDE_FACTORY_FRONT_SPECIES,
+  flickerIncreasingFrameAtTick,
+  FLICKER_INCREASING_FACTORY_FRONT_SPECIES,
+  FLICKER_INCREASING_FRONT_SPECIES,
+  FLICKER_INCREASING_OUTSIDE_FACTORY_FRONT_SPECIES,
   horizontalJumpsFrameAtTick,
   H_JUMPS_FACTORY_FRONT_SPECIES,
   H_JUMPS_FRONT_SPECIES,
@@ -279,6 +283,12 @@ import spoinkRunB from "../../tools/compare/fixtures/sendout-front-spoink-run-b.
 import hariyamaScenario from "../../tools/compare/fixtures/sendout-front-hariyama.json" with { type: "json" };
 import hariyamaRunA from "../../tools/compare/fixtures/sendout-front-hariyama-run-a.json" with { type: "json" };
 import hariyamaRunB from "../../tools/compare/fixtures/sendout-front-hariyama-run-b.json" with { type: "json" };
+import haunterScenario from "../../tools/compare/fixtures/sendout-front-haunter.json" with { type: "json" };
+import haunterRunA from "../../tools/compare/fixtures/sendout-front-haunter-run-a.json" with { type: "json" };
+import haunterRunB from "../../tools/compare/fixtures/sendout-front-haunter-run-b.json" with { type: "json" };
+import kecleonScenario from "../../tools/compare/fixtures/sendout-front-kecleon.json" with { type: "json" };
+import kecleonRunA from "../../tools/compare/fixtures/sendout-front-kecleon-run-a.json" with { type: "json" };
+import kecleonRunB from "../../tools/compare/fixtures/sendout-front-kecleon-run-b.json" with { type: "json" };
 import {
   KABUTO_FRONT_ANIM_START_OFFSET,
   kabutoHSlideWobble,
@@ -541,6 +551,18 @@ const hariyamaRawA = readFileSync(
 );
 const hariyamaRawB = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-hariyama-run-b.json", import.meta.url),
+);
+const haunterRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-haunter-run-a.json", import.meta.url),
+);
+const haunterRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-haunter-run-b.json", import.meta.url),
+);
+const kecleonRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-kecleon-run-a.json", import.meta.url),
+);
+const kecleonRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-kecleon-run-b.json", import.meta.url),
 );
 
 describe("speciesIdleAnim", () => {
@@ -2226,7 +2248,7 @@ describe("speciesIdleAnim", () => {
       expect(selectorTables.frontAnimIds.species.HARIYAMA).toBe("ANIM_ROTATE_UP_TO_SIDES");
       expect(speciesFrontIdleRestOffset("HARIYAMA")).toEqual({ x2: 0, y2: 0 });
       expect(selectorTables.frontAnimIds.species.HAUNTER).toBe("ANIM_FLICKER_INCREASING");
-      expect(speciesFrontIdleRestOffset("HAUNTER")).toBeNull();
+      expect(speciesFrontIdleRestOffset("HAUNTER")).toEqual({ x2: 0, y2: 0 });
     });
   });
 
@@ -5772,7 +5794,7 @@ describe("speciesIdleAnim", () => {
       });
     });
 
-    it("regression-pins the predecessor and does not broaden the adjacent selector", () => {
+    it("regression-pins the predecessor and advances only the accepted adjacent selector", () => {
       expect(horizontalJumpsVerticalStretchTwiceFrameAtTick(156)).toMatchObject({
         x2: 0,
         y2: 0,
@@ -5786,8 +5808,201 @@ describe("speciesIdleAnim", () => {
       }
       expect(selectorTables.frontAnimIds.species.HAUNTER).toBe("ANIM_FLICKER_INCREASING");
       expect(selectorTables.frontAnimIds.species.KECLEON).toBe("ANIM_FLICKER_INCREASING");
-      expect(speciesFrontIdleRestOffset("HAUNTER")).toBeNull();
-      expect(speciesFrontIdleRestOffset("KECLEON")).toBeNull();
+      expect(speciesFrontIdleRestOffset("HAUNTER")).toEqual({ x2: 0, y2: 0 });
+      expect(speciesFrontIdleRestOffset("KECLEON")).toEqual({ x2: 0, y2: 0 });
+    });
+  });
+
+  describe("flickerIncreasingFrameAtTick (Anim_FlickerIncreasing source lifecycle)", () => {
+    it("derives exactly HAUNTER and KECLEON as Factory-reachable with no outside mapping", () => {
+      const speciesSelectors = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
+      const generated = Object.entries(speciesSelectors)
+        .filter(([, family]) => family === "ANIM_FLICKER_INCREASING")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(FLICKER_INCREASING_FRONT_SPECIES).toEqual(generated);
+      expect(FLICKER_INCREASING_FRONT_SPECIES).toEqual(["HAUNTER", "KECLEON"]);
+      expect(FLICKER_INCREASING_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(FLICKER_INCREASING_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(FLICKER_INCREASING_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of generated) {
+        expect(speciesSelectors[species]).toBe("ANIM_FLICKER_INCREASING");
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins tick 0 and every phase's invisible callbacks followed by its equality edge", () => {
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual(
+        expect.arrayContaining([0, 2, 7]),
+      );
+      expect(flickerIncreasingFrameAtTick(0)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 0,
+        data2Before: 0,
+        data7Before: 0,
+        data2: 1,
+        data7: 0,
+        resetData7AtStart: true,
+        equalityBranch: true,
+        invisible: false,
+        terminalGuard: false,
+        callback: "Anim_FlickerIncreasing",
+      });
+
+      let tick = 1;
+      for (let phase = 1; phase <= 10; phase += 1) {
+        for (let invisibleIndex = 0; invisibleIndex < phase; invisibleIndex += 1) {
+          expect(flickerIncreasingFrameAtTick(tick), `phase ${phase} invisible ${invisibleIndex}`).toEqual({
+            x2: 0,
+            y2: 0,
+            data0: 0,
+            data2Before: phase,
+            data7Before: invisibleIndex,
+            data2: phase,
+            data7: invisibleIndex + 1,
+            resetData7AtStart: false,
+            equalityBranch: false,
+            invisible: true,
+            terminalGuard: false,
+            callback: "Anim_FlickerIncreasing",
+          });
+          tick += 1;
+        }
+
+        expect(flickerIncreasingFrameAtTick(tick), `phase ${phase} equality`).toEqual({
+          x2: 0,
+          y2: 0,
+          data0: 0,
+          data2Before: phase,
+          data7Before: phase,
+          data2: phase + 1,
+          data7: 0,
+          resetData7AtStart: false,
+          equalityBranch: true,
+          invisible: false,
+          terminalGuard: phase === 10,
+          callback: phase === 10 ? "WaitAnimEnd" : "Anim_FlickerIncreasing",
+        });
+        tick += 1;
+      }
+      expect(tick).toBe(66);
+    });
+
+    it("terminates only on callback 66 and remains visibly stable in WaitAnimEnd", () => {
+      const callbacks = Array.from({ length: 66 }, (_, tick) => flickerIncreasingFrameAtTick(tick)!);
+      expect(callbacks).toHaveLength(66);
+      expect(callbacks.findIndex(({ callback }) => callback === "WaitAnimEnd")).toBe(65);
+      expect(callbacks.slice(0, 65).every(({ terminalGuard }) => !terminalGuard)).toBe(true);
+      expect(callbacks[64]).toMatchObject({
+        data2Before: 10,
+        data7Before: 9,
+        data2: 10,
+        data7: 10,
+        invisible: true,
+        terminalGuard: false,
+      });
+      expect(callbacks[65]).toMatchObject({
+        data2Before: 10,
+        data7Before: 10,
+        data2: 11,
+        data7: 0,
+        equalityBranch: true,
+        invisible: false,
+        terminalGuard: true,
+        callback: "WaitAnimEnd",
+      });
+      expect(flickerIncreasingFrameAtTick(66)).toEqual(callbacks[65]);
+      expect(flickerIncreasingFrameAtTick(1000)).toEqual(callbacks[65]);
+      expect(flickerIncreasingFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      ["HAUNTER", haunterScenario, 93],
+      ["KECLEON", kecleonScenario, 352],
+    ] as const)("stages a complete legal three-mon %s Scene-ON party", (
+      _species, scenario, speciesId,
+    ) => {
+      expect(scenario).toMatchObject({
+        mode: "mechanicLab",
+        profile: "battle-scene-on",
+        level: 50,
+        challengeNum: 0,
+        trainerId: 50,
+      });
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(speciesId);
+      for (const setId of [...scenario.playerSetIds, ...scenario.opponentSetIds]) {
+        expect(setId).toBeGreaterThanOrEqual(110);
+        expect(setId).toBeLessThanOrEqual(199);
+      }
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "HAUNTER", haunterRunA, haunterRunB, haunterRawA, haunterRawB, 93, 372,
+        "398f043ed6a00f057c7ada95eb36e89f21000f886ffac5afd77df79055539c54",
+      ],
+      [
+        "KECLEON", kecleonRunA, kecleonRunB, kecleonRawA, kecleonRawB, 352, 373,
+        "f231f0843138b3b18ff69bbbb6ee4d10df6f77f42fa553b5c603a39eb41f3e38",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species, runA, runB, rawA, rawB, speciesId, rawBytes, rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA).toHaveLength(rawBytes);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_FLICKER_INCREASING");
+      expect(runA.ticks[0]!.battler1).toMatchObject({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex: 4,
+        data2: speciesId,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+    });
+
+    it("regression-pins ROTATE_UP_TO_SIDES and does not broaden GROW_IN_STAGES", () => {
+      expect(rotateUpToSidesFrameAtTick(32)).toMatchObject({
+        x2: 0,
+        y2: 0,
+        data7: 256,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      });
+      expect(speciesFrontIdleRestOffset("HARIYAMA")).toEqual({ x2: 0, y2: 0 });
+      for (const species of ["GENGAR", "QWILFISH", "LUGIA"] as const) {
+        expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_GROW_IN_STAGES");
+        expect(speciesFrontIdleRestOffset(species)).toBeNull();
+      }
     });
   });
 });
