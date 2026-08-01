@@ -6,7 +6,7 @@ one, **delete the entry** in the same docs commit that records the fix in
 symptom, what's confirmed from the reference/oracle, and any leads.
 
 **Two kinds of entry live here — do not confuse them.** `#39`, `#55`, `#56`,
-`#61`, and `#62` are open, actionable debt. `#38`, `#18`, and `#5` are
+and `#62` are open, actionable debt. `#38`, `#18`, `#61`, and `#5` are
 **settled records, not work**: each was investigated to root cause and then
 parked or accepted by decision. They stay because ROADMAP acceptance lines
 cite them by number as the recorded reason specific pixel diffs are accepted
@@ -509,38 +509,6 @@ delayed Turn-16 rung and Turn-17 rung 6b (**2,163 total**). Census falls
 only for the earlier mirror/dispatcher debt inventoried in
 `docs/battle-scene-retirement-inventory.md`.
 
-## #61 — Scene-OFF FIGHT reveal needs a source-owned DMA-ready event, not a fixed delay
-
-**Bounded evidence (2026-07-31, `bc988ef9`):** the reproducible OFF-profile
-watch specs and full source/RAM analysis live in
-`docs/issue61-fight-submenu-reveal-boundary.md`. The real player controller
-reveals the move list only when `HandleChooseMoveAfterDma3` observes the BG
-copy queue idle, writes `gBattle_BG0_Y=320`, and installs
-`HandleInputChooseMove`. Initial, turn-2, and turn-4 openings cross after one
-DMA-busy poll; turn 3 crosses after two because its busy bitfield remains
-nonzero for one extra poll. Pixels agree: the oracle keeps the action menu at
-frame 3852 and reveals on 3853, while the app reveals at 3852. Every other
-turn-3 capture is exact, and all committed turn-1/2/4 OFF insurance traces
-remain exact.
-
-**Queue-slot follow-up (2026-08-01):** a fresh full-ring probe, documented
-in the same dossier, proves all four openings enqueue the identical source
-`9/11/6` request batches and byte sizes. Turn 3 alone polls before the final
-VBlank drain; at its next snapshot the queue is empty but the callback/busy
-bits have not yet advanced. The missing causal fact is generic
-controller-versus-VBlank scheduling phase, not window content, request count,
-move cursor, or a delay. A queue-size threshold would be a fitted exception.
-
-**Rejected fix:** globally changing `t < revealTick` to `t <= revealTick`, or
-increasing `FIGHT_SUBMENU_OPEN_DELAY`, fixes turn 3 but makes the other exact
-openings one frame late. Do not add a turn-3/tick/cursor exception.
-
-**Next:** first derive a source-backed generic controller/VBlank-ordering
-event. Only then may the command-presentation owner expose DMA-ready reveal
-to both legacy Scene-OFF renderers and the input gate. Acceptance remains turn
-3 **255/255**, every committed turn-1/2/4 OFF trace unchanged, synthetic
-initial/reopen boundaries, and no battle/turn/absolute-tick routing.
-
 ## #62 — Retired turn-2-shaped reproducers remain pixel-red on the generated OFF route after #60's crash fix
 
 **Bounded evidence (2026-07-31, `f1bc60a2`):** recovered the deleted
@@ -572,6 +540,28 @@ extend the canonical Battle-2 march, or fit the residual with trace/tick
 special cases.
 
 # Settled records (not open work — see the note at the top of this file)
+
+## #61 — [PARKED 2026-08-01, supervisor decision] Scene-OFF turn-3 FIGHT
+  reveal one-frame residual: controller/VBlank poll order is sub-tick CPU
+  phase — same settled class as #5/#38
+
+The turn-3 FIGHT opening reveals one frame later in the oracle because the
+real player controller's DMA-busy poll lands before the final VBlank drain on
+that opening only, while all four openings enqueue identical `9/11/6` BG-copy
+batches. `docs/issue61-fight-submenu-reveal-boundary.md` (RAM/source
+evidence + queue-slot follow-up) and `docs/issue61-vblank-phase-event-design.md`
+(2026-08-01 design evaluation) establish that no tick-level, source-owned
+state predicts the poll/drain order — it is CPU instruction/cycle phase
+relative to `VBlankIntr`, the same architectural class as #5's settled
+`SetGpuReg` race. Three candidate designs were evaluated; any producer fed
+from turn/tick/cursor/queue-size/payload facts would be a fitted exception
+(rejected). Affected acceptance: `turn3-endeavor-off.json` ships **254/255**
+(sole residual, reveal frame); `turn3-rockslide-off.json` **161/161** and
+every turn-1/2/4 OFF window remain exact. Do not fit a phase bit and do not
+retune `FIGHT_SUBMENU_OPEN_DELAY`. Reopen only if the design doc's §4.1
+instruction-ordered VBlank watch finds a stable tick-granular source-owned
+phase proxy, or the engine gains a general cycle/register-queue model; §3 of
+that doc then gives the bounded five-slice implementation plan.
 
 ## #38 — [PARKED 2026-07-22, supervisor decision] Turn 16 FAINT_ATTACK
   delayed-control tick 21006 exposes `BLDALPHA` one VBlank early
