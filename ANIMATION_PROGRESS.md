@@ -1,5 +1,34 @@
 # Animation coverage
 
+## Front `ANIM_H_STRETCH` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2r is exact for all **7 selector mappings / 7
+Factory-reachable species**, with **zero outside-Factory mappings**: EKANS,
+HITMONLEE, QUAGSIRE, SNEASEL, TYROGUE, TORCHIC, ALTARIA. EKANS is the
+representative and ALTARIA the sibling; every prior accepted front family
+remains regression-pinned. Move coverage stays **107 exact / 0 partial / 0
+staged / 169 unsupported** and `ANIMATION_COVERAGE.json` remains byte-identical
+at SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:911-939,1562-1595`
+proves task-zeroed data, normal-front `sDontFlip=TRUE`, tick-0 affine start,
+all **41 active callbacks** (data2=0..40), exact GBA sine and C truncation,
+the data2=10..29-only data7/index1 modulation, s16 wrapping/u8 masking, signed
+affine scales, and tick 41 identity/reset/`WaitAnimEnd` cleanup with data2=42.
+The distinct `ANIM_H_STRETCH_FAR`, `_FAR_TWICE`, and `_FAR_SLOW` back selectors
+remain unaccepted. Fresh complete legal Scene-ON parties settle both species at
+x2=0/y2=0/animNum=1/`SpriteCallbackDummy`. Paired raw outputs are byte-identical
+with no EOF newline: EKANS SHA-256
+`910a3f50de504e27097b7eb7a4b445229888540513362c16912bee88addadb44`,
+ALTARIA `24dddba203497ba399c2944bbf7a636edb3ced114e5bc4d44ddc7dee826176e9`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per legal party; raw `cmp`; focused family plus
+both ratchets **159/159**; TypeScript no-emit and diff checks green; exactly one
+full `npm test` **567 files, 5851 passed + 1 skipped** and one `npm run build`
+green. The next generated-census/source-ranked front family is
+**`ANIM_FLASH_YELLOW`** (7 Factory species).
+
 ## Front `ANIM_H_VIBRATE` terminal family accepted (2026-08-01)
 
 **Verdict / counts:** rung 2q is exact for all **7 selector mappings / 7
