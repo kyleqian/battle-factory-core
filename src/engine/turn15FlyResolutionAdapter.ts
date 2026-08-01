@@ -23,6 +23,7 @@ import type {
   BattleState,
 } from "./battleDecisionBoundary.ts";
 import {
+  appendBattleResolutionLockedActionContinuation,
   createBattleResolutionPresentation,
   type BattleResolutionPresentationCommand,
   type BattleResolutionPresentationState,
@@ -166,9 +167,10 @@ export type Turn15FlyResolutionAdapter = Readonly<{
 function linesForMessage(
   resolution: BattleResolutionPresentationState,
   messageId: string,
+  segmentIndex = 0,
 ): readonly string[] {
-  const segment = resolution.segments[0]!;
-  const event = segment.events.find(({ payload }) =>
+  const segment = resolution.segments[segmentIndex];
+  const event = segment?.events.find(({ payload }) =>
     payload.kind === "message" && payload.messageId === messageId
   );
   if (event === undefined) {
@@ -240,26 +242,22 @@ export function resolveTurn15FlyResolutionAdapter(): Turn15FlyResolutionAdapter 
     }),
     "locked FLY strike",
   );
-  const strikeResolution = createBattleResolutionPresentation({
-    sourceRequest: continuationRequest,
-    sourceDecision: PLAYER_DRAGON_BREATH,
-    beforeRules: charge.state.rules,
+  const strikeResolution = appendBattleResolutionLockedActionContinuation({
+    resolution: chargeResolution,
     transition: strike,
-    fieldBoundary: createBattleCommandPresentation(
-      continuationRequest,
-      charge.state.rules.rulesContext,
-      PLAYER_DRAGON_BREATH.moveSlot,
-    ).field,
-    confirmHandoff: Object.freeze({
-      fightDisplayCursor: PLAYER_DRAGON_BREATH.moveSlot,
-      idleBounceElapsed: 0,
+    fieldBoundary: chargeResolution.field,
+    lockedAction: Object.freeze({
+      battler: 1,
+      currentMove: FLY,
+      currentMovePosition: TRAINER_FLY.moveSlot,
     }),
   });
   const forcedRequest = strikeResolution.forcedRequest;
   if (forcedRequest === null || forcedRequest.side !== "player") {
     throw new Error("turn15FlyResolutionAdapter: locked FLY did not publish a player forced switch");
   }
-  const hp = strikeResolution.segments[0]!.commands.find((command) =>
+  const strikeSegment = strikeResolution.segments[1]!;
+  const hp = strikeSegment.commands.find((command) =>
     command.type === "hp" && command.battler === 0
   );
   if (hp?.type !== "hp") {
@@ -269,11 +267,11 @@ export function resolveTurn15FlyResolutionAdapter(): Turn15FlyResolutionAdapter 
     chargeResolution,
     strikeResolution,
     chargeCommands: chargeResolution.segments[0]!.commands,
-    strikeCommands: strikeResolution.segments[0]!.commands,
+    strikeCommands: strikeSegment.commands,
     chargeLines: linesForMessage(chargeResolution, "STRINGID_PKMNFLEWHIGH"),
     missLines: linesForMessage(chargeResolution, "STRINGID_ATTACKMISSED"),
-    strikeLines: linesForMessage(strikeResolution, "STRINGID_USEDMOVE"),
-    faintLines: linesForMessage(strikeResolution, "STRINGID_TARGETFAINTED"),
+    strikeLines: linesForMessage(strikeResolution, "STRINGID_USEDMOVE", 1),
+    faintLines: linesForMessage(strikeResolution, "STRINGID_TARGETFAINTED", 1),
     hp: Object.freeze({ from: hp.from, to: hp.to }),
     forcedRequest,
   });

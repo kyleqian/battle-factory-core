@@ -5,7 +5,12 @@ describe("Turn-14/15 typed FLY presentation bridge", () => {
   it("owns charge, airborne miss, locked strike, faint, and forced request across the real intervening player request", () => {
     const adapter = CANONICAL_OPPONENT_FLY_RESOLUTION;
     expect(adapter.chargeResolution.segments).toHaveLength(1);
-    expect(adapter.strikeResolution.segments).toHaveLength(1);
+    expect(adapter.strikeResolution.segments).toHaveLength(2);
+    expect(adapter.strikeResolution.resolutionId)
+      .toBe(adapter.chargeResolution.resolutionId);
+    expect(adapter.strikeResolution.segments[0])
+      .toBe(adapter.chargeResolution.segments[0]);
+    expect(Object.isFrozen(adapter.strikeResolution.segments)).toBe(true);
     expect(adapter.chargeResolution.pendingBoundary).toMatchObject({
       kind: "decision-required",
       request: { kind: "command", side: "player", requestId: 3 },
