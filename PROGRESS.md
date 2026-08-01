@@ -13,6 +13,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 818 — [bounded worker, 2026-08-01] rank-3 dead KO-dismiss mirror retired
+
+- **State:** implementation `88fd05f6`; focused owner/menu/scene/ratchet
+  suites are **452/452**, standalone TypeScript is green, full `npm test` is
+  green (**571 files, 5,727 passed + 1 skipped**) and production build is
+  green.
+- **Did:** mapped both rank-3 mirrors. `turn5KoDismissElapsed` had one writer,
+  only its own one-shot guard as a reader, and zero render/continuation/PP/
+  request consumers, so its dead field and producer branch are deleted. The
+  immutable adapter lifecycle already owns KO→PIDGEOTTO→Sitrus→next-command
+  content; `turn5Resolved` stays because it still has live turn-6 dispatch,
+  PP, and next-reopen consumers. Clean-`7d65832d` app replay is byte-identical
+  for all rank-3 + five insurance pins (**3,021 captures**) and three +30
+  delayed-dismiss variants (**484**); census fell **2,496→2,487 refs**,
+  **33,124→33,103 LOC**.
+- **Next:** retire `turn5Resolved` only after a typed terminal/next-command
+  boundary supplies all three live consumers; otherwise take rank 2's
+  analogous `turn13Resolved` predecessor as a separately evidenced slice.
+- **Notes:** no mechanics/RNG/AI/outcome, animation, trace/capture list,
+  ratchet/barrier, recording import, or prohibited selector changed.
+
 ## 817 — [bounded worker, 2026-08-01] rank-8 exact owner mirrors retired
 
 - **State:** implementation `d410cfe5`; focused exact/owner/terminal suites
@@ -57,23 +78,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   No mechanics/RNG/AI/outcome, animation, trace/capture list, ratchet,
   barrier, recording import, or timing/move/species/request/battle/turn/tick
   selector changed.
-
-## 815 — [bounded worker, 2026-08-01] rank-7 opponent locked-action owner landed
-
-- **State:** implementation `fea91d54`, documentation `2b94e1ea`; focused
-  locked-action/presentation/round suites are **48/48**, full `npm test` is
-  green (**569 files, 5722 passed + 1 skipped**), and production build is
-  green.
-- **Did:** the production seven-battle orchestrator now retains a completed
-  resolution by generic locked battler/current-move/PP-slot identity across a
-  genuine, independently presented player command. Submission reclaims the
-  immutable charge owner, appends the opponent strike without a second PP
-  write, restores visibility, publishes the typed forced request, and advances
-  the existing `PartySelectState` through switch-in. Player-owned FLY,
-  Scene-ON/OFF logical outcomes, and the seven-battle regression remain pinned.
-- **Next:** retire the remaining exact-renderer
-  `turn14Resolved`/`turn15PartySelect` mirrors as a separate bounded slice;
-  do not resume the canonical Battle-2 march.
-- **Notes:** no pixel count is claimed. No mechanics/RNG/AI/round outcome,
-  animation code/ledger, ratchet, barrier, recording import, canonical trace,
-  or timing/move/species/request/battle/turn/absolute-tick selector changed.

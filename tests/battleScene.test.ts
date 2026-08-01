@@ -1554,10 +1554,10 @@ describe("rank-3 turn-5 KO dismiss mirror retirement", () => {
     expect(turn5RockSlideKoDismissEligible(7000)).toBe(true);
   });
 
-  it("the historical dismiss A edge is presentation-inert: at the first eligible frame it produces exactly the same battle state as idle", () => {
+  it.each([6561, 6591])("the historical dismiss A edge at trace tick %i is presentation-inert and produces exactly the same battle state as idle", (pressTick) => {
     let state: EngineState = { ...createInitialState(), battleScene: stateAtTurn5Confirm().battleScene };
-    for (let i = 0; i < 6543 - 5959; i += 1) state = tick(state, new Set());
-    expect(state.battleScene!.elapsed).toBe(6543 - TICK0);
+    for (let i = 0; i < pressTick - 1 - 5959; i += 1) state = tick(state, new Set());
+    expect(state.battleScene!.elapsed).toBe(pressTick - 1 - TICK0);
     const idle = tick(state, new Set());
     const pressed = tick(state, new Set(["A"]));
     expect(pressed.battleScene).toEqual(idle.battleScene);

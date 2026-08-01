@@ -1,3 +1,9 @@
+## 815 — [bounded worker, 2026-08-01] rank-7 opponent locked-action owner landed
+
+- Archived from the live ledger. `fea91d54` retained a completed locked action
+  across an intervening command and advanced its typed forced selector through
+  switch-in; full live-entry detail remains in git history.
+
 ## 814 — [supervisor + bounded workers, 2026-08-01] rank-8 Scene-OFF status-icon receipt landed
 
 - Archived from the live ledger. `80c5d6af` projected the one-callback

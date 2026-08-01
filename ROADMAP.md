@@ -961,6 +961,16 @@ all requested Turn-16/Turn-17 rungs and delayed-input insurance are
 byte-identical to clean `60acda9c` (**2,163 captures**). Rank 8 is closed;
 continue only with earlier #39 mirrors, never a canonical Battle-2 march.
 
+**#39 rank-3 mirror follow-up (2026-08-01, `88fd05f6`):** the
+`turn5KoDismissElapsed` census found one producer and only its own one-shot
+guard as a reader; render, continuation, PP, and requests never consumed it.
+The dead field/branch is deleted while the immutable staged KO→switch-in→
+Sitrus→next-command lifecycle remains authoritative. All rank-3 and insurance
+pins plus +30 delayed-dismiss variants are byte-identical to clean
+`7d65832d` (**3,505 captures total**). `turn5Resolved` remains deliberately:
+its turn-6 dispatch, PP, and next-reopen consumers need a typed terminal/
+next-command owner before that predecessor can retire.
+
 Build the rules engine from the pinned source's actual structure: generated
 tables plus a typed Battle Script IR/interpreter and source-mapped item,
 ability, end-turn, AI, and switching hooks. Do not grow a collection of

@@ -165,9 +165,12 @@ level/healthbox/sent-out adapter-derived), Sitrus heal half `54278249`
 adapter-derived, timing curves kept, `TURN5_PRESENTATION_TIMING_NOT_
 STAGED` deleted), and the adapter swapped onto the #57-fixed shared
 staging helper (`14c4295b`, ~120-line local workaround deleted). All
-nine turn5 pins + five insurance pins held at every step;
-`turn5KoDismissElapsed`/`turn5Resolved` mirroring remains (unchanged
-consumers, same as turn13's). Rank 4 is **fully retired** (2026-07-31,
+nine turn5 pins + five insurance pins held at every step. The dead
+`turn5KoDismissElapsed` mirror is retired (`88fd05f6`): its sole reader was
+its own one-shot guard, while render/continuation already consumed the staged
+lifecycle. `turn5Resolved` remains because turn-6 dispatch, PP reconstruction,
+and the next reopen gate still read it (same predecessor class as turn13's).
+Rank 4 is **fully retired** (2026-07-31,
 all 5 slices): `174cc388` ROCK_SLIDE tails; `441ddf83`+`6aba6662`
 turn-7/8 FEATHER_DANCE staged+flipped; `0769ccc6` stat-fall banner
 reads each turn's own staged stat; `40c969e5`+`ef971686` BIND
