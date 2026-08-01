@@ -74,7 +74,7 @@ const stage = createSceneOnMovePresentation({
 let componentMatches = 0;
 let framebufferMatches = 0;
 const mismatches: string[] = [];
-let firstFramebufferDiff: string | null = null;
+const framebufferDiffLines: string[] = [];
 
 const key = (ring: {
   readonly x: number;
@@ -147,9 +147,8 @@ for (
     maxY = Math.max(maxY, y);
   }
   if (exact) framebufferMatches += 1;
-  else if (firstFramebufferDiff === null) {
-    firstFramebufferDiff =
-      `first framebuffer diff at frame ${frame}: ${count}px bbox ${minX},${minY}-${maxX},${maxY}`;
+  else {
+    framebufferDiffLines.push(`framebuffer diff at frame ${frame}: ${count}px bbox ${minX},${minY}-${maxX},${maxY}`);
     if (process.env.DEBUG_FRAMES === "1") {
       const appPng = new PNG({ width: 240, height: 160 });
       appPng.data.set(app);
@@ -170,7 +169,12 @@ for (
 const total = fixture.denseWindow.endFrame - fixture.denseWindow.startFrame + 1;
 console.log(`SUPERSONIC component ${componentMatches}/${total}; framebuffer ${framebufferMatches}/${total}`);
 if (mismatches.length || framebufferMatches !== total) {
-  if (firstFramebufferDiff) console.error(firstFramebufferDiff);
+  if (framebufferDiffLines.length) {
+    console.error(framebufferDiffLines.slice(0, 32).join("\n"));
+    if (framebufferDiffLines.length > 32) {
+      console.error(`...and ${framebufferDiffLines.length - 32} more framebuffer diff frames`);
+    }
+  }
   if (mismatches.length) console.error(mismatches.slice(0, 8).join("\n"));
   process.exit(1);
 }

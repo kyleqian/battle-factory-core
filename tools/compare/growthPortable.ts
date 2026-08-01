@@ -93,7 +93,7 @@ const stage = createSceneOnMovePresentation({
 let componentMatches = 0;
 let framebufferMatches = 0;
 const mismatches: string[] = [];
-let firstFramebufferDiff: string | null = null;
+const framebufferDiffLines: string[] = [];
 
 for (
   let frame = fixture.denseWindow.startFrame;
@@ -153,7 +153,7 @@ for (
   if (exact) framebufferMatches += 1;
   else {
     mismatches.push(`frame ${frame}: framebuffer`);
-    if (firstFramebufferDiff === null) {
+    {
       let count = 0;
       let minX = 240;
       let minY = 160;
@@ -174,8 +174,7 @@ for (
         maxX = Math.max(maxX, x);
         maxY = Math.max(maxY, y);
       }
-      firstFramebufferDiff =
-        `first framebuffer diff at frame ${frame}: ${count}px bbox ${minX},${minY}-${maxX},${maxY}`;
+      framebufferDiffLines.push(`framebuffer diff at frame ${frame}: ${count}px bbox ${minX},${minY}-${maxX},${maxY}`);
     }
   }
 }
@@ -185,7 +184,12 @@ console.log(
   `GROWTH component ${componentMatches}/${total}; framebuffer ${framebufferMatches}/${total}`,
 );
 if (mismatches.length) {
-  if (firstFramebufferDiff) console.error(firstFramebufferDiff);
+  if (framebufferDiffLines.length) {
+    console.error(framebufferDiffLines.slice(0, 32).join("\n"));
+    if (framebufferDiffLines.length > 32) {
+      console.error(`...and ${framebufferDiffLines.length - 32} more framebuffer diff frames`);
+    }
+  }
   console.error(mismatches.join("\n"));
   process.exit(1);
 }

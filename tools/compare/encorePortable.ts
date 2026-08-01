@@ -84,7 +84,7 @@ const stage = createSceneOnMovePresentation({
 });
 let componentMatches = 0;
 let framebufferMatches = 0;
-let firstFramebufferDiff: string | null = null;
+const framebufferDiffLines: string[] = [];
 const sampledFramebufferDiffs: string[] = [];
 const componentDiffs: string[] = [];
 
@@ -250,10 +250,11 @@ for (
     maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
   }
   if (exact) framebufferMatches += 1;
-  else if (firstFramebufferDiff === null) {
-    firstFramebufferDiff =
-      `first framebuffer diff at frame ${frame}/age ${age}: ${count}px`
-      + ` bbox ${minX},${minY}-${maxX},${maxY}; ${samples.join("; ")}`;
+  else {
+    framebufferDiffLines.push(
+      `framebuffer diff at frame ${frame}/age ${age}: ${count}px`
+      + ` bbox ${minX},${minY}-${maxX},${maxY}; ${samples.join("; ")}`,
+    );
   }
   if (!exact && [43, 44, 50, 60, 63, 64, 100, 149, 160, 167].includes(age)) {
     sampledFramebufferDiffs.push(`age ${age}: ${count}px bbox ${minX},${minY}-${maxX},${maxY}`);
@@ -266,7 +267,12 @@ console.log(
   + ` framebuffer ${framebufferMatches}/${total}`,
 );
 if (componentMatches !== total || framebufferMatches !== total) {
-  if (firstFramebufferDiff) console.error(firstFramebufferDiff);
+  if (framebufferDiffLines.length) {
+    console.error(framebufferDiffLines.slice(0, 32).join("\n"));
+    if (framebufferDiffLines.length > 32) {
+      console.error(`...and ${framebufferDiffLines.length - 32} more framebuffer diff frames`);
+    }
+  }
   if (sampledFramebufferDiffs.length) console.error(sampledFramebufferDiffs.join("\n"));
   if (componentDiffs.length) console.error(componentDiffs.slice(0, 20).join("\n"));
   console.error(`scratch: ${scratch}`);

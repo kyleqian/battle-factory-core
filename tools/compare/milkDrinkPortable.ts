@@ -77,7 +77,7 @@ const stage = createSceneOnMovePresentation({
 let componentMatches = 0;
 let framebufferMatches = 0;
 const mismatches: string[] = [];
-let firstFramebufferDiff: string | null = null;
+const framebufferDiffLines: string[] = [];
 
 const predictedKey = (sprite: ReturnType<typeof sceneOnMilkDrinkView>["sprites"][number]) => {
   if (sprite.kind === "bottle") {
@@ -166,16 +166,20 @@ for (
     maxY = Math.max(maxY, y);
   }
   if (exact) framebufferMatches += 1;
-  else if (firstFramebufferDiff === null) {
-    firstFramebufferDiff =
-      `first framebuffer diff at frame ${frame}: ${count}px bbox ${minX},${minY}-${maxX},${maxY}`;
+  else {
+    framebufferDiffLines.push(`framebuffer diff at frame ${frame}: ${count}px bbox ${minX},${minY}-${maxX},${maxY}`);
   }
 }
 
 const total = fixture.denseWindow.endFrame - fixture.denseWindow.startFrame + 1;
 console.log(`MILK_DRINK component ${componentMatches}/${total}; framebuffer ${framebufferMatches}/${total}`);
 if (mismatches.length || framebufferMatches !== total) {
-  if (firstFramebufferDiff) console.error(firstFramebufferDiff);
+  if (framebufferDiffLines.length) {
+    console.error(framebufferDiffLines.slice(0, 32).join("\n"));
+    if (framebufferDiffLines.length > 32) {
+      console.error(`...and ${framebufferDiffLines.length - 32} more framebuffer diff frames`);
+    }
+  }
   if (mismatches.length) console.error(mismatches.slice(0, 8).join("\n"));
   process.exit(1);
 }

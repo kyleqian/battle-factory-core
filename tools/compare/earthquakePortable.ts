@@ -62,7 +62,7 @@ const stage = createSceneOnMovePresentation({
 });
 let componentMatches = 0, framebufferMatches = 0;
 const mismatches: string[] = [];
-let firstFramebufferDiff: string | null = null;
+const framebufferDiffLines: string[] = [];
 const blend15 = (packed: number, target: number, coefficient: number): number => {
   const r = packed & 31, g = (packed >>> 5) & 31, b = (packed >>> 10) & 31;
   const tr = target & 31, tg = (target >>> 5) & 31, tb = (target >>> 10) & 31;
@@ -130,14 +130,19 @@ for (let frame = fixture.denseWindow.startFrame; frame <= fixture.denseWindow.en
     maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
   }
   if (exact) framebufferMatches += 1;
-  else if (firstFramebufferDiff === null) {
-    firstFramebufferDiff = `first framebuffer diff at frame ${frame}: ${count}px bbox ${minX},${minY}-${maxX},${maxY}`;
+  else {
+    framebufferDiffLines.push(`framebuffer diff at frame ${frame}: ${count}px bbox ${minX},${minY}-${maxX},${maxY}`);
   }
 }
 const total = fixture.denseWindow.endFrame - fixture.denseWindow.startFrame + 1;
 console.log(`EARTHQUAKE component ${componentMatches}/${total}; framebuffer ${framebufferMatches}/${total}`);
 if (mismatches.length || framebufferMatches !== total) {
-  if (firstFramebufferDiff) console.error(firstFramebufferDiff);
+  if (framebufferDiffLines.length) {
+    console.error(framebufferDiffLines.slice(0, 32).join("\n"));
+    if (framebufferDiffLines.length > 32) {
+      console.error(`...and ${framebufferDiffLines.length - 32} more framebuffer diff frames`);
+    }
+  }
   if (mismatches.length) console.error(mismatches.slice(0, 10).join("\n"));
   console.error(`scratch: ${scratch}`);
   process.exit(1);

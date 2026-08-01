@@ -71,6 +71,11 @@ Usage: tools/run-subagent.sh [options] "step brief for the worker"
                         alias for --lane animation
   -l, --lane NAME       main, side, or animation. Side/animation use fresh
                         worktrees and must not touch shared docs.
+      --base REF        base the side/animation worktree on REF instead of
+                        current HEAD (name the last supervisor-verified green
+                        commit when launching while main is mid-step, so the
+                        worker doesn't inherit transiently-red intermediate
+                        states)
       --log FILE        provider event log path
       --brief-file FILE read the step brief verbatim from a file
       --read-only       run an audit that must leave no edits or commits
@@ -99,6 +104,7 @@ LANE="${WORKER_LANE:-main}"
 if [[ "${WORKTREE:-0}" == "1" ]]; then LANE="side"; fi
 BRIEF=""
 BRIEF_FILE=""
+WT_BASE_REF=""
 PRINT_CONFIG=0
 READ_ONLY=0
 PROVIDER_FLAG_SET=0
@@ -112,6 +118,8 @@ while [[ $# -gt 0 ]]; do
     --animation-worktree|--animation-lane) LANE="animation"; shift ;;
     -l|--lane)        LANE="${2:?--lane needs main, side, or animation}"; shift 2 ;;
     --lane=*)         LANE="${1#*=}"; shift ;;
+    --base)           WT_BASE_REF="${2:?--base needs a git ref}"; shift 2 ;;
+    --base=*)         WT_BASE_REF="${1#*=}"; shift ;;
     -p|--provider)    PROVIDER="${2:?--provider needs a name}"; PROVIDER_FLAG_SET=1; shift 2 ;;
     --provider=*)     PROVIDER="${1#*=}"; PROVIDER_FLAG_SET=1; shift ;;
     -M|--max-mode)    MAX_MODE=1; shift ;;
@@ -179,6 +187,10 @@ if [[ ! "$PROVIDER" =~ ^(claude|codex)$ ]]; then
 fi
 if [[ ! "$LANE" =~ ^(main|side|animation)$ ]]; then
   echo "run-subagent: unsupported lane '$LANE' (expected main, side, or animation)" >&2
+  exit 2
+fi
+if [[ -n "$WT_BASE_REF" && "$LANE" == "main" ]]; then
+  echo "run-subagent: --base only applies to worktree lanes (side/animation); the main lane runs in the shared tree at HEAD" >&2
   exit 2
 fi
 case "$PROVIDER" in
@@ -312,9 +324,16 @@ if [[ "$IS_WORKTREE" == "1" ]]; then
   WT_ID="${LANE}-$(date +%Y%m%d-%H%M%S)"
   WT_BRANCH="worker/$WT_ID"
   WT_PATH="$(pwd)/.worktrees/$WT_ID"
-  WT_BASE="$(git rev-parse HEAD)"
+  if [[ -n "$WT_BASE_REF" ]]; then
+    if ! WT_BASE="$(git rev-parse --verify --quiet "${WT_BASE_REF}^{commit}")"; then
+      echo "run-subagent: --base '$WT_BASE_REF' does not name a commit" >&2
+      exit 2
+    fi
+  else
+    WT_BASE="$(git rev-parse HEAD)"
+  fi
   echo "worktree: $WT_PATH · branch $WT_BRANCH · base ${WT_BASE:0:7}"
-  git worktree add -b "$WT_BRANCH" "$WT_PATH" HEAD >/dev/null
+  git worktree add -b "$WT_BRANCH" "$WT_PATH" "$WT_BASE" >/dev/null
   # reference/ (ROM + pret source) is a gitignored on-disk prerequisite; the
   # worktree shares the main tree's copy — it's read-only reference material.
   ln -s "$(pwd)/reference" "$WT_PATH/reference"
@@ -630,8 +649,16 @@ if [[ "$marker_epoch" =~ ^[0-9]+$ ]] && (( marker_epoch >= LAUNCH_EPOCH )); then
   exit 42
 fi
 # Turn authentication failures into a pointed hint instead of a mystery exit 1.
-if [[ "$worker_status" -ne 0 && -f "$AGENT_LOG" ]] \
-    && grep -qiE 'not logged in|authentication required|unauthorized|401' \
+# Cap/deadline kills (124 from the deadline wrappers) and signal deaths (>=128)
+# are NOT auth failures — a killed worker's log routinely contains
+# "401"/"unauthorized" strings from its own project work, and the old
+# unconditional hint mis-directed triage toward re-auth (PAPERCUTS
+# 2026-07-30). Name the kill for what it is; auth is fine if the next
+# launch starts.
+if [[ "$worker_status" -eq 124 || "$worker_status" -ge 128 ]]; then
+  echo "run-subagent: worker was killed before turn completion (exit $worker_status — cap/deadline or signal, NOT an authentication failure). Check the digest's worker-FAILED marker and the branch's committed state." >&2
+elif [[ "$worker_status" -ne 0 && -f "$AGENT_LOG" ]] \
+    && grep -qiE 'not logged in|authentication required|unauthorized|HTTP[ /]?401' \
       "$AGENT_LOG" ${CODEX_STDERR_LOG:+"$CODEX_STDERR_LOG"}; then
   if [[ "$PROVIDER" == "claude" ]]; then
     echo "run-subagent: worker exited unauthenticated — this launch was probably sandboxed. Relaunch with the Bash tool's dangerouslyDisableSandbox: true (see the header comment)." >&2

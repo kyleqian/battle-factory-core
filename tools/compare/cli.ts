@@ -1,11 +1,13 @@
-export const DEFAULT_COMPARE_OUT_DIR = "tools/compare/out/latest";
 export const COMPARE_USAGE =
   "usage: npm run compare -- <trace.json> [outDir] " +
-  "[--capture-range START:END] [--summary]";
+  "[--capture-range START:END] [--summary]\n" +
+  "(default outDir: a fresh tools/compare/out/run-* directory per invocation; " +
+  "tools/compare/out/latest symlinks to the newest run)";
 
 export interface CompareCliOptions {
   readonly tracePath: string;
-  readonly outDir: string;
+  /** Explicit output directory; when absent the caller allocates a per-run one. */
+  readonly outDir?: string;
   readonly summary: boolean;
   readonly captureRange?: readonly [start: number, end: number];
 }
@@ -58,7 +60,7 @@ export function parseCompareCliArgs(args: readonly string[]): CompareCliOptions 
   if (positional.length > 2) throw new Error(`unexpected argument: ${positional[2]}`);
   return {
     tracePath: positional[0]!,
-    outDir: positional[1] ?? DEFAULT_COMPARE_OUT_DIR,
+    ...(positional[1] ? { outDir: positional[1] } : {}),
     summary,
     ...(captureRange ? { captureRange } : {}),
   };

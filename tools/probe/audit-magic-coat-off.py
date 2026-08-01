@@ -75,8 +75,11 @@ def main() -> None:
             "allowNoPp": bool(hit_marker & HITMARKER_ALLOW_NO_PP),
             "bounceMove": [bool(oracle.read_u32(protect + battler * 4) & PROTECT_BOUNCE_MOVE)
                            for battler in range(2)],
-            "attackStages": [oracle.read_u8(mons + battler * BATTLE_MON_SIZE + 0x3A)
-                             for battler in range(2)],
+            # BattlePokemon.statStages[] @0x18, index order HP,ATK,DEF,SPEED,SPATK,SPDEF,ACC,EVA
+            # (6 = neutral). The old "attackStages" read at 0x3A was the last
+            # nickname byte, not a stat stage.
+            "statStages": [[oracle.read_u8(mons + battler * BATTLE_MON_SIZE + 0x18 + stat)
+                            for stat in range(8)] for battler in range(2)],
             "pp": [[oracle.read_u8(mons + battler * BATTLE_MON_SIZE + 0x24 + slot)
                     for slot in range(4)] for battler in range(2)],
         }

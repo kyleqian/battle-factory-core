@@ -31,6 +31,7 @@ import {
 } from "./oracleClient.ts";
 import {
   prepareCompareOutputDirectory,
+  prepareCompareRunOutputDirectory,
   resolveCompareFixturePath,
   resolveCompareTracePath,
   resolveSourceTracePath,
@@ -47,7 +48,8 @@ try {
   console.error(COMPARE_USAGE);
   process.exit(2);
 }
-const { outDir, summary, captureRange } = cli;
+const { summary, captureRange } = cli;
+const outDir = cli.outDir ?? prepareCompareRunOutputDirectory();
 let tracePath: string;
 try {
   tracePath = resolveCompareTracePath(cli.tracePath);
@@ -105,6 +107,19 @@ if (traceFile.sourceTrace) {
   } as Trace;
 }
 trace = withCaptureRange(trace, captureRange);
+if (!trace.appRoute) {
+  // Missing appRoute silently replays the app on its default
+  // generated-orchestrator route; for canonical-recorded traces that reads
+  // as a wholesale renderer mismatch (recurred 4x on 2026-07-31 alone).
+  // tests/compareTraceAppRoute.test.ts pins the legacy allowlist — new
+  // traces must declare the field.
+  console.warn(
+    'note: trace declares no "appRoute" — app replays on the default '
+    + "generated-orchestrator route. If this compare wholesale-mismatches, "
+    + 'set "appRoute": "canonical-recorded" (or "generated-orchestrator") '
+    + "in the trace before debugging the renderer.",
+  );
+}
 const oracleProfile: OracleProfile = trace.oracleProfile ?? "battle-scene-on";
 prepareCompareOutputDirectory(outDir);
 
