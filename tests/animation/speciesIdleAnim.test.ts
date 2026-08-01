@@ -7,6 +7,10 @@ import {
   GROW_VIBRATE_FACTORY_FRONT_SPECIES,
   GROW_VIBRATE_FRONT_SPECIES,
   GROW_VIBRATE_OUTSIDE_FACTORY_FRONT_SPECIES,
+  horizontalJumpsVerticalStretchFrameAtTick,
+  H_JUMPS_V_STRETCH_FACTORY_FRONT_SPECIES,
+  H_JUMPS_V_STRETCH_FRONT_SPECIES,
+  H_JUMPS_V_STRETCH_OUTSIDE_FACTORY_FRONT_SPECIES,
   horizontalShakeFrameAtTick,
   H_SHAKE_FACTORY_FRONT_SPECIES,
   H_SHAKE_FRONT_SPECIES,
@@ -78,6 +82,12 @@ import charmanderRunB from "../../tools/compare/fixtures/sendout-front-charmande
 import delibirdScenario from "../../tools/compare/fixtures/sendout-front-delibird.json" with { type: "json" };
 import delibirdRunA from "../../tools/compare/fixtures/sendout-front-delibird-run-a.json" with { type: "json" };
 import delibirdRunB from "../../tools/compare/fixtures/sendout-front-delibird-run-b.json" with { type: "json" };
+import mankeyScenario from "../../tools/compare/fixtures/sendout-front-mankey.json" with { type: "json" };
+import mankeyRunA from "../../tools/compare/fixtures/sendout-front-mankey-run-a.json" with { type: "json" };
+import mankeyRunB from "../../tools/compare/fixtures/sendout-front-mankey-run-b.json" with { type: "json" };
+import wynautScenario from "../../tools/compare/fixtures/sendout-front-wynaut.json" with { type: "json" };
+import wynautRunA from "../../tools/compare/fixtures/sendout-front-wynaut-run-a.json" with { type: "json" };
+import wynautRunB from "../../tools/compare/fixtures/sendout-front-wynaut-run-b.json" with { type: "json" };
 
 const squirtleRawA = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-squirtle-run-a.json", import.meta.url),
@@ -114,6 +124,18 @@ const delibirdRawA = readFileSync(
 );
 const delibirdRawB = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-delibird-run-b.json", import.meta.url),
+);
+const mankeyRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-mankey-run-a.json", import.meta.url),
+);
+const mankeyRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-mankey-run-b.json", import.meta.url),
+);
+const wynautRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-wynaut-run-a.json", import.meta.url),
+);
+const wynautRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-wynaut-run-b.json", import.meta.url),
 );
 
 describe("speciesIdleAnim", () => {
@@ -1204,6 +1226,282 @@ describe("speciesIdleAnim", () => {
         "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN",
         "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN", "KADABRA", "REGISTEEL",
         "SQUIRTLE", "SHUCKLE", "SEADRA", "MARSHTOMP",
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("horizontalJumpsVerticalStretchFrameAtTick (single-run callbacks _0/_1/_2)", () => {
+    it("derives all 10 selector mappings as Factory-reachable with no outside mappings", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_H_JUMPS_V_STRETCH")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(H_JUMPS_V_STRETCH_FRONT_SPECIES).toEqual(generated);
+      expect(H_JUMPS_V_STRETCH_FRONT_SPECIES).toEqual([
+        "MANKEY", "POLIWHIRL", "VICTREEBEL", "EXEGGUTOR", "FURRET",
+        "POLITOED", "AIPOM", "PHANPY", "GRUMPIG", "WYNAUT",
+      ]);
+      expect(H_JUMPS_V_STRETCH_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(H_JUMPS_V_STRETCH_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(H_JUMPS_V_STRETCH_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of H_JUMPS_V_STRETCH_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins AddNewAnim defaults, the single-run data=-1 override, and tick-0 affine start", () => {
+      expect(horizontalJumpsVerticalStretchFrameAtTick(0)).toEqual({
+        x2: 0,
+        y2: 0,
+        data2: 12,
+        data3: 0,
+        data4: 0,
+        animRotation: 0,
+        animDelay: 0,
+        animRuns: 1,
+        animSpeed: 0,
+        animData: -1,
+        counter: 0,
+        xScale: 256,
+        yScale: 256,
+        startedAffine: true,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        resetSpriteAfterAnim: false,
+        callback: "HorizontalJumpsVerticalStretch_0",
+        affineMode: "double",
+      });
+      // The distinct `_Twice` initializer uses data=1/runs=2 and reaches the
+      // delay/repeat branch; neither value is inherited by this family.
+      expect(horizontalJumpsVerticalStretchFrameAtTick(0)).toMatchObject({
+        animDelay: 0,
+        animRuns: 1,
+        animData: -1,
+      });
+    });
+
+    it("pins every callback-_0 jump write and its strict >128 transition/reset", () => {
+      const active = [
+        [0,0,0],[12,0,-2],[24,-1,-4],[36,-2,-6],[48,-3,-7],[60,-3,-7],
+        [72,-4,-7],[84,-5,-7],[96,-6,-5],[108,-6,-3],[120,-7,-1],
+      ] as const;
+      for (const [tick, [counter, x2, y2]] of active.entries()) {
+        expect(horizontalJumpsVerticalStretchFrameAtTick(tick)).toMatchObject({
+          x2,
+          y2,
+          data2: counter + 12,
+          data3: 0,
+          data4: 0,
+          animDelay: 0,
+          counter,
+          xScale: 256,
+          yScale: 256,
+          normalFrontDontFlip: true,
+          tryFlipXCalls: 2,
+          callback: "HorizontalJumpsVerticalStretch_0",
+          affineMode: "double",
+        });
+      }
+      expect(horizontalJumpsVerticalStretchFrameAtTick(11)).toMatchObject({
+        x2: -7,
+        y2: -1,
+        data2: 0,
+        data3: 0,
+        data4: 0,
+        counter: 132,
+        callback: "HorizontalJumpsVerticalStretch_1",
+      });
+    });
+
+    it("pins all 49 callback-_1 sine/scale/x2/y2 writes and the strict >48 transition", () => {
+      const active = [
+        [0,0,8,-7,0,256,256],[1,0,16,-7,1,250,268],[2,0,24,-7,3,244,280],
+        [3,0,32,-7,4,239,291],[4,0,40,-7,5,234,301],[5,0,48,-7,6,230,309],
+        [6,0,56,-7,7,227,315],[7,0,64,-7,7,225,318],[8,0,72,-7,8,224,320],
+        [9,0,80,-7,7,225,318],[10,0,88,-7,7,227,315],[11,0,96,-7,6,230,309],
+        [12,0,104,-7,5,234,301],[13,0,112,-7,4,239,291],[14,0,120,-7,3,244,280],
+        [15,0,128,-7,1,250,268],[16,8,136,-6,-3,256,256],[17,16,144,-5,-7,263,243],
+        [18,24,152,-4,-11,269,231],[19,32,160,-3,-14,274,220],
+        [20,40,168,-2,-16,279,210],[21,48,176,-1,-18,283,203],
+        [22,56,184,0,-19,286,197],[23,64,192,1,-20,288,193],
+        [24,72,200,2,-19,288,192],[25,80,208,3,-18,288,193],
+        [26,88,216,4,-16,286,197],[27,96,224,5,-14,283,203],
+        [28,104,232,6,-11,279,210],[29,112,240,7,-7,274,220],
+        [30,120,248,8,-3,269,231],[31,128,0,9,0,263,243],[32,128,8,9,0,256,256],
+        [33,128,16,9,1,250,268],[34,128,24,9,3,244,280],[35,128,32,9,4,239,291],
+        [36,128,40,9,5,234,301],[37,128,48,9,6,230,309],[38,128,56,9,7,227,315],
+        [39,128,64,9,7,225,318],[40,128,72,9,8,224,320],[41,128,80,9,7,225,318],
+        [42,128,88,9,7,227,315],[43,128,96,9,6,230,309],
+        [44,128,104,9,5,234,301],[45,128,112,9,4,239,291],
+        [46,128,120,9,3,244,280],[47,128,128,9,1,250,268],
+        [48,128,136,9,0,256,256],
+      ] as const;
+      expect(active).toHaveLength(49);
+      for (const [offset, [counter, data3, data4, x2, y2, xScale, yScale]]
+        of active.entries()) {
+        expect(horizontalJumpsVerticalStretchFrameAtTick(12 + offset)).toMatchObject({
+          x2,
+          y2,
+          data2: counter + 1,
+          data3,
+          data4,
+          counter,
+          xScale,
+          yScale,
+          normalFrontDontFlip: true,
+          tryFlipXCalls: 2,
+          callback: "HorizontalJumpsVerticalStretch_1",
+          affineMode: "double",
+        });
+      }
+      expect(horizontalJumpsVerticalStretchFrameAtTick(61)).toMatchObject({
+        x2: 9,
+        y2: 0,
+        data2: 0,
+        data3: 128,
+        data4: 136,
+        counter: 49,
+        xScale: 256,
+        yScale: 256,
+        callback: "HorizontalJumpsVerticalStretch_2",
+      });
+    });
+
+    it("pins every callback-_2 write and terminal ResetSpriteAfterAnim/final increment", () => {
+      const active = [
+        [0,8,0],[12,8,-2],[24,7,-4],[36,6,-6],[48,5,-7],[60,5,-7],
+        [72,4,-7],[84,3,-7],[96,2,-5],[108,2,-3],[120,1,-1],
+      ] as const;
+      for (const [offset, [counter, x2, y2]] of active.entries()) {
+        expect(horizontalJumpsVerticalStretchFrameAtTick(62 + offset)).toMatchObject({
+          x2,
+          y2,
+          data2: counter + 12,
+          data3: 128,
+          data4: 136,
+          counter,
+          xScale: 256,
+          yScale: 256,
+          normalFrontDontFlip: true,
+          tryFlipXCalls: 2,
+          resetSpriteAfterAnim: false,
+          callback: "HorizontalJumpsVerticalStretch_2",
+          affineMode: "double",
+        });
+      }
+      expect(horizontalJumpsVerticalStretchFrameAtTick(73)).toEqual({
+        x2: 0,
+        y2: 0,
+        data2: 144,
+        data3: 128,
+        data4: 136,
+        animRotation: 0,
+        animDelay: 0,
+        animRuns: 1,
+        animSpeed: 0,
+        animData: -1,
+        counter: 132,
+        xScale: 256,
+        yScale: 256,
+        startedAffine: false,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      });
+      expect(horizontalJumpsVerticalStretchFrameAtTick(74)).toEqual(
+        horizontalJumpsVerticalStretchFrameAtTick(73),
+      );
+      expect(horizontalJumpsVerticalStretchFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      [56, mankeyScenario],
+      [360, wynautScenario],
+    ] as const)("stages a complete legal Scene-ON party for opponent species %i", (species, scenario) => {
+      expect(scenario.mode).toBe("mechanicLab");
+      expect(scenario.profile).toBe("battle-scene-on");
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(species);
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "MANKEY", mankeyRunA, mankeyRunB, mankeyRawA, mankeyRawB, 5, 56,
+        "dd828c5122f1693d1a947794c315648eb3fd1edbb15b0d988667d9de8ffb5161",
+      ],
+      [
+        "WYNAUT", wynautRunA, wynautRunB, wynautRawA, wynautRawB, 4, 360,
+        "0998becc3884e86138b282f1a17b153827575583adeac15283618a98b2bc9d61",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species,
+      runA,
+      runB,
+      rawA,
+      rawB,
+      animCmdIndex,
+      data2,
+      rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_H_JUMPS_V_STRETCH");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("preserves all previously accepted representative and sibling families", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of [
+        "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN",
+        "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN", "KADABRA", "REGISTEEL",
+        "SQUIRTLE", "SHUCKLE", "SEADRA", "MARSHTOMP", "CHARMANDER", "DELIBIRD",
+        "MANKEY", "WYNAUT",
       ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }
