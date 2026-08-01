@@ -15,21 +15,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 810 — [bounded worker, 2026-08-01] ISSUES #56 item 1 staged ready-tail verdict: duration is non-universal
 
-- **State:** production `src/` is intentionally unchanged. Baseline is green
-  (**567 files, 5709 passed + 1 skipped**) and build/oracle are green; staged
-  probe evidence and the exact legal ONIX fixture are ready for acceptance
-  verification and an evidence commit.
+- **State:** evidence commit `e497c7d6`; production `src/` is intentionally
+  unchanged. Focused intro/ack/handoff/battleScene/ratchet is **244/244**;
+  full `npm test` is green (**567 files, 5709 passed + 1 skipped**) and build
+  is green.
 - **Did:** generalized the canonical RAM watcher to accept `factoryLegal`
   fixtures. Canonical ONIX is exec-flags **1738→1741→1744** (+3 dispatch,
   +3 AI); staged YOSHI reproduces **1847→1850→1853**, but same-player-species
   staged ONIX is **1885→1888→1890** (+3/+2). The source mechanism is shared;
   its duration is AI-decision-dependent, so a fixed generic +6 tail is false.
-- **Next:** run the required focused suites and all four compares, then full
-  test/build; retain the existing route term and commit the clean evidence
-  checkpoint with exact counts/scores.
-- **Notes:** no route/species/trainer/tick selector, ratchet move, unsupported
-  branch, or production change. Item 1 is resolved; #56 item 2 remains open.
-- **PAPERCUT:** none so far.
+- **Next:** #56 item 2 remains open at entry 809's hardware-OAM/display-latch
+  discriminator; do not revive item 1 or add a fixed player-ready tail.
+- **Notes:** fresh dense holds: interactive **715/715**, command **128/128**,
+  YOSHI **700/751**, MAGNETON **703/751**. The ready-lag branch is retained;
+  no route/species/trainer/tick selector, ratchet move, unsupported branch,
+  or production change was added.
+- **PAPERCUT:** none.
 
 ## 809 — [bounded worker, 2026-07-31 ~night] ISSUES #56 item 2 raw-clock/discriminator checkpoint; no unsafe presentation fit landed
 
