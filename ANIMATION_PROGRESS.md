@@ -1,5 +1,29 @@
 # Animation coverage
 
+## Front `ANIM_V_SQUISH_AND_BOUNCE` terminal family accepted (2026-07-31)
+
+**Verdict:** rung 2a is complete for the generated 50-species Factory front
+family. `speciesIdleAnim.ts` now dispatches from
+`send-out-anim-selector-tables.json`, not a hand-maintained species map, and
+ports `VerticalSquishBounce`'s 49 active callbacks plus affine/y2 terminal
+cleanup before `WaitAnimEnd`. Existing ONIX `ANIM_RAPID_H_HOPS` support is
+unchanged.
+
+**Evidence:** complete legal Scene-ON parties settle opponent-front BAYLEEF
+and MAGBY at **x2=0 / y2=0 / animNum=1 / SpriteCallbackDummy**. Two fresh
+RAM-probe runs per species are byte-identical: BAYLEEF receipt SHA-256
+`e5bcb0354f65713fa5ef5713035209762ebf6e204a48e985b9d05ab58f38fc6a`,
+MAGBY `58cb14b494d54e6e4950642d9cd57e841a0dc8529f784c24e4b3b46adc45f2ab`.
+Tier-1 pins source arithmetic, generated dispatch/all 50 species, both paired
+receipts, and ONIX regression. Full acceptance gates are green: **567 files,
+5711 passed + 1 skipped**, plus the production build.
+
+**Coverage / next:** `ANIMATION_COVERAGE.json` remains byte-identical and
+`npm run animation:coverage` remains **107 exact / 0 partial / 0 staged / 169
+unsupported**. Continue the ordered front-family terminal ladder; no move
+track was fabricated and no gameplay, engine seam, boundary, barrier, RNG,
+turn, damage, or facility state changed.
+
 ## PRIORITY DIRECTIVE — send-out intro animations run ahead of the move queue (2026-07-31)
 
 **State:** User-set priority, recorded by the interactive main session at the
