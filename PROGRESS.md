@@ -13,6 +13,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 822 — [bounded MAIN worker, 2026-08-01] rank-2 turn-13 predecessor handoff retired
+
+- **State:** implementation `53472f3d` + `79885140`; the typed adapter
+  handoff now replaces `turn13Resolved` and the source/test census is clean.
+- **Did:** published the immutable post-turn-13/next-command handoff with
+  DRAGON_BREATH **18/20**, persisted slot 2, and typed settled/ready
+  redraw-input facts. Swapped the following FIGHT reopen gate, dispatcher
+  threading/rejection, and turn-14 submenu PP reconstruction; the FLY owner
+  remains its distinct post-turn-14 **17/20** owner. Kept
+  `opponentFaintDismissElapsed` and `turn5Resolved` untouched.
+- **Next:** resume the remaining roadmap/#39 inventory from its next bounded
+  lifecycle slice; the separate turn-5 predecessor class remains open.
+- **Notes:** Tier-1 proof/consumer suites green; full `npm test` **572 files,
+  5,902 passed + 1 skipped**, and build green. OFF compares: 141/141,
+  242/242, dense-b 223/223, turn13-sandattack 190/190; dense-a remains its
+  parent-identical parked #23 result (204/256 on `41409b24` and here).
+  `turn13-menu` remains 56/57; `turn14-fly-miss` aborts on the same preexisting
+  unresolved item-restored-health placeholder in parent `41409b24`.
+
 ## 821 — [supervisor orient, 2026-08-01] animation-main folded; freshness FAIL judged client-only
 
 - **State:** master fast-forwarded to fold union `4843f6c8`; full `npm test`
@@ -67,23 +86,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `anchor.json` compare passed 1/1 through a fresh `run-*` dir with the
   `latest` symlink migrated from the legacy directory; the launcher's
   `--base` guard and help text exercised directly.
-
-## 819 — [bounded worker, 2026-08-01] rank-2 predecessor audit checkpoint
-
-- **State:** evidence checkpoint `14e4fe59`; no production change. Tier-1
-  predecessor pin is green, standalone
-  TypeScript is green, full `npm test` is green (**571 files, 5,729 passed +
-  1 skipped**), and production build is green.
-- **Did:** mapped `turn13Resolved` and its adjacent KO-dismiss lifecycle. The
-  mirror cannot use the current FLY owner: the predecessor command needs
-  DRAGON_BREATH **18/20**, while that already-completed following charge owns
-  **17/20**. Typed redraw readiness and persisted-slot facts are also absent.
-  `opponentFaintDismissElapsed` is live in cursor freeze and switch-in.
-- **Next:** first publish a typed turn-13 completed-resolution/next-command
-  handoff owning PP, persisted slot, and redraw/input readiness; only then
-  retire `turn13Resolved`. Keep the variable dismiss edge until its lifecycle
-  owns it.
-- **Notes:** Tier-1 pins the 18-versus-17 boundary; full audit is in
-  `docs/rank2-turn13resolved-predecessor-audit.md`. No mechanics/RNG/AI/
-  outcome, runtime presentation, animation, trace/capture list, ratchet,
-  barrier, recording import, or prohibited selector changed.

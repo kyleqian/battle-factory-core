@@ -1,3 +1,23 @@
+## 819 — [bounded worker, 2026-08-01] rank-2 predecessor audit checkpoint
+
+- **State:** evidence checkpoint `14e4fe59`; no production change. Tier-1
+  predecessor pin is green, standalone TypeScript is green, full `npm test`
+  is green (**571 files, 5,729 passed + 1 skipped**), and production build is
+  green.
+- **Did:** mapped `turn13Resolved` and its adjacent KO-dismiss lifecycle. The
+  mirror cannot use the current FLY owner: the predecessor command needs
+  DRAGON_BREATH **18/20**, while that already-completed following charge owns
+  **17/20**. Typed redraw readiness and persisted-slot facts are also absent.
+  `opponentFaintDismissElapsed` is live in cursor freeze and switch-in.
+- **Next:** first publish a typed turn-13 completed-resolution/next-command
+  handoff owning PP, persisted slot, and redraw/input readiness; only then
+  retire `turn13Resolved`. Keep the variable dismiss edge until its lifecycle
+  owns it.
+- **Notes:** Tier-1 pins the 18-versus-17 boundary; full audit is in
+  `docs/rank2-turn13resolved-predecessor-audit.md`. No mechanics/RNG/AI/
+  outcome, runtime presentation, animation, trace/capture list, ratchet,
+  barrier, recording import, or prohibited selector changed.
+
 ## 818 — [bounded worker, 2026-08-01] rank-3 dead KO-dismiss mirror retired
 
 - **State:** implementation `88fd05f6`; focused owner/menu/scene/ratchet
