@@ -13,6 +13,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 830 — [bounded MAIN worker, 2026-08-01] turn-9 predecessor handoff retired
+
+- **State:** proof `8e0fbc80`, implementation `6f9ef899`; source/test census
+  has no `turn9Resolved` reference.
+- **Did:** published the immutable completed-turn-9/next-command handoff with
+  canonical PP **[3,19,19,10]**, persisted slot 0, and settled/ready facts;
+  moved turn-10 dispatch, slot-0 PP reconstruction, and the following reopen
+  guard onto it without composing a turn-9 move stage.
+- **Next:** take only the next separately scoped #39 owner-chain slice; do not
+  batch `turn10Resolved` or another field into this completed retirement.
+- **Notes:** clean-parent `00f79944` (`8e0fbc80^`) differential app replay is
+  byte-identical across all requested turn-9 primary, turn-10 reader, and
+  turn-8 upstream windows (**1,483/1,483 raw RGBA captures**). Focused
+  Tier-1 tests (**9 files, 472 passed**, including the ratchet), `npx tsc
+  --noEmit`, and `npm run build` are green; full-suite output remains with the
+  supervisor.
+
 ## 829 — [supervisor, 2026-08-01 PM] session start: animation fold `c16e73dd`, union green
 
 - **State:** master `c16e73dd` (fold of `animation-main`, 5 commits:

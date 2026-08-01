@@ -193,6 +193,13 @@ than composing either FEATHER_DANCE/BIND stage. It now owns turn-9 dispatch,
 PP reconstruction, and the following reopen guard. Clean-`8f83bb4e` app
 replays held every required primary, boundary, reader, and upstream window
 byte-identical (**1,385/1,385 raw RGBA captures**).
+The matching typed completed-turn-9/next-command handoff retired
+`turn9Resolved` (`8e0fbc80` + `6f9ef899`): it publishes canonical PP
+**[3,19,19,10]**, persisted slot 0, and settled/ready facts directly rather
+than gating on a turn-9 move staging module. It now owns turn-10 dispatch,
+slot-0 PP reconstruction, and the following reopen guard. Clean-parent
+`00f79944` (`8e0fbc80^`) app replays held every required primary, reader, and
+upstream window byte-identical (**1,483/1,483 raw RGBA captures**).
 Rank 4 is **fully retired** (2026-07-31,
 all 5 slices): `174cc388` ROCK_SLIDE tails; `441ddf83`+`6aba6662`
 turn-7/8 FEATHER_DANCE staged+flipped; `0769ccc6` stat-fall banner
