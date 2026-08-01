@@ -13,6 +13,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 815 — [bounded worker, 2026-08-01] rank-7 opponent locked-action owner landed
+
+- **State:** implementation `fea91d54`; focused locked-action/presentation/
+  round suites are **48/48** and TypeScript build is green. Full-suite and
+  production-build final verification are in progress.
+- **Did:** the production seven-battle orchestrator now retains a completed
+  resolution by generic locked battler/current-move/PP-slot identity across a
+  genuine, independently presented player command. Submission reclaims the
+  immutable charge owner, appends the opponent strike without a second PP
+  write, restores visibility, publishes the typed forced request, and advances
+  the existing `PartySelectState` through switch-in. Player-owned FLY,
+  Scene-ON/OFF logical outcomes, and the seven-battle regression remain pinned.
+- **Next:** run final `npm test`/`npm run build`, then retire the remaining
+  exact-renderer `turn14Resolved`/`turn15PartySelect` mirrors as a separate
+  bounded slice; do not resume the canonical Battle-2 march.
+- **Notes:** no pixel count is claimed. No mechanics/RNG/AI/round outcome,
+  animation code/ledger, ratchet, barrier, recording import, canonical trace,
+  or timing/move/species/request/battle/turn/absolute-tick selector changed.
+
 ## 814 — [supervisor + bounded workers, 2026-08-01] rank-8 Scene-OFF status-icon receipt landed
 
 - **State:** implementation `80c5d6af`, documentation `73ad40f2`, and
@@ -71,27 +90,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   animation, ratchet, barrier, trace, capture-list, or timing change.
 - **PAPERCUT:** overlapping full-suite runs saturated Vitest workers; the
   required full suite remained green but took ~8 minutes.
-
-## 812 — [bounded worker, 2026-08-01] rank-7 Scene-OFF locked-action grouping landed
-
-- **State:** implementation `b464a6e7` plus receipt-pin follow-up `72546da6`;
-  focused suites are **74/74** plus **16/16** snapshot regressions, full
-  `npm test` is green (**568 files, 5718 passed + 1 skipped**), and production
-  build is green.
-- **Did:** made `battleScene` an explicit fresh-battle option, source-initialized
-  `HITMARKER_NO_ANIMATIONS` once for OFF, and selected OFF in the generated
-  round route. Full-turn `Cmd_printstring` receipts now freeze attacker/current
-  move/source position, so used-move text no longer depends on a later PP
-  receipt. The round driver preserves each source-published locked pass as an
-  immutable segment; the fixed generated Taillow FLY route proves charge,
-  hide, opponent action, no-PP locked FLY text, restoration, and request 4.
-- **Next:** rank 7's remaining work is only exact Turn-14/15 legacy-renderer
-  handoff and `turn15PartySelect` mirror retirement; do not reintroduce a
-  canonical turn/tick branch.
-- **Notes:** ON code/ledgers, mechanics, RNG, AI, round advancement, barriers,
-  and ratchets are unchanged. Scene ON/OFF state equivalence is pinned aside
-  from presentation receipts/timing; Assist/player and opponent FLY ownership
-  are covered at the production fresh-battle seam. No new dense pixel trace
-  was claimed for this semantic controller slice.
-- **PAPERCUT:** Vitest's `--maxWorkers` conflicts with this repo's forks-pool
-  settings, ~2 minutes lost before using the project command unchanged.

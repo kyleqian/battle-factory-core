@@ -1,3 +1,9 @@
+## 812 — [bounded worker, 2026-08-01] rank-7 Scene-OFF locked-action grouping landed
+
+- Archived from the live ledger. `b464a6e7`/`72546da6` established explicit
+  Scene-OFF fresh battles and immutable player-owned locked-action segments;
+  full live-entry detail remains in git history.
+
 ## 811 — [bounded worker, 2026-08-01] generic MOVEEND sprite-visibility round seam landed
 
 - Archived from the live ledger. `8ee8cbe7` projected the source-owned
