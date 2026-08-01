@@ -23,7 +23,7 @@ in each listed edge window (124 captures / 3,738 total trace frames).
 | 0 | constructed action request | Gastly `105/105`, Murkrow `120/120`, FLY PP `15,15,15,15`; raw framebuffer SHA-256 `7ae0874af2675287d1385b3cb8d597a31bbff7c99360a35350369bd60f38c4d9`. |
 | 1063→1064 | real first locked FLY strike | Gastly `105→25`; its selected Night Shade later runs, leaving Murkrow `70` at 1250. This is the only low-HP staging. |
 | 1300 / 1667–1669 | two ordinary command/input boundaries | first post-strike player action request is live at 1300; the next ordinary choice starts the inverse lifecycle, with no controller-state injection. |
-| 1714→1715 | second FLY first-use PP edge | Murkrow's selected FLY slot is `14→13` (`15,14,15,15` → `15,13,15,15`). |
+| 1715→1716 | second FLY first-use PP edge | Murkrow's selected FLY slot is `14→13` (`15,14,15,15` → `15,13,15,15`). |
 | 1845–1886 | charge/hide and intervening player move | `STATUS3_ON_AIR` sets at 1847; Night Shade PP falls `13→12` at 1884 while the flag remains set, proving the player action is consumed but auto-misses. |
 | 2016→2017 | genuine next player command | player controller command becomes `18` while Murkrow remains airborne; the trace opens FIGHT at 2502–2504 and confirms the highlighted move at 2534–2538. |
 | 2541 / 2548–2552 | locked strike, visibility restoration, no second PP use | `currentMove=FLY` at 2541; `STATUS3_ON_AIR` clears `64→0` at 2550 while FLY PP remains `15,13,15,15`. |
