@@ -1,5 +1,31 @@
 # Animation coverage
 
+## Front `ANIM_GROW_VIBRATE` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2f is exact for all **18 selector mappings**, the
+derived **16 Factory-reachable species**, and the two outside-Factory mappings
+**MEWTWO + HO_OH**. KADABRA is the representative and REGISTEEL the sibling;
+all six prior front families remain regression-pinned. Move coverage stays
+**107 exact / 0 partial / 0 staged / 169 unsupported** and
+`ANIMATION_COVERAGE.json` is byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:1257-1286` is ported in
+source order: tick 0 `HandleStartAffineAnim`, all 41 active callbacks with C
+index truncation and even/odd 32/8 sine amplitudes, then strict `data2 > 40`
+identity-affine/`ResetSpriteAfterAnim`/`WaitAnimEnd` cleanup and the final
+data2 increment at tick 41. Fresh complete legal Scene-ON parties settle both
+species at x2=0/y2=0/animNum=1/`SpriteCallbackDummy`; paired direct raw probe
+outputs are byte-identical with no EOF newline: KADABRA SHA-256
+`54e722be9865fa649ce1b4913ebd72c06ee23c4c092cd3c13ea7943e538d52bf`,
+REGISTEEL `06dba32da33afb561f90b10e6a5551a41f3efe3735eedc522f46a65c0ca19471`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per party; raw `cmp`; focused family/boundary/
+ratchet tests **48/48**; one full `npm test` **567 files, 5740 passed + 1
+skipped** and `npm run build` green. The generated Factory selector census
+ranks **`ANIM_SWING_CONCAVE` (11 species)** next.
+
 ## Front `ANIM_H_SHAKE` terminal family accepted (2026-08-01)
 
 **Verdict / counts:** rung 2e is exact for all **17 selector mappings**, the

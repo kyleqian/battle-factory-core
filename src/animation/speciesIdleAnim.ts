@@ -42,6 +42,7 @@ import selectorTables from "../data/gen/send-out-anim-selector-tables.json" with
  */
 
 export type SpeciesFrontAnimFamily =
+  | "GROW_VIBRATE"
   | "H_SHAKE"
   | "RAPID_H_HOPS"
   | "V_SQUISH_AND_BOUNCE"
@@ -51,6 +52,7 @@ export type SpeciesFrontAnimFamily =
 
 const FRONT_ANIM_PREFIX = "ANIM_";
 const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
+  "GROW_VIBRATE",
   "H_SHAKE",
   "RAPID_H_HOPS",
   "V_SQUISH_AND_BOUNCE",
@@ -129,6 +131,26 @@ export const H_SHAKE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
 /** Selector mappings outside the Factory pool (RAYQUAZA alone). */
 export const H_SHAKE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   H_SHAKE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/**
+ * All 18 selector-table mappings for `ANIM_GROW_VIBRATE`. MEWTWO and HO_OH
+ * are the only mappings outside the Factory rental pool.
+ */
+export const GROW_VIBRATE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_GROW_VIBRATE")
+    .map(([species]) => species),
+);
+
+/** The 16 `ANIM_GROW_VIBRATE` species reachable through Factory rentals. */
+export const GROW_VIBRATE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  GROW_VIBRATE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** Selector mappings outside the Factory pool (MEWTWO and HO_OH). */
+export const GROW_VIBRATE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  GROW_VIBRATE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 export interface SpeciesIdleOffset {
@@ -376,6 +398,85 @@ export interface HorizontalShakeFrame extends SpeciesIdleOffset {
   readonly callback: "HorizontalShake" | "WaitAnimEnd";
 }
 
+export interface GrowVibrateFrame extends SpeciesIdleOffset {
+  readonly data2: number;
+  readonly data4: number;
+  readonly data5: number;
+  readonly index: number | null;
+  readonly amplitude: 8 | 32 | null;
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly startedAffine: boolean;
+  readonly callback: "Anim_GrowVibrate" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+const GROW_VIBRATE_DURATION = 40;
+
+/**
+ * Source-order port of `Anim_GrowVibrate`
+ * (`pokemon_animation.c:1257-1284`) for the normal front-sprite path, where
+ * `Task_HandleMonAnimation` sets `sDontFlip = TRUE`. Tick 0 performs
+ * `HandleStartAffineAnim` before its first scale write. Active ticks 0..40
+ * alternate sine amplitudes 32/8 after C-truncated index arithmetic; tick 41
+ * observes the strict `data[2] > 40` guard, restores identity affine/normal
+ * mode, installs `WaitAnimEnd`, and still performs the source's final
+ * `data[2]++`.
+ */
+export function growVibrateFrameAtTick(ticksSinceStart: number): GrowVibrateFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let data4 = 0;
+  let data5 = 0;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    const startedAffine = data2 === 0;
+    if (data2 > GROW_VIBRATE_DURATION) {
+      data2 += 1;
+      return {
+        x2: 0,
+        y2: 0,
+        data2,
+        data4,
+        data5,
+        index: null,
+        amplitude: null,
+        xScale: 256,
+        yScale: 256,
+        startedAffine: false,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      };
+    }
+
+    const index = Math.trunc((data2 * 256) / GROW_VIBRATE_DURATION) % 256;
+    const amplitude = data2 % 2 === 0 ? 32 : 8;
+    data4 = gbaSin(index, amplitude) + 256;
+    data5 = gbaSin(index, amplitude) + 256;
+    data2 += 1;
+
+    if (tick === ticksSinceStart) {
+      return {
+        x2: 0,
+        y2: 0,
+        data2,
+        data4,
+        data5,
+        index,
+        amplitude,
+        xScale: data4,
+        yScale: data5,
+        startedAffine,
+        callback: "Anim_GrowVibrate",
+        affineMode: "double",
+      };
+    }
+  }
+
+  throw new Error("unreachable GrowVibrate reducer state");
+}
+
 const HORIZONTAL_SHAKE_ACCUMULATOR_STEP = 60;
 const HORIZONTAL_SHAKE_ACCUMULATOR_LIMIT = 2304;
 const HORIZONTAL_SHAKE_AMPLITUDE = 3;
@@ -463,6 +564,13 @@ export function verticalShakeFrameAtTick(ticksSinceStart: number): VerticalShake
 
 function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffset {
   switch (family) {
+    case "GROW_VIBRATE": {
+      const terminal = growVibrateFrameAtTick(41);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_GrowVibrate did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
     case "H_SHAKE": {
       const terminal = horizontalShakeFrameAtTick(39);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {

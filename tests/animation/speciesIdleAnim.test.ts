@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import probe from "../../src/data/gen/onix-front-idle-probe.json" with { type: "json" };
 import {
+  growVibrateFrameAtTick,
+  GROW_VIBRATE_FACTORY_FRONT_SPECIES,
+  GROW_VIBRATE_FRONT_SPECIES,
+  GROW_VIBRATE_OUTSIDE_FACTORY_FRONT_SPECIES,
   horizontalShakeFrameAtTick,
   H_SHAKE_FACTORY_FRONT_SPECIES,
   H_SHAKE_FRONT_SPECIES,
@@ -40,6 +44,10 @@ import kabutopsRunA from "../../tools/compare/fixtures/sendout-front-kabutops-ru
 import kabutopsRunB from "../../tools/compare/fixtures/sendout-front-kabutops-run-b.json" with { type: "json" };
 import blazikenRunA from "../../tools/compare/fixtures/sendout-front-blaziken-run-a.json" with { type: "json" };
 import blazikenRunB from "../../tools/compare/fixtures/sendout-front-blaziken-run-b.json" with { type: "json" };
+import kadabraRunA from "../../tools/compare/fixtures/sendout-front-kadabra-run-a.json" with { type: "json" };
+import kadabraRunB from "../../tools/compare/fixtures/sendout-front-kadabra-run-b.json" with { type: "json" };
+import registeelRunA from "../../tools/compare/fixtures/sendout-front-registeel-run-a.json" with { type: "json" };
+import registeelRunB from "../../tools/compare/fixtures/sendout-front-registeel-run-b.json" with { type: "json" };
 
 describe("speciesIdleAnim", () => {
   describe("rapidHorizontalHopsOffsetAtTick (Anim_RapidHorizontalHops port)", () => {
@@ -501,6 +509,135 @@ describe("speciesIdleAnim", () => {
       for (const species of [
         "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR",
         "MACHOKE", "RHYHORN", "LICKITUNG", "MILTANK",
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("growVibrateFrameAtTick (Anim_GrowVibrate port)", () => {
+    it("distinguishes 18 selector mappings, 16 Factory species, and MEWTWO plus HO_OH outside Factory", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_GROW_VIBRATE")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(GROW_VIBRATE_FRONT_SPECIES).toEqual(generated);
+      expect(GROW_VIBRATE_FRONT_SPECIES).toHaveLength(18);
+      expect(GROW_VIBRATE_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(GROW_VIBRATE_FACTORY_FRONT_SPECIES).toHaveLength(16);
+      expect(GROW_VIBRATE_FACTORY_FRONT_SPECIES).toContain("KADABRA");
+      expect(GROW_VIBRATE_FACTORY_FRONT_SPECIES).toContain("REGISTEEL");
+      expect(GROW_VIBRATE_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual(["MEWTWO", "HO_OH"]);
+      expect(factorySpecies.has("MEWTWO")).toBe(false);
+      expect(factorySpecies.has("HO_OH")).toBe(false);
+      for (const species of GROW_VIBRATE_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins every active callback boundary, C index arithmetic, and alternating sine amplitude", () => {
+      const activeIndexAmplitudeScale = [
+        [0, 32, 256], [6, 8, 257], [12, 32, 265], [19, 8, 259],
+        [25, 32, 274], [32, 8, 261], [38, 32, 281], [44, 8, 263],
+        [51, 32, 286], [57, 8, 263], [64, 32, 288], [70, 8, 263],
+        [76, 32, 286], [83, 8, 263], [89, 32, 282], [96, 8, 261],
+        [102, 32, 275], [108, 8, 259], [115, 32, 266], [121, 8, 257],
+        [128, 32, 256], [134, 8, 254], [140, 32, 246], [147, 8, 252],
+        [153, 32, 237], [160, 8, 250], [166, 32, 230], [172, 8, 248],
+        [179, 32, 225], [185, 8, 248], [192, 32, 224], [198, 8, 248],
+        [204, 32, 225], [211, 8, 248], [217, 32, 229], [224, 8, 250],
+        [230, 32, 237], [236, 8, 252], [243, 32, 246], [249, 8, 254],
+        [0, 32, 256],
+      ] as const;
+      expect(activeIndexAmplitudeScale).toHaveLength(41);
+      for (const [tick, [index, amplitude, scale]] of activeIndexAmplitudeScale.entries()) {
+        expect(growVibrateFrameAtTick(tick)).toEqual({
+          x2: 0,
+          y2: 0,
+          data2: tick + 1,
+          data4: scale,
+          data5: scale,
+          index,
+          amplitude,
+          xScale: scale,
+          yScale: scale,
+          startedAffine: tick === 0,
+          callback: "Anim_GrowVibrate",
+          affineMode: "double",
+        });
+      }
+    });
+
+    it("uses strict data2 > 40 cleanup and preserves the final data2 increment", () => {
+      expect(growVibrateFrameAtTick(40)).toMatchObject({
+        data2: 41,
+        index: 0,
+        amplitude: 32,
+        xScale: 256,
+        yScale: 256,
+        callback: "Anim_GrowVibrate",
+        affineMode: "double",
+      });
+      expect(growVibrateFrameAtTick(41)).toEqual({
+        x2: 0,
+        y2: 0,
+        data2: 42,
+        data4: 256,
+        data5: 256,
+        index: null,
+        amplitude: null,
+        xScale: 256,
+        yScale: 256,
+        startedAffine: false,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      });
+      expect(growVibrateFrameAtTick(42)).toEqual(growVibrateFrameAtTick(41));
+      expect(growVibrateFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      ["KADABRA", kadabraRunA, kadabraRunB, 2, 64],
+      ["REGISTEEL", registeelRunA, registeelRunB, 4, 403],
+    ] as const)("matches two byte-identical fresh settled %s RAM receipts", (
+      species,
+      runA,
+      runB,
+      animCmdIndex,
+      data2,
+    ) => {
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_GROW_VIBRATE");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("preserves every previously accepted front family", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of [
+        "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN",
+        "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN",
       ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }
