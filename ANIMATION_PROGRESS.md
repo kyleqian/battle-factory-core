@@ -1,5 +1,35 @@
 # Animation coverage
 
+## Front `ANIM_V_JUMPS_BIG` Factory family accepted (2026-08-01)
+
+**Verdict / counts:** exact for the complete generated selector census: all
+**5 mappings / 5 Factory-reachable species / 0 outside-Factory mappings** —
+PICHU, FLAAFFY, GIRAFARIG, SWAMPERT, TAILLOW. PICHU is the representative and
+TAILLOW the terminal sibling. The shared source-derived `VerticalJumps` reducer
+now parameterizes Big data0=4 and accepted Small data0=3; Small is
+regression-pinned and `ANIM_H_JUMPS_V_STRETCH_TWICE` remains unaccepted. No
+unsupported-branch barrier was added. Move coverage remains **107 exact / 0
+partial / 0 staged / 169 unsupported**; `ANIMATION_COVERAGE.json` is unchanged
+at SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / evidence / verification:** `pokemon_animation.c:911-939,
+1181-1215,5540-5544` and `trig.c:514-518` prove task-zeroed data2, the immediate
+Big callback, shared signed/C-truncated arithmetic, GBA u8 sine lookup, strict
+cleanup, and stable `WaitAnimEnd`. All **33 active callbacks** pin counters
+0..384 by 12, phase transitions at 0/132/264/384, amplitudes 8 then 12, and the
+counter-=256/u8-index boundaries; tick 33 observes counter 396 > 384, clears
+x2/y2, increments data2 to 408, installs `WaitAnimEnd`, and stays stable.
+Fresh complete legal challenge-0 Scene-ON parties (all set IDs 110..199) and
+unchanged `dump-onix-front-idle-anim.py` runs are paired byte-identical with no
+EOF newline: PICHU SHA-256
+`cde69635974e4c6a55e7bad360e38a1507db9405f164851cb522ff4ddfb27d1f`,
+TAILLOW `c286b13cef798ca9c35f5638852d138363ac4455ab8dc016935bb36379839190`.
+Focused family plus both ratchets are **234/234**; `npx tsc --noEmit` is green;
+the single post-change full `npm test` is green at **572 files, 5,956 passed +
+1 skipped**; production build is green (**534 modules transformed**). Next:
+**`ANIM_H_JUMPS_V_STRETCH_TWICE`** (2 mappings / 2 Factory / 0 outside):
+SHARPEDO, SPOINK.
+
 ## Front `ANIM_V_JUMPS_H_JUMPS` Factory family accepted (2026-08-01)
 
 **Verdict / counts:** rung 2y is exact for the complete generated selector
