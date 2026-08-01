@@ -1,3 +1,10 @@
+## 810 — [bounded worker, 2026-08-01] ISSUES #56 ready-tail verdict
+
+- Archived from the live ledger. Evidence commit `e497c7d6` proved the
+  action-menu ready tail is AI-decision-dependent, not a universal +6; #56
+  item 2 remains at the hardware-OAM/display-latch discriminator. Full
+  live-entry detail remains in git history.
+
 ## 809 — [bounded worker, 2026-07-31 ~night] ISSUES #56 item 2 raw-clock/discriminator checkpoint
 
 - Archived from the live ledger. Evidence commit `822522c7` pinned the

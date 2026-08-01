@@ -390,6 +390,26 @@ is closed. Exact Turn-14/15 legacy-renderer handoff and `turn15PartySelect`
 mirror retirement remain open. No canonical turn/tick branch, mechanics/RNG/
 AI/round change, Scene-ON edit, ratchet, or barrier was added.
 
+**Rank-7 opponent-owner bridge landed (2026-08-01, `30b61236`):** a new
+source-driven adapter stages the exact Onix/Murkrow boundary under Scene OFF
+through the production full-turn reducer. It publishes the charge/hide/
+airborne-miss receipt, then preserves the real intervening player request and
+publishes the locked strike/restoration/4→0/faint/forced-request receipt. The
+legacy exact renderer now consumes the charge, strike, and faint lines from
+those typed commands, and core constructs its forced selector from genuine
+request **4** (legal slots **1/2**) rather than `CANONICAL_FORCED_SWITCH_REQUEST`
+request 0. The remaining blocker is structural, not timing: player-owned FLY
+can append immediately because its only published continuation is a trainer
+command, while opponent-owned FLY publishes a real player command. The live
+round presenter currently releases the old resolution owner to that command,
+so directly appending would conflate two genuine player requests. Next retain
+an opponent locked-action owner across command presentation, then let it own
+the forced `PartySelectState` and delete `turn14Resolved` dispatch plus
+`turn15PartySelect`. Existing exact evidence remains charge **213**, strike
+**256**, selector **200/200**, send-out **43/46/16/144/195**; no new pixel
+count was claimed because those historical pins are ON-profile and this lane
+was restricted to OFF.
+
 ## #61 — Scene-OFF FIGHT reveal needs a source-owned DMA-ready event, not a fixed delay
 
 **Bounded evidence (2026-07-31, `bc988ef9`):** the reproducible OFF-profile

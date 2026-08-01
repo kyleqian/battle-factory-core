@@ -13,6 +13,34 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 813 — [bounded worker, 2026-08-01] rank-7 opponent-FLY receipt bridge landed
+
+- **State:** implementation `30b61236`; focused adapter/selector/scene suites
+  are **244/244**, full `npm test` is green (**569 files, 5719 passed + 1
+  skipped**), and production build is green.
+- **Did:** staged canonical Onix/Murkrow from the real turn-14 boundary through
+  the full-turn reducer under Scene OFF. Two genuine player requests now own
+  separate immutable charge/miss and locked-strike/faint resolutions; the
+  exact legacy renderer reads charge, strike, and faint lines from those
+  receipts, and core constructs the selector from the published forced request
+  (**request 4, legal slots 1/2**) instead of synthetic request 0.
+- **Next:** retain an opponent-owned locked-action presentation owner across
+  the intervening player command, then let that owner directly advance the
+  forced `PartySelectState`; only then delete `turn14Resolved` dispatch and
+  `turn15PartySelect`. Acceptance stays the existing exact windows: charge
+  **213**, strike **256**, selector **200/200**, send-out
+  **43/46/16/144/195**; add a fresh short explicit-OFF owner trace rather than
+  extending the canonical march.
+- **Notes:** no new oracle pixel count is claimed: the listed exact pins are
+  historical ON-profile evidence and this main-lane session was restricted to
+  OFF. The bridge found the structural asymmetry honestly: player-owned FLY's
+  continuation publishes only a trainer command and can append immediately;
+  opponent-owned FLY publishes a real player command that the current round
+  presenter releases before the locked strike. No mechanics/RNG/AI/round,
+  animation, ratchet, barrier, trace, capture-list, or timing change.
+- **PAPERCUT:** overlapping full-suite runs saturated Vitest workers; the
+  required full suite remained green but took ~8 minutes.
+
 ## 812 — [bounded worker, 2026-08-01] rank-7 Scene-OFF locked-action grouping landed
 
 - **State:** implementation `b464a6e7` plus receipt-pin follow-up `72546da6`;
@@ -55,23 +83,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   this slice deliberately did not claim those pixel windows.
 - **Notes:** no rule/RNG/damage/order/round/Scene-ON changes, canonical branch,
   recording import, unsupported barrier, or executable-frontier ratchet move.
-- **PAPERCUT:** none.
-
-## 810 — [bounded worker, 2026-08-01] ISSUES #56 item 1 staged ready-tail verdict: duration is non-universal
-
-- **State:** evidence commit `e497c7d6`; production `src/` is intentionally
-  unchanged. Focused intro/ack/handoff/battleScene/ratchet is **244/244**;
-  full `npm test` is green (**567 files, 5709 passed + 1 skipped**) and build
-  is green.
-- **Did:** generalized the canonical RAM watcher to accept `factoryLegal`
-  fixtures. Canonical ONIX is exec-flags **1738→1741→1744** (+3 dispatch,
-  +3 AI); staged YOSHI reproduces **1847→1850→1853**, but same-player-species
-  staged ONIX is **1885→1888→1890** (+3/+2). The source mechanism is shared;
-  its duration is AI-decision-dependent, so a fixed generic +6 tail is false.
-- **Next:** #56 item 2 remains open at entry 809's hardware-OAM/display-latch
-  discriminator; do not revive item 1 or add a fixed player-ready tail.
-- **Notes:** fresh dense holds: interactive **715/715**, command **128/128**,
-  YOSHI **700/751**, MAGNETON **703/751**. The ready-lag branch is retained;
-  no route/species/trainer/tick selector, ratchet move, unsupported branch,
-  or production change was added.
 - **PAPERCUT:** none.
