@@ -13,6 +13,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 821 — [supervisor orient, 2026-08-01] animation-main folded; freshness FAIL judged client-only
+
+- **State:** master fast-forwarded to fold union `4843f6c8`; full `npm test`
+  green on the union (**572 files, 5,899 passed + 1 skipped**) and production
+  build green.
+- **Did:** folded ~30 animation commits (seven more front send-out families
+  accepted with receipts/fixtures). Read the animation ledger's "For the main
+  program" line: rung 1 — extracting `sMonFrontAnimIdsTable`,
+  `sSpeciesToBackAnimSet`, `sBackAnimNatureModTable`,
+  `sMonAnimationDelayTable`, `sBackAnimationIds` into `src/data/gen/` — is
+  main-program-owned and blocks animation rung 2; dispatching it to the side
+  lane this session. `check-oracle-freshness.sh` FAILs both ports, but the
+  only harness commit since service start (`acc5c4e`) touches the `bin/oracle`
+  CLI and `_template` mirrors — client-side only, no service/schema change —
+  so per the known tooling-only false-positive class, no restart. DEFERRED
+  empty. A live animation worker exists (their lane, untouched).
+- **Next:** main lane: #39 rank-2 remainder — typed turn-13
+  completed-resolution/next-command handoff (PP 18/20, persisted slot,
+  redraw/input readiness), then retire `turn13Resolved`. Side lane: the
+  rung-1 five-table extraction.
+- **Notes:** session deadline 15:32; supervisor session, hybrid profile.
+
 ## 820 — [solo session, 2026-08-01] papercut burn-down: eight dev-loop fixes landed (run + harness)
 
 - **State:** tooling-only session, no engine/runtime behavior changed. Full
@@ -65,25 +87,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `docs/rank2-turn13resolved-predecessor-audit.md`. No mechanics/RNG/AI/
   outcome, runtime presentation, animation, trace/capture list, ratchet,
   barrier, recording import, or prohibited selector changed.
-
-## 818 — [bounded worker, 2026-08-01] rank-3 dead KO-dismiss mirror retired
-
-- **State:** implementation `88fd05f6`; focused owner/menu/scene/ratchet
-  suites are **452/452**, standalone TypeScript is green, full `npm test` is
-  green (**571 files, 5,728 passed + 1 skipped**) and production build is
-  green.
-- **Did:** mapped both rank-3 mirrors. `turn5KoDismissElapsed` had one writer,
-  only its own one-shot guard as a reader, and zero render/continuation/PP/
-  request consumers, so its dead field and producer branch are deleted. The
-  immutable adapter lifecycle already owns KO→PIDGEOTTO→Sitrus→next-command
-  content; `turn5Resolved` stays because it still has live turn-6 dispatch,
-  PP, and next-reopen consumers. Clean-`7d65832d` app replay is byte-identical
-  for all rank-3 + five insurance pins (**3,021 captures**) and three +30
-  delayed-dismiss variants (**484**); census fell **2,496→2,487 refs**,
-  **33,124→33,103 LOC**.
-- **Next:** retire `turn5Resolved` only after a typed terminal/next-command
-  boundary supplies all three live consumers; otherwise take rank 2's
-  analogous `turn13Resolved` predecessor as a separately evidenced slice.
-- **Notes:** no mechanics/RNG/AI/outcome, animation, trace/capture list,
-  ratchet/barrier, recording import, or prohibited selector changed.
-

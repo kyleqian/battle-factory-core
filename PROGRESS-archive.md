@@ -1,3 +1,24 @@
+## 818 — [bounded worker, 2026-08-01] rank-3 dead KO-dismiss mirror retired
+
+- **State:** implementation `88fd05f6`; focused owner/menu/scene/ratchet
+  suites are **452/452**, standalone TypeScript is green, full `npm test` is
+  green (**571 files, 5,728 passed + 1 skipped**) and production build is
+  green.
+- **Did:** mapped both rank-3 mirrors. `turn5KoDismissElapsed` had one writer,
+  only its own one-shot guard as a reader, and zero render/continuation/PP/
+  request consumers, so its dead field and producer branch are deleted. The
+  immutable adapter lifecycle already owns KO→PIDGEOTTO→Sitrus→next-command
+  content; `turn5Resolved` stays because it still has live turn-6 dispatch,
+  PP, and next-reopen consumers. Clean-`7d65832d` app replay is byte-identical
+  for all rank-3 + five insurance pins (**3,021 captures**) and three +30
+  delayed-dismiss variants (**484**); census fell **2,496→2,487 refs**,
+  **33,124→33,103 LOC**.
+- **Next:** retire `turn5Resolved` only after a typed terminal/next-command
+  boundary supplies all three live consumers; otherwise take rank 2's
+  analogous `turn13Resolved` predecessor as a separately evidenced slice.
+- **Notes:** no mechanics/RNG/AI/outcome, animation, trace/capture list,
+  ratchet/barrier, recording import, or prohibited selector changed.
+
 ## 817 — [bounded worker, 2026-08-01] rank-8 exact owner mirrors retired
 
 - Archived from the live ledger. `d410cfe5` staged the MAGBY/MURKROW
