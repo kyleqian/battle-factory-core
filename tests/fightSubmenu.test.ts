@@ -49,6 +49,7 @@ import {
 import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "../src/engine/turn15FlyResolutionAdapter.ts";
 import { resolveTurn13CompletedResolutionNextCommandHandoff } from "../src/engine/turn13ResolutionAdapter.ts";
 import { resolveTurn5CompletedResolutionNextCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
+import { resolveTurn6CompletedResolutionNextCommandHandoff } from "../src/engine/turn6ResolutionAdapter.ts";
 import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "../src/engine/turn16FirePunchResolutionAdapter.ts";
 import {
   beginBattleSceneForcedPartySelect,
@@ -148,7 +149,7 @@ function stateAtTick(firstTickAbsolute: number): EngineState {
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
-    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null },
+    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null },
   };
 }
 
@@ -173,7 +174,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
         turn3Resolved: true,
         turn4Resolved: true,
         turn5NextCommandHandoff: resolveTurn5CompletedResolutionNextCommandHandoff(),
-        turn6Resolved: true,
+        turn6NextCommandHandoff: resolveTurn6CompletedResolutionNextCommandHandoff(),
         turn7Resolved: true,
         turn8Resolved: true,
         turn9Resolved: true,
@@ -289,7 +290,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
       false,
       false,
       null,
-      false,
+      null,
       false,
       false,
       false,
@@ -526,7 +527,7 @@ function stateAtTurn3Reopen(firstTickAbsolute: number): EngineState {
       turn1Resolved: true,
       turn2Resolved: false,
       turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null,
-    turn6Resolved: false,
+    turn6NextCommandHandoff: null,
     turn7Resolved: false,
     turn8Resolved: false,
     turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
@@ -649,7 +650,7 @@ function stateAtTurn3Confirm(): EngineState {
       turn1Resolved: true,
       turn2Resolved: true,
       turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null,
-    turn6Resolved: false,
+    turn6NextCommandHandoff: null,
     turn7Resolved: false,
     turn8Resolved: false,
     turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
@@ -821,7 +822,7 @@ function stateAtTurn4Confirm(): EngineState {
       turn2Resolved: true,
       turn3Resolved: true,
       turn4Resolved: false, turn5NextCommandHandoff: null,
-    turn6Resolved: false,
+    turn6NextCommandHandoff: null,
     turn7Resolved: false,
     turn8Resolved: false,
     turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
@@ -851,7 +852,7 @@ function stateAtTurn5Confirm(): EngineState {
       turn2Resolved: true,
       turn3Resolved: true,
       turn4Resolved: true, turn5NextCommandHandoff: null,
-    turn6Resolved: false,
+    turn6NextCommandHandoff: null,
     turn7Resolved: false,
     turn8Resolved: false,
     turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
@@ -942,7 +943,7 @@ function stateAtTurn5SitrusConfirm(): EngineState {
       turn2Resolved: true,
       turn3Resolved: true,
       turn4Resolved: true, turn5NextCommandHandoff: null,
-    turn6Resolved: false,
+    turn6NextCommandHandoff: null,
     turn7Resolved: false,
     turn8Resolved: false,
     turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
@@ -1002,13 +1003,34 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
     expect(currentPPForActiveMon(moveset, true, true, true, true, null)[0]).toBe(7);
   });
 
-  it("S7 slice O: currentPPForActiveMon reads 5/10 once turn6Resolved (used turns 1, 3, 4, 5 AND 6) - matches turn7-notes.md §4/§5's own 'PP 5/10 displayed' at turn 7's own reopen", () => {
+  it("S7 slice O: currentPPForActiveMon reads 5/10 from turn 6's completed-command receipt, matching turn 7's reopen ledger", () => {
     const moveset = rentalMoveset("ONIX");
-    const handoff = resolveTurn5CompletedResolutionNextCommandHandoff();
-    expect(currentPPForActiveMon(moveset, true, true, true, true, handoff, true)[0]).toBe(moveset.maxPP[0] - 5);
-    expect(currentPPForActiveMon(moveset, true, true, true, true, handoff, true)[0]).toBe(5);
+    const turn5Handoff = resolveTurn5CompletedResolutionNextCommandHandoff();
+    const turn6Handoff = resolveTurn6CompletedResolutionNextCommandHandoff();
+    expect(currentPPForActiveMon(moveset, true, true, true, true, turn5Handoff, turn6Handoff)[0]).toBe(moveset.maxPP[0] - 5);
+    expect(currentPPForActiveMon(moveset, true, true, true, true, turn5Handoff, turn6Handoff)[0]).toBe(5);
     // Sanity: the completed turn-5 receipt alone (pre-turn-7) still reads 6/10.
-    expect(currentPPForActiveMon(moveset, true, true, true, true, handoff, false)[0]).toBe(6);
+    expect(currentPPForActiveMon(moveset, true, true, true, true, turn5Handoff, null)[0]).toBe(6);
+  });
+
+  it("replaying turn7-menu.json's existing input script uses turn 6's typed receipt for the following reopen guard", () => {
+    const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn7-menu.json", import.meta.url), "utf8")) as {
+      segments: { frames: number; buttons?: GbaButton[] }[];
+    };
+    let state = createInitialState({ appRoute: "canonical-recorded" });
+    for (const segment of trace.segments) {
+      for (let i = 0; i < segment.frames; i += 1) state = press(state, segment.buttons ?? []);
+    }
+
+    expect(state.battleScene!.turn6NextCommandHandoff).toEqual(
+      resolveTurn6CompletedResolutionNextCommandHandoff(),
+    );
+    expect(state.battleScene!.fightSubmenu.openElapsed).toBe(8347 - SCENE_TICK0);
+    // The unchanged script then confirms turn 7's ROCK_SLIDE at 8379; retain
+    // that edge as proof this is the live following-command path, not merely
+    // a synthetic handoff-shaped state.
+    expect(state.battleScene!.fightSubmenu.confirmElapsed).toBe(8379 - SCENE_TICK0);
+    expect(state.battleScene!.fightSubmenu.cursor).toBe(0);
   });
 
   it("engine state stays well-formed and deterministic through the reopen/confirm-registration window - pixel parity lives in tools/compare/traces/turn6-menu.json (33/33, 0 diff, 11 named single-tick bounce-extremum residuals excluded, docs/battle-turn-notes.md's new §27)", () => {

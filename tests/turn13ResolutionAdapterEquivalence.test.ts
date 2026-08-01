@@ -18,6 +18,7 @@ import {
 import { currentPPForActiveMon } from "../src/engine/battleMenu.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
 import { resolveTurn5CompletedResolutionNextCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
+import { resolveTurn6CompletedResolutionNextCommandHandoff } from "../src/engine/turn6ResolutionAdapter.ts";
 import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "../src/engine/turn15FlyResolutionAdapter.ts";
 
 /**
@@ -131,7 +132,7 @@ describe("turn13ResolutionAdapter: #39 rank-2 kernel-to-typed-owner equivalence 
       const handoff = resolveTurn13CompletedResolutionNextCommandHandoff();
       const predecessorPp = currentPPForActiveMon(
         onix,
-        true, true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), true, true,
+        true, true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff(), true,
         true, true, true, true, true,
         handoff,
       )[2];
