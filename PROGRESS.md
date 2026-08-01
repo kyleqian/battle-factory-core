@@ -59,6 +59,48 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   supervisor, not started here. `docs/battle-scene-retirement-inventory.md`
   names what's next in the broader #39 retirement order.
 - **PAPERCUT:** none this session.
+- **SUPERVISOR WIND-DOWN (session close 2026-07-31 ~22:30; this addendum
+  is the resume point):**
+  - **Headline: rank 6 FULLY EXECUTED same-session as its adoption** (user
+    decision recorded in archived entry 799). All four turns flipped to
+    Scene-OFF-owned presentation at exact acceptance: slice 1/turn 1
+    `01eac159` (81+230+256+102), slice 2/turn 2 `4c793748` (256+237, third
+    attempt), slice 3/turn 3 `2e567316` (254/255 + 161, the 1 frame =
+    pre-existing #61), slice 4/turn 4 `40414e55` (256+256). 13 legacy ON
+    turn1-4 pins retired; `turn2-dragonbreath-projectiles.json` kept
+    (explicit ON-only fixture). Idle-bounce phase family's turn-1-4 share
+    CLOSED (verdict (b) confirmed); remaining share = turns 5-8 (future
+    rank/policy question — NOT covered by the rank-6 user decision).
+  - **Session totals: 6 workers / 4 slices landed / 2 honest non-landings**
+    (slice-2 attempts 1-2, both reverted-with-findings-banked; the banked
+    constants + salvaged edits made attempt 3 land). Final gate run by
+    supervisor on this union: **567 files / 5701 passed + 1 skipped**
+    (count down from 5722 = retired turn-keyed tests deleted with their
+    windows), build clean, ratchet 6/6, all 10 rank-6 OFF pins +
+    turn5-rockslide/turn8-bind-a insurance re-verified by supervisor
+    directly. Tree clean at HEAD; DEFERRED.md empty all session; animation
+    fold delta 0 at orient AND wind-down; no orphan worker branches.
+  - **Slice-4 worker was killed by a usage limit (launcher exit 42) AFTER
+    its landing commit** — work verified complete, exit code was the
+    session's wind-down signal per the standing rule. No workers launched
+    after it.
+  - **New issues filed this session (both confirmed PRE-EXISTING via
+    src-swap checks, not slice regressions):** #60 — profile-less
+    turn-2-shaped traces crash on the post-#53 generated route (battler-1
+    stat-RISE sibling of #59's fixed guard; repro recipe in the entry);
+    #61 — reveal-boundary off-by-one at reopen+6 (oracle shows action menu,
+    app shows submenu, single tick; suspected `t >= revealTick` boundary in
+    the shared reveal mechanism, ~11 call sites).
+  - **Next session (ordered):** (i) #60 fix (crash family on the
+    production route, same shape as user-reported #59 — top candidate);
+    (ii) #61 reveal-boundary off-by-one (RAM-probe the real boundary before
+    touching the shared comparison); (iii) #56 item 2's two named sub-steps
+    (intro-off rawElapsed pin → frame-444 discriminator; +6 universality
+    probe fold-in); (iv) turn9/11/12-menu OFF pins (S9 landmark data
+    banked; phase family turn-1-4 share now closed, turns 5-8 share
+    remains); (v) turns 5-8 OFF pin policy question for the user when
+    their re-timing comes up; (vi) rank 7 (FLY) / rank 8 (burn projection)
+    inventory rows. #55 parked.
 
 ## 804 — [bounded worker, 2026-07-31 ~night] ISSUES #39 rank-6 slice 3 (turn 3) LANDED — fallback invoked, turn 4 not attempted
 
