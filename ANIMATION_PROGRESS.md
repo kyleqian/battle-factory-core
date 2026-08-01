@@ -1,5 +1,32 @@
 # Animation coverage
 
+## Front `ANIM_SWING_CONCAVE` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2g is exact for all **11 selector mappings / 11
+Factory-reachable species**, with **zero outside-Factory mappings**. SQUIRTLE
+is the representative and SHUCKLE the sibling; all seven prior front families
+remain regression-pinned. Move coverage stays **107 exact / 0 partial / 0
+staged / 169 unsupported** and `ANIMATION_COVERAGE.json` is byte-identical at
+SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:910-939,1038-1059,
+2512-2542,3836-3843` proves and is ported in source order: the normal-front
+`sDontFlip=TRUE` path; `AddNewAnim`'s explicit rotation/delay/runs/speed/data
+defaults; data=100; tick-0 affine start; both `TryFlipX` calls; all 101 active
+C-index/x2-sine/rotation-affine writes; and tick-101's strict guard,
+identity/x2/reset/`WaitAnimEnd` cleanup, and final data2 increment. Fresh
+complete legal Scene-ON parties settle both species at
+x2=0/y2=0/animNum=1/`SpriteCallbackDummy`. Paired raw outputs are
+byte-identical with no EOF newline: SQUIRTLE SHA-256
+`e09a8302d4a11998a8b719017563adafff8e43c3be61f5f5c7996cab41e3a712`,
+SHUCKLE `e68670c57fea068ff9e3b6871973dc83af89e171dce3a3cbe9ba6e019f1433a0`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per party; raw `cmp`; focused family/boundary/
+ratchet tests **55/55**; exactly one full `npm test` **567 files, 5747 passed +
+1 skipped** and `npm run build` green. The generated Factory selector census
+ranks **`ANIM_V_SLIDE` (10 species)** next.
+
 ## Front `ANIM_GROW_VIBRATE` terminal family accepted (2026-08-01)
 
 **Verdict / counts:** rung 2f is exact for all **18 selector mappings**, the

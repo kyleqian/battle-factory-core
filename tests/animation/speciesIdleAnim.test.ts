@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import probe from "../../src/data/gen/onix-front-idle-probe.json" with { type: "json" };
 import {
   growVibrateFrameAtTick,
@@ -11,6 +12,10 @@ import {
   H_SHAKE_OUTSIDE_FACTORY_FRONT_SPECIES,
   rapidHorizontalHopsOffsetAtTick,
   speciesFrontIdleRestOffset,
+  swingConcaveFrameAtTick,
+  SWING_CONCAVE_FACTORY_FRONT_SPECIES,
+  SWING_CONCAVE_FRONT_SPECIES,
+  SWING_CONCAVE_OUTSIDE_FACTORY_FRONT_SPECIES,
   verticalShakeFrameAtTick,
   verticalSquishBounceFrameAtTick,
   verticalSquishBounceSlowFrameAtTick,
@@ -48,6 +53,23 @@ import kadabraRunA from "../../tools/compare/fixtures/sendout-front-kadabra-run-
 import kadabraRunB from "../../tools/compare/fixtures/sendout-front-kadabra-run-b.json" with { type: "json" };
 import registeelRunA from "../../tools/compare/fixtures/sendout-front-registeel-run-a.json" with { type: "json" };
 import registeelRunB from "../../tools/compare/fixtures/sendout-front-registeel-run-b.json" with { type: "json" };
+import squirtleRunA from "../../tools/compare/fixtures/sendout-front-squirtle-run-a.json" with { type: "json" };
+import squirtleRunB from "../../tools/compare/fixtures/sendout-front-squirtle-run-b.json" with { type: "json" };
+import shuckleRunA from "../../tools/compare/fixtures/sendout-front-shuckle-run-a.json" with { type: "json" };
+import shuckleRunB from "../../tools/compare/fixtures/sendout-front-shuckle-run-b.json" with { type: "json" };
+
+const squirtleRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-squirtle-run-a.json", import.meta.url),
+);
+const squirtleRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-squirtle-run-b.json", import.meta.url),
+);
+const shuckleRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-shuckle-run-a.json", import.meta.url),
+);
+const shuckleRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-shuckle-run-b.json", import.meta.url),
+);
 
 describe("speciesIdleAnim", () => {
   describe("rapidHorizontalHopsOffsetAtTick (Anim_RapidHorizontalHops port)", () => {
@@ -638,6 +660,182 @@ describe("speciesIdleAnim", () => {
       for (const species of [
         "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN",
         "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN",
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("swingConcaveFrameAtTick (Anim_SwingConcave / SwingConcave port)", () => {
+    it("derives all 11 selector mappings as Factory-reachable with no outside mappings", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_SWING_CONCAVE")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(SWING_CONCAVE_FRONT_SPECIES).toEqual(generated);
+      expect(SWING_CONCAVE_FRONT_SPECIES).toHaveLength(11);
+      expect(SWING_CONCAVE_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(SWING_CONCAVE_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(SWING_CONCAVE_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      expect(SWING_CONCAVE_FACTORY_FRONT_SPECIES).toContain("SQUIRTLE");
+      expect(SWING_CONCAVE_FACTORY_FRONT_SPECIES).toContain("SHUCKLE");
+      for (const species of SWING_CONCAVE_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins AddNewAnim defaults and data=100 at the tick-0 affine start", () => {
+      expect(swingConcaveFrameAtTick(0)).toEqual({
+        x2: 0,
+        y2: 0,
+        data2: 1,
+        animRotation: 0,
+        animDelay: 0,
+        animRuns: 1,
+        animSpeed: 0,
+        animData: 100,
+        index: 0,
+        xScale: 256,
+        yScale: 256,
+        affineRotation: 0,
+        startedAffine: true,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        resetSpriteAfterAnim: false,
+        callback: "SwingConcave",
+        affineMode: "double",
+      });
+    });
+
+    it("pins C index arithmetic, both normal-front flips, x2 sine, and rotation at every active boundary", () => {
+      const indices = [
+        0,2,5,7,10,12,15,17,20,23,25,28,30,33,35,38,40,43,46,48,51,53,56,58,61,
+        64,66,69,71,74,76,79,81,84,87,89,92,94,97,99,102,104,107,110,112,115,117,
+        120,122,125,128,130,133,135,138,140,143,145,148,151,153,156,158,161,163,166,
+        168,171,174,176,179,181,184,186,189,192,194,197,199,202,204,207,209,212,215,
+        217,220,222,225,227,230,232,235,238,240,243,245,248,250,253,256,
+      ];
+      const x2Writes = [
+        0,0,-1,-1,-2,-2,-3,-4,-4,-5,-5,-6,-6,-7,-7,-8,-8,-8,-9,-9,-9,-9,-9,-9,
+        -9,-10,-9,-9,-9,-9,-9,-9,-9,-8,-8,-8,-7,-7,-6,-6,-5,-5,-4,-4,-3,-3,-2,-1,
+        -1,0,0,1,2,2,3,3,4,5,5,6,6,7,7,8,8,9,9,9,10,10,10,10,10,10,10,10,10,10,
+        10,10,10,10,10,9,9,9,8,8,7,7,6,6,5,5,4,4,3,2,2,1,0,
+      ];
+      const rotationWrites = [
+        0,153,396,550,793,946,1177,1318,1535,1740,1881,2073,2188,2367,2469,2623,
+        2712,2840,2956,3020,3109,3148,3212,3237,3263,3276,3263,3250,3224,3173,3122,
+        3045,2994,2879,2764,2674,2520,2418,2252,2137,1945,1817,1612,1394,1241,1023,
+        870,627,473,230,0,-154,-397,-551,-794,-947,-1178,-1319,-1536,-1741,-1882,
+        -2074,-2189,-2368,-2470,-2624,-2713,-2841,-2957,-3021,-3110,-3149,-3213,
+        -3238,-3264,-3276,-3264,-3251,-3225,-3174,-3123,-3046,-2995,-2880,-2765,
+        -2675,-2521,-2419,-2253,-2138,-1946,-1818,-1613,-1395,-1242,-1024,-871,-628,
+        -474,-231,0,
+      ];
+      expect(indices).toHaveLength(101);
+      expect(x2Writes).toHaveLength(101);
+      expect(rotationWrites).toHaveLength(101);
+      for (let tick = 0; tick <= 100; tick += 1) {
+        expect(swingConcaveFrameAtTick(tick)).toMatchObject({
+          x2: x2Writes[tick],
+          y2: 0,
+          data2: tick + 1,
+          animRotation: 0,
+          animDelay: 0,
+          animRuns: 1,
+          animSpeed: 0,
+          animData: 100,
+          index: indices[tick],
+          xScale: 256,
+          yScale: 256,
+          affineRotation: rotationWrites[tick],
+          startedAffine: tick === 0,
+          normalFrontDontFlip: true,
+          tryFlipXCalls: 2,
+          resetSpriteAfterAnim: false,
+          callback: "SwingConcave",
+          affineMode: "double",
+        });
+      }
+    });
+
+    it("uses the strict duration guard and pins identity/x2/reset/callback terminal state", () => {
+      expect(swingConcaveFrameAtTick(100)).toMatchObject({
+        data2: 101,
+        index: 256,
+        x2: 0,
+        affineRotation: 0,
+        callback: "SwingConcave",
+        affineMode: "double",
+      });
+      expect(swingConcaveFrameAtTick(101)).toEqual({
+        x2: 0,
+        y2: 0,
+        data2: 102,
+        animRotation: 0,
+        animDelay: 0,
+        animRuns: 1,
+        animSpeed: 0,
+        animData: 100,
+        index: null,
+        xScale: 256,
+        yScale: 256,
+        affineRotation: 0,
+        startedAffine: false,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      });
+      expect(swingConcaveFrameAtTick(102)).toEqual(swingConcaveFrameAtTick(101));
+      expect(swingConcaveFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      ["SQUIRTLE", squirtleRunA, squirtleRunB, squirtleRawA, squirtleRawB, 7],
+      ["SHUCKLE", shuckleRunA, shuckleRunB, shuckleRawA, shuckleRawB, 213],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species,
+      runA,
+      runB,
+      rawA,
+      rawB,
+      data2,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_SWING_CONCAVE");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex: 2,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("preserves every previously accepted front family", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of [
+        "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN",
+        "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN", "KADABRA", "REGISTEEL",
       ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }

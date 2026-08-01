@@ -45,6 +45,7 @@ export type SpeciesFrontAnimFamily =
   | "GROW_VIBRATE"
   | "H_SHAKE"
   | "RAPID_H_HOPS"
+  | "SWING_CONCAVE"
   | "V_SQUISH_AND_BOUNCE"
   | "V_SQUISH_AND_BOUNCE_SLOW"
   | "V_STRETCH"
@@ -55,6 +56,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "GROW_VIBRATE",
   "H_SHAKE",
   "RAPID_H_HOPS",
+  "SWING_CONCAVE",
   "V_SQUISH_AND_BOUNCE",
   "V_SQUISH_AND_BOUNCE_SLOW",
   "V_STRETCH",
@@ -151,6 +153,23 @@ export const GROW_VIBRATE_FACTORY_FRONT_SPECIES: readonly string[] = Object.free
 /** Selector mappings outside the Factory pool (MEWTWO and HO_OH). */
 export const GROW_VIBRATE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   GROW_VIBRATE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All 11 source selector mappings for `ANIM_SWING_CONCAVE`. */
+export const SWING_CONCAVE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_SWING_CONCAVE")
+    .map(([species]) => species),
+);
+
+/** Every `ANIM_SWING_CONCAVE` mapping is reachable through Factory rentals. */
+export const SWING_CONCAVE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  SWING_CONCAVE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no `ANIM_SWING_CONCAVE` selector mappings outside the Factory pool. */
+export const SWING_CONCAVE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  SWING_CONCAVE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 export interface SpeciesIdleOffset {
@@ -411,6 +430,120 @@ export interface GrowVibrateFrame extends SpeciesIdleOffset {
   readonly affineMode: "double" | "normal";
 }
 
+export interface SwingConcaveFrame extends SpeciesIdleOffset {
+  readonly data2: number;
+  readonly animRotation: number;
+  readonly animDelay: number;
+  readonly animRuns: number;
+  readonly animSpeed: number;
+  readonly animData: number;
+  readonly index: number | null;
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly affineRotation: number;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXCalls: 2;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "SwingConcave" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+const SWING_CONCAVE_DURATION = 100;
+
+function tryFlipX(x2: number, dontFlip: boolean): number {
+  return dontFlip ? x2 : -x2;
+}
+
+/**
+ * Source-order port of `Anim_SwingConcave` / `SwingConcave`
+ * (`pokemon_animation.c:1038-1059,2512-2542,3836-3843`) on the normal
+ * opponent-front path. `AddNewAnim` calls `InitAnimData`, which explicitly
+ * establishes rotation=0, delay=0, runs=1, speed=0, data=0; the initializer
+ * then overwrites only data=100. `Task_HandleMonAnimation` has already set
+ * `sDontFlip=TRUE`, so both source-order `TryFlipX` calls execute but leave x2
+ * unchanged. Tick 0 starts affine mode before the first write, ticks 0..100
+ * apply C-truncated index, x2 sine and affine rotation writes, and tick 101
+ * observes the strict data2 > data guard, restores identity/x2/normal affine
+ * state, installs `WaitAnimEnd`, and still performs the final data2 increment.
+ */
+export function swingConcaveFrameAtTick(ticksSinceStart: number): SwingConcaveFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  // `InitAnimData`, called by `AddNewAnim`, is the source of these defaults.
+  const animRotation = 0;
+  const animDelay = 0;
+  const animRuns = 1;
+  const animSpeed = 0;
+  let animData = 0;
+  animData = SWING_CONCAVE_DURATION;
+  let data2 = 0;
+  let x2 = 0;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    const startedAffine = data2 === 0;
+
+    // First source-order `TryFlipX`; Task_HandleMonAnimation set sDontFlip.
+    x2 = tryFlipX(x2, true);
+    if (data2 > animData) {
+      x2 = 0;
+      data2 += 1;
+      x2 = tryFlipX(x2, true);
+      return {
+        x2,
+        y2: 0,
+        data2,
+        animRotation,
+        animDelay,
+        animRuns,
+        animSpeed,
+        animData,
+        index: null,
+        xScale: 256,
+        yScale: 256,
+        affineRotation: 0,
+        startedAffine: false,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      };
+    }
+
+    const index = Math.trunc((data2 * 256) / animData);
+    x2 = -gbaSin(index, 10) + 0;
+    const affineRotation = gbaSin(index, 3276);
+    data2 += 1;
+    x2 = tryFlipX(x2, true);
+
+    if (tick === ticksSinceStart) {
+      return {
+        x2,
+        y2: 0,
+        data2,
+        animRotation,
+        animDelay,
+        animRuns,
+        animSpeed,
+        animData,
+        index,
+        xScale: 256,
+        yScale: 256,
+        affineRotation,
+        startedAffine,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        resetSpriteAfterAnim: false,
+        callback: "SwingConcave",
+        affineMode: "double",
+      };
+    }
+  }
+
+  throw new Error("unreachable SwingConcave reducer state");
+}
+
 const GROW_VIBRATE_DURATION = 40;
 
 /**
@@ -587,6 +720,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
         last = offset;
         tick += 1;
       }
+    }
+    case "SWING_CONCAVE": {
+      const terminal = swingConcaveFrameAtTick(101);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_SwingConcave did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
     }
     case "V_SQUISH_AND_BOUNCE": {
       const terminal = verticalSquishBounceFrameAtTick(49);
