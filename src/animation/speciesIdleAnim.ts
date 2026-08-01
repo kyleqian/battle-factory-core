@@ -42,6 +42,7 @@ import selectorTables from "../data/gen/send-out-anim-selector-tables.json" with
  */
 
 export type SpeciesFrontAnimFamily =
+  | "BOUNCE_ROTATE_TO_SIDES_SMALL"
   | "BOUNCE_ROTATE_TO_SIDES_SLOW"
   | "GROW_VIBRATE"
   | "H_JUMPS_V_STRETCH"
@@ -57,6 +58,7 @@ export type SpeciesFrontAnimFamily =
 
 const FRONT_ANIM_PREFIX = "ANIM_";
 const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
+  "BOUNCE_ROTATE_TO_SIDES_SMALL",
   "BOUNCE_ROTATE_TO_SIDES_SLOW",
   "GROW_VIBRATE",
   "H_JUMPS_V_STRETCH",
@@ -247,6 +249,26 @@ export const BOUNCE_ROTATE_TO_SIDES_SLOW_FACTORY_FRONT_SPECIES: readonly string[
 export const BOUNCE_ROTATE_TO_SIDES_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
   Object.freeze(
     BOUNCE_ROTATE_TO_SIDES_SLOW_FRONT_SPECIES.filter(
+      (species) => !factoryFrontSpecies.has(species),
+    ),
+  );
+
+/** All 8 source selector mappings for `ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL`. */
+export const BOUNCE_ROTATE_TO_SIDES_SMALL_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL")
+    .map(([species]) => species),
+);
+
+/** Every small normal-speed bounce/rotate mapping is Factory-reachable. */
+export const BOUNCE_ROTATE_TO_SIDES_SMALL_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  BOUNCE_ROTATE_TO_SIDES_SMALL_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no small normal-speed bounce/rotate mappings outside the Factory pool. */
+export const BOUNCE_ROTATE_TO_SIDES_SMALL_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
+  Object.freeze(
+    BOUNCE_ROTATE_TO_SIDES_SMALL_FRONT_SPECIES.filter(
       (species) => !factoryFrontSpecies.has(species),
     ),
   );
@@ -986,7 +1008,7 @@ export interface BounceRotateToSidesFrame extends SpeciesIdleOffset {
 
 function bounceRotateToSidesFrameAtTick(
   ticksSinceStart: number,
-  variant: (typeof BOUNCE_ROTATE_TO_SIDES_VARIANTS)["slow" | "smallSlow"],
+  variant: (typeof BOUNCE_ROTATE_TO_SIDES_VARIANTS)[keyof typeof BOUNCE_ROTATE_TO_SIDES_VARIANTS],
 ): BounceRotateToSidesFrame | null {
   if (ticksSinceStart < 0) return null;
 
@@ -1109,6 +1131,28 @@ export function bounceRotateToSidesSlowFrameAtTick(
   ticksSinceStart: number,
 ): BounceRotateToSidesFrame | null {
   return bounceRotateToSidesFrameAtTick(ticksSinceStart, BOUNCE_ROTATE_TO_SIDES_VARIANTS.slow);
+}
+
+/**
+ * Exact source-order `Anim_BounceRotateToSides_Small` lifecycle. `AddNewAnim`
+ * leaves `data6`/animation data at zero, the initializer selects rotation
+ * 2048, and the shared callback consumes the normal-speed seven-leg table.
+ * Active ticks are 0..86; tick 87 consumes the zero-duration sentinel.
+ */
+export function bounceRotateToSidesSmallFrameAtTick(
+  ticksSinceStart: number,
+): BounceRotateToSidesFrame | null {
+  return bounceRotateToSidesFrameAtTick(ticksSinceStart, BOUNCE_ROTATE_TO_SIDES_VARIANTS.small);
+}
+
+/** Source sibling retained explicitly: small rotation with the slow table. */
+export function bounceRotateToSidesSmallSlowFrameAtTick(
+  ticksSinceStart: number,
+): BounceRotateToSidesFrame | null {
+  return bounceRotateToSidesFrameAtTick(
+    ticksSinceStart,
+    BOUNCE_ROTATE_TO_SIDES_VARIANTS.smallSlow,
+  );
 }
 
 const GROW_VIBRATE_DURATION = 40;
@@ -1264,6 +1308,13 @@ export function verticalShakeFrameAtTick(ticksSinceStart: number): VerticalShake
 
 function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffset {
   switch (family) {
+    case "BOUNCE_ROTATE_TO_SIDES_SMALL": {
+      const terminal = bounceRotateToSidesSmallFrameAtTick(87);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_BounceRotateToSides_Small did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
     case "BOUNCE_ROTATE_TO_SIDES_SLOW": {
       const terminal = bounceRotateToSidesSlowFrameAtTick(167);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
