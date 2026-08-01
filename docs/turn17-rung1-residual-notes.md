@@ -1,5 +1,17 @@
 # turn17-rung1 residual notes (side lane, 2026-07-31)
 
+> **CORRECTION (supervisor, same day — see PROGRESS entry 797 /
+> `4e2244c3`):** the fix worker live-instrumented the render and found the
+> named branch below is NOT the live path — `state.terminalResolution` is
+> genuinely `null` throughout 21774-21801, so the real fallback is the
+> `terminalResolution === null` half (`drawTurn16PostSwitchField`'s two
+> call sites there + the tail `drawFightSubmenuChrome` call). The
+> mechanism SHAPE this doc derived (hardcoded-false fallback during the
+> reopen gap, both defect surfaces, input-bounded flip) was correct and
+> drove the fix; the branch attribution was inferred from naming without a
+> live state dump. 22/28 frames fixed (90/118 → 112/118); the remaining 6
+> are idle-bounce-phase-family content, not this mechanism.
+
 Bounded step per the assigned brief. Two parts: (1) confirm the `appRoute`
 papercut fix's status on the seven `turn17-rung*.json` traces, (2) attribute
 `turn17-rung1.json`'s 28 mismatching frames. **No `src/` edits** — read-only
