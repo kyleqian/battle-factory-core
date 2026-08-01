@@ -1031,29 +1031,31 @@ describe("battleScene: S7 slice B - stat-change banner as a real scrolling BG1 (
   // `gStatAnim_Increase_Tilemap`/`_Gfx`/`gStatAnim_Evasion_Pal` blended onto
   // Grovyle's own OBJ-window silhouette, scrolled by `statsBannerBg1Y`'s
   // RAM-confirmed `+3`/tick ramp (one-tick render lag, like `bg1X`) - NOT the
-  // flat white flash a prior session's 2-sample solve concluded. Pinned at
-  // two ticks spanning the ramp-up (2140) and the "flat eva/evb" hold
-  // (2160, still visibly scrolling underneath) at Grovyle's own first
+  // flat white flash a prior session's 2-sample solve concluded. ISSUES #39
+  // rank-6 slice 1: turn 1's own banner is now Scene-OFF-owned and shifted
+  // much earlier (`TURN1_OFF_STATS_BANNER_*`, `battleScene.ts`) - re-pinned
+  // at two ticks spanning the OFF ramp-up (2010) and the OFF "flat eva/evb"
+  // hold (2030, still visibly scrolling underneath) at Grovyle's own first
   // opaque pixel (GROVYLE_CORNER+(31,7) = (175,19)) - oracle-cross-checked
-  // directly (`turn1-cloneanim.json`, now 230/230).
-  it("renders the real scrolling arrow tilemap, not a flat color, at two different points in the banner (ramp-up tick 2140, hold tick 2160)", () => {
+  // directly (`turn1-cloneanim-off.json`, 230/230).
+  it("renders the real scrolling arrow tilemap, not a flat color, at two different points in the banner (OFF ramp-up tick 2010, OFF hold tick 2030)", () => {
     const GROVYLE_CORNER = { x: 144, y: 12 };
     const submenu = confirmFightMove(openFightSubmenu(0, rentalMoveset("ONIX")), 879); // pressTick = 1919
     const x = GROVYLE_CORNER.x + GROVYLE_FIRST_OPAQUE_OFFSET.x;
     const y = GROVYLE_CORNER.y + GROVYLE_FIRST_OPAQUE_OFFSET.y;
     const o = (y * 240 + x) * 4;
 
-    const fb2140 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb2140, { elapsed: 2140 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false });
-    const at2140: [number, number, number] = [fb2140[o]!, fb2140[o + 1]!, fb2140[o + 2]!];
+    const fb2010 = new Uint8Array(240 * 160 * 4);
+    renderBattleScene(fb2010, { elapsed: 2010 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false });
+    const at2010: [number, number, number] = [fb2010[o]!, fb2010[o + 1]!, fb2010[o + 2]!];
 
-    const fb2160 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb2160, { elapsed: 2160 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false });
-    const at2160: [number, number, number] = [fb2160[o]!, fb2160[o + 1]!, fb2160[o + 2]!];
+    const fb2030 = new Uint8Array(240 * 160 * 4);
+    renderBattleScene(fb2030, { elapsed: 2030 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13Resolved: false, turn14Resolved: false });
+    const at2030: [number, number, number] = [fb2030[o]!, fb2030[o + 1]!, fb2030[o + 2]!];
 
-    expect(at2140).toEqual([118, 170, 125]);
-    expect(at2160).toEqual([21, 142, 86]);
-    expect(at2140).not.toEqual(at2160); // the scroll genuinely moves content, not just a static blend
+    expect(at2010).toEqual([69, 160, 99]);
+    expect(at2030).toEqual([88, 203, 148]);
+    expect(at2010).not.toEqual(at2030); // the scroll genuinely moves content, not just a static blend
   });
 });
 

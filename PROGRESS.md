@@ -13,6 +13,67 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 800 — [bounded worker, 2026-07-31 ~19:05] ISSUES #39 rank-6 slice 1 EXECUTED: turn 1 flipped to Scene-OFF-owned presentation
+
+- **State:** master green — tsc clean, build clean, focused vitest
+  (battleScene 247/battleMenu 121/factoryBattleStartIntro 5/fightSubmenu
+  57/executableFrontierRatchet 6) 436/436 passed, no new ratchet barrier.
+  One commit pending (this session's own).
+- **Did:** per the ADOPTED rank-6 policy (PROGRESS 799 addendum) and the
+  rank-5 slice-1 recipe, flipped turn 1's whole DOUBLE_TEAM/ROCK_SLIDE
+  window (menu 1884 → settle ~2348) to Scene-OFF-owned. Deleted class-(c)
+  bodies from turn 1's own render path: DOUBLE_TEAM's clone-blend
+  (`drawDoubleTeamClones` call site removed) and ROCK_SLIDE's camera
+  shake/target shake/rock-prop loop (`rockSlideBg3Y`/`rockSlideMonShakeY2`/
+  `rockSlideRockState`/`rockSlideDrawOrder` calls dropped from
+  `drawRockSlideAttack`) — both RAM-confirmed flat/absent the whole window
+  (new probe `tools/probe/dump-turn1-rockslide-off.py`, `gBattle_BG3_Y`
+  and Grovyle's own `x2`/`y2` pinned 0 throughout). Re-timed the surviving
+  class-(b) choreography (stat-change banner, generic hit-flash pair,
+  HP-drain, text) against 8 new RAM-exact constants
+  (`TURN1_OFF_STATS_BANNER_*`/`TURN1_OFF_ROCKSLIDE_*`,
+  `battleScene.ts`) — `ROCK_SLIDE_MENU_REDRAW_DELAY` real OFF value
+  pinned at exactly **429**, matching `docs/rank6-off-ground-truth.md`
+  §5's own ~429 estimate. `statsBannerEva`/`statsBannerBg1Y`/
+  `statRoseTextStartTick`/`statRoseTextVisibleChars`/
+  `rockSlideTextStartTick`/`rockSlideTextVisibleChars`/
+  `rockSlideResettledBounceTick` (`battleMenu.ts`) gained optional
+  override params defaulting to their existing ON-fit constants — turn 4's
+  own still-ON DOUBLE_TEAM call site (`drawStatsBanner`/
+  `drawDoubleTeamClones`, S7 slice I) is byte-for-byte unaffected. Two
+  small RAM-vs-PNG capture-lag corrections found by iterating against the
+  dense oracle captures (bg1Y anchor +1, hit-flash anchor +1 — same
+  "PNG(t)=RAM(t-1)" convention this program's BG-scroll-register findings
+  already establish) and one text-clear tick corrected from the coarser
+  v3 whole-frame-sha table (2345) to a fresh sha crop of the opponent-
+  healthbox-name-plate bbox (2341) — restores the same 7-tick clear-to-
+  redraw gap turn6/turn7's own ROCK_SLIDE pairs already establish.
+- **Acceptance (fresh, this session):** `turn1-kickoff-off.json`
+  **81/81**, `turn1-cloneanim-off.json` **230/230**, `turn1-rockslide-off.json`
+  **256/256**, `turn1-drain-off.json` **102/102** — all EXACT. Retired the
+  four legacy ON turn-1 pins (`git rm turn1-{kickoff,cloneanim,rockslide,
+  drain}.json`); no turn-1-only scratch diagnostics existed to retire
+  (`dump-doubleteam-sprites.py`/`dump-rockslide-sprites.py` remain live,
+  still used by turns 3-7's own still-ON rock-slide/clone work).
+- **Boundary insurance — surprise finding, NOT a regression:** the
+  brief's named turn-2 pins were expected 100% green today.
+  `turn2-endeavor.json` actually **throws** (`Scene OFF typed stat
+  adapter cannot draw battler 1 evasion 7->8`) and `turn2-dragonbreath.json`
+  is **0/237** — but `git stash` against this session's own changes
+  reproduces byte-identical failures on unmodified master (`f0621d47`),
+  proving both are pre-existing and unrelated to turn 1's own dispatcher
+  (they route through the GENERATED-route presentation adapter, not
+  `renderBattleScene`). New entry **ISSUES #60** files this honestly
+  rather than silently absorbing it into this slice's own report. Per the
+  hard-stop rule this only applies to a genuine regression — confirmed
+  this isn't one, so slice 1 proceeded to its own green commit.
+- **Next:** rank-6 slice 2 (turn 2) is next in the same shape; #56 item 2
+  and #56 +6 universality remain open per PROGRESS 799's own next-list;
+  #60 (new, this session) is a leftover lead for whoever next touches the
+  generated-route stat adapter or wants turn2's own pins actually green.
+- **PAPERCUT:** none beyond #60's own discovery (not dev-loop friction,
+  a real pre-existing app bug — filed as an issue, not a papercut).
+
 ## 799 — [bounded worker, 2026-07-31 ~18:05] ISSUES #56 item 2: MAGNETON-side RAM probe run — discriminator NOT pinned clean, no fix landed (probe-only step)
 
 - **State:** master green — tsc clean, focused vitest (factoryBattleStartIntro
@@ -167,84 +228,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
     (v) rank 7 (FLY) / rank 8 (burn projection) inventory rows. #55
     parked. No DEFERRED entries — the rank-6 policy question is a
     start-of-work decision, not a blocker (rank-5 precedent).
-
----
-## 797 — [bounded worker, 2026-07-31 ~17:15] turn17-rung1's 28-frame residual FIXED — 90/118 → 112/118; remaining 6 frames re-attributed to the already-tracked idle-bounce phase family
-
-- **State:** master green — tsc clean, focused vitest (fightSubmenu 57/
-  battleScene 247/battleMenu 121/factoryBattleStartIntro 5) green,
-  ratchet 6/6 (no new barrier), full `npm test` **567 files / 5721
-  passed + 1 skipped** (+1 over 796's baseline, the new gap-window
-  pin), build clean.
-- **Root cause was NOT where `docs/turn17-rung1-residual-notes.md`
-  said.** That doc named `drawTurn16FightSubmenuWindow`'s
-  `terminalResolution !== null` branch. Live-instrumented the actual
-  render call (`console.error` in the function, removed before commit)
-  and found `state.terminalResolution` is genuinely `null` throughout
-  frames 21774-21801 for this trace — `core.ts`'s own terminal-creation
-  guard (`priorFightConfirmElapsed === null && fightSubmenu.confirmElapsed
-  !== null`) only fires on turn 17's own confirm tick (~21801-21802),
-  not before. The real fallback is the *other* half of the function
-  (the `terminalResolution === null` path, `drawTurn16PostSwitchField`
-  call ~line 16718 and the bare `drawFightSubmenuChrome(fb,
-  sm.displayCursor, false, false, sm.activeMonMoveset)` call at its
-  tail) — the same shared function handles both turn 16's own
-  pre-confirm dwell (correctly full HP/no status/PP untouched) *and*
-  turn 17's reopened-but-unconfirmed dwell (needs the settled
-  post-turn-16 values), with no prior signal distinguishing the two.
-- **Fix:** `sm.menuRedrawElapsed !== null` is the only available
-  signal that a given `FightSubmenuState` is turn 17's reopen specifically
-  (`core.ts` only threads a real `menuRedrawElapsed` on that one
-  `openFightSubmenu` call, line ~1427) — `isTurn17Reopen`/
-  `settledPreConfirm` derived from it. Threaded through: (1) both
-  `drawTurn16PostSwitchField` call sites in the `terminalResolution
-  === null` half (the `t < revealTick` early return AND the main body)
-  now pass MAGBY's settled HP (79) and MURKROW's settled status
-  (`{hp: 58, status: "burn"}`) when `settledPreConfirm`, via a new
-  `settledPlayerHp` param plus relaxing the `explicitOpponent` draw
-  guard to not require `faintAttackAge !== null`; (2) the tail
-  `drawFightSubmenuChrome` call now passes `isTurn17Reopen` as
-  `turn16Resolved` (was hardcoded `false`) — `currentPPForActiveMon`'s
-  existing `moveIds[0] === 7 && turn16Resolved` special case then
-  correctly reconstructs FIRE PUNCH's PP as 14/15 instead of 15/15;
-  turn1Resolved..turn14Resolved were left `false` (verified inert for
-  MAGBY's moveset — the species check short-circuits before they're
-  read — and threading them would need a wider signature change this
-  step didn't need). `drawTurn16PostSwitchField`'s three OTHER call
-  sites (the `terminalResolution !== null` half) are untouched — that
-  branch is real but not exercised by this trace's mismatch window.
-- **Numbers:** turn17-rung1 **90/118 → 112/118**. rung2-6b held exact
-  (221/143/200/113/255/41); rung7a **255/255**, rung8b **118/118**;
-  turn13-switchin **242/242**, turn5-rockslide **256/256**, turn8-bind-a
-  **256/256**, interactive-generated-intro-off **715/715**,
-  battle-command-generated-off **128/128** — all re-run fresh this
-  session, no regressions.
-- **Remaining 6 frames (21783-85, 21792-94) are NOT this mechanism.**
-  Their bbox (`127,74-229,110`) exactly matches
-  `docs/idle-bounce-phase-attribution.md`'s own documented idle-bounce
-  healthbox signature (quoted verbatim in this doc's own family-
-  exclusion section) — a box-open-transition bounce-phase misalignment,
-  not a wrong-content defect. Per this step's OUT-OF-SCOPE list (the
-  idle-bounce family closes with ranks 6-8), stopped here rather than
-  chasing it; 118/118 is not reachable from this step's assigned
-  mechanism alone.
-- **Tier-1 pin (`tests/fightSubmenu.test.ts`):** new test replays
-  `turn17-rung1.json` through `core.ts`'s real `tick()`/`render()` to
-  frame 21786 (mid-gap, `confirmElapsed` still null), then asserts 3
-  oracle-matched pixels (MURKROW's BRN badge color, MAGBY's HP-bar-
-  stops-at-79 boundary, the PP-digit-reads-14 background) — ablation-
-  verified: fails (`[255,255,222]` vs expected `[231,115,82]`) with
-  only the test present and the src fix reverted.
-- **Next:** the idle-bounce phase family (ranks 6-8, side-lane per
-  standing arrangement) is the only thing left blocking turn17-rung1's
-  final 6 frames. Otherwise: #56 item 2 remainder (MAGNETON-side RAM
-  probe for frame 444's real discriminator + its materialize-column-
-  shift defect), rank 6.
-- **PAPERCUT:** the residual-notes doc's named branch was wrong (right
-  general shape — hardcoded-false fallback during the reopen gap —
-  wrong function half); ~20min lost re-deriving the actual call site
-  via live instrumentation before finding it. Worth a note for anyone
-  writing root-cause docs from pixel+segment evidence alone without a
-  live state dump: confirm the branch predicate's actual runtime value,
-  don't infer it from naming/comments.
-

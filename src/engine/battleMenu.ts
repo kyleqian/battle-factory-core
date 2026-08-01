@@ -1324,9 +1324,14 @@ export const STATS_BANNER_END_DELAY = 274;
  * scrolling tilemap, not a flat white flash. This function's own schedule
  * needed no change once that was found.
  */
-export function statsBannerEva(t: number, pressTick: number): number | null {
-  const start = pressTick + STATS_BANNER_START_DELAY;
-  const end = pressTick + STATS_BANNER_END_DELAY;
+export function statsBannerEva(
+  t: number,
+  pressTick: number,
+  startDelay: number = STATS_BANNER_START_DELAY,
+  endDelay: number = STATS_BANNER_END_DELAY,
+): number | null {
+  const start = pressTick + startDelay;
+  const end = pressTick + endDelay;
   if (t < start || t > end) return null;
   const d = t - start;
   if (d <= 4) return 0;
@@ -1369,8 +1374,8 @@ export function statsBannerEva(t: number, pressTick: number): number | null {
  */
 export const STATS_BANNER_BG1_Y_ANCHOR_DELAY = 211;
 
-export function statsBannerBg1Y(t: number, pressTick: number): number {
-  const d = t - (pressTick + STATS_BANNER_BG1_Y_ANCHOR_DELAY);
+export function statsBannerBg1Y(t: number, pressTick: number, anchorDelay: number = STATS_BANNER_BG1_Y_ANCHOR_DELAY): number {
+  const d = t - (pressTick + anchorDelay);
   return Math.max(0, Math.min(180, 3 * d));
 }
 
@@ -1650,13 +1655,13 @@ export const STAT_ROSE_TEXT_TOTAL = STAT_ROSE_LINE1.length + STAT_ROSE_LINE2.len
 /** Ticks from the A-confirm press to this textbox's own clear+first-glyph tick (RAM/pixel-confirmed 2203, same "clear and draw in the same tick" convention as `TURN_KICKOFF_LINE1`). */
 export const STAT_ROSE_TEXT_DELAY = 284;
 
-export function statRoseTextStartTick(pressTick: number): number {
-  return pressTick + STAT_ROSE_TEXT_DELAY;
+export function statRoseTextStartTick(pressTick: number, delay: number = STAT_ROSE_TEXT_DELAY): number {
+  return pressTick + delay;
 }
 
 /** Visible character count (0..STAT_ROSE_TEXT_TOTAL) at absolute trace tick `t` - same 1-tick/char-including-spaces mechanism as `turnKickoffTextVisibleChars`. */
-export function statRoseTextVisibleChars(t: number, pressTick: number): number {
-  const start = statRoseTextStartTick(pressTick);
+export function statRoseTextVisibleChars(t: number, pressTick: number, delay: number = STAT_ROSE_TEXT_DELAY): number {
+  const start = statRoseTextStartTick(pressTick, delay);
   if (t < start) return 0;
   return Math.min(STAT_ROSE_TEXT_TOTAL, t - start + 1);
 }
@@ -1669,13 +1674,13 @@ export const ROCK_SLIDE_TEXT_TOTAL = ROCK_SLIDE_LINE1.length + ROCK_SLIDE_LINE2.
 /** Ticks from the A-confirm press to this textbox's own clear+first-glyph tick (RAM/pixel-confirmed 2312). */
 export const ROCK_SLIDE_TEXT_DELAY = 393;
 
-export function rockSlideTextStartTick(pressTick: number): number {
-  return pressTick + ROCK_SLIDE_TEXT_DELAY;
+export function rockSlideTextStartTick(pressTick: number, delay: number = ROCK_SLIDE_TEXT_DELAY): number {
+  return pressTick + delay;
 }
 
 /** Visible character count (0..ROCK_SLIDE_TEXT_TOTAL) at absolute trace tick `t`. */
-export function rockSlideTextVisibleChars(t: number, pressTick: number): number {
-  const start = rockSlideTextStartTick(pressTick);
+export function rockSlideTextVisibleChars(t: number, pressTick: number, delay: number = ROCK_SLIDE_TEXT_DELAY): number {
+  const start = rockSlideTextStartTick(pressTick, delay);
   if (t < start) return 0;
   return Math.min(ROCK_SLIDE_TEXT_TOTAL, t - start + 1);
 }
@@ -2305,8 +2310,8 @@ export const ROCK_SLIDE_MENU_REDRAW_DELAY = 664;
  * tried first and rejected: plain `menuIdleBounce(t)` does not reproduce
  * the observed blip/dwell boundaries at this `t` range at all).
  */
-export function rockSlideResettledBounceTick(t: number, pressTick: number): number {
-  return t - (pressTick + ROCK_SLIDE_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
+export function rockSlideResettledBounceTick(t: number, pressTick: number, redrawDelay: number = ROCK_SLIDE_MENU_REDRAW_DELAY): number {
+  return t - (pressTick + redrawDelay) + (MENU_IDLE_BLANK_END_TICK + 1);
 }
 
 // --- S7 slice N-4 rung (b): turn 6's own ROCK_SLIDE (Onix vs. Pidgeotto,

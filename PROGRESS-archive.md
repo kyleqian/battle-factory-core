@@ -1,3 +1,82 @@
+## 797 — [bounded worker, 2026-07-31 ~17:15] turn17-rung1's 28-frame residual FIXED — 90/118 → 112/118; remaining 6 frames re-attributed to the already-tracked idle-bounce phase family
+
+- **State:** master green — tsc clean, focused vitest (fightSubmenu 57/
+  battleScene 247/battleMenu 121/factoryBattleStartIntro 5) green,
+  ratchet 6/6 (no new barrier), full `npm test` **567 files / 5721
+  passed + 1 skipped** (+1 over 796's baseline, the new gap-window
+  pin), build clean.
+- **Root cause was NOT where `docs/turn17-rung1-residual-notes.md`
+  said.** That doc named `drawTurn16FightSubmenuWindow`'s
+  `terminalResolution !== null` branch. Live-instrumented the actual
+  render call (`console.error` in the function, removed before commit)
+  and found `state.terminalResolution` is genuinely `null` throughout
+  frames 21774-21801 for this trace — `core.ts`'s own terminal-creation
+  guard (`priorFightConfirmElapsed === null && fightSubmenu.confirmElapsed
+  !== null`) only fires on turn 17's own confirm tick (~21801-21802),
+  not before. The real fallback is the *other* half of the function
+  (the `terminalResolution === null` path, `drawTurn16PostSwitchField`
+  call ~line 16718 and the bare `drawFightSubmenuChrome(fb,
+  sm.displayCursor, false, false, sm.activeMonMoveset)` call at its
+  tail) — the same shared function handles both turn 16's own
+  pre-confirm dwell (correctly full HP/no status/PP untouched) *and*
+  turn 17's reopened-but-unconfirmed dwell (needs the settled
+  post-turn-16 values), with no prior signal distinguishing the two.
+- **Fix:** `sm.menuRedrawElapsed !== null` is the only available
+  signal that a given `FightSubmenuState` is turn 17's reopen specifically
+  (`core.ts` only threads a real `menuRedrawElapsed` on that one
+  `openFightSubmenu` call, line ~1427) — `isTurn17Reopen`/
+  `settledPreConfirm` derived from it. Threaded through: (1) both
+  `drawTurn16PostSwitchField` call sites in the `terminalResolution
+  === null` half (the `t < revealTick` early return AND the main body)
+  now pass MAGBY's settled HP (79) and MURKROW's settled status
+  (`{hp: 58, status: "burn"}`) when `settledPreConfirm`, via a new
+  `settledPlayerHp` param plus relaxing the `explicitOpponent` draw
+  guard to not require `faintAttackAge !== null`; (2) the tail
+  `drawFightSubmenuChrome` call now passes `isTurn17Reopen` as
+  `turn16Resolved` (was hardcoded `false`) — `currentPPForActiveMon`'s
+  existing `moveIds[0] === 7 && turn16Resolved` special case then
+  correctly reconstructs FIRE PUNCH's PP as 14/15 instead of 15/15;
+  turn1Resolved..turn14Resolved were left `false` (verified inert for
+  MAGBY's moveset — the species check short-circuits before they're
+  read — and threading them would need a wider signature change this
+  step didn't need). `drawTurn16PostSwitchField`'s three OTHER call
+  sites (the `terminalResolution !== null` half) are untouched — that
+  branch is real but not exercised by this trace's mismatch window.
+- **Numbers:** turn17-rung1 **90/118 → 112/118**. rung2-6b held exact
+  (221/143/200/113/255/41); rung7a **255/255**, rung8b **118/118**;
+  turn13-switchin **242/242**, turn5-rockslide **256/256**, turn8-bind-a
+  **256/256**, interactive-generated-intro-off **715/715**,
+  battle-command-generated-off **128/128** — all re-run fresh this
+  session, no regressions.
+- **Remaining 6 frames (21783-85, 21792-94) are NOT this mechanism.**
+  Their bbox (`127,74-229,110`) exactly matches
+  `docs/idle-bounce-phase-attribution.md`'s own documented idle-bounce
+  healthbox signature (quoted verbatim in this doc's own family-
+  exclusion section) — a box-open-transition bounce-phase misalignment,
+  not a wrong-content defect. Per this step's OUT-OF-SCOPE list (the
+  idle-bounce family closes with ranks 6-8), stopped here rather than
+  chasing it; 118/118 is not reachable from this step's assigned
+  mechanism alone.
+- **Tier-1 pin (`tests/fightSubmenu.test.ts`):** new test replays
+  `turn17-rung1.json` through `core.ts`'s real `tick()`/`render()` to
+  frame 21786 (mid-gap, `confirmElapsed` still null), then asserts 3
+  oracle-matched pixels (MURKROW's BRN badge color, MAGBY's HP-bar-
+  stops-at-79 boundary, the PP-digit-reads-14 background) — ablation-
+  verified: fails (`[255,255,222]` vs expected `[231,115,82]`) with
+  only the test present and the src fix reverted.
+- **Next:** the idle-bounce phase family (ranks 6-8, side-lane per
+  standing arrangement) is the only thing left blocking turn17-rung1's
+  final 6 frames. Otherwise: #56 item 2 remainder (MAGNETON-side RAM
+  probe for frame 444's real discriminator + its materialize-column-
+  shift defect), rank 6.
+- **PAPERCUT:** the residual-notes doc's named branch was wrong (right
+  general shape — hardcoded-false fallback during the reopen gap —
+  wrong function half); ~20min lost re-deriving the actual call site
+  via live instrumentation before finding it. Worth a note for anyone
+  writing root-cause docs from pixel+segment evidence alone without a
+  live state dump: confirm the branch predicate's actual runtime value,
+  don't infer it from naming/comments.
+
 ## 796 — [bounded worker, 2026-07-31 ~16:40] ISSUES #56 item 2: frame 536 RESOLVED (Part B); frame 444 fix blocked by new MAGNETON regression (Part A, not landed)
 
 - **State:** master green — tsc clean, focused vitest (factoryBattleStartIntro

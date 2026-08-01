@@ -478,8 +478,6 @@ import {
   HIT_FLASH_RAM_ANCHOR_DELAY,
   STATS_BANNER_END_DELAY,
   rockSlideOpponentHp,
-  ROCK_SLIDE_TEXT_CLEAR_DELAY,
-  ROCK_SLIDE_MENU_REDRAW_DELAY,
   rockSlideResettledBounceTick,
   TURN2_KICKOFF_LINE2,
   turn2KickoffTextVisibleChars,
@@ -6535,10 +6533,17 @@ function statAnimBg1PixelAt(tilemap: Tilemap, tileset: Tileset, palette: RgbColo
  * stays 0 for a stat INCREASE (only a stat DECREASE sets it to 64, out of
  * scope this slice), so only the vertical map coordinate shifts.
  */
-function drawStatsBanner(fb: Uint8Array, t: number, pressTick: number): boolean {
-  const eva = statsBannerEva(t, pressTick);
+function drawStatsBanner(
+  fb: Uint8Array,
+  t: number,
+  pressTick: number,
+  startDelay?: number,
+  endDelay?: number,
+  bg1YAnchorDelay?: number,
+): boolean {
+  const eva = statsBannerEva(t, pressTick, startDelay, endDelay);
   if (eva === null) return false;
-  const bg1Y = statsBannerBg1Y(t, pressTick);
+  const bg1Y = statsBannerBg1Y(t, pressTick, bg1YAnchorDelay);
   drawStatIncreaseBannerForBattler(
     fb,
     grovyleFrontSprite.tileset,
@@ -7687,12 +7692,21 @@ function drawFightSubmenuWindow(
         drawTurn3EndeavorText(fb, t, pressTick);
         return;
       }
-      if (t - pressTick > STATS_BANNER_END_DELAY) {
+      // ISSUES #39 rank-6 slice 1: turn 1 is now Scene-OFF-owned - DOUBLE_TEAM's
+      // own clone-blend (`drawDoubleTeamClones`) is class (c), never renders
+      // under `HITMARKER_NO_ANIMATIONS` (RAM-confirmed absent the whole
+      // window, `TURN1_OFF_ROCKSLIDE_ANIMATION_PROFILE`'s own doc comment
+      // above), so this branch no longer calls it; the generic stat-change
+      // banner is exempt from that substitution and re-times via the
+      // `TURN1_OFF_STATS_BANNER_*` constants instead of the shared ON-fit
+      // ones (turn 4's own still-ON `drawStatsBanner`/`drawDoubleTeamClones`
+      // call site, S7 slice I's window, is untouched).
+      if (t - pressTick > TURN1_OFF_STATS_BANNER_END_DELAY) {
         drawRockSlideWindow(fb, t, pressTick);
         return;
       }
       drawTurnKickoffText(fb, t, pressTick);
-      if (!drawDoubleTeamClones(fb, t, pressTick)) drawStatsBanner(fb, t, pressTick);
+      drawStatsBanner(fb, t, pressTick, TURN1_OFF_STATS_BANNER_START_DELAY, TURN1_OFF_STATS_BANNER_END_DELAY, TURN1_OFF_STATS_BANNER_BG1_Y_ANCHOR_DELAY);
       return;
     }
     // Engine-side turn-order/attacker resolution is in flight but not yet
@@ -14325,15 +14339,45 @@ const [TURN1_ROCKSLIDE_KICKOFF_LINE1, TURN1_ROCKSLIDE_KICKOFF_LINE2] = resolveTu
 const [TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2] = resolveTurn1RockSlideAttackLines();
 const TURN1_ROCKSLIDE_HP = resolveTurn1RockSlideHpEndpoints();
 
+/**
+ * ISSUES #39 rank-6 slice 1: turn 1's own Scene-OFF re-timing. `attackanimation`
+ * substitutes a fixed `BattleScript_Pausex20` pause for both DOUBLE_TEAM's own
+ * clone-blend and ROCK_SLIDE's own rock-prop/camera-shake/target-shake
+ * (`Cmd_playanimation`'s `HITMARKER_NO_ANIMATIONS` branch,
+ * `reference/pokeemerald/src/battle_script_commands.c:4018-4021`) - both
+ * confirmed absent for turn 1's whole window by a fresh RAM probe
+ * (`tools/probe/dump-turn1-rockslide-off.py` against `turn1-drain-off.json`'s
+ * own segments: `gBattle_BG3_Y` and Grovyle's own `x2`/`y2` stay flat 0 the
+ * entire 1919-2360 window). The generic stat-change banner
+ * (`playanimation B_ANIM_STATS_CHANGE`) is exempt from that substitution
+ * (`Cmd_playanimation`'s own special case, same source lines) and the generic
+ * hit-flash pair (`rockSlideHealthboxWobbleY2`/`rockSlideMonBlinkInvisible`)
+ * survive too (class b) - both re-timed below, RAM-exact (same probe, plus a
+ * `BLDALPHA`/`gBattle_BG1_Y` register read cross-checking the banner's own
+ * schedule tick-for-tick against the ON model's own shape function).
+ */
+const TURN1_OFF_STATS_BANNER_START_DELAY = 80; // RAM tick 1999 (BLDCNT eva/evb first write) - pressTick(1919)
+const TURN1_OFF_STATS_BANNER_END_DELAY = 146; // start+66, same total life as the ON schedule (RAM-confirmed: eva returns to 0 at render 2062, BLDCNT fully off by 2065)
+const TURN1_OFF_STATS_BANNER_BG1_Y_ANCHOR_DELAY = 83; // RAM tick 2001 (BG1_Y's own first +3 write) - pressTick(1919), +1 for the same BG-scroll-register render lag `STATS_BANNER_BG1_Y_ANCHOR_DELAY`'s own doc establishes (PNG(t) shows RAM(t-1))
+const TURN1_OFF_STAT_ROSE_TEXT_DELAY = 156; // banner end(146) + the same 10-tick gap the ON schedule (274->284) already establishes
+const TURN1_OFF_ROCKSLIDE_TEXT_DELAY = 265; // "ONIX used\nROCK SLIDE!" - just past Onix's own accuracy roll (RAM/sha 2182, offset 263 from pressTick)
+const TURN1_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY = 362; // RAM tick 2281 (battleBars[1]'s own start sentinel) - pressTick(1919), probe-exact
+const TURN1_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY = 422; // sha tick 2341 (this session's fresh dense-capture crop of the opponent-healthbox-name-plate bbox, HEALTHBOX_FRAME_ORIGIN-anchored - the SAME 7-tick clear-to-redraw gap turn6/turn7's own ROCK_SLIDE pairs establish (743->750, 731->738), not the coarser whole-frame-sha v3 table's own 2345 citation
+const TURN1_OFF_ROCKSLIDE_MENU_REDRAW_DELAY = 429; // RAM/sha tick 2348 (same table - settle onto the 4-phase idle cycle), matches `docs/rank6-off-ground-truth.md` §5's own ~429 estimate exactly
+const TURN1_OFF_ROCKSLIDE_ANIMATION_PROFILE = {
+  ...ROCK_SLIDE_ANIMATION_PROFILE,
+  hitFlashAnchorAge: 327, // RAM tick 2245 (healthbox wobble's own first +1 write) - pressTick(1919), +1 for the PNG(t)=RAM(t-1) capture lag `TURN1_OFF_STATS_BANNER_BG1_Y_ANCHOR_DELAY`'s own doc establishes
+};
+
 function drawRockSlideWindow(fb: Uint8Array, t: number, pressTick: number): void {
-  const redrawTick = pressTick + ROCK_SLIDE_MENU_REDRAW_DELAY;
+  const redrawTick = pressTick + TURN1_OFF_ROCKSLIDE_MENU_REDRAW_DELAY;
   if (t >= redrawTick) {
     drawTurnEndSettledMenu(fb, t, pressTick);
     return;
   }
-  const statRoseStart = statRoseTextStartTick(pressTick);
-  const rockSlideStart = rockSlideTextStartTick(pressTick);
-  const textClearTick = pressTick + ROCK_SLIDE_TEXT_CLEAR_DELAY;
+  const statRoseStart = statRoseTextStartTick(pressTick, TURN1_OFF_STAT_ROSE_TEXT_DELAY);
+  const rockSlideStart = rockSlideTextStartTick(pressTick, TURN1_OFF_ROCKSLIDE_TEXT_DELAY);
+  const textClearTick = pressTick + TURN1_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY;
   drawRockSlideAttack(fb, t, pressTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   if (t < textClearTick) {
@@ -14347,11 +14391,11 @@ function drawRockSlideWindow(fb: Uint8Array, t: number, pressTick: number): void
     } else if (t < rockSlideStart) {
       line1 = STAT_ROSE_LINE1;
       line2 = STAT_ROSE_LINE2;
-      chars = statRoseTextVisibleChars(t, pressTick);
+      chars = statRoseTextVisibleChars(t, pressTick, TURN1_OFF_STAT_ROSE_TEXT_DELAY);
     } else {
       line1 = TURN1_ROCKSLIDE_ATTACK_LINE1;
       line2 = TURN1_ROCKSLIDE_ATTACK_LINE2;
-      chars = rockSlideTextVisibleChars(t, pressTick);
+      chars = rockSlideTextVisibleChars(t, pressTick, TURN1_OFF_ROCKSLIDE_TEXT_DELAY);
     }
     drawMessageTextLines(fb, line1, line2, chars);
   }
@@ -14373,23 +14417,24 @@ function drawRockSlideWindow(fb: Uint8Array, t: number, pressTick: number): void
  * directly).
  */
 function drawRockSlideAttack(fb: Uint8Array, t: number, pressTick: number): void {
-  const shiftY = rockSlideBg3Y(t, pressTick);
-  drawStaticBgShiftedY(fb, shiftY);
-  if (!rockSlideMonBlinkInvisible(t, pressTick)) {
-    drawSpriteSheet(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y + rockSlideMonShakeY2(t, pressTick));
+  // ISSUES #39 rank-6 slice 1: the camera shake (`rockSlideBg3Y`), Grovyle's
+  // own target shake (`rockSlideMonShakeY2`), and the falling-rock props
+  // (`rockSlideDrawOrder`/`rockSlideRockState`) are ROCK_SLIDE's own
+  // `attackanimation` body - class (c), never renders under
+  // `HITMARKER_NO_ANIMATIONS` (RAM-confirmed flat 0 the whole window, this
+  // window's own doc comment above) - dropped entirely rather than called
+  // with a never-active override.
+  drawStaticBgShiftedY(fb, 0);
+  if (!rockSlideMonBlinkInvisible(t, pressTick, TURN1_OFF_ROCKSLIDE_ANIMATION_PROFILE)) {
+    drawSpriteSheet(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y);
   }
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
-  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
-  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN1_ROCKSLIDE_HP.from, TURN1_ROCKSLIDE_HP.to);
+  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick, TURN1_OFF_ROCKSLIDE_ANIMATION_PROFILE);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN1_ROCKSLIDE_HP.from, TURN1_ROCKSLIDE_HP.to, TURN1_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
   drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(opponentHp));
   if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2);
   drawMenuHealthboxPlayer(fb, 0);
   drawMenuIdleBounceOverlay(fb, turnKickoffBounceTick(t, pressTick));
-  for (const i of rockSlideDrawOrder(t, pressTick)) {
-    const rock = rockSlideRockState(i, t, pressTick);
-    if (!rock) continue;
-    drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
-  }
 }
 
 /**
@@ -14406,8 +14451,8 @@ function drawRockSlideAttack(fb: Uint8Array, t: number, pressTick: number): void
  * though by this tick always settled) HP.
  */
 function drawTurnEndSettledMenu(fb: Uint8Array, t: number, pressTick: number): void {
-  drawActionMenuIdleContent(fb, rockSlideResettledBounceTick(t, pressTick), false);
-  const opponentHp = rockSlideOpponentHp(t, pressTick, anchorOpponentBattler.hp, anchorOpponentAfterTurnHp);
+  drawActionMenuIdleContent(fb, rockSlideResettledBounceTick(t, pressTick, TURN1_OFF_ROCKSLIDE_MENU_REDRAW_DELAY), false);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, anchorOpponentBattler.hp, anchorOpponentAfterTurnHp, TURN1_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
   drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(opponentHp));
 }
 

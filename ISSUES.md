@@ -199,7 +199,18 @@ ADOPTED (user decision 2026-07-31 evening, recorded in PROGRESS 799
 addendum):** same shape for turns 1-4 — acceptance moves to the 10
 banked OFF pins (`docs/rank6-off-ground-truth.md`), legacy ON turns
 1-4 pins retire as rank 6 executes; turns 5-8 pins deliberately NOT
-covered by this decision. Earlier
+covered by this decision. **Slice 1 (turn 1) executed 2026-07-31
+evening:** DOUBLE_TEAM's clone-blend and ROCK_SLIDE's rock-prop/camera-
+shake/target-shake (class c, `Cmd_playanimation`'s `HITMARKER_NO_
+ANIMATIONS` branch) deleted from turn 1's own window; the generic
+stat-change banner and the generic hit-flash pair (class b) re-timed
+against a fresh RAM probe (`tools/probe/dump-turn1-rockslide-off.py`).
+OFF pins all EXACT: 81/81 + 230/230 + 256/256 + 102/102; four legacy ON
+turn-1 pins retired (`git rm`). Turn-2 boundary insurance traces
+(`turn2-endeavor.json`/`turn2-dragonbreath.json`) were found ALREADY
+red on master pre-change (a pre-existing, unrelated generated-route
+crash — confirmed byte-identical via `git stash`, not a regression
+from this slice). Earlier
 progress:
 `turn13-sandattack.json`'s complete captured
 SAND_ATTACK content now resolves its kickoff and opponent-target accuracy-fall
@@ -223,6 +234,28 @@ oracle-exact and that evidence is worth keeping. The debt is the *keying*.
 ROADMAP S10 §3 requires one already-exact window to be re-driven from semantic
 events as a proof of the seam; that conversion, window by window, is the
 retirement path. AGENTS.md already forbids adding new turn-keyed branches.
+
+## #60 — `turn2-endeavor.json`/`turn2-dragonbreath.json` already red on master, unrelated to the canonical dispatcher
+
+**Discovered** 2026-07-31 (rank-6 slice 1's own boundary-insurance check).
+Both traces render through `core.ts`'s `renderWithoutFactoryTerminal` ->
+`renderBattleResolutionPresentation` -> `renderBattleResolutionSceneOffView`
+(the GENERATED-route presentation adapter, not the canonical Battle 1
+turn-by-turn dispatcher in `battleScene.ts`'s `renderBattleScene`) — an
+unexpected route for traces that look like plain canonical-battle turn-2
+windows. `turn2-endeavor.json` throws `Scene OFF typed stat adapter cannot
+draw battler 1 evasion 7->8` (the `view.effect.battler !== 0 || to >=
+from` guard #59 left in place, `battleScene.ts` ~32759 — a RISE on the
+opponent's own battler, a case #59's fix never claimed to cover).
+`turn2-dragonbreath.json` doesn't throw but renders 0/237, large diffs
+throughout. **Confirmed pre-existing, not a regression**: `git stash`
+against rank-6 slice 1's own changes reproduces byte-identical output
+(same error, same line-shifted-only stack trace; same diff-by-diff summary)
+on master at `f0621d47`. Not investigated further this step (out of the
+canonical-turn-1 window this step owns) — leads for whoever picks it up:
+why a canonical-battle-shaped trace with no `appRoute`/`oracleProfile`
+field takes the generated-route path at all, and whether #59's own guard
+needs a battler-1/rising case the way its own drop-only fix didn't attempt.
 
 # Settled records (not open work — see the note at the top of this file)
 
