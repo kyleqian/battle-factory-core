@@ -1,5 +1,30 @@
 # Animation coverage
 
+## Front `ANIM_V_SQUISH_AND_BOUNCE_SLOW` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2d is exact for all **16 selector mappings / 16
+Factory-reachable species**. LICKITUNG represents the family and MILTANK is
+the independently probed sibling. The prior four accepted front families are
+regression-pinned. Coverage remains **107 exact / 0 partial / 0 staged / 169
+unsupported**; `ANIMATION_COVERAGE.json` is byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:1834-1870,3658-3663`
+proves the slow initializer reuses `VerticalSquishBounce` and changes only
+`data[0]` from 16 to 32. The source-order reducer pins active ticks **0-96**
+and tick **97** terminal x2=0/y2=0, identity affine, normal affine mode and
+`WaitAnimEnd`; fresh settled Scene-ON receipts pin animNum=1 and
+`SpriteCallbackDummy`. Paired direct probe outputs are byte-identical (no EOF
+newline): LICKITUNG SHA-256
+`b886194e2bdaf8a1c3f67dcd17afe727f70e3bcad8955374a1d50aff2291c360`,
+MILTANK `65731784a67a75e0ecdc4e58ae8d4de8be01c1c6f27a2520b36e6e6c7ba3f3c1`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per legal party; `cmp` both pairs; focused
+animation tests **30/30**; full `npm test` **567 files, 5728 passed + 1
+skipped**; `npm run build` green. Next exact front family:
+**`ANIM_H_SHAKE`** (16 Factory species), then continue the source-ranked head.
+
 ## Front `ANIM_V_SHAKE` terminal family accepted (2026-07-31)
 
 **Verdict:** rung 2c is complete for the **24 Factory-reachable species** in

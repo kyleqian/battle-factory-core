@@ -44,6 +44,7 @@ import selectorTables from "../data/gen/send-out-anim-selector-tables.json" with
 export type SpeciesFrontAnimFamily =
   | "RAPID_H_HOPS"
   | "V_SQUISH_AND_BOUNCE"
+  | "V_SQUISH_AND_BOUNCE_SLOW"
   | "V_STRETCH"
   | "V_SHAKE";
 
@@ -51,6 +52,7 @@ const FRONT_ANIM_PREFIX = "ANIM_";
 const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "RAPID_H_HOPS",
   "V_SQUISH_AND_BOUNCE",
+  "V_SQUISH_AND_BOUNCE_SLOW",
   "V_STRETCH",
   "V_SHAKE",
 ]);
@@ -69,6 +71,13 @@ const factoryFrontSpecies = new Set(
 export const V_SQUISH_AND_BOUNCE_FRONT_SPECIES: readonly string[] = Object.freeze(
   Object.entries(generatedFrontAnimIds)
     .filter(([, family]) => family === "ANIM_V_SQUISH_AND_BOUNCE")
+    .map(([species]) => species),
+);
+
+/** Complete Factory-reachable slow squish/bounce family, source-derived. */
+export const V_SQUISH_AND_BOUNCE_SLOW_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_V_SQUISH_AND_BOUNCE_SLOW")
     .map(([species]) => species),
 );
 
@@ -170,18 +179,14 @@ export interface VerticalSquishBounceFrame extends SpeciesIdleOffset {
 }
 
 const VERTICAL_SQUISH_BOUNCE_DURATION = 16;
+const VERTICAL_SQUISH_BOUNCE_SLOW_DURATION = 32;
 
-/**
- * Source-order port of `Anim_VerticalSquishBounce` /
- * `VerticalSquishBounce` (`pokemon_animation.c:1834-1876`). The returned
- * frame is the state after the callback for `ticksSinceStart` has run. Tick
- * 49 is the terminal cleanup callback: affine identity, y2=0, normal affine
- * mode, and `WaitAnimEnd`. The later OAM-frame completion changes only the
- * callback to `SpriteCallbackDummy`, so the terminal positional result is
- * already final here.
- */
-export function verticalSquishBounceFrameAtTick(
+/** Shared source-order `VerticalSquishBounce` callback port
+ * (`pokemon_animation.c:1834-1870`). The two source initializers select
+ * duration 16 or 32 through `data[0]`; no other arithmetic differs. */
+function verticalSquishBounceFrameAtDurationTick(
   ticksSinceStart: number,
+  duration: number,
 ): VerticalSquishBounceFrame | null {
   if (ticksSinceStart < 0) return null;
 
@@ -193,7 +198,7 @@ export function verticalSquishBounceFrameAtTick(
   let yScale = 256;
 
   for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
-    if (data2 > VERTICAL_SQUISH_BOUNCE_DURATION * 3) {
+    if (data2 > duration * 3) {
       return {
         x2: 0,
         y2: 0,
@@ -208,14 +213,14 @@ export function verticalSquishBounceFrameAtTick(
     }
 
     yScale = gbaSin(data4, 32) + 256;
-    if (data2 > VERTICAL_SQUISH_BOUNCE_DURATION && data2 < VERTICAL_SQUISH_BOUNCE_DURATION * 2) {
-      data3 += Math.trunc(128 / VERTICAL_SQUISH_BOUNCE_DURATION);
+    if (data2 > duration && data2 < duration * 2) {
+      data3 += Math.trunc(128 / duration);
     }
     const posY = yScale > 256 ? Math.trunc((256 - yScale) / 8) : 0;
     y2 = -gbaSin(data3, 10) - posY + 0;
     xScale = 256 - gbaSin(data4, 32);
     data2 += 1;
-    data4 = (data4 + Math.trunc(128 / VERTICAL_SQUISH_BOUNCE_DURATION)) & 0xff;
+    data4 = (data4 + Math.trunc(128 / duration)) & 0xff;
   }
 
   return {
@@ -229,6 +234,32 @@ export function verticalSquishBounceFrameAtTick(
     callback: "VerticalSquishBounce",
     affineMode: "double",
   };
+}
+
+/**
+ * `Anim_VerticalSquishBounce` (`pokemon_animation.c:1871-1876`). Tick 49
+ * performs affine identity/y2 cleanup and hands off to `WaitAnimEnd`.
+ */
+export function verticalSquishBounceFrameAtTick(
+  ticksSinceStart: number,
+): VerticalSquishBounceFrame | null {
+  return verticalSquishBounceFrameAtDurationTick(ticksSinceStart, VERTICAL_SQUISH_BOUNCE_DURATION);
+}
+
+/**
+ * Source-order port of `Anim_VerticalSquishBounce_Slow`
+ * (`pokemon_animation.c:3658-3663`). That initializer selects the same
+ * `VerticalSquishBounce` callback as the normal family and changes only
+ * `data[0]` from 16 to 32. Ticks 0..96 are active; tick 97 performs affine
+ * identity/y2 cleanup and hands off to `WaitAnimEnd`.
+ */
+export function verticalSquishBounceSlowFrameAtTick(
+  ticksSinceStart: number,
+): VerticalSquishBounceFrame | null {
+  return verticalSquishBounceFrameAtDurationTick(
+    ticksSinceStart,
+    VERTICAL_SQUISH_BOUNCE_SLOW_DURATION,
+  );
 }
 
 export interface VerticalStretchFrame extends SpeciesIdleOffset {
@@ -373,6 +404,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = verticalSquishBounceFrameAtTick(49);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_VerticalSquishBounce did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "V_SQUISH_AND_BOUNCE_SLOW": {
+      const terminal = verticalSquishBounceSlowFrameAtTick(97);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_VerticalSquishBounce_Slow did not reach its source terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }

@@ -5,8 +5,10 @@ import {
   speciesFrontIdleRestOffset,
   verticalShakeFrameAtTick,
   verticalSquishBounceFrameAtTick,
+  verticalSquishBounceSlowFrameAtTick,
   verticalStretchFrameAtTick,
   V_SQUISH_AND_BOUNCE_FRONT_SPECIES,
+  V_SQUISH_AND_BOUNCE_SLOW_FRONT_SPECIES,
   V_SHAKE_FACTORY_FRONT_SPECIES,
   V_SHAKE_FRONT_SPECIES,
   V_SHAKE_OUTSIDE_FACTORY_FRONT_SPECIES,
@@ -26,6 +28,10 @@ import machokeRunA from "../../tools/compare/fixtures/sendout-front-machoke-run-
 import machokeRunB from "../../tools/compare/fixtures/sendout-front-machoke-run-b.json" with { type: "json" };
 import rhyhornRunA from "../../tools/compare/fixtures/sendout-front-rhyhorn-run-a.json" with { type: "json" };
 import rhyhornRunB from "../../tools/compare/fixtures/sendout-front-rhyhorn-run-b.json" with { type: "json" };
+import lickitungRunA from "../../tools/compare/fixtures/sendout-front-lickitung-run-a.json" with { type: "json" };
+import lickitungRunB from "../../tools/compare/fixtures/sendout-front-lickitung-run-b.json" with { type: "json" };
+import miltankRunA from "../../tools/compare/fixtures/sendout-front-miltank-run-a.json" with { type: "json" };
+import miltankRunB from "../../tools/compare/fixtures/sendout-front-miltank-run-b.json" with { type: "json" };
 
 describe("speciesIdleAnim", () => {
   describe("rapidHorizontalHopsOffsetAtTick (Anim_RapidHorizontalHops port)", () => {
@@ -234,6 +240,95 @@ describe("speciesIdleAnim", () => {
         callbackSymbol: "SpriteCallbackDummy",
       });
       expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+  });
+
+  describe("verticalSquishBounceSlowFrameAtTick (Anim_VerticalSquishBounce_Slow port)", () => {
+    it("derives all 16 selector mappings and proves every one is Factory-reachable", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_V_SQUISH_AND_BOUNCE_SLOW")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(V_SQUISH_AND_BOUNCE_SLOW_FRONT_SPECIES).toEqual(generated);
+      expect(V_SQUISH_AND_BOUNCE_SLOW_FRONT_SPECIES).toHaveLength(16);
+      expect(generated.filter((species) => factorySpecies.has(species))).toHaveLength(16);
+      expect(V_SQUISH_AND_BOUNCE_SLOW_FRONT_SPECIES).toContain("LICKITUNG");
+      expect(V_SQUISH_AND_BOUNCE_SLOW_FRONT_SPECIES).toContain("MILTANK");
+      for (const species of V_SQUISH_AND_BOUNCE_SLOW_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("ports the shared callback with source duration 32 arithmetic", () => {
+      expect(verticalSquishBounceSlowFrameAtTick(0)).toEqual({
+        x2: 0, y2: 0, data2: 1, data3: 0, data4: 4,
+        xScale: 256, yScale: 256,
+        callback: "VerticalSquishBounce", affineMode: "double",
+      });
+      expect(verticalSquishBounceSlowFrameAtTick(16)).toMatchObject({
+        y2: 4, data2: 17, data3: 0, data4: 68, xScale: 224, yScale: 288,
+      });
+      expect(verticalSquishBounceSlowFrameAtTick(48)).toMatchObject({
+        y2: -10, data2: 49, data3: 64, data4: 196, xScale: 288, yScale: 224,
+      });
+      expect(verticalSquishBounceSlowFrameAtTick(96)).toMatchObject({
+        y2: 0, data2: 97, data3: 124, data4: 132,
+        callback: "VerticalSquishBounce", affineMode: "double",
+      });
+    });
+
+    it("pins tick 97 terminal x2/y2/affine/callback cleanup", () => {
+      expect(verticalSquishBounceSlowFrameAtTick(97)).toEqual({
+        x2: 0, y2: 0, data2: 97, data3: 124, data4: 132,
+        xScale: 256, yScale: 256,
+        callback: "WaitAnimEnd", affineMode: "normal",
+      });
+      expect(verticalSquishBounceSlowFrameAtTick(98)).toEqual(
+        verticalSquishBounceSlowFrameAtTick(97),
+      );
+      expect(verticalSquishBounceSlowFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      ["LICKITUNG", lickitungRunA, lickitungRunB, 2, 108],
+      ["MILTANK", miltankRunA, miltankRunB, 1, 241],
+    ] as const)("matches two byte-identical fresh settled %s RAM receipts", (
+      species,
+      runA,
+      runB,
+      animCmdIndex,
+      data2,
+    ) => {
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_V_SQUISH_AND_BOUNCE_SLOW");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("preserves every previously accepted front family", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of ["BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN"]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
     });
   });
 
