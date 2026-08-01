@@ -553,26 +553,6 @@ families with a short explicit-OFF probe. Do not revive either deleted trace,
 extend the canonical Battle-2 march, or fit the residual with trace/tick
 special cases.
 
-## #63 — Generated-orchestrator route crashes on `STRINGID_PKMNSITEMRESTOREDHEALTH`: no `B_SCR_ACTIVE_NAME_WITH_PREFIX` resolver supplied
-
-**Bounded evidence (2026-08-01, supervisor):** a route-less legacy trace that
-reaches the Sitrus-heal string on the app's default generated route aborts:
-`battleStringResolver.ts:144` throws "references placeholder
-{B_SCR_ACTIVE_NAME_WITH_PREFIX} with no resolver supplied", reached via
-`battleResolutionPresentation.ts:555` (`messageLines`) ←
-`projectBattleResolutionCommands` (655) ← `createBattleResolutionPresentation`
-(953) ← `factoryRoundBattleOrchestrator.ts:1096`. Found via
-`turn14-fly-miss.json`, which crashed identically on `41409b24` and
-post-rank-2 master; that trace is now route-pinned `"appRoute":
-"canonical-recorded"` and back to its verifiable **213/213** (appRoute
-legacy pin-set shrunk 66→65). The canonical route resolves the same string
-from rank-3 adapter facts; the generated route's resolution presenter
-supplies no scr-active-name resolver at that call site.
-
-**Next:** supply the active-battler name resolver on the generated route's
-resolution presenter with a Tier-1 pin. This is a wiring gap regardless of
-#62's route-selection decision (cross-ref #62; do not fold the two).
-
 # Settled records (not open work — see the note at the top of this file)
 
 ## #38 — [PARKED 2026-07-22, supervisor decision] Turn 16 FAINT_ATTACK

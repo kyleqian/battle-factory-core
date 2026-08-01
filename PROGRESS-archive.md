@@ -1,3 +1,40 @@
+## 830 — [bounded MAIN worker, 2026-08-01] turn-9 predecessor handoff retired
+
+- **State:** proof `8e0fbc80`, implementation `6f9ef899`; source/test census
+  has no `turn9Resolved` reference.
+- **Did:** published the immutable completed-turn-9/next-command handoff with
+  canonical PP **[3,19,19,10]**, persisted slot 0, and settled/ready facts;
+  moved turn-10 dispatch, slot-0 PP reconstruction, and the following reopen
+  guard onto it without composing a turn-9 move stage.
+- **Next:** take only the next separately scoped #39 owner-chain slice; do not
+  batch `turn10Resolved` or another field into this completed retirement.
+- **Notes:** clean-parent `00f79944` (`8e0fbc80^`) differential app replay is
+  byte-identical across all requested turn-9 primary, turn-10 reader, and
+  turn-8 upstream windows (**1,483/1,483 raw RGBA captures**). Focused
+  Tier-1 tests (**9 files, 472 passed**, including the ratchet), `npx tsc
+  --noEmit`, and `npm run build` are green; full-suite output remains with the
+  supervisor.
+
+## 829 — [supervisor, 2026-08-01 PM] session start: animation fold `c16e73dd`, union green
+
+- **State:** master `c16e73dd` (fold of `animation-main`, 5 commits:
+  flicker-increasing + rotate-up-to-sides front-idle acceptances; animation
+  fixtures/docs only, clean merge). Union full `npm test` **576 files, 6,006
+  passed + 1 skipped**; `npm run build` green. Stale turn8-diff temp worktree
+  removed. Oracle freshness FAIL on both ports remains the known client-only
+  false positive (harness HEAD `9cadad7` is template/tooling-only).
+- **Did:** orient + fold per protocol; re-verified all committed OFF trace
+  capture counts for the turns 9-12 acceptance sets against
+  `docs/turn-resolved-owner-chain-audit.md` (exact match).
+- **Next:** main lane (Terra/max): `turn9Resolved` retirement per the audit's
+  slice-order item 4, then turns 10/11/12 serial, one field per worker. Side
+  lane (Sol/high): turns 1-4 typed HP/bounce epoch prep-scout (consumer map +
+  RAM ground truth + handoff design), unblocking slice-order item 6. #63
+  remains a small standalone fix if time allows.
+- **Notes:** animation supervisor live until 15:32 (nested worker too); full
+  suites stay at supervisor verify boundaries per the contention rule. Session
+  deadline 20:27.
+
 ## 828 — [bounded MAIN worker, 2026-08-01] turn-8 predecessor handoff retired
 
 > **Supervisor close-out (14:27):** turn-8 landing verified (grep clean,
