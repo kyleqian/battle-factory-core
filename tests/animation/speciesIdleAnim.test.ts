@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import probe from "../../src/data/gen/onix-front-idle-probe.json" with { type: "json" };
 import {
+  horizontalShakeFrameAtTick,
+  H_SHAKE_FACTORY_FRONT_SPECIES,
+  H_SHAKE_FRONT_SPECIES,
+  H_SHAKE_OUTSIDE_FACTORY_FRONT_SPECIES,
   rapidHorizontalHopsOffsetAtTick,
   speciesFrontIdleRestOffset,
   verticalShakeFrameAtTick,
@@ -32,6 +36,10 @@ import lickitungRunA from "../../tools/compare/fixtures/sendout-front-lickitung-
 import lickitungRunB from "../../tools/compare/fixtures/sendout-front-lickitung-run-b.json" with { type: "json" };
 import miltankRunA from "../../tools/compare/fixtures/sendout-front-miltank-run-a.json" with { type: "json" };
 import miltankRunB from "../../tools/compare/fixtures/sendout-front-miltank-run-b.json" with { type: "json" };
+import kabutopsRunA from "../../tools/compare/fixtures/sendout-front-kabutops-run-a.json" with { type: "json" };
+import kabutopsRunB from "../../tools/compare/fixtures/sendout-front-kabutops-run-b.json" with { type: "json" };
+import blazikenRunA from "../../tools/compare/fixtures/sendout-front-blaziken-run-a.json" with { type: "json" };
+import blazikenRunB from "../../tools/compare/fixtures/sendout-front-blaziken-run-b.json" with { type: "json" };
 
 describe("speciesIdleAnim", () => {
   describe("rapidHorizontalHopsOffsetAtTick (Anim_RapidHorizontalHops port)", () => {
@@ -395,6 +403,105 @@ describe("speciesIdleAnim", () => {
     it("preserves the three prior accepted front families", () => {
       expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
       for (const species of ["BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR"]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("horizontalShakeFrameAtTick (Anim_HorizontalShake / HorizontalShake port)", () => {
+    it("distinguishes all 17 selector mappings, 16 Factory species, and RAYQUAZA outside Factory", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_H_SHAKE")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(H_SHAKE_FRONT_SPECIES).toEqual(generated);
+      expect(H_SHAKE_FRONT_SPECIES).toHaveLength(17);
+      expect(H_SHAKE_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(H_SHAKE_FACTORY_FRONT_SPECIES).toHaveLength(16);
+      expect(H_SHAKE_FACTORY_FRONT_SPECIES).toContain("KABUTOPS");
+      expect(H_SHAKE_FACTORY_FRONT_SPECIES).toContain("BLAZIKEN");
+      expect(H_SHAKE_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual(["RAYQUAZA"]);
+      expect(factorySpecies.has("RAYQUAZA")).toBe(false);
+      for (const species of H_SHAKE_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins every active callback boundary with source data0=60 and data7=3", () => {
+      const activeX2 = [
+        0, 2, 0, -3, -2, 2, 1, -3, -3, 1, 2, -2, -3,
+        0, 2, -1, -3, -1, 2, 0, -3, -2, 2, 1, -3, -3,
+        1, 2, -2, -3, 0, 2, 0, -3, -1, 2, 1, -3, -2,
+      ];
+      expect(activeX2).toHaveLength(39);
+      for (const [tick, x2] of activeX2.entries()) {
+        expect(horizontalShakeFrameAtTick(tick)).toEqual({
+          x2,
+          y2: 0,
+          data0: 60,
+          data2: (tick + 1) * 60,
+          data7: 3,
+          callback: "HorizontalShake",
+        });
+      }
+    });
+
+    it("uses the strict >2304 guard and performs terminal x2/y2/callback cleanup", () => {
+      expect(horizontalShakeFrameAtTick(38)).toEqual({
+        x2: -2, y2: 0, data0: 60, data2: 2340, data7: 3,
+        callback: "HorizontalShake",
+      });
+      expect(horizontalShakeFrameAtTick(39)).toEqual({
+        x2: 0, y2: 0, data0: 60, data2: 2400, data7: 3,
+        callback: "WaitAnimEnd",
+      });
+      expect(horizontalShakeFrameAtTick(40)).toEqual(horizontalShakeFrameAtTick(39));
+      expect(horizontalShakeFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      ["KABUTOPS", kabutopsRunA, kabutopsRunB, 3, 141],
+      ["BLAZIKEN", blazikenRunA, blazikenRunB, 4, 282],
+    ] as const)("matches two byte-identical fresh settled %s RAM receipts", (
+      species,
+      runA,
+      runB,
+      animCmdIndex,
+      data2,
+    ) => {
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_H_SHAKE");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("preserves every previously accepted front family", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of [
+        "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR",
+        "MACHOKE", "RHYHORN", "LICKITUNG", "MILTANK",
+      ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }
     });

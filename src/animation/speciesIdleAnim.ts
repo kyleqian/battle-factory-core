@@ -42,6 +42,7 @@ import selectorTables from "../data/gen/send-out-anim-selector-tables.json" with
  */
 
 export type SpeciesFrontAnimFamily =
+  | "H_SHAKE"
   | "RAPID_H_HOPS"
   | "V_SQUISH_AND_BOUNCE"
   | "V_SQUISH_AND_BOUNCE_SLOW"
@@ -50,6 +51,7 @@ export type SpeciesFrontAnimFamily =
 
 const FRONT_ANIM_PREFIX = "ANIM_";
 const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
+  "H_SHAKE",
   "RAPID_H_HOPS",
   "V_SQUISH_AND_BOUNCE",
   "V_SQUISH_AND_BOUNCE_SLOW",
@@ -107,6 +109,26 @@ export const V_SHAKE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
 /** Selector mappings outside the Factory pool (currently GROUDON alone). */
 export const V_SHAKE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   V_SHAKE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/**
+ * All 17 selector-table mappings for `ANIM_H_SHAKE`. RAYQUAZA is the sole
+ * mapping outside the Factory rental pool.
+ */
+export const H_SHAKE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_H_SHAKE")
+    .map(([species]) => species),
+);
+
+/** The 16 `ANIM_H_SHAKE` species reachable through Factory rental sets. */
+export const H_SHAKE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_SHAKE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** Selector mappings outside the Factory pool (RAYQUAZA alone). */
+export const H_SHAKE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_SHAKE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 export interface SpeciesIdleOffset {
@@ -347,6 +369,57 @@ export interface VerticalShakeFrame extends SpeciesIdleOffset {
   readonly callback: "VerticalShake" | "WaitAnimEnd";
 }
 
+export interface HorizontalShakeFrame extends SpeciesIdleOffset {
+  readonly data0: number;
+  readonly data2: number;
+  readonly data7: number;
+  readonly callback: "HorizontalShake" | "WaitAnimEnd";
+}
+
+const HORIZONTAL_SHAKE_ACCUMULATOR_STEP = 60;
+const HORIZONTAL_SHAKE_ACCUMULATOR_LIMIT = 2304;
+const HORIZONTAL_SHAKE_AMPLITUDE = 3;
+
+/**
+ * Source-order port of `Anim_HorizontalShake` / `HorizontalShake`
+ * (`pokemon_animation.c:1343-1366`). The initializer sets data[0]=60 and
+ * data[7]=3, invokes the callback once, then installs `HorizontalShake`.
+ * Accumulators 0..2280 are active; tick 39 observes 2340 > 2304, clears x2,
+ * and hands off to `WaitAnimEnd` before the final data[2] increment.
+ */
+export function horizontalShakeFrameAtTick(ticksSinceStart: number): HorizontalShakeFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let x2 = 0;
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    const counter = data2;
+    if (counter > HORIZONTAL_SHAKE_ACCUMULATOR_LIMIT) {
+      data2 += HORIZONTAL_SHAKE_ACCUMULATOR_STEP;
+      return {
+        x2: 0,
+        y2: 0,
+        data0: HORIZONTAL_SHAKE_ACCUMULATOR_STEP,
+        data2,
+        data7: HORIZONTAL_SHAKE_AMPLITUDE,
+        callback: "WaitAnimEnd",
+      };
+    }
+
+    x2 = gbaSin(counter % 256, HORIZONTAL_SHAKE_AMPLITUDE);
+    data2 += HORIZONTAL_SHAKE_ACCUMULATOR_STEP;
+  }
+
+  return {
+    x2,
+    y2: 0,
+    data0: HORIZONTAL_SHAKE_ACCUMULATOR_STEP,
+    data2,
+    data7: HORIZONTAL_SHAKE_AMPLITUDE,
+    callback: "HorizontalShake",
+  };
+}
+
 const VERTICAL_SHAKE_ACCUMULATOR_STEP = 60;
 const VERTICAL_SHAKE_ACCUMULATOR_LIMIT = 2304;
 
@@ -390,6 +463,13 @@ export function verticalShakeFrameAtTick(ticksSinceStart: number): VerticalShake
 
 function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffset {
   switch (family) {
+    case "H_SHAKE": {
+      const terminal = horizontalShakeFrameAtTick(39);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_HorizontalShake did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
     case "RAPID_H_HOPS": {
       let tick = 0;
       let last: SpeciesIdleOffset = { x2: 0, y2: 0 };

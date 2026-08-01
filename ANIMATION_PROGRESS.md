@@ -1,5 +1,30 @@
 # Animation coverage
 
+## Front `ANIM_H_SHAKE` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2e is exact for all **17 selector mappings**, the
+derived **16 Factory-reachable species**, and the sole outside-Factory mapping
+**RAYQUAZA**. KABUTOPS is the representative and BLAZIKEN the independently
+probed sibling; all five prior accepted front families remain regression-pinned.
+Move coverage remains **107 exact / 0 partial / 0 staged / 169 unsupported**;
+`ANIMATION_COVERAGE.json` stays byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:1343-1366` proves
+`Anim_HorizontalShake` sets data0=60/data7=3, invokes `HorizontalShake`, then
+installs that callback. The source-order reducer pins every active callback at
+ticks **0-38** (accumulators 0-2280), the strict **2340 > 2304** guard, and tick
+**39** terminal x2=0/y2=0/`WaitAnimEnd` cleanup. Complete legal Scene-ON parties
+settle both species at animNum=1/`SpriteCallbackDummy`; paired direct raw probe
+outputs are byte-identical with no EOF newline: KABUTOPS SHA-256
+`96894be4819931417816ecffecd9eb114441a08751d046bb2e8b38d0f12cae34`,
+BLAZIKEN `44025025cca8950231cae7f7d494c519b61029503834956055f57af9ef0cfc86`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` through
+`tools/run-mgba-probe.py` twice per party; `cmp` both raw pairs; focused
+animation tests **36/36** plus executable ratchets **6/6**; one full `npm test`
+and `npm run build` green. Next exact front family: **`ANIM_GROW_VIBRATE`**.
+
 ## Front `ANIM_V_SQUISH_AND_BOUNCE_SLOW` terminal family accepted (2026-08-01)
 
 **Verdict / counts:** rung 2d is exact for all **16 selector mappings / 16
