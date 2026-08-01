@@ -1,3 +1,25 @@
+## 833 — [supervisor, 2026-08-01 15:45] turn-10 verified; #63 fixed+closed; second animation fold
+
+- **State:** master at the second animation fold (GROW_IN_STAGES family,
+  2 commits). Turn-10 landing verified: census empty, supervisor-run
+  `npm run build` green (worker's was deadline-cut mid-transform), spot
+  compares `turn10-rockslide-off` **255/255** exact and
+  `turn11-featherdance-off` **189/191** — exactly the recorded pre-existing
+  rank-5 idle-bounce phase residual, no regression (worker differential was
+  byte-identical on all 191).
+- **Did:** merged side `0c66ca94` (ISSUES #63 fix — generated-route Sitrus
+  string resolves `B_SCR_ACTIVE_NAME_WITH_PREFIX` from the typed
+  `HELD_ITEM_EFFECT` receipt battler and `B_LAST_ITEM` from
+  reducer-boundary held items + typed item writes; new Tier-1 pin
+  `generatedResolutionHeldItemName.test.ts`; #63 entry deleted). Folded
+  `animation-main` (`cb39bdac`); build green, focused animation + new-pin
+  suites rerun on the union.
+- **Next:** turn-11 slice (Terra/max), then turn-12. Full union suite at
+  wind-down covers both folds and all slices.
+- **Notes:** side workers ran the full suite twice against brief
+  instructions (Sol/high both times) — green both times, harmless, but
+  note the pattern when phrasing future side briefs.
+
 ## 832 — [bounded MAIN worker, 2026-08-01] turn-10 predecessor handoff retired
 
 - **State:** proof `f8e6bcc7`, implementation `f702a404`; source/test census

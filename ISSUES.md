@@ -215,6 +215,16 @@ own only opponent move content. It now owns turn-12 dispatch, slot-0 PP
 reconstruction, and the following reopen guard. Clean-parent `5b46d038`
 (`c96ce5b3^`) app replays held every required primary, reader, and upstream
 window byte-identical (**1,033/1,033 raw RGBA captures**).
+The matching typed completed-turn-12/next-command handoff retired
+`turn12Resolved` (`ad34442f` + `271d7c03`): it publishes canonical PP
+**[0,19,19,10]**, persisted slot 0, and settled/ready facts directly; the
+turn-12 ROCK_SLIDE miss still consumes its tenth PP, and this owner deliberately
+does not reuse the later post-DRAGON_BREATH turn-13 handoff. It now owns
+turn-13 dispatch, slot-0 PP reconstruction, and the following reopen guard.
+Clean-parent `fbd575a9` (`ad34442f^`) app replays held all requested turn-12,
+OFF turn-13 reopen/reader, and legacy turn-13 insurance windows byte-identical
+(**1,141/1,141 raw RGBA captures**). Turns 9–12 are now all retired; #39
+remains open for turns 1–4, `opponentFaintDismissElapsed`, and dispatcher debt.
 Rank 4 is **fully retired** (2026-07-31,
 all 5 slices): `174cc388` ROCK_SLIDE tails; `441ddf83`+`6aba6662`
 turn-7/8 FEATHER_DANCE staged+flipped; `0769ccc6` stat-fall banner
