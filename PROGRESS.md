@@ -17,7 +17,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 - **State:** no production behavior change. The full source queue proves the
   required two-poll shape cannot honestly be derived from the current
-  high-level state; final green verification is running.
+  high-level state; committed as green evidence checkpoint `98a2441f`.
 - **Did:** added a narrow mGBA queue-slot probe and captured all four OFF
   openings. Each emits the same source `9/11/6` BG-copy batches; turn 3 alone
   checks before the final VBlank drain. The missing fact is generic
@@ -26,8 +26,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** stop this implementation slice at the green evidence checkpoint.
   A future owner must first derive a source-backed controller/VBlank-phase
   event before wiring one DMA-ready reveal transition to render and input.
-- **Notes:** no mechanics/RNG/AI/outcome, animation, trace/capture list,
-  ratchet/barrier, recording import, or prohibited selector changed.
+- **Notes:** OFF insurance compares: turn 1 **81/81**, turn 2 **256/256**,
+  turn 4 **256/256**; turn 3 remains the honest #61 residual **254/255** at
+  frame 3852. Full `npm test`: **573 files, 5,907 passed + 1 skipped**;
+  `npm run build` green. No mechanics/RNG/AI/outcome, animation,
+  trace/capture-list, ratchet/barrier, recording import, or prohibited
+  selector changed.
 
 ## 822 — [bounded MAIN worker, 2026-08-01] rank-2 turn-13 predecessor handoff retired
 
