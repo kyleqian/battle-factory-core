@@ -13,6 +13,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 832 — [bounded MAIN worker, 2026-08-01] turn-10 predecessor handoff retired
+
+- **State:** proof `f8e6bcc7`, implementation `f702a404`; source/test census
+  has no `turn10Resolved` reference.
+- **Did:** published the immutable completed-turn-10/next-command handoff with
+  canonical PP **[2,19,19,10]**, persisted slot 0, and settled/ready facts;
+  moved turn-11 dispatch, slot-0 PP reconstruction, and the following reopen
+  guard onto it without gating on a turn-10 move staging module.
+- **Next:** take only the next separately scoped #39 owner-chain slice; do not
+  batch `turn11Resolved` or another field into this completed retirement.
+- **Notes:** clean-parent `1056b153` (`f8e6bcc7^`) differential app replay is
+  byte-identical across all requested turn-10 primary, turn-11 reader, and
+  turn-9 upstream windows (**1,842/1,842 raw RGBA captures**). Focused Tier-1
+  tests (**9 files, 465 passed**, including the ratchet) and `npx tsc --noEmit`
+  are green; the worker deadline interrupted `npm run build` during Vite's
+  transform phase, so its final green result remains for supervisor verification.
+
 ## 831 — [supervisor, 2026-08-01 15:10] turn-9 verified; turns 1-4 prep dossier merged
 
 - **State:** master `d77be40f`. Turn-9 landing verified: census grep empty,
