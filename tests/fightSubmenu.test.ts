@@ -242,6 +242,41 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
     )[0]).toBe(14);
   });
 
+  it("turn 17's reopened-but-unconfirmed submenu renders MAGBY/MURKROW's real settled state, not drawTurn16FightSubmenuWindow's pre-turn-16 defaults (docs/turn17-rung1-residual-notes.md's named fix)", () => {
+    // The gap between the turn-16->17 reopen and turn 17's own confirm
+    // (`fightSubmenu.confirmElapsed === null`, frames 21774-21801 of this
+    // same trace) used to fall into a fallback that hardcoded MAGBY at full
+    // HP/never-used PP and drew no burn badge for MURKROW - all three
+    // self-correct instantly at the next confirm, which is exactly why the
+    // wrong values were easy to miss without a pin dense in this window.
+    const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn17-rung1.json", import.meta.url), "utf8")) as {
+      segments: { frames: number; buttons?: GbaButton[] }[];
+    };
+    let state = createInitialState({ appRoute: "canonical-recorded" });
+    let frame = 0;
+    let atGap: EngineState | null = null;
+    for (const seg of trace.segments) {
+      for (let i = 0; i < seg.frames; i += 1) {
+        state = press(state, seg.buttons ?? []);
+        if (frame === 21786) atGap = state; // mid-gap: MOVE list settled, still unconfirmed
+        frame += 1;
+      }
+    }
+    expect(atGap!.battleScene!.fightSubmenu.confirmElapsed).toBeNull();
+    expect(atGap!.battleScene!.fightSubmenu.menuRedrawElapsed).not.toBeNull();
+    const fb = render(atGap!);
+    const pixelAt = (x: number, y: number): [number, number, number] => {
+      const o = (y * 240 + x) * 4;
+      return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
+    };
+    // Oracle-matched RGB triples, sampled from this exact trace/frame
+    // (tools/compare/traces/turn17-rung1.json, frame 21786) - each differs
+    // from the pre-fix fallback's rendered color at the same coordinate.
+    expect(pixelAt(20, 32)).toEqual([231, 115, 82]); // MURKROW's BRN badge (was the cream no-status background)
+    expect(pixelAt(216, 92)).toEqual([74, 66, 90]); // MAGBY's HP bar stops at 79/138 (was filled green to 138/138)
+    expect(pixelAt(210, 128)).toEqual([255, 255, 255]); // PP digit reads 14 (was inking a "5", i.e. 15)
+  });
+
   it("A on the settled action menu opens the submenu at the exact next tick, JOY_NEW only (a held A the following tick doesn't re-open/no-op differently)", () => {
     let state = stateAtTick(1887);
     state = press(state, ["A"]);

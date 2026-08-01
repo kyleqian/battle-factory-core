@@ -16224,6 +16224,8 @@ function drawTurn16PostSwitchField(
   explicitOpponent: { hp: number; status: "none" | "burn" } | null = null,
   firePunchEpochAge: number = TURN16_FIRE_PUNCH_FIRST_OWNED_AGE,
   firePunchProfile: import("../animation/firePunch.ts").FirePunchResolutionProfile | null = null,
+  /** Player HP to show while `faintAttackAge` is null (no animation owns the field yet) but the settled post-turn-16 value (not the pre-turn-16 138 default) is already known - the reopened-but-unconfirmed turn 17 submenu dwell. */
+  settledPlayerHp: number | null = null,
 ): void {
   const releaseTick = partySendOutReleaseLogicalTick(partyElapsed);
   const bounce = menuIdleBounce(bounceTick);
@@ -16403,7 +16405,7 @@ function drawTurn16PostSwitchField(
       }
     }
   }
-  if (faintAttackAge !== null && !ownsFirePunch && explicitOpponent !== null) {
+  if (!ownsFirePunch && explicitOpponent !== null) {
     drawOpponentHealthboxWobble(
       fb,
       0,
@@ -16425,7 +16427,7 @@ function drawTurn16PostSwitchField(
       fb,
       healthboxDx,
       bounce.healthboxY2 + (resolution?.targetHealthboxY2 ?? 0),
-      resolution?.displayedHp ?? 138,
+      resolution?.displayedHp ?? settledPlayerHp ?? 138,
     );
   }
   if (faintAttackAge !== null && faintAttackHitsplatVisible(faintAttackAge)) {
@@ -16686,12 +16688,30 @@ function drawTurn16FightSubmenuWindow(
     return;
   }
 
+  // `menuRedrawElapsed` is only ever set (non-null) by the turn-16-resolve
+  // reopen (core.ts threads turn 17's real menu-redraw anchor through
+  // `openFightSubmenu`) - an ordinary fresh FIGHT open (turn 16's own,
+  // pre-confirm) always leaves it null. This is the only signal available
+  // here that distinguishes "MAGBY hasn't acted yet" (full HP, no burn, PP
+  // untouched - correct defaults) from "MAGBY already used FIRE PUNCH on
+  // turn 16, this is turn 17's reopen, not yet reconfirmed" (settled
+  // 79/138 HP, MURKROW burned, PP down one) while `sm.confirmElapsed` is
+  // still null for either case.
+  const isTurn17Reopen = sm.menuRedrawElapsed !== null;
+  const settledPreConfirm = isTurn17Reopen && sm.confirmElapsed === null;
+
   if (t < revealTick) {
     drawTurn16PostSwitchField(
       fb,
       partyElapsed,
       partySendOutMenuBounceTick(openPartyElapsed),
       t,
+      undefined,
+      undefined,
+      settledPreConfirm ? { hp: 58, status: "burn" } : null,
+      undefined,
+      undefined,
+      settledPreConfirm ? 79 : null,
     );
     drawTurn15MagbySettledMenuChrome(fb);
     return;
@@ -16721,6 +16741,11 @@ function drawTurn16FightSubmenuWindow(
     turn17BounceTick ?? partySendOutMenuBounceTick(bouncePartyElapsed),
     t,
     ownedAnimationAge,
+    undefined,
+    settledPreConfirm ? { hp: 58, status: "burn" } : null,
+    undefined,
+    undefined,
+    settledPreConfirm ? 79 : null,
   );
 
   if (ownedAnimationAge !== null && faintAttackResolutionState(ownedAnimationAge).message === "FIRE_PUNCH") {
@@ -16773,7 +16798,26 @@ function drawTurn16FightSubmenuWindow(
 
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
-  drawFightSubmenuChrome(fb, sm.displayCursor, false, false, sm.activeMonMoveset);
+  drawFightSubmenuChrome(
+    fb,
+    sm.displayCursor,
+    false,
+    false,
+    sm.activeMonMoveset,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    isTurn17Reopen,
+  );
 }
 
 const PARTY_ENTRY_FADE_OUT: FadeTiming = { startDelay: 0, startY: 0, targetY: 16 };

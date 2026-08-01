@@ -1,3 +1,36 @@
+## 794 — [SUPERVISOR round 2, 2026-07-31 ~14:50] Turn-10 flipped OFF at EXACT acceptance (M10); animation-handoff five-table extraction landed (S10)
+
+- **State:** master green on the M10+S10 union (full gate in commit
+  message); rank-5 execution now 2 of 4 turn windows done. DEFERRED.md
+  empty; only `.worktrees/animation-main` remains.
+- **M10 (verified, `329f8320`):** turn-10 OFF flip — supervisor re-ran
+  all four: turn10-aerialace-off **206/206**, turn10-rockslide-off
+  **255/255**, -b **131/131**, turn10-menu-off **83/83**. Turn-9 +
+  insurance pins all held. Legacy ON pins turn10-{aerialace,rockslide,
+  menu}.json retired. (b)/(c) ambiguity on turn10AerialAceOnixShakeY2
+  resolved class-(c) by fresh RAM probe. Class-(c) bodies KEPT alive
+  where turn-12's still-ON window reuses them — they die with their
+  last consumer in slice 3. **Known-cost regression:**
+  turn11-menu.json (legacy ON) 56/56 → **45/56** (frames 13296-13351)
+  — bisection-proven inherent (that window renders via turn-10's
+  now-OFF-fit dispatcher; OFF menu-settle anchor is ~126 ticks
+  earlier); retirement in slice 3 authorized under the adopted policy.
+  turn9-menu 111/111 and turn12-menu 46/46 unaffected.
+- **S10 (verified, merged):** `6d568f0d` — the five send-out anim
+  selector tables extracted to
+  `src/data/gen/send-out-anim-selector-tables.json` (front 386, delay
+  55 w/ 52-in-pool matching the program doc, backSet 386, natureMod 25,
+  backIds 25×3) + extractor + 16-test literal pins; supervisor
+  spot-checked entries against pokemon.c/pokemon_animation.c incl. the
+  [SPECIES_x - 1] indexing. Animation rung 2 is UNBLOCKED.
+  **For the animation program:** ANIMATION_COVERAGE.json still cites
+  the now-retired turn10-aerialace.json (stale citation, your ledger —
+  main lane deliberately did not touch it).
+- **Next:** M11 turns 11-12 flip (+ turn11-menu retirement); S11
+  idle-bounce phase attribution probe (briefs ready). Then #56
+  444/536, turn17-rung1's 28 frames.
+
+---
 ## 793 — [SUPERVISOR round 1, evening session 2026-07-31 ~14:30] Rank-5 execution OPEN: turn-9 flipped OFF (M9), ALL nine move/result OFF windows banked (S9)
 
 - **State:** master green on the M9+S9 union (full gate re-run by
