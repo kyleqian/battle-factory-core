@@ -91,6 +91,12 @@ GSPRITES = 0x02020630
 SPRITE_SIZE = 0x44
 SLOTS = list(range(64))
 MATRIX_SIZE = 8
+GTASKS = 0x03005E00
+TASK_SIZE = 0x28
+GBATTLER_STATUS_SUMMARY_TASK_ID = 0x020244B4
+GBATTLE_SPRITES_DATA_PTR = 0x020244D0
+GMAIN = 0x030022C0
+GMAIN_OAM_BUFFER_OFFSET = 0x38
 
 
 def resolve_flat_segments(fixture: dict) -> list[dict] | None:
@@ -128,10 +134,70 @@ def main() -> None:
     def read_s16(addr: int) -> int:
         return s16(read_u16(addr))
 
+    def read_u32(addr: int) -> int:
+        return (
+            oracle.read_u8(addr)
+            | (oracle.read_u8(addr + 1) << 8)
+            | (oracle.read_u8(addr + 2) << 16)
+            | (oracle.read_u8(addr + 3) << 24)
+        )
+
     rows: list[dict] = []
 
+    def record_summary_task() -> dict:
+        task_ids = [
+            oracle.read_u8(GBATTLER_STATUS_SUMMARY_TASK_ID + battler)
+            for battler in range(4)
+        ]
+        tasks = {}
+        for task_id in sorted(set(task_ids)):
+            base = GTASKS + task_id * TASK_SIZE
+            tasks[str(task_id)] = {
+                "active": bool(oracle.read_u8(base + 4)),
+                "priority": oracle.read_u8(base + 7),
+                "data": [read_s16(base + 8 + i * 2) for i in range(16)],
+            }
+        battle_sprites_data = read_u32(GBATTLE_SPRITES_DATA_PTR)
+        animation_data = read_u32(battle_sprites_data + 8)
+        healthboxes_data = read_u32(battle_sprites_data + 4)
+        return {
+            "taskIdsByBattler": task_ids,
+            "tasks": tasks,
+            "summaryShownByBattler": [
+                bool(oracle.read_u8(healthboxes_data + battler * 12) & 1)
+                for battler in range(4)
+            ],
+            "activeSummaryCount": (oracle.read_u8(animation_data + 9) >> 2) & 0x7,
+        }
+
+    def record_oam() -> list[dict]:
+        entries = []
+        for index in range(128):
+            base = GMAIN + GMAIN_OAM_BUFFER_OFFSET + index * 8
+            attr0 = read_u16(base)
+            attr1 = read_u16(base + 2)
+            attr2 = read_u16(base + 4)
+            # ST_OAM_AFFINE_ERASE is the buffer's empty entry. Matrix rows
+            # live at the same offsets, but cannot be ordinary drawable OAM.
+            if (attr0 & 0x3) == 2:
+                continue
+            entries.append({
+                "index": index,
+                "x": attr1 & 0x1FF,
+                "y": attr0 & 0xFF,
+                "tile": attr2 & 0x3FF,
+                "palette": (attr2 >> 12) & 0xF,
+                "priority": (attr2 >> 10) & 0x3,
+            })
+        return entries
+
     def record() -> None:
-        row = {"frame": oracle.frame, "sprites": {}}
+        row = {
+            "frame": oracle.frame,
+            "sprites": {},
+            "summaryTask": record_summary_task(),
+            "oam": record_oam(),
+        }
         for slot in SLOTS:
             base = GSPRITES + slot * SPRITE_SIZE
             flags3e = read_u16(base + 0x3E)

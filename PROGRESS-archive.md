@@ -1,3 +1,17 @@
+## 806 — [supervisor tooling, 2026-07-31 ~night] ordinary Codex model/effort policy enforced
+
+- Archived from the live ledger. `c4d5b8dd` limits ordinary Codex launches
+  to Terra/max, Luna/max, or Sol/high; the recorded full suite was 567 files,
+  5706 passed + 1 skipped, with build green. Full live-entry detail remains
+  in git history.
+
+## 805 — [bounded worker, 2026-07-31 ~night] ISSUES #39 rank-6 slice 4 landed
+
+- Archived from the live ledger. `40414e55` moved turn 4's
+  DOUBLE_TEAM/ROCK_SLIDE window to Scene-OFF-owned presentation; its docs
+  receipt is `67a95503`. Both fresh OFF pins were 256/256 exact and rank 6
+  (turns 1–4) was complete. Full live-entry detail remains in git history.
+
 ## 804 — [bounded worker, 2026-07-31 ~night] ISSUES #39 rank-6 slice 3 (turn 3) LANDED — fallback invoked, turn 4 not attempted
 
 - **State:** master HEAD is this session's own commit (src+tests+traces) —

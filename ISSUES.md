@@ -63,12 +63,18 @@ characterized in `docs/trainer-pic-off-window-scout.md` §D. Remainder:
    MAGNETON's bar and icon widgets destroy on TWO different ticks (bar
    first) while YOSHI and intro-off destroy in sync, so
    `opponentSummaryExitElapsed`'s single shared `elapsed` clock
-   structurally cannot make MAGNETON pixel-exact both ways; intro-off's
-   real destroy tick RAM-confirmed at abs-1492 but its `rawElapsed`
-   there is unresolved (~5-7-frame app-side anchor disagreement). Next:
-   pin intro-off's real `handoffTick`/`rawElapsed` at abs-1492, then
-   revisit the discriminator with the three-fixture table; frame 444
-   also carries a second, separate materialize-column-shift defect
+   structurally cannot make MAGNETON pixel-exact both ways. **Round 4
+   checkpoint (2026-07-31):** intro-off's semantic handoff is now pinned
+   at source `t=1459`; at its RAM-confirmed abs-1492 destruction,
+   `rawElapsed=31` exactly. Its task state (`Task_HidePartyStatusSummary`
+   terminal `data[15]=-1`) and pending `gMain.oamBuffer` exit rows are
+   identical to YOSHI's synced raw-31 terminal state, yet those two want
+   opposite bar display-tail clocks. So raw elapsed, current source-task
+   readiness, and pending OAM cannot safely discriminate; no per-route/
+   species/tick fit was landed. MAGNETON's split does justify a future
+   typed per-widget bar/icon lifecycle, but it needs a source-owned
+   hardware-OAM/display-latch readiness event first. Frame 444 also carries
+   a second, separate materialize-column-shift defect
    (`docs/issue56-residual-probe.md` Q1) never in this fix's scope. The idle-menu-bounce family
    is **closed as no-app-bug** (2026-07-31, `432e16aa`): the oscillator
    is RAM-proven exact and species-independent, and the decisive

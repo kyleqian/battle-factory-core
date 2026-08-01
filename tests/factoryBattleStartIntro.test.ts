@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import naturesData from "../src/data/gen/natures.json" with { type: "json" };
+import interactiveGeneratedIntroTrace from "../tools/compare/traces/interactive-generated-intro-off.json" with { type: "json" };
+import battle1IntroTrace from "../tools/compare/traces-groundtruth/battle1-intro.json" with { type: "json" };
+import { traceAdvances } from "../tools/compare/traceReplay.ts";
 import type { FactoryRentalRecord } from "../src/engine/battleScenario.ts";
+import { createInitialState, tick } from "../src/engine/core.ts";
 import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
 import { getLevel50InitialRentalFixedIv } from "../src/engine/factoryRentalGeneration.ts";
 import {
@@ -77,6 +81,36 @@ function intro() {
 }
 
 describe("generated Factory pre-send-out intro lifecycle", () => {
+  it("pins the interactive generated-intro summary destroy receipt to its semantic handoff clock (ISSUES #56 item 2)", () => {
+    // The Battle Scene OFF RAM probe records the real bar+icon destroy at
+    // absolute frame 1492. Replay the exact interactive input route through
+    // the hermetic engine so that physical receipt has an explicit typed
+    // handoff/rawElapsed counterpart rather than an inferred trainer-slide
+    // clock. Recording imports stay test-only; production imports none.
+    const segments = [
+      ...battle1IntroTrace.segments.slice(0, interactiveGeneratedIntroTrace.sourceSegmentCount),
+      ...interactiveGeneratedIntroTrace.appendSegments,
+    ];
+    let state = createInitialState({ appRoute: "generated-orchestrator" });
+    let handoff: { frame: number; elapsed: number; t: number } | null = null;
+    let destroy: { elapsed: number; t: number } | null = null;
+    for (const advance of traceAdvances(segments)) {
+      state = tick(state, advance.buttons);
+      const introState = state.factoryRoundBattleOrchestrator?.battleStartIntro;
+      if (introState !== undefined && introState !== null) {
+        const t = generatedBattleIntroSourceClock(introState.elapsed);
+        if (handoff === null && generatedBattleStartOpponentReleaseStarted(introState)) {
+          handoff = { frame: advance.frame, elapsed: introState.elapsed, t };
+        }
+        if (advance.frame === 1492) destroy = { elapsed: introState.elapsed, t };
+      }
+      if (advance.frame >= 1492) break;
+    }
+    expect(handoff).toEqual({ frame: 1460, elapsed: 411, t: 1459 });
+    expect(destroy).toEqual({ elapsed: 443, t: 1491 });
+    expect(destroy!.t - handoff!.t - 1).toBe(31);
+  });
+
   it("advances only the typed initial summary tail past DESTIN's recorded stall", () => {
     expect(opponentSummaryExitElapsed(
       31,
