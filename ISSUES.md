@@ -552,23 +552,6 @@ supplies no scr-active-name resolver at that call site.
 resolution presenter with a Tier-1 pin. This is a wiring gap regardless of
 #62's route-selection decision (cross-ref #62; do not fold the two).
 
-## #64 — `turn13-menu.json` drifted from its recorded 57/57 to 56/57
-
-**Bounded evidence (2026-08-01, supervisor):** frame 15374 diffs **769px**,
-bbox 44,49-99,110, dominant 697px cluster 44,61-99,110 — the oracle shows
-player-mon-region sprite pixels where the app draws background/message white
-(sample 58,49: oracle 189,181,181 → app 247,247,255). Historical records pin
-this trace 57/57 (`docs/battle-turn-notes.md:7011,7043,7065`, both seam-design
-regression tables). The 56/57 is pre-existing relative to `41409b24` (rank-2
-worker's parent A/B), so the flip landed between the last recorded 57/57
-sweep and `41409b24`.
-
-**Next if prioritized:** bisect `npm run compare -- turn13-menu.json` across
-the rank-2/3/5-8 retirement landings to find the flip commit, then classify
-the mechanism (one-tick visibility gap vs send-out residual class vs #61
-reveal class). No fitted per-trace patch.
-
-
 # Settled records (not open work — see the note at the top of this file)
 
 ## #38 — [PARKED 2026-07-22, supervisor decision] Turn 16 FAINT_ATTACK
