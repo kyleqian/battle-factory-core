@@ -47,6 +47,7 @@ export type SpeciesFrontAnimFamily =
   | "GROW_VIBRATE"
   | "FLASH_YELLOW"
   | "H_JUMPS"
+  | "H_SLIDE_SLOW"
   | "H_SLIDE_WOBBLE"
   | "H_STRETCH"
   | "H_VIBRATE"
@@ -70,6 +71,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "GROW_VIBRATE",
   "FLASH_YELLOW",
   "H_JUMPS",
+  "H_SLIDE_SLOW",
   "H_SLIDE_WOBBLE",
   "H_STRETCH",
   "H_VIBRATE",
@@ -406,6 +408,23 @@ export const FLASH_YELLOW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Obj
   FLASH_YELLOW_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
+/** All 7 source selector mappings for the slow `ANIM_H_SLIDE_SLOW`. */
+export const H_SLIDE_SLOW_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_H_SLIDE_SLOW")
+    .map(([species]) => species),
+);
+
+/** Every slow horizontal-slide mapping is reachable through Factory rentals. */
+export const H_SLIDE_SLOW_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_SLIDE_SLOW_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no slow horizontal-slide mappings outside the Factory rental pool. */
+export const H_SLIDE_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_SLIDE_SLOW_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
 export interface SpeciesIdleOffset {
   readonly x2: number;
   readonly y2: number;
@@ -731,6 +750,26 @@ export interface HorizontalSlideWobbleFrame extends SpeciesIdleOffset {
   readonly resetSpriteAfterAnim: boolean;
   readonly callback: "HorizontalSlideWobble" | "WaitAnimEnd";
   readonly affineMode: "double" | "normal";
+}
+
+/**
+ * The three initializers share `HorizontalSlide`, but selector acceptance is
+ * per family. This rung accepts only the slow data0=80 front initializer.
+ */
+export const HORIZONTAL_SLIDE_INITIALIZERS = Object.freeze({
+  slow: Object.freeze({ selector: "ANIM_H_SLIDE_SLOW", data0: 80, accepted: true }),
+  normal: Object.freeze({ selector: "ANIM_H_SLIDE", data0: 40, accepted: false }),
+  fast: Object.freeze({ selector: "ANIM_H_SLIDE_FAST", data0: 20, accepted: false }),
+} as const);
+
+export interface HorizontalSlideFrame extends SpeciesIdleOffset {
+  readonly data0: 80;
+  readonly data2: number;
+  readonly index: number | null;
+  readonly amplitude: 6;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXCalls: 2;
+  readonly callback: "HorizontalSlide" | "WaitAnimEnd";
 }
 
 export interface HorizontalJumpsFrame extends SpeciesIdleOffset {
@@ -1835,6 +1874,50 @@ export function verticalSlideWobbleFrameAtTick(
 }
 
 /**
+ * Source-order port of `Anim_HorizontalSlide_Slow` and `HorizontalSlide`
+ * (`pokemon_animation.c:911-939,1131-1153,3665-3669`). The front task
+ * zeroes data2 and sets `sDontFlip=TRUE`; the slow initializer sets data0=80
+ * and immediately runs the shared callback. Ticks 0..80 perform both no-op
+ * `TryFlipX` calls, write the C-truncated sine index/x2, and increment data2.
+ * Tick 81 clears x2, installs `WaitAnimEnd`, increments data2 to 82, and
+ * performs the second no-op flip.
+ */
+export function horizontalSlideSlowFrameAtTick(
+  ticksSinceStart: number,
+): HorizontalSlideFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  const data0 = HORIZONTAL_SLIDE_INITIALIZERS.slow.data0;
+  if (ticksSinceStart > data0) {
+    return {
+      x2: 0,
+      y2: 0,
+      data0,
+      data2: data0 + 2,
+      index: null,
+      amplitude: 6,
+      normalFrontDontFlip: true,
+      tryFlipXCalls: 2,
+      callback: "WaitAnimEnd",
+    };
+  }
+
+  const data2BeforeIncrement = ticksSinceStart;
+  const index = Math.trunc((data2BeforeIncrement * 384) / data0) % 256;
+  return {
+    x2: gbaSin(index, 6),
+    y2: 0,
+    data0,
+    data2: data2BeforeIncrement + 1,
+    index,
+    amplitude: 6,
+    normalFrontDontFlip: true,
+    tryFlipXCalls: 2,
+    callback: "HorizontalSlide",
+  };
+}
+
+/**
  * Source-order port of `Anim_HorizontalSlideWobble`
  * (`pokemon_animation.c:911-939,1803-1833`). `Task_HandleMonAnimation`
  * leaves data0/data2..data7 zeroed and sets `sDontFlip=TRUE`, so the two
@@ -2239,6 +2322,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = horizontalJumpsFrameAtTick(43);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_HorizontalJumps did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "H_SLIDE_SLOW": {
+      const terminal = horizontalSlideSlowFrameAtTick(81);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_HorizontalSlide_Slow did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }

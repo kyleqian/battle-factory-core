@@ -37,6 +37,11 @@ import {
   H_VIBRATE_FACTORY_FRONT_SPECIES,
   H_VIBRATE_FRONT_SPECIES,
   H_VIBRATE_OUTSIDE_FACTORY_FRONT_SPECIES,
+  horizontalSlideSlowFrameAtTick,
+  HORIZONTAL_SLIDE_INITIALIZERS,
+  H_SLIDE_SLOW_FACTORY_FRONT_SPECIES,
+  H_SLIDE_SLOW_FRONT_SPECIES,
+  H_SLIDE_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES,
   horizontalSlideWobbleFrameAtTick,
   H_SLIDE_WOBBLE_FACTORY_FRONT_SPECIES,
   H_SLIDE_WOBBLE_FRONT_SPECIES,
@@ -3681,6 +3686,98 @@ describe("speciesIdleAnim", () => {
         "BLASTOISE", "BAGON", "SEAKING", "SHUPPET", "BUTTERFREE", "CHIMECHO",
         "WIGGLYTUFF", "VIGOROTH", "BEEDRILL", "DUSCLOPS", "EKANS", "ALTARIA",
         "PIKACHU", "RAIKOU",
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("horizontalSlideSlowFrameAtTick (source lifecycle)", () => {
+    it("derives exactly all 7 selector mappings as Factory-reachable with zero outside", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_H_SLIDE_SLOW")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(H_SLIDE_SLOW_FRONT_SPECIES).toEqual(generated);
+      expect(H_SLIDE_SLOW_FRONT_SPECIES).toEqual([
+        "WEEDLE", "PARAS", "GRIMER", "EXEGGCUTE", "MR_MIME", "SUDOWOODO", "NINJASK",
+      ]);
+      expect(H_SLIDE_SLOW_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(H_SLIDE_SLOW_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(H_SLIDE_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of H_SLIDE_SLOW_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("accepts only slow data0=80 and keeps normal/fast distinct", () => {
+      expect(HORIZONTAL_SLIDE_INITIALIZERS).toEqual({
+        slow: { selector: "ANIM_H_SLIDE_SLOW", data0: 80, accepted: true },
+        normal: { selector: "ANIM_H_SLIDE", data0: 40, accepted: false },
+        fast: { selector: "ANIM_H_SLIDE_FAST", data0: 20, accepted: false },
+      });
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
+    });
+
+    it("pins every active callback's C-truncated sine arithmetic and both flip no-ops", () => {
+      const active = Array.from({ length: 81 }, (_, tick) => {
+        const index = Math.trunc((tick * 384) / 80) % 256;
+        const frame = horizontalSlideSlowFrameAtTick(tick);
+        expect(frame, `tick ${tick}`).toEqual({
+          x2: Math.floor((6 * GBA_SINE_TABLE_256[index]!) / 256) + 0,
+          y2: 0,
+          data0: 80,
+          data2: tick + 1,
+          index,
+          amplitude: 6,
+          normalFrontDontFlip: true,
+          tryFlipXCalls: 2,
+          callback: "HorizontalSlide",
+        });
+        return frame!;
+      });
+      expect(active).toHaveLength(81);
+      expect([0, 20, 40, 60, 80].map((tick) => [
+        tick, active[tick]!.index, active[tick]!.x2, active[tick]!.data2,
+      ])).toEqual([
+        [0, 0, 0, 1],
+        [20, 96, 4, 21],
+        [40, 192, -6, 41],
+        [60, 32, 4, 61],
+        [80, 128, 0, 81],
+      ]);
+    });
+
+    it("pins tick 81 terminal reset/WaitAnimEnd and stable settled state", () => {
+      expect(horizontalSlideSlowFrameAtTick(81)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 80,
+        data2: 82,
+        index: null,
+        amplitude: 6,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        callback: "WaitAnimEnd",
+      });
+      expect(horizontalSlideSlowFrameAtTick(82)).toEqual(horizontalSlideSlowFrameAtTick(81));
+      expect(horizontalSlideSlowFrameAtTick(-1)).toBeNull();
+    });
+
+    it("preserves every previously accepted representative and sibling family", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of [
+        "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN",
+        "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN", "KADABRA", "REGISTEEL",
+        "SQUIRTLE", "SHUCKLE", "SEADRA", "MARSHTOMP", "CHARMANDER", "DELIBIRD",
+        "MANKEY", "WYNAUT", "VILEPLUME", "LOUDRED", "JIGGLYPUFF", "GYARADOS",
+        "BLASTOISE", "BAGON", "SEAKING", "SHUPPET", "BUTTERFREE", "CHIMECHO",
+        "WIGGLYTUFF", "VIGOROTH", "BEEDRILL", "DUSCLOPS", "EKANS", "ALTARIA",
+        "PIKACHU", "RAIKOU", "WEEDLE", "NINJASK",
       ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }
