@@ -1,5 +1,35 @@
 # Animation coverage
 
+## Front `ANIM_H_VIBRATE` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2q is exact for all **7 selector mappings / 7
+Factory-reachable species**, with **zero outside-Factory mappings**: BEEDRILL,
+ARCANINE, SCYTHER, SCIZOR, HITMONTOP, SHIFTRY, DUSCLOPS. BEEDRILL is the
+representative and DUSCLOPS the sibling; every prior accepted front family
+remains regression-pinned. Move coverage stays **107 exact / 0 partial / 0
+staged / 169 unsupported** and `ANIMATION_COVERAGE.json` is byte-identical at
+SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:911-939,1110-1129`
+proves Task-zeroed data0/data2..data7 and the exact source-ordered normal
+callback with no affine setup or `TryFlipX`. All **41 active callbacks**
+(data2=0..40) are pinned for alternating +1/-1 signs, C-truncated indices,
+and amplitude-6 GBA sine x2 writes. Tick 41 clears x2, installs `WaitAnimEnd`,
+and increments data2 to 42. The distinct amplitude-9 `ANIM_H_VIBRATE_FAST`
+and amplitude-12 `ANIM_H_VIBRATE_FASTEST` remain explicitly unaccepted. Fresh
+complete legal Scene-ON parties settle both species at x2=0/y2=0/animNum=1/
+`SpriteCallbackDummy`. Paired direct raw outputs are byte-identical with no
+EOF newline: BEEDRILL SHA-256
+`4657eaa59c66c769b56a4f1db250b3ba24ee7b1789e7a7d0c01db99fe0cd98ca`,
+DUSCLOPS `b13802454ef9b92cf94aa210d4027f2ce67a12ae96dc7ca252c044782561f3f3`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per legal party; raw `cmp`; focused family plus
+both ratchets **148/148**; TypeScript no-emit and diff checks green; exactly one
+full `npm test` **567 files, 5840 passed + 1 skipped** and one `npm run build`
+green. The next generated-census/source-ranked front family is
+**`ANIM_H_STRETCH`** (7 Factory species).
+
 ## Front `ANIM_H_JUMPS` terminal family accepted (2026-08-01)
 
 **Verdict / counts:** rung 2p is exact for all **8 selector mappings / 8
