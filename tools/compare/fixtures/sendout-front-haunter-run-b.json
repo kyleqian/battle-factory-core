@@ -1,0 +1,29 @@
+{
+"ticks": [
+{
+"tick": 0,
+"battler0": {
+"battler": 0,
+"slot": 6,
+"x2": 0,
+"y2": 1,
+"animNum": 0,
+"animCmdIndex": 0,
+"data2": 95,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+},
+"battler1": {
+"battler": 1,
+"slot": 8,
+"x2": 0,
+"y2": 0,
+"animNum": 1,
+"animCmdIndex": 4,
+"data2": 93,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+}
+}
+]
+}
