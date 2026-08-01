@@ -193,14 +193,17 @@ function applyCompletedCommand(
   if (command.type === "hp") {
     return withDisplayedHp(field, command.battler, command.to);
   }
-  if (command.type === "status") {
-    return withDisplayedStatus(field, command.battler, command.after);
+  if (command.type === "status-icon") {
+    return withDisplayedStatus(field, command.battler, command.status1);
   }
   if (
     command.type === "message"
     || command.type === "move-animation"
     || command.type === "hit-animation"
     || command.type === "stat"
+    // The raw status write is logical battle state. The later
+    // status-icon controller receipt owns the visible healthbox transition.
+    || command.type === "status"
     || command.type === "faint"
     || command.type === "party-summary"
     || command.type === "sprite-visibility"
@@ -263,6 +266,7 @@ export function battleResolutionCommandDuration(
         BATTLE_RESOLUTION_STAT_CHANGE_FRAMES,
       );
     case "status":
+    case "status-icon":
     case "faint":
     case "switch-in":
     case "sprite-visibility":

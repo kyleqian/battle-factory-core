@@ -956,7 +956,7 @@ describe("battle resolution typed Scene-OFF renderer", () => {
     )).toBe(true);
   });
 
-  it("projects stat/status effects and commits a status icon only after its command", () => {
+  it("projects stat effects and defers status display to the typed status-icon receipt", () => {
     const statResolution = createBattleResolutionPresentation(inputFor([
       event(0, {
         kind: "stat-stage-change",
@@ -1013,9 +1013,44 @@ describe("battle resolution typed Scene-OFF renderer", () => {
       event(0, {
         kind: "set-battler-status-data",
         battler: 1,
-        status1: 1 << 3,
+        status1: 1 << 4,
+      }),
+      event(1, {
+        kind: "message",
+        messageId: "STRINGID_PKMNWASBURNED",
+        substitutions: [],
+      }),
+      event(2, {
+        kind: "status-icon-update",
+        battler: 1,
+        status1: 1 << 4,
+        status2: 0,
       }),
     ], NEXT_COMMAND));
+    const [rawStatus, burnMessage, statusIcon] = statusResolution.segments[0]!.commands;
+    expect([rawStatus, burnMessage, statusIcon].map((command) => command!.type))
+      .toEqual(["status", "message", "status-icon"]);
+    expect(rawStatus).toMatchObject({ type: "status", eventSequence: 0 });
+    expect(burnMessage).toMatchObject({
+      type: "message",
+      eventSequence: 1,
+      lines: ["Foe KABUTO was burned!"],
+    });
+    expect(statusIcon).toMatchObject({
+      type: "status-icon",
+      eventSequence: 2,
+      battler: 1,
+      status1: 1 << 4,
+      status2: 0,
+      timing: { minimumFrames: 1 },
+    });
+    if (statusIcon?.type !== "status-icon") throw new Error("expected a typed status-icon receipt");
+    expect(Object.isFrozen(statusResolution.segments[0]!.commands)).toBe(true);
+    expect(Object.isFrozen(statusIcon)).toBe(true);
+    expect(Object.isFrozen(statusIcon.timing)).toBe(true);
+    expect(
+      battleResolutionCommandDuration(statusIcon, statusResolution.field),
+    ).toBe(1);
     expect(
       createBattleResolutionPresentationRenderView(
         atRenderClock(statusResolution, 0, 4),
@@ -1025,7 +1060,51 @@ describe("battle resolution typed Scene-OFF renderer", () => {
       createBattleResolutionPresentationRenderView(
         atRenderClock(statusResolution, 1, 0),
       ).field.opponent.status,
-    ).toBe("poison");
+    ).toBe("none");
+    expect(
+      createBattleResolutionPresentationRenderView(
+        atRenderClock(statusResolution, 2, 0),
+      ).field.opponent.status,
+    ).toBe("none");
+    expect(
+      createBattleResolutionPresentationRenderView(
+        atRenderClock(statusResolution, 3, 0),
+      ).field.opponent.status,
+    ).toBe("burn");
+
+    const clearResolution = createBattleResolutionPresentation(inputFor([
+      event(0, {
+        kind: "set-battler-status-data",
+        battler: 1,
+        status1: 0,
+      }),
+      event(1, {
+        kind: "status-icon-update",
+        battler: 1,
+        status1: 0,
+        status2: 0,
+      }),
+    ], NEXT_COMMAND));
+    const clearFromBurn = Object.freeze({
+      ...clearResolution,
+      field: Object.freeze({
+        ...clearResolution.field,
+        opponent: Object.freeze({
+          ...clearResolution.field.opponent,
+          status: "burn" as const,
+        }),
+      }),
+    });
+    expect(
+      createBattleResolutionPresentationRenderView(
+        atRenderClock(clearFromBurn, 1, 0),
+      ).field.opponent.status,
+    ).toBe("burn");
+    expect(
+      createBattleResolutionPresentationRenderView(
+        atRenderClock(clearFromBurn, 2, 0),
+      ).field.opponent.status,
+    ).toBe("none");
   });
 
   it("ISSUES #59/#60: supports rise/drop on either battler through the generated-route Scene-OFF adapter", () => {

@@ -95,6 +95,29 @@ function createStartedGeneratedFlyBattle(): FactoryRoundBattleOrchestratorState 
   return acknowledgeAndAdvance(state);
 }
 
+/**
+ * A legal generated-round seed whose ordinary player FIRE_PUNCH applies burn
+ * to the generated WAILMER. This is a production round-controller seam, not
+ * a battle-number recording: its result is owned by the live kernel and AI.
+ */
+function createStartedSceneOffStatusIconBurnBattle(): FactoryRoundBattleOrchestratorState {
+  const playerRecords = [record(149), record(300), record(301)] as const;
+  const state = createFactoryRoundBattleOrchestrator({
+    id: "scene-off-status-icon-burn",
+    rngValue: 3359,
+    factoryWinStreak: 0,
+    playerTrainerId: PLAYER_TRAINER_ID,
+    battleTowerLevel50WinStreak: 0,
+    facilityState: { rentsCount: 0 },
+    rentals: {
+      type: "currentRecords",
+      playerRentalRecords: playerRecords,
+      savedRentalRecords: [...playerRecords, record(302), record(303), record(304)],
+    },
+  });
+  return acknowledgeAndAdvance(state);
+}
+
 function advanceCommandToPhase(
   state: FactoryRoundBattleOrchestratorState,
   phase: NonNullable<
@@ -214,6 +237,125 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       kind: "decision-required",
       request: { kind: "command", side: "player", battler: 0 },
     });
+  });
+
+  it("ISSUES #39: Scene-OFF burn keeps the live status logical until its generic status-icon controller receipt", () => {
+    let state = createStartedSceneOffStatusIconBurnBattle();
+    expect(state.round.rules.currentOpponent.rentalRecords?.map(({ setId }) => setId))
+      .toEqual([170, 122, 133]);
+    expect(state.battle?.rules.rulesContext.hitMarker).toBe(
+      BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS,
+    );
+
+    state = advanceCommandToPhase(state, "action-menu");
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+    state = advanceCommandToPhase(state, "fight-menu");
+    state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+
+    const resolution = state.battleResolutionPresentation;
+    if (resolution === null) throw new Error("expected the live burn resolution");
+    const events = resolution.segments[0]!.events;
+    const rawStatusEventIndex = events.findIndex(({ payload }) =>
+      payload.kind === "set-battler-status-data"
+      && payload.battler === 1
+      && payload.status1 === (1 << 4)
+    );
+    const burnTextEventIndex = events.findIndex(({ payload }, index) =>
+      index > rawStatusEventIndex
+      && payload.kind === "message"
+      && payload.messageId === "STRINGID_PKMNWASBURNED"
+    );
+    const statusIconEventIndex = events.findIndex(({ payload }, index) =>
+      index > burnTextEventIndex
+      && payload.kind === "status-icon-update"
+      && payload.battler === 1
+      && payload.status1 === (1 << 4)
+      && payload.status2 === 0
+    );
+    expect(rawStatusEventIndex).toBeGreaterThanOrEqual(0);
+    expect(burnTextEventIndex).toBeGreaterThan(rawStatusEventIndex);
+    expect(statusIconEventIndex).toBeGreaterThan(burnTextEventIndex);
+    expect(events.some(({ payload }) => payload.kind === "status-animation")).toBe(false);
+
+    const commands = resolution.segments[0]!.commands;
+    const rawStatusCommandIndex = commands.findIndex((command) =>
+      command.type === "status" && command.eventSequence === events[rawStatusEventIndex]!.sequence
+    );
+    const burnMessageCommandIndex = commands.findIndex((command) =>
+      command.type === "message" && command.eventSequence === events[burnTextEventIndex]!.sequence
+    );
+    const statusIconCommandIndex = commands.findIndex((command) =>
+      command.type === "status-icon" && command.eventSequence === events[statusIconEventIndex]!.sequence
+    );
+    expect(rawStatusCommandIndex).toBeGreaterThanOrEqual(0);
+    expect(burnMessageCommandIndex).toBeGreaterThan(rawStatusCommandIndex);
+    expect(statusIconCommandIndex).toBeGreaterThan(burnMessageCommandIndex);
+    expect(commands[burnMessageCommandIndex]).toMatchObject({
+      type: "message",
+      lines: ["Foe WAILMER was burned!"],
+    });
+    expect(commands[statusIconCommandIndex]).toMatchObject({
+      type: "status-icon",
+      battler: 1,
+      status1: 1 << 4,
+      status2: 0,
+      timing: { minimumFrames: 1 },
+    });
+
+    for (
+      let budget = 0;
+      budget < 2_000
+        && (
+          state.battleResolutionPresentation?.lifecycle.phase !== "presenting"
+          || state.battleResolutionPresentation.commandIndex !== rawStatusCommandIndex
+        );
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state);
+    }
+    expect(state.battleResolutionPresentation?.commandIndex).toBe(rawStatusCommandIndex);
+    expect(state.battle?.rules.rulesContext.battlers[1].status1).toBe(1 << 4);
+    expect(state.battlePresentationBoundaries?.[1].displayedStatus1).toBe(0);
+
+    for (
+      let budget = 0;
+      budget < 128 && state.battleResolutionPresentation?.commandIndex === rawStatusCommandIndex;
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state);
+    }
+    expect(state.battleResolutionPresentation?.commandIndex).toBe(rawStatusCommandIndex + 1);
+    expect(state.battlePresentationBoundaries?.[1].displayedStatus1).toBe(0);
+
+    for (
+      let budget = 0;
+      budget < 512 && state.battleResolutionPresentation?.commandIndex !== statusIconCommandIndex;
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state);
+    }
+    expect(state.battleResolutionPresentation?.commandIndex).toBe(statusIconCommandIndex);
+    expect(state.battlePresentationBoundaries?.[1].displayedStatus1).toBe(0);
+
+    for (
+      let budget = 0;
+      budget < 16 && state.battleResolutionPresentation?.commandIndex === statusIconCommandIndex;
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state);
+    }
+    expect(state.battleResolutionPresentation?.commandIndex).toBe(statusIconCommandIndex + 1);
+    expect(state.battlePresentationBoundaries?.[1].displayedStatus1).toBe(1 << 4);
+
+    state = advanceResolutionToNextCommand(state);
+    expect(state.battleCommandPresentation?.request).toMatchObject({
+      kind: "command",
+      requestId: 3,
+      side: "player",
+      battler: 0,
+    });
+    expect(state.battlePresentationBoundaries?.[1].displayedStatus1)
+      .toBe(state.battle?.rules.rulesContext.battlers[1].status1);
   });
 
   it("drives an unmodified generated FLY round receipt through charge, lock, restoration, and the next player command", () => {

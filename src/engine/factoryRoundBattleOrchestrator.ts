@@ -1139,8 +1139,8 @@ function commitCompletedResolutionCommand(
     field: boundaryFieldAt(displayed, battler as 0 | 1),
     displayedHp: boundaryFieldAt(displayed, battler as 0 | 1).hp,
     displayedStatus1:
-      command.type === "status" && command.battler === battler
-        ? command.after
+      command.type === "status-icon" && command.battler === battler
+        ? command.status1
         : boundary.displayedStatus1,
     partyIndex:
       command.type === "switch-in" && command.battler === battler

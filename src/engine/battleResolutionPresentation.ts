@@ -42,6 +42,7 @@ export type BattleHitAnimationTiming = Readonly<{
 export type BattleHpTiming = Readonly<{ minimumFrames: 28 }>;
 export type BattleStatTiming = Readonly<{ minimumFrames: 32 }>;
 export type BattleStatusTiming = Readonly<{ minimumFrames: 32 }>;
+export type BattleStatusIconTiming = Readonly<{ minimumFrames: 1 }>;
 export type BattleFaintTiming =
   | Readonly<{
       minimumFrames: number;
@@ -105,6 +106,15 @@ export type BattleResolutionPresentationCommand =
       before: number;
       after: number;
       timing: BattleStatusTiming;
+    }>
+  | Readonly<{
+      /** BtlController_EmitStatusIconUpdate's distinct healthbox display receipt. */
+      type: "status-icon";
+      eventSequence: number;
+      battler: 0 | 1;
+      status1: number;
+      status2: number;
+      timing: BattleStatusIconTiming;
     }>
   | Readonly<{
       type: "faint";
@@ -298,6 +308,15 @@ const SCENE_OFF_MOVE_PAUSE_FRAMES = 32;
 const HP_TIMING = Object.freeze({ minimumFrames: 28 } as const);
 const STAT_TIMING = Object.freeze({ minimumFrames: 32 } as const);
 const STATUS_TIMING = Object.freeze({ minimumFrames: 32 } as const);
+/**
+ * Cmd_updatestatusicon emits one controller request and waits for it
+ * (battle_script_commands.c:7699-7730). Its player/opponent controller
+ * handlers copy the healthbox status tile on that callback, then install the
+ * ordinary completion callback (battle_controller_{player,opponent}.c:
+ * 1712-1722 / 2755-2765). The display edge is therefore the receipt's own
+ * one callback, independent of any skipped Scene-OFF status animation.
+ */
+const STATUS_ICON_TIMING = Object.freeze({ minimumFrames: 1 } as const);
 const SWITCH_IN_TIMING = Object.freeze({ minimumFrames: 1 } as const);
 const TURN_END_TIMING = Object.freeze({ minimumFrames: 8 } as const);
 
@@ -375,6 +394,7 @@ function messageLines(
     { kind: "stat-stage-change" }
   > | null,
   lastFaintBattler: 0 | 1 | null,
+  pendingStatusMessageBattler: 0 | 1 | null,
   lastMoveAttacker: 0 | 1 | null,
   actionSnapshot: BattleScriptActionMessageSnapshot | null,
   opponentTrainer: Readonly<{ className: string; name: string }> | null,
@@ -507,21 +527,32 @@ function messageLines(
       `out ${incoming.name}!`,
     ]);
   }
+  const resolvers: Record<string, () => string> = {};
   if (lastMoveAttacker !== null) {
     const displayed = fieldBattler(field, lastMoveAttacker);
-    return resolveBattleStringLines(messageId, {
-      // Some effect scripts print their action-specific result after a
-      // controller PP receipt without STRINGID_USEDMOVE (two-turn charge is
-      // one source example). Supplying the already-owned attacker token is
-      // generic; templates that do not reference it ignore it.
-      B_ATK_NAME_WITH_PREFIX: () => resolveBattleNameWithPrefix({
-        side: lastMoveAttacker === 0 ? "player" : "opponent",
-        isTrainerBattle: true,
-        nickname: displayed.name,
-      }),
+    // Some effect scripts print their action-specific result after a
+    // controller PP receipt without STRINGID_USEDMOVE (two-turn charge is
+    // one source example). Supplying the already-owned attacker token is
+    // generic; templates that do not reference it ignore it.
+    resolvers.B_ATK_NAME_WITH_PREFIX = () => resolveBattleNameWithPrefix({
+      side: lastMoveAttacker === 0 ? "player" : "opponent",
+      isTrainerBattle: true,
+      nickname: displayed.name,
     });
   }
-  return resolveBattleStringLines(messageId);
+  if (pendingStatusMessageBattler !== null) {
+    const displayed = fieldBattler(field, pendingStatusMessageBattler);
+    // SetMoveEffect's raw REQUEST_STATUS_BATTLE receipt precedes its result
+    // text. Keep that target only until the next text receipt, so a
+    // B_EFF_NAME_WITH_PREFIX template is sourced from the status write—not
+    // inferred from a move, species, or later battle state.
+    resolvers.B_EFF_NAME_WITH_PREFIX = () => resolveBattleNameWithPrefix({
+      side: pendingStatusMessageBattler === 0 ? "player" : "opponent",
+      isTrainerBattle: true,
+      nickname: displayed.name,
+    });
+  }
+  return resolveBattleStringLines(messageId, resolvers);
 }
 
 function partyBallStates(
@@ -573,6 +604,7 @@ export function projectBattleResolutionCommands(
     { kind: "stat-stage-change" }
   > | null = null;
   let lastFaintBattler: 0 | 1 | null = null;
+  let pendingStatusMessageBattler: 0 | 1 | null = null;
   let lastMoveAttacker: 0 | 1 | null = null;
   let usedMoveInstructionExecution: number | null = null;
   const zeroHpBattlers = new Set<0 | 1>();
@@ -629,6 +661,7 @@ export function projectBattleResolutionCommands(
           afterField,
           lastStatChange,
           lastFaintBattler,
+          pendingStatusMessageBattler,
           lastMoveAttacker,
           actionSnapshot,
           opponentTrainer,
@@ -640,6 +673,7 @@ export function projectBattleResolutionCommands(
             : "automatic",
         timing: MESSAGE_TIMING,
       }));
+      pendingStatusMessageBattler = null;
       continue;
     }
     if (
@@ -733,6 +767,7 @@ export function projectBattleResolutionCommands(
     }
     if (payload.kind === "set-battler-status-data") {
       const battler = singlesBattler(payload.battler, "status change");
+      pendingStatusMessageBattler = battler;
       commands.push(Object.freeze({
         type: "status",
         eventSequence: event.sequence,
@@ -740,6 +775,18 @@ export function projectBattleResolutionCommands(
         before: beforeRules.battlers[battler]!.status1,
         after: payload.status1,
         timing: STATUS_TIMING,
+      }));
+      continue;
+    }
+    if (payload.kind === "status-icon-update") {
+      pendingStatusMessageBattler = null;
+      commands.push(Object.freeze({
+        type: "status-icon",
+        eventSequence: event.sequence,
+        battler: singlesBattler(payload.battler, "status icon update"),
+        status1: payload.status1,
+        status2: payload.status2,
+        timing: STATUS_ICON_TIMING,
       }));
       continue;
     }
