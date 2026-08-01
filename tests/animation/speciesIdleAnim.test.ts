@@ -23,6 +23,11 @@ import {
   H_JUMPS_FACTORY_FRONT_SPECIES,
   H_JUMPS_FRONT_SPECIES,
   H_JUMPS_OUTSIDE_FACTORY_FRONT_SPECIES,
+  horizontalVibrateFrameAtTick,
+  HORIZONTAL_VIBRATE_VARIANTS,
+  H_VIBRATE_FACTORY_FRONT_SPECIES,
+  H_VIBRATE_FRONT_SPECIES,
+  H_VIBRATE_OUTSIDE_FACTORY_FRONT_SPECIES,
   horizontalSlideWobbleFrameAtTick,
   H_SLIDE_WOBBLE_FACTORY_FRONT_SPECIES,
   H_SLIDE_WOBBLE_FRONT_SPECIES,
@@ -3008,6 +3013,110 @@ describe("speciesIdleAnim", () => {
         "MANKEY", "WYNAUT", "VILEPLUME", "LOUDRED", "JIGGLYPUFF", "GYARADOS",
         "BLASTOISE", "BAGON", "SEAKING", "SHUPPET", "BUTTERFREE", "CHIMECHO",
         "WIGGLYTUFF", "VIGOROTH",
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("horizontalVibrateFrameAtTick (source lifecycle)", () => {
+    it("derives exactly all 7 selector mappings as Factory-reachable with zero outside", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_H_VIBRATE")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(H_VIBRATE_FRONT_SPECIES).toEqual(generated);
+      expect(H_VIBRATE_FRONT_SPECIES).toEqual([
+        "BEEDRILL", "ARCANINE", "SCYTHER", "SCIZOR",
+        "HITMONTOP", "SHIFTRY", "DUSCLOPS",
+      ]);
+      expect(H_VIBRATE_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(H_VIBRATE_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(H_VIBRATE_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of H_VIBRATE_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("keeps Fast and Fastest distinct and explicitly unaccepted", () => {
+      expect(HORIZONTAL_VIBRATE_VARIANTS).toEqual({
+        normal: { selector: "ANIM_H_VIBRATE", amplitude: 6, accepted: true },
+        fast: { selector: "ANIM_H_VIBRATE_FAST", amplitude: 9, accepted: false },
+        fastest: { selector: "ANIM_H_VIBRATE_FASTEST", amplitude: 12, accepted: false },
+      });
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
+    });
+
+    it("pins all 41 active callbacks, alternating signs and exact sine indices", () => {
+      const active = Array.from({ length: 41 }, (_, tick) => {
+        const sign = tick % 2 === 0 ? 1 : -1;
+        const index = Math.trunc((tick * 128) / 40) % 256;
+        const x2 = Math.floor((6 * GBA_SINE_TABLE_256[index]!) / 256) * sign + 0;
+        const frame = horizontalVibrateFrameAtTick(tick)!;
+        expect(frame, `tick ${tick}`).toEqual({
+          x2,
+          y2: 0,
+          data0: 0,
+          data2: tick + 1,
+          counter: tick,
+          index,
+          sign,
+          amplitude: 6,
+          callback: "Anim_HorizontalVibrate",
+        });
+        return frame;
+      });
+
+      expect(active).toHaveLength(41);
+      expect(active.map(({ sign }) => sign)).toEqual(
+        Array.from({ length: 41 }, (_, tick) => tick % 2 === 0 ? 1 : -1),
+      );
+      expect(active.map(({ index }) => index)).toEqual(
+        Array.from({ length: 41 }, (_, tick) => Math.trunc((tick * 128) / 40)),
+      );
+      expect([0, 1, 10, 20, 30, 39, 40].map((tick) => {
+        const frame = active[tick]!;
+        return [tick, frame.index, frame.sign, frame.x2];
+      })).toEqual([
+        [0, 0, 1, 0],
+        [1, 3, -1, 0],
+        [10, 32, 1, 4],
+        [20, 64, 1, 6],
+        [30, 96, 1, 4],
+        [39, 124, -1, 0],
+        [40, 128, 1, 0],
+      ]);
+    });
+
+    it("pins tick 41 cleanup, WaitAnimEnd install, and final data2 increment to 42", () => {
+      expect(horizontalVibrateFrameAtTick(41)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 0,
+        data2: 42,
+        counter: 41,
+        index: null,
+        sign: null,
+        amplitude: 6,
+        callback: "WaitAnimEnd",
+      });
+      expect(horizontalVibrateFrameAtTick(42)).toEqual(horizontalVibrateFrameAtTick(41));
+      expect(horizontalVibrateFrameAtTick(-1)).toBeNull();
+    });
+
+    it("preserves every previously accepted representative and sibling family", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of [
+        "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN",
+        "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN", "KADABRA", "REGISTEEL",
+        "SQUIRTLE", "SHUCKLE", "SEADRA", "MARSHTOMP", "CHARMANDER", "DELIBIRD",
+        "MANKEY", "WYNAUT", "VILEPLUME", "LOUDRED", "JIGGLYPUFF", "GYARADOS",
+        "BLASTOISE", "BAGON", "SEAKING", "SHUPPET", "BUTTERFREE", "CHIMECHO",
+        "WIGGLYTUFF", "VIGOROTH", "BEEDRILL", "DUSCLOPS",
       ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }

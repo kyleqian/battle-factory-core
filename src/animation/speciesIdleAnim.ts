@@ -47,6 +47,7 @@ export type SpeciesFrontAnimFamily =
   | "GROW_VIBRATE"
   | "H_JUMPS"
   | "H_SLIDE_WOBBLE"
+  | "H_VIBRATE"
   | "H_JUMPS_V_STRETCH"
   | "H_SHAKE"
   | "RAPID_H_HOPS"
@@ -67,6 +68,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "GROW_VIBRATE",
   "H_JUMPS",
   "H_SLIDE_WOBBLE",
+  "H_VIBRATE",
   "H_JUMPS_V_STRETCH",
   "H_SHAKE",
   "RAPID_H_HOPS",
@@ -347,6 +349,23 @@ export const H_JUMPS_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
 /** There are no horizontal-jumps mappings outside the Factory pool. */
 export const H_JUMPS_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   H_JUMPS_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All 7 source selector mappings for the normal `ANIM_H_VIBRATE`. */
+export const H_VIBRATE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_H_VIBRATE")
+    .map(([species]) => species),
+);
+
+/** Every normal horizontal-vibrate mapping is Factory-reachable. */
+export const H_VIBRATE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_VIBRATE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no normal horizontal-vibrate mappings outside the Factory pool. */
+export const H_VIBRATE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_VIBRATE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 export interface SpeciesIdleOffset {
@@ -686,6 +705,27 @@ export interface HorizontalJumpsFrame extends SpeciesIdleOffset {
   readonly normalFrontDontFlip: true;
   readonly tryFlipXCalls: 2;
   readonly callback: "Anim_HorizontalJumps" | "WaitAnimEnd";
+}
+
+/**
+ * The adjacent amplitude-only callbacks are distinct selectors. This rung
+ * accepts the normal amplitude-6 family only; Fast and Fastest remain named
+ * here so they cannot be mistaken for covered aliases.
+ */
+export const HORIZONTAL_VIBRATE_VARIANTS = Object.freeze({
+  normal: Object.freeze({ selector: "ANIM_H_VIBRATE", amplitude: 6, accepted: true }),
+  fast: Object.freeze({ selector: "ANIM_H_VIBRATE_FAST", amplitude: 9, accepted: false }),
+  fastest: Object.freeze({ selector: "ANIM_H_VIBRATE_FASTEST", amplitude: 12, accepted: false }),
+} as const);
+
+export interface HorizontalVibrateFrame extends SpeciesIdleOffset {
+  readonly data0: 0;
+  readonly data2: number;
+  readonly counter: number;
+  readonly index: number | null;
+  readonly sign: 1 | -1 | null;
+  readonly amplitude: 6;
+  readonly callback: "Anim_HorizontalVibrate" | "WaitAnimEnd";
 }
 
 export interface HorizontalShakeFrame extends SpeciesIdleOffset {
@@ -1819,6 +1859,64 @@ export function horizontalJumpsFrameAtTick(
   throw new Error("unreachable HorizontalJumps reducer state");
 }
 
+/**
+ * Source-order port of `Anim_HorizontalVibrate`
+ * (`pokemon_animation.c:911-939,1110-1129`). The front-animation task leaves
+ * data0/data2..data7 zeroed. Ticks 0..40 select +1 for even data2 and -1 for
+ * odd data2, calculate the C-truncated sine index, write x2 from the exact GBA
+ * sine table at amplitude 6, then increment data2. Tick 41 installs
+ * `WaitAnimEnd`, clears x2, and increments data2 to 42. Unlike adjacent
+ * families and its separate back-animation selectors, this callback performs
+ * no affine setup and no `TryFlipX` call.
+ */
+export function horizontalVibrateFrameAtTick(
+  ticksSinceStart: number,
+): HorizontalVibrateFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let x2 = 0;
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    const counter = data2;
+    if (counter > 40) {
+      x2 = 0;
+      data2 += 1;
+      return {
+        x2,
+        y2: 0,
+        data0: 0,
+        data2,
+        counter,
+        index: null,
+        sign: null,
+        amplitude: HORIZONTAL_VIBRATE_VARIANTS.normal.amplitude,
+        callback: "WaitAnimEnd",
+      };
+    }
+
+    const sign = counter % 2 === 0 ? 1 : -1;
+    const index = Math.trunc((counter * 128) / 40) % 256;
+    x2 = gbaSin(index, HORIZONTAL_VIBRATE_VARIANTS.normal.amplitude) * sign + 0;
+    data2 += 1;
+
+    if (tick === ticksSinceStart) {
+      return {
+        x2,
+        y2: 0,
+        data0: 0,
+        data2,
+        counter,
+        index,
+        sign,
+        amplitude: HORIZONTAL_VIBRATE_VARIANTS.normal.amplitude,
+        callback: "Anim_HorizontalVibrate",
+      };
+    }
+  }
+
+  throw new Error("unreachable HorizontalVibrate reducer state");
+}
+
 function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffset {
   switch (family) {
     case "BOUNCE_ROTATE_TO_SIDES_SMALL": {
@@ -1846,6 +1944,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = horizontalJumpsFrameAtTick(43);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_HorizontalJumps did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "H_VIBRATE": {
+      const terminal = horizontalVibrateFrameAtTick(41);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_HorizontalVibrate did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
