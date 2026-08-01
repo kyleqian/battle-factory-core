@@ -40,12 +40,16 @@ import selectorTables from "../data/gen/send-out-anim-selector-tables.json" with
  * window actually needs is RAM-confirmed.
  */
 
-export type SpeciesFrontAnimFamily = "RAPID_H_HOPS" | "V_SQUISH_AND_BOUNCE";
+export type SpeciesFrontAnimFamily =
+  | "RAPID_H_HOPS"
+  | "V_SQUISH_AND_BOUNCE"
+  | "V_STRETCH";
 
 const FRONT_ANIM_PREFIX = "ANIM_";
 const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "RAPID_H_HOPS",
   "V_SQUISH_AND_BOUNCE",
+  "V_STRETCH",
 ]);
 
 const generatedFrontAnimIds = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
@@ -58,6 +62,13 @@ const generatedFrontAnimIds = selectorTables.frontAnimIds.species as Readonly<Re
 export const V_SQUISH_AND_BOUNCE_FRONT_SPECIES: readonly string[] = Object.freeze(
   Object.entries(generatedFrontAnimIds)
     .filter(([, family]) => family === "ANIM_V_SQUISH_AND_BOUNCE")
+    .map(([species]) => species),
+);
+
+/** Complete Factory-reachable `ANIM_V_STRETCH` front family, source-derived. */
+export const V_STRETCH_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_V_STRETCH")
     .map(([species]) => species),
 );
 
@@ -192,6 +203,85 @@ export function verticalSquishBounceFrameAtTick(
   };
 }
 
+export interface VerticalStretchFrame extends SpeciesIdleOffset {
+  readonly data2: number;
+  readonly data4: number;
+  readonly data5: number;
+  readonly data7: number;
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly callback: "Anim_VerticalStretch" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+const VERTICAL_STRETCH_DURATION = 40;
+
+/**
+ * Source-order port of `Anim_VerticalStretch`
+ * (`pokemon_animation.c:1597-1629`). The returned frame is the state after
+ * the callback for `ticksSinceStart` has run. `dontFlip` is the source's
+ * `sprite->sDontFlip` bit; it changes only the first affine scale argument.
+ * Tick 41 performs the identity-affine/y2 cleanup, restores normal affine
+ * mode, and hands off to `WaitAnimEnd`.
+ */
+export function verticalStretchFrameAtTick(
+  ticksSinceStart: number,
+  dontFlip = false,
+): VerticalStretchFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let data4 = 0;
+  let data5 = 0;
+  let data7 = 0;
+  let y2 = 0;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (data2 > VERTICAL_STRETCH_DURATION) {
+      // `HandleSetAffineData(256, 256, 0)` does not rewrite data[4]/data[5].
+      data2 += 1;
+      return {
+        x2: 0,
+        y2: 0,
+        data2,
+        data4,
+        data5,
+        data7,
+        xScale: 256,
+        yScale: 256,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      };
+    }
+
+    const index2 = Math.trunc((data2 * 128) / VERTICAL_STRETCH_DURATION);
+    let index1 = 0;
+    if (data2 >= 10 && data2 <= 29) {
+      data7 += 51;
+      index1 = data7 & 0xff;
+    }
+
+    data4 = dontFlip ? gbaSin(index2, 16) + 256 : -gbaSin(index2, 16) - 256;
+    data5 = 256 - gbaSin(index2, 40) - gbaSin(index1, 8);
+    const posY = data5 !== 256 ? Math.trunc((256 - data5) / 8) : 0;
+    y2 = -posY + 0;
+    data2 += 1;
+  }
+
+  return {
+    x2: 0,
+    y2,
+    data2,
+    data4,
+    data5,
+    data7,
+    xScale: data4,
+    yScale: data5,
+    callback: "Anim_VerticalStretch",
+    affineMode: "double",
+  };
+}
+
 function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffset {
   switch (family) {
     case "RAPID_H_HOPS": {
@@ -208,6 +298,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = verticalSquishBounceFrameAtTick(49);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_VerticalSquishBounce did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "V_STRETCH": {
+      const terminal = verticalStretchFrameAtTick(41);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_VerticalStretch did not reach its source terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
