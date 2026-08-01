@@ -19,6 +19,10 @@ import {
   GROW_VIBRATE_FACTORY_FRONT_SPECIES,
   GROW_VIBRATE_FRONT_SPECIES,
   GROW_VIBRATE_OUTSIDE_FACTORY_FRONT_SPECIES,
+  flashYellowFrameAtTick,
+  FLASH_YELLOW_FACTORY_FRONT_SPECIES,
+  FLASH_YELLOW_FRONT_SPECIES,
+  FLASH_YELLOW_OUTSIDE_FACTORY_FRONT_SPECIES,
   horizontalJumpsFrameAtTick,
   H_JUMPS_FACTORY_FRONT_SPECIES,
   H_JUMPS_FRONT_SPECIES,
@@ -81,6 +85,7 @@ import {
   VERTICAL_SHAKE_TWICE_DATA,
   VERTICAL_SHAKE_TWICE_INITIALIZERS,
   VERTICAL_SLIDE_WOBBLE_INITIALIZERS,
+  YELLOW_FLASH_DATA,
 } from "../../src/animation/speciesIdleAnim.ts";
 import frontierMons from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import selectorTables from "../../src/data/gen/send-out-anim-selector-tables.json" with { type: "json" };
@@ -3444,6 +3449,147 @@ describe("speciesIdleAnim", () => {
         "MANKEY", "WYNAUT", "VILEPLUME", "LOUDRED", "JIGGLYPUFF", "GYARADOS",
         "BLASTOISE", "BAGON", "SEAKING", "SHUPPET", "BUTTERFREE", "CHIMECHO",
         "WIGGLYTUFF", "VIGOROTH", "BEEDRILL", "DUSCLOPS", "EKANS", "ALTARIA",
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("flashYellowFrameAtTick (source palette lifecycle)", () => {
+    it("derives exactly all 7 selector mappings as Factory-reachable with zero outside", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_FLASH_YELLOW")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(FLASH_YELLOW_FRONT_SPECIES).toEqual(generated);
+      expect(FLASH_YELLOW_FRONT_SPECIES).toEqual([
+        "PIKACHU", "MAGNETON", "ELECTABUZZ", "ZAPDOS", "AMPHAROS", "ELEKID", "RAIKOU",
+      ]);
+      expect(FLASH_YELLOW_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(FLASH_YELLOW_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(FLASH_YELLOW_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of FLASH_YELLOW_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins every sYellowFlashData row and the implicit u8 -1 sentinel", () => {
+      expect(YELLOW_FLASH_DATA).toEqual([
+        [false, 5], [true, 1], [false, 15], [true, 4],
+        [false, 2], [true, 2], [false, 2], [true, 2],
+        [false, 2], [true, 2], [false, 2], [true, 2], [false, 2],
+      ]);
+      expect(YELLOW_FLASH_DATA).toHaveLength(13);
+    });
+
+    it("pins all 56 active callbacks including delayed palette writes", () => {
+      let data5 = 0;
+      let data6 = 0;
+      let data4 = 0;
+      let coefficient: 0 | 16 = 0;
+      const transitions: number[] = [];
+      const writes: number[] = [];
+      const active = Array.from({ length: 56 }, (_, tick) => {
+        const entry = YELLOW_FLASH_DATA[data6]!;
+        let paletteWrite = false;
+        if (data4 === 1) {
+          coefficient = entry[0] ? 16 : 0;
+          paletteWrite = true;
+          writes.push(tick);
+          data4 = 0;
+        }
+        if (entry[1] === data5) {
+          data4 = 1;
+          data5 = 0;
+          data6 += 1;
+          transitions.push(tick);
+        } else {
+          data5 += 1;
+        }
+
+        const frame = flashYellowFrameAtTick(tick, 6)!;
+        expect(frame, `tick ${tick}`).toEqual({
+          x2: 0,
+          y2: 0,
+          data0: 0,
+          data2: tick + 1,
+          data4,
+          data5,
+          data6,
+          data7: 0x160,
+          tableFlashYellow: entry[0],
+          tableDuration: entry[1],
+          paletteNum: 6,
+          paletteStart: 0x160,
+          paletteCount: 16,
+          blendCoefficient: coefficient,
+          blendColor: 0x03ff,
+          paletteWrite,
+          callback: "Anim_FlashYellow",
+        });
+        return frame;
+      });
+
+      expect(active).toHaveLength(56);
+      expect(transitions).toEqual([5, 7, 23, 28, 31, 34, 37, 40, 43, 46, 49, 52, 55]);
+      expect(writes).toEqual([6, 8, 24, 29, 32, 35, 38, 41, 44, 47, 50, 53]);
+      expect(writes.map((tick) => active[tick]!.blendCoefficient)).toEqual([
+        16, 0, 16, 0, 16, 0, 16, 0, 16, 0, 16, 0,
+      ]);
+    });
+
+    it("pins OBJ_PLTT_ID capture, final restore, and tick-56 sentinel cleanup", () => {
+      expect(flashYellowFrameAtTick(0, 0x16)).toMatchObject({
+        data2: 1,
+        data7: 0x160,
+        paletteNum: 6,
+        paletteStart: 0x160,
+        paletteWrite: false,
+      });
+      expect(flashYellowFrameAtTick(53, 6)).toMatchObject({
+        data6: 12,
+        tableFlashYellow: false,
+        tableDuration: 2,
+        blendCoefficient: 0,
+        paletteWrite: true,
+      });
+      expect(flashYellowFrameAtTick(56, 6)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 0,
+        data2: 57,
+        data4: 1,
+        data5: 0,
+        data6: 13,
+        data7: 0x160,
+        tableFlashYellow: null,
+        tableDuration: null,
+        paletteNum: 6,
+        paletteStart: 0x160,
+        paletteCount: 16,
+        blendCoefficient: 0,
+        blendColor: 0x03ff,
+        paletteWrite: false,
+        callback: "WaitAnimEnd",
+      });
+      expect(flashYellowFrameAtTick(57, 6)).toEqual(flashYellowFrameAtTick(56, 6));
+      expect(flashYellowFrameAtTick(-1, 6)).toBeNull();
+    });
+
+    it("preserves every previously accepted representative and sibling family", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of [
+        "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN",
+        "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN", "KADABRA", "REGISTEEL",
+        "SQUIRTLE", "SHUCKLE", "SEADRA", "MARSHTOMP", "CHARMANDER", "DELIBIRD",
+        "MANKEY", "WYNAUT", "VILEPLUME", "LOUDRED", "JIGGLYPUFF", "GYARADOS",
+        "BLASTOISE", "BAGON", "SEAKING", "SHUPPET", "BUTTERFREE", "CHIMECHO",
+        "WIGGLYTUFF", "VIGOROTH", "BEEDRILL", "DUSCLOPS", "EKANS", "ALTARIA",
+        "PIKACHU", "RAIKOU",
       ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }

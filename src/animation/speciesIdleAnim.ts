@@ -45,6 +45,7 @@ export type SpeciesFrontAnimFamily =
   | "BOUNCE_ROTATE_TO_SIDES_SMALL"
   | "BOUNCE_ROTATE_TO_SIDES_SLOW"
   | "GROW_VIBRATE"
+  | "FLASH_YELLOW"
   | "H_JUMPS"
   | "H_SLIDE_WOBBLE"
   | "H_STRETCH"
@@ -67,6 +68,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "BOUNCE_ROTATE_TO_SIDES_SMALL",
   "BOUNCE_ROTATE_TO_SIDES_SLOW",
   "GROW_VIBRATE",
+  "FLASH_YELLOW",
   "H_JUMPS",
   "H_SLIDE_WOBBLE",
   "H_STRETCH",
@@ -385,6 +387,23 @@ export const H_STRETCH_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
 /** There are no normal horizontal-stretch mappings outside the Factory pool. */
 export const H_STRETCH_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   H_STRETCH_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All 7 source selector mappings for the palette-only `ANIM_FLASH_YELLOW`. */
+export const FLASH_YELLOW_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_FLASH_YELLOW")
+    .map(([species]) => species),
+);
+
+/** Every yellow-flash mapping is reachable through Factory rentals. */
+export const FLASH_YELLOW_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  FLASH_YELLOW_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no yellow-flash mappings outside the Factory rental pool. */
+export const FLASH_YELLOW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  FLASH_YELLOW_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 export interface SpeciesIdleOffset {
@@ -774,6 +793,33 @@ export interface HorizontalStretchFrame extends SpeciesIdleOffset {
   readonly resetSpriteAfterAnim: boolean;
   readonly callback: "Anim_HorizontalStretch" | "WaitAnimEnd";
   readonly affineMode: "double" | "normal";
+}
+
+export type YellowFlashTableEntry = readonly [flashYellow: boolean, duration: number];
+
+/** Exact `sYellowFlashData` rows, excluding the source's `{FALSE, (u8)-1}` sentinel. */
+export const YELLOW_FLASH_DATA: readonly YellowFlashTableEntry[] = Object.freeze([
+  [false, 5], [true, 1], [false, 15], [true, 4],
+  [false, 2], [true, 2], [false, 2], [true, 2],
+  [false, 2], [true, 2], [false, 2], [true, 2], [false, 2],
+] as const);
+
+export interface FlashYellowFrame extends SpeciesIdleOffset {
+  readonly data0: 0;
+  readonly data2: number;
+  readonly data4: number;
+  readonly data5: number;
+  readonly data6: number;
+  readonly data7: number;
+  readonly tableFlashYellow: boolean | null;
+  readonly tableDuration: number | null;
+  readonly paletteNum: number;
+  readonly paletteStart: number;
+  readonly paletteCount: 16;
+  readonly blendCoefficient: 0 | 16;
+  readonly blendColor: 0x03ff;
+  readonly paletteWrite: boolean;
+  readonly callback: "Anim_FlashYellow" | "WaitAnimEnd";
 }
 
 export interface HorizontalShakeFrame extends SpeciesIdleOffset {
@@ -2061,6 +2107,104 @@ export function horizontalStretchFrameAtTick(
   throw new Error("unreachable HorizontalStretch reducer state");
 }
 
+/**
+ * Source-order port of `Anim_FlashYellow` and `sYellowFlashData`
+ * (`pokemon_animation.c:603-620,2473-2509`). The front-animation task
+ * zeroes data0/data2..data7. On tick 0 the callback captures
+ * `OBJ_PLTT_ID(oam.paletteNum)`. A table transition sets data4 only after
+ * that callback's palette-write check, so every yellow/restore write occurs
+ * on the following callback. Active ticks are 0..55; tick 56 observes the
+ * `(u8)-1` sentinel and installs `WaitAnimEnd`. The last write restores the
+ * unfaded palette at coefficient 0 before cleanup.
+ */
+export function flashYellowFrameAtTick(
+  ticksSinceStart: number,
+  paletteNum = 0,
+): FlashYellowFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  const normalizedPaletteNum = paletteNum & 0xf;
+  const paletteStart = 0x100 + normalizedPaletteNum * 16;
+  let data2 = 0;
+  let data4 = 0;
+  let data5 = 0;
+  let data6 = 0;
+  let data7 = 0;
+  let blendCoefficient: 0 | 16 = 0;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    data2 = toS16(data2 + 1);
+    if (data2 === 1) {
+      data7 = paletteStart;
+      data6 = 0;
+      data5 = 0;
+      data4 = 0;
+    }
+
+    const entry = YELLOW_FLASH_DATA[data6];
+    if (entry === undefined) {
+      return {
+        x2: 0,
+        y2: 0,
+        data0: 0,
+        data2,
+        data4,
+        data5,
+        data6,
+        data7,
+        tableFlashYellow: null,
+        tableDuration: null,
+        paletteNum: normalizedPaletteNum,
+        paletteStart,
+        paletteCount: 16,
+        blendCoefficient,
+        blendColor: 0x03ff,
+        paletteWrite: false,
+        callback: "WaitAnimEnd",
+      };
+    }
+
+    let paletteWrite = false;
+    if (data4 === 1) {
+      blendCoefficient = entry[0] ? 16 : 0;
+      paletteWrite = true;
+      data4 = 0;
+    }
+
+    if (entry[1] === data5) {
+      data4 = 1;
+      data5 = 0;
+      data6 += 1;
+    } else {
+      data5 += 1;
+    }
+
+    if (tick === ticksSinceStart) {
+      return {
+        x2: 0,
+        y2: 0,
+        data0: 0,
+        data2,
+        data4,
+        data5,
+        data6,
+        data7,
+        tableFlashYellow: entry[0],
+        tableDuration: entry[1],
+        paletteNum: normalizedPaletteNum,
+        paletteStart,
+        paletteCount: 16,
+        blendCoefficient,
+        blendColor: 0x03ff,
+        paletteWrite,
+        callback: "Anim_FlashYellow",
+      };
+    }
+  }
+
+  throw new Error("unreachable FlashYellow reducer state");
+}
+
 function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffset {
   switch (family) {
     case "BOUNCE_ROTATE_TO_SIDES_SMALL": {
@@ -2081,6 +2225,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = growVibrateFrameAtTick(41);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_GrowVibrate did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "FLASH_YELLOW": {
+      const terminal = flashYellowFrameAtTick(56);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_FlashYellow did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
