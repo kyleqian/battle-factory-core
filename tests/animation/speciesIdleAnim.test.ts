@@ -172,6 +172,12 @@ import beedrillRunB from "../../tools/compare/fixtures/sendout-front-beedrill-ru
 import dusclopsScenario from "../../tools/compare/fixtures/sendout-front-dusclops.json" with { type: "json" };
 import dusclopsRunA from "../../tools/compare/fixtures/sendout-front-dusclops-run-a.json" with { type: "json" };
 import dusclopsRunB from "../../tools/compare/fixtures/sendout-front-dusclops-run-b.json" with { type: "json" };
+import ekansScenario from "../../tools/compare/fixtures/sendout-front-ekans.json" with { type: "json" };
+import ekansRunA from "../../tools/compare/fixtures/sendout-front-ekans-run-a.json" with { type: "json" };
+import ekansRunB from "../../tools/compare/fixtures/sendout-front-ekans-run-b.json" with { type: "json" };
+import altariaScenario from "../../tools/compare/fixtures/sendout-front-altaria.json" with { type: "json" };
+import altariaRunA from "../../tools/compare/fixtures/sendout-front-altaria-run-a.json" with { type: "json" };
+import altariaRunB from "../../tools/compare/fixtures/sendout-front-altaria-run-b.json" with { type: "json" };
 import {
   KABUTO_FRONT_ANIM_START_OFFSET,
   kabutoHSlideWobble,
@@ -308,6 +314,18 @@ const dusclopsRawA = readFileSync(
 );
 const dusclopsRawB = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-dusclops-run-b.json", import.meta.url),
+);
+const ekansRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-ekans-run-a.json", import.meta.url),
+);
+const ekansRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-ekans-run-b.json", import.meta.url),
+);
+const altariaRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-altaria-run-a.json", import.meta.url),
+);
+const altariaRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-altaria-run-b.json", import.meta.url),
 );
 
 describe("speciesIdleAnim", () => {
@@ -3342,6 +3360,79 @@ describe("speciesIdleAnim", () => {
       });
       expect(horizontalStretchFrameAtTick(42)).toEqual(horizontalStretchFrameAtTick(41));
       expect(horizontalStretchFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      [23, ekansScenario],
+      [334, altariaScenario],
+    ] as const)("stages a complete legal Scene-ON party for opponent species %i", (species, scenario) => {
+      expect(scenario.mode).toBe("mechanicLab");
+      expect(scenario.profile).toBe("battle-scene-on");
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(species);
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "EKANS", ekansRunA, ekansRunB, ekansRawA, ekansRawB, 23, 5,
+        "910a3f50de504e27097b7eb7a4b445229888540513362c16912bee88addadb44",
+      ],
+      [
+        "ALTARIA", altariaRunA, altariaRunB, altariaRawA, altariaRawB, 334, 6,
+        "24dddba203497ba399c2944bbf7a636edb3ced114e5bc4d44ddc7dee826176e9",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species,
+      runA,
+      runB,
+      rawA,
+      rawB,
+      data2,
+      animCmdIndex,
+      rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_H_STRETCH");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
     });
 
     it("preserves every previously accepted representative and sibling family", () => {
