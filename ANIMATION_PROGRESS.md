@@ -1,5 +1,41 @@
 # Animation coverage
 
+## Front `ANIM_ROTATE_UP_TO_SIDES` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** exact for the complete generated selector census: all
+**1 mapping / 1 Factory-reachable species / 0 outside-Factory mappings** —
+HARIYAMA. No adjacent selector, unsupported barrier, per-species branch, or
+absolute-tick branch was added. Move coverage remains **107 exact / 0 partial /
+0 staged / 169 unsupported**, and `ANIMATION_COVERAGE.json` is unchanged at
+SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,984-1064,
+2918-2951,5540-5544` and `trig.c:514-518` prove task-zeroed sprite data,
+`InitAnimData`/`AddNewAnim` defaults and the adjacent fast selector's distinct
+ownership, affine start/set/reset helpers, GBA signed sine/u16 rotation
+semantics, and stable `WaitAnimEnd`. All **32 active callbacks** pin data7
+0..248 by 8: tick 0 starts affine exactly once; every active callback preserves
+both normal-front no-op `TryFlipX` calls, writes
+`x2=-Sin(data7,16)`, `y2=-Sin(data7%128,16)`, converts
+`Sin(data7,32)` through u16 and shifts it left 8 for the affine rotation, then
+advances data7 by 8. Tick 32 alone observes strict data7 > 254 at 256, clears
+both offsets, writes identity affine, calls `ResetSpriteAfterAnim`, preserves
+both flips, and installs stable `WaitAnimEnd`. The accepted predecessor
+`ANIM_H_JUMPS_V_STRETCH_TWICE` remains regression-pinned, while adjacent
+`ANIM_FLICKER_INCREASING` remains unaccepted. A fresh complete legal
+challenge-0 Scene-ON party settles HARIYAMA at x2=0/y2=0, animNum=1/
+`SpriteCallbackDummy`; two unchanged-probe raw receipts are byte-identical,
+373 bytes each, end at byte 125 with no newline, and have SHA-256
+`1a865d6dc82960110465722aa619bdc1cc5725d4716cfc7c13f363bcf16e6e49`.
+
+**Verification / next:** focused species-idle family plus both ratchets are
+**251/251**; `npx tsc --noEmit`, raw/diff checks, and the unchanged coverage
+hash are green; the single post-change full `npm test` is green at **572 files,
+5,973 passed + 1 skipped**; production build is green (**534 modules
+transformed**). The next source-ranked generated census family is
+**`ANIM_FLICKER_INCREASING`** (2 mappings / 2 Factory / 0 outside): HAUNTER and
+KECLEON.
+
 ## Front `ANIM_H_JUMPS_V_STRETCH_TWICE` terminal family accepted (2026-08-01)
 
 **Verdict / counts:** exact for the complete generated selector census: all
