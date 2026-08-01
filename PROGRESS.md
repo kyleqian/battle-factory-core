@@ -13,6 +13,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 829 — [supervisor, 2026-08-01 PM] session start: animation fold `c16e73dd`, union green
+
+- **State:** master `c16e73dd` (fold of `animation-main`, 5 commits:
+  flicker-increasing + rotate-up-to-sides front-idle acceptances; animation
+  fixtures/docs only, clean merge). Union full `npm test` **576 files, 6,006
+  passed + 1 skipped**; `npm run build` green. Stale turn8-diff temp worktree
+  removed. Oracle freshness FAIL on both ports remains the known client-only
+  false positive (harness HEAD `9cadad7` is template/tooling-only).
+- **Did:** orient + fold per protocol; re-verified all committed OFF trace
+  capture counts for the turns 9-12 acceptance sets against
+  `docs/turn-resolved-owner-chain-audit.md` (exact match).
+- **Next:** main lane (Terra/max): `turn9Resolved` retirement per the audit's
+  slice-order item 4, then turns 10/11/12 serial, one field per worker. Side
+  lane (Sol/high): turns 1-4 typed HP/bounce epoch prep-scout (consumer map +
+  RAM ground truth + handoff design), unblocking slice-order item 6. #63
+  remains a small standalone fix if time allows.
+- **Notes:** animation supervisor live until 15:32 (nested worker too); full
+  suites stay at supervisor verify boundaries per the contention rule. Session
+  deadline 20:27.
+
 ## 828 — [bounded MAIN worker, 2026-08-01] turn-8 predecessor handoff retired
 
 > **Supervisor close-out (14:27):** turn-8 landing verified (grep clean,
@@ -73,20 +93,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   proposal; nothing this session presupposed it.
 - **Notes:** worker scorecard 10/10 briefs landed or blocked honestly (0
   failures); two animation folds (30 + 18 commits) both union-green.
-
-## 826 — [bounded MAIN worker, 2026-08-01] turn-7 predecessor handoff retired
-
-- **State:** proof `74f4a0d5`, implementation `8a73efc3`; source/test census
-  has no `turn7Resolved` reference.
-- **Did:** published the immutable completed-turn-7/next-command handoff with
-  canonical PP **[4,20,19,10]**, persisted slot 0, and settled/ready facts;
-  moved turn-8 dispatch, slot-0 PP reconstruction, and the turn-9 reopen
-  guard onto it without composing FEATHER_DANCE/ROCK_SLIDE stages.
-- **Next:** take only the next separately scoped #39 owner-chain slice; do not
-  batch `turn8Resolved` or another field into this completed retirement.
-- **Notes:** clean-`74f4a0d5` differential app replay is byte-identical across
-  all requested turn-7 primary/boundary, turn-8 reader, and turn-6 upstream
-  windows (**1,413/1,413 raw RGBA captures**). Full `npm test`: **575 files,
-  5,920 passed + 1 skipped**; `npm run build` green. No trace/capture-list,
-  timing/presentation, ratchet/barrier, recording-import, or prohibited
-  selector change.

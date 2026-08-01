@@ -1,3 +1,20 @@
+## 826 — [bounded MAIN worker, 2026-08-01] turn-7 predecessor handoff retired
+
+- **State:** proof `74f4a0d5`, implementation `8a73efc3`; source/test census
+  has no `turn7Resolved` reference.
+- **Did:** published the immutable completed-turn-7/next-command handoff with
+  canonical PP **[4,20,19,10]**, persisted slot 0, and settled/ready facts;
+  moved turn-8 dispatch, slot-0 PP reconstruction, and the turn-9 reopen
+  guard onto it without composing FEATHER_DANCE/ROCK_SLIDE stages.
+- **Next:** take only the next separately scoped #39 owner-chain slice; do not
+  batch `turn8Resolved` or another field into this completed retirement.
+- **Notes:** clean-`74f4a0d5` differential app replay is byte-identical across
+  all requested turn-7 primary/boundary, turn-8 reader, and turn-6 upstream
+  windows (**1,413/1,413 raw RGBA captures**). Full `npm test`: **575 files,
+  5,920 passed + 1 skipped**; `npm run build` green. No trace/capture-list,
+  timing/presentation, ratchet/barrier, recording-import, or prohibited
+  selector change.
+
 ## 825 — [bounded MAIN worker, 2026-08-01] turn-6 predecessor handoff retired
 
 - **State:** proof `80b2767a`, implementation `c6f3cdd4`; source/test census
