@@ -5,14 +5,15 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-**Two kinds of entry live here — do not confuse them.** Only `#39` below is
-open, actionable debt. `#38`, `#18`, and `#5` are **settled records, not
-work**: each was investigated to root cause and then parked or accepted by
-decision. They stay because ROADMAP acceptance lines cite them by number as
-the recorded reason specific pixel diffs are accepted (`#5` at ROADMAP:127,
-142, 150, 163, 175; `#18` at :176; `#38` at :503) — deleting them would
-orphan those citations and lose the *why* behind a green tick. Do not reopen
-one without a user decision, and do not count them as backlog.
+**Two kinds of entry live here — do not confuse them.** `#39`, `#55`, `#56`,
+`#61`, and `#62` are open, actionable debt. `#38`, `#18`, and `#5` are
+**settled records, not work**: each was investigated to root cause and then
+parked or accepted by decision. They stay because ROADMAP acceptance lines
+cite them by number as the recorded reason specific pixel diffs are accepted
+(`#5` at ROADMAP:127, 142, 150, 163, 175; `#18` at :176; `#38` at :503) —
+deleting them would orphan those citations and lose the *why* behind a green
+tick. Do not reopen one without a user decision, and do not count them as
+backlog.
 
 # Open
 
@@ -373,35 +374,6 @@ ROADMAP S10 §3 requires one already-exact window to be re-driven from semantic
 events as a proof of the seam; that conversion, window by window, is the
 retirement path. AGENTS.md already forbids adding new turn-keyed branches.
 
-## #60 — `turn2-endeavor.json`/`turn2-dragonbreath.json` already red on master, unrelated to the canonical dispatcher
-
-**Repro note (2026-07-31 night):** both named traces were retired by rank-6
-slice 2's landing (`4c793748`, superseded by `turn2-endeavor-off.json`/
-`turn2-dragonbreath-off.json`, unrelated to this entry's own generated-route
-bug). To reproduce: `git show 01eac159:tools/compare/traces/turn2-
-endeavor.json > /tmp/t.json` (or `...turn2-dragonbreath.json`), then `npm
-run compare -- /tmp/t.json`.
-
-**Discovered** 2026-07-31 (rank-6 slice 1's own boundary-insurance check).
-Both traces render through `core.ts`'s `renderWithoutFactoryTerminal` ->
-`renderBattleResolutionPresentation` -> `renderBattleResolutionSceneOffView`
-(the GENERATED-route presentation adapter, not the canonical Battle 1
-turn-by-turn dispatcher in `battleScene.ts`'s `renderBattleScene`) — an
-unexpected route for traces that look like plain canonical-battle turn-2
-windows. `turn2-endeavor.json` throws `Scene OFF typed stat adapter cannot
-draw battler 1 evasion 7->8` (the `view.effect.battler !== 0 || to >=
-from` guard #59 left in place, `battleScene.ts` ~32759 — a RISE on the
-opponent's own battler, a case #59's fix never claimed to cover).
-`turn2-dragonbreath.json` doesn't throw but renders 0/237, large diffs
-throughout. **Confirmed pre-existing, not a regression**: `git stash`
-against rank-6 slice 1's own changes reproduces byte-identical output
-(same error, same line-shifted-only stack trace; same diff-by-diff summary)
-on master at `f0621d47`. Not investigated further this step (out of the
-canonical-turn-1 window this step owns) — leads for whoever picks it up:
-why a canonical-battle-shaped trace with no `appRoute`/`oracleProfile`
-field takes the generated-route path at all, and whether #59's own guard
-needs a battler-1/rising case the way its own drop-only fix didn't attempt.
-
 ## #61 — turn 3's own reopen shows the FIGHT submenu one tick early (frame 3852) vs. the real ONIX action-menu dwell
 
 **Discovered** 2026-07-31 (rank-6 slice 3's own acceptance run against
@@ -428,6 +400,36 @@ picks it up: check `sm.openElapsed`'s own setter (`battleMenu.ts`) against
 the real hardware's own reveal boundary directly (RAM probe, not pixel
 inference), and grep the ~11 `revealTick` call sites before changing the
 shared comparison (turn 1/2/4's own reopens must not regress).
+
+## #62 — Retired turn-2-shaped reproducers remain pixel-red on the generated OFF route after #60's crash fix
+
+**Bounded evidence (2026-07-31, `f1bc60a2`):** recovered the deleted
+`turn2-endeavor.json` and `turn2-dragonbreath.json` byte-for-byte from
+`01eac159` into a fresh `/tmp` directory, then added explicit
+`oracleProfile: battle-scene-off` only to scratch copies so the main-lane
+oracle contract was unambiguous. Both now execute through
+`renderWithoutFactoryTerminal` -> `renderBattleResolutionPresentation` ->
+`renderBattleResolutionSceneOffView` without throwing, including the exact
+battler-1 EVASION 7→8 rise that defined #60. Pixel results remain separately
+red: Endeavor **0/77** (captures 2894–2999) and Dragon Breath **0/237**
+(captures 3121–3846).
+
+**Why this is not #60:** Dragon Breath was already **0/237** before the stat
+adapter changed (the old #60 evidence pinned that on `f0621d47`), and its
+recovered capture window never exercised the former battler-1-rise throw.
+The adapter change is confined to typed stat-banner direction, palette, and
+affected-battler geometry; it does not alter routing, turn timing, damage,
+RNG, order, or DRAGON_BREATH presentation. Endeavor's now-visible red frames
+likewise begin only after removing the crash barrier. These retired,
+profile-less inputs are reproducers, not canonical fixtures; their explicit
+OFF successors from rank 6 remain the accepted exact windows.
+
+**Next if prioritized:** first decide whether old profile-less inputs are
+supposed to select the generated default route or the historical canonical
+route. Only then characterize the remaining idle-bounce/field-art/timing
+families with a short explicit-OFF probe. Do not revive either deleted trace,
+extend the canonical Battle-2 march, or fit the residual with trace/tick
+special cases.
 
 # Settled records (not open work — see the note at the top of this file)
 

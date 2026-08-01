@@ -1,3 +1,42 @@
+## 804 — [bounded worker, 2026-07-31 ~night] ISSUES #39 rank-6 slice 3 (turn 3) LANDED — fallback invoked, turn 4 not attempted
+
+- **State:** master HEAD is this session's own commit (src+tests+traces) —
+  tree clean, `npx tsc --noEmit` clean, `npm run build` clean, focused
+  vitest (battleScene 227/battleMenu 121/fightSubmenu 57/
+  factoryBattleStartIntro 5/executableFrontierRatchet 6) 416/416 passed. Docs
+  commit (this one) follows.
+- **Did:** flipped turn 3's whole ENDEAVOR+ROCK_SLIDE window to Scene-OFF,
+  same class-(c)-delete/class-(b)-retime recipe slices 1-2 established (full
+  mechanism detail in ISSUES #39's own rank-6 paragraph — not renarrated
+  here). New finding beyond the recipe: turn 3's own cross-turn bounce chain
+  (`turn3SubmenuBounceTick`/`turn3KickoffBounceTick`) still hardcoded turn
+  2's ON-fit redraw delay, AND its frozen-bounce plateau (previously a
+  module constant that only coincidentally matched the live formula under
+  ON) needed a fresh oracle-pixel grid search — real hardware freezes at
+  `pressTick+9`, not the naive `pressTick+FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`
+  continuation. Acceptance: `turn3-endeavor-off.json` **254/255** (one
+  residual — ISSUES #61, a pre-existing action-menu/submenu reveal-boundary
+  bug confirmed present, worse even, on unmodified master, unrelated to this
+  window's own content), `turn3-rockslide-off.json` **161/161** EXACT;
+  insurance `turn5-rockslide.json`/`turn8-bind-a.json` 256/256 each, zero
+  regression. Retired `turn3-{menu,endeavor,rockslide}.json` (`git rm`).
+  Re-pinned `tests/fightSubmenu.test.ts`'s two turn-3 tests at the fresh OFF
+  ticks (4043/4205/4212 replacing dead ON 4080/4349/4356) and redirected its
+  button-script loader from the retired `turn3-menu.json` to
+  `turn3-endeavor-off.json` (byte-identical segments).
+- **Next:** turn 4 (rank-6 slice 4, DOUBLE_TEAM+ROCK_SLIDE) is next in
+  order — fallback invoked this session (turn-4 attempt would have exceeded
+  the session's own time budget after slice 3's bounce-chain investigation
+  ran long); a clean turn-3-only landing per the brief's own fallback
+  clause. Expect the SAME cross-turn bounce-chain fix pattern for
+  `turn4SubmenuBounceTick`/`turn4KickoffBounceTick` (chained off THIS
+  slice's own `TURN3_OFF_ROCKSLIDE_MENU_REDRAW_DELAY`=525) plus a fresh
+  frozen-plateau grid search for turn 4's own confirm-wait window - budget
+  time for both up front, not just the recipe's class-(c)/(b) split.
+- **PAPERCUT:** none beyond ISSUES #61's own discovery.
+
+---
+
 ## 803 — [bounded worker, 2026-07-31 ~night] ISSUES #39 rank-6 slice 2 (turn 2) LANDED — third attempt, both blockers root-caused
 
 - **State:** master at `4c793748` — tree clean, tsc/build clean, focused
