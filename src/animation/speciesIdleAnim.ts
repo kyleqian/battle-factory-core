@@ -45,6 +45,7 @@ export type SpeciesFrontAnimFamily =
   | "BOUNCE_ROTATE_TO_SIDES_SMALL"
   | "BOUNCE_ROTATE_TO_SIDES_SLOW"
   | "GROW_VIBRATE"
+  | "H_SLIDE_WOBBLE"
   | "H_JUMPS_V_STRETCH"
   | "H_SHAKE"
   | "RAPID_H_HOPS"
@@ -63,6 +64,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "BOUNCE_ROTATE_TO_SIDES_SMALL",
   "BOUNCE_ROTATE_TO_SIDES_SLOW",
   "GROW_VIBRATE",
+  "H_SLIDE_WOBBLE",
   "H_JUMPS_V_STRETCH",
   "H_SHAKE",
   "RAPID_H_HOPS",
@@ -309,6 +311,23 @@ export const V_SLIDE_WOBBLE_FACTORY_FRONT_SPECIES: readonly string[] = Object.fr
 /** There are no normal vertical-slide-wobble mappings outside the Factory pool. */
 export const V_SLIDE_WOBBLE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   V_SLIDE_WOBBLE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All 8 source selector mappings for `ANIM_H_SLIDE_WOBBLE`. */
+export const H_SLIDE_WOBBLE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_H_SLIDE_WOBBLE")
+    .map(([species]) => species),
+);
+
+/** Every horizontal-slide-wobble mapping is Factory-reachable. */
+export const H_SLIDE_WOBBLE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_SLIDE_WOBBLE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no horizontal-slide-wobble mappings outside the Factory pool. */
+export const H_SLIDE_WOBBLE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_SLIDE_WOBBLE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 export interface SpeciesIdleOffset {
@@ -617,6 +636,24 @@ export interface VerticalSlideWobbleFrame extends SpeciesIdleOffset {
   readonly normalFrontDontFlip: true;
   readonly resetSpriteAfterAnim: boolean;
   readonly callback: "VerticalSlideWobble" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+export interface HorizontalSlideWobbleFrame extends SpeciesIdleOffset {
+  readonly data0: 0;
+  readonly data2: number;
+  readonly index: number | null;
+  readonly varBeforeMask: number | null;
+  readonly wobbleIndex: number | null;
+  readonly rotationSigned: number;
+  readonly affineRotation: number;
+  readonly xScale: 256;
+  readonly yScale: 256;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXCalls: 2;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "HorizontalSlideWobble" | "WaitAnimEnd";
   readonly affineMode: "double" | "normal";
 }
 
@@ -1524,6 +1561,75 @@ function toU16(value: number): number {
   return value & 0xffff;
 }
 
+interface SlideWobbleCoreFrame {
+  readonly offset: number;
+  readonly data2: number;
+  readonly index: number | null;
+  readonly varBeforeMask: number | null;
+  readonly wobbleIndex: number | null;
+  readonly rotationSigned: number;
+  readonly affineRotation: number;
+  readonly startedAffine: boolean;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly waiting: boolean;
+  readonly affineMode: "double" | "normal";
+}
+
+/** Shared source arithmetic used by both slide-wobble callbacks. */
+function slideWobbleCoreFrameAtTick(
+  ticksSinceStart: number,
+  amplitude: number,
+): SlideWobbleCoreFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    const startedAffine = data2 === 0;
+    if (data2 > 100) {
+      data2 += 1;
+      return {
+        offset: 0,
+        data2,
+        index: null,
+        varBeforeMask: null,
+        wobbleIndex: null,
+        rotationSigned: 0,
+        affineRotation: 0,
+        startedAffine: false,
+        resetSpriteAfterAnim: true,
+        waiting: true,
+        affineMode: "normal",
+      };
+    }
+
+    const index = Math.trunc((data2 * 256) / 100);
+    const varBeforeMask = Math.trunc((data2 * 512) / 100);
+    const wobbleIndex = varBeforeMask & 0xff;
+    const offset = gbaSin(index, amplitude) + 0;
+    const rotationSigned = gbaSin(wobbleIndex, 3276);
+    const affineRotation = toU16(rotationSigned);
+    data2 += 1;
+
+    if (tick === ticksSinceStart) {
+      return {
+        offset,
+        data2,
+        index,
+        varBeforeMask,
+        wobbleIndex,
+        rotationSigned,
+        affineRotation,
+        startedAffine,
+        resetSpriteAfterAnim: false,
+        waiting: false,
+        affineMode: "double",
+      };
+    }
+  }
+
+  throw new Error("unreachable slide-wobble reducer state");
+}
+
 /**
  * Source-order port of `Anim_VerticalSlideWobble` / `VerticalSlideWobble`
  * (`pokemon_animation.c:911-939,984-1028,1735-1766`). The front-animation
@@ -1540,69 +1646,63 @@ function toU16(value: number): number {
 export function verticalSlideWobbleFrameAtTick(
   ticksSinceStart: number,
 ): VerticalSlideWobbleFrame | null {
-  if (ticksSinceStart < 0) return null;
-
   const data0 = VERTICAL_SLIDE_WOBBLE_INITIALIZERS.normal.data0;
-  let data2 = 0;
-  let y2 = 0;
+  const core = slideWobbleCoreFrameAtTick(ticksSinceStart, data0);
+  if (core === null) return null;
+  return {
+    x2: 0,
+    y2: core.offset,
+    data0,
+    data2: core.data2,
+    index: core.index,
+    varBeforeMask: core.varBeforeMask,
+    wobbleIndex: core.wobbleIndex,
+    rotationSigned: core.rotationSigned,
+    affineRotation: core.affineRotation,
+    xScale: 256,
+    yScale: 256,
+    startedAffine: core.startedAffine,
+    normalFrontDontFlip: true,
+    resetSpriteAfterAnim: core.resetSpriteAfterAnim,
+    callback: core.waiting ? "WaitAnimEnd" : "VerticalSlideWobble",
+    affineMode: core.affineMode,
+  };
+}
 
-  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
-    const startedAffine = data2 === 0;
-    if (data2 > 100) {
-      y2 = 0;
-      data2 += 1;
-      return {
-        x2: 0,
-        y2,
-        data0,
-        data2,
-        index: null,
-        varBeforeMask: null,
-        wobbleIndex: null,
-        rotationSigned: 0,
-        affineRotation: 0,
-        xScale: 256,
-        yScale: 256,
-        startedAffine: false,
-        normalFrontDontFlip: true,
-        resetSpriteAfterAnim: true,
-        callback: "WaitAnimEnd",
-        affineMode: "normal",
-      };
-    }
-
-    const index = Math.trunc((data2 * 256) / 100);
-    const varBeforeMask = Math.trunc((data2 * 512) / 100);
-    const wobbleIndex = varBeforeMask & 0xff;
-    y2 = gbaSin(index, data0) + 0;
-    const rotationSigned = gbaSin(wobbleIndex, 3276);
-    // `Sin` returns s16; the third HandleSetAffineData parameter is u16.
-    const affineRotation = toU16(rotationSigned);
-    data2 += 1;
-
-    if (tick === ticksSinceStart) {
-      return {
-        x2: 0,
-        y2,
-        data0,
-        data2,
-        index,
-        varBeforeMask,
-        wobbleIndex,
-        rotationSigned,
-        affineRotation,
-        xScale: 256,
-        yScale: 256,
-        startedAffine,
-        normalFrontDontFlip: true,
-        resetSpriteAfterAnim: false,
-        callback: "VerticalSlideWobble",
-        affineMode: "double",
-      };
-    }
-  }
-
-  throw new Error("unreachable VerticalSlideWobble reducer state");
+/**
+ * Source-order port of `Anim_HorizontalSlideWobble`
+ * (`pokemon_animation.c:911-939,1803-1833`). `Task_HandleMonAnimation`
+ * leaves data0/data2..data7 zeroed and sets `sDontFlip=TRUE`, so the two
+ * source-order `TryFlipX` calls are no-ops. Tick 0 starts affine mode;
+ * ticks 0..100 write the shared C-truncated indices, horizontal GBA sine,
+ * and signed-s16-to-u16 affine rotation before incrementing data2. Tick 101
+ * restores identity affine/x2, resets the sprite, installs `WaitAnimEnd`,
+ * increments data2, and performs the second no-op flip.
+ */
+export function horizontalSlideWobbleFrameAtTick(
+  ticksSinceStart: number,
+): HorizontalSlideWobbleFrame | null {
+  const core = slideWobbleCoreFrameAtTick(ticksSinceStart, 8);
+  if (core === null) return null;
+  return {
+    x2: core.offset,
+    y2: 0,
+    data0: 0,
+    data2: core.data2,
+    index: core.index,
+    varBeforeMask: core.varBeforeMask,
+    wobbleIndex: core.wobbleIndex,
+    rotationSigned: core.rotationSigned,
+    affineRotation: core.affineRotation,
+    xScale: 256,
+    yScale: 256,
+    startedAffine: core.startedAffine,
+    normalFrontDontFlip: true,
+    tryFlipXCalls: 2,
+    resetSpriteAfterAnim: core.resetSpriteAfterAnim,
+    callback: core.waiting ? "WaitAnimEnd" : "HorizontalSlideWobble",
+    affineMode: core.affineMode,
+  };
 }
 
 function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffset {
@@ -1625,6 +1725,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = growVibrateFrameAtTick(41);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_GrowVibrate did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "H_SLIDE_WOBBLE": {
+      const terminal = horizontalSlideWobbleFrameAtTick(101);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_HorizontalSlideWobble did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }

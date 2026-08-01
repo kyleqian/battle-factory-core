@@ -19,6 +19,10 @@ import {
   GROW_VIBRATE_FACTORY_FRONT_SPECIES,
   GROW_VIBRATE_FRONT_SPECIES,
   GROW_VIBRATE_OUTSIDE_FACTORY_FRONT_SPECIES,
+  horizontalSlideWobbleFrameAtTick,
+  H_SLIDE_WOBBLE_FACTORY_FRONT_SPECIES,
+  H_SLIDE_WOBBLE_FRONT_SPECIES,
+  H_SLIDE_WOBBLE_OUTSIDE_FACTORY_FRONT_SPECIES,
   horizontalJumpsVerticalStretchFrameAtTick,
   H_JUMPS_V_STRETCH_FACTORY_FRONT_SPECIES,
   H_JUMPS_V_STRETCH_FRONT_SPECIES,
@@ -136,6 +140,16 @@ import seakingRunB from "../../tools/compare/fixtures/sendout-front-seaking-run-
 import shuppetScenario from "../../tools/compare/fixtures/sendout-front-shuppet.json" with { type: "json" };
 import shuppetRunA from "../../tools/compare/fixtures/sendout-front-shuppet-run-a.json" with { type: "json" };
 import shuppetRunB from "../../tools/compare/fixtures/sendout-front-shuppet-run-b.json" with { type: "json" };
+import butterfreeScenario from "../../tools/compare/fixtures/sendout-front-butterfree.json" with { type: "json" };
+import butterfreeRunA from "../../tools/compare/fixtures/sendout-front-butterfree-run-a.json" with { type: "json" };
+import butterfreeRunB from "../../tools/compare/fixtures/sendout-front-butterfree-run-b.json" with { type: "json" };
+import chimechoScenario from "../../tools/compare/fixtures/sendout-front-chimecho.json" with { type: "json" };
+import chimechoRunA from "../../tools/compare/fixtures/sendout-front-chimecho-run-a.json" with { type: "json" };
+import chimechoRunB from "../../tools/compare/fixtures/sendout-front-chimecho-run-b.json" with { type: "json" };
+import {
+  KABUTO_FRONT_ANIM_START_OFFSET,
+  kabutoHSlideWobble,
+} from "../../src/engine/kabutoSendOut.ts";
 
 const squirtleRawA = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-squirtle-run-a.json", import.meta.url),
@@ -232,6 +246,18 @@ const shuppetRawA = readFileSync(
 );
 const shuppetRawB = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-shuppet-run-b.json", import.meta.url),
+);
+const butterfreeRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-butterfree-run-a.json", import.meta.url),
+);
+const butterfreeRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-butterfree-run-b.json", import.meta.url),
+);
+const chimechoRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-chimecho-run-a.json", import.meta.url),
+);
+const chimechoRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-chimecho-run-b.json", import.meta.url),
 );
 
 describe("speciesIdleAnim", () => {
@@ -2544,6 +2570,218 @@ describe("speciesIdleAnim", () => {
         "SQUIRTLE", "SHUCKLE", "SEADRA", "MARSHTOMP", "CHARMANDER", "DELIBIRD",
         "MANKEY", "WYNAUT", "VILEPLUME", "LOUDRED", "JIGGLYPUFF", "GYARADOS",
         "BLASTOISE", "BAGON",
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("horizontalSlideWobbleFrameAtTick (source lifecycle)", () => {
+    it("derives exactly all 8 selector mappings as Factory-reachable with zero outside", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_H_SLIDE_WOBBLE")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(H_SLIDE_WOBBLE_FRONT_SPECIES).toEqual(generated);
+      expect(H_SLIDE_WOBBLE_FRONT_SPECIES).toEqual([
+        "BUTTERFREE", "GOLBAT", "CLOYSTER", "KABUTO",
+        "BALTOY", "LUVDISC", "CASTFORM", "CHIMECHO",
+      ]);
+      expect(H_SLIDE_WOBBLE_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(H_SLIDE_WOBBLE_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(H_SLIDE_WOBBLE_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of H_SLIDE_WOBBLE_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins zeroed task data, tick-0 affine start, and both normal-front flip no-ops", () => {
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
+      expect(horizontalSlideWobbleFrameAtTick(0)).toMatchObject({
+        data0: 0,
+        data2: 1,
+        x2: 0,
+        y2: 0,
+        startedAffine: true,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+      });
+    });
+
+    it("pins every active callback's source-order index, x2, rotation, and increment", () => {
+      const active = Array.from({ length: 101 }, (_, tick) => {
+        const frame = horizontalSlideWobbleFrameAtTick(tick)!;
+        const index = Math.trunc((tick * 256) / 100);
+        const varBeforeMask = Math.trunc((tick * 512) / 100);
+        const wobbleIndex = varBeforeMask & 0xff;
+        const x2 = Math.floor((8 * GBA_SINE_TABLE_256[index & 0xff]!) / 256) + 0;
+        const rotationSigned = Math.floor(
+          (3276 * GBA_SINE_TABLE_256[wobbleIndex]!) / 256,
+        );
+        expect(frame, `tick ${tick}`).toEqual({
+          x2,
+          y2: 0,
+          data0: 0,
+          data2: tick + 1,
+          index,
+          varBeforeMask,
+          wobbleIndex,
+          rotationSigned,
+          affineRotation: rotationSigned & 0xffff,
+          xScale: 256,
+          yScale: 256,
+          startedAffine: tick === 0,
+          normalFrontDontFlip: true,
+          tryFlipXCalls: 2,
+          resetSpriteAfterAnim: false,
+          callback: "HorizontalSlideWobble",
+          affineMode: "double",
+        });
+        return frame;
+      });
+
+      expect(active).toHaveLength(101);
+      expect([0, 25, 50, 75, 100].map((tick) => {
+        const frame = active[tick]!;
+        return [
+          tick, frame.index, frame.varBeforeMask, frame.wobbleIndex,
+          frame.x2, frame.rotationSigned, frame.affineRotation, frame.data2,
+        ];
+      })).toEqual([
+        [0, 0, 0, 0, 0, 0, 0, 1],
+        [25, 64, 128, 128, 8, 0, 0, 26],
+        [50, 128, 256, 0, 0, 0, 0, 51],
+        [75, 192, 384, 128, -8, 0, 0, 76],
+        [100, 256, 512, 0, 0, 0, 0, 101],
+      ]);
+      const negativeRotation = active.find((frame) => frame.rotationSigned < 0)!;
+      expect(negativeRotation.affineRotation).toBe(negativeRotation.rotationSigned + 0x10000);
+    });
+
+    it("generalizes the existing source-faithful KABUTO reducer without arithmetic drift", () => {
+      for (let tick = 0; tick <= 100; tick += 1) {
+        const generic = horizontalSlideWobbleFrameAtTick(tick)!;
+        const displayElapsed = KABUTO_FRONT_ANIM_START_OFFSET + (tick === 0 ? 0 : tick + 1);
+        const kabuto = kabutoHSlideWobble(displayElapsed);
+        expect(kabuto.callback, `tick ${tick}`).toBe(tick);
+        expect({ x2: kabuto.x2, rotation: kabuto.rotation }, `tick ${tick}`).toEqual({
+          x2: generic.x2,
+          rotation: generic.affineRotation,
+        });
+      }
+    });
+
+    it("pins tick 101 identity/x2/reset/WaitAnimEnd cleanup and final increment", () => {
+      expect(horizontalSlideWobbleFrameAtTick(101)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 0,
+        data2: 102,
+        index: null,
+        varBeforeMask: null,
+        wobbleIndex: null,
+        rotationSigned: 0,
+        affineRotation: 0,
+        xScale: 256,
+        yScale: 256,
+        startedAffine: false,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      });
+      expect(horizontalSlideWobbleFrameAtTick(102)).toEqual(
+        horizontalSlideWobbleFrameAtTick(101),
+      );
+      expect(horizontalSlideWobbleFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      [12, butterfreeScenario],
+      [358, chimechoScenario],
+    ] as const)("stages a complete legal Scene-ON party for opponent species %i", (species, scenario) => {
+      expect(scenario.mode).toBe("mechanicLab");
+      expect(scenario.profile).toBe("battle-scene-on");
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(species);
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "BUTTERFREE", butterfreeRunA, butterfreeRunB, butterfreeRawA, butterfreeRawB, 12, 12,
+        "6e578f80ba3c04fe2048ff3ecc0ae2788dce350239907594d7bd01c30ea4961d",
+      ],
+      [
+        "CHIMECHO", chimechoRunA, chimechoRunB, chimechoRawA, chimechoRawB, 358, 6,
+        "a6bda637cc6e6993afce75b7f934113a1ffd5db5d5cd44f77072114c6929a2be",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species,
+      runA,
+      runB,
+      rawA,
+      rawB,
+      data2,
+      animCmdIndex,
+      rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_H_SLIDE_WOBBLE");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("preserves every previously accepted representative and sibling family", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of [
+        "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN",
+        "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN", "KADABRA", "REGISTEEL",
+        "SQUIRTLE", "SHUCKLE", "SEADRA", "MARSHTOMP", "CHARMANDER", "DELIBIRD",
+        "MANKEY", "WYNAUT", "VILEPLUME", "LOUDRED", "JIGGLYPUFF", "GYARADOS",
+        "BLASTOISE", "BAGON", "SEAKING", "SHUPPET", "BUTTERFREE", "CHIMECHO",
       ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }
