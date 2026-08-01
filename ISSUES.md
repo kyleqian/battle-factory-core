@@ -177,7 +177,8 @@ bridge + additive entryLabel param landed). Rank 9 is **fully
 retired** (2026-07-31, `3f850e37`): postwin fade + WIN-flip census
 moved onto `terminalResolution`, four legacy Turn-17 clock mirrors +
 dead `turn17.ts` deleted (`turn17MenuRedrawElapsed`'s live redraw
-anchor rehomed as `FightSubmenuState.menuRedrawElapsed`). Rank-5
+anchor was rehomed as `FightSubmenuState.menuRedrawElapsed`, then retired by
+rank 8 in favor of the following-resolution owner's relative redraw edge). Rank-5
 policy ADOPTED (user decision 2026-07-31; evidence
 `docs/rank5-effect-visibility-scout.md`, plan in inventory row 5):
 delete class-(c) move bodies on the OFF route, re-time class-(b)
@@ -435,9 +436,20 @@ request; the Scene-OFF event list deliberately contains no status-animation
 receipt. The authoritative oracle evidence remains the already-verified
 **42 captures / 42 capture-states** in
 `docs/fire-punch-burn-lifecycle-off-evidence.md`, not a new pixel claim.
-Legacy Turn-16/old-Turn-17 dispatch retirement remains open; no canonical
-battle/turn/tick branch, mechanics/RNG/AI/round change, trace/capture-list,
-animation change, recording import, or ratchet move was added.
+**Rank-8 exact owner mirrors retired (2026-08-01, `d410cfe5`):** the exact
+post-switch MAGBY/MURKROW boundary now runs through the production full-turn
+reducer at the documented eight-call RNG cursor. Its immutable resolution
+owns FAINT ATTACK damage, FIRE PUNCH damage/PP, raw burn, burn text, the
+one-callback status-icon receipt, residual damage, and genuine next command.
+The compatibility owner retains that following resolution and its relative
+redraw edge until the already-typed terminal owner begins. Deleted
+`turn16Resolved` and `FightSubmenuState.menuRedrawElapsed`; no replacement
+episode selector was added. Clean-`60acda9c` differential app replay held the
+requested Turn-16/Turn-17 rungs byte-for-byte (**2,041 captures**), plus the
+delayed Turn-16 rung and Turn-17 rung 6b (**2,163 total**). Census falls
+**2,506→2,496 refs / 33,125→33,124 LOC**. Rank 8 is closed; #39 remains open
+only for the earlier mirror/dispatcher debt inventoried in
+`docs/battle-scene-retirement-inventory.md`.
 
 ## #61 — Scene-OFF FIGHT reveal needs a source-owned DMA-ready event, not a fixed delay
 

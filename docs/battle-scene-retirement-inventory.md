@@ -1,7 +1,7 @@
 # Battle-scene retirement inventory
 
-Status: census refreshed at `c0821a65` (2026-08-01), after rank 7's retained
-opponent-action owner replaced its exact dispatch and forced-selector mirrors.
+Status: census refreshed at `d410cfe5` (2026-08-01), after rank 8's immutable
+full-turn owner replaced the Turn-16 and old-Turn-17-prefix mirrors.
 This is a worklist, not a rewrite proposal.
 Each slice must preserve its committed dense evidence and replace only its
 selection/ownership key with a typed semantic lifecycle.
@@ -44,18 +44,19 @@ This is the expected shape of a receipt-driven retirement: the ref count is
 the signal, LOC is not.
 
 Current reproducible result: only `battleScene.ts` remains from the five-file
-command (the other four files are deleted), at **2,506 refs / 33,125 LOC**.
-The immediately preceding `8caad013` baseline was **2,526 / 33,135**, so rank
-7 deletes 20 textual refs and 10 lines from the exact renderer while moving
-semantic ownership into the small typed owner module.
+command (the other four files are deleted), at **2,496 refs / 33,124 LOC**.
+Rank 7 moved **2,526→2,506 refs / 33,135→33,125 LOC**; rank 8 then moved
+**2,506→2,496 / 33,125→33,124** while putting the source-owned reducer facts
+and presentation-local clocks in small typed modules.
 
 ## The remaining owner chain
 
 `BattleSceneState` still declares earlier canonical epoch fields and threads
-them into the top-level FIGHT dispatcher. Rank 7 removed the latest boolean
-dispatch: `BattleSceneResolutionOwner` now carries the immutable reducer
-resolution and its request-owned selector, while segment ownership selects
-the retained charge/strike presentation and supplies source PP directly.
+them into the top-level FIGHT dispatcher. The newest chain is typed:
+`BattleSceneResolutionOwner` carries the immutable charge/strike resolution,
+its request-owned selector, and the following immutable full-turn resolution;
+the following presentation owns its confirmation-relative redraw edge and
+supplies source PP/status/HP facts to the exact window.
 
 The state-field census is complete:
 
@@ -66,7 +67,7 @@ The state-field census is complete:
 | `turn6Resolved` … `turn12Resolved` | 2328-2399 | repeated Pidgeotto action/result/menu epochs |
 | `turn13KoDismissElapsed`, `turn13Resolved` | 2415-2436 | Pidgeotto KO and Murkrow switch-in predecessor; FLY charge/strike ownership is now semantic |
 | ~~`turn14Resolved`, `turn15PartySelect`~~ | **retired `c0821a65`** | replaced by one retained two-segment resolution identity and its request-owned selector |
-| `turn16Resolved`, `turn17MenuRedrawElapsed`, `turn17KoDismissElapsed`, `turn17OutcomeDismissElapsed`, `turn17LossDismissElapsed` | 2443-2468 | legacy Fire-Punch/terminal predecessor and **postwin-field mirror**; terminal renderer itself is now typed |
+| ~~`turn16Resolved`, `FightSubmenuState.menuRedrawElapsed`, and the four old Turn-17 clocks~~ | **retired `3f850e37` + `d410cfe5` / ranks 9 + 8** | following-resolution owner keeps the pre-terminal redraw edge; terminal owner keeps the faint/result/loss clocks |
 
 The concrete named species/episode entry points remaining in the same file
 are: GROVYLE/KABUTO intro materialize/stretch (`4405-5467`);
@@ -96,8 +97,8 @@ trace. “Kernel” names the producer, not a renderer inference.
 | 5 | **[FLIPPED 2026-07-31 evening — all four move windows Scene-OFF-owned]** Executed per the adopted user policy: `8802fcb6` (turn 9), `329f8320` (turn 10), `59a3fa7d` (turns 11-12). Class-(c) bodies deleted (turn-10 AERIAL_ACE helper family died with turn 12 as last consumer; ROCK_SLIDE rock-prop loop survives on turns 1-8 ON windows + the generic Scene-ON adapter), class-(b) re-timed against the 13-window fresh OFF ground truth (`docs/rank5-off-ground-truth.md`). OFF pins EXACT: turn9-quickattack-b 231, turn9-rockslide 256, turn10-aerialace 206, turn10-rockslide 255+131, turn10-menu 83, turn11-rockslide 256, turn12-rockslide-miss 256. Residuals all ONE mechanism (idle-bounce PHASE, root-caused `docs/idle-bounce-phase-attribution.md`, closes with ranks 6-8 upstream OFF re-timing): turn9-quickattack 177/233, turn11-featherdance 189/191, turn12-aerialace 246/247. Eleven legacy ON pins retired; turn9-menu.json (111/111) + turn12-menu.json (46/46) stay until the phase family closes and their OFF pins bank. Remaining debt in this row: the turn-keyed DISPATCHER shape itself (turn9-12 clocks/constants are OFF-fit but still per-turn-named), foldable into ranks 6-8 keying retirement. Original row: **Turns 9-12 AERIAL_ACE/QUICK_ATTACK/ROCK_SLIDE loop**: `11313-13302` | 1,990 | T9 `turn9-quickattack.json` **169** / `turn9-rockslide.json` **130**; T10 `turn10-aerialace.json` **93** / `turn10-rockslide.json` **220**; T11 **178/163**; T12 **131/38** | ordinary message/HP/stat/PP/next-request events exist | Scene OFF has no typed owner for movement/clone/field-darken effect presentation. In scene OFF the visible controller/result shells are available, but exact effect bodies are animation-lane/source-component work. Blocked until the event-to-presentation policy can declare skipped versus controller-visible effects. |
 | 6 | **[POLICY ADOPTED — user decision 2026-07-31 evening (PROGRESS 799 addendum)]** Scene-OFF retirement authorized for turns 1-4, same Option-A shape as rank 5: acceptance moves to the 10 banked OFF pins in `docs/rank6-off-ground-truth.md` (zero desync, determinism-checked); delete class-(c)/re-time class-(b) on the OFF route; retire legacy ON turns 1-4 pins as rank 6 executes. Execution = next session opener; slice recipe = rank-5 commits `8802fcb6`/`329f8320`/`59a3fa7d`. Executing rank 6 also closes the idle-bounce phase family share owned by turns 1-4 (predicted OFF menu-redraw delays 429/285/525/427 already measured). Original row: **Turns 1-4 initial menu/result chain**: kickoff through Turn-4 result `7515-9026`, with menu base and flag/PP wiring `7041-7514` | 1,986 | T1 `turn1-rockslide.json` **256**; T2 `turn2-dragonbreath.json` **237** / `turn2-endeavor.json` **77**; T3 **192/256**; T4 **250/250** | same basic receipt facts as rank 1 | Semantics exist, but this is entangled with harvested GROVYLE/ONIX command chrome and the `turn1Resolved…turn4Resolved` current-PP reconstruction. Do it after rank 1 proves the command adapter can fully replace flag-based PP and bounce ownership. |
 | 7 | **[RETIRED 2026-08-01, `1f276c95` + `c0821a65`]** **Turn-14 FLY charge/miss and Turn-15 player faint/forced send-out**: `14546-16590` | 2,045 | `turn14-fly-miss.json` **213**; `turn15-fly-strike.json` **256**; selector **200/200**; send-out rungs **43/46/16/144/195**, plus all six +30 delayed twins | The canonical adapter now appends the locked strike to the immutable charge resolution exactly like the live retained owner. The exact route carries that resolution plus its request-owned `PartySelectState`; segment ownership replaces dispatch, source PP replaces flag reconstruction, and request 4 owns selector/send-out. Recharge and Bide snapshots are hardened at `8caad013`; merged OFF evidence is `adfb746c`/`49e18075`. | Both legacy fields are deleted. Differential replay against `8caad013` held all 13 ordinary/delayed trace capture lists byte-identical (**1,496 captures**) without querying the ON oracle from this OFF lane. Census **2,526→2,506 refs**, **33,135→33,125 LOC**. |
-| 8 | **[GENERIC STATUS-ICON RECEIPT LANDED 2026-08-01, `80c5d6af`; legacy dispatch not retired]** **Turn 16 FIRE_PUNCH/burn and old Turn-17 prefix**: `15952-16590` | 1,639 | Turn-16 rungs **81/221/123/236/155/175**; Turn-17 rungs 1-6 **118/221/143/200/113/255** | HP/message/faint/terminal boundary all exist; raw `set-battler-status-data` remains logical, while generic `status-icon-update` now becomes a typed immutable one-callback `status-icon` command and owns `displayedStatus1`. The source status target supplies `B_EFF_NAME_WITH_PREFIX`; a legal generated round reaches the nonterminal next request with burn and residual HP normally. | OFF evidence now covers both directions: FIRE_PUNCH/burn **42 captures with embedded states** (`docs/fire-punch-burn-lifecycle-off-evidence.md`) and Toxic→Heal Bell clear **38** (`docs/primary-status-clear-display-off-evidence.md`, `22421ee6`). These are controller-boundary evidence, not new legacy-window pixel acceptance. Legacy Turn-16/old-Turn-17 dispatch still needs retirement; do not extend the canonical march. The terminal **result/loss dispatch is retired**, and (2026-07-31, rank 9) the postwin mirror is gone too. |
-| 9 | **[RETIRED 2026-07-31]** ~~Turn-17 terminal result/loss/postwin legacy tail~~ — `applyTurn17PostwinFastFade` (`battleScene.ts`) now reads `state.terminalResolution` (`faintDismissElapsed`/`resultDismissElapsed`/`menuRedrawElapsed`) directly, same typed object `drawTurn16FightSubmenuWindow` already consumed; `advanceBattleScene`'s WIN-flip census also moved off the mirror. The four legacy fields (`turn17MenuRedrawElapsed`, `turn17KoDismissElapsed`, `turn17OutcomeDismissElapsed`, `turn17LossDismissElapsed`) and the dead `turn17.ts` dispatch-state file (never wired to production, only self-tested) are deleted. The one genuine gap - the redraw anchor must survive the tick gap between the turn-16→17 reopen and turn 17's own confirm, before `terminalResolution` exists to hold it - now lives on the new submenu's own `FightSubmenuState.menuRedrawElapsed` instead of a floating BattleSceneState field. Original row: **Turn-17 terminal result/loss/postwin legacy tail**: state/copy `2443-2468`, legacy fade `15290-15415`, `turn17.ts:17-46` | 179 + 48 | `turn17-rung7a/b.json` **255/147**, `turn17-rung8a/b.json` **255/118** | immutable `BattleTerminalBoundary` (`battleDecisionBoundary.ts:78-101`), retained by `factoryRoundBattleOrchestrator.ts` in `985ec1fa`, consumed by resolution presenter | Already retired for knockout/result/loss rendering by `ae94cc4c`; the postwin owner handoff (this row) is now retired too. |
+| 8 | **[RETIRED 2026-08-01, `80c5d6af` + `d410cfe5`]** **Turn 16 FIRE_PUNCH/burn and old Turn-17 prefix**: `15952-16590` | 1,639 | Turn-16 rungs **81/221/123/236/155/175**; Turn-17 rungs 1-6 **118/221/143/200/113/255** | `turn16FirePunchResolutionAdapter.ts` stages the documented Scene-OFF boundary through the production full-turn reducer at the exact eight-call RNG cursor. Its immutable commands own 138→79, 142→75, raw burn, burn text, one-callback status icon, 75→58 residual, PP 14/15, and the genuine next command. The compatibility owner attaches that following resolution after send-out and stores its relative redraw edge. | `turn16Resolved` and `FightSubmenuState.menuRedrawElapsed` are deleted. The exact renderer reads PP/status/HP/text from the resolution/status receipt and hands the stored edge to the existing terminal owner. Clean-prechange differential app replay is byte-identical for the requested **2,041 captures**, plus delayed Turn-16 rung 1 and Turn-17 rung 6b (**2,163 total**). Census **2,506→2,496 refs**, **33,125→33,124 LOC**. OFF authority remains FIRE_PUNCH/burn **42 captures with embedded states** and Toxic→Heal Bell clear **38**; no ON query was made. |
+| 9 | **[RETIRED 2026-07-31; redraw gap rehomed by rank 8 `d410cfe5`]** ~~Turn-17 terminal result/loss/postwin legacy tail~~ — `applyTurn17PostwinFastFade` (`battleScene.ts`) reads `state.terminalResolution` (`faintDismissElapsed`/`resultDismissElapsed`/`menuRedrawElapsed`) directly; `advanceBattleScene`'s WIN-flip census also moved off the mirror. The four legacy fields (`turn17MenuRedrawElapsed`, `turn17KoDismissElapsed`, `turn17OutcomeDismissElapsed`, `turn17LossDismissElapsed`) and dead `turn17.ts` are deleted. Rank 8 subsequently moved the pre-confirm redraw gap from the submenu mirror to the immutable following-resolution presentation owner. Original row: **Turn-17 terminal result/loss/postwin legacy tail**: state/copy `2443-2468`, legacy fade `15290-15415`, `turn17.ts:17-46` | 179 + 48 | `turn17-rung7a/b.json` **255/147**, `turn17-rung8a/b.json` **255/118** | immutable `BattleTerminalBoundary` (`battleDecisionBoundary.ts:78-101`), retained by `factoryRoundBattleOrchestrator.ts` in `985ec1fa`, consumed by resolution presenter | Terminal and postwin ownership are typed; rank 8 closes the predecessor redraw mirror without changing this proof. |
 
 ## Blocked work
 
@@ -128,6 +129,5 @@ trace. “Kernel” names the producer, not a renderer inference.
   the four mirrored Turn-17 clock fields are deleted and the result/loss
   proof is untouched (dense pins re-verified exact).
 
-The next bounded retirement is rank 8's Turn-16/old-Turn-17 prefix. Keep its
-status-icon receipt and OFF evidence as the semantic authority; do not resume
-the retired canonical Battle-2 march.
+Rank 8 is complete. The remaining #39 work is earlier mirror/dispatcher debt
+listed above; do not resume the retired canonical Battle-2 march.

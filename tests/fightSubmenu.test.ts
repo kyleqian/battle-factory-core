@@ -174,6 +174,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
         fightSubmenu: staleTurn15Choice,
         resolutionOwner: Object.freeze({
           resolution: resolutionOwner.resolution,
+          followingPresentation: null,
           forcedPartySelect: {
             ...resolutionOwner.forcedPartySelect!,
             elapsed: 500,

@@ -13,6 +13,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 817 — [bounded worker, 2026-08-01] rank-8 exact owner mirrors retired
+
+- **State:** implementation `d410cfe5`; focused exact/owner/terminal suites
+  are **443/443**, generic seven-battle/round regressions are **69/69**, the
+  executable ratchet is **6/6**, full `npm test` is green (**571 files,
+  5,728 passed + 1 skipped**), and production build + standalone TypeScript
+  build are green.
+- **Did:** staged the documented MAGBY/MURKROW Scene-OFF full turn through the
+  production reducer at its exact eight-call RNG cursor. Its immutable
+  resolution now owns damage, PP, burn text/status-icon receipt, residual,
+  and next-command facts; the compatibility owner carries its relative redraw
+  edge into the existing terminal owner. Deleted `turn16Resolved` and the
+  submenu redraw mirror. Clean-`60acda9c` app replay is byte-identical for all
+  requested rungs plus delayed/rung-6b insurance (**2,163 captures**); census
+  fell **2,506→2,496 refs**, **33,125→33,124 LOC**.
+- **Next:** supervisor selects the next earlier #39 mirror/dispatcher slice;
+  do not extend the canonical Battle-2 march.
+- **Notes:** supervisor's starting union was green at **570 files / 5,726
+  passed + 1 skipped** with build green; merged recharge/Bide hardening and
+  OFF opponent-recharge evidence remain intact. No mechanics/RNG/AI/outcome,
+  animation, trace/capture list, ratchet/barrier, recording import, or
+  prohibited selector changed.
+
 ## 816 — [bounded worker, 2026-08-01] rank-7 exact owner mirrors retired
 
 - **State:** implementation `1f276c95` + `c0821a65`, docs `574354a4`;
@@ -54,34 +77,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no pixel count is claimed. No mechanics/RNG/AI/round outcome,
   animation code/ledger, ratchet, barrier, recording import, canonical trace,
   or timing/move/species/request/battle/turn/absolute-tick selector changed.
-
-## 814 — [supervisor + bounded workers, 2026-08-01] rank-8 Scene-OFF status-icon receipt landed
-
-- **State:** implementation `80c5d6af`, documentation `73ad40f2`, and
-  primary-status-clear evidence `22421ee6`; focused
-  resolver/presentation/round seam tests, full `npm test` (**569 files,
-  5720 passed + 1 skipped**), and `npm run build` are green.
-- **Did:** projected the existing `status-icon-update` kernel receipt into an
-  immutable, one-controller-callback `status-icon` command. The raw
-  `set-battler-status-data` write remains logical; the render field and
-  round `displayedStatus1` now change only after the icon command completes.
-  The generic message context reads `B_EFF_NAME_WITH_PREFIX` from the pending
-  raw status receipt, so burn text never infers a target from a move/species.
-  A legal generated Factory round proves FIRE_PUNCH's status write → burn
-  text → icon receipt → nonterminal next-command handoff, plus a generic
-  status clear is pinned at the renderer boundary. A second complete-party
-  OFF trace proves Toxic raw write **142** → PSN display **235** → Heal Bell
-  raw clear **275** → icon clear **326** → next command **409/415**.
-- **Next:** return to rank 7's generic opponent-owned locked-action retention:
-  preserve its resolution owner across the genuine intervening player command,
-  then remove the `turn14Resolved`/`turn15PartySelect` mirrors without a
-  turn/tick selector. Legacy rank-8 dispatch retirement remains separately
-  scoped; do not resume the retired canonical Battle-2 march.
-- **Notes:** the Scene-OFF oracle evidence is **42 captures with embedded
-  states** for FIRE_PUNCH/burn plus **38 captures with embedded states** for
-  Toxic/Heal Bell clear; supervisor reruns reproduced both, including clear
-  manifest SHA-256 `068ccfb40b8e8fda280e33182d5033ba4131fc1040fc259865f43d6f0bc202a4`.
-  This semantic slice adds no pixel-parity claim and no fabricated Scene-OFF
-  status-animation receipt. No
-  mechanics/RNG/AI/round outcomes, animation code/ledgers, ratchets, or
-  oracle trace/capture lists changed.

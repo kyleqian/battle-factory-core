@@ -951,6 +951,16 @@ published forced selector through send-out. The exact renderer's
 `turn14Resolved` and `turn15PartySelect` mirrors are deleted; all ordinary
 and delayed historical pins held by differential replay. Rank 8 is next.
 
+**#39 rank-8 completion (2026-08-01, `d410cfe5`):** the source-derived
+MAGBY/MURKROW Scene-OFF full turn is an immutable generic resolution whose
+commands own both HP changes, FIRE PUNCH PP, burn/status-icon sequencing,
+residual damage, and the next command. Its compatibility presentation owns
+the confirmation-relative redraw edge until the existing typed terminal owner
+takes over. `turn16Resolved` and the old submenu redraw mirror are deleted;
+all requested Turn-16/Turn-17 rungs and delayed-input insurance are
+byte-identical to clean `60acda9c` (**2,163 captures**). Rank 8 is closed;
+continue only with earlier #39 mirrors, never a canonical Battle-2 march.
+
 Build the rules engine from the pinned source's actual structure: generated
 tables plus a typed Battle Script IR/interpreter and source-mapped item,
 ability, end-turn, AI, and switching hooks. Do not grow a collection of

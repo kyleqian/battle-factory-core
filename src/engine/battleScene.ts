@@ -15522,7 +15522,7 @@ function drawTurn15FightSubmenuWindow(
   drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick, true);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
-  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true, true, true, true, true, true, true, resolution, true);
+  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true, true, true, true, true, true, true, resolution);
 }
 
 type PartyChromeFrame = { palette: number[]; indices: string };
@@ -16786,12 +16786,8 @@ function drawTurn16FightSubmenuWindow(
     && followingPresentation?.menuRedrawElapsed !== undefined;
   const settledPreConfirm = isNextCommand && sm.confirmElapsed === null;
   const resolvedTurn = CANONICAL_FIRE_PUNCH_RESOLUTION;
-  const resolvedOpponentStatus = mapStatus1ToBattleStatus(
-    resolvedTurn.opponentStatus1,
-  );
-  if (resolvedOpponentStatus !== "burn") {
-    throw new Error("canonical FIRE_PUNCH resolution lost its burn status-icon receipt");
-  }
+  const resolvedOpponentStatus = mapStatus1ToBattleStatus(resolvedTurn.opponentStatus1);
+  if (resolvedOpponentStatus !== "burn") throw new Error("canonical FIRE_PUNCH resolution lost its burn status-icon receipt");
 
   if (t < revealTick) {
     drawTurn16PostSwitchField(

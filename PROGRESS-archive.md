@@ -1,3 +1,9 @@
+## 814 — [supervisor + bounded workers, 2026-08-01] rank-8 Scene-OFF status-icon receipt landed
+
+- Archived from the live ledger. `80c5d6af` projected the one-callback
+  status-icon receipt; `22421ee6` added primary-status-clear evidence. Full
+  live-entry detail remains in git history.
+
 ## 813 — [bounded worker, 2026-08-01] rank-7 opponent-FLY receipt bridge landed
 
 - Archived from the live ledger. `30b61236` staged the inverse opponent-FLY
