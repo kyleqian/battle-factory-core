@@ -2516,8 +2516,8 @@ export const TURN7_ROCKSLIDE_REOPEN_GATE_DELAY = 765;
 const TURN1_CONFIRM_PRESS_TICK = 1919;
 
 /** S7 slice E1: turn 2's own reopened submenu's bounce overlay - composes the resettled remap (`TURN1_CONFIRM_PRESS_TICK`'s own doc) with the ordinary `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` DMA-wait correction every submenu open needs. */
-export function turn2SubmenuBounceTick(t: number): number {
-  return rockSlideResettledBounceTick(t, TURN1_CONFIRM_PRESS_TICK) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+export function turn2SubmenuBounceTick(t: number, redrawDelay: number = ROCK_SLIDE_MENU_REDRAW_DELAY): number {
+  return rockSlideResettledBounceTick(t, TURN1_CONFIRM_PRESS_TICK, redrawDelay) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
 }
 
 /**
@@ -2538,8 +2538,8 @@ export function turn2SubmenuBounceTick(t: number): number {
 const TURN2_KICKOFF_FROZEN_BOUNCE_TICK = 2119;
 
 /** S7 slice E1's own analogue of `turnKickoffBounceTick`, composed with `turn2SubmenuBounceTick`'s own resettled remap - live for the same `FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY` ticks after the press, then frozen at `TURN2_KICKOFF_FROZEN_BOUNCE_TICK`. */
-export function turn2KickoffBounceTick(t: number, pressTick: number): number {
-  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return turn2SubmenuBounceTick(t);
+export function turn2KickoffBounceTick(t: number, pressTick: number, redrawDelay: number = ROCK_SLIDE_MENU_REDRAW_DELAY): number {
+  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return turn2SubmenuBounceTick(t, redrawDelay);
   return TURN2_KICKOFF_FROZEN_BOUNCE_TICK;
 }
 
@@ -2768,7 +2768,7 @@ export const ENDEAVOR_HP_DRAIN_START_DELAY = 153;
  * 3103, 3107, 3111, 3128) via `battle-healthbox.json`'s `hpbar`/`hpbarAnim`
  * tile sheets, cropped to the player healthbox's own fill strip.
  */
-export function endeavorOnixHp(t: number, pressTick: number, startHp: number, endHp: number): number {
-  const d = t - (pressTick + ENDEAVOR_HP_DRAIN_START_DELAY);
+export function endeavorOnixHp(t: number, pressTick: number, startHp: number, endHp: number, startDelay: number = ENDEAVOR_HP_DRAIN_START_DELAY): number {
+  const d = t - (pressTick + startDelay);
   return Math.max(endHp, startHp - Math.max(d, 0));
 }

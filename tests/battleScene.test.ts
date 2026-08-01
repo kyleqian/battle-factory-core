@@ -1094,121 +1094,6 @@ describe("battleScene: S7 slice C - Rock Slide's shaken BG3 vs. the player healt
   });
 });
 
-// S7 slice E1d-retry (docs/battle-menu-notes.md §15b): ENDEAVOR's attacker
-// squish sub-window, RAM-probed (tools/probe/dump-endeavor-squish.py)
-// against gOamMatrices directly rather than pixel-fit. Every value below is
-// Tier-1-pinned straight from that probe dump / the oracle cross-check that
-// found the matrix's own render lag (2 ticks) differs from the palette
-// blend's (1 tick) - see ENDEAVOR_SQUISH_TABLE's own doc comment.
-describe("S7 slice E1d-retry: ENDEAVOR's attacker squish sub-window (docs/battle-menu-notes.md §15b) - RAM-probed matrix, not a pixel fit", () => {
-  const GROVYLE_CORNER = { x: 144, y: 12 }; // battleScene.ts's own (unexported) constant - Grovyle's front-sprite corner, unchanged by this session
-
-  it("render 3000 (pressTick+55) is blend-only - matrix still neutral (GROVYLE_FIRST_OPAQUE_OFFSET unmoved) but the palette is already ramping toward the blend target (coeff=1, not the raw palette color)", () => {
-    const [r, g, b] = pixelAtTurn2(3000, GROVYLE_CORNER.x + GROVYLE_FIRST_OPAQUE_OFFSET.x, GROVYLE_CORNER.y + GROVYLE_FIRST_OPAQUE_OFFSET.y);
-    expect([r, g, b]).not.toEqual([grovyleFirstOpaquePixel.r, grovyleFirstOpaquePixel.g, grovyleFirstOpaquePixel.b]);
-    expect([r, g, b]).toEqual([66, 132, 57]); // blendComponentToward(raw=(57,132,66), target=(248,168,0), coeff=1)
-
-    // Geometry is still neutral at 3000 - a doubled-box-only pixel (x=214, past
-    // the native 64px-wide canvas' own right edge at GROVYLE_CORNER.x+64=208)
-    // is still bare background, not yet-widened silhouette.
-    expect(pixelAtTurn2(3000, 214, 63)).toEqual([189, 189, 156]);
-  });
-
-  it("render 3003 (pressTick+58) silhouette extends past the native 64px canvas on X (the doubled-affine-box fix) with the correctly-blended color (coeff=4) at that same pixel - the exact §15a X-axis miss this session closed", () => {
-    // (214,63) is GROVYLE_CORNER-relative (70,51) - 6px past the sprite's own
-    // native right edge (GROVYLE_CORNER.x+64=208). Only reachable at all if
-    // drawSpriteSheetAffineStretch's `doubled` scan window is wired AND the
-    // matrix (not an inverted/axis-swapped guess) genuinely stretches X here.
-    expect(pixelAtTurn2(3003, 214, 63)).toEqual([57, 41, 0]);
-  });
-
-  it("the tick before the window (pressTick+54 = 2999, §15a's own neutral anchor) still falls back to the plain (unsquished, unblended) idle content", () => {
-    const before = pixelAtTurn2(TURN2_PRESS_TICK + 54, GROVYLE_CORNER.x + GROVYLE_FIRST_OPAQUE_OFFSET.x, GROVYLE_CORNER.y + GROVYLE_FIRST_OPAQUE_OFFSET.y);
-    expect(before).toEqual([grovyleFirstOpaquePixel.r, grovyleFirstOpaquePixel.g, grovyleFirstOpaquePixel.b]);
-  });
-});
-
-// S7 slice E1d droplets increment (docs/battle-menu-notes.md §15c): the
-// first sweat-droplet sprite (cycle 0, batch 0/"lower", droplet index 0)
-// becomes visible at render 3006 - oracle-cross-checked pixel values
-// (tools/compare's own oracle-03005/03006.png for this trace), not hand-picked.
-describe("S7 slice E1d: ENDEAVOR's sweat droplets (docs/battle-menu-notes.md §15c) - RAM-probed spawn/motion, oracle-confirmed render lag", () => {
-  it("render 3006 (the droplet's own first visible tick, one AnimFacadeSweatDrop motion step past its raw CreateSprite position) shows the droplet's own bright highlight color at (144,59)", () => {
-    expect(pixelAtTurn2(3006, 144, 59)).toEqual([206, 255, 255]);
-  });
-
-  it("render 3005 (one tick earlier - the sprite exists in RAM by then but isn't composited into OAM/PPU output yet) still shows plain background at that same pixel", () => {
-    expect(pixelAtTurn2(3005, 144, 59)).toEqual([140, 165, 115]);
-  });
-});
-
-// S7 slice E1d batch-1 increment (docs/battle-menu-notes.md §15d): the
-// SAME RAM=render-1/n>=1 convention above, verified to generalize to batch 1
-// ("upper", tTimer==18) without any code change - oracle-cross-checked
-// against a scratch bin/oracle run capture (frame-03017/03018.png), not
-// hand-picked. Batch 1 cycle 0 spawns at RAM 3016 (pressTick+59+12), so its
-// first visible render tick is 3016+1(n)+1(lag)=3018, one tick later than
-// the naive "~3017" estimate §15c's own next-steps note guessed.
-describe("S7 slice E1d batch-1 (docs/battle-menu-notes.md §15d): the upper droplet batch's own first-visible tick generalizes the same convention", () => {
-  it("render 3018 (batch 1/cycle 0's own first visible tick) shows the droplet's own bright highlight color at (156,19)", () => {
-    expect(pixelAtTurn2(3018, 156, 19)).toEqual([206, 255, 255]);
-  });
-
-  it("render 3017 (one tick earlier - composited but not yet visible, same as batch 0's own n=0 tick) still shows plain background at that same pixel", () => {
-    expect(pixelAtTurn2(3017, 156, 19)).toEqual([247, 247, 255]);
-  });
-});
-
-// S7 slice E1d batch-1 increment (§15d): the extended ENDEAVOR_SQUISH_TABLE
-// now covers cycle 2 - these two pins lock in the "one extra RAM tick per
-// cycle boundary" quirk (coeff restarts a tick before the matrix) and the
-// table's own neutral tail, both oracle-cross-checked the same way as above.
-describe("S7 slice E1d batch-1 (docs/battle-menu-notes.md §15d): the extended squish/blend table's cycle-2 restart and neutral tail", () => {
-  it("render 3024 (cycle 2's own blend restart, matrix still neutral - the inter-round lull between hitsplat rounds) reproduces the exact coeff=1 blended color render 3000 used", () => {
-    expect(pixelAtTurn2(3024, 175, 19)).toEqual([66, 132, 57]);
-  });
-
-  it("render 3050 (past both full squish/blend cycles - table's own neutral tail) shows the plain, unblended Grovyle color at the same pixel", () => {
-    expect(pixelAtTurn2(3050, 175, 19)).toEqual([57, 132, 66]);
-  });
-});
-
-// S7 slice E1 hitsplat/shake increment (docs/battle-menu-notes.md §15e):
-// AnimHitSplatBasic (RAM-confirmed real center + constant OAM matrix, not a
-// ramp) and AnimTask_ShakeTargetBasedOnMovePowerOrDmg (gAnimMovePower=75
-// RAM-confirmed for ENDEAVOR, amplitude 3px both directions). All four
-// pixels below are oracle-cross-checked (tools/probe/dump-endeavor-hitsplat-
-// shake.py's own RAM window, oracle-030XX.png captures), not hand-picked.
-describe("S7 slice E1 (docs/battle-menu-notes.md §15e): ENDEAVOR's hitsplat pop-in and target shake", () => {
-  it("render 3008 (round 0 hitsplat's own first visible tick, RAM 3007+1) shows the hitsplat's own bright color at its RAM-confirmed center (60,76)", () => {
-    expect(pixelAtTurn2(3008, 60, 76)).toEqual([255, 255, 173]);
-  });
-
-  it("render 3007 (one tick earlier) still shows plain background at that same pixel - the hitsplat hasn't popped in yet", () => {
-    expect(pixelAtTurn2(3007, 60, 76)).toEqual([82, 74, 74]);
-  });
-
-  it("render 3010 (round 0 shake's own first visible tick - RAM=render-2, one tick later than the blend/droplet RAM=render-1 convention) shows the target shifted +3px at (58,49)", () => {
-    expect(pixelAtTurn2(3010, 58, 49)).toEqual([247, 247, 255]);
-  });
-
-  it("render 3009 (one tick earlier) still shows the unshaken silhouette at that same pixel", () => {
-    expect(pixelAtTurn2(3009, 58, 49)).toEqual([189, 181, 181]);
-  });
-
-  it("render 3034 (round 1 hitsplat's own first visible tick, generalizing the same convention across the script's `delay 24` gap) shows the hitsplat color at its RAM-confirmed center (84,100)", () => {
-    expect(pixelAtTurn2(3034, 84, 100)).toEqual([255, 255, 173]);
-  });
-
-  it("render 3050 (past round 1 shake's own last alternation - the settle this session's own extended captureFrames now starts at) shows the target back at its unshaken position", () => {
-    expect(pixelAtTurn2(3050, 58, 49)).toEqual([189, 181, 181]);
-  });
-
-  it("render 3049 (one tick earlier - round 1 shake's own final +3 still held) still shows the shifted pixel", () => {
-    expect(pixelAtTurn2(3049, 58, 49)).toEqual([247, 247, 255]);
-  });
-});
-
 // S7 residual cleanup (Family A, docs/turn3-residual-probe-notes.md):
 // endeavorShakeSteps generalizes the shake amplitude away from a hardcoded
 // symmetric constant - gAnimMovePower/gBattleMovePower is stale (ENDEAVOR
@@ -1408,76 +1293,51 @@ describe("ISSUES #29 fix (docs/bounce-blip-notes.md): pre-reveal idle-window + t
   });
 });
 
-// S7 slice E1 tail increment (docs/battle-menu-notes.md §15f): the two
-// mechanisms past the settled squish/blend/droplet/shake/hitsplat window
-// (§15e) - the player healthbox's own brief post-hit "wobble" (y2 bounce,
-// RAM-confirmed on gHealthboxSpriteIds[0]'s own sprite) and Onix's own
-// brief post-hit "flicker" (struct Sprite.invisible toggling, NOT a
-// palette blend - both ruled out first via tools/probe/dump-endeavor-
-// tail.py's own paletteDiffersFromBaseline/x2/y2 fields staying
-// False/0/0 throughout). All pixels below are oracle-cross-checked
-// (tools/compare/out/latest's own oracle-030XX.png captures for this
-// trace), not hand-picked.
-describe("S7 slice E1 tail (docs/battle-menu-notes.md §15f): the player healthbox's post-hit wobble and Onix's post-hit flicker", () => {
-  it("render 3064 (the healthbox wobble's own first visible tick, RAM 3063+1, y2=+1) shows a shifted color at the healthbox's own top-border pixel (150,74)", () => {
-    expect(pixelAtTurn2(3064, 150, 74)).toEqual([189, 189, 156]);
+// S7 slice E1 tail increment (docs/battle-menu-notes.md §15f), RE-PINNED
+// ISSUES #39 rank-6 slice 2: the two mechanisms past the now-deleted
+// squish/blend/droplet/shake/hitsplat window (all class (c), gone under
+// Scene OFF) - the player healthbox's own brief post-hit "wobble" (y2
+// bounce) and Onix's own brief post-hit "flicker" (struct Sprite.invisible
+// toggling) are BOTH class (b) and survive, just re-anchored 37 ticks
+// earlier (`TURN2_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START`=81/
+// `TURN2_OFF_ENDEAVOR_FLICKER_START`=82 replacing the ON fit's 118/119) -
+// same asset/pixel colors as the ON fit, only the tick anchors moved, all
+// re-derived this session directly from `pixelAtTurn2` (itself oracle-exact
+// against `turn2-endeavor-off.json`, 256/256). This block also pins the
+// `drawMenuHealthboxPlayerWobble` erase-then-redraw fix (a real negative-dy
+// overdraw bug found this session - without it, ticks in this exact window
+// mismatch the oracle by ~1700px, see ISSUES #39).
+describe("S7 slice E1 tail (docs/battle-menu-notes.md §15f): the player healthbox's post-hit wobble and Onix's post-hit flicker (Scene-OFF re-timed, rank-6 slice 2)", () => {
+  it("render 3027 (the healthbox wobble's own first visible tick, RAM 3026+1, y2=+1) shows a shifted color at the healthbox's own top-border pixel (150,74)", () => {
+    expect(pixelAtTurn2(3027, 150, 74)).toEqual([189, 189, 156]);
   });
 
-  it("render 3060 (before the wobble starts) shows the plain, unshifted color at that same pixel", () => {
-    expect(pixelAtTurn2(3060, 150, 74)).toEqual([82, 107, 99]);
+  it("render 3023 (before the wobble starts) shows the plain, unshifted color at that same pixel", () => {
+    expect(pixelAtTurn2(3023, 150, 74)).toEqual([82, 107, 99]);
   });
 
-  it("render 3083 (the wobble's own last affected tick, RAM 3082+1, y2=-1) shows the opposite-direction shifted color at the same pixel", () => {
-    expect(pixelAtTurn2(3083, 150, 74)).toEqual([33, 57, 0]);
+  it("render 3046 (the wobble's own last affected tick, RAM 3045+1, y2=-1) shows the opposite-direction shifted color at the same pixel", () => {
+    expect(pixelAtTurn2(3046, 150, 74)).toEqual([33, 57, 0]);
   });
 
-  it("render 3084 (one tick later - the wobble has hard-stopped, not damped) shows the plain color again", () => {
-    expect(pixelAtTurn2(3084, 150, 74)).toEqual([82, 107, 99]);
+  it("render 3047 (one tick later - the wobble has hard-stopped, not damped) shows the plain color again", () => {
+    expect(pixelAtTurn2(3047, 150, 74)).toEqual([82, 107, 99]);
   });
 
-  it("render 3065 (the flicker's own first invisible tick, RAM 3064+1) shows plain background at (60,90), deep inside Onix's own silhouette", () => {
-    expect(pixelAtTurn2(3065, 60, 90)).toEqual([247, 247, 255]);
+  it("render 3028 (the flicker's own first invisible tick, RAM 3027+1) shows plain background at (60,90), deep inside Onix's own silhouette", () => {
+    expect(pixelAtTurn2(3028, 60, 90)).toEqual([247, 247, 255]);
   });
 
-  it("render 3064 (one tick earlier - still visible) shows Onix's own body color at that same pixel", () => {
-    expect(pixelAtTurn2(3064, 60, 90)).toEqual([132, 123, 123]);
+  it("render 3027 (one tick earlier - still visible) shows Onix's own body color at that same pixel", () => {
+    expect(pixelAtTurn2(3027, 60, 90)).toEqual([132, 123, 123]);
   });
 
-  it("render 3092 (the flicker's own fourth and final invisible tick) still shows plain background at the same pixel", () => {
-    expect(pixelAtTurn2(3092, 60, 90)).toEqual([247, 247, 255]);
+  it("render 3055 (the flicker's own fourth and final invisible tick) still shows plain background at the same pixel", () => {
+    expect(pixelAtTurn2(3055, 60, 90)).toEqual([247, 247, 255]);
   });
 
-  it("render 3093 (one tick later - settled visible for good, no fifth cycle) shows Onix's own body color again", () => {
-    expect(pixelAtTurn2(3093, 60, 90)).toEqual([132, 123, 123]);
-  });
-});
-
-// S7 slice E2a-3 Tier-1 backfill (docs/dragon-breath-notes.md "Engine slice
-// E2a-2"): `dragonBreathShakeX2`/`dragonBreathBlendCoeff` shipped in E2a-2
-// with only Tier-2 (oracle compare) verification, against this run's own
-// "pin every pure-logic fix with a Tier-1 test" rule (AGENTS.md) - debt
-// flagged in PROGRESS #152/#153, closed here. Both pixels below are
-// re-derived from a FRESH scratch `bin/oracle run` capture this session
-// (ticks 3172-3225, `battle1-turn2-dragonbreath.json`'s own verbatim
-// segments), not reused from any committed trace/PNG - genuinely
-// oracle-cross-checked, not hand-picked. (193,16) is the same Grovyle-body
-// coordinate `DRAGONBREATH_BLEND_RENDER_LAG`'s own doc comment already
-// cites for its render-lag derivation.
-describe("S7 slice E2a-2 Tier-1 backfill (docs/dragon-breath-notes.md): DRAGON_BREATH's target shake and red-fade blend, pinned against a fresh oracle capture", () => {
-  it("render 3211 (a shake polarity flip, RAM 3210, blend coeff flat at 9 - isolates the shake alone) shows the shake's own shifted+blended color at (193,16)", () => {
-    expect(pixelAtTurn2(3211, 193, 16)).toEqual([148, 33, 24]);
-  });
-
-  it("render 3210 (one tick earlier - opposite shake polarity, same flat blend coeff) shows the other polarity's color at the same pixel", () => {
-    expect(pixelAtTurn2(3210, 193, 16)).toEqual([255, 255, 255]);
-  });
-
-  it("render 3186 (blend coeff steps 0->1, RAM 3184 - shake not yet started, isolates the blend alone) shows the first non-neutral blended color at (193,16)", () => {
-    expect(pixelAtTurn2(3186, 193, 16)).toEqual([24, 74, 66]);
-  });
-
-  it("render 3184 (two ticks earlier - blend coeff still 0, shake still 0) shows the plain unblended color at the same pixel", () => {
-    expect(pixelAtTurn2(3184, 193, 16)).toEqual([16, 82, 74]);
+  it("render 3056 (one tick later - settled visible for good, no fifth cycle) shows Onix's own body color again", () => {
+    expect(pixelAtTurn2(3056, 60, 90)).toEqual([132, 123, 123]);
   });
 });
 
@@ -1515,44 +1375,57 @@ describe("S7 slice E2b: dragonBreathGrovyleHp (docs/dragon-breath-notes.md)", ()
   });
 });
 
-describe("S7 slice E2b: Grovyle's HP-bar drain, hit-flash reuse, text-clear, and the turn-3 resettled menu (pixel-pinned, docs/dragon-breath-notes.md)", () => {
-  it("render 3298-3299 (the bar's own fill-pixel boundary at (84,33), settled bar color through the sentinel tick, first drained-tick color from 3301 - the fill-count formula lags a few ticks behind the raw HP since a 1-HP step often doesn't cross a 48px/143hp pixel boundary)", () => {
-    expect(pixelAtTurn2(3298, 84, 33)).toEqual([90, 214, 132]);
-    expect(pixelAtTurn2(3300, 84, 33)).toEqual([90, 214, 132]);
-    expect(pixelAtTurn2(3301, 84, 33)).toEqual([74, 66, 90]);
+describe("S7 slice E2b: Grovyle's HP-bar drain, hit-flash reuse, text-clear, and the turn-3 resettled menu (pixel-pinned, docs/dragon-breath-notes.md, Scene-OFF re-timed rank-6 slice 2)", () => {
+  // ISSUES #39 rank-6 slice 2: turn 2's own DRAGON_BREATH HP-drain start
+  // moved from pressTick+353 (ON) to `TURN2_OFF_DRAGONBREATH_HP_DRAIN_START_
+  // DELAY`=254 (OFF) - the fill-pixel boundary itself re-derived directly
+  // from `pixelAtTurn2` this session (oracle-exact against `turn2-
+  // dragonbreath-off.json`, 237/237).
+  it("render 3201-3202 (the bar's own fill-pixel boundary at (84,33), settled bar color through 3201, first drained-tick color from 3202)", () => {
+    expect(pixelAtTurn2(3200, 84, 33)).toEqual([90, 214, 132]);
+    expect(pixelAtTurn2(3201, 84, 33)).toEqual([90, 214, 132]);
+    expect(pixelAtTurn2(3202, 84, 33)).toEqual([74, 66, 90]);
   });
 
-  it("render 3312 (the drain's own settled endpoint, Grovyle at 88/143) keeps the drained fill color at the same pixel", () => {
-    expect(pixelAtTurn2(3312, 84, 33)).toEqual([74, 66, 90]);
+  it("render 3215 (the drain's own settled endpoint, Grovyle at 88/143) keeps the drained fill color at the same pixel", () => {
+    expect(pixelAtTurn2(3215, 84, 33)).toEqual([74, 66, 90]);
   });
 
-  it("render 3263 (Grovyle still visible, hit-flash not yet started) vs render 3265 (mon-blink's own first invisible tick, reused `rockSlideMonBlinkInvisible`) at a fixed Grovyle-body coordinate (160,30)", () => {
-    expect(pixelAtTurn2(3263, 160, 30)).toEqual([231, 66, 41]);
-    expect(pixelAtTurn2(3265, 160, 30)).toEqual([247, 247, 255]);
+  it("render 3165 (Grovyle still visible, hit-flash not yet started) vs render 3166 (mon-blink's own first invisible tick, reused `rockSlideMonBlinkInvisible`, TURN2_OFF_DRAGONBREATH_HIT_FLASH_ANCHOR_DELAY=219 replacing the ON fit's 318) at a fixed Grovyle-body coordinate (160,30)", () => {
+    expect(pixelAtTurn2(3165, 160, 30)).toEqual([231, 66, 41]);
+    expect(pixelAtTurn2(3166, 160, 30)).toEqual([247, 247, 255]);
   });
 
-  it("render 3328 (kickoff text still held) vs render 3329 (DRAGONBREATH_TEXT_CLEAR_DELAY - message box goes blank, box stays) at a message-glyph pixel (17,124)", () => {
-    expect(pixelAtTurn2(3328, 17, 124)).toEqual([255, 255, 255]);
-    expect(pixelAtTurn2(3329, 17, 124)).toEqual([107, 165, 165]);
+  // ISSUES #39 rank-6 slice 2: turn 2's own ENDEAVOR/DRAGON_BREATH text
+  // handoff is Scene-OFF re-timed - `TURN2_OFF_ENDEAVOR_TEXT_CLEAR_DELAY`
+  // and `TURN2_OFF_DRAGONBREATH_TEXT_START_DELAY` are BOTH 155 (pressTick+155
+  // = render 3100), a same-frame swap with no blank tick at all (pixel-
+  // confirmed directly against the oracle this session, correcting the
+  // prior attempt's own "single blank tick" claim). (16,124) discriminates
+  // cleanly: ENDEAVOR's "Foe GROVYLE used" has ink there, DRAGON_BREATH's
+  // "ONIX used" doesn't.
+  it("render 3099 (ENDEAVOR's kickoff text still held) vs render 3100 (same-frame swap to DRAGON_BREATH's own first character, zero blank ticks) at a message-glyph pixel (16,124)", () => {
+    expect(pixelAtTurn2(3099, 16, 124)).toEqual([255, 255, 255]);
+    expect(pixelAtTurn2(3100, 16, 124)).toEqual([107, 165, 165]);
   });
 
-  it("render 3336 (DRAGONBREATH_MENU_REDRAW_DELAY - hard cut to the turn-3 resettled action menu) shows Onix's own real HP digits (101/117, not `menuIdleBase`'s stale pre-turn-1 117/117 harvest) at a digit-glyph pixel (192,97)", () => {
-    expect(pixelAtTurn2(3336, 192, 97)).toEqual([66, 66, 66]);
+  it("render 3237 (TURN2_OFF_DRAGONBREATH_MENU_REDRAW_DELAY - hard cut to the turn-3 resettled action menu) shows Onix's own real HP digits (101/117, not `menuIdleBase`'s stale pre-turn-1 117/117 harvest) at a digit-glyph pixel (192,97)", () => {
+    expect(pixelAtTurn2(3237, 192, 97)).toEqual([66, 66, 66]);
   });
 });
 
-// S7 slice E2b-2 (docs/dragon-breath-notes.md "Engine slice E2b-2"): the
-// `3347-3846` tail - the resettled menu's own idle bounce is LIVE (not
-// frozen, unlike every earlier resettled-menu path this engine already
-// modeled), so `drawPlayerHealthboxHpOverlay`'s HP-digit blit must track
-// the healthbox's own bounce offset (`menuIdleBounce(bounceTick).healthboxY2`)
-// or the digits float free of the bar whenever the bounce is non-zero - a
-// real bug a dense oracle probe of this tail caught (401px mismatch on
-// ~50% of ticks, none of it visible in any earlier/shorter-held trace).
-describe("S7 slice E2b-2: the resettled menu's live bounce carries its own HP-digit overlay (docs/dragon-breath-notes.md)", () => {
-  it("render 3347 (healthboxY2=0, bounce at rest) vs render 3357 (healthboxY2=1) at the same digit-glyph pixel (192,97) - the digit is only there at rest, since the bar (and its digits) shifted up 1px once the live bounce moves off zero", () => {
-    expect(pixelAtTurn2(3347, 192, 97)).toEqual([66, 66, 66]);
-    expect(pixelAtTurn2(3357, 192, 97)).toEqual([255, 255, 222]);
+// S7 slice E2b-2 (docs/dragon-breath-notes.md "Engine slice E2b-2"), RE-PINNED
+// ISSUES #39 rank-6 slice 2 (the resettled menu's own reopen tick moved from
+// pressTick+391 to `TURN2_OFF_DRAGONBREATH_MENU_REDRAW_DELAY`=292, render
+// 3237): the resettled menu's own idle bounce is LIVE (not frozen, unlike
+// every earlier resettled-menu path this engine already modeled), so
+// `drawPlayerHealthboxHpOverlay`'s HP-digit blit must track the healthbox's
+// own bounce offset (`menuIdleBounce(bounceTick).healthboxY2`) or the digits
+// float free of the bar whenever the bounce is non-zero.
+describe("S7 slice E2b-2: the resettled menu's live bounce carries its own HP-digit overlay (docs/dragon-breath-notes.md, Scene-OFF re-timed)", () => {
+  it("render 3237 (healthboxY2=0, bounce at rest) vs render 3257 (healthboxY2!=0) at the same digit-glyph pixel (192,97) - the digit is only there at rest, since the bar (and its digits) shifted up 1px once the live bounce moves off zero", () => {
+    expect(pixelAtTurn2(3237, 192, 97)).toEqual([66, 66, 66]);
+    expect(pixelAtTurn2(3257, 192, 97)).toEqual([255, 255, 222]);
   });
 });
 

@@ -512,7 +512,6 @@ import { rentalMoveset, type ActiveMonMoveset } from "./battleSetup.ts";
 import { turn6FeatherSprites, turn7FeatherSprites, turn8FeatherSprites, compareFeatherDrawOrder, type FeatherRenderSprite } from "../animation/featherDance.ts";
 import {
   dragonBreathEmbersInFrontOfAttacker,
-  dragonBreathFireSprites,
   DRAGON_BREATH_FRAMEBUFFER_OAM_AGE_LAG,
   DRAGON_BREATH_FRAMEBUFFER_PALETTE_AGE_LAG,
 } from "../animation/dragonBreath.ts";
@@ -6983,6 +6982,41 @@ function drawMenuHealthboxPlayer(fb: Uint8Array, dx: number, dy: number = 0): vo
   }
 }
 
+/**
+ * ISSUES #39 rank-6 slice 2: `drawMenuHealthboxPlayer(fb, 0, dy)` alone
+ * (used unconditionally by `drawEndeavorSquish` and every other bounce
+ * caller) only ever draws OVER a plain freshly-drawn background - it never
+ * needs to erase, since nothing stale sits at the nominal (`dy=0`) position
+ * first. Turn 2's own OFF idle window is the first caller compositing this
+ * translated healthbox on top of `menuIdleBase`'s flat harvest (which
+ * already bakes the healthbox in at `dy=0`) - overdrawing the shifted
+ * content alone leaves a stale sliver of the untranslated harvest at
+ * whichever edge row the shift newly uncovers (RAM/pixel-confirmed this
+ * session: a 103px top-row residual at `dy=+1`, a bottom-row residual at
+ * `dy=-1`, both exactly one row tall). Same "erase the nominal footprint to
+ * true field background, then redraw translated" two-pass shape
+ * `drawOpponentHealthboxWobble` already established for the opposite side's
+ * own wobble - the player side simply never needed it before this caller.
+ */
+function drawMenuHealthboxPlayerWobble(fb: Uint8Array, dy: number): void {
+  const { x, y, width, height, pixels } = menuHealthboxPlayer;
+  const mask = getMenuHealthboxPlayerContentMask();
+  for (let py = 0; py < height; py += 1) {
+    for (let px = 0; px < width; px += 1) {
+      if (!mask[py * width + px]) continue;
+      const bg = healthboxBackgroundColorAt(x + px, y + py);
+      if (bg) setPixel(fb, x + px, y + py, bg);
+    }
+  }
+  for (let py = 0; py < height; py += 1) {
+    for (let px = 0; px < width; px += 1) {
+      if (!mask[py * width + px]) continue;
+      const i = (py * width + px) * 3;
+      setPixel(fb, x + px, y + dy + py, { r: pixels[i]!, g: pixels[i + 1]!, b: pixels[i + 2]! });
+    }
+  }
+}
+
 function drawComposedPlayerHealthbox(
   fb: Uint8Array,
   content: ReturnType<typeof composePlayerHealthbox>,
@@ -7496,7 +7530,7 @@ function drawActionMenuIdleWindow(fb: Uint8Array, t: number, turn1Resolved: bool
       : turn2Resolved
         ? turn3SubmenuBounceTick(t)
         : turn1Resolved
-          ? turn2SubmenuBounceTick(t)
+          ? turn2SubmenuBounceTick(t, TURN1_OFF_ROCKSLIDE_MENU_REDRAW_DELAY)
           : t;
   drawActionMenuIdleContent(fb, bounceTick, turn1Resolved, turn2Resolved, turn3Resolved ? anchorPlayerAfterTurn3Hp : anchorPlayerAfterTurnHp, turn3Resolved, turn4Resolved);
 }
@@ -7734,7 +7768,7 @@ function drawFightSubmenuWindow(
         : turn2Resolved
           ? turn3KickoffBounceTick(t, pressTick)
           : turn1Resolved
-            ? turn2KickoffBounceTick(t, pressTick)
+            ? turn2KickoffBounceTick(t, pressTick, TURN1_OFF_ROCKSLIDE_MENU_REDRAW_DELAY)
             : turnKickoffBounceTick(t, pressTick);
     drawMenuIdleBounceOverlay(fb, confirmWaitBounceTick);
     // S7 slice F: same overlay-after-bounce ordering as `drawActionMenuIdleContent`'s
@@ -7765,7 +7799,7 @@ function drawFightSubmenuWindow(
       : turn2Resolved
         ? turn3SubmenuBounceTick(t)
         : turn1Resolved
-          ? turn2SubmenuBounceTick(t)
+          ? turn2SubmenuBounceTick(t, TURN1_OFF_ROCKSLIDE_MENU_REDRAW_DELAY)
           : sm.reopenedFromClose
             ? t - FIGHT_SUBMENU_REOPEN_BOUNCE_SHIFT
             : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
@@ -8386,9 +8420,9 @@ function drawEndeavorHitsplats(fb: Uint8Array, t: number, pressTick: number): vo
 const ENDEAVOR_HEALTHBOX_BOUNCE_RENDER_LAG = 1;
 const ENDEAVOR_HEALTHBOX_BOUNCE_START = 118;
 const ENDEAVOR_HEALTHBOX_BOUNCE_TICKS = 20;
-function endeavorHealthboxBounceY2(t: number, pressTick: number): number {
+function endeavorHealthboxBounceY2(t: number, pressTick: number, start: number = ENDEAVOR_HEALTHBOX_BOUNCE_START): number {
   const ramTick = t - ENDEAVOR_HEALTHBOX_BOUNCE_RENDER_LAG;
-  const n = ramTick - pressTick - ENDEAVOR_HEALTHBOX_BOUNCE_START;
+  const n = ramTick - pressTick - start;
   if (n < 0 || n >= ENDEAVOR_HEALTHBOX_BOUNCE_TICKS) return 0;
   return n % 2 === 0 ? 1 : -1;
 }
@@ -8411,9 +8445,9 @@ const ENDEAVOR_FLICKER_START = 119;
 const ENDEAVOR_FLICKER_PERIOD = 8;
 const ENDEAVOR_FLICKER_ON_TICKS = 4;
 const ENDEAVOR_FLICKER_CYCLES = 4;
-function endeavorOnixInvisible(t: number, pressTick: number): boolean {
+function endeavorOnixInvisible(t: number, pressTick: number, start: number = ENDEAVOR_FLICKER_START): boolean {
   const ramTick = t - ENDEAVOR_FLICKER_RENDER_LAG;
-  const n = ramTick - pressTick - ENDEAVOR_FLICKER_START;
+  const n = ramTick - pressTick - start;
   if (n < 0 || n >= ENDEAVOR_FLICKER_PERIOD * ENDEAVOR_FLICKER_CYCLES) return false;
   return n % ENDEAVOR_FLICKER_PERIOD < ENDEAVOR_FLICKER_ON_TICKS;
 }
@@ -8499,94 +8533,29 @@ const DRAGONBREATH_KICKOFF_LINE2 = "DRAGONBREATH!";
 const DRAGONBREATH_KICKOFF_TEXT_TOTAL = ROCK_SLIDE_LINE1.length + DRAGONBREATH_KICKOFF_LINE2.length;
 const DRAGONBREATH_TEXT_START_DELAY = 192;
 
-function dragonBreathTextStartTick(pressTick: number): number {
-  return pressTick + DRAGONBREATH_TEXT_START_DELAY;
+function dragonBreathTextStartTick(pressTick: number, startDelay: number = DRAGONBREATH_TEXT_START_DELAY): number {
+  return pressTick + startDelay;
 }
 
 /** Visible character count (0..DRAGONBREATH_KICKOFF_TEXT_TOTAL) of "ONIX used\nDRAGONBREATH!" at absolute trace tick `t` - same 1-tick/char mechanism as `turn2KickoffTextVisibleChars`. Oracle-confirmed exact (docs/dragon-breath-notes.md): tick 3157 (start+20) is the last still-increasing frame (21 chars), tick 3158 (start+21) shows all 22 and holds flat through 3176. */
-function dragonBreathTextVisibleChars(t: number, pressTick: number): number {
-  const start = dragonBreathTextStartTick(pressTick);
+function dragonBreathTextVisibleChars(t: number, pressTick: number, startDelay: number = DRAGONBREATH_TEXT_START_DELAY): number {
+  const start = dragonBreathTextStartTick(pressTick, startDelay);
   if (t < start) return 0;
   return Math.min(DRAGONBREATH_KICKOFF_TEXT_TOTAL, t - start + 1);
 }
 
 /**
- * S7 slice E2a-2 (docs/dragon-breath-notes.md "Engine slice E2a-2"):
- * DRAGON_BREATH's target-side shake (`AnimTask_ShakeMon2`) and red-fade
- * blend (`AnimTask_BlendBattleAnimPal`, two instances - fade in then out).
- * Both RAM-probed directly (`tools/probe/dump-dragonbreath-anim.py`,
- * ticks 3170-3350) - real per-tick `gSprites[targetSlot].x2` and
- * `gPlttBufferFaded` reads, not pixel-fit. Both reduce to plain formulas
- * (no lookup table needed - neither mechanism goes through the
- * `AnimTranslateLinear_WithFollowup` primitive `TRAINER_EXIT_X2`'s own
- * precedent needed a literal table for; see docs/dragon-breath-notes.md's
- * "Engine slice E2a-2" section for the fire-projectile mechanism's own
- * RAM-probed data, which DOES go through that primitive and IS banked as a
- * table, just not wired into a renderer yet).
- *
- * Shake: `AnimTask_ShakeMon2`'s own setup writes `sprite->x2 =
- * gBattleAnimArgs[1]` (=2) directly BEFORE the step function's own first
- * call, and that first call's "else" branch (delay countdown) doesn't
- * touch x2 - so by the first RAM tick this task's callback is observed
- * (`gTasks[].func` diff dump, RAM 3186), x2 already reads the FIRST flip's
- * result (-2), one flip ahead of what the step function's own bare logic
- * would suggest starting from a neutral sprite. Verified RAM sequence
- * (ticks 3186-3225, `pressTick`+241..+280): `-2,-2,+2,+2,-2,-2,+2,+2,...`
- * (each polarity holds 2 real ticks, "1-tick cadence" in the script's own
- * args - `2, ANIM_TARGET, 2, 0, 21, 1` - actually meaning 1 tick of delay
- * between the paired hold+flip step, same 2-real-ticks-per-nominal-tick
- * convention `ENDEAVOR_SHAKE_STEP`'s own doc flags), settling to 0 at
- * `pressTick`+281 (RAM 3226, y offset arg is 0 so no y2 ever moves).
- *
- * Blend: two `AnimTask_BlendBattleAnimPal` instances (`battle_anim_scripts.s`
- * DRAGON_BREATH script: `10, F_PAL_TARGET, 1, 0, 9, RGB_RED` then, after all
- * projectiles+shake finish, `10, F_PAL_TARGET, 1, 9, 0, RGB_RED`) blend
- * Grovyle's own palette toward `RGB_RED` (31,0,0 5-bit = 248,0,0 8-bit,
- * `DRAGON_BREATH_BLEND_COLOR`) via the SAME `BlendPalette`/
- * `blendComponentToward` bit-math ENDEAVOR's own blend already uses
- * (`faded = unfaded + ((target-unfaded)*coeff)>>4`) - RAM-solved coeff
- * directly from `gPlttBufferFaded` vs `gPlttBufferUnfaded`: creation tick
- * holds coeff 0 for 2 ticks (same "one step already baked into the
- * creation tick" pattern the shake and fire-projectile mechanisms both
- * also show), then steps `+1` every 2 ticks up to 9 (`pressTick`+237
- * creation -> 9 reached at `pressTick`+255, held there through
- * `pressTick`+291 while the projectiles/shake finish under
- * `waitforvisualfinish`), then the fade-out instance (`pressTick`+291
- * creation) steps back down `-1` every 2 ticks to 0 by `pressTick`+309 -
- * an exact mirror of the fade-in, both RAM-confirmed tick-for-tick across
- * the full probed window (3170-3350).
+ * ISSUES #39 rank-6 slice 2: DRAGON_BREATH's own target-side shake
+ * (`AnimTask_ShakeMon2`) and red-fade blend (`AnimTask_BlendBattleAnimPal`)
+ * were turn 2's ON-fit formulas (`dragonBreathShakeX2`/`dragonBreathBlendCoeff`,
+ * RAM-probed via `tools/probe/dump-dragonbreath-anim.py`) - both class (c)
+ * for turn 2's own Scene-OFF window (RAM-confirmed absent, `drawDragonBreathScene`'s
+ * own doc above) and deleted along with their call site; the staged/generated-
+ * route DRAGON_BREATH view below (`renderDragonBreathScene`-family, ISSUES
+ * #60) still needs `DRAGON_BREATH_BLEND_COLOR`/`subTileset`/
+ * `drawSpriteSheetAffineRotate`/`battleAnimSmallEmber`, kept.
  */
-const DRAGONBREATH_SHAKE_START_OFFSET = 241; // pressTick+241 = RAM 3186 (AnimTask_ShakeMon2's own first observed flip)
-const DRAGONBREATH_SHAKE_END_OFFSET = 281; // pressTick+281 = RAM 3226 (settles to 0)
-const DRAGONBREATH_SHAKE_STEP = 2;
-const DRAGONBREATH_BLEND_FADE_IN_OFFSET = 237; // pressTick+237 = RAM 3182 (AnimTask_BlendBattleAnimPal creation, fade 0->9)
-const DRAGONBREATH_BLEND_FADE_OUT_OFFSET = 291; // pressTick+291 = RAM 3236 (2nd instance creation, fade 9->0)
-const DRAGONBREATH_BLEND_MAX_COEFF = 9;
 const DRAGON_BREATH_BLEND_COLOR: RgbColor = { r: 248, g: 0, b: 0 }; // RGB_RED (31,0,0 5-bit)
-/** Same `RAM=render-2` lag family `ENDEAVOR_SHAKE_RENDER_LAG`/`ENDEAVOR_SQUISH_TABLE` already use (§15's own doc: matrix/blend RAM state lags the rendered pixel by 2 ticks, NOT droplet/hitsplat/text's own separate 1-tick-lag family) - pixel-confirmed here independently, not assumed: oracle-cross-checked via `tools/compare` on this session's extended `turn2-dragonbreath.json` pixel-by-pixel at a fixed Grovyle-body coordinate (193,16) across ticks 3236-3245 - the observed 8-bit color sequence there (`(148,33,24)x4, (132,41,33)x2, (115,41,41)x2, (99,49,41)x2, ...`) only reduces cleanly to the RAM-probed coeff sequence (`9,9,8,8,7,7,6,6,5,5...` from `gPlttBufferFaded`) under a 2-tick lag - 1 tick (matching the kickoff-text family) leaves every odd-offset tick wrong, since the fade-out task's own creation-tick stall (same "one step already elapsed" pattern the shake setup call also shows) adds a 2nd stall tick on top of the 1-tick RAM/pixel gap. */
-const DRAGONBREATH_BLEND_RENDER_LAG = 2;
-/** Oracle-confirmed (pixel scan around ticks 3185-3188): the shake's own render lag is 1 tick, not the blend's 2 - a distinct lag value in this same window. Don't assume mechanisms in the same window share one lag - `docs/dragon-breath-notes.md`'s own brief flagged this exact risk (ENDEAVOR's own window had three distinct lag conventions too). */
-const DRAGONBREATH_SHAKE_RENDER_LAG = 1;
-
-/** Grovyle's own sprite `x2` during DRAGON_BREATH's target-shake window (`AnimTask_ShakeMon2`) - see the module doc above for the RAM-probed derivation. 0 outside the window. */
-function dragonBreathShakeX2(t: number, pressTick: number): number {
-  const ramTick = t - DRAGONBREATH_SHAKE_RENDER_LAG;
-  const start = pressTick + DRAGONBREATH_SHAKE_START_OFFSET;
-  const end = pressTick + DRAGONBREATH_SHAKE_END_OFFSET;
-  if (ramTick < start || ramTick >= end) return 0;
-  const half = Math.floor((ramTick - start) / 2);
-  return half % 2 === 0 ? -DRAGONBREATH_SHAKE_STEP : DRAGONBREATH_SHAKE_STEP;
-}
-
-/** Grovyle's own red-fade blend coefficient (0..9, `BlendPalette`/`blendComponentToward` units) at trace tick `t` - see the module doc above for the RAM-probed fade-in/fade-out derivation. 0 outside the window. */
-function dragonBreathBlendCoeff(t: number, pressTick: number): number {
-  const ramTick = t - DRAGONBREATH_BLEND_RENDER_LAG;
-  const fadeIn = pressTick + DRAGONBREATH_BLEND_FADE_IN_OFFSET;
-  const fadeOut = pressTick + DRAGONBREATH_BLEND_FADE_OUT_OFFSET;
-  if (ramTick < fadeIn) return 0;
-  if (ramTick < fadeOut) return Math.min(DRAGONBREATH_BLEND_MAX_COEFF, Math.floor((ramTick - fadeIn) / 2));
-  return Math.max(0, DRAGONBREATH_BLEND_MAX_COEFF - Math.floor((ramTick - fadeOut) / 2));
-}
 
 /**
  * DRAGON_BREATH's own battlefield scene: same static-backdrop-plus-
@@ -8617,8 +8586,8 @@ function dragonBreathBlendCoeff(t: number, pressTick: number): number {
  */
 const DRAGONBREATH_HP_DRAIN_START_DELAY = 353; // pressTick+353 = RAM 3298 (healthBar1Curr sentinel, docs/dragon-breath-notes.md phase table)
 
-export function dragonBreathGrovyleHp(t: number, pressTick: number, startHp: number, endHp: number): number {
-  const d = t - (pressTick + DRAGONBREATH_HP_DRAIN_START_DELAY);
+export function dragonBreathGrovyleHp(t: number, pressTick: number, startHp: number, endHp: number, startDelay: number = DRAGONBREATH_HP_DRAIN_START_DELAY): number {
+  const d = t - (pressTick + startDelay);
   return Math.max(endHp, startHp - Math.max(d, 0));
 }
 
@@ -8640,53 +8609,40 @@ export function dragonBreathGrovyleHp(t: number, pressTick: number, startHp: num
 const DRAGONBREATH_HIT_FLASH_ANCHOR_DELAY = 318; // pressTick+318 = RAM 3263 (target-side hit-flash start)
 const DRAGONBREATH_HIT_FLASH_OFFSET = DRAGONBREATH_HIT_FLASH_ANCHOR_DELAY - HIT_FLASH_RAM_ANCHOR_DELAY;
 
+/**
+ * ISSUES #39 rank-6 slice 2: turn 2's own Scene-OFF re-timing of DRAGON_BREATH's
+ * resolution half. `attackanimation` substitutes a fixed pause for the move's
+ * own real animation the same way it did for turn 1's ROCK_SLIDE/DOUBLE_TEAM
+ * (slice 1) - the fire-projectile stream (`dragonBreathFireSprites`), the
+ * target's own red-fade blend (`dragonBreathBlendCoeff`), and the target's
+ * own shake (`dragonBreathShakeX2`, `AnimTask_ShakeMon2`) are all class (c)
+ * for this move's own attack script, RAM-confirmed absent the whole window
+ * (`tools/probe/dump-turn2-dragonbreath-off.py` against `turn2-dragonbreath-
+ * off.json`: Grovyle's own sprite `x2`/`y2` and OBJ palette entry 1 stay flat
+ * 0/0/9538 throughout 3090-3260) - dropped entirely, same treatment turn 1's
+ * `drawRockSlideAttack` already established. The generic hit-flash pair
+ * (`rockSlideMonBlinkInvisible`/`rockSlideHealthboxWobbleY2`, class b)
+ * survives, re-anchored to a fresh RAM-probed OFF delay (pixel-confirmed via
+ * a `bin/oracle run` scout: the healthbox-wobble region first differs at
+ * render 3165, matching this anchor's own `t-1` convention exactly).
+ */
+const TURN2_OFF_DRAGONBREATH_HIT_FLASH_ANCHOR_DELAY = 219; // pixel-confirmed render 3165 (pressTick+219) is the wobble's own first visible tick
+const TURN2_OFF_DRAGONBREATH_HP_DRAIN_START_DELAY = 254; // RAM tick 3199 (bar1Curr sentinel -32768), same "sentinel tick itself" convention DRAGONBREATH_HP_DRAIN_START_DELAY's own doc cites - probe-exact, no render-lag correction (same-frame CPU-copy mechanism)
+
 function drawDragonBreathScene(fb: Uint8Array, t: number, pressTick: number): void {
   drawStaticBgShiftedY(fb, 0);
-  const grovyleHp = dragonBreathGrovyleHp(t, pressTick, anchorOpponentAfterTurnHp, anchorOpponentAfterTurn2Hp);
+  const grovyleHp = dragonBreathGrovyleHp(t, pressTick, anchorOpponentAfterTurnHp, anchorOpponentAfterTurn2Hp, TURN2_OFF_DRAGONBREATH_HP_DRAIN_START_DELAY);
   const grovyleContent = opponentHealthboxContentForHp(grovyleHp);
-  const hitFlashPressTick = pressTick + DRAGONBREATH_HIT_FLASH_OFFSET;
+  const hitFlashPressTick = pressTick + (TURN2_OFF_DRAGONBREATH_HIT_FLASH_ANCHOR_DELAY - HIT_FLASH_RAM_ANCHOR_DELAY);
 
-  // `monbg ANIM_DEF_PARTNER` moves the target to BG1. The normal-priority
-  // ember OBJs therefore win over Grovyle at equal priority.
   if (!rockSlideMonBlinkInvisible(t, hitFlashPressTick)) {
-    drawSpriteSheetAffineStretch(
-      fb,
-      grovyleFrontSprite.tileset,
-      grovyleFrontSprite.palette,
-      GROVYLE_CORNER.x,
-      GROVYLE_CORNER.y,
-      256,
-      256,
-      0,
-      DRAGON_BREATH_BLEND_COLOR,
-      dragonBreathBlendCoeff(t, pressTick),
-      false,
-      dragonBreathShakeX2(t, pressTick),
-    );
+    drawSpriteSheet(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y);
   }
 
-  for (const sprite of dragonBreathFireSprites(t, pressTick)) {
-    const tileset = subTileset(battleAnimSmallEmber.tileset, sprite.sheetFrame * 4, 4);
-    drawSpriteSheetAffineRotate(
-      fb,
-      tileset,
-      battleAnimSmallEmber.palette,
-      sprite.centerX,
-      sprite.centerY,
-      sprite.pa,
-      sprite.pb,
-      sprite.pc,
-      sprite.pd,
-    );
-  }
-
-  // The ember subpriority is 38 (target 40 minus the script's offset 2);
-  // Onix is subpriority 30. `SortSprites` puts Onix at the winning lower OAM
-  // index, so its opaque pixels cover compressed embers near the origin.
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
   drawSendOutHealthbox(fb, 0, grovyleContent);
   drawMenuHealthboxPlayer(fb, 0, 0);
-  drawMenuIdleBounceOverlay(fb, turn2KickoffBounceTick(t, pressTick));
+  drawMenuIdleBounceOverlay(fb, turn2KickoffBounceTick(t, pressTick, TURN1_OFF_ROCKSLIDE_MENU_REDRAW_DELAY));
   const healthboxY2 = rockSlideHealthboxWobbleY2(t, hitFlashPressTick);
   if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, grovyleContent);
 }
@@ -8700,12 +8656,27 @@ function drawDragonBreathScene(fb: Uint8Array, t: number, pressTick: number): vo
  * settled HP on top) but keyed off DRAGON_BREATH's own redraw/bounce timing
  * and Grovyle's post-DRAGON_BREATH HP (88, not ROCK_SLIDE's 101).
  */
-const DRAGONBREATH_TEXT_CLEAR_DELAY = 384; // pressTick+384 = RAM 3329 (message box goes blank, box stays)
-/** Exported for core.ts's own turn-3 reopen gate (S7 slice F) - same "resolution's own redraw delay gates the next reopen" convention `ROCK_SLIDE_MENU_REDRAW_DELAY` already established for turn 1->2. */
+/** Exported for core.ts's own turn-3 reopen gate (S7 slice F) - same "resolution's own redraw delay gates the next reopen" convention `ROCK_SLIDE_MENU_REDRAW_DELAY` already established for turn 1->2. Left at the ON-fit value (same idiom `ROCK_SLIDE_MENU_REDRAW_DELAY` itself already established for turn 1 in rank-6 slice 1): core.ts's own reopen-gate gets no Scene-OFF override this slice, purely a presentation-timing seam, same "logic gate stays put, only the rendered pixels move earlier" split slice 1 already shipped. */
 export const DRAGONBREATH_MENU_REDRAW_DELAY = 391; // pressTick+391 = RAM 3336 (hard cut to the resettled action menu)
 
-function dragonBreathResettledBounceTick(t: number, pressTick: number): number {
-  return t - (pressTick + DRAGONBREATH_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
+/**
+ * ISSUES #39 rank-6 slice 2: turn 2's own Scene-OFF re-timing of the
+ * message-box-blank + hard-cut-to-resettled-menu pair, mirroring turn 1's
+ * `TURN1_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY`/`TURN1_OFF_ROCKSLIDE_MENU_REDRAW_DELAY`.
+ * Both pixel-confirmed via a `bin/oracle run` scout over `turn2-dragonbreath-
+ * off.json` (dense per-tick sha + a PIL pixel diff to disambiguate the
+ * text-clear's own small diff from the menu's own big hard-cut swap):
+ * frame 3230 (856px diff, message-glyph-only) is the first blank-box frame;
+ * frame 3237 (5983px diff, the whole bottom half - same "~6000px" magnitude
+ * `ROCK_SLIDE_MENU_REDRAW_DELAY`'s own doc cites for turn 1) is the first
+ * resettled-menu frame - the same 7-tick clear-to-redraw gap turn 1/6/7's
+ * own ROCK_SLIDE pairs already establish.
+ */
+const TURN2_OFF_DRAGONBREATH_TEXT_CLEAR_DELAY = 285; // pixel-confirmed render 3230 (pressTick+285)
+const TURN2_OFF_DRAGONBREATH_MENU_REDRAW_DELAY = 292; // pixel-confirmed render 3237 (pressTick+292)
+
+function dragonBreathResettledBounceTick(t: number, pressTick: number, redrawDelay: number = DRAGONBREATH_MENU_REDRAW_DELAY): number {
+  return t - (pressTick + redrawDelay) + (MENU_IDLE_BLANK_END_TICK + 1);
 }
 
 /** S7 slice F (docs/battle-turn-notes.md §13): turn 2's own A-confirm press tick (RAM/render 2945 - matches `DRAGONBREATH_TEXT_START_DELAY`'s own doc: `2945+192=3137` is the busy-flag render tick already cited there). Needed for the same reason `TURN1_CONFIRM_PRESS_TICK` is (`battleMenu.ts`): turn 3's reopen inherits the turn-2-resettled-menu's own re-anchored bounce phase (`dragonBreathResettledBounceTick`), not a fresh mapping - reopening FIGHT doesn't reset the underlying bounce task any more than turn 2's own reopen did. */
@@ -8767,7 +8738,7 @@ function turn3KickoffBounceTick(t: number, pressTick: number): number {
 }
 
 function drawDragonBreathTurnEndSettledMenu(fb: Uint8Array, t: number, pressTick: number): void {
-  const bounceTick = dragonBreathResettledBounceTick(t, pressTick);
+  const bounceTick = dragonBreathResettledBounceTick(t, pressTick, TURN2_OFF_DRAGONBREATH_MENU_REDRAW_DELAY);
   drawActionMenuIdleContent(fb, bounceTick, true);
   drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(anchorOpponentAfterTurn2Hp));
   // Unlike `drawTurnEndSettledMenu` (ROCK_SLIDE's own turn-1->turn-2
@@ -8823,41 +8794,103 @@ function drawDragonBreathTurnEndSettledMenu(fb: Uint8Array, t: number, pressTick
 const [TURN2_ENDEAVOR_ATTACK_LINE1, TURN2_ENDEAVOR_ATTACK_LINE2] = resolveTurn2EndeavorAttackLines();
 const TURN2_ENDEAVOR_HP = resolveTurn2EndeavorHpEndpoints();
 
+/**
+ * ISSUES #39 rank-6 slice 2: turn 2's own ENDEAVOR-half Scene-OFF re-timing
+ * (pinned exactly per the banked ISSUES #39 slice-2 findings, pressTick=2945):
+ * Onix's own `endeavorOnixHp` drain starts 37 ticks earlier than the ON fit
+ * (RAM/pixel-pinned tick 3061, first visible drop 3062). The held ENDEAVOR
+ * text and DRAGON_BREATH's own first character swap in the SAME frame -
+ * unlike ROCK_SLIDE's own clear/redraw pair (a 7-tick gap), there is no
+ * blank tick at this seam at all: oracle frame 3100 shows the ENDEAVOR box
+ * already empty AND DRAGON_BREATH's own first char ("O") already visible
+ * (pixel-confirmed directly this session, correcting the prior attempt's
+ * "single blank tick" claim, which was pixel-scouted with an off-by-one) -
+ * `TURN2_OFF_ENDEAVOR_TEXT_CLEAR_DELAY` ==
+ * `TURN2_OFF_DRAGONBREATH_TEXT_START_DELAY`, both 155.
+ */
+const TURN2_OFF_ENDEAVOR_HP_DRAIN_START_DELAY = 116; // pixel/RAM-pinned tick 3061 (pressTick+116)
+const TURN2_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START = 81; // RAM/pixel-pinned: healthbox0Y2 first flip at render 3027 (pressTick+81), 1-tick lag already baked into endeavorHealthboxBounceY2's own formula
+/**
+ * ISSUES #39 rank-6 slice 2: Onix's own `endeavorOnixInvisible` hit-flash
+ * flicker (`struct Sprite.invisible`) is ALSO class (b), not just the
+ * healthbox wobble - missed by the prior attempt, which skipped
+ * `drawEndeavorSquish` (including this flicker) entirely and left Onix
+ * always-visible against the flat `menuIdleBase` harvest. RAM-confirmed
+ * (`tools/probe/dump-turn2-dragonbreath-off.py`, extended with an
+ * `onixInvisible` field this session): `invisible` first true at RAM tick
+ * 3027, ONE tick after the wobble's own first flip (RAM tick 3026) - the
+ * exact same +1 relationship the ON fit's own anchors already show
+ * (`ENDEAVOR_HEALTHBOX_BOUNCE_START`=118, `ENDEAVOR_FLICKER_START`=119), so
+ * this is `TURN2_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START`+1, not the same value.
+ * Cycle shape (4-on/4-off, 4 cycles, 1-tick render lag) is unchanged from
+ * the ON fit, only the anchor moves.
+ */
+const TURN2_OFF_ENDEAVOR_FLICKER_START = TURN2_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START + 1; // RAM/pixel-pinned: onixInvisible first true at render 3027 (pressTick+82)
+const TURN2_OFF_ENDEAVOR_TEXT_CLEAR_DELAY = 155; // pixel-pinned tick 3100 (pressTick+155) - held ENDEAVOR text goes blank, box stays
+const TURN2_OFF_DRAGONBREATH_TEXT_START_DELAY = 155; // pixel-pinned tick 3100 (pressTick+155) - DRAGON_BREATH's own first character, same frame ENDEAVOR's own text clears; override on the shared dragonBreathTextStartTick default (192, turn 13's own call site unaffected)
+
 function drawTurn2KickoffText(fb: Uint8Array, t: number, pressTick: number): void {
-  const dragonBreathStart = dragonBreathTextStartTick(pressTick);
-  if (t >= dragonBreathStart && t >= pressTick + DRAGONBREATH_MENU_REDRAW_DELAY) {
+  const dragonBreathStart = dragonBreathTextStartTick(pressTick, TURN2_OFF_DRAGONBREATH_TEXT_START_DELAY);
+  if (t >= dragonBreathStart && t >= pressTick + TURN2_OFF_DRAGONBREATH_MENU_REDRAW_DELAY) {
     drawDragonBreathTurnEndSettledMenu(fb, t, pressTick);
     return;
   }
-  // Only ever reached via turn 2's own confirm (cursor 2), which by
-  // construction can't happen before the S7 slice E1 reopen sets
-  // `turn1Resolved` - Grovyle's healthbox always needs its real (101) HP
-  // here, never the stale full-HP harvest.
-  if (!drawEndeavorSquish(fb, t, pressTick, anchorOpponentAfterTurnHp, turn2KickoffBounceTick(t, pressTick), ROCK_SLIDE_MOVE_POWER)) {
-    if (t >= dragonBreathStart) {
-      drawDragonBreathScene(fb, t, pressTick);
-    } else {
-      drawActionMenuIdleContent(fb, turn2KickoffBounceTick(t, pressTick), true);
+  // ISSUES #39 rank-6 slice 2: ENDEAVOR's own attacker squish/blend/droplets
+  // and the target's own hitsplats (`drawEndeavorSquish`'s attacker-side
+  // content) are class (c) for turn 2's own Scene-OFF window (pixel-confirmed
+  // absent, oracle frames 3000-3026 match cleanly once the call is skipped -
+  // banked ISSUES #39) - never called here; the idle content underneath
+  // renders unchanged instead, the same "just don't call it" treatment turn
+  // 1's own DOUBLE_TEAM clone-blend got. `drawEndeavorSquish` itself, shared
+  // with turn 3/turn 5 (S7 slice G/K, both still ON this slice), is
+  // untouched - this function is turn-2-exclusive, so no override param is
+  // needed on the shared function. UNLIKE the attacker-side content, Onix's
+  // own generic post-hit healthbox wobble (class b, the SAME "wobble
+  // survives, shake/squish doesn't" split ROCK_SLIDE/DRAGON_BREATH's own
+  // hit-flash pairs already establish) is RAM/pixel-confirmed still active
+  // here (`healthbox0Y2` alternates +1/-1 for 20 ticks starting render 3027,
+  // `tools/probe/dump-turn2-dragonbreath-off.py` against `turn2-endeavor-
+  // off.json`) - re-anchored below rather than dropped.
+  if (t >= dragonBreathStart) {
+    drawDragonBreathScene(fb, t, pressTick);
+  } else {
+    drawActionMenuIdleContent(fb, turn2KickoffBounceTick(t, pressTick, TURN1_OFF_ROCKSLIDE_MENU_REDRAW_DELAY), true);
+    // Onix's own hit-flash flicker (class b, paired with the wobble below)
+    // is baked permanently visible into `menuIdleBase`'s flat harvest -
+    // unlike `drawEndeavorSquish`'s own primitive reconstruction (where
+    // skipping the sprite draw call is enough), this window needs an active
+    // erase back to the field background whenever the real sprite's own
+    // `invisible` bit is set, same shape `eraseSpriteFootprint`'s own
+    // Pidgeotto/Grovyle callers already use elsewhere.
+    if (endeavorOnixInvisible(t, pressTick, TURN2_OFF_ENDEAVOR_FLICKER_START)) {
+      eraseSpriteFootprint(fb, onixBackSprite.tileset, ONIX_MATERIALIZE_CORNER);
     }
+    // Onix's hp is still exactly `anchorPlayerBattler.hp` throughout this
+    // wobble window (the drain doesn't start until `TURN2_OFF_ENDEAVOR_HP_
+    // DRAIN_START_DELAY`, well after it), so `drawPlayerHealthboxHpOverlay`'s
+    // own no-op guard below never fires to carry the yOffset - the wobble
+    // needs its own direct redraw of the healthbox base, same call
+    // `drawEndeavorSquish` itself uses.
+    const wobbleY2 = endeavorHealthboxBounceY2(t, pressTick, TURN2_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START);
+    if (wobbleY2 !== 0) drawMenuHealthboxPlayerWobble(fb, wobbleY2);
   }
   // S7 slice E1b: Onix's own HP-bar drain (117->101, `endeavorOnixHp`) is
   // valid for every `t` (clamped both sides) - safe to call unconditionally
   // here rather than gating on a separate "drain window" branch, same
   // convention `drawRockSlideAttack`/`drawTurnEndSettledMenu` already use
-  // for the opponent's own bar. Before the drain starts (and through
-  // ENDEAVOR's own unmodeled attack-animation window, ticks ~3003-3097 -
-  // see battleMenu.ts's own slice E1b doc) this resolves to the anchor HP,
-  // a no-op.
-  const onixHp = endeavorOnixHp(t, pressTick, TURN2_ENDEAVOR_HP.from, TURN2_ENDEAVOR_HP.to);
-  drawPlayerHealthboxHpOverlay(fb, onixHp);
+  // for the opponent's own bar.
+  const onixHp = endeavorOnixHp(t, pressTick, TURN2_ENDEAVOR_HP.from, TURN2_ENDEAVOR_HP.to, TURN2_OFF_ENDEAVOR_HP_DRAIN_START_DELAY);
+  drawPlayerHealthboxHpOverlay(fb, onixHp, endeavorHealthboxBounceY2(t, pressTick, TURN2_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START));
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   if (t >= dragonBreathStart) {
-    if (t < pressTick + DRAGONBREATH_TEXT_CLEAR_DELAY) {
-      drawMessageTextLines(fb, ROCK_SLIDE_LINE1, DRAGONBREATH_KICKOFF_LINE2, dragonBreathTextVisibleChars(t, pressTick));
+    if (t < pressTick + TURN2_OFF_DRAGONBREATH_TEXT_CLEAR_DELAY) {
+      drawMessageTextLines(fb, ROCK_SLIDE_LINE1, DRAGONBREATH_KICKOFF_LINE2, dragonBreathTextVisibleChars(t, pressTick, TURN2_OFF_DRAGONBREATH_TEXT_START_DELAY));
     }
     return;
   }
-  drawMessageTextLines(fb, TURN2_ENDEAVOR_ATTACK_LINE1, TURN2_ENDEAVOR_ATTACK_LINE2, turn2KickoffTextVisibleChars(t, pressTick));
+  if (t < pressTick + TURN2_OFF_ENDEAVOR_TEXT_CLEAR_DELAY) {
+    drawMessageTextLines(fb, TURN2_ENDEAVOR_ATTACK_LINE1, TURN2_ENDEAVOR_ATTACK_LINE2, turn2KickoffTextVisibleChars(t, pressTick));
+  }
 }
 
 /**

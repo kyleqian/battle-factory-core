@@ -103,6 +103,7 @@ def main() -> None:
 
         onix_slot = oracle.read_u8(GBATTLERSPRITEIDS + 0)
         obase = GSPRITES + onix_slot * SPRITE_SIZE
+        oflags = oracle.read_u8(obase + SPRITE_FLAGS_OFF)
 
         grovyle_slot = oracle.read_u8(GBATTLERSPRITEIDS + 1)
         gbase = GSPRITES + grovyle_slot * SPRITE_SIZE
@@ -125,6 +126,7 @@ def main() -> None:
             "healthbox1Y2": read_s16(hbase1 + SPRITE_Y2_OFF),
             "onixX2": read_s16(obase + SPRITE_X2_OFF),
             "onixY2": read_s16(obase + SPRITE_Y2_OFF),
+            "onixInvisible": bool(oflags & 4),
             "grovyleInvisible": bool(gflags & 4),
             "grovyleX2": read_s16(gbase + SPRITE_X2_OFF),
             "grovyleY2": read_s16(gbase + SPRITE_Y2_OFF),
