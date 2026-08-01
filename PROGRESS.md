@@ -13,9 +13,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
-## 814 — [bounded main worker, 2026-08-01] rank-8 Scene-OFF status-icon receipt landed
+## 814 — [supervisor + bounded workers, 2026-08-01] rank-8 Scene-OFF status-icon receipt landed
 
-- **State:** implementation `80c5d6af`, documentation `73ad40f2`; focused
+- **State:** implementation `80c5d6af`, documentation `73ad40f2`, and
+  primary-status-clear evidence `22421ee6`; focused
   resolver/presentation/round seam tests, full `npm test` (**569 files,
   5720 passed + 1 skipped**), and `npm run build` are green.
 - **Did:** projected the existing `status-icon-update` kernel receipt into an
@@ -26,15 +27,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   raw status receipt, so burn text never infers a target from a move/species.
   A legal generated Factory round proves FIRE_PUNCH's status write → burn
   text → icon receipt → nonterminal next-command handoff, plus a generic
-  status clear is pinned at the renderer boundary.
-- **Next:** preserve this generic receipt path while selecting the next
-  source/oracle-backed, noncanonical semantic presentation ownership slice.
-  Legacy dispatcher retirement remains separately scoped; do not resume the
-  retired canonical Battle-2 march or claim a new pixel comparison.
-- **Notes:** the authoritative Scene-OFF oracle checkpoint remains the already
-  verified **42 captures / 42 capture-states** in
-  `docs/fire-punch-burn-lifecycle-off-evidence.md`; this semantic slice adds
-  no pixel claim and no fabricated Scene-OFF status-animation receipt. No
+  status clear is pinned at the renderer boundary. A second complete-party
+  OFF trace proves Toxic raw write **142** → PSN display **235** → Heal Bell
+  raw clear **275** → icon clear **326** → next command **409/415**.
+- **Next:** return to rank 7's generic opponent-owned locked-action retention:
+  preserve its resolution owner across the genuine intervening player command,
+  then remove the `turn14Resolved`/`turn15PartySelect` mirrors without a
+  turn/tick selector. Legacy rank-8 dispatch retirement remains separately
+  scoped; do not resume the retired canonical Battle-2 march.
+- **Notes:** the Scene-OFF oracle evidence is **42 captures with embedded
+  states** for FIRE_PUNCH/burn plus **38 captures with embedded states** for
+  Toxic/Heal Bell clear; supervisor reruns reproduced both, including clear
+  manifest SHA-256 `068ccfb40b8e8fda280e33182d5033ba4131fc1040fc259865f43d6f0bc202a4`.
+  This semantic slice adds no pixel-parity claim and no fabricated Scene-OFF
+  status-animation receipt. No
   mechanics/RNG/AI/round outcomes, animation code/ledgers, ratchets, or
   oracle trace/capture lists changed.
 
