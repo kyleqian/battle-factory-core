@@ -1,3 +1,22 @@
+## 831 — [supervisor, 2026-08-01 15:10] turn-9 verified; turns 1-4 prep dossier merged
+
+- **State:** master `d77be40f`. Turn-9 landing verified: census grep empty,
+  supervisor spot compares exact (`turn9-rockslide-off` **256/256**,
+  `turn10-menu-off` **83/83**). Side branch merged (docs/probe new files
+  only): `docs/turn1-4-epoch-prep.md` + committed OFF epoch probe.
+- **Did:** verified entry 830's slice; merged `worker/side-20260801-144007`
+  (worktree removed, branch deleted). The dossier pins all four turn 1-4
+  install/reset boundaries (2347/2348, 3236/3237, 4211/4212, 5352-row),
+  source owner `HandleInputChooseAction`/`DoBounceEffect`, per-field
+  consumer-migration tables, and eight one-field-worker traps.
+- **Next:** turn-10 slice launching now (Terra/max); then 11, 12. Turn-4's
+  future acceptance needs a committed turn-5 OFF reader set that does not
+  exist — deliberately NOT banked this session (turns 5-8 OFF re-timing is
+  an un-adopted policy question; next session decides profile).
+- **Notes:** `animation-main` has 2 new commits (staged-growth family),
+  their session live until 15:32; single fold deferred to wind-down so the
+  union suite runs once.
+
 ## 830 — [bounded MAIN worker, 2026-08-01] turn-9 predecessor handoff retired
 
 - **State:** proof `8e0fbc80`, implementation `6f9ef899`; source/test census

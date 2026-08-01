@@ -207,6 +207,14 @@ than gating on a turn-10 move staging module. It now owns turn-11 dispatch,
 slot-0 PP reconstruction, and the following reopen guard. Clean-parent
 `1056b153` (`f8e6bcc7^`) app replays held every required primary, reader, and
 upstream window byte-identical (**1,842/1,842 raw RGBA captures**).
+The matching typed completed-turn-11/next-command handoff retired
+`turn11Resolved` (`c96ce5b3` + `0499bc30`): it publishes canonical PP
+**[1,19,19,10]**, persisted slot 0, and settled/ready facts directly rather
+than gating on `turn11FeatherDancePresentationStaging.ts`, which continues to
+own only opponent move content. It now owns turn-12 dispatch, slot-0 PP
+reconstruction, and the following reopen guard. Clean-parent `5b46d038`
+(`c96ce5b3^`) app replays held every required primary, reader, and upstream
+window byte-identical (**1,033/1,033 raw RGBA captures**).
 Rank 4 is **fully retired** (2026-07-31,
 all 5 slices): `174cc388` ROCK_SLIDE tails; `441ddf83`+`6aba6662`
 turn-7/8 FEATHER_DANCE staged+flipped; `0769ccc6` stat-fall banner

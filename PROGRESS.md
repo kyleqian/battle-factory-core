@@ -13,6 +13,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 834 — [bounded MAIN worker, 2026-08-01] turn-11 predecessor handoff retired
+
+- **State:** proof `c96ce5b3`, implementation `0499bc30`; source/test census
+  has no `turn11Resolved` reference.
+- **Did:** published the immutable completed-turn-11/next-command handoff with
+  canonical PP **[1,19,19,10]**, persisted slot 0, and settled/ready facts;
+  moved turn-12 dispatch, slot-0 PP reconstruction, and the following reopen
+  guard onto it without gating on `turn11FeatherDancePresentationStaging.ts`,
+  which remains the opponent move-content owner.
+- **Next:** take only the next separately scoped #39 owner-chain slice; do not
+  batch `turn12Resolved` or another field into this completed retirement.
+- **Notes:** clean-parent `5b46d038` (`c96ce5b3^`) differential app replay is
+  byte-identical across all requested turn-11 primary, turn-12 reader, and
+  turn-10 upstream windows (**1,033/1,033 raw RGBA captures**). Focused Tier-1
+  tests (**9 files, 465 passed**, including the ratchet), `npx tsc --noEmit`,
+  and `npm run build` are green; the full suite was intentionally not run per
+  this bounded-worker scope.
+
 ## 833 — [supervisor, 2026-08-01 15:45] turn-10 verified; #63 fixed+closed; second animation fold
 
 - **State:** master at the second animation fold (GROW_IN_STAGES family,
@@ -51,22 +69,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   tests (**9 files, 465 passed**, including the ratchet) and `npx tsc --noEmit`
   are green; the worker deadline interrupted `npm run build` during Vite's
   transform phase, so its final green result remains for supervisor verification.
-
-## 831 — [supervisor, 2026-08-01 15:10] turn-9 verified; turns 1-4 prep dossier merged
-
-- **State:** master `d77be40f`. Turn-9 landing verified: census grep empty,
-  supervisor spot compares exact (`turn9-rockslide-off` **256/256**,
-  `turn10-menu-off` **83/83**). Side branch merged (docs/probe new files
-  only): `docs/turn1-4-epoch-prep.md` + committed OFF epoch probe.
-- **Did:** verified entry 830's slice; merged `worker/side-20260801-144007`
-  (worktree removed, branch deleted). The dossier pins all four turn 1-4
-  install/reset boundaries (2347/2348, 3236/3237, 4211/4212, 5352-row),
-  source owner `HandleInputChooseAction`/`DoBounceEffect`, per-field
-  consumer-migration tables, and eight one-field-worker traps.
-- **Next:** turn-10 slice launching now (Terra/max); then 11, 12. Turn-4's
-  future acceptance needs a committed turn-5 OFF reader set that does not
-  exist — deliberately NOT banked this session (turns 5-8 OFF re-timing is
-  an un-adopted policy question; next session decides profile).
-- **Notes:** `animation-main` has 2 new commits (staged-growth family),
-  their session live until 15:32; single fold deferred to wind-down so the
-  union suite runs once.
