@@ -51,6 +51,7 @@ export type SpeciesFrontAnimFamily =
   | "SWING_CONCAVE"
   | "V_JUMPS_SMALL"
   | "V_SLIDE"
+  | "V_SLIDE_WOBBLE"
   | "V_SQUISH_AND_BOUNCE"
   | "V_SQUISH_AND_BOUNCE_SLOW"
   | "V_STRETCH"
@@ -68,6 +69,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "SWING_CONCAVE",
   "V_JUMPS_SMALL",
   "V_SLIDE",
+  "V_SLIDE_WOBBLE",
   "V_SQUISH_AND_BOUNCE",
   "V_SQUISH_AND_BOUNCE_SLOW",
   "V_STRETCH",
@@ -290,6 +292,23 @@ export const V_SHAKE_TWICE_FACTORY_FRONT_SPECIES: readonly string[] = Object.fre
 /** There are no normal-speed vertical-shake-twice mappings outside the Factory pool. */
 export const V_SHAKE_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   V_SHAKE_TWICE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All 8 source selector mappings for the normal `ANIM_V_SLIDE_WOBBLE`. */
+export const V_SLIDE_WOBBLE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_V_SLIDE_WOBBLE")
+    .map(([species]) => species),
+);
+
+/** Every normal vertical-slide-wobble mapping is Factory-reachable. */
+export const V_SLIDE_WOBBLE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  V_SLIDE_WOBBLE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no normal vertical-slide-wobble mappings outside the Factory pool. */
+export const V_SLIDE_WOBBLE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  V_SLIDE_WOBBLE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 export interface SpeciesIdleOffset {
@@ -572,6 +591,33 @@ export interface VerticalShakeTwiceFrame extends SpeciesIdleOffset {
   readonly var7: number;
   readonly amplitude: number;
   readonly callback: "VerticalShakeTwice" | "WaitAnimEnd";
+}
+
+/**
+ * The Small initializer is a source sibling that shares `VerticalSlideWobble`
+ * but is not accepted by this rung. Its selector mappings therefore remain
+ * outside `PORTED_FRONT_FAMILIES`.
+ */
+export const VERTICAL_SLIDE_WOBBLE_INITIALIZERS = Object.freeze({
+  normal: Object.freeze({ selector: "ANIM_V_SLIDE_WOBBLE", data0: 10, accepted: true }),
+  small: Object.freeze({ selector: "ANIM_V_SLIDE_WOBBLE_SMALL", data0: 5, accepted: false }),
+} as const);
+
+export interface VerticalSlideWobbleFrame extends SpeciesIdleOffset {
+  readonly data0: 10;
+  readonly data2: number;
+  readonly index: number | null;
+  readonly varBeforeMask: number | null;
+  readonly wobbleIndex: number | null;
+  readonly rotationSigned: number;
+  readonly affineRotation: number;
+  readonly xScale: 256;
+  readonly yScale: 256;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "VerticalSlideWobble" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
 }
 
 export interface HorizontalShakeFrame extends SpeciesIdleOffset {
@@ -1474,6 +1520,91 @@ export function verticalShakeTwiceFrameAtTick(
   throw new Error("unreachable VerticalShakeTwice reducer state");
 }
 
+function toU16(value: number): number {
+  return value & 0xffff;
+}
+
+/**
+ * Source-order port of `Anim_VerticalSlideWobble` / `VerticalSlideWobble`
+ * (`pokemon_animation.c:911-939,984-1028,1735-1766`). The front-animation
+ * task has zeroed data0/data2..data7 and set `sDontFlip=TRUE`; the normal
+ * initializer then sets data0=10 and immediately calls the shared callback.
+ *
+ * Tick 0 starts affine mode before the first writes. Ticks 0..100 use C
+ * truncation for both integer indices, mask the doubled wobble index to u8,
+ * write GBA sine y2, and cross the signed-s16 `Sin` result into the u16
+ * `HandleSetAffineData` rotation parameter without opponent-front flipping.
+ * Tick 101 restores identity affine/y2, calls `ResetSpriteAfterAnim`, installs
+ * `WaitAnimEnd`, and still performs the source's final data2 increment.
+ */
+export function verticalSlideWobbleFrameAtTick(
+  ticksSinceStart: number,
+): VerticalSlideWobbleFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  const data0 = VERTICAL_SLIDE_WOBBLE_INITIALIZERS.normal.data0;
+  let data2 = 0;
+  let y2 = 0;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    const startedAffine = data2 === 0;
+    if (data2 > 100) {
+      y2 = 0;
+      data2 += 1;
+      return {
+        x2: 0,
+        y2,
+        data0,
+        data2,
+        index: null,
+        varBeforeMask: null,
+        wobbleIndex: null,
+        rotationSigned: 0,
+        affineRotation: 0,
+        xScale: 256,
+        yScale: 256,
+        startedAffine: false,
+        normalFrontDontFlip: true,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      };
+    }
+
+    const index = Math.trunc((data2 * 256) / 100);
+    const varBeforeMask = Math.trunc((data2 * 512) / 100);
+    const wobbleIndex = varBeforeMask & 0xff;
+    y2 = gbaSin(index, data0) + 0;
+    const rotationSigned = gbaSin(wobbleIndex, 3276);
+    // `Sin` returns s16; the third HandleSetAffineData parameter is u16.
+    const affineRotation = toU16(rotationSigned);
+    data2 += 1;
+
+    if (tick === ticksSinceStart) {
+      return {
+        x2: 0,
+        y2,
+        data0,
+        data2,
+        index,
+        varBeforeMask,
+        wobbleIndex,
+        rotationSigned,
+        affineRotation,
+        xScale: 256,
+        yScale: 256,
+        startedAffine,
+        normalFrontDontFlip: true,
+        resetSpriteAfterAnim: false,
+        callback: "VerticalSlideWobble",
+        affineMode: "double",
+      };
+    }
+  }
+
+  throw new Error("unreachable VerticalSlideWobble reducer state");
+}
+
 function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffset {
   switch (family) {
     case "BOUNCE_ROTATE_TO_SIDES_SMALL": {
@@ -1539,6 +1670,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = verticalSlideFrameAtTick(41);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_VerticalSlide did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "V_SLIDE_WOBBLE": {
+      const terminal = verticalSlideWobbleFrameAtTick(101);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_VerticalSlideWobble did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
