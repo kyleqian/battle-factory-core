@@ -15,9 +15,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 815 — [bounded worker, 2026-08-01] rank-7 opponent locked-action owner landed
 
-- **State:** implementation `fea91d54`; focused locked-action/presentation/
-  round suites are **48/48** and TypeScript build is green. Full-suite and
-  production-build final verification are in progress.
+- **State:** implementation `fea91d54`, documentation `2b94e1ea`; focused
+  locked-action/presentation/round suites are **48/48**, full `npm test` is
+  green (**569 files, 5722 passed + 1 skipped**), and production build is
+  green.
 - **Did:** the production seven-battle orchestrator now retains a completed
   resolution by generic locked battler/current-move/PP-slot identity across a
   genuine, independently presented player command. Submission reclaims the
@@ -25,9 +26,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   write, restores visibility, publishes the typed forced request, and advances
   the existing `PartySelectState` through switch-in. Player-owned FLY,
   Scene-ON/OFF logical outcomes, and the seven-battle regression remain pinned.
-- **Next:** run final `npm test`/`npm run build`, then retire the remaining
-  exact-renderer `turn14Resolved`/`turn15PartySelect` mirrors as a separate
-  bounded slice; do not resume the canonical Battle-2 march.
+- **Next:** retire the remaining exact-renderer
+  `turn14Resolved`/`turn15PartySelect` mirrors as a separate bounded slice;
+  do not resume the canonical Battle-2 march.
 - **Notes:** no pixel count is claimed. No mechanics/RNG/AI/round outcome,
   animation code/ledger, ratchet, barrier, recording import, canonical trace,
   or timing/move/species/request/battle/turn/absolute-tick selector changed.
