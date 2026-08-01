@@ -1,0 +1,1488 @@
+{
+  "sourceTrace": "tools/compare/traces/turn5-menu.json",
+  "oracleProfile": "battle-scene-off",
+  "functionPointers": {
+    "BattleTurnPassed": 134461885,
+    "HandleTurnActionSelectionState": 134463093,
+    "HandleInputChooseAction": 134575497,
+    "PlayerBufferRunCommand": 134575365
+  },
+  "boundaries": {
+    "turn1": {
+      "handlerInstalledTick": 2347,
+      "bounceResetAndFirstInputTick": 2348,
+      "postTurnFacts": {
+        "playerHp": 117,
+        "opponentHp": 101,
+        "playerPp": [
+          9,
+          20,
+          20,
+          10
+        ],
+        "persistedMoveSlot": 0
+      },
+      "canonicalRows": [
+        {
+          "tick": 2339,
+          "battleMainFunc": 134461885,
+          "execFlags": 0,
+          "playerControllerFunc": 134575365,
+          "playerCommand": 51,
+          "playerReturnAction": 10,
+          "bg0Y": 0,
+          "actionState": 0,
+          "persistedMoveSlot": 0,
+          "playerPp": [
+            9,
+            20,
+            20,
+            10
+          ],
+          "playerHp": 117,
+          "opponentHp": 101,
+          "healthboxIsBouncing": false,
+          "battlerIsBouncing": false,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "framebufferSha256": "64857bf16c67a5e5b99070265956e4ba86f81a0e4968d99eaf539808a2683972"
+        },
+        {
+          "tick": 2340,
+          "battleMainFunc": 134463093,
+          "execFlags": 0,
+          "playerControllerFunc": 134575365,
+          "playerCommand": 51,
+          "playerReturnAction": 10,
+          "bg0Y": 0,
+          "actionState": 0,
+          "persistedMoveSlot": 0,
+          "playerPp": [
+            9,
+            20,
+            20,
+            10
+          ],
+          "playerHp": 117,
+          "opponentHp": 101,
+          "healthboxIsBouncing": false,
+          "battlerIsBouncing": false,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "framebufferSha256": "64857bf16c67a5e5b99070265956e4ba86f81a0e4968d99eaf539808a2683972"
+        },
+        {
+          "tick": 2345,
+          "battleMainFunc": 134463093,
+          "execFlags": 1,
+          "playerControllerFunc": 134594565,
+          "playerCommand": 18,
+          "playerReturnAction": 10,
+          "bg0Y": 0,
+          "actionState": 2,
+          "persistedMoveSlot": 0,
+          "playerPp": [
+            9,
+            20,
+            20,
+            10
+          ],
+          "playerHp": 117,
+          "opponentHp": 101,
+          "healthboxIsBouncing": false,
+          "battlerIsBouncing": false,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "framebufferSha256": "70f4821905ff6f0650e828168cfd97d6e92658b2578b7c1673c4fbccbdafd667"
+        },
+        {
+          "tick": 2346,
+          "battleMainFunc": 134463093,
+          "execFlags": 1,
+          "playerControllerFunc": 134594565,
+          "playerCommand": 18,
+          "playerReturnAction": 10,
+          "bg0Y": 0,
+          "actionState": 2,
+          "persistedMoveSlot": 0,
+          "playerPp": [
+            9,
+            20,
+            20,
+            10
+          ],
+          "playerHp": 117,
+          "opponentHp": 101,
+          "healthboxIsBouncing": false,
+          "battlerIsBouncing": false,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "framebufferSha256": "70f4821905ff6f0650e828168cfd97d6e92658b2578b7c1673c4fbccbdafd667"
+        },
+        {
+          "tick": 2347,
+          "battleMainFunc": 134463093,
+          "execFlags": 1,
+          "playerControllerFunc": 134575497,
+          "playerCommand": 18,
+          "playerReturnAction": 10,
+          "bg0Y": 160,
+          "actionState": 2,
+          "persistedMoveSlot": 0,
+          "playerPp": [
+            9,
+            20,
+            20,
+            10
+          ],
+          "playerHp": 117,
+          "opponentHp": 101,
+          "healthboxIsBouncing": false,
+          "battlerIsBouncing": false,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "framebufferSha256": "70f4821905ff6f0650e828168cfd97d6e92658b2578b7c1673c4fbccbdafd667"
+        },
+        {
+          "tick": 2348,
+          "battleMainFunc": 134463093,
+          "execFlags": 1,
+          "playerControllerFunc": 134575497,
+          "playerCommand": 18,
+          "playerReturnAction": 10,
+          "bg0Y": 160,
+          "actionState": 2,
+          "persistedMoveSlot": 0,
+          "playerPp": [
+            9,
+            20,
+            20,
+            10
+          ],
+          "playerHp": 117,
+          "opponentHp": 101,
+          "healthboxIsBouncing": true,
+          "battlerIsBouncing": true,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 135,
+            "delta": 7,
+            "amplitude": 1,
+            "targetSpriteId": 0,
+            "which": 1
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 199,
+            "delta": 7,
+            "amplitude": 1,
+            "targetSpriteId": 6,
+            "which": 0
+          },
+          "framebufferSha256": "c2a09dbe135017788287adb328076a7c9181ab06299f8de757de3619d883a83a"
+        },
+        {
+          "tick": 2349,
+          "battleMainFunc": 134463093,
+          "execFlags": 1,
+          "playerControllerFunc": 134575497,
+          "playerCommand": 18,
+          "playerReturnAction": 10,
+          "bg0Y": 160,
+          "actionState": 2,
+          "persistedMoveSlot": 0,
+          "playerPp": [
+            9,
+            20,
+            20,
+            10
+          ],
+          "playerHp": 117,
+          "opponentHp": 101,
+          "healthboxIsBouncing": true,
+          "battlerIsBouncing": true,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 142,
+            "delta": 7,
+            "amplitude": 1,
+            "targetSpriteId": 0,
+            "which": 1
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 206,
+            "delta": 7,
+            "amplitude": 1,
+            "targetSpriteId": 6,
+            "which": 0
+          },
+          "framebufferSha256": "a4bffb32ef6b75a2f4bd4d601c63dddf371151a1d7c9624497737a12649991a7"
+        }
+      ],
+      "inputCandidates": [
+        {
+          "pulseTick": 2347,
+          "acceptedActionOnPulse": false,
+          "pressRow": {
+            "tick": 2347,
+            "battleMainFunc": 134463093,
+            "execFlags": 1,
+            "playerControllerFunc": 134575497,
+            "playerCommand": 18,
+            "playerReturnAction": 10,
+            "bg0Y": 160,
+            "actionState": 2,
+            "persistedMoveSlot": 0,
+            "playerPp": [
+              9,
+              20,
+              20,
+              10
+            ],
+            "playerHp": 117,
+            "opponentHp": 101,
+            "healthboxIsBouncing": false,
+            "battlerIsBouncing": false,
+            "healthboxDriver": {
+              "id": 3,
+              "sinIndex": 0,
+              "delta": 0,
+              "amplitude": 0,
+              "targetSpriteId": 0,
+              "which": 0
+            },
+            "battlerDriver": {
+              "id": 4,
+              "sinIndex": 0,
+              "delta": 0,
+              "amplitude": 0,
+              "targetSpriteId": 0,
+              "which": 0
+            },
+            "framebufferSha256": "70f4821905ff6f0650e828168cfd97d6e92658b2578b7c1673c4fbccbdafd667"
+          }
+        },
+        {
+          "pulseTick": 2348,
+          "acceptedActionOnPulse": true,
+          "pressRow": {
+            "tick": 2348,
+            "battleMainFunc": 134463093,
+            "execFlags": 0,
+            "playerControllerFunc": 134575365,
+            "playerCommand": 18,
+            "playerReturnAction": 0,
+            "bg0Y": 160,
+            "actionState": 2,
+            "persistedMoveSlot": 0,
+            "playerPp": [
+              9,
+              20,
+              20,
+              10
+            ],
+            "playerHp": 117,
+            "opponentHp": 101,
+            "healthboxIsBouncing": true,
+            "battlerIsBouncing": true,
+            "healthboxDriver": {
+              "id": 3,
+              "sinIndex": 135,
+              "delta": 7,
+              "amplitude": 1,
+              "targetSpriteId": 0,
+              "which": 1
+            },
+            "battlerDriver": {
+              "id": 4,
+              "sinIndex": 199,
+              "delta": 7,
+              "amplitude": 1,
+              "targetSpriteId": 6,
+              "which": 0
+            },
+            "framebufferSha256": "c2a09dbe135017788287adb328076a7c9181ab06299f8de757de3619d883a83a"
+          }
+        }
+      ]
+    },
+    "turn2": {
+      "handlerInstalledTick": 3236,
+      "bounceResetAndFirstInputTick": 3237,
+      "postTurnFacts": {
+        "playerHp": 101,
+        "opponentHp": 88,
+        "playerPp": [
+          9,
+          20,
+          19,
+          10
+        ],
+        "persistedMoveSlot": 2
+      },
+      "canonicalRows": [
+        {
+          "tick": 3228,
+          "battleMainFunc": 134461885,
+          "execFlags": 0,
+          "playerControllerFunc": 134575365,
+          "playerCommand": 51,
+          "playerReturnAction": 10,
+          "bg0Y": 0,
+          "actionState": 0,
+          "persistedMoveSlot": 2,
+          "playerPp": [
+            9,
+            20,
+            19,
+            10
+          ],
+          "playerHp": 101,
+          "opponentHp": 88,
+          "healthboxIsBouncing": false,
+          "battlerIsBouncing": false,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "framebufferSha256": "999c663332e965135fe394f49e1f34462b0440d6b8736e25ac9e2dbbeeaa403b"
+        },
+        {
+          "tick": 3229,
+          "battleMainFunc": 134463093,
+          "execFlags": 0,
+          "playerControllerFunc": 134575365,
+          "playerCommand": 51,
+          "playerReturnAction": 10,
+          "bg0Y": 0,
+          "actionState": 0,
+          "persistedMoveSlot": 2,
+          "playerPp": [
+            9,
+            20,
+            19,
+            10
+          ],
+          "playerHp": 101,
+          "opponentHp": 88,
+          "healthboxIsBouncing": false,
+          "battlerIsBouncing": false,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "framebufferSha256": "999c663332e965135fe394f49e1f34462b0440d6b8736e25ac9e2dbbeeaa403b"
+        },
+        {
+          "tick": 3234,
+          "battleMainFunc": 134463093,
+          "execFlags": 1,
+          "playerControllerFunc": 134594565,
+          "playerCommand": 18,
+          "playerReturnAction": 10,
+          "bg0Y": 0,
+          "actionState": 2,
+          "persistedMoveSlot": 2,
+          "playerPp": [
+            9,
+            20,
+            19,
+            10
+          ],
+          "playerHp": 101,
+          "opponentHp": 88,
+          "healthboxIsBouncing": false,
+          "battlerIsBouncing": false,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "framebufferSha256": "ef14ee5a79899a90c27f48e9c6f5645d175fbf77f9e6bc98bfc8f875072e71e4"
+        },
+        {
+          "tick": 3235,
+          "battleMainFunc": 134463093,
+          "execFlags": 1,
+          "playerControllerFunc": 134594565,
+          "playerCommand": 18,
+          "playerReturnAction": 10,
+          "bg0Y": 0,
+          "actionState": 2,
+          "persistedMoveSlot": 2,
+          "playerPp": [
+            9,
+            20,
+            19,
+            10
+          ],
+          "playerHp": 101,
+          "opponentHp": 88,
+          "healthboxIsBouncing": false,
+          "battlerIsBouncing": false,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "framebufferSha256": "ef14ee5a79899a90c27f48e9c6f5645d175fbf77f9e6bc98bfc8f875072e71e4"
+        },
+        {
+          "tick": 3236,
+          "battleMainFunc": 134463093,
+          "execFlags": 1,
+          "playerControllerFunc": 134575497,
+          "playerCommand": 18,
+          "playerReturnAction": 10,
+          "bg0Y": 160,
+          "actionState": 2,
+          "persistedMoveSlot": 2,
+          "playerPp": [
+            9,
+            20,
+            19,
+            10
+          ],
+          "playerHp": 101,
+          "opponentHp": 88,
+          "healthboxIsBouncing": false,
+          "battlerIsBouncing": false,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "framebufferSha256": "ef14ee5a79899a90c27f48e9c6f5645d175fbf77f9e6bc98bfc8f875072e71e4"
+        },
+        {
+          "tick": 3237,
+          "battleMainFunc": 134463093,
+          "execFlags": 1,
+          "playerControllerFunc": 134575497,
+          "playerCommand": 18,
+          "playerReturnAction": 10,
+          "bg0Y": 160,
+          "actionState": 2,
+          "persistedMoveSlot": 2,
+          "playerPp": [
+            9,
+            20,
+            19,
+            10
+          ],
+          "playerHp": 101,
+          "opponentHp": 88,
+          "healthboxIsBouncing": true,
+          "battlerIsBouncing": true,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 135,
+            "delta": 7,
+            "amplitude": 1,
+            "targetSpriteId": 0,
+            "which": 1
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 199,
+            "delta": 7,
+            "amplitude": 1,
+            "targetSpriteId": 6,
+            "which": 0
+          },
+          "framebufferSha256": "a6e5dbf22d8a194fde8a0a7ce9d198a2d27784571bcabaefe52c104baca30610"
+        },
+        {
+          "tick": 3238,
+          "battleMainFunc": 134463093,
+          "execFlags": 1,
+          "playerControllerFunc": 134575497,
+          "playerCommand": 18,
+          "playerReturnAction": 10,
+          "bg0Y": 160,
+          "actionState": 2,
+          "persistedMoveSlot": 2,
+          "playerPp": [
+            9,
+            20,
+            19,
+            10
+          ],
+          "playerHp": 101,
+          "opponentHp": 88,
+          "healthboxIsBouncing": true,
+          "battlerIsBouncing": true,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 142,
+            "delta": 7,
+            "amplitude": 1,
+            "targetSpriteId": 0,
+            "which": 1
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 206,
+            "delta": 7,
+            "amplitude": 1,
+            "targetSpriteId": 6,
+            "which": 0
+          },
+          "framebufferSha256": "8f36f1c784c54c0d11cc2f9b09ba1e1584f6fe4a5bbed8e0ab36e1d88291a078"
+        }
+      ],
+      "inputCandidates": [
+        {
+          "pulseTick": 3236,
+          "acceptedActionOnPulse": false,
+          "pressRow": {
+            "tick": 3236,
+            "battleMainFunc": 134463093,
+            "execFlags": 1,
+            "playerControllerFunc": 134575497,
+            "playerCommand": 18,
+            "playerReturnAction": 10,
+            "bg0Y": 160,
+            "actionState": 2,
+            "persistedMoveSlot": 2,
+            "playerPp": [
+              9,
+              20,
+              19,
+              10
+            ],
+            "playerHp": 101,
+            "opponentHp": 88,
+            "healthboxIsBouncing": false,
+            "battlerIsBouncing": false,
+            "healthboxDriver": {
+              "id": 3,
+              "sinIndex": 0,
+              "delta": 0,
+              "amplitude": 0,
+              "targetSpriteId": 0,
+              "which": 0
+            },
+            "battlerDriver": {
+              "id": 4,
+              "sinIndex": 0,
+              "delta": 0,
+              "amplitude": 0,
+              "targetSpriteId": 0,
+              "which": 0
+            },
+            "framebufferSha256": "ef14ee5a79899a90c27f48e9c6f5645d175fbf77f9e6bc98bfc8f875072e71e4"
+          }
+        },
+        {
+          "pulseTick": 3237,
+          "acceptedActionOnPulse": true,
+          "pressRow": {
+            "tick": 3237,
+            "battleMainFunc": 134463093,
+            "execFlags": 0,
+            "playerControllerFunc": 134575365,
+            "playerCommand": 18,
+            "playerReturnAction": 0,
+            "bg0Y": 160,
+            "actionState": 2,
+            "persistedMoveSlot": 2,
+            "playerPp": [
+              9,
+              20,
+              19,
+              10
+            ],
+            "playerHp": 101,
+            "opponentHp": 88,
+            "healthboxIsBouncing": true,
+            "battlerIsBouncing": true,
+            "healthboxDriver": {
+              "id": 3,
+              "sinIndex": 135,
+              "delta": 7,
+              "amplitude": 1,
+              "targetSpriteId": 0,
+              "which": 1
+            },
+            "battlerDriver": {
+              "id": 4,
+              "sinIndex": 199,
+              "delta": 7,
+              "amplitude": 1,
+              "targetSpriteId": 6,
+              "which": 0
+            },
+            "framebufferSha256": "a6e5dbf22d8a194fde8a0a7ce9d198a2d27784571bcabaefe52c104baca30610"
+          }
+        }
+      ]
+    },
+    "turn3": {
+      "handlerInstalledTick": 4211,
+      "bounceResetAndFirstInputTick": 4212,
+      "postTurnFacts": {
+        "playerHp": 88,
+        "opponentHp": 41,
+        "playerPp": [
+          8,
+          20,
+          19,
+          10
+        ],
+        "persistedMoveSlot": 0
+      },
+      "canonicalRows": [
+        {
+          "tick": 4203,
+          "battleMainFunc": 134461885,
+          "execFlags": 0,
+          "playerControllerFunc": 134575365,
+          "playerCommand": 51,
+          "playerReturnAction": 10,
+          "bg0Y": 0,
+          "actionState": 0,
+          "persistedMoveSlot": 0,
+          "playerPp": [
+            8,
+            20,
+            19,
+            10
+          ],
+          "playerHp": 88,
+          "opponentHp": 41,
+          "healthboxIsBouncing": false,
+          "battlerIsBouncing": false,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "framebufferSha256": "4f32c891c8d07c976be8ac3cdd30b5d199f4eb270a33f1ab5718d14f02608b55"
+        },
+        {
+          "tick": 4204,
+          "battleMainFunc": 134463093,
+          "execFlags": 0,
+          "playerControllerFunc": 134575365,
+          "playerCommand": 51,
+          "playerReturnAction": 10,
+          "bg0Y": 0,
+          "actionState": 0,
+          "persistedMoveSlot": 0,
+          "playerPp": [
+            8,
+            20,
+            19,
+            10
+          ],
+          "playerHp": 88,
+          "opponentHp": 41,
+          "healthboxIsBouncing": false,
+          "battlerIsBouncing": false,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "framebufferSha256": "4f32c891c8d07c976be8ac3cdd30b5d199f4eb270a33f1ab5718d14f02608b55"
+        },
+        {
+          "tick": 4209,
+          "battleMainFunc": 134463093,
+          "execFlags": 3,
+          "playerControllerFunc": 134594565,
+          "playerCommand": 18,
+          "playerReturnAction": 10,
+          "bg0Y": 0,
+          "actionState": 2,
+          "persistedMoveSlot": 0,
+          "playerPp": [
+            8,
+            20,
+            19,
+            10
+          ],
+          "playerHp": 88,
+          "opponentHp": 41,
+          "healthboxIsBouncing": false,
+          "battlerIsBouncing": false,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "framebufferSha256": "a69c11cc9a3d10907dfb9d4c83e1a63f904f14162bb4a55d1fcc4c28f0dee8f7"
+        },
+        {
+          "tick": 4210,
+          "battleMainFunc": 134463093,
+          "execFlags": 1,
+          "playerControllerFunc": 134594565,
+          "playerCommand": 18,
+          "playerReturnAction": 10,
+          "bg0Y": 0,
+          "actionState": 2,
+          "persistedMoveSlot": 0,
+          "playerPp": [
+            8,
+            20,
+            19,
+            10
+          ],
+          "playerHp": 88,
+          "opponentHp": 41,
+          "healthboxIsBouncing": false,
+          "battlerIsBouncing": false,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "framebufferSha256": "a69c11cc9a3d10907dfb9d4c83e1a63f904f14162bb4a55d1fcc4c28f0dee8f7"
+        },
+        {
+          "tick": 4211,
+          "battleMainFunc": 134463093,
+          "execFlags": 1,
+          "playerControllerFunc": 134575497,
+          "playerCommand": 18,
+          "playerReturnAction": 10,
+          "bg0Y": 160,
+          "actionState": 2,
+          "persistedMoveSlot": 0,
+          "playerPp": [
+            8,
+            20,
+            19,
+            10
+          ],
+          "playerHp": 88,
+          "opponentHp": 41,
+          "healthboxIsBouncing": false,
+          "battlerIsBouncing": false,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "framebufferSha256": "a69c11cc9a3d10907dfb9d4c83e1a63f904f14162bb4a55d1fcc4c28f0dee8f7"
+        },
+        {
+          "tick": 4212,
+          "battleMainFunc": 134463093,
+          "execFlags": 1,
+          "playerControllerFunc": 134575497,
+          "playerCommand": 18,
+          "playerReturnAction": 10,
+          "bg0Y": 160,
+          "actionState": 2,
+          "persistedMoveSlot": 0,
+          "playerPp": [
+            8,
+            20,
+            19,
+            10
+          ],
+          "playerHp": 88,
+          "opponentHp": 41,
+          "healthboxIsBouncing": true,
+          "battlerIsBouncing": true,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 135,
+            "delta": 7,
+            "amplitude": 1,
+            "targetSpriteId": 0,
+            "which": 1
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 199,
+            "delta": 7,
+            "amplitude": 1,
+            "targetSpriteId": 6,
+            "which": 0
+          },
+          "framebufferSha256": "faea0cb92fa6e2a6abb4e6879c5c34a5d8e79637a01a8422f17a5258eef156e7"
+        },
+        {
+          "tick": 4213,
+          "battleMainFunc": 134463093,
+          "execFlags": 1,
+          "playerControllerFunc": 134575497,
+          "playerCommand": 18,
+          "playerReturnAction": 10,
+          "bg0Y": 160,
+          "actionState": 2,
+          "persistedMoveSlot": 0,
+          "playerPp": [
+            8,
+            20,
+            19,
+            10
+          ],
+          "playerHp": 88,
+          "opponentHp": 41,
+          "healthboxIsBouncing": true,
+          "battlerIsBouncing": true,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 142,
+            "delta": 7,
+            "amplitude": 1,
+            "targetSpriteId": 0,
+            "which": 1
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 206,
+            "delta": 7,
+            "amplitude": 1,
+            "targetSpriteId": 6,
+            "which": 0
+          },
+          "framebufferSha256": "0039ecaa952af2da0df4ee7cbdb3d2a85f4e770888092b945f7943d806b9b20f"
+        }
+      ],
+      "inputCandidates": [
+        {
+          "pulseTick": 4211,
+          "acceptedActionOnPulse": false,
+          "pressRow": {
+            "tick": 4211,
+            "battleMainFunc": 134463093,
+            "execFlags": 1,
+            "playerControllerFunc": 134575497,
+            "playerCommand": 18,
+            "playerReturnAction": 10,
+            "bg0Y": 160,
+            "actionState": 2,
+            "persistedMoveSlot": 0,
+            "playerPp": [
+              8,
+              20,
+              19,
+              10
+            ],
+            "playerHp": 88,
+            "opponentHp": 41,
+            "healthboxIsBouncing": false,
+            "battlerIsBouncing": false,
+            "healthboxDriver": {
+              "id": 3,
+              "sinIndex": 0,
+              "delta": 0,
+              "amplitude": 0,
+              "targetSpriteId": 0,
+              "which": 0
+            },
+            "battlerDriver": {
+              "id": 4,
+              "sinIndex": 0,
+              "delta": 0,
+              "amplitude": 0,
+              "targetSpriteId": 0,
+              "which": 0
+            },
+            "framebufferSha256": "a69c11cc9a3d10907dfb9d4c83e1a63f904f14162bb4a55d1fcc4c28f0dee8f7"
+          }
+        },
+        {
+          "pulseTick": 4212,
+          "acceptedActionOnPulse": true,
+          "pressRow": {
+            "tick": 4212,
+            "battleMainFunc": 134463093,
+            "execFlags": 0,
+            "playerControllerFunc": 134575365,
+            "playerCommand": 18,
+            "playerReturnAction": 0,
+            "bg0Y": 160,
+            "actionState": 2,
+            "persistedMoveSlot": 0,
+            "playerPp": [
+              8,
+              20,
+              19,
+              10
+            ],
+            "playerHp": 88,
+            "opponentHp": 41,
+            "healthboxIsBouncing": true,
+            "battlerIsBouncing": true,
+            "healthboxDriver": {
+              "id": 3,
+              "sinIndex": 135,
+              "delta": 7,
+              "amplitude": 1,
+              "targetSpriteId": 0,
+              "which": 1
+            },
+            "battlerDriver": {
+              "id": 4,
+              "sinIndex": 199,
+              "delta": 7,
+              "amplitude": 1,
+              "targetSpriteId": 6,
+              "which": 0
+            },
+            "framebufferSha256": "faea0cb92fa6e2a6abb4e6879c5c34a5d8e79637a01a8422f17a5258eef156e7"
+          }
+        }
+      ]
+    },
+    "turn4": {
+      "handlerInstalledTick": 5351,
+      "bounceResetAndFirstInputTick": 5352,
+      "postTurnFacts": {
+        "playerHp": 88,
+        "opponentHp": 1,
+        "playerPp": [
+          7,
+          20,
+          19,
+          10
+        ],
+        "persistedMoveSlot": 0
+      },
+      "canonicalRows": [
+        {
+          "tick": 5343,
+          "battleMainFunc": 134461885,
+          "execFlags": 0,
+          "playerControllerFunc": 134575365,
+          "playerCommand": 51,
+          "playerReturnAction": 10,
+          "bg0Y": 0,
+          "actionState": 0,
+          "persistedMoveSlot": 0,
+          "playerPp": [
+            7,
+            20,
+            19,
+            10
+          ],
+          "playerHp": 88,
+          "opponentHp": 1,
+          "healthboxIsBouncing": false,
+          "battlerIsBouncing": false,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "framebufferSha256": "e56e4c278c62994c474183be421ea6ab891967c8bd8ada1062851aebf6afde17"
+        },
+        {
+          "tick": 5344,
+          "battleMainFunc": 134463093,
+          "execFlags": 0,
+          "playerControllerFunc": 134575365,
+          "playerCommand": 51,
+          "playerReturnAction": 10,
+          "bg0Y": 0,
+          "actionState": 0,
+          "persistedMoveSlot": 0,
+          "playerPp": [
+            7,
+            20,
+            19,
+            10
+          ],
+          "playerHp": 88,
+          "opponentHp": 1,
+          "healthboxIsBouncing": false,
+          "battlerIsBouncing": false,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "framebufferSha256": "e56e4c278c62994c474183be421ea6ab891967c8bd8ada1062851aebf6afde17"
+        },
+        {
+          "tick": 5349,
+          "battleMainFunc": 134463093,
+          "execFlags": 3,
+          "playerControllerFunc": 134594565,
+          "playerCommand": 18,
+          "playerReturnAction": 10,
+          "bg0Y": 0,
+          "actionState": 2,
+          "persistedMoveSlot": 0,
+          "playerPp": [
+            7,
+            20,
+            19,
+            10
+          ],
+          "playerHp": 88,
+          "opponentHp": 1,
+          "healthboxIsBouncing": false,
+          "battlerIsBouncing": false,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "framebufferSha256": "7cc8365cff45a090f825a741daeb61d5d48a503d6c2fc6526306f5ba028beeff"
+        },
+        {
+          "tick": 5350,
+          "battleMainFunc": 134463093,
+          "execFlags": 1,
+          "playerControllerFunc": 134594565,
+          "playerCommand": 18,
+          "playerReturnAction": 10,
+          "bg0Y": 0,
+          "actionState": 2,
+          "persistedMoveSlot": 0,
+          "playerPp": [
+            7,
+            20,
+            19,
+            10
+          ],
+          "playerHp": 88,
+          "opponentHp": 1,
+          "healthboxIsBouncing": false,
+          "battlerIsBouncing": false,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "framebufferSha256": "7cc8365cff45a090f825a741daeb61d5d48a503d6c2fc6526306f5ba028beeff"
+        },
+        {
+          "tick": 5351,
+          "battleMainFunc": 134463093,
+          "execFlags": 1,
+          "playerControllerFunc": 134575497,
+          "playerCommand": 18,
+          "playerReturnAction": 10,
+          "bg0Y": 160,
+          "actionState": 2,
+          "persistedMoveSlot": 0,
+          "playerPp": [
+            7,
+            20,
+            19,
+            10
+          ],
+          "playerHp": 88,
+          "opponentHp": 1,
+          "healthboxIsBouncing": false,
+          "battlerIsBouncing": false,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 0,
+            "delta": 0,
+            "amplitude": 0,
+            "targetSpriteId": 0,
+            "which": 0
+          },
+          "framebufferSha256": "7cc8365cff45a090f825a741daeb61d5d48a503d6c2fc6526306f5ba028beeff"
+        },
+        {
+          "tick": 5352,
+          "battleMainFunc": 134463093,
+          "execFlags": 1,
+          "playerControllerFunc": 134575497,
+          "playerCommand": 18,
+          "playerReturnAction": 10,
+          "bg0Y": 160,
+          "actionState": 2,
+          "persistedMoveSlot": 0,
+          "playerPp": [
+            7,
+            20,
+            19,
+            10
+          ],
+          "playerHp": 88,
+          "opponentHp": 1,
+          "healthboxIsBouncing": true,
+          "battlerIsBouncing": true,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 135,
+            "delta": 7,
+            "amplitude": 1,
+            "targetSpriteId": 0,
+            "which": 1
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 199,
+            "delta": 7,
+            "amplitude": 1,
+            "targetSpriteId": 6,
+            "which": 0
+          },
+          "framebufferSha256": "46b0356f90c262b02701ce9f967dd72ca9a9743e48d0b93bfcd5878e00033f77"
+        },
+        {
+          "tick": 5353,
+          "battleMainFunc": 134463093,
+          "execFlags": 1,
+          "playerControllerFunc": 134575497,
+          "playerCommand": 18,
+          "playerReturnAction": 10,
+          "bg0Y": 160,
+          "actionState": 2,
+          "persistedMoveSlot": 0,
+          "playerPp": [
+            7,
+            20,
+            19,
+            10
+          ],
+          "playerHp": 88,
+          "opponentHp": 1,
+          "healthboxIsBouncing": true,
+          "battlerIsBouncing": true,
+          "healthboxDriver": {
+            "id": 3,
+            "sinIndex": 142,
+            "delta": 7,
+            "amplitude": 1,
+            "targetSpriteId": 0,
+            "which": 1
+          },
+          "battlerDriver": {
+            "id": 4,
+            "sinIndex": 206,
+            "delta": 7,
+            "amplitude": 1,
+            "targetSpriteId": 6,
+            "which": 0
+          },
+          "framebufferSha256": "bdd7ae0989f662be2913aab67f54f177896a452f95a0bbe44ddf953039e13eb4"
+        }
+      ],
+      "inputCandidates": [
+        {
+          "pulseTick": 5351,
+          "acceptedActionOnPulse": false,
+          "pressRow": {
+            "tick": 5351,
+            "battleMainFunc": 134463093,
+            "execFlags": 1,
+            "playerControllerFunc": 134575497,
+            "playerCommand": 18,
+            "playerReturnAction": 10,
+            "bg0Y": 160,
+            "actionState": 2,
+            "persistedMoveSlot": 0,
+            "playerPp": [
+              7,
+              20,
+              19,
+              10
+            ],
+            "playerHp": 88,
+            "opponentHp": 1,
+            "healthboxIsBouncing": false,
+            "battlerIsBouncing": false,
+            "healthboxDriver": {
+              "id": 3,
+              "sinIndex": 0,
+              "delta": 0,
+              "amplitude": 0,
+              "targetSpriteId": 0,
+              "which": 0
+            },
+            "battlerDriver": {
+              "id": 4,
+              "sinIndex": 0,
+              "delta": 0,
+              "amplitude": 0,
+              "targetSpriteId": 0,
+              "which": 0
+            },
+            "framebufferSha256": "7cc8365cff45a090f825a741daeb61d5d48a503d6c2fc6526306f5ba028beeff"
+          }
+        },
+        {
+          "pulseTick": 5352,
+          "acceptedActionOnPulse": true,
+          "pressRow": {
+            "tick": 5352,
+            "battleMainFunc": 134463093,
+            "execFlags": 0,
+            "playerControllerFunc": 134575365,
+            "playerCommand": 18,
+            "playerReturnAction": 0,
+            "bg0Y": 160,
+            "actionState": 2,
+            "persistedMoveSlot": 0,
+            "playerPp": [
+              7,
+              20,
+              19,
+              10
+            ],
+            "playerHp": 88,
+            "opponentHp": 1,
+            "healthboxIsBouncing": true,
+            "battlerIsBouncing": true,
+            "healthboxDriver": {
+              "id": 3,
+              "sinIndex": 135,
+              "delta": 7,
+              "amplitude": 1,
+              "targetSpriteId": 0,
+              "which": 1
+            },
+            "battlerDriver": {
+              "id": 4,
+              "sinIndex": 199,
+              "delta": 7,
+              "amplitude": 1,
+              "targetSpriteId": 6,
+              "which": 0
+            },
+            "framebufferSha256": "46b0356f90c262b02701ce9f967dd72ca9a9743e48d0b93bfcd5878e00033f77"
+          }
+        }
+      ]
+    }
+  }
+}
