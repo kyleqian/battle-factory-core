@@ -1,5 +1,35 @@
 # Animation coverage
 
+## Front `ANIM_V_SLIDE_WOBBLE` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2n is exact for all **8 selector mappings / 8
+Factory-reachable species**, with **zero outside-Factory mappings**: SEAKING,
+HOPPIP, MISDREAVUS, SHEDINJA, PELIPPER, WAILORD, GOREBYSS, SHUPPET. SEAKING
+is the representative and SHUPPET the sibling; every prior accepted front
+family remains regression-pinned. Move coverage stays **107 exact / 0 partial
+/ 0 staged / 169 unsupported** and `ANIMATION_COVERAGE.json` is byte-identical
+at SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:911-939,984-1028,
+1735-1766,3761-3765` proves Task zeroed data defaults, normal data0=10,
+tick-0 affine start, C-truncated index/var arithmetic, var's u8 mask, every GBA
+sine y2 and signed-s16 to u16 affine-rotation write on the normal-front
+`sDontFlip=TRUE` path, data2 increment order, and tick-101 identity/y2/reset/
+`WaitAnimEnd` cleanup after **101 active callbacks (ticks 0..100)**. The
+distinct Small initializer data0=5 remains explicitly unaccepted. Fresh
+complete legal Scene-ON parties settle both species at x2=0/y2=0/animNum=1/
+`SpriteCallbackDummy`. Paired direct raw outputs are byte-identical with no EOF
+newline: SEAKING SHA-256
+`06751f507c7530342cd859a0b16d8830b55a2ce2f52d82e6857ea13b25c1381b`,
+SHUPPET `3f180c13952503be637c5aaa329a8121ef3eaf0d1098c664e15fe381d11502ef`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per legal party; raw `cmp`; focused family plus
+both ratchets **120/120**; TypeScript no-emit and diff checks green; exactly one
+full `npm test` **567 files, 5811 passed + 1 skipped** and one `npm run build`
+green. The next source-ranked generated census family is
+**`ANIM_H_SLIDE_WOBBLE`** (8 Factory species).
+
 ## Front `ANIM_V_SHAKE_TWICE` terminal family accepted (2026-08-01)
 
 **Verdict / counts:** rung 2m is exact for all **8 selector mappings / 8
