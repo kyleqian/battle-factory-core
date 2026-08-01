@@ -1,0 +1,61 @@
+import { describe, expect, it } from "vitest";
+import { currentPPForActiveMon } from "../src/engine/battleMenu.ts";
+import { rentalMoveset } from "../src/engine/battleSetup.ts";
+import { resolveTurn5CompletedResolutionNextCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
+import { resolveTurn6CompletedResolutionNextCommandHandoff } from "../src/engine/turn6ResolutionAdapter.ts";
+import {
+  isTurn7NextCommandHandoffReady,
+  resolveTurn7CompletedResolutionNextCommandHandoff,
+} from "../src/engine/turn7ResolutionAdapter.ts";
+
+describe("turn7ResolutionAdapter: #39 completed-turn-7/next-command handoff proof", () => {
+  it("publishes the same settled redraw/input-ready facts that the old reopen guard supplied", () => {
+    const handoff = resolveTurn7CompletedResolutionNextCommandHandoff();
+
+    expect(handoff.nextCommand).toEqual({ redraw: "settled", input: "ready" });
+    expect(isTurn7NextCommandHandoffReady(handoff)).toBe(true);
+    expect(isTurn7NextCommandHandoffReady(null)).toBe(false);
+  });
+
+  it("publishes the persisted ROCK_SLIDE slot required by the turn-8 FIGHT dispatcher", () => {
+    expect(resolveTurn7CompletedResolutionNextCommandHandoff().persistedMoveSlot).toBe(0);
+  });
+
+  it("owns exactly the old turn-7-resolved PP receipt without depending on staged move composition", () => {
+    const onix = rentalMoveset("ONIX");
+    const turn5Handoff = resolveTurn5CompletedResolutionNextCommandHandoff();
+    const turn6Handoff = resolveTurn6CompletedResolutionNextCommandHandoff();
+    const handoff = resolveTurn7CompletedResolutionNextCommandHandoff();
+    const oldFlagReceipt = currentPPForActiveMon(
+      onix,
+      true, true, true, true,
+      turn5Handoff,
+      turn6Handoff,
+      true,
+    );
+
+    expect(oldFlagReceipt).toEqual([4, 20, 19, 10]);
+    expect(handoff.playerPp).toEqual(oldFlagReceipt);
+    expect(handoff.playerPp).toEqual([4, 20, 19, 10]);
+    expect(Object.isFrozen(handoff)).toBe(true);
+    expect(Object.isFrozen(handoff.playerPp)).toBe(true);
+    expect(Object.isFrozen(handoff.nextCommand)).toBe(true);
+  });
+
+  it("identifies slot 0 as the canonical handoff fact while the menu keeps generic slots generic", () => {
+    const genericMoveset = {
+      moveIds: [157, 349, 288, 201],
+      maxPP: [10, 15, 20, 10],
+    } as const;
+    const oldFlagReceipt = currentPPForActiveMon(
+      genericMoveset,
+      true, true, true, true,
+      resolveTurn5CompletedResolutionNextCommandHandoff(),
+      resolveTurn6CompletedResolutionNextCommandHandoff(),
+      true,
+    );
+
+    expect(oldFlagReceipt).toEqual([4, 15, 19, 10]);
+    expect(resolveTurn7CompletedResolutionNextCommandHandoff().playerPp[0]).toBe(oldFlagReceipt[0]);
+  });
+});
