@@ -13,6 +13,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 808 — [bounded worker, 2026-07-31 ~night] ISSUES #61 DMA reveal boundary characterized; no unsafe global fix landed
+
+- **State:** evidence commit `bc988ef9`; production code/tests unchanged,
+  focused battle-menu/fight-submenu/command-presentation/battle-scene/ratchet
+  suites green (**442/442**) and `npm run build` green. The worker process
+  stalled after completing its turn and was terminated by the supervisor;
+  committed evidence and the main tree remained clean.
+- **Did:** committed two reproducible Battle Scene OFF RAM-watch specs and
+  `docs/issue61-fight-submenu-reveal-boundary.md`. Source + RAM prove the
+  reveal is the generic `HandleChooseMoveAfterDma3`/BG-copy-ready transition:
+  initial, turn-2, and turn-4 openings need one busy poll, while turn 3 needs
+  two. A global `<`/`<=` or delay change would repair frame 3852 but regress
+  already-exact windows, so no turn/tick exception or speculative constant
+  was added.
+- **Next:** implement one command-presentation-owned DMA-ready reveal event
+  (or faithful bounded BG-copy queue model), route legacy Scene-OFF renderers
+  and input gating through it, then require turn 3 **255/255** with turns
+  1/2/4 unchanged. If not taken immediately, continue #56 item 2; #62 stays
+  separate retired-trace pixel debt.
+- **Notes:** insurance remained exact for every committed turn-1/2/4 OFF
+  trace; turn 3 remains the same single mismatch. No ratchet pin moved and no
+  unsupported branch was added. No `animation-main` fold existed at orient;
+  new animation commits arrived later and remain intentionally unfolded.
+- **PAPERCUT:** Codex `exec` waited on already-closed stdin after the final
+  tool event; ~10 minutes lost before the supervisor terminated the child.
+
 ## 807 — [bounded worker, 2026-07-31 ~night] ISSUES #60 typed Scene-OFF stat adapter crash fixed
 
 - **State:** implementation commit `f1bc60a2`; focused vitest is green
@@ -144,4 +170,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
     remains); (v) turns 5-8 OFF pin policy question for the user when
     their re-timing comes up; (vi) rank 7 (FLY) / rank 8 (burn projection)
     inventory rows. #55 parked.
-

@@ -374,32 +374,30 @@ ROADMAP S10 §3 requires one already-exact window to be re-driven from semantic
 events as a proof of the seam; that conversion, window by window, is the
 retirement path. AGENTS.md already forbids adding new turn-keyed branches.
 
-## #61 — turn 3's own reopen shows the FIGHT submenu one tick early (frame 3852) vs. the real ONIX action-menu dwell
+## #61 — Scene-OFF FIGHT reveal needs a source-owned DMA-ready event, not a fixed delay
 
-**Discovered** 2026-07-31 (rank-6 slice 3's own acceptance run against
-`turn3-endeavor-off.json`). At the single tick 3852 (6 ticks past turn 3's
-own reopen A-press, 3846-3847), the oracle still shows the top-level
-"What will ONIX do?" action menu, while the app has already switched to the
-FIGHT submenu's move list (ROCK SLIDE/DRAGONBREATH/BIND/SANDSTORM). Every
-other tick in the window (3846-4260, both `turn3-endeavor-off.json` and
-`turn3-rockslide-off.json`) is exact. **Confirmed pre-existing, not a rank-6
-regression**: `git stash` against this slice's own changes reproduces the
-same mismatch on master at `594c40c7` (in fact worse — 8047px there vs
-7278px after this slice's own fixes, since this slice's bounce-chain
-corrections happened to also tighten this exact frame's sprite/healthbox
-area). Root cause not isolated this session (out of time) — the generic
-`sm.openElapsed`/`FIGHT_SUBMENU_OPEN_DELAY`/`revealTick` mechanism
-(`battleScene.ts`, ~11 call sites) governs the action-menu-vs-submenu
-reveal boundary and is shared by every turn's own reopen; turn 3's own
-reopen (a 2-frame A-press at 3846-3847, then a 30-tick dwell, then a
-2-frame UP-nav, then confirm at 3891) is the first reopen sequence dense
-enough to sample the exact `revealTick` boundary tick itself, so this may
-be a `t >= revealTick` vs `t > revealTick` off-by-one that every other
-turn's own reopen simply never landed a test frame on. Leads for whoever
-picks it up: check `sm.openElapsed`'s own setter (`battleMenu.ts`) against
-the real hardware's own reveal boundary directly (RAM probe, not pixel
-inference), and grep the ~11 `revealTick` call sites before changing the
-shared comparison (turn 1/2/4's own reopens must not regress).
+**Bounded evidence (2026-07-31, `bc988ef9`):** the reproducible OFF-profile
+watch specs and full source/RAM analysis live in
+`docs/issue61-fight-submenu-reveal-boundary.md`. The real player controller
+reveals the move list only when `HandleChooseMoveAfterDma3` observes the BG
+copy queue idle, writes `gBattle_BG0_Y=320`, and installs
+`HandleInputChooseMove`. Initial, turn-2, and turn-4 openings cross after one
+DMA-busy poll; turn 3 crosses after two because its busy bitfield remains
+nonzero for one extra poll. Pixels agree: the oracle keeps the action menu at
+frame 3852 and reveals on 3853, while the app reveals at 3852. Every other
+turn-3 capture is exact, and all committed turn-1/2/4 OFF insurance traces
+remain exact.
+
+**Rejected fix:** globally changing `t < revealTick` to `t <= revealTick`, or
+increasing `FIGHT_SUBMENU_OPEN_DELAY`, fixes turn 3 but makes the other exact
+openings one frame late. Do not add a turn-3/tick/cursor exception.
+
+**Next:** the generic command-presentation owner must expose a source-derived
+DMA-ready reveal event (or a faithful bounded BG-copy queue model); both
+legacy Scene-OFF renderers and their input gate must consume that one semantic
+transition. Acceptance is turn 3 **255/255**, every committed turn-1/2/4 OFF
+trace unchanged, synthetic initial/reopen boundary tests, and no new
+battle/turn/absolute-tick routing.
 
 ## #62 — Retired turn-2-shaped reproducers remain pixel-red on the generated OFF route after #60's crash fix
 

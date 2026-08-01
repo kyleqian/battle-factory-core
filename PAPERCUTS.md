@@ -31,6 +31,20 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
+## Codex worker waits forever for additional input after its bounded turn
+
+- **What:** after the #61 worker's last completed tool event and committed
+  evidence checkpoint, `codex exec` printed `Reading additional input from
+  stdin...` even though the launcher's managed session already had closed
+  stdin. The event log stopped advancing and the process stayed idle until
+  the supervisor terminated only the Codex child; postflight then
+  misleadingly labeled exit 241 as an authentication failure.
+- **Hits:** 1.
+- **Cost each:** ~10 min.
+- **Workaround:** confirm the JSONL mtime, clean tree, and committed checkpoint
+  before terminating the wedged child; the launcher should explicitly close
+  Codex stdin and distinguish signal exits from authentication failures.
+
 ## Shell command substitution mutates inline worker briefs
 
 - **What:** Markdown backticks embedded in a double-quoted
