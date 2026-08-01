@@ -24,10 +24,10 @@ describe("turn10ResolutionAdapter: #39 completed-turn-10/next-command handoff pr
     expect(resolveTurn10CompletedResolutionNextCommandHandoff().persistedMoveSlot).toBe(0);
   });
 
-  it("owns exactly the completed turn-10 PP receipt supplied by the live boolean path without staged move composition", () => {
+  it("owns exactly the completed turn-10 PP receipt consumed by the live submenu without staged move composition", () => {
     const onix = rentalMoveset("ONIX");
     const handoff = resolveTurn10CompletedResolutionNextCommandHandoff();
-    const liveBooleanReceipt = currentPPForActiveMon(
+    const liveReceipt = currentPPForActiveMon(
       onix,
       true, true, true, true,
       resolveTurn5CompletedResolutionNextCommandHandoff(),
@@ -35,11 +35,11 @@ describe("turn10ResolutionAdapter: #39 completed-turn-10/next-command handoff pr
       resolveTurn7CompletedResolutionNextCommandHandoff(),
       resolveTurn8CompletedResolutionNextCommandHandoff(),
       resolveTurn9CompletedResolutionNextCommandHandoff(),
-      true,
+      handoff,
     );
 
-    expect(liveBooleanReceipt).toEqual([2, 19, 19, 10]);
-    expect(handoff.playerPp).toEqual(liveBooleanReceipt);
+    expect(liveReceipt).toEqual([2, 19, 19, 10]);
+    expect(handoff.playerPp).toEqual(liveReceipt);
     expect(handoff.playerPp).toEqual([2, 19, 19, 10]);
     expect(Object.isFrozen(handoff)).toBe(true);
     expect(Object.isFrozen(handoff.playerPp)).toBe(true);
@@ -51,7 +51,7 @@ describe("turn10ResolutionAdapter: #39 completed-turn-10/next-command handoff pr
       moveIds: [157, 20, 288, 201],
       maxPP: [10, 15, 20, 10],
     } as const;
-    const liveBooleanReceipt = currentPPForActiveMon(
+    const liveReceipt = currentPPForActiveMon(
       genericMoveset,
       true, true, true, true,
       resolveTurn5CompletedResolutionNextCommandHandoff(),
@@ -59,11 +59,11 @@ describe("turn10ResolutionAdapter: #39 completed-turn-10/next-command handoff pr
       resolveTurn7CompletedResolutionNextCommandHandoff(),
       resolveTurn8CompletedResolutionNextCommandHandoff(),
       resolveTurn9CompletedResolutionNextCommandHandoff(),
-      true,
+      resolveTurn10CompletedResolutionNextCommandHandoff(),
     );
 
-    expect(liveBooleanReceipt).toEqual([2, 14, 19, 10]);
-    expect(liveBooleanReceipt[0]).toBe(genericMoveset.maxPP[0] - 8);
+    expect(liveReceipt).toEqual([2, 14, 19, 10]);
+    expect(liveReceipt[0]).toBe(genericMoveset.maxPP[0] - 8);
     expect(resolveTurn10CompletedResolutionNextCommandHandoff().playerPp[0]).toBe(2);
   });
 });

@@ -30,6 +30,7 @@ import { resolveTurn6CompletedResolutionNextCommandHandoff } from "../src/engine
 import { resolveTurn7CompletedResolutionNextCommandHandoff } from "../src/engine/turn7ResolutionAdapter.ts";
 import { resolveTurn8CompletedResolutionNextCommandHandoff } from "../src/engine/turn8ResolutionAdapter.ts";
 import { resolveTurn9CompletedResolutionNextCommandHandoff } from "../src/engine/turn9ResolutionAdapter.ts";
+import { resolveTurn10CompletedResolutionNextCommandHandoff } from "../src/engine/turn10ResolutionAdapter.ts";
 import { createInitialState, tick } from "../src/engine/core.ts";
 import { CLOSED_FIGHT_SUBMENU_STATE } from "../src/engine/battleMenu.ts";
 import {
@@ -70,7 +71,7 @@ describe("turn 17 faint hold and outcome latency", () => {
         turn7NextCommandHandoff: resolveTurn7CompletedResolutionNextCommandHandoff(),
         turn8NextCommandHandoff: resolveTurn8CompletedResolutionNextCommandHandoff(),
         turn9NextCommandHandoff: resolveTurn9CompletedResolutionNextCommandHandoff(),
-        turn10Resolved: true,
+        turn10NextCommandHandoff: resolveTurn10CompletedResolutionNextCommandHandoff(),
         turn11Resolved: true,
         turn12Resolved: true,
         turn13NextCommandHandoff: resolveTurn13CompletedResolutionNextCommandHandoff(),
