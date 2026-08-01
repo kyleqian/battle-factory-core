@@ -1,5 +1,34 @@
 # Animation coverage
 
+## Front `ANIM_CIRCULAR_STRETCH_TWICE` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2u is exact for all **6 selector mappings / 6
+Factory-reachable species**, with **zero outside-Factory mappings**: DITTO,
+MUDKIP, SWELLOW, WAILMER, MINUN, REGIROCK. DITTO is the representative and
+REGIROCK the terminal sibling; every prior accepted front family remains
+regression-pinned. Move coverage stays **107 exact / 0 partial / 0 staged / 169
+unsupported** and `ANIMATION_COVERAGE.json` remains byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:911-939,1087-1109`
+proves task-zeroed data, normal-front `sDontFlip=TRUE`, tick-0 affine start,
+and all **41 active callbacks** (data2=0..40) with C-truncated
+`(data2*512/40)%256` indices and amplitude-32 GBA sine/cosine scales in
+data4/data5. Tick 41 writes identity affine, calls `ResetSpriteAfterAnim`,
+installs `WaitAnimEnd`, and increments data2 to 42. Fresh complete legal
+Scene-ON parties settle both species at x2=0/y2=0/animNum=1/
+`SpriteCallbackDummy`. Paired raw outputs are byte-identical with no EOF
+newline: DITTO SHA-256
+`26cae4ff0244a36a7cb6dbea0e7cfbe94b506ec4a86bea200f5032c433dc595e`,
+REGIROCK `5d2e0fb67df2033d4868db97e13f5bf473d34c9b5a498a4da42d90847cb7c7d3`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per legal party; raw `cmp`; focused family plus
+both ratchets **186/186**; TypeScript no-emit and diff checks green; exactly one
+full `npm test` and one `npm run build` green. The next source-ranked generated
+census family is **`ANIM_SHRINK_GROW`** (6/6 Factory species, zero outside):
+WARTORTLE, NIDORINO, KOFFING, RHYDON, SLOWKING, GLIGAR.
+
 ## Front `ANIM_H_SLIDE_SLOW` terminal family accepted (2026-08-01)
 
 **Verdict / counts:** rung 2t is exact for all **7 selector mappings / 7
