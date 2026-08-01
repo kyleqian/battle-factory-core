@@ -1,5 +1,40 @@
 # Animation coverage
 
+## Front `ANIM_FLICKER_INCREASING` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** exact for the complete generated selector census: all
+**2 mappings / 2 Factory-reachable species / 0 outside-Factory mappings** —
+HAUNTER (representative) and KECLEON (terminal sibling). No adjacent selector,
+unsupported barrier, per-species branch, or absolute-tick branch was added.
+Move coverage remains **107 exact / 0 partial / 0 staged / 169 unsupported**;
+`ANIMATION_COVERAGE.json` is unchanged at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,1037-1059,
+2949-2974,5540-5544` proves task-zeroed data2/data7, the adjacent unused
+`InitAnimData`/`AddNewAnim` defaults, source-order data7 reset/equality and
+invisibility writes, strict data2 > 10 termination, and stable `WaitAnimEnd`.
+All **66 callbacks** are exhaustive: tick 0 moves data2 0->1 visible with
+data7=0; each phase n=1..10 has n invisible callbacks followed by its visible
+equality callback, which resets data7=0 and increments data2. Callback 66
+(tick 65) is phase 10's equality edge, raises data2 10->11, forces visible,
+installs `WaitAnimEnd`, and remains byte-stable thereafter. Fresh complete
+legal challenge-0 Scene-ON parties settle both species at x2=0/y2=0,
+animNum=1/`SpriteCallbackDummy`; paired raw receipts end at byte 125 without a
+newline and are byte-identical: HAUNTER **372 bytes**, SHA-256
+`398f043ed6a00f057c7ada95eb36e89f21000f886ffac5afd77df79055539c54`;
+KECLEON **373 bytes**, SHA-256
+`f231f0843138b3b18ff69bbbb6ee4d10df6f77f42fa553b5c603a39eb41f3e38`.
+
+**Verification / next:** unchanged `dump-onix-front-idle-anim.py` ran only via
+`tools/run-mgba-probe.py` twice per legal party in one fresh `mktemp` directory;
+paired raw `cmp`, focused family plus both ratchets **259/259**, `npx tsc
+--noEmit`, and diff checks are green. The single post-change full `npm test` is
+green at **572 files, 5,981 passed + 1 skipped**; production build is green
+(**534 modules transformed**). Next bounded generated family:
+**`ANIM_GROW_IN_STAGES`** (3 mappings / 2 Factory / 1 outside): GENGAR,
+QWILFISH, LUGIA.
+
 ## Front `ANIM_ROTATE_UP_TO_SIDES` terminal family accepted (2026-08-01)
 
 **Verdict / counts:** exact for the complete generated selector census: all
