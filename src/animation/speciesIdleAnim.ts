@@ -42,6 +42,7 @@ import selectorTables from "../data/gen/send-out-anim-selector-tables.json" with
  */
 
 export type SpeciesFrontAnimFamily =
+  | "BOUNCE_ROTATE_TO_SIDES"
   | "BOUNCE_ROTATE_TO_SIDES_SMALL"
   | "BOUNCE_ROTATE_TO_SIDES_SLOW"
   | "CIRCULAR_STRETCH_TWICE"
@@ -69,6 +70,7 @@ export type SpeciesFrontAnimFamily =
 
 const FRONT_ANIM_PREFIX = "ANIM_";
 const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
+  "BOUNCE_ROTATE_TO_SIDES",
   "BOUNCE_ROTATE_TO_SIDES_SMALL",
   "BOUNCE_ROTATE_TO_SIDES_SLOW",
   "CIRCULAR_STRETCH_TWICE",
@@ -254,6 +256,26 @@ export const H_JUMPS_V_STRETCH_FACTORY_FRONT_SPECIES: readonly string[] = Object
 export const H_JUMPS_V_STRETCH_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   H_JUMPS_V_STRETCH_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
+
+/** All 5 source selector mappings for the normal `ANIM_BOUNCE_ROTATE_TO_SIDES`. */
+export const BOUNCE_ROTATE_TO_SIDES_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_BOUNCE_ROTATE_TO_SIDES")
+    .map(([species]) => species),
+);
+
+/** Every normal bounce/rotate selector mapping is Factory-reachable. */
+export const BOUNCE_ROTATE_TO_SIDES_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  BOUNCE_ROTATE_TO_SIDES_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no normal bounce/rotate mappings outside the Factory pool. */
+export const BOUNCE_ROTATE_TO_SIDES_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
+  Object.freeze(
+    BOUNCE_ROTATE_TO_SIDES_FRONT_SPECIES.filter(
+      (species) => !factoryFrontSpecies.has(species),
+    ),
+  );
 
 /** All 9 source selector mappings for `ANIM_BOUNCE_ROTATE_TO_SIDES_SLOW`. */
 export const BOUNCE_ROTATE_TO_SIDES_SLOW_FRONT_SPECIES: readonly string[] = Object.freeze(
@@ -1514,7 +1536,7 @@ export interface BounceRotateToSidesFrame extends SpeciesIdleOffset {
   readonly affineMode: "double" | "normal";
 }
 
-function bounceRotateToSidesFrameAtTick(
+function bounceRotateToSidesVariantFrameAtTick(
   ticksSinceStart: number,
   variant: (typeof BOUNCE_ROTATE_TO_SIDES_VARIANTS)[keyof typeof BOUNCE_ROTATE_TO_SIDES_VARIANTS],
 ): BounceRotateToSidesFrame | null {
@@ -1630,6 +1652,21 @@ function bounceRotateToSidesFrameAtTick(
 }
 
 /**
+ * Exact source-order normal `Anim_BounceRotateToSides` lifecycle. The
+ * task-zeroed `data6=0` selects table 0, while `AddNewAnim` defaults are
+ * followed by the normal initializer's rotation 4096. Active ticks are
+ * 0..86; tick 87 consumes the zero-duration sentinel.
+ */
+export function bounceRotateToSidesFrameAtTick(
+  ticksSinceStart: number,
+): BounceRotateToSidesFrame | null {
+  return bounceRotateToSidesVariantFrameAtTick(
+    ticksSinceStart,
+    BOUNCE_ROTATE_TO_SIDES_VARIANTS.normal,
+  );
+}
+
+/**
  * Exact source-order normal `Anim_BounceRotateToSides_Slow` lifecycle:
  * initializer -> normal rotation-4096 initializer -> shared callback. Active
  * ticks are 0..166; tick 167 consumes the zero-duration sentinel and performs
@@ -1638,7 +1675,10 @@ function bounceRotateToSidesFrameAtTick(
 export function bounceRotateToSidesSlowFrameAtTick(
   ticksSinceStart: number,
 ): BounceRotateToSidesFrame | null {
-  return bounceRotateToSidesFrameAtTick(ticksSinceStart, BOUNCE_ROTATE_TO_SIDES_VARIANTS.slow);
+  return bounceRotateToSidesVariantFrameAtTick(
+    ticksSinceStart,
+    BOUNCE_ROTATE_TO_SIDES_VARIANTS.slow,
+  );
 }
 
 /**
@@ -1650,14 +1690,17 @@ export function bounceRotateToSidesSlowFrameAtTick(
 export function bounceRotateToSidesSmallFrameAtTick(
   ticksSinceStart: number,
 ): BounceRotateToSidesFrame | null {
-  return bounceRotateToSidesFrameAtTick(ticksSinceStart, BOUNCE_ROTATE_TO_SIDES_VARIANTS.small);
+  return bounceRotateToSidesVariantFrameAtTick(
+    ticksSinceStart,
+    BOUNCE_ROTATE_TO_SIDES_VARIANTS.small,
+  );
 }
 
 /** Source sibling retained explicitly: small rotation with the slow table. */
 export function bounceRotateToSidesSmallSlowFrameAtTick(
   ticksSinceStart: number,
 ): BounceRotateToSidesFrame | null {
-  return bounceRotateToSidesFrameAtTick(
+  return bounceRotateToSidesVariantFrameAtTick(
     ticksSinceStart,
     BOUNCE_ROTATE_TO_SIDES_VARIANTS.smallSlow,
   );
@@ -2582,6 +2625,13 @@ export function flashYellowFrameAtTick(
 
 function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffset {
   switch (family) {
+    case "BOUNCE_ROTATE_TO_SIDES": {
+      const terminal = bounceRotateToSidesFrameAtTick(87);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_BounceRotateToSides did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
     case "BOUNCE_ROTATE_TO_SIDES_SMALL": {
       const terminal = bounceRotateToSidesSmallFrameAtTick(87);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
