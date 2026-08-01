@@ -19,6 +19,10 @@ import {
   GROW_VIBRATE_FACTORY_FRONT_SPECIES,
   GROW_VIBRATE_FRONT_SPECIES,
   GROW_VIBRATE_OUTSIDE_FACTORY_FRONT_SPECIES,
+  horizontalJumpsFrameAtTick,
+  H_JUMPS_FACTORY_FRONT_SPECIES,
+  H_JUMPS_FRONT_SPECIES,
+  H_JUMPS_OUTSIDE_FACTORY_FRONT_SPECIES,
   horizontalSlideWobbleFrameAtTick,
   H_SLIDE_WOBBLE_FACTORY_FRONT_SPECIES,
   H_SLIDE_WOBBLE_FRONT_SPECIES,
@@ -146,6 +150,12 @@ import butterfreeRunB from "../../tools/compare/fixtures/sendout-front-butterfre
 import chimechoScenario from "../../tools/compare/fixtures/sendout-front-chimecho.json" with { type: "json" };
 import chimechoRunA from "../../tools/compare/fixtures/sendout-front-chimecho-run-a.json" with { type: "json" };
 import chimechoRunB from "../../tools/compare/fixtures/sendout-front-chimecho-run-b.json" with { type: "json" };
+import wigglytuffScenario from "../../tools/compare/fixtures/sendout-front-wigglytuff.json" with { type: "json" };
+import wigglytuffRunA from "../../tools/compare/fixtures/sendout-front-wigglytuff-run-a.json" with { type: "json" };
+import wigglytuffRunB from "../../tools/compare/fixtures/sendout-front-wigglytuff-run-b.json" with { type: "json" };
+import vigorothScenario from "../../tools/compare/fixtures/sendout-front-vigoroth.json" with { type: "json" };
+import vigorothRunA from "../../tools/compare/fixtures/sendout-front-vigoroth-run-a.json" with { type: "json" };
+import vigorothRunB from "../../tools/compare/fixtures/sendout-front-vigoroth-run-b.json" with { type: "json" };
 import {
   KABUTO_FRONT_ANIM_START_OFFSET,
   kabutoHSlideWobble,
@@ -258,6 +268,18 @@ const chimechoRawA = readFileSync(
 );
 const chimechoRawB = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-chimecho-run-b.json", import.meta.url),
+);
+const wigglytuffRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-wigglytuff-run-a.json", import.meta.url),
+);
+const wigglytuffRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-wigglytuff-run-b.json", import.meta.url),
+);
+const vigorothRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-vigoroth-run-a.json", import.meta.url),
+);
+const vigorothRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-vigoroth-run-b.json", import.meta.url),
 );
 
 describe("speciesIdleAnim", () => {
@@ -2782,6 +2804,210 @@ describe("speciesIdleAnim", () => {
         "SQUIRTLE", "SHUCKLE", "SEADRA", "MARSHTOMP", "CHARMANDER", "DELIBIRD",
         "MANKEY", "WYNAUT", "VILEPLUME", "LOUDRED", "JIGGLYPUFF", "GYARADOS",
         "BLASTOISE", "BAGON", "SEAKING", "SHUPPET", "BUTTERFREE", "CHIMECHO",
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("horizontalJumpsFrameAtTick (source lifecycle)", () => {
+    it("derives exactly all 8 selector mappings as Factory-reachable with zero outside", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_H_JUMPS")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(H_JUMPS_FRONT_SPECIES).toEqual(generated);
+      expect(H_JUMPS_FRONT_SPECIES).toEqual([
+        "WIGGLYTUFF", "ABRA", "MACHAMP", "TOTODILE",
+        "NATU", "SMEARGLE", "SPINDA", "VIGOROTH",
+      ]);
+      expect(H_JUMPS_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(H_JUMPS_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(H_JUMPS_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of H_JUMPS_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins zeroed task data and both normal-front flip no-ops", () => {
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
+      expect(horizontalJumpsFrameAtTick(0)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 0,
+        data2: 12,
+        counter: 0,
+        divCounter: 0,
+        remainder: 0,
+        sineIndex: 0,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        callback: "Anim_HorizontalJumps",
+      });
+    });
+
+    it("pins every active callback in exact source order across all four switch legs", () => {
+      const active = Array.from({ length: 43 }, (_, tick) => {
+        const counter = tick * 12;
+        const divCounter = Math.trunc(counter / 128) as 0 | 1 | 2 | 3;
+        const remainder = counter % 128;
+        let x2: number;
+        switch (divCounter) {
+          case 0:
+            x2 = -Math.trunc((remainder * 8) / 128) + 0;
+            break;
+          case 1:
+            x2 = Math.trunc(remainder / 16) - 8;
+            break;
+          case 2:
+            x2 = Math.trunc(remainder / 16);
+            break;
+          case 3:
+            x2 = -Math.trunc((remainder * 8) / 128) + 8;
+            break;
+        }
+        const sineIndex = counter % 128;
+        const y2 = -Math.floor((8 * GBA_SINE_TABLE_256[sineIndex]!) / 256) + 0;
+        const frame = horizontalJumpsFrameAtTick(tick)!;
+        expect(frame, `tick ${tick}`).toEqual({
+          x2,
+          y2,
+          data0: 0,
+          data2: counter + 12,
+          counter,
+          divCounter,
+          remainder,
+          sineIndex,
+          normalFrontDontFlip: true,
+          tryFlipXCalls: 2,
+          callback: "Anim_HorizontalJumps",
+        });
+        return frame;
+      });
+
+      expect(active).toHaveLength(43);
+      expect(active.map(({ divCounter }) => divCounter)).toContain(0);
+      expect(active.map(({ divCounter }) => divCounter)).toContain(1);
+      expect(active.map(({ divCounter }) => divCounter)).toContain(2);
+      expect(active.map(({ divCounter }) => divCounter)).toContain(3);
+      expect([0, 11, 21, 32, 42].map((tick) => {
+        const frame = active[tick]!;
+        return [tick, frame.counter, frame.divCounter, frame.remainder, frame.x2, frame.y2];
+      })).toEqual([
+        [0, 0, 0, 0, 0, 0],
+        [11, 132, 1, 4, -8, 0],
+        [21, 252, 1, 124, -1, 0],
+        [32, 384, 3, 0, 8, 0],
+        [42, 504, 3, 120, 1, -1],
+      ]);
+    });
+
+    it("pins counter 516 terminal cleanup, data2 increment to 528, and WaitAnimEnd", () => {
+      expect(horizontalJumpsFrameAtTick(43)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 0,
+        data2: 528,
+        counter: 516,
+        divCounter: null,
+        remainder: null,
+        sineIndex: null,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        callback: "WaitAnimEnd",
+      });
+      expect(horizontalJumpsFrameAtTick(44)).toEqual(horizontalJumpsFrameAtTick(43));
+      expect(horizontalJumpsFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      [40, wigglytuffScenario],
+      [365, vigorothScenario],
+    ] as const)("stages a complete legal Scene-ON party for opponent species %i", (species, scenario) => {
+      expect(scenario.mode).toBe("mechanicLab");
+      expect(scenario.profile).toBe("battle-scene-on");
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(species);
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "WIGGLYTUFF", wigglytuffRunA, wigglytuffRunB,
+        wigglytuffRawA, wigglytuffRawB, 40, 4,
+        "ace0d70d460715a093f9830d074e6e3d6cea3e2741b3fb80054ea2a4ecda558f",
+      ],
+      [
+        "VIGOROTH", vigorothRunA, vigorothRunB,
+        vigorothRawA, vigorothRawB, 365, 6,
+        "9e7ad2953ca1a23d4864d476c6da558a6ac0af556404785f63cc47fa26fbaa2f",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species,
+      runA,
+      runB,
+      rawA,
+      rawB,
+      data2,
+      animCmdIndex,
+      rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_H_JUMPS");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("preserves every previously accepted representative and sibling family", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of [
+        "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN",
+        "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN", "KADABRA", "REGISTEEL",
+        "SQUIRTLE", "SHUCKLE", "SEADRA", "MARSHTOMP", "CHARMANDER", "DELIBIRD",
+        "MANKEY", "WYNAUT", "VILEPLUME", "LOUDRED", "JIGGLYPUFF", "GYARADOS",
+        "BLASTOISE", "BAGON", "SEAKING", "SHUPPET", "BUTTERFREE", "CHIMECHO",
+        "WIGGLYTUFF", "VIGOROTH",
       ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }

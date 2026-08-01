@@ -45,6 +45,7 @@ export type SpeciesFrontAnimFamily =
   | "BOUNCE_ROTATE_TO_SIDES_SMALL"
   | "BOUNCE_ROTATE_TO_SIDES_SLOW"
   | "GROW_VIBRATE"
+  | "H_JUMPS"
   | "H_SLIDE_WOBBLE"
   | "H_JUMPS_V_STRETCH"
   | "H_SHAKE"
@@ -64,6 +65,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "BOUNCE_ROTATE_TO_SIDES_SMALL",
   "BOUNCE_ROTATE_TO_SIDES_SLOW",
   "GROW_VIBRATE",
+  "H_JUMPS",
   "H_SLIDE_WOBBLE",
   "H_JUMPS_V_STRETCH",
   "H_SHAKE",
@@ -328,6 +330,23 @@ export const H_SLIDE_WOBBLE_FACTORY_FRONT_SPECIES: readonly string[] = Object.fr
 /** There are no horizontal-slide-wobble mappings outside the Factory pool. */
 export const H_SLIDE_WOBBLE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   H_SLIDE_WOBBLE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All 8 source selector mappings for `ANIM_H_JUMPS`. */
+export const H_JUMPS_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_H_JUMPS")
+    .map(([species]) => species),
+);
+
+/** Every horizontal-jumps mapping is Factory-reachable. */
+export const H_JUMPS_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_JUMPS_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no horizontal-jumps mappings outside the Factory pool. */
+export const H_JUMPS_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_JUMPS_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 export interface SpeciesIdleOffset {
@@ -655,6 +674,18 @@ export interface HorizontalSlideWobbleFrame extends SpeciesIdleOffset {
   readonly resetSpriteAfterAnim: boolean;
   readonly callback: "HorizontalSlideWobble" | "WaitAnimEnd";
   readonly affineMode: "double" | "normal";
+}
+
+export interface HorizontalJumpsFrame extends SpeciesIdleOffset {
+  readonly data0: 0;
+  readonly data2: number;
+  readonly counter: number;
+  readonly divCounter: 0 | 1 | 2 | 3 | null;
+  readonly remainder: number | null;
+  readonly sineIndex: number | null;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXCalls: 2;
+  readonly callback: "Anim_HorizontalJumps" | "WaitAnimEnd";
 }
 
 export interface HorizontalShakeFrame extends SpeciesIdleOffset {
@@ -1705,6 +1736,89 @@ export function horizontalSlideWobbleFrameAtTick(
   };
 }
 
+const HORIZONTAL_JUMPS_STEP = 12;
+const HORIZONTAL_JUMPS_LIMIT = 512;
+
+/**
+ * Source-order port of `Anim_HorizontalJumps`
+ * (`pokemon_animation.c:911-939,2720-2753`) on the normal opponent-front
+ * path. `Task_HandleMonAnimation` leaves data0/data2..data7 zeroed and sets
+ * `sDontFlip=TRUE`, so both source-order `TryFlipX` calls execute as no-ops.
+ * Ticks 0..42 observe counters 0..504 in steps of 12, use the source's exact
+ * C-truncated counter/128 switch and remainder arithmetic for all four x2
+ * legs, write y2 from the GBA sine table, and then increment data2. Tick 43
+ * observes counter 516, clears x2/y2, installs `WaitAnimEnd`, increments data2
+ * to 528, and performs the second no-op flip.
+ */
+export function horizontalJumpsFrameAtTick(
+  ticksSinceStart: number,
+): HorizontalJumpsFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let x2 = 0;
+  let y2 = 0;
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    const counter = data2;
+    if (counter > HORIZONTAL_JUMPS_LIMIT) {
+      x2 = 0;
+      y2 = 0;
+      data2 += HORIZONTAL_JUMPS_STEP;
+      return {
+        x2,
+        y2,
+        data0: 0,
+        data2,
+        counter,
+        divCounter: null,
+        remainder: null,
+        sineIndex: null,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        callback: "WaitAnimEnd",
+      };
+    }
+
+    const divCounter = Math.trunc(counter / 128) as 0 | 1 | 2 | 3;
+    const remainder = counter % 128;
+    switch (divCounter) {
+      case 0:
+        x2 = -Math.trunc((remainder * 8) / 128) + 0;
+        break;
+      case 1:
+        x2 = Math.trunc(remainder / 16) - 8;
+        break;
+      case 2:
+        x2 = Math.trunc(remainder / 16);
+        break;
+      case 3:
+        x2 = -Math.trunc((remainder * 8) / 128) + 8;
+        break;
+    }
+    const sineIndex = counter % 128;
+    y2 = -gbaSin(sineIndex, 8) + 0;
+    data2 += HORIZONTAL_JUMPS_STEP;
+
+    if (tick === ticksSinceStart) {
+      return {
+        x2,
+        y2,
+        data0: 0,
+        data2,
+        counter,
+        divCounter,
+        remainder,
+        sineIndex,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        callback: "Anim_HorizontalJumps",
+      };
+    }
+  }
+
+  throw new Error("unreachable HorizontalJumps reducer state");
+}
+
 function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffset {
   switch (family) {
     case "BOUNCE_ROTATE_TO_SIDES_SMALL": {
@@ -1725,6 +1839,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = growVibrateFrameAtTick(41);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_GrowVibrate did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "H_JUMPS": {
+      const terminal = horizontalJumpsFrameAtTick(43);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_HorizontalJumps did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
