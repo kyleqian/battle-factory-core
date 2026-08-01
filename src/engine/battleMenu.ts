@@ -29,6 +29,7 @@ import type { Turn7CompletedResolutionNextCommandHandoff } from "./turn7Resoluti
 import type { Turn8CompletedResolutionNextCommandHandoff } from "./turn8ResolutionAdapter.ts";
 import type { Turn9CompletedResolutionNextCommandHandoff } from "./turn9ResolutionAdapter.ts";
 import type { Turn10CompletedResolutionNextCommandHandoff } from "./turn10ResolutionAdapter.ts";
+import type { Turn11CompletedResolutionNextCommandHandoff } from "./turn11ResolutionAdapter.ts";
 import type { Turn13CompletedResolutionNextCommandHandoff } from "./turn13ResolutionAdapter.ts";
 
 /** `sText_GoPkmn` resolved for this save's rental pool (single line, fits `B_WIN_MSG`'s line 1 - never wraps to line 2). */
@@ -2575,7 +2576,7 @@ export function currentPPForActiveMon(
   turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null = null,
   turn9NextCommandHandoff: Turn9CompletedResolutionNextCommandHandoff | null = null,
   turn10NextCommandHandoff: Turn10CompletedResolutionNextCommandHandoff | null = null,
-  turn11Resolved: boolean = false,
+  turn11NextCommandHandoff: Turn11CompletedResolutionNextCommandHandoff | null = null,
   turn12Resolved: boolean = false,
   turn13NextCommandHandoff: Turn13CompletedResolutionNextCommandHandoff | null = null,
   lockedActionResolution: BattleResolutionPresentationState | null = null,
@@ -2614,8 +2615,7 @@ export function currentPPForActiveMon(
     (turn1Resolved ? 1 : 0) +
     (turn3Resolved ? 1 : 0) +
     (turn4Resolved ? 1 : 0);
-  const slot0UsesAfterTurn10 =
-    (turn11Resolved ? 1 : 0) +
+  const slot0UsesAfterTurn11 =
     (turn12Resolved ? 1 : 0);
   // The handoffs own full canonical tuples. This consumer reconstructs each
   // selected slot against the supplied moveset, preserving its existing
@@ -2626,7 +2626,8 @@ export function currentPPForActiveMon(
     ? 0
     : rentalMoveset("ONIX").maxPP[1] - turn8NextCommandHandoff.playerPp[1];
   const ppBeforeLaterTurns = [
-    turn10NextCommandHandoff?.playerPp[0]
+    turn11NextCommandHandoff?.playerPp[0]
+      ?? turn10NextCommandHandoff?.playerPp[0]
       ?? turn9NextCommandHandoff?.playerPp[0]
       ?? turn7NextCommandHandoff?.playerPp[0]
       ?? turn6NextCommandHandoff?.playerPp[0]
@@ -2642,7 +2643,7 @@ export function currentPPForActiveMon(
     ?.afterRules.rulesContext.battlers[0]!.pp;
   if (followingPlayerPp !== undefined) return followingPlayerPp;
   return [
-    ppBeforeLaterTurns[0] - slot0UsesAfterTurn10,
+    ppBeforeLaterTurns[0] - slot0UsesAfterTurn11,
     ppBeforeLaterTurns[1],
     resolvedPlayerPp?.[2] ?? turn13NextCommandHandoff?.dragonBreathPp.current ?? ppBeforeLaterTurns[2],
     ppBeforeLaterTurns[3],

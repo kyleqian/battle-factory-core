@@ -37,7 +37,7 @@ describe("turn11ResolutionAdapter: #39 completed-turn-11/next-command handoff pr
       resolveTurn8CompletedResolutionNextCommandHandoff(),
       resolveTurn9CompletedResolutionNextCommandHandoff(),
       resolveTurn10CompletedResolutionNextCommandHandoff(),
-      true,
+      handoff,
     );
 
     expect(liveReceipt).toEqual([1, 19, 19, 10]);
@@ -62,7 +62,7 @@ describe("turn11ResolutionAdapter: #39 completed-turn-11/next-command handoff pr
       resolveTurn8CompletedResolutionNextCommandHandoff(),
       resolveTurn9CompletedResolutionNextCommandHandoff(),
       resolveTurn10CompletedResolutionNextCommandHandoff(),
-      true,
+      resolveTurn11CompletedResolutionNextCommandHandoff(),
     );
 
     expect(liveReceipt).toEqual([1, 14, 19, 10]);

@@ -54,6 +54,7 @@ import { resolveTurn7CompletedResolutionNextCommandHandoff } from "../src/engine
 import { resolveTurn8CompletedResolutionNextCommandHandoff } from "../src/engine/turn8ResolutionAdapter.ts";
 import { resolveTurn9CompletedResolutionNextCommandHandoff } from "../src/engine/turn9ResolutionAdapter.ts";
 import { resolveTurn10CompletedResolutionNextCommandHandoff } from "../src/engine/turn10ResolutionAdapter.ts";
+import { resolveTurn11CompletedResolutionNextCommandHandoff } from "../src/engine/turn11ResolutionAdapter.ts";
 import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "../src/engine/turn16FirePunchResolutionAdapter.ts";
 import {
   beginBattleSceneForcedPartySelect,
@@ -153,7 +154,7 @@ function stateAtTick(firstTickAbsolute: number): EngineState {
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
-    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11Resolved: false, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null },
+    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null },
   };
 }
 
@@ -183,7 +184,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
         turn8NextCommandHandoff: resolveTurn8CompletedResolutionNextCommandHandoff(),
         turn9NextCommandHandoff: resolveTurn9CompletedResolutionNextCommandHandoff(),
         turn10NextCommandHandoff: resolveTurn10CompletedResolutionNextCommandHandoff(),
-        turn11Resolved: true,
+        turn11NextCommandHandoff: resolveTurn11CompletedResolutionNextCommandHandoff(),
         turn12Resolved: true,
       },
     }, new Set(["A"]));
@@ -299,7 +300,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
       null,
       null,
       null,
-      false,
+      null,
       false,
       null,
       null,
@@ -534,7 +535,7 @@ function stateAtTurn3Reopen(firstTickAbsolute: number): EngineState {
     turn6NextCommandHandoff: null,
     turn7NextCommandHandoff: null,
     turn8NextCommandHandoff: null,
-    turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11Resolved: false,
+    turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null,
     turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null,
     },
   };
@@ -657,7 +658,7 @@ function stateAtTurn3Confirm(): EngineState {
     turn6NextCommandHandoff: null,
     turn7NextCommandHandoff: null,
     turn8NextCommandHandoff: null,
-    turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11Resolved: false,
+    turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null,
     turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null,
     },
   };
@@ -829,7 +830,7 @@ function stateAtTurn4Confirm(): EngineState {
     turn6NextCommandHandoff: null,
     turn7NextCommandHandoff: null,
     turn8NextCommandHandoff: null,
-    turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11Resolved: false,
+    turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null,
     turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null,
     },
   };
@@ -859,7 +860,7 @@ function stateAtTurn5Confirm(): EngineState {
     turn6NextCommandHandoff: null,
     turn7NextCommandHandoff: null,
     turn8NextCommandHandoff: null,
-    turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11Resolved: false,
+    turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null,
     turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null,
     },
   };
@@ -950,7 +951,7 @@ function stateAtTurn5SitrusConfirm(): EngineState {
     turn6NextCommandHandoff: null,
     turn7NextCommandHandoff: null,
     turn8NextCommandHandoff: null,
-    turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11Resolved: false,
+    turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null,
     turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null,
     },
   };

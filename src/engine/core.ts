@@ -185,6 +185,10 @@ import {
   isTurn10NextCommandHandoffReady,
   resolveTurn10CompletedResolutionNextCommandHandoff,
 } from "./turn10ResolutionAdapter.ts";
+import {
+  isTurn11NextCommandHandoffReady,
+  resolveTurn11CompletedResolutionNextCommandHandoff,
+} from "./turn11ResolutionAdapter.ts";
 import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "./turn16FirePunchResolutionAdapter.ts";
 import {
   advanceBattleSceneForcedPartySelect,
@@ -1111,7 +1115,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let turn8NextCommandHandoff = battleScene.turn8NextCommandHandoff;
     let turn9NextCommandHandoff = battleScene.turn9NextCommandHandoff;
     let turn10NextCommandHandoff = battleScene.turn10NextCommandHandoff;
-    let turn11Resolved = battleScene.turn11Resolved;
+    let turn11NextCommandHandoff = battleScene.turn11NextCommandHandoff;
     let turn12Resolved = battleScene.turn12Resolved;
     let turn13NextCommandHandoff = battleScene.turn13NextCommandHandoff;
     let lockedActionOwner = battleScene.resolutionOwner ?? null;
@@ -1388,7 +1392,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       );
     } else if (
       isTurn10NextCommandHandoffReady(turn10NextCommandHandoff) &&
-      !turn11Resolved &&
+      !isTurn11NextCommandHandoffReady(turn11NextCommandHandoff) &&
       fightSubmenu.confirmElapsed !== null &&
       newKeys.has("A") &&
       sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN11_ROCKSLIDE_MENU_REDRAW_DELAY
@@ -1400,10 +1404,14 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // persisted at slot 0 (ROCK_SLIDE, unchanged) - zero further nav
       // needed, docs/turn12-notes.md §1's own "zero navigation presses this
       // turn" ledger.
-      fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen));
-      turn11Resolved = true;
+      turn11NextCommandHandoff = resolveTurn11CompletedResolutionNextCommandHandoff();
+      fightSubmenu = openFightSubmenu(
+        battleScene.elapsed + 1,
+        activeMonMoveset(draftScreen),
+        turn11NextCommandHandoff.persistedMoveSlot,
+      );
     } else if (
-      turn11Resolved &&
+      isTurn11NextCommandHandoffReady(turn11NextCommandHandoff) &&
       !turn12Resolved &&
       fightSubmenu.confirmElapsed !== null &&
       newKeys.has("A") &&
@@ -1547,7 +1555,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn8NextCommandHandoff,
       turn9NextCommandHandoff,
       turn10NextCommandHandoff,
-      turn11Resolved,
+      turn11NextCommandHandoff,
       turn12Resolved,
       turn13NextCommandHandoff,
       resolutionOwner: lockedActionOwner,
