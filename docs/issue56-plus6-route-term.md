@@ -124,36 +124,59 @@ never modeled.**
 
 ## What is still open (why this is not a full fix)
 
-This step did **not** determine whether the +3/+3 tail is **universal**
-(present on every intro route, including GRIMER/KADABRA/DELCATTY/ONIX-
-`factoryLegal`, silently absorbed because their own pixel landmark happened
-to land before the tail completes) or genuinely **specific to this route**
-(e.g., only the canonical anchor's own turn-order setup dispatches
-`CHOOSEACTION` to both battlers this way; a fresh `factoryLegal` battle might
-resolve the AI's action during an earlier, already-elapsed window and so
-never add visible ticks here). Distinguishing these needs the same
-`gBattleControllerExecFlags`/healthbox RAM read run against one of the
-already-validated staged fixtures (e.g. the YOSHI/COMBUSKEN or the Probe-1
-ONIX `factoryLegal` fixture) — not attempted this step, time-boxed per the
-brief's own investigation-only scope.
+Resolved by the main-lane follow-up below. The mechanism is shared, but its
+duration is not a universal six ticks; production therefore retains the
+route-level term.
 
-**Recommendation:** **(b) with a concrete lead for (a).** Keep the flat
-`GENERATED_PLAYER_READY_LAG`(185) route term exactly as committed — it is
-demonstrably not a fudge, it is stable (715/715 held across every round that
-re-verified it), and this step found real RAM evidence for where its extra
-6 ticks physically come from. But do not yet fold that mechanism into
-`generatedPlayerReadyLagSpeciesFormula` as a universal `+6` (or `+dispatch-
-latency+AI-latency`) term: that would be curve-fitting from a single route's
-RAM read, exactly the honesty rule this run already applies elsewhere. The
-concrete next step for a future main-lane round: RAM-probe
-`gBattleControllerExecFlags` across the same `CHOOSEACTION`-dispatch boundary
-on one already-pixel-validated staged fixture (Probe 1's own ONIX
-`factoryLegal` fixture is the cheapest reuse) to check whether frames
-1738-analog→1744-analog also take 6 ticks there. If yes, the +6 is universal
-and belongs in the shared formula (retiring `isCanonicalAnchorIntro`'s ready-
-lag branch entirely); if no, the route-level flat constant should stay
-exactly as it is today, now with a named (not just "leading candidate")
-mechanism in its own doc comment.
+## Main-lane follow-up: staged `factoryLegal` controller tail (2026-08-01)
+
+The reusable watcher now accepts either its original canonical replay (no
+fixture argument) or a complete legal `factoryLegal` fixture. The committed
+same-player-species fixture is
+`tools/battle-lab/factory-onix-readylag-off.json`, exactly the Probe-1 recipe
+formerly recorded only in scratch: ONIX/ELEKID/NOSEPASS versus
+COMBUSKEN/POLIWHIRL/KRABBY, trainer 49, seed 42, Scene OFF. The already
+full-window-pixel-validated YOSHI fixture was also run as a cross-check.
+
+Reproduce through the validated wrapper, allocating a fresh output path for
+each run:
+
+```sh
+probe_dir="$(mktemp -d)"
+python3 tools/run-mgba-probe.py "$probe_dir/yoshi.json" -- \
+  tools/probe/dump-canonical-anchor-readylag-ram.py "$probe_dir/yoshi.json" \
+  tools/battle-lab/factory-arbitrary-intro-yoshi-off.json
+python3 tools/run-mgba-probe.py "$probe_dir/onix.json" -- \
+  tools/probe/dump-canonical-anchor-readylag-ram.py "$probe_dir/onix.json" \
+  tools/battle-lab/factory-onix-readylag-off.json
+```
+
+Exact `gBattleControllerExecFlags` transitions:
+
+| Route / player lead | Player completion (`1→0`) | `CHOOSEACTION` both (`0→3`) | Opponent AI clear (`3→1`) | Tail |
+| --- | ---: | ---: | ---: | ---: |
+| Canonical anchor / ONIX | 1738 | 1741 | 1744 | +3 / +3 |
+| Staged YOSHI / GRIMER | 1847 | 1850 | 1853 | +3 / +3 |
+| Staged ONIX / ONIX | 1885 | 1888 | 1890 | +3 / +2 |
+
+All three routes share the source mechanism: player
+`Intro_TryShinyAnimShowHealthbox` completion clears bit 0, the main battle
+loop later dispatches `CONTROLLER_CHOOSEACTION` to both battlers (flags 3),
+then Factory AI clears opponent bit 1 while the player input bit remains.
+YOSHI reproduces the canonical +3/+3 timing exactly. But the staged ONIX
+case—using the same player species as the canonical route—resolves the AI
+phase in two ticks, not three. That falsifies a universal fixed +3/+3 tail;
+the AI phase is data/decision dependent even though its controller transition
+is universal.
+
+**Verdict: non-universal duration.** Keep `isCanonicalAnchorIntro`'s current
+ready-lag route term. Folding a fixed six ticks into
+`generatedPlayerReadyLagSpeciesFormula` would misname variable AI work and
+would move the already-proven staged formula away from its pixel landmarks.
+No trainer/species/route/tick selector and no production change follows from
+this result. A future generic semantic seam would need to expose an actual
+AI-resolution completion event (or run the real staged AI controller) rather
+than encode one fixed duration.
 
 ## PAPERCUTs
 

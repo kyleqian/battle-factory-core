@@ -13,6 +13,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 810 — [bounded worker, 2026-08-01] ISSUES #56 item 1 staged ready-tail verdict: duration is non-universal
+
+- **State:** production `src/` is intentionally unchanged. Baseline is green
+  (**567 files, 5709 passed + 1 skipped**) and build/oracle are green; staged
+  probe evidence and the exact legal ONIX fixture are ready for acceptance
+  verification and an evidence commit.
+- **Did:** generalized the canonical RAM watcher to accept `factoryLegal`
+  fixtures. Canonical ONIX is exec-flags **1738→1741→1744** (+3 dispatch,
+  +3 AI); staged YOSHI reproduces **1847→1850→1853**, but same-player-species
+  staged ONIX is **1885→1888→1890** (+3/+2). The source mechanism is shared;
+  its duration is AI-decision-dependent, so a fixed generic +6 tail is false.
+- **Next:** run the required focused suites and all four compares, then full
+  test/build; retain the existing route term and commit the clean evidence
+  checkpoint with exact counts/scores.
+- **Notes:** no route/species/trainer/tick selector, ratchet move, unsupported
+  branch, or production change. Item 1 is resolved; #56 item 2 remains open.
+- **PAPERCUT:** none so far.
+
 ## 809 — [bounded worker, 2026-07-31 ~night] ISSUES #56 item 2 raw-clock/discriminator checkpoint; no unsafe presentation fit landed
 
 - **State:** evidence commit `822522c7`; production `src/` is intentionally
@@ -65,28 +83,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   new animation commits arrived later and remain intentionally unfolded.
 - **PAPERCUT:** Codex `exec` waited on already-closed stdin after the final
   tool event; ~10 minutes lost before the supervisor terminated the child.
-
-## 807 — [bounded worker, 2026-07-31 ~night] ISSUES #60 typed Scene-OFF stat adapter crash fixed
-
-- **State:** implementation commit `f1bc60a2`; focused vitest is green
-  (**25/25**, including executable-frontier ratchet **6/6**), full `npm test`
-  is green (**567 files, 5708 passed + 1 skipped**), and `npm run build` is
-  green. This lean ledger/issue commit follows; no ratchet pin moved and no
-  unsupported branch was added.
-- **Did:** widened the generated-route typed Scene-OFF stat banner from only
-  battler-0 drops to the reusable 2×2 matrix: battler 0/1 × rise/drop. The
-  adapter consumes the typed source direction, all seven extracted palettes,
-  and the affected battler's live sprite/origin; no battle/turn/tick routing
-  was added. Tier 1 proves all four cases, the exact battler-1 EVASION 7→8
-  reproducer, deterministic command completion, target-footprint ownership,
-  and malformed/directionless guards.
-- **Next:** ISSUES #61, then #56 item 2 per entry 806's ordered backlog. #62
-  records the retired reproducers' separate pixel debt; do not revive them as
-  canonical fixtures or extend the retired Battle-2 march.
-- **Notes:** recovered both deleted traces from `01eac159` into a fresh `/tmp`
-  directory and added explicit `oracleProfile: battle-scene-off` only to the
-  scratch acceptance copies. Both now execute without throwing; compare is
-  **0/77** (Endeavor) and **0/237** (Dragon Breath). The crash family is
-  closed; the red pixels pre-existed it and remain out of this step's scope.
-- **PAPERCUT:** concurrent worktree CPU contention stretched the full suite to
-  431s, ~5 minutes slower than an uncontended run.

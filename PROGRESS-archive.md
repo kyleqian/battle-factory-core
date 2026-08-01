@@ -1,3 +1,9 @@
+## 807 — [bounded worker, 2026-07-31 ~night] ISSUES #60 typed Scene-OFF stat adapter crash fixed
+
+- Archived from the live ledger. `f1bc60a2` widened the typed Scene-OFF stat
+  banner to battler 0/1 × rise/drop and fixed the exact battler-1 EVASION
+  7→8 crash. Full live-entry detail remains in git history.
+
 ## 806 — [supervisor tooling, 2026-07-31 ~night] ordinary Codex model/effort policy enforced
 
 - Archived from the live ledger. `c4d5b8dd` limits ordinary Codex launches
