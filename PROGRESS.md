@@ -15,9 +15,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 814 — [bounded main worker, 2026-08-01] rank-8 Scene-OFF status-icon receipt landed
 
-- **State:** implementation `80c5d6af`; targeted resolver/presentation/round
-  seam tests are green, as is `npm run build`. Full `npm test` and final
-  clean-tree verification are next.
+- **State:** implementation `80c5d6af`, documentation `73ad40f2`; focused
+  resolver/presentation/round seam tests, full `npm test` (**569 files,
+  5720 passed + 1 skipped**), and `npm run build` are green.
 - **Did:** projected the existing `status-icon-update` kernel receipt into an
   immutable, one-controller-callback `status-icon` command. The raw
   `set-battler-status-data` write remains logical; the render field and
@@ -27,10 +27,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   A legal generated Factory round proves FIRE_PUNCH's status write → burn
   text → icon receipt → nonterminal next-command handoff, plus a generic
   status clear is pinned at the renderer boundary.
-- **Next:** run the required full suite, then record its result and commit the
-  ledger/docs update. Keep rank 8 scoped to generic semantic presentation;
-  do not resume the retired canonical Battle-2 march or claim a new pixel
-  comparison.
+- **Next:** preserve this generic receipt path while selecting the next
+  source/oracle-backed, noncanonical semantic presentation ownership slice.
+  Legacy dispatcher retirement remains separately scoped; do not resume the
+  retired canonical Battle-2 march or claim a new pixel comparison.
 - **Notes:** the authoritative Scene-OFF oracle checkpoint remains the already
   verified **42 captures / 42 capture-states** in
   `docs/fire-punch-burn-lifecycle-off-evidence.md`; this semantic slice adds
