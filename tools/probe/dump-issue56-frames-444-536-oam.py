@@ -1,10 +1,19 @@
 #!/usr/bin/env python3
 """ISSUES #56 item 2 probe: RAM-read full OAM (`x`/`y`/`x2`/`y2`/`affineMode`/
 `matrixNum` + live `gOamMatrices[matrixNum]` a/b/c/d when affine) for every
-in-use, visible sprite slot across one or more absolute-frame windows, for a
-`factoryLegal` arbitrary-trainer intro fixture whose pre-battle route is
-built internally by `oracle/battle_lab.py`'s `BattleLab.prepare()` (no flat
-button-segments file to replay).
+in-use, visible sprite slot across one or more absolute-frame windows, for
+either fixture shape this run's arbitrary-trainer-intro family uses:
+  - a `factoryLegal` request whose pre-battle route is built internally by
+    `oracle/battle_lab.py`'s `BattleLab.prepare()` (no flat button-segments
+    file to replay) - `tools/battle-lab/factory-arbitrary-intro-*-off.json`.
+  - a flat button-segment replay, optionally composed from a
+    `sourceTrace`+`sourceSegmentCount`+`appendSegments` compare-trace (the
+    same composition `tools/compare/run.ts` performs) - e.g.
+    `tools/compare/traces/interactive-generated-intro-off.json` ->
+    `tools/compare/traces-groundtruth/battle1-intro.json`. Detected by the
+    fixture JSON having a top-level `segments` key (plain groundtruth trace)
+    or a `sourceTrace` key (compare-trace composition); anything else is
+    treated as a `BattleLab` request.
 
 Combines two existing idioms, neither edited:
   - `tools/probe/dump-arbitrary-intro-bounce-driver.py`'s in-process
@@ -13,12 +22,17 @@ Combines two existing idioms, neither edited:
   - `tools/probe/dump-switchin-materialize-affine.py`'s OAM-byte decode
     (`struct OamData`'s packed matrixNum/affineMode fields) + live
     `gOamMatrices[matrixNum]` register read (needed to distinguish a real
-    sub-pixel/matrix effect from a plain x/x2 translation).
+    sub-pixel/matrix effect from a plain x/x2 translation), and its flat
+    `segments`-replay driving loop (reused verbatim for the second fixture
+    shape above).
 
-Frame numbers are ABSOLUTE `BattleLab.prepare()` pre-checkpoint frame numbers
-(0 == immediately after `new_session()`), the same space
+Frame numbers are ABSOLUTE ticks since `new_session()` (0 == immediately
+after `new_session()`) in both fixture shapes - the same space
 `factory-arbitrary-intro-*-off.json` traces' own `preCheckpointFrameOffset`
-maps to app-relative frames (`absolute = appRelative + preCheckpointFrameOffset`).
+maps to app-relative frames for the `BattleLab` shape
+(`absolute = appRelative + preCheckpointFrameOffset`); the flat-replay shape
+needs no offset (its own `captureWindow` is already in this same absolute
+tick space, e.g. `interactive-generated-intro-off.json`'s frame 1492).
 
 Run with the harness's mGBA-enabled interpreter, through the standard SIGSEGV-
 tolerant wrapper:
@@ -79,6 +93,24 @@ SLOTS = list(range(64))
 MATRIX_SIZE = 8
 
 
+def resolve_flat_segments(fixture: dict) -> list[dict] | None:
+    """Returns the flat `segments` list for either non-BattleLab fixture
+    shape (plain groundtruth trace, or a sourceTrace+appendSegments compare-
+    trace composed the same way `tools/compare/run.ts` does), or None if
+    `fixture` is a `BattleLab` request instead."""
+    if "segments" in fixture:
+        return fixture["segments"]
+    if "sourceTrace" in fixture:
+        source_path = (FIXTURE_PATH.parent / fixture["sourceTrace"]).resolve()
+        source = json.loads(source_path.read_text())
+        source_segments = source["segments"]
+        count = fixture.get("sourceSegmentCount")
+        if count is not None:
+            source_segments = source_segments[:count]
+        return [*source_segments, *fixture.get("appendSegments", [])]
+    return None
+
+
 def main() -> None:
     fixture = json.loads(FIXTURE_PATH.read_text())
     oracle = EmeraldOracle(ROM_PATH, MAP_PATH, BOOTSTRAP_PATH)
@@ -130,19 +162,37 @@ def main() -> None:
             row["sprites"][str(slot)] = entry
         rows.append(row)
 
-    orig_advance = oracle.advance
+    flat_segments = resolve_flat_segments(fixture)
 
-    def patched_advance(buttons):
-        orig_advance(buttons)
+    if flat_segments is None:
+        orig_advance = oracle.advance
+
+        def patched_advance(buttons):
+            orig_advance(buttons)
+            if in_ranges(oracle.frame):
+                record()
+
+        oracle.advance = patched_advance  # type: ignore[method-assign]
+
+        oracle.new_session()
+        lab = BattleLab(oracle, "battle-scene-off")
+        request = validate_request(fixture, "battle-scene-off")
+        lab.prepare(request)
+    else:
+        oracle.new_session()
         if in_ranges(oracle.frame):
             record()
-
-    oracle.advance = patched_advance  # type: ignore[method-assign]
-
-    oracle.new_session()
-    lab = BattleLab(oracle, "battle-scene-off")
-    request = validate_request(fixture, "battle-scene-off")
-    lab.prepare(request)
+        last_end = max((b for _, b in RANGES), default=0)
+        for segment in flat_segments:
+            buttons = segment.get("buttons", [])
+            for _ in range(int(segment["frames"])):
+                oracle.advance(buttons)
+                if in_ranges(oracle.frame):
+                    record()
+                if oracle.frame > last_end:
+                    break
+            if oracle.frame > last_end:
+                break
 
     OUTPUT_PATH.write_text(json.dumps({"rows": rows}, indent=0))
     print(f"wrote {OUTPUT_PATH} ({len(rows)} frames, slots scanned={len(SLOTS)})")

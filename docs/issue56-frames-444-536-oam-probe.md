@@ -371,3 +371,155 @@ reverting just the two `playerClock:` call sites and re-running).
 | --- | --- | --- |
 | 444 | **Partially resolved, not landed.** The status-bar/icon widget sub-fix is RAM/pixel-confirmed exact for its own 4 targeted pixels, but a second, separate, previously-flagged materialize-column-shift defect remains at the same frame, AND narrowing the widget fix to `isCanonicalAnchorIntro` newly regresses MAGNETON's own analogous frame 437 (opposite-direction pixel evidence) — reverted; needs a MAGNETON-side RAM probe to find the real discriminator. | High for the sub-fix itself; frame-level fix still blocked |
 | 536 | **RESOLVED and landed.** Real onset RAM-pinned at app-relative 550, exactly matching the existing `generatedPlayerVisualClock` mechanism already proven on 4 species elsewhere in this run — a call-site bug (unrebased clock), not a new term. YOSHI 699→700/751, all insurance held. | High — RAM-pinned onset, oracle-verified fix, ablation-tested Tier-1 pin |
+
+## Round 3 (2026-07-31, main lane): MAGNETON-side + third-fixture RAM probe — discriminator NOT pinned clean; no fix landed
+
+Per this round's brief: mirror the YOSHI-side OAM technique on MAGNETON's own
+frame 437, and on `interactive-generated-intro-off`'s own fitted frame 1492
+if needed to explain all three fixtures. Both probed. **Verdict: the
+discriminator space is narrowed with a genuinely new structural fact
+(MAGNETON's bar and icon widgets destroy on different ticks, uniquely among
+the three fixtures) but not proven to a landable formula — no fix applied
+this round**, per the brief's explicit "don't land a fix that trades one
+fixture for another" instruction.
+
+### Script generalized (no fixture-specific edits needed going forward)
+
+`dump-issue56-frames-444-536-oam.py` gained a `resolve_flat_segments()`
+branch: it now accepts either fixture shape used by this run's arbitrary-
+trainer-intro family — a `BattleLab` request (unchanged, existing behavior,
+used e.g. by YOSHI/MAGNETON), or a flat button-segment trace, either a plain groundtruth trace
+(top-level `segments`) or a `sourceTrace`+`sourceSegmentCount`+
+`appendSegments` compare-trace composed exactly the way `tools/compare/
+run.ts` does it (`interactive-generated-intro-off.json` ->
+`traces-groundtruth/battle1-intro.json`). Both new code paths reuse
+`dump-switchin-materialize-affine.py`'s existing flat-replay driving loop
+verbatim (adapted, not duplicated logic). No existing script behavior
+changed for the already-used BattleLab path (verified: YOSHI's own probe
+re-run this round reproduces last round's exact table below).
+
+### MAGNETON: RAM probe around its own frame 437 (analogue of YOSHI's 444)
+
+```
+python3 tools/run-mgba-probe.py /tmp/issue56-magneton-probe/oam.json -- \
+  tools/probe/dump-issue56-frames-444-536-oam.py /tmp/issue56-magneton-probe/oam.json \
+  tools/battle-lab/factory-arbitrary-intro-magneton-off.json 1595:1635
+  # preCheckpointFrameOffset for this fixture is 1178 (its own compare-trace JSON)
+```
+
+`gSprites[6]` (the same slot number YOSHI's own bar occupies) around
+app-relative 429-441 (abs 1607-1619):
+
+| app-rel | abs | x/y/x2 | note |
+| --- | --- | --- | --- |
+| 433-435 | 1611-1613 | 8/40/(+2 per tick, ...58,60,62) | alive, sliding, same shape as YOSHI |
+| **436** | **1614** | **ABSENT — not present in the full 64-slot scan at all** (verified: not merely invisible-flagged, genuinely absent from every slot dumped this frame) | **new fact — YOSHI's own slot 6 has no such gap** |
+| **437** | **1615** | **176/59/0** (reused for the particle-burst cluster, same coordinates/shape as YOSHI's own reuse) | destroy-confirmed-complete |
+
+**But the party-ball icons (slots 51-53, `y=36`) do NOT show the same gap** —
+they stay alive through app-relative 436 (`x2` still climbing, e.g. slot 51:
+108→135→165→198 through app436) and are **not** destroyed until app-relative
+**437**, one tick *after* the bar. Re-checked YOSHI's own already-captured
+icon series (slots 51-53) for the same comparison: YOSHI's icons and bar
+destroy on the exact same tick (app444), confirming the Frame 444 section's
+original "single simultaneous widget-teardown event" claim for YOSHI
+specifically, not universally.
+
+**New structural fact: MAGNETON's bar and icon widgets destroy on two
+different ticks (bar first, icons one tick later); YOSHI's destroy
+simultaneously.** `opponentSummaryExitElapsed` computes one shared `elapsed`
+value that drives both `barExitX2(elapsed)` and `opponentIconExitX(j,
+elapsed)` in `drawOpponentSummaryExit` — a single-clock model. If the real
+ROM genuinely desyncs these two widgets by a tick for MAGNETON, no value of
+that one shared `elapsed` clock can make both widgets pixel-exact
+simultaneously at the transition tick; this is a structural gap in the
+current model, not just a wrong constant.
+
+### Third fixture: `interactive-generated-intro-off` around its own historically-fitted frame 1492
+
+Extended the same probe to this fixture's own composed flat trace:
+
+```
+python3 tools/run-mgba-probe.py /tmp/issue56-introoff-probe/oam.json -- \
+  tools/probe/dump-issue56-frames-444-536-oam.py /tmp/issue56-introoff-probe/oam.json \
+  tools/compare/traces/interactive-generated-intro-off.json 1478:1500
+```
+
+`gSprites[6]`: alive/climbing through abs **1491** (`x2=64`, same shape as
+YOSHI's last-alive tick), destroyed/reused at abs **1492** — landing on
+**exactly** the frame `git log -S opponentSummaryExitElapsed` (commit
+`0c4dab29`, PROGRESS #743) independently identified as this special case's
+own original fitted window. This is a clean, direct RAM confirmation that
+the historical "frame 1492" citation is the real widget-destroy tick, not a
+coincidence. The party-ball icons (slots 50-53) destroy on the **same**
+tick, abs 1492 — synced, matching YOSHI's shape, **not** MAGNETON's
+desynced shape.
+
+**The unresolved piece: exact `rawElapsed` alignment at that tick was not
+pinned.** A new app-side probe (`analyze-issue56-introoff-app-series.ts`,
+driving the real trace through `createInitialState`/`tick`/`render`, no
+`appStage` needed since this fixture replays real button input) confirms
+`t = frame - 1` for this fixture but finds the px(158,40)/(160,40) pink→white
+wipe completing around frame 1487, not 1492-1495 as a `handoffTick≈1462`
+estimate (from an unrelated comment about the trainer-exit-slide sprite,
+`battleScene.ts:3213-3214`) would predict — a discrepancy not resolved this
+round (time-boxed). Without the real `rawElapsed` value at the RAM-confirmed
+destroy tick, it is not possible to say whether this fixture's teardown
+lands on `rawElapsed=31` (the special case's trigger value, like YOSHI) or
+one tick earlier (like the hypothesis MAGNETON's data suggests) — the fact
+needed to resolve the apparent paradox that YOSHI and `interactive-
+generated-intro-off` show **identical, synced RAM teardown shapes** yet
+(per the already-established Part A regression) want **opposite** special-
+case behavior (YOSHI wants it removed; this fixture wants it kept, per
+`git log -S`'s own commit motivation and the Part A regression run).
+
+### Verdict: discriminator space narrowed, NOT pinned clean — no fix landed
+
+Three fixtures, three distinct RAM shapes:
+
+| Fixture | Bar/icon sync | Bar destroy tick vs. rawElapsed=31 | Wants special case? |
+| --- | --- | --- | --- |
+| YOSHI (COMBUSKEN, generated) | synced | exactly at 31 (RAM+pixel both confirmed prior rounds) | NO (removing it fixes frame 444's 4 targeted px) |
+| `interactive-generated-intro-off` (GROVYLE, canonical anchor) | synced (RAM-confirmed this round) | **not pinned this round** | YES (Part A regression, prior round) |
+| MAGNETON | **desynced by 1 tick** (RAM-confirmed this round, new fact) | bar: 1 tick early (30, not 31); icons: exactly 31 | YES (unmodified special case is pixel-exact at 437) |
+
+A single scalar discriminator on `lifecycle`/`isCanonicalAnchorIntro`/
+species cannot explain this table: intro-off and YOSHI have the *same* RAM
+shape (synced teardown) but want *opposite* formula behavior, while
+MAGNETON has a *different* RAM shape (desynced) from both yet wants the
+*same* formula behavior as intro-off. Candidates ruled out this round:
+
+- **Species cry-duration, linear or ordered.** GROVYLE (58 ticks) <
+  MAGNETON (68) < COMBUSKEN (82) does not order clean/desynced or
+  wants-special-case/doesn't in a monotonic way.
+- **`isCanonicalAnchorIntro`.** Already falsified last round (MAGNETON is
+  not canonical-anchor yet wants the same behavior as the canonical-anchor
+  fixture).
+- **A pure "does the widget desync" signal** cannot be the whole story
+  either, since it doesn't by itself explain why two *synced* fixtures
+  (YOSHI, intro-off) want opposite behavior — the real discriminator, if it
+  exists as a single mechanism, has to be something that (a) desyncs
+  MAGNETON's bar/icon pair specifically and (b) also explains intro-off's
+  opposite-from-YOSHI preference despite an identical synced RAM shape;
+  candidate (b) most likely traces to the exact `rawElapsed` value at each
+  fixture's own destroy tick (this round's biggest gap — not pinned for
+  intro-off).
+
+**Not landed, per the brief's own instruction not to trade one fixture's
+frame for another.** `src/engine/battleScene.ts` is unchanged this round.
+New files only: this section, the generalized probe script (same file,
+extended), and `tools/probe/analyze-issue56-introoff-app-series.ts`.
+
+**Next step, named:** pin `interactive-generated-intro-off`'s real
+`handoffTick` (in the same `t`-clock domain `generatedBattleIntroSourceClock`
+uses) directly — e.g. by instrumenting `generatedBattleStartOpponentHandoffTick`
+itself (temporarily, read-only) rather than inferring it from the unrelated
+trainer-exit-slide comment — then recompute `rawElapsed` at its RAM-confirmed
+abs-1492 destroy tick and check it against 31. That single number resolves
+the table's central paradox (row 2's blank cell) and would either complete a
+three-fixture-consistent discriminator or rule out `rawElapsed`-alignment as
+the explanation entirely, narrowing further toward whatever RAM signal
+(likely something in the cry-completion/audio-gate family already documented
+at `generatedBattleStartOpponentHandoffTick`'s own comment,
+`battleScene.ts:4129-4154`) actually drives the real per-fixture teardown
+tick.

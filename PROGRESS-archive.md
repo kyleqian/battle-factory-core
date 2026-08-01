@@ -1,3 +1,74 @@
+## 796 — [bounded worker, 2026-07-31 ~16:40] ISSUES #56 item 2: frame 536 RESOLVED (Part B); frame 444 fix blocked by new MAGNETON regression (Part A, not landed)
+
+- **State:** master green — tsc clean, focused vitest (factoryBattleStartIntro
+  5/battleScene 247/battleMenu 121) green, ratchet 6/6, full `npm test`
+  **567 files / 5720 passed + 1 skipped** (+1 over baseline, the new Part B
+  pin), build clean. Two commits: `2bf68ac1` (Part A, docs-only) +
+  `7467636e` (Part B, fix).
+- **Part B (landed, `7467636e`):** extended the OAM RAM probe
+  (`dump-issue56-frames-444-536-oam.py`, same script, wider range) past
+  app-relative 542 — real onset for the player status-bar/icons pins
+  exactly at app-relative **550**. Not a new species term: matches the
+  ALREADY-EXISTING, already-4-species-proven `generatedPlayerVisualClock`
+  rebasing exactly (frames 537+ in this same trace already use it,
+  unmodified, and already matched oracle). Root cause was a call-site
+  bug: `renderGeneratedBattleStartOpponentRelease`'s own pre-player-release
+  `drawBallIcons` calls used the raw opponent-handoff clock instead of the
+  same rebased clock the player-release compositor already uses.
+  `drawBallIcons` gained an optional `playerClock` param (every other call
+  site untouched); new exported `generatedPlayerVisualTAtOpponentHandoff`
+  wraps the existing rebasing (no duplicated logic). **YOSHI 699/751 →
+  700/751** (frame 536 flips, mismatch-list diff confirms nothing else
+  moved); `interactive-generated-intro-off` 715/715, `battle-command
+  -generated-off` 128/128, `factory-arbitrary-intro-magneton-off` 703/751
+  all held exactly; `turn9-rockslide-off` 256/256 + `turn10-aerialace-off`
+  206/206 insurance canaries held. Tier-1 pin added, ablation-verified
+  (fails without the fix, passes with it).
+- **Part A (investigated, NOT landed, `2bf68ac1`):** re-derived the
+  `opponentSummaryExitElapsed` special case's original fitted window via
+  `git log -S` (commit `0c4dab29`, frame 1492 of `interactive-generated
+  -intro-off`). Removing it reproduces YOSHI's frame-444 targeted 4 pixels
+  exactly (RAM-confirmed root cause from the prior round) but regresses
+  that original window (715/715 → 714/715) exactly as the brief warned.
+  Narrowing to `isCanonicalAnchorIntro` (the same discriminator
+  `generatedPlayerReadyLag` already uses) restores 715/715 but surfaces a
+  **new** regression: `factory-arbitrary-intro-magneton-off`'s own
+  analogous frame 437 flips from pixel-exact to a 10px mismatch, in the
+  OPPOSITE direction from YOSHI's own evidence — `isCanonicalAnchorIntro`
+  is not the real discriminator. Reverted to the original unmodified
+  special case; frame 444 also carries a second, separate, previously-
+  flagged (`docs/issue56-residual-probe.md` Q1) materialize-column-shift
+  defect never in scope of this fix. Full finding recorded in
+  `docs/issue56-frames-444-536-oam-probe.md`'s Round 2 section.
+- **Next:** #56 item 2 remainder — a MAGNETON-side RAM probe of
+  `gSprites[6]` around its own frame 437 (mirroring this round's own
+  YOSHI-side technique) to find frame 444's real discriminator, plus its
+  separate materialize-column-shift defect. Then turn17-rung1's 28 frames,
+  rank 6, idle-bounce phase attribution (parallel side-lane territory).
+- **PAPERCUT:** none.
+- **SUPERVISOR ADDENDUM (round-4 verify + S12):** supervisor re-ran
+  YOSHI **700/751**, MAGNETON **703/751**, intro **715/715** — all as
+  reported; ISSUES #56 updated (536 clause resolved/deleted, 444
+  remainder sharpened to the discriminator probe). **S12 (verified,
+  merged): turn17-rung1's 28 frames ROOT-CAUSED** —
+  `docs/turn17-rung1-residual-notes.md`: one contiguous input-bounded
+  cluster (21774-21801, supervisor re-ran 90/118 + confirmed
+  contiguity from the manifest) caused by
+  `drawTurn16FightSubmenuWindow`'s `confirmElapsed === null` fallback
+  hardcoding `turn1..14Resolved=false` (wrong PP 15/15 vs 14/15) and
+  gating off `drawTurn16PostSwitchField`'s HP/status overrides (wrong
+  HP 138/138 vs 79/138, garbled BRN badge); rung2-6b re-verified all
+  exact (221/143/200/113/255/41). Named fix = thread real state
+  through both call sites; dispatched as round-5 M13. S12's step 1
+  (appRoute) was a no-op — `712ab295` had already fixed it
+  pre-session; supervisor's brief cited the stale entry-790 note.
+- **Round 5 (launched ~17:00):** M13 turn17-rung1 fix; S13 rank-6
+  turns 1-4 OFF ground-truth prep scout (policy deliberately NOT
+  presupposed — banks evidence for next session's rank-6 opener, same
+  two-step as rank 5's own S8/S9 prep).
+
+---
+
 ## 795 — [round 3, 2026-07-31 ~15:50, supervisor-verified] Turns 11-12 flipped OFF (M11) — rank-5's four move windows ALL flipped; idle-bounce phase ROOT-CAUSED, verdict (b) (S11)
 
 - **State:** master green — tsc clean, focused vitest (battleScene 247/
