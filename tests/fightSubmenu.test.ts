@@ -601,20 +601,24 @@ function stateAtTurn3Confirm(): EngineState {
 }
 
 describe("battleMenu: turn 3's ENDEAVOR resolution (S7 slice G, docs/battle-turn-notes.md §20)", () => {
-  it("replaying turn3-menu.json's own committed button script (reopen/UP-nav/confirm) lands turn 3's own confirm at tick 3891, matching TURN3_CONFIRM_PRESS_TICK's own doc", () => {
-    const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn3-menu.json", import.meta.url), "utf8")) as {
+  it("replaying turn3-endeavor-off.json's own committed button script (reopen/UP-nav/confirm - byte-identical segments to the retired turn3-menu.json, ISSUES #39 rank-6 slice 3) lands turn 3's own confirm at tick 3891, matching TURN3_CONFIRM_PRESS_TICK's own doc", () => {
+    const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn3-endeavor-off.json", import.meta.url), "utf8")) as {
       segments: { frames: number; buttons?: GbaButton[] }[];
     };
     let state = createInitialState({ appRoute: "canonical-recorded" });
-    for (const seg of trace.segments) {
-      for (let i = 0; i < seg.frames; i += 1) state = press(state, seg.buttons ?? []);
+    const target = 3896 - SCENE_TICK0; // turn3-menu.json's own committed capture-range end; the retiring trace's segments continue well past this (through turn 4's own reopen), unlike the deleted turn3-menu.json which stopped here
+    outer: for (const seg of trace.segments) {
+      for (let i = 0; i < seg.frames; i += 1) {
+        state = press(state, seg.buttons ?? []);
+        if (state.battleScene !== null && state.battleScene.elapsed >= target) break outer;
+      }
     }
     expect(state.battleScene!.fightSubmenu.confirmElapsed).toBe(3891 - SCENE_TICK0);
     expect(state.battleScene!.fightSubmenu.cursor).toBe(0);
     expect(state.battleScene!.turn2Resolved).toBe(true);
   });
 
-  it("engine state stays well-formed (turn2Resolved, cursor 0) through the whole ENDEAVOR-again window - a pure smoke/determinism check, pixel parity lives in tools/compare/traces/turn3-endeavor.json", () => {
+  it("engine state stays well-formed (turn2Resolved, cursor 0) through the whole ENDEAVOR-again window - a pure smoke/determinism check, pixel parity lives in tools/compare/traces/turn3-endeavor-off.json", () => {
     let state = stateAtTurn3Confirm();
     for (let i = 0; i < 190; i += 1) state = press(state, []);
     expect(state.battleScene!.turn1Resolved).toBe(true);
@@ -639,7 +643,7 @@ describe("battleMenu/battleScene: turn 3's ROCK_SLIDE resolution (S7 slice H, do
     expect(rockSlideOpponentHp(pressTick + 700, pressTick, 88, 41)).toBe(41); // clamped, well past settle
   });
 
-  it("replaying turn3-rockslide.json's own idle window renders ROCK_SLIDE's kickoff text hard-cutting the message box at tick 4080 (not 4079), text-clearing at 4349, and hard-cutting to the resettled menu at 4356 - the three pixel-confirmed anchors this slice's own doc names", () => {
+  it("replaying turn3-rockslide-off.json's own idle window renders ROCK_SLIDE's kickoff text hard-cutting the message box at tick 4043 (not 4042), text-clearing at 4205, and hard-cutting to the resettled menu at 4212 - ISSUES #39 rank-6 slice 3's own fresh OFF-pinned anchors (superseding the retired ON-fit 4080/4349/4356 trio)", () => {
     let state = stateAtTurn3Confirm();
     // stateAtTurn3Confirm() starts at battleScene.elapsed = 3891 - SCENE_TICK0 (the confirm tick itself); advance to each
     // boundary tick by pressing idle frames the same number of times as the elapsed-tick delta.
@@ -649,20 +653,20 @@ describe("battleMenu/battleScene: turn 3's ROCK_SLIDE resolution (S7 slice H, do
       while (s.battleScene!.elapsed < target) s = press(s, []);
       return render(s);
     };
-    const before4080 = frameAt(4079);
-    const at4080 = frameAt(4080);
-    expect(before4080).not.toEqual(at4080); // ROCK_SLIDE's own kickoff text hard-cuts the message box here, not a tick earlier/later
+    const before4043 = frameAt(4042);
+    const at4043 = frameAt(4043);
+    expect(before4043).not.toEqual(at4043); // ROCK_SLIDE's own kickoff text hard-cuts the message box here (TURN3_OFF_ROCKSLIDE_TEXT_DELAY), not a tick earlier/later
 
-    const before4349 = frameAt(4348);
-    const at4349 = frameAt(4349);
-    expect(before4349).not.toEqual(at4349); // TURN3_ROCKSLIDE_TEXT_CLEAR_DELAY(662): the message box goes blank
+    const before4205 = frameAt(4204);
+    const at4205 = frameAt(4205);
+    expect(before4205).not.toEqual(at4205); // TURN3_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY(518): the message box goes blank
 
-    const before4356 = frameAt(4355);
-    const at4356 = frameAt(4356);
-    expect(before4356).not.toEqual(at4356); // TURN3_ROCKSLIDE_MENU_REDRAW_DELAY(669): hard cut to the resettled action menu
+    const before4212 = frameAt(4211);
+    const at4212 = frameAt(4212);
+    expect(before4212).not.toEqual(at4212); // TURN3_OFF_ROCKSLIDE_MENU_REDRAW_DELAY(525): hard cut to the resettled action menu
   });
 
-  it("engine state stays well-formed and deterministic through the whole ROCK_SLIDE window (turn1Resolved/turn2Resolved unchanged, cursor still 0) - pixel parity lives in tools/compare/traces/turn3-rockslide.json", () => {
+  it("engine state stays well-formed and deterministic through the whole ROCK_SLIDE window (turn1Resolved/turn2Resolved unchanged, cursor still 0) - pixel parity lives in tools/compare/traces/turn3-rockslide-off.json", () => {
     let state = stateAtTurn3Confirm();
     for (let i = 0; i < 999; i += 1) state = press(state, []); // 3891 -> 4890, this slice's own committed trace boundary (before tick 4892, turn 4's own input, out of scope)
     expect(state.battleScene!.turn1Resolved).toBe(true);

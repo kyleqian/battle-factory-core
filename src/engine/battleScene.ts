@@ -7528,7 +7528,7 @@ function drawActionMenuIdleWindow(fb: Uint8Array, t: number, turn1Resolved: bool
     : turn3Resolved
       ? turn4SubmenuBounceTick(t)
       : turn2Resolved
-        ? turn3SubmenuBounceTick(t)
+        ? turn3SubmenuBounceTick(t, TURN2_OFF_DRAGONBREATH_MENU_REDRAW_DELAY)
         : turn1Resolved
           ? turn2SubmenuBounceTick(t, TURN1_OFF_ROCKSLIDE_MENU_REDRAW_DELAY)
           : t;
@@ -7766,7 +7766,7 @@ function drawFightSubmenuWindow(
       : turn3Resolved
         ? turn4KickoffBounceTick(t, pressTick)
         : turn2Resolved
-          ? turn3KickoffBounceTick(t, pressTick)
+          ? turn3KickoffBounceTick(t, pressTick, TURN2_OFF_DRAGONBREATH_MENU_REDRAW_DELAY)
           : turn1Resolved
             ? turn2KickoffBounceTick(t, pressTick, TURN1_OFF_ROCKSLIDE_MENU_REDRAW_DELAY)
             : turnKickoffBounceTick(t, pressTick);
@@ -7797,7 +7797,7 @@ function drawFightSubmenuWindow(
     : turn3Resolved
       ? turn4SubmenuBounceTick(t)
       : turn2Resolved
-        ? turn3SubmenuBounceTick(t)
+        ? turn3SubmenuBounceTick(t, TURN2_OFF_DRAGONBREATH_MENU_REDRAW_DELAY)
         : turn1Resolved
           ? turn2SubmenuBounceTick(t, TURN1_OFF_ROCKSLIDE_MENU_REDRAW_DELAY)
           : sm.reopenedFromClose
@@ -8707,8 +8707,8 @@ const TURN2_CONFIRM_PRESS_TICK = 2945;
  * dump (`src/data/gen/turn3-menu-bouncer-raw-probe.json`,
  * `tools/probe/verify-turn3-menu-bounce-rule.py`'s own source).
  */
-export function turn3SubmenuBounceTick(t: number): number {
-  return dragonBreathResettledBounceTick(t, TURN2_CONFIRM_PRESS_TICK) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT - 1;
+export function turn3SubmenuBounceTick(t: number, redrawDelay: number = DRAGONBREATH_MENU_REDRAW_DELAY): number {
+  return dragonBreathResettledBounceTick(t, TURN2_CONFIRM_PRESS_TICK, redrawDelay) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT - 1;
 }
 
 /**
@@ -8730,11 +8730,18 @@ export function turn3SubmenuBounceTick(t: number): number {
  */
 /** Turn 3's own A-confirm press tick (RAM/render 3891 - `turn3-menu.json`'s own committed button script, last frame of its final 2-frame `A` hold, same "last frame of the hold" convention `TURN1_CONFIRM_PRESS_TICK`/`TURN2_CONFIRM_PRESS_TICK` already established). */
 const TURN3_CONFIRM_PRESS_TICK = 3891;
-const TURN3_KICKOFF_FROZEN_BOUNCE_TICK = turn3SubmenuBounceTick(TURN3_CONFIRM_PRESS_TICK + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY);
 
-function turn3KickoffBounceTick(t: number, pressTick: number): number {
-  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return turn3SubmenuBounceTick(t);
-  return TURN3_KICKOFF_FROZEN_BOUNCE_TICK;
+/**
+ * ISSUES #39 rank-6 slice 3: the frozen plateau is the live formula's own
+ * value at the freeze moment (module doc above) rather than an
+ * independently pixel-fit literal (unlike `TURN2_KICKOFF_FROZEN_BOUNCE_
+ * TICK`) - so under a `redrawDelay` override this must be recomputed
+ * against the SAME override, not read from a stale ON-fit module constant.
+ */
+function turn3KickoffBounceTick(t: number, pressTick: number, redrawDelay: number = DRAGONBREATH_MENU_REDRAW_DELAY): number {
+  const freezeTick = pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY;
+  if (t < freezeTick) return turn3SubmenuBounceTick(t, redrawDelay);
+  return turn3SubmenuBounceTick(pressTick + 9, redrawDelay);
 }
 
 function drawDragonBreathTurnEndSettledMenu(fb: Uint8Array, t: number, pressTick: number): void {
@@ -8894,60 +8901,60 @@ function drawTurn2KickoffText(fb: Uint8Array, t: number, pressTick: number): voi
 }
 
 /**
- * S7 slice G (docs/battle-turn-notes.md §20): turn 3's own kickoff message,
- * "Foe GROVYLE used\nENDEAVOR!" again (Grovyle repeats its turn-2 move,
- * §13's own ledger) - reuses `drawTurn2KickoffText`'s exact text/timing
- * formulas (`turn2KickoffTextStartTick`/`turn2KickoffTextVisibleChars`,
- * oracle-pixel-confirmed this session to hard-cut at the SAME `pressTick`+9
- * offset turn 2 used, tick 3900 for this trace's own `TURN3_CONFIRM_PRESS_
- * TICK`=3891) and `drawEndeavorSquish`'s entire animation state machine
- * (squish/blend/droplets/shake/hitsplat/healthbox-wobble/flicker - every
- * one of those sub-mechanisms is `pressTick`-relative already, none needed
- * a turn-3-specific correction), parameterized by turn 3's own Grovyle hp
- * (`anchorOpponentAfterTurn2Hp`, 88, steady all through this window - turn
- * 3's ENDEAVOR targets ONIX, not Grovyle) and turn 3's own idle-bounce
- * freeze (`turn3KickoffBounceTick`). Unlike `drawTurn2KickoffText`, this
- * function does NOT dispatch onward into the turn's second half (ROCK_SLIDE,
- * Onix's own move, out of scope this session per the brief) - it only ever
- * holds the ENDEAVOR text once fully printed, oracle-confirmed stable (byte-
- * identical full-frame captures) through `pressTick`+188 (tick 4079), well
- * past the HP drain's own completion (`pressTick`+166=4057) - safely before
- * ROCK_SLIDE's own kickoff text hard-cuts the message box again at
- * `pressTick`+189 (tick 4080, oracle-confirmed, NOT modeled here).
+ * ISSUES #39 rank-6 slice 3: turn 3's own ENDEAVOR-half Scene-OFF re-timing,
+ * same treatment slice 2 established for turn 2's own ENDEAVOR half -
+ * `drawEndeavorSquish`'s entire attacker-side content (squish/blend/
+ * droplets/hitsplat/target-shake, all class c) is RAM/pixel-confirmed
+ * absent (fresh combined probe, `tools/probe/dump-turn2-dragonbreath-
+ * off.py` reused verbatim against `turn3-endeavor-off.json`'s own segments)
+ * - never called here; the idle content underneath renders unchanged
+ * instead. Onix's own generic post-hit healthbox wobble
+ * (`endeavorHealthboxBounceY2`) AND hit-flash flicker
+ * (`endeavorOnixInvisible`, class b, the same pair slice 2 root-caused) both
+ * survive, re-anchored to turn 3's own OFF ticks - RAM-confirmed identical
+ * relative offsets to turn 2's own (81/82 ticks past `pressTick`), a second
+ * independent confirmation this pair's timing is fixed post-hit overhead,
+ * not turn-specific. `drawEndeavorSquish` itself, still shared with turn 5
+ * (S7 slice K, byte-exact ON, out of scope), is untouched.
  *
- * The player healthbox's own HP-digit overlay needs its OWN yOffset
- * threading here, unlike turn 2's analogous call (`drawTurn2KickoffText`'s
- * own unconditional, offset-less `drawPlayerHealthboxHpOverlay(fb, onixHp)`
- * call): turn 2's `onixHp` sits AT `anchorPlayerBattler.hp` (117) for this
- * whole window (its own drain starts well after the tail's own healthbox-
- * wobble sub-mechanism ends), so that overlay's own no-op guard (`hp ===
- * anchorPlayerBattler.hp`) skips drawing entirely during the ONE span where
- * a missing offset would show - turn 3's own `onixHp` starts at 101, never
- * 117, so the overlay is NEVER a no-op here and must track
- * `endeavorHealthboxBounceY2` (the real hardware wobble `drawEndeavorSquish`
- * itself draws the healthbox base at) for as long as the squish/tail window
- * is active; past that window, `drawActionMenuIdleContent`'s own `playerHp`
- * param (S7 slice G) handles the (already-zero, oracle-confirmed) offset
- * internally, so no second call is needed there.
+ * `endeavorOnixHp`'s drain-start delay is turn-3-specific
+ * (`TURN3_OFF_ENDEAVOR_HP_DRAIN_START_DELAY`, 116 - RAM-confirmed identical
+ * relative offset to turn 2's own, same "fixed post-hit overhead" finding).
+ * The handoff into ROCK_SLIDE's own kickoff text is a same-frame hard cut
+ * (pixel-confirmed via a dense `bin/oracle run` scout: frame 4043 already
+ * shows ROCK_SLIDE's own first character, the held ENDEAVOR text nowhere
+ * in between - the identical "no blank tick" shape slice 2 found for the
+ * ENDEAVOR/DRAGON_BREATH seam), so no separate text-clear delay is needed
+ * here; the boundary condition below (`rockSlideTextStartTick` with the new
+ * `TURN3_OFF_ROCKSLIDE_TEXT_DELAY`) already lands exactly there.
  */
+const TURN3_OFF_ENDEAVOR_HP_DRAIN_START_DELAY = 116; // pixel/RAM-pinned tick 4007 (pressTick+116), same relative offset as turn 2's own
+const TURN3_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START = 81; // RAM-pinned: healthbox0Y2 first flip at RAM tick 3972 (pressTick+81), same relative offset as turn 2's own
+const TURN3_OFF_ENDEAVOR_FLICKER_START = TURN3_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START + 1; // RAM-pinned: onixInvisible first true at RAM tick 3973 (pressTick+82), same +1 pairing turn 2's own established
+
 function drawTurn3EndeavorText(fb: Uint8Array, t: number, pressTick: number): void {
-  // S7 slice H (docs/battle-turn-notes.md §21): once ROCK_SLIDE's own
-  // kickoff text hard-cuts the message box (oracle-pixel-confirmed at tick
-  // 4080 - `rockSlideTextStartTick(TURN3_ROCKSLIDE_PRESS_TICK)` below,
-  // matching slice G's own named boundary exactly), hand off to the turn's
-  // second half instead of holding the ENDEAVOR text forever - the same
-  // shape `drawTurn2KickoffText`'s own `dragonBreathStart` handoff already
-  // established for turn 2.
-  if (t >= rockSlideTextStartTick(TURN3_ROCKSLIDE_PRESS_TICK)) {
+  // ISSUES #39 rank-6 slice 3: hands off into turn 3's own ROCK_SLIDE half
+  // at the fresh OFF-pinned tick (`TURN3_OFF_ROCKSLIDE_TEXT_DELAY`, replacing
+  // the ON-fit default) - same shape `drawTurn2KickoffText`'s own
+  // `dragonBreathStart` handoff already established for turn 2.
+  if (t >= rockSlideTextStartTick(TURN3_ROCKSLIDE_PRESS_TICK, TURN3_OFF_ROCKSLIDE_TEXT_DELAY)) {
     drawTurn3RockSlideWindow(fb, t);
     return;
   }
-  const bounceTick = turn3KickoffBounceTick(t, pressTick);
-  const onixHp = endeavorOnixHp(t, pressTick, anchorPlayerAfterTurnHp, anchorPlayerAfterTurn3Hp);
-  if (drawEndeavorSquish(fb, t, pressTick, anchorOpponentAfterTurn2Hp, bounceTick, DRAGON_BREATH_MOVE_POWER)) {
-    drawPlayerHealthboxHpOverlay(fb, onixHp, endeavorHealthboxBounceY2(t, pressTick));
-  } else {
-    drawActionMenuIdleContent(fb, bounceTick, true, true, onixHp);
+  const bounceTick = turn3KickoffBounceTick(t, pressTick, TURN2_OFF_DRAGONBREATH_MENU_REDRAW_DELAY);
+  const onixHp = endeavorOnixHp(t, pressTick, anchorPlayerAfterTurnHp, anchorPlayerAfterTurn3Hp, TURN3_OFF_ENDEAVOR_HP_DRAIN_START_DELAY);
+  drawActionMenuIdleContent(fb, bounceTick, true, true, onixHp);
+  // Onix's own hit-flash flicker (class b, paired with the wobble below) is
+  // baked permanently visible into `menuIdleBase`'s flat harvest - erase its
+  // footprint whenever the real sprite's own `invisible` bit is set, same
+  // shape slice 2 established for turn 2's own window.
+  if (endeavorOnixInvisible(t, pressTick, TURN3_OFF_ENDEAVOR_FLICKER_START)) {
+    eraseSpriteFootprint(fb, onixBackSprite.tileset, ONIX_MATERIALIZE_CORNER);
+  }
+  const wobbleY2 = endeavorHealthboxBounceY2(t, pressTick, TURN3_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START);
+  if (wobbleY2 !== 0) {
+    drawMenuHealthboxPlayerWobble(fb, wobbleY2);
+    drawPlayerHealthboxHpOverlay(fb, onixHp, wobbleY2);
   }
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawMessageTextLines(fb, TURN_KICKOFF_LINE1, TURN2_KICKOFF_LINE2, turn2KickoffTextVisibleChars(t, pressTick));
@@ -9022,56 +9029,79 @@ const TURN3_ROCKSLIDE_PRESS_TICK = 3687; // 4080 - ROCK_SLIDE_TEXT_DELAY(393)
  * to ITS OWN hp-field-update tick (2560) - the "+5" is fully explained by
  * parameter drift through an unchanged formula, not a divergent mechanism.
  */
-const TURN3_ROCKSLIDE_TEXT_CLEAR_DELAY = 662; // pressTick+662 = 4349 (message box blanks, box stays)
-const TURN3_ROCKSLIDE_MENU_REDRAW_DELAY = 669; // pressTick+669 = 4356 (hard cut to the resettled action menu)
+const TURN3_ROCKSLIDE_MENU_REDRAW_DELAY = 669; // pressTick+669 = 4356 (hard cut to the resettled action menu) - ON-fit; kept unchanged since `TURN3_ROCKSLIDE_REOPEN_GATE_DELAY` (a LOGICAL core.ts gate, not rendering) still derives from it, same "logic gate stays put, only the rendered pixels move earlier" split slice 1 established
 
 /**
- * S7 slice H: the battlefield base + rocks + shake + Grovyle's own HP drain
- * for turn 3's ROCK_SLIDE window - identical shape to turn 1's own
- * `drawRockSlideAttack`, parameterized by `TURN3_ROCKSLIDE_PRESS_TICK` and
- * turn 3's own HP endpoints, now the staged `TURN3_ROCKSLIDE_HP` pair
- * (88 -> 41, `docs/presentation-seam-scout.md` §10.3 step 1, byte-identical
- * to the `anchorOpponentAfterTurn2Hp`/`anchorOpponentAfterTurn3Hp` literals).
- * Unlike turn 1 (where Onix stays at
- * full HP(117) the whole window, so `drawMenuHealthboxPlayer`'s own stale
- * full-HP harvest is already correct), Onix already carries ENDEAVOR's own
- * damage (117->88) by this point - the caller (`drawTurn3RockSlideWindow`)
- * applies the real HP overlay on top, same "overlay applied once at the
- * dispatcher level" shape `drawTurn2KickoffText` already established for
- * DRAGON_BREATH's own Onix-HP-overlay call.
+ * ISSUES #39 rank-6 slice 3: turn 3's own ROCK_SLIDE-half Scene-OFF
+ * re-timing, same treatment slice 1 established for turn 1's own ROCK_SLIDE
+ * (camera shake/target shake/falling-rock props all class c, deleted;
+ * generic hit-flash pair class b, survives, re-anchored). All four pixel/
+ * RAM-confirmed this session against `turn3-rockslide-off.json` (a fresh
+ * `bin/oracle run` dense sweep plus the combined RAM probe,
+ * `tools/probe/dump-turn2-dragonbreath-off.py` reused verbatim - its fields
+ * are move-agnostic): kickoff text hard-cut (matching `drawTurn3EndeavorText`'s
+ * own handoff boundary, frame 4043), hit-flash anchor (RAM tick 4105, first
+ * flip render 4106), HP-drain start (RAM tick 4140 sentinel), text-clear
+ * (frame 4205, small glyph-only diff) and menu-redraw (frame 4212, the
+ * whole-bottom-half swap - the same 7-tick clear-to-redraw gap turns 1/2's
+ * own OFF pairs establish) - `TURN3_OFF_ROCKSLIDE_MENU_REDRAW_DELAY`(525)
+ * matches `docs/rank6-off-ground-truth.md` §5's own ~525 estimate exactly.
+ * All four are relative to the SAME unchanged synthetic
+ * `TURN3_ROCKSLIDE_PRESS_TICK` anchor (free-choice constant, not tied to any
+ * real press) rather than a newly recomputed anchor - simpler, and every
+ * downstream shared function's default (unmodified ON) delay stays
+ * irrelevant here since every call site below passes its own override.
+ */
+const TURN3_OFF_ROCKSLIDE_TEXT_DELAY = 356; // pressTick+356 = 4043 (same-frame hard cut from the held ENDEAVOR text to ROCK_SLIDE's own first character, pixel-confirmed)
+const TURN3_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY = 453; // pressTick+453 = 4140 (bar1Curr sentinel, probe-exact, same convention TURN1_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY's own doc establishes)
+const TURN3_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY = 518; // pressTick+518 = 4205 (message box blanks, box stays)
+const TURN3_OFF_ROCKSLIDE_MENU_REDRAW_DELAY = 525; // pressTick+525 = 4212 (hard cut to the resettled action menu)
+const TURN3_OFF_ROCKSLIDE_ANIMATION_PROFILE = {
+  ...ROCK_SLIDE_ANIMATION_PROFILE,
+  hitFlashAnchorAge: 418, // RAM tick 4105 (healthbox wobble's own first +1 write) - pressTick(3687)
+};
+
+/**
+ * ISSUES #39 rank-6 slice 3: the battlefield base + Grovyle's own HP drain
+ * for turn 3's OFF ROCK_SLIDE window - same shape turn 1's own
+ * `drawRockSlideAttack` established: the camera shake (`rockSlideBg3Y`),
+ * Grovyle's own target shake (`rockSlideMonShakeY2`), and the falling-rock
+ * props (`rockSlideDrawOrder`/`rockSlideRockState`) are all class (c),
+ * RAM-confirmed absent the whole window (this window's own doc above) -
+ * dropped entirely. The generic hit-flash pair
+ * (`rockSlideHealthboxWobbleY2`/`rockSlideMonBlinkInvisible`) survives via
+ * `TURN3_OFF_ROCKSLIDE_ANIMATION_PROFILE`'s override.
  */
 function drawTurn3RockSlideAttack(fb: Uint8Array, t: number): void {
   const pressTick = TURN3_ROCKSLIDE_PRESS_TICK;
-  const shiftY = rockSlideBg3Y(t, pressTick);
-  drawStaticBgShiftedY(fb, shiftY);
-  if (!rockSlideMonBlinkInvisible(t, pressTick)) {
-    drawSpriteSheet(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y + rockSlideMonShakeY2(t, pressTick));
+  drawStaticBgShiftedY(fb, 0);
+  if (!rockSlideMonBlinkInvisible(t, pressTick, TURN3_OFF_ROCKSLIDE_ANIMATION_PROFILE)) {
+    drawSpriteSheet(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y);
   }
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
-  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
-  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN3_ROCKSLIDE_HP.from, TURN3_ROCKSLIDE_HP.to);
+  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick, TURN3_OFF_ROCKSLIDE_ANIMATION_PROFILE);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN3_ROCKSLIDE_HP.from, TURN3_ROCKSLIDE_HP.to, TURN3_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
   const opponentContent = opponentHealthboxContentForHp(opponentHp);
   drawSendOutHealthbox(fb, 0, opponentContent);
   if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
   drawMenuHealthboxPlayer(fb, 0);
-  drawMenuIdleBounceOverlay(fb, turn3KickoffBounceTick(t, TURN3_CONFIRM_PRESS_TICK));
-  for (const i of rockSlideDrawOrder(t, pressTick)) {
-    const rock = rockSlideRockState(i, t, pressTick);
-    if (!rock) continue;
-    drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
-  }
+  drawMenuIdleBounceOverlay(fb, turn3KickoffBounceTick(t, TURN3_CONFIRM_PRESS_TICK, TURN2_OFF_DRAGONBREATH_MENU_REDRAW_DELAY));
 }
 
 /**
  * S7 slice H: the same "resettled menu re-initializes its own bounce phase
  * fresh at redraw" formula `rockSlideResettledBounceTick`/
  * `dragonBreathResettledBounceTick` already establish, keyed off turn 3's
- * own `TURN3_ROCKSLIDE_MENU_REDRAW_DELAY` rather than reusing either of
- * those functions directly (both hardcode THEIR OWN turn-specific redraw
- * delay internally, not parameterized).
+ * own menu-redraw delay. `redrawDelay` defaults to the unchanged ON-fit
+ * `TURN3_ROCKSLIDE_MENU_REDRAW_DELAY` (ISSUES #39 rank-6 slice 3): turn 4's
+ * own `turn4SubmenuBounceTick` still calls this with no override and must
+ * keep composing from the ON-fit redraw (turn 4 stays Scene-ON this slice) -
+ * turn 3's OWN rendering below passes `TURN3_OFF_ROCKSLIDE_MENU_REDRAW_DELAY`
+ * explicitly, same "override at the turn's own call site only" idiom slice 2
+ * established for `dragonBreathResettledBounceTick`.
  */
-function turn3RockSlideResettledBounceTick(t: number): number {
-  return t - (TURN3_ROCKSLIDE_PRESS_TICK + TURN3_ROCKSLIDE_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
+function turn3RockSlideResettledBounceTick(t: number, redrawDelay: number = TURN3_ROCKSLIDE_MENU_REDRAW_DELAY): number {
+  return t - (TURN3_ROCKSLIDE_PRESS_TICK + redrawDelay) + (MENU_IDLE_BLANK_END_TICK + 1);
 }
 
 /**
@@ -9085,7 +9115,7 @@ function turn3RockSlideResettledBounceTick(t: number): number {
  * like every earlier settled-menu variant in this turn sequence).
  */
 function drawTurn3RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number): void {
-  const bounceTick = turn3RockSlideResettledBounceTick(t);
+  const bounceTick = turn3RockSlideResettledBounceTick(t, TURN3_OFF_ROCKSLIDE_MENU_REDRAW_DELAY);
   drawActionMenuIdleContent(fb, bounceTick, false);
   drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(TURN3_ROCKSLIDE_HP.to));
   drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurn3Hp, menuIdleBounce(bounceTick).healthboxY2);
@@ -9111,17 +9141,17 @@ function drawTurn3RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number): void {
  */
 function drawTurn3RockSlideWindow(fb: Uint8Array, t: number): void {
   const pressTick = TURN3_ROCKSLIDE_PRESS_TICK;
-  const redrawTick = pressTick + TURN3_ROCKSLIDE_MENU_REDRAW_DELAY;
+  const redrawTick = pressTick + TURN3_OFF_ROCKSLIDE_MENU_REDRAW_DELAY;
   if (t >= redrawTick) {
     drawTurn3RockSlideTurnEndSettledMenu(fb, t);
     return;
   }
-  const textClearTick = pressTick + TURN3_ROCKSLIDE_TEXT_CLEAR_DELAY;
+  const textClearTick = pressTick + TURN3_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY;
   drawTurn3RockSlideAttack(fb, t);
   drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurn3Hp);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   if (t < textClearTick) {
-    drawMessageTextLines(fb, TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2, rockSlideTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2, rockSlideTextVisibleChars(t, pressTick, TURN3_OFF_ROCKSLIDE_TEXT_DELAY));
   }
 }
 

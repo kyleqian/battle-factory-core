@@ -13,6 +13,43 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 804 — [bounded worker, 2026-07-31 ~night] ISSUES #39 rank-6 slice 3 (turn 3) LANDED — fallback invoked, turn 4 not attempted
+
+- **State:** master HEAD is this session's own commit (src+tests+traces) —
+  tree clean, `npx tsc --noEmit` clean, `npm run build` clean, focused
+  vitest (battleScene 227/battleMenu 121/fightSubmenu 57/
+  factoryBattleStartIntro 5/executableFrontierRatchet 6) 416/416 passed. Docs
+  commit (this one) follows.
+- **Did:** flipped turn 3's whole ENDEAVOR+ROCK_SLIDE window to Scene-OFF,
+  same class-(c)-delete/class-(b)-retime recipe slices 1-2 established (full
+  mechanism detail in ISSUES #39's own rank-6 paragraph — not renarrated
+  here). New finding beyond the recipe: turn 3's own cross-turn bounce chain
+  (`turn3SubmenuBounceTick`/`turn3KickoffBounceTick`) still hardcoded turn
+  2's ON-fit redraw delay, AND its frozen-bounce plateau (previously a
+  module constant that only coincidentally matched the live formula under
+  ON) needed a fresh oracle-pixel grid search — real hardware freezes at
+  `pressTick+9`, not the naive `pressTick+FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`
+  continuation. Acceptance: `turn3-endeavor-off.json` **254/255** (one
+  residual — ISSUES #61, a pre-existing action-menu/submenu reveal-boundary
+  bug confirmed present, worse even, on unmodified master, unrelated to this
+  window's own content), `turn3-rockslide-off.json` **161/161** EXACT;
+  insurance `turn5-rockslide.json`/`turn8-bind-a.json` 256/256 each, zero
+  regression. Retired `turn3-{menu,endeavor,rockslide}.json` (`git rm`).
+  Re-pinned `tests/fightSubmenu.test.ts`'s two turn-3 tests at the fresh OFF
+  ticks (4043/4205/4212 replacing dead ON 4080/4349/4356) and redirected its
+  button-script loader from the retired `turn3-menu.json` to
+  `turn3-endeavor-off.json` (byte-identical segments).
+- **Next:** turn 4 (rank-6 slice 4, DOUBLE_TEAM+ROCK_SLIDE) is next in
+  order — fallback invoked this session (turn-4 attempt would have exceeded
+  the session's own time budget after slice 3's bounce-chain investigation
+  ran long); a clean turn-3-only landing per the brief's own fallback
+  clause. Expect the SAME cross-turn bounce-chain fix pattern for
+  `turn4SubmenuBounceTick`/`turn4KickoffBounceTick` (chained off THIS
+  slice's own `TURN3_OFF_ROCKSLIDE_MENU_REDRAW_DELAY`=525) plus a fresh
+  frozen-plateau grid search for turn 4's own confirm-wait window - budget
+  time for both up front, not just the recipe's class-(c)/(b) split.
+- **PAPERCUT:** none beyond ISSUES #61's own discovery.
+
 ## 803 — [bounded worker, 2026-07-31 ~night] ISSUES #39 rank-6 slice 2 (turn 2) LANDED — third attempt, both blockers root-caused
 
 - **State:** master at `4c793748` — tree clean, tsc/build clean, focused
@@ -56,246 +93,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   argument counts. Future salvage-and-reapply should diff the FULL file
   against a known-good base rather than trusting a partial edit list.
 
-## 802 — [bounded worker, 2026-07-31 ~night] ISSUES #39 rank-6 slice 2 (turn 2) RETRY — every timing constant now pinned, still NOT landed — new blocker found, reverted
-
-- **State:** master unchanged from `01eac159` (slice 1) — tree is clean,
-  tsc/build clean, focused vitest (battleScene 247/battleMenu
-  121/factoryBattleStartIntro 5/fightSubmenu 57/executableFrontierRatchet 6)
-  436/436 passed. One commit this session (the new RAM probe script only,
-  no `src/` changes — see below).
-- **Did:** re-attempted rank-6 slice 2 starting from entry 801/ISSUES #39's
-  banked findings (did not re-derive items 1/3). Wrote the recommended
-  combined RAM probe (`tools/probe/dump-turn2-dragonbreath-off.py`,
-  generalizing `dump-turn1-rockslide-off.py`) and used it plus a `bin/oracle
-  run` + PIL pixel-diff scout to pin **every** remaining DRAGON_BREATH/
-  ENDEAVOR OFF constant in one pass (exact values, all pixel/RAM-confirmed,
-  not estimates — full numbers in ISSUES #39): the cross-turn bounce fix
-  (item 1), DRAGON_BREATH's hit-flash anchor/HP-drain start/text-clear/
-  menu-redraw delays (219/254/285/292, replacing ON 318/353/384/391), and
-  independently confirmed DRAGON_BREATH's own target shake+red-fade blend
-  (not just the fire-projectile stream) are ALSO class (c) — deleted along
-  with their now-dead constants/functions. Implemented all of it plus (2)'s
-  override-param treatment for `drawEndeavorSquish`'s shared siblings. On
-  running acceptance, found item (2) of entry 801's own findings was
-  **wrong**: `drawEndeavorSquish`'s body is not entirely class (c) — Onix's
-  own generic post-hit healthbox wobble (`endeavorHealthboxBounceY2`) is
-  RAM/pixel-confirmed STILL ACTIVE under OFF (OFF anchor 81 vs ON 118,
-  same "class (b) wobble survives" split ROCK_SLIDE/DRAGON_BREATH's own
-  hit-flash pairs already establish). Re-added it via a direct
-  `drawMenuHealthboxPlayer(fb, 0, wobbleY2)` overdraw (since
-  `drawPlayerHealthboxHpOverlay`'s own no-op-at-full-HP guard never fires
-  here) — this fixed most frames down to a 103px residual, but frames where
-  `wobbleY2` is specifically **-1** still show a ~1767px diff spanning the
-  ENTIRE upper playfield (both mons, not just the healthbox) - a real bug
-  in overdrawing a negative-offset healthbox on top of the flat idle
-  harvest, NOT root-caused this session (out of time). `turn2-endeavor-off.json`
-  plateaued at 210/256 (short of the required 256/256) — never reached
-  green, so per the brief's hard rule **all `src/` edits were reverted**
-  (`git checkout`), same as entry 801. The probe script has no `src/` risk
-  and is kept/committed — it found every constant above in one pass,
-  confirming the brief's own recommendation.
-- **Next:** re-attempt rank-6 slice 2 a third time starting from ISSUES
-  #39's now-fully-updated slice-2 paragraph — every timing constant is
-  banked, so the only remaining work is: (a) root-cause the negative-
-  `wobbleY2` overdraw bug (leads in ISSUES #39), (b) close the 103px
-  even-parity residual, (c) implement + re-verify acceptance. Turns 3 and 4
-  (rank-6 slices 3/4) remain fully unstarted, still next in order after
-  turn 2 lands.
-- **PAPERCUT:** none beyond what ISSUES #39 already documents — the RAM
-  probe approach (vs pixel-crop bisection) worked exactly as entry 801
-  predicted, pinning 6 constants in under 15 minutes total.
-
-## 801 — [bounded worker, 2026-07-31 ~19:35] ISSUES #39 rank-6 slice 2 (turn 2) NOT landed — investigated and reverted, findings banked
-
-- **State:** master unchanged from `01eac159` (slice 1) — tree is clean,
-  tsc/build clean, focused vitest (battleScene 247/battleMenu
-  121/factoryBattleStartIntro 5/fightSubmenu 57/executableFrontierRatchet 6)
-  436/436 passed. No commit this session (nothing reached green).
-- **Did:** attempted rank-6 slice 2 (turn 2, ENDEAVOR+DRAGON_BREATH) per
-  the same brief-ordered plan as slice 1. Deep RAM/pixel investigation
-  against the already-banked `turn2-endeavor-off.json`/
-  `turn2-dragonbreath-off.json` fixtures found real, verified facts —
-  including a genuine cross-turn bug (`turn2SubmenuBounceTick`/
-  `turn2KickoffBounceTick` in `battleMenu.ts` still default to
-  `ROCK_SLIDE_MENU_REDRAW_DELAY`=664, not slice 1's OFF value 429, which
-  desyncs turn 2's whole idle-bounce phase) and confirmation that
-  `drawEndeavorSquish`'s entire body is class (c) but shared with
-  turn 3 (in scope) and turn 5 (out of scope) — plus four of roughly
-  seven needed OFF constants pixel/RAM-pinned. Full detail (exact ticks,
-  exact delay values, what's still missing) is in **ISSUES #39**'s own
-  slice-2 paragraph, not re-narrated here. Ran out of session time before
-  reaching turn 2's own 256/256 + 237/237 acceptance, so **reverted all
-  `src/` edits** (`git checkout`) rather than commit a half-flipped turn —
-  per the brief's own hard rule, a half-flipped turn is not a success.
-- **Next:** re-attempt rank-6 slice 2 starting from ISSUES #39's slice-2
-  paragraph (don't re-derive the bounce-phase bug or the constants already
-  found) — write a combined RAM probe (`tools/probe/dump-turn1-rockslide-off.py`'s
-  own shape, retargeted at turn 2's battler 1 healthbar/sprite state and
-  the message-box text pointer across `turn2-dragonbreath-off.json`'s
-  3149-3385 window) rather than pixel-cropping blind, which is what ate
-  this session's time budget. Turns 3 and 4 (rank-6 slices 3/4) remain
-  fully unstarted, still next in order after turn 2 lands.
-- **PAPERCUT:** pixel-crop bisection against raw oracle PNGs (no RAM
-  read) is slow and error-prone for finding exact per-tick delay
-  constants (mis-cropped a healthbox region twice this session, costing
-  real time) — a small reusable "combined RAM dump for a given trace's
-  battler/text/BG state across a tick range" probe helper (generalizing
-  `dump-turn1-rockslide-off.py`) would pay for itself across every
-  remaining rank-6/7/8 slice, ~20-30 min lost this session alone.
-
-## 800 — [bounded worker, 2026-07-31 ~19:05] ISSUES #39 rank-6 slice 1 EXECUTED: turn 1 flipped to Scene-OFF-owned presentation
-
-- **State:** master green — tsc clean, build clean, focused vitest
-  (battleScene 247/battleMenu 121/factoryBattleStartIntro 5/fightSubmenu
-  57/executableFrontierRatchet 6) 436/436 passed, no new ratchet barrier.
-  One commit pending (this session's own).
-- **Did:** per the ADOPTED rank-6 policy (PROGRESS 799 addendum) and the
-  rank-5 slice-1 recipe, flipped turn 1's whole DOUBLE_TEAM/ROCK_SLIDE
-  window (menu 1884 → settle ~2348) to Scene-OFF-owned. Deleted class-(c)
-  bodies from turn 1's own render path: DOUBLE_TEAM's clone-blend
-  (`drawDoubleTeamClones` call site removed) and ROCK_SLIDE's camera
-  shake/target shake/rock-prop loop (`rockSlideBg3Y`/`rockSlideMonShakeY2`/
-  `rockSlideRockState`/`rockSlideDrawOrder` calls dropped from
-  `drawRockSlideAttack`) — both RAM-confirmed flat/absent the whole window
-  (new probe `tools/probe/dump-turn1-rockslide-off.py`, `gBattle_BG3_Y`
-  and Grovyle's own `x2`/`y2` pinned 0 throughout). Re-timed the surviving
-  class-(b) choreography (stat-change banner, generic hit-flash pair,
-  HP-drain, text) against 8 new RAM-exact constants
-  (`TURN1_OFF_STATS_BANNER_*`/`TURN1_OFF_ROCKSLIDE_*`,
-  `battleScene.ts`) — `ROCK_SLIDE_MENU_REDRAW_DELAY` real OFF value
-  pinned at exactly **429**, matching `docs/rank6-off-ground-truth.md`
-  §5's own ~429 estimate. `statsBannerEva`/`statsBannerBg1Y`/
-  `statRoseTextStartTick`/`statRoseTextVisibleChars`/
-  `rockSlideTextStartTick`/`rockSlideTextVisibleChars`/
-  `rockSlideResettledBounceTick` (`battleMenu.ts`) gained optional
-  override params defaulting to their existing ON-fit constants — turn 4's
-  own still-ON DOUBLE_TEAM call site (`drawStatsBanner`/
-  `drawDoubleTeamClones`, S7 slice I) is byte-for-byte unaffected. Two
-  small RAM-vs-PNG capture-lag corrections found by iterating against the
-  dense oracle captures (bg1Y anchor +1, hit-flash anchor +1 — same
-  "PNG(t)=RAM(t-1)" convention this program's BG-scroll-register findings
-  already establish) and one text-clear tick corrected from the coarser
-  v3 whole-frame-sha table (2345) to a fresh sha crop of the opponent-
-  healthbox-name-plate bbox (2341) — restores the same 7-tick clear-to-
-  redraw gap turn6/turn7's own ROCK_SLIDE pairs already establish.
-- **Acceptance (fresh, this session):** `turn1-kickoff-off.json`
-  **81/81**, `turn1-cloneanim-off.json` **230/230**, `turn1-rockslide-off.json`
-  **256/256**, `turn1-drain-off.json` **102/102** — all EXACT. Retired the
-  four legacy ON turn-1 pins (`git rm turn1-{kickoff,cloneanim,rockslide,
-  drain}.json`); no turn-1-only scratch diagnostics existed to retire
-  (`dump-doubleteam-sprites.py`/`dump-rockslide-sprites.py` remain live,
-  still used by turns 3-7's own still-ON rock-slide/clone work).
-- **Boundary insurance — surprise finding, NOT a regression:** the
-  brief's named turn-2 pins were expected 100% green today.
-  `turn2-endeavor.json` actually **throws** (`Scene OFF typed stat
-  adapter cannot draw battler 1 evasion 7->8`) and `turn2-dragonbreath.json`
-  is **0/237** — but `git stash` against this session's own changes
-  reproduces byte-identical failures on unmodified master (`f0621d47`),
-  proving both are pre-existing and unrelated to turn 1's own dispatcher
-  (they route through the GENERATED-route presentation adapter, not
-  `renderBattleScene`). New entry **ISSUES #60** files this honestly
-  rather than silently absorbing it into this slice's own report. Per the
-  hard-stop rule this only applies to a genuine regression — confirmed
-  this isn't one, so slice 1 proceeded to its own green commit.
-- **Next:** rank-6 slice 2 (turn 2) is next in the same shape; #56 item 2
-  and #56 +6 universality remain open per PROGRESS 799's own next-list;
-  #60 (new, this session) is a leftover lead for whoever next touches the
-  generated-route stat adapter or wants turn2's own pins actually green.
-- **PAPERCUT:** none beyond #60's own discovery (not dev-loop friction,
-  a real pre-existing app bug — filed as an issue, not a papercut).
-
-## 798 — [bounded worker, 2026-07-31 ~17:50] ISSUES #59 FIXED: generated-route opponent stat-drop crash — presentation-seam gap, not kernel
-
-- **State:** master green — tsc clean, focused vitest (battleResolutionPresentation
-  17, battleScene 247, battleMenu 121, battleCommandGeneratedOffEvidence 2,
-  factoryRoundBattleOrchestrator 30, fightSubmenu 57, factoryBattleStartIntro 5)
-  green, ratchet 6/6 (unchanged — presentation-only fix, no kernel barrier
-  moved), full `npm test` **567 files / 5722 passed + 1 skipped** (+1 over
-  797's baseline), build clean.
-- **Root cause was presentation, not kernel.** EFFECT_ATTACK_DOWN_2's real
-  script (`BattleScript_EffectAttackDown2` -> `EffectStatDown`) only calls
-  `statbuffchange`/`playanimation(B_ANIM_STATS_CHANGE)`/`jumpifstatus2
-  (STATUS2_SUBSTITUTE)` — all already registered generically (confirmed by
-  source read + existing TAIL_WHIP/Swords Dance kernel tests; no kernel gap,
-  no new kernel test needed). The real halt: `renderBattleResolutionSceneOffView`
-  (`battleScene.ts`) — the generated route's actual production render path
-  (`core.ts` `renderWithoutFactoryTerminal` -> `battleResolutionPresentation`
-  -> `drawScene`) — hard-asserted its `"stat"` effect branch to exactly
-  `battler===0 && stat==="accuracy" && decreasing` (the turn13 SAND_ATTACK
-  precedent only), throwing `Scene OFF typed stat adapter cannot draw battler
-  ${b} ${stat} ${from}->${to}` for every other stat. Any opponent-inflicted
-  non-accuracy stat drop on the player's battler (FEATHER_DANCE's ATK, or any
-  other stat-down move) crashed there — the generated route never runs the
-  turn-keyed canonical staging modules (`turn6/78/11FeatherDancePresentation
-  Staging.ts`) that only cover the fixed canonical battle.
-- **Reproduced first (STEP 1):** a hand-authored `{battler:0, stat:"attack",
-  from:6, to:4}` stat-stage-change event (FEATHER_DANCE's real ATK-2 shape)
-  fed through the real `projectBattleResolutionCommands` ->
-  `createBattleResolutionPresentationRenderView` -> `renderBattleResolutionSceneOffView`
-  pipeline threw exactly `Scene OFF typed stat adapter cannot draw battler 0
-  attack 6->4` pre-fix — confirmed by running the assertion before touching
-  source.
-- **Fix:** generalized the guard to `battler !== 0 || not-decreasing` (a rise,
-  or a drop on the OPPONENT's own battler, still barriers — deliberately out
-  of scope); replaced the hardcoded-Onix-sprite `drawTurn13SandAttackAccBanner`
-  draw with the already-generic `drawStatDecreaseBannerForBattlerPalette`
-  primitive (same one turn6/turn13/Shuckle callers already use), parameterized
-  by the real battler's own live field-art sprite tileset + corner
-  (`view.fieldArt.player.pic.tileset`/`.origin`, per-species already) and a
-  new `statAnimBannerDecreasePalette(stat)` lookup into the already-extracted
-  7-palette `stat-anim-banner.json` asset. No turn-keyed or species-keyed
-  branch added.
-- **Family coverage:** covers every stat a legal opponent stat-down move can
-  name landing on the player's battler, not a FEATHER_DANCE special case —
-  Tier-1 pinned in `tests/battleResolutionPresentation.test.ts` with both ATK
-  (FEATHER_DANCE's real shape) and SPECIAL_DEFENSE (proving the family), plus
-  regression coverage that a rise and an opponent-target drop still barrier.
-- **Canaries** (re-run fresh): battleScene.test.ts 247/247,
-  battleCommandGeneratedOffEvidence.test.ts 2/2, factoryRoundBattleOrchestrator.test.ts
-  30/30 — all green, no regressions.
-- **Next:** supervisor picks the next step; #56 frame-444 MAGNETON regression
-  and the idle-bounce phase family remain open per their own entries.
-- **SUPERVISOR WIND-DOWN (session close 2026-07-31 ~18:00; this
-  addendum supersedes all of today's evening entries as the resume
-  point):**
-  - **Session totals: 6 rounds (5 paired + 1 bonus) / 11 workers
-    (M9-M14, S9-S13) / 0 failed steps.** Final gate run by supervisor
-    on this tree: **5722 passed + 1 deliberate skip / 567 files**,
-    build clean, ratchet 6/6, tree clean at this commit. DEFERRED.md
-    empty ALL session. Animation fold delta **0** at orient AND at
-    wind-down (animation-main still at `555bab3f`); only the permanent
-    `.worktrees/animation-main` remains; no orphan branches.
-  - **Headline: #39 rank-5 EXECUTED same-day** (user's Option A,
-    adopted this morning): turns 9-12 all Scene-OFF-owned (`8802fcb6`,
-    `329f8320`, `59a3fa7d`), 8 OFF windows EXACT, 11 legacy ON pins
-    retired, residuals all ONE root-caused mechanism (idle-bounce
-    phase; verdict (b) — closes with ranks 6-8 OFF re-timing;
-    `TURN8_MENU_REDRAW_DELAY` real OFF ≈434 banked; S13 measured the
-    same overcount at turns 1-4: 429/285/525/427 vs ON-fit
-    664/391/669/661).
-  - **Also landed:** #56 frame 536 FIXED (YOSHI 700/751; 444
-    regression-blocked w/ MAGNETON-probe lead banked); turn17-rung1
-    90/118 → **112/118** (last 6 frames = phase family; S12's doc
-    corrected in place); five-table animation handoff EXTRACTED
-    (animation rung 2 unblocked); rank-6 turns 1-4 OFF ground truth
-    banked (10 traces, zero desync); **#59 user-reported FEATHER_DANCE
-    crash FIXED same-day** (entry deleted per lifecycle; generic
-    opponent-side stat-drop family, presentation-side).
-  - **User reports this session (both addressed):** missing send-out
-    ball animation = the known send-out intro program (rung 1 landed
-    today; animation lane's top priority, and note Scene OFF does NOT
-    suppress send-outs in the real game — OFF windows need it too);
-    FEATHER_DANCE crash = fixed above.
-  - **Next session (ordered):** (i) **rank-6 pin policy question for
-    the user** (same shape as rank-5's: adopt Scene-OFF pins for turns
-    1-4 and retire their ON pins as rank 6 executes? Turns 1-4 are the
-    app's most deeply ON-fit region and their ON pins all pass today;
-    the S13 doc + 10 banked OFF traces make execution turnkey on
-    adoption) — then rank-6 execution, which ALSO closes the phase
-    family's turn-1-4 share; (ii) #56 frame-444 MAGNETON-side
-    `gSprites[6]` RAM probe → real discriminator → land the fix behind
-    the 751-frame regression; (iii) turn9/11/12-menu OFF pins once
-    phase closes (S9 landmark data banked); (iv) #56 +6 route term;
-    (v) rank 7 (FLY) / rank 8 (burn projection) inventory rows. #55
-    parked. No DEFERRED entries — the rank-6 policy question is a
-    start-of-work decision, not a blocker (rank-5 precedent).

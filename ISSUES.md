@@ -250,7 +250,38 @@ off.json` 237/237, both EXACT; insurance `turn5-rockslide.json`/`turn8-
 bind-a.json` 256/256 each, zero regression on `drawEndeavorSquish`'s/
 `drawMenuHealthboxPlayer`'s still-ON callers. `turn2-{endeavor,endeavor-
 drain,dragonbreath}.json` retired (`git rm`); `turn2-dragonbreath-
-projectiles.json` kept (ISSUES #60 domain, untouched). Earlier
+projectiles.json` kept (ISSUES #60 domain, untouched). **Slice 3 (turn 3)
+executed 2026-07-31 night:** ENDEAVOR's attacker squish/blend/droplets/
+hitsplat/target-shake and ROCK_SLIDE's camera-shake/target-shake/falling-
+rock props (all class c) deleted from turn 3's own window, same treatment
+slices 1-2 established; the generic ENDEAVOR healthbox-wobble+Onix-flicker
+pair and the generic ROCK_SLIDE hit-flash pair (class b) survive, re-timed
+against a fresh combined RAM probe (`tools/probe/dump-turn2-dragonbreath-
+off.py`, reused verbatim - its fields are move-agnostic) plus a dense
+`bin/oracle run`/PIL pixel scout for the two text-handoff/menu-redraw
+boundaries: both landed EXACTLY at `docs/rank6-off-ground-truth.md` §5's
+own estimates (`TURN3_OFF_ROCKSLIDE_MENU_REDRAW_DELAY`=525 vs the ~525
+estimate). §20's own asymmetric-target-shake caution was moot as predicted
+(class c, deleted). A genuine cross-turn bounce bug (turn 3's own reopened-
+submenu/confirm-wait bounce chain, `turn3SubmenuBounceTick`/
+`turn3KickoffBounceTick`, still hardcoding turn 2's ON-fit
+`DRAGONBREATH_MENU_REDRAW_DELAY`=391 instead of slice 2's OFF value 292)
+fixed via the same defaulted-param idiom slice 2 established, at the three
+call sites in `battleScene.ts`'s generic dispatcher; the FROZEN plateau
+constant (previously a `TURN3_KICKOFF_FROZEN_BOUNCE_TICK` module constant
+that only coincidentally equaled the live formula's own freeze-moment
+reading under ON) needed re-deriving as a live per-call computation, and
+oracle-pixel grid search found the real hardware freezes at `pressTick+9`
+(matching the ON-era doc's own "byte-identical through pressTick+9"
+citation), not `pressTick+FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`(+3) as the
+generic formula's own naive continuation would suggest. Acceptance:
+`turn3-endeavor-off.json` 254/255 (the sole residual is ISSUES #61, a
+pre-existing action-menu/submenu reveal-boundary bug confirmed present -
+worse, even - on unmodified master, unrelated to this window's own
+ENDEAVOR/ROCK_SLIDE content), `turn3-rockslide-off.json` 161/161 EXACT;
+insurance `turn5-rockslide.json`/`turn8-bind-a.json` 256/256 each, zero
+regression. `turn3-{menu,endeavor,rockslide}.json` retired (`git rm`).
+Slice 4 (turn 4) remains next; rank 6 is not yet fully executed. Earlier
 progress:
 `turn13-sandattack.json`'s complete captured
 SAND_ATTACK content now resolves its kickoff and opponent-target accuracy-fall
@@ -303,6 +334,33 @@ canonical-turn-1 window this step owns) — leads for whoever picks it up:
 why a canonical-battle-shaped trace with no `appRoute`/`oracleProfile`
 field takes the generated-route path at all, and whether #59's own guard
 needs a battler-1/rising case the way its own drop-only fix didn't attempt.
+
+## #61 — turn 3's own reopen shows the FIGHT submenu one tick early (frame 3852) vs. the real ONIX action-menu dwell
+
+**Discovered** 2026-07-31 (rank-6 slice 3's own acceptance run against
+`turn3-endeavor-off.json`). At the single tick 3852 (6 ticks past turn 3's
+own reopen A-press, 3846-3847), the oracle still shows the top-level
+"What will ONIX do?" action menu, while the app has already switched to the
+FIGHT submenu's move list (ROCK SLIDE/DRAGONBREATH/BIND/SANDSTORM). Every
+other tick in the window (3846-4260, both `turn3-endeavor-off.json` and
+`turn3-rockslide-off.json`) is exact. **Confirmed pre-existing, not a rank-6
+regression**: `git stash` against this slice's own changes reproduces the
+same mismatch on master at `594c40c7` (in fact worse — 8047px there vs
+7278px after this slice's own fixes, since this slice's bounce-chain
+corrections happened to also tighten this exact frame's sprite/healthbox
+area). Root cause not isolated this session (out of time) — the generic
+`sm.openElapsed`/`FIGHT_SUBMENU_OPEN_DELAY`/`revealTick` mechanism
+(`battleScene.ts`, ~11 call sites) governs the action-menu-vs-submenu
+reveal boundary and is shared by every turn's own reopen; turn 3's own
+reopen (a 2-frame A-press at 3846-3847, then a 30-tick dwell, then a
+2-frame UP-nav, then confirm at 3891) is the first reopen sequence dense
+enough to sample the exact `revealTick` boundary tick itself, so this may
+be a `t >= revealTick` vs `t > revealTick` off-by-one that every other
+turn's own reopen simply never landed a test frame on. Leads for whoever
+picks it up: check `sm.openElapsed`'s own setter (`battleMenu.ts`) against
+the real hardware's own reveal boundary directly (RAM probe, not pixel
+inference), and grep the ~11 `revealTick` call sites before changing the
+shared comparison (turn 1/2/4's own reopens must not regress).
 
 # Settled records (not open work — see the note at the top of this file)
 
