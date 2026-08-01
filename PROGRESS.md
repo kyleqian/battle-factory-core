@@ -15,6 +15,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 828 — [bounded MAIN worker, 2026-08-01] turn-8 predecessor handoff retired
 
+> **Supervisor close-out (14:27):** turn-8 landing verified (grep clean,
+> spot compares exact incl. OFF turn-9 pins 231/231 + 256/256; the 177/233
+> quickattack residual is the recorded pre-existing idle-bounce family).
+> Final union suite **5,991 passed + 1 skipped**, build green, tree clean.
+> `animation-main` holds 5 unfolded commits (their session still live) —
+> next session folds at orient per protocol. Session ended on user request.
+
 - **State:** proof `8f83bb4e`, implementation `56d48b80`; source/test census
   has no `turn8Resolved` reference.
 - **Did:** published the immutable completed-turn-8/next-command handoff with
