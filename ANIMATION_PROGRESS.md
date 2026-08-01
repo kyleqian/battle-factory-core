@@ -15,8 +15,8 @@ before `WaitAnimEnd`. Complete legal Scene-ON parties settle representative
 MACHOKE and sibling RHYHORN at **x2=0 / y2=0 / animNum=1 /
 SpriteCallbackDummy**. Two fresh RAM-probe runs per species are byte-identical:
 MACHOKE receipt SHA-256
-`20f06634892d5ca2e8053473e0148bb55b7ae3ed089a6388473edc949b3d2a5b`,
-RHYHORN `bdcd7abb310ee49ef378768421ef4230785bcc782a5ce3ad3bfedcd3082fe648`.
+`7b5914c4e81c08e73287c19593f791a0b44e48d213fdbd14e1308df9a946c0af`,
+RHYHORN `1c7cd9974d4115327d40cb5dd602a9123c82b31211066ef33b59cf727243b313`.
 
 **Gates / coverage:** focused animation tests are **24/24**; the full suite is
 green at **567 files, 5722 passed + 1 skipped**, and the production build is
