@@ -36,6 +36,7 @@ import {
   verticalSlideFrameAtTick,
   verticalJumpsSmallFrameAtTick,
   verticalShakeFrameAtTick,
+  verticalShakeTwiceFrameAtTick,
   verticalSquishBounceFrameAtTick,
   verticalSquishBounceSlowFrameAtTick,
   verticalStretchFrameAtTick,
@@ -44,6 +45,9 @@ import {
   V_SHAKE_FACTORY_FRONT_SPECIES,
   V_SHAKE_FRONT_SPECIES,
   V_SHAKE_OUTSIDE_FACTORY_FRONT_SPECIES,
+  V_SHAKE_TWICE_FACTORY_FRONT_SPECIES,
+  V_SHAKE_TWICE_FRONT_SPECIES,
+  V_SHAKE_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES,
   V_JUMPS_SMALL_FACTORY_FRONT_SPECIES,
   V_JUMPS_SMALL_FRONT_SPECIES,
   V_JUMPS_SMALL_OUTSIDE_FACTORY_FRONT_SPECIES,
@@ -51,6 +55,9 @@ import {
   V_SLIDE_FRONT_SPECIES,
   V_SLIDE_OUTSIDE_FACTORY_FRONT_SPECIES,
   V_STRETCH_FRONT_SPECIES,
+  TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES,
+  VERTICAL_SHAKE_TWICE_DATA,
+  VERTICAL_SHAKE_TWICE_INITIALIZERS,
 } from "../../src/animation/speciesIdleAnim.ts";
 import frontierMons from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import selectorTables from "../../src/data/gen/send-out-anim-selector-tables.json" with { type: "json" };
@@ -112,6 +119,12 @@ import jigglypuffRunB from "../../tools/compare/fixtures/sendout-front-jigglypuf
 import gyaradosScenario from "../../tools/compare/fixtures/sendout-front-gyarados.json" with { type: "json" };
 import gyaradosRunA from "../../tools/compare/fixtures/sendout-front-gyarados-run-a.json" with { type: "json" };
 import gyaradosRunB from "../../tools/compare/fixtures/sendout-front-gyarados-run-b.json" with { type: "json" };
+import blastoiseScenario from "../../tools/compare/fixtures/sendout-front-blastoise.json" with { type: "json" };
+import blastoiseRunA from "../../tools/compare/fixtures/sendout-front-blastoise-run-a.json" with { type: "json" };
+import blastoiseRunB from "../../tools/compare/fixtures/sendout-front-blastoise-run-b.json" with { type: "json" };
+import bagonScenario from "../../tools/compare/fixtures/sendout-front-bagon.json" with { type: "json" };
+import bagonRunA from "../../tools/compare/fixtures/sendout-front-bagon-run-a.json" with { type: "json" };
+import bagonRunB from "../../tools/compare/fixtures/sendout-front-bagon-run-b.json" with { type: "json" };
 
 const squirtleRawA = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-squirtle-run-a.json", import.meta.url),
@@ -184,6 +197,18 @@ const gyaradosRawA = readFileSync(
 );
 const gyaradosRawB = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-gyarados-run-b.json", import.meta.url),
+);
+const blastoiseRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-blastoise-run-a.json", import.meta.url),
+);
+const blastoiseRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-blastoise-run-b.json", import.meta.url),
+);
+const bagonRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-bagon-run-a.json", import.meta.url),
+);
+const bagonRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-bagon-run-b.json", import.meta.url),
 );
 
 describe("speciesIdleAnim", () => {
@@ -2087,6 +2112,214 @@ describe("speciesIdleAnim", () => {
         "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN", "KADABRA", "REGISTEEL",
         "SQUIRTLE", "SHUCKLE", "SEADRA", "MARSHTOMP", "CHARMANDER", "DELIBIRD",
         "MANKEY", "WYNAUT", "VILEPLUME", "LOUDRED",
+      ]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("verticalShakeTwiceFrameAtTick (normal source lifecycle)", () => {
+    it("derives all 8 selector mappings as Factory-reachable with no outside mappings", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_V_SHAKE_TWICE")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(V_SHAKE_TWICE_FRONT_SPECIES).toEqual(generated);
+      expect(V_SHAKE_TWICE_FRONT_SPECIES).toEqual([
+        "BLASTOISE", "POLIWRATH", "TAUROS", "DONPHAN",
+        "EXPLOUD", "AGGRON", "CRADILY", "BAGON",
+      ]);
+      expect(V_SHAKE_TWICE_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(V_SHAKE_TWICE_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(V_SHAKE_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of V_SHAKE_TWICE_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins Task_HandleMonAnimation defaults, the complete u8 table, and initializer distinction", () => {
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
+      expect(VERTICAL_SHAKE_TWICE_DATA).toEqual([
+        [6, 30],
+        [254, 15],
+        [6, 30],
+        [255, 0],
+      ]);
+      expect(VERTICAL_SHAKE_TWICE_INITIALIZERS).toEqual({
+        normal: { selector: "ANIM_V_SHAKE_TWICE", data0: 48, used: true },
+        slow: { selector: "ANIM_V_SHAKE_TWICE_SLOW", data0: 24, used: false },
+      });
+      expect(Object.values(selectorTables.frontAnimIds.species)).not.toContain(
+        "ANIM_V_SHAKE_TWICE_SLOW",
+      );
+      expect(verticalShakeTwiceFrameAtTick(0)).toMatchObject({
+        data0: 48,
+        data2: 48,
+        data3: 0,
+        data4: 0,
+        data5: 0,
+        data6: 1,
+        data7: 0,
+      });
+    });
+
+    it("pins all 78 active callbacks, u8 casts, amplitudes, sine writes, and phase resets", () => {
+      let tick = 0;
+      let expectedData2 = 0;
+      for (let phase = 0; phase < 3; phase += 1) {
+        const [var5, var6] = VERTICAL_SHAKE_TWICE_DATA[phase]!;
+        for (let var7 = 0; var7 <= var6; var7 += 1) {
+          const index = expectedData2 & 0xff;
+          const amplitude = var5 === 254
+            ? 0
+            : Math.trunc(((var6 - var7) * var5) / var6) & 0xff;
+          const expectedY = Math.floor(
+            (amplitude * GBA_SINE_TABLE_256[index]!) / 256,
+          ) + 0;
+          const boundary = var7 === var6;
+          if (!boundary) expectedData2 += 48;
+
+          expect(verticalShakeTwiceFrameAtTick(tick), `tick ${tick}`).toEqual({
+            x2: 0,
+            y2: expectedY,
+            data0: 48,
+            data2: expectedData2,
+            data3: 0,
+            data4: 0,
+            data5: boundary ? phase + 1 : phase,
+            data6: boundary ? 0 : var7 + 1,
+            data7: 0,
+            index,
+            var5: var5 & 0xff,
+            var6: var6 & 0xff,
+            var7: var7 & 0xff,
+            amplitude,
+            callback: "VerticalShakeTwice",
+          });
+          tick += 1;
+        }
+      }
+      expect(tick).toBe(78);
+      expect(expectedData2).toBe(3600);
+
+      expect([30, 46, 77].map((boundaryTick) => {
+        const frame = verticalShakeTwiceFrameAtTick(boundaryTick)!;
+        return [
+          boundaryTick, frame.index, frame.var5, frame.var6, frame.var7,
+          frame.amplitude, frame.y2, frame.data2, frame.data5, frame.data6,
+        ];
+      })).toEqual([
+        [30, 160, 6, 30, 30, 0, 0, 1440, 1, 0],
+        [46, 112, 254, 15, 15, 0, 0, 2160, 2, 0],
+        [77, 16, 6, 30, 30, 0, 0, 3600, 3, 0],
+      ]);
+    });
+
+    it("pins tick 78 sentinel division result and terminal y2/WaitAnimEnd cleanup", () => {
+      expect(verticalShakeTwiceFrameAtTick(78)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 48,
+        data2: 3600,
+        data3: 0,
+        data4: 0,
+        data5: 3,
+        data6: 0,
+        data7: 0,
+        index: 16,
+        var5: 255,
+        var6: 0,
+        var7: 0,
+        amplitude: 0,
+        callback: "WaitAnimEnd",
+      });
+      expect(verticalShakeTwiceFrameAtTick(79)).toEqual(verticalShakeTwiceFrameAtTick(78));
+      expect(verticalShakeTwiceFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      [9, blastoiseScenario],
+      [395, bagonScenario],
+    ] as const)("stages a complete legal Scene-ON party for opponent species %i", (species, scenario) => {
+      expect(scenario.mode).toBe("mechanicLab");
+      expect(scenario.profile).toBe("battle-scene-on");
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(species);
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "BLASTOISE", blastoiseRunA, blastoiseRunB, blastoiseRawA, blastoiseRawB, 9,
+        "333c436ec56ad12d0d8d3586f86af7f4feb076a5234a646c194f6705ab826a87",
+      ],
+      [
+        "BAGON", bagonRunA, bagonRunB, bagonRawA, bagonRawB, 395,
+        "9accac67bde9270bfe8898e45ea5160783fc08dc47fcfbd0d8fea1ca995fdf16",
+      ],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (
+      species,
+      runA,
+      runB,
+      rawA,
+      rawB,
+      data2,
+      rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_V_SHAKE_TWICE");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex: 4,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("preserves every previously accepted representative and sibling family", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of [
+        "BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR", "MACHOKE", "RHYHORN",
+        "LICKITUNG", "MILTANK", "KABUTOPS", "BLAZIKEN", "KADABRA", "REGISTEEL",
+        "SQUIRTLE", "SHUCKLE", "SEADRA", "MARSHTOMP", "CHARMANDER", "DELIBIRD",
+        "MANKEY", "WYNAUT", "VILEPLUME", "LOUDRED", "JIGGLYPUFF", "GYARADOS",
       ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }

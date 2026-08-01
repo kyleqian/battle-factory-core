@@ -54,7 +54,8 @@ export type SpeciesFrontAnimFamily =
   | "V_SQUISH_AND_BOUNCE"
   | "V_SQUISH_AND_BOUNCE_SLOW"
   | "V_STRETCH"
-  | "V_SHAKE";
+  | "V_SHAKE"
+  | "V_SHAKE_TWICE";
 
 const FRONT_ANIM_PREFIX = "ANIM_";
 const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
@@ -71,6 +72,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "V_SQUISH_AND_BOUNCE_SLOW",
   "V_STRETCH",
   "V_SHAKE",
+  "V_SHAKE_TWICE",
 ]);
 
 const generatedFrontAnimIds = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
@@ -272,6 +274,23 @@ export const BOUNCE_ROTATE_TO_SIDES_SMALL_OUTSIDE_FACTORY_FRONT_SPECIES: readonl
       (species) => !factoryFrontSpecies.has(species),
     ),
   );
+
+/** All 8 source selector mappings for `ANIM_V_SHAKE_TWICE`. */
+export const V_SHAKE_TWICE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_V_SHAKE_TWICE")
+    .map(([species]) => species),
+);
+
+/** Every normal-speed vertical-shake-twice mapping is Factory-reachable. */
+export const V_SHAKE_TWICE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  V_SHAKE_TWICE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no normal-speed vertical-shake-twice mappings outside the Factory pool. */
+export const V_SHAKE_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  V_SHAKE_TWICE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
 
 export interface SpeciesIdleOffset {
   readonly x2: number;
@@ -509,6 +528,50 @@ export interface VerticalShakeFrame extends SpeciesIdleOffset {
   readonly data0: number;
   readonly data2: number;
   readonly callback: "VerticalShake" | "WaitAnimEnd";
+}
+
+export type VerticalShakeTwiceTableEntry = readonly [amplitude: number, duration: number];
+
+/**
+ * Complete `sVerticalShakeData` table (`pokemon_animation.c:622-628`) after
+ * its source `u8` storage conversions. Thus -2 and -1 are 254 and 255.
+ */
+export const VERTICAL_SHAKE_TWICE_DATA: readonly VerticalShakeTwiceTableEntry[] = Object.freeze([
+  [6, 30],
+  [254, 15],
+  [6, 30],
+  [255, 0],
+] as const);
+
+/**
+ * The accepted normal initializer uses data0=48. The data0=24 initializer is
+ * the distinct, source-labelled unused `ANIM_V_SHAKE_TWICE_SLOW` selector;
+ * it is recorded here for distinction only and is not a ported front family.
+ */
+export const VERTICAL_SHAKE_TWICE_INITIALIZERS = Object.freeze({
+  normal: Object.freeze({ selector: "ANIM_V_SHAKE_TWICE", data0: 48, used: true }),
+  slow: Object.freeze({ selector: "ANIM_V_SHAKE_TWICE_SLOW", data0: 24, used: false }),
+} as const);
+
+/** Data slots explicitly zeroed by `Task_HandleMonAnimation` before dispatch. */
+export const TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES = Object.freeze([
+  0, 2, 3, 4, 5, 6, 7,
+] as const);
+
+export interface VerticalShakeTwiceFrame extends SpeciesIdleOffset {
+  readonly data0: 48;
+  readonly data2: number;
+  readonly data3: 0;
+  readonly data4: 0;
+  readonly data5: number;
+  readonly data6: number;
+  readonly data7: 0;
+  readonly index: number;
+  readonly var5: number;
+  readonly var6: number;
+  readonly var7: number;
+  readonly amplitude: number;
+  readonly callback: "VerticalShakeTwice" | "WaitAnimEnd";
 }
 
 export interface HorizontalShakeFrame extends SpeciesIdleOffset {
@@ -1306,6 +1369,111 @@ export function verticalShakeFrameAtTick(ticksSinceStart: number): VerticalShake
   };
 }
 
+function toU8(value: number): number {
+  return value & 0xff;
+}
+
+/**
+ * Source-order port of `Anim_VerticalShakeTwice` / `VerticalShakeTwice`
+ * (`pokemon_animation.c:622-628,911-939,1638-1678`). The normal front task
+ * first clears data0 and data2..data7, then the initializer sets data0=48 and
+ * immediately invokes the callback. Every callback reads data2/data6 and the
+ * table bytes through the source's `u8` conversions before calculating the
+ * decaying amplitude and GBA sine write.
+ *
+ * Ticks 0..30, 31..46, and 47..77 are the complete 31/16/31 active table
+ * phases. Each phase boundary writes y2 first, increments data5, and resets
+ * data6 without advancing data2. Tick 78 reads the 255/0 sentinel and performs
+ * y2=0/WaitAnimEnd cleanup. The compiled `__divsi3` returns zero for the
+ * sentinel's source-order 0/0 amplitude expression before that cleanup.
+ */
+export function verticalShakeTwiceFrameAtTick(
+  ticksSinceStart: number,
+): VerticalShakeTwiceFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  const data0 = VERTICAL_SHAKE_TWICE_INITIALIZERS.normal.data0;
+  let data2 = 0;
+  const data3 = 0;
+  const data4 = 0;
+  let data5 = 0;
+  let data6 = 0;
+  const data7 = 0;
+  let y2 = 0;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    const index = toU8(data2);
+    const var7 = toU8(data6);
+    const tableEntry = VERTICAL_SHAKE_TWICE_DATA[data5];
+    if (tableEntry === undefined) {
+      throw new Error(`VerticalShakeTwice table index ${data5} is out of range`);
+    }
+    const var5 = toU8(tableEntry[0]);
+    const var6 = toU8(tableEntry[1]);
+    let amplitude = 0;
+
+    if (var5 !== 254) {
+      // The ROM's compiled `__divsi3` returns 0 for the terminal 0/0 case.
+      amplitude = var6 === 0
+        ? 0
+        : toU8(Math.trunc(((var6 - var7) * var5) / var6));
+    }
+
+    if (var5 === 255) {
+      y2 = 0;
+      return {
+        x2: 0,
+        y2,
+        data0,
+        data2,
+        data3,
+        data4,
+        data5,
+        data6,
+        data7,
+        index,
+        var5,
+        var6,
+        var7,
+        amplitude,
+        callback: "WaitAnimEnd",
+      };
+    }
+
+    // C's s16 has no signed-zero representation.
+    y2 = gbaSin(index, amplitude) + 0;
+    if (var7 === var6) {
+      data5 += 1;
+      data6 = 0;
+    } else {
+      data2 += data0;
+      data6 += 1;
+    }
+
+    if (tick === ticksSinceStart) {
+      return {
+        x2: 0,
+        y2,
+        data0,
+        data2,
+        data3,
+        data4,
+        data5,
+        data6,
+        data7,
+        index,
+        var5,
+        var6,
+        var7,
+        amplitude,
+        callback: "VerticalShakeTwice",
+      };
+    }
+  }
+
+  throw new Error("unreachable VerticalShakeTwice reducer state");
+}
+
 function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffset {
   switch (family) {
     case "BOUNCE_ROTATE_TO_SIDES_SMALL": {
@@ -1399,6 +1567,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = verticalShakeFrameAtTick(39);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_VerticalShake did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "V_SHAKE_TWICE": {
+      const terminal = verticalShakeTwiceFrameAtTick(78);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_VerticalShakeTwice did not reach its source terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
