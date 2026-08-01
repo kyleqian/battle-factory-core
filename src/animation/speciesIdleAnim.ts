@@ -1,4 +1,5 @@
 import { GBA_SINE_TABLE_256 } from "../engine/battleMenu.ts";
+import frontierMons from "../data/gen/battle-frontier-mons.json" with { type: "json" };
 import selectorTables from "../data/gen/send-out-anim-selector-tables.json" with { type: "json" };
 
 /**
@@ -43,16 +44,22 @@ import selectorTables from "../data/gen/send-out-anim-selector-tables.json" with
 export type SpeciesFrontAnimFamily =
   | "RAPID_H_HOPS"
   | "V_SQUISH_AND_BOUNCE"
-  | "V_STRETCH";
+  | "V_STRETCH"
+  | "V_SHAKE";
 
 const FRONT_ANIM_PREFIX = "ANIM_";
 const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "RAPID_H_HOPS",
   "V_SQUISH_AND_BOUNCE",
   "V_STRETCH",
+  "V_SHAKE",
 ]);
 
 const generatedFrontAnimIds = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
+const factoryFrontSpecies = new Set(
+  (frontierMons.entries as readonly { readonly species: string }[])
+    .map(({ species }) => species.replace(/^SPECIES_/, "")),
+);
 
 /**
  * Complete Factory-reachable `ANIM_V_SQUISH_AND_BOUNCE` front family,
@@ -70,6 +77,27 @@ export const V_STRETCH_FRONT_SPECIES: readonly string[] = Object.freeze(
   Object.entries(generatedFrontAnimIds)
     .filter(([, family]) => family === "ANIM_V_STRETCH")
     .map(([species]) => species),
+);
+
+/**
+ * All selector-table mappings for `ANIM_V_SHAKE`. This is 25 species, not a
+ * Factory count: GROUDON is present in `sMonFrontAnimIdsTable` but absent from
+ * every `gBattleFrontierMons` rental entry.
+ */
+export const V_SHAKE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_V_SHAKE")
+    .map(([species]) => species),
+);
+
+/** The 24 `ANIM_V_SHAKE` species reachable through Factory rental sets. */
+export const V_SHAKE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  V_SHAKE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** Selector mappings outside the Factory pool (currently GROUDON alone). */
+export const V_SHAKE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  V_SHAKE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 export interface SpeciesIdleOffset {
@@ -282,6 +310,53 @@ export function verticalStretchFrameAtTick(
   };
 }
 
+export interface VerticalShakeFrame extends SpeciesIdleOffset {
+  readonly data0: number;
+  readonly data2: number;
+  readonly callback: "VerticalShake" | "WaitAnimEnd";
+}
+
+const VERTICAL_SHAKE_ACCUMULATOR_STEP = 60;
+const VERTICAL_SHAKE_ACCUMULATOR_LIMIT = 2304;
+
+/**
+ * Source-order port of `Anim_VerticalShake` / `VerticalShake`
+ * (`pokemon_animation.c:1368-1391`). The initializer sets data[0]=60 and
+ * immediately invokes `VerticalShake`, so tick 0 includes the accumulator-0
+ * write. Accumulators 0..2280 are active; tick 39 observes 2340 > 2304,
+ * clears y2, and hands off to `WaitAnimEnd`.
+ */
+export function verticalShakeFrameAtTick(ticksSinceStart: number): VerticalShakeFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let y2 = 0;
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    const counter = data2;
+    if (counter > VERTICAL_SHAKE_ACCUMULATOR_LIMIT) {
+      data2 += VERTICAL_SHAKE_ACCUMULATOR_STEP;
+      return {
+        x2: 0,
+        y2: 0,
+        data0: VERTICAL_SHAKE_ACCUMULATOR_STEP,
+        data2,
+        callback: "WaitAnimEnd",
+      };
+    }
+
+    y2 = gbaSin(counter % 256, 3);
+    data2 += VERTICAL_SHAKE_ACCUMULATOR_STEP;
+  }
+
+  return {
+    x2: 0,
+    y2,
+    data0: VERTICAL_SHAKE_ACCUMULATOR_STEP,
+    data2,
+    callback: "VerticalShake",
+  };
+}
+
 function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffset {
   switch (family) {
     case "RAPID_H_HOPS": {
@@ -305,6 +380,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = verticalStretchFrameAtTick(41);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_VerticalStretch did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "V_SHAKE": {
+      const terminal = verticalShakeFrameAtTick(39);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_VerticalShake did not reach its source terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }

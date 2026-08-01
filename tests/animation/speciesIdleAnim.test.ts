@@ -3,11 +3,16 @@ import probe from "../../src/data/gen/onix-front-idle-probe.json" with { type: "
 import {
   rapidHorizontalHopsOffsetAtTick,
   speciesFrontIdleRestOffset,
+  verticalShakeFrameAtTick,
   verticalSquishBounceFrameAtTick,
   verticalStretchFrameAtTick,
   V_SQUISH_AND_BOUNCE_FRONT_SPECIES,
+  V_SHAKE_FACTORY_FRONT_SPECIES,
+  V_SHAKE_FRONT_SPECIES,
+  V_SHAKE_OUTSIDE_FACTORY_FRONT_SPECIES,
   V_STRETCH_FRONT_SPECIES,
 } from "../../src/animation/speciesIdleAnim.ts";
+import frontierMons from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import selectorTables from "../../src/data/gen/send-out-anim-selector-tables.json" with { type: "json" };
 import bayleefRunA from "../../tools/compare/fixtures/sendout-front-bayleef-run-a.json" with { type: "json" };
 import bayleefRunB from "../../tools/compare/fixtures/sendout-front-bayleef-run-b.json" with { type: "json" };
@@ -17,6 +22,10 @@ import quilavaRunA from "../../tools/compare/fixtures/sendout-front-quilava-run-
 import quilavaRunB from "../../tools/compare/fixtures/sendout-front-quilava-run-b.json" with { type: "json" };
 import houndourRunA from "../../tools/compare/fixtures/sendout-front-houndour-run-a.json" with { type: "json" };
 import houndourRunB from "../../tools/compare/fixtures/sendout-front-houndour-run-b.json" with { type: "json" };
+import machokeRunA from "../../tools/compare/fixtures/sendout-front-machoke-run-a.json" with { type: "json" };
+import machokeRunB from "../../tools/compare/fixtures/sendout-front-machoke-run-b.json" with { type: "json" };
+import rhyhornRunA from "../../tools/compare/fixtures/sendout-front-rhyhorn-run-a.json" with { type: "json" };
+import rhyhornRunB from "../../tools/compare/fixtures/sendout-front-rhyhorn-run-b.json" with { type: "json" };
 
 describe("speciesIdleAnim", () => {
   describe("rapidHorizontalHopsOffsetAtTick (Anim_RapidHorizontalHops port)", () => {
@@ -87,6 +96,28 @@ describe("speciesIdleAnim", () => {
       expect(V_STRETCH_FRONT_SPECIES).toContain("HOUNDOUR");
       expect(V_STRETCH_FRONT_SPECIES).toContain("GROVYLE");
       for (const species of V_STRETCH_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("distinguishes all 25 V_SHAKE selector mappings from the 24-species Factory subset", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_V_SHAKE")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(V_SHAKE_FRONT_SPECIES).toEqual(generated);
+      expect(V_SHAKE_FRONT_SPECIES).toHaveLength(25);
+      expect(V_SHAKE_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(V_SHAKE_FACTORY_FRONT_SPECIES).toHaveLength(24);
+      expect(V_SHAKE_FACTORY_FRONT_SPECIES).toContain("MACHOKE");
+      expect(V_SHAKE_FACTORY_FRONT_SPECIES).toContain("RHYHORN");
+      expect(V_SHAKE_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual(["GROUDON"]);
+      expect(factorySpecies.has("GROUDON")).toBe(false);
+      for (const species of V_SHAKE_FRONT_SPECIES) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }
     });
@@ -203,6 +234,74 @@ describe("speciesIdleAnim", () => {
         callbackSymbol: "SpriteCallbackDummy",
       });
       expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+  });
+
+  describe("verticalShakeFrameAtTick (Anim_VerticalShake / VerticalShake port)", () => {
+    it("ports source accumulator arithmetic and the strict terminal guard", () => {
+      expect(verticalShakeFrameAtTick(0)).toEqual({
+        x2: 0, y2: 0, data0: 60, data2: 60, callback: "VerticalShake",
+      });
+      expect(verticalShakeFrameAtTick(1)).toEqual({
+        x2: 0, y2: 2, data0: 60, data2: 120, callback: "VerticalShake",
+      });
+      expect(verticalShakeFrameAtTick(3)).toEqual({
+        x2: 0, y2: -3, data0: 60, data2: 240, callback: "VerticalShake",
+      });
+      expect(verticalShakeFrameAtTick(37)).toMatchObject({
+        y2: -3, data2: 2280, callback: "VerticalShake",
+      });
+      expect(verticalShakeFrameAtTick(38)).toEqual({
+        x2: 0, y2: -2, data0: 60, data2: 2340, callback: "VerticalShake",
+      });
+    });
+
+    it("cleans terminal y2 only after the accumulator exceeds 2304", () => {
+      expect(verticalShakeFrameAtTick(39)).toEqual({
+        x2: 0, y2: 0, data0: 60, data2: 2400, callback: "WaitAnimEnd",
+      });
+      expect(verticalShakeFrameAtTick(40)).toEqual(verticalShakeFrameAtTick(39));
+      expect(verticalShakeFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      ["MACHOKE", machokeRunA, machokeRunB, 2, 67],
+      ["RHYHORN", rhyhornRunA, rhyhornRunB, 4, 111],
+    ] as const)("matches two byte-identical fresh settled %s RAM receipts", (
+      species,
+      runA,
+      runB,
+      animCmdIndex,
+      data2,
+    ) => {
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_V_SHAKE");
+      const settled = runA.ticks[0]!.battler1;
+      expect({
+        x2: settled.x2,
+        y2: settled.y2,
+        animNum: settled.animNum,
+        animCmdIndex: settled.animCmdIndex,
+        data2: settled.data2,
+        callback: settled.callback,
+        callbackSymbol: settled.callbackSymbol,
+      }).toEqual({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({ x2: settled.x2, y2: settled.y2 }).toEqual(speciesFrontIdleRestOffset(species));
+    });
+
+    it("preserves the three prior accepted front families", () => {
+      expect(speciesFrontIdleRestOffset("ONIX")).toEqual({ x2: 1, y2: 0 });
+      for (const species of ["BAYLEEF", "MAGBY", "QUILAVA", "HOUNDOUR"]) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
     });
   });
 });

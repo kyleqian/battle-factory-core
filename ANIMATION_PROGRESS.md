@@ -1,5 +1,31 @@
 # Animation coverage
 
+## Front `ANIM_V_SHAKE` terminal family accepted (2026-07-31)
+
+**Verdict:** rung 2c is complete for the **24 Factory-reachable species** in
+this opponent-front family. The generated selector table has 25 mappings, but
+`battle-frontier-mons.json` proves GROUDON is the sole outside-Factory member;
+derived exports and Tier-1 tests pin both counts without mislabeling 25 as the
+Factory total. The three prior accepted families remain unchanged.
+
+**Model / evidence:** `speciesIdleAnim.ts` ports `Anim_VerticalShake` and
+`VerticalShake` source-order arithmetic: data[0]=60, active accumulators
+0..2280, the strict `counter > 2304` guard at 2340, and terminal y2=0 cleanup
+before `WaitAnimEnd`. Complete legal Scene-ON parties settle representative
+MACHOKE and sibling RHYHORN at **x2=0 / y2=0 / animNum=1 /
+SpriteCallbackDummy**. Two fresh RAM-probe runs per species are byte-identical:
+MACHOKE receipt SHA-256
+`20f06634892d5ca2e8053473e0148bb55b7ae3ed089a6388473edc949b3d2a5b`,
+RHYHORN `bdcd7abb310ee49ef378768421ef4230785bcc782a5ce3ad3bfedcd3082fe648`.
+
+**Gates / coverage:** focused animation tests are **24/24**; the full suite is
+green at **567 files, 5722 passed + 1 skipped**, and the production build is
+green. `ANIMATION_COVERAGE.json` remains byte-identical (SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`),
+with coverage unchanged at **107 exact / 0 partial / 0 staged / 169
+unsupported**. No probe, seam, boundary, barrier, gameplay, RNG, turn, damage,
+facility, or move-coverage state changed.
+
 ## Front `ANIM_V_STRETCH` terminal family accepted (2026-07-31)
 
 **Verdict:** rung 2b is complete for the generated 32-species Factory front
