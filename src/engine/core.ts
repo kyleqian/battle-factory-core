@@ -156,10 +156,10 @@ import {
   advancePartySelect,
   CANONICAL_FORCED_SWITCH_PARTY,
   CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
-  CANONICAL_FORCED_SWITCH_REQUEST,
   createPartySelectStateFromForcedSwitch,
   partySendOutBattleMenuReady,
 } from "./partySelect.ts";
+import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "./turn15FlyResolutionAdapter.ts";
 import {
   advanceFightSubmenuDisplay,
   closeFightSubmenu,
@@ -928,7 +928,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       battleScene = {
         ...battleScene,
         turn15PartySelect: createPartySelectStateFromForcedSwitch(
-          CANONICAL_FORCED_SWITCH_REQUEST,
+          CANONICAL_OPPONENT_FLY_RESOLUTION.forcedRequest,
           CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
           CANONICAL_FORCED_SWITCH_PARTY,
         ),

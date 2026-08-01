@@ -803,6 +803,7 @@ import {
   resolveTurn6FeatherDanceKickoffLines,
   resolveTurn6FeatherDanceWindowContent,
 } from "./turn6FeatherDancePresentationStaging.ts";
+import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "./turn15FlyResolutionAdapter.ts";
 import {
   resolveTurn7AtkFellLines,
   resolveTurn7FeatherDanceKickoffLines,
@@ -14936,8 +14937,8 @@ function turn14MurkrowInvisible(t: number): boolean {
 }
 
 /** "Foe MURKROW flew\nup high!" (`gFirstTurnOfTwoStringIds[B_MSG_TURN1_FLY]`) uses the ordinary one-character-per-frame printer, but its first visible glyph is render tick 17823. Fresh per-glyph diffs show the former 17822 anchor led the oracle by exactly one character (the three space ticks were consequently already exact); the completed string remains exact at 17846. */
-export const TURN14_FLYUP_LINE1 = "Foe MURKROW flew";
-export const TURN14_FLYUP_LINE2 = "up high!";
+export const TURN14_FLYUP_LINE1 = CANONICAL_OPPONENT_FLY_RESOLUTION.chargeLines[0]!;
+export const TURN14_FLYUP_LINE2 = CANONICAL_OPPONENT_FLY_RESOLUTION.chargeLines[1]!;
 const TURN14_FLYUP_TEXT_TOTAL = TURN14_FLYUP_LINE1.length + TURN14_FLYUP_LINE2.length;
 const TURN14_FLYUP_TEXT_START_TICK = 17823;
 
@@ -15101,8 +15102,8 @@ function drawTurn14FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmen
 // 19003's own RNG-already-resolved accuracy roll). ---
 
 /** "Foe MURKROW used\nFLY!" - reuses `TURN14_FLYUP_LINE1`'s own string shape (no new asset), FLY's own display name for line 2. Oracle-pixel-bisected exact (dense sha-transition probe, boundary (i) this session): first char 19007, 20 total chars (16+4) - independently confirmed by BOTH of the space characters producing a "no visible change" repeat tick exactly where the formula predicts (chars 3->4, the space after "Foe", at ticks 19009/19010; chars 11->12, the space after "MURKROW", at ticks 19017/19018) - not just fit to the settle tick. */
-export const TURN15_FLY_STRIKE_LINE1 = "Foe MURKROW used";
-export const TURN15_FLY_STRIKE_LINE2 = "FLY!";
+export const TURN15_FLY_STRIKE_LINE1 = CANONICAL_OPPONENT_FLY_RESOLUTION.strikeLines[0]!;
+export const TURN15_FLY_STRIKE_LINE2 = CANONICAL_OPPONENT_FLY_RESOLUTION.strikeLines[1]!;
 const TURN15_FLY_STRIKE_TEXT_TOTAL = TURN15_FLY_STRIKE_LINE1.length + TURN15_FLY_STRIKE_LINE2.length;
 const TURN15_FLY_STRIKE_TEXT_START_TICK = 19007;
 
@@ -15448,8 +15449,8 @@ const TURN15_ONIX_HEALTHBOX_VANISH_TICK = 19326;
  * "hard cut, no blank gap" convention boundary (i)'s own kickoff-text
  * transition already established (§7).
  */
-const TURN15_FAINTED_LINE1 = "ONIX";
-const TURN15_FAINTED_LINE2 = "fainted!";
+const TURN15_FAINTED_LINE1 = CANONICAL_OPPONENT_FLY_RESOLUTION.faintLines[0]!;
+const TURN15_FAINTED_LINE2 = CANONICAL_OPPONENT_FLY_RESOLUTION.faintLines[1]!;
 const TURN15_FAINTED_TEXT_TOTAL = TURN15_FAINTED_LINE1.length + TURN15_FAINTED_LINE2.length;
 const TURN15_FAINTED_TEXT_START_TICK = 19328;
 /** Identical line2 content ("fainted!") to every prior faint text in this dossier gives an identical cursor X - reused directly rather than recomputed. */
