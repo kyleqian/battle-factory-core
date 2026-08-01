@@ -13,6 +13,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 824 — [bounded MAIN worker, 2026-08-01] rank-3 turn-5 predecessor handoff retired
+
+- **State:** implementation `73cb7455` + `891a44d7` + `97de11a4`; source and
+  test census has no `turn5Resolved` reference.
+- **Did:** published the immutable completed-turn-5/next-command handoff with
+  canonical PP **[6,20,19,10]**, persisted slot 0, and settled/ready facts;
+  moved turn-6 dispatch, slot-0 PP reconstruction, and turn-7 reopen guard
+  onto it. The existing adapter remains the sole switch/Sitrus content owner.
+- **Next:** take only the next separately scoped #39 owner-chain slice; do not
+  batch later turn fields into this completed predecessor retirement.
+- **Notes:** clean-`feffce4c` app replay was byte-identical for all requested
+  primary and insurance windows (**1,742/1,742 captures**). Full `npm test`:
+  **573 files, 5,910 passed + 1 skipped**; `npm run build` green. No trace,
+  capture-list, timing/presentation, ratchet/barrier, recording-import, or
+  prohibited selector change.
+
 ## 823 — [bounded MAIN worker, 2026-08-01] #61 DMA queue evidence checkpoint
 
 - **State:** no production behavior change. The full source queue proves the
@@ -51,25 +67,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   parent-identical parked #23 result (204/256 on `41409b24` and here).
   `turn13-menu` remains 56/57; `turn14-fly-miss` aborts on the same preexisting
   unresolved item-restored-health placeholder in parent `41409b24`.
-
-## 821 — [supervisor orient, 2026-08-01] animation-main folded; freshness FAIL judged client-only
-
-- **State:** master fast-forwarded to fold union `4843f6c8`; full `npm test`
-  green on the union (**572 files, 5,899 passed + 1 skipped**) and production
-  build green.
-- **Did:** folded ~30 animation commits (seven more front send-out families
-  accepted with receipts/fixtures). Read the animation ledger's "For the main
-  program" line: rung 1 — extracting `sMonFrontAnimIdsTable`,
-  `sSpeciesToBackAnimSet`, `sBackAnimNatureModTable`,
-  `sMonAnimationDelayTable`, `sBackAnimationIds` into `src/data/gen/` — is
-  main-program-owned and blocks animation rung 2; dispatching it to the side
-  lane this session. `check-oracle-freshness.sh` FAILs both ports, but the
-  only harness commit since service start (`acc5c4e`) touches the `bin/oracle`
-  CLI and `_template` mirrors — client-side only, no service/schema change —
-  so per the known tooling-only false-positive class, no restart. DEFERRED
-  empty. A live animation worker exists (their lane, untouched).
-- **Next:** main lane: #39 rank-2 remainder — typed turn-13
-  completed-resolution/next-command handoff (PP 18/20, persisted slot,
-  redraw/input readiness), then retire `turn13Resolved`. Side lane: the
-  rung-1 five-table extraction.
-- **Notes:** session deadline 15:32; supervisor session, hybrid profile.

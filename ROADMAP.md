@@ -967,9 +967,12 @@ guard as a reader; render, continuation, PP, and requests never consumed it.
 The dead field/branch is deleted while the immutable staged KO→switch-in→
 Sitrus→next-command lifecycle remains authoritative. All rank-3 and insurance
 pins plus +30 delayed-dismiss variants are byte-identical to clean
-`7d65832d` (**3,505 captures total**). `turn5Resolved` remains deliberately:
-its turn-6 dispatch, PP, and next-reopen consumers need a typed terminal/
-next-command owner before that predecessor can retire.
+`7d65832d` (**3,505 captures total**). Its remaining predecessor is now
+retired (`73cb7455` + `891a44d7` + `97de11a4`): the typed completed-turn-5/
+next-command handoff owns PP **[6,20,19,10]**, persisted slot 0, and the
+existing settled/ready boundary facts, while the adapter continues to own
+switch/Sitrus content. Clean-`feffce4c` app replay held **1,742/1,742**
+requested rank-3 and boundary-insurance captures byte-identical.
 
 **#39 rank-2 predecessor checkpoint (2026-08-01):** the analogous
 `turn13Resolved` mirror cannot yet retire. Its existing FLY owner represents

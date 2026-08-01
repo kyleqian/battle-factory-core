@@ -167,8 +167,11 @@ staging helper (`14c4295b`, ~120-line local workaround deleted). All
 nine turn5 pins + five insurance pins held at every step. The dead
 `turn5KoDismissElapsed` mirror is retired (`88fd05f6`): its sole reader was
 its own one-shot guard, while render/continuation already consumed the staged
-lifecycle. `turn5Resolved` remains because turn-6 dispatch, PP reconstruction,
-and the next reopen gate still read it (same predecessor class as turn13's).
+lifecycle. The typed completed-turn-5/next-command handoff retired
+`turn5Resolved` (`73cb7455` + `891a44d7` + `97de11a4`): it owns canonical PP
+**[6,20,19,10]**, persisted slot 0, and settled/ready facts for turn-6
+dispatch, PP reconstruction, and the turn-7 reopen guard. The existing adapter
+continues to own switch/Sitrus content.
 Rank 4 is **fully retired** (2026-07-31,
 all 5 slices): `174cc388` ROCK_SLIDE tails; `441ddf83`+`6aba6662`
 turn-7/8 FEATHER_DANCE staged+flipped; `0769ccc6` stat-fall banner

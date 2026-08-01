@@ -31071,3 +31071,24 @@ both verify scripts/census independently re-verified before this entry.)*
   icon consumer, trace/capture list, issue, census, roadmap, animation,
   battle/turn/tick selector, PP/HP/RNG, or turn-order change. PAPERCUT:
   parallel compare commands race over `tools/compare/out/latest`, ~1 min.
+## 821 — [supervisor orient, 2026-08-01] animation-main folded; freshness FAIL judged client-only
+
+- **State:** master fast-forwarded to fold union `4843f6c8`; full `npm test`
+  green on the union (**572 files, 5,899 passed + 1 skipped**) and production
+  build green.
+- **Did:** folded ~30 animation commits (seven more front send-out families
+  accepted with receipts/fixtures). Read the animation ledger's "For the main
+  program" line: rung 1 — extracting `sMonFrontAnimIdsTable`,
+  `sSpeciesToBackAnimSet`, `sBackAnimNatureModTable`,
+  `sMonAnimationDelayTable`, `sBackAnimationIds` into `src/data/gen/` — is
+  main-program-owned and blocks animation rung 2; dispatching it to the side
+  lane this session. `check-oracle-freshness.sh` FAILs both ports, but the
+  only harness commit since service start (`acc5c4e`) touches the `bin/oracle`
+  CLI and `_template` mirrors — client-side only, no service/schema change —
+  so per the known tooling-only false-positive class, no restart. DEFERRED
+  empty. A live animation worker exists (their lane, untouched).
+- **Next:** main lane: #39 rank-2 remainder — typed turn-13
+  completed-resolution/next-command handoff (PP 18/20, persisted slot,
+  redraw/input readiness), then retire `turn13Resolved`. Side lane: the
+  rung-1 five-table extraction.
+- **Notes:** session deadline 15:32; supervisor session, hybrid profile.
