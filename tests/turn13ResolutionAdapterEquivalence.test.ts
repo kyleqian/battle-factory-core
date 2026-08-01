@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  isTurn13NextCommandHandoffReady,
   opponentFaintSinkGeometry,
+  resolveTurn13CompletedResolutionNextCommandHandoff,
   resolveTurn13ResolutionAdapter,
   resolveTurn13SwitchInAdapter,
-  TURN13_TURN14_HANDOFF_NOT_STAGED,
 } from "../src/engine/turn13ResolutionAdapter.ts";
 import {
   TURN13_DRAGONBREATH_PRESS_TICK,
@@ -109,23 +110,36 @@ describe("turn13ResolutionAdapter: #39 rank-2 kernel-to-typed-owner equivalence 
     });
   });
 
-  describe("documented gap: the turn-14 dispatcher/slot-2 PP mirroring are NOT staged here", () => {
-    it("is named as an explicit, exported marker, not a silently-green omission", () => {
-      expect(TURN13_TURN14_HANDOFF_NOT_STAGED).toBe(true);
+  describe("completed-resolution/next-command handoff (rank-2 predecessor retirement proof)", () => {
+    it("publishes the core guard's settled redraw and input-ready facts for the following FIGHT reopen", () => {
+      const handoff = resolveTurn13CompletedResolutionNextCommandHandoff();
+
+      expect(handoff.nextCommand).toEqual({ redraw: "settled", input: "ready" });
+      expect(isTurn13NextCommandHandoffReady(handoff)).toBe(true);
+      expect(isTurn13NextCommandHandoffReady(null)).toBe(false);
     });
 
-    it("cannot substitute the already-completed FLY charge owner for the predecessor PP receipt", () => {
+    it("publishes the persisted DRAGON_BREATH slot required by the FIGHT dispatcher", () => {
+      const handoff = resolveTurn13CompletedResolutionNextCommandHandoff();
+
+      expect(handoff.persistedMoveSlot).toBe(2);
+    });
+
+    it("owns the turn-14 submenu's post-turn-13 DRAGON_BREATH PP receipt, not the already-completed FLY charge owner", () => {
       const onix = rentalMoveset("ONIX");
-      const predecessorPp = currentPPForActiveMon(
+      const legacyPredecessorPp = currentPPForActiveMon(
         onix,
         true, true, true, true, true, true, true,
         true, true, true, true, true, true,
       )[2];
       const chargeOwnerPp = CANONICAL_OPPONENT_FLY_RESOLUTION
         .chargeResolution.segments[0]!.afterRules.rulesContext.battlers[0]!.pp[2];
+      const handoff = resolveTurn13CompletedResolutionNextCommandHandoff();
 
-      expect(predecessorPp).toBe(18);
+      expect(legacyPredecessorPp).toBe(18);
+      expect(handoff.dragonBreathPp).toEqual({ current: legacyPredecessorPp, max: 20 });
       expect(chargeOwnerPp).toBe(17);
+      expect(handoff.dragonBreathPp.current).not.toBe(chargeOwnerPp);
     });
   });
 });

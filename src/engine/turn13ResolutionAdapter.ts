@@ -44,9 +44,12 @@
  * real outcome, not a terminal WON/LOST -- the battle genuinely continues
  * into turn 14.
  *
- * Still unowned here, named per this slice's own brief: the turn-14
- * dispatcher and slot-2 PP mirroring (`battleScene.ts`'s `turn13Resolved`/
- * turn-14 consumers, entry 751) -- a later step's own flip, not this one's.
+ * The completed switch-in chain also retains the player-side post-turn
+ * command facts. `resolveTurn13CompletedResolutionNextCommandHandoff`
+ * publishes that exact predecessor receipt for the following FIGHT reopen:
+ * the post-DRAGON_BREATH PP, persisted move slot, and settled redraw/input
+ * readiness. It deliberately reads the terminal turn-13 chain, rather than
+ * the later retained FLY charge owner, whose player PP belongs to turn 14.
  *
  * Two corrections to this slice's own brief, made explicit so a later flip
  * does not inherit them: (a) the fainting mon is PIDGEOTTO, not "Grovyle" --
@@ -70,6 +73,7 @@ import {
   turn13DragonBreathHasParalysisStatusChange,
 } from "./turn13DragonBreathPresentationStaging.ts";
 import { runBattleScriptFaintedActionsOrchestration } from "./battleScriptFaintedActionsOrchestration.ts";
+import { rentalMoveset } from "./battleSetup.ts";
 
 type MonPicCoordsAsset = Readonly<{
   front: Readonly<Record<string, Readonly<{ yOffset: number }>>>;
@@ -132,15 +136,6 @@ export function resolveTurn13ResolutionAdapter(): Turn13ResolutionAdapter {
   });
 }
 
-/**
- * Named gap marker (docs/battle-scene-retirement-inventory.md rank-2's own
- * "Missing bridge" column), narrowed by this slice: the switch-in decision
- * and the incoming battler's own species/level/HP are now staged below
- * (`resolveTurn13SwitchInAdapter`). Only the turn-14 dispatcher/slot-2 PP
- * mirroring stay unowned -- see this module's own top doc.
- */
-export const TURN13_TURN14_HANDOFF_NOT_STAGED = true;
-
 type SpeciesNamesAsset = Readonly<{ species: readonly Readonly<{ species: string; name: string }>[] }>;
 
 function speciesDisplayName(speciesId: number): string {
@@ -161,6 +156,24 @@ export type Turn13SwitchInAdapter = Readonly<{
 }>;
 
 /**
+ * Runs the one real turn-13 terminal state through HandleFaintedMonActions.
+ * Both the switch-in adapter and the following-command handoff deliberately
+ * project this same resumed state, so neither can accidentally borrow facts
+ * from the later FLY owner.
+ */
+function resolveTurn13ResumedRulesContext() {
+  const { program, handlers, state } = stageTurn13DragonBreathHitChainToTerminalMachineState();
+  const result = runBattleScriptFaintedActionsOrchestration(program, handlers, state);
+  if (result.kind !== "resumed") {
+    throw new Error(
+      `turn13ResolutionAdapter: expected the forced-switch dance to resume with a healthy `
+        + `replacement, got "${result.kind}" instead`,
+    );
+  }
+  return result.state.rulesContext;
+}
+
+/**
  * Stages DESTIN's real turn-13 forced-switch dance (see this module's own
  * top doc) and returns the typed facts this window's switch-in dispatcher
  * (`drawTurn13SwitchinFieldBase`/`murkrowHealthboxContent`/
@@ -170,15 +183,7 @@ export type Turn13SwitchInAdapter = Readonly<{
  * silently-wrong default.
  */
 export function resolveTurn13SwitchInAdapter(): Turn13SwitchInAdapter {
-  const { program, handlers, state } = stageTurn13DragonBreathHitChainToTerminalMachineState();
-  const result = runBattleScriptFaintedActionsOrchestration(program, handlers, state);
-  if (result.kind !== "resumed") {
-    throw new Error(
-      `turn13ResolutionAdapter: expected the forced-switch dance to resume with a healthy `
-        + `replacement, got "${result.kind}" instead`,
-    );
-  }
-  const replacement = result.state.rulesContext.battlers[1];
+  const replacement = resolveTurn13ResumedRulesContext().battlers[1];
   const replacementSpecies = speciesDisplayName(replacement.species);
   return Object.freeze({
     replacementSpecies,
@@ -187,4 +192,55 @@ export function resolveTurn13SwitchInAdapter(): Turn13SwitchInAdapter {
     replacementHp: Object.freeze({ current: replacement.hp, max: replacement.maxHP }),
     sentOutLine2: `out ${replacementSpecies}!`,
   });
+}
+
+/**
+ * Typed predecessor receipt for the next FIGHT command after turn 13. The
+ * strings model the already-settled redraw controller state at the input
+ * edge which installs this receipt; a consumer must require both rather than
+ * treating arbitrary adapter presence as input readiness.
+ */
+export type Turn13CompletedResolutionNextCommandHandoff = Readonly<{
+  /** Post-turn-13 DRAGON_BREATH receipt. The separate later FLY owner is 17/20. */
+  dragonBreathPp: Readonly<{ current: number; max: number }>;
+  /** `gMoveSelectionCursor` carried from the completed DRAGON_BREATH command. */
+  persistedMoveSlot: 2;
+  /** The following FIGHT reopen is visually settled and may accept input. */
+  nextCommand: Readonly<{
+    redraw: "settled";
+    input: "ready";
+  }>;
+}>;
+
+/**
+ * Projects the completed turn-13 lifecycle's own post-switch rules context
+ * into a handoff for turn 14. The current PP comes from the DRAGON_BREATH
+ * chain after its real PP deduction; maximum PP comes from the same active
+ * ONIX moveset the menu renders. This must not read a future FLY resolution.
+ */
+export function resolveTurn13CompletedResolutionNextCommandHandoff(): Turn13CompletedResolutionNextCommandHandoff {
+  const rulesContext = resolveTurn13ResumedRulesContext();
+  if (rulesContext.currentMovePosition !== 2) {
+    throw new Error(
+      "turn13ResolutionAdapter: completed DRAGON_BREATH chain did not retain move slot 2",
+    );
+  }
+  const playerPp = rulesContext.battlers[0].pp[2];
+  const maxPp = rentalMoveset("ONIX").maxPP[2];
+  if (playerPp === undefined || maxPp === undefined) {
+    throw new Error("turn13ResolutionAdapter: turn-13 DRAGON_BREATH PP receipt is unavailable");
+  }
+  return Object.freeze({
+    dragonBreathPp: Object.freeze({ current: playerPp, max: maxPp }),
+    persistedMoveSlot: 2,
+    nextCommand: Object.freeze({ redraw: "settled" as const, input: "ready" as const }),
+  });
+}
+
+/** Typed gate shared by the core's next-FIGHT reopen and its dispatcher. */
+export function isTurn13NextCommandHandoffReady(
+  handoff: Turn13CompletedResolutionNextCommandHandoff | null | undefined,
+): handoff is Turn13CompletedResolutionNextCommandHandoff {
+  return handoff?.nextCommand.redraw === "settled"
+    && handoff.nextCommand.input === "ready";
 }
