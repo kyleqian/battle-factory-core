@@ -179,6 +179,13 @@ than treating either FEATHER_DANCE/ROCK_SLIDE stage as combined completion.
 It now owns turn-7 dispatch, PP reconstruction, and the turn-8 reopen guard.
 Clean-`80b2767a` app replays held all required primary, boundary, reader, and
 upstream windows byte-identical (**1,461/1,461 raw RGBA captures**).
+The matching typed completed-turn-7/next-command handoff retired
+`turn7Resolved` (`74f4a0d5` + `8a73efc3`): it publishes canonical PP
+**[4,20,19,10]**, persisted slot 0, and settled/ready facts directly rather
+than composing either FEATHER_DANCE/ROCK_SLIDE stage. It now owns turn-8
+dispatch, PP reconstruction, and the turn-9 reopen guard. Clean-`74f4a0d5`
+app replays held every required primary, boundary, reader, and upstream window
+byte-identical (**1,413/1,413 raw RGBA captures**).
 Rank 4 is **fully retired** (2026-07-31,
 all 5 slices): `174cc388` ROCK_SLIDE tails; `441ddf83`+`6aba6662`
 turn-7/8 FEATHER_DANCE staged+flipped; `0769ccc6` stat-fall banner
