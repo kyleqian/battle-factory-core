@@ -1,5 +1,41 @@
 # Animation coverage
 
+## Front `ANIM_H_JUMPS_V_STRETCH_TWICE` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** exact for the complete generated selector census: all
+**2 mappings / 2 Factory-reachable species / 0 outside-Factory mappings** —
+SHARPEDO and SPOINK. SHARPEDO is the representative and SPOINK the terminal
+sibling. The accepted single-run horizontal-jumps/vertical-stretch reducer is
+now parameterized for Single data=-1/runs=1 and Twice data=1/runs=2; no
+adjacent selector or unsupported barrier was added. Move coverage remains
+**107 exact / 0 partial / 0 staged / 169 unsupported** and
+`ANIMATION_COVERAGE.json` is unchanged at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,1037-1075,
+2755-2868,3805-3815,5540-5544` and `trig.c:514-518` prove task-zeroed sprite
+data, `AddNewAnim` defaults, `ResetSpriteAfterAnim`, GBA sine semantics, the
+shared callbacks, the Twice overrides, and stable `WaitAnimEnd`. All **157
+callbacks** (ticks 0..156) pin both normal-front no-op `TryFlipX` calls,
+affine/C-truncated sine and scale writes, every data2/data3/data4 update, and
+strict guards: `_0->_1` at 11/94, `_1->_2` at 61/144, tick 73 decrements runs
+2->1 and sets delay=10/data3=data4=0 before the shared tail carries data2 to
+12, ticks 74..83 count delay to zero, and tick 156 sees `_2` counter=132,
+resets offsets/affine state, increments data2 to 144, and installs
+`WaitAnimEnd`. The accepted Single tick-73 terminal remains regression-pinned.
+Fresh complete legal Scene-ON parties settle both species at x2=0/y2=0,
+animNum=1/`SpriteCallbackDummy`; paired raw receipts are byte-identical with no
+EOF newline: SHARPEDO SHA-256
+`beddd02c936693a4e82573b7f4ab965aa0e128af8eb72cf78945e60777864dcf`,
+SPOINK `f5c33bc034669fa7a53240a02bbb7a630f5d1d17f8405baeab87770d03e3eb7b`.
+
+**Verification / next:** focused species-idle family plus both ratchets are
+**244/244**; `npx tsc --noEmit` and diff checks are green; the single
+post-change full `npm test` is green at **572 files, 5,966 passed + 1
+skipped**; production build is green (**534 modules transformed**). The next
+source-ranked generated census family is **`ANIM_ROTATE_UP_TO_SIDES`** (1
+mapping / 1 Factory / 0 outside): HARIYAMA.
+
 ## Front `ANIM_V_JUMPS_BIG` Factory family accepted (2026-08-01)
 
 **Verdict / counts:** exact for the complete generated selector census: all
