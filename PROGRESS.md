@@ -13,25 +13,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
-## 834 — [bounded MAIN worker, 2026-08-01] turn-11 predecessor handoff retired
-
-- **State:** proof `c96ce5b3`, implementation `0499bc30`; source/test census
-  has no `turn11Resolved` reference.
-- **Did:** published the immutable completed-turn-11/next-command handoff with
-  canonical PP **[1,19,19,10]**, persisted slot 0, and settled/ready facts;
-  moved turn-12 dispatch, slot-0 PP reconstruction, and the following reopen
-  guard onto it without gating on `turn11FeatherDancePresentationStaging.ts`,
-  which remains the opponent move-content owner.
-- **Next:** take only the next separately scoped #39 owner-chain slice; do not
-  batch `turn12Resolved` or another field into this completed retirement.
-- **Notes:** clean-parent `5b46d038` (`c96ce5b3^`) differential app replay is
-  byte-identical across all requested turn-11 primary, turn-12 reader, and
-  turn-10 upstream windows (**1,033/1,033 raw RGBA captures**). Focused Tier-1
-  tests (**9 files, 465 passed**, including the ratchet), `npx tsc --noEmit`,
-  and `npm run build` are green; the full suite was intentionally not run per
-  this bounded-worker scope.
-
-## 834 — [supervisor, 2026-08-01 16:05] turn-11 verified; faint-dismiss owner prep merged
+## 835 — [supervisor, 2026-08-01 16:05] turn-11 verified; faint-dismiss owner prep merged
 
 - **State:** master `432f623e`. Turn-11 landing verified: census empty,
   supervisor spot compares `turn11-rockslide-off` **256/256** and
@@ -51,6 +33,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** with turn-12 done, #39's remaining ladder is turns 1-4 (prep
   dossier merged today) then item 7 (prep merged today), then dispatcher
   debt per the retirement inventory.
+
+## 834 — [bounded MAIN worker, 2026-08-01] turn-11 predecessor handoff retired
+
+- **State:** proof `c96ce5b3`, implementation `0499bc30`; source/test census
+  has no `turn11Resolved` reference.
+- **Did:** published the immutable completed-turn-11/next-command handoff with
+  canonical PP **[1,19,19,10]**, persisted slot 0, and settled/ready facts;
+  moved turn-12 dispatch, slot-0 PP reconstruction, and the following reopen
+  guard onto it without gating on `turn11FeatherDancePresentationStaging.ts`,
+  which remains the opponent move-content owner.
+- **Next:** take only the next separately scoped #39 owner-chain slice; do not
+  batch `turn12Resolved` or another field into this completed retirement.
+- **Notes:** clean-parent `5b46d038` (`c96ce5b3^`) differential app replay is
+  byte-identical across all requested turn-11 primary, turn-12 reader, and
+  turn-10 upstream windows (**1,033/1,033 raw RGBA captures**). Focused Tier-1
+  tests (**9 files, 465 passed**, including the ratchet), `npx tsc --noEmit`,
+  and `npm run build` are green; the full suite was intentionally not run per
+  this bounded-worker scope.
+
 
 ## 833 — [supervisor, 2026-08-01 15:45] turn-10 verified; #63 fixed+closed; second animation fold
 
@@ -73,20 +74,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** side workers ran the full suite twice against brief
   instructions (Sol/high both times) — green both times, harmless, but
   note the pattern when phrasing future side briefs.
-
-## 832 — [bounded MAIN worker, 2026-08-01] turn-10 predecessor handoff retired
-
-- **State:** proof `f8e6bcc7`, implementation `f702a404`; source/test census
-  has no `turn10Resolved` reference.
-- **Did:** published the immutable completed-turn-10/next-command handoff with
-  canonical PP **[2,19,19,10]**, persisted slot 0, and settled/ready facts;
-  moved turn-11 dispatch, slot-0 PP reconstruction, and the following reopen
-  guard onto it without gating on a turn-10 move staging module.
-- **Next:** take only the next separately scoped #39 owner-chain slice; do not
-  batch `turn11Resolved` or another field into this completed retirement.
-- **Notes:** clean-parent `1056b153` (`f8e6bcc7^`) differential app replay is
-  byte-identical across all requested turn-10 primary, turn-11 reader, and
-  turn-9 upstream windows (**1,842/1,842 raw RGBA captures**). Focused Tier-1
-  tests (**9 files, 465 passed**, including the ratchet) and `npx tsc --noEmit`
-  are green; the worker deadline interrupted `npm run build` during Vite's
-  transform phase, so its final green result remains for supervisor verification.
