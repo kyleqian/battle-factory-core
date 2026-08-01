@@ -1,5 +1,35 @@
 # Animation coverage
 
+## Front `ANIM_FLASH_YELLOW` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2s is exact for all **7 selector mappings / 7
+Factory-reachable species**, with **zero outside-Factory mappings**: PIKACHU,
+MAGNETON, ELECTABUZZ, ZAPDOS, AMPHAROS, ELEKID, RAIKOU. PIKACHU is the
+representative and RAIKOU the sibling; every prior accepted front family
+remains regression-pinned. Move coverage stays **107 exact / 0 partial / 0
+staged / 169 unsupported** and `ANIMATION_COVERAGE.json` remains byte-identical
+at SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:603-620,911-939,
+2473-2509` plus `palette.h:20-24` proves the exact 13-row
+`sYellowFlashData`, task-zeroed data, palette capture through
+`OBJ_PLTT_ID(oam.paletteNum)`, and all **56 active callbacks**. The reducer
+pins every duration transition, the one-callback-delayed 12 palette writes,
+full-strength coefficient 16 `RGB_YELLOW` flashes, coefficient 0 restores,
+and tick 56's `(u8)-1` sentinel/`WaitAnimEnd` cleanup after the final restore.
+Fresh complete legal Scene-ON parties settle both species at x2=0/y2=0,
+animNum=1, and `SpriteCallbackDummy`. Paired raw outputs are byte-identical
+with no EOF newline: PIKACHU SHA-256
+`2e83c09bdb040ef1ff8637a260f94ac6dcfe33c6f967b56b984348a848884968`,
+RAIKOU `b72527919f77b4f34bb43feba56c36876de8adafc321b481f0142d09de3e109f`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per legal party; raw `cmp`; focused family plus
+both ratchets **168/168**; TypeScript no-emit and diff checks green; exactly one
+full `npm test` **567 files, 5855 passed + 1 skipped** and one `npm run build`
+green. The next generated-census/source-ranked front family is
+**`ANIM_H_SLIDE_SLOW`** (7 Factory species).
+
 ## Front `ANIM_H_STRETCH` terminal family accepted (2026-08-01)
 
 **Verdict / counts:** rung 2r is exact for all **7 selector mappings / 7
