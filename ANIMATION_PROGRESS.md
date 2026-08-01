@@ -10,6 +10,9 @@ prior accepted front family remains regression-pinned. Move coverage stays
 **107 exact / 0 partial / 0 staged / 169 unsupported** and
 `ANIMATION_COVERAGE.json` remains byte-identical at SHA-256
 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+Follow-up verification repair: the dynamic selector census now crosses an
+explicit read-only `Record<string, string>` boundary; assertions and production
+animation code are unchanged.
 
 **Source boundary / evidence:** `pokemon_animation.c:911-939,1878-1912`
 proves task-zeroed data, normal-front `sDontFlip=TRUE`, tick-0 affine start,
@@ -25,12 +28,14 @@ with no EOF newline: WARTORTLE SHA-256
 `e4c09e7b1c413acc21745c649e7bb493ea87ff51d648181ae77bf7d6f2466005`,
 GLIGAR `5dbf9079a53eb71470f474107391fc9f05ad9cf6604d1d807b561729b6d820d6`.
 
-**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
-`tools/run-mgba-probe.py` twice per legal party; raw `cmp`; focused family plus
-both ratchets **195/195**; TypeScript no-emit and diff checks green; exactly one
-full `npm test` and one `npm run build` green. The next source-ranked generated
-census family is **`ANIM_SWING_CONVEX`** (6 selector mappings / 4 Factory / 2
-outside): WEEPINBELL, GOLDEEN, MEW, MANTINE, BANETTE, JIRACHI.
+**Commands / next:** the preceding acceptance evidence remains the unchanged
+`dump-onix-front-idle-anim.py` via `tools/run-mgba-probe.py` twice per legal
+party and paired raw outputs cited above. This repair independently verified
+the focused family plus both ratchets at **195/195**, `npx tsc --noEmit` green,
+exactly one complete `npm test` at **572 files, 5,917 passed + 1 skipped**, and
+one `npm run build` green (**534 modules transformed**). The next source-ranked
+generated census family is **`ANIM_SWING_CONVEX`** (6 selector mappings / 4
+Factory / 2 outside): WEEPINBELL, GOLDEEN, MEW, MANTINE, BANETTE, JIRACHI.
 
 ## Front `ANIM_CIRCULAR_STRETCH_TWICE` terminal family accepted (2026-08-01)
 

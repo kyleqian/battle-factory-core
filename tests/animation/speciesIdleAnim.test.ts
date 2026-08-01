@@ -4086,7 +4086,8 @@ describe("speciesIdleAnim", () => {
 
   describe("shrinkGrowFrameAtTick (source lifecycle)", () => {
     it("derives exactly all 6 selector mappings as Factory-reachable with zero outside", () => {
-      const generated = Object.entries(selectorTables.frontAnimIds.species)
+      const speciesSelectors = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
+      const generated = Object.entries(speciesSelectors)
         .filter(([, family]) => family === "ANIM_SHRINK_GROW")
         .map(([species]) => species);
       const factorySpecies = new Set(
@@ -4102,7 +4103,7 @@ describe("speciesIdleAnim", () => {
       );
       expect(SHRINK_GROW_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
       for (const species of SHRINK_GROW_FRONT_SPECIES) {
-        expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_SHRINK_GROW");
+        expect(speciesSelectors[species]).toBe("ANIM_SHRINK_GROW");
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }
     });
