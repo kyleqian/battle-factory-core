@@ -100,6 +100,7 @@ import { resolveTurn8CompletedResolutionNextCommandHandoff } from "../src/engine
 import { resolveTurn9CompletedResolutionNextCommandHandoff } from "../src/engine/turn9ResolutionAdapter.ts";
 import { resolveTurn10CompletedResolutionNextCommandHandoff } from "../src/engine/turn10ResolutionAdapter.ts";
 import { resolveTurn11CompletedResolutionNextCommandHandoff } from "../src/engine/turn11ResolutionAdapter.ts";
+import { resolveTurn12CompletedResolutionNextCommandHandoff } from "../src/engine/turn12ResolutionAdapter.ts";
 import {
   renderBattleScene,
   TICK0,
@@ -139,7 +140,7 @@ import {
 /** Same rig as tests/battleScene.test.ts's `pixelAtSentOut` - send-out A-press already registered at trace tick 1420 (sendOutPressElapsed=380), the fixed script every committed trace in this window shares. */
 function pixelAtSentOut(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -191,16 +192,16 @@ describe("battleMenu: rendered pixels (oracle-pinned, tools/compare/traces/menu-
   it("renders byte-identical frames across the silent space tick (1565 -> 1566)", () => {
     const fb1 = new Uint8Array(240 * 160 * 4);
     const fb2 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb1, { elapsed: 1565 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
-    renderBattleScene(fb2, { elapsed: 1566 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
+    renderBattleScene(fb1, { elapsed: 1565 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
+    renderBattleScene(fb2, { elapsed: 1566 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
     expect(fb2).toEqual(fb1);
   });
 
   it("renders byte-identical frames once static (1571 -> 1572)", () => {
     const fb1 = new Uint8Array(240 * 160 * 4);
     const fb2 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb1, { elapsed: 1571 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
-    renderBattleScene(fb2, { elapsed: 1572 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12Resolved: false, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
+    renderBattleScene(fb1, { elapsed: 1571 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
+    renderBattleScene(fb2, { elapsed: 1572 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
     expect(fb2).toEqual(fb1);
   });
 });
@@ -805,11 +806,11 @@ describe("battleMenu: S7 slice O - turn 7's own FEATHER_DANCE/ROCK_SLIDE (Onix v
     expect(currentPPForActiveMon(moveset, true, true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff(), resolveTurn7CompletedResolutionNextCommandHandoff(), resolveTurn8CompletedResolutionNextCommandHandoff(), resolveTurn9CompletedResolutionNextCommandHandoff(), resolveTurn10CompletedResolutionNextCommandHandoff(), null)[0]).toBe(2);
   });
 
-  it("S7/S8: currentPPForActiveMon reads ROCK_SLIDE 0/10 (exhausted) once turn12Resolved (turn 12's own confirmed ROCK_SLIDE miss is a 10th slot-0 use) - matches turn13-notes.md §3's own 'ROCK_SLIDE 0/10 (exhausted, confirmed)' entering-turn-13 ledger; BIND (slot 1, 19/20) and DRAGON_BREATH (slot 2, 19/20) stay at their own already-used PP, independent of this new slot-0 decrement", () => {
+  it("S7/S8: currentPPForActiveMon reads ROCK_SLIDE 0/10 (exhausted) once the completed turn-12 handoff is present (turn 12's own confirmed ROCK_SLIDE miss is a 10th slot-0 use) - matches turn13-notes.md §3's own 'ROCK_SLIDE 0/10 (exhausted, confirmed)' entering-turn-13 ledger; BIND (slot 1, 19/20) and DRAGON_BREATH (slot 2, 19/20) stay at their own already-used PP, independent of this new slot-0 receipt", () => {
     const moveset = { moveIds: [157, 20, 225, 201], maxPP: [10, 20, 20, 10] } as const;
-    expect(currentPPForActiveMon(moveset, true, true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff(), resolveTurn7CompletedResolutionNextCommandHandoff(), resolveTurn8CompletedResolutionNextCommandHandoff(), resolveTurn9CompletedResolutionNextCommandHandoff(), resolveTurn10CompletedResolutionNextCommandHandoff(), resolveTurn11CompletedResolutionNextCommandHandoff(), true)).toEqual([0, 19, 19, 10]);
+    expect(currentPPForActiveMon(moveset, true, true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff(), resolveTurn7CompletedResolutionNextCommandHandoff(), resolveTurn8CompletedResolutionNextCommandHandoff(), resolveTurn9CompletedResolutionNextCommandHandoff(), resolveTurn10CompletedResolutionNextCommandHandoff(), resolveTurn11CompletedResolutionNextCommandHandoff(), resolveTurn12CompletedResolutionNextCommandHandoff())).toEqual([0, 19, 19, 10]);
     // Sanity: the completed turn-11 handoff alone (pre-turn-13) still reads ROCK_SLIDE at 1/10.
-    expect(currentPPForActiveMon(moveset, true, true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff(), resolveTurn7CompletedResolutionNextCommandHandoff(), resolveTurn8CompletedResolutionNextCommandHandoff(), resolveTurn9CompletedResolutionNextCommandHandoff(), resolveTurn10CompletedResolutionNextCommandHandoff(), resolveTurn11CompletedResolutionNextCommandHandoff(), false)[0]).toBe(1);
+    expect(currentPPForActiveMon(moveset, true, true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff(), resolveTurn7CompletedResolutionNextCommandHandoff(), resolveTurn8CompletedResolutionNextCommandHandoff(), resolveTurn9CompletedResolutionNextCommandHandoff(), resolveTurn10CompletedResolutionNextCommandHandoff(), resolveTurn11CompletedResolutionNextCommandHandoff(), null)[0]).toBe(1);
   });
 
   it("S7/S8 (docs/turn13-notes.md §3): moveFightCursor's own 2x2-grid DOWN press moves ROCK_SLIDE (0, top-left) onto DRAGON_BREATH (2, bottom-left) - the double-decrement the dossier root-caused as a plain row move, no new nav code needed", () => {

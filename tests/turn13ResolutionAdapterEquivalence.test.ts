@@ -24,6 +24,7 @@ import { resolveTurn8CompletedResolutionNextCommandHandoff } from "../src/engine
 import { resolveTurn9CompletedResolutionNextCommandHandoff } from "../src/engine/turn9ResolutionAdapter.ts";
 import { resolveTurn10CompletedResolutionNextCommandHandoff } from "../src/engine/turn10ResolutionAdapter.ts";
 import { resolveTurn11CompletedResolutionNextCommandHandoff } from "../src/engine/turn11ResolutionAdapter.ts";
+import { resolveTurn12CompletedResolutionNextCommandHandoff } from "../src/engine/turn12ResolutionAdapter.ts";
 import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "../src/engine/turn15FlyResolutionAdapter.ts";
 
 /**
@@ -138,7 +139,7 @@ describe("turn13ResolutionAdapter: #39 rank-2 kernel-to-typed-owner equivalence 
       const predecessorPp = currentPPForActiveMon(
         onix,
         true, true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff(), resolveTurn7CompletedResolutionNextCommandHandoff(),
-        resolveTurn8CompletedResolutionNextCommandHandoff(), resolveTurn9CompletedResolutionNextCommandHandoff(), resolveTurn10CompletedResolutionNextCommandHandoff(), resolveTurn11CompletedResolutionNextCommandHandoff(), true,
+        resolveTurn8CompletedResolutionNextCommandHandoff(), resolveTurn9CompletedResolutionNextCommandHandoff(), resolveTurn10CompletedResolutionNextCommandHandoff(), resolveTurn11CompletedResolutionNextCommandHandoff(), resolveTurn12CompletedResolutionNextCommandHandoff(),
         handoff,
       )[2];
       const chargeOwnerPp = CANONICAL_OPPONENT_FLY_RESOLUTION

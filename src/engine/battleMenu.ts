@@ -30,6 +30,7 @@ import type { Turn8CompletedResolutionNextCommandHandoff } from "./turn8Resoluti
 import type { Turn9CompletedResolutionNextCommandHandoff } from "./turn9ResolutionAdapter.ts";
 import type { Turn10CompletedResolutionNextCommandHandoff } from "./turn10ResolutionAdapter.ts";
 import type { Turn11CompletedResolutionNextCommandHandoff } from "./turn11ResolutionAdapter.ts";
+import type { Turn12CompletedResolutionNextCommandHandoff } from "./turn12ResolutionAdapter.ts";
 import type { Turn13CompletedResolutionNextCommandHandoff } from "./turn13ResolutionAdapter.ts";
 
 /** `sText_GoPkmn` resolved for this save's rental pool (single line, fits `B_WIN_MSG`'s line 1 - never wraps to line 2). */
@@ -2577,7 +2578,7 @@ export function currentPPForActiveMon(
   turn9NextCommandHandoff: Turn9CompletedResolutionNextCommandHandoff | null = null,
   turn10NextCommandHandoff: Turn10CompletedResolutionNextCommandHandoff | null = null,
   turn11NextCommandHandoff: Turn11CompletedResolutionNextCommandHandoff | null = null,
-  turn12Resolved: boolean = false,
+  turn12NextCommandHandoff: Turn12CompletedResolutionNextCommandHandoff | null = null,
   turn13NextCommandHandoff: Turn13CompletedResolutionNextCommandHandoff | null = null,
   lockedActionResolution: BattleResolutionPresentationState | null = null,
   followingResolution: BattleResolutionPresentationState | null = null,
@@ -2608,15 +2609,13 @@ export function currentPPForActiveMon(
   // S7/S8 (docs/turn12-notes.md §4): turn 11's own ROCK_SLIDE (zero nav
   // needed, cursor already at slot 0) is a 9th slot-0 use, matching
   // turn12-notes' own "ROCK_SLIDE(157) 1/10" ledger at turn 12's own reopen.
-  // S7/S8 (docs/turn13-notes.md §3): turn 12's own ROCK_SLIDE (a miss, still
-  // PP-decrementing) is a 10th slot-0 use, matching turn13-notes' own
-  // "ROCK_SLIDE 0/10 (exhausted, confirmed)" ledger at turn 13's own reopen.
+  // The completed turn-12 handoff owns ROCK_SLIDE's tenth use (a miss still
+  // consumes PP) and the resulting exhausted 0/10 receipt at turn 13's
+  // reopen.
   const slot0UsesBeforeTurn5 =
     (turn1Resolved ? 1 : 0) +
     (turn3Resolved ? 1 : 0) +
     (turn4Resolved ? 1 : 0);
-  const slot0UsesAfterTurn11 =
-    (turn12Resolved ? 1 : 0);
   // The handoffs own full canonical tuples. This consumer reconstructs each
   // selected slot against the supplied moveset, preserving its existing
   // generic-moveset behavior while the live Onix boundary receives the
@@ -2626,7 +2625,8 @@ export function currentPPForActiveMon(
     ? 0
     : rentalMoveset("ONIX").maxPP[1] - turn8NextCommandHandoff.playerPp[1];
   const ppBeforeLaterTurns = [
-    turn11NextCommandHandoff?.playerPp[0]
+    turn12NextCommandHandoff?.playerPp[0]
+      ?? turn11NextCommandHandoff?.playerPp[0]
       ?? turn10NextCommandHandoff?.playerPp[0]
       ?? turn9NextCommandHandoff?.playerPp[0]
       ?? turn7NextCommandHandoff?.playerPp[0]
@@ -2643,7 +2643,7 @@ export function currentPPForActiveMon(
     ?.afterRules.rulesContext.battlers[0]!.pp;
   if (followingPlayerPp !== undefined) return followingPlayerPp;
   return [
-    ppBeforeLaterTurns[0] - slot0UsesAfterTurn11,
+    ppBeforeLaterTurns[0],
     ppBeforeLaterTurns[1],
     resolvedPlayerPp?.[2] ?? turn13NextCommandHandoff?.dragonBreathPp.current ?? ppBeforeLaterTurns[2],
     ppBeforeLaterTurns[3],

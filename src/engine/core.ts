@@ -189,6 +189,10 @@ import {
   isTurn11NextCommandHandoffReady,
   resolveTurn11CompletedResolutionNextCommandHandoff,
 } from "./turn11ResolutionAdapter.ts";
+import {
+  isTurn12NextCommandHandoffReady,
+  resolveTurn12CompletedResolutionNextCommandHandoff,
+} from "./turn12ResolutionAdapter.ts";
 import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "./turn16FirePunchResolutionAdapter.ts";
 import {
   advanceBattleSceneForcedPartySelect,
@@ -1116,7 +1120,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let turn9NextCommandHandoff = battleScene.turn9NextCommandHandoff;
     let turn10NextCommandHandoff = battleScene.turn10NextCommandHandoff;
     let turn11NextCommandHandoff = battleScene.turn11NextCommandHandoff;
-    let turn12Resolved = battleScene.turn12Resolved;
+    let turn12NextCommandHandoff = battleScene.turn12NextCommandHandoff;
     let turn13NextCommandHandoff = battleScene.turn13NextCommandHandoff;
     let lockedActionOwner = battleScene.resolutionOwner ?? null;
     let terminalResolution = battleScene.terminalResolution ?? null;
@@ -1412,7 +1416,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       );
     } else if (
       isTurn11NextCommandHandoffReady(turn11NextCommandHandoff) &&
-      !turn12Resolved &&
+      !isTurn12NextCommandHandoffReady(turn12NextCommandHandoff) &&
       fightSubmenu.confirmElapsed !== null &&
       newKeys.has("A") &&
       sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN12_ROCKSLIDE_MENU_REDRAW_DELAY
@@ -1424,10 +1428,14 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // turn 13, cursor persisted at slot 0 (ROCK_SLIDE, unchanged) - turn
       // 13's own single `DOWN` press then moves it onto DRAGON_BREATH via the
       // generic nav branch above.
-      fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen));
-      turn12Resolved = true;
+      turn12NextCommandHandoff = resolveTurn12CompletedResolutionNextCommandHandoff();
+      fightSubmenu = openFightSubmenu(
+        battleScene.elapsed + 1,
+        activeMonMoveset(draftScreen),
+        turn12NextCommandHandoff.persistedMoveSlot,
+      );
     } else if (
-      turn12Resolved &&
+      isTurn12NextCommandHandoffReady(turn12NextCommandHandoff) &&
       !isTurn13NextCommandHandoffReady(turn13NextCommandHandoff) &&
       fightSubmenu.confirmElapsed !== null &&
       newKeys.has("A") &&
@@ -1440,7 +1448,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // cursor persisted at slot 2 (DRAGON_BREATH, where turn 13's own
       // confirm left it) - no further nav needed, docs/turn14-notes.md's
       // own "cursor persisted... NO DOWN press this turn" ledger. Mirrors
-      // `turn12Resolved`'s own branch exactly, per the brief.
+      // the completed turn-12 handoff branch exactly, per the brief.
       turn13NextCommandHandoff = resolveTurn13CompletedResolutionNextCommandHandoff();
       fightSubmenu = openFightSubmenu(
         battleScene.elapsed + 1,
@@ -1556,7 +1564,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn9NextCommandHandoff,
       turn10NextCommandHandoff,
       turn11NextCommandHandoff,
-      turn12Resolved,
+      turn12NextCommandHandoff,
       turn13NextCommandHandoff,
       resolutionOwner: lockedActionOwner,
       terminalResolution,
