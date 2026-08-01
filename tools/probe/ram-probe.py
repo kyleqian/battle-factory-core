@@ -34,7 +34,8 @@ Run with the harness's mGBA-enabled interpreter (NOT system python3):
         {"op": "mask", "shift": 12, "mask": "0xf"}
     ], "size": 2}
   ],
-  "startTick": 0   // optional, record only from this tick onward (default 0)
+  "startTick": 0,  // optional, record only from this tick onward (default 0)
+  "endTick": 1200, // optional, stop replay after recording this tick
   "oracleProfile": "battle-scene-off" // optional; defaults to battle-scene-on
 }
 "addr" is either "<hexOrDecimal>" (absolute), or "<symbolOrPointerLabel>+<offset>"
@@ -181,6 +182,9 @@ def main() -> None:
 
     watches = spec["watch"]
     start_tick = int(spec.get("startTick", 0))
+    end_tick = int(spec["endTick"]) if "endTick" in spec else None
+    if end_tick is not None and end_tick < start_tick:
+        raise ValueError("endTick must be >= startTick")
     ticks_out = []
     tick = 0
 
@@ -200,6 +204,10 @@ def main() -> None:
             tick += 1
             if tick >= start_tick:
                 record()
+            if end_tick is not None and tick >= end_tick:
+                break
+        if end_tick is not None and tick >= end_tick:
+            break
 
     OUTPUT_PATH.write_text(json.dumps({"ticks": ticks_out}, indent=0))
 
