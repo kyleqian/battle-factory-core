@@ -2617,8 +2617,12 @@ export function currentPPForActiveMon(
     (turn10Resolved ? 1 : 0) +
     (turn11Resolved ? 1 : 0) +
     (turn12Resolved ? 1 : 0);
-  const ppBeforeLaterTurns = turn5NextCommandHandoff?.playerPp ?? [
-    a - slot0UsesBeforeTurn5,
+  // The handoff owns the full canonical post-turn-5 tuple, but its audited
+  // consumer here is slot 0. Preserve this helper's existing generic-moveset
+  // behavior for the untouched slots (Tier-1 callers deliberately vary BIND
+  // max PP), while the live Onix boundary still receives [6, 20, 19, 10].
+  const ppBeforeLaterTurns = [
+    turn5NextCommandHandoff?.playerPp[0] ?? a - slot0UsesBeforeTurn5,
     b,
     c - (turn2Resolved ? 1 : 0),
     d,

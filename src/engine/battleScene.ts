@@ -7471,12 +7471,19 @@ function drawFightSubmenuWindow(
       t,
       sm,
       resolutionOwner.resolution,
+      turn5NextCommandHandoff,
       turn13NextCommandHandoff,
     );
     return;
   }
   if (resolutionOwner?.resolution.segmentIndex === 0) {
-    drawTurn14FightSubmenuWindow(fb, t, sm, turn13NextCommandHandoff);
+    drawTurn14FightSubmenuWindow(
+      fb,
+      t,
+      sm,
+      turn5NextCommandHandoff,
+      turn13NextCommandHandoff,
+    );
     return;
   }
   if (isTurn13NextCommandHandoffReady(turn13NextCommandHandoff)) {
@@ -15059,6 +15066,7 @@ function drawTurn14FightSubmenuWindow(
   fb: Uint8Array,
   t: number,
   sm: FightSubmenuState,
+  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
   turn13NextCommandHandoff: Turn13CompletedResolutionNextCommandHandoff | null,
 ): void {
   const revealTick = sm.openElapsed === null ? -Infinity : TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
@@ -15082,7 +15090,7 @@ function drawTurn14FightSubmenuWindow(
   drawTurn5SitrusSettledMenuChrome(fb);
   // The handoff owns turn 13's already-completed PP and persisted slot before
   // the retained charge receipt advances to its locked strike segment.
-  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true, true, true, true, true, true, turn13NextCommandHandoff);
+  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, turn5NextCommandHandoff, true, true, true, true, true, true, true, turn13NextCommandHandoff);
 }
 
 // --- S7/S8 turn 15 (docs/turn15-notes.md): Murkrow's FLY strike-half kickoff
@@ -15516,6 +15524,7 @@ function drawTurn15FightSubmenuWindow(
   t: number,
   sm: FightSubmenuState,
   resolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState,
+  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
   turn13NextCommandHandoff: Turn13CompletedResolutionNextCommandHandoff | null,
 ): void {
   const revealTick = sm.openElapsed === null ? -Infinity : TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
@@ -15537,7 +15546,7 @@ function drawTurn15FightSubmenuWindow(
   drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick, true);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
-  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true, true, true, true, true, true, turn13NextCommandHandoff, resolution);
+  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, turn5NextCommandHandoff, true, true, true, true, true, true, true, turn13NextCommandHandoff, resolution);
 }
 
 type PartyChromeFrame = { palette: number[]; indices: string };
@@ -16782,7 +16791,7 @@ function drawTurn16FightSubmenuWindow(
       sm.activeMonMoveset,
       false,
       false,
-      false,
+      null,
       false,
       false,
       false,
@@ -16916,7 +16925,7 @@ function drawTurn16FightSubmenuWindow(
     sm.activeMonMoveset,
     false,
     false,
-    false,
+    null,
     false,
     false,
     false,
