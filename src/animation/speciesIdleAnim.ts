@@ -42,6 +42,7 @@ import selectorTables from "../data/gen/send-out-anim-selector-tables.json" with
  */
 
 export type SpeciesFrontAnimFamily =
+  | "BOUNCE_ROTATE_TO_SIDES_SLOW"
   | "GROW_VIBRATE"
   | "H_JUMPS_V_STRETCH"
   | "H_SHAKE"
@@ -56,6 +57,7 @@ export type SpeciesFrontAnimFamily =
 
 const FRONT_ANIM_PREFIX = "ANIM_";
 const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
+  "BOUNCE_ROTATE_TO_SIDES_SLOW",
   "GROW_VIBRATE",
   "H_JUMPS_V_STRETCH",
   "H_SHAKE",
@@ -228,6 +230,26 @@ export const H_JUMPS_V_STRETCH_FACTORY_FRONT_SPECIES: readonly string[] = Object
 export const H_JUMPS_V_STRETCH_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   H_JUMPS_V_STRETCH_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
+
+/** All 9 source selector mappings for `ANIM_BOUNCE_ROTATE_TO_SIDES_SLOW`. */
+export const BOUNCE_ROTATE_TO_SIDES_SLOW_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_BOUNCE_ROTATE_TO_SIDES_SLOW")
+    .map(([species]) => species),
+);
+
+/** Every normal slow bounce/rotate mapping is Factory-reachable. */
+export const BOUNCE_ROTATE_TO_SIDES_SLOW_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  BOUNCE_ROTATE_TO_SIDES_SLOW_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no normal slow bounce/rotate mappings outside the Factory pool. */
+export const BOUNCE_ROTATE_TO_SIDES_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
+  Object.freeze(
+    BOUNCE_ROTATE_TO_SIDES_SLOW_FRONT_SPECIES.filter(
+      (species) => !factoryFrontSpecies.has(species),
+    ),
+  );
 
 export interface SpeciesIdleOffset {
   readonly x2: number;
@@ -900,6 +922,195 @@ export function horizontalJumpsVerticalStretchFrameAtTick(
   throw new Error("unreachable HorizontalJumpsVerticalStretch reducer state");
 }
 
+export type BounceRotateToSidesTableEntry = readonly [
+  startX: number,
+  endX: number,
+  duration: number,
+];
+
+/**
+ * Complete source table from `sBounceRotateToSidesData`
+ * (`pokemon_animation.c:1915-1937`). Index 0 is the normal-speed table and
+ * index 1 the slow table selected by `sprite->data[6] = 1`.
+ */
+export const BOUNCE_ROTATE_TO_SIDES_DATA: readonly (
+  readonly BounceRotateToSidesTableEntry[]
+)[] = Object.freeze([
+  Object.freeze([
+    [0, 8, 8], [8, -8, 12], [-8, 8, 12], [8, -8, 12],
+    [-8, 8, 12], [8, -8, 12], [-8, 0, 12], [0, 0, 0],
+  ] as const),
+  Object.freeze([
+    [0, 8, 16], [8, -8, 24], [-8, 8, 24], [8, -8, 24],
+    [-8, 8, 24], [8, -8, 24], [-8, 0, 24], [0, 0, 0],
+  ] as const),
+]);
+
+/**
+ * Source initializer distinctions. In particular, the requested normal Slow
+ * family reaches `Anim_BounceRotateToSides` and therefore uses rotation 4096;
+ * rotation 2048 belongs to the Small/SmallSlow sibling initializer.
+ */
+export const BOUNCE_ROTATE_TO_SIDES_VARIANTS = Object.freeze({
+  normal: Object.freeze({ data6: 0, rotation: 4096 }),
+  small: Object.freeze({ data6: 0, rotation: 2048 }),
+  slow: Object.freeze({ data6: 1, rotation: 4096 }),
+  smallSlow: Object.freeze({ data6: 1, rotation: 2048 }),
+} as const);
+
+export interface BounceRotateToSidesFrame extends SpeciesIdleOffset {
+  readonly data2: number;
+  readonly data3: number;
+  readonly data4: number;
+  readonly data6: number;
+  readonly animRotation: number;
+  readonly animDelay: number;
+  readonly animRuns: number;
+  readonly animSpeed: number;
+  readonly animData: number;
+  readonly legIndex: number;
+  readonly legStartX: number;
+  readonly legEndX: number;
+  readonly legDuration: number;
+  readonly legProgress: number;
+  readonly affineRotationU16: number;
+  readonly xScale: 256;
+  readonly yScale: 256;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXCalls: 2;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "BounceRotateToSides" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+function bounceRotateToSidesFrameAtTick(
+  ticksSinceStart: number,
+  variant: (typeof BOUNCE_ROTATE_TO_SIDES_VARIANTS)["slow" | "smallSlow"],
+): BounceRotateToSidesFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  // `AddNewAnim`/`InitAnimData` defaults, followed in source order by the
+  // selected initializer's rotation and slow-table overrides.
+  const animDelay = 0;
+  const animRuns = 1;
+  const animSpeed = 0;
+  const data6 = variant.data6;
+  const animRotation = variant.rotation;
+  const animData = data6;
+  let data2 = 0;
+  let data3 = 0;
+  let data4 = 0;
+  let x2 = 0;
+  let y2 = 0;
+  let affineRotationU16 = 0;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    const startedAffine = data2 === 0;
+    const legIndex = data4;
+    const [legStartX, legEndX, legDuration] = BOUNCE_ROTATE_TO_SIDES_DATA[animData]![
+      legIndex
+    ]!;
+    const legProgress = data3;
+
+    // Both source-order `TryFlipX` calls are no-ops because the ordinary
+    // opponent-front task set `sDontFlip=TRUE` before dispatch.
+    if (data2 === 0) data2 += 1;
+
+    if (legDuration === 0) {
+      affineRotationU16 = 0;
+      x2 = 0;
+      y2 = 0;
+      return {
+        x2,
+        y2,
+        data2,
+        data3,
+        data4,
+        data6,
+        animRotation,
+        animDelay,
+        animRuns,
+        animSpeed,
+        animData,
+        legIndex,
+        legStartX,
+        legEndX,
+        legDuration,
+        legProgress,
+        affineRotationU16,
+        xScale: 256,
+        yScale: 256,
+        startedAffine,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      };
+    }
+
+    const deltaX = legEndX - legStartX;
+    // The interpolation is signed C arithmetic: division truncates toward
+    // zero, including the alternating negative-delta legs.
+    y2 = -gbaSin(Math.trunc((legProgress * 128) / legDuration), 10) + 0;
+    x2 = Math.trunc((deltaX * legProgress) / legDuration) + legStartX;
+    // The C destination is `u16`: perform signed division first, then wrap.
+    affineRotationU16 = Math.trunc((-(animRotation * x2)) / 8) & 0xffff;
+
+    if (legProgress === legDuration) {
+      data4 += 1;
+      data3 = 0;
+    } else {
+      data3 += 1;
+    }
+
+    if (tick === ticksSinceStart) {
+      return {
+        x2,
+        y2,
+        data2,
+        data3,
+        data4,
+        data6,
+        animRotation,
+        animDelay,
+        animRuns,
+        animSpeed,
+        animData,
+        legIndex,
+        legStartX,
+        legEndX,
+        legDuration,
+        legProgress,
+        affineRotationU16,
+        xScale: 256,
+        yScale: 256,
+        startedAffine,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        resetSpriteAfterAnim: false,
+        callback: "BounceRotateToSides",
+        affineMode: "double",
+      };
+    }
+  }
+
+  throw new Error("unreachable BounceRotateToSides reducer state");
+}
+
+/**
+ * Exact source-order normal `Anim_BounceRotateToSides_Slow` lifecycle:
+ * initializer -> normal rotation-4096 initializer -> shared callback. Active
+ * ticks are 0..166; tick 167 consumes the zero-duration sentinel and performs
+ * identity/x2/y2/`ResetSpriteAfterAnim`/`WaitAnimEnd` cleanup.
+ */
+export function bounceRotateToSidesSlowFrameAtTick(
+  ticksSinceStart: number,
+): BounceRotateToSidesFrame | null {
+  return bounceRotateToSidesFrameAtTick(ticksSinceStart, BOUNCE_ROTATE_TO_SIDES_VARIANTS.slow);
+}
+
 const GROW_VIBRATE_DURATION = 40;
 
 /**
@@ -1053,6 +1264,13 @@ export function verticalShakeFrameAtTick(ticksSinceStart: number): VerticalShake
 
 function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffset {
   switch (family) {
+    case "BOUNCE_ROTATE_TO_SIDES_SLOW": {
+      const terminal = bounceRotateToSidesSlowFrameAtTick(167);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_BounceRotateToSides_Slow did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
     case "GROW_VIBRATE": {
       const terminal = growVibrateFrameAtTick(41);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {

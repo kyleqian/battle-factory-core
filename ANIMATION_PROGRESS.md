@@ -1,5 +1,36 @@
 # Animation coverage
 
+## Front `ANIM_BOUNCE_ROTATE_TO_SIDES_SLOW` terminal family accepted (2026-08-01)
+
+**Verdict / counts:** rung 2k is exact for all **9 selector mappings / 9
+Factory-reachable species**, with **zero outside-Factory mappings**. VILEPLUME
+is the representative and LOUDRED the sibling; every prior accepted front
+family remains regression-pinned. Move coverage stays **107 exact / 0 partial /
+0 staged / 169 unsupported** and `ANIMATION_COVERAGE.json` is byte-identical at
+SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source boundary / evidence:** `pokemon_animation.c:911-939,1003-1077,
+1915-2001,3679-3699` proves the normal-front `sDontFlip=TRUE` path, full fast
+and slow tables, `AddNewAnim` defaults, slow `data6/data=1`, affine start, both
+`TryFlipX` calls, and all 167 active writes across the 16-tick first leg plus
+six 24-tick legs. The source-order reducer pins C signed truncation, u16
+rotation, x2/y2/affine writes, every leg/reset transition, and tick 167's
+identity/x2/y2/`ResetSpriteAfterAnim`/`WaitAnimEnd` cleanup. Source correction:
+normal `Slow -> Anim_BounceRotateToSides` uses rotation **4096**; **2048** is
+exclusive to the distinct `Small`/`SmallSlow` initializer. Fresh complete legal
+Scene-ON parties settle both species at x2=0/y2=0/animNum=1/
+`SpriteCallbackDummy`. Paired direct raw outputs are byte-identical with no EOF
+newline: VILEPLUME SHA-256
+`891884d74ae18521c3e4963b01d290653f988cdbe5045e87c3860bd847cfd2f2`,
+LOUDRED `f0dadc0c0711f44386e832a5f2ea862e967096fe27b56686bdc53ff210e9c3bc`.
+
+**Commands / next:** unchanged `dump-onix-front-idle-anim.py` via
+`tools/run-mgba-probe.py` twice per legal party; raw `cmp`; focused family/
+boundary-ratchet tests **85/85**; TypeScript no-emit and diff checks green;
+exactly one full `npm test` **567 files, 5783 passed + 1 skipped** and one
+`npm run build` green. The next generated-census/source-adjacent front family
+is **`ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL`** (8 Factory species).
+
 ## Front `ANIM_H_JUMPS_V_STRETCH` terminal family accepted (2026-08-01)
 
 **Verdict / counts:** rung 2j is exact for all **10 selector mappings / 10
