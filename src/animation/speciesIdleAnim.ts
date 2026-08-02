@@ -72,6 +72,7 @@ export type SpeciesFrontAnimFamily =
   | "H_SHAKE"
   | "H_SHAKE_SLOW"
   | "RAPID_H_HOPS"
+  | "ROTATE_UP_SLAM_DOWN"
   | "ROTATE_UP_TO_SIDES"
   | "SHRINK_GROW"
   | "SPIN"
@@ -128,6 +129,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "H_SHAKE",
   "H_SHAKE_SLOW",
   "RAPID_H_HOPS",
+  "ROTATE_UP_SLAM_DOWN",
   "ROTATE_UP_TO_SIDES",
   "SHRINK_GROW",
   "SPIN",
@@ -468,6 +470,26 @@ export const ROTATE_UP_TO_SIDES_FACTORY_FRONT_SPECIES: readonly string[] = Objec
 export const ROTATE_UP_TO_SIDES_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
   Object.freeze(
     ROTATE_UP_TO_SIDES_FRONT_SPECIES.filter(
+      (species) => !factoryFrontSpecies.has(species),
+    ),
+  );
+
+/** All source selector mappings for `ANIM_ROTATE_UP_SLAM_DOWN`. */
+export const ROTATE_UP_SLAM_DOWN_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_ROTATE_UP_SLAM_DOWN")
+    .map(([species]) => species),
+);
+
+/** The complete Factory-reachable rotate-up/slam-down family. */
+export const ROTATE_UP_SLAM_DOWN_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  ROTATE_UP_SLAM_DOWN_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no rotate-up/slam-down mappings outside the Factory pool. */
+export const ROTATE_UP_SLAM_DOWN_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
+  Object.freeze(
+    ROTATE_UP_SLAM_DOWN_FRONT_SPECIES.filter(
       (species) => !factoryFrontSpecies.has(species),
     ),
   );
@@ -1715,6 +1737,62 @@ export interface RotateUpToSidesFrame extends SpeciesIdleOffset {
   readonly affineMode: "double" | "normal";
 }
 
+/** Source selector 47's front-sprite affine initializer. */
+export const ROTATE_UP_SLAM_DOWN_INITIALIZER = Object.freeze({
+  selector: "ANIM_ROTATE_UP_SLAM_DOWN",
+  sourceId: 47,
+  centerToCornerVecXBeforeAffine: 32,
+  centerToCornerVecXAfterAffine: 64,
+  data6: -89,
+  data7: 128,
+  callbackInstalled: "RotateUpSlamDown_0",
+  callbackInvokedByInitializer: false,
+  handleStartAffineAnimCalls: 1,
+  normalFrontDontFlip: true,
+  affineMode: "double",
+  accepted: true,
+} as const);
+
+export interface RotateUpSlamDownFrame extends SpeciesIdleOffset {
+  readonly phase:
+    | "RotateUpSlamDown_0"
+    | "RotateUpSlamDown_1"
+    | "RotateUpSlamDown_2"
+    | "Anim_VerticalShake"
+    | "VerticalShake";
+  readonly data0: number;
+  readonly data2Before: number;
+  readonly data2: number;
+  readonly data3Before: number;
+  readonly data3: number;
+  readonly data6: number;
+  readonly data7Before: number;
+  readonly data7: number;
+  readonly centerToCornerVecX: number;
+  readonly affineRotationSigned: number | null;
+  readonly affineRotationU16: number | null;
+  readonly affineRotationWrites: readonly number[];
+  readonly affineWriteCount: 0 | 1 | 2;
+  readonly xScale: 256;
+  readonly yScale: 256;
+  readonly initializerCall: "Anim_RotateUpSlamDown" | "Anim_VerticalShake" | null;
+  readonly callbackInvokedByInitializer: boolean;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXBeforeMotion: boolean;
+  readonly tryFlipXAfterMotion: boolean;
+  readonly tryFlipXCalls: 0 | 2;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback:
+    | "RotateUpSlamDown_0"
+    | "RotateUpSlamDown_1"
+    | "RotateUpSlamDown_2"
+    | "Anim_VerticalShake"
+    | "VerticalShake"
+    | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
 export interface FlickerIncreasingFrame extends SpeciesIdleOffset {
   readonly data0: 0;
   readonly data2Before: number;
@@ -2319,6 +2397,156 @@ export function horizontalJumpsVerticalStretchTwiceFrameAtTick(
     ticksSinceStart,
     { animData: 1, animRuns: 2 },
   );
+}
+
+/**
+ * Source-order port of `Anim_RotateUpSlamDown` and its three callbacks
+ * (`pokemon_animation.c:2592-2645`). The selector-47 initializer starts the
+ * doubled affine OAM mode and installs `_0`; `_0` rotates up, `_1` pauses for
+ * 21 callback bodies, and `_2` slams back down before the exact
+ * `ResetSpriteAfterAnim` -> `Anim_VerticalShake` tail. The reducer keeps the
+ * initializer's first callback body at tick zero, matching the other front
+ * animation reducers while recording that the initializer itself does not
+ * invoke `_0`.
+ */
+export function rotateUpSlamDownFrameAtTick(
+  ticksSinceStart: number,
+  centerToCornerVecX = ROTATE_UP_SLAM_DOWN_INITIALIZER.centerToCornerVecXAfterAffine,
+): RotateUpSlamDownFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+  if (!Number.isInteger(centerToCornerVecX)) return null;
+
+  const data6 = toS16(-Math.trunc((14 * centerToCornerVecX) / 10));
+  let data0 = 0;
+  let data2 = 0;
+  let data3 = 0;
+  let data6State = data6;
+  let data7 = 128;
+  let x2 = 0;
+  let y2 = 0;
+  let centerToCorner = centerToCornerVecX;
+  let callback: RotateUpSlamDownFrame["callback"] = "RotateUpSlamDown_0";
+  let affineMode: RotateUpSlamDownFrame["affineMode"] = "double";
+  let lastFrame: RotateUpSlamDownFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (callback === "WaitAnimEnd") break;
+
+    const phase = callback;
+    const data2Before = data2;
+    const data3Before = data3;
+    const data7Before = data7;
+    const affineRotationWrites: number[] = [];
+    const initializerCall = tick === 0
+      ? "Anim_RotateUpSlamDown"
+      : callback === "Anim_VerticalShake"
+      ? "Anim_VerticalShake"
+      : null;
+    const callbackInvokedByInitializer = callback === "Anim_VerticalShake";
+    const startedAffine = tick === 0;
+    let affineRotationSigned: number | null = null;
+    let affineRotationU16: number | null = null;
+    let affineWriteCount: 0 | 1 | 2 = 0;
+    let tryFlipXBeforeMotion = false;
+    let tryFlipXAfterMotion = false;
+    let resetSpriteAfterAnim = false;
+
+    if (phase === "RotateUpSlamDown_0") {
+      tryFlipXBeforeMotion = true;
+      data7 = toS16(data7 - 1);
+      x2 = toS16(data6State + gbaCos(data7, data6State));
+      y2 = toS16(-gbaSin(data7, data6State));
+      affineRotationSigned = (data7 - 128) << 8;
+      affineRotationU16 = affineRotationSigned & 0xffff;
+      affineRotationWrites.push(affineRotationU16);
+      if (data7 <= 120) {
+        data7 = 120;
+        data3 = 0;
+        callback = "RotateUpSlamDown_1";
+      }
+      tryFlipXAfterMotion = true;
+    } else if (phase === "RotateUpSlamDown_1") {
+      if (data3 === 20) {
+        callback = "RotateUpSlamDown_2";
+        data3 = 0;
+      }
+      data3 = toS16(data3 + 1);
+    } else if (phase === "RotateUpSlamDown_2") {
+      tryFlipXBeforeMotion = true;
+      data7 = toS16(data7 + 2);
+      x2 = toS16(data6State + gbaCos(data7, data6State));
+      y2 = toS16(-gbaSin(data7, data6State));
+      affineRotationSigned = (data7 - 128) << 8;
+      affineRotationU16 = affineRotationSigned & 0xffff;
+      affineRotationWrites.push(affineRotationU16);
+      if (data7 >= 128) {
+        x2 = 0;
+        y2 = 0;
+        affineRotationSigned = 0;
+        affineRotationU16 = 0;
+        affineRotationWrites.push(0);
+        data2 = 0;
+        centerToCorner = Math.trunc(centerToCornerVecX / 2);
+        affineMode = "normal";
+        data2 = toS16(data2 + 1);
+        resetSpriteAfterAnim = true;
+        callback = "Anim_VerticalShake";
+      }
+      tryFlipXAfterMotion = true;
+    } else if (phase === "Anim_VerticalShake") {
+      data0 = VERTICAL_SHAKE_ACCUMULATOR_STEP;
+      const counter = data2;
+      y2 = gbaSin(counter % 256, 3);
+      data2 = toS16(data2 + VERTICAL_SHAKE_ACCUMULATOR_STEP);
+      callback = "VerticalShake";
+    } else {
+      data0 = VERTICAL_SHAKE_ACCUMULATOR_STEP;
+      const counter = data2;
+      if (counter > VERTICAL_SHAKE_ACCUMULATOR_LIMIT) {
+        y2 = 0;
+        data2 = toS16(data2 + VERTICAL_SHAKE_ACCUMULATOR_STEP);
+        callback = "WaitAnimEnd";
+      } else {
+        y2 = gbaSin(counter % 256, 3);
+        data2 = toS16(data2 + VERTICAL_SHAKE_ACCUMULATOR_STEP);
+      }
+    }
+
+    affineWriteCount = affineRotationWrites.length as 0 | 1 | 2;
+    lastFrame = {
+      x2,
+      y2,
+      phase,
+      data0,
+      data2Before,
+      data2,
+      data3Before,
+      data3,
+      data6: data6State,
+      data7Before,
+      data7,
+      centerToCornerVecX: centerToCorner,
+      affineRotationSigned,
+      affineRotationU16,
+      affineRotationWrites,
+      affineWriteCount,
+      xScale: 256,
+      yScale: 256,
+      initializerCall,
+      callbackInvokedByInitializer,
+      startedAffine,
+      normalFrontDontFlip: true,
+      tryFlipXBeforeMotion,
+      tryFlipXAfterMotion,
+      tryFlipXCalls: tryFlipXBeforeMotion ? 2 : 0,
+      resetSpriteAfterAnim,
+      callback,
+      affineMode,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable RotateUpSlamDown reducer state");
+  return lastFrame;
 }
 
 /**
@@ -5904,6 +6132,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
         last = offset;
         tick += 1;
       }
+    }
+    case "ROTATE_UP_SLAM_DOWN": {
+      const terminal = rotateUpSlamDownFrameAtTick(72);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_RotateUpSlamDown did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
     }
     case "ROTATE_UP_TO_SIDES": {
       const terminal = rotateUpToSidesFrameAtTick(32);

@@ -773,7 +773,7 @@ describe("speciesIdleAnim", () => {
     });
 
     it("returns null for generated species whose front-anim family isn't ported", () => {
-      expect(speciesFrontIdleRestOffset("VENUSAUR")).toBeNull();
+      expect(speciesFrontIdleRestOffset("PIDGEOT")).toBeNull();
     });
 
     it("dispatches the complete generated 32-species V_STRETCH family", () => {
