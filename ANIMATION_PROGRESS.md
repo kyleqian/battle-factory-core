@@ -1,5 +1,37 @@
 # Animation coverage
 
+## Front `ANIM_H_SHAKE_SLOW` family accepted (2026-08-01)
+
+**State:** exact for the complete generated census: **3 selector mappings / 3
+Factory-reachable species / 0 outside-Factory mappings** — DUGTRIO
+(representative), GOLDUCK, and DODUO. The accepted normal and new slow entry
+points share the source-derived `HorizontalShake` reducer; normal remains
+regression-pinned. No adjacent selector, barrier, per-species/tick branch,
+baked frame, engine-boundary widening, or move promotion was added. Coverage
+remains **107 exact / 0 partial / 0 staged / 169 unsupported** and
+`ANIMATION_COVERAGE.json` remains SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Did:** `pokemon_animation.c:1343-1366,3717-3722,5540-5544` and `trig.c`
+pin source-order data0=30/data7=3 initialization, call-before-callback-install
+ordering, signed GBA sine, strict counter `>2304` termination, x2=0 cleanup,
+and `WaitAnimEnd` / `SpriteCallbackDummy`. Every active callback is exhaustive:
+ticks 0..76 cover counters 0..2280 by 30; tick 77 alone observes 2310, clears
+x2, increments data2 to 2340, and installs stable `WaitAnimEnd`. Fresh complete
+legal challenge-0 Scene-ON parties settle all three at x2=0/y2=0, animNum=1,
+`SpriteCallbackDummy`: DUGTRIO species 51 / animCmdIndex 9, paired **372-byte**
+receipts SHA-256 `1abe9c26e063a2b15db3f3f6f832f458649075a302c2da25fd714807edd9cc94`;
+GOLDUCK species 55 / index 4, `4b67a65f258a3006b448e348aa6713c0376b6453a95ff35ca708041bd6ba2b14`;
+DODUO species 84 / index 4, `2ef5f1430ae2ffc7666a33ea21b3b9239531b3ba603d386039b29c65f6037abb`.
+
+**Next / Notes:** supervisor selects the next generated source-ranked family;
+`ANIM_H_SHAKE_FAST` and vertical variants remain untouched. The unchanged
+generic probe ran only through `tools/run-mgba-probe.py`, twice fresh per
+party; all three raw pairs passed `cmp`, and focused species-idle/evidence plus
+both ratchets are **321/321** green. `npx tsc --noEmit` and coverage/hash checks
+are green; full `npm test` is **590 files / 6,121 passed / 1 skipped**, and the
+production build is green (**549 modules transformed**).
+
 ## Front `ANIM_ZIGZAG_SLOW` family accepted (2026-08-01)
 
 **State / verdict:** exact for the complete generated selector census: all
