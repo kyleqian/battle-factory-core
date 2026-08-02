@@ -225,6 +225,19 @@ Clean-parent `fbd575a9` (`ad34442f^`) app replays held all requested turn-12,
 OFF turn-13 reopen/reader, and legacy turn-13 insurance windows byte-identical
 (**1,141/1,141 raw RGBA captures**). Turns 9–12 are now all retired; #39
 remains open for turns 1–4, `opponentFaintDismissElapsed`, and dispatcher debt.
+**Turn-1 receipt checkpoint (2026-08-01, `210d96af`; not retired):** the
+typed handoff proof owns canonical PP **[9,20,20,10]**, persisted slot 0, HP
+**117/101**, settled/ready facts, and the runtime-relative
+`HandleInputChooseAction` → `DoBounceEffect` epoch. A full candidate consumer
+migration was deliberately not landed: clean-parent replay held all turn-1
+primary OFF windows (**669/669**) and `turn2-dragonbreath-off` (**237/237**),
+but `turn2-endeavor-off` differed in **47/256** captures, first at frame
+**2901** (**6,982 raw RGBA bytes**) and continuing through 2947
+(**1,115/1,162** total exact). The candidate was discarded, so
+`turn1Resolved` remains live. Reopen from the proof checkpoint only with a
+fresh source/evidence design for the turn-2 submenu epoch selection; do not
+tune the mismatching frames or re-anchor downstream helpers to an old
+turn-specific delay.
 Rank 4 is **fully retired** (2026-07-31,
 all 5 slices): `174cc388` ROCK_SLIDE tails; `441ddf83`+`6aba6662`
 turn-7/8 FEATHER_DANCE staged+flipped; `0769ccc6` stat-fall banner

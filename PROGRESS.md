@@ -13,6 +13,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 839 — [bounded MAIN worker, 2026-08-01] turn-1 retirement stopped at proof checkpoint
+
+- **State:** `210d96af` remains the last green code checkpoint; its immutable
+  turn-1 receipt is present, but `turn1Resolved` deliberately remains live.
+  A complete candidate consumer migration was discarded after the required
+  clean-parent pixel differential was non-identical.
+- **Did:** exercised the core/predecessor, generic HP, slot-0 PP, and turn-2
+  submenu/kickoff bounce consumer families against the new handoff without
+  landing them. Restored the proof-only tree rather than tuning the reader
+  mismatch or retaining a partial migration.
+- **Next:** take a fresh, separately scoped evidence/design step from
+  `210d96af` for the turn-2 submenu epoch selection; do not re-anchor it to an
+  old turn-specific delay and do not continue this failed migration.
+- **Notes:** clean-parent `210d96af` replay held all four turn-1 primary OFF
+  traces (**669/669**) and `turn2-dragonbreath-off` (**237/237**) byte-exact.
+  `turn2-endeavor-off` differed in **47/256** captures: first frame **2901**
+  (**6,982 raw RGBA bytes**), continuing through 2947, so only **1,115/1,162**
+  captures matched. Focused Tier-1 **453/453** (7 files), `npx tsc --noEmit`,
+  and `npm run build` are green; full `npm test` was intentionally not run.
+
 ## 838 — [bounded MAIN worker, 2026-08-01] turn-1 handoff proof checkpoint
 
 - **State:** immutable receipt proof is green; consumer migration has not
@@ -49,22 +69,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   suite + wind-down before 20:27.
 - **Notes:** worker entry numbering collided once (834); supervisor entries
   now offset. Ledger kept at 3 entries.
-
-## 836 — [bounded MAIN worker, 2026-08-01] turn-12 predecessor handoff retired
-
-- **State:** proof `ad34442f`, implementation `271d7c03`; the production and
-  test census has no `turn12Resolved` reference.
-- **Did:** published the immutable completed-turn-12/next-command handoff with
-  canonical PP **[0,19,19,10]**, persisted slot 0, and settled/ready facts;
-  moved turn-13 dispatch, slot-0 PP reconstruction, and the following reopen
-  guard onto it. The turn-12 ROCK_SLIDE miss consumes its tenth PP; this owner
-  is deliberately separate from the post-DRAGON_BREATH turn-13 handoff.
-- **Next:** #39 remains only for turns 1–4, `opponentFaintDismissElapsed`, and
-  dispatcher debt; do not batch any of that into this completed slice.
-- **Notes:** clean-parent `fbd575a9` (`ad34442f^`) differential app replay is
-  byte-identical for both turn-12 primary traces (503 captures), both derived
-  OFF turn-13 reopen/reader traces (151 + 104), and legacy turn-13 insurance
-  (141 + 242): **1,141/1,141 raw RGBA captures**. Focused Tier-1 tests
-  (**9 files, 465 passed**, including the ratchet), `npx tsc --noEmit`, and
-  `npm run build` are green; the full suite was intentionally not run per this
-  bounded-worker scope.
