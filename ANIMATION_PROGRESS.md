@@ -4,6 +4,43 @@
 > in `ANIMATION_SUPERVISOR.md` ("The loop, adjusted") and `SUPERVISOR.md`
 > ("Which pair — the routing rubric"), so ledger rotation cannot lose it.
 
+## Front `ANIM_GLOW_BLACK` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **2 mappings / 2
+Factory-reachable species / 0 outside-Factory mappings** — GASTLY and SABLEYE.
+Only source ID **21** is promoted; adjacent glow selectors, back routing, move
+coverage, battle state, facility progression, and engine interfaces are
+unchanged. Coverage remains **107/276 exact, 0 partial, 0 staged, 169
+unsupported**; `ANIMATION_COVERAGE.json` remains SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Did / evidence:** `pokemon_animation.c:911-939,1539-1560,5540-5544`,
+`pokemon_animation.h:61`, `pokemon.c:1498,1703`, `sprite.h:215-217`,
+`palette.h:24`, `gba/types.h:70`, and `constants/rgb.h:15` pin the task-zeroed
+signed-s16 registers, direct callback install, 4-bit OBJ palette selection,
+black blend, source-order strict guard, and terminal palette restoration.
+Dense Tier-1 coverage exhausts active callbacks **0..128**, including every
+sine coefficient and palette write, callback **129** restore/`WaitAnimEnd`,
+stable terminal, palette-slot masking, all phase boundaries, and invalid
+inputs; orange and blue glow controls remain unsupported. Fresh complete legal
+challenge-0 Scene-ON parties were probed twice per species only through
+`tools/run-mgba-probe.py`; each raw pair is byte-identical and settles battler
+1 at x2=0/y2=0/`SpriteCallbackDummy`: GASTLY **372 B**, animNum 1/cmd 2/data2
+92, `64e09ca6ce19b244f3f34b0ddfcd1a4ecd84327d3e7fae3de805a85590f3f637`;
+SABLEYE **373 B**, animNum 1/cmd 4/data2 322,
+`951a7b12ebc5d211fe26a7112cbf7b81f5890532426fc47cba82a17a13ca80a1`.
+
+**Next / Notes:** focused family/evidence plus both ratchets are **20/20**;
+regression-inclusive focused gates are **344/344**. `npx tsc --noEmit`,
+`npm run animation:coverage`, full `npm test` (**613 files / 6,282 passed / 1
+skipped**), and `npm run build` (**552 modules transformed**) are green.
+Commits: `6b5e7953` (reducer/census/dense lifecycle), `a3997e10`
+(fixtures/source/receipt evidence), and `e0c41461` (signed-width source pins).
+The next source-ranked unsupported generated Factory-front family is
+**`ANIM_RISING_WOBBLE`** (source ID **24**; **3 mappings / 2 Factory / 1
+outside**) — SPEAROW and SKIPLOOM in Factory, CELEBI outside. No move status is
+promoted for send-out coverage.
+
 ## Front `ANIM_CIRCULAR_VIBRATE` family accepted (2026-08-02)
 
 **State:** exact for the complete generated selector census: **2 mappings / 2
