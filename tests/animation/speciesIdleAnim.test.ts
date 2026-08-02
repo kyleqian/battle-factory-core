@@ -26,6 +26,11 @@ import {
   CIRCLE_INTO_BG_FACTORY_FRONT_SPECIES,
   CIRCLE_INTO_BG_FRONT_SPECIES,
   CIRCLE_INTO_BG_OUTSIDE_FACTORY_FRONT_SPECIES,
+  circularVibrateFrameAtTick,
+  CIRCULAR_VIBRATE_ENTRY,
+  CIRCULAR_VIBRATE_FACTORY_FRONT_SPECIES,
+  CIRCULAR_VIBRATE_FRONT_SPECIES,
+  CIRCULAR_VIBRATE_OUTSIDE_FACTORY_FRONT_SPECIES,
   fourPetalFrameAtTick,
   FOUR_PETAL_FACTORY_FRONT_SPECIES,
   FOUR_PETAL_FRONT_SPECIES,
@@ -56,6 +61,11 @@ import {
   FLICKER_INCREASING_FACTORY_FRONT_SPECIES,
   FLICKER_INCREASING_FRONT_SPECIES,
   FLICKER_INCREASING_OUTSIDE_FACTORY_FRONT_SPECIES,
+  figure8FrameAtTick,
+  FIGURE_8_FACTORY_FRONT_SPECIES,
+  FIGURE_8_FRONT_SPECIES,
+  FIGURE_8_INITIALIZER,
+  FIGURE_8_OUTSIDE_FACTORY_FRONT_SPECIES,
   growInStagesFrameAtTick,
   GROW_IN_STAGES_FACTORY_FRONT_SPECIES,
   GROW_IN_STAGES_FRONT_SPECIES,
@@ -168,8 +178,12 @@ import {
   VERTICAL_SLIDE_WOBBLE_INITIALIZERS,
   VERTICAL_SLIDE_INITIALIZERS,
   YELLOW_FLASH_DATA,
+  zigzagFastFrameAtTick,
   zigzagSlowFrameAtTick,
   ZIGZAG_DATA,
+  ZIGZAG_FAST_FACTORY_FRONT_SPECIES,
+  ZIGZAG_FAST_FRONT_SPECIES,
+  ZIGZAG_FAST_OUTSIDE_FACTORY_FRONT_SPECIES,
   ZIGZAG_SLOW_FACTORY_FRONT_SPECIES,
   ZIGZAG_SLOW_FRONT_SPECIES,
   ZIGZAG_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES,
@@ -754,7 +768,6 @@ describe("speciesIdleAnim", () => {
     });
 
     it("returns null for generated species whose front-anim family isn't ported", () => {
-      expect(speciesFrontIdleRestOffset("CHARMELEON")).toBeNull();
       expect(speciesFrontIdleRestOffset("VENUSAUR")).toBeNull();
     });
 
@@ -3742,6 +3755,66 @@ describe("speciesIdleAnim", () => {
     });
   });
 
+  describe("zigzagFastFrameAtTick (fast source lifecycle)", () => {
+    it("derives the exhaustive three-species Factory census", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_ZIGZAG_FAST")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(ZIGZAG_FAST_FRONT_SPECIES).toEqual(generated);
+      expect(generated).toEqual(["UNOWN", "GLALIE", "DUSKULL"]);
+      expect(ZIGZAG_FAST_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(ZIGZAG_FAST_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(ZIGZAG_FAST_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of generated) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins the immediate initializer, every shared callback, edge legs, and terminal tick 54", () => {
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
+      expect(ZIGZAG_DATA).toEqual([
+        [-1, -1, 6], [2, 0, 6], [-2, 2, 6], [2, 0, 6], [-2, -2, 6],
+        [2, 0, 6], [-2, 2, 6], [2, 0, 6], [-1, -1, 6], [0, 0, 0],
+      ]);
+      expect(zigzagFastFrameAtTick(-1)).toBeNull();
+      expect(zigzagFastFrameAtTick(0)).toEqual({
+        x2: -1, y2: -1, data0: 0, data2: 1, data3: 0, moved: true,
+        initializerCalled: true, normalFrontDontFlip: true, tryFlipXCalls: 2,
+        callback: "Zigzag",
+      });
+      for (let tick = 0; tick < 54; tick += 1) {
+        const frame = zigzagFastFrameAtTick(tick)!;
+        expect(frame.callback, `tick ${tick}`).toBe("Zigzag");
+        expect(frame.moved, `tick ${tick}`).toBe(true);
+        expect(frame.tryFlipXCalls, `tick ${tick}`).toBe(2);
+        expect(frame.data0, `tick ${tick}`).toBe(0);
+        expect(frame.initializerCalled, `tick ${tick}`).toBe(tick === 0);
+      }
+      expect(zigzagFastFrameAtTick(54)).toEqual({
+        x2: 0, y2: 0, data0: 0, data2: 0, data3: 9, moved: false,
+        initializerCalled: false, normalFrontDontFlip: true, tryFlipXCalls: 1,
+        callback: "WaitAnimEnd",
+      });
+      expect(zigzagFastFrameAtTick(200)).toEqual({
+        x2: 0, y2: 0, data0: 0, data2: 0, data3: 9, moved: false,
+        initializerCalled: false, normalFrontDontFlip: true, tryFlipXCalls: 0,
+        callback: "WaitAnimEnd",
+      });
+      expect([5, 6, 11, 12, 53].map((tick) => [tick, zigzagFastFrameAtTick(tick)])).toEqual([
+        [5, expect.objectContaining({ x2: -6, y2: -6, data2: 6, data3: 0 })],
+        [6, expect.objectContaining({ x2: -4, y2: -6, data2: 1, data3: 1 })],
+        [11, expect.objectContaining({ x2: 6, y2: -6, data2: 6, data3: 1 })],
+        [12, expect.objectContaining({ x2: 4, y2: -4, data2: 1, data3: 2 })],
+        [53, expect.objectContaining({ x2: 0, y2: 0, data2: 6, data3: 8 })],
+      ]);
+    });
+  });
+
   describe("verticalShakeTwiceFrameAtTick (normal source lifecycle)", () => {
     it("derives all 8 selector mappings as Factory-reachable with no outside mappings", () => {
       const generated = Object.entries(selectorTables.frontAnimIds.species)
@@ -5170,6 +5243,269 @@ describe("speciesIdleAnim", () => {
         "PIKACHU", "RAIKOU",
       ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("circularVibrateFrameAtTick (source lifecycle)", () => {
+    it("derives exactly both Factory-reachable selector mappings", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_CIRCULAR_VIBRATE")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(CIRCULAR_VIBRATE_FRONT_SPECIES).toEqual(generated);
+      expect(CIRCULAR_VIBRATE_FRONT_SPECIES).toEqual(["RAPIDASH", "ABSOL"]);
+      expect(CIRCULAR_VIBRATE_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(CIRCULAR_VIBRATE_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(CIRCULAR_VIBRATE_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of CIRCULAR_VIBRATE_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins task initialization before the direct callback begins", () => {
+      expect(CIRCULAR_VIBRATE_ENTRY).toEqual({
+        selector: "ANIM_CIRCULAR_VIBRATE",
+        sourceId: 17,
+        taskZeroedData2: true,
+        callbackInstalled: "Anim_CircularVibrate",
+        callbackInvokedByInitializer: false,
+        normalFrontDontFlip: true,
+        accepted: true,
+      });
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
+      expect(circularVibrateFrameAtTick(0)).toMatchObject({
+        data2Before: 0,
+        data2: 9,
+        amplitudeIndex: 0,
+        amplitude: 0,
+        index: 0,
+        sign: 1,
+        callback: "Anim_CircularVibrate",
+      });
+    });
+
+    it("pins all active callbacks, source sine/cosine order, and parity sign alternation", () => {
+      const active = Array.from({ length: 57 }, (_, tick) => {
+        const data2Before = tick * 9;
+        const amplitudeIndex = Math.trunc(data2Before / 4);
+        const amplitude = Math.floor((8 * GBA_SINE_TABLE_256[amplitudeIndex]!) / 256);
+        const index = data2Before % 256;
+        const sign = data2Before % 2 === 0 ? 1 : -1;
+        // GBA s16 stores a single zero representation; normalize JS -0 after
+        // the odd-parity zero-amplitude callbacks before comparing writes.
+        const motionY2 = Math.floor((amplitude * GBA_SINE_TABLE_256[index]!) / 256) * sign + 0;
+        const motionX2 = Math.floor((amplitude * GBA_SINE_TABLE_256[(index + 64) & 0xff]!) / 256) * sign + 0;
+        const frame = circularVibrateFrameAtTick(tick)!;
+        expect(frame, `tick ${tick}`).toEqual({
+          x2: motionX2,
+          y2: motionY2,
+          data2Before,
+          data2: data2Before + 9,
+          amplitudeIndex,
+          amplitude,
+          index,
+          sign,
+          motionX2,
+          motionY2,
+          normalFrontDontFlip: true,
+          resetPosition: false,
+          callback: "Anim_CircularVibrate",
+        });
+        return frame;
+      });
+      expect(active.map(({ sign }) => sign)).toEqual(
+        Array.from({ length: 57 }, (_, tick) => tick % 2 === 0 ? 1 : -1),
+      );
+      expect([5, 6, 8, 9, 10, 20, 28, 35, 42, 49].map((tick) => [
+        tick,
+        active[tick]!.data2Before,
+        active[tick]!.amplitude,
+        active[tick]!.x2,
+        active[tick]!.y2,
+      ])).toEqual([
+        [5, 45, 2, 0, -1],
+        [6, 54, 2, 0, 1],
+        [8, 72, 3, -1, 2],
+        [9, 81, 3, 2, -2],
+        [10, 90, 4, -3, 3],
+        [20, 180, 7, -3, -7],
+        [28, 252, 7, 6, -1],
+        [35, 315, 7, 0, -6],
+        [42, 378, 5, -5, 0],
+        [49, 441, 3, 1, 3],
+      ]);
+    });
+
+    it("pins the strict terminal sentinel, position reset, stable handoff, and invalid ticks", () => {
+      expect(circularVibrateFrameAtTick(56)).toMatchObject({
+        data2Before: 504,
+        data2: 513,
+        amplitudeIndex: 126,
+        amplitude: 0,
+        index: 248,
+        sign: 1,
+        resetPosition: false,
+        callback: "Anim_CircularVibrate",
+      });
+      expect(circularVibrateFrameAtTick(57)).toEqual({
+        x2: 0,
+        y2: 0,
+        data2Before: 513,
+        data2: 522,
+        amplitudeIndex: null,
+        amplitude: null,
+        index: null,
+        sign: null,
+        motionX2: null,
+        motionY2: null,
+        normalFrontDontFlip: true,
+        resetPosition: true,
+        callback: "WaitAnimEnd",
+      });
+      expect(circularVibrateFrameAtTick(58)).toEqual(circularVibrateFrameAtTick(57));
+      expect(circularVibrateFrameAtTick(4096)).toEqual(circularVibrateFrameAtTick(57));
+      for (const invalid of [-1, 0.5, Number.NaN, Number.POSITIVE_INFINITY]) {
+        expect(circularVibrateFrameAtTick(invalid)).toBeNull();
+      }
+    });
+  });
+
+  describe("figure8FrameAtTick (source lifecycle)", () => {
+    it("derives exactly all 3 selector mappings as Factory-reachable with zero outside", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_FIGURE_8")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(FIGURE_8_FRONT_SPECIES).toEqual(generated);
+      expect(FIGURE_8_FRONT_SPECIES).toEqual(["RATICATE", "FEAROW", "YANMA"]);
+      expect(FIGURE_8_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(FIGURE_8_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(FIGURE_8_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of FIGURE_8_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins the initializer-only affine start, zeroes, and callback install", () => {
+      expect(FIGURE_8_INITIALIZER).toEqual({
+        selector: "ANIM_FIGURE_8",
+        sourceId: 43,
+        handleStartAffineAnimCalls: 1,
+        data6: 0,
+        data7: 0,
+        callbackInstalled: "Figure8",
+        figure8BodyCalls: 0,
+        normalFrontDontFlip: true,
+        affineMode: "double",
+        accepted: true,
+      });
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
+      expect(figure8FrameAtTick(0)).toMatchObject({ data6Before: 0, data6: 4 });
+    });
+
+    it("pins all callbacks 0..63, increment-before-sines, both flip no-ops, and writes", () => {
+      const frames = Array.from({ length: 64 }, (_, tick) => {
+        const frame = figure8FrameAtTick(tick)!;
+        const data6 = (tick + 1) * 4;
+        const xSine = Math.floor((16 * GBA_SINE_TABLE_256[data6 & 0xff]!) / 256);
+        const yIndex = (data6 * 2) & 0xff;
+        const ySine = Math.floor((8 * GBA_SINE_TABLE_256[yIndex]!) / 256);
+        expect(frame, `tick ${tick}`).toMatchObject({
+          data6Before: tick * 4,
+          data6,
+          xSineIndex: data6,
+          ySineIndex: yIndex,
+          xSine,
+          ySine,
+          motionX2: xSine === 0 ? 0 : -xSine,
+          motionY2: ySine === 0 ? 0 : -ySine,
+          normalFrontDontFlip: true,
+          tryFlipXBeforeMotion: true,
+          tryFlipXAfterTerminalCheck: true,
+          tryFlipXCalls: 2,
+        });
+        return frame;
+      });
+
+      expect(frames.map(({ affineWriteCount }) => affineWriteCount).reduce<number>(
+        (sum, count) => sum + count, 0,
+      )).toBe(3);
+      expect(frames.flatMap(({ affineWrites }) => affineWrites)).toEqual([
+        {
+          source: "phase-negative",
+          xScaleSigned: -256,
+          xScaleU16: 0xff00,
+          yScaleSigned: 256,
+          yScaleU16: 0x0100,
+          rotationSigned: 0,
+          rotationU16: 0,
+        },
+        {
+          source: "phase-identity",
+          xScaleSigned: 256,
+          xScaleU16: 0x0100,
+          yScaleSigned: 256,
+          yScaleU16: 0x0100,
+          rotationSigned: 0,
+          rotationU16: 0,
+        },
+        {
+          source: "terminal-identity",
+          xScaleSigned: 256,
+          xScaleU16: 0x0100,
+          yScaleSigned: 256,
+          yScaleU16: 0x0100,
+          rotationSigned: 0,
+          rotationU16: 0,
+        },
+      ]);
+    });
+
+    it("pins strict phase edges, same-callback terminal reset, stable rest, and invalid ticks", () => {
+      expect(figure8FrameAtTick(15)).toMatchObject({
+        data6: 64, data7: 0, affineWriteCount: 0, affineXScaleSigned: 256,
+      });
+      expect(figure8FrameAtTick(16)).toMatchObject({
+        data6: 68, data7Before: 0, data7: 1, affineXScaleSigned: -256,
+        affineXScaleU16: 0xff00, affineWriteCount: 1,
+      });
+      expect(figure8FrameAtTick(47)).toMatchObject({
+        data6: 192, data7: 1, affineWriteCount: 0, affineXScaleSigned: -256,
+      });
+      expect(figure8FrameAtTick(48)).toMatchObject({
+        data6: 196, data7Before: 1, data7: 2, affineXScaleSigned: 256,
+        affineXScaleU16: 0x0100, affineWriteCount: 1,
+      });
+      expect(figure8FrameAtTick(62)).toMatchObject({
+        data6: 252, callback: "Figure8", affineMode: "double",
+        resetSpriteAfterAnim: false,
+      });
+      expect(figure8FrameAtTick(63)).toMatchObject({
+        x2: 0,
+        y2: 0,
+        data6Before: 252,
+        data6: 256,
+        data7: 2,
+        affineWriteCount: 1,
+        affineXScaleSigned: 256,
+        affineXScaleU16: 0x0100,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      });
+      expect(figure8FrameAtTick(64)).toEqual(figure8FrameAtTick(63));
+      expect(figure8FrameAtTick(4096)).toEqual(figure8FrameAtTick(63));
+      for (const invalid of [-1, 0.5, Number.NaN, Number.POSITIVE_INFINITY]) {
+        expect(figure8FrameAtTick(invalid)).toBeNull();
       }
     });
   });

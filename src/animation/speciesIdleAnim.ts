@@ -42,12 +42,14 @@ import selectorTables from "../data/gen/send-out-anim-selector-tables.json" with
  */
 
 export type SpeciesFrontAnimFamily =
+  | "BACK_AND_LUNGE"
   | "BOUNCE_ROTATE_TO_SIDES"
   | "BOUNCE_ROTATE_TO_SIDES_SMALL"
   | "BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW"
   | "BOUNCE_ROTATE_TO_SIDES_SLOW"
   | "CIRCLE_INTO_BG"
   | "CIRCLE_C_CLOCKWISE_SLOW"
+  | "CIRCULAR_VIBRATE"
   | "CIRCULAR_STRETCH_TWICE"
   | "FOUR_PETAL"
   | "GROW_VIBRATE"
@@ -55,6 +57,7 @@ export type SpeciesFrontAnimFamily =
   | "LUNGE_GROW"
   | "FLASH_YELLOW"
   | "FLICKER_INCREASING"
+  | "FIGURE_8"
   | "H_JUMPS"
   | "H_SLIDE"
   | "H_SLIDE_SLOW"
@@ -86,16 +89,19 @@ export type SpeciesFrontAnimFamily =
   | "V_STRETCH"
   | "V_SHAKE"
   | "V_SHAKE_TWICE"
+  | "ZIGZAG_FAST"
   | "ZIGZAG_SLOW";
 
 const FRONT_ANIM_PREFIX = "ANIM_";
 const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
+  "BACK_AND_LUNGE",
   "BOUNCE_ROTATE_TO_SIDES",
   "BOUNCE_ROTATE_TO_SIDES_SMALL",
   "BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW",
   "BOUNCE_ROTATE_TO_SIDES_SLOW",
   "CIRCLE_INTO_BG",
   "CIRCLE_C_CLOCKWISE_SLOW",
+  "CIRCULAR_VIBRATE",
   "CIRCULAR_STRETCH_TWICE",
   "FOUR_PETAL",
   "GROW_VIBRATE",
@@ -103,6 +109,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "LUNGE_GROW",
   "FLASH_YELLOW",
   "FLICKER_INCREASING",
+  "FIGURE_8",
   "H_JUMPS",
   "H_SLIDE",
   "H_SLIDE_SLOW",
@@ -134,6 +141,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "V_STRETCH",
   "V_SHAKE",
   "V_SHAKE_TWICE",
+  "ZIGZAG_FAST",
   "ZIGZAG_SLOW",
 ]);
 
@@ -581,6 +589,23 @@ export const FOUR_PETAL_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Objec
   FOUR_PETAL_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
+/** All source selector mappings for `ANIM_ZIGZAG_FAST`. */
+export const ZIGZAG_FAST_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_ZIGZAG_FAST")
+    .map(([species]) => species),
+);
+
+/** Every fast-zigzag mapping is reachable through Factory rentals. */
+export const ZIGZAG_FAST_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  ZIGZAG_FAST_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no fast-zigzag mappings outside the Factory pool. */
+export const ZIGZAG_FAST_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  ZIGZAG_FAST_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
 /** All source selector mappings for `ANIM_ZIGZAG_SLOW`. */
 export const ZIGZAG_SLOW_FRONT_SPECIES: readonly string[] = Object.freeze(
   Object.entries(generatedFrontAnimIds)
@@ -832,6 +857,57 @@ export const H_SLIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
 /** There are no normal horizontal-slide mappings outside the Factory rental pool. */
 export const H_SLIDE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   H_SLIDE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All source selector mappings for `ANIM_FIGURE_8`. */
+export const FIGURE_8_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_FIGURE_8")
+    .map(([species]) => species),
+);
+
+/** Every Figure8 mapping is reachable through Factory rentals. */
+export const FIGURE_8_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  FIGURE_8_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no Figure8 mappings outside the Factory rental pool. */
+export const FIGURE_8_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  FIGURE_8_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All source selector mappings for `ANIM_CIRCULAR_VIBRATE`. */
+export const CIRCULAR_VIBRATE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_CIRCULAR_VIBRATE")
+    .map(([species]) => species),
+);
+
+/** Every circular-vibrate mapping is reachable through Factory rentals. */
+export const CIRCULAR_VIBRATE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  CIRCULAR_VIBRATE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no circular-vibrate mappings outside the Factory pool. */
+export const CIRCULAR_VIBRATE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  CIRCULAR_VIBRATE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All source selector mappings for `ANIM_BACK_AND_LUNGE`. */
+export const BACK_AND_LUNGE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_BACK_AND_LUNGE")
+    .map(([species]) => species),
+);
+
+/** Every back-and-lunge mapping is reachable through Factory rentals. */
+export const BACK_AND_LUNGE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  BACK_AND_LUNGE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no back-and-lunge mappings outside the Factory rental pool. */
+export const BACK_AND_LUNGE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  BACK_AND_LUNGE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /** All 7 source selector mappings for the slow `ANIM_H_SLIDE_SLOW`. */
@@ -2918,6 +2994,102 @@ export const ZIGZAG_DATA: readonly (readonly [number, number, number])[] = Objec
   [2, 0, 6], [-2, 2, 6], [2, 0, 6], [-1, -1, 6], [0, 0, 0],
 ]);
 
+interface ZigzagSharedState {
+  x2: number;
+  y2: number;
+  data2: number;
+  data3: number;
+}
+
+interface ZigzagSharedStep {
+  readonly moved: boolean;
+  readonly tryFlipXCalls: 1 | 2;
+  readonly reachedTerminal: boolean;
+}
+
+/**
+ * Shared source-order `Zigzag` callback (`pokemon_animation.c:1290-1322`).
+ * Its callers retain their own callback identities: the fast initializer
+ * installs `Zigzag` after this first invocation, while the slow wrapper keeps
+ * itself installed until this routine consumes the zero-duration sentinel.
+ */
+function zigzagSharedStep(state: ZigzagSharedState): ZigzagSharedStep {
+  if (state.data2 === 0) state.data3 = 0;
+
+  let leg = ZIGZAG_DATA[state.data3]!;
+  if (leg[2] === state.data2) {
+    if (leg[2] === 0) return { moved: false, tryFlipXCalls: 1, reachedTerminal: true };
+    state.data3 += 1;
+    state.data2 = 0;
+  }
+
+  leg = ZIGZAG_DATA[state.data3]!;
+  if (leg[2] === 0) return { moved: false, tryFlipXCalls: 1, reachedTerminal: true };
+
+  state.x2 += leg[0];
+  state.y2 += leg[1];
+  state.data2 += 1;
+  return { moved: true, tryFlipXCalls: 2, reachedTerminal: false };
+}
+
+export interface ZigzagFastFrame extends SpeciesIdleOffset {
+  readonly data0: number;
+  readonly data2: number;
+  readonly data3: number;
+  readonly moved: boolean;
+  readonly initializerCalled: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXCalls: 0 | 1 | 2;
+  readonly callback: "Zigzag" | "WaitAnimEnd";
+}
+
+/**
+ * Exact source-order normal-front `Anim_ZigzagFast` lifecycle. Its
+ * initializer calls `Zigzag` on tick 0 and only then overwrites the sprite
+ * callback with `Zigzag`; all remaining motion is one callback per tick.
+ * Ticks 0..53 apply the nine six-callback legs, and tick 54 alone consumes
+ * the zero-duration sentinel and hands off to `WaitAnimEnd`.
+ */
+export function zigzagFastFrameAtTick(ticksSinceStart: number): ZigzagFastFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+  const state: ZigzagSharedState = { x2: 0, y2: 0, data2: 0, data3: 0 };
+  let callback: "Anim_ZigzagFast" | ZigzagFastFrame["callback"] = "Anim_ZigzagFast";
+  let moved = false;
+  let initializerCalled = false;
+  let tryFlipXCalls: ZigzagFastFrame["tryFlipXCalls"] = 0;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    moved = false;
+    initializerCalled = false;
+    tryFlipXCalls = 0;
+    if (callback === "WaitAnimEnd") continue;
+
+    const step = zigzagSharedStep(state);
+    moved = step.moved;
+    tryFlipXCalls = step.tryFlipXCalls;
+    if (callback === "Anim_ZigzagFast") {
+      // `Anim_ZigzagFast` overwrites even its callee's callback result.
+      initializerCalled = true;
+      callback = "Zigzag";
+    } else if (step.reachedTerminal) {
+      callback = "WaitAnimEnd";
+    }
+  }
+
+  return {
+    x2: state.x2,
+    y2: state.y2,
+    data0: 0,
+    data2: state.data2,
+    data3: state.data3,
+    moved,
+    initializerCalled,
+    normalFrontDontFlip: true,
+    tryFlipXCalls,
+    callback: callback === "Anim_ZigzagFast" ? "Zigzag" : callback,
+  };
+}
+
 export interface ZigzagSlowFrame extends SpeciesIdleOffset {
   readonly data0: number;
   readonly data2: number;
@@ -2931,7 +3103,8 @@ export interface ZigzagSlowFrame extends SpeciesIdleOffset {
 /** Source-order normal-front `Anim_ZigzagSlow` plus shared `Zigzag`. */
 export function zigzagSlowFrameAtTick(ticksSinceStart: number): ZigzagSlowFrame | null {
   if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
-  let x2 = 0, y2 = 0, data0 = 0, data2 = 0, data3 = 0;
+  const state: ZigzagSharedState = { x2: 0, y2: 0, data2: 0, data3: 0 };
+  let data0 = 0;
   let callback: ZigzagSlowFrame["callback"] = "Anim_ZigzagSlow";
   let moved = false;
   let tryFlipXCalls: ZigzagSlowFrame["tryFlipXCalls"] = 0;
@@ -2940,27 +3113,18 @@ export function zigzagSlowFrameAtTick(ticksSinceStart: number): ZigzagSlowFrame 
     moved = false;
     tryFlipXCalls = 0;
     if (callback === "WaitAnimEnd") continue;
-    if (data2 === 0) data0 = 0;
+    if (state.data2 === 0) data0 = 0;
     if (data0 <= 0) {
-      tryFlipXCalls = 1;
-      if (data2 === 0) data3 = 0;
-      let leg = ZIGZAG_DATA[data3]!;
-      if (leg[2] === data2) {
-        if (leg[2] === 0) callback = "WaitAnimEnd";
-        else { data3 += 1; data2 = 0; }
-      }
-      leg = ZIGZAG_DATA[data3]!;
-      if (leg[2] === 0) callback = "WaitAnimEnd";
-      else {
-        x2 += leg[0]; y2 += leg[1]; data2 += 1;
-        moved = true; tryFlipXCalls = 2;
-      }
+      const step = zigzagSharedStep(state);
+      moved = step.moved;
+      tryFlipXCalls = step.tryFlipXCalls;
+      if (step.reachedTerminal) callback = "WaitAnimEnd";
       data0 = 1;
     } else {
       data0 -= 1;
     }
   }
-  return { x2, y2, data0, data2, data3, moved, normalFrontDontFlip: true,
+  return { x2: state.x2, y2: state.y2, data0, data2: state.data2, data3: state.data3, moved, normalFrontDontFlip: true,
     tryFlipXCalls, callback };
 }
 
@@ -4648,8 +4812,464 @@ export function flashYellowFrameAtTick(
   throw new Error("unreachable FlashYellow reducer state");
 }
 
+/** Source selector 17's task-installed direct callback receipt. */
+export const CIRCULAR_VIBRATE_ENTRY = Object.freeze({
+  selector: "ANIM_CIRCULAR_VIBRATE",
+  sourceId: 17,
+  taskZeroedData2: true,
+  callbackInstalled: "Anim_CircularVibrate",
+  callbackInvokedByInitializer: false,
+  normalFrontDontFlip: true,
+  accepted: true,
+} as const);
+
+export interface CircularVibrateFrame extends SpeciesIdleOffset {
+  /** `sprite->data[2]` before this callback's strict terminal guard. */
+  readonly data2Before: number;
+  /** `sprite->data[2]` after this callback's unconditional `+= 9`. */
+  readonly data2: number;
+  /** C-truncated `data[2] / 4` passed to the amplitude sine. */
+  readonly amplitudeIndex: number | null;
+  /** `Sin(amplitudeIndex, 8)`, then used as the next sine/cosine amplitude. */
+  readonly amplitude: number | null;
+  /** `data[2] % 256` passed to the motion sine/cosine pair. */
+  readonly index: number | null;
+  readonly sign: -1 | 1 | null;
+  readonly motionX2: number | null;
+  readonly motionY2: number | null;
+  readonly normalFrontDontFlip: true;
+  readonly resetPosition: boolean;
+  readonly callback: "Anim_CircularVibrate" | "WaitAnimEnd";
+}
+
+/**
+ * Source-order normal-front port of selector 17's direct
+ * `Anim_CircularVibrate` callback (`pokemon_animation.c:1392-1418`).
+ * `Task_HandleMonAnimation` already zeroes data[2] and installs this function,
+ * so callback tick zero begins at accumulator zero; unlike neighboring
+ * animation families it has no separate initializer and no `TryFlipX` call.
+ *
+ * The active callbacks are ticks 0..56 (accumulators 0..504). Each derives a
+ * signed amplitude before applying the parity-selected sign to both sine and
+ * cosine position writes. Tick 57 sees 513, clears both position fields,
+ * installs `WaitAnimEnd`, and still performs the source's final `+= 9`.
+ */
+export function circularVibrateFrameAtTick(
+  ticksSinceStart: number,
+): CircularVibrateFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let x2 = 0;
+  let y2 = 0;
+  let callback: CircularVibrateFrame["callback"] = "Anim_CircularVibrate";
+  let lastFrame: CircularVibrateFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (callback === "WaitAnimEnd") continue;
+
+    const data2Before = data2;
+    let amplitudeIndex: number | null = null;
+    let amplitude: number | null = null;
+    let index: number | null = null;
+    let sign: -1 | 1 | null = null;
+    let motionX2: number | null = null;
+    let motionY2: number | null = null;
+    let resetPosition = false;
+
+    if (data2 > 512) {
+      x2 = 0;
+      y2 = 0;
+      resetPosition = true;
+      callback = "WaitAnimEnd";
+    } else {
+      sign = (data2 & 1) === 0 ? 1 : -1;
+      amplitudeIndex = Math.trunc(data2 / 4);
+      amplitude = gbaSin(amplitudeIndex, 8);
+      index = data2 % 256;
+      motionY2 = toS16(gbaSin(index, amplitude) * sign);
+      motionX2 = toS16(gbaCos(index, amplitude) * sign);
+      y2 = motionY2;
+      x2 = motionX2;
+    }
+
+    data2 = toS16(data2 + 9);
+    lastFrame = {
+      x2,
+      y2,
+      data2Before,
+      data2,
+      amplitudeIndex,
+      amplitude,
+      index,
+      sign,
+      motionX2,
+      motionY2,
+      normalFrontDontFlip: true,
+      resetPosition,
+      callback,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable CircularVibrate reducer state");
+  return lastFrame;
+}
+
+/** Source selector 43's initializer-only `Anim_Figure8` receipt. */
+export const FIGURE_8_INITIALIZER = Object.freeze({
+  selector: "ANIM_FIGURE_8",
+  sourceId: 43,
+  handleStartAffineAnimCalls: 1,
+  data6: 0,
+  data7: 0,
+  callbackInstalled: "Figure8",
+  figure8BodyCalls: 0,
+  normalFrontDontFlip: true,
+  affineMode: "double",
+  accepted: true,
+} as const);
+
+export interface Figure8AffineWrite {
+  readonly source: "phase-negative" | "phase-identity" | "terminal-identity";
+  readonly xScaleSigned: -256 | 256;
+  /** The signed x-scale's exact 16-bit argument pattern. */
+  readonly xScaleU16: 0xff00 | 0x0100;
+  readonly yScaleSigned: 256;
+  readonly yScaleU16: 0x0100;
+  readonly rotationSigned: 0;
+  readonly rotationU16: 0;
+}
+
+export interface Figure8Frame extends SpeciesIdleOffset {
+  readonly data6Before: number;
+  readonly data6: number;
+  readonly data7Before: 0 | 1 | 2;
+  readonly data7: 0 | 1 | 2;
+  readonly xSineIndex: number;
+  readonly ySineIndex: number;
+  readonly xSine: number;
+  readonly ySine: number;
+  /** Position writes immediately after both source `Sin` calls. */
+  readonly motionX2: number;
+  readonly motionY2: number;
+  readonly affineWrites: readonly Figure8AffineWrite[];
+  readonly affineWriteCount: 0 | 1;
+  readonly affineXScaleSigned: -256 | 256;
+  readonly affineXScaleU16: 0xff00 | 0x0100;
+  readonly affineYScaleSigned: 256;
+  readonly affineYScaleU16: 0x0100;
+  readonly affineRotationU16: 0;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXBeforeMotion: true;
+  readonly tryFlipXAfterTerminalCheck: true;
+  readonly tryFlipXCalls: 2;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "Figure8" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+function figure8AffineWrite(
+  source: Figure8AffineWrite["source"],
+  xScaleSigned: -256 | 256,
+): Figure8AffineWrite {
+  return {
+    source,
+    xScaleSigned,
+    xScaleU16: toU16(xScaleSigned) as 0xff00 | 0x0100,
+    yScaleSigned: 256,
+    yScaleU16: 0x0100,
+    rotationSigned: 0,
+    rotationU16: 0,
+  };
+}
+
+/**
+ * Source-order port of selector 43's `Anim_Figure8` -> `Figure8`
+ * (`pokemon_animation.c:1003-1034,2435-2471,5540-5544`) for the ordinary
+ * opponent-front `Task_HandleMonAnimation` path. The initializer starts
+ * affine mode, zeroes data6/data7, and installs `Figure8` without invoking
+ * its body. Callback tick zero is therefore the first body call.
+ *
+ * Every callback retains both source-order `TryFlipX` calls as no-ops because
+ * the task set `sDontFlip=TRUE`, increments signed data6 by four before both
+ * signed GBA sine writes, and evaluates the `>192` phase before the `>64`
+ * phase. The strict terminal callback is tick 63 (data6 252 -> 256); it clears
+ * position, writes identity, resets affine mode, and installs stable
+ * `WaitAnimEnd` on that same callback.
+ */
+export function figure8FrameAtTick(ticksSinceStart: number): Figure8Frame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  let data6: number = FIGURE_8_INITIALIZER.data6;
+  let data7: 0 | 1 | 2 = FIGURE_8_INITIALIZER.data7;
+  let x2 = 0;
+  let y2 = 0;
+  let affineXScaleSigned: -256 | 256 = 256;
+  let callback: Figure8Frame["callback"] = "Figure8";
+  let affineMode: Figure8Frame["affineMode"] = "double";
+  let lastFrame: Figure8Frame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (callback === "WaitAnimEnd") continue;
+
+    const data6Before = data6;
+    const data7Before = data7;
+    data6 = toS16(data6 + 4);
+    const xSineIndex = data6;
+    const ySineIndex = (data6 * 2) & 0xff;
+    const xSine = gbaSin(xSineIndex, 16);
+    const ySine = gbaSin(ySineIndex, 8);
+    const motionX2 = toS16(-xSine);
+    const motionY2 = toS16(-ySine);
+    x2 = motionX2;
+    y2 = motionY2;
+
+    const affineWrites: Figure8AffineWrite[] = [];
+    if (data6 > 192 && data7 === 1) {
+      affineXScaleSigned = 256;
+      affineWrites.push(figure8AffineWrite("phase-identity", affineXScaleSigned));
+      data7 = 2;
+    } else if (data6 > 64 && data7 === 0) {
+      affineXScaleSigned = -256;
+      affineWrites.push(figure8AffineWrite("phase-negative", affineXScaleSigned));
+      data7 = 1;
+    }
+
+    let resetSpriteAfterAnim = false;
+    if (data6 > 255) {
+      x2 = 0;
+      y2 = 0;
+      affineXScaleSigned = 256;
+      affineWrites.push(figure8AffineWrite("terminal-identity", affineXScaleSigned));
+      resetSpriteAfterAnim = true;
+      affineMode = "normal";
+      callback = "WaitAnimEnd";
+    }
+
+    lastFrame = {
+      x2,
+      y2,
+      data6Before,
+      data6,
+      data7Before,
+      data7,
+      xSineIndex,
+      ySineIndex,
+      xSine,
+      ySine,
+      motionX2,
+      motionY2,
+      affineWrites,
+      affineWriteCount: affineWrites.length as 0 | 1,
+      affineXScaleSigned,
+      affineXScaleU16: toU16(affineXScaleSigned) as 0xff00 | 0x0100,
+      affineYScaleSigned: 256,
+      affineYScaleU16: 0x0100,
+      affineRotationU16: 0,
+      normalFrontDontFlip: true,
+      tryFlipXBeforeMotion: true,
+      tryFlipXAfterTerminalCheck: true,
+      tryFlipXCalls: 2,
+      resetSpriteAfterAnim,
+      callback,
+      affineMode,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable Figure8 reducer state");
+  return lastFrame;
+}
+
+/** Source selector 37's direct `Anim_BackAndLunge` initializer receipt. */
+export const BACK_AND_LUNGE_INITIALIZER = Object.freeze({
+  selector: "ANIM_BACK_AND_LUNGE",
+  sourceId: 37,
+  handleStartAffineAnimCalls: 1,
+  callbackInvokedByInitializer: false,
+  callbackInstalled: "BackAndLunge_0",
+  normalFrontDontFlip: true,
+  affineMode: "double",
+  accepted: true,
+} as const);
+
+export interface BackAndLungeFrame extends SpeciesIdleOffset {
+  readonly phase: "BackAndLunge_0" | "BackAndLunge_1" | "BackAndLunge_2" | "BackAndLunge_3" | "BackAndLunge_4";
+  readonly data2Before: number;
+  readonly data2: number;
+  readonly data3Before: number;
+  readonly data3: number;
+  readonly data4Before: number;
+  readonly data4: number;
+  readonly data5Before: number;
+  readonly data5: number;
+  readonly data6Before: number;
+  readonly data6: number;
+  readonly data7Before: number;
+  readonly data7: number;
+  readonly rotationU8: number | null;
+  readonly affineRotationShifted: number | null;
+  readonly affineRotationU16: number | null;
+  readonly affineWriteCount: 0 | 1;
+  readonly initializerCalled: boolean;
+  readonly callbackInvokedByInitializer: false;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXBeforeMotion: true;
+  readonly tryFlipXAfterMotion: true;
+  readonly tryFlipXCalls: 2;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "BackAndLunge_0" | "BackAndLunge_1" | "BackAndLunge_2" | "BackAndLunge_3" | "BackAndLunge_4" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+/**
+ * Source-order normal-front port of selector 37's
+ * `Anim_BackAndLunge` -> `BackAndLunge_0` through `_4`
+ * (`pokemon_animation.c:1037-1059,2028-2140,5540-5544`). The task has
+ * already set `sDontFlip=TRUE` and zeroed data[2..7], so both source-order
+ * `TryFlipX` calls in every active callback are retained as no-ops.
+ *
+ * All sprite/data registers are reduced as signed s16 values. The local
+ * `var` in `_1` is a u8, and `_2`'s rotation is the source u8 quotient. The
+ * affine writes preserve the source's shifted rotation before its u16
+ * `HandleSetAffineData` argument conversion. Tick 32 is the strict terminal
+ * `_4` callback; `WaitAnimEnd` then remains stable.
+ */
+export function backAndLungeFrameAtTick(ticksSinceStart: number): BackAndLungeFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  let x2 = 0;
+  let y2 = 0;
+  let data2 = 0;
+  let data3 = 0;
+  let data4 = 0;
+  let data5 = 0;
+  let data6 = 0;
+  let data7 = 0;
+  let callback: BackAndLungeFrame["callback"] = "BackAndLunge_0";
+  let affineMode: BackAndLungeFrame["affineMode"] = "double";
+  let lastFrame: BackAndLungeFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (callback === "WaitAnimEnd") continue;
+
+    const phase = callback as BackAndLungeFrame["phase"];
+    const data2Before = data2;
+    const data3Before = data3;
+    const data4Before = data4;
+    const data5Before = data5;
+    const data6Before = data6;
+    const data7Before = data7;
+    let rotationU8: number | null = null;
+    let affineRotationShifted: number | null = null;
+    let affineRotationU16: number | null = null;
+    let resetSpriteAfterAnim = false;
+
+    if (phase === "BackAndLunge_0") {
+      x2 = toS16(x2 + 1);
+      if (x2 > 7) {
+        x2 = 8;
+        data7 = 2;
+        callback = "BackAndLunge_1";
+      }
+    } else if (phase === "BackAndLunge_1") {
+      x2 = toS16(x2 - data7);
+      data7 = toS16(data7 + 1);
+      if (x2 <= 0) {
+        let subResult = x2;
+        let varU8 = data7 & 0xff;
+        data6 = 0;
+        do {
+          subResult = toS16(subResult - varU8);
+          data6 = toS16(data6 + 1);
+          varU8 = (varU8 + 1) & 0xff;
+        } while (subResult > -8);
+        data5 = 1;
+        callback = "BackAndLunge_2";
+      }
+    } else if (phase === "BackAndLunge_2") {
+      x2 = toS16(x2 - data7);
+      data7 = toS16(data7 + 1);
+      rotationU8 = Math.trunc((data5 * 6) / data6) & 0xff;
+      data5 = toS16(data5 + 1);
+      if (data5 > data6) data5 = data6;
+      affineRotationShifted = rotationU8 * 256;
+      affineRotationU16 = affineRotationShifted & 0xffff;
+      if (x2 < -8) {
+        x2 = -8;
+        data4 = 2;
+        data3 = 0;
+        data2 = rotationU8;
+        callback = "BackAndLunge_3";
+      }
+    } else if (phase === "BackAndLunge_3") {
+      if (data3 > 11) {
+        data2 = toS16(data2 - 2);
+        if (data2 < 0) data2 = 0;
+        affineRotationShifted = data2 << 8;
+        affineRotationU16 = affineRotationShifted & 0xffff;
+        if (data2 === 0) callback = "BackAndLunge_4";
+      } else {
+        x2 = toS16(x2 + data4);
+        data4 = toS16(data4 * -1);
+        data3 = toS16(data3 + 1);
+      }
+    } else {
+      x2 = toS16(x2 + 2);
+      if (x2 > 0) {
+        x2 = 0;
+        resetSpriteAfterAnim = true;
+        affineMode = "normal";
+        callback = "WaitAnimEnd";
+      }
+    }
+
+    lastFrame = {
+      x2,
+      y2,
+      phase,
+      data2Before,
+      data2,
+      data3Before,
+      data3,
+      data4Before,
+      data4,
+      data5Before,
+      data5,
+      data6Before,
+      data6,
+      data7Before,
+      data7,
+      rotationU8,
+      affineRotationShifted,
+      affineRotationU16,
+      affineWriteCount: affineRotationShifted === null ? 0 : 1,
+      initializerCalled: tick === 0,
+      callbackInvokedByInitializer: BACK_AND_LUNGE_INITIALIZER.callbackInvokedByInitializer,
+      startedAffine: tick === 0,
+      normalFrontDontFlip: true,
+      tryFlipXBeforeMotion: true,
+      tryFlipXAfterMotion: true,
+      tryFlipXCalls: 2,
+      resetSpriteAfterAnim,
+      callback,
+      affineMode,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable BackAndLunge reducer state");
+  return lastFrame;
+}
+
 function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffset {
   switch (family) {
+    case "BACK_AND_LUNGE": {
+      const terminal = backAndLungeFrameAtTick(32);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_BackAndLunge did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
     case "BOUNCE_ROTATE_TO_SIDES": {
       const terminal = bounceRotateToSidesFrameAtTick(87);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
@@ -4689,6 +5309,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = circleCCounterclockwiseSlowFrameAtTick(43);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_CircleCounterclockwise_Slow did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "CIRCULAR_VIBRATE": {
+      const terminal = circularVibrateFrameAtTick(57);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_CircularVibrate did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
@@ -4752,6 +5379,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = flickerIncreasingFrameAtTick(65);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_FlickerIncreasing did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "FIGURE_8": {
+      const terminal = figure8FrameAtTick(63);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_Figure8 did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
@@ -4962,6 +5596,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = verticalShakeTwiceFrameAtTick(78);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_VerticalShakeTwice did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "ZIGZAG_FAST": {
+      const terminal = zigzagFastFrameAtTick(54);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_ZigzagFast did not reach its source terminal sentinel");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
