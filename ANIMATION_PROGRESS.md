@@ -8,6 +8,41 @@
 > routing hint, not a deferral or an acceptance-bar waiver; escalate any worker
 > result that does not survive supervisor verification.
 
+## Front `ANIM_H_SLIDE` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **4 mappings / 4
+Factory-reachable species / 0 outside-Factory mappings** — KRABBY, CORSOLA,
+ZIGZAGOON, and WHISMUR. Only source ID **3** is promoted. The accepted slow
+source-ID-70 path remains dense regression-pinned; `ANIM_H_SLIDE_FAST`, back
+sprites, adjacent selectors, moves, battle state, and engine boundaries remain
+untouched. Move coverage remains **107/276 exact, 0 partial, 0 staged, 169
+unsupported**; Open-only **0/1** and Outside Factory **0/77**.
+`ANIMATION_COVERAGE.json` is byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,1131-1153,
+3665-3669,5540-5544`, `pokemon_animation.h:43`, `pokemon.c:1504,1628,1669,
+1751`, and `trig.c:514-518` pin `Task_HandleMonAnimation`'s data2 zeroing and
+`sDontFlip=TRUE`, selector-3 data0=40, immediate `HorizontalSlide` before
+callback installation, both source-order no-op `TryFlipX` calls, and C-truncated
+sine indices. Dense reducer coverage exhausts motion ticks **0..40**; strict
+terminal tick **41** clears x2, installs `WaitAnimEnd`, and increments data2 to
+42, followed by stable terminal and invalid-input checks. Fresh complete legal
+challenge-0 Scene-ON parties were probed twice each only through
+`tools/run-mgba-probe.py` in a fresh `mktemp` directory; pairs are byte-identical
+and settle battler 1 at x2=0/y2=0/animNum=1/`SpriteCallbackDummy`: KRABBY
+**372 B**, cmd 5/data2 98, `cea94859fc353e431fc7393228cbc4b18f5532a6bcb95af10219cc5df5648b07`;
+CORSOLA **373 B**, cmd 4/data2 222, `b76201a913b2036e0d7c3cc8e939431a6a0d40f03c03846f43996abb3aa52cd4`;
+ZIGZAGOON **373 B**, cmd 4/data2 288, `e3261da2b51b339985c30c32f04252739a2d7ce475db406e2816fd330467b864`;
+WHISMUR **373 B**, cmd 9/data2 370, `094437764c82a40da10b929ba235895427a46cbd646c5a2e77591ca6c6783889`.
+
+**Gates / next:** focused family/evidence plus both animation ratchets are
+**332/332** green; `npx tsc --noEmit`, full `npm test` (**602 files / 6,190
+passed / 1 skipped**), production build (**549 modules transformed**), and
+`npm run animation:coverage` are green. Next largest unsupported generated
+Factory front family: **`ANIM_FIGURE_8`** (source ID 43; **3 mappings / 3
+Factory / 0 outside**) — RATICATE, FEAROW, YANMA.
+
 ## Front `ANIM_TWIST` family accepted (2026-08-02)
 
 **State:** exact for the complete generated selector census: **5 mappings / 5
