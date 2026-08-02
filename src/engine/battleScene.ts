@@ -7478,6 +7478,23 @@ function drawActionMenuIdleWindow(
     // open/close events already established (see
     // `FIGHT_SUBMENU_REOPEN_BOUNCE_SHIFT`'s own doc).
     drawActionMenuIdleContent(fb, t - FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT, currentEpochHandoff, currentTurn2Handoff, undefined, currentTurn3Handoff, currentTurn4Handoff);
+    // Slice 9: once turn 4's own source-owned reset has evicted turn 3's
+    // shape from the shared slot (`currentTurn3Handoff === null`), the
+    // internal fallback above can no longer reach Onix's own HP - draw it
+    // explicitly from the completed-turn-4 receipt instead (same 88 turn 3
+    // already established; `turn4SettledWindowActive`'s own eviction-class
+    // doc in `drawFightSubmenuWindow`).
+    if (
+      isTurn4NextCommandHandoffReady(currentTurn4Handoff)
+      && !isTurn3NextCommandHandoffReady(currentTurn3Handoff)
+      && !isTurn2NextCommandHandoffReady(currentTurn2Handoff)
+    ) {
+      drawPlayerHealthboxHpOverlay(
+        fb,
+        currentTurn4Handoff.hp.player,
+        menuIdleBounce(t - FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT).healthboxY2,
+      );
+    }
     return;
   }
   // S7 slice F: turn 3's own reopen needs the same receipt-epoch remap
@@ -7575,6 +7592,17 @@ function drawActionMenuIdleWindow(
             )
           : t;
   drawActionMenuIdleContent(fb, bounceTick, currentEpochHandoff, currentTurn2Handoff, undefined, currentTurn3Handoff, currentTurn4Handoff);
+  // Slice 9: same eviction-class gap as the `reopenedFromClose` branch above
+  // - once turn 4's own reset has evicted turn 3's shape, Onix's own HP
+  // (still 88, per turn 3's own established anchor) must come from the
+  // completed-turn-4 receipt instead.
+  if (
+    isTurn4NextCommandHandoffReady(currentTurn4Handoff)
+    && !isTurn3NextCommandHandoffReady(currentTurn3Handoff)
+    && !isTurn2NextCommandHandoffReady(currentTurn2Handoff)
+  ) {
+    drawPlayerHealthboxHpOverlay(fb, currentTurn4Handoff.hp.player, menuIdleBounce(bounceTick).healthboxY2);
+  }
 }
 
 /**
@@ -8018,7 +8046,8 @@ function drawFightSubmenuWindow(
     // own (turn 3's reopen isn't reachable through this specific branch yet -
     // it needs a fresh confirm of its own first - but kept consistent so a
     // future turn-3-confirm slice doesn't rediscover the ordering bug).
-    if (isTurn3NextCommandHandoffReady(currentTurn3Handoff)) drawPlayerHealthboxHpOverlay(fb, currentTurn3Handoff.hp.player, menuIdleBounce(confirmWaitBounceTick).healthboxY2);
+    if (isTurn4NextCommandHandoffReady(currentTurn4Handoff)) drawPlayerHealthboxHpOverlay(fb, currentTurn4Handoff.hp.player, menuIdleBounce(confirmWaitBounceTick).healthboxY2);
+    else if (isTurn3NextCommandHandoffReady(currentTurn3Handoff)) drawPlayerHealthboxHpOverlay(fb, currentTurn3Handoff.hp.player, menuIdleBounce(confirmWaitBounceTick).healthboxY2);
     else if (isTurn2NextCommandHandoffReady(currentTurn2Handoff)) drawPlayerHealthboxHpOverlay(fb, currentTurn2Handoff.hp.player, menuIdleBounce(confirmWaitBounceTick).healthboxY2);
     return;
   }
@@ -8075,7 +8104,8 @@ function drawFightSubmenuWindow(
   // ALSO resolved. S7 slice J: turn 5's own reopened submenu needs the SAME
   // 88 (Onix untouched by turn 4's own DOUBLE_TEAM) - no further anchor swap
   // needed; the completed-turn-3 receipt selects it directly.
-  if (isTurn3NextCommandHandoffReady(currentTurn3Handoff)) drawPlayerHealthboxHpOverlay(fb, currentTurn3Handoff.hp.player, menuIdleBounce(idleWaitBounceTick).healthboxY2);
+  if (isTurn4NextCommandHandoffReady(currentTurn4Handoff)) drawPlayerHealthboxHpOverlay(fb, currentTurn4Handoff.hp.player, menuIdleBounce(idleWaitBounceTick).healthboxY2);
+  else if (isTurn3NextCommandHandoffReady(currentTurn3Handoff)) drawPlayerHealthboxHpOverlay(fb, currentTurn3Handoff.hp.player, menuIdleBounce(idleWaitBounceTick).healthboxY2);
   else if (isTurn2NextCommandHandoffReady(currentTurn2Handoff)) drawPlayerHealthboxHpOverlay(fb, currentTurn2Handoff.hp.player, menuIdleBounce(idleWaitBounceTick).healthboxY2);
 }
 
