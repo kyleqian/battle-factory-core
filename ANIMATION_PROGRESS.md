@@ -1,5 +1,40 @@
 # Animation coverage
 
+## Front `ANIM_BACK_AND_LUNGE` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **2 mappings / 2
+Factory-reachable species / 0 outside-Factory mappings** — CHARMELEON and
+GROWLITHE. Only source ID **37** is promoted; back routing, adjacent selectors,
+moves, battle state, engine/presentation boundaries, and
+`ANIMATION_COVERAGE.json` remain untouched. Coverage is **107/276 exact, 0
+partial, 0 staged, 169 unsupported**; the coverage SHA-256 remains
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:1037-1059,2028-2140,
+5540-5544`, `pokemon_animation.h:77`, and `pokemon.c:1411,1464` pin the direct
+affine initializer and callback install, signed-s16 position/data arithmetic,
+the `_1` u8 local, `_2` u8 rotation quotient, both normal-front `TryFlipX`
+calls in every active phase, 12 wobble callbacks, three rotation-unwind writes,
+return-to-origin teardown, and stable `WaitAnimEnd`. Dense Tier-1 coverage
+exhausts all **33 callbacks** (ticks 0..32), including every `_0`..`_4` edge,
+the terminal reset, stable wait, and invalid inputs. Fresh complete legal
+challenge-0 Scene-ON parties were probed twice per species only through
+`tools/run-mgba-probe.py`; each pair is byte-identical: CHARMELEON **371 B**
+`0190ff42c6eb73abf7aa8dbf8db1704a8ceb8fbaa05869a6f83fd668a95491bf`, GROWLITHE
+**372 B** `f88488626bb95c8c9db0dd220cc74c85154c25b5632959c8c30c7d9ce1af8030`.
+Both settle battler 1 at x2=0/y2=0 with `SpriteCallbackDummy`; command/data are
+CHARMELEON 2/5 and GROWLITHE 5/58.
+
+**Verification / next:** focused family/evidence plus both ratchets are
+**17/17** green; `npx tsc --noEmit` and `npm run animation:coverage` are green
+with unchanged counts/hash. The regression-inclusive focused run is **337/337**
+green. Commits: `b6a54bca` (reducer/census), `af96fa26` (fixtures/evidence),
+and `1d9ffcc4` (updated unsupported-family control). Full `npm test` is green
+at **606 files / 6,218 passed / 1 skipped**; production build is green with
+**549 modules transformed**. The next largest unsupported generated
+Factory-front family is the source-table tie **`ANIM_CIRCULAR_VIBRATE`**
+(source ID **17**; **2 mappings / 2 Factory / 0 outside**) — RAPIDASH and ABSOL.
+
 > **Supervisor worker routing (2026-08-01):** use Terra/max for narrow
 > source-transcription families with established reducer, fixture, and probe
 > patterns; use Luna/max for bounded multi-phase lifecycle work with moderate
