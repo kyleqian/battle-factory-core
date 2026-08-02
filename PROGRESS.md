@@ -13,6 +13,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 843 — [supervisor final close-out, 2026-08-01 19:10] turns 1+2 also retired — session total SIX turn-flag retirements
+
+- **State:** master `34c4efec`, tree clean. Final union full `npm test`
+  **6,045 passed + 1 skipped** (18:58 run) and build green; the two commits
+  since are docs-only (papercut + this entry). Retired today: `turn9/10/11/
+  12Resolved` (entries 830-836), then `turn1Resolved` (841, second attempt
+  landed with the epoch-continuation rule after 838/839's honest checkpoint
+  + same-session evidence scout) and `turn2Resolved` (842, first try,
+  990/990). **Remaining `#39` fields: turns 3 and 4, then
+  `opponentFaintDismissElapsed`, then dispatcher debt — all with merged
+  prep/evidence dossiers.** Supervisor spot compares after each landing all
+  exact, incl. previously-failing `turn2-endeavor-off` now 256/256 live.
+- **Did (since entry 840):** turn-1 retry (evidence-doc prescription —
+  differential 1,162/1,162); turn-2 slice (990/990); verified both; new
+  papercut recorded (nested diff worktree doubles vitest discovery); temp
+  diff worktrees swept.
+- **Next session:** turn-3 then turn-4 per `docs/turn1-4-epoch-prep.md`
+  (turn-4's acceptance first needs the turn-5 OFF reader-set decision —
+  turns 5-8 OFF re-timing policy still un-adopted); then item 7 per
+  `docs/opponent-faint-dismiss-owner-prep.md`. Fold `animation-main` at
+  orient: a NEW animation session (started 17:56, deadline 20:56, still
+  live at close) has it 8+ commits ahead — deliberately left unfolded per
+  protocol since their branch is still moving.
+- **Notes:** 12 briefs total this session, 11 landed + 1 honest checkpoint
+  converted to a landing same-day; 0 unresolved failures; no exit-42;
+  DEFERRED.md empty — no open questions block the next session.
+
 ## 842 — [bounded MAIN worker, 2026-08-01] turn-2 predecessor retired with immutable epoch
 
 - **State:** proof `c16386d6`, migration `7a3fca06`; the production/test
@@ -54,44 +81,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `npx tsc --noEmit`, and `npm run build` green; full `npm test` deliberately
   unrun per the bounded-step brief. No trace/capture-list, recording import,
   ratchet/barrier, or selector changes.
-
-## 840 — [supervisor wind-down, 2026-08-01 17:30] 9-step session: turns 9-12 retired, #63 fixed, #61+#56-tail parked, three prep dossiers banked
-
-- **State:** master `2f5f8c53`, tree clean and green: full union `npm test`
-  **582 files, 6,037 passed + 1 skipped** and build green at `6dc73f72`
-  (17:14; the two commits since are docs-only merges). `animation-main`
-  fully folded (three folds this session: 5 + 2 + 2 commits, all
-  union-verified). DEFERRED empty. Only the permanent animation worktree
-  remains; all temp diff worktrees removed. Scene-ON oracle 8012 was found
-  down (stopped with the animation session) and restarted fresh —
-  freshness OK.
-- **Did (main lane, Terra/max, 5 briefs):** retired `turn9Resolved` (830),
-  `turn10Resolved` (832), `turn11Resolved` (834), `turn12Resolved` (836)
-  via the typed handoff recipe — differentials 1,483 / 1,842 / 1,033 /
-  1,141 captures all byte-identical, supervisor spot compares exact at
-  every recorded count (incl. the pre-existing 189/191 and 246/247
-  idle-bounce residuals, non-regressed). **Every `turnNResolved` for turns
-  5-13 is now retired.** Turn-1 (838/839) stopped honestly at its proof
-  checkpoint (`210d96af`): candidate migration broke `turn2-endeavor-off`
-  47/256 (frames 2901-2947) and was discarded per brief discipline.
-  **(side lane, Sol/high, 5 briefs):** turns 1-4 epoch prep dossier
-  (`docs/turn1-4-epoch-prep.md`); ISSUES #63 FIXED+closed
-  (typed-receipt Sitrus resolver, new Tier-1 pin); item-7 prep
-  (`docs/opponent-faint-dismiss-owner-prep.md`); #61 design→**PARKED** as
-  settled record (sub-tick CPU/VBlank class, supervisor decision, #38
-  precedent); #56 frame-444 bar/icon display tail→**SETTLED** same class
-  (Q1 materialize-column-shift stays 444's open lead); post-failure scout
-  pinned the turn-2 submenu epoch rule
-  (`docs/turn1-submenu-epoch-evidence.md`): drivers continue the turn-1
-  epoch (abs 2348), never reset at the 2901 reopen, destroyed at 2947 —
-  matches the failed window exactly and prescribes the retry.
-- **Next:** (1) retry turn-1 with the epoch-evidence prescription (proof
-  `210d96af` already landed); then turns 2-4 per the dossier; (2) the
-  turn-4 slice needs a reader-set decision first (no committed turn-5 OFF
-  set; turns 5-8 OFF re-timing policy still un-adopted); (3) item 7
-  (`opponentFaintDismissElapsed`) is fully prepped; (4) #62 route-selection
-  decision remains open; (5) #55 stream-model boundary unchanged.
-- **Notes:** 10 briefs, 0 worker failures (turn-1 is an honest checkpoint,
-  not a failure); no exit-42; vitest-cap papercut deleted as
-  cross-session-verified (502s capped 3-lane suite vs 935s+ pre-fix).
-  No deferred questions — DEFERRED.md stays empty.
