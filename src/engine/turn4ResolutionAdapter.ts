@@ -7,6 +7,47 @@
  * descended from it) only consumes that immutable epoch.
  */
 import { rentalMoveset } from "./battleSetup.ts";
+import {
+  createFightCommandPresentation,
+  type FightCommandPresentation,
+} from "./fightCommandPresentation.ts";
+import {
+  createLatestCompletedCommandHandoff,
+  isLatestCompletedCommandHandoffReady,
+  isLatestCompletedCommandLifecycleActive,
+  latestCompletedCommandPresentationEpoch,
+  type LatestCompletedCommandHandoff,
+} from "./nextCommandHandoff.ts";
+import { resolveTurn1RockSlideAttackLines } from "./turn1RockSlidePresentationStaging.ts";
+import { resolveTurn4RockSlideHpEndpoints } from "./turn4RockSlidePresentationStaging.ts";
+import {
+  resolveTurn5EndeavorAttackLines,
+  resolveTurn5EndeavorHpEndpoints,
+} from "./turn5EndeavorPresentationStaging.ts";
+import { resolveTurn5FaintWindowKoHp, resolveTurn5FaintWindowLines } from "./turn5FaintPresentationStaging.ts";
+
+/** The source-owned action-menu bounce table origin shared by early epochs. */
+const TURN4_IDLE_BOUNCE_EPOCH_TICK = 1748;
+/**
+ * Turn 5's FIGHT open bounce offset. Unlike turns 2-4's own boundary, the
+ * live turn-5 renderer still composes its bounce off the legacy Scene-ON
+ * continuation contract (`TURN5_LEGACY_PRESENTATION_CONTINUATION_LAG`,
+ * `battleScene.ts`), so this offset folds BOTH the ordinary
+ * `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` and that continuation lag together
+ * (`-(2 + 234)`), reproducing `turn5SubmenuBounceTick`'s existing output
+ * exactly rather than inventing a new formula.
+ */
+const TURN5_FIGHT_SUBMENU_BOUNCE_OFFSET = -236;
+/** HandleInputChooseMove stops polling the turn-5 bounce drivers after three ticks. */
+const TURN5_KICKOFF_FREEZE_AFTER_CONFIRM_TICKS = 3;
+/**
+ * Turn 5's own frozen plateau is the live formula evaluated AT the freeze
+ * moment itself (`turn5KickoffBounceTick`'s own "d=0" doc) - no further
+ * press-relative shift beyond the submenu offset above.
+ */
+const TURN5_KICKOFF_FROZEN_PRESS_OFFSET = TURN5_FIGHT_SUBMENU_BOUNCE_OFFSET;
+const ONIX_MAX_HP = 117;
+const GROVYLE_MAX_HP = 143;
 
 export type Turn4CompletedResolutionNextCommandHandoff = Readonly<{
   /** Exact post-turn-4 PP for `[ROCK_SLIDE, BIND, DRAGON_BREATH, SANDSTORM]`. */
@@ -60,6 +101,173 @@ export function resolveTurn4CompletedResolutionNextCommandHandoff(
     }),
     nextCommand: Object.freeze({ redraw: "settled" as const, input: "ready" as const }),
   });
+}
+
+/**
+ * Semantic generic content for the command that follows turn 4. The source
+ * reset, field snapshot, and ENDEAVOR/ROCK_SLIDE stream all belong to this
+ * completed-command owner; neither a PP tuple nor a predecessor redraw
+ * delay selects the turn-5 route.
+ */
+export function resolveTurn4FightCommandPresentation(
+  handoff: Turn4CompletedResolutionNextCommandHandoff,
+): FightCommandPresentation {
+  const endeavor = resolveTurn5EndeavorHpEndpoints();
+  const rockSlide = {
+    from: resolveTurn4RockSlideHpEndpoints().to,
+    to: resolveTurn5FaintWindowKoHp(),
+  };
+  return createFightCommandPresentation({
+    field: {
+      player: {
+        species: "ONIX",
+        displayName: "ONIX",
+        level: 50,
+        gender: "male",
+        status: "none",
+        hp: { current: handoff.hp.player, max: ONIX_MAX_HP },
+        attackStage: 6,
+      },
+      opponent: {
+        species: "GROVYLE",
+        displayName: "GROVYLE",
+        level: 50,
+        gender: "male",
+        status: "none",
+        hp: { current: handoff.hp.opponent, max: GROVYLE_MAX_HP },
+        attackStage: 6,
+      },
+    },
+    bounce: {
+      actionMenuRedrawTick: handoff.presentationEpoch.elapsed,
+      idleBounceEpochTick: TURN4_IDLE_BOUNCE_EPOCH_TICK,
+      fightSubmenuTickOffset: TURN5_FIGHT_SUBMENU_BOUNCE_OFFSET,
+      kickoff: {
+        freezeAfterConfirmTicks: TURN5_KICKOFF_FREEZE_AFTER_CONFIRM_TICKS,
+        preFreezeTickOffset: TURN5_FIGHT_SUBMENU_BOUNCE_OFFSET,
+        frozenPressTickOffset: TURN5_KICKOFF_FROZEN_PRESS_OFFSET,
+      },
+    },
+    presentationEpoch: handoff.presentationEpoch,
+    upcoming: {
+      // Turn 5's own kickoff text (Grovyle's ENDEAVOR) starts printing
+      // immediately at confirm - no reopened-menu delay needed.
+      firstTextStartDelay: 0,
+      moves: [
+        {
+          user: "opponent",
+          target: "player",
+          move: "ENDEAVOR",
+          text: { lines: resolveTurn5EndeavorAttackLines() },
+          hpChange: {
+            target: "player",
+            from: endeavor.from,
+            to: endeavor.to,
+          },
+        },
+        {
+          user: "player",
+          target: "opponent",
+          move: "ROCK_SLIDE",
+          text: { lines: resolveTurn1RockSlideAttackLines() },
+          hpChange: {
+            target: "opponent",
+            from: rockSlide.from,
+            to: rockSlide.to,
+          },
+          faint: {
+            target: "opponent",
+            text: { lines: resolveTurn5FaintWindowLines() },
+          },
+        },
+      ],
+    },
+  });
+}
+
+/** Publishes turn 4 through the generic completed-command owner. */
+export function resolveTurn4LatestCompletedCommandHandoff(
+  presentationEpochElapsed: number,
+): LatestCompletedCommandHandoff {
+  const handoff = resolveTurn4CompletedResolutionNextCommandHandoff(
+    presentationEpochElapsed,
+  );
+  return createLatestCompletedCommandHandoff({
+    playerPp: handoff.playerPp,
+    persistedMoveSlot: handoff.persistedMoveSlot,
+    nextCommand: handoff.nextCommand,
+    content: resolveTurn4FightCommandPresentation(handoff),
+  });
+}
+
+/**
+ * Narrows a generic owner to the semantic turn-5 command shape. The move
+ * stream and field facts carry the identity; slot 0 is checked only as an
+ * invariant of the completed receipt, never as a route selector.
+ */
+export function turn4FightCommandPresentationFromLatest(
+  latest: LatestCompletedCommandHandoff | null | undefined,
+): FightCommandPresentation | null {
+  const epoch = latestCompletedCommandPresentationEpoch(latest);
+  const content = latest?.content;
+  const moves = content?.upcoming?.moves;
+  const endeavor = moves?.[0];
+  const rockSlide = moves?.[1];
+  if (
+    !isLatestCompletedCommandHandoffReady(latest)
+    || epoch === null
+    || content === undefined
+    || endeavor?.user !== "opponent"
+    || endeavor.target !== "player"
+    || endeavor.move !== "ENDEAVOR"
+    || rockSlide?.user !== "player"
+    || rockSlide.target !== "opponent"
+    || rockSlide.move !== "ROCK_SLIDE"
+    || content.field.player.hp.current !== 88
+    || content.field.opponent.hp.current !== 1
+  ) {
+    return null;
+  }
+  if (latest.persistedMoveSlot !== 0) {
+    throw new Error("turn-4 ROCK_SLIDE command content requires the persisted ROCK_SLIDE slot");
+  }
+  return content;
+}
+
+/**
+ * Temporary positional-ABI view for the still-legacy turn-5 renderer. It
+ * reads generic semantic content only; live BattleSceneState no longer
+ * needs a separate turn-4 field once the field-cut checkpoint lands.
+ */
+export function turn4CompletedResolutionNextCommandHandoffFromLatest(
+  latest: LatestCompletedCommandHandoff | null | undefined,
+): Turn4CompletedResolutionNextCommandHandoff | null {
+  const content = turn4FightCommandPresentationFromLatest(latest);
+  const epoch = latestCompletedCommandPresentationEpoch(latest);
+  if (content === null || epoch === null || latest === null || latest === undefined) return null;
+  return Object.freeze({
+    playerPp: latest.playerPp,
+    persistedMoveSlot: 0 as const,
+    hp: Object.freeze({
+      player: content.field.player.hp.current,
+      opponent: content.field.opponent.hp.current,
+    }),
+    presentationEpoch: epoch,
+    nextCommand: latest.nextCommand,
+  });
+}
+
+/**
+ * The turn-5 command lifecycle consumes the generic turn-4 receipt's own
+ * epoch. This deliberately identifies the semantic ENDEAVOR/ROCK_SLIDE
+ * content before reading its age; no predecessor redraw delay participates.
+ */
+export function isTurn4LatestCompletedCommandLifecycleActive(
+  latest: LatestCompletedCommandHandoff | null | undefined,
+  openElapsed: number | null,
+): boolean {
+  return turn4FightCommandPresentationFromLatest(latest) !== null
+    && isLatestCompletedCommandLifecycleActive(latest, openElapsed);
 }
 
 /** Typed gate shared by the turn-5 controller and presentation readers. */
