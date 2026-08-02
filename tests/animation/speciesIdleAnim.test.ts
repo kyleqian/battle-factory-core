@@ -49,6 +49,10 @@ import {
   GROW_IN_STAGES_FACTORY_FRONT_SPECIES,
   GROW_IN_STAGES_FRONT_SPECIES,
   GROW_IN_STAGES_OUTSIDE_FACTORY_FRONT_SPECIES,
+  lungeGrowFrameAtTick,
+  LUNGE_GROW_FACTORY_FRONT_SPECIES,
+  LUNGE_GROW_FRONT_SPECIES,
+  LUNGE_GROW_OUTSIDE_FACTORY_FRONT_SPECIES,
   ADD_NEW_ANIM_DEFAULTS,
   horizontalJumpsFrameAtTick,
   H_JUMPS_FACTORY_FRONT_SPECIES,
@@ -300,6 +304,12 @@ import gengarRunB from "../../tools/compare/fixtures/sendout-front-gengar-run-b.
 import lugiaScenario from "../../tools/compare/fixtures/sendout-front-lugia.json" with { type: "json" };
 import lugiaRunA from "../../tools/compare/fixtures/sendout-front-lugia-run-a.json" with { type: "json" };
 import lugiaRunB from "../../tools/compare/fixtures/sendout-front-lugia-run-b.json" with { type: "json" };
+import dodrioScenario from "../../tools/compare/fixtures/sendout-front-dodrio.json" with { type: "json" };
+import dodrioRunA from "../../tools/compare/fixtures/sendout-front-dodrio-run-a.json" with { type: "json" };
+import dodrioRunB from "../../tools/compare/fixtures/sendout-front-dodrio-run-b.json" with { type: "json" };
+import heracrossScenario from "../../tools/compare/fixtures/sendout-front-heracross.json" with { type: "json" };
+import heracrossRunA from "../../tools/compare/fixtures/sendout-front-heracross-run-a.json" with { type: "json" };
+import heracrossRunB from "../../tools/compare/fixtures/sendout-front-heracross-run-b.json" with { type: "json" };
 import {
   KABUTO_FRONT_ANIM_START_OFFSET,
   kabutoHSlideWobble,
@@ -586,6 +596,18 @@ const lugiaRawA = readFileSync(
 );
 const lugiaRawB = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-lugia-run-b.json", import.meta.url),
+);
+const dodrioRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-dodrio-run-a.json", import.meta.url),
+);
+const dodrioRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-dodrio-run-b.json", import.meta.url),
+);
+const heracrossRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-heracross-run-a.json", import.meta.url),
+);
+const heracrossRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-heracross-run-b.json", import.meta.url),
 );
 
 describe("speciesIdleAnim", () => {
@@ -6167,6 +6189,143 @@ describe("speciesIdleAnim", () => {
       expect(flickerIncreasingFrameAtTick(65)).toMatchObject({ data2: 11, invisible: false, callback: "WaitAnimEnd" });
       expect(speciesFrontIdleRestOffset("HAUNTER")).toEqual({ x2: 0, y2: 0 });
       const selectorValues = Object.values(selectorTables.frontAnimIds.species);
+      expect(selectorValues).not.toContain("ANIM_V_SPRING");
+      expect(selectorValues).not.toContain("ANIM_V_REPEATED_SPRING");
+      expect(selectorValues).not.toContain("ANIM_SPRING_RISING");
+    });
+  });
+
+  describe("lungeGrowFrameAtTick (Anim_LungeGrow source lifecycle)", () => {
+    it("derives the exact 2/2/0 selector census from generated tables", () => {
+      const selectors = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
+      const generated = Object.entries(selectors)
+        .filter(([, family]) => family === "ANIM_LUNGE_GROW")
+        .map(([species]) => species);
+      expect(LUNGE_GROW_FRONT_SPECIES).toEqual(generated);
+      expect(LUNGE_GROW_FRONT_SPECIES).toEqual(["DODRIO", "HERACROSS"]);
+      expect(LUNGE_GROW_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(LUNGE_GROW_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => new Set(
+          (frontierMons.entries as readonly { readonly species: string }[])
+            .map(({ species }) => species.replace(/^SPECIES_/, "")),
+        ).has(species)),
+      );
+      expect(LUNGE_GROW_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of generated) {
+        expect(selectors[species]).toBe("ANIM_LUNGE_GROW");
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins all 66 callbacks, GBA trig writes, affine state, and both normal-front flips", () => {
+      expect(ADD_NEW_ANIM_DEFAULTS).toEqual({ rotation: 0, delay: 0, runs: 1, speed: 0, data: 0 });
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual(
+        expect.arrayContaining([0, 2, 7]),
+      );
+      const callbacks = Array.from({ length: 66 }, (_, tick) => lungeGrowFrameAtTick(tick)!);
+      expect(callbacks).toHaveLength(66);
+      for (const [tick, frame] of callbacks.entries()) {
+        expect(frame.data0, `data0 tick ${tick}`).toBe(0);
+        expect(frame.data2, `data2 tick ${tick}`).toBe(1);
+        expect(frame.normalFrontDontFlip, `dontFlip tick ${tick}`).toBe(true);
+        expect(frame.tryFlipXCalls, `TryFlipX tick ${tick}`).toBe(2);
+        expect(frame.y2, `y2 tick ${tick}`).toBe(0);
+        expect(frame.affineWriteCount, `affine writes tick ${tick}`).toBe(1);
+        if (frame.xSineIndex !== null) {
+          const xTableValue = GBA_SINE_TABLE_256[frame.xSineIndex]!;
+          const scaleTableValue = GBA_SINE_TABLE_256[frame.scaleSineIndex!]!;
+          expect(frame.xSineValue, `x sine tick ${tick}`).toBe(
+            Math.floor((16 * xTableValue) / 256),
+          );
+          expect(frame.scaleSineValue, `scale sine tick ${tick}`).toBe(
+            Math.floor((64 * scaleTableValue) / 256),
+          );
+          expect(frame.x2, `x2 tick ${tick}`).toBe(-frame.xSineValue! + 0);
+          expect(frame.xScale, `xScale tick ${tick}`).toBe(256 - frame.scaleSineValue!);
+          expect(frame.yScale, `yScale tick ${tick}`).toBe(frame.xScale);
+        }
+      }
+    });
+
+    it("pins source ordering, C truncation, sine wrap, tick-0 affine start, and strict terminal guard", () => {
+      expect(lungeGrowFrameAtTick(0)).toEqual({
+        x2: 0, y2: 0, data0: 0, data2Before: 0, data2: 1,
+        data7Before: 0, data7: 8, xSineIndex: 0, xSineValue: 0,
+        scaleSineIndex: 4, scaleSineValue: 6, xScale: 250, yScale: 250,
+        startedAffine: true, normalFrontDontFlip: true, tryFlipXCalls: 2,
+        affineWriteCount: 1, resetSpriteAfterAnim: false,
+        callback: "Anim_LungeGrow", affineMode: "double",
+      });
+      for (let tick = 0; tick <= 64; tick += 1) {
+        const frame = lungeGrowFrameAtTick(tick)!;
+        expect(frame.data7Before).toBe(tick * 8);
+        expect(frame.xSineIndex).toBe(Math.trunc(((tick * 8) % 256) / 2));
+        expect(frame.scaleSineIndex).toBe(Math.trunc((((tick + 1) * 8) % 256) / 2));
+        expect(frame.callback, `active callback ${tick}`).toBe("Anim_LungeGrow");
+        expect(frame.resetSpriteAfterAnim, `active callback ${tick}`).toBe(false);
+      }
+      expect(lungeGrowFrameAtTick(31)).toMatchObject({ data7Before: 248, data7: 256, xSineIndex: 124, scaleSineIndex: 0 });
+      expect(lungeGrowFrameAtTick(32)).toMatchObject({ data7Before: 256, data7: 264, xSineIndex: 0, scaleSineIndex: 4 });
+      expect(lungeGrowFrameAtTick(64)).toMatchObject({ data7Before: 512, data7: 520, callback: "Anim_LungeGrow" });
+    });
+
+    it("terminates only at data7 520 and keeps the reset/identity state byte-stable", () => {
+      const terminal = lungeGrowFrameAtTick(65)!;
+      expect(terminal).toEqual({
+        x2: 0, y2: 0, data0: 0, data2Before: 1, data2: 1,
+        data7Before: 520, data7: 520, xSineIndex: null, xSineValue: null,
+        scaleSineIndex: null, scaleSineValue: null, xScale: 256, yScale: 256,
+        startedAffine: false, normalFrontDontFlip: true, tryFlipXCalls: 2,
+        affineWriteCount: 1, resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd", affineMode: "normal",
+      });
+      expect(lungeGrowFrameAtTick(66)).toEqual(terminal);
+      expect(lungeGrowFrameAtTick(1000)).toEqual(terminal);
+      expect(lungeGrowFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      ["DODRIO", dodrioScenario, 85],
+      ["HERACROSS", heracrossScenario, 214],
+    ] as const)("stages a complete legal three-mon %s Scene-ON party", (_species, scenario, speciesId) => {
+      expect(scenario).toMatchObject({ mode: "mechanicLab", profile: "battle-scene-on", level: 50, challengeNum: 0, trainerId: 50 });
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]!.species).toBe(speciesId);
+      for (const setId of [...scenario.playerSetIds, ...scenario.opponentSetIds]) {
+        expect(setId).toBeGreaterThanOrEqual(110);
+        expect(setId).toBeLessThanOrEqual(199);
+      }
+      for (const mon of [...scenario.overrides.parties.player, ...scenario.overrides.parties.opponent]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({ item: expect.any(Number), abilitySlot: expect.any(Number), friendship: expect.any(Number), gender: expect.any(String), shiny: expect.any(Boolean) }));
+      }
+    });
+
+    it.each([
+      ["DODRIO", dodrioRunA, dodrioRunB, dodrioRawA, dodrioRawB, 85, 8, 372, "16487508c32e6eb17cb5e46531161779bf8e18440e1469f9e81a0d119d5b1760"],
+      ["HERACROSS", heracrossRunA, heracrossRunB, heracrossRawA, heracrossRawB, 214, 4, 373, "881886efd435b939ebb35bd0a017b4602cbf06fd7c6be8d72871ed22c75fc082"],
+    ] as const)("matches byte-identical raw settled %s Scene-ON receipts", (species, runA, runB, rawA, rawB, speciesId, animCmdIndex, rawBytes, rawSha256) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA).toHaveLength(rawBytes);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(selectorTables.frontAnimIds.species[species]).toBe("ANIM_LUNGE_GROW");
+      expect(runA.ticks[0]!.battler1).toMatchObject({ x2: 0, y2: 0, animNum: 1, animCmdIndex, data2: speciesId, callback: "0x8007428", callbackSymbol: "SpriteCallbackDummy" });
+    });
+
+    it("regression-pins GROW_IN_STAGES and leaves adjacent circle/lunge/spring selectors unported", () => {
+      expect(growInStagesFrameAtTick(114)).toMatchObject({ xScale: 256, yScale: 256, callback: "WaitAnimEnd" });
+      expect(speciesFrontIdleRestOffset("GENGAR")).toEqual({ x2: 0, y2: 0 });
+      expect(selectorTables.frontAnimIds.species.KINGDRA).toBe("ANIM_CIRCLE_INTO_BG");
+      expect(speciesFrontIdleRestOffset("KINGDRA")).toBeNull();
+      const selectorValues = Object.values(selectorTables.frontAnimIds.species);
+      expect(selectorValues).not.toContain("ANIM_H_LUNGE");
       expect(selectorValues).not.toContain("ANIM_V_SPRING");
       expect(selectorValues).not.toContain("ANIM_V_REPEATED_SPRING");
       expect(selectorValues).not.toContain("ANIM_SPRING_RISING");

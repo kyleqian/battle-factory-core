@@ -48,6 +48,7 @@ export type SpeciesFrontAnimFamily =
   | "CIRCULAR_STRETCH_TWICE"
   | "GROW_VIBRATE"
   | "GROW_IN_STAGES"
+  | "LUNGE_GROW"
   | "FLASH_YELLOW"
   | "FLICKER_INCREASING"
   | "H_JUMPS"
@@ -82,6 +83,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "CIRCULAR_STRETCH_TWICE",
   "GROW_VIBRATE",
   "GROW_IN_STAGES",
+  "LUNGE_GROW",
   "FLASH_YELLOW",
   "FLICKER_INCREASING",
   "H_JUMPS",
@@ -378,6 +380,23 @@ export const GROW_IN_STAGES_FACTORY_FRONT_SPECIES: readonly string[] = Object.fr
 /** The staged-growth mappings outside the Factory pool (LUGIA). */
 export const GROW_IN_STAGES_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   GROW_IN_STAGES_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All source selector mappings for `ANIM_LUNGE_GROW`. */
+export const LUNGE_GROW_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_LUNGE_GROW")
+    .map(([species]) => species),
+);
+
+/** Every lunge/grow selector mapping is reachable through Factory rentals. */
+export const LUNGE_GROW_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  LUNGE_GROW_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no lunge/grow mappings outside the Factory rental pool. */
+export const LUNGE_GROW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  LUNGE_GROW_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /** All 5 source selector mappings for the normal `ANIM_BOUNCE_ROTATE_TO_SIDES`. */
@@ -1281,6 +1300,27 @@ export interface GrowInStagesFrame extends SpeciesIdleOffset {
   readonly affineMode: "double" | "normal";
 }
 
+export interface LungeGrowFrame extends SpeciesIdleOffset {
+  readonly data0: 0;
+  readonly data2Before: 0 | 1;
+  readonly data2: 1;
+  readonly data7Before: number;
+  readonly data7: number;
+  readonly xSineIndex: number | null;
+  readonly xSineValue: number | null;
+  readonly scaleSineIndex: number | null;
+  readonly scaleSineValue: number | null;
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXCalls: 2;
+  readonly affineWriteCount: 1;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "Anim_LungeGrow" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
 /** `InitAnimData`, called by `AddNewAnim`, source defaults adjacent to this family. */
 export const ADD_NEW_ANIM_DEFAULTS = Object.freeze({
   rotation: 0,
@@ -1988,6 +2028,78 @@ export function growInStagesFrameAtTick(
   }
 
   throw new Error("unreachable GrowInStages reducer state");
+}
+
+/**
+ * Source-order normal-front port of `Anim_LungeGrow`
+ * (`pokemon_animation.c:911-939,984-1064,3507-3534,5540-5544` and
+ * `trig.c:514-518`). `Task_HandleMonAnimation` zeroes data2/data7 before
+ * callback zero. Tick zero starts affine mode before performing its ordinary
+ * motion/scale write. Active callbacks consume data7 0..512 inclusive; only
+ * the next callback observes the strict `data7 > 512` guard, clears x2,
+ * restores identity affine state, resets the sprite, and installs stable
+ * `WaitAnimEnd`. Both source-order normal-front `TryFlipX` calls are no-ops.
+ */
+export function lungeGrowFrameAtTick(
+  ticksSinceStart: number,
+): LungeGrowFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  const terminalTick = 65;
+  if (ticksSinceStart >= terminalTick) {
+    return {
+      x2: 0,
+      y2: 0,
+      data0: 0,
+      data2Before: 1,
+      data2: 1,
+      data7Before: 520,
+      data7: 520,
+      xSineIndex: null,
+      xSineValue: null,
+      scaleSineIndex: null,
+      scaleSineValue: null,
+      xScale: 256,
+      yScale: 256,
+      startedAffine: false,
+      normalFrontDontFlip: true,
+      tryFlipXCalls: 2,
+      affineWriteCount: 1,
+      resetSpriteAfterAnim: true,
+      callback: "WaitAnimEnd",
+      affineMode: "normal",
+    };
+  }
+
+  const data7Before = ticksSinceStart * 8;
+  const xSineIndex = Math.trunc((data7Before % 256) / 2);
+  const xSineValue = gbaSin(xSineIndex, 16);
+  const data7 = data7Before + 8;
+  const scaleSineIndex = Math.trunc((data7 % 256) / 2);
+  const scaleSineValue = gbaSin(scaleSineIndex, 64);
+  const scale = 256 - scaleSineValue;
+  return {
+    x2: -xSineValue + 0,
+    y2: 0,
+    data0: 0,
+    data2Before: ticksSinceStart === 0 ? 0 : 1,
+    data2: 1,
+    data7Before,
+    data7,
+    xSineIndex,
+    xSineValue,
+    scaleSineIndex,
+    scaleSineValue,
+    xScale: scale,
+    yScale: scale,
+    startedAffine: ticksSinceStart === 0,
+    normalFrontDontFlip: true,
+    tryFlipXCalls: 2,
+    affineWriteCount: 1,
+    resetSpriteAfterAnim: false,
+    callback: "Anim_LungeGrow",
+    affineMode: "double",
+  };
 }
 
 export type BounceRotateToSidesTableEntry = readonly [
@@ -3306,6 +3418,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = growInStagesFrameAtTick(114);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_GrowInStages did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "LUNGE_GROW": {
+      const terminal = lungeGrowFrameAtTick(65);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_LungeGrow did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
