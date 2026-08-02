@@ -9618,7 +9618,7 @@ function drawTurn5EndeavorText(
       turn1NextCommandHandoff,
       turn2NextCommandHandoff,
       onixHp,
-      true,
+      null,
       true,
     );
   }
