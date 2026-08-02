@@ -8,6 +8,43 @@
 > routing hint, not a deferral or an acceptance-bar waiver; escalate any worker
 > result that does not survive supervisor verification.
 
+## Front `ANIM_TWIST` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **5 mappings / 5
+Factory-reachable species / 0 outside-Factory mappings** — SHELLDER, HORSEA,
+STARMIE, CLAMPERL, and ANORITH. Only source ID **18** is promoted; the
+accepted source-ID-78 `ANIM_TWIST_TWICE` path remains regression-pinned. No
+adjacent selector, back route, move, battle state, or engine boundary changed.
+Move coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**;
+Open-only **0/1** and Outside Factory **0/77**. `ANIMATION_COVERAGE.json`
+remains SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:1037-1059,1420-1470,
+3732-3741,5540-5544`, `pokemon_animation.h:58`, and
+`pokemon.c:1496,1522,1527,1754,1771` pin `AddNewAnim` defaults, normal
+rotation=512/delay=0/implicit runs=1, immediate `Twist` before callback
+installation, source-shared signed-s16 sine/u16 affine writes, and the strict
+`> rotation` identity/reset/`WaitAnimEnd` handoff. Dense Tier-1 coverage
+exhausts all **34** callbacks (motion ticks 0..32 consuming 0..512; terminal
+tick 33 sees 528 and leaves data2=544) plus stable rest and invalid inputs.
+Fresh complete legal challenge-0 Scene-ON parties were probed twice each only
+through `tools/run-mgba-probe.py`; raw pairs are byte-identical: SHELLDER
+**372 B** `f9b846b9d9418dd0a678c4d1222f7c9df42464634fee8ac0bd39a3b0e6c02b6a`,
+HORSEA **373 B** `16d0d76e49bf990c01fa4957dc6ff92d99510fe56b3e2141478ce82d64c082d3`,
+STARMIE **373 B** `9151d0bd0b93524e3ecf9091c2e7aebae9e9860db06cfb0398606944df1e0712`,
+CLAMPERL **373 B** `8df94958eab3a2d6d67008250c5511f1b2902f1b70b106aadfe397e2fcf05f61`,
+and ANORITH **373 B** `81ddad2de88ce1327715b4b3a17141f60c0d3339a8f967977b1e8f63cbefa48f`.
+Each settles battler 1 at x2=0/y2=0, animNum=1, its source command index,
+species data2, and `SpriteCallbackDummy`.
+
+**Verification / next:** focused family/evidence plus both animation ratchets
+are **329/329** green; `npx tsc --noEmit`, full `npm test` (**601 files /
+6,177 passed / 1 skipped**), and production build (**549 modules transformed**)
+are green. The next largest unsupported generated Factory front family is
+**`ANIM_H_SLIDE`** (source ID **3**; **4 mappings / 4 Factory / 0 outside**) —
+KRABBY, CORSOLA, ZIGZAGOON, and WHISMUR.
+
 ## Front `ANIM_TUMBLING_FRONT_FLIP_TWICE` family accepted (2026-08-02)
 
 **State:** exact for the complete generated selector census: **1 mapping / 1
