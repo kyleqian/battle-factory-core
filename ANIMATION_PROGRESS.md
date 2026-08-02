@@ -24,9 +24,12 @@ animNum 1/cmd 2/data2 78, `85fdcb480a1a70a947a1332a6c22f3f23fbcd9c1e3ff7dbcf78bf
 ABSOL **373 B**, animNum 1/cmd 4/data2 359,
 `bb2389a403c0071b10a79610ce82ebcfcb4bea4467e261ac8c0abc4013825279`.
 
-**Verification / next:** lifecycle/evidence plus boundary ratchet are
-**332/332** green; `npx tsc --noEmit`, `npm run animation:coverage`, full
-`npm test`, and `npm run build` are green. Commits: `88412662`
+**Verification / next:** supervisor reruns are **335/335** green across the
+lifecycle, evidence, and executable-frontier ratchet; fresh Scene-ON probes
+match both committed receipts byte-for-byte. `npx tsc --noEmit` and
+`npm run animation:coverage` are green. Persistent-tree `npm test` is green at
+**607 files / 6,227 passed / 1 skipped**; `npm run build` is green with **549
+modules transformed**. Commits: `88412662`
 (reducer/census/dense lifecycle) and `24d21c24` (fixtures/source/receipt
 evidence). Next largest unsupported generated Factory-front family is pending
 supervisor selection.
