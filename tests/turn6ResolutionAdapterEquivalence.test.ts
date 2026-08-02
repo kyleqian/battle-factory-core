@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { currentPPForActiveMon } from "../src/engine/battleMenu.ts";
 import { resolveTurn1CompletedResolutionNextCommandHandoff } from "../src/engine/turn1ResolutionAdapter.ts";
 import { resolveTurn2CompletedResolutionNextCommandHandoff } from "../src/engine/turn2ResolutionAdapter.ts";
+import { resolveTurn3CompletedResolutionNextCommandHandoff } from "../src/engine/turn3ResolutionAdapter.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
 import { resolveTurn5CompletedResolutionNextCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
 import {
@@ -28,7 +29,7 @@ describe("turn6ResolutionAdapter: #39 completed-turn-6/next-command handoff proo
     const handoff = resolveTurn6CompletedResolutionNextCommandHandoff();
     const liveReceipt = currentPPForActiveMon(
       onix,
-      resolveTurn1CompletedResolutionNextCommandHandoff(1308), resolveTurn2CompletedResolutionNextCommandHandoff(2197), true, true,
+      resolveTurn1CompletedResolutionNextCommandHandoff(1308), resolveTurn2CompletedResolutionNextCommandHandoff(2197), resolveTurn3CompletedResolutionNextCommandHandoff(3172), true,
       turn5Handoff,
       handoff,
     );
@@ -48,7 +49,7 @@ describe("turn6ResolutionAdapter: #39 completed-turn-6/next-command handoff proo
     } as const;
     const liveReceipt = currentPPForActiveMon(
       genericMoveset,
-      resolveTurn1CompletedResolutionNextCommandHandoff(1308), resolveTurn2CompletedResolutionNextCommandHandoff(2197), true, true,
+      resolveTurn1CompletedResolutionNextCommandHandoff(1308), resolveTurn2CompletedResolutionNextCommandHandoff(2197), resolveTurn3CompletedResolutionNextCommandHandoff(3172), true,
       resolveTurn5CompletedResolutionNextCommandHandoff(),
       resolveTurn6CompletedResolutionNextCommandHandoff(),
     );

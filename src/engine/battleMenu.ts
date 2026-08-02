@@ -31,6 +31,10 @@ import {
   isTurn2NextCommandHandoffReady,
   type Turn2CompletedResolutionNextCommandHandoff,
 } from "./turn2ResolutionAdapter.ts";
+import {
+  isTurn3NextCommandHandoffReady,
+  type Turn3CompletedResolutionNextCommandHandoff,
+} from "./turn3ResolutionAdapter.ts";
 import type { Turn5CompletedResolutionNextCommandHandoff } from "./turn5ResolutionAdapter.ts";
 import type { Turn6CompletedResolutionNextCommandHandoff } from "./turn6ResolutionAdapter.ts";
 import type { Turn7CompletedResolutionNextCommandHandoff } from "./turn7ResolutionAdapter.ts";
@@ -2560,11 +2564,9 @@ export function turn2KickoffBounceTick(
  * persisted slot instead of reconstructing history from a resolved count.
  */
 /**
- * S7 slice I: `turn3Resolved` (docs/battle-turn-notes.md §13/§22) adds a
- * SECOND slot-0 decrement - turn 3 also used ROCK_SLIDE (this engine's own
- * scripted turn-3 choice, cursor 0 again after the turn-2->3 UP-nav), so by
- * turn 4's own reopen ROCK_SLIDE has been used twice (turns 1 and 3, PP
- * 10->8), independent of turn 2's slot-2 DRAGON_BREATH receipt.
+ * The completed turn-3 receipt owns the SECOND slot-0 decrement: its
+ * canonical tuple includes both ROCK_SLIDE uses (turns 1 and 3, PP 10->8)
+ * while retaining turn 2's independent slot-2 DRAGON_BREATH deduction.
  *
  * S7 slice J: `turn4Resolved` (docs/battle-turn-notes.md §13/§23) adds a
  * THIRD slot-0 decrement - turn 4 also used ROCK_SLIDE (cursor stayed at 0,
@@ -2575,7 +2577,7 @@ export function currentPPForActiveMon(
   moveset: ActiveMonMoveset,
   turn1NextCommandHandoff: Turn1CompletedResolutionNextCommandHandoff | null = null,
   turn2NextCommandHandoff: Turn2CompletedResolutionNextCommandHandoff | null = null,
-  turn3Resolved: boolean = false,
+  turn3NextCommandHandoff: Turn3CompletedResolutionNextCommandHandoff | null = null,
   turn4Resolved: boolean = false,
   turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null = null,
   turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null = null,
@@ -2637,10 +2639,11 @@ export function currentPPForActiveMon(
     : latestEarlierSlot2Pp === undefined
       ? 0
       : rentalMoveset("ONIX").maxPP[2] - latestEarlierSlot2Pp;
-  const slot0UsesBeforeTurn5 =
-    turn1Slot0Uses +
-    (turn3Resolved ? 1 : 0) +
-    (turn4Resolved ? 1 : 0);
+  const slot0UsesAfterTurn3 = isTurn3NextCommandHandoffReady(turn3NextCommandHandoff)
+    ? rentalMoveset("ONIX").maxPP[turn3NextCommandHandoff.persistedMoveSlot]
+      - turn3NextCommandHandoff.playerPp[turn3NextCommandHandoff.persistedMoveSlot]
+    : turn1Slot0Uses;
+  const slot0UsesBeforeTurn5 = slot0UsesAfterTurn3 + (turn4Resolved ? 1 : 0);
   // The handoffs own full canonical tuples. This consumer reconstructs each
   // selected slot against the supplied moveset, preserving its existing
   // generic-moveset behavior while the live Onix boundary receives the

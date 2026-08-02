@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { currentPPForActiveMon } from "../src/engine/battleMenu.ts";
 import { resolveTurn1CompletedResolutionNextCommandHandoff } from "../src/engine/turn1ResolutionAdapter.ts";
 import { resolveTurn2CompletedResolutionNextCommandHandoff } from "../src/engine/turn2ResolutionAdapter.ts";
+import { resolveTurn3CompletedResolutionNextCommandHandoff } from "../src/engine/turn3ResolutionAdapter.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
 import { resolveTurn5CompletedResolutionNextCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
 import { resolveTurn6CompletedResolutionNextCommandHandoff } from "../src/engine/turn6ResolutionAdapter.ts";
@@ -29,7 +30,7 @@ describe("turn8ResolutionAdapter: #39 completed-turn-8/next-command handoff proo
     const handoff = resolveTurn8CompletedResolutionNextCommandHandoff();
     const liveReceipt = currentPPForActiveMon(
       onix,
-      resolveTurn1CompletedResolutionNextCommandHandoff(1308), resolveTurn2CompletedResolutionNextCommandHandoff(2197), true, true,
+      resolveTurn1CompletedResolutionNextCommandHandoff(1308), resolveTurn2CompletedResolutionNextCommandHandoff(2197), resolveTurn3CompletedResolutionNextCommandHandoff(3172), true,
       resolveTurn5CompletedResolutionNextCommandHandoff(),
       resolveTurn6CompletedResolutionNextCommandHandoff(),
       resolveTurn7CompletedResolutionNextCommandHandoff(),
@@ -51,7 +52,7 @@ describe("turn8ResolutionAdapter: #39 completed-turn-8/next-command handoff proo
     } as const;
     const liveReceipt = currentPPForActiveMon(
       genericMoveset,
-      resolveTurn1CompletedResolutionNextCommandHandoff(1308), resolveTurn2CompletedResolutionNextCommandHandoff(2197), true, true,
+      resolveTurn1CompletedResolutionNextCommandHandoff(1308), resolveTurn2CompletedResolutionNextCommandHandoff(2197), resolveTurn3CompletedResolutionNextCommandHandoff(3172), true,
       resolveTurn5CompletedResolutionNextCommandHandoff(),
       resolveTurn6CompletedResolutionNextCommandHandoff(),
       resolveTurn7CompletedResolutionNextCommandHandoff(),
