@@ -1,5 +1,36 @@
 # Animation coverage
 
+## Front `ANIM_CIRCULAR_VIBRATE` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **2 mappings / 2
+Factory-reachable species / 0 outside-Factory mappings** — RAPIDASH and ABSOL.
+Only source ID **17** is promoted; move coverage, back routing, adjacent
+selectors, battle state, facility progression, and presentation boundaries are
+unchanged. Coverage remains **107/276 exact, 0 partial, 0 staged, 169
+unsupported**; `ANIMATION_COVERAGE.json` remains SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,1392-1418`,
+`pokemon_animation.h:57`, `pokemon.c:1484,1757`, and `trig.c:514-523` pin the
+task's zeroed data[2], direct callback install, signed s16 position/data writes,
+parity-selected sign, source-order amplitude sine then y-sine/x-cosine writes,
+and strict terminal reset. Dense Tier-1 coverage exhausts active callbacks
+**0..56** (data2 **0..504**) plus tick **57** sentinel/reset/`WaitAnimEnd`,
+stable terminal, all representative x/y samples, sign alternation, and invalid
+inputs. Fresh complete legal challenge-0 Scene-ON parties were probed twice per
+species through `tools/run-mgba-probe.py`; each pair is byte-identical and
+settles battler 1 at x2=0/y2=0/`SpriteCallbackDummy`: RAPIDASH **372 B**,
+animNum 1/cmd 2/data2 78, `85fdcb480a1a70a947a1332a6c22f3f23fbcd9c1e3ff7dbcf78bf90137e50431`;
+ABSOL **373 B**, animNum 1/cmd 4/data2 359,
+`bb2389a403c0071b10a79610ce82ebcfcb4bea4467e261ac8c0abc4013825279`.
+
+**Verification / next:** lifecycle/evidence plus boundary ratchet are
+**332/332** green; `npx tsc --noEmit`, `npm run animation:coverage`, full
+`npm test`, and `npm run build` are green. Commits: `88412662`
+(reducer/census/dense lifecycle) and `24d21c24` (fixtures/source/receipt
+evidence). Next largest unsupported generated Factory-front family is pending
+supervisor selection.
+
 ## Front `ANIM_BACK_AND_LUNGE` family accepted (2026-08-02)
 
 **State:** exact for the complete generated selector census: **2 mappings / 2
