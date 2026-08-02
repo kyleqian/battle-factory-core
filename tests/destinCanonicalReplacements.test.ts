@@ -30,7 +30,7 @@
  *   MURKROW) and PIDGEOTTO's own RAM-read stat block:
  *   `docs/battle-turn-notes.md` §13 note 7 (atk 98/def 61/spAtk 56/spDef 56)
  *   and §47-50 (turn 13 DRAGON_BREATH -> faint -> Murkrow switch-in, tick
- *   15887 KO / TURN13_ICONBAR_CREATE_TICK 16847 window).
+ *   15887 KO / 26-frame opponent-faint continuation window).
  * - Species types (ONIX/GROVYLE/PIDGEOTTO/MURKROW) and move
  *   type/power/id: `src/data/gen/species-types.json`,
  *   `src/data/gen/moves.json` (generated, source-derived catalogs already

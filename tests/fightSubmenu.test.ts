@@ -65,6 +65,11 @@ import {
 } from "../src/engine/partySelect.ts";
 import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "../src/engine/turn15FlyResolutionAdapter.ts";
 import { resolveTurn13CompletedResolutionNextCommandHandoff } from "../src/engine/turn13ResolutionAdapter.ts";
+import {
+  createOpponentFaintPresentationOwner,
+  storeOpponentFaintDismiss,
+  type OpponentFaintPresentationOwner,
+} from "../src/engine/opponentFaintPresentationOwner.ts";
 import { resolveTurn5CompletedResolutionNextCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
 import { resolveTurn6CompletedResolutionNextCommandHandoff } from "../src/engine/turn6ResolutionAdapter.ts";
 import { resolveTurn7CompletedResolutionNextCommandHandoff } from "../src/engine/turn7ResolutionAdapter.ts";
@@ -176,7 +181,7 @@ function stateAtTick(firstTickAbsolute: number): EngineState {
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
-    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: null, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null },
+    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: null, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null },
   };
 }
 
@@ -185,12 +190,14 @@ function press(state: EngineState, buttons: GbaButton[]): EngineState {
 }
 
 describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gating, 1-tick lag, B-close resume)", () => {
-  it("installs the typed turn-13 handoff and its FLY owner together before reopening FIGHT on the persisted DRAGON_BREATH slot", () => {
+  it("installs the typed turn-13 handoff only after the opponent-faint continuation completes", () => {
     const initial = createInitialState({ appRoute: "canonical-recorded" });
     // This synthetic late-turn fixture must still be later than every
     // retained predecessor epoch, including the completed-turn-3 reset.
     const turn13Confirmed = confirmFightMove(openFightSubmenu(5000, ONIX_MOVESET, 2), 5001);
-    const state = tick({
+    const sceneAt = (
+      opponentFaintPresentationOwner: OpponentFaintPresentationOwner | null = null,
+    ) => ({
       ...initial,
       draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
       battleScene: {
@@ -210,8 +217,20 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
         turn10NextCommandHandoff: resolveTurn10CompletedResolutionNextCommandHandoff(),
         turn11NextCommandHandoff: resolveTurn11CompletedResolutionNextCommandHandoff(),
         turn12NextCommandHandoff: resolveTurn12CompletedResolutionNextCommandHandoff(),
+        opponentFaintPresentationOwner,
       },
-    }, new Set(["A"]));
+    });
+
+    const notYet = tick(
+      sceneAt(storeOpponentFaintDismiss(createOpponentFaintPresentationOwner(), 20_001 - 290)),
+      new Set(["A"]),
+    );
+    expect(notYet.battleScene!.turn13NextCommandHandoff).toBeNull();
+
+    const state = tick(
+      sceneAt(storeOpponentFaintDismiss(createOpponentFaintPresentationOwner(), 20_001 - 291)),
+      new Set(["A"]),
+    );
 
     expect(state.battleScene!.turn13NextCommandHandoff).toEqual(
       resolveTurn13CompletedResolutionNextCommandHandoff(),
@@ -640,7 +659,7 @@ function stateAtTurn3Reopen(firstTickAbsolute: number): EngineState {
     turn7NextCommandHandoff: null,
     turn8NextCommandHandoff: null,
     turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null,
-    turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null,
+    turn12NextCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null,
     },
   };
 }
@@ -767,7 +786,7 @@ function stateAtTurn3Confirm(): EngineState {
     turn7NextCommandHandoff: null,
     turn8NextCommandHandoff: null,
     turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null,
-    turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null,
+    turn12NextCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null,
     },
   };
 }
@@ -961,7 +980,7 @@ function stateAtTurn4Confirm(): EngineState {
     turn7NextCommandHandoff: null,
     turn8NextCommandHandoff: null,
     turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null,
-    turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null,
+    turn12NextCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null,
     },
   };
 }
@@ -1011,7 +1030,7 @@ function stateAtTurn5Confirm(): EngineState {
     turn7NextCommandHandoff: null,
     turn8NextCommandHandoff: null,
     turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null,
-    turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null,
+    turn12NextCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null,
     },
   };
 }
@@ -1119,7 +1138,7 @@ function stateAtTurn5SitrusConfirm(): EngineState {
     turn7NextCommandHandoff: null,
     turn8NextCommandHandoff: null,
     turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null,
-    turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null,
+    turn12NextCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null,
     },
   };
 }

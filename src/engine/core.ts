@@ -134,7 +134,7 @@ import {
   TURN10_ROCKSLIDE_MENU_REDRAW_DELAY,
   TURN11_ROCKSLIDE_MENU_REDRAW_DELAY,
   TURN12_ROCKSLIDE_MENU_REDRAW_DELAY,
-  TURN13_DRAGONBREATH_MENU_REDRAW_DELAY,
+  TURN13_SWITCHIN_MENU_REDRAW_AFTER_DISMISS,
   TURN14_DRAGONBREATH_MENU_REDRAW_DELAY,
   TURN16_FIRE_PUNCH_MENU_REDRAW_DELAY,
   opponentFaintDismissEligible,
@@ -158,6 +158,11 @@ import {
   isTurn13NextCommandHandoffReady,
   resolveTurn13CompletedResolutionNextCommandHandoff,
 } from "./turn13ResolutionAdapter.ts";
+import {
+  createOpponentFaintPresentationOwner,
+  opponentFaintContinuationElapsed,
+  storeOpponentFaintDismiss,
+} from "./opponentFaintPresentationOwner.ts";
 import {
   isTurn5NextCommandHandoffReady,
   resolveTurn5CompletedResolutionNextCommandHandoff,
@@ -947,17 +952,25 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     if (battleScene.sendOutPressElapsed === null && newKeys.has("A") && sendOutPressEligible(SCENE_TICK0 + battleScene.elapsed)) {
       battleScene = { ...battleScene, sendOutPressElapsed: battleScene.elapsed };
     }
-    // The staged damage/faint receipt owns this opponent KO-text dismiss.
-    // Eligibility is the message controller's settled-cursor boundary, so
-    // the input gate needs no turn-resolution flag. The one-shot field is
-    // presentation-semantic and the same edge drives the existing switch-in
-    // continuation.
+    // The faint-text controller publishes its typed owner at the settled
+    // input-ready boundary. A fresh A then atomically retains the accepted
+    // edge, frozen cursor, and automatic opponent switch-in continuation.
+    const nextSceneElapsed = battleScene.elapsed + 1;
     if (
-      battleScene.opponentFaintDismissElapsed === null &&
-      newKeys.has("A") &&
-      opponentFaintDismissEligible(SCENE_TICK0 + battleScene.elapsed + 1)
+      battleScene.opponentFaintPresentationOwner === null
+      && opponentFaintDismissEligible(SCENE_TICK0 + nextSceneElapsed)
     ) {
-      battleScene = { ...battleScene, opponentFaintDismissElapsed: battleScene.elapsed + 1 };
+      battleScene = {
+        ...battleScene,
+        opponentFaintPresentationOwner: createOpponentFaintPresentationOwner(),
+      };
+    }
+    const opponentFaintOwner = battleScene.opponentFaintPresentationOwner;
+    if (opponentFaintOwner !== null && newKeys.has("A")) {
+      const storedOwner = storeOpponentFaintDismiss(opponentFaintOwner, nextSceneElapsed);
+      if (storedOwner !== opponentFaintOwner) {
+        battleScene = { ...battleScene, opponentFaintPresentationOwner: storedOwner };
+      }
     }
     const resolutionOwner = battleScene.resolutionOwner ?? null;
     const forcedPartySelect = resolutionOwner?.forcedPartySelect ?? null;
@@ -1144,6 +1157,10 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let turn13NextCommandHandoff = battleScene.turn13NextCommandHandoff;
     let lockedActionOwner = battleScene.resolutionOwner ?? null;
     let terminalResolution = battleScene.terminalResolution ?? null;
+    const opponentFaintContinuationAge = opponentFaintContinuationElapsed(
+      battleScene.opponentFaintPresentationOwner,
+      battleScene.elapsed + 1,
+    );
     if (
       turn1NextCommandHandoff === null
       && isTurn1ChooseActionBounceReset(
@@ -1522,14 +1539,16 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     } else if (
       isTurn12NextCommandHandoffReady(turn12NextCommandHandoff) &&
       !isTurn13NextCommandHandoffReady(turn13NextCommandHandoff) &&
+      opponentFaintContinuationAge !== null &&
+      opponentFaintContinuationAge >= TURN13_SWITCHIN_MENU_REDRAW_AFTER_DISMISS &&
       fightSubmenu.confirmElapsed !== null &&
       newKeys.has("A") &&
-      sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN13_DRAGONBREATH_MENU_REDRAW_DELAY
+      sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed
     ) {
       // S7/S8 (docs/turn14-notes.md): turn 13's own whole DRAGON_BREATH-
       // faint/MURKROW-switch-in resolution has redrawn the settled action
-      // menu by now (`TURN13_DRAGONBREATH_MENU_REDRAW_DELAY` past turn 13's
-      // own real confirm) - a fresh A-press reopens FIGHT for turn 14,
+      // menu by now (the typed owner's switch-in continuation reached its
+      // local redraw boundary) - a fresh A-press reopens FIGHT for turn 14,
       // cursor persisted at slot 2 (DRAGON_BREATH, where turn 13's own
       // confirm left it) - no further nav needed, docs/turn14-notes.md's
       // own "cursor persisted... NO DOWN press this turn" ledger. Mirrors
