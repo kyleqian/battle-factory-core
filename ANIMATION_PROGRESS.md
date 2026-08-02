@@ -34,13 +34,12 @@ status is promoted for send-out coverage.
 
 **Notes:** focused lifecycle/source/census/evidence is **11/11**; both
 animation/executable-frontier ratchets are **9/9**; `npx tsc --noEmit`,
-`npm run animation:coverage`, and production build are green. Commits:
-`5f9092aa` (reducer/census/lifecycle), `e91d6a15` (source evidence, dense
-probe, and paired Scene-ON fixtures), and `86b7e5ed` (source-correct shake-tail
-counter). `npm test` was run repeatedly with no assertion failures observed in
-the completed batches, but the full forked suite exceeded the command runner's
-time window before its final summary; the focused gates above are the final
-green checks for this worker.
+`npm run animation:coverage`, and production build (**552 modules
+transformed**) are green. Full `npm test` is green at **620 files / 6,325
+passed / 1 skipped**. Commits: `5f9092aa` (reducer/census/lifecycle),
+`e91d6a15` (source evidence, dense probe, and paired Scene-ON fixtures),
+`86b7e5ed` (source-correct shake-tail counter), `30d30ba8` (typed geometry
+input), and `b7340908` (ledger and unsupported-control regression).
 
 ## Front `ANIM_SWING_CONCAVE_FAST_SHORT` family accepted (2026-08-02)
 
