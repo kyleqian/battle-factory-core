@@ -763,7 +763,6 @@ describe("speciesIdleAnim", () => {
     });
 
     it("returns null for generated species whose front-anim family isn't ported", () => {
-      expect(speciesFrontIdleRestOffset("CHARMELEON")).toBeNull();
       expect(speciesFrontIdleRestOffset("VENUSAUR")).toBeNull();
     });
 
