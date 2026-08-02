@@ -1,5 +1,42 @@
 # Animation coverage
 
+## Front `ANIM_GLOW_ORANGE` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **2 mappings / 2
+Factory-reachable / 0 outside-Factory** — KAKUNA and PONYTA. Only source ID
+**32** is promoted. `ANIMATION_COVERAGE.json` remains byte-identical at
+SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`;
+move coverage is still **107/276 exact, 0 partial, 0 staged, 169
+unsupported**. Adjacent glow selectors, back routing, damage/RNG/turn order,
+facility state, and engine interfaces are untouched.
+
+**Did:** source pins `pokemon_animation.c:911-939,1539-1560,2003-2006`,
+`pokemon_animation.h:72`, `pokemon.c:1420,1483`, `palette.h:24`, and
+`constants/rgb.h:7`: task-zeroed signed `data[2]/[6]/[7]`, direct callback
+install, OBJ palette masking, orange `RGB(31,22,0)` = `0x02df`, amplitude 12,
+speed 2, source-order strict guard, restore/`WaitAnimEnd`, and stable terminal.
+The shared port reuses only the source `GlowColor` lifecycle; dense Tier-1
+coverage exhausts active callbacks **0..64** (`data2` 0..128 by twos) and
+terminal **65**, including palette/sine boundaries, invalid inputs, and the
+unsupported blue control while black-glow regression remains dense. Fresh
+complete legal challenge-0 Scene-ON RAM probes ran twice per species only
+through `tools/run-mgba-probe.py`; raw pairs are byte-identical and settle
+battler 1 at x2=0/y2=0/`SpriteCallbackDummy`: KAKUNA species 14, animNum 1,
+cmd 10, 373 B, `323b9838655b0faa062cb8852a08374e341e15dc02bc8f43f9f47c5e00c26c37`;
+PONYTA species 77, animNum 1, cmd 1, 372 B,
+`4a5bf6f9883e9527190e3af1d0a62fb4ab41124988ee567ba78a234f0fbd97ba`.
+
+**Next:** the generated-table rank after source ID 32 is
+**`ANIM_SWING_CONCAVE_FAST_SHORT`** (source ID **45**): **3 mappings / 2
+Factory / 1 outside** — Factory SANDSHREW and LATIAS; KYOGRE outside.
+
+**Notes:** focused orange/black lifecycle + evidence, species-idle, and both
+ratchets are **360/360**; `npx tsc --noEmit`, `npm run animation:coverage`,
+full `npm test` (**616 files / 6,303 passed / 1 skipped**), and `npm run build`
+are green. Commits: `cdd9aceb` (shared lifecycle/census/dense reducer) and
+`a44d1d00` (source evidence plus paired Scene-ON fixtures). No move status is
+promoted for send-out coverage.
+
 ## Front `ANIM_RISING_WOBBLE` family accepted (2026-08-02)
 
 **State:** exact for the complete generated selector census: **3 mappings / 2
