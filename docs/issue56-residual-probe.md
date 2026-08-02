@@ -347,3 +347,94 @@ modified; new files were this doc and
 instrument's result; new committed file
 `tests/issue56ActionMenuHandoffFrame.test.ts`; still no other production
 code or existing traces modified.
+
+## Q1 RAM attribution follow-up — YOSHI frame 444 (2026-08-01, side lane)
+
+This is the concrete OAM read requested by Q1's next step.  It used the
+Battle Scene OFF oracle and a fresh run of the unchanged trace:
+
+```sh
+npm run compare -- tools/compare/traces/factory-arbitrary-intro-yoshi-off.json \
+  <scratch>/yoshi-full --summary
+```
+
+The current result is **700/751 matched**.  Frame 444 is still `DIFF 219px`
+with its prior `x=158..161` pink/white column signature.  There is no frame
+536 entry in this current mismatch list, so the 2026-07-31 handoff-clock fix
+is present; no 536 OAM investigation was started.
+
+The committed probe has its exact reproduction command in its header; the
+actual capture used absolute BattleLab frames 1614:1616 (app frames
+443:445):
+
+```sh
+python3 tools/run-mgba-probe.py <fresh-output.json> -- \
+  tools/probe/dump-issue56-yoshi-materialize-oam.py <fresh-output.json> \
+  tools/battle-lab/factory-arbitrary-intro-yoshi-off.json 1614:1616
+```
+
+`gBattlerSpriteIds` was `[3, 8, 0, 0]`, so the opponent is `gSprites[8]`.
+The direct sprite and its *hardware* OAM/matrix are bit-identical over the
+three relevant ticks (hardware OAM compaction changes only its entry index):
+
+| App frame / absolute frame | `gSprites[8]` position | OAM `(x, y)` / attrs | Matrix |
+| --- | --- | --- | --- |
+| 443 / 1614 | `pos1=(176,41)`, `pos2=(0,0)`, corner `(-32,-32)` | `(144,9)`, `(attr0,attr1,attr2)=(265,50320,6617)`, affine matrix 2, tile 473 | live and hardware `[pa,pb,pc,pd]=[256,0,0,256]` |
+| **444 / 1615** | same | same; hardware OAM entry 33 | same |
+| 445 / 1616 | same | same; hardware OAM entry 39 | same |
+
+Thus the materialized opponent has already reached identity scale before the
+bad frame.  This directly falsifies a changed affine-emerge x term or a
+fixed-point rounding/truncation error (**not verdict (b)**), and it also
+falsifies sampling this sprite's tick N-1/N/N+1 matrix (**not the direct
+sprite form of verdict (a)**).  `gMain.oamBuffer` is deliberately only
+recorded as a VBlank-phase diagnostic; the conclusion above uses the live
+matrix plus hardware OAM, whose coefficients agree.
+
+The same probe records the overlapping ball-open particle cohort by its
+source-stable `pos1=(176,59)`, priority 1, and subpriority 28.  Those slots
+freeze exactly at the bad tick, then advance on frame 445:
+
+| Slot | Frame 443 / 444 (identical) | Frame 445 |
+| --- | --- | --- |
+| 9 | `pos2=(0,0)`, tile 549, anim cmd 0, `data1=0` | tile 550, anim cmd 1, `data1=2` |
+| 10 | `pos2=(0,24)`, tile 550, anim cmd 1, `data1=26` | `pos2=(0,26)`, tile 551, anim cmd 2, `data1=28` |
+| 16 | `pos2=(-12,0)`, OAM x=160, tile 550, anim cmd 1, `data1=14` | `pos2=(-14,0)`, OAM x=158, tile 551, anim cmd 2, `data1=16` |
+
+`tools/probe/analyze-issue56-yoshi-particle-stall.ts` independently
+reconstructs the production particle geometry from the extracted asset and
+the GBA sine table.  At logical tick 13 it reports that changing only the
+call-site `stallLag` from 1 to 0 gives exactly the previous logical-12
+particle signature, while logical tick 14 is bit-for-bit the current
+signature.  Its read-only frame-444 overlap check found 201 of the 219
+different pixels inside the changed particle footprint (203 changed
+particle pixels total); 18 lie outside it, including the known separate
+display-tail area.  The four original `x=158..161,y=40` sample points are
+not particle pixels, so this result does not mislabel that settled
+display-tail family as a particle fix.
+
+**Verdict: (a), qualified to the particle sub-step.**  The apparent
+materialize-column residual is not the opponent sprite affine computation;
+the generated Scene-OFF ball-open particle overlay is sampled one step early
+at logical tick 13.  The falsifiable app-side prescription is local and
+source-relative: in the generated-opponent `drawBallOpenParticles` call,
+remove `stallLag: 1` (or set it to `0`) so the non-late particle formula is
+
+```text
+age = logicalTick - particleIndex - 1, for logicalTick >= 13
+```
+
+rather than first subtracting at logical tick 14.  It predicts the field
+particle/materialize clusters at frame 444 take the oracle's frozen
+frame-443 state; frames 440:443 are untouched and frame 445:450 are
+unchanged by construction because both formulas subtract one from logical
+tick 14 onward.  It does **not** claim to remove the 18 outside-footprint
+pixels, which remain for the already-settled display-tail owner / any
+separately classified residual.
+
+The future Tier-1 pin is likewise narrow: expose or test the generated
+Scene-OFF particle-age helper with `PARTICLE_STALL_LOGICAL_TICK = 13`, then
+assert `logical=13, stallLag=0` equals the logical-12 particle state and
+that `logical=14` is equal for both lag values.  A dense 440:450 oracle
+window should then verify the predicted isolation without adding a
+turn- or absolute-tick-keyed branch.
