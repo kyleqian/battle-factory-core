@@ -1,5 +1,36 @@
 # Animation coverage
 
+## Front `ANIM_FOUR_PETAL` terminal family accepted (2026-08-01)
+
+**State / verdict:** exact for the complete generated selector census: all
+**1 mapping / 1 Factory-reachable species / 0 outside-Factory mappings** —
+REGICE. No adjacent selector, unsupported barrier, per-species/tick branch,
+baked frame, or engine-boundary widening was added. Move coverage remains
+**107 exact / 0 partial / 0 staged / 169 unsupported**;
+`ANIMATION_COVERAGE.json` is unchanged at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,3601-3656,
+5540-5544` and `trig.c:514-518` pin task-zeroed data2/data6/data7, tick-zero
+data6=0/data7=64/data2=1 ordering, pre-guard data7+=8, both normal-front
+no-op `TryFlipX` calls, every signed GBA Sin/Cos switch arm, strict phases
+0..3 `>127` versus phase 4 `>63`, zero-offset default cleanup, and stable
+`WaitAnimEnd`. All **64 callbacks** are exhaustive: active ticks 0..62,
+phase transitions/resets at 7/23/39/55, and tick 63 alone advances phase 4
+from data7 56 through 64 to terminal data6=5/data7=0. A fresh complete legal
+challenge-0 Scene-ON REGICE party settles at x2=0/y2=0, animNum=1/
+animCmdIndex=4 and `SpriteCallbackDummy`; paired unchanged-probe receipts are
+byte-identical at **373 bytes**, end with `}` and no newline, SHA-256
+`e02097374599e03808cf8f1122a6b1b802e69b1a2d2af582e755ee6b627e6cb1`.
+
+**Verification / next:** unchanged `dump-onix-front-idle-anim.py` ran only via
+`tools/run-mgba-probe.py` twice in one fresh `mktemp` directory; raw `cmp`,
+focused species-idle plus both ratchets **293/293**, `npx tsc --noEmit`, and
+coverage/hash checks are green. Full `npm test`: **583 files, 6,069 passed +
+1 skipped**; production build: **545 modules transformed**. Next generated
+source-ranked family: **`ANIM_V_SLIDE_SLOW`** (5 mappings / 5 Factory / 0
+outside): PIDGEY, AERODACTYL, DRAGONITE, HOOTHOOT, LEDIAN.
+
 ## Front `ANIM_CIRCLE_INTO_BG` terminal family accepted (2026-08-01)
 
 **State / verdict:** exact for the complete generated selector census: all
