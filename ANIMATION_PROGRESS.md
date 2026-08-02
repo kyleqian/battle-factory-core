@@ -8,6 +8,39 @@
 > routing hint, not a deferral or an acceptance-bar waiver; escalate any worker
 > result that does not survive supervisor verification.
 
+## Front `ANIM_V_SLIDE_WOBBLE_SMALL` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **4 mappings / 4
+Factory-reachable species / 0 outside-Factory mappings** — OMANYTE
+(representative), LANTURN, JUMPLUFF, and CLAYDOL. Only source ID **81** is
+promoted. The accepted normal source-ID-28 path stays regression-pinned;
+adjacent selectors and back routing remain untouched. No move coverage or
+`ANIMATION_COVERAGE.json` change was made; its SHA-256 remains
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,984-1028,
+1061-1085,1735-1767,3761-3766,5540-5544`, `trig.c:514-518`, and
+`pokemon.c:1544,1577,1595,1700` pin initialization, tick-0 affine start,
+data0=10/5 normal/small amplitude, immediate callback-before-install ordering,
+C-truncated indices, masked doubled wobble index, signed GBA sine and u16
+rotation, strict terminal `data2 > 100`, reset, final counter increment, and
+stable `WaitAnimEnd`. The shared reducer exhausts active ticks 0..100 and the
+terminal tick 101. Fresh complete legal challenge-0 Scene-ON parties were
+probed twice per species only through `tools/run-mgba-probe.py` in one fresh
+`mktemp` directory; each pair is byte-identical: OMANYTE **373 B**
+`dc4bbb0eee279c7d3a30f2062d7d6589a9e060327821da7ee4359e866656dcbd`,
+LANTURN **373 B** `3b1426d8bc2186aaa5a733adbb6435c08d5da2f7364b872557f4389291053e8c`,
+JUMPLUFF **373 B** `71ff480a0b9a62492f7e243ebfdda963d2f698e6bade85608b4d56e8c60b2ae5`,
+and CLAYDOL **374 B** `d6b99b7e666e14b003e7d475f8506d299ae709136c76f87211eaba49b91b477d`.
+
+**Verification / next:** focused family/evidence plus both animation ratchets
+are **331/331** green; `npx tsc --noEmit`, full `npm test` (**595 files /
+6,148 passed / 1 skipped**), and production build (**549 modules transformed**)
+are green. `npm run animation:coverage` remains **107/276 exact, 0 partial,
+0 staged, 169 unsupported; Open-only 0/1; Outside 0/77**. Next generated
+source-ranked selector: **`ANIM_SPIN`** (source ID **83**; **1 mapping / 1
+Factory / 0 outside**) — SPHEAL.
+
 ## Front `ANIM_CIRCLE_C_CLOCKWISE_SLOW` family accepted (2026-08-01)
 
 **State:** exact for the complete generated selector census: **2 mappings / 2
