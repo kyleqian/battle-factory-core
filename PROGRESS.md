@@ -4,6 +4,50 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 867 — [supervisor wind-down, 2026-08-02 14:30] slice 8 + #65 landed; slice-9 fold honestly open with both root causes banked; D1 comms contract awaits user
+
+- **State:** master `4807676f` = green slice-9 BRIDGE + all docs; full
+  `npm test` + `npm run build` supervisor-verified green at wind-down
+  (613 files / 6,277 passed / 1 skipped). Census: state fields 1 (turn4);
+  declarations/FIGHT/PP params 13. **DEFERRED.md has ONE OPEN entry (D1,
+  user-communication contract) — user must edit/delete it to unblock the
+  next supervised session (their explicit request).**
+- **Session outcomes:** slice 8 turn-3 fold LANDED (`fed91e87`,
+  salvage→retry; oracle-over-differential acceptance: its 37-frame
+  turn4-doubleteam deviation FIXES a PP bug leaked by slice-6
+  `cbb41421`, bisect-proven). #65 SILVER WIND crash: user-reported,
+  scouted, FIXED (`c7461398`), verified, entry removed — same day.
+  Turn-5 reader bank merged (9 traces, 1,382 captures). Species dossier
+  banked (census 4→45, 7 slices) + erratum. Day-audit: 2 real findings
+  → **#66** (capped-stat banner crash (a) reachable, magnitude edge (b)
+  unconfirmed); finding 3 = turn4CommandHandoff's 4 unguarded call sites
+  (battleScene.ts:7859/7887/7952/7997 pre-fold numbering) — the slice-9
+  fold MUST guard these. Two claude-worker self-aborts salvaged →
+  PAPERCUTS entry + foreground clause in briefs.
+- **Slice-9 fold state (NOT landed, fully mapped):** bridge `1c61cfac` on
+  master is green/differential-clean. Branch
+  `salvage/slice9-fold-20260802` (`a6d88eaa`, suite-green) carries the
+  fold + fix #1 (eviction-class HP fallback — drawActionMenuIdleContent +
+  two drawFightSubmenuWindow chains checked only turn3/turn2 shapes →
+  full-HP 117 default; fixed all four sites). OPEN root cause #2: FIGHT
+  submenu PP/chrome shows turn-4's fresh PP one turn early vs parent
+  legacy timing (windows: turn5-action-off 6/32, turn5-confirm-off-a
+  121/132 vs base `105c72d5`) — two freshness requirements multiplexed on
+  the shared latest slot; needs a small design, not a patch. Resume
+  recipe in entry 866 + the salvage commit message.
+- **Next session (ordered):** (1) slice-9 fold completion from
+  `a6d88eaa` — design the PP-freshness split, guard the four audited call
+  sites, full 14-window differential vs `105c72d5`; (2) slice 10 (final
+  13-param/type cut); (3) #66(a) capped-stat banner fix (+(b) after an
+  oracle probe); (4) species-dossier slices. Turns 5-8 OFF re-timing
+  policy remains un-adopted (unchanged).
+- **Unfolded:** `animation-main` ~8 commits ahead with a LIVE animation
+  supervisor + worker at wind-down — deliberately NOT folded (moving
+  branch); fold at next orient. `.worktrees/play-preview` (serving the
+  user's frozen build at :5199, currently `105c72d5`) is INTENTIONAL —
+  do not sweep while in use; rebuild after user-visible fixes land.
+
+---
 ## 866 — [bounded MAIN worker, 2026-08-02] slice-9 fold retry: one root cause fixed, one found+scoped, NOT landed
 
 - **State:** master unchanged at `1c61cfac` (the bridge, still green). The
@@ -113,45 +157,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** touched only `src/engine/battleResolutionPresentation.ts` plus
   the two named test files, per scope. No trace/capture edits, no
   dispatcher-ladder files touched.
-
----
-## 864 — [supervisor, 2026-08-02 11:55] slice 8 landed via salvage→retry; #65 scouted, fix launching; slice-6 PP leak bisected; species dossier banked
-
-- **State:** master at `d13944bf`; full `npm test` **611 files / 6,273
-  passed / 1 skipped**, build + tsc green (supervisor-run). Census: state
-  fields 1 (turn4); declarations/FIGHT/PP params 13. Slice-8 differential
-  vs `706be469`: every window byte-identical EXCEPT turn4-doubleteam-off
-  **219/256** — deviation deliberately accepted: the 37 frames (4898-4934,
-  6px, submenu PP region) are a pre-existing oracle divergence the fold
-  FIXES (master **256/256** vs oracle; parent **219/256** — both replayed
-  directly by the supervisor).
-- **Did:** (1) Slice-8 attempt 1 cap-killed differential-red
-  (turn3-rockslide 112/161); preserved on a salvage branch, master reset to
-  the green bridge `947d624c`, retry rebriefed with the exact failure map —
-  landed `fed91e87`. Root cause was eviction-class, not bounce-composition:
-  a reader narrowed to turn-2's receipt shape broke when turn 3 evicts the
-  shared latest slot (fix: `turn3SettledWindowActive` gate). (2) Bisected
-  the PP divergence: green at slice-6 bridge `04bc1092`, red at slice-6
-  fold `cbb41421` — slice 6's differential list (turn-1/2 windows only)
-  could not see a turn-4 reader break. **Process rule: fold-slice
-  differential lists must include downstream-turn windows** (slice-9 brief
-  widened with the turn-3 pair). (3) Same-day user crash filed as **#65**
-  (SILVER WIND 10% proc → uncaught throw): side scout root-caused it to the
-  missing ATTACKER-variant stat-banner branch in
-  `battleResolutionPresentation.ts` `messageLines` (kernel exonerated,
-  oracle pins at seed 8, it.fails repro committed) — scout doc merged;
-  fix worker launching next on main. (4) #39 species render entry-point
-  retirement dossier banked (census 4→45, 7-slice plan,
-  `docs/species-render-entry-point-retirement-design.md`). (5) Turn-5
-  Scene-OFF reader bank merged (9 traces, 1,382 dense captures; windows
-  2-5 honestly non-oracle-exact per the un-adopted turns-5-8 OFF policy —
-  differential-only readers for slice 9). (6) Two claude-worker
-  self-aborts (backgrounded verification + notification wait) salvaged by
-  the supervisor; PAPERCUTS entry added; all queued briefs carry a
-  foreground-execution clause. (7) `.worktrees/play-preview` is an
-  INTENTIONAL user-facing worktree (frozen play build on :5199), not a
-  stale scratch worktree — do not sweep while the preview is in use.
-- **Next:** verify #65 fix → slice 9 (turn-4 fold, widened windows) →
-  slice 10 if time permits; species-dossier slices follow the ladder.
-  Wind-down before the 15:23 hard deadline.
-

@@ -19,6 +19,13 @@ land independently of the ladder; none may edit
 `nextCommandHandoff.ts`/`fightCommandPresentation.ts` before ladder slice 10,
 and are marked **GATED** where the dispatcher doc's own file list overlaps.
 
+> **Erratum (supervisor, 2026-08-02 audit):** all `battleScene.ts` line
+> citations are as of `fc597ac3` and drift +45..+56 after the slice-8 fold
+> `fed91e87` (e.g. `dragonBreathGrovyleHp` 8820→8865); re-resolve by symbol,
+> not line, when scoping slices. Also §4 slice-4's `renderSceneOffTurnView`
+> citation `:33763` was wrong at authoring time — the same doc's §1.3G
+> correctly cites `:34185` (now `:34241`).
+
 ## 1. Census
 
 ### 1.1 Method

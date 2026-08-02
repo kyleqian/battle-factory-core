@@ -1,3 +1,43 @@
+## 864 — [supervisor, 2026-08-02 11:55] slice 8 landed via salvage→retry; #65 scouted, fix launching; slice-6 PP leak bisected; species dossier banked
+
+- **State:** master at `d13944bf`; full `npm test` **611 files / 6,273
+  passed / 1 skipped**, build + tsc green (supervisor-run). Census: state
+  fields 1 (turn4); declarations/FIGHT/PP params 13. Slice-8 differential
+  vs `706be469`: every window byte-identical EXCEPT turn4-doubleteam-off
+  **219/256** — deviation deliberately accepted: the 37 frames (4898-4934,
+  6px, submenu PP region) are a pre-existing oracle divergence the fold
+  FIXES (master **256/256** vs oracle; parent **219/256** — both replayed
+  directly by the supervisor).
+- **Did:** (1) Slice-8 attempt 1 cap-killed differential-red
+  (turn3-rockslide 112/161); preserved on a salvage branch, master reset to
+  the green bridge `947d624c`, retry rebriefed with the exact failure map —
+  landed `fed91e87`. Root cause was eviction-class, not bounce-composition:
+  a reader narrowed to turn-2's receipt shape broke when turn 3 evicts the
+  shared latest slot (fix: `turn3SettledWindowActive` gate). (2) Bisected
+  the PP divergence: green at slice-6 bridge `04bc1092`, red at slice-6
+  fold `cbb41421` — slice 6's differential list (turn-1/2 windows only)
+  could not see a turn-4 reader break. **Process rule: fold-slice
+  differential lists must include downstream-turn windows** (slice-9 brief
+  widened with the turn-3 pair). (3) Same-day user crash filed as **#65**
+  (SILVER WIND 10% proc → uncaught throw): side scout root-caused it to the
+  missing ATTACKER-variant stat-banner branch in
+  `battleResolutionPresentation.ts` `messageLines` (kernel exonerated,
+  oracle pins at seed 8, it.fails repro committed) — scout doc merged;
+  fix worker launching next on main. (4) #39 species render entry-point
+  retirement dossier banked (census 4→45, 7-slice plan,
+  `docs/species-render-entry-point-retirement-design.md`). (5) Turn-5
+  Scene-OFF reader bank merged (9 traces, 1,382 dense captures; windows
+  2-5 honestly non-oracle-exact per the un-adopted turns-5-8 OFF policy —
+  differential-only readers for slice 9). (6) Two claude-worker
+  self-aborts (backgrounded verification + notification wait) salvaged by
+  the supervisor; PAPERCUTS entry added; all queued briefs carry a
+  foreground-execution clause. (7) `.worktrees/play-preview` is an
+  INTENTIONAL user-facing worktree (frozen play build on :5199), not a
+  stale scratch worktree — do not sweep while the preview is in use.
+- **Next:** verify #65 fix → slice 9 (turn-4 fold, widened windows) →
+  slice 10 if time permits; species-dossier slices follow the ladder.
+  Wind-down before the 15:23 hard deadline.
+
 ## 863 — [bounded MAIN worker, 2026-08-02] dispatcher slice 8 Turn-3 generic fold (retry, landed)
 
 - **State:** `fed91e87` is the green fold commit. Full `npm test` **611 files
