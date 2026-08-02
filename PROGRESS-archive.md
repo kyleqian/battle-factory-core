@@ -1,3 +1,27 @@
+## 853 — [bounded MAIN worker, 2026-08-01] dispatcher slice 1 uniform receipt contract landed
+
+- **State:** `1e5e81e7` is the green implementation checkpoint. Full `npm
+  test` is **591 files / 6,127 passed / 1 skipped**, `npm run build` exits 0,
+  and the focused generic/adapter equivalence set is **58/58**.
+- **Did:** added immutable `LatestCompletedCommandHandoff` values and additive
+  turn 5–13 normalizers. Turns 5–12 copy their legacy tuple/slot/readiness;
+  turn 13 builds canonical PP **[0,19,18,10]** from its resumed
+  DRAGON_BREATH rules context, with slot 2 equal to the legacy **18/20**
+  receipt. State, renderers, core reopen logic, content dispatch, the retained
+  FLY owner, and the fresh opponent-faint presentation owner are unchanged.
+- **Evidence:** `HEAD^..HEAD` changes only imports, additive exports, and
+  tests, so the slice-plan cheap differential applied. One unchanged-list
+  window per turn plus the full turn-13 trio is byte-identical to the clean
+  parent: **1,474/1,474 raw RGBA captures**.
+- **Next:** execute dispatcher design slice 2: shadow the verified generic
+  latest receipt and prove generic PP equals the legacy PP path; delete no
+  legacy fields/imports and change no render route.
+- **Notes:** handoff census before/after is unchanged: **13** declarations,
+  **13** state fields, **13/13** FIGHT/PP positional parameters, and **289**
+  literal assignments. No conflict with the post-design opponent-faint
+  landing: its typed owner remains intact and outside this value contract.
+
+---
 ## 852 — [bounded MAIN worker, 2026-08-01] opponent-faint dismiss owner retired and verified
 
 - **State:** `ef1aa50f` is the green implementation checkpoint. Exact

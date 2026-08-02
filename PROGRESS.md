@@ -4,6 +4,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 856 — [bounded MAIN worker, 2026-08-02] dispatcher slice 3 Pidgeotto content bridge landed
+
+- **State:** `2820689e` is the green implementation checkpoint. Full `npm
+  test` is **592 files / 6,137 passed / 1 skipped**; `npm run build` exits
+  0; the focused bridge set is **301/301**.
+- **Did:** added immutable semantic `FightCommandPresentation` content for
+  turn-5–8 latest receipts: Pidgeotto field snapshots, real bounce/kickoff
+  anchors, and staged FEATHER_DANCE/ROCK_SLIDE/BIND text/effect facts. The
+  legacy turn-keyed renderer and core reopen ladder remain the production
+  route; no PP tuple selects content.
+- **Evidence:** an isolated clean-parent `103b0abe` app replay is raw-RGBA
+  byte-identical over the required untouched windows: **3,527/3,527**
+  captures across turn-5 primary, turn-6–8 menu/action, and turn-9 OFF
+  readers. Tier-1 shadow pins compare each bridge to the legacy field,
+  drawTurn6–8 bounce, and available move/text inputs.
+- **Next:** execute dispatcher design slice 4: bridge turns 9–13 semantic
+  content, including the retained FLY presentation owner; do not cut state,
+  render dispatch, or the core ladder yet.
+- **Notes:** handoff census before/after is unchanged: **13** declarations,
+  **13** state fields, **13/13** FIGHT/PP positional parameters, and **289**
+  literal assignments. Turn 8 deliberately leaves its turn-9 continuation
+  `upcoming: null`; its high-chain move/text content is Slice 4 scope, not a
+  PP- or turn-keyed fallback.
+
+---
 ## 855 — [bounded MAIN worker, 2026-08-02] Issue #56 frame-444 particle stall RAM fix landed
 
 - **State:** `1aa13ebb` is the green implementation checkpoint. Full `npm
@@ -54,25 +79,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   was deleted or replaced.
 
 ---
-## 853 — [bounded MAIN worker, 2026-08-01] dispatcher slice 1 uniform receipt contract landed
-
-- **State:** `1e5e81e7` is the green implementation checkpoint. Full `npm
-  test` is **591 files / 6,127 passed / 1 skipped**, `npm run build` exits 0,
-  and the focused generic/adapter equivalence set is **58/58**.
-- **Did:** added immutable `LatestCompletedCommandHandoff` values and additive
-  turn 5–13 normalizers. Turns 5–12 copy their legacy tuple/slot/readiness;
-  turn 13 builds canonical PP **[0,19,18,10]** from its resumed
-  DRAGON_BREATH rules context, with slot 2 equal to the legacy **18/20**
-  receipt. State, renderers, core reopen logic, content dispatch, the retained
-  FLY owner, and the fresh opponent-faint presentation owner are unchanged.
-- **Evidence:** `HEAD^..HEAD` changes only imports, additive exports, and
-  tests, so the slice-plan cheap differential applied. One unchanged-list
-  window per turn plus the full turn-13 trio is byte-identical to the clean
-  parent: **1,474/1,474 raw RGBA captures**.
-- **Next:** execute dispatcher design slice 2: shadow the verified generic
-  latest receipt and prove generic PP equals the legacy PP path; delete no
-  legacy fields/imports and change no render route.
-- **Notes:** handoff census before/after is unchanged: **13** declarations,
-  **13** state fields, **13/13** FIGHT/PP positional parameters, and **289**
-  literal assignments. No conflict with the post-design opponent-faint
-  landing: its typed owner remains intact and outside this value contract.
