@@ -13,6 +13,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 845 — [bounded MAIN worker, 2026-08-01] turn-3 predecessor retired with immutable epoch
+
+- **State:** proof `3487117c`, migration `0e7fd346`; `rg -n '\\bturn3Resolved\\b' src tests` is empty. The receipt publishes at the
+  source-owned first choose-action callback: absolute **4212**, runtime
+  elapsed **3172** (the 4211 handler-install tick still rejects A).
+- **Did:** migrated turn-4 dispatch, generic HP/content, DOUBLE_TEAM routing,
+  slot-0 PP, all turn-4 bounce consumers, and direct presentation calls to
+  PP **[8,20,19,10]**, slot **0**, HP **88/41**, settled/ready, and the
+  DoBounceEffect **192/128**, delta **7**, amplitude **1** receipt. A
+  turn-4 B-close/A-reopen retains the same receipt object/epoch.
+- **Next:** stay scoped: turn 4, `opponentFaintDismissElapsed`, and dispatcher
+  debt remain #39 work; do not reopen turns 1–3.
+- **Notes:** clean-parent `354ebc89` (`3487117c^`) app replays are byte-
+  identical: turn-3 **416/416**, turn-4 readers **512/512**, upstream
+  turn-2 **237/237**, total **1,165/1,165** raw RGBA captures. Focused
+  Tier-1 **528/528** (19 files), `npx tsc --noEmit`, and `npm run build`
+  green; full `npm test` deliberately unrun per the bounded brief.
+
 ## 844 — [supervisor session open, 2026-08-01 19:25] animation-main folded; turn-3 + turn-5-OFF-banking lanes launching
 
 - **State:** master `ca227c9c` (fold merge of `animation-main`, 8 commits:
@@ -82,4 +100,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `npm run build` green; full `npm test` deliberately unrun per the bounded
   brief. No trace/capture-list, recording import, ratchet/barrier, or
   selector changes.
-
