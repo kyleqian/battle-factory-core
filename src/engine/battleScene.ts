@@ -4418,9 +4418,10 @@ export function renderGeneratedBattleStartOpponentRelease(
   drawGeneratedOpponentRelease(fb, t, handoffTick, fieldView);
   drawSendOutBall(fb, t, handoffTick);
   drawBallOpenParticles(fb, t, handoffTick, "destin", {
-    // The Scene-OFF intro controller reaches the shared one-frame particle
-    // stall one callback later than the canonical Scene-ON release.
-    stallLag: 1,
+    // The canonical anchor's real pre-battle route retains its proven later
+    // stall publication; arbitrary generated Scene-OFF releases use the
+    // RAM-attributed logical-13 stall directly (ISSUES #56 frame 444).
+    stallLag: state.isCanonicalAnchorIntro ? 1 : 0,
     persistentTieWinner14: true,
   });
   if (t === handoffTick) {
@@ -5893,8 +5894,27 @@ const PARTICLE_MAX_AGE = 24;
  * regressed the already-bit-exact render tick 1522 (caught by the full
  * 19-trace sweep before landing, not shipped broken).
  */
-const PARTICLE_STALL_LOGICAL_TICK = 13;
+export const PARTICLE_STALL_LOGICAL_TICK = 13;
 const PARTICLE_LATE_SPAWN_START_INDEX = 14;
+
+/**
+ * Source-relative age for the generated Scene-OFF ball-open particle burst.
+ * `stallLag` is retained for the callers whose controller handoff reaches the
+ * shared stall later; the generated-opponent release uses the default zero.
+ */
+export function generatedSceneOffParticleAge(
+  logicalTick: number,
+  particleIndex: number,
+  stallLag: number = 0,
+): number {
+  let age = logicalTick - particleIndex;
+  if (particleIndex >= PARTICLE_LATE_SPAWN_START_INDEX) {
+    age -= 1;
+  } else if (logicalTick >= PARTICLE_STALL_LOGICAL_TICK + stallLag) {
+    age -= 1;
+  }
+  return age;
+}
 
 /** `Sin(index, amplitude)` (`trig.c:515-517`): `gSineTable` is a 256-entry (period) Q8.8 sine table, `(amplitude * gSineTable[index]) >> 8` - reproduced via `Math.sin` at the same Q8.8 rounding rather than a literal 256-entry copy (this mechanism doesn't gate any full-frame match, see the module doc above). */
 function gbaSin(index: number, amplitude: number): number {
@@ -5996,16 +6016,11 @@ function drawBallOpenParticles(
   const anim = battleAnimParticles.regularBallAnim;
   const alive: AliveParticle[] = [];
   for (let i = 0; i < PARTICLE_SPAWN_COUNT; i += 1) {
-    let age = logicalT - i;
-    if (i >= PARTICLE_LATE_SPAWN_START_INDEX) {
-      age -= 1;
-    } else if (
-      logicalT >= PARTICLE_STALL_LOGICAL_TICK
-        + (encounter === "jenson" ? 1 : 0)
-        + (options.stallLag ?? 0)
-    ) {
-      age -= 1;
-    }
+    const age = generatedSceneOffParticleAge(
+      logicalT,
+      i,
+      (encounter === "jenson" ? 1 : 0) + (options.stallLag ?? 0),
+    );
     if (age < 0 || age > PARTICLE_MAX_AGE) continue;
     const angle = (i % 8) * 32;
     const radius = age === 0 ? 0 : 2 * (age - 1);
