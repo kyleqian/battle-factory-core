@@ -1,5 +1,105 @@
 # Animation coverage
 
+## Front `ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW` family accepted (2026-08-01)
+
+**State / verdict:** exact for the complete generated selector census: all
+**2 mappings / 2 Factory-reachable species / 0 outside-Factory mappings** —
+CLEFABLE and AZUMARILL. The accepted normal, Slow, and Small siblings and the
+new SmallSlow entry point share the source-derived `BounceRotateToSides`
+reducer. No adjacent selector, unsupported barrier, per-species/tick branch,
+baked frame, or engine-boundary widening was added. Move coverage remains
+**107 exact / 0 partial / 0 staged / 169 unsupported**;
+`ANIMATION_COVERAGE.json` is unchanged at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,1037-1064,
+1915-2001,3679-3699,5540-5544` and `trig.c:514-518` pin task-zeroed sprite
+data, SmallSlow's `data6=1` write before Small, Small's `AddNewAnim` followed
+by rotation 2048 and animation data 1, affine start/set/reset, both
+normal-front no-op `TryFlipX` calls, signed C-truncated interpolation, GBA
+sine and u16 rotation arithmetic, and stable `WaitAnimEnd`. All **167 active
+callbacks** (ticks 0..166) and every seven-leg boundary are exhaustive; tick
+167 alone consumes the zero-duration sentinel, restores identity offsets and
+affine state, calls `ResetSpriteAfterAnim`, and installs `WaitAnimEnd`. Fresh
+complete legal challenge-0 Scene-ON parties settle both species at x2=0/y2=0,
+animNum=1 and `SpriteCallbackDummy`; paired unchanged-probe receipts are raw
+byte-identical and end with `}` without a newline: CLEFABLE **372 bytes**,
+SHA-256 `62a1979f9af10ce6a6914651bc03407de755e30162594e04527e4e832f943ea4`;
+AZUMARILL **373 bytes**, `908422f7084676cdceda114470205e152976a243fa1d131533685acfbb57b0c7`.
+
+**Verification / next:** unchanged `dump-onix-front-idle-anim.py` ran only via
+`tools/run-mgba-probe.py`, twice fresh per party in one new `mktemp` directory;
+paired raw `cmp`, focused species-idle plus both ratchets **310/310**, `npx tsc
+--noEmit`, coverage/hash checks, and build (**547 modules transformed**) are
+green. Full `npm test`: **584 files, 6,093 passed + 1 skipped**. Next generated
+source-ranked family: **`ANIM_ZIGZAG_SLOW`** (3 mappings / 3 Factory / 0
+outside): VENOMOTH, KINGLER, FLYGON.
+
+## Front `ANIM_V_SLIDE_SLOW` family accepted (2026-08-01)
+
+**State / verdict:** exact for the complete generated selector census: all
+**5 mappings / 5 Factory-reachable species / 0 outside-Factory mappings** —
+PIDGEY, AERODACTYL, DRAGONITE, HOOTHOOT, LEDIAN. The accepted normal
+`Anim_VerticalSlide` data0=40 path and new slow data0=80 path share one
+source-derived `VerticalSlide` reducer; normal remains regression-pinned. No
+adjacent selector, unsupported barrier, per-species/tick branch, baked frame,
+or engine-boundary widening was added. Move coverage remains **107 exact / 0
+partial / 0 staged / 169 unsupported**; `ANIMATION_COVERAGE.json` is unchanged
+at SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,1156-1179,
+3672-3677,5540-5544` and `trig.c:514-518` pin task-zeroed data2, both immediate
+initializers' install-after-call overwrite semantics, both normal-front no-op
+`TryFlipX` calls, C truncation before modulo, signed GBA sine, body-order data2
+increment, strict `data2 > data0` termination, y2 cleanup, and stable
+`WaitAnimEnd`. All **81 active callbacks** (ticks 0..80) are exhaustive; tick
+81 alone observes data2=81 > 80, clears y2, increments data2 to 82, and installs
+`WaitAnimEnd`. Fresh complete legal challenge-0 Scene-ON parties settle both
+species at x2=0/y2=0, animNum=1/`SpriteCallbackDummy`; paired unchanged-probe
+receipts are raw byte-identical and end with `}` without a newline: PIDGEY
+**373 bytes**, SHA-256
+`54d30286650c7bc624c48ca0edeff146008052358ef0b8350f52e7a3c884a4a6`;
+LEDIAN **374 bytes**, `a195c9271c61c104d528af5cfd22bdc1917114fd14efe6b2200218238c59e564`.
+
+**Verification / next:** unchanged `dump-onix-front-idle-anim.py` ran only via
+`tools/run-mgba-probe.py`, twice fresh per party in one new `mktemp` directory;
+paired raw `cmp`, focused species-idle plus both ratchets **301/301**, `npx tsc
+--noEmit`, coverage/hash checks, and build (**545 modules transformed**) are
+green. Full `npm test`: **583 files, 6,077 passed + 1 skipped**. Next generated
+source-ranked family: **`ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW`** (2 mappings /
+2 Factory / 0 outside): CLEFABLE and AZUMARILL.
+
+## Front `ANIM_FOUR_PETAL` terminal family accepted (2026-08-01)
+
+**State / verdict:** exact for the complete generated selector census: all
+**1 mapping / 1 Factory-reachable species / 0 outside-Factory mappings** —
+REGICE. No adjacent selector, unsupported barrier, per-species/tick branch,
+baked frame, or engine-boundary widening was added. Move coverage remains
+**107 exact / 0 partial / 0 staged / 169 unsupported**;
+`ANIMATION_COVERAGE.json` is unchanged at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,3601-3656,
+5540-5544` and `trig.c:514-518` pin task-zeroed data2/data6/data7, tick-zero
+data6=0/data7=64/data2=1 ordering, pre-guard data7+=8, both normal-front
+no-op `TryFlipX` calls, every signed GBA Sin/Cos switch arm, strict phases
+0..3 `>127` versus phase 4 `>63`, zero-offset default cleanup, and stable
+`WaitAnimEnd`. All **64 callbacks** are exhaustive: active ticks 0..62,
+phase transitions/resets at 7/23/39/55, and tick 63 alone advances phase 4
+from data7 56 through 64 to terminal data6=5/data7=0. A fresh complete legal
+challenge-0 Scene-ON REGICE party settles at x2=0/y2=0, animNum=1/
+animCmdIndex=4 and `SpriteCallbackDummy`; paired unchanged-probe receipts are
+byte-identical at **373 bytes**, end with `}` and no newline, SHA-256
+`e02097374599e03808cf8f1122a6b1b802e69b1a2d2af582e755ee6b627e6cb1`.
+
+**Verification / next:** unchanged `dump-onix-front-idle-anim.py` ran only via
+`tools/run-mgba-probe.py` twice in one fresh `mktemp` directory; raw `cmp`,
+focused species-idle plus both ratchets **293/293**, `npx tsc --noEmit`, and
+coverage/hash checks are green. Full `npm test`: **583 files, 6,069 passed +
+1 skipped**; production build: **545 modules transformed**. Next generated
+source-ranked family: **`ANIM_V_SLIDE_SLOW`** (5 mappings / 5 Factory / 0
+outside): PIDGEY, AERODACTYL, DRAGONITE, HOOTHOOT, LEDIAN.
+
 ## Front `ANIM_CIRCLE_INTO_BG` terminal family accepted (2026-08-01)
 
 **State / verdict:** exact for the complete generated selector census: all

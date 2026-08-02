@@ -44,9 +44,11 @@ import selectorTables from "../data/gen/send-out-anim-selector-tables.json" with
 export type SpeciesFrontAnimFamily =
   | "BOUNCE_ROTATE_TO_SIDES"
   | "BOUNCE_ROTATE_TO_SIDES_SMALL"
+  | "BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW"
   | "BOUNCE_ROTATE_TO_SIDES_SLOW"
   | "CIRCLE_INTO_BG"
   | "CIRCULAR_STRETCH_TWICE"
+  | "FOUR_PETAL"
   | "GROW_VIBRATE"
   | "GROW_IN_STAGES"
   | "LUNGE_GROW"
@@ -69,6 +71,7 @@ export type SpeciesFrontAnimFamily =
   | "V_JUMPS_SMALL"
   | "V_JUMPS_H_JUMPS"
   | "V_SLIDE"
+  | "V_SLIDE_SLOW"
   | "V_SLIDE_WOBBLE"
   | "V_SQUISH_AND_BOUNCE"
   | "V_SQUISH_AND_BOUNCE_SLOW"
@@ -80,9 +83,11 @@ const FRONT_ANIM_PREFIX = "ANIM_";
 const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "BOUNCE_ROTATE_TO_SIDES",
   "BOUNCE_ROTATE_TO_SIDES_SMALL",
+  "BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW",
   "BOUNCE_ROTATE_TO_SIDES_SLOW",
   "CIRCLE_INTO_BG",
   "CIRCULAR_STRETCH_TWICE",
+  "FOUR_PETAL",
   "GROW_VIBRATE",
   "GROW_IN_STAGES",
   "LUNGE_GROW",
@@ -105,6 +110,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "V_JUMPS_SMALL",
   "V_JUMPS_H_JUMPS",
   "V_SLIDE",
+  "V_SLIDE_SLOW",
   "V_SLIDE_WOBBLE",
   "V_SQUISH_AND_BOUNCE",
   "V_SQUISH_AND_BOUNCE_SLOW",
@@ -237,6 +243,23 @@ export const V_SLIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
 /** There are no `ANIM_V_SLIDE` selector mappings outside the Factory pool. */
 export const V_SLIDE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   V_SLIDE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All 5 source selector mappings for the slow `ANIM_V_SLIDE_SLOW`. */
+export const V_SLIDE_SLOW_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_V_SLIDE_SLOW")
+    .map(([species]) => species),
+);
+
+/** Every slow vertical-slide mapping is reachable through Factory rentals. */
+export const V_SLIDE_SLOW_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  V_SLIDE_SLOW_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no slow vertical-slide mappings outside the Factory pool. */
+export const V_SLIDE_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  V_SLIDE_SLOW_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /** All 10 source selector mappings for `ANIM_V_JUMPS_SMALL`. */
@@ -418,6 +441,23 @@ export const CIRCLE_INTO_BG_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = O
   CIRCLE_INTO_BG_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
+/** The sole source selector mapping for `ANIM_FOUR_PETAL`. */
+export const FOUR_PETAL_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_FOUR_PETAL")
+    .map(([species]) => species),
+);
+
+/** The complete Factory-reachable four-petal family (REGICE). */
+export const FOUR_PETAL_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  FOUR_PETAL_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no four-petal mappings outside the Factory rental pool. */
+export const FOUR_PETAL_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  FOUR_PETAL_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
 /** All 5 source selector mappings for the normal `ANIM_BOUNCE_ROTATE_TO_SIDES`. */
 export const BOUNCE_ROTATE_TO_SIDES_FRONT_SPECIES: readonly string[] = Object.freeze(
   Object.entries(generatedFrontAnimIds)
@@ -474,6 +514,29 @@ export const BOUNCE_ROTATE_TO_SIDES_SMALL_FACTORY_FRONT_SPECIES: readonly string
 export const BOUNCE_ROTATE_TO_SIDES_SMALL_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
   Object.freeze(
     BOUNCE_ROTATE_TO_SIDES_SMALL_FRONT_SPECIES.filter(
+      (species) => !factoryFrontSpecies.has(species),
+    ),
+  );
+
+/** Both source selector mappings for `ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW`. */
+export const BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW")
+    .map(([species]) => species),
+);
+
+/** Every small-slow bounce/rotate mapping is Factory-reachable. */
+export const BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW_FACTORY_FRONT_SPECIES: readonly string[] =
+  Object.freeze(
+    BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW_FRONT_SPECIES.filter(
+      (species) => factoryFrontSpecies.has(species),
+    ),
+  );
+
+/** There are no small-slow bounce/rotate mappings outside the Factory pool. */
+export const BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
+  Object.freeze(
+    BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW_FRONT_SPECIES.filter(
       (species) => !factoryFrontSpecies.has(species),
     ),
   );
@@ -1214,14 +1277,44 @@ export interface SwingFrame<Callback extends "SwingConcave" | "SwingConvex">
 export type SwingConcaveFrame = SwingFrame<"SwingConcave">;
 export type SwingConvexFrame = SwingFrame<"SwingConvex">;
 
+/**
+ * Both initializers invoke `VerticalSlide` immediately and then install that
+ * same callback after it returns. The final write deliberately overwrites any
+ * callback selected by the immediate call; task-zeroed data2=0 keeps the real
+ * tick-zero path active rather than terminal.
+ */
+export const VERTICAL_SLIDE_INITIALIZERS = Object.freeze({
+  normal: Object.freeze({
+    selector: "ANIM_V_SLIDE",
+    initializer: "Anim_VerticalSlide",
+    data0: 40,
+    immediateCallback: "VerticalSlide",
+    installedCallback: "VerticalSlide",
+    sourceOverwriteAfterImmediateCall: true,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_V_SLIDE_SLOW",
+    initializer: "Anim_VerticalSlide_Slow",
+    data0: 80,
+    immediateCallback: "VerticalSlide",
+    installedCallback: "VerticalSlide",
+    sourceOverwriteAfterImmediateCall: true,
+    accepted: true,
+  }),
+} as const);
+
 export interface VerticalSlideFrame extends SpeciesIdleOffset {
-  readonly data0: 40;
+  readonly data0: 40 | 80;
   readonly data2: number;
   readonly index: number | null;
   readonly normalFrontDontFlip: true;
   readonly tryFlipXCalls: 2;
   readonly callback: "VerticalSlide" | "WaitAnimEnd";
 }
+
+export type VerticalSlideNormalFrame = VerticalSlideFrame & { readonly data0: 40 };
+export type VerticalSlideSlowFrame = VerticalSlideFrame & { readonly data0: 80 };
 
 export interface VerticalJumpsFrame extends SpeciesIdleOffset {
   readonly data0: 3 | 4;
@@ -1359,6 +1452,31 @@ export interface CircleIntoBackgroundFrame extends SpeciesIdleOffset {
   readonly resetSpriteAfterAnim: boolean;
   readonly callback: "Anim_CircleIntoBackground" | "WaitAnimEnd";
   readonly affineMode: "double" | "normal";
+}
+
+export interface FourPetalFrame extends SpeciesIdleOffset {
+  readonly data0: 0;
+  readonly data2Before: 0 | 1;
+  readonly data2: 1;
+  readonly data6Before: number;
+  readonly data6: number;
+  readonly data7Before: number;
+  readonly data7AfterInitialization: number;
+  readonly data7AfterIncrement: number;
+  readonly data7: number;
+  readonly initialized: boolean;
+  readonly phaseGuardLimit: 63 | 127;
+  readonly phaseTransition: boolean;
+  readonly switchArm: 0 | 1 | 2 | 3 | 4 | "default";
+  readonly xTrigFunction: "Sin" | "Cos" | null;
+  readonly xTrigIndex: number | null;
+  readonly xTrigValue: number | null;
+  readonly yTrigFunction: "Sin" | "Cos" | null;
+  readonly yTrigIndex: number | null;
+  readonly yTrigValue: number | null;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXCalls: 2;
+  readonly callback: "Anim_FourPetal" | "WaitAnimEnd";
 }
 
 /** `InitAnimData`, called by `AddNewAnim`, source defaults adjacent to this family. */
@@ -1506,20 +1624,21 @@ export function swingConvexFrameAtTick(ticksSinceStart: number): SwingConvexFram
   return swingFrameAtTick(ticksSinceStart, "SwingConvex", -1);
 }
 
-const VERTICAL_SLIDE_DURATION = 40;
-
 /**
- * Source-order port of `Anim_VerticalSlide` / `VerticalSlide`
- * (`pokemon_animation.c:1156-1180`) on the normal opponent-front path.
- * The initializer sets data0=40 and invokes `VerticalSlide` immediately.
+ * Shared source-order port of `VerticalSlide`
+ * (`pokemon_animation.c:1156-1173`) on the normal opponent-front path.
+ * Its normal and slow initializers set data0=40/80, invoke this callback
+ * immediately, and install it after return (`:1175-1180,3672-3677`).
  * `Task_HandleMonAnimation` has already set `sDontFlip=TRUE`, so both
- * source-order `TryFlipX` calls execute without changing x2. Active ticks
- * 0..40 use C-truncated index arithmetic and write the negated sine to y2;
- * tick 41 observes the strict data2 > data0 guard, clears y2, installs
- * `WaitAnimEnd`, performs the final data2 increment, and executes the second
- * `TryFlipX` call.
+ * source-order `TryFlipX` calls execute without changing x2. Active callbacks
+ * use C-truncated `(data2 * 384 / data0)` before modulo and signed GBA sine;
+ * the first callback after the strict `data2 > data0` edge clears y2, installs
+ * `WaitAnimEnd`, still increments data2, and performs the second flip call.
  */
-export function verticalSlideFrameAtTick(ticksSinceStart: number): VerticalSlideFrame | null {
+function verticalSlideFrameAtTickForDuration(
+  ticksSinceStart: number,
+  data0: 40 | 80,
+): VerticalSlideFrame | null {
   if (ticksSinceStart < 0) return null;
 
   let data2 = 0;
@@ -1528,14 +1647,14 @@ export function verticalSlideFrameAtTick(ticksSinceStart: number): VerticalSlide
 
   for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
     x2 = tryFlipX(x2, true);
-    if (data2 > VERTICAL_SLIDE_DURATION) {
+    if (data2 > data0) {
       y2 = 0;
       data2 += 1;
       x2 = tryFlipX(x2, true);
       return {
         x2,
         y2,
-        data0: VERTICAL_SLIDE_DURATION,
+        data0,
         data2,
         index: null,
         normalFrontDontFlip: true,
@@ -1544,7 +1663,7 @@ export function verticalSlideFrameAtTick(ticksSinceStart: number): VerticalSlide
       };
     }
 
-    const index = Math.trunc((data2 * 384) / VERTICAL_SLIDE_DURATION) % 256;
+    const index = Math.trunc((data2 * 384) / data0) % 256;
     y2 = -gbaSin(index, 6) + 0;
     data2 += 1;
     x2 = tryFlipX(x2, true);
@@ -1553,7 +1672,7 @@ export function verticalSlideFrameAtTick(ticksSinceStart: number): VerticalSlide
       return {
         x2,
         y2,
-        data0: VERTICAL_SLIDE_DURATION,
+        data0,
         data2,
         index,
         normalFrontDontFlip: true,
@@ -1564,6 +1683,20 @@ export function verticalSlideFrameAtTick(ticksSinceStart: number): VerticalSlide
   }
 
   throw new Error("unreachable VerticalSlide reducer state");
+}
+
+/** Normal data0=40 initializer routed through the shared callback reducer. */
+export function verticalSlideFrameAtTick(
+  ticksSinceStart: number,
+): VerticalSlideNormalFrame | null {
+  return verticalSlideFrameAtTickForDuration(ticksSinceStart, 40) as VerticalSlideNormalFrame | null;
+}
+
+/** Slow data0=80 initializer routed through the same shared callback reducer. */
+export function verticalSlideSlowFrameAtTick(
+  ticksSinceStart: number,
+): VerticalSlideSlowFrame | null {
+  return verticalSlideFrameAtTickForDuration(ticksSinceStart, 80) as VerticalSlideSlowFrame | null;
 }
 
 const VERTICAL_JUMPS_ACCUMULATOR_STEP = 12;
@@ -2214,6 +2347,145 @@ export function circleIntoBackgroundFrameAtTick(
   };
 }
 
+/**
+ * Source-order normal-front port of `Anim_FourPetal`
+ * (`pokemon_animation.c:911-939,3601-3656,5540-5544` and
+ * `trig.c:514-518`). `Task_HandleMonAnimation` zeroes data2/data6/data7.
+ * Callback zero writes data6=0/data7=64/data2=1 in that order, then every
+ * active callback increments data7 by eight before applying its phase guard.
+ * Phases 0..3 use the strict `> 127` guard; phase 4 alone uses `> 63`.
+ * Every switch arm uses the signed GBA sine table, and both source-order
+ * `TryFlipX` calls are retained as normal-front no-ops. The default arm
+ * clears both offsets, installs `WaitAnimEnd`, and remains stable.
+ */
+export function fourPetalFrameAtTick(
+  ticksSinceStart: number,
+): FourPetalFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  let data2: 0 | 1 = 0;
+  let data6 = 0;
+  let data7 = 0;
+  let terminal: FourPetalFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (terminal !== null) return terminal;
+
+    const data2Before = data2;
+    const data6Before = data6;
+    const data7Before = data7;
+    const initialized = data2 === 0;
+    if (initialized) {
+      data6 = 0;
+      data7 = 64;
+      data2 = 1;
+    }
+    const data7AfterInitialization = data7;
+
+    data7 += 8;
+    const data7AfterIncrement = data7;
+    const phaseGuardLimit: 63 | 127 = data6 === 4 ? 63 : 127;
+    const phaseTransition = data7 > phaseGuardLimit;
+    if (phaseTransition) {
+      data7 = 0;
+      data6 += 1;
+    }
+
+    let x2 = 0;
+    let y2 = 0;
+    let switchArm: FourPetalFrame["switchArm"] = "default";
+    let xTrigFunction: FourPetalFrame["xTrigFunction"] = null;
+    let xTrigIndex: number | null = null;
+    let xTrigValue: number | null = null;
+    let yTrigFunction: FourPetalFrame["yTrigFunction"] = null;
+    let yTrigIndex: number | null = null;
+    let yTrigValue: number | null = null;
+    let callback: FourPetalFrame["callback"] = "Anim_FourPetal";
+
+    switch (data6) {
+      case 1:
+        switchArm = 1;
+        xTrigFunction = "Cos";
+        xTrigIndex = data7;
+        xTrigValue = gbaCos(data7, 8);
+        yTrigFunction = "Sin";
+        yTrigIndex = data7;
+        yTrigValue = gbaSin(data7, 8);
+        x2 = -xTrigValue + 0;
+        y2 = yTrigValue - 8;
+        break;
+      case 2:
+        switchArm = 2;
+        xTrigFunction = "Sin";
+        xTrigIndex = data7 + 128;
+        xTrigValue = gbaSin(data7 + 128, 8);
+        yTrigFunction = "Cos";
+        yTrigIndex = data7;
+        yTrigValue = gbaCos(data7, 8);
+        x2 = xTrigValue + 8;
+        y2 = -yTrigValue + 0;
+        break;
+      case 3:
+        switchArm = 3;
+        xTrigFunction = "Cos";
+        xTrigIndex = data7;
+        xTrigValue = gbaCos(data7, 8);
+        yTrigFunction = "Sin";
+        yTrigIndex = data7 + 128;
+        yTrigValue = gbaSin(data7 + 128, 8);
+        x2 = xTrigValue + 0;
+        y2 = yTrigValue + 8;
+        break;
+      case 0:
+      case 4:
+        switchArm = data6;
+        xTrigFunction = "Sin";
+        xTrigIndex = data7;
+        xTrigValue = gbaSin(data7, 8);
+        yTrigFunction = "Cos";
+        yTrigIndex = data7;
+        yTrigValue = gbaCos(data7, 8);
+        x2 = xTrigValue - 8;
+        y2 = yTrigValue + 0;
+        break;
+      default:
+        callback = "WaitAnimEnd";
+        break;
+    }
+
+    const frame: FourPetalFrame = {
+      x2,
+      y2,
+      data0: 0,
+      data2Before,
+      data2: 1,
+      data6Before,
+      data6,
+      data7Before,
+      data7AfterInitialization,
+      data7AfterIncrement,
+      data7,
+      initialized,
+      phaseGuardLimit,
+      phaseTransition,
+      switchArm,
+      xTrigFunction,
+      xTrigIndex,
+      xTrigValue,
+      yTrigFunction,
+      yTrigIndex,
+      yTrigValue,
+      normalFrontDontFlip: true,
+      tryFlipXCalls: 2,
+      callback,
+    };
+    if (callback === "WaitAnimEnd") terminal = frame;
+    if (tick === ticksSinceStart) return frame;
+  }
+
+  throw new Error("unreachable FourPetal reducer state");
+}
+
 export type BounceRotateToSidesTableEntry = readonly [
   startX: number,
   endX: number,
@@ -2436,7 +2708,12 @@ export function bounceRotateToSidesSmallFrameAtTick(
   );
 }
 
-/** Source sibling retained explicitly: small rotation with the slow table. */
+/**
+ * Exact source-order `Anim_BounceRotateToSides_SmallSlow` lifecycle. The
+ * wrapper first writes sprite `data6=1`, then Small allocates a zeroed
+ * `AddNewAnim` entry, writes rotation 2048 and copies `data6` into animation
+ * data before immediately invoking the shared slow-table callback.
+ */
 export function bounceRotateToSidesSmallSlowFrameAtTick(
   ticksSinceStart: number,
 ): BounceRotateToSidesFrame | null {
@@ -3477,6 +3754,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
+    case "BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW": {
+      const terminal = bounceRotateToSidesSmallSlowFrameAtTick(167);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_BounceRotateToSides_SmallSlow did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
     case "BOUNCE_ROTATE_TO_SIDES_SLOW": {
       const terminal = bounceRotateToSidesSlowFrameAtTick(167);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
@@ -3495,6 +3779,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = circularStretchTwiceFrameAtTick(41);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_CircularStretchTwice did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "FOUR_PETAL": {
+      const terminal = fourPetalFrameAtTick(63);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_FourPetal did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
@@ -3656,6 +3947,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = verticalSlideFrameAtTick(41);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_VerticalSlide did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "V_SLIDE_SLOW": {
+      const terminal = verticalSlideSlowFrameAtTick(81);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_VerticalSlide_Slow did not reach its source terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
