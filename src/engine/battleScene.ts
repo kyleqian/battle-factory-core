@@ -865,6 +865,7 @@ import {
   turn2PresentationEpochElapsedSinceReset,
   type Turn2CompletedResolutionNextCommandHandoff,
 } from "./turn2ResolutionAdapter.ts";
+import type { Turn3CompletedResolutionNextCommandHandoff } from "./turn3ResolutionAdapter.ts";
 import { TURN1_CHOOSE_ACTION_RESET_AFTER_CONFIRM } from "./turn1ChooseActionReset.ts";
 import {
   isTurn6NextCommandHandoffReady,
@@ -2504,6 +2505,8 @@ export interface BattleSceneState {
   turn1NextCommandHandoff?: Turn1CompletedResolutionNextCommandHandoff | null;
   /** Completed turn-2 receipt published by the source-owned choose-action reset. */
   turn2NextCommandHandoff?: Turn2CompletedResolutionNextCommandHandoff | null;
+  /** Completed turn-3 receipt published by the source-owned choose-action reset. */
+  turn3NextCommandHandoff?: Turn3CompletedResolutionNextCommandHandoff | null;
   /** S7 slice I (docs/battle-turn-notes.md §13/§22): `true` once turn 3's whole ROCK_SLIDE resolution has redrawn the settled action menu (`TURN3_ROCKSLIDE_REOPEN_GATE_DELAY` past turn 3's own real confirm) AND a fresh A-press has reopened FIGHT for turn 4 - same direct-create idiom as the preceding turn controller. Turn 4's reopen persists the cursor at slot 0 (ROCK_SLIDE, unchanged since turn 3) - no nav needed, §13's own ledger. Distinguishes turn 4's own DOUBLE_TEAM+ROCK_SLIDE resolution from turn 3's ENDEAVOR+ROCK_SLIDE one (both confirm at cursor 0). */
   turn3Resolved: boolean;
   /** S7 slice J (docs/battle-turn-notes.md §13/§23): `true` once turn 4's whole ROCK_SLIDE resolution has redrawn the settled action menu (`TURN4_ROCKSLIDE_MENU_REDRAW_DELAY` past turn 4's own real confirm) AND a fresh A-press has reopened FIGHT for turn 5 - same direct-create idiom as the preceding turn controllers. Turn 5's reopen persists the cursor at slot 0 (ROCK_SLIDE, unchanged since turn 3) - no nav needed, §13's own ledger. Distinguishes turn 5's own ENDEAVOR resolution (Grovyle's fatal-to-1 hit on Onix) from turn 4's DOUBLE_TEAM+ROCK_SLIDE one (both confirm at cursor 0). */
@@ -2555,6 +2558,7 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE,
   turn1NextCommandHandoff: null,
   turn2NextCommandHandoff: null,
+  turn3NextCommandHandoff: null,
   turn3Resolved: false,
   turn4Resolved: false,
   turn5NextCommandHandoff: null,
@@ -2585,6 +2589,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     fightSubmenu: state.fightSubmenu,
     turn1NextCommandHandoff: state.turn1NextCommandHandoff ?? null,
     turn2NextCommandHandoff: state.turn2NextCommandHandoff ?? null,
+    turn3NextCommandHandoff: state.turn3NextCommandHandoff ?? null,
     turn3Resolved: state.turn3Resolved,
     turn4Resolved: state.turn4Resolved,
     turn5NextCommandHandoff: state.turn5NextCommandHandoff,

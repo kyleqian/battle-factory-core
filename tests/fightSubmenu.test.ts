@@ -50,6 +50,7 @@ import {
   isTurn2NextCommandLifecycleActive,
   resolveTurn2CompletedResolutionNextCommandHandoff,
 } from "../src/engine/turn2ResolutionAdapter.ts";
+import { isTurn3NextCommandHandoffReady } from "../src/engine/turn3ResolutionAdapter.ts";
 import {
   CANONICAL_FORCED_SWITCH_PARTY,
   CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
@@ -769,6 +770,24 @@ describe("battleMenu: turn 3's ENDEAVOR resolution (S7 slice G, docs/battle-turn
 });
 
 describe("battleMenu/battleScene: turn 3's ROCK_SLIDE resolution (S7 slice H, docs/battle-turn-notes.md §21)", () => {
+  it("publishes the completed-turn-3 receipt on elapsed 3172, after the rejected handler-install tick and before any turn-4 reopen", () => {
+    let state = stateAtTurn3Confirm();
+    while (state.battleScene!.elapsed < 3171) state = press(state, []);
+    expect(state.battleScene!.turn3NextCommandHandoff ?? null).toBeNull();
+
+    state = press(state, []);
+
+    const handoff = state.battleScene!.turn3NextCommandHandoff;
+    expect(state.battleScene!.elapsed).toBe(3172);
+    expect(isTurn3NextCommandHandoffReady(handoff)).toBe(true);
+    expect(handoff).toMatchObject({
+      playerPp: [8, 20, 19, 10],
+      persistedMoveSlot: 0,
+      hp: { player: 88, opponent: 41 },
+      presentationEpoch: { elapsed: 3172 },
+    });
+  });
+
   it("the synthetic TURN3_ROCKSLIDE_PRESS_TICK anchor (3687) reuses rockSlideOpponentHp unchanged for Grovyle's own 88->41 drain, matching the RAM-probed schedule exactly", () => {
     const pressTick = 3687; // 4080 - ROCK_SLIDE_TEXT_DELAY(393), battleScene.ts's own TURN3_ROCKSLIDE_PRESS_TICK
     expect(rockSlideOpponentHp(pressTick + 596, pressTick, 88, 41)).toBe(88); // still full, one tick before the drain-start sentinel

@@ -204,6 +204,8 @@ import {
   isTurn2NextCommandLifecycleActive,
   resolveTurn2CompletedResolutionNextCommandHandoff,
 } from "./turn2ResolutionAdapter.ts";
+import { isTurn3ChooseActionBounceReset } from "./turn3ChooseActionReset.ts";
+import { resolveTurn3CompletedResolutionNextCommandHandoff } from "./turn3ResolutionAdapter.ts";
 import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "./turn16FirePunchResolutionAdapter.ts";
 import {
   advanceBattleSceneForcedPartySelect,
@@ -1121,6 +1123,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         : activeMonMoveset(draftScreen);
     let turn1NextCommandHandoff = battleScene.turn1NextCommandHandoff ?? null;
     let turn2NextCommandHandoff = battleScene.turn2NextCommandHandoff ?? null;
+    let turn3NextCommandHandoff = battleScene.turn3NextCommandHandoff ?? null;
     let turn3Resolved = battleScene.turn3Resolved;
     let turn4Resolved = battleScene.turn4Resolved;
     let turn5NextCommandHandoff = battleScene.turn5NextCommandHandoff;
@@ -1157,6 +1160,21 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       )
     ) {
       turn2NextCommandHandoff = resolveTurn2CompletedResolutionNextCommandHandoff(
+        battleScene.elapsed + 1,
+      );
+    }
+    if (
+      turn3NextCommandHandoff === null
+      && isTurn2NextCommandLifecycleActive(
+        turn2NextCommandHandoff,
+        fightSubmenu.openElapsed,
+      )
+      && isTurn3ChooseActionBounceReset(
+        fightSubmenu.confirmElapsed,
+        battleScene.elapsed + 1,
+      )
+    ) {
+      turn3NextCommandHandoff = resolveTurn3CompletedResolutionNextCommandHandoff(
         battleScene.elapsed + 1,
       );
     }
@@ -1597,6 +1615,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       fightSubmenu,
       turn1NextCommandHandoff,
       turn2NextCommandHandoff,
+      turn3NextCommandHandoff,
       turn3Resolved,
       turn4Resolved,
       turn5NextCommandHandoff,
