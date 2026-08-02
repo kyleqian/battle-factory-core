@@ -4,6 +4,44 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 849 — [user-directed maintenance, 2026-08-01 22:20] vitest fair-shares the box; 88,808 scratch dirs / ~210 GB reclaimed
+
+- **State:** full `npm test` 588 files / 6,107 passed / 1 skipped, build
+  green, tree clean. $TMPDIR down from 103,881 entries to 15,073.
+- **Did:**
+  - **Vitest worker oversubscription (user report).** Root cause: only
+    `tools/run-subagent.sh` exported `POKEBENCH_VITEST_MAX_WORKERS` (4).
+    `run-agent.sh` and `run-supervisor.sh` export nothing, so every
+    supervisor and interactive session ran at vitest's default of
+    `availableParallelism() - 1` = **15 forks**. Measured solo: uncapped =
+    15 forks / 167s / ~83 GB peak tree RSS; `MAX_WORKERS=4` = 4 forks /
+    329s / ~36 GB. (RSS sums overcount shared copy-on-write pages — upper
+    bounds, the ratio is what matters.)
+  - **Fix (user chose fair-share over a flat cap):** `vite.config.ts`
+    `resolveMaxWorkers()` counts live peer vitest parents via `ps` and
+    divides the core budget; explicit env still wins; floor of 2; `ps`
+    failure falls back to assuming solo. Verified: solo 15, explicit cap=3
+    gives 3, and a second run launched against one live peer took 7
+    (combined 22, vs 30 uncapped). Contended peer run stayed green.
+    `tests/vitestWorkerBudget.test.ts` pins the override, the floor, and
+    malformed-override handling.
+  - **Swept the existing debris** (user approved): 88,808 directories,
+    ~210 GB. **Two passes were needed and the reason matters:** the first
+    pass found only 89 prefixes because entry 848's codemod had rewritten
+    tools/ to `createScratchDir("...")`, which the sweeper's
+    `mkdtempSync(join(tmpdir(), ...))` regex no longer matched. The sweeper
+    now recognises BOTH spellings (208 prefixes).
+  - **Corrected size attribution from entry 848.** By directory *count*
+    tests are ~95% of the leak, but by *bytes* it is the reverse: the 2,671
+    tools-created directories held **123.53 GB** (~46 MB each, probe RGB
+    dumps and diagnostic PNGs) against ~87 GB for the 86k test directories.
+    Entry 848's "95% was the suite" is true by count only.
+- **Next:** ~13.4k directories were younger than 24h and were left alone;
+  they age out, or sweep sooner with `--min-age-hours N`. Papercut entry
+  for concurrent full-suite contention rewritten rather than deleted — the
+  start-within-seconds race remains. #39 remainder untouched.
+
+---
 ## 848 — [user-directed maintenance, 2026-08-01 21:40] $TMPDIR scratch leak fixed (95% was the suite, not tools/) + four papercuts retired
 
 - **State:** full `npm test` 587 files / 6,104 passed / 1 skipped and

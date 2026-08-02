@@ -25,9 +25,15 @@ const repoRoot = fileURLToPath(new URL("..", import.meta.url));
 
 const MKDTEMP_SUFFIX_LENGTH = 6;
 const SOURCE_DIRECTORIES = ["tools", "tests", "src", "bin"];
-// Matches both the single-line and wrapped spellings of the allocation.
-const PREFIX_PATTERN =
-  /mkdtempSync\(\s*join\(\s*tmpdir\(\)\s*,\s*[`"']([^`"']+)[`"']/g;
+// Both spellings must be recognised, or the sweeper silently stops matching
+// whole families of debris:
+//   - the raw allocation, single-line and wrapped, as the suites still write it;
+//   - `createScratchDir("prefix-")`, which is how tools/ spells it since the
+//     helper landed — directories created before that still litter $TMPDIR.
+const PREFIX_PATTERNS = [
+  /mkdtempSync\(\s*join\(\s*tmpdir\(\)\s*,\s*[`"']([^`"']+)[`"']/g,
+  /createScratchDir\(\s*[`"']([^`"']+)[`"']/g,
+];
 
 interface Options {
   apply: boolean;
@@ -85,7 +91,9 @@ function discoverPrefixes(): Set<string> {
   for (const directory of SOURCE_DIRECTORIES) {
     for (const file of collectSourceFiles(join(repoRoot, directory))) {
       const source = readFileSync(file, "utf8");
-      for (const match of source.matchAll(PREFIX_PATTERN)) prefixes.add(match[1]);
+      for (const pattern of PREFIX_PATTERNS) {
+        for (const match of source.matchAll(pattern)) prefixes.add(match[1]);
+      }
     }
   }
   return prefixes;

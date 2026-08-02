@@ -1,4 +1,48 @@
+import { execSync } from "node:child_process";
+import { availableParallelism } from "node:os";
 import { defineConfig, configDefaults } from "vitest/config";
+
+// How many OTHER vitest runs are live right now.
+//
+// Vitest names its main process `node (vitest)` and its forks `node (vitest N)`,
+// so the parents are countable and the forks are not mistaken for them. Our own
+// process is excluded by pid — whether or not it has been renamed yet by the
+// time this config is evaluated.
+function livePeerVitestRuns(): number {
+  try {
+    const listing = execSync("ps -eo pid=,command=", {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    });
+    let peers = 0;
+    for (const line of listing.split("\n")) {
+      const match = /^\s*(\d+)\s+node \(vitest\)\s*$/.exec(line);
+      if (match && Number(match[1]) !== process.pid) peers += 1;
+    }
+    return peers;
+  } catch {
+    // No `ps`, or it failed — fall back to assuming we are alone.
+    return 0;
+  }
+}
+
+// Fair-share the machine between concurrent suites.
+//
+// One uncapped full suite peaks at 15 forks (~1 GB each, plus a ~4.5 GB parent)
+// and this repo routinely runs 4+ sessions at once, which oversubscribes a
+// 16-core box badly enough to have caused a signal-143 kill and 16-30 minute
+// suites. Sizing the pool by the number of live peers keeps a solo run at full
+// speed (167s) while a contended one backs off automatically.
+//
+// `POKEBENCH_VITEST_MAX_WORKERS` still wins when set — `run-subagent.sh`
+// exports 4 for bounded workers, and it is the escape hatch for a run you know
+// is alone.
+export function resolveMaxWorkers(): number {
+  const explicit = Number(process.env.POKEBENCH_VITEST_MAX_WORKERS);
+  if (Number.isFinite(explicit) && explicit >= 1) return Math.floor(explicit);
+  const budget = Math.max(1, availableParallelism() - 1);
+  return Math.max(2, Math.floor(budget / (livePeerVitestRuns() + 1)));
+}
 
 export default defineConfig({
   root: ".",
@@ -23,15 +67,9 @@ export default defineConfig({
     // header for the measurement behind this.
     setupFiles: ["tests/setup/scratchSandbox.ts"],
     globalSetup: ["tests/setup/scratchSandboxGlobal.ts"],
-    // Concurrent supervisor lanes each spawning a full-width fork pool
-    // oversubscribe the machine (measured 16-30min full suites vs ~3-8min
-    // solo). `run-subagent.sh` exports a low cap for worker sessions;
-    // solo/interactive sessions keep vitest's default parallelism.
-    ...(process.env.POKEBENCH_VITEST_MAX_WORKERS
-      ? {
-          minWorkers: 1,
-          maxWorkers: Number(process.env.POKEBENCH_VITEST_MAX_WORKERS),
-        }
-      : {}),
+    // See resolveMaxWorkers() above — solo runs stay full-width, concurrent
+    // ones back off so 4 sessions cannot each claim the whole machine.
+    minWorkers: 1,
+    maxWorkers: resolveMaxWorkers(),
   },
 });

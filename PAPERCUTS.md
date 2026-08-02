@@ -432,11 +432,21 @@ Per entry:
   animation supervisor's full gate on 2026-07-31, stretching the main suite
   to 431s, ~5 min).
 - **Cost each:** ~10 min (main retry) + ~20 min (side validation stall).
-- **Workaround:** stagger full-suite runs — workers run focused suites
-  during the step and the full suite once near the end; supervisors avoid
-  launching two workers whose acceptance both requires a full-suite run at
-  the same wall-clock window, and treat a contended full-suite claim as
-  unverified until rerun serially.
+- **Largely fixed 2026-08-01:** the root cause was that only
+  `run-subagent.sh` exported `POKEBENCH_VITEST_MAX_WORKERS` (4), so bounded
+  workers were capped but every supervisor and interactive session ran at
+  vitest's default of `availableParallelism() - 1` = 15 forks. Measured on
+  this box: one uncapped full suite = 15 forks / 167s / ~83 GB peak tree RSS
+  (RSS sums overcount shared pages, so treat as an upper bound); at
+  `MAX_WORKERS=4` it is 4 forks / 329s / ~36 GB. `vite.config.ts` now
+  fair-shares the core budget by counting live peer vitest runs, so a solo
+  run stays at 15 and a contended one backs off automatically (verified:
+  a second run launched against one live peer took 7).
+- **Residual:** two suites starting within a few seconds of each other both
+  observe zero peers and both take a full share. Staggering still helps —
+  workers run focused suites during the step and the full suite once near
+  the end — and a contended full-suite claim is still worth rerunning
+  serially before trusting it.
 
 ## mGBA probe wrapper leaves multi-MB logs beside committed receipts
 
