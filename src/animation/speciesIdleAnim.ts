@@ -77,7 +77,8 @@ export type SpeciesFrontAnimFamily =
   | "V_SQUISH_AND_BOUNCE_SLOW"
   | "V_STRETCH"
   | "V_SHAKE"
-  | "V_SHAKE_TWICE";
+  | "V_SHAKE_TWICE"
+  | "ZIGZAG_SLOW";
 
 const FRONT_ANIM_PREFIX = "ANIM_";
 const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
@@ -117,6 +118,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "V_STRETCH",
   "V_SHAKE",
   "V_SHAKE_TWICE",
+  "ZIGZAG_SLOW",
 ]);
 
 const generatedFrontAnimIds = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
@@ -456,6 +458,23 @@ export const FOUR_PETAL_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze
 /** There are no four-petal mappings outside the Factory rental pool. */
 export const FOUR_PETAL_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   FOUR_PETAL_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All source selector mappings for `ANIM_ZIGZAG_SLOW`. */
+export const ZIGZAG_SLOW_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_ZIGZAG_SLOW")
+    .map(([species]) => species),
+);
+
+/** Every slow-zigzag mapping is reachable through Factory rentals. */
+export const ZIGZAG_SLOW_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  ZIGZAG_SLOW_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no slow-zigzag mappings outside the Factory rental pool. */
+export const ZIGZAG_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  ZIGZAG_SLOW_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /** All 5 source selector mappings for the normal `ANIM_BOUNCE_ROTATE_TO_SIDES`. */
@@ -2723,6 +2742,58 @@ export function bounceRotateToSidesSmallSlowFrameAtTick(
   );
 }
 
+/** Source `sZigzagData`: x delta, y delta, callback count. */
+export const ZIGZAG_DATA: readonly (readonly [number, number, number])[] = Object.freeze([
+  [-1, -1, 6], [2, 0, 6], [-2, 2, 6], [2, 0, 6], [-2, -2, 6],
+  [2, 0, 6], [-2, 2, 6], [2, 0, 6], [-1, -1, 6], [0, 0, 0],
+]);
+
+export interface ZigzagSlowFrame extends SpeciesIdleOffset {
+  readonly data0: number;
+  readonly data2: number;
+  readonly data3: number;
+  readonly moved: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXCalls: 0 | 1 | 2;
+  readonly callback: "Anim_ZigzagSlow" | "WaitAnimEnd";
+}
+
+/** Source-order normal-front `Anim_ZigzagSlow` plus shared `Zigzag`. */
+export function zigzagSlowFrameAtTick(ticksSinceStart: number): ZigzagSlowFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+  let x2 = 0, y2 = 0, data0 = 0, data2 = 0, data3 = 0;
+  let callback: ZigzagSlowFrame["callback"] = "Anim_ZigzagSlow";
+  let moved = false;
+  let tryFlipXCalls: ZigzagSlowFrame["tryFlipXCalls"] = 0;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    moved = false;
+    tryFlipXCalls = 0;
+    if (callback === "WaitAnimEnd") continue;
+    if (data2 === 0) data0 = 0;
+    if (data0 <= 0) {
+      tryFlipXCalls = 1;
+      if (data2 === 0) data3 = 0;
+      let leg = ZIGZAG_DATA[data3]!;
+      if (leg[2] === data2) {
+        if (leg[2] === 0) callback = "WaitAnimEnd";
+        else { data3 += 1; data2 = 0; }
+      }
+      leg = ZIGZAG_DATA[data3]!;
+      if (leg[2] === 0) callback = "WaitAnimEnd";
+      else {
+        x2 += leg[0]; y2 += leg[1]; data2 += 1;
+        moved = true; tryFlipXCalls = 2;
+      }
+      data0 = 1;
+    } else {
+      data0 -= 1;
+    }
+  }
+  return { x2, y2, data0, data2, data3, moved, normalFrontDontFlip: true,
+    tryFlipXCalls, callback };
+}
+
 const GROW_VIBRATE_DURATION = 40;
 
 /**
@@ -3996,6 +4067,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = verticalShakeTwiceFrameAtTick(78);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_VerticalShakeTwice did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "ZIGZAG_SLOW": {
+      const terminal = zigzagSlowFrameAtTick(108);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_ZigzagSlow did not reach its source terminal sentinel");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
