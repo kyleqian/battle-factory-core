@@ -314,6 +314,9 @@ import dodrioRunB from "../../tools/compare/fixtures/sendout-front-dodrio-run-b.
 import heracrossScenario from "../../tools/compare/fixtures/sendout-front-heracross.json" with { type: "json" };
 import heracrossRunA from "../../tools/compare/fixtures/sendout-front-heracross-run-a.json" with { type: "json" };
 import heracrossRunB from "../../tools/compare/fixtures/sendout-front-heracross-run-b.json" with { type: "json" };
+import kingdraScenario from "../../tools/compare/fixtures/sendout-front-kingdra.json" with { type: "json" };
+import kingdraRunA from "../../tools/compare/fixtures/sendout-front-kingdra-run-a.json" with { type: "json" };
+import kingdraRunB from "../../tools/compare/fixtures/sendout-front-kingdra-run-b.json" with { type: "json" };
 import {
   KABUTO_FRONT_ANIM_START_OFFSET,
   kabutoHSlideWobble,
@@ -612,6 +615,12 @@ const heracrossRawA = readFileSync(
 );
 const heracrossRawB = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-heracross-run-b.json", import.meta.url),
+);
+const kingdraRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-kingdra-run-a.json", import.meta.url),
+);
+const kingdraRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-kingdra-run-b.json", import.meta.url),
 );
 
 describe("speciesIdleAnim", () => {
@@ -6438,6 +6447,64 @@ describe("speciesIdleAnim", () => {
       expect(circleIntoBackgroundFrameAtTick(66)).toEqual(terminal);
       expect(circleIntoBackgroundFrameAtTick(1000)).toEqual(terminal);
       expect(circleIntoBackgroundFrameAtTick(-1)).toBeNull();
+    });
+
+    it("stages one complete legal challenge-0 KINGDRA Scene-ON party", () => {
+      expect(kingdraScenario).toMatchObject({
+        mode: "mechanicLab",
+        profile: "battle-scene-on",
+        level: 50,
+        challengeNum: 0,
+        trainerId: 50,
+      });
+      expect(kingdraScenario.overrides.parties.player).toHaveLength(3);
+      expect(kingdraScenario.overrides.parties.opponent).toHaveLength(3);
+      expect(kingdraScenario.overrides.parties.opponent[0]!.species).toBe(230);
+      expect(kingdraScenario.overrides.parties.opponent[0]!.moves).toEqual([56, 225, 196, 213]);
+      for (const setId of [
+        ...kingdraScenario.playerSetIds,
+        ...kingdraScenario.opponentSetIds,
+      ]) {
+        expect(setId).toBeGreaterThanOrEqual(110);
+        expect(setId).toBeLessThanOrEqual(199);
+      }
+      for (const mon of [
+        ...kingdraScenario.overrides.parties.player,
+        ...kingdraScenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it("matches the paired byte-identical raw settled KINGDRA Scene-ON receipts", () => {
+      expect(kingdraRawA.equals(kingdraRawB)).toBe(true);
+      expect(kingdraRawA).toHaveLength(373);
+      expect(kingdraRawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(kingdraRawA).digest("hex")).toBe(
+        "1747d48abbe711e2b6d799caa48fe7cb95d6ad276a461713902556b3b229043b",
+      );
+      expect(kingdraRunA).toEqual(kingdraRunB);
+      expect(selectorTables.frontAnimIds.species.KINGDRA).toBe("ANIM_CIRCLE_INTO_BG");
+      expect(kingdraRunA.ticks[0]!.battler1).toMatchObject({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex: 4,
+        data2: 230,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
     });
 
     it("regression-pins the accepted adjacent lunge family", () => {
