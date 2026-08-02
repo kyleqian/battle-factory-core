@@ -154,6 +154,11 @@ import {
   VERTICAL_SLIDE_WOBBLE_INITIALIZERS,
   VERTICAL_SLIDE_INITIALIZERS,
   YELLOW_FLASH_DATA,
+  zigzagSlowFrameAtTick,
+  ZIGZAG_DATA,
+  ZIGZAG_SLOW_FACTORY_FRONT_SPECIES,
+  ZIGZAG_SLOW_FRONT_SPECIES,
+  ZIGZAG_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES,
 } from "../../src/animation/speciesIdleAnim.ts";
 import frontierMons from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import selectorTables from "../../src/data/gen/send-out-anim-selector-tables.json" with { type: "json" };
@@ -3354,7 +3359,65 @@ describe("speciesIdleAnim", () => {
         .filter(([, family]) => family === "ANIM_ZIGZAG_SLOW")
         .map(([species]) => species);
       expect(nextGenerated).toEqual(["VENOMOTH", "KINGLER", "FLYGON"]);
-      for (const species of nextGenerated) expect(speciesFrontIdleRestOffset(species)).toBeNull();
+      for (const species of nextGenerated) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("zigzagSlowFrameAtTick (slow source lifecycle)", () => {
+    it("derives the exhaustive three-species Factory census", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_ZIGZAG_SLOW")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(ZIGZAG_SLOW_FRONT_SPECIES).toEqual(generated);
+      expect(generated).toEqual(["VENOMOTH", "KINGLER", "FLYGON"]);
+      expect(ZIGZAG_SLOW_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(ZIGZAG_SLOW_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(ZIGZAG_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of generated) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins source data, alternating wrapper gates, every movement, and terminal tick 108", () => {
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
+      expect(ZIGZAG_DATA).toEqual([
+        [-1, -1, 6], [2, 0, 6], [-2, 2, 6], [2, 0, 6], [-2, -2, 6],
+        [2, 0, 6], [-2, 2, 6], [2, 0, 6], [-1, -1, 6], [0, 0, 0],
+      ]);
+      expect(zigzagSlowFrameAtTick(-1)).toBeNull();
+      expect(zigzagSlowFrameAtTick(0)).toEqual({
+        x2: -1, y2: -1, data0: 1, data2: 1, data3: 0, moved: true,
+        normalFrontDontFlip: true, tryFlipXCalls: 2, callback: "Anim_ZigzagSlow",
+      });
+      for (let tick = 0; tick < 108; tick += 1) {
+        const frame = zigzagSlowFrameAtTick(tick)!;
+        expect(frame.callback, `tick ${tick}`).toBe("Anim_ZigzagSlow");
+        expect(frame.moved, `tick ${tick}`).toBe(tick % 2 === 0);
+        expect(frame.tryFlipXCalls, `tick ${tick}`).toBe(tick % 2 === 0 ? 2 : 0);
+        expect(frame.data0, `tick ${tick}`).toBe(tick % 2 === 0 ? 1 : 0);
+      }
+      expect(zigzagSlowFrameAtTick(108)).toEqual({
+        x2: 0, y2: 0, data0: 1, data2: 0, data3: 9, moved: false,
+        normalFrontDontFlip: true, tryFlipXCalls: 1, callback: "WaitAnimEnd",
+      });
+      expect(zigzagSlowFrameAtTick(200)).toEqual({
+        x2: 0, y2: 0, data0: 1, data2: 0, data3: 9, moved: false,
+        normalFrontDontFlip: true, tryFlipXCalls: 0, callback: "WaitAnimEnd",
+      });
+      expect([10, 12, 22, 24, 106].map((tick) => [tick, zigzagSlowFrameAtTick(tick)])).toEqual([
+        [10, expect.objectContaining({ x2: -6, y2: -6, data2: 6, data3: 0 })],
+        [12, expect.objectContaining({ x2: -4, y2: -6, data2: 1, data3: 1 })],
+        [22, expect.objectContaining({ x2: 6, y2: -6, data2: 6, data3: 1 })],
+        [24, expect.objectContaining({ x2: 4, y2: -4, data2: 1, data3: 2 })],
+        [106, expect.objectContaining({ x2: 0, y2: 0, data2: 6, data3: 8 })],
+      ]);
     });
   });
 
@@ -7343,7 +7406,9 @@ describe("speciesIdleAnim", () => {
         .filter(([, family]) => family === "ANIM_ZIGZAG_SLOW")
         .map(([species]) => species);
       expect(followingGenerated).toEqual(["VENOMOTH", "KINGLER", "FLYGON"]);
-      for (const species of followingGenerated) expect(speciesFrontIdleRestOffset(species)).toBeNull();
+      for (const species of followingGenerated) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
     });
   });
 });
