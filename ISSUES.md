@@ -204,7 +204,7 @@ turn-13 dispatch, slot-0 PP reconstruction, and the following reopen guard.
 Clean-parent `fbd575a9` (`ad34442f^`) app replays held all requested turn-12,
 OFF turn-13 reopen/reader, and legacy turn-13 insurance windows byte-identical
 (**1,141/1,141 raw RGBA captures**). Turns 9–12 are now all retired; #39
-remains open for turns 1–4, `opponentFaintDismissElapsed`, and dispatcher debt.
+remains open for turns 1–4 and dispatcher debt.
 The matching typed completed-turn-1/next-command handoff retired
 `turn1Resolved` (`b34e6279` + `13389b9c`): it publishes canonical PP
 **[9,20,20,10]**, persisted slot 0, HP **117/101**, settled/ready facts, and
@@ -247,7 +247,7 @@ preserving the current legacy presentation continuation from that immutable
 epoch. Clean-parent `b7cdbe46` (`75d9c1d3^`) app replays held the turn-4
 primary, all turn-5/6 readers, and upstream turn-3 window byte-identical
 (**1,841/1,841 raw RGBA captures**). Turns 1–4 and 5–13 are now retired; #39
-remains open only for `opponentFaintDismissElapsed` and dispatcher debt.
+remains open only for dispatcher debt.
 Rank 4 is **fully retired** (2026-07-31,
 all 5 slices): `174cc388` ROCK_SLIDE tails; `441ddf83`+`6aba6662`
 turn-7/8 FEATHER_DANCE staged+flipped; `0769ccc6` stat-fall banner
@@ -528,8 +528,14 @@ redraw edge until the already-typed terminal owner begins. Deleted
 episode selector was added. Clean-`60acda9c` differential app replay held the
 requested Turn-16/Turn-17 rungs byte-for-byte (**2,041 captures**), plus the
 delayed Turn-16 rung and Turn-17 rung 6b (**2,163 total**). Census falls
-**2,506→2,496 refs / 33,125→33,124 LOC**. Rank 8 is closed; #39 remains open
-only for the earlier mirror/dispatcher debt inventoried in
+**2,506→2,496 refs / 33,125→33,124 LOC**. Rank 8 is closed.
+
+**Opponent-faint presentation owner retired (2026-08-01, `ef1aa50f`):** the
+nonterminal PIDGEOTTO-faint/MURKROW-switch-in lifecycle now owns its accepted
+A edge, frozen cursor, and edge-relative continuation as one immutable typed
+receipt. The old loose clock and every alias/thread are gone; the four legacy
+app replays remain byte-identical (**141 + 242 + 256 + 223 = 862** captures).
+#39 remains open only for the next-command dispatcher debt inventoried in
 `docs/battle-scene-retirement-inventory.md`.
 
 ## #62 — Retired turn-2-shaped reproducers remain pixel-red on the generated OFF route after #60's crash fix
