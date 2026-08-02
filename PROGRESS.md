@@ -15,14 +15,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 845 — [bounded MAIN worker, 2026-08-01] turn-3 predecessor retired with immutable epoch
 
-- **State:** proof `3487117c`, migration `0e7fd346`; `rg -n '\\bturn3Resolved\\b' src tests` is empty. The receipt publishes at the
+- **State:** proof `3487117c`, migration `0e7fd346` + follow-up `c0c2c228`; `rg -n '\\bturn3Resolved\\b' src tests` is empty. The receipt publishes at the
   source-owned first choose-action callback: absolute **4212**, runtime
   elapsed **3172** (the 4211 handler-install tick still rejects A).
 - **Did:** migrated turn-4 dispatch, generic HP/content, DOUBLE_TEAM routing,
   slot-0 PP, all turn-4 bounce consumers, and direct presentation calls to
   PP **[8,20,19,10]**, slot **0**, HP **88/41**, settled/ready, and the
   DoBounceEffect **192/128**, delta **7**, amplitude **1** receipt. A
-  turn-4 B-close/A-reopen retains the same receipt object/epoch.
+  turn-4 B-close/A-reopen retains the same receipt object/epoch. The
+  turn-5-only fallback explicitly clears its no-longer-applicable turn-3
+  receipt rather than passing a stale positional boolean.
 - **Next:** stay scoped: turn 4, `opponentFaintDismissElapsed`, and dispatcher
   debt remain #39 work; do not reopen turns 1–3.
 - **Notes:** clean-parent `354ebc89` (`3487117c^`) app replays are byte-
