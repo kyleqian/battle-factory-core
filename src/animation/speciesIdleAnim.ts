@@ -44,6 +44,7 @@ import selectorTables from "../data/gen/send-out-anim-selector-tables.json" with
 export type SpeciesFrontAnimFamily =
   | "BOUNCE_ROTATE_TO_SIDES"
   | "BOUNCE_ROTATE_TO_SIDES_SMALL"
+  | "BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW"
   | "BOUNCE_ROTATE_TO_SIDES_SLOW"
   | "CIRCLE_INTO_BG"
   | "CIRCULAR_STRETCH_TWICE"
@@ -82,6 +83,7 @@ const FRONT_ANIM_PREFIX = "ANIM_";
 const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "BOUNCE_ROTATE_TO_SIDES",
   "BOUNCE_ROTATE_TO_SIDES_SMALL",
+  "BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW",
   "BOUNCE_ROTATE_TO_SIDES_SLOW",
   "CIRCLE_INTO_BG",
   "CIRCULAR_STRETCH_TWICE",
@@ -512,6 +514,29 @@ export const BOUNCE_ROTATE_TO_SIDES_SMALL_FACTORY_FRONT_SPECIES: readonly string
 export const BOUNCE_ROTATE_TO_SIDES_SMALL_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
   Object.freeze(
     BOUNCE_ROTATE_TO_SIDES_SMALL_FRONT_SPECIES.filter(
+      (species) => !factoryFrontSpecies.has(species),
+    ),
+  );
+
+/** Both source selector mappings for `ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW`. */
+export const BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW")
+    .map(([species]) => species),
+);
+
+/** Every small-slow bounce/rotate mapping is Factory-reachable. */
+export const BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW_FACTORY_FRONT_SPECIES: readonly string[] =
+  Object.freeze(
+    BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW_FRONT_SPECIES.filter(
+      (species) => factoryFrontSpecies.has(species),
+    ),
+  );
+
+/** There are no small-slow bounce/rotate mappings outside the Factory pool. */
+export const BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
+  Object.freeze(
+    BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW_FRONT_SPECIES.filter(
       (species) => !factoryFrontSpecies.has(species),
     ),
   );
@@ -2683,7 +2708,12 @@ export function bounceRotateToSidesSmallFrameAtTick(
   );
 }
 
-/** Source sibling retained explicitly: small rotation with the slow table. */
+/**
+ * Exact source-order `Anim_BounceRotateToSides_SmallSlow` lifecycle. The
+ * wrapper first writes sprite `data6=1`, then Small allocates a zeroed
+ * `AddNewAnim` entry, writes rotation 2048 and copies `data6` into animation
+ * data before immediately invoking the shared slow-table callback.
+ */
 export function bounceRotateToSidesSmallSlowFrameAtTick(
   ticksSinceStart: number,
 ): BounceRotateToSidesFrame | null {
@@ -3721,6 +3751,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = bounceRotateToSidesSmallFrameAtTick(87);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_BounceRotateToSides_Small did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW": {
+      const terminal = bounceRotateToSidesSmallSlowFrameAtTick(167);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_BounceRotateToSides_SmallSlow did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }

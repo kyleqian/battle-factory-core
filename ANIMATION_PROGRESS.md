@@ -1,5 +1,40 @@
 # Animation coverage
 
+## Front `ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW` family accepted (2026-08-01)
+
+**State / verdict:** exact for the complete generated selector census: all
+**2 mappings / 2 Factory-reachable species / 0 outside-Factory mappings** —
+CLEFABLE and AZUMARILL. The accepted normal, Slow, and Small siblings and the
+new SmallSlow entry point share the source-derived `BounceRotateToSides`
+reducer. No adjacent selector, unsupported barrier, per-species/tick branch,
+baked frame, or engine-boundary widening was added. Move coverage remains
+**107 exact / 0 partial / 0 staged / 169 unsupported**;
+`ANIMATION_COVERAGE.json` is unchanged at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,1037-1064,
+1915-2001,3679-3699,5540-5544` and `trig.c:514-518` pin task-zeroed sprite
+data, SmallSlow's `data6=1` write before Small, Small's `AddNewAnim` followed
+by rotation 2048 and animation data 1, affine start/set/reset, both
+normal-front no-op `TryFlipX` calls, signed C-truncated interpolation, GBA
+sine and u16 rotation arithmetic, and stable `WaitAnimEnd`. All **167 active
+callbacks** (ticks 0..166) and every seven-leg boundary are exhaustive; tick
+167 alone consumes the zero-duration sentinel, restores identity offsets and
+affine state, calls `ResetSpriteAfterAnim`, and installs `WaitAnimEnd`. Fresh
+complete legal challenge-0 Scene-ON parties settle both species at x2=0/y2=0,
+animNum=1 and `SpriteCallbackDummy`; paired unchanged-probe receipts are raw
+byte-identical and end with `}` without a newline: CLEFABLE **372 bytes**,
+SHA-256 `62a1979f9af10ce6a6914651bc03407de755e30162594e04527e4e832f943ea4`;
+AZUMARILL **373 bytes**, `908422f7084676cdceda114470205e152976a243fa1d131533685acfbb57b0c7`.
+
+**Verification / next:** unchanged `dump-onix-front-idle-anim.py` ran only via
+`tools/run-mgba-probe.py`, twice fresh per party in one new `mktemp` directory;
+paired raw `cmp`, focused species-idle plus both ratchets **310/310**, `npx tsc
+--noEmit`, coverage/hash checks, and build (**547 modules transformed**) are
+green. Full `npm test`: **584 files, 6,093 passed + 1 skipped**. Next generated
+source-ranked family: **`ANIM_ZIGZAG_SLOW`** (3 mappings / 3 Factory / 0
+outside): VENOMOTH, KINGLER, FLYGON.
+
 ## Front `ANIM_V_SLIDE_SLOW` family accepted (2026-08-01)
 
 **State / verdict:** exact for the complete generated selector census: all
