@@ -42,6 +42,7 @@ import selectorTables from "../data/gen/send-out-anim-selector-tables.json" with
  */
 
 export type SpeciesFrontAnimFamily =
+  | "BACK_AND_LUNGE"
   | "BOUNCE_ROTATE_TO_SIDES"
   | "BOUNCE_ROTATE_TO_SIDES_SMALL"
   | "BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW"
@@ -92,6 +93,7 @@ export type SpeciesFrontAnimFamily =
 
 const FRONT_ANIM_PREFIX = "ANIM_";
 const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
+  "BACK_AND_LUNGE",
   "BOUNCE_ROTATE_TO_SIDES",
   "BOUNCE_ROTATE_TO_SIDES_SMALL",
   "BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW",
@@ -870,6 +872,23 @@ export const FIGURE_8_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
 /** There are no Figure8 mappings outside the Factory rental pool. */
 export const FIGURE_8_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   FIGURE_8_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All source selector mappings for `ANIM_BACK_AND_LUNGE`. */
+export const BACK_AND_LUNGE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_BACK_AND_LUNGE")
+    .map(([species]) => species),
+);
+
+/** Every back-and-lunge mapping is reachable through Factory rentals. */
+export const BACK_AND_LUNGE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  BACK_AND_LUNGE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no back-and-lunge mappings outside the Factory rental pool. */
+export const BACK_AND_LUNGE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  BACK_AND_LUNGE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /** All 7 source selector mappings for the slow `ANIM_H_SLIDE_SLOW`. */
@@ -4939,8 +4958,196 @@ export function figure8FrameAtTick(ticksSinceStart: number): Figure8Frame | null
   return lastFrame;
 }
 
+/** Source selector 37's direct `Anim_BackAndLunge` initializer receipt. */
+export const BACK_AND_LUNGE_INITIALIZER = Object.freeze({
+  selector: "ANIM_BACK_AND_LUNGE",
+  sourceId: 37,
+  handleStartAffineAnimCalls: 1,
+  callbackInvokedByInitializer: false,
+  callbackInstalled: "BackAndLunge_0",
+  normalFrontDontFlip: true,
+  affineMode: "double",
+  accepted: true,
+} as const);
+
+export interface BackAndLungeFrame extends SpeciesIdleOffset {
+  readonly phase: "BackAndLunge_0" | "BackAndLunge_1" | "BackAndLunge_2" | "BackAndLunge_3" | "BackAndLunge_4";
+  readonly data2Before: number;
+  readonly data2: number;
+  readonly data3Before: number;
+  readonly data3: number;
+  readonly data4Before: number;
+  readonly data4: number;
+  readonly data5Before: number;
+  readonly data5: number;
+  readonly data6Before: number;
+  readonly data6: number;
+  readonly data7Before: number;
+  readonly data7: number;
+  readonly rotationU8: number | null;
+  readonly affineRotationShifted: number | null;
+  readonly affineRotationU16: number | null;
+  readonly affineWriteCount: 0 | 1;
+  readonly initializerCalled: boolean;
+  readonly callbackInvokedByInitializer: false;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXBeforeMotion: true;
+  readonly tryFlipXAfterMotion: true;
+  readonly tryFlipXCalls: 2;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "BackAndLunge_0" | "BackAndLunge_1" | "BackAndLunge_2" | "BackAndLunge_3" | "BackAndLunge_4" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+/**
+ * Source-order normal-front port of selector 37's
+ * `Anim_BackAndLunge` -> `BackAndLunge_0` through `_4`
+ * (`pokemon_animation.c:1037-1059,2028-2140,5540-5544`). The task has
+ * already set `sDontFlip=TRUE` and zeroed data[2..7], so both source-order
+ * `TryFlipX` calls in every active callback are retained as no-ops.
+ *
+ * All sprite/data registers are reduced as signed s16 values. The local
+ * `var` in `_1` is a u8, and `_2`'s rotation is the source u8 quotient. The
+ * affine writes preserve the source's shifted rotation before its u16
+ * `HandleSetAffineData` argument conversion. Tick 33 is the strict terminal
+ * `_4` callback; `WaitAnimEnd` then remains stable.
+ */
+export function backAndLungeFrameAtTick(ticksSinceStart: number): BackAndLungeFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  let x2 = 0;
+  let y2 = 0;
+  let data2 = 0;
+  let data3 = 0;
+  let data4 = 0;
+  let data5 = 0;
+  let data6 = 0;
+  let data7 = 0;
+  let callback: BackAndLungeFrame["callback"] = "BackAndLunge_0";
+  let affineMode: BackAndLungeFrame["affineMode"] = "double";
+  let lastFrame: BackAndLungeFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (callback === "WaitAnimEnd") continue;
+
+    const phase = callback as BackAndLungeFrame["phase"];
+    const data2Before = data2;
+    const data3Before = data3;
+    const data4Before = data4;
+    const data5Before = data5;
+    const data6Before = data6;
+    const data7Before = data7;
+    let rotationU8: number | null = null;
+    let affineRotationShifted: number | null = null;
+    let affineRotationU16: number | null = null;
+    let resetSpriteAfterAnim = false;
+
+    if (phase === "BackAndLunge_0") {
+      x2 = toS16(x2 + 1);
+      if (x2 > 7) {
+        x2 = 8;
+        data7 = 2;
+        callback = "BackAndLunge_1";
+      }
+    } else if (phase === "BackAndLunge_1") {
+      x2 = toS16(x2 - data7);
+      data7 = toS16(data7 + 1);
+      if (x2 <= 0) {
+        let subResult = x2;
+        let varU8 = data7 & 0xff;
+        data6 = 0;
+        do {
+          subResult = toS16(subResult - varU8);
+          data6 = toS16(data6 + 1);
+          varU8 = (varU8 + 1) & 0xff;
+        } while (subResult > -8);
+        data5 = 1;
+        callback = "BackAndLunge_2";
+      }
+    } else if (phase === "BackAndLunge_2") {
+      x2 = toS16(x2 - data7);
+      data7 = toS16(data7 + 1);
+      rotationU8 = Math.trunc((data5 * 6) / data6) & 0xff;
+      data5 = toS16(data5 + 1);
+      if (data5 > data6) data5 = data6;
+      affineRotationShifted = rotationU8 * 256;
+      affineRotationU16 = affineRotationShifted & 0xffff;
+      if (x2 < -8) {
+        x2 = -8;
+        data4 = 2;
+        data3 = 0;
+        data2 = rotationU8;
+        callback = "BackAndLunge_3";
+      }
+    } else if (phase === "BackAndLunge_3") {
+      if (data3 > 11) {
+        data2 = toS16(data2 - 2);
+        if (data2 < 0) data2 = 0;
+        affineRotationShifted = data2 << 8;
+        affineRotationU16 = affineRotationShifted & 0xffff;
+        if (data2 === 0) callback = "BackAndLunge_4";
+      } else {
+        x2 = toS16(x2 + data4);
+        data4 = toS16(data4 * -1);
+        data3 = toS16(data3 + 1);
+      }
+    } else {
+      x2 = toS16(x2 + 2);
+      if (x2 > 0) {
+        x2 = 0;
+        resetSpriteAfterAnim = true;
+        affineMode = "normal";
+        callback = "WaitAnimEnd";
+      }
+    }
+
+    lastFrame = {
+      x2,
+      y2,
+      phase,
+      data2Before,
+      data2,
+      data3Before,
+      data3,
+      data4Before,
+      data4,
+      data5Before,
+      data5,
+      data6Before,
+      data6,
+      data7Before,
+      data7,
+      rotationU8,
+      affineRotationShifted,
+      affineRotationU16,
+      affineWriteCount: affineRotationShifted === null ? 0 : 1,
+      initializerCalled: tick === 0,
+      callbackInvokedByInitializer: BACK_AND_LUNGE_INITIALIZER.callbackInvokedByInitializer,
+      startedAffine: tick === 0,
+      normalFrontDontFlip: true,
+      tryFlipXBeforeMotion: true,
+      tryFlipXAfterMotion: true,
+      tryFlipXCalls: 2,
+      resetSpriteAfterAnim,
+      callback,
+      affineMode,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable BackAndLunge reducer state");
+  return lastFrame;
+}
+
 function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffset {
   switch (family) {
+    case "BACK_AND_LUNGE": {
+      const terminal = backAndLungeFrameAtTick(32);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_BackAndLunge did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
     case "BOUNCE_ROTATE_TO_SIDES": {
       const terminal = bounceRotateToSidesFrameAtTick(87);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
