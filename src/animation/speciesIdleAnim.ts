@@ -55,6 +55,7 @@ export type SpeciesFrontAnimFamily =
   | "GROW_VIBRATE"
   | "GROW_IN_STAGES"
   | "GLOW_BLACK"
+  | "RISING_WOBBLE"
   | "LUNGE_GROW"
   | "FLASH_YELLOW"
   | "FLICKER_INCREASING"
@@ -108,6 +109,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "GROW_VIBRATE",
   "GROW_IN_STAGES",
   "GLOW_BLACK",
+  "RISING_WOBBLE",
   "LUNGE_GROW",
   "FLASH_YELLOW",
   "FLICKER_INCREASING",
@@ -910,6 +912,23 @@ export const GLOW_BLACK_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze
 /** There are no black-glow mappings outside the Factory rental pool. */
 export const GLOW_BLACK_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   GLOW_BLACK_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All source selector mappings for `ANIM_RISING_WOBBLE`. */
+export const RISING_WOBBLE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_RISING_WOBBLE")
+    .map(([species]) => species),
+);
+
+/** The two rising-wobble mappings reachable through Factory rentals. */
+export const RISING_WOBBLE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  RISING_WOBBLE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** CELEBI is the sole selector-24 mapping outside the Factory pool. */
+export const RISING_WOBBLE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  RISING_WOBBLE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /** All source selector mappings for `ANIM_BACK_AND_LUNGE`. */
@@ -5032,6 +5051,124 @@ export function glowBlackFrameAtTick(
   return lastFrame;
 }
 
+/** Source selector 24's callback-initializer receipt. */
+export const RISING_WOBBLE_INITIALIZER = Object.freeze({
+  selector: "ANIM_RISING_WOBBLE",
+  sourceId: 24,
+  data0: 5,
+  callbackInvokedByInitializer: true,
+  callbackInstalled: "RisingWobble",
+  handleStartAffineAnimOnData2Zero: true,
+  normalFrontDontFlip: true,
+  tryFlipXCalls: 0,
+  affineMode: "double",
+  accepted: true,
+} as const);
+
+export interface RisingWobbleFrame extends SpeciesIdleOffset {
+  /** `sprite->data[0]`, a signed s16 source register set to five. */
+  readonly data0: 5;
+  /** `sprite->data[2]` before the callback branch and after its final ++. */
+  readonly data2Before: number;
+  readonly data2: number;
+  /** Source `s16 index = (data[2] * 256) / 100`. */
+  readonly index: number;
+  /** Source s32 `var` before its `& 0xFF` conversion. */
+  readonly rotationIndexBeforeMask: number;
+  /** The masked source rotation index, stored/consumed as a u8. */
+  readonly rotationIndexU8: number;
+  readonly ySine: number;
+  readonly rotationSine: number;
+  readonly affineRotationSigned: number;
+  readonly affineRotationU16: number;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXCalls: 0;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly affineWriteCount: 0 | 1;
+  readonly callback: "RisingWobble" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+/**
+ * Source-order normal-front port of selector 24's
+ * `Anim_RisingWobble` -> `RisingWobble`
+ * (`pokemon_animation.c:1003-1034,1769-1800`). The initializer sets data0=5,
+ * invokes the callback once, and then installs the same callback, so tick 0
+ * is already the first body call. The callback starts affine mode at data2=0,
+ * computes the signed-s16 index, masks the s32 rotation phase to u8, writes
+ * negated vertical motion and affine rotation, and increments signed data2.
+ * Tick 101 sees the strict `data2 > 100` guard, restores identity/y2, resets
+ * affine mode, installs `WaitAnimEnd`, and still increments data2 to 102.
+ */
+export function risingWobbleFrameAtTick(
+  ticksSinceStart: number,
+): RisingWobbleFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let y2 = 0;
+  let affineRotationSigned = 0;
+  let callback: RisingWobbleFrame["callback"] = "RisingWobble";
+  let affineMode: RisingWobbleFrame["affineMode"] = "double";
+  let lastFrame: RisingWobbleFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (callback === "WaitAnimEnd") continue;
+
+    const data2Before = data2;
+    const startedAffine = data2 === 0;
+    let index = 0;
+    let rotationIndexBeforeMask = 0;
+    let rotationIndexU8 = 0;
+    let ySine = 0;
+    let rotationSine = 0;
+    let resetSpriteAfterAnim = false;
+
+    if (data2 > 100) {
+      affineRotationSigned = 0;
+      y2 = 0;
+      resetSpriteAfterAnim = true;
+      affineMode = "normal";
+      callback = "WaitAnimEnd";
+    } else {
+      index = toS16(Math.trunc((data2 * 256) / 100));
+      rotationIndexBeforeMask = Math.trunc((data2 * 512) / 100);
+      rotationIndexU8 = rotationIndexBeforeMask & 0xff;
+      ySine = gbaSin(Math.trunc(index / 2), 10);
+      rotationSine = gbaSin(rotationIndexU8, 3276);
+      y2 = toS16(-ySine);
+      affineRotationSigned = toS16(rotationSine);
+    }
+
+    data2 = toS16(data2 + 1);
+    lastFrame = {
+      x2: 0,
+      y2,
+      data0: RISING_WOBBLE_INITIALIZER.data0,
+      data2Before,
+      data2,
+      index,
+      rotationIndexBeforeMask,
+      rotationIndexU8,
+      ySine,
+      rotationSine,
+      affineRotationSigned,
+      affineRotationU16: toU16(affineRotationSigned),
+      startedAffine,
+      normalFrontDontFlip: true,
+      tryFlipXCalls: 0,
+      resetSpriteAfterAnim,
+      affineWriteCount: 1,
+      callback,
+      affineMode,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable RisingWobble reducer state");
+  return lastFrame;
+}
+
 /** Source selector 43's initializer-only `Anim_Figure8` receipt. */
 export const FIGURE_8_INITIALIZER = Object.freeze({
   selector: "ANIM_FIGURE_8",
@@ -5440,6 +5577,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = glowBlackFrameAtTick(129);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_GlowBlack did not restore its palette at the terminal boundary");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "RISING_WOBBLE": {
+      const terminal = risingWobbleFrameAtTick(101);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_RisingWobble did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
