@@ -13,6 +13,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 842 — [bounded MAIN worker, 2026-08-01] turn-2 predecessor retired with immutable epoch
+
+- **State:** proof `c16386d6`, migration `7a3fca06`; the production/test
+  census has no `turn2Resolved` reference. The receipt is published at the
+  source-owned first choose-action callback (absolute **3237**, runtime
+  elapsed **2197**; the handler install at 3236 still rejects A).
+- **Did:** migrated core dispatch/predecessor, generic HP/content,
+  ENDEAVOR-family routing, slot-2 PP, and every turn-3 submenu/kickoff clock
+  onto the immutable receipt: PP **[9,20,19,10]**, slot **2**, HP
+  **101/88**, settled/ready, and DoBounceEffect seeds **192/128** with
+  delta **7** and amplitude **1**. The later turn-3 open and its B-close/A-
+  reopen consume that epoch rather than replacing it.
+- **Next:** stay scoped: turns 3–4, `opponentFaintDismissElapsed`, and
+  dispatcher debt remain #39 work; do not reopen turn 2.
+- **Notes:** clean-parent `ace2b44c` (`c16386d6^`) app replays are
+  byte-identical: turn-2 **493/493**, turn-3 readers **416/416**, upstream
+  **81/81**, total **990/990** raw RGBA captures. (The known #61 live-oracle
+  residual remains `turn3-endeavor-off` 254/255, but this differential is
+  255/255.) Focused Tier-1 **461/461** (8 files), `npx tsc --noEmit`, and
+  `npm run build` green; full `npm test` deliberately unrun per the bounded
+  brief. No trace/capture-list, recording import, ratchet/barrier, or
+  selector changes.
+
 ## 841 — [bounded MAIN worker, 2026-08-01] turn-1 predecessor retired with immutable epoch
 
 - **State:** `13389b9c` retires `turn1Resolved`; every production/test
@@ -72,23 +95,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   not a failure); no exit-42; vitest-cap papercut deleted as
   cross-session-verified (502s capped 3-lane suite vs 935s+ pre-fix).
   No deferred questions — DEFERRED.md stays empty.
-
-## 839 — [bounded MAIN worker, 2026-08-01] turn-1 retirement stopped at proof checkpoint
-
-- **State:** `210d96af` remains the last green code checkpoint; its immutable
-  turn-1 receipt is present, but `turn1Resolved` deliberately remains live.
-  A complete candidate consumer migration was discarded after the required
-  clean-parent pixel differential was non-identical.
-- **Did:** exercised the core/predecessor, generic HP, slot-0 PP, and turn-2
-  submenu/kickoff bounce consumer families against the new handoff without
-  landing them. Restored the proof-only tree rather than tuning the reader
-  mismatch or retaining a partial migration.
-- **Next:** take a fresh, separately scoped evidence/design step from
-  `210d96af` for the turn-2 submenu epoch selection; do not re-anchor it to an
-  old turn-specific delay and do not continue this failed migration.
-- **Notes:** clean-parent `210d96af` replay held all four turn-1 primary OFF
-  traces (**669/669**) and `turn2-dragonbreath-off` (**237/237**) byte-exact.
-  `turn2-endeavor-off` differed in **47/256** captures: first frame **2901**
-  (**6,982 raw RGBA bytes**), continuing through 2947, so only **1,115/1,162**
-  captures matched. Focused Tier-1 **453/453** (7 files), `npx tsc --noEmit`,
-  and `npm run build` are green; full `npm test` was intentionally not run.
