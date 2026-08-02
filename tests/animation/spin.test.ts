@@ -141,12 +141,10 @@ describe("ANIM_SPIN", () => {
     expect(spinFrameAtTick(0.5)).toBeNull();
   });
 
-  it("does not widen the unused long-spin or adjacent tumbling selector", () => {
+  it("does not widen the unused long-spin or single-run tumbling selector", () => {
     const selectors = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
     expect(Object.values(selectors).filter((family) => family === "ANIM_SPIN_LONG")).toEqual([]);
-    expect(Object.entries(selectors)
-      .filter(([, family]) => family === "ANIM_TUMBLING_FRONT_FLIP_TWICE"))
-      .toEqual([["MAGNEMITE", "ANIM_TUMBLING_FRONT_FLIP_TWICE"]]);
-    expect(speciesFrontIdleRestOffset("MAGNEMITE")).toBeNull();
+    expect(Object.values(selectors).filter((family) => family === "ANIM_TUMBLING_FRONT_FLIP")).toEqual([]);
+    expect(speciesFrontIdleRestOffset("MAGNEMITE")).toEqual({ x2: 0, y2: 0 });
   });
 });

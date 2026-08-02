@@ -68,6 +68,7 @@ export type SpeciesFrontAnimFamily =
   | "ROTATE_UP_TO_SIDES"
   | "SHRINK_GROW"
   | "SPIN"
+  | "TUMBLING_FRONT_FLIP_TWICE"
   | "SWING_CONVEX"
   | "SWING_CONCAVE"
   | "TWIST_TWICE"
@@ -113,6 +114,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "ROTATE_UP_TO_SIDES",
   "SHRINK_GROW",
   "SPIN",
+  "TUMBLING_FRONT_FLIP_TWICE",
   "SWING_CONVEX",
   "SWING_CONCAVE",
   "TWIST_TWICE",
@@ -503,6 +505,26 @@ export const SPIN_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
 export const SPIN_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   SPIN_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
+
+/** The sole source selector mapping for selector 84, `ANIM_TUMBLING_FRONT_FLIP_TWICE`. */
+export const TUMBLING_FRONT_FLIP_TWICE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_TUMBLING_FRONT_FLIP_TWICE")
+    .map(([species]) => species),
+);
+
+/** MAGNEMITE's twice-tumbling selector is reachable through the Factory pool. */
+export const TUMBLING_FRONT_FLIP_TWICE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  TUMBLING_FRONT_FLIP_TWICE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no selector-84 mappings outside the Factory rental pool. */
+export const TUMBLING_FRONT_FLIP_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
+  Object.freeze(
+    TUMBLING_FRONT_FLIP_TWICE_FRONT_SPECIES.filter(
+      (species) => !factoryFrontSpecies.has(species),
+    ),
+  );
 
 /** All source selector mappings for selector 79, `ANIM_CIRCLE_C_CLOCKWISE_SLOW`. */
 export const CIRCLE_C_CLOCKWISE_SLOW_FRONT_SPECIES: readonly string[] = Object.freeze(
@@ -3241,6 +3263,213 @@ export function spinFrameAtTick(ticksSinceStart: number): SpinFrame | null {
   return lastFrame;
 }
 
+/** Source-specific `Anim_TumblingFrontFlip_Twice` initializer for selector 84. */
+export const TUMBLING_FRONT_FLIP_TWICE_INITIALIZER = Object.freeze({
+  selector: "ANIM_TUMBLING_FRONT_FLIP_TWICE",
+  sourceId: 84,
+  rotation: 0,
+  delay: 0,
+  runs: 2,
+  speed: 1,
+  data: 0,
+  accepted: true,
+} as const);
+
+export interface TumblingFrontFlipTwiceFrame extends SpeciesIdleOffset {
+  /** Signed s16 sprite data registers before and after this callback. */
+  readonly data2Before: number;
+  readonly data2: number;
+  readonly data3Before: number;
+  readonly data3: number;
+  readonly data4Before: number;
+  readonly data4: number;
+  readonly data5Before: number;
+  readonly data5: number;
+  readonly data6Before: number;
+  readonly data6: number;
+  readonly data7Before: number;
+  readonly data7: number;
+  readonly animRotation: 0;
+  readonly animDelayBefore: number;
+  readonly animDelay: number;
+  readonly animRunsBefore: 1 | 2;
+  readonly animRuns: 1 | 2;
+  readonly animSpeed: 1;
+  readonly animData: 0;
+  /** The source tests x-boundaries before its else-if y-boundary. */
+  readonly boundary: "x" | "y" | null;
+  /** Raw `sprite->data[6] << 8` before HandleSetAffineData's u16 argument. */
+  readonly affineRotationShifted: number | null;
+  readonly affineRotationU16: number | null;
+  readonly affineWriteCount: 0 | 1;
+  /** Tick zero invokes TumblingFrontFlip before callback installation. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXBeforeMotion: boolean;
+  readonly tryFlipXAfterAffine: boolean;
+  readonly tryFlipXCalls: 0 | 2;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "TumblingFrontFlip" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+/**
+ * Source-order port of selector 84's `Anim_TumblingFrontFlip_Twice` ->
+ * `TumblingFrontFlip` (`pokemon_animation.c:1037-1059,2366-2433,3785-3793,
+ * 5540-5544`) on the ordinary opponent-front path. `AddNewAnim` supplies
+ * rotation=0/delay=0/runs=1/speed=0/data=0; the selector changes only speed to
+ * one and runs to two, calls the shared callback immediately, then installs
+ * it. The task has already set `sDontFlip=TRUE`, so both source-order
+ * `TryFlipX` calls are retained as no-ops.
+ *
+ * All sprite position/data registers are GBA s16 values. The x-boundary test
+ * is deliberately an `if` before the y-boundary `else if`; after six
+ * crossings the next x2<=0 callback completes a run, arms ten delay-only
+ * callbacks, and leaves the direction registers intact for the second run.
+ * The affine write uses the source's `data[6] << 8` expression and then the
+ * `u16` HandleSetAffineData parameter conversion. Tick 137 resets affine mode
+ * and installs stable `WaitAnimEnd`; later calls leave the terminal receipt
+ * unchanged.
+ */
+export function tumblingFrontFlipTwiceFrameAtTick(
+  ticksSinceStart: number,
+): TumblingFrontFlipTwiceFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  const { animRotation, delay: initialDelay, runs: initialRuns, speed: animSpeed, data: animData } = {
+    animRotation: TUMBLING_FRONT_FLIP_TWICE_INITIALIZER.rotation,
+    delay: TUMBLING_FRONT_FLIP_TWICE_INITIALIZER.delay,
+    runs: TUMBLING_FRONT_FLIP_TWICE_INITIALIZER.runs,
+    speed: TUMBLING_FRONT_FLIP_TWICE_INITIALIZER.speed,
+    data: TUMBLING_FRONT_FLIP_TWICE_INITIALIZER.data,
+  } as const;
+  let animDelay: number = initialDelay;
+  let animRuns: 1 | 2 = initialRuns;
+  let data2 = 0;
+  let data3 = 0;
+  let data4 = 0;
+  let data5 = 0;
+  let data6 = 0;
+  let data7 = 0;
+  let x2 = 0;
+  let y2 = 0;
+  let callback: TumblingFrontFlipTwiceFrame["callback"] = "TumblingFrontFlip";
+  let affineMode: TumblingFrontFlipTwiceFrame["affineMode"] = "normal";
+  let lastFrame: TumblingFrontFlipTwiceFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (callback === "WaitAnimEnd") continue;
+
+    const data2Before = data2;
+    const data3Before = data3;
+    const data4Before = data4;
+    const data5Before = data5;
+    const data6Before = data6;
+    const data7Before = data7;
+    const animDelayBefore = animDelay;
+    const animRunsBefore = animRuns;
+    let boundary: TumblingFrontFlipTwiceFrame["boundary"] = null;
+    let affineRotationShifted: number | null = null;
+    let affineRotationU16: number | null = null;
+    let startedAffine = false;
+    let tryFlipXBeforeMotion = false;
+    let tryFlipXAfterAffine = false;
+    let resetSpriteAfterAnim = false;
+
+    if (animDelay !== 0) {
+      animDelay = toS16(animDelay - 1);
+    } else {
+      // TryFlipX(sprite) is a no-op for the normal opponent-front task.
+      tryFlipXBeforeMotion = true;
+      if (data2 === 0) {
+        data2 = toS16(data2 + 1);
+        startedAffine = true;
+        affineMode = "double";
+        data7 = toS16(animSpeed);
+        data3 = -1;
+        data4 = -1;
+        data5 = 0;
+        data6 = 0;
+      }
+
+      x2 = toS16(x2 + data7 * 2 * data3);
+      y2 = toS16(y2 + data7 * data4);
+      data6 = toS16(data6 + 8);
+      if (x2 <= -16 || x2 >= 16) {
+        boundary = "x";
+        x2 = toS16(data3 * 16);
+        data3 = toS16(data3 * -1);
+        data5 = toS16(data5 + 1);
+      } else if (y2 <= -16 || y2 >= 16) {
+        boundary = "y";
+        y2 = toS16(data4 * 16);
+        data4 = toS16(data4 * -1);
+        data5 = toS16(data5 + 1);
+      }
+
+      if (data5 > 5 && x2 <= 0) {
+        x2 = 0;
+        y2 = 0;
+        if (animRuns > 1) {
+          animRuns = toS16(animRuns - 1) as 1;
+          data5 = 0;
+          data6 = 0;
+          animDelay = 10;
+        } else {
+          resetSpriteAfterAnim = true;
+          affineMode = "normal";
+          callback = "WaitAnimEnd";
+        }
+      }
+
+      affineRotationShifted = data6 << 8;
+      affineRotationU16 = affineRotationShifted & 0xffff;
+      tryFlipXAfterAffine = true;
+    }
+
+    lastFrame = {
+      x2,
+      y2,
+      data2Before,
+      data2,
+      data3Before,
+      data3,
+      data4Before,
+      data4,
+      data5Before,
+      data5,
+      data6Before,
+      data6,
+      data7Before,
+      data7,
+      animRotation,
+      animDelayBefore,
+      animDelay,
+      animRunsBefore,
+      animRuns,
+      animSpeed,
+      animData,
+      boundary,
+      affineRotationShifted,
+      affineRotationU16,
+      affineWriteCount: affineRotationShifted === null ? 0 : 1,
+      initializerCallBeforeCallbackInstall: tick === 0,
+      startedAffine,
+      normalFrontDontFlip: true,
+      tryFlipXBeforeMotion,
+      tryFlipXAfterAffine,
+      tryFlipXCalls: tryFlipXBeforeMotion ? 2 : 0,
+      resetSpriteAfterAnim,
+      callback,
+      affineMode,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable TumblingFrontFlip reducer state");
+  return lastFrame;
+}
+
 /**
  * Source-specific initializer for selector 78. `ANIM_TWIST` uses the same
  * shared C callback with a different one-run/512-degree setup, but that
@@ -4398,6 +4627,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = spinFrameAtTick(61);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_Spin did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "TUMBLING_FRONT_FLIP_TWICE": {
+      const terminal = tumblingFrontFlipTwiceFrameAtTick(137);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_TumblingFrontFlip_Twice did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
