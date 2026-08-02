@@ -8,6 +8,41 @@
 > routing hint, not a deferral or an acceptance-bar waiver; escalate any worker
 > result that does not survive supervisor verification.
 
+## Front `ANIM_ZIGZAG_FAST` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **3 mappings / 3
+Factory-reachable species / 0 outside-Factory mappings** — UNOWN, GLALIE, and
+DUSKULL. Only source ID **10** is promoted; the accepted slow ID-75 path remains
+regression-pinned. No move coverage, presentation boundary, back-sprite, battle
+state, or coverage-ledger change: Level 50 **107/276 exact, 0 partial, 0
+staged, 169 unsupported**; Open-only **0/1**; Outside Factory **0/77**;
+`ANIMATION_COVERAGE.json` SHA-256 remains
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,1290-1341,
+5540-5544`, `pokemon_animation.h:50`, and
+`pokemon.c:1607,1728,1742` pin `sDontFlip=TRUE`, zeroed task registers, the
+fast initializer's immediate `Zigzag` then callback replacement, shared
+source-order boundary/sentinel handling, and both otherwise no-op flips. Dense
+Tier-1 coverage exhausts the **54** active callbacks (ticks **0..53**), each
+leg transition, tick **54** sentinel/`WaitAnimEnd` handoff, stable terminal,
+and invalid input. Fresh complete legal challenge-0 Scene-ON parties were
+probed twice per species only through `tools/run-mgba-probe.py`; each pair is
+byte-identical and settles battler 1 at x2=0/y2=0/`SpriteCallbackDummy`: UNOWN
+**373 B**, animNum 0/cmd 0/data2 201,
+`4bba4625ae521e0e58665b2963e5152e0d27726fa26aa506ae760c5b1e126c95`;
+GLALIE **373 B**, animNum 1/cmd 4/data2 362,
+`b13802454ef9b92cf94aa210d4027f2ce67a12ae96dc7ca252c044782561f3f3`;
+DUSKULL **373 B**, animNum 1/cmd 6/data2 355,
+`1baa7e01f12a7a3ee1b831845281a714a34667adfedebb3ac2dada343628b20a`.
+
+**Gates / next:** focused family/evidence plus both ratchets are **336/336**
+green; `npx tsc --noEmit`, full `npm test` (**604 files / 6,210 passed / 1
+skipped**), production build (**549 modules transformed**), and `npm run
+animation:coverage` are green. Next largest unsupported generated Factory-front
+family (source-table tie-break): **`ANIM_BACK_AND_LUNGE`** (source ID **37**;
+**2 mappings / 2 Factory / 0 outside**) — CHARMELEON and GROWLITHE.
+
 ## Front `ANIM_FIGURE_8` family accepted (2026-08-02)
 
 **State:** exact for the complete generated selector census: **3 mappings / 3
