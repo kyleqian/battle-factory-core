@@ -25,7 +25,10 @@ import { ANCHOR_DRAFT_SCREEN_STATE, type DraftScreenState } from "../src/engine/
 import { createFramebuffer, SCREEN_WIDTH } from "../src/engine/framebuffer.ts";
 import { renderBattleScene } from "../src/engine/battleScene.ts";
 import { openFightSubmenu, FIGHT_SUBMENU_SLOT_NAMES, currentPPForActiveMon, currentPPForActiveMonFromLatest } from "../src/engine/battleMenu.ts";
-import { resolveTurn1CompletedResolutionNextCommandHandoff } from "../src/engine/turn1ResolutionAdapter.ts";
+import {
+  resolveTurn1CompletedResolutionNextCommandHandoff,
+  resolveTurn1LatestCompletedCommandHandoff,
+} from "../src/engine/turn1ResolutionAdapter.ts";
 import { resolveTurn2CompletedResolutionNextCommandHandoff } from "../src/engine/turn2ResolutionAdapter.ts";
 import { resolveTurn5CompletedResolutionNextCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
 import { resolveTurn6CompletedResolutionNextCommandHandoff, resolveTurn6LatestCompletedCommandHandoff } from "../src/engine/turn6ResolutionAdapter.ts";
@@ -49,6 +52,7 @@ const dump = (
 /** A fully-confirmed draft screen (ONIX/MAGBY/BAYLEEF, pick order 1/2/3) - the same `selectedIds` shape `tests/confirmDecline.test.ts` pins for a real played-through draft screen, reproducing what every committed trace's own button script leaves `draftScreen` in by the time battle starts. */
 const CONFIRMED_DRAFT_SCREEN: DraftScreenState = { ...ANCHOR_DRAFT_SCREEN_STATE, selectedIds: [1, 2, 3, 0, 0, 0] };
 const TURN1_HANDOFF = resolveTurn1CompletedResolutionNextCommandHandoff(1308);
+const TURN1_LATEST_HANDOFF = resolveTurn1LatestCompletedCommandHandoff(1308);
 const TURN2_HANDOFF = resolveTurn2CompletedResolutionNextCommandHandoff(2197);
 
 describe("battleSetup: activeMonMoveset/rentalMoveset (S8 engine dependency, docs/battle-menu-notes.md §13c)", () => {
@@ -182,7 +186,7 @@ describe("battleScene: genericity end-to-end through the STATE plumbing (not jus
     it(`cursor ${cursor} (${FIGHT_SUBMENU_SLOT_NAMES[cursor]} highlighted): renderBattleScene's FIGHT window matches an independently-assembled expected image byte-for-byte, at full PP`, () => {
       const sm = { ...opened, cursor: cursor as 0 | 1 | 2 | 3, displayCursor: cursor as 0 | 1 | 2 | 3 };
       const fb = createFramebuffer();
-      renderBattleScene(fb, { elapsed: 900, sendOutPressElapsed: 380, fightSubmenu: sm, turn1NextCommandHandoff: null, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, });
+      renderBattleScene(fb, { elapsed: 900, sendOutPressElapsed: 380, fightSubmenu: sm, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, });
 
       const expectedMoveset = buildFightMoveset(kabutoMoveset.moveIds, currentPPForActiveMon(kabutoMoveset, null));
       expect(extractWindowRegion(fb)).toEqual(expectedWindowRegion(expectedMoveset, cursor as 0 | 1 | 2 | 3));
@@ -192,9 +196,9 @@ describe("battleScene: genericity end-to-end through the STATE plumbing (not jus
   it("the completed turn-1 receipt's PP decrement also reaches the renderer for a non-Onix moveset (slot 0 only, currentPPForActiveMon's own documented scope)", () => {
     const sm = { ...opened, cursor: 0 as const, displayCursor: 0 as const };
     const fb = createFramebuffer();
-    renderBattleScene(fb, { elapsed: 900, sendOutPressElapsed: 380, fightSubmenu: sm, turn1NextCommandHandoff: TURN1_HANDOFF, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, });
+    renderBattleScene(fb, { elapsed: 900, sendOutPressElapsed: 380, fightSubmenu: sm, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, latestCompletedCommandHandoff: TURN1_LATEST_HANDOFF, opponentFaintPresentationOwner: null, });
 
-    const expectedMoveset = buildFightMoveset(kabutoMoveset.moveIds, currentPPForActiveMon(kabutoMoveset, TURN1_HANDOFF));
+    const expectedMoveset = buildFightMoveset(kabutoMoveset.moveIds, currentPPForActiveMonFromLatest(kabutoMoveset, TURN1_LATEST_HANDOFF));
     expect(extractWindowRegion(fb)).toEqual(expectedWindowRegion(expectedMoveset, 0));
   });
 });

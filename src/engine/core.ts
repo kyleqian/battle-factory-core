@@ -171,14 +171,15 @@ import { resolveTurn12LatestCompletedCommandHandoff } from "./turn12ResolutionAd
 import {
   consumeNextCommandReopenGuard,
   createNextCommandReopenGuard,
+  isLatestCompletedCommandHandoffReady,
+  isLatestCompletedCommandLifecycleActive,
+  latestCompletedCommandPresentationEpoch,
   withNextCommandReopenGuard,
   type LatestCompletedCommandHandoff,
 } from "./nextCommandHandoff.ts";
 import { isTurn1ChooseActionBounceReset } from "./turn1ChooseActionReset.ts";
 import {
-  isTurn1NextCommandHandoffReady,
-  isTurn1NextCommandLifecycleActive,
-  resolveTurn1CompletedResolutionNextCommandHandoff,
+  resolveTurn1LatestCompletedCommandHandoff,
 } from "./turn1ResolutionAdapter.ts";
 import { isTurn2ChooseActionBounceReset } from "./turn2ChooseActionReset.ts";
 import {
@@ -1210,7 +1211,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       partySendOutBattleMenuReady(partySendOutElapsed)
         ? fightSubmenu.activeMonMoveset
         : activeMonMoveset(draftScreen);
-    let turn1NextCommandHandoff = battleScene.turn1NextCommandHandoff ?? null;
     let turn2NextCommandHandoff = battleScene.turn2NextCommandHandoff ?? null;
     let turn3NextCommandHandoff = battleScene.turn3NextCommandHandoff ?? null;
     let turn4NextCommandHandoff = battleScene.turn4NextCommandHandoff ?? null;
@@ -1232,20 +1232,24 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         opponentFaintContinuationAge,
       );
     if (
-      turn1NextCommandHandoff === null
+      latestCompletedCommandHandoff === null
       && isTurn1ChooseActionBounceReset(
         fightSubmenu.confirmElapsed,
         battleScene.elapsed + 1,
       )
     ) {
-      turn1NextCommandHandoff = resolveTurn1CompletedResolutionNextCommandHandoff(
+      // The first completed-command receipt is published at the real
+      // HandleInputChooseAction -> DoBounceEffect reset, not at the later A
+      // that opens FIGHT. Its semantic epoch content remains immutable
+      // through every B-close/A-reopen cycle before turn 2.
+      latestCompletedCommandHandoff = resolveTurn1LatestCompletedCommandHandoff(
         battleScene.elapsed + 1,
       );
     }
     if (
       turn2NextCommandHandoff === null
-      && isTurn1NextCommandLifecycleActive(
-        turn1NextCommandHandoff,
+      && isLatestCompletedCommandLifecycleActive(
+        latestCompletedCommandHandoff,
         fightSubmenu.openElapsed,
       )
       && isTurn2ChooseActionBounceReset(
@@ -1371,11 +1375,13 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // lockstep, matching what the oracle actually shows for both.
       fightSubmenu = openFightSubmenu(battleScene.elapsed + 2, currentActiveMoveset(), fightSubmenu.cursor, true);
     } else if (
-      !isTurn1NextCommandLifecycleActive(
-        turn1NextCommandHandoff,
+      !isLatestCompletedCommandLifecycleActive(
+        latestCompletedCommandHandoff,
         fightSubmenu.openElapsed,
       ) &&
-      isTurn1NextCommandHandoffReady(turn1NextCommandHandoff) &&
+      isLatestCompletedCommandHandoffReady(latestCompletedCommandHandoff)
+      && latestCompletedCommandPresentationEpoch(latestCompletedCommandHandoff) !== null
+      &&
       fightSubmenu.confirmElapsed !== null &&
       newKeys.has("A")
     ) {
@@ -1389,8 +1395,8 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // cursor persistence beyond that coincidence).
       fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen));
     } else if (
-      isTurn1NextCommandLifecycleActive(
-        turn1NextCommandHandoff,
+      isLatestCompletedCommandLifecycleActive(
+        latestCompletedCommandHandoff,
         fightSubmenu.openElapsed,
       ) &&
       !isTurn2NextCommandLifecycleActive(
@@ -1446,7 +1452,12 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         turn4NextCommandHandoff,
         fightSubmenu.openElapsed,
       ) &&
-      latestCompletedCommandHandoff === null &&
+      // The turn-1 generic receipt carries an optional presentation epoch;
+      // that typed content is the staged early-boundary form and is replaced
+      // here by the first 5-13 guard-owned receipt. A later generic receipt
+      // has no such epoch and can never re-enter this legacy 4->5 boundary.
+      (latestCompletedCommandHandoff === null
+        || latestCompletedCommandPresentationEpoch(latestCompletedCommandHandoff) !== null) &&
       fightSubmenu.confirmElapsed !== null &&
       newKeys.has("A") &&
       sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN5_SITRUS_MENU_REOPEN_GATE_DELAY
@@ -1546,7 +1557,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     battleScene = {
       ...battleScene,
       fightSubmenu,
-      turn1NextCommandHandoff,
       turn2NextCommandHandoff,
       turn3NextCommandHandoff,
       turn4NextCommandHandoff,

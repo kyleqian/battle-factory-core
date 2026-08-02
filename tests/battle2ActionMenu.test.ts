@@ -171,7 +171,7 @@ describe("Battle 2 FIGHT submenu interaction", () => {
     expect(closed.confirmElapsed).toBeNull();
     for (let i = 0; i < FIGHT_SUBMENU_CLOSE_DELAY; i += 1) state = tick(state, new Set());
     expect(state.battleScene?.fightSubmenu.closeElapsed).toBe(closed.closeElapsed);
-    expect(state.battleScene?.turn1NextCommandHandoff).toBeNull();
+    expect(state.battleScene?.latestCompletedCommandHandoff).toBeNull();
     expect(state.battleScene?.fightSubmenu.cursor).toBe(2);
   });
 });

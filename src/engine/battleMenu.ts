@@ -2689,10 +2689,12 @@ export function currentPPForActiveMon(
 }
 
 /**
- * Generic-owner PP projection for the production 5-13 renderer.  The
- * historical thirteen-receipt helper above remains staged for its positional
- * ABI until the final interface cut; this path takes one canonical tuple
- * directly from the semantic completed-command owner.
+ * Generic-owner PP projection for the production contentful renderer.  It
+ * serves Turn 1's HandleInputChooseAction epoch content as well as the 5-13
+ * guard-owned chain; the historical thirteen-receipt helper above remains
+ * staged for its positional ABI until the final interface cut. This path
+ * takes one canonical tuple directly from the semantic completed-command
+ * owner.
  */
 export function currentPPForActiveMonFromLatest(
   moveset: ActiveMonMoveset,
