@@ -2160,6 +2160,7 @@ function createAttackanimationOpcodeHandler(
     if ((rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0) {
       const pausex20 = resolveBattleScriptLabel(context.program, "BattleScript_Pausex20");
       if (!pausex20) throw new Error("attackanimation: committed program has no label BattleScript_Pausex20");
+      const attacker = requireBattlerRole(rulesContext, "attacker");
       return transitionBattleScriptCommand(
         context,
         Object.freeze({ kind: "call", programCounter: pausex20.programCounter }),
@@ -2169,6 +2170,14 @@ function createAttackanimationOpcodeHandler(
             animTurn: (rulesContext.animTurn + 1) & 0xff,
             animTargetsHit: (rulesContext.animTargetsHit + 1) & 0xff,
           }),
+          events: Object.freeze([
+            Object.freeze({
+              kind: "animation" as const,
+              animationId: "SCENE_OFF_ATTACK_PAUSE",
+              battler: attacker,
+              arguments: Object.freeze([]),
+            }),
+          ]),
         },
       );
     }

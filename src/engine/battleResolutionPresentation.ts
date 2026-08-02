@@ -374,7 +374,10 @@ function nextHitAnimation(
     ) return candidate;
     if (
       candidate.payload.kind === "animation"
-      && candidate.payload.animationId === "MOVE_ANIMATION"
+      && (
+        candidate.payload.animationId === "MOVE_ANIMATION"
+        || candidate.payload.animationId === "SCENE_OFF_ATTACK_PAUSE"
+      )
     ) break;
   }
   return null;
@@ -732,19 +735,31 @@ export function projectBattleResolutionCommands(
     }
     if (
       payload.kind === "animation"
-      && payload.animationId === "MOVE_ANIMATION"
+      && (
+        payload.animationId === "MOVE_ANIMATION"
+        || payload.animationId === "SCENE_OFF_ATTACK_PAUSE"
+      )
     ) {
-      const battler = singlesBattler(payload.battler ?? -1, "move animation");
+      const battler = singlesBattler(payload.battler ?? -1, "attack pause");
       const hit = nextHitAnimation(events, index);
       if (usedMoveInstructionExecution === null || hit === null) {
-        // A move animation without a hit receipt has no target hit/drain
+        // An attack receipt without a hit receipt has no target hit/drain
         // choreography. Existing typed effect/status commands own its
         // controller-specific presentation.
         continue;
       }
       const hitExecution = instructionExecutionOf(hit);
+      // The interpreter provenance counts Cmd_pause's initial execution plus
+      // each of B_WAIT_TIME_SHORT's blocked retries. The visual command owns
+      // that source pause below, so exclude those callback executions before
+      // applying the same attack-string-to-hit formula used by the controller
+      // MOVE_ANIMATION receipt.
+      const executedPauseCallbacks =
+        payload.animationId === "SCENE_OFF_ATTACK_PAUSE"
+          ? SCENE_OFF_MOVE_PAUSE_FRAMES + 1
+          : 0;
       const interveningInstructions =
-        hitExecution - usedMoveInstructionExecution;
+        hitExecution - usedMoveInstructionExecution - executedPauseCallbacks;
       if (interveningInstructions <= 0) {
         throw new Error("battle resolution move/hit provenance is not ordered");
       }

@@ -107,6 +107,17 @@ describe("fresh Factory battle initializer (Gate-5 rungs 2-3)", () => {
     expect(off.transition.events.some(({ payload }) =>
       payload.kind === "animation" && payload.animationId === "MOVE_ANIMATION"
     )).toBe(false);
+    const offAttackPauses = off.transition.events.filter(({ payload }) =>
+      payload.kind === "animation" && payload.animationId === "SCENE_OFF_ATTACK_PAUSE"
+    );
+    const offHitActions = off.transition.events.filter(({ payload }) =>
+      payload.kind === "animation" && payload.animationId === "HIT_ANIMATION"
+    );
+    expect(offHitActions).toHaveLength(2);
+    expect(offAttackPauses).toHaveLength(offHitActions.length);
+    expect(offAttackPauses.map(({ payload }) =>
+      payload.kind === "animation" ? payload.battler : null
+    )).toEqual([0, 1]);
   });
 
   it("publishes the first player command with source-fresh tracked state and exactly draws A then B", () => {

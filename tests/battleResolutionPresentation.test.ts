@@ -421,19 +421,19 @@ describe("battle resolution presentation receipt ownership", () => {
       event(1, { kind: "set-battler-pp-data", battler: 0, movePosition: 0, pp: 9 }, 3),
       event(2, {
         kind: "animation",
-        animationId: "MOVE_ANIMATION",
+        animationId: "SCENE_OFF_ATTACK_PAUSE",
         battler: 0,
         arguments: [],
       }, 14),
-      event(3, { kind: "play-se", battler: 1, songId: 1 }, 16),
+      event(3, { kind: "play-se", battler: 1, songId: 1 }, 49),
       event(4, {
         kind: "animation",
         animationId: "HIT_ANIMATION",
         battler: 1,
         arguments: [],
-      }, 17),
-      event(5, { kind: "health-bar-update", battler: 1, healthValue: 17 }, 19),
-      event(6, { kind: "hp-change", battler: 1, from: 91, to: 74 }, 20),
+      }, 50),
+      event(5, { kind: "health-bar-update", battler: 1, healthValue: 17 }, 52),
+      event(6, { kind: "hp-change", battler: 1, from: 91, to: 74 }, 53),
     ], NEXT_COMMAND));
 
     expect(resolution.segments[0]!.commands).toMatchObject([
@@ -486,6 +486,34 @@ describe("battle resolution presentation receipt ownership", () => {
       targetInvisible: true,
     });
     expect(firstBlink.visibility.opponent.sprite).toBe(false);
+  });
+
+  it("keeps controller MOVE_ANIMATION on the same source-derived no-op hold", () => {
+    const resolution = createBattleResolutionPresentation(inputFor([
+      event(0, { kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }, 2),
+      event(1, { kind: "set-battler-pp-data", battler: 0, movePosition: 0, pp: 9 }, 3),
+      event(2, {
+        kind: "animation",
+        animationId: "MOVE_ANIMATION",
+        battler: 0,
+        arguments: [],
+      }, 14),
+      event(3, {
+        kind: "animation",
+        animationId: "HIT_ANIMATION",
+        battler: 1,
+        arguments: [],
+      }, 17),
+      event(4, { kind: "health-bar-update", battler: 1, healthValue: 17 }, 19),
+      event(5, { kind: "hp-change", battler: 1, from: 91, to: 74 }, 20),
+    ], NEXT_COMMAND));
+
+    expect(resolution.segments[0]!.commands.slice(0, 4)).toMatchObject([
+      { type: "message" },
+      { type: "move-animation", eventSequence: 2, timing: { minimumFrames: 48 } },
+      { type: "hit-animation", eventSequence: 3 },
+      { type: "hp", eventSequence: 4 },
+    ]);
   });
 
   it("projects typed sprite visibility receipts with relative duration and persistent render state", () => {

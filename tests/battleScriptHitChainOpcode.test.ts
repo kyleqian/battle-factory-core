@@ -2016,7 +2016,18 @@ describe("production attackanimation (Cmd_attackanimation) dispatch", () => {
     expect(result.state.programCounter).toBe(labelPc("BattleScript_Pausex20"));
     expect(result.state.rulesContext.animTurn).toBe(1);
     expect(result.state.rulesContext.animTargetsHit).toBe(1);
-    expect(result.state.events.length).toBe(0);
+    expect(result.state.events).toHaveLength(1);
+    expect(result.state.events[0]).toMatchObject({
+      kind: "animation",
+      animationId: "SCENE_OFF_ATTACK_PAUSE",
+      battler: 0,
+      arguments: [],
+      provenance: {
+        dispatcher: "Cmd_attackanimation",
+        sourceLabel: "BattleScript_HitFromAtkAnimation",
+      },
+    });
+    expect(Object.isFrozen(result.state.events[0])).toBe(true);
   });
 });
 
