@@ -1,5 +1,42 @@
 # Animation coverage
 
+## Front `ANIM_DEEP_V_SQUISH_AND_BOUNCE` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **2 mappings / 2
+Factory-reachable / 0 outside-Factory** — MUK and WOBBUFFET. Only source ID
+**48** is promoted. `ANIMATION_COVERAGE.json` remains byte-identical at
+SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`; move
+coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**,
+Open-only **0/1**, Outside Factory **0/77**. Adjacent selectors, all back
+routing, logical battle state, and engine boundaries are unchanged.
+
+**Did:** source pins `pokemon_animation.h:88,125`, `pokemon.c:1495,1608`,
+and `pokemon_animation.c:680,2656-2719`: task-zeroed signed-s16 state,
+initializer affine start and rotation 4, C-truncated sine arithmetic, phase
+0/1 transition at data4 128, delay/runs branches, affine/OAM writes, identity
+reset, `WaitAnimEnd`, and stable terminal. Tier-1 source/census/lifecycle
+coverage exhausts every active callback and phase (65 reducer frames), delay/
+runs/counters, signed arithmetic, affine cleanup, invalid inputs, and
+adjacent unsupported controls. Fresh complete legal Scene-ON parties were
+probed twice per Factory species only through `tools/run-mgba-probe.py`; each
+pair is byte-identical and captures the complete active-to-dummy window:
+MUK **1655..1721 (67 frames)**, **31,103 B**, SHA-256
+`fa36e420297d624604ee3ef267eb801141f7c1bfb56876e80fb72eb149700812`;
+WOBBUFFET **1618..1704 (87 frames)**, **39,736 B**, SHA-256
+`efa85c119ebbd5c8e497e558e8f26e5394fbe04dac99b9188e9beeea6592073e`.
+
+**Next:** this bounded selector-48 step is complete; await supervisor
+selection of the next unsupported generated Factory-front family. No move
+status is promoted for send-out coverage.
+
+**Notes:** focused lifecycle/source/census/evidence is **9/9**; both
+animation/executable-frontier ratchets are **9/9**; `npx tsc --noEmit`,
+`npm run animation:coverage`, full `npm test` (**622 files / 6,334 passed /
+1 skipped**), and production build are green. Commits: `031751d0` (reducer,
+census, and lifecycle tests) and `d99f9840` (source evidence, dense probe,
+and paired Scene-ON fixtures). `ANIMATION_COVERAGE.json` was not modified.
+
 ## Front `ANIM_ROTATE_UP_SLAM_DOWN` family accepted (2026-08-02)
 
 **State:** exact for the complete generated selector census: **2 mappings / 2
