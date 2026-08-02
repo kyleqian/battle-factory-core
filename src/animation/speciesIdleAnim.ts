@@ -67,6 +67,7 @@ export type SpeciesFrontAnimFamily =
   | "RAPID_H_HOPS"
   | "ROTATE_UP_TO_SIDES"
   | "SHRINK_GROW"
+  | "SPIN"
   | "SWING_CONVEX"
   | "SWING_CONCAVE"
   | "TWIST_TWICE"
@@ -111,6 +112,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "RAPID_H_HOPS",
   "ROTATE_UP_TO_SIDES",
   "SHRINK_GROW",
+  "SPIN",
   "SWING_CONVEX",
   "SWING_CONCAVE",
   "TWIST_TWICE",
@@ -483,6 +485,23 @@ export const CIRCLE_INTO_BG_FACTORY_FRONT_SPECIES: readonly string[] = Object.fr
 /** There are no circle-into-background mappings outside the Factory pool. */
 export const CIRCLE_INTO_BG_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   CIRCLE_INTO_BG_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** The sole source selector mapping for selector 83, `ANIM_SPIN`. */
+export const SPIN_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_SPIN")
+    .map(([species]) => species),
+);
+
+/** SPHEAL's spin selector is reachable through the Level-50 Factory pool. */
+export const SPIN_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  SPIN_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no `ANIM_SPIN` mappings outside the Factory rental pool. */
+export const SPIN_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  SPIN_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /** All source selector mappings for selector 79, `ANIM_CIRCLE_C_CLOCKWISE_SLOW`. */
@@ -3116,6 +3135,112 @@ export function circleCCounterclockwiseSlowFrameAtTick(
   return lastFrame;
 }
 
+/** Source-specific `Anim_Spin` initializer for front selector 83. */
+export const SPIN_INITIALIZER = Object.freeze({
+  selector: "ANIM_SPIN",
+  sourceId: 83,
+  delay: 60,
+  data: 30,
+  accepted: true,
+} as const);
+
+export interface SpinFrame extends SpeciesIdleOffset {
+  /** `sprite->data[2]` immediately before this source callback. */
+  readonly data2Before: number;
+  /** `sprite->data[2]` after the source's unconditional final increment. */
+  readonly data2: number;
+  /** Signed `s16 sprite->data[6]`; retained across the terminal reset. */
+  readonly data6: number;
+  readonly animDelay: 60;
+  readonly animData: 30;
+  /** C-truncated `65536 / animData`, prior to the `s16` product store. */
+  readonly rotationStep: 2184;
+  /** Tick zero invokes `Spin` before `sprite->callback = Spin` is written. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
+  readonly startedAffine: boolean;
+  readonly affineWriteRotationSigned: number;
+  /** Rotation after C converts the signed source argument to `u16`. */
+  readonly affineWriteRotationU16: number;
+  readonly xScale: 256;
+  readonly yScale: 256;
+  readonly normalFrontDontFlip: true;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "Spin" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+/**
+ * Source-order port of selector 83's `Anim_Spin` -> `Spin`
+ * (`pokemon_animation.c:1037-1059,1472-1492,3775-3782,5540-5544`) on the
+ * ordinary opponent-front path. `AddNewAnim` clears the animation record,
+ * then the initializer writes delay=60/data=30, invokes `Spin` immediately,
+ * and only afterward installs `Spin` as the sprite callback.
+ *
+ * Tick zero starts affine mode and writes rotation zero. Active ticks 0..60
+ * calculate `(65536 / 30) * data2` with C's integer division, assign the
+ * product through signed `sprite->data[6]`, and pass that bit pattern through
+ * `HandleSetAffineData`'s unsigned rotation parameter. Tick 61 alone satisfies
+ * the strict `data2 > delay` guard, writes identity, resets affine mode, and
+ * installs `WaitAnimEnd`; the source then still increments data2. Subsequent
+ * calls model `WaitAnimEnd` polling without mutating this reducer's state.
+ */
+export function spinFrameAtTick(ticksSinceStart: number): SpinFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  const { delay: animDelay, data: animData } = SPIN_INITIALIZER;
+  const rotationStep = Math.trunc(65536 / animData) as 2184;
+  let data2 = 0;
+  let data6 = 0;
+  let callback: SpinFrame["callback"] = "Spin";
+  let affineMode: SpinFrame["affineMode"] = "normal";
+  let lastFrame: SpinFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (callback === "WaitAnimEnd") continue;
+
+    const data2Before = data2;
+    const startedAffine = data2 === 0;
+    if (startedAffine) affineMode = "double";
+
+    let affineWriteRotationSigned: number;
+    let resetSpriteAfterAnim = false;
+    if (data2 > animDelay) {
+      affineWriteRotationSigned = 0;
+      resetSpriteAfterAnim = true;
+      affineMode = "normal";
+      callback = "WaitAnimEnd";
+    } else {
+      data6 = toS16(rotationStep * data2);
+      affineWriteRotationSigned = data6;
+    }
+    data2 = toS16(data2 + 1);
+
+    lastFrame = {
+      x2: 0,
+      y2: 0,
+      data2Before,
+      data2,
+      data6,
+      animDelay,
+      animData,
+      rotationStep,
+      initializerCallBeforeCallbackInstall: tick === 0,
+      startedAffine,
+      affineWriteRotationSigned,
+      affineWriteRotationU16: toU16(affineWriteRotationSigned),
+      xScale: 256,
+      yScale: 256,
+      normalFrontDontFlip: true,
+      resetSpriteAfterAnim,
+      callback,
+      affineMode,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable Spin reducer state");
+  return lastFrame;
+}
+
 /**
  * Source-specific initializer for selector 78. `ANIM_TWIST` uses the same
  * shared C callback with a different one-run/512-degree setup, but that
@@ -4266,6 +4391,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = shrinkGrowFrameAtTick(49);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_ShrinkGrow did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "SPIN": {
+      const terminal = spinFrameAtTick(61);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_Spin did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
