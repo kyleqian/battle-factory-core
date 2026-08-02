@@ -55,6 +55,7 @@ import {
   isTurn3NextCommandLifecycleActive,
   resolveTurn3CompletedResolutionNextCommandHandoff,
 } from "../src/engine/turn3ResolutionAdapter.ts";
+import { isTurn4NextCommandHandoffReady } from "../src/engine/turn4ResolutionAdapter.ts";
 import {
   CANONICAL_FORCED_SWITCH_PARTY,
   CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
@@ -960,6 +961,26 @@ function stateAtTurn4Confirm(): EngineState {
     },
   };
 }
+
+describe("battleMenu/battleScene: completed turn-4 choose-action receipt", () => {
+  it("publishes on elapsed 4312, after the rejected handler-install tick and before any turn-5 reopen", () => {
+    let state = stateAtTurn4Confirm();
+    while (state.battleScene!.elapsed < 4311) state = press(state, []);
+    expect(state.battleScene!.turn4NextCommandHandoff ?? null).toBeNull();
+
+    state = press(state, []);
+
+    const handoff = state.battleScene!.turn4NextCommandHandoff;
+    expect(state.battleScene!.elapsed).toBe(4312);
+    expect(isTurn4NextCommandHandoffReady(handoff)).toBe(true);
+    expect(handoff).toMatchObject({
+      playerPp: [7, 20, 19, 10],
+      persistedMoveSlot: 0,
+      hp: { player: 88, opponent: 1 },
+      presentationEpoch: { elapsed: 4312 },
+    });
+  });
+});
 
 function stateAtTurn5Confirm(): EngineState {
   const initial = createInitialState({ appRoute: "canonical-recorded" });

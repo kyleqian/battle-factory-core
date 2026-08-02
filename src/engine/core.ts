@@ -209,6 +209,8 @@ import {
   isTurn3NextCommandLifecycleActive,
   resolveTurn3CompletedResolutionNextCommandHandoff,
 } from "./turn3ResolutionAdapter.ts";
+import { isTurn4ChooseActionBounceReset } from "./turn4ChooseActionReset.ts";
+import { resolveTurn4CompletedResolutionNextCommandHandoff } from "./turn4ResolutionAdapter.ts";
 import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "./turn16FirePunchResolutionAdapter.ts";
 import {
   advanceBattleSceneForcedPartySelect,
@@ -1127,6 +1129,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let turn1NextCommandHandoff = battleScene.turn1NextCommandHandoff ?? null;
     let turn2NextCommandHandoff = battleScene.turn2NextCommandHandoff ?? null;
     let turn3NextCommandHandoff = battleScene.turn3NextCommandHandoff ?? null;
+    let turn4NextCommandHandoff = battleScene.turn4NextCommandHandoff ?? null;
     let turn4Resolved = battleScene.turn4Resolved;
     let turn5NextCommandHandoff = battleScene.turn5NextCommandHandoff;
     let turn6NextCommandHandoff = battleScene.turn6NextCommandHandoff;
@@ -1177,6 +1180,21 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       )
     ) {
       turn3NextCommandHandoff = resolveTurn3CompletedResolutionNextCommandHandoff(
+        battleScene.elapsed + 1,
+      );
+    }
+    if (
+      turn4NextCommandHandoff === null
+      && isTurn3NextCommandLifecycleActive(
+        turn3NextCommandHandoff,
+        fightSubmenu.openElapsed,
+      )
+      && isTurn4ChooseActionBounceReset(
+        fightSubmenu.confirmElapsed,
+        battleScene.elapsed + 1,
+      )
+    ) {
+      turn4NextCommandHandoff = resolveTurn4CompletedResolutionNextCommandHandoff(
         battleScene.elapsed + 1,
       );
     }
@@ -1619,6 +1637,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn1NextCommandHandoff,
       turn2NextCommandHandoff,
       turn3NextCommandHandoff,
+      turn4NextCommandHandoff,
       turn4Resolved,
       turn5NextCommandHandoff,
       turn6NextCommandHandoff,
