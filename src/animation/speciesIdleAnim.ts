@@ -47,6 +47,7 @@ export type SpeciesFrontAnimFamily =
   | "BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW"
   | "BOUNCE_ROTATE_TO_SIDES_SLOW"
   | "CIRCLE_INTO_BG"
+  | "CIRCLE_C_CLOCKWISE_SLOW"
   | "CIRCULAR_STRETCH_TWICE"
   | "FOUR_PETAL"
   | "GROW_VIBRATE"
@@ -89,6 +90,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW",
   "BOUNCE_ROTATE_TO_SIDES_SLOW",
   "CIRCLE_INTO_BG",
+  "CIRCLE_C_CLOCKWISE_SLOW",
   "CIRCULAR_STRETCH_TWICE",
   "FOUR_PETAL",
   "GROW_VIBRATE",
@@ -479,6 +481,23 @@ export const CIRCLE_INTO_BG_FACTORY_FRONT_SPECIES: readonly string[] = Object.fr
 /** There are no circle-into-background mappings outside the Factory pool. */
 export const CIRCLE_INTO_BG_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   CIRCLE_INTO_BG_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All source selector mappings for selector 79, `ANIM_CIRCLE_C_CLOCKWISE_SLOW`. */
+export const CIRCLE_C_CLOCKWISE_SLOW_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_CIRCLE_C_CLOCKWISE_SLOW")
+    .map(([species]) => species),
+);
+
+/** Every slow circle-counterclockwise mapping is reachable through Factory rentals. */
+export const CIRCLE_C_CLOCKWISE_SLOW_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  CIRCLE_C_CLOCKWISE_SLOW_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no slow circle-counterclockwise mappings outside the Factory pool. */
+export const CIRCLE_C_CLOCKWISE_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  CIRCLE_C_CLOCKWISE_SLOW_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /** The sole source selector mapping for `ANIM_FOUR_PETAL`. */
@@ -2960,6 +2979,112 @@ export function horizontalShakeSlowFrameAtTick(
   return horizontalShakeFrameAtTickWithStep(ticksSinceStart, HORIZONTAL_SHAKE_INITIALIZERS.slow);
 }
 
+/** Source-specific initializer for selector 79. */
+export const CIRCLE_C_CLOCKWISE_SLOW_INITIALIZER = Object.freeze({
+  selector: "ANIM_CIRCLE_C_CLOCKWISE_SLOW",
+  sourceId: 79,
+  rotation: 512,
+  data: 3,
+  speed: 12,
+  accepted: true,
+} as const);
+
+export interface CircleCCounterclockwiseSlowFrame extends SpeciesIdleOffset {
+  /** `sprite->data[2]` immediately before this source callback. */
+  readonly data2Before: number;
+  /** `sprite->data[2]` after the source's final `+= speed`. */
+  readonly data2: number;
+  /** `(data2 + 192) % 256`, only for active callbacks. */
+  readonly index: number | null;
+  /** Signed GBA `Sin(index, data)` result, only for active callbacks. */
+  readonly sin: number | null;
+  /** Signed GBA `Cos(index, data * 2)` result, only for active callbacks. */
+  readonly cos: number | null;
+  readonly animRotation: 512;
+  readonly animData: 3;
+  readonly animSpeed: 12;
+  /** Tick zero is the initializer's immediate call before callback install. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXBeforeBranch: true;
+  readonly tryFlipXAfterCounterIncrement: true;
+  /** Both source-order `TryFlipX` calls run, including the terminal branch. */
+  readonly tryFlipXCalls: 2;
+  readonly callback: "CircleCounterclockwise" | "WaitAnimEnd";
+}
+
+/**
+ * Source-order port of `Anim_CircleCounterclockwise_Slow` ->
+ * `CircleCounterclockwise` (`pokemon_animation.c:1504-1536,3743-3751`) for
+ * the ordinary opponent-front path. `AddNewAnim` supplies zeroed animation
+ * data before the selector writes rotation=512, data=3, and speed=12. The
+ * initializer calls the shared callback once before installing it, so tick
+ * zero already consumes counter 0. The callback flips before its strict
+ * `data[2] > rotation` guard, clears both offsets on the terminal callback,
+ * increments the counter after either branch, and flips once more after the
+ * branch. `sDontFlip=TRUE` makes both flips no-ops for a normal front sprite,
+ * but their source-order presence remains part of this reducer's contract.
+ */
+export function circleCCounterclockwiseSlowFrameAtTick(
+  ticksSinceStart: number,
+): CircleCCounterclockwiseSlowFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  const { rotation: animRotation, data: animData, speed: animSpeed } =
+    CIRCLE_C_CLOCKWISE_SLOW_INITIALIZER;
+  let data2 = 0;
+  let callback: CircleCCounterclockwiseSlowFrame["callback"] = "CircleCounterclockwise";
+  let lastFrame: CircleCCounterclockwiseSlowFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    // `WaitAnimEnd` only polls the sprite's frame animation. Once the shared
+    // callback hands off, this reducer's terminal state remains stable.
+    if (callback === "WaitAnimEnd") continue;
+
+    const data2Before = data2;
+    let index: number | null = null;
+    let sin: number | null = null;
+    let cos: number | null = null;
+    let x2 = 0;
+    let y2 = 0;
+
+    // Source order: TryFlipX, branch, data2 += speed, TryFlipX.
+    if (data2 > animRotation) {
+      callback = "WaitAnimEnd";
+    } else {
+      index = (data2 + 192) % 256;
+      cos = gbaCos(index, animData * 2);
+      sin = gbaSin(index, animData);
+      // C's integer negation stores plain zero, not JavaScript's `-0`.
+      x2 = cos === 0 ? 0 : -cos;
+      y2 = sin + animData;
+    }
+    data2 += animSpeed;
+
+    lastFrame = {
+      x2,
+      y2,
+      data2Before,
+      data2,
+      index,
+      sin,
+      cos,
+      animRotation,
+      animData,
+      animSpeed,
+      initializerCallBeforeCallbackInstall: tick === 0,
+      normalFrontDontFlip: true,
+      tryFlipXBeforeBranch: true,
+      tryFlipXAfterCounterIncrement: true,
+      tryFlipXCalls: 2,
+      callback,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable CircleCounterclockwise reducer state");
+  return lastFrame;
+}
+
 /**
  * Source-specific initializer for selector 78. `ANIM_TWIST` uses the same
  * shared C callback with a different one-run/512-degree setup, but that
@@ -4059,6 +4184,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = circleIntoBackgroundFrameAtTick(65);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_CircleIntoBackground did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "CIRCLE_C_CLOCKWISE_SLOW": {
+      const terminal = circleCCounterclockwiseSlowFrameAtTick(43);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_CircleCounterclockwise_Slow did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
