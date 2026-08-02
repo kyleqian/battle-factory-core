@@ -1,3 +1,18 @@
+## 850 — [supervisor session open, 2026-08-01 22:40] animation-main folded; #39 item-7 + dispatcher-design lanes launching
+
+- **State:** master `2036472f` (fold of animation-main's 3-commit
+  ZIGZAG_SLOW family, additive animation files only). Union full
+  `npm test` 589 files / 6,112 passed / 1 skipped + `npm run build`
+  green. DEFERRED.md empty. Oracle freshness FAIL on 8014/8012 verified
+  as the known false positive: every harness commit after each service
+  start touches only `_template/` or the `bin/oracle` CLI wrapper.
+- **Plan:** per entry 847 — MAIN lane executes ISSUES #39 item 7
+  (`opponentFaintDismissElapsed` → typed owner, brief defers to
+  `docs/opponent-faint-dismiss-owner-prep.md`, Terra/max, 75-min cap);
+  SIDE lane banks the dispatcher-generalization design dossier
+  (13 `TurnN...NextCommandHandoff` census + slice plan, new files only,
+  Terra/max). Then dispatcher slices per the dossier.
+
 ## 849 — [user-directed maintenance, 2026-08-01 22:20] vitest fair-shares the box; 88,808 scratch dirs / ~210 GB reclaimed
 
 - **State:** full `npm test` 588 files / 6,107 passed / 1 skipped, build
