@@ -73,6 +73,7 @@ export type SpeciesFrontAnimFamily =
   | "H_SHAKE"
   | "H_SHAKE_SLOW"
   | "RAPID_H_HOPS"
+  | "ROTATE_TO_SIDES_TWICE"
   | "ROTATE_UP_SLAM_DOWN"
   | "ROTATE_UP_TO_SIDES"
   | "SHRINK_GROW"
@@ -131,6 +132,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "H_SHAKE",
   "H_SHAKE_SLOW",
   "RAPID_H_HOPS",
+  "ROTATE_TO_SIDES_TWICE",
   "ROTATE_UP_SLAM_DOWN",
   "ROTATE_UP_TO_SIDES",
   "SHRINK_GROW",
@@ -472,6 +474,26 @@ export const ROTATE_UP_TO_SIDES_FACTORY_FRONT_SPECIES: readonly string[] = Objec
 export const ROTATE_UP_TO_SIDES_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
   Object.freeze(
     ROTATE_UP_TO_SIDES_FRONT_SPECIES.filter(
+      (species) => !factoryFrontSpecies.has(species),
+    ),
+  );
+
+/** The sole source selector mapping for `ANIM_ROTATE_TO_SIDES_TWICE`. */
+export const ROTATE_TO_SIDES_TWICE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_ROTATE_TO_SIDES_TWICE")
+    .map(([species]) => species),
+);
+
+/** SOLROCK is the complete Factory-reachable selector-8 front family. */
+export const ROTATE_TO_SIDES_TWICE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  ROTATE_TO_SIDES_TWICE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no selector-8 mappings outside the Factory rental pool. */
+export const ROTATE_TO_SIDES_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
+  Object.freeze(
+    ROTATE_TO_SIDES_TWICE_FRONT_SPECIES.filter(
       (species) => !factoryFrontSpecies.has(species),
     ),
   );
@@ -1979,6 +2001,61 @@ export interface RotateUpToSidesFrame extends SpeciesIdleOffset {
   readonly affineMode: "double" | "normal";
 }
 
+/** Source selector 8's `AddNewAnim` initializer for the two-pass front route. */
+export const ROTATE_TO_SIDES_TWICE_INITIALIZER = Object.freeze({
+  selector: "ANIM_ROTATE_TO_SIDES_TWICE",
+  sourceId: 8,
+  addNewAnim: true,
+  data0: 1,
+  rotation: 4,
+  delay: 0,
+  runs: 2,
+  speed: 0,
+  data: 0,
+  callbackInvokedByInitializer: true,
+  callbackInstalled: "RotateToSides",
+  normalFrontDontFlip: true,
+  accepted: true,
+} as const);
+
+export interface RotateToSidesTwiceAffineWrite {
+  readonly xScale: 256;
+  readonly yScale: 256;
+  /** `Sin(data7, 32)` before the source's u16 local conversion. */
+  readonly rotationSigned: number;
+  /** `rotation << 8` after the u16 `rotation` local's promotion. */
+  readonly rotationShifted: number;
+  /** The u16 value handed to `HandleSetAffineData` / OAM matrix setup. */
+  readonly rotationU16: number;
+}
+
+export interface RotateToSidesTwiceFrame extends SpeciesIdleOffset {
+  readonly data0: 1;
+  readonly data2Before: 0 | 1;
+  readonly data2: 0 | 1;
+  readonly data7Before: number;
+  readonly data7: number;
+  readonly animRotation: 4;
+  readonly animDelay: 0;
+  readonly animRunsBefore: 1 | 2;
+  readonly animRuns: 1 | 2;
+  readonly animSpeed: 0;
+  readonly animData: 0;
+  readonly sineIndex: number | null;
+  readonly sineValue: number | null;
+  readonly affineWrites: readonly RotateToSidesTwiceAffineWrite[];
+  readonly affineWriteCount: 1;
+  readonly initializerCallBeforeCallbackInstall: boolean;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXBeforeMotion: true;
+  readonly tryFlipXAfterAffine: true;
+  readonly tryFlipXCalls: 2;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "RotateToSides" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
 /** Source selector 47's front-sprite affine initializer. */
 export const ROTATE_UP_SLAM_DOWN_INITIALIZER = Object.freeze({
   selector: "ANIM_ROTATE_UP_SLAM_DOWN",
@@ -2856,6 +2933,133 @@ export function rotateUpToSidesFrameAtTick(
     callback: "Anim_RotateUpToSides",
     affineMode: "double",
   };
+}
+
+/**
+ * Source-order port of selector 8's `Anim_RotateToSides_Twice` -> shared
+ * `RotateToSides` callback (`pokemon_animation.c:1037-1059,2870-2916,
+ * 3817-3834,5540-5544`). `AddNewAnim` starts the first fresh animation slot
+ * at its ordinary defaults; selector 8 changes only rotation to four and
+ * runs to two, invokes the shared callback once, then installs it.
+ *
+ * The normal front task has already zeroed `data[2]`/`data[7]` and set
+ * `sDontFlip=TRUE`. Each run consumes signed-s16 `data7` values 0..252 in
+ * steps of four. The next callback observes the strict `> 254` guard: the
+ * first pass restores identity and resets only `data2`/`data7`, while the
+ * second pass additionally resets the sprite and installs stable
+ * `WaitAnimEnd`. Both source-order `TryFlipX` calls are represented even
+ * though they are no-ops on this ordinary opponent-front route.
+ */
+export function rotateToSidesTwiceFrameAtTick(
+  ticksSinceStart: number,
+): RotateToSidesTwiceFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  const data0 = ROTATE_TO_SIDES_TWICE_INITIALIZER.data0;
+  const animRotation = ROTATE_TO_SIDES_TWICE_INITIALIZER.rotation;
+  const animDelay = ROTATE_TO_SIDES_TWICE_INITIALIZER.delay;
+  const animSpeed = ROTATE_TO_SIDES_TWICE_INITIALIZER.speed;
+  const animData = ROTATE_TO_SIDES_TWICE_INITIALIZER.data;
+  let animRuns: 1 | 2 = ROTATE_TO_SIDES_TWICE_INITIALIZER.runs;
+  let data2: 0 | 1 = 0;
+  let data7 = 0;
+  let x2 = 0;
+  let y2 = 0;
+  let callback: RotateToSidesTwiceFrame["callback"] = "RotateToSides";
+  let affineMode: RotateToSidesTwiceFrame["affineMode"] = "normal";
+  let lastFrame: RotateToSidesTwiceFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (callback === "WaitAnimEnd") continue;
+
+    const data2Before = data2;
+    const data7Before = data7;
+    const animRunsBefore = animRuns;
+    const startedAffine = data2 === 0;
+    let resetSpriteAfterAnim = false;
+    let sineIndex: number | null = null;
+    let sineValue: number | null = null;
+    let affineWrites: RotateToSidesTwiceAffineWrite[];
+
+    if (startedAffine) {
+      // `HandleStartAffineAnim` switches the live OAM sprite to double size
+      // before the source's first `TryFlipX` / motion write.
+      data2 = 1;
+      affineMode = "double";
+    }
+
+    // First `TryFlipX(sprite)`: Task_HandleMonAnimation's normal-front
+    // `sDontFlip=TRUE` makes it a no-op, but it remains source-observable.
+    if (data7 > 254) {
+      x2 = 0;
+      y2 = 0;
+      affineWrites = [{
+        xScale: 256,
+        yScale: 256,
+        rotationSigned: 0,
+        rotationShifted: 0,
+        rotationU16: 0,
+      }];
+      if (animRuns > 1) {
+        animRuns = 1;
+        data2 = 0;
+        data7 = 0;
+      } else {
+        resetSpriteAfterAnim = true;
+        affineMode = "normal";
+        callback = "WaitAnimEnd";
+      }
+    } else {
+      sineIndex = data7;
+      x2 = toS16(-gbaSin(sineIndex, 16));
+      sineValue = toS16(gbaSin(sineIndex, 32));
+      const rotationU16 = sineValue & 0xffff;
+      const rotationShifted = rotationU16 << 8;
+      affineWrites = [{
+        xScale: 256,
+        yScale: 256,
+        rotationSigned: sineValue,
+        rotationShifted,
+        rotationU16: rotationShifted & 0xffff,
+      }];
+      data7 = toS16(data7 + animRotation);
+    }
+
+    // Second `TryFlipX(sprite)`, after either affine branch. It is likewise a
+    // no-op for the accepted front route; the two call sites stay distinct in
+    // the receipt rather than collapsing them into a presentation shortcut.
+    lastFrame = {
+      x2,
+      y2,
+      data0,
+      data2Before,
+      data2,
+      data7Before,
+      data7,
+      animRotation,
+      animDelay,
+      animRunsBefore,
+      animRuns,
+      animSpeed,
+      animData,
+      sineIndex,
+      sineValue,
+      affineWrites,
+      affineWriteCount: 1,
+      initializerCallBeforeCallbackInstall: tick === 0,
+      startedAffine,
+      normalFrontDontFlip: true,
+      tryFlipXBeforeMotion: true,
+      tryFlipXAfterAffine: true,
+      tryFlipXCalls: 2,
+      resetSpriteAfterAnim,
+      callback,
+      affineMode,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable RotateToSides reducer state");
+  return lastFrame;
 }
 
 /**
@@ -6380,6 +6584,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
         last = offset;
         tick += 1;
       }
+    }
+    case "ROTATE_TO_SIDES_TWICE": {
+      const terminal = rotateToSidesTwiceFrameAtTick(129);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_RotateToSides_Twice did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
     }
     case "ROTATE_UP_SLAM_DOWN": {
       const terminal = rotateUpSlamDownFrameAtTick(72);
