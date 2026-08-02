@@ -79,8 +79,12 @@ import {
   H_VIBRATE_FACTORY_FRONT_SPECIES,
   H_VIBRATE_FRONT_SPECIES,
   H_VIBRATE_OUTSIDE_FACTORY_FRONT_SPECIES,
+  horizontalSlideFrameAtTick,
   horizontalSlideSlowFrameAtTick,
   HORIZONTAL_SLIDE_INITIALIZERS,
+  H_SLIDE_FACTORY_FRONT_SPECIES,
+  H_SLIDE_FRONT_SPECIES,
+  H_SLIDE_OUTSIDE_FACTORY_FRONT_SPECIES,
   H_SLIDE_SLOW_FACTORY_FRONT_SPECIES,
   H_SLIDE_SLOW_FRONT_SPECIES,
   H_SLIDE_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES,
@@ -5170,6 +5174,85 @@ describe("speciesIdleAnim", () => {
     });
   });
 
+  describe("horizontalSlideFrameAtTick (normal source lifecycle)", () => {
+    it("derives exactly all 4 selector mappings as Factory-reachable with zero outside", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_H_SLIDE")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(H_SLIDE_FRONT_SPECIES).toEqual(generated);
+      expect(H_SLIDE_FRONT_SPECIES).toEqual([
+        "KRABBY", "CORSOLA", "ZIGZAGOON", "WHISMUR",
+      ]);
+      expect(H_SLIDE_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(H_SLIDE_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(H_SLIDE_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of H_SLIDE_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("accepts the normal data0=40 initializer while keeping fast distinct", () => {
+      expect(HORIZONTAL_SLIDE_INITIALIZERS).toEqual({
+        slow: { selector: "ANIM_H_SLIDE_SLOW", data0: 80, accepted: true },
+        normal: { selector: "ANIM_H_SLIDE", data0: 40, accepted: true },
+        fast: { selector: "ANIM_H_SLIDE_FAST", data0: 20, accepted: false },
+      });
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
+    });
+
+    it("pins every active callback's C-truncated sine arithmetic and both flip no-ops", () => {
+      const active = Array.from({ length: 41 }, (_, tick) => {
+        const index = Math.trunc((tick * 384) / 40) % 256;
+        const frame = horizontalSlideFrameAtTick(tick);
+        expect(frame, `tick ${tick}`).toEqual({
+          x2: Math.floor((6 * GBA_SINE_TABLE_256[index]!) / 256) + 0,
+          y2: 0,
+          data0: 40,
+          data2: tick + 1,
+          index,
+          amplitude: 6,
+          initializerCallBeforeCallbackInstall: tick === 0,
+          normalFrontDontFlip: true,
+          tryFlipXCalls: 2,
+          callback: "HorizontalSlide",
+        });
+        return frame!;
+      });
+      expect(active).toHaveLength(41);
+      expect([0, 10, 20, 30, 40].map((tick) => [
+        tick, active[tick]!.index, active[tick]!.x2, active[tick]!.data2,
+      ])).toEqual([
+        [0, 0, 0, 1],
+        [10, 96, 4, 11],
+        [20, 192, -6, 21],
+        [30, 32, 4, 31],
+        [40, 128, 0, 41],
+      ]);
+    });
+
+    it("pins tick 41 terminal reset/WaitAnimEnd, stable settled state, and invalid input", () => {
+      expect(horizontalSlideFrameAtTick(41)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 40,
+        data2: 42,
+        index: null,
+        amplitude: 6,
+        initializerCallBeforeCallbackInstall: false,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        callback: "WaitAnimEnd",
+      });
+      expect(horizontalSlideFrameAtTick(42)).toEqual(horizontalSlideFrameAtTick(41));
+      expect(horizontalSlideFrameAtTick(-1)).toBeNull();
+    });
+  });
+
   describe("horizontalSlideSlowFrameAtTick (source lifecycle)", () => {
     it("derives exactly all 7 selector mappings as Factory-reachable with zero outside", () => {
       const generated = Object.entries(selectorTables.frontAnimIds.species)
@@ -5192,10 +5275,10 @@ describe("speciesIdleAnim", () => {
       }
     });
 
-    it("accepts only slow data0=80 and keeps normal/fast distinct", () => {
+    it("preserves accepted slow data0=80 alongside normal and keeps fast distinct", () => {
       expect(HORIZONTAL_SLIDE_INITIALIZERS).toEqual({
         slow: { selector: "ANIM_H_SLIDE_SLOW", data0: 80, accepted: true },
-        normal: { selector: "ANIM_H_SLIDE", data0: 40, accepted: false },
+        normal: { selector: "ANIM_H_SLIDE", data0: 40, accepted: true },
         fast: { selector: "ANIM_H_SLIDE_FAST", data0: 20, accepted: false },
       });
       expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
@@ -5212,6 +5295,7 @@ describe("speciesIdleAnim", () => {
           data2: tick + 1,
           index,
           amplitude: 6,
+          initializerCallBeforeCallbackInstall: tick === 0,
           normalFrontDontFlip: true,
           tryFlipXCalls: 2,
           callback: "HorizontalSlide",
@@ -5238,6 +5322,7 @@ describe("speciesIdleAnim", () => {
         data2: 82,
         index: null,
         amplitude: 6,
+        initializerCallBeforeCallbackInstall: false,
         normalFrontDontFlip: true,
         tryFlipXCalls: 2,
         callback: "WaitAnimEnd",

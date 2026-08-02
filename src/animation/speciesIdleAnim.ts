@@ -56,6 +56,7 @@ export type SpeciesFrontAnimFamily =
   | "FLASH_YELLOW"
   | "FLICKER_INCREASING"
   | "H_JUMPS"
+  | "H_SLIDE"
   | "H_SLIDE_SLOW"
   | "H_SLIDE_WOBBLE"
   | "H_STRETCH"
@@ -103,6 +104,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "FLASH_YELLOW",
   "FLICKER_INCREASING",
   "H_JUMPS",
+  "H_SLIDE",
   "H_SLIDE_SLOW",
   "H_SLIDE_WOBBLE",
   "H_STRETCH",
@@ -815,6 +817,23 @@ export const FLASH_YELLOW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Obj
   FLASH_YELLOW_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
+/** All 4 source selector mappings for the normal `ANIM_H_SLIDE`. */
+export const H_SLIDE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_H_SLIDE")
+    .map(([species]) => species),
+);
+
+/** Every normal horizontal-slide mapping is reachable through Factory rentals. */
+export const H_SLIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_SLIDE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no normal horizontal-slide mappings outside the Factory rental pool. */
+export const H_SLIDE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_SLIDE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
 /** All 7 source selector mappings for the slow `ANIM_H_SLIDE_SLOW`. */
 export const H_SLIDE_SLOW_FRONT_SPECIES: readonly string[] = Object.freeze(
   Object.entries(generatedFrontAnimIds)
@@ -1228,19 +1247,22 @@ export interface HorizontalSlideWobbleFrame extends SpeciesIdleOffset {
 
 /**
  * The three initializers share `HorizontalSlide`, but selector acceptance is
- * per family. This rung accepts only the slow data0=80 front initializer.
+ * per family. The normal data0=40 and slow data0=80 front initializers are
+ * accepted independently; the fast data0=20 back-sprite route is not.
  */
 export const HORIZONTAL_SLIDE_INITIALIZERS = Object.freeze({
   slow: Object.freeze({ selector: "ANIM_H_SLIDE_SLOW", data0: 80, accepted: true }),
-  normal: Object.freeze({ selector: "ANIM_H_SLIDE", data0: 40, accepted: false }),
+  normal: Object.freeze({ selector: "ANIM_H_SLIDE", data0: 40, accepted: true }),
   fast: Object.freeze({ selector: "ANIM_H_SLIDE_FAST", data0: 20, accepted: false }),
 } as const);
 
 export interface HorizontalSlideFrame extends SpeciesIdleOffset {
-  readonly data0: 80;
+  readonly data0: 40 | 80;
   readonly data2: number;
   readonly index: number | null;
   readonly amplitude: 6;
+  /** Tick zero is the initializer's immediate callback before it installs the callback. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
   readonly normalFrontDontFlip: true;
   readonly tryFlipXCalls: 2;
   readonly callback: "HorizontalSlide" | "WaitAnimEnd";
@@ -3957,20 +3979,21 @@ export function verticalSlideWobbleSmallFrameAtTick(
 }
 
 /**
- * Source-order port of `Anim_HorizontalSlide_Slow` and `HorizontalSlide`
- * (`pokemon_animation.c:911-939,1131-1153,3665-3669`). The front task
- * zeroes data2 and sets `sDontFlip=TRUE`; the slow initializer sets data0=80
- * and immediately runs the shared callback. Ticks 0..80 perform both no-op
- * `TryFlipX` calls, write the C-truncated sine index/x2, and increment data2.
- * Tick 81 clears x2, installs `WaitAnimEnd`, increments data2 to 82, and
- * performs the second no-op flip.
+ * Source-order `HorizontalSlide` reducer shared by the normal and slow
+ * opponent-front initializers (`pokemon_animation.c:911-939,1131-1153,
+ * 3665-3669`). `Task_HandleMonAnimation` zeroes data2 and sets
+ * `sDontFlip=TRUE`; each initializer writes data0, immediately runs this
+ * callback, and then installs it. Active ticks perform both no-op `TryFlipX`
+ * calls, write the C-truncated sine index/x2, and increment data2. The first
+ * tick after data2 exceeds data0 clears x2, installs `WaitAnimEnd`, still
+ * increments data2, and performs the second no-op flip.
  */
-export function horizontalSlideSlowFrameAtTick(
+function horizontalSlideFrameAtTickWithDuration(
   ticksSinceStart: number,
+  data0: 40 | 80,
 ): HorizontalSlideFrame | null {
   if (ticksSinceStart < 0) return null;
 
-  const data0 = HORIZONTAL_SLIDE_INITIALIZERS.slow.data0;
   if (ticksSinceStart > data0) {
     return {
       x2: 0,
@@ -3979,6 +4002,7 @@ export function horizontalSlideSlowFrameAtTick(
       data2: data0 + 2,
       index: null,
       amplitude: 6,
+      initializerCallBeforeCallbackInstall: false,
       normalFrontDontFlip: true,
       tryFlipXCalls: 2,
       callback: "WaitAnimEnd",
@@ -3994,10 +4018,31 @@ export function horizontalSlideSlowFrameAtTick(
     data2: data2BeforeIncrement + 1,
     index,
     amplitude: 6,
+    initializerCallBeforeCallbackInstall: ticksSinceStart === 0,
     normalFrontDontFlip: true,
     tryFlipXCalls: 2,
     callback: "HorizontalSlide",
   };
+}
+
+/** Selector 3's normal-duration `Anim_HorizontalSlide` entry point. */
+export function horizontalSlideFrameAtTick(
+  ticksSinceStart: number,
+): HorizontalSlideFrame | null {
+  return horizontalSlideFrameAtTickWithDuration(
+    ticksSinceStart,
+    HORIZONTAL_SLIDE_INITIALIZERS.normal.data0,
+  );
+}
+
+/** Selector 70's slow-duration `Anim_HorizontalSlide_Slow` entry point. */
+export function horizontalSlideSlowFrameAtTick(
+  ticksSinceStart: number,
+): HorizontalSlideFrame | null {
+  return horizontalSlideFrameAtTickWithDuration(
+    ticksSinceStart,
+    HORIZONTAL_SLIDE_INITIALIZERS.slow.data0,
+  );
 }
 
 const CIRCULAR_STRETCH_TWICE_DURATION = 40;
@@ -4728,6 +4773,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = horizontalJumpsFrameAtTick(43);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_HorizontalJumps did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "H_SLIDE": {
+      const terminal = horizontalSlideFrameAtTick(41);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_HorizontalSlide did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
