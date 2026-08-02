@@ -1,3 +1,40 @@
+## 837 — [supervisor, 2026-08-01 16:40] turns 9-12 COMPLETE; #61 parked (settled record); ON oracle restarted
+
+- **State:** turn-12 verified: census empty, spot compares
+  `turn12-rockslide-miss-off` **256/256** and `turn13-switchin` **242/242**
+  exact (worker differential 1,141/1,141 incl. the regenerated
+  turn-13 OFF windows 151+104). **Every `turnNResolved` boolean for turns
+  5-13 is now retired**; #39's remainder is turns 1-4 (prepped), item 7
+  (prepped), and dispatcher debt.
+- **Did:** merged side `278f1af3` (`docs/issue61-vblank-phase-event-design.md`)
+  and **parked #61 as a settled record** (supervisor decision, #38
+  precedent): the turn-3 reveal order is sub-tick CPU/VBlank phase — same
+  class as settled #5; no tick-level source-owned discriminator exists;
+  reopen condition is the doc's §4.1 falsification gate or a general cycle
+  model. `turn3-endeavor-off` ships 254/255 permanently under this record.
+  Also: found Scene-ON oracle 8012 DOWN (stopped with the animation
+  session); restarted via `PORT=8012 run-oracle.sh --profile
+  battle-scene-on` — freshness now OK, `turn13-switchin` 242/242 confirms.
+- **Next:** turn-1 slice launching (Terra/max, 70-min cap) — first turns 1-4
+  rung per the merged dossier. Then final animation fold check + full union
+  suite + wind-down before 20:27.
+- **Notes:** worker entry numbering collided once (834); supervisor entries
+  now offset. Ledger kept at 3 entries.
+
+## 838 — [bounded MAIN worker, 2026-08-01] turn-1 handoff proof checkpoint
+
+- **State:** immutable receipt proof is green; consumer migration has not
+  started, so `turn1Resolved` remains live until the next committed step.
+- **Did:** added `turn1ResolutionAdapter.ts` and its equivalence suite. The
+  receipt owns PP **[9,20,20,10]**, slot 0, HP **117/101**, settled/ready
+  facts, and the runtime-relative `HandleInputChooseAction` →
+  `DoBounceEffect` epoch (192/128 seeds, delta 7, amplitude 1).
+- **Next:** publish that receipt at the modeled reset (not the later FIGHT
+  reopen), migrate every turn-1 HP/PP/bounce/core consumer, then run the
+  1,162-capture clean-parent differential set.
+- **Notes:** focused proof **4/4** and `npx tsc --noEmit` are green. No
+  trace, timing, oracle, or presentation change in this checkpoint.
+
 ## 836 — [bounded MAIN worker, 2026-08-01] turn-12 predecessor handoff retired
 
 - **State:** proof `ad34442f`, implementation `271d7c03`; the production and
