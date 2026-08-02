@@ -1,3 +1,23 @@
+## 859 — [bounded MAIN worker, 2026-08-02] dispatcher slice 5 production cut
+
+- **State:** `5c8eb38c` is the second green slice-5 checkpoint. `npm test` is
+  **592 files / 6,142 passed / 1 skipped**; `npm run build` and `npx tsc
+  --noEmit` exit 0.
+- **Did:** generic semantic content and immutable reopen guards are now the
+  production turn-5–13 route. Core atomically installs each successor/retained
+  FLY owner; the nine legacy state fields, copies, publications, and renderer
+  fallbacks are gone. Turns 1–4 and the staged 13 renderer/PP parameters/types
+  remain untouched for later slices.
+- **Evidence:** clean-parent app replay is **5,638/5,638** raw captures across
+  all 33 slice-1 windows; generated Scene-OFF is **128/128**; changed terminal
+  rungs are **255/255**, **147/147**, **255/255**, **118/118**. Census:
+  state/initial/copy **13→4**, type declarations and FIGHT/PP parameters remain
+  **13**, test literal assignments **289→202**.
+- **Next:** Slice 6, fold the turn-1 epoch/content into the generic owner;
+  preserve the remaining early-turn invariants and staged ABI.
+- **Notes:** no trace/capture edits, animation, barrier, PP tuple selector, or
+  completed-turn selector landed.
+
 ## 857 — [bounded MAIN worker, 2026-08-02] generated Scene-OFF attack-pause receipt regression fixed
 
 - **State:** `ecd00a9c` is the green implementation checkpoint. Full `npm
