@@ -157,6 +157,7 @@ import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "./turn15FlyResolutionAdapter.
 import {
   isTurn13NextCommandHandoffReady,
   resolveTurn13CompletedResolutionNextCommandHandoff,
+  resolveTurn13LatestCompletedCommandHandoff,
 } from "./turn13ResolutionAdapter.ts";
 import {
   createOpponentFaintPresentationOwner,
@@ -166,34 +167,42 @@ import {
 import {
   isTurn5NextCommandHandoffReady,
   resolveTurn5CompletedResolutionNextCommandHandoff,
+  resolveTurn5LatestCompletedCommandHandoff,
 } from "./turn5ResolutionAdapter.ts";
 import {
   isTurn6NextCommandHandoffReady,
   resolveTurn6CompletedResolutionNextCommandHandoff,
+  resolveTurn6LatestCompletedCommandHandoff,
 } from "./turn6ResolutionAdapter.ts";
 import {
   isTurn7NextCommandHandoffReady,
   resolveTurn7CompletedResolutionNextCommandHandoff,
+  resolveTurn7LatestCompletedCommandHandoff,
 } from "./turn7ResolutionAdapter.ts";
 import {
   isTurn8NextCommandHandoffReady,
   resolveTurn8CompletedResolutionNextCommandHandoff,
+  resolveTurn8LatestCompletedCommandHandoff,
 } from "./turn8ResolutionAdapter.ts";
 import {
   isTurn9NextCommandHandoffReady,
   resolveTurn9CompletedResolutionNextCommandHandoff,
+  resolveTurn9LatestCompletedCommandHandoff,
 } from "./turn9ResolutionAdapter.ts";
 import {
   isTurn10NextCommandHandoffReady,
   resolveTurn10CompletedResolutionNextCommandHandoff,
+  resolveTurn10LatestCompletedCommandHandoff,
 } from "./turn10ResolutionAdapter.ts";
 import {
   isTurn11NextCommandHandoffReady,
   resolveTurn11CompletedResolutionNextCommandHandoff,
+  resolveTurn11LatestCompletedCommandHandoff,
 } from "./turn11ResolutionAdapter.ts";
 import {
   isTurn12NextCommandHandoffReady,
   resolveTurn12CompletedResolutionNextCommandHandoff,
+  resolveTurn12LatestCompletedCommandHandoff,
 } from "./turn12ResolutionAdapter.ts";
 import { isTurn1ChooseActionBounceReset } from "./turn1ChooseActionReset.ts";
 import {
@@ -1155,6 +1164,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let turn11NextCommandHandoff = battleScene.turn11NextCommandHandoff;
     let turn12NextCommandHandoff = battleScene.turn12NextCommandHandoff;
     let turn13NextCommandHandoff = battleScene.turn13NextCommandHandoff;
+    let latestCompletedCommandHandoff = battleScene.latestCompletedCommandHandoff;
     let lockedActionOwner = battleScene.resolutionOwner ?? null;
     let terminalResolution = battleScene.terminalResolution ?? null;
     const opponentFaintContinuationAge = opponentFaintContinuationElapsed(
@@ -1389,6 +1399,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // persisted at slot 0 (ROCK_SLIDE, unchanged since turn 3 - no nav
       // needed, docs/turn6-notes.md §4's own ledger).
       turn5NextCommandHandoff = resolveTurn5CompletedResolutionNextCommandHandoff();
+      latestCompletedCommandHandoff = resolveTurn5LatestCompletedCommandHandoff();
       fightSubmenu = openFightSubmenu(
         battleScene.elapsed + 1,
         activeMonMoveset(draftScreen),
@@ -1408,6 +1419,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // persisted at slot 0 (ROCK_SLIDE, unchanged) - no nav needed,
       // turn7-notes §5's own "cursor persistence confirmed" ledger.
       turn6NextCommandHandoff = resolveTurn6CompletedResolutionNextCommandHandoff();
+      latestCompletedCommandHandoff = resolveTurn6LatestCompletedCommandHandoff();
       fightSubmenu = openFightSubmenu(
         battleScene.elapsed + 1,
         activeMonMoveset(draftScreen),
@@ -1428,6 +1440,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // divergence happens via the nav branch above (one RIGHT press onto
       // BIND), not at reopen.
       turn7NextCommandHandoff = resolveTurn7CompletedResolutionNextCommandHandoff();
+      latestCompletedCommandHandoff = resolveTurn7LatestCompletedCommandHandoff();
       fightSubmenu = openFightSubmenu(
         battleScene.elapsed + 1,
         activeMonMoveset(draftScreen),
@@ -1449,6 +1462,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // where turn 8's own confirm left it) - turn 9's own `LEFT` press then
       // moves it back onto ROCK_SLIDE via the generic nav branch above.
       turn8NextCommandHandoff = resolveTurn8CompletedResolutionNextCommandHandoff();
+      latestCompletedCommandHandoff = resolveTurn8LatestCompletedCommandHandoff();
       fightSubmenu = openFightSubmenu(
         battleScene.elapsed + 1,
         activeMonMoveset(draftScreen),
@@ -1469,6 +1483,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // nav needed, docs/turn10-notes.md §4/§5's own "zero navigation
       // presses this turn" ledger.
       turn9NextCommandHandoff = resolveTurn9CompletedResolutionNextCommandHandoff();
+      latestCompletedCommandHandoff = resolveTurn9LatestCompletedCommandHandoff();
       fightSubmenu = openFightSubmenu(
         battleScene.elapsed + 1,
         activeMonMoveset(draftScreen),
@@ -1491,6 +1506,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // zero further nav needed, docs/turn11-notes.md §1's own "zero
       // navigation presses this turn" ledger.
       turn10NextCommandHandoff = resolveTurn10CompletedResolutionNextCommandHandoff();
+      latestCompletedCommandHandoff = resolveTurn10LatestCompletedCommandHandoff();
       fightSubmenu = openFightSubmenu(
         battleScene.elapsed + 1,
         activeMonMoveset(draftScreen),
@@ -1511,6 +1527,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // needed, docs/turn12-notes.md §1's own "zero navigation presses this
       // turn" ledger.
       turn11NextCommandHandoff = resolveTurn11CompletedResolutionNextCommandHandoff();
+      latestCompletedCommandHandoff = resolveTurn11LatestCompletedCommandHandoff();
       fightSubmenu = openFightSubmenu(
         battleScene.elapsed + 1,
         activeMonMoveset(draftScreen),
@@ -1531,6 +1548,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // 13's own single `DOWN` press then moves it onto DRAGON_BREATH via the
       // generic nav branch above.
       turn12NextCommandHandoff = resolveTurn12CompletedResolutionNextCommandHandoff();
+      latestCompletedCommandHandoff = resolveTurn12LatestCompletedCommandHandoff();
       fightSubmenu = openFightSubmenu(
         battleScene.elapsed + 1,
         activeMonMoveset(draftScreen),
@@ -1554,6 +1572,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // own "cursor persisted... NO DOWN press this turn" ledger. Mirrors
       // the completed turn-12 handoff branch exactly, per the brief.
       turn13NextCommandHandoff = resolveTurn13CompletedResolutionNextCommandHandoff();
+      latestCompletedCommandHandoff = resolveTurn13LatestCompletedCommandHandoff();
       fightSubmenu = openFightSubmenu(
         battleScene.elapsed + 1,
         activeMonMoveset(draftScreen),
@@ -1670,6 +1689,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn11NextCommandHandoff,
       turn12NextCommandHandoff,
       turn13NextCommandHandoff,
+      latestCompletedCommandHandoff,
       resolutionOwner: lockedActionOwner,
       terminalResolution,
     };

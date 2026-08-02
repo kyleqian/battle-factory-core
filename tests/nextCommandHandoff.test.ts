@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   createLatestCompletedCommandHandoff,
   isLatestCompletedCommandHandoffReady,
+  projectLatestCompletedCommandPp,
 } from "../src/engine/nextCommandHandoff.ts";
 
 describe("LatestCompletedCommandHandoff", () => {
@@ -34,5 +35,27 @@ describe("LatestCompletedCommandHandoff", () => {
     expect(isLatestCompletedCommandHandoffReady(handoff)).toBe(true);
     expect(isLatestCompletedCommandHandoffReady(null)).toBe(false);
     expect(isLatestCompletedCommandHandoffReady(undefined)).toBe(false);
+  });
+
+  it("projects canonical PP uses onto the active moveset and carries the persisted slot", () => {
+    const handoff = createLatestCompletedCommandHandoff({
+      playerPp: [5, 20, 19, 10],
+      persistedMoveSlot: 0,
+      nextCommand: { redraw: "settled", input: "ready" },
+    });
+
+    expect(projectLatestCompletedCommandPp(
+      [15, 15, 25, 5],
+      [10, 20, 20, 10],
+      handoff,
+    )).toEqual({
+      playerPp: [10, 15, 24, 5],
+      persistedMoveSlot: 0,
+    });
+    expect(projectLatestCompletedCommandPp(
+      [15, 15, 25, 5],
+      [10, 20, 20, 10],
+      null,
+    )).toBeNull();
   });
 });

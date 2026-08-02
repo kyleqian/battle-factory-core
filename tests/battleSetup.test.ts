@@ -24,9 +24,11 @@ import { activeMonMoveset, createBattleSetup, rentalMoveset, type ActiveMonMoves
 import { ANCHOR_DRAFT_SCREEN_STATE, type DraftScreenState } from "../src/engine/factoryDraftScreen.ts";
 import { createFramebuffer, SCREEN_WIDTH } from "../src/engine/framebuffer.ts";
 import { renderBattleScene } from "../src/engine/battleScene.ts";
-import { openFightSubmenu, FIGHT_SUBMENU_SLOT_NAMES, currentPPForActiveMon } from "../src/engine/battleMenu.ts";
+import { openFightSubmenu, FIGHT_SUBMENU_SLOT_NAMES, currentPPForActiveMon, currentPPForActiveMonFromLatest } from "../src/engine/battleMenu.ts";
 import { resolveTurn1CompletedResolutionNextCommandHandoff } from "../src/engine/turn1ResolutionAdapter.ts";
 import { resolveTurn2CompletedResolutionNextCommandHandoff } from "../src/engine/turn2ResolutionAdapter.ts";
+import { resolveTurn5CompletedResolutionNextCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
+import { resolveTurn6CompletedResolutionNextCommandHandoff, resolveTurn6LatestCompletedCommandHandoff } from "../src/engine/turn6ResolutionAdapter.ts";
 import { buildFightMoveset, drawFightSubmenuText } from "../src/engine/fightSubmenuText.ts";
 import fightSubmenuWindowAsset from "../src/assets/gen/fight-submenu-window.json" with { type: "json" };
 import battlerDump from "../src/data/gen/battle2-turn1-battler-dump.json" with { type: "json" };
@@ -117,6 +119,23 @@ describe("battleMenu: currentPPForActiveMon (S8 generalization of the old hardco
   it("an absent turn-2 receipt leaves every pre-existing 2-arg call site unaffected", () => {
     expect(currentPPForActiveMon(moveset, TURN1_HANDOFF)).toEqual([9, 20, 20, 10]);
   });
+
+  it("the generic latest path preserves the legacy turn-6 PP result for a noncanonical slot-1 maximum", () => {
+    const variedMoveset: ActiveMonMoveset = { moveIds: [1, 2, 3, 4], maxPP: [10, 15, 20, 10] };
+    const legacy = currentPPForActiveMon(
+      variedMoveset,
+      null,
+      null,
+      null,
+      null,
+      resolveTurn5CompletedResolutionNextCommandHandoff(),
+      resolveTurn6CompletedResolutionNextCommandHandoff(),
+    );
+    expect(currentPPForActiveMonFromLatest(
+      variedMoveset,
+      resolveTurn6LatestCompletedCommandHandoff(),
+    )).toEqual(legacy);
+  });
 });
 
 function extractWindowRegion(fb: Uint8Array): number[] {
@@ -163,7 +182,7 @@ describe("battleScene: genericity end-to-end through the STATE plumbing (not jus
     it(`cursor ${cursor} (${FIGHT_SUBMENU_SLOT_NAMES[cursor]} highlighted): renderBattleScene's FIGHT window matches an independently-assembled expected image byte-for-byte, at full PP`, () => {
       const sm = { ...opened, cursor: cursor as 0 | 1 | 2 | 3, displayCursor: cursor as 0 | 1 | 2 | 3 };
       const fb = createFramebuffer();
-      renderBattleScene(fb, { elapsed: 900, sendOutPressElapsed: 380, fightSubmenu: sm, turn1NextCommandHandoff: null, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null });
+      renderBattleScene(fb, { elapsed: 900, sendOutPressElapsed: 380, fightSubmenu: sm, turn1NextCommandHandoff: null, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null });
 
       const expectedMoveset = buildFightMoveset(kabutoMoveset.moveIds, currentPPForActiveMon(kabutoMoveset, null));
       expect(extractWindowRegion(fb)).toEqual(expectedWindowRegion(expectedMoveset, cursor as 0 | 1 | 2 | 3));
@@ -173,7 +192,7 @@ describe("battleScene: genericity end-to-end through the STATE plumbing (not jus
   it("the completed turn-1 receipt's PP decrement also reaches the renderer for a non-Onix moveset (slot 0 only, currentPPForActiveMon's own documented scope)", () => {
     const sm = { ...opened, cursor: 0 as const, displayCursor: 0 as const };
     const fb = createFramebuffer();
-    renderBattleScene(fb, { elapsed: 900, sendOutPressElapsed: 380, fightSubmenu: sm, turn1NextCommandHandoff: TURN1_HANDOFF, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null });
+    renderBattleScene(fb, { elapsed: 900, sendOutPressElapsed: 380, fightSubmenu: sm, turn1NextCommandHandoff: TURN1_HANDOFF, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null });
 
     const expectedMoveset = buildFightMoveset(kabutoMoveset.moveIds, currentPPForActiveMon(kabutoMoveset, TURN1_HANDOFF));
     expect(extractWindowRegion(fb)).toEqual(expectedWindowRegion(expectedMoveset, 0));

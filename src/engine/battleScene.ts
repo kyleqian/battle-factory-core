@@ -910,6 +910,7 @@ import {
   isTurn12NextCommandHandoffReady,
   type Turn12CompletedResolutionNextCommandHandoff,
 } from "./turn12ResolutionAdapter.ts";
+import type { LatestCompletedCommandHandoff } from "./nextCommandHandoff.ts";
 import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
@@ -2540,6 +2541,12 @@ export interface BattleSceneState {
   /** Completed turn-12 receipt for the following FIGHT command. */
   turn12NextCommandHandoff: Turn12CompletedResolutionNextCommandHandoff | null;
   /**
+   * Shadow-only generic receipt for the latest completed turn 5-13 command.
+   * Legacy fields remain the sole production render/dispatch route in this
+   * slice; later slices cut over only after content and reopen bridges exist.
+   */
+  latestCompletedCommandHandoff?: LatestCompletedCommandHandoff | null;
+  /**
    * Nonterminal opponent-faint presentation. Once the text controller is
    * ready, this owner atomically retains the accepted A edge, frozen cursor,
    * and automatic opponent switch-in continuation.
@@ -2579,6 +2586,7 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn10NextCommandHandoff: null,
   turn11NextCommandHandoff: null,
   turn12NextCommandHandoff: null,
+  latestCompletedCommandHandoff: null,
   opponentFaintPresentationOwner: null,
   turn13NextCommandHandoff: null,
   resolutionOwner: null,
@@ -2609,6 +2617,9 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn10NextCommandHandoff: state.turn10NextCommandHandoff,
     turn11NextCommandHandoff: state.turn11NextCommandHandoff,
     turn12NextCommandHandoff: state.turn12NextCommandHandoff,
+    ...(state.latestCompletedCommandHandoff == null
+      ? {}
+      : { latestCompletedCommandHandoff: state.latestCompletedCommandHandoff }),
     opponentFaintPresentationOwner: state.opponentFaintPresentationOwner,
     turn13NextCommandHandoff: state.turn13NextCommandHandoff,
     resolutionOwner: state.resolutionOwner ?? null,

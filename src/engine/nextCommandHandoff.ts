@@ -17,6 +17,11 @@ export type LatestCompletedCommandHandoff = Readonly<{
   }>;
 }>;
 
+export type LatestCompletedCommandPpProjection = Readonly<{
+  playerPp: CanonicalPlayerPp;
+  persistedMoveSlot: LatestCompletedCommandHandoff["persistedMoveSlot"];
+}>;
+
 /** Copies adapter-owned facts into an immutable generic receipt. */
 export function createLatestCompletedCommandHandoff(
   values: LatestCompletedCommandHandoff,
@@ -37,4 +42,25 @@ export function isLatestCompletedCommandHandoffReady(
 ): handoff is LatestCompletedCommandHandoff {
   return handoff?.nextCommand.redraw === "settled"
     && handoff.nextCommand.input === "ready";
+}
+
+/**
+ * Projects a generic receipt onto an active moveset without consulting a
+ * turn-keyed handoff. The receipt stores the canonical active-mon tuple, so
+ * its per-slot PP uses are rebased onto the supplied moveset's own maxima.
+ * The persisted cursor is carried with the projection because it is the
+ * other value consumed at the same next-command boundary.
+ */
+export function projectLatestCompletedCommandPp(
+  maxPp: CanonicalPlayerPp,
+  canonicalMaxPp: CanonicalPlayerPp,
+  latest: LatestCompletedCommandHandoff | null,
+): LatestCompletedCommandPpProjection | null {
+  if (latest === null) return null;
+  return Object.freeze({
+    playerPp: Object.freeze(maxPp.map(
+      (maximum, slot) => maximum - (canonicalMaxPp[slot]! - latest.playerPp[slot]!),
+    )) as CanonicalPlayerPp,
+    persistedMoveSlot: latest.persistedMoveSlot,
+  });
 }

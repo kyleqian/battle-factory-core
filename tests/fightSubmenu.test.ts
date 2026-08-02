@@ -40,7 +40,7 @@ import {
 } from "../src/engine/battleScene.ts";
 import { menuIdleBounce } from "../src/engine/battleMenu.ts";
 import { createInitialState, render, tick, type EngineState } from "../src/engine/core.ts";
-import { rockSlideOpponentHp, currentPPForActiveMon } from "../src/engine/battleMenu.ts";
+import { rockSlideOpponentHp, currentPPForActiveMon, currentPPForActiveMonFromLatest } from "../src/engine/battleMenu.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
 import {
   isTurn1NextCommandLifecycleActive,
@@ -64,7 +64,7 @@ import {
   CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
 } from "../src/engine/partySelect.ts";
 import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "../src/engine/turn15FlyResolutionAdapter.ts";
-import { resolveTurn13CompletedResolutionNextCommandHandoff } from "../src/engine/turn13ResolutionAdapter.ts";
+import { resolveTurn13CompletedResolutionNextCommandHandoff, resolveTurn13LatestCompletedCommandHandoff } from "../src/engine/turn13ResolutionAdapter.ts";
 import {
   createOpponentFaintPresentationOwner,
   storeOpponentFaintDismiss,
@@ -181,7 +181,7 @@ function stateAtTick(firstTickAbsolute: number): EngineState {
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
-    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: null, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null },
+    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: null, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null },
   };
 }
 
@@ -235,9 +235,81 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
     expect(state.battleScene!.turn13NextCommandHandoff).toEqual(
       resolveTurn13CompletedResolutionNextCommandHandoff(),
     );
+    expect(state.battleScene!.latestCompletedCommandHandoff).toEqual(
+      resolveTurn13LatestCompletedCommandHandoff(),
+    );
     expect(state.battleScene!.fightSubmenu.cursor).toBe(2);
     expect(state.battleScene!.resolutionOwner?.resolution).toBe(
       CANONICAL_OPPONENT_FLY_RESOLUTION.chargeResolution,
+    );
+  });
+
+  it("dispatcher slice 2: the existing turn-13-menu fixture shadows every turn 5-12 legacy publication in order", () => {
+    const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn13-menu.json", import.meta.url), "utf8")) as {
+      segments: { frames: number; buttons?: GbaButton[] }[];
+    };
+    let state = createInitialState({ appRoute: "canonical-recorded" });
+    const publications: unknown[] = [];
+    let prior = state.battleScene?.latestCompletedCommandHandoff ?? null;
+    for (const segment of trace.segments) {
+      for (let frame = 0; frame < segment.frames; frame += 1) {
+        state = press(state, segment.buttons ?? []);
+        const latest = state.battleScene?.latestCompletedCommandHandoff ?? null;
+        if (latest !== prior && latest !== null) publications.push(latest);
+        prior = latest;
+      }
+    }
+
+    expect(publications).toEqual([
+      { playerPp: [6, 20, 19, 10], persistedMoveSlot: 0, nextCommand: { redraw: "settled", input: "ready" } },
+      { playerPp: [5, 20, 19, 10], persistedMoveSlot: 0, nextCommand: { redraw: "settled", input: "ready" } },
+      { playerPp: [4, 20, 19, 10], persistedMoveSlot: 0, nextCommand: { redraw: "settled", input: "ready" } },
+      { playerPp: [4, 19, 19, 10], persistedMoveSlot: 1, nextCommand: { redraw: "settled", input: "ready" } },
+      { playerPp: [3, 19, 19, 10], persistedMoveSlot: 0, nextCommand: { redraw: "settled", input: "ready" } },
+      { playerPp: [2, 19, 19, 10], persistedMoveSlot: 0, nextCommand: { redraw: "settled", input: "ready" } },
+      { playerPp: [1, 19, 19, 10], persistedMoveSlot: 0, nextCommand: { redraw: "settled", input: "ready" } },
+      { playerPp: [0, 19, 19, 10], persistedMoveSlot: 0, nextCommand: { redraw: "settled", input: "ready" } },
+    ]);
+  });
+
+  it("dispatcher slice 2: turn-13 fallback and locked/following PP precedence agree on generic and legacy paths", () => {
+    const latest = resolveTurn13LatestCompletedCommandHandoff();
+    const legacy = resolveTurn13CompletedResolutionNextCommandHandoff();
+    const onix = rentalMoveset("ONIX");
+    const legacyArgs = [
+      TURN1_HANDOFF,
+      TURN2_HANDOFF,
+      TURN3_HANDOFF,
+      TURN4_HANDOFF,
+      resolveTurn5CompletedResolutionNextCommandHandoff(),
+      resolveTurn6CompletedResolutionNextCommandHandoff(),
+      resolveTurn7CompletedResolutionNextCommandHandoff(),
+      resolveTurn8CompletedResolutionNextCommandHandoff(),
+      resolveTurn9CompletedResolutionNextCommandHandoff(),
+      resolveTurn10CompletedResolutionNextCommandHandoff(),
+      resolveTurn11CompletedResolutionNextCommandHandoff(),
+      resolveTurn12CompletedResolutionNextCommandHandoff(),
+      legacy,
+    ] as const;
+    const legacyFallback = currentPPForActiveMon(onix, ...legacyArgs);
+    expect(currentPPForActiveMonFromLatest(onix, latest)).toEqual(legacyFallback);
+    expect(legacyFallback[2]).toBe(18);
+
+    const locked = CANONICAL_OPPONENT_FLY_RESOLUTION.chargeResolution;
+    const legacyLocked = currentPPForActiveMon(onix, ...legacyArgs, locked);
+    const genericLocked = currentPPForActiveMonFromLatest(onix, latest, locked);
+    expect(genericLocked).toEqual(legacyLocked);
+    expect(genericLocked[2]).toBe(
+      locked.segments[0]!.afterRules.rulesContext.battlers[0]!.pp[2],
+    );
+
+    const following = CANONICAL_FIRE_PUNCH_RESOLUTION.resolution;
+    const magby = rentalMoveset("MAGBY");
+    const legacyFollowing = currentPPForActiveMon(magby, ...legacyArgs, locked, following);
+    const genericFollowing = currentPPForActiveMonFromLatest(magby, latest, locked, following);
+    expect(genericFollowing).toEqual(legacyFollowing);
+    expect(genericFollowing).toEqual(
+      following.segments.at(-1)!.afterRules.rulesContext.battlers[0]!.pp,
     );
   });
 
@@ -659,7 +731,7 @@ function stateAtTurn3Reopen(firstTickAbsolute: number): EngineState {
     turn7NextCommandHandoff: null,
     turn8NextCommandHandoff: null,
     turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null,
-    turn12NextCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null,
+    turn12NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null,
     },
   };
 }
@@ -786,7 +858,7 @@ function stateAtTurn3Confirm(): EngineState {
     turn7NextCommandHandoff: null,
     turn8NextCommandHandoff: null,
     turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null,
-    turn12NextCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null,
+    turn12NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null,
     },
   };
 }
@@ -980,7 +1052,7 @@ function stateAtTurn4Confirm(): EngineState {
     turn7NextCommandHandoff: null,
     turn8NextCommandHandoff: null,
     turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null,
-    turn12NextCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null,
+    turn12NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null,
     },
   };
 }
@@ -1030,7 +1102,7 @@ function stateAtTurn5Confirm(): EngineState {
     turn7NextCommandHandoff: null,
     turn8NextCommandHandoff: null,
     turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null,
-    turn12NextCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null,
+    turn12NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null,
     },
   };
 }
@@ -1138,7 +1210,7 @@ function stateAtTurn5SitrusConfirm(): EngineState {
     turn7NextCommandHandoff: null,
     turn8NextCommandHandoff: null,
     turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null,
-    turn12NextCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null,
+    turn12NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null,
     },
   };
 }

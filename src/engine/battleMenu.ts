@@ -48,6 +48,10 @@ import type { Turn10CompletedResolutionNextCommandHandoff } from "./turn10Resolu
 import type { Turn11CompletedResolutionNextCommandHandoff } from "./turn11ResolutionAdapter.ts";
 import type { Turn12CompletedResolutionNextCommandHandoff } from "./turn12ResolutionAdapter.ts";
 import type { Turn13CompletedResolutionNextCommandHandoff } from "./turn13ResolutionAdapter.ts";
+import {
+  projectLatestCompletedCommandPp,
+  type LatestCompletedCommandHandoff,
+} from "./nextCommandHandoff.ts";
 
 /** `sText_GoPkmn` resolved for this save's rental pool (single line, fits `B_WIN_MSG`'s line 1 - never wraps to line 2). */
 export const GO_TEXT = "Go! ONIX!";
@@ -2681,6 +2685,36 @@ export function currentPPForActiveMon(
     ppBeforeLaterTurns[1],
     resolvedPlayerPp?.[2] ?? turn13NextCommandHandoff?.dragonBreathPp.current ?? ppBeforeLaterTurns[2],
     ppBeforeLaterTurns[3],
+  ];
+}
+
+/**
+ * Shadow equivalent of `currentPPForActiveMon` for a generic latest receipt.
+ * Production rendering deliberately continues to call the legacy function
+ * above until the turn-owned presentation bridge and routing cutover land.
+ */
+export function currentPPForActiveMonFromLatest(
+  moveset: ActiveMonMoveset,
+  latest: LatestCompletedCommandHandoff | null,
+  lockedActionResolution: BattleResolutionPresentationState | null = null,
+  followingResolution: BattleResolutionPresentationState | null = null,
+): readonly [number, number, number, number] {
+  const followingPlayerPp = followingResolution?.segments.at(-1)
+    ?.afterRules.rulesContext.battlers[0]!.pp;
+  if (followingPlayerPp !== undefined) return followingPlayerPp;
+
+  const projected = projectLatestCompletedCommandPp(
+    moveset.maxPP,
+    rentalMoveset("ONIX").maxPP,
+    latest,
+  )?.playerPp ?? moveset.maxPP;
+  const resolvedPlayerPp = lockedActionResolution?.segments[0]
+    ?.afterRules.rulesContext.battlers[0]!.pp;
+  return [
+    projected[0],
+    projected[1],
+    resolvedPlayerPp?.[2] ?? projected[2],
+    projected[3],
   ];
 }
 
