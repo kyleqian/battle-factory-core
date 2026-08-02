@@ -190,9 +190,9 @@ import {
 } from "./turn2ResolutionAdapter.ts";
 import { isTurn3ChooseActionBounceReset } from "./turn3ChooseActionReset.ts";
 import {
-  isTurn3NextCommandHandoffReady,
-  isTurn3NextCommandLifecycleActive,
-  resolveTurn3CompletedResolutionNextCommandHandoff,
+  isTurn3LatestCompletedCommandLifecycleActive,
+  resolveTurn3LatestCompletedCommandHandoff,
+  turn3FightCommandPresentationFromLatest,
 } from "./turn3ResolutionAdapter.ts";
 import { isTurn4ChooseActionBounceReset } from "./turn4ChooseActionReset.ts";
 import {
@@ -1212,7 +1212,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       partySendOutBattleMenuReady(partySendOutElapsed)
         ? fightSubmenu.activeMonMoveset
         : activeMonMoveset(draftScreen);
-    let turn3NextCommandHandoff = battleScene.turn3NextCommandHandoff ?? null;
     let turn4NextCommandHandoff = battleScene.turn4NextCommandHandoff ?? null;
     let latestCompletedCommandHandoff = battleScene.latestCompletedCommandHandoff ?? null;
     let lockedActionOwner = battleScene.resolutionOwner ?? null;
@@ -1248,6 +1247,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     }
     if (
       turn2FightCommandPresentationFromLatest(latestCompletedCommandHandoff) === null
+      && turn1CompletedResolutionNextCommandHandoffFromLatest(latestCompletedCommandHandoff) !== null
       && isLatestCompletedCommandLifecycleActive(
         latestCompletedCommandHandoff,
         fightSubmenu.openElapsed,
@@ -1262,7 +1262,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       );
     }
     if (
-      turn3NextCommandHandoff === null
+      turn3FightCommandPresentationFromLatest(latestCompletedCommandHandoff) === null
       && isTurn2LatestCompletedCommandLifecycleActive(
         latestCompletedCommandHandoff,
         fightSubmenu.openElapsed,
@@ -1272,14 +1272,14 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         battleScene.elapsed + 1,
       )
     ) {
-      turn3NextCommandHandoff = resolveTurn3CompletedResolutionNextCommandHandoff(
+      latestCompletedCommandHandoff = resolveTurn3LatestCompletedCommandHandoff(
         battleScene.elapsed + 1,
       );
     }
     if (
       turn4NextCommandHandoff === null
-      && isTurn3NextCommandLifecycleActive(
-        turn3NextCommandHandoff,
+      && isTurn3LatestCompletedCommandLifecycleActive(
+        latestCompletedCommandHandoff,
         fightSubmenu.openElapsed,
       )
       && isTurn4ChooseActionBounceReset(
@@ -1412,15 +1412,11 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // presentation epoch rather than publishing a replacement.
       fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen), 2);
     } else if (
-      isTurn2LatestCompletedCommandLifecycleActive(
+      !isLatestCompletedCommandLifecycleActive(
         latestCompletedCommandHandoff,
         fightSubmenu.openElapsed,
       ) &&
-      !isTurn3NextCommandLifecycleActive(
-        turn3NextCommandHandoff,
-        fightSubmenu.openElapsed,
-      ) &&
-      isTurn3NextCommandHandoffReady(turn3NextCommandHandoff) &&
+      turn3FightCommandPresentationFromLatest(latestCompletedCommandHandoff) !== null &&
       fightSubmenu.confirmElapsed !== null &&
       newKeys.has("A")
     ) {
@@ -1430,8 +1426,8 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // presentation epoch rather than publishing a replacement.
       fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen));
     } else if (
-      isTurn3NextCommandLifecycleActive(
-        turn3NextCommandHandoff,
+      isTurn3LatestCompletedCommandLifecycleActive(
+        latestCompletedCommandHandoff,
         fightSubmenu.openElapsed,
       ) &&
       !isTurn4NextCommandLifecycleActive(
@@ -1556,7 +1552,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     battleScene = {
       ...battleScene,
       fightSubmenu,
-      turn3NextCommandHandoff,
       turn4NextCommandHandoff,
       latestCompletedCommandHandoff,
       resolutionOwner: lockedActionOwner,
