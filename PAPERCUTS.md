@@ -8,21 +8,6 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
-## Vitest spawns full-width fork pools per session; concurrent lanes oversubscribe the machine
-
-- **What:** each lane's `npm test` spawns a full-core vitest fork pool, so
-  concurrent supervisor lanes crawl: measured 15m42s and 935.9s full suites
-  in side worktrees under load, one main worker's serial fallback ~25 min,
-  and a bisect worker's 29m50s (all 2026-08-01; solo baseline is ~3-8 min).
-  User-requested fix same day.
-- **Hits:** 4 (one session).
-- **Cost each:** ~14-25 min.
-- **Workaround:** FIXED PENDING VERIFICATION ACROSS SESSIONS: `vite.config.ts`
-  now caps the pool when `POKEBENCH_VITEST_MAX_WORKERS` is set and
-  `run-subagent.sh` exports it (default 4) to every worker; solo/interactive
-  sessions keep default parallelism. Also mirrored into `_template`. Delete
-  this entry once a multi-lane session confirms sane suite times.
-
 ## Raw before/after RNG-window diffs pick up unrelated-subsystem draws
 
 - **What:** ground-truth scouts that pin an RNG draw count from a raw
