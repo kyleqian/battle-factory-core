@@ -13,6 +13,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 844 — [supervisor session open, 2026-08-01 19:25] animation-main folded; turn-3 + turn-5-OFF-banking lanes launching
+
+- **State:** master `ca227c9c` (fold merge of `animation-main`, 8 commits:
+  lunge-grow + circle idle families, sendout fixtures). Union verified by me:
+  full `npm test` **6,061 passed + 1 skipped** (19:12), `npm run build`
+  green. Oracle 8014 freshness FAIL re-confirmed as the known docs-only
+  false positive (harness `9cadad7`/`acc5c4e` are template/CLI-output-only;
+  no service schema change) — no restart. 8012 fresh; animation session
+  live until 20:56.
+- **Did:** orient + fold + union verification.
+- **Next:** parallel lanes — MAIN: `turn3Resolved` retirement per
+  `docs/turn1-4-epoch-prep.md` (Terra/max); SIDE: bank the missing turn-5
+  OFF reader set as **new files only** (Sol/high). **Decision (supervisor,
+  reversible):** banking the turn-5 OFF reader set is additive evidence,
+  precedented by the pre-adoption rank-5/6 OFF ground-truth banking; it
+  does NOT adopt the turns 5-8 ON-pin re-timing policy, which remains an
+  open user question. Then turn-4 slice with exact `512 + N` acceptance.
+- **Notes:** hard deadline 21:11; wind-down target ~20:50 with a re-check
+  of `animation-main` for new commits.
+
 ## 843 — [supervisor final close-out, 2026-08-01 19:10] turns 1+2 also retired — session total SIX turn-flag retirements
 
 - **State:** master `34c4efec`, tree clean. Final union full `npm test`
@@ -63,21 +83,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   brief. No trace/capture-list, recording import, ratchet/barrier, or
   selector changes.
 
-## 841 — [bounded MAIN worker, 2026-08-01] turn-1 predecessor retired with immutable epoch
-
-- **State:** `13389b9c` retires `turn1Resolved`; every production/test
-  consumer now uses `turn1NextCommandHandoff`, published at the source-owned
-  reset (relative elapsed **1308**).
-- **Did:** migrated the core guard/write/predecessor, opponent HP, slot-0 PP,
-  and turn-2 submenu/kickoff bounce clock. New Tier-1 tuple pins 2901
-  `ready=true`, epoch 1308, open/current 1861, and pseudo-t 2299; drivers
-  remain live through 2947 and freeze at 2948. Same-turn B-close/A-reopen
-  preserves the immutable epoch.
-- **Next:** stay scoped: turns 2–4, `opponentFaintDismissElapsed`, and
-  dispatcher debt remain #39 work; do not reopen turn-1.
-- **Notes:** clean-parent `76af5060` (`b34e6279^`) app replays are
-  byte-identical: turn-1 **669/669**, turn-2 readers **493/493**, total
-  **1,162/1,162** raw RGBA captures. Focused Tier-1 **456/456** (7 files),
-  `npx tsc --noEmit`, and `npm run build` green; full `npm test` deliberately
-  unrun per the bounded-step brief. No trace/capture-list, recording import,
-  ratchet/barrier, or selector changes.

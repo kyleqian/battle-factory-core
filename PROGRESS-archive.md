@@ -1,3 +1,22 @@
+## 841 — [bounded MAIN worker, 2026-08-01] turn-1 predecessor retired with immutable epoch
+
+- **State:** `13389b9c` retires `turn1Resolved`; every production/test
+  consumer now uses `turn1NextCommandHandoff`, published at the source-owned
+  reset (relative elapsed **1308**).
+- **Did:** migrated the core guard/write/predecessor, opponent HP, slot-0 PP,
+  and turn-2 submenu/kickoff bounce clock. New Tier-1 tuple pins 2901
+  `ready=true`, epoch 1308, open/current 1861, and pseudo-t 2299; drivers
+  remain live through 2947 and freeze at 2948. Same-turn B-close/A-reopen
+  preserves the immutable epoch.
+- **Next:** stay scoped: turns 2–4, `opponentFaintDismissElapsed`, and
+  dispatcher debt remain #39 work; do not reopen turn-1.
+- **Notes:** clean-parent `76af5060` (`b34e6279^`) app replays are
+  byte-identical: turn-1 **669/669**, turn-2 readers **493/493**, total
+  **1,162/1,162** raw RGBA captures. Focused Tier-1 **456/456** (7 files),
+  `npx tsc --noEmit`, and `npm run build` green; full `npm test` deliberately
+  unrun per the bounded-step brief. No trace/capture-list, recording import,
+  ratchet/barrier, or selector changes.
+
 ## 840 — [supervisor wind-down, 2026-08-01 17:30] 9-step session: turns 9-12 retired, #63 fixed, #61+#56-tail parked, three prep dossiers banked
 
 - **State:** master `2f5f8c53`, tree clean and green: full union `npm test`
