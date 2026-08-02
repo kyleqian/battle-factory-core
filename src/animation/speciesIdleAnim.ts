@@ -55,6 +55,7 @@ export type SpeciesFrontAnimFamily =
   | "GROW_VIBRATE"
   | "GROW_IN_STAGES"
   | "GLOW_BLACK"
+  | "GLOW_ORANGE"
   | "RISING_WOBBLE"
   | "LUNGE_GROW"
   | "FLASH_YELLOW"
@@ -109,6 +110,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "GROW_VIBRATE",
   "GROW_IN_STAGES",
   "GLOW_BLACK",
+  "GLOW_ORANGE",
   "RISING_WOBBLE",
   "LUNGE_GROW",
   "FLASH_YELLOW",
@@ -912,6 +914,23 @@ export const GLOW_BLACK_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze
 /** There are no black-glow mappings outside the Factory rental pool. */
 export const GLOW_BLACK_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   GLOW_BLACK_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All source selector mappings for the palette-only `ANIM_GLOW_ORANGE`. */
+export const GLOW_ORANGE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_GLOW_ORANGE")
+    .map(([species]) => species),
+);
+
+/** Every orange-glow mapping is reachable through Factory rentals. */
+export const GLOW_ORANGE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  GLOW_ORANGE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no orange-glow mappings outside the Factory rental pool. */
+export const GLOW_ORANGE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  GLOW_ORANGE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /** All source selector mappings for `ANIM_RISING_WOBBLE`. */
@@ -4966,7 +4985,28 @@ export const GLOW_BLACK_ENTRY = Object.freeze({
   accepted: true,
 } as const);
 
-export interface GlowBlackFrame extends SpeciesIdleOffset {
+/** Source selector 32's task-installed direct callback receipt. */
+export const GLOW_ORANGE_ENTRY = Object.freeze({
+  selector: "ANIM_GLOW_ORANGE",
+  sourceId: 32,
+  taskZeroedData2: true,
+  taskZeroedData6: true,
+  taskZeroedData7: true,
+  callbackInstalled: "Anim_GlowOrange",
+  callbackInvokedByInitializer: false,
+  colorIncrement: 12,
+  speed: 2,
+  blendColor: 0x02df,
+  normalFrontDontFlip: true,
+  accepted: true,
+} as const);
+
+type GlowColorCallback = "Anim_GlowBlack" | "Anim_GlowOrange";
+
+interface GlowColorFrame<
+  TCallback extends GlowColorCallback,
+  TBlendColor extends number,
+> extends SpeciesIdleOffset {
   /** `sprite->data[2]` before the callback's strict terminal guard. */
   readonly data2Before: number;
   /** `sprite->data[2]` after the callback's unconditional signed-s16 increment. */
@@ -4979,26 +5019,58 @@ export interface GlowBlackFrame extends SpeciesIdleOffset {
   readonly paletteStart: number;
   readonly paletteCount: 16;
   readonly blendCoefficient: number;
-  readonly blendColor: 0;
+  readonly blendColor: TBlendColor;
   readonly paletteWrite: boolean;
   readonly restoredPalette: boolean;
   readonly normalFrontDontFlip: true;
-  readonly callback: "Anim_GlowBlack" | "WaitAnimEnd";
+  readonly callback: TCallback | "WaitAnimEnd";
 }
 
+export type GlowBlackFrame = GlowColorFrame<"Anim_GlowBlack", 0>;
+export type GlowOrangeFrame = GlowColorFrame<"Anim_GlowOrange", 0x02df>;
+
+interface GlowColorConfig<
+  TCallback extends GlowColorCallback,
+  TBlendColor extends number,
+> {
+  readonly callback: TCallback;
+  readonly colorIncrement: number;
+  readonly speed: number;
+  readonly blendColor: TBlendColor;
+}
+
+const GLOW_BLACK_CONFIG = {
+  callback: "Anim_GlowBlack",
+  colorIncrement: 16,
+  speed: 1,
+  blendColor: 0,
+} as const satisfies GlowColorConfig<"Anim_GlowBlack", 0>;
+
+const GLOW_ORANGE_CONFIG = {
+  callback: "Anim_GlowOrange",
+  colorIncrement: 12,
+  speed: 2,
+  blendColor: 0x02df,
+} as const satisfies GlowColorConfig<"Anim_GlowOrange", 0x02df>;
+
 /**
- * Source-order normal-front port of selector 21's `GlowColor(RGB_BLACK, 16, 1)`
- * expansion (`pokemon_animation.c:911-939,1539-1560`). The task zeroes
- * data2/data6/data7 and directly installs `Anim_GlowBlack`; callback zero
- * captures `OBJ_PLTT_ID(oam.paletteNum)`. Active callbacks 0..128 write the
- * GBA sine coefficient to all 16 OBJ-palette entries. Callback 129 observes
- * the strict `data2 > 128` boundary, restores coefficient zero, installs
- * `WaitAnimEnd`, and still increments data2. The terminal receipt is stable.
+ * Source-order normal-front port of `GlowColor(color, colorIncrement, speed)`
+ * (`pokemon_animation.c:911-939,1539-1560`). Both accepted selectors enter
+ * through the same task-zeroed direct callback: callback zero captures
+ * `OBJ_PLTT_ID(oam.paletteNum)`; active callbacks write a signed GBA sine
+ * coefficient to all 16 OBJ-palette entries; the strict `data2 > 128` guard
+ * restores coefficient zero, installs `WaitAnimEnd`, and still increments the
+ * signed `data2` register. Selector-specific initializer values remain in the
+ * two immutable source receipts above.
  */
-export function glowBlackFrameAtTick(
+function glowColorFrameAtTick<
+  TCallback extends GlowColorCallback,
+  TBlendColor extends number,
+>(
   ticksSinceStart: number,
-  paletteNum = 0,
-): GlowBlackFrame | null {
+  paletteNum: number,
+  config: GlowColorConfig<TCallback, TBlendColor>,
+): GlowColorFrame<TCallback, TBlendColor> | null {
   if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
   if (!Number.isInteger(paletteNum) || !Number.isFinite(paletteNum)) return null;
 
@@ -5007,8 +5079,8 @@ export function glowBlackFrameAtTick(
   let data2 = 0;
   let data6 = 0;
   let data7 = 0;
-  let callback: GlowBlackFrame["callback"] = "Anim_GlowBlack";
-  let lastFrame: GlowBlackFrame | null = null;
+  let callback: GlowColorFrame<TCallback, TBlendColor>["callback"] = config.callback;
+  let lastFrame: GlowColorFrame<TCallback, TBlendColor> | null = null;
 
   for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
     if (callback === "WaitAnimEnd") continue;
@@ -5023,11 +5095,11 @@ export function glowBlackFrameAtTick(
       restoredPalette = true;
       callback = "WaitAnimEnd";
     } else {
-      data6 = toS16(gbaSin(data2, 16));
+      data6 = toS16(gbaSin(data2, config.colorIncrement));
       blendCoefficient = data6;
     }
 
-    data2 = toS16(data2 + 1);
+    data2 = toS16(data2 + config.speed);
     lastFrame = {
       x2: 0,
       y2: 0,
@@ -5039,7 +5111,7 @@ export function glowBlackFrameAtTick(
       paletteStart,
       paletteCount: 16,
       blendCoefficient,
-      blendColor: 0,
+      blendColor: config.blendColor,
       paletteWrite: true,
       restoredPalette,
       normalFrontDontFlip: true,
@@ -5049,6 +5121,26 @@ export function glowBlackFrameAtTick(
 
   if (lastFrame === null) throw new Error("unreachable GlowBlack reducer state");
   return lastFrame;
+}
+
+/** Source-order normal-front port of selector 21's `GlowColor(RGB_BLACK, 16, 1)`. */
+export function glowBlackFrameAtTick(
+  ticksSinceStart: number,
+  paletteNum = 0,
+): GlowBlackFrame | null {
+  return glowColorFrameAtTick(ticksSinceStart, paletteNum, GLOW_BLACK_CONFIG);
+}
+
+/**
+ * Source-order normal-front port of selector 32's
+ * `GlowColor(RGB(31, 22, 0), 12, 2)` expansion. Its two-step signed data2
+ * progression has 65 active callbacks (0..128) and terminal callback 65.
+ */
+export function glowOrangeFrameAtTick(
+  ticksSinceStart: number,
+  paletteNum = 0,
+): GlowOrangeFrame | null {
+  return glowColorFrameAtTick(ticksSinceStart, paletteNum, GLOW_ORANGE_CONFIG);
 }
 
 /** Source selector 24's callback-initializer receipt. */
@@ -5577,6 +5669,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = glowBlackFrameAtTick(129);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_GlowBlack did not restore its palette at the terminal boundary");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "GLOW_ORANGE": {
+      const terminal = glowOrangeFrameAtTick(65);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_GlowOrange did not restore its palette at the terminal boundary");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }

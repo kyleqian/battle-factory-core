@@ -113,7 +113,7 @@ describe("ANIM_GLOW_BLACK", () => {
     expect(glowBlackFrameAtTick(4096, 5)).toEqual(terminal);
   });
 
-  it("rejects invalid inputs and preserves unsupported adjacent glow selectors", () => {
+  it("rejects invalid inputs and preserves the unsupported blue-glow control", () => {
     for (const invalid of [-1, 0.5, Number.NaN, Number.POSITIVE_INFINITY]) {
       expect(glowBlackFrameAtTick(invalid)).toBeNull();
     }
@@ -122,7 +122,7 @@ describe("ANIM_GLOW_BLACK", () => {
     }
     expect(selectorTables.frontAnimIds.species.PONYTA).toBe("ANIM_GLOW_ORANGE");
     expect(selectorTables.frontAnimIds.species.MILOTIC).toBe("ANIM_GLOW_BLUE");
-    expect(speciesFrontIdleRestOffset("PONYTA")).toBeNull();
+    expect(speciesFrontIdleRestOffset("PONYTA")).toEqual({ x2: 0, y2: 0 });
     expect(speciesFrontIdleRestOffset("MILOTIC")).toBeNull();
     expect(speciesFrontIdleRestOffset("VENUSAUR")).toBeNull();
   });
