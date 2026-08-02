@@ -171,22 +171,22 @@ describe("ANIM_ROTATE_UP_SLAM_DOWN (selector 47)", () => {
       data7Before: 126,
       data7: 128,
       data2Before: 0,
-      data2: 1,
+      data2: 0,
       affineRotationWrites: [0, 0],
       callback: "Anim_VerticalShake",
       resetSpriteAfterAnim: true,
     });
     expect(frames[33]).toMatchObject({
       data0: 60,
-      data2Before: 1,
-      data2: 61,
-      y2: gbaSin(1, 3),
+      data2Before: 0,
+      data2: 60,
+      y2: gbaSin(0, 3),
       callback: "VerticalShake",
     });
-    expect(frames[71]).toMatchObject({ data2Before: 2281, data2: 2341 });
+    expect(frames[71]).toMatchObject({ data2Before: 2280, data2: 2340 });
     expect(frames[72]).toMatchObject({
-      data2Before: 2341,
-      data2: 2401,
+      data2Before: 2340,
+      data2: 2400,
       y2: 0,
       callback: "WaitAnimEnd",
       resetSpriteAfterAnim: false,

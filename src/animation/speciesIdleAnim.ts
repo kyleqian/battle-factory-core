@@ -2488,7 +2488,6 @@ export function rotateUpSlamDownFrameAtTick(
         data2 = 0;
         centerToCorner = Math.trunc(centerToCornerVecX / 2);
         affineMode = "normal";
-        data2 = toS16(data2 + 1);
         resetSpriteAfterAnim = true;
         callback = "Anim_VerticalShake";
       }
