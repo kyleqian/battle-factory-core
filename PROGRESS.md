@@ -4,6 +4,57 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 863 — [bounded MAIN worker, 2026-08-02] dispatcher slice 8 Turn-3 generic fold (retry, landed)
+
+- **State:** `fed91e87` is the green fold commit. Full `npm test` **611 files
+  / 6,273 passed / 1 skipped**, `npm run build` and `npx tsc --noEmit` exit 0.
+  Salvage branch `salvage/slice8-fold-20260802` deleted (folded in cleanly).
+- **Diagnosis (required by the brief):** cherry-picked the salvage commit
+  as a starting point, then bisected its regression with `inspect-frame`
+  against clean `947d624c`. Root cause: once turn 3 publishes into the
+  shared `latestCompletedCommandHandoff` slot, the pre-existing
+  `turn3CommandHandoff` render flag (`drawFightSubmenuWindow`'s "turn 2's
+  receipt, still active during turn 3") loses its own lookup — it narrowed
+  `latest` to turn 2's shape, which stops resolving the instant turn 3
+  overwrites that slot with its own shape. The dispatcher then fell through
+  turn 3's WHOLE settled-menu window (turn3-rockslide-off frames 4212+) to
+  the turn-1 ROCK_SLIDE fallback (Onix rendered at stale full HP) — this was
+  the 49-frame regression, not a timing/bounce-composition bug as first
+  suspected. Fix: added `turn3SettledWindowActive`, an explicit "turn 3's
+  own post-reset window, before turn 4 supersedes it" gate independent of
+  the now-evicted turn-2 shape; threaded `null`-tolerant
+  `turn2NextCommandHandoff` params (with throwing guards) down the one call
+  chain that still needs it, pre-reset only.
+- **Evidence:** oracle-verified directly (ground truth, not just the
+  differential): `turn3-rockslide-off` **161/161**, `turn4-doubleteam-off`
+  **256/256**, `turn4-rockslide-off` **256/256**,
+  `battle-command-generated-off` **128/128** (`turn3-endeavor-off` **254/255**,
+  the known parked #61 residual, unrelated). `compare:differential --base
+  706be469`: turn3-endeavor-off 255/255, turn3-rockslide-off 161/161,
+  turn4-rockslide-off 256/256, battle-command-generated-off 128/128 all
+  clean; turn4-doubleteam-off is **219/256 (37 differ)** — proven (via a
+  706be469 worktree replayed against the oracle directly) to be a
+  **pre-existing PP-display bug already in 706be469** (ROCK_SLIDE showed
+  9/10 PP instead of the oracle's correct 8/10 once turn 4's own FIGHT
+  submenu opens), not a slice-8 regression; this fold fixes it as a side
+  effect of deriving PP from the generic receipt chain. Census: handoff
+  state fields **2→1** (turn4 remains), initial-state/advance-copy **2→1**;
+  declarations and FIGHT/PP parameters stay **13**.
+- **Did:** two `tests/fightSubmenu.test.ts` assertions and one
+  `tests/battleScene.test.ts` fixture (`TURN4_FIGHT_SUBMENU_STATE
+  .openElapsed`, a stale `0` placeholder that stopped being a "don't care"
+  once turn 3 started publishing into the shared slot) updated for the new
+  fold; `TURN2_LATEST_HANDOFF` → `TURN3_LATEST_HANDOFF` where the generic
+  receipt is now turn 3's own.
+- **Next:** slice 9 (turn-4 fold consuming the already-banked turn-5 OFF
+  reader set), slice 10 (final 13-param/type cut), then #39 species/episode
+  render entry points.
+- **Notes:** no trace/capture-list edits, recording import, PP/turn
+  selector, animation, or unsupported-branch barrier work. Landed well
+  within the 60-minute cap (diagnosis conclusive by ~25 min, matching the
+  brief's checkpoint).
+
+---
 ## 862 — [supervisor orient, 2026-08-02 09:45] pre-session fold verified green; rg census trap cured; slice-8 + turn-5-reader lanes launched
 
 - **State:** master at `706be469`; union verified green by the supervisor:
@@ -71,22 +122,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `animation-20260802-044900`) — fold at next orient per protocol.
 
 ---
-## 860 — [bounded MAIN worker, 2026-08-02] dispatcher slice 6 Turn-1 generic fold
-
-- **State:** `04bc1092` carries the optional typed epoch/content checkpoint;
-  `cbb41421` is the green field-cut checkpoint. Full `npm test` is **592 files
-  / 6,144 passed / 1 skipped**; `npm run build` and `npx tsc --noEmit` pass.
-- **Did:** Turn 1 now publishes the generic completed-command owner at the
-  HandleInputChooseAction → DoBounceEffect reset (epoch 1308, HP 117/101,
-  seeds 192/128). Production core, rendering, PP projection, and the turn-2
-  link consume that content; B-close/A-reopen preserves it. The retired Turn-1
-  scene field is gone while turns 2–4 retain their staged ABI.
-- **Evidence:** clean-parent `04bc1092` raw-RGBA replay is **1,395/1,395**:
-  required turn-1/2 windows **1,162/1,162** plus turn-9 reader **233/233**.
-  `battle-command-generated-off` is **128/128** vs the Scene-OFF oracle.
-  Census state/initial/copy **4→3**; test literals **202→194**; declarations
-  and staged FIGHT/PP parameters remain **13**.
-- **Next:** Slice 7 — fold Turn 2 epoch/content onto the same generic owner;
-  leave Turns 3–4 and final positional ABI deletion for their planned slices.
-- **Notes:** no trace/capture-list edits, recording import, PP/turn selector,
-  animation, unsupported-branch barrier, or ON-profile work.

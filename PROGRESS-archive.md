@@ -1,3 +1,25 @@
+## 860 — [bounded MAIN worker, 2026-08-02] dispatcher slice 6 Turn-1 generic fold
+
+- **State:** `04bc1092` carries the optional typed epoch/content checkpoint;
+  `cbb41421` is the green field-cut checkpoint. Full `npm test` is **592 files
+  / 6,144 passed / 1 skipped**; `npm run build` and `npx tsc --noEmit` pass.
+- **Did:** Turn 1 now publishes the generic completed-command owner at the
+  HandleInputChooseAction → DoBounceEffect reset (epoch 1308, HP 117/101,
+  seeds 192/128). Production core, rendering, PP projection, and the turn-2
+  link consume that content; B-close/A-reopen preserves it. The retired Turn-1
+  scene field is gone while turns 2–4 retain their staged ABI.
+- **Evidence:** clean-parent `04bc1092` raw-RGBA replay is **1,395/1,395**:
+  required turn-1/2 windows **1,162/1,162** plus turn-9 reader **233/233**.
+  `battle-command-generated-off` is **128/128** vs the Scene-OFF oracle.
+  Census state/initial/copy **4→3**; test literals **202→194**; declarations
+  and staged FIGHT/PP parameters remain **13**.
+- **Next:** Slice 7 — fold Turn 2 epoch/content onto the same generic owner;
+  leave Turns 3–4 and final positional ABI deletion for their planned slices.
+- **Notes:** no trace/capture-list edits, recording import, PP/turn selector,
+  animation, unsupported-branch barrier, or ON-profile work.
+
+---
+
 ## 859 — [bounded MAIN worker, 2026-08-02] dispatcher slice 5 production cut
 
 - **State:** `5c8eb38c` is the second green slice-5 checkpoint. `npm test` is
