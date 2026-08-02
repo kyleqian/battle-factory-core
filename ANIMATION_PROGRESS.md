@@ -8,6 +8,35 @@
 > routing hint, not a deferral or an acceptance-bar waiver; escalate any worker
 > result that does not survive supervisor verification.
 
+## Front `ANIM_SPIN` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **1 mapping / 1
+Factory-reachable species / 0 outside-Factory mappings** — SPHEAL. Only source
+ID **83** is promoted; back routing, unused `ANIM_SPIN_LONG`, adjacent
+selectors, moves, and engine boundaries remain untouched. Move coverage stays
+**107/276 exact, 0 partial, 0 staged, 169 unsupported**; Open-only **0/1** and
+Outside Factory **0/77**. `ANIMATION_COVERAGE.json` remains SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:1037-1059,1472-1492,
+3775-3782,5540-5544`, `pokemon_animation.h:123`, and `pokemon.c:1722` pin
+`AddNewAnim` defaults, delay=60/data=30, immediate `Spin` before callback
+installation, tick-0 affine start, C-truncated `65536/30=2184`, signed-s16 to
+unsigned-u16 rotation writes, strict terminal guard, identity/reset, and stable
+`WaitAnimEnd`. All **61 active callbacks** (ticks 0..60) plus tick 61's terminal
+handoff are exhaustive. A fresh complete legal challenge-0 Scene-ON SPHEAL
+party was probed twice only through `tools/run-mgba-probe.py`; the paired raw
+**373-byte** receipts are byte-identical, SHA-256
+`47b66252cad485dec48946f8beffff1aef7760727a9794132a8f5b1488e4c8b5`, and
+settle species 341 at x2=0/y2=0, animNum=1, animCmdIndex=7, and
+`SpriteCallbackDummy`.
+
+**Verification / next:** focused family/evidence plus both animation ratchets
+are **327/327** green; `npx tsc --noEmit`, full `npm test` (**597 files / 6,156
+passed / 1 skipped**), and production build (**549 modules transformed**) are
+green. Next generated source-ranked selector: **`ANIM_TUMBLING_FRONT_FLIP_TWICE`**
+(source ID **84**; **1 mapping / 1 Factory / 0 outside**) — MAGNEMITE.
+
 ## Front `ANIM_V_SLIDE_WOBBLE_SMALL` family accepted (2026-08-02)
 
 **State:** exact for the complete generated selector census: **4 mappings / 4
