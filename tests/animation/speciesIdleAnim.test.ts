@@ -329,6 +329,12 @@ import kingdraRunB from "../../tools/compare/fixtures/sendout-front-kingdra-run-
 import regiceScenario from "../../tools/compare/fixtures/sendout-front-regice.json" with { type: "json" };
 import regiceRunA from "../../tools/compare/fixtures/sendout-front-regice-run-a.json" with { type: "json" };
 import regiceRunB from "../../tools/compare/fixtures/sendout-front-regice-run-b.json" with { type: "json" };
+import pidgeyScenario from "../../tools/compare/fixtures/sendout-front-pidgey.json" with { type: "json" };
+import pidgeyRunA from "../../tools/compare/fixtures/sendout-front-pidgey-run-a.json" with { type: "json" };
+import pidgeyRunB from "../../tools/compare/fixtures/sendout-front-pidgey-run-b.json" with { type: "json" };
+import ledianScenario from "../../tools/compare/fixtures/sendout-front-ledian.json" with { type: "json" };
+import ledianRunA from "../../tools/compare/fixtures/sendout-front-ledian-run-a.json" with { type: "json" };
+import ledianRunB from "../../tools/compare/fixtures/sendout-front-ledian-run-b.json" with { type: "json" };
 import {
   KABUTO_FRONT_ANIM_START_OFFSET,
   kabutoHSlideWobble,
@@ -639,6 +645,18 @@ const regiceRawA = readFileSync(
 );
 const regiceRawB = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-regice-run-b.json", import.meta.url),
+);
+const pidgeyRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-pidgey-run-a.json", import.meta.url),
+);
+const pidgeyRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-pidgey-run-b.json", import.meta.url),
+);
+const ledianRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-ledian-run-a.json", import.meta.url),
+);
+const ledianRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-ledian-run-b.json", import.meta.url),
 );
 
 describe("speciesIdleAnim", () => {
@@ -1677,6 +1695,93 @@ describe("speciesIdleAnim", () => {
       expect(verticalSlideSlowFrameAtTick(82)).toEqual(terminal);
       expect(verticalSlideSlowFrameAtTick(1000)).toEqual(terminal);
       expect(verticalSlideSlowFrameAtTick(-1)).toBeNull();
+    });
+
+    it.each([
+      [16, [16, 28, 18, 98], pidgeyScenario],
+      [166, [4, 226, 14, 97], ledianScenario],
+    ] as const)("stages a complete legal challenge-0 Scene-ON party for species %i", (
+      species,
+      moves,
+      scenario,
+    ) => {
+      expect(scenario).toMatchObject({
+        mode: "mechanicLab",
+        profile: "battle-scene-on",
+        level: 50,
+        challengeNum: 0,
+        trainerId: 50,
+      });
+      expect(scenario.overrides.parties.player).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      expect(scenario.overrides.parties.opponent[0]).toMatchObject({
+        species,
+        moves,
+      });
+      for (const setId of [...scenario.playerSetIds, ...scenario.opponentSetIds]) {
+        expect(setId).toBeGreaterThanOrEqual(110);
+        expect(setId).toBeLessThanOrEqual(199);
+      }
+      for (const mon of [
+        ...scenario.overrides.parties.player,
+        ...scenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it.each([
+      [
+        "PIDGEY", pidgeyRunA, pidgeyRunB, pidgeyRawA, pidgeyRawB,
+        16, 11, 373, "54d30286650c7bc624c48ca0edeff146008052358ef0b8350f52e7a3c884a4a6",
+      ],
+      [
+        "LEDIAN", ledianRunA, ledianRunB, ledianRawA, ledianRawB,
+        166, 25, 374, "a195c9271c61c104d528af5cfd22bdc1917114fd14efe6b2200218238c59e564",
+      ],
+    ] as const)("matches paired byte-identical raw settled %s Scene-ON receipts", (
+      species,
+      runA,
+      runB,
+      rawA,
+      rawB,
+      speciesId,
+      animCmdIndex,
+      rawBytes,
+      rawSha256,
+    ) => {
+      expect(rawA.equals(rawB)).toBe(true);
+      expect(rawA).toHaveLength(rawBytes);
+      expect(rawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(rawA).digest("hex")).toBe(rawSha256);
+      expect(runA).toEqual(runB);
+      expect(
+        (selectorTables.frontAnimIds.species as Readonly<Record<string, string>>)[species],
+      ).toBe("ANIM_V_SLIDE_SLOW");
+      expect(runA.ticks[0]!.battler1).toMatchObject({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex,
+        data2: speciesId,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({
+        x2: runA.ticks[0]!.battler1.x2,
+        y2: runA.ticks[0]!.battler1.y2,
+      }).toEqual(speciesFrontIdleRestOffset(species));
     });
   });
 
