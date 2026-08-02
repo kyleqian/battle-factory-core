@@ -236,8 +236,18 @@ the DOUBLE_TEAM/ROCK_SLIDE routing, and the turn-4 submenu/kickoff bounce
 clock; the turn-4 B-close/A-reopen consumes the same immutable epoch.
 Clean-parent `354ebc89` (`3487117c^`) app replays held the turn-3 primary,
 turn-4 reader, and upstream turn-2 window byte-identical
-(**1,165/1,165 raw RGBA captures**). Turns 1–3 and 5–13 are now retired; #39
-remains open for turn 4, `opponentFaintDismissElapsed`, and dispatcher debt.
+(**1,165/1,165 raw RGBA captures**). The matching typed completed-turn-4/
+next-command handoff retired `turn4Resolved` (`75d9c1d3` + `350d5aa0`): it
+publishes canonical PP **[7,20,19,10]**, persisted slot 0, HP **88/1**,
+settled/ready facts, and the runtime-relative `HandleInputChooseAction` →
+`DoBounceEffect` epoch (elapsed **4312**, source seeds **192/128**, delta
+**7**, amplitude **1**). It now owns turn-5 dispatch, shared HP/content,
+ENDEAVOR routing, slot-0 PP reconstruction, and the turn-5 clock while
+preserving the current legacy presentation continuation from that immutable
+epoch. Clean-parent `b7cdbe46` (`75d9c1d3^`) app replays held the turn-4
+primary, all turn-5/6 readers, and upstream turn-3 window byte-identical
+(**1,841/1,841 raw RGBA captures**). Turns 1–4 and 5–13 are now retired; #39
+remains open only for `opponentFaintDismissElapsed` and dispatcher debt.
 Rank 4 is **fully retired** (2026-07-31,
 all 5 slices): `174cc388` ROCK_SLIDE tails; `441ddf83`+`6aba6662`
 turn-7/8 FEATHER_DANCE staged+flipped; `0769ccc6` stat-fall banner

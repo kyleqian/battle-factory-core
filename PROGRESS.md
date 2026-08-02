@@ -13,6 +13,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 846 — [bounded MAIN worker, 2026-08-01] turn-4 predecessor retired with immutable epoch
+
+- **State:** proof `75d9c1d3`, migration `350d5aa0`; `rg -n '\\bturn4Resolved\\b' src tests` is empty. The receipt publishes at the source-owned first choose-action callback: absolute **5352**, runtime elapsed **4312** (the 5351 handler-install tick still rejects A).
+- **Did:** migrated turn-5 dispatch, generic HP/content, ENDEAVOR routing, slot-0 PP, all turn-5 clock consumers, and direct presentation calls to PP **[7,20,19,10]**, slot **0**, HP **88/1**, settled/ready, and DoBounceEffect seeds **192/128**, delta **7**, amplitude **1**. Turn-5's open and B-close/A-reopen retain the same receipt object; its existing legacy continuation phase is receipt-derived, not republished.
+- **Next:** stay scoped: `opponentFaintDismissElapsed` and dispatcher debt remain #39 work; do not reopen turns 1–4.
+- **Notes:** clean-parent `b7cdbe46` (`75d9c1d3^`) app replays are byte-identical: turn-4 DOUBLE_TEAM **256/256**, ROCK_SLIDE **256/256**; turn-5/6 readers **51/51 + 42/42 + 254/254 + 256/256 + 121/121 + 252/252 + 145/145 + 47/47 = 1,168/1,168**; upstream turn-3 **161/161**; total **1,841/1,841** raw RGBA captures. Focused Tier-1 **510/510** (16 files), `npx tsc --noEmit`, and `npm run build` green; full `npm test` deliberately unrun per the bounded brief.
+
 ## 845 — [bounded MAIN worker, 2026-08-01] turn-3 predecessor retired with immutable epoch
 
 - **State:** proof `3487117c`, migration `0e7fd346` + follow-up `c0c2c228`; `rg -n '\\bturn3Resolved\\b' src tests` is empty. The receipt publishes at the
