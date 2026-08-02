@@ -511,6 +511,8 @@ and **33,135→33,125 LOC**. No mechanics/RNG/AI/outcome, animation, trace or
 capture list, ratchet/barrier, recording import, or prohibited selector was
 added. Rank 7 is closed; #39 remains open at rank 8 and earlier mirror debt.
 
+**Rank-7 generated-route addendum (2026-08-02):** regression bisected to `b464a6e7` and root-caused in `docs/generated-route-canary-regression.md`; `ecd00a9c` restores the missing source-owned Scene-OFF attack-pause receipt and the **128/128** canary while the canonical rank-7 differential remains byte-identical.
+
 **Rank-8 Scene-OFF status-icon receipt landed (2026-08-01, `80c5d6af`):**
 the generic resolution presenter now keeps `set-battler-status-data` as the
 logical raw write and projects the existing `status-icon-update` as an

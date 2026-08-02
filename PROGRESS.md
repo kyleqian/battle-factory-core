@@ -4,6 +4,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 857 — [bounded MAIN worker, 2026-08-02] generated Scene-OFF attack-pause receipt regression fixed
+
+- **State:** `ecd00a9c` is the green implementation checkpoint. Full `npm
+  test` is **592 files / 6,138 passed / 1 skipped**, `npm run build` exits 0,
+  and the focused receipt/projection/reachability set is **360/360**.
+- **Did:** `Cmd_attackanimation`'s `HITMARKER_NO_ANIMATIONS` branch now emits
+  one immutable `SCENE_OFF_ATTACK_PAUSE` receipt while still calling the real
+  `BattleScript_Pausex20`. The generic presenter projects it through the
+  existing visual-no-op hold using provenance and `B_WAIT_TIME_SHORT`; option
+  initialization, frozen receipts, and dispatcher files are unchanged.
+- **Evidence:** `battle-command-generated-off` recovered **70/128 → 128/128**.
+  Clean-parent replay preserves all rank-7 charge/strike/selector/send-out
+  and delayed captures byte-for-byte (**1,757/1,757 raw comparisons; the
+  recorded 1,496-capture acceptance set remains unchanged**). Intro insurance
+  is unchanged and retains oracle results **700/751 YOSHI + 715/715**.
+- **Next:** resume dispatcher design slice 4: bridge turns 9–13 semantic
+  content, including the retained FLY presentation owner; do not cut state,
+  render dispatch, or the core ladder yet.
+- **Notes:** no unsupported branch/barrier, trace/capture edit, animation,
+  mechanics, RNG, turn/tick selector, or dispatcher/adapter change landed.
+
+---
 ## 856 — [bounded MAIN worker, 2026-08-02] dispatcher slice 3 Pidgeotto content bridge landed
 
 - **State:** `2820689e` is the green implementation checkpoint. Full `npm
@@ -52,30 +74,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   frame 68 on this branch; this particle release path is unreachable from
   that staged checkpoint, so the required insurance used the exact 715-frame
   intro window instead.
-
----
-## 854 — [bounded MAIN worker, 2026-08-01] dispatcher slice 2 shadow latest and PP equivalence landed
-
-- **State:** `7521d5ae` is the green implementation checkpoint. Full `npm
-  test` is **591 files / 6,132 passed / 1 skipped**, `npm run build` exits 0,
-  and the focused slice/state set is **438/438**.
-- **Did:** core now publishes an additive `latestCompletedCommandHandoff`
-  shadow alongside every legacy turn 5–13 receipt. The legacy reopen ladder,
-  thirteen state fields/parameters, PP renderer route, content dispatch, and
-  retained FLY owner remain the only production route. A separate generic PP
-  projection proves tuple/slot equivalence without routing production reads.
-- **Evidence:** clean-parent `59bec279` app replay is byte-identical for the
-  complete slice-1 list: **5,638/5,638 raw RGBA captures across 33 traces**.
-  OFF readers remain turn 9 **720**, turn 10 **675**, turn 11 **447**, and
-  turn 12 **503**, plus turn12-menu **46**. Tier-1 pins turns 5–13 shadow
-  publication, turn 13's **18/20 slot-2 fallback**, and locked/following PP
-  precedence.
-- **Next:** execute dispatcher design slice 3: introduce the semantic
-  Pidgeotto `FightCommandPresentation` content bridge for turns 5–8 only;
-  do not cut state/core routing or begin turns 9–13 content.
-- **Notes:** handoff census before/after is unchanged: **13** declarations,
-  **13** state fields, **13/13** FIGHT/PP positional parameters, and **289**
-  literal assignments. No legacy field, import, parameter, or render route
-  was deleted or replaced.
-
----
