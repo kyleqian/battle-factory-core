@@ -254,7 +254,7 @@ preserving the current legacy presentation continuation from that immutable
 epoch. Clean-parent `b7cdbe46` (`75d9c1d3^`) app replays held the turn-4
 primary, all turn-5/6 readers, and upstream turn-3 window byte-identical
 (**1,841/1,841 raw RGBA captures**). Turns 1–4 and 5–13 are now retired; #39
-remains open only for dispatcher debt.
+remains open only for dispatcher debt. Dispatcher ladder status (2026-08-02): design dossier `docs/next-command-handoff-dispatcher-design.md` slices 1-7 are landed (generic guard chain drives turns 5-13; turn-1 and turn-2 epoch folds done; handoff state fields 13→2, only turn3/turn4 remain); slices 8-10 (turn-3/turn-4 folds, final 13-parameter/type cut) are the remaining #39 dispatcher work, then the species/episode render entry points inventoried in `docs/battle-scene-retirement-inventory.md`.
 Rank 4 is **fully retired** (2026-07-31,
 all 5 slices): `174cc388` ROCK_SLIDE tails; `441ddf83`+`6aba6662`
 turn-7/8 FEATHER_DANCE staged+flipped; `0769ccc6` stat-fall banner
