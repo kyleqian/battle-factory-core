@@ -71,6 +71,7 @@ export type SpeciesFrontAnimFamily =
   | "TUMBLING_FRONT_FLIP_TWICE"
   | "SWING_CONVEX"
   | "SWING_CONCAVE"
+  | "TWIST"
   | "TWIST_TWICE"
   | "V_JUMPS_BIG"
   | "V_JUMPS_SMALL"
@@ -117,6 +118,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "TUMBLING_FRONT_FLIP_TWICE",
   "SWING_CONVEX",
   "SWING_CONCAVE",
+  "TWIST",
   "TWIST_TWICE",
   "V_JUMPS_BIG",
   "V_JUMPS_SMALL",
@@ -220,6 +222,23 @@ export const H_SHAKE_SLOW_FACTORY_FRONT_SPECIES: readonly string[] = Object.free
 /** There are no slow horizontal-shake mappings outside the Factory rental pool. */
 export const H_SHAKE_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   H_SHAKE_SLOW_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All source selector mappings for the one-run `ANIM_TWIST` entry point. */
+export const TWIST_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_TWIST")
+    .map(([species]) => species),
+);
+
+/** Every normal-twist mapping is reachable through Factory rentals. */
+export const TWIST_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  TWIST_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no normal-twist selector mappings outside the Factory pool. */
+export const TWIST_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  TWIST_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /** The sole source selector mapping for `ANIM_TWIST_TWICE` (STARYU). */
@@ -3471,11 +3490,20 @@ export function tumblingFrontFlipTwiceFrameAtTick(
 }
 
 /**
- * Source-specific initializer for selector 78. `ANIM_TWIST` uses the same
- * shared C callback with a different one-run/512-degree setup, but that
- * selector remains deliberately unported: this is only the exact STARYU
- * `ANIM_TWIST_TWICE` entry point.
+ * Source-specific `Anim_Twist` initializer (source selector 18). `AddNewAnim`
+ * supplies `runs=1`; this initializer explicitly changes only rotation and
+ * delay before its immediate `Twist` call.
  */
+export const TWIST_INITIALIZER = Object.freeze({
+  selector: "ANIM_TWIST",
+  sourceId: 18,
+  rotation: 512,
+  delay: 0,
+  runs: 1,
+  accepted: true,
+} as const);
+
+/** Source-specific selector-78 initializer for STARYU's twice-twist path. */
 export const TWIST_TWICE_INITIALIZER = Object.freeze({
   selector: "ANIM_TWIST_TWICE",
   sourceId: 78,
@@ -3485,7 +3513,10 @@ export const TWIST_TWICE_INITIALIZER = Object.freeze({
   accepted: true,
 } as const);
 
-export interface TwistTwiceFrame extends SpeciesIdleOffset {
+type TwistInitializer = typeof TWIST_INITIALIZER | typeof TWIST_TWICE_INITIALIZER;
+
+/** Observable source callback state shared by normal and twice-twist. */
+export interface TwistFrame extends SpeciesIdleOffset {
   /** `sprite->data[2]` immediately before this source callback. */
   readonly data2Before: number;
   /** `sprite->data[2]` after the source's optional final `+= 16`. */
@@ -3493,7 +3524,7 @@ export interface TwistTwiceFrame extends SpeciesIdleOffset {
   /** Signed `s16 sprite->data[6]`, set only by a rotation-body callback. */
   readonly data6: number;
   /** `AddNewAnim`/`InitAnimData` fields after the initializer overrides. */
-  readonly animRotation: 1024;
+  readonly animRotation: 512 | 1024;
   readonly animDelayBefore: number;
   readonly animDelay: number;
   readonly animRunsBefore: 1 | 2;
@@ -3517,35 +3548,39 @@ export interface TwistTwiceFrame extends SpeciesIdleOffset {
   readonly affineMode: "double" | "normal";
 }
 
+/** Compatibility name for STARYU's already accepted twice-twist reducer. */
+export type TwistTwiceFrame = TwistFrame;
+
 /**
- * Source-order port of `Anim_Twist_Twice` -> `Twist`
+ * Shared source-order port of `Anim_Twist` / `Anim_Twist_Twice` -> `Twist`
  * (`pokemon_animation.c:1037-1059,1420-1470,3732-3741,5540-5544`) for the
- * ordinary opponent-front path. `Task_HandleMonAnimation` has already
- * zeroed sprite data and set `sDontFlip=TRUE`; `AddNewAnim` then clears its
- * animation-slot record before this initializer writes rotation=1024,
- * delay=0, and runs=2. The initializer immediately invokes `Twist`, then
- * installs it as the sprite callback.
+ * ordinary opponent-front path. `Task_HandleMonAnimation` has already zeroed
+ * sprite data and set `sDontFlip=TRUE`; `AddNewAnim` clears its animation-slot
+ * record before the source-specific initializer changes its fields, invokes
+ * `Twist` immediately, and only then installs it as the sprite callback.
  *
- * First-run counters 0..1024 step by 16. At counter 1040 the strict
- * `> rotation` branch writes identity, decrements runs, arms exactly ten
- * delay-only callbacks, resets data2, and still performs the final +=16.
- * The second run therefore begins at counter 16, not zero, and the following
- * 1040 boundary restores identity, calls `ResetSpriteAfterAnim`, and hands
- * off to stable `WaitAnimEnd`.
+ * The normal selector runs counters 0..512 by 16, then its strict `>` branch
+ * writes identity, calls `ResetSpriteAfterAnim`, and hands off to stable
+ * `WaitAnimEnd`. The twice selector retains its accepted 1024/2-run behavior:
+ * the first strict boundary arms ten delay callbacks and the second terminal
+ * boundary restores identity and hands off to `WaitAnimEnd`.
  */
-export function twistTwiceFrameAtTick(ticksSinceStart: number): TwistTwiceFrame | null {
+function twistFrameForInitializer(
+  initializer: TwistInitializer,
+  ticksSinceStart: number,
+): TwistFrame | null {
   if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
 
-  const animRotation = TWIST_TWICE_INITIALIZER.rotation;
-  let animDelay: number = TWIST_TWICE_INITIALIZER.delay;
-  let animRuns: 1 | 2 = TWIST_TWICE_INITIALIZER.runs;
+  const animRotation = initializer.rotation;
+  let animDelay: number = initializer.delay;
+  let animRuns: 1 | 2 = initializer.runs;
   const animSpeed = 0;
   let animData: 0 | 1 = 0;
   let data2 = 0;
   let data6 = 0;
-  let callback: TwistTwiceFrame["callback"] = "Twist";
-  let affineMode: TwistTwiceFrame["affineMode"] = "normal";
-  let lastFrame: TwistTwiceFrame | null = null;
+  let callback: TwistFrame["callback"] = "Twist";
+  let affineMode: TwistFrame["affineMode"] = "normal";
+  let lastFrame: TwistFrame | null = null;
 
   for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
     // `WaitAnimEnd` only polls sprite animation completion; this reducer's
@@ -3594,7 +3629,7 @@ export function twistTwiceFrameAtTick(ticksSinceStart: number): TwistTwiceFrame 
     // Tick zero's immediate `Twist` body is the only path from InitAnimData's
     // zero to the stable initialized record; every observable callback ends
     // after that source increment.
-    if (animData !== 1) throw new Error("Anim_Twist_Twice did not initialize animation data");
+    if (animData !== 1) throw new Error("Anim_Twist did not initialize animation data");
 
     lastFrame = {
       x2: 0,
@@ -3626,8 +3661,18 @@ export function twistTwiceFrameAtTick(ticksSinceStart: number): TwistTwiceFrame 
     };
   }
 
-  if (lastFrame === null) throw new Error("unreachable TwistTwice reducer state");
+  if (lastFrame === null) throw new Error("unreachable Twist reducer state");
   return lastFrame;
+}
+
+/** Exact one-run selector-18 `Anim_Twist` lifecycle. */
+export function twistFrameAtTick(ticksSinceStart: number): TwistFrame | null {
+  return twistFrameForInitializer(TWIST_INITIALIZER, ticksSinceStart);
+}
+
+/** Exact twice-twist selector-78 lifecycle, retained as a regression export. */
+export function twistTwiceFrameAtTick(ticksSinceStart: number): TwistTwiceFrame | null {
+  return twistFrameForInitializer(TWIST_TWICE_INITIALIZER, ticksSinceStart);
 }
 
 const VERTICAL_SHAKE_ACCUMULATOR_STEP = 60;
@@ -4765,6 +4810,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = swingConcaveFrameAtTick(101);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_SwingConcave did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "TWIST": {
+      const terminal = twistFrameAtTick(33);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_Twist did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }

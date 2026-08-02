@@ -1444,14 +1444,14 @@ describe("speciesIdleAnim", () => {
       expect(twistTwiceFrameAtTick(0.5)).toBeNull();
     });
 
-    it("keeps normal Twist unsupported while the next circle selector is promoted", () => {
+    it("keeps the accepted normal Twist family and adjacent selector boundaries explicit", () => {
       const selectors = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
       const normalTwist = Object.entries(selectors)
         .filter(([, family]) => family === "ANIM_TWIST")
         .map(([species]) => species);
       expect(normalTwist).toEqual(["SHELLDER", "HORSEA", "STARMIE", "CLAMPERL", "ANORITH"]);
       for (const species of normalTwist) {
-        expect(speciesFrontIdleRestOffset(species)).toBeNull();
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }
 
       const preceding = Object.entries(selectors)
