@@ -5010,7 +5010,7 @@ export interface BackAndLungeFrame extends SpeciesIdleOffset {
  * All sprite/data registers are reduced as signed s16 values. The local
  * `var` in `_1` is a u8, and `_2`'s rotation is the source u8 quotient. The
  * affine writes preserve the source's shifted rotation before its u16
- * `HandleSetAffineData` argument conversion. Tick 33 is the strict terminal
+ * `HandleSetAffineData` argument conversion. Tick 32 is the strict terminal
  * `_4` callback; `WaitAnimEnd` then remains stable.
  */
 export function backAndLungeFrameAtTick(ticksSinceStart: number): BackAndLungeFrame | null {
