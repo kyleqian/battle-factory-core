@@ -154,62 +154,20 @@ import {
   partySendOutBattleMenuReady,
 } from "./partySelect.ts";
 import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "./turn15FlyResolutionAdapter.ts";
-import {
-  isTurn13NextCommandHandoffReady,
-  resolveTurn13CompletedResolutionNextCommandHandoff,
-  resolveTurn13LatestCompletedCommandHandoff,
-  type Turn13CompletedResolutionNextCommandHandoff,
-} from "./turn13ResolutionAdapter.ts";
+import { resolveTurn13LatestCompletedCommandHandoff } from "./turn13ResolutionAdapter.ts";
 import {
   createOpponentFaintPresentationOwner,
   opponentFaintContinuationElapsed,
   storeOpponentFaintDismiss,
 } from "./opponentFaintPresentationOwner.ts";
-import {
-  resolveTurn5LatestCompletedCommandHandoff,
-  type Turn5CompletedResolutionNextCommandHandoff,
-} from "./turn5ResolutionAdapter.ts";
-import {
-  isTurn6NextCommandHandoffReady,
-  resolveTurn6LatestCompletedCommandHandoff,
-  type Turn6CompletedResolutionNextCommandHandoff,
-} from "./turn6ResolutionAdapter.ts";
-import {
-  isTurn7NextCommandHandoffReady,
-  resolveTurn7CompletedResolutionNextCommandHandoff,
-  resolveTurn7LatestCompletedCommandHandoff,
-  type Turn7CompletedResolutionNextCommandHandoff,
-} from "./turn7ResolutionAdapter.ts";
-import {
-  isTurn8NextCommandHandoffReady,
-  resolveTurn8CompletedResolutionNextCommandHandoff,
-  resolveTurn8LatestCompletedCommandHandoff,
-  type Turn8CompletedResolutionNextCommandHandoff,
-} from "./turn8ResolutionAdapter.ts";
-import {
-  isTurn9NextCommandHandoffReady,
-  resolveTurn9CompletedResolutionNextCommandHandoff,
-  resolveTurn9LatestCompletedCommandHandoff,
-  type Turn9CompletedResolutionNextCommandHandoff,
-} from "./turn9ResolutionAdapter.ts";
-import {
-  isTurn10NextCommandHandoffReady,
-  resolveTurn10CompletedResolutionNextCommandHandoff,
-  resolveTurn10LatestCompletedCommandHandoff,
-  type Turn10CompletedResolutionNextCommandHandoff,
-} from "./turn10ResolutionAdapter.ts";
-import {
-  isTurn11NextCommandHandoffReady,
-  resolveTurn11CompletedResolutionNextCommandHandoff,
-  resolveTurn11LatestCompletedCommandHandoff,
-  type Turn11CompletedResolutionNextCommandHandoff,
-} from "./turn11ResolutionAdapter.ts";
-import {
-  isTurn12NextCommandHandoffReady,
-  resolveTurn12CompletedResolutionNextCommandHandoff,
-  resolveTurn12LatestCompletedCommandHandoff,
-  type Turn12CompletedResolutionNextCommandHandoff,
-} from "./turn12ResolutionAdapter.ts";
+import { resolveTurn5LatestCompletedCommandHandoff } from "./turn5ResolutionAdapter.ts";
+import { resolveTurn6LatestCompletedCommandHandoff } from "./turn6ResolutionAdapter.ts";
+import { resolveTurn7LatestCompletedCommandHandoff } from "./turn7ResolutionAdapter.ts";
+import { resolveTurn8LatestCompletedCommandHandoff } from "./turn8ResolutionAdapter.ts";
+import { resolveTurn9LatestCompletedCommandHandoff } from "./turn9ResolutionAdapter.ts";
+import { resolveTurn10LatestCompletedCommandHandoff } from "./turn10ResolutionAdapter.ts";
+import { resolveTurn11LatestCompletedCommandHandoff } from "./turn11ResolutionAdapter.ts";
+import { resolveTurn12LatestCompletedCommandHandoff } from "./turn12ResolutionAdapter.ts";
 import {
   consumeNextCommandReopenGuard,
   createNextCommandReopenGuard,
@@ -1256,19 +1214,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let turn2NextCommandHandoff = battleScene.turn2NextCommandHandoff ?? null;
     let turn3NextCommandHandoff = battleScene.turn3NextCommandHandoff ?? null;
     let turn4NextCommandHandoff = battleScene.turn4NextCommandHandoff ?? null;
-    // Compatibility locals remain only through this checkpoint so old
-    // fixtures can still exercise their renderer ABI. Production never
-    // publishes them: the generic owner/guard above is now the only 5-13
-    // core route, and the following fields are removed in the next cut.
-    let turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null = null;
-    let turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null = null;
-    let turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null = null;
-    let turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null = null;
-    let turn9NextCommandHandoff: Turn9CompletedResolutionNextCommandHandoff | null = null;
-    let turn10NextCommandHandoff: Turn10CompletedResolutionNextCommandHandoff | null = null;
-    let turn11NextCommandHandoff: Turn11CompletedResolutionNextCommandHandoff | null = null;
-    let turn12NextCommandHandoff: Turn12CompletedResolutionNextCommandHandoff | null = null;
-    let turn13NextCommandHandoff: Turn13CompletedResolutionNextCommandHandoff | null = null;
     let latestCompletedCommandHandoff = battleScene.latestCompletedCommandHandoff ?? null;
     let lockedActionOwner = battleScene.resolutionOwner ?? null;
     let terminalResolution = battleScene.terminalResolution ?? null;
@@ -1526,181 +1471,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       latestCompletedCommandHandoff = successor;
       lockedActionOwner = genericReopenTransition.resolutionOwner;
     } else if (
-      isTurn6NextCommandHandoffReady(turn6NextCommandHandoff) &&
-      !isTurn7NextCommandHandoffReady(turn7NextCommandHandoff) &&
-      fightSubmenu.confirmElapsed !== null &&
-      newKeys.has("A") &&
-      sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN7_ROCKSLIDE_REOPEN_GATE_DELAY
-    ) {
-      // S7 slice P (docs/turn8-notes.md, docs/battle-turn-notes.md §33):
-      // turn 7's whole ROCK_SLIDE resolution has redrawn the settled action
-      // menu by now (`TURN7_ROCKSLIDE_REOPEN_GATE_DELAY` past turn 7's own
-      // real confirm) - a fresh A-press reopens FIGHT for turn 8, cursor
-      // persisted at slot 0 (ROCK_SLIDE, unchanged) - the winning line's own
-      // divergence happens via the nav branch above (one RIGHT press onto
-      // BIND), not at reopen.
-      turn7NextCommandHandoff = resolveTurn7CompletedResolutionNextCommandHandoff();
-      latestCompletedCommandHandoff = resolveTurn7LatestCompletedCommandHandoff();
-      fightSubmenu = openFightSubmenu(
-        battleScene.elapsed + 1,
-        activeMonMoveset(draftScreen),
-        turn7NextCommandHandoff.persistedMoveSlot,
-      );
-    } else if (
-      isTurn7NextCommandHandoffReady(turn7NextCommandHandoff) &&
-      !isTurn8NextCommandHandoffReady(turn8NextCommandHandoff) &&
-      fightSubmenu.confirmElapsed !== null &&
-      newKeys.has("A") &&
-      sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN8_MENU_REDRAW_DELAY
-    ) {
-      // S7 slice R (docs/turn9-notes.md, docs/battle-turn-notes.md §35):
-      // turn 8's own BIND-miss resolution has redrawn the settled action
-      // menu by now (`TURN8_MENU_REDRAW_DELAY` past turn 8's own real
-      // confirm - directly usable, same "no synthetic anchor needed" reason
-      // `TURN4_ROCKSLIDE_MENU_REDRAW_DELAY` already established) - a fresh
-      // A-press reopens FIGHT for turn 9, cursor persisted at slot 1 (BIND,
-      // where turn 8's own confirm left it) - turn 9's own `LEFT` press then
-      // moves it back onto ROCK_SLIDE via the generic nav branch above.
-      turn8NextCommandHandoff = resolveTurn8CompletedResolutionNextCommandHandoff();
-      latestCompletedCommandHandoff = resolveTurn8LatestCompletedCommandHandoff();
-      fightSubmenu = openFightSubmenu(
-        battleScene.elapsed + 1,
-        activeMonMoveset(draftScreen),
-        turn8NextCommandHandoff.persistedMoveSlot,
-      );
-    } else if (
-      isTurn8NextCommandHandoffReady(turn8NextCommandHandoff) &&
-      !isTurn9NextCommandHandoffReady(turn9NextCommandHandoff) &&
-      fightSubmenu.confirmElapsed !== null &&
-      newKeys.has("A") &&
-      sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN9_MENU_REDRAW_DELAY
-    ) {
-      // S7 slice R rung (a) (docs/turn10-notes.md): turn 9's own whole
-      // resolution has redrawn the settled action menu by now (`TURN9_MENU_
-      // REDRAW_DELAY` past turn 9's own real confirm) - a fresh A-press
-      // reopens FIGHT for turn 10, cursor persisted at slot 0 (ROCK_SLIDE,
-      // where turn 9's own `LEFT` press + confirm left it) - zero further
-      // nav needed, docs/turn10-notes.md §4/§5's own "zero navigation
-      // presses this turn" ledger.
-      turn9NextCommandHandoff = resolveTurn9CompletedResolutionNextCommandHandoff();
-      latestCompletedCommandHandoff = resolveTurn9LatestCompletedCommandHandoff();
-      fightSubmenu = openFightSubmenu(
-        battleScene.elapsed + 1,
-        activeMonMoveset(draftScreen),
-        turn9NextCommandHandoff.persistedMoveSlot,
-      );
-    } else if (
-      isTurn9NextCommandHandoffReady(turn9NextCommandHandoff) &&
-      !isTurn10NextCommandHandoffReady(turn10NextCommandHandoff) &&
-      fightSubmenu.confirmElapsed !== null &&
-      newKeys.has("A") &&
-      sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN10_ROCKSLIDE_MENU_REDRAW_DELAY
-    ) {
-      // S7 slice R rung 1 (docs/turn11-notes.md): turn 10's own whole
-      // ROCK_SLIDE resolution has redrawn the settled action menu by now
-      // (`TURN10_ROCKSLIDE_MENU_REDRAW_DELAY` past turn 10's own SYNTHETIC
-      // `TURN10_ROCKSLIDE_PRESS_TICK` - no player press for the AI-adjacent
-      // second half of a turn, same reason every synthetic `TURNn_ROCKSLIDE_
-      // PRESS_TICK` anchor already exists) - a fresh A-press reopens FIGHT
-      // for turn 11, cursor persisted at slot 0 (ROCK_SLIDE, unchanged) -
-      // zero further nav needed, docs/turn11-notes.md §1's own "zero
-      // navigation presses this turn" ledger.
-      turn10NextCommandHandoff = resolveTurn10CompletedResolutionNextCommandHandoff();
-      latestCompletedCommandHandoff = resolveTurn10LatestCompletedCommandHandoff();
-      fightSubmenu = openFightSubmenu(
-        battleScene.elapsed + 1,
-        activeMonMoveset(draftScreen),
-        turn10NextCommandHandoff.persistedMoveSlot,
-      );
-    } else if (
-      isTurn10NextCommandHandoffReady(turn10NextCommandHandoff) &&
-      !isTurn11NextCommandHandoffReady(turn11NextCommandHandoff) &&
-      fightSubmenu.confirmElapsed !== null &&
-      newKeys.has("A") &&
-      sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN11_ROCKSLIDE_MENU_REDRAW_DELAY
-    ) {
-      // S7/S8 (docs/turn12-notes.md): turn 11's own whole ROCK_SLIDE
-      // resolution has redrawn the settled action menu by now
-      // (`TURN11_ROCKSLIDE_MENU_REDRAW_DELAY` past turn 11's own real
-      // confirm) - a fresh A-press reopens FIGHT for turn 12, cursor
-      // persisted at slot 0 (ROCK_SLIDE, unchanged) - zero further nav
-      // needed, docs/turn12-notes.md §1's own "zero navigation presses this
-      // turn" ledger.
-      turn11NextCommandHandoff = resolveTurn11CompletedResolutionNextCommandHandoff();
-      latestCompletedCommandHandoff = resolveTurn11LatestCompletedCommandHandoff();
-      fightSubmenu = openFightSubmenu(
-        battleScene.elapsed + 1,
-        activeMonMoveset(draftScreen),
-        turn11NextCommandHandoff.persistedMoveSlot,
-      );
-    } else if (
-      isTurn11NextCommandHandoffReady(turn11NextCommandHandoff) &&
-      !isTurn12NextCommandHandoffReady(turn12NextCommandHandoff) &&
-      fightSubmenu.confirmElapsed !== null &&
-      newKeys.has("A") &&
-      sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN12_ROCKSLIDE_MENU_REDRAW_DELAY
-    ) {
-      // S7/S8 (docs/turn13-notes.md): turn 12's own whole ROCK_SLIDE (miss)
-      // resolution has redrawn the settled action menu by now
-      // (`TURN12_ROCKSLIDE_MENU_REDRAW_DELAY` past turn 12's own synthetic
-      // `TURN12_ROCKSLIDE_PRESS_TICK`) - a fresh A-press reopens FIGHT for
-      // turn 13, cursor persisted at slot 0 (ROCK_SLIDE, unchanged) - turn
-      // 13's own single `DOWN` press then moves it onto DRAGON_BREATH via the
-      // generic nav branch above.
-      turn12NextCommandHandoff = resolveTurn12CompletedResolutionNextCommandHandoff();
-      latestCompletedCommandHandoff = resolveTurn12LatestCompletedCommandHandoff();
-      fightSubmenu = openFightSubmenu(
-        battleScene.elapsed + 1,
-        activeMonMoveset(draftScreen),
-        turn12NextCommandHandoff.persistedMoveSlot,
-      );
-    } else if (
-      isTurn12NextCommandHandoffReady(turn12NextCommandHandoff) &&
-      !isTurn13NextCommandHandoffReady(turn13NextCommandHandoff) &&
-      opponentFaintContinuationAge !== null &&
-      opponentFaintContinuationAge >= TURN13_SWITCHIN_MENU_REDRAW_AFTER_DISMISS &&
-      fightSubmenu.confirmElapsed !== null &&
-      newKeys.has("A") &&
-      sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed
-    ) {
-      // S7/S8 (docs/turn14-notes.md): turn 13's own whole DRAGON_BREATH-
-      // faint/MURKROW-switch-in resolution has redrawn the settled action
-      // menu by now (the typed owner's switch-in continuation reached its
-      // local redraw boundary) - a fresh A-press reopens FIGHT for turn 14,
-      // cursor persisted at slot 2 (DRAGON_BREATH, where turn 13's own
-      // confirm left it) - no further nav needed, docs/turn14-notes.md's
-      // own "cursor persisted... NO DOWN press this turn" ledger. Mirrors
-      // the completed turn-12 handoff branch exactly, per the brief.
-      turn13NextCommandHandoff = resolveTurn13CompletedResolutionNextCommandHandoff();
-      latestCompletedCommandHandoff = resolveTurn13LatestCompletedCommandHandoff();
-      fightSubmenu = openFightSubmenu(
-        battleScene.elapsed + 1,
-        activeMonMoveset(draftScreen),
-        turn13NextCommandHandoff.persistedMoveSlot,
-      );
-      lockedActionOwner = createBattleSceneResolutionOwner(
-        CANONICAL_OPPONENT_FLY_RESOLUTION.chargeResolution,
-      );
-    } else if (
-      isTurn13NextCommandHandoffReady(turn13NextCommandHandoff) &&
-      lockedActionOwner?.resolution.segmentIndex === 0 &&
-      fightSubmenu.confirmElapsed !== null &&
-      newKeys.has("A") &&
-      sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN14_DRAGONBREATH_MENU_REDRAW_DELAY
-    ) {
-      // S7/S8 (docs/turn15-notes.md): turn 14's own whole DRAGON_BREATH-
-      // auto-miss resolution has redrawn the settled action menu by now
-      // (`TURN14_DRAGONBREATH_MENU_REDRAW_DELAY` past turn 14's own real
-      // confirm) - a fresh A-press reopens FIGHT for turn 15, cursor
-      // persisted at slot 2 (DRAGON_BREATH, unchanged since turn 13/14) -
-      // no further nav needed, docs/turn15-notes.md's own "cursor
-      // persisted... no nav" ledger. The typed turn-13 handoff remains the
-      // predecessor guard through this retained FLY-charge window.
-      fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen), 2);
-      lockedActionOwner = createBattleSceneResolutionOwner(
-        CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution,
-      );
-    } else if (
       lockedActionOwner !== null &&
       lockedActionOwner.followingPresentation !== null &&
       lockedActionOwner.followingPresentation.menuRedrawElapsed === null &&
@@ -1780,15 +1550,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn2NextCommandHandoff,
       turn3NextCommandHandoff,
       turn4NextCommandHandoff,
-      turn5NextCommandHandoff,
-      turn6NextCommandHandoff,
-      turn7NextCommandHandoff,
-      turn8NextCommandHandoff,
-      turn9NextCommandHandoff,
-      turn10NextCommandHandoff,
-      turn11NextCommandHandoff,
-      turn12NextCommandHandoff,
-      turn13NextCommandHandoff,
       latestCompletedCommandHandoff,
       resolutionOwner: lockedActionOwner,
       terminalResolution,

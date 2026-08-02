@@ -843,7 +843,6 @@ import {
 } from "./turn13SandAttackPresentationStaging.ts";
 import {
   CANONICAL_TURN13_RETAINED_FLY_PRESENTATION_OWNER,
-  isTurn13NextCommandHandoffReady,
   resolveTurn13ResolutionAdapter,
   resolveTurn13SwitchInAdapter,
   type Turn13CompletedResolutionNextCommandHandoff,
@@ -853,7 +852,6 @@ import {
   type OpponentFaintPresentationOwner,
 } from "./opponentFaintPresentationOwner.ts";
 import {
-  isTurn5NextCommandHandoffReady,
   resolveTurn5FaintSinkGeometry,
   resolveTurn5SitrusAdapter,
   resolveTurn5SwitchInAdapter,
@@ -884,34 +882,13 @@ import {
   type Turn4CompletedResolutionNextCommandHandoff,
 } from "./turn4ResolutionAdapter.ts";
 import { TURN1_CHOOSE_ACTION_RESET_AFTER_CONFIRM } from "./turn1ChooseActionReset.ts";
-import {
-  isTurn6NextCommandHandoffReady,
-  type Turn6CompletedResolutionNextCommandHandoff,
-} from "./turn6ResolutionAdapter.ts";
-import {
-  isTurn7NextCommandHandoffReady,
-  type Turn7CompletedResolutionNextCommandHandoff,
-} from "./turn7ResolutionAdapter.ts";
-import {
-  isTurn8NextCommandHandoffReady,
-  type Turn8CompletedResolutionNextCommandHandoff,
-} from "./turn8ResolutionAdapter.ts";
-import {
-  isTurn9NextCommandHandoffReady,
-  type Turn9CompletedResolutionNextCommandHandoff,
-} from "./turn9ResolutionAdapter.ts";
-import {
-  isTurn10NextCommandHandoffReady,
-  type Turn10CompletedResolutionNextCommandHandoff,
-} from "./turn10ResolutionAdapter.ts";
-import {
-  isTurn11NextCommandHandoffReady,
-  type Turn11CompletedResolutionNextCommandHandoff,
-} from "./turn11ResolutionAdapter.ts";
-import {
-  isTurn12NextCommandHandoffReady,
-  type Turn12CompletedResolutionNextCommandHandoff,
-} from "./turn12ResolutionAdapter.ts";
+import type { Turn6CompletedResolutionNextCommandHandoff } from "./turn6ResolutionAdapter.ts";
+import type { Turn7CompletedResolutionNextCommandHandoff } from "./turn7ResolutionAdapter.ts";
+import type { Turn8CompletedResolutionNextCommandHandoff } from "./turn8ResolutionAdapter.ts";
+import type { Turn9CompletedResolutionNextCommandHandoff } from "./turn9ResolutionAdapter.ts";
+import type { Turn10CompletedResolutionNextCommandHandoff } from "./turn10ResolutionAdapter.ts";
+import type { Turn11CompletedResolutionNextCommandHandoff } from "./turn11ResolutionAdapter.ts";
+import type { Turn12CompletedResolutionNextCommandHandoff } from "./turn12ResolutionAdapter.ts";
 import {
   isLatestCompletedCommandHandoffReady,
   type LatestCompletedCommandHandoff,
@@ -2533,26 +2510,10 @@ export interface BattleSceneState {
   turn3NextCommandHandoff?: Turn3CompletedResolutionNextCommandHandoff | null;
   /** Completed turn-4 receipt published by the source-owned choose-action reset. */
   turn4NextCommandHandoff?: Turn4CompletedResolutionNextCommandHandoff | null;
-  /** Completed turn-5 receipt for the following FIGHT command. */
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null;
-  /** Completed turn-6 receipt for the following FIGHT command. */
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null;
-  /** Completed turn-7 receipt for the following FIGHT command. */
-  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null;
-  /** Completed turn-8 receipt for the following FIGHT command. */
-  turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null;
-  /** Completed turn-9 receipt for the following FIGHT command. */
-  turn9NextCommandHandoff: Turn9CompletedResolutionNextCommandHandoff | null;
-  /** Completed turn-10 receipt for the following FIGHT command. */
-  turn10NextCommandHandoff: Turn10CompletedResolutionNextCommandHandoff | null;
-  /** Completed turn-11 receipt for the following FIGHT command. */
-  turn11NextCommandHandoff: Turn11CompletedResolutionNextCommandHandoff | null;
-  /** Completed turn-12 receipt for the following FIGHT command. */
-  turn12NextCommandHandoff: Turn12CompletedResolutionNextCommandHandoff | null;
   /**
-   * Shadow-only generic receipt for the latest completed turn 5-13 command.
-   * Legacy fields remain the sole production render/dispatch route in this
-   * slice; later slices cut over only after content and reopen bridges exist.
+   * Generic completed-command owner for turns 5-13. Its immutable content
+   * drives the render dispatcher and its guard atomically installs the next
+   * owner at the next eligible reopen.
    */
   latestCompletedCommandHandoff?: LatestCompletedCommandHandoff | null;
   /**
@@ -2561,8 +2522,6 @@ export interface BattleSceneState {
    * and automatic opponent switch-in continuation.
    */
   opponentFaintPresentationOwner: OpponentFaintPresentationOwner | null;
-  /** Completed turn-13 receipt for the following FIGHT command. */
-  turn13NextCommandHandoff: Turn13CompletedResolutionNextCommandHandoff | null;
   /** Immutable retained-action resolution plus its request-owned selector. */
   resolutionOwner?: BattleSceneResolutionOwner | null;
   /**
@@ -2587,17 +2546,8 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn2NextCommandHandoff: null,
   turn3NextCommandHandoff: null,
   turn4NextCommandHandoff: null,
-  turn5NextCommandHandoff: null,
-  turn6NextCommandHandoff: null,
-  turn7NextCommandHandoff: null,
-  turn8NextCommandHandoff: null,
-  turn9NextCommandHandoff: null,
-  turn10NextCommandHandoff: null,
-  turn11NextCommandHandoff: null,
-  turn12NextCommandHandoff: null,
   latestCompletedCommandHandoff: null,
   opponentFaintPresentationOwner: null,
-  turn13NextCommandHandoff: null,
   resolutionOwner: null,
   battleOutcome: 0,
   terminalResolution: null,
@@ -2618,19 +2568,10 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn2NextCommandHandoff: state.turn2NextCommandHandoff ?? null,
     turn3NextCommandHandoff: state.turn3NextCommandHandoff ?? null,
     turn4NextCommandHandoff: state.turn4NextCommandHandoff ?? null,
-    turn5NextCommandHandoff: state.turn5NextCommandHandoff,
-    turn6NextCommandHandoff: state.turn6NextCommandHandoff,
-    turn7NextCommandHandoff: state.turn7NextCommandHandoff,
-    turn8NextCommandHandoff: state.turn8NextCommandHandoff,
-    turn9NextCommandHandoff: state.turn9NextCommandHandoff,
-    turn10NextCommandHandoff: state.turn10NextCommandHandoff,
-    turn11NextCommandHandoff: state.turn11NextCommandHandoff,
-    turn12NextCommandHandoff: state.turn12NextCommandHandoff,
     ...(state.latestCompletedCommandHandoff == null
       ? {}
       : { latestCompletedCommandHandoff: state.latestCompletedCommandHandoff }),
     opponentFaintPresentationOwner: state.opponentFaintPresentationOwner,
-    turn13NextCommandHandoff: state.turn13NextCommandHandoff,
     resolutionOwner: state.resolutionOwner ?? null,
     battleOutcome:
       postDismiss === null ? (state.battleOutcome ?? 0) : postDismiss.battleOutcome,
@@ -7720,6 +7661,17 @@ function drawFightSubmenuWindow(
   )
     ? turn4NextCommandHandoff
     : null;
+  // Staged ABI: the positional turn-5-13 parameters and their type exports
+  // remain through slice 10, but generic content is the only live dispatcher.
+  void turn5NextCommandHandoff;
+  void turn6NextCommandHandoff;
+  void turn7NextCommandHandoff;
+  void turn8NextCommandHandoff;
+  void turn9NextCommandHandoff;
+  void turn10NextCommandHandoff;
+  void turn11NextCommandHandoff;
+  void turn12NextCommandHandoff;
+  void turn13NextCommandHandoff;
   if (isLatestCompletedCommandHandoffReady(latestCompletedCommandHandoff)) {
     drawLatestCompletedCommandWindow(
       fb,
@@ -7730,134 +7682,6 @@ function drawFightSubmenuWindow(
       resolutionOwner,
       trainerPresentation,
     );
-    return;
-  }
-  if (resolutionOwner?.resolution.segmentIndex === 1) {
-    drawTurn15FightSubmenuWindow(
-      fb,
-      t,
-      sm,
-      resolutionOwner.resolution,
-      turn5NextCommandHandoff,
-      turn6NextCommandHandoff,
-      turn7NextCommandHandoff,
-      turn8NextCommandHandoff,
-      turn9NextCommandHandoff,
-      turn10NextCommandHandoff,
-      turn11NextCommandHandoff,
-      turn12NextCommandHandoff,
-      turn13NextCommandHandoff,
-    );
-    return;
-  }
-  if (resolutionOwner?.resolution.segmentIndex === 0) {
-    drawTurn14FightSubmenuWindow(
-      fb,
-      t,
-      sm,
-      turn5NextCommandHandoff,
-      turn6NextCommandHandoff,
-      turn7NextCommandHandoff,
-      turn8NextCommandHandoff,
-      turn9NextCommandHandoff,
-      turn10NextCommandHandoff,
-      turn11NextCommandHandoff,
-      turn12NextCommandHandoff,
-      turn13NextCommandHandoff,
-    );
-    return;
-  }
-  if (isTurn13NextCommandHandoffReady(turn13NextCommandHandoff)) {
-    throw new Error("resolved turn-13 handoff has no retained action presentation owner");
-  }
-  if (isTurn12NextCommandHandoffReady(turn12NextCommandHandoff)) {
-    // S7/S8 (docs/turn13-notes.md): turn 13 is the winning line's own FIFTH
-    // reconvergence turn - a single `DOWN` press moves the cursor off
-    // ROCK_SLIDE onto DRAGON_BREATH (slot 2, the 2x2 grid's row-move case) -
-    // its own dedicated dispatcher, same "genuinely different PP/text"
-    // reason the completed turn-11 receipt's branch below already establishes
-    // for turn 12.
-    drawTurn13FightSubmenuWindow(
-      fb,
-      t,
-      sm,
-      turn5NextCommandHandoff,
-      turn6NextCommandHandoff,
-      turn7NextCommandHandoff,
-      turn8NextCommandHandoff,
-      turn9NextCommandHandoff,
-      turn10NextCommandHandoff,
-      turn11NextCommandHandoff,
-      turn12NextCommandHandoff,
-      opponentFaintPresentationOwner,
-      trainerPresentation,
-    );
-    return;
-  }
-  if (isTurn11NextCommandHandoffReady(turn11NextCommandHandoff)) {
-    // S7/S8 (docs/turn12-notes.md): turn 12 is the winning line's own
-    // FOURTH reconvergence turn - zero navigation presses (cursor already
-    // rests on ROCK_SLIDE from turn 11's own confirm) - its own dedicated
-    // dispatcher, same "genuinely different PP/text" reason the completed
-    // turn-10 receipt's branch below already establishes for turn 11.
-    drawTurn12FightSubmenuWindow(fb, t, sm, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, turn8NextCommandHandoff, turn9NextCommandHandoff, turn10NextCommandHandoff, turn11NextCommandHandoff);
-    return;
-  }
-  if (isTurn10NextCommandHandoffReady(turn10NextCommandHandoff)) {
-    // S7 slice R rung 1 (docs/turn11-notes.md): turn 11 is the winning
-    // line's own THIRD reconvergence turn - zero navigation presses (cursor
-    // already rests on ROCK_SLIDE from turn 10's own confirm) - its own
-    // dedicated dispatcher, same "genuinely different PP/text" reason the
-    // completed turn-9 receipt's branch below already establishes turn 10.
-    drawTurn11FightSubmenuWindow(fb, t, sm, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, turn8NextCommandHandoff, turn9NextCommandHandoff, turn10NextCommandHandoff);
-    return;
-  }
-  if (isTurn9NextCommandHandoffReady(turn9NextCommandHandoff)) {
-    // S7 slice R rung (a): turn 10 is the winning line's own SECOND
-    // reconvergence turn - zero navigation presses (cursor already rests on
-    // ROCK_SLIDE from turn 9's own confirm) - its own dedicated dispatcher,
-    // same distinct PP/text reason the completed turn-8 receipt's branch
-    // below already establishes for turn 9.
-    drawTurn10FightSubmenuWindow(fb, t, sm, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, turn8NextCommandHandoff, turn9NextCommandHandoff);
-    return;
-  }
-  if (isTurn8NextCommandHandoffReady(turn8NextCommandHandoff)) {
-    // S7 slice R: turn 9 is the winning line's own reconvergence turn - one
-    // LEFT press moves the cursor off BIND back onto ROCK_SLIDE - its own
-    // dedicated dispatcher, same "genuinely different PP/text" reason
-    // The completed turn-7 handoff branch below already establishes turn 8.
-    drawTurn9FightSubmenuWindow(fb, t, sm, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, turn8NextCommandHandoff);
-    return;
-  }
-  if (isTurn7NextCommandHandoffReady(turn7NextCommandHandoff)) {
-    // S7 slice P: turn 8 is the winning line's own divergence turn - one
-    // RIGHT press onto BIND instead of ROCK_SLIDE, its own dedicated
-    // dispatcher, following the completed turn-6 handoff's turn-7 branch.
-    drawTurn8FightSubmenuWindow(
-      fb,
-      t,
-      sm,
-      turn5NextCommandHandoff,
-      turn6NextCommandHandoff,
-      turn7NextCommandHandoff,
-    );
-    return;
-  }
-  if (isTurn6NextCommandHandoffReady(turn6NextCommandHandoff)) {
-    // S7 slice O: turn 7 repeats turn 6's exact scene (same battlers) - its
-    // own dedicated dispatcher, same "genuinely different PP/text" reason
-    // The completed turn-5 handoff below establishes the distinct
-    // Pidgeotto base scene for this sibling dispatcher.
-    drawTurn7FightSubmenuWindow(fb, t, sm, turn5NextCommandHandoff, turn6NextCommandHandoff);
-    return;
-  }
-  if (isTurn5NextCommandHandoffReady(turn5NextCommandHandoff)) {
-    // S7 slice N: turn 6 is a genuinely different base scene (Pidgeotto, not
-    // Grovyle, is on-field) - dispatched to its own dedicated function rather
-    // than threading a 5th tier through every Grovyle-shaped helper above
-    // (`drawMenuIdleBaseWithOpponentHp` et al. bake in `menuIdleBase`'s own
-    // Grovyle harvest, which is simply wrong for this opponent).
-    drawTurn6FightSubmenuWindow(fb, t, sm, turn5NextCommandHandoff);
     return;
   }
   if (sm.openElapsed === null) {
@@ -18180,15 +18004,15 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
       state.turn2NextCommandHandoff ?? null,
       state.turn3NextCommandHandoff ?? null,
       state.turn4NextCommandHandoff ?? null,
-      state.turn5NextCommandHandoff,
-      state.turn6NextCommandHandoff,
-      state.turn7NextCommandHandoff,
-      state.turn8NextCommandHandoff,
-      state.turn9NextCommandHandoff,
-      state.turn10NextCommandHandoff,
-      state.turn11NextCommandHandoff,
-      state.turn12NextCommandHandoff,
-      state.turn13NextCommandHandoff,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
       state.latestCompletedCommandHandoff ?? null,
       state.opponentFaintPresentationOwner,
       state.resolutionOwner ?? null,

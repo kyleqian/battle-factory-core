@@ -24,19 +24,11 @@ import {
   TURN17_FIRE_PUNCH_RESOLUTION,
 } from "../src/animation/firePunch.ts";
 import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "../src/engine/turn15FlyResolutionAdapter.ts";
-import { resolveTurn13CompletedResolutionNextCommandHandoff } from "../src/engine/turn13ResolutionAdapter.ts";
+import { resolveTurn13LatestCompletedCommandHandoff } from "../src/engine/turn13ResolutionAdapter.ts";
 import { resolveTurn1CompletedResolutionNextCommandHandoff } from "../src/engine/turn1ResolutionAdapter.ts";
 import { resolveTurn2CompletedResolutionNextCommandHandoff } from "../src/engine/turn2ResolutionAdapter.ts";
 import { resolveTurn3CompletedResolutionNextCommandHandoff } from "../src/engine/turn3ResolutionAdapter.ts";
 import { resolveTurn4CompletedResolutionNextCommandHandoff } from "../src/engine/turn4ResolutionAdapter.ts";
-import { resolveTurn5CompletedResolutionNextCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
-import { resolveTurn6CompletedResolutionNextCommandHandoff } from "../src/engine/turn6ResolutionAdapter.ts";
-import { resolveTurn7CompletedResolutionNextCommandHandoff } from "../src/engine/turn7ResolutionAdapter.ts";
-import { resolveTurn8CompletedResolutionNextCommandHandoff } from "../src/engine/turn8ResolutionAdapter.ts";
-import { resolveTurn9CompletedResolutionNextCommandHandoff } from "../src/engine/turn9ResolutionAdapter.ts";
-import { resolveTurn10CompletedResolutionNextCommandHandoff } from "../src/engine/turn10ResolutionAdapter.ts";
-import { resolveTurn11CompletedResolutionNextCommandHandoff } from "../src/engine/turn11ResolutionAdapter.ts";
-import { resolveTurn12CompletedResolutionNextCommandHandoff } from "../src/engine/turn12ResolutionAdapter.ts";
 import { createInitialState, tick } from "../src/engine/core.ts";
 import { CLOSED_FIGHT_SUBMENU_STATE } from "../src/engine/battleMenu.ts";
 import {
@@ -72,15 +64,7 @@ describe("turn 17 faint hold and outcome latency", () => {
         turn2NextCommandHandoff: resolveTurn2CompletedResolutionNextCommandHandoff(2197),
         turn3NextCommandHandoff: resolveTurn3CompletedResolutionNextCommandHandoff(3172),
         turn4NextCommandHandoff: resolveTurn4CompletedResolutionNextCommandHandoff(4312),
-        turn5NextCommandHandoff: resolveTurn5CompletedResolutionNextCommandHandoff(),
-        turn6NextCommandHandoff: resolveTurn6CompletedResolutionNextCommandHandoff(),
-        turn7NextCommandHandoff: resolveTurn7CompletedResolutionNextCommandHandoff(),
-        turn8NextCommandHandoff: resolveTurn8CompletedResolutionNextCommandHandoff(),
-        turn9NextCommandHandoff: resolveTurn9CompletedResolutionNextCommandHandoff(),
-        turn10NextCommandHandoff: resolveTurn10CompletedResolutionNextCommandHandoff(),
-        turn11NextCommandHandoff: resolveTurn11CompletedResolutionNextCommandHandoff(),
-        turn12NextCommandHandoff: resolveTurn12CompletedResolutionNextCommandHandoff(),
-        turn13NextCommandHandoff: resolveTurn13CompletedResolutionNextCommandHandoff(),
+        latestCompletedCommandHandoff: resolveTurn13LatestCompletedCommandHandoff(),
         resolutionOwner: Object.freeze({
           resolution: CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution,
           forcedPartySelect: null,

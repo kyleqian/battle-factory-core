@@ -211,7 +211,7 @@ function stateAtTick(firstTickAbsolute: number): EngineState {
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
-    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: null, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null },
+    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: null, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, },
   };
 }
 
@@ -771,13 +771,7 @@ function stateAtTurn3Reopen(firstTickAbsolute: number): EngineState {
       },
       turn1NextCommandHandoff: TURN1_HANDOFF,
       turn2NextCommandHandoff: firstTickAbsolute >= 3237 ? TURN2_HANDOFF : null,
-      turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, turn5NextCommandHandoff: null,
-    turn6NextCommandHandoff: null,
-    turn7NextCommandHandoff: null,
-    turn8NextCommandHandoff: null,
-    turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null,
-    turn12NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null,
-    },
+      turn3NextCommandHandoff: null, turn4NextCommandHandoff: null,                     latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null,     },
   };
 }
 
@@ -898,13 +892,7 @@ function stateAtTurn3Confirm(): EngineState {
       },
       turn1NextCommandHandoff: TURN1_HANDOFF,
       turn2NextCommandHandoff: TURN2_HANDOFF,
-      turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, turn5NextCommandHandoff: null,
-    turn6NextCommandHandoff: null,
-    turn7NextCommandHandoff: null,
-    turn8NextCommandHandoff: null,
-    turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null,
-    turn12NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null,
-    },
+      turn3NextCommandHandoff: null, turn4NextCommandHandoff: null,                     latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null,     },
   };
 }
 
@@ -1092,13 +1080,7 @@ function stateAtTurn4Confirm(): EngineState {
       turn1NextCommandHandoff: TURN1_HANDOFF,
       turn2NextCommandHandoff: TURN2_HANDOFF,
       turn3NextCommandHandoff: TURN3_HANDOFF,
-      turn4NextCommandHandoff: null, turn5NextCommandHandoff: null,
-    turn6NextCommandHandoff: null,
-    turn7NextCommandHandoff: null,
-    turn8NextCommandHandoff: null,
-    turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null,
-    turn12NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null,
-    },
+      turn4NextCommandHandoff: null,                     latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null,     },
   };
 }
 
@@ -1142,13 +1124,7 @@ function stateAtTurn5Confirm(): EngineState {
       turn1NextCommandHandoff: TURN1_HANDOFF,
       turn2NextCommandHandoff: TURN2_HANDOFF,
       turn3NextCommandHandoff: TURN3_HANDOFF,
-      turn4NextCommandHandoff: TURN4_HANDOFF, turn5NextCommandHandoff: null,
-    turn6NextCommandHandoff: null,
-    turn7NextCommandHandoff: null,
-    turn8NextCommandHandoff: null,
-    turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null,
-    turn12NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null,
-    },
+      turn4NextCommandHandoff: TURN4_HANDOFF,                     latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null,     },
   };
 }
 
@@ -1250,13 +1226,7 @@ function stateAtTurn5SitrusConfirm(): EngineState {
       turn1NextCommandHandoff: TURN1_HANDOFF,
       turn2NextCommandHandoff: TURN2_HANDOFF,
       turn3NextCommandHandoff: TURN3_HANDOFF,
-      turn4NextCommandHandoff: TURN4_HANDOFF, turn5NextCommandHandoff: null,
-    turn6NextCommandHandoff: null,
-    turn7NextCommandHandoff: null,
-    turn8NextCommandHandoff: null,
-    turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null,
-    turn12NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, turn13NextCommandHandoff: null,
-    },
+      turn4NextCommandHandoff: TURN4_HANDOFF,                     latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null,     },
   };
 }
 
