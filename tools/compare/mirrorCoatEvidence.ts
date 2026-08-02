@@ -1,12 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import {
-  mkdtempSync,
-  readFileSync,
-  realpathSync,
-  writeFileSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   createSceneOnMovePresentation,
@@ -15,6 +9,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { mirrorCoatScenario } from "./mirrorCoatScenario.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture extends SceneOnMirrorCoatConfig {
   schema: string;
@@ -95,9 +90,7 @@ function verify(fixturePath: string, runNumber: number): void {
   const fixture = JSON.parse(
     readFileSync(resolve(fixturePath), "utf8"),
   ) as Fixture;
-  const scratch = mkdtempSync(
-    join(tmpdir(), "pokebench-mirror-coat-evidence-"),
-  );
+  const scratch = createScratchDir("pokebench-mirror-coat-evidence-");
   const scenario = join(scratch, "scenario.json");
   const output = join(scratch, "probe.json");
   const rgb = join(scratch, "rgb");

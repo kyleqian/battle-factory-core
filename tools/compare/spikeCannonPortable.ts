@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { spikeCannonEffectAtAge } from "../../src/animation/spikeCannon.ts";
 import {
@@ -14,6 +13,7 @@ import {
   render,
   type EngineState,
 } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture extends SceneOnSpikeCannonConfig {
   readonly scenario: string;
@@ -124,7 +124,7 @@ function verify(fixturePath: string): void {
   const fixture = JSON.parse(
     readFileSync(resolve(fixturePath), "utf8"),
   ) as Fixture;
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-spike-portable-"));
+  const scratch = createScratchDir("pokebench-spike-portable-");
   const output = join(scratch, "probe.json");
   const rgbDir = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

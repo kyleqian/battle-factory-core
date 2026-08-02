@@ -4,6 +4,55 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 848 — [user-directed maintenance, 2026-08-01 21:40] $TMPDIR scratch leak fixed (95% was the suite, not tools/) + four papercuts retired
+
+- **State:** full `npm test` 587 files / 6,104 passed / 1 skipped and
+  `npm run build` green after the change. A full suite run now leaves
+  $TMPDIR byte-for-byte unchanged (103,872 entries before and after);
+  it previously leaked ~40 directories per run.
+- **Did:**
+  - **Scratch-directory leak.** $TMPDIR held 97k+ orphaned directories /
+    262 GB. Attributing every leaked directory name back to the literal
+    prefix that created it showed **~95% came from `tests/`, not `tools/`**
+    (tools/ is 2.5%) — the top offenders (`pokeemerald-factory-catalog-`
+    10,040, `compare-source-`/`compare-paths-`/`compare-output-` 2,503 each)
+    are all test files. Fix is `tests/setup/scratchSandbox.ts` +
+    `scratchSandboxGlobal.ts`: `os.tmpdir()` re-reads $TMPDIR on every call,
+    so redirecting it to a per-worker sandbox captures all ~200 call sites
+    with no per-site edits. Removal is owned by the globalSetup teardown
+    because vitest terminates workers, so their `process.on("exit")` never
+    fires. `tools/lib/scratch.ts` + a 118-file codemod covers tools run as
+    their own process; cleanup there is gated on exit code 0 so a comparator
+    that finds a mismatch still keeps its diagnostic PNGs.
+  - **`npm run sweep-scratch`** (`tools/sweep-scratch-dirs.ts`) reclaims
+    existing debris. It derives its prefix list from the source, so new
+    tools/suites are swept without updating a list. Dry run reports
+    **88,751 directories / 210.63 GB** older than 24h. NOT yet applied —
+    awaiting the user.
+  - **Four papercuts fixed and deleted:** `.rgignore` for generated
+    JSON/bundles (206 files hidden from plain `rg`; note `-g` overrides it);
+    `run-subagent.sh` now accepts `--reasoning`/`--reasoning-effort`,
+    `--brief TEXT`, `--side-worktree`, and strips a trailing
+    `-worktree`/`-lane` from `--lane`; vitest discovery pinned to
+    `tests/**/*.test.ts` so nested checkouts cannot double it; ImageMagick
+    entry deleted (ffmpeg is installed and is the path).
+  - **Corrected a stale papercut:** the Codex-stdin entry proposed closing
+    Codex stdin as the fix — `codex exec ... </dev/null` has been in the
+    launcher since `1ef2c4ce` (2026-07-21), before the wedge. Entry now
+    records that explicitly so nobody re-plumbs it.
+  - Mirrored the generic pieces to `_template` (harness repo).
+- **Next:** decide whether to run `npm run sweep-scratch --apply` (210 GB);
+  open question from the user on vitest worker counts across concurrent
+  sessions. #39 remainder (`opponentFaintDismissElapsed`, dispatcher debt)
+  is untouched.
+- **Notes:** `tools/` is not in `tsconfig.include`, so the 118-file codemod
+  had no compiler safety net — it was verified by parsing every modified
+  file with the TypeScript parser, asserting import/usage consistency per
+  file, and the full suite (15 suites import `tools/compare` modules).
+  `tests/toolsScratchDir.test.ts` pins both directions of the exit-code
+  gating.
+
+---
 > **STANDING ARRANGEMENT (user directive, 2026-07-26):** the animation
 > program runs under its own supervisor (`./run-supervisor.sh --lane
 > animation`, guide `ANIMATION_SUPERVISOR.md`) in the persistent

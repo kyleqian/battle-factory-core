@@ -66,11 +66,13 @@ Usage: tools/run-subagent.sh [options] "step brief for the worker"
   -m, --model NAME      worker model (provider default)
   -e, --effort EFFORT   Codex reasoning effort (Terra/Luna=max; Sol=high;
                         max mode also permits Sol/xhigh)
-  -w, --worktree        alias for --lane side
+                        (aliases: --reasoning, --reasoning-effort)
+  -w, --worktree        alias for --lane side (also --side-worktree)
       --animation-worktree
                         alias for --lane animation
   -l, --lane NAME       main, side, or animation. Side/animation use fresh
-                        worktrees and must not touch shared docs.
+                        worktrees and must not touch shared docs. A trailing
+                        "-worktree"/"-lane" is accepted and stripped.
       --base REF        base the side/animation worktree on REF instead of
                         current HEAD (name the last supervisor-verified green
                         commit when launching while main is mid-step, so the
@@ -78,6 +80,7 @@ Usage: tools/run-subagent.sh [options] "step brief for the worker"
                         states)
       --log FILE        provider event log path
       --brief-file FILE read the step brief verbatim from a file
+      --brief TEXT      alias for the positional step brief
       --read-only       run an audit that must leave no edits or commits
       --audit           alias for --read-only
       --print-config    print the resolved profile without launching
@@ -103,6 +106,7 @@ AGENT_LOG="${AGENT_LOG:-}"
 LANE="${WORKER_LANE:-main}"
 if [[ "${WORKTREE:-0}" == "1" ]]; then LANE="side"; fi
 BRIEF=""
+BRIEF_OPT=""
 BRIEF_FILE=""
 WT_BASE_REF=""
 PRINT_CONFIG=0
@@ -114,7 +118,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     -c|--cap-minutes) CAP_MINUTES="${2:?--cap-minutes needs a number}"; shift 2 ;;
     --cap-minutes=*)  CAP_MINUTES="${1#*=}"; shift ;;
-    -w|--worktree)    LANE="side"; shift ;;
+    -w|--worktree|--side-worktree|--side-lane) LANE="side"; shift ;;
     --animation-worktree|--animation-lane) LANE="animation"; shift ;;
     -l|--lane)        LANE="${2:?--lane needs main, side, or animation}"; shift 2 ;;
     --lane=*)         LANE="${1#*=}"; shift ;;
@@ -125,12 +129,16 @@ while [[ $# -gt 0 ]]; do
     -M|--max-mode)    MAX_MODE=1; shift ;;
     -m|--model)       MODEL="${2:?--model needs a model name}"; MODEL_FLAG_SET=1; shift 2 ;;
     --model=*)        MODEL="${1#*=}"; MODEL_FLAG_SET=1; shift ;;
-    -e|--effort)      REASONING_EFFORT="${2:?--effort needs a value}"; shift 2 ;;
-    --effort=*)       REASONING_EFFORT="${1#*=}"; shift ;;
+    -e|--effort|--reasoning|--reasoning-effort)
+                      REASONING_EFFORT="${2:?--effort needs a value}"; shift 2 ;;
+    --effort=*|--reasoning=*|--reasoning-effort=*)
+                      REASONING_EFFORT="${1#*=}"; shift ;;
     --log)            AGENT_LOG="${2:?--log needs a path}"; shift 2 ;;
     --log=*)          AGENT_LOG="${1#*=}"; shift ;;
     --brief-file)     BRIEF_FILE="${2:?--brief-file needs a path}"; shift 2 ;;
     --brief-file=*)   BRIEF_FILE="${1#*=}"; shift ;;
+    --brief)          BRIEF_OPT="${2:?--brief needs the step brief text}"; shift 2 ;;
+    --brief=*)        BRIEF_OPT="${1#*=}"; shift ;;
     --read-only|--audit) READ_ONLY=1; shift ;;
     --print-config)   PRINT_CONFIG=1; shift ;;
     -h|--help)        usage; exit 0 ;;
@@ -162,10 +170,23 @@ if [[ "$MAX_MODE" == "1" ]]; then
   REASONING_EFFORT="${REASONING_EFFORT:-xhigh}"
 fi
 
+# `--brief TEXT` is an alias for the positional brief: supervisor briefs kept
+# reaching for it by analogy with --brief-file (PAPERCUTS, 3 hits).
+if [[ -n "$BRIEF_OPT" ]]; then
+  if [[ -n "$BRIEF" ]]; then
+    echo "run-subagent: use either --brief or a positional brief, not both" >&2
+    exit 2
+  fi
+  BRIEF="$BRIEF_OPT"
+fi
 if [[ -n "$BRIEF" && -n "$BRIEF_FILE" ]]; then
   echo "run-subagent: use either a positional brief or --brief-file, not both" >&2
   exit 2
 fi
+# Accept the conceptual lane spellings (`side-worktree`, `animation-lane`) that
+# supervisor briefs use in prose.
+LANE="${LANE%-worktree}"
+LANE="${LANE%-lane}"
 if [[ -n "$BRIEF_FILE" ]]; then
   if [[ ! -r "$BRIEF_FILE" ]]; then
     echo "run-subagent: cannot read brief file '$BRIEF_FILE'" >&2

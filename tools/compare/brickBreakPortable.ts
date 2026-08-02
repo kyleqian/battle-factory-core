@@ -1,11 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import {
-  mkdtempSync,
-  readFileSync,
-  realpathSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   brickBreakAtAge,
@@ -17,6 +12,7 @@ import {
   type SceneOnBrickBreakConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 type Fixture = {
   schema: string;
@@ -126,7 +122,7 @@ function verify(path: string, pass: number): void {
   const fixture = JSON.parse(readFileSync(resolve(path), "utf8")) as Fixture;
   const body: BrickBreakBody = fixture.sourceWindow.frameCount === 151
     ? "normal" : "shattered-wall";
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-brick-live-"));
+  const scratch = createScratchDir("pokebench-brick-live-");
   const out = join(scratch, "probe.json");
   const rgb = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

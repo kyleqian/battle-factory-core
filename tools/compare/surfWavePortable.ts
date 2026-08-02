@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   SURF_WAVE_FRAME_COUNT,
@@ -13,6 +12,7 @@ import {
   type SceneOnSurfConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 interface Window {
   readonly startFrame: number;
@@ -109,7 +109,7 @@ function configFor(playerToOpponent: boolean): SceneOnSurfConfig {
 
 function runFixture(fixturePath: string, runNumber: number): void {
   const fixture = JSON.parse(readFileSync(resolve(fixturePath), "utf8")) as Fixture;
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-surf-wave-proof-"));
+  const scratch = createScratchDir("pokebench-surf-wave-proof-");
   const output = join(scratch, "probe.json");
   const rgbDir = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

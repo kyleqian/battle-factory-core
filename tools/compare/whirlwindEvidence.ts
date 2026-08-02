@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   whirlwindAtAge,
@@ -14,6 +13,7 @@ import {
   type SceneOnWhirlwindConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture {
   readonly schema: string;
@@ -163,7 +163,7 @@ function verify(fixturePath: string, runNumber: number): void {
   ) {
     throw new Error(`${fixture.orientation}: invalid fixture contract`);
   }
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-whirlwind-evidence-"));
+  const scratch = createScratchDir("pokebench-whirlwind-evidence-");
   const output = join(scratch, "probe.json");
   const rgbDir = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

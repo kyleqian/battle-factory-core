@@ -2,8 +2,7 @@
 // shape as confusionPortable.ts/futureSightPortable.ts. Supports the same
 // `--per-frame-bbox` flag confusionPortable.ts's own module doc explains.
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   createSceneOnMovePresentation,
@@ -12,6 +11,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { getMonGender } from "../../src/engine/monGender.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 const GENDER_RATIO: Record<string, number> = { KADABRA: 63, ONIX: 127 };
 
@@ -39,7 +39,7 @@ if (!fixtureArg) throw new Error("usage: psychicPortable.ts <fixture.json> [--pe
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
 const fixturePath = resolve(fixtureArg);
 const fixture = JSON.parse(readFileSync(fixturePath, "utf8")) as Fixture;
-const scratch = mkdtempSync(join(tmpdir(), "pokebench-psychic-compare-"));
+const scratch = createScratchDir("pokebench-psychic-compare-");
 const output = join(scratch, "probe.json");
 const rgbDir = join(scratch, "rgb");
 const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

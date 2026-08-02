@@ -1,8 +1,7 @@
 // Fresh complete software/hardware/audio proof for legal Scene-ON TAIL_GLOW.
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   TAIL_GLOW_BODY_FRAME_COUNT,
@@ -18,6 +17,7 @@ import {
   render,
   type EngineState,
 } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 type Fixture = {
   scenario: string; probe: string;
@@ -57,7 +57,7 @@ function blendBgr555TowardBlack(color: number, coefficient: number): number {
 
 function run(fixturePath: string, runNumber: number): string {
   const fixture = JSON.parse(readFileSync(resolve(fixturePath), "utf8")) as Fixture;
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-tail-glow-evidence-"));
+  const scratch = createScratchDir("pokebench-tail-glow-evidence-");
   const output = join(scratch, "probe.json");
   const rgbDir = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

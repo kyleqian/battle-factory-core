@@ -1,7 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { roarAtAge } from "../../src/animation/roar.ts";
 import {
@@ -15,6 +14,7 @@ import {
   render,
   type EngineState,
 } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 type Fixture = {
   schema: "roar-portable-evidence/v1";
@@ -70,7 +70,7 @@ const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
 
 function verify(path: string, runNumber: number): void {
   const fixture = JSON.parse(readFileSync(resolve(path), "utf8")) as Fixture;
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-roar-portable-"));
+  const scratch = createScratchDir("pokebench-roar-portable-");
   const output = join(scratch, "probe.json");
   const rgbDir = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

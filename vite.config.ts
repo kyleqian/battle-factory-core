@@ -10,10 +10,19 @@ export default defineConfig({
     port: 5173,
   },
   test: {
-    // The parallel-worker lane (`tools/run-subagent.sh --worktree`) checks a
-    // second copy of the repo out under `.worktrees/`; without this exclude
-    // vitest's default glob picks those tests up too while a worktree is live.
+    // Every suite lives in `tests/`. Pinning discovery there (rather than
+    // vitest's default repo-wide glob) keeps nested checkouts invisible: the
+    // parallel-worker lane checks a second copy of the repo out under
+    // `.worktrees/`, and differential worktrees occasionally land elsewhere
+    // under the run root — either one otherwise doubles every suite.
+    include: ["tests/**/*.test.ts"],
     exclude: [...configDefaults.exclude, "**/.worktrees/**"],
+    // Redirects $TMPDIR to a per-process sandbox that is removed on exit, so
+    // the suite's ~200 `mkdtempSync(join(tmpdir(), ...))` sites stop leaking
+    // scratch directories that macOS only sweeps on reboot. See the file
+    // header for the measurement behind this.
+    setupFiles: ["tests/setup/scratchSandbox.ts"],
+    globalSetup: ["tests/setup/scratchSandboxGlobal.ts"],
     // Concurrent supervisor lanes each spawning a full-width fork pool
     // oversubscribe the machine (measured 16-30min full suites vs ~3-8min
     // solo). `run-subagent.sh` exports a low cap for worker sessions;

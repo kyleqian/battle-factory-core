@@ -9,10 +9,10 @@
 // The probe exits 139 during libmGBA teardown after writing valid JSON; that
 // historical quirk is accepted only when the expected output was completed.
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { existsSync, readFileSync, rmSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { runOracleTrace, type Trace } from "../compare/oracleClient.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 const TRACE_PATH = "tools/compare/traces/turn14-fly-miss.json";
 // The immediately preceding framebuffer (17780) still contains Murkrow due
@@ -144,7 +144,7 @@ function runRamProbe(output: string): void {
   if (!existsSync(output)) throw new Error("RAM/OAM probe did not write its output");
 }
 
-const temp = mkdtempSync(join(tmpdir(), "flyup-affine-"));
+const temp = createScratchDir("flyup-affine-");
 try {
   const dumpPath = join(temp, "ram-oam.json");
   runRamProbe(dumpPath);

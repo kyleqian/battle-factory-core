@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import { createScratchDir } from "../lib/scratch.ts";
 
 interface Window { readonly startFrame: number; readonly endFrame: number; readonly frameCount: number }
 interface Fixture { readonly scenario: string; readonly probe: string; readonly orientation: string; readonly captureWindow: Window; readonly blendParticleActiveWindow: Window; readonly sourceOwnedComponentWindow: Window; readonly evidenceSha256: string; readonly rawRgbSha256: string }
@@ -21,7 +21,7 @@ function rawDigest(dir: string, frames: readonly Frame[]): string {
 }
 function run(number: number): void {
   const fixture = JSON.parse(readFileSync(resolve(fixturePath), "utf8")) as Fixture;
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-fake-tears-evidence-"));
+  const scratch = createScratchDir("pokebench-fake-tears-evidence-");
   const output = join(scratch, "probe.json"); const rgb = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
   const proc = spawnSync("python3", [join(root, "tools/run-mgba-probe.py"), output, "--", join(vendor, "mgba-venv/bin/python"), resolve(root, fixture.probe), resolve(root, fixture.scenario), output, rgb], { cwd: root, encoding: "utf8" });

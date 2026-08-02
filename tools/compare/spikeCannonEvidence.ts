@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture { readonly scenario: string; readonly orientation: string; readonly sourceWindow: { readonly startFrame: number; readonly endFrame: number; readonly frameCount: number }; readonly evidenceSha256: string; readonly rawRgbSha256: string; }
 interface Frame { readonly frame: number; readonly sha256: string; readonly gAnimScriptActive: number; readonly scriptOffset: number | null; readonly tasks: readonly { readonly func: { readonly symbol: string | null } }[]; readonly sprites: readonly { readonly template: { readonly symbol: string | null } }[]; readonly hardwareOam: readonly string[]; readonly hardwareMatrices: readonly unknown[]; readonly hardwarePalette: readonly number[]; readonly fadedPalette: readonly number[]; readonly paletteTags: readonly number[]; readonly registers: Readonly<Record<string, number>>; readonly se1: { readonly tracks: readonly unknown[]; readonly rawInfo: string }; readonly se2: { readonly tracks: readonly unknown[]; readonly rawInfo: string }; }
@@ -13,7 +13,7 @@ if (fixtures.length !== 2) throw new Error("usage: spikeCannonEvidence.ts <playe
 const fresh = new Map<string, { evidence: string; raw: string }>();
 for (let repeat = 0; repeat < 2; repeat += 1) for (const path of fixtures) {
   const fixture = JSON.parse(readFileSync(resolve(path), "utf8")) as Fixture;
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-spike-cannon-"));
+  const scratch = createScratchDir("pokebench-spike-cannon-");
   const output = join(scratch, "probe.json"), rgb = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
   const run = spawnSync("python3", [join(root, "tools/run-mgba-probe.py"), output, "--", join(vendor, "mgba-venv/bin/python"), join(root, "tools/compare/spikeCannonProbe.py"), resolve(root, fixture.scenario), output, rgb], { cwd: root, encoding: "utf8" });

@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { rollingKickAtAge } from "../../src/animation/rollingKick.ts";
 import {
@@ -10,6 +9,7 @@ import {
   type SceneOnRollingKickConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 type Side = "player" | "opponent";
 type Fixture = SceneOnRollingKickConfig & {
@@ -59,7 +59,7 @@ const pan = (side: Side, sound: "SE_M_DOUBLE_TEAM" | "SE_M_VITAL_THROW2") =>
 
 function verify(path: string, runNumber: number): void {
   const fixture = JSON.parse(readFileSync(resolve(path), "utf8")) as Fixture;
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-rolling-kick-"));
+  const scratch = createScratchDir("pokebench-rolling-kick-");
   const output = join(scratch, "probe.json");
   const rgbDir = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

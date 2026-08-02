@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { astonishAtAge } from "../../src/animation/astonish.ts";
 import {
@@ -13,6 +12,7 @@ import {
   render,
   type EngineState,
 } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture { readonly scenario: string; readonly probe: string; readonly orientation: string; readonly sourceWindow: { readonly startFrame: number; readonly endFrame: number; readonly frameCount: number }; readonly evidenceSha256: string; readonly rawRgbSha256: string; }
 interface Sprite {
@@ -39,7 +39,7 @@ const hex16 = (value: number) =>
 
 function verify(path: string, runNumber: number): void {
   const fixture = JSON.parse(readFileSync(resolve(path), "utf8")) as Fixture;
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-astonish-evidence-")); const output = join(scratch, "probe.json"); const rgb = join(scratch, "rgb");
+  const scratch = createScratchDir("pokebench-astonish-evidence-"); const output = join(scratch, "probe.json"); const rgb = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
   const probeRun = spawnSync("python3", [join(root, "tools/run-mgba-probe.py"), output, "--", join(vendor, "mgba-venv/bin/python"), resolve(root, fixture.probe), resolve(root, fixture.scenario), output, rgb], { cwd: root, encoding: "utf8" });
   if (probeRun.stdout) globalThis.process.stdout.write(probeRun.stdout); if (probeRun.stderr) globalThis.process.stderr.write(probeRun.stderr);

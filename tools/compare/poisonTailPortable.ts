@@ -1,6 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { horizontalLungeDestroyTick } from "../../src/animation/horizontalLunge.ts";
 import {
@@ -14,6 +13,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import poisonTailAsset from "../../src/animation/assets/poisonTail.json" with { type: "json" };
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture {
   readonly scenario: string;
@@ -69,7 +69,7 @@ interface ProbeFrame {
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
 const fixture = JSON.parse(readFileSync(resolve(process.argv[2]!), "utf8")) as Fixture;
-const scratch = mkdtempSync(join(tmpdir(), "pokebench-poison-tail-portable-"));
+const scratch = createScratchDir("pokebench-poison-tail-portable-");
 const output = join(scratch, "probe.json");
 const rgbDir = join(scratch, "rgb");
 const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

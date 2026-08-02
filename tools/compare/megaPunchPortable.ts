@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { megaPunchAtAge } from "../../src/animation/megaPunch.ts";
 import {
@@ -10,6 +9,7 @@ import {
   type SceneOnMegaPunchConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 type Fixture = SceneOnMegaPunchConfig & {
   schema: "mega-punch-portable-evidence/v1";
@@ -57,7 +57,7 @@ function targetPan(side: "player" | "opponent"): number {
 
 function verify(path: string, runNumber: number): void {
   const fixture = JSON.parse(readFileSync(resolve(path), "utf8")) as Fixture;
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-mega-punch-"));
+  const scratch = createScratchDir("pokebench-mega-punch-");
   const output = join(scratch, "probe.json");
   const rgbDir = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

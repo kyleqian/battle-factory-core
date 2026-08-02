@@ -1,10 +1,4 @@
-import {
-  mkdtempSync,
-  mkdirSync,
-  readFileSync,
-  realpathSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
+import { mkdirSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -14,6 +8,7 @@ import {
   type SceneOnFirePunchConfig,
   type SceneOnFaintAttackFieldProfile,
 } from "../../src/animation/sceneOnPresentation.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 interface PortableFixture {
   readonly move?: "FIRE_PUNCH" | "ICE_PUNCH";
@@ -91,7 +86,7 @@ const fixturePath = process.argv[2]
   ? resolve(process.argv[2])
   : join(root, "tools/compare/fixtures/fire-punch-onix-grovyle.json");
 const fixture = JSON.parse(readFileSync(fixturePath, "utf8")) as PortableFixture;
-const scratch = mkdtempSync(join(tmpdir(), "pokebench-fire-punch-compare-"));
+const scratch = createScratchDir("pokebench-fire-punch-compare-");
 const rgbDir = join(scratch, "rgb");
 mkdirSync(rgbDir);
 const probeOutput = join(scratch, "probe.json");

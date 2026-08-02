@@ -1,0 +1,16 @@
+# ripgrep exclusions for generated artifacts.
+#
+# Broad source searches kept descending into generated single-line JSON and
+# minified bundles, flooding worker terminals and burying the real call sites
+# (PAPERCUTS, 3 hits). These paths hold machine-written data, never source you
+# would grep for by hand.
+#
+# To search them anyway, pass `rg -u` (or `--no-ignore`) for one query. Note
+# that an explicit `-g '<glob>'` also overrides these rules — ripgrep applies
+# --glob with higher precedence than ignore files.
+
+src/data/gen/*.json
+src/assets/gen/*.json
+dist/
+*.min.*
+tsconfig.tsbuildinfo

@@ -1,6 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   createSceneOnMovePresentation,
@@ -8,6 +7,7 @@ import {
   type SceneOnReflectConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture extends SceneOnReflectConfig {
   scenario: string;
@@ -48,7 +48,7 @@ function rotatedPalette(base: readonly number[], count: number): number[] {
 
 function verify(fixturePath: string, runNumber: number): void {
   const fixture = JSON.parse(readFileSync(resolve(fixturePath), "utf8")) as Fixture;
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-reflect-portable-"));
+  const scratch = createScratchDir("pokebench-reflect-portable-");
   const output = join(scratch, "probe.json");
   const rgb = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

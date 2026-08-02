@@ -1,12 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import {
-  mkdtempSync,
-  readFileSync,
-  realpathSync,
-  writeFileSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { whirlpoolAtAge, type WhirlpoolBody } from "../../src/animation/whirlpool.ts";
 import {
@@ -15,6 +9,7 @@ import {
   type SceneOnWhirlpoolConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 type Side = "player" | "opponent";
 type Fixture = {
@@ -196,7 +191,7 @@ function verify(fixturePath: string, runNumber: number): void {
   const body: WhirlpoolBody =
     fixture.schema.startsWith("status-") ? "residual" : "main";
   const expectedCount = body === "main" ? 133 : 108;
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-whirlpool-live-"));
+  const scratch = createScratchDir("pokebench-whirlpool-live-");
   const output = join(scratch, "probe.json");
   const rgbDir = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

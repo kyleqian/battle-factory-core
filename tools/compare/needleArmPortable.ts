@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   NEEDLE_ARM_FRAME_COUNT,
@@ -13,6 +12,7 @@ import {
   type SceneOnNeedleArmConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 type Fixture = SceneOnNeedleArmConfig & {
   schema: string; orientation: string; scenario: string; probe: string;
@@ -51,7 +51,7 @@ const fresh = new Map<string, { evidence: string; raw: string }>();
 
 function verify(path: string, runNumber: number): void {
   const fixture = JSON.parse(readFileSync(resolve(path), "utf8")) as Fixture;
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-needle-arm-portable-"));
+  const scratch = createScratchDir("pokebench-needle-arm-portable-");
   const output = join(scratch, "probe.json");
   const rgbDir = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

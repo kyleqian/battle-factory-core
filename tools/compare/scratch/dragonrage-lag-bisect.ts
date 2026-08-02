@@ -7,14 +7,14 @@
 // isolated from every other concurrent mechanism (checked against the
 // decoded schedule in dragonRage.ts).
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   createSceneOnMovePresentation,
   sceneOnDragonRageView,
 } from "../../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../../src/engine/core.ts";
+import { createScratchDir } from "../../lib/scratch.ts";
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../../..");
 const fixture = JSON.parse(
@@ -28,7 +28,7 @@ const fixture = JSON.parse(
   fieldProfile: any;
 };
 
-const scratch = mkdtempSync(join(tmpdir(), "pokebench-dragonrage-lag-"));
+const scratch = createScratchDir("pokebench-dragonrage-lag-");
 const output = join(scratch, "probe.json");
 const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
 const run = spawnSync(

@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   createSceneOnMovePresentation,
@@ -9,6 +8,7 @@ import {
   type SceneOnLightScreenConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture extends SceneOnLightScreenConfig {
   schema: string;
@@ -85,9 +85,7 @@ function verify(fixturePath: string, runNumber: number): void {
   const fixture = JSON.parse(
     readFileSync(resolve(fixturePath), "utf8"),
   ) as Fixture;
-  const scratch = mkdtempSync(
-    join(tmpdir(), "pokebench-light-screen-evidence-"),
-  );
+  const scratch = createScratchDir("pokebench-light-screen-evidence-");
   const output = join(scratch, "probe.json");
   const rgb = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

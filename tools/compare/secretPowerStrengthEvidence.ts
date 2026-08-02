@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { strengthAtAge } from "../../src/animation/strength.ts";
 import {
@@ -15,6 +14,7 @@ import {
   render,
   type EngineState,
 } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture {
   readonly schema: "secret-power-strength-portable-evidence/v1";
@@ -137,9 +137,7 @@ function verify(fixturePath: string, runNumber: number): void {
   ) {
     throw new Error(`${fixture.orientation}: invalid fixture contract`);
   }
-  const scratch = mkdtempSync(
-    join(tmpdir(), "pokebench-secret-power-strength-evidence-"),
-  );
+  const scratch = createScratchDir("pokebench-secret-power-strength-evidence-");
   const output = join(scratch, "probe.json");
   const rgbDir = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

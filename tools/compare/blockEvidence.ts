@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { blockAtAge } from "../../src/animation/block.ts";
 import {
@@ -11,6 +10,7 @@ import {
   type SceneOnPresentationBattler,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture {
   schema: string;
@@ -92,7 +92,7 @@ function verify(path: string, runNumber: number): void {
     fixture.schema !== "block-portable-evidence/v1"
     || fixture.oracleProfile !== "battle-scene-on"
   ) throw new Error(`${fixture.orientation}: invalid fixture`);
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-block-evidence-"));
+  const scratch = createScratchDir("pokebench-block-evidence-");
   const output = join(scratch, "probe.json");
   const rgb = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
