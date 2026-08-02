@@ -8,6 +8,19 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Clean-parent diff worktrees nested under the run root double vitest discovery
+
+- **What:** the 2026-08-01 turn-2 worker created its clean-parent
+  differential worktree at a path nested under the run root, so a focused
+  vitest run discovered every suite twice (the mirror under the worktree)
+  and burned a confusing run before relocation. The standing recipe's
+  `mktemp -d` location outside the repo avoids this entirely.
+- **Hits:** 1
+- **Cost each:** ~3 min
+- **Workaround:** always create differential worktrees under `mktemp -d`
+  (outside the repo); if one must live inside, exclude its path from vitest
+  discovery for the focused run.
+
 ## Raw before/after RNG-window diffs pick up unrelated-subsystem draws
 
 - **What:** ground-truth scouts that pin an RNG draw count from a raw
