@@ -75,6 +75,20 @@ export function isTurn1NextCommandHandoffReady(
     && handoff.nextCommand.input === "ready";
 }
 
+/**
+ * The following command lifecycle is distinct from receipt publication: the
+ * original turn-1 submenu predates the reset, while a later FIGHT open (and
+ * any same-turn close/reopen descended from it) consumes the same epoch.
+ */
+export function isTurn1NextCommandLifecycleActive(
+  handoff: Turn1CompletedResolutionNextCommandHandoff | null | undefined,
+  openElapsed: number | null,
+): handoff is Turn1CompletedResolutionNextCommandHandoff {
+  return isTurn1NextCommandHandoffReady(handoff)
+    && openElapsed !== null
+    && openElapsed > handoff.presentationEpoch.elapsed;
+}
+
 /** Runtime-relative age of the fresh DoBounceEffect epoch. */
 export function turn1PresentationEpochElapsedSinceReset(
   handoff: Turn1CompletedResolutionNextCommandHandoff,

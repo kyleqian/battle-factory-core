@@ -853,6 +853,7 @@ import {
   resolveTurn5SwitchInAdapter,
   type Turn5CompletedResolutionNextCommandHandoff,
 } from "./turn5ResolutionAdapter.ts";
+import type { Turn1CompletedResolutionNextCommandHandoff } from "./turn1ResolutionAdapter.ts";
 import {
   isTurn6NextCommandHandoffReady,
   type Turn6CompletedResolutionNextCommandHandoff,
@@ -2489,6 +2490,8 @@ export interface BattleSceneState {
   fightSubmenu: FightSubmenuState;
   /** S7 slice E1: `true` once turn 1's whole resolution has redrawn the settled action menu (`ROCK_SLIDE_MENU_REDRAW_DELAY` past turn 1's own confirm) AND a fresh A-press has reopened FIGHT for turn 2 - core.ts sets this the same tick it calls `openFightSubmenu` again, mirroring `sendOutPressElapsed`'s "created directly" idiom. Distinguishes turn 2's ROCK_SLIDE dwell (PP 9/10, dynamic overlay) from turn 1's (PP 10/10, the static harvest alone) - both dwells are otherwise indistinguishable from `fightSubmenu` alone (cursor rests at slot 0 both times). */
   turn1Resolved: boolean;
+  /** Completed turn-1 receipt published by the source-owned choose-action reset. */
+  turn1NextCommandHandoff?: Turn1CompletedResolutionNextCommandHandoff | null;
   /** S7 slice F (docs/battle-turn-notes.md §13): `true` once turn 2's whole resolution has redrawn the settled action menu (`DRAGONBREATH_MENU_REDRAW_DELAY` past turn 2's own confirm) AND a fresh A-press has reopened FIGHT for turn 3 - core.ts sets this the same tick it calls `openFightSubmenu` again, same "created directly" idiom as `turn1Resolved`. Turn 3's reopen persists the cursor at slot 2 (DRAGON_BREATH, where turn 2's own confirm left it) instead of resetting to slot 0 - §13's own "cursor persists across turns" finding, this run's first real test of it (turn 2's own reopen coincidentally rested at slot 0 both before and after, so it never exercised persistence). This slice only models the reopen/nav/confirm window itself (through the A-confirm registering ROCK_SLIDE again) - turn 3's actual resolution (ENDEAVOR/ROCK_SLIDE animations, HP drains, text) is out of scope, see `tools/compare/traces/turn3-menu.json`. */
   turn2Resolved: boolean;
   /** S7 slice I (docs/battle-turn-notes.md §13/§22): `true` once turn 3's whole ROCK_SLIDE resolution has redrawn the settled action menu (`TURN3_ROCKSLIDE_REOPEN_GATE_DELAY` past turn 3's own real confirm) AND a fresh A-press has reopened FIGHT for turn 4 - same "created directly" idiom as `turn1Resolved`/`turn2Resolved`. Turn 4's reopen persists the cursor at slot 0 (ROCK_SLIDE, unchanged since turn 3) - no nav needed, §13's own ledger. Distinguishes turn 4's own DOUBLE_TEAM+ROCK_SLIDE resolution from turn 3's ENDEAVOR+ROCK_SLIDE one (both confirm at cursor 0). */
@@ -2541,6 +2544,7 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   sendOutPressElapsed: null,
   fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE,
   turn1Resolved: false,
+  turn1NextCommandHandoff: null,
   turn2Resolved: false,
   turn3Resolved: false,
   turn4Resolved: false,
@@ -2571,6 +2575,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     sendOutPressElapsed: state.sendOutPressElapsed,
     fightSubmenu: state.fightSubmenu,
     turn1Resolved: state.turn1Resolved,
+    turn1NextCommandHandoff: state.turn1NextCommandHandoff ?? null,
     turn2Resolved: state.turn2Resolved,
     turn3Resolved: state.turn3Resolved,
     turn4Resolved: state.turn4Resolved,
