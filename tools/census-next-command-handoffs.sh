@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+command -v rg >/dev/null 2>&1 || {
+  echo "census-next-command-handoffs: rg (ripgrep) is required; without it every count silently reads 0" >&2
+  exit 2
+}
+
 cd "$(dirname "$0")/.."
 
 type_count=0
