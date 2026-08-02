@@ -46,7 +46,7 @@ import {
   TURN5_ICONBAR_DESTROY_TICK,
   TURN5_ICONBAR_FADE_START_TICK,
   TURN5_OPPONENT_ICON_STATES,
-  turn3SubmenuBounceTick,
+  turn3SubmenuBounceTickFromPresentationEpochAge,
   turn5IconBarEva,
   turn5MaterializeCoeff,
   turn5PidgeottoHealthboxSlideDx,
@@ -130,6 +130,10 @@ import {
 } from "../src/engine/battleMenu.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
 import { resolveTurn1CompletedResolutionNextCommandHandoff } from "../src/engine/turn1ResolutionAdapter.ts";
+import {
+  resolveTurn2CompletedResolutionNextCommandHandoff,
+  turn2PresentationEpochElapsedSinceReset,
+} from "../src/engine/turn2ResolutionAdapter.ts";
 import { resolveTurn13CompletedResolutionNextCommandHandoff } from "../src/engine/turn13ResolutionAdapter.ts";
 import { resolveTurn5CompletedResolutionNextCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
 import { resolveTurn6CompletedResolutionNextCommandHandoff } from "../src/engine/turn6ResolutionAdapter.ts";
@@ -153,10 +157,15 @@ import turn8BounceBlipProbe from "../src/data/gen/turn8-bounce-blip-probe.json" 
 import { turn6FeatherSprites, turn7FeatherSprites, turn8FeatherSprites, compareFeatherDrawOrder } from "../src/animation/featherDance.ts";
 
 const TURN1_HANDOFF = resolveTurn1CompletedResolutionNextCommandHandoff(1308);
+const TURN2_HANDOFF = resolveTurn2CompletedResolutionNextCommandHandoff(2197);
+// This RAM probe predates the Scene-OFF contract and retains the historical
+// ON-profile reset epoch. Keep that evidence on its own typed receipt rather
+// than reintroducing a production move-delay anchor.
+const TURN2_ON_PROFILE_HANDOFF = resolveTurn2CompletedResolutionNextCommandHandoff(2296);
 
 function pixelAt(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: null, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: null, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: null, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: null, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -164,7 +173,7 @@ function pixelAt(t: number, x: number, y: number): [number, number, number] {
 /** Same as `pixelAt`, but with the send-out A-press already registered at trace tick 1420 (`sendOutPressElapsed = 380`, matching the §7.2/§7.3 tests above). */
 function pixelAtSentOut(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: null, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: null, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -183,7 +192,7 @@ const TURN2_FIGHT_SUBMENU_STATE = {
 /** Same as `pixelAtSentOut`, but with turn 2's own FIGHT submenu already confirmed on ENDEAVOR (cursor slot 2) - the state `drawTurn2KickoffText`/`drawEndeavorSquish` render under (S7 slice E1d-retry, §15b). */
 function pixelAtTurn2(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN2_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: TURN1_HANDOFF, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN2_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: TURN1_HANDOFF, turn2NextCommandHandoff: t >= 3237 ? TURN2_HANDOFF : null, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -226,7 +235,7 @@ const TURN5_REOPEN_FIGHT_SUBMENU_STATE = {
 /** Same shape as `pixelAtTurn4`, but for turn 5's own reopen DMA-wait window (`turn4Resolved: true`, no confirm yet) - the state `drawActionMenuIdleWindow`'s bounce-tick selection renders under (PROGRESS #183/cleanup, tick 5927). */
 function pixelAtTurn5Reopen(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN5_REOPEN_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: TURN1_HANDOFF, turn2Resolved: true, turn3Resolved: true, turn4Resolved: true, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN5_REOPEN_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: TURN1_HANDOFF, turn2NextCommandHandoff: TURN2_HANDOFF, turn3Resolved: true, turn4Resolved: true, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -234,7 +243,7 @@ function pixelAtTurn5Reopen(t: number, x: number, y: number): [number, number, n
 /** Same as `pixelAtTurn2`, but turns 1-3 all resolved and the FIGHT submenu confirmed on turn 4's own ROCK_SLIDE (slot 0) - the state `drawTurn4KickoffText`/`drawTurn4RockSlideWindow` render under (S7 slice I resolution, docs/battle-turn-notes.md §22). */
 function pixelAtTurn4(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN4_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: TURN1_HANDOFF, turn2Resolved: true, turn3Resolved: true, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN4_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: TURN1_HANDOFF, turn2NextCommandHandoff: TURN2_HANDOFF, turn3Resolved: true, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -506,7 +515,7 @@ describe("battleScene: send-out A-press #3 registration + text cadence (docs/bat
   it("state advance preserves sendOutPressElapsed once set, and elapsed keeps incrementing regardless", () => {
     let state: BattleSceneState = { ...INITIAL_BATTLE_SCENE_STATE, sendOutPressElapsed: 380 };
     state = advanceBattleScene(state);
-    expect(state).toEqual({ elapsed: 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: null, turn2NextCommandHandoff: null, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null, resolutionOwner: null, battleOutcome: 0, terminalResolution: null });
+    expect(state).toEqual({ elapsed: 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: null, turn2NextCommandHandoff: null, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null, resolutionOwner: null, battleOutcome: 0, terminalResolution: null });
   });
 });
 
@@ -1043,7 +1052,7 @@ describe("battleScene: S7 slice B - DOUBLE_TEAM clone vs. opponent healthbox z-o
 
     const submenu = confirmFightMove(openFightSubmenu(0, rentalMoveset("ONIX")), 879); // pressTick = TICK0+879 = 1919
     const fb = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb, { elapsed: 2075 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1NextCommandHandoff: null, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
+    renderBattleScene(fb, { elapsed: 2075 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1NextCommandHandoff: null, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
     const o = (25 * 240 + 104) * 4;
     expect([fb[o]!, fb[o + 1]!, fb[o + 2]!]).toEqual([expected.r, expected.g, expected.b]);
   });
@@ -1068,11 +1077,11 @@ describe("battleScene: S7 slice B - stat-change banner as a real scrolling BG1 (
     const o = (y * 240 + x) * 4;
 
     const fb2010 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb2010, { elapsed: 2010 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1NextCommandHandoff: null, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
+    renderBattleScene(fb2010, { elapsed: 2010 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1NextCommandHandoff: null, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
     const at2010: [number, number, number] = [fb2010[o]!, fb2010[o + 1]!, fb2010[o + 2]!];
 
     const fb2030 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb2030, { elapsed: 2030 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1NextCommandHandoff: null, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
+    renderBattleScene(fb2030, { elapsed: 2030 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1NextCommandHandoff: null, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
     const at2030: [number, number, number] = [fb2030[o]!, fb2030[o + 1]!, fb2030[o + 2]!];
 
     expect(at2010).toEqual([69, 160, 99]);
@@ -1104,11 +1113,11 @@ describe("battleScene: S7 slice C - Rock Slide's shaken BG3 vs. the player healt
     const o = (y * 240 + x) * 4;
 
     const fbUnshifted = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fbUnshifted, { elapsed: 2348 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1NextCommandHandoff: null, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null }); // rockSlideBg3Y === 0 here
+    renderBattleScene(fbUnshifted, { elapsed: 2348 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1NextCommandHandoff: null, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null }); // rockSlideBg3Y === 0 here
     const atUnshifted: [number, number, number] = [fbUnshifted[o]!, fbUnshifted[o + 1]!, fbUnshifted[o + 2]!];
 
     const fbShaken = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fbShaken, { elapsed: 2349 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1NextCommandHandoff: null, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null }); // rockSlideBg3Y === -7 here
+    renderBattleScene(fbShaken, { elapsed: 2349 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1NextCommandHandoff: null, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null }); // rockSlideBg3Y === -7 here
     const atShaken: [number, number, number] = [fbShaken[o]!, fbShaken[o + 1]!, fbShaken[o + 2]!];
 
     expect(atUnshifted).toEqual([255, 255, 255]);
@@ -1145,26 +1154,29 @@ describe("S7 residual cleanup (docs/turn3-residual-probe-notes.md, Family A): en
 });
 
 // S7 residual cleanup (Family B, docs/turn3-residual-probe-notes.md "Family
-// B, continued"): turn3SubmenuBounceTick's own composition was uniformly one
+// B, continued"): the receipt-age turn-3 submenu composition was uniformly one
 // RAM tick more advanced than the real invisible bouncer sprite's own
 // sSinIndex (proven by a pointer-chase RAM dump, zero exceptions over 41
 // probed ticks x 2 regions). The retarding `-1` fix should make
-// `menuIdleBounce(turn3SubmenuBounceTick(t))` (the exact composition the
-// renderer calls) match the real hardware's own screen-tick content
+// `menuIdleBounce(turn3SubmenuBounceTickFromPresentationEpochAge(age))`, with
+// `age` read from this legacy probe's receipt, match the real hardware's own
+// screen-tick content
 // (`real_screen_y2(t) == probed_y2(t-1)`, the window's already-established
 // +1 render lag) directly, with no further shift - pinned against the
 // committed RAM dump itself, not re-derived by hand.
-describe("S7 residual cleanup (docs/turn3-residual-probe-notes.md, Family B): turn3SubmenuBounceTick vs the real bouncer's own RAM-probed sSinIndex", () => {
+describe("S7 residual cleanup (docs/turn3-residual-probe-notes.md, Family B): turn-2 receipt age vs the real bouncer's own RAM-probed sSinIndex", () => {
   const rows = new Map(turn3MenuBouncerRawProbe.ticks.map((r) => [r.tick, r]));
 
-  it("menuIdleBounce(turn3SubmenuBounceTick(t)) equals real_screen_y2(t) (= probed y2 at RAM tick t-1) at every probed tick while the bounce is active, both regions - zero exceptions", () => {
+  it("receipt-age bounce equals real_screen_y2(t) (= probed y2 at RAM tick t-1) at every active tick, both regions - zero exceptions", () => {
     let onixChecked = 0;
     let healthboxChecked = 0;
     for (const row of turn3MenuBouncerRawProbe.ticks) {
       const t = row.tick;
       const prev = rows.get(t - 1);
       if (!prev) continue;
-      const model = menuIdleBounce(turn3SubmenuBounceTick(t));
+      const model = menuIdleBounce(turn3SubmenuBounceTickFromPresentationEpochAge(
+        turn2PresentationEpochElapsedSinceReset(TURN2_ON_PROFILE_HANDOFF, t - TICK0),
+      ));
       if (prev.onixAmplitude !== 0) {
         expect({ t, region: "onix", model: model.onixY2 }).toEqual({ t, region: "onix", model: prev.onixY2 });
         onixChecked++;
@@ -1182,8 +1194,12 @@ describe("S7 residual cleanup (docs/turn3-residual-probe-notes.md, Family B): tu
   });
 
   it("the two named residuals (3879 onix, 3888 healthbox) individually match post-fix, not just in aggregate", () => {
-    expect(menuIdleBounce(turn3SubmenuBounceTick(3879)).onixY2).toBe(rows.get(3878)!.onixY2);
-    expect(menuIdleBounce(turn3SubmenuBounceTick(3888)).healthboxY2).toBe(rows.get(3887)!.healthboxMainY2);
+    expect(menuIdleBounce(turn3SubmenuBounceTickFromPresentationEpochAge(
+      turn2PresentationEpochElapsedSinceReset(TURN2_ON_PROFILE_HANDOFF, 3879 - TICK0),
+    )).onixY2).toBe(rows.get(3878)!.onixY2);
+    expect(menuIdleBounce(turn3SubmenuBounceTickFromPresentationEpochAge(
+      turn2PresentationEpochElapsedSinceReset(TURN2_ON_PROFILE_HANDOFF, 3888 - TICK0),
+    )).healthboxY2).toBe(rows.get(3887)!.healthboxMainY2);
   });
 });
 
@@ -1191,7 +1207,7 @@ describe("S7 residual cleanup (docs/turn3-residual-probe-notes.md, Family B): tu
 // BROWSING branch (`sm.confirmElapsed === null`, past `revealTick`) was
 // feeding `bounceTick = t` instead of applying `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`
 // - the exact correction turns 1-5's own reopened-submenu wrappers (e.g.
-// `turn3SubmenuBounceTick` above) already apply. Pinned directly against the
+// receipt-age turn-3 submenu composition above) already apply. Pinned directly against the
 // committed RAM dumps (`turn6-bounce-blip-probe.json`/`turn8-bounce-blip-
 // probe.json`, twice-run byte-identical) at the restored, formerly-excluded
 // ticks - same `real_screen_y2(t) == probed_y2(t-1)` convention as Family B.
@@ -1464,7 +1480,7 @@ describe("ISSUES #39 rank-6 slice 4: turn 4's own OFF-timed DOUBLE_TEAM/ROCK_SLI
   it("stat-rose text phase: render 5080 (pressTick+155, STAT_ROSE_LINE1 not yet started) vs render 5081 (pressTick+156, TURN4_OFF_STAT_ROSE_TEXT_DELAY - the message box hard-cuts to the new text) - the two whole frames differ (the text-phase gate flips), and render 5109 (deep in STAT_ROSE_LINE1's own typing) is stable through the following tick (no further text-box-wide change until ROCK_SLIDE's own hand-off)", () => {
     const frameAt = (t: number): Uint8Array => {
       const fb = new Uint8Array(240 * 160 * 4);
-      renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN4_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: TURN1_HANDOFF, turn2Resolved: true, turn3Resolved: true, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
+      renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN4_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: TURN1_HANDOFF, turn2NextCommandHandoff: TURN2_HANDOFF, turn3Resolved: true, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
       return fb;
     };
     expect(frameAt(5080)).not.toEqual(frameAt(5081));
@@ -1472,8 +1488,8 @@ describe("ISSUES #39 rank-6 slice 4: turn 4's own OFF-timed DOUBLE_TEAM/ROCK_SLI
 
   // PROGRESS #183/cleanup (docs/turn3-residual-probe-notes.md "The extremum
   // class, probed", tick 4934): `drawFightSubmenuWindow`'s `textStart` gate
-  // keyed the ENDEAVOR-family kickoff delay off the monotonic `turn2Resolved`
-  // flag alone, so turn 4's own DOUBLE_TEAM window (which needs the one-
+  // keyed the ENDEAVOR-family kickoff delay off an overly broad history
+  // predicate, so turn 4's own DOUBLE_TEAM window (which needs the one-
   // tick-longer DOUBLE_TEAM-family delay, same as turn 1) wrongly got
   // ENDEAVOR's delay for exactly one tick (pressTick+9=4934, where the two
   // candidate delays disagree). Fixed by additionally excluding "turn3Resolved
@@ -1560,7 +1576,7 @@ describe("rank-3 turn-5 KO dismiss mirror retirement", () => {
           reopenedFromClose: false,
         },
         turn1NextCommandHandoff: TURN1_HANDOFF,
-        turn2Resolved: true,
+        turn2NextCommandHandoff: TURN2_HANDOFF,
         turn3Resolved: true,
         turn4Resolved: true,
         turn5NextCommandHandoff: null,
@@ -2393,7 +2409,7 @@ describe("S7/S8 turn 13 rung 3 (docs/turn13-notes.md §4/§5/§7): DRAGON_BREATH
           reopenedFromClose: false,
         },
         turn1NextCommandHandoff: TURN1_HANDOFF,
-        turn2Resolved: true,
+        turn2NextCommandHandoff: TURN2_HANDOFF,
         turn3Resolved: true,
         turn4Resolved: true,
         turn5NextCommandHandoff: resolveTurn5CompletedResolutionNextCommandHandoff(),

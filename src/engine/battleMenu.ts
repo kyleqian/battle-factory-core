@@ -27,6 +27,10 @@ import {
   isTurn1NextCommandHandoffReady,
   type Turn1CompletedResolutionNextCommandHandoff,
 } from "./turn1ResolutionAdapter.ts";
+import {
+  isTurn2NextCommandHandoffReady,
+  type Turn2CompletedResolutionNextCommandHandoff,
+} from "./turn2ResolutionAdapter.ts";
 import type { Turn5CompletedResolutionNextCommandHandoff } from "./turn5ResolutionAdapter.ts";
 import type { Turn6CompletedResolutionNextCommandHandoff } from "./turn6ResolutionAdapter.ts";
 import type { Turn7CompletedResolutionNextCommandHandoff } from "./turn7ResolutionAdapter.ts";
@@ -2551,21 +2555,16 @@ export function turn2KickoffBounceTick(
  * to whatever `activeMonMoveset` the caller supplies - the completed turn-1
  * receipt only ever decrements SLOT 0 (this engine's own scripted turn-1 choice is
  * always slot 0, `core.ts`'s own confirm gate), not "whichever move was
- * actually confirmed" in general. `turn2Resolved` (S7 slice F, docs/
- * battle-turn-notes.md §14: "DRAGON_BREATH... 19/20 remaining going into
- * turn 12 thanks to turn 2's own prior use") adds the SAME one-shot
- * decrement for SLOT 2 (DRAGON_BREATH, this engine's own scripted turn-2
- * choice) once turn 2 resolves - still only ever these two fixed slots, not
- * "whichever move was actually confirmed" in general; BIND/SANDSTORM's own
- * PP-after-use remains unoracled and would still be faking data to model.
+ * actually confirmed" in general. The completed turn-2 receipt owns the
+ * one-shot slot-2 DRAGON_BREATH deduction (19/20), preserving its real
+ * persisted slot instead of reconstructing history from a resolved count.
  */
 /**
  * S7 slice I: `turn3Resolved` (docs/battle-turn-notes.md §13/§22) adds a
  * SECOND slot-0 decrement - turn 3 also used ROCK_SLIDE (this engine's own
  * scripted turn-3 choice, cursor 0 again after the turn-2->3 UP-nav), so by
  * turn 4's own reopen ROCK_SLIDE has been used twice (turns 1 and 3, PP
- * 10->8), independent of `turn2Resolved`'s own slot-2 (DRAGON_BREATH)
- * decrement.
+ * 10->8), independent of turn 2's slot-2 DRAGON_BREATH receipt.
  *
  * S7 slice J: `turn4Resolved` (docs/battle-turn-notes.md §13/§23) adds a
  * THIRD slot-0 decrement - turn 4 also used ROCK_SLIDE (cursor stayed at 0,
@@ -2575,7 +2574,7 @@ export function turn2KickoffBounceTick(
 export function currentPPForActiveMon(
   moveset: ActiveMonMoveset,
   turn1NextCommandHandoff: Turn1CompletedResolutionNextCommandHandoff | null = null,
-  turn2Resolved: boolean = false,
+  turn2NextCommandHandoff: Turn2CompletedResolutionNextCommandHandoff | null = null,
   turn3Resolved: boolean = false,
   turn4Resolved: boolean = false,
   turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null = null,
@@ -2623,6 +2622,21 @@ export function currentPPForActiveMon(
     ? rentalMoveset("ONIX").maxPP[turn1NextCommandHandoff.persistedMoveSlot]
       - turn1NextCommandHandoff.playerPp[turn1NextCommandHandoff.persistedMoveSlot]
     : 0;
+  const latestEarlierSlot2Pp =
+    turn12NextCommandHandoff?.playerPp[2]
+    ?? turn11NextCommandHandoff?.playerPp[2]
+    ?? turn10NextCommandHandoff?.playerPp[2]
+    ?? turn9NextCommandHandoff?.playerPp[2]
+    ?? turn8NextCommandHandoff?.playerPp[2]
+    ?? turn7NextCommandHandoff?.playerPp[2]
+    ?? turn6NextCommandHandoff?.playerPp[2]
+    ?? turn5NextCommandHandoff?.playerPp[2];
+  const turn2Slot2Uses = isTurn2NextCommandHandoffReady(turn2NextCommandHandoff)
+    ? rentalMoveset("ONIX").maxPP[turn2NextCommandHandoff.persistedMoveSlot]
+      - turn2NextCommandHandoff.playerPp[turn2NextCommandHandoff.persistedMoveSlot]
+    : latestEarlierSlot2Pp === undefined
+      ? 0
+      : rentalMoveset("ONIX").maxPP[2] - latestEarlierSlot2Pp;
   const slot0UsesBeforeTurn5 =
     turn1Slot0Uses +
     (turn3Resolved ? 1 : 0) +
@@ -2645,7 +2659,7 @@ export function currentPPForActiveMon(
       ?? turn5NextCommandHandoff?.playerPp[0]
       ?? a - slot0UsesBeforeTurn5,
     b - turn8BindUses,
-    c - (turn2Resolved ? 1 : 0),
+    c - turn2Slot2Uses,
     d,
   ] as const;
   const resolvedPlayerPp = lockedActionResolution?.segments[0]

@@ -8,6 +8,7 @@ import {
 } from "../src/engine/turn5ResolutionAdapter.ts";
 import { currentPPForActiveMon } from "../src/engine/battleMenu.ts";
 import { resolveTurn1CompletedResolutionNextCommandHandoff } from "../src/engine/turn1ResolutionAdapter.ts";
+import { resolveTurn2CompletedResolutionNextCommandHandoff } from "../src/engine/turn2ResolutionAdapter.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
 import {
   GROVYLE_FAINT_SINK_START_TICK,
@@ -137,7 +138,7 @@ describe("turn5ResolutionAdapter: #39 rank-3 kernel-to-typed-owner equivalence (
       const handoff = resolveTurn5CompletedResolutionNextCommandHandoff();
       const receiptPp = currentPPForActiveMon(
         onix,
-        resolveTurn1CompletedResolutionNextCommandHandoff(1308), true, true, true, handoff,
+        resolveTurn1CompletedResolutionNextCommandHandoff(1308), resolveTurn2CompletedResolutionNextCommandHandoff(2197), true, true, handoff,
       );
 
       expect(receiptPp).toEqual([6, 20, 19, 10]);

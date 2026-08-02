@@ -26,6 +26,7 @@ import { createFramebuffer, SCREEN_WIDTH } from "../src/engine/framebuffer.ts";
 import { renderBattleScene } from "../src/engine/battleScene.ts";
 import { openFightSubmenu, FIGHT_SUBMENU_SLOT_NAMES, currentPPForActiveMon } from "../src/engine/battleMenu.ts";
 import { resolveTurn1CompletedResolutionNextCommandHandoff } from "../src/engine/turn1ResolutionAdapter.ts";
+import { resolveTurn2CompletedResolutionNextCommandHandoff } from "../src/engine/turn2ResolutionAdapter.ts";
 import { buildFightMoveset, drawFightSubmenuText } from "../src/engine/fightSubmenuText.ts";
 import fightSubmenuWindowAsset from "../src/assets/gen/fight-submenu-window.json" with { type: "json" };
 import battlerDump from "../src/data/gen/battle2-turn1-battler-dump.json" with { type: "json" };
@@ -46,6 +47,7 @@ const dump = (
 /** A fully-confirmed draft screen (ONIX/MAGBY/BAYLEEF, pick order 1/2/3) - the same `selectedIds` shape `tests/confirmDecline.test.ts` pins for a real played-through draft screen, reproducing what every committed trace's own button script leaves `draftScreen` in by the time battle starts. */
 const CONFIRMED_DRAFT_SCREEN: DraftScreenState = { ...ANCHOR_DRAFT_SCREEN_STATE, selectedIds: [1, 2, 3, 0, 0, 0] };
 const TURN1_HANDOFF = resolveTurn1CompletedResolutionNextCommandHandoff(1308);
+const TURN2_HANDOFF = resolveTurn2CompletedResolutionNextCommandHandoff(2197);
 
 describe("battleSetup: activeMonMoveset/rentalMoveset (S8 engine dependency, docs/battle-menu-notes.md §13c)", () => {
   it("preserves Battle 2 identity, healed party, and ONIX's actual moves through immutable setup state", () => {
@@ -107,12 +109,12 @@ describe("battleMenu: currentPPForActiveMon (S8 generalization of the old hardco
     expect(currentPPForActiveMon(kabuto, TURN1_HANDOFF)).toEqual([dump.battler1.pp[0]! - 1, dump.battler1.pp[1], dump.battler1.pp[2], dump.battler1.pp[3]]);
   });
 
-  it("also decrements slot 2 by 1 once turn 2 resolves - S7 slice F, docs/battle-turn-notes.md §14's own DRAGON_BREATH 19/20 finding (turn 2's real choice, this engine's own scripted slot 2)", () => {
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, false)).toEqual([9, 20, 20, 10]);
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, true)).toEqual([9, 20, 19, 10]);
+  it("derives slot 2's DRAGON_BREATH decrement from the completed turn-2 receipt", () => {
+    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, null)).toEqual([9, 20, 20, 10]);
+    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF)).toEqual([9, 20, 19, 10]);
   });
 
-  it("turn2Resolved defaults to false, leaving every pre-existing 2-arg call site unaffected", () => {
+  it("an absent turn-2 receipt leaves every pre-existing 2-arg call site unaffected", () => {
     expect(currentPPForActiveMon(moveset, TURN1_HANDOFF)).toEqual([9, 20, 20, 10]);
   });
 });
@@ -161,7 +163,7 @@ describe("battleScene: genericity end-to-end through the STATE plumbing (not jus
     it(`cursor ${cursor} (${FIGHT_SUBMENU_SLOT_NAMES[cursor]} highlighted): renderBattleScene's FIGHT window matches an independently-assembled expected image byte-for-byte, at full PP`, () => {
       const sm = { ...opened, cursor: cursor as 0 | 1 | 2 | 3, displayCursor: cursor as 0 | 1 | 2 | 3 };
       const fb = createFramebuffer();
-      renderBattleScene(fb, { elapsed: 900, sendOutPressElapsed: 380, fightSubmenu: sm, turn1NextCommandHandoff: null, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
+      renderBattleScene(fb, { elapsed: 900, sendOutPressElapsed: 380, fightSubmenu: sm, turn1NextCommandHandoff: null, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
 
       const expectedMoveset = buildFightMoveset(kabutoMoveset.moveIds, currentPPForActiveMon(kabutoMoveset, null));
       expect(extractWindowRegion(fb)).toEqual(expectedWindowRegion(expectedMoveset, cursor as 0 | 1 | 2 | 3));
@@ -171,7 +173,7 @@ describe("battleScene: genericity end-to-end through the STATE plumbing (not jus
   it("the completed turn-1 receipt's PP decrement also reaches the renderer for a non-Onix moveset (slot 0 only, currentPPForActiveMon's own documented scope)", () => {
     const sm = { ...opened, cursor: 0 as const, displayCursor: 0 as const };
     const fb = createFramebuffer();
-    renderBattleScene(fb, { elapsed: 900, sendOutPressElapsed: 380, fightSubmenu: sm, turn1NextCommandHandoff: TURN1_HANDOFF, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
+    renderBattleScene(fb, { elapsed: 900, sendOutPressElapsed: 380, fightSubmenu: sm, turn1NextCommandHandoff: TURN1_HANDOFF, turn3Resolved: false, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null });
 
     const expectedMoveset = buildFightMoveset(kabutoMoveset.moveIds, currentPPForActiveMon(kabutoMoveset, TURN1_HANDOFF));
     expect(extractWindowRegion(fb)).toEqual(expectedWindowRegion(expectedMoveset, 0));
