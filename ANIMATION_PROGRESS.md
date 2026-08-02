@@ -8,6 +8,43 @@
 > routing hint, not a deferral or an acceptance-bar waiver; escalate any worker
 > result that does not survive supervisor verification.
 
+## Front `ANIM_CIRCLE_C_CLOCKWISE_SLOW` family accepted (2026-08-01)
+
+**State:** exact for the complete generated selector census: **2 mappings / 2
+Factory-reachable species / 0 outside-Factory mappings** — DROWZEE
+(representative) and SPINARAK. Only source ID **79** is promoted; normal and
+long circle selectors, adjacent selectors, and back-sprite routing remain
+unsupported. No per-species/tick branch, baked frame, engine-boundary
+widening, move promotion, or `ANIMATION_COVERAGE.json` change was made; the
+coverage hash remains
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:1504-1536,3743-3751`,
+`trig.c:514-518`, and `pokemon.c` selector mappings pin
+`AddNewAnim`/`InitAnimData`, rotation=512/data=3/speed=12, immediate
+`CircleCounterclockwise` before callback installation, signed GBA Sin/Cos,
+both normal-front `TryFlipX` calls, strict `data2 > 512` terminal cleanup,
+post-branch data2 increment, and stable `WaitAnimEnd`. All **44 callbacks**
+are exhaustive: ticks 0..42 consume counters 0..504 by 12; tick 43 alone
+observes 516 > 512, clears x2/y2, and increments data2 to 528. Fresh complete
+legal challenge-0 Scene-ON parties were probed twice each only through
+`tools/run-mgba-probe.py` in one fresh `mktemp` directory. DROWZEE paired
+**372-byte** receipts are byte-identical, hash
+`1735dde24d224d3d98eafe6c4f28cfc8b1c28ac67863d168ed79cd730e2e4138`; SPINARAK
+paired **373-byte** receipts are byte-identical, hash
+`67fae9ba7ccda325f46df3a8a87e4574cd98a3e1dd9cf32ab4e2412d27e6579d`. Both
+settle battler 1 at x2=0/y2=0 with `SpriteCallbackDummy` (command indices 5
+and 7 respectively).
+
+**Verification / next:** focused species-idle/evidence plus both animation
+ratchets are **328/328** green; `npx tsc --noEmit`, full `npm test` (**593
+files / 6,136 passed / 1 skipped**), and production build (**549 modules
+transformed**) are green. `npm run animation:coverage` reports **107/276
+exact, 0 partial, 0 staged, 169 unsupported; Open-only 0/1; Outside 0/77**.
+Next generated source-ranked selector: **`ANIM_V_SLIDE_WOBBLE_SMALL`** (source
+ID 81; **4 mappings / 4 Factory / 0 outside**) — OMANYTE, LANTURN, JUMPLUFF,
+CLAYDOL.
+
 ## Front `ANIM_TWIST_TWICE` family accepted (2026-08-01)
 
 **State:** exact for the complete generated selector census: **1 mapping / 1
