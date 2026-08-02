@@ -68,6 +68,7 @@ export type SpeciesFrontAnimFamily =
   | "SHRINK_GROW"
   | "SWING_CONVEX"
   | "SWING_CONCAVE"
+  | "TWIST_TWICE"
   | "V_JUMPS_BIG"
   | "V_JUMPS_SMALL"
   | "V_JUMPS_H_JUMPS"
@@ -109,6 +110,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "SHRINK_GROW",
   "SWING_CONVEX",
   "SWING_CONCAVE",
+  "TWIST_TWICE",
   "V_JUMPS_BIG",
   "V_JUMPS_SMALL",
   "V_JUMPS_H_JUMPS",
@@ -210,6 +212,23 @@ export const H_SHAKE_SLOW_FACTORY_FRONT_SPECIES: readonly string[] = Object.free
 /** There are no slow horizontal-shake mappings outside the Factory rental pool. */
 export const H_SHAKE_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   H_SHAKE_SLOW_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** The sole source selector mapping for `ANIM_TWIST_TWICE` (STARYU). */
+export const TWIST_TWICE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_TWIST_TWICE")
+    .map(([species]) => species),
+);
+
+/** STARYU's twice-twist selector is reachable through the Level-50 Factory pool. */
+export const TWIST_TWICE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  TWIST_TWICE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no `ANIM_TWIST_TWICE` mappings outside the Factory rental pool. */
+export const TWIST_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  TWIST_TWICE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /**
@@ -2941,6 +2960,161 @@ export function horizontalShakeSlowFrameAtTick(
   return horizontalShakeFrameAtTickWithStep(ticksSinceStart, HORIZONTAL_SHAKE_INITIALIZERS.slow);
 }
 
+/**
+ * Source-specific initializer for selector 78. `ANIM_TWIST` uses the same
+ * shared C callback with a different one-run/512-degree setup, but that
+ * selector remains deliberately unported: this is only the exact STARYU
+ * `ANIM_TWIST_TWICE` entry point.
+ */
+export const TWIST_TWICE_INITIALIZER = Object.freeze({
+  selector: "ANIM_TWIST_TWICE",
+  sourceId: 78,
+  rotation: 1024,
+  delay: 0,
+  runs: 2,
+  accepted: true,
+} as const);
+
+export interface TwistTwiceFrame extends SpeciesIdleOffset {
+  /** `sprite->data[2]` immediately before this source callback. */
+  readonly data2Before: number;
+  /** `sprite->data[2]` after the source's optional final `+= 16`. */
+  readonly data2: number;
+  /** Signed `s16 sprite->data[6]`, set only by a rotation-body callback. */
+  readonly data6: number;
+  /** `AddNewAnim`/`InitAnimData` fields after the initializer overrides. */
+  readonly animRotation: 1024;
+  readonly animDelayBefore: number;
+  readonly animDelay: number;
+  readonly animRunsBefore: 1 | 2;
+  readonly animRuns: 1 | 2;
+  readonly animSpeed: 0;
+  readonly animDataBefore: 0 | 1;
+  readonly animData: 1;
+  /** Tick zero invokes `Twist` before `sprite->callback = Twist` is written. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
+  readonly startedAffine: boolean;
+  readonly affineWriteCount: 0 | 1;
+  /** Signed source rotation argument passed to `HandleSetAffineData`, if any. */
+  readonly affineWriteRotationSigned: number | null;
+  /** The same rotation after C's `u16` parameter conversion. */
+  readonly affineWriteRotationU16: number | null;
+  readonly xScale: 256;
+  readonly yScale: 256;
+  readonly normalFrontDontFlip: true;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "Twist" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+/**
+ * Source-order port of `Anim_Twist_Twice` -> `Twist`
+ * (`pokemon_animation.c:1037-1059,1420-1470,3732-3741,5540-5544`) for the
+ * ordinary opponent-front path. `Task_HandleMonAnimation` has already
+ * zeroed sprite data and set `sDontFlip=TRUE`; `AddNewAnim` then clears its
+ * animation-slot record before this initializer writes rotation=1024,
+ * delay=0, and runs=2. The initializer immediately invokes `Twist`, then
+ * installs it as the sprite callback.
+ *
+ * First-run counters 0..1024 step by 16. At counter 1040 the strict
+ * `> rotation` branch writes identity, decrements runs, arms exactly ten
+ * delay-only callbacks, resets data2, and still performs the final +=16.
+ * The second run therefore begins at counter 16, not zero, and the following
+ * 1040 boundary restores identity, calls `ResetSpriteAfterAnim`, and hands
+ * off to stable `WaitAnimEnd`.
+ */
+export function twistTwiceFrameAtTick(ticksSinceStart: number): TwistTwiceFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  const animRotation = TWIST_TWICE_INITIALIZER.rotation;
+  let animDelay = TWIST_TWICE_INITIALIZER.delay;
+  let animRuns: 1 | 2 = TWIST_TWICE_INITIALIZER.runs;
+  const animSpeed = 0;
+  let animData: 0 | 1 = 0;
+  let data2 = 0;
+  let data6 = 0;
+  let callback: TwistTwiceFrame["callback"] = "Twist";
+  let affineMode: TwistTwiceFrame["affineMode"] = "normal";
+  let lastFrame: TwistTwiceFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    // `WaitAnimEnd` only polls sprite animation completion; this reducer's
+    // settled record is intentionally byte-stable until it reaches the dummy.
+    if (callback === "WaitAnimEnd") continue;
+
+    const data2Before = data2;
+    const animDelayBefore = animDelay;
+    const animRunsBefore = animRuns;
+    const animDataBefore = animData;
+    let startedAffine = false;
+    let affineWriteRotationSigned: number | null = null;
+    let resetSpriteAfterAnim = false;
+
+    if (animDelay !== 0) {
+      animDelay -= 1;
+    } else {
+      if (data2 === 0 && animData === 0) {
+        startedAffine = true;
+        affineMode = "double";
+        animData = 1;
+      }
+
+      if (data2 > animRotation) {
+        // `HandleSetAffineData(sprite, 256, 256, 0)` precedes both repeat
+        // setup and the terminal ResetSpriteAfterAnim branch.
+        affineWriteRotationSigned = 0;
+        if (animRuns > 1) {
+          animRuns = 1;
+          animDelay = 10;
+          data2 = 0;
+        } else {
+          resetSpriteAfterAnim = true;
+          affineMode = "normal";
+          callback = "WaitAnimEnd";
+        }
+      } else {
+        data6 = gbaSin(data2 % 256, 4096);
+        affineWriteRotationSigned = data6;
+      }
+
+      // This executes after both repeat and terminal branches in the source.
+      data2 += 16;
+    }
+
+    lastFrame = {
+      x2: 0,
+      y2: 0,
+      data2Before,
+      data2,
+      data6,
+      animRotation,
+      animDelayBefore,
+      animDelay,
+      animRunsBefore,
+      animRuns,
+      animSpeed,
+      animDataBefore,
+      animData,
+      initializerCallBeforeCallbackInstall: tick === 0,
+      startedAffine,
+      affineWriteCount: affineWriteRotationSigned === null ? 0 : 1,
+      affineWriteRotationSigned,
+      affineWriteRotationU16: affineWriteRotationSigned === null
+        ? null
+        : affineWriteRotationSigned & 0xffff,
+      xScale: 256,
+      yScale: 256,
+      normalFrontDontFlip: true,
+      resetSpriteAfterAnim,
+      callback,
+      affineMode,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable TwistTwice reducer state");
+  return lastFrame;
+}
+
 const VERTICAL_SHAKE_ACCUMULATOR_STEP = 60;
 const VERTICAL_SHAKE_ACCUMULATOR_LIMIT = 2304;
 
@@ -4032,6 +4206,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = swingConcaveFrameAtTick(101);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_SwingConcave did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "TWIST_TWICE": {
+      const terminal = twistTwiceFrameAtTick(140);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_Twist_Twice did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }

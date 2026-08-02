@@ -105,6 +105,11 @@ import {
   H_SHAKE_SLOW_FACTORY_FRONT_SPECIES,
   H_SHAKE_SLOW_FRONT_SPECIES,
   H_SHAKE_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES,
+  twistTwiceFrameAtTick,
+  TWIST_TWICE_FACTORY_FRONT_SPECIES,
+  TWIST_TWICE_FRONT_SPECIES,
+  TWIST_TWICE_INITIALIZER,
+  TWIST_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES,
   rapidHorizontalHopsOffsetAtTick,
   rotateUpToSidesFrameAtTick,
   ROTATE_UP_TO_SIDES_FACTORY_FRONT_SPECIES,
@@ -1217,6 +1222,249 @@ describe("speciesIdleAnim", () => {
         callback: "WaitAnimEnd",
       });
       expect(horizontalShakeFrameAtTick(100)).toEqual(horizontalShakeFrameAtTick(39));
+    });
+  });
+
+  describe("twistTwiceFrameAtTick (Anim_Twist_Twice -> Twist source lifecycle)", () => {
+    it("derives the exact 1/1/0 generated selector census for STARYU", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_TWIST_TWICE")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(TWIST_TWICE_FRONT_SPECIES).toEqual(generated);
+      expect(generated).toEqual(["STARYU"]);
+      expect(TWIST_TWICE_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(TWIST_TWICE_FACTORY_FRONT_SPECIES).toEqual(["STARYU"]);
+      expect(TWIST_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      expect(speciesFrontIdleRestOffset("STARYU")).toEqual({ x2: 0, y2: 0 });
+    });
+
+    it("pins AddNewAnim defaults, selector-78 overrides, and call-before-install ordering", () => {
+      expect(ADD_NEW_ANIM_DEFAULTS).toEqual({
+        rotation: 0, delay: 0, runs: 1, speed: 0, data: 0,
+      });
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual(
+        expect.arrayContaining([0, 2, 6]),
+      );
+      expect(TWIST_TWICE_INITIALIZER).toEqual({
+        selector: "ANIM_TWIST_TWICE", sourceId: 78, rotation: 1024,
+        delay: 0, runs: 2, accepted: true,
+      });
+      expect(twistTwiceFrameAtTick(0)).toEqual({
+        x2: 0,
+        y2: 0,
+        data2Before: 0,
+        data2: 16,
+        data6: 0,
+        animRotation: 1024,
+        animDelayBefore: 0,
+        animDelay: 0,
+        animRunsBefore: 2,
+        animRuns: 2,
+        animSpeed: 0,
+        animDataBefore: 0,
+        animData: 1,
+        initializerCallBeforeCallbackInstall: true,
+        startedAffine: true,
+        affineWriteCount: 1,
+        affineWriteRotationSigned: 0,
+        affineWriteRotationU16: 0,
+        xScale: 256,
+        yScale: 256,
+        normalFrontDontFlip: true,
+        resetSpriteAfterAnim: false,
+        callback: "Twist",
+        affineMode: "double",
+      });
+    });
+
+    it("pins every first-run, strict boundary, delay, second-run, and terminal callback", () => {
+      const callbacks = Array.from({ length: 141 }, (_, tick) => twistTwiceFrameAtTick(tick)!);
+      expect(callbacks).toHaveLength(141);
+
+      // Tick zero through 64 consume 0..1024 by 16. Their signed `Sin`
+      // result is stored in s16 data6 before `HandleSetAffineData` receives
+      // the same bit-pattern as a u16 rotation.
+      for (let tick = 0; tick <= 64; tick += 1) {
+        const counter = tick * 16;
+        const rotationSigned = Math.floor((4096 * GBA_SINE_TABLE_256[counter & 0xff]!) / 256);
+        expect(callbacks[tick], `first run tick ${tick}`).toMatchObject({
+          x2: 0,
+          y2: 0,
+          data2Before: counter,
+          data2: counter + 16,
+          data6: rotationSigned,
+          animRotation: 1024,
+          animDelayBefore: 0,
+          animDelay: 0,
+          animRunsBefore: 2,
+          animRuns: 2,
+          animSpeed: 0,
+          animDataBefore: tick === 0 ? 0 : 1,
+          animData: 1,
+          initializerCallBeforeCallbackInstall: tick === 0,
+          startedAffine: tick === 0,
+          affineWriteCount: 1,
+          affineWriteRotationSigned: rotationSigned,
+          affineWriteRotationU16: rotationSigned & 0xffff,
+          xScale: 256,
+          yScale: 256,
+          normalFrontDontFlip: true,
+          resetSpriteAfterAnim: false,
+          callback: "Twist",
+          affineMode: "double",
+        });
+      }
+
+      // The `>` (not `>=`) check delays the repeat boundary until data2=1040.
+      expect(callbacks[65]).toEqual({
+        x2: 0,
+        y2: 0,
+        data2Before: 1040,
+        data2: 16,
+        data6: 0,
+        animRotation: 1024,
+        animDelayBefore: 0,
+        animDelay: 10,
+        animRunsBefore: 2,
+        animRuns: 1,
+        animSpeed: 0,
+        animDataBefore: 1,
+        animData: 1,
+        initializerCallBeforeCallbackInstall: false,
+        startedAffine: false,
+        affineWriteCount: 1,
+        affineWriteRotationSigned: 0,
+        affineWriteRotationU16: 0,
+        xScale: 256,
+        yScale: 256,
+        normalFrontDontFlip: true,
+        resetSpriteAfterAnim: false,
+        callback: "Twist",
+        affineMode: "double",
+      });
+
+      // Exactly ten `delay--` callbacks follow. They neither write affine
+      // data nor increment data2, so the second run starts at 16.
+      for (let tick = 66; tick <= 75; tick += 1) {
+        const delayBefore = 10 - (tick - 66);
+        expect(callbacks[tick], `delay callback ${tick}`).toMatchObject({
+          x2: 0,
+          y2: 0,
+          data2Before: 16,
+          data2: 16,
+          data6: 0,
+          animRotation: 1024,
+          animDelayBefore: delayBefore,
+          animDelay: delayBefore - 1,
+          animRunsBefore: 1,
+          animRuns: 1,
+          animSpeed: 0,
+          animDataBefore: 1,
+          animData: 1,
+          initializerCallBeforeCallbackInstall: false,
+          startedAffine: false,
+          affineWriteCount: 0,
+          affineWriteRotationSigned: null,
+          affineWriteRotationU16: null,
+          xScale: 256,
+          yScale: 256,
+          normalFrontDontFlip: true,
+          resetSpriteAfterAnim: false,
+          callback: "Twist",
+          affineMode: "double",
+        });
+      }
+
+      for (let tick = 76; tick <= 139; tick += 1) {
+        const counter = (tick - 75) * 16;
+        const rotationSigned = Math.floor((4096 * GBA_SINE_TABLE_256[counter & 0xff]!) / 256);
+        expect(callbacks[tick], `second run tick ${tick}`).toMatchObject({
+          x2: 0,
+          y2: 0,
+          data2Before: counter,
+          data2: counter + 16,
+          data6: rotationSigned,
+          animRotation: 1024,
+          animDelayBefore: 0,
+          animDelay: 0,
+          animRunsBefore: 1,
+          animRuns: 1,
+          animSpeed: 0,
+          animDataBefore: 1,
+          animData: 1,
+          initializerCallBeforeCallbackInstall: false,
+          startedAffine: false,
+          affineWriteCount: 1,
+          affineWriteRotationSigned: rotationSigned,
+          affineWriteRotationU16: rotationSigned & 0xffff,
+          xScale: 256,
+          yScale: 256,
+          normalFrontDontFlip: true,
+          resetSpriteAfterAnim: false,
+          callback: "Twist",
+          affineMode: "double",
+        });
+      }
+
+      const terminal = callbacks[140]!;
+      expect(terminal).toEqual({
+        x2: 0,
+        y2: 0,
+        data2Before: 1040,
+        data2: 1056,
+        data6: 0,
+        animRotation: 1024,
+        animDelayBefore: 0,
+        animDelay: 0,
+        animRunsBefore: 1,
+        animRuns: 1,
+        animSpeed: 0,
+        animDataBefore: 1,
+        animData: 1,
+        initializerCallBeforeCallbackInstall: false,
+        startedAffine: false,
+        affineWriteCount: 1,
+        affineWriteRotationSigned: 0,
+        affineWriteRotationU16: 0,
+        xScale: 256,
+        yScale: 256,
+        normalFrontDontFlip: true,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      });
+      expect(twistTwiceFrameAtTick(141)).toEqual(terminal);
+      expect(twistTwiceFrameAtTick(1000)).toEqual(terminal);
+      expect(twistTwiceFrameAtTick(-1)).toBeNull();
+      expect(twistTwiceFrameAtTick(0.5)).toBeNull();
+    });
+
+    it("promotes selector 78 only; normal Twist and source-adjacent selectors remain unsupported", () => {
+      const selectors = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
+      const normalTwist = Object.entries(selectors)
+        .filter(([, family]) => family === "ANIM_TWIST")
+        .map(([species]) => species);
+      expect(normalTwist).toEqual(["SHELLDER", "HORSEA", "STARMIE", "CLAMPERL", "ANORITH"]);
+      for (const species of normalTwist) {
+        expect(speciesFrontIdleRestOffset(species)).toBeNull();
+      }
+
+      const preceding = Object.entries(selectors)
+        .filter(([, family]) => family === "ANIM_V_SHAKE_SLOW")
+        .map(([species]) => species);
+      const following = Object.entries(selectors)
+        .filter(([, family]) => family === "ANIM_CIRCLE_C_CLOCKWISE_SLOW")
+        .map(([species]) => species);
+      expect(preceding).toEqual([]);
+      expect(following).toEqual(["DROWZEE", "SPINARAK"]);
+      for (const species of following) {
+        expect(speciesFrontIdleRestOffset(species)).toBeNull();
+      }
     });
   });
 
