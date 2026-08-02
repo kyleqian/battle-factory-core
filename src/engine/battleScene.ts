@@ -7302,16 +7302,16 @@ function drawMenuIdleBaseWithOpponentHp(
   turn4NextCommandHandoff: Turn4CompletedResolutionNextCommandHandoff | null = null,
 ): void {
   drawRect(fb, menuIdleBase);
-  if (isTurn1NextCommandHandoffReady(turn1NextCommandHandoff)) {
-    const hp = isTurn4NextCommandHandoffReady(turn4NextCommandHandoff)
-      ? turn4NextCommandHandoff.hp.opponent
-      : isTurn3NextCommandHandoffReady(turn3NextCommandHandoff)
-        ? turn3NextCommandHandoff.hp.opponent
-        : isTurn2NextCommandHandoffReady(turn2NextCommandHandoff)
-          ? turn2NextCommandHandoff.hp.opponent
-          : turn1NextCommandHandoff.hp.opponent;
-    drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(hp));
-  }
+  const hp = isTurn4NextCommandHandoffReady(turn4NextCommandHandoff)
+    ? turn4NextCommandHandoff.hp.opponent
+    : isTurn3NextCommandHandoffReady(turn3NextCommandHandoff)
+      ? turn3NextCommandHandoff.hp.opponent
+      : isTurn2NextCommandHandoffReady(turn2NextCommandHandoff)
+        ? turn2NextCommandHandoff.hp.opponent
+        : isTurn1NextCommandHandoffReady(turn1NextCommandHandoff)
+          ? turn1NextCommandHandoff.hp.opponent
+          : null;
+  if (hp !== null) drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(hp));
 }
 
 function drawActionMenuIdleContent(
