@@ -124,6 +124,6 @@ describe("ANIM_GLOW_BLACK", () => {
     expect(selectorTables.frontAnimIds.species.MILOTIC).toBe("ANIM_GLOW_BLUE");
     expect(speciesFrontIdleRestOffset("PONYTA")).toEqual({ x2: 0, y2: 0 });
     expect(speciesFrontIdleRestOffset("MILOTIC")).toBeNull();
-    expect(speciesFrontIdleRestOffset("VENUSAUR")).toBeNull();
+    expect(speciesFrontIdleRestOffset("PIDGEOT")).toBeNull();
   });
 });

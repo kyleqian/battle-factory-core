@@ -1,5 +1,47 @@
 # Animation coverage
 
+## Front `ANIM_ROTATE_UP_SLAM_DOWN` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **2 mappings / 2
+Factory-reachable / 0 outside-Factory** — VENUSAUR and GOLEM. Only source ID
+**47** is promoted. `ANIMATION_COVERAGE.json` remains byte-identical at
+SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`; move
+coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**,
+Open-only **0/1**, Outside Factory **0/77**. Adjacent unsupported selectors,
+back routing, damage/RNG/turn order, facility state, and engine boundaries are
+unchanged.
+
+**Did:** source pins `pokemon_animation.c:643-677,911-939,1003-1068,
+1368-1391,2592-2645`, `pokemon_animation.h:87`, and
+`pokemon.c:1409,1482`: signed-s16 center-to-corner/data6 arithmetic, doubled
+affine start, no initializer callback invocation, `_0`/`_1`/`_2` source-order
+transitions, both normal-front `TryFlipX` calls, identity/normal affine reset,
+and the strict VerticalShake tail through WaitAnimEnd. Tier-1 coverage exhausts
+all active callback phases (**0..72**), terminal/stable terminal behavior,
+affine/OAM writes, invalid inputs, signed arithmetic, and adjacent unsupported
+front/back controls. Complete legal Scene-ON parties were probed twice per
+Factory species only through `tools/run-mgba-probe.py`; each pair is byte-
+identical and captures a dense **76-frame** window through SpriteCallbackDummy:
+VENUSAUR window **1618..1693**, **34,759 B**, SHA-256
+`fab9786556bf5780c29c1e7fe79526ccb2fa0ae1be0c4271cc66c9d05140aa35`;
+GOLEM window **1613..1688**, **34,748 B**, SHA-256
+`b4f0ad9d2a21a447ff0bc72cbf4c1680d1599a071cf0cc52b2fddf6d8e817c36`.
+
+**Next:** this bounded selector-47 step is complete; await supervisor
+selection of the next unsupported generated Factory-front family. No move
+status is promoted for send-out coverage.
+
+**Notes:** focused lifecycle/source/census/evidence is **11/11**; both
+animation/executable-frontier ratchets are **9/9**; `npx tsc --noEmit`,
+`npm run animation:coverage`, and production build are green. Commits:
+`5f9092aa` (reducer/census/lifecycle), `e91d6a15` (source evidence, dense
+probe, and paired Scene-ON fixtures), and `86b7e5ed` (source-correct shake-tail
+counter). `npm test` was run repeatedly with no assertion failures observed in
+the completed batches, but the full forked suite exceeded the command runner's
+time window before its final summary; the focused gates above are the final
+green checks for this worker.
+
 ## Front `ANIM_SWING_CONCAVE_FAST_SHORT` family accepted (2026-08-02)
 
 **State:** exact for the complete generated selector census: **3 mappings / 2
