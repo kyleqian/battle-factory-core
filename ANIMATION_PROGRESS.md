@@ -1,5 +1,35 @@
 # Animation coverage
 
+## Front `ANIM_CIRCLE_INTO_BG` terminal family accepted (2026-08-01)
+
+**State / verdict:** exact for the complete generated selector census: all
+**1 mapping / 1 Factory-reachable species / 0 outside-Factory mappings** —
+KINGDRA. No adjacent selector, unsupported barrier, per-species/tick branch,
+baked frame, or engine-boundary widening was added. Move coverage remains
+**107 exact / 0 partial / 0 staged / 169 unsupported**;
+`ANIMATION_COVERAGE.json` is unchanged at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,984-1064,
+3537-3565,5540-5544` and `trig.c:514-518` pin task-zeroed data2/data7,
+tick-0 affine start, both normal-front no-op `TryFlipX` calls, and C/GBA
+signed sine and affine arithmetic. All **66 callbacks** are exhaustive: ticks
+0..64 consume data7 0..512 inclusive by 8, and tick 65 alone observes strict
+data7=520 `> 512`, clears x2, resets the sprite, writes identity affine state,
+installs `WaitAnimEnd`, and remains stable thereafter. A fresh complete legal
+challenge-0 Scene-ON party settles KINGDRA species 230 at x2=0/y2=0,
+animNum=1/animCmdIndex=4 and `SpriteCallbackDummy`; paired raw receipts are
+byte-identical at **373 bytes**, SHA-256
+`1747d48abbe711e2b6d799caa48fe7cb95d6ad276a461713902556b3b229043b`.
+
+**Verification / next:** unchanged `dump-onix-front-idle-anim.py` ran only via
+`tools/run-mgba-probe.py` twice in one fresh `mktemp` directory; paired raw
+`cmp`, focused species-idle plus both ratchets **285/285**, `npx tsc --noEmit`,
+coverage/hash and diff checks are green. Full `npm test`: **583 files, 6,061
+passed + 1 skipped**; production build: **545 modules transformed**. Next
+generated source-ranked family: **`ANIM_FOUR_PETAL`** (1 mapping / 1 Factory /
+0 outside): REGICE.
+
 ## Front `ANIM_LUNGE_GROW` terminal family accepted (2026-08-01)
 
 **State / verdict:** exact for the complete generated selector census: all
