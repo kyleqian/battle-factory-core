@@ -2518,7 +2518,7 @@ export interface BattleSceneState {
    * guard-owned records drive the 5-13 dispatcher and atomically install the
    * next owner at the next eligible reopen.
    */
-  latestCompletedCommandHandoff?: LatestCompletedCommandHandoff | null;
+  latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null;
   /**
    * Nonterminal opponent-faint presentation. Once the text controller is
    * ready, this owner atomically retains the accepted A edge, frozen cursor,
@@ -2569,9 +2569,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn2NextCommandHandoff: state.turn2NextCommandHandoff ?? null,
     turn3NextCommandHandoff: state.turn3NextCommandHandoff ?? null,
     turn4NextCommandHandoff: state.turn4NextCommandHandoff ?? null,
-    ...(state.latestCompletedCommandHandoff == null
-      ? {}
-      : { latestCompletedCommandHandoff: state.latestCompletedCommandHandoff }),
+    latestCompletedCommandHandoff: state.latestCompletedCommandHandoff ?? null,
     opponentFaintPresentationOwner: state.opponentFaintPresentationOwner,
     resolutionOwner: state.resolutionOwner ?? null,
     battleOutcome:

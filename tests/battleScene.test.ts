@@ -295,7 +295,7 @@ describe("dispatcher slices 3-4: FightCommandPresentation shadow equivalence", (
 
 function pixelAt(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: null, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, opponentFaintPresentationOwner: null, });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: null, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -303,7 +303,7 @@ function pixelAt(t: number, x: number, y: number): [number, number, number] {
 /** Same as `pixelAt`, but with the send-out A-press already registered at trace tick 1420 (`sendOutPressElapsed = 380`, matching the §7.2/§7.3 tests above). */
 function pixelAtSentOut(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, opponentFaintPresentationOwner: null, });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -644,7 +644,7 @@ describe("battleScene: send-out A-press #3 registration + text cadence (docs/bat
   it("state advance preserves sendOutPressElapsed once set, and elapsed keeps incrementing regardless", () => {
     let state: BattleSceneState = { ...INITIAL_BATTLE_SCENE_STATE, sendOutPressElapsed: 380 };
     state = advanceBattleScene(state);
-    expect(state).toEqual({ elapsed: 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn2NextCommandHandoff: null, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, opponentFaintPresentationOwner: null, resolutionOwner: null, battleOutcome: 0, terminalResolution: null });
+    expect(state).toEqual({ elapsed: 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn2NextCommandHandoff: null, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, resolutionOwner: null, battleOutcome: 0, terminalResolution: null });
   });
 });
 
@@ -1181,7 +1181,7 @@ describe("battleScene: S7 slice B - DOUBLE_TEAM clone vs. opponent healthbox z-o
 
     const submenu = confirmFightMove(openFightSubmenu(0, rentalMoveset("ONIX")), 879); // pressTick = TICK0+879 = 1919
     const fb = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb, { elapsed: 2075 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, opponentFaintPresentationOwner: null, });
+    renderBattleScene(fb, { elapsed: 2075 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, });
     const o = (25 * 240 + 104) * 4;
     expect([fb[o]!, fb[o + 1]!, fb[o + 2]!]).toEqual([expected.r, expected.g, expected.b]);
   });
@@ -1206,11 +1206,11 @@ describe("battleScene: S7 slice B - stat-change banner as a real scrolling BG1 (
     const o = (y * 240 + x) * 4;
 
     const fb2010 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb2010, { elapsed: 2010 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, opponentFaintPresentationOwner: null, });
+    renderBattleScene(fb2010, { elapsed: 2010 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, });
     const at2010: [number, number, number] = [fb2010[o]!, fb2010[o + 1]!, fb2010[o + 2]!];
 
     const fb2030 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb2030, { elapsed: 2030 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, opponentFaintPresentationOwner: null, });
+    renderBattleScene(fb2030, { elapsed: 2030 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, });
     const at2030: [number, number, number] = [fb2030[o]!, fb2030[o + 1]!, fb2030[o + 2]!];
 
     expect(at2010).toEqual([69, 160, 99]);
@@ -1242,11 +1242,11 @@ describe("battleScene: S7 slice C - Rock Slide's shaken BG3 vs. the player healt
     const o = (y * 240 + x) * 4;
 
     const fbUnshifted = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fbUnshifted, { elapsed: 2348 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, opponentFaintPresentationOwner: null, }); // rockSlideBg3Y === 0 here
+    renderBattleScene(fbUnshifted, { elapsed: 2348 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, }); // rockSlideBg3Y === 0 here
     const atUnshifted: [number, number, number] = [fbUnshifted[o]!, fbUnshifted[o + 1]!, fbUnshifted[o + 2]!];
 
     const fbShaken = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fbShaken, { elapsed: 2349 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, opponentFaintPresentationOwner: null, }); // rockSlideBg3Y === -7 here
+    renderBattleScene(fbShaken, { elapsed: 2349 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, }); // rockSlideBg3Y === -7 here
     const atShaken: [number, number, number] = [fbShaken[o]!, fbShaken[o + 1]!, fbShaken[o + 2]!];
 
     expect(atUnshifted).toEqual([255, 255, 255]);

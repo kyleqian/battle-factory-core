@@ -8,6 +8,25 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Clean-parent app-differential replay has no shared harness
+
+- **What:** the standard acceptance for #39-class slices — replay a trace's
+  captureFrames app-vs-app against the clean parent commit and byte-compare
+  raw RGBA — gets rebuilt ad hoc by every worker: each session leaves a
+  fresh scratch git-worktree + one-off driver script (tonight alone:
+  `pokebench-slice2-parent.*`, `pokebench-slice5-parent-*`,
+  `pokebench-attack-pause-*`, two `tmp.*` parents, plus the supervisor's
+  canary-bisect pair). Slice-6's worker flagged ~5 min lost re-deriving the
+  recipe; the wind-down sweep keeps finding the orphaned worktrees.
+- **Hits:** 2 (recurring across many workers within each).
+- **Cost each:** ~5-10 min per worker, plus supervisor sweep time.
+- **Workaround / fix shape:** a small `tools/compare/app-differential.ts`
+  (or shell recipe doc) that takes `<traces...> --base REF`, creates the
+  parent worktree with symlinked `node_modules` (valid while package.json
+  is unchanged), renders both apps, byte-compares, and removes the worktree
+  on success. The `npm run compare -- --base REF` flag from the 2026-08-01
+  papercut session covers oracle-vs-app; this is the app-vs-app sibling.
+
 ## Raw before/after RNG-window diffs pick up unrelated-subsystem draws
 
 - **What:** ground-truth scouts that pin an RNG draw count from a raw
