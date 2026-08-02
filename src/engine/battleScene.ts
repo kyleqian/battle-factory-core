@@ -871,6 +871,7 @@ import {
   turn3PresentationEpochElapsedSinceReset,
   type Turn3CompletedResolutionNextCommandHandoff,
 } from "./turn3ResolutionAdapter.ts";
+import type { Turn4CompletedResolutionNextCommandHandoff } from "./turn4ResolutionAdapter.ts";
 import { TURN1_CHOOSE_ACTION_RESET_AFTER_CONFIRM } from "./turn1ChooseActionReset.ts";
 import {
   isTurn6NextCommandHandoffReady,
@@ -2511,6 +2512,8 @@ export interface BattleSceneState {
   turn2NextCommandHandoff?: Turn2CompletedResolutionNextCommandHandoff | null;
   /** Completed turn-3 receipt published by the source-owned choose-action reset. */
   turn3NextCommandHandoff?: Turn3CompletedResolutionNextCommandHandoff | null;
+  /** Completed turn-4 receipt published by the source-owned choose-action reset. */
+  turn4NextCommandHandoff?: Turn4CompletedResolutionNextCommandHandoff | null;
   /** S7 slice J (docs/battle-turn-notes.md §13/§23): `true` once turn 4's whole ROCK_SLIDE resolution has redrawn the settled action menu (`TURN4_ROCKSLIDE_MENU_REDRAW_DELAY` past turn 4's own real confirm) AND a fresh A-press has reopened FIGHT for turn 5 - same direct-create idiom as the preceding turn controllers. Turn 5's reopen persists the cursor at slot 0 (ROCK_SLIDE, unchanged since turn 3) - no nav needed, §13's own ledger. Distinguishes turn 5's own ENDEAVOR resolution (Grovyle's fatal-to-1 hit on Onix) from turn 4's DOUBLE_TEAM+ROCK_SLIDE one (both confirm at cursor 0). */
   turn4Resolved: boolean;
   /** Completed turn-5 receipt for the following FIGHT command. */
@@ -2561,6 +2564,7 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn1NextCommandHandoff: null,
   turn2NextCommandHandoff: null,
   turn3NextCommandHandoff: null,
+  turn4NextCommandHandoff: null,
   turn4Resolved: false,
   turn5NextCommandHandoff: null,
   turn6NextCommandHandoff: null,
@@ -2591,6 +2595,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn1NextCommandHandoff: state.turn1NextCommandHandoff ?? null,
     turn2NextCommandHandoff: state.turn2NextCommandHandoff ?? null,
     turn3NextCommandHandoff: state.turn3NextCommandHandoff ?? null,
+    turn4NextCommandHandoff: state.turn4NextCommandHandoff ?? null,
     turn4Resolved: state.turn4Resolved,
     turn5NextCommandHandoff: state.turn5NextCommandHandoff,
     turn6NextCommandHandoff: state.turn6NextCommandHandoff,

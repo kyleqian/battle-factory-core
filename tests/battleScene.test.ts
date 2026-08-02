@@ -517,7 +517,7 @@ describe("battleScene: send-out A-press #3 registration + text cadence (docs/bat
   it("state advance preserves sendOutPressElapsed once set, and elapsed keeps incrementing regardless", () => {
     let state: BattleSceneState = { ...INITIAL_BATTLE_SCENE_STATE, sendOutPressElapsed: 380 };
     state = advanceBattleScene(state);
-    expect(state).toEqual({ elapsed: 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: null, turn2NextCommandHandoff: null, turn3NextCommandHandoff: null, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null, resolutionOwner: null, battleOutcome: 0, terminalResolution: null });
+    expect(state).toEqual({ elapsed: 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: null, turn2NextCommandHandoff: null, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null, resolutionOwner: null, battleOutcome: 0, terminalResolution: null });
   });
 });
 
