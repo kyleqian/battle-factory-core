@@ -49,6 +49,7 @@ export type SpeciesFrontAnimFamily =
   | "BOUNCE_ROTATE_TO_SIDES_SLOW"
   | "CIRCLE_INTO_BG"
   | "CIRCLE_C_CLOCKWISE_SLOW"
+  | "CIRCULAR_VIBRATE"
   | "CIRCULAR_STRETCH_TWICE"
   | "FOUR_PETAL"
   | "GROW_VIBRATE"
@@ -100,6 +101,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "BOUNCE_ROTATE_TO_SIDES_SLOW",
   "CIRCLE_INTO_BG",
   "CIRCLE_C_CLOCKWISE_SLOW",
+  "CIRCULAR_VIBRATE",
   "CIRCULAR_STRETCH_TWICE",
   "FOUR_PETAL",
   "GROW_VIBRATE",
@@ -872,6 +874,23 @@ export const FIGURE_8_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
 /** There are no Figure8 mappings outside the Factory rental pool. */
 export const FIGURE_8_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   FIGURE_8_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All source selector mappings for `ANIM_CIRCULAR_VIBRATE`. */
+export const CIRCULAR_VIBRATE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_CIRCULAR_VIBRATE")
+    .map(([species]) => species),
+);
+
+/** Every circular-vibrate mapping is reachable through Factory rentals. */
+export const CIRCULAR_VIBRATE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  CIRCULAR_VIBRATE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no circular-vibrate mappings outside the Factory pool. */
+export const CIRCULAR_VIBRATE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  CIRCULAR_VIBRATE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /** All source selector mappings for `ANIM_BACK_AND_LUNGE`. */
@@ -4793,6 +4812,109 @@ export function flashYellowFrameAtTick(
   throw new Error("unreachable FlashYellow reducer state");
 }
 
+/** Source selector 17's task-installed direct callback receipt. */
+export const CIRCULAR_VIBRATE_ENTRY = Object.freeze({
+  selector: "ANIM_CIRCULAR_VIBRATE",
+  sourceId: 17,
+  taskZeroedData2: true,
+  callbackInstalled: "Anim_CircularVibrate",
+  callbackInvokedByInitializer: false,
+  normalFrontDontFlip: true,
+  accepted: true,
+} as const);
+
+export interface CircularVibrateFrame extends SpeciesIdleOffset {
+  /** `sprite->data[2]` before this callback's strict terminal guard. */
+  readonly data2Before: number;
+  /** `sprite->data[2]` after this callback's unconditional `+= 9`. */
+  readonly data2: number;
+  /** C-truncated `data[2] / 4` passed to the amplitude sine. */
+  readonly amplitudeIndex: number | null;
+  /** `Sin(amplitudeIndex, 8)`, then used as the next sine/cosine amplitude. */
+  readonly amplitude: number | null;
+  /** `data[2] % 256` passed to the motion sine/cosine pair. */
+  readonly index: number | null;
+  readonly sign: -1 | 1 | null;
+  readonly motionX2: number | null;
+  readonly motionY2: number | null;
+  readonly normalFrontDontFlip: true;
+  readonly resetPosition: boolean;
+  readonly callback: "Anim_CircularVibrate" | "WaitAnimEnd";
+}
+
+/**
+ * Source-order normal-front port of selector 17's direct
+ * `Anim_CircularVibrate` callback (`pokemon_animation.c:1392-1418`).
+ * `Task_HandleMonAnimation` already zeroes data[2] and installs this function,
+ * so callback tick zero begins at accumulator zero; unlike neighboring
+ * animation families it has no separate initializer and no `TryFlipX` call.
+ *
+ * The active callbacks are ticks 0..56 (accumulators 0..504). Each derives a
+ * signed amplitude before applying the parity-selected sign to both sine and
+ * cosine position writes. Tick 57 sees 513, clears both position fields,
+ * installs `WaitAnimEnd`, and still performs the source's final `+= 9`.
+ */
+export function circularVibrateFrameAtTick(
+  ticksSinceStart: number,
+): CircularVibrateFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let x2 = 0;
+  let y2 = 0;
+  let callback: CircularVibrateFrame["callback"] = "Anim_CircularVibrate";
+  let lastFrame: CircularVibrateFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (callback === "WaitAnimEnd") continue;
+
+    const data2Before = data2;
+    let amplitudeIndex: number | null = null;
+    let amplitude: number | null = null;
+    let index: number | null = null;
+    let sign: -1 | 1 | null = null;
+    let motionX2: number | null = null;
+    let motionY2: number | null = null;
+    let resetPosition = false;
+
+    if (data2 > 512) {
+      x2 = 0;
+      y2 = 0;
+      resetPosition = true;
+      callback = "WaitAnimEnd";
+    } else {
+      sign = (data2 & 1) === 0 ? 1 : -1;
+      amplitudeIndex = Math.trunc(data2 / 4);
+      amplitude = gbaSin(amplitudeIndex, 8);
+      index = data2 % 256;
+      motionY2 = toS16(gbaSin(index, amplitude) * sign);
+      motionX2 = toS16(gbaCos(index, amplitude) * sign);
+      y2 = motionY2;
+      x2 = motionX2;
+    }
+
+    data2 = toS16(data2 + 9);
+    lastFrame = {
+      x2,
+      y2,
+      data2Before,
+      data2,
+      amplitudeIndex,
+      amplitude,
+      index,
+      sign,
+      motionX2,
+      motionY2,
+      normalFrontDontFlip: true,
+      resetPosition,
+      callback,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable CircularVibrate reducer state");
+  return lastFrame;
+}
+
 /** Source selector 43's initializer-only `Anim_Figure8` receipt. */
 export const FIGURE_8_INITIALIZER = Object.freeze({
   selector: "ANIM_FIGURE_8",
@@ -5187,6 +5309,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = circleCCounterclockwiseSlowFrameAtTick(43);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_CircleCounterclockwise_Slow did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "CIRCULAR_VIBRATE": {
+      const terminal = circularVibrateFrameAtTick(57);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_CircularVibrate did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
