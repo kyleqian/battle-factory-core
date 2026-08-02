@@ -4,23 +4,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 859 — [bounded MAIN worker, 2026-08-02] dispatcher slice 5 generic-guard checkpoint
+## 859 — [bounded MAIN worker, 2026-08-02] dispatcher slice 5 production cut
 
-- **State:** `3dda38b6` is the first green slice-5 checkpoint. Full `npm test`
-  is **592 files / 6,142 passed / 1 skipped**; `npm run build` and `npx tsc
+- **State:** `5c8eb38c` is the second green slice-5 checkpoint. `npm test` is
+  **592 files / 6,142 passed / 1 skipped**; `npm run build` and `npx tsc
   --noEmit` exit 0.
-- **Did:** the live turn 5–13 route now consumes immutable generic reopen
-  guards, atomically installs successors, projects PP from the generic owner,
-  and routes drawTurn6–15 only from semantic bridge content. The retained FLY
-  owner/segment identity remains a hard invariant.
-- **Evidence:** focused generic handoff and FIGHT suites are green; the
-  representative Scene-OFF turn-6 replay is **44/44** against the oracle.
-- **Next:** delete the nine turn 5–13 state fields, their compatibility locals,
-  and the retired renderer/core fallbacks; retain the four early fields plus
-  positional renderer/PP parameters through slice 10.
-- **Notes:** this checkpoint intentionally still has the nine legacy state
-  fields only as inert compatibility shape; production neither publishes nor
-  consumes them. No trace/capture edits, animation, barrier, PP selector, or
+- **Did:** generic semantic content and immutable reopen guards are now the
+  production turn-5–13 route. Core atomically installs each successor/retained
+  FLY owner; the nine legacy state fields, copies, publications, and renderer
+  fallbacks are gone. Turns 1–4 and the staged 13 renderer/PP parameters/types
+  remain untouched for later slices.
+- **Evidence:** clean-parent app replay is **5,638/5,638** raw captures across
+  all 33 slice-1 windows; generated Scene-OFF is **128/128**; changed terminal
+  rungs are **255/255**, **147/147**, **255/255**, **118/118**. Census:
+  state/initial/copy **13→4**, type declarations and FIGHT/PP parameters remain
+  **13**, test literal assignments **289→202**.
+- **Next:** Slice 6, fold the turn-1 epoch/content into the generic owner;
+  preserve the remaining early-turn invariants and staged ABI.
+- **Notes:** no trace/capture edits, animation, barrier, PP tuple selector, or
   completed-turn selector landed.
 
 ---
