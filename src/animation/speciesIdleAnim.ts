@@ -76,6 +76,7 @@ export type SpeciesFrontAnimFamily =
   | "V_SLIDE"
   | "V_SLIDE_SLOW"
   | "V_SLIDE_WOBBLE"
+  | "V_SLIDE_WOBBLE_SMALL"
   | "V_SQUISH_AND_BOUNCE"
   | "V_SQUISH_AND_BOUNCE_SLOW"
   | "V_STRETCH"
@@ -119,6 +120,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "V_SLIDE",
   "V_SLIDE_SLOW",
   "V_SLIDE_WOBBLE",
+  "V_SLIDE_WOBBLE_SMALL",
   "V_SQUISH_AND_BOUNCE",
   "V_SQUISH_AND_BOUNCE_SLOW",
   "V_STRETCH",
@@ -651,6 +653,23 @@ export const V_SLIDE_WOBBLE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = O
   V_SLIDE_WOBBLE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
+/** All 4 source selector mappings for `ANIM_V_SLIDE_WOBBLE_SMALL`. */
+export const V_SLIDE_WOBBLE_SMALL_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_V_SLIDE_WOBBLE_SMALL")
+    .map(([species]) => species),
+);
+
+/** Every small vertical-slide-wobble mapping is Factory-reachable. */
+export const V_SLIDE_WOBBLE_SMALL_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  V_SLIDE_WOBBLE_SMALL_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no small vertical-slide-wobble mappings outside the Factory pool. */
+export const V_SLIDE_WOBBLE_SMALL_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  V_SLIDE_WOBBLE_SMALL_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
 /** All 8 source selector mappings for `ANIM_H_SLIDE_WOBBLE`. */
 export const H_SLIDE_WOBBLE_FRONT_SPECIES: readonly string[] = Object.freeze(
   Object.entries(generatedFrontAnimIds)
@@ -1091,17 +1110,27 @@ export interface VerticalShakeTwiceFrame extends SpeciesIdleOffset {
 }
 
 /**
- * The Small initializer is a source sibling that shares `VerticalSlideWobble`
- * but is not accepted by this rung. Its selector mappings therefore remain
- * outside `PORTED_FRONT_FAMILIES`.
+ * The two source initializers share `VerticalSlideWobble`; each calls that
+ * callback once before installing it. Selector 28 supplies amplitude 10 and
+ * selector 81 supplies amplitude 5.
  */
 export const VERTICAL_SLIDE_WOBBLE_INITIALIZERS = Object.freeze({
-  normal: Object.freeze({ selector: "ANIM_V_SLIDE_WOBBLE", data0: 10, accepted: true }),
-  small: Object.freeze({ selector: "ANIM_V_SLIDE_WOBBLE_SMALL", data0: 5, accepted: false }),
+  normal: Object.freeze({
+    selector: "ANIM_V_SLIDE_WOBBLE",
+    sourceId: 28,
+    data0: 10,
+    accepted: true,
+  }),
+  small: Object.freeze({
+    selector: "ANIM_V_SLIDE_WOBBLE_SMALL",
+    sourceId: 81,
+    data0: 5,
+    accepted: true,
+  }),
 } as const);
 
 export interface VerticalSlideWobbleFrame extends SpeciesIdleOffset {
-  readonly data0: 10;
+  readonly data0: 5 | 10;
   readonly data2: number;
   readonly index: number | null;
   readonly varBeforeMask: number | null;
@@ -1110,6 +1139,8 @@ export interface VerticalSlideWobbleFrame extends SpeciesIdleOffset {
   readonly affineRotation: number;
   readonly xScale: 256;
   readonly yScale: 256;
+  /** Tick zero is the initializer's immediate callback before it installs the callback. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
   readonly startedAffine: boolean;
   readonly normalFrontDontFlip: true;
   readonly resetSpriteAfterAnim: boolean;
@@ -3414,7 +3445,7 @@ function slideWobbleCoreFrameAtTick(
   ticksSinceStart: number,
   amplitude: number,
 ): SlideWobbleCoreFrame | null {
-  if (ticksSinceStart < 0) return null;
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
 
   let data2 = 0;
   for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
@@ -3465,10 +3496,12 @@ function slideWobbleCoreFrameAtTick(
 }
 
 /**
- * Source-order port of `Anim_VerticalSlideWobble` / `VerticalSlideWobble`
- * (`pokemon_animation.c:911-939,984-1028,1735-1766`). The front-animation
- * task has zeroed data0/data2..data7 and set `sDontFlip=TRUE`; the normal
- * initializer then sets data0=10 and immediately calls the shared callback.
+ * Shared source-order port of `Anim_VerticalSlideWobble` /
+ * `Anim_VerticalSlideWobble_Small` -> `VerticalSlideWobble`
+ * (`pokemon_animation.c:911-939,984-1028,1735-1766,3753-3758`). The
+ * front-animation task has zeroed data0/data2..data7 and set
+ * `sDontFlip=TRUE`; each initializer writes its amplitude and immediately
+ * calls the shared callback before installing it.
  *
  * Tick 0 starts affine mode before the first writes. Ticks 0..100 use C
  * truncation for both integer indices, mask the doubled wobble index to u8,
@@ -3477,10 +3510,10 @@ function slideWobbleCoreFrameAtTick(
  * Tick 101 restores identity affine/y2, calls `ResetSpriteAfterAnim`, installs
  * `WaitAnimEnd`, and still performs the source's final data2 increment.
  */
-export function verticalSlideWobbleFrameAtTick(
+function verticalSlideWobbleFrameAtTickWithAmplitude(
   ticksSinceStart: number,
+  data0: 5 | 10,
 ): VerticalSlideWobbleFrame | null {
-  const data0 = VERTICAL_SLIDE_WOBBLE_INITIALIZERS.normal.data0;
   const core = slideWobbleCoreFrameAtTick(ticksSinceStart, data0);
   if (core === null) return null;
   return {
@@ -3495,12 +3528,33 @@ export function verticalSlideWobbleFrameAtTick(
     affineRotation: core.affineRotation,
     xScale: 256,
     yScale: 256,
+    initializerCallBeforeCallbackInstall: ticksSinceStart === 0,
     startedAffine: core.startedAffine,
     normalFrontDontFlip: true,
     resetSpriteAfterAnim: core.resetSpriteAfterAnim,
     callback: core.waiting ? "WaitAnimEnd" : "VerticalSlideWobble",
     affineMode: core.affineMode,
   };
+}
+
+/** Selector 28's normal-amplitude `Anim_VerticalSlideWobble` entry point. */
+export function verticalSlideWobbleFrameAtTick(
+  ticksSinceStart: number,
+): VerticalSlideWobbleFrame | null {
+  return verticalSlideWobbleFrameAtTickWithAmplitude(
+    ticksSinceStart,
+    VERTICAL_SLIDE_WOBBLE_INITIALIZERS.normal.data0,
+  );
+}
+
+/** Selector 81's small-amplitude `Anim_VerticalSlideWobble_Small` entry point. */
+export function verticalSlideWobbleSmallFrameAtTick(
+  ticksSinceStart: number,
+): VerticalSlideWobbleFrame | null {
+  return verticalSlideWobbleFrameAtTickWithAmplitude(
+    ticksSinceStart,
+    VERTICAL_SLIDE_WOBBLE_INITIALIZERS.small.data0,
+  );
 }
 
 /**
@@ -4394,6 +4448,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = verticalSlideWobbleFrameAtTick(101);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_VerticalSlideWobble did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "V_SLIDE_WOBBLE_SMALL": {
+      const terminal = verticalSlideWobbleSmallFrameAtTick(101);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_VerticalSlideWobble_Small did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }

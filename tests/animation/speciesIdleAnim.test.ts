@@ -3969,19 +3969,20 @@ describe("speciesIdleAnim", () => {
       }
     });
 
-    it("pins zeroed task data, normal data0=10, and the unaccepted Small data0=5 sibling", () => {
+    it("pins zeroed task data plus the accepted normal/small initializer amplitudes", () => {
       expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
       expect(VERTICAL_SLIDE_WOBBLE_INITIALIZERS).toEqual({
-        normal: { selector: "ANIM_V_SLIDE_WOBBLE", data0: 10, accepted: true },
-        small: { selector: "ANIM_V_SLIDE_WOBBLE_SMALL", data0: 5, accepted: false },
+        normal: { selector: "ANIM_V_SLIDE_WOBBLE", sourceId: 28, data0: 10, accepted: true },
+        small: { selector: "ANIM_V_SLIDE_WOBBLE_SMALL", sourceId: 81, data0: 5, accepted: true },
       });
       expect(Object.values(selectorTables.frontAnimIds.species)).toContain(
         "ANIM_V_SLIDE_WOBBLE_SMALL",
       );
-      expect(speciesFrontIdleRestOffset("OMANYTE")).toBeNull();
+      expect(speciesFrontIdleRestOffset("OMANYTE")).toEqual({ x2: 0, y2: 0 });
       expect(verticalSlideWobbleFrameAtTick(0)).toMatchObject({
         data0: 10,
         data2: 1,
+        initializerCallBeforeCallbackInstall: true,
         startedAffine: true,
         normalFrontDontFlip: true,
       });
@@ -4009,6 +4010,7 @@ describe("speciesIdleAnim", () => {
           affineRotation: rotationSigned & 0xffff,
           xScale: 256,
           yScale: 256,
+          initializerCallBeforeCallbackInstall: tick === 0,
           startedAffine: tick === 0,
           normalFrontDontFlip: true,
           resetSpriteAfterAnim: false,
@@ -4050,6 +4052,7 @@ describe("speciesIdleAnim", () => {
         affineRotation: 0,
         xScale: 256,
         yScale: 256,
+        initializerCallBeforeCallbackInstall: false,
         startedAffine: false,
         normalFrontDontFlip: true,
         resetSpriteAfterAnim: true,
