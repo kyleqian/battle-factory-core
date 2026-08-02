@@ -1,5 +1,288 @@
 # Animation coverage
 
+> **Supervisor worker routing (2026-08-01):** use Terra/max for narrow
+> source-transcription families with established reducer, fixture, and probe
+> patterns; use Luna/max for bounded multi-phase lifecycle work with moderate
+> state-machine ambiguity; reserve Sol/high for novel reducers, affine/palette/
+> OAM ambiguity, oracle diagnosis, or presentation-seam integration. This is a
+> routing hint, not a deferral or an acceptance-bar waiver; escalate any worker
+> result that does not survive supervisor verification.
+
+## Front `ANIM_H_SLIDE` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **4 mappings / 4
+Factory-reachable species / 0 outside-Factory mappings** — KRABBY, CORSOLA,
+ZIGZAGOON, and WHISMUR. Only source ID **3** is promoted. The accepted slow
+source-ID-70 path remains dense regression-pinned; `ANIM_H_SLIDE_FAST`, back
+sprites, adjacent selectors, moves, battle state, and engine boundaries remain
+untouched. Move coverage remains **107/276 exact, 0 partial, 0 staged, 169
+unsupported**; Open-only **0/1** and Outside Factory **0/77**.
+`ANIMATION_COVERAGE.json` is byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,1131-1153,
+3665-3669,5540-5544`, `pokemon_animation.h:43`, `pokemon.c:1504,1628,1669,
+1751`, and `trig.c:514-518` pin `Task_HandleMonAnimation`'s data2 zeroing and
+`sDontFlip=TRUE`, selector-3 data0=40, immediate `HorizontalSlide` before
+callback installation, both source-order no-op `TryFlipX` calls, and C-truncated
+sine indices. Dense reducer coverage exhausts motion ticks **0..40**; strict
+terminal tick **41** clears x2, installs `WaitAnimEnd`, and increments data2 to
+42, followed by stable terminal and invalid-input checks. Fresh complete legal
+challenge-0 Scene-ON parties were probed twice each only through
+`tools/run-mgba-probe.py` in a fresh `mktemp` directory; pairs are byte-identical
+and settle battler 1 at x2=0/y2=0/animNum=1/`SpriteCallbackDummy`: KRABBY
+**372 B**, cmd 5/data2 98, `cea94859fc353e431fc7393228cbc4b18f5532a6bcb95af10219cc5df5648b07`;
+CORSOLA **373 B**, cmd 4/data2 222, `b76201a913b2036e0d7c3cc8e939431a6a0d40f03c03846f43996abb3aa52cd4`;
+ZIGZAGOON **373 B**, cmd 4/data2 288, `e3261da2b51b339985c30c32f04252739a2d7ce475db406e2816fd330467b864`;
+WHISMUR **373 B**, cmd 9/data2 370, `094437764c82a40da10b929ba235895427a46cbd646c5a2e77591ca6c6783889`.
+
+**Gates / next:** focused family/evidence plus both animation ratchets are
+**332/332** green; `npx tsc --noEmit`, full `npm test` (**602 files / 6,190
+passed / 1 skipped**), production build (**549 modules transformed**), and
+`npm run animation:coverage` are green. Next largest unsupported generated
+Factory front family: **`ANIM_FIGURE_8`** (source ID 43; **3 mappings / 3
+Factory / 0 outside**) — RATICATE, FEAROW, YANMA.
+
+## Front `ANIM_TWIST` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **5 mappings / 5
+Factory-reachable species / 0 outside-Factory mappings** — SHELLDER, HORSEA,
+STARMIE, CLAMPERL, and ANORITH. Only source ID **18** is promoted; the
+accepted source-ID-78 `ANIM_TWIST_TWICE` path remains regression-pinned. No
+adjacent selector, back route, move, battle state, or engine boundary changed.
+Move coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**;
+Open-only **0/1** and Outside Factory **0/77**. `ANIMATION_COVERAGE.json`
+remains SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:1037-1059,1420-1470,
+3732-3741,5540-5544`, `pokemon_animation.h:58`, and
+`pokemon.c:1496,1522,1527,1754,1771` pin `AddNewAnim` defaults, normal
+rotation=512/delay=0/implicit runs=1, immediate `Twist` before callback
+installation, source-shared signed-s16 sine/u16 affine writes, and the strict
+`> rotation` identity/reset/`WaitAnimEnd` handoff. Dense Tier-1 coverage
+exhausts all **34** callbacks (motion ticks 0..32 consuming 0..512; terminal
+tick 33 sees 528 and leaves data2=544) plus stable rest and invalid inputs.
+Fresh complete legal challenge-0 Scene-ON parties were probed twice each only
+through `tools/run-mgba-probe.py`; raw pairs are byte-identical: SHELLDER
+**372 B** `f9b846b9d9418dd0a678c4d1222f7c9df42464634fee8ac0bd39a3b0e6c02b6a`,
+HORSEA **373 B** `16d0d76e49bf990c01fa4957dc6ff92d99510fe56b3e2141478ce82d64c082d3`,
+STARMIE **373 B** `9151d0bd0b93524e3ecf9091c2e7aebae9e9860db06cfb0398606944df1e0712`,
+CLAMPERL **373 B** `8df94958eab3a2d6d67008250c5511f1b2902f1b70b106aadfe397e2fcf05f61`,
+and ANORITH **373 B** `81ddad2de88ce1327715b4b3a17141f60c0d3339a8f967977b1e8f63cbefa48f`.
+Each settles battler 1 at x2=0/y2=0, animNum=1, its source command index,
+species data2, and `SpriteCallbackDummy`.
+
+**Verification / next:** focused family/evidence plus both animation ratchets
+are **329/329** green; `npx tsc --noEmit`, full `npm test` (**601 files /
+6,177 passed / 1 skipped**), and production build (**549 modules transformed**)
+are green. The next largest unsupported generated Factory front family is
+**`ANIM_H_SLIDE`** (source ID **3**; **4 mappings / 4 Factory / 0 outside**) —
+KRABBY, CORSOLA, ZIGZAGOON, and WHISMUR.
+
+## Front `ANIM_TUMBLING_FRONT_FLIP_TWICE` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **1 mapping / 1
+Factory-reachable species / 0 outside-Factory mappings** — MAGNEMITE. Only
+source ID **84** is promoted; unused `ANIM_TUMBLING_FRONT_FLIP`, adjacent
+selector 85, back sprites, moves, and engine boundaries remain untouched.
+Move coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**;
+Open-only **0/1** and Outside Factory **0/77**. `ANIMATION_COVERAGE.json`
+remains SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:1037-1059,2366-2433,
+3785-3793,5540-5544`, `pokemon_animation.h:124`, and `pokemon.c:1487` pin
+`AddNewAnim` defaults, speed=1/runs=2, immediate initializer callback,
+tick-zero affine start, signed-s16 x2/y2/data, source-ordered x-boundary then
+else-if y-boundary handling, six-crossing completion, 10-callback delay,
+shifted/u16 rotation semantics, reset, and stable `WaitAnimEnd`. Dense Tier-1
+coverage exhausts callbacks **0..137**: first run 0..63, delay 64..73, second
+run 74..137; terminal tick **137**. A complete legal Scene-ON MAGNEMITE
+mechanicLab party was probed twice through `tools/run-mgba-probe.py`; the
+paired raw **372-byte** receipts are byte-identical, SHA-256
+`9f0354fb3d8f1ad72f6bd4a49ddc3b074c5f4151459833ad68b55e98647033cf`, and
+settle battler 1 at x2=0/y2=0, animNum=1, animCmdIndex=4, data2=81, and
+`SpriteCallbackDummy`.
+
+**Verification / next:** focused family/evidence plus both animation ratchets
+are **331/331** green; `npx tsc --noEmit`, full `npm test` (**599 files / 6,163
+passed / 1 skipped**), and production build (**549 modules transformed**) are
+green. Selector 85 has no mapping and source ID 86
+(`ANIM_H_JUMPS_V_STRETCH_TWICE`) was already accepted for SHARPEDO/SPOINK, so
+neither is a next action. The standing send-out priority directive still keeps
+the remaining Tier-1 front ladder ahead of move-component work. Its largest
+remaining generated Factory census is **`ANIM_TWIST`** (source ID **18**;
+**5 mappings / 5 Factory / 0 outside**) — SHELLDER, HORSEA, STARMIE, CLAMPERL,
+and ANORITH. Reuse the accepted shared `Twist` callback, but prove the distinct
+normal runs=1 initializer and every species receipt independently of
+`ANIM_TWIST_TWICE`.
+
+## Front `ANIM_SPIN` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **1 mapping / 1
+Factory-reachable species / 0 outside-Factory mappings** — SPHEAL. Only source
+ID **83** is promoted; back routing, unused `ANIM_SPIN_LONG`, adjacent
+selectors, moves, and engine boundaries remain untouched. Move coverage stays
+**107/276 exact, 0 partial, 0 staged, 169 unsupported**; Open-only **0/1** and
+Outside Factory **0/77**. `ANIMATION_COVERAGE.json` remains SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:1037-1059,1472-1492,
+3775-3782,5540-5544`, `pokemon_animation.h:123`, and `pokemon.c:1722` pin
+`AddNewAnim` defaults, delay=60/data=30, immediate `Spin` before callback
+installation, tick-0 affine start, C-truncated `65536/30=2184`, signed-s16 to
+unsigned-u16 rotation writes, strict terminal guard, identity/reset, and stable
+`WaitAnimEnd`. All **61 active callbacks** (ticks 0..60) plus tick 61's terminal
+handoff are exhaustive. A fresh complete legal challenge-0 Scene-ON SPHEAL
+party was probed twice only through `tools/run-mgba-probe.py`; the paired raw
+**373-byte** receipts are byte-identical, SHA-256
+`47b66252cad485dec48946f8beffff1aef7760727a9794132a8f5b1488e4c8b5`, and
+settle species 341 at x2=0/y2=0, animNum=1, animCmdIndex=7, and
+`SpriteCallbackDummy`.
+
+**Verification / next:** focused family/evidence plus both animation ratchets
+are **327/327** green; `npx tsc --noEmit`, full `npm test` (**597 files / 6,156
+passed / 1 skipped**), and production build (**549 modules transformed**) are
+green. Next generated source-ranked selector: **`ANIM_TUMBLING_FRONT_FLIP_TWICE`**
+(source ID **84**; **1 mapping / 1 Factory / 0 outside**) — MAGNEMITE.
+
+## Front `ANIM_V_SLIDE_WOBBLE_SMALL` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **4 mappings / 4
+Factory-reachable species / 0 outside-Factory mappings** — OMANYTE
+(representative), LANTURN, JUMPLUFF, and CLAYDOL. Only source ID **81** is
+promoted. The accepted normal source-ID-28 path stays regression-pinned;
+adjacent selectors and back routing remain untouched. No move coverage or
+`ANIMATION_COVERAGE.json` change was made; its SHA-256 remains
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,984-1028,
+1061-1085,1735-1767,3761-3766,5540-5544`, `trig.c:514-518`, and
+`pokemon.c:1544,1577,1595,1700` pin initialization, tick-0 affine start,
+data0=10/5 normal/small amplitude, immediate callback-before-install ordering,
+C-truncated indices, masked doubled wobble index, signed GBA sine and u16
+rotation, strict terminal `data2 > 100`, reset, final counter increment, and
+stable `WaitAnimEnd`. The shared reducer exhausts active ticks 0..100 and the
+terminal tick 101. Fresh complete legal challenge-0 Scene-ON parties were
+probed twice per species only through `tools/run-mgba-probe.py` in one fresh
+`mktemp` directory; each pair is byte-identical: OMANYTE **373 B**
+`dc4bbb0eee279c7d3a30f2062d7d6589a9e060327821da7ee4359e866656dcbd`,
+LANTURN **373 B** `3b1426d8bc2186aaa5a733adbb6435c08d5da2f7364b872557f4389291053e8c`,
+JUMPLUFF **373 B** `71ff480a0b9a62492f7e243ebfdda963d2f698e6bade85608b4d56e8c60b2ae5`,
+and CLAYDOL **374 B** `d6b99b7e666e14b003e7d475f8506d299ae709136c76f87211eaba49b91b477d`.
+
+**Verification / next:** focused family/evidence plus both animation ratchets
+are **331/331** green; `npx tsc --noEmit`, full `npm test` (**595 files /
+6,148 passed / 1 skipped**), and production build (**549 modules transformed**)
+are green. `npm run animation:coverage` remains **107/276 exact, 0 partial,
+0 staged, 169 unsupported; Open-only 0/1; Outside 0/77**. Next generated
+source-ranked selector: **`ANIM_SPIN`** (source ID **83**; **1 mapping / 1
+Factory / 0 outside**) — SPHEAL.
+
+## Front `ANIM_CIRCLE_C_CLOCKWISE_SLOW` family accepted (2026-08-01)
+
+**State:** exact for the complete generated selector census: **2 mappings / 2
+Factory-reachable species / 0 outside-Factory mappings** — DROWZEE
+(representative) and SPINARAK. Only source ID **79** is promoted; normal and
+long circle selectors, adjacent selectors, and back-sprite routing remain
+unsupported. No per-species/tick branch, baked frame, engine-boundary
+widening, move promotion, or `ANIMATION_COVERAGE.json` change was made; the
+coverage hash remains
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:1504-1536,3743-3751`,
+`trig.c:514-518`, and `pokemon.c` selector mappings pin
+`AddNewAnim`/`InitAnimData`, rotation=512/data=3/speed=12, immediate
+`CircleCounterclockwise` before callback installation, signed GBA Sin/Cos,
+both normal-front `TryFlipX` calls, strict `data2 > 512` terminal cleanup,
+post-branch data2 increment, and stable `WaitAnimEnd`. All **44 callbacks**
+are exhaustive: ticks 0..42 consume counters 0..504 by 12; tick 43 alone
+observes 516 > 512, clears x2/y2, and increments data2 to 528. Fresh complete
+legal challenge-0 Scene-ON parties were probed twice each only through
+`tools/run-mgba-probe.py` in one fresh `mktemp` directory. DROWZEE paired
+**372-byte** receipts are byte-identical, hash
+`1735dde24d224d3d98eafe6c4f28cfc8b1c28ac67863d168ed79cd730e2e4138`; SPINARAK
+paired **373-byte** receipts are byte-identical, hash
+`67fae9ba7ccda325f46df3a8a87e4574cd98a3e1dd9cf32ab4e2412d27e6579d`. Both
+settle battler 1 at x2=0/y2=0 with `SpriteCallbackDummy` (command indices 5
+and 7 respectively).
+
+**Verification / next:** focused species-idle/evidence plus both animation
+ratchets are **328/328** green; `npx tsc --noEmit`, full `npm test` (**593
+files / 6,136 passed / 1 skipped**), and production build (**549 modules
+transformed**) are green. `npm run animation:coverage` reports **107/276
+exact, 0 partial, 0 staged, 169 unsupported; Open-only 0/1; Outside 0/77**.
+Next generated source-ranked selector: **`ANIM_V_SLIDE_WOBBLE_SMALL`** (source
+ID 81; **4 mappings / 4 Factory / 0 outside**) — OMANYTE, LANTURN, JUMPLUFF,
+CLAYDOL.
+
+## Front `ANIM_TWIST_TWICE` family accepted (2026-08-01)
+
+**State:** exact for the complete generated selector census: **1 mapping / 1
+Factory-reachable species / 0 outside-Factory mappings** — STARYU. Only
+source ID **78** is promoted; normal `ANIM_TWIST` (SHELLDER, HORSEA, STARMIE,
+CLAMPERL, ANORITH) and adjacent source selectors remain unsupported. No
+per-species/tick branch, baked frame, engine-boundary widening, or move
+promotion was added. Coverage remains **107 exact / 0 partial / 0 staged / 169
+unsupported**; `ANIMATION_COVERAGE.json` is unchanged at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:1037-1059,1420-1470,
+3732-3741,5540-5544` and `trig.c:514-518` pin `AddNewAnim`/`InitAnimData`
+defaults, selector-78 rotation=1024/runs=2 overrides, immediate
+`Twist`-before-callback-install ordering, signed sine → u16 affine writes,
+identity/reset, and `WaitAnimEnd`. Every **141 callbacks** is exhaustive:
+first-run ticks 0..64 consume 0..1024; tick 65 alone observes 1040 `>1024`,
+writes identity, arms delay=10, and leaves data2=16; ticks 66..75 are the ten
+delay-only callbacks; second-run ticks 76..139 consume 16..1024; tick 140
+alone resets affine state and installs stable `WaitAnimEnd`. A fresh complete
+legal challenge-0 Scene-ON STARYU party (Factory set ID 128) was probed twice
+only through `tools/run-mgba-probe.py`; the raw 373-byte receipts are
+byte-identical, end in `}` without a newline, and SHA-256
+`67e14ee16e9eb44e699ee888cf405fd69e1901b2c689adf3f6932347cee5be5c`.
+It settles battler 1 at x2=0/y2=0, animNum=1, animCmdIndex=4, data2=120, and
+`SpriteCallbackDummy`.
+
+**Verification / next:** focused species-idle/evidence plus both animation
+ratchets are **321/321** green; `npx tsc --noEmit`, coverage/hash checks, full
+`npm test` (**591 files / 6,127 passed / 1 skipped**), and production build
+(**549 modules transformed**) are green. Next generated source-ranked selector:
+**`ANIM_CIRCLE_C_CLOCKWISE_SLOW`** (source ID 79; **2 mappings / 2 Factory /
+0 outside**) — DROWZEE and SPINARAK.
+
+## Front `ANIM_H_SHAKE_SLOW` family accepted (2026-08-01)
+
+**State:** exact for the complete generated census: **3 selector mappings / 3
+Factory-reachable species / 0 outside-Factory mappings** — DUGTRIO
+(representative), GOLDUCK, and DODUO. The accepted normal and new slow entry
+points share the source-derived `HorizontalShake` reducer; normal remains
+regression-pinned. No adjacent selector, barrier, per-species/tick branch,
+baked frame, engine-boundary widening, or move promotion was added. Coverage
+remains **107 exact / 0 partial / 0 staged / 169 unsupported** and
+`ANIMATION_COVERAGE.json` remains SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Did:** `pokemon_animation.c:1343-1366,3717-3722,5540-5544` and `trig.c`
+pin source-order data0=30/data7=3 initialization, call-before-callback-install
+ordering, signed GBA sine, strict counter `>2304` termination, x2=0 cleanup,
+and `WaitAnimEnd` / `SpriteCallbackDummy`. Every active callback is exhaustive:
+ticks 0..76 cover counters 0..2280 by 30; tick 77 alone observes 2310, clears
+x2, increments data2 to 2340, and installs stable `WaitAnimEnd`. Fresh complete
+legal challenge-0 Scene-ON parties settle all three at x2=0/y2=0, animNum=1,
+`SpriteCallbackDummy`: DUGTRIO species 51 / animCmdIndex 9, paired **372-byte**
+receipts SHA-256 `1abe9c26e063a2b15db3f3f6f832f458649075a302c2da25fd714807edd9cc94`;
+GOLDUCK species 55 / index 4, `4b67a65f258a3006b448e348aa6713c0376b6453a95ff35ca708041bd6ba2b14`;
+DODUO species 84 / index 4, `2ef5f1430ae2ffc7666a33ea21b3b9239531b3ba603d386039b29c65f6037abb`.
+
+**Next / Notes:** supervisor selects the next generated source-ranked family;
+`ANIM_H_SHAKE_FAST` and vertical variants remain untouched. The unchanged
+generic probe ran only through `tools/run-mgba-probe.py`, twice fresh per
+party; all three raw pairs passed `cmp`, and focused species-idle/evidence plus
+both ratchets are **321/321** green. `npx tsc --noEmit` and coverage/hash checks
+are green; full `npm test` is **590 files / 6,121 passed / 1 skipped**, and the
+production build is green (**549 modules transformed**).
+
 ## Front `ANIM_ZIGZAG_SLOW` family accepted (2026-08-01)
 
 **State / verdict:** exact for the complete generated selector census: all

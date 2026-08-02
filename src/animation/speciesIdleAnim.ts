@@ -47,6 +47,7 @@ export type SpeciesFrontAnimFamily =
   | "BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW"
   | "BOUNCE_ROTATE_TO_SIDES_SLOW"
   | "CIRCLE_INTO_BG"
+  | "CIRCLE_C_CLOCKWISE_SLOW"
   | "CIRCULAR_STRETCH_TWICE"
   | "FOUR_PETAL"
   | "GROW_VIBRATE"
@@ -55,6 +56,7 @@ export type SpeciesFrontAnimFamily =
   | "FLASH_YELLOW"
   | "FLICKER_INCREASING"
   | "H_JUMPS"
+  | "H_SLIDE"
   | "H_SLIDE_SLOW"
   | "H_SLIDE_WOBBLE"
   | "H_STRETCH"
@@ -62,17 +64,23 @@ export type SpeciesFrontAnimFamily =
   | "H_JUMPS_V_STRETCH"
   | "H_JUMPS_V_STRETCH_TWICE"
   | "H_SHAKE"
+  | "H_SHAKE_SLOW"
   | "RAPID_H_HOPS"
   | "ROTATE_UP_TO_SIDES"
   | "SHRINK_GROW"
+  | "SPIN"
+  | "TUMBLING_FRONT_FLIP_TWICE"
   | "SWING_CONVEX"
   | "SWING_CONCAVE"
+  | "TWIST"
+  | "TWIST_TWICE"
   | "V_JUMPS_BIG"
   | "V_JUMPS_SMALL"
   | "V_JUMPS_H_JUMPS"
   | "V_SLIDE"
   | "V_SLIDE_SLOW"
   | "V_SLIDE_WOBBLE"
+  | "V_SLIDE_WOBBLE_SMALL"
   | "V_SQUISH_AND_BOUNCE"
   | "V_SQUISH_AND_BOUNCE_SLOW"
   | "V_STRETCH"
@@ -87,6 +95,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW",
   "BOUNCE_ROTATE_TO_SIDES_SLOW",
   "CIRCLE_INTO_BG",
+  "CIRCLE_C_CLOCKWISE_SLOW",
   "CIRCULAR_STRETCH_TWICE",
   "FOUR_PETAL",
   "GROW_VIBRATE",
@@ -95,6 +104,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "FLASH_YELLOW",
   "FLICKER_INCREASING",
   "H_JUMPS",
+  "H_SLIDE",
   "H_SLIDE_SLOW",
   "H_SLIDE_WOBBLE",
   "H_STRETCH",
@@ -102,17 +112,23 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "H_JUMPS_V_STRETCH",
   "H_JUMPS_V_STRETCH_TWICE",
   "H_SHAKE",
+  "H_SHAKE_SLOW",
   "RAPID_H_HOPS",
   "ROTATE_UP_TO_SIDES",
   "SHRINK_GROW",
+  "SPIN",
+  "TUMBLING_FRONT_FLIP_TWICE",
   "SWING_CONVEX",
   "SWING_CONCAVE",
+  "TWIST",
+  "TWIST_TWICE",
   "V_JUMPS_BIG",
   "V_JUMPS_SMALL",
   "V_JUMPS_H_JUMPS",
   "V_SLIDE",
   "V_SLIDE_SLOW",
   "V_SLIDE_WOBBLE",
+  "V_SLIDE_WOBBLE_SMALL",
   "V_SQUISH_AND_BOUNCE",
   "V_SQUISH_AND_BOUNCE_SLOW",
   "V_STRETCH",
@@ -191,6 +207,57 @@ export const H_SHAKE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
 /** Selector mappings outside the Factory pool (RAYQUAZA alone). */
 export const H_SHAKE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   H_SHAKE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All source selector mappings for `ANIM_H_SHAKE_SLOW`. */
+export const H_SHAKE_SLOW_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_H_SHAKE_SLOW")
+    .map(([species]) => species),
+);
+
+/** Every slow horizontal-shake mapping is reachable through Factory rentals. */
+export const H_SHAKE_SLOW_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_SHAKE_SLOW_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no slow horizontal-shake mappings outside the Factory rental pool. */
+export const H_SHAKE_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_SHAKE_SLOW_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All source selector mappings for the one-run `ANIM_TWIST` entry point. */
+export const TWIST_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_TWIST")
+    .map(([species]) => species),
+);
+
+/** Every normal-twist mapping is reachable through Factory rentals. */
+export const TWIST_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  TWIST_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no normal-twist selector mappings outside the Factory pool. */
+export const TWIST_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  TWIST_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** The sole source selector mapping for `ANIM_TWIST_TWICE` (STARYU). */
+export const TWIST_TWICE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_TWIST_TWICE")
+    .map(([species]) => species),
+);
+
+/** STARYU's twice-twist selector is reachable through the Level-50 Factory pool. */
+export const TWIST_TWICE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  TWIST_TWICE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no `ANIM_TWIST_TWICE` mappings outside the Factory rental pool. */
+export const TWIST_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  TWIST_TWICE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /**
@@ -443,6 +510,60 @@ export const CIRCLE_INTO_BG_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = O
   CIRCLE_INTO_BG_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
+/** The sole source selector mapping for selector 83, `ANIM_SPIN`. */
+export const SPIN_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_SPIN")
+    .map(([species]) => species),
+);
+
+/** SPHEAL's spin selector is reachable through the Level-50 Factory pool. */
+export const SPIN_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  SPIN_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no `ANIM_SPIN` mappings outside the Factory rental pool. */
+export const SPIN_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  SPIN_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** The sole source selector mapping for selector 84, `ANIM_TUMBLING_FRONT_FLIP_TWICE`. */
+export const TUMBLING_FRONT_FLIP_TWICE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_TUMBLING_FRONT_FLIP_TWICE")
+    .map(([species]) => species),
+);
+
+/** MAGNEMITE's twice-tumbling selector is reachable through the Factory pool. */
+export const TUMBLING_FRONT_FLIP_TWICE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  TUMBLING_FRONT_FLIP_TWICE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no selector-84 mappings outside the Factory rental pool. */
+export const TUMBLING_FRONT_FLIP_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
+  Object.freeze(
+    TUMBLING_FRONT_FLIP_TWICE_FRONT_SPECIES.filter(
+      (species) => !factoryFrontSpecies.has(species),
+    ),
+  );
+
+/** All source selector mappings for selector 79, `ANIM_CIRCLE_C_CLOCKWISE_SLOW`. */
+export const CIRCLE_C_CLOCKWISE_SLOW_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_CIRCLE_C_CLOCKWISE_SLOW")
+    .map(([species]) => species),
+);
+
+/** Every slow circle-counterclockwise mapping is reachable through Factory rentals. */
+export const CIRCLE_C_CLOCKWISE_SLOW_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  CIRCLE_C_CLOCKWISE_SLOW_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no slow circle-counterclockwise mappings outside the Factory pool. */
+export const CIRCLE_C_CLOCKWISE_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  CIRCLE_C_CLOCKWISE_SLOW_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
 /** The sole source selector mapping for `ANIM_FOUR_PETAL`. */
 export const FOUR_PETAL_FRONT_SPECIES: readonly string[] = Object.freeze(
   Object.entries(generatedFrontAnimIds)
@@ -594,6 +715,23 @@ export const V_SLIDE_WOBBLE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = O
   V_SLIDE_WOBBLE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
+/** All 4 source selector mappings for `ANIM_V_SLIDE_WOBBLE_SMALL`. */
+export const V_SLIDE_WOBBLE_SMALL_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_V_SLIDE_WOBBLE_SMALL")
+    .map(([species]) => species),
+);
+
+/** Every small vertical-slide-wobble mapping is Factory-reachable. */
+export const V_SLIDE_WOBBLE_SMALL_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  V_SLIDE_WOBBLE_SMALL_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no small vertical-slide-wobble mappings outside the Factory pool. */
+export const V_SLIDE_WOBBLE_SMALL_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  V_SLIDE_WOBBLE_SMALL_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
 /** All 8 source selector mappings for `ANIM_H_SLIDE_WOBBLE`. */
 export const H_SLIDE_WOBBLE_FRONT_SPECIES: readonly string[] = Object.freeze(
   Object.entries(generatedFrontAnimIds)
@@ -677,6 +815,23 @@ export const FLASH_YELLOW_FACTORY_FRONT_SPECIES: readonly string[] = Object.free
 /** There are no yellow-flash mappings outside the Factory rental pool. */
 export const FLASH_YELLOW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   FLASH_YELLOW_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All 4 source selector mappings for the normal `ANIM_H_SLIDE`. */
+export const H_SLIDE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_H_SLIDE")
+    .map(([species]) => species),
+);
+
+/** Every normal horizontal-slide mapping is reachable through Factory rentals. */
+export const H_SLIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_SLIDE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no normal horizontal-slide mappings outside the Factory rental pool. */
+export const H_SLIDE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_SLIDE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /** All 7 source selector mappings for the slow `ANIM_H_SLIDE_SLOW`. */
@@ -1034,17 +1189,27 @@ export interface VerticalShakeTwiceFrame extends SpeciesIdleOffset {
 }
 
 /**
- * The Small initializer is a source sibling that shares `VerticalSlideWobble`
- * but is not accepted by this rung. Its selector mappings therefore remain
- * outside `PORTED_FRONT_FAMILIES`.
+ * The two source initializers share `VerticalSlideWobble`; each calls that
+ * callback once before installing it. Selector 28 supplies amplitude 10 and
+ * selector 81 supplies amplitude 5.
  */
 export const VERTICAL_SLIDE_WOBBLE_INITIALIZERS = Object.freeze({
-  normal: Object.freeze({ selector: "ANIM_V_SLIDE_WOBBLE", data0: 10, accepted: true }),
-  small: Object.freeze({ selector: "ANIM_V_SLIDE_WOBBLE_SMALL", data0: 5, accepted: false }),
+  normal: Object.freeze({
+    selector: "ANIM_V_SLIDE_WOBBLE",
+    sourceId: 28,
+    data0: 10,
+    accepted: true,
+  }),
+  small: Object.freeze({
+    selector: "ANIM_V_SLIDE_WOBBLE_SMALL",
+    sourceId: 81,
+    data0: 5,
+    accepted: true,
+  }),
 } as const);
 
 export interface VerticalSlideWobbleFrame extends SpeciesIdleOffset {
-  readonly data0: 10;
+  readonly data0: 5 | 10;
   readonly data2: number;
   readonly index: number | null;
   readonly varBeforeMask: number | null;
@@ -1053,6 +1218,8 @@ export interface VerticalSlideWobbleFrame extends SpeciesIdleOffset {
   readonly affineRotation: number;
   readonly xScale: 256;
   readonly yScale: 256;
+  /** Tick zero is the initializer's immediate callback before it installs the callback. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
   readonly startedAffine: boolean;
   readonly normalFrontDontFlip: true;
   readonly resetSpriteAfterAnim: boolean;
@@ -1080,19 +1247,22 @@ export interface HorizontalSlideWobbleFrame extends SpeciesIdleOffset {
 
 /**
  * The three initializers share `HorizontalSlide`, but selector acceptance is
- * per family. This rung accepts only the slow data0=80 front initializer.
+ * per family. The normal data0=40 and slow data0=80 front initializers are
+ * accepted independently; the fast data0=20 back-sprite route is not.
  */
 export const HORIZONTAL_SLIDE_INITIALIZERS = Object.freeze({
   slow: Object.freeze({ selector: "ANIM_H_SLIDE_SLOW", data0: 80, accepted: true }),
-  normal: Object.freeze({ selector: "ANIM_H_SLIDE", data0: 40, accepted: false }),
+  normal: Object.freeze({ selector: "ANIM_H_SLIDE", data0: 40, accepted: true }),
   fast: Object.freeze({ selector: "ANIM_H_SLIDE_FAST", data0: 20, accepted: false }),
 } as const);
 
 export interface HorizontalSlideFrame extends SpeciesIdleOffset {
-  readonly data0: 80;
+  readonly data0: 40 | 80;
   readonly data2: number;
   readonly index: number | null;
   readonly amplitude: 6;
+  /** Tick zero is the initializer's immediate callback before it installs the callback. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
   readonly normalFrontDontFlip: true;
   readonly tryFlipXCalls: 2;
   readonly callback: "HorizontalSlide" | "WaitAnimEnd";
@@ -2860,9 +3030,45 @@ export function growVibrateFrameAtTick(ticksSinceStart: number): GrowVibrateFram
   throw new Error("unreachable GrowVibrate reducer state");
 }
 
-const HORIZONTAL_SHAKE_ACCUMULATOR_STEP = 60;
 const HORIZONTAL_SHAKE_ACCUMULATOR_LIMIT = 2304;
 const HORIZONTAL_SHAKE_AMPLITUDE = 3;
+
+/** Source initializer data[0] values for the normal and slow entry points. */
+export const HORIZONTAL_SHAKE_INITIALIZERS = Object.freeze({
+  normal: 60,
+  slow: 30,
+} as const);
+
+function horizontalShakeFrameAtTickWithStep(
+  ticksSinceStart: number,
+  accumulatorStep: 30 | 60,
+): HorizontalShakeFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let x2 = 0;
+  let callback: HorizontalShakeFrame["callback"] = "HorizontalShake";
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (callback === "WaitAnimEnd") continue;
+    const counter = data2;
+    if (counter > HORIZONTAL_SHAKE_ACCUMULATOR_LIMIT) {
+      callback = "WaitAnimEnd";
+      x2 = 0;
+    } else {
+      x2 = gbaSin(counter % 256, HORIZONTAL_SHAKE_AMPLITUDE);
+    }
+    data2 += accumulatorStep;
+  }
+
+  return {
+    x2,
+    y2: 0,
+    data0: accumulatorStep,
+    data2,
+    data7: HORIZONTAL_SHAKE_AMPLITUDE,
+    callback,
+  };
+}
 
 /**
  * Source-order port of `Anim_HorizontalShake` / `HorizontalShake`
@@ -2872,36 +3078,623 @@ const HORIZONTAL_SHAKE_AMPLITUDE = 3;
  * and hands off to `WaitAnimEnd` before the final data[2] increment.
  */
 export function horizontalShakeFrameAtTick(ticksSinceStart: number): HorizontalShakeFrame | null {
-  if (ticksSinceStart < 0) return null;
+  return horizontalShakeFrameAtTickWithStep(ticksSinceStart, HORIZONTAL_SHAKE_INITIALIZERS.normal);
+}
 
+/**
+ * Source-order `Anim_HorizontalShake_Slow` port (`pokemon_animation.c:3717-3722`).
+ * The initializer writes data[0]=30/data[7]=3, calls the shared reducer once,
+ * then installs `HorizontalShake`; active counters 0..2280 occupy ticks 0..76.
+ */
+export function horizontalShakeSlowFrameAtTick(
+  ticksSinceStart: number,
+): HorizontalShakeFrame | null {
+  return horizontalShakeFrameAtTickWithStep(ticksSinceStart, HORIZONTAL_SHAKE_INITIALIZERS.slow);
+}
+
+/** Source-specific initializer for selector 79. */
+export const CIRCLE_C_CLOCKWISE_SLOW_INITIALIZER = Object.freeze({
+  selector: "ANIM_CIRCLE_C_CLOCKWISE_SLOW",
+  sourceId: 79,
+  rotation: 512,
+  data: 3,
+  speed: 12,
+  accepted: true,
+} as const);
+
+export interface CircleCCounterclockwiseSlowFrame extends SpeciesIdleOffset {
+  /** `sprite->data[2]` immediately before this source callback. */
+  readonly data2Before: number;
+  /** `sprite->data[2]` after the source's final `+= speed`. */
+  readonly data2: number;
+  /** `(data2 + 192) % 256`, only for active callbacks. */
+  readonly index: number | null;
+  /** Signed GBA `Sin(index, data)` result, only for active callbacks. */
+  readonly sin: number | null;
+  /** Signed GBA `Cos(index, data * 2)` result, only for active callbacks. */
+  readonly cos: number | null;
+  readonly animRotation: 512;
+  readonly animData: 3;
+  readonly animSpeed: 12;
+  /** Tick zero is the initializer's immediate call before callback install. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXBeforeBranch: true;
+  readonly tryFlipXAfterCounterIncrement: true;
+  /** Both source-order `TryFlipX` calls run, including the terminal branch. */
+  readonly tryFlipXCalls: 2;
+  readonly callback: "CircleCounterclockwise" | "WaitAnimEnd";
+}
+
+/**
+ * Source-order port of `Anim_CircleCounterclockwise_Slow` ->
+ * `CircleCounterclockwise` (`pokemon_animation.c:1504-1536,3743-3751`) for
+ * the ordinary opponent-front path. `AddNewAnim` supplies zeroed animation
+ * data before the selector writes rotation=512, data=3, and speed=12. The
+ * initializer calls the shared callback once before installing it, so tick
+ * zero already consumes counter 0. The callback flips before its strict
+ * `data[2] > rotation` guard, clears both offsets on the terminal callback,
+ * increments the counter after either branch, and flips once more after the
+ * branch. `sDontFlip=TRUE` makes both flips no-ops for a normal front sprite,
+ * but their source-order presence remains part of this reducer's contract.
+ */
+export function circleCCounterclockwiseSlowFrameAtTick(
+  ticksSinceStart: number,
+): CircleCCounterclockwiseSlowFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  const { rotation: animRotation, data: animData, speed: animSpeed } =
+    CIRCLE_C_CLOCKWISE_SLOW_INITIALIZER;
   let data2 = 0;
-  let x2 = 0;
-  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
-    const counter = data2;
-    if (counter > HORIZONTAL_SHAKE_ACCUMULATOR_LIMIT) {
-      data2 += HORIZONTAL_SHAKE_ACCUMULATOR_STEP;
-      return {
-        x2: 0,
-        y2: 0,
-        data0: HORIZONTAL_SHAKE_ACCUMULATOR_STEP,
-        data2,
-        data7: HORIZONTAL_SHAKE_AMPLITUDE,
-        callback: "WaitAnimEnd",
-      };
-    }
+  let callback: CircleCCounterclockwiseSlowFrame["callback"] = "CircleCounterclockwise";
+  let lastFrame: CircleCCounterclockwiseSlowFrame | null = null;
 
-    x2 = gbaSin(counter % 256, HORIZONTAL_SHAKE_AMPLITUDE);
-    data2 += HORIZONTAL_SHAKE_ACCUMULATOR_STEP;
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    // `WaitAnimEnd` only polls the sprite's frame animation. Once the shared
+    // callback hands off, this reducer's terminal state remains stable.
+    if (callback === "WaitAnimEnd") continue;
+
+    const data2Before = data2;
+    let index: number | null = null;
+    let sin: number | null = null;
+    let cos: number | null = null;
+    let x2 = 0;
+    let y2 = 0;
+
+    // Source order: TryFlipX, branch, data2 += speed, TryFlipX.
+    if (data2 > animRotation) {
+      callback = "WaitAnimEnd";
+    } else {
+      index = (data2 + 192) % 256;
+      cos = gbaCos(index, animData * 2);
+      sin = gbaSin(index, animData);
+      // C's integer negation stores plain zero, not JavaScript's `-0`.
+      x2 = cos === 0 ? 0 : -cos;
+      y2 = sin + animData;
+    }
+    data2 += animSpeed;
+
+    lastFrame = {
+      x2,
+      y2,
+      data2Before,
+      data2,
+      index,
+      sin,
+      cos,
+      animRotation,
+      animData,
+      animSpeed,
+      initializerCallBeforeCallbackInstall: tick === 0,
+      normalFrontDontFlip: true,
+      tryFlipXBeforeBranch: true,
+      tryFlipXAfterCounterIncrement: true,
+      tryFlipXCalls: 2,
+      callback,
+    };
   }
 
-  return {
-    x2,
-    y2: 0,
-    data0: HORIZONTAL_SHAKE_ACCUMULATOR_STEP,
-    data2,
-    data7: HORIZONTAL_SHAKE_AMPLITUDE,
-    callback: "HorizontalShake",
-  };
+  if (lastFrame === null) throw new Error("unreachable CircleCounterclockwise reducer state");
+  return lastFrame;
+}
+
+/** Source-specific `Anim_Spin` initializer for front selector 83. */
+export const SPIN_INITIALIZER = Object.freeze({
+  selector: "ANIM_SPIN",
+  sourceId: 83,
+  delay: 60,
+  data: 30,
+  accepted: true,
+} as const);
+
+export interface SpinFrame extends SpeciesIdleOffset {
+  /** `sprite->data[2]` immediately before this source callback. */
+  readonly data2Before: number;
+  /** `sprite->data[2]` after the source's unconditional final increment. */
+  readonly data2: number;
+  /** Signed `s16 sprite->data[6]`; retained across the terminal reset. */
+  readonly data6: number;
+  readonly animDelay: 60;
+  readonly animData: 30;
+  /** C-truncated `65536 / animData`, prior to the `s16` product store. */
+  readonly rotationStep: 2184;
+  /** Tick zero invokes `Spin` before `sprite->callback = Spin` is written. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
+  readonly startedAffine: boolean;
+  readonly affineWriteRotationSigned: number;
+  /** Rotation after C converts the signed source argument to `u16`. */
+  readonly affineWriteRotationU16: number;
+  readonly xScale: 256;
+  readonly yScale: 256;
+  readonly normalFrontDontFlip: true;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "Spin" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+/**
+ * Source-order port of selector 83's `Anim_Spin` -> `Spin`
+ * (`pokemon_animation.c:1037-1059,1472-1492,3775-3782,5540-5544`) on the
+ * ordinary opponent-front path. `AddNewAnim` clears the animation record,
+ * then the initializer writes delay=60/data=30, invokes `Spin` immediately,
+ * and only afterward installs `Spin` as the sprite callback.
+ *
+ * Tick zero starts affine mode and writes rotation zero. Active ticks 0..60
+ * calculate `(65536 / 30) * data2` with C's integer division, assign the
+ * product through signed `sprite->data[6]`, and pass that bit pattern through
+ * `HandleSetAffineData`'s unsigned rotation parameter. Tick 61 alone satisfies
+ * the strict `data2 > delay` guard, writes identity, resets affine mode, and
+ * installs `WaitAnimEnd`; the source then still increments data2. Subsequent
+ * calls model `WaitAnimEnd` polling without mutating this reducer's state.
+ */
+export function spinFrameAtTick(ticksSinceStart: number): SpinFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  const { delay: animDelay, data: animData } = SPIN_INITIALIZER;
+  const rotationStep = Math.trunc(65536 / animData) as 2184;
+  let data2 = 0;
+  let data6 = 0;
+  let callback: SpinFrame["callback"] = "Spin";
+  let affineMode: SpinFrame["affineMode"] = "normal";
+  let lastFrame: SpinFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (callback === "WaitAnimEnd") continue;
+
+    const data2Before = data2;
+    const startedAffine = data2 === 0;
+    if (startedAffine) affineMode = "double";
+
+    let affineWriteRotationSigned: number;
+    let resetSpriteAfterAnim = false;
+    if (data2 > animDelay) {
+      affineWriteRotationSigned = 0;
+      resetSpriteAfterAnim = true;
+      affineMode = "normal";
+      callback = "WaitAnimEnd";
+    } else {
+      data6 = toS16(rotationStep * data2);
+      affineWriteRotationSigned = data6;
+    }
+    data2 = toS16(data2 + 1);
+
+    lastFrame = {
+      x2: 0,
+      y2: 0,
+      data2Before,
+      data2,
+      data6,
+      animDelay,
+      animData,
+      rotationStep,
+      initializerCallBeforeCallbackInstall: tick === 0,
+      startedAffine,
+      affineWriteRotationSigned,
+      affineWriteRotationU16: toU16(affineWriteRotationSigned),
+      xScale: 256,
+      yScale: 256,
+      normalFrontDontFlip: true,
+      resetSpriteAfterAnim,
+      callback,
+      affineMode,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable Spin reducer state");
+  return lastFrame;
+}
+
+/** Source-specific `Anim_TumblingFrontFlip_Twice` initializer for selector 84. */
+export const TUMBLING_FRONT_FLIP_TWICE_INITIALIZER = Object.freeze({
+  selector: "ANIM_TUMBLING_FRONT_FLIP_TWICE",
+  sourceId: 84,
+  rotation: 0,
+  delay: 0,
+  runs: 2,
+  speed: 1,
+  data: 0,
+  accepted: true,
+} as const);
+
+export interface TumblingFrontFlipTwiceFrame extends SpeciesIdleOffset {
+  /** Signed s16 sprite data registers before and after this callback. */
+  readonly data2Before: number;
+  readonly data2: number;
+  readonly data3Before: number;
+  readonly data3: number;
+  readonly data4Before: number;
+  readonly data4: number;
+  readonly data5Before: number;
+  readonly data5: number;
+  readonly data6Before: number;
+  readonly data6: number;
+  readonly data7Before: number;
+  readonly data7: number;
+  readonly animRotation: 0;
+  readonly animDelayBefore: number;
+  readonly animDelay: number;
+  readonly animRunsBefore: 1 | 2;
+  readonly animRuns: 1 | 2;
+  readonly animSpeed: 1;
+  readonly animData: 0;
+  /** The source tests x-boundaries before its else-if y-boundary. */
+  readonly boundary: "x" | "y" | null;
+  /** Raw `sprite->data[6] << 8` before HandleSetAffineData's u16 argument. */
+  readonly affineRotationShifted: number | null;
+  readonly affineRotationU16: number | null;
+  readonly affineWriteCount: 0 | 1;
+  /** Tick zero invokes TumblingFrontFlip before callback installation. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXBeforeMotion: boolean;
+  readonly tryFlipXAfterAffine: boolean;
+  readonly tryFlipXCalls: 0 | 2;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "TumblingFrontFlip" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+/**
+ * Source-order port of selector 84's `Anim_TumblingFrontFlip_Twice` ->
+ * `TumblingFrontFlip` (`pokemon_animation.c:1037-1059,2366-2433,3785-3793,
+ * 5540-5544`) on the ordinary opponent-front path. `AddNewAnim` supplies
+ * rotation=0/delay=0/runs=1/speed=0/data=0; the selector changes only speed to
+ * one and runs to two, calls the shared callback immediately, then installs
+ * it. The task has already set `sDontFlip=TRUE`, so both source-order
+ * `TryFlipX` calls are retained as no-ops.
+ *
+ * All sprite position/data registers are GBA s16 values. The x-boundary test
+ * is deliberately an `if` before the y-boundary `else if`; after six
+ * crossings the next x2<=0 callback completes a run, arms ten delay-only
+ * callbacks, and leaves the direction registers intact for the second run.
+ * The affine write uses the source's `data[6] << 8` expression and then the
+ * `u16` HandleSetAffineData parameter conversion. Tick 137 resets affine mode
+ * and installs stable `WaitAnimEnd`; later calls leave the terminal receipt
+ * unchanged.
+ */
+export function tumblingFrontFlipTwiceFrameAtTick(
+  ticksSinceStart: number,
+): TumblingFrontFlipTwiceFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  const { animRotation, delay: initialDelay, runs: initialRuns, speed: animSpeed, data: animData } = {
+    animRotation: TUMBLING_FRONT_FLIP_TWICE_INITIALIZER.rotation,
+    delay: TUMBLING_FRONT_FLIP_TWICE_INITIALIZER.delay,
+    runs: TUMBLING_FRONT_FLIP_TWICE_INITIALIZER.runs,
+    speed: TUMBLING_FRONT_FLIP_TWICE_INITIALIZER.speed,
+    data: TUMBLING_FRONT_FLIP_TWICE_INITIALIZER.data,
+  } as const;
+  let animDelay: number = initialDelay;
+  let animRuns: 1 | 2 = initialRuns;
+  let data2 = 0;
+  let data3 = 0;
+  let data4 = 0;
+  let data5 = 0;
+  let data6 = 0;
+  let data7 = 0;
+  let x2 = 0;
+  let y2 = 0;
+  let callback: TumblingFrontFlipTwiceFrame["callback"] = "TumblingFrontFlip";
+  let affineMode: TumblingFrontFlipTwiceFrame["affineMode"] = "normal";
+  let lastFrame: TumblingFrontFlipTwiceFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (callback === "WaitAnimEnd") continue;
+
+    const data2Before = data2;
+    const data3Before = data3;
+    const data4Before = data4;
+    const data5Before = data5;
+    const data6Before = data6;
+    const data7Before = data7;
+    const animDelayBefore = animDelay;
+    const animRunsBefore = animRuns;
+    let boundary: TumblingFrontFlipTwiceFrame["boundary"] = null;
+    let affineRotationShifted: number | null = null;
+    let affineRotationU16: number | null = null;
+    let startedAffine = false;
+    let tryFlipXBeforeMotion = false;
+    let tryFlipXAfterAffine = false;
+    let resetSpriteAfterAnim = false;
+
+    if (animDelay !== 0) {
+      animDelay = toS16(animDelay - 1);
+    } else {
+      // TryFlipX(sprite) is a no-op for the normal opponent-front task.
+      tryFlipXBeforeMotion = true;
+      if (data2 === 0) {
+        data2 = toS16(data2 + 1);
+        startedAffine = true;
+        affineMode = "double";
+        data7 = toS16(animSpeed);
+        data3 = -1;
+        data4 = -1;
+        data5 = 0;
+        data6 = 0;
+      }
+
+      x2 = toS16(x2 + data7 * 2 * data3);
+      y2 = toS16(y2 + data7 * data4);
+      data6 = toS16(data6 + 8);
+      if (x2 <= -16 || x2 >= 16) {
+        boundary = "x";
+        x2 = toS16(data3 * 16);
+        data3 = toS16(data3 * -1);
+        data5 = toS16(data5 + 1);
+      } else if (y2 <= -16 || y2 >= 16) {
+        boundary = "y";
+        y2 = toS16(data4 * 16);
+        data4 = toS16(data4 * -1);
+        data5 = toS16(data5 + 1);
+      }
+
+      if (data5 > 5 && x2 <= 0) {
+        x2 = 0;
+        y2 = 0;
+        if (animRuns > 1) {
+          animRuns = toS16(animRuns - 1) as 1;
+          data5 = 0;
+          data6 = 0;
+          animDelay = 10;
+        } else {
+          resetSpriteAfterAnim = true;
+          affineMode = "normal";
+          callback = "WaitAnimEnd";
+        }
+      }
+
+      affineRotationShifted = data6 << 8;
+      affineRotationU16 = affineRotationShifted & 0xffff;
+      tryFlipXAfterAffine = true;
+    }
+
+    lastFrame = {
+      x2,
+      y2,
+      data2Before,
+      data2,
+      data3Before,
+      data3,
+      data4Before,
+      data4,
+      data5Before,
+      data5,
+      data6Before,
+      data6,
+      data7Before,
+      data7,
+      animRotation,
+      animDelayBefore,
+      animDelay,
+      animRunsBefore,
+      animRuns,
+      animSpeed,
+      animData,
+      boundary,
+      affineRotationShifted,
+      affineRotationU16,
+      affineWriteCount: affineRotationShifted === null ? 0 : 1,
+      initializerCallBeforeCallbackInstall: tick === 0,
+      startedAffine,
+      normalFrontDontFlip: true,
+      tryFlipXBeforeMotion,
+      tryFlipXAfterAffine,
+      tryFlipXCalls: tryFlipXBeforeMotion ? 2 : 0,
+      resetSpriteAfterAnim,
+      callback,
+      affineMode,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable TumblingFrontFlip reducer state");
+  return lastFrame;
+}
+
+/**
+ * Source-specific `Anim_Twist` initializer (source selector 18). `AddNewAnim`
+ * supplies `runs=1`; this initializer explicitly changes only rotation and
+ * delay before its immediate `Twist` call.
+ */
+export const TWIST_INITIALIZER = Object.freeze({
+  selector: "ANIM_TWIST",
+  sourceId: 18,
+  rotation: 512,
+  delay: 0,
+  runs: 1,
+  accepted: true,
+} as const);
+
+/** Source-specific selector-78 initializer for STARYU's twice-twist path. */
+export const TWIST_TWICE_INITIALIZER = Object.freeze({
+  selector: "ANIM_TWIST_TWICE",
+  sourceId: 78,
+  rotation: 1024,
+  delay: 0,
+  runs: 2,
+  accepted: true,
+} as const);
+
+type TwistInitializer = typeof TWIST_INITIALIZER | typeof TWIST_TWICE_INITIALIZER;
+
+/** Observable source callback state shared by normal and twice-twist. */
+export interface TwistFrame extends SpeciesIdleOffset {
+  /** `sprite->data[2]` immediately before this source callback. */
+  readonly data2Before: number;
+  /** `sprite->data[2]` after the source's optional final `+= 16`. */
+  readonly data2: number;
+  /** Signed `s16 sprite->data[6]`, set only by a rotation-body callback. */
+  readonly data6: number;
+  /** `AddNewAnim`/`InitAnimData` fields after the initializer overrides. */
+  readonly animRotation: 512 | 1024;
+  readonly animDelayBefore: number;
+  readonly animDelay: number;
+  readonly animRunsBefore: 1 | 2;
+  readonly animRuns: 1 | 2;
+  readonly animSpeed: 0;
+  readonly animDataBefore: 0 | 1;
+  readonly animData: 1;
+  /** Tick zero invokes `Twist` before `sprite->callback = Twist` is written. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
+  readonly startedAffine: boolean;
+  readonly affineWriteCount: 0 | 1;
+  /** Signed source rotation argument passed to `HandleSetAffineData`, if any. */
+  readonly affineWriteRotationSigned: number | null;
+  /** The same rotation after C's `u16` parameter conversion. */
+  readonly affineWriteRotationU16: number | null;
+  readonly xScale: 256;
+  readonly yScale: 256;
+  readonly normalFrontDontFlip: true;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "Twist" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+/** Compatibility name for STARYU's already accepted twice-twist reducer. */
+export type TwistTwiceFrame = TwistFrame;
+
+/**
+ * Shared source-order port of `Anim_Twist` / `Anim_Twist_Twice` -> `Twist`
+ * (`pokemon_animation.c:1037-1059,1420-1470,3732-3741,5540-5544`) for the
+ * ordinary opponent-front path. `Task_HandleMonAnimation` has already zeroed
+ * sprite data and set `sDontFlip=TRUE`; `AddNewAnim` clears its animation-slot
+ * record before the source-specific initializer changes its fields, invokes
+ * `Twist` immediately, and only then installs it as the sprite callback.
+ *
+ * The normal selector runs counters 0..512 by 16, then its strict `>` branch
+ * writes identity, calls `ResetSpriteAfterAnim`, and hands off to stable
+ * `WaitAnimEnd`. The twice selector retains its accepted 1024/2-run behavior:
+ * the first strict boundary arms ten delay callbacks and the second terminal
+ * boundary restores identity and hands off to `WaitAnimEnd`.
+ */
+function twistFrameForInitializer(
+  initializer: TwistInitializer,
+  ticksSinceStart: number,
+): TwistFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  const animRotation = initializer.rotation;
+  let animDelay: number = initializer.delay;
+  let animRuns: 1 | 2 = initializer.runs;
+  const animSpeed = 0;
+  let animData: 0 | 1 = 0;
+  let data2 = 0;
+  let data6 = 0;
+  let callback: TwistFrame["callback"] = "Twist";
+  let affineMode: TwistFrame["affineMode"] = "normal";
+  let lastFrame: TwistFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    // `WaitAnimEnd` only polls sprite animation completion; this reducer's
+    // settled record is intentionally byte-stable until it reaches the dummy.
+    if (callback === "WaitAnimEnd") continue;
+
+    const data2Before = data2;
+    const animDelayBefore = animDelay;
+    const animRunsBefore = animRuns;
+    const animDataBefore = animData;
+    let startedAffine = false;
+    let affineWriteRotationSigned: number | null = null;
+    let resetSpriteAfterAnim = false;
+
+    if (animDelay !== 0) {
+      animDelay -= 1;
+    } else {
+      if (data2 === 0 && animData === 0) {
+        startedAffine = true;
+        affineMode = "double";
+        animData = 1;
+      }
+
+      if (data2 > animRotation) {
+        // `HandleSetAffineData(sprite, 256, 256, 0)` precedes both repeat
+        // setup and the terminal ResetSpriteAfterAnim branch.
+        affineWriteRotationSigned = 0;
+        if (animRuns > 1) {
+          animRuns = 1;
+          animDelay = 10;
+          data2 = 0;
+        } else {
+          resetSpriteAfterAnim = true;
+          affineMode = "normal";
+          callback = "WaitAnimEnd";
+        }
+      } else {
+        data6 = gbaSin(data2 % 256, 4096);
+        affineWriteRotationSigned = data6;
+      }
+
+      // This executes after both repeat and terminal branches in the source.
+      data2 += 16;
+    }
+
+    // Tick zero's immediate `Twist` body is the only path from InitAnimData's
+    // zero to the stable initialized record; every observable callback ends
+    // after that source increment.
+    if (animData !== 1) throw new Error("Anim_Twist did not initialize animation data");
+
+    lastFrame = {
+      x2: 0,
+      y2: 0,
+      data2Before,
+      data2,
+      data6,
+      animRotation,
+      animDelayBefore,
+      animDelay,
+      animRunsBefore,
+      animRuns,
+      animSpeed,
+      animDataBefore,
+      animData,
+      initializerCallBeforeCallbackInstall: tick === 0,
+      startedAffine,
+      affineWriteCount: affineWriteRotationSigned === null ? 0 : 1,
+      affineWriteRotationSigned,
+      affineWriteRotationU16: affineWriteRotationSigned === null
+        ? null
+        : affineWriteRotationSigned & 0xffff,
+      xScale: 256,
+      yScale: 256,
+      normalFrontDontFlip: true,
+      resetSpriteAfterAnim,
+      callback,
+      affineMode,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable Twist reducer state");
+  return lastFrame;
+}
+
+/** Exact one-run selector-18 `Anim_Twist` lifecycle. */
+export function twistFrameAtTick(ticksSinceStart: number): TwistFrame | null {
+  return twistFrameForInitializer(TWIST_INITIALIZER, ticksSinceStart);
+}
+
+/** Exact twice-twist selector-78 lifecycle, retained as a regression export. */
+export function twistTwiceFrameAtTick(ticksSinceStart: number): TwistTwiceFrame | null {
+  return twistFrameForInitializer(TWIST_TWICE_INITIALIZER, ticksSinceStart);
 }
 
 const VERTICAL_SHAKE_ACCUMULATOR_STEP = 60;
@@ -3073,7 +3866,7 @@ function slideWobbleCoreFrameAtTick(
   ticksSinceStart: number,
   amplitude: number,
 ): SlideWobbleCoreFrame | null {
-  if (ticksSinceStart < 0) return null;
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
 
   let data2 = 0;
   for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
@@ -3124,10 +3917,12 @@ function slideWobbleCoreFrameAtTick(
 }
 
 /**
- * Source-order port of `Anim_VerticalSlideWobble` / `VerticalSlideWobble`
- * (`pokemon_animation.c:911-939,984-1028,1735-1766`). The front-animation
- * task has zeroed data0/data2..data7 and set `sDontFlip=TRUE`; the normal
- * initializer then sets data0=10 and immediately calls the shared callback.
+ * Shared source-order port of `Anim_VerticalSlideWobble` /
+ * `Anim_VerticalSlideWobble_Small` -> `VerticalSlideWobble`
+ * (`pokemon_animation.c:911-939,984-1028,1735-1766,3753-3758`). The
+ * front-animation task has zeroed data0/data2..data7 and set
+ * `sDontFlip=TRUE`; each initializer writes its amplitude and immediately
+ * calls the shared callback before installing it.
  *
  * Tick 0 starts affine mode before the first writes. Ticks 0..100 use C
  * truncation for both integer indices, mask the doubled wobble index to u8,
@@ -3136,10 +3931,10 @@ function slideWobbleCoreFrameAtTick(
  * Tick 101 restores identity affine/y2, calls `ResetSpriteAfterAnim`, installs
  * `WaitAnimEnd`, and still performs the source's final data2 increment.
  */
-export function verticalSlideWobbleFrameAtTick(
+function verticalSlideWobbleFrameAtTickWithAmplitude(
   ticksSinceStart: number,
+  data0: 5 | 10,
 ): VerticalSlideWobbleFrame | null {
-  const data0 = VERTICAL_SLIDE_WOBBLE_INITIALIZERS.normal.data0;
   const core = slideWobbleCoreFrameAtTick(ticksSinceStart, data0);
   if (core === null) return null;
   return {
@@ -3154,6 +3949,7 @@ export function verticalSlideWobbleFrameAtTick(
     affineRotation: core.affineRotation,
     xScale: 256,
     yScale: 256,
+    initializerCallBeforeCallbackInstall: ticksSinceStart === 0,
     startedAffine: core.startedAffine,
     normalFrontDontFlip: true,
     resetSpriteAfterAnim: core.resetSpriteAfterAnim,
@@ -3162,21 +3958,42 @@ export function verticalSlideWobbleFrameAtTick(
   };
 }
 
-/**
- * Source-order port of `Anim_HorizontalSlide_Slow` and `HorizontalSlide`
- * (`pokemon_animation.c:911-939,1131-1153,3665-3669`). The front task
- * zeroes data2 and sets `sDontFlip=TRUE`; the slow initializer sets data0=80
- * and immediately runs the shared callback. Ticks 0..80 perform both no-op
- * `TryFlipX` calls, write the C-truncated sine index/x2, and increment data2.
- * Tick 81 clears x2, installs `WaitAnimEnd`, increments data2 to 82, and
- * performs the second no-op flip.
- */
-export function horizontalSlideSlowFrameAtTick(
+/** Selector 28's normal-amplitude `Anim_VerticalSlideWobble` entry point. */
+export function verticalSlideWobbleFrameAtTick(
   ticksSinceStart: number,
+): VerticalSlideWobbleFrame | null {
+  return verticalSlideWobbleFrameAtTickWithAmplitude(
+    ticksSinceStart,
+    VERTICAL_SLIDE_WOBBLE_INITIALIZERS.normal.data0,
+  );
+}
+
+/** Selector 81's small-amplitude `Anim_VerticalSlideWobble_Small` entry point. */
+export function verticalSlideWobbleSmallFrameAtTick(
+  ticksSinceStart: number,
+): VerticalSlideWobbleFrame | null {
+  return verticalSlideWobbleFrameAtTickWithAmplitude(
+    ticksSinceStart,
+    VERTICAL_SLIDE_WOBBLE_INITIALIZERS.small.data0,
+  );
+}
+
+/**
+ * Source-order `HorizontalSlide` reducer shared by the normal and slow
+ * opponent-front initializers (`pokemon_animation.c:911-939,1131-1153,
+ * 3665-3669`). `Task_HandleMonAnimation` zeroes data2 and sets
+ * `sDontFlip=TRUE`; each initializer writes data0, immediately runs this
+ * callback, and then installs it. Active ticks perform both no-op `TryFlipX`
+ * calls, write the C-truncated sine index/x2, and increment data2. The first
+ * tick after data2 exceeds data0 clears x2, installs `WaitAnimEnd`, still
+ * increments data2, and performs the second no-op flip.
+ */
+function horizontalSlideFrameAtTickWithDuration(
+  ticksSinceStart: number,
+  data0: 40 | 80,
 ): HorizontalSlideFrame | null {
   if (ticksSinceStart < 0) return null;
 
-  const data0 = HORIZONTAL_SLIDE_INITIALIZERS.slow.data0;
   if (ticksSinceStart > data0) {
     return {
       x2: 0,
@@ -3185,6 +4002,7 @@ export function horizontalSlideSlowFrameAtTick(
       data2: data0 + 2,
       index: null,
       amplitude: 6,
+      initializerCallBeforeCallbackInstall: false,
       normalFrontDontFlip: true,
       tryFlipXCalls: 2,
       callback: "WaitAnimEnd",
@@ -3200,10 +4018,31 @@ export function horizontalSlideSlowFrameAtTick(
     data2: data2BeforeIncrement + 1,
     index,
     amplitude: 6,
+    initializerCallBeforeCallbackInstall: ticksSinceStart === 0,
     normalFrontDontFlip: true,
     tryFlipXCalls: 2,
     callback: "HorizontalSlide",
   };
+}
+
+/** Selector 3's normal-duration `Anim_HorizontalSlide` entry point. */
+export function horizontalSlideFrameAtTick(
+  ticksSinceStart: number,
+): HorizontalSlideFrame | null {
+  return horizontalSlideFrameAtTickWithDuration(
+    ticksSinceStart,
+    HORIZONTAL_SLIDE_INITIALIZERS.normal.data0,
+  );
+}
+
+/** Selector 70's slow-duration `Anim_HorizontalSlide_Slow` entry point. */
+export function horizontalSlideSlowFrameAtTick(
+  ticksSinceStart: number,
+): HorizontalSlideFrame | null {
+  return horizontalSlideFrameAtTickWithDuration(
+    ticksSinceStart,
+    HORIZONTAL_SLIDE_INITIALIZERS.slow.data0,
+  );
 }
 
 const CIRCULAR_STRETCH_TWICE_DURATION = 40;
@@ -3846,6 +4685,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
+    case "CIRCLE_C_CLOCKWISE_SLOW": {
+      const terminal = circleCCounterclockwiseSlowFrameAtTick(43);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_CircleCounterclockwise_Slow did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
     case "CIRCULAR_STRETCH_TWICE": {
       const terminal = circularStretchTwiceFrameAtTick(41);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
@@ -3864,6 +4710,20 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = shrinkGrowFrameAtTick(49);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_ShrinkGrow did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "SPIN": {
+      const terminal = spinFrameAtTick(61);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_Spin did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "TUMBLING_FRONT_FLIP_TWICE": {
+      const terminal = tumblingFrontFlipTwiceFrameAtTick(137);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_TumblingFrontFlip_Twice did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
@@ -3913,6 +4773,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = horizontalJumpsFrameAtTick(43);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_HorizontalJumps did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "H_SLIDE": {
+      const terminal = horizontalSlideFrameAtTick(41);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_HorizontalSlide did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
@@ -3967,6 +4834,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
+    case "H_SHAKE_SLOW": {
+      const terminal = horizontalShakeSlowFrameAtTick(77);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_HorizontalShake_Slow did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
     case "RAPID_H_HOPS": {
       let tick = 0;
       let last: SpeciesIdleOffset = { x2: 0, y2: 0 };
@@ -3988,6 +4862,20 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = swingConcaveFrameAtTick(101);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_SwingConcave did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "TWIST": {
+      const terminal = twistFrameAtTick(33);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_Twist did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "TWIST_TWICE": {
+      const terminal = twistTwiceFrameAtTick(140);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_Twist_Twice did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
@@ -4032,6 +4920,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = verticalSlideWobbleFrameAtTick(101);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_VerticalSlideWobble did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "V_SLIDE_WOBBLE_SMALL": {
+      const terminal = verticalSlideWobbleSmallFrameAtTick(101);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_VerticalSlideWobble_Small did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
