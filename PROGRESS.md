@@ -4,6 +4,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 851 — [bounded MAIN worker, 2026-08-01] typed opponent-faint owner introduced; live field remains pending atomic rebase
+
+- **State:** `ae5e5457`, tree clean. Baseline was green: `npm test` 589
+  files / 6,112 passed / 1 skipped and build green; Scene-OFF `bin/oracle
+  info` answered. Exact old-field census remains **48** (10 src / 38 tests)
+  until the atomic migration.
+- **Did:** added immutable `OpponentFaintPresentationOwner` + one-shot
+  `OpponentFaintDismissEdge`; it composes the real turn-13 resolution and
+  MURKROW switch adapters, and atomically publishes accepted edge, frozen
+  cursor, and automatic continuation. New Tier-1 owner tests (3/3) and build
+  are green.
+- **Next:** wire readiness/producer, rebase every Murkrow continuation anchor
+  from the owner edge, then delete the flat field only with all consumers
+  migrated; do not touch the dispatcher-family debt.
+
+---
 ## 850 — [supervisor session open, 2026-08-01 22:40] animation-main folded; #39 item-7 + dispatcher-design lanes launching
 
 - **State:** master `2036472f` (fold of animation-main's 3-commit
