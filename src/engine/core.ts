@@ -128,7 +128,6 @@ import {
   sendOutHandoffTick,
   sendOutPressEligible,
   TICK0 as SCENE_TICK0,
-  TURN3_ROCKSLIDE_REOPEN_GATE_DELAY,
   TURN4_ROCKSLIDE_MENU_REDRAW_DELAY,
   TURN5_SITRUS_MENU_REOPEN_GATE_DELAY,
   TURN8_MENU_REDRAW_DELAY,
@@ -205,7 +204,11 @@ import {
   resolveTurn2CompletedResolutionNextCommandHandoff,
 } from "./turn2ResolutionAdapter.ts";
 import { isTurn3ChooseActionBounceReset } from "./turn3ChooseActionReset.ts";
-import { resolveTurn3CompletedResolutionNextCommandHandoff } from "./turn3ResolutionAdapter.ts";
+import {
+  isTurn3NextCommandHandoffReady,
+  isTurn3NextCommandLifecycleActive,
+  resolveTurn3CompletedResolutionNextCommandHandoff,
+} from "./turn3ResolutionAdapter.ts";
 import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "./turn16FirePunchResolutionAdapter.ts";
 import {
   advanceBattleSceneForcedPartySelect,
@@ -1124,7 +1127,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let turn1NextCommandHandoff = battleScene.turn1NextCommandHandoff ?? null;
     let turn2NextCommandHandoff = battleScene.turn2NextCommandHandoff ?? null;
     let turn3NextCommandHandoff = battleScene.turn3NextCommandHandoff ?? null;
-    let turn3Resolved = battleScene.turn3Resolved;
     let turn4Resolved = battleScene.turn4Resolved;
     let turn5NextCommandHandoff = battleScene.turn5NextCommandHandoff;
     let turn6NextCommandHandoff = battleScene.turn6NextCommandHandoff;
@@ -1302,21 +1304,24 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         turn2NextCommandHandoff,
         fightSubmenu.openElapsed,
       ) &&
-      !turn3Resolved &&
+      !isTurn3NextCommandLifecycleActive(
+        turn3NextCommandHandoff,
+        fightSubmenu.openElapsed,
+      ) &&
+      isTurn3NextCommandHandoffReady(turn3NextCommandHandoff) &&
       fightSubmenu.confirmElapsed !== null &&
-      newKeys.has("A") &&
-      sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN3_ROCKSLIDE_REOPEN_GATE_DELAY
+      newKeys.has("A")
     ) {
-      // S7 slice I (docs/battle-turn-notes.md §13/§22): turn 3's whole
-      // ROCK_SLIDE resolution has redrawn the settled action menu by now
-      // (`TURN3_ROCKSLIDE_REOPEN_GATE_DELAY` past turn 3's own real confirm)
-      // - a fresh A-press reopens FIGHT for turn 4, cursor persisted at slot
-      // 0 (ROCK_SLIDE, unchanged since turn 3 - no UP-nav needed this time,
-      // §13's own ledger).
+      // The source-owned turn-3 receipt makes the settled action menu ready;
+      // this later A only opens the turn-4 command lifecycle. Its submenu
+      // (including same-turn B-close/A-reopen) consumes the immutable 3172
+      // presentation epoch rather than publishing a replacement.
       fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen));
-      turn3Resolved = true;
     } else if (
-      turn3Resolved &&
+      isTurn3NextCommandLifecycleActive(
+        turn3NextCommandHandoff,
+        fightSubmenu.openElapsed,
+      ) &&
       !turn4Resolved &&
       fightSubmenu.confirmElapsed !== null &&
       newKeys.has("A") &&
@@ -1324,10 +1329,8 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     ) {
       // S7 slice J (docs/battle-turn-notes.md §13/§23): turn 4's whole
       // ROCK_SLIDE resolution has redrawn the settled action menu by now
-      // (`TURN4_ROCKSLIDE_MENU_REDRAW_DELAY` past turn 4's own real confirm -
-      // directly usable, unlike `TURN3_ROCKSLIDE_REOPEN_GATE_DELAY`'s own
-      // synthetic-anchor correction, since turn 4's own ROCK_SLIDE was
-      // already anchored to a real press) - a fresh A-press reopens FIGHT
+      // (`TURN4_ROCKSLIDE_MENU_REDRAW_DELAY` past turn 4's own real confirm)
+      // - a fresh A-press reopens FIGHT
       // for turn 5, cursor persisted at slot 0 (ROCK_SLIDE, unchanged since
       // turn 3 - no UP-nav needed this time, §13's own ledger).
       fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen));
@@ -1616,7 +1619,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn1NextCommandHandoff,
       turn2NextCommandHandoff,
       turn3NextCommandHandoff,
-      turn3Resolved,
       turn4Resolved,
       turn5NextCommandHandoff,
       turn6NextCommandHandoff,
