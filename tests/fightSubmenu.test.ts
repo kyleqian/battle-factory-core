@@ -86,10 +86,22 @@ import {
   resolveTurn8CompletedResolutionNextCommandHandoff,
   resolveTurn8LatestCompletedCommandHandoff,
 } from "../src/engine/turn8ResolutionAdapter.ts";
-import { resolveTurn9CompletedResolutionNextCommandHandoff } from "../src/engine/turn9ResolutionAdapter.ts";
-import { resolveTurn10CompletedResolutionNextCommandHandoff } from "../src/engine/turn10ResolutionAdapter.ts";
-import { resolveTurn11CompletedResolutionNextCommandHandoff } from "../src/engine/turn11ResolutionAdapter.ts";
-import { resolveTurn12CompletedResolutionNextCommandHandoff } from "../src/engine/turn12ResolutionAdapter.ts";
+import {
+  resolveTurn9CompletedResolutionNextCommandHandoff,
+  resolveTurn9LatestCompletedCommandHandoff,
+} from "../src/engine/turn9ResolutionAdapter.ts";
+import {
+  resolveTurn10CompletedResolutionNextCommandHandoff,
+  resolveTurn10LatestCompletedCommandHandoff,
+} from "../src/engine/turn10ResolutionAdapter.ts";
+import {
+  resolveTurn11CompletedResolutionNextCommandHandoff,
+  resolveTurn11LatestCompletedCommandHandoff,
+} from "../src/engine/turn11ResolutionAdapter.ts";
+import {
+  resolveTurn12CompletedResolutionNextCommandHandoff,
+  resolveTurn12LatestCompletedCommandHandoff,
+} from "../src/engine/turn12ResolutionAdapter.ts";
 import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "../src/engine/turn16FirePunchResolutionAdapter.ts";
 import {
   beginBattleSceneForcedPartySelect,
@@ -256,7 +268,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
     );
   });
 
-  it("dispatcher slice 3: the existing turn-13-menu fixture carries each published Pidgeotto content bridge alongside its legacy receipt", () => {
+  it("dispatcher slices 3-4: the existing turn-13-menu fixture carries each published semantic content bridge alongside its legacy receipt", () => {
     const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn13-menu.json", import.meta.url), "utf8")) as {
       segments: { frames: number; buttons?: GbaButton[] }[];
     };
@@ -277,10 +289,10 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
       resolveTurn6LatestCompletedCommandHandoff(),
       resolveTurn7LatestCompletedCommandHandoff(),
       resolveTurn8LatestCompletedCommandHandoff(),
-      { playerPp: [3, 19, 19, 10], persistedMoveSlot: 0, nextCommand: { redraw: "settled", input: "ready" } },
-      { playerPp: [2, 19, 19, 10], persistedMoveSlot: 0, nextCommand: { redraw: "settled", input: "ready" } },
-      { playerPp: [1, 19, 19, 10], persistedMoveSlot: 0, nextCommand: { redraw: "settled", input: "ready" } },
-      { playerPp: [0, 19, 19, 10], persistedMoveSlot: 0, nextCommand: { redraw: "settled", input: "ready" } },
+      resolveTurn9LatestCompletedCommandHandoff(),
+      resolveTurn10LatestCompletedCommandHandoff(),
+      resolveTurn11LatestCompletedCommandHandoff(),
+      resolveTurn12LatestCompletedCommandHandoff(),
     ]);
   });
 

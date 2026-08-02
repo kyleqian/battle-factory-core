@@ -8,9 +8,34 @@
  */
 import { rentalMoveset } from "./battleSetup.ts";
 import {
+  FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+  FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+  MENU_IDLE_BLANK_END_TICK,
+} from "./battleMenu.ts";
+import {
   createLatestCompletedCommandHandoff,
   type LatestCompletedCommandHandoff,
 } from "./nextCommandHandoff.ts";
+import {
+  createFightCommandPresentation,
+  type FightCommandPresentation,
+} from "./fightCommandPresentation.ts";
+import {
+  resolveTurn13DragonBreathFaintLines,
+  resolveTurn13DragonBreathKickoffLines,
+  resolveTurn13DragonBreathWindowContent,
+} from "./turn13DragonBreathPresentationStaging.ts";
+import {
+  resolveTurn13AccFellLines,
+  resolveTurn13SandAttackKickoffLines,
+  resolveTurn13SandAttackWindowContent,
+} from "./turn13SandAttackPresentationStaging.ts";
+
+const ONIX_MAX_HP = 117;
+const PIDGEOTTO_MAX_HP = 156;
+const TURN13_COMMAND_MENU_REDRAW_TICK = 14_237 + 551;
+const TURN12_ONIX_AFTER_AERIAL_ACE_HP = 4;
+const TURN11_PIDGEOTTO_AFTER_ROCK_SLIDE_HP = 16;
 
 export type Turn12CompletedResolutionNextCommandHandoff = Readonly<{
   /** Exact post-turn-12 player PP for `[ROCK_SLIDE, BIND, DRAGON_BREATH, SANDSTORM]`. */
@@ -44,10 +69,84 @@ export function resolveTurn12CompletedResolutionNextCommandHandoff(): Turn12Comp
   });
 }
 
+/** Semantic field/bounce/move content for the final Pidgeotto command. */
+export function resolveTurn12FightCommandPresentation(): FightCommandPresentation {
+  const sandAttack = resolveTurn13SandAttackWindowContent();
+  const dragonBreath = resolveTurn13DragonBreathWindowContent();
+  return createFightCommandPresentation({
+    field: {
+      player: {
+        species: "ONIX",
+        displayName: "ONIX",
+        level: 50,
+        gender: "male",
+        status: "none",
+        hp: { current: TURN12_ONIX_AFTER_AERIAL_ACE_HP, max: ONIX_MAX_HP },
+        attackStage: 0,
+      },
+      opponent: {
+        species: "PIDGEOTTO",
+        displayName: "PIDGEOTTO",
+        level: 50,
+        gender: "male",
+        status: "none",
+        hp: { current: TURN11_PIDGEOTTO_AFTER_ROCK_SLIDE_HP, max: PIDGEOTTO_MAX_HP },
+        attackStage: 6,
+      },
+    },
+    bounce: {
+      actionMenuRedrawTick: TURN13_COMMAND_MENU_REDRAW_TICK,
+      idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
+      fightSubmenuTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+      kickoff: {
+        freezeAfterConfirmTicks: FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+        preFreezeTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+        frozenBounceTick: TURN13_COMMAND_MENU_REDRAW_TICK,
+      },
+    },
+    upcoming: {
+      firstTextStartDelay: 13,
+      moves: [
+        {
+          user: "opponent",
+          target: "player",
+          move: "SAND_ATTACK",
+          text: { lines: resolveTurn13SandAttackKickoffLines() },
+          statChange: {
+            target: "player",
+            stat: sandAttack.statChange.stat,
+            from: sandAttack.statChange.from,
+            to: sandAttack.statChange.to,
+            text: { lines: resolveTurn13AccFellLines() },
+          },
+        },
+        {
+          user: "player",
+          target: "opponent",
+          move: "DRAGON_BREATH",
+          text: { lines: resolveTurn13DragonBreathKickoffLines() },
+          hpChange: {
+            target: "opponent",
+            from: dragonBreath.damage.hp.from,
+            to: dragonBreath.damage.hp.to,
+          },
+          faint: {
+            target: "opponent",
+            text: { lines: resolveTurn13DragonBreathFaintLines() },
+          },
+        },
+      ],
+    },
+  });
+}
+
 /** Normalizes the legacy turn-12 receipt into the generic command boundary. */
 export function resolveTurn12LatestCompletedCommandHandoff(): LatestCompletedCommandHandoff {
   return createLatestCompletedCommandHandoff(
-    resolveTurn12CompletedResolutionNextCommandHandoff(),
+    {
+      ...resolveTurn12CompletedResolutionNextCommandHandoff(),
+      content: resolveTurn12FightCommandPresentation(),
+    },
   );
 }
 

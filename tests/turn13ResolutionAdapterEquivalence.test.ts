@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  CANONICAL_TURN13_RETAINED_FLY_PRESENTATION_OWNER,
   isTurn13NextCommandHandoffReady,
   opponentFaintSinkGeometry,
   resolveTurn13CompletedResolutionNextCommandHandoff,
+  resolveTurn13FightCommandPresentation,
   resolveTurn13LatestCompletedCommandHandoff,
   resolveTurn13ResolutionAdapter,
   resolveTurn13SwitchInAdapter,
@@ -132,6 +134,19 @@ describe("turn13ResolutionAdapter: #39 rank-2 kernel-to-typed-owner equivalence 
       expect(generic.playerPp[2]).toBe(legacy.dragonBreathPp.current);
       expect(generic.persistedMoveSlot).toBe(legacy.persistedMoveSlot);
       expect(generic.nextCommand).toEqual(legacy.nextCommand);
+    });
+
+    it("retains FLY charge/strike segments as owner-backed content, never as a copied PP-selected route", () => {
+      const content = resolveTurn13FightCommandPresentation();
+      const retained = content.retainedResolution;
+
+      expect(retained).toBeDefined();
+      expect(retained!.owner).toBe(CANONICAL_TURN13_RETAINED_FLY_PRESENTATION_OWNER);
+      expect(retained!.segments).toBe(retained!.owner.resolution.segments);
+      expect(retained!.segments).toBe(CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution.segments);
+      expect(retained!.segments[0]).toBe(CANONICAL_OPPONENT_FLY_RESOLUTION.chargeResolution.segments[0]);
+      expect(retained!.segments[1]).toBe(CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution.segments[1]);
+      expect(content.upcoming).toBeNull();
     });
 
     it("publishes the core guard's settled redraw and input-ready facts for the following FIGHT reopen", () => {

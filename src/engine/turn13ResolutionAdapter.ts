@@ -75,9 +75,32 @@ import {
 import { runBattleScriptFaintedActionsOrchestration } from "./battleScriptFaintedActionsOrchestration.ts";
 import { rentalMoveset } from "./battleSetup.ts";
 import {
+  FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+  FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+  MENU_IDLE_BLANK_END_TICK,
+} from "./battleMenu.ts";
+import { createBattleSceneResolutionOwner } from "./battleSceneResolutionOwner.ts";
+import {
   createLatestCompletedCommandHandoff,
   type LatestCompletedCommandHandoff,
 } from "./nextCommandHandoff.ts";
+import {
+  createFightCommandPresentation,
+  type FightCommandPresentation,
+} from "./fightCommandPresentation.ts";
+import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "./turn15FlyResolutionAdapter.ts";
+
+const ONIX_MAX_HP = 117;
+/** The settled turn-14 menu is timed in the retained switch-in owner's local clock. */
+const TURN13_SWITCHIN_MENU_REDRAW_ELAPSED = 291;
+
+/**
+ * The full FLY owner retains the charge and locked-strike segments together.
+ * Content holds this owner by reference; it never reconstructs either
+ * segment from the post-DRAGON_BREATH handoff's PP or cursor facts.
+ */
+export const CANONICAL_TURN13_RETAINED_FLY_PRESENTATION_OWNER =
+  createBattleSceneResolutionOwner(CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution);
 
 type MonPicCoordsAsset = Readonly<{
   front: Readonly<Record<string, Readonly<{ yOffset: number }>>>;
@@ -242,6 +265,56 @@ export function resolveTurn13CompletedResolutionNextCommandHandoff(): Turn13Comp
 }
 
 /**
+ * Semantic view of the command after Pidgeotto's faint and Murkrow's switch
+ * in. The direct text/move stream is intentionally null: the retained FLY
+ * resolution owner supplies its exact charge/strike segments by reference.
+ */
+export function resolveTurn13FightCommandPresentation(): FightCommandPresentation {
+  const switchIn = resolveTurn13SwitchInAdapter();
+  const owner = CANONICAL_TURN13_RETAINED_FLY_PRESENTATION_OWNER;
+  return createFightCommandPresentation({
+    field: {
+      player: {
+        species: "ONIX",
+        displayName: "ONIX",
+        level: 50,
+        gender: "male",
+        status: "none",
+        hp: { current: 4, max: ONIX_MAX_HP },
+        attackStage: 0,
+      },
+      opponent: {
+        species: switchIn.replacementSpecies,
+        displayName: switchIn.replacementSpecies,
+        level: switchIn.replacementLevel,
+        gender: "male",
+        status: "none",
+        hp: switchIn.replacementHp,
+        attackStage: 6,
+      },
+    },
+    bounce: {
+      // This is an owner-relative edge, not a trace-tick selector. The
+      // future generic renderer receives the same retained owner alongside
+      // content and reads its continuation clock at this semantic boundary.
+      actionMenuRedrawTick: TURN13_SWITCHIN_MENU_REDRAW_ELAPSED,
+      idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
+      fightSubmenuTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+      kickoff: {
+        freezeAfterConfirmTicks: FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+        preFreezeTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+        frozenBounceTick: TURN13_SWITCHIN_MENU_REDRAW_ELAPSED,
+      },
+    },
+    upcoming: null,
+    retainedResolution: {
+      owner,
+      segments: owner.resolution.segments,
+    },
+  });
+}
+
+/**
  * Normalizes turn 13's compact legacy receipt into a complete generic PP
  * tuple. The tuple comes from the completed DRAGON_BREATH chain's resumed
  * rules context; the later retained FLY presentation owner is intentionally
@@ -263,6 +336,7 @@ export function resolveTurn13LatestCompletedCommandHandoff(): LatestCompletedCom
     playerPp: [rockSlidePp, bindPp, dragonBreathPp, sandstormPp],
     persistedMoveSlot: legacyHandoff.persistedMoveSlot,
     nextCommand: legacyHandoff.nextCommand,
+    content: resolveTurn13FightCommandPresentation(),
   });
 }
 

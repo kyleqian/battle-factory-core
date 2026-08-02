@@ -5,6 +5,8 @@ import {
   projectLatestCompletedCommandPp,
 } from "../src/engine/nextCommandHandoff.ts";
 import { createFightCommandPresentation } from "../src/engine/fightCommandPresentation.ts";
+import { createBattleSceneResolutionOwner } from "../src/engine/battleSceneResolutionOwner.ts";
+import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "../src/engine/turn15FlyResolutionAdapter.ts";
 
 describe("LatestCompletedCommandHandoff", () => {
   it("publishes an immutable canonical PP tuple, persisted slot, and readiness receipt", () => {
@@ -61,6 +63,9 @@ describe("LatestCompletedCommandHandoff", () => {
   });
 
   it("carries an immutable semantic content view without deriving it from the PP tuple", () => {
+    const retainedOwner = createBattleSceneResolutionOwner(
+      CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution,
+    );
     const content = createFightCommandPresentation({
       field: {
         player: {
@@ -89,6 +94,10 @@ describe("LatestCompletedCommandHandoff", () => {
           text: { lines: ["Foe PIDGEOTTO used", "FEATHERDANCE!"] },
         }],
       },
+      retainedResolution: {
+        owner: retainedOwner,
+        segments: retainedOwner.resolution.segments,
+      },
     });
     const handoff = createLatestCompletedCommandHandoff({
       playerPp: [5, 20, 19, 10],
@@ -102,5 +111,41 @@ describe("LatestCompletedCommandHandoff", () => {
     expect(Object.isFrozen(handoff.content)).toBe(true);
     expect(Object.isFrozen(handoff.content!.field.player.hp)).toBe(true);
     expect(Object.isFrozen(handoff.content!.upcoming!.moves)).toBe(true);
+    expect(handoff.content!.retainedResolution!.owner).toBe(retainedOwner);
+    expect(handoff.content!.retainedResolution!.segments)
+      .toBe(retainedOwner.resolution.segments);
+  });
+
+  it("rejects retained segments that do not belong to the supplied owner", () => {
+    const owner = createBattleSceneResolutionOwner(
+      CANONICAL_OPPONENT_FLY_RESOLUTION.chargeResolution,
+    );
+    const foreignOwner = createBattleSceneResolutionOwner(
+      CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution,
+    );
+    expect(() => createFightCommandPresentation({
+      field: {
+        player: {
+          species: "ONIX", displayName: "ONIX", level: 50, gender: "male", status: "none",
+          hp: { current: 4, max: 117 }, attackStage: 0,
+        },
+        opponent: {
+          species: "MURKROW", displayName: "MURKROW", level: 50, gender: "male", status: "none",
+          hp: { current: 142, max: 142 }, attackStage: 6,
+        },
+      },
+      bounce: {
+        actionMenuRedrawTick: 291,
+        idleBounceEpochTick: 1748,
+        fightSubmenuTickOffset: -2,
+        kickoff: {
+          freezeAfterConfirmTicks: 3,
+          preFreezeTickOffset: -2,
+          frozenBounceTick: 291,
+        },
+      },
+      upcoming: null,
+      retainedResolution: { owner, segments: foreignOwner.resolution.segments },
+    })).toThrow("retained resolution segments must belong to their owner");
   });
 });

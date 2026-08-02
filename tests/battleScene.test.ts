@@ -29,6 +29,12 @@ import {
   LEGACY_TURN7_FIGHT_COMMAND_PRESENTATION,
   LEGACY_TURN8_FIGHT_COMMAND_PRESENTATION,
   LEGACY_TURN9_FIELD_AND_BOUNCE_PRESENTATION,
+  LEGACY_TURN9_FIGHT_COMMAND_PRESENTATION,
+  LEGACY_TURN10_FIGHT_COMMAND_PRESENTATION,
+  LEGACY_TURN11_FIGHT_COMMAND_PRESENTATION,
+  LEGACY_TURN12_FIGHT_COMMAND_PRESENTATION,
+  LEGACY_TURN13_FIGHT_COMMAND_PRESENTATION,
+  LEGACY_TURN14_RETAINED_FLY_PRESENTATION,
   PARTICLE_OAM_PRIORITY,
   PARTICLE_OAM_SUBPRIORITY,
   renderBattleScene,
@@ -152,7 +158,10 @@ import {
 } from "../src/engine/turn2ResolutionAdapter.ts";
 import { resolveTurn3CompletedResolutionNextCommandHandoff } from "../src/engine/turn3ResolutionAdapter.ts";
 import { resolveTurn4CompletedResolutionNextCommandHandoff } from "../src/engine/turn4ResolutionAdapter.ts";
-import { resolveTurn13CompletedResolutionNextCommandHandoff } from "../src/engine/turn13ResolutionAdapter.ts";
+import {
+  resolveTurn13CompletedResolutionNextCommandHandoff,
+  resolveTurn13FightCommandPresentation,
+} from "../src/engine/turn13ResolutionAdapter.ts";
 import {
   resolveTurn5CompletedResolutionNextCommandHandoff,
   resolveTurn5FightCommandPresentation,
@@ -174,10 +183,22 @@ import {
   fightCommandSettledBounceEpochTick,
   fightCommandSubmenuBounceEpochTick,
 } from "../src/engine/fightCommandPresentation.ts";
-import { resolveTurn9CompletedResolutionNextCommandHandoff } from "../src/engine/turn9ResolutionAdapter.ts";
-import { resolveTurn10CompletedResolutionNextCommandHandoff } from "../src/engine/turn10ResolutionAdapter.ts";
-import { resolveTurn11CompletedResolutionNextCommandHandoff } from "../src/engine/turn11ResolutionAdapter.ts";
-import { resolveTurn12CompletedResolutionNextCommandHandoff } from "../src/engine/turn12ResolutionAdapter.ts";
+import {
+  resolveTurn9CompletedResolutionNextCommandHandoff,
+  resolveTurn9FightCommandPresentation,
+} from "../src/engine/turn9ResolutionAdapter.ts";
+import {
+  resolveTurn10CompletedResolutionNextCommandHandoff,
+  resolveTurn10FightCommandPresentation,
+} from "../src/engine/turn10ResolutionAdapter.ts";
+import {
+  resolveTurn11CompletedResolutionNextCommandHandoff,
+  resolveTurn11FightCommandPresentation,
+} from "../src/engine/turn11ResolutionAdapter.ts";
+import {
+  resolveTurn12CompletedResolutionNextCommandHandoff,
+  resolveTurn12FightCommandPresentation,
+} from "../src/engine/turn12ResolutionAdapter.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN } from "../src/engine/healthboxAssembly.ts";
 import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
 import grovyleFrontSpritesAsset from "../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
@@ -200,12 +221,17 @@ const TURN4_HANDOFF = resolveTurn4CompletedResolutionNextCommandHandoff(4312);
 // than reintroducing a production move-delay anchor.
 const TURN2_ON_PROFILE_HANDOFF = resolveTurn2CompletedResolutionNextCommandHandoff(2296);
 
-describe("dispatcher slice 3: Pidgeotto FightCommandPresentation shadow equivalence", () => {
+describe("dispatcher slices 3-4: FightCommandPresentation shadow equivalence", () => {
   const cases = [
     ["turn 6", resolveTurn5FightCommandPresentation, LEGACY_TURN6_FIGHT_COMMAND_PRESENTATION],
     ["turn 7", resolveTurn6FightCommandPresentation, LEGACY_TURN7_FIGHT_COMMAND_PRESENTATION],
     ["turn 8", resolveTurn7FightCommandPresentation, LEGACY_TURN8_FIGHT_COMMAND_PRESENTATION],
-    ["turn 9 field/bounce", resolveTurn8FightCommandPresentation, LEGACY_TURN9_FIELD_AND_BOUNCE_PRESENTATION],
+    ["turn 9", resolveTurn8FightCommandPresentation, LEGACY_TURN9_FIGHT_COMMAND_PRESENTATION],
+    ["turn 10", resolveTurn9FightCommandPresentation, LEGACY_TURN10_FIGHT_COMMAND_PRESENTATION],
+    ["turn 11", resolveTurn10FightCommandPresentation, LEGACY_TURN11_FIGHT_COMMAND_PRESENTATION],
+    ["turn 12", resolveTurn11FightCommandPresentation, LEGACY_TURN12_FIGHT_COMMAND_PRESENTATION],
+    ["turn 13", resolveTurn12FightCommandPresentation, LEGACY_TURN13_FIGHT_COMMAND_PRESENTATION],
+    ["turn 14 retained FLY", resolveTurn13FightCommandPresentation, LEGACY_TURN14_RETAINED_FLY_PRESENTATION],
   ] as const;
 
   it("copies each legacy branch's semantic field, bounce regime, and available text content without a PP or turn member", () => {
@@ -216,7 +242,10 @@ describe("dispatcher slice 3: Pidgeotto FightCommandPresentation shadow equivale
       expect(Object.hasOwn(bridge, "episode")).toBe(false);
       expect(Object.keys(bridge).join(","), label).not.toContain("pp");
     }
-    expect(resolveTurn8FightCommandPresentation().upcoming).toBeNull();
+    expect(LEGACY_TURN9_FIELD_AND_BOUNCE_PRESENTATION.upcoming).toBeNull();
+    expect(resolveTurn8FightCommandPresentation().upcoming).not.toBeNull();
+    expect(resolveTurn13FightCommandPresentation().retainedResolution?.segments)
+      .toBe(resolveTurn13FightCommandPresentation().retainedResolution?.owner.resolution.segments);
   });
 
   it("reproduces the drawTurn6-8 bounce inputs from content-owned redraw and kickoff facts", () => {

@@ -4,6 +4,7 @@
  * callers describe the field, its bounce epoch, and the actual move/text
  * content that follows the command boundary.
  */
+import type { BattleSceneResolutionOwner } from "./battleSceneResolutionOwner.ts";
 
 export type FightCommandSide = "player" | "opponent";
 
@@ -20,6 +21,22 @@ export type FightCommandFieldBattler = Readonly<{
 
 export type FightCommandTextPresentation = Readonly<{
   lines: readonly string[];
+}>;
+
+export type FightCommandUpcomingPresentation = Readonly<{
+  firstTextStartDelay: number;
+  moves: readonly FightCommandMovePresentation[];
+}>;
+
+/**
+ * A retained action is already represented by the immutable resolution
+ * owner. The bridge deliberately holds that owner and its exact segment
+ * array by reference: it must never reconstruct charge/strike commands from
+ * a turn, PP tuple, or a copied command list.
+ */
+export type FightCommandRetainedResolutionPresentation = Readonly<{
+  owner: BattleSceneResolutionOwner;
+  segments: BattleSceneResolutionOwner["resolution"]["segments"];
 }>;
 
 export type FightCommandMovePresentation = Readonly<{
@@ -43,6 +60,10 @@ export type FightCommandMovePresentation = Readonly<{
     text: FightCommandTextPresentation;
   }>;
   miss?: Readonly<{
+    target: FightCommandSide;
+    text: FightCommandTextPresentation;
+  }>;
+  faint?: Readonly<{
     target: FightCommandSide;
     text: FightCommandTextPresentation;
   }>;
@@ -73,13 +94,12 @@ export type FightCommandPresentation = Readonly<{
   bounce: FightCommandBouncePresentation;
   /**
    * The real move/text stream available to the next command renderer.
-   * `null` is an explicit incomplete bridge boundary, never a fallback to a
-   * turn or PP selector; Slice 4 supplies the high-chain continuation.
+   * `null` is an explicit absence of a generic text stream; a retained
+   * resolution owner can instead supply its source-owned command segments.
    */
-  upcoming: Readonly<{
-    firstTextStartDelay: number;
-    moves: readonly FightCommandMovePresentation[];
-  }> | null;
+  upcoming: FightCommandUpcomingPresentation | null;
+  /** Present only when a retained reducer owner supplies the next action. */
+  retainedResolution?: FightCommandRetainedResolutionPresentation;
 }>;
 
 function freezeText(input: FightCommandTextPresentation): FightCommandTextPresentation {
@@ -135,6 +155,30 @@ function freezeMove(input: FightCommandMovePresentation): FightCommandMovePresen
           text: freezeText(input.miss.text),
         }),
       }),
+    ...(input.faint === undefined
+      ? {}
+      : {
+        faint: Object.freeze({
+          target: input.faint.target,
+          text: freezeText(input.faint.text),
+        }),
+      }),
+  });
+}
+
+function freezeRetainedResolution(
+  input: FightCommandRetainedResolutionPresentation,
+): FightCommandRetainedResolutionPresentation {
+  if (input.segments !== input.owner.resolution.segments) {
+    throw new Error(
+      "fightCommandPresentation: retained resolution segments must belong to their owner",
+    );
+  }
+  return Object.freeze({
+    owner: input.owner,
+    // Keep this reference intact. The resolution owner is the sole source of
+    // the FLY charge/strike segments; cloning would disguise a re-derivation.
+    segments: input.owner.resolution.segments,
   });
 }
 
@@ -177,6 +221,9 @@ export function createFightCommandPresentation(
           moves: Object.freeze(input.upcoming.moves.map(freezeMove)),
         }),
       }),
+    ...(input.retainedResolution === undefined
+      ? {}
+      : { retainedResolution: freezeRetainedResolution(input.retainedResolution) }),
   });
 }
 

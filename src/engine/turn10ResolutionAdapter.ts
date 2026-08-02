@@ -8,9 +8,32 @@
  */
 import { rentalMoveset } from "./battleSetup.ts";
 import {
+  FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+  FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+  MENU_IDLE_BLANK_END_TICK,
+  TURN6_SUPER_EFFECTIVE_LINE,
+} from "./battleMenu.ts";
+import {
   createLatestCompletedCommandHandoff,
   type LatestCompletedCommandHandoff,
 } from "./nextCommandHandoff.ts";
+import {
+  createFightCommandPresentation,
+  type FightCommandPresentation,
+} from "./fightCommandPresentation.ts";
+import {
+  resolveTurn11AtkFloorLines,
+  resolveTurn11FeatherDanceKickoffLines,
+  resolveTurn11FeatherDanceWindowContent,
+} from "./turn11FeatherDancePresentationStaging.ts";
+import { resolveTurn6RockSlideAttackLines } from "./turn67RockSlidePresentationStaging.ts";
+
+const ONIX_MAX_HP = 117;
+const PIDGEOTTO_MAX_HP = 156;
+const TURN11_COMMAND_MENU_REDRAW_TICK = 12_169 + 730;
+const TURN10_ONIX_AFTER_AERIAL_ACE_HP = 14;
+const TURN10_PIDGEOTTO_AFTER_ROCK_SLIDE_HP = 38;
+const TURN11_PIDGEOTTO_AFTER_ROCK_SLIDE_HP = 16;
 
 export type Turn10CompletedResolutionNextCommandHandoff = Readonly<{
   /** Exact post-turn-10 player PP for `[ROCK_SLIDE, BIND, DRAGON_BREATH, SANDSTORM]`. */
@@ -43,10 +66,80 @@ export function resolveTurn10CompletedResolutionNextCommandHandoff(): Turn10Comp
   });
 }
 
+/** Semantic field/bounce/move content for the following floored-ATK command. */
+export function resolveTurn10FightCommandPresentation(): FightCommandPresentation {
+  const featherDance = resolveTurn11FeatherDanceWindowContent();
+  return createFightCommandPresentation({
+    field: {
+      player: {
+        species: "ONIX",
+        displayName: "ONIX",
+        level: 50,
+        gender: "male",
+        status: "none",
+        hp: { current: TURN10_ONIX_AFTER_AERIAL_ACE_HP, max: ONIX_MAX_HP },
+        attackStage: featherDance.statChange.from,
+      },
+      opponent: {
+        species: "PIDGEOTTO",
+        displayName: "PIDGEOTTO",
+        level: 50,
+        gender: "male",
+        status: "none",
+        hp: { current: TURN10_PIDGEOTTO_AFTER_ROCK_SLIDE_HP, max: PIDGEOTTO_MAX_HP },
+        attackStage: 6,
+      },
+    },
+    bounce: {
+      actionMenuRedrawTick: TURN11_COMMAND_MENU_REDRAW_TICK,
+      idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
+      fightSubmenuTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+      kickoff: {
+        freezeAfterConfirmTicks: FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+        preFreezeTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+        frozenBounceTick: TURN11_COMMAND_MENU_REDRAW_TICK,
+      },
+    },
+    upcoming: {
+      firstTextStartDelay: 13,
+      moves: [
+        {
+          user: "opponent",
+          target: "player",
+          move: "FEATHER_DANCE",
+          text: { lines: resolveTurn11FeatherDanceKickoffLines() },
+          statChange: {
+            target: "player",
+            stat: featherDance.statChange.stat,
+            from: featherDance.statChange.from,
+            to: featherDance.statChange.to,
+            text: { lines: resolveTurn11AtkFloorLines() },
+          },
+        },
+        {
+          user: "player",
+          target: "opponent",
+          move: "ROCK_SLIDE",
+          text: { lines: resolveTurn6RockSlideAttackLines() },
+          hpChange: {
+            target: "opponent",
+            from: TURN10_PIDGEOTTO_AFTER_ROCK_SLIDE_HP,
+            to: TURN11_PIDGEOTTO_AFTER_ROCK_SLIDE_HP,
+          },
+          effectiveness: { text: { lines: [TURN6_SUPER_EFFECTIVE_LINE] } },
+        },
+      ],
+    },
+  });
+}
+
 /** Normalizes the legacy turn-10 receipt into the generic command boundary. */
 export function resolveTurn10LatestCompletedCommandHandoff(): LatestCompletedCommandHandoff {
   return createLatestCompletedCommandHandoff(
-    resolveTurn10CompletedResolutionNextCommandHandoff(),
+    {
+      ...resolveTurn10CompletedResolutionNextCommandHandoff(),
+      content: resolveTurn10FightCommandPresentation(),
+    },
   );
 }
 

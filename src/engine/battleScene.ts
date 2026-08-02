@@ -841,6 +841,7 @@ import {
   resolveTurn13SandAttackKickoffLines,
 } from "./turn13SandAttackPresentationStaging.ts";
 import {
+  CANONICAL_TURN13_RETAINED_FLY_PRESENTATION_OWNER,
   isTurn13NextCommandHandoffReady,
   resolveTurn13ResolutionAdapter,
   resolveTurn13SwitchInAdapter,
@@ -14668,6 +14669,276 @@ export function turn13FaintedTextVisibleChars(t: number, pressTick: number): num
   if (t < start) return 0;
   return Math.min(TURN13_DRAGONBREATH_FAINT_TEXT_TOTAL, t - start + 1);
 }
+
+/**
+ * Shadow-only readouts for Slice 4's high-chain bridge. These mirror the
+ * existing legacy render inputs without changing dispatch: each value is
+ * semantic field/bounce/move content, never a PP-derived episode selector.
+ */
+export const LEGACY_TURN9_FIGHT_COMMAND_PRESENTATION = createFightCommandPresentation({
+  field: legacyPidgeottoField(31, 0, TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP),
+  bounce: {
+    actionMenuRedrawTick: TURN8_BIND_PRESS_TICK + TURN8_MENU_REDRAW_DELAY,
+    idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
+    fightSubmenuTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+    kickoff: {
+      freezeAfterConfirmTicks: FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+      preFreezeTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+      frozenBounceTick: TURN8_BIND_PRESS_TICK + TURN8_MENU_REDRAW_DELAY,
+    },
+  },
+  upcoming: {
+    firstTextStartDelay: TURN9_QUICKATTACK_TEXT_DELAY,
+    moves: [
+      {
+        user: "opponent",
+        target: "player",
+        move: "QUICK_ATTACK",
+        text: { lines: [TURN9_QUICKATTACK_LINE1, TURN9_QUICKATTACK_LINE2] },
+        hpChange: { target: "player", from: 31, to: TURN9_ONIX_AFTER_QUICKATTACK_HP },
+        effectiveness: { text: { lines: [TURN9_NOTVERYEFFECTIVE_LINE] } },
+      },
+      {
+        user: "player",
+        target: "opponent",
+        move: "ROCK_SLIDE",
+        text: { lines: [ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2] },
+        hpChange: {
+          target: "opponent",
+          from: TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP,
+          to: TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP,
+        },
+        effectiveness: { text: { lines: [TURN6_SUPER_EFFECTIVE_LINE] } },
+      },
+    ],
+  },
+});
+
+export const LEGACY_TURN10_FIGHT_COMMAND_PRESENTATION = createFightCommandPresentation({
+  field: legacyPidgeottoField(
+    TURN9_ONIX_AFTER_QUICKATTACK_HP,
+    0,
+    TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP,
+  ),
+  bounce: {
+    actionMenuRedrawTick: TURN9_QUICKATTACK_PRESS_TICK + TURN9_MENU_REDRAW_DELAY,
+    idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
+    fightSubmenuTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+    kickoff: {
+      freezeAfterConfirmTicks: FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+      preFreezeTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+      frozenBounceTick: TURN9_QUICKATTACK_PRESS_TICK + TURN9_MENU_REDRAW_DELAY,
+    },
+  },
+  upcoming: {
+    firstTextStartDelay: TURN10_AERIALACE_TEXT_DELAY,
+    moves: [
+      {
+        user: "opponent",
+        target: "player",
+        move: "AERIAL_ACE",
+        text: { lines: [TURN10_AERIALACE_LINE1, TURN10_AERIALACE_LINE2] },
+        hpChange: {
+          target: "player",
+          from: TURN9_ONIX_AFTER_QUICKATTACK_HP,
+          to: TURN10_ONIX_AFTER_AERIALACE_HP,
+        },
+        effectiveness: { text: { lines: [TURN9_NOTVERYEFFECTIVE_LINE] } },
+      },
+      {
+        user: "player",
+        target: "opponent",
+        move: "ROCK_SLIDE",
+        text: { lines: [ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2] },
+        hpChange: {
+          target: "opponent",
+          from: TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP,
+          to: TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP,
+        },
+        effectiveness: { text: { lines: [TURN6_SUPER_EFFECTIVE_LINE] } },
+      },
+    ],
+  },
+});
+
+export const LEGACY_TURN11_FIGHT_COMMAND_PRESENTATION = createFightCommandPresentation({
+  field: legacyPidgeottoField(
+    TURN10_ONIX_AFTER_AERIALACE_HP,
+    0,
+    TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP,
+  ),
+  bounce: {
+    actionMenuRedrawTick: TURN10_ROCKSLIDE_PRESS_TICK + TURN10_ROCKSLIDE_MENU_REDRAW_DELAY,
+    idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
+    fightSubmenuTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+    kickoff: {
+      freezeAfterConfirmTicks: FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+      preFreezeTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+      frozenBounceTick: TURN10_ROCKSLIDE_PRESS_TICK + TURN10_ROCKSLIDE_MENU_REDRAW_DELAY,
+    },
+  },
+  upcoming: {
+    firstTextStartDelay: 13,
+    moves: [
+      {
+        user: "opponent",
+        target: "player",
+        move: "FEATHER_DANCE",
+        text: { lines: [TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2] },
+        statChange: {
+          target: "player",
+          stat: "attack",
+          from: 0,
+          to: 0,
+          text: { lines: [TURN11_ATKFLOOR_KICKOFF_LINE1, TURN11_ATKFLOOR_KICKOFF_LINE2] },
+        },
+      },
+      {
+        user: "player",
+        target: "opponent",
+        move: "ROCK_SLIDE",
+        text: { lines: [ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2] },
+        hpChange: {
+          target: "opponent",
+          from: TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP,
+          to: TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP,
+        },
+        effectiveness: { text: { lines: [TURN6_SUPER_EFFECTIVE_LINE] } },
+      },
+    ],
+  },
+});
+
+export const LEGACY_TURN12_FIGHT_COMMAND_PRESENTATION = createFightCommandPresentation({
+  field: legacyPidgeottoField(
+    TURN10_ONIX_AFTER_AERIALACE_HP,
+    0,
+    TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP,
+  ),
+  bounce: {
+    actionMenuRedrawTick: TURN11_ROCKSLIDE_PRESS_TICK + TURN11_ROCKSLIDE_MENU_REDRAW_DELAY,
+    idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
+    fightSubmenuTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+    kickoff: {
+      freezeAfterConfirmTicks: FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+      preFreezeTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+      frozenBounceTick: TURN11_ROCKSLIDE_PRESS_TICK + TURN11_ROCKSLIDE_MENU_REDRAW_DELAY,
+    },
+  },
+  upcoming: {
+    firstTextStartDelay: TURN10_AERIALACE_TEXT_DELAY,
+    moves: [
+      {
+        user: "opponent",
+        target: "player",
+        move: "AERIAL_ACE",
+        text: { lines: [TURN10_AERIALACE_LINE1, TURN10_AERIALACE_LINE2] },
+        hpChange: {
+          target: "player",
+          from: TURN10_ONIX_AFTER_AERIALACE_HP,
+          to: TURN12_ONIX_AFTER_AERIALACE_HP,
+        },
+        effectiveness: { text: { lines: [TURN9_NOTVERYEFFECTIVE_LINE] } },
+      },
+      {
+        user: "player",
+        target: "opponent",
+        move: "ROCK_SLIDE",
+        text: { lines: [ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2] },
+        miss: { target: "opponent", text: { lines: [TURN8_MISS_LINE1, TURN8_MISS_LINE2] } },
+      },
+    ],
+  },
+});
+
+export const LEGACY_TURN13_FIGHT_COMMAND_PRESENTATION = createFightCommandPresentation({
+  field: legacyPidgeottoField(
+    TURN12_ONIX_AFTER_AERIALACE_HP,
+    0,
+    TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP,
+  ),
+  bounce: {
+    actionMenuRedrawTick: TURN12_ROCKSLIDE_PRESS_TICK + TURN12_ROCKSLIDE_MENU_REDRAW_DELAY,
+    idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
+    fightSubmenuTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+    kickoff: {
+      freezeAfterConfirmTicks: FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+      preFreezeTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+      frozenBounceTick: TURN12_ROCKSLIDE_PRESS_TICK + TURN12_ROCKSLIDE_MENU_REDRAW_DELAY,
+    },
+  },
+  upcoming: {
+    firstTextStartDelay: TURN13_SANDATTACK_TEXT_DELAY,
+    moves: [
+      {
+        user: "opponent",
+        target: "player",
+        move: "SAND_ATTACK",
+        text: { lines: [TURN13_SANDATTACK_EVENT_LINE1, TURN13_SANDATTACK_EVENT_LINE2] },
+        statChange: {
+          target: "player",
+          stat: "accuracy",
+          from: 6,
+          to: 5,
+          text: { lines: [TURN13_ACCFELL_EVENT_LINE1, TURN13_ACCFELL_EVENT_LINE2] },
+        },
+      },
+      {
+        user: "player",
+        target: "opponent",
+        move: "DRAGON_BREATH",
+        text: { lines: [TURN13_DRAGONBREATH_KICKOFF_LINE1, TURN13_DRAGONBREATH_KICKOFF_LINE2] },
+        hpChange: {
+          target: "opponent",
+          from: TURN13_DRAGONBREATH_HP.from,
+          to: TURN13_DRAGONBREATH_HP.to,
+        },
+        faint: {
+          target: "opponent",
+          text: { lines: [TURN13_DRAGONBREATH_FAINT_LINE1, TURN13_DRAGONBREATH_FAINT_LINE2] },
+        },
+      },
+    ],
+  },
+});
+
+export const LEGACY_TURN14_RETAINED_FLY_PRESENTATION = createFightCommandPresentation({
+  field: {
+    player: {
+      species: "ONIX",
+      displayName: "ONIX",
+      level: 50,
+      gender: "male",
+      status: "none",
+      hp: { current: TURN12_ONIX_AFTER_AERIALACE_HP, max: LEGACY_PIDGEOTTO_ONIX_MAX_HP },
+      attackStage: 0,
+    },
+    opponent: {
+      species: TURN13_SWITCHIN.replacementSpecies,
+      displayName: TURN13_SWITCHIN.replacementSpecies,
+      level: TURN13_SWITCHIN.replacementLevel,
+      gender: "male",
+      status: "none",
+      hp: TURN13_SWITCHIN.replacementHp,
+      attackStage: 6,
+    },
+  },
+  bounce: {
+    actionMenuRedrawTick: TURN13_SWITCHIN_MENU_REDRAW_AFTER_DISMISS,
+    idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
+    fightSubmenuTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+    kickoff: {
+      freezeAfterConfirmTicks: FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+      preFreezeTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+      frozenBounceTick: TURN13_SWITCHIN_MENU_REDRAW_AFTER_DISMISS,
+    },
+  },
+  upcoming: null,
+  retainedResolution: {
+    owner: CANONICAL_TURN13_RETAINED_FLY_PRESENTATION_OWNER,
+    segments: CANONICAL_TURN13_RETAINED_FLY_PRESENTATION_OWNER.resolution.segments,
+  },
+});
 const TURN13_FAINTED_CURSOR_X =
   LINE2_ORIGIN.x
   + measureText(font, charmap, TURN13_DRAGONBREATH_FAINT_LINE2);

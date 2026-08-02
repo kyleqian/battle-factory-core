@@ -8,9 +8,63 @@
  */
 import { rentalMoveset } from "./battleSetup.ts";
 import {
+  FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+  FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+  MENU_IDLE_BLANK_END_TICK,
+  TURN6_SUPER_EFFECTIVE_LINE,
+} from "./battleMenu.ts";
+import {
   createLatestCompletedCommandHandoff,
   type LatestCompletedCommandHandoff,
 } from "./nextCommandHandoff.ts";
+import {
+  createFightCommandPresentation,
+  type FightCommandPresentation,
+  type FightCommandUpcomingPresentation,
+} from "./fightCommandPresentation.ts";
+import { resolveTurn6RockSlideAttackLines } from "./turn67RockSlidePresentationStaging.ts";
+
+const ONIX_MAX_HP = 117;
+const PIDGEOTTO_MAX_HP = 156;
+/** Turn 9's BIND-miss successor redraw, which begins the turn-10 bounce epoch. */
+const TURN10_COMMAND_MENU_REDRAW_TICK = 10_871 + 465;
+const TURN9_ONIX_AFTER_QUICK_ATTACK_HP = 24;
+const TURN9_PIDGEOTTO_AFTER_ROCK_SLIDE_HP = 61;
+const TURN10_ONIX_AFTER_AERIAL_ACE_HP = 14;
+const TURN10_PIDGEOTTO_AFTER_ROCK_SLIDE_HP = 38;
+
+/** Semantic move/text stream for turn 9 itself, attached to turn 8's receipt. */
+export function resolveTurn9FightCommandUpcoming(): FightCommandUpcomingPresentation {
+  return {
+    firstTextStartDelay: 11,
+    moves: [
+      {
+        user: "opponent",
+        target: "player",
+        move: "QUICK_ATTACK",
+        text: { lines: ["Foe PIDGEOTTO used", "QUICK ATTACK!"] },
+        hpChange: {
+          target: "player",
+          from: 31,
+          to: TURN9_ONIX_AFTER_QUICK_ATTACK_HP,
+        },
+        effectiveness: { text: { lines: ["It’s not very effective…"] } },
+      },
+      {
+        user: "player",
+        target: "opponent",
+        move: "ROCK_SLIDE",
+        text: { lines: resolveTurn6RockSlideAttackLines() },
+        hpChange: {
+          target: "opponent",
+          from: 82,
+          to: TURN9_PIDGEOTTO_AFTER_ROCK_SLIDE_HP,
+        },
+        effectiveness: { text: { lines: [TURN6_SUPER_EFFECTIVE_LINE] } },
+      },
+    ],
+  };
+}
 
 export type Turn9CompletedResolutionNextCommandHandoff = Readonly<{
   /** Exact post-turn-9 player PP for `[ROCK_SLIDE, BIND, DRAGON_BREATH, SANDSTORM]`. */
@@ -43,10 +97,82 @@ export function resolveTurn9CompletedResolutionNextCommandHandoff(): Turn9Comple
   });
 }
 
+/**
+ * Semantic field, bounce, and next-action view after turn 9. The values
+ * describe the following command directly; no PP value or turn identity
+ * participates in selecting it.
+ */
+export function resolveTurn9FightCommandPresentation(): FightCommandPresentation {
+  return createFightCommandPresentation({
+    field: {
+      player: {
+        species: "ONIX",
+        displayName: "ONIX",
+        level: 50,
+        gender: "male",
+        status: "none",
+        hp: { current: TURN9_ONIX_AFTER_QUICK_ATTACK_HP, max: ONIX_MAX_HP },
+        attackStage: 0,
+      },
+      opponent: {
+        species: "PIDGEOTTO",
+        displayName: "PIDGEOTTO",
+        level: 50,
+        gender: "male",
+        status: "none",
+        hp: { current: TURN9_PIDGEOTTO_AFTER_ROCK_SLIDE_HP, max: PIDGEOTTO_MAX_HP },
+        attackStage: 6,
+      },
+    },
+    bounce: {
+      actionMenuRedrawTick: TURN10_COMMAND_MENU_REDRAW_TICK,
+      idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
+      fightSubmenuTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+      kickoff: {
+        freezeAfterConfirmTicks: FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+        preFreezeTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+        frozenBounceTick: TURN10_COMMAND_MENU_REDRAW_TICK,
+      },
+    },
+    upcoming: {
+      firstTextStartDelay: 11,
+      moves: [
+        {
+          user: "opponent",
+          target: "player",
+          move: "AERIAL_ACE",
+          text: { lines: ["Foe PIDGEOTTO used", "AERIAL ACE!"] },
+          hpChange: {
+            target: "player",
+            from: TURN9_ONIX_AFTER_QUICK_ATTACK_HP,
+            to: TURN10_ONIX_AFTER_AERIAL_ACE_HP,
+          },
+          effectiveness: { text: { lines: ["It’s not very effective…"] } },
+        },
+        {
+          user: "player",
+          target: "opponent",
+          move: "ROCK_SLIDE",
+          text: { lines: resolveTurn6RockSlideAttackLines() },
+          hpChange: {
+            target: "opponent",
+            from: TURN9_PIDGEOTTO_AFTER_ROCK_SLIDE_HP,
+            to: TURN10_PIDGEOTTO_AFTER_ROCK_SLIDE_HP,
+          },
+          effectiveness: { text: { lines: [TURN6_SUPER_EFFECTIVE_LINE] } },
+        },
+      ],
+    },
+  });
+}
+
 /** Normalizes the legacy turn-9 receipt into the generic command boundary. */
 export function resolveTurn9LatestCompletedCommandHandoff(): LatestCompletedCommandHandoff {
   return createLatestCompletedCommandHandoff(
-    resolveTurn9CompletedResolutionNextCommandHandoff(),
+    {
+      ...resolveTurn9CompletedResolutionNextCommandHandoff(),
+      content: resolveTurn9FightCommandPresentation(),
+    },
   );
 }
 

@@ -8,9 +8,27 @@
  */
 import { rentalMoveset } from "./battleSetup.ts";
 import {
+  FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+  FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+  MENU_IDLE_BLANK_END_TICK,
+} from "./battleMenu.ts";
+import {
   createLatestCompletedCommandHandoff,
   type LatestCompletedCommandHandoff,
 } from "./nextCommandHandoff.ts";
+import {
+  createFightCommandPresentation,
+  type FightCommandPresentation,
+} from "./fightCommandPresentation.ts";
+import { resolveTurn11FeatherDanceWindowContent } from "./turn11FeatherDancePresentationStaging.ts";
+import { resolveTurn8MissLines } from "./turn8BindPresentationStaging.ts";
+
+const ONIX_MAX_HP = 117;
+const PIDGEOTTO_MAX_HP = 156;
+const TURN12_COMMAND_MENU_REDRAW_TICK = 13_137 + 729;
+const TURN10_ONIX_AFTER_AERIAL_ACE_HP = 14;
+const TURN11_PIDGEOTTO_AFTER_ROCK_SLIDE_HP = 16;
+const TURN12_ONIX_AFTER_AERIAL_ACE_HP = 4;
 
 export type Turn11CompletedResolutionNextCommandHandoff = Readonly<{
   /** Exact post-turn-11 player PP for `[ROCK_SLIDE, BIND, DRAGON_BREATH, SANDSTORM]`. */
@@ -44,10 +62,77 @@ export function resolveTurn11CompletedResolutionNextCommandHandoff(): Turn11Comp
   });
 }
 
+/** Semantic field/bounce/move content for the following AERIAL_ACE/miss command. */
+export function resolveTurn11FightCommandPresentation(): FightCommandPresentation {
+  const featherDance = resolveTurn11FeatherDanceWindowContent();
+  return createFightCommandPresentation({
+    field: {
+      player: {
+        species: "ONIX",
+        displayName: "ONIX",
+        level: 50,
+        gender: "male",
+        status: "none",
+        hp: { current: TURN10_ONIX_AFTER_AERIAL_ACE_HP, max: ONIX_MAX_HP },
+        attackStage: featherDance.statChange.to,
+      },
+      opponent: {
+        species: "PIDGEOTTO",
+        displayName: "PIDGEOTTO",
+        level: 50,
+        gender: "male",
+        status: "none",
+        hp: { current: TURN11_PIDGEOTTO_AFTER_ROCK_SLIDE_HP, max: PIDGEOTTO_MAX_HP },
+        attackStage: 6,
+      },
+    },
+    bounce: {
+      actionMenuRedrawTick: TURN12_COMMAND_MENU_REDRAW_TICK,
+      idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
+      fightSubmenuTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+      kickoff: {
+        freezeAfterConfirmTicks: FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+        preFreezeTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+        frozenBounceTick: TURN12_COMMAND_MENU_REDRAW_TICK,
+      },
+    },
+    upcoming: {
+      firstTextStartDelay: 11,
+      moves: [
+        {
+          user: "opponent",
+          target: "player",
+          move: "AERIAL_ACE",
+          text: { lines: ["Foe PIDGEOTTO used", "AERIAL ACE!"] },
+          hpChange: {
+            target: "player",
+            from: TURN10_ONIX_AFTER_AERIAL_ACE_HP,
+            to: TURN12_ONIX_AFTER_AERIAL_ACE_HP,
+          },
+          effectiveness: { text: { lines: ["It’s not very effective…"] } },
+        },
+        {
+          user: "player",
+          target: "opponent",
+          move: "ROCK_SLIDE",
+          text: { lines: ["ONIX used", "ROCK SLIDE!"] },
+          miss: {
+            target: "opponent",
+            text: { lines: resolveTurn8MissLines() },
+          },
+        },
+      ],
+    },
+  });
+}
+
 /** Normalizes the legacy turn-11 receipt into the generic command boundary. */
 export function resolveTurn11LatestCompletedCommandHandoff(): LatestCompletedCommandHandoff {
   return createLatestCompletedCommandHandoff(
-    resolveTurn11CompletedResolutionNextCommandHandoff(),
+    {
+      ...resolveTurn11CompletedResolutionNextCommandHandoff(),
+      content: resolveTurn11FightCommandPresentation(),
+    },
   );
 }
 

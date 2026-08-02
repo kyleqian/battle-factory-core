@@ -23,6 +23,7 @@ import {
 } from "./fightCommandPresentation.ts";
 import { resolveTurn8FeatherDanceWindowContent } from "./turn78FeatherDancePresentationStaging.ts";
 import { stageTurn8BindMiss } from "./turn8BindPresentationStaging.ts";
+import { resolveTurn9FightCommandUpcoming } from "./turn9ResolutionAdapter.ts";
 
 const ONIX_MAX_HP = 117;
 const PIDGEOTTO_MAX_HP = 156;
@@ -62,9 +63,9 @@ export function resolveTurn8CompletedResolutionNextCommandHandoff(): Turn8Comple
 }
 
 /**
- * Publishes the semantic field and bounce state that survived BIND's real
- * miss. The high-chain move/text continuation is intentionally absent here:
- * its first consumer is the turn-9 renderer, which Slice 4 owns.
+ * Publishes the semantic field, bounce, and move/text state that survived
+ * BIND's real miss. Turn 9's continuation is sourced by its own adapter and
+ * attached here because this completed turn owns the next FIGHT boundary.
  */
 export function resolveTurn8FightCommandPresentation(): FightCommandPresentation {
   const featherDance = resolveTurn8FeatherDanceWindowContent();
@@ -100,7 +101,7 @@ export function resolveTurn8FightCommandPresentation(): FightCommandPresentation
         frozenBounceTick: PIDGEOTTO_COMMAND_MENU_REDRAW_TICK,
       },
     },
-    upcoming: null,
+    upcoming: resolveTurn9FightCommandUpcoming(),
   });
 }
 
