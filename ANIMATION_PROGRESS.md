@@ -1,43 +1,70 @@
 # Animation coverage
 
-## Front `ANIM_GROW_IN_STAGES` terminal family accepted (2026-08-01)
+## Front `ANIM_CIRCLE_INTO_BG` terminal family accepted (2026-08-01)
 
-**Verdict / counts:** exact for the complete generated selector census: all
-**3 mappings / 2 Factory-reachable species / 1 outside-Factory mapping** —
-GENGAR (representative), QWILFISH (batch-pinned), and LUGIA (terminal source
-sibling). No adjacent selector, unsupported barrier, per-species branch, or
-absolute-tick branch was added. Move coverage remains **107 exact / 0 partial /
-0 staged / 169 unsupported**; `ANIMATION_COVERAGE.json` is unchanged at
-SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+**State / verdict:** exact for the complete generated selector census: all
+**1 mapping / 1 Factory-reachable species / 0 outside-Factory mappings** —
+KINGDRA. No adjacent selector, unsupported barrier, per-species/tick branch,
+baked frame, or engine-boundary widening was added. Move coverage remains
+**107 exact / 0 partial / 0 staged / 169 unsupported**;
+`ANIMATION_COVERAGE.json` is unchanged at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
 
-**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,984-1059,
-3198-3267,5540-5544` and `trig.c:514-518` prove task-zeroed data2/data5/data6/
-data7, `InitAnimData`/`AddNewAnim` defaults, both normal-front no-op
-`TryFlipX` calls, affine start/set/reset, C-truncated delay scale, GBA signed
-sine/cosine semantics, every strict stage guard, and stable `WaitAnimEnd`.
-All **115 callbacks** (ticks 0..114) are exhaustive: stage 0 crosses >16 at
-tick 6; its source-order 20-callback delay is ticks 7..26; stage 1 crosses >48
-at tick 38 and delays at 39..58; stage 2 crosses data7 >63 at tick 72 and
-installs stage 3's 10-callback no-affine-write delay at 73..82; cosine resumes
-at tick 83. Tick 114 alone sees stage-3 data7=64 >63, resets affine state and
-installs `WaitAnimEnd`, then still computes Cos(64)=0, advances data7 to 66,
-and performs the source's second identity affine write; it remains byte-stable
-thereafter. Fresh complete legal challenge-0 Scene-ON parties settle both
-selected species at x2=0/y2=0, animNum=1/`SpriteCallbackDummy`; paired raw
-receipts end at byte 125 without a newline and are byte-identical: GENGAR
-**372 bytes**, SHA-256
-`b1a87f64c1c95e92d52e09a9e7d6937f1e4b28ea98cbb8bed5c6de6c42d4277e`;
-LUGIA **373 bytes**, SHA-256
-`5c965e88720ddd92cc03b60f165942999ee5d4c8c205b86752dcdcad417eeca8`.
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,984-1064,
+3537-3565,5540-5544` and `trig.c:514-518` pin task-zeroed data2/data7,
+tick-0 affine start, both normal-front no-op `TryFlipX` calls, and C/GBA
+signed sine and affine arithmetic. All **66 callbacks** are exhaustive: ticks
+0..64 consume data7 0..512 inclusive by 8, and tick 65 alone observes strict
+data7=520 `> 512`, clears x2, resets the sprite, writes identity affine state,
+installs `WaitAnimEnd`, and remains stable thereafter. A fresh complete legal
+challenge-0 Scene-ON party settles KINGDRA species 230 at x2=0/y2=0,
+animNum=1/animCmdIndex=4 and `SpriteCallbackDummy`; paired raw receipts are
+byte-identical at **373 bytes**, SHA-256
+`1747d48abbe711e2b6d799caa48fe7cb95d6ad276a461713902556b3b229043b`.
 
 **Verification / next:** unchanged `dump-onix-front-idle-anim.py` ran only via
-`tools/run-mgba-probe.py` twice per legal party in one fresh `mktemp`
-directory; paired raw `cmp`, focused family plus both ratchets **269/269**,
-`npx tsc --noEmit`, and diff checks are green. The single post-change full
-`npm test` is green at **572 files, 5,991 passed + 1 skipped**; production
-build is green (**534 modules transformed**). The next bounded generated
-family is **`ANIM_LUNGE_GROW`** (2 mappings / 2 Factory / 0 outside): DODRIO
-and HERACROSS.
+`tools/run-mgba-probe.py` twice in one fresh `mktemp` directory; paired raw
+`cmp`, focused species-idle plus both ratchets **285/285**, `npx tsc --noEmit`,
+coverage/hash and diff checks are green. Full `npm test`: **583 files, 6,061
+passed + 1 skipped**; production build: **545 modules transformed**. Next
+generated source-ranked family: **`ANIM_FOUR_PETAL`** (1 mapping / 1 Factory /
+0 outside): REGICE.
+
+## Front `ANIM_LUNGE_GROW` terminal family accepted (2026-08-01)
+
+**State / verdict:** exact for the complete generated selector census: all
+**2 mappings / 2 Factory-reachable species / 0 outside-Factory mappings** —
+DODRIO (representative) and HERACROSS (independently probed terminal sibling).
+No adjacent selector, unsupported barrier, per-species/tick branch, baked
+frame, or engine-boundary widening was added. Move coverage remains **107
+exact / 0 partial / 0 staged / 169 unsupported**; `ANIMATION_COVERAGE.json`
+is unchanged at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,984-1064,
+3507-3534,5540-5544` and `trig.c:514-518` pin task-zeroed data2/data7,
+`InitAnimData`/`AddNewAnim` defaults, affine start/set/reset, C-truncated
+indices, GBA signed sine arithmetic, x2, both affine scales, and both
+normal-front no-op `TryFlipX` calls. All **66 callbacks** are exhaustive:
+ticks 0..64 consume data7 0..512 inclusive by 8, tick 0 starts affine before
+its ordinary motion/scale write, and tick 65 alone observes strict data7=520
+`> 512`, clears x2, writes identity affine, resets the sprite, installs
+`WaitAnimEnd`, and remains stable thereafter. Fresh complete legal
+challenge-0 Scene-ON parties settle x2=0/y2=0, animNum=1 and callback
+`0x08007428`/`SpriteCallbackDummy`: DODRIO species 85 / animCmdIndex 8,
+paired **372-byte** receipts SHA-256
+`16487508c32e6eb17cb5e46531161779bf8e18440e1469f9e81a0d119d5b1760`;
+HERACROSS species 214 / animCmdIndex 4, paired **373-byte** receipts SHA-256
+`881886efd435b939ebb35bd0a017b4602cbf06fd7c6be8d72871ed22c75fc082`.
+
+**Verification / next:** unchanged `dump-onix-front-idle-anim.py` ran only
+through `tools/run-mgba-probe.py`, twice fresh per legal party in one fresh
+`mktemp` directory; paired raw `cmp`, focused species-idle plus both ratchets
+**278/278**, `npx tsc --noEmit`, coverage/hash, boundary/barrier, and diff
+checks are green. Full `npm test`: **582 files, 6,047 passed + 1 skipped**;
+production build: **543 modules transformed**. Next generated source-ranked
+family: **`ANIM_CIRCLE_INTO_BG`** (1 mapping / 1 Factory / 0 outside):
+KINGDRA.
 
 ## Front `ANIM_FLICKER_INCREASING` terminal family accepted (2026-08-01)
 
