@@ -51,6 +51,7 @@ export type SpeciesFrontAnimFamily =
   | "CIRCLE_C_CLOCKWISE_SLOW"
   | "CIRCULAR_VIBRATE"
   | "CIRCULAR_STRETCH_TWICE"
+  | "DEEP_V_SQUISH_AND_BOUNCE"
   | "FOUR_PETAL"
   | "GROW_VIBRATE"
   | "GROW_IN_STAGES"
@@ -108,6 +109,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "CIRCLE_C_CLOCKWISE_SLOW",
   "CIRCULAR_VIBRATE",
   "CIRCULAR_STRETCH_TWICE",
+  "DEEP_V_SQUISH_AND_BOUNCE",
   "FOUR_PETAL",
   "GROW_VIBRATE",
   "GROW_IN_STAGES",
@@ -490,6 +492,26 @@ export const ROTATE_UP_SLAM_DOWN_FACTORY_FRONT_SPECIES: readonly string[] = Obje
 export const ROTATE_UP_SLAM_DOWN_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
   Object.freeze(
     ROTATE_UP_SLAM_DOWN_FRONT_SPECIES.filter(
+      (species) => !factoryFrontSpecies.has(species),
+    ),
+  );
+
+/** All source selector mappings for `ANIM_DEEP_V_SQUISH_AND_BOUNCE`. */
+export const DEEP_V_SQUISH_AND_BOUNCE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_DEEP_V_SQUISH_AND_BOUNCE")
+    .map(([species]) => species),
+);
+
+/** The complete Factory-reachable deep squish/bounce family. */
+export const DEEP_V_SQUISH_AND_BOUNCE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  DEEP_V_SQUISH_AND_BOUNCE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no deep squish/bounce mappings outside the Factory pool. */
+export const DEEP_V_SQUISH_AND_BOUNCE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] =
+  Object.freeze(
+    DEEP_V_SQUISH_AND_BOUNCE_FRONT_SPECIES.filter(
       (species) => !factoryFrontSpecies.has(species),
     ),
   );
@@ -1231,6 +1253,226 @@ export function verticalSquishBounceSlowFrameAtTick(
     ticksSinceStart,
     VERTICAL_SQUISH_BOUNCE_SLOW_DURATION,
   );
+}
+
+export interface DeepVerticalSquishBounceAffineWrite {
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly rotationSigned: 0;
+  readonly rotationU16: 0;
+}
+
+export interface DeepVerticalSquishBounceFrame extends SpeciesIdleOffset {
+  readonly phase: "DeepVerticalSquishBounce_0" | "DeepVerticalSquishBounce_1";
+  /** The first AddNewAnim slot in a fresh front-animation task. */
+  readonly data0: 1;
+  readonly delayBefore: number;
+  readonly delay: number;
+  readonly runsBefore: number;
+  readonly runs: number;
+  readonly rotation: 4;
+  readonly data2Before: number;
+  readonly data2: number;
+  readonly data3Before: number;
+  readonly data3: number;
+  readonly data4Before: number;
+  readonly data4: number;
+  readonly data5Before: number;
+  readonly data5: number;
+  readonly data6Before: number;
+  readonly data6: number;
+  readonly data7Before: number;
+  readonly data7: number;
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly affineWrites: readonly DeepVerticalSquishBounceAffineWrite[];
+  readonly affineWriteCount: 0 | 1 | 2;
+  readonly initializerCalled: boolean;
+  readonly callbackInvokedByInitializer: true;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXCalls: 0;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "DeepVerticalSquishBounce" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+/** Source selector 48's direct front-sprite initializer. */
+export const DEEP_V_SQUISH_AND_BOUNCE_INITIALIZER = Object.freeze({
+  selector: "ANIM_DEEP_V_SQUISH_AND_BOUNCE",
+  sourceId: 48,
+  addNewAnim: true,
+  delay: 0,
+  runs: 1,
+  rotation: 4,
+  callbackInvokedByInitializer: true,
+  callbackInstalled: "DeepVerticalSquishBounce",
+  handleStartAffineAnimOnData2Zero: true,
+  normalFrontDontFlip: true,
+  tryFlipXCalls: 0,
+  affineMode: "double",
+  accepted: true,
+} as const);
+
+/**
+ * Source-order port of selector 48's `DeepVerticalSquishBounce`
+ * (`pokemon_animation.c:2656-2710`). The normal-front task has zeroed
+ * `data[2..7]`, then `Anim_DeepVerticalSquishBounce` allocates a fresh anim
+ * record, sets rotation 4, calls this callback once, and only afterward
+ * installs it as the sprite callback. Each active callback writes the
+ * source's affine matrix and advances signed-s16 data4 by four. Phase 0
+ * consumes data4 0..128 with amplitudes 256/16/32; phase 1 consumes the same
+ * counter with amplitudes 32/8/128. The final phase-1 callback performs its
+ * ordinary identity write, then the source's second identity write,
+ * `ResetSpriteAfterAnim`, and `WaitAnimEnd`, before the unconditional data4
+ * increment. There is no delay on the normal selector; delay/runs are kept in
+ * the receipt because the source callback owns those guards and selector 85's
+ * unsupported twice variant changes runs/delay semantics.
+ */
+export function deepVerticalSquishBounceFrameAtTick(
+  ticksSinceStart: number,
+): DeepVerticalSquishBounceFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  let x2 = 0;
+  let y2 = 0;
+  let delay = 0;
+  let runs = 1;
+  const rotation = 4;
+  let data2 = 0;
+  let data3 = 0;
+  let data4 = 0;
+  let data5 = 0;
+  let data6 = 0;
+  let data7 = 0;
+  let xScale = 256;
+  let yScale = 256;
+  let callback: DeepVerticalSquishBounceFrame["callback"] =
+    "DeepVerticalSquishBounce";
+  let affineMode: DeepVerticalSquishBounceFrame["affineMode"] = "normal";
+  let lastFrame: DeepVerticalSquishBounceFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (callback === "WaitAnimEnd") continue;
+
+    const phase: DeepVerticalSquishBounceFrame["phase"] = data5 === 0
+      ? "DeepVerticalSquishBounce_0"
+      : "DeepVerticalSquishBounce_1";
+    const delayBefore = delay;
+    const runsBefore = runs;
+    const data2Before = data2;
+    const data3Before = data3;
+    const data4Before = data4;
+    const data5Before = data5;
+    const data6Before = data6;
+    const data7Before = data7;
+    const affineWrites: DeepVerticalSquishBounceAffineWrite[] = [];
+    let startedAffine = false;
+    let resetSpriteAfterAnim = false;
+
+    if (delay !== 0) {
+      delay = toS16(delay - 1);
+    } else {
+      if (data2 === 0) {
+        affineMode = "double";
+        startedAffine = true;
+        data4 = 0;
+        data5 = 0;
+        data2 = 1;
+      }
+
+      if (data5 === 0) {
+        data7 = toS16(gbaSin(data4, 256));
+        y2 = toS16(gbaSin(data4, 16));
+        data6 = toS16(gbaSin(data4, 32));
+        xScale = toS16(256 - data6);
+        yScale = toS16(256 + data7);
+        affineWrites.push({
+          xScale,
+          yScale,
+          rotationSigned: 0,
+          rotationU16: 0,
+        });
+        if (data4 === 128) {
+          data4 = 0;
+          data5 = 1;
+        }
+      } else {
+        data7 = toS16(gbaSin(data4, 32));
+        y2 = toS16(-gbaSin(data4, 8));
+        data6 = toS16(gbaSin(data4, 128));
+        xScale = toS16(256 + data6);
+        yScale = toS16(256 - data7);
+        affineWrites.push({
+          xScale,
+          yScale,
+          rotationSigned: 0,
+          rotationU16: 0,
+        });
+        if (data4 === 128) {
+          if (runs > 1) {
+            runs = toS16(runs - 1);
+            delay = 10;
+            data4 = 0;
+            data5 = 0;
+          } else {
+            affineWrites.push({
+              xScale: 256,
+              yScale: 256,
+              rotationSigned: 0,
+              rotationU16: 0,
+            });
+            xScale = 256;
+            yScale = 256;
+            affineMode = "normal";
+            resetSpriteAfterAnim = true;
+            callback = "WaitAnimEnd";
+          }
+        }
+      }
+
+      data4 = toS16(data4 + rotation);
+    }
+
+    lastFrame = {
+      x2,
+      y2,
+      phase,
+      data0: 1,
+      delayBefore,
+      delay,
+      runsBefore,
+      runs,
+      rotation,
+      data2Before,
+      data2,
+      data3Before,
+      data3,
+      data4Before,
+      data4,
+      data5Before,
+      data5,
+      data6Before,
+      data6,
+      data7Before,
+      data7,
+      xScale,
+      yScale,
+      affineWrites,
+      affineWriteCount: affineWrites.length as 0 | 1 | 2,
+      initializerCalled: tick === 0,
+      callbackInvokedByInitializer: true,
+      startedAffine,
+      normalFrontDontFlip: true,
+      tryFlipXCalls: 0,
+      resetSpriteAfterAnim,
+      callback,
+      affineMode,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable DeepVerticalSquishBounce reducer state");
+  return lastFrame;
 }
 
 export interface VerticalStretchFrame extends SpeciesIdleOffset {
@@ -5970,6 +6212,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = circularStretchTwiceFrameAtTick(41);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_CircularStretchTwice did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "DEEP_V_SQUISH_AND_BOUNCE": {
+      const terminal = deepVerticalSquishBounceFrameAtTick(64);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_DeepVerticalSquishBounce did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
