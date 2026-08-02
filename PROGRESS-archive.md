@@ -1,3 +1,28 @@
+## 862 — [supervisor orient, 2026-08-02 09:45] pre-session fold verified green; rg census trap cured; slice-8 + turn-5-reader lanes launched
+
+- **State:** master at `706be469`; union verified green by the supervisor:
+  full `npm test` **611 files / 6,271 passed / 1 skipped**, `npm run build`
+  exit 0, oracle freshness PASS. DEFERRED.md empty. Census: handoff state
+  fields 2 (turn3/turn4); declarations, FIGHT and PP params 13 each.
+- **Did:** (1) Verified the pre-session morning fold: `99c85078` merged
+  animation-main (fast-zigzag, back-and-lunge, circular-vibrate families) and
+  the harness landed `2b783b25` (tier-routing docs) + `706be469`
+  (`npm run compare:differential` shared clean-parent harness, top papercut
+  retired) at 09:04-09:21, before this session — entry 861's "Unfolded"
+  pointer is resolved. (2) Cured the rg-missing census trap system-side
+  (`brew install ripgrep`); `tools/census-next-command-handoffs.sh` runs
+  standalone again (it exited 2 on every bash invocation since the
+  loud-failure guard landed). (3) Launching dispatcher slice 8 (turn-3 fold,
+  MAIN lane) and the turn-5 Scene-OFF reader bank (SIDE lane, the slice-9
+  prerequisite per docs/turn1-4-epoch-prep.md:240-272) in parallel —
+  disjoint ownership: slice 8 touches src/engine + named tests only; the
+  bank adds new tools/compare/traces files only.
+- **Next:** verify both lanes; slice 9 (turn-4 fold consuming the banked
+  readers), slice 10 (final 13-param/type cut), then #39 species/episode
+  render entry points. Turns 5-8 ON-pin OFF re-timing policy remains
+  un-adopted (unchanged).
+
+---
 ## 861 — [supervisor wind-down, 2026-08-02 05:15] dispatcher ladder slices 1-7 + item-7 dismiss owner + two same-session fix chains; union green
 
 - **State:** master at the slice-7 salvage acceptance; full `npm test`
