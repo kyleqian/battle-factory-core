@@ -4,8 +4,20 @@ import {
   isTurn2NextCommandHandoffReady,
   isTurn2NextCommandLifecycleActive,
   resolveTurn2CompletedResolutionNextCommandHandoff,
+  resolveTurn2LatestCompletedCommandHandoff,
+  turn2CompletedResolutionNextCommandHandoffFromLatest,
   turn2PresentationEpochElapsedSinceReset,
 } from "../src/engine/turn2ResolutionAdapter.ts";
+import {
+  fightCommandKickoffBounceEpochTick,
+  fightCommandSettledBounceEpochTick,
+  fightCommandSubmenuBounceEpochTick,
+} from "../src/engine/fightCommandPresentation.ts";
+import {
+  isLatestCompletedCommandHandoffReady,
+  isLatestCompletedCommandLifecycleActive,
+  latestCompletedCommandPresentationEpochElapsedSinceReset,
+} from "../src/engine/nextCommandHandoff.ts";
 import {
   isTurn2ChooseActionBounceReset,
   turn2ChooseActionResetElapsed,
@@ -47,6 +59,42 @@ describe("turn2ResolutionAdapter: #39 completed-turn-2/next-command handoff proo
     expect(turn2PresentationEpochElapsedSinceReset(handoff, 2204)).toBe(7);
   });
 
+  it("carries slot 2, field facts, ENDEAVOR routing, and the immutable epoch through generic content", () => {
+    const legacy = resolveTurn2CompletedResolutionNextCommandHandoff(2197);
+    const latest = resolveTurn2LatestCompletedCommandHandoff(2197);
+    const content = latest.content;
+    if (content === undefined) throw new Error("turn-2 generic receipt has no content");
+
+    expect(isLatestCompletedCommandHandoffReady(latest)).toBe(true);
+    expect(latest.playerPp).toEqual(legacy.playerPp);
+    expect(latest.persistedMoveSlot).toBe(2);
+    expect(content.field.player.hp.current).toBe(101);
+    expect(content.field.opponent.hp.current).toBe(88);
+    expect(content.presentationEpoch).toEqual(legacy.presentationEpoch);
+    expect(content.upcoming?.moves).toMatchObject([
+      { user: "opponent", target: "player", move: "ENDEAVOR", hpChange: { from: 101, to: 88 } },
+      { user: "player", target: "opponent", move: "ROCK_SLIDE", hpChange: { from: 88, to: 41 } },
+    ]);
+    expect(latestCompletedCommandPresentationEpochElapsedSinceReset(latest, 2204)).toBe(7);
+    expect(turn2CompletedResolutionNextCommandHandoffFromLatest(latest)).toEqual(legacy);
+    expect(Object.isFrozen(content.presentationEpoch)).toBe(true);
+    expect(Object.isFrozen(content.presentationEpoch!.mon)).toBe(true);
+    expect(Object.isFrozen(content.upcoming?.moves)).toBe(true);
+  });
+
+  it("derives every turn-3 bounce and kickoff clock from turn-2 content's semantic epoch", () => {
+    const latest = resolveTurn2LatestCompletedCommandHandoff(2197);
+    const content = latest.content;
+    if (content === undefined) throw new Error("turn-2 generic receipt has no content");
+
+    expect(fightCommandSettledBounceEpochTick(content, 2204)).toBe(1748 + 7);
+    expect(fightCommandSubmenuBounceEpochTick(content, 2807)).toBe(1748 + (2807 - 2197) - 3);
+    expect(fightCommandKickoffBounceEpochTick(content, 2849, 2847))
+      .toBe(1748 + (2849 - 2197) - 3);
+    expect(fightCommandKickoffBounceEpochTick(content, 2850, 2847))
+      .toBe(1748 + (2847 + 9 - 2197) - 3);
+  });
+
   it("publishes only at the accepted choose-action reset and survives a later submenu reopen", () => {
     const handoff = resolveTurn2CompletedResolutionNextCommandHandoff(2197);
 
@@ -59,6 +107,11 @@ describe("turn2ResolutionAdapter: #39 completed-turn-2/next-command handoff proo
     // fresh epoch over the immutable completed-turn receipt.
     expect(isTurn2NextCommandLifecycleActive(handoff, 2816)).toBe(true);
     expect(handoff.presentationEpoch.elapsed).toBe(2197);
+
+    const latest = resolveTurn2LatestCompletedCommandHandoff(2197);
+    expect(isLatestCompletedCommandLifecycleActive(latest, 1861)).toBe(false);
+    expect(isLatestCompletedCommandLifecycleActive(latest, 2807)).toBe(true);
+    expect(isLatestCompletedCommandLifecycleActive(latest, 2816)).toBe(true);
   });
 
   it("freezes every owner-facing nested fact", () => {
