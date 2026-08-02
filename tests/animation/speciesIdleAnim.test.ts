@@ -108,6 +108,7 @@ import {
   SWING_CONCAVE_FRONT_SPECIES,
   SWING_CONCAVE_OUTSIDE_FACTORY_FRONT_SPECIES,
   verticalSlideFrameAtTick,
+  verticalSlideSlowFrameAtTick,
   verticalSlideWobbleFrameAtTick,
   verticalJumpsSmallFrameAtTick,
   verticalJumpsBigFrameAtTick,
@@ -137,6 +138,9 @@ import {
   V_SLIDE_FACTORY_FRONT_SPECIES,
   V_SLIDE_FRONT_SPECIES,
   V_SLIDE_OUTSIDE_FACTORY_FRONT_SPECIES,
+  V_SLIDE_SLOW_FACTORY_FRONT_SPECIES,
+  V_SLIDE_SLOW_FRONT_SPECIES,
+  V_SLIDE_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES,
   V_SLIDE_WOBBLE_FACTORY_FRONT_SPECIES,
   V_SLIDE_WOBBLE_FRONT_SPECIES,
   V_SLIDE_WOBBLE_OUTSIDE_FACTORY_FRONT_SPECIES,
@@ -145,6 +149,7 @@ import {
   VERTICAL_SHAKE_TWICE_DATA,
   VERTICAL_SHAKE_TWICE_INITIALIZERS,
   VERTICAL_SLIDE_WOBBLE_INITIALIZERS,
+  VERTICAL_SLIDE_INITIALIZERS,
   YELLOW_FLASH_DATA,
 } from "../../src/animation/speciesIdleAnim.ts";
 import frontierMons from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
@@ -1559,6 +1564,119 @@ describe("speciesIdleAnim", () => {
       ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }
+    });
+  });
+
+  describe("verticalSlideSlowFrameAtTick (Anim_VerticalSlide_Slow / shared VerticalSlide port)", () => {
+    it("derives exactly all 5 selector mappings as Factory-reachable with zero outside", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_V_SLIDE_SLOW")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(V_SLIDE_SLOW_FRONT_SPECIES).toEqual(generated);
+      expect(V_SLIDE_SLOW_FRONT_SPECIES).toEqual([
+        "PIDGEY", "AERODACTYL", "DRAGONITE", "HOOTHOOT", "LEDIAN",
+      ]);
+      expect(V_SLIDE_SLOW_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(V_SLIDE_SLOW_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(V_SLIDE_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of V_SLIDE_SLOW_FRONT_SPECIES) {
+        expect(
+          (selectorTables.frontAnimIds.species as Readonly<Record<string, string>>)[species],
+        ).toBe("ANIM_V_SLIDE_SLOW");
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins task zeroing and both immediate initializers' install-after-call semantics", () => {
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
+      expect(VERTICAL_SLIDE_INITIALIZERS).toEqual({
+        normal: {
+          selector: "ANIM_V_SLIDE",
+          initializer: "Anim_VerticalSlide",
+          data0: 40,
+          immediateCallback: "VerticalSlide",
+          installedCallback: "VerticalSlide",
+          sourceOverwriteAfterImmediateCall: true,
+          accepted: true,
+        },
+        slow: {
+          selector: "ANIM_V_SLIDE_SLOW",
+          initializer: "Anim_VerticalSlide_Slow",
+          data0: 80,
+          immediateCallback: "VerticalSlide",
+          installedCallback: "VerticalSlide",
+          sourceOverwriteAfterImmediateCall: true,
+          accepted: true,
+        },
+      });
+      expect(verticalSlideFrameAtTick(0)).toMatchObject({
+        data0: 40, data2: 1, index: 0, callback: "VerticalSlide",
+      });
+      expect(verticalSlideSlowFrameAtTick(0)).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 80,
+        data2: 1,
+        index: 0,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        callback: "VerticalSlide",
+      });
+    });
+
+    it("pins every slow active callback after C truncation, modulo, signed sine, and body increment", () => {
+      const active = Array.from({ length: 81 }, (_, tick) => {
+        const quotientBeforeModulo = Math.trunc((tick * 384) / 80);
+        const index = quotientBeforeModulo % 256;
+        const signedSine = Math.floor((6 * GBA_SINE_TABLE_256[index]!) / 256);
+        const frame = verticalSlideSlowFrameAtTick(tick);
+        expect(frame, `tick ${tick}`).toEqual({
+          x2: 0,
+          y2: -signedSine + 0,
+          data0: 80,
+          data2: tick + 1,
+          index,
+          normalFrontDontFlip: true,
+          tryFlipXCalls: 2,
+          callback: "VerticalSlide",
+        });
+        return frame!;
+      });
+      expect(active).toHaveLength(81);
+      expect([0, 20, 40, 60, 80].map((tick) => [
+        tick, active[tick]!.index, active[tick]!.y2, active[tick]!.data2,
+      ])).toEqual([
+        [0, 0, 0, 1],
+        [20, 96, -4, 21],
+        [40, 192, 6, 41],
+        [60, 32, -4, 61],
+        [80, 128, 0, 81],
+      ]);
+    });
+
+    it("pins strict data2 > data0 terminal cleanup and stable WaitAnimEnd", () => {
+      expect(verticalSlideSlowFrameAtTick(80)).toMatchObject({
+        data0: 80, data2: 81, index: 128, callback: "VerticalSlide",
+      });
+      const terminal = {
+        x2: 0,
+        y2: 0,
+        data0: 80,
+        data2: 82,
+        index: null,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        callback: "WaitAnimEnd",
+      } as const;
+      expect(verticalSlideSlowFrameAtTick(81)).toEqual(terminal);
+      expect(verticalSlideSlowFrameAtTick(82)).toEqual(terminal);
+      expect(verticalSlideSlowFrameAtTick(1000)).toEqual(terminal);
+      expect(verticalSlideSlowFrameAtTick(-1)).toBeNull();
     });
   });
 
@@ -6814,23 +6932,30 @@ describe("speciesIdleAnim", () => {
       }).toEqual(speciesFrontIdleRestOffset("REGICE"));
     });
 
-    it("regression-pins CIRCLE_INTO_BG and leaves the next source-ranked slow selector unported", () => {
+    it("regression-pins the newly accepted slow slide and derives the next source-ranked family", () => {
       expect(circleIntoBackgroundFrameAtTick(65)).toMatchObject({
         x2: 0,
         y2: 0,
         callback: "WaitAnimEnd",
       });
       const selectors = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
-      const nextGenerated = Object.entries(selectors)
+      const acceptedGenerated = Object.entries(selectors)
         .filter(([, family]) => family === "ANIM_V_SLIDE_SLOW")
         .map(([species]) => species);
-      expect(nextGenerated).toEqual([
+      expect(acceptedGenerated).toEqual([
         "PIDGEY",
         "AERODACTYL",
         "DRAGONITE",
         "HOOTHOOT",
         "LEDIAN",
       ]);
+      for (const species of acceptedGenerated) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+      const nextGenerated = Object.entries(selectors)
+        .filter(([, family]) => family === "ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW")
+        .map(([species]) => species);
+      expect(nextGenerated).toEqual(["CLEFABLE", "AZUMARILL"]);
       for (const species of nextGenerated) {
         expect(speciesFrontIdleRestOffset(species)).toBeNull();
       }
