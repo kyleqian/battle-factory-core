@@ -1,5 +1,38 @@
 # Animation coverage
 
+## Front `ANIM_ZIGZAG_SLOW` family accepted (2026-08-01)
+
+**State / verdict:** exact for the complete generated selector census: all
+**3 mappings / 3 Factory-reachable species / 0 outside-Factory mappings** —
+VENOMOTH (representative), KINGLER, and FLYGON. The entry point ports the
+shared source `Zigzag` reducer behind its slow every-other-callback gate. No
+adjacent selector, unsupported barrier, per-species/tick branch, baked frame,
+or engine-boundary widening was added. Move coverage remains **107 exact / 0
+partial / 0 staged / 169 unsupported**; `ANIMATION_COVERAGE.json` is unchanged
+at SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,1290-1341,
+3702-3718,5540-5544` pins task-zeroed data0/data2/data3, all nine signed-delta
+legs plus the zero sentinel, both normal-front no-op `TryFlipX` calls, leg
+boundary fallthrough, and the slow wrapper's source-order gate. All **109
+callbacks** are exhaustive: 54 movement callbacks on even ticks 0..106, 54
+gate-only callbacks on odd ticks 1..107, and tick 108's 55th shared-reducer
+invocation alone consumes the sentinel and installs stable `WaitAnimEnd` at
+x2=0/y2=0. Fresh complete legal challenge-0 Scene-ON parties settle all three
+at animNum=1 and `SpriteCallbackDummy`: VENOMOTH species 49 / animCmdIndex 21,
+paired **373-byte** receipts SHA-256
+`cfc7e2a234d3eb7e0124ec3c9198d7620ee1341b06e607a3e5f8cd15cfa506ff`;
+KINGLER species 99 / index 8, **372 bytes**,
+`e07a9dd6d5b3cbe81314ed08871982dd1b04d72380d6a01d794fe2c9b2e3787f`;
+FLYGON species 334 / index 6, **373 bytes**,
+`24dddba203497ba399c2944bbf7a636edb3ced114e5bc4d44ddc7dee826176e9`.
+
+**Verification / next:** the unchanged generic probe ran only through
+`tools/run-mgba-probe.py`, twice fresh per legal party; paired raw `cmp` and
+focused species-idle/evidence plus both ratchets are **315/315** green. Next
+generated source-ranked family: **`ANIM_H_SHAKE_SLOW`** (3 mappings / 3
+Factory / 0 outside): DUGTRIO, GOLDUCK, DODUO.
+
 ## Front `ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW` family accepted (2026-08-01)
 
 **State / verdict:** exact for the complete generated selector census: all
