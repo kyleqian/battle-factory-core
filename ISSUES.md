@@ -17,6 +17,38 @@ backlog.
 
 # Open
 
+## #65 — Production presentation crashes on ATTACKER-variant stat-change banners (Silver Wind proc class)
+
+**Symptom (user report, 2026-08-02):** playing the production generated
+route, a drafted BUTTERFREE used SILVER WIND and the app crashed with an
+uncaught exception the moment the move's 10% all-stats-up secondary proc'd.
+
+**Root cause (scout, supervisor-verified):**
+`docs/silverwind-allstatsup-crash-scout.md`. The kernel is correct — it
+executes `BattleScript_AllStatsUp` to completion and emits five
+`stat-stage-change` + `STRINGID_ATTACKERSSTATROSE` message events. The
+production message resolver (`battleResolutionPresentation.ts`'s
+`messageLines`) has a branch only for the DEFENDER-variant stat banners;
+the ATTACKER variant reaches `battleStringResolver`'s completeness guard
+with an unresolved `{B_BUFF1}` and throws:
+`Error: battleStringResolver: STRINGID_ATTACKERSSTATROSE references
+placeholder {B_BUFF1} with no resolver supplied` (battleStringResolver.ts:144
+→ battleResolutionPresentation.ts:594/699/1027).
+
+**Scope:** every `MOVE_EFFECT_AFFECTS_USER` stat change on the production
+route — Swords Dance, Growth, Minimize, Superpower/Overheat self-drops,
+Ancient Power's secondary, and 12 Factory L50 sets carrying SILVER WIND.
+
+**Repro + pins:** committed `tests/silverWindAllStatsUpRepro.test.ts`
+(it.fails-marked, engine rngSeed 13, proc roll u16 63008 → 8 < 10) and the
+scout doc's §4 mechanicLab scenario (seed 8; five-banner cadence at frames
+320/420/540/650/734; final statStages `[6,7,7,7,7,7,6,6]`; non-proc control
+seeds 1-7).
+
+**Fix:** in flight (main-lane brief, same day) — add the ATTACKER-variant
+branch (ROSE + FELL) to `messageLines`, flip the repro test, add a FALL-path
+insurance test; differential + stat-window insurance per the brief.
+
 ## #56 — Arbitrary-trainer intro: residuals, ONIX ready-lag regression, MAGNETON shadow coverage
 
 **Symptom:** the public dense arbitrary-trainer intro comparison

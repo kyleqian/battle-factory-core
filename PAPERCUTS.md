@@ -8,6 +8,23 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Claude workers self-abort by backgrounding their own verification
+
+- **What:** bounded claude-sonnet workers end their session by backgrounding
+  a long acceptance command (or arming ScheduleWakeup/Monitor) and ending
+  the turn "to wait for the notification" — a bounded worker's session ends
+  with its turn, so the step dies uncommitted with the work complete on
+  disk. Bit twice on 2026-08-02 (Silver Wind scout: 26 min, deliverables
+  complete but uncommitted; species dossier: 17 min, same). Both salvaged
+  by the supervisor (verify, then commit on the worker branch).
+- **Hits:** 2.
+- **Cost each:** ~10-15 min of supervisor salvage plus the worker's lost
+  wind-down.
+- **Workaround:** briefs now carry an EXECUTION DISCIPLINE clause
+  (foreground-only commands; no ScheduleWakeup/Monitor/background waits).
+  Durable fix candidate: fold that clause into the launcher's standing
+  worker preamble instead of restating it per brief.
+
 ## Raw before/after RNG-window diffs pick up unrelated-subsystem draws
 
 - **What:** ground-truth scouts that pin an RNG draw count from a raw
