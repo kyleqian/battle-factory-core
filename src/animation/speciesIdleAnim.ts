@@ -1741,9 +1741,9 @@ export interface RotateUpToSidesFrame extends SpeciesIdleOffset {
 export const ROTATE_UP_SLAM_DOWN_INITIALIZER = Object.freeze({
   selector: "ANIM_ROTATE_UP_SLAM_DOWN",
   sourceId: 47,
-  centerToCornerVecXBeforeAffine: 32,
-  centerToCornerVecXAfterAffine: 64,
-  data6: -89,
+  centerToCornerVecXBeforeAffine: -32,
+  centerToCornerVecXAfterAffine: -64,
+  data6: 89,
   data7: 128,
   callbackInstalled: "RotateUpSlamDown_0",
   callbackInvokedByInitializer: false,

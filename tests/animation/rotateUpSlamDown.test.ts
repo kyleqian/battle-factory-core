@@ -45,9 +45,9 @@ describe("ANIM_ROTATE_UP_SLAM_DOWN (selector 47)", () => {
     expect(ROTATE_UP_SLAM_DOWN_INITIALIZER).toEqual({
       selector: "ANIM_ROTATE_UP_SLAM_DOWN",
       sourceId: 47,
-      centerToCornerVecXBeforeAffine: 32,
-      centerToCornerVecXAfterAffine: 64,
-      data6: -89,
+      centerToCornerVecXBeforeAffine: -32,
+      centerToCornerVecXAfterAffine: -64,
+      data6: 89,
       data7: 128,
       callbackInstalled: "RotateUpSlamDown_0",
       callbackInvokedByInitializer: false,
@@ -60,17 +60,17 @@ describe("ANIM_ROTATE_UP_SLAM_DOWN (selector 47)", () => {
     const first = rotateUpSlamDownFrameAtTick(0);
     expect(first).toMatchObject({
       phase: "RotateUpSlamDown_0",
-      x2: toS16(-89 + gbaSin(127 + 64, -89)),
-      y2: toS16(-gbaSin(127, -89)),
+      x2: toS16(89 + gbaSin(127 + 64, 89)),
+      y2: toS16(-gbaSin(127, 89)),
       data0: 0,
       data2Before: 0,
       data2: 0,
       data3Before: 0,
       data3: 0,
-      data6: -89,
+      data6: 89,
       data7Before: 128,
       data7: 127,
-      centerToCornerVecX: 64,
+      centerToCornerVecX: -64,
       affineRotationSigned: -256,
       affineRotationU16: 0xff00,
       affineRotationWrites: [0xff00],
@@ -146,7 +146,7 @@ describe("ANIM_ROTATE_UP_SLAM_DOWN (selector 47)", () => {
       );
       expect(frame.affineMode).toBe(tick < 32 ? "double" : "normal");
       expect(frame.resetSpriteAfterAnim).toBe(tick === 32);
-      expect(frame.centerToCornerVecX).toBe(tick < 32 ? 64 : 32);
+      expect(frame.centerToCornerVecX).toBe(tick < 32 ? -64 : -32);
     }
 
     expect(frames[7]).toMatchObject({
