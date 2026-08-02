@@ -1,5 +1,39 @@
 # Animation coverage
 
+## Front `ANIM_V_SLIDE_SLOW` family accepted (2026-08-01)
+
+**State / verdict:** exact for the complete generated selector census: all
+**5 mappings / 5 Factory-reachable species / 0 outside-Factory mappings** —
+PIDGEY, AERODACTYL, DRAGONITE, HOOTHOOT, LEDIAN. The accepted normal
+`Anim_VerticalSlide` data0=40 path and new slow data0=80 path share one
+source-derived `VerticalSlide` reducer; normal remains regression-pinned. No
+adjacent selector, unsupported barrier, per-species/tick branch, baked frame,
+or engine-boundary widening was added. Move coverage remains **107 exact / 0
+partial / 0 staged / 169 unsupported**; `ANIMATION_COVERAGE.json` is unchanged
+at SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,1156-1179,
+3672-3677,5540-5544` and `trig.c:514-518` pin task-zeroed data2, both immediate
+initializers' install-after-call overwrite semantics, both normal-front no-op
+`TryFlipX` calls, C truncation before modulo, signed GBA sine, body-order data2
+increment, strict `data2 > data0` termination, y2 cleanup, and stable
+`WaitAnimEnd`. All **81 active callbacks** (ticks 0..80) are exhaustive; tick
+81 alone observes data2=81 > 80, clears y2, increments data2 to 82, and installs
+`WaitAnimEnd`. Fresh complete legal challenge-0 Scene-ON parties settle both
+species at x2=0/y2=0, animNum=1/`SpriteCallbackDummy`; paired unchanged-probe
+receipts are raw byte-identical and end with `}` without a newline: PIDGEY
+**373 bytes**, SHA-256
+`54d30286650c7bc624c48ca0edeff146008052358ef0b8350f52e7a3c884a4a6`;
+LEDIAN **374 bytes**, `a195c9271c61c104d528af5cfd22bdc1917114fd14efe6b2200218238c59e564`.
+
+**Verification / next:** unchanged `dump-onix-front-idle-anim.py` ran only via
+`tools/run-mgba-probe.py`, twice fresh per party in one new `mktemp` directory;
+paired raw `cmp`, focused species-idle plus both ratchets **301/301**, `npx tsc
+--noEmit`, coverage/hash checks, and build (**545 modules transformed**) are
+green. Full `npm test`: **583 files, 6,077 passed + 1 skipped**. Next generated
+source-ranked family: **`ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW`** (2 mappings /
+2 Factory / 0 outside): CLEFABLE and AZUMARILL.
+
 ## Front `ANIM_FOUR_PETAL` terminal family accepted (2026-08-01)
 
 **State / verdict:** exact for the complete generated selector census: all
