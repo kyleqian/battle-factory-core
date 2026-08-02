@@ -1,8 +1,8 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import { createScratchDir } from "../lib/scratch.ts";
 
 type Fixture = {
   schema: "status-whirlpool-portable-evidence/v1";
@@ -53,7 +53,7 @@ const burst = [
 
 function verify(path: string, pass: number): void {
   const fixture = JSON.parse(readFileSync(resolve(path), "utf8")) as Fixture;
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-status-whirlpool-"));
+  const scratch = createScratchDir("pokebench-status-whirlpool-");
   const output = join(scratch, "probe.json");
   const rgb = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

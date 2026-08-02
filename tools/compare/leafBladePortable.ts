@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import { createScratchDir } from "../lib/scratch.ts";
 interface Fixture { schema: string; orientation: string; scenario: string; probe: string; sourceWindow: { startFrame: number; endFrame: number; frameCount: number }; evidenceSha256: string; rawRgbSha256: string; lifecycleCounts: { leafBlade: number; crossImpact: number }; topology: Record<string, readonly string[]>; }
 interface Frame { frame: number; sha256: string; scriptOffset: number | null; tasks: readonly unknown[]; sprites: readonly unknown[]; softwareOam: readonly string[]; hardwareOam: readonly string[]; hardwareMatrices: readonly (readonly number[])[]; fadedPalette: readonly number[]; unfadedPalette: readonly number[]; hardwarePalette: readonly number[]; paletteTags: readonly number[]; registers: Record<string, number>; se1: unknown; se2: unknown; }
 interface Probe { schema: string; sourceWindow: Fixture["sourceWindow"]; lifecycleCounts: Fixture["lifecycleCounts"]; topology: Fixture["topology"]; frames: readonly Frame[]; }
@@ -13,7 +13,7 @@ const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
 const fresh = new Map<string, { evidence: string; raw: string }>();
 function verify(path: string): void {
   const fixture = JSON.parse(readFileSync(resolve(path), "utf8")) as Fixture;
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-leaf-blade-")); const output = join(scratch, "probe.json"); const rgb = join(scratch, "rgb");
+  const scratch = createScratchDir("pokebench-leaf-blade-"); const output = join(scratch, "probe.json"); const rgb = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
   const run = spawnSync("python3", [join(root, "tools/run-mgba-probe.py"), output, "--", join(vendor, "mgba-venv/bin/python"), resolve(root, fixture.probe), resolve(root, fixture.scenario), output, rgb], { cwd: root, encoding: "utf8" });
   if (run.stdout) process.stdout.write(run.stdout); if (run.stderr) process.stderr.write(run.stderr); if (run.status !== 0) process.exit(run.status ?? 1);

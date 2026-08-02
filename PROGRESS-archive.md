@@ -1,3 +1,73 @@
+## 844 — [supervisor session open, 2026-08-01 19:25] animation-main folded; turn-3 + turn-5-OFF-banking lanes launching
+
+- **State:** master `ca227c9c` (fold merge of `animation-main`, 8 commits:
+  lunge-grow + circle idle families, sendout fixtures). Union verified by me:
+  full `npm test` **6,061 passed + 1 skipped** (19:12), `npm run build`
+  green. Oracle 8014 freshness FAIL re-confirmed as the known docs-only
+  false positive (harness `9cadad7`/`acc5c4e` are template/CLI-output-only;
+  no service schema change) — no restart. 8012 fresh; animation session
+  live until 20:56.
+- **Did:** orient + fold + union verification.
+- **Next:** parallel lanes — MAIN: `turn3Resolved` retirement per
+  `docs/turn1-4-epoch-prep.md` (Terra/max); SIDE: bank the missing turn-5
+  OFF reader set as **new files only** (Sol/high). **Decision (supervisor,
+  reversible):** banking the turn-5 OFF reader set is additive evidence,
+  precedented by the pre-adoption rank-5/6 OFF ground-truth banking; it
+  does NOT adopt the turns 5-8 ON-pin re-timing policy, which remains an
+  open user question. Then turn-4 slice with exact `512 + N` acceptance.
+- **Notes:** hard deadline 21:11; wind-down target ~20:50 with a re-check
+  of `animation-main` for new commits.
+
+## 843 — [supervisor final close-out, 2026-08-01 19:10] turns 1+2 also retired — session total SIX turn-flag retirements
+
+- **State:** master `34c4efec`, tree clean. Final union full `npm test`
+  **6,045 passed + 1 skipped** (18:58 run) and build green; the two commits
+  since are docs-only (papercut + this entry). Retired today: `turn9/10/11/
+  12Resolved` (entries 830-836), then `turn1Resolved` (841, second attempt
+  landed with the epoch-continuation rule after 838/839's honest checkpoint
+  + same-session evidence scout) and `turn2Resolved` (842, first try,
+  990/990). **Remaining `#39` fields: turns 3 and 4, then
+  `opponentFaintDismissElapsed`, then dispatcher debt — all with merged
+  prep/evidence dossiers.** Supervisor spot compares after each landing all
+  exact, incl. previously-failing `turn2-endeavor-off` now 256/256 live.
+- **Did (since entry 840):** turn-1 retry (evidence-doc prescription —
+  differential 1,162/1,162); turn-2 slice (990/990); verified both; new
+  papercut recorded (nested diff worktree doubles vitest discovery); temp
+  diff worktrees swept.
+- **Next session:** turn-3 then turn-4 per `docs/turn1-4-epoch-prep.md`
+  (turn-4's acceptance first needs the turn-5 OFF reader-set decision —
+  turns 5-8 OFF re-timing policy still un-adopted); then item 7 per
+  `docs/opponent-faint-dismiss-owner-prep.md`. Fold `animation-main` at
+  orient: a NEW animation session (started 17:56, deadline 20:56, still
+  live at close) has it 8+ commits ahead — deliberately left unfolded per
+  protocol since their branch is still moving.
+- **Notes:** 12 briefs total this session, 11 landed + 1 honest checkpoint
+  converted to a landing same-day; 0 unresolved failures; no exit-42;
+  DEFERRED.md empty — no open questions block the next session.
+
+## 842 — [bounded MAIN worker, 2026-08-01] turn-2 predecessor retired with immutable epoch
+
+- **State:** proof `c16386d6`, migration `7a3fca06`; the production/test
+  census has no `turn2Resolved` reference. The receipt is published at the
+  source-owned first choose-action callback (absolute **3237**, runtime
+  elapsed **2197**; the handler install at 3236 still rejects A).
+- **Did:** migrated core dispatch/predecessor, generic HP/content,
+  ENDEAVOR-family routing, slot-2 PP, and every turn-3 submenu/kickoff clock
+  onto the immutable receipt: PP **[9,20,19,10]**, slot **2**, HP
+  **101/88**, settled/ready, and DoBounceEffect seeds **192/128** with
+  delta **7** and amplitude **1**. The later turn-3 open and its B-close/A-
+  reopen consume that epoch rather than replacing it.
+- **Next:** stay scoped: turns 3–4, `opponentFaintDismissElapsed`, and
+  dispatcher debt remain #39 work; do not reopen turn 2.
+- **Notes:** clean-parent `ace2b44c` (`c16386d6^`) app replays are
+  byte-identical: turn-2 **493/493**, turn-3 readers **416/416**, upstream
+  **81/81**, total **990/990** raw RGBA captures. (The known #61 live-oracle
+  residual remains `turn3-endeavor-off` 254/255, but this differential is
+  255/255.) Focused Tier-1 **461/461** (8 files), `npx tsc --noEmit`, and
+  `npm run build` green; full `npm test` deliberately unrun per the bounded
+  brief. No trace/capture-list, recording import, ratchet/barrier, or
+  selector changes.
+
 ## 841 — [bounded MAIN worker, 2026-08-01] turn-1 predecessor retired with immutable epoch
 
 - **State:** `13389b9c` retires `turn1Resolved`; every production/test

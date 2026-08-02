@@ -1,6 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   createInitialState,
@@ -14,6 +13,7 @@ import {
   type SceneOnFaintAttackFieldProfile,
   type SceneOnFlyConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture {
   readonly scenario: string;
@@ -38,7 +38,7 @@ const fixturePath = process.argv[2]
   ? resolve(process.argv[2])
   : join(root, "tools/compare/fixtures/fly-murkrow-onix-charge.json");
 const fixture = JSON.parse(readFileSync(fixturePath, "utf8")) as Fixture;
-const scratch = mkdtempSync(join(tmpdir(), "pokebench-fly-compare-"));
+const scratch = createScratchDir("pokebench-fly-compare-");
 const rgbDir = join(scratch, "rgb");
 const probeOutput = join(scratch, "probe.json");
 const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

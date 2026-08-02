@@ -1,6 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   createSceneOnMovePresentation,
@@ -10,6 +9,7 @@ import {
 import { growthAnimationAtAge } from "../../src/animation/growth.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { getMonGender } from "../../src/engine/monGender.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 // IVYSAUR/ONIX genderRatio, direct from reference/pokeemerald/src/data/
 // pokemon/species_info.h (`.genderRatio = PERCENT_FEMALE(12.5)` / `(50)`,
@@ -44,7 +44,7 @@ interface ProbeFrame {
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
 const fixturePath = resolve(process.argv[2]!);
 const fixture = JSON.parse(readFileSync(fixturePath, "utf8")) as Fixture;
-const scratch = mkdtempSync(join(tmpdir(), "pokebench-growth-compare-"));
+const scratch = createScratchDir("pokebench-growth-compare-");
 const output = join(scratch, "probe.json");
 const rgbDir = join(scratch, "rgb");
 const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

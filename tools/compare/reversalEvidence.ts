@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import { createScratchDir } from "../lib/scratch.ts";
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
 const requiredTemplates = [
@@ -34,7 +34,7 @@ const gpuRegisters = [
 for (let pass = 0; pass < 2; pass += 1) {
   for (const path of process.argv.slice(2)) {
     const fixture = JSON.parse(readFileSync(resolve(path), "utf8"));
-    const scratch = mkdtempSync(join(tmpdir(), "pokebench-reversal-"));
+    const scratch = createScratchDir("pokebench-reversal-");
     const output = join(scratch, "probe.json");
     const rgb = join(scratch, "rgb");
     const vendor = dirname(

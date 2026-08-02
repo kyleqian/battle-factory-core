@@ -1,8 +1,7 @@
 // Fresh complete reducer/seam/hardware/audio/RGB/framebuffer proof for DIZZY_PUNCH.
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { dizzyPunchAtAge } from "../../src/animation/dizzyPunch.ts";
 import {
@@ -15,6 +14,7 @@ import {
   render,
   type EngineState,
 } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 type Fixture = SceneOnDizzyPunchConfig & {
   scenario: string;
@@ -64,7 +64,7 @@ function runFixture(fixturePath: string, runNumber: number): string {
   const fixture = JSON.parse(
     readFileSync(resolve(fixturePath), "utf8"),
   ) as Fixture;
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-dizzy-punch-"));
+  const scratch = createScratchDir("pokebench-dizzy-punch-");
   const output = join(scratch, "probe.json");
   const rgbDir = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

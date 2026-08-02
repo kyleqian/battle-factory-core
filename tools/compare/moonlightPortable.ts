@@ -1,11 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import {
-  mkdtempSync,
-  readFileSync,
-  realpathSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -14,6 +9,7 @@ import {
   type SceneOnMoonlightConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture extends SceneOnMoonlightConfig {
   readonly schema: "moonlight-portable-evidence/v1";
@@ -101,7 +97,7 @@ function sha256(bytes: Uint8Array): string {
 }
 
 function runProbe(): { output: string; rgbDir: string; scratch: string } {
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-moonlight-compare-"));
+  const scratch = createScratchDir("pokebench-moonlight-compare-");
   const output = join(scratch, "probe.json");
   const rgbDir = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

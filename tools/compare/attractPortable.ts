@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   ATTRACT_FRAME_COUNT,
@@ -12,6 +11,7 @@ import {
   sceneOnAttractView,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
 const fixturePaths = process.argv.slice(2);
@@ -29,7 +29,7 @@ function s16(raw: string, offset: number): number {
 
 function verify(fixturePath: string, runNumber: number): void {
   const fixture = JSON.parse(readFileSync(resolve(fixturePath), "utf8"));
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-attract-"));
+  const scratch = createScratchDir("pokebench-attract-");
   const output = join(scratch, "probe.json");
   const rgbDir = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

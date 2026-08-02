@@ -1,6 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   createInitialState,
@@ -14,6 +13,7 @@ import {
   type SceneOnBounceConfig,
   type SceneOnFaintAttackFieldProfile,
 } from "../../src/animation/sceneOnPresentation.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture {
   readonly scenario: string;
@@ -41,7 +41,7 @@ const fixture = JSON.parse(readFileSync(fixturePath, "utf8")) as Fixture;
 const geometry = fixture.orientation === "player-to-opponent"
   ? PLAYER_SPOINK_TO_OPPONENT_ONIX_BOUNCE_PRESENTATION
   : SPOINK_TO_ONIX_BOUNCE_PRESENTATION;
-const scratch = mkdtempSync(join(tmpdir(), "pokebench-bounce-compare-"));
+const scratch = createScratchDir("pokebench-bounce-compare-");
 const rgbDir = join(scratch, "rgb");
 const probeOutput = join(scratch, "probe.json");
 const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

@@ -1,6 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   singNotesAtAge,
@@ -14,6 +13,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import singAsset from "../../src/animation/assets/sing.json" with { type: "json" };
+import { createScratchDir } from "../lib/scratch.ts";
 
 interface Scenario {
   readonly overrides: {
@@ -61,7 +61,7 @@ const attackerSide = playerAttacker ? "player" : "opponent";
 const origin: SingPoint = playerAttacker ? { x: 72, y: 98 } : { x: 176, y: 55 };
 const target: SingPoint = playerAttacker ? { x: 176, y: 42 } : { x: 72, y: 88 };
 
-const scratch = mkdtempSync(join(tmpdir(), "pokebench-sing-compare-"));
+const scratch = createScratchDir("pokebench-sing-compare-");
 const output = join(scratch, "probe.json");
 const rgbDir = join(scratch, "rgb");
 const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

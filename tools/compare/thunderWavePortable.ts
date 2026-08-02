@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   THUNDER_WAVE_FRAME_COUNT,
@@ -13,6 +12,7 @@ import {
   type SceneOnThunderWaveConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture {
   readonly scenario: string;
@@ -146,7 +146,7 @@ function configFor(playerToOpponent: boolean): SceneOnThunderWaveConfig {
 
 function runFixture(fixturePath: string, runNumber: number): void {
   const fixture = JSON.parse(readFileSync(resolve(fixturePath), "utf8")) as Fixture;
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-thunder-wave-proof-"));
+  const scratch = createScratchDir("pokebench-thunder-wave-proof-");
   const output = join(scratch, "probe.json");
   const rgbDir = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

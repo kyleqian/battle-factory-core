@@ -1,8 +1,7 @@
 // Fresh dense source/component/hardware/framebuffer comparator for Metronome.
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   METRONOME_FRAME_COUNT,
@@ -19,6 +18,7 @@ import {
   type SceneOnPresentationBattler,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 type Window = { startFrame: number; endFrame: number; frameCount: number };
 type Fixture = {
@@ -65,7 +65,7 @@ function verify(fixturePath: string, runNumber: number): void {
     ? "follow-me-dense-evidence/v1" : "metronome-dense-evidence/v1";
   const expectedFrameCount = isFollowMe
     ? FOLLOW_ME_FRAME_COUNT : METRONOME_FRAME_COUNT;
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-metronome-portable-"));
+  const scratch = createScratchDir("pokebench-metronome-portable-");
   const output = join(scratch, "probe.json");
   const rgbDir = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

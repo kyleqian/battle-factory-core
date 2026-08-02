@@ -1,6 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   createSceneOnMovePresentation,
@@ -9,6 +8,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import hardenAsset from "../../src/animation/assets/harden.json" with { type: "json" };
+import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture {
   readonly scenario: string; readonly probe: string;
@@ -35,7 +35,7 @@ interface ProbeFrame {
 }
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
 const fixture = JSON.parse(readFileSync(resolve(process.argv[2]!), "utf8")) as Fixture;
-const scratch = mkdtempSync(join(tmpdir(), "pokebench-harden-compare-"));
+const scratch = createScratchDir("pokebench-harden-compare-");
 const output = join(scratch, "probe.json"), rgbDir = join(scratch, "rgb");
 const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
 const run = spawnSync("python3", [

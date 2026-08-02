@@ -1,9 +1,9 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createScratchDir } from "../lib/scratch.ts";
 
 type Fixture = {
   readonly scenario: string; readonly probe: string; readonly orientation: string;
@@ -19,7 +19,7 @@ const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
 const sha = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest("hex");
 
 function verify(label: string) {
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-present-evidence-"));
+  const scratch = createScratchDir("pokebench-present-evidence-");
   const output = join(scratch, "probe.json"), rgb = join(scratch, "rgb");
   const run = spawnSync("python3", [join(root, "tools/run-mgba-probe.py"), output, "--", join(vendor, "mgba-venv/bin/python"), resolve(root, fixture.probe), resolve(root, fixture.scenario), output, rgb, String(fixture.occurrence)], { cwd: root, encoding: "utf8" });
   if (run.stdout) process.stdout.write(run.stdout); if (run.stderr) process.stderr.write(run.stderr);

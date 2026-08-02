@@ -32,10 +32,10 @@
 // Never imported at runtime - the production build only reads its JSON output.
 
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { PNG } from "pngjs";
+import { createScratchDir } from "../lib/scratch.ts";
 
 const OUT_PATH = "src/assets/gen/menu-healthbox-player.json";
 const DENSE_TRACE = "tools/compare/traces-groundtruth/battle1-menu-dense.json";
@@ -46,7 +46,7 @@ const BBOX = { x0: 127, y0: 74, x1: 229, y1: 109 };
 // correction) - any tick in that range gives byte-identical content.
 const SETTLED_TICK = 1730;
 
-const tmpDir = mkdtempSync(join(tmpdir(), "menu-healthbox-"));
+const tmpDir = createScratchDir("menu-healthbox-");
 try {
   execFileSync("./bin/oracle", ["run", DENSE_TRACE, "-o", tmpDir], { stdio: ["ignore", "ignore", "inherit"] });
   const png = PNG.sync.read(readFileSync(join(tmpDir, `frame-${String(SETTLED_TICK).padStart(5, "0")}.png`)));

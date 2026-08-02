@@ -1,11 +1,4 @@
-import {
-  mkdtempSync,
-  mkdirSync,
-  readFileSync,
-  realpathSync,
-  writeFileSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
+import { mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -16,6 +9,7 @@ import {
   ONIX_TO_GROVYLE_ENDEAVOR_PROFILE,
   type SceneOnEndeavorConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 interface PortableBattler {
   readonly species: "ONIX" | "GROVYLE";
@@ -61,7 +55,7 @@ const fixturePath = process.argv[2]
   ? resolve(process.argv[2])
   : join(root, "tools/compare/fixtures/endeavor-onix-grovyle.json");
 const fixture = JSON.parse(readFileSync(fixturePath, "utf8")) as PortableFixture;
-const scratch = mkdtempSync(join(tmpdir(), "pokebench-endeavor-compare-"));
+const scratch = createScratchDir("pokebench-endeavor-compare-");
 const rgbDir = join(scratch, "rgb");
 mkdirSync(rgbDir);
 const probeOutput = join(scratch, "probe.json");

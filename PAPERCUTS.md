@@ -8,19 +8,6 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
-## Clean-parent diff worktrees nested under the run root double vitest discovery
-
-- **What:** the 2026-08-01 turn-2 worker created its clean-parent
-  differential worktree at a path nested under the run root, so a focused
-  vitest run discovered every suite twice (the mirror under the worktree)
-  and burned a confusing run before relocation. The standing recipe's
-  `mktemp -d` location outside the repo avoids this entirely.
-- **Hits:** 1
-- **Cost each:** ~3 min
-- **Workaround:** always create differential worktrees under `mktemp -d`
-  (outside the repo); if one must live inside, exclude its path from vitest
-  discovery for the focused run.
-
 ## Raw before/after RNG-window diffs pick up unrelated-subsystem draws
 
 - **What:** ground-truth scouts that pin an RNG draw count from a raw
@@ -55,9 +42,14 @@ Per entry:
 - **Hits:** 1.
 - **Cost each:** ~10 min.
 - **Workaround:** confirm the JSONL mtime, clean tree, and committed checkpoint
-  before terminating the wedged child; the launcher should explicitly close
-  Codex stdin. (Postflight now names cap/signal exits distinctly instead of
-  mislabeling them as authentication failures, 2026-08-01.)
+  before terminating the wedged child. (Postflight now names cap/signal exits
+  distinctly instead of mislabeling them as authentication failures,
+  2026-08-01.)
+- **Not the cure:** an earlier revision of this entry proposed "the launcher
+  should explicitly close Codex stdin" — `run-subagent.sh` has invoked
+  `codex exec ... </dev/null` since `1ef2c4ce` (2026-07-21), well before this
+  wedge. Stdin is already closed; the `Reading additional input from stdin...`
+  line is the symptom, not the cause. Don't spend a session re-plumbing it.
 
 ## Shell command substitution mutates inline worker briefs
 
@@ -111,31 +103,6 @@ Per entry:
 - **Workaround:** include the accepted endpoint in the staged capture range
   and reuse one fresh probe artifact while iterating on app-side rendering.
 
-## Supervisor launcher option names are easy to misaddress
-
-- **What:** supervisor briefs used the conceptual lane names
-  `side-worktree`/`animation-worktree` and common-looking `--reasoning` and
-  `--brief` options, while `run-subagent.sh` accepts `--lane side|animation`,
-  `--effort`, and a positional brief or `--brief-file`. Each mismatch required
-  a failed launch and help lookup before the bounded worker could start.
-- **Hits:** 3.
-- **Cost each:** ~1 min.
-- **Workaround:** run `tools/run-subagent.sh --help` before the first launch of
-  a supervised session and use the launcher’s exact option spellings.
-
-## Broad source search descends into generated minified bundles
-
-- **What:** an Uproar ownership audit searched broadly enough to enter a
-  generated minified index, producing noisy output and obscuring the relevant
-  source call sites. Same class 2026-07-28 afternoon: broad `rg` matched
-  one-line generated topology/census JSON, flooding two workers' terminals
-  (row-4 implementation ~1 min; interaction audit ~2 min).
-- **Hits:** 3.
-- **Cost each:** ~1-2 min.
-- **Workaround:** scope `rg` to `src/`, `tests/`, and the exact reference
-  source directories, or add generated/bundle globs to the exclusion list
-  (`-g '!*.min.*' -g '!src/data/gen/*.json'` covers both shapes).
-
 ## Foreground oracle restart floods the execution transcript
 
 - **What:** starting `run-oracle.sh` directly in a retained PTY streams
@@ -176,14 +143,6 @@ Per entry:
 - **Cost each:** ~8 min.
 - **Workaround:** split each outcome/control into a fresh
   `run-mgba-probe.py` wrapper invocation and merge only the concise evidence.
-
-## ImageMagick unavailable for raw-frame inspection
-
-- **What:** an animation probe expected ImageMagick for converting raw RGB
-  frames, but it is not installed in the run environment.
-- **Hits:** 2.
-- **Cost each:** ~1 min.
-- **Workaround:** use the available `ffmpeg` rawvideo conversion path.
 
 ## Popup evidence used “input gate” for a state handoff, not a sampled key edge
 
@@ -473,11 +432,21 @@ Per entry:
   animation supervisor's full gate on 2026-07-31, stretching the main suite
   to 431s, ~5 min).
 - **Cost each:** ~10 min (main retry) + ~20 min (side validation stall).
-- **Workaround:** stagger full-suite runs — workers run focused suites
-  during the step and the full suite once near the end; supervisors avoid
-  launching two workers whose acceptance both requires a full-suite run at
-  the same wall-clock window, and treat a contended full-suite claim as
-  unverified until rerun serially.
+- **Largely fixed 2026-08-01:** the root cause was that only
+  `run-subagent.sh` exported `POKEBENCH_VITEST_MAX_WORKERS` (4), so bounded
+  workers were capped but every supervisor and interactive session ran at
+  vitest's default of `availableParallelism() - 1` = 15 forks. Measured on
+  this box: one uncapped full suite = 15 forks / 167s / ~83 GB peak tree RSS
+  (RSS sums overcount shared pages, so treat as an upper bound); at
+  `MAX_WORKERS=4` it is 4 forks / 329s / ~36 GB. `vite.config.ts` now
+  fair-shares the core budget by counting live peer vitest runs, so a solo
+  run stays at 15 and a contended one backs off automatically (verified:
+  a second run launched against one live peer took 7).
+- **Residual:** two suites starting within a few seconds of each other both
+  observe zero peers and both take a full share. Staggering still helps —
+  workers run focused suites during the step and the full suite once near
+  the end — and a contended full-suite claim is still worth rerunning
+  serially before trusting it.
 
 ## mGBA probe wrapper leaves multi-MB logs beside committed receipts
 

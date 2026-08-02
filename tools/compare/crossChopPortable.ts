@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { crossChopAtAge } from "../../src/animation/crossChop.ts";
 import {
@@ -14,6 +13,7 @@ import {
   render,
   type EngineState,
 } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture extends SceneOnCrossChopConfig {
   readonly schema: string;
@@ -126,7 +126,7 @@ function verify(fixturePath: string): void {
   const fixture = JSON.parse(
     readFileSync(resolve(fixturePath), "utf8"),
   ) as Fixture;
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-cross-chop-"));
+  const scratch = createScratchDir("pokebench-cross-chop-");
   const output = join(scratch, "probe.json");
   const rgbDir = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

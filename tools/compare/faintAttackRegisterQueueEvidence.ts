@@ -1,5 +1,4 @@
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import {
@@ -7,6 +6,7 @@ import {
   produceAnimationDisplayIntervalWorkload,
   type AnimationGpuRegisterState,
 } from "../../src/animation/gpuRegisterQueue.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 const BLDALPHA = 0x52;
 const BEFORE_WRITE = 0x0e02;
@@ -45,7 +45,7 @@ interface ProbeOutput {
 }
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
-const scratch = mkdtempSync(join(tmpdir(), "pokebench-faint-register-evidence-"));
+const scratch = createScratchDir("pokebench-faint-register-evidence-");
 const output = join(scratch, "register-queue.json");
 const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
 const mgbaPython = join(vendor, "mgba-venv/bin/python");

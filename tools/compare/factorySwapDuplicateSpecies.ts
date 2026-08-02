@@ -1,10 +1,10 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import type { Trace } from "./oracleClient.ts";
 import { renderAppTrace } from "./appTrace.ts";
 import { PNG } from "pngjs";
+import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture {
   readonly probe: string;
@@ -35,7 +35,7 @@ const trace: Trace = {
   appStage: fixture.stage,
 };
 
-const scratch = mkdtempSync(join(tmpdir(), "pokebench-swap-duplicate-"));
+const scratch = createScratchDir("pokebench-swap-duplicate-");
 const rgbDir = join(scratch, "rgb");
 mkdirSync(rgbDir);
 const probeOutput = join(scratch, "probe.json");

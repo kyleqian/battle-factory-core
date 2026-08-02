@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import { createScratchDir } from "../lib/scratch.ts";
 
 type Fixture = { schema: string; oracleProfile: string; orientation: string; scenario: string; probe: string; sourceWindow: { startFrame: number; endFrame: number; frameCount: number }; evidenceSha256: string; rawRgbSha256: string };
 type Frame = { frame: number; sha256: string; active: number; visualTaskCount: number; sprites: Array<{ slot: number; template: { symbol: string | null }; callback: { symbol: string | null } }>; tasks: Array<{ func: { symbol: string | null } }>; paletteTags: number[]; tileTags: number[]; softwareOam: string[]; hardwareOam: string[]; hardwareMatrices: number[][]; fadedPalette: number[]; unfadedPalette: number[]; hardwarePalette: number[]; registers: { bldcnt: number; bldalpha: number; bldy: number }; se1: { songHeader: number; tracks: Array<{ flags: number; panX: number }> } };
@@ -13,7 +13,7 @@ if (paths.length !== 2) throw new Error("usage: brickBreakPortableEvidence.ts <p
 const fresh = new Map<string, string>();
 function run(path: string, pass: number) {
   const f = JSON.parse(readFileSync(resolve(path), "utf8")) as Fixture;
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-brick-break-")); const out = join(scratch, "probe.json"); const rgb = join(scratch, "rgb");
+  const scratch = createScratchDir("pokebench-brick-break-"); const out = join(scratch, "probe.json"); const rgb = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
   const p = spawnSync("python3", [join(root, "tools/run-mgba-probe.py"), out, "--", join(vendor, "mgba-venv/bin/python"), resolve(root, f.probe), resolve(root, f.scenario), out, rgb], { cwd: root, encoding: "utf8" });
   if (p.stdout) process.stdout.write(p.stdout); if (p.stderr) process.stderr.write(p.stderr); if (p.status) process.exit(p.status);

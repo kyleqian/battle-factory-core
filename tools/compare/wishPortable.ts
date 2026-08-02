@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   createSceneOnMovePresentation,
@@ -10,6 +9,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import { WISH_FRAME_COUNT, wishAtAge } from "../../src/animation/wish.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 type Fixture = SceneOnWishConfig & {
   schema: string; orientation: string; scenario: string; probe: string;
@@ -61,7 +61,7 @@ function blendBlack(color: number, coeff: number): number {
 
 function verify(path: string, runNumber: number): void {
   const fixture = JSON.parse(readFileSync(resolve(path), "utf8")) as Fixture;
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-wish-portable-"));
+  const scratch = createScratchDir("pokebench-wish-portable-");
   const output = join(scratch, "probe.json");
   const rgbDir = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));

@@ -1,7 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { presentAtAge } from "../../src/animation/present.ts";
@@ -11,6 +10,7 @@ import {
   type SceneOnPresentConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import { createScratchDir } from "../lib/scratch.ts";
 
 type Fixture = {
   readonly scenario: string;
@@ -156,7 +156,7 @@ function configFor(): SceneOnPresentConfig {
 }
 
 function runProbe(): { output: string; rgbDir: string; scratch: string } {
-  const scratch = mkdtempSync(join(tmpdir(), "pokebench-present-compare-"));
+  const scratch = createScratchDir("pokebench-present-compare-");
   const output = join(scratch, "probe.json");
   const rgbDir = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
