@@ -45,6 +45,7 @@ export type SpeciesFrontAnimFamily =
   | "BOUNCE_ROTATE_TO_SIDES"
   | "BOUNCE_ROTATE_TO_SIDES_SMALL"
   | "BOUNCE_ROTATE_TO_SIDES_SLOW"
+  | "CIRCLE_INTO_BG"
   | "CIRCULAR_STRETCH_TWICE"
   | "GROW_VIBRATE"
   | "GROW_IN_STAGES"
@@ -80,6 +81,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "BOUNCE_ROTATE_TO_SIDES",
   "BOUNCE_ROTATE_TO_SIDES_SMALL",
   "BOUNCE_ROTATE_TO_SIDES_SLOW",
+  "CIRCLE_INTO_BG",
   "CIRCULAR_STRETCH_TWICE",
   "GROW_VIBRATE",
   "GROW_IN_STAGES",
@@ -397,6 +399,23 @@ export const LUNGE_GROW_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze
 /** There are no lunge/grow mappings outside the Factory rental pool. */
 export const LUNGE_GROW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   LUNGE_GROW_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** The sole source selector mapping for `ANIM_CIRCLE_INTO_BG`. */
+export const CIRCLE_INTO_BG_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_CIRCLE_INTO_BG")
+    .map(([species]) => species),
+);
+
+/** The complete Factory-reachable circle-into-background family (KINGDRA). */
+export const CIRCLE_INTO_BG_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  CIRCLE_INTO_BG_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no circle-into-background mappings outside the Factory pool. */
+export const CIRCLE_INTO_BG_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  CIRCLE_INTO_BG_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /** All 5 source selector mappings for the normal `ANIM_BOUNCE_ROTATE_TO_SIDES`. */
@@ -1321,6 +1340,27 @@ export interface LungeGrowFrame extends SpeciesIdleOffset {
   readonly affineMode: "double" | "normal";
 }
 
+export interface CircleIntoBackgroundFrame extends SpeciesIdleOffset {
+  readonly data0: 0;
+  readonly data2Before: 0 | 1;
+  readonly data2: 1;
+  readonly data7Before: number;
+  readonly data7: number;
+  readonly xSineIndex: number | null;
+  readonly xSineValue: number | null;
+  readonly scaleSineIndex: number | null;
+  readonly scaleSineValue: number | null;
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXCalls: 2;
+  readonly affineWriteCount: 1;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "Anim_CircleIntoBackground" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
 /** `InitAnimData`, called by `AddNewAnim`, source defaults adjacent to this family. */
 export const ADD_NEW_ANIM_DEFAULTS = Object.freeze({
   rotation: 0,
@@ -2098,6 +2138,78 @@ export function lungeGrowFrameAtTick(
     affineWriteCount: 1,
     resetSpriteAfterAnim: false,
     callback: "Anim_LungeGrow",
+    affineMode: "double",
+  };
+}
+
+/**
+ * Source-order normal-front port of `Anim_CircleIntoBackground`
+ * (`pokemon_animation.c:911-939,984-1064,3537-3565,5540-5544` and
+ * `trig.c:514-518`). The front-animation task zeroes data2/data7. Tick zero
+ * starts affine mode before its ordinary motion and scale write. Active
+ * callbacks consume data7 0..512 inclusive in steps of eight; tick 65 alone
+ * observes the strict `data7 > 512` guard at 520, clears x2, resets the
+ * sprite, writes identity affine state, and installs stable `WaitAnimEnd`.
+ * Both source-order `TryFlipX` calls are normal-front no-ops.
+ */
+export function circleIntoBackgroundFrameAtTick(
+  ticksSinceStart: number,
+): CircleIntoBackgroundFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  const terminalTick = 65;
+  if (ticksSinceStart >= terminalTick) {
+    return {
+      x2: 0,
+      y2: 0,
+      data0: 0,
+      data2Before: 1,
+      data2: 1,
+      data7Before: 520,
+      data7: 520,
+      xSineIndex: null,
+      xSineValue: null,
+      scaleSineIndex: null,
+      scaleSineValue: null,
+      xScale: 256,
+      yScale: 256,
+      startedAffine: false,
+      normalFrontDontFlip: true,
+      tryFlipXCalls: 2,
+      affineWriteCount: 1,
+      resetSpriteAfterAnim: true,
+      callback: "WaitAnimEnd",
+      affineMode: "normal",
+    };
+  }
+
+  const data7Before = ticksSinceStart * 8;
+  const xSineIndex = data7Before % 256;
+  const xSineValue = gbaSin(xSineIndex, 8);
+  const data7 = data7Before + 8;
+  const scaleSineIndex = Math.trunc((data7 % 256) / 2);
+  const scaleSineValue = gbaSin(scaleSineIndex, 96);
+  const scale = 256 + scaleSineValue;
+  return {
+    x2: -xSineValue + 0,
+    y2: 0,
+    data0: 0,
+    data2Before: ticksSinceStart === 0 ? 0 : 1,
+    data2: 1,
+    data7Before,
+    data7,
+    xSineIndex,
+    xSineValue,
+    scaleSineIndex,
+    scaleSineValue,
+    xScale: scale,
+    yScale: scale,
+    startedAffine: ticksSinceStart === 0,
+    normalFrontDontFlip: true,
+    tryFlipXCalls: 2,
+    affineWriteCount: 1,
+    resetSpriteAfterAnim: false,
+    callback: "Anim_CircleIntoBackground",
     affineMode: "double",
   };
 }
@@ -3369,6 +3481,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = bounceRotateToSidesSlowFrameAtTick(167);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_BounceRotateToSides_Slow did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "CIRCLE_INTO_BG": {
+      const terminal = circleIntoBackgroundFrameAtTick(65);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_CircleIntoBackground did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }

@@ -19,6 +19,10 @@ import {
   BOUNCE_ROTATE_TO_SIDES_SLOW_FRONT_SPECIES,
   BOUNCE_ROTATE_TO_SIDES_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES,
   BOUNCE_ROTATE_TO_SIDES_VARIANTS,
+  circleIntoBackgroundFrameAtTick,
+  CIRCLE_INTO_BG_FACTORY_FRONT_SPECIES,
+  CIRCLE_INTO_BG_FRONT_SPECIES,
+  CIRCLE_INTO_BG_OUTSIDE_FACTORY_FRONT_SPECIES,
   circularStretchTwiceFrameAtTick,
   CIRCULAR_STRETCH_TWICE_FACTORY_FRONT_SPECIES,
   CIRCULAR_STRETCH_TWICE_FRONT_SPECIES,
@@ -6319,16 +6323,131 @@ describe("speciesIdleAnim", () => {
       expect(runA.ticks[0]!.battler1).toMatchObject({ x2: 0, y2: 0, animNum: 1, animCmdIndex, data2: speciesId, callback: "0x8007428", callbackSymbol: "SpriteCallbackDummy" });
     });
 
-    it("regression-pins GROW_IN_STAGES and leaves adjacent circle/lunge/spring selectors unported", () => {
+    it("regression-pins GROW_IN_STAGES and identifies the next circle selector", () => {
       expect(growInStagesFrameAtTick(114)).toMatchObject({ xScale: 256, yScale: 256, callback: "WaitAnimEnd" });
       expect(speciesFrontIdleRestOffset("GENGAR")).toEqual({ x2: 0, y2: 0 });
       expect(selectorTables.frontAnimIds.species.KINGDRA).toBe("ANIM_CIRCLE_INTO_BG");
-      expect(speciesFrontIdleRestOffset("KINGDRA")).toBeNull();
+      expect(speciesFrontIdleRestOffset("KINGDRA")).toEqual({ x2: 0, y2: 0 });
       const selectorValues = Object.values(selectorTables.frontAnimIds.species);
       expect(selectorValues).not.toContain("ANIM_H_LUNGE");
       expect(selectorValues).not.toContain("ANIM_V_SPRING");
       expect(selectorValues).not.toContain("ANIM_V_REPEATED_SPRING");
       expect(selectorValues).not.toContain("ANIM_SPRING_RISING");
+    });
+  });
+
+  describe("circleIntoBackgroundFrameAtTick (Anim_CircleIntoBackground source lifecycle)", () => {
+    it("derives exactly KINGDRA as Factory-reachable with no outside mapping", () => {
+      const selectors = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
+      const generated = Object.entries(selectors)
+        .filter(([, family]) => family === "ANIM_CIRCLE_INTO_BG")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        (frontierMons.entries as readonly { readonly species: string }[])
+          .map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(CIRCLE_INTO_BG_FRONT_SPECIES).toEqual(generated);
+      expect(CIRCLE_INTO_BG_FRONT_SPECIES).toEqual(["KINGDRA"]);
+      expect(CIRCLE_INTO_BG_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(CIRCLE_INTO_BG_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(CIRCLE_INTO_BG_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      expect(selectors.KINGDRA).toBe("ANIM_CIRCLE_INTO_BG");
+      expect(speciesFrontIdleRestOffset("KINGDRA")).toEqual({ x2: 0, y2: 0 });
+    });
+
+    it("pins tick 0 initialization and every active data7/GBA trig write", () => {
+      expect(ADD_NEW_ANIM_DEFAULTS).toEqual({ rotation: 0, delay: 0, runs: 1, speed: 0, data: 0 });
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual(
+        expect.arrayContaining([0, 2, 7]),
+      );
+      const callbacks = Array.from({ length: 65 }, (_, tick) => circleIntoBackgroundFrameAtTick(tick)!);
+      expect(callbacks).toHaveLength(65);
+      for (const [tick, frame] of callbacks.entries()) {
+        const data7Before = tick * 8;
+        const xSineIndex = data7Before % 256;
+        const data7 = data7Before + 8;
+        const scaleSineIndex = Math.trunc((data7 % 256) / 2);
+        const xSineValue = Math.floor((8 * GBA_SINE_TABLE_256[xSineIndex]!) / 256);
+        const scaleSineValue = Math.floor((96 * GBA_SINE_TABLE_256[scaleSineIndex]!) / 256);
+        expect(frame, `data7 ${data7Before}`).toEqual({
+          x2: -xSineValue + 0,
+          y2: 0,
+          data0: 0,
+          data2Before: tick === 0 ? 0 : 1,
+          data2: 1,
+          data7Before,
+          data7,
+          xSineIndex,
+          xSineValue,
+          scaleSineIndex,
+          scaleSineValue,
+          xScale: 256 + scaleSineValue,
+          yScale: 256 + scaleSineValue,
+          startedAffine: tick === 0,
+          normalFrontDontFlip: true,
+          tryFlipXCalls: 2,
+          affineWriteCount: 1,
+          resetSpriteAfterAnim: false,
+          callback: "Anim_CircleIntoBackground",
+          affineMode: "double",
+        });
+      }
+    });
+
+    it("pins C truncation, signed sine wrap, and the strict data7 guard edges", () => {
+      expect(circleIntoBackgroundFrameAtTick(0)).toMatchObject({
+        data2Before: 0, data7Before: 0, data7: 8, xSineIndex: 0,
+        scaleSineIndex: 4, x2: 0, xScale: 265, startedAffine: true,
+      });
+      expect([0, 8, 64, 120, 128, 136, 192, 248].map((data7) => {
+        const frame = circleIntoBackgroundFrameAtTick(data7 / 8)!;
+        return [data7, frame.xSineIndex, frame.xSineValue, frame.x2];
+      })).toEqual([
+        [0, 0, 0, 0],
+        [8, 8, 1, -1],
+        [64, 64, 8, -8],
+        [120, 120, 1, -1],
+        [128, 128, 0, 0],
+        [136, 136, -2, 2],
+        [192, 192, -8, 8],
+        [248, 248, -2, 2],
+      ]);
+      expect(circleIntoBackgroundFrameAtTick(31)).toMatchObject({
+        data7Before: 248, data7: 256, scaleSineIndex: 0,
+      });
+      expect(circleIntoBackgroundFrameAtTick(32)).toMatchObject({
+        data7Before: 256, data7: 264, xSineIndex: 0, scaleSineIndex: 4,
+      });
+      expect(circleIntoBackgroundFrameAtTick(64)).toMatchObject({
+        data7Before: 512, data7: 520, callback: "Anim_CircleIntoBackground",
+      });
+    });
+
+    it("cleans up only when data7 is 520 and keeps terminal callbacks stable", () => {
+      const terminal = circleIntoBackgroundFrameAtTick(65)!;
+      expect(terminal).toEqual({
+        x2: 0, y2: 0, data0: 0, data2Before: 1, data2: 1,
+        data7Before: 520, data7: 520, xSineIndex: null, xSineValue: null,
+        scaleSineIndex: null, scaleSineValue: null, xScale: 256, yScale: 256,
+        startedAffine: false, normalFrontDontFlip: true, tryFlipXCalls: 2,
+        affineWriteCount: 1, resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd", affineMode: "normal",
+      });
+      expect(circleIntoBackgroundFrameAtTick(66)).toEqual(terminal);
+      expect(circleIntoBackgroundFrameAtTick(1000)).toEqual(terminal);
+      expect(circleIntoBackgroundFrameAtTick(-1)).toBeNull();
+    });
+
+    it("regression-pins the accepted adjacent lunge family", () => {
+      expect(lungeGrowFrameAtTick(65)).toMatchObject({
+        data7Before: 520, xScale: 256, yScale: 256,
+        resetSpriteAfterAnim: true, callback: "WaitAnimEnd", affineMode: "normal",
+      });
+      for (const species of LUNGE_GROW_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
     });
   });
 });
