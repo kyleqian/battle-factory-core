@@ -321,6 +321,9 @@ import heracrossRunB from "../../tools/compare/fixtures/sendout-front-heracross-
 import kingdraScenario from "../../tools/compare/fixtures/sendout-front-kingdra.json" with { type: "json" };
 import kingdraRunA from "../../tools/compare/fixtures/sendout-front-kingdra-run-a.json" with { type: "json" };
 import kingdraRunB from "../../tools/compare/fixtures/sendout-front-kingdra-run-b.json" with { type: "json" };
+import regiceScenario from "../../tools/compare/fixtures/sendout-front-regice.json" with { type: "json" };
+import regiceRunA from "../../tools/compare/fixtures/sendout-front-regice-run-a.json" with { type: "json" };
+import regiceRunB from "../../tools/compare/fixtures/sendout-front-regice-run-b.json" with { type: "json" };
 import {
   KABUTO_FRONT_ANIM_START_OFFSET,
   kabutoHSlideWobble,
@@ -625,6 +628,12 @@ const kingdraRawA = readFileSync(
 );
 const kingdraRawB = readFileSync(
   new URL("../../tools/compare/fixtures/sendout-front-kingdra-run-b.json", import.meta.url),
+);
+const regiceRawA = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-regice-run-a.json", import.meta.url),
+);
+const regiceRawB = readFileSync(
+  new URL("../../tools/compare/fixtures/sendout-front-regice-run-b.json", import.meta.url),
 );
 
 describe("speciesIdleAnim", () => {
@@ -6738,6 +6747,71 @@ describe("speciesIdleAnim", () => {
       expect(fourPetalFrameAtTick(64)).toEqual(terminal);
       expect(fourPetalFrameAtTick(1000)).toEqual(terminal);
       expect(fourPetalFrameAtTick(-1)).toBeNull();
+    });
+
+    it("stages one complete legal challenge-0 REGICE Scene-ON party", () => {
+      expect(regiceScenario).toMatchObject({
+        mode: "mechanicLab",
+        profile: "battle-scene-on",
+        level: 50,
+        challengeNum: 0,
+        trainerId: 50,
+      });
+      expect(regiceScenario.overrides.parties.player).toHaveLength(3);
+      expect(regiceScenario.overrides.parties.opponent).toHaveLength(3);
+      expect(regiceScenario.overrides.parties.opponent[0]).toMatchObject({
+        species: 402,
+        moves: [58, 85, 133, 156],
+        gender: "genderless",
+      });
+      for (const setId of [
+        ...regiceScenario.playerSetIds,
+        ...regiceScenario.opponentSetIds,
+      ]) {
+        expect(setId).toBeGreaterThanOrEqual(110);
+        expect(setId).toBeLessThanOrEqual(199);
+      }
+      for (const mon of [
+        ...regiceScenario.overrides.parties.player,
+        ...regiceScenario.overrides.parties.opponent,
+      ]) {
+        expect(mon.level).toBe(50);
+        expect(Object.keys(mon.ivs)).toHaveLength(6);
+        expect(Object.keys(mon.evs)).toHaveLength(6);
+        expect(mon.moves).toHaveLength(4);
+        expect(mon.ppUps).toHaveLength(4);
+        expect(mon).toEqual(expect.objectContaining({
+          item: expect.any(Number),
+          abilitySlot: expect.any(Number),
+          friendship: expect.any(Number),
+          gender: expect.any(String),
+          shiny: expect.any(Boolean),
+        }));
+      }
+    });
+
+    it("matches paired byte-identical raw settled REGICE Scene-ON receipts", () => {
+      expect(regiceRawA.equals(regiceRawB)).toBe(true);
+      expect(regiceRawA).toHaveLength(373);
+      expect(regiceRawA.at(-1)).toBe("}".charCodeAt(0));
+      expect(createHash("sha256").update(regiceRawA).digest("hex")).toBe(
+        "e02097374599e03808cf8f1122a6b1b802e69b1a2d2af582e755ee6b627e6cb1",
+      );
+      expect(regiceRunA).toEqual(regiceRunB);
+      expect(selectorTables.frontAnimIds.species.REGICE).toBe("ANIM_FOUR_PETAL");
+      expect(regiceRunA.ticks[0]!.battler1).toMatchObject({
+        x2: 0,
+        y2: 0,
+        animNum: 1,
+        animCmdIndex: 4,
+        data2: 402,
+        callback: "0x8007428",
+        callbackSymbol: "SpriteCallbackDummy",
+      });
+      expect({
+        x2: regiceRunA.ticks[0]!.battler1.x2,
+        y2: regiceRunA.ticks[0]!.battler1.y2,
+      }).toEqual(speciesFrontIdleRestOffset("REGICE"));
     });
 
     it("regression-pins CIRCLE_INTO_BG and leaves the next source-ranked slow selector unported", () => {
