@@ -3027,7 +3027,7 @@ export function twistTwiceFrameAtTick(ticksSinceStart: number): TwistTwiceFrame 
   if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
 
   const animRotation = TWIST_TWICE_INITIALIZER.rotation;
-  let animDelay = TWIST_TWICE_INITIALIZER.delay;
+  let animDelay: number = TWIST_TWICE_INITIALIZER.delay;
   let animRuns: 1 | 2 = TWIST_TWICE_INITIALIZER.runs;
   const animSpeed = 0;
   let animData: 0 | 1 = 0;
@@ -3080,6 +3080,11 @@ export function twistTwiceFrameAtTick(ticksSinceStart: number): TwistTwiceFrame 
       // This executes after both repeat and terminal branches in the source.
       data2 += 16;
     }
+
+    // Tick zero's immediate `Twist` body is the only path from InitAnimData's
+    // zero to the stable initialized record; every observable callback ends
+    // after that source increment.
+    if (animData !== 1) throw new Error("Anim_Twist_Twice did not initialize animation data");
 
     lastFrame = {
       x2: 0,
