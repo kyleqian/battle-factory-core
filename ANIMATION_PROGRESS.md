@@ -1,5 +1,38 @@
 # Animation coverage
 
+## Front `ANIM_ROTATE_TO_SIDES_TWICE` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **1 mapping / 1
+Factory-reachable / 0 outside-Factory** — SOLROCK. Only source ID **8** is
+promoted. `ANIMATION_COVERAGE.json` remains byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`;
+move coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**,
+Open-only **0/1**, and Outside Factory **0/77**. Selector 7/51 have no
+generated mapping, all back routing is unchanged, and no move status is
+promoted.
+
+**Did:** source pins `pokemon_animation.h:47-48,91`,
+`pokemon_animation.c:637-640,911-939,1037-1059,2870-2916,3817-3834,5540-5544`,
+and `pokemon.c:1730`: task-zeroed signed-s16 state, fresh `AddNewAnim`
+defaults, selector-8 rotation 4/runs 2, immediate shared callback, every
+data7 0..252 step across both runs, first-run data2/data7 reset at 256, both
+source-order `TryFlipX` paths, trig/affine OAM writes, and final identity /
+`WaitAnimEnd` cleanup. Fresh complete legal Scene-ON SOLROCK parties were
+probed twice only through `tools/run-mgba-probe.py`; the active-to-dummy pair
+is byte-identical: window **1616..1747 (132 frames)**, **59,501 B**,
+SHA-256 `06ad352e574feb2b5fae6bbe818bead7af2431bc4890d90430278797e9e35dff`.
+
+**Next:** the source-ranked unsupported generated Factory-front family is
+**`ANIM_SWING_CONCAVE_FAST`** (source ID **12**): **1 mapping / 1 Factory /
+0 outside** — IGGLYBUFF.
+
+**Notes:** focused reducer/source/census/evidence is **8/8**; both
+animation/executable-frontier ratchets are **9/9**; `npx tsc --noEmit`,
+`npm run animation:coverage`, full `npm test` (**624 files / 6,342 passed /
+1 skipped**), and production build are green. Commits: `dd22baf6` (reducer,
+census, lifecycle) and `fae28869` (source evidence plus paired Scene-ON
+fixtures).
+
 ## Front `ANIM_DEEP_V_SQUISH_AND_BOUNCE` family accepted (2026-08-02)
 
 **State:** exact for the complete generated selector census: **2 mappings / 2
