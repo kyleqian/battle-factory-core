@@ -8,6 +8,43 @@
 > routing hint, not a deferral or an acceptance-bar waiver; escalate any worker
 > result that does not survive supervisor verification.
 
+## Front `ANIM_FIGURE_8` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **3 mappings / 3
+Factory-reachable species / 0 outside-Factory mappings** — RATICATE, FEAROW,
+and YANMA. Only source ID **43** is promoted. Adjacent selectors, back sprites,
+moves, battle state, and engine boundaries remain untouched. Move coverage
+remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**; Open-only
+**0/1** and Outside Factory **0/77**. `ANIMATION_COVERAGE.json` is byte-identical
+at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,1003-1034,
+2435-2471,5540-5544`, `pokemon_animation.h:83`, `pokemon.c:1426,1428,1599`,
+and `trig.c:514-518` pin the ordinary opponent-front task's zeroed registers and
+`sDontFlip=TRUE`, initializer-only affine start/data6=0/data7=0/callback install,
+increment-before-sines ordering, both source-order flip no-ops, signed GBA sine
+writes, signed affine bit patterns, and strict phase/terminal guards. Dense Tier-1
+coverage exhausts all callbacks **0..63**: data6 **64->68** writes xScale=-256,
+**192->196** restores +256, and terminal **252->256** clears x2/y2, writes
+identity, resets affine state, and installs stable `WaitAnimEnd` on the same
+callback; stable rest and invalid ticks are pinned. Fresh complete legal
+challenge-0 Scene-ON parties were probed twice per species only through
+`tools/run-mgba-probe.py`; each pair is byte-identical and settles battler 1 at
+x2=0/y2=0/animNum=1/`SpriteCallbackDummy`: RATICATE **373 B**, cmd 11/data2 20,
+`8813e872595ede6ee0047bfee2e403d8db9384763230caf2c7a18b52634d9808`;
+FEAROW **372 B**, cmd 7/data2 22,
+`47b454268a9660ac8756382a8464d2f3e57f2cc618f985a8cbfefe7a505484f1`;
+YANMA **374 B**, cmd 21/data2 193,
+`a745006922877d4441281a3403d70cf20fdc3609fbae9f686be9e2201a1b60c4`.
+
+**Gates / next:** focused family/evidence plus both ratchets are **334/334**
+green; `npx tsc --noEmit`, full `npm test` (**603 files / 6,201 passed / 1
+skipped**), production build (**549 modules transformed**), and `npm run
+animation:coverage` are green. Next largest unsupported generated Factory front
+family: **`ANIM_ZIGZAG_FAST`** (source ID **10**; **3 mappings / 3 Factory / 0
+outside**) — UNOWN, GLALIE, DUSKULL.
+
 ## Front `ANIM_H_SLIDE` family accepted (2026-08-02)
 
 **State:** exact for the complete generated selector census: **4 mappings / 4
