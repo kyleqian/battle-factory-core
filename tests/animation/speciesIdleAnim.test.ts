@@ -56,6 +56,11 @@ import {
   FLICKER_INCREASING_FACTORY_FRONT_SPECIES,
   FLICKER_INCREASING_FRONT_SPECIES,
   FLICKER_INCREASING_OUTSIDE_FACTORY_FRONT_SPECIES,
+  figure8FrameAtTick,
+  FIGURE_8_FACTORY_FRONT_SPECIES,
+  FIGURE_8_FRONT_SPECIES,
+  FIGURE_8_INITIALIZER,
+  FIGURE_8_OUTSIDE_FACTORY_FRONT_SPECIES,
   growInStagesFrameAtTick,
   GROW_IN_STAGES_FACTORY_FRONT_SPECIES,
   GROW_IN_STAGES_FRONT_SPECIES,
@@ -5170,6 +5175,141 @@ describe("speciesIdleAnim", () => {
         "PIKACHU", "RAIKOU",
       ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("figure8FrameAtTick (source lifecycle)", () => {
+    it("derives exactly all 3 selector mappings as Factory-reachable with zero outside", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_FIGURE_8")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(FIGURE_8_FRONT_SPECIES).toEqual(generated);
+      expect(FIGURE_8_FRONT_SPECIES).toEqual(["RATICATE", "FEAROW", "YANMA"]);
+      expect(FIGURE_8_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(FIGURE_8_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(FIGURE_8_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of FIGURE_8_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins the initializer-only affine start, zeroes, and callback install", () => {
+      expect(FIGURE_8_INITIALIZER).toEqual({
+        selector: "ANIM_FIGURE_8",
+        sourceId: 43,
+        handleStartAffineAnimCalls: 1,
+        data6: 0,
+        data7: 0,
+        callbackInstalled: "Figure8",
+        figure8BodyCalls: 0,
+        normalFrontDontFlip: true,
+        affineMode: "double",
+        accepted: true,
+      });
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
+      expect(figure8FrameAtTick(0)).toMatchObject({ data6Before: 0, data6: 4 });
+    });
+
+    it("pins all callbacks 0..63, increment-before-sines, both flip no-ops, and writes", () => {
+      const frames = Array.from({ length: 64 }, (_, tick) => {
+        const frame = figure8FrameAtTick(tick)!;
+        const data6 = (tick + 1) * 4;
+        const xSine = Math.floor((16 * GBA_SINE_TABLE_256[data6 & 0xff]!) / 256);
+        const yIndex = (data6 * 2) & 0xff;
+        const ySine = Math.floor((8 * GBA_SINE_TABLE_256[yIndex]!) / 256);
+        expect(frame, `tick ${tick}`).toMatchObject({
+          data6Before: tick * 4,
+          data6,
+          xSineIndex: data6,
+          ySineIndex: yIndex,
+          xSine,
+          ySine,
+          motionX2: xSine === 0 ? 0 : -xSine,
+          motionY2: ySine === 0 ? 0 : -ySine,
+          normalFrontDontFlip: true,
+          tryFlipXBeforeMotion: true,
+          tryFlipXAfterTerminalCheck: true,
+          tryFlipXCalls: 2,
+        });
+        return frame;
+      });
+
+      expect(frames.map(({ affineWriteCount }) => affineWriteCount).reduce<number>(
+        (sum, count) => sum + count, 0,
+      )).toBe(3);
+      expect(frames.flatMap(({ affineWrites }) => affineWrites)).toEqual([
+        {
+          source: "phase-negative",
+          xScaleSigned: -256,
+          xScaleU16: 0xff00,
+          yScaleSigned: 256,
+          yScaleU16: 0x0100,
+          rotationSigned: 0,
+          rotationU16: 0,
+        },
+        {
+          source: "phase-identity",
+          xScaleSigned: 256,
+          xScaleU16: 0x0100,
+          yScaleSigned: 256,
+          yScaleU16: 0x0100,
+          rotationSigned: 0,
+          rotationU16: 0,
+        },
+        {
+          source: "terminal-identity",
+          xScaleSigned: 256,
+          xScaleU16: 0x0100,
+          yScaleSigned: 256,
+          yScaleU16: 0x0100,
+          rotationSigned: 0,
+          rotationU16: 0,
+        },
+      ]);
+    });
+
+    it("pins strict phase edges, same-callback terminal reset, stable rest, and invalid ticks", () => {
+      expect(figure8FrameAtTick(15)).toMatchObject({
+        data6: 64, data7: 0, affineWriteCount: 0, affineXScaleSigned: 256,
+      });
+      expect(figure8FrameAtTick(16)).toMatchObject({
+        data6: 68, data7Before: 0, data7: 1, affineXScaleSigned: -256,
+        affineXScaleU16: 0xff00, affineWriteCount: 1,
+      });
+      expect(figure8FrameAtTick(47)).toMatchObject({
+        data6: 192, data7: 1, affineWriteCount: 0, affineXScaleSigned: -256,
+      });
+      expect(figure8FrameAtTick(48)).toMatchObject({
+        data6: 196, data7Before: 1, data7: 2, affineXScaleSigned: 256,
+        affineXScaleU16: 0x0100, affineWriteCount: 1,
+      });
+      expect(figure8FrameAtTick(62)).toMatchObject({
+        data6: 252, callback: "Figure8", affineMode: "double",
+        resetSpriteAfterAnim: false,
+      });
+      expect(figure8FrameAtTick(63)).toMatchObject({
+        x2: 0,
+        y2: 0,
+        data6Before: 252,
+        data6: 256,
+        data7: 2,
+        affineWriteCount: 1,
+        affineXScaleSigned: 256,
+        affineXScaleU16: 0x0100,
+        resetSpriteAfterAnim: true,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      });
+      expect(figure8FrameAtTick(64)).toEqual(figure8FrameAtTick(63));
+      expect(figure8FrameAtTick(4096)).toEqual(figure8FrameAtTick(63));
+      for (const invalid of [-1, 0.5, Number.NaN, Number.POSITIVE_INFINITY]) {
+        expect(figure8FrameAtTick(invalid)).toBeNull();
       }
     });
   });

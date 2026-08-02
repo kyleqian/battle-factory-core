@@ -55,6 +55,7 @@ export type SpeciesFrontAnimFamily =
   | "LUNGE_GROW"
   | "FLASH_YELLOW"
   | "FLICKER_INCREASING"
+  | "FIGURE_8"
   | "H_JUMPS"
   | "H_SLIDE"
   | "H_SLIDE_SLOW"
@@ -103,6 +104,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "LUNGE_GROW",
   "FLASH_YELLOW",
   "FLICKER_INCREASING",
+  "FIGURE_8",
   "H_JUMPS",
   "H_SLIDE",
   "H_SLIDE_SLOW",
@@ -832,6 +834,23 @@ export const H_SLIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
 /** There are no normal horizontal-slide mappings outside the Factory rental pool. */
 export const H_SLIDE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   H_SLIDE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All source selector mappings for `ANIM_FIGURE_8`. */
+export const FIGURE_8_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_FIGURE_8")
+    .map(([species]) => species),
+);
+
+/** Every Figure8 mapping is reachable through Factory rentals. */
+export const FIGURE_8_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  FIGURE_8_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no Figure8 mappings outside the Factory rental pool. */
+export const FIGURE_8_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  FIGURE_8_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /** All 7 source selector mappings for the slow `ANIM_H_SLIDE_SLOW`. */
@@ -4648,6 +4667,171 @@ export function flashYellowFrameAtTick(
   throw new Error("unreachable FlashYellow reducer state");
 }
 
+/** Source selector 43's initializer-only `Anim_Figure8` receipt. */
+export const FIGURE_8_INITIALIZER = Object.freeze({
+  selector: "ANIM_FIGURE_8",
+  sourceId: 43,
+  handleStartAffineAnimCalls: 1,
+  data6: 0,
+  data7: 0,
+  callbackInstalled: "Figure8",
+  figure8BodyCalls: 0,
+  normalFrontDontFlip: true,
+  affineMode: "double",
+  accepted: true,
+} as const);
+
+export interface Figure8AffineWrite {
+  readonly source: "phase-negative" | "phase-identity" | "terminal-identity";
+  readonly xScaleSigned: -256 | 256;
+  /** The signed x-scale's exact 16-bit argument pattern. */
+  readonly xScaleU16: 0xff00 | 0x0100;
+  readonly yScaleSigned: 256;
+  readonly yScaleU16: 0x0100;
+  readonly rotationSigned: 0;
+  readonly rotationU16: 0;
+}
+
+export interface Figure8Frame extends SpeciesIdleOffset {
+  readonly data6Before: number;
+  readonly data6: number;
+  readonly data7Before: 0 | 1 | 2;
+  readonly data7: 0 | 1 | 2;
+  readonly xSineIndex: number;
+  readonly ySineIndex: number;
+  readonly xSine: number;
+  readonly ySine: number;
+  /** Position writes immediately after both source `Sin` calls. */
+  readonly motionX2: number;
+  readonly motionY2: number;
+  readonly affineWrites: readonly Figure8AffineWrite[];
+  readonly affineWriteCount: 0 | 1;
+  readonly affineXScaleSigned: -256 | 256;
+  readonly affineXScaleU16: 0xff00 | 0x0100;
+  readonly affineYScaleSigned: 256;
+  readonly affineYScaleU16: 0x0100;
+  readonly affineRotationU16: 0;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXBeforeMotion: true;
+  readonly tryFlipXAfterTerminalCheck: true;
+  readonly tryFlipXCalls: 2;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "Figure8" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+function figure8AffineWrite(
+  source: Figure8AffineWrite["source"],
+  xScaleSigned: -256 | 256,
+): Figure8AffineWrite {
+  return {
+    source,
+    xScaleSigned,
+    xScaleU16: toU16(xScaleSigned) as 0xff00 | 0x0100,
+    yScaleSigned: 256,
+    yScaleU16: 0x0100,
+    rotationSigned: 0,
+    rotationU16: 0,
+  };
+}
+
+/**
+ * Source-order port of selector 43's `Anim_Figure8` -> `Figure8`
+ * (`pokemon_animation.c:1003-1034,2435-2471,5540-5544`) for the ordinary
+ * opponent-front `Task_HandleMonAnimation` path. The initializer starts
+ * affine mode, zeroes data6/data7, and installs `Figure8` without invoking
+ * its body. Callback tick zero is therefore the first body call.
+ *
+ * Every callback retains both source-order `TryFlipX` calls as no-ops because
+ * the task set `sDontFlip=TRUE`, increments signed data6 by four before both
+ * signed GBA sine writes, and evaluates the `>192` phase before the `>64`
+ * phase. The strict terminal callback is tick 63 (data6 252 -> 256); it clears
+ * position, writes identity, resets affine mode, and installs stable
+ * `WaitAnimEnd` on that same callback.
+ */
+export function figure8FrameAtTick(ticksSinceStart: number): Figure8Frame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  let data6: number = FIGURE_8_INITIALIZER.data6;
+  let data7: 0 | 1 | 2 = FIGURE_8_INITIALIZER.data7;
+  let x2 = 0;
+  let y2 = 0;
+  let affineXScaleSigned: -256 | 256 = 256;
+  let callback: Figure8Frame["callback"] = "Figure8";
+  let affineMode: Figure8Frame["affineMode"] = "double";
+  let lastFrame: Figure8Frame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (callback === "WaitAnimEnd") continue;
+
+    const data6Before = data6;
+    const data7Before = data7;
+    data6 = toS16(data6 + 4);
+    const xSineIndex = data6;
+    const ySineIndex = (data6 * 2) & 0xff;
+    const xSine = gbaSin(xSineIndex, 16);
+    const ySine = gbaSin(ySineIndex, 8);
+    const motionX2 = toS16(-xSine);
+    const motionY2 = toS16(-ySine);
+    x2 = motionX2;
+    y2 = motionY2;
+
+    const affineWrites: Figure8AffineWrite[] = [];
+    if (data6 > 192 && data7 === 1) {
+      affineXScaleSigned = 256;
+      affineWrites.push(figure8AffineWrite("phase-identity", affineXScaleSigned));
+      data7 = 2;
+    } else if (data6 > 64 && data7 === 0) {
+      affineXScaleSigned = -256;
+      affineWrites.push(figure8AffineWrite("phase-negative", affineXScaleSigned));
+      data7 = 1;
+    }
+
+    let resetSpriteAfterAnim = false;
+    if (data6 > 255) {
+      x2 = 0;
+      y2 = 0;
+      affineXScaleSigned = 256;
+      affineWrites.push(figure8AffineWrite("terminal-identity", affineXScaleSigned));
+      resetSpriteAfterAnim = true;
+      affineMode = "normal";
+      callback = "WaitAnimEnd";
+    }
+
+    lastFrame = {
+      x2,
+      y2,
+      data6Before,
+      data6,
+      data7Before,
+      data7,
+      xSineIndex,
+      ySineIndex,
+      xSine,
+      ySine,
+      motionX2,
+      motionY2,
+      affineWrites,
+      affineWriteCount: affineWrites.length as 0 | 1,
+      affineXScaleSigned,
+      affineXScaleU16: toU16(affineXScaleSigned) as 0xff00 | 0x0100,
+      affineYScaleSigned: 256,
+      affineYScaleU16: 0x0100,
+      affineRotationU16: 0,
+      normalFrontDontFlip: true,
+      tryFlipXBeforeMotion: true,
+      tryFlipXAfterTerminalCheck: true,
+      tryFlipXCalls: 2,
+      resetSpriteAfterAnim,
+      callback,
+      affineMode,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable Figure8 reducer state");
+  return lastFrame;
+}
+
 function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffset {
   switch (family) {
     case "BOUNCE_ROTATE_TO_SIDES": {
@@ -4752,6 +4936,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = flickerIncreasingFrameAtTick(65);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_FlickerIncreasing did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "FIGURE_8": {
+      const terminal = figure8FrameAtTick(63);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_Figure8 did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
