@@ -4,8 +4,15 @@ import {
   isTurn1NextCommandLifecycleActive,
   isTurn1NextCommandHandoffReady,
   resolveTurn1CompletedResolutionNextCommandHandoff,
+  resolveTurn1LatestCompletedCommandHandoff,
+  turn1CompletedResolutionNextCommandHandoffFromLatest,
   turn1PresentationEpochElapsedSinceReset,
 } from "../src/engine/turn1ResolutionAdapter.ts";
+import {
+  isLatestCompletedCommandHandoffReady,
+  isLatestCompletedCommandLifecycleActive,
+  latestCompletedCommandPresentationEpochElapsedSinceReset,
+} from "../src/engine/nextCommandHandoff.ts";
 import {
   isTurn1ChooseActionBounceReset,
   turn1ChooseActionResetElapsed,
@@ -47,6 +54,25 @@ describe("turn1ResolutionAdapter: #39 completed-turn-1/next-command handoff proo
     expect(turn1PresentationEpochElapsedSinceReset(handoff, 524)).toBe(7);
   });
 
+  it("carries the HP pair and immutable epoch through generic semantic content", () => {
+    const legacy = resolveTurn1CompletedResolutionNextCommandHandoff(517);
+    const latest = resolveTurn1LatestCompletedCommandHandoff(517);
+    const content = latest.content;
+    if (content === undefined) throw new Error("turn-1 generic receipt has no content");
+
+    expect(isLatestCompletedCommandHandoffReady(latest)).toBe(true);
+    expect(latest.playerPp).toEqual(legacy.playerPp);
+    expect(latest.persistedMoveSlot).toBe(legacy.persistedMoveSlot);
+    expect(content.field.player.hp.current).toBe(legacy.hp.player);
+    expect(content.field.opponent.hp.current).toBe(legacy.hp.opponent);
+    expect(content.presentationEpoch).toEqual(legacy.presentationEpoch);
+    expect(latestCompletedCommandPresentationEpochElapsedSinceReset(latest, 524)).toBe(7);
+    expect(turn1CompletedResolutionNextCommandHandoffFromLatest(latest)).toEqual(legacy);
+    expect(Object.isFrozen(content.presentationEpoch)).toBe(true);
+    expect(Object.isFrozen(content.presentationEpoch!.mon)).toBe(true);
+    expect(Object.isFrozen(content.presentationEpoch!.healthbox)).toBe(true);
+  });
+
   it("publishes at the source reset and activates only for the later command lifecycle", () => {
     const handoff = resolveTurn1CompletedResolutionNextCommandHandoff(1308);
 
@@ -59,6 +85,11 @@ describe("turn1ResolutionAdapter: #39 completed-turn-1/next-command handoff proo
     // overwrite the receipt's immutable completed-turn epoch.
     expect(isTurn1NextCommandLifecycleActive(handoff, 1870)).toBe(true);
     expect(handoff.presentationEpoch.elapsed).toBe(1308);
+
+    const latest = resolveTurn1LatestCompletedCommandHandoff(1308);
+    expect(isLatestCompletedCommandLifecycleActive(latest, 847)).toBe(false);
+    expect(isLatestCompletedCommandLifecycleActive(latest, 1861)).toBe(true);
+    expect(isLatestCompletedCommandLifecycleActive(latest, 1870)).toBe(true);
   });
 
   it("freezes every owner-facing nested fact", () => {

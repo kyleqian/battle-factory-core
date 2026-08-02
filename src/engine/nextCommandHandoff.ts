@@ -1,5 +1,6 @@
 import {
   createFightCommandPresentation,
+  type FightCommandPresentationEpoch,
   type FightCommandPresentation,
 } from "./fightCommandPresentation.ts";
 import type { GbaButton } from "../input.ts";
@@ -171,6 +172,42 @@ export function isLatestCompletedCommandHandoffReady(
 ): handoff is LatestCompletedCommandHandoff {
   return handoff?.nextCommand.redraw === "settled"
     && handoff.nextCommand.input === "ready";
+}
+
+/**
+ * Narrows the generic receipt to the contentful early-boundary form.  Epoch
+ * presence is semantic presentation data, never a proxy for a completed-turn
+ * number or a PP tuple.
+ */
+export function latestCompletedCommandPresentationEpoch(
+  handoff: LatestCompletedCommandHandoff | null | undefined,
+): FightCommandPresentationEpoch | null {
+  return handoff?.content?.presentationEpoch ?? null;
+}
+
+/**
+ * The later FIGHT lifecycle begins after the source-owned reset edge.  A
+ * same-turn B-close/A-reopen supplies a new UI open elapsed but deliberately
+ * continues to consume the same immutable content epoch.
+ */
+export function isLatestCompletedCommandLifecycleActive(
+  handoff: LatestCompletedCommandHandoff | null | undefined,
+  openElapsed: number | null,
+): handoff is LatestCompletedCommandHandoff {
+  const epoch = latestCompletedCommandPresentationEpoch(handoff);
+  return isLatestCompletedCommandHandoffReady(handoff)
+    && epoch !== null
+    && openElapsed !== null
+    && openElapsed > epoch.elapsed;
+}
+
+/** Runtime-relative age of a semantic presentation epoch, if this receipt owns one. */
+export function latestCompletedCommandPresentationEpochElapsedSinceReset(
+  handoff: LatestCompletedCommandHandoff | null | undefined,
+  currentElapsed: number,
+): number | null {
+  const epoch = latestCompletedCommandPresentationEpoch(handoff);
+  return epoch === null ? null : currentElapsed - epoch.elapsed;
 }
 
 /**

@@ -83,7 +83,27 @@ export type FightCommandBouncePresentation = Readonly<{
     preFreezeTickOffset: number;
     frozenBounceTick?: number;
     frozenPressTickOffset?: number;
+    /**
+     * A fixed output phase for runtime-relative command epochs.  Unlike the
+     * two source-tick anchors above, this is already the bounce-table epoch
+     * consumed by the renderer and therefore needs no trace-tick conversion.
+     */
+    frozenBounceEpochTick?: number;
   }>;
+}>;
+
+/**
+ * The early command boundary is published by the real choose-action
+ * controller, not by a later FIGHT input.  It is optional content because
+ * only the early receipts carry this source-owned DoBounceEffect identity.
+ */
+export type FightCommandPresentationEpoch = Readonly<{
+  owner: "HandleInputChooseAction";
+  reset: "DoBounceEffect";
+  /** Runtime-relative scene elapsed at the controller's reset event. */
+  elapsed: number;
+  mon: Readonly<{ seed: 192; delta: 7; amplitude: 1 }>;
+  healthbox: Readonly<{ seed: 128; delta: 7; amplitude: 1 }>;
 }>;
 
 export type FightCommandPresentation = Readonly<{
@@ -92,6 +112,8 @@ export type FightCommandPresentation = Readonly<{
     opponent: FightCommandFieldBattler;
   }>;
   bounce: FightCommandBouncePresentation;
+  /** Present only when this completed command owns a fresh bounce epoch. */
+  presentationEpoch?: FightCommandPresentationEpoch;
   /**
    * The real move/text stream available to the next command renderer.
    * `null` is an explicit absence of a generic text stream; a retained
@@ -166,6 +188,26 @@ function freezeMove(input: FightCommandMovePresentation): FightCommandMovePresen
   });
 }
 
+function freezePresentationEpoch(
+  input: FightCommandPresentationEpoch,
+): FightCommandPresentationEpoch {
+  return Object.freeze({
+    owner: input.owner,
+    reset: input.reset,
+    elapsed: input.elapsed,
+    mon: Object.freeze({
+      seed: input.mon.seed,
+      delta: input.mon.delta,
+      amplitude: input.mon.amplitude,
+    }),
+    healthbox: Object.freeze({
+      seed: input.healthbox.seed,
+      delta: input.healthbox.delta,
+      amplitude: input.healthbox.amplitude,
+    }),
+  });
+}
+
 function freezeRetainedResolution(
   input: FightCommandRetainedResolutionPresentation,
 ): FightCommandRetainedResolutionPresentation {
@@ -189,7 +231,13 @@ export function createFightCommandPresentation(
   const kickoff = input.bounce.kickoff;
   const hasFixedBounceTick = kickoff.frozenBounceTick !== undefined;
   const hasPressRelativeBounceTick = kickoff.frozenPressTickOffset !== undefined;
-  if (hasFixedBounceTick === hasPressRelativeBounceTick) {
+  const hasFixedBounceEpochTick = kickoff.frozenBounceEpochTick !== undefined;
+  if (
+    Number(hasFixedBounceTick)
+      + Number(hasPressRelativeBounceTick)
+      + Number(hasFixedBounceEpochTick)
+      !== 1
+  ) {
     throw new Error(
       "fightCommandPresentation: kickoff needs exactly one frozen bounce anchor",
     );
@@ -211,8 +259,14 @@ export function createFightCommandPresentation(
         ...(hasPressRelativeBounceTick
           ? { frozenPressTickOffset: kickoff.frozenPressTickOffset }
           : {}),
+        ...(hasFixedBounceEpochTick
+          ? { frozenBounceEpochTick: kickoff.frozenBounceEpochTick }
+          : {}),
       }),
     }),
+    ...(input.presentationEpoch === undefined
+      ? {}
+      : { presentationEpoch: freezePresentationEpoch(input.presentationEpoch) }),
     ...(input.upcoming === null
       ? { upcoming: null }
       : {
@@ -274,6 +328,10 @@ export function fightCommandKickoffBounceEpochTick(
   confirmTick: number,
 ): number {
   const kickoff = presentation.bounce.kickoff;
+  if (tick >= confirmTick + kickoff.freezeAfterConfirmTicks
+    && kickoff.frozenBounceEpochTick !== undefined) {
+    return kickoff.frozenBounceEpochTick;
+  }
   const sourceTick = tick < confirmTick + kickoff.freezeAfterConfirmTicks
     ? tick + kickoff.preFreezeTickOffset
     : kickoff.frozenBounceTick

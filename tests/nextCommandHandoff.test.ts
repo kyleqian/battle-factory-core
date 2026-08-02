@@ -4,6 +4,9 @@ import {
   createNextCommandReopenGuard,
   createLatestCompletedCommandHandoff,
   isLatestCompletedCommandHandoffReady,
+  isLatestCompletedCommandLifecycleActive,
+  latestCompletedCommandPresentationEpoch,
+  latestCompletedCommandPresentationEpochElapsedSinceReset,
   projectLatestCompletedCommandPp,
   withNextCommandReopenGuard,
 } from "../src/engine/nextCommandHandoff.ts";
@@ -90,6 +93,13 @@ describe("LatestCompletedCommandHandoff", () => {
           frozenBounceTick: 8122,
         },
       },
+      presentationEpoch: {
+        owner: "HandleInputChooseAction",
+        reset: "DoBounceEffect",
+        elapsed: 1308,
+        mon: { seed: 192, delta: 7, amplitude: 1 },
+        healthbox: { seed: 128, delta: 7, amplitude: 1 },
+      },
       upcoming: {
         firstTextStartDelay: 13,
         moves: [{
@@ -113,10 +123,55 @@ describe("LatestCompletedCommandHandoff", () => {
     expect(handoff.content).not.toBe(content);
     expect(Object.isFrozen(handoff.content)).toBe(true);
     expect(Object.isFrozen(handoff.content!.field.player.hp)).toBe(true);
+    expect(Object.isFrozen(handoff.content!.presentationEpoch)).toBe(true);
+    expect(Object.isFrozen(handoff.content!.presentationEpoch!.mon)).toBe(true);
     expect(Object.isFrozen(handoff.content!.upcoming!.moves)).toBe(true);
     expect(handoff.content!.retainedResolution!.owner).toBe(retainedOwner);
     expect(handoff.content!.retainedResolution!.segments)
       .toBe(retainedOwner.resolution.segments);
+  });
+
+  it("treats optional epoch presence as semantic content for lifecycle age", () => {
+    const handoff = createLatestCompletedCommandHandoff({
+      playerPp: [9, 20, 20, 10],
+      persistedMoveSlot: 0,
+      nextCommand: { redraw: "settled", input: "ready" },
+      content: createFightCommandPresentation({
+        field: {
+          player: {
+            species: "ONIX", displayName: "ONIX", level: 50, gender: "male", status: "none",
+            hp: { current: 117, max: 117 }, attackStage: 6,
+          },
+          opponent: {
+            species: "GROVYLE", displayName: "GROVYLE", level: 50, gender: "male", status: "none",
+            hp: { current: 101, max: 143 }, attackStage: 6,
+          },
+        },
+        bounce: {
+          actionMenuRedrawTick: 1308,
+          idleBounceEpochTick: 1748,
+          fightSubmenuTickOffset: -2,
+          kickoff: {
+            freezeAfterConfirmTicks: 9,
+            preFreezeTickOffset: -2,
+            frozenBounceEpochTick: 2119,
+          },
+        },
+        presentationEpoch: {
+          owner: "HandleInputChooseAction",
+          reset: "DoBounceEffect",
+          elapsed: 1308,
+          mon: { seed: 192, delta: 7, amplitude: 1 },
+          healthbox: { seed: 128, delta: 7, amplitude: 1 },
+        },
+        upcoming: null,
+      }),
+    });
+
+    expect(latestCompletedCommandPresentationEpoch(handoff)?.elapsed).toBe(1308);
+    expect(latestCompletedCommandPresentationEpochElapsedSinceReset(handoff, 1861)).toBe(553);
+    expect(isLatestCompletedCommandLifecycleActive(handoff, 1308)).toBe(false);
+    expect(isLatestCompletedCommandLifecycleActive(handoff, 1861)).toBe(true);
   });
 
   it("rejects retained segments that do not belong to the supplied owner", () => {
