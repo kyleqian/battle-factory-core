@@ -12,11 +12,9 @@ import type { BattleCommandRequest } from "../src/engine/battleDecisionBoundary.
  * Repro for docs/silverwind-allstatsup-crash-scout.md: BUTTERFREE's SILVER
  * WIND secondary (10% MOVE_EFFECT_ALL_STATS_UP proc, MOVE_EFFECT_AFFECTS_USER)
  * emits a real STRINGID_ATTACKERSSTATROSE message event from the production
- * kernel, but battleResolutionPresentation.ts's messageLines only handles the
- * STRINGID_DEFENDERSSTATROSE/FELL (target !== attacker) variant -- so the
- * production presentation entry point throws. it.fails so the suite stays
- * green until the main-lane fix adds the missing ATTACKER-variant branch;
- * flip this to a plain `it` once that branch exists.
+ * kernel. battleResolutionPresentation.ts's messageLines now has the
+ * ATTACKER-variant branch mirroring STRINGID_DEFENDERSSTATROSE/FELL, so this
+ * no longer throws.
  */
 const SCENARIO: FactoryFullTurnConfig = Object.freeze({
   requestId: 1,
@@ -58,8 +56,8 @@ const SCENARIO: FactoryFullTurnConfig = Object.freeze({
 });
 
 describe("Silver Wind All-Stats-Up ATTACKERSSTATROSE presentation crash", () => {
-  it.fails(
-    "the production resolution presentation throws on BUTTERFREE's proc'd SILVER_WIND (docs/silverwind-allstatsup-crash-scout.md)",
+  it(
+    "the production resolution presentation resolves BUTTERFREE's proc'd SILVER_WIND into five ordered stat banners (docs/silverwind-allstatsup-crash-scout.md)",
     () => {
       const initial = createFactoryFullTurnBattleState(SCENARIO);
       if (initial.boundary.kind !== "decision-required") {
@@ -81,7 +79,7 @@ describe("Silver Wind All-Stats-Up ATTACKERSSTATROSE presentation crash", () => 
 
       // Confirm the kernel itself ran the proc correctly (five real ATK/DEF/
       // SPEED/SPATK/SPDEF stat rises, all reported via STRINGID_ATTACKERSSTATROSE)
-      // before handing off to presentation -- the crash is downstream, not here.
+      // before handing off to presentation -- the crash was downstream, not here.
       const messageIds = transition.events
         .filter((event) => event.payload.kind === "message")
         .map((event) => (event.payload as { messageId: string }).messageId);
@@ -94,12 +92,12 @@ describe("Silver Wind All-Stats-Up ATTACKERSSTATROSE presentation crash", () => 
         0,
       );
 
-      // Throws today: "battleStringResolver: STRINGID_ATTACKERSSTATROSE
+      // Used to throw: "battleStringResolver: STRINGID_ATTACKERSSTATROSE
       // references placeholder {B_BUFF1} with no resolver supplied"
       // (src/engine/battleStringResolver.ts:144), reached via messageLines
       // (battleResolutionPresentation.ts:594), the production presentation
-      // path wired into the live render path.
-      createBattleResolutionPresentation({
+      // path wired into the live render path. Now resolves cleanly.
+      const resolution = createBattleResolutionPresentation({
         sourceRequest: initial.boundary.request as BattleCommandRequest,
         sourceDecision: { kind: "use-move", moveSlot: 0, targetBattler: 1 },
         beforeRules: initial.rules,
@@ -111,6 +109,31 @@ describe("Silver Wind All-Stats-Up ATTACKERSSTATROSE presentation crash", () => 
         },
         opponentTrainer: null,
       });
+
+      const commands = resolution.segments.flatMap((segment) => segment.commands);
+      const statCommands = commands.filter(
+        (cmd): cmd is Extract<typeof cmd, { type: "stat" }> => cmd.type === "stat",
+      );
+      expect(statCommands.map((cmd) => ({ battler: cmd.battler, stat: cmd.stat, from: cmd.from, to: cmd.to })))
+        .toEqual([
+          { battler: 0, stat: "attack", from: 6, to: 7 },
+          { battler: 0, stat: "defense", from: 6, to: 7 },
+          { battler: 0, stat: "speed", from: 6, to: 7 },
+          { battler: 0, stat: "special-attack", from: 6, to: 7 },
+          { battler: 0, stat: "special-defense", from: 6, to: 7 },
+        ]);
+
+      const messageLinesInOrder = commands
+        .filter((cmd): cmd is Extract<typeof cmd, { type: "message" }> => cmd.type === "message")
+        .map((cmd) => cmd.lines)
+        .filter((lines) => lines.some((line) => line.includes("rose!")));
+      expect(messageLinesInOrder).toEqual([
+        ["BUTTERFREE’s attack", "rose!"],
+        ["BUTTERFREE’s defense", "rose!"],
+        ["BUTTERFREE’s speed", "rose!"],
+        ["BUTTERFREE’s special-attack", "rose!"],
+        ["BUTTERFREE’s special-defense", "rose!"],
+      ]);
     },
   );
 });
