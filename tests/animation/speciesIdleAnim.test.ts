@@ -1444,7 +1444,7 @@ describe("speciesIdleAnim", () => {
       expect(twistTwiceFrameAtTick(0.5)).toBeNull();
     });
 
-    it("promotes selector 78 only; normal Twist and source-adjacent selectors remain unsupported", () => {
+    it("keeps normal Twist unsupported while the next circle selector is promoted", () => {
       const selectors = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
       const normalTwist = Object.entries(selectors)
         .filter(([, family]) => family === "ANIM_TWIST")
@@ -1463,7 +1463,7 @@ describe("speciesIdleAnim", () => {
       expect(preceding).toEqual([]);
       expect(following).toEqual(["DROWZEE", "SPINARAK"]);
       for (const species of following) {
-        expect(speciesFrontIdleRestOffset(species)).toBeNull();
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }
     });
   });
