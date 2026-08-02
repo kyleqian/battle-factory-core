@@ -36,14 +36,15 @@ settle battler 1 at x2=0/y2=0, animNum=1, animCmdIndex=4, data2=81, and
 **Verification / next:** focused family/evidence plus both animation ratchets
 are **331/331** green; `npx tsc --noEmit`, full `npm test` (**599 files / 6,163
 passed / 1 skipped**), and production build (**549 modules transformed**) are
-green. The generated front-selector program is now complete: selector 85 has
-no mapping, source ID 86 (`ANIM_H_JUMPS_V_STRETCH_TWICE`) was already accepted
-for SHARPEDO/SPOINK, and every species in generated `frontAnimIds` now resolves
-through a supported terminal reducer. Next bounded coverage-ranked component
-track: **`asset:ANIM_TAG_GUST`** — prove Level-50 representative
-`MOVE_RAZOR_WIND`, then independently batch-check Level-50 sibling
-`MOVE_STEEL_WING`; lower-priority `MOVE_GUST`/`MOVE_WING_ATTACK` remain outside
-this step.
+green. Selector 85 has no mapping and source ID 86
+(`ANIM_H_JUMPS_V_STRETCH_TWICE`) was already accepted for SHARPEDO/SPOINK, so
+neither is a next action. The standing send-out priority directive still keeps
+the remaining Tier-1 front ladder ahead of move-component work. Its largest
+remaining generated Factory census is **`ANIM_TWIST`** (source ID **18**;
+**5 mappings / 5 Factory / 0 outside**) — SHELLDER, HORSEA, STARMIE, CLAMPERL,
+and ANORITH. Reuse the accepted shared `Twist` callback, but prove the distinct
+normal runs=1 initializer and every species receipt independently of
+`ANIM_TWIST_TWICE`.
 
 ## Front `ANIM_SPIN` family accepted (2026-08-02)
 
