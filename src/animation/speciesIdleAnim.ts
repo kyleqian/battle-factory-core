@@ -78,6 +78,7 @@ export type SpeciesFrontAnimFamily =
   | "TUMBLING_FRONT_FLIP_TWICE"
   | "SWING_CONVEX"
   | "SWING_CONCAVE"
+  | "SWING_CONCAVE_FAST_SHORT"
   | "TWIST"
   | "TWIST_TWICE"
   | "V_JUMPS_BIG"
@@ -133,6 +134,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "TUMBLING_FRONT_FLIP_TWICE",
   "SWING_CONVEX",
   "SWING_CONCAVE",
+  "SWING_CONCAVE_FAST_SHORT",
   "TWIST",
   "TWIST_TWICE",
   "V_JUMPS_BIG",
@@ -309,6 +311,23 @@ export const SWING_CONCAVE_FACTORY_FRONT_SPECIES: readonly string[] = Object.fre
 /** There are no `ANIM_SWING_CONCAVE` selector mappings outside the Factory pool. */
 export const SWING_CONCAVE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   SWING_CONCAVE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All source selector mappings for the fast-short `ANIM_SWING_CONCAVE` callback. */
+export const SWING_CONCAVE_FAST_SHORT_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_SWING_CONCAVE_FAST_SHORT")
+    .map(([species]) => species),
+);
+
+/** The two fast-short mappings reachable through Factory rentals. */
+export const SWING_CONCAVE_FAST_SHORT_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  SWING_CONCAVE_FAST_SHORT_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** The fast-short mapping outside the Factory rental pool (KYOGRE). */
+export const SWING_CONCAVE_FAST_SHORT_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  SWING_CONCAVE_FAST_SHORT_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /** All 10 source selector mappings for `ANIM_V_SLIDE`. */
@@ -1598,6 +1617,7 @@ export interface SwingFrame<Callback extends "SwingConcave" | "SwingConvex">
 
 export type SwingConcaveFrame = SwingFrame<"SwingConcave">;
 export type SwingConvexFrame = SwingFrame<"SwingConvex">;
+export type SwingConcaveFastShortFrame = SwingFrame<"SwingConcave">;
 
 /**
  * Both initializers invoke `VerticalSlide` immediately and then install that
@@ -1811,6 +1831,7 @@ export const ADD_NEW_ANIM_DEFAULTS = Object.freeze({
 });
 
 const SWING_CONCAVE_DURATION = 100;
+const SWING_CONCAVE_FAST_SHORT_DURATION = 50;
 
 /**
  * The normal, fast, and unused fast-short selectors all share `SwingConvex`.
@@ -1830,6 +1851,19 @@ export const SWING_CONVEX_INITIALIZERS = Object.freeze({
     unused: true,
     accepted: false,
   }),
+} as const);
+
+/** Source selector 45's `AddNewAnim` initializer and immediate callback call. */
+export const SWING_CONCAVE_FAST_SHORT_INITIALIZER = Object.freeze({
+  selector: "ANIM_SWING_CONCAVE_FAST_SHORT",
+  sourceId: 45,
+  data: 50,
+  runs: 1,
+  callbackInvokedByInitializer: true,
+  callbackInstalled: "SwingConcave",
+  normalFrontDontFlip: true,
+  affineMode: "double",
+  accepted: true,
 } as const);
 
 function tryFlipX(x2: number, dontFlip: boolean): number {
@@ -1852,8 +1886,9 @@ function swingFrameAtTick<Callback extends "SwingConcave" | "SwingConvex">(
   ticksSinceStart: number,
   callback: Callback,
   rotationSign: 1 | -1,
+  duration = SWING_CONCAVE_DURATION,
 ): SwingFrame<Callback> | null {
-  if (ticksSinceStart < 0) return null;
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
 
   // `InitAnimData`, called by `AddNewAnim`, is the source of these defaults.
   const animRotation = 0;
@@ -1861,7 +1896,7 @@ function swingFrameAtTick<Callback extends "SwingConcave" | "SwingConvex">(
   const animRuns = 1;
   const animSpeed = 0;
   let animData = 0;
-  animData = SWING_CONCAVE_DURATION;
+  animData = duration;
   let data2 = 0;
   let x2 = 0;
 
@@ -1931,6 +1966,24 @@ function swingFrameAtTick<Callback extends "SwingConcave" | "SwingConvex">(
 
 export function swingConcaveFrameAtTick(ticksSinceStart: number): SwingConcaveFrame | null {
   return swingFrameAtTick(ticksSinceStart, "SwingConcave", 1);
+}
+
+/**
+ * Source-order port of selector 45's `Anim_SwingConcave_FastShort`
+ * (`pokemon_animation.c:2544-2550`). It allocates the normal one-run anim
+ * record, overwrites only `data=50`, invokes `SwingConcave` immediately, and
+ * then installs that same callback. The shared callback therefore has active
+ * ticks 0..50 and its strict terminal callback at tick 51.
+ */
+export function swingConcaveFastShortFrameAtTick(
+  ticksSinceStart: number,
+): SwingConcaveFastShortFrame | null {
+  return swingFrameAtTick(
+    ticksSinceStart,
+    "SwingConcave",
+    1,
+    SWING_CONCAVE_FAST_SHORT_DURATION,
+  );
 }
 
 /**
@@ -5863,6 +5916,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = swingConcaveFrameAtTick(101);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_SwingConcave did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "SWING_CONCAVE_FAST_SHORT": {
+      const terminal = swingConcaveFastShortFrameAtTick(51);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_SwingConcave_FastShort did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
