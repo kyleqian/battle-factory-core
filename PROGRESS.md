@@ -13,27 +13,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
-## 841 — [bounded MAIN worker, 2026-08-01] turn-1 reset seam checkpoint; consumer retirement in progress
+## 841 — [bounded MAIN worker, 2026-08-01] turn-1 predecessor retired with immutable epoch
 
-- **State:** `b34e6279` is a clean, green source-reset checkpoint. The
-  immutable turn-1 receipt is now published at the modeled
-  `HandleInputChooseAction` → `DoBounceEffect` event (relative elapsed
-  **1308**); `turn1Resolved` intentionally remains live pending the one
-  uncommitted consumer migration and dense reader proof.
-- **Did:** added the source-relative controller seam (confirmation +429, not
-  an absolute tick), wired state initialization/copy/writeback, and pinned
-  reset/lifecycle semantics: old open 847 is inactive, turn-2 open 1861 is
-  active, and later same-turn reopen cannot overwrite epoch 1308. Focused
-  Tier-1 is green (battleMenu, battleMenuIdle, battleScene, battleSetup,
-  fightSubmenu, battle2ActionMenu, turn1 adapter), plus `npx tsc --noEmit`
-  and build.
-- **Next:** migrate core guards, HP, PP, and all turn-2 bounce consumers to
-  the handoff’s immutable epoch; add the 2901 pseudo-t=2299 tuple pin, then
-  run the exact clean-parent **1,162/1,162** differential before committing
-  the removal.
-- **Notes:** no traces/capture lists, recording imports, ratchet/barrier
-  counts, or selector branches changed. Full `npm test` remains deliberately
-  unrun per the bounded-step brief.
+- **State:** `13389b9c` retires `turn1Resolved`; every production/test
+  consumer now uses `turn1NextCommandHandoff`, published at the source-owned
+  reset (relative elapsed **1308**).
+- **Did:** migrated the core guard/write/predecessor, opponent HP, slot-0 PP,
+  and turn-2 submenu/kickoff bounce clock. New Tier-1 tuple pins 2901
+  `ready=true`, epoch 1308, open/current 1861, and pseudo-t 2299; drivers
+  remain live through 2947 and freeze at 2948. Same-turn B-close/A-reopen
+  preserves the immutable epoch.
+- **Next:** stay scoped: turns 2–4, `opponentFaintDismissElapsed`, and
+  dispatcher debt remain #39 work; do not reopen turn-1.
+- **Notes:** clean-parent `76af5060` (`b34e6279^`) app replays are
+  byte-identical: turn-1 **669/669**, turn-2 readers **493/493**, total
+  **1,162/1,162** raw RGBA captures. Focused Tier-1 **456/456** (7 files),
+  `npx tsc --noEmit`, and `npm run build` green; full `npm test` deliberately
+  unrun per the bounded-step brief. No trace/capture-list, recording import,
+  ratchet/barrier, or selector changes.
 
 ## 840 — [supervisor wind-down, 2026-08-01 17:30] 9-step session: turns 9-12 retired, #63 fixed, #61+#56-tail parked, three prep dossiers banked
 

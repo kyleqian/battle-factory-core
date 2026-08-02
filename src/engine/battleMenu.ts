@@ -23,6 +23,10 @@
 
 import { rentalMoveset, type ActiveMonMoveset } from "./battleSetup.ts";
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
+import {
+  isTurn1NextCommandHandoffReady,
+  type Turn1CompletedResolutionNextCommandHandoff,
+} from "./turn1ResolutionAdapter.ts";
 import type { Turn5CompletedResolutionNextCommandHandoff } from "./turn5ResolutionAdapter.ts";
 import type { Turn6CompletedResolutionNextCommandHandoff } from "./turn6ResolutionAdapter.ts";
 import type { Turn7CompletedResolutionNextCommandHandoff } from "./turn7ResolutionAdapter.ts";
@@ -2484,25 +2488,18 @@ export const TURN7_ROCKSLIDE_REOPEN_GATE_DELAY = 765;
 // glyph run within it that needs to become a fresh "9/10" render.
 
 /**
- * Turn 1's own A-confirm press tick (RAM/render 1919 - matches
- * `FIGHT_CONFIRM_TEXT_DELAY`'s own doc: press-registers 1919 -> first glyph
- * 1929; `1919 + ROCK_SLIDE_MENU_REDRAW_DELAY(664) = 2583` matches the
- * resettled-menu redraw tick exactly). Needed here because reopening FIGHT
- * for turn 2 does NOT reset the underlying bounce task
- * (`HandleInputChooseMove` doesn't call `DoBounceEffect`/`EndBounceEffect`,
- * per this file's own turn-1 doc) - it inherits the RESETTLED action menu's
- * own re-anchored phase (`rockSlideResettledBounceTick`), not a fresh
- * absolute-`t` mapping the way turn 1's own very first open happened to
- * (that one coincided with the very first menu's own natural anchor, a
- * coincidence turn 2 doesn't share - oracle-pixel-confirmed this session:
- * the plain `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` formula that works for
- * turn 1 produces a wrong phase for turn 2's own dwelling ticks).
+ * Turn 2's reopened-submenu phase expressed from the immutable source-owned
+ * action-menu reset.  `presentationEpochAge` is not itself a menu clock: it
+ * continues from the first menu's local origin (1748), then applies the
+ * ordinary FIGHT DMA-open correction.  At the 2901 reopen this yields
+ * `1748 + (1861 - 1308) - 2 = 2299`.
  */
-const TURN1_CONFIRM_PRESS_TICK = 1919;
-
-/** S7 slice E1: turn 2's own reopened submenu's bounce overlay - composes the resettled remap (`TURN1_CONFIRM_PRESS_TICK`'s own doc) with the ordinary `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` DMA-wait correction every submenu open needs. */
-export function turn2SubmenuBounceTick(t: number, redrawDelay: number = ROCK_SLIDE_MENU_REDRAW_DELAY): number {
-  return rockSlideResettledBounceTick(t, TURN1_CONFIRM_PRESS_TICK, redrawDelay) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+export function turn2SubmenuBounceTickFromPresentationEpochAge(
+  presentationEpochAge: number,
+): number {
+  return MENU_IDLE_BLANK_END_TICK + 1
+    + presentationEpochAge
+    - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
 }
 
 /**
@@ -2522,9 +2519,19 @@ export function turn2SubmenuBounceTick(t: number, redrawDelay: number = ROCK_SLI
  */
 const TURN2_KICKOFF_FROZEN_BOUNCE_TICK = 2119;
 
-/** S7 slice E1's own analogue of `turnKickoffBounceTick`, composed with `turn2SubmenuBounceTick`'s own resettled remap - live for the same `FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY` ticks after the press, then frozen at `TURN2_KICKOFF_FROZEN_BOUNCE_TICK`. */
-export function turn2KickoffBounceTick(t: number, pressTick: number, redrawDelay: number = ROCK_SLIDE_MENU_REDRAW_DELAY): number {
-  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return turn2SubmenuBounceTick(t, redrawDelay);
+/**
+ * Turn 2's kickoff keeps the submenu clock through the live confirm wait,
+ * then preserves the hardware's literal flat plateau.  Both elapsed inputs
+ * are runtime-relative; no move-local redraw delay is a downstream owner.
+ */
+export function turn2KickoffBounceTick(
+  currentElapsed: number,
+  confirmElapsed: number,
+  presentationEpochAge: number,
+): number {
+  if (currentElapsed < confirmElapsed + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) {
+    return turn2SubmenuBounceTickFromPresentationEpochAge(presentationEpochAge);
+  }
   return TURN2_KICKOFF_FROZEN_BOUNCE_TICK;
 }
 
@@ -2541,8 +2548,8 @@ export function turn2KickoffBounceTick(t: number, pressTick: number, redrawDelay
 /**
  * ISSUES #20's ONLY previously-live PP change (ROCK_SLIDE spending 1 PP
  * once turn 1 resolves, docs/battle-menu-notes.md §13/§13b), now generalized
- * to whatever `activeMonMoveset` the caller supplies - `turn1Resolved` still
- * only ever decrements SLOT 0 (this engine's own scripted turn-1 choice is
+ * to whatever `activeMonMoveset` the caller supplies - the completed turn-1
+ * receipt only ever decrements SLOT 0 (this engine's own scripted turn-1 choice is
  * always slot 0, `core.ts`'s own confirm gate), not "whichever move was
  * actually confirmed" in general. `turn2Resolved` (S7 slice F, docs/
  * battle-turn-notes.md §14: "DRAGON_BREATH... 19/20 remaining going into
@@ -2567,7 +2574,7 @@ export function turn2KickoffBounceTick(t: number, pressTick: number, redrawDelay
  */
 export function currentPPForActiveMon(
   moveset: ActiveMonMoveset,
-  turn1Resolved: boolean,
+  turn1NextCommandHandoff: Turn1CompletedResolutionNextCommandHandoff | null = null,
   turn2Resolved: boolean = false,
   turn3Resolved: boolean = false,
   turn4Resolved: boolean = false,
@@ -2612,8 +2619,12 @@ export function currentPPForActiveMon(
   // The completed turn-12 handoff owns ROCK_SLIDE's tenth use (a miss still
   // consumes PP) and the resulting exhausted 0/10 receipt at turn 13's
   // reopen.
+  const turn1Slot0Uses = isTurn1NextCommandHandoffReady(turn1NextCommandHandoff)
+    ? rentalMoveset("ONIX").maxPP[turn1NextCommandHandoff.persistedMoveSlot]
+      - turn1NextCommandHandoff.playerPp[turn1NextCommandHandoff.persistedMoveSlot]
+    : 0;
   const slot0UsesBeforeTurn5 =
-    (turn1Resolved ? 1 : 0) +
+    turn1Slot0Uses +
     (turn3Resolved ? 1 : 0) +
     (turn4Resolved ? 1 : 0);
   // The handoffs own full canonical tuples. This consumer reconstructs each

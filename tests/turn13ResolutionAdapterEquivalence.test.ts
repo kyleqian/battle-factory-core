@@ -16,6 +16,7 @@ import {
   turn13FaintedTextVisibleChars,
 } from "../src/engine/battleScene.ts";
 import { currentPPForActiveMon } from "../src/engine/battleMenu.ts";
+import { resolveTurn1CompletedResolutionNextCommandHandoff } from "../src/engine/turn1ResolutionAdapter.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
 import { resolveTurn5CompletedResolutionNextCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
 import { resolveTurn6CompletedResolutionNextCommandHandoff } from "../src/engine/turn6ResolutionAdapter.ts";
@@ -138,7 +139,7 @@ describe("turn13ResolutionAdapter: #39 rank-2 kernel-to-typed-owner equivalence 
       const handoff = resolveTurn13CompletedResolutionNextCommandHandoff();
       const predecessorPp = currentPPForActiveMon(
         onix,
-        true, true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff(), resolveTurn7CompletedResolutionNextCommandHandoff(),
+        resolveTurn1CompletedResolutionNextCommandHandoff(1308), true, true, true, resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff(), resolveTurn7CompletedResolutionNextCommandHandoff(),
         resolveTurn8CompletedResolutionNextCommandHandoff(), resolveTurn9CompletedResolutionNextCommandHandoff(), resolveTurn10CompletedResolutionNextCommandHandoff(), resolveTurn11CompletedResolutionNextCommandHandoff(), resolveTurn12CompletedResolutionNextCommandHandoff(),
         handoff,
       )[2];

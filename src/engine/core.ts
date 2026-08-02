@@ -194,7 +194,13 @@ import {
   resolveTurn12CompletedResolutionNextCommandHandoff,
 } from "./turn12ResolutionAdapter.ts";
 import { isTurn1ChooseActionBounceReset } from "./turn1ChooseActionReset.ts";
-import { resolveTurn1CompletedResolutionNextCommandHandoff } from "./turn1ResolutionAdapter.ts";
+import {
+  isTurn1NextCommandHandoffReady,
+  isTurn1NextCommandLifecycleActive,
+  resolveTurn1CompletedResolutionNextCommandHandoff,
+} from "./turn1ResolutionAdapter.ts";
+import { isTurn2ChooseActionBounceReset } from "./turn2ChooseActionReset.ts";
+import { resolveTurn2CompletedResolutionNextCommandHandoff } from "./turn2ResolutionAdapter.ts";
 import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "./turn16FirePunchResolutionAdapter.ts";
 import {
   advanceBattleSceneForcedPartySelect,
@@ -213,7 +219,6 @@ import {
   MENU_DRAW_TICK,
   moveFightCursor,
   openFightSubmenu,
-  ROCK_SLIDE_MENU_REDRAW_DELAY,
   TURN6_ROCKSLIDE_REOPEN_GATE_DELAY,
   TURN7_ROCKSLIDE_REOPEN_GATE_DELAY,
 } from "./battleMenu.ts";
@@ -1111,8 +1116,8 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       partySendOutBattleMenuReady(partySendOutElapsed)
         ? fightSubmenu.activeMonMoveset
         : activeMonMoveset(draftScreen);
-    let turn1Resolved = battleScene.turn1Resolved;
     let turn1NextCommandHandoff = battleScene.turn1NextCommandHandoff ?? null;
+    let turn2NextCommandHandoff = battleScene.turn2NextCommandHandoff ?? null;
     let turn2Resolved = battleScene.turn2Resolved;
     let turn3Resolved = battleScene.turn3Resolved;
     let turn4Resolved = battleScene.turn4Resolved;
@@ -1135,6 +1140,21 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       )
     ) {
       turn1NextCommandHandoff = resolveTurn1CompletedResolutionNextCommandHandoff(
+        battleScene.elapsed + 1,
+      );
+    }
+    if (
+      turn2NextCommandHandoff === null
+      && isTurn1NextCommandLifecycleActive(
+        turn1NextCommandHandoff,
+        fightSubmenu.openElapsed,
+      )
+      && isTurn2ChooseActionBounceReset(
+        fightSubmenu.confirmElapsed,
+        battleScene.elapsed + 1,
+      )
+    ) {
+      turn2NextCommandHandoff = resolveTurn2CompletedResolutionNextCommandHandoff(
         battleScene.elapsed + 1,
       );
     }
@@ -1222,10 +1242,13 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // lockstep, matching what the oracle actually shows for both.
       fightSubmenu = openFightSubmenu(battleScene.elapsed + 2, currentActiveMoveset(), fightSubmenu.cursor, true);
     } else if (
-      !turn1Resolved &&
+      !isTurn1NextCommandLifecycleActive(
+        turn1NextCommandHandoff,
+        fightSubmenu.openElapsed,
+      ) &&
+      isTurn1NextCommandHandoffReady(turn1NextCommandHandoff) &&
       fightSubmenu.confirmElapsed !== null &&
-      newKeys.has("A") &&
-      sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + ROCK_SLIDE_MENU_REDRAW_DELAY
+      newKeys.has("A")
     ) {
       // S7 slice E1 (docs/battle-turn-notes.md §12): turn 1's whole
       // resolution has redrawn the settled action menu by now
@@ -1236,9 +1259,11 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // `openFightSubmenu`'s own doc for the caveat this doesn't generalize
       // cursor persistence beyond that coincidence).
       fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen));
-      turn1Resolved = true;
     } else if (
-      turn1Resolved &&
+      isTurn1NextCommandLifecycleActive(
+        turn1NextCommandHandoff,
+        fightSubmenu.openElapsed,
+      ) &&
       !turn2Resolved &&
       fightSubmenu.confirmElapsed !== null &&
       newKeys.has("A") &&
@@ -1567,8 +1592,8 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     battleScene = {
       ...battleScene,
       fightSubmenu,
-      turn1Resolved,
       turn1NextCommandHandoff,
+      turn2NextCommandHandoff,
       turn2Resolved,
       turn3Resolved,
       turn4Resolved,
