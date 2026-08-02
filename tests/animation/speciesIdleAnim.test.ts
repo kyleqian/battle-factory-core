@@ -97,9 +97,14 @@ import {
   H_JUMPS_V_STRETCH_TWICE_FRONT_SPECIES,
   H_JUMPS_V_STRETCH_TWICE_OUTSIDE_FACTORY_FRONT_SPECIES,
   horizontalShakeFrameAtTick,
+  horizontalShakeSlowFrameAtTick,
+  HORIZONTAL_SHAKE_INITIALIZERS,
   H_SHAKE_FACTORY_FRONT_SPECIES,
   H_SHAKE_FRONT_SPECIES,
   H_SHAKE_OUTSIDE_FACTORY_FRONT_SPECIES,
+  H_SHAKE_SLOW_FACTORY_FRONT_SPECIES,
+  H_SHAKE_SLOW_FRONT_SPECIES,
+  H_SHAKE_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES,
   rapidHorizontalHopsOffsetAtTick,
   rotateUpToSidesFrameAtTick,
   ROTATE_UP_TO_SIDES_FACTORY_FRONT_SPECIES,
@@ -1148,6 +1153,70 @@ describe("speciesIdleAnim", () => {
       ]) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }
+    });
+  });
+
+  describe("horizontalShakeSlowFrameAtTick (Anim_HorizontalShake_Slow port)", () => {
+    it("derives exactly three selector mappings, all Factory-reachable", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_H_SHAKE_SLOW")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(H_SHAKE_SLOW_FRONT_SPECIES).toEqual(generated);
+      expect(generated).toEqual(["DUGTRIO", "GOLDUCK", "DODUO"]);
+      expect(H_SHAKE_SLOW_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(H_SHAKE_SLOW_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(H_SHAKE_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of generated) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins every active counter 0..2280 by 30 with GBA signed sine", () => {
+      expect(HORIZONTAL_SHAKE_INITIALIZERS).toEqual({ normal: 60, slow: 30 });
+      for (let tick = 0; tick <= 76; tick += 1) {
+        const counter = tick * 30;
+        const x2 = Math.floor((3 * GBA_SINE_TABLE_256[counter & 0xff]!) / 256);
+        expect(horizontalShakeSlowFrameAtTick(tick), `tick ${tick}, counter ${counter}`).toEqual({
+          x2,
+          y2: 0,
+          data0: 30,
+          data2: counter + 30,
+          data7: 3,
+          callback: "HorizontalShake",
+        });
+      }
+    });
+
+    it("pins tick 77's strict guard cleanup, stable rest, and normal regression", () => {
+      expect(horizontalShakeSlowFrameAtTick(76)).toMatchObject({
+        x2: -2, data2: 2310, callback: "HorizontalShake",
+      });
+      expect(horizontalShakeSlowFrameAtTick(77)).toEqual({
+        x2: 0, y2: 0, data0: 30, data2: 2340, data7: 3,
+        callback: "WaitAnimEnd",
+      });
+      expect(horizontalShakeSlowFrameAtTick(78)).toEqual(horizontalShakeSlowFrameAtTick(77));
+      expect(horizontalShakeSlowFrameAtTick(500)).toEqual(horizontalShakeSlowFrameAtTick(77));
+      expect(horizontalShakeSlowFrameAtTick(-1)).toBeNull();
+      expect(horizontalShakeSlowFrameAtTick(0.5)).toBeNull();
+
+      expect(horizontalShakeFrameAtTick(0)).toEqual({
+        x2: 0, y2: 0, data0: 60, data2: 60, data7: 3,
+        callback: "HorizontalShake",
+      });
+      expect(horizontalShakeFrameAtTick(38)).toMatchObject({
+        x2: -2, data0: 60, data2: 2340, callback: "HorizontalShake",
+      });
+      expect(horizontalShakeFrameAtTick(39)).toEqual({
+        x2: 0, y2: 0, data0: 60, data2: 2400, data7: 3,
+        callback: "WaitAnimEnd",
+      });
+      expect(horizontalShakeFrameAtTick(100)).toEqual(horizontalShakeFrameAtTick(39));
     });
   });
 

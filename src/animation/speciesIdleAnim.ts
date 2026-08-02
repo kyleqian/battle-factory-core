@@ -62,6 +62,7 @@ export type SpeciesFrontAnimFamily =
   | "H_JUMPS_V_STRETCH"
   | "H_JUMPS_V_STRETCH_TWICE"
   | "H_SHAKE"
+  | "H_SHAKE_SLOW"
   | "RAPID_H_HOPS"
   | "ROTATE_UP_TO_SIDES"
   | "SHRINK_GROW"
@@ -102,6 +103,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "H_JUMPS_V_STRETCH",
   "H_JUMPS_V_STRETCH_TWICE",
   "H_SHAKE",
+  "H_SHAKE_SLOW",
   "RAPID_H_HOPS",
   "ROTATE_UP_TO_SIDES",
   "SHRINK_GROW",
@@ -191,6 +193,23 @@ export const H_SHAKE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
 /** Selector mappings outside the Factory pool (RAYQUAZA alone). */
 export const H_SHAKE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   H_SHAKE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All source selector mappings for `ANIM_H_SHAKE_SLOW`. */
+export const H_SHAKE_SLOW_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_H_SHAKE_SLOW")
+    .map(([species]) => species),
+);
+
+/** Every slow horizontal-shake mapping is reachable through Factory rentals. */
+export const H_SHAKE_SLOW_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_SHAKE_SLOW_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no slow horizontal-shake mappings outside the Factory rental pool. */
+export const H_SHAKE_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_SHAKE_SLOW_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /**
@@ -2860,9 +2879,45 @@ export function growVibrateFrameAtTick(ticksSinceStart: number): GrowVibrateFram
   throw new Error("unreachable GrowVibrate reducer state");
 }
 
-const HORIZONTAL_SHAKE_ACCUMULATOR_STEP = 60;
 const HORIZONTAL_SHAKE_ACCUMULATOR_LIMIT = 2304;
 const HORIZONTAL_SHAKE_AMPLITUDE = 3;
+
+/** Source initializer data[0] values for the normal and slow entry points. */
+export const HORIZONTAL_SHAKE_INITIALIZERS = Object.freeze({
+  normal: 60,
+  slow: 30,
+} as const);
+
+function horizontalShakeFrameAtTickWithStep(
+  ticksSinceStart: number,
+  accumulatorStep: 30 | 60,
+): HorizontalShakeFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let x2 = 0;
+  let callback: HorizontalShakeFrame["callback"] = "HorizontalShake";
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (callback === "WaitAnimEnd") continue;
+    const counter = data2;
+    if (counter > HORIZONTAL_SHAKE_ACCUMULATOR_LIMIT) {
+      callback = "WaitAnimEnd";
+      x2 = 0;
+    } else {
+      x2 = gbaSin(counter % 256, HORIZONTAL_SHAKE_AMPLITUDE);
+    }
+    data2 += accumulatorStep;
+  }
+
+  return {
+    x2,
+    y2: 0,
+    data0: accumulatorStep,
+    data2,
+    data7: HORIZONTAL_SHAKE_AMPLITUDE,
+    callback,
+  };
+}
 
 /**
  * Source-order port of `Anim_HorizontalShake` / `HorizontalShake`
@@ -2872,36 +2927,18 @@ const HORIZONTAL_SHAKE_AMPLITUDE = 3;
  * and hands off to `WaitAnimEnd` before the final data[2] increment.
  */
 export function horizontalShakeFrameAtTick(ticksSinceStart: number): HorizontalShakeFrame | null {
-  if (ticksSinceStart < 0) return null;
+  return horizontalShakeFrameAtTickWithStep(ticksSinceStart, HORIZONTAL_SHAKE_INITIALIZERS.normal);
+}
 
-  let data2 = 0;
-  let x2 = 0;
-  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
-    const counter = data2;
-    if (counter > HORIZONTAL_SHAKE_ACCUMULATOR_LIMIT) {
-      data2 += HORIZONTAL_SHAKE_ACCUMULATOR_STEP;
-      return {
-        x2: 0,
-        y2: 0,
-        data0: HORIZONTAL_SHAKE_ACCUMULATOR_STEP,
-        data2,
-        data7: HORIZONTAL_SHAKE_AMPLITUDE,
-        callback: "WaitAnimEnd",
-      };
-    }
-
-    x2 = gbaSin(counter % 256, HORIZONTAL_SHAKE_AMPLITUDE);
-    data2 += HORIZONTAL_SHAKE_ACCUMULATOR_STEP;
-  }
-
-  return {
-    x2,
-    y2: 0,
-    data0: HORIZONTAL_SHAKE_ACCUMULATOR_STEP,
-    data2,
-    data7: HORIZONTAL_SHAKE_AMPLITUDE,
-    callback: "HorizontalShake",
-  };
+/**
+ * Source-order `Anim_HorizontalShake_Slow` port (`pokemon_animation.c:3717-3722`).
+ * The initializer writes data[0]=30/data[7]=3, calls the shared reducer once,
+ * then installs `HorizontalShake`; active counters 0..2280 occupy ticks 0..76.
+ */
+export function horizontalShakeSlowFrameAtTick(
+  ticksSinceStart: number,
+): HorizontalShakeFrame | null {
+  return horizontalShakeFrameAtTickWithStep(ticksSinceStart, HORIZONTAL_SHAKE_INITIALIZERS.slow);
 }
 
 const VERTICAL_SHAKE_ACCUMULATOR_STEP = 60;
@@ -3964,6 +4001,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = horizontalShakeFrameAtTick(39);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_HorizontalShake did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "H_SHAKE_SLOW": {
+      const terminal = horizontalShakeSlowFrameAtTick(77);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_HorizontalShake_Slow did not reach its source terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
