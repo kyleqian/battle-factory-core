@@ -214,8 +214,19 @@ slot-0 PP reconstruction, and the following submenu/kickoff bounce clock;
 the 2901 reopen activates a new command lifecycle without replacing the
 epoch. Clean-parent `76af5060` (`b34e6279^`) app replays held all four
 turn-1 primary OFF windows and the two turn-2 reader windows byte-identical
-(**1,162/1,162 raw RGBA captures**). Turns 1 and 5–13 are now retired; #39
-remains open for turns 2–4, `opponentFaintDismissElapsed`, and dispatcher
+(**1,162/1,162 raw RGBA captures**). Turns 1 and 5–13 are now retired.
+The matching typed completed-turn-2/next-command handoff retired
+`turn2Resolved` (`c16386d6` + `7a3fca06`): it publishes canonical PP
+**[9,20,19,10]**, persisted slot 2, HP **101/88**, settled/ready facts, and
+the runtime-relative `HandleInputChooseAction` → `DoBounceEffect` epoch
+(elapsed **2197**, source seeds **192/128**, delta **7**, amplitude **1**).
+It now owns turn-3 dispatch, opponent/player-HP selection, slot-2 PP
+reconstruction, ENDEAVOR-family routing, and the following submenu/kickoff
+bounce clock; later turn-3 menu reopens consume the same immutable epoch.
+Clean-parent `ace2b44c` (`c16386d6^`) app replays held turn-2 primary,
+turn-3 reader, and upstream insurance windows byte-identical
+(**990/990 raw RGBA captures**). Turns 1–2 and 5–13 are now retired; #39
+remains open for turns 3–4, `opponentFaintDismissElapsed`, and dispatcher
 debt.
 Rank 4 is **fully retired** (2026-07-31,
 all 5 slices): `174cc388` ROCK_SLIDE tails; `441ddf83`+`6aba6662`

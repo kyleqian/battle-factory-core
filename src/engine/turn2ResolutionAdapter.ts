@@ -66,8 +66,8 @@ export function resolveTurn2CompletedResolutionNextCommandHandoff(
 export function isTurn2NextCommandHandoffReady(
   handoff: Turn2CompletedResolutionNextCommandHandoff | null | undefined,
 ): handoff is Turn2CompletedResolutionNextCommandHandoff {
-  return handoff?.nextCommand.redraw === "settled"
-    && handoff.nextCommand.input === "ready";
+  return handoff?.nextCommand?.redraw === "settled"
+    && handoff.nextCommand?.input === "ready";
 }
 
 /**

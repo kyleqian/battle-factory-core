@@ -117,7 +117,6 @@ import {
   applyTurn17PostwinFastFade,
   battle2PreTurnRngCalls,
   battle2Turn1RngCalls,
-  DRAGONBREATH_MENU_REDRAW_DELAY,
   INITIAL_BATTLE_SCENE_STATE,
   renderBattleScene,
   renderBattleResolutionForcedPartySelect,
@@ -200,7 +199,11 @@ import {
   resolveTurn1CompletedResolutionNextCommandHandoff,
 } from "./turn1ResolutionAdapter.ts";
 import { isTurn2ChooseActionBounceReset } from "./turn2ChooseActionReset.ts";
-import { resolveTurn2CompletedResolutionNextCommandHandoff } from "./turn2ResolutionAdapter.ts";
+import {
+  isTurn2NextCommandHandoffReady,
+  isTurn2NextCommandLifecycleActive,
+  resolveTurn2CompletedResolutionNextCommandHandoff,
+} from "./turn2ResolutionAdapter.ts";
 import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "./turn16FirePunchResolutionAdapter.ts";
 import {
   advanceBattleSceneForcedPartySelect,
@@ -1118,7 +1121,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         : activeMonMoveset(draftScreen);
     let turn1NextCommandHandoff = battleScene.turn1NextCommandHandoff ?? null;
     let turn2NextCommandHandoff = battleScene.turn2NextCommandHandoff ?? null;
-    let turn2Resolved = battleScene.turn2Resolved;
     let turn3Resolved = battleScene.turn3Resolved;
     let turn4Resolved = battleScene.turn4Resolved;
     let turn5NextCommandHandoff = battleScene.turn5NextCommandHandoff;
@@ -1264,23 +1266,24 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         turn1NextCommandHandoff,
         fightSubmenu.openElapsed,
       ) &&
-      !turn2Resolved &&
+      !isTurn2NextCommandLifecycleActive(
+        turn2NextCommandHandoff,
+        fightSubmenu.openElapsed,
+      ) &&
+      isTurn2NextCommandHandoffReady(turn2NextCommandHandoff) &&
       fightSubmenu.confirmElapsed !== null &&
-      newKeys.has("A") &&
-      sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + DRAGONBREATH_MENU_REDRAW_DELAY
+      newKeys.has("A")
     ) {
-      // S7 slice F (docs/battle-turn-notes.md §13): turn 2's whole resolution
-      // has redrawn the settled action menu by now (`DRAGONBREATH_MENU_
-      // REDRAW_DELAY` past its own confirm) - a fresh A-press reopens FIGHT
-      // for turn 3, cursor persisted at slot 2 (DRAGON_BREATH, where turn 2's
-      // own confirm left it) rather than reset to slot 0 - unlike turn 1->2's
-      // own reopen, this is a REAL exercise of cursor persistence (turn 1->2
-      // rested at slot 0 both times, so it never distinguished "always reset"
-      // from "persist" - see `openFightSubmenu`'s own doc).
+      // The source-owned turn-2 receipt makes the settled action menu ready;
+      // this later A only opens the turn-3 command lifecycle. Its submenu
+      // (including same-turn B-close/A-reopen) consumes the immutable 2197
+      // presentation epoch rather than publishing a replacement.
       fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen), 2);
-      turn2Resolved = true;
     } else if (
-      turn2Resolved &&
+      isTurn2NextCommandLifecycleActive(
+        turn2NextCommandHandoff,
+        fightSubmenu.openElapsed,
+      ) &&
       !turn3Resolved &&
       fightSubmenu.confirmElapsed !== null &&
       newKeys.has("A") &&
@@ -1594,7 +1597,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       fightSubmenu,
       turn1NextCommandHandoff,
       turn2NextCommandHandoff,
-      turn2Resolved,
       turn3Resolved,
       turn4Resolved,
       turn5NextCommandHandoff,
