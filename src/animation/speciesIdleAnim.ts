@@ -54,6 +54,7 @@ export type SpeciesFrontAnimFamily =
   | "FOUR_PETAL"
   | "GROW_VIBRATE"
   | "GROW_IN_STAGES"
+  | "GLOW_BLACK"
   | "LUNGE_GROW"
   | "FLASH_YELLOW"
   | "FLICKER_INCREASING"
@@ -106,6 +107,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "FOUR_PETAL",
   "GROW_VIBRATE",
   "GROW_IN_STAGES",
+  "GLOW_BLACK",
   "LUNGE_GROW",
   "FLASH_YELLOW",
   "FLICKER_INCREASING",
@@ -891,6 +893,23 @@ export const CIRCULAR_VIBRATE_FACTORY_FRONT_SPECIES: readonly string[] = Object.
 /** There are no circular-vibrate mappings outside the Factory pool. */
 export const CIRCULAR_VIBRATE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   CIRCULAR_VIBRATE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All source selector mappings for the palette-only `ANIM_GLOW_BLACK`. */
+export const GLOW_BLACK_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_GLOW_BLACK")
+    .map(([species]) => species),
+);
+
+/** Every black-glow mapping is reachable through Factory rentals. */
+export const GLOW_BLACK_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  GLOW_BLACK_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no black-glow mappings outside the Factory rental pool. */
+export const GLOW_BLACK_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  GLOW_BLACK_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /** All source selector mappings for `ANIM_BACK_AND_LUNGE`. */
@@ -4915,6 +4934,104 @@ export function circularVibrateFrameAtTick(
   return lastFrame;
 }
 
+/** Source selector 21's task-installed direct callback receipt. */
+export const GLOW_BLACK_ENTRY = Object.freeze({
+  selector: "ANIM_GLOW_BLACK",
+  sourceId: 21,
+  taskZeroedData2: true,
+  taskZeroedData6: true,
+  taskZeroedData7: true,
+  callbackInstalled: "Anim_GlowBlack",
+  callbackInvokedByInitializer: false,
+  normalFrontDontFlip: true,
+  accepted: true,
+} as const);
+
+export interface GlowBlackFrame extends SpeciesIdleOffset {
+  /** `sprite->data[2]` before the callback's strict terminal guard. */
+  readonly data2Before: number;
+  /** `sprite->data[2]` after the callback's unconditional signed-s16 increment. */
+  readonly data2: number;
+  /** Last sine result stored in signed `sprite->data[6]`. */
+  readonly data6: number;
+  /** Captured OBJ palette start stored in signed `sprite->data[7]`. */
+  readonly data7: number;
+  readonly paletteNum: number;
+  readonly paletteStart: number;
+  readonly paletteCount: 16;
+  readonly blendCoefficient: number;
+  readonly blendColor: 0;
+  readonly paletteWrite: boolean;
+  readonly restoredPalette: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly callback: "Anim_GlowBlack" | "WaitAnimEnd";
+}
+
+/**
+ * Source-order normal-front port of selector 21's `GlowColor(RGB_BLACK, 16, 1)`
+ * expansion (`pokemon_animation.c:911-939,1518-1559`). The task zeroes
+ * data2/data6/data7 and directly installs `Anim_GlowBlack`; callback zero
+ * captures `OBJ_PLTT_ID(oam.paletteNum)`. Active callbacks 0..128 write the
+ * GBA sine coefficient to all 16 OBJ-palette entries. Callback 129 observes
+ * the strict `data2 > 128` boundary, restores coefficient zero, installs
+ * `WaitAnimEnd`, and still increments data2. The terminal receipt is stable.
+ */
+export function glowBlackFrameAtTick(
+  ticksSinceStart: number,
+  paletteNum = 0,
+): GlowBlackFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+  if (!Number.isInteger(paletteNum) || !Number.isFinite(paletteNum)) return null;
+
+  const normalizedPaletteNum = paletteNum & 0xf;
+  const paletteStart = 0x100 + normalizedPaletteNum * 16;
+  let data2 = 0;
+  let data6 = 0;
+  let data7 = 0;
+  let callback: GlowBlackFrame["callback"] = "Anim_GlowBlack";
+  let lastFrame: GlowBlackFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (callback === "WaitAnimEnd") continue;
+
+    const data2Before = data2;
+    if (data2 === 0) data7 = toS16(paletteStart);
+
+    let blendCoefficient: number;
+    let restoredPalette = false;
+    if (data2 > 128) {
+      blendCoefficient = 0;
+      restoredPalette = true;
+      callback = "WaitAnimEnd";
+    } else {
+      data6 = toS16(gbaSin(data2, 16));
+      blendCoefficient = data6;
+    }
+
+    data2 = toS16(data2 + 1);
+    lastFrame = {
+      x2: 0,
+      y2: 0,
+      data2Before,
+      data2,
+      data6,
+      data7,
+      paletteNum: normalizedPaletteNum,
+      paletteStart,
+      paletteCount: 16,
+      blendCoefficient,
+      blendColor: 0,
+      paletteWrite: true,
+      restoredPalette,
+      normalFrontDontFlip: true,
+      callback,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable GlowBlack reducer state");
+  return lastFrame;
+}
+
 /** Source selector 43's initializer-only `Anim_Figure8` receipt. */
 export const FIGURE_8_INITIALIZER = Object.freeze({
   selector: "ANIM_FIGURE_8",
@@ -5316,6 +5433,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = circularVibrateFrameAtTick(57);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_CircularVibrate did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "GLOW_BLACK": {
+      const terminal = glowBlackFrameAtTick(129);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_GlowBlack did not restore its palette at the terminal boundary");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
