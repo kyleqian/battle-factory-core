@@ -34,8 +34,8 @@ import {
   prepareCompareRunOutputDirectory,
   resolveCompareFixturePath,
   resolveCompareTracePath,
-  resolveSourceTracePath,
 } from "./paths.ts";
+import { loadCompareTrace } from "./traceFile.ts";
 
 const WIDTH = 240;
 const HEIGHT = 160;
@@ -57,56 +57,7 @@ try {
   console.error(error instanceof Error ? error.message : String(error));
   process.exit(2);
 }
-interface CompareTraceFile extends Partial<Trace> {
-  readonly sourceTrace?: string;
-  /** Reuse an exact committed prefix without copying a long canonical script. */
-  readonly sourceSegmentCount?: number;
-  /** Phase-specific controls appended after sourceSegmentCount. */
-  readonly appendSegments?: Trace["segments"];
-  /** Inclusive dense capture window, expanded without thinning before replay. */
-  readonly captureWindow?: Readonly<{ start: number; end: number }>;
-}
-
-const traceFile = JSON.parse(readFileSync(tracePath, "utf8")) as CompareTraceFile;
-let trace: Trace;
-if (traceFile.sourceTrace) {
-  const sourcePath = resolveSourceTracePath(traceFile.sourceTrace, tracePath);
-  const source = JSON.parse(readFileSync(sourcePath, "utf8")) as Trace;
-  const {
-    sourceTrace: _sourceTrace,
-    sourceSegmentCount,
-    appendSegments,
-    captureWindow,
-    ...overrides
-  } = traceFile;
-  const sourceSegments =
-    sourceSegmentCount === undefined
-      ? source.segments
-      : source.segments.slice(0, sourceSegmentCount);
-  trace = {
-    ...source,
-    ...overrides,
-    segments: [...sourceSegments, ...(appendSegments ?? [])],
-    captureFrames: captureWindow === undefined
-      ? overrides.captureFrames ?? source.captureFrames
-      : Array.from(
-          { length: captureWindow.end - captureWindow.start + 1 },
-          (_, index) => captureWindow.start + index,
-        ),
-  };
-} else {
-  const { captureWindow, ...plainTrace } = traceFile;
-  trace = {
-    ...plainTrace,
-    captureFrames: captureWindow === undefined
-      ? plainTrace.captureFrames
-      : Array.from(
-          { length: captureWindow.end - captureWindow.start + 1 },
-          (_, index) => captureWindow.start + index,
-        ),
-  } as Trace;
-}
-trace = withCaptureRange(trace, captureRange);
+let trace: Trace = withCaptureRange(loadCompareTrace(tracePath), captureRange);
 if (!trace.appRoute) {
   // Missing appRoute silently replays the app on its default
   // generated-orchestrator route; for canonical-recorded traces that reads

@@ -319,6 +319,18 @@ relationship.
 Every acceptance entry means differential replay of the named committed trace
 files against a clean-parent app build with its existing captureFrames list
 byte-identical app-vs-app. No slice may thin, edit, or replace a capture list.
+
+Run that acceptance with the committed harness — do not rebuild it by hand:
+
+```sh
+npm run compare:differential -- <trace...> --base <clean parent sha> --summary
+```
+
+It creates the parent worktree (borrowing `node_modules` by symlink), replays
+each trace on both engines, byte-compares the raw RGBA, and removes the
+worktree. Exit 0 means every requested capture is byte-identical. Traces may
+be named bare (`turn6-menu`) or by path. `--keep` retains the base checkout
+when you need to inspect it.
 Historical trace profiles remain their established insurance profile; the
 explicit Scene-OFF names are authority for their listed windows.
 

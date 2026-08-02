@@ -11,6 +11,7 @@
     "sweep-scratch": "node --experimental-strip-types tools/sweep-scratch-dirs.ts",
     "compare": "node --experimental-strip-types tools/compare/run.ts",
     "compare:batch": "node --experimental-strip-types tools/compare/batch.ts",
+    "compare:differential": "node --experimental-strip-types tools/compare/app-differential.ts",
     "inspect-frame": "node --experimental-strip-types tools/compare/inspect-frame.ts",
     "animation:coverage": "node --experimental-strip-types tools/animation/report.ts",
     "census:ability-item": "node --experimental-strip-types tools/report/ability-item-parity-census.ts",

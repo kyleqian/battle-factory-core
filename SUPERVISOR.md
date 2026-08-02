@@ -177,6 +177,16 @@ edit.
      partial fix trimmed to its open remainder) — not marked CLOSED in place?
    - Spot-check the step's central claim: rerun the compare/oracle command
      the worker cites, look at the artifact. Don't take "it passes" on faith.
+   - **Presentation-neutral slices** (a refactor that must not move a pixel —
+     the #39 handoff ladder and its kin) are proved with
+     `npm run compare:differential -- <traces...> --base <clean parent>`:
+     it replays each trace's captureFrames against both this tree and a clean
+     checkout of the parent and byte-compares the raw RGBA, removing its own
+     worktree afterwards. Brief the exact command and trace list rather than
+     letting each worker rebuild the recipe by hand — that ad-hoc version was
+     a standing papercut and leaked orphaned worktrees for weeks. A green
+     differential means "nothing visible changed", NOT "correct" — pair it
+     with `npm run compare` against the oracle whenever behavior should move.
    - Papercuts: if the worker's final message flags one (`PAPERCUT:` line),
      or you watched it waste time on known friction, append or bump the entry
      in `PAPERCUTS.md` — you are that file's only writer in this flow.
