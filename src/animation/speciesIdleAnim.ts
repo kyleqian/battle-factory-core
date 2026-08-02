@@ -4969,7 +4969,7 @@ export interface GlowBlackFrame extends SpeciesIdleOffset {
 
 /**
  * Source-order normal-front port of selector 21's `GlowColor(RGB_BLACK, 16, 1)`
- * expansion (`pokemon_animation.c:911-939,1518-1559`). The task zeroes
+ * expansion (`pokemon_animation.c:911-939,1539-1560`). The task zeroes
  * data2/data6/data7 and directly installs `Anim_GlowBlack`; callback zero
  * captures `OBJ_PLTT_ID(oam.paletteNum)`. Active callbacks 0..128 write the
  * GBA sine coefficient to all 16 OBJ-palette entries. Callback 129 observes

@@ -40,10 +40,20 @@ describe("ANIM_GLOW_BLACK Scene-ON evidence", () => {
       new URL("../../reference/pokeemerald/include/constants/rgb.h", import.meta.url),
       "utf8",
     );
+    const spriteHeader = readFileSync(
+      new URL("../../reference/pokeemerald/include/sprite.h", import.meta.url),
+      "utf8",
+    );
+    const gbaTypesHeader = readFileSync(
+      new URL("../../reference/pokeemerald/include/gba/types.h", import.meta.url),
+      "utf8",
+    );
 
     expect(constants).toMatch(/^#define ANIM_GLOW_BLACK\s+21$/m);
     expect(paletteHeader).toMatch(/^#define OBJ_PLTT_ID\(n\) \(OBJ_PLTT_OFFSET \+ PLTT_ID\(n\)\)$/m);
     expect(rgbHeader).toMatch(/^#define RGB_BLACK\s+RGB\(0, 0, 0\)$/m);
+    expect(spriteHeader).toMatch(/\/\*0x2E\*\/ s16 data\[8\];/);
+    expect(gbaTypesHeader).toMatch(/u16 paletteNum:4;/);
 
     const taskStart = animationSource.indexOf("static void Task_HandleMonAnimation(u8 taskId)\n{");
     const taskEnd = animationSource.indexOf("void LaunchAnimationTaskForFrontSprite", taskStart);
