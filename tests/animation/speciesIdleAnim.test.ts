@@ -23,6 +23,10 @@ import {
   CIRCLE_INTO_BG_FACTORY_FRONT_SPECIES,
   CIRCLE_INTO_BG_FRONT_SPECIES,
   CIRCLE_INTO_BG_OUTSIDE_FACTORY_FRONT_SPECIES,
+  fourPetalFrameAtTick,
+  FOUR_PETAL_FACTORY_FRONT_SPECIES,
+  FOUR_PETAL_FRONT_SPECIES,
+  FOUR_PETAL_OUTSIDE_FACTORY_FRONT_SPECIES,
   circularStretchTwiceFrameAtTick,
   CIRCULAR_STRETCH_TWICE_FACTORY_FRONT_SPECIES,
   CIRCULAR_STRETCH_TWICE_FRONT_SPECIES,
@@ -6514,6 +6518,247 @@ describe("speciesIdleAnim", () => {
       });
       for (const species of LUNGE_GROW_FRONT_SPECIES) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+  });
+
+  describe("fourPetalFrameAtTick (Anim_FourPetal source lifecycle)", () => {
+    const sourceSin = (index: number, amplitude = 8): number =>
+      Math.floor(
+        (amplitude * GBA_SINE_TABLE_256[((index % 256) + 256) % 256]!) / 256,
+      );
+    const sourceCos = (index: number): number => sourceSin(index + 64);
+
+    it("derives exactly REGICE as Factory-reachable with no outside mapping", () => {
+      const selectors = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
+      const generated = Object.entries(selectors)
+        .filter(([, family]) => family === "ANIM_FOUR_PETAL")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        (frontierMons.entries as readonly { readonly species: string }[])
+          .map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(FOUR_PETAL_FRONT_SPECIES).toEqual(generated);
+      expect(FOUR_PETAL_FRONT_SPECIES).toEqual(["REGICE"]);
+      expect(FOUR_PETAL_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(FOUR_PETAL_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(FOUR_PETAL_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      expect(selectors.REGICE).toBe("ANIM_FOUR_PETAL");
+      expect(speciesFrontIdleRestOffset("REGICE")).toEqual({ x2: 0, y2: 0 });
+    });
+
+    it("pins tick-zero data6/data7/data2 source ordering", () => {
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual(
+        expect.arrayContaining([0, 2, 6, 7]),
+      );
+      expect(fourPetalFrameAtTick(0)).toEqual({
+        x2: -1,
+        y2: -2,
+        data0: 0,
+        data2Before: 0,
+        data2: 1,
+        data6Before: 0,
+        data6: 0,
+        data7Before: 0,
+        data7AfterInitialization: 64,
+        data7AfterIncrement: 72,
+        data7: 72,
+        initialized: true,
+        phaseGuardLimit: 127,
+        phaseTransition: false,
+        switchArm: 0,
+        xTrigFunction: "Sin",
+        xTrigIndex: 72,
+        xTrigValue: 7,
+        yTrigFunction: "Cos",
+        yTrigIndex: 72,
+        yTrigValue: -2,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        callback: "Anim_FourPetal",
+      });
+    });
+
+    it("pins every active callback, phase transition, switch arm, and signed GBA trig write", () => {
+      let data6 = 0;
+      let data7 = 0;
+      const callbacks = Array.from({ length: 63 }, (_, tick) => fourPetalFrameAtTick(tick)!);
+      expect(callbacks).toHaveLength(63);
+
+      for (const [tick, frame] of callbacks.entries()) {
+        const data2Before = tick === 0 ? 0 : 1;
+        const data6Before = data6;
+        const data7Before = data7;
+        const initialized = tick === 0;
+        if (initialized) {
+          data6 = 0;
+          data7 = 64;
+        }
+        const data7AfterInitialization = data7;
+        data7 += 8;
+        const data7AfterIncrement = data7;
+        const phaseGuardLimit = data6 === 4 ? 63 : 127;
+        const phaseTransition = data7 > phaseGuardLimit;
+        if (phaseTransition) {
+          data7 = 0;
+          data6 += 1;
+        }
+
+        let x2: number;
+        let y2: number;
+        let xTrigFunction: "Sin" | "Cos";
+        let xTrigIndex: number;
+        let xTrigValue: number;
+        let yTrigFunction: "Sin" | "Cos";
+        let yTrigIndex: number;
+        let yTrigValue: number;
+        if (data6 === 1) {
+          xTrigFunction = "Cos";
+          xTrigIndex = data7;
+          xTrigValue = sourceCos(data7);
+          yTrigFunction = "Sin";
+          yTrigIndex = data7;
+          yTrigValue = sourceSin(data7);
+          x2 = -xTrigValue + 0;
+          y2 = yTrigValue - 8;
+        } else if (data6 === 2) {
+          xTrigFunction = "Sin";
+          xTrigIndex = data7 + 128;
+          xTrigValue = sourceSin(data7 + 128);
+          yTrigFunction = "Cos";
+          yTrigIndex = data7;
+          yTrigValue = sourceCos(data7);
+          x2 = xTrigValue + 8;
+          y2 = -yTrigValue + 0;
+        } else if (data6 === 3) {
+          xTrigFunction = "Cos";
+          xTrigIndex = data7;
+          xTrigValue = sourceCos(data7);
+          yTrigFunction = "Sin";
+          yTrigIndex = data7 + 128;
+          yTrigValue = sourceSin(data7 + 128);
+          x2 = xTrigValue + 0;
+          y2 = yTrigValue + 8;
+        } else {
+          xTrigFunction = "Sin";
+          xTrigIndex = data7;
+          xTrigValue = sourceSin(data7);
+          yTrigFunction = "Cos";
+          yTrigIndex = data7;
+          yTrigValue = sourceCos(data7);
+          x2 = xTrigValue - 8;
+          y2 = yTrigValue + 0;
+        }
+
+        expect(frame, `tick ${tick}`).toEqual({
+          x2,
+          y2,
+          data0: 0,
+          data2Before,
+          data2: 1,
+          data6Before,
+          data6,
+          data7Before,
+          data7AfterInitialization,
+          data7AfterIncrement,
+          data7,
+          initialized,
+          phaseGuardLimit,
+          phaseTransition,
+          switchArm: data6,
+          xTrigFunction,
+          xTrigIndex,
+          xTrigValue,
+          yTrigFunction,
+          yTrigIndex,
+          yTrigValue,
+          normalFrontDontFlip: true,
+          tryFlipXCalls: 2,
+          callback: "Anim_FourPetal",
+        });
+      }
+    });
+
+    it("uses >127 for phases 0..3, the distinct phase-4 >63 guard, and exact resets", () => {
+      expect([6, 7, 22, 23, 38, 39, 54, 55, 62, 63].map((tick) => {
+        const frame = fourPetalFrameAtTick(tick)!;
+        return [
+          tick,
+          frame.data6Before,
+          frame.data7AfterIncrement,
+          frame.phaseGuardLimit,
+          frame.phaseTransition,
+          frame.data6,
+          frame.data7,
+        ];
+      })).toEqual([
+        [6, 0, 120, 127, false, 0, 120],
+        [7, 0, 128, 127, true, 1, 0],
+        [22, 1, 120, 127, false, 1, 120],
+        [23, 1, 128, 127, true, 2, 0],
+        [38, 2, 120, 127, false, 2, 120],
+        [39, 2, 128, 127, true, 3, 0],
+        [54, 3, 120, 127, false, 3, 120],
+        [55, 3, 128, 127, true, 4, 0],
+        [62, 4, 56, 63, false, 4, 56],
+        [63, 4, 64, 63, true, 5, 0],
+      ]);
+    });
+
+    it("takes the default arm only at tick 63 and keeps WaitAnimEnd stable", () => {
+      const terminal = fourPetalFrameAtTick(63)!;
+      expect(terminal).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 0,
+        data2Before: 1,
+        data2: 1,
+        data6Before: 4,
+        data6: 5,
+        data7Before: 56,
+        data7AfterInitialization: 56,
+        data7AfterIncrement: 64,
+        data7: 0,
+        initialized: false,
+        phaseGuardLimit: 63,
+        phaseTransition: true,
+        switchArm: "default",
+        xTrigFunction: null,
+        xTrigIndex: null,
+        xTrigValue: null,
+        yTrigFunction: null,
+        yTrigIndex: null,
+        yTrigValue: null,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 2,
+        callback: "WaitAnimEnd",
+      });
+      expect(fourPetalFrameAtTick(64)).toEqual(terminal);
+      expect(fourPetalFrameAtTick(1000)).toEqual(terminal);
+      expect(fourPetalFrameAtTick(-1)).toBeNull();
+    });
+
+    it("regression-pins CIRCLE_INTO_BG and leaves the next source-ranked slow selector unported", () => {
+      expect(circleIntoBackgroundFrameAtTick(65)).toMatchObject({
+        x2: 0,
+        y2: 0,
+        callback: "WaitAnimEnd",
+      });
+      const selectors = selectorTables.frontAnimIds.species as Readonly<Record<string, string>>;
+      const nextGenerated = Object.entries(selectors)
+        .filter(([, family]) => family === "ANIM_V_SLIDE_SLOW")
+        .map(([species]) => species);
+      expect(nextGenerated).toEqual([
+        "PIDGEY",
+        "AERODACTYL",
+        "DRAGONITE",
+        "HOOTHOOT",
+        "LEDIAN",
+      ]);
+      for (const species of nextGenerated) {
+        expect(speciesFrontIdleRestOffset(species)).toBeNull();
       }
     });
   });

@@ -47,6 +47,7 @@ export type SpeciesFrontAnimFamily =
   | "BOUNCE_ROTATE_TO_SIDES_SLOW"
   | "CIRCLE_INTO_BG"
   | "CIRCULAR_STRETCH_TWICE"
+  | "FOUR_PETAL"
   | "GROW_VIBRATE"
   | "GROW_IN_STAGES"
   | "LUNGE_GROW"
@@ -83,6 +84,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "BOUNCE_ROTATE_TO_SIDES_SLOW",
   "CIRCLE_INTO_BG",
   "CIRCULAR_STRETCH_TWICE",
+  "FOUR_PETAL",
   "GROW_VIBRATE",
   "GROW_IN_STAGES",
   "LUNGE_GROW",
@@ -416,6 +418,23 @@ export const CIRCLE_INTO_BG_FACTORY_FRONT_SPECIES: readonly string[] = Object.fr
 /** There are no circle-into-background mappings outside the Factory pool. */
 export const CIRCLE_INTO_BG_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   CIRCLE_INTO_BG_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** The sole source selector mapping for `ANIM_FOUR_PETAL`. */
+export const FOUR_PETAL_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_FOUR_PETAL")
+    .map(([species]) => species),
+);
+
+/** The complete Factory-reachable four-petal family (REGICE). */
+export const FOUR_PETAL_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  FOUR_PETAL_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no four-petal mappings outside the Factory rental pool. */
+export const FOUR_PETAL_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  FOUR_PETAL_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /** All 5 source selector mappings for the normal `ANIM_BOUNCE_ROTATE_TO_SIDES`. */
@@ -1361,6 +1380,31 @@ export interface CircleIntoBackgroundFrame extends SpeciesIdleOffset {
   readonly affineMode: "double" | "normal";
 }
 
+export interface FourPetalFrame extends SpeciesIdleOffset {
+  readonly data0: 0;
+  readonly data2Before: 0 | 1;
+  readonly data2: 1;
+  readonly data6Before: number;
+  readonly data6: number;
+  readonly data7Before: number;
+  readonly data7AfterInitialization: number;
+  readonly data7AfterIncrement: number;
+  readonly data7: number;
+  readonly initialized: boolean;
+  readonly phaseGuardLimit: 63 | 127;
+  readonly phaseTransition: boolean;
+  readonly switchArm: 0 | 1 | 2 | 3 | 4 | "default";
+  readonly xTrigFunction: "Sin" | "Cos" | null;
+  readonly xTrigIndex: number | null;
+  readonly xTrigValue: number | null;
+  readonly yTrigFunction: "Sin" | "Cos" | null;
+  readonly yTrigIndex: number | null;
+  readonly yTrigValue: number | null;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXCalls: 2;
+  readonly callback: "Anim_FourPetal" | "WaitAnimEnd";
+}
+
 /** `InitAnimData`, called by `AddNewAnim`, source defaults adjacent to this family. */
 export const ADD_NEW_ANIM_DEFAULTS = Object.freeze({
   rotation: 0,
@@ -2212,6 +2256,145 @@ export function circleIntoBackgroundFrameAtTick(
     callback: "Anim_CircleIntoBackground",
     affineMode: "double",
   };
+}
+
+/**
+ * Source-order normal-front port of `Anim_FourPetal`
+ * (`pokemon_animation.c:911-939,3601-3656,5540-5544` and
+ * `trig.c:514-518`). `Task_HandleMonAnimation` zeroes data2/data6/data7.
+ * Callback zero writes data6=0/data7=64/data2=1 in that order, then every
+ * active callback increments data7 by eight before applying its phase guard.
+ * Phases 0..3 use the strict `> 127` guard; phase 4 alone uses `> 63`.
+ * Every switch arm uses the signed GBA sine table, and both source-order
+ * `TryFlipX` calls are retained as normal-front no-ops. The default arm
+ * clears both offsets, installs `WaitAnimEnd`, and remains stable.
+ */
+export function fourPetalFrameAtTick(
+  ticksSinceStart: number,
+): FourPetalFrame | null {
+  if (ticksSinceStart < 0) return null;
+
+  let data2: 0 | 1 = 0;
+  let data6 = 0;
+  let data7 = 0;
+  let terminal: FourPetalFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (terminal !== null) return terminal;
+
+    const data2Before = data2;
+    const data6Before = data6;
+    const data7Before = data7;
+    const initialized = data2 === 0;
+    if (initialized) {
+      data6 = 0;
+      data7 = 64;
+      data2 = 1;
+    }
+    const data7AfterInitialization = data7;
+
+    data7 += 8;
+    const data7AfterIncrement = data7;
+    const phaseGuardLimit: 63 | 127 = data6 === 4 ? 63 : 127;
+    const phaseTransition = data7 > phaseGuardLimit;
+    if (phaseTransition) {
+      data7 = 0;
+      data6 += 1;
+    }
+
+    let x2 = 0;
+    let y2 = 0;
+    let switchArm: FourPetalFrame["switchArm"] = "default";
+    let xTrigFunction: FourPetalFrame["xTrigFunction"] = null;
+    let xTrigIndex: number | null = null;
+    let xTrigValue: number | null = null;
+    let yTrigFunction: FourPetalFrame["yTrigFunction"] = null;
+    let yTrigIndex: number | null = null;
+    let yTrigValue: number | null = null;
+    let callback: FourPetalFrame["callback"] = "Anim_FourPetal";
+
+    switch (data6) {
+      case 1:
+        switchArm = 1;
+        xTrigFunction = "Cos";
+        xTrigIndex = data7;
+        xTrigValue = gbaCos(data7, 8);
+        yTrigFunction = "Sin";
+        yTrigIndex = data7;
+        yTrigValue = gbaSin(data7, 8);
+        x2 = -xTrigValue + 0;
+        y2 = yTrigValue - 8;
+        break;
+      case 2:
+        switchArm = 2;
+        xTrigFunction = "Sin";
+        xTrigIndex = data7 + 128;
+        xTrigValue = gbaSin(data7 + 128, 8);
+        yTrigFunction = "Cos";
+        yTrigIndex = data7;
+        yTrigValue = gbaCos(data7, 8);
+        x2 = xTrigValue + 8;
+        y2 = -yTrigValue + 0;
+        break;
+      case 3:
+        switchArm = 3;
+        xTrigFunction = "Cos";
+        xTrigIndex = data7;
+        xTrigValue = gbaCos(data7, 8);
+        yTrigFunction = "Sin";
+        yTrigIndex = data7 + 128;
+        yTrigValue = gbaSin(data7 + 128, 8);
+        x2 = xTrigValue + 0;
+        y2 = yTrigValue + 8;
+        break;
+      case 0:
+      case 4:
+        switchArm = data6;
+        xTrigFunction = "Sin";
+        xTrigIndex = data7;
+        xTrigValue = gbaSin(data7, 8);
+        yTrigFunction = "Cos";
+        yTrigIndex = data7;
+        yTrigValue = gbaCos(data7, 8);
+        x2 = xTrigValue - 8;
+        y2 = yTrigValue + 0;
+        break;
+      default:
+        callback = "WaitAnimEnd";
+        break;
+    }
+
+    const frame: FourPetalFrame = {
+      x2,
+      y2,
+      data0: 0,
+      data2Before,
+      data2: 1,
+      data6Before,
+      data6,
+      data7Before,
+      data7AfterInitialization,
+      data7AfterIncrement,
+      data7,
+      initialized,
+      phaseGuardLimit,
+      phaseTransition,
+      switchArm,
+      xTrigFunction,
+      xTrigIndex,
+      xTrigValue,
+      yTrigFunction,
+      yTrigIndex,
+      yTrigValue,
+      normalFrontDontFlip: true,
+      tryFlipXCalls: 2,
+      callback,
+    };
+    if (callback === "WaitAnimEnd") terminal = frame;
+    if (tick === ticksSinceStart) return frame;
+  }
+
+  throw new Error("unreachable FourPetal reducer state");
 }
 
 export type BounceRotateToSidesTableEntry = readonly [
@@ -3495,6 +3678,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = circularStretchTwiceFrameAtTick(41);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_CircularStretchTwice did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "FOUR_PETAL": {
+      const terminal = fourPetalFrameAtTick(63);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_FourPetal did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
