@@ -173,8 +173,12 @@ import {
   VERTICAL_SLIDE_WOBBLE_INITIALIZERS,
   VERTICAL_SLIDE_INITIALIZERS,
   YELLOW_FLASH_DATA,
+  zigzagFastFrameAtTick,
   zigzagSlowFrameAtTick,
   ZIGZAG_DATA,
+  ZIGZAG_FAST_FACTORY_FRONT_SPECIES,
+  ZIGZAG_FAST_FRONT_SPECIES,
+  ZIGZAG_FAST_OUTSIDE_FACTORY_FRONT_SPECIES,
   ZIGZAG_SLOW_FACTORY_FRONT_SPECIES,
   ZIGZAG_SLOW_FRONT_SPECIES,
   ZIGZAG_SLOW_OUTSIDE_FACTORY_FRONT_SPECIES,
@@ -3743,6 +3747,66 @@ describe("speciesIdleAnim", () => {
         [22, expect.objectContaining({ x2: 6, y2: -6, data2: 6, data3: 1 })],
         [24, expect.objectContaining({ x2: 4, y2: -4, data2: 1, data3: 2 })],
         [106, expect.objectContaining({ x2: 0, y2: 0, data2: 6, data3: 8 })],
+      ]);
+    });
+  });
+
+  describe("zigzagFastFrameAtTick (fast source lifecycle)", () => {
+    it("derives the exhaustive three-species Factory census", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_ZIGZAG_FAST")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(ZIGZAG_FAST_FRONT_SPECIES).toEqual(generated);
+      expect(generated).toEqual(["UNOWN", "GLALIE", "DUSKULL"]);
+      expect(ZIGZAG_FAST_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(ZIGZAG_FAST_FACTORY_FRONT_SPECIES).toEqual(generated);
+      expect(ZIGZAG_FAST_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual([]);
+      for (const species of generated) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins the immediate initializer, every shared callback, edge legs, and terminal tick 54", () => {
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
+      expect(ZIGZAG_DATA).toEqual([
+        [-1, -1, 6], [2, 0, 6], [-2, 2, 6], [2, 0, 6], [-2, -2, 6],
+        [2, 0, 6], [-2, 2, 6], [2, 0, 6], [-1, -1, 6], [0, 0, 0],
+      ]);
+      expect(zigzagFastFrameAtTick(-1)).toBeNull();
+      expect(zigzagFastFrameAtTick(0)).toEqual({
+        x2: -1, y2: -1, data0: 0, data2: 1, data3: 0, moved: true,
+        initializerCalled: true, normalFrontDontFlip: true, tryFlipXCalls: 2,
+        callback: "Zigzag",
+      });
+      for (let tick = 0; tick < 54; tick += 1) {
+        const frame = zigzagFastFrameAtTick(tick)!;
+        expect(frame.callback, `tick ${tick}`).toBe("Zigzag");
+        expect(frame.moved, `tick ${tick}`).toBe(true);
+        expect(frame.tryFlipXCalls, `tick ${tick}`).toBe(2);
+        expect(frame.data0, `tick ${tick}`).toBe(0);
+        expect(frame.initializerCalled, `tick ${tick}`).toBe(tick === 0);
+      }
+      expect(zigzagFastFrameAtTick(54)).toEqual({
+        x2: 0, y2: 0, data0: 0, data2: 0, data3: 9, moved: false,
+        initializerCalled: false, normalFrontDontFlip: true, tryFlipXCalls: 1,
+        callback: "WaitAnimEnd",
+      });
+      expect(zigzagFastFrameAtTick(200)).toEqual({
+        x2: 0, y2: 0, data0: 0, data2: 0, data3: 9, moved: false,
+        initializerCalled: false, normalFrontDontFlip: true, tryFlipXCalls: 0,
+        callback: "WaitAnimEnd",
+      });
+      expect([5, 6, 11, 12, 53].map((tick) => [tick, zigzagFastFrameAtTick(tick)])).toEqual([
+        [5, expect.objectContaining({ x2: -6, y2: -6, data2: 6, data3: 0 })],
+        [6, expect.objectContaining({ x2: -4, y2: -6, data2: 1, data3: 1 })],
+        [11, expect.objectContaining({ x2: 6, y2: -6, data2: 6, data3: 1 })],
+        [12, expect.objectContaining({ x2: 4, y2: -4, data2: 1, data3: 2 })],
+        [53, expect.objectContaining({ x2: 0, y2: 0, data2: 6, data3: 8 })],
       ]);
     });
   });

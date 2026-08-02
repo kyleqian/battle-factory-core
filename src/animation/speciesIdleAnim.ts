@@ -87,6 +87,7 @@ export type SpeciesFrontAnimFamily =
   | "V_STRETCH"
   | "V_SHAKE"
   | "V_SHAKE_TWICE"
+  | "ZIGZAG_FAST"
   | "ZIGZAG_SLOW";
 
 const FRONT_ANIM_PREFIX = "ANIM_";
@@ -136,6 +137,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "V_STRETCH",
   "V_SHAKE",
   "V_SHAKE_TWICE",
+  "ZIGZAG_FAST",
   "ZIGZAG_SLOW",
 ]);
 
@@ -581,6 +583,23 @@ export const FOUR_PETAL_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze
 /** There are no four-petal mappings outside the Factory rental pool. */
 export const FOUR_PETAL_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   FOUR_PETAL_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All source selector mappings for `ANIM_ZIGZAG_FAST`. */
+export const ZIGZAG_FAST_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_ZIGZAG_FAST")
+    .map(([species]) => species),
+);
+
+/** Every fast-zigzag mapping is reachable through Factory rentals. */
+export const ZIGZAG_FAST_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  ZIGZAG_FAST_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no fast-zigzag mappings outside the Factory pool. */
+export const ZIGZAG_FAST_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  ZIGZAG_FAST_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /** All source selector mappings for `ANIM_ZIGZAG_SLOW`. */
@@ -2937,6 +2956,102 @@ export const ZIGZAG_DATA: readonly (readonly [number, number, number])[] = Objec
   [2, 0, 6], [-2, 2, 6], [2, 0, 6], [-1, -1, 6], [0, 0, 0],
 ]);
 
+interface ZigzagSharedState {
+  x2: number;
+  y2: number;
+  data2: number;
+  data3: number;
+}
+
+interface ZigzagSharedStep {
+  readonly moved: boolean;
+  readonly tryFlipXCalls: 1 | 2;
+  readonly reachedTerminal: boolean;
+}
+
+/**
+ * Shared source-order `Zigzag` callback (`pokemon_animation.c:1290-1322`).
+ * Its callers retain their own callback identities: the fast initializer
+ * installs `Zigzag` after this first invocation, while the slow wrapper keeps
+ * itself installed until this routine consumes the zero-duration sentinel.
+ */
+function zigzagSharedStep(state: ZigzagSharedState): ZigzagSharedStep {
+  if (state.data2 === 0) state.data3 = 0;
+
+  let leg = ZIGZAG_DATA[state.data3]!;
+  if (leg[2] === state.data2) {
+    if (leg[2] === 0) return { moved: false, tryFlipXCalls: 1, reachedTerminal: true };
+    state.data3 += 1;
+    state.data2 = 0;
+  }
+
+  leg = ZIGZAG_DATA[state.data3]!;
+  if (leg[2] === 0) return { moved: false, tryFlipXCalls: 1, reachedTerminal: true };
+
+  state.x2 += leg[0];
+  state.y2 += leg[1];
+  state.data2 += 1;
+  return { moved: true, tryFlipXCalls: 2, reachedTerminal: false };
+}
+
+export interface ZigzagFastFrame extends SpeciesIdleOffset {
+  readonly data0: number;
+  readonly data2: number;
+  readonly data3: number;
+  readonly moved: boolean;
+  readonly initializerCalled: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXCalls: 0 | 1 | 2;
+  readonly callback: "Zigzag" | "WaitAnimEnd";
+}
+
+/**
+ * Exact source-order normal-front `Anim_ZigzagFast` lifecycle. Its
+ * initializer calls `Zigzag` on tick 0 and only then overwrites the sprite
+ * callback with `Zigzag`; all remaining motion is one callback per tick.
+ * Ticks 0..53 apply the nine six-callback legs, and tick 54 alone consumes
+ * the zero-duration sentinel and hands off to `WaitAnimEnd`.
+ */
+export function zigzagFastFrameAtTick(ticksSinceStart: number): ZigzagFastFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+  const state: ZigzagSharedState = { x2: 0, y2: 0, data2: 0, data3: 0 };
+  let callback: "Anim_ZigzagFast" | ZigzagFastFrame["callback"] = "Anim_ZigzagFast";
+  let moved = false;
+  let initializerCalled = false;
+  let tryFlipXCalls: ZigzagFastFrame["tryFlipXCalls"] = 0;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    moved = false;
+    initializerCalled = false;
+    tryFlipXCalls = 0;
+    if (callback === "WaitAnimEnd") continue;
+
+    const step = zigzagSharedStep(state);
+    moved = step.moved;
+    tryFlipXCalls = step.tryFlipXCalls;
+    if (callback === "Anim_ZigzagFast") {
+      // `Anim_ZigzagFast` overwrites even its callee's callback result.
+      initializerCalled = true;
+      callback = "Zigzag";
+    } else if (step.reachedTerminal) {
+      callback = "WaitAnimEnd";
+    }
+  }
+
+  return {
+    x2: state.x2,
+    y2: state.y2,
+    data0: 0,
+    data2: state.data2,
+    data3: state.data3,
+    moved,
+    initializerCalled,
+    normalFrontDontFlip: true,
+    tryFlipXCalls,
+    callback: callback === "Anim_ZigzagFast" ? "Zigzag" : callback,
+  };
+}
+
 export interface ZigzagSlowFrame extends SpeciesIdleOffset {
   readonly data0: number;
   readonly data2: number;
@@ -2950,7 +3065,8 @@ export interface ZigzagSlowFrame extends SpeciesIdleOffset {
 /** Source-order normal-front `Anim_ZigzagSlow` plus shared `Zigzag`. */
 export function zigzagSlowFrameAtTick(ticksSinceStart: number): ZigzagSlowFrame | null {
   if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
-  let x2 = 0, y2 = 0, data0 = 0, data2 = 0, data3 = 0;
+  const state: ZigzagSharedState = { x2: 0, y2: 0, data2: 0, data3: 0 };
+  let data0 = 0;
   let callback: ZigzagSlowFrame["callback"] = "Anim_ZigzagSlow";
   let moved = false;
   let tryFlipXCalls: ZigzagSlowFrame["tryFlipXCalls"] = 0;
@@ -2959,27 +3075,18 @@ export function zigzagSlowFrameAtTick(ticksSinceStart: number): ZigzagSlowFrame 
     moved = false;
     tryFlipXCalls = 0;
     if (callback === "WaitAnimEnd") continue;
-    if (data2 === 0) data0 = 0;
+    if (state.data2 === 0) data0 = 0;
     if (data0 <= 0) {
-      tryFlipXCalls = 1;
-      if (data2 === 0) data3 = 0;
-      let leg = ZIGZAG_DATA[data3]!;
-      if (leg[2] === data2) {
-        if (leg[2] === 0) callback = "WaitAnimEnd";
-        else { data3 += 1; data2 = 0; }
-      }
-      leg = ZIGZAG_DATA[data3]!;
-      if (leg[2] === 0) callback = "WaitAnimEnd";
-      else {
-        x2 += leg[0]; y2 += leg[1]; data2 += 1;
-        moved = true; tryFlipXCalls = 2;
-      }
+      const step = zigzagSharedStep(state);
+      moved = step.moved;
+      tryFlipXCalls = step.tryFlipXCalls;
+      if (step.reachedTerminal) callback = "WaitAnimEnd";
       data0 = 1;
     } else {
       data0 -= 1;
     }
   }
-  return { x2, y2, data0, data2, data3, moved, normalFrontDontFlip: true,
+  return { x2: state.x2, y2: state.y2, data0, data2: state.data2, data3: state.data3, moved, normalFrontDontFlip: true,
     tryFlipXCalls, callback };
 }
 
@@ -5153,6 +5260,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = verticalShakeTwiceFrameAtTick(78);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_VerticalShakeTwice did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "ZIGZAG_FAST": {
+      const terminal = zigzagFastFrameAtTick(54);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_ZigzagFast did not reach its source terminal sentinel");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
