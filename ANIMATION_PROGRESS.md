@@ -1,5 +1,41 @@
 # Animation coverage
 
+## Front `ANIM_RISING_WOBBLE` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **3 mappings / 2
+Factory-reachable / 1 outside-Factory** — SPEAROW, SKIPLOOM, and CELEBI. Only
+source ID **24** is promoted; no outside-Factory oracle fixture was added for
+CELEBI. Adjacent selectors, back routing, moves, battle state, facility
+progression, and engine boundaries remain untouched. Move coverage remains
+**107/276 exact, 0 partial, 0 staged, 169 unsupported**; Open-only **0/1** and
+Outside Factory **0/77**. `ANIMATION_COVERAGE.json` is unchanged at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,1003-1034,
+1769-1800`, `pokemon_animation.h:64`, `pokemon.c:1427,1594,1657`, and
+`trig.c:514-518` pin task-zeroed signed-s16 registers, `sDontFlip=TRUE`,
+data0=5 callback-before-install ordering, affine start at data2=0, signed
+index and masked-u8 rotation arithmetic, negated y2, identity/reset/WaitAnimEnd
+teardown, and the post-branch data2 increment. Dense Tier-1 coverage exhausts
+active callbacks **0..100** and strict terminal callback **101**, plus stable
+terminal, invalid inputs, all phase/index boundaries, and adjacent accepted and
+unsupported controls. Fresh complete legal challenge-0 Scene-ON parties were
+probed twice per Factory species only through `tools/run-mgba-probe.py`; each
+raw pair is byte-identical, 373 B, and settles battler 1 at x2=0/y2=0,
+animNum=1/`SpriteCallbackDummy`: SPEAROW species 21, command 15, data2 21,
+SHA-256 `9e1ce2d84208d71287a87450e2df28961d717329dc7cc3d3495146674bbd61ec`;
+SKIPLOOM species 188, command 7, data2 188, SHA-256
+`787a4f0eab9dca690d555347d938bee8fa4eb008c464e3727af53073db0be45b`.
+
+**Gates / next:** focused species-idle + evidence tests are **334/334** and
+both animation/executable-frontier ratchets are **9/9**; `npx tsc --noEmit`,
+full `npm test` (**614 files / 6,292 passed / 1 skipped**), production build
+(**552 modules transformed**), and `npm run animation:coverage` are green.
+The next source-ranked unsupported generated Factory-front tie, derived from
+the current selector table with source-ID tie-break, is
+**`ANIM_GLOW_ORANGE`** (source ID **32**; **2 mappings / 2 Factory / 0 outside**)
+— KAKUNA and PONYTA. No move status is promoted for send-out coverage.
+
 > Worker routing policy moved out of this ledger on 2026-08-02 — it now lives
 > in `ANIMATION_SUPERVISOR.md` ("The loop, adjusted") and `SUPERVISOR.md`
 > ("Which pair — the routing rubric"), so ledger rotation cannot lose it.
