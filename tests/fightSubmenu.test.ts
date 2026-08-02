@@ -55,7 +55,10 @@ import {
   isTurn3NextCommandLifecycleActive,
   resolveTurn3CompletedResolutionNextCommandHandoff,
 } from "../src/engine/turn3ResolutionAdapter.ts";
-import { isTurn4NextCommandHandoffReady } from "../src/engine/turn4ResolutionAdapter.ts";
+import {
+  isTurn4NextCommandHandoffReady,
+  resolveTurn4CompletedResolutionNextCommandHandoff,
+} from "../src/engine/turn4ResolutionAdapter.ts";
 import {
   CANONICAL_FORCED_SWITCH_PARTY,
   CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
@@ -82,6 +85,7 @@ const ONIX_MOVESET = rentalMoveset("ONIX");
 const TURN1_HANDOFF = resolveTurn1CompletedResolutionNextCommandHandoff(1308);
 const TURN2_HANDOFF = resolveTurn2CompletedResolutionNextCommandHandoff(2197);
 const TURN3_HANDOFF = resolveTurn3CompletedResolutionNextCommandHandoff(3172);
+const TURN4_HANDOFF = resolveTurn4CompletedResolutionNextCommandHandoff(4312);
 
 describe("battleMenu: moveFightCursor (HandleInputChooseMove's DPAD guards, §11 finding 2)", () => {
   it("RIGHT/DOWN/LEFT/UP loop 0(ROCK_SLIDE)->1(BIND)->3(SANDSTORM)->2(DRAGON_BREATH)->0(ROCK_SLIDE), matching the nav groundtruth trace exactly", () => {
@@ -172,7 +176,7 @@ function stateAtTick(firstTickAbsolute: number): EngineState {
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
-    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: null, turn3NextCommandHandoff: null, turn4Resolved: false, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null },
+    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1NextCommandHandoff: null, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, turn5NextCommandHandoff: null, turn6NextCommandHandoff: null, turn7NextCommandHandoff: null, turn8NextCommandHandoff: null, turn9NextCommandHandoff: null, turn10NextCommandHandoff: null, turn11NextCommandHandoff: null, turn12NextCommandHandoff: null, opponentFaintDismissElapsed: null, turn13NextCommandHandoff: null },
   };
 }
 
@@ -185,7 +189,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
     const initial = createInitialState({ appRoute: "canonical-recorded" });
     // This synthetic late-turn fixture must still be later than every
     // retained predecessor epoch, including the completed-turn-3 reset.
-    const turn13Confirmed = confirmFightMove(openFightSubmenu(4000, ONIX_MOVESET, 2), 4001);
+    const turn13Confirmed = confirmFightMove(openFightSubmenu(5000, ONIX_MOVESET, 2), 5001);
     const state = tick({
       ...initial,
       draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
@@ -197,7 +201,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
         turn1NextCommandHandoff: TURN1_HANDOFF,
         turn2NextCommandHandoff: TURN2_HANDOFF,
         turn3NextCommandHandoff: TURN3_HANDOFF,
-        turn4Resolved: true,
+        turn4NextCommandHandoff: TURN4_HANDOFF,
         turn5NextCommandHandoff: resolveTurn5CompletedResolutionNextCommandHandoff(),
         turn6NextCommandHandoff: resolveTurn6CompletedResolutionNextCommandHandoff(),
         turn7NextCommandHandoff: resolveTurn7CompletedResolutionNextCommandHandoff(),
@@ -313,7 +317,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
       null,
       null,
       null,
-      false,
+      null,
       null,
       null,
       null,
@@ -483,7 +487,7 @@ describe("battleMenu: ISSUES #25 - a B-close no longer strands the submenu forev
     expect(state.battleScene!.turn1NextCommandHandoff).toBeNull(); // no completion receipt has published before confirmation
     expect(state.battleScene!.turn2NextCommandHandoff).toBeNull();
     expect(state.battleScene!.turn3NextCommandHandoff).toBeNull();
-    expect(state.battleScene!.turn4Resolved).toBe(false);
+    expect(state.battleScene!.turn4NextCommandHandoff ?? null).toBeNull();
   });
 
   it("the reopened submenu is fully interactive again: nav + a second close + a second reopen (close->reopen->nav->close->reopen cycling) keeps persisting the cursor each time", () => {
@@ -631,7 +635,7 @@ function stateAtTurn3Reopen(firstTickAbsolute: number): EngineState {
       },
       turn1NextCommandHandoff: TURN1_HANDOFF,
       turn2NextCommandHandoff: firstTickAbsolute >= 3237 ? TURN2_HANDOFF : null,
-      turn3NextCommandHandoff: null, turn4Resolved: false, turn5NextCommandHandoff: null,
+      turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, turn5NextCommandHandoff: null,
     turn6NextCommandHandoff: null,
     turn7NextCommandHandoff: null,
     turn8NextCommandHandoff: null,
@@ -758,7 +762,7 @@ function stateAtTurn3Confirm(): EngineState {
       },
       turn1NextCommandHandoff: TURN1_HANDOFF,
       turn2NextCommandHandoff: TURN2_HANDOFF,
-      turn3NextCommandHandoff: null, turn4Resolved: false, turn5NextCommandHandoff: null,
+      turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, turn5NextCommandHandoff: null,
     turn6NextCommandHandoff: null,
     turn7NextCommandHandoff: null,
     turn8NextCommandHandoff: null,
@@ -952,7 +956,7 @@ function stateAtTurn4Confirm(): EngineState {
       turn1NextCommandHandoff: TURN1_HANDOFF,
       turn2NextCommandHandoff: TURN2_HANDOFF,
       turn3NextCommandHandoff: TURN3_HANDOFF,
-      turn4Resolved: false, turn5NextCommandHandoff: null,
+      turn4NextCommandHandoff: null, turn5NextCommandHandoff: null,
     turn6NextCommandHandoff: null,
     turn7NextCommandHandoff: null,
     turn8NextCommandHandoff: null,
@@ -1002,7 +1006,7 @@ function stateAtTurn5Confirm(): EngineState {
       turn1NextCommandHandoff: TURN1_HANDOFF,
       turn2NextCommandHandoff: TURN2_HANDOFF,
       turn3NextCommandHandoff: TURN3_HANDOFF,
-      turn4Resolved: true, turn5NextCommandHandoff: null,
+      turn4NextCommandHandoff: TURN4_HANDOFF, turn5NextCommandHandoff: null,
     turn6NextCommandHandoff: null,
     turn7NextCommandHandoff: null,
     turn8NextCommandHandoff: null,
@@ -1013,7 +1017,24 @@ function stateAtTurn5Confirm(): EngineState {
 }
 
 describe("battleMenu/battleScene: turn 5's FIGHT-submenu reopen (S7 slice J, docs/battle-turn-notes.md §13/§23)", () => {
-  it("replaying turn5-menu.json's own committed button script (reopen, NO nav needed, confirm) lands turn 5's own confirm at tick 5959, cursor persisted at 0 (ROCK_SLIDE, unchanged since turn 3), turn4Resolved flips true", () => {
+  it("the turn-5 open and a B-close/A-reopen consume the one immutable completed-turn-4 receipt", () => {
+    let state = stateAtTurn4Confirm();
+    while (state.battleScene!.elapsed < 4312) state = press(state, []);
+    const receipt = state.battleScene!.turn4NextCommandHandoff;
+    expect(isTurn4NextCommandHandoffReady(receipt)).toBe(true);
+
+    state = press(state, ["A"]);
+    expect(state.battleScene!.turn4NextCommandHandoff).toBe(receipt);
+    for (let i = 0; i < FIGHT_SUBMENU_OPEN_DELAY; i += 1) state = press(state, []);
+    state = press(state, ["B"]);
+    for (let i = 0; i < FIGHT_SUBMENU_CLOSE_DELAY - 1; i += 1) state = press(state, []);
+    state = press(state, ["A"]);
+
+    expect(state.battleScene!.fightSubmenu.reopenedFromClose).toBe(true);
+    expect(state.battleScene!.turn4NextCommandHandoff).toBe(receipt);
+  });
+
+  it("replaying turn5-menu.json's own committed button script (reopen, NO nav needed, confirm) lands turn 5's own confirm at tick 5959, cursor persisted at 0 (ROCK_SLIDE, unchanged since turn 3), consuming the completed-turn-4 receipt", () => {
     const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn5-menu.json", import.meta.url), "utf8")) as {
       segments: { frames: number; buttons?: GbaButton[] }[];
     };
@@ -1027,25 +1048,25 @@ describe("battleMenu/battleScene: turn 5's FIGHT-submenu reopen (S7 slice J, doc
     expect(state.battleScene!.turn1NextCommandHandoff).toEqual(TURN1_HANDOFF);
     expect(state.battleScene!.turn2NextCommandHandoff).toEqual(TURN2_HANDOFF);
     expect(state.battleScene!.turn3NextCommandHandoff).toEqual(TURN3_HANDOFF);
-    expect(state.battleScene!.turn4Resolved).toBe(true);
+    expect(state.battleScene!.turn4NextCommandHandoff).toEqual(TURN4_HANDOFF);
   });
 
-  it("the turn-4-resolved reopen gate stays closed before TURN4_ROCKSLIDE_MENU_REDRAW_DELAY(661) has elapsed past turn 4's own real confirm (4925) - an early A press is simply dropped, matching turns 1/2/3/4's own reopen-gate precedent", () => {
+  it("the turn-4 receipt lifecycle stays closed before its source-owned reset - an early A press is simply dropped, matching turns 1/2/3/4's own reopen-gate precedent", () => {
     let state = stateAtTurn4Confirm();
     const confirmElapsedBefore = state.battleScene!.fightSubmenu.confirmElapsed;
     for (let i = 0; i < 100; i += 1) state = press(state, []);
     state = press(state, ["A"]);
-    expect(state.battleScene!.turn4Resolved).toBe(false);
+    expect(state.battleScene!.turn4NextCommandHandoff ?? null).toBeNull();
     expect(state.battleScene!.fightSubmenu.confirmElapsed).toBe(confirmElapsedBefore);
   });
 
-  it("currentPPForActiveMon: ROCK_SLIDE (slot 0) reads 7/10 once turn4Resolved (used turns 1, 3 AND 4), independent of turn 2's slot-2 DRAGON_BREATH receipt", () => {
+  it("currentPPForActiveMon: ROCK_SLIDE (slot 0) reads 7/10 from the completed-turn-4 receipt (used turns 1, 3 AND 4), independent of turn 2's slot-2 DRAGON_BREATH receipt", () => {
     const moveset = rentalMoveset("ONIX");
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, true)[0]).toBe(moveset.maxPP[0] - 3);
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, true)[0]).toBe(7);
+    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF)[0]).toBe(moveset.maxPP[0] - 3);
+    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF)[0]).toBe(7);
     // Sanity: the completed-turn-3 receipt alone (pre-turn-5) still reads 8/10, matching
     // slice I's own pinned behavior - this test doesn't regress it.
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, false)[0]).toBe(8);
+    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, null)[0]).toBe(8);
   });
 
   it("engine state stays well-formed and deterministic through the reopen/confirm-registration window - pixel parity lives in tools/compare/traces/turn5-menu.json (42/42, 0 diff; tick 5927's own former residual RESOLVED, see docs/battle-turn-notes.md §23)", () => {
@@ -1062,10 +1083,10 @@ describe("battleMenu/battleScene: turn 5's FIGHT-submenu reopen (S7 slice J, doc
     expect(replay().battleScene).toEqual(replay().battleScene);
   });
 
-  it("engine state stays well-formed (turn4Resolved, cursor 0) through the whole ENDEAVOR-again window - a pure smoke/determinism check, pixel parity lives in tools/compare/traces/turn5-endeavor.json (254/254, 0 diff)", () => {
+  it("engine state keeps the completed-turn-4 receipt and cursor 0 through the whole ENDEAVOR-again window - a pure smoke/determinism check, pixel parity lives in tools/compare/traces/turn5-endeavor.json (254/254, 0 diff)", () => {
     let state = stateAtTurn5Confirm();
     for (let i = 0; i < 254; i += 1) state = press(state, []);
-    expect(state.battleScene!.turn4Resolved).toBe(true);
+    expect(state.battleScene!.turn4NextCommandHandoff).toEqual(TURN4_HANDOFF);
     expect(state.battleScene!.fightSubmenu.cursor).toBe(0);
     let replay = stateAtTurn5Confirm();
     for (let i = 0; i < 254; i += 1) replay = press(replay, []);
@@ -1093,7 +1114,7 @@ function stateAtTurn5SitrusConfirm(): EngineState {
       turn1NextCommandHandoff: TURN1_HANDOFF,
       turn2NextCommandHandoff: TURN2_HANDOFF,
       turn3NextCommandHandoff: TURN3_HANDOFF,
-      turn4Resolved: true, turn5NextCommandHandoff: null,
+      turn4NextCommandHandoff: TURN4_HANDOFF, turn5NextCommandHandoff: null,
     turn6NextCommandHandoff: null,
     turn7NextCommandHandoff: null,
     turn8NextCommandHandoff: null,
@@ -1118,7 +1139,7 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
     expect(state.battleScene!.turn1NextCommandHandoff).toEqual(TURN1_HANDOFF);
     expect(state.battleScene!.turn2NextCommandHandoff).toEqual(TURN2_HANDOFF);
     expect(state.battleScene!.turn3NextCommandHandoff).toEqual(TURN3_HANDOFF);
-    expect(state.battleScene!.turn4Resolved).toBe(true);
+    expect(state.battleScene!.turn4NextCommandHandoff).toEqual(TURN4_HANDOFF);
     expect(state.battleScene!.turn5NextCommandHandoff).toEqual(
       resolveTurn5CompletedResolutionNextCommandHandoff(),
     );
@@ -1147,21 +1168,21 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
   it("currentPPForActiveMon: ROCK_SLIDE (slot 0) reads the completed-turn-5 receipt's 6/10 after uses in turns 1, 3, 4, and 5, independent of turn 2's slot-2 DRAGON_BREATH decrement", () => {
     const moveset = rentalMoveset("ONIX");
     const handoff = resolveTurn5CompletedResolutionNextCommandHandoff();
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, true, handoff)[0]).toBe(moveset.maxPP[0] - 4);
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, true, handoff)[0]).toBe(6);
-    // Sanity: turn4Resolved alone (pre-turn-6) still reads 7/10, matching
+    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, handoff)[0]).toBe(moveset.maxPP[0] - 4);
+    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, handoff)[0]).toBe(6);
+    // Sanity: the completed-turn-4 receipt alone (pre-turn-6) still reads 7/10, matching
     // slice J's own pinned behavior - this test doesn't regress it.
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, true, null)[0]).toBe(7);
+    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, null)[0]).toBe(7);
   });
 
   it("S7 slice O: currentPPForActiveMon reads 5/10 from turn 6's completed-command receipt, matching turn 7's reopen ledger", () => {
     const moveset = rentalMoveset("ONIX");
     const turn5Handoff = resolveTurn5CompletedResolutionNextCommandHandoff();
     const turn6Handoff = resolveTurn6CompletedResolutionNextCommandHandoff();
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, true, turn5Handoff, turn6Handoff)[0]).toBe(moveset.maxPP[0] - 5);
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, true, turn5Handoff, turn6Handoff)[0]).toBe(5);
+    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, turn5Handoff, turn6Handoff)[0]).toBe(moveset.maxPP[0] - 5);
+    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, turn5Handoff, turn6Handoff)[0]).toBe(5);
     // Sanity: the completed turn-5 receipt alone (pre-turn-7) still reads 6/10.
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, true, turn5Handoff, null)[0]).toBe(6);
+    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, turn5Handoff, null)[0]).toBe(6);
   });
 
   it("replaying turn7-menu.json's existing input script uses turn 6's typed receipt for the following reopen guard", () => {

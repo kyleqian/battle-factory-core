@@ -28,6 +28,7 @@ import { resolveTurn13CompletedResolutionNextCommandHandoff } from "../src/engin
 import { resolveTurn1CompletedResolutionNextCommandHandoff } from "../src/engine/turn1ResolutionAdapter.ts";
 import { resolveTurn2CompletedResolutionNextCommandHandoff } from "../src/engine/turn2ResolutionAdapter.ts";
 import { resolveTurn3CompletedResolutionNextCommandHandoff } from "../src/engine/turn3ResolutionAdapter.ts";
+import { resolveTurn4CompletedResolutionNextCommandHandoff } from "../src/engine/turn4ResolutionAdapter.ts";
 import { resolveTurn5CompletedResolutionNextCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
 import { resolveTurn6CompletedResolutionNextCommandHandoff } from "../src/engine/turn6ResolutionAdapter.ts";
 import { resolveTurn7CompletedResolutionNextCommandHandoff } from "../src/engine/turn7ResolutionAdapter.ts";
@@ -70,7 +71,7 @@ describe("turn 17 faint hold and outcome latency", () => {
         turn1NextCommandHandoff: resolveTurn1CompletedResolutionNextCommandHandoff(1308),
         turn2NextCommandHandoff: resolveTurn2CompletedResolutionNextCommandHandoff(2197),
         turn3NextCommandHandoff: resolveTurn3CompletedResolutionNextCommandHandoff(3172),
-        turn4Resolved: true,
+        turn4NextCommandHandoff: resolveTurn4CompletedResolutionNextCommandHandoff(4312),
         turn5NextCommandHandoff: resolveTurn5CompletedResolutionNextCommandHandoff(),
         turn6NextCommandHandoff: resolveTurn6CompletedResolutionNextCommandHandoff(),
         turn7NextCommandHandoff: resolveTurn7CompletedResolutionNextCommandHandoff(),

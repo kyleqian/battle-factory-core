@@ -3,7 +3,7 @@
  * scout.md §7.3 gap 7): "a presentation consumer must answer 'which window
  * am I in' from `BattleScriptEventProvenance` (`programCounter`/
  * `sourceLabel`) instead of the hand-threaded turn-5 completion receipt/
- * `turn4Resolved` booleans." This is the minimal bridge for the turn5-faint
+ * retired canonical turn flags." This is the minimal bridge for the turn5-faint
  * window's own dispatch decision -- it does not redesign `battleScene.ts`'s
  * whole `drawFightSubmenuWindow` turn cascade (out of this checkpoint's
  * scope, per the brief).

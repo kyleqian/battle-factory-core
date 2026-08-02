@@ -128,7 +128,6 @@ import {
   sendOutHandoffTick,
   sendOutPressEligible,
   TICK0 as SCENE_TICK0,
-  TURN4_ROCKSLIDE_MENU_REDRAW_DELAY,
   TURN5_SITRUS_MENU_REOPEN_GATE_DELAY,
   TURN8_MENU_REDRAW_DELAY,
   TURN9_MENU_REDRAW_DELAY,
@@ -210,7 +209,11 @@ import {
   resolveTurn3CompletedResolutionNextCommandHandoff,
 } from "./turn3ResolutionAdapter.ts";
 import { isTurn4ChooseActionBounceReset } from "./turn4ChooseActionReset.ts";
-import { resolveTurn4CompletedResolutionNextCommandHandoff } from "./turn4ResolutionAdapter.ts";
+import {
+  isTurn4NextCommandHandoffReady,
+  isTurn4NextCommandLifecycleActive,
+  resolveTurn4CompletedResolutionNextCommandHandoff,
+} from "./turn4ResolutionAdapter.ts";
 import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "./turn16FirePunchResolutionAdapter.ts";
 import {
   advanceBattleSceneForcedPartySelect,
@@ -1130,7 +1133,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let turn2NextCommandHandoff = battleScene.turn2NextCommandHandoff ?? null;
     let turn3NextCommandHandoff = battleScene.turn3NextCommandHandoff ?? null;
     let turn4NextCommandHandoff = battleScene.turn4NextCommandHandoff ?? null;
-    let turn4Resolved = battleScene.turn4Resolved;
     let turn5NextCommandHandoff = battleScene.turn5NextCommandHandoff;
     let turn6NextCommandHandoff = battleScene.turn6NextCommandHandoff;
     let turn7NextCommandHandoff = battleScene.turn7NextCommandHandoff;
@@ -1340,21 +1342,23 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         turn3NextCommandHandoff,
         fightSubmenu.openElapsed,
       ) &&
-      !turn4Resolved &&
+      !isTurn4NextCommandLifecycleActive(
+        turn4NextCommandHandoff,
+        fightSubmenu.openElapsed,
+      ) &&
+      isTurn4NextCommandHandoffReady(turn4NextCommandHandoff) &&
       fightSubmenu.confirmElapsed !== null &&
-      newKeys.has("A") &&
-      sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN4_ROCKSLIDE_MENU_REDRAW_DELAY
+      newKeys.has("A")
     ) {
-      // S7 slice J (docs/battle-turn-notes.md §13/§23): turn 4's whole
-      // ROCK_SLIDE resolution has redrawn the settled action menu by now
-      // (`TURN4_ROCKSLIDE_MENU_REDRAW_DELAY` past turn 4's own real confirm)
-      // - a fresh A-press reopens FIGHT
-      // for turn 5, cursor persisted at slot 0 (ROCK_SLIDE, unchanged since
-      // turn 3 - no UP-nav needed this time, §13's own ledger).
+      // The source-owned turn-4 receipt makes the settled menu ready. This
+      // later A only opens the turn-5 command lifecycle and retains the
+      // immutable epoch through any B-close/A-reopen cycle.
       fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen));
-      turn4Resolved = true;
     } else if (
-      turn4Resolved &&
+      isTurn4NextCommandLifecycleActive(
+        turn4NextCommandHandoff,
+        fightSubmenu.openElapsed,
+      ) &&
       !isTurn5NextCommandHandoffReady(turn5NextCommandHandoff) &&
       fightSubmenu.confirmElapsed !== null &&
       newKeys.has("A") &&
@@ -1638,7 +1642,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn2NextCommandHandoff,
       turn3NextCommandHandoff,
       turn4NextCommandHandoff,
-      turn4Resolved,
       turn5NextCommandHandoff,
       turn6NextCommandHandoff,
       turn7NextCommandHandoff,
