@@ -26,7 +26,8 @@ a supervisor plans one increment at a time, delegates it to a capped
 disposable worker via `tools/run-subagent.sh`, and verifies the result between
 steps. Use `./run-supervisor.sh --hybrid` for a Claude Fable supervisor
 (interactive sessions are available through Claude Remote Control) routing
-each step to an appropriate Codex Terra or Sol worker; it otherwise follows
+each step to an appropriate Codex Terra, Luna, or Sol worker (the supervisor
+guides carry the routing rubric); it otherwise follows
 the same supervised contract. Configuration options live in the launchers
 (`--help` lists them). If your prompt says you're a bounded worker session,
 you are one of those workers: this guide applies to you in full, plus the step

@@ -1,12 +1,8 @@
 # Animation coverage
 
-> **Supervisor worker routing (2026-08-01):** use Terra/max for narrow
-> source-transcription families with established reducer, fixture, and probe
-> patterns; use Luna/max for bounded multi-phase lifecycle work with moderate
-> state-machine ambiguity; reserve Sol/high for novel reducers, affine/palette/
-> OAM ambiguity, oracle diagnosis, or presentation-seam integration. This is a
-> routing hint, not a deferral or an acceptance-bar waiver; escalate any worker
-> result that does not survive supervisor verification.
+> Worker routing policy moved out of this ledger on 2026-08-02 — it now lives
+> in `ANIMATION_SUPERVISOR.md` ("The loop, adjusted") and `SUPERVISOR.md`
+> ("Which pair — the routing rubric"), so ledger rotation cannot lose it.
 
 ## Front `ANIM_H_SLIDE` family accepted (2026-08-02)
 

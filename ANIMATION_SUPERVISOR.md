@@ -61,6 +61,16 @@ substitutions:
   both animation ledgers updated; a canonical window alone stays `partial`.
   Do not invent filler work just to occupy the session — wind down early
   instead.
+- **Route** each brief to a tier deliberately — `SUPERVISOR.md`'s routing
+  rubric applies here in full, and the launcher's Sol default is not a
+  decision. In this lane it lands as: **Terra/max** for narrow source-
+  transcription families with established reducer, fixture, and probe
+  patterns (most component tracks); **Luna/max** for bounded multi-phase
+  lifecycle work with moderate state-machine ambiguity; **Sol/high** reserved
+  for novel reducers, affine/palette/OAM ambiguity, oracle diagnosis, or
+  presentation-seam integration. Pass the pair explicitly:
+  `--model gpt-5.6-terra --effort max`. Escalate a step to the next tier only
+  when a result fails your verification, and say so in the ledger.
 - **Verify** in the worker's worktree, then merge `worker/<id>` into
   `animation-main` **from this tree** (never from inside the worker's
   worktree — the cwd self-merge trap), rerun `npm test` + `npm run build`

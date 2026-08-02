@@ -84,7 +84,9 @@ edit.
    **Whenever the worker provider is ordinary Codex — including `--hybrid`
    — the supervisor chooses one exact, mechanically enforced pair:**
    - `gpt-5.6-terra` / `max`;
-   - `gpt-5.6-luna` / `max`, if Luna is available;
+   - `gpt-5.6-luna` / `max` (available and exercised — Luna workers landed
+     work on 2026-08-02; there is no availability probe, so treat it as
+     available and fall back only on an actual launch error);
    - `gpt-5.6-sol` / `high` (launcher default).
    No other ordinary Codex model or effort pairing is allowed. In particular,
    never lower Terra or Luna below max, and never raise Sol above high.
@@ -94,6 +96,31 @@ edit.
    profile: the supervisor runs Sol/ultra, every worker is locked to Sol, and
    workers default to xhigh (the worker ceiling) while permitting high.
    Max mode rejects both the hybrid profile and every non-Sol worker override.
+
+   **Which pair — the routing rubric.** The three pairs are legal; choosing
+   between them is a real decision you make per brief, not a formality that
+   defaults to the launcher's Sol. Sol is for *uncertainty*, not for
+   *importance*: a brief that names a proven recipe and its exact acceptance
+   matrix is not a Sol brief no matter how load-bearing the step is.
+
+   - **Terra/max** — the shape is already established. A slice that repeats a
+     proven recipe (the next turn-N fold, the next component family), source
+     transcription, census/ratchet regeneration, mechanical deletion behind a
+     known verification matrix. Most ladder slices land here.
+   - **Luna/max** — bounded multi-phase work with moderate ambiguity. Staged
+     bridges, equivalence proofs, ground-truth scouts whose probe method is
+     known but whose answer is not, evidence lanes, lifecycle work with a
+     state machine to get right.
+   - **Sol/high** — genuinely novel or diagnostic. New mechanism design,
+     bisecting an unexplained regression, RAM/oracle archaeology,
+     affine/palette/OAM ambiguity, presentation-seam integration — anything
+     whose honest description is "we don't know what's wrong yet."
+
+   Escalate on evidence, not on nerves: if a Terra or Luna worker returns a
+   result that does not survive your verification, rebrief the same step at
+   the next tier and record why in the ledger. This is a routing rubric, not
+   an acceptance-bar waiver — the verification you run is identical either way.
+
    Before every battle-lane brief, apply the **novelty gate**: name the new
    reusable mechanism, unique screen, or generic state transition it adds.
    "The next canonical Battle 2 turn/window" is not a mechanism and must not
