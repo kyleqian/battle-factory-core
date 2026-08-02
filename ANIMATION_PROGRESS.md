@@ -1,5 +1,42 @@
 # Animation coverage
 
+## Front `ANIM_SWING_CONCAVE_FAST_SHORT` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **3 mappings / 2
+Factory-reachable / 1 outside-Factory** — SANDSHREW, LATIAS, and KYOGRE. Only
+source ID **45** is promoted. `ANIMATION_COVERAGE.json` remains byte-identical
+at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`; move
+coverage is still **107/276 exact, 0 partial, 0 staged, 169 unsupported**.
+Adjacent fast/convex selectors, back routing, damage/RNG/turn order, facility
+state, and engine interfaces are untouched.
+
+**Did:** source pins `pokemon_animation.c:643-677,911-939,1003-1068,2512-2550`,
+`pokemon_animation.h:85`, `pokemon.c:1433,1785,1788`, `sprite.h:205,217`, and
+`gba/types.h:83-85`: task-zeroed signed-s16 registers, `sDontFlip=TRUE`, direct
+selector dispatch, `AddNewAnim` defaults with `data=50/runs=1`, immediate
+`SwingConcave` call before callback installation, both source-order `TryFlipX`
+calls, C-truncated indices, signed x2/affine sine writes, identity/reset/
+`WaitAnimEnd` terminal, and stable terminal. Tier-1 coverage exhausts active
+callbacks **0..50** and strict terminal callback **51** (`data2=52`), with
+invalid input, affine/OAM width, and adjacent-control checks. Fresh complete
+legal challenge-0 Scene-ON parties were probed twice per Factory species only
+through `tools/run-mgba-probe.py`; pairs are byte-identical and settle battler
+1 at x2=0/y2=0/`SpriteCallbackDummy`: SANDSHREW species 27, animNum 1, cmd 4,
+372 B, `955a186fdeb2b253a3617590207723a4111c81a11628bab71adc5ffcdd177d9a`;
+LATIAS species 380, animNum 1, cmd 6, 373 B,
+`bf88104dee8bb42023b67c237d509ab80a2aa64ecbc4761d95395fcd35eb2a38`.
+
+**Next:** this bounded selector-45 step is complete; await supervisor
+selection of the next unsupported generated Factory-front family. No move
+status is promoted for send-out coverage.
+
+**Notes:** focused reducer/source/census/evidence plus both ratchets are
+**20/20**; `npx tsc --noEmit`, `npm run animation:coverage`, and production
+build are green. Full `npm test` is green at **618 files / 6,314 passed / 1
+skipped**. Commits: `abf4ecc9` (reducer/census/dense lifecycle) and
+`db4b4435` (source evidence plus paired Scene-ON fixtures).
+
 ## Front `ANIM_GLOW_ORANGE` family accepted (2026-08-02)
 
 **State:** exact for the complete generated selector census: **2 mappings / 2
