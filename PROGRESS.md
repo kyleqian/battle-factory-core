@@ -36,8 +36,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the shared latest slot; needs a small design, not a patch. Resume
   recipe in entry 866 + the salvage commit message.
 - **Next session (ordered):** (1) slice-9 fold completion from
-  `a6d88eaa` — design the PP-freshness split, guard the four audited call
-  sites, full 14-window differential vs `105c72d5`; (2) slice 10 (final
+  `a6d88eaa` per the BANKED design `docs/turn4-fold-pp-freshness-design.md`
+  (`238280bf`, supervisor-verified: pin playerPp/persistedMoveSlot at the
+  turn-4 install to prior-handoff values — one param + one core.ts call
+  site; all four audited call sites resolved with evidence); full
+  14-window differential vs `105c72d5`; (2) slice 10 (final
   13-param/type cut); (3) #66(a) capped-stat banner fix (+(b) after an
   oracle probe); (4) species-dossier slices. Turns 5-8 OFF re-timing
   policy remains un-adopted (unchanged).
