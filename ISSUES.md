@@ -37,45 +37,25 @@ characterized in `docs/trainer-pic-off-window-scout.md` §D. Remainder:
    was added. Reproducer and interpretation:
    `docs/issue56-plus6-route-term.md` main-lane follow-up and
    `tools/probe/dump-canonical-anchor-readylag-ram.py`.
-2. **Isolated frame 444** (536 RESOLVED 2026-07-31, `7467636e`: real
-   onset app-relative 550; root cause was a call-site bug —
-   `renderGeneratedBattleStartOpponentRelease`'s pre-player-release
-   `drawBallIcons` used the raw opponent-handoff clock instead of the
-   already-proven rebased `generatedPlayerVisualClock`; YOSHI now
-   **700/751**, ablation-verified Tier-1 pin added). Frame 444 remains:
-   root cause still the RAM-confirmed one-tick OBJ-VRAM freeze skipped
-   by `opponentSummaryExitElapsed`'s `generated-initial-release &&
-   rawElapsed === 31` special case, but the described fix is
-   REGRESSION-BLOCKED (2026-07-31, `2bf68ac1`, probe doc Round 2):
-   plain removal regresses the case's original fitted window
-   (`interactive-generated-intro-off` 715/715 → 714/715, fitted at
-   frame 1492 per `git log -S` → `0c4dab29`); narrowing to
-   `isCanonicalAnchorIntro` restores 715/715 but flips MAGNETON's
-   analogous frame 437 to a 10px mismatch in the OPPOSITE direction —
-   not the real discriminator. MAGNETON-side probe RUN (2026-07-31
-   evening, probe doc Round 3, `11933483`): new structural fact —
-   MAGNETON's bar and icon widgets destroy on TWO different ticks (bar
-   first) while YOSHI and intro-off destroy in sync, so
-   `opponentSummaryExitElapsed`'s single shared `elapsed` clock
-   structurally cannot make MAGNETON pixel-exact both ways. **Round 4
-   checkpoint (2026-07-31):** intro-off's semantic handoff is now pinned
-   at source `t=1459`; at its RAM-confirmed abs-1492 destruction,
-   `rawElapsed=31` exactly. Its task state (`Task_HidePartyStatusSummary`
-   terminal `data[15]=-1`) and pending `gMain.oamBuffer` exit rows are
-   identical to YOSHI's synced raw-31 terminal state, yet those two want
-   opposite bar display-tail clocks. So raw elapsed, current source-task
-   readiness, and pending OAM cannot safely discriminate; no per-route/
-   species/tick fit was landed. MAGNETON's split does justify a future
-   typed per-widget bar/icon lifecycle, but it needs a source-owned
-   hardware-OAM/display-latch readiness event first. Frame 444 also carries
-   a second, separate materialize-column-shift defect
-   (`docs/issue56-residual-probe.md` Q1) never in this fix's scope. The idle-menu-bounce family
-   is **closed as no-app-bug** (2026-07-31, `432e16aa`): the oscillator
-   is RAM-proven exact and species-independent, and the decisive
-   instrument falsified a constant-offset app bug (deltas +67 YOSHI vs
-   +139 MAGNETON — see the probe doc's Q2 addendum, which also banks a
-   narrower follow-up lead: RAM-implied inter-species handoff gap is 61
-   ticks, app's is 11 with the species ORDER reversed).
+2. **Frame 536 RESOLVED** (2026-07-31, `7467636e`: call-site bug —
+   pre-player-release `drawBallIcons` used the raw opponent-handoff clock;
+   YOSHI 700/751, ablation-verified Tier-1 pin). **Frame 444's bar/icon
+   display tail is SETTLED — same #5/#61 sub-tick class** (2026-08-01,
+   supervisor decision; `docs/issue56-display-latch-event-design.md`): the
+   source destroys the summary bar and every icon inside ONE foreground
+   callback (`battle_interface.c:1740-1768`), so MAGNETON's observed
+   two-tick bar/icon split can only be VBlank interposing mid-callback — a
+   CPU/VBlank phase fact, not a source-owned tick-granular lifecycle. Raw
+   elapsed, terminal task state, destroy order, and pending OAM are all
+   falsified discriminators (Round 4 evidence + the design doc §2; YOSHI
+   and intro-off share equivalent terminal state yet need opposite bar
+   tail clocks). Do not fit a phase bit or per-widget clock unless the
+   design doc's §4 falsification gate succeeds; §3 then has the bounded
+   plan. **Frame 444's remaining OPEN lead is the separate
+   materialize-column-shift defect** (`docs/issue56-residual-probe.md` Q1),
+   never in the display-tail scope. The idle-menu-bounce family stays
+   closed as no-app-bug (2026-07-31, `432e16aa`; narrower follow-up lead
+   banked in the probe doc's Q2 addendum).
 3. **RESOLVED (2026-07-31, `7cfef2d7`).** `gEnemyMonElevation` extracted
    (61 species sparse, absent = 0, isolated extractor test) and the
    solved rule `origin.y = 8 + yOffset − elevation` applied at all three
