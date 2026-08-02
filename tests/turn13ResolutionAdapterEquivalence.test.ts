@@ -3,6 +3,7 @@ import {
   isTurn13NextCommandHandoffReady,
   opponentFaintSinkGeometry,
   resolveTurn13CompletedResolutionNextCommandHandoff,
+  resolveTurn13LatestCompletedCommandHandoff,
   resolveTurn13ResolutionAdapter,
   resolveTurn13SwitchInAdapter,
 } from "../src/engine/turn13ResolutionAdapter.ts";
@@ -123,6 +124,16 @@ describe("turn13ResolutionAdapter: #39 rank-2 kernel-to-typed-owner equivalence 
   });
 
   describe("completed-resolution/next-command handoff (rank-2 predecessor retirement proof)", () => {
+    it("normalizes the resumed DRAGON_BREATH boundary into a complete generic receipt", () => {
+      const legacy = resolveTurn13CompletedResolutionNextCommandHandoff();
+      const generic = resolveTurn13LatestCompletedCommandHandoff();
+
+      expect(generic.playerPp).toEqual([0, 19, 18, 10]);
+      expect(generic.playerPp[2]).toBe(legacy.dragonBreathPp.current);
+      expect(generic.persistedMoveSlot).toBe(legacy.persistedMoveSlot);
+      expect(generic.nextCommand).toEqual(legacy.nextCommand);
+    });
+
     it("publishes the core guard's settled redraw and input-ready facts for the following FIGHT reopen", () => {
       const handoff = resolveTurn13CompletedResolutionNextCommandHandoff();
 

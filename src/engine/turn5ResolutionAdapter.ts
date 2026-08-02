@@ -95,6 +95,10 @@ import { runBattleEndTurnOrchestration } from "./battleEndTurnOrchestration.ts";
 import { resolveBattleNameWithPrefix, resolveBattleStringLines } from "./battleStringResolver.ts";
 import { rentalMoveset } from "./battleSetup.ts";
 import {
+  createLatestCompletedCommandHandoff,
+  type LatestCompletedCommandHandoff,
+} from "./nextCommandHandoff.ts";
+import {
   frontYOffset,
   opponentFaintSinkGeometry,
   type Turn13FaintSinkGeometry,
@@ -379,6 +383,13 @@ export function resolveTurn5CompletedResolutionNextCommandHandoff(): Turn5Comple
     persistedMoveSlot: 0 as const,
     nextCommand: Object.freeze({ redraw: "settled" as const, input: "ready" as const }),
   });
+}
+
+/** Normalizes the legacy turn-5 receipt into the generic command boundary. */
+export function resolveTurn5LatestCompletedCommandHandoff(): LatestCompletedCommandHandoff {
+  return createLatestCompletedCommandHandoff(
+    resolveTurn5CompletedResolutionNextCommandHandoff(),
+  );
 }
 
 /** Typed gate shared by the core's next-FIGHT reopen and its dispatcher. */

@@ -7,6 +7,10 @@
  * staging module.
  */
 import { rentalMoveset } from "./battleSetup.ts";
+import {
+  createLatestCompletedCommandHandoff,
+  type LatestCompletedCommandHandoff,
+} from "./nextCommandHandoff.ts";
 
 export type Turn10CompletedResolutionNextCommandHandoff = Readonly<{
   /** Exact post-turn-10 player PP for `[ROCK_SLIDE, BIND, DRAGON_BREATH, SANDSTORM]`. */
@@ -37,6 +41,13 @@ export function resolveTurn10CompletedResolutionNextCommandHandoff(): Turn10Comp
     persistedMoveSlot: 0 as const,
     nextCommand: Object.freeze({ redraw: "settled" as const, input: "ready" as const }),
   });
+}
+
+/** Normalizes the legacy turn-10 receipt into the generic command boundary. */
+export function resolveTurn10LatestCompletedCommandHandoff(): LatestCompletedCommandHandoff {
+  return createLatestCompletedCommandHandoff(
+    resolveTurn10CompletedResolutionNextCommandHandoff(),
+  );
 }
 
 /** Typed gate shared by the core's next-FIGHT reopen and dispatcher. */

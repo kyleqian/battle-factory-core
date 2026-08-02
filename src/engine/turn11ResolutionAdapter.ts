@@ -7,6 +7,10 @@
  * `turn11FeatherDancePresentationStaging.ts`.
  */
 import { rentalMoveset } from "./battleSetup.ts";
+import {
+  createLatestCompletedCommandHandoff,
+  type LatestCompletedCommandHandoff,
+} from "./nextCommandHandoff.ts";
 
 export type Turn11CompletedResolutionNextCommandHandoff = Readonly<{
   /** Exact post-turn-11 player PP for `[ROCK_SLIDE, BIND, DRAGON_BREATH, SANDSTORM]`. */
@@ -38,6 +42,13 @@ export function resolveTurn11CompletedResolutionNextCommandHandoff(): Turn11Comp
     persistedMoveSlot: 0 as const,
     nextCommand: Object.freeze({ redraw: "settled" as const, input: "ready" as const }),
   });
+}
+
+/** Normalizes the legacy turn-11 receipt into the generic command boundary. */
+export function resolveTurn11LatestCompletedCommandHandoff(): LatestCompletedCommandHandoff {
+  return createLatestCompletedCommandHandoff(
+    resolveTurn11CompletedResolutionNextCommandHandoff(),
+  );
 }
 
 /** Typed gate shared by the core's next-FIGHT reopen and dispatcher. */

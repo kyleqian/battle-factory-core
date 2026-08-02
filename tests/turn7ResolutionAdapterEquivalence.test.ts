@@ -10,9 +10,19 @@ import { resolveTurn6CompletedResolutionNextCommandHandoff } from "../src/engine
 import {
   isTurn7NextCommandHandoffReady,
   resolveTurn7CompletedResolutionNextCommandHandoff,
+  resolveTurn7LatestCompletedCommandHandoff,
 } from "../src/engine/turn7ResolutionAdapter.ts";
 
 describe("turn7ResolutionAdapter: #39 completed-turn-7/next-command handoff proof", () => {
+  it("normalizes every legacy receipt fact into the generic handoff", () => {
+    const legacy = resolveTurn7CompletedResolutionNextCommandHandoff();
+    const generic = resolveTurn7LatestCompletedCommandHandoff();
+
+    expect(generic.playerPp).toEqual(legacy.playerPp);
+    expect(generic.persistedMoveSlot).toBe(legacy.persistedMoveSlot);
+    expect(generic.nextCommand).toEqual(legacy.nextCommand);
+  });
+
   it("publishes the same settled redraw/input-ready facts that the old reopen guard supplied", () => {
     const handoff = resolveTurn7CompletedResolutionNextCommandHandoff();
 

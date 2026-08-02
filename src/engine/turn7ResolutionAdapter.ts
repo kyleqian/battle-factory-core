@@ -9,6 +9,10 @@
  * present.
  */
 import { rentalMoveset } from "./battleSetup.ts";
+import {
+  createLatestCompletedCommandHandoff,
+  type LatestCompletedCommandHandoff,
+} from "./nextCommandHandoff.ts";
 
 export type Turn7CompletedResolutionNextCommandHandoff = Readonly<{
   /** Exact post-turn-7 player PP for `[ROCK_SLIDE, BIND, DRAGON_BREATH, SANDSTORM]`. */
@@ -39,6 +43,13 @@ export function resolveTurn7CompletedResolutionNextCommandHandoff(): Turn7Comple
     persistedMoveSlot: 0 as const,
     nextCommand: Object.freeze({ redraw: "settled" as const, input: "ready" as const }),
   });
+}
+
+/** Normalizes the legacy turn-7 receipt into the generic command boundary. */
+export function resolveTurn7LatestCompletedCommandHandoff(): LatestCompletedCommandHandoff {
+  return createLatestCompletedCommandHandoff(
+    resolveTurn7CompletedResolutionNextCommandHandoff(),
+  );
 }
 
 /** Typed gate shared by the core's next-FIGHT reopen and dispatcher. */

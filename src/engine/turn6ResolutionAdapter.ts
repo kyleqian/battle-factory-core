@@ -8,6 +8,10 @@
  * does; it must not be gated on either staged result being present.
  */
 import { rentalMoveset } from "./battleSetup.ts";
+import {
+  createLatestCompletedCommandHandoff,
+  type LatestCompletedCommandHandoff,
+} from "./nextCommandHandoff.ts";
 
 export type Turn6CompletedResolutionNextCommandHandoff = Readonly<{
   /** Exact post-turn-6 player PP for `[ROCK_SLIDE, BIND, DRAGON_BREATH, SANDSTORM]`. */
@@ -38,6 +42,13 @@ export function resolveTurn6CompletedResolutionNextCommandHandoff(): Turn6Comple
     persistedMoveSlot: 0 as const,
     nextCommand: Object.freeze({ redraw: "settled" as const, input: "ready" as const }),
   });
+}
+
+/** Normalizes the legacy turn-6 receipt into the generic command boundary. */
+export function resolveTurn6LatestCompletedCommandHandoff(): LatestCompletedCommandHandoff {
+  return createLatestCompletedCommandHandoff(
+    resolveTurn6CompletedResolutionNextCommandHandoff(),
+  );
 }
 
 /** Typed gate shared by the core's next-FIGHT reopen and dispatcher. */

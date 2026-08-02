@@ -3,6 +3,7 @@ import {
   isTurn5NextCommandHandoffReady,
   resolveTurn5CompletedResolutionNextCommandHandoff,
   resolveTurn5FaintSinkGeometry,
+  resolveTurn5LatestCompletedCommandHandoff,
   resolveTurn5SitrusAdapter,
   resolveTurn5SwitchInAdapter,
 } from "../src/engine/turn5ResolutionAdapter.ts";
@@ -121,6 +122,15 @@ describe("turn5ResolutionAdapter: #39 rank-3 kernel-to-typed-owner equivalence (
   );
 
   describe("completed-resolution/next-command handoff (rank-2 predecessor retirement proof)", () => {
+    it("normalizes every legacy receipt fact into the generic handoff", () => {
+      const legacy = resolveTurn5CompletedResolutionNextCommandHandoff();
+      const generic = resolveTurn5LatestCompletedCommandHandoff();
+
+      expect(generic.playerPp).toEqual(legacy.playerPp);
+      expect(generic.persistedMoveSlot).toBe(legacy.persistedMoveSlot);
+      expect(generic.nextCommand).toEqual(legacy.nextCommand);
+    });
+
     it("publishes the core guard's settled redraw and input-ready facts for the following FIGHT reopen", () => {
       const handoff = resolveTurn5CompletedResolutionNextCommandHandoff();
 

@@ -74,6 +74,10 @@ import {
 } from "./turn13DragonBreathPresentationStaging.ts";
 import { runBattleScriptFaintedActionsOrchestration } from "./battleScriptFaintedActionsOrchestration.ts";
 import { rentalMoveset } from "./battleSetup.ts";
+import {
+  createLatestCompletedCommandHandoff,
+  type LatestCompletedCommandHandoff,
+} from "./nextCommandHandoff.ts";
 
 type MonPicCoordsAsset = Readonly<{
   front: Readonly<Record<string, Readonly<{ yOffset: number }>>>;
@@ -234,6 +238,31 @@ export function resolveTurn13CompletedResolutionNextCommandHandoff(): Turn13Comp
     dragonBreathPp: Object.freeze({ current: playerPp, max: maxPp }),
     persistedMoveSlot: 2,
     nextCommand: Object.freeze({ redraw: "settled" as const, input: "ready" as const }),
+  });
+}
+
+/**
+ * Normalizes turn 13's compact legacy receipt into a complete generic PP
+ * tuple. The tuple comes from the completed DRAGON_BREATH chain's resumed
+ * rules context; the later retained FLY presentation owner is intentionally
+ * outside this command boundary.
+ */
+export function resolveTurn13LatestCompletedCommandHandoff(): LatestCompletedCommandHandoff {
+  const legacyHandoff = resolveTurn13CompletedResolutionNextCommandHandoff();
+  const rulesContext = resolveTurn13ResumedRulesContext();
+  const [rockSlidePp, bindPp, dragonBreathPp, sandstormPp] = rulesContext.battlers[0].pp;
+  if (
+    rockSlidePp === undefined
+    || bindPp === undefined
+    || dragonBreathPp === undefined
+    || sandstormPp === undefined
+  ) {
+    throw new Error("turn13ResolutionAdapter: canonical four-slot PP receipt is unavailable");
+  }
+  return createLatestCompletedCommandHandoff({
+    playerPp: [rockSlidePp, bindPp, dragonBreathPp, sandstormPp],
+    persistedMoveSlot: legacyHandoff.persistedMoveSlot,
+    nextCommand: legacyHandoff.nextCommand,
   });
 }
 

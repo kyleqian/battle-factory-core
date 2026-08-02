@@ -7,6 +7,10 @@
  * post-DRAGON_BREATH turn-13 handoff, which belongs one command later.
  */
 import { rentalMoveset } from "./battleSetup.ts";
+import {
+  createLatestCompletedCommandHandoff,
+  type LatestCompletedCommandHandoff,
+} from "./nextCommandHandoff.ts";
 
 export type Turn12CompletedResolutionNextCommandHandoff = Readonly<{
   /** Exact post-turn-12 player PP for `[ROCK_SLIDE, BIND, DRAGON_BREATH, SANDSTORM]`. */
@@ -38,6 +42,13 @@ export function resolveTurn12CompletedResolutionNextCommandHandoff(): Turn12Comp
     persistedMoveSlot: 0 as const,
     nextCommand: Object.freeze({ redraw: "settled" as const, input: "ready" as const }),
   });
+}
+
+/** Normalizes the legacy turn-12 receipt into the generic command boundary. */
+export function resolveTurn12LatestCompletedCommandHandoff(): LatestCompletedCommandHandoff {
+  return createLatestCompletedCommandHandoff(
+    resolveTurn12CompletedResolutionNextCommandHandoff(),
+  );
 }
 
 /** Typed gate shared by the core's next-FIGHT reopen and dispatcher. */
