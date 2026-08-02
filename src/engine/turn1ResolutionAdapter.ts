@@ -161,12 +161,18 @@ export function turn1CompletedResolutionNextCommandHandoffFromLatest(
 ): Turn1CompletedResolutionNextCommandHandoff | null {
   const epoch = latestCompletedCommandPresentationEpoch(latest);
   if (!isLatestCompletedCommandHandoffReady(latest) || epoch === null) return null;
+  const content = latest.content;
+  // A later early-boundary owner also carries an epoch.  It is not a malformed
+  // turn-1 receipt; decline it by its semantic content before checking the
+  // turn-1 slot invariant so generic ownership can advance across epochs.
+  if (
+    content === undefined
+    || content.upcoming !== null
+    || content.field.player.hp.current !== 117
+    || content.field.opponent.hp.current !== 101
+  ) return null;
   if (latest.persistedMoveSlot !== 0) {
     throw new Error("turn-1 epoch content requires the persisted ROCK_SLIDE slot");
-  }
-  const content = latest.content;
-  if (content === undefined) {
-    throw new Error("turn-1 epoch content requires semantic field content");
   }
   return Object.freeze({
     playerPp: latest.playerPp,

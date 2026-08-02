@@ -14,6 +14,7 @@ import {
 import {
   createLatestCompletedCommandHandoff,
   isLatestCompletedCommandHandoffReady,
+  isLatestCompletedCommandLifecycleActive,
   latestCompletedCommandPresentationEpoch,
   type LatestCompletedCommandHandoff,
 } from "./nextCommandHandoff.ts";
@@ -222,7 +223,7 @@ export function turn2CompletedResolutionNextCommandHandoffFromLatest(
 ): Turn2CompletedResolutionNextCommandHandoff | null {
   const content = turn2FightCommandPresentationFromLatest(latest);
   const epoch = latestCompletedCommandPresentationEpoch(latest);
-  if (content === null || epoch === null || latest === null) return null;
+  if (content === null || epoch === null || latest === null || latest === undefined) return null;
   return Object.freeze({
     playerPp: latest.playerPp,
     persistedMoveSlot: 2 as const,
@@ -233,6 +234,19 @@ export function turn2CompletedResolutionNextCommandHandoffFromLatest(
     presentationEpoch: epoch,
     nextCommand: latest.nextCommand,
   });
+}
+
+/**
+ * The turn-3 command lifecycle consumes the generic turn-2 receipt's own
+ * epoch.  This deliberately identifies the semantic ENDEAVOR/ROCK_SLIDE
+ * content before reading its age; no predecessor redraw delay participates.
+ */
+export function isTurn2LatestCompletedCommandLifecycleActive(
+  latest: LatestCompletedCommandHandoff | null | undefined,
+  openElapsed: number | null,
+): boolean {
+  return turn2FightCommandPresentationFromLatest(latest) !== null
+    && isLatestCompletedCommandLifecycleActive(latest, openElapsed);
 }
 
 /** Typed gate shared by the turn-3 controller and presentation readers. */

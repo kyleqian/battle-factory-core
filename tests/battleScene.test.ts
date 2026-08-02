@@ -154,6 +154,7 @@ import { rentalMoveset } from "../src/engine/battleSetup.ts";
 import { resolveTurn1LatestCompletedCommandHandoff } from "../src/engine/turn1ResolutionAdapter.ts";
 import {
   resolveTurn2CompletedResolutionNextCommandHandoff,
+  resolveTurn2LatestCompletedCommandHandoff,
   turn2PresentationEpochElapsedSinceReset,
 } from "../src/engine/turn2ResolutionAdapter.ts";
 import { resolveTurn3CompletedResolutionNextCommandHandoff } from "../src/engine/turn3ResolutionAdapter.ts";
@@ -206,7 +207,7 @@ import turn8BounceBlipProbe from "../src/data/gen/turn8-bounce-blip-probe.json" 
 import { turn6FeatherSprites, turn7FeatherSprites, turn8FeatherSprites, compareFeatherDrawOrder } from "../src/animation/featherDance.ts";
 
 const TURN1_LATEST_HANDOFF = resolveTurn1LatestCompletedCommandHandoff(1308);
-const TURN2_HANDOFF = resolveTurn2CompletedResolutionNextCommandHandoff(2197);
+const TURN2_LATEST_HANDOFF = resolveTurn2LatestCompletedCommandHandoff(2197);
 const TURN3_HANDOFF = resolveTurn3CompletedResolutionNextCommandHandoff(3172);
 const TURN4_HANDOFF = resolveTurn4CompletedResolutionNextCommandHandoff(4312);
 // This RAM probe predates the Scene-OFF contract and retains the historical
@@ -322,7 +323,7 @@ const TURN2_FIGHT_SUBMENU_STATE = {
 /** Same as `pixelAtSentOut`, but with turn 2's own FIGHT submenu already confirmed on ENDEAVOR (cursor slot 2) - the state `drawTurn2KickoffText`/`drawEndeavorSquish` render under (S7 slice E1d-retry, §15b). */
 function pixelAtTurn2(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN2_FIGHT_SUBMENU_STATE, latestCompletedCommandHandoff: TURN1_LATEST_HANDOFF, turn2NextCommandHandoff: t >= 3237 ? TURN2_HANDOFF : null, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, opponentFaintPresentationOwner: null, });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN2_FIGHT_SUBMENU_STATE, latestCompletedCommandHandoff: t >= 3237 ? TURN2_LATEST_HANDOFF : TURN1_LATEST_HANDOFF, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, opponentFaintPresentationOwner: null, });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -364,7 +365,7 @@ const TURN5_REOPEN_FIGHT_SUBMENU_STATE = {
 /** Same shape as `pixelAtTurn4`, but for turn 5's own reopen DMA-wait window (completed turn-4 receipt present, no confirm yet) - the state `drawActionMenuIdleWindow`'s bounce-tick selection renders under (PROGRESS #183/cleanup, tick 5927). */
 function pixelAtTurn5Reopen(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN5_REOPEN_FIGHT_SUBMENU_STATE, latestCompletedCommandHandoff: TURN1_LATEST_HANDOFF, turn2NextCommandHandoff: TURN2_HANDOFF, turn3NextCommandHandoff: TURN3_HANDOFF, turn4NextCommandHandoff: TURN4_HANDOFF, opponentFaintPresentationOwner: null, });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN5_REOPEN_FIGHT_SUBMENU_STATE, latestCompletedCommandHandoff: TURN2_LATEST_HANDOFF, turn3NextCommandHandoff: TURN3_HANDOFF, turn4NextCommandHandoff: TURN4_HANDOFF, opponentFaintPresentationOwner: null, });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -372,7 +373,7 @@ function pixelAtTurn5Reopen(t: number, x: number, y: number): [number, number, n
 /** Same as `pixelAtTurn2`, but turns 1-3 all resolved and the FIGHT submenu confirmed on turn 4's own ROCK_SLIDE (slot 0) - the state `drawTurn4KickoffText`/`drawTurn4RockSlideWindow` render under (S7 slice I resolution, docs/battle-turn-notes.md §22). */
 function pixelAtTurn4(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN4_FIGHT_SUBMENU_STATE, latestCompletedCommandHandoff: TURN1_LATEST_HANDOFF, turn2NextCommandHandoff: TURN2_HANDOFF, turn3NextCommandHandoff: TURN3_HANDOFF, turn4NextCommandHandoff: null, opponentFaintPresentationOwner: null, });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN4_FIGHT_SUBMENU_STATE, latestCompletedCommandHandoff: TURN2_LATEST_HANDOFF, turn3NextCommandHandoff: TURN3_HANDOFF, turn4NextCommandHandoff: null, opponentFaintPresentationOwner: null, });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -644,7 +645,7 @@ describe("battleScene: send-out A-press #3 registration + text cadence (docs/bat
   it("state advance preserves sendOutPressElapsed once set, and elapsed keeps incrementing regardless", () => {
     let state: BattleSceneState = { ...INITIAL_BATTLE_SCENE_STATE, sendOutPressElapsed: 380 };
     state = advanceBattleScene(state);
-    expect(state).toEqual({ elapsed: 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn2NextCommandHandoff: null, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, resolutionOwner: null, battleOutcome: 0, terminalResolution: null });
+    expect(state).toEqual({ elapsed: 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn3NextCommandHandoff: null, turn4NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, resolutionOwner: null, battleOutcome: 0, terminalResolution: null });
   });
 });
 
@@ -1609,7 +1610,7 @@ describe("ISSUES #39 rank-6 slice 4: turn 4's own OFF-timed DOUBLE_TEAM/ROCK_SLI
   it("stat-rose text phase: render 5080 (pressTick+155, STAT_ROSE_LINE1 not yet started) vs render 5081 (pressTick+156, TURN4_OFF_STAT_ROSE_TEXT_DELAY - the message box hard-cuts to the new text) - the two whole frames differ (the text-phase gate flips), and render 5109 (deep in STAT_ROSE_LINE1's own typing) is stable through the following tick (no further text-box-wide change until ROCK_SLIDE's own hand-off)", () => {
     const frameAt = (t: number): Uint8Array => {
       const fb = new Uint8Array(240 * 160 * 4);
-      renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN4_FIGHT_SUBMENU_STATE, latestCompletedCommandHandoff: TURN1_LATEST_HANDOFF, turn2NextCommandHandoff: TURN2_HANDOFF, turn3NextCommandHandoff: TURN3_HANDOFF, turn4NextCommandHandoff: null, opponentFaintPresentationOwner: null, });
+      renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN4_FIGHT_SUBMENU_STATE, latestCompletedCommandHandoff: TURN2_LATEST_HANDOFF, turn3NextCommandHandoff: TURN3_HANDOFF, turn4NextCommandHandoff: null, opponentFaintPresentationOwner: null, });
       return fb;
     };
     expect(frameAt(5080)).not.toEqual(frameAt(5081));
@@ -1699,8 +1700,7 @@ describe("rank-3 turn-5 KO dismiss mirror retirement", () => {
           activeMonMoveset: rentalMoveset("ONIX"),
           reopenedFromClose: false,
         },
-        latestCompletedCommandHandoff: TURN1_LATEST_HANDOFF,
-        turn2NextCommandHandoff: TURN2_HANDOFF,
+        latestCompletedCommandHandoff: TURN2_LATEST_HANDOFF,
         turn3NextCommandHandoff: TURN3_HANDOFF,
         turn4NextCommandHandoff: TURN4_HANDOFF,
         opponentFaintPresentationOwner: null,
@@ -2529,7 +2529,6 @@ describe("S7/S8 turn 13 rung 3 (docs/turn13-notes.md §4/§5/§7): DRAGON_BREATH
         },
         // The high generic owner drives this late fixture; no retired
         // turn-1 state field accompanies it.
-        turn2NextCommandHandoff: TURN2_HANDOFF,
         turn3NextCommandHandoff: TURN3_HANDOFF,
         turn4NextCommandHandoff: TURN4_HANDOFF,
         // The generic predecessor owns the content for the following command:

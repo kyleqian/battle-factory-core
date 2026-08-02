@@ -179,13 +179,14 @@ import {
 } from "./nextCommandHandoff.ts";
 import { isTurn1ChooseActionBounceReset } from "./turn1ChooseActionReset.ts";
 import {
+  turn1CompletedResolutionNextCommandHandoffFromLatest,
   resolveTurn1LatestCompletedCommandHandoff,
 } from "./turn1ResolutionAdapter.ts";
 import { isTurn2ChooseActionBounceReset } from "./turn2ChooseActionReset.ts";
 import {
-  isTurn2NextCommandHandoffReady,
-  isTurn2NextCommandLifecycleActive,
-  resolveTurn2CompletedResolutionNextCommandHandoff,
+  isTurn2LatestCompletedCommandLifecycleActive,
+  resolveTurn2LatestCompletedCommandHandoff,
+  turn2FightCommandPresentationFromLatest,
 } from "./turn2ResolutionAdapter.ts";
 import { isTurn3ChooseActionBounceReset } from "./turn3ChooseActionReset.ts";
 import {
@@ -1211,7 +1212,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       partySendOutBattleMenuReady(partySendOutElapsed)
         ? fightSubmenu.activeMonMoveset
         : activeMonMoveset(draftScreen);
-    let turn2NextCommandHandoff = battleScene.turn2NextCommandHandoff ?? null;
     let turn3NextCommandHandoff = battleScene.turn3NextCommandHandoff ?? null;
     let turn4NextCommandHandoff = battleScene.turn4NextCommandHandoff ?? null;
     let latestCompletedCommandHandoff = battleScene.latestCompletedCommandHandoff ?? null;
@@ -1247,7 +1247,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       );
     }
     if (
-      turn2NextCommandHandoff === null
+      turn2FightCommandPresentationFromLatest(latestCompletedCommandHandoff) === null
       && isLatestCompletedCommandLifecycleActive(
         latestCompletedCommandHandoff,
         fightSubmenu.openElapsed,
@@ -1257,14 +1257,14 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         battleScene.elapsed + 1,
       )
     ) {
-      turn2NextCommandHandoff = resolveTurn2CompletedResolutionNextCommandHandoff(
+      latestCompletedCommandHandoff = resolveTurn2LatestCompletedCommandHandoff(
         battleScene.elapsed + 1,
       );
     }
     if (
       turn3NextCommandHandoff === null
-      && isTurn2NextCommandLifecycleActive(
-        turn2NextCommandHandoff,
+      && isTurn2LatestCompletedCommandLifecycleActive(
+        latestCompletedCommandHandoff,
         fightSubmenu.openElapsed,
       )
       && isTurn3ChooseActionBounceReset(
@@ -1380,6 +1380,9 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         fightSubmenu.openElapsed,
       ) &&
       isLatestCompletedCommandHandoffReady(latestCompletedCommandHandoff)
+      && turn1CompletedResolutionNextCommandHandoffFromLatest(
+        latestCompletedCommandHandoff,
+      ) !== null
       && latestCompletedCommandPresentationEpoch(latestCompletedCommandHandoff) !== null
       &&
       fightSubmenu.confirmElapsed !== null &&
@@ -1395,15 +1398,11 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // cursor persistence beyond that coincidence).
       fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen));
     } else if (
-      isLatestCompletedCommandLifecycleActive(
+      !isLatestCompletedCommandLifecycleActive(
         latestCompletedCommandHandoff,
         fightSubmenu.openElapsed,
       ) &&
-      !isTurn2NextCommandLifecycleActive(
-        turn2NextCommandHandoff,
-        fightSubmenu.openElapsed,
-      ) &&
-      isTurn2NextCommandHandoffReady(turn2NextCommandHandoff) &&
+      turn2FightCommandPresentationFromLatest(latestCompletedCommandHandoff) !== null &&
       fightSubmenu.confirmElapsed !== null &&
       newKeys.has("A")
     ) {
@@ -1413,8 +1412,8 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // presentation epoch rather than publishing a replacement.
       fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen), 2);
     } else if (
-      isTurn2NextCommandLifecycleActive(
-        turn2NextCommandHandoff,
+      isTurn2LatestCompletedCommandLifecycleActive(
+        latestCompletedCommandHandoff,
         fightSubmenu.openElapsed,
       ) &&
       !isTurn3NextCommandLifecycleActive(
@@ -1557,7 +1556,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     battleScene = {
       ...battleScene,
       fightSubmenu,
-      turn2NextCommandHandoff,
       turn3NextCommandHandoff,
       turn4NextCommandHandoff,
       latestCompletedCommandHandoff,

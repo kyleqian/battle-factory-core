@@ -48,8 +48,9 @@ import {
   resolveTurn1LatestCompletedCommandHandoff,
 } from "../src/engine/turn1ResolutionAdapter.ts";
 import {
-  isTurn2NextCommandLifecycleActive,
+  isTurn2LatestCompletedCommandLifecycleActive,
   resolveTurn2CompletedResolutionNextCommandHandoff,
+  resolveTurn2LatestCompletedCommandHandoff,
 } from "../src/engine/turn2ResolutionAdapter.ts";
 import {
   isTurn3NextCommandHandoffReady,
@@ -122,6 +123,7 @@ const ONIX_MOVESET = rentalMoveset("ONIX");
 const TURN1_HANDOFF = resolveTurn1CompletedResolutionNextCommandHandoff(1308);
 const TURN1_LATEST_HANDOFF = resolveTurn1LatestCompletedCommandHandoff(1308);
 const TURN2_HANDOFF = resolveTurn2CompletedResolutionNextCommandHandoff(2197);
+const TURN2_LATEST_HANDOFF = resolveTurn2LatestCompletedCommandHandoff(2197);
 const TURN3_HANDOFF = resolveTurn3CompletedResolutionNextCommandHandoff(3172);
 const TURN4_HANDOFF = resolveTurn4CompletedResolutionNextCommandHandoff(4312);
 
@@ -259,7 +261,6 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
         elapsed: 20_000,
         sendOutPressElapsed: 380,
         fightSubmenu: turn13Confirmed,
-        turn2NextCommandHandoff: TURN2_HANDOFF,
         turn3NextCommandHandoff: TURN3_HANDOFF,
         turn4NextCommandHandoff: TURN4_HANDOFF,
         latestCompletedCommandHandoff: turn12,
@@ -286,7 +287,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
     expect(state.battleScene!.resolutionOwner).toBe(retainedOwner);
   });
 
-  it("dispatcher slices 3-6: the turn-13 fixture publishes the Turn-1 epoch content before each guard-owned generic bridge", () => {
+  it("dispatcher slices 3-7: the turn-13 fixture publishes both early generic epochs before each guard-owned bridge", () => {
     const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn13-menu.json", import.meta.url), "utf8")) as {
       segments: { frames: number; buttons?: GbaButton[] }[];
     };
@@ -304,6 +305,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
 
     const expected = [
       TURN1_LATEST_HANDOFF,
+      TURN2_LATEST_HANDOFF,
       resolveTurn5LatestCompletedCommandHandoff(),
       resolveTurn6LatestCompletedCommandHandoff(),
       resolveTurn7LatestCompletedCommandHandoff(),
@@ -628,7 +630,6 @@ describe("battleMenu: ISSUES #25 - a B-close no longer strands the submenu forev
     expect(sm.displayCursor).toBe(1);
     expect(sm.reopenedFromClose).toBe(true);
     expect(state.battleScene!.latestCompletedCommandHandoff ?? null).toBeNull(); // no completion receipt has published before confirmation
-    expect(state.battleScene!.turn2NextCommandHandoff).toBeNull();
     expect(state.battleScene!.turn3NextCommandHandoff).toBeNull();
     expect(state.battleScene!.turn4NextCommandHandoff ?? null).toBeNull();
   });
@@ -704,9 +705,9 @@ describe("battleMenu: ISSUES #25 - a B-close no longer strands the submenu forev
   it("turn 3 epoch (post-confirm reopen): the SAME same-turn close/reopen mechanism retains the completed-turn-2 receipt and its immutable epoch", () => {
     let state = stateAtTurn3Reopen(3846);
     state = press(state, ["A"]); // turn-epoch reopen for turn 3, cursor persisted at 2 (DRAGON_BREATH)
-    expect(state.battleScene!.turn2NextCommandHandoff).toEqual(TURN2_HANDOFF);
-    expect(isTurn2NextCommandLifecycleActive(
-      state.battleScene!.turn2NextCommandHandoff,
+    expect(state.battleScene!.latestCompletedCommandHandoff).toEqual(TURN2_LATEST_HANDOFF);
+    expect(isTurn2LatestCompletedCommandLifecycleActive(
+      state.battleScene!.latestCompletedCommandHandoff,
       state.battleScene!.fightSubmenu.openElapsed,
     )).toBe(true);
     for (let i = 0; i < 5; i += 1) state = press(state, []); // FIGHT_SUBMENU_OPEN_DELAY settle
@@ -721,10 +722,10 @@ describe("battleMenu: ISSUES #25 - a B-close no longer strands the submenu forev
     expect(sm.closeElapsed).toBeNull();
     expect(sm.cursor).toBe(0); // persisted at ROCK_SLIDE, where the nav+close left it
     expect(sm.reopenedFromClose).toBe(true);
-    expect(state.battleScene!.turn2NextCommandHandoff).toEqual(TURN2_HANDOFF);
-    expect(state.battleScene!.turn2NextCommandHandoff!.presentationEpoch.elapsed).toBe(2197);
-    expect(isTurn2NextCommandLifecycleActive(
-      state.battleScene!.turn2NextCommandHandoff,
+    expect(state.battleScene!.latestCompletedCommandHandoff).toEqual(TURN2_LATEST_HANDOFF);
+    expect(state.battleScene!.latestCompletedCommandHandoff!.content!.presentationEpoch!.elapsed).toBe(2197);
+    expect(isTurn2LatestCompletedCommandLifecycleActive(
+      state.battleScene!.latestCompletedCommandHandoff,
       state.battleScene!.fightSubmenu.openElapsed,
     )).toBe(true); // same-turn reopen continues, never replaces, the epoch
     expect(state.battleScene!.turn3NextCommandHandoff).toBeNull(); // no turn-3 completion has occurred in this cycle
@@ -776,8 +777,7 @@ function stateAtTurn3Reopen(firstTickAbsolute: number): EngineState {
         activeMonMoveset: rentalMoveset("ONIX"),
         reopenedFromClose: false,
       },
-      latestCompletedCommandHandoff: TURN1_LATEST_HANDOFF,
-      turn2NextCommandHandoff: firstTickAbsolute >= 3237 ? TURN2_HANDOFF : null,
+      latestCompletedCommandHandoff: firstTickAbsolute >= 3237 ? TURN2_LATEST_HANDOFF : TURN1_LATEST_HANDOFF,
       turn3NextCommandHandoff: null, turn4NextCommandHandoff: null,                     opponentFaintPresentationOwner: null,     },
   };
 }
@@ -787,9 +787,9 @@ describe("battleMenu: turn 3's FIGHT-submenu reopen wired through core.ts's tick
     let state = stateAtTurn3Reopen(3846);
     state = press(state, ["A"]);
     const sm = state.battleScene!.fightSubmenu;
-    expect(state.battleScene!.turn2NextCommandHandoff).toEqual(TURN2_HANDOFF);
-    expect(isTurn2NextCommandLifecycleActive(
-      state.battleScene!.turn2NextCommandHandoff,
+    expect(state.battleScene!.latestCompletedCommandHandoff).toEqual(TURN2_LATEST_HANDOFF);
+    expect(isTurn2LatestCompletedCommandLifecycleActive(
+      state.battleScene!.latestCompletedCommandHandoff,
       state.battleScene!.fightSubmenu.openElapsed,
     )).toBe(true);
     expect(sm.openElapsed).toBe(3846 - SCENE_TICK0);
@@ -813,7 +813,7 @@ describe("battleMenu: turn 3's FIGHT-submenu reopen wired through core.ts's tick
     // Reset is at 3237; this state intentionally has no receipt yet.
     let state = stateAtTurn3Reopen(3200);
     state = press(state, ["A"]);
-    expect(state.battleScene!.turn2NextCommandHandoff).toBeNull();
+    expect(state.battleScene!.latestCompletedCommandHandoff).toEqual(TURN1_LATEST_HANDOFF);
     expect(state.battleScene!.fightSubmenu.openElapsed).toBe(1861); // unchanged - still turn 2's own long-settled submenu
   });
 });
@@ -897,8 +897,7 @@ function stateAtTurn3Confirm(): EngineState {
         activeMonMoveset: ONIX_MOVESET,
         reopenedFromClose: false,
       },
-      latestCompletedCommandHandoff: TURN1_LATEST_HANDOFF,
-      turn2NextCommandHandoff: TURN2_HANDOFF,
+      latestCompletedCommandHandoff: TURN2_LATEST_HANDOFF,
       turn3NextCommandHandoff: null, turn4NextCommandHandoff: null,                     opponentFaintPresentationOwner: null,     },
   };
 }
@@ -918,14 +917,13 @@ describe("battleMenu: turn 3's ENDEAVOR resolution (S7 slice G, docs/battle-turn
     }
     expect(state.battleScene!.fightSubmenu.confirmElapsed).toBe(3891 - SCENE_TICK0);
     expect(state.battleScene!.fightSubmenu.cursor).toBe(0);
-    expect(state.battleScene!.turn2NextCommandHandoff).toEqual(TURN2_HANDOFF);
+    expect(state.battleScene!.latestCompletedCommandHandoff).toEqual(TURN2_LATEST_HANDOFF);
   });
 
   it("engine state stays well-formed (turn-2 receipt, cursor 0) through the whole ENDEAVOR-again window - a pure smoke/determinism check, pixel parity lives in tools/compare/traces/turn3-endeavor-off.json", () => {
     let state = stateAtTurn3Confirm();
     for (let i = 0; i < 190; i += 1) state = press(state, []);
-    expect(state.battleScene!.latestCompletedCommandHandoff).toEqual(TURN1_LATEST_HANDOFF);
-    expect(state.battleScene!.turn2NextCommandHandoff).toEqual(TURN2_HANDOFF);
+    expect(state.battleScene!.latestCompletedCommandHandoff).toEqual(TURN2_LATEST_HANDOFF);
     expect(state.battleScene!.fightSubmenu.cursor).toBe(0);
     // Replaying the identical idle window twice from the identical start
     // state must produce byte-identical battleScene state - no hidden
@@ -990,8 +988,7 @@ describe("battleMenu/battleScene: turn 3's ROCK_SLIDE resolution (S7 slice H, do
   it("engine state stays well-formed and deterministic through the whole ROCK_SLIDE window (turn-1/turn-2 receipts unchanged, cursor still 0) - pixel parity lives in tools/compare/traces/turn3-rockslide-off.json", () => {
     let state = stateAtTurn3Confirm();
     for (let i = 0; i < 999; i += 1) state = press(state, []); // 3891 -> 4890, this slice's own committed trace boundary (before tick 4892, turn 4's own input, out of scope)
-    expect(state.battleScene!.latestCompletedCommandHandoff).toEqual(TURN1_LATEST_HANDOFF);
-    expect(state.battleScene!.turn2NextCommandHandoff).toEqual(TURN2_HANDOFF);
+    expect(state.battleScene!.latestCompletedCommandHandoff).toEqual(TURN2_LATEST_HANDOFF);
     expect(state.battleScene!.fightSubmenu.cursor).toBe(0);
     let replay = stateAtTurn3Confirm();
     for (let i = 0; i < 999; i += 1) replay = press(replay, []);
@@ -1020,8 +1017,7 @@ describe("battleMenu/battleScene: turn 4's FIGHT-submenu reopen (S7 slice I, doc
     expect(state.battleScene!.fightSubmenu.openElapsed).toBe(4893 - SCENE_TICK0);
     expect(state.battleScene!.fightSubmenu.confirmElapsed).toBe(4925 - SCENE_TICK0);
     expect(state.battleScene!.fightSubmenu.cursor).toBe(0);
-    expect(state.battleScene!.latestCompletedCommandHandoff).toEqual(TURN1_LATEST_HANDOFF);
-    expect(state.battleScene!.turn2NextCommandHandoff).toEqual(TURN2_HANDOFF);
+    expect(state.battleScene!.latestCompletedCommandHandoff).toEqual(TURN2_LATEST_HANDOFF);
     expect(state.battleScene!.turn3NextCommandHandoff).toEqual(TURN3_HANDOFF);
     expect(isTurn3NextCommandLifecycleActive(
       state.battleScene!.turn3NextCommandHandoff,
@@ -1084,8 +1080,7 @@ function stateAtTurn4Confirm(): EngineState {
         activeMonMoveset: ONIX_MOVESET,
         reopenedFromClose: false,
       },
-      latestCompletedCommandHandoff: TURN1_LATEST_HANDOFF,
-      turn2NextCommandHandoff: TURN2_HANDOFF,
+      latestCompletedCommandHandoff: TURN2_LATEST_HANDOFF,
       turn3NextCommandHandoff: TURN3_HANDOFF,
       turn4NextCommandHandoff: null,                     opponentFaintPresentationOwner: null,     },
   };
@@ -1128,8 +1123,7 @@ function stateAtTurn5Confirm(): EngineState {
         activeMonMoveset: ONIX_MOVESET,
         reopenedFromClose: false,
       },
-      latestCompletedCommandHandoff: TURN1_LATEST_HANDOFF,
-      turn2NextCommandHandoff: TURN2_HANDOFF,
+      latestCompletedCommandHandoff: TURN2_LATEST_HANDOFF,
       turn3NextCommandHandoff: TURN3_HANDOFF,
       turn4NextCommandHandoff: TURN4_HANDOFF,                     opponentFaintPresentationOwner: null,     },
   };
@@ -1164,8 +1158,7 @@ describe("battleMenu/battleScene: turn 5's FIGHT-submenu reopen (S7 slice J, doc
     expect(state.battleScene!.fightSubmenu.openElapsed).toBe(5927 - SCENE_TICK0);
     expect(state.battleScene!.fightSubmenu.confirmElapsed).toBe(5959 - SCENE_TICK0);
     expect(state.battleScene!.fightSubmenu.cursor).toBe(0);
-    expect(state.battleScene!.latestCompletedCommandHandoff).toEqual(TURN1_LATEST_HANDOFF);
-    expect(state.battleScene!.turn2NextCommandHandoff).toEqual(TURN2_HANDOFF);
+    expect(state.battleScene!.latestCompletedCommandHandoff).toEqual(TURN2_LATEST_HANDOFF);
     expect(state.battleScene!.turn3NextCommandHandoff).toEqual(TURN3_HANDOFF);
     expect(state.battleScene!.turn4NextCommandHandoff).toEqual(TURN4_HANDOFF);
   });
@@ -1230,8 +1223,7 @@ function stateAtTurn5SitrusConfirm(): EngineState {
         activeMonMoveset: ONIX_MOVESET,
         reopenedFromClose: false,
       },
-      latestCompletedCommandHandoff: TURN1_LATEST_HANDOFF,
-      turn2NextCommandHandoff: TURN2_HANDOFF,
+      latestCompletedCommandHandoff: TURN2_LATEST_HANDOFF,
       turn3NextCommandHandoff: TURN3_HANDOFF,
       turn4NextCommandHandoff: TURN4_HANDOFF,                     opponentFaintPresentationOwner: null,     },
   };
@@ -1249,7 +1241,6 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
     expect(state.battleScene!.fightSubmenu.openElapsed).toBe(7313 - SCENE_TICK0);
     expect(state.battleScene!.fightSubmenu.confirmElapsed).toBe(7345 - SCENE_TICK0);
     expect(state.battleScene!.fightSubmenu.cursor).toBe(0);
-    expect(state.battleScene!.turn2NextCommandHandoff).toEqual(TURN2_HANDOFF);
     expect(state.battleScene!.turn3NextCommandHandoff).toEqual(TURN3_HANDOFF);
     expect(state.battleScene!.turn4NextCommandHandoff).toEqual(TURN4_HANDOFF);
     expect(state.battleScene!.latestCompletedCommandHandoff).toMatchObject(
@@ -1263,7 +1254,7 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
     const confirmElapsedBefore = state.battleScene!.fightSubmenu.confirmElapsed;
     for (let i = 0; i < 100; i += 1) state = press(state, []);
     state = press(state, ["A"]);
-    expect(state.battleScene!.latestCompletedCommandHandoff).toBe(TURN1_LATEST_HANDOFF);
+    expect(state.battleScene!.latestCompletedCommandHandoff).toBe(TURN2_LATEST_HANDOFF);
     expect(state.battleScene!.fightSubmenu.confirmElapsed).toBe(confirmElapsedBefore);
   });
 
