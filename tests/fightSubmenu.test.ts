@@ -28,6 +28,7 @@ import {
   INITIAL_BATTLE_SCENE_STATE,
   TICK0 as SCENE_TICK0,
   TURN5_SITRUS_MENU_REOPEN_GATE_DELAY,
+  TURN13_SWITCHIN_MENU_REDRAW_AFTER_DISMISS,
   TURN16_FIRE_PUNCH_MENU_REDRAW_DELAY,
   TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET,
   TURN6_FEATHERDANCE_LINE1,
@@ -102,6 +103,11 @@ import {
   resolveTurn12CompletedResolutionNextCommandHandoff,
   resolveTurn12LatestCompletedCommandHandoff,
 } from "../src/engine/turn12ResolutionAdapter.ts";
+import {
+  createNextCommandReopenGuard,
+  withNextCommandReopenGuard,
+  type LatestCompletedCommandHandoff,
+} from "../src/engine/nextCommandHandoff.ts";
 import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "../src/engine/turn16FirePunchResolutionAdapter.ts";
 import {
   beginBattleSceneForcedPartySelect,
@@ -214,8 +220,29 @@ function press(state: EngineState, buttons: GbaButton[]): EngineState {
 }
 
 describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gating, 1-tick lag, B-close resume)", () => {
-  it("installs the typed turn-13 handoff only after the opponent-faint continuation completes", () => {
+  it("consumes the generic turn-12 reopen guard only after the opponent-faint continuation completes", () => {
     const initial = createInitialState({ appRoute: "canonical-recorded" });
+    const retained = resolveTurn13LatestCompletedCommandHandoff();
+    const retainedOwner = retained.content?.retainedResolution?.owner;
+    if (retainedOwner === undefined) {
+      throw new Error("turn-13 generic receipt lost its retained FLY owner");
+    }
+    const turn13 = withNextCommandReopenGuard(
+      retained,
+      createNextCommandReopenGuard({
+        minimumConfirmElapsed: 0,
+        successor: { resolutionOwner: retainedOwner },
+      }),
+    );
+    const turn12 = withNextCommandReopenGuard(
+      resolveTurn12LatestCompletedCommandHandoff(),
+      createNextCommandReopenGuard({
+        minimumConfirmElapsed: 0,
+        minimumOpponentFaintContinuationElapsed:
+          TURN13_SWITCHIN_MENU_REDRAW_AFTER_DISMISS,
+        successor: { handoff: turn13, resolutionOwner: retainedOwner },
+      }),
+    );
     // This synthetic late-turn fixture must still be later than every
     // retained predecessor epoch, including the completed-turn-3 reset.
     const turn13Confirmed = confirmFightMove(openFightSubmenu(5000, ONIX_MOVESET, 2), 5001);
@@ -233,14 +260,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
         turn2NextCommandHandoff: TURN2_HANDOFF,
         turn3NextCommandHandoff: TURN3_HANDOFF,
         turn4NextCommandHandoff: TURN4_HANDOFF,
-        turn5NextCommandHandoff: resolveTurn5CompletedResolutionNextCommandHandoff(),
-        turn6NextCommandHandoff: resolveTurn6CompletedResolutionNextCommandHandoff(),
-        turn7NextCommandHandoff: resolveTurn7CompletedResolutionNextCommandHandoff(),
-        turn8NextCommandHandoff: resolveTurn8CompletedResolutionNextCommandHandoff(),
-        turn9NextCommandHandoff: resolveTurn9CompletedResolutionNextCommandHandoff(),
-        turn10NextCommandHandoff: resolveTurn10CompletedResolutionNextCommandHandoff(),
-        turn11NextCommandHandoff: resolveTurn11CompletedResolutionNextCommandHandoff(),
-        turn12NextCommandHandoff: resolveTurn12CompletedResolutionNextCommandHandoff(),
+        latestCompletedCommandHandoff: turn12,
         opponentFaintPresentationOwner,
       },
     });
@@ -249,23 +269,19 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
       sceneAt(storeOpponentFaintDismiss(createOpponentFaintPresentationOwner(), 20_001 - 290)),
       new Set(["A"]),
     );
-    expect(notYet.battleScene!.turn13NextCommandHandoff).toBeNull();
+    expect(notYet.battleScene!.latestCompletedCommandHandoff).toBe(turn12);
 
     const state = tick(
       sceneAt(storeOpponentFaintDismiss(createOpponentFaintPresentationOwner(), 20_001 - 291)),
       new Set(["A"]),
     );
 
-    expect(state.battleScene!.turn13NextCommandHandoff).toEqual(
-      resolveTurn13CompletedResolutionNextCommandHandoff(),
-    );
-    expect(state.battleScene!.latestCompletedCommandHandoff).toEqual(
+    expect(state.battleScene!.latestCompletedCommandHandoff).toMatchObject(
       resolveTurn13LatestCompletedCommandHandoff(),
     );
+    expect(state.battleScene!.latestCompletedCommandHandoff?.reopenGuard).toBeDefined();
     expect(state.battleScene!.fightSubmenu.cursor).toBe(2);
-    expect(state.battleScene!.resolutionOwner?.resolution).toBe(
-      CANONICAL_OPPONENT_FLY_RESOLUTION.chargeResolution,
-    );
+    expect(state.battleScene!.resolutionOwner).toBe(retainedOwner);
   });
 
   it("dispatcher slices 3-4: the existing turn-13-menu fixture carries each published semantic content bridge alongside its legacy receipt", () => {
@@ -273,7 +289,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
       segments: { frames: number; buttons?: GbaButton[] }[];
     };
     let state = createInitialState({ appRoute: "canonical-recorded" });
-    const publications: unknown[] = [];
+    const publications: LatestCompletedCommandHandoff[] = [];
     let prior = state.battleScene?.latestCompletedCommandHandoff ?? null;
     for (const segment of trace.segments) {
       for (let frame = 0; frame < segment.frames; frame += 1) {
@@ -284,7 +300,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
       }
     }
 
-    expect(publications).toEqual([
+    const expected = [
       resolveTurn5LatestCompletedCommandHandoff(),
       resolveTurn6LatestCompletedCommandHandoff(),
       resolveTurn7LatestCompletedCommandHandoff(),
@@ -293,7 +309,12 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
       resolveTurn10LatestCompletedCommandHandoff(),
       resolveTurn11LatestCompletedCommandHandoff(),
       resolveTurn12LatestCompletedCommandHandoff(),
-    ]);
+    ];
+    expect(publications).toHaveLength(expected.length);
+    for (const [index, publication] of publications.entries()) {
+      expect(publication).toMatchObject(expected[index]!);
+      expect(publication.reopenGuard).toBeDefined();
+    }
   });
 
   it("dispatcher slice 2: turn-13 fallback and locked/following PP precedence agree on generic and legacy paths", () => {
@@ -1255,9 +1276,10 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
     expect(state.battleScene!.turn2NextCommandHandoff).toEqual(TURN2_HANDOFF);
     expect(state.battleScene!.turn3NextCommandHandoff).toEqual(TURN3_HANDOFF);
     expect(state.battleScene!.turn4NextCommandHandoff).toEqual(TURN4_HANDOFF);
-    expect(state.battleScene!.turn5NextCommandHandoff).toEqual(
-      resolveTurn5CompletedResolutionNextCommandHandoff(),
+    expect(state.battleScene!.latestCompletedCommandHandoff).toMatchObject(
+      resolveTurn5LatestCompletedCommandHandoff(),
     );
+    expect(state.battleScene!.latestCompletedCommandHandoff?.reopenGuard).toBeDefined();
   });
 
   it("the turn-5-resolved reopen gate stays closed before TURN5_SITRUS_MENU_REOPEN_GATE_DELAY has elapsed past turn 5's own real confirm (5959) - an early A press is simply dropped, matching turns 1-5's own reopen-gate precedent", () => {
@@ -1265,7 +1287,7 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
     const confirmElapsedBefore = state.battleScene!.fightSubmenu.confirmElapsed;
     for (let i = 0; i < 100; i += 1) state = press(state, []);
     state = press(state, ["A"]);
-    expect(state.battleScene!.turn5NextCommandHandoff).toBeNull();
+    expect(state.battleScene!.latestCompletedCommandHandoff).toBeFalsy();
     expect(state.battleScene!.fightSubmenu.confirmElapsed).toBe(confirmElapsedBefore);
   });
 
@@ -1273,8 +1295,8 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
     let state = stateAtTurn5SitrusConfirm();
     for (let i = 0; i < TURN5_SITRUS_MENU_REOPEN_GATE_DELAY; i += 1) state = press(state, []);
     state = press(state, ["A"]);
-    expect(state.battleScene!.turn5NextCommandHandoff).toEqual(
-      resolveTurn5CompletedResolutionNextCommandHandoff(),
+    expect(state.battleScene!.latestCompletedCommandHandoff).toMatchObject(
+      resolveTurn5LatestCompletedCommandHandoff(),
     );
     expect(state.battleScene!.fightSubmenu.cursor).toBe(0);
     expect(state.battleScene!.fightSubmenu.confirmElapsed).toBeNull();
@@ -1309,8 +1331,8 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
       for (let i = 0; i < segment.frames; i += 1) state = press(state, segment.buttons ?? []);
     }
 
-    expect(state.battleScene!.turn6NextCommandHandoff).toEqual(
-      resolveTurn6CompletedResolutionNextCommandHandoff(),
+    expect(state.battleScene!.latestCompletedCommandHandoff).toMatchObject(
+      resolveTurn6LatestCompletedCommandHandoff(),
     );
     expect(state.battleScene!.fightSubmenu.openElapsed).toBe(8347 - SCENE_TICK0);
     // The unchanged script then confirms turn 7's ROCK_SLIDE at 8379; retain
@@ -1329,8 +1351,8 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
       for (let i = 0; i < segment.frames; i += 1) state = press(state, segment.buttons ?? []);
     }
 
-    expect(state.battleScene!.turn7NextCommandHandoff).toEqual(
-      resolveTurn7CompletedResolutionNextCommandHandoff(),
+    expect(state.battleScene!.latestCompletedCommandHandoff).toMatchObject(
+      resolveTurn7LatestCompletedCommandHandoff(),
     );
     // The unchanged script opens turn 8 on ROCK_SLIDE, moves RIGHT to BIND,
     // and confirms there. This proves the live next-command path rather than

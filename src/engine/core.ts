@@ -158,6 +158,7 @@ import {
   isTurn13NextCommandHandoffReady,
   resolveTurn13CompletedResolutionNextCommandHandoff,
   resolveTurn13LatestCompletedCommandHandoff,
+  type Turn13CompletedResolutionNextCommandHandoff,
 } from "./turn13ResolutionAdapter.ts";
 import {
   createOpponentFaintPresentationOwner,
@@ -165,45 +166,56 @@ import {
   storeOpponentFaintDismiss,
 } from "./opponentFaintPresentationOwner.ts";
 import {
-  isTurn5NextCommandHandoffReady,
-  resolveTurn5CompletedResolutionNextCommandHandoff,
   resolveTurn5LatestCompletedCommandHandoff,
+  type Turn5CompletedResolutionNextCommandHandoff,
 } from "./turn5ResolutionAdapter.ts";
 import {
   isTurn6NextCommandHandoffReady,
-  resolveTurn6CompletedResolutionNextCommandHandoff,
   resolveTurn6LatestCompletedCommandHandoff,
+  type Turn6CompletedResolutionNextCommandHandoff,
 } from "./turn6ResolutionAdapter.ts";
 import {
   isTurn7NextCommandHandoffReady,
   resolveTurn7CompletedResolutionNextCommandHandoff,
   resolveTurn7LatestCompletedCommandHandoff,
+  type Turn7CompletedResolutionNextCommandHandoff,
 } from "./turn7ResolutionAdapter.ts";
 import {
   isTurn8NextCommandHandoffReady,
   resolveTurn8CompletedResolutionNextCommandHandoff,
   resolveTurn8LatestCompletedCommandHandoff,
+  type Turn8CompletedResolutionNextCommandHandoff,
 } from "./turn8ResolutionAdapter.ts";
 import {
   isTurn9NextCommandHandoffReady,
   resolveTurn9CompletedResolutionNextCommandHandoff,
   resolveTurn9LatestCompletedCommandHandoff,
+  type Turn9CompletedResolutionNextCommandHandoff,
 } from "./turn9ResolutionAdapter.ts";
 import {
   isTurn10NextCommandHandoffReady,
   resolveTurn10CompletedResolutionNextCommandHandoff,
   resolveTurn10LatestCompletedCommandHandoff,
+  type Turn10CompletedResolutionNextCommandHandoff,
 } from "./turn10ResolutionAdapter.ts";
 import {
   isTurn11NextCommandHandoffReady,
   resolveTurn11CompletedResolutionNextCommandHandoff,
   resolveTurn11LatestCompletedCommandHandoff,
+  type Turn11CompletedResolutionNextCommandHandoff,
 } from "./turn11ResolutionAdapter.ts";
 import {
   isTurn12NextCommandHandoffReady,
   resolveTurn12CompletedResolutionNextCommandHandoff,
   resolveTurn12LatestCompletedCommandHandoff,
+  type Turn12CompletedResolutionNextCommandHandoff,
 } from "./turn12ResolutionAdapter.ts";
+import {
+  consumeNextCommandReopenGuard,
+  createNextCommandReopenGuard,
+  withNextCommandReopenGuard,
+  type LatestCompletedCommandHandoff,
+} from "./nextCommandHandoff.ts";
 import { isTurn1ChooseActionBounceReset } from "./turn1ChooseActionReset.ts";
 import {
   isTurn1NextCommandHandoffReady,
@@ -353,6 +365,95 @@ import {
   createBattleTerminalResolutionPresentation,
   storeBattleTerminalPresentationDismiss,
 } from "./battleResolutionPresentation.ts";
+
+/**
+ * Builds the source-owned completed-command chain once the turn-4 lifecycle
+ * reaches its first generic boundary.  The links are immutable data carried
+ * by each receipt; consumption below never discovers an edge from a turn
+ * field or a PP value.
+ */
+function createCanonicalCompletedCommandChain(): LatestCompletedCommandHandoff {
+  const retained = resolveTurn13LatestCompletedCommandHandoff();
+  const retainedContent = retained.content?.retainedResolution;
+  if (retainedContent === undefined) {
+    throw new Error("next-command handoff: retained FLY command has no presentation owner");
+  }
+  const final = withNextCommandReopenGuard(
+    retained,
+    createNextCommandReopenGuard({
+      minimumConfirmElapsed: TURN14_DRAGONBREATH_MENU_REDRAW_DELAY,
+      requiredActiveResolutionSegment: retainedContent.segments[0],
+      successor: {
+        resolutionOwner: createBattleSceneResolutionOwner(
+          CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution,
+        ),
+      },
+    }),
+  );
+  const eighth = withNextCommandReopenGuard(
+    resolveTurn12LatestCompletedCommandHandoff(),
+    createNextCommandReopenGuard({
+      minimumConfirmElapsed: 0,
+      minimumOpponentFaintContinuationElapsed:
+        TURN13_SWITCHIN_MENU_REDRAW_AFTER_DISMISS,
+      successor: {
+        handoff: final,
+        // This is the same immutable charge owner retained by generic
+        // content; no independent turn-13 owner is reconstructed here.
+        resolutionOwner: retainedContent.owner,
+      },
+    }),
+  );
+  const seventh = withNextCommandReopenGuard(
+    resolveTurn11LatestCompletedCommandHandoff(),
+    createNextCommandReopenGuard({
+      minimumConfirmElapsed: TURN12_ROCKSLIDE_MENU_REDRAW_DELAY,
+      successor: { handoff: eighth },
+    }),
+  );
+  const sixth = withNextCommandReopenGuard(
+    resolveTurn10LatestCompletedCommandHandoff(),
+    createNextCommandReopenGuard({
+      minimumConfirmElapsed: TURN11_ROCKSLIDE_MENU_REDRAW_DELAY,
+      successor: { handoff: seventh },
+    }),
+  );
+  const fifth = withNextCommandReopenGuard(
+    resolveTurn9LatestCompletedCommandHandoff(),
+    createNextCommandReopenGuard({
+      minimumConfirmElapsed: TURN10_ROCKSLIDE_MENU_REDRAW_DELAY,
+      successor: { handoff: sixth },
+    }),
+  );
+  const fourth = withNextCommandReopenGuard(
+    resolveTurn8LatestCompletedCommandHandoff(),
+    createNextCommandReopenGuard({
+      minimumConfirmElapsed: TURN9_MENU_REDRAW_DELAY,
+      successor: { handoff: fifth },
+    }),
+  );
+  const third = withNextCommandReopenGuard(
+    resolveTurn7LatestCompletedCommandHandoff(),
+    createNextCommandReopenGuard({
+      minimumConfirmElapsed: TURN8_MENU_REDRAW_DELAY,
+      successor: { handoff: fourth },
+    }),
+  );
+  const second = withNextCommandReopenGuard(
+    resolveTurn6LatestCompletedCommandHandoff(),
+    createNextCommandReopenGuard({
+      minimumConfirmElapsed: TURN7_ROCKSLIDE_REOPEN_GATE_DELAY,
+      successor: { handoff: third },
+    }),
+  );
+  return withNextCommandReopenGuard(
+    resolveTurn5LatestCompletedCommandHandoff(),
+    createNextCommandReopenGuard({
+      minimumConfirmElapsed: TURN6_ROCKSLIDE_REOPEN_GATE_DELAY,
+      successor: { handoff: second },
+    }),
+  );
+}
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
 
@@ -1155,22 +1256,36 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let turn2NextCommandHandoff = battleScene.turn2NextCommandHandoff ?? null;
     let turn3NextCommandHandoff = battleScene.turn3NextCommandHandoff ?? null;
     let turn4NextCommandHandoff = battleScene.turn4NextCommandHandoff ?? null;
-    let turn5NextCommandHandoff = battleScene.turn5NextCommandHandoff;
-    let turn6NextCommandHandoff = battleScene.turn6NextCommandHandoff;
-    let turn7NextCommandHandoff = battleScene.turn7NextCommandHandoff;
-    let turn8NextCommandHandoff = battleScene.turn8NextCommandHandoff;
-    let turn9NextCommandHandoff = battleScene.turn9NextCommandHandoff;
-    let turn10NextCommandHandoff = battleScene.turn10NextCommandHandoff;
-    let turn11NextCommandHandoff = battleScene.turn11NextCommandHandoff;
-    let turn12NextCommandHandoff = battleScene.turn12NextCommandHandoff;
-    let turn13NextCommandHandoff = battleScene.turn13NextCommandHandoff;
-    let latestCompletedCommandHandoff = battleScene.latestCompletedCommandHandoff;
+    // Compatibility locals remain only through this checkpoint so old
+    // fixtures can still exercise their renderer ABI. Production never
+    // publishes them: the generic owner/guard above is now the only 5-13
+    // core route, and the following fields are removed in the next cut.
+    let turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null = null;
+    let turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null = null;
+    let turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null = null;
+    let turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null = null;
+    let turn9NextCommandHandoff: Turn9CompletedResolutionNextCommandHandoff | null = null;
+    let turn10NextCommandHandoff: Turn10CompletedResolutionNextCommandHandoff | null = null;
+    let turn11NextCommandHandoff: Turn11CompletedResolutionNextCommandHandoff | null = null;
+    let turn12NextCommandHandoff: Turn12CompletedResolutionNextCommandHandoff | null = null;
+    let turn13NextCommandHandoff: Turn13CompletedResolutionNextCommandHandoff | null = null;
+    let latestCompletedCommandHandoff = battleScene.latestCompletedCommandHandoff ?? null;
     let lockedActionOwner = battleScene.resolutionOwner ?? null;
     let terminalResolution = battleScene.terminalResolution ?? null;
     const opponentFaintContinuationAge = opponentFaintContinuationElapsed(
       battleScene.opponentFaintPresentationOwner,
       battleScene.elapsed + 1,
     );
+    const genericReopenTransition = latestCompletedCommandHandoff?.reopenGuard === undefined
+      ? null
+      : consumeNextCommandReopenGuard(
+        latestCompletedCommandHandoff.reopenGuard,
+        lockedActionOwner,
+        fightSubmenu,
+        newKeys,
+        battleScene.elapsed + 1,
+        opponentFaintContinuationAge,
+      );
     if (
       turn1NextCommandHandoff === null
       && isTurn1ChooseActionBounceReset(
@@ -1386,45 +1501,30 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         turn4NextCommandHandoff,
         fightSubmenu.openElapsed,
       ) &&
-      !isTurn5NextCommandHandoffReady(turn5NextCommandHandoff) &&
+      latestCompletedCommandHandoff === null &&
       fightSubmenu.confirmElapsed !== null &&
       newKeys.has("A") &&
       sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN5_SITRUS_MENU_REOPEN_GATE_DELAY
     ) {
-      // S7 slice N (docs/turn6-notes.md, docs/battle-turn-notes.md §19-24's
-      // "parameterize, don't rebuild" pattern): turn 5's whole faint/switch-
-      // in/Sitrus-heal sequence has settled the turn-6 action menu by now
-      // (`TURN5_SITRUS_MENU_REOPEN_GATE_DELAY` past turn 5's own real
-      // confirm) - a fresh A-press reopens FIGHT for turn 6, cursor
-      // persisted at slot 0 (ROCK_SLIDE, unchanged since turn 3 - no nav
-      // needed, docs/turn6-notes.md §4's own ledger).
-      turn5NextCommandHandoff = resolveTurn5CompletedResolutionNextCommandHandoff();
-      latestCompletedCommandHandoff = resolveTurn5LatestCompletedCommandHandoff();
+      // The first generic owner is published only at the real settled edge
+      // that formerly created the turn-5 receipt.  Its own guard carries
+      // every following reopen, so the core never resumes a turn-keyed
+      // predecessor/successor ladder after this point.
+      latestCompletedCommandHandoff = createCanonicalCompletedCommandChain();
       fightSubmenu = openFightSubmenu(
         battleScene.elapsed + 1,
         activeMonMoveset(draftScreen),
-        turn5NextCommandHandoff.persistedMoveSlot,
+        latestCompletedCommandHandoff.persistedMoveSlot,
       );
-    } else if (
-      isTurn5NextCommandHandoffReady(turn5NextCommandHandoff) &&
-      !isTurn6NextCommandHandoffReady(turn6NextCommandHandoff) &&
-      fightSubmenu.confirmElapsed !== null &&
-      newKeys.has("A") &&
-      sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN6_ROCKSLIDE_REOPEN_GATE_DELAY
-    ) {
-      // S7 slice O (docs/turn7-notes.md, docs/battle-turn-notes.md §32):
-      // turn 6's whole ROCK_SLIDE resolution has redrawn the settled action
-      // menu by now (`TURN6_ROCKSLIDE_REOPEN_GATE_DELAY` past turn 6's own
-      // real confirm) - a fresh A-press reopens FIGHT for turn 7, cursor
-      // persisted at slot 0 (ROCK_SLIDE, unchanged) - no nav needed,
-      // turn7-notes §5's own "cursor persistence confirmed" ledger.
-      turn6NextCommandHandoff = resolveTurn6CompletedResolutionNextCommandHandoff();
-      latestCompletedCommandHandoff = resolveTurn6LatestCompletedCommandHandoff();
+    } else if (genericReopenTransition !== null) {
+      const successor = genericReopenTransition.handoff ?? latestCompletedCommandHandoff!;
       fightSubmenu = openFightSubmenu(
         battleScene.elapsed + 1,
-        activeMonMoveset(draftScreen),
-        turn6NextCommandHandoff.persistedMoveSlot,
+        currentActiveMoveset(),
+        successor.persistedMoveSlot,
       );
+      latestCompletedCommandHandoff = successor;
+      lockedActionOwner = genericReopenTransition.resolutionOwner;
     } else if (
       isTurn6NextCommandHandoffReady(turn6NextCommandHandoff) &&
       !isTurn7NextCommandHandoffReady(turn7NextCommandHandoff) &&

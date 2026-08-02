@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  consumeNextCommandReopenGuard,
+  createNextCommandReopenGuard,
   createLatestCompletedCommandHandoff,
   isLatestCompletedCommandHandoffReady,
   projectLatestCompletedCommandPp,
+  withNextCommandReopenGuard,
 } from "../src/engine/nextCommandHandoff.ts";
 import { createFightCommandPresentation } from "../src/engine/fightCommandPresentation.ts";
 import { createBattleSceneResolutionOwner } from "../src/engine/battleSceneResolutionOwner.ts";
@@ -147,5 +150,70 @@ describe("LatestCompletedCommandHandoff", () => {
       upcoming: null,
       retainedResolution: { owner, segments: foreignOwner.resolution.segments },
     })).toThrow("retained resolution segments must belong to their owner");
+  });
+
+  it("consumes a semantic reopen guard only at its confirmation-relative source edge and atomically returns its successor", () => {
+    const successor = createLatestCompletedCommandHandoff({
+      playerPp: [5, 20, 19, 10],
+      persistedMoveSlot: 0,
+      nextCommand: { redraw: "settled", input: "ready" },
+    });
+    const guard = createNextCommandReopenGuard({
+      minimumConfirmElapsed: 12,
+      successor: { handoff: successor },
+    });
+    const owner = withNextCommandReopenGuard(
+      createLatestCompletedCommandHandoff({
+        playerPp: [6, 20, 19, 10],
+        persistedMoveSlot: 0,
+        nextCommand: { redraw: "settled", input: "ready" },
+      }),
+      guard,
+    );
+
+    expect(Object.isFrozen(owner.reopenGuard)).toBe(true);
+    expect(consumeNextCommandReopenGuard(
+      owner.reopenGuard!,
+      null,
+      { confirmElapsed: 100 },
+      new Set(["A"]),
+      111,
+    )).toBeNull();
+    expect(consumeNextCommandReopenGuard(
+      owner.reopenGuard!,
+      null,
+      { confirmElapsed: 100 },
+      new Set(["A"]),
+      112,
+    )).toEqual({ handoff: successor, resolutionOwner: null });
+  });
+
+  it("requires the retained content segment and any automatic-switch continuation without using a command identity", () => {
+    const chargeOwner = createBattleSceneResolutionOwner(
+      CANONICAL_OPPONENT_FLY_RESOLUTION.chargeResolution,
+    );
+    const guard = createNextCommandReopenGuard({
+      minimumConfirmElapsed: 0,
+      minimumOpponentFaintContinuationElapsed: 3,
+      requiredActiveResolutionSegment: chargeOwner.resolution.segments[0]!,
+      successor: { resolutionOwner: chargeOwner },
+    });
+
+    expect(consumeNextCommandReopenGuard(
+      guard,
+      chargeOwner,
+      { confirmElapsed: 100 },
+      new Set(["A"]),
+      100,
+      2,
+    )).toBeNull();
+    expect(consumeNextCommandReopenGuard(
+      guard,
+      chargeOwner,
+      { confirmElapsed: 100 },
+      new Set(["A"]),
+      100,
+      3,
+    )).toEqual({ handoff: null, resolutionOwner: chargeOwner });
   });
 });

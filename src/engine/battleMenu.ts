@@ -2689,9 +2689,10 @@ export function currentPPForActiveMon(
 }
 
 /**
- * Shadow equivalent of `currentPPForActiveMon` for a generic latest receipt.
- * Production rendering deliberately continues to call the legacy function
- * above until the turn-owned presentation bridge and routing cutover land.
+ * Generic-owner PP projection for the production 5-13 renderer.  The
+ * historical thirteen-receipt helper above remains staged for its positional
+ * ABI until the final interface cut; this path takes one canonical tuple
+ * directly from the semantic completed-command owner.
  */
 export function currentPPForActiveMonFromLatest(
   moveset: ActiveMonMoveset,

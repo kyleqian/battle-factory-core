@@ -227,6 +227,25 @@ export function createFightCommandPresentation(
   });
 }
 
+/**
+ * Reads the retained action from semantic content and verifies that its
+ * segment view still belongs to that immutable owner.  The generic 5-13
+ * renderer uses this for FLY's charge/strike continuation instead of a
+ * turn-keyed handoff identity.
+ */
+export function retainedFightCommandResolutionOwner(
+  presentation: FightCommandPresentation,
+): FightCommandRetainedResolutionPresentation | null {
+  const retained = presentation.retainedResolution;
+  if (retained === undefined) return null;
+  if (retained.segments !== retained.owner.resolution.segments) {
+    throw new Error(
+      "fightCommandPresentation: retained resolution segments must belong to their owner",
+    );
+  }
+  return retained;
+}
+
 /** Maps a trace tick onto the source-owned settled action-menu bounce epoch. */
 export function fightCommandSettledBounceEpochTick(
   presentation: FightCommandPresentation,

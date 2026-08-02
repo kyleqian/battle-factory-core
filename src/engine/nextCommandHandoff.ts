@@ -2,6 +2,8 @@ import {
   createFightCommandPresentation,
   type FightCommandPresentation,
 } from "./fightCommandPresentation.ts";
+import type { GbaButton } from "../input.ts";
+import type { BattleSceneResolutionOwner } from "./battleSceneResolutionOwner.ts";
 
 /** Canonical PP values for the active Pokémon's four move slots. */
 export type CanonicalPlayerPp = readonly [number, number, number, number];
@@ -21,6 +23,47 @@ export type LatestCompletedCommandHandoff = Readonly<{
     input: "ready";
   }>;
   content?: FightCommandPresentation;
+  /**
+   * The source-owned edge which may reopen the following command.  Adapters
+   * publish the immutable receipt/content first; core installs this bridge
+   * when it links the real 5-13 command sequence.  Keeping it optional
+   * preserves the staged adapter ABI while ensuring every live generic owner
+   * carries a concrete guard before it reaches production dispatch.
+   */
+  reopenGuard?: NextCommandReopenGuard;
+}>;
+
+/**
+ * A completed command's semantic reopen edge.  There is deliberately no
+ * turn, PP, or episode member here: readiness is expressed only in terms of
+ * the accepted FIGHT confirmation, an optional source-owned continuation,
+ * and (for retained actions) the actual active resolution segment.
+ */
+export type NextCommandReopenGuard = Readonly<{
+  /** Minimum source-owned elapsed frames after the accepted move confirm. */
+  minimumConfirmElapsed: number;
+  /** Optional automatic-opponent-switch continuation gate. */
+  minimumOpponentFaintContinuationElapsed?: number;
+  /** Optional retained command segment that must still be the active one. */
+  requiredActiveResolutionSegment?: BattleSceneResolutionOwner["resolution"]["segments"][number];
+  /**
+   * The next immutable receipt/owner pair.  An omitted handoff intentionally
+   * retains the current generic receipt for a retained-action continuation.
+   */
+  successor: Readonly<{
+    handoff?: LatestCompletedCommandHandoff;
+    resolutionOwner?: BattleSceneResolutionOwner;
+  }>;
+}>;
+
+export type NextCommandReopenTransition = Readonly<{
+  /** `null` means retain the current receipt through a locked continuation. */
+  handoff: LatestCompletedCommandHandoff | null;
+  resolutionOwner: BattleSceneResolutionOwner | null;
+}>;
+
+export type NextCommandReopenSubmenu = Readonly<{
+  confirmElapsed: number | null;
 }>;
 
 export type LatestCompletedCommandPpProjection = Readonly<{
@@ -42,6 +85,83 @@ export function createLatestCompletedCommandHandoff(
     ...(values.content === undefined
       ? {}
       : { content: createFightCommandPresentation(values.content) }),
+  });
+}
+
+/** Freezes a semantic reopen edge together with its already-built successor. */
+export function createNextCommandReopenGuard(
+  values: NextCommandReopenGuard,
+): NextCommandReopenGuard {
+  return Object.freeze({
+    minimumConfirmElapsed: values.minimumConfirmElapsed,
+    ...(values.minimumOpponentFaintContinuationElapsed === undefined
+      ? {}
+      : {
+        minimumOpponentFaintContinuationElapsed:
+          values.minimumOpponentFaintContinuationElapsed,
+      }),
+    ...(values.requiredActiveResolutionSegment === undefined
+      ? {}
+      : { requiredActiveResolutionSegment: values.requiredActiveResolutionSegment }),
+    successor: Object.freeze({
+      ...(values.successor.handoff === undefined
+        ? {}
+        : { handoff: values.successor.handoff }),
+      ...(values.successor.resolutionOwner === undefined
+        ? {}
+        : { resolutionOwner: values.successor.resolutionOwner }),
+    }),
+  });
+}
+
+/** Attaches a source-owned reopen edge without changing the frozen receipt data. */
+export function withNextCommandReopenGuard(
+  handoff: LatestCompletedCommandHandoff,
+  reopenGuard: NextCommandReopenGuard,
+): LatestCompletedCommandHandoff {
+  return Object.freeze({ ...handoff, reopenGuard });
+}
+
+/**
+ * Consumes one generic reopen edge.  The result installs both successor
+ * receipt and resolution owner atomically; no caller needs to discover a
+ * successor by inspecting a turn field or a PP tuple.
+ */
+export function consumeNextCommandReopenGuard(
+  reopenGuard: NextCommandReopenGuard,
+  resolutionOwner: BattleSceneResolutionOwner | null,
+  fightSubmenu: NextCommandReopenSubmenu,
+  newKeys: ReadonlySet<GbaButton>,
+  elapsed: number,
+  opponentFaintContinuationElapsed: number | null = null,
+): NextCommandReopenTransition | null {
+  const confirmElapsed = fightSubmenu.confirmElapsed;
+  if (
+    !newKeys.has("A")
+    || confirmElapsed === null
+    || elapsed < confirmElapsed + reopenGuard.minimumConfirmElapsed
+  ) {
+    return null;
+  }
+  const continuationMinimum = reopenGuard.minimumOpponentFaintContinuationElapsed;
+  if (
+    continuationMinimum !== undefined
+    && (opponentFaintContinuationElapsed === null
+      || opponentFaintContinuationElapsed < continuationMinimum)
+  ) {
+    return null;
+  }
+  const requiredSegment = reopenGuard.requiredActiveResolutionSegment;
+  if (
+    requiredSegment !== undefined
+    && resolutionOwner?.resolution.segments[resolutionOwner.resolution.segmentIndex]
+      !== requiredSegment
+  ) {
+    return null;
+  }
+  return Object.freeze({
+    handoff: reopenGuard.successor.handoff ?? null,
+    resolutionOwner: reopenGuard.successor.resolutionOwner ?? resolutionOwner,
   });
 }
 
