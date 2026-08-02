@@ -1,5 +1,39 @@
 # Animation coverage
 
+## Front `ANIM_TWIST_TWICE` family accepted (2026-08-01)
+
+**State:** exact for the complete generated selector census: **1 mapping / 1
+Factory-reachable species / 0 outside-Factory mappings** — STARYU. Only
+source ID **78** is promoted; normal `ANIM_TWIST` (SHELLDER, HORSEA, STARMIE,
+CLAMPERL, ANORITH) and adjacent source selectors remain unsupported. No
+per-species/tick branch, baked frame, engine-boundary widening, or move
+promotion was added. Coverage remains **107 exact / 0 partial / 0 staged / 169
+unsupported**; `ANIMATION_COVERAGE.json` is unchanged at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:1037-1059,1420-1470,
+3732-3741,5540-5544` and `trig.c:514-518` pin `AddNewAnim`/`InitAnimData`
+defaults, selector-78 rotation=1024/runs=2 overrides, immediate
+`Twist`-before-callback-install ordering, signed sine → u16 affine writes,
+identity/reset, and `WaitAnimEnd`. Every **141 callbacks** is exhaustive:
+first-run ticks 0..64 consume 0..1024; tick 65 alone observes 1040 `>1024`,
+writes identity, arms delay=10, and leaves data2=16; ticks 66..75 are the ten
+delay-only callbacks; second-run ticks 76..139 consume 16..1024; tick 140
+alone resets affine state and installs stable `WaitAnimEnd`. A fresh complete
+legal challenge-0 Scene-ON STARYU party (Factory set ID 128) was probed twice
+only through `tools/run-mgba-probe.py`; the raw 373-byte receipts are
+byte-identical, end in `}` without a newline, and SHA-256
+`67e14ee16e9eb44e699ee888cf405fd69e1901b2c689adf3f6932347cee5be5c`.
+It settles battler 1 at x2=0/y2=0, animNum=1, animCmdIndex=4, data2=120, and
+`SpriteCallbackDummy`.
+
+**Verification / next:** focused species-idle/evidence plus both animation
+ratchets are **321/321** green; `npx tsc --noEmit`, coverage/hash checks, full
+`npm test` (**591 files / 6,127 passed / 1 skipped**), and production build
+(**549 modules transformed**) are green. Next generated source-ranked selector:
+**`ANIM_CIRCLE_C_CLOCKWISE_SLOW`** (source ID 79; **2 mappings / 2 Factory /
+0 outside**) — DROWZEE and SPINARAK.
+
 ## Front `ANIM_H_SHAKE_SLOW` family accepted (2026-08-01)
 
 **State:** exact for the complete generated census: **3 selector mappings / 3
