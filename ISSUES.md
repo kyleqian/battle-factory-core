@@ -51,11 +51,18 @@ characterized in `docs/trainer-pic-off-window-scout.md` §D. Remainder:
    and intro-off share equivalent terminal state yet need opposite bar
    tail clocks). Do not fit a phase bit or per-widget clock unless the
    design doc's §4 falsification gate succeeds; §3 then has the bounded
-   plan. **Frame 444's remaining OPEN lead is the separate
-   materialize-column-shift defect** (`docs/issue56-residual-probe.md` Q1),
-   never in the display-tail scope. The idle-menu-bounce family stays
-   closed as no-app-bug (2026-07-31, `432e16aa`; narrower follow-up lead
-   banked in the probe doc's Q2 addendum).
+   plan. **Frame 444's separate materialize-column-shift lead is RESOLVED**
+   (2026-08-02, `1aa13ebb`; `docs/issue56-residual-probe.md` Q1 RAM
+   follow-up): live sprite + hardware OAM/matrix exonerated the opponent
+   affine path and attributed the defect to the generated Scene-OFF
+   ball-open particles sampling one step early at logical tick 13. The
+   arbitrary generated route now publishes the logical-13 stall directly;
+   the audited canonical-anchor route retains lag 1 through its existing
+   route fact. Dense 440:450 changes only frame 444, whose diff shrank
+   **219px → 18px** as exactly **201** app pixels changed; the remaining 18
+   are the settled display-tail class above. The idle-menu-bounce family
+   stays closed as no-app-bug (2026-07-31, `432e16aa`; narrower follow-up
+   lead banked in the probe doc's Q2 addendum).
 3. **RESOLVED (2026-07-31, `7cfef2d7`).** `gEnemyMonElevation` extracted
    (61 species sparse, absent = 0, isolated extractor test) and the
    solved rule `origin.y = 8 + yOffset − elevation` applied at all three

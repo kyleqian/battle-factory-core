@@ -1,3 +1,23 @@
+## 852 — [bounded MAIN worker, 2026-08-01] opponent-faint dismiss owner retired and verified
+
+- **State:** `ef1aa50f` is the green implementation checkpoint. Exact
+  old-field and alias census is **0/0** in `src` and `tests`; focused
+  owner/scene/submenu tests are **296/296**, full `npm test` exits 0, and
+  `npm run build` exits 0.
+- **Did:** the typed nonterminal owner now atomically owns accepted A,
+  frozen cursor, and automatic MURKROW continuation. All icon/text/ball/
+  healthbox/menu anchors are dismiss-edge-relative; the turn-13 handoff
+  waits for its local completion. Clean-`2649a484` app differential is
+  byte-identical: **141 + 242 + 256 + 223 = 862** captures.
+- **Evidence:** fresh OFF scratch manifests are **151** base and **104**
+  delay-30 captures. App replay accepts at 16821/16851, holds distinct
+  frozen frames, and shifts icon, glyph, ball, healthbox, and menu landmarks
+  exactly +30. The wider OFF oracle comparator remains non-exact
+  (**70/151**, **18/104**), so it is recorded as behavior evidence only.
+- **Next:** #39 remains only on the next-command dispatcher debt; do not fold
+  that separate design/implementation work into this owner retirement. The
+  refreshed retirement census is **2,657 refs / 33,489 LOC**.
+
 ## 851 — [bounded MAIN worker, 2026-08-01] typed opponent-faint owner introduced; live field remains pending atomic rebase
 
 - **State:** `ae5e5457`, tree clean. Baseline was green: `npm test` 589
