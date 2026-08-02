@@ -8,6 +8,37 @@
 > routing hint, not a deferral or an acceptance-bar waiver; escalate any worker
 > result that does not survive supervisor verification.
 
+## Front `ANIM_TUMBLING_FRONT_FLIP_TWICE` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **1 mapping / 1
+Factory-reachable species / 0 outside-Factory mappings** — MAGNEMITE. Only
+source ID **84** is promoted; unused `ANIM_TUMBLING_FRONT_FLIP`, adjacent
+selector 85, back sprites, moves, and engine boundaries remain untouched.
+Move coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**;
+Open-only **0/1** and Outside Factory **0/77**. `ANIMATION_COVERAGE.json`
+remains SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:1037-1059,2366-2433,
+3785-3793,5540-5544`, `pokemon_animation.h:124`, and `pokemon.c:1487` pin
+`AddNewAnim` defaults, speed=1/runs=2, immediate initializer callback,
+tick-zero affine start, signed-s16 x2/y2/data, source-ordered x-boundary then
+else-if y-boundary handling, six-crossing completion, 10-callback delay,
+shifted/u16 rotation semantics, reset, and stable `WaitAnimEnd`. Dense Tier-1
+coverage exhausts callbacks **0..137**: first run 0..63, delay 64..73, second
+run 74..137; terminal tick **137**. A complete legal Scene-ON MAGNEMITE
+mechanicLab party was probed twice through `tools/run-mgba-probe.py`; the
+paired raw **372-byte** receipts are byte-identical, SHA-256
+`9f0354fb3d8f1ad72f6bd4a49ddc3b074c5f4151459833ad68b55e98647033cf`, and
+settle battler 1 at x2=0/y2=0, animNum=1, animCmdIndex=4, data2=81, and
+`SpriteCallbackDummy`.
+
+**Verification / next:** focused family/evidence plus both animation ratchets
+are **331/331** green; `npx tsc --noEmit`, full `npm test` (**599 files / 6,163
+passed / 1 skipped**), and production build (**549 modules transformed**) are
+green. Next generated source-ranked selector: **`ANIM_H_JUMPS_V_STRETCH_TWICE`**
+(source ID **86**; **2 mappings / 2 Factory / 0 outside**) — SHARPEDO and SPOINK.
+
 ## Front `ANIM_SPIN` family accepted (2026-08-02)
 
 **State:** exact for the complete generated selector census: **1 mapping / 1
