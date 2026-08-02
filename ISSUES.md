@@ -546,11 +546,12 @@ receipt. The old loose clock and every alias/thread are gone; the four legacy
 app replays remain byte-identical (**141 + 242 + 256 + 223 = 862** captures).
 #39 remains open only for the next-command dispatcher debt inventoried in
 `docs/battle-scene-retirement-inventory.md`. **Dispatcher migration update
-(2026-08-02): slices 1–5 are complete.** The generic receipt/content bridge
-and reopen guard now own production turns 5–13, including the retained FLY
-owner, and their nine state fields are cut. Remaining work is only the
-turn-1–4 epoch/content folds (slices 6–9) and the final positional
-parameter/type cleanup (slice 10).
+(2026-08-02): slices 1–6 are complete.** The generic receipt/content bridge
+and reopen guard own production turns 5–13, including the retained FLY owner;
+it now also owns turn 1's immutable HandleInputChooseAction/DoBounceEffect
+epoch and field content. The first early state field is cut (four handoff
+fields to three). Remaining work is turn-2–4 epoch/content folds (slices 7–9)
+and final positional parameter/type cleanup (slice 10).
 
 ## #62 — Retired turn-2-shaped reproducers remain pixel-red on the generated OFF route after #60's crash fix
 
