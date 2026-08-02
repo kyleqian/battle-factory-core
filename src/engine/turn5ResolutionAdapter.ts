@@ -95,9 +95,28 @@ import { runBattleEndTurnOrchestration } from "./battleEndTurnOrchestration.ts";
 import { resolveBattleNameWithPrefix, resolveBattleStringLines } from "./battleStringResolver.ts";
 import { rentalMoveset } from "./battleSetup.ts";
 import {
+  FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+  FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+  MENU_IDLE_BLANK_END_TICK,
+  TURN6_SUPER_EFFECTIVE_LINE,
+} from "./battleMenu.ts";
+import {
   createLatestCompletedCommandHandoff,
   type LatestCompletedCommandHandoff,
 } from "./nextCommandHandoff.ts";
+import {
+  createFightCommandPresentation,
+  type FightCommandPresentation,
+} from "./fightCommandPresentation.ts";
+import {
+  resolveTurn6AtkFellLines,
+  resolveTurn6FeatherDanceKickoffLines,
+  resolveTurn6FeatherDanceWindowContent,
+} from "./turn6FeatherDancePresentationStaging.ts";
+import {
+  resolveTurn6RockSlideAttackLines,
+  resolveTurn6RockSlideWindowContent,
+} from "./turn67RockSlidePresentationStaging.ts";
 import {
   frontYOffset,
   opponentFaintSinkGeometry,
@@ -145,6 +164,9 @@ const BATTLE_TYPE_FACTORY = 1 << 19;
 const ITEM_SITRUS_BERRY = 142;
 /** STRINGID_PKMNSITEMRESTOREDHEALTH's own real messageId (battle_message.c:492,805), reused verbatim, not fabricated. */
 const STRINGID_PKMNSITEMRESTOREDHEALTH = "STRINGID_PKMNSITEMRESTOREDHEALTH";
+/** The source-owned Sitrus action-menu redraw that starts the next bounce epoch. */
+const PIDGEOTTO_COMMAND_MENU_REDRAW_TICK = 7222;
+const ONIX_MAX_HP = 117;
 
 /**
  * ISSUES #39 rank-3 flip: Grovyle's own opponent-faint sink geometry, the
@@ -385,10 +407,88 @@ export function resolveTurn5CompletedResolutionNextCommandHandoff(): Turn5Comple
   });
 }
 
+/**
+ * Semantic view of the Pidgeotto command that follows this completed turn.
+ * These are field snapshots and real staged event facts, not a compact turn
+ * selector disguised as PP values. The legacy renderer remains authoritative
+ * until the later dispatch-cut slice consumes this bridge.
+ */
+export function resolveTurn5FightCommandPresentation(): FightCommandPresentation {
+  const switchIn = resolveTurn5SwitchInAdapter();
+  const sitrus = resolveTurn5SitrusAdapter();
+  const featherDance = resolveTurn6FeatherDanceWindowContent();
+  const rockSlide = resolveTurn6RockSlideWindowContent();
+  return createFightCommandPresentation({
+    field: {
+      player: {
+        species: "ONIX",
+        displayName: "ONIX",
+        level: 50,
+        gender: "male",
+        status: "none",
+        hp: { current: sitrus.hp.to, max: ONIX_MAX_HP },
+        attackStage: 6,
+      },
+      opponent: {
+        species: switchIn.replacementSpecies,
+        displayName: switchIn.replacementSpecies,
+        level: switchIn.replacementLevel,
+        gender: "male",
+        status: "none",
+        hp: switchIn.replacementHp,
+        attackStage: 6,
+      },
+    },
+    bounce: {
+      actionMenuRedrawTick: PIDGEOTTO_COMMAND_MENU_REDRAW_TICK,
+      idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
+      fightSubmenuTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+      kickoff: {
+        freezeAfterConfirmTicks: FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+        preFreezeTickOffset: 0,
+        frozenPressTickOffset: -4,
+      },
+    },
+    upcoming: {
+      firstTextStartDelay: 13,
+      moves: [
+        {
+          user: "opponent",
+          target: "player",
+          move: "FEATHER_DANCE",
+          text: { lines: resolveTurn6FeatherDanceKickoffLines() },
+          statChange: {
+            target: "player",
+            stat: featherDance.statChange.stat,
+            from: featherDance.statChange.from,
+            to: featherDance.statChange.to,
+            text: { lines: resolveTurn6AtkFellLines() },
+          },
+        },
+        {
+          user: "player",
+          target: "opponent",
+          move: "ROCK_SLIDE",
+          text: { lines: resolveTurn6RockSlideAttackLines() },
+          hpChange: {
+            target: "opponent",
+            from: rockSlide.hp.from,
+            to: rockSlide.hp.to,
+          },
+          effectiveness: { text: { lines: [TURN6_SUPER_EFFECTIVE_LINE] } },
+        },
+      ],
+    },
+  });
+}
+
 /** Normalizes the legacy turn-5 receipt into the generic command boundary. */
 export function resolveTurn5LatestCompletedCommandHandoff(): LatestCompletedCommandHandoff {
   return createLatestCompletedCommandHandoff(
-    resolveTurn5CompletedResolutionNextCommandHandoff(),
+    {
+      ...resolveTurn5CompletedResolutionNextCommandHandoff(),
+      content: resolveTurn5FightCommandPresentation(),
+    },
   );
 }
 

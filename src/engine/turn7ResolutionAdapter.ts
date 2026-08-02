@@ -10,9 +10,36 @@
  */
 import { rentalMoveset } from "./battleSetup.ts";
 import {
+  FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+  FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+  MENU_IDLE_BLANK_END_TICK,
+  TURN7_ROCKSLIDE_MENU_REDRAW_DELAY,
+  TURN7_ROCKSLIDE_PRESS_TICK,
+} from "./battleMenu.ts";
+import {
   createLatestCompletedCommandHandoff,
   type LatestCompletedCommandHandoff,
 } from "./nextCommandHandoff.ts";
+import {
+  createFightCommandPresentation,
+  type FightCommandPresentation,
+} from "./fightCommandPresentation.ts";
+import {
+  resolveTurn7FeatherDanceWindowContent,
+  resolveTurn8AtkFellLines,
+  resolveTurn8FeatherDanceKickoffLines,
+  resolveTurn8FeatherDanceWindowContent,
+} from "./turn78FeatherDancePresentationStaging.ts";
+import {
+  resolveTurn7RockSlideWindowContent,
+} from "./turn67RockSlidePresentationStaging.ts";
+import {
+  resolveTurn8BindKickoffLines,
+  resolveTurn8MissLines,
+} from "./turn8BindPresentationStaging.ts";
+
+const ONIX_MAX_HP = 117;
+const PIDGEOTTO_MAX_HP = 156;
 
 export type Turn7CompletedResolutionNextCommandHandoff = Readonly<{
   /** Exact post-turn-7 player PP for `[ROCK_SLIDE, BIND, DRAGON_BREATH, SANDSTORM]`. */
@@ -45,10 +72,81 @@ export function resolveTurn7CompletedResolutionNextCommandHandoff(): Turn7Comple
   });
 }
 
+/** Semantic field/bounce/move content for the following Pidgeotto command. */
+export function resolveTurn7FightCommandPresentation(): FightCommandPresentation {
+  const precedingFeatherDance = resolveTurn7FeatherDanceWindowContent();
+  const precedingRockSlide = resolveTurn7RockSlideWindowContent();
+  const featherDance = resolveTurn8FeatherDanceWindowContent();
+  const redrawTick = TURN7_ROCKSLIDE_PRESS_TICK + TURN7_ROCKSLIDE_MENU_REDRAW_DELAY;
+  return createFightCommandPresentation({
+    field: {
+      player: {
+        species: "ONIX",
+        displayName: "ONIX",
+        level: 50,
+        gender: "male",
+        status: "none",
+        hp: { current: 31, max: ONIX_MAX_HP },
+        attackStage: precedingFeatherDance.statChange.to,
+      },
+      opponent: {
+        species: "PIDGEOTTO",
+        displayName: "PIDGEOTTO",
+        level: 50,
+        gender: "male",
+        status: "none",
+        hp: { current: precedingRockSlide.hp.to, max: PIDGEOTTO_MAX_HP },
+        attackStage: 6,
+      },
+    },
+    bounce: {
+      actionMenuRedrawTick: redrawTick,
+      idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
+      fightSubmenuTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+      kickoff: {
+        freezeAfterConfirmTicks: FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+        preFreezeTickOffset: 0,
+        frozenBounceTick: redrawTick,
+      },
+    },
+    upcoming: {
+      firstTextStartDelay: 13,
+      moves: [
+        {
+          user: "opponent",
+          target: "player",
+          move: "FEATHER_DANCE",
+          text: { lines: resolveTurn8FeatherDanceKickoffLines() },
+          statChange: {
+            target: "player",
+            stat: featherDance.statChange.stat,
+            from: featherDance.statChange.from,
+            to: featherDance.statChange.to,
+            text: { lines: resolveTurn8AtkFellLines() },
+          },
+        },
+        {
+          user: "player",
+          target: "opponent",
+          move: "BIND",
+          text: { lines: resolveTurn8BindKickoffLines() },
+          miss: {
+            target: "opponent",
+            text: { lines: resolveTurn8MissLines() },
+          },
+        },
+      ],
+    },
+  });
+}
+
 /** Normalizes the legacy turn-7 receipt into the generic command boundary. */
 export function resolveTurn7LatestCompletedCommandHandoff(): LatestCompletedCommandHandoff {
   return createLatestCompletedCommandHandoff(
-    resolveTurn7CompletedResolutionNextCommandHandoff(),
+    {
+      ...resolveTurn7CompletedResolutionNextCommandHandoff(),
+      content: resolveTurn7FightCommandPresentation(),
+    },
   );
 }
 

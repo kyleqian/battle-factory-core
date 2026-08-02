@@ -1,12 +1,17 @@
+import {
+  createFightCommandPresentation,
+  type FightCommandPresentation,
+} from "./fightCommandPresentation.ts";
+
 /** Canonical PP values for the active Pokémon's four move slots. */
 export type CanonicalPlayerPp = readonly [number, number, number, number];
 
 /**
  * Command-boundary facts shared by every completed-resolution handoff.
  *
- * Presentation content and the successor reopen guard are deliberately not
- * part of this slice's value contract. They remain owned by the existing
- * turn adapters until their semantic bridges are introduced.
+ * `content` is optional while the bridge is migrating in bounded source
+ * ranges. Its absence means no semantic renderer route exists yet; it never
+ * asks a consumer to infer that route from PP or a completed-turn identity.
  */
 export type LatestCompletedCommandHandoff = Readonly<{
   playerPp: CanonicalPlayerPp;
@@ -15,6 +20,7 @@ export type LatestCompletedCommandHandoff = Readonly<{
     redraw: "settled";
     input: "ready";
   }>;
+  content?: FightCommandPresentation;
 }>;
 
 export type LatestCompletedCommandPpProjection = Readonly<{
@@ -33,6 +39,9 @@ export function createLatestCompletedCommandHandoff(
       redraw: values.nextCommand.redraw,
       input: values.nextCommand.input,
     }),
+    ...(values.content === undefined
+      ? {}
+      : { content: createFightCommandPresentation(values.content) }),
   });
 }
 

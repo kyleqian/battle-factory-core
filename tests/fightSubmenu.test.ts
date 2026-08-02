@@ -70,10 +70,22 @@ import {
   storeOpponentFaintDismiss,
   type OpponentFaintPresentationOwner,
 } from "../src/engine/opponentFaintPresentationOwner.ts";
-import { resolveTurn5CompletedResolutionNextCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
-import { resolveTurn6CompletedResolutionNextCommandHandoff } from "../src/engine/turn6ResolutionAdapter.ts";
-import { resolveTurn7CompletedResolutionNextCommandHandoff } from "../src/engine/turn7ResolutionAdapter.ts";
-import { resolveTurn8CompletedResolutionNextCommandHandoff } from "../src/engine/turn8ResolutionAdapter.ts";
+import {
+  resolveTurn5CompletedResolutionNextCommandHandoff,
+  resolveTurn5LatestCompletedCommandHandoff,
+} from "../src/engine/turn5ResolutionAdapter.ts";
+import {
+  resolveTurn6CompletedResolutionNextCommandHandoff,
+  resolveTurn6LatestCompletedCommandHandoff,
+} from "../src/engine/turn6ResolutionAdapter.ts";
+import {
+  resolveTurn7CompletedResolutionNextCommandHandoff,
+  resolveTurn7LatestCompletedCommandHandoff,
+} from "../src/engine/turn7ResolutionAdapter.ts";
+import {
+  resolveTurn8CompletedResolutionNextCommandHandoff,
+  resolveTurn8LatestCompletedCommandHandoff,
+} from "../src/engine/turn8ResolutionAdapter.ts";
 import { resolveTurn9CompletedResolutionNextCommandHandoff } from "../src/engine/turn9ResolutionAdapter.ts";
 import { resolveTurn10CompletedResolutionNextCommandHandoff } from "../src/engine/turn10ResolutionAdapter.ts";
 import { resolveTurn11CompletedResolutionNextCommandHandoff } from "../src/engine/turn11ResolutionAdapter.ts";
@@ -244,7 +256,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
     );
   });
 
-  it("dispatcher slice 2: the existing turn-13-menu fixture shadows every turn 5-12 legacy publication in order", () => {
+  it("dispatcher slice 3: the existing turn-13-menu fixture carries each published Pidgeotto content bridge alongside its legacy receipt", () => {
     const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn13-menu.json", import.meta.url), "utf8")) as {
       segments: { frames: number; buttons?: GbaButton[] }[];
     };
@@ -261,10 +273,10 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
     }
 
     expect(publications).toEqual([
-      { playerPp: [6, 20, 19, 10], persistedMoveSlot: 0, nextCommand: { redraw: "settled", input: "ready" } },
-      { playerPp: [5, 20, 19, 10], persistedMoveSlot: 0, nextCommand: { redraw: "settled", input: "ready" } },
-      { playerPp: [4, 20, 19, 10], persistedMoveSlot: 0, nextCommand: { redraw: "settled", input: "ready" } },
-      { playerPp: [4, 19, 19, 10], persistedMoveSlot: 1, nextCommand: { redraw: "settled", input: "ready" } },
+      resolveTurn5LatestCompletedCommandHandoff(),
+      resolveTurn6LatestCompletedCommandHandoff(),
+      resolveTurn7LatestCompletedCommandHandoff(),
+      resolveTurn8LatestCompletedCommandHandoff(),
       { playerPp: [3, 19, 19, 10], persistedMoveSlot: 0, nextCommand: { redraw: "settled", input: "ready" } },
       { playerPp: [2, 19, 19, 10], persistedMoveSlot: 0, nextCommand: { redraw: "settled", input: "ready" } },
       { playerPp: [1, 19, 19, 10], persistedMoveSlot: 0, nextCommand: { redraw: "settled", input: "ready" } },

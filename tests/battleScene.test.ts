@@ -25,6 +25,10 @@ import {
   turn5SitrusOnixHp,
   turn5SitrusResettledBounceTick,
   turn5SitrusRingMatrix,
+  LEGACY_TURN6_FIGHT_COMMAND_PRESENTATION,
+  LEGACY_TURN7_FIGHT_COMMAND_PRESENTATION,
+  LEGACY_TURN8_FIGHT_COMMAND_PRESENTATION,
+  LEGACY_TURN9_FIELD_AND_BOUNCE_PRESENTATION,
   PARTICLE_OAM_PRIORITY,
   PARTICLE_OAM_SUBPRIORITY,
   renderBattleScene,
@@ -54,7 +58,12 @@ import {
   TURN5_PIDGEOTTO_SETTLE_TICK,
   TURN7_REGIME2_TO_REGIME1_SHIFT,
   TURN8_REGIME3_TO_REGIME1_SHIFT,
+  turn6KickoffBounceTick,
   turn7KickoffBounceTick,
+  turn8KickoffBounceTick,
+  turn8ResettledBounceTick,
+  TURN8_BIND_PRESS_TICK,
+  TURN8_MENU_REDRAW_DELAY,
   turn9Ep2HealthboxWobbleY2,
   turn9Ep2OnixInvisible,
   turn9OnixHp,
@@ -123,9 +132,12 @@ describe("turn13MurkrowFrame boundary transfer timing", () => {
 import {
   CLOSED_FIGHT_SUBMENU_STATE,
   confirmFightMove,
+  FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
   FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
   menuIdleBounce,
   openFightSubmenu,
+  turn6RockSlideResettledBounceTick,
+  TURN6_ROCKSLIDE_PRESS_TICK,
   turn7RockSlideResettledBounceTick,
   TURN7_ROCKSLIDE_PRESS_TICK,
   rockSlideOpponentHp,
@@ -141,10 +153,27 @@ import {
 import { resolveTurn3CompletedResolutionNextCommandHandoff } from "../src/engine/turn3ResolutionAdapter.ts";
 import { resolveTurn4CompletedResolutionNextCommandHandoff } from "../src/engine/turn4ResolutionAdapter.ts";
 import { resolveTurn13CompletedResolutionNextCommandHandoff } from "../src/engine/turn13ResolutionAdapter.ts";
-import { resolveTurn5CompletedResolutionNextCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
-import { resolveTurn6CompletedResolutionNextCommandHandoff } from "../src/engine/turn6ResolutionAdapter.ts";
-import { resolveTurn7CompletedResolutionNextCommandHandoff } from "../src/engine/turn7ResolutionAdapter.ts";
-import { resolveTurn8CompletedResolutionNextCommandHandoff } from "../src/engine/turn8ResolutionAdapter.ts";
+import {
+  resolveTurn5CompletedResolutionNextCommandHandoff,
+  resolveTurn5FightCommandPresentation,
+} from "../src/engine/turn5ResolutionAdapter.ts";
+import {
+  resolveTurn6CompletedResolutionNextCommandHandoff,
+  resolveTurn6FightCommandPresentation,
+} from "../src/engine/turn6ResolutionAdapter.ts";
+import {
+  resolveTurn7CompletedResolutionNextCommandHandoff,
+  resolveTurn7FightCommandPresentation,
+} from "../src/engine/turn7ResolutionAdapter.ts";
+import {
+  resolveTurn8CompletedResolutionNextCommandHandoff,
+  resolveTurn8FightCommandPresentation,
+} from "../src/engine/turn8ResolutionAdapter.ts";
+import {
+  fightCommandKickoffBounceEpochTick,
+  fightCommandSettledBounceEpochTick,
+  fightCommandSubmenuBounceEpochTick,
+} from "../src/engine/fightCommandPresentation.ts";
 import { resolveTurn9CompletedResolutionNextCommandHandoff } from "../src/engine/turn9ResolutionAdapter.ts";
 import { resolveTurn10CompletedResolutionNextCommandHandoff } from "../src/engine/turn10ResolutionAdapter.ts";
 import { resolveTurn11CompletedResolutionNextCommandHandoff } from "../src/engine/turn11ResolutionAdapter.ts";
@@ -170,6 +199,77 @@ const TURN4_HANDOFF = resolveTurn4CompletedResolutionNextCommandHandoff(4312);
 // ON-profile reset epoch. Keep that evidence on its own typed receipt rather
 // than reintroducing a production move-delay anchor.
 const TURN2_ON_PROFILE_HANDOFF = resolveTurn2CompletedResolutionNextCommandHandoff(2296);
+
+describe("dispatcher slice 3: Pidgeotto FightCommandPresentation shadow equivalence", () => {
+  const cases = [
+    ["turn 6", resolveTurn5FightCommandPresentation, LEGACY_TURN6_FIGHT_COMMAND_PRESENTATION],
+    ["turn 7", resolveTurn6FightCommandPresentation, LEGACY_TURN7_FIGHT_COMMAND_PRESENTATION],
+    ["turn 8", resolveTurn7FightCommandPresentation, LEGACY_TURN8_FIGHT_COMMAND_PRESENTATION],
+    ["turn 9 field/bounce", resolveTurn8FightCommandPresentation, LEGACY_TURN9_FIELD_AND_BOUNCE_PRESENTATION],
+  ] as const;
+
+  it("copies each legacy branch's semantic field, bounce regime, and available text content without a PP or turn member", () => {
+    for (const [label, resolve, legacy] of cases) {
+      const bridge = resolve();
+      expect(bridge, label).toEqual(legacy);
+      expect(Object.hasOwn(bridge, "turn")).toBe(false);
+      expect(Object.hasOwn(bridge, "episode")).toBe(false);
+      expect(Object.keys(bridge).join(","), label).not.toContain("pp");
+    }
+    expect(resolveTurn8FightCommandPresentation().upcoming).toBeNull();
+  });
+
+  it("reproduces the drawTurn6-8 bounce inputs from content-owned redraw and kickoff facts", () => {
+    const turn6 = resolveTurn5FightCommandPresentation();
+    const turn7 = resolveTurn6FightCommandPresentation();
+    const turn8 = resolveTurn7FightCommandPresentation();
+    const turn9Field = resolveTurn8FightCommandPresentation();
+    const samples = [7313, 7345, 7350, 7400];
+    for (const tick of samples) {
+      expect(fightCommandSettledBounceEpochTick(turn6, tick)).toBe(turn5SitrusResettledBounceTick(tick));
+      expect(fightCommandSubmenuBounceEpochTick(turn6, tick)).toBe(
+        turn5SitrusResettledBounceTick(tick - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT),
+      );
+      expect(fightCommandKickoffBounceEpochTick(turn6, tick, 7345)).toBe(
+        turn5SitrusResettledBounceTick(turn6KickoffBounceTick(tick, 7345)),
+      );
+    }
+    for (const tick of [8347, 8379, 8381, 8400]) {
+      expect(fightCommandSettledBounceEpochTick(turn7, tick)).toBe(
+        turn6RockSlideResettledBounceTick(tick, TURN6_ROCKSLIDE_PRESS_TICK),
+      );
+      expect(fightCommandSubmenuBounceEpochTick(turn7, tick)).toBe(
+        turn6RockSlideResettledBounceTick(tick - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT, TURN6_ROCKSLIDE_PRESS_TICK),
+      );
+      expect(fightCommandKickoffBounceEpochTick(turn7, tick, 8379)).toBe(
+        turn6RockSlideResettledBounceTick(turn7KickoffBounceTick(tick, 8379), TURN6_ROCKSLIDE_PRESS_TICK),
+      );
+    }
+    for (const tick of [9381, 9425, 9428, 9450]) {
+      expect(fightCommandSettledBounceEpochTick(turn8, tick)).toBe(
+        turn7RockSlideResettledBounceTick(tick, TURN7_ROCKSLIDE_PRESS_TICK),
+      );
+      expect(fightCommandSubmenuBounceEpochTick(turn8, tick)).toBe(
+        turn7RockSlideResettledBounceTick(tick - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT, TURN7_ROCKSLIDE_PRESS_TICK),
+      );
+      expect(fightCommandKickoffBounceEpochTick(turn8, tick, 9425)).toBe(
+        turn7RockSlideResettledBounceTick(turn8KickoffBounceTick(tick, 9425), TURN7_ROCKSLIDE_PRESS_TICK),
+      );
+    }
+    for (const tick of [10000, 10020]) {
+      const sourceTick = tick < 10010
+        ? tick - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT
+        : TURN8_BIND_PRESS_TICK + TURN8_MENU_REDRAW_DELAY;
+      expect(fightCommandSettledBounceEpochTick(turn9Field, tick)).toBe(
+        turn8ResettledBounceTick(tick, TURN8_BIND_PRESS_TICK),
+      );
+      expect(fightCommandKickoffBounceEpochTick(turn9Field, tick, 10007)).toBe(
+        turn8ResettledBounceTick(sourceTick, TURN8_BIND_PRESS_TICK),
+      );
+    }
+    expect(FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY).toBe(3);
+  });
+});
 
 function pixelAt(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);

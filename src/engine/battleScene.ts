@@ -911,6 +911,7 @@ import {
   type Turn12CompletedResolutionNextCommandHandoff,
 } from "./turn12ResolutionAdapter.ts";
 import type { LatestCompletedCommandHandoff } from "./nextCommandHandoff.ts";
+import { createFightCommandPresentation } from "./fightCommandPresentation.ts";
 import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
@@ -11908,7 +11909,7 @@ function drawTurn8FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, b
 }
 
 /** `turn7KickoffBounceTick`'s own turn-8 analogue, in regime-3 space (`drawTurn8FieldBase`'s own domain) - freezes at the regime-3 anchor tick itself (`TURN7_ROCKSLIDE_PRESS_TICK+TURN7_ROCKSLIDE_MENU_REDRAW_DELAY`, local phase 0 by construction). */
-function turn8KickoffBounceTick(t: number, pressTick: number): number {
+export function turn8KickoffBounceTick(t: number, pressTick: number): number {
   if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t;
   return TURN7_ROCKSLIDE_PRESS_TICK + TURN7_ROCKSLIDE_MENU_REDRAW_DELAY;
 }
@@ -12155,6 +12156,175 @@ function turn9KickoffBounceTick(t: number, pressTick: number): number {
   if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
   return TURN8_BIND_PRESS_TICK + TURN8_MENU_REDRAW_DELAY;
 }
+
+/**
+ * Shadow-only readouts of the existing turn-keyed Pidgeotto renderer inputs.
+ * They are intentionally not consumed by `drawFightSubmenuWindow`: Slice 3
+ * compares the adapter-published semantic bridge against these values before
+ * Slice 5 changes any dispatch. The values contain no turn/episode member
+ * and never use PP to select a window.
+ */
+const LEGACY_PIDGEOTTO_ONIX_MAX_HP = 117;
+function legacyPidgeottoField(playerHp: number, playerAttackStage: number, opponentHp: number) {
+  return {
+    player: {
+      species: "ONIX",
+      displayName: "ONIX",
+      level: 50,
+      gender: "male" as const,
+      status: "none" as const,
+      hp: { current: playerHp, max: LEGACY_PIDGEOTTO_ONIX_MAX_HP },
+      attackStage: playerAttackStage,
+    },
+    opponent: {
+      species: TURN5_SWITCHIN.replacementSpecies,
+      displayName: TURN5_SWITCHIN.replacementSpecies,
+      level: TURN5_SWITCHIN.replacementLevel,
+      gender: "male" as const,
+      status: "none" as const,
+      hp: { current: opponentHp, max: PIDGEOTTO_MAX_HP },
+      attackStage: 6,
+    },
+  };
+}
+
+export const LEGACY_TURN6_FIGHT_COMMAND_PRESENTATION = createFightCommandPresentation({
+  field: legacyPidgeottoField(TURN5_SITRUS_HEAL_HP_END, 6, TURN5_SWITCHIN.replacementHp.current),
+  bounce: {
+    actionMenuRedrawTick: TURN5_SITRUS_MENU_REDRAW_TICK,
+    idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
+    fightSubmenuTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+    kickoff: {
+      freezeAfterConfirmTicks: FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+      preFreezeTickOffset: 0,
+      frozenPressTickOffset: -TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET,
+    },
+  },
+  upcoming: {
+    firstTextStartDelay: 13,
+    moves: [
+      {
+        user: "opponent",
+        target: "player",
+        move: "FEATHER_DANCE",
+        text: { lines: [TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2] },
+        statChange: {
+          target: "player",
+          stat: "attack",
+          from: 6,
+          to: 4,
+          text: { lines: [TURN6_ATKFELL_KICKOFF_LINE1, TURN6_ATKFELL_KICKOFF_LINE2] },
+        },
+      },
+      {
+        user: "player",
+        target: "opponent",
+        move: "ROCK_SLIDE",
+        text: { lines: [TURN6_ROCKSLIDE_ATTACK_LINE1, TURN6_ROCKSLIDE_ATTACK_LINE2] },
+        hpChange: { target: "opponent", from: PIDGEOTTO_MAX_HP, to: TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP },
+        effectiveness: { text: { lines: [TURN6_SUPER_EFFECTIVE_LINE] } },
+      },
+    ],
+  },
+});
+
+export const LEGACY_TURN7_FIGHT_COMMAND_PRESENTATION = createFightCommandPresentation({
+  field: legacyPidgeottoField(31, 4, TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP),
+  bounce: {
+    actionMenuRedrawTick: TURN6_ROCKSLIDE_PRESS_TICK + TURN6_ROCKSLIDE_MENU_REDRAW_DELAY,
+    idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
+    fightSubmenuTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+    kickoff: {
+      freezeAfterConfirmTicks: FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+      preFreezeTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+      frozenBounceTick: TURN6_ROCKSLIDE_PRESS_TICK + TURN6_ROCKSLIDE_MENU_REDRAW_DELAY,
+    },
+  },
+  upcoming: {
+    firstTextStartDelay: 13,
+    moves: [
+      {
+        user: "opponent",
+        target: "player",
+        move: "FEATHER_DANCE",
+        text: { lines: [TURN7_FEATHERDANCE_KICKOFF_LINE1, TURN7_FEATHERDANCE_KICKOFF_LINE2] },
+        statChange: {
+          target: "player",
+          stat: "attack",
+          from: 4,
+          to: 2,
+          text: { lines: [TURN7_ATKFELL_KICKOFF_LINE1, TURN7_ATKFELL_KICKOFF_LINE2] },
+        },
+      },
+      {
+        user: "player",
+        target: "opponent",
+        move: "ROCK_SLIDE",
+        text: { lines: [TURN7_ROCKSLIDE_ATTACK_LINE1, TURN7_ROCKSLIDE_ATTACK_LINE2] },
+        hpChange: {
+          target: "opponent",
+          from: TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP,
+          to: TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP,
+        },
+        effectiveness: { text: { lines: [TURN6_SUPER_EFFECTIVE_LINE] } },
+      },
+    ],
+  },
+});
+
+export const LEGACY_TURN8_FIGHT_COMMAND_PRESENTATION = createFightCommandPresentation({
+  field: legacyPidgeottoField(31, 2, TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP),
+  bounce: {
+    actionMenuRedrawTick: TURN7_ROCKSLIDE_PRESS_TICK + TURN7_ROCKSLIDE_MENU_REDRAW_DELAY,
+    idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
+    fightSubmenuTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+    kickoff: {
+      freezeAfterConfirmTicks: FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+      preFreezeTickOffset: 0,
+      frozenBounceTick: TURN7_ROCKSLIDE_PRESS_TICK + TURN7_ROCKSLIDE_MENU_REDRAW_DELAY,
+    },
+  },
+  upcoming: {
+    firstTextStartDelay: 13,
+    moves: [
+      {
+        user: "opponent",
+        target: "player",
+        move: "FEATHER_DANCE",
+        text: { lines: [TURN8_FEATHERDANCE_KICKOFF_LINE1, TURN8_FEATHERDANCE_KICKOFF_LINE2] },
+        statChange: {
+          target: "player",
+          stat: "attack",
+          from: 2,
+          to: 0,
+          text: { lines: [TURN8_ATKFELL_KICKOFF_LINE1, TURN8_ATKFELL_KICKOFF_LINE2] },
+        },
+      },
+      {
+        user: "player",
+        target: "opponent",
+        move: "BIND",
+        text: { lines: [TURN8_BIND_LINE1, TURN8_BIND_LINE2] },
+        miss: { target: "opponent", text: { lines: [TURN8_MISS_LINE1, TURN8_MISS_LINE2] } },
+      },
+    ],
+  },
+});
+
+export const LEGACY_TURN9_FIELD_AND_BOUNCE_PRESENTATION = createFightCommandPresentation({
+  field: legacyPidgeottoField(31, 0, TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP),
+  bounce: {
+    actionMenuRedrawTick: TURN8_BIND_PRESS_TICK + TURN8_MENU_REDRAW_DELAY,
+    idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
+    fightSubmenuTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+    kickoff: {
+      freezeAfterConfirmTicks: FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+      preFreezeTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+      frozenBounceTick: TURN8_BIND_PRESS_TICK + TURN8_MENU_REDRAW_DELAY,
+    },
+  },
+  upcoming: null,
+});
 
 /**
  * S7 slice R (docs/turn9-notes.md): "Foe PIDGEOTTO used\nQUICK ATTACK!" -

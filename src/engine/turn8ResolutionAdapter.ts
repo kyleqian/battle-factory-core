@@ -9,9 +9,25 @@
  */
 import { rentalMoveset } from "./battleSetup.ts";
 import {
+  FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+  FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+  MENU_IDLE_BLANK_END_TICK,
+} from "./battleMenu.ts";
+import {
   createLatestCompletedCommandHandoff,
   type LatestCompletedCommandHandoff,
 } from "./nextCommandHandoff.ts";
+import {
+  createFightCommandPresentation,
+  type FightCommandPresentation,
+} from "./fightCommandPresentation.ts";
+import { resolveTurn8FeatherDanceWindowContent } from "./turn78FeatherDancePresentationStaging.ts";
+import { stageTurn8BindMiss } from "./turn8BindPresentationStaging.ts";
+
+const ONIX_MAX_HP = 117;
+const PIDGEOTTO_MAX_HP = 156;
+/** The real post-BIND redraw that initializes turn 9's action-menu bounce. */
+const PIDGEOTTO_COMMAND_MENU_REDRAW_TICK = 9997;
 
 export type Turn8CompletedResolutionNextCommandHandoff = Readonly<{
   /** Exact post-turn-8 player PP for `[ROCK_SLIDE, BIND, DRAGON_BREATH, SANDSTORM]`. */
@@ -45,10 +61,56 @@ export function resolveTurn8CompletedResolutionNextCommandHandoff(): Turn8Comple
   });
 }
 
+/**
+ * Publishes the semantic field and bounce state that survived BIND's real
+ * miss. The high-chain move/text continuation is intentionally absent here:
+ * its first consumer is the turn-9 renderer, which Slice 4 owns.
+ */
+export function resolveTurn8FightCommandPresentation(): FightCommandPresentation {
+  const featherDance = resolveTurn8FeatherDanceWindowContent();
+  const bindMiss = stageTurn8BindMiss();
+  return createFightCommandPresentation({
+    field: {
+      player: {
+        species: "ONIX",
+        displayName: "ONIX",
+        level: 50,
+        gender: "male",
+        status: "none",
+        hp: { current: 31, max: ONIX_MAX_HP },
+        attackStage: featherDance.statChange.to,
+      },
+      opponent: {
+        species: "PIDGEOTTO",
+        displayName: "PIDGEOTTO",
+        level: 50,
+        gender: "male",
+        status: "none",
+        hp: { current: bindMiss.pidgeottoHpAfter, max: PIDGEOTTO_MAX_HP },
+        attackStage: 6,
+      },
+    },
+    bounce: {
+      actionMenuRedrawTick: PIDGEOTTO_COMMAND_MENU_REDRAW_TICK,
+      idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
+      fightSubmenuTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+      kickoff: {
+        freezeAfterConfirmTicks: FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+        preFreezeTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+        frozenBounceTick: PIDGEOTTO_COMMAND_MENU_REDRAW_TICK,
+      },
+    },
+    upcoming: null,
+  });
+}
+
 /** Normalizes the legacy turn-8 receipt into the generic command boundary. */
 export function resolveTurn8LatestCompletedCommandHandoff(): LatestCompletedCommandHandoff {
   return createLatestCompletedCommandHandoff(
-    resolveTurn8CompletedResolutionNextCommandHandoff(),
+    {
+      ...resolveTurn8CompletedResolutionNextCommandHandoff(),
+      content: resolveTurn8FightCommandPresentation(),
+    },
   );
 }
 
