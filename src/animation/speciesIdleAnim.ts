@@ -2411,7 +2411,7 @@ export function horizontalJumpsVerticalStretchTwiceFrameAtTick(
  */
 export function rotateUpSlamDownFrameAtTick(
   ticksSinceStart: number,
-  centerToCornerVecX = ROTATE_UP_SLAM_DOWN_INITIALIZER.centerToCornerVecXAfterAffine,
+  centerToCornerVecX: number = ROTATE_UP_SLAM_DOWN_INITIALIZER.centerToCornerVecXAfterAffine,
 ): RotateUpSlamDownFrame | null {
   if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
   if (!Number.isInteger(centerToCornerVecX)) return null;
@@ -2424,7 +2424,7 @@ export function rotateUpSlamDownFrameAtTick(
   let data7 = 128;
   let x2 = 0;
   let y2 = 0;
-  let centerToCorner = centerToCornerVecX;
+  let centerToCorner: number = centerToCornerVecX;
   let callback: RotateUpSlamDownFrame["callback"] = "RotateUpSlamDown_0";
   let affineMode: RotateUpSlamDownFrame["affineMode"] = "double";
   let lastFrame: RotateUpSlamDownFrame | null = null;
