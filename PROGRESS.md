@@ -4,6 +4,51 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 885 — [bounded MAIN worker, 2026-08-03] ISSUES #70 — STRINGID_PKMNHURTBY crash FIXED (wrap-family end-of-turn damage tick)
+
+- **State:** master `58634980` (one commit on top of `37a4b621`). Full
+  `npm test`: **645 files / 6,444 passed / 1 skipped** (+1 from this step's
+  new test). `npm run build` green (tsc -b + vite).
+- **Did:** fixed the highest-severity gap batch-2 surfaced last session:
+  `BattleScript_WrapTurnDmg`'s own `printstring STRINGID_PKMNHURTBY`
+  (`battle_message.c:148`, `{B_ATK_NAME_WITH_PREFIX} is hurt\nby
+  {B_BUFF1}!`), fired every turn `ENDTURN_WRAP`'s recurring-damage branch
+  runs (`battleEndTurnOrchestration.ts`'s `WRAP_TURN_DMG_LABEL`/
+  `runWrapTick`) — reachable on the very first successful use of any of the
+  6 trapping moves (Bind/Wrap/Fire Spin/Clamp/Whirlpool/Sand Tomb), since
+  real Gen3 deals the trap's first damage tick the same turn it's set.
+  `messageLines` (`battleResolutionPresentation.ts`) gained a dedicated
+  branch reading the print-time action snapshot for
+  `B_ATK_NAME_WITH_PREFIX`, not `lastMoveAttacker` — `BS_ATTACKER` is
+  reassigned to the trapped battler itself for this tick
+  (`enterTickBattlerContext`), which can differ from the battler that last
+  used a real move. `prepareMessage`
+  (`factoryBattleScriptFullTurnDecision.ts`) gained a `STRINGID_PKMNHURTBY`
+  substitution resolving `{B_BUFF1}` via `resolveMoveName(rules.battlers
+  [rules.selectorRoles.attacker].wrappedMove)` — the trapping move's own id,
+  stamped onto the trapped battler by `applyWrapMoveEffect`
+  (`battleScriptHitChainOpcode.ts:3722`) when the trap was first cast.
+- **Tests:** `tests/presentationStringHurtBy.test.ts` — one staged real-Bind
+  full-turn repro through the production kernel (the same turn's own
+  end-of-turn tick fires the gap, so no synthetic-event fallback was
+  needed), brute-forcing seeds for Bind's 75% accuracy roll. Red-verified
+  once via `git stash` on the two touched engine files: threw
+  `battleStringResolver`'s exact completeness-guard error
+  (`STRINGID_PKMNHURTBY references placeholder {B_BUFF1} with no resolver
+  supplied`) pre-fix; green post-fix, asserting `["Foe {opponent} is
+  hurt", "by BIND!"]`. `npm run compare:differential -- battle-command-
+  generated-off.json --base 37a4b621 --summary` (base = this commit's
+  parent): **PASS — 128/128 captures byte-identical** — no standing capture
+  reaches this string.
+- **Next:** ISSUES #70's remaining 12 ids (ability-prevention family x5,
+  Uproar family x3, `USINGITEMSTATOFPKMNROSE`, `PKMNSTOCKPILED`/`PKMNHPFULL`,
+  `PKMNTRANSFORMEDINTO`) plus the `INTROSENDOUT` extractor gap. Full per-id
+  detail and file:line citations already in ISSUES #70 — do not re-derive.
+- **Notes:** `tests/executableFrontierRatchet.test.ts` green, untouched, no
+  new recording imports, no barrier-count changes. Diff stays additive in
+  `messageLines`/`prepareMessage`; no timing constants touched.
+
+---
 ## 884 — [bounded MAIN worker, 2026-08-03] ISSUES #70 batch 2 — 19 of 31 remaining presentation-string rows FIXED; 12 remain + 1 new gap found
 
 - **State:** master `63dc4dc3` (two commits on top of `5ce289c8`). Full
@@ -88,69 +133,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   ISSUES.md/PROGRESS.md in the main tree while a main-lane worker is live.
   One app-differential temp worktree may linger under /var/folders —
   `git worktree prune` at next orient if present.
-
----
-## 882 — [bounded MAIN worker, 2026-08-03] ISSUES #70 batch 1 — ranked top-8 presentation-string rows (15 STRINGIDs) FIXED
-
-- **State:** master `fba78340` (one commit on top of `5b2cddf4`). Full
-  `npm test`: **635 files / 6,390 passed / 1 skipped** (+8 from this step's
-  new suite). `npm run build` green (tsc -b + vite).
-- **Did:** ported the ranked top-8 rows of `docs/issue70-stringid-
-  reachability.md`'s crash-risk table (15 `STRINGID_*` ids) into
-  `messageLines` (`battleResolutionPresentation.ts`), mirroring #65/#68's
-  resolver shape: `PKMNENERGYDRAINED`, `PKMNPROTECTEDITSELF`,
-  `PKMNAVOIDEDATTACK`, `AVOIDEDDAMAGE`, `PKMNMAKESGROUNDMISS`,
-  `PKMNPOISONEDBY`, `PKMNBURNEDBY`, `PKMNWASPARALYZEDBY`,
-  `PKMNSITEMCUREDPROBLEM`, `PKMNENDUREDHIT`, `SUBSTITUTEDAMAGED`,
-  `PKMNRAISEDDEF`, `PKMNRAISEDSPDEF`, `PKMNCOVEREDBYVEIL`, `HITXTIMES`.
-  Three of these needed real data plumbing beyond a messageLines branch,
-  added to `prepareMessage` (`factoryBattleScriptFullTurnDecision.ts`): (1) a
-  new `scriptingBattler` field on the message event (source
-  `gBattleScripting.battler` at print time), letting `B_SCR_ACTIVE_
-  NAME_WITH_PREFIX` resolve generically for the on-contact-ability status
-  ids; (2) ability-id→display-name substitutions for `B_DEF_ABILITY`
-  (Wonder Guard/Levitate) and `B_SCR_ACTIVE_ABILITY` (Static/Poison
-  Point/Flame Body/Effect Spore); (3) `rulesContext.multiHitStringCounter`
-  surfaced as `HITXTIMES`'s `{B_BUFF1}`. Also closed a real reducer gap:
-  `battleEndTurnOrchestration.ts`'s end-of-turn `HOLD_EFFECT_CURE_STATUS`/
-  `CURE_ATTRACT` branches never captured `battleTextBuff1Status` before
-  clearing the status bits (only the mid-battle post-hit sibling in
-  `battleScriptMoveEndOpcode.ts` did), which would have left
-  `PKMNSITEMCUREDPROBLEM`'s `{B_BUFF1}` unresolved for the more common
-  end-of-turn Lum Berry/Mental Herb cure trigger.
-- **Tests:** `tests/presentationStringBatch1.test.ts`, 8 scenarios (one per
-  ranked row) through the production kernel (`createFactoryFullTurnBattleState`
-  / `submitFactoryFullTurnDecision`) + `createBattleResolutionPresentation`,
-  using the constrained-AI staging idiom and a small seed-search helper for
-  the RNG-gated triggers (accuracy rolls, 30%-chance contact abilities).
-  Red-verified once via `git stash` on the six touched engine files: every
-  scenario threw battleStringResolver's exact completeness-guard error
-  pre-fix; all 8 green post-fix, asserting the resolved banner text against
-  the source-cited templates. `STRINGID_PKMNAVOIDEDATTACK` (part of ranked
-  row 2) is mapped but not independently repro'd — its own trigger
-  (`isDoubleAvoided`, `battleScriptHitChainOpcode.ts:1212-1213`) is
-  `BATTLE_TYPE_DOUBLE`-gated, structurally unreachable in this engine's
-  singles-only scope, matching the reachability doc's own row-31 note.
-  The new `scriptingBattler` message-event field is exposed unconditionally
-  (mirroring `actionSnapshot`), which surfaced 2 pre-existing exact-payload
-  assertions (`tests/factoryBattleScriptWakeUpFullTurn.test.ts`,
-  `tests/battleScriptTryswapitemsOpcode.test.ts`) — updated both to include
-  the new (real, correct) field rather than narrowing the field's exposure.
-- **Verified:** `npm run test:smoke` green mid-step (339/339, including
-  `abilityItemParityCensus` after adding the new `ABILITY_DISPLAY_NAME_BY_ID`
-  constant to that census tool's `ENGINE_INFRA_SPELLINGS` allowlist — a
-  table name, not an ability member, same class as the pre-existing
-  `ABILITY_NAME_BY_ID` entry). `npm run compare:differential -- turn5-
-  rockslide.json battle-command-generated-off.json --base 5b2cddf4
-  --summary` (post-commit, base = this commit's parent): **PASS — 384/384
-  captures byte-identical across both traces** — neither standing window
-  triggers any of the 15 fixed strings, exactly as expected.
-- **Next:** ISSUES #70 batch 2 — the 31 remaining unranked ids + the
-  `STRINGID_INTROSENDOUT` extractor gap (both scoped in the trimmed #70
-  entry). Species-dossier slice 4 (capstone `renderSceneOffTurnView`
-  convergence) is still the last ROADMAP slice.
-- **Notes:** `tests/executableFrontierRatchet.test.ts` green, untouched, no
-  new recording imports, no barrier-count changes. Diff stays additive in
-  `messageLines`/`prepareMessage`; no timing constants touched (kept clear
-  of #69's STAT_TIMING/MESSAGE_TIMING surface per the brief).
-

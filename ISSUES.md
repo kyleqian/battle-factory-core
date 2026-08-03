@@ -17,7 +17,7 @@ backlog.
 
 # Open
 
-## #70 — Presentation-string completeness: 12 unmapped STRINGID refs remain reachable; 1 newly-found resolver gap outside the original 47; 1 real extractor gap
+## #70 — Presentation-string completeness: 12 unmapped STRINGID refs remain reachable; 1 real extractor gap
 
 **Batch 1 (ranked rows 1-8 of `docs/issue70-stringid-reachability.md`'s "Ranked
 top-N by crash risk" table, 15 ids) FIXED** (2026-08-03, see PROGRESS entry
@@ -60,29 +60,31 @@ could be staged in one turn. Pinned by `tests/presentationStringBatch2.test.ts`
 (19 cases: staged full-turn repro for every non-zero-incidence id, the direct
 resolver-branch idiom — synthetic event straight into
 `createBattleResolutionPresentation` — for the 8 genuinely zero-incidence ids
-plus the wrap family, see the new gap below). Red-verified once via
+plus the wrap family, see the (now-fixed) `STRINGID_PKMNHURTBY` gap below).
+Red-verified once via
 `git stash` on the two engine files. Fixing `STRINGID_PKMNSXMADEYINEFFECTIVE`
 also surfaced a real, adjacent gap the full suite caught: `ABILITY_STICKY_HOLD`
 (60) had no ability-display-name entry — `BattleScript_StickyHoldActivates`
 (`reference/pokeemerald/data/battle_scripts_1.s:4173-4177`) reuses this same
 STRINGID for Sticky Hold blocking Trick — now added alongside Flash Fire's.
 
-**New gap found this session (not one of the original 47 — outside `#68`'s
-sweep, since it's parsed from the real committed battle-script program, not a
-TS string literal):** `STRINGID_PKMNHURTBY` (`battle_message.c:148`,
-`{B_ATK_NAME_WITH_PREFIX} is hurt\nby {B_BUFF1}!`) crashes the resolver
-whenever a wrap-family move (Bind/Wrap/Fire Spin/Clamp/Whirlpool/Sand Tomb)
-is used — real Gen3 behavior deals the trap's first recurring-damage tick on
-the *same* turn it's set (`battleEndTurnOrchestration.ts`'s
-`WRAP_TURN_DMG_LABEL`), and that tick's own `printstring STRINGID_PKMNHURTBY`
-has no `messageLines`/`prepareMessage` mapping (`{B_BUFF1}` needs the
-trapping move's own name, likely `resolveMoveName(rules.battlers[battler]
-.wrappedMove)` — the field already exists, `battleScriptHitChainOpcode.ts`'s
-`applyWrapMoveEffect`). **Likely higher real-world severity than the 12
-below** — any of the 6 trapping moves, all common Factory rentals, crashes on
-their very first successful use, not just a rare follow-up. Same fix shape as
-everything else in this entry; not fixed here (discovered while staging the
-wrap-family tests, out of this step's assigned scope).
+**`STRINGID_PKMNHURTBY` crash FIXED** (2026-08-03, highest-severity remaining
+gap — reachable on every real Bind/Wrap/Fire Spin/Clamp/Whirlpool/Sand Tomb
+use, not just a rare follow-up): `BattleScript_WrapTurnDmg`'s end-of-turn
+recurring-damage tick (`battle_message.c:148`,
+`{B_ATK_NAME_WITH_PREFIX} is hurt\nby {B_BUFF1}!`, fired from
+`battleEndTurnOrchestration.ts`'s `WRAP_TURN_DMG_LABEL`/`runWrapTick`) now has
+a `messageLines` branch (`battleResolutionPresentation.ts`) reading the
+print-time action snapshot (`BS_ATTACKER` is reassigned to the trapped
+battler itself for this tick, `enterTickBattlerContext`, not the last real
+move's attacker) plus a `prepareMessage` substitution
+(`factoryBattleScriptFullTurnDecision.ts`) resolving `{B_BUFF1}` from
+`rules.battlers[rules.selectorRoles.attacker].wrappedMove` via
+`resolveMoveName`. Pinned by `tests/presentationStringHurtBy.test.ts` (a
+staged real-Bind full-turn repro — the same turn's own end-of-turn tick
+fires the gap — red-verified once via `git stash` on the two touched engine
+files: threw battleStringResolver's exact completeness-guard error
+pre-fix).
 
 **Still open — 12 of the original 31 unranked ids, same fix shape
 (`messageLines` branch + `prepareMessage` substitution where needed + repro
