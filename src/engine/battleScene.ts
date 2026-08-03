@@ -844,7 +844,6 @@ import {
   CANONICAL_TURN13_RETAINED_FLY_PRESENTATION_OWNER,
   resolveTurn13ResolutionAdapter,
   resolveTurn13SwitchInAdapter,
-  type Turn13CompletedResolutionNextCommandHandoff,
 } from "./turn13ResolutionAdapter.ts";
 import {
   opponentFaintContinuationElapsed,
@@ -854,7 +853,6 @@ import {
   resolveTurn5FaintSinkGeometry,
   resolveTurn5SitrusAdapter,
   resolveTurn5SwitchInAdapter,
-  type Turn5CompletedResolutionNextCommandHandoff,
 } from "./turn5ResolutionAdapter.ts";
 import {
   isTurn1NextCommandHandoffReady,
@@ -891,22 +889,9 @@ import {
   type Turn4CompletedResolutionNextCommandHandoff,
 } from "./turn4ResolutionAdapter.ts";
 import { TURN1_CHOOSE_ACTION_RESET_AFTER_CONFIRM } from "./turn1ChooseActionReset.ts";
-import type { Turn6CompletedResolutionNextCommandHandoff } from "./turn6ResolutionAdapter.ts";
-import type { Turn7CompletedResolutionNextCommandHandoff } from "./turn7ResolutionAdapter.ts";
-import type { Turn8CompletedResolutionNextCommandHandoff } from "./turn8ResolutionAdapter.ts";
-import {
-  TURN9_QUICKATTACK_HP,
-  type Turn9CompletedResolutionNextCommandHandoff,
-} from "./turn9ResolutionAdapter.ts";
-import {
-  TURN10_AERIALACE_HP,
-  type Turn10CompletedResolutionNextCommandHandoff,
-} from "./turn10ResolutionAdapter.ts";
-import type { Turn11CompletedResolutionNextCommandHandoff } from "./turn11ResolutionAdapter.ts";
-import {
-  TURN12_AERIALACE_HP,
-  type Turn12CompletedResolutionNextCommandHandoff,
-} from "./turn12ResolutionAdapter.ts";
+import { TURN9_QUICKATTACK_HP } from "./turn9ResolutionAdapter.ts";
+import { TURN10_AERIALACE_HP } from "./turn10ResolutionAdapter.ts";
+import { TURN12_AERIALACE_HP } from "./turn12ResolutionAdapter.ts";
 import {
   isLatestCompletedCommandHandoffReady,
   isLatestCompletedCommandLifecycleActive,
@@ -7731,21 +7716,7 @@ function drawLatestCompletedCommandWindow(
     ];
     const retainedSegment = retained.segments[0];
     if (retainedSegment !== undefined && activeSegment === retainedSegment) {
-      drawTurn14FightSubmenuWindow(
-        fb,
-        t,
-        sm,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        latest,
-      );
+      drawTurn14FightSubmenuWindow(fb, t, sm, latest);
       return;
     }
     if (
@@ -7755,22 +7726,7 @@ function drawLatestCompletedCommandWindow(
     ) {
       throw new Error("retained FLY command owner lost its charge/strike segment chain");
     }
-    drawTurn15FightSubmenuWindow(
-      fb,
-      t,
-      sm,
-      resolutionOwner.resolution,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      latest,
-    );
+    drawTurn15FightSubmenuWindow(fb, t, sm, resolutionOwner.resolution, latest);
     return;
   }
 
@@ -7781,74 +7737,37 @@ function drawLatestCompletedCommandWindow(
     throw new Error("latest completed command handoff has no complete semantic move stream");
   }
   if (opponentMove.move === "SAND_ATTACK" && playerMove.move === "DRAGON_BREATH") {
-    drawTurn13FightSubmenuWindow(
-      fb,
-      t,
-      sm,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      opponentFaintPresentationOwner,
-      trainerPresentation,
-      latest,
-    );
+    drawTurn13FightSubmenuWindow(fb, t, sm, opponentFaintPresentationOwner, trainerPresentation, latest);
     return;
   }
   if (opponentMove.move === "AERIAL_ACE" && playerMove.move === "ROCK_SLIDE") {
     if (playerMove.miss !== undefined) {
-      drawTurn12FightSubmenuWindow(
-        fb,
-        t,
-        sm,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        latest,
-      );
+      drawTurn12FightSubmenuWindow(fb, t, sm, latest);
     } else {
-      drawTurn10FightSubmenuWindow(
-        fb,
-        t,
-        sm,
-        null,
-        null,
-        null,
-        null,
-        null,
-        latest,
-      );
+      drawTurn10FightSubmenuWindow(fb, t, sm, latest);
     }
     return;
   }
   if (opponentMove.move === "QUICK_ATTACK" && playerMove.move === "ROCK_SLIDE") {
-    drawTurn9FightSubmenuWindow(fb, t, sm, null, null, null, null, latest);
+    drawTurn9FightSubmenuWindow(fb, t, sm, latest);
     return;
   }
   if (opponentMove.move === "FEATHER_DANCE") {
     const statChange = opponentMove.statChange;
     if (playerMove.move === "BIND" && playerMove.miss !== undefined) {
-      drawTurn8FightSubmenuWindow(fb, t, sm, null, null, null, latest);
+      drawTurn8FightSubmenuWindow(fb, t, sm, latest);
       return;
     }
     if (playerMove.move === "ROCK_SLIDE" && statChange?.from === 6 && statChange.to === 4) {
-      drawTurn6FightSubmenuWindow(fb, t, sm, null, latest);
+      drawTurn6FightSubmenuWindow(fb, t, sm, latest);
       return;
     }
     if (playerMove.move === "ROCK_SLIDE" && statChange?.from === 4 && statChange.to === 2) {
-      drawTurn7FightSubmenuWindow(fb, t, sm, null, null, latest);
+      drawTurn7FightSubmenuWindow(fb, t, sm, latest);
       return;
     }
     if (playerMove.move === "ROCK_SLIDE" && statChange?.from === 0 && statChange.to === 0) {
-      drawTurn11FightSubmenuWindow(fb, t, sm, null, null, null, null, null, null, latest);
+      drawTurn11FightSubmenuWindow(fb, t, sm, latest);
       return;
     }
   }
@@ -8273,27 +8192,9 @@ function drawFightSubmenuChrome(
   moveset: ActiveMonMoveset,
   turn3NextCommandHandoff: Turn3CompletedResolutionNextCommandHandoff | null = null,
   turn4NextCommandHandoff: Turn4CompletedResolutionNextCommandHandoff | null = null,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null = null,
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null = null,
-  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null = null,
-  turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null = null,
-  turn9NextCommandHandoff: Turn9CompletedResolutionNextCommandHandoff | null = null,
-  turn10NextCommandHandoff: Turn10CompletedResolutionNextCommandHandoff | null = null,
-  turn11NextCommandHandoff: Turn11CompletedResolutionNextCommandHandoff | null = null,
-  turn12NextCommandHandoff: Turn12CompletedResolutionNextCommandHandoff | null = null,
-  turn13NextCommandHandoff: Turn13CompletedResolutionNextCommandHandoff | null = null,
   lockedActionResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null = null,
   followingResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null = null,
 ): void {
-  void turn5NextCommandHandoff;
-  void turn6NextCommandHandoff;
-  void turn7NextCommandHandoff;
-  void turn8NextCommandHandoff;
-  void turn9NextCommandHandoff;
-  void turn10NextCommandHandoff;
-  void turn11NextCommandHandoff;
-  void turn12NextCommandHandoff;
-  void turn13NextCommandHandoff;
   const currentPP = drawFightSubmenuChromeTurn1Through4PP(moveset, turn1NextCommandHandoff, turn2NextCommandHandoff, turn3NextCommandHandoff, turn4NextCommandHandoff, lockedActionResolution, followingResolution);
   drawFightSubmenuChromeFromLiveState(
     fb,
@@ -12124,7 +12025,6 @@ function drawTurn6FightSubmenuWindow(
   fb: Uint8Array,
   t: number,
   sm: FightSubmenuState,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
   latest: LatestCompletedCommandHandoff | null = null,
 ): void {
   if (sm.openElapsed === null) {
@@ -12160,7 +12060,7 @@ function drawTurn6FightSubmenuWindow(
   if (latest !== null) {
     drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
   } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, turn5NextCommandHandoff);
+    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
   }
 }
 
@@ -12218,8 +12118,6 @@ function drawTurn7FightSubmenuWindow(
   fb: Uint8Array,
   t: number,
   sm: FightSubmenuState,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
   latest: LatestCompletedCommandHandoff | null = null,
 ): void {
   // NOT `drawTurn6ActionMenuIdleWindow` - unlike turn 6's own pre-any-
@@ -12255,7 +12153,7 @@ function drawTurn7FightSubmenuWindow(
   if (latest !== null) {
     drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
   } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, turn5NextCommandHandoff, turn6NextCommandHandoff);
+    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
   }
 }
 
@@ -12441,9 +12339,6 @@ function drawTurn8FightSubmenuWindow(
   fb: Uint8Array,
   t: number,
   sm: FightSubmenuState,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
-  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
   latest: LatestCompletedCommandHandoff | null = null,
 ): void {
   // Same "NOT the plain idle window, the already-redrawn turn's own
@@ -12476,7 +12371,7 @@ function drawTurn8FightSubmenuWindow(
   if (latest !== null) {
     drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
   } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff);
+    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
   }
 }
 
@@ -13421,10 +13316,6 @@ function drawTurn9FightSubmenuWindow(
   fb: Uint8Array,
   t: number,
   sm: FightSubmenuState,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
-  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
-  turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null,
   latest: LatestCompletedCommandHandoff | null = null,
 ): void {
   if (sm.openElapsed === null) {
@@ -13461,7 +13352,7 @@ function drawTurn9FightSubmenuWindow(
   if (latest !== null) {
     drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
   } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, turn8NextCommandHandoff);
+    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
   }
 }
 
@@ -14023,11 +13914,6 @@ function drawTurn10FightSubmenuWindow(
   fb: Uint8Array,
   t: number,
   sm: FightSubmenuState,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
-  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
-  turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null,
-  turn9NextCommandHandoff: Turn9CompletedResolutionNextCommandHandoff | null,
   latest: LatestCompletedCommandHandoff | null = null,
 ): void {
   if (sm.openElapsed === null) {
@@ -14054,7 +13940,7 @@ function drawTurn10FightSubmenuWindow(
   if (latest !== null) {
     drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
   } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, turn8NextCommandHandoff, turn9NextCommandHandoff);
+    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
   }
 }
 
@@ -14367,12 +14253,6 @@ function drawTurn11FightSubmenuWindow(
   fb: Uint8Array,
   t: number,
   sm: FightSubmenuState,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
-  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
-  turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null,
-  turn9NextCommandHandoff: Turn9CompletedResolutionNextCommandHandoff | null,
-  turn10NextCommandHandoff: Turn10CompletedResolutionNextCommandHandoff | null,
   latest: LatestCompletedCommandHandoff | null = null,
 ): void {
   if (sm.openElapsed === null) {
@@ -14399,7 +14279,7 @@ function drawTurn11FightSubmenuWindow(
   if (latest !== null) {
     drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
   } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, turn8NextCommandHandoff, turn9NextCommandHandoff, turn10NextCommandHandoff);
+    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
   }
 }
 
@@ -14622,13 +14502,6 @@ function drawTurn12FightSubmenuWindow(
   fb: Uint8Array,
   t: number,
   sm: FightSubmenuState,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
-  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
-  turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null,
-  turn9NextCommandHandoff: Turn9CompletedResolutionNextCommandHandoff | null,
-  turn10NextCommandHandoff: Turn10CompletedResolutionNextCommandHandoff | null,
-  turn11NextCommandHandoff: Turn11CompletedResolutionNextCommandHandoff | null,
   latest: LatestCompletedCommandHandoff | null = null,
 ): void {
   if (sm.openElapsed === null) {
@@ -14655,7 +14528,7 @@ function drawTurn12FightSubmenuWindow(
   if (latest !== null) {
     drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
   } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, turn8NextCommandHandoff, turn9NextCommandHandoff, turn10NextCommandHandoff, turn11NextCommandHandoff);
+    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
   }
 }
 
@@ -14725,14 +14598,6 @@ function drawTurn13FightSubmenuWindow(
   fb: Uint8Array,
   t: number,
   sm: FightSubmenuState,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
-  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
-  turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null,
-  turn9NextCommandHandoff: Turn9CompletedResolutionNextCommandHandoff | null,
-  turn10NextCommandHandoff: Turn10CompletedResolutionNextCommandHandoff | null,
-  turn11NextCommandHandoff: Turn11CompletedResolutionNextCommandHandoff | null,
-  turn12NextCommandHandoff: Turn12CompletedResolutionNextCommandHandoff | null,
   opponentFaintPresentationOwner: OpponentFaintPresentationOwner | null,
   trainerPresentation?: FactoryTrainerPresentation,
   latest: LatestCompletedCommandHandoff | null = null,
@@ -14777,7 +14642,7 @@ function drawTurn13FightSubmenuWindow(
   if (latest !== null) {
     drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
   } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, turn8NextCommandHandoff, turn9NextCommandHandoff, turn10NextCommandHandoff, turn11NextCommandHandoff, turn12NextCommandHandoff);
+    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
   }
 }
 
@@ -16424,15 +16289,6 @@ function drawTurn14FightSubmenuWindow(
   fb: Uint8Array,
   t: number,
   sm: FightSubmenuState,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
-  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
-  turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null,
-  turn9NextCommandHandoff: Turn9CompletedResolutionNextCommandHandoff | null,
-  turn10NextCommandHandoff: Turn10CompletedResolutionNextCommandHandoff | null,
-  turn11NextCommandHandoff: Turn11CompletedResolutionNextCommandHandoff | null,
-  turn12NextCommandHandoff: Turn12CompletedResolutionNextCommandHandoff | null,
-  turn13NextCommandHandoff: Turn13CompletedResolutionNextCommandHandoff | null,
   latest: LatestCompletedCommandHandoff | null = null,
 ): void {
   const revealTick = sm.openElapsed === null ? -Infinity : TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
@@ -16459,7 +16315,7 @@ function drawTurn14FightSubmenuWindow(
   if (latest !== null) {
     drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
   } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, turn8NextCommandHandoff, turn9NextCommandHandoff, turn10NextCommandHandoff, turn11NextCommandHandoff, turn12NextCommandHandoff, turn13NextCommandHandoff);
+    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
   }
 }
 
@@ -16909,15 +16765,6 @@ function drawTurn15FightSubmenuWindow(
   t: number,
   sm: FightSubmenuState,
   resolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
-  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
-  turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null,
-  turn9NextCommandHandoff: Turn9CompletedResolutionNextCommandHandoff | null,
-  turn10NextCommandHandoff: Turn10CompletedResolutionNextCommandHandoff | null,
-  turn11NextCommandHandoff: Turn11CompletedResolutionNextCommandHandoff | null,
-  turn12NextCommandHandoff: Turn12CompletedResolutionNextCommandHandoff | null,
-  turn13NextCommandHandoff: Turn13CompletedResolutionNextCommandHandoff | null,
   latest: LatestCompletedCommandHandoff | null = null,
 ): void {
   const revealTick = sm.openElapsed === null ? -Infinity : TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
@@ -16948,7 +16795,7 @@ function drawTurn15FightSubmenuWindow(
       resolution,
     );
   } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, turn8NextCommandHandoff, turn9NextCommandHandoff, turn10NextCommandHandoff, turn11NextCommandHandoff, turn12NextCommandHandoff, turn13NextCommandHandoff, resolution);
+    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, resolution);
   }
 }
 
@@ -18198,15 +18045,6 @@ function drawTurn16FightSubmenuWindow(
       null,
       null,
       null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
       followingPresentation?.resolution ?? null,
     );
     return;
@@ -18329,15 +18167,6 @@ function drawTurn16FightSubmenuWindow(
     null,
     null,
     sm.activeMonMoveset,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
     null,
     null,
     null,
