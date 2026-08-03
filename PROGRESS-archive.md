@@ -1,3 +1,38 @@
+## 868 — [interactive user session, 2026-08-02 evening] D1 adopted → DEFERRED clear; papercut fixes landed; play-preview retired
+
+- **State:** master = this entry's commit on top of `f6452d7a`; no engine or
+  test code touched (tooling/docs only), `npm run test:smoke` green (7
+  files / 339 passed, ~23 s). **DEFERRED.md has NO open entries — the next
+  `run-supervisor.sh` session is unblocked.**
+- **Did (all user-directed):**
+  1. **D1 RESOLVED:** communication contract moved into `SUPERVISOR.md`
+     § "Communicating with the user", D1 entry deleted. Amended same
+     evening at user request: cut to a short plain-English rule (no
+     mandated status format, no per-item numeric requirement).
+  2. **Worker self-abort papercut:** EXECUTION DISCIPLINE clause folded into
+     `tools/run-subagent.sh`'s standing preamble (both prompt branches, all
+     providers) — briefs no longer restate it. PAPERCUTS entry updated;
+     delete it after a few clean worker rounds.
+  3. **New `npm run test:smoke`** (~25 s: frontier ratchet, ability/item
+     census, decision boundary, kernel full-turn, roundController,
+     roundScenarioMatrix, battleScene) for mid-step sanity checks;
+     documented in AGENTS.md Tests. Never substitutes for the full suite at
+     a finish requirement.
+  4. **Scene-ON battle-lab papercut entry DELETED** — verified fixed live:
+     POST `/v1/battle-lab/run` on :8012 answers 400 mode-validation,
+     identical to :8014 (the running service now carries the route).
+  5. **Play-preview retired:** nothing was listening on :5199 (server
+     already down); `.worktrees/play-preview` removed (detached at
+     `105c72d5`, an ancestor of master; only untracked node_modules).
+     Rebuild a fresh preview after the next user-visible fix lands.
+- **Next (unchanged from 867):** (1) slice-9 fold completion from `a6d88eaa`
+  per the banked design `docs/turn4-fold-pp-freshness-design.md`; (2) slice
+  10; (3) #66(a) capped-stat banner fix (+(b) after an oracle probe); (4)
+  species-dossier slices.
+- **Notes:** `animation-main` still ~8 commits ahead with its own ledger —
+  fold at next orient (unchanged from 867's note).
+
+---
 ## 867 — [supervisor wind-down, 2026-08-02 14:30] slice 8 + #65 landed; slice-9 fold honestly open with both root causes banked; D1 comms contract awaits user
 
 - **State:** master `4807676f` = green slice-9 BRIDGE + all docs; full
