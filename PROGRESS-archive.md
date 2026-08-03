@@ -1,3 +1,51 @@
+## 867 — [supervisor wind-down, 2026-08-02 14:30] slice 8 + #65 landed; slice-9 fold honestly open with both root causes banked; D1 comms contract awaits user
+
+- **State:** master `4807676f` = green slice-9 BRIDGE + all docs; full
+  `npm test` + `npm run build` supervisor-verified green at wind-down
+  (613 files / 6,277 passed / 1 skipped). Census: state fields 1 (turn4);
+  declarations/FIGHT/PP params 13. **DEFERRED.md has ONE OPEN entry (D1,
+  user-communication contract) — user must edit/delete it to unblock the
+  next supervised session (their explicit request).**
+- **Session outcomes:** slice 8 turn-3 fold LANDED (`fed91e87`,
+  salvage→retry; oracle-over-differential acceptance: its 37-frame
+  turn4-doubleteam deviation FIXES a PP bug leaked by slice-6
+  `cbb41421`, bisect-proven). #65 SILVER WIND crash: user-reported,
+  scouted, FIXED (`c7461398`), verified, entry removed — same day.
+  Turn-5 reader bank merged (9 traces, 1,382 captures). Species dossier
+  banked (census 4→45, 7 slices) + erratum. Day-audit: 2 real findings
+  → **#66** (capped-stat banner crash (a) reachable, magnitude edge (b)
+  unconfirmed); finding 3 = turn4CommandHandoff's 4 unguarded call sites
+  (battleScene.ts:7859/7887/7952/7997 pre-fold numbering) — the slice-9
+  fold MUST guard these. Two claude-worker self-aborts salvaged →
+  PAPERCUTS entry + foreground clause in briefs.
+- **Slice-9 fold state (NOT landed, fully mapped):** bridge `1c61cfac` on
+  master is green/differential-clean. Branch
+  `salvage/slice9-fold-20260802` (`a6d88eaa`, suite-green) carries the
+  fold + fix #1 (eviction-class HP fallback — drawActionMenuIdleContent +
+  two drawFightSubmenuWindow chains checked only turn3/turn2 shapes →
+  full-HP 117 default; fixed all four sites). OPEN root cause #2: FIGHT
+  submenu PP/chrome shows turn-4's fresh PP one turn early vs parent
+  legacy timing (windows: turn5-action-off 6/32, turn5-confirm-off-a
+  121/132 vs base `105c72d5`) — two freshness requirements multiplexed on
+  the shared latest slot; needs a small design, not a patch. Resume
+  recipe in entry 866 + the salvage commit message.
+- **Next session (ordered):** (1) slice-9 fold completion from
+  `a6d88eaa` per the BANKED design `docs/turn4-fold-pp-freshness-design.md`
+  (`238280bf`, supervisor-verified: pin playerPp/persistedMoveSlot at the
+  turn-4 install to prior-handoff values — one param + one core.ts call
+  site; all four audited call sites resolved with evidence); full
+  14-window differential vs `105c72d5`; (2) slice 10 (final
+  13-param/type cut); (3) #66(a) capped-stat banner fix (+(b) after an
+  oracle probe); (4) species-dossier slices. Turns 5-8 OFF re-timing
+  policy remains un-adopted (unchanged).
+- **Unfolded:** `animation-main` ~8 commits ahead with a LIVE animation
+  supervisor + worker at wind-down — deliberately NOT folded (moving
+  branch); fold at next orient. `.worktrees/play-preview` (serving the
+  user's frozen build at :5199, currently `105c72d5`) is INTENTIONAL —
+  do not sweep while in use; rebuild after user-visible fixes land.
+
+---
+
 ## 866 — [bounded MAIN worker, 2026-08-02] slice-9 fold retry: one root cause fixed, one found+scoped, NOT landed
 
 - **State:** master unchanged at `1c61cfac` (the bridge, still green). The
