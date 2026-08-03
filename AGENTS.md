@@ -120,6 +120,11 @@ top entry of `PROGRESS.md` — uncommitted work is lost work.
   part of `npm test`; run it manually/densely while building.
 - **When you fix or add pure engine logic, pin it with a Tier-1 test** — reserve
   Tier 2 for parity that genuinely needs the emulator or exact pixels.
+- **Mid-step sanity checks: `npm run test:smoke`** (~25 s) runs a curated
+  subset — the frontier/census ratchets, kernel decision boundary, a full
+  kernel turn, the round controller, and `battleScene` — instead of the full
+  ~5-7 min suite. It never substitutes for the full `npm test` a finish
+  requirement or acceptance demands.
 - **Two ratchets in `tests/executableFrontierRatchet.test.ts` will fail your
   step deliberately.** (1) No production module may import a canonical
   recording (`src/data/gen/*-{dump,probe,watch,boundaries}.json`) — derive

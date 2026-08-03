@@ -341,6 +341,22 @@ Run mGBA-backed Python probes through tools/run-mgba-probe.py so their output is
 validated and known teardown crashes do not masquerade as probe failures."
 fi
 
+# Standing execution-discipline clause for every worker prompt. Bounded
+# sessions end with their turn: a backgrounded verification (or any
+# wait-for-notification pattern) dies uncommitted even when the work is
+# finished on disk — this self-abort class bit twice on 2026-08-02 (see
+# PAPERCUTS.md) before the clause moved here from per-brief restatement.
+EXECUTION_DISCIPLINE="
+
+Execution discipline: your session ends the moment your turn ends. Never
+background a command and never use ScheduleWakeup, Monitor, or any
+wait-for-notification pattern — a backgrounded verification dies with your
+turn and the step is lost even if the work is complete on disk. Run every
+command in the foreground and block until it completes, including the final
+full-suite/build verification. For mid-step sanity checks prefer
+'npm run test:smoke' (~25 s curated subset); it never substitutes for the
+full 'npm test' where your finish requirement demands one."
+
 if [[ "$IS_WORKTREE" == "1" ]]; then
   WT_ID="${LANE}-$(date +%Y%m%d-%H%M%S)"
   WT_BRANCH="worker/$WT_ID"
@@ -440,7 +456,7 @@ Your selected oracle is ${ORACLE_PROFILE} at ${ORACLE_URL}, exported as POKEBENC
 
 Your assigned step (from the supervisor):
 ${BRIEF}
-${CODEX_ACCEPTANCE_GUARDRAILS}
+${CODEX_ACCEPTANCE_GUARDRAILS}${EXECUTION_DISCIPLINE}
 
 Stay on this step. If it turns out to be blocked or mis-scoped, say exactly why in your final message instead of improvising a different plan. ${WORKTREE_FINISH_REQUIREMENT}
 
@@ -450,7 +466,7 @@ else
 
 Your assigned step (from the supervisor):
 ${BRIEF}
-${CODEX_ACCEPTANCE_GUARDRAILS}
+${CODEX_ACCEPTANCE_GUARDRAILS}${EXECUTION_DISCIPLINE}
 
 This main lane uses the Battle Scene OFF oracle. Follow the finite Stage 8 reset in ROADMAP.md and the worker-lane ownership contract in AGENTS.md; do not resume the retired canonical Battle 2 turn-by-turn march.
 
