@@ -4,6 +4,63 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 877 — [bounded MAIN worker, 2026-08-02] species-dossier slice 3 LANDED (family-A HP-drain closed-form generalization)
+
+- **State:** master `bb5289b2` (one commit on top of `40dcddff`). Full
+  `npm test`: **633 files / 6,376 passed / 1 skipped** (unchanged from
+  base — pure rename + adapter-source threading, no new tests needed).
+  `npm run build` green (tsc -b + vite). Differential (`compare:differential`,
+  10-trace window list from the brief plus `turn12-aerialace-off.json`
+  insurance, base `40dcddff`): **PASS, 2,095/2,095 captures byte-identical**
+  — 237/141/233/231/206/247/256/255/161/128, every brief-cited count
+  (237, 141, 233, 231, 206, 256, 128) matched exactly.
+- **Did:** per `docs/species-render-entry-point-retirement-design.md` §4
+  row 3, §1.3A/§3 family-A row (gate opened by slice 10's dispatcher-ladder
+  landing). Renamed the four species-suffixed HP-drain closed forms to
+  drop their species suffix, keeping the move/turn prefix (matching
+  `rockSlideOpponentHp`'s already-generic precedent):
+  `dragonBreathGrovyleHp`→`dragonBreathHp` (battleScene.ts, 2 call sites:
+  Grovyle turn 2, Pidgeotto turn 13), `endeavorOnixHp`→`endeavorHp`
+  (battleMenu.ts, exported, 3 call sites: turns 2/3/5), `turn9OnixHp`→
+  `turn9Hp` (1 call site), `turn10AerialAceOnixHp`→`turn10AerialAceHp`
+  (2 call sites: turns 10/12). No formula or default-value change — every
+  call site's resulting value is unchanged (trap 2 audited: all four
+  functions' body/signature untouched except the name). Moved turn-9's
+  and turn-10/12's `{from,to}` HP-drain endpoints off call-site literals
+  onto their owning resolution adapters — `turn9ResolutionAdapter.ts`'s
+  new `TURN9_QUICKATTACK_HP` (31→24), `turn10ResolutionAdapter.ts`'s new
+  `TURN10_AERIALACE_HP` (24→14), `turn12ResolutionAdapter.ts`'s new
+  `TURN12_AERIALACE_HP` (14→4) — the same shape
+  `TURN13_DRAGONBREATH_HP.{from,to}` already uses, each adapter file
+  wiring its own private literal (matching the file's existing sibling-
+  independence convention, e.g. the ROCK_SLIDE HP chain) rather than
+  cross-importing a sibling adapter's constant. battleScene.ts's own
+  widely-reused scalar constants (`TURN9_ONIX_AFTER_QUICKATTACK_HP` etc.,
+  8+ downstream consumers each) now read `.to` off the new adapter
+  records instead of a bare literal, leaving every other consumer
+  untouched. Turn-2/turn-3/turn-5's `endeavorHp` endpoints were already
+  adapter/staging-derived (`TURN2_ENDEAVOR_HP`/`TURN5_ENDEAVOR_HP`/
+  `BATTLE1_PRESENTATION_HP`) — verified provenance, left untouched per the
+  brief's "do not churn" instruction. All rename references (doc comments,
+  `tests/battleMenu.test.ts`, `tests/battleScene.test.ts`,
+  `tests/turn{2,5}EndeavorPresentationStaging.test.ts`,
+  `tools/probe/verify-turn13.ts`, two other tools/ scratch scripts) updated
+  to match.
+- **Next:** slice 4 (capstone `renderSceneOffTurnView` convergence, now
+  UNGATED) is the last species-dossier slice; slice 7 (family-B Sitrus
+  anchor) remains after that.
+- **Notes:** `tests/executableFrontierRatchet.test.ts` untouched and
+  green — no new recording imports, no barrier-count changes. No ISSUES
+  entries touched this step (not in scope). PAPERCUT: `npm test`
+  (~8.5 min wall-clock this session, vs. AGENTS.md's "~5-7 min") exceeded
+  the Bash tool's foreground timeout and got auto-backgrounded by the
+  harness rather than by my own choice — recovered by polling the
+  originating process's pid in a single blocking loop rather than trusting
+  a detached notification, per the execution-discipline note, but cost
+  ~5 min of extra care; likely contention from concurrent sibling
+  worker/animation test runs on the same shared machine this session.
+
+---
 ## 876 — [bounded MAIN worker, 2026-08-02] species-dossier slice 6 LANDED (family-E materialize primitive + family-F palette source-sprite threading)
 
 - **State:** master `d2608e83` (one commit on top of `68718a2a`). Full
@@ -109,58 +166,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   314 red frames now settled/inherent; entry deleted (census + probe docs
   are the forensic record). Side worktree/branch cleaned.
 
----
-## 874 — [bounded MAIN worker, 2026-08-02] species-dossier slices 1+2 LANDED (family-C healthbox factory parameterization)
-
-- **State:** master `4d767598` (two commits on top of `5aaba475`: `8d9f6a64`
-  slice 1, `4d767598` slice 2). Full `npm test`: **633 files / 6,376 passed
-  / 1 skipped** (+1 file/+6 tests over base). `npm run build` green (tsc -b
-  + vite). Combined differential (`compare:differential`, union window list
-  per the brief, base `5aaba475`): **PASS, 3,055/3,055 captures
-  byte-identical** across all 17 traces (per-trace counts matched or
-  exceeded the brief's expectations exactly, e.g. turn5-switchin 241,
-  turn13-switchin 242, battle-command-generated-off 128).
-- **Did:** per `docs/species-render-entry-point-retirement-design.md` §4
-  rows 1-2. Slice 1 (`8d9f6a64`): `PIDGEOTTO_MAX_HP` now reads
-  `TURN5_SWITCHIN.replacementHp.max` instead of a bare `156`;
-  `murkrowHealthboxContentForHp`'s cache-miss branch reads
-  `TURN13_SWITCHIN.replacementHp.max` instead of a bare `142` divisor
-  (both occurrences). Turn-6 call sites (`:11934`/`:12581`, the census
-  drift the design doc missed) keep reading the same constant, untouched.
-  Slice 2 (`4d767598`): the six remaining family-C factories
-  (`kabutoHealthboxContentForHp`, `onixPlayerHealthboxContentForState`,
-  `featherDanceOnixOpponentHealthbox`, `featherDancePidgeottoPlayerHealthbox`,
-  `flyMurkrowPlayerHealthbox`, `magbyPlayerHealthboxContentForHp`) now take
-  name/level/maxHp (+gender for kabuto/magby) as explicit parameters
-  instead of closing over a module constant/literal; all ~45 call sites
-  thread the already-available identity (`ONIX_MENU_BATTLER`,
-  `KABUTO_SENDOUT_BATTLER`, `TURN5_SWITCHIN`/`TURN13_SWITCHIN`-derived
-  locals, or the pre-change literal for MAGBY, which has no equivalent
-  named battler constant) explicitly, matching the already-parameterized
-  `extremeSpeedOpponentHealthbox`/`shadowPunchOpponentHealthbox` shape.
-  All six exported for testing. New
-  `tests/battleSceneHealthboxFactories.test.ts` pins each factory's output
-  (2 HP values each) against directly calling
-  `composeOpponentHealthbox`/`composePlayerHealthbox` with the pre-change
-  literal values — 6 tests, all green.
-- **Next:** slices 3/4 of the same dossier (Family-A HP-drain
-  generalization; capstone `renderSceneOffTurnView` convergence — both now
-  UNGATED since dispatcher ladder slice 10 landed), then slice 5 (turn-15
-  Onix gate cluster) and slice 6 (Grovyle/Kabuto intro materialize
-  primitive); then entry-871 Turn1-13 type-ref follow-up, #62, #56.
-- **Notes:** `tests/executableFrontierRatchet.test.ts` untouched and
-  green — no new recording imports, no barrier-count changes. No ISSUES
-  entries closed this step (not in scope). PAPERCUT: the design brief's
-  own call-site census undercounted volume for `onixPlayerHealthboxContentForState`
-  (19 call sites, 6 relying on an omitted `gender` default) and
-  `featherDanceOnixOpponentHealthbox` (13 call sites) — mechanical but
-  ~15 min of extra scripted-edit + verification time versus a "small
-  parameterization" characterization.
-- **[supervisor addendum, ~22:05]** verified slices 1+2 (3-trace spot
-  differential re-run 625/625, new factory test 6/6, smoke green).
-  Side lane merged (`26df7c7c`): #62 census `05ac3009` — all 314 red
-  frames accounted, 5 families, only the 187-frame HP-bar-fraction gap
-  is candidate presentation work pending a discriminating state probe;
-  ISSUES #62 trimmed to that remainder + routing decision recorded
-  (profile-less legacy inputs correctly take the generated route; the
-  deleted historical route stays deleted). Side worktree/branch cleaned.

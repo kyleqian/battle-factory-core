@@ -1,4 +1,61 @@
 
+## 874 — [bounded MAIN worker, 2026-08-02] species-dossier slices 1+2 LANDED (family-C healthbox factory parameterization)
+
+- **State:** master `4d767598` (two commits on top of `5aaba475`: `8d9f6a64`
+  slice 1, `4d767598` slice 2). Full `npm test`: **633 files / 6,376 passed
+  / 1 skipped** (+1 file/+6 tests over base). `npm run build` green (tsc -b
+  + vite). Combined differential (`compare:differential`, union window list
+  per the brief, base `5aaba475`): **PASS, 3,055/3,055 captures
+  byte-identical** across all 17 traces (per-trace counts matched or
+  exceeded the brief's expectations exactly, e.g. turn5-switchin 241,
+  turn13-switchin 242, battle-command-generated-off 128).
+- **Did:** per `docs/species-render-entry-point-retirement-design.md` §4
+  rows 1-2. Slice 1 (`8d9f6a64`): `PIDGEOTTO_MAX_HP` now reads
+  `TURN5_SWITCHIN.replacementHp.max` instead of a bare `156`;
+  `murkrowHealthboxContentForHp`'s cache-miss branch reads
+  `TURN13_SWITCHIN.replacementHp.max` instead of a bare `142` divisor
+  (both occurrences). Turn-6 call sites (`:11934`/`:12581`, the census
+  drift the design doc missed) keep reading the same constant, untouched.
+  Slice 2 (`4d767598`): the six remaining family-C factories
+  (`kabutoHealthboxContentForHp`, `onixPlayerHealthboxContentForState`,
+  `featherDanceOnixOpponentHealthbox`, `featherDancePidgeottoPlayerHealthbox`,
+  `flyMurkrowPlayerHealthbox`, `magbyPlayerHealthboxContentForHp`) now take
+  name/level/maxHp (+gender for kabuto/magby) as explicit parameters
+  instead of closing over a module constant/literal; all ~45 call sites
+  thread the already-available identity (`ONIX_MENU_BATTLER`,
+  `KABUTO_SENDOUT_BATTLER`, `TURN5_SWITCHIN`/`TURN13_SWITCHIN`-derived
+  locals, or the pre-change literal for MAGBY, which has no equivalent
+  named battler constant) explicitly, matching the already-parameterized
+  `extremeSpeedOpponentHealthbox`/`shadowPunchOpponentHealthbox` shape.
+  All six exported for testing. New
+  `tests/battleSceneHealthboxFactories.test.ts` pins each factory's output
+  (2 HP values each) against directly calling
+  `composeOpponentHealthbox`/`composePlayerHealthbox` with the pre-change
+  literal values — 6 tests, all green.
+- **Next:** slices 3/4 of the same dossier (Family-A HP-drain
+  generalization; capstone `renderSceneOffTurnView` convergence — both now
+  UNGATED since dispatcher ladder slice 10 landed), then slice 5 (turn-15
+  Onix gate cluster) and slice 6 (Grovyle/Kabuto intro materialize
+  primitive); then entry-871 Turn1-13 type-ref follow-up, #62, #56.
+- **Notes:** `tests/executableFrontierRatchet.test.ts` untouched and
+  green — no new recording imports, no barrier-count changes. No ISSUES
+  entries closed this step (not in scope). PAPERCUT: the design brief's
+  own call-site census undercounted volume for `onixPlayerHealthboxContentForState`
+  (19 call sites, 6 relying on an omitted `gender` default) and
+  `featherDanceOnixOpponentHealthbox` (13 call sites) — mechanical but
+  ~15 min of extra scripted-edit + verification time versus a "small
+  parameterization" characterization.
+- **[supervisor addendum, ~22:05]** verified slices 1+2 (3-trace spot
+  differential re-run 625/625, new factory test 6/6, smoke green).
+  Side lane merged (`26df7c7c`): #62 census `05ac3009` — all 314 red
+  frames accounted, 5 families, only the 187-frame HP-bar-fraction gap
+  is candidate presentation work pending a discriminating state probe;
+  ISSUES #62 trimmed to that remainder + routing decision recorded
+  (profile-less legacy inputs correctly take the generated route; the
+  deleted historical route stays deleted). Side worktree/branch cleaned.
+
+---
+
 ## 873 — [supervisor orient, 2026-08-02 ~21:30] animation-main folded (fast concave + convex send-out families); union verified green
 
 - **State:** master `5aaba475` = merge of `animation-main` (`29c9ebe0`, 9
