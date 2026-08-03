@@ -174,6 +174,23 @@ export const BACK_H_SHAKE_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.fr
   BACK_H_SHAKE_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by the generated `BACK_ANIM_V_SHAKE` source row. */
+export const BACK_V_SHAKE_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_V_SHAKE")
+    .map(([species]) => species),
+);
+
+/** All thirty-eight V-shake mappings are reachable through Factory rentals. */
+export const BACK_V_SHAKE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_V_SHAKE_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** This bounded back set has no non-Factory selector mappings. */
+export const BACK_V_SHAKE_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_V_SHAKE_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -455,6 +472,41 @@ export const BACK_H_SHAKE_VARIANTS = Object.freeze({
   }),
 } as const);
 
+/**
+ * `BACK_ANIM_V_SHAKE` selects three source initializers around the shared
+ * non-affine `VerticalShakeBack` callback. The initializer first writes the
+ * step/amplitude pair, invokes the helper once, then installs that helper.
+ */
+export const BACK_V_SHAKE_VARIANTS = Object.freeze({
+  fast: Object.freeze({
+    selector: "ANIM_V_SHAKE_BACK_FAST",
+    callback: "Anim_VerticalShakeBack_Fast",
+    sourceId: 97,
+    natureMod: 0,
+    step: 70,
+    amplitude: 6,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_V_SHAKE_BACK",
+    callback: "Anim_VerticalShakeBack",
+    sourceId: 87,
+    natureMod: 1,
+    step: 60,
+    amplitude: 3,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_V_SHAKE_BACK_SLOW",
+    callback: "Anim_VerticalShakeBack_Slow",
+    sourceId: 88,
+    natureMod: 2,
+    step: 30,
+    amplitude: 3,
+    accepted: true,
+  }),
+} as const);
+
 type BackHSlideSelector = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["selector"];
 type BackHSlideCallback = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["callback"];
 type BackHSlideDuration = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["duration"];
@@ -485,6 +537,11 @@ type BackHShakeCallback = typeof BACK_H_SHAKE_VARIANTS[keyof typeof BACK_H_SHAKE
 type BackHShakeSourceId = typeof BACK_H_SHAKE_VARIANTS[keyof typeof BACK_H_SHAKE_VARIANTS]["sourceId"];
 type BackHShakeStep = typeof BACK_H_SHAKE_VARIANTS[keyof typeof BACK_H_SHAKE_VARIANTS]["step"];
 type BackHShakeAmplitude = typeof BACK_H_SHAKE_VARIANTS[keyof typeof BACK_H_SHAKE_VARIANTS]["amplitude"];
+type BackVShakeSelector = typeof BACK_V_SHAKE_VARIANTS[keyof typeof BACK_V_SHAKE_VARIANTS]["selector"];
+type BackVShakeCallback = typeof BACK_V_SHAKE_VARIANTS[keyof typeof BACK_V_SHAKE_VARIANTS]["callback"];
+type BackVShakeSourceId = typeof BACK_V_SHAKE_VARIANTS[keyof typeof BACK_V_SHAKE_VARIANTS]["sourceId"];
+type BackVShakeStep = typeof BACK_V_SHAKE_VARIANTS[keyof typeof BACK_V_SHAKE_VARIANTS]["step"];
+type BackVShakeAmplitude = typeof BACK_V_SHAKE_VARIANTS[keyof typeof BACK_V_SHAKE_VARIANTS]["amplitude"];
 
 /**
  * Source facts at the `LaunchAnimationTaskForBackSprite` seam. The shared
@@ -673,6 +730,19 @@ function hShakeVariant(selector: string): {
   readonly amplitude: BackHShakeAmplitude;
 } | null {
   for (const variant of Object.values(BACK_H_SHAKE_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function vShakeVariant(selector: string): {
+  readonly selector: BackVShakeSelector;
+  readonly callback: BackVShakeCallback;
+  readonly sourceId: BackVShakeSourceId;
+  readonly step: BackVShakeStep;
+  readonly amplitude: BackVShakeAmplitude;
+} | null {
+  for (const variant of Object.values(BACK_V_SHAKE_VARIANTS)) {
     if (variant.selector === selector) return variant;
   }
   return null;
@@ -1695,6 +1765,90 @@ export function backHorizontalShakeFrameAtTick(
 
 /** Source WaitAnimEnd lifecycle after static back OAM reports animEnded. */
 export function backHorizontalShakeWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+export interface BackVerticalShakeFrame {
+  readonly x2: 0;
+  readonly y2: number;
+  readonly data0: BackVShakeStep;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  /** `sprite->data[2]` immediately before the shared source callback. */
+  readonly data2Before: number;
+  /** The source adds `data[0]` even on its terminal callback. */
+  readonly data2: number;
+  readonly data7: BackVShakeAmplitude;
+  readonly index: number | null;
+  readonly selector: BackVShakeSelector;
+  readonly sourceId: BackVShakeSourceId;
+  readonly step: BackVShakeStep;
+  readonly amplitude: BackVShakeAmplitude;
+  /** Tick zero invokes the selected initializer before installing the helper. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
+  readonly normalBackDontFlip: true;
+  readonly tryFlipXCalls: 0;
+  readonly affineWriteCount: 0;
+  readonly affineMode: "normal";
+  readonly resetSpriteAfterAnim: false;
+  readonly callback: "VerticalShakeBack" | "WaitAnimEnd";
+}
+
+/**
+ * Source-order reducer for every `BACK_ANIM_V_SHAKE` selector. The selected
+ * initializer writes `data[0]`/`data[7]`, invokes VerticalShakeBack once,
+ * then installs it as callback. VerticalShakeBack clears y2 and installs
+ * WaitAnimEnd only after the strict `counter > 2304` guard; it still
+ * increments data[2] on that terminal call. The shared helper offsets its
+ * sine phase by 192 and adds the amplitude, and makes no TryFlipX calls.
+ */
+export function backVerticalShakeFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackVerticalShakeFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_V_SHAKE") return null;
+  const variant = vShakeVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected V-shake selector ${selection.selector}`);
+
+  const terminalTick = Math.floor(2304 / variant.step) + 1;
+  const effectiveTick = Math.min(ticksSinceStart, terminalTick);
+  const data2Before = effectiveTick * variant.step;
+  const terminal = effectiveTick === terminalTick;
+  const data2 = toS16(data2Before + variant.step);
+  const index = terminal ? null : (data2Before + 192) % 256;
+  return Object.freeze({
+    x2: 0 as const,
+    y2: terminal ? 0 : gbaSin(index!, variant.amplitude) + variant.amplitude,
+    data0: variant.step,
+    data1: toS16(preservedData1),
+    data2Before: toS16(data2Before),
+    data2,
+    data7: variant.amplitude,
+    index,
+    selector: variant.selector,
+    sourceId: variant.sourceId,
+    step: variant.step,
+    amplitude: variant.amplitude,
+    initializerCallBeforeCallbackInstall: effectiveTick === 0,
+    normalBackDontFlip: true as const,
+    tryFlipXCalls: 0 as const,
+    affineWriteCount: 0 as const,
+    affineMode: "normal" as const,
+    resetSpriteAfterAnim: false as const,
+    callback: terminal ? "WaitAnimEnd" as const : "VerticalShakeBack" as const,
+  });
+}
+
+/** Source WaitAnimEnd lifecycle after static back OAM reports animEnded. */
+export function backVerticalShakeWaitAnimEndCallback(
   animEnded: boolean,
 ): "WaitAnimEnd" | "SpriteCallbackDummy" {
   return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
