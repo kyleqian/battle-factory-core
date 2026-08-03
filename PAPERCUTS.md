@@ -8,6 +8,20 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Full `npm test` exceeds the Bash tool's default 120 s timeout
+
+- **What:** the full suite is now ~12 min (626+ files), so a worker running
+  the mandatory end-of-step `npm test` inside a default-timeout Bash call
+  gets auto-backgrounded mid-run and must re-establish a blocking wait
+  (foreground poll loop) to honor the no-self-abort discipline. Flagged by
+  the 2026-08-02 #66(b) side worker, ~2 min lost.
+- **Hits:** 1.
+- **Possible durable fix:** teach the worker preamble (or the brief
+  template) to pass an explicit long timeout for the final full-suite call
+  (the tool accepts up to 10 min per call; the suite may soon exceed even
+  that — a chunked runner or a launcher-provided `npm run test:full` with
+  progress lines would be sturdier).
+
 ## Claude workers self-abort by backgrounding their own verification
 
 - **What:** bounded claude-sonnet workers end their session by backgrounding

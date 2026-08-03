@@ -1,3 +1,27 @@
+## 869 — [supervisor session, 2026-08-02 evening] animation-main folded (fast-forward); slice-9 + #66 two-lane round dispatched
+
+- **State:** master `e3d7a0bc` = fast-forward fold of `animation-main`
+  (animation supervisor live in its worktree; fold SHA pinned at orient).
+  Union verified by supervisor: full `npm test` **626 files / 6,348
+  passed / 1 skipped**, `npm run build` green. Oracle freshness PASS (both
+  services current). DEFERRED.md remains clear.
+- **Fold contents:** 7 accepted front-animation families since the last fold
+  (glow black, rising wobble, orange glow, fast-short concave, rotate-up
+  slam-down, deep V squish bounce, rotate-to-sides twice) — all inside
+  `src/animation/` + `tests/animation/` + fixtures; no main-lane files.
+  `ANIMATION_PROGRESS.md` top entry carried no "For the main program:" line.
+- **Did:** (dispatch record; outcomes land in the next entry)
+  1. MAIN lane: slice-9 fold completion from `a6d88eaa` per
+     `docs/turn4-fold-pp-freshness-design.md` — implement-only brief with
+     the §5 14-window acceptance table and §6 risk probes verbatim.
+  2. SIDE lane: ISSUES #66(a) capped-stat banner fix (mirror `c7461398`)
+     + (b) discriminating oracle probe (fix only on confirmation) —
+     file-disjoint from the slice-9 touch list (verified: #65's fix touched
+     only `battleResolutionPresentation.ts`).
+- **Next:** verify both lanes; then slice 10 (final 13-param/type cut);
+  then species-dossier slices per
+  `docs/species-render-entry-point-retirement-design.md`.
+
 ## 868 — [interactive user session, 2026-08-02 evening] D1 adopted → DEFERRED clear; papercut fixes landed; play-preview retired
 
 - **State:** master = this entry's commit on top of `f6452d7a`; no engine or
