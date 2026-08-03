@@ -17,6 +17,42 @@ backlog.
 
 # Open
 
+## #70 — Presentation-string completeness: 47 STRINGID refs would hit the resolver guard if reached; 4 ids missing from the extracted table
+
+**Found by #68's insurance sweep (2026-08-02, worker log
+`/tmp/emerald-factory-subagent-20260802-233149.jsonl`; summary in PROGRESS
+entry 879):** of 122 distinct `STRINGID_*` referenced in `src/engine/*.ts`,
+47 name a placeholder `battleResolutionPresentation.ts`'s `messageLines`
+fallback cannot supply (mostly `B_DEF_NAME_WITH_PREFIX`/`B_SCR_ACTIVE_
+ABILITY`/`B_BUFF1/2`/`B_CURRENT_MOVE`/`B_ATK_PREFIX2`) and would throw the
+#65/#68-class completeness-guard crash IF actually reachable — reachability
+NOT yet verified (many are doc-comment citations, not wired-opcode
+emissions). The 47:
+AVOIDEDDAMAGE, HITXTIMES, PKMNAVOIDEDATTACK, PKMNBURNEDBY,
+PKMNCANTSLEEPINUPROAR2, PKMNCHOSEXASDESTINY, PKMNCLAMPED,
+PKMNCOVEREDBYVEIL, PKMNENDUREDHIT, PKMNENERGYDRAINED, PKMNEVADEDATTACK,
+PKMNFROZENBY, PKMNHPFULL, PKMNMADESLEEP, PKMNMAKESGROUNDMISS,
+PKMNOBTAINEDX, PKMNOBTAINEDX2, PKMNOBTAINEDXYOBTAINEDZ, PKMNPOISONEDBY,
+PKMNPREVENTSPARALYSISWITH, PKMNPREVENTSPOISONINGWITH,
+PKMNPROTECTEDITSELF, PKMNRAISEDDEF, PKMNRAISEDDEFALITTLE,
+PKMNRAISEDFIREPOWERWITH, PKMNRAISEDSPDEF, PKMNRAISEDSPDEFALITTLE,
+PKMNSEEDED, PKMNSHROUDEDINMIST, PKMNSITEMCUREDPROBLEM,
+PKMNSQUEEZEDBYBIND, PKMNSTAYEDAWAKEUSING, PKMNSTOCKPILED,
+PKMNSXCUREDITSYPROBLEM, PKMNSXHADNOEFFECTONY, PKMNSXMADEYINEFFECTIVE,
+PKMNSXPREVENTSBURNS, PKMNSXPREVENTSYSZ, PKMNTRANSFORMEDINTO,
+PKMNTRAPPEDBYSANDTOMB, PKMNTRAPPEDINVORTEX, PKMNUNAFFECTED,
+PKMNWASPARALYZEDBY, PKMNWRAPPEDBY, SUBSTITUTEDAMAGED,
+UPROARKEPTPKMNAWAKE, USINGITEMSTATOFPKMNROSE (all `STRINGID_` prefixed).
+Plus 4 referenced but ABSENT from the extracted string table:
+STRINGID_FAINTED, STRINGID_INTROSENDOUT, STRINGID_ITEMHEALHP_BERRY,
+STRINGID_USEDMOVE_OPERAND (table-extraction gap, separate fix shape).
+
+**Next:** a reachability pass FIRST (which of the 47 can a currently-wired
+opcode actually emit in Factory L50 singles — cross-reference the emitting
+opcode set, not doc comments), then fix the reachable ones in ranked
+batches with #65/#68's established resolver shape + a repro test each. The
+4 missing-table ids need the extractor gap closed before any mapping.
+
 ## #69 — [USER REPORT 2026-08-02] Scene-OFF stat-banner cadence runs ~21% fast: missing 64-frame post-print hold
 
 **Ground truth pinned (2026-08-02, `0b8c0537`,
