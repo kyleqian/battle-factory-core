@@ -785,6 +785,28 @@ function messageLines(
       B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
     });
   }
+  if (messageId === "STRINGID_PKMNHURTBY") {
+    // BattleScript_WrapTurnDmg (reference/pokeemerald/data/battle_scripts_1.s:
+    // 3829-3833), fired from ENDTURN_WRAP (battle_util.c:1592-1621,
+    // runWrapTick/WRAP_TURN_DMG_LABEL, battleEndTurnOrchestration.ts) -- the
+    // trap's own recurring damage tick, reachable the same turn a wrap-family
+    // move (Bind/Wrap/Fire Spin/Clamp/Whirlpool/Sand Tomb) first lands.
+    // BS_ATTACKER is reassigned to the trapped battler itself for this tick
+    // (battle_util.c:1471, enterTickBattlerContext), not the last move's real
+    // attacker, so this reads the print-time action snapshot rather than
+    // lastMoveAttacker. {B_BUFF1} is the trapping move's own name --
+    // prepareMessage's own battlers[...].wrappedMove substitution
+    // (factoryBattleScriptFullTurnDecision.ts).
+    if (actionSnapshot === null || event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no preceding action snapshot/substitution`);
+    }
+    const battler = singlesBattler(actionSnapshot.attacker, `${messageId.toLowerCase()} action snapshot`);
+    const trappingMoveName = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, battler),
+      B_BUFF1: () => trappingMoveName,
+    });
+  }
   if (
     messageId === "STRINGID_PKMNEVADEDATTACK"
     || messageId === "STRINGID_PKMNSEEDED"

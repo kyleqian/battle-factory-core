@@ -76,6 +76,7 @@ import {
 } from "./battleDecisionBoundary.ts";
 import { handleBattleActionFinished } from "./battleActionFinished.ts";
 import { checkBattleScriptMoveLimitations } from "./battleScriptActionAdmission.ts";
+import { resolveMoveName } from "./battleStringResolver.ts";
 import {
   HOLD_EFFECT_NAME_BY_ID,
   unsupportedBranch,
@@ -824,7 +825,19 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                 // battleScriptIngrainLeechSeedWrapOpcode.ts:308-323).
                 : operand.expression === "STRINGID_HITXTIMES"
                   ? [String(rules.multiHitStringCounter)]
-                  : [];
+                  // {B_BUFF1}: the trapping move's own name --
+                  // BattleScript_WrapTurnDmg (ENDTURN_WRAP,
+                  // battle_util.c:1592-1621) reassigns BS_ATTACKER to the
+                  // trapped battler itself for this tick
+                  // (enterTickBattlerContext), so rules.selectorRoles.attacker
+                  // is that battler, whose own wrappedMove field
+                  // (applyWrapMoveEffect, battleScriptHitChainOpcode.ts:3722)
+                  // holds the trapping move's id.
+                  : operand.expression === "STRINGID_PKMNHURTBY"
+                    ? (rules.selectorRoles.attacker === null
+                        ? []
+                        : [resolveMoveName(rules.battlers[rules.selectorRoles.attacker].wrappedMove)])
+                    : [];
       return Object.freeze({
         kind: "message" as const,
         messageId: operand.expression,
