@@ -553,36 +553,6 @@ epoch and field content. The first early state field is cut (four handoff
 fields to three). Remaining work is turn-2–4 epoch/content folds (slices 7–9)
 and final positional parameter/type cleanup (slice 10).
 
-## #62 — Retired turn-2-shaped reproducers remain pixel-red on the generated OFF route after #60's crash fix
-
-**Bounded evidence (2026-07-31, `f1bc60a2`):** recovered the deleted
-`turn2-endeavor.json` and `turn2-dragonbreath.json` byte-for-byte from
-`01eac159` into a fresh `/tmp` directory, then added explicit
-`oracleProfile: battle-scene-off` only to scratch copies so the main-lane
-oracle contract was unambiguous. Both now execute through
-`renderWithoutFactoryTerminal` -> `renderBattleResolutionPresentation` ->
-`renderBattleResolutionSceneOffView` without throwing, including the exact
-battler-1 EVASION 7→8 rise that defined #60. Pixel results remain separately
-red: Endeavor **0/77** (captures 2894–2999) and Dragon Breath **0/237**
-(captures 3121–3846).
-
-**Why this is not #60:** Dragon Breath was already **0/237** before the stat
-adapter changed (the old #60 evidence pinned that on `f0621d47`), and its
-recovered capture window never exercised the former battler-1-rise throw.
-The adapter change is confined to typed stat-banner direction, palette, and
-affected-battler geometry; it does not alter routing, turn timing, damage,
-RNG, order, or DRAGON_BREATH presentation. Endeavor's now-visible red frames
-likewise begin only after removing the crash barrier. These retired,
-profile-less inputs are reproducers, not canonical fixtures; their explicit
-OFF successors from rank 6 remain the accepted exact windows.
-
-**Next if prioritized:** first decide whether old profile-less inputs are
-supposed to select the generated default route or the historical canonical
-route. Only then characterize the remaining idle-bounce/field-art/timing
-families with a short explicit-OFF probe. Do not revive either deleted trace,
-extend the canonical Battle-2 march, or fit the residual with trace/tick
-special cases.
-
 # Settled records (not open work — see the note at the top of this file)
 
 ## #61 — [PARKED 2026-08-01, supervisor decision] Scene-OFF turn-3 FIGHT

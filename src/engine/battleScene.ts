@@ -4664,9 +4664,66 @@ export function renderGeneratedBattleStartPlayerRelease(
   );
 }
 
+/**
+ * Family E's shared front-sprite intro-materialize draw primitive
+ * (`docs/species-render-entry-point-retirement-design.md` §1.3E/§4 row 6):
+ * given a species' own tileset/palette/corner plus the geometry its caller
+ * already resolved for this tick, dispatches to the matching already-generic
+ * low-level drawer. GROVYLE/KABUTO are its first callers, not its only
+ * possible ones (mirrors the `extremeSpeedOpponentHealthbox`-style
+ * already-parameterized precedent §1.1 cites). The four draw "kinds" are
+ * the family's whole closed set - settled (plain), tint (mechanism 4's
+ * affine-emerge silhouette), stretch (mechanism 5's affine squish), and
+ * rotate (Kabuto's own h-slide wobble) - each dispatching to the one
+ * already-generic low-level sampler that already served it before this
+ * extraction, so no rendering math moved, only the call-site boilerplate.
+ */
+type FrontMaterializeGeometry =
+  | { readonly kind: "settled" }
+  | { readonly kind: "tint"; readonly accumulator: number; readonly y2: number }
+  | { readonly kind: "stretch"; readonly xScale: number; readonly yScale: number; readonly y2: number; readonly tintCoeff: number }
+  | { readonly kind: "rotate"; readonly pa: number; readonly pb: number; readonly pc: number; readonly pd: number; readonly x2: number; readonly tintCoeff: number };
+
+function drawFrontBackMaterialize(
+  fb: Uint8Array,
+  tileset: Tileset,
+  palette: RgbColor[],
+  corner: { x: number; y: number },
+  geometry: FrontMaterializeGeometry,
+): void {
+  switch (geometry.kind) {
+    case "settled":
+      drawSpriteSheet(fb, tileset, palette, corner.x, corner.y);
+      return;
+    case "tint":
+      drawSpriteSheetAffineTinted(fb, tileset, corner.x, corner.y, geometry.accumulator, MATERIALIZE_TINT_COLOR, geometry.y2);
+      return;
+    case "stretch":
+      drawSpriteSheetAffineStretch(fb, tileset, palette, corner.x, corner.y, geometry.xScale, geometry.yScale, geometry.y2, MATERIALIZE_TINT_COLOR, geometry.tintCoeff);
+      return;
+    case "rotate":
+      drawSpriteSheetAffineRotate(
+        fb,
+        tileset,
+        palette,
+        corner.x + 32 + geometry.x2,
+        corner.y + 32,
+        geometry.pa,
+        geometry.pb,
+        geometry.pc,
+        geometry.pd,
+        undefined,
+        true,
+        MATERIALIZE_TINT_COLOR,
+        geometry.tintCoeff,
+      );
+      return;
+  }
+}
+
 /** §7.5: Grovyle's settled front sprite - see `GROVYLE_MATERIALIZE_TICK`'s doc comment. */
 function drawGrovyleSettled(fb: Uint8Array): void {
-  drawSpriteSheet(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y);
+  drawFrontBackMaterialize(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER, { kind: "settled" });
 }
 
 /**
@@ -4806,7 +4863,7 @@ function drawGrovyleMaterialize(fb: Uint8Array, t: number, handoffTick: number):
   const local = et - MATERIALIZE_START_OFFSET;
   const accumulator = affineEmergeAccumulator(local + 1);
   const y2 = MATERIALIZE_Y2_TABLE[local] ?? 0;
-  drawSpriteSheetAffineTinted(fb, grovyleFrontSprite.tileset, GROVYLE_CORNER.x, GROVYLE_CORNER.y, accumulator, MATERIALIZE_TINT_COLOR, y2);
+  drawFrontBackMaterialize(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER, { kind: "tint", accumulator, y2 });
 }
 
 function drawKabutoMaterialize(fb: Uint8Array, t: number, handoffTick: number): void {
@@ -4815,15 +4872,7 @@ function drawKabutoMaterialize(fb: Uint8Array, t: number, handoffTick: number): 
   const local = et - MATERIALIZE_START_OFFSET;
   const accumulator = affineEmergeAccumulator(local + 1);
   const y2 = MATERIALIZE_Y2_TABLE[local] ?? 0;
-  drawSpriteSheetAffineTinted(
-    fb,
-    kabutoFrontSprite.tileset,
-    KABUTO_CORNER.x,
-    KABUTO_CORNER.y,
-    accumulator,
-    MATERIALIZE_TINT_COLOR,
-    y2,
-  );
+  drawFrontBackMaterialize(fb, kabutoFrontSprite.tileset, kabutoFrontSprite.palette, KABUTO_CORNER, { kind: "tint", accumulator, y2 });
 }
 
 /**
@@ -5675,17 +5724,12 @@ function drawGrovyleStretch(fb: Uint8Array, t: number, handoffTick: number): voi
   const coeff = grovyleStretchTintCoeff(local);
   const frameOffset = t - handoffTick - GROVYLE_FRONT_ANIM_START_OFFSET;
   const frame = frontSpriteAnimFrame(battleAnimTables.grovyleFrontAnim.steps, frameOffset);
-  drawSpriteSheetAffineStretch(
+  drawFrontBackMaterialize(
     fb,
     frame === 0 ? grovyleFrontSprite.tileset : grovyleFrontSprite.frame2,
     grovyleFrontSprite.palette,
-    GROVYLE_CORNER.x,
-    GROVYLE_CORNER.y,
-    entry.xScale,
-    entry.yScale,
-    entry.y2,
-    MATERIALIZE_TINT_COLOR,
-    coeff,
+    GROVYLE_CORNER,
+    { kind: "stretch", xScale: entry.xScale, yScale: entry.yScale, y2: entry.y2, tintCoeff: coeff },
   );
 }
 
@@ -5712,17 +5756,12 @@ function drawGrovyleStretchEarly(fb: Uint8Array, t: number, handoffTick: number)
   const entry = GROVYLE_STRETCH_EARLY_TABLE[et - GROVYLE_FRONT_ANIM_START_OFFSET]!;
   const frameOffset = et - GROVYLE_FRONT_ANIM_START_OFFSET;
   const frame = frontSpriteAnimFrame(battleAnimTables.grovyleFrontAnim.steps, frameOffset);
-  drawSpriteSheetAffineStretch(
+  drawFrontBackMaterialize(
     fb,
     frame === 0 ? grovyleFrontSprite.tileset : grovyleFrontSprite.frame2,
     grovyleFrontSprite.palette,
-    GROVYLE_CORNER.x,
-    GROVYLE_CORNER.y,
-    entry.xScale,
-    entry.yScale,
-    entry.y2,
-    MATERIALIZE_TINT_COLOR,
-    16,
+    GROVYLE_CORNER,
+    { kind: "stretch", xScale: entry.xScale, yScale: entry.yScale, y2: entry.y2, tintCoeff: 16 },
   );
 }
 
@@ -5731,7 +5770,7 @@ function drawKabutoHSlideWobble(fb: Uint8Array, t: number, handoffTick: number):
   const wobble = kabutoHSlideWobble(et);
   if (!wobble.active) {
     if (et >= KABUTO_FRONT_ANIM_END_OFFSET) {
-      drawSpriteSheet(fb, kabutoFrontSprite.tileset, kabutoFrontSprite.palette, KABUTO_CORNER.x, KABUTO_CORNER.y);
+      drawFrontBackMaterialize(fb, kabutoFrontSprite.tileset, kabutoFrontSprite.palette, KABUTO_CORNER, { kind: "settled" });
     }
     return;
   }
@@ -5739,27 +5778,17 @@ function drawKabutoHSlideWobble(fb: Uint8Array, t: number, handoffTick: number):
   const angleIndex = (angle >> 8) & 0xff;
   const matrixSin = GBA_SINE_TABLE_256[angleIndex]!;
   const matrixCos = GBA_SINE_TABLE_256[(angleIndex + 64) & 0xff]!;
-  const pa = matrixCos;
-  const pb = -matrixSin;
-  const pc = matrixSin;
-  const pd = matrixCos;
   const tileset = wobble.frame === 0 ? kabutoFrontSprite.tileset : kabutoFrontSprite.frame2;
   const tintCoeff = et < MATERIALIZE_END_OFFSET ? 16 : Math.max(0, 57 - et);
-  drawSpriteSheetAffineRotate(
-    fb,
-    tileset,
-    kabutoFrontSprite.palette,
-    KABUTO_CORNER.x + 32 + wobble.x2,
-    KABUTO_CORNER.y + 32,
-    pa,
-    pb,
-    pc,
-    pd,
-    undefined,
-    true,
-    MATERIALIZE_TINT_COLOR,
+  drawFrontBackMaterialize(fb, tileset, kabutoFrontSprite.palette, KABUTO_CORNER, {
+    kind: "rotate",
+    pa: matrixCos,
+    pb: -matrixSin,
+    pc: matrixSin,
+    pd: matrixCos,
+    x2: wobble.x2,
     tintCoeff,
-  );
+  });
 }
 
 /**
@@ -6216,9 +6245,10 @@ function blendedTile(
  */
 
 let onixDoubleTeamClonePaletteCache: RgbColor[] | null = null;
-function getOnixDoubleTeamClonePalette(): RgbColor[] {
+/** Threads the source sprite asset in explicitly (`docs/species-render-entry-point-retirement-design.md` §1.3F/§4 row 6) rather than closing over `onixBackSprite` by name; palette math unchanged. */
+function getOnixDoubleTeamClonePalette(sourceSprite: BattleBackSpriteAsset): RgbColor[] {
   if (onixDoubleTeamClonePaletteCache) return onixDoubleTeamClonePaletteCache;
-  onixDoubleTeamClonePaletteCache = onixBackSprite.palette.map((c) =>
+  onixDoubleTeamClonePaletteCache = sourceSprite.palette.map((c) =>
     c ? {
       r: blendComponentToward(c.r, 0, 11),
       g: blendComponentToward(c.g, 0, 11),
@@ -6233,8 +6263,9 @@ function darkenPaletteToward10(palette: readonly (RgbColor | undefined)[]): RgbC
   return palette.map((c) => (c ? { r: blendComponentToward(c.r, 0, 10), g: blendComponentToward(c.g, 0, 10), b: blendComponentToward(c.b, 0, 10) } : (c as unknown as RgbColor)));
 }
 let turn10OnixDarkPaletteCache: RgbColor[] | null = null;
-function turn10OnixDarkPalette(): RgbColor[] {
-  return (turn10OnixDarkPaletteCache ??= darkenPaletteToward10(onixBackSprite.palette));
+/** Threads the source sprite asset in explicitly, same as `getOnixDoubleTeamClonePalette` above - see that function's doc comment. */
+function turn10OnixDarkPalette(sourceSprite: BattleBackSpriteAsset): RgbColor[] {
+  return (turn10OnixDarkPaletteCache ??= darkenPaletteToward10(sourceSprite.palette));
 }
 /**
  * Hardware `F_PAL_BG` selects BG_PLTT banks 1/2/3 (`UnpackSelectedBattlePalettes`/
@@ -10657,9 +10688,9 @@ function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number 
       if (tintCoeff > 0) {
         drawSpriteSheetAffineTintedBlend(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + onixX2, ONIX_MATERIALIZE_CORNER.y, 256, ONIX_SITRUS_TINT_COLOR, tintCoeff, onixY2);
       } else if (onixSinkSkipRows > 0) {
-        drawSpriteSheetTopClipped(fb, onixBackSprite.tileset, darken ? turn10OnixDarkPalette() : onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + onixX2, ONIX_MATERIALIZE_CORNER.y + onixY2, onixSinkSkipRows);
+        drawSpriteSheetTopClipped(fb, onixBackSprite.tileset, darken ? turn10OnixDarkPalette(onixBackSprite) : onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + onixX2, ONIX_MATERIALIZE_CORNER.y + onixY2, onixSinkSkipRows);
       } else {
-        drawSpriteSheet(fb, onixBackSprite.tileset, darken ? turn10OnixDarkPalette() : onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + onixX2, ONIX_MATERIALIZE_CORNER.y + onixY2);
+        drawSpriteSheet(fb, onixBackSprite.tileset, darken ? turn10OnixDarkPalette(onixBackSprite) : onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + onixX2, ONIX_MATERIALIZE_CORNER.y + onixY2);
       }
     }
   }
@@ -16505,10 +16536,13 @@ function drawTurn15FlyBallDescent(fb: Uint8Array, t: number): void {
  * ~4-tick invisible pulses (19107-110/115-118/123-126/131-134), settling
  * visible for good at 19135.
  */
-function turn15OnixInvisible(t: number): boolean {
+const TURN15_STRIKE_TARGET_INVISIBLE_PULSE_START_TICK = 19107;
+const TURN15_STRIKE_TARGET_INVISIBLE_PULSE_END_TICK = 19134;
+const TURN15_STRIKE_TARGET_INVISIBLE_PULSE_PERIOD = 4;
+function turn15StrikeTargetInvisible(t: number, pulseStartTick: number, pulseEndTick: number, pulsePeriod: number): boolean {
   const ramTick = t - TURN15_STRIKE_RENDER_LAG;
-  if (ramTick < 19107) return false;
-  if (ramTick <= 19134) return Math.floor((ramTick - 19107) / 4) % 2 === 0;
+  if (ramTick < pulseStartTick) return false;
+  if (ramTick <= pulseEndTick) return Math.floor((ramTick - pulseStartTick) / pulsePeriod) % 2 === 0;
   return false;
 }
 
@@ -16518,8 +16552,9 @@ function turn15OnixInvisible(t: number): boolean {
  * own source-code branch, both in the same `if` block - RAM-confirmed
  * simultaneous, §6b).
  */
-function turn15MurkrowInvisible(t: number): boolean {
-  return t - TURN15_STRIKE_RENDER_LAG < 19075;
+const TURN15_STRIKE_ATTACKER_REVEAL_TICK = 19075;
+function turn15StrikeAttackerInvisible(t: number, revealTick: number): boolean {
+  return t - TURN15_STRIKE_RENDER_LAG < revealTick;
 }
 
 /**
@@ -16535,8 +16570,8 @@ function turn15MurkrowInvisible(t: number): boolean {
  */
 const TURN15_ONIX_SHAKE_X2 = 6;
 const TURN15_ONIX_SHAKE_RAM_TICKS: ReadonlySet<number> = new Set([19069, 19070, 19073, 19074, 19077, 19078]);
-function turn15OnixShakeX2(t: number): number {
-  return TURN15_ONIX_SHAKE_RAM_TICKS.has(t - TURN15_STRIKE_RENDER_LAG) ? TURN15_ONIX_SHAKE_X2 : 0;
+function turn15StrikeTargetShakeX2(t: number, magnitude: number, ramTicks: ReadonlySet<number>): number {
+  return ramTicks.has(t - TURN15_STRIKE_RENDER_LAG) ? magnitude : 0;
 }
 
 /**
@@ -16556,10 +16591,10 @@ function turn15OnixShakeX2(t: number): number {
  */
 const TURN15_HEALTHBOX_WOBBLE_RAM_START = 19106;
 const TURN15_HEALTHBOX_WOBBLE_TICKS = 20;
-function turn15OnixHealthboxWobbleY2(t: number): number {
+function turn15StrikeTargetHealthboxWobbleY2(t: number, wobbleStartTick: number, wobbleTicks: number): number {
   const ramTick = t - TURN15_STRIKE_RENDER_LAG;
-  const n = ramTick - TURN15_HEALTHBOX_WOBBLE_RAM_START;
-  if (n < 0 || n >= TURN15_HEALTHBOX_WOBBLE_TICKS) return 0;
+  const n = ramTick - wobbleStartTick;
+  if (n < 0 || n >= wobbleTicks) return 0;
   return n % 2 === 0 ? 1 : -1;
 }
 
@@ -16636,9 +16671,9 @@ function drawTurn15ImpactHitsplat(fb: Uint8Array, t: number): void {
  * turn's own faint-sink delay), not a new render-lag family.
  */
 const TURN15_HP_DRAIN_START_TICK = 19141;
-function turn15OnixHp(t: number): number {
+function turn15StrikeTargetHp(t: number, startHp: number): number {
   const d = t - TURN15_HP_DRAIN_START_TICK;
-  return Math.max(0, TURN12_ONIX_AFTER_AERIALACE_HP - Math.max(d, 0));
+  return Math.max(0, startHp - Math.max(d, 0));
 }
 
 /**
@@ -16672,8 +16707,8 @@ const TURN15_NOTVERYEFFECTIVE_TEXT_START_TICK = 19151;
  */
 const TURN15_ONIX_SINK_START_TICK = 19308;
 const TURN15_ONIX_SINK_RATE = 5;
-function turn15OnixSinkSkipRows(t: number): number {
-  return Math.max(0, TURN15_ONIX_SINK_RATE * (t - TURN15_ONIX_SINK_START_TICK));
+function turn15FaintSinkSkipRows(t: number, sinkStartTick: number, sinkRate: number): number {
+  return Math.max(0, sinkRate * (t - sinkStartTick));
 }
 
 /**
@@ -16731,10 +16766,21 @@ export function turn15KoDismissEligible(t: number): boolean {
 
 function drawTurn15FlyStrikeWindow(fb: Uint8Array, t: number, pressTick: number): void {
   const frozenBounceTick = turn15KickoffBounceTick(t, pressTick);
-  const onixHp = turn15OnixHp(t);
-  const onixSinkSkipRows = turn15OnixSinkSkipRows(t);
+  const onixHp = turn15StrikeTargetHp(t, TURN12_ONIX_AFTER_AERIALACE_HP);
+  const onixSinkSkipRows = turn15FaintSinkSkipRows(t, TURN15_ONIX_SINK_START_TICK, TURN15_ONIX_SINK_RATE);
   const onixHealthboxVisible = t < TURN15_ONIX_HEALTHBOX_VANISH_TICK;
-  drawTurn13SwitchinFieldBase(fb, t, frozenBounceTick, turn15MurkrowInvisible(t), turn15OnixInvisible(t), turn15OnixHealthboxWobbleY2(t), turn15OnixShakeX2(t), onixHp, onixSinkSkipRows, onixHealthboxVisible);
+  drawTurn13SwitchinFieldBase(
+    fb,
+    t,
+    frozenBounceTick,
+    turn15StrikeAttackerInvisible(t, TURN15_STRIKE_ATTACKER_REVEAL_TICK),
+    turn15StrikeTargetInvisible(t, TURN15_STRIKE_TARGET_INVISIBLE_PULSE_START_TICK, TURN15_STRIKE_TARGET_INVISIBLE_PULSE_END_TICK, TURN15_STRIKE_TARGET_INVISIBLE_PULSE_PERIOD),
+    turn15StrikeTargetHealthboxWobbleY2(t, TURN15_HEALTHBOX_WOBBLE_RAM_START, TURN15_HEALTHBOX_WOBBLE_TICKS),
+    turn15StrikeTargetShakeX2(t, TURN15_ONIX_SHAKE_X2, TURN15_ONIX_SHAKE_RAM_TICKS),
+    onixHp,
+    onixSinkSkipRows,
+    onixHealthboxVisible,
+  );
   drawTurn15ImpactHitsplat(fb, t);
   drawTurn15FlyBallDescent(fb, t);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
@@ -16887,9 +16933,12 @@ function drawTurn15ExitObjSubset(fb: Uint8Array, oam: Mode0Oam[]): void {
   });
 }
 
+/** The canonical turn-15 party roster, gating whether the hardcoded fast path below renders or falls back to `renderBattlePartySelect`. */
+const TURN15_CANONICAL_PARTY_SPECIES = ["ONIX", "MAGBY", "BAYLEEF"] as const;
+
 function drawTurn15PartySelectList(fb: Uint8Array, state: import("./partySelect.ts").PartySelectState): void {
   if (state.party.some((member, index) =>
-    member.species !== (["ONIX", "MAGBY", "BAYLEEF"] as const)[index]
+    member.species !== TURN15_CANONICAL_PARTY_SPECIES[index]
   )) {
     renderBattlePartySelect(fb, battlePartySelectStateForForcedParty(state));
     return;
@@ -17079,7 +17128,7 @@ function drawPartyMenuSourceMask(mask: Uint8Array, encoded: string, width: numbe
 /** Live OBJ ownership for the party list (three icons plus two status OBJ instances). */
 function drawTurn15PartyListObjMask(mask: Uint8Array, state: import("./partySelect.ts").PartySelectState): void {
   if (state.party.some((member, index) =>
-    member.species !== (["ONIX", "MAGBY", "BAYLEEF"] as const)[index]
+    member.species !== TURN15_CANONICAL_PARTY_SPECIES[index]
   )) {
     renderBattlePartySelect(mask, battlePartySelectStateForForcedParty(state));
     return;
@@ -32110,7 +32159,7 @@ export function renderSceneOnMovePresentation(
       target.geometry.spriteCorner.y,
     );
     if (view.clones) {
-      const palette = getOnixDoubleTeamClonePalette();
+      const palette = getOnixDoubleTeamClonePalette(onixBackSprite);
       const drawClone = (offset: number) => drawSpriteSheetBlended(
         fb,
         onixBackSprite.tileset,
