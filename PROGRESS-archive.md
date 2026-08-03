@@ -1,4 +1,56 @@
 ## 888 — [supervisor fold, 2026-08-03 ~10:30] species-dossier program CLOSED — slice-4 capstone folded from side lane
+## 889 — [bounded MAIN worker, 2026-08-03] typeref slice 1 LANDED (Family S dead-parameter cut); slice 2 blocked, documented
+
+- **State:** master `7ca03a17`. Full `npm test`: **649 files / 6,488 passed /
+  1 skipped** (unchanged from baseline). `npm run build` green (tsc -b +
+  vite). `compare:differential --base 4fe0e206 --summary` over the full §2.5
+  turn 5-15 window list + `turn5-menu`/`turn5-rockslide` + insurance
+  `battle-command-generated-off.json` (49 traces): **PASS — 7,466/7,466
+  captures byte-identical**. `tests/executableFrontierRatchet.test.ts` green,
+  untouched.
+- **Did:** landed `docs/battlescene-turnN-typeref-retirement-design.md` §4
+  slice 1 exactly as scoped: cut the turn5-13 predecessor-handoff parameters
+  from `drawTurn6FightSubmenuWindow`..`drawTurn15FightSubmenuWindow` (10
+  functions) and `drawFightSubmenuChrome`'s 9 void-marked turn5-13 slots
+  (keeping its turn1-4/moveset/resolution params); truncated the ~14
+  literal-null call sites in `drawLatestCompletedCommandWindow`'s dispatch
+  ladder and inside each of the 10 functions' own chrome calls accordingly;
+  deleted the now-dead `import type { TurnNCompletedResolutionNextCommandHandoff }`
+  lines for N=5..13 (9 import refs — re-grepped each before deleting, matching
+  the doc's own N=5..13 range, not just N=6..12). Every one of these was
+  already provably dead (§2.2/§2.4: production always passes a non-null
+  `latest`, so the deleted params only ever fed the unreachable `else`
+  fallback branch) — this was a pure mechanical cut, no behavior change.
+  battleScene.ts ref count **152 → 80** (72 retired: 54 Family S + 9 Family Q
+  dead chrome slots + 9 imports), re-run via the doc's own §1.1 census script.
+- **Next:** typeref slice 2 (Family P+Q turn1-4 fold) is the next pick but
+  needs a fresh, focused session — see Notes for exactly why this session
+  didn't land it. Slices 3/4a/4b/5 remain after that.
+- **Notes:** slice 2 (Family P+Q turn1-4 fold) did **not** land this session
+  — invoked the step brief's own documented fallback rather than rush a
+  "not one pixel may move" change. Investigation found the design doc's "24
+  refs / 6 functions" framing undersells the entanglement: Family Q's
+  remaining 6 functions (`drawMenuIdleBaseWithOpponentHp`,
+  `drawActionMenuIdleContent`, `drawActionMenuIdleWindow`,
+  `drawFightSubmenuChromeTurn1Through4PP`, `drawFightSubmenuChrome`,
+  `drawFightSubmenuChromeFromCurrentOwner`) are called from far more than the
+  in-scope `drawFightSubmenuWindow`/`drawActionMenuIdleWindow` —
+  `drawActionMenuIdleContent` alone has 9+ call sites inside Family R
+  (explicitly out of scope this session, slices 3/4a/4b), each passing a
+  differently-shaped positional argument list (some just `turn1NextCommandHandoff`,
+  some `null, null, turn3NextCommandHandoff.hp.player, turn3NextCommandHandoff`,
+  some bare `null`). Changing Family Q's signatures to read `latest` directly
+  forces edits to every one of those Family R call sites. Confirmed at least
+  one real semantic nuance in the process (an HP-overlay guard inside
+  `drawActionMenuIdleContent` that deliberately fires for turn 2/3 lifecycle
+  but explicitly excludes turn 1 — not a plain "hp changed" check), meaning
+  each call site needs individual verification, not a batch swap. The
+  slice-2 precondition pin test (`tests/battleSceneFightCommandPresentationTurn1Through4.test.ts`,
+  banked at `a76bb338`) is still green and still the right starting point for
+  whoever picks this up. ISSUES #39 updated with the same detail. No
+  PAPERCUT beyond the investigation time itself.
+
+---
 
 - **State:** master `bb64afc0` = merge of side branch
   `worker/side-20260803-093850` (`90e5a2b2`, dossier slice 4) into
