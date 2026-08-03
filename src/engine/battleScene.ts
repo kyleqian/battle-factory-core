@@ -16505,10 +16505,13 @@ function drawTurn15FlyBallDescent(fb: Uint8Array, t: number): void {
  * ~4-tick invisible pulses (19107-110/115-118/123-126/131-134), settling
  * visible for good at 19135.
  */
-function turn15OnixInvisible(t: number): boolean {
+const TURN15_STRIKE_TARGET_INVISIBLE_PULSE_START_TICK = 19107;
+const TURN15_STRIKE_TARGET_INVISIBLE_PULSE_END_TICK = 19134;
+const TURN15_STRIKE_TARGET_INVISIBLE_PULSE_PERIOD = 4;
+function turn15StrikeTargetInvisible(t: number, pulseStartTick: number, pulseEndTick: number, pulsePeriod: number): boolean {
   const ramTick = t - TURN15_STRIKE_RENDER_LAG;
-  if (ramTick < 19107) return false;
-  if (ramTick <= 19134) return Math.floor((ramTick - 19107) / 4) % 2 === 0;
+  if (ramTick < pulseStartTick) return false;
+  if (ramTick <= pulseEndTick) return Math.floor((ramTick - pulseStartTick) / pulsePeriod) % 2 === 0;
   return false;
 }
 
@@ -16518,8 +16521,9 @@ function turn15OnixInvisible(t: number): boolean {
  * own source-code branch, both in the same `if` block - RAM-confirmed
  * simultaneous, §6b).
  */
-function turn15MurkrowInvisible(t: number): boolean {
-  return t - TURN15_STRIKE_RENDER_LAG < 19075;
+const TURN15_STRIKE_ATTACKER_REVEAL_TICK = 19075;
+function turn15StrikeAttackerInvisible(t: number, revealTick: number): boolean {
+  return t - TURN15_STRIKE_RENDER_LAG < revealTick;
 }
 
 /**
@@ -16535,8 +16539,8 @@ function turn15MurkrowInvisible(t: number): boolean {
  */
 const TURN15_ONIX_SHAKE_X2 = 6;
 const TURN15_ONIX_SHAKE_RAM_TICKS: ReadonlySet<number> = new Set([19069, 19070, 19073, 19074, 19077, 19078]);
-function turn15OnixShakeX2(t: number): number {
-  return TURN15_ONIX_SHAKE_RAM_TICKS.has(t - TURN15_STRIKE_RENDER_LAG) ? TURN15_ONIX_SHAKE_X2 : 0;
+function turn15StrikeTargetShakeX2(t: number, magnitude: number, ramTicks: ReadonlySet<number>): number {
+  return ramTicks.has(t - TURN15_STRIKE_RENDER_LAG) ? magnitude : 0;
 }
 
 /**
@@ -16556,10 +16560,10 @@ function turn15OnixShakeX2(t: number): number {
  */
 const TURN15_HEALTHBOX_WOBBLE_RAM_START = 19106;
 const TURN15_HEALTHBOX_WOBBLE_TICKS = 20;
-function turn15OnixHealthboxWobbleY2(t: number): number {
+function turn15StrikeTargetHealthboxWobbleY2(t: number, wobbleStartTick: number, wobbleTicks: number): number {
   const ramTick = t - TURN15_STRIKE_RENDER_LAG;
-  const n = ramTick - TURN15_HEALTHBOX_WOBBLE_RAM_START;
-  if (n < 0 || n >= TURN15_HEALTHBOX_WOBBLE_TICKS) return 0;
+  const n = ramTick - wobbleStartTick;
+  if (n < 0 || n >= wobbleTicks) return 0;
   return n % 2 === 0 ? 1 : -1;
 }
 
@@ -16636,9 +16640,9 @@ function drawTurn15ImpactHitsplat(fb: Uint8Array, t: number): void {
  * turn's own faint-sink delay), not a new render-lag family.
  */
 const TURN15_HP_DRAIN_START_TICK = 19141;
-function turn15OnixHp(t: number): number {
+function turn15StrikeTargetHp(t: number, startHp: number): number {
   const d = t - TURN15_HP_DRAIN_START_TICK;
-  return Math.max(0, TURN12_ONIX_AFTER_AERIALACE_HP - Math.max(d, 0));
+  return Math.max(0, startHp - Math.max(d, 0));
 }
 
 /**
@@ -16672,8 +16676,8 @@ const TURN15_NOTVERYEFFECTIVE_TEXT_START_TICK = 19151;
  */
 const TURN15_ONIX_SINK_START_TICK = 19308;
 const TURN15_ONIX_SINK_RATE = 5;
-function turn15OnixSinkSkipRows(t: number): number {
-  return Math.max(0, TURN15_ONIX_SINK_RATE * (t - TURN15_ONIX_SINK_START_TICK));
+function turn15FaintSinkSkipRows(t: number, sinkStartTick: number, sinkRate: number): number {
+  return Math.max(0, sinkRate * (t - sinkStartTick));
 }
 
 /**
@@ -16731,10 +16735,21 @@ export function turn15KoDismissEligible(t: number): boolean {
 
 function drawTurn15FlyStrikeWindow(fb: Uint8Array, t: number, pressTick: number): void {
   const frozenBounceTick = turn15KickoffBounceTick(t, pressTick);
-  const onixHp = turn15OnixHp(t);
-  const onixSinkSkipRows = turn15OnixSinkSkipRows(t);
+  const onixHp = turn15StrikeTargetHp(t, TURN12_ONIX_AFTER_AERIALACE_HP);
+  const onixSinkSkipRows = turn15FaintSinkSkipRows(t, TURN15_ONIX_SINK_START_TICK, TURN15_ONIX_SINK_RATE);
   const onixHealthboxVisible = t < TURN15_ONIX_HEALTHBOX_VANISH_TICK;
-  drawTurn13SwitchinFieldBase(fb, t, frozenBounceTick, turn15MurkrowInvisible(t), turn15OnixInvisible(t), turn15OnixHealthboxWobbleY2(t), turn15OnixShakeX2(t), onixHp, onixSinkSkipRows, onixHealthboxVisible);
+  drawTurn13SwitchinFieldBase(
+    fb,
+    t,
+    frozenBounceTick,
+    turn15StrikeAttackerInvisible(t, TURN15_STRIKE_ATTACKER_REVEAL_TICK),
+    turn15StrikeTargetInvisible(t, TURN15_STRIKE_TARGET_INVISIBLE_PULSE_START_TICK, TURN15_STRIKE_TARGET_INVISIBLE_PULSE_END_TICK, TURN15_STRIKE_TARGET_INVISIBLE_PULSE_PERIOD),
+    turn15StrikeTargetHealthboxWobbleY2(t, TURN15_HEALTHBOX_WOBBLE_RAM_START, TURN15_HEALTHBOX_WOBBLE_TICKS),
+    turn15StrikeTargetShakeX2(t, TURN15_ONIX_SHAKE_X2, TURN15_ONIX_SHAKE_RAM_TICKS),
+    onixHp,
+    onixSinkSkipRows,
+    onixHealthboxVisible,
+  );
   drawTurn15ImpactHitsplat(fb, t);
   drawTurn15FlyBallDescent(fb, t);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
@@ -16887,9 +16902,12 @@ function drawTurn15ExitObjSubset(fb: Uint8Array, oam: Mode0Oam[]): void {
   });
 }
 
+/** The canonical turn-15 party roster, gating whether the hardcoded fast path below renders or falls back to `renderBattlePartySelect`. */
+const TURN15_CANONICAL_PARTY_SPECIES = ["ONIX", "MAGBY", "BAYLEEF"] as const;
+
 function drawTurn15PartySelectList(fb: Uint8Array, state: import("./partySelect.ts").PartySelectState): void {
   if (state.party.some((member, index) =>
-    member.species !== (["ONIX", "MAGBY", "BAYLEEF"] as const)[index]
+    member.species !== TURN15_CANONICAL_PARTY_SPECIES[index]
   )) {
     renderBattlePartySelect(fb, battlePartySelectStateForForcedParty(state));
     return;
@@ -17079,7 +17097,7 @@ function drawPartyMenuSourceMask(mask: Uint8Array, encoded: string, width: numbe
 /** Live OBJ ownership for the party list (three icons plus two status OBJ instances). */
 function drawTurn15PartyListObjMask(mask: Uint8Array, state: import("./partySelect.ts").PartySelectState): void {
   if (state.party.some((member, index) =>
-    member.species !== (["ONIX", "MAGBY", "BAYLEEF"] as const)[index]
+    member.species !== TURN15_CANONICAL_PARTY_SPECIES[index]
   )) {
     renderBattlePartySelect(mask, battlePartySelectStateForForcedParty(state));
     return;
