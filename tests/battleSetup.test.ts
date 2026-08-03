@@ -186,7 +186,7 @@ describe("battleScene: genericity end-to-end through the STATE plumbing (not jus
     it(`cursor ${cursor} (${FIGHT_SUBMENU_SLOT_NAMES[cursor]} highlighted): renderBattleScene's FIGHT window matches an independently-assembled expected image byte-for-byte, at full PP`, () => {
       const sm = { ...opened, cursor: cursor as 0 | 1 | 2 | 3, displayCursor: cursor as 0 | 1 | 2 | 3 };
       const fb = createFramebuffer();
-      renderBattleScene(fb, { elapsed: 900, sendOutPressElapsed: 380, fightSubmenu: sm, turn4NextCommandHandoff: null, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, });
+      renderBattleScene(fb, { elapsed: 900, sendOutPressElapsed: 380, fightSubmenu: sm, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, });
 
       const expectedMoveset = buildFightMoveset(kabutoMoveset.moveIds, currentPPForActiveMon(kabutoMoveset, null));
       expect(extractWindowRegion(fb)).toEqual(expectedWindowRegion(expectedMoveset, cursor as 0 | 1 | 2 | 3));
@@ -196,7 +196,7 @@ describe("battleScene: genericity end-to-end through the STATE plumbing (not jus
   it("the completed turn-1 receipt's PP decrement also reaches the renderer for a non-Onix moveset (slot 0 only, currentPPForActiveMon's own documented scope)", () => {
     const sm = { ...opened, cursor: 0 as const, displayCursor: 0 as const };
     const fb = createFramebuffer();
-    renderBattleScene(fb, { elapsed: 900, sendOutPressElapsed: 380, fightSubmenu: sm, turn4NextCommandHandoff: null, latestCompletedCommandHandoff: TURN1_LATEST_HANDOFF, opponentFaintPresentationOwner: null, });
+    renderBattleScene(fb, { elapsed: 900, sendOutPressElapsed: 380, fightSubmenu: sm, latestCompletedCommandHandoff: TURN1_LATEST_HANDOFF, opponentFaintPresentationOwner: null, });
 
     const expectedMoveset = buildFightMoveset(kabutoMoveset.moveIds, currentPPForActiveMonFromLatest(kabutoMoveset, TURN1_LATEST_HANDOFF));
     expect(extractWindowRegion(fb)).toEqual(expectedWindowRegion(expectedMoveset, 0));

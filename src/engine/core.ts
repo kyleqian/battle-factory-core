@@ -196,9 +196,9 @@ import {
 } from "./turn3ResolutionAdapter.ts";
 import { isTurn4ChooseActionBounceReset } from "./turn4ChooseActionReset.ts";
 import {
-  isTurn4NextCommandHandoffReady,
-  isTurn4NextCommandLifecycleActive,
-  resolveTurn4CompletedResolutionNextCommandHandoff,
+  isTurn4LatestCompletedCommandLifecycleActive,
+  resolveTurn4LatestCompletedCommandHandoff,
+  turn4FightCommandPresentationFromLatest,
 } from "./turn4ResolutionAdapter.ts";
 import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "./turn16FirePunchResolutionAdapter.ts";
 import {
@@ -1212,7 +1212,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       partySendOutBattleMenuReady(partySendOutElapsed)
         ? fightSubmenu.activeMonMoveset
         : activeMonMoveset(draftScreen);
-    let turn4NextCommandHandoff = battleScene.turn4NextCommandHandoff ?? null;
     let latestCompletedCommandHandoff = battleScene.latestCompletedCommandHandoff ?? null;
     let lockedActionOwner = battleScene.resolutionOwner ?? null;
     let terminalResolution = battleScene.terminalResolution ?? null;
@@ -1277,7 +1276,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       );
     }
     if (
-      turn4NextCommandHandoff === null
+      turn4FightCommandPresentationFromLatest(latestCompletedCommandHandoff) === null
       && isTurn3LatestCompletedCommandLifecycleActive(
         latestCompletedCommandHandoff,
         fightSubmenu.openElapsed,
@@ -1287,8 +1286,9 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         battleScene.elapsed + 1,
       )
     ) {
-      turn4NextCommandHandoff = resolveTurn4CompletedResolutionNextCommandHandoff(
+      latestCompletedCommandHandoff = resolveTurn4LatestCompletedCommandHandoff(
         battleScene.elapsed + 1,
+        latestCompletedCommandHandoff!,
       );
     }
     if (fightSubmenu.openElapsed === null) {
@@ -1426,15 +1426,11 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // presentation epoch rather than publishing a replacement.
       fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen));
     } else if (
-      isTurn3LatestCompletedCommandLifecycleActive(
+      !isLatestCompletedCommandLifecycleActive(
         latestCompletedCommandHandoff,
         fightSubmenu.openElapsed,
       ) &&
-      !isTurn4NextCommandLifecycleActive(
-        turn4NextCommandHandoff,
-        fightSubmenu.openElapsed,
-      ) &&
-      isTurn4NextCommandHandoffReady(turn4NextCommandHandoff) &&
+      turn4FightCommandPresentationFromLatest(latestCompletedCommandHandoff) !== null &&
       fightSubmenu.confirmElapsed !== null &&
       newKeys.has("A")
     ) {
@@ -1443,8 +1439,8 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // immutable epoch through any B-close/A-reopen cycle.
       fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen));
     } else if (
-      isTurn4NextCommandLifecycleActive(
-        turn4NextCommandHandoff,
+      isTurn4LatestCompletedCommandLifecycleActive(
+        latestCompletedCommandHandoff,
         fightSubmenu.openElapsed,
       ) &&
       // The turn-1 generic receipt carries an optional presentation epoch;
@@ -1552,7 +1548,6 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     battleScene = {
       ...battleScene,
       fightSubmenu,
-      turn4NextCommandHandoff,
       latestCompletedCommandHandoff,
       resolutionOwner: lockedActionOwner,
       terminalResolution,
