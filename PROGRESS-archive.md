@@ -1,4 +1,61 @@
 
+## 872 — [supervisor wind-down, 2026-08-02 ~20:45] slice-9 + slice-10 + full #66 family landed; dispatcher ladder rows 1-10 complete
+
+- **State:** master = this docs commit on top of merge `d263968f`
+  (slice-10 `7bd37eab` + side chain `4fd820fc`). Final union verified by
+  supervisor at wind-down: full `npm test` **628 files / 6,351 passed /
+  1 skipped**, `npm run build` green. DEFERRED.md: no entries opened this
+  session. ISSUES #66 removed (fully fixed, see below).
+- **Session outcomes (4 workers, 0 failures, all supervisor-verified):**
+  1. **animation-main folded** at orient (fast-forward to `e3d7a0bc`, 7
+     accepted front-animation families; union suite verified green, entry
+     869).
+  2. **Slice-9 fold landed** (`c5563c72`): PP-freshness design implemented
+     verbatim; 14/14 differential windows byte-identical vs `105c72d5`
+     (supervisor re-ran the two formerly-red windows independently);
+     census state entries 0/0/0.
+  3. **Slice-10 final interface cut landed** (`ad0cfa07`+`7bd37eab`):
+     drawFightSubmenuWindow and currentPPForActiveMon positional handoff
+     params 13→0 each; 53-trace row-10 union differential 9,238/9,238
+     byte-identical vs `d4a89680` (supervisor spot re-ran 3 traces).
+     Honest remainder in entry 871: battleScene.ts still carries ~144
+     TurnN-handoff type refs on per-turn draw functions row 10 never
+     named — that surface belongs to the #39 retirement program.
+  4. **#66 fully closed in two stacked side steps** (`3631116d`,
+     `4fd820fc`): (a) STATSWONTINCREASE/DECREASE crash fixed
+     (red-before/green-after, real-ROM receipt); (b) pre-clamp
+     "sharply/harshly" magnitude CONFIRMED by discriminating oracle probe
+     (stage 11 + SWORDS DANCE → "sharply rose!" at post-clamp delta 1)
+     then fixed via `requestedMagnitude` on the stat-stage-change event;
+     plus a third find — generic-route stat names rendered lowercase vs
+     the ROM's "ATTACK" — proven pixel-real on the kernel route only
+     (162/9600 px diff → 0 after fix; legacy turn-owned windows
+     structurally unaffected, which is why standing traces never caught
+     it). Evidence docs + fixtures committed under docs/issue66* and
+     tools/compare/fixtures/issue66*.
+- **Next session (ordered):** (1) species-dossier slices per
+  `docs/species-render-entry-point-retirement-design.md` (census 4→45,
+  7-slice plan), folding in entry 871's recommended follow-up for
+  battleScene.ts's remaining per-turn Turn1-13 type usage (same #39
+  retirement surface); (2) #62 generated-route pixel-red reproducers;
+  (3) #56 intro residuals.
+- **Day-audit (read-only, post-wind-down commit):** 5 angles over today's
+  surface — 4 explicitly clean (STAT_DISPLAY_NAME byte-exact vs
+  gStatNamesTable; slice-10 helper algebraically equivalent at all-null;
+  rebuilt turn5-13 pins kept every numeric tuple; slice-9 x #66 disjoint
+  by grep). 1 latent finding filed as ISSUES #67 (unchecked
+  `as 1 | 2` magnitude cast from raw script bytes + `>= 2` vs source's
+  `== 2`, unreachable with stock data) — **fixed same-session (`e7ef6dab`):**
+  runtime guard added at the cast site, `>= 2` tightened to `=== 2` at all
+  four sharply/harshly sites, parametrized red/green test added; full
+  `npm test` 628 files / 6,353 passed / 1 skipped, `npm run build` green.
+- **Notes:** `animation-main` is a moving branch again (live animation
+  supervisor + nested worker at wind-down; tip was `54b2d48e`+ during this
+  session) — fold at next orient per protocol. PAPERCUTS: new entry for
+  the full-suite-vs-Bash-timeout friction flagged by the #66(b) worker.
+
+---
+
 ## 871 — [bounded MAIN worker, 2026-08-02] slice 10 (final interface cut) LANDED for drawFightSubmenuWindow/currentPPForActiveMon; battleScene.ts's broader Turn1-13 type usage stays open (scope gap, reported)
 
 - **State:** master `7bd37eab` (two commits on top of `d4a89680`:

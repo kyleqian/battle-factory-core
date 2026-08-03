@@ -4,6 +4,50 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 875 — [bounded MAIN worker, 2026-08-02] species-dossier slice 5 LANDED (turn-15 Onix gate cluster + family-H party literal)
+
+- **State:** master `1c144a1c` (one commit on top of `537110fd`). Full
+  `npm test`: **633 files / 6,376 passed / 1 skipped** (unchanged from
+  base — naming/threading only, no new tests needed). `npm run build`
+  green (tsc -b + vite). Differential (`compare:differential`, 13-trace
+  window list from the brief, base `537110fd`): **PASS, 1,544/1,544
+  captures byte-identical** — 256 (fly-strike), 43/43, 46/46, 16/16,
+  144/144, 195/195 (rung pairs), 200/200 × 2 (party-select pair), every
+  count matching or exceeding the brief.
+- **Did:** per `docs/species-render-entry-point-retirement-design.md` §4
+  row 5, §1.3H. Renamed the six grep-confirmed single-caller turn-15 gate
+  functions to species-neutral names, threading their species-scoped
+  constants as explicit parameters from the sole caller
+  (`drawTurn15FlyStrikeWindow`) instead of closing over them — mirroring
+  the rank-4 "caller passes its own staged stat" idiom, same shape as
+  `dragonBreathGrovyleHp`'s `startHp`/`endHp` params:
+  `turn15OnixInvisible`→`turn15StrikeTargetInvisible(t, pulseStartTick,
+  pulseEndTick, pulsePeriod)`, `turn15MurkrowInvisible`→
+  `turn15StrikeAttackerInvisible(t, revealTick)`, `turn15OnixShakeX2`→
+  `turn15StrikeTargetShakeX2(t, magnitude, ramTicks)`,
+  `turn15OnixHealthboxWobbleY2`→`turn15StrikeTargetHealthboxWobbleY2(t,
+  wobbleStartTick, wobbleTicks)`, `turn15OnixHp`→`turn15StrikeTargetHp(t,
+  startHp)`, `turn15OnixSinkSkipRows`→`turn15FaintSinkSkipRows(t,
+  sinkStartTick, sinkRate)`. The previously-inline literal window
+  boundaries (19107/19134/4/19075) are now named module constants passed
+  at the call site, matching the file's existing convention. No formula
+  change — every number is identical, this is naming + parameter
+  threading only. Family H: collapsed the duplicated
+  `(["ONIX","MAGBY","BAYLEEF"] as const)` literal (identical in
+  `drawTurn15PartySelectList`/`drawTurn15PartyListObjMask`) into one
+  named `TURN15_CANONICAL_PARTY_SPECIES` module constant; gating logic
+  unchanged (deeper H retirement — reading the roster from real party
+  state — stays out of scope per the brief).
+- **Next:** slice 6 (Grovyle/Kabuto intro materialize primitive, family
+  E) is the next ladder-independent slice; slices 3/4 (family-A HP-drain,
+  capstone `renderSceneOffTurnView`) and slice 7 (family-B Sitrus anchor)
+  remain after that. Turn-14's own `turn14MurkrowInvisible` stays
+  untouched (different window/adapter, explicitly excluded by the brief).
+- **Notes:** `tests/executableFrontierRatchet.test.ts` untouched and
+  green — no new recording imports, no barrier-count changes. No ISSUES
+  entries touched this step (not in scope).
+
+---
 ## 874 — [bounded MAIN worker, 2026-08-02] species-dossier slices 1+2 LANDED (family-C healthbox factory parameterization)
 
 - **State:** master `4d767598` (two commits on top of `5aaba475`: `8d9f6a64`
@@ -79,59 +123,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   windows are `battle2-turn1-rockslide` 191 / `battle2-action-menu-dense`
   209 / `battle2-off-turn1-staged` 16; `PIDGEOTTO_MAX_HP` has 2 extra
   turn-6 call sites (:11934/:12581) the census missed — folded into briefs.
-
----
-## 872 — [supervisor wind-down, 2026-08-02 ~20:45] slice-9 + slice-10 + full #66 family landed; dispatcher ladder rows 1-10 complete
-
-- **State:** master = this docs commit on top of merge `d263968f`
-  (slice-10 `7bd37eab` + side chain `4fd820fc`). Final union verified by
-  supervisor at wind-down: full `npm test` **628 files / 6,351 passed /
-  1 skipped**, `npm run build` green. DEFERRED.md: no entries opened this
-  session. ISSUES #66 removed (fully fixed, see below).
-- **Session outcomes (4 workers, 0 failures, all supervisor-verified):**
-  1. **animation-main folded** at orient (fast-forward to `e3d7a0bc`, 7
-     accepted front-animation families; union suite verified green, entry
-     869).
-  2. **Slice-9 fold landed** (`c5563c72`): PP-freshness design implemented
-     verbatim; 14/14 differential windows byte-identical vs `105c72d5`
-     (supervisor re-ran the two formerly-red windows independently);
-     census state entries 0/0/0.
-  3. **Slice-10 final interface cut landed** (`ad0cfa07`+`7bd37eab`):
-     drawFightSubmenuWindow and currentPPForActiveMon positional handoff
-     params 13→0 each; 53-trace row-10 union differential 9,238/9,238
-     byte-identical vs `d4a89680` (supervisor spot re-ran 3 traces).
-     Honest remainder in entry 871: battleScene.ts still carries ~144
-     TurnN-handoff type refs on per-turn draw functions row 10 never
-     named — that surface belongs to the #39 retirement program.
-  4. **#66 fully closed in two stacked side steps** (`3631116d`,
-     `4fd820fc`): (a) STATSWONTINCREASE/DECREASE crash fixed
-     (red-before/green-after, real-ROM receipt); (b) pre-clamp
-     "sharply/harshly" magnitude CONFIRMED by discriminating oracle probe
-     (stage 11 + SWORDS DANCE → "sharply rose!" at post-clamp delta 1)
-     then fixed via `requestedMagnitude` on the stat-stage-change event;
-     plus a third find — generic-route stat names rendered lowercase vs
-     the ROM's "ATTACK" — proven pixel-real on the kernel route only
-     (162/9600 px diff → 0 after fix; legacy turn-owned windows
-     structurally unaffected, which is why standing traces never caught
-     it). Evidence docs + fixtures committed under docs/issue66* and
-     tools/compare/fixtures/issue66*.
-- **Next session (ordered):** (1) species-dossier slices per
-  `docs/species-render-entry-point-retirement-design.md` (census 4→45,
-  7-slice plan), folding in entry 871's recommended follow-up for
-  battleScene.ts's remaining per-turn Turn1-13 type usage (same #39
-  retirement surface); (2) #62 generated-route pixel-red reproducers;
-  (3) #56 intro residuals.
-- **Day-audit (read-only, post-wind-down commit):** 5 angles over today's
-  surface — 4 explicitly clean (STAT_DISPLAY_NAME byte-exact vs
-  gStatNamesTable; slice-10 helper algebraically equivalent at all-null;
-  rebuilt turn5-13 pins kept every numeric tuple; slice-9 x #66 disjoint
-  by grep). 1 latent finding filed as ISSUES #67 (unchecked
-  `as 1 | 2` magnitude cast from raw script bytes + `>= 2` vs source's
-  `== 2`, unreachable with stock data) — **fixed same-session (`e7ef6dab`):**
-  runtime guard added at the cast site, `>= 2` tightened to `=== 2` at all
-  four sharply/harshly sites, parametrized red/green test added; full
-  `npm test` 628 files / 6,353 passed / 1 skipped, `npm run build` green.
-- **Notes:** `animation-main` is a moving branch again (live animation
-  supervisor + nested worker at wind-down; tip was `54b2d48e`+ during this
-  session) — fold at next orient per protocol. PAPERCUTS: new entry for
-  the full-suite-vs-Bash-timeout friction flagged by the #66(b) worker.
