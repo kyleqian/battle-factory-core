@@ -1928,16 +1928,20 @@ const kabutoHealthboxContentByHp = new Map<
   number,
   ReturnType<typeof composeOpponentHealthbox>
 >([[KABUTO_SENDOUT_BATTLER.hp, kabutoHealthboxContent]]);
-function kabutoHealthboxContentForHp(
+export function kabutoHealthboxContentForHp(
   hp: number,
+  name: string,
+  level: number,
+  maxHp: number,
+  gender: "male" | "female",
 ): ReturnType<typeof composeOpponentHealthbox> {
   let cached = kabutoHealthboxContentByHp.get(hp);
   if (!cached) {
     cached = composeOpponentHealthbox(healthboxAssemblyAssets, {
-      name: KABUTO_SENDOUT_BATTLER.name,
-      level: KABUTO_SENDOUT_BATTLER.level,
-      gender: KABUTO_SENDOUT_BATTLER.gender,
-      hpFraction: hp / KABUTO_SENDOUT_BATTLER.maxHP,
+      name,
+      level,
+      gender,
+      hpFraction: hp / maxHp,
       status: "none",
     });
     kabutoHealthboxContentByHp.set(hp, cached);
@@ -1966,22 +1970,25 @@ const onixPlayerHealthboxContentByState = new Map<
   string,
   ReturnType<typeof composePlayerHealthbox>
 >([["117:none", onixPlayerHealthboxContent]]);
-function onixPlayerHealthboxContentForState(
+export function onixPlayerHealthboxContentForState(
   hp: number,
   status: "none" | "burn" | "freeze" | "paralysis",
   gender: "male" | "female" = ONIX_MENU_BATTLER.gender,
+  name: string = ONIX_MENU_BATTLER.name,
+  level: number = ONIX_MENU_BATTLER.level,
+  maxHp: number = ONIX_MENU_BATTLER.maxHP,
 ): ReturnType<typeof composePlayerHealthbox> {
   const key = `${hp}:${status}:${gender}`;
   let cached = onixPlayerHealthboxContentByState.get(key);
   if (!cached) {
     cached = composePlayerHealthbox(playerHealthboxAssets, {
-      name: ONIX_MENU_BATTLER.name,
-      level: ONIX_MENU_BATTLER.level,
+      name,
+      level,
       gender,
-      hpFraction: hp / ONIX_MENU_BATTLER.maxHP,
+      hpFraction: hp / maxHp,
       status,
       currentHp: hp,
-      maxHp: ONIX_MENU_BATTLER.maxHP,
+      maxHp,
     });
     onixPlayerHealthboxContentByState.set(key, cached);
   }
@@ -1992,18 +1999,21 @@ const featherDanceOnixOpponentHealthboxes = new Map<
   string,
   ReturnType<typeof composeOpponentHealthbox>
 >();
-function featherDanceOnixOpponentHealthbox(
+export function featherDanceOnixOpponentHealthbox(
   hp: number,
   gender: "male" | "female",
+  name: string,
+  level: number,
+  maxHp: number,
 ): ReturnType<typeof composeOpponentHealthbox> {
   const key = `${hp}:${gender}`;
   let cached = featherDanceOnixOpponentHealthboxes.get(key);
   if (!cached) {
     cached = composeOpponentHealthbox(healthboxAssemblyAssets, {
-      name: "ONIX",
-      level: 50,
+      name,
+      level,
       gender,
-      hpFraction: hp / 117,
+      hpFraction: hp / maxHp,
       status: "none",
     });
     featherDanceOnixOpponentHealthboxes.set(key, cached);
@@ -2015,22 +2025,25 @@ const featherDancePidgeottoPlayerHealthboxes = new Map<
   string,
   ReturnType<typeof composePlayerHealthbox>
 >();
-function featherDancePidgeottoPlayerHealthbox(
+export function featherDancePidgeottoPlayerHealthbox(
   hp: number,
   status: "none" | "burn",
   gender: "male" | "female",
+  name: string,
+  level: number,
+  maxHp: number,
 ): ReturnType<typeof composePlayerHealthbox> {
   const key = `${hp}:${status}:${gender}`;
   let cached = featherDancePidgeottoPlayerHealthboxes.get(key);
   if (!cached) {
     cached = composePlayerHealthbox(playerHealthboxAssets, {
-      name: "PIDGEOTTO",
-      level: 50,
+      name,
+      level,
       gender,
-      hpFraction: hp / 156,
+      hpFraction: hp / maxHp,
       status,
       currentHp: hp,
-      maxHp: 156,
+      maxHp,
     });
     featherDancePidgeottoPlayerHealthboxes.set(key, cached);
   }
@@ -2106,22 +2119,25 @@ const flyMurkrowPlayerHealthboxes = new Map<
   string,
   ReturnType<typeof composePlayerHealthbox>
 >();
-function flyMurkrowPlayerHealthbox(
+export function flyMurkrowPlayerHealthbox(
   hp: number,
   status: "none" | "burn",
   gender: "male" | "female",
+  name: string,
+  level: number,
+  maxHp: number,
 ): ReturnType<typeof composePlayerHealthbox> {
   const key = `${hp}:${status}:${gender}`;
   let cached = flyMurkrowPlayerHealthboxes.get(key);
   if (!cached) {
     cached = composePlayerHealthbox(playerHealthboxAssets, {
-      name: "MURKROW",
-      level: 50,
+      name,
+      level,
       gender,
-      hpFraction: hp / 142,
+      hpFraction: hp / maxHp,
       status,
       currentHp: hp,
-      maxHp: 142,
+      maxHp,
     });
     flyMurkrowPlayerHealthboxes.set(key, cached);
   }
@@ -2414,7 +2430,13 @@ const magbyPlayerHealthboxContentByHp = new Map<number, typeof magbyPlayerHealth
   [138, magbyPlayerHealthboxContent],
 ]);
 
-function magbyPlayerHealthboxContentForHp(hp: number): typeof magbyPlayerHealthboxContent {
+export function magbyPlayerHealthboxContentForHp(
+  hp: number,
+  name: string,
+  level: number,
+  maxHp: number,
+  gender: "male" | "female",
+): typeof magbyPlayerHealthboxContent {
   let cached = magbyPlayerHealthboxContentByHp.get(hp);
   if (!cached) {
     cached = composePlayerHealthbox(
@@ -2426,7 +2448,7 @@ function magbyPlayerHealthboxContentForHp(hp: number): typeof magbyPlayerHealthb
         statusIcons: (battleHealthboxAsset as { status: HealthboxAssets["statusIcons"] }).status,
         textPalette: (battleHealthboxAsset as { singlesPlayer: { palette: RgbColor[] } }).singlesPlayer.palette,
       },
-      { name: "MAGBY", level: 50, gender: "female", hpFraction: hp / 138, status: "none", currentHp: hp, maxHp: 138 },
+      { name, level, gender, hpFraction: hp / maxHp, status: "none", currentHp: hp, maxHp },
     );
     magbyPlayerHealthboxContentByHp.set(hp, cached);
   }
@@ -7153,7 +7175,7 @@ function drawBattle2RockSlideAttack(
     BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP.from,
     BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP.to,
   );
-  const kabutoContent = kabutoHealthboxContentForHp(kabutoDisplayHp);
+  const kabutoContent = kabutoHealthboxContentForHp(kabutoDisplayHp, KABUTO_SENDOUT_BATTLER.name, KABUTO_SENDOUT_BATTLER.level, KABUTO_SENDOUT_BATTLER.maxHP, KABUTO_SENDOUT_BATTLER.gender);
 
   drawStaticBgShiftedY(fb, shiftY);
   if (!rockSlideMonBlinkInvisible(t, mechanismPress)) {
@@ -17217,7 +17239,7 @@ function drawTurn15ForcedSwitchRelease(fb: Uint8Array, logicalTick: number, y2Ex
 }
 
 function drawTurn15MagbyHealthbox(fb: Uint8Array, dx: number, dy: number = 0, hp: number = 138): void {
-  const { width, height, pixels } = magbyPlayerHealthboxContentForHp(hp);
+  const { width, height, pixels } = magbyPlayerHealthboxContentForHp(hp, "MAGBY", 50, 138, "female");
   for (let py = 0; py < height; py += 1) {
     for (let px = 0; px < width; px += 1) {
       const color = pixels[py * width + px];
@@ -23059,6 +23081,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "female",
+          ONIX_MENU_BATTLER.name,
+          ONIX_MENU_BATTLER.level,
+          ONIX_MENU_BATTLER.maxHP,
         ),
       );
     } else {
@@ -23068,6 +23093,9 @@ export function renderSceneOnMovePresentation(
         featherDanceOnixOpponentHealthbox(
           state.config.fieldProfile.opponentHp,
           state.config.fieldProfile.opponentGender ?? "male",
+          ONIX_MENU_BATTLER.name,
+          ONIX_MENU_BATTLER.level,
+          ONIX_MENU_BATTLER.maxHP,
         ),
       );
       drawComposedPlayerHealthbox(
@@ -23076,6 +23104,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "male",
+          TURN13_SWITCHIN.replacementSpecies,
+          MURKROW_LEVEL,
+          TURN13_SWITCHIN.replacementHp.max,
         ),
       );
     }
@@ -30786,6 +30817,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "female",
+          ONIX_MENU_BATTLER.name,
+          ONIX_MENU_BATTLER.level,
+          ONIX_MENU_BATTLER.maxHP,
         ),
       );
     } else {
@@ -30795,6 +30829,9 @@ export function renderSceneOnMovePresentation(
         featherDanceOnixOpponentHealthbox(
           state.config.fieldProfile.opponentHp,
           state.config.fieldProfile.opponentGender ?? "male",
+          ONIX_MENU_BATTLER.name,
+          ONIX_MENU_BATTLER.level,
+          ONIX_MENU_BATTLER.maxHP,
         ),
       );
       drawComposedPlayerHealthbox(
@@ -30803,6 +30840,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "male",
+          TURN13_SWITCHIN.replacementSpecies,
+          MURKROW_LEVEL,
+          TURN13_SWITCHIN.replacementHp.max,
         ),
       );
     }
@@ -30931,6 +30971,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "female",
+          ONIX_MENU_BATTLER.name,
+          ONIX_MENU_BATTLER.level,
+          ONIX_MENU_BATTLER.maxHP,
         ),
       );
     } else {
@@ -30940,6 +30983,9 @@ export function renderSceneOnMovePresentation(
         featherDanceOnixOpponentHealthbox(
           state.config.fieldProfile.opponentHp,
           state.config.fieldProfile.opponentGender ?? "male",
+          ONIX_MENU_BATTLER.name,
+          ONIX_MENU_BATTLER.level,
+          ONIX_MENU_BATTLER.maxHP,
         ),
       );
       drawComposedPlayerHealthbox(
@@ -30948,6 +30994,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "female",
+          TURN13_SWITCHIN.replacementSpecies,
+          MURKROW_LEVEL,
+          TURN13_SWITCHIN.replacementHp.max,
         ),
       );
     }
@@ -31021,6 +31070,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "female",
+          ONIX_MENU_BATTLER.name,
+          ONIX_MENU_BATTLER.level,
+          ONIX_MENU_BATTLER.maxHP,
         ),
       );
     } else {
@@ -31030,6 +31082,9 @@ export function renderSceneOnMovePresentation(
         featherDanceOnixOpponentHealthbox(
           state.config.fieldProfile.opponentHp,
           state.config.fieldProfile.opponentGender ?? "male",
+          ONIX_MENU_BATTLER.name,
+          ONIX_MENU_BATTLER.level,
+          ONIX_MENU_BATTLER.maxHP,
         ),
       );
       drawComposedPlayerHealthbox(
@@ -31038,6 +31093,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "male",
+          TURN13_SWITCHIN.replacementSpecies,
+          MURKROW_LEVEL,
+          TURN13_SWITCHIN.replacementHp.max,
         ),
       );
     }
@@ -31146,6 +31204,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "female",
+          ONIX_MENU_BATTLER.name,
+          ONIX_MENU_BATTLER.level,
+          ONIX_MENU_BATTLER.maxHP,
         ),
       );
     } else {
@@ -31155,6 +31216,9 @@ export function renderSceneOnMovePresentation(
         featherDanceOnixOpponentHealthbox(
           state.config.fieldProfile.opponentHp,
           state.config.fieldProfile.opponentGender ?? "male",
+          ONIX_MENU_BATTLER.name,
+          ONIX_MENU_BATTLER.level,
+          ONIX_MENU_BATTLER.maxHP,
         ),
       );
       drawComposedPlayerHealthbox(
@@ -31163,6 +31227,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "male",
+          TURN13_SWITCHIN.replacementSpecies,
+          MURKROW_LEVEL,
+          TURN13_SWITCHIN.replacementHp.max,
         ),
       );
     }
@@ -31319,6 +31386,9 @@ export function renderSceneOnMovePresentation(
           view.displayedTargetHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender,
+          ONIX_MENU_BATTLER.name,
+          ONIX_MENU_BATTLER.level,
+          ONIX_MENU_BATTLER.maxHP,
         ),
         0,
         view.healthboxY2,
@@ -31327,6 +31397,9 @@ export function renderSceneOnMovePresentation(
       const opponentContent = featherDanceOnixOpponentHealthbox(
         view.displayedTargetHp,
         state.config.fieldProfile.opponentGender ?? "female",
+        ONIX_MENU_BATTLER.name,
+        ONIX_MENU_BATTLER.level,
+        ONIX_MENU_BATTLER.maxHP,
       );
       drawSendOutHealthbox(fb, 0, opponentContent);
       if (view.healthboxY2 !== 0) {
@@ -31342,6 +31415,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "male",
+          TURN5_SWITCHIN.replacementSpecies,
+          PIDGEOTTO_LEVEL,
+          PIDGEOTTO_MAX_HP,
         ),
       );
     }
@@ -31446,6 +31522,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender,
+          ONIX_MENU_BATTLER.name,
+          ONIX_MENU_BATTLER.level,
+          ONIX_MENU_BATTLER.maxHP,
         ),
       );
     } else {
@@ -31455,6 +31534,9 @@ export function renderSceneOnMovePresentation(
         featherDanceOnixOpponentHealthbox(
           state.config.fieldProfile.opponentHp,
           state.config.fieldProfile.opponentGender ?? "female",
+          ONIX_MENU_BATTLER.name,
+          ONIX_MENU_BATTLER.level,
+          ONIX_MENU_BATTLER.maxHP,
         ),
       );
       drawComposedPlayerHealthbox(
@@ -31463,6 +31545,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "male",
+          TURN5_SWITCHIN.replacementSpecies,
+          PIDGEOTTO_LEVEL,
+          PIDGEOTTO_MAX_HP,
         ),
       );
     }
@@ -31751,6 +31836,10 @@ export function renderSceneOnMovePresentation(
         target.geometry.side === "player"
           ? view.resolution.healthboxStatus
           : state.config.fieldProfile.playerStatus,
+        ONIX_MENU_BATTLER.gender,
+        ONIX_MENU_BATTLER.name,
+        ONIX_MENU_BATTLER.level,
+        ONIX_MENU_BATTLER.maxHP,
       ),
       0,
       view.actionMenu.healthboxY2
@@ -31968,6 +32057,10 @@ export function renderSceneOnMovePresentation(
       onixPlayerHealthboxContentForState(
         state.config.fieldProfile.playerHp,
         state.config.fieldProfile.playerStatus,
+        ONIX_MENU_BATTLER.gender,
+        ONIX_MENU_BATTLER.name,
+        ONIX_MENU_BATTLER.level,
+        ONIX_MENU_BATTLER.maxHP,
       ),
     );
 
@@ -32063,6 +32156,10 @@ export function renderSceneOnMovePresentation(
       onixPlayerHealthboxContentForState(
         state.config.fieldProfile.playerHp,
         state.config.fieldProfile.playerStatus,
+        ONIX_MENU_BATTLER.gender,
+        ONIX_MENU_BATTLER.name,
+        ONIX_MENU_BATTLER.level,
+        ONIX_MENU_BATTLER.maxHP,
       ),
     );
     drawTileBg(
@@ -32129,6 +32226,10 @@ export function renderSceneOnMovePresentation(
       onixPlayerHealthboxContentForState(
         state.config.fieldProfile.playerHp,
         state.config.fieldProfile.playerStatus,
+        ONIX_MENU_BATTLER.gender,
+        ONIX_MENU_BATTLER.name,
+        ONIX_MENU_BATTLER.level,
+        ONIX_MENU_BATTLER.maxHP,
       ),
       0,
       view.healthboxY2,
@@ -32235,6 +32336,10 @@ export function renderSceneOnMovePresentation(
       onixPlayerHealthboxContentForState(
         state.config.fieldProfile.playerHp,
         state.config.fieldProfile.playerStatus,
+        ONIX_MENU_BATTLER.gender,
+        ONIX_MENU_BATTLER.name,
+        ONIX_MENU_BATTLER.level,
+        ONIX_MENU_BATTLER.maxHP,
       ),
       0,
       0,
@@ -32349,6 +32454,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender,
+          ONIX_MENU_BATTLER.name,
+          ONIX_MENU_BATTLER.level,
+          ONIX_MENU_BATTLER.maxHP,
         ),
       );
     } else {
@@ -32358,6 +32466,9 @@ export function renderSceneOnMovePresentation(
         featherDanceOnixOpponentHealthbox(
           state.config.fieldProfile.opponentHp,
           state.config.fieldProfile.opponentGender ?? "female",
+          ONIX_MENU_BATTLER.name,
+          ONIX_MENU_BATTLER.level,
+          ONIX_MENU_BATTLER.maxHP,
         ),
       );
       drawComposedPlayerHealthbox(
@@ -32366,6 +32477,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "male",
+          TURN5_SWITCHIN.replacementSpecies,
+          PIDGEOTTO_LEVEL,
+          PIDGEOTTO_MAX_HP,
         ),
       );
     }
@@ -32458,6 +32572,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender,
+          ONIX_MENU_BATTLER.name,
+          ONIX_MENU_BATTLER.level,
+          ONIX_MENU_BATTLER.maxHP,
         ),
       );
     } else {
@@ -32467,6 +32584,9 @@ export function renderSceneOnMovePresentation(
         featherDanceOnixOpponentHealthbox(
           state.config.fieldProfile.opponentHp,
           state.config.fieldProfile.opponentGender ?? "female",
+          ONIX_MENU_BATTLER.name,
+          ONIX_MENU_BATTLER.level,
+          ONIX_MENU_BATTLER.maxHP,
         ),
       );
       drawComposedPlayerHealthbox(
@@ -32475,6 +32595,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "male",
+          TURN5_SWITCHIN.replacementSpecies,
+          PIDGEOTTO_LEVEL,
+          PIDGEOTTO_MAX_HP,
         ),
       );
     }
@@ -32663,6 +32786,9 @@ export function renderSceneOnMovePresentation(
           view.displayedTargetHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender,
+          ONIX_MENU_BATTLER.name,
+          ONIX_MENU_BATTLER.level,
+          ONIX_MENU_BATTLER.maxHP,
         ),
         0,
         view.healthboxY2,
@@ -32671,6 +32797,9 @@ export function renderSceneOnMovePresentation(
       const opponentContent = featherDanceOnixOpponentHealthbox(
         view.displayedTargetHp,
         state.config.fieldProfile.opponentGender ?? "female",
+        ONIX_MENU_BATTLER.name,
+        ONIX_MENU_BATTLER.level,
+        ONIX_MENU_BATTLER.maxHP,
       );
       drawSendOutHealthbox(fb, 0, opponentContent);
       if (view.healthboxY2 !== 0) {
@@ -32686,6 +32815,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "male",
+          TURN5_SWITCHIN.replacementSpecies,
+          PIDGEOTTO_LEVEL,
+          PIDGEOTTO_MAX_HP,
         ),
       );
     }
@@ -32853,6 +32985,9 @@ export function renderSceneOnMovePresentation(
           view.displayedTargetHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender,
+          ONIX_MENU_BATTLER.name,
+          ONIX_MENU_BATTLER.level,
+          ONIX_MENU_BATTLER.maxHP,
         ),
         0,
         view.healthboxY2,
@@ -32861,6 +32996,9 @@ export function renderSceneOnMovePresentation(
       const opponentContent = featherDanceOnixOpponentHealthbox(
         view.displayedTargetHp,
         state.config.fieldProfile.opponentGender ?? "male",
+        ONIX_MENU_BATTLER.name,
+        ONIX_MENU_BATTLER.level,
+        ONIX_MENU_BATTLER.maxHP,
       );
       drawSendOutHealthbox(fb, 0, opponentContent);
       if (view.healthboxY2 !== 0) {
@@ -32876,6 +33014,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "male",
+          TURN13_SWITCHIN.replacementSpecies,
+          MURKROW_LEVEL,
+          TURN13_SWITCHIN.replacementHp.max,
         ),
       );
     }
@@ -33015,6 +33156,9 @@ export function renderSceneOnMovePresentation(
             ? "paralysis"
             : state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender,
+          ONIX_MENU_BATTLER.name,
+          ONIX_MENU_BATTLER.level,
+          ONIX_MENU_BATTLER.maxHP,
         ),
         0,
         view.healthboxY2 + view.actionMenu.healthboxY2,
@@ -33023,6 +33167,9 @@ export function renderSceneOnMovePresentation(
       const opponentContent = featherDanceOnixOpponentHealthbox(
         view.displayedTargetHp,
         state.config.fieldProfile.opponentGender ?? "female",
+        ONIX_MENU_BATTLER.name,
+        ONIX_MENU_BATTLER.level,
+        ONIX_MENU_BATTLER.maxHP,
       );
       drawSendOutHealthbox(
         fb,
@@ -33139,6 +33286,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "female",
+          ONIX_MENU_BATTLER.name,
+          ONIX_MENU_BATTLER.level,
+          ONIX_MENU_BATTLER.maxHP,
         ),
       );
     } else {
@@ -33148,6 +33298,9 @@ export function renderSceneOnMovePresentation(
         featherDanceOnixOpponentHealthbox(
           state.config.fieldProfile.opponentHp,
           state.config.fieldProfile.opponentGender ?? "male",
+          ONIX_MENU_BATTLER.name,
+          ONIX_MENU_BATTLER.level,
+          ONIX_MENU_BATTLER.maxHP,
         ),
       );
       drawComposedPlayerHealthbox(
@@ -33156,6 +33309,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "female",
+          TURN13_SWITCHIN.replacementSpecies,
+          MURKROW_LEVEL,
+          TURN13_SWITCHIN.replacementHp.max,
         ),
       );
     }
@@ -33870,6 +34026,10 @@ export function renderSceneOnMovePresentation(
     target.geometry.side === "player"
       ? resolution.healthboxStatus
       : "none",
+    ONIX_MENU_BATTLER.gender,
+    ONIX_MENU_BATTLER.name,
+    ONIX_MENU_BATTLER.level,
+    ONIX_MENU_BATTLER.maxHP,
   );
   drawComposedPlayerHealthbox(
     fb,
@@ -34355,7 +34515,7 @@ export function renderSceneOffTurnView(
     ONIX_MATERIALIZE_CORNER.x,
     ONIX_MATERIALIZE_CORNER.y + (view.playerY2 ?? 0),
   );
-  drawSendOutHealthbox(fb, 0, kabutoHealthboxContentForHp(view.opponentHp));
+  drawSendOutHealthbox(fb, 0, kabutoHealthboxContentForHp(view.opponentHp, KABUTO_SENDOUT_BATTLER.name, KABUTO_SENDOUT_BATTLER.level, KABUTO_SENDOUT_BATTLER.maxHP, KABUTO_SENDOUT_BATTLER.gender));
   drawComposedPlayerHealthbox(fb, onixPlayerHealthboxContent);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
 
