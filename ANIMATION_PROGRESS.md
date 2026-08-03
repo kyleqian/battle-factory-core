@@ -28,9 +28,12 @@ Factory-front family.
 
 **Notes:** focused blue + black/orange regression/source/census/evidence and
 both ratchets are **40/40**; `npx tsc --noEmit` and
-`npm run animation:coverage` are green. Commits: `445c38fe` (reducer/census)
-and `438053bf` (paired Scene-ON evidence). Full suite/build pending this
-session's final gate.
+`npm run animation:coverage` are green. Full `npm test` is **639 files /
+6,401 passed / 1 skipped** and the production build is green. Commits:
+`445c38fe` (reducer/census), `438053bf` (paired Scene-ON evidence), and
+`5e448621` (Milotic terminal receipt regression). No move status was
+promoted; this remains reducer/evidence coverage rather than live battle-seam
+wiring.
 
 ## Front `ANIM_H_PIVOT` family accepted (2026-08-02)
 
