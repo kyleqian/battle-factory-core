@@ -33,10 +33,12 @@ Salamence slow **1841..1920 / 80, 36,574 B,
 `c4c3004247f31b143840a754fbd7da0aa61c2a0ab12e6c148427b35e15ada5a0`**.
 
 **Verification / next:** focused source/census/routing/reducer/evidence checks
-**2 files / 11 tests**, `npx tsc --noEmit`, and smoke **7 files / 346 tests**
-are green. Next source-ranked unsupported player-back set is
-**`BACK_ANIM_V_SHAKE` (set 9)**. No move status was promoted and no live
-dispatcher wiring or gameplay state changed.
+**2 files / 11 tests**, both animation/executable ratchets **4 files / 20
+tests**, `npx tsc --noEmit`, smoke **7 files / 346 tests**, and coverage are
+green; full `npm test` is **666 files / 6,588 passed / 1 skipped** and
+`npm run build` is green at **553 modules transformed**. Next source-ranked
+unsupported player-back set is **`BACK_ANIM_V_SHAKE` (set 9)**. No move status
+was promoted and no live dispatcher wiring or gameplay state changed.
 
 ## Back `BACK_ANIM_CIRCLE_COUNTERCLOCKWISE` triple accepted (2026-08-03)
 
