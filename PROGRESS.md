@@ -11,9 +11,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   files / 339 passed, ~23 s). **DEFERRED.md has NO open entries — the next
   `run-supervisor.sh` session is unblocked.**
 - **Did (all user-directed):**
-  1. **D1 RESOLVED:** user adopted the communication contract verbatim; text
-     moved into `SUPERVISOR.md` § "Communicating with the user", D1 entry
-     deleted.
+  1. **D1 RESOLVED:** communication contract moved into `SUPERVISOR.md`
+     § "Communicating with the user", D1 entry deleted. Amended same
+     evening at user request: cut to a short plain-English rule (no
+     mandated status format, no per-item numeric requirement).
   2. **Worker self-abort papercut:** EXECUTION DISCIPLINE clause folded into
      `tools/run-subagent.sh`'s standing preamble (both prompt branches, all
      providers) — briefs no longer restate it. PAPERCUTS entry updated;
