@@ -308,6 +308,7 @@ export function changeStatBuffs(
     stat: STAT_NAME_BY_ID[statId]!,
     from: before,
     to: after,
+    requestedMagnitude: magnitude,
   });
   return Object.freeze({ kind: "worked" as const, rulesContext: nextRulesContext, events: Object.freeze([event]) });
 }

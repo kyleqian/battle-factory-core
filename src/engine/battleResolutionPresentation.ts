@@ -505,19 +505,30 @@ function messageLines(
     }
     const battler = singlesBattler(lastStatChange.battler, "stat-fell message");
     const displayed = fieldBattler(field, battler);
-    const amount = Math.abs(lastStatChange.from - lastStatChange.to);
+    // ChangeStatBuffs's {B_BUFF2} "sharply"/"harshly" selection reads the
+    // pre-clamp requested magnitude, not the post-clamp from/to delta
+    // (battle_script_commands.c:7038,7061; docs/issue66b-preclamp-magnitude-verdict.md).
+    const magnitude = lastStatChange.requestedMagnitude;
     const rose = messageId === "STRINGID_DEFENDERSSTATROSE";
+    // {B_BUFF1} is ChangeStatBuffs's own PREPARE_STAT_BUFFER(gBattleTextBuff1,
+    // statId) (battle_script_commands.c:6958), which copies gStatNamesTable
+    // ("ATTACK" etc, not lastStatChange.stat's lowercase-always enum string) --
+    // oracle-confirmed pixel mismatch, docs/issue66b-stat-name-capitalization-verdict.md.
+    const statName = STAT_DISPLAY_NAME[lastStatChange.stat];
+    if (statName === undefined) {
+      throw new Error(`battle resolution stat-change message has unknown stat ${lastStatChange.stat}`);
+    }
     return resolveBattleStringLines(messageId, {
       B_DEF_NAME_WITH_PREFIX: () => resolveBattleNameWithPrefix({
         side: battler === 0 ? "player" : "opponent",
         isTrainerBattle: true,
         nickname: displayed.name,
       }),
-      B_BUFF1: () => lastStatChange.stat,
+      B_BUFF1: () => statName,
       B_BUFF2: () =>
         rose
-          ? amount >= 2 ? "sharply rose!" : "rose!"
-          : amount >= 2 ? "harshly fell!" : "fell!",
+          ? magnitude >= 2 ? "sharply rose!" : "rose!"
+          : magnitude >= 2 ? "harshly fell!" : "fell!",
     });
   }
   if (
@@ -531,19 +542,23 @@ function messageLines(
     }
     const battler = singlesBattler(lastStatChange.battler, "stat-fell message");
     const displayed = fieldBattler(field, battler);
-    const amount = Math.abs(lastStatChange.from - lastStatChange.to);
+    const magnitude = lastStatChange.requestedMagnitude;
     const rose = messageId === "STRINGID_ATTACKERSSTATROSE";
+    const statName = STAT_DISPLAY_NAME[lastStatChange.stat];
+    if (statName === undefined) {
+      throw new Error(`battle resolution stat-change message has unknown stat ${lastStatChange.stat}`);
+    }
     return resolveBattleStringLines(messageId, {
       B_ATK_NAME_WITH_PREFIX: () => resolveBattleNameWithPrefix({
         side: battler === 0 ? "player" : "opponent",
         isTrainerBattle: true,
         nickname: displayed.name,
       }),
-      B_BUFF1: () => lastStatChange.stat,
+      B_BUFF1: () => statName,
       B_BUFF2: () =>
         rose
-          ? amount >= 2 ? "sharply rose!" : "rose!"
-          : amount >= 2 ? "harshly fell!" : "fell!",
+          ? magnitude >= 2 ? "sharply rose!" : "rose!"
+          : magnitude >= 2 ? "harshly fell!" : "fell!",
     });
   }
   if (
