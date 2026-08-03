@@ -6294,13 +6294,13 @@ describe("speciesIdleAnim", () => {
       }
     });
 
-    it("accepts only normal data=100/runs=1 and keeps both fast selectors distinct", () => {
+    it("accepts normal and fast source initializers while keeping fast-short distinct", () => {
       expect(SWING_CONVEX_INITIALIZERS).toEqual({
         normal: {
           selector: "ANIM_SWING_CONVEX", data: 100, runs: 1, accepted: true,
         },
         fast: {
-          selector: "ANIM_SWING_CONVEX_FAST", data: 50, runs: 2, accepted: false,
+          selector: "ANIM_SWING_CONVEX_FAST", data: 50, runs: 2, accepted: true,
         },
         fastShort: {
           selector: "ANIM_SWING_CONVEX_FAST_SHORT",

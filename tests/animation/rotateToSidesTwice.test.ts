@@ -237,7 +237,7 @@ describe("ANIM_ROTATE_TO_SIDES_TWICE (selector 8)", () => {
     expect(selectors.LUNATONE).toBe("ANIM_SWING_CONVEX_FAST");
     expect(selectors.HARIYAMA).toBe("ANIM_ROTATE_UP_TO_SIDES");
     expect(JSON.stringify(selectorTables.backAnimationIds)).not.toContain("ROTATE_TO_SIDES");
-    expect(speciesFrontIdleRestOffset("LUNATONE")).toBeNull();
+    expect(speciesFrontIdleRestOffset("LUNATONE")).toEqual({ x2: 0, y2: 0 });
     expect(speciesFrontIdleRestOffset("HARIYAMA")).toEqual({ x2: 0, y2: 0 });
   });
 });

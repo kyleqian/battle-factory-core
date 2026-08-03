@@ -1,5 +1,69 @@
 # Animation coverage
 
+## Front `ANIM_SWING_CONVEX_FAST` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **1 mapping / 1
+Factory-reachable / 0 outside-Factory** — LUNATONE. Only source ID **14** is
+promoted. `ANIMATION_COVERAGE.json` remains byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`;
+move coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**,
+Open-only **0/1**, and Outside Factory **0/77**. No move status is promoted.
+
+**Did:** source pins `pokemon_animation.h:51-55`, `pokemon.c:1729`,
+`pokemon_animation.c:911-939,1003-1064,2552-2582,3864-3872,5540-5544`,
+`sprite.h:204-217`, and `gba/types.h:82-85`: task-zeroed signed-s16 state,
+fresh `AddNewAnim` defaults, selector-14 `data=50`/`runs=2`, immediate
+`SwingConvex` before callback installation, all 103 no-delay callback
+invocations, both source-order `TryFlipX` paths, C-truncated trig and the
+opposite-sign affine-OAM rotation from concave, inter-run identity/data2 reset
+and runs decrement/tail increment, final identity/`WaitAnimEnd` teardown, and
+stable/invalid endpoints. Fresh complete legal Scene-ON LUNATONE parties were
+probed twice only through `tools/run-mgba-probe.py`; the active-to-dummy pair
+is byte-identical: window **1617..1721 (105 frames)**, **46,864 B**, SHA-256
+`fd1a912e5034ef040bd4036258a82c6bf9dcbebafb9ffe6d6f31e537f553cbf8`.
+
+**Next:** the source-ranked unsupported generated Factory-front family is
+**`ANIM_TIP_MOVE_FORWARD`** (source ID **26**): **1 mapping / 1 Factory /
+0 outside** — RELICANTH.
+
+**Notes:** focused reducer/source/census/lifecycle/evidence plus concave
+regression and animation/executable-frontier ratchets are **26/26**;
+`npx tsc --noEmit`, `npm run animation:coverage`, full `npm test`, and
+production build are green. Commits: `3090de7b` (reducer, census, lifecycle)
+and `07ffcd83` (source evidence plus paired Scene-ON fixtures).
+
+## Front `ANIM_SWING_CONCAVE_FAST` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **1 mapping / 1
+Factory-reachable / 0 outside-Factory** — IGGLYBUFF. Only source ID **12** is
+promoted. `ANIMATION_COVERAGE.json` remains byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`;
+move coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**,
+Open-only **0/1**, and Outside Factory **0/77**. No move status is promoted.
+
+**Did:** source pins `pokemon_animation.h:51-54`, `pokemon.c:1580`,
+`pokemon_animation.c:911-939,1003-1068,2512-2550,3836-3853,5540-5544`,
+`sprite.h:205,217`, and `gba/types.h:83-85`: task-zeroed signed-s16 state,
+fresh `AddNewAnim` defaults, selector-12 `data=50`/`runs=2`, immediate
+`SwingConcave` before callback installation, both source-order `TryFlipX`
+paths, C-truncated signed-s16 trig/affine-OAM writes, the no-delay inter-run
+identity/reset, final identity/`WaitAnimEnd` teardown, stable terminal, and
+invalid endpoints. Fresh complete legal Scene-ON IGGLYBUFF parties were probed
+twice only through `tools/run-mgba-probe.py`; the active-to-dummy pair is
+byte-identical: window
+**1618..1722 (105 frames)**, **47,073 B**, SHA-256
+`3ce05c26f5d10bdb51d710e4be61919d3d8bcf9c03e7d072206d9f525117f764`.
+
+**Next:** the source-ranked unsupported generated Factory-front family is
+**`ANIM_SWING_CONVEX_FAST`** (source ID **14**): **1 mapping / 1 Factory /
+0 outside** — LUNATONE.
+
+**Notes:** focused reducer/source/census/lifecycle/evidence plus both ratchets
+are **23/23**; `npx tsc --noEmit`, `npm run animation:coverage`, full
+`npm test` (**628 files / 6,357 passed / 1 skipped**), and production build
+are green. Commits: `38f73a1b` (reducer, census, lifecycle) and `34dbaac8`
+(source evidence plus paired Scene-ON fixtures).
+
 ## Front `ANIM_ROTATE_TO_SIDES_TWICE` family accepted (2026-08-02)
 
 **State:** exact for the complete generated selector census: **1 mapping / 1
