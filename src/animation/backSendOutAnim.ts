@@ -140,6 +140,23 @@ export const BACK_GROW_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freez
   BACK_GROW_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by the generated `BACK_ANIM_CIRCLE_COUNTERCLOCKWISE` row. */
+export const BACK_CIRCLE_COUNTERCLOCKWISE_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_CIRCLE_COUNTERCLOCKWISE")
+    .map(([species]) => species),
+);
+
+/** Both circle-counterclockwise mappings are Factory-reachable. */
+export const BACK_CIRCLE_COUNTERCLOCKWISE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_CIRCLE_COUNTERCLOCKWISE_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** There are no outside-Factory mappings for this bounded back set. */
+export const BACK_CIRCLE_COUNTERCLOCKWISE_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_CIRCLE_COUNTERCLOCKWISE_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -347,6 +364,45 @@ export const BACK_GROW_VARIANTS = Object.freeze({
   }),
 } as const);
 
+/**
+ * `BACK_ANIM_CIRCLE_COUNTERCLOCKWISE` selects the three source initializers
+ * around the shared non-affine `CircleCounterclockwise` callback. The
+ * initializer allocates the callback's four-slot animation record, invokes
+ * the callback immediately, and then installs the shared callback.
+ */
+export const BACK_CIRCLE_COUNTERCLOCKWISE_VARIANTS = Object.freeze({
+  long: Object.freeze({
+    selector: "ANIM_CIRCLE_C_CLOCKWISE_LONG",
+    callback: "Anim_CircleCounterclockwise_Long",
+    sourceId: 100,
+    natureMod: 0,
+    rotation: 1024,
+    data: 6,
+    speed: 24,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_CIRCLE_C_CLOCKWISE",
+    callback: "Anim_CircleCounterclockwise",
+    sourceId: 20,
+    natureMod: 1,
+    rotation: 512,
+    data: 6,
+    speed: 24,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_CIRCLE_C_CLOCKWISE_SLOW",
+    callback: "Anim_CircleCounterclockwise_Slow",
+    sourceId: 79,
+    natureMod: 2,
+    rotation: 512,
+    data: 3,
+    speed: 12,
+    accepted: true,
+  }),
+} as const);
+
 type BackHSlideSelector = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["selector"];
 type BackHSlideCallback = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["callback"];
 type BackHSlideDuration = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["duration"];
@@ -369,6 +425,9 @@ type BackShrinkGrowPhaseLimit = typeof BACK_SHRINK_GROW_VARIANTS[keyof typeof BA
 type BackGrowSelector = typeof BACK_GROW_VARIANTS[keyof typeof BACK_GROW_VARIANTS]["selector"];
 type BackGrowCallback = typeof BACK_GROW_VARIANTS[keyof typeof BACK_GROW_VARIANTS]["callback"];
 type BackGrowSourceId = typeof BACK_GROW_VARIANTS[keyof typeof BACK_GROW_VARIANTS]["sourceId"];
+type BackCircleCounterclockwiseSelector = typeof BACK_CIRCLE_COUNTERCLOCKWISE_VARIANTS[keyof typeof BACK_CIRCLE_COUNTERCLOCKWISE_VARIANTS]["selector"];
+type BackCircleCounterclockwiseCallback = typeof BACK_CIRCLE_COUNTERCLOCKWISE_VARIANTS[keyof typeof BACK_CIRCLE_COUNTERCLOCKWISE_VARIANTS]["callback"];
+type BackCircleCounterclockwiseSourceId = typeof BACK_CIRCLE_COUNTERCLOCKWISE_VARIANTS[keyof typeof BACK_CIRCLE_COUNTERCLOCKWISE_VARIANTS]["sourceId"];
 
 /**
  * Source facts at the `LaunchAnimationTaskForBackSprite` seam. The shared
@@ -530,6 +589,20 @@ function growVariant(selector: string): {
   readonly runs?: 1 | 2;
 } | null {
   for (const variant of Object.values(BACK_GROW_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function circleCounterclockwiseVariant(selector: string): {
+  readonly selector: BackCircleCounterclockwiseSelector;
+  readonly callback: BackCircleCounterclockwiseCallback;
+  readonly sourceId: BackCircleCounterclockwiseSourceId;
+  readonly rotation: 512 | 1024;
+  readonly data: 3 | 6;
+  readonly speed: 12 | 24;
+} | null {
+  for (const variant of Object.values(BACK_CIRCLE_COUNTERCLOCKWISE_VARIANTS)) {
     if (variant.selector === selector) return variant;
   }
   return null;
@@ -1348,6 +1421,126 @@ export function backGrowInStagesFrameAtTick(
 
 /** Source WaitAnimEnd lifecycle after static back OAM reports animEnded. */
 export function backGrowWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+export interface BackCircleCounterclockwiseFrame {
+  readonly x2: number;
+  readonly y2: number;
+  /** `AddNewAnim`'s four-slot animation record id. */
+  readonly data0: number;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  /** `sprite->data[2]` immediately before the shared source callback. */
+  readonly data2Before: number;
+  /** The source increments data[2] after either branch. */
+  readonly data2: number;
+  readonly index: number | null;
+  readonly sin: number | null;
+  readonly cos: number | null;
+  readonly selector: BackCircleCounterclockwiseSelector;
+  readonly sourceId: BackCircleCounterclockwiseSourceId;
+  readonly rotation: 512 | 1024;
+  readonly data: 3 | 6;
+  readonly speed: 12 | 24;
+  /** Tick zero invokes the selected initializer before it installs the helper. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
+  readonly normalBackDontFlip: true;
+  /** Both source-order flips are no-ops after the shared back task sets this flag. */
+  readonly tryFlipXCalls: 2;
+  readonly affineWriteCount: 0;
+  readonly affineMode: "normal";
+  readonly resetSpriteAfterAnim: false;
+  readonly callback: "CircleCounterclockwise" | "WaitAnimEnd";
+}
+
+/**
+ * Source-order reducer for every `BACK_ANIM_CIRCLE_COUNTERCLOCKWISE` route.
+ * The species + party-nature seam selects one initializer; that initializer
+ * stores an `AddNewAnim` slot, writes its rotation/data/speed record, invokes
+ * CircleCounterclockwise once, then replaces itself with that shared callback.
+ * `animationSlot` is the source global's circular `sAnimIdx` result, not a
+ * species selector (the task normally starts the isolated receipt at slot 0).
+ */
+export function backCircleCounterclockwiseFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+  animationSlot = 0,
+): BackCircleCounterclockwiseFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0
+    || !Number.isInteger(preservedData1)
+    || !Number.isInteger(animationSlot) || animationSlot < 0 || animationSlot >= 4) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_CIRCLE_COUNTERCLOCKWISE") return null;
+  const variant = circleCounterclockwiseVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected circle-counterclockwise selector ${selection.selector}`);
+
+  let data2 = 0;
+  let callback: BackCircleCounterclockwiseFrame["callback"] = "CircleCounterclockwise";
+  let lastFrame: BackCircleCounterclockwiseFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    // WaitAnimEnd merely polls the static OAM animation after the source
+    // helper hands off. Preserve the terminal source writes for later ticks.
+    if (callback === "WaitAnimEnd") continue;
+
+    const data2Before = data2;
+    let x2 = 0;
+    let y2 = 0;
+    let index: number | null = null;
+    let sin: number | null = null;
+    let cos: number | null = null;
+
+    // Source order: TryFlipX, strict guard/body, data[2] += speed, TryFlipX.
+    if (data2 > variant.rotation) {
+      callback = "WaitAnimEnd";
+    } else {
+      index = (data2 + 192) % 256;
+      cos = gbaCos(index, variant.data * 2);
+      sin = gbaSin(index, variant.data);
+      // A signed GBA store canonicalizes a negated zero to an ordinary zero.
+      x2 = cos === 0 ? 0 : -cos;
+      y2 = toS16(sin + variant.data);
+    }
+    data2 = toS16(data2 + variant.speed);
+
+    lastFrame = Object.freeze({
+      x2,
+      y2,
+      data0: animationSlot,
+      data1: toS16(preservedData1),
+      data2Before,
+      data2,
+      index,
+      sin,
+      cos,
+      selector: variant.selector,
+      sourceId: variant.sourceId,
+      rotation: variant.rotation,
+      data: variant.data,
+      speed: variant.speed,
+      initializerCallBeforeCallbackInstall: tick === 0,
+      normalBackDontFlip: true as const,
+      tryFlipXCalls: 2 as const,
+      affineWriteCount: 0 as const,
+      affineMode: "normal" as const,
+      resetSpriteAfterAnim: false as const,
+      callback,
+    });
+  }
+
+  if (lastFrame === null) throw new Error("unreachable back circle-counterclockwise reducer state");
+  return lastFrame;
+}
+
+/** Source WaitAnimEnd lifecycle after static back OAM reports animEnded. */
+export function backCircleCounterclockwiseWaitAnimEndCallback(
   animEnded: boolean,
 ): "WaitAnimEnd" | "SpriteCallbackDummy" {
   return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
