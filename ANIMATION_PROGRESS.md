@@ -1,5 +1,37 @@
 # Animation coverage
 
+## Front `ANIM_H_PIVOT` family accepted (2026-08-02)
+
+**State:** exact reducer/evidence coverage for the complete generated selector
+census: **2 mappings / 1 Factory-reachable / 1 outside-Factory** — WINGULL
+and DEOXYS. Source ID **27** is promoted, bringing Factory-front coverage to
+**60/62 families** and **374/376 species mappings**.
+`ANIMATION_COVERAGE.json` remains byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`;
+move coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**.
+
+**Did:** source pins `pokemon_animation.h:67`, `pokemon.c:1690,1791`, and
+`pokemon_animation.c:659,911-939,1003-1077,1713-1733,5540-5544`: direct
+task-installed callback (no `AddNewAnim` or `TryFlipX`), signed-s16
+C-truncated arithmetic, affine/OAM writes, identity reset, `WaitAnimEnd`,
+dummy teardown, stable terminal, invalid endpoints, and adjacent controls.
+Fresh complete legal Scene-ON WINGULL parties produced a byte-identical
+active-to-dummy pair: window **1616..1719 (104 frames)**, **47,483 B**,
+SHA-256 `b709b5f8831cf086234a1e578ddb6b32bc0732b21efc248d41c0dbd7167d8e63`.
+DEOXYS is source-census-only: no source or oracle evidence requires an
+outside-Factory fixture variant.
+
+**Next:** source-ranked unsupported Factory-front family **`ANIM_GLOW_BLUE`**
+(MILOTIC).
+
+**Notes:** focused lifecycle/source/census/evidence plus both ratchets are
+**21/21**; `npx tsc --noEmit`, unchanged coverage, full `npm test`
+(**637 files / 6,392 passed / 1 skipped**), and production build are green.
+Commits: `5177440d` (reducer), `849a68f3` (probe), `b2c5f047` (evidence),
+`5840bf11` (source bounds), and `36e8e894` (adjacent regression). No move
+status was promoted; this remains evidence/reducer coverage rather than live
+battle-seam wiring.
+
 ## Front `ANIM_TIP_MOVE_FORWARD` family accepted (2026-08-02)
 
 **State:** exact reducer/evidence coverage for the complete generated selector
