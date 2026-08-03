@@ -260,6 +260,7 @@ function hasAdjacentLiveBranchShape(line: string, literal: { start: number; end:
 
 /** Engine-local constant spellings that are infrastructure, not members. */
 const ENGINE_INFRA_SPELLINGS = new Set([
+  "ABILITY_DISPLAY_NAME_BY_ID",
   "ABILITY_ID_BY_SYMBOL",
   "ABILITY_ID_IN_WEATHER_RANGE",
   "ABILITY_NAME_BY_ID",

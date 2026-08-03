@@ -94,6 +94,7 @@ describe("Factory full-turn sleep expiry", () => {
         kind: "message",
         messageId: "STRINGID_PKMNWOKEUP",
         substitutions: [],
+        scriptingBattler: 0,
         actionSnapshot: {
           attacker: 0,
           currentMove: TACKLE,

@@ -23,6 +23,7 @@ import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import {
   resolveBattleNameWithPrefix,
   resolveBattleStringLines,
+  resolveMoveName,
   resolveMoveNameExclaim,
 } from "./battleStringResolver.ts";
 import frontierHeldItemsData from "../data/gen/battle-frontier-held-items.json" with { type: "json" };
@@ -387,6 +388,34 @@ const STAT_DISPLAY_NAME: Readonly<Record<string, string>> = Object.freeze({
   "evasion": "evasiveness",
 });
 
+/**
+ * The move's own target battler, for the several presentation ids
+ * (ISSUES #70 batch 1) whose source template's only nickname placeholder is
+ * {B_DEF_NAME_WITH_PREFIX} -- Cmd_resultmessage/Cmd_healthbarupdate print
+ * these while rulesContext.selectorRoles.target (== the opposite singles
+ * battler of the attacker) is still the current action's target, the same
+ * relationship STRINGID_ITDOESNTAFFECT/STRINGID_PKMNSUBJECTEDTOTORMENT above
+ * already rely on.
+ */
+function requireMoveDefender(lastMoveAttacker: 0 | 1 | null, context: string): 0 | 1 {
+  if (lastMoveAttacker === null) {
+    throw new Error(`battle resolution ${context} has no preceding used-move event`);
+  }
+  return lastMoveAttacker === 0 ? 1 : 0;
+}
+
+function nameWithPrefixResolver(
+  field: BattleResolutionDisplayedField,
+  battler: 0 | 1,
+): () => string {
+  const displayed = fieldBattler(field, battler);
+  return () => resolveBattleNameWithPrefix({
+    side: battler === 0 ? "player" : "opponent",
+    isTrainerBattle: true,
+    nickname: displayed.name,
+  });
+}
+
 function singlesBattler(battler: number, context: string): 0 | 1 {
   if (battler === 0 || battler === 1) return battler;
   throw new Error(`${context} cannot present non-singles battler ${battler}`);
@@ -549,6 +578,160 @@ function messageLines(
         isTrainerBattle: true,
         nickname: displayed.name,
       }),
+    });
+  }
+  // ISSUES #70 batch 1 (docs/issue70-stringid-reachability.md, ranked rows
+  // 1-8): the STRINGIDs below hit battleStringResolver's completeness guard
+  // whenever a currently-wired opcode reached them, because the generic
+  // fallback (below) never supplied their placeholders.
+  if (messageId === "STRINGID_PKMNENERGYDRAINED") {
+    // gAbsorbDrainStringIds[0] (battle_message.c:441-444), Cmd_printfromtable
+    // -- Absorb/Mega Drain/Giga Drain landing on a non-Liquid-Ooze target.
+    const defender = requireMoveDefender(lastMoveAttacker, "energy-drained message");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (messageId === "STRINGID_PKMNPROTECTEDITSELF") {
+    // MISS_STRING_ID_BY_TYPE[B_MSG_PROTECTED], Cmd_resultmessage -- any
+    // attack a Protect/Detect use blocks.
+    const defender = requireMoveDefender(lastMoveAttacker, "protected-itself message");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (messageId === "STRINGID_PKMNAVOIDEDATTACK") {
+    // MISS_STRING_ID_BY_TYPE[B_MSG_AVOIDED_ATK], Cmd_resultmessage --
+    // Wonder-Guard-style double-avoid tail (battleScriptHitChainOpcode.ts:1224).
+    const defender = requireMoveDefender(lastMoveAttacker, "avoided-attack message");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (
+    messageId === "STRINGID_AVOIDEDDAMAGE"
+    || messageId === "STRINGID_PKMNMAKESGROUNDMISS"
+  ) {
+    // MISS_STRING_ID_BY_TYPE[B_MSG_AVOIDED_DMG]/[B_MSG_GROUND_MISS],
+    // Cmd_resultmessage -- Wonder Guard / Levitate, the same defending
+    // battler checkWonderGuardAndLevitate/typecalc/typecalc2 tested
+    // (battleScriptHitChainOpcode.ts:958-959,986-989,1617-1622,1672-1677,
+    // 1778-1783,1818-1823). {B_DEF_ABILITY} is prepareMessage's own
+    // substitution (factoryBattleScriptFullTurnDecision.ts), sourced from
+    // that same target's rulesContext.battlers[target].ability.
+    if (event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no ability substitution`);
+    }
+    const defender = requireMoveDefender(lastMoveAttacker, `${messageId.toLowerCase()} message`);
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_DEF_ABILITY: () => ability,
+    });
+  }
+  if (
+    messageId === "STRINGID_PKMNPOISONEDBY"
+    || messageId === "STRINGID_PKMNBURNEDBY"
+    || messageId === "STRINGID_PKMNWASPARALYZEDBY"
+  ) {
+    // gGotPoisonedStringIds[1]/gGotBurnedStringIds[1]/gGotParalyzedStringIds[1]
+    // (battle_message.c:387-390) -- Poison Point/Flame Body/Static/Effect
+    // Spore's on-contact status block (battleScriptMoveEndOpcode.ts:447-608).
+    // B_SCR_ACTIVE_* is the ability holder (applySetMoveEffect's
+    // scriptingBattler, battleScriptHitChainOpcode.ts:2841-2848); B_EFF_* is
+    // the attacker who got statused, already tracked generically via
+    // pendingStatusMessageBattler below.
+    if (event.payload.scriptingBattler === undefined || event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no scripting-battler/ability substitution`);
+    }
+    if (pendingStatusMessageBattler === null) {
+      throw new Error(`battle resolution ${messageId} message has no preceding status event`);
+    }
+    const scriptingBattler = singlesBattler(event.payload.scriptingBattler, `${messageId} scripting battler`);
+    const effectDisplayed = fieldBattler(field, pendingStatusMessageBattler);
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, scriptingBattler),
+      B_SCR_ACTIVE_ABILITY: () => ability,
+      B_EFF_NAME_WITH_PREFIX: () => resolveBattleNameWithPrefix({
+        side: pendingStatusMessageBattler === 0 ? "player" : "opponent",
+        isTrainerBattle: true,
+        nickname: effectDisplayed.name,
+      }),
+    });
+  }
+  if (messageId === "STRINGID_PKMNSITEMCUREDPROBLEM") {
+    // gBerryEffectStringIds[0] (battle_message.c:437-441),
+    // BattleScript_BerryCureChosenStatusRet (Lum Berry/Mental Herb -- the
+    // "any status" cure items; per-status berries print their own distinct
+    // fixed-text STRINGIDs and never reach this template). {B_BUFF1} is
+    // prepareMessage's substitution of rulesContext.battleTextBuff1Status,
+    // captured pre-clear at both live call sites (battleScriptMoveEndOpcode.ts:
+    // 793,811; battleEndTurnOrchestration.ts's HOLD_EFFECT_CURE_STATUS/
+    // CURE_ATTRACT branches).
+    if (pendingHeldItemEffectBattler === null) {
+      throw new Error("battle resolution item-cured-problem message has no preceding held-item effect");
+    }
+    if (event.payload.substitutions.length === 0) {
+      throw new Error("battle resolution item-cured-problem message has no status substitution");
+    }
+    const statusName = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, pendingHeldItemEffectBattler),
+      B_LAST_ITEM: () => factoryItemDisplayName(heldItems[pendingHeldItemEffectBattler]),
+      B_BUFF1: () => statusName,
+    });
+  }
+  if (messageId === "STRINGID_PKMNENDUREDHIT") {
+    // classifyResultMessage's MOVE_RESULT_FOE_ENDURED case
+    // (battleScriptHitChainOpcode.ts:2611-2612) -- an Endure carrier takes a
+    // hit that would otherwise KO it.
+    const defender = requireMoveDefender(lastMoveAttacker, "endured-hit message");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (messageId === "STRINGID_SUBSTITUTEDAMAGED") {
+    // Cmd_healthbarupdate direct literal (battleScriptHitChainOpcode.ts:2354)
+    // -- any damaging hit landing on a battler with an active Substitute.
+    const defender = requireMoveDefender(lastMoveAttacker, "substitute-damaged message");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (
+    messageId === "STRINGID_PKMNRAISEDDEF"
+    || messageId === "STRINGID_PKMNRAISEDSPDEF"
+    || messageId === "STRINGID_PKMNCOVEREDBYVEIL"
+  ) {
+    // createSetSideStatusHandler's REFLECT_CONFIG/LIGHTSCREEN_CONFIG/
+    // SAFEGUARD_CONFIG success choosers (battleScriptSetSideStatusOpcode.ts).
+    // {B_ATK_PREFIX2} is the literal "Ally"/"Foe" side label (battle_message.c:
+    // 2637-2641, sText_AllyPkmnPrefix2/sText_FoePkmnPrefix3), not a nicknamed
+    // battler -- the attacking side that cast Reflect/Light Screen/Safeguard.
+    // {B_CURRENT_MOVE} is gMoveNames[gBattleMsgDataPtr->currentMove]
+    // (battle_message.c:2453-2456), the frozen action snapshot's own move.
+    if (lastMoveAttacker === null || actionSnapshot === null) {
+      throw new Error(`battle resolution ${messageId} message has no preceding used-move action snapshot`);
+    }
+    const prefix2 = lastMoveAttacker === 0 ? "Ally" : "Foe";
+    return resolveBattleStringLines(messageId, {
+      B_ATK_PREFIX2: () => prefix2,
+      B_CURRENT_MOVE: () => resolveMoveName(actionSnapshot.currentMove),
+    });
+  }
+  if (messageId === "STRINGID_HITXTIMES") {
+    // BattleScript_MultiHitPrintStrings's printstring, real script data
+    // right after `copyarray gBattleTextBuff1, sMULTIHIT_STRING, 6`
+    // (battleScriptIngrainLeechSeedWrapOpcode.ts:308-323). {B_BUFF1} is
+    // prepareMessage's substitution of rulesContext.multiHitStringCounter,
+    // the multi-hit family's own hits-landed counter.
+    if (event.payload.substitutions.length === 0) {
+      throw new Error("battle resolution hit-x-times message has no hit-count substitution");
+    }
+    const hitCount = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_BUFF1: () => hitCount,
     });
   }
   if (

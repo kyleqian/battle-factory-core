@@ -428,7 +428,7 @@ function callCurrentMoveendItemScript(
   );
 }
 
-function moveEndLumStatusName(
+export function moveEndLumStatusName(
   battlerState: BattleScriptRulesBattlerState,
 ): "poison" | "sleep" | "paralysis" | "burn" | "ice" | "confusion" {
   // battle_util.c:3710-3729 uses independent `if`s, so the last matching

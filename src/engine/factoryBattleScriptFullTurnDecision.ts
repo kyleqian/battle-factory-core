@@ -168,6 +168,28 @@ const FACTORY_ITEM_NAME_BY_ID = new Map(
     ({ itemId, displayName }) => [itemId, displayName],
   ),
 );
+/**
+ * `gAbilityNames` display text (`reference/pokeemerald/src/data/text/
+ * abilities.h:89-146`), scoped to the abilities ISSUES #70 batch 1's
+ * B_DEF_ABILITY/B_SCR_ACTIVE_ABILITY presentation ids can actually reveal
+ * (`docs/issue70-stringid-reachability.md` rows 2-3) -- not a full 78-entry
+ * table.
+ */
+const ABILITY_DISPLAY_NAME_BY_ID: Readonly<Record<number, string>> = Object.freeze({
+  9: "STATIC",
+  25: "WONDER GUARD",
+  26: "LEVITATE",
+  27: "EFFECT SPORE",
+  38: "POISON POINT",
+  49: "FLAME BODY",
+});
+function abilityDisplayName(ability: number): string {
+  const name = ABILITY_DISPLAY_NAME_BY_ID[ability];
+  if (name === undefined) {
+    throw new Error(`prepareMessage: no display name mapped for ability ${ability}`);
+  }
+  return name;
+}
 const PROGRAM = loadBattleScriptProgram();
 const NEUTRAL_STAT_STAGES = Object.freeze([6, 6, 6, 6, 6, 6, 6, 6] as const);
 const ZERO_STAT_STAGES = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0] as const);
@@ -745,6 +767,7 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
       const buff1 = itemName(rules.battleTextBuff1Item);
       const buff2 = itemName(rules.battleTextBuff2Item);
       const substitutions = operand.expression === "STRINGID_PKMNSXCUREDITSYPROBLEM"
+        || operand.expression === "STRINGID_PKMNSITEMCUREDPROBLEM"
         ? (rules.battleTextBuff1Status === null ? [] : [rules.battleTextBuff1Status])
         : operand.expression === "STRINGID_PKMNOBTAINEDX"
         ? (buff1 === null ? [] : [buff1])
@@ -752,7 +775,36 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
           ? (buff2 === null ? [] : [buff2])
           : operand.expression === "STRINGID_PKMNOBTAINEDXYOBTAINEDZ"
             ? [buff1, buff2].filter((value): value is string => value !== null)
-            : [];
+            // B_TXT_DEF_ABILITY: gAbilityNames[sBattlerAbilities[gBattlerTarget]]
+            // (battle_message.c:2515-2517) -- the move's own target, whose
+            // Wonder Guard/Levitate caused the miss (docs/issue70-stringid-
+            // reachability.md rows 2-3; battleScriptHitChainOpcode.ts:958-959,
+            // 1617-1622,1778-1783 (GROUND_MISS) and :986-989,1672-1677,
+            // 1818-1823 (AVOIDED_DMG), all three call sites Levitate/Wonder
+            // Guard-only).
+            : operand.expression === "STRINGID_AVOIDEDDAMAGE"
+              || operand.expression === "STRINGID_PKMNMAKESGROUNDMISS"
+              ? (rules.selectorRoles.target === null
+                ? []
+                : [abilityDisplayName(rules.battlers[rules.selectorRoles.target].ability)])
+              // B_TXT_SCR_ACTIVE_ABILITY: gAbilityNames[sBattlerAbilities[
+              // gBattleScripting.battler]] (battle_message.c:2519-2520) --
+              // applySetMoveEffect sets scriptingBattler to the ability
+              // holder (the move's target) whenever MOVE_EFFECT_AFFECTS_USER
+              // is set (battleScriptHitChainOpcode.ts:2841-2848), which
+              // executeOnDamageAbilities always sets for its Static/Poison
+              // Point/Flame Body/Effect Spore contact-ability block
+              // (battleScriptMoveEndOpcode.ts:455,587-599).
+              : operand.expression === "STRINGID_PKMNPOISONEDBY"
+                || operand.expression === "STRINGID_PKMNBURNEDBY"
+                || operand.expression === "STRINGID_PKMNWASPARALYZEDBY"
+                ? [abilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
+                // STRINGID_HITXTIMES's {B_BUFF1}: the multi-hit family's own
+                // hits-landed counter (battleScriptRulesContext.ts:700-710,
+                // battleScriptIngrainLeechSeedWrapOpcode.ts:308-323).
+                : operand.expression === "STRINGID_HITXTIMES"
+                  ? [String(rules.multiHitStringCounter)]
+                  : [];
       return Object.freeze({
         kind: "message" as const,
         messageId: operand.expression,
@@ -770,6 +822,10 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                 currentMovePosition: rules.currentMovePosition,
               }),
             }),
+        // Source gBattleScripting.battler at print time -- battle_message.c's
+        // own B_TXT_SCR_ACTIVE_NAME_WITH_PREFIX selector reads this same
+        // global (:2481-2482).
+        scriptingBattler: rules.scriptingBattler,
       });
     },
     prepareSelectionMessage: () => null,

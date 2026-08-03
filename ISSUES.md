@@ -17,41 +17,63 @@ backlog.
 
 # Open
 
-## #70 — Presentation-string completeness: 47 STRINGID refs would hit the resolver guard if reached; 4 ids missing from the extracted table
+## #70 — Presentation-string completeness batch 2: 31 unranked STRINGID refs would hit the resolver guard if reached; 1 real extractor gap
 
-**Found by #68's insurance sweep (2026-08-02, worker log
-`/tmp/emerald-factory-subagent-20260802-233149.jsonl`; summary in PROGRESS
-entry 879):** of 122 distinct `STRINGID_*` referenced in `src/engine/*.ts`,
-47 name a placeholder `battleResolutionPresentation.ts`'s `messageLines`
-fallback cannot supply (mostly `B_DEF_NAME_WITH_PREFIX`/`B_SCR_ACTIVE_
-ABILITY`/`B_BUFF1/2`/`B_CURRENT_MOVE`/`B_ATK_PREFIX2`) and would throw the
-#65/#68-class completeness-guard crash IF actually reachable — reachability
-NOT yet verified (many are doc-comment citations, not wired-opcode
-emissions). The 47:
-AVOIDEDDAMAGE, HITXTIMES, PKMNAVOIDEDATTACK, PKMNBURNEDBY,
+**Batch 1 (ranked rows 1-8 of `docs/issue70-stringid-reachability.md`'s "Ranked
+top-N by crash risk" table, 15 ids) FIXED** (2026-08-03, see PROGRESS entry
+882): `messageLines` (`battleResolutionPresentation.ts`) gained dedicated
+branches, and `prepareMessage` (`factoryBattleScriptFullTurnDecision.ts`)
+gained the `scriptingBattler` event field + ability/status/hit-count
+substitutions they need, for `PKMNENERGYDRAINED`, `PKMNPROTECTEDITSELF`,
+`PKMNAVOIDEDATTACK`, `AVOIDEDDAMAGE`, `PKMNMAKESGROUNDMISS`,
+`PKMNPOISONEDBY`, `PKMNBURNEDBY`, `PKMNWASPARALYZEDBY`,
+`PKMNSITEMCUREDPROBLEM`, `PKMNENDUREDHIT`, `SUBSTITUTEDAMAGED`,
+`PKMNRAISEDDEF`, `PKMNRAISEDSPDEF`, `PKMNCOVEREDBYVEIL`, `HITXTIMES`.
+`battleEndTurnOrchestration.ts`'s end-of-turn `HOLD_EFFECT_CURE_STATUS`/
+`CURE_ATTRACT` branches also gained the pre-clear `battleTextBuff1Status`
+capture `PKMNSITEMCUREDPROBLEM`'s `{B_BUFF1}` needs (a real gap: only the
+mid-battle post-hit path captured it before). Pinned by
+`tests/presentationStringBatch1.test.ts` (8 repro scenarios via the
+constrained-AI staging idiom, red-verified pre-fix via `git stash`).
+`STRINGID_PKMNAVOIDEDATTACK`'s own trigger (the `isDoubleAvoided` tail,
+`battleScriptHitChainOpcode.ts:1212-1213`) is gated on `BATTLE_TYPE_DOUBLE`
+and structurally unreachable in this engine's singles-only Factory L50
+scope — mapped (same shape as its `resultmessage` siblings) but not
+independently repro'd, matching the reachability doc's own row-31 note.
+
+**Still open — 31 unranked ids, same fix shape (messageLines branch +
+prepareMessage substitution where needed + repro test), per-id emitting
+context already root-caused in `docs/issue70-stringid-reachability.md`'s
+per-id table (do not re-derive):**
 PKMNCANTSLEEPINUPROAR2, PKMNCHOSEXASDESTINY, PKMNCLAMPED,
-PKMNCOVEREDBYVEIL, PKMNENDUREDHIT, PKMNENERGYDRAINED, PKMNEVADEDATTACK,
-PKMNFROZENBY, PKMNHPFULL, PKMNMADESLEEP, PKMNMAKESGROUNDMISS,
-PKMNOBTAINEDX, PKMNOBTAINEDX2, PKMNOBTAINEDXYOBTAINEDZ, PKMNPOISONEDBY,
-PKMNPREVENTSPARALYSISWITH, PKMNPREVENTSPOISONINGWITH,
-PKMNPROTECTEDITSELF, PKMNRAISEDDEF, PKMNRAISEDDEFALITTLE,
-PKMNRAISEDFIREPOWERWITH, PKMNRAISEDSPDEF, PKMNRAISEDSPDEFALITTLE,
-PKMNSEEDED, PKMNSHROUDEDINMIST, PKMNSITEMCUREDPROBLEM,
+PKMNEVADEDATTACK, PKMNFROZENBY, PKMNHPFULL, PKMNMADESLEEP, PKMNOBTAINEDX,
+PKMNOBTAINEDX2, PKMNOBTAINEDXYOBTAINEDZ, PKMNPREVENTSPARALYSISWITH,
+PKMNPREVENTSPOISONINGWITH, PKMNRAISEDDEFALITTLE, PKMNRAISEDFIREPOWERWITH,
+PKMNRAISEDSPDEFALITTLE, PKMNSEEDED, PKMNSHROUDEDINMIST,
 PKMNSQUEEZEDBYBIND, PKMNSTAYEDAWAKEUSING, PKMNSTOCKPILED,
-PKMNSXCUREDITSYPROBLEM, PKMNSXHADNOEFFECTONY, PKMNSXMADEYINEFFECTIVE,
-PKMNSXPREVENTSBURNS, PKMNSXPREVENTSYSZ, PKMNTRANSFORMEDINTO,
-PKMNTRAPPEDBYSANDTOMB, PKMNTRAPPEDINVORTEX, PKMNUNAFFECTED,
-PKMNWASPARALYZEDBY, PKMNWRAPPEDBY, SUBSTITUTEDAMAGED,
-UPROARKEPTPKMNAWAKE, USINGITEMSTATOFPKMNROSE (all `STRINGID_` prefixed).
-Plus 4 referenced but ABSENT from the extracted string table:
-STRINGID_FAINTED, STRINGID_INTROSENDOUT, STRINGID_ITEMHEALHP_BERRY,
-STRINGID_USEDMOVE_OPERAND (table-extraction gap, separate fix shape).
+PKMNSXHADNOEFFECTONY, PKMNSXMADEYINEFFECTIVE, PKMNSXPREVENTSBURNS,
+PKMNSXPREVENTSYSZ, PKMNTRANSFORMEDINTO, PKMNTRAPPEDBYSANDTOMB,
+PKMNTRAPPEDINVORTEX, PKMNUNAFFECTED, PKMNWRAPPEDBY, UPROARKEPTPKMNAWAKE,
+USINGITEMSTATOFPKMNROSE (all `STRINGID_` prefixed; 8 of these have
+**zero real-world incidence** at Factory L50 singles per the reachability
+doc's own sum-check — still (a) EMITTABLE, just not crash risks today).
 
-**Next:** a reachability pass FIRST (which of the 47 can a currently-wired
-opcode actually emit in Factory L50 singles — cross-reference the emitting
-opcode set, not doc comments), then fix the reachable ones in ranked
-batches with #65/#68's established resolver shape + a repro test each. The
-4 missing-table ids need the extractor gap closed before any mapping.
+**1 real extractor gap (unchanged):** `STRINGID_INTROSENDOUT` is missing
+from the extracted string table (`tools/extract/extract-battle-messages.ts`
+scopes to `STRINGID_x, x >= BATTLESTRINGS_TABLE_START=12`; ids 0/1/2/5 need
+a small hand-mapped table parsed from `BufferStringBattle`'s switch arms,
+the same way `STRINGID_SWITCHINMON` was hand-ported — see reachability
+doc §3). The other 3 originally-flagged "missing" ids (`STRINGID_FAINTED`,
+`STRINGID_ITEMHEALHP_BERRY`, `STRINGID_USEDMOVE_OPERAND`) were sweep-regex
+false positives, already root-caused, no fix needed.
+
+**Not an open item:** `PKMNSXCUREDITSYPROBLEM` is dead wiring — its only
+occurrence is `prepareMessage`'s own defensive substitution branch
+(`factoryBattleScriptFullTurnDecision.ts`); no code path in this engine
+emits it (the source's `AbilityBattleEffects` Insomnia/Water Veil/Magma
+Armor/Oblivious auto-cure-on-activation block, `battle_util.c:2900-2946`,
+is not ported). Do not port that block to "use" this branch — it's not
+part of the 31 above.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 

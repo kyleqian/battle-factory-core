@@ -442,6 +442,7 @@ describe("source-complete B_SCR_OP_TRYSWAPITEMS registration", () => {
       kind: "message",
       messageId: "STRINGID_PKMNOBTAINEDXYOBTAINEDZ",
       substitutions: ["LEFTOVERS", "CHOICE BAND"],
+      scriptingBattler: 0,
       actionSnapshot: {
         attacker: 0,
         currentMove: 271, // Trick

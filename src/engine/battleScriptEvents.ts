@@ -65,6 +65,11 @@ export type BattleScriptSemanticEventPayload =
     substitutions: readonly string[];
     /** Optional for synthetic/staged receipts that predate the full-turn seam. */
     actionSnapshot?: BattleScriptActionMessageSnapshot;
+    /**
+     * Source gBattleScripting.battler at print time (rulesContext.scriptingBattler).
+     * Optional for synthetic/staged receipts that predate this field.
+     */
+    scriptingBattler?: BattleScriptBattlerId;
   }>
   | Readonly<{
     kind: "selection-message";

@@ -57,6 +57,7 @@ import {
   type BattleScriptSideTimerState,
 } from "./battleScriptRulesContext.ts";
 import { applyConfusionStatus2Mutation, withBattler } from "./battleScriptHitChainOpcode.ts";
+import { moveEndLumStatusName } from "./battleScriptMoveEndOpcode.ts";
 import {
   runBattleScriptFaintedActionsOrchestration,
   type BattleScriptFaintedActionsResult,
@@ -1293,6 +1294,12 @@ function runItemsTick(
       scriptingBattler: battler,
       // battle_util.c:3572-3577: >1 condition cleared at once (a status1 bit AND confusion together) prints the "normalized" variant.
       multistringChooser: hasStatus1 && hasConfusion ? B_MSG_NORMALIZED_STATUS : B_MSG_CURED_PROBLEM,
+      // STRINGID_PKMNSITEMCUREDPROBLEM's {B_BUFF1} (battle_message.c:88-90) --
+      // captured from the pre-clear battler state, mirroring
+      // battleScriptMoveEndOpcode.ts:811's mid-battle HOLD_EFFECT_CURE_STATUS
+      // sibling branch (moveEndLumStatusName reads status1/status2 before
+      // this reducer zeroes them above).
+      battleTextBuff1Status: moveEndLumStatusName(b),
     });
     return runTickScript(program, handlers, state, synced, battler, BERRY_CURE_CHOSEN_STATUS_END2_LABEL);
   }
@@ -1301,7 +1308,14 @@ function runItemsTick(
     const withStatus2 = withBattler(state.rulesContext, battler, {
       status2: (b.status2 & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION) >>> 0,
     });
-    const rc = Object.freeze({ ...withStatus2, scriptingBattler: battler, multistringChooser: B_MSG_CURED_PROBLEM });
+    const rc = Object.freeze({
+      ...withStatus2,
+      scriptingBattler: battler,
+      multistringChooser: B_MSG_CURED_PROBLEM,
+      // battleScriptMoveEndOpcode.ts:793's mid-battle HOLD_EFFECT_CURE_ATTRACT
+      // sibling sets the same literal (battle_util.c:3639-3640's "love").
+      battleTextBuff1Status: "love" as const,
+    });
     return runTickScript(program, handlers, state, rc, battler, BERRY_CURE_CHOSEN_STATUS_END2_LABEL);
   }
 

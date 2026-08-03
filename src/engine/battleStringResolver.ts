@@ -74,6 +74,13 @@ export function resolveMoveNameExclaim(moveId: number): string {
   return `${entry.name}!`;
 }
 
+/** `{B_CURRENT_MOVE}`: `gMoveNames[gBattleMsgDataPtr->currentMove]` (battle_message.c:2453-2456), no punctuation appended. */
+export function resolveMoveName(moveId: number): string {
+  const entry = MOVES[moveId];
+  if (!entry) throw new Error(`battleStringResolver: no moves.json entry for move id ${moveId}`);
+  return entry.name;
+}
+
 /**
  * One resolver function per source text substitution this call site's
  * template(s) actually use. Most are `B_TXT_*` placeholders; a few
