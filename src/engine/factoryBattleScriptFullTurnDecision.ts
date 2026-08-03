@@ -183,6 +183,11 @@ const ABILITY_DISPLAY_NAME_BY_ID: Readonly<Record<number, string>> = Object.free
   27: "EFFECT SPORE",
   38: "POISON POINT",
   49: "FLAME BODY",
+  // BattleScript_StickyHoldActivates (reference/pokeemerald/data/battle_scripts_1.s:4173-4177)
+  // reuses STRINGID_PKMNSXMADEYINEFFECTIVE for Sticky Hold blocking Trick
+  // (battleScriptTryswapitemsOpcode.ts:152-177) -- the same id ISSUES #70
+  // batch 2 ported for Flash Fire's re-activation shares this ability slot.
+  60: "STICKY HOLD",
 });
 function abilityDisplayName(ability: number): string {
   const name = ABILITY_DISPLAY_NAME_BY_ID[ability];
