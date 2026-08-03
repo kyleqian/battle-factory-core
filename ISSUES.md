@@ -245,7 +245,26 @@ slice 4 (`90e5a2b2`) threads `SceneOffTurnView` species/asset identity as
 data (differential 144/144 byte-identical, base `46190382`). Remaining #39
 debt: the dispatcher-ladder remainder above plus the turnN-typeref
 retirement program (`docs/battlescene-turnN-typeref-retirement-design.md`,
-6-slice plan; slice-2's precondition pin test banked at `a76bb338`).
+6-slice plan). **Typeref slice 1 landed (2026-08-03, `7ca03a17`):** Family S's
+dead turn5-13 predecessor-handoff parameters cut from
+`drawTurn6..15FightSubmenuWindow` (10 functions) and `drawFightSubmenuChrome`'s
+9 void-marked slots, ~14 call sites truncated, 9 dead
+`import type { TurnNCompletedResolutionNextCommandHandoff }` lines (N=5..13)
+deleted. battleScene.ts ref count 152→80. Differential replay held all 49
+named traces byte-identical (7,466 captures) against clean parent `4fe0e206`.
+**Slice 2 (Family P+Q turn1-4 fold) did not land**: Family Q's remaining 6
+functions (`drawMenuIdleBaseWithOpponentHp`, `drawActionMenuIdleContent`,
+`drawActionMenuIdleWindow`, `drawFightSubmenuChromeTurn1Through4PP`,
+`drawFightSubmenuChrome`, `drawFightSubmenuChromeFromCurrentOwner`) turn out
+to be called from far more than the in-scope `drawFightSubmenuWindow` —
+`drawActionMenuIdleContent` alone has 9+ call sites inside Family R (slices
+3/4a/4b, explicitly out of scope this session), each passing a differently-
+shaped positional argument list. At least one real semantic nuance surfaced
+(an HP-overlay guard that deliberately fires for turn 2/3 but not turn 1) that
+doesn't reduce to a plain "read `latest` directly" swap without per-call-site
+verification. This is more entangled than the design doc's "24 refs / 6
+functions" framing suggests; the slice-2 precondition pin test remains banked
+at `a76bb338` for whoever picks this up next. Slices 3/4a/4b/5 also remain.
 Rank 4 is **fully retired** (2026-07-31,
 all 5 slices): `174cc388` ROCK_SLIDE tails; `441ddf83`+`6aba6662`
 turn-7/8 FEATHER_DANCE staged+flipped; `0769ccc6` stat-fall banner

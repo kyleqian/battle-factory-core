@@ -1,3 +1,72 @@
+## 886 — [bounded MAIN worker, 2026-08-03] ISSUES #70 batch 3 — final 12 presentation-string rows FIXED; #70 closed bar the extractor gap
+
+- **State:** master `8489ca18` (one commit on top of `f36d7433`). Full
+  `npm test`: **646 files / 6,456 passed / 1 skipped** (+12 from this step's
+  new suite). `npm run build` green (tsc -b + vite).
+- **Did:** mapped ISSUES #70's final 12 unranked ids (`docs/issue70-
+  stringid-reachability.md`'s remaining rows), closing #70's string-mapping
+  work entirely except the already-out-of-scope `STRINGID_INTROSENDOUT`
+  extractor gap. Ability-prevention family (rows 6-10:
+  `PKMNPREVENTSPOISONINGWITH`/`PKMNSXPREVENTSBURNS`/
+  `PKMNPREVENTSPARALYSISWITH`/`PKMNSXPREVENTSYSZ`/`PKMNSXHADNOEFFECTONY`) —
+  turned out simpler than the brief's own hypothesis once traced against
+  real source: the direct-status-move trio is reached via
+  `BattleScript_ImmunityProtected`/`WaterVeilPrevents`/`LimberProtected`'s
+  own `copybyte gEffectBattler, gBattlerTarget` (already ported generically,
+  `battleScriptIngrainLeechSeedWrapOpcode.ts:277-290`), while the other two
+  are reachable **only** via Synchronize's own `seteffectprimary`
+  re-application (`executeSynchronize`) — Poison Point/Static/Flame
+  Body/Effect Spore's own contact-ability path calls `seteffectsecondary`
+  (`primary=FALSE, certain=0`), which can never satisfy `preventionCall`'s
+  `(primary||certain)` gate. Added a new, scoped `effectBattler`
+  message-event field (`battleScriptEvents.ts`, mirroring batch 1's
+  `scriptingBattler`) attached only to the 4 ids that read it — an
+  unconditional first draft broke 2 pre-existing exact-equality tests
+  (Trick's item-swap message, sleep-wake-up) by appearing on unrelated
+  STRINGIDs that already had a non-null `selectorRoles.effectBattler`.
+  Uproar family (rows 12-14: `PKMNCANTSLEEPINUPROAR2`/`UPROARKEPTPKMNAWAKE`/
+  `PKMNSTAYEDAWAKEUSING`) — all three always name the sleep move's real
+  target regardless of whose Uproar it is. `USINGITEMSTATOFPKMNROSE`
+  (row 11) — `{B_BUFF1}`/`{B_BUFF2}` reuse `ATTACKERSSTATROSE`/
+  `DEFENDERSSTATROSE`'s existing `lastStatChange` tracking; a real gap fix
+  in `battleEndTurnOrchestration.ts`'s `STAT_UP_BERRIES` tick (never wired
+  `scriptingBattler` to the berry holder, unlike every other end-turn
+  held-item tick) supplied `{B_SCR_ACTIVE_NAME_WITH_PREFIX}`/`{B_LAST_ITEM}`.
+  `PKMNSTOCKPILED`/`PKMNHPFULL` (rows 21-22) — Stockpile's counter was
+  already tracked (`rulesContext.battleTextBuff1ByteNumber`), just not
+  plumbed; Swallow-at-full-HP's `B_DEF_NAME_WITH_PREFIX` resolves via the
+  attacker itself, matching its own self-target reassignment.
+  `PKMNTRANSFORMEDINTO` (row 40, zero-incidence) — `{B_BUFF1}` reads the
+  already-set `battleTextBuff1Species`. `FactoryFullTurnBattlerConfig`
+  gained a `stockpileCounter` staging field (mirroring batch 2's
+  `flashFireBoosted`) to stage Swallow-at-full-HP in one turn.
+- **Tests:** `tests/presentationStringBatch3.test.ts`, 12 cases: 11 staged
+  full-turn repros through the production kernel (including a genuine
+  two-ability Synchronize interaction for rows 7-8: an Immunity/Poison-type
+  attacker vs. a Synchronize-holding target using Toxic), 1 direct-resolver-
+  branch case for row 40 (the doc's only explicitly zero-incidence id this
+  batch). Red-verified once via `git stash` on the four touched engine
+  files: 11 threw `battleStringResolver`'s exact completeness-guard error
+  pre-fix; row 22 instead failed to even reach Swallow's full-HP branch
+  pre-fix (the `stockpileCounter` field didn't exist yet).
+  `npm run compare:differential -- battle-command-generated-off.json --base
+  f36d7433 --summary` (base = this commit's parent): **PASS — 128/128
+  byte-identical** — no standing capture reaches these strings.
+- **Next:** the `STRINGID_INTROSENDOUT` extractor gap (`tools/extract/
+  extract-battle-messages.ts`, ids 0/1/2/5 need a small hand-mapped table
+  parsed from `BufferStringBattle`'s switch arms, same shape as
+  `STRINGID_SWITCHINMON`'s own hand-port) — the only remaining piece of
+  #70, owned by a separate step per ISSUES #71's own scoping note.
+- **Notes:** `tests/executableFrontierRatchet.test.ts` untouched and green:
+  no new recording imports, no barrier-count changes. Diff stays additive in
+  `messageLines`/`prepareMessage`/`battleEndTurnOrchestration.ts`; no timing
+  constants touched. PAPERCUT: `battleEndTurnOrchestration.ts`'s per-tick
+  `scriptingBattler` wiring is set ad hoc per branch rather than once
+  generically for every end-turn tick — the `STAT_UP_BERRIES` gap this step
+  fixed is the kind of omission that pattern invites; a future pass could
+  fold it into `runTickScript`/`enterTickBattlerContext` itself, ~10min cost
+  avoided by not doing it now (out of this step's narrow scope).
+
 ---
 ## 885 — [bounded MAIN worker, 2026-08-03] ISSUES #70 — STRINGID_PKMNHURTBY crash FIXED (wrap-family end-of-turn damage tick)
 
