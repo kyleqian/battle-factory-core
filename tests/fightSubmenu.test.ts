@@ -55,6 +55,7 @@ import {
   resolveTurn3LatestCompletedCommandHandoff,
 } from "../src/engine/turn3ResolutionAdapter.ts";
 import {
+  resolveTurn4CompletedResolutionNextCommandHandoff,
   resolveTurn4LatestCompletedCommandHandoff,
 } from "../src/engine/turn4ResolutionAdapter.ts";
 import {
@@ -1135,10 +1136,11 @@ describe("battleMenu/battleScene: turn 5's FIGHT-submenu reopen (S7 slice J, doc
     expect(state.battleScene!.fightSubmenu.confirmElapsed).toBe(confirmElapsedBefore);
   });
 
-  it("currentPPForActiveMon: ROCK_SLIDE (slot 0) reads 7/10 from the completed-turn-4 receipt (used turns 1, 3 AND 4), independent of turn 2's slot-2 DRAGON_BREATH receipt", () => {
+  it("currentPPForActiveMon: ROCK_SLIDE (slot 0) reads 7/10 from the completed-turn-4 receipt's own fresh fact (used turns 1, 3 AND 4), independent of turn 2's slot-2 DRAGON_BREATH receipt - distinct from TURN4_LATEST_HANDOFF, whose canonical playerPp/persistedMoveSlot are pinned to turn 3's own prior receipt through the turn-4-settled/turn-5-reopen window (docs/turn4-fold-pp-freshness-design.md §3)", () => {
     const moveset = rentalMoveset("ONIX");
-    expect(currentPPForActiveMon(moveset, TURN4_LATEST_HANDOFF)[0]).toBe(moveset.maxPP[0] - 3);
-    expect(currentPPForActiveMon(moveset, TURN4_LATEST_HANDOFF)[0]).toBe(7);
+    const turn4OwnFreshReceipt = resolveTurn4CompletedResolutionNextCommandHandoff(4312);
+    expect(currentPPForActiveMon(moveset, turn4OwnFreshReceipt)[0]).toBe(moveset.maxPP[0] - 3);
+    expect(currentPPForActiveMon(moveset, turn4OwnFreshReceipt)[0]).toBe(7);
     // Sanity: the completed-turn-3 receipt alone (pre-turn-5) still reads 8/10, matching
     // slice I's own pinned behavior - this test doesn't regress it.
     expect(currentPPForActiveMon(moveset, TURN3_LATEST_HANDOFF)[0]).toBe(8);
@@ -1236,9 +1238,12 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
     expect(currentPPForActiveMon(moveset, resolveTurn5LatestCompletedCommandHandoff())[0]).toBe(moveset.maxPP[0] - 4);
     expect(currentPPForActiveMon(moveset, resolveTurn5LatestCompletedCommandHandoff())[0]).toBe(6);
     expect(handoff.playerPp[0]).toBe(6);
-    // Sanity: the completed-turn-4 receipt alone (pre-turn-6) still reads 7/10, matching
-    // slice J's own pinned behavior - this test doesn't regress it.
-    expect(currentPPForActiveMon(moveset, TURN4_LATEST_HANDOFF)[0]).toBe(7);
+    // Sanity: the completed-turn-4 receipt's own fresh fact (pre-turn-6) still reads
+    // 7/10, matching slice J's own pinned behavior - this test doesn't regress it.
+    // (TURN4_LATEST_HANDOFF isn't used here: its canonical playerPp is pinned to
+    // turn 3's own prior receipt through the turn-4-settled/turn-5-reopen window,
+    // docs/turn4-fold-pp-freshness-design.md §3.)
+    expect(currentPPForActiveMon(moveset, resolveTurn4CompletedResolutionNextCommandHandoff(4312))[0]).toBe(7);
   });
 
   it("S7 slice O: currentPPForActiveMon reads 5/10 from turn 6's completed-command receipt, matching turn 7's reopen ledger", () => {

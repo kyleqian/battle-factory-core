@@ -75,7 +75,7 @@ describe("presentationEventWindowBridge (S10 presentation-seam checkpoint, gap 7
     const events: BattleScriptSemanticEvent[] = [
       event({ kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }, EFFECT_STAT_UP_AFTER_ATK_CANCELER_SCRIPT_LABEL),
       event({ kind: "set-battler-pp-data", battler: 1, movePosition: 0, pp: 13 }, "BattleScript_EffectEvasionUp"),
-      event({ kind: "stat-stage-change", battler: 1, stat: "evasion", from: 7, to: 8 }, EFFECT_STAT_UP_AFTER_ATK_CANCELER_SCRIPT_LABEL),
+      event({ kind: "stat-stage-change", battler: 1, stat: "evasion", from: 7, to: 8, requestedMagnitude: 1 }, EFFECT_STAT_UP_AFTER_ATK_CANCELER_SCRIPT_LABEL),
       event({ kind: "animation", animationId: "MOVE_ANIMATION", battler: 1, arguments: ["104", "0", "0", "0", "0", "0"] }, "BattleScript_EffectEvasionUp"),
       event({ kind: "message", messageId: "STRINGID_DEFENDERSSTATROSE", substitutions: [] }, "BattleScript_StatUpMessage"),
     ];
@@ -96,7 +96,7 @@ describe("presentationEventWindowBridge (S10 presentation-seam checkpoint, gap 7
 
   it("returns null when no message event carries the stat-up script's own sourceLabel", () => {
     const events: BattleScriptSemanticEvent[] = [
-      event({ kind: "stat-stage-change", battler: 1, stat: "evasion", from: 7, to: 8 }, EFFECT_STAT_UP_AFTER_ATK_CANCELER_SCRIPT_LABEL),
+      event({ kind: "stat-stage-change", battler: 1, stat: "evasion", from: 7, to: 8, requestedMagnitude: 1 }, EFFECT_STAT_UP_AFTER_ATK_CANCELER_SCRIPT_LABEL),
       event({ kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }, "BattleScript_HitFromAtkCanceler"),
     ];
     expect(resolveDoubleTeamKickoffPresentationWindowContent(events)).toBeNull();
@@ -106,7 +106,7 @@ describe("presentationEventWindowBridge (S10 presentation-seam checkpoint, gap 7
     const events: BattleScriptSemanticEvent[] = [
       event({ kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }, EFFECT_STAT_DOWN_SCRIPT_LABEL),
       event({ kind: "set-battler-pp-data", battler: 1, movePosition: 2, pp: 14 }, EFFECT_STAT_DOWN_SCRIPT_LABEL),
-      event({ kind: "stat-stage-change", battler: 0, stat: "attack", from: 6, to: 4 }, EFFECT_STAT_DOWN_SCRIPT_LABEL),
+      event({ kind: "stat-stage-change", battler: 0, stat: "attack", from: 6, to: 4, requestedMagnitude: 2 }, EFFECT_STAT_DOWN_SCRIPT_LABEL),
       event({ kind: "animation", animationId: "MOVE_ANIMATION", battler: 1, arguments: ["297", "0", "0", "0", "0", "0"] }, "BattleScript_StatDownDoAnim"),
       event({ kind: "message", messageId: "STRINGID_DEFENDERSSTATFELL", substitutions: [] }, STAT_DOWN_PRINT_STRING_SCRIPT_LABEL),
     ];
@@ -122,7 +122,7 @@ describe("presentationEventWindowBridge (S10 presentation-seam checkpoint, gap 7
   it("preserves an opponent-target accuracy drop for the SAND_ATTACK banner instead of assuming the earlier attack-stat shape", () => {
     const events: BattleScriptSemanticEvent[] = [
       event({ kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }, EFFECT_STAT_DOWN_SCRIPT_LABEL),
-      event({ kind: "stat-stage-change", battler: 0, stat: "accuracy", from: 6, to: 5 }, EFFECT_STAT_DOWN_SCRIPT_LABEL),
+      event({ kind: "stat-stage-change", battler: 0, stat: "accuracy", from: 6, to: 5, requestedMagnitude: 1 }, EFFECT_STAT_DOWN_SCRIPT_LABEL),
       event({ kind: "animation", animationId: "STATS_CHANGE", battler: 0, arguments: ["27"] }, "BattleScript_StatDownDoAnim"),
       event({ kind: "message", messageId: "STRINGID_DEFENDERSSTATFELL", substitutions: [] }, STAT_DOWN_PRINT_STRING_SCRIPT_LABEL),
     ];
@@ -138,7 +138,7 @@ describe("presentationEventWindowBridge (S10 presentation-seam checkpoint, gap 7
   it("returns null when no message event carries the separate stat-fell script's own sourceLabel (the two-sourceLabel signal this window's own shape genuinely needs)", () => {
     const events: BattleScriptSemanticEvent[] = [
       event({ kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }, EFFECT_STAT_DOWN_SCRIPT_LABEL),
-      event({ kind: "stat-stage-change", battler: 0, stat: "attack", from: 6, to: 4 }, EFFECT_STAT_DOWN_SCRIPT_LABEL),
+      event({ kind: "stat-stage-change", battler: 0, stat: "attack", from: 6, to: 4, requestedMagnitude: 2 }, EFFECT_STAT_DOWN_SCRIPT_LABEL),
     ];
     expect(resolveFeatherDanceKickoffPresentationWindowContent(events)).toBeNull();
   });

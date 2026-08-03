@@ -4,6 +4,128 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 872 — [supervisor wind-down, 2026-08-02 ~20:45] slice-9 + slice-10 + full #66 family landed; dispatcher ladder rows 1-10 complete
+
+- **State:** master = this docs commit on top of merge `d263968f`
+  (slice-10 `7bd37eab` + side chain `4fd820fc`). Final union verified by
+  supervisor at wind-down: full `npm test` **628 files / 6,351 passed /
+  1 skipped**, `npm run build` green. DEFERRED.md: no entries opened this
+  session. ISSUES #66 removed (fully fixed, see below).
+- **Session outcomes (4 workers, 0 failures, all supervisor-verified):**
+  1. **animation-main folded** at orient (fast-forward to `e3d7a0bc`, 7
+     accepted front-animation families; union suite verified green, entry
+     869).
+  2. **Slice-9 fold landed** (`c5563c72`): PP-freshness design implemented
+     verbatim; 14/14 differential windows byte-identical vs `105c72d5`
+     (supervisor re-ran the two formerly-red windows independently);
+     census state entries 0/0/0.
+  3. **Slice-10 final interface cut landed** (`ad0cfa07`+`7bd37eab`):
+     drawFightSubmenuWindow and currentPPForActiveMon positional handoff
+     params 13→0 each; 53-trace row-10 union differential 9,238/9,238
+     byte-identical vs `d4a89680` (supervisor spot re-ran 3 traces).
+     Honest remainder in entry 871: battleScene.ts still carries ~144
+     TurnN-handoff type refs on per-turn draw functions row 10 never
+     named — that surface belongs to the #39 retirement program.
+  4. **#66 fully closed in two stacked side steps** (`3631116d`,
+     `4fd820fc`): (a) STATSWONTINCREASE/DECREASE crash fixed
+     (red-before/green-after, real-ROM receipt); (b) pre-clamp
+     "sharply/harshly" magnitude CONFIRMED by discriminating oracle probe
+     (stage 11 + SWORDS DANCE → "sharply rose!" at post-clamp delta 1)
+     then fixed via `requestedMagnitude` on the stat-stage-change event;
+     plus a third find — generic-route stat names rendered lowercase vs
+     the ROM's "ATTACK" — proven pixel-real on the kernel route only
+     (162/9600 px diff → 0 after fix; legacy turn-owned windows
+     structurally unaffected, which is why standing traces never caught
+     it). Evidence docs + fixtures committed under docs/issue66* and
+     tools/compare/fixtures/issue66*.
+- **Next session (ordered):** (1) species-dossier slices per
+  `docs/species-render-entry-point-retirement-design.md` (census 4→45,
+  7-slice plan), folding in entry 871's recommended follow-up for
+  battleScene.ts's remaining per-turn Turn1-13 type usage (same #39
+  retirement surface); (2) #62 generated-route pixel-red reproducers;
+  (3) #56 intro residuals.
+- **Notes:** `animation-main` is a moving branch again (live animation
+  supervisor + nested worker at wind-down; tip was `54b2d48e`+ during this
+  session) — fold at next orient per protocol. PAPERCUTS: new entry for
+  the full-suite-vs-Bash-timeout friction flagged by the #66(b) worker.
+
+---
+## 871 — [bounded MAIN worker, 2026-08-02] slice 10 (final interface cut) LANDED for drawFightSubmenuWindow/currentPPForActiveMon; battleScene.ts's broader Turn1-13 type usage stays open (scope gap, reported)
+
+- **State:** master `7bd37eab` (two commits on top of `d4a89680`:
+  `ad0cfa07` the cut, `7bd37eab` a two-assertion test fix). Full `npm test`:
+  **626 files / 6,348 passed / 1 skipped**; `npm run build` green (tsc + vite).
+  Differential: `compare:differential` over the row-10 union (53 traces) vs
+  base `d4a89680` — **PASS, 9,238/9,238 captures byte-identical**, every
+  per-trace count matching the brief's table exactly. Census
+  (`tools/census-next-command-handoffs.sh`): `drawFightSubmenuWindow`
+  handoff parameters **0** (was 13), `currentPPForActiveMon` handoff
+  parameters **0** (was 13), state/initial/advance-copy entries stay **0**,
+  completed-handoff type declarations **13** (unchanged, as directed —
+  the turnNResolutionAdapter.ts files keep their own).
+- **Did:** `drawFightSubmenuWindow`'s only production call site always
+  passed `null` for all 13 turn1-13 params, so the signature drops to
+  `(fb, t, submenu, latest, resolutionOwner, trainerPresentation)` and the
+  four internal compatibility-fn calls inline literal `null` in place of the
+  removed params (byte-identical by construction, confirmed by the
+  differential). `currentPPForActiveMon` is now the design's final
+  `(moveset, latest, lockedResolution, followingResolution)` signature —
+  the retired 13-arg legacy body is gone and `currentPPForActiveMonFromLatest`
+  is folded into the `currentPPForActiveMon` name. `drawFightSubmenuChrome`
+  (out of this slice's own scope, its 13-param signature untouched) is the
+  one remaining internal consumer of the old chain; since its own callers
+  never supply turn5-13, it now calls a small local
+  `drawFightSubmenuChromeTurn1Through4PP` helper in `battleScene.ts` that
+  keeps only the turn1-4 subset of the retired formula. Rewired
+  `tests/battleMenu.test.ts`, `battleSetup.test.ts`, `fightSubmenu.test.ts`,
+  and (necessary consequence, not in the row-10 file list but required for
+  the signature change to compile/pass) `tests/turn{5..13}
+  ResolutionAdapterEquivalence.test.ts` to build `LatestCompletedCommandHandoff`
+  fixtures via each turn's own `resolveTurnNLatestCompletedCommandHandoff`
+  instead of hand-chaining 13 positional legacy receipts; the shadow
+  legacy-vs-generic equivalence tests (whose entire purpose was proving this
+  exact cut safe) are replaced with direct regression pins on the now-sole
+  generic path. One post-differential test fix: two `fightSubmenu.test.ts`
+  assertions had substituted `TURN4_LATEST_HANDOFF` (correctly pinned to
+  turn 3's own prior receipt through the turn-4-settled/turn-5-reopen window
+  per `docs/turn4-fold-pp-freshness-design.md` §3) where the test actually
+  wanted turn 4's own fresh completed-receipt PP fact (7/10, not 8/10) —
+  fixed by calling `resolveTurn4CompletedResolutionNextCommandHandoff(4312)`
+  directly for those two assertions only; every other `TURN4_LATEST_HANDOFF`
+  use in that file was already correct (real production state fixtures).
+  Did NOT add a `tests/helpers/battleSceneState.ts` fixture helper — the
+  actual per-file transform needed was call-site substitution (raw
+  positional chain → one `resolveTurnNLatestCompletedCommandHandoff()`
+  value), which didn't need a shared constructor; flagging this as a
+  deliberate deviation from the row-10 file list rather than a silent skip.
+- **Next:** slice 10's remaining acceptance item (below); ISSUES #66(a)
+  capped-stat banner fix (+(b) after an oracle probe, may already be
+  in flight per entry 869's dispatch); species-dossier slices per
+  `docs/species-render-entry-point-retirement-design.md`.
+- **Notes — scope gap, reported per the brief's failure mode:** the
+  acceptance bullet "grep confirms battleScene.ts + battleMenu.ts import
+  zero TurnNCompletedResolutionNextCommandHandoff types" is met for
+  `battleMenu.ts` (**0** refs, confirmed) but NOT for `battleScene.ts`
+  (**144** refs remain: turn1 17, turn2 17, turn3 18, turn4 20, turn5 12,
+  turn6 11, turn7 10, turn8 9, turn9 8, turn10 7, turn11 6, turn12 5,
+  turn13 4). These are NOT dead ABI on `drawFightSubmenuWindow`/
+  `currentPPForActiveMon` (both already at 0) — they're live parameters on
+  dozens of OTHER per-turn rendering helpers this slice's own SCOPE bullet
+  never named (e.g. `drawFightSubmenuChrome`, `drawTurn5RockSlideAttack`,
+  `drawTurn6FieldBase`, and the per-turn `drawTurnN...` window functions for
+  turns 6-13, which still take raw typed handoffs for field/HP/bounce
+  content — exactly the "named content-routing blocker" the design doc's
+  own "Named content-routing blocker" section flags as unfinished, distinct
+  from the dispatcher ABI this slice targets). Retiring those would mean
+  auditing and likely rewriting dozens of unrelated rendering functions
+  across a 34k-line file — a materially bigger, unscoped, unverified change
+  I did not attempt inside this session's cap. Recommend either a
+  follow-up slice (11?) scoped explicitly to that content-rendering type
+  usage, or accepting the census's own numeric checks (all satisfied) as
+  the real acceptance surface and treating the grep bullet as describing an
+  aspiration the design doc's file list undersized.
+
+---
 ## 870 — [bounded MAIN worker, 2026-08-02] slice-9 fold LANDED — turn4-fold-pp-freshness-design.md implemented, 14/14 differential clean, salvage branch merged+deleted
 
 - **State:** master `c5563c72` (fast-forward merge of
@@ -51,64 +173,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the parent) remains explicitly out of scope, per this fold's own
   byte-identity-to-parent brief. `animation-main` fold status unchanged
   from entry 869.
-
----
-## 869 — [supervisor session, 2026-08-02 evening] animation-main folded (fast-forward); slice-9 + #66 two-lane round dispatched
-
-- **State:** master `e3d7a0bc` = fast-forward fold of `animation-main`
-  (animation supervisor live in its worktree; fold SHA pinned at orient).
-  Union verified by supervisor: full `npm test` **626 files / 6,348
-  passed / 1 skipped**, `npm run build` green. Oracle freshness PASS (both
-  services current). DEFERRED.md remains clear.
-- **Fold contents:** 7 accepted front-animation families since the last fold
-  (glow black, rising wobble, orange glow, fast-short concave, rotate-up
-  slam-down, deep V squish bounce, rotate-to-sides twice) — all inside
-  `src/animation/` + `tests/animation/` + fixtures; no main-lane files.
-  `ANIMATION_PROGRESS.md` top entry carried no "For the main program:" line.
-- **Did:** (dispatch record; outcomes land in the next entry)
-  1. MAIN lane: slice-9 fold completion from `a6d88eaa` per
-     `docs/turn4-fold-pp-freshness-design.md` — implement-only brief with
-     the §5 14-window acceptance table and §6 risk probes verbatim.
-  2. SIDE lane: ISSUES #66(a) capped-stat banner fix (mirror `c7461398`)
-     + (b) discriminating oracle probe (fix only on confirmation) —
-     file-disjoint from the slice-9 touch list (verified: #65's fix touched
-     only `battleResolutionPresentation.ts`).
-- **Next:** verify both lanes; then slice 10 (final 13-param/type cut);
-  then species-dossier slices per
-  `docs/species-render-entry-point-retirement-design.md`.
-
----
-## 868 — [interactive user session, 2026-08-02 evening] D1 adopted → DEFERRED clear; papercut fixes landed; play-preview retired
-
-- **State:** master = this entry's commit on top of `f6452d7a`; no engine or
-  test code touched (tooling/docs only), `npm run test:smoke` green (7
-  files / 339 passed, ~23 s). **DEFERRED.md has NO open entries — the next
-  `run-supervisor.sh` session is unblocked.**
-- **Did (all user-directed):**
-  1. **D1 RESOLVED:** communication contract moved into `SUPERVISOR.md`
-     § "Communicating with the user", D1 entry deleted. Amended same
-     evening at user request: cut to a short plain-English rule (no
-     mandated status format, no per-item numeric requirement).
-  2. **Worker self-abort papercut:** EXECUTION DISCIPLINE clause folded into
-     `tools/run-subagent.sh`'s standing preamble (both prompt branches, all
-     providers) — briefs no longer restate it. PAPERCUTS entry updated;
-     delete it after a few clean worker rounds.
-  3. **New `npm run test:smoke`** (~25 s: frontier ratchet, ability/item
-     census, decision boundary, kernel full-turn, roundController,
-     roundScenarioMatrix, battleScene) for mid-step sanity checks;
-     documented in AGENTS.md Tests. Never substitutes for the full suite at
-     a finish requirement.
-  4. **Scene-ON battle-lab papercut entry DELETED** — verified fixed live:
-     POST `/v1/battle-lab/run` on :8012 answers 400 mode-validation,
-     identical to :8014 (the running service now carries the route).
-  5. **Play-preview retired:** nothing was listening on :5199 (server
-     already down); `.worktrees/play-preview` removed (detached at
-     `105c72d5`, an ancestor of master; only untracked node_modules).
-     Rebuild a fresh preview after the next user-visible fix lands.
-- **Next (unchanged from 867):** (1) slice-9 fold completion from `a6d88eaa`
-  per the banked design `docs/turn4-fold-pp-freshness-design.md`; (2) slice
-  10; (3) #66(a) capped-stat banner fix (+(b) after an oracle probe); (4)
-  species-dossier slices.
-- **Notes:** `animation-main` still ~8 commits ahead with its own ledger —
-  fold at next orient (unchanged from 867's note).
 
