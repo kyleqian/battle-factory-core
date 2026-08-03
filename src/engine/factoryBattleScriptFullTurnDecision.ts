@@ -138,6 +138,7 @@ import {
 } from "./battleScriptSourceConstants.ts";
 import { isFactoryAiSwitchPrecheckBlocked } from "./factoryAiSwitchPolicy.ts";
 import { mapFactoryBattleOutcome } from "./factoryBattleScriptTerminalDecision.ts";
+import { battleCommandSpeciesDisplayName } from "./battleCommandPresentation.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import topologyData from "../data/gen/battle-script-topology.json" with { type: "json" };
 import frontierHeldItemsData from "../data/gen/battle-frontier-held-items.json" with { type: "json" };
@@ -189,6 +190,18 @@ const ABILITY_DISPLAY_NAME_BY_ID: Readonly<Record<number, string>> = Object.free
   // (battleScriptTryswapitemsOpcode.ts:152-177) -- the same id ISSUES #70
   // batch 2 ported for Flash Fire's re-activation shares this ability slot.
   60: "STICKY HOLD",
+  // ISSUES #70 batch 3's ability-prevention family (docs/issue70-stringid-
+  // reachability.md rows 6-10): the two real trigger paths --
+  // BattleScript_ImmunityProtected/WaterVeilPrevents/LimberProtected's direct
+  // jumpifability short-circuit, and Synchronize's own seteffectprimary
+  // re-application (battleScriptMoveEndOpcode.ts's executeSynchronize) --
+  // can reveal any of these five abilities.
+  7: "LIMBER",
+  15: "INSOMNIA",
+  17: "IMMUNITY",
+  28: "SYNCHRONIZE",
+  41: "WATER VEIL",
+  72: "VITAL SPIRIT",
 });
 function abilityDisplayName(ability: number): string {
   const name = ABILITY_DISPLAY_NAME_BY_ID[ability];
@@ -291,6 +304,8 @@ export type FactoryFullTurnBattlerConfig = Readonly<{
   types?: readonly [string, string];
   /** Source gDisableStructs[].flashFireBoosted -- stages Flash Fire's re-activation string (ISSUES #70 batch 2, STRINGID_PKMNSXMADEYINEFFECTIVE). */
   flashFireBoosted?: 0 | 1;
+  /** Source two-bit DisableStruct::stockpileCounter (0..3) -- stages Swallow-at-full-HP in one turn (ISSUES #70 batch 3, STRINGID_PKMNHPFULL) without a real prior Stockpile use. */
+  stockpileCounter?: 0 | 1 | 2 | 3;
 }>;
 
 export type FactoryFullTurnConfig = Readonly<{
@@ -487,6 +502,7 @@ function activeBattler(
     maxHP: config.maxHp ?? config.hp,
     partyIndex: 0,
     flashFireBoosted: config.flashFireBoosted ?? 0,
+    stockpileCounter: config.stockpileCounter ?? 0,
   });
 }
 
@@ -837,7 +853,69 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                     ? (rules.selectorRoles.attacker === null
                         ? []
                         : [resolveMoveName(rules.battlers[rules.selectorRoles.attacker].wrappedMove)])
-                    : [];
+                    // ISSUES #70 batch 3 (docs/issue70-stringid-reachability.md
+                    // rows 6/9/10): the direct-status-move context (Toxic vs
+                    // Immunity, Will-O-Wisp vs Water Veil, Thunder Wave/Stun
+                    // Spore/Glare vs Limber) -- BattleScript_ImmunityProtected/
+                    // WaterVeilPrevents/LimberProtected's own `copybyte
+                    // gEffectBattler, gBattlerTarget` (battle_scripts_1.s:
+                    // 715,1035,2191, already ported as Cmd_copyarray's
+                    // gEffectBattler<-gBattlerTarget tuple,
+                    // battleScriptIngrainLeechSeedWrapOpcode.ts:277-290) always
+                    // leaves rules.selectorRoles.effectBattler === the
+                    // ability-holding target regardless of which of the three
+                    // status types fired -- both {B_DEF_ABILITY}/{B_EFF_ABILITY}
+                    // template variants read that same battler's ability.
+                    : operand.expression === "STRINGID_PKMNPREVENTSPOISONINGWITH"
+                      || operand.expression === "STRINGID_PKMNSXPREVENTSBURNS"
+                      || operand.expression === "STRINGID_PKMNPREVENTSPARALYSISWITH"
+                      ? (rules.selectorRoles.effectBattler === null
+                        ? []
+                        : [abilityDisplayName(rules.battlers[rules.selectorRoles.effectBattler].ability)])
+                      // Row 7 (STRINGID_PKMNSXPREVENTSYSZ): only reachable via
+                      // Synchronize's own seteffectprimary re-application
+                      // (executeSynchronize, battleScriptMoveEndOpcode.ts) --
+                      // the real, fixed gBattlerAttacker/gBattlerTarget never
+                      // move mid-effect (unlike gEffectBattler/scriptingBattler,
+                      // which Synchronize's own affectsUser flag swaps), so
+                      // {B_ATK_ABILITY}/{B_DEF_ABILITY} read those two battlers'
+                      // ability fields directly.
+                      : operand.expression === "STRINGID_PKMNSXPREVENTSYSZ"
+                        ? (rules.selectorRoles.attacker === null || rules.selectorRoles.target === null
+                          ? []
+                          : [
+                              abilityDisplayName(rules.battlers[rules.selectorRoles.attacker].ability),
+                              abilityDisplayName(rules.battlers[rules.selectorRoles.target].ability),
+                            ])
+                        // Row 8 (STRINGID_PKMNSXHADNOEFFECTONY): same
+                        // Synchronize-only reachability; {B_SCR_ACTIVE_ABILITY}
+                        // reads the ability holder's (scriptingBattler's) own
+                        // ability, always ABILITY_SYNCHRONIZE in practice.
+                        : operand.expression === "STRINGID_PKMNSXHADNOEFFECTONY"
+                          ? [abilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
+                          // Row 14 (STRINGID_PKMNSTAYEDAWAKEUSING):
+                          // createJumpifcantmakeasleepOpcodeHandler's own
+                          // Insomnia/Vital Spirit branch always targets the
+                          // sleep move's real target (battleScriptStatusPrimaryOpcode.ts:236-245).
+                          : operand.expression === "STRINGID_PKMNSTAYEDAWAKEUSING"
+                            ? (rules.selectorRoles.target === null
+                              ? []
+                              : [abilityDisplayName(rules.battlers[rules.selectorRoles.target].ability)])
+                            // Row 21 (STRINGID_PKMNSTOCKPILED): the stockpile
+                            // count itself (stockpileHandler,
+                            // battleScriptStockpileOpcode.ts), the same
+                            // counter-substitution shape as HITXTIMES above.
+                            : operand.expression === "STRINGID_PKMNSTOCKPILED"
+                              ? [String(rules.battleTextBuff1ByteNumber)]
+                              // Row 40 (STRINGID_PKMNTRANSFORMEDINTO): the
+                              // species Transform just copied
+                              // (battleScriptTransformOpcode.ts's own
+                              // battleTextBuff1Species write).
+                              : operand.expression === "STRINGID_PKMNTRANSFORMEDINTO"
+                                ? (rules.battleTextBuff1Species === null
+                                  ? []
+                                  : [battleCommandSpeciesDisplayName(rules.battleTextBuff1Species)])
+                                : [];
       return Object.freeze({
         kind: "message" as const,
         messageId: operand.expression,
@@ -859,6 +937,24 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
         // own B_TXT_SCR_ACTIVE_NAME_WITH_PREFIX selector reads this same
         // global (:2481-2482).
         scriptingBattler: rules.scriptingBattler,
+        // Source gEffectBattler at print time -- battle_message.c's own
+        // B_TXT_EFF_NAME_WITH_PREFIX selector reads this same global
+        // (:2444-2447). ISSUES #70 batch 3's ability-prevention family needs
+        // this distinct from scriptingBattler (applySetMoveEffect's own
+        // affectsUser swap sends the two to opposite real battlers,
+        // battleScriptHitChainOpcode.ts:2841-2848). Scoped to only the 4 ids
+        // that read it -- unlike scriptingBattler, selectorRoles.effectBattler
+        // is already a widely-populated generic field (Trick, Leech Seed, the
+        // wrap family, ...), so attaching it unconditionally would perturb
+        // every other message event's exact payload shape.
+        ...((
+          operand.expression === "STRINGID_PKMNPREVENTSPOISONINGWITH"
+          || operand.expression === "STRINGID_PKMNSXPREVENTSBURNS"
+          || operand.expression === "STRINGID_PKMNPREVENTSPARALYSISWITH"
+          || operand.expression === "STRINGID_PKMNSXHADNOEFFECTONY"
+        ) && rules.selectorRoles.effectBattler !== null
+          ? { effectBattler: rules.selectorRoles.effectBattler }
+          : {}),
       });
     },
     prepareSelectionMessage: () => null,

@@ -70,6 +70,16 @@ export type BattleScriptSemanticEventPayload =
      * Optional for synthetic/staged receipts that predate this field.
      */
     scriptingBattler?: BattleScriptBattlerId;
+    /**
+     * Source gEffectBattler at print time (rulesContext.selectorRoles.effectBattler).
+     * ISSUES #70 batch 3's ability-prevention family: `applySetMoveEffect`
+     * swaps which real battler (attacker vs target) this is depending on
+     * whether the effect is a direct status move or an on-contact/Synchronize
+     * ability effect (`battleScriptHitChainOpcode.ts:2841-2848`), distinct
+     * from `scriptingBattler`'s own independent swap. Optional for
+     * synthetic/staged receipts that predate this field.
+     */
+    effectBattler?: BattleScriptBattlerId;
   }>
   | Readonly<{
     kind: "selection-message";

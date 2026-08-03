@@ -892,6 +892,166 @@ function messageLines(
       B_BUFF1: () => hitCount,
     });
   }
+  // ISSUES #70 batch 3 (docs/issue70-stringid-reachability.md rows 6-14,
+  // 21-22, 40): the ability-prevention family, the Uproar family, Stockpile/
+  // Swallow, and Transform.
+  if (
+    messageId === "STRINGID_PKMNPREVENTSPOISONINGWITH"
+    || messageId === "STRINGID_PKMNSXPREVENTSBURNS"
+    || messageId === "STRINGID_PKMNPREVENTSPARALYSISWITH"
+  ) {
+    // gPSNPreventionStringIds[0]/gBRNPreventionStringIds[0]/
+    // gPRLZPreventionStringIds[0] (battle_message.c:391-405) -- the
+    // direct-status-move context (Toxic/Will-O-Wisp/Thunder Wave-family vs
+    // Immunity/Water Veil/Limber), reached via BattleScript_ImmunityProtected/
+    // WaterVeilPrevents/LimberProtected's own `copybyte gEffectBattler,
+    // gBattlerTarget` (battle_scripts_1.s:715,1035,2191), already ported as
+    // Cmd_copyarray's gEffectBattler<-gBattlerTarget tuple
+    // (battleScriptIngrainLeechSeedWrapOpcode.ts:277-290). Both template
+    // variants ({B_DEF_ABILITY} for PSN/PRLZ, {B_EFF_ABILITY} for BRN) name
+    // the same battler here, since this context never swaps effectBattler
+    // away from the real move's target.
+    if (event.payload.effectBattler === undefined || event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no effect-battler/ability substitution`);
+    }
+    const effectBattler = singlesBattler(event.payload.effectBattler, `${messageId} effect battler`);
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_EFF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, effectBattler),
+      B_DEF_ABILITY: () => ability,
+      B_EFF_ABILITY: () => ability,
+    });
+  }
+  if (messageId === "STRINGID_PKMNSXPREVENTSYSZ") {
+    // idx1 of all three prevention tables (battle_message.c:391-405) -- only
+    // reachable via Synchronize's own seteffectprimary re-application
+    // (executeSynchronize, battleScriptMoveEndOpcode.ts), which sets
+    // HITMARKER_STATUS_ABILITY_EFFECT before applySetMoveEffect runs.
+    // {B_ATK_NAME_WITH_PREFIX}/{B_DEF_NAME_WITH_PREFIX} are the real, fixed
+    // attacker/target (unaffected by Synchronize's own effectBattler/
+    // scriptingBattler swap) -- lastMoveAttacker already tracks them.
+    if (event.payload.substitutions.length < 2) {
+      throw new Error(`battle resolution ${messageId} message has no ability substitutions`);
+    }
+    const attacker = requireMoveAttacker(lastMoveAttacker, "prevents-ability message");
+    const defender = requireMoveDefender(lastMoveAttacker, "prevents-ability message");
+    const attackerAbility = event.payload.substitutions[0]!;
+    const defenderAbility = event.payload.substitutions[1]!;
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_ATK_ABILITY: () => attackerAbility,
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_DEF_ABILITY: () => defenderAbility,
+    });
+  }
+  if (messageId === "STRINGID_PKMNSXHADNOEFFECTONY") {
+    // idx2 of all three prevention tables -- same Synchronize-only
+    // reachability as above, but the type-immune (not ability-block) tail:
+    // {B_SCR_ACTIVE_*} is the ability holder (scriptingBattler, always
+    // Synchronize in practice), {B_EFF_NAME_WITH_PREFIX} is the type-immune
+    // battler (effectBattler).
+    if (
+      event.payload.scriptingBattler === undefined
+      || event.payload.effectBattler === undefined
+      || event.payload.substitutions.length === 0
+    ) {
+      throw new Error(`battle resolution ${messageId} message has no scripting/effect-battler or ability substitution`);
+    }
+    const scriptingBattler = singlesBattler(event.payload.scriptingBattler, `${messageId} scripting battler`);
+    const effectBattler = singlesBattler(event.payload.effectBattler, `${messageId} effect battler`);
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, scriptingBattler),
+      B_SCR_ACTIVE_ABILITY: () => ability,
+      B_EFF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, effectBattler),
+    });
+  }
+  if (
+    messageId === "STRINGID_PKMNCANTSLEEPINUPROAR2"
+    || messageId === "STRINGID_UPROARKEPTPKMNAWAKE"
+  ) {
+    // gUproarAwakeStringIds[0]/[1] (battle_message.c:426-431),
+    // createJumpifcantmakeasleepOpcodeHandler -- both choosers only differ in
+    // wording on whose Uproar it is; the displayed battler is always the
+    // sleep move's own real target either way.
+    const target = requireMoveDefender(lastMoveAttacker, `${messageId.toLowerCase()} message`);
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, target),
+    });
+  }
+  if (messageId === "STRINGID_PKMNSTAYEDAWAKEUSING") {
+    // gUproarAwakeStringIds[2] -- the Insomnia/Vital Spirit branch,
+    // independent of any Uproar carrier.
+    if (event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no ability substitution`);
+    }
+    const target = requireMoveDefender(lastMoveAttacker, "stayed-awake message");
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, target),
+      B_DEF_ABILITY: () => ability,
+    });
+  }
+  if (messageId === "STRINGID_USINGITEMSTATOFPKMNROSE") {
+    // gStatUpStringIds[4] (battle_message.c:1006-1015), BattleScript_
+    // BerryStatRaiseDoStatUp -- the same statbuffchange/BattleScript_StatUp
+    // mechanism as ATTACKERSSTATROSE/DEFENDERSSTATROSE below, just a
+    // different chooser index; {B_BUFF1}/{B_BUFF2} reuse that same
+    // lastStatChange tracking. {B_SCR_ACTIVE_NAME_WITH_PREFIX}/{B_LAST_ITEM}
+    // are the berry holder (scriptingBattler, battleEndTurnOrchestration.ts's
+    // STAT_UP_BERRIES tick).
+    if (event.payload.scriptingBattler === undefined || !lastStatChange) {
+      throw new Error(`battle resolution ${messageId} message has no scripting-battler/stat event`);
+    }
+    const scriptingBattler = singlesBattler(event.payload.scriptingBattler, `${messageId} scripting battler`);
+    const statName = STAT_DISPLAY_NAME[lastStatChange.stat];
+    if (statName === undefined) {
+      throw new Error(`battle resolution ${messageId} message has unknown stat ${lastStatChange.stat}`);
+    }
+    return resolveBattleStringLines(messageId, {
+      B_LAST_ITEM: () => factoryItemDisplayName(heldItems[scriptingBattler]),
+      B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, scriptingBattler),
+      B_BUFF1: () => statName,
+      B_BUFF2: () => (lastStatChange.requestedMagnitude === 2 ? "sharply rose!" : "rose!"),
+    });
+  }
+  if (messageId === "STRINGID_PKMNSTOCKPILED") {
+    // gStockpileUsedStringIds[0] (battle_message.c:341-345),
+    // stockpileHandler -- {B_BUFF1} is the post-increment stockpile counter
+    // (rulesContext.battleTextBuff1ByteNumber), the same shape as HITXTIMES.
+    if (event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no stockpile-count substitution`);
+    }
+    const attacker = requireMoveAttacker(lastMoveAttacker, "stockpiled message");
+    const count = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_BUFF1: () => count,
+    });
+  }
+  if (messageId === "STRINGID_PKMNHPFULL") {
+    // gSwallowFailStringIds[1] (battle_message.c:351-355) -- Swallow at full
+    // HP self-targets (stockpileToHpHealHandler reassigns
+    // selectorRoles.target to the attacker itself), so {B_DEF_NAME_WITH_PREFIX}
+    // is the attacker, not the generic opposite-singles-battler defender.
+    const attacker = requireMoveAttacker(lastMoveAttacker, "hp-full message");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+    });
+  }
+  if (messageId === "STRINGID_PKMNTRANSFORMEDINTO") {
+    // gTransformUsedStringIds[0] (battle_message.c:331-335) -- {B_BUFF1} is
+    // the species Transform just copied (rulesContext.battleTextBuff1Species).
+    if (event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no species substitution`);
+    }
+    const attacker = requireMoveAttacker(lastMoveAttacker, "transformed-into message");
+    const speciesName = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_BUFF1: () => speciesName,
+    });
+  }
   if (
     messageId === "STRINGID_DEFENDERSSTATROSE"
     || messageId === "STRINGID_DEFENDERSSTATFELL"
