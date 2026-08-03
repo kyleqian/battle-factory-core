@@ -114,61 +114,106 @@ animation lane's rung-3 dispatcher (`frontSendOutFrameAtTick` + OAM/anim-frame
 side, §5 of the consumer-map doc) stays open and is a prerequisite for Slice
 D only.
 
-## #72 — battleStringResolver completeness-guard gaps: 107 `printstring`-literal STRINGIDs unresolved (blind-spot class beyond #70's scope)
+## #72 — battleStringResolver completeness-guard gaps: 66 REACHABLE printstring STRINGIDs need the Taunt-pair fix idiom
 
 **Symptom:** the same-day user-reported crash (2026-08-03, opponent MURKROW's
 TAUNT: `battleStringResolver: STRINGID_PKMNFELLFORTAUNT references placeholder
 {B_DEF_NAME_WITH_PREFIX} with no resolver supplied`) and a sibling gap found
 alongside it (`STRINGID_PKMNCANTUSEMOVETAUNT`) are both now fixed
 (`battleResolutionPresentation.ts`'s `messageLines`, `tests/
-presentationStringTaunt.test.ts`). Both evaded ISSUES #70's 47-id sweep for
-the same reason `STRINGID_PKMNHURTBY` did: #70 grepped `src/engine/*.ts` for
-`STRINGID_` TS literals, but these ids are emitted purely by the generic
-`printstring <STRINGID_X>` opcode handler reading the operand straight out of
-the parsed battle-script program (`src/data/gen/battle-script-program.json`)
-— no TS code ever spells the id out, so the grep-based sweep structurally
-cannot see it. This is a **distinct blind-spot class** from #70's (which
-covered `printfromtable`'s table-indexed ids, already closed and not
-reopened here).
+presentationStringTaunt.test.ts`). Both evaded ISSUES #70's 47-id sweep
+because #70 grepped `src/engine/*.ts` for `STRINGID_` TS literals, but these
+ids are emitted purely by the generic `printstring <STRINGID_X>` opcode
+handler reading the operand straight out of the parsed battle-script program
+— no TS code ever spells the id out. `tools/report/printstring-literal-
+census.ts` (regenerable, `docs/printstring-literal-census.md`) enumerated the
+full blind spot: of 207 unique literal `printstring` operands, 107 are
+UNRESOLVED (would hit the completeness guard).
 
-**Confirmed** (`tools/report/printstring-literal-census.ts`, regenerable,
-output `docs/printstring-literal-census.md`): of **207 unique STRINGID
-literal `printstring` operands** in the parsed program (249 raw occurrences
-across 230 script labels), 13 already have an explicit `messageLines` branch
-and 87 resolve via the generic fallback's fixed token set
-(`B_ATK_NAME_WITH_PREFIX`/`B_EFF_NAME_WITH_PREFIX`/
-`B_SCR_ACTIVE_NAME_WITH_PREFIX`/`B_LAST_ITEM`) — **107 are UNRESOLVED** and
-would hit the completeness guard the instant a non-barriered path reaches
-their `printstring`. This is a **syntactic upper bound, not a per-id
-reachability trace** like #70's: the script does not itself prove any given
-id's emitting script is live at Factory L50 singles (many obviously are not
-— `STRINGID_DEFEATEDOPPONENTBYREFEREE`/`TIEDOPPONENTBYREFEREE` are Battle
-Arena-only, `STRINGID_FORFEITEDMATCH`/`TRAINER1WINTEXT`/`PLAYERWHITEOUT2` are
-link-battle/local-battle-only, `STRINGID_DIDNOTLEARNMOVE`/`TRYTOLEARNMOVE*`
-are the move-relearner UI, none reachable from a Factory round). Per #70's
-own precedent, real triage requires the same per-id reachability work (trace
-each `BattleScript_*` label's own call sites for barriers/gating), which is
-out of this bounded step's scope.
+**Reachability triage done** (`docs/issue72-reachability-triage.md`,
+following #70's own per-id method — trace each id's emitting script label(s)
+to their trigger, check static gates, cross-reference Factory L50 singles
+carrier data): **66 REACHABLE, 37 DEAD, 4 MANUAL** of the 107. This is the
+open remainder — DEAD ids (facility gates, no-EXP rentals, zero-carrier
+moves, unimplemented mechanics) are not reopened here; see the triage doc for
+their gate citations.
 
-**Highest-suspicion next pick** (same shape as the just-fixed Taunt pair —
-an "already-has-status"/"can't-use-move-X" family with obvious ordinary-play
-triggers): `STRINGID_PKMNALREADYASLEEP`, `STRINGID_PKMNALREADYCONFUSED`,
-`STRINGID_PKMNALREADYHASBURN`, `STRINGID_PKMNALREADYPOISONED`,
-`STRINGID_PKMNISALREADYPARALYZED` (re-using an already-inflicted status),
-and `STRINGID_PKMNCANTUSEMOVETORMENT`/`STRINGID_PKMNCANTUSEMOVESEALED`
-(Torment/Imprison — literally the same attack-canceler family
-`STRINGID_PKMNCANTUSEMOVETAUNT` was just fixed in, `battleScriptActionAdmission.ts`).
-All seven read `{B_DEF_NAME_WITH_PREFIX}` or `{B_ACTIVE_NAME_WITH_PREFIX}` +
-`{B_CURRENT_MOVE}` only — the same resolver shape already proven for Taunt.
+**REACHABLE (66), ordered by carrier-weight proxy for likely-hit-first —
+name a batch, use the Taunt-pair idiom** (`messageId === "STRINGID_X"` branch
+in `messageLines`, `requireMoveDefender`/`actionSnapshot`-sourced battler,
+staged full-turn repro test, red-verify via `git stash`):
+`STRINGID_PKMNPREVENTSSTATLOSSWITH`, `STRINGID_PKMNWASDEFROSTED`,
+`STRINGID_PKMNSXCUREDITSYPROBLEM`, `STRINGID_PKMNHUNGONWITHX`,
+`STRINGID_PKMNPREVENTSCONFUSIONWITH`, `STRINGID_PKMNISALREADYPARALYZED`,
+`STRINGID_PKMNREGAINEDHEALTH`, `STRINGID_PKMNALREADYCONFUSED`,
+`STRINGID_PKMNSXWOREOFF`, `STRINGID_PKMNFELLINLOVE`,
+`STRINGID_PKMNPREVENTSROMANCEWITH`, `STRINGID_PKMNPROTECTEDBY`,
+`STRINGID_PKMNANCHOREDITSELF`, `STRINGID_PKMNANCHORSITSELFWITH`,
+`STRINGID_PKMNWASDRAGGEDOUT`, `STRINGID_PKMNALREADYASLEEP`,
+`STRINGID_PKMNCUTSATTACKWITH`, `STRINGID_PREVENTEDFROMWORKING`,
+`STRINGID_PKMNSXPREVENTSFLINCHING`, `STRINGID_PKMNSXPREVENTSYLOSS`,
+`STRINGID_PKMNALREADYPOISONED`, `STRINGID_PKMNPREVENTSUSAGE`,
+`STRINGID_PKMNRESTOREDHPUSING`, `STRINGID_PKMNSXMADEYUSELESS`,
+`STRINGID_PKMNLAIDCURSE`, `STRINGID_PKMNTRACED`, `STRINGID_PKMNSXBLOCKSY`,
+`STRINGID_PKMNSXBLOCKSY2`, `STRINGID_PKMNSXMADEITINEFFECTIVE`,
+`STRINGID_PKMNCOPIEDSTATCHANGES`, `STRINGID_PKMNFREEDFROM`,
+`STRINGID_PKMNGOTFREE`, `STRINGID_PKMNSXCUREDYPROBLEM`,
+`STRINGID_PKMNSXINFATUATEDY`, `STRINGID_PKMNALREADYHASBURN`,
+`STRINGID_PKMNSXWHIPPEDUPSANDSTORM`, `STRINGID_PKMNTOOKFOE`,
+`STRINGID_PKMNWASMADEDROWSY`, `STRINGID_PKMNWISHCAMETRUE`,
+`STRINGID_PKMNKNOCKEDOFF`, `STRINGID_PKMNSAFEGUARDEXPIRED`,
+`STRINGID_PKMNUSEDSAFEGUARD`, `STRINGID_PKMNDREAMEATEN`,
+`STRINGID_PKMNSXRESTOREDHPALITTLE2`, `STRINGID_PKMNWASNTAFFECTED`,
+`STRINGID_TARGETCANTESCAPENOW`, `STRINGID_PKMNMOVEISDISABLED`,
+`STRINGID_PKMNMOVEWASDISABLED`, `STRINGID_PKMNTOOKATTACK`,
+`STRINGID_PKMNGOTENCORE`, `STRINGID_PKMNPERISHCOUNTFELL`,
+`STRINGID_PKMNHURTSWITH`, `STRINGID_PKMNIDENTIFIED`,
+`STRINGID_PKMNMOVEBOUNCED`, `STRINGID_PKMNRAISEDSPEED`,
+`STRINGID_PKMNSHROUDEDITSELF`, `STRINGID_STATSWONTDECREASE2`,
+`STRINGID_MAGNITUDESTRENGTH`, `STRINGID_PKMNCHANGEDTYPEWITH`,
+`STRINGID_PKMNFELLINTONIGHTMARE`, `STRINGID_PKMNLOSTPPGRUDGE`,
+`STRINGID_PKMNREDUCEDPP`, `STRINGID_PKMNSITEMRESTOREDPP`,
+`STRINGID_PKMNCOPIEDFOE`, `STRINGID_PKMNHEALEDPARALYSIS`,
+`STRINGID_PKMNSTOLEITEM`.
+
+**MANUAL (4) — not statically decidable, need a settling experiment before a
+verdict, let alone a fix:**
+- `STRINGID_PKMNCANTUSEMOVESEALED` (Imprison attack-canceler print): engine
+  wiring is real (`battleScriptActionAdmission.ts:2588`), but the sole
+  Imprison carrier (`FRONTIER_MON_RALTS`, raw catalog index 5, inside the
+  0-849 L50 boundary) is contradicted by `battle-script-topology.json`'s
+  `level50FactoryReachableEffects`, which lists zero L50 carriers for
+  EFFECT_IMPRISON. Settle with a `factoryLegal`/`mechanicLab` battle-lab
+  trace forcing that exact rental into a draft, or re-run
+  `tools/extract/extract-factory-animation-inventory.ts` with tracing to see
+  why it dropped Imprison.
+- `STRINGID_PLAYERDEFEATEDTRAINER1`, `STRINGID_TRAINER1LOSETEXT`,
+  `STRINGID_TRAINER1WINTEXT` (the Factory win/loss trainer-text triplet):
+  real-source always prints these on an ordinary Factory win/loss, but this
+  engine's `finalizeOrchestration` (`factoryBattleScriptTerminalDecision.ts:
+  612-621`) short-circuits to a coarse `{kind:"terminal",outcome:...}` the
+  instant `battleOutcome` is decided and never resumes the script interpreter
+  at these labels — a real, fixable gap (port the `HandleEndTurn_BattleWon`/
+  `_BattleLost` continuation), not a game-mode dead-end. Settle by porting
+  that continuation and re-censusing, or by an oracle trace of a real
+  Factory win/loss's final tick to confirm the exact text the ROM emits at
+  that boundary before porting.
+
+**Also found, tracked separately:** `STRINGID_PKMNCANTUSEMOVETORMENT` is
+DEAD *today* but not by a game-design gate — this engine's attack-canceler
+phase enum (`battleScriptSourceConstants.ts:69-85`) has no
+`CANCELER_TORMENTED` phase at all (goes `CANCELER_DISABLED` → `CANCELER_TAUNTED`
+directly), even though Torment itself is inflictable with a real 4/850
+carrier. Same fix idiom as the Taunt/Imprison pair (add the missing phase +
+handoff) would make it REACHABLE immediately — folded into the REACHABLE
+batch above is wrong since the printstring itself can't fire yet; fix the
+phase gap first, *then* it joins the batch.
 
 **Leads:** rerun `node --experimental-strip-types tools/report/
 printstring-literal-census.ts` after any `messageLines`/battle-script-program
-change (it is deterministic and re-derives from the tree, not a stale
-snapshot). Full 107-id list + emitting script label(s) + offending
-placeholder(s) in `docs/printstring-literal-census.md`. Fix idiom: the same
-one this entry's Taunt pair used — explicit `messageId === "STRINGID_X"`
-branch in `messageLines`, `requireMoveDefender`/`actionSnapshot`-sourced
-battler, staged full-turn repro test, red-verify via `git stash`.
+change (deterministic, re-derives from the tree). Full 107-id list incl. all
+37 DEAD gates + emitting script label(s) + trigger/carrier evidence in
+`docs/issue72-reachability-triage.md`.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
