@@ -328,6 +328,24 @@ const STATUS_ICON_TIMING = Object.freeze({ minimumFrames: 1 } as const);
 const SWITCH_IN_TIMING = Object.freeze({ minimumFrames: 1 } as const);
 const TURN_END_TIMING = Object.freeze({ minimumFrames: 8 } as const);
 
+/**
+ * `{B_BUFF1}`'s real source for every stat-change message, oracle-confirmed
+ * (`tools/battle-lab/swords-dance-cap-wontincrease-off.json`): `ChangeStatBuffs`'s
+ * `PREPARE_STAT_BUFFER(gBattleTextBuff1, statId)` (battle_script_commands.c:6958)
+ * copies `gStatNamesTable` (battle_message.c:425-443) -- "ATTACK"/"DEFENSE"/
+ * "SPEED"/"SP. ATK"/"SP. DEF" capitalized, "accuracy"/"evasiveness" lowercase --
+ * not `lastStatChange.stat`'s own internal lowercase-always enum string.
+ */
+const STAT_DISPLAY_NAME: Readonly<Record<string, string>> = Object.freeze({
+  "attack": "ATTACK",
+  "defense": "DEFENSE",
+  "speed": "SPEED",
+  "special-attack": "SP. ATK",
+  "special-defense": "SP. DEF",
+  "accuracy": "accuracy",
+  "evasion": "evasiveness",
+});
+
 function singlesBattler(battler: number, context: string): 0 | 1 {
   if (battler === 0 || battler === 1) return battler;
   throw new Error(`${context} cannot present non-singles battler ${battler}`);
@@ -526,6 +544,37 @@ function messageLines(
         rose
           ? amount >= 2 ? "sharply rose!" : "rose!"
           : amount >= 2 ? "harshly fell!" : "fell!",
+    });
+  }
+  if (
+    messageId === "STRINGID_STATSWONTINCREASE"
+    || messageId === "STRINGID_STATSWONTDECREASE"
+  ) {
+    if (!lastStatChange) {
+      throw new Error(
+        "battle resolution stat-change message has no preceding stat event",
+      );
+    }
+    const battler = singlesBattler(lastStatChange.battler, "stat-wont-change message");
+    const displayed = fieldBattler(field, battler);
+    const nameWithPrefix = () => resolveBattleNameWithPrefix({
+      side: battler === 0 ? "player" : "opponent",
+      isTrainerBattle: true,
+      nickname: displayed.name,
+    });
+    const statName = STAT_DISPLAY_NAME[lastStatChange.stat];
+    if (statName === undefined) {
+      throw new Error(`battle resolution stat-wont-change message has unknown stat ${lastStatChange.stat}`);
+    }
+    if (messageId === "STRINGID_STATSWONTINCREASE") {
+      return resolveBattleStringLines(messageId, {
+        B_ATK_NAME_WITH_PREFIX: nameWithPrefix,
+        B_BUFF1: () => statName,
+      });
+    }
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefix,
+      B_BUFF1: () => statName,
     });
   }
   if (messageId === "STRINGID_TARGETFAINTED") {

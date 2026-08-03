@@ -1,0 +1,5875 @@
+{
+  "schemaVersion": 1,
+  "totalFrames": 2896,
+  "battleLab": {
+    "schemaVersion": 1,
+    "mode": "mechanicLab",
+    "profile": "battle-scene-off",
+    "level": 50,
+    "challengeNum": 2,
+    "battleNum": 2,
+    "trainerId": 110,
+    "rentalSwapCount": 0,
+    "rentalRank": 0,
+    "seed": 1,
+    "player": [
+      {
+        "setId": 274,
+        "species": 64,
+        "moves": [
+          94,
+          86,
+          115,
+          105
+        ],
+        "item": 214,
+        "itemTableId": 35,
+        "evSpread": 5,
+        "nature": 15
+      },
+      {
+        "setId": 354,
+        "species": 327,
+        "moves": [
+          12,
+          218,
+          246,
+          332
+        ],
+        "item": 183,
+        "itemTableId": 24,
+        "evSpread": 33,
+        "nature": 3
+      },
+      {
+        "setId": 338,
+        "species": 106,
+        "moves": [
+          25,
+          280,
+          193,
+          317
+        ],
+        "item": 221,
+        "itemTableId": 54,
+        "evSpread": 5,
+        "nature": 3
+      }
+    ],
+    "opponent": [
+      {
+        "setId": 349,
+        "species": 82,
+        "moves": [
+          87,
+          240,
+          86,
+          319
+        ],
+        "item": 141,
+        "itemTableId": 41,
+        "evSpread": 33,
+        "nature": 0
+      },
+      {
+        "setId": 339,
+        "species": 107,
+        "moves": [
+          223,
+          183,
+          197,
+          68
+        ],
+        "item": 187,
+        "itemTableId": 1,
+        "evSpread": 5,
+        "nature": 3
+      },
+      {
+        "setId": 327,
+        "species": 348,
+        "moves": [
+          94,
+          58,
+          322,
+          347
+        ],
+        "item": 221,
+        "itemTableId": 54,
+        "evSpread": 5,
+        "nature": 17
+      }
+    ],
+    "rentalCandidates": [
+      {
+        "setId": 274,
+        "species": 64,
+        "moves": [
+          94,
+          86,
+          115,
+          105
+        ],
+        "item": 214,
+        "itemTableId": 35,
+        "evSpread": 5,
+        "nature": 15
+      },
+      {
+        "setId": 354,
+        "species": 327,
+        "moves": [
+          12,
+          218,
+          246,
+          332
+        ],
+        "item": 183,
+        "itemTableId": 24,
+        "evSpread": 33,
+        "nature": 3
+      },
+      {
+        "setId": 338,
+        "species": 106,
+        "moves": [
+          25,
+          280,
+          193,
+          317
+        ],
+        "item": 221,
+        "itemTableId": 54,
+        "evSpread": 5,
+        "nature": 3
+      },
+      {
+        "setId": 268,
+        "species": 322,
+        "moves": [
+          247,
+          185,
+          109,
+          105
+        ],
+        "item": 141,
+        "itemTableId": 41,
+        "evSpread": 19,
+        "nature": 24
+      },
+      {
+        "setId": 269,
+        "species": 108,
+        "moves": [
+          89,
+          34,
+          247,
+          157
+        ],
+        "item": 133,
+        "itemTableId": 12,
+        "evSpread": 38,
+        "nature": 3
+      },
+      {
+        "setId": 270,
+        "species": 70,
+        "moves": [
+          188,
+          75,
+          79,
+          115
+        ],
+        "item": 198,
+        "itemTableId": 34,
+        "evSpread": 36,
+        "nature": 24
+      }
+    ],
+    "selectedRentalPositions": [
+      0,
+      1,
+      2
+    ],
+    "rentalFillers": [
+      {
+        "setId": 268,
+        "species": 322,
+        "moves": [
+          247,
+          185,
+          109,
+          105
+        ],
+        "item": 141,
+        "itemTableId": 41,
+        "evSpread": 19,
+        "nature": 24
+      },
+      {
+        "setId": 269,
+        "species": 108,
+        "moves": [
+          89,
+          34,
+          247,
+          157
+        ],
+        "item": 133,
+        "itemTableId": 12,
+        "evSpread": 38,
+        "nature": 3
+      },
+      {
+        "setId": 270,
+        "species": 70,
+        "moves": [
+          188,
+          75,
+          79,
+          115
+        ],
+        "item": 198,
+        "itemTableId": 34,
+        "evSpread": 36,
+        "nature": 24
+      }
+    ],
+    "sourceInitialized": true,
+    "customPartiesBuiltBeforeBattle": true,
+    "rangeIndex": 2,
+    "preCheckpointCaptures": []
+  },
+  "captures": [
+    {
+      "frame": 0,
+      "sha256": "4979c64a4515828160b6e0d566eab4b87b734978266e697350381c87d4ba5f52",
+      "state": {
+        "rngValue": 1621732966,
+        "battleOutcome": 0,
+        "weather": 0,
+        "weatherTurns": 0,
+        "sideStatuses": [
+          0,
+          0
+        ],
+        "sideConditions": {
+          "player": {
+            "reflectTurns": 0,
+            "lightScreenTurns": 0,
+            "mistTurns": 0,
+            "safeguardTurns": 0,
+            "spikes": 0
+          },
+          "opponent": {
+            "reflectTurns": 0,
+            "lightScreenTurns": 0,
+            "mistTurns": 0,
+            "safeguardTurns": 0,
+            "spikes": 0
+          }
+        },
+        "battlers": {
+          "player": {
+            "partyIndex": 0,
+            "species": 95,
+            "stats": {
+              "attack": 65,
+              "defense": 180,
+              "speed": 90,
+              "spAttack": 50,
+              "spDefense": 65
+            },
+            "moves": [
+              14,
+              150,
+              0,
+              0
+            ],
+            "statStages": [
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            "ability": 69,
+            "types": [
+              5,
+              4
+            ],
+            "pp": [
+              30,
+              40,
+              0,
+              0
+            ],
+            "ppUps": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "hp": 110,
+            "level": 50,
+            "friendship": 70,
+            "maxHp": 110,
+            "item": 0,
+            "status1": 0,
+            "status": {
+              "kind": "none"
+            },
+            "status2": 0,
+            "status3": 0,
+            "volatile": {
+              "confusionTurns": 0,
+              "leechSeededBy": null,
+              "perishSongTurns": 0
+            }
+          },
+          "opponent": {
+            "partyIndex": 0,
+            "species": 19,
+            "stats": {
+              "attack": 76,
+              "defense": 55,
+              "speed": 77,
+              "spAttack": 30,
+              "spDefense": 55
+            },
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ],
+            "statStages": [
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            "ability": 50,
+            "types": [
+              0,
+              0
+            ],
+            "pp": [
+              40,
+              40,
+              40,
+              40
+            ],
+            "ppUps": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "hp": 105,
+            "level": 50,
+            "friendship": 70,
+            "maxHp": 105,
+            "item": 0,
+            "status1": 0,
+            "status": {
+              "kind": "none"
+            },
+            "status2": 0,
+            "status3": 0,
+            "volatile": {
+              "confusionTurns": 0,
+              "leechSeededBy": null,
+              "perishSongTurns": 0
+            }
+          }
+        },
+        "parties": {
+          "player": [
+            {
+              "species": 95,
+              "level": 50,
+              "experience": 125000,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                14,
+                150,
+                0,
+                0
+              ],
+              "pp": [
+                30,
+                40,
+                0,
+                0
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 69,
+              "types": [
+                5,
+                4
+              ],
+              "friendship": 70,
+              "personality": 2654435775,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 110,
+              "maxHp": 110,
+              "stats": {
+                "attack": 65,
+                "defense": 180,
+                "speed": 90,
+                "spAttack": 50,
+                "spDefense": 65
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 1,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 65,
+              "types": [
+                12,
+                3
+              ],
+              "friendship": 70,
+              "personality": 1013904250,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 120,
+              "maxHp": 120,
+              "stats": {
+                "attack": 69,
+                "defense": 69,
+                "speed": 65,
+                "spAttack": 85,
+                "spDefense": 85
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 4,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 66,
+              "types": [
+                10,
+                10
+              ],
+              "friendship": 70,
+              "personality": 3668340025,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 114,
+              "maxHp": 114,
+              "stats": {
+                "attack": 72,
+                "defense": 63,
+                "speed": 85,
+                "spAttack": 80,
+                "spDefense": 70
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            }
+          ],
+          "opponent": [
+            {
+              "species": 19,
+              "level": 50,
+              "experience": 125000,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                150,
+                150,
+                150,
+                150
+              ],
+              "pp": [
+                40,
+                40,
+                40,
+                40
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 50,
+              "types": [
+                0,
+                0
+              ],
+              "friendship": 70,
+              "personality": 2027808525,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 105,
+              "maxHp": 105,
+              "stats": {
+                "attack": 76,
+                "defense": 55,
+                "speed": 77,
+                "spAttack": 30,
+                "spDefense": 55
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 129,
+              "level": 50,
+              "experience": 156250,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 33,
+              "types": [
+                11,
+                11
+              ],
+              "friendship": 70,
+              "personality": 387277075,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 95,
+              "maxHp": 95,
+              "stats": {
+                "attack": 30,
+                "defense": 75,
+                "speed": 100,
+                "spAttack": 35,
+                "spDefense": 40
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 187,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 34,
+              "types": [
+                12,
+                2
+              ],
+              "friendship": 70,
+              "personality": 3041712750,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 110,
+              "maxHp": 110,
+              "stats": {
+                "attack": 55,
+                "defense": 60,
+                "speed": 70,
+                "spAttack": 55,
+                "spDefense": 75
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            }
+          ]
+        },
+        "engine": {
+          "mainCallback2": 134448161,
+          "activeBattler": 2,
+          "controllerExecFlags": 1,
+          "playerControllerCommand": 18,
+          "opponentControllerCommand": 53,
+          "currentMove": 0
+        }
+      },
+      "file": "frame-00000.png"
+    },
+    {
+      "frame": 230,
+      "sha256": "c9524d1a6d4add5134a47550095a87018d073533bc02f910d471fc15e7963076",
+      "state": {
+        "rngValue": 1621732966,
+        "battleOutcome": 0,
+        "weather": 0,
+        "weatherTurns": 0,
+        "sideStatuses": [
+          0,
+          0
+        ],
+        "sideConditions": {
+          "player": {
+            "reflectTurns": 0,
+            "lightScreenTurns": 0,
+            "mistTurns": 0,
+            "safeguardTurns": 0,
+            "spikes": 0
+          },
+          "opponent": {
+            "reflectTurns": 0,
+            "lightScreenTurns": 0,
+            "mistTurns": 0,
+            "safeguardTurns": 0,
+            "spikes": 0
+          }
+        },
+        "battlers": {
+          "player": {
+            "partyIndex": 0,
+            "species": 95,
+            "stats": {
+              "attack": 65,
+              "defense": 180,
+              "speed": 90,
+              "spAttack": 50,
+              "spDefense": 65
+            },
+            "moves": [
+              14,
+              150,
+              0,
+              0
+            ],
+            "statStages": [
+              6,
+              8,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            "ability": 69,
+            "types": [
+              5,
+              4
+            ],
+            "pp": [
+              29,
+              40,
+              0,
+              0
+            ],
+            "ppUps": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "hp": 110,
+            "level": 50,
+            "friendship": 70,
+            "maxHp": 110,
+            "item": 0,
+            "status1": 0,
+            "status": {
+              "kind": "none"
+            },
+            "status2": 0,
+            "status3": 0,
+            "volatile": {
+              "confusionTurns": 0,
+              "leechSeededBy": null,
+              "perishSongTurns": 0
+            }
+          },
+          "opponent": {
+            "partyIndex": 0,
+            "species": 19,
+            "stats": {
+              "attack": 76,
+              "defense": 55,
+              "speed": 77,
+              "spAttack": 30,
+              "spDefense": 55
+            },
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ],
+            "statStages": [
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            "ability": 50,
+            "types": [
+              0,
+              0
+            ],
+            "pp": [
+              40,
+              40,
+              40,
+              40
+            ],
+            "ppUps": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "hp": 105,
+            "level": 50,
+            "friendship": 70,
+            "maxHp": 105,
+            "item": 0,
+            "status1": 0,
+            "status": {
+              "kind": "none"
+            },
+            "status2": 0,
+            "status3": 0,
+            "volatile": {
+              "confusionTurns": 0,
+              "leechSeededBy": null,
+              "perishSongTurns": 0
+            }
+          }
+        },
+        "parties": {
+          "player": [
+            {
+              "species": 95,
+              "level": 50,
+              "experience": 125000,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                14,
+                150,
+                0,
+                0
+              ],
+              "pp": [
+                29,
+                40,
+                0,
+                0
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 69,
+              "types": [
+                5,
+                4
+              ],
+              "friendship": 70,
+              "personality": 2654435775,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 110,
+              "maxHp": 110,
+              "stats": {
+                "attack": 65,
+                "defense": 180,
+                "speed": 90,
+                "spAttack": 50,
+                "spDefense": 65
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 1,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 65,
+              "types": [
+                12,
+                3
+              ],
+              "friendship": 70,
+              "personality": 1013904250,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 120,
+              "maxHp": 120,
+              "stats": {
+                "attack": 69,
+                "defense": 69,
+                "speed": 65,
+                "spAttack": 85,
+                "spDefense": 85
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 4,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 66,
+              "types": [
+                10,
+                10
+              ],
+              "friendship": 70,
+              "personality": 3668340025,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 114,
+              "maxHp": 114,
+              "stats": {
+                "attack": 72,
+                "defense": 63,
+                "speed": 85,
+                "spAttack": 80,
+                "spDefense": 70
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            }
+          ],
+          "opponent": [
+            {
+              "species": 19,
+              "level": 50,
+              "experience": 125000,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                150,
+                150,
+                150,
+                150
+              ],
+              "pp": [
+                40,
+                40,
+                40,
+                40
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 50,
+              "types": [
+                0,
+                0
+              ],
+              "friendship": 70,
+              "personality": 2027808525,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 105,
+              "maxHp": 105,
+              "stats": {
+                "attack": 76,
+                "defense": 55,
+                "speed": 77,
+                "spAttack": 30,
+                "spDefense": 55
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 129,
+              "level": 50,
+              "experience": 156250,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 33,
+              "types": [
+                11,
+                11
+              ],
+              "friendship": 70,
+              "personality": 387277075,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 95,
+              "maxHp": 95,
+              "stats": {
+                "attack": 30,
+                "defense": 75,
+                "speed": 100,
+                "spAttack": 35,
+                "spDefense": 40
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 187,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 34,
+              "types": [
+                12,
+                2
+              ],
+              "friendship": 70,
+              "personality": 3041712750,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 110,
+              "maxHp": 110,
+              "stats": {
+                "attack": 55,
+                "defense": 60,
+                "speed": 70,
+                "spAttack": 55,
+                "spDefense": 75
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            }
+          ]
+        },
+        "engine": {
+          "mainCallback2": 134448161,
+          "activeBattler": 2,
+          "controllerExecFlags": 0,
+          "playerControllerCommand": 16,
+          "opponentControllerCommand": 53,
+          "currentMove": 14
+        }
+      },
+      "file": "frame-00230.png"
+    },
+    {
+      "frame": 724,
+      "sha256": "62e24e26a9ab45dfd1e8a056ed3147b3413936202c35626256b851254d3dd36a",
+      "state": {
+        "rngValue": 1160559944,
+        "battleOutcome": 0,
+        "weather": 0,
+        "weatherTurns": 0,
+        "sideStatuses": [
+          0,
+          0
+        ],
+        "sideConditions": {
+          "player": {
+            "reflectTurns": 0,
+            "lightScreenTurns": 0,
+            "mistTurns": 0,
+            "safeguardTurns": 0,
+            "spikes": 0
+          },
+          "opponent": {
+            "reflectTurns": 0,
+            "lightScreenTurns": 0,
+            "mistTurns": 0,
+            "safeguardTurns": 0,
+            "spikes": 0
+          }
+        },
+        "battlers": {
+          "player": {
+            "partyIndex": 0,
+            "species": 95,
+            "stats": {
+              "attack": 65,
+              "defense": 180,
+              "speed": 90,
+              "spAttack": 50,
+              "spDefense": 65
+            },
+            "moves": [
+              14,
+              150,
+              0,
+              0
+            ],
+            "statStages": [
+              6,
+              8,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            "ability": 69,
+            "types": [
+              5,
+              4
+            ],
+            "pp": [
+              29,
+              40,
+              0,
+              0
+            ],
+            "ppUps": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "hp": 110,
+            "level": 50,
+            "friendship": 70,
+            "maxHp": 110,
+            "item": 0,
+            "status1": 0,
+            "status": {
+              "kind": "none"
+            },
+            "status2": 0,
+            "status3": 0,
+            "volatile": {
+              "confusionTurns": 0,
+              "leechSeededBy": null,
+              "perishSongTurns": 0
+            }
+          },
+          "opponent": {
+            "partyIndex": 0,
+            "species": 19,
+            "stats": {
+              "attack": 76,
+              "defense": 55,
+              "speed": 77,
+              "spAttack": 30,
+              "spDefense": 55
+            },
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ],
+            "statStages": [
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            "ability": 50,
+            "types": [
+              0,
+              0
+            ],
+            "pp": [
+              40,
+              39,
+              40,
+              40
+            ],
+            "ppUps": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "hp": 105,
+            "level": 50,
+            "friendship": 70,
+            "maxHp": 105,
+            "item": 0,
+            "status1": 0,
+            "status": {
+              "kind": "none"
+            },
+            "status2": 0,
+            "status3": 0,
+            "volatile": {
+              "confusionTurns": 0,
+              "leechSeededBy": null,
+              "perishSongTurns": 0
+            }
+          }
+        },
+        "parties": {
+          "player": [
+            {
+              "species": 95,
+              "level": 50,
+              "experience": 125000,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                14,
+                150,
+                0,
+                0
+              ],
+              "pp": [
+                29,
+                40,
+                0,
+                0
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 69,
+              "types": [
+                5,
+                4
+              ],
+              "friendship": 70,
+              "personality": 2654435775,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 110,
+              "maxHp": 110,
+              "stats": {
+                "attack": 65,
+                "defense": 180,
+                "speed": 90,
+                "spAttack": 50,
+                "spDefense": 65
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 1,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 65,
+              "types": [
+                12,
+                3
+              ],
+              "friendship": 70,
+              "personality": 1013904250,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 120,
+              "maxHp": 120,
+              "stats": {
+                "attack": 69,
+                "defense": 69,
+                "speed": 65,
+                "spAttack": 85,
+                "spDefense": 85
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 4,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 66,
+              "types": [
+                10,
+                10
+              ],
+              "friendship": 70,
+              "personality": 3668340025,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 114,
+              "maxHp": 114,
+              "stats": {
+                "attack": 72,
+                "defense": 63,
+                "speed": 85,
+                "spAttack": 80,
+                "spDefense": 70
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            }
+          ],
+          "opponent": [
+            {
+              "species": 19,
+              "level": 50,
+              "experience": 125000,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                150,
+                150,
+                150,
+                150
+              ],
+              "pp": [
+                40,
+                39,
+                40,
+                40
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 50,
+              "types": [
+                0,
+                0
+              ],
+              "friendship": 70,
+              "personality": 2027808525,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 105,
+              "maxHp": 105,
+              "stats": {
+                "attack": 76,
+                "defense": 55,
+                "speed": 77,
+                "spAttack": 30,
+                "spDefense": 55
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 129,
+              "level": 50,
+              "experience": 156250,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 33,
+              "types": [
+                11,
+                11
+              ],
+              "friendship": 70,
+              "personality": 387277075,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 95,
+              "maxHp": 95,
+              "stats": {
+                "attack": 30,
+                "defense": 75,
+                "speed": 100,
+                "spAttack": 35,
+                "spDefense": 40
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 187,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 34,
+              "types": [
+                12,
+                2
+              ],
+              "friendship": 70,
+              "personality": 3041712750,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 110,
+              "maxHp": 110,
+              "stats": {
+                "attack": 55,
+                "defense": 60,
+                "speed": 70,
+                "spAttack": 55,
+                "spDefense": 75
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            }
+          ]
+        },
+        "engine": {
+          "mainCallback2": 134448161,
+          "activeBattler": 2,
+          "controllerExecFlags": 1,
+          "playerControllerCommand": 18,
+          "opponentControllerCommand": 53,
+          "currentMove": 0
+        }
+      },
+      "file": "frame-00724.png"
+    },
+    {
+      "frame": 1448,
+      "sha256": "62e24e26a9ab45dfd1e8a056ed3147b3413936202c35626256b851254d3dd36a",
+      "state": {
+        "rngValue": 1300148282,
+        "battleOutcome": 0,
+        "weather": 0,
+        "weatherTurns": 0,
+        "sideStatuses": [
+          0,
+          0
+        ],
+        "sideConditions": {
+          "player": {
+            "reflectTurns": 0,
+            "lightScreenTurns": 0,
+            "mistTurns": 0,
+            "safeguardTurns": 0,
+            "spikes": 0
+          },
+          "opponent": {
+            "reflectTurns": 0,
+            "lightScreenTurns": 0,
+            "mistTurns": 0,
+            "safeguardTurns": 0,
+            "spikes": 0
+          }
+        },
+        "battlers": {
+          "player": {
+            "partyIndex": 0,
+            "species": 95,
+            "stats": {
+              "attack": 65,
+              "defense": 180,
+              "speed": 90,
+              "spAttack": 50,
+              "spDefense": 65
+            },
+            "moves": [
+              14,
+              150,
+              0,
+              0
+            ],
+            "statStages": [
+              6,
+              10,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            "ability": 69,
+            "types": [
+              5,
+              4
+            ],
+            "pp": [
+              28,
+              40,
+              0,
+              0
+            ],
+            "ppUps": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "hp": 110,
+            "level": 50,
+            "friendship": 70,
+            "maxHp": 110,
+            "item": 0,
+            "status1": 0,
+            "status": {
+              "kind": "none"
+            },
+            "status2": 0,
+            "status3": 0,
+            "volatile": {
+              "confusionTurns": 0,
+              "leechSeededBy": null,
+              "perishSongTurns": 0
+            }
+          },
+          "opponent": {
+            "partyIndex": 0,
+            "species": 19,
+            "stats": {
+              "attack": 76,
+              "defense": 55,
+              "speed": 77,
+              "spAttack": 30,
+              "spDefense": 55
+            },
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ],
+            "statStages": [
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            "ability": 50,
+            "types": [
+              0,
+              0
+            ],
+            "pp": [
+              39,
+              39,
+              40,
+              40
+            ],
+            "ppUps": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "hp": 105,
+            "level": 50,
+            "friendship": 70,
+            "maxHp": 105,
+            "item": 0,
+            "status1": 0,
+            "status": {
+              "kind": "none"
+            },
+            "status2": 0,
+            "status3": 0,
+            "volatile": {
+              "confusionTurns": 0,
+              "leechSeededBy": null,
+              "perishSongTurns": 0
+            }
+          }
+        },
+        "parties": {
+          "player": [
+            {
+              "species": 95,
+              "level": 50,
+              "experience": 125000,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                14,
+                150,
+                0,
+                0
+              ],
+              "pp": [
+                28,
+                40,
+                0,
+                0
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 69,
+              "types": [
+                5,
+                4
+              ],
+              "friendship": 70,
+              "personality": 2654435775,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 110,
+              "maxHp": 110,
+              "stats": {
+                "attack": 65,
+                "defense": 180,
+                "speed": 90,
+                "spAttack": 50,
+                "spDefense": 65
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 1,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 65,
+              "types": [
+                12,
+                3
+              ],
+              "friendship": 70,
+              "personality": 1013904250,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 120,
+              "maxHp": 120,
+              "stats": {
+                "attack": 69,
+                "defense": 69,
+                "speed": 65,
+                "spAttack": 85,
+                "spDefense": 85
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 4,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 66,
+              "types": [
+                10,
+                10
+              ],
+              "friendship": 70,
+              "personality": 3668340025,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 114,
+              "maxHp": 114,
+              "stats": {
+                "attack": 72,
+                "defense": 63,
+                "speed": 85,
+                "spAttack": 80,
+                "spDefense": 70
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            }
+          ],
+          "opponent": [
+            {
+              "species": 19,
+              "level": 50,
+              "experience": 125000,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                150,
+                150,
+                150,
+                150
+              ],
+              "pp": [
+                39,
+                39,
+                40,
+                40
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 50,
+              "types": [
+                0,
+                0
+              ],
+              "friendship": 70,
+              "personality": 2027808525,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 105,
+              "maxHp": 105,
+              "stats": {
+                "attack": 76,
+                "defense": 55,
+                "speed": 77,
+                "spAttack": 30,
+                "spDefense": 55
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 129,
+              "level": 50,
+              "experience": 156250,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 33,
+              "types": [
+                11,
+                11
+              ],
+              "friendship": 70,
+              "personality": 387277075,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 95,
+              "maxHp": 95,
+              "stats": {
+                "attack": 30,
+                "defense": 75,
+                "speed": 100,
+                "spAttack": 35,
+                "spDefense": 40
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 187,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 34,
+              "types": [
+                12,
+                2
+              ],
+              "friendship": 70,
+              "personality": 3041712750,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 110,
+              "maxHp": 110,
+              "stats": {
+                "attack": 55,
+                "defense": 60,
+                "speed": 70,
+                "spAttack": 55,
+                "spDefense": 75
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            }
+          ]
+        },
+        "engine": {
+          "mainCallback2": 134448161,
+          "activeBattler": 2,
+          "controllerExecFlags": 1,
+          "playerControllerCommand": 18,
+          "opponentControllerCommand": 53,
+          "currentMove": 0
+        }
+      },
+      "file": "frame-01448.png"
+    },
+    {
+      "frame": 2172,
+      "sha256": "62e24e26a9ab45dfd1e8a056ed3147b3413936202c35626256b851254d3dd36a",
+      "state": {
+        "rngValue": 1493602236,
+        "battleOutcome": 0,
+        "weather": 0,
+        "weatherTurns": 0,
+        "sideStatuses": [
+          0,
+          0
+        ],
+        "sideConditions": {
+          "player": {
+            "reflectTurns": 0,
+            "lightScreenTurns": 0,
+            "mistTurns": 0,
+            "safeguardTurns": 0,
+            "spikes": 0
+          },
+          "opponent": {
+            "reflectTurns": 0,
+            "lightScreenTurns": 0,
+            "mistTurns": 0,
+            "safeguardTurns": 0,
+            "spikes": 0
+          }
+        },
+        "battlers": {
+          "player": {
+            "partyIndex": 0,
+            "species": 95,
+            "stats": {
+              "attack": 65,
+              "defense": 180,
+              "speed": 90,
+              "spAttack": 50,
+              "spDefense": 65
+            },
+            "moves": [
+              14,
+              150,
+              0,
+              0
+            ],
+            "statStages": [
+              6,
+              12,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            "ability": 69,
+            "types": [
+              5,
+              4
+            ],
+            "pp": [
+              27,
+              40,
+              0,
+              0
+            ],
+            "ppUps": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "hp": 110,
+            "level": 50,
+            "friendship": 70,
+            "maxHp": 110,
+            "item": 0,
+            "status1": 0,
+            "status": {
+              "kind": "none"
+            },
+            "status2": 0,
+            "status3": 0,
+            "volatile": {
+              "confusionTurns": 0,
+              "leechSeededBy": null,
+              "perishSongTurns": 0
+            }
+          },
+          "opponent": {
+            "partyIndex": 0,
+            "species": 19,
+            "stats": {
+              "attack": 76,
+              "defense": 55,
+              "speed": 77,
+              "spAttack": 30,
+              "spDefense": 55
+            },
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ],
+            "statStages": [
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            "ability": 50,
+            "types": [
+              0,
+              0
+            ],
+            "pp": [
+              39,
+              39,
+              39,
+              40
+            ],
+            "ppUps": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "hp": 105,
+            "level": 50,
+            "friendship": 70,
+            "maxHp": 105,
+            "item": 0,
+            "status1": 0,
+            "status": {
+              "kind": "none"
+            },
+            "status2": 0,
+            "status3": 0,
+            "volatile": {
+              "confusionTurns": 0,
+              "leechSeededBy": null,
+              "perishSongTurns": 0
+            }
+          }
+        },
+        "parties": {
+          "player": [
+            {
+              "species": 95,
+              "level": 50,
+              "experience": 125000,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                14,
+                150,
+                0,
+                0
+              ],
+              "pp": [
+                27,
+                40,
+                0,
+                0
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 69,
+              "types": [
+                5,
+                4
+              ],
+              "friendship": 70,
+              "personality": 2654435775,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 110,
+              "maxHp": 110,
+              "stats": {
+                "attack": 65,
+                "defense": 180,
+                "speed": 90,
+                "spAttack": 50,
+                "spDefense": 65
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 1,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 65,
+              "types": [
+                12,
+                3
+              ],
+              "friendship": 70,
+              "personality": 1013904250,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 120,
+              "maxHp": 120,
+              "stats": {
+                "attack": 69,
+                "defense": 69,
+                "speed": 65,
+                "spAttack": 85,
+                "spDefense": 85
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 4,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 66,
+              "types": [
+                10,
+                10
+              ],
+              "friendship": 70,
+              "personality": 3668340025,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 114,
+              "maxHp": 114,
+              "stats": {
+                "attack": 72,
+                "defense": 63,
+                "speed": 85,
+                "spAttack": 80,
+                "spDefense": 70
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            }
+          ],
+          "opponent": [
+            {
+              "species": 19,
+              "level": 50,
+              "experience": 125000,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                150,
+                150,
+                150,
+                150
+              ],
+              "pp": [
+                39,
+                39,
+                39,
+                40
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 50,
+              "types": [
+                0,
+                0
+              ],
+              "friendship": 70,
+              "personality": 2027808525,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 105,
+              "maxHp": 105,
+              "stats": {
+                "attack": 76,
+                "defense": 55,
+                "speed": 77,
+                "spAttack": 30,
+                "spDefense": 55
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 129,
+              "level": 50,
+              "experience": 156250,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 33,
+              "types": [
+                11,
+                11
+              ],
+              "friendship": 70,
+              "personality": 387277075,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 95,
+              "maxHp": 95,
+              "stats": {
+                "attack": 30,
+                "defense": 75,
+                "speed": 100,
+                "spAttack": 35,
+                "spDefense": 40
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 187,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 34,
+              "types": [
+                12,
+                2
+              ],
+              "friendship": 70,
+              "personality": 3041712750,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 110,
+              "maxHp": 110,
+              "stats": {
+                "attack": 55,
+                "defense": 60,
+                "speed": 70,
+                "spAttack": 55,
+                "spDefense": 75
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            }
+          ]
+        },
+        "engine": {
+          "mainCallback2": 134448161,
+          "activeBattler": 2,
+          "controllerExecFlags": 1,
+          "playerControllerCommand": 18,
+          "opponentControllerCommand": 53,
+          "currentMove": 0
+        }
+      },
+      "file": "frame-02172.png"
+    },
+    {
+      "frame": 2298,
+      "sha256": "36c268121907f0d67da878f31f94921c53c71c6a03313c2d430b99ffd4f1f9e0",
+      "state": {
+        "rngValue": 1493602236,
+        "battleOutcome": 0,
+        "weather": 0,
+        "weatherTurns": 0,
+        "sideStatuses": [
+          0,
+          0
+        ],
+        "sideConditions": {
+          "player": {
+            "reflectTurns": 0,
+            "lightScreenTurns": 0,
+            "mistTurns": 0,
+            "safeguardTurns": 0,
+            "spikes": 0
+          },
+          "opponent": {
+            "reflectTurns": 0,
+            "lightScreenTurns": 0,
+            "mistTurns": 0,
+            "safeguardTurns": 0,
+            "spikes": 0
+          }
+        },
+        "battlers": {
+          "player": {
+            "partyIndex": 0,
+            "species": 95,
+            "stats": {
+              "attack": 65,
+              "defense": 180,
+              "speed": 90,
+              "spAttack": 50,
+              "spDefense": 65
+            },
+            "moves": [
+              14,
+              150,
+              0,
+              0
+            ],
+            "statStages": [
+              6,
+              12,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            "ability": 69,
+            "types": [
+              5,
+              4
+            ],
+            "pp": [
+              26,
+              40,
+              0,
+              0
+            ],
+            "ppUps": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "hp": 110,
+            "level": 50,
+            "friendship": 70,
+            "maxHp": 110,
+            "item": 0,
+            "status1": 0,
+            "status": {
+              "kind": "none"
+            },
+            "status2": 0,
+            "status3": 0,
+            "volatile": {
+              "confusionTurns": 0,
+              "leechSeededBy": null,
+              "perishSongTurns": 0
+            }
+          },
+          "opponent": {
+            "partyIndex": 0,
+            "species": 19,
+            "stats": {
+              "attack": 76,
+              "defense": 55,
+              "speed": 77,
+              "spAttack": 30,
+              "spDefense": 55
+            },
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ],
+            "statStages": [
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            "ability": 50,
+            "types": [
+              0,
+              0
+            ],
+            "pp": [
+              39,
+              39,
+              39,
+              40
+            ],
+            "ppUps": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "hp": 105,
+            "level": 50,
+            "friendship": 70,
+            "maxHp": 105,
+            "item": 0,
+            "status1": 0,
+            "status": {
+              "kind": "none"
+            },
+            "status2": 0,
+            "status3": 0,
+            "volatile": {
+              "confusionTurns": 0,
+              "leechSeededBy": null,
+              "perishSongTurns": 0
+            }
+          }
+        },
+        "parties": {
+          "player": [
+            {
+              "species": 95,
+              "level": 50,
+              "experience": 125000,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                14,
+                150,
+                0,
+                0
+              ],
+              "pp": [
+                26,
+                40,
+                0,
+                0
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 69,
+              "types": [
+                5,
+                4
+              ],
+              "friendship": 70,
+              "personality": 2654435775,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 110,
+              "maxHp": 110,
+              "stats": {
+                "attack": 65,
+                "defense": 180,
+                "speed": 90,
+                "spAttack": 50,
+                "spDefense": 65
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 1,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 65,
+              "types": [
+                12,
+                3
+              ],
+              "friendship": 70,
+              "personality": 1013904250,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 120,
+              "maxHp": 120,
+              "stats": {
+                "attack": 69,
+                "defense": 69,
+                "speed": 65,
+                "spAttack": 85,
+                "spDefense": 85
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 4,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 66,
+              "types": [
+                10,
+                10
+              ],
+              "friendship": 70,
+              "personality": 3668340025,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 114,
+              "maxHp": 114,
+              "stats": {
+                "attack": 72,
+                "defense": 63,
+                "speed": 85,
+                "spAttack": 80,
+                "spDefense": 70
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            }
+          ],
+          "opponent": [
+            {
+              "species": 19,
+              "level": 50,
+              "experience": 125000,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                150,
+                150,
+                150,
+                150
+              ],
+              "pp": [
+                39,
+                39,
+                39,
+                40
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 50,
+              "types": [
+                0,
+                0
+              ],
+              "friendship": 70,
+              "personality": 2027808525,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 105,
+              "maxHp": 105,
+              "stats": {
+                "attack": 76,
+                "defense": 55,
+                "speed": 77,
+                "spAttack": 30,
+                "spDefense": 55
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 129,
+              "level": 50,
+              "experience": 156250,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 33,
+              "types": [
+                11,
+                11
+              ],
+              "friendship": 70,
+              "personality": 387277075,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 95,
+              "maxHp": 95,
+              "stats": {
+                "attack": 30,
+                "defense": 75,
+                "speed": 100,
+                "spAttack": 35,
+                "spDefense": 40
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 187,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 34,
+              "types": [
+                12,
+                2
+              ],
+              "friendship": 70,
+              "personality": 3041712750,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 110,
+              "maxHp": 110,
+              "stats": {
+                "attack": 55,
+                "defense": 60,
+                "speed": 70,
+                "spAttack": 55,
+                "spDefense": 75
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            }
+          ]
+        },
+        "engine": {
+          "mainCallback2": 134448161,
+          "activeBattler": 2,
+          "controllerExecFlags": 0,
+          "playerControllerCommand": 16,
+          "opponentControllerCommand": 53,
+          "currentMove": 14
+        }
+      },
+      "file": "frame-02298.png"
+    },
+    {
+      "frame": 2316,
+      "sha256": "36c268121907f0d67da878f31f94921c53c71c6a03313c2d430b99ffd4f1f9e0",
+      "state": {
+        "rngValue": 1493602236,
+        "battleOutcome": 0,
+        "weather": 0,
+        "weatherTurns": 0,
+        "sideStatuses": [
+          0,
+          0
+        ],
+        "sideConditions": {
+          "player": {
+            "reflectTurns": 0,
+            "lightScreenTurns": 0,
+            "mistTurns": 0,
+            "safeguardTurns": 0,
+            "spikes": 0
+          },
+          "opponent": {
+            "reflectTurns": 0,
+            "lightScreenTurns": 0,
+            "mistTurns": 0,
+            "safeguardTurns": 0,
+            "spikes": 0
+          }
+        },
+        "battlers": {
+          "player": {
+            "partyIndex": 0,
+            "species": 95,
+            "stats": {
+              "attack": 65,
+              "defense": 180,
+              "speed": 90,
+              "spAttack": 50,
+              "spDefense": 65
+            },
+            "moves": [
+              14,
+              150,
+              0,
+              0
+            ],
+            "statStages": [
+              6,
+              12,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            "ability": 69,
+            "types": [
+              5,
+              4
+            ],
+            "pp": [
+              26,
+              40,
+              0,
+              0
+            ],
+            "ppUps": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "hp": 110,
+            "level": 50,
+            "friendship": 70,
+            "maxHp": 110,
+            "item": 0,
+            "status1": 0,
+            "status": {
+              "kind": "none"
+            },
+            "status2": 0,
+            "status3": 0,
+            "volatile": {
+              "confusionTurns": 0,
+              "leechSeededBy": null,
+              "perishSongTurns": 0
+            }
+          },
+          "opponent": {
+            "partyIndex": 0,
+            "species": 19,
+            "stats": {
+              "attack": 76,
+              "defense": 55,
+              "speed": 77,
+              "spAttack": 30,
+              "spDefense": 55
+            },
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ],
+            "statStages": [
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            "ability": 50,
+            "types": [
+              0,
+              0
+            ],
+            "pp": [
+              39,
+              39,
+              39,
+              40
+            ],
+            "ppUps": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "hp": 105,
+            "level": 50,
+            "friendship": 70,
+            "maxHp": 105,
+            "item": 0,
+            "status1": 0,
+            "status": {
+              "kind": "none"
+            },
+            "status2": 0,
+            "status3": 0,
+            "volatile": {
+              "confusionTurns": 0,
+              "leechSeededBy": null,
+              "perishSongTurns": 0
+            }
+          }
+        },
+        "parties": {
+          "player": [
+            {
+              "species": 95,
+              "level": 50,
+              "experience": 125000,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                14,
+                150,
+                0,
+                0
+              ],
+              "pp": [
+                26,
+                40,
+                0,
+                0
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 69,
+              "types": [
+                5,
+                4
+              ],
+              "friendship": 70,
+              "personality": 2654435775,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 110,
+              "maxHp": 110,
+              "stats": {
+                "attack": 65,
+                "defense": 180,
+                "speed": 90,
+                "spAttack": 50,
+                "spDefense": 65
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 1,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 65,
+              "types": [
+                12,
+                3
+              ],
+              "friendship": 70,
+              "personality": 1013904250,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 120,
+              "maxHp": 120,
+              "stats": {
+                "attack": 69,
+                "defense": 69,
+                "speed": 65,
+                "spAttack": 85,
+                "spDefense": 85
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 4,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 66,
+              "types": [
+                10,
+                10
+              ],
+              "friendship": 70,
+              "personality": 3668340025,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 114,
+              "maxHp": 114,
+              "stats": {
+                "attack": 72,
+                "defense": 63,
+                "speed": 85,
+                "spAttack": 80,
+                "spDefense": 70
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            }
+          ],
+          "opponent": [
+            {
+              "species": 19,
+              "level": 50,
+              "experience": 125000,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                150,
+                150,
+                150,
+                150
+              ],
+              "pp": [
+                39,
+                39,
+                39,
+                40
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 50,
+              "types": [
+                0,
+                0
+              ],
+              "friendship": 70,
+              "personality": 2027808525,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 105,
+              "maxHp": 105,
+              "stats": {
+                "attack": 76,
+                "defense": 55,
+                "speed": 77,
+                "spAttack": 30,
+                "spDefense": 55
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 129,
+              "level": 50,
+              "experience": 156250,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 33,
+              "types": [
+                11,
+                11
+              ],
+              "friendship": 70,
+              "personality": 387277075,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 95,
+              "maxHp": 95,
+              "stats": {
+                "attack": 30,
+                "defense": 75,
+                "speed": 100,
+                "spAttack": 35,
+                "spDefense": 40
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 187,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 34,
+              "types": [
+                12,
+                2
+              ],
+              "friendship": 70,
+              "personality": 3041712750,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 110,
+              "maxHp": 110,
+              "stats": {
+                "attack": 55,
+                "defense": 60,
+                "speed": 70,
+                "spAttack": 55,
+                "spDefense": 75
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            }
+          ]
+        },
+        "engine": {
+          "mainCallback2": 134448161,
+          "activeBattler": 2,
+          "controllerExecFlags": 0,
+          "playerControllerCommand": 16,
+          "opponentControllerCommand": 53,
+          "currentMove": 14
+        }
+      },
+      "file": "frame-02316.png"
+    },
+    {
+      "frame": 2334,
+      "sha256": "36c268121907f0d67da878f31f94921c53c71c6a03313c2d430b99ffd4f1f9e0",
+      "state": {
+        "rngValue": 1493602236,
+        "battleOutcome": 0,
+        "weather": 0,
+        "weatherTurns": 0,
+        "sideStatuses": [
+          0,
+          0
+        ],
+        "sideConditions": {
+          "player": {
+            "reflectTurns": 0,
+            "lightScreenTurns": 0,
+            "mistTurns": 0,
+            "safeguardTurns": 0,
+            "spikes": 0
+          },
+          "opponent": {
+            "reflectTurns": 0,
+            "lightScreenTurns": 0,
+            "mistTurns": 0,
+            "safeguardTurns": 0,
+            "spikes": 0
+          }
+        },
+        "battlers": {
+          "player": {
+            "partyIndex": 0,
+            "species": 95,
+            "stats": {
+              "attack": 65,
+              "defense": 180,
+              "speed": 90,
+              "spAttack": 50,
+              "spDefense": 65
+            },
+            "moves": [
+              14,
+              150,
+              0,
+              0
+            ],
+            "statStages": [
+              6,
+              12,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            "ability": 69,
+            "types": [
+              5,
+              4
+            ],
+            "pp": [
+              26,
+              40,
+              0,
+              0
+            ],
+            "ppUps": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "hp": 110,
+            "level": 50,
+            "friendship": 70,
+            "maxHp": 110,
+            "item": 0,
+            "status1": 0,
+            "status": {
+              "kind": "none"
+            },
+            "status2": 0,
+            "status3": 0,
+            "volatile": {
+              "confusionTurns": 0,
+              "leechSeededBy": null,
+              "perishSongTurns": 0
+            }
+          },
+          "opponent": {
+            "partyIndex": 0,
+            "species": 19,
+            "stats": {
+              "attack": 76,
+              "defense": 55,
+              "speed": 77,
+              "spAttack": 30,
+              "spDefense": 55
+            },
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ],
+            "statStages": [
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            "ability": 50,
+            "types": [
+              0,
+              0
+            ],
+            "pp": [
+              39,
+              39,
+              39,
+              40
+            ],
+            "ppUps": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "hp": 105,
+            "level": 50,
+            "friendship": 70,
+            "maxHp": 105,
+            "item": 0,
+            "status1": 0,
+            "status": {
+              "kind": "none"
+            },
+            "status2": 0,
+            "status3": 0,
+            "volatile": {
+              "confusionTurns": 0,
+              "leechSeededBy": null,
+              "perishSongTurns": 0
+            }
+          }
+        },
+        "parties": {
+          "player": [
+            {
+              "species": 95,
+              "level": 50,
+              "experience": 125000,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                14,
+                150,
+                0,
+                0
+              ],
+              "pp": [
+                26,
+                40,
+                0,
+                0
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 69,
+              "types": [
+                5,
+                4
+              ],
+              "friendship": 70,
+              "personality": 2654435775,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 110,
+              "maxHp": 110,
+              "stats": {
+                "attack": 65,
+                "defense": 180,
+                "speed": 90,
+                "spAttack": 50,
+                "spDefense": 65
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 1,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 65,
+              "types": [
+                12,
+                3
+              ],
+              "friendship": 70,
+              "personality": 1013904250,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 120,
+              "maxHp": 120,
+              "stats": {
+                "attack": 69,
+                "defense": 69,
+                "speed": 65,
+                "spAttack": 85,
+                "spDefense": 85
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 4,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 66,
+              "types": [
+                10,
+                10
+              ],
+              "friendship": 70,
+              "personality": 3668340025,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 114,
+              "maxHp": 114,
+              "stats": {
+                "attack": 72,
+                "defense": 63,
+                "speed": 85,
+                "spAttack": 80,
+                "spDefense": 70
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            }
+          ],
+          "opponent": [
+            {
+              "species": 19,
+              "level": 50,
+              "experience": 125000,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                150,
+                150,
+                150,
+                150
+              ],
+              "pp": [
+                39,
+                39,
+                39,
+                40
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 50,
+              "types": [
+                0,
+                0
+              ],
+              "friendship": 70,
+              "personality": 2027808525,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 105,
+              "maxHp": 105,
+              "stats": {
+                "attack": 76,
+                "defense": 55,
+                "speed": 77,
+                "spAttack": 30,
+                "spDefense": 55
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 129,
+              "level": 50,
+              "experience": 156250,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 33,
+              "types": [
+                11,
+                11
+              ],
+              "friendship": 70,
+              "personality": 387277075,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 95,
+              "maxHp": 95,
+              "stats": {
+                "attack": 30,
+                "defense": 75,
+                "speed": 100,
+                "spAttack": 35,
+                "spDefense": 40
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 187,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 34,
+              "types": [
+                12,
+                2
+              ],
+              "friendship": 70,
+              "personality": 3041712750,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 110,
+              "maxHp": 110,
+              "stats": {
+                "attack": 55,
+                "defense": 60,
+                "speed": 70,
+                "spAttack": 55,
+                "spDefense": 75
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            }
+          ]
+        },
+        "engine": {
+          "mainCallback2": 134448161,
+          "activeBattler": 2,
+          "controllerExecFlags": 0,
+          "playerControllerCommand": 16,
+          "opponentControllerCommand": 53,
+          "currentMove": 14
+        }
+      },
+      "file": "frame-02334.png"
+    },
+    {
+      "frame": 2352,
+      "sha256": "36c268121907f0d67da878f31f94921c53c71c6a03313c2d430b99ffd4f1f9e0",
+      "state": {
+        "rngValue": 1493602236,
+        "battleOutcome": 0,
+        "weather": 0,
+        "weatherTurns": 0,
+        "sideStatuses": [
+          0,
+          0
+        ],
+        "sideConditions": {
+          "player": {
+            "reflectTurns": 0,
+            "lightScreenTurns": 0,
+            "mistTurns": 0,
+            "safeguardTurns": 0,
+            "spikes": 0
+          },
+          "opponent": {
+            "reflectTurns": 0,
+            "lightScreenTurns": 0,
+            "mistTurns": 0,
+            "safeguardTurns": 0,
+            "spikes": 0
+          }
+        },
+        "battlers": {
+          "player": {
+            "partyIndex": 0,
+            "species": 95,
+            "stats": {
+              "attack": 65,
+              "defense": 180,
+              "speed": 90,
+              "spAttack": 50,
+              "spDefense": 65
+            },
+            "moves": [
+              14,
+              150,
+              0,
+              0
+            ],
+            "statStages": [
+              6,
+              12,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            "ability": 69,
+            "types": [
+              5,
+              4
+            ],
+            "pp": [
+              26,
+              40,
+              0,
+              0
+            ],
+            "ppUps": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "hp": 110,
+            "level": 50,
+            "friendship": 70,
+            "maxHp": 110,
+            "item": 0,
+            "status1": 0,
+            "status": {
+              "kind": "none"
+            },
+            "status2": 0,
+            "status3": 0,
+            "volatile": {
+              "confusionTurns": 0,
+              "leechSeededBy": null,
+              "perishSongTurns": 0
+            }
+          },
+          "opponent": {
+            "partyIndex": 0,
+            "species": 19,
+            "stats": {
+              "attack": 76,
+              "defense": 55,
+              "speed": 77,
+              "spAttack": 30,
+              "spDefense": 55
+            },
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ],
+            "statStages": [
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            "ability": 50,
+            "types": [
+              0,
+              0
+            ],
+            "pp": [
+              39,
+              39,
+              39,
+              40
+            ],
+            "ppUps": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "hp": 105,
+            "level": 50,
+            "friendship": 70,
+            "maxHp": 105,
+            "item": 0,
+            "status1": 0,
+            "status": {
+              "kind": "none"
+            },
+            "status2": 0,
+            "status3": 0,
+            "volatile": {
+              "confusionTurns": 0,
+              "leechSeededBy": null,
+              "perishSongTurns": 0
+            }
+          }
+        },
+        "parties": {
+          "player": [
+            {
+              "species": 95,
+              "level": 50,
+              "experience": 125000,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                14,
+                150,
+                0,
+                0
+              ],
+              "pp": [
+                26,
+                40,
+                0,
+                0
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 69,
+              "types": [
+                5,
+                4
+              ],
+              "friendship": 70,
+              "personality": 2654435775,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 110,
+              "maxHp": 110,
+              "stats": {
+                "attack": 65,
+                "defense": 180,
+                "speed": 90,
+                "spAttack": 50,
+                "spDefense": 65
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 1,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 65,
+              "types": [
+                12,
+                3
+              ],
+              "friendship": 70,
+              "personality": 1013904250,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 120,
+              "maxHp": 120,
+              "stats": {
+                "attack": 69,
+                "defense": 69,
+                "speed": 65,
+                "spAttack": 85,
+                "spDefense": 85
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 4,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 66,
+              "types": [
+                10,
+                10
+              ],
+              "friendship": 70,
+              "personality": 3668340025,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 114,
+              "maxHp": 114,
+              "stats": {
+                "attack": 72,
+                "defense": 63,
+                "speed": 85,
+                "spAttack": 80,
+                "spDefense": 70
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            }
+          ],
+          "opponent": [
+            {
+              "species": 19,
+              "level": 50,
+              "experience": 125000,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                150,
+                150,
+                150,
+                150
+              ],
+              "pp": [
+                39,
+                39,
+                39,
+                40
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 50,
+              "types": [
+                0,
+                0
+              ],
+              "friendship": 70,
+              "personality": 2027808525,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 105,
+              "maxHp": 105,
+              "stats": {
+                "attack": 76,
+                "defense": 55,
+                "speed": 77,
+                "spAttack": 30,
+                "spDefense": 55
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 129,
+              "level": 50,
+              "experience": 156250,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 33,
+              "types": [
+                11,
+                11
+              ],
+              "friendship": 70,
+              "personality": 387277075,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 95,
+              "maxHp": 95,
+              "stats": {
+                "attack": 30,
+                "defense": 75,
+                "speed": 100,
+                "spAttack": 35,
+                "spDefense": 40
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 187,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 34,
+              "types": [
+                12,
+                2
+              ],
+              "friendship": 70,
+              "personality": 3041712750,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 110,
+              "maxHp": 110,
+              "stats": {
+                "attack": 55,
+                "defense": 60,
+                "speed": 70,
+                "spAttack": 55,
+                "spDefense": 75
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            }
+          ]
+        },
+        "engine": {
+          "mainCallback2": 134448161,
+          "activeBattler": 2,
+          "controllerExecFlags": 0,
+          "playerControllerCommand": 16,
+          "opponentControllerCommand": 53,
+          "currentMove": 14
+        }
+      },
+      "file": "frame-02352.png"
+    },
+    {
+      "frame": 2896,
+      "sha256": "670a0cd537ea70bdad15217a3a373cad7f38a493e92e95ac176ccd8847f0e2c1",
+      "state": {
+        "rngValue": 956753998,
+        "battleOutcome": 0,
+        "weather": 0,
+        "weatherTurns": 0,
+        "sideStatuses": [
+          0,
+          0
+        ],
+        "sideConditions": {
+          "player": {
+            "reflectTurns": 0,
+            "lightScreenTurns": 0,
+            "mistTurns": 0,
+            "safeguardTurns": 0,
+            "spikes": 0
+          },
+          "opponent": {
+            "reflectTurns": 0,
+            "lightScreenTurns": 0,
+            "mistTurns": 0,
+            "safeguardTurns": 0,
+            "spikes": 0
+          }
+        },
+        "battlers": {
+          "player": {
+            "partyIndex": 0,
+            "species": 95,
+            "stats": {
+              "attack": 65,
+              "defense": 180,
+              "speed": 90,
+              "spAttack": 50,
+              "spDefense": 65
+            },
+            "moves": [
+              14,
+              150,
+              0,
+              0
+            ],
+            "statStages": [
+              6,
+              12,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            "ability": 69,
+            "types": [
+              5,
+              4
+            ],
+            "pp": [
+              26,
+              40,
+              0,
+              0
+            ],
+            "ppUps": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "hp": 110,
+            "level": 50,
+            "friendship": 70,
+            "maxHp": 110,
+            "item": 0,
+            "status1": 0,
+            "status": {
+              "kind": "none"
+            },
+            "status2": 0,
+            "status3": 0,
+            "volatile": {
+              "confusionTurns": 0,
+              "leechSeededBy": null,
+              "perishSongTurns": 0
+            }
+          },
+          "opponent": {
+            "partyIndex": 0,
+            "species": 19,
+            "stats": {
+              "attack": 76,
+              "defense": 55,
+              "speed": 77,
+              "spAttack": 30,
+              "spDefense": 55
+            },
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ],
+            "statStages": [
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            "ability": 50,
+            "types": [
+              0,
+              0
+            ],
+            "pp": [
+              39,
+              39,
+              38,
+              40
+            ],
+            "ppUps": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "hp": 105,
+            "level": 50,
+            "friendship": 70,
+            "maxHp": 105,
+            "item": 0,
+            "status1": 0,
+            "status": {
+              "kind": "none"
+            },
+            "status2": 0,
+            "status3": 0,
+            "volatile": {
+              "confusionTurns": 0,
+              "leechSeededBy": null,
+              "perishSongTurns": 0
+            }
+          }
+        },
+        "parties": {
+          "player": [
+            {
+              "species": 95,
+              "level": 50,
+              "experience": 125000,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                14,
+                150,
+                0,
+                0
+              ],
+              "pp": [
+                26,
+                40,
+                0,
+                0
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 69,
+              "types": [
+                5,
+                4
+              ],
+              "friendship": 70,
+              "personality": 2654435775,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 110,
+              "maxHp": 110,
+              "stats": {
+                "attack": 65,
+                "defense": 180,
+                "speed": 90,
+                "spAttack": 50,
+                "spDefense": 65
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 1,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 65,
+              "types": [
+                12,
+                3
+              ],
+              "friendship": 70,
+              "personality": 1013904250,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 120,
+              "maxHp": 120,
+              "stats": {
+                "attack": 69,
+                "defense": 69,
+                "speed": 65,
+                "spAttack": 85,
+                "spDefense": 85
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 4,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 66,
+              "types": [
+                10,
+                10
+              ],
+              "friendship": 70,
+              "personality": 3668340025,
+              "gender": "male",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 114,
+              "maxHp": 114,
+              "stats": {
+                "attack": 72,
+                "defense": 63,
+                "speed": 85,
+                "spAttack": 80,
+                "spDefense": 70
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            }
+          ],
+          "opponent": [
+            {
+              "species": 19,
+              "level": 50,
+              "experience": 125000,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                150,
+                150,
+                150,
+                150
+              ],
+              "pp": [
+                39,
+                39,
+                38,
+                40
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 50,
+              "types": [
+                0,
+                0
+              ],
+              "friendship": 70,
+              "personality": 2027808525,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 105,
+              "maxHp": 105,
+              "stats": {
+                "attack": 76,
+                "defense": 55,
+                "speed": 77,
+                "spAttack": 30,
+                "spDefense": 55
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 129,
+              "level": 50,
+              "experience": 156250,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 33,
+              "types": [
+                11,
+                11
+              ],
+              "friendship": 70,
+              "personality": 387277075,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 95,
+              "maxHp": 95,
+              "stats": {
+                "attack": 30,
+                "defense": 75,
+                "speed": 100,
+                "spAttack": 35,
+                "spDefense": 40
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            },
+            {
+              "species": 187,
+              "level": 50,
+              "experience": 117360,
+              "nature": 0,
+              "ivs": {
+                "hp": 31,
+                "attack": 31,
+                "defense": 31,
+                "speed": 31,
+                "spAttack": 31,
+                "spDefense": 31
+              },
+              "evs": {
+                "hp": 0,
+                "attack": 0,
+                "defense": 0,
+                "speed": 0,
+                "spAttack": 0,
+                "spDefense": 0
+              },
+              "moves": [
+                33,
+                33,
+                33,
+                33
+              ],
+              "pp": [
+                35,
+                35,
+                35,
+                35
+              ],
+              "ppUps": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "item": 0,
+              "abilitySlot": 0,
+              "ability": 34,
+              "types": [
+                12,
+                2
+              ],
+              "friendship": 70,
+              "personality": 3041712750,
+              "gender": "female",
+              "shiny": false,
+              "otId": 416049562,
+              "hp": 110,
+              "maxHp": 110,
+              "stats": {
+                "attack": 55,
+                "defense": 60,
+                "speed": 70,
+                "spAttack": 55,
+                "spDefense": 75
+              },
+              "status1": 0,
+              "status": {
+                "kind": "none"
+              },
+              "checksumValid": true
+            }
+          ]
+        },
+        "engine": {
+          "mainCallback2": 134448161,
+          "activeBattler": 2,
+          "controllerExecFlags": 1,
+          "playerControllerCommand": 18,
+          "opponentControllerCommand": 53,
+          "currentMove": 0
+        }
+      },
+      "file": "frame-02896.png"
+    }
+  ]
+}
