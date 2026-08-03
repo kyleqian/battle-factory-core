@@ -38,9 +38,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `{B_DEF_NAME_WITH_PREFIX}` from 3 different battler roles -- self-heal,
   Present's opponent-target heal, Wish's frozen-at-cast battler -- needs its
   own investigation, not one shared shape). ISSUES #72 REACHABLE list
-  trimmed to the remaining 56 (heading corrected 66→56: the pre-batch list
-  actually enumerated 67 distinct ids against the triage doc's own 66 count,
-  a pre-existing off-by-one noted but not chased down).
+  trimmed to the remaining 55.
+  **[supervisor correction, ~16:50]** the worker's "pre-batch list had 67"
+  recount was itself the miscount — `git show 49763783:ISSUES.md` enumerates
+  exactly 66 unique ids, matching the triage doc; 66 − 11 = 55, and the
+  post-batch list body already contained exactly 55 (verified unique-counted).
+  Headings/intro corrected 56→55 in the same docs pass. Also recorded here:
+  the typeref re-scope scout merged at `6848d2ca` (docs-only,
+  §4.1 revised slices 2-8, shim-by-call-site-cluster shape; entry-889
+  blockage resolved; slice 3 dispatched to the side lane ~16:40).
 - **Next:** ISSUES #72 batch 2, starting from `STRINGID_PKMNHUNGONWITHX`
   (now the top of the ranked REACHABLE list) — the FocusBand/OHKO-accuracy
   pair needs a seed search or an alternate deterministic staging approach

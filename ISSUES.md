@@ -114,7 +114,7 @@ animation lane's rung-3 dispatcher (`frontSendOutFrameAtTick` + OAM/anim-frame
 side, §5 of the consumer-map doc) stays open and is a prerequisite for Slice
 D only.
 
-## #72 — battleStringResolver completeness-guard gaps: 56 REACHABLE printstring STRINGIDs need the Taunt-pair fix idiom
+## #72 — battleStringResolver completeness-guard gaps: 55 REACHABLE printstring STRINGIDs need the Taunt-pair fix idiom
 
 **Symptom:** the same-day user-reported crash (2026-08-03, opponent MURKROW's
 TAUNT: `battleStringResolver: STRINGID_PKMNFELLFORTAUNT references placeholder
@@ -137,7 +137,7 @@ carrier data): 66 REACHABLE, 37 DEAD, 4 MANUAL of the original 107 (the list
 below actually enumerated 67 distinct ids pre-batch — a pre-existing
 off-by-one against the triage doc's own count, not introduced or chased down
 this batch); 11 of the REACHABLE ids are now fixed (batch 1 below), leaving
-**56 REACHABLE**. DEAD ids (facility gates, no-EXP rentals, zero-carrier
+**55 REACHABLE**. DEAD ids (facility gates, no-EXP rentals, zero-carrier
 moves, unimplemented mechanics) are not reopened here; see the triage doc for
 their gate citations.
 
@@ -161,7 +161,7 @@ Present's opponent-target heal, Wish's frozen-at-cast battler) — needs its
 own per-context investigation, not the single shared `requireMoveDefender`
 shape the rest of this batch used.
 
-**REACHABLE (56), ordered by carrier-weight proxy for likely-hit-first —
+**REACHABLE (55), ordered by carrier-weight proxy for likely-hit-first —
 name a batch, use the Taunt-pair idiom** (`messageId === "STRINGID_X"` branch
 in `messageLines`, `requireMoveDefender`/`actionSnapshot`-sourced battler,
 staged full-turn repro test, red-verify via `git stash`):
