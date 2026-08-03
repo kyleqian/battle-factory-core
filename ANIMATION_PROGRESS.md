@@ -1,5 +1,222 @@
 # Animation coverage
 
+## Back `BACK_ANIM_SHRINK_GROW` triple accepted (2026-08-03)
+
+**State:** exact for the fifth bounded player-back set: **5/25 back sets,
+15/75 selector variants, 55/376 Factory mappings**. The generated set is
+exactly **3 mappings / 3 Factory / 0 outside** — DITTO, GLIGAR, OCTILLERY.
+All three nature callbacks are accepted through the live species +
+party-nature seam: Factory record 54 Hardy/mod-0 is fast and record 361
+Quirky/mod-1 is normal; Gligar Modest/mod-2 slow is staged-only because no
+set in this species group has natureMod 2. Overall move coverage remains
+**107/276 exact, 0 partial, 0 staged, 169 unsupported**; `ANIMATION_COVERAGE.json`
+is unchanged at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Did:** ported source-relative `Anim_ShrinkGrow_Fast`, `Anim_ShrinkGrow`,
+`Anim_ShrinkGrow_Slow`, and shared `ShrinkGrow`: initializer guard/order,
+`HandleStartAffineAnim`, C integer duration/y2 rules, signed GBA Sin and
+affine math, phase wrapping, OAM/matrix timing, `WaitAnimEnd`, and terminal
+task restoration. Added source/census/routing/reducer/evidence Tier-1 pins
+and a Scene-ON dense probe retaining every framebuffer hash plus sprite RAM,
+OAM, and affine state. No friendship/species/tick production branches.
+
+**Evidence:** six fresh receipts, paired by `cmp`, dense through
+`SpriteCallbackDummy`: Ditto index 54 fast **1837..1920 / 84 frames, 38,542 B,
+`03d766da9a7ddc9c1a2a7c1f258dc001497d160f2dbff22713e30ed816cd4157`**;
+Octillery index 361 normal **1841..1892 / 52, 23,831 B,
+`2f75ee331dd01188bb987713b6bba3ad83f0a3d91f055aa22854bf27c8299718`**;
+staged Gligar Modest slow **1838..1937 / 100, 45,820 B,
+`1a1f6caf910d7c5158ac1b2b5ef0b083a292bf92222f60ba12365716560a2580`**.
+
+**Verification / next:** focused reducer/evidence/source/census checks **2
+files / 11 tests**, `npx tsc --noEmit`, and coverage are green. Full
+`npm test`: **655 files / 6,506 passed / 1 skipped**; `npm run build`: **green,
+552 modules transformed**. Next source-ranked unsupported player-back set is
+**`BACK_ANIM_GROW` (set 6), 3 Factory mappings / 0 outside — WIGGLYTUFF,
+KOFFING, WEEZING**. No move status was promoted.
+
+## Back `BACK_ANIM_H_SPRING_REPEATED` triple accepted (2026-08-03)
+
+**State:** exact for the fourth bounded player-back set: **4/25 back sets,
+12/75 selector variants, 52/376 Factory mappings**. The generated set is
+exactly **2 mappings / 2 Factory / 0 outside** — LUVDISC and CARVANHA. All
+three nature callbacks are accepted through the live species + party-nature
+seam: Hardy/mod-0 fast is staged legal only, while Factory LUVDISC index 123
+Relaxed/mod-1 is normal and Factory CARVANHA index 86 Quiet/mod-2 is slow.
+Overall move coverage remains **107/276 exact, 0 partial, 0 staged, 169
+unsupported**; `ANIMATION_COVERAGE.json` is unchanged at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Did:** ported the source-relative repeated `HorizontalRepeatedSpring`
+initializer/helper lifecycle with signed GBA Sin/affine math, callback
+boundaries, task zero/preserve/restore, and no friendship/species/tick
+production branches. Added Tier-1 reducer/routing/source/census tests and a
+Scene-ON dense probe/fixture receipt set.
+
+**Evidence:** six fresh `tools/run-mgba-probe.py` receipts, paired by `cmp`,
+dense through `SpriteCallbackDummy` with every frame's RGB hash, sprite RAM,
+OAM, and affine matrix: staged Luvdisc Hardy fast **1839..1906 / 68 frames,
+32,584 B, `58a82e8b83c4507b68ccf1247f4c37370560cdac866c1e58a54e455872bcab8b`**;
+Factory Luvdisc index 123 Relaxed normal **1839..1906 / 68, 32,087 B,
+`d2b0b2692734ca7acc903cfe2d9a7f461ad55a1c2d2df0c30daaba433a210202`**;
+Factory Carvanha index 86 Quiet slow **1840..1907 / 68, 32,522 B,
+`396db95ffe2208e9cb88a860d60cc0c26553770e90f0ddebb5a01435edf4eed8`**.
+
+**Verification / next:** focused repeated reducer/evidence/source/boundary
+checks **3 files / 14 tests**, `npx tsc --noEmit`, and coverage are green;
+full `npm test`: **653 files / 6,495 passed / 1 skipped**; `npm run build`:
+**green, 552 modules transformed**. Next source-ranked unsupported player-back
+set is **`BACK_ANIM_SHRINK_GROW` (set 5), 3 Factory mappings / 0 outside —
+DITTO, GLIGAR, OCTILLERY**. No move status was promoted.
+
+## Back `BACK_ANIM_H_SPRING` triple accepted (2026-08-03)
+
+**State:** exact for the third bounded player-back set: **3/25 back sets,
+9/75 selector variants, 50/376 Factory mappings**. `BACK_ANIM_H_SPRING` is
+**2 mappings / 2 Factory / 0 outside** — SURSKIT and FEEBAS. Overall move
+coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**;
+`ANIMATION_COVERAGE.json` is byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Did:** added source-faithful `HorizontalSpring` plus all three entry points
+to `src/animation/backSendOutAnim.ts`: normal **data7=0/data6=8/data5=512/
+data4=8**, fast **8/512/16**, slow **4/256/16**; first-invocation
+`HandleStartAffineAnim`, signed-s16 Sin/write reducers, affine OAM
+double→normal lifecycle, terminal `WaitAnimEnd`, and task zero/preserve/
+restore semantics. `TryFlipX` remains pinned absent. `BACK_ANIM_H_SLIDE` is
+the accepted predecessor; `BACK_ANIM_H_SPRING_REPEATED` (LUVDISC/CARVANHA)
+remains an explicit unsupported adjacent control.
+
+**Evidence:** six fresh Scene-ON `tools/run-mgba-probe.py` runs, paired by
+`cmp`, dense from initializer through `SpriteCallbackDummy`: staged SURSKIT
+Hardy/mod-0 fast (not a real rental route) **1839..1906 / 68 frames,
+31,872 B, `7f97f6722c47b6454b4067e57462aaa42dc404f6e11d5d6ea5f2ff7ad9920c40`**;
+real SURSKIT index **42** Relaxed/normal **1839..1906 / 68,
+31,422 B, `42d5f4d5c54f9958d23560de7bc54a69f03d9e3559f26aa70325311e212669ec`**;
+real FEEBAS index **7** Lonely/slow **1838..1905 / 68,
+31,862 B, `0ecde341e47881a57393cbacedc5b722d3be4c42bef9e92d0d47d9155badd6ff`**.
+All use complete legal three-mon parties with scaffold IDs
+`[154,135,188]` / `[156,149,180]`; indices 42/7 are staged via overrides
+because they are below challenge-0's legal scaffold range.
+
+**Verification / next:** focused spring/slide/vibrate + selector/source
+pins + both ratchets: **10 files / 70 tests green**; `npx tsc --noEmit` and
+`npm run animation:coverage` green with unchanged digest; final `npm test`:
+**651 files / 6,484 passed / 1 skipped**, and `npm run build`: **green, 552
+modules transformed**. Next source-ranked
+unsupported player-back set: **`BACK_ANIM_H_SPRING_REPEATED` (set 4), 2
+Factory mappings / 0 outside — LUVDISC and CARVANHA**. No live dispatcher
+wiring or move status was promoted; no baked pixels or absolute-tick lookup.
+
+## Back `BACK_ANIM_H_SLIDE` triple accepted (2026-08-03)
+
+**State:** exact for a second bounded player-back set: **2/25 back sets,
+6/75 selector variants, 48/376 Factory mappings**. Set 2 is **31 mappings /
+31 Factory / 0 outside-Factory** — IVYSAUR, CATERPIE, WEEDLE, ODDISH, GLOOM,
+PARAS, PSYDUCK, TENTACOOL, TENTACRUEL, SLOWPOKE, FARFETCHD, DEWGONG,
+EXEGGCUTE, HITMONLEE, LICKITUNG, DRATINI, BAYLEEF, ARIADOS, SUDOWOODO,
+SUNFLORA, QUAGSIRE, CORSOLA, REMORAID, MANTINE, SMEARGLE, SMOOCHUM,
+MILTANK, MUDKIP, LOTAD, SLAKOTH, RELICANTH. This remains reducer/evidence
+coverage only; no live battle dispatcher wiring is claimed.
+
+**Did:** added the explicit back route for `LaunchAnimationTaskForBackSprite`
+set 2: nature mods select fast `ANIM_H_SLIDE_FAST` (data0 20), normal
+`ANIM_H_SLIDE` (40), or slow `ANIM_H_SLIDE_SLOW` (80), each initializer calls
+the shared `HorizontalSlide` immediately before installing it. The separate
+back reducer pins task zero/preserve/restore, `sDontFlip` plus both source
+`TryFlipX` no-ops, signed-s16 `Sin`/x2 writes, terminal x2 clear,
+WaitAnimEnd, and SpriteCallbackDummy restoration; no front-family assertion
+is reused. Tests pin the generated global **25/75/386/376/10** census and
+adjacent H-vibrate/H-spring controls.
+
+**Evidence:** TENTACRUEL source records span every selector: index **434**
+Impish → fast, **722** Quirky → normal, **626** Modest → slow. Complete legal
+three-mon-per-side Scene-ON mechanicLab overrides use legal scaffold IDs
+`[154,135,188]` / `[156,149,180]` because those high source records are
+outside challenge-0's source range. Two independent dense mGBA receipts per
+selector are byte-identical from selected initializer through dummy: fast
+**1842..1865 (24 frames), 11,273 B,
+44813ac0bc52abe9cad62ea8b6c019fb04a25363044f5496563cc0e161f1ee8e**;
+normal **1842..1885 (44 frames), 20,199 B,
+86eb4b5b1cedf5e267797f4f9eaf6831fde1b10a63a316cc6f55cd2b3302fcac**;
+slow **1842..1925 (84 frames), 38,114 B,
+db6b09b14767a8a3932a228a771cdbf5511efc92ade18d1320e87f2d52a717d3**.
+Distinct sibling verdict: Factory BAYLEEF index **180**, Docile → normal,
+uses literal legal player base ID 180 with unique-item legal teams
+`[180,154,135]` / `[156,149,188]` and complete source-move override; its
+fresh pair is **1839..1882 (44 frames), 20,200 B,
+241db20d259d1b3d4d2d7d122c350a20ad9c131b2fc3e1fb49487ae70c807432**.
+
+**Next:** source-ranked unsupported player-back set `BACK_ANIM_H_SPRING`
+(set 3), independently scoped and evidenced.
+
+**Notes:** focused reducer/evidence/source/extraction/boundary and
+executable-frontier ratchets, `npx tsc --noEmit`, full `npm test` (649 files,
+6,473 passed / 1 skipped), and `npm run build` are green.
+`ANIMATION_COVERAGE.json` remains unchanged at
+SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+No move status was promoted; no canonical framebuffer lookup, absolute-tick
+fitting, or baked interactive pixels were added.
+
+## Back `BACK_ANIM_H_VIBRATE` triple accepted (2026-08-03)
+
+**State:** exact for one bounded player-back set: **1/25 back sets, 3/75
+selector variants, 17/376 Factory mappings** (17 total / 0 outside-Factory)
+— BEEDRILL, NINETALES, GASTLY, HAUNTER, PORYGON, MISDREAVUS, PORYGON2,
+NINJASK, KECLEON, SABLEYE, VIBRAVA, DUSKULL, DUSCLOPS, SHUPPET, BANETTE,
+LATIAS, and LATIOS. This does not claim overall send-out completion; front
+coverage remains separately complete and 24 back sets remain unsupported.
+`ANIMATION_COVERAGE.json` is unchanged at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`;
+no move status was promoted.
+
+**Did:** added the explicit source-faithful species+nature back seam
+(`src/animation/backSendOutAnim.ts`) rather than reusing front acceptance:
+`GetSpeciesBackAnimSet`'s one-based-to-zero-based route, the complete global
+25/75/386/376/10 census, `LaunchAnimationTaskForBackSprite`'s `3 * set +
+natureMod` selector, all three H-vibrate amplitudes (Fastest 12 / Fast 9 /
+normal 6), task zero/preserve/restore state, `sDontFlip`, C-truncated signed
+s16 writes, no affine/flip lifecycle, `WaitAnimEnd`, and dummy terminal are
+source-pinned. Focused reducer/census/source/evidence tests also pin adjacent
+H_SLIDE and DIP_RIGHT_SIDE controls, generated selector extraction, and the
+animation import boundary.
+
+**Evidence:** BEEDRILL is a legal Factory representative. Fresh complete
+three-Pokémon-per-side Scene-ON mechanicLab parties select nature-mod 0 Hardy
+→ `ANIM_H_VIBRATE_FASTEST`, mod 1 Bold → `ANIM_H_VIBRATE_FAST`, and mod 2
+Lonely → `ANIM_H_VIBRATE`. Two independent `tools/run-mgba-probe.py` receipts
+per nature are byte-identical through active-to-dummy: Fastest
+**1840..1883 (44 frames), 20,737 B,
+3818da227b178358ac3fa0c58fe7cddb500e0bb56d7827de11ba99208bd51bbe**;
+Fast **1840..1883 (44 frames), 20,588 B,
+cc2fcfe92395c4bb9db03179e898046270cbf56a3b11aa33f5068bab98faed74**;
+normal **1840..1883 (44 frames), 20,367 B,
+e8b967069b23d04c8f524ed9c799ac22bea67af1b865c6f9ff10ac69c5fd7012**.
+Each receipt pins every callback/RAM/OAM/RGB-hash frame, including static
+normal-affine OAM and the task's `[0,0,15,0,0,0,0,0]` dummy restoration.
+The required distinct sibling spot-check is the Factory source record
+`FRONTIER_MON_GASTLY` **set/index 92**, `NATURE_LONELY`, which selects the
+normal `ANIM_H_VIBRATE` route. The oracle's challenge-0 Level-50 rental
+planner rejects literal set 92 because that challenge's legal source range
+starts at 110, so the receipt uses the established legal scaffold IDs
+`[154,135,188]` while its complete-party override stages Gastly set 92's
+species, nature, and source moves. Two fresh `tools/run-mgba-probe.py`
+receipts are byte-identical and dense from the first active callback through
+`SpriteCallbackDummy`: **1838..1881 (44 frames), 20,367 B, SHA-256
+`d18ef99788612633f1f9fd1436234dfd5ef399beba66c78f01dd74378d180f09`**.
+
+**Next:** source-ranked unsupported back set **`BACK_ANIM_H_SLIDE`** (set 2):
+**31 mappings / 31 Factory / 0 outside**, with its three nature-selected
+variants requiring independent source, reducer, and dense Scene-ON evidence.
+
+**Notes:** focused reducer/census/source/evidence/extraction/boundary sweep
+including the Gastly sibling pair is green; `npx tsc --noEmit`,
+`npm run animation:coverage`, and the full `npm test` (**647 files, 6,457
+passed, 1 skipped / 6,458 total**) are green. `npm run build` is green (552
+modules transformed). No canonical framebuffer lookup, absolute-tick image
+fitting, or interactive screenshot asset was added.
+
 ## Front `ANIM_FRONT_FLIP` family accepted (2026-08-03)
 
 **State:** exact reducer/evidence coverage for the complete generated selector
