@@ -56,6 +56,7 @@ export type SpeciesFrontAnimFamily =
   | "GROW_VIBRATE"
   | "GROW_IN_STAGES"
   | "GLOW_BLACK"
+  | "GLOW_BLUE"
   | "GLOW_ORANGE"
   | "RISING_WOBBLE"
   | "LUNGE_GROW"
@@ -119,6 +120,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "GROW_VIBRATE",
   "GROW_IN_STAGES",
   "GLOW_BLACK",
+  "GLOW_BLUE",
   "GLOW_ORANGE",
   "RISING_WOBBLE",
   "LUNGE_GROW",
@@ -1024,6 +1026,23 @@ export const GLOW_BLACK_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze
 /** There are no black-glow mappings outside the Factory rental pool. */
 export const GLOW_BLACK_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   GLOW_BLACK_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All source selector mappings for the palette-only `ANIM_GLOW_BLUE`. */
+export const GLOW_BLUE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_GLOW_BLUE")
+    .map(([species]) => species),
+);
+
+/** Every blue-glow mapping is reachable through Factory rentals. */
+export const GLOW_BLUE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  GLOW_BLUE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no blue-glow mappings outside the Factory rental pool. */
+export const GLOW_BLUE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  GLOW_BLUE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /** All source selector mappings for the palette-only `ANIM_GLOW_ORANGE`. */
@@ -6203,6 +6222,22 @@ export const GLOW_BLACK_ENTRY = Object.freeze({
   accepted: true,
 } as const);
 
+/** Source selector 34's task-installed direct callback receipt. */
+export const GLOW_BLUE_ENTRY = Object.freeze({
+  selector: "ANIM_GLOW_BLUE",
+  sourceId: 34,
+  taskZeroedData2: true,
+  taskZeroedData6: true,
+  taskZeroedData7: true,
+  callbackInstalled: "Anim_GlowBlue",
+  callbackInvokedByInitializer: false,
+  colorIncrement: 12,
+  speed: 2,
+  blendColor: 0x7c00,
+  normalFrontDontFlip: true,
+  accepted: true,
+} as const);
+
 /** Source selector 32's task-installed direct callback receipt. */
 export const GLOW_ORANGE_ENTRY = Object.freeze({
   selector: "ANIM_GLOW_ORANGE",
@@ -6219,7 +6254,7 @@ export const GLOW_ORANGE_ENTRY = Object.freeze({
   accepted: true,
 } as const);
 
-type GlowColorCallback = "Anim_GlowBlack" | "Anim_GlowOrange";
+type GlowColorCallback = "Anim_GlowBlack" | "Anim_GlowBlue" | "Anim_GlowOrange";
 
 interface GlowColorFrame<
   TCallback extends GlowColorCallback,
@@ -6245,6 +6280,7 @@ interface GlowColorFrame<
 }
 
 export type GlowBlackFrame = GlowColorFrame<"Anim_GlowBlack", 0>;
+export type GlowBlueFrame = GlowColorFrame<"Anim_GlowBlue", 0x7c00>;
 export type GlowOrangeFrame = GlowColorFrame<"Anim_GlowOrange", 0x02df>;
 
 interface GlowColorConfig<
@@ -6264,6 +6300,13 @@ const GLOW_BLACK_CONFIG = {
   blendColor: 0,
 } as const satisfies GlowColorConfig<"Anim_GlowBlack", 0>;
 
+const GLOW_BLUE_CONFIG = {
+  callback: "Anim_GlowBlue",
+  colorIncrement: 12,
+  speed: 2,
+  blendColor: 0x7c00,
+} as const satisfies GlowColorConfig<"Anim_GlowBlue", 0x7c00>;
+
 const GLOW_ORANGE_CONFIG = {
   callback: "Anim_GlowOrange",
   colorIncrement: 12,
@@ -6273,7 +6316,7 @@ const GLOW_ORANGE_CONFIG = {
 
 /**
  * Source-order normal-front port of `GlowColor(color, colorIncrement, speed)`
- * (`pokemon_animation.c:911-939,1539-1560`). Both accepted selectors enter
+ * (`pokemon_animation.c:911-939,1539-1560`). All accepted selectors enter
  * through the same task-zeroed direct callback: callback zero captures
  * `OBJ_PLTT_ID(oam.paletteNum)`; active callbacks write a signed GBA sine
  * coefficient to all 16 OBJ-palette entries; the strict `data2 > 128` guard
@@ -6347,6 +6390,18 @@ export function glowBlackFrameAtTick(
   paletteNum = 0,
 ): GlowBlackFrame | null {
   return glowColorFrameAtTick(ticksSinceStart, paletteNum, GLOW_BLACK_CONFIG);
+}
+
+/**
+ * Source-order normal-front port of selector 34's
+ * `GlowColor(RGB_BLUE, 12, 2)` expansion. Its two-step signed `data2`
+ * progression has 65 active callbacks (0..128) and terminal callback 65.
+ */
+export function glowBlueFrameAtTick(
+  ticksSinceStart: number,
+  paletteNum = 0,
+): GlowBlueFrame | null {
+  return glowColorFrameAtTick(ticksSinceStart, paletteNum, GLOW_BLUE_CONFIG);
 }
 
 /**
@@ -6887,6 +6942,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = glowBlackFrameAtTick(129);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_GlowBlack did not restore its palette at the terminal boundary");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "GLOW_BLUE": {
+      const terminal = glowBlueFrameAtTick(65);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_GlowBlue did not restore its palette at the terminal boundary");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }

@@ -135,6 +135,7 @@ describe("ANIM_GLOW_ORANGE", () => {
       "ANIM_GLOW_ORANGE",
     ]);
     expect(speciesFrontIdleRestOffset("GASTLY")).toEqual({ x2: 0, y2: 0 });
-    expect(speciesFrontIdleRestOffset("MILOTIC")).toBeNull();
+    expect(speciesFrontIdleRestOffset("MILOTIC")).toEqual({ x2: 0, y2: 0 });
+    expect(speciesFrontIdleRestOffset("PIDGEOT")).toBeNull();
   });
 });
