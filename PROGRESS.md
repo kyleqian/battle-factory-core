@@ -4,6 +4,58 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 878 — [bounded MAIN worker, 2026-08-02] species-dossier slice 7 LANDED (family-B Sitrus anchor/geometry de-hardcoding)
+
+- **State:** master `a29fd795` (one commit on top of `f49e0b27` — base
+  drifted from session start `fef2b77e`, a side-lane merge landed
+  mid-session, same shared-master pattern noted in prior entries). Full
+  `npm test`: **633 files / 6,376 passed / 1 skipped** (unchanged from
+  base). `npm run build` green (tsc -b + vite). Differential
+  (`compare:differential`, base `f49e0b27`): **PASS, 985/985 captures
+  byte-identical** — 110/82/181/133/110/241/128, every brief-cited count
+  matched exactly (turn5-sitrus-a/b/c/d, turn5-faint, turn5-switchin,
+  battle-command-generated-off).
+- **Did:** per `docs/species-render-entry-point-retirement-design.md` §4
+  row 7, §1.3B, §5 traps 1/3. `turn5ResolutionAdapter.ts` now exposes
+  three RAM-probed facts as adapter-owned exports (same hosting precedent
+  as its existing `PIDGEOTTO_COMMAND_MENU_REDRAW_TICK`): `Turn5SitrusAdapter.
+  procTriggerRamTick` (6872, the real Sitrus-proc-trigger RAM tick),
+  `Turn5SitrusAdapter.onFieldCenter` ({x:72,y:88}, Onix's on-field screen
+  center the ring/stars anchor to — the generic per-battler field-geometry
+  catalog, `battleCommandFieldArt.ts`, isn't reachable from this staged-
+  machine-state adapter, so this took the brief's documented-literal-fact
+  fallback), and `Turn5SwitchInAdapter.materializeSettleTick` (6828,
+  Pidgeotto's switch-in materialize settle). `battleScene.ts`'s
+  `ONIX_SITRUS_IDENTITY_RENDER_TICK` (the shared epoch all seven family-B
+  wrappers — `onixSitrusRotateMatrix`, `turn5GrantingStarPlacement`,
+  `turn5SitrusHealTextVisibleChars`, `turn5SitrusOnixHp`,
+  `turn5SitrusResettledBounceTick`, `onixSitrusTintCoeff`,
+  `turn5SitrusRingMatrix` — key off, per trap 1), `TURN5_SITRUS_RING_CENTER`,
+  and `TURN5_PIDGEOTTO_SETTLE_TICK` (feeding `turn5PidgeottoHealthboxSlideDx`)
+  now derive from those adapter facts instead of hand-derived module
+  constants — all moved in the same commit per trap 1. Trap 3 (lag
+  asymmetry): kept rotate's own +2 render lag and the ring/stars' own +1
+  render lag as two separately named constants
+  (`ONIX_SITRUS_ROTATE_RENDER_LAG`/`TURN5_SITRUS_RING_RENDER_LAG`) with a
+  runtime guard asserting they stay exactly 1 apart — only the rotate lag
+  drives the shared epoch (matching what `heldItemHeal.ts`'s own
+  `SITRUS_ITEM_*_FIRST_AGE` constants were fit against), so the ring/star
+  fact is preserved as its own named constant rather than silently merged
+  into one lag or used to compute a second, drifting epoch. All numeric
+  values unchanged (6872, 72/88, 6828) — this moves ownership, not fit.
+  `turn5SitrusResettledBounceTick` keys off a separate constant
+  (`TURN5_SITRUS_MENU_REDRAW_TICK`, 7222) not among the three anchors the
+  brief named, so it needed no change — confirmed by grep before scoping.
+- **Next:** wrapper renames to species-neutral names (item 4, in scope
+  only if the diff stays reviewable) were left as the honest remainder —
+  ran out of budget after the anchor de-hardcoding landed clean. Slice 4
+  (capstone `renderSceneOffTurnView` convergence) is now the LAST
+  remaining species-dossier slice (1/2/3/5/6/7 all landed).
+- **Notes:** `tests/executableFrontierRatchet.test.ts` untouched and
+  green — no new recording imports, no barrier-count changes. No ISSUES
+  entries touched this step (not in scope).
+
+---
 ## 877 — [bounded MAIN worker, 2026-08-02] species-dossier slice 3 LANDED (family-A HP-drain closed-form generalization)
 
 - **State:** master `bb5289b2` (one commit on top of `40dcddff`). Full
@@ -112,57 +164,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   existing shadow-equivalence suite pins the generic path), 6-slice plan;
   its slices 3/4b collide with species-dossier slice 7's file region →
   serialized on main, never concurrent. Side worktree/branch cleaned.
-
----
-## 875 — [bounded MAIN worker, 2026-08-02] species-dossier slice 5 LANDED (turn-15 Onix gate cluster + family-H party literal)
-
-- **State:** master `1c144a1c` (one commit on top of `537110fd`). Full
-  `npm test`: **633 files / 6,376 passed / 1 skipped** (unchanged from
-  base — naming/threading only, no new tests needed). `npm run build`
-  green (tsc -b + vite). Differential (`compare:differential`, 13-trace
-  window list from the brief, base `537110fd`): **PASS, 1,544/1,544
-  captures byte-identical** — 256 (fly-strike), 43/43, 46/46, 16/16,
-  144/144, 195/195 (rung pairs), 200/200 × 2 (party-select pair), every
-  count matching or exceeding the brief.
-- **Did:** per `docs/species-render-entry-point-retirement-design.md` §4
-  row 5, §1.3H. Renamed the six grep-confirmed single-caller turn-15 gate
-  functions to species-neutral names, threading their species-scoped
-  constants as explicit parameters from the sole caller
-  (`drawTurn15FlyStrikeWindow`) instead of closing over them — mirroring
-  the rank-4 "caller passes its own staged stat" idiom, same shape as
-  `dragonBreathGrovyleHp`'s `startHp`/`endHp` params:
-  `turn15OnixInvisible`→`turn15StrikeTargetInvisible(t, pulseStartTick,
-  pulseEndTick, pulsePeriod)`, `turn15MurkrowInvisible`→
-  `turn15StrikeAttackerInvisible(t, revealTick)`, `turn15OnixShakeX2`→
-  `turn15StrikeTargetShakeX2(t, magnitude, ramTicks)`,
-  `turn15OnixHealthboxWobbleY2`→`turn15StrikeTargetHealthboxWobbleY2(t,
-  wobbleStartTick, wobbleTicks)`, `turn15OnixHp`→`turn15StrikeTargetHp(t,
-  startHp)`, `turn15OnixSinkSkipRows`→`turn15FaintSinkSkipRows(t,
-  sinkStartTick, sinkRate)`. The previously-inline literal window
-  boundaries (19107/19134/4/19075) are now named module constants passed
-  at the call site, matching the file's existing convention. No formula
-  change — every number is identical, this is naming + parameter
-  threading only. Family H: collapsed the duplicated
-  `(["ONIX","MAGBY","BAYLEEF"] as const)` literal (identical in
-  `drawTurn15PartySelectList`/`drawTurn15PartyListObjMask`) into one
-  named `TURN15_CANONICAL_PARTY_SPECIES` module constant; gating logic
-  unchanged (deeper H retirement — reading the roster from real party
-  state — stays out of scope per the brief).
-- **Next:** slice 6 (Grovyle/Kabuto intro materialize primitive, family
-  E) is the next ladder-independent slice; slices 3/4 (family-A HP-drain,
-  capstone `renderSceneOffTurnView`) and slice 7 (family-B Sitrus anchor)
-  remain after that. Turn-14's own `turn14MurkrowInvisible` stays
-  untouched (different window/adapter, explicitly excluded by the brief).
-- **Notes:** `tests/executableFrontierRatchet.test.ts` untouched and
-  green — no new recording imports, no barrier-count changes. No ISSUES
-  entries touched this step (not in scope).
-- **[supervisor addendum, ~22:35]** slice 5 verified (600/600 spot
-  differential, old names fully gone). **ISSUES #62 CLOSED** — side probe
-  merged (`c19b3ad8`, `docs/issue62-hpbar-probe.md`): verdict (b), the
-  187-frame HP-bar family is route divergence, not a presentation bug —
-  kernel-rendered fraction exactly matches kernel-tracked HP at all 9
-  sampled frames; the gap is kernel-vs-oracle battle state, fully formed
-  before either fixture's first captured frame (earlier-turn fork). All
-  314 red frames now settled/inherent; entry deleted (census + probe docs
-  are the forensic record). Side worktree/branch cleaned.
 
