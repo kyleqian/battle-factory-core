@@ -1,4 +1,38 @@
 ---
+## 883 — [supervisor wind-down, 2026-08-03 ~02:30] species-dossier 6/7 + three same-night user-bug fixes + #70 batch-1; final union green
+
+- **State:** master `70c58ae2` = final animation fold (front flip +
+  ANIM_GLOW_BLUE + horizontal pivot families). Final union verified by
+  supervisor: full `npm test` **6,424 passed / 1 skipped**, `npm run build`
+  green. DEFERRED.md: no entries. Open backlog: **#70 batch-2** (31
+  unranked ids + INTROSENDOUT extractor gap), **#39** (shrunk: dossier 6/7
+  + typeref design banked), **#55** (parked). #56 settled, #62/#68/#69
+  deleted-as-fixed this session.
+- **Session (15 workers: 9 main + 6 side, 1 cap-kill salvaged, 0 lost):**
+  dossier slices 1+2/3/5/6/7 presentation-neutral (slice 4 capstone
+  DEFERRED to next session — §4 row 4); typeref retirement design banked
+  (6-slice plan; 1+2 landable, 3/4b's dossier-7 gate now lifted); #62
+  CLOSED (route divergence); #56 audit caught + same-night fixed the
+  MAGNETON 703→702 stallLag regression, then SETTLED; live user play
+  reports triaged→probed→fixed same-night: #68 TORMENT string (+ #70
+  class discovered via its insurance sweep), #69 banner cadence
+  (74.6→90.6 f/banner vs ROM 92; RNG exonerated 25/25); #70 batch-1
+  (15 STRINGIDs + scriptingBattler event field + end-of-turn cure-name
+  gap, 8 staged repro tests).
+- **Next session (ordered):** (1) #70 batch-2 reachable-string mappings
+  (docs/issue70-stringid-reachability.md rows below top-8); (2) dossier
+  slice 4 capstone; (3) typeref slices 1-2 (dead-cut + P/Q fold), then
+  3/4a/4b/5. All briefs re-derivable from the banked design docs.
+- **Notes:** play-preview worktree (`.worktrees/play-preview`, port 5199)
+  serving `70c58ae2` — INTENTIONAL, exclude from stale sweeps.
+  `animation-main` remains a moving branch (live animation supervisor +
+  nested worker `worker/animation-20260803-014242` at wind-down) — fold at
+  next orient. Ledger-race rule adopted after one bite: never stage
+  ISSUES.md/PROGRESS.md in the main tree while a main-lane worker is live.
+  One app-differential temp worktree may linger under /var/folders —
+  `git worktree prune` at next orient if present.
+
+---
 ## 882 — [bounded MAIN worker, 2026-08-03] ISSUES #70 batch 1 — ranked top-8 presentation-string rows (15 STRINGIDs) FIXED
 
 - **State:** master `fba78340` (one commit on top of `5b2cddf4`). Full

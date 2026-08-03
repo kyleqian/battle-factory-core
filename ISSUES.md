@@ -55,10 +55,11 @@ oracle window twice fresh, and a sibling-species spot-check per promoted
 function.
 
 **Sequencing:** filed 2026-08-03 at user request so the main lane sees this
-work. The user has **not** reprioritized it above the queued #70 remainder /
-dossier slice 4 / typeref slices — it slots after those unless reordered.
+work. The user has **not** reprioritized it above the queued #70
+`STRINGID_INTROSENDOUT` extractor-gap remainder / dossier slice 4 / typeref
+slices — it slots after those unless reordered.
 
-## #70 — Presentation-string completeness: 12 unmapped STRINGID refs remain reachable; 1 real extractor gap
+## #70 — Presentation-string completeness: 1 real extractor gap remains (STRINGID_INTROSENDOUT)
 
 **Batch 1 (ranked rows 1-8 of `docs/issue70-stringid-reachability.md`'s "Ranked
 top-N by crash risk" table, 15 ids) FIXED** (2026-08-03, see PROGRESS entry
@@ -127,36 +128,78 @@ fires the gap — red-verified once via `git stash` on the two touched engine
 files: threw battleStringResolver's exact completeness-guard error
 pre-fix).
 
-**Still open — 12 of the original 31 unranked ids, same fix shape
-(`messageLines` branch + `prepareMessage` substitution where needed + repro
-test), per-id emitting context already root-caused in
-`docs/issue70-stringid-reachability.md`'s per-id table (do not re-derive):**
-- Ability-prevention family (rows 6-10, `preventionCall`,
-  `battleScriptHitChainOpcode.ts:3262-3292`): `PKMNPREVENTSPOISONINGWITH`,
+**Batch 3 (the final 12 of the original 31 unranked ids) FIXED** (2026-08-03):
+same fix shape (`messageLines` branch + `prepareMessage` substitution),
+closing #70's string-mapping work entirely bar the extractor gap below.
+- Ability-prevention family (rows 6-10, `PKMNPREVENTSPOISONINGWITH`,
   `PKMNSXPREVENTSYSZ`, `PKMNSXHADNOEFFECTONY`, `PKMNSXPREVENTSBURNS`,
-  `PKMNPREVENTSPARALYSISWITH` — traced but genuinely intricate: the two call
-  contexts (direct status move vs. on-contact ability) swap which battler is
-  `B_EFF_*`/`gEffectBattler` vs. `B_ATK_*`/`B_DEF_*`, needing a role check
-  beyond what `lastMoveAttacker`/`scriptingBattler` already expose generically.
-- Uproar family (rows 12-14, `createJumpifcantmakeasleepOpcodeHandler`,
-  `battleScriptStatusPrimaryOpcode.ts:201-245`): `PKMNCANTSLEEPINUPROAR2`,
-  `UPROARKEPTPKMNAWAKE`, `PKMNSTAYEDAWAKEUSING` — needs tracking which of two
-  battlers (the sleep-move target vs. a third-party Uproar carrier) each
-  chooser value names.
-- `USINGITEMSTATOFPKMNROSE` (row 11, `BattleScript_BerryStatRaiseDoStatUp`,
-  stat-raise berries) — needs `{B_BUFF1}` (the raised stat's name) and
-  `{B_BUFF2}` (the raise-amount tail text), neither currently plumbed.
-- `PKMNSTOCKPILED`/`PKMNHPFULL` (rows 21-22,
-  `battleScriptStockpileOpcode.ts`) — Stockpile needs a `{B_BUFF1}`
-  substitution for `rulesContext.battleTextBuff1ByteNumber` (not yet wired,
-  unlike `HITXTIMES`'s analogous counter); Swallow-at-full-HP's
-  `B_DEF_NAME_WITH_PREFIX` resolves to the *user itself* (Swallow
-  self-targets, `selectorRoles.target === attacker`), not the generic
-  opposite-singles-battler `requireMoveDefender` shape every other id here
-  uses — needs its own resolution path.
-- `PKMNTRANSFORMEDINTO` (row 40, zero-incidence,
-  `battleScriptTransformOpcode.ts`) — needs a `{B_BUFF1}` species-name
-  substitution, not currently plumbed.
+  `PKMNPREVENTSPARALYSISWITH`): the two real trigger paths turned out simpler
+  than `preventionCall`'s own internal branch (which real primary status
+  moves never actually reach — their scripts short-circuit earlier).
+  `PKMNPREVENTSPOISONINGWITH`/`SXPREVENTSBURNS`/`PREVENTSPARALYSISWITH` are
+  the direct-status-move context (Toxic vs Immunity, Will-O-Wisp vs Water
+  Veil, Thunder Wave-family vs Limber), reached via
+  `BattleScript_ImmunityProtected`/`WaterVeilPrevents`/`LimberProtected`'s own
+  `copybyte gEffectBattler, gBattlerTarget` (`battle_scripts_1.s:715,1035,
+  2191`) — already ported as `Cmd_copyarray`'s `gEffectBattler<-gBattlerTarget`
+  tuple (`battleScriptIngrainLeechSeedWrapOpcode.ts:277-290`). `PKMNSXPREVENTSYSZ`/
+  `PKMNSXHADNOEFFECTONY` are reachable *only* via Synchronize's own
+  `seteffectprimary` re-application (`executeSynchronize`,
+  `battleScriptMoveEndOpcode.ts`) — Poison Point/Static/Flame Body/Effect
+  Spore's contact-ability path always calls `seteffectsecondary`
+  (`primary=FALSE, certain=0`), which can never satisfy `preventionCall`'s own
+  `(primary||certain)` gate. `messageLines` reads a new, scoped
+  `effectBattler` message-event field (mirroring batch 1's `scriptingBattler`,
+  attached only to these 4 ids to avoid perturbing every other message
+  event's exact payload shape) for `B_EFF_NAME_WITH_PREFIX`/idx2's
+  `B_EFF_NAME_WITH_PREFIX`; `B_ATK_*`/`B_DEF_*` in the Synchronize-only
+  `PKMNSXPREVENTSYSZ` template are the real, fixed attacker/target
+  (unaffected by Synchronize's own effectBattler/scriptingBattler swap), so
+  `lastMoveAttacker` already covers them.
+- Uproar family (rows 12-14, `PKMNCANTSLEEPINUPROAR2`, `UPROARKEPTPKMNAWAKE`,
+  `PKMNSTAYEDAWAKEUSING`): all three always display the sleep move's own real
+  target (`B_DEF_NAME_WITH_PREFIX`) regardless of whose Uproar it is — the
+  Uproar carrier itself is never named in the text, just implied by word
+  choice; `PKMNSTAYEDAWAKEUSING` additionally needed a `{B_DEF_ABILITY}`
+  substitution (Insomnia/Vital Spirit).
+- `USINGITEMSTATOFPKMNROSE` (row 11): `{B_BUFF1}`/`{B_BUFF2}` reuse the same
+  `lastStatChange` tracking `ATTACKERSSTATROSE`/`DEFENDERSSTATROSE` already
+  rely on (same underlying `statbuffchange`/`BattleScript_StatUp` mechanism,
+  just a different chooser index); `{B_SCR_ACTIVE_NAME_WITH_PREFIX}`/
+  `{B_LAST_ITEM}` needed a real gap fix —
+  `battleEndTurnOrchestration.ts`'s `STAT_UP_BERRIES` tick never wired
+  `scriptingBattler` to the berry holder (every other end-turn held-item tick
+  already did).
+- `PKMNSTOCKPILED`/`PKMNHPFULL` (rows 21-22): Stockpile's `{B_BUFF1}` reads
+  `rulesContext.battleTextBuff1ByteNumber` (already set by
+  `stockpileHandler`, just not yet plumbed through `prepareMessage`, unlike
+  `HITXTIMES`'s analogous counter); Swallow-at-full-HP's
+  `B_DEF_NAME_WITH_PREFIX` resolves via the attacker itself
+  (`requireMoveAttacker`, not `requireMoveDefender`), matching
+  `stockpileToHpHealHandler`'s own self-target reassignment
+  (`selectorRoles.target = attacker`). `FactoryFullTurnBattlerConfig` gained
+  a `stockpileCounter` staging field (mirroring batch 2's
+  `flashFireBoosted`) to reach Swallow's full-HP branch in one turn.
+- `PKMNTRANSFORMEDINTO` (row 40, zero-incidence): `{B_BUFF1}` is the species
+  Transform just copied (`rulesContext.battleTextBuff1Species`, already set
+  by `battleScriptTransformOpcode.ts`, not yet plumbed).
+
+Pinned by `tests/presentationStringBatch3.test.ts` (12 cases: 11 staged
+full-turn repros through the production kernel — including the Synchronize
+two-ability interaction for rows 7-8 — and 1 direct-resolver-branch case for
+row 40, the doc's only explicitly zero-incidence id in this batch). Red-verified
+once via `git stash` on the four touched engine files: 11 threw
+`battleStringResolver`'s exact completeness-guard error pre-fix; row 22
+(`PKMNHPFULL`) instead failed to even reach Swallow's full-HP branch
+pre-fix (the `stockpileCounter` config field didn't exist yet). Full `npm
+test` green (646 files / 6,456 passed / 1 skipped); the new scoped
+`effectBattler` field's first (unconditional) draft broke 2 pre-existing
+exact-equality tests (Trick's item-swap message, the sleep-wake-up message)
+by appearing on unrelated STRINGIDs that already happened to have a non-null
+`selectorRoles.effectBattler` — fixed by scoping the field to only the 4 ids
+that read it. `compare:differential -- battle-command-generated-off.json
+--base f36d7433` (this batch's parent commit): **PASS — 128/128
+byte-identical**.
 
 **1 real extractor gap (unchanged):** `STRINGID_INTROSENDOUT` is missing
 from the extracted string table (`tools/extract/extract-battle-messages.ts`
