@@ -1,5 +1,37 @@
 # Animation coverage
 
+## Front `ANIM_GLOW_BLUE` family accepted (2026-08-02)
+
+**State:** exact reducer/evidence coverage for the complete generated selector
+census: **1 mapping / 1 Factory-reachable / 0 outside-Factory** — MILOTIC.
+Source ID is **34** (the brief's expected 33 is adjacent `ANIM_GLOW_RED`).
+Factory-front coverage is **61/62 families** and **375/376 species mappings**.
+`ANIMATION_COVERAGE.json` remains byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`;
+move coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**.
+
+**Did:** source pins `pokemon_animation.h:72-75`, `pokemon.c:1710,1795,
+6784-6855`, `pokemon_animation.c:653-666,911-939,1539-1555,2013-2016,
+5540-5544`, `util.c:264-279`, and MILOTIC's 45-frame delayed startup plus
+seven 15-frame front-picture program. The selector-specific receipt pins
+task-zeroed signed-s16 data, `RGB_BLUE` `0x7c00`, palette masking, amplitude
+12/speed 2, strict guard/order, restore/WaitAnimEnd/dummy teardown, stable
+terminal, invalid inputs, and adjacent unused glow controls. Fresh complete
+legal Scene-ON MILOTIC parties produced a byte-identical active-to-dummy pair:
+window **1660..1727 (68 frames)**, **58,643 B**, SHA-256
+`29a28ccc3d39e04533a74065f5a561153d59899a5654966e452e3c9e98a9cfba`.
+The receipt pins callback addresses, every reducer/RAM/OAM/palette frame, and
+every RGB hash; no move status was promoted.
+
+**Next:** **`ANIM_FRONT_FLIP` (PIDGEOT)**, the last unsupported
+Factory-front family.
+
+**Notes:** focused blue + black/orange regression/source/census/evidence and
+both ratchets are **40/40**; `npx tsc --noEmit` and
+`npm run animation:coverage` are green. Commits: `445c38fe` (reducer/census)
+and `438053bf` (paired Scene-ON evidence). Full suite/build pending this
+session's final gate.
+
 ## Front `ANIM_H_PIVOT` family accepted (2026-08-02)
 
 **State:** exact reducer/evidence coverage for the complete generated selector
