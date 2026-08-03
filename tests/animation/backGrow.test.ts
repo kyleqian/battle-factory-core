@@ -129,6 +129,7 @@ describe("BACK_ANIM_GROW back send-out reducer", () => {
     const terminal = backGrowFrameAtTick("WEEZING", 3, 65, -1)!;
     expect(terminal).toMatchObject({
       data5: 1, data6: 8, data7: 256, xScale: 256, yScale: 256,
+      initializerCalled: false, handleStartAffineAnimCalls: 0,
       resetSpriteAfterAnim: true, affineMode: "normal", affineWriteCount: 1,
       callback: "WaitAnimEnd",
     });
@@ -153,6 +154,7 @@ describe("BACK_ANIM_GROW back send-out reducer", () => {
     const terminal = backGrowInStagesFrameAtTick("KOFFING", 15, 114, -1)!;
     expect(terminal).toMatchObject({
       data5: 3, data6: 0, data7: 66, resetSpriteAfterAnim: true,
+      initializerCalled: false, handleStartAffineAnimCalls: 0,
       affineMode: "normal", affineWriteCount: 2, callback: "WaitAnimEnd",
     });
     expect(terminal.terminalAffineWriteOrdering).toEqual([

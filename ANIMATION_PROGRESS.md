@@ -31,7 +31,8 @@ double-write ordering.
 
 **Verification / next:** focused source/census/routing/reducer/evidence checks
 **2 files / 10 tests**, smoke, `npx tsc --noEmit`, and coverage are green;
-full suite/build remain before handoff. Next source-ranked unsupported set is
+full `npm test` is **657 files / 6,516 passed / 1 skipped** and `npm run build`
+is green at **552 modules transformed**. Next source-ranked unsupported set is
 **`BACK_ANIM_CIRCLE_COUNTERCLOCKWISE` (set 7): 2 mappings / 2 Factory / 0
 outside — HITMONTOP, SPINDA**. No move status was promoted.
 
