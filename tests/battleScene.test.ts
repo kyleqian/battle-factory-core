@@ -12,7 +12,10 @@ import {
   DRAGON_BREATH_MOVE_POWER,
   dragonBreathHp,
   drawGeneratedOpponentRelease,
+  drawKabutoHSlideWobble,
+  drawPlayerMaterializeSettle,
   drawSpriteSheetAffineRotate,
+  drawTurn15ForcedSwitchRelease,
   endeavorShakeSteps,
   evaEvb,
   GROVYLE_FAINT_SINK_START_TICK,
@@ -2764,5 +2767,43 @@ describe("ISSUES #71 Slice A/B: drawGeneratedOpponentRelease applies the real op
     const unshifted = new Uint8Array(240 * 160 * 4);
     blitSprite(unshifted, pic.tileset, pic.palette, origin.x, origin.y);
     expect(Array.from(frame)).toEqual(Array.from(unshifted));
+  });
+});
+
+describe("ISSUES #71 Slice C: back-side hand-fit consumers documented + loudly guarded (docs/send-out-live-wiring-consumer-map.md §2/§5 Slice C)", () => {
+  it("drawPlayerMaterializeSettle (ONIX back, legacy) draws identically for both valid encounters and throws for any other encounter", () => {
+    const fbDestin = new Uint8Array(240 * 160 * 4);
+    const fbJenson = new Uint8Array(240 * 160 * 4);
+    drawPlayerMaterializeSettle(fbDestin, 1670, "destin");
+    drawPlayerMaterializeSettle(fbJenson, 1670, "jenson");
+    expect(Array.from(fbDestin)).toEqual(Array.from(fbJenson));
+    expect(fbDestin.some((value) => value !== 0)).toBe(true);
+    expect(() => drawPlayerMaterializeSettle(
+      new Uint8Array(240 * 160 * 4),
+      1670,
+      "other" as unknown as BattleSceneState["encounter"],
+    )).toThrow(/unsupported legacy player back-settle encounter other/);
+  });
+
+  it("drawKabutoHSlideWobble (KABUTO front, legacy) draws unchanged for jenson and throws for any other encounter (destin included - unlike ONIX back, this hand-fit is jenson-only)", () => {
+    const fb1 = new Uint8Array(240 * 160 * 4);
+    const fb2 = new Uint8Array(240 * 160 * 4);
+    drawKabutoHSlideWobble(fb1, 100, 0, "jenson");
+    drawKabutoHSlideWobble(fb2, 100, 0, "jenson");
+    expect(Array.from(fb1)).toEqual(Array.from(fb2));
+    expect(fb1.some((value) => value !== 0)).toBe(true);
+    expect(() => drawKabutoHSlideWobble(new Uint8Array(240 * 160 * 4), 100, 0, "destin"))
+      .toThrow(/unsupported legacy front-settle encounter destin for KABUTO/);
+  });
+
+  it("drawTurn15ForcedSwitchRelease (MAGBY back, forced switch) draws identically for repeated MAGBY calls and throws for any other species", () => {
+    const fb1 = new Uint8Array(240 * 160 * 4);
+    const fb2 = new Uint8Array(240 * 160 * 4);
+    drawTurn15ForcedSwitchRelease(fb1, 20, "MAGBY");
+    drawTurn15ForcedSwitchRelease(fb2, 20, "MAGBY");
+    expect(Array.from(fb1)).toEqual(Array.from(fb2));
+    expect(fb1.some((value) => value !== 0)).toBe(true);
+    expect(() => drawTurn15ForcedSwitchRelease(new Uint8Array(240 * 160 * 4), 20, "MURKROW"))
+      .toThrow(/unsupported forced-switch back species MURKROW/);
   });
 });

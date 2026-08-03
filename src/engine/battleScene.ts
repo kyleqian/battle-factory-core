@@ -4511,6 +4511,24 @@ export function generatedPlayerVisualTAtOpponentHandoff(
   );
 }
 
+/**
+ * **ONIX-back hand-fit validity gap, NOT guarded here - ISSUES #71 Slice C
+ * left this deliberately un-guarded; see docs/send-out-live-wiring-consumer-map.md
+ * §2 ONIX back / §5 Slice C and the Slice-C worker's final report.**
+ * `playerMaterializeSettleY2`/`playerMaterializeSettleTintCoeff`
+ * (`battleMenu.ts`) are ONIX-only literals, applied below regardless of
+ * `art.speciesSymbol` - unlike this run's other two back hand-fit
+ * consumers, this one is reached TODAY by any generated-round player
+ * species once its materialize-settle window starts (confirmed: the
+ * `factoryBattleStartIntro.test.ts` "renders every lifecycle phase..."
+ * case already drives a KADABRA player through this exact branch at
+ * elapsed 710/714). A species-validity throw guard here would fire on
+ * that already-green test, i.e. this is a real latent defect, not a
+ * future-proofing gap - do not add a throw guard or otherwise touch this
+ * branch without first deciding how to fix the underlying wrong-table
+ * application; adding a guard alone would only convert a silent bug into
+ * a crash on ordinary generated-round play.
+ */
 function drawGeneratedPlayerMaterialize(
   fb: Uint8Array,
   playerVisualT: number,
@@ -5001,8 +5019,28 @@ function drawPlayerMaterialize(fb: Uint8Array, t: number): void {
  * blit - reuses `drawSpriteSheetAffineStretch` at `xScale=yScale=256`
  * (the identity matrix) purely for its existing palette+`tintCoeff`-blend
  * support, not for any actual stretch.
+ *
+ * **ONIX-back hand-fit validity (ISSUES #71 Slice C,
+ * docs/send-out-live-wiring-consumer-map.md §2 ONIX back / §5):**
+ * `playerMaterializeSettleY2`/`playerMaterializeSettleTintCoeff`
+ * (`battleMenu.ts`) are a literal RAM-derived table valid only for the
+ * player's own ONIX in this run's two fixed legacy encounters
+ * ("destin"/"jenson"), whatever nature that recorded ONIX actually has -
+ * nature isn't checked below because neither this function nor either of
+ * its two callers carries a species/nature value at all (the player's
+ * rental is hardcoded ONIX art for both encounters); `encounter` is the
+ * closest available validity proxy. A third encounter ever added to
+ * `BattleSceneState["encounter"]` with a non-ONIX player rental must not
+ * silently reuse this table.
  */
-function drawPlayerMaterializeSettle(fb: Uint8Array, t: number): void {
+export function drawPlayerMaterializeSettle(fb: Uint8Array, t: number, encounter: BattleSceneState["encounter"]): void {
+  if (encounter !== "destin" && encounter !== "jenson") {
+    throw new Error(
+      `unsupported legacy player back-settle encounter ${String(encounter)} `
+      + `(ONIX back hand-fit is destin/jenson-only - `
+      + `docs/send-out-live-wiring-consumer-map.md §2 ONIX back)`,
+    );
+  }
   if (t < PLAYER_MATERIALIZE_SETTLE_START_TICK) return;
   drawSpriteSheetAffineStretch(
     fb,
@@ -5800,7 +5838,25 @@ function drawGrovyleStretchEarly(fb: Uint8Array, t: number, handoffTick: number)
   );
 }
 
-function drawKabutoHSlideWobble(fb: Uint8Array, t: number, handoffTick: number): void {
+/**
+ * KABUTO front hand-fit validity (ISSUES #71 Slice C,
+ * docs/send-out-live-wiring-consumer-map.md §2 KABUTO front / §5):
+ * `kabutoHSlideWobble`/`kabutoFrame` (`kabutoSendOut.ts`) play real
+ * frame-by-frame `Anim_HorizontalSlideWobble` and are valid only for
+ * KABUTO in the "jenson" fixed legacy encounter - the sole opponent this
+ * run's two named encounters ever send to this compositor. Both callers
+ * are already `isJenson`-gated (one hardcoded, one an explicit branch), so
+ * `encounter` is a real, always-available validity check here, not just a
+ * proxy.
+ */
+export function drawKabutoHSlideWobble(fb: Uint8Array, t: number, handoffTick: number, encounter: BattleSceneState["encounter"]): void {
+  if (encounter !== "jenson") {
+    throw new Error(
+      `unsupported legacy front-settle encounter ${String(encounter)} for KABUTO `
+      + `(kabutoHSlideWobble hand-fit is jenson-only - `
+      + `docs/send-out-live-wiring-consumer-map.md §2 KABUTO front)`,
+    );
+  }
   const et = t - handoffTick;
   const wobble = kabutoHSlideWobble(et);
   if (!wobble.active) {
@@ -7020,7 +7076,7 @@ function drawBattle2ActionMenuWindow(
       fieldArt.opponent.origin.y - enemyMonElevation(fieldArt.opponent.speciesSymbol),
     );
   } else {
-    drawKabutoHSlideWobble(fb, t, handoffTick);
+    drawKabutoHSlideWobble(fb, t, handoffTick, "jenson");
   }
   if (revealed) {
     if (fieldArt) {
@@ -7041,7 +7097,7 @@ function drawBattle2ActionMenuWindow(
       );
     }
   } else {
-    drawPlayerMaterializeSettle(fb, playerVisualT);
+    drawPlayerMaterializeSettle(fb, playerVisualT, "jenson");
   }
   if (healthboxes) {
     drawSendOutHealthbox(
@@ -15922,7 +15978,7 @@ function drawSendOutHandoff(
   }
   if (isJenson) {
     drawKabutoMaterialize(fb, t, handoffTick);
-    drawKabutoHSlideWobble(fb, t, handoffTick);
+    drawKabutoHSlideWobble(fb, t, handoffTick, encounter);
   } else {
     drawGrovyleMaterialize(fb, t, handoffTick);
     drawGrovyleStretchEarly(fb, t, handoffTick);
@@ -15949,7 +16005,7 @@ function drawSendOutHandoff(
   }
   drawBallOpenParticles(fb, t, handoffTick, encounter);
   drawPlayerMaterialize(fb, playerTrainerT);
-  drawPlayerMaterializeSettle(fb, playerTrainerT);
+  drawPlayerMaterializeSettle(fb, playerTrainerT, encounter);
   drawPlayerBallOpen(fb, playerTrainerT);
   drawPlayerBallOpenParticles(fb, playerTrainerT);
   if (!isJenson && t >= GROVYLE_MATERIALIZE_TICK) drawGrovyleSettled(fb);
@@ -16998,6 +17054,7 @@ export function applyTurn17PostwinFastFade(
     drawTurn15ForcedSwitchRelease(
       objMask,
       releaseTick,
+      "MAGBY",
       bounce.onixY2,
       faintAttackTargetShakeX2(frozenAnimationAge),
     );
@@ -17203,7 +17260,26 @@ function turn15ReleaseFieldPalette(logicalTick: number): number[][] {
   ));
 }
 
-function drawTurn15ForcedSwitchRelease(fb: Uint8Array, logicalTick: number, y2Extra: number = 0, x2Extra: number = 0): void {
+/**
+ * MAGBY back hand-fit validity (ISSUES #71 Slice C,
+ * docs/send-out-live-wiring-consumer-map.md §2 MAGBY back / §5): `magbySendOutAnimation`
+ * (`magbySendOut.ts`) is valid only for MAGBY, Docile nature specifically.
+ * Nature isn't represented anywhere in this presentation layer (no caller
+ * here can supply it), so this guard can only enforce species; a future
+ * MAGBY of a different nature would still pass silently until the
+ * animation lane's rung-4 back-family nature-mod table exists. All 4
+ * current call sites already resolve to a real "MAGBY" (3 are the fixed
+ * canonical Turn-15 content; the 4th, generated-route caller, is already
+ * gated on `view.field.player.name === "MAGBY"` before it ever calls this).
+ */
+export function drawTurn15ForcedSwitchRelease(fb: Uint8Array, logicalTick: number, species: string, y2Extra: number = 0, x2Extra: number = 0): void {
+  if (species !== "MAGBY") {
+    throw new Error(
+      `unsupported forced-switch back species ${species} `
+      + `(magbySendOutAnimation hand-fit is MAGBY/Docile-only - `
+      + `docs/send-out-live-wiring-consumer-map.md §2 MAGBY back)`,
+    );
+  }
   if (logicalTick <= 16) {
     drawPlayerSideAffineMaterialize(fb, magbyBackSprite.tileset, FORCED_SWITCH_MAGBY_CORNER, logicalTick, 1, PLAYER_BALL_OPEN_VISIBLE_BOTTOM);
   } else {
@@ -17798,7 +17874,7 @@ function drawTurn16PostSwitchField(
       ? null
       : faintAttackResolutionState(faintAttackAge, faintAttackTargetHp);
   if (releaseTick !== null && !resolution?.targetInvisible) {
-    drawTurn15ForcedSwitchRelease(fb, releaseTick, bounce.onixY2, targetX2);
+    drawTurn15ForcedSwitchRelease(fb, releaseTick, "MAGBY", bounce.onixY2, targetX2);
   }
   const healthboxDx = partySendOutHealthboxDx(partyElapsed);
   if (healthboxDx !== null) {
@@ -18231,7 +18307,7 @@ function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, pa
       paletteBgr555: releaseTick === null ? turn15FieldPpuAsset.paletteBgr555 : turn15ReleaseFieldPalette(releaseTick),
     });
     drawTurn15ForcedSwitchBall(fb, party.sendOutElapsed);
-    if (releaseTick !== null) drawTurn15ForcedSwitchRelease(fb, releaseTick, bounce.onixY2);
+    if (releaseTick !== null) drawTurn15ForcedSwitchRelease(fb, releaseTick, "MAGBY", bounce.onixY2);
     const healthboxDx = partySendOutHealthboxDx(party.sendOutElapsed);
     if (healthboxDx !== null) drawTurn15MagbyHealthbox(fb, healthboxDx, bounce.healthboxY2);
     if (phase === "actionMenu") {
@@ -34389,7 +34465,7 @@ export function renderBattleResolutionForcedPartySelect(
     drawTurn15ForcedSwitchBall(fb, elapsed);
     if (releaseTick !== null) {
       if (canonicalIncoming) {
-        drawTurn15ForcedSwitchRelease(fb, releaseTick);
+        drawTurn15ForcedSwitchRelease(fb, releaseTick, view.field.player.name);
       } else if (releaseTick <= 16) {
         drawPlayerSideAffineMaterialize(
           fb,
