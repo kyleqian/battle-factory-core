@@ -56,6 +56,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   background a verification" discipline — worth remembering the fix
   pattern rather than re-deriving it next time a full-suite run exceeds
   120s.
+- **[supervisor close, 14:05]** the #72 reachability triage (user-directed:
+  attribute each of the 107 unresolved printstring ids to its emitting
+  move/hook + Factory-corpus carrier + static battle-type gates, partition
+  reachable/dead/manual) was launched at 14:02 by supervisor clock error
+  and cancelled 2 min in, nothing landed — **it is next session's FIRST
+  brief**, fully re-derivable from ISSUES #72 + docs/printstring-literal-
+  census.md + the #70 reachability doc's methodology. Second open user
+  decision unchanged: non-fatal resolver guard in the playable build.
+  Tree clean and green at `78d9efcc`; preview serves `bc763f06` (:5199).
 - **[supervisor final addendum, 13:10]** verified (repro test + smoke
   green; worker's same-commit full suite 660 files / 6,558 / 1 skipped;
   differential 128/128). Play-preview rebuilt at `bc763f06`, serving :5199.
