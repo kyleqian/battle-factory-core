@@ -17,6 +17,31 @@ backlog.
 
 # Open
 
+## #66 — Stat-banner presentation: two residual gaps from the #65 family (one reachable crash)
+
+**Found by the 2026-08-02 read-only day-audit** (after the #65 ATTACKER-variant
+fix `c7461398`); supervisor-reviewed, not yet independently reproduced.
+
+**(a) Reachable crash — `STRINGID_STATSWONTINCREASE`/`STRINGID_STATSWONTDECREASE`
+have no `messageLines` branch.** Same class as #65: `battleScriptStatBuffs.ts`
+sets `multistringChooser = B_MSG_STAT_WONT_CHANGE` when a stat is already at
+its cap with `allowPtr` true, still emitting a `message` event whose template
+needs `{B_ATK/B_DEF_NAME_WITH_PREFIX}` + `{B_BUFF1}`; the resolver's
+completeness guard throws. Failure scenario: re-using a boost move on an
+already-maxed stat (e.g. a 4th SWORDS DANCE) in a real battle → uncaught
+mid-battle throw. Fix shape mirrors `c7461398` (add the branch, both
+directions); pin with a Tier-1 test driving the capped case through the
+production presentation path, and an oracle probe for the real message text.
+
+**(b) Latent, unconfirmed — "sharply/harshly" picked from post-clamp delta.**
+`battleResolutionPresentation.ts` selects B_BUFF2 from
+`abs(from - to)` AFTER clamping to [MIN,MAX] stage; reference
+(`battle_script_commands.c:7044,7067`) uses the requested ±2 magnitude
+pre-clamp. Edge case: stage 11 + a +2 move → real game says "sharply rose!",
+engine would say "rose!". Pre-existing in the DEFENDER branch, copied
+verbatim into ATTACKER by `c7461398`. Needs an oracle probe to confirm
+before fixing — do not fix blind.
+
 ## #56 — Arbitrary-trainer intro: residuals, ONIX ready-lag regression, MAGNETON shadow coverage
 
 **Symptom:** the public dense arbitrary-trainer intro comparison

@@ -4,8 +4,20 @@ import {
   isTurn3NextCommandHandoffReady,
   isTurn3NextCommandLifecycleActive,
   resolveTurn3CompletedResolutionNextCommandHandoff,
+  resolveTurn3LatestCompletedCommandHandoff,
+  turn3CompletedResolutionNextCommandHandoffFromLatest,
   turn3PresentationEpochElapsedSinceReset,
 } from "../src/engine/turn3ResolutionAdapter.ts";
+import {
+  fightCommandKickoffBounceEpochTick,
+  fightCommandSettledBounceEpochTick,
+  fightCommandSubmenuBounceEpochTick,
+} from "../src/engine/fightCommandPresentation.ts";
+import {
+  isLatestCompletedCommandHandoffReady,
+  isLatestCompletedCommandLifecycleActive,
+  latestCompletedCommandPresentationEpochElapsedSinceReset,
+} from "../src/engine/nextCommandHandoff.ts";
 import {
   isTurn3ChooseActionBounceReset,
   turn3ChooseActionResetElapsed,
@@ -47,6 +59,42 @@ describe("turn3ResolutionAdapter: #39 completed-turn-3/next-command handoff proo
     expect(turn3PresentationEpochElapsedSinceReset(handoff, 3179)).toBe(7);
   });
 
+  it("carries slot 0, field facts, DOUBLE_TEAM/ROCK_SLIDE routing, and the immutable epoch through generic content", () => {
+    const legacy = resolveTurn3CompletedResolutionNextCommandHandoff(3172);
+    const latest = resolveTurn3LatestCompletedCommandHandoff(3172);
+    const content = latest.content;
+    if (content === undefined) throw new Error("turn-3 generic receipt has no content");
+
+    expect(isLatestCompletedCommandHandoffReady(latest)).toBe(true);
+    expect(latest.playerPp).toEqual(legacy.playerPp);
+    expect(latest.persistedMoveSlot).toBe(0);
+    expect(content.field.player.hp.current).toBe(88);
+    expect(content.field.opponent.hp.current).toBe(41);
+    expect(content.presentationEpoch).toEqual(legacy.presentationEpoch);
+    expect(content.upcoming?.moves).toMatchObject([
+      { user: "opponent", target: "opponent", move: "DOUBLE_TEAM" },
+      { user: "player", target: "opponent", move: "ROCK_SLIDE", hpChange: { from: 41, to: 1 } },
+    ]);
+    expect(latestCompletedCommandPresentationEpochElapsedSinceReset(latest, 3179)).toBe(7);
+    expect(turn3CompletedResolutionNextCommandHandoffFromLatest(latest)).toEqual(legacy);
+    expect(Object.isFrozen(content.presentationEpoch)).toBe(true);
+    expect(Object.isFrozen(content.presentationEpoch!.mon)).toBe(true);
+    expect(Object.isFrozen(content.upcoming?.moves)).toBe(true);
+  });
+
+  it("derives every turn-4 bounce and kickoff clock from turn-3 content's semantic epoch", () => {
+    const latest = resolveTurn3LatestCompletedCommandHandoff(3172);
+    const content = latest.content;
+    if (content === undefined) throw new Error("turn-3 generic receipt has no content");
+
+    expect(fightCommandSettledBounceEpochTick(content, 3179)).toBe(1748 + 7);
+    expect(fightCommandSubmenuBounceEpochTick(content, 3179)).toBe(1748 + (3179 - 3172) - 2);
+    expect(fightCommandKickoffBounceEpochTick(content, 3183, 3182))
+      .toBe(1748 + (3183 - 3172) - 2);
+    expect(fightCommandKickoffBounceEpochTick(content, 3186, 3182))
+      .toBe(1748 + (3182 - 13 - 3172));
+  });
+
   it("publishes only at the accepted choose-action reset and survives a later submenu reopen", () => {
     const handoff = resolveTurn3CompletedResolutionNextCommandHandoff(3172);
 
@@ -59,6 +107,11 @@ describe("turn3ResolutionAdapter: #39 completed-turn-3/next-command handoff proo
     // fresh epoch over the immutable completed-turn receipt.
     expect(isTurn3NextCommandLifecycleActive(handoff, 3862)).toBe(true);
     expect(handoff.presentationEpoch.elapsed).toBe(3172);
+
+    const latest = resolveTurn3LatestCompletedCommandHandoff(3172);
+    expect(isLatestCompletedCommandLifecycleActive(latest, 2807)).toBe(false);
+    expect(isLatestCompletedCommandLifecycleActive(latest, 3853)).toBe(true);
+    expect(isLatestCompletedCommandLifecycleActive(latest, 3862)).toBe(true);
   });
 
   it("freezes every owner-facing nested fact", () => {

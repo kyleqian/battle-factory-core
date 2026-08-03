@@ -8,6 +8,26 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Claude workers self-abort by backgrounding their own verification
+
+- **What:** bounded claude-sonnet workers end their session by backgrounding
+  a long acceptance command (or arming ScheduleWakeup/Monitor) and ending
+  the turn "to wait for the notification" — a bounded worker's session ends
+  with its turn, so the step dies uncommitted with the work complete on
+  disk. Bit twice on 2026-08-02 (Silver Wind scout: 26 min, deliverables
+  complete but uncommitted; species dossier: 17 min, same). Both salvaged
+  by the supervisor (verify, then commit on the worker branch).
+- **Hits:** 2.
+- **Cost each:** ~10-15 min of supervisor salvage plus the worker's lost
+  wind-down.
+- **Durable fix landed 2026-08-02 (user-directed):** the EXECUTION
+  DISCIPLINE clause is now part of `run-subagent.sh`'s standing worker
+  preamble (both lanes, all providers), so briefs no longer restate it; the
+  same change added `npm run test:smoke` (~25 s curated subset) so mid-step
+  sanity checks stop tempting workers into backgrounding the ~7 min full
+  suite. Prompt-level prevention, not a mechanical guarantee — delete this
+  entry after a few clean worker rounds.
+
 ## Raw before/after RNG-window diffs pick up unrelated-subsystem draws
 
 - **What:** ground-truth scouts that pin an RNG draw count from a raw
@@ -113,16 +133,6 @@ Per entry:
 - **Workaround:** launch the retained foreground service with stdout/stderr
   redirected to a named `/tmp` log, then poll `/v1/info` for readiness and
   retain only the process handle for shutdown.
-
-## Scene-ON battle-lab HTTP route is unavailable
-
-- **What:** the Scene-ON service answers canonical oracle requests but returns
-  404 for the battle-lab route, so two animation workers had to discover and
-  switch to the local mGBA battle-lab probe path.
-- **Hits:** 3.
-- **Cost each:** ~2-5 min.
-- **Workaround:** use the committed local mGBA probe/comparator for Scene-ON
-  mechanicLab fixtures until the service exposes the additive route.
 
 ## Summary extractor rewrites an unrelated preview asset
 

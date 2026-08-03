@@ -502,6 +502,32 @@ function messageLines(
           : amount >= 2 ? "harshly fell!" : "fell!",
     });
   }
+  if (
+    messageId === "STRINGID_ATTACKERSSTATROSE"
+    || messageId === "STRINGID_ATTACKERSSTATFELL"
+  ) {
+    if (!lastStatChange) {
+      throw new Error(
+        "battle resolution stat-change message has no preceding stat event",
+      );
+    }
+    const battler = singlesBattler(lastStatChange.battler, "stat-fell message");
+    const displayed = fieldBattler(field, battler);
+    const amount = Math.abs(lastStatChange.from - lastStatChange.to);
+    const rose = messageId === "STRINGID_ATTACKERSSTATROSE";
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: () => resolveBattleNameWithPrefix({
+        side: battler === 0 ? "player" : "opponent",
+        isTrainerBattle: true,
+        nickname: displayed.name,
+      }),
+      B_BUFF1: () => lastStatChange.stat,
+      B_BUFF2: () =>
+        rose
+          ? amount >= 2 ? "sharply rose!" : "rose!"
+          : amount >= 2 ? "harshly fell!" : "fell!",
+    });
+  }
   if (messageId === "STRINGID_TARGETFAINTED") {
     if (lastFaintBattler === null) {
       throw new Error("battle resolution target-fainted message has no faint event");

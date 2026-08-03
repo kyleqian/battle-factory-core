@@ -23,4 +23,6 @@ start another session while any such heading remains. Each entry should state:
 At wind-down, summarize every question added or still blocking work in the top
 `PROGRESS.md` entry and final session report.
 
-*(no deferred questions)*
+No open entries. (D1, the user-communication contract, was adopted verbatim
+into SUPERVISOR.md "Communicating with the user" by user decision on
+2026-08-02 — git retains the entry text.)

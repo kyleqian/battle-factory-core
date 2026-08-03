@@ -4,86 +4,151 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 861 — [supervisor wind-down, 2026-08-02 05:15] dispatcher ladder slices 1-7 + item-7 dismiss owner + two same-session fix chains; union green
+## 868 — [interactive user session, 2026-08-02 evening] D1 adopted → DEFERRED clear; papercut fixes landed; play-preview retired
 
-- **State:** master at the slice-7 salvage acceptance; full `npm test`
-  **605 files / 6,224 passed / 1 skipped**, `npm run build` + `npx tsc
-  --noEmit` green (supervisor-run, post-final-commit). DEFERRED.md empty.
-  Census: handoff state fields **13→2** (turn3/turn4 remain), declarations/
-  positional params still 13 (slice 10). Session: 10 workers (9 landed, 1
-  cap-killed and salvaged), 2 supervisor fix/bisect chains.
-- **Did:** (1) #39 item 7: `opponentFaintDismissElapsed` → typed owner
-  (entries 851-852). (2) Dispatcher design dossier banked + slices 1-7:
-  uniform receipts, shadow latest + PP equivalence (5,638/5,638), content
-  bridges 5-8 and 9-13, slice-5 CUTOVER (generic guard chain drives 5-13),
-  turn-1 and turn-2 epoch folds. Slice 7 was cap-killed mid-ledger
-  (exit 124) after its three implementation commits; supervisor verified
-  the salvage directly — six oracle pins exact (256/256, 237/237, 254/255
-  #61-residual, 161/161, 256/256, 128/128) + full suite/tsc — and accepted.
-  (3) #56 frame-444 CLOSED as fixed: side OAM probe exonerated the sprite,
-  pinned the ball-open particle stall; fix landed at exact prediction
-  (219px→18px, the 18 are the settled display-tail class). (4) Generated-
-  route canary `battle-command-generated-off` found at 70/128, bisected to
-  `b464a6e7` (rank-7), root-caused (missing `BattleScript_Pausex20` receipt
-  under `HITMARKER_NO_ANIMATIONS`), fixed to 128/128 with rank-7 canonical
-  windows byte-identical. (5) Slice-6 regression (optional state field +
-  conditional spread → null degraded to undefined) caught by the
-  supervisor's post-fold union suite, fixed in `3005e9c2`. (6) Folded
-  animation-main at orient (ZIGZAG_SLOW); ledger archived to top-3; census
-  script now fails loudly without rg; 7 stale scratch worktrees swept.
-- **Process rules adopted (recorded, apply in future briefs):**
-  `battle-command-generated-off.json` joins the standing differential-
-  insurance set for any slice touching resolution/orchestrator files;
-  workers rerun the FULL suite + tsc AFTER their final implementation
-  commit; state fields are never optional/conditionally-spread.
-- **Next:** dispatcher slices 8 (turn-3 fold), 9 (turn-4 fold + turn-5
-  reader bank), 10 (final 13-param/type cut) per
-  `docs/next-command-handoff-dispatcher-design.md`; then #39 species/episode
-  render entry points. Turns 5-8 ON-pin OFF re-timing policy remains an
-  un-adopted user question (unchanged). #55/#62 untouched.
-- **Unfolded:** `animation-main` is 3 commits ahead (fast-zigzag family)
-  with a LIVE animation worker at wind-down (worktree
-  `animation-20260802-044900`) — fold at next orient per protocol.
+- **State:** master = this entry's commit on top of `f6452d7a`; no engine or
+  test code touched (tooling/docs only), `npm run test:smoke` green (7
+  files / 339 passed, ~23 s). **DEFERRED.md has NO open entries — the next
+  `run-supervisor.sh` session is unblocked.**
+- **Did (all user-directed):**
+  1. **D1 RESOLVED:** communication contract moved into `SUPERVISOR.md`
+     § "Communicating with the user", D1 entry deleted. Amended same
+     evening at user request: cut to a short plain-English rule (no
+     mandated status format, no per-item numeric requirement).
+  2. **Worker self-abort papercut:** EXECUTION DISCIPLINE clause folded into
+     `tools/run-subagent.sh`'s standing preamble (both prompt branches, all
+     providers) — briefs no longer restate it. PAPERCUTS entry updated;
+     delete it after a few clean worker rounds.
+  3. **New `npm run test:smoke`** (~25 s: frontier ratchet, ability/item
+     census, decision boundary, kernel full-turn, roundController,
+     roundScenarioMatrix, battleScene) for mid-step sanity checks;
+     documented in AGENTS.md Tests. Never substitutes for the full suite at
+     a finish requirement.
+  4. **Scene-ON battle-lab papercut entry DELETED** — verified fixed live:
+     POST `/v1/battle-lab/run` on :8012 answers 400 mode-validation,
+     identical to :8014 (the running service now carries the route).
+  5. **Play-preview retired:** nothing was listening on :5199 (server
+     already down); `.worktrees/play-preview` removed (detached at
+     `105c72d5`, an ancestor of master; only untracked node_modules).
+     Rebuild a fresh preview after the next user-visible fix lands.
+- **Next (unchanged from 867):** (1) slice-9 fold completion from `a6d88eaa`
+  per the banked design `docs/turn4-fold-pp-freshness-design.md`; (2) slice
+  10; (3) #66(a) capped-stat banner fix (+(b) after an oracle probe); (4)
+  species-dossier slices.
+- **Notes:** `animation-main` still ~8 commits ahead with its own ledger —
+  fold at next orient (unchanged from 867's note).
 
 ---
-## 860 — [bounded MAIN worker, 2026-08-02] dispatcher slice 6 Turn-1 generic fold
+## 867 — [supervisor wind-down, 2026-08-02 14:30] slice 8 + #65 landed; slice-9 fold honestly open with both root causes banked; D1 comms contract awaits user
 
-- **State:** `04bc1092` carries the optional typed epoch/content checkpoint;
-  `cbb41421` is the green field-cut checkpoint. Full `npm test` is **592 files
-  / 6,144 passed / 1 skipped**; `npm run build` and `npx tsc --noEmit` pass.
-- **Did:** Turn 1 now publishes the generic completed-command owner at the
-  HandleInputChooseAction → DoBounceEffect reset (epoch 1308, HP 117/101,
-  seeds 192/128). Production core, rendering, PP projection, and the turn-2
-  link consume that content; B-close/A-reopen preserves it. The retired Turn-1
-  scene field is gone while turns 2–4 retain their staged ABI.
-- **Evidence:** clean-parent `04bc1092` raw-RGBA replay is **1,395/1,395**:
-  required turn-1/2 windows **1,162/1,162** plus turn-9 reader **233/233**.
-  `battle-command-generated-off` is **128/128** vs the Scene-OFF oracle.
-  Census state/initial/copy **4→3**; test literals **202→194**; declarations
-  and staged FIGHT/PP parameters remain **13**.
-- **Next:** Slice 7 — fold Turn 2 epoch/content onto the same generic owner;
-  leave Turns 3–4 and final positional ABI deletion for their planned slices.
-- **Notes:** no trace/capture-list edits, recording import, PP/turn selector,
-  animation, unsupported-branch barrier, or ON-profile work.
+- **State:** master `4807676f` = green slice-9 BRIDGE + all docs; full
+  `npm test` + `npm run build` supervisor-verified green at wind-down
+  (613 files / 6,277 passed / 1 skipped). Census: state fields 1 (turn4);
+  declarations/FIGHT/PP params 13. **DEFERRED.md has ONE OPEN entry (D1,
+  user-communication contract) — user must edit/delete it to unblock the
+  next supervised session (their explicit request).**
+- **Session outcomes:** slice 8 turn-3 fold LANDED (`fed91e87`,
+  salvage→retry; oracle-over-differential acceptance: its 37-frame
+  turn4-doubleteam deviation FIXES a PP bug leaked by slice-6
+  `cbb41421`, bisect-proven). #65 SILVER WIND crash: user-reported,
+  scouted, FIXED (`c7461398`), verified, entry removed — same day.
+  Turn-5 reader bank merged (9 traces, 1,382 captures). Species dossier
+  banked (census 4→45, 7 slices) + erratum. Day-audit: 2 real findings
+  → **#66** (capped-stat banner crash (a) reachable, magnitude edge (b)
+  unconfirmed); finding 3 = turn4CommandHandoff's 4 unguarded call sites
+  (battleScene.ts:7859/7887/7952/7997 pre-fold numbering) — the slice-9
+  fold MUST guard these. Two claude-worker self-aborts salvaged →
+  PAPERCUTS entry + foreground clause in briefs.
+- **Slice-9 fold state (NOT landed, fully mapped):** bridge `1c61cfac` on
+  master is green/differential-clean. Branch
+  `salvage/slice9-fold-20260802` (`a6d88eaa`, suite-green) carries the
+  fold + fix #1 (eviction-class HP fallback — drawActionMenuIdleContent +
+  two drawFightSubmenuWindow chains checked only turn3/turn2 shapes →
+  full-HP 117 default; fixed all four sites). OPEN root cause #2: FIGHT
+  submenu PP/chrome shows turn-4's fresh PP one turn early vs parent
+  legacy timing (windows: turn5-action-off 6/32, turn5-confirm-off-a
+  121/132 vs base `105c72d5`) — two freshness requirements multiplexed on
+  the shared latest slot; needs a small design, not a patch. Resume
+  recipe in entry 866 + the salvage commit message.
+- **Next session (ordered):** (1) slice-9 fold completion from
+  `a6d88eaa` per the BANKED design `docs/turn4-fold-pp-freshness-design.md`
+  (`238280bf`, supervisor-verified: pin playerPp/persistedMoveSlot at the
+  turn-4 install to prior-handoff values — one param + one core.ts call
+  site; all four audited call sites resolved with evidence); full
+  14-window differential vs `105c72d5`; (2) slice 10 (final
+  13-param/type cut); (3) #66(a) capped-stat banner fix (+(b) after an
+  oracle probe); (4) species-dossier slices. Turns 5-8 OFF re-timing
+  policy remains un-adopted (unchanged).
+- **Unfolded:** `animation-main` ~8 commits ahead with a LIVE animation
+  supervisor + worker at wind-down — deliberately NOT folded (moving
+  branch); fold at next orient. `.worktrees/play-preview` (serving the
+  user's frozen build at :5199, currently `105c72d5`) is INTENTIONAL —
+  do not sweep while in use; rebuild after user-visible fixes land.
 
 ---
-## 859 — [bounded MAIN worker, 2026-08-02] dispatcher slice 5 production cut
+## 866 — [bounded MAIN worker, 2026-08-02] slice-9 fold retry: one root cause fixed, one found+scoped, NOT landed
 
-- **State:** `5c8eb38c` is the second green slice-5 checkpoint. `npm test` is
-  **592 files / 6,142 passed / 1 skipped**; `npm run build` and `npx tsc
-  --noEmit` exit 0.
-- **Did:** generic semantic content and immutable reopen guards are now the
-  production turn-5–13 route. Core atomically installs each successor/retained
-  FLY owner; the nine legacy state fields, copies, publications, and renderer
-  fallbacks are gone. Turns 1–4 and the staged 13 renderer/PP parameters/types
-  remain untouched for later slices.
-- **Evidence:** clean-parent app replay is **5,638/5,638** raw captures across
-  all 33 slice-1 windows; generated Scene-OFF is **128/128**; changed terminal
-  rungs are **255/255**, **147/147**, **255/255**, **118/118**. Census:
-  state/initial/copy **13→4**, type declarations and FIGHT/PP parameters remain
-  **13**, test literal assignments **289→202**.
-- **Next:** Slice 6, fold the turn-1 epoch/content into the generic owner;
-  preserve the remaining early-turn invariants and staged ABI.
-- **Notes:** no trace/capture edits, animation, barrier, PP tuple selector, or
-  completed-turn selector landed.
-
+- **State:** master unchanged at `1c61cfac` (the bridge, still green). The
+  retry's fix lives on `salvage/slice9-fold-20260802` at `a6d88eaa`
+  (NOT merged — differential still red on 2 of 14 windows). Full `npm
+  test` on that branch: **613 files / 6,277 passed / 1 skipped**, tsc
+  clean.
+- **Did:** diagnosed the brief's reported regression with `inspect-frame`
+  (parent vs fold PNG diff at frame 5927) instead of guessing: found
+  `drawActionMenuIdleContent`'s player-HP fallback (and two matching
+  if/else-if overlay chains in `drawFightSubmenuWindow`) only ever
+  consulted turn3/turn2 compat handoffs, never turn4 — the same
+  eviction-class bug slice 8 already hit one turn earlier
+  (`turn3SettledWindowActive`'s doc), just for player HP instead of the
+  render-branch selector. Once turn 4's own reset evicts turn 3's shape
+  from the shared `latestCompletedCommandHandoff` slot, the fallback fell
+  through to `anchorPlayerAfterTurnHp` (117, full) instead of Onix's real
+  88 — rendering "117/117" instead of "88/117" in the FIGHT-submenu HP
+  text. Fixed all four spots (mirroring the existing "prefer freshest
+  ready receipt" idiom). Fully committed with root-cause writeup on the
+  salvage branch (commit message has the long version).
+- **Found but NOT fixed (scoped, not guessed at):** a second, structurally
+  different bug survives in `drawFightSubmenuChromeFromCurrentOwner`'s
+  PP/chrome dispatch. In the parent, `latestCompletedCommandHandoff` never
+  advances past turn 3's content until turn 5's own confirm (turn 4 only
+  ever wrote a separate positional field there) — so the FIGHT submenu
+  keeps showing turn 3's stale ROCK_SLIDE PP (8/10) all through turn 5's
+  reopen-hold window. This fold's `latestCompletedCommandHandoff`
+  *correctly* advances at turn 4's own reset (5351) instead — required
+  for opponent-HP/`turn4SettledWindowActive` correctness elsewhere,
+  already verified byte-identical for turn5-reset-off/turn4-doubleteam-
+  off/turn4-rockslide-off — so chrome now shows turn 4's fresh PP (7/10)
+  one turn early relative to parent. Unlike slice 8's analogous turn3→4 PP
+  deviation (supervisor-verified oracle-correct and deliberately
+  accepted), my brief pre-settled oracle direction as out of scope for
+  turns 5-8 ("byte-identity to the clean parent, nothing else"), so I did
+  not rush a fix: reconciling "PP must look fresh via one channel
+  (opponent HP, `turn4SettledWindowActive`) but stale via another (FIGHT
+  chrome) off the SAME shared slot" needs a real design decision (a second
+  suppressed view of latest, or a distinct trigger tied to turn 5's own
+  confirm), not a guess under a expiring clock.
+- **Acceptance numbers (`compare:differential --base 105c72d5 --summary`,
+  all 14 windows):** turn3-endeavor-off 255/255, turn3-rockslide-off
+  161/161, turn4-doubleteam-off 256/256, turn4-rockslide-off 256/256,
+  turn5-reset-off 256/256, **turn5-action-off 6/32** (was 1/32 pre-fix),
+  **turn5-confirm-off-a 121/132** (unchanged — confirmed same root cause,
+  untouched by this commit), turn5-confirm-off-b 132/132, all four
+  turn5-resolve-off-{a,b,c,d} 196/196, turn6-reopen-off 46/46,
+  battle-command-generated-off 128/128. 12 of 14 clean; the remaining 2
+  share the one open PP-chrome root cause above.
+- **Next:** a MAIN worker should resume `salvage/slice9-fold-20260802`
+  (`a6d88eaa`) and design the PP-chrome fix (see "Found but NOT fixed"
+  above) rather than re-diagnosing from scratch — the eviction-class HP
+  bug is already closed. Re-run the full 14-window differential + full
+  suite + build once that lands, then merge and delete the salvage branch
+  per the standing instruction.
+- **Notes:** touched only `src/engine/battleScene.ts` (the four HP-overlay
+  spots) on the salvage branch; no trace/capture edits, no new state
+  fields, no PP/turn selector. `DEFERRED.md` has an unrelated, pre-
+  existing uncommitted change (a D1 user-communication-contract note, not
+  mine, out of this step's file scope) sitting in the working tree on both
+  branches — left untouched. PAPERCUT: `npm test` took ~7 minutes this
+  session (422s wall clock) and auto-backgrounded past the tool's 120s
+  timeout, needing an explicit blocking `TaskOutput` wait to avoid a
+  premature self-abort — worth a shorter smoke-subset option for mid-
+  session sanity checks.
