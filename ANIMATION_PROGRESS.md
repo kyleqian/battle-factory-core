@@ -39,7 +39,11 @@ Manectric slow **1841..1920 / 80, 36,702 B,
 **Verification / next:** focused source/census/routing/reducer/evidence
 checks **2 files / 11 tests**, both animation/executable ratchets **4 files /
 20 tests**, `npx tsc --noEmit`, smoke **7 files / 346 tests**, and coverage
-are green. Next source-ranked unsupported player-back set is
+are green. Full `npm test` is **668 files / 6,599 passed / 1 skipped**;
+`npm run build` is green at **553 modules transformed** with
+`NODE_OPTIONS=--max-old-space-size=8192` after this shared host's bare
+default Node heap reached its 4-GB V8 limit during `tsc -b`. Next
+source-ranked unsupported player-back set is
 **`BACK_ANIM_V_SHAKE_H_SLIDE` (set 10): 9 mappings / 9 Factory / 0 outside**
 — RATTATA, RATICATE, VENONAT, KRABBY, LEDYBA, SPINARAK, SWINUB, NINCADA, and
 CACNEA. No move status was promoted and no live dispatcher wiring or gameplay
