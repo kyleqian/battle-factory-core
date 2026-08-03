@@ -769,7 +769,7 @@ import {
   renderBattleCommandPresentation,
   type BattleCommandPresentationRenderView,
 } from "./battleCommandPresentationRender.ts";
-import type { BattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
+import type { BattleCommandFieldArtBattler, BattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
 import type {
   BattleResolutionRenderEffect,
   BattleResolutionPresentationRenderView,
@@ -4511,25 +4511,43 @@ export function generatedPlayerVisualTAtOpponentHandoff(
   );
 }
 
+/** `GetSpeciesBackAnimSet(SPECIES_ONIX) = BACK_ANIM_V_SHAKE` id (`battleMenu.ts`'s own doc); the one species `PLAYER_SETTLE_WOBBLE_Y2_TABLE` was RAM-derived for. */
+const MATERIALIZE_SETTLE_WOBBLE_SPECIES_ID = 95;
+const MATERIALIZE_SETTLE_WOBBLE_SPECIES_SYMBOL = "ONIX";
+
 /**
- * **ONIX-back hand-fit validity gap, NOT guarded here - ISSUES #71 Slice C
- * left this deliberately un-guarded; see docs/send-out-live-wiring-consumer-map.md
- * §2 ONIX back / §5 Slice C and the Slice-C worker's final report.**
  * `playerMaterializeSettleY2`/`playerMaterializeSettleTintCoeff`
- * (`battleMenu.ts`) are ONIX-only literals, applied below regardless of
- * `art.speciesSymbol` - unlike this run's other two back hand-fit
- * consumers, this one is reached TODAY by any generated-round player
- * species once its materialize-settle window starts (confirmed: the
- * `factoryBattleStartIntro.test.ts` "renders every lifecycle phase..."
- * case already drives a KADABRA player through this exact branch at
- * elapsed 710/714). A species-validity throw guard here would fire on
- * that already-green test, i.e. this is a real latent defect, not a
- * future-proofing gap - do not add a throw guard or otherwise touch this
- * branch without first deciding how to fix the underlying wrong-table
- * application; adding a guard alone would only convert a silent bug into
- * a crash on ordinary generated-round play.
+ * (`battleMenu.ts`) were both RAM-derived from a real ONIX save
+ * (`GetSpeciesBackAnimSet(SPECIES_ONIX) = BACK_ANIM_V_SHAKE`, a genuine
+ * per-species back-sprite entrance animation, per that module's own doc).
+ * ISSUES #71 entry-891: `drawGeneratedPlayerMaterialize` applied the `y2`
+ * wobble table to every generated-round player species regardless of
+ * `art.speciesSymbol`, not just ONIX. A RAM probe of a generated KADABRA
+ * lead (`docs/probes/kadabra-materialize-settle/`, `mechanicLab` scenario,
+ * battle-scene-off) confirms the tint fade is species-generic (identical
+ * closed form to `playerMaterializeSettleTintCoeff` - kept for every
+ * species) but KADABRA's own real `y2` settle is a DIFFERENT, unrelated
+ * animation family (its own back-send-out motion, descending 14->0 over 13
+ * ticks at a different point in its timeline, not ONIX's table). Only ONIX
+ * gets the wobble table; every other species draws `y2=0` (flat) through
+ * the settle window until the animation lane's per-species back-animation
+ * dispatcher (Slice D) lands.
  */
-function drawGeneratedPlayerMaterialize(
+export function generatedPlayerMaterializeSettleY2(
+  art: Pick<BattleCommandFieldArtBattler, "species" | "speciesSymbol">,
+  playerVisualT: number,
+): number {
+  // Scene OFF leaves the player sprite at neutral y once the ball-release
+  // callback clears. The older ONIX window's later bob belongs to Scene ON;
+  // the shared pre-clear settle offsets remain valid through tick 1669,
+  // and only for ONIX itself - see the function doc above.
+  if (playerVisualT >= GENERATED_PLAYER_NEUTRAL_Y_VISUAL_TICK) return 0;
+  const isSettleWobbleSpecies = art.species === MATERIALIZE_SETTLE_WOBBLE_SPECIES_ID
+    && art.speciesSymbol === MATERIALIZE_SETTLE_WOBBLE_SPECIES_SYMBOL;
+  return isSettleWobbleSpecies ? playerMaterializeSettleY2(playerVisualT) : 0;
+}
+
+export function drawGeneratedPlayerMaterialize(
   fb: Uint8Array,
   playerVisualT: number,
   fieldView: ReturnType<typeof createBattleCommandFieldRenderView>,
@@ -4559,12 +4577,7 @@ function drawGeneratedPlayerMaterialize(
     origin.y,
     256,
     256,
-    // Scene OFF leaves the player sprite at neutral y once the ball-release
-    // callback clears. The older ONIX window's later bob belongs to Scene ON;
-    // the shared pre-clear settle offsets remain valid through tick 1669.
-    playerVisualT >= GENERATED_PLAYER_NEUTRAL_Y_VISUAL_TICK
-      ? 0
-      : playerMaterializeSettleY2(playerVisualT),
+    generatedPlayerMaterializeSettleY2(art, playerVisualT),
     MATERIALIZE_TINT_COLOR,
     playerMaterializeSettleTintCoeff(playerVisualT),
   );
