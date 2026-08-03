@@ -56,10 +56,12 @@ export type SpeciesFrontAnimFamily =
   | "GROW_VIBRATE"
   | "GROW_IN_STAGES"
   | "GLOW_BLACK"
+  | "GLOW_BLUE"
   | "GLOW_ORANGE"
   | "RISING_WOBBLE"
   | "LUNGE_GROW"
   | "FLASH_YELLOW"
+  | "FRONT_FLIP"
   | "FLICKER_INCREASING"
   | "FIGURE_8"
   | "H_JUMPS"
@@ -70,6 +72,7 @@ export type SpeciesFrontAnimFamily =
   | "H_VIBRATE"
   | "H_JUMPS_V_STRETCH"
   | "H_JUMPS_V_STRETCH_TWICE"
+  | "H_PIVOT"
   | "H_SHAKE"
   | "H_SHAKE_SLOW"
   | "RAPID_H_HOPS"
@@ -78,6 +81,7 @@ export type SpeciesFrontAnimFamily =
   | "ROTATE_UP_TO_SIDES"
   | "SHRINK_GROW"
   | "SPIN"
+  | "TIP_MOVE_FORWARD"
   | "TUMBLING_FRONT_FLIP_TWICE"
   | "SWING_CONVEX"
   | "SWING_CONVEX_FAST"
@@ -117,10 +121,12 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "GROW_VIBRATE",
   "GROW_IN_STAGES",
   "GLOW_BLACK",
+  "GLOW_BLUE",
   "GLOW_ORANGE",
   "RISING_WOBBLE",
   "LUNGE_GROW",
   "FLASH_YELLOW",
+  "FRONT_FLIP",
   "FLICKER_INCREASING",
   "FIGURE_8",
   "H_JUMPS",
@@ -131,6 +137,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "H_VIBRATE",
   "H_JUMPS_V_STRETCH",
   "H_JUMPS_V_STRETCH_TWICE",
+  "H_PIVOT",
   "H_SHAKE",
   "H_SHAKE_SLOW",
   "RAPID_H_HOPS",
@@ -139,6 +146,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "ROTATE_UP_TO_SIDES",
   "SHRINK_GROW",
   "SPIN",
+  "TIP_MOVE_FORWARD",
   "TUMBLING_FRONT_FLIP_TWICE",
   "SWING_CONVEX",
   "SWING_CONVEX_FAST",
@@ -1022,6 +1030,40 @@ export const GLOW_BLACK_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Objec
   GLOW_BLACK_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
+/** All source selector mappings for the palette-only `ANIM_GLOW_BLUE`. */
+export const GLOW_BLUE_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_GLOW_BLUE")
+    .map(([species]) => species),
+);
+
+/** Every blue-glow mapping is reachable through Factory rentals. */
+export const GLOW_BLUE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  GLOW_BLUE_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no blue-glow mappings outside the Factory rental pool. */
+export const GLOW_BLUE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  GLOW_BLUE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All source selector mappings for `ANIM_FRONT_FLIP`. */
+export const FRONT_FLIP_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_FRONT_FLIP")
+    .map(([species]) => species),
+);
+
+/** Every front-flip mapping is reachable through a Factory rental. */
+export const FRONT_FLIP_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  FRONT_FLIP_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no front-flip mappings outside the Factory rental pool. */
+export const FRONT_FLIP_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  FRONT_FLIP_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
 /** All source selector mappings for the palette-only `ANIM_GLOW_ORANGE`. */
 export const GLOW_ORANGE_FRONT_SPECIES: readonly string[] = Object.freeze(
   Object.entries(generatedFrontAnimIds)
@@ -1156,6 +1198,40 @@ export const SWING_CONVEX_FAST_FACTORY_FRONT_SPECIES: readonly string[] = Object
 /** There are no fast convex mappings outside the Factory rental pool. */
 export const SWING_CONVEX_FAST_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   SWING_CONVEX_FAST_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** The sole source selector mapping for normal-front `ANIM_TIP_MOVE_FORWARD`. */
+export const TIP_MOVE_FORWARD_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_TIP_MOVE_FORWARD")
+    .map(([species]) => species),
+);
+
+/** RELICANTH is the complete Factory-reachable tip/move-forward family. */
+export const TIP_MOVE_FORWARD_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  TIP_MOVE_FORWARD_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no `ANIM_TIP_MOVE_FORWARD` mappings outside the Factory pool. */
+export const TIP_MOVE_FORWARD_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  TIP_MOVE_FORWARD_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** Both source selector mappings for normal-front `ANIM_H_PIVOT`. */
+export const H_PIVOT_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_H_PIVOT")
+    .map(([species]) => species),
+);
+
+/** WINGULL is the sole `ANIM_H_PIVOT` mapping reachable through Factory rentals. */
+export const H_PIVOT_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_PIVOT_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** DEOXYS is the selector table's one `ANIM_H_PIVOT` mapping outside the Factory pool. */
+export const H_PIVOT_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_PIVOT_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 export interface SpeciesIdleOffset {
@@ -2541,6 +2617,313 @@ export function swingConvexFastFrameAtTick(
     SWING_CONVEX_FAST_DURATION,
     2,
   );
+}
+
+/**
+ * Source selector 26 enters directly through `Task_HandleMonAnimation`; it
+ * does not allocate an `sAnims` record through `AddNewAnim`. The task saves
+ * battler/species, sets `sDontFlip`, zeros data[0] and data[2..7], and only
+ * then installs this callback. data[1] deliberately survives the zeroing.
+ */
+export const TIP_MOVE_FORWARD_ENTRY = Object.freeze({
+  selector: "ANIM_TIP_MOVE_FORWARD",
+  sourceId: 26,
+  usesAddNewAnim: false,
+  taskZeroedDataIndices: TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES,
+  taskPreservedDataIndices: [1],
+  normalFrontDontFlip: true,
+  callbackInstalled: "Anim_TipMoveForward",
+  callbackInvokedByInitializer: false,
+  taskRestoresBattlerAndSpeciesAtSpriteCallbackDummy: true,
+  accepted: true,
+} as const);
+
+export interface TipMoveForwardAffineWrite {
+  readonly xScale: 256;
+  readonly yScale: 256;
+  /** Signed source rotation handed to `HandleSetAffineData`. */
+  readonly rotationSigned: number;
+  /** The same rotation after C's u16 function-argument conversion. */
+  readonly rotationU16: number;
+}
+
+export interface TipMoveForwardFrame extends SpeciesIdleOffset {
+  /** `sprite->data[2]` before this callback's source-order work. */
+  readonly data2Before: number;
+  /** The signed-s16 register after the unconditional source increment. */
+  readonly data2: number;
+  /** C's u8 `counter = sprite->data[2]` local. */
+  readonly counter: number;
+  /**
+   * `((counter - 10) * 128) / 20`, evaluated before the source's branch
+   * selection and truncated toward zero as C integer division requires.
+   */
+  readonly index: number | null;
+  readonly phase: "tip" | "moveForward" | "tipBack" | "terminal";
+  /** Current affine rotation after any write made by this callback. */
+  readonly affineRotationSigned: number;
+  readonly affineRotationU16: number;
+  readonly affineWrites: readonly TipMoveForwardAffineWrite[];
+  readonly affineWriteCount: 0 | 1;
+  readonly xScale: 256;
+  readonly yScale: 256;
+  readonly wroteX2: boolean;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXBeforeMotion: true;
+  readonly tryFlipXAfterMotion: true;
+  readonly tryFlipXCalls: 2;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "Anim_TipMoveForward" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+/**
+ * Source-order normal-front port of selector 26's `Anim_TipMoveForward`
+ * (`pokemon_animation.c:911-939,1680-1711,5540-5544`). Unlike its adjacent
+ * `AddNewAnim` selectors, this callback is installed directly by the
+ * task-zeroed animation launcher. Its u8 `counter` snapshots signed data2
+ * before the branch: callbacks 0..9 tip forward through paired half-counter
+ * rotation, 10..29 write only the signed sine x2 lunge (leaving the last
+ * affine rotation intact), and 30..35 tip back. The strict callback at 36
+ * writes affine identity, resets normal OAM geometry, clears x2, and installs
+ * `WaitAnimEnd`; later calls are the stable wait receipt until the real OAM
+ * frame animation makes `WaitAnimEnd` hand its callback to SpriteCallbackDummy.
+ */
+export function tipMoveForwardFrameAtTick(
+  ticksSinceStart: number,
+): TipMoveForwardFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let x2 = 0;
+  let affineRotationSigned = 0;
+  let callback: TipMoveForwardFrame["callback"] = "Anim_TipMoveForward";
+  let affineMode: TipMoveForwardFrame["affineMode"] = "double";
+  let lastFrame: TipMoveForwardFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (callback === "WaitAnimEnd") continue;
+
+    const data2Before = data2;
+    // `counter` is a u8 local in the source even though data[] is signed s16.
+    const counter = data2 & 0xff;
+    const startedAffine = data2 === 0;
+    let index: number | null = null;
+    let phase: TipMoveForwardFrame["phase"];
+    let affineWrites: readonly TipMoveForwardAffineWrite[] = [];
+    let wroteX2 = false;
+    let resetSpriteAfterAnim = false;
+
+    // First source-order `TryFlipX`; sDontFlip was set by the front task.
+    x2 = tryFlipX(x2, true);
+    if (data2 > 35) {
+      phase = "terminal";
+      affineRotationSigned = 0;
+      affineWrites = [{
+        xScale: 256,
+        yScale: 256,
+        rotationSigned: affineRotationSigned,
+        rotationU16: toU16(affineRotationSigned),
+      }];
+      resetSpriteAfterAnim = true;
+      affineMode = "normal";
+      callback = "WaitAnimEnd";
+      x2 = 0;
+      wroteX2 = true;
+    } else {
+      // C's signed integer division truncates toward zero, including the
+      // deliberately negative counter-0..9 local result.
+      index = toS16(Math.trunc(((counter - 10) * 128) / 20));
+      if (counter < 10) {
+        phase = "tip";
+        affineRotationSigned = toS16(Math.trunc(counter / 2) * 512);
+        affineWrites = [{
+          xScale: 256,
+          yScale: 256,
+          rotationSigned: affineRotationSigned,
+          rotationU16: toU16(affineRotationSigned),
+        }];
+      } else if (counter <= 29) {
+        phase = "moveForward";
+        x2 = toS16(-gbaSin(index, 5));
+        wroteX2 = true;
+      } else {
+        phase = "tipBack";
+        affineRotationSigned = toS16(Math.trunc((35 - counter) / 2) * 1024);
+        affineWrites = [{
+          xScale: 256,
+          yScale: 256,
+          rotationSigned: affineRotationSigned,
+          rotationU16: toU16(affineRotationSigned),
+        }];
+      }
+    }
+
+    data2 = toS16(data2 + 1);
+    // Second source-order `TryFlipX`; again a no-op on normal fronts.
+    x2 = tryFlipX(x2, true);
+    lastFrame = {
+      x2,
+      y2: 0,
+      data2Before,
+      data2,
+      counter,
+      index,
+      phase,
+      affineRotationSigned,
+      affineRotationU16: toU16(affineRotationSigned),
+      affineWrites,
+      affineWriteCount: affineWrites.length as 0 | 1,
+      xScale: 256,
+      yScale: 256,
+      wroteX2,
+      startedAffine,
+      normalFrontDontFlip: true,
+      tryFlipXBeforeMotion: true,
+      tryFlipXAfterMotion: true,
+      tryFlipXCalls: 2,
+      resetSpriteAfterAnim,
+      callback,
+      affineMode,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable Anim_TipMoveForward reducer state");
+  return lastFrame;
+}
+
+/**
+ * Source selector 27 enters directly through `Task_HandleMonAnimation`; it
+ * never allocates an `sAnims` record and it contains no `TryFlipX` calls.
+ * The front task saves battler/species, sets `sDontFlip`, zeros data[0] and
+ * data[2..7], then installs this callback while preserving data[1].
+ */
+export const HORIZONTAL_PIVOT_ENTRY = Object.freeze({
+  selector: "ANIM_H_PIVOT",
+  sourceId: 27,
+  usesAddNewAnim: false,
+  taskZeroedDataIndices: TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES,
+  taskPreservedDataIndices: [1],
+  normalFrontDontFlip: true,
+  callbackInstalled: "Anim_HorizontalPivot",
+  callbackInvokedByInitializer: false,
+  tryFlipXCalls: 0,
+  taskRestoresBattlerAndSpeciesAtSpriteCallbackDummy: true,
+  accepted: true,
+} as const);
+
+export interface HorizontalPivotAffineWrite {
+  readonly xScale: 256;
+  readonly yScale: 256;
+  /** Signed `Sin` result before `HandleSetAffineData` receives its u16 argument. */
+  readonly rotationSigned: number;
+  readonly rotationU16: number;
+}
+
+export interface HorizontalPivotFrame extends SpeciesIdleOffset {
+  /** `sprite->data[2]` before the callback's strict terminal guard. */
+  readonly data2Before: number;
+  /** Signed-s16 source register after the unconditional callback increment. */
+  readonly data2: number;
+  /** Source `s16 index = (data[2] * 256) / 100`, absent at terminal cleanup. */
+  readonly index: number | null;
+  /** The source `Sin(index, 10)` value written directly to `sprite->y2`. */
+  readonly ySine: number;
+  readonly affineRotationSigned: number;
+  readonly affineRotationU16: number;
+  readonly affineWrites: readonly HorizontalPivotAffineWrite[];
+  readonly affineWriteCount: 1;
+  readonly xScale: 256;
+  readonly yScale: 256;
+  readonly wroteY2: true;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  /** This callback has no source `TryFlipX` invocation. */
+  readonly tryFlipXCalls: 0;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "Anim_HorizontalPivot" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+/**
+ * Source-order normal-front port of selector 27's `Anim_HorizontalPivot`
+ * (`pokemon_animation.c:911-939,1713-1733,5540-5544`). Tick zero starts
+ * double-affine mode, then active callbacks 0..100 calculate the signed-s16
+ * C-truncated `(data2 * 256) / 100` index, write vertical sine motion and
+ * the same signed sine to affine rotation. The strict callback at 101 writes
+ * affine identity, clears y2, restores normal OAM geometry, installs
+ * `WaitAnimEnd`, and still increments data2 to 102. Later observations are
+ * the same stable wait receipt until the real OAM frame animation lets
+ * `WaitAnimEnd` hand off to `SpriteCallbackDummy`.
+ */
+export function horizontalPivotFrameAtTick(
+  ticksSinceStart: number,
+): HorizontalPivotFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let y2 = 0;
+  let affineRotationSigned = 0;
+  let callback: HorizontalPivotFrame["callback"] = "Anim_HorizontalPivot";
+  let affineMode: HorizontalPivotFrame["affineMode"] = "double";
+  let lastFrame: HorizontalPivotFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (callback === "WaitAnimEnd") continue;
+
+    const data2Before = data2;
+    const startedAffine = data2 === 0;
+    let index: number | null = null;
+    let ySine = 0;
+    let resetSpriteAfterAnim = false;
+
+    if (data2 > 100) {
+      affineRotationSigned = 0;
+      y2 = 0;
+      resetSpriteAfterAnim = true;
+      affineMode = "normal";
+      callback = "WaitAnimEnd";
+    } else {
+      // The source local is s16; C integer division truncates toward zero.
+      index = toS16(Math.trunc((data2 * 256) / 100));
+      ySine = toS16(gbaSin(index, 10));
+      y2 = ySine;
+      affineRotationSigned = toS16(gbaSin(index, 3276));
+    }
+
+    data2 = toS16(data2 + 1);
+    const affineWrites: readonly HorizontalPivotAffineWrite[] = [{
+      xScale: 256,
+      yScale: 256,
+      rotationSigned: affineRotationSigned,
+      rotationU16: toU16(affineRotationSigned),
+    }];
+    lastFrame = {
+      x2: 0,
+      y2,
+      data2Before,
+      data2,
+      index,
+      ySine,
+      affineRotationSigned,
+      affineRotationU16: toU16(affineRotationSigned),
+      affineWrites,
+      affineWriteCount: 1,
+      xScale: 256,
+      yScale: 256,
+      wroteY2: true,
+      startedAffine,
+      normalFrontDontFlip: true,
+      tryFlipXCalls: 0,
+      resetSpriteAfterAnim,
+      callback,
+      affineMode,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable Anim_HorizontalPivot reducer state");
+  return lastFrame;
 }
 
 /**
@@ -4398,6 +4781,190 @@ export function spinFrameAtTick(ticksSinceStart: number): SpinFrame | null {
   return lastFrame;
 }
 
+/**
+ * Direct-task selector 41. Unlike the nearby tumbling selector, this never
+ * allocates an `sAnims` slot: `Task_HandleMonAnimation` installs
+ * `Anim_FrontFlip` after zeroing all data slots except the front-picture
+ * frame accumulator in data[1]. Pidgeot has no sMonAnimationDelayTable entry,
+ * so `DoMonFrontSpriteAnimation` launches this task immediately after it
+ * starts front-picture program 1.
+ */
+export const FRONT_FLIP_ENTRY = Object.freeze({
+  selector: "ANIM_FRONT_FLIP",
+  sourceId: 41,
+  usesAddNewAnim: false,
+  taskZeroedDataIndices: TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES,
+  taskPreservedDataIndices: [1],
+  normalFrontDontFlip: true,
+  callbackInstalled: "Anim_FrontFlip",
+  callbackInvokedByInitializer: false,
+  initializerStartsAffine: true,
+  initializerInstallsCallback: "FrontFlip_0",
+  frontPictureProgramIndex: 1,
+  sourceAnimationDelay: 0,
+  taskRestoresBattlerAndSpeciesAtSpriteCallbackDummy: true,
+  accepted: true,
+} as const);
+
+/** Exact `sAnim_Pidgeot_1` program started by `DoMonFrontSpriteAnimation`. */
+export const FRONT_FLIP_PIDGEOT_FRONT_PICTURE_PROGRAM = Object.freeze([
+  Object.freeze({ frame: 1, duration: 20 }),
+  Object.freeze({ frame: 0, duration: 10 }),
+  Object.freeze({ frame: 1, duration: 15 }),
+  Object.freeze({ frame: 0, duration: 1 }),
+] as const);
+
+export interface FrontFlipFrame extends SpeciesIdleOffset {
+  /** Callback entered for this source update, before it mutates the sprite. */
+  readonly phase: "Anim_FrontFlip" | "FrontFlip_0" | "FrontFlip_1" | "FrontFlip_2";
+  /** Signed data[2] immediately before and after that callback. */
+  readonly data2Before: number;
+  readonly data2: number;
+  /** Source's raw `data[2] << 8`, before the u16 function argument conversion. */
+  readonly affineRotationShifted: number | null;
+  readonly affineRotationU16: number | null;
+  readonly affineWriteCount: 0 | 1;
+  readonly xScale: 256;
+  readonly yScale: 256;
+  /** `HandleStartAffineAnim` has set affine double mode this callback. */
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  /** The source calls TryFlipX around each motion callback; it is a no-op here. */
+  readonly tryFlipXBeforeMotion: boolean;
+  readonly tryFlipXAfterMotion: boolean;
+  readonly tryFlipXCalls: 0 | 2;
+  readonly resetSpriteAfterAnim: boolean;
+  /** Sprite callback selected for the following frame. */
+  readonly callback: "FrontFlip_0" | "FrontFlip_1" | "FrontFlip_2" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+/**
+ * Source-order reducer for selector 41's `Anim_FrontFlip` ->
+ * `FrontFlip_0` -> `FrontFlip_1` -> `FrontFlip_2`
+ * (`pokemon_animation.c:911-939,1003-1035,2302-2364,5540-5544`). The task
+ * has already made `sDontFlip=TRUE` for a normal opponent-front sprite, so
+ * both preserved `TryFlipX` calls are no-ops. All x2/y2/data[2] writes pass
+ * through s16 storage; the rotation call retains the source `data[2] << 8`
+ * expression before `HandleSetAffineData` receives its u16 argument.
+ *
+ * Tick 0 is the delayed task's direct `Anim_FrontFlip` callback. Ticks 1..49
+ * are the three motion callbacks; tick 49 calls `ResetSpriteAfterAnim` and
+ * installs `WaitAnimEnd`. Later calls leave this settled reducer state intact
+ * while WaitAnimEnd waits for the front-picture program to signal animEnded.
+ */
+export function frontFlipFrameAtTick(ticksSinceStart: number): FrontFlipFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  type Phase = FrontFlipFrame["phase"] | "WaitAnimEnd";
+  let phase: Phase = "Anim_FrontFlip";
+  let data2 = 0;
+  let x2 = 0;
+  let y2 = 0;
+  let affineMode: FrontFlipFrame["affineMode"] = "normal";
+  let lastFrame: FrontFlipFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (phase === "WaitAnimEnd") continue;
+
+    const callbackPhase: FrontFlipFrame["phase"] = phase;
+    const data2Before = data2;
+    let affineRotationShifted: number | null = null;
+    let affineRotationU16: number | null = null;
+    let startedAffine = false;
+    let tryFlipXBeforeMotion = false;
+    let tryFlipXAfterMotion = false;
+    let resetSpriteAfterAnim = false;
+    // Each source callback stays installed unless its transition branch below
+    // replaces it; Anim_FrontFlip alone always installs FrontFlip_0.
+    let callback: FrontFlipFrame["callback"] =
+      callbackPhase === "Anim_FrontFlip" ? "FrontFlip_0" : callbackPhase;
+
+    switch (callbackPhase) {
+      case "Anim_FrontFlip":
+        // HandleStartAffineAnim: double OAM, affine program 0 for sDontFlip.
+        affineMode = "double";
+        startedAffine = true;
+        break;
+      case "FrontFlip_0":
+        tryFlipXBeforeMotion = true;
+        x2 = tryFlipX(x2, true);
+        x2 = toS16(x2 + 1);
+        y2 = toS16(y2 - 1);
+        if (x2 > 15) {
+          data2 = 0;
+          callback = "FrontFlip_1";
+        }
+        x2 = tryFlipX(x2, true);
+        tryFlipXAfterMotion = true;
+        break;
+      case "FrontFlip_1":
+        tryFlipXBeforeMotion = true;
+        x2 = tryFlipX(x2, true);
+        data2 = toS16(data2 + 16);
+        if (x2 <= -16) {
+          x2 = -16;
+          y2 = 16;
+          data2 = 0;
+          callback = "FrontFlip_2";
+        } else {
+          x2 = toS16(x2 - 2);
+          y2 = toS16(y2 + 2);
+        }
+        affineRotationShifted = data2 << 8;
+        affineRotationU16 = toU16(affineRotationShifted);
+        x2 = tryFlipX(x2, true);
+        tryFlipXAfterMotion = true;
+        break;
+      case "FrontFlip_2":
+        tryFlipXBeforeMotion = true;
+        x2 = tryFlipX(x2, true);
+        x2 = toS16(x2 + 1);
+        y2 = toS16(y2 - 1);
+        if (x2 >= 0) {
+          x2 = 0;
+          y2 = 0;
+          affineMode = "normal";
+          resetSpriteAfterAnim = true;
+          callback = "WaitAnimEnd";
+        }
+        x2 = tryFlipX(x2, true);
+        tryFlipXAfterMotion = true;
+        break;
+    }
+
+    phase = callback;
+    lastFrame = {
+      x2,
+      y2,
+      phase: callbackPhase,
+      data2Before,
+      data2,
+      affineRotationShifted,
+      affineRotationU16,
+      affineWriteCount: affineRotationShifted === null ? 0 : 1,
+      xScale: 256,
+      yScale: 256,
+      startedAffine,
+      normalFrontDontFlip: true,
+      tryFlipXBeforeMotion,
+      tryFlipXAfterMotion,
+      tryFlipXCalls: tryFlipXBeforeMotion && tryFlipXAfterMotion ? 2 : 0,
+      resetSpriteAfterAnim,
+      callback,
+      affineMode,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable FrontFlip reducer state");
+  return lastFrame;
+}
+
+/** `WaitAnimEnd` becomes the terminal dummy callback only after animEnded. */
+export function frontFlipWaitAnimEndCallback(animEnded: boolean): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
 /** Source-specific `Anim_TumblingFrontFlip_Twice` initializer for selector 84. */
 export const TUMBLING_FRONT_FLIP_TWICE_INITIALIZER = Object.freeze({
   selector: "ANIM_TUMBLING_FRONT_FLIP_TWICE",
@@ -5858,6 +6425,22 @@ export const GLOW_BLACK_ENTRY = Object.freeze({
   accepted: true,
 } as const);
 
+/** Source selector 34's task-installed direct callback receipt. */
+export const GLOW_BLUE_ENTRY = Object.freeze({
+  selector: "ANIM_GLOW_BLUE",
+  sourceId: 34,
+  taskZeroedData2: true,
+  taskZeroedData6: true,
+  taskZeroedData7: true,
+  callbackInstalled: "Anim_GlowBlue",
+  callbackInvokedByInitializer: false,
+  colorIncrement: 12,
+  speed: 2,
+  blendColor: 0x7c00,
+  normalFrontDontFlip: true,
+  accepted: true,
+} as const);
+
 /** Source selector 32's task-installed direct callback receipt. */
 export const GLOW_ORANGE_ENTRY = Object.freeze({
   selector: "ANIM_GLOW_ORANGE",
@@ -5874,7 +6457,7 @@ export const GLOW_ORANGE_ENTRY = Object.freeze({
   accepted: true,
 } as const);
 
-type GlowColorCallback = "Anim_GlowBlack" | "Anim_GlowOrange";
+type GlowColorCallback = "Anim_GlowBlack" | "Anim_GlowBlue" | "Anim_GlowOrange";
 
 interface GlowColorFrame<
   TCallback extends GlowColorCallback,
@@ -5900,6 +6483,7 @@ interface GlowColorFrame<
 }
 
 export type GlowBlackFrame = GlowColorFrame<"Anim_GlowBlack", 0>;
+export type GlowBlueFrame = GlowColorFrame<"Anim_GlowBlue", 0x7c00>;
 export type GlowOrangeFrame = GlowColorFrame<"Anim_GlowOrange", 0x02df>;
 
 interface GlowColorConfig<
@@ -5919,6 +6503,13 @@ const GLOW_BLACK_CONFIG = {
   blendColor: 0,
 } as const satisfies GlowColorConfig<"Anim_GlowBlack", 0>;
 
+const GLOW_BLUE_CONFIG = {
+  callback: "Anim_GlowBlue",
+  colorIncrement: 12,
+  speed: 2,
+  blendColor: 0x7c00,
+} as const satisfies GlowColorConfig<"Anim_GlowBlue", 0x7c00>;
+
 const GLOW_ORANGE_CONFIG = {
   callback: "Anim_GlowOrange",
   colorIncrement: 12,
@@ -5928,7 +6519,7 @@ const GLOW_ORANGE_CONFIG = {
 
 /**
  * Source-order normal-front port of `GlowColor(color, colorIncrement, speed)`
- * (`pokemon_animation.c:911-939,1539-1560`). Both accepted selectors enter
+ * (`pokemon_animation.c:911-939,1539-1560`). All accepted selectors enter
  * through the same task-zeroed direct callback: callback zero captures
  * `OBJ_PLTT_ID(oam.paletteNum)`; active callbacks write a signed GBA sine
  * coefficient to all 16 OBJ-palette entries; the strict `data2 > 128` guard
@@ -6002,6 +6593,18 @@ export function glowBlackFrameAtTick(
   paletteNum = 0,
 ): GlowBlackFrame | null {
   return glowColorFrameAtTick(ticksSinceStart, paletteNum, GLOW_BLACK_CONFIG);
+}
+
+/**
+ * Source-order normal-front port of selector 34's
+ * `GlowColor(RGB_BLUE, 12, 2)` expansion. Its two-step signed `data2`
+ * progression has 65 active callbacks (0..128) and terminal callback 65.
+ */
+export function glowBlueFrameAtTick(
+  ticksSinceStart: number,
+  paletteNum = 0,
+): GlowBlueFrame | null {
+  return glowColorFrameAtTick(ticksSinceStart, paletteNum, GLOW_BLUE_CONFIG);
 }
 
 /**
@@ -6545,6 +7148,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
+    case "GLOW_BLUE": {
+      const terminal = glowBlueFrameAtTick(65);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_GlowBlue did not restore its palette at the terminal boundary");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
     case "GLOW_ORANGE": {
       const terminal = glowOrangeFrameAtTick(65);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
@@ -6580,6 +7190,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
+    case "FRONT_FLIP": {
+      const terminal = frontFlipFrameAtTick(49);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_FrontFlip did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
     case "SHRINK_GROW": {
       const terminal = shrinkGrowFrameAtTick(49);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
@@ -6598,6 +7215,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = tumblingFrontFlipTwiceFrameAtTick(137);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_TumblingFrontFlip_Twice did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "TIP_MOVE_FORWARD": {
+      const terminal = tipMoveForwardFrameAtTick(36);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_TipMoveForward did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
@@ -6712,6 +7336,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
         throw new Error(
           "Anim_HorizontalJumpsVerticalStretch_Twice did not reach terminal cleanup",
         );
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "H_PIVOT": {
+      const terminal = horizontalPivotFrameAtTick(101);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_HorizontalPivot did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }

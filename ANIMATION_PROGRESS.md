@@ -1,5 +1,137 @@
 # Animation coverage
 
+## Front `ANIM_FRONT_FLIP` family accepted (2026-08-03)
+
+**State:** exact reducer/evidence coverage for the complete generated selector
+census: **1 mapping / 1 Factory-reachable / 0 outside-Factory** — PIDGEOT.
+Source ID **41** closes the final Factory-front family: Factory-front coverage
+is **62/62 families** and **376/376 species mappings** (the full generated
+front census is 62 families / 386 mappings). `ANIMATION_COVERAGE.json` remains
+byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`;
+move coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**.
+
+**Did:** source pins selector neighbors 40/41/42, direct no-delay task dispatch,
+Pidgeot's `1×20, 0×10, 1×15, 0×1` front-picture program, task-preserved
+data[1], signed-s16 x2/y2/data[2] storage, all six source-order `TryFlipX`
+calls, raw `data[2] << 8` / u16 affine writes, double-to-normal OAM reset,
+and `WaitAnimEnd` -> dummy teardown. The front seam now has an extraction/
+coverage ratchet for all 62 generated families and all 376 Factory mappings;
+the distinct Pidgeot back selector remains deliberately unported. Two fresh,
+complete legal Scene-ON PIDGEOT mGBA receipts from `tools/run-mgba-probe.py`
+are byte-identical: active-to-dummy window **1616..1667 (52 frames)**,
+**23,468 B**, SHA-256
+`fe5a38bcddffb556d221ace425473006cc52d3b8f89acc1b5d0c951bd8f51b1b`.
+
+**Next:** supervisor census/implementation of **back send-out animations**.
+Front-family coverage is complete, but overall send-out coverage is **not**
+complete because the back-animation family is separate.
+
+**Notes:** focused reducer/source/census/evidence, adjacent-family controls,
+and animation boundary ratchets are green; `npx tsc --noEmit`,
+`npm run animation:coverage`, full `npm test`, and `npm run build` are green.
+No move status was promoted and no canonical-screen lookup or baked pixel
+behavior was added.
+
+## Front `ANIM_GLOW_BLUE` family accepted (2026-08-02)
+
+**State:** exact reducer/evidence coverage for the complete generated selector
+census: **1 mapping / 1 Factory-reachable / 0 outside-Factory** — MILOTIC.
+Source ID is **34** (the brief's expected 33 is adjacent `ANIM_GLOW_RED`).
+Factory-front coverage is **61/62 families** and **375/376 species mappings**.
+`ANIMATION_COVERAGE.json` remains byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`;
+move coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**.
+
+**Did:** source pins `pokemon_animation.h:72-75`, `pokemon.c:1710,1795,
+6784-6855`, `pokemon_animation.c:653-666,911-939,1539-1555,2013-2016,
+5540-5544`, `util.c:264-279`, and MILOTIC's 45-frame delayed startup plus
+seven 15-frame front-picture program. The selector-specific receipt pins
+task-zeroed signed-s16 data, `RGB_BLUE` `0x7c00`, palette masking, amplitude
+12/speed 2, strict guard/order, restore/WaitAnimEnd/dummy teardown, stable
+terminal, invalid inputs, and adjacent unused glow controls. Fresh complete
+legal Scene-ON MILOTIC parties produced a byte-identical active-to-dummy pair:
+window **1660..1727 (68 frames)**, **58,643 B**, SHA-256
+`29a28ccc3d39e04533a74065f5a561153d59899a5654966e452e3c9e98a9cfba`.
+The receipt pins callback addresses, every reducer/RAM/OAM/palette frame, and
+every RGB hash; no move status was promoted.
+
+**Next:** **`ANIM_FRONT_FLIP` (PIDGEOT)**, the last unsupported
+Factory-front family.
+
+**Notes:** focused blue + black/orange regression/source/census/evidence and
+both ratchets are **40/40**; `npx tsc --noEmit` and
+`npm run animation:coverage` are green. Full `npm test` is **639 files /
+6,401 passed / 1 skipped** and the production build is green. Commits:
+`445c38fe` (reducer/census), `438053bf` (paired Scene-ON evidence), and
+`5e448621` (Milotic terminal receipt regression). No move status was
+promoted; this remains reducer/evidence coverage rather than live battle-seam
+wiring.
+
+## Front `ANIM_H_PIVOT` family accepted (2026-08-02)
+
+**State:** exact reducer/evidence coverage for the complete generated selector
+census: **2 mappings / 1 Factory-reachable / 1 outside-Factory** — WINGULL
+and DEOXYS. Source ID **27** is promoted, bringing Factory-front coverage to
+**60/62 families** and **374/376 species mappings**.
+`ANIMATION_COVERAGE.json` remains byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`;
+move coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**.
+
+**Did:** source pins `pokemon_animation.h:67`, `pokemon.c:1690,1791`, and
+`pokemon_animation.c:659,911-939,1003-1077,1713-1733,5540-5544`: direct
+task-installed callback (no `AddNewAnim` or `TryFlipX`), signed-s16
+C-truncated arithmetic, affine/OAM writes, identity reset, `WaitAnimEnd`,
+dummy teardown, stable terminal, invalid endpoints, and adjacent controls.
+Fresh complete legal Scene-ON WINGULL parties produced a byte-identical
+active-to-dummy pair: window **1616..1719 (104 frames)**, **47,483 B**,
+SHA-256 `b709b5f8831cf086234a1e578ddb6b32bc0732b21efc248d41c0dbd7167d8e63`.
+DEOXYS is source-census-only: no source or oracle evidence requires an
+outside-Factory fixture variant.
+
+**Next:** source-ranked unsupported Factory-front family **`ANIM_GLOW_BLUE`**
+(MILOTIC).
+
+**Notes:** focused lifecycle/source/census/evidence plus both ratchets are
+**21/21**; `npx tsc --noEmit`, unchanged coverage, full `npm test`
+(**637 files / 6,392 passed / 1 skipped**), and production build are green.
+Commits: `5177440d` (reducer), `849a68f3` (probe), `b2c5f047` (evidence),
+`5840bf11` (source bounds), and `36e8e894` (adjacent regression). No move
+status was promoted; this remains evidence/reducer coverage rather than live
+battle-seam wiring.
+
+## Front `ANIM_TIP_MOVE_FORWARD` family accepted (2026-08-02)
+
+**State:** exact reducer/evidence coverage for the complete generated selector
+census: **1 mapping / 1 Factory-reachable / 0 outside-Factory** — RELICANTH.
+Source ID **26** is promoted, bringing Factory-front coverage to **59/62
+families** and **373/376 species mappings**. `ANIMATION_COVERAGE.json` remains
+byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`;
+move coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**.
+
+**Did:** source pins `pokemon_animation.h:66`, `pokemon.c:1762`, and
+`pokemon_animation.c:658,911-939,1680-1711,5540-5544`: direct task-installed
+callback (no `AddNewAnim`), task-zeroed signed-s16 state, both source-order
+`TryFlipX` calls, C-truncated tip/lunge/tip-back arithmetic, exact x2 and
+affine-OAM writes across 37 active/terminal callbacks, identity reset,
+`WaitAnimEnd`, stable terminal, and invalid endpoints. Fresh complete legal
+Scene-ON RELICANTH parties produced a byte-identical active-to-dummy pair:
+window **1618..1694 (77 frames)**, **34,589 B**, SHA-256
+`0c1fffb728ed675db5e0e632c85c25802bc66ed0fec83afffdfb151523ec0d6c`.
+
+**Next:** source-ranked unsupported Factory-front family
+**`ANIM_H_PIVOT`** (ID **27**), **1 Factory mapping** — WINGULL. Remaining
+after this step: H_PIVOT/WINGULL, GLOW_BLUE/MILOTIC, FRONT_FLIP/PIDGEOT.
+
+**Notes:** focused lifecycle/source/census/evidence plus both ratchets are
+**346/346**; TypeScript, unchanged coverage, three full `npm test` runs
+(**634 files / 6,376 passed / 1 skipped**), and production build are green.
+Commits: `8f146a3a` (reducer/census/lifecycle) and `a6805428` (paired Scene-ON
+evidence). This acceptance proves reducers, receipts, and terminal rest
+offsets; the live battle send-out seam still does not invoke these reducers
+frame-by-frame, so this is not yet playable live wiring.
+
 ## Front `ANIM_SWING_CONVEX_FAST` family accepted (2026-08-02)
 
 **State:** exact for the complete generated selector census: **1 mapping / 1

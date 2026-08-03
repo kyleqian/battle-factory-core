@@ -772,8 +772,8 @@ describe("speciesIdleAnim", () => {
       }
     });
 
-    it("returns null for generated species whose front-anim family isn't ported", () => {
-      expect(speciesFrontIdleRestOffset("PIDGEOT")).toBeNull();
+    it("dispatches PIDGEOT after the final generated front family is ported", () => {
+      expect(speciesFrontIdleRestOffset("PIDGEOT")).toEqual({ x2: 0, y2: 0 });
     });
 
     it("dispatches the complete generated 32-species V_STRETCH family", () => {
@@ -5654,7 +5654,7 @@ describe("speciesIdleAnim", () => {
       expect(selectorTables.frontAnimIds.species.BLASTOISE).toBe("ANIM_V_SHAKE_TWICE");
       expect(speciesFrontIdleRestOffset("BLASTOISE")).toEqual({ x2: 0, y2: 0 });
       expect(selectorTables.frontAnimIds.species.RELICANTH).toBe("ANIM_TIP_MOVE_FORWARD");
-      expect(speciesFrontIdleRestOffset("RELICANTH")).toBeNull();
+      expect(speciesFrontIdleRestOffset("RELICANTH")).toEqual({ x2: 0, y2: 0 });
     });
   });
 
