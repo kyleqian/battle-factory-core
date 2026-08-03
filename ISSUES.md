@@ -17,6 +17,46 @@ backlog.
 
 # Open
 
+## #68 — [USER REPORT 2026-08-02, play session] Selecting a Torment-blocked move throws instead of the ROM's in-menu rejection message
+
+**Report:** interactive play (preview at `3a165507`), rental BUTTERFREE vs
+opponent MURKROW. SILVER WIND used twice; on attempting it a third time the
+app threw a user-visible error mentioning torment (MURKROW's set carries
+TORMENT). Expected per source: selecting a `CheckMoveLimitations`-blocked
+move prints "{mon} can't use {move} after the TORMENT!" (or the
+class-appropriate limitation string) and returns to move selection —
+`HandleTurnActionSelectionState`'s selection-retry loop, not an exception.
+
+**Triage (supervisor, same-session):** the kernel side is likely right —
+`legalMoveDecisions` (`factoryBattleScriptFullTurnDecision.ts`, consuming
+`checkBattleScriptMoveLimitations`, the ported `battle_util.c:1082-1123`)
+already excludes tormented slots, and `submitBattleDecision` validates
+membership. Working hypothesis: the fight-submenu UI never consults the
+legal-decision set, submits the illegal choice, and the validator's throw
+surfaces raw. Needs: repro via staged scenario (opponent all-four-TORMENT
+constrains the AI), then the source-faithful rejection flow (message +
+re-selection) wired at the menu boundary, plus a check of EVERY other
+limitation class reachable in Factory L50 (Disable, Encore, Taunt, choice
+lock, no-PP) for the same gap. Struggle path (all four blocked) must keep
+working.
+
+## #69 — [USER REPORT 2026-08-02, play session] Scene-OFF all-stats-up (SILVER WIND omniboost) presentation cadence looks wrong; double-proc bias check
+
+**Report (same session/matchup as #68):** on omniboost the app rendered a
+visible stat-up effect per stat, each unusually fast ("fast-forwarded");
+user's recollection of the real game is one gray flash then the text. Also
+observed omniboost on both of two consecutive SILVER WIND uses (10%
+per-use in source — 1% for the pair, plausible luck, unverified).
+
+**Needs (oracle ground truth first, no app change before it):** stage
+BUTTERFREE SILVER WIND vs constrained opponent on the OFF profile, sweep
+seeds to a proc, capture the full omniboost window dense; pin the ROM's
+real cadence (how many/which effect flashes, banner cadence, frame
+counts). Then diff the app's window and fix presentation to match. For the
+bias question: count attributed effect-chance RNG draws per use (hit chain
+contract = 4 rolls + effect-chance) and compare proc frequency across a
+seed sweep app-vs-oracle before touching any RNG code.
+
 ## #56 — Arbitrary-trainer intro: residuals, ONIX ready-lag regression, MAGNETON shadow coverage
 
 **Symptom:** the public dense arbitrary-trainer intro comparison
