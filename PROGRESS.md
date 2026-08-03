@@ -48,10 +48,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   surface — 4 explicitly clean (STAT_DISPLAY_NAME byte-exact vs
   gStatNamesTable; slice-10 helper algebraically equivalent at all-null;
   rebuilt turn5-13 pins kept every numeric tuple; slice-9 x #66 disjoint
-  by grep). 1 latent finding filed as **ISSUES #67** (unchecked
+  by grep). 1 latent finding filed as ISSUES #67 (unchecked
   `as 1 | 2` magnitude cast from raw script bytes + `>= 2` vs source's
-  `== 2`, unreachable with stock data; minutes-sized guard+test
-  prescription in the entry).
+  `== 2`, unreachable with stock data) — **fixed same-session (`e7ef6dab`):**
+  runtime guard added at the cast site, `>= 2` tightened to `=== 2` at all
+  four sharply/harshly sites, parametrized red/green test added; full
+  `npm test` 628 files / 6,353 passed / 1 skipped, `npm run build` green.
 - **Notes:** `animation-main` is a moving branch again (live animation
   supervisor + nested worker at wind-down; tip was `54b2d48e`+ during this
   session) — fold at next orient per protocol. PAPERCUTS: new entry for

@@ -17,36 +17,6 @@ backlog.
 
 # Open
 
-## #67 — Latent: unchecked `as 1 | 2` cast feeds requestedMagnitude from raw script bytes
-
-**Found by the 2026-08-02 evening read-only day-audit** (supervisor-reviewed).
-Not reachable with stock data — every `setstatchanger` site in the pinned
-source uses magnitude 1 or 2 (exhaustively grepped) — but the guarantee is
-convention, not code.
-
-`battleScriptStatbuffchangeOpcode.ts:97` extracts the 3-bit magnitude from
-the raw `statChanger` byte (`(statChanger >> 4) & 0x7`, range 0-7, settable
-by the generic `setbyte` handler with any 0-255 value) and force-casts it to
-`1 | 2` with zero runtime validation. The sibling feed
-(`battleScriptHitChainOpcode.ts`'s STAT_MOVE_EFFECT_TABLE) is literal-typed
-and safe. Downstream, `battleResolutionPresentation.ts`'s new
-`magnitude >= 2` "sharply/harshly" check (`~:530,541`) is looser than the
-source's exact `statValue == 2` / `== -2`
-(`battle_script_commands.c:7044,7067`) — behaviorally identical only while
-the 1|2 claim actually holds, so the two gaps compound silently.
-
-**Fix shape (minutes):** runtime guard at the cast site
-(`if (magnitude !== 1 && magnitude !== 2) throw` mirroring the adjacent
-`statName === undefined` pattern) + a Tier-1 test driving the opcode with a
-corrupt `statChanger` byte expecting the throw; optionally tighten `>= 2`
-to `=== 2` once guarded.
-
-**Related pre-existing notes from the same audit** (context, not this fix):
-`resolveTurnNLatestCompletedCommandHandoff`'s per-file equivalence check is
-structurally tautological (adapter spreads its own receipt — #39-retirement
-surface); `core.ts:1291`'s slice-9 non-null assertion is safe only via
-`isTurn3LatestCompletedCommandLifecycleActive`'s external null-guard.
-
 ## #56 — Arbitrary-trainer intro: residuals, ONIX ready-lag regression, MAGNETON shadow coverage
 
 **Symptom:** the public dense arbitrary-trainer intro comparison
