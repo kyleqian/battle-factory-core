@@ -4,6 +4,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 873 — [supervisor orient, 2026-08-02 ~21:30] animation-main folded (fast concave + convex send-out families); union verified green
+
+- **State:** master `5aaba475` = merge of `animation-main` (`29c9ebe0`, 9
+  commits: `ANIM_SWING_CONCAVE_FAST` IGGLYBUFF + `ANIM_SWING_CONVEX_FAST`
+  families accepted, Scene-ON evidence + fixtures). Union verified by
+  supervisor: full `npm test` **632 files / 6,370 passed / 1 skipped**,
+  `npm run build` green. Oracle freshness PASS (both profiles). Animation
+  supervisor + nested worker live during fold (fold-race protocol: re-check
+  at wind-down).
+- **Next:** dispatching species-dossier slices per
+  `docs/species-render-entry-point-retirement-design.md` — slices 1+2
+  (family-C healthbox factories) first; slices 3/4 now UNGATED (dispatcher
+  ladder slice 10 landed `7bd37eab`). Then entry-871 Turn1-13 type-ref
+  follow-up, #62, #56 as time allows. Hard deadline 2026-08-03 05:06.
+- **Notes:** design-doc window-list drift found while briefing:
+  `battle2-off-turn1.json` (179) was deleted at rank-1 retirement — slice-6
+  windows are `battle2-turn1-rockslide` 191 / `battle2-action-menu-dense`
+  209 / `battle2-off-turn1-staged` 16; `PIDGEOTTO_MAX_HP` has 2 extra
+  turn-6 call sites (:11934/:12581) the census missed — folded into briefs.
+
+---
 ## 872 — [supervisor wind-down, 2026-08-02 ~20:45] slice-9 + slice-10 + full #66 family landed; dispatcher ladder rows 1-10 complete
 
 - **State:** master = this docs commit on top of merge `d263968f`
@@ -134,53 +155,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   usage, or accepting the census's own numeric checks (all satisfied) as
   the real acceptance surface and treating the grep bullet as describing an
   aspiration the design doc's file list undersized.
-
----
-## 870 — [bounded MAIN worker, 2026-08-02] slice-9 fold LANDED — turn4-fold-pp-freshness-design.md implemented, 14/14 differential clean, salvage branch merged+deleted
-
-- **State:** master `c5563c72` (fast-forward merge of
-  `salvage/slice9-fold-20260802`, now deleted). Full `npm test`: **626
-  files / 6,349 passed / 1 skipped**; `npm run build` green (tsc + vite).
-  Slice-9 fold is fully landed — both root causes from entry 866/867 are
-  now closed (eviction-class HP fix was already in `a6d88eaa`; this
-  session closed the PP-freshness root cause per the banked design).
-- **Did:** implemented `docs/turn4-fold-pp-freshness-design.md` §3 exactly
-  (no re-derivation): `resolveTurn4LatestCompletedCommandHandoff`
-  (`turn4ResolutionAdapter.ts`) gained a `priorLatest` parameter and now
-  sources `playerPp`/`persistedMoveSlot` from it instead of turn 4's own
-  fresh receipt; `content` (HP/bounce/kickoff) stays turn-4-fresh,
-  untouched. `core.ts`'s one call site (~1289) passes the pre-reassignment
-  `latestCompletedCommandHandoff` as the second arg (non-null asserted,
-  matching existing precedent at `core.ts:1467`). Added the §3.3 pinning
-  unit test to `turn4ResolutionAdapterEquivalence.test.ts`; updated
-  `fightSubmenu.test.ts`'s turn-4-confirm fixture's expected PP tuple from
-  `[7,20,19,10]` (turn 4's own fresh) to `[8,20,19,10]` (turn 3's, pinned)
-  per §3.4 — the only fixture found hard-coding the fresh tuple across the
-  turn-4-settled→turn-5-reopen window.
-- **Verification:** risk probes (design §6) both went byte-identical
-  BEFORE the full run — `turn5-action-off` 32/32 (was 6/32),
-  `turn5-confirm-off-a` 132/132 (was 121/132); their `captureFrames`
-  cover the exact dense 5926-5957/5958-6089 reopen-edge ranges, so the
-  clean per-tick result also confirms no new one-tick PP flicker (risk 2).
-  Full 14-window matrix vs base `105c72d5`: **14/14 byte-identical**,
-  matching every per-window count in design §5's table exactly (255,
-  161, 256, 256, 256, 32, 132, 132, 196, 196, 196, 196, 46, 128 — sum
-  **2,438**; the design doc/brief state "sum 2,436" for this same table,
-  which is an arithmetic slip, not a real 2-capture discrepancy — the
-  per-window acceptance, the actual criterion, is exact). Census
-  (`tools/census-next-command-handoffs.sh`): state/initial/advance-copy
-  handoff entries **0/0/0**, completed-handoff type declarations **13**,
-  `drawFightSubmenuWindow` handoff parameters **13**,
-  `currentPPForActiveMon` handoff parameters **13** — all exactly as
-  design §5 specified.
-- **Next:** slice 10 (final 13-param/type declaration cut, deferred per
-  `docs/next-command-handoff-dispatcher-design.md` row 10); ISSUES #66(a)
-  capped-stat banner fix (+(b) after an oracle probe, side lane, may
-  already be in flight per entry 869's dispatch); species-dossier slices
-  per `docs/species-render-entry-point-retirement-design.md`.
-- **Notes:** the §6-risk-4 oracle-direction question (whether turn 5's
-  reopen-hold window's PP freshness itself matches real hardware, vs just
-  the parent) remains explicitly out of scope, per this fold's own
-  byte-identity-to-parent brief. `animation-main` fold status unchanged
-  from entry 869.
-
