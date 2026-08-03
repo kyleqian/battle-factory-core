@@ -8,10 +8,6 @@ import {
   resolveTurn5SwitchInAdapter,
 } from "../src/engine/turn5ResolutionAdapter.ts";
 import { currentPPForActiveMon } from "../src/engine/battleMenu.ts";
-import { resolveTurn1CompletedResolutionNextCommandHandoff } from "../src/engine/turn1ResolutionAdapter.ts";
-import { resolveTurn2CompletedResolutionNextCommandHandoff } from "../src/engine/turn2ResolutionAdapter.ts";
-import { resolveTurn3CompletedResolutionNextCommandHandoff } from "../src/engine/turn3ResolutionAdapter.ts";
-import { resolveTurn4CompletedResolutionNextCommandHandoff } from "../src/engine/turn4ResolutionAdapter.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
 import {
   GROVYLE_FAINT_SINK_START_TICK,
@@ -148,10 +144,7 @@ describe("turn5ResolutionAdapter: #39 rank-3 kernel-to-typed-owner equivalence (
     it("owns exactly the post-turn-5 menu PP receipt consumed by the live submenu", () => {
       const onix = rentalMoveset("ONIX");
       const handoff = resolveTurn5CompletedResolutionNextCommandHandoff();
-      const receiptPp = currentPPForActiveMon(
-        onix,
-        resolveTurn1CompletedResolutionNextCommandHandoff(1308), resolveTurn2CompletedResolutionNextCommandHandoff(2197), resolveTurn3CompletedResolutionNextCommandHandoff(3172), resolveTurn4CompletedResolutionNextCommandHandoff(4312), handoff,
-      );
+      const receiptPp = currentPPForActiveMon(onix, resolveTurn5LatestCompletedCommandHandoff());
 
       expect(receiptPp).toEqual([6, 20, 19, 10]);
       expect(handoff.playerPp).toEqual(receiptPp);

@@ -19,19 +19,7 @@ import {
   turn13FaintedTextVisibleChars,
 } from "../src/engine/battleScene.ts";
 import { currentPPForActiveMon } from "../src/engine/battleMenu.ts";
-import { resolveTurn1CompletedResolutionNextCommandHandoff } from "../src/engine/turn1ResolutionAdapter.ts";
-import { resolveTurn2CompletedResolutionNextCommandHandoff } from "../src/engine/turn2ResolutionAdapter.ts";
-import { resolveTurn3CompletedResolutionNextCommandHandoff } from "../src/engine/turn3ResolutionAdapter.ts";
-import { resolveTurn4CompletedResolutionNextCommandHandoff } from "../src/engine/turn4ResolutionAdapter.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
-import { resolveTurn5CompletedResolutionNextCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
-import { resolveTurn6CompletedResolutionNextCommandHandoff } from "../src/engine/turn6ResolutionAdapter.ts";
-import { resolveTurn7CompletedResolutionNextCommandHandoff } from "../src/engine/turn7ResolutionAdapter.ts";
-import { resolveTurn8CompletedResolutionNextCommandHandoff } from "../src/engine/turn8ResolutionAdapter.ts";
-import { resolveTurn9CompletedResolutionNextCommandHandoff } from "../src/engine/turn9ResolutionAdapter.ts";
-import { resolveTurn10CompletedResolutionNextCommandHandoff } from "../src/engine/turn10ResolutionAdapter.ts";
-import { resolveTurn11CompletedResolutionNextCommandHandoff } from "../src/engine/turn11ResolutionAdapter.ts";
-import { resolveTurn12CompletedResolutionNextCommandHandoff } from "../src/engine/turn12ResolutionAdapter.ts";
 import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "../src/engine/turn15FlyResolutionAdapter.ts";
 
 /**
@@ -166,12 +154,7 @@ describe("turn13ResolutionAdapter: #39 rank-2 kernel-to-typed-owner equivalence 
     it("owns the turn-14 submenu's post-turn-13 DRAGON_BREATH PP receipt, not the already-completed FLY charge owner", () => {
       const onix = rentalMoveset("ONIX");
       const handoff = resolveTurn13CompletedResolutionNextCommandHandoff();
-      const predecessorPp = currentPPForActiveMon(
-        onix,
-        resolveTurn1CompletedResolutionNextCommandHandoff(1308), resolveTurn2CompletedResolutionNextCommandHandoff(2197), resolveTurn3CompletedResolutionNextCommandHandoff(3172), resolveTurn4CompletedResolutionNextCommandHandoff(4312), resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff(), resolveTurn7CompletedResolutionNextCommandHandoff(),
-        resolveTurn8CompletedResolutionNextCommandHandoff(), resolveTurn9CompletedResolutionNextCommandHandoff(), resolveTurn10CompletedResolutionNextCommandHandoff(), resolveTurn11CompletedResolutionNextCommandHandoff(), resolveTurn12CompletedResolutionNextCommandHandoff(),
-        handoff,
-      )[2];
+      const predecessorPp = currentPPForActiveMon(onix, resolveTurn13LatestCompletedCommandHandoff())[2];
       const chargeOwnerPp = CANONICAL_OPPONENT_FLY_RESOLUTION
         .chargeResolution.segments[0]!.afterRules.rulesContext.battlers[0]!.pp[2];
 

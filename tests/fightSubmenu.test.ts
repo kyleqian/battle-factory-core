@@ -41,24 +41,20 @@ import {
 } from "../src/engine/battleScene.ts";
 import { menuIdleBounce } from "../src/engine/battleMenu.ts";
 import { createInitialState, render, tick, type EngineState } from "../src/engine/core.ts";
-import { rockSlideOpponentHp, currentPPForActiveMon, currentPPForActiveMonFromLatest } from "../src/engine/battleMenu.ts";
+import { rockSlideOpponentHp, currentPPForActiveMon } from "../src/engine/battleMenu.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
 import {
-  resolveTurn1CompletedResolutionNextCommandHandoff,
   resolveTurn1LatestCompletedCommandHandoff,
 } from "../src/engine/turn1ResolutionAdapter.ts";
 import {
   isTurn2LatestCompletedCommandLifecycleActive,
-  resolveTurn2CompletedResolutionNextCommandHandoff,
   resolveTurn2LatestCompletedCommandHandoff,
 } from "../src/engine/turn2ResolutionAdapter.ts";
 import {
   isTurn3LatestCompletedCommandLifecycleActive,
-  resolveTurn3CompletedResolutionNextCommandHandoff,
   resolveTurn3LatestCompletedCommandHandoff,
 } from "../src/engine/turn3ResolutionAdapter.ts";
 import {
-  resolveTurn4CompletedResolutionNextCommandHandoff,
   resolveTurn4LatestCompletedCommandHandoff,
 } from "../src/engine/turn4ResolutionAdapter.ts";
 import {
@@ -66,7 +62,7 @@ import {
   CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
 } from "../src/engine/partySelect.ts";
 import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "../src/engine/turn15FlyResolutionAdapter.ts";
-import { resolveTurn13CompletedResolutionNextCommandHandoff, resolveTurn13LatestCompletedCommandHandoff } from "../src/engine/turn13ResolutionAdapter.ts";
+import { resolveTurn13LatestCompletedCommandHandoff } from "../src/engine/turn13ResolutionAdapter.ts";
 import {
   createOpponentFaintPresentationOwner,
   storeOpponentFaintDismiss,
@@ -77,31 +73,24 @@ import {
   resolveTurn5LatestCompletedCommandHandoff,
 } from "../src/engine/turn5ResolutionAdapter.ts";
 import {
-  resolveTurn6CompletedResolutionNextCommandHandoff,
   resolveTurn6LatestCompletedCommandHandoff,
 } from "../src/engine/turn6ResolutionAdapter.ts";
 import {
-  resolveTurn7CompletedResolutionNextCommandHandoff,
   resolveTurn7LatestCompletedCommandHandoff,
 } from "../src/engine/turn7ResolutionAdapter.ts";
 import {
-  resolveTurn8CompletedResolutionNextCommandHandoff,
   resolveTurn8LatestCompletedCommandHandoff,
 } from "../src/engine/turn8ResolutionAdapter.ts";
 import {
-  resolveTurn9CompletedResolutionNextCommandHandoff,
   resolveTurn9LatestCompletedCommandHandoff,
 } from "../src/engine/turn9ResolutionAdapter.ts";
 import {
-  resolveTurn10CompletedResolutionNextCommandHandoff,
   resolveTurn10LatestCompletedCommandHandoff,
 } from "../src/engine/turn10ResolutionAdapter.ts";
 import {
-  resolveTurn11CompletedResolutionNextCommandHandoff,
   resolveTurn11LatestCompletedCommandHandoff,
 } from "../src/engine/turn11ResolutionAdapter.ts";
 import {
-  resolveTurn12CompletedResolutionNextCommandHandoff,
   resolveTurn12LatestCompletedCommandHandoff,
 } from "../src/engine/turn12ResolutionAdapter.ts";
 import {
@@ -121,13 +110,9 @@ import type { GbaButton } from "../src/input.ts";
 
 /** Onix's real moveset (`battleSetup.ts`'s own rental-pool lookup) - every `openFightSubmenu` call below needs this now that it threads the S8 `activeMonMoveset` plumbing (docs/battle-menu-notes.md §13c) through explicitly, rather than each test re-deriving it from a fully-played draft screen. */
 const ONIX_MOVESET = rentalMoveset("ONIX");
-const TURN1_HANDOFF = resolveTurn1CompletedResolutionNextCommandHandoff(1308);
 const TURN1_LATEST_HANDOFF = resolveTurn1LatestCompletedCommandHandoff(1308);
-const TURN2_HANDOFF = resolveTurn2CompletedResolutionNextCommandHandoff(2197);
 const TURN2_LATEST_HANDOFF = resolveTurn2LatestCompletedCommandHandoff(2197);
-const TURN3_HANDOFF = resolveTurn3CompletedResolutionNextCommandHandoff(3172);
 const TURN3_LATEST_HANDOFF = resolveTurn3LatestCompletedCommandHandoff(3172);
-const TURN4_HANDOFF = resolveTurn4CompletedResolutionNextCommandHandoff(4312);
 const TURN4_LATEST_HANDOFF = resolveTurn4LatestCompletedCommandHandoff(4312, TURN3_LATEST_HANDOFF);
 
 describe("battleMenu: moveFightCursor (HandleInputChooseMove's DPAD guards, §11 finding 2)", () => {
@@ -329,42 +314,20 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
     }
   });
 
-  it("dispatcher slice 2: turn-13 fallback and locked/following PP precedence agree on generic and legacy paths", () => {
+  it("dispatcher slice 10: turn-13 fallback and locked/following PP precedence resolve correctly against the generic latest receipt", () => {
     const latest = resolveTurn13LatestCompletedCommandHandoff();
-    const legacy = resolveTurn13CompletedResolutionNextCommandHandoff();
     const onix = rentalMoveset("ONIX");
-    const legacyArgs = [
-      TURN1_HANDOFF,
-      TURN2_HANDOFF,
-      TURN3_HANDOFF,
-      TURN4_HANDOFF,
-      resolveTurn5CompletedResolutionNextCommandHandoff(),
-      resolveTurn6CompletedResolutionNextCommandHandoff(),
-      resolveTurn7CompletedResolutionNextCommandHandoff(),
-      resolveTurn8CompletedResolutionNextCommandHandoff(),
-      resolveTurn9CompletedResolutionNextCommandHandoff(),
-      resolveTurn10CompletedResolutionNextCommandHandoff(),
-      resolveTurn11CompletedResolutionNextCommandHandoff(),
-      resolveTurn12CompletedResolutionNextCommandHandoff(),
-      legacy,
-    ] as const;
-    const legacyFallback = currentPPForActiveMon(onix, ...legacyArgs);
-    expect(currentPPForActiveMonFromLatest(onix, latest)).toEqual(legacyFallback);
-    expect(legacyFallback[2]).toBe(18);
+    expect(currentPPForActiveMon(onix, latest)[2]).toBe(18);
 
     const locked = CANONICAL_OPPONENT_FLY_RESOLUTION.chargeResolution;
-    const legacyLocked = currentPPForActiveMon(onix, ...legacyArgs, locked);
-    const genericLocked = currentPPForActiveMonFromLatest(onix, latest, locked);
-    expect(genericLocked).toEqual(legacyLocked);
+    const genericLocked = currentPPForActiveMon(onix, latest, locked);
     expect(genericLocked[2]).toBe(
       locked.segments[0]!.afterRules.rulesContext.battlers[0]!.pp[2],
     );
 
     const following = CANONICAL_FIRE_PUNCH_RESOLUTION.resolution;
     const magby = rentalMoveset("MAGBY");
-    const legacyFollowing = currentPPForActiveMon(magby, ...legacyArgs, locked, following);
-    const genericFollowing = currentPPForActiveMonFromLatest(magby, latest, locked, following);
-    expect(genericFollowing).toEqual(legacyFollowing);
+    const genericFollowing = currentPPForActiveMon(magby, latest, locked, following);
     expect(genericFollowing).toEqual(
       following.segments.at(-1)!.afterRules.rulesContext.battlers[0]!.pp,
     );
@@ -462,18 +425,6 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
     const magby = rentalMoveset("MAGBY");
     expect(currentPPForActiveMon(
       magby,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
       null,
       null,
       CANONICAL_FIRE_PUNCH_RESOLUTION.resolution,
@@ -1046,11 +997,11 @@ describe("battleMenu/battleScene: turn 4's FIGHT-submenu reopen (S7 slice I, doc
 
   it("currentPPForActiveMon: ROCK_SLIDE (slot 0) reads 8/10 from the completed-turn-3 receipt (used turns 1 AND 3), independent of turn 2's slot-2 DRAGON_BREATH receipt", () => {
     const moveset = rentalMoveset("ONIX");
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF)[0]).toBe(moveset.maxPP[0] - 2);
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF)[0]).toBe(8);
+    expect(currentPPForActiveMon(moveset, TURN3_LATEST_HANDOFF)[0]).toBe(moveset.maxPP[0] - 2);
+    expect(currentPPForActiveMon(moveset, TURN3_LATEST_HANDOFF)[0]).toBe(8);
     // Sanity: the turn-1 receipt alone (pre-turn-3) still reads 9/10, matching
     // every earlier turn's own pinned behavior - this test doesn't regress it.
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, null, null)[0]).toBe(9);
+    expect(currentPPForActiveMon(moveset, TURN1_LATEST_HANDOFF)[0]).toBe(9);
   });
 
   it("engine state stays well-formed and deterministic through the reopen/confirm-registration window - pixel parity lives in tools/compare/traces/turn4-doubleteam-off.json (256/256, 0 diff)", () => {
@@ -1186,11 +1137,11 @@ describe("battleMenu/battleScene: turn 5's FIGHT-submenu reopen (S7 slice J, doc
 
   it("currentPPForActiveMon: ROCK_SLIDE (slot 0) reads 7/10 from the completed-turn-4 receipt (used turns 1, 3 AND 4), independent of turn 2's slot-2 DRAGON_BREATH receipt", () => {
     const moveset = rentalMoveset("ONIX");
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF)[0]).toBe(moveset.maxPP[0] - 3);
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF)[0]).toBe(7);
+    expect(currentPPForActiveMon(moveset, TURN4_LATEST_HANDOFF)[0]).toBe(moveset.maxPP[0] - 3);
+    expect(currentPPForActiveMon(moveset, TURN4_LATEST_HANDOFF)[0]).toBe(7);
     // Sanity: the completed-turn-3 receipt alone (pre-turn-5) still reads 8/10, matching
     // slice I's own pinned behavior - this test doesn't regress it.
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, null)[0]).toBe(8);
+    expect(currentPPForActiveMon(moveset, TURN3_LATEST_HANDOFF)[0]).toBe(8);
   });
 
   it("engine state stays well-formed and deterministic through the reopen/confirm-registration window - pixel parity lives in tools/compare/traces/turn5-menu.json (42/42, 0 diff; tick 5927's own former residual RESOLVED, see docs/battle-turn-notes.md §23)", () => {
@@ -1282,21 +1233,20 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
   it("currentPPForActiveMon: ROCK_SLIDE (slot 0) reads the completed-turn-5 receipt's 6/10 after uses in turns 1, 3, 4, and 5, independent of turn 2's slot-2 DRAGON_BREATH decrement", () => {
     const moveset = rentalMoveset("ONIX");
     const handoff = resolveTurn5CompletedResolutionNextCommandHandoff();
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, handoff)[0]).toBe(moveset.maxPP[0] - 4);
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, handoff)[0]).toBe(6);
+    expect(currentPPForActiveMon(moveset, resolveTurn5LatestCompletedCommandHandoff())[0]).toBe(moveset.maxPP[0] - 4);
+    expect(currentPPForActiveMon(moveset, resolveTurn5LatestCompletedCommandHandoff())[0]).toBe(6);
+    expect(handoff.playerPp[0]).toBe(6);
     // Sanity: the completed-turn-4 receipt alone (pre-turn-6) still reads 7/10, matching
     // slice J's own pinned behavior - this test doesn't regress it.
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, null)[0]).toBe(7);
+    expect(currentPPForActiveMon(moveset, TURN4_LATEST_HANDOFF)[0]).toBe(7);
   });
 
   it("S7 slice O: currentPPForActiveMon reads 5/10 from turn 6's completed-command receipt, matching turn 7's reopen ledger", () => {
     const moveset = rentalMoveset("ONIX");
-    const turn5Handoff = resolveTurn5CompletedResolutionNextCommandHandoff();
-    const turn6Handoff = resolveTurn6CompletedResolutionNextCommandHandoff();
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, turn5Handoff, turn6Handoff)[0]).toBe(moveset.maxPP[0] - 5);
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, turn5Handoff, turn6Handoff)[0]).toBe(5);
+    expect(currentPPForActiveMon(moveset, resolveTurn6LatestCompletedCommandHandoff())[0]).toBe(moveset.maxPP[0] - 5);
+    expect(currentPPForActiveMon(moveset, resolveTurn6LatestCompletedCommandHandoff())[0]).toBe(5);
     // Sanity: the completed turn-5 receipt alone (pre-turn-7) still reads 6/10.
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, turn5Handoff, null)[0]).toBe(6);
+    expect(currentPPForActiveMon(moveset, resolveTurn5LatestCompletedCommandHandoff())[0]).toBe(6);
   });
 
   it("replaying turn7-menu.json's existing input script uses turn 6's typed receipt for the following reopen guard", () => {

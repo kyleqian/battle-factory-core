@@ -484,7 +484,6 @@ import {
   turn2KickoffBounceTick,
   endeavorOnixHp,
   currentPPForActiveMon,
-  currentPPForActiveMonFromLatest,
   FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
   turn6StatFallEva,
   turn6StatFallBg1Y,
@@ -7772,44 +7771,31 @@ function drawFightSubmenuWindow(
   fb: Uint8Array,
   t: number,
   sm: FightSubmenuState,
-  turn1NextCommandHandoff: Turn1CompletedResolutionNextCommandHandoff | null,
-  turn2NextCommandHandoff: Turn2CompletedResolutionNextCommandHandoff | null,
-  turn3NextCommandHandoff: Turn3CompletedResolutionNextCommandHandoff | null = null,
-  turn4NextCommandHandoff: Turn4CompletedResolutionNextCommandHandoff | null = null,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null = null,
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null = null,
-  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null = null,
-  turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null = null,
-  turn9NextCommandHandoff: Turn9CompletedResolutionNextCommandHandoff | null = null,
-  turn10NextCommandHandoff: Turn10CompletedResolutionNextCommandHandoff | null = null,
-  turn11NextCommandHandoff: Turn11CompletedResolutionNextCommandHandoff | null = null,
-  turn12NextCommandHandoff: Turn12CompletedResolutionNextCommandHandoff | null = null,
-  turn13NextCommandHandoff: Turn13CompletedResolutionNextCommandHandoff | null = null,
   latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null = null,
   opponentFaintPresentationOwner: OpponentFaintPresentationOwner | null = null,
   resolutionOwner: BattleSceneResolutionOwner | null = null,
   trainerPresentation?: FactoryTrainerPresentation,
 ): void {
   const currentEpochHandoff = currentEpochCompatibilityHandoff(
-    turn1NextCommandHandoff,
+    null,
     latestCompletedCommandHandoff,
   );
   const currentTurn2Handoff = turn2CompatibilityHandoff(
-    turn2NextCommandHandoff,
+    null,
     latestCompletedCommandHandoff,
   );
   const genericTurn2Content = turn2FightCommandPresentationFromLatest(
     latestCompletedCommandHandoff,
   );
   const currentTurn3Handoff = turn3CompatibilityHandoff(
-    turn3NextCommandHandoff,
+    null,
     latestCompletedCommandHandoff,
   );
   const genericTurn3Content = turn3FightCommandPresentationFromLatest(
     latestCompletedCommandHandoff,
   );
   const currentTurn4Handoff = turn4CompatibilityHandoff(
-    turn4NextCommandHandoff,
+    null,
     latestCompletedCommandHandoff,
   );
   const genericTurn4Content = turn4FightCommandPresentationFromLatest(
@@ -7828,18 +7814,14 @@ function drawFightSubmenuWindow(
         sm.openElapsed,
       )
     ? currentTurn2Handoff
-    : isTurn2NextCommandLifecycleActive(turn2NextCommandHandoff, sm.openElapsed)
-      ? turn2NextCommandHandoff
-      : null;
+    : null;
   const turn4CommandHandoff = genericTurn3Content !== null
       && isTurn3LatestCompletedCommandLifecycleActive(
         latestCompletedCommandHandoff,
         sm.openElapsed,
       )
     ? currentTurn3Handoff
-    : isTurn3NextCommandLifecycleActive(turn3NextCommandHandoff, sm.openElapsed)
-      ? turn3NextCommandHandoff
-      : null;
+    : null;
   // Turn 3's own source-owned reset publishes directly into the shared
   // generic slot, which is exactly what `turn3CommandHandoff` above narrows
   // FROM (turn 2's content) - so that publish evicts the very shape
@@ -7857,9 +7839,7 @@ function drawFightSubmenuWindow(
         sm.openElapsed,
       )
     ? currentTurn4Handoff
-    : isTurn4NextCommandLifecycleActive(turn4NextCommandHandoff, sm.openElapsed)
-      ? turn4NextCommandHandoff
-      : null;
+    : null;
   // Turn 4's own source-owned reset publishes directly into the shared
   // generic slot, evicting the turn-3 shape `turn4CommandHandoff` above
   // narrows FROM - so that publish happens WHILE we're still deep inside
@@ -7870,17 +7850,6 @@ function drawFightSubmenuWindow(
   // supersedes it.
   const turn4SettledWindowActive = turn5CommandHandoff === null
     && isTurn4NextCommandHandoffReady(currentTurn4Handoff);
-  // Staged ABI: the positional turn-5-13 parameters and their type exports
-  // remain through slice 10, but generic content is the only live dispatcher.
-  void turn5NextCommandHandoff;
-  void turn6NextCommandHandoff;
-  void turn7NextCommandHandoff;
-  void turn8NextCommandHandoff;
-  void turn9NextCommandHandoff;
-  void turn10NextCommandHandoff;
-  void turn11NextCommandHandoff;
-  void turn12NextCommandHandoff;
-  void turn13NextCommandHandoff;
   if (
     isLatestCompletedCommandHandoffReady(latestCompletedCommandHandoff)
     && latestCompletedCommandPresentationEpoch(latestCompletedCommandHandoff) === null
@@ -8151,6 +8120,53 @@ function drawFightSubmenuOuterChrome(fb: Uint8Array): void {
   }
 }
 
+/**
+ * `drawFightSubmenuChrome`'s own historical turn 1-4 predecessor-chain PP
+ * reconstruction. Turn 5-13 never reach this route with a real value (every
+ * caller omits them, defaulting to null - see the census-verified positional
+ * ABI this slice retired from `currentPPForActiveMon` itself), so this keeps
+ * only the turn 1-4 subset of that retired chain, local to its one remaining
+ * caller.
+ */
+function drawFightSubmenuChromeTurn1Through4PP(
+  moveset: ActiveMonMoveset,
+  turn1NextCommandHandoff: Turn1CompletedResolutionNextCommandHandoff | null,
+  turn2NextCommandHandoff: Turn2CompletedResolutionNextCommandHandoff | null,
+  turn3NextCommandHandoff: Turn3CompletedResolutionNextCommandHandoff | null,
+  turn4NextCommandHandoff: Turn4CompletedResolutionNextCommandHandoff | null,
+  lockedActionResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null,
+  followingResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null,
+): readonly [number, number, number, number] {
+  const [a, b, c, d] = moveset.maxPP;
+  const turn1Slot0Uses = isTurn1NextCommandHandoffReady(turn1NextCommandHandoff)
+    ? rentalMoveset("ONIX").maxPP[turn1NextCommandHandoff.persistedMoveSlot]
+      - turn1NextCommandHandoff.playerPp[turn1NextCommandHandoff.persistedMoveSlot]
+    : 0;
+  const turn2Slot2Uses = isTurn2NextCommandHandoffReady(turn2NextCommandHandoff)
+    ? rentalMoveset("ONIX").maxPP[turn2NextCommandHandoff.persistedMoveSlot]
+      - turn2NextCommandHandoff.playerPp[turn2NextCommandHandoff.persistedMoveSlot]
+    : 0;
+  const slot0UsesAfterTurn3 = isTurn3NextCommandHandoffReady(turn3NextCommandHandoff)
+    ? rentalMoveset("ONIX").maxPP[turn3NextCommandHandoff.persistedMoveSlot]
+      - turn3NextCommandHandoff.playerPp[turn3NextCommandHandoff.persistedMoveSlot]
+    : turn1Slot0Uses;
+  const slot0UsesAfterTurn4 = isTurn4NextCommandHandoffReady(turn4NextCommandHandoff)
+    ? rentalMoveset("ONIX").maxPP[turn4NextCommandHandoff.persistedMoveSlot]
+      - turn4NextCommandHandoff.playerPp[turn4NextCommandHandoff.persistedMoveSlot]
+    : slot0UsesAfterTurn3;
+  const resolvedPlayerPp = lockedActionResolution?.segments[0]
+    ?.afterRules.rulesContext.battlers[0]!.pp;
+  const followingPlayerPp = followingResolution?.segments.at(-1)
+    ?.afterRules.rulesContext.battlers[0]!.pp;
+  if (followingPlayerPp !== undefined) return followingPlayerPp;
+  return [
+    a - slot0UsesAfterTurn4,
+    b,
+    resolvedPlayerPp?.[2] ?? c - turn2Slot2Uses,
+    d,
+  ];
+}
+
 function drawFightSubmenuChrome(
   fb: Uint8Array,
   displayCursor: FightSubmenuSlot,
@@ -8171,7 +8187,16 @@ function drawFightSubmenuChrome(
   lockedActionResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null = null,
   followingResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null = null,
 ): void {
-  const currentPP = currentPPForActiveMon(moveset, turn1NextCommandHandoff, turn2NextCommandHandoff, turn3NextCommandHandoff, turn4NextCommandHandoff, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, turn8NextCommandHandoff, turn9NextCommandHandoff, turn10NextCommandHandoff, turn11NextCommandHandoff, turn12NextCommandHandoff, turn13NextCommandHandoff, lockedActionResolution, followingResolution);
+  void turn5NextCommandHandoff;
+  void turn6NextCommandHandoff;
+  void turn7NextCommandHandoff;
+  void turn8NextCommandHandoff;
+  void turn9NextCommandHandoff;
+  void turn10NextCommandHandoff;
+  void turn11NextCommandHandoff;
+  void turn12NextCommandHandoff;
+  void turn13NextCommandHandoff;
+  const currentPP = drawFightSubmenuChromeTurn1Through4PP(moveset, turn1NextCommandHandoff, turn2NextCommandHandoff, turn3NextCommandHandoff, turn4NextCommandHandoff, lockedActionResolution, followingResolution);
   drawFightSubmenuChromeFromLiveState(
     fb,
     displayCursor,
@@ -8180,9 +8205,7 @@ function drawFightSubmenuChrome(
 }
 
 /**
- * Generic-owner chrome for the contentful production route.  The historical
- * thirteen positional receipt parameters remain on `drawFightSubmenuChrome`
- * and `currentPPForActiveMon` until the final ABI cut, but this live route
+ * Generic-owner chrome for the contentful production route: this live route
  * receives one canonical tuple from its semantic owner instead of rebuilding
  * it from a turn-keyed predecessor list.
  */
@@ -8194,7 +8217,7 @@ function drawFightSubmenuChromeFromLatest(
   lockedActionResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null = null,
   followingResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null = null,
 ): void {
-  const currentPP = currentPPForActiveMonFromLatest(
+  const currentPP = currentPPForActiveMon(
     moveset,
     latest,
     lockedActionResolution,
@@ -18332,19 +18355,6 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
       fb,
       t,
       state.fightSubmenu,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
       state.latestCompletedCommandHandoff ?? null,
       state.opponentFaintPresentationOwner,
       state.resolutionOwner ?? null,

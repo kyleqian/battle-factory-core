@@ -24,14 +24,12 @@ import { activeMonMoveset, createBattleSetup, rentalMoveset, type ActiveMonMoves
 import { ANCHOR_DRAFT_SCREEN_STATE, type DraftScreenState } from "../src/engine/factoryDraftScreen.ts";
 import { createFramebuffer, SCREEN_WIDTH } from "../src/engine/framebuffer.ts";
 import { renderBattleScene } from "../src/engine/battleScene.ts";
-import { openFightSubmenu, FIGHT_SUBMENU_SLOT_NAMES, currentPPForActiveMon, currentPPForActiveMonFromLatest } from "../src/engine/battleMenu.ts";
+import { openFightSubmenu, FIGHT_SUBMENU_SLOT_NAMES, currentPPForActiveMon } from "../src/engine/battleMenu.ts";
 import {
-  resolveTurn1CompletedResolutionNextCommandHandoff,
   resolveTurn1LatestCompletedCommandHandoff,
 } from "../src/engine/turn1ResolutionAdapter.ts";
-import { resolveTurn2CompletedResolutionNextCommandHandoff } from "../src/engine/turn2ResolutionAdapter.ts";
-import { resolveTurn5CompletedResolutionNextCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
-import { resolveTurn6CompletedResolutionNextCommandHandoff, resolveTurn6LatestCompletedCommandHandoff } from "../src/engine/turn6ResolutionAdapter.ts";
+import { resolveTurn2LatestCompletedCommandHandoff } from "../src/engine/turn2ResolutionAdapter.ts";
+import { resolveTurn6LatestCompletedCommandHandoff } from "../src/engine/turn6ResolutionAdapter.ts";
 import { buildFightMoveset, drawFightSubmenuText } from "../src/engine/fightSubmenuText.ts";
 import fightSubmenuWindowAsset from "../src/assets/gen/fight-submenu-window.json" with { type: "json" };
 import battlerDump from "../src/data/gen/battle2-turn1-battler-dump.json" with { type: "json" };
@@ -51,9 +49,8 @@ const dump = (
 
 /** A fully-confirmed draft screen (ONIX/MAGBY/BAYLEEF, pick order 1/2/3) - the same `selectedIds` shape `tests/confirmDecline.test.ts` pins for a real played-through draft screen, reproducing what every committed trace's own button script leaves `draftScreen` in by the time battle starts. */
 const CONFIRMED_DRAFT_SCREEN: DraftScreenState = { ...ANCHOR_DRAFT_SCREEN_STATE, selectedIds: [1, 2, 3, 0, 0, 0] };
-const TURN1_HANDOFF = resolveTurn1CompletedResolutionNextCommandHandoff(1308);
 const TURN1_LATEST_HANDOFF = resolveTurn1LatestCompletedCommandHandoff(1308);
-const TURN2_HANDOFF = resolveTurn2CompletedResolutionNextCommandHandoff(2197);
+const TURN2_LATEST_HANDOFF = resolveTurn2LatestCompletedCommandHandoff(2197);
 
 describe("battleSetup: activeMonMoveset/rentalMoveset (S8 engine dependency, docs/battle-menu-notes.md §13c)", () => {
   it("preserves Battle 2 identity, healed party, and ONIX's actual moves through immutable setup state", () => {
@@ -106,39 +103,23 @@ describe("battleMenu: currentPPForActiveMon (S8 generalization of the old hardco
   });
 
   it("decrements only slot 0 by 1 once turn 1 resolves - battle 1's own ROCK_SLIDE 9/10 finding, now driven by whatever moveset is supplied instead of a hardcoded pair", () => {
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF)).toEqual([9, 20, 20, 10]);
+    expect(currentPPForActiveMon(moveset, TURN1_LATEST_HANDOFF)).toEqual([9, 20, 20, 10]);
   });
 
   it("generalizes to a wholly different moveset's own maxPP values (KABUTO's), not just Onix's specific 10/20/20/10", () => {
     const kabuto: ActiveMonMoveset = { moveIds: dump.battler1.moves as [number, number, number, number], maxPP: dump.battler1.pp as [number, number, number, number] };
     expect(currentPPForActiveMon(kabuto, null)).toEqual(dump.battler1.pp);
-    expect(currentPPForActiveMon(kabuto, TURN1_HANDOFF)).toEqual([dump.battler1.pp[0]! - 1, dump.battler1.pp[1], dump.battler1.pp[2], dump.battler1.pp[3]]);
+    expect(currentPPForActiveMon(kabuto, TURN1_LATEST_HANDOFF)).toEqual([dump.battler1.pp[0]! - 1, dump.battler1.pp[1], dump.battler1.pp[2], dump.battler1.pp[3]]);
   });
 
   it("derives slot 2's DRAGON_BREATH decrement from the completed turn-2 receipt", () => {
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, null)).toEqual([9, 20, 20, 10]);
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF)).toEqual([9, 20, 19, 10]);
+    expect(currentPPForActiveMon(moveset, TURN1_LATEST_HANDOFF)).toEqual([9, 20, 20, 10]);
+    expect(currentPPForActiveMon(moveset, TURN2_LATEST_HANDOFF)).toEqual([9, 20, 19, 10]);
   });
 
-  it("an absent turn-2 receipt leaves every pre-existing 2-arg call site unaffected", () => {
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF)).toEqual([9, 20, 20, 10]);
-  });
-
-  it("the generic latest path preserves the legacy turn-6 PP result for a noncanonical slot-1 maximum", () => {
+  it("the generic path applies a noncanonical slot-1 maximum correctly at turn 6", () => {
     const variedMoveset: ActiveMonMoveset = { moveIds: [1, 2, 3, 4], maxPP: [10, 15, 20, 10] };
-    const legacy = currentPPForActiveMon(
-      variedMoveset,
-      null,
-      null,
-      null,
-      null,
-      resolveTurn5CompletedResolutionNextCommandHandoff(),
-      resolveTurn6CompletedResolutionNextCommandHandoff(),
-    );
-    expect(currentPPForActiveMonFromLatest(
-      variedMoveset,
-      resolveTurn6LatestCompletedCommandHandoff(),
-    )).toEqual(legacy);
+    expect(currentPPForActiveMon(variedMoveset, resolveTurn6LatestCompletedCommandHandoff())).toEqual([5, 15, 19, 10]);
   });
 });
 
@@ -198,7 +179,7 @@ describe("battleScene: genericity end-to-end through the STATE plumbing (not jus
     const fb = createFramebuffer();
     renderBattleScene(fb, { elapsed: 900, sendOutPressElapsed: 380, fightSubmenu: sm, latestCompletedCommandHandoff: TURN1_LATEST_HANDOFF, opponentFaintPresentationOwner: null, });
 
-    const expectedMoveset = buildFightMoveset(kabutoMoveset.moveIds, currentPPForActiveMonFromLatest(kabutoMoveset, TURN1_LATEST_HANDOFF));
+    const expectedMoveset = buildFightMoveset(kabutoMoveset.moveIds, currentPPForActiveMon(kabutoMoveset, TURN1_LATEST_HANDOFF));
     expect(extractWindowRegion(fb)).toEqual(expectedWindowRegion(expectedMoveset, 0));
   });
 });

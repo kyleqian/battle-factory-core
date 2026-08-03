@@ -1,11 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { currentPPForActiveMon } from "../src/engine/battleMenu.ts";
-import { resolveTurn1CompletedResolutionNextCommandHandoff } from "../src/engine/turn1ResolutionAdapter.ts";
-import { resolveTurn2CompletedResolutionNextCommandHandoff } from "../src/engine/turn2ResolutionAdapter.ts";
-import { resolveTurn3CompletedResolutionNextCommandHandoff } from "../src/engine/turn3ResolutionAdapter.ts";
-import { resolveTurn4CompletedResolutionNextCommandHandoff } from "../src/engine/turn4ResolutionAdapter.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
-import { resolveTurn5CompletedResolutionNextCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
 import {
   isTurn6NextCommandHandoffReady,
   resolveTurn6CompletedResolutionNextCommandHandoff,
@@ -36,14 +31,8 @@ describe("turn6ResolutionAdapter: #39 completed-turn-6/next-command handoff proo
 
   it("owns exactly the completed turn-6 PP receipt without depending on staged move composition", () => {
     const onix = rentalMoveset("ONIX");
-    const turn5Handoff = resolveTurn5CompletedResolutionNextCommandHandoff();
     const handoff = resolveTurn6CompletedResolutionNextCommandHandoff();
-    const liveReceipt = currentPPForActiveMon(
-      onix,
-      resolveTurn1CompletedResolutionNextCommandHandoff(1308), resolveTurn2CompletedResolutionNextCommandHandoff(2197), resolveTurn3CompletedResolutionNextCommandHandoff(3172), resolveTurn4CompletedResolutionNextCommandHandoff(4312),
-      turn5Handoff,
-      handoff,
-    );
+    const liveReceipt = currentPPForActiveMon(onix, resolveTurn6LatestCompletedCommandHandoff());
 
     expect(liveReceipt).toEqual([5, 20, 19, 10]);
     expect(handoff.playerPp).toEqual(liveReceipt);
@@ -58,12 +47,7 @@ describe("turn6ResolutionAdapter: #39 completed-turn-6/next-command handoff proo
       moveIds: [157, 349, 288, 201],
       maxPP: [10, 15, 20, 10],
     } as const;
-    const liveReceipt = currentPPForActiveMon(
-      genericMoveset,
-      resolveTurn1CompletedResolutionNextCommandHandoff(1308), resolveTurn2CompletedResolutionNextCommandHandoff(2197), resolveTurn3CompletedResolutionNextCommandHandoff(3172), resolveTurn4CompletedResolutionNextCommandHandoff(4312),
-      resolveTurn5CompletedResolutionNextCommandHandoff(),
-      resolveTurn6CompletedResolutionNextCommandHandoff(),
-    );
+    const liveReceipt = currentPPForActiveMon(genericMoveset, resolveTurn6LatestCompletedCommandHandoff());
 
     expect(liveReceipt).toEqual([5, 15, 19, 10]);
     expect(resolveTurn6CompletedResolutionNextCommandHandoff().playerPp[0]).toBe(liveReceipt[0]);
