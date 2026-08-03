@@ -11080,8 +11080,8 @@ const pidgeottoHealthboxContent = composeOpponentHealthbox(healthboxAssemblyAsse
   status: "none",
 });
 
-/** S7 slice N-4 rung (b) (docs/turn6-notes.md §4, RAM-confirmed via `dump-battler-full.py`): Pidgeotto's own max HP - the ROCK_SLIDE HP-drain window's own `hpFraction` denominator. */
-const PIDGEOTTO_MAX_HP = 156;
+/** S7 slice N-4 rung (b) (docs/turn6-notes.md §4, RAM-confirmed via `dump-battler-full.py`): Pidgeotto's own max HP - the ROCK_SLIDE HP-drain window's own `hpFraction` denominator, now literally derived from `TURN5_SWITCHIN` (156) rather than independently re-stated. */
+const PIDGEOTTO_MAX_HP = TURN5_SWITCHIN.replacementHp.max;
 
 /**
  * S7 slice N-4 rung (b): Pidgeotto's own opponent healthbox at an arbitrary
@@ -11427,8 +11427,8 @@ function murkrowHealthboxContentForHp(
           name: TURN13_SWITCHIN.replacementSpecies,
           level: MURKROW_LEVEL,
           gender: "male",
-          hpFraction: hp / 142,
-          hpTargetFraction: targetHp / 142,
+          hpFraction: hp / TURN13_SWITCHIN.replacementHp.max,
+          hpTargetFraction: targetHp / TURN13_SWITCHIN.replacementHp.max,
           status,
         });
     murkrowHealthboxContentByHp.set(key, cached);
