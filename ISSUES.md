@@ -54,13 +54,21 @@ settled sprite (`gBattlerSpriteIds[n]` `x2`/`y2`/`animNum`/`callback`), dense
 oracle window twice fresh, and a sibling-species spot-check per promoted
 function.
 
-**Sequencing:** filed 2026-08-03 at user request so the main lane sees this
-work. The user has **not** reprioritized it above the queued typeref slices
-— it slots after those unless reordered (#70 and dossier slice 4, the other
-two items originally ahead of it, both closed 2026-08-03). Note: the
-resolver side is now ready for this program — `battleIntroStrings.ts` +
-entry 887's `introBattler`/`introHpScale`/`introOutcome` event fields mean
-the send-out strings resolve the moment a live path emits them.
+**Sequencing (updated 2026-08-03, mid-session user directive):** the hookup
+is the MAIN lane's job ("the animation supervisor works on implementing the
+animations... it should be your job to hook those things up") and is now
+**next in queue** — ahead of the remaining typeref slices (slice-2
+remainder, 3/4a/4b/5), which drop behind it. Ground truth for scoping:
+`docs/send-out-live-wiring-consumer-map.md` (2026-08-03 scout, base
+`4fe0e206`) — 4-slice plan §5, the 5 settle hooks §4, RAM-probe recipe,
+cross-lane dispatcher ask. Supervisor-verified scout finding: of 386
+species only ONIX and RATTATA have a nonzero terminal rest offset (both
+`{x2:1,y2:0}`). The scout also found a **4th uncatalogued hand-fit**
+(KABUTO live per-tick front animation, `src/engine/kabutoSendOut.ts`) and
+corrected the ONIX-back citation drift (`battleMenu.ts:708` → `:733-749`).
+Resolver side is ready — `battleIntroStrings.ts` + entry 887's
+`introBattler`/`introHpScale`/`introOutcome` event fields mean the send-out
+strings resolve the moment a live path emits them.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
