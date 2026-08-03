@@ -34221,7 +34221,51 @@ export interface SceneOffTurnView {
   readonly statEffectAge: number | null;
   readonly bottom: "fight" | "message" | "blank" | "action";
   readonly playerY2?: number;
+  readonly opponentSpecies: string;
+  readonly opponentCorner: { readonly x: number; readonly y: number };
+  readonly opponentBattler: {
+    readonly name: string;
+    readonly level: number;
+    readonly maxHp: number;
+    readonly gender: "male" | "female";
+  };
+  readonly playerSpecies: string;
+  readonly playerCorner: { readonly x: number; readonly y: number };
+  readonly playerHealthboxContent: ReturnType<typeof composePlayerHealthbox>;
+  readonly moveset: ActiveMonMoveset;
 }
+
+/**
+ * `docs/species-render-entry-point-retirement-design.md` §4 row 4: the
+ * ONIX/KABUTO identity `renderSceneOffTurnView` used to close over by name.
+ * `stagedBattleTurn.ts` threads this through `StagedBattleTurnState` as data
+ * instead of the render function re-deriving it.
+ */
+export type SceneOffTurnIdentity = Pick<
+  SceneOffTurnView,
+  | "opponentSpecies"
+  | "opponentCorner"
+  | "opponentBattler"
+  | "playerSpecies"
+  | "playerCorner"
+  | "playerHealthboxContent"
+  | "moveset"
+>;
+
+export const SCENE_OFF_TURN_DEFAULT_IDENTITY: SceneOffTurnIdentity = {
+  opponentSpecies: "KABUTO",
+  opponentCorner: KABUTO_CORNER,
+  opponentBattler: {
+    name: KABUTO_SENDOUT_BATTLER.name,
+    level: KABUTO_SENDOUT_BATTLER.level,
+    maxHp: KABUTO_SENDOUT_BATTLER.maxHP,
+    gender: KABUTO_SENDOUT_BATTLER.gender,
+  },
+  playerSpecies: "ONIX",
+  playerCorner: ONIX_MATERIALIZE_CORNER,
+  playerHealthboxContent: onixPlayerHealthboxContent,
+  moveset: rentalMoveset("ONIX"),
+};
 
 /**
  * Source-composed battlefield/message adapter for the typed non-KO
@@ -34640,23 +34684,25 @@ export function renderSceneOffTurnView(
   fb: Uint8Array,
   view: SceneOffTurnView,
 ): void {
+  const opponentSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.opponentSpecies]!;
+  const playerSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.playerSpecies]!;
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
   drawSpriteSheet(
     fb,
-    kabutoFrontSprite.tileset,
-    kabutoFrontSprite.palette,
-    KABUTO_CORNER.x,
-    KABUTO_CORNER.y,
+    opponentSprite.tileset,
+    opponentSprite.palette,
+    view.opponentCorner.x,
+    view.opponentCorner.y,
   );
   drawSpriteSheet(
     fb,
-    onixBackSprite.tileset,
-    onixBackSprite.palette,
-    ONIX_MATERIALIZE_CORNER.x,
-    ONIX_MATERIALIZE_CORNER.y + (view.playerY2 ?? 0),
+    playerSprite.tileset,
+    playerSprite.palette,
+    view.playerCorner.x,
+    view.playerCorner.y + (view.playerY2 ?? 0),
   );
-  drawSendOutHealthbox(fb, 0, kabutoHealthboxContentForHp(view.opponentHp, KABUTO_SENDOUT_BATTLER.name, KABUTO_SENDOUT_BATTLER.level, KABUTO_SENDOUT_BATTLER.maxHP, KABUTO_SENDOUT_BATTLER.gender));
-  drawComposedPlayerHealthbox(fb, onixPlayerHealthboxContent);
+  drawSendOutHealthbox(fb, 0, kabutoHealthboxContentForHp(view.opponentHp, view.opponentBattler.name, view.opponentBattler.level, view.opponentBattler.maxHp, view.opponentBattler.gender));
+  drawComposedPlayerHealthbox(fb, view.playerHealthboxContent);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
 
   if (view.statEffectAge !== null) {
@@ -34666,7 +34712,7 @@ export function renderSceneOffTurnView(
     }
   }
   if (view.bottom === "fight") {
-    drawFightSubmenuChrome(fb, 0, null, null, rentalMoveset("ONIX"));
+    drawFightSubmenuChrome(fb, 0, null, null, view.moveset);
   } else if (view.bottom === "action") {
     drawTurn5SitrusSettledMenuChrome(fb);
   } else if (view.bottom === "message" && view.messageLines) {

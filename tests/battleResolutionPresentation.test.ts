@@ -21,6 +21,7 @@ import {
   renderBattleResolutionSceneOffView,
   renderSceneOffTurnView,
   sceneOffStatStageBannerView,
+  SCENE_OFF_TURN_DEFAULT_IDENTITY,
 } from "../src/engine/battleScene.ts";
 import {
   createBattleState,
@@ -1386,6 +1387,7 @@ describe("battle resolution typed Scene-OFF renderer", () => {
 
     const legacy = new Uint8Array(240 * 160 * 4);
     renderSceneOffTurnView(legacy, {
+      ...SCENE_OFF_TURN_DEFAULT_IDENTITY,
       opponentHp: 91,
       messageLines: ["ONIX used", "ROCK SLIDE!"],
       messageChars: 20,
