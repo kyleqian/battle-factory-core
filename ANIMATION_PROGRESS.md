@@ -1,5 +1,42 @@
 # Animation coverage
 
+## Back `BACK_ANIM_H_SPRING` triple accepted (2026-08-03)
+
+**State:** exact for the third bounded player-back set: **3/25 back sets,
+9/75 selector variants, 50/376 Factory mappings**. `BACK_ANIM_H_SPRING` is
+**2 mappings / 2 Factory / 0 outside** — SURSKIT and FEEBAS. Overall move
+coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**;
+`ANIMATION_COVERAGE.json` is byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Did:** added source-faithful `HorizontalSpring` plus all three entry points
+to `src/animation/backSendOutAnim.ts`: normal **data7=0/data6=8/data5=512/
+data4=8**, fast **8/512/16**, slow **4/256/16**; first-invocation
+`HandleStartAffineAnim`, signed-s16 Sin/write reducers, affine OAM
+double→normal lifecycle, terminal `WaitAnimEnd`, and task zero/preserve/
+restore semantics. `TryFlipX` remains pinned absent. `BACK_ANIM_H_SLIDE` is
+the accepted predecessor; `BACK_ANIM_H_SPRING_REPEATED` (LUVDISC/CARVANHA)
+remains an explicit unsupported adjacent control.
+
+**Evidence:** six fresh Scene-ON `tools/run-mgba-probe.py` runs, paired by
+`cmp`, dense from initializer through `SpriteCallbackDummy`: staged SURSKIT
+Hardy/mod-0 fast (not a real rental route) **1839..1906 / 68 frames,
+31,872 B, `7f97f6722c47b6454b4067e57462aaa42dc404f6e11d5d6ea5f2ff7ad9920c40`**;
+real SURSKIT index **42** Relaxed/normal **1839..1906 / 68,
+31,422 B, `42d5f4d5c54f9958d23560de7bc54a69f03d9e3559f26aa70325311e212669ec`**;
+real FEEBAS index **7** Lonely/slow **1838..1905 / 68,
+31,862 B, `0ecde341e47881a57393cbacedc5b722d3be4c42bef9e92d0d47d9155badd6ff`**.
+All use complete legal three-mon parties with scaffold IDs
+`[154,135,188]` / `[156,149,180]`; indices 42/7 are staged via overrides
+because they are below challenge-0's legal scaffold range.
+
+**Verification / next:** focused spring/slide/vibrate + selector/source
+pins + both ratchets: **10 files / 70 tests green**; `npx tsc --noEmit` and
+`npm run animation:coverage` green with unchanged digest. Next source-ranked
+unsupported player-back set: **`BACK_ANIM_H_SPRING_REPEATED` (set 4), 2
+Factory mappings / 0 outside — LUVDISC and CARVANHA**. No live dispatcher
+wiring or move status was promoted; no baked pixels or absolute-tick lookup.
+
 ## Back `BACK_ANIM_H_SLIDE` triple accepted (2026-08-03)
 
 **State:** exact for a second bounded player-back set: **2/25 back sets,
