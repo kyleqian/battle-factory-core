@@ -27,11 +27,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the tint fade (16→0, −1/tick) is species-generic. Retry brief embeds the
   probe (artifacts: docs-bound copy pending worker; scratchpad backup
   kept).
-- **In flight:** side lane — #71 `drawGeneratedPlayerMaterialize` fix
-  (ONIX-gate the wobble table, keep generic tint; worktree
-  side-20260803-151003). Main lane — #72 107-id printstring reachability
-  triage (user-directed first brief), launching next.
-- **Next:** verify + merge both; then #72 REACHABLE fixes per triage;
+- **#71 latent bug FIXED and MERGED** (`7e14afae` → merge `cffb7491`,
+  ~15:55): ONIX-gated wobble table, species-generic tint kept, probe banked
+  at `docs/probes/kadabra-materialize-settle/`. 7 red-verified tests;
+  worker full suite green at commit (665 files / 6,584); supervisor
+  spot-checks: new test file 7/7 in-worktree, differential
+  `battle-command-generated-off.json --base 660494f9` **128/128
+  byte-identical**. Oracle-pixel compare deferred into Slice D acceptance
+  (see ISSUES #71 + 2 new PAPERCUTS). Post-merge smoke+targeted deferred
+  until the live main-lane worker exits (shared-tree discipline).
+- **In flight:** main lane — #72 107-id printstring reachability triage
+  (user-directed first brief), launched ~15:37.
+- **Next:** verify + merge triage; then #72 REACHABLE fixes per triage;
   typeref slice-2 re-scope (#39). Preview server is DOWN (died with last
   session); restart at wind-down on the final commit.
 

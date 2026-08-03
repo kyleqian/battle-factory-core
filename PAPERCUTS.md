@@ -46,6 +46,58 @@ history.
   sanity checks stop tempting workers into backgrounding the ~7 min full
   suite. Prompt-level prevention, not a mechanical guarantee — delete this
   entry after a few clean worker rounds.
+- **2026-08-03 note:** a side worker backgrounded its second mGBA probe run
+  despite the preamble (harness task, heartbeats live). It had NOT died from
+  it — the loss that followed was the supervisor's, see the spurious-
+  notification entry below. Counting it as a near-hit, not a hit.
+
+## Supervisor background-task "completed" notifications fire spuriously early
+
+- **What:** the Claude supervisor's `run_in_background` Bash tasks emit
+  completion notifications while the underlying process tree is still
+  running. On 2026-08-03 three fired in one hour (an `npm test`, a worker
+  launcher, a second `npm test`); acting on the launcher's one led the
+  supervisor to remove a live worker's worktree mid-step (worker noticed,
+  reported cleanly, session lost ~38 min/$8; its probe data was salvaged
+  and the retry landed). The 2026-07-31 "notification-unreliability kill-0
+  policy" already predicted this class.
+- **Hits:** 3 (one with real cost), all 2026-08-03.
+- **Cost each:** the bad one ~40 worker-min + ~20 supervisor-min; the others
+  ~5 min of confusion.
+- **Workaround (adopted):** treat notifications as hints. Before acting:
+  `kill -0` the retained PID (launcher/process), and require the task output
+  file to contain the command's terminal marker (echoed exit-code line,
+  launcher digest footer). Spurious notifications arrive with empty or
+  setup-only output files; real ones carry the tail.
+
+## Matched app/oracle fixture-pair authoring for a new species scenario has no tooling shortcut
+
+- **What:** staging an oracle-comparable capture trace for an arbitrary
+  `mechanicLab` scenario (new species lead, specific set) requires
+  hand-matching the app-side `appStage` (species/nature/IVs/EVs/moves/item
+  re-derived to pair byte-exactly with the oracle override). The #71 retry
+  worker abandoned oracle-pixel acceptance after ~15 min of this and fell
+  back to an existing fixture.
+- **Hits:** 1.
+- **Cost each:** ~25 min (authoring attempt + fallback).
+- **Possible durable fix:** a small generator that emits the paired
+  appStage + scenario JSON from one set-id/species spec (the worker reports
+  it already computed the exact `createFactoryCorpusPartyMember` output
+  needed — see its final message in the 2026-08-03 side-lane log).
+
+## Oracle single-frame diffs appear non-deterministic under concurrent multi-lane load
+
+- **What:** the #71 retry worker saw repeated runs of the same compare
+  (same source, same trace) disagree on one frame while three lanes were
+  hammering the shared machine. Unconfirmed whether this is the oracle
+  service, capture timing under load, or a test-side race; the 2026-08-01
+  per-run compare-dir fix removed the known `out/latest` race, so this
+  would be a new mechanism.
+- **Hits:** 1.
+- **Cost each:** ~10 min chasing a false signal.
+- **Workaround:** rerun pixel-acceptance compares on an idle oracle before
+  believing a single-frame diff; don't run compare acceptance while 3+
+  suites/lanes are saturating the machine.
 
 ## Raw before/after RNG-window diffs pick up unrelated-subsystem draws
 

@@ -79,29 +79,31 @@ mechanicLab fast-forward gotcha it turned up. Dense-window list re-run twice
 fresh, zero new diffs; `battle-command-generated-off.json` 128/128
 byte-identical vs. parent.
 
-**Progress (2026-08-03, entry 891): Slice C DONE, plus one new latent bug
-found (not fixed).** The 3 back-side hand-fit consumers (`drawPlayerMaterializeSettle`
-ONIX-back-legacy, `drawKabutoHSlideWobble` KABUTO-front-legacy — the §2 4th
-hand-fit, treated the same way — and `drawTurn15ForcedSwitchRelease`
-MAGBY-back-forced-switch) are now documented + throw-guarded exactly per §5
-Slice C; each guard has a Tier-1 pin. Differential 128/128 byte-identical,
-full suite green. **Deliberately NOT guarded, found and reported instead:**
-`drawGeneratedPlayerMaterialize` (ONIX back, the **generated** route, §1b)
-applies the ONIX-only `playerMaterializeSettleY2`/`TintCoeff` tables to
-whatever species the real per-round player leads with — confirmed reachable
-**today**, not hypothetically (the already-green `factoryBattleStartIntro.test.ts`
-"renders every lifecycle phase..." case drives a KADABRA player through this
-exact branch at elapsed 710/714). A throw guard there would crash that
-passing test rather than fix anything; left as a documented comment citing
-this finding. **This is a real, currently-shipping visual defect** (not just
-a future-round risk like the other three) and needs its own fix — candidate:
-thread `art.speciesSymbol` and skip/zero the ONIX-only offsets for non-ONIX
-species, mirroring how the sibling generated-route MAGBY-back call site
-already does this correctly via its `canonicalIncoming` check
-(`battleScene.ts` near `renderBattleResolutionForcedPartySelect`).
+**Progress (2026-08-03, entry 891): Slice C DONE.** The 3 back-side hand-fit
+consumers (`drawPlayerMaterializeSettle` ONIX-back-legacy,
+`drawKabutoHSlideWobble` KABUTO-front-legacy — the §2 4th hand-fit — and
+`drawTurn15ForcedSwitchRelease` MAGBY-back-forced-switch) are documented +
+throw-guarded per §5 Slice C, each with a Tier-1 pin.
 
-**Still open (main-lane share):** the `drawGeneratedPlayerMaterialize`
-latent bug above (new); Slice D (per-tick front playback at the generated
+**Progress (2026-08-03, entry 894/895): entry-891's latent bug FIXED**
+(`7e14afae`, merged `cffb7491`): `drawGeneratedPlayerMaterialize` now applies
+the ONIX-only `playerMaterializeSettleY2` wobble table only when the generated
+player lead is ONIX (species 95 + symbol double-gate,
+`generatedPlayerMaterializeSettleY2`); the tint fade stays for every species
+(RAM-probe-confirmed species-generic, `Task_FadeMon_ToNormal` 16→0 −1/tick).
+Ground truth banked from a real-ROM KADABRA-lead probe
+(`docs/probes/kadabra-materialize-settle/`): each species' true settle is its
+own back-anim-family motion (KADABRA: y2 descent 14→0 over 13 ticks), so
+non-ONIX draws flat y2=0 **until Slice D's dispatcher lands** — the descent
+itself is deliberately un-modeled here. 7 red-verified tests
+(`tests/generatedPlayerMaterializeSettleSpecies.test.ts`); differential
+128/128 byte-identical (supervisor-rerun); full suite green at the commit.
+Open remainder from that step: the oracle-pixel compare over a staged
+non-ONIX settle window was NOT completed (matched app/oracle fixture-pair
+authoring cost + suspected oracle single-frame nondeterminism under
+multi-lane load — see PAPERCUTS); fold that check into Slice D's acceptance.
+
+**Still open (main-lane share):** Slice D (per-tick front playback at the generated
 battle-start seam, **gated on the animation lane's rung-3 dispatcher landing
 first** — do not hand-roll a per-tick dispatch switch in `src/engine/` to
 dodge this dependency, same class of mistake as the MAGBY/ONIX-back
