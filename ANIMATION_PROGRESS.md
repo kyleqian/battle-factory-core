@@ -32,7 +32,9 @@ because they are below challenge-0's legal scaffold range.
 
 **Verification / next:** focused spring/slide/vibrate + selector/source
 pins + both ratchets: **10 files / 70 tests green**; `npx tsc --noEmit` and
-`npm run animation:coverage` green with unchanged digest. Next source-ranked
+`npm run animation:coverage` green with unchanged digest; final `npm test`:
+**651 files / 6,484 passed / 1 skipped**, and `npm run build`: **green, 552
+modules transformed**. Next source-ranked
 unsupported player-back set: **`BACK_ANIM_H_SPRING_REPEATED` (set 4), 2
 Factory mappings / 0 outside — LUVDISC and CARVANHA**. No live dispatcher
 wiring or move status was promoted; no baked pixels or absolute-tick lookup.
