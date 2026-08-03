@@ -1288,6 +1288,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     ) {
       latestCompletedCommandHandoff = resolveTurn4LatestCompletedCommandHandoff(
         battleScene.elapsed + 1,
+        latestCompletedCommandHandoff!,
       );
     }
     if (fightSubmenu.openElapsed === null) {

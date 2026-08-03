@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
+import { resolveTurn3LatestCompletedCommandHandoff } from "../src/engine/turn3ResolutionAdapter.ts";
 import {
   isTurn4NextCommandHandoffReady,
   isTurn4NextCommandLifecycleActive,
@@ -22,6 +23,8 @@ import {
   isTurn4ChooseActionBounceReset,
   turn4ChooseActionResetElapsed,
 } from "../src/engine/turn4ChooseActionReset.ts";
+
+const TURN3_PRIOR_LATEST = resolveTurn3LatestCompletedCommandHandoff(3172);
 
 describe("turn4ResolutionAdapter: #39 completed-turn-4/next-command handoff proof", () => {
   it("publishes canonical PP, persisted slot, field HP, and settled/input-ready facts", () => {
@@ -61,12 +64,12 @@ describe("turn4ResolutionAdapter: #39 completed-turn-4/next-command handoff proo
 
   it("carries slot 0, field facts, ENDEAVOR/ROCK_SLIDE routing, and the immutable epoch through generic content", () => {
     const legacy = resolveTurn4CompletedResolutionNextCommandHandoff(4312);
-    const latest = resolveTurn4LatestCompletedCommandHandoff(4312);
+    const latest = resolveTurn4LatestCompletedCommandHandoff(4312, TURN3_PRIOR_LATEST);
     const content = latest.content;
     if (content === undefined) throw new Error("turn-4 generic receipt has no content");
 
     expect(isLatestCompletedCommandHandoffReady(latest)).toBe(true);
-    expect(latest.playerPp).toEqual(legacy.playerPp);
+    expect(latest.playerPp).toEqual(TURN3_PRIOR_LATEST.playerPp);
     expect(latest.persistedMoveSlot).toBe(0);
     expect(content.field.player.hp.current).toBe(88);
     expect(content.field.opponent.hp.current).toBe(1);
@@ -76,14 +79,17 @@ describe("turn4ResolutionAdapter: #39 completed-turn-4/next-command handoff proo
       { user: "player", target: "opponent", move: "ROCK_SLIDE", hpChange: { from: 1, to: 0 } },
     ]);
     expect(latestCompletedCommandPresentationEpochElapsedSinceReset(latest, 4319)).toBe(7);
-    expect(turn4CompletedResolutionNextCommandHandoffFromLatest(latest)).toEqual(legacy);
+    expect(turn4CompletedResolutionNextCommandHandoffFromLatest(latest)).toEqual({
+      ...legacy,
+      playerPp: TURN3_PRIOR_LATEST.playerPp,
+    });
     expect(Object.isFrozen(content.presentationEpoch)).toBe(true);
     expect(Object.isFrozen(content.presentationEpoch!.mon)).toBe(true);
     expect(Object.isFrozen(content.upcoming?.moves)).toBe(true);
   });
 
   it("derives every turn-5 bounce and kickoff clock from turn-4 content's semantic epoch", () => {
-    const latest = resolveTurn4LatestCompletedCommandHandoff(4312);
+    const latest = resolveTurn4LatestCompletedCommandHandoff(4312, TURN3_PRIOR_LATEST);
     const content = latest.content;
     if (content === undefined) throw new Error("turn-4 generic receipt has no content");
 
@@ -108,7 +114,7 @@ describe("turn4ResolutionAdapter: #39 completed-turn-4/next-command handoff proo
     expect(isTurn4NextCommandLifecycleActive(handoff, 4896)).toBe(true);
     expect(handoff.presentationEpoch.elapsed).toBe(4312);
 
-    const latest = resolveTurn4LatestCompletedCommandHandoff(4312);
+    const latest = resolveTurn4LatestCompletedCommandHandoff(4312, TURN3_PRIOR_LATEST);
     expect(isLatestCompletedCommandLifecycleActive(latest, 3853)).toBe(false);
     expect(isLatestCompletedCommandLifecycleActive(latest, 4887)).toBe(true);
     expect(isLatestCompletedCommandLifecycleActive(latest, 4896)).toBe(true);
@@ -124,5 +130,18 @@ describe("turn4ResolutionAdapter: #39 completed-turn-4/next-command handoff proo
     expect(Object.isFrozen(handoff.presentationEpoch.mon)).toBe(true);
     expect(Object.isFrozen(handoff.presentationEpoch.healthbox)).toBe(true);
     expect(Object.isFrozen(handoff.nextCommand)).toBe(true);
+  });
+
+  it("pins playerPp/persistedMoveSlot from the prior latest handoff while content stays turn-4 fresh (turn4-fold-pp-freshness-design.md §3.3)", () => {
+    const latest = resolveTurn4LatestCompletedCommandHandoff(4312, TURN3_PRIOR_LATEST);
+    const content = latest.content;
+    if (content === undefined) throw new Error("turn-4 generic receipt has no content");
+
+    expect(latest.playerPp).toEqual(TURN3_PRIOR_LATEST.playerPp);
+    expect(latest.persistedMoveSlot).toBe(TURN3_PRIOR_LATEST.persistedMoveSlot);
+    expect(latest.playerPp).not.toEqual(
+      resolveTurn4CompletedResolutionNextCommandHandoff(4312).playerPp,
+    );
+    expect(content.field.player.hp.current).toBe(88);
   });
 });

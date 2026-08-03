@@ -209,7 +209,7 @@ import { turn6FeatherSprites, turn7FeatherSprites, turn8FeatherSprites, compareF
 const TURN1_LATEST_HANDOFF = resolveTurn1LatestCompletedCommandHandoff(1308);
 const TURN2_LATEST_HANDOFF = resolveTurn2LatestCompletedCommandHandoff(2197);
 const TURN3_LATEST_HANDOFF = resolveTurn3LatestCompletedCommandHandoff(3172);
-const TURN4_LATEST_HANDOFF = resolveTurn4LatestCompletedCommandHandoff(4312);
+const TURN4_LATEST_HANDOFF = resolveTurn4LatestCompletedCommandHandoff(4312, TURN3_LATEST_HANDOFF);
 // This RAM probe predates the Scene-OFF contract and retains the historical
 // ON-profile reset epoch. Keep that evidence on its own typed receipt rather
 // than reintroducing a production move-delay anchor.

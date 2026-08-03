@@ -128,7 +128,7 @@ const TURN2_LATEST_HANDOFF = resolveTurn2LatestCompletedCommandHandoff(2197);
 const TURN3_HANDOFF = resolveTurn3CompletedResolutionNextCommandHandoff(3172);
 const TURN3_LATEST_HANDOFF = resolveTurn3LatestCompletedCommandHandoff(3172);
 const TURN4_HANDOFF = resolveTurn4CompletedResolutionNextCommandHandoff(4312);
-const TURN4_LATEST_HANDOFF = resolveTurn4LatestCompletedCommandHandoff(4312);
+const TURN4_LATEST_HANDOFF = resolveTurn4LatestCompletedCommandHandoff(4312, TURN3_LATEST_HANDOFF);
 
 describe("battleMenu: moveFightCursor (HandleInputChooseMove's DPAD guards, §11 finding 2)", () => {
   it("RIGHT/DOWN/LEFT/UP loop 0(ROCK_SLIDE)->1(BIND)->3(SANDSTORM)->2(DRAGON_BREATH)->0(ROCK_SLIDE), matching the nav groundtruth trace exactly", () => {
@@ -1104,7 +1104,10 @@ describe("battleMenu/battleScene: completed turn-4 choose-action receipt", () =>
     expect(isLatestCompletedCommandHandoffReady(handoff)).toBe(true);
     expect(handoff).toEqual(TURN4_LATEST_HANDOFF);
     expect(handoff).toMatchObject({
-      playerPp: [7, 20, 19, 10],
+      // Pinned from the prior (turn-3) receipt, not turn 4's own fresh PP -
+      // docs/turn4-fold-pp-freshness-design.md §3/§3.4; stays [8, 20, 19, 10]
+      // until the turn5->6 promotion (createCanonicalCompletedCommandChain).
+      playerPp: [8, 20, 19, 10],
       persistedMoveSlot: 0,
       content: {
         field: {

@@ -185,16 +185,25 @@ export function resolveTurn4FightCommandPresentation(
   });
 }
 
-/** Publishes turn 4 through the generic completed-command owner. */
+/**
+ * Publishes turn 4 through the generic completed-command owner.
+ *
+ * `playerPp`/`persistedMoveSlot` are pinned from `priorLatest` (turn 3's
+ * values) rather than turn 4's own fresh receipt: chrome must stay on turn
+ * 3's PP until the turn 5->6 promotion explicitly replaces the whole
+ * handoff (`createCanonicalCompletedCommandChain`). `content` still carries
+ * turn 4's own fresh HP/bounce/kickoff - only the top-level PP/slot pin.
+ */
 export function resolveTurn4LatestCompletedCommandHandoff(
   presentationEpochElapsed: number,
+  priorLatest: LatestCompletedCommandHandoff,
 ): LatestCompletedCommandHandoff {
   const handoff = resolveTurn4CompletedResolutionNextCommandHandoff(
     presentationEpochElapsed,
   );
   return createLatestCompletedCommandHandoff({
-    playerPp: handoff.playerPp,
-    persistedMoveSlot: handoff.persistedMoveSlot,
+    playerPp: priorLatest.playerPp,
+    persistedMoveSlot: priorLatest.persistedMoveSlot,
     nextCommand: handoff.nextCommand,
     content: resolveTurn4FightCommandPresentation(handoff),
   });
