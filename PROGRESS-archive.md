@@ -1,3 +1,54 @@
+## 891 — [bounded MAIN worker, 2026-08-03] ISSUES #71 Slice C LANDED — back-side hand-fit consumers documented + loud-guarded; one real latent bug found, NOT fixed (reported)
+
+- **State:** master `e5bd18dd`. Full `npm test`: **649 files / 6,495 passed /
+  1 skipped**. `npm run build` green (tsc -b + vite).
+  `compare:differential -- battle-command-generated-off.json --base
+  b7dbbe01 --summary`: **PASS — 128/128 byte-identical**.
+  `tests/executableFrontierRatchet.test.ts` green, untouched, no barrier
+  changes.
+- **Did:** `docs/send-out-live-wiring-consumer-map.md` §5 Slice C — no
+  dispatcher exists yet (animation lane's rung 3/4), so nothing is deleted
+  or retired. At each of the 3 back-side consumer sites, added a code
+  comment naming the exact species(+nature) the hand-fit is valid for
+  (citing the doc) plus a throw-guard matching the existing §1e pattern:
+  `drawPlayerMaterializeSettle` (ONIX back, legacy) guards on `encounter`
+  (destin/jenson only — neither it nor its 2 callers carry a species
+  value); `drawKabutoHSlideWobble` (KABUTO front, §2's uncatalogued 4th
+  hand-fit — treated the same way since it's equally guardable) guards on
+  `encounter` too, jenson-only; `drawTurn15ForcedSwitchRelease` (MAGBY
+  back, forced-switch) guards on a real `species` param — all 4 current
+  call sites already resolve "MAGBY" (3 fixed Turn-15 content, the 4th
+  generated-route caller already gated on `view.field.player.name ===
+  "MAGBY"`). All three were module-private; exported (Slice A precedent)
+  for direct testability.
+- **Tests:** 3 new Tier-1 cases in `tests/battleScene.test.ts`, one per
+  guard — valid input draws unchanged (repeat calls / both valid encounters
+  byte-identical), invalid input throws the named error.
+- **Real latent bug found, NOT fixed (per the step's explicit STOP
+  instruction):** `drawGeneratedPlayerMaterialize` (ONIX back, **generated**
+  route, §1b) applies the same ONIX-only `playerMaterializeSettleY2`/
+  `TintCoeff` tables regardless of the real per-round player species —
+  confirmed this is reachable **today**, not just hypothetically: the
+  already-green `factoryBattleStartIntro.test.ts` "renders every lifecycle
+  phase..." case drives a KADABRA-led player party through this exact
+  branch at elapsed 710/714. A naive throw guard there would crash that
+  passing test. Left documented in place (comment citing this finding),
+  deliberately un-guarded — guarding without fixing the underlying
+  wrong-table application would only convert a silent bug into a crash on
+  ordinary generated-round play. **Needs a real decision/fix, not a guard**
+  — candidate: thread `art.speciesSymbol` and skip/zero the ONIX-only
+  offsets for non-ONIX species until a real per-species back hand-fit
+  exists (mirrors how the already-generic sibling call site at
+  `battleScene.ts:34450` handles this via its `canonicalIncoming` check).
+- **Next:** ISSUES #71 remaining: fix the `drawGeneratedPlayerMaterialize`
+  latent bug above (new, not previously tracked); Slice D (per-tick front
+  playback, gated on animation lane's rung-3 dispatcher); §1e's 56/58
+  move-window patch-site retirement. Cross-lane dispatcher ask stays open.
+- **Notes:** no PAPERCUT this step beyond the reachability analysis time
+  itself (worth it — it caught a real bug before a guard would have shipped
+  a crash).
+
+---
 ## 890 — [bounded MAIN worker, 2026-08-03] ISSUES #71 Slices A+B LANDED — front terminal offsets wired at the 5 real settle hooks, RAM-confirmed
 
 - **State:** master `32af4030`. Full `npm test`: **649 files / 6,492 passed /
