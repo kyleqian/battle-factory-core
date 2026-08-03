@@ -261,6 +261,44 @@ describe("primary-effect stat-change route (Cmd_statbuffchange + SETGRAPHICALSTA
     expect(result.state.callStack.length).toBe(0); // the sub-script's own `return` already popped it
   });
 
+  /**
+   * ISSUES #67: `statChanger`'s magnitude bits (bits 4-6, 3-bit range 0-7)
+   * are force-cast to `1 | 2` with zero runtime validation at the cast site
+   * (battleScriptStatbuffchangeOpcode.ts:97-101). Every real `setstatchanger`
+   * call site only ever encodes magnitude 1 or 2, but the generic `setbyte`
+   * handler can write any 0-255 value into `statChanger` at runtime, so the
+   * `1 | 2` guarantee was convention, not code. This pins the added runtime
+   * guard: enters directly at the committed STATBUFFCHANGE instruction (same
+   * technique as the Clear Body test above) with a corrupted magnitude,
+   * expecting the throw. Magnitude 1 and 2 are already exercised end-to-end
+   * by the Tail Whip test (magnitude bits = 1, DEF -1) and the Swords Dance
+   * test (magnitude bits = 2, ATK +2) above -- both still reach
+   * BattleScript_MoveEnd unchanged by this guard.
+   */
+  it.each([
+    [0x82, 0], // statId=STAT_DEF, magnitude bits=0
+    [0xf2, 7], // statId=STAT_DEF, magnitude bits=7 (max 3-bit value)
+  ])("throws when statChanger's magnitude bits are corrupt (raw byte 0x%s)", (statChangerByte, expectedMagnitude) => {
+    const rc = context({}, { currentMove: TAIL_WHIP, statChanger: statChangerByte });
+    const statbuffchangePc = program.instructions.find(
+      (i, index) =>
+        i.opcodeName === "B_SCR_OP_STATBUFFCHANGE"
+        && index >= labelPc("BattleScript_EffectDefenseDown")
+        && index < labelPc("BattleScript_EffectHaze"),
+    )!.programCounter;
+    const execution = createBattleScriptStatusRulesExecution(
+      program,
+      "BattleScript_EffectDefenseDown",
+      rc,
+      1,
+      externalPorts(),
+    );
+    const patched = Object.freeze({ ...execution.state, programCounter: statbuffchangePc });
+    expect(() => stepBattleScriptMachine(program, patched, execution.handlers)).toThrow(
+      `Cmd_statbuffchange: statChanger has unknown magnitude ${expectedMagnitude}`,
+    );
+  });
+
   it("stat already at MAX_STAT_STAGE (12): Swords Dance sets MOVE_RESULT_MISSED, prints the 'wont go higher' message, skips the animation trio, still reaches BattleScript_MoveEnd", () => {
     const rc = context({ statStages: [6, 12, 6, 6, 6, 6, 6, 6] }, { currentMove: SWORDS_DANCE });
     const { result } = runUntilLabel("BattleScript_EffectAttackUp2", "BattleScript_MoveEnd", rc);

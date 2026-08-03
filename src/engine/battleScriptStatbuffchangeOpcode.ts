@@ -94,7 +94,11 @@ function createStatbuffchangeOpcodeHandler(): BattleScriptOpcodeHandler<BattleSc
     const target = requireBattlerRole(rulesContext, "target");
     const statChanger = rulesContext.statChanger;
     const statId = statChanger & 0xf;
-    const magnitude = ((statChanger >> 4) & 0x7) as 1 | 2;
+    const rawMagnitude = (statChanger >> 4) & 0x7;
+    if (rawMagnitude !== 1 && rawMagnitude !== 2) {
+      throw new Error(`Cmd_statbuffchange: statChanger has unknown magnitude ${rawMagnitude}`);
+    }
+    const magnitude = rawMagnitude;
     const direction = (statChanger & 0x80) !== 0 ? "decrease" as const : "increase" as const;
 
     const outcome = changeStatBuffs(context, {
