@@ -404,6 +404,13 @@ function requireMoveDefender(lastMoveAttacker: 0 | 1 | null, context: string): 0
   return lastMoveAttacker === 0 ? 1 : 0;
 }
 
+function requireMoveAttacker(lastMoveAttacker: 0 | 1 | null, context: string): 0 | 1 {
+  if (lastMoveAttacker === null) {
+    throw new Error(`battle resolution ${context} has no preceding used-move event`);
+  }
+  return lastMoveAttacker;
+}
+
 function nameWithPrefixResolver(
   field: BattleResolutionDisplayedField,
   battler: 0 | 1,
@@ -633,6 +640,8 @@ function messageLines(
     messageId === "STRINGID_PKMNPOISONEDBY"
     || messageId === "STRINGID_PKMNBURNEDBY"
     || messageId === "STRINGID_PKMNWASPARALYZEDBY"
+    || messageId === "STRINGID_PKMNFROZENBY"
+    || messageId === "STRINGID_PKMNMADESLEEP"
   ) {
     // gGotPoisonedStringIds[1]/gGotBurnedStringIds[1]/gGotParalyzedStringIds[1]
     // (battle_message.c:387-390) -- Poison Point/Flame Body/Static/Effect
@@ -640,7 +649,13 @@ function messageLines(
     // B_SCR_ACTIVE_* is the ability holder (applySetMoveEffect's
     // scriptingBattler, battleScriptHitChainOpcode.ts:2841-2848); B_EFF_* is
     // the attacker who got statused, already tracked generically via
-    // pendingStatusMessageBattler below.
+    // pendingStatusMessageBattler below. ISSUES #70 batch 2 (docs/issue70-
+    // stringid-reachability.md rows 4/23): gGotFrozenStringIds[1]/
+    // gFellAsleepStringIds[1] share this exact template shape and the same
+    // generic applySetMoveEffect(abilityEffectHitmarkerSet) dispatch tail
+    // (battleScriptHitChainOpcode.ts:3410-3413) -- wired and real, but no
+    // rental ability drives MOVE_EFFECT_FREEZE/SLEEP through it in vanilla
+    // Gen3 (zero-incidence per the doc's own sum-check).
     if (event.payload.scriptingBattler === undefined || event.payload.substitutions.length === 0) {
       throw new Error(`battle resolution ${messageId} message has no scripting-battler/ability substitution`);
     }
@@ -703,6 +718,8 @@ function messageLines(
     messageId === "STRINGID_PKMNRAISEDDEF"
     || messageId === "STRINGID_PKMNRAISEDSPDEF"
     || messageId === "STRINGID_PKMNCOVEREDBYVEIL"
+    || messageId === "STRINGID_PKMNRAISEDDEFALITTLE"
+    || messageId === "STRINGID_PKMNRAISEDSPDEFALITTLE"
   ) {
     // createSetSideStatusHandler's REFLECT_CONFIG/LIGHTSCREEN_CONFIG/
     // SAFEGUARD_CONFIG success choosers (battleScriptSetSideStatusOpcode.ts).
@@ -711,6 +728,11 @@ function messageLines(
     // battler -- the attacking side that cast Reflect/Light Screen/Safeguard.
     // {B_CURRENT_MOVE} is gMoveNames[gBattleMsgDataPtr->currentMove]
     // (battle_message.c:2453-2456), the frozen action snapshot's own move.
+    // ISSUES #70 batch 2 (docs/issue70-stringid-reachability.md rows 35/37):
+    // gReflectLightScreenSafeguardStringIds[2]/[4] (the doubles-only "a
+    // little" choosers) share this exact template shape; structurally
+    // unreachable in this engine's singles-only scope
+    // (battleScriptSetSideStatusOpcode.ts:14-19's own header comment).
     if (lastMoveAttacker === null || actionSnapshot === null) {
       throw new Error(`battle resolution ${messageId} message has no preceding used-move action snapshot`);
     }
@@ -719,6 +741,120 @@ function messageLines(
       B_ATK_PREFIX2: () => prefix2,
       B_CURRENT_MOVE: () => resolveMoveName(actionSnapshot.currentMove),
     });
+  }
+  if (messageId === "STRINGID_PKMNSHROUDEDINMIST") {
+    // MIST_CONFIG's own successChooser (B_MSG_SET_MIST), the same
+    // createSetSideStatusHandler family as Reflect/Light Screen/Safeguard
+    // above, but gText_PkmnShroudedInMist (battle_message.c:151) has no
+    // {B_CURRENT_MOVE} placeholder -- Mist's own name is implied.
+    if (lastMoveAttacker === null) {
+      throw new Error(`battle resolution ${messageId} message has no preceding used-move event`);
+    }
+    const prefix2 = lastMoveAttacker === 0 ? "Ally" : "Foe";
+    return resolveBattleStringLines(messageId, {
+      B_ATK_PREFIX2: () => prefix2,
+    });
+  }
+  if (messageId === "STRINGID_PKMNCHOSEXASDESTINY") {
+    // gFutureMoveUsedStringIds[1], battleScriptTrysetfutureattackOpcode.ts:
+    // 129-165 -- multistringChooser=1 iff currentMove === MOVE_DOOM_DESIRE,
+    // never a legal Factory L50 rental move (Jirachi-exclusive).
+    if (lastMoveAttacker === null || actionSnapshot === null) {
+      throw new Error(`battle resolution ${messageId} message has no preceding used-move action snapshot`);
+    }
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, lastMoveAttacker),
+      B_CURRENT_MOVE: () => resolveMoveName(actionSnapshot.currentMove),
+    });
+  }
+  if (
+    messageId === "STRINGID_PKMNSQUEEZEDBYBIND"
+    || messageId === "STRINGID_PKMNWRAPPEDBY"
+    || messageId === "STRINGID_PKMNTRAPPEDINVORTEX"
+    || messageId === "STRINGID_PKMNCLAMPED"
+    || messageId === "STRINGID_PKMNTRAPPEDBYSANDTOMB"
+  ) {
+    // gWrappedStringIds, applyWrapMoveEffect (battleScriptHitChainOpcode.ts:
+    // 3692-3727) -- indexed by the move's own position in TRAPPING_MOVES
+    // (Bind/Wrap/Fire Spin/Clamp/Whirlpool/Sand Tomb; Fire Spin and
+    // Whirlpool share idx2's text, matching vanilla gWrappedStringIds).
+    const attacker = requireMoveAttacker(lastMoveAttacker, `${messageId.toLowerCase()} message`);
+    const defender = requireMoveDefender(lastMoveAttacker, `${messageId.toLowerCase()} message`);
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (
+    messageId === "STRINGID_PKMNEVADEDATTACK"
+    || messageId === "STRINGID_PKMNSEEDED"
+  ) {
+    // gLeechSeedStringIds[1]/[0], Cmd_setseeded
+    // (battleScriptIngrainLeechSeedWrapOpcode.ts:87-120) -- Leech Seed
+    // missing (already-seeded/accuracy-missed) or landing.
+    const defender = requireMoveDefender(lastMoveAttacker, `${messageId.toLowerCase()} message`);
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (
+    messageId === "STRINGID_PKMNOBTAINEDX"
+    || messageId === "STRINGID_PKMNOBTAINEDX2"
+    || messageId === "STRINGID_PKMNOBTAINEDXYOBTAINEDZ"
+  ) {
+    // gItemSwapStringIds, Cmd_tryswapitems (battleScriptTryswapitemsOpcode.ts:
+    // 119-215, Trick) -- {B_BUFF1}/{B_BUFF2} are prepareMessage's own
+    // battleTextBuff1Item/battleTextBuff2Item substitutions (already wired).
+    if (event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no item substitution`);
+    }
+    const attacker = requireMoveAttacker(lastMoveAttacker, `${messageId.toLowerCase()} message`);
+    const defender = requireMoveDefender(lastMoveAttacker, `${messageId.toLowerCase()} message`);
+    const buff1 = event.payload.substitutions[0]!;
+    const buff2 = messageId === "STRINGID_PKMNOBTAINEDXYOBTAINEDZ"
+      ? event.payload.substitutions[1]!
+      : event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_BUFF1: () => buff1,
+      B_BUFF2: () => buff2,
+    });
+  }
+  if (messageId === "STRINGID_PKMNUNAFFECTED") {
+    // gKOFailedStringIds[1], Cmd_tryKO (battleScriptTryKOOpcode.ts:170-175) --
+    // B_MSG_KO_UNAFFECTED iff targetLevel > attackerLevel, never true in this
+    // engine's mirror-level L50 singles scope.
+    const defender = requireMoveDefender(lastMoveAttacker, "unaffected message");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (
+    messageId === "STRINGID_PKMNRAISEDFIREPOWERWITH"
+    || messageId === "STRINGID_PKMNSXMADEYINEFFECTIVE"
+  ) {
+    // gFlashFireStringIds, advancePastAccuracyCheck
+    // (battleScriptHitChainOpcode.ts:908-925) -- first activation vs an
+    // already-boosted re-activation. {B_DEF_ABILITY} is prepareMessage's own
+    // substitution, sourced from that same target's rulesContext.battlers[
+    // target].ability (same shape as AVOIDEDDAMAGE/PKMNMAKESGROUNDMISS above).
+    if (event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no ability substitution`);
+    }
+    const defender = requireMoveDefender(lastMoveAttacker, `${messageId.toLowerCase()} message`);
+    const ability = event.payload.substitutions[0]!;
+    const resolvers: Record<string, () => string> = {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_DEF_ABILITY: () => ability,
+    };
+    if (messageId === "STRINGID_PKMNSXMADEYINEFFECTIVE") {
+      if (actionSnapshot === null) {
+        throw new Error(`battle resolution ${messageId} message has no preceding used-move action snapshot`);
+      }
+      resolvers.B_CURRENT_MOVE = () => resolveMoveName(actionSnapshot.currentMove);
+    }
+    return resolveBattleStringLines(messageId, resolvers);
   }
   if (messageId === "STRINGID_HITXTIMES") {
     // BattleScript_MultiHitPrintStrings's printstring, real script data

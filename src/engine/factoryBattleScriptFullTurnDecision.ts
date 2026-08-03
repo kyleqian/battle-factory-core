@@ -177,6 +177,7 @@ const FACTORY_ITEM_NAME_BY_ID = new Map(
  */
 const ABILITY_DISPLAY_NAME_BY_ID: Readonly<Record<number, string>> = Object.freeze({
   9: "STATIC",
+  18: "FLASH FIRE",
   25: "WONDER GUARD",
   26: "LEVITATE",
   27: "EFFECT SPORE",
@@ -282,6 +283,8 @@ export type FactoryFullTurnBattlerConfig = Readonly<{
   chosenMovePosition?: number;
   statStages?: readonly [number, number, number, number, number, number, number, number];
   types?: readonly [string, string];
+  /** Source gDisableStructs[].flashFireBoosted -- stages Flash Fire's re-activation string (ISSUES #70 batch 2, STRINGID_PKMNSXMADEYINEFFECTIVE). */
+  flashFireBoosted?: 0 | 1;
 }>;
 
 export type FactoryFullTurnConfig = Readonly<{
@@ -477,6 +480,7 @@ function activeBattler(
     encoreTimerStartValue: config.encoreTimerStartValue ?? 0,
     maxHP: config.maxHp ?? config.hp,
     partyIndex: 0,
+    flashFireBoosted: config.flashFireBoosted ?? 0,
   });
 }
 
@@ -782,8 +786,15 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
             // 1617-1622,1778-1783 (GROUND_MISS) and :986-989,1672-1677,
             // 1818-1823 (AVOIDED_DMG), all three call sites Levitate/Wonder
             // Guard-only).
+            // ISSUES #70 batch 2 (docs/issue70-stringid-reachability.md rows
+            // 41-42): gFlashFireStringIds shares this exact B_TXT_DEF_ABILITY
+            // shape (advancePastAccuracyCheck, battleScriptHitChainOpcode.ts:
+            // 908-925 -- Flash Fire is still gBattlerTarget's ability at the
+            // print, roles unchanged since the AVOIDEDDAMAGE/GROUNDMISS case).
             : operand.expression === "STRINGID_AVOIDEDDAMAGE"
               || operand.expression === "STRINGID_PKMNMAKESGROUNDMISS"
+              || operand.expression === "STRINGID_PKMNRAISEDFIREPOWERWITH"
+              || operand.expression === "STRINGID_PKMNSXMADEYINEFFECTIVE"
               ? (rules.selectorRoles.target === null
                 ? []
                 : [abilityDisplayName(rules.battlers[rules.selectorRoles.target].ability)])
@@ -794,10 +805,14 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
               // is set (battleScriptHitChainOpcode.ts:2841-2848), which
               // executeOnDamageAbilities always sets for its Static/Poison
               // Point/Flame Body/Effect Spore contact-ability block
-              // (battleScriptMoveEndOpcode.ts:455,587-599).
+              // (battleScriptMoveEndOpcode.ts:455,587-599). ISSUES #70 batch 2
+              // (rows 4/23): gGotFrozenStringIds/gFellAsleepStringIds' idx1
+              // share this exact shape (generic, zero real-world incidence).
               : operand.expression === "STRINGID_PKMNPOISONEDBY"
                 || operand.expression === "STRINGID_PKMNBURNEDBY"
                 || operand.expression === "STRINGID_PKMNWASPARALYZEDBY"
+                || operand.expression === "STRINGID_PKMNFROZENBY"
+                || operand.expression === "STRINGID_PKMNMADESLEEP"
                 ? [abilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
                 // STRINGID_HITXTIMES's {B_BUFF1}: the multi-hit family's own
                 // hits-landed counter (battleScriptRulesContext.ts:700-710,
