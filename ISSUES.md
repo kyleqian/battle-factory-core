@@ -17,51 +17,29 @@ backlog.
 
 # Open
 
-## #68 — [USER REPORT 2026-08-02, play session] Opponent MURKROW's first TORMENT throws a user-visible exception mid-turn
+## #69 — [USER REPORT 2026-08-02] Scene-OFF stat-banner cadence runs ~21% fast: missing 64-frame post-print hold
 
-**Report (corrected timeline, user 2nd message):** interactive play
-(preview at `3a165507`), rental BUTTERFREE. Battle vs GROVYLE: two SILVER
-WINDs (omniboost both — see #69), KO. MURKROW (set 184: FAINT_ATTACK/FLY/
-TORMENT/TAUNT, LAX_INCENSE) replaces it. On the FIRST Silver Wind click vs
-MURKROW the app threw immediately, error text mentioning torment. MURKROW
-had never had a turn, so no torment status could exist at selection time.
+**Ground truth pinned (2026-08-02, `0b8c0537`,
+`docs/issue69-omniboost-off-ground-truth.md`):** the ROM's Scene-OFF
+omniboost is **5 separate banners** (box-clear flash + text + the source's
+64-frame `waitmessage(B_WAIT_TIME_LONG)` hold), ~92 frames/banner, 473
+total (dense fixture `issue69-omniboost-dense-seed8.json`). The app's five
+banners are structurally CORRECT (user's "one gray flash" memory is the
+Scene-ON animation, skipped in OFF); the defect is timing: ~74.6
+frames/banner, 373 total — **zero post-print hold modeled**, generic to
+every stat-change move (cross-ref: the open flag in
+`docs/stat-change-confusion-ground-truth.md`). RNG exonerated: 25/25
+seed-for-seed proc agreement; draw attribution exact (double proc = luck).
 
-**Triage (supervisor, same-session):** the app computes the full turn
-synchronously at click, so "immediately" spans Butterfree's move AND
-Murkrow's response. Ranked hypotheses:
-1. **#65 class — missing presentation string.** Murkrow's first action is
-   TORMENT; `battleScriptSettormentOpcode.ts` exists (kernel executes it),
-   but `battleStringResolver.ts`/`battleResolutionPresentation.ts` contain
-   ZERO torment references (grep-verified) — the "{target} was subjected
-   to TORMENT!" string id is likely unmapped and the resolver completeness
-   guard throws, exactly like #65's ATTACKER-banner crash.
-2. A barrier/throw further down TORMENT's script or moveend path.
-3. (Demoted) selection-time legality-UI gap — the original hypothesis;
-   timeline now makes it secondary, but the breadth audit (selection-time
-   rejection flow for Torment/Taunt/Disable/Encore/choice-lock/no-PP) is
-   still worth doing while in here, since the tormented-NEXT-turn menu is
-   one turn away from the same repro.
-
-Repro recipe: staged BUTTERFREE (SILVER WIND) vs MURKROW all-four-TORMENT
-via `overrides.parties`-style staging or a pure Tier-1 full-turn test; the
-crash should fall out of executing Murkrow's TORMENT.
-
-## #69 — [USER REPORT 2026-08-02, play session] Scene-OFF all-stats-up (SILVER WIND omniboost) presentation cadence looks wrong; double-proc bias check
-
-**Report (same session/matchup as #68):** on omniboost the app rendered a
-visible stat-up effect per stat, each unusually fast ("fast-forwarded");
-user's recollection of the real game is one gray flash then the text. Also
-observed omniboost on both of two consecutive SILVER WIND uses (10%
-per-use in source — 1% for the pair, plausible luck, unverified).
-
-**Needs (oracle ground truth first, no app change before it):** stage
-BUTTERFREE SILVER WIND vs constrained opponent on the OFF profile, sweep
-seeds to a proc, capture the full omniboost window dense; pin the ROM's
-real cadence (how many/which effect flashes, banner cadence, frame
-counts). Then diff the app's window and fix presentation to match. For the
-bias question: count attributed effect-chance RNG draws per use (hit chain
-contract = 4 rolls + effect-chance) and compare proc frequency across a
-seed sweep app-vs-oracle before touching any RNG code.
+**Fix (bounded, prescribed):** `battleResolutionCommandDuration`'s
+`"stat"`/`"message"` cases + `STAT_TIMING`/`MESSAGE_TIMING`
+(`battleResolutionPresentation.ts`): add the missing 64-frame post-print
+hold, target ~92 frames/banner against the dense fixture. CAUTION: this
+moves timing on a SHARED constant — every standing window containing a
+kernel-route stat/message banner must be re-run against the ORACLE (not
+differential); windows that were implicitly fitted around the missing hold
+may move. If any standing pin regresses vs the oracle, stop and report
+rather than refit.
 
 ## #56 — Arbitrary-trainer intro: residuals, ONIX ready-lag regression, MAGNETON shadow coverage
 
