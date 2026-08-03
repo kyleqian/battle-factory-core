@@ -553,35 +553,32 @@ epoch and field content. The first early state field is cut (four handoff
 fields to three). Remaining work is turn-2–4 epoch/content folds (slices 7–9)
 and final positional parameter/type cleanup (slice 10).
 
-## #62 — Retired turn-2-shaped reproducers remain pixel-red on the generated OFF route after #60's crash fix
+## #62 — Retired turn-2-shaped reproducers: one candidate presentation family (HP-bar fraction) needs a discriminating state probe
 
-**Bounded evidence (2026-07-31, `f1bc60a2`):** recovered the deleted
-`turn2-endeavor.json` and `turn2-dragonbreath.json` byte-for-byte from
-`01eac159` into a fresh `/tmp` directory, then added explicit
-`oracleProfile: battle-scene-off` only to scratch copies so the main-lane
-oracle contract was unambiguous. Both now execute through
-`renderWithoutFactoryTerminal` -> `renderBattleResolutionPresentation` ->
-`renderBattleResolutionSceneOffView` without throwing, including the exact
-battler-1 EVASION 7→8 rise that defined #60. Pixel results remain separately
-red: Endeavor **0/77** (captures 2894–2999) and Dragon Breath **0/237**
-(captures 3121–3846).
+**Routing DECIDED (supervisor, 2026-08-02):** profile-less legacy-shaped
+inputs correctly select the generated default route; the historical
+canonical turn-2 route was deleted at the rank-6 flip and is not coming
+back. Red frames on these reproducers are therefore either generated-route
+parity gaps or inherent route divergence — never mis-routing.
 
-**Why this is not #60:** Dragon Breath was already **0/237** before the stat
-adapter changed (the old #60 evidence pinned that on `f0621d47`), and its
-recovered capture window never exercised the former battler-1-rise throw.
-The adapter change is confined to typed stat-banner direction, palette, and
-affected-battler geometry; it does not alter routing, turn timing, damage,
-RNG, order, or DRAGON_BREATH presentation. Endeavor's now-visible red frames
-likewise begin only after removing the crash barrier. These retired,
-profile-less inputs are reproducers, not canonical fixtures; their explicit
-OFF successors from rank 6 remain the accepted exact windows.
+**Census complete (2026-08-02, `05ac3009`):**
+`docs/issue62-generated-route-residual-census.md` accounts for all 77+237
+red frames, no remainder, five families. Settled/zero-leverage: idle-menu-
+bounce (60 frames, exact match to #56 item 2's settled class), AI
+move-choice divergence (8, the app's Factory AI legally picks a different
+move than the deleted recording), turn-resolution frame-budget divergence
+(59, trace-specific legacy schedule). Reproducer fixtures:
+`tools/compare/fixtures/issue62-turn2-{endeavor,dragonbreath}.json`.
 
-**Next if prioritized:** first decide whether old profile-less inputs are
-supposed to select the generated default route or the historical canonical
-route. Only then characterize the remaining idle-bounce/field-art/timing
-families with a short explicit-OFF probe. Do not revive either deleted trace,
-extend the canonical Battle-2 march, or fit the residual with trace/tick
-special cases.
+**Open remainder (the only actionable piece):** the persistent
+HP-bar-fraction gap (E-2/D-2, 187 frames) — app and oracle disagree on a
+battler's HP-bar fill throughout the window. Discriminating probe needed
+BEFORE any code change: does the kernel's own tracked HP match the oracle's
+real replay (→ stale `resolutionField()`/`healthboxParams()` wiring, a
+real scenario-independent presentation bug worth a small slice), or does
+the underlying battle itself diverge (→ visible edge of route divergence,
+close as inherent)? Do not revive deleted traces, extend the canonical
+march, or fit trace/tick special cases.
 
 # Settled records (not open work — see the note at the top of this file)
 

@@ -50,6 +50,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `featherDanceOnixOpponentHealthbox` (13 call sites) — mechanical but
   ~15 min of extra scripted-edit + verification time versus a "small
   parameterization" characterization.
+- **[supervisor addendum, ~22:05]** verified slices 1+2 (3-trace spot
+  differential re-run 625/625, new factory test 6/6, smoke green).
+  Side lane merged (`26df7c7c`): #62 census `05ac3009` — all 314 red
+  frames accounted, 5 families, only the 187-frame HP-bar-fraction gap
+  is candidate presentation work pending a discriminating state probe;
+  ISSUES #62 trimmed to that remainder + routing decision recorded
+  (profile-less legacy inputs correctly take the generated route; the
+  deleted historical route stays deleted). Side worktree/branch cleaned.
 
 ---
 ## 873 — [supervisor orient, 2026-08-02 ~21:30] animation-main folded (fast concave + convex send-out families); union verified green
