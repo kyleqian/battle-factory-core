@@ -64,7 +64,7 @@ describe("turn2EndeavorPresentationStaging: staged real MOVE_ENDEAVOR chain (doc
     expect(content.hp).toMatchObject({ battler: 0, from: 117, to: 101 });
   });
 
-  it("resolveTurn2EndeavorHpEndpoints exposes the real {from:117, to:101} pair for battleScene.ts's own endeavorOnixHp call site at drawTurn2KickoffText", () => {
+  it("resolveTurn2EndeavorHpEndpoints exposes the real {from:117, to:101} pair for battleScene.ts's own endeavorHp call site at drawTurn2KickoffText", () => {
     expect(resolveTurn2EndeavorHpEndpoints()).toEqual({ from: 117, to: 101 });
   });
 

@@ -31,9 +31,23 @@ import { resolveTurn6RockSlideAttackLines } from "./turn67RockSlidePresentationS
 const ONIX_MAX_HP = 117;
 const PIDGEOTTO_MAX_HP = 156;
 const TURN11_COMMAND_MENU_REDRAW_TICK = 12_169 + 730;
+const TURN10_ONIX_BEFORE_AERIAL_ACE_HP = 24;
 const TURN10_ONIX_AFTER_AERIAL_ACE_HP = 14;
 const TURN10_PIDGEOTTO_AFTER_ROCK_SLIDE_HP = 38;
 const TURN11_PIDGEOTTO_AFTER_ROCK_SLIDE_HP = 16;
+
+/**
+ * Turn 10's own (first) AERIAL_ACE HP-drain endpoints (24 -> 14), the
+ * owning adapter for `battleScene.ts`'s `turn10AerialAceHp` closed-form
+ * call site at the turn-10 window (species-dossier slice 3,
+ * `docs/species-render-entry-point-retirement-design.md` §4 row 3), the
+ * way `TURN13_DRAGONBREATH_HP.{from,to}` already lives on
+ * `turn13ResolutionAdapter.ts`.
+ */
+export const TURN10_AERIALACE_HP: Readonly<{ from: number; to: number }> = Object.freeze({
+  from: TURN10_ONIX_BEFORE_AERIAL_ACE_HP,
+  to: TURN10_ONIX_AFTER_AERIAL_ACE_HP,
+});
 
 export type Turn10CompletedResolutionNextCommandHandoff = Readonly<{
   /** Exact post-turn-10 player PP for `[ROCK_SLIDE, BIND, DRAGON_BREATH, SANDSTORM]`. */

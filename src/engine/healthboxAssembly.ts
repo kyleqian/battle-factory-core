@@ -622,7 +622,7 @@ export const HEALTHBOX_FRAME_ORIGIN = FRAME_ORIGIN;
 // scope this session), this is a small sparse OVERLAY patch covering just
 // the two regions that actually change value: the bar's 6 fill tiles and the
 // HP digit run. Both patches share the exact same per-tick HP value
-// (`endeavorOnixHp`, `battleMenu.ts`) - grid-search-confirmed (this session,
+// (`endeavorHp`, `battleMenu.ts`) - grid-search-confirmed (this session,
 // against `battle1-turn2.json`'s own ENDEAVOR window) 0 mismatches at every
 // one of 6 independently-tested ticks (2999/3099/3103/3107/3111/3128) for
 // both the bar (288 checked px/tick) and the text (157-176 checked ink

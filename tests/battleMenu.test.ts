@@ -57,7 +57,7 @@ import {
   turn2KickoffTextStartTick,
   turnKickoffTextStartTick,
   TURN2_KICKOFF_TEXT_TOTAL,
-  endeavorOnixHp,
+  endeavorHp,
   ENDEAVOR_HP_DRAIN_START_DELAY,
   openFightSubmenu,
   confirmFightMove,
@@ -988,7 +988,7 @@ describe("S7 slice I resolution: rockSlideOpponentHp with turn 4's real numbers 
 
 // S7 slice J (docs/battle-turn-notes.md §13/§23): turn 5's own ENDEAVOR
 // drain, Onix 88 -> 1 (HP-diff 87, the longest drain yet - the same
-// `endeavorOnixHp` formula already proven value-agnostic above, pinned here
+// `endeavorHp` formula already proven value-agnostic above, pinned here
 // with turn 5's REAL numbers (`TURN5_CONFIRM_PRESS_TICK`=5959, a real press)
 // since this is the first turn whose drain crosses the PLAYER healthbox's
 // own green->yellow->red HP-band thresholds AND lands on the 1-HP "never
@@ -997,18 +997,18 @@ describe("S7 slice I resolution: rockSlideOpponentHp with turn 4's real numbers 
 // oracle-confirmed via `tools/compare/traces/turn5-endeavor.json` (254/254,
 // 0 diff) that the drain needs zero new band-color code: the existing
 // compositor already renders every step of 88 -> 1 correctly.
-describe("S7 slice J: endeavorOnixHp with turn 5's real numbers (88 -> 1, the first player-side green->yellow->red crossing)", () => {
+describe("S7 slice J: endeavorHp with turn 5's real numbers (88 -> 1, the first player-side green->yellow->red crossing)", () => {
   const pressTick = 5959;
   const startHp = 88;
   const endHp = 1;
 
   it("full HP before the sentinel tick, then exactly 1 HP/tick down to endHp, settled forever after", () => {
     const sentinel = pressTick + ENDEAVOR_HP_DRAIN_START_DELAY;
-    expect(endeavorOnixHp(sentinel, pressTick, startHp, endHp)).toBe(88);
-    expect(endeavorOnixHp(sentinel + 1, pressTick, startHp, endHp)).toBe(87); // first drained tick
-    expect(endeavorOnixHp(sentinel + 87, pressTick, startHp, endHp)).toBe(1); // d=87, exactly startHp-endHp
-    expect(endeavorOnixHp(sentinel + 88, pressTick, startHp, endHp)).toBe(1); // settled
-    expect(endeavorOnixHp(sentinel + 200, pressTick, startHp, endHp)).toBe(1); // stays settled indefinitely
+    expect(endeavorHp(sentinel, pressTick, startHp, endHp)).toBe(88);
+    expect(endeavorHp(sentinel + 1, pressTick, startHp, endHp)).toBe(87); // first drained tick
+    expect(endeavorHp(sentinel + 87, pressTick, startHp, endHp)).toBe(1); // d=87, exactly startHp-endHp
+    expect(endeavorHp(sentinel + 88, pressTick, startHp, endHp)).toBe(1); // settled
+    expect(endeavorHp(sentinel + 200, pressTick, startHp, endHp)).toBe(1); // stays settled indefinitely
   });
 });
 
@@ -1052,26 +1052,26 @@ describe("S7 slice E1b: ENDEAVOR's own HP-bar drain (docs/battle-menu-notes.md �
   const startHp = 117;
   const endHp = 101;
 
-  it("endeavorOnixHp: full HP through the sentinel tick, then exactly 1 HP/tick down to endHp, settled forever after", () => {
+  it("endeavorHp: full HP through the sentinel tick, then exactly 1 HP/tick down to endHp, settled forever after", () => {
     expect(pressTick + ENDEAVOR_HP_DRAIN_START_DELAY).toBe(3098); // the RAM sentinel tick itself
-    expect(endeavorOnixHp(3097, pressTick, startHp, endHp)).toBe(117);
-    expect(endeavorOnixHp(3098, pressTick, startHp, endHp)).toBe(117); // sentinel tick itself, no visible drop yet
-    expect(endeavorOnixHp(3099, pressTick, startHp, endHp)).toBe(116); // first drained tick
-    expect(endeavorOnixHp(3103, pressTick, startHp, endHp)).toBe(112);
-    expect(endeavorOnixHp(3111, pressTick, startHp, endHp)).toBe(104);
-    expect(endeavorOnixHp(3114, pressTick, startHp, endHp)).toBe(101); // d=16, last decrement, already at endHp
-    expect(endeavorOnixHp(3115, pressTick, startHp, endHp)).toBe(101); // done sentinel tick, settled
-    expect(endeavorOnixHp(3128, pressTick, startHp, endHp)).toBe(101); // stays settled indefinitely
+    expect(endeavorHp(3097, pressTick, startHp, endHp)).toBe(117);
+    expect(endeavorHp(3098, pressTick, startHp, endHp)).toBe(117); // sentinel tick itself, no visible drop yet
+    expect(endeavorHp(3099, pressTick, startHp, endHp)).toBe(116); // first drained tick
+    expect(endeavorHp(3103, pressTick, startHp, endHp)).toBe(112);
+    expect(endeavorHp(3111, pressTick, startHp, endHp)).toBe(104);
+    expect(endeavorHp(3114, pressTick, startHp, endHp)).toBe(101); // d=16, last decrement, already at endHp
+    expect(endeavorHp(3115, pressTick, startHp, endHp)).toBe(101); // done sentinel tick, settled
+    expect(endeavorHp(3128, pressTick, startHp, endHp)).toBe(101); // stays settled indefinitely
   });
 
-  it("endeavorOnixHp is value-agnostic (works for any startHp/endHp pair, not just this trace's 117/101)", () => {
-    expect(endeavorOnixHp(3098, pressTick, 200, 150)).toBe(200);
-    expect(endeavorOnixHp(3099, pressTick, 200, 150)).toBe(199);
-    expect(endeavorOnixHp(3148, pressTick, 200, 150)).toBe(150); // d=50, exactly startHp-endHp
-    expect(endeavorOnixHp(3200, pressTick, 200, 150)).toBe(150);
+  it("endeavorHp is value-agnostic (works for any startHp/endHp pair, not just this trace's 117/101)", () => {
+    expect(endeavorHp(3098, pressTick, 200, 150)).toBe(200);
+    expect(endeavorHp(3099, pressTick, 200, 150)).toBe(199);
+    expect(endeavorHp(3148, pressTick, 200, 150)).toBe(150); // d=50, exactly startHp-endHp
+    expect(endeavorHp(3200, pressTick, 200, 150)).toBe(150);
   });
 
-  it("endeavorOnixHp's own anchor delay differs from ROCK_SLIDE's opponent-bar delay (a different move/animation window, not a shared constant)", () => {
+  it("endeavorHp's own anchor delay differs from ROCK_SLIDE's opponent-bar delay (a different move/animation window, not a shared constant)", () => {
     expect(ENDEAVOR_HP_DRAIN_START_DELAY).not.toBe(ROCK_SLIDE_HP_DRAIN_START_DELAY);
   });
 });

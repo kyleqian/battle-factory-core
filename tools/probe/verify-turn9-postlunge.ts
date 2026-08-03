@@ -205,7 +205,7 @@ async function main() {
 
   // --- §1 (2026-07-21 addendum): HP-drain per-tick displayed HP + bar band,
   // RAM tick == render tick directly (same "no extra lag" family as
-  // endeavorOnixHp), using composePlayerHealthboxHpOverlay (already-proven,
+  // endeavorHp), using composePlayerHealthboxHpOverlay (already-proven,
   // unmodified code) as the candidate generator. ---
   const HB = menuHealthboxPlayerAsset as { x: number; y: number; width: number; height: number };
   const ONIX_MAX_HP = 117;
