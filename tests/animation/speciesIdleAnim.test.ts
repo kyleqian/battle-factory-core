@@ -5654,7 +5654,7 @@ describe("speciesIdleAnim", () => {
       expect(selectorTables.frontAnimIds.species.BLASTOISE).toBe("ANIM_V_SHAKE_TWICE");
       expect(speciesFrontIdleRestOffset("BLASTOISE")).toEqual({ x2: 0, y2: 0 });
       expect(selectorTables.frontAnimIds.species.RELICANTH).toBe("ANIM_TIP_MOVE_FORWARD");
-      expect(speciesFrontIdleRestOffset("RELICANTH")).toBeNull();
+      expect(speciesFrontIdleRestOffset("RELICANTH")).toEqual({ x2: 0, y2: 0 });
     });
   });
 

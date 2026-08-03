@@ -78,6 +78,7 @@ export type SpeciesFrontAnimFamily =
   | "ROTATE_UP_TO_SIDES"
   | "SHRINK_GROW"
   | "SPIN"
+  | "TIP_MOVE_FORWARD"
   | "TUMBLING_FRONT_FLIP_TWICE"
   | "SWING_CONVEX"
   | "SWING_CONVEX_FAST"
@@ -139,6 +140,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "ROTATE_UP_TO_SIDES",
   "SHRINK_GROW",
   "SPIN",
+  "TIP_MOVE_FORWARD",
   "TUMBLING_FRONT_FLIP_TWICE",
   "SWING_CONVEX",
   "SWING_CONVEX_FAST",
@@ -1156,6 +1158,23 @@ export const SWING_CONVEX_FAST_FACTORY_FRONT_SPECIES: readonly string[] = Object
 /** There are no fast convex mappings outside the Factory rental pool. */
 export const SWING_CONVEX_FAST_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   SWING_CONVEX_FAST_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** The sole source selector mapping for normal-front `ANIM_TIP_MOVE_FORWARD`. */
+export const TIP_MOVE_FORWARD_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_TIP_MOVE_FORWARD")
+    .map(([species]) => species),
+);
+
+/** RELICANTH is the complete Factory-reachable tip/move-forward family. */
+export const TIP_MOVE_FORWARD_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  TIP_MOVE_FORWARD_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no `ANIM_TIP_MOVE_FORWARD` mappings outside the Factory pool. */
+export const TIP_MOVE_FORWARD_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  TIP_MOVE_FORWARD_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 export interface SpeciesIdleOffset {
@@ -2541,6 +2560,180 @@ export function swingConvexFastFrameAtTick(
     SWING_CONVEX_FAST_DURATION,
     2,
   );
+}
+
+/**
+ * Source selector 26 enters directly through `Task_HandleMonAnimation`; it
+ * does not allocate an `sAnims` record through `AddNewAnim`. The task saves
+ * battler/species, sets `sDontFlip`, zeros data[0] and data[2..7], and only
+ * then installs this callback. data[1] deliberately survives the zeroing.
+ */
+export const TIP_MOVE_FORWARD_ENTRY = Object.freeze({
+  selector: "ANIM_TIP_MOVE_FORWARD",
+  sourceId: 26,
+  usesAddNewAnim: false,
+  taskZeroedDataIndices: TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES,
+  taskPreservedDataIndices: [1],
+  normalFrontDontFlip: true,
+  callbackInstalled: "Anim_TipMoveForward",
+  callbackInvokedByInitializer: false,
+  taskRestoresBattlerAndSpeciesAtSpriteCallbackDummy: true,
+  accepted: true,
+} as const);
+
+export interface TipMoveForwardAffineWrite {
+  readonly xScale: 256;
+  readonly yScale: 256;
+  /** Signed source rotation handed to `HandleSetAffineData`. */
+  readonly rotationSigned: number;
+  /** The same rotation after C's u16 function-argument conversion. */
+  readonly rotationU16: number;
+}
+
+export interface TipMoveForwardFrame extends SpeciesIdleOffset {
+  /** `sprite->data[2]` before this callback's source-order work. */
+  readonly data2Before: number;
+  /** The signed-s16 register after the unconditional source increment. */
+  readonly data2: number;
+  /** C's u8 `counter = sprite->data[2]` local. */
+  readonly counter: number;
+  /**
+   * `((counter - 10) * 128) / 20`, evaluated before the source's branch
+   * selection and truncated toward zero as C integer division requires.
+   */
+  readonly index: number | null;
+  readonly phase: "tip" | "moveForward" | "tipBack" | "terminal";
+  /** Current affine rotation after any write made by this callback. */
+  readonly affineRotationSigned: number;
+  readonly affineRotationU16: number;
+  readonly affineWrites: readonly TipMoveForwardAffineWrite[];
+  readonly affineWriteCount: 0 | 1;
+  readonly xScale: 256;
+  readonly yScale: 256;
+  readonly wroteX2: boolean;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  readonly tryFlipXBeforeMotion: true;
+  readonly tryFlipXAfterMotion: true;
+  readonly tryFlipXCalls: 2;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "Anim_TipMoveForward" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+/**
+ * Source-order normal-front port of selector 26's `Anim_TipMoveForward`
+ * (`pokemon_animation.c:911-939,1680-1711,5540-5544`). Unlike its adjacent
+ * `AddNewAnim` selectors, this callback is installed directly by the
+ * task-zeroed animation launcher. Its u8 `counter` snapshots signed data2
+ * before the branch: callbacks 0..9 tip forward through paired half-counter
+ * rotation, 10..29 write only the signed sine x2 lunge (leaving the last
+ * affine rotation intact), and 30..35 tip back. The strict callback at 36
+ * writes affine identity, resets normal OAM geometry, clears x2, and installs
+ * `WaitAnimEnd`; later calls are the stable wait receipt until the real OAM
+ * frame animation makes `WaitAnimEnd` hand its callback to SpriteCallbackDummy.
+ */
+export function tipMoveForwardFrameAtTick(
+  ticksSinceStart: number,
+): TipMoveForwardFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let x2 = 0;
+  let affineRotationSigned = 0;
+  let callback: TipMoveForwardFrame["callback"] = "Anim_TipMoveForward";
+  let affineMode: TipMoveForwardFrame["affineMode"] = "double";
+  let lastFrame: TipMoveForwardFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (callback === "WaitAnimEnd") continue;
+
+    const data2Before = data2;
+    // `counter` is a u8 local in the source even though data[] is signed s16.
+    const counter = data2 & 0xff;
+    const startedAffine = data2 === 0;
+    let index: number | null = null;
+    let phase: TipMoveForwardFrame["phase"];
+    let affineWrites: readonly TipMoveForwardAffineWrite[] = [];
+    let wroteX2 = false;
+    let resetSpriteAfterAnim = false;
+
+    // First source-order `TryFlipX`; sDontFlip was set by the front task.
+    x2 = tryFlipX(x2, true);
+    if (data2 > 35) {
+      phase = "terminal";
+      affineRotationSigned = 0;
+      affineWrites = [{
+        xScale: 256,
+        yScale: 256,
+        rotationSigned: affineRotationSigned,
+        rotationU16: toU16(affineRotationSigned),
+      }];
+      resetSpriteAfterAnim = true;
+      affineMode = "normal";
+      callback = "WaitAnimEnd";
+      x2 = 0;
+      wroteX2 = true;
+    } else {
+      // C's signed integer division truncates toward zero, including the
+      // deliberately negative counter-0..9 local result.
+      index = toS16(Math.trunc(((counter - 10) * 128) / 20));
+      if (counter < 10) {
+        phase = "tip";
+        affineRotationSigned = toS16(Math.trunc(counter / 2) * 512);
+        affineWrites = [{
+          xScale: 256,
+          yScale: 256,
+          rotationSigned: affineRotationSigned,
+          rotationU16: toU16(affineRotationSigned),
+        }];
+      } else if (counter <= 29) {
+        phase = "moveForward";
+        x2 = toS16(-gbaSin(index, 5));
+        wroteX2 = true;
+      } else {
+        phase = "tipBack";
+        affineRotationSigned = toS16(Math.trunc((35 - counter) / 2) * 1024);
+        affineWrites = [{
+          xScale: 256,
+          yScale: 256,
+          rotationSigned: affineRotationSigned,
+          rotationU16: toU16(affineRotationSigned),
+        }];
+      }
+    }
+
+    data2 = toS16(data2 + 1);
+    // Second source-order `TryFlipX`; again a no-op on normal fronts.
+    x2 = tryFlipX(x2, true);
+    lastFrame = {
+      x2,
+      y2: 0,
+      data2Before,
+      data2,
+      counter,
+      index,
+      phase,
+      affineRotationSigned,
+      affineRotationU16: toU16(affineRotationSigned),
+      affineWrites,
+      affineWriteCount: affineWrites.length as 0 | 1,
+      xScale: 256,
+      yScale: 256,
+      wroteX2,
+      startedAffine,
+      normalFrontDontFlip: true,
+      tryFlipXBeforeMotion: true,
+      tryFlipXAfterMotion: true,
+      tryFlipXCalls: 2,
+      resetSpriteAfterAnim,
+      callback,
+      affineMode,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable Anim_TipMoveForward reducer state");
+  return lastFrame;
 }
 
 /**
@@ -6598,6 +6791,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = tumblingFrontFlipTwiceFrameAtTick(137);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_TumblingFrontFlip_Twice did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "TIP_MOVE_FORWARD": {
+      const terminal = tipMoveForwardFrameAtTick(36);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_TipMoveForward did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
