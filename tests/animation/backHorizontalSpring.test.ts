@@ -185,7 +185,7 @@ describe("BACK_ANIM_H_SPRING back send-out reducer", () => {
       .toEqual([0, 0, species === "SURSKIT" ? 311 : 328, 0, 0, 0, 0, 0]);
   });
 
-  it("keeps the adjacent repeated spring unsupported and rejects other back sets", () => {
+  it("keeps the H-spring reducer isolated from the adjacent repeated set", () => {
     expect(backHorizontalSpringFrameAtTick("BEEDRILL", 0, 0)).toBeNull();
     expect(backHorizontalSpringFrameAtTick("SURSKIT", 0, -1)).toBeNull();
     expect(backHorizontalSpringFrameAtTick("SURSKIT", 0, 0.5)).toBeNull();

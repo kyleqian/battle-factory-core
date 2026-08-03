@@ -89,6 +89,23 @@ export const BACK_H_SPRING_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.f
   BACK_H_SPRING_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by the generated `BACK_ANIM_H_SPRING_REPEATED` row. */
+export const BACK_H_SPRING_REPEATED_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_H_SPRING_REPEATED")
+    .map(([species]) => species),
+);
+
+/** Both repeated-spring mappings are reachable in the Factory rental pool. */
+export const BACK_H_SPRING_REPEATED_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_H_SPRING_REPEATED_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** There are no outside-Factory mappings for this one bounded back set. */
+export const BACK_H_SPRING_REPEATED_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_H_SPRING_REPEATED_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -188,6 +205,45 @@ export const BACK_H_SPRING_VARIANTS = Object.freeze({
   }),
 } as const);
 
+/**
+ * `BACK_ANIM_H_SPRING_REPEATED` uses the same entry-point/task lifecycle as
+ * H-spring, but its shared helper advances a 64-step affine phase twice per
+ * sine-table turn. The nature-selected amplitudes and limits remain source
+ * data, not a species-specific production branch.
+ */
+export const BACK_H_SPRING_REPEATED_VARIANTS = Object.freeze({
+  fast: Object.freeze({
+    selector: "ANIM_H_REPEATED_SPRING_FAST",
+    callback: "Anim_HorizontalRepeatedSpring_Fast",
+    sourceId: 111,
+    natureMod: 0,
+    speed: 8,
+    limit: 512,
+    amplitude: 16,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_H_REPEATED_SPRING",
+    callback: "Anim_HorizontalRepeatedSpring",
+    sourceId: 112,
+    natureMod: 1,
+    speed: 8,
+    limit: 512,
+    amplitude: 8,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_H_REPEATED_SPRING_SLOW",
+    callback: "Anim_HorizontalRepeatedSpring_Slow",
+    sourceId: 63,
+    natureMod: 2,
+    speed: 4,
+    limit: 256,
+    amplitude: 16,
+    accepted: true,
+  }),
+} as const);
+
 type BackHSlideSelector = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["selector"];
 type BackHSlideCallback = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["callback"];
 type BackHSlideDuration = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["duration"];
@@ -196,6 +252,12 @@ type BackHSpringCallback = typeof BACK_H_SPRING_VARIANTS[keyof typeof BACK_H_SPR
 type BackHSpringSpeed = typeof BACK_H_SPRING_VARIANTS[keyof typeof BACK_H_SPRING_VARIANTS]["speed"];
 type BackHSpringLimit = typeof BACK_H_SPRING_VARIANTS[keyof typeof BACK_H_SPRING_VARIANTS]["limit"];
 type BackHSpringAmplitude = typeof BACK_H_SPRING_VARIANTS[keyof typeof BACK_H_SPRING_VARIANTS]["amplitude"];
+type BackHRepeatedSpringSelector = typeof BACK_H_SPRING_REPEATED_VARIANTS[keyof typeof BACK_H_SPRING_REPEATED_VARIANTS]["selector"];
+type BackHRepeatedSpringCallback = typeof BACK_H_SPRING_REPEATED_VARIANTS[keyof typeof BACK_H_SPRING_REPEATED_VARIANTS]["callback"];
+type BackHRepeatedSpringSourceId = typeof BACK_H_SPRING_REPEATED_VARIANTS[keyof typeof BACK_H_SPRING_REPEATED_VARIANTS]["sourceId"];
+type BackHRepeatedSpringSpeed = typeof BACK_H_SPRING_REPEATED_VARIANTS[keyof typeof BACK_H_SPRING_REPEATED_VARIANTS]["speed"];
+type BackHRepeatedSpringLimit = typeof BACK_H_SPRING_REPEATED_VARIANTS[keyof typeof BACK_H_SPRING_REPEATED_VARIANTS]["limit"];
+type BackHRepeatedSpringAmplitude = typeof BACK_H_SPRING_REPEATED_VARIANTS[keyof typeof BACK_H_SPRING_REPEATED_VARIANTS]["amplitude"];
 
 /**
  * Source facts at the `LaunchAnimationTaskForBackSprite` seam. The shared
@@ -317,6 +379,20 @@ function hSpringVariant(selector: string): {
   readonly amplitude: BackHSpringAmplitude;
 } | null {
   for (const variant of Object.values(BACK_H_SPRING_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function hRepeatedSpringVariant(selector: string): {
+  readonly selector: BackHRepeatedSpringSelector;
+  readonly callback: BackHRepeatedSpringCallback;
+  readonly sourceId: BackHRepeatedSpringSourceId;
+  readonly speed: BackHRepeatedSpringSpeed;
+  readonly limit: BackHRepeatedSpringLimit;
+  readonly amplitude: BackHRepeatedSpringAmplitude;
+} | null {
+  for (const variant of Object.values(BACK_H_SPRING_REPEATED_VARIANTS)) {
     if (variant.selector === selector) return variant;
   }
   return null;
@@ -634,6 +710,120 @@ export function backHorizontalSpringFrameAtTick(
 
 /** Source WaitAnimEnd lifecycle after static back OAM reports animEnded. */
 export function backHorizontalSpringWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+export interface BackHorizontalRepeatedSpringAffineWrite {
+  readonly xScale: number;
+  readonly yScale: 256;
+  readonly rotationSigned: 0;
+  readonly rotationU16: 0;
+}
+
+export interface BackHorizontalRepeatedSpringFrame {
+  readonly x2: number;
+  readonly y2: 0;
+  readonly data0: 0;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  /** The initializer guard is set once and then remains set. */
+  readonly data2: 1;
+  readonly data4: BackHRepeatedSpringAmplitude;
+  readonly data5: BackHRepeatedSpringLimit;
+  readonly data6: BackHRepeatedSpringSpeed;
+  readonly data7Before: number;
+  readonly data7: number;
+  readonly selector: BackHRepeatedSpringSelector;
+  readonly sourceId: BackHRepeatedSpringSourceId;
+  readonly speed: BackHRepeatedSpringSpeed;
+  readonly limit: BackHRepeatedSpringLimit;
+  readonly amplitude: BackHRepeatedSpringAmplitude;
+  readonly xScale: number;
+  readonly yScale: 256;
+  readonly initializerCalled: boolean;
+  readonly handleStartAffineAnimCalls: 0 | 1;
+  readonly callbackInvokedByInitializer: true;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly normalBackDontFlip: true;
+  readonly tryFlipXCalls: 0;
+  readonly affineWriteCount: 1;
+  readonly affineWrites: readonly [BackHorizontalRepeatedSpringAffineWrite];
+  readonly affineMode: "double" | "normal";
+  readonly callback: BackHRepeatedSpringCallback | "WaitAnimEnd";
+}
+
+/**
+ * Source-order reducer for the complete `BACK_ANIM_H_SPRING_REPEATED` triple.
+ * It preserves the live species+nature selector seam while sharing the task,
+ * signed-s16, affine, WaitAnimEnd, and terminal restoration lifecycle of the
+ * adjacent H-spring family. The only family-specific operation is the source
+ * helper's repeated affine phase: `(data[7] % 64) * 2` at amplitude 128.
+ */
+export function backHorizontalRepeatedSpringFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackHorizontalRepeatedSpringFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_H_SPRING_REPEATED") return null;
+  const variant = hRepeatedSpringVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected repeated H-spring selector ${selection.selector}`);
+
+  const requestedData7Before = variant.speed * ticksSinceStart;
+  // Once the helper has crossed the guard it is waiting on the task-owned
+  // callback handoff; keep the terminal snapshot stable for later queries.
+  const data7Before = requestedData7Before > variant.limit
+    ? variant.limit + variant.speed
+    : requestedData7Before;
+  const terminal = data7Before > variant.limit;
+  const data7 = terminal ? data7Before : data7Before + variant.speed;
+  const x2 = terminal ? 0 : gbaSin(data7Before % 256, variant.amplitude);
+  const xScale = terminal ? 256 : toS16(256 + gbaSin((data7 % 64) * 2, 128));
+  const write = Object.freeze({
+    xScale,
+    yScale: 256 as const,
+    rotationSigned: 0 as const,
+    rotationU16: 0 as const,
+  });
+  return Object.freeze({
+    x2,
+    y2: 0 as const,
+    data0: 0 as const,
+    data1: toS16(preservedData1),
+    data2: 1 as const,
+    data4: variant.amplitude,
+    data5: variant.limit,
+    data6: variant.speed,
+    data7Before: toS16(data7Before),
+    data7: toS16(data7),
+    selector: variant.selector,
+    sourceId: variant.sourceId,
+    speed: variant.speed,
+    limit: variant.limit,
+    amplitude: variant.amplitude,
+    xScale,
+    yScale: 256 as const,
+    initializerCalled: ticksSinceStart === 0,
+    handleStartAffineAnimCalls: ticksSinceStart === 0 ? 1 as const : 0 as const,
+    callbackInvokedByInitializer: true as const,
+    resetSpriteAfterAnim: terminal,
+    normalBackDontFlip: true as const,
+    tryFlipXCalls: 0 as const,
+    affineWriteCount: 1 as const,
+    affineWrites: [write] as const,
+    affineMode: terminal ? "normal" as const : "double" as const,
+    callback: terminal ? "WaitAnimEnd" as const : variant.callback,
+  });
+}
+
+/** Source WaitAnimEnd lifecycle after static back OAM reports animEnded. */
+export function backHorizontalRepeatedSpringWaitAnimEndCallback(
   animEnded: boolean,
 ): "WaitAnimEnd" | "SpriteCallbackDummy" {
   return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
