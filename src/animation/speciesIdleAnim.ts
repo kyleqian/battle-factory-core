@@ -70,6 +70,7 @@ export type SpeciesFrontAnimFamily =
   | "H_VIBRATE"
   | "H_JUMPS_V_STRETCH"
   | "H_JUMPS_V_STRETCH_TWICE"
+  | "H_PIVOT"
   | "H_SHAKE"
   | "H_SHAKE_SLOW"
   | "RAPID_H_HOPS"
@@ -132,6 +133,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "H_VIBRATE",
   "H_JUMPS_V_STRETCH",
   "H_JUMPS_V_STRETCH_TWICE",
+  "H_PIVOT",
   "H_SHAKE",
   "H_SHAKE_SLOW",
   "RAPID_H_HOPS",
@@ -1175,6 +1177,23 @@ export const TIP_MOVE_FORWARD_FACTORY_FRONT_SPECIES: readonly string[] = Object.
 /** There are no `ANIM_TIP_MOVE_FORWARD` mappings outside the Factory pool. */
 export const TIP_MOVE_FORWARD_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   TIP_MOVE_FORWARD_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** Both source selector mappings for normal-front `ANIM_H_PIVOT`. */
+export const H_PIVOT_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_H_PIVOT")
+    .map(([species]) => species),
+);
+
+/** WINGULL is the sole `ANIM_H_PIVOT` mapping reachable through Factory rentals. */
+export const H_PIVOT_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_PIVOT_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** DEOXYS is the selector table's one `ANIM_H_PIVOT` mapping outside the Factory pool. */
+export const H_PIVOT_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  H_PIVOT_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 export interface SpeciesIdleOffset {
@@ -2733,6 +2752,139 @@ export function tipMoveForwardFrameAtTick(
   }
 
   if (lastFrame === null) throw new Error("unreachable Anim_TipMoveForward reducer state");
+  return lastFrame;
+}
+
+/**
+ * Source selector 27 enters directly through `Task_HandleMonAnimation`; it
+ * never allocates an `sAnims` record and it contains no `TryFlipX` calls.
+ * The front task saves battler/species, sets `sDontFlip`, zeros data[0] and
+ * data[2..7], then installs this callback while preserving data[1].
+ */
+export const HORIZONTAL_PIVOT_ENTRY = Object.freeze({
+  selector: "ANIM_H_PIVOT",
+  sourceId: 27,
+  usesAddNewAnim: false,
+  taskZeroedDataIndices: TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES,
+  taskPreservedDataIndices: [1],
+  normalFrontDontFlip: true,
+  callbackInstalled: "Anim_HorizontalPivot",
+  callbackInvokedByInitializer: false,
+  tryFlipXCalls: 0,
+  taskRestoresBattlerAndSpeciesAtSpriteCallbackDummy: true,
+  accepted: true,
+} as const);
+
+export interface HorizontalPivotAffineWrite {
+  readonly xScale: 256;
+  readonly yScale: 256;
+  /** Signed `Sin` result before `HandleSetAffineData` receives its u16 argument. */
+  readonly rotationSigned: number;
+  readonly rotationU16: number;
+}
+
+export interface HorizontalPivotFrame extends SpeciesIdleOffset {
+  /** `sprite->data[2]` before the callback's strict terminal guard. */
+  readonly data2Before: number;
+  /** Signed-s16 source register after the unconditional callback increment. */
+  readonly data2: number;
+  /** Source `s16 index = (data[2] * 256) / 100`, absent at terminal cleanup. */
+  readonly index: number | null;
+  /** The source `Sin(index, 10)` value written directly to `sprite->y2`. */
+  readonly ySine: number;
+  readonly affineRotationSigned: number;
+  readonly affineRotationU16: number;
+  readonly affineWrites: readonly HorizontalPivotAffineWrite[];
+  readonly affineWriteCount: 1;
+  readonly xScale: 256;
+  readonly yScale: 256;
+  readonly wroteY2: true;
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  /** This callback has no source `TryFlipX` invocation. */
+  readonly tryFlipXCalls: 0;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly callback: "Anim_HorizontalPivot" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+/**
+ * Source-order normal-front port of selector 27's `Anim_HorizontalPivot`
+ * (`pokemon_animation.c:911-939,1713-1733,5540-5544`). Tick zero starts
+ * double-affine mode, then active callbacks 0..100 calculate the signed-s16
+ * C-truncated `(data2 * 256) / 100` index, write vertical sine motion and
+ * the same signed sine to affine rotation. The strict callback at 101 writes
+ * affine identity, clears y2, restores normal OAM geometry, installs
+ * `WaitAnimEnd`, and still increments data2 to 102. Later observations are
+ * the same stable wait receipt until the real OAM frame animation lets
+ * `WaitAnimEnd` hand off to `SpriteCallbackDummy`.
+ */
+export function horizontalPivotFrameAtTick(
+  ticksSinceStart: number,
+): HorizontalPivotFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  let data2 = 0;
+  let y2 = 0;
+  let affineRotationSigned = 0;
+  let callback: HorizontalPivotFrame["callback"] = "Anim_HorizontalPivot";
+  let affineMode: HorizontalPivotFrame["affineMode"] = "double";
+  let lastFrame: HorizontalPivotFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (callback === "WaitAnimEnd") continue;
+
+    const data2Before = data2;
+    const startedAffine = data2 === 0;
+    let index: number | null = null;
+    let ySine = 0;
+    let resetSpriteAfterAnim = false;
+
+    if (data2 > 100) {
+      affineRotationSigned = 0;
+      y2 = 0;
+      resetSpriteAfterAnim = true;
+      affineMode = "normal";
+      callback = "WaitAnimEnd";
+    } else {
+      // The source local is s16; C integer division truncates toward zero.
+      index = toS16(Math.trunc((data2 * 256) / 100));
+      ySine = toS16(gbaSin(index, 10));
+      y2 = ySine;
+      affineRotationSigned = toS16(gbaSin(index, 3276));
+    }
+
+    data2 = toS16(data2 + 1);
+    const affineWrites: readonly HorizontalPivotAffineWrite[] = [{
+      xScale: 256,
+      yScale: 256,
+      rotationSigned: affineRotationSigned,
+      rotationU16: toU16(affineRotationSigned),
+    }];
+    lastFrame = {
+      x2: 0,
+      y2,
+      data2Before,
+      data2,
+      index,
+      ySine,
+      affineRotationSigned,
+      affineRotationU16: toU16(affineRotationSigned),
+      affineWrites,
+      affineWriteCount: 1,
+      xScale: 256,
+      yScale: 256,
+      wroteY2: true,
+      startedAffine,
+      normalFrontDontFlip: true,
+      tryFlipXCalls: 0,
+      resetSpriteAfterAnim,
+      callback,
+      affineMode,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable Anim_HorizontalPivot reducer state");
   return lastFrame;
 }
 
@@ -6912,6 +7064,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
         throw new Error(
           "Anim_HorizontalJumpsVerticalStretch_Twice did not reach terminal cleanup",
         );
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "H_PIVOT": {
+      const terminal = horizontalPivotFrameAtTick(101);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_HorizontalPivot did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
