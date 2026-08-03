@@ -112,6 +112,62 @@ animation lane's rung-3 dispatcher (`frontSendOutFrameAtTick` + OAM/anim-frame
 side, §5 of the consumer-map doc) stays open and is a prerequisite for Slice
 D only.
 
+## #72 — battleStringResolver completeness-guard gaps: 107 `printstring`-literal STRINGIDs unresolved (blind-spot class beyond #70's scope)
+
+**Symptom:** the same-day user-reported crash (2026-08-03, opponent MURKROW's
+TAUNT: `battleStringResolver: STRINGID_PKMNFELLFORTAUNT references placeholder
+{B_DEF_NAME_WITH_PREFIX} with no resolver supplied`) and a sibling gap found
+alongside it (`STRINGID_PKMNCANTUSEMOVETAUNT`) are both now fixed
+(`battleResolutionPresentation.ts`'s `messageLines`, `tests/
+presentationStringTaunt.test.ts`). Both evaded ISSUES #70's 47-id sweep for
+the same reason `STRINGID_PKMNHURTBY` did: #70 grepped `src/engine/*.ts` for
+`STRINGID_` TS literals, but these ids are emitted purely by the generic
+`printstring <STRINGID_X>` opcode handler reading the operand straight out of
+the parsed battle-script program (`src/data/gen/battle-script-program.json`)
+— no TS code ever spells the id out, so the grep-based sweep structurally
+cannot see it. This is a **distinct blind-spot class** from #70's (which
+covered `printfromtable`'s table-indexed ids, already closed and not
+reopened here).
+
+**Confirmed** (`tools/report/printstring-literal-census.ts`, regenerable,
+output `docs/printstring-literal-census.md`): of **207 unique STRINGID
+literal `printstring` operands** in the parsed program (249 raw occurrences
+across 230 script labels), 13 already have an explicit `messageLines` branch
+and 87 resolve via the generic fallback's fixed token set
+(`B_ATK_NAME_WITH_PREFIX`/`B_EFF_NAME_WITH_PREFIX`/
+`B_SCR_ACTIVE_NAME_WITH_PREFIX`/`B_LAST_ITEM`) — **107 are UNRESOLVED** and
+would hit the completeness guard the instant a non-barriered path reaches
+their `printstring`. This is a **syntactic upper bound, not a per-id
+reachability trace** like #70's: the script does not itself prove any given
+id's emitting script is live at Factory L50 singles (many obviously are not
+— `STRINGID_DEFEATEDOPPONENTBYREFEREE`/`TIEDOPPONENTBYREFEREE` are Battle
+Arena-only, `STRINGID_FORFEITEDMATCH`/`TRAINER1WINTEXT`/`PLAYERWHITEOUT2` are
+link-battle/local-battle-only, `STRINGID_DIDNOTLEARNMOVE`/`TRYTOLEARNMOVE*`
+are the move-relearner UI, none reachable from a Factory round). Per #70's
+own precedent, real triage requires the same per-id reachability work (trace
+each `BattleScript_*` label's own call sites for barriers/gating), which is
+out of this bounded step's scope.
+
+**Highest-suspicion next pick** (same shape as the just-fixed Taunt pair —
+an "already-has-status"/"can't-use-move-X" family with obvious ordinary-play
+triggers): `STRINGID_PKMNALREADYASLEEP`, `STRINGID_PKMNALREADYCONFUSED`,
+`STRINGID_PKMNALREADYHASBURN`, `STRINGID_PKMNALREADYPOISONED`,
+`STRINGID_PKMNISALREADYPARALYZED` (re-using an already-inflicted status),
+and `STRINGID_PKMNCANTUSEMOVETORMENT`/`STRINGID_PKMNCANTUSEMOVESEALED`
+(Torment/Imprison — literally the same attack-canceler family
+`STRINGID_PKMNCANTUSEMOVETAUNT` was just fixed in, `battleScriptActionAdmission.ts`).
+All seven read `{B_DEF_NAME_WITH_PREFIX}` or `{B_ACTIVE_NAME_WITH_PREFIX}` +
+`{B_CURRENT_MOVE}` only — the same resolver shape already proven for Taunt.
+
+**Leads:** rerun `node --experimental-strip-types tools/report/
+printstring-literal-census.ts` after any `messageLines`/battle-script-program
+change (it is deterministic and re-derives from the tree, not a stale
+snapshot). Full 107-id list + emitting script label(s) + offending
+placeholder(s) in `docs/printstring-literal-census.md`. Fix idiom: the same
+one this entry's Taunt pair used — explicit `messageId === "STRINGID_X"`
+branch in `messageLines`, `requireMoveDefender`/`actionSnapshot`-sourced
+battler, staged full-turn repro test, red-verify via `git stash`.
+
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
 **Symptom:** `generateInitialFactoryRentals`'s `constructionRngValue`

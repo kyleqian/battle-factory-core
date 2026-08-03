@@ -1,0 +1,122 @@
+# printstring literal-operand census (same-day Taunt-crash follow-up, ISSUES #72 source)
+
+Regenerable via `node --experimental-strip-types tools/report/printstring-literal-census.ts`. See the script header for method and scope (syntactic upper bound, not a per-id reachability trace).
+
+**Totals:** 207 unique STRINGID literal `printstring` operands in the parsed program (249 raw occurrences across 230 script labels). 13 already explicitly branched in messageLines, 87 resolvable by the generic fallback's fixed token set, **107 UNRESOLVED** (would hit battleStringResolver's completeness guard the moment a non-barriered path reaches their printstring).
+
+## UNRESOLVED (candidate gaps -- filed as ISSUES #72, NOT individually reachability-traced here)
+
+| STRINGID | Emitting script label(s) | Offending placeholder(s) | Template |
+| --- | --- | --- | --- |
+| `STRINGID_DEFEATEDOPPONENTBYREFEREE` | `BattleScript_ArenaDoJudgment` | `{B_PLAYER_MON1_NAME}`, `{B_OPPONENT_MON1_NAME}` | {B_PLAYER_MON1_NAME} defeated the opponent\n{B_OPPONENT_MON1_NAME} in a REFEREE’s decision! |
+| `STRINGID_DIDNOTLEARNMOVE` | `BattleScript_AskToLearnMove` | `{B_BUFF1}`, `{B_BUFF2}` | {B_BUFF1} did not learn\n{B_BUFF2}.\p |
+| `STRINGID_ENEMYABOUTTOSWITCHPKMN` | `BattleScript_FaintedMonTryChoose` | `{B_TRAINER1_CLASS}`, `{B_TRAINER1_NAME}`, `{B_BUFF2}`, `{B_PLAYER_NAME}` | {B_TRAINER1_CLASS} {B_TRAINER1_NAME} is\nabout to use {B_BUFF2}.\pWill {B_PLAYER_NAME} change\nPOKéMON? |
+| `STRINGID_FORFEITEDMATCH` | `BattleScript_PrintPlayerForfeited`, `BattleScript_PrintPlayerForfeitedLinkBattle` | `{B_PLAYER_NAME}` | {B_PLAYER_NAME} forfeited the match! |
+| `STRINGID_FORXCOMMAYZ` | `BattleScript_BerryConfuseHealEnd2` | `{B_BUFF1}` | For {B_SCR_ACTIVE_NAME_WITH_PREFIX},\n{B_LAST_ITEM} {B_BUFF1} |
+| `STRINGID_LOSTTOOPPONENTBYREFEREE` | `BattleScript_ArenaJudgmentPlayerLoses` | `{B_PLAYER_MON1_NAME}`, `{B_OPPONENT_MON1_NAME}` | {B_PLAYER_MON1_NAME} lost to the opponent\n{B_OPPONENT_MON1_NAME} in a REFEREE’s decision! |
+| `STRINGID_MAGNITUDESTRENGTH` | `BattleScript_EffectMagnitude` | `{B_BUFF1}` | MAGNITUDE {B_BUFF1}! |
+| `STRINGID_NATUREPOWERTURNEDINTO` | `BattleScript_EffectNaturePower` | `{B_CURRENT_MOVE}` | NATURE POWER turned into\n{B_CURRENT_MOVE}! |
+| `STRINGID_PKMNALREADYASLEEP` | `BattleScript_AlreadyAsleep` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX} is\nalready asleep! |
+| `STRINGID_PKMNALREADYCONFUSED` | `BattleScript_AlreadyConfused`, `BattleScript_TeeterDanceAlreadyConfused` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX} is\nalready confused! |
+| `STRINGID_PKMNALREADYHASBURN` | `BattleScript_AlreadyBurned` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX} already\nhas a burn. |
+| `STRINGID_PKMNALREADYPOISONED` | `BattleScript_AlreadyPoisoned` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX} is already\npoisoned. |
+| `STRINGID_PKMNANCHOREDITSELF` | `BattleScript_PrintMonIsRooted` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX} anchored\nitself with its roots! |
+| `STRINGID_PKMNANCHORSITSELFWITH` | `BattleScript_AbilityPreventsPhasingOut` | `{B_DEF_NAME_WITH_PREFIX}`, `{B_DEF_ABILITY}` | {B_DEF_NAME_WITH_PREFIX} anchors\nitself with {B_DEF_ABILITY}! |
+| `STRINGID_PKMNATTACK` | `BattleScript_BeatUpLoop` | `{B_BUFF1}` | {B_BUFF1}’s attack! |
+| `STRINGID_PKMNCANTUSEMOVESEALED` | `BattleScript_MoveUsedIsImprisoned`, `BattleScript_SelectingImprisonedMoveInPalace` | `{B_ACTIVE_NAME_WITH_PREFIX}`, `{B_CURRENT_MOVE}` | {B_ACTIVE_NAME_WITH_PREFIX} can’t use the\nsealed {B_CURRENT_MOVE}!\p |
+| `STRINGID_PKMNCANTUSEMOVETORMENT` | `BattleScript_MoveUsedIsTormented`, `BattleScript_SelectingTormentedMoveInPalace` | `{B_ACTIVE_NAME_WITH_PREFIX}` | {B_ACTIVE_NAME_WITH_PREFIX} can’t use the same\nmove in a row due to the TORMENT!\p |
+| `STRINGID_PKMNCHANGEDTYPE` | `BattleScript_EffectCamouflage`, `BattleScript_EffectConversion`, `BattleScript_EffectConversion2` | `{B_BUFF1}` | {B_ATK_NAME_WITH_PREFIX} transformed\ninto the {B_BUFF1} type! |
+| `STRINGID_PKMNCHANGEDTYPEWITH` | `BattleScript_ColorChangeActivates` | `{B_DEF_NAME_WITH_PREFIX}`, `{B_DEF_ABILITY}`, `{B_BUFF1}` | {B_DEF_NAME_WITH_PREFIX}’s {B_DEF_ABILITY}\nmade it the {B_BUFF1} type! |
+| `STRINGID_PKMNCOPIEDFOE` | `BattleScript_EffectRolePlay` | `{B_DEF_NAME_WITH_PREFIX}`, `{B_DEF_ABILITY}` | {B_ATK_NAME_WITH_PREFIX} copied\n{B_DEF_NAME_WITH_PREFIX}’s {B_DEF_ABILITY}! |
+| `STRINGID_PKMNCOPIEDSTATCHANGES` | `BattleScript_EffectPsychUp` | `{B_DEF_NAME_WITH_PREFIX}` | {B_ATK_NAME_WITH_PREFIX} copied\n{B_DEF_NAME_WITH_PREFIX}’s stat changes! |
+| `STRINGID_PKMNCUTSATTACKWITH` | `BattleScript_IntimidateActivatesLoop` | `{B_SCR_ACTIVE_ABILITY}`, `{B_DEF_NAME_WITH_PREFIX}` | {B_SCR_ACTIVE_NAME_WITH_PREFIX}’s {B_SCR_ACTIVE_ABILITY}\ncuts {B_DEF_NAME_WITH_PREFIX}’s ATTACK! |
+| `STRINGID_PKMNDREAMEATEN` | `BattleScript_DreamEaterWorked` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX}’s\ndream was eaten! |
+| `STRINGID_PKMNFELLINLOVE` | `BattleScript_EffectAttract` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX}\nfell in love! |
+| `STRINGID_PKMNFELLINTONIGHTMARE` | `BattleScript_NightmareWorked` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX} fell into\na NIGHTMARE! |
+| `STRINGID_PKMNFLEDUSING` | `BattleScript_RanAwayUsingMonAbility` | `{B_ATK_ABILITY}` | {PLAY_SE SE_FLEE}{B_ATK_NAME_WITH_PREFIX} fled\nusing {B_ATK_ABILITY}!\p |
+| `STRINGID_PKMNFORGOTMOVE` | `BattleScript_ForgotAndLearnedNewMove` | `{B_BUFF1}`, `{B_BUFF2}` | {B_BUFF1} forgot\n{B_BUFF2}.\p |
+| `STRINGID_PKMNFREEDFROM` | `BattleScript_WrapEnds` | `{B_BUFF1}` | {B_ATK_NAME_WITH_PREFIX} was freed\nfrom {B_BUFF1}! |
+| `STRINGID_PKMNGOTENCORE` | `BattleScript_EffectEncore` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX} got\nan ENCORE! |
+| `STRINGID_PKMNGOTFREE` | `BattleScript_WrapFree` | `{B_DEF_NAME_WITH_PREFIX}`, `{B_BUFF1}` | {B_ATK_NAME_WITH_PREFIX} got free of\n{B_DEF_NAME_WITH_PREFIX}’s {B_BUFF1}! |
+| `STRINGID_PKMNGREWTOLV` | `BattleScript_LevelUp` | `{B_BUFF1}`, `{B_BUFF2}`, `{WAIT_SE}` | {B_BUFF1} grew to\nLV. {B_BUFF2}!{WAIT_SE}\p |
+| `STRINGID_PKMNHEALEDPARALYSIS` | `BattleScript_TargetPRLZHeal` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX} was\nhealed of paralysis! |
+| `STRINGID_PKMNHUNGONWITHX` | `BattleScript_FocusBandActivates` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX} hung on\nusing its {B_LAST_ITEM}! |
+| `STRINGID_PKMNHURTSWITH` | `BattleScript_RoughSkinActivates` | `{B_DEF_NAME_WITH_PREFIX}`, `{B_DEF_ABILITY}` | {B_DEF_NAME_WITH_PREFIX}’s {B_DEF_ABILITY}\nhurt {B_ATK_NAME_WITH_PREFIX}! |
+| `STRINGID_PKMNIDENTIFIED` | `BattleScript_EffectForesight` | `{B_DEF_NAME_WITH_PREFIX}` | {B_ATK_NAME_WITH_PREFIX} identified\n{B_DEF_NAME_WITH_PREFIX}! |
+| `STRINGID_PKMNISALREADYPARALYZED` | `BattleScript_AlreadyParalyzed` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX} is\nalready paralyzed! |
+| `STRINGID_PKMNKNOCKEDOFF` | `BattleScript_KnockedOff` | `{B_DEF_NAME_WITH_PREFIX}` | {B_ATK_NAME_WITH_PREFIX} knocked off\n{B_DEF_NAME_WITH_PREFIX}’s {B_LAST_ITEM}! |
+| `STRINGID_PKMNLAIDCURSE` | `BattleScript_DoGhostCurse` | `{B_DEF_NAME_WITH_PREFIX}` | {B_ATK_NAME_WITH_PREFIX} cut its own HP and\nlaid a CURSE on {B_DEF_NAME_WITH_PREFIX}! |
+| `STRINGID_PKMNLEARNEDMOVE` | `BattleScript_LearnedNewMove` | `{B_BUFF1}`, `{B_BUFF2}`, `{WAIT_SE}` | {B_BUFF1} learned\n{B_BUFF2}!{WAIT_SE}\p |
+| `STRINGID_PKMNLEARNEDMOVE2` | `BattleScript_EffectMimic` | `{B_BUFF1}` | {B_ATK_NAME_WITH_PREFIX} learned\n{B_BUFF1}! |
+| `STRINGID_PKMNLOSTPPGRUDGE` | `BattleScript_GrudgeTakesPP` | `{B_BUFF1}` | {B_ATK_NAME_WITH_PREFIX}’s {B_BUFF1} lost\nall its PP due to the GRUDGE! |
+| `STRINGID_PKMNMADEITRAIN` | `BattleScript_DrizzleActivates` | `{B_SCR_ACTIVE_ABILITY}` | {B_SCR_ACTIVE_NAME_WITH_PREFIX}’s {B_SCR_ACTIVE_ABILITY}\nmade it rain! |
+| `STRINGID_PKMNMOVEBOUNCED` | `BattleScript_MagicCoatBounce` | `{B_CURRENT_MOVE}` | {B_ATK_NAME_WITH_PREFIX}’s {B_CURRENT_MOVE}\nwas bounced back by MAGIC COAT! |
+| `STRINGID_PKMNMOVEISDISABLED` | `BattleScript_MoveUsedIsDisabled`, `BattleScript_SelectingDisabledMoveInPalace` | `{B_ACTIVE_NAME_WITH_PREFIX}`, `{B_CURRENT_MOVE}` | {B_ACTIVE_NAME_WITH_PREFIX}’s {B_CURRENT_MOVE}\nis disabled!\p |
+| `STRINGID_PKMNMOVEWASDISABLED` | `BattleScript_EffectDisable` | `{B_DEF_NAME_WITH_PREFIX}`, `{B_BUFF1}` | {B_DEF_NAME_WITH_PREFIX}’s {B_BUFF1}\nwas disabled! |
+| `STRINGID_PKMNPERISHCOUNTFELL` | `BattleScript_PerishSongCountGoesDown`, `BattleScript_PerishSongTakesLife` | `{B_BUFF1}` | {B_ATK_NAME_WITH_PREFIX}’s PERISH count\nfell to {B_BUFF1}! |
+| `STRINGID_PKMNPREVENTSCONFUSIONWITH` | `BattleScript_OwnTempoPrevents`, `BattleScript_TeeterDanceOwnTempoPrevents` | `{B_DEF_NAME_WITH_PREFIX}`, `{B_DEF_ABILITY}` | {B_DEF_NAME_WITH_PREFIX}’s {B_DEF_ABILITY}\nprevents confusion! |
+| `STRINGID_PKMNPREVENTSROMANCEWITH` | `BattleScript_ObliviousPreventsAttraction` | `{B_DEF_NAME_WITH_PREFIX}`, `{B_DEF_ABILITY}` | {B_DEF_NAME_WITH_PREFIX}’s {B_DEF_ABILITY}\nprevents romance! |
+| `STRINGID_PKMNPREVENTSSTATLOSSWITH` | `BattleScript_AbilityNoStatLoss` | `{B_SCR_ACTIVE_ABILITY}` | {B_SCR_ACTIVE_NAME_WITH_PREFIX}’s {B_SCR_ACTIVE_ABILITY}\nprevents stat loss! |
+| `STRINGID_PKMNPREVENTSUSAGE` | `BattleScript_DampStopsExplosion` | `{B_DEF_NAME_WITH_PREFIX}`, `{B_DEF_ABILITY}`, `{B_CURRENT_MOVE}` | {B_DEF_NAME_WITH_PREFIX}’s {B_DEF_ABILITY}\nprevents {B_ATK_NAME_WITH_PREFIX}\lfrom using {B_CURRENT_MOVE}! |
+| `STRINGID_PKMNPROTECTEDBY` | `BattleScript_SturdyPreventsOHKO` | `{B_DEF_NAME_WITH_PREFIX}`, `{B_DEF_ABILITY}` | {B_DEF_NAME_WITH_PREFIX} was protected\nby {B_DEF_ABILITY}! |
+| `STRINGID_PKMNRAGEBUILDING` | `BattleScript_RageIsBuilding` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX}’s RAGE\nis building! |
+| `STRINGID_PKMNRAISEDSPEED` | `BattleScript_SpeedBoostActivates` | `{B_SCR_ACTIVE_ABILITY}` | {B_SCR_ACTIVE_NAME_WITH_PREFIX}’s {B_SCR_ACTIVE_ABILITY}\nraised its SPEED! |
+| `STRINGID_PKMNREADYTOHELP` | `BattleScript_EffectHelpingHand` | `{B_DEF_NAME_WITH_PREFIX}` | {B_ATK_NAME_WITH_PREFIX} is ready to\nhelp {B_DEF_NAME_WITH_PREFIX}! |
+| `STRINGID_PKMNREDUCEDPP` | `BattleScript_EffectSpite` | `{B_DEF_NAME_WITH_PREFIX}`, `{B_BUFF1}`, `{B_BUFF2}` | Reduced {B_DEF_NAME_WITH_PREFIX}’s\n{B_BUFF1} by {B_BUFF2}! |
+| `STRINGID_PKMNREGAINEDHEALTH` | `BattleScript_EffectRestoreHp`, `BattleScript_PresentHealTarget`, `BattleScript_WishComesTrue` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX} regained\nhealth! |
+| `STRINGID_PKMNRESTOREDHPUSING` | `BattleScript_MoveHPDrain` | `{B_DEF_NAME_WITH_PREFIX}`, `{B_DEF_ABILITY}` | {B_DEF_NAME_WITH_PREFIX} restored HP\nusing its {B_DEF_ABILITY}! |
+| `STRINGID_PKMNSAFEGUARDEXPIRED` | `BattleScript_SafeguardEnds` | `{B_ATK_PREFIX3}` | {B_ATK_PREFIX3}’s party is no longer\nprotected by SAFEGUARD! |
+| `STRINGID_PKMNSHROUDEDITSELF` | `BattleScript_EffectMagicCoat` | `{B_CURRENT_MOVE}` | {B_ATK_NAME_WITH_PREFIX} shrouded\nitself in {B_CURRENT_MOVE}! |
+| `STRINGID_PKMNSITEMRESTOREDPP` | `BattleScript_BerryPPHealEnd2` | `{B_BUFF1}` | {B_SCR_ACTIVE_NAME_WITH_PREFIX}’s {B_LAST_ITEM}\nrestored {B_BUFF1}’s PP! |
+| `STRINGID_PKMNSKETCHEDMOVE` | `BattleScript_EffectSketch` | `{B_BUFF1}` | {B_ATK_NAME_WITH_PREFIX} SKETCHED\n{B_BUFF1}! |
+| `STRINGID_PKMNSNATCHEDMOVE` | `BattleScript_SnatchedMove` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX} SNATCHED\n{B_SCR_ACTIVE_NAME_WITH_PREFIX}’s move! |
+| `STRINGID_PKMNSTOLEITEM` | `BattleScript_ItemSteal` | `{B_DEF_NAME_WITH_PREFIX}` | {B_ATK_NAME_WITH_PREFIX} stole\n{B_DEF_NAME_WITH_PREFIX}’s {B_LAST_ITEM}! |
+| `STRINGID_PKMNSUBSTITUTEFADED` | `BattleScript_SubstituteFade` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX}’s\nSUBSTITUTE faded!\p |
+| `STRINGID_PKMNSXBLOCKSY` | `BattleScript_EffectHealBell`, `BattleScript_SoundproofProtected` | `{B_DEF_NAME_WITH_PREFIX}`, `{B_DEF_ABILITY}`, `{B_CURRENT_MOVE}` | {B_DEF_NAME_WITH_PREFIX}’s {B_DEF_ABILITY}\nblocks {B_CURRENT_MOVE}! |
+| `STRINGID_PKMNSXBLOCKSY2` | `BattleScript_CheckHealBellMon2Unaffected`, `BattleScript_PerishSongNotAffected` | `{B_SCR_ACTIVE_ABILITY}`, `{B_CURRENT_MOVE}` | {B_SCR_ACTIVE_NAME_WITH_PREFIX}’s {B_SCR_ACTIVE_ABILITY}\nblocks {B_CURRENT_MOVE}! |
+| `STRINGID_PKMNSXCUREDITSYPROBLEM` | `BattleScript_AbilityCuredStatus` | `{B_SCR_ACTIVE_ABILITY}`, `{B_BUFF1}` | {B_SCR_ACTIVE_NAME_WITH_PREFIX}’s {B_SCR_ACTIVE_ABILITY}\ncured its {B_BUFF1} problem! |
+| `STRINGID_PKMNSXCUREDYPROBLEM` | `BattleScript_ShedSkinActivates` | `{B_SCR_ACTIVE_ABILITY}`, `{B_BUFF1}` | {B_SCR_ACTIVE_NAME_WITH_PREFIX}’s {B_SCR_ACTIVE_ABILITY}\ncured its {B_BUFF1} problem! |
+| `STRINGID_PKMNSXINFATUATEDY` | `BattleScript_CuteCharmActivates` | `{B_DEF_NAME_WITH_PREFIX}`, `{B_DEF_ABILITY}` | {B_DEF_NAME_WITH_PREFIX}’s {B_DEF_ABILITY}\ninfatuated {B_ATK_NAME_WITH_PREFIX}! |
+| `STRINGID_PKMNSXINTENSIFIEDSUN` | `BattleScript_DroughtActivates` | `{B_SCR_ACTIVE_ABILITY}` | {B_SCR_ACTIVE_NAME_WITH_PREFIX}’s {B_SCR_ACTIVE_ABILITY}\nintensified the sun’s rays! |
+| `STRINGID_PKMNSXMADEITINEFFECTIVE` | `BattleScript_PrintAbilityMadeIneffective` | `{B_SCR_ACTIVE_ABILITY}` | {B_SCR_ACTIVE_NAME_WITH_PREFIX}’s {B_SCR_ACTIVE_ABILITY}\nmade it ineffective! |
+| `STRINGID_PKMNSXMADEYUSELESS` | `BattleScript_MonMadeMoveUseless` | `{B_DEF_NAME_WITH_PREFIX}`, `{B_DEF_ABILITY}`, `{B_CURRENT_MOVE}` | {B_DEF_NAME_WITH_PREFIX}’s {B_DEF_ABILITY}\nmade {B_CURRENT_MOVE} useless! |
+| `STRINGID_PKMNSXPREVENTSFLINCHING` | `BattleScript_FlinchPrevention` | `{B_EFF_ABILITY}` | {B_EFF_NAME_WITH_PREFIX}’s {B_EFF_ABILITY}\nprevents flinching! |
+| `STRINGID_PKMNSXPREVENTSYLOSS` | `BattleScript_AbilityNoSpecificStatLoss` | `{B_SCR_ACTIVE_ABILITY}`, `{B_BUFF1}` | {B_SCR_ACTIVE_NAME_WITH_PREFIX}’s {B_SCR_ACTIVE_ABILITY}\nprevents {B_BUFF1} loss! |
+| `STRINGID_PKMNSXRESTOREDHPALITTLE2` | `BattleScript_RainDishActivates` | `{B_ATK_ABILITY}` | {B_ATK_NAME_WITH_PREFIX}’s {B_ATK_ABILITY}\nrestored its HP a little! |
+| `STRINGID_PKMNSXTOOKATTACK` | `BattleScript_TookAttack` | `{B_DEF_NAME_WITH_PREFIX}`, `{B_DEF_ABILITY}` | {B_DEF_NAME_WITH_PREFIX}’s {B_DEF_ABILITY}\ntook the attack! |
+| `STRINGID_PKMNSXWHIPPEDUPSANDSTORM` | `BattleScript_SandstreamActivates` | `{B_SCR_ACTIVE_ABILITY}` | {B_SCR_ACTIVE_NAME_WITH_PREFIX}’s {B_SCR_ACTIVE_ABILITY}\nwhipped up a sandstorm! |
+| `STRINGID_PKMNSXWOREOFF` | `BattleScript_SideStatusWoreOff` | `{B_ATK_PREFIX1}`, `{B_BUFF1}` | {B_ATK_PREFIX1}’s {B_BUFF1}\nwore off! |
+| `STRINGID_PKMNTOOKAIM` | `BattleScript_EffectLockOn` | `{B_DEF_NAME_WITH_PREFIX}` | {B_ATK_NAME_WITH_PREFIX} took aim\nat {B_DEF_NAME_WITH_PREFIX}! |
+| `STRINGID_PKMNTOOKATTACK` | `BattleScript_MonTookFutureAttack` | `{B_DEF_NAME_WITH_PREFIX}`, `{B_BUFF1}` | {B_DEF_NAME_WITH_PREFIX} took the\n{B_BUFF1} attack! |
+| `STRINGID_PKMNTOOKFOE` | `BattleScript_DestinyBondTakesLife` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX} took\n{B_ATK_NAME_WITH_PREFIX} with it! |
+| `STRINGID_PKMNTRACED` | `BattleScript_TraceActivates` | `{B_BUFF1}`, `{B_BUFF2}` | {B_SCR_ACTIVE_NAME_WITH_PREFIX} TRACED\n{B_BUFF1}’s {B_BUFF2}! |
+| `STRINGID_PKMNUSEDSAFEGUARD` | `BattleScript_SafeguardProtected`, `BattleScript_TeeterDanceSafeguardProtected` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX}’s party is protected\nby SAFEGUARD! |
+| `STRINGID_PKMNWASDEFROSTED` | `BattleScript_DefrostedViaFireMove` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX} was\ndefrosted! |
+| `STRINGID_PKMNWASDRAGGEDOUT` | `BattleScript_TrainerBattleForceOut` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX} was\ndragged out!\p |
+| `STRINGID_PKMNWASMADEDROWSY` | `BattleScript_EffectYawn` | `{B_DEF_NAME_WITH_PREFIX}` | {B_ATK_NAME_WITH_PREFIX} made\n{B_DEF_NAME_WITH_PREFIX} drowsy! |
+| `STRINGID_PKMNWASNTAFFECTED` | `BattleScript_WasntAffected` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX}\nwasn’t affected! |
+| `STRINGID_PKMNWISHCAMETRUE` | `BattleScript_WishButFullHp`, `BattleScript_WishComesTrue` | `{B_BUFF1}` | {B_BUFF1}’s WISH\ncame true! |
+| `STRINGID_PLAYERDEFEATEDTRAINER1` | `BattleScript_FrontierTrainerBattleWon`, `BattleScript_LocalTrainerBattleWon` | `{B_TRAINER1_CLASS}`, `{B_TRAINER1_NAME}` | Player defeated\n{B_TRAINER1_CLASS} {B_TRAINER1_NAME}!\p |
+| `STRINGID_PLAYERGOTMONEY` | `BattleScript_LocalBattleWonReward` | `{B_PLAYER_NAME}`, `{B_BUFF1}` | {B_PLAYER_NAME} got ¥{B_BUFF1}\nfor winning!\p |
+| `STRINGID_PLAYERPICKEDUPMONEY` | `BattleScript_PrintPayDayMoneyString` | `{B_PLAYER_NAME}`, `{B_BUFF1}` | {B_PLAYER_NAME} picked up\n¥{B_BUFF1}!\p |
+| `STRINGID_PLAYERWHITEOUT` | `BattleScript_LocalBattleLostPrintWhiteOut` | `{B_PLAYER_NAME}` | {B_PLAYER_NAME} is out of\nusable POKéMON!\p |
+| `STRINGID_PLAYERWHITEOUT2` | `BattleScript_LocalBattleLostPrintWhiteOut` | `{B_PLAYER_NAME}`, `{PAUSE_UNTIL_PRESS}` | {B_PLAYER_NAME} whited out!{PAUSE_UNTIL_PRESS} |
+| `STRINGID_PREVENTEDFROMWORKING` | `BattleScript_IntimidatePrevented` | `{B_DEF_NAME_WITH_PREFIX}`, `{B_DEF_ABILITY}`, `{B_BUFF1}` | {B_DEF_NAME_WITH_PREFIX}’s {B_DEF_ABILITY}\nprevented {B_SCR_ACTIVE_NAME_WITH_PREFIX}’s\l{B_BUFF1} from working! |
+| `STRINGID_STATSWONTDECREASE2` | `BattleScript_CantLowerMultipleStats` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX}’s stats won’t\ngo any lower! |
+| `STRINGID_STOPLEARNINGMOVE` | `BattleScript_AskToLearnMove` | `{B_BUFF2}` | {PAUSE 32}Stop learning\n{B_BUFF2}? |
+| `STRINGID_TARGETCANTESCAPENOW` | `BattleScript_EffectMeanLook` | `{B_DEF_NAME_WITH_PREFIX}` | {B_DEF_NAME_WITH_PREFIX} can’t\nescape now! |
+| `STRINGID_TIEDOPPONENTBYREFEREE` | `BattleScript_ArenaJudgmentDraw` | `{B_PLAYER_MON1_NAME}`, `{B_OPPONENT_MON1_NAME}` | {B_PLAYER_MON1_NAME} tied the opponent\n{B_OPPONENT_MON1_NAME} in a REFEREE’s decision! |
+| `STRINGID_TRAINER1LOSETEXT` | `BattleScript_FrontierTrainerBattleWon_LoseTexts`, `BattleScript_LocalBattleWonLoseTexts`, `BattleScript_TowerLinkBattleWon` | `{B_TRAINER1_LOSE_TEXT}` | {B_TRAINER1_LOSE_TEXT} |
+| `STRINGID_TRAINER1WINTEXT` | `BattleScript_FrontierLinkBattleLost`, `BattleScript_LocalBattleLostPrintTrainersWinText` | `{B_TRAINER1_WIN_TEXT}` | {B_TRAINER1_WIN_TEXT} |
+| `STRINGID_TRAINER2LOSETEXT` | `BattleScript_FrontierTrainerBattleWon_LoseTexts`, `BattleScript_LocalBattleWonLoseTexts`, `BattleScript_TowerLinkBattleWon` | `{B_TRAINER2_LOSE_TEXT}` | {B_TRAINER2_LOSE_TEXT} |
+| `STRINGID_TRAINER2WINTEXT` | `BattleScript_FrontierLinkBattleLost`, `BattleScript_LocalBattleLostDoTrainer2WinText` | `{B_TRAINER2_WIN_TEXT}` | {B_TRAINER2_WIN_TEXT} |
+| `STRINGID_TRYTOLEARNMOVE1` | `BattleScript_AskToLearnMove` | `{B_BUFF1}`, `{B_BUFF2}` | {B_BUFF1} is trying to\nlearn {B_BUFF2}.\p |
+| `STRINGID_TRYTOLEARNMOVE2` | `BattleScript_AskToLearnMove` | `{B_BUFF1}` | But, {B_BUFF1} can’t learn\nmore than four moves.\p |
+| `STRINGID_TRYTOLEARNMOVE3` | `BattleScript_AskToLearnMove` | `{B_BUFF2}` | Delete a move to make\nroom for {B_BUFF2}? |
+| `STRINGID_TWOENEMIESDEFEATED` | `BattleScript_FrontierTrainerBattleWon_TwoDefeated`, `BattleScript_LocalTwoTrainersDefeated` | `{B_TRAINER1_CLASS}`, `{B_TRAINER1_NAME}`, `{B_TRAINER2_CLASS}`, `{B_TRAINER2_NAME}` | {B_TRAINER1_CLASS} {B_TRAINER1_NAME} and\n{B_TRAINER2_CLASS} {B_TRAINER2_NAME}\lwere defeated!\p |
+| `STRINGID_WILDPKMNFLED` | `BattleScript_WildMonFled` | `{B_BUFF1}` | {PLAY_SE SE_FLEE}Wild {B_BUFF1} fled! |
+
+## Already safe (100 ids, for completeness -- 13 explicit + 87 generic-fallback-only)
+
+`STRINGID_ATTACKERFAINTED`, `STRINGID_BATTLEEND`, `STRINGID_HITXTIMES`, `STRINGID_PKMNCANTUSEMOVETAUNT`, `STRINGID_PKMNENDUREDHIT`, `STRINGID_PKMNFELLFORTAUNT`, `STRINGID_PKMNHPFULL`, `STRINGID_PKMNHURTBY`, `STRINGID_PKMNSUBJECTEDTOTORMENT`, `STRINGID_PKMNSXMADEYINEFFECTIVE`, `STRINGID_RETURNMON`, `STRINGID_SWITCHINMON`, `STRINGID_TARGETFAINTED`, `STRINGID_123POOF`, `STRINGID_ANDELLIPSIS`, `STRINGID_BUTITFAILED`, `STRINGID_BUTNOEFFECT`, `STRINGID_BUTNOPPLEFT`, `STRINGID_BUTNOTHINGHAPPENED`, `STRINGID_CANTESCAPE2`, `STRINGID_COINSSCATTERED`, `STRINGID_EMPTYSTRING3`, `STRINGID_FAILEDTOSPITUP`, `STRINGID_FAINTINTHREE`, `STRINGID_GOTAWAYSAFELY`, `STRINGID_ITHURTCONFUSION`, `STRINGID_MIRRORMOVEFAILED`, `STRINGID_NORUNNINGFROMTRAINERS`, `STRINGID_ONEHITKO`, `STRINGID_PKMNABSORBEDNUTRIENTS`, `STRINGID_PKMNAFFLICTEDBYCURSE`, `STRINGID_PKMNALREADYASLEEP2`, `STRINGID_PKMNBADLYPOISONED`, `STRINGID_PKMNBEGANTONAP`, `STRINGID_PKMNBLEWAWAYSPIKES`, `STRINGID_PKMNCAUSEDUPROAR`, `STRINGID_PKMNCENTERATTENTION`, `STRINGID_PKMNCHARGINGPOWER`, `STRINGID_PKMNCRASHED`, `STRINGID_PKMNCUTHPMAXEDATTACK`, `STRINGID_PKMNENCOREENDED`, `STRINGID_PKMNFASTASLEEP`, `STRINGID_PKMNFATIGUECONFUSION`, `STRINGID_PKMNFELLASLEEP`, `STRINGID_PKMNFLEDFROMBATTLE`, `STRINGID_PKMNFLEDUSINGITS`, `STRINGID_PKMNFLINCHED`, `STRINGID_PKMNHASSUBSTITUTE`, `STRINGID_PKMNHEALEDCONFUSION`, `STRINGID_PKMNHITWITHRECOIL`, `STRINGID_PKMNHURTBYBURN`, `STRINGID_PKMNHURTBYPOISON`, `STRINGID_PKMNHURTBYSPIKES`, `STRINGID_PKMNIGNOREDORDERS`, `STRINGID_PKMNIGNORESASLEEP`, `STRINGID_PKMNIMMOBILIZEDBYLOVE`, `STRINGID_PKMNINLOVE`, `STRINGID_PKMNISCONFUSED`, `STRINGID_PKMNISFROZEN`, `STRINGID_PKMNISPARALYZED`, `STRINGID_PKMNLOCKEDINNIGHTMARE`, `STRINGID_PKMNLOSTFOCUS`, `STRINGID_PKMNMOVEDISABLEDNOMORE`, `STRINGID_PKMNMUSTRECHARGE`, `STRINGID_PKMNPLANTEDROOTS`, `STRINGID_PKMNPROTECTEDBYMIST`, `STRINGID_PKMNSEALEDOPPONENTMOVE`, `STRINGID_PKMNSHEDLEECHSEED`, `STRINGID_PKMNSITEMCUREDPARALYSIS`, `STRINGID_PKMNSITEMCUREDPOISON`, `STRINGID_PKMNSITEMDEFROSTEDIT`, `STRINGID_PKMNSITEMHEALEDBURN`, `STRINGID_PKMNSITEMRESTOREDHEALTH`, `STRINGID_PKMNSITEMRESTOREDHPALITTLE`, `STRINGID_PKMNSITEMRESTOREDSTATUS`, `STRINGID_PKMNSITEMSNAPPEDOUT`, `STRINGID_PKMNSITEMWOKEIT`, `STRINGID_PKMNSTATUSNORMAL`, `STRINGID_PKMNSTORINGENERGY`, `STRINGID_PKMNSWAPPEDABILITIES`, `STRINGID_PKMNSWITCHEDITEMS`, `STRINGID_PKMNTIGHTENINGFOCUS`, `STRINGID_PKMNTRANSFORMED`, `STRINGID_PKMNTRYINGTOTAKEFOE`, `STRINGID_PKMNUNLEASHEDENERGY`, `STRINGID_PKMNUSEDXTOGETPUMPED`, `STRINGID_PKMNWAITSFORTARGET`, `STRINGID_PKMNWANTSGRUDGE`, `STRINGID_PKMNWASCONFUSED`, `STRINGID_PKMNWOKEUPINUPROAR`, `STRINGID_PKMNWONTOBEY`, `STRINGID_SHAREDPAIN`, `STRINGID_SPIKESSCATTERED`, `STRINGID_STATCHANGESGONE`, `STRINGID_STATSWONTINCREASE2`, `STRINGID_SUNLIGHTFADED`, `STRINGID_SUNLIGHTSTRONG`, `STRINGID_THEWALLSHATTERED`, `STRINGID_USENEXTPKMN`, `STRINGID_XFOUNDONEY`
+
