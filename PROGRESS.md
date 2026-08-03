@@ -51,6 +51,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   new recording imports, no barrier-count changes (verified via
   `test:smoke`, all 339 tests green, plus the full suite run above). No
   PAPERCUT this step.
+- **[supervisor addendum, ~00:30]** #56 fix verified live (MAGNETON
+  **703/751** re-run confirmed). **#56 reclassified as a settled record**
+  (supervisor decision): all three numbered items resolved, both public
+  intro comparisons' residuals fully in settled classes (YOSHI 51 =
+  1 display-tail + 50 idle-bounce; MAGNETON 48 = idle-bounce), route-term
+  follow-up concluded 2026-08-01. Moved below the settled-records line
+  (ROADMAP gate-5 note cites #56 by number); header lists updated. Open
+  backlog is now #70, #69, #55, #39.
+
 
 ---
 ## 879 — [bounded MAIN worker, 2026-08-02] ISSUES #68 — MURKROW TORMENT presentation crash FIXED + pinned
