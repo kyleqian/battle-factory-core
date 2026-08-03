@@ -1,17 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { currentPPForActiveMon } from "../src/engine/battleMenu.ts";
-import { resolveTurn1CompletedResolutionNextCommandHandoff } from "../src/engine/turn1ResolutionAdapter.ts";
-import { resolveTurn2CompletedResolutionNextCommandHandoff } from "../src/engine/turn2ResolutionAdapter.ts";
-import { resolveTurn3CompletedResolutionNextCommandHandoff } from "../src/engine/turn3ResolutionAdapter.ts";
-import { resolveTurn4CompletedResolutionNextCommandHandoff } from "../src/engine/turn4ResolutionAdapter.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
-import { resolveTurn5CompletedResolutionNextCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
-import { resolveTurn6CompletedResolutionNextCommandHandoff } from "../src/engine/turn6ResolutionAdapter.ts";
-import { resolveTurn7CompletedResolutionNextCommandHandoff } from "../src/engine/turn7ResolutionAdapter.ts";
-import { resolveTurn8CompletedResolutionNextCommandHandoff } from "../src/engine/turn8ResolutionAdapter.ts";
-import { resolveTurn9CompletedResolutionNextCommandHandoff } from "../src/engine/turn9ResolutionAdapter.ts";
-import { resolveTurn10CompletedResolutionNextCommandHandoff } from "../src/engine/turn10ResolutionAdapter.ts";
-import { resolveTurn11CompletedResolutionNextCommandHandoff } from "../src/engine/turn11ResolutionAdapter.ts";
 import {
   isTurn12NextCommandHandoffReady,
   resolveTurn12CompletedResolutionNextCommandHandoff,
@@ -43,18 +32,7 @@ describe("turn12ResolutionAdapter: #39 completed-turn-12/next-command handoff pr
   it("owns exactly the completed turn-12 PP receipt consumed by the live submenu without staged move composition", () => {
     const onix = rentalMoveset("ONIX");
     const handoff = resolveTurn12CompletedResolutionNextCommandHandoff();
-    const liveReceipt = currentPPForActiveMon(
-      onix,
-      resolveTurn1CompletedResolutionNextCommandHandoff(1308), resolveTurn2CompletedResolutionNextCommandHandoff(2197), resolveTurn3CompletedResolutionNextCommandHandoff(3172), resolveTurn4CompletedResolutionNextCommandHandoff(4312),
-      resolveTurn5CompletedResolutionNextCommandHandoff(),
-      resolveTurn6CompletedResolutionNextCommandHandoff(),
-      resolveTurn7CompletedResolutionNextCommandHandoff(),
-      resolveTurn8CompletedResolutionNextCommandHandoff(),
-      resolveTurn9CompletedResolutionNextCommandHandoff(),
-      resolveTurn10CompletedResolutionNextCommandHandoff(),
-      resolveTurn11CompletedResolutionNextCommandHandoff(),
-      handoff,
-    );
+    const liveReceipt = currentPPForActiveMon(onix, resolveTurn12LatestCompletedCommandHandoff());
 
     expect(liveReceipt).toEqual([0, 19, 19, 10]);
     expect(handoff.playerPp).toEqual(liveReceipt);
@@ -69,18 +47,7 @@ describe("turn12ResolutionAdapter: #39 completed-turn-12/next-command handoff pr
       moveIds: [157, 20, 288, 201],
       maxPP: [10, 15, 20, 10],
     } as const;
-    const liveReceipt = currentPPForActiveMon(
-      genericMoveset,
-      resolveTurn1CompletedResolutionNextCommandHandoff(1308), resolveTurn2CompletedResolutionNextCommandHandoff(2197), resolveTurn3CompletedResolutionNextCommandHandoff(3172), resolveTurn4CompletedResolutionNextCommandHandoff(4312),
-      resolveTurn5CompletedResolutionNextCommandHandoff(),
-      resolveTurn6CompletedResolutionNextCommandHandoff(),
-      resolveTurn7CompletedResolutionNextCommandHandoff(),
-      resolveTurn8CompletedResolutionNextCommandHandoff(),
-      resolveTurn9CompletedResolutionNextCommandHandoff(),
-      resolveTurn10CompletedResolutionNextCommandHandoff(),
-      resolveTurn11CompletedResolutionNextCommandHandoff(),
-      resolveTurn12CompletedResolutionNextCommandHandoff(),
-    );
+    const liveReceipt = currentPPForActiveMon(genericMoveset, resolveTurn12LatestCompletedCommandHandoff());
 
     expect(liveReceipt).toEqual([0, 14, 19, 10]);
     expect(liveReceipt[0]).toBe(genericMoveset.maxPP[0] - 10);

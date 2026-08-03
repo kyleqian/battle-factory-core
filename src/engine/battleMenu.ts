@@ -24,31 +24,6 @@
 import { rentalMoveset, type ActiveMonMoveset } from "./battleSetup.ts";
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
 import {
-  isTurn1NextCommandHandoffReady,
-  type Turn1CompletedResolutionNextCommandHandoff,
-} from "./turn1ResolutionAdapter.ts";
-import {
-  isTurn2NextCommandHandoffReady,
-  type Turn2CompletedResolutionNextCommandHandoff,
-} from "./turn2ResolutionAdapter.ts";
-import {
-  isTurn3NextCommandHandoffReady,
-  type Turn3CompletedResolutionNextCommandHandoff,
-} from "./turn3ResolutionAdapter.ts";
-import {
-  isTurn4NextCommandHandoffReady,
-  type Turn4CompletedResolutionNextCommandHandoff,
-} from "./turn4ResolutionAdapter.ts";
-import type { Turn5CompletedResolutionNextCommandHandoff } from "./turn5ResolutionAdapter.ts";
-import type { Turn6CompletedResolutionNextCommandHandoff } from "./turn6ResolutionAdapter.ts";
-import type { Turn7CompletedResolutionNextCommandHandoff } from "./turn7ResolutionAdapter.ts";
-import type { Turn8CompletedResolutionNextCommandHandoff } from "./turn8ResolutionAdapter.ts";
-import type { Turn9CompletedResolutionNextCommandHandoff } from "./turn9ResolutionAdapter.ts";
-import type { Turn10CompletedResolutionNextCommandHandoff } from "./turn10ResolutionAdapter.ts";
-import type { Turn11CompletedResolutionNextCommandHandoff } from "./turn11ResolutionAdapter.ts";
-import type { Turn12CompletedResolutionNextCommandHandoff } from "./turn12ResolutionAdapter.ts";
-import type { Turn13CompletedResolutionNextCommandHandoff } from "./turn13ResolutionAdapter.ts";
-import {
   projectLatestCompletedCommandPp,
   type LatestCompletedCommandHandoff,
 } from "./nextCommandHandoff.ts";
@@ -2572,131 +2547,12 @@ export function turn2KickoffBounceTick(
  * persisted slot instead of reconstructing history from a resolved count.
  */
 /**
- * The completed turn-3 receipt owns the SECOND slot-0 decrement: its
- * canonical tuple includes both ROCK_SLIDE uses (turns 1 and 3, PP 10->8)
- * while retaining turn 2's independent slot-2 DRAGON_BREATH deduction.
- *
- * The completed turn-4 receipt owns the THIRD slot-0 decrement: its canonical
- * tuple includes all three ROCK_SLIDE uses (turns 1, 3, and 4; PP 10->7)
- * while retaining turn 2's independent slot-2 DRAGON_BREATH deduction.
+ * Generic-owner PP projection for the production contentful renderer. It
+ * serves Turn 1's HandleInputChooseAction epoch content as well as the 5-13
+ * guard-owned chain, taking one canonical tuple directly from the semantic
+ * completed-command owner rather than a turn-keyed predecessor chain.
  */
 export function currentPPForActiveMon(
-  moveset: ActiveMonMoveset,
-  turn1NextCommandHandoff: Turn1CompletedResolutionNextCommandHandoff | null = null,
-  turn2NextCommandHandoff: Turn2CompletedResolutionNextCommandHandoff | null = null,
-  turn3NextCommandHandoff: Turn3CompletedResolutionNextCommandHandoff | null = null,
-  turn4NextCommandHandoff: Turn4CompletedResolutionNextCommandHandoff | null = null,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null = null,
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null = null,
-  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null = null,
-  turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null = null,
-  turn9NextCommandHandoff: Turn9CompletedResolutionNextCommandHandoff | null = null,
-  turn10NextCommandHandoff: Turn10CompletedResolutionNextCommandHandoff | null = null,
-  turn11NextCommandHandoff: Turn11CompletedResolutionNextCommandHandoff | null = null,
-  turn12NextCommandHandoff: Turn12CompletedResolutionNextCommandHandoff | null = null,
-  turn13NextCommandHandoff: Turn13CompletedResolutionNextCommandHandoff | null = null,
-  lockedActionResolution: BattleResolutionPresentationState | null = null,
-  followingResolution: BattleResolutionPresentationState | null = null,
-): readonly [number, number, number, number] {
-  const [a, b, c, d] = moveset.maxPP;
-  // Turn 5's own ROCK_SLIDE is carried by its completed-resolution handoff,
-  // not reconstructed from a resolution flag. The receipt includes the
-  // earlier turn-2 DRAGON_BREATH deduction too, so later PP reconstruction
-  // starts from its full immutable tuple rather than re-counting it.
-  // S7 slice O (docs/turn7-notes.md §4): turn 6's own ROCK_SLIDE (Onix vs.
-  // Pidgeotto) is a 5th slot-0 use, matching turn7-notes' own "PP 5/10
-  // displayed" ledger at turn 7's own reopen.
-  // The completed turn-7 handoff owns ROCK_SLIDE's sixth use and the
-  // resulting 4/10 receipt at turn 8's reopen.
-  // S7 slice R (docs/turn9-notes.md §4): turn 8's own BIND (a miss still
-  // decrements PP, same rule ROCK_SLIDE's own misses would follow) is a
-  // FIRST slot-1 use, matching turn9-notes' own "BIND(20) 19/20 (unchanged)"
-  // ledger at turn 9's own reopen - independent of `slot0Uses` (ROCK_SLIDE
-  // was frozen, unused, all through turn 8).
-  // S7 slice R rung (a) (docs/turn10-notes.md §4): turn 9's own ROCK_SLIDE
-  // (cursor moved back via `LEFT`, then confirmed) is a 7th slot-0 use,
-  // matching turn10-notes' own "ROCK_SLIDE(157) 3/10" ledger at turn 10's
-  // own reopen.
-  // S7 slice R rung 1 (docs/turn11-notes.md §4): turn 10's own ROCK_SLIDE
-  // (zero nav needed, cursor already at slot 0) is an 8th slot-0 use,
-  // matching turn11-notes' own "ROCK_SLIDE(157) 2/10" ledger at turn 11's
-  // own reopen.
-  // S7/S8 (docs/turn12-notes.md §4): turn 11's own ROCK_SLIDE (zero nav
-  // needed, cursor already at slot 0) is a 9th slot-0 use, matching
-  // turn12-notes' own "ROCK_SLIDE(157) 1/10" ledger at turn 12's own reopen.
-  // The completed turn-12 handoff owns ROCK_SLIDE's tenth use (a miss still
-  // consumes PP) and the resulting exhausted 0/10 receipt at turn 13's
-  // reopen.
-  const turn1Slot0Uses = isTurn1NextCommandHandoffReady(turn1NextCommandHandoff)
-    ? rentalMoveset("ONIX").maxPP[turn1NextCommandHandoff.persistedMoveSlot]
-      - turn1NextCommandHandoff.playerPp[turn1NextCommandHandoff.persistedMoveSlot]
-    : 0;
-  const latestEarlierSlot2Pp =
-    turn12NextCommandHandoff?.playerPp[2]
-    ?? turn11NextCommandHandoff?.playerPp[2]
-    ?? turn10NextCommandHandoff?.playerPp[2]
-    ?? turn9NextCommandHandoff?.playerPp[2]
-    ?? turn8NextCommandHandoff?.playerPp[2]
-    ?? turn7NextCommandHandoff?.playerPp[2]
-    ?? turn6NextCommandHandoff?.playerPp[2]
-    ?? turn5NextCommandHandoff?.playerPp[2];
-  const turn2Slot2Uses = isTurn2NextCommandHandoffReady(turn2NextCommandHandoff)
-    ? rentalMoveset("ONIX").maxPP[turn2NextCommandHandoff.persistedMoveSlot]
-      - turn2NextCommandHandoff.playerPp[turn2NextCommandHandoff.persistedMoveSlot]
-    : latestEarlierSlot2Pp === undefined
-      ? 0
-      : rentalMoveset("ONIX").maxPP[2] - latestEarlierSlot2Pp;
-  const slot0UsesAfterTurn3 = isTurn3NextCommandHandoffReady(turn3NextCommandHandoff)
-    ? rentalMoveset("ONIX").maxPP[turn3NextCommandHandoff.persistedMoveSlot]
-      - turn3NextCommandHandoff.playerPp[turn3NextCommandHandoff.persistedMoveSlot]
-    : turn1Slot0Uses;
-  const slot0UsesAfterTurn4 = isTurn4NextCommandHandoffReady(turn4NextCommandHandoff)
-    ? rentalMoveset("ONIX").maxPP[turn4NextCommandHandoff.persistedMoveSlot]
-      - turn4NextCommandHandoff.playerPp[turn4NextCommandHandoff.persistedMoveSlot]
-    : slot0UsesAfterTurn3;
-  // The handoffs own full canonical tuples. This consumer reconstructs each
-  // selected slot against the supplied moveset, preserving its existing
-  // generic-moveset behavior while the live Onix boundary receives the
-  // canonical receipt. Turn 8's typed slot-1 receipt therefore contributes
-  // its real one BIND use rather than a turn-resolution mirror.
-  const turn8BindUses = turn8NextCommandHandoff === null
-    ? 0
-    : rentalMoveset("ONIX").maxPP[1] - turn8NextCommandHandoff.playerPp[1];
-  const ppBeforeLaterTurns = [
-    turn12NextCommandHandoff?.playerPp[0]
-      ?? turn11NextCommandHandoff?.playerPp[0]
-      ?? turn10NextCommandHandoff?.playerPp[0]
-      ?? turn9NextCommandHandoff?.playerPp[0]
-      ?? turn7NextCommandHandoff?.playerPp[0]
-      ?? turn6NextCommandHandoff?.playerPp[0]
-      ?? turn5NextCommandHandoff?.playerPp[0]
-      ?? a - slot0UsesAfterTurn4,
-    b - turn8BindUses,
-    c - turn2Slot2Uses,
-    d,
-  ] as const;
-  const resolvedPlayerPp = lockedActionResolution?.segments[0]
-    ?.afterRules.rulesContext.battlers[0]!.pp;
-  const followingPlayerPp = followingResolution?.segments.at(-1)
-    ?.afterRules.rulesContext.battlers[0]!.pp;
-  if (followingPlayerPp !== undefined) return followingPlayerPp;
-  return [
-    ppBeforeLaterTurns[0],
-    ppBeforeLaterTurns[1],
-    resolvedPlayerPp?.[2] ?? turn13NextCommandHandoff?.dragonBreathPp.current ?? ppBeforeLaterTurns[2],
-    ppBeforeLaterTurns[3],
-  ];
-}
-
-/**
- * Generic-owner PP projection for the production contentful renderer.  It
- * serves Turn 1's HandleInputChooseAction epoch content as well as the 5-13
- * guard-owned chain; the historical thirteen-receipt helper above remains
- * staged for its positional ABI until the final interface cut. This path
- * takes one canonical tuple directly from the semantic completed-command
- * owner.
- */
-export function currentPPForActiveMonFromLatest(
   moveset: ActiveMonMoveset,
   latest: LatestCompletedCommandHandoff | null,
   lockedActionResolution: BattleResolutionPresentationState | null = null,

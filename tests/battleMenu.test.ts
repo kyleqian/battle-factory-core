@@ -91,7 +91,6 @@ import {
   turn7RockSlideResettledBounceTick,
   TURN7_ROCKSLIDE_REOPEN_GATE_DELAY,
   currentPPForActiveMon,
-  currentPPForActiveMonFromLatest,
   rockSlideTextStartTick,
   moveFightCursor,
 } from "../src/engine/battleMenu.ts";
@@ -100,17 +99,14 @@ import {
   resolveTurn1CompletedResolutionNextCommandHandoff,
   turn1PresentationEpochElapsedSinceReset,
 } from "../src/engine/turn1ResolutionAdapter.ts";
-import { resolveTurn2CompletedResolutionNextCommandHandoff } from "../src/engine/turn2ResolutionAdapter.ts";
-import { resolveTurn3CompletedResolutionNextCommandHandoff } from "../src/engine/turn3ResolutionAdapter.ts";
-import { resolveTurn4CompletedResolutionNextCommandHandoff } from "../src/engine/turn4ResolutionAdapter.ts";
-import { resolveTurn5CompletedResolutionNextCommandHandoff, resolveTurn5LatestCompletedCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
-import { resolveTurn6CompletedResolutionNextCommandHandoff, resolveTurn6LatestCompletedCommandHandoff } from "../src/engine/turn6ResolutionAdapter.ts";
-import { resolveTurn7CompletedResolutionNextCommandHandoff, resolveTurn7LatestCompletedCommandHandoff } from "../src/engine/turn7ResolutionAdapter.ts";
-import { resolveTurn8CompletedResolutionNextCommandHandoff, resolveTurn8LatestCompletedCommandHandoff } from "../src/engine/turn8ResolutionAdapter.ts";
-import { resolveTurn9CompletedResolutionNextCommandHandoff, resolveTurn9LatestCompletedCommandHandoff } from "../src/engine/turn9ResolutionAdapter.ts";
-import { resolveTurn10CompletedResolutionNextCommandHandoff, resolveTurn10LatestCompletedCommandHandoff } from "../src/engine/turn10ResolutionAdapter.ts";
-import { resolveTurn11CompletedResolutionNextCommandHandoff, resolveTurn11LatestCompletedCommandHandoff } from "../src/engine/turn11ResolutionAdapter.ts";
-import { resolveTurn12CompletedResolutionNextCommandHandoff, resolveTurn12LatestCompletedCommandHandoff } from "../src/engine/turn12ResolutionAdapter.ts";
+import { resolveTurn5LatestCompletedCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
+import { resolveTurn6LatestCompletedCommandHandoff } from "../src/engine/turn6ResolutionAdapter.ts";
+import { resolveTurn7LatestCompletedCommandHandoff } from "../src/engine/turn7ResolutionAdapter.ts";
+import { resolveTurn8LatestCompletedCommandHandoff } from "../src/engine/turn8ResolutionAdapter.ts";
+import { resolveTurn9LatestCompletedCommandHandoff } from "../src/engine/turn9ResolutionAdapter.ts";
+import { resolveTurn10LatestCompletedCommandHandoff } from "../src/engine/turn10ResolutionAdapter.ts";
+import { resolveTurn11LatestCompletedCommandHandoff } from "../src/engine/turn11ResolutionAdapter.ts";
+import { resolveTurn12LatestCompletedCommandHandoff } from "../src/engine/turn12ResolutionAdapter.ts";
 import {
   renderBattleScene,
   TICK0,
@@ -146,11 +142,6 @@ import {
   turn10AerialAceTextStartTick,
   turn10AerialAceTextVisibleChars,
 } from "../src/engine/battleScene.ts";
-
-const TURN1_HANDOFF = resolveTurn1CompletedResolutionNextCommandHandoff(1308);
-const TURN2_HANDOFF = resolveTurn2CompletedResolutionNextCommandHandoff(2197);
-const TURN3_HANDOFF = resolveTurn3CompletedResolutionNextCommandHandoff(3172);
-const TURN4_HANDOFF = resolveTurn4CompletedResolutionNextCommandHandoff(4312);
 
 /** Same rig as tests/battleScene.test.ts's `pixelAtSentOut` - send-out A-press already registered at trace tick 1420 (sendOutPressElapsed=380), the fixed script every committed trace in this window shares. */
 function pixelAtSentOut(t: number, x: number, y: number): [number, number, number] {
@@ -716,7 +707,7 @@ describe("battleMenu: S7 slice O - turn 7's own FEATHER_DANCE/ROCK_SLIDE (Onix v
 
   it("currentPPForActiveMon: ROCK_SLIDE (slot 0) reads 5/10 from the completed turn-6 handoff, matching turn7-notes.md's own PP ledger", () => {
     const moveset = { moveIds: [157, 349, 288, 201], maxPP: [10, 15, 20, 10] } as const;
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff())).toEqual([5, 15, 19, 10]);
+    expect(currentPPForActiveMon(moveset, resolveTurn6LatestCompletedCommandHandoff())).toEqual([5, 15, 19, 10]);
   });
 
   it("S7 slice P: TURN7_ROCKSLIDE_REOPEN_GATE_DELAY opens the turn-7-to-8 reopen gate at the settled turn-7 menu's own redraw tick (9144 = TURN7_ROCKSLIDE_PRESS_TICK+738), safely before the real reopen press (9381)", () => {
@@ -725,9 +716,9 @@ describe("battleMenu: S7 slice O - turn 7's own FEATHER_DANCE/ROCK_SLIDE (Onix v
 
   it("completed turn-7 handoff supplies 4/10 (uses 1, 3, 4, 5, 6, and 7) while BIND remains fresh", () => {
     const moveset = { moveIds: [157, 20, 288, 201], maxPP: [10, 20, 20, 10] } as const;
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff(), resolveTurn7CompletedResolutionNextCommandHandoff())).toEqual([4, 20, 19, 10]);
+    expect(currentPPForActiveMon(moveset, resolveTurn7LatestCompletedCommandHandoff())).toEqual([4, 20, 19, 10]);
     // Sanity: the completed turn-6 receipt alone (pre-turn-8) still reads 5/10.
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff(), null)[0]).toBe(5);
+    expect(currentPPForActiveMon(moveset, resolveTurn6LatestCompletedCommandHandoff())[0]).toBe(5);
   });
 
   it("S7 slice P: moveFightCursor's existing cursor^1 grid arithmetic moves RIGHT from ROCK_SLIDE (0) onto BIND (1) - the winning line's own divergence turn, no new nav code needed", () => {
@@ -737,9 +728,9 @@ describe("battleMenu: S7 slice O - turn 7's own FEATHER_DANCE/ROCK_SLIDE (Onix v
 
   it("completed turn-8 handoff reads BIND 19/20 (a miss still decrements PP) - matches turn9-notes.md §4's own 'BIND(20) 19/20 (unchanged)' ledger; ROCK_SLIDE (slot 0) stays frozen at 4/10, independent of this slot-1 receipt", () => {
     const moveset = { moveIds: [157, 20, 288, 201], maxPP: [10, 20, 20, 10] } as const;
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff(), resolveTurn7CompletedResolutionNextCommandHandoff(), resolveTurn8CompletedResolutionNextCommandHandoff())).toEqual([4, 19, 19, 10]);
+    expect(currentPPForActiveMon(moveset, resolveTurn8LatestCompletedCommandHandoff())).toEqual([4, 19, 19, 10]);
     // Sanity: the completed turn-7 receipt alone (pre-turn-9) keeps BIND at full 20/20.
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff(), resolveTurn7CompletedResolutionNextCommandHandoff(), null)[1]).toBe(20);
+    expect(currentPPForActiveMon(moveset, resolveTurn7LatestCompletedCommandHandoff())[1]).toBe(20);
   });
 
   it("S7 slice R: TURN8_MENU_REDRAW_DELAY doubles as the turn-8-to-9 reopen gate delay (directly usable, same 'no synthetic anchor needed' reason TURN4_ROCKSLIDE_MENU_REDRAW_DELAY already established) - opens at turn 8's own real redraw tick (9997 = TURN8_BIND_PRESS_TICK+572)", () => {
@@ -802,52 +793,34 @@ describe("battleMenu: S7 slice O - turn 7's own FEATHER_DANCE/ROCK_SLIDE (Onix v
 
   it("S7 slice R rung (a): currentPPForActiveMon reads ROCK_SLIDE 3/10 once the completed turn-9 handoff is present (turn 9's own confirmed ROCK_SLIDE is a 7th slot-0 use) - matches turn10-notes.md §4's own 'ROCK_SLIDE(157) 3/10' ledger; BIND (slot 1) stays frozen at 19/20, independent of this new slot-0 decrement", () => {
     const moveset = { moveIds: [157, 20, 288, 201], maxPP: [10, 20, 20, 10] } as const;
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff(), resolveTurn7CompletedResolutionNextCommandHandoff(), resolveTurn8CompletedResolutionNextCommandHandoff(), resolveTurn9CompletedResolutionNextCommandHandoff())).toEqual([3, 19, 19, 10]);
+    expect(currentPPForActiveMon(moveset, resolveTurn9LatestCompletedCommandHandoff())).toEqual([3, 19, 19, 10]);
     // Sanity: the completed turn-8 receipt alone (pre-turn-10) still reads ROCK_SLIDE at 4/10.
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff(), resolveTurn7CompletedResolutionNextCommandHandoff(), resolveTurn8CompletedResolutionNextCommandHandoff(), null)[0]).toBe(4);
+    expect(currentPPForActiveMon(moveset, resolveTurn8LatestCompletedCommandHandoff())[0]).toBe(4);
   });
 
   it("S7 slice R rung 1: currentPPForActiveMon reads ROCK_SLIDE 2/10 once the completed turn-10 handoff is present (turn 10's own confirmed ROCK_SLIDE is an 8th slot-0 use) - matches turn11-notes.md §4's own 'ROCK_SLIDE(157) 2/10' ledger; BIND (slot 1) stays frozen at 19/20, independent of this new slot-0 decrement", () => {
     const moveset = { moveIds: [157, 20, 288, 201], maxPP: [10, 20, 20, 10] } as const;
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff(), resolveTurn7CompletedResolutionNextCommandHandoff(), resolveTurn8CompletedResolutionNextCommandHandoff(), resolveTurn9CompletedResolutionNextCommandHandoff(), resolveTurn10CompletedResolutionNextCommandHandoff())).toEqual([2, 19, 19, 10]);
+    expect(currentPPForActiveMon(moveset, resolveTurn10LatestCompletedCommandHandoff())).toEqual([2, 19, 19, 10]);
     // Sanity: the completed turn-9 handoff alone (pre-turn-11) still reads ROCK_SLIDE at 3/10.
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff(), resolveTurn7CompletedResolutionNextCommandHandoff(), resolveTurn8CompletedResolutionNextCommandHandoff(), resolveTurn9CompletedResolutionNextCommandHandoff())[0]).toBe(3);
+    expect(currentPPForActiveMon(moveset, resolveTurn9LatestCompletedCommandHandoff())[0]).toBe(3);
   });
 
   it("S7/S8: currentPPForActiveMon reads ROCK_SLIDE 1/10 once the completed turn-11 handoff is present (turn 11's own confirmed ROCK_SLIDE is a 9th slot-0 use) - matches turn12-notes.md §4's own 'ROCK_SLIDE(157) 1/10' entering-turn-12 ledger; BIND (slot 1) stays frozen at 19/20, independent of this new slot-0 decrement", () => {
     const moveset = { moveIds: [157, 20, 288, 201], maxPP: [10, 20, 20, 10] } as const;
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff(), resolveTurn7CompletedResolutionNextCommandHandoff(), resolveTurn8CompletedResolutionNextCommandHandoff(), resolveTurn9CompletedResolutionNextCommandHandoff(), resolveTurn10CompletedResolutionNextCommandHandoff(), resolveTurn11CompletedResolutionNextCommandHandoff())).toEqual([1, 19, 19, 10]);
+    expect(currentPPForActiveMon(moveset, resolveTurn11LatestCompletedCommandHandoff())).toEqual([1, 19, 19, 10]);
     // Sanity: the completed turn-10 handoff alone (pre-turn-12) still reads ROCK_SLIDE at 2/10.
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff(), resolveTurn7CompletedResolutionNextCommandHandoff(), resolveTurn8CompletedResolutionNextCommandHandoff(), resolveTurn9CompletedResolutionNextCommandHandoff(), resolveTurn10CompletedResolutionNextCommandHandoff(), null)[0]).toBe(2);
+    expect(currentPPForActiveMon(moveset, resolveTurn10LatestCompletedCommandHandoff())[0]).toBe(2);
   });
 
   it("S7/S8: currentPPForActiveMon reads ROCK_SLIDE 0/10 (exhausted) once the completed turn-12 handoff is present (turn 12's own confirmed ROCK_SLIDE miss is a 10th slot-0 use) - matches turn13-notes.md §3's own 'ROCK_SLIDE 0/10 (exhausted, confirmed)' entering-turn-13 ledger; BIND (slot 1, 19/20) and DRAGON_BREATH (slot 2, 19/20) stay at their own already-used PP, independent of this new slot-0 receipt", () => {
     const moveset = { moveIds: [157, 20, 225, 201], maxPP: [10, 20, 20, 10] } as const;
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff(), resolveTurn7CompletedResolutionNextCommandHandoff(), resolveTurn8CompletedResolutionNextCommandHandoff(), resolveTurn9CompletedResolutionNextCommandHandoff(), resolveTurn10CompletedResolutionNextCommandHandoff(), resolveTurn11CompletedResolutionNextCommandHandoff(), resolveTurn12CompletedResolutionNextCommandHandoff())).toEqual([0, 19, 19, 10]);
+    expect(currentPPForActiveMon(moveset, resolveTurn12LatestCompletedCommandHandoff())).toEqual([0, 19, 19, 10]);
     // Sanity: the completed turn-11 handoff alone (pre-turn-13) still reads ROCK_SLIDE at 1/10.
-    expect(currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, resolveTurn5CompletedResolutionNextCommandHandoff(), resolveTurn6CompletedResolutionNextCommandHandoff(), resolveTurn7CompletedResolutionNextCommandHandoff(), resolveTurn8CompletedResolutionNextCommandHandoff(), resolveTurn9CompletedResolutionNextCommandHandoff(), resolveTurn10CompletedResolutionNextCommandHandoff(), resolveTurn11CompletedResolutionNextCommandHandoff(), null)[0]).toBe(1);
+    expect(currentPPForActiveMon(moveset, resolveTurn11LatestCompletedCommandHandoff())[0]).toBe(1);
   });
 
-  it("dispatcher slice 2: generic latest PP is identical to the legacy reconstruction at every turn 5-12 fixture", () => {
+  it("dispatcher slice 10: currentPPForActiveMon projects the generic canonical tuple correctly at every turn 5-12 fixture", () => {
     const moveset = { moveIds: [157, 20, 225, 201], maxPP: [10, 20, 20, 10] } as const;
-    const turn5 = resolveTurn5CompletedResolutionNextCommandHandoff();
-    const turn6 = resolveTurn6CompletedResolutionNextCommandHandoff();
-    const turn7 = resolveTurn7CompletedResolutionNextCommandHandoff();
-    const turn8 = resolveTurn8CompletedResolutionNextCommandHandoff();
-    const turn9 = resolveTurn9CompletedResolutionNextCommandHandoff();
-    const turn10 = resolveTurn10CompletedResolutionNextCommandHandoff();
-    const turn11 = resolveTurn11CompletedResolutionNextCommandHandoff();
-    const turn12 = resolveTurn12CompletedResolutionNextCommandHandoff();
-    const legacy = [
-      currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, turn5),
-      currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, turn5, turn6),
-      currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, turn5, turn6, turn7),
-      currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, turn5, turn6, turn7, turn8),
-      currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, turn5, turn6, turn7, turn8, turn9),
-      currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, turn5, turn6, turn7, turn8, turn9, turn10),
-      currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, turn5, turn6, turn7, turn8, turn9, turn10, turn11),
-      currentPPForActiveMon(moveset, TURN1_HANDOFF, TURN2_HANDOFF, TURN3_HANDOFF, TURN4_HANDOFF, turn5, turn6, turn7, turn8, turn9, turn10, turn11, turn12),
-    ];
     const generic = [
       resolveTurn5LatestCompletedCommandHandoff(),
       resolveTurn6LatestCompletedCommandHandoff(),
@@ -857,9 +830,18 @@ describe("battleMenu: S7 slice O - turn 7's own FEATHER_DANCE/ROCK_SLIDE (Onix v
       resolveTurn10LatestCompletedCommandHandoff(),
       resolveTurn11LatestCompletedCommandHandoff(),
       resolveTurn12LatestCompletedCommandHandoff(),
-    ].map((latest) => currentPPForActiveMonFromLatest(moveset, latest));
+    ].map((latest) => currentPPForActiveMon(moveset, latest));
 
-    expect(generic).toEqual(legacy);
+    expect(generic).toEqual([
+      [6, 20, 19, 10],
+      [5, 20, 19, 10],
+      [4, 20, 19, 10],
+      [4, 19, 19, 10],
+      [3, 19, 19, 10],
+      [2, 19, 19, 10],
+      [1, 19, 19, 10],
+      [0, 19, 19, 10],
+    ]);
   });
 
   it("S7/S8 (docs/turn13-notes.md §3): moveFightCursor's own 2x2-grid DOWN press moves ROCK_SLIDE (0, top-left) onto DRAGON_BREATH (2, bottom-left) - the double-decrement the dossier root-caused as a plain row move, no new nav code needed", () => {

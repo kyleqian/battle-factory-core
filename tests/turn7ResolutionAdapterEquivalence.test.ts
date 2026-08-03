@@ -1,12 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { currentPPForActiveMon } from "../src/engine/battleMenu.ts";
-import { resolveTurn1CompletedResolutionNextCommandHandoff } from "../src/engine/turn1ResolutionAdapter.ts";
-import { resolveTurn2CompletedResolutionNextCommandHandoff } from "../src/engine/turn2ResolutionAdapter.ts";
-import { resolveTurn3CompletedResolutionNextCommandHandoff } from "../src/engine/turn3ResolutionAdapter.ts";
-import { resolveTurn4CompletedResolutionNextCommandHandoff } from "../src/engine/turn4ResolutionAdapter.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
-import { resolveTurn5CompletedResolutionNextCommandHandoff } from "../src/engine/turn5ResolutionAdapter.ts";
-import { resolveTurn6CompletedResolutionNextCommandHandoff } from "../src/engine/turn6ResolutionAdapter.ts";
 import {
   isTurn7NextCommandHandoffReady,
   resolveTurn7CompletedResolutionNextCommandHandoff,
@@ -37,16 +31,8 @@ describe("turn7ResolutionAdapter: #39 completed-turn-7/next-command handoff proo
 
   it("owns exactly the live turn-7 PP receipt without depending on staged move composition", () => {
     const onix = rentalMoveset("ONIX");
-    const turn5Handoff = resolveTurn5CompletedResolutionNextCommandHandoff();
-    const turn6Handoff = resolveTurn6CompletedResolutionNextCommandHandoff();
     const handoff = resolveTurn7CompletedResolutionNextCommandHandoff();
-    const liveReceipt = currentPPForActiveMon(
-      onix,
-      resolveTurn1CompletedResolutionNextCommandHandoff(1308), resolveTurn2CompletedResolutionNextCommandHandoff(2197), resolveTurn3CompletedResolutionNextCommandHandoff(3172), resolveTurn4CompletedResolutionNextCommandHandoff(4312),
-      turn5Handoff,
-      turn6Handoff,
-      handoff,
-    );
+    const liveReceipt = currentPPForActiveMon(onix, resolveTurn7LatestCompletedCommandHandoff());
 
     expect(liveReceipt).toEqual([4, 20, 19, 10]);
     expect(handoff.playerPp).toEqual(liveReceipt);
@@ -61,13 +47,7 @@ describe("turn7ResolutionAdapter: #39 completed-turn-7/next-command handoff proo
       moveIds: [157, 349, 288, 201],
       maxPP: [10, 15, 20, 10],
     } as const;
-    const liveReceipt = currentPPForActiveMon(
-      genericMoveset,
-      resolveTurn1CompletedResolutionNextCommandHandoff(1308), resolveTurn2CompletedResolutionNextCommandHandoff(2197), resolveTurn3CompletedResolutionNextCommandHandoff(3172), resolveTurn4CompletedResolutionNextCommandHandoff(4312),
-      resolveTurn5CompletedResolutionNextCommandHandoff(),
-      resolveTurn6CompletedResolutionNextCommandHandoff(),
-      resolveTurn7CompletedResolutionNextCommandHandoff(),
-    );
+    const liveReceipt = currentPPForActiveMon(genericMoveset, resolveTurn7LatestCompletedCommandHandoff());
 
     expect(liveReceipt).toEqual([4, 15, 19, 10]);
     expect(resolveTurn7CompletedResolutionNextCommandHandoff().playerPp[0]).toBe(liveReceipt[0]);
