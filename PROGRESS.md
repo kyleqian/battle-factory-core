@@ -4,6 +4,60 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 893 — [bounded MAIN worker, 2026-08-03 ~13:05] Same-day crash FIXED (STRINGID_PKMNFELLFORTAUNT + sibling) + ISSUES #72 filed (107-id census, blind-spot class beyond #70)
+
+- **State:** master `a6d533a7`. Full `npm test`: **660 files / 6,558 passed /
+  1 skipped**. `npm run build` green (tsc -b + vite).
+  `compare:differential -- battle-command-generated-off.json --base 78fb4ef0
+  --summary`: **PASS — 128/128 byte-identical**.
+  `tests/executableFrontierRatchet.test.ts` green, untouched, no barrier
+  changes.
+- **Did:** Fixed the same-day user-reported crash (live preview `3a1e1d8b`:
+  opponent MURKROW's TAUNT threw battleStringResolver's completeness guard
+  on `{B_DEF_NAME_WITH_PREFIX}`). Mapped `STRINGID_PKMNFELLFORTAUNT` in
+  `messageLines` (`battleResolutionPresentation.ts`) — Taunt's own
+  `Cmd_settaunt` operates on `gBattlerTarget` directly, so B_DEF is the
+  move's own defender, same shape as `STRINGID_PKMNSUBJECTEDTOTORMENT`.
+  While staging a real repro (MURKROW's real Factory rental set,
+  `FRONTIER_MON_MURKROW_1`), found and fixed a **sibling gap in the same
+  turn**: `STRINGID_PKMNCANTUSEMOVETAUNT` (the taunted battler's own blocked
+  status-move action, printed by the attack canceler instead of
+  STRINGID_USEDMOVE) — sourced from the frozen action snapshot's
+  attacker/currentMove, not `lastMoveAttacker` (no used-move message
+  precedes a canceled action). `tests/presentationStringTaunt.test.ts`: full
+  production-kernel repro, red-verified via `git stash` on the engine file
+  (threw the exact reported error pre-fix).
+  **Root cause of why #70 missed both:** #70's sweep grepped `src/engine/
+  *.ts` for `STRINGID_` TS literals; these two ids are emitted purely by the
+  generic `printstring` opcode handler reading the operand straight out of
+  the parsed battle-script program — no TS code ever names them, so the
+  grep-based method structurally cannot see this class. Wrote
+  `tools/report/printstring-literal-census.ts` (regenerable,
+  `docs/printstring-literal-census.md`) to enumerate it properly: **207**
+  unique literal `printstring` STRINGID operands in the parsed program, 13
+  already explicit + 87 generic-fallback-safe, **107 UNRESOLVED**
+  (syntactic upper bound, not per-id reachability-traced like #70's own
+  method — many are structurally dead, e.g. Battle Arena/link-battle-only
+  ids). Filed as **ISSUES #72** with the full list and the 7
+  highest-suspicion same-family next picks (PKMNALREADYASLEEP/CONFUSED/
+  HASBURN/POISONED/ISALREADYPARALYZED, PKMNCANTUSEMOVETORMENT/SEALED) —
+  per the step's own outcome rule (longer tail → file, don't chase).
+- **Next:** ISSUES #72's 7 highest-suspicion ids (same "already-status"/
+  "can't-use-move-X" family as the just-fixed Taunt pair, same fix idiom);
+  the rest of #72's 107-id list needs #70-style per-id reachability triage
+  before fixing (many are dead paths, not real gaps); ISSUES #71 remaining
+  (Slice D gated on animation lane's rung-3 dispatcher; the
+  `drawGeneratedPlayerMaterialize` ONIX-back latent bug from entry 891);
+  typeref slice-2 re-scope.
+- **Notes:** no PAPERCUT this step. `npm test` auto-backgrounded past the
+  harness's 120s default Bash timeout (suite takes ~11min); resolved by
+  polling the background output file in a single blocking foreground Bash
+  call with an explicit longer timeout, per this run's "never actually
+  background a verification" discipline — worth remembering the fix
+  pattern rather than re-deriving it next time a full-suite run exceeds
+  120s.
+
+---
 ## 892 — [supervisor wind-down, 2026-08-03 ~12:40] #70 CLOSED + dossier CLOSED + #71 hookup slices A/B/C landed + typeref slice 1; animation fold; final union green
 
 - **State:** master `3a1e1d8b` = supervisor fold of animation-main
@@ -112,69 +166,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no PAPERCUT this step beyond the reachability analysis time
   itself (worth it — it caught a real bug before a guard would have shipped
   a crash).
-
----
-## 890 — [bounded MAIN worker, 2026-08-03] ISSUES #71 Slices A+B LANDED — front terminal offsets wired at the 5 real settle hooks, RAM-confirmed
-
-- **State:** master `32af4030`. Full `npm test`: **649 files / 6,492 passed /
-  1 skipped** (+4 from this step's new suite). `npm run build` green (tsc -b
-  + vite). `compare:differential -- battle-command-generated-off.json --base
-  30afb56d --summary`: **PASS — 128/128 byte-identical**.
-  `tests/executableFrontierRatchet.test.ts` green, untouched, no new
-  recording imports, no barrier-count changes.
-- **Did:** `docs/send-out-live-wiring-consumer-map.md` §5 Slice A (+ Slice
-  B's species-threading acceptance) — wired `speciesFrontIdleRestOffset`
-  (already-banked front-family dispatcher, `src/animation/speciesIdleAnim.ts`)
-  at the 5 real live settle hooks in `battleScene.ts` (6 call sites):
-  `drawGrovyleSettled`, `drawKabutoHSlideWobble`'s settle branch,
-  `drawGeneratedOpponentRelease`'s `coeff===0` branch + its duplicate in
-  `renderGeneratedBattleStartPlayerRelease`, `drawTurn5PidgeottoSettled`,
-  `drawTurn13MurkrowSettled` — offset added directly to each draw's origin
-  x/y, reusing the `:1105` import. The generated-route pair (item 3) already
-  threaded the real `fieldView.fieldArt.opponent.speciesSymbol` used for
-  sprite art/elevation at that exact call site, so Slice B's guard (no
-  literal/shared-default species) was satisfied as written, not a separate
-  fix. Exported `drawGeneratedOpponentRelease` (was module-private) so it's
-  directly unit-testable.
-- **Tests:** 4 new Tier-1 cases in `tests/battleScene.test.ts` — GROVYLE and
-  MURKROW settled-sprite no-op pins (offset `{0,0}`, via the existing
-  `pixelAtSentOut`/turn13-confirm render idioms — no visible change, proving
-  the wiring is inert where expected); RATTATA positive case (staged
-  `fieldView`, no existing idiom reaches the generated-route settle) —
-  settles at `x2=+1` vs. an independently-blitted un-offset reference frame;
-  BULBASAUR staged-`fieldView` companion guarding Slice B (settles at the
-  plain origin, not a shared/literal default).
-- **Oracle acceptance (program doc §7 bar):** extended
-  `tools/probe/dump-onix-front-idle-anim.py`'s `SYMBOLS` table
-  (`Anim_VerticalStretch`, `Anim_HorizontalSlideWobble`; `nm` addresses on
-  the reference ELF). Three new minimal `battle-scene-on` mechanicLab
-  scenarios (`tools/battle-lab/send-out-front-idle-{grovyle,pidgeotto,
-  rattata}.json`) RAM-probed `gBattlerSpriteIds[1]` at the settled tick:
-  GROVYLE `x2=0,y2=0`, PIDGEOTTO `x2=0,y2=0` (same `animNum`/`animCmdIndex`
-  as GROVYLE — the §7 sibling-pair spot-check for shared `V_STRETCH`),
-  RATTATA `x2=1,y2=0` (the mandatory positive case) — all three match
-  `speciesFrontIdleRestOffset`'s output exactly. **Gotcha found along the
-  way:** a `battle-scene-off`-profile mechanicLab scenario never dispatches
-  the front idle-anim task at all (flat `SpriteCallbackDummy`/`x2=0`/
-  `animNum=0` from tick 0) — only `battle-scene-on` fast-forwards through
-  the real intro, matching the prior ONIX fixture's own profile, not this
-  lane's default oracle. Re-ran the §4 dense-window list twice fresh
-  (`battle2-kabuto-sendout-dense` 151/151, `battle2-player-sendout-dense`
-  170/170, `sendout` 255/256, `battle2-jenson-sendout-text` 39/39,
-  `factory-arbitrary-intro-yoshi-off` 700/751,
-  `factory-arbitrary-intro-magneton-off` 703/751) — identical both runs and
-  matching each window's own pre-existing accepted baseline exactly (zero
-  new diffs; ONIX/RATTATA appear in none of these committed windows, per
-  §3's empirical finding).
-- **Next:** ISSUES #71 remaining scope: Slices C/D (ONIX-back/MAGBY-back
-  hand-fit consumer guards; per-tick front playback) + the §1e 56/58
-  move-window patch-site retirement — all still queued, cross-lane ask for
-  the animation lane's rung-3 dispatcher stays open (see ISSUES.md #71).
-  Typeref retirement slice 2 remainder (Family P+Q turn1-4 fold, see entry
-  889 below) is the next queued item after that.
-- **Notes:** no PAPERCUT beyond ordinary research time; the `battle-scene-
-  off`-vs-`battle-scene-on` mechanicLab fast-forward gotcha above cost
-  ~10min to root-cause and is worth remembering for any future front/back
-  send-out probe in this codebase.
 
 ---
