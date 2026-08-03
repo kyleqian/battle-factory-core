@@ -176,7 +176,7 @@ describe("ANIM_GLOW_BLUE Scene-ON evidence", () => {
     expect(Object.values(selectorTables.frontAnimIds.species)).not.toContain("ANIM_GLOW_YELLOW");
     expect(Object.values(selectorTables.frontAnimIds.species)).not.toContain("ANIM_GLOW_PURPLE");
     expect(speciesFrontIdleRestOffset("MILOTIC")).toEqual({ x2: 0, y2: 0 });
-    expect(speciesFrontIdleRestOffset("PIDGEOT")).toBeNull();
+    expect(speciesFrontIdleRestOffset("PIDGEOT")).toEqual({ x2: 0, y2: 0 });
   });
 
   it("pins MILOTIC_1's Factory source record inside complete legal Scene-ON parties", () => {

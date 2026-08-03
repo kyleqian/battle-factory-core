@@ -138,6 +138,6 @@ describe("ANIM_GLOW_BLUE", () => {
     expect(Object.values(selectorTables.frontAnimIds.species)).not.toContain("ANIM_GLOW_PURPLE");
     expect(speciesFrontIdleRestOffset("GASTLY")).toEqual({ x2: 0, y2: 0 });
     expect(speciesFrontIdleRestOffset("PONYTA")).toEqual({ x2: 0, y2: 0 });
-    expect(speciesFrontIdleRestOffset("PIDGEOT")).toBeNull();
+    expect(speciesFrontIdleRestOffset("PIDGEOT")).toEqual({ x2: 0, y2: 0 });
   });
 });

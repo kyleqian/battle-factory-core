@@ -61,6 +61,7 @@ export type SpeciesFrontAnimFamily =
   | "RISING_WOBBLE"
   | "LUNGE_GROW"
   | "FLASH_YELLOW"
+  | "FRONT_FLIP"
   | "FLICKER_INCREASING"
   | "FIGURE_8"
   | "H_JUMPS"
@@ -125,6 +126,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "RISING_WOBBLE",
   "LUNGE_GROW",
   "FLASH_YELLOW",
+  "FRONT_FLIP",
   "FLICKER_INCREASING",
   "FIGURE_8",
   "H_JUMPS",
@@ -1043,6 +1045,23 @@ export const GLOW_BLUE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
 /** There are no blue-glow mappings outside the Factory rental pool. */
 export const GLOW_BLUE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   GLOW_BLUE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** All source selector mappings for `ANIM_FRONT_FLIP`. */
+export const FRONT_FLIP_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_FRONT_FLIP")
+    .map(([species]) => species),
+);
+
+/** Every front-flip mapping is reachable through a Factory rental. */
+export const FRONT_FLIP_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  FRONT_FLIP_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no front-flip mappings outside the Factory rental pool. */
+export const FRONT_FLIP_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  FRONT_FLIP_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /** All source selector mappings for the palette-only `ANIM_GLOW_ORANGE`. */
@@ -4762,6 +4781,187 @@ export function spinFrameAtTick(ticksSinceStart: number): SpinFrame | null {
   return lastFrame;
 }
 
+/**
+ * Direct-task selector 41. Unlike the nearby tumbling selector, this never
+ * allocates an `sAnims` slot: `Task_HandleMonAnimation` installs
+ * `Anim_FrontFlip` after zeroing all data slots except the front-picture
+ * frame accumulator in data[1]. Pidgeot has no sMonAnimationDelayTable entry,
+ * so `DoMonFrontSpriteAnimation` launches this task immediately after it
+ * starts front-picture program 1.
+ */
+export const FRONT_FLIP_ENTRY = Object.freeze({
+  selector: "ANIM_FRONT_FLIP",
+  sourceId: 41,
+  usesAddNewAnim: false,
+  taskZeroedDataIndices: TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES,
+  taskPreservedDataIndices: [1],
+  normalFrontDontFlip: true,
+  callbackInstalled: "Anim_FrontFlip",
+  callbackInvokedByInitializer: false,
+  initializerStartsAffine: true,
+  initializerInstallsCallback: "FrontFlip_0",
+  frontPictureProgramIndex: 1,
+  sourceAnimationDelay: 0,
+  taskRestoresBattlerAndSpeciesAtSpriteCallbackDummy: true,
+  accepted: true,
+} as const);
+
+/** Exact `sAnim_Pidgeot_1` program started by `DoMonFrontSpriteAnimation`. */
+export const FRONT_FLIP_PIDGEOT_FRONT_PICTURE_PROGRAM = Object.freeze([
+  Object.freeze({ frame: 1, duration: 20 }),
+  Object.freeze({ frame: 0, duration: 10 }),
+  Object.freeze({ frame: 1, duration: 15 }),
+  Object.freeze({ frame: 0, duration: 1 }),
+] as const);
+
+export interface FrontFlipFrame extends SpeciesIdleOffset {
+  /** Callback entered for this source update, before it mutates the sprite. */
+  readonly phase: "Anim_FrontFlip" | "FrontFlip_0" | "FrontFlip_1" | "FrontFlip_2";
+  /** Signed data[2] immediately before and after that callback. */
+  readonly data2Before: number;
+  readonly data2: number;
+  /** Source's raw `data[2] << 8`, before the u16 function argument conversion. */
+  readonly affineRotationShifted: number | null;
+  readonly affineRotationU16: number | null;
+  readonly affineWriteCount: 0 | 1;
+  readonly xScale: 256;
+  readonly yScale: 256;
+  /** `HandleStartAffineAnim` has set affine double mode this callback. */
+  readonly startedAffine: boolean;
+  readonly normalFrontDontFlip: true;
+  /** The source calls TryFlipX around each motion callback; it is a no-op here. */
+  readonly tryFlipXBeforeMotion: boolean;
+  readonly tryFlipXAfterMotion: boolean;
+  readonly tryFlipXCalls: 0 | 2;
+  readonly resetSpriteAfterAnim: boolean;
+  /** Sprite callback selected for the following frame. */
+  readonly callback: "FrontFlip_0" | "FrontFlip_1" | "FrontFlip_2" | "WaitAnimEnd";
+  readonly affineMode: "double" | "normal";
+}
+
+/**
+ * Source-order reducer for selector 41's `Anim_FrontFlip` ->
+ * `FrontFlip_0` -> `FrontFlip_1` -> `FrontFlip_2`
+ * (`pokemon_animation.c:911-939,1003-1035,2302-2364,5540-5544`). The task
+ * has already made `sDontFlip=TRUE` for a normal opponent-front sprite, so
+ * both preserved `TryFlipX` calls are no-ops. All x2/y2/data[2] writes pass
+ * through s16 storage; the rotation call retains the source `data[2] << 8`
+ * expression before `HandleSetAffineData` receives its u16 argument.
+ *
+ * Tick 0 is the delayed task's direct `Anim_FrontFlip` callback. Ticks 1..49
+ * are the three motion callbacks; tick 49 calls `ResetSpriteAfterAnim` and
+ * installs `WaitAnimEnd`. Later calls leave this settled reducer state intact
+ * while WaitAnimEnd waits for the front-picture program to signal animEnded.
+ */
+export function frontFlipFrameAtTick(ticksSinceStart: number): FrontFlipFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+
+  type Phase = FrontFlipFrame["phase"] | "WaitAnimEnd";
+  let phase: Phase = "Anim_FrontFlip";
+  let data2 = 0;
+  let x2 = 0;
+  let y2 = 0;
+  let affineMode: FrontFlipFrame["affineMode"] = "normal";
+  let lastFrame: FrontFlipFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (phase === "WaitAnimEnd") continue;
+
+    const callbackPhase = phase;
+    const data2Before = data2;
+    let affineRotationShifted: number | null = null;
+    let affineRotationU16: number | null = null;
+    let startedAffine = false;
+    let tryFlipXBeforeMotion = false;
+    let tryFlipXAfterMotion = false;
+    let resetSpriteAfterAnim = false;
+
+    switch (callbackPhase) {
+      case "Anim_FrontFlip":
+        // HandleStartAffineAnim: double OAM, affine program 0 for sDontFlip.
+        affineMode = "double";
+        startedAffine = true;
+        phase = "FrontFlip_0";
+        break;
+      case "FrontFlip_0":
+        tryFlipXBeforeMotion = true;
+        x2 = tryFlipX(x2, true);
+        x2 = toS16(x2 + 1);
+        y2 = toS16(y2 - 1);
+        if (x2 > 15) {
+          data2 = 0;
+          phase = "FrontFlip_1";
+        }
+        x2 = tryFlipX(x2, true);
+        tryFlipXAfterMotion = true;
+        break;
+      case "FrontFlip_1":
+        tryFlipXBeforeMotion = true;
+        x2 = tryFlipX(x2, true);
+        data2 = toS16(data2 + 16);
+        if (x2 <= -16) {
+          x2 = -16;
+          y2 = 16;
+          data2 = 0;
+          phase = "FrontFlip_2";
+        } else {
+          x2 = toS16(x2 - 2);
+          y2 = toS16(y2 + 2);
+        }
+        affineRotationShifted = data2 << 8;
+        affineRotationU16 = toU16(affineRotationShifted);
+        x2 = tryFlipX(x2, true);
+        tryFlipXAfterMotion = true;
+        break;
+      case "FrontFlip_2":
+        tryFlipXBeforeMotion = true;
+        x2 = tryFlipX(x2, true);
+        x2 = toS16(x2 + 1);
+        y2 = toS16(y2 - 1);
+        if (x2 >= 0) {
+          x2 = 0;
+          y2 = 0;
+          affineMode = "normal";
+          resetSpriteAfterAnim = true;
+          phase = "WaitAnimEnd";
+        }
+        x2 = tryFlipX(x2, true);
+        tryFlipXAfterMotion = true;
+        break;
+    }
+
+    const callback: FrontFlipFrame["callback"] = phase;
+    lastFrame = {
+      x2,
+      y2,
+      phase: callbackPhase,
+      data2Before,
+      data2,
+      affineRotationShifted,
+      affineRotationU16,
+      affineWriteCount: affineRotationShifted === null ? 0 : 1,
+      xScale: 256,
+      yScale: 256,
+      startedAffine,
+      normalFrontDontFlip: true,
+      tryFlipXBeforeMotion,
+      tryFlipXAfterMotion,
+      tryFlipXCalls: tryFlipXBeforeMotion && tryFlipXAfterMotion ? 2 : 0,
+      resetSpriteAfterAnim,
+      callback,
+      affineMode,
+    };
+  }
+
+  if (lastFrame === null) throw new Error("unreachable FrontFlip reducer state");
+  return lastFrame;
+}
+
+/** `WaitAnimEnd` becomes the terminal dummy callback only after animEnded. */
+export function frontFlipWaitAnimEndCallback(animEnded: boolean): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
 /** Source-specific `Anim_TumblingFrontFlip_Twice` initializer for selector 84. */
 export const TUMBLING_FRONT_FLIP_TWICE_INITIALIZER = Object.freeze({
   selector: "ANIM_TUMBLING_FRONT_FLIP_TWICE",
@@ -6984,6 +7184,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = fourPetalFrameAtTick(63);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_FourPetal did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "FRONT_FLIP": {
+      const terminal = frontFlipFrameAtTick(49);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_FrontFlip did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }

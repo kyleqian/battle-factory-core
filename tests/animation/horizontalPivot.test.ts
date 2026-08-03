@@ -161,7 +161,7 @@ describe("ANIM_H_PIVOT", () => {
     expect(selectorTables.frontAnimIds.species.MILOTIC).toBe("ANIM_GLOW_BLUE");
     expect(speciesFrontIdleRestOffset("MILOTIC")).toEqual({ x2: 0, y2: 0 });
     expect(selectorTables.frontAnimIds.species.PIDGEOT).toBe("ANIM_FRONT_FLIP");
-    expect(speciesFrontIdleRestOffset("PIDGEOT")).toBeNull();
+    expect(speciesFrontIdleRestOffset("PIDGEOT")).toEqual({ x2: 0, y2: 0 });
     expect(JSON.stringify(selectorTables.backAnimationIds)).not.toContain("ANIM_H_PIVOT");
   });
 });
