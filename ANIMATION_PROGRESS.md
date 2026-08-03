@@ -1,5 +1,40 @@
 # Animation coverage
 
+## Back `BACK_ANIM_GROW` triple accepted (2026-08-03)
+
+**State:** exact for the sixth bounded player-back set: **6/25 back sets,
+18/75 selector variants, 58/376 Factory mappings**. The generated set is
+exactly **3 mappings / 3 Factory / 0 outside** — WIGGLYTUFF, KOFFING, WEEZING.
+Move coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**;
+`ANIMATION_COVERAGE.json` is unchanged at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Did:** ported source-relative `Anim_Grow_Twice`, `Anim_Grow`, shared `Grow`,
+and separate `Anim_GrowInStages`: TryFlipX/order, affine start, signed GBA
+Sin/Cos, source integer division, shared cycle reset, staged pauses and
+thresholds, terminal double-write order, WaitAnimEnd, OAM/matrix latency, and
+task restoration. The live species + party-nature selector seam remains the
+only routing input; friendship is not read. Weezing index **405** Adamant
+selects twice/fast; Wigglytuff index **207** Relaxed selects normal; Koffing
+Modest is explicitly **staged-only** because no set-6 Factory record is mod 2.
+
+**Evidence:** six fresh Scene-ON receipts, paired byte-identical and dense
+through `SpriteCallbackDummy`: Weezing twice **1839..1906 (68 frames),
+30,880 B, `5949f90fe115cb1b81dcb9a768d4af963dd7d1c05171df669de8944f0d8c3104`**;
+Wigglytuff normal **1842..1908 (67, 30,026 B,
+`af8df9de2bbd38d267fb3d500a93741d3343124e34f24904e91f2754ba5a1dad`)**;
+staged Koffing slow **1839..1955 (117, 52,934 B,
+`1dc9bdb377d9c6392e5fa90dea7579aafbe9452e367c96080a8c81a7158d06ab`)**.
+Every receipt retains each framebuffer hash plus sprite RAM/OAM/affine state;
+Tier-1 evidence checks reducer state on every frame and asserts staged terminal
+double-write ordering.
+
+**Verification / next:** focused source/census/routing/reducer/evidence checks
+**2 files / 10 tests**, smoke, `npx tsc --noEmit`, and coverage are green;
+full suite/build remain before handoff. Next source-ranked unsupported set is
+**`BACK_ANIM_CIRCLE_COUNTERCLOCKWISE` (set 7): 2 mappings / 2 Factory / 0
+outside — HITMONTOP, SPINDA**. No move status was promoted.
+
 ## Back `BACK_ANIM_SHRINK_GROW` triple accepted (2026-08-03)
 
 **State:** exact for the fifth bounded player-back set: **5/25 back sets,
