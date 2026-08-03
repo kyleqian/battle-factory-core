@@ -5,8 +5,8 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-**Two kinds of entry live here — do not confuse them.** `#39`, `#55`, `#69`,
-and `#70` are open, actionable debt. `#38`, `#18`, `#56`, `#61`, and `#5` are
+**Two kinds of entry live here — do not confuse them.** `#39`, `#55`, and
+`#70` are open, actionable debt. `#38`, `#18`, `#56`, `#61`, and `#5` are
 **settled records, not work**: each was investigated to root cause and then
 parked or accepted by decision. They stay because ROADMAP acceptance lines
 cite them by number as the recorded reason specific pixel diffs are accepted
@@ -52,30 +52,6 @@ opcode actually emit in Factory L50 singles — cross-reference the emitting
 opcode set, not doc comments), then fix the reachable ones in ranked
 batches with #65/#68's established resolver shape + a repro test each. The
 4 missing-table ids need the extractor gap closed before any mapping.
-
-## #69 — [USER REPORT 2026-08-02] Scene-OFF stat-banner cadence runs ~21% fast: missing 64-frame post-print hold
-
-**Ground truth pinned (2026-08-02, `0b8c0537`,
-`docs/issue69-omniboost-off-ground-truth.md`):** the ROM's Scene-OFF
-omniboost is **5 separate banners** (box-clear flash + text + the source's
-64-frame `waitmessage(B_WAIT_TIME_LONG)` hold), ~92 frames/banner, 473
-total (dense fixture `issue69-omniboost-dense-seed8.json`). The app's five
-banners are structurally CORRECT (user's "one gray flash" memory is the
-Scene-ON animation, skipped in OFF); the defect is timing: ~74.6
-frames/banner, 373 total — **zero post-print hold modeled**, generic to
-every stat-change move (cross-ref: the open flag in
-`docs/stat-change-confusion-ground-truth.md`). RNG exonerated: 25/25
-seed-for-seed proc agreement; draw attribution exact (double proc = luck).
-
-**Fix (bounded, prescribed):** `battleResolutionCommandDuration`'s
-`"stat"`/`"message"` cases + `STAT_TIMING`/`MESSAGE_TIMING`
-(`battleResolutionPresentation.ts`): add the missing 64-frame post-print
-hold, target ~92 frames/banner against the dense fixture. CAUTION: this
-moves timing on a SHARED constant — every standing window containing a
-kernel-route stat/message banner must be re-run against the ORACLE (not
-differential); windows that were implicitly fitted around the missing hold
-may move. If any standing pin regresses vs the oracle, stop and report
-rather than refit.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 

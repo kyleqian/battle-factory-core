@@ -1,4 +1,64 @@
 
+## 878 — [bounded MAIN worker, 2026-08-02] species-dossier slice 7 LANDED (family-B Sitrus anchor/geometry de-hardcoding)
+
+- **State:** master `a29fd795` (one commit on top of `f49e0b27` — base
+  drifted from session start `fef2b77e`, a side-lane merge landed
+  mid-session, same shared-master pattern noted in prior entries). Full
+  `npm test`: **633 files / 6,376 passed / 1 skipped** (unchanged from
+  base). `npm run build` green (tsc -b + vite). Differential
+  (`compare:differential`, base `f49e0b27`): **PASS, 985/985 captures
+  byte-identical** — 110/82/181/133/110/241/128, every brief-cited count
+  matched exactly (turn5-sitrus-a/b/c/d, turn5-faint, turn5-switchin,
+  battle-command-generated-off).
+- **Did:** per `docs/species-render-entry-point-retirement-design.md` §4
+  row 7, §1.3B, §5 traps 1/3. `turn5ResolutionAdapter.ts` now exposes
+  three RAM-probed facts as adapter-owned exports (same hosting precedent
+  as its existing `PIDGEOTTO_COMMAND_MENU_REDRAW_TICK`): `Turn5SitrusAdapter.
+  procTriggerRamTick` (6872, the real Sitrus-proc-trigger RAM tick),
+  `Turn5SitrusAdapter.onFieldCenter` ({x:72,y:88}, Onix's on-field screen
+  center the ring/stars anchor to — the generic per-battler field-geometry
+  catalog, `battleCommandFieldArt.ts`, isn't reachable from this staged-
+  machine-state adapter, so this took the brief's documented-literal-fact
+  fallback), and `Turn5SwitchInAdapter.materializeSettleTick` (6828,
+  Pidgeotto's switch-in materialize settle). `battleScene.ts`'s
+  `ONIX_SITRUS_IDENTITY_RENDER_TICK` (the shared epoch all seven family-B
+  wrappers — `onixSitrusRotateMatrix`, `turn5GrantingStarPlacement`,
+  `turn5SitrusHealTextVisibleChars`, `turn5SitrusOnixHp`,
+  `turn5SitrusResettledBounceTick`, `onixSitrusTintCoeff`,
+  `turn5SitrusRingMatrix` — key off, per trap 1), `TURN5_SITRUS_RING_CENTER`,
+  and `TURN5_PIDGEOTTO_SETTLE_TICK` (feeding `turn5PidgeottoHealthboxSlideDx`)
+  now derive from those adapter facts instead of hand-derived module
+  constants — all moved in the same commit per trap 1. Trap 3 (lag
+  asymmetry): kept rotate's own +2 render lag and the ring/stars' own +1
+  render lag as two separately named constants
+  (`ONIX_SITRUS_ROTATE_RENDER_LAG`/`TURN5_SITRUS_RING_RENDER_LAG`) with a
+  runtime guard asserting they stay exactly 1 apart — only the rotate lag
+  drives the shared epoch (matching what `heldItemHeal.ts`'s own
+  `SITRUS_ITEM_*_FIRST_AGE` constants were fit against), so the ring/star
+  fact is preserved as its own named constant rather than silently merged
+  into one lag or used to compute a second, drifting epoch. All numeric
+  values unchanged (6872, 72/88, 6828) — this moves ownership, not fit.
+- **[supervisor addendum, ~23:55]** slice 7 verified (422/422 spot
+  differential). #56 closure audit merged earlier (`f49e0b27`,
+  `docs/issue56-closure-audit.md`): YOSHI 700/751 fully settled-classed;
+  **MAGNETON regressed 703→702** (frame 437, 201px) — root-caused to
+  `1aa13ebb`'s shared stallLag keying, landing never re-ran MAGNETON;
+  ISSUES #56 updated with the bounded fix prescription. User play session
+  filed #68 (TORMENT crash — fix worker dispatched) + #69 (omniboost OFF
+  cadence + RNG bias — side probe running). Play-preview worktree serving
+  frozen `3a165507` on :5199 (intentional, exclude from stale sweeps).
+  `turn5SitrusResettledBounceTick` keys off a separate constant
+  (`TURN5_SITRUS_MENU_REDRAW_TICK`, 7222) not among the three anchors the
+  brief named, so it needed no change — confirmed by grep before scoping.
+- **Next:** wrapper renames to species-neutral names (item 4, in scope
+  only if the diff stays reviewable) were left as the honest remainder —
+  ran out of budget after the anchor de-hardcoding landed clean. Slice 4
+  (capstone `renderSceneOffTurnView` convergence) is now the LAST
+  remaining species-dossier slice (1/2/3/5/6/7 all landed).
+- **Notes:** `tests/executableFrontierRatchet.test.ts` untouched and
+  green — no new recording imports, no barrier-count changes. No ISSUES
+  entries touched this step (not in scope).
+
 ## 877 — [bounded MAIN worker, 2026-08-02] species-dossier slice 3 LANDED (family-A HP-drain closed-form generalization)
 
 - **State:** master `bb5289b2` (one commit on top of `40dcddff`). Full

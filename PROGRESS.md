@@ -4,6 +4,83 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 881 — [bounded MAIN worker, 2026-08-03] ISSUES #69 — Scene-OFF stat/message banner cadence FIXED (missing 64-frame post-print hold)
+
+- **State:** master `bb198d16` (one commit on top of `8c78c807`). Full
+  `npm test`: **634 files / 6,382 passed / 1 skipped** (+1 from this step's
+  new pin). `npm run build` green (tsc -b + vite).
+- **Did:** `battleResolutionCommandDuration`'s `"message"` case
+  (`battleResolutionPresentationRender.ts`) now adds a `holdFrames` term (0
+  by default, 64 for the six stat-change STRINGIDs — `ATTACKERSSTATROSE/
+  FELL`, `DEFENDERSSTATROSE/FELL`, `STATSWONTINCREASE/DECREASE`, the
+  exhaustive contents of source's `gStatUpStringIds`/`gStatDownStringIds`,
+  `reference/pokeemerald/src/battle_message.c:1006-1022`) **after** the
+  print-time floor/length term, modeling `BattleScript_StatUp`/`StatDown`'s
+  own `printfromtable ...; waitmessage B_WAIT_TIME_LONG`
+  (`reference/pokeemerald/data/battle_scripts_1.s:511-514,556-560`;
+  `AllStatsUp`'s five per-stat blocks, `:3458-3483`; hold value
+  `include/constants/battle.h:324`) as a genuine post-print hold phase, not a
+  fudge on print speed. `BATTLE_RESOLUTION_STAT_CHANGE_FRAMES`/`STAT_TIMING`
+  drop from the uncited 50/32 placeholder to **2** — the oracle-measured
+  silent RAM-write-to-box-clear gap, identical across all 5 omniboost
+  banners (`docs/issue69-omniboost-off-ground-truth.md` §2: 283→285,
+  375→377, 468→470, 559→561, 652→654) — since the hold is a `message`
+  property in source (`waitmessage` follows `printfromtable`, not
+  `statbuffchange`), not a `stat` one.
+- **Verified:** `tools/compare/issue69OmniboostAppWindow.ts` (the same
+  production `battleResolutionCommandDuration` the real render loop calls,
+  over the real 5-banner Silver Wind proc sequence) — **before: 373 frames
+  total, 74.6 frames/banner** (matches the ISSUES #69 doc exactly); **after:
+  453 frames total, 90.6 frames/banner** — closing in on the oracle's
+  measured 473 total / ~92/banner (doc §2/§4), from -21%/-19% off to only
+  ~-4%/-1.6% off. Residual characterized honestly: the ROM's own last banner
+  (SPDEF, transitioning into RATTATA's next move) measures an anomalously
+  long ~103-frame gap vs the other four's 89-91 — not a stat-change-script
+  property, more likely turn-transition overhead out of this fix's scope;
+  the other four land within 1-3 frames of their measured cycle lengths
+  (92/93/91/93). `npm run compare -- tools/compare/fixtures/issue69-
+  omniboost-dense-seed8.json --summary` (the brief's literal acceptance
+  command) does **not** run: that fixture is a raw `mechanicLab`
+  scenario (`bin/oracle lab` format — `segments`/`captureFrames` nested
+  under a `trace` key), not a compare-tool trace, and no named `appStage`
+  exists to replay this exact BUTTERFREE/RATTATA/seed-8 party through the
+  compare CLI's oracle-vs-app pixel pipeline (building one is real
+  infrastructure work, out of this bounded step — flagged as a PAPERCUT
+  below rather than attempted). Used the doc's own established methodology
+  instead (the app-window script above), which calls the identical
+  production function the real render loop invokes every frame.
+- **No-regression sweep:** full Tier-1 suite green (634/634, 6382 tests).
+  `battleTurnPortability.test.ts`'s pre-existing real oracle-derived
+  kernel-route ONIX/KABUTO SAND-ATTACK stat-fell banner pin moved as
+  expected (stat timing 32→2, message timing +64 hold) and was updated —
+  not a regression, the generic "every stat-change move" fix correctly
+  reaching a second, independent move. `compare:differential` (base
+  `8c78c807`, the three standing public sentinels): `battle-command-
+  generated-off` **128/128**, `factory-arbitrary-intro-magneton-off`
+  **751/751**, `interactive-generated-intro-off` **715/715**, all
+  byte-identical before/after — none of these captures reach into a
+  stat-change banner region, confirming zero unintended pixel impact.
+  Live-oracle spot checks on `turn5-rockslide-off.json` (7/256) and
+  `factory-terminal-round-won-off.json` (1/208) are pre-existing broken
+  baselines **unrelated to this change** (confirmed identical via
+  `git stash` before/after) — both are `canonical-recorded`/legacy-turn-owned
+  or non-stat-change windows, structurally untouched by the constants this
+  fix moved (each `turnN...PresentationStaging.ts` file already carries its
+  own separate local `B_WAIT_TIME_LONG` constant, confirmed by grep before
+  scoping). Did not chase that pre-existing oracle-compare breakage — out of
+  scope for this step, flagged for whoever next needs live oracle-compare on
+  those two fixtures.
+- **Next:** species-dossier slice 4 (capstone `renderSceneOffTurnView`
+  convergence) is still the last remaining slice. ISSUES #70's
+  reachability-verified STRINGID batch-fix remainder is open.
+- **Notes:** `tests/executableFrontierRatchet.test.ts` green, untouched, no
+  new recording imports, no barrier-count changes. **PAPERCUT:** `npm run
+  compare` has no working trace/`appStage` path for dense `mechanicLab`
+  fixtures like `tools/compare/fixtures/issue69-omniboost-dense-seed8.json`
+  without hand-authoring a new named `appStage` (~15 min lost discovering
+  this before falling back to the doc's own app-window script).
+
+---
 ## 880 — [bounded MAIN worker, 2026-08-03] ISSUES #56 — MAGNETON frame-437 stallLag regression FIXED (closure audit's root cause)
 
 - **State:** one commit on top of `963d6bc2`. Full `npm test`: **634 files /
@@ -130,63 +207,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   recording imports, no barrier-count changes (checked via
   `test:smoke`). No PAPERCUT this step.
 
----
-## 878 — [bounded MAIN worker, 2026-08-02] species-dossier slice 7 LANDED (family-B Sitrus anchor/geometry de-hardcoding)
-
-- **State:** master `a29fd795` (one commit on top of `f49e0b27` — base
-  drifted from session start `fef2b77e`, a side-lane merge landed
-  mid-session, same shared-master pattern noted in prior entries). Full
-  `npm test`: **633 files / 6,376 passed / 1 skipped** (unchanged from
-  base). `npm run build` green (tsc -b + vite). Differential
-  (`compare:differential`, base `f49e0b27`): **PASS, 985/985 captures
-  byte-identical** — 110/82/181/133/110/241/128, every brief-cited count
-  matched exactly (turn5-sitrus-a/b/c/d, turn5-faint, turn5-switchin,
-  battle-command-generated-off).
-- **Did:** per `docs/species-render-entry-point-retirement-design.md` §4
-  row 7, §1.3B, §5 traps 1/3. `turn5ResolutionAdapter.ts` now exposes
-  three RAM-probed facts as adapter-owned exports (same hosting precedent
-  as its existing `PIDGEOTTO_COMMAND_MENU_REDRAW_TICK`): `Turn5SitrusAdapter.
-  procTriggerRamTick` (6872, the real Sitrus-proc-trigger RAM tick),
-  `Turn5SitrusAdapter.onFieldCenter` ({x:72,y:88}, Onix's on-field screen
-  center the ring/stars anchor to — the generic per-battler field-geometry
-  catalog, `battleCommandFieldArt.ts`, isn't reachable from this staged-
-  machine-state adapter, so this took the brief's documented-literal-fact
-  fallback), and `Turn5SwitchInAdapter.materializeSettleTick` (6828,
-  Pidgeotto's switch-in materialize settle). `battleScene.ts`'s
-  `ONIX_SITRUS_IDENTITY_RENDER_TICK` (the shared epoch all seven family-B
-  wrappers — `onixSitrusRotateMatrix`, `turn5GrantingStarPlacement`,
-  `turn5SitrusHealTextVisibleChars`, `turn5SitrusOnixHp`,
-  `turn5SitrusResettledBounceTick`, `onixSitrusTintCoeff`,
-  `turn5SitrusRingMatrix` — key off, per trap 1), `TURN5_SITRUS_RING_CENTER`,
-  and `TURN5_PIDGEOTTO_SETTLE_TICK` (feeding `turn5PidgeottoHealthboxSlideDx`)
-  now derive from those adapter facts instead of hand-derived module
-  constants — all moved in the same commit per trap 1. Trap 3 (lag
-  asymmetry): kept rotate's own +2 render lag and the ring/stars' own +1
-  render lag as two separately named constants
-  (`ONIX_SITRUS_ROTATE_RENDER_LAG`/`TURN5_SITRUS_RING_RENDER_LAG`) with a
-  runtime guard asserting they stay exactly 1 apart — only the rotate lag
-  drives the shared epoch (matching what `heldItemHeal.ts`'s own
-  `SITRUS_ITEM_*_FIRST_AGE` constants were fit against), so the ring/star
-  fact is preserved as its own named constant rather than silently merged
-  into one lag or used to compute a second, drifting epoch. All numeric
-  values unchanged (6872, 72/88, 6828) — this moves ownership, not fit.
-- **[supervisor addendum, ~23:55]** slice 7 verified (422/422 spot
-  differential). #56 closure audit merged earlier (`f49e0b27`,
-  `docs/issue56-closure-audit.md`): YOSHI 700/751 fully settled-classed;
-  **MAGNETON regressed 703→702** (frame 437, 201px) — root-caused to
-  `1aa13ebb`'s shared stallLag keying, landing never re-ran MAGNETON;
-  ISSUES #56 updated with the bounded fix prescription. User play session
-  filed #68 (TORMENT crash — fix worker dispatched) + #69 (omniboost OFF
-  cadence + RNG bias — side probe running). Play-preview worktree serving
-  frozen `3a165507` on :5199 (intentional, exclude from stale sweeps).
-  `turn5SitrusResettledBounceTick` keys off a separate constant
-  (`TURN5_SITRUS_MENU_REDRAW_TICK`, 7222) not among the three anchors the
-  brief named, so it needed no change — confirmed by grep before scoping.
-- **Next:** wrapper renames to species-neutral names (item 4, in scope
-  only if the diff stays reviewable) were left as the honest remainder —
-  ran out of budget after the anchor de-hardcoding landed clean. Slice 4
-  (capstone `renderSceneOffTurnView` convergence) is now the LAST
-  remaining species-dossier slice (1/2/3/5/6/7 all landed).
-- **Notes:** `tests/executableFrontierRatchet.test.ts` untouched and
-  green — no new recording imports, no barrier-count changes. No ISSUES
-  entries touched this step (not in scope).
