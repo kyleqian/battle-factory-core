@@ -17,28 +17,34 @@ backlog.
 
 # Open
 
-## #68 — [USER REPORT 2026-08-02, play session] Selecting a Torment-blocked move throws instead of the ROM's in-menu rejection message
+## #68 — [USER REPORT 2026-08-02, play session] Opponent MURKROW's first TORMENT throws a user-visible exception mid-turn
 
-**Report:** interactive play (preview at `3a165507`), rental BUTTERFREE vs
-opponent MURKROW. SILVER WIND used twice; on attempting it a third time the
-app threw a user-visible error mentioning torment (MURKROW's set carries
-TORMENT). Expected per source: selecting a `CheckMoveLimitations`-blocked
-move prints "{mon} can't use {move} after the TORMENT!" (or the
-class-appropriate limitation string) and returns to move selection —
-`HandleTurnActionSelectionState`'s selection-retry loop, not an exception.
+**Report (corrected timeline, user 2nd message):** interactive play
+(preview at `3a165507`), rental BUTTERFREE. Battle vs GROVYLE: two SILVER
+WINDs (omniboost both — see #69), KO. MURKROW (set 184: FAINT_ATTACK/FLY/
+TORMENT/TAUNT, LAX_INCENSE) replaces it. On the FIRST Silver Wind click vs
+MURKROW the app threw immediately, error text mentioning torment. MURKROW
+had never had a turn, so no torment status could exist at selection time.
 
-**Triage (supervisor, same-session):** the kernel side is likely right —
-`legalMoveDecisions` (`factoryBattleScriptFullTurnDecision.ts`, consuming
-`checkBattleScriptMoveLimitations`, the ported `battle_util.c:1082-1123`)
-already excludes tormented slots, and `submitBattleDecision` validates
-membership. Working hypothesis: the fight-submenu UI never consults the
-legal-decision set, submits the illegal choice, and the validator's throw
-surfaces raw. Needs: repro via staged scenario (opponent all-four-TORMENT
-constrains the AI), then the source-faithful rejection flow (message +
-re-selection) wired at the menu boundary, plus a check of EVERY other
-limitation class reachable in Factory L50 (Disable, Encore, Taunt, choice
-lock, no-PP) for the same gap. Struggle path (all four blocked) must keep
-working.
+**Triage (supervisor, same-session):** the app computes the full turn
+synchronously at click, so "immediately" spans Butterfree's move AND
+Murkrow's response. Ranked hypotheses:
+1. **#65 class — missing presentation string.** Murkrow's first action is
+   TORMENT; `battleScriptSettormentOpcode.ts` exists (kernel executes it),
+   but `battleStringResolver.ts`/`battleResolutionPresentation.ts` contain
+   ZERO torment references (grep-verified) — the "{target} was subjected
+   to TORMENT!" string id is likely unmapped and the resolver completeness
+   guard throws, exactly like #65's ATTACKER-banner crash.
+2. A barrier/throw further down TORMENT's script or moveend path.
+3. (Demoted) selection-time legality-UI gap — the original hypothesis;
+   timeline now makes it secondary, but the breadth audit (selection-time
+   rejection flow for Torment/Taunt/Disable/Encore/choice-lock/no-PP) is
+   still worth doing while in here, since the tormented-NEXT-turn menu is
+   one turn away from the same repro.
+
+Repro recipe: staged BUTTERFREE (SILVER WIND) vs MURKROW all-four-TORMENT
+via `overrides.parties`-style staging or a pure Tier-1 full-turn test; the
+crash should fall out of executing Murkrow's TORMENT.
 
 ## #69 — [USER REPORT 2026-08-02, play session] Scene-OFF all-stats-up (SILVER WIND omniboost) presentation cadence looks wrong; double-proc bias check
 
