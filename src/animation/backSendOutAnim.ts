@@ -106,6 +106,23 @@ export const BACK_H_SPRING_REPEATED_OUTSIDE_FACTORY_SPECIES: readonly string[] =
   BACK_H_SPRING_REPEATED_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by the generated `BACK_ANIM_SHRINK_GROW` source row. */
+export const BACK_SHRINK_GROW_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_SHRINK_GROW")
+    .map(([species]) => species),
+);
+
+/** The complete shrink/grow back set is Factory-reachable. */
+export const BACK_SHRINK_GROW_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_SHRINK_GROW_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** There are no outside-Factory mappings for this bounded back set. */
+export const BACK_SHRINK_GROW_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_SHRINK_GROW_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -244,6 +261,41 @@ export const BACK_H_SPRING_REPEATED_VARIANTS = Object.freeze({
   }),
 } as const);
 
+/**
+ * `BACK_ANIM_SHRINK_GROW` uses the shared ShrinkGrow helper with three
+ * source-relative initializer parameter pairs. `phaseLimit` is written to
+ * data[7], while `speed` is written to data[6].
+ */
+export const BACK_SHRINK_GROW_VARIANTS = Object.freeze({
+  fast: Object.freeze({
+    selector: "ANIM_SHRINK_GROW_FAST",
+    callback: "Anim_ShrinkGrow_Fast",
+    sourceId: 113,
+    natureMod: 0,
+    speed: 8,
+    phaseLimit: 5,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_SHRINK_GROW",
+    callback: "Anim_ShrinkGrow",
+    sourceId: 19,
+    natureMod: 1,
+    speed: 8,
+    phaseLimit: 3,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_SHRINK_GROW_SLOW",
+    callback: "Anim_ShrinkGrow_Slow",
+    sourceId: 114,
+    natureMod: 2,
+    speed: 4,
+    phaseLimit: 3,
+    accepted: true,
+  }),
+} as const);
+
 type BackHSlideSelector = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["selector"];
 type BackHSlideCallback = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["callback"];
 type BackHSlideDuration = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["duration"];
@@ -258,6 +310,11 @@ type BackHRepeatedSpringSourceId = typeof BACK_H_SPRING_REPEATED_VARIANTS[keyof 
 type BackHRepeatedSpringSpeed = typeof BACK_H_SPRING_REPEATED_VARIANTS[keyof typeof BACK_H_SPRING_REPEATED_VARIANTS]["speed"];
 type BackHRepeatedSpringLimit = typeof BACK_H_SPRING_REPEATED_VARIANTS[keyof typeof BACK_H_SPRING_REPEATED_VARIANTS]["limit"];
 type BackHRepeatedSpringAmplitude = typeof BACK_H_SPRING_REPEATED_VARIANTS[keyof typeof BACK_H_SPRING_REPEATED_VARIANTS]["amplitude"];
+type BackShrinkGrowSelector = typeof BACK_SHRINK_GROW_VARIANTS[keyof typeof BACK_SHRINK_GROW_VARIANTS]["selector"];
+type BackShrinkGrowCallback = typeof BACK_SHRINK_GROW_VARIANTS[keyof typeof BACK_SHRINK_GROW_VARIANTS]["callback"];
+type BackShrinkGrowSourceId = typeof BACK_SHRINK_GROW_VARIANTS[keyof typeof BACK_SHRINK_GROW_VARIANTS]["sourceId"];
+type BackShrinkGrowSpeed = typeof BACK_SHRINK_GROW_VARIANTS[keyof typeof BACK_SHRINK_GROW_VARIANTS]["speed"];
+type BackShrinkGrowPhaseLimit = typeof BACK_SHRINK_GROW_VARIANTS[keyof typeof BACK_SHRINK_GROW_VARIANTS]["phaseLimit"];
 
 /**
  * Source facts at the `LaunchAnimationTaskForBackSprite` seam. The shared
@@ -393,6 +450,19 @@ function hRepeatedSpringVariant(selector: string): {
   readonly amplitude: BackHRepeatedSpringAmplitude;
 } | null {
   for (const variant of Object.values(BACK_H_SPRING_REPEATED_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function shrinkGrowVariant(selector: string): {
+  readonly selector: BackShrinkGrowSelector;
+  readonly callback: BackShrinkGrowCallback;
+  readonly sourceId: BackShrinkGrowSourceId;
+  readonly speed: BackShrinkGrowSpeed;
+  readonly phaseLimit: BackShrinkGrowPhaseLimit;
+} | null {
+  for (const variant of Object.values(BACK_SHRINK_GROW_VARIANTS)) {
     if (variant.selector === selector) return variant;
   }
   return null;
@@ -824,6 +894,127 @@ export function backHorizontalRepeatedSpringFrameAtTick(
 
 /** Source WaitAnimEnd lifecycle after static back OAM reports animEnded. */
 export function backHorizontalRepeatedSpringWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+export interface BackShrinkGrowAffineWrite {
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly rotationSigned: 0;
+  readonly rotationU16: 0;
+}
+
+export interface BackShrinkGrowFrame {
+  readonly x2: 0;
+  readonly y2: number;
+  readonly data0: 0;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  readonly data2: number;
+  readonly data4: number;
+  readonly data5: 0;
+  readonly data6: BackShrinkGrowSpeed;
+  readonly data7: BackShrinkGrowPhaseLimit;
+  readonly phaseBefore: number;
+  readonly phaseAfter: number;
+  readonly duration: number;
+  readonly selector: BackShrinkGrowSelector;
+  readonly sourceId: BackShrinkGrowSourceId;
+  readonly speed: BackShrinkGrowSpeed;
+  readonly phaseLimit: BackShrinkGrowPhaseLimit;
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly initializerCalled: boolean;
+  readonly handleStartAffineAnimCalls: 0 | 1;
+  readonly callbackInvokedByInitializer: true;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly normalBackDontFlip: true;
+  readonly tryFlipXCalls: 0;
+  readonly affineWriteCount: 1;
+  readonly affineWrites: readonly [BackShrinkGrowAffineWrite];
+  readonly affineMode: "double" | "normal";
+  readonly callback: BackShrinkGrowCallback | "WaitAnimEnd";
+}
+
+/**
+ * Source-order reducer for the complete `BACK_ANIM_SHRINK_GROW` triple.
+ * The selected initializer first calls HandleStartAffineAnim, writes data[7]
+ * and data[6], then immediately invokes ShrinkGrow. ShrinkGrow runs while
+ * `data[2] <= (128 / data[6]) * data[7]`, using C integer division for the
+ * y2 correction and source signed GBA Sin/affine writes.
+ */
+export function backShrinkGrowFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackShrinkGrowFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_SHRINK_GROW") return null;
+  const variant = shrinkGrowVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected shrink/grow selector ${selection.selector}`);
+
+  // This is the source expression, including its C integer division order.
+  const duration = Math.floor(128 / variant.speed) * variant.phaseLimit;
+  const terminal = ticksSinceStart > duration;
+  const activeTick = terminal ? duration : ticksSinceStart;
+  const phaseBefore = (activeTick * variant.speed) & 0xff;
+  const phaseAfter = (phaseBefore + variant.speed) & 0xff;
+  const data2 = terminal ? duration + 1 : activeTick + 1;
+  const sinY = gbaSin(phaseBefore, 32);
+  const yScale = terminal ? 256 : sinY + 256;
+  // `posY = (256 - yScale) / 8` is C s16 division (towards zero), not a
+  // floating-point floor for the negative numerator.
+  const posY = !terminal && yScale > 256 ? Math.trunc((256 - yScale) / 8) : 0;
+  // A GBA s16 write canonicalizes the source expression's `-(0)` to zero;
+  // keep JS's signed-zero distinction out of the observable sprite state.
+  const y2 = terminal || posY === 0 ? 0 : -posY;
+  const xScale = terminal ? 256 : gbaSin(phaseBefore, 48) + 256;
+  const write = Object.freeze({
+    xScale,
+    yScale,
+    rotationSigned: 0 as const,
+    rotationU16: 0 as const,
+  });
+  return Object.freeze({
+    x2: 0 as const,
+    y2,
+    data0: 0 as const,
+    data1: toS16(preservedData1),
+    data2,
+    data4: phaseAfter,
+    data5: 0 as const,
+    data6: variant.speed,
+    data7: variant.phaseLimit,
+    phaseBefore,
+    phaseAfter,
+    duration,
+    selector: variant.selector,
+    sourceId: variant.sourceId,
+    speed: variant.speed,
+    phaseLimit: variant.phaseLimit,
+    xScale,
+    yScale,
+    initializerCalled: ticksSinceStart === 0,
+    handleStartAffineAnimCalls: ticksSinceStart === 0 ? 1 as const : 0 as const,
+    callbackInvokedByInitializer: true as const,
+    resetSpriteAfterAnim: terminal,
+    normalBackDontFlip: true as const,
+    tryFlipXCalls: 0 as const,
+    affineWriteCount: 1 as const,
+    affineWrites: [write] as const,
+    affineMode: terminal ? "normal" as const : "double" as const,
+    callback: terminal ? "WaitAnimEnd" as const : variant.callback,
+  });
+}
+
+/** Source WaitAnimEnd lifecycle after static back OAM reports animEnded. */
+export function backShrinkGrowWaitAnimEndCallback(
   animEnded: boolean,
 ): "WaitAnimEnd" | "SpriteCallbackDummy" {
   return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
