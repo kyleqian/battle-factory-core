@@ -201,7 +201,7 @@ describe("ANIM_ROTATE_UP_SLAM_DOWN (selector 47)", () => {
     expect(selectorTables.frontAnimIds.species.IGGLYBUFF).toBe("ANIM_SWING_CONCAVE_FAST");
     expect(selectorTables.frontAnimIds.species.LUNATONE).toBe("ANIM_SWING_CONVEX_FAST");
     expect(speciesFrontIdleRestOffset("IGGLYBUFF")).toEqual({ x2: 0, y2: 0 });
-    expect(speciesFrontIdleRestOffset("LUNATONE")).toBeNull();
+    expect(speciesFrontIdleRestOffset("LUNATONE")).toEqual({ x2: 0, y2: 0 });
     expect(selectorTables.backAnimationIds.sets.BACK_ANIM_H_VIBRATE).toEqual([
       "ANIM_H_VIBRATE_FASTEST", "ANIM_H_VIBRATE_FAST", "ANIM_H_VIBRATE",
     ]);

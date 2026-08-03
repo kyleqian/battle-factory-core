@@ -160,7 +160,7 @@ describe("ANIM_SWING_CONCAVE_FAST", () => {
     }
   });
 
-  it("keeps accepted concave siblings and unsupported convex-fast control separate", () => {
+  it("keeps accepted concave/convex fast siblings and unsupported fast-short separate", () => {
     expect(swingConcaveFrameAtTick(25)).toMatchObject({
       animData: 100,
       animRuns: 1,
@@ -172,8 +172,9 @@ describe("ANIM_SWING_CONCAVE_FAST", () => {
       affineRotation: 0,
     });
     expect(SWING_CONCAVE_FAST_SHORT_INITIALIZER.accepted).toBe(true);
-    expect(SWING_CONVEX_INITIALIZERS.fast.accepted).toBe(false);
+    expect(SWING_CONVEX_INITIALIZERS.fast.accepted).toBe(true);
+    expect(SWING_CONVEX_INITIALIZERS.fastShort.accepted).toBe(false);
     expect(selectorTables.frontAnimIds.species.LUNATONE).toBe("ANIM_SWING_CONVEX_FAST");
-    expect(speciesFrontIdleRestOffset("LUNATONE")).toBeNull();
+    expect(speciesFrontIdleRestOffset("LUNATONE")).toEqual({ x2: 0, y2: 0 });
   });
 });

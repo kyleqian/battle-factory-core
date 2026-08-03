@@ -140,12 +140,12 @@ describe("ANIM_SWING_CONCAVE_FAST_SHORT", () => {
   });
 
   it("keeps adjacent selector controls and opposite rotation independent", () => {
-    expect(SWING_CONVEX_INITIALIZERS.fast.accepted).toBe(false);
+    expect(SWING_CONVEX_INITIALIZERS.fast.accepted).toBe(true);
     expect(SWING_CONVEX_INITIALIZERS.fastShort.accepted).toBe(false);
     expect(selectorTables.frontAnimIds.species.IGGLYBUFF).toBe("ANIM_SWING_CONCAVE_FAST");
     expect(selectorTables.frontAnimIds.species.LUNATONE).toBe("ANIM_SWING_CONVEX_FAST");
     expect(speciesFrontIdleRestOffset("IGGLYBUFF")).toEqual({ x2: 0, y2: 0 });
-    expect(speciesFrontIdleRestOffset("LUNATONE")).toBeNull();
+    expect(speciesFrontIdleRestOffset("LUNATONE")).toEqual({ x2: 0, y2: 0 });
     expect(swingConcaveFrameAtTick(25)).toMatchObject({ animData: 100, affineRotation: 3276 });
     expect(swingConvexFrameAtTick(25)).toMatchObject({ animData: 100, affineRotation: -3276 });
   });

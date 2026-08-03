@@ -80,6 +80,7 @@ export type SpeciesFrontAnimFamily =
   | "SPIN"
   | "TUMBLING_FRONT_FLIP_TWICE"
   | "SWING_CONVEX"
+  | "SWING_CONVEX_FAST"
   | "SWING_CONCAVE"
   | "SWING_CONCAVE_FAST"
   | "SWING_CONCAVE_FAST_SHORT"
@@ -140,6 +141,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "SPIN",
   "TUMBLING_FRONT_FLIP_TWICE",
   "SWING_CONVEX",
+  "SWING_CONVEX_FAST",
   "SWING_CONCAVE",
   "SWING_CONCAVE_FAST",
   "SWING_CONCAVE_FAST_SHORT",
@@ -1139,6 +1141,23 @@ export const SWING_CONVEX_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Obj
   SWING_CONVEX_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
+/** The sole source selector mapping for two-run `ANIM_SWING_CONVEX_FAST`. */
+export const SWING_CONVEX_FAST_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_SWING_CONVEX_FAST")
+    .map(([species]) => species),
+);
+
+/** The complete Factory-reachable fast convex family (LUNATONE). */
+export const SWING_CONVEX_FAST_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  SWING_CONVEX_FAST_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no fast convex mappings outside the Factory rental pool. */
+export const SWING_CONVEX_FAST_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  SWING_CONVEX_FAST_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
 export interface SpeciesIdleOffset {
   readonly x2: number;
   readonly y2: number;
@@ -1924,6 +1943,7 @@ export type SwingConcaveFrame = SwingFrame<"SwingConcave">;
 export type SwingConvexFrame = SwingFrame<"SwingConvex">;
 export type SwingConcaveFastFrame = SwingFrame<"SwingConcave">;
 export type SwingConcaveFastShortFrame = SwingFrame<"SwingConcave">;
+export type SwingConvexFastFrame = SwingFrame<"SwingConvex">;
 
 /**
  * Both initializers invoke `VerticalSlide` immediately and then install that
@@ -2250,17 +2270,19 @@ export const ADD_NEW_ANIM_DEFAULTS = Object.freeze({
 const SWING_CONCAVE_DURATION = 100;
 const SWING_CONCAVE_FAST_DURATION = 50;
 const SWING_CONCAVE_FAST_SHORT_DURATION = 50;
+const SWING_CONVEX_FAST_DURATION = 50;
 
 /**
  * The normal, fast, and unused fast-short selectors all share `SwingConvex`.
- * This rung accepts only the normal single-run duration-100 initializer.
+ * The normal and fast paths are source-accepted; only fast-short remains
+ * outside the current Factory-front coverage.
  */
 export const SWING_CONVEX_INITIALIZERS = Object.freeze({
   normal: Object.freeze({
     selector: "ANIM_SWING_CONVEX", data: 100, runs: 1, accepted: true,
   }),
   fast: Object.freeze({
-    selector: "ANIM_SWING_CONVEX_FAST", data: 50, runs: 2, accepted: false,
+    selector: "ANIM_SWING_CONVEX_FAST", data: 50, runs: 2, accepted: true,
   }),
   fastShort: Object.freeze({
     selector: "ANIM_SWING_CONVEX_FAST_SHORT",
@@ -2292,6 +2314,19 @@ export const SWING_CONCAVE_FAST_SHORT_INITIALIZER = Object.freeze({
   runs: 1,
   callbackInvokedByInitializer: true,
   callbackInstalled: "SwingConcave",
+  normalFrontDontFlip: true,
+  affineMode: "double",
+  accepted: true,
+} as const);
+
+/** Source selector 14's two-run `AddNewAnim` initializer and immediate callback call. */
+export const SWING_CONVEX_FAST_INITIALIZER = Object.freeze({
+  selector: "ANIM_SWING_CONVEX_FAST",
+  sourceId: 14,
+  data: 50,
+  runs: 2,
+  callbackInvokedByInitializer: true,
+  callbackInstalled: "SwingConvex",
   normalFrontDontFlip: true,
   affineMode: "double",
   accepted: true,
@@ -2482,6 +2517,30 @@ export function swingConcaveFastShortFrameAtTick(
  */
 export function swingConvexFrameAtTick(ticksSinceStart: number): SwingConvexFrame | null {
   return swingFrameAtTick(ticksSinceStart, "SwingConvex", -1);
+}
+
+/**
+ * Source-order port of selector 14's `Anim_SwingConvex_Fast`
+ * (`pokemon_animation.c:2552-2589,3862-3871`). `AddNewAnim` begins with the
+ * default record, then this initializer writes data=50 and runs=2, invokes
+ * `SwingConvex` immediately, and installs it after return. Its first strict
+ * terminal callback restores the identity affine data, decrements runs,
+ * resets data2 to zero, and then increments it to one before the second
+ * `TryFlipX`; the second run therefore begins at index 5. The shared convex
+ * reducer keeps the same C-truncated sine/x2 motion as concave while writing
+ * the opposite signed affine rotation; its second terminal call resets the
+ * sprite and installs `WaitAnimEnd`.
+ */
+export function swingConvexFastFrameAtTick(
+  ticksSinceStart: number,
+): SwingConvexFastFrame | null {
+  return swingFrameAtTick(
+    ticksSinceStart,
+    "SwingConvex",
+    -1,
+    SWING_CONVEX_FAST_DURATION,
+    2,
+  );
 }
 
 /**
@@ -6546,6 +6605,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = swingConvexFrameAtTick(101);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_SwingConvex did not reach terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "SWING_CONVEX_FAST": {
+      const terminal = swingConvexFastFrameAtTick(102);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_SwingConvex_Fast did not reach terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
