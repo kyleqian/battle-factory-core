@@ -51,12 +51,12 @@ receipts are byte-identical and dense from the first active callback through
 **31 mappings / 31 Factory / 0 outside**, with its three nature-selected
 variants requiring independent source, reducer, and dense Scene-ON evidence.
 
-**Notes:** focused six-file reducer/source/evidence/extraction/boundary sweep
-was **44/44** green; `npx tsc --noEmit`, `npm run animation:coverage`, and
-the full `npm test` (**644 files, 6,426 passed, 1 skipped / 6,427 total**)
-are green. `npm run build` is green (552 modules transformed). No canonical
-framebuffer lookup, absolute-tick image fitting, or interactive screenshot
-asset was added.
+**Notes:** focused reducer/census/source/evidence/extraction/boundary sweep
+including the Gastly sibling pair is green; `npx tsc --noEmit`,
+`npm run animation:coverage`, and the full `npm test` (**647 files, 6,457
+passed, 1 skipped / 6,458 total**) are green. `npm run build` is green (552
+modules transformed). No canonical framebuffer lookup, absolute-tick image
+fitting, or interactive screenshot asset was added.
 
 ## Front `ANIM_FRONT_FLIP` family accepted (2026-08-03)
 
