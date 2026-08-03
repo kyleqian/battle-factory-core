@@ -1,5 +1,43 @@
 # Animation coverage
 
+## Back `BACK_ANIM_H_SHAKE` triple accepted (2026-08-03)
+
+**State:** exact for the eighth bounded player-back set: **8/25 back sets,
+24/75 selector variants, 73/376 Factory mappings**. The generated set is
+exactly **13 mappings / 13 Factory / 0 outside** — VENUSAUR, PARASECT,
+GRAVELER, GOLEM, PINECO, PILOSWINE, ELEKID, MIGHTYENA, SILCOON, CASCOON,
+CACTURNE, SLAKING, and SALAMENCE. Move coverage remains **107/276 exact, 0
+partial, 0 staged, 169 unsupported**; `ANIMATION_COVERAGE.json` deliberately
+remains byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`:
+this send-out-only work promotes no move status.
+
+**Did:** ported source-relative `Anim_HorizontalShake_Fast`,
+`Anim_HorizontalShake`, `Anim_HorizontalShake_Slow`, and shared
+`HorizontalShake`: 70/6, 60/3, and 30/3 step/amplitude pairs; signed GBA
+`Sin`; strict `counter > 2304` terminal; the terminal increment; no
+`TryFlipX`; initializer-first helper/callback cadence; `WaitAnimEnd`/dummy;
+and task zero/preserve/restore. The live selector remains species + party
+nature only. Factory Cacturne index **254** Hasty/mod-0 is fast, Venusaur
+index **537** Bold/mod-1 is normal, and Salamence index **830** Modest/mod-2
+is slow — every variant has a real Factory record.
+
+**Evidence:** six fresh paired, byte-identical Scene-ON receipts are dense
+from selected initializer through `SpriteCallbackDummy`, retaining every
+framebuffer hash plus sprite RAM/OAM/affine state: Cacturne fast
+**1840..1875 / 36 frames, 16,813 B,
+`97c700cd90700b3dc117a3f6f33a0bec5db45dea15795ba75932f10d407bc977`**;
+Venusaur normal **1840..1881 / 42, 19,483 B,
+`a69f036d24077f914904032669550d6e4ca29b28e8bbd5434eeffe18da9c66cb`**;
+Salamence slow **1841..1920 / 80, 36,574 B,
+`c4c3004247f31b143840a754fbd7da0aa61c2a0ab12e6c148427b35e15ada5a0`**.
+
+**Verification / next:** focused source/census/routing/reducer/evidence checks
+**2 files / 11 tests**, `npx tsc --noEmit`, and smoke **7 files / 346 tests**
+are green. Next source-ranked unsupported player-back set is
+**`BACK_ANIM_V_SHAKE` (set 9)**. No move status was promoted and no live
+dispatcher wiring or gameplay state changed.
+
 ## Back `BACK_ANIM_CIRCLE_COUNTERCLOCKWISE` triple accepted (2026-08-03)
 
 **State:** exact for the seventh bounded player-back set: **7/25 back sets,
