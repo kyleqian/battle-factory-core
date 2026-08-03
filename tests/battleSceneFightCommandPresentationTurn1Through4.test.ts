@@ -9,14 +9,14 @@ import {
   resolveTurn2CompletedResolutionNextCommandHandoff,
   resolveTurn2FightCommandPresentation,
   resolveTurn2LatestCompletedCommandHandoff,
-  turn2CompletedResolutionNextCommandHandoffFromLatest,
+  turn2FightCommandPresentationFromLatest,
 } from "../src/engine/turn2ResolutionAdapter.ts";
 import {
   isTurn3NextCommandHandoffReady,
   resolveTurn3CompletedResolutionNextCommandHandoff,
   resolveTurn3FightCommandPresentation,
   resolveTurn3LatestCompletedCommandHandoff,
-  turn3CompletedResolutionNextCommandHandoffFromLatest,
+  turn3FightCommandPresentationFromLatest,
 } from "../src/engine/turn3ResolutionAdapter.ts";
 import {
   resolveTurn4CompletedResolutionNextCommandHandoff,
@@ -439,12 +439,13 @@ describe("slice 3: drawActionMenuIdleContent's HP-overlay guard fires for turn-2
   }
 
   // The exact expression the new shim (`drawActionMenuIdleContentFromLatest`)
-  // will run: the same two predicates applied to the two already-exported
-  // `turnNCompletedResolutionNextCommandHandoffFromLatest` bridges instead
-  // of positional arguments.
+  // runs: `latest` carries turn-2 or turn-3 content, read via the same
+  // already-exported `turnNFightCommandPresentationFromLatest` narrowing
+  // functions `drawFightSubmenuWindow`'s own generic locals already use
+  // (battleScene.ts, e.g. its `genericTurn2Content`/`genericTurn3Content`).
   function genericHpOverlayGuardFires(latest: LatestCompletedCommandHandoff | null): boolean {
-    return isTurn3NextCommandHandoffReady(turn3CompletedResolutionNextCommandHandoffFromLatest(latest))
-      || isTurn2NextCommandHandoffReady(turn2CompletedResolutionNextCommandHandoffFromLatest(latest));
+    return turn2FightCommandPresentationFromLatest(latest) !== null
+      || turn3FightCommandPresentationFromLatest(latest) !== null;
   }
 
   it("turn 1: does NOT fire -- drawTurnKickoffText's own (fb, tick, null) call shape carries no turn2/3 slot", () => {

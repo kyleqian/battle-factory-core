@@ -7505,6 +7505,39 @@ function drawActionMenuIdleContent(
 }
 
 /**
+ * Generic-owner idle content for callers with no legacy-typed predecessor
+ * handoff of their own (typeref-retirement slice 3,
+ * `docs/battlescene-turnN-typeref-retirement-design.md` §4.1 row 3). Reads
+ * `latest.content.field.opponent/player.hp.current` directly - the same
+ * single source `drawMenuIdleBaseWithOpponentHp`'s turn4-then-3-then-2-
+ * then-1 cascade and `drawActionMenuIdleContent`'s own `playerHp` fallback
+ * both already reconstruct from `latest` one call frame up (§2.3). The
+ * HP-overlay guard below is copied verbatim from `drawActionMenuIdleContent`
+ * (fires only when `latest` carries turn-2 or turn-3 content, never turn-1
+ * or turn-4) - not re-derived, and pinned by `tests/battleSceneFight
+ * CommandPresentationTurn1Through4.test.ts`'s own "slice 3" describe block.
+ */
+function drawActionMenuIdleContentFromLatest(
+  fb: Uint8Array,
+  bounceTick: number,
+  latest: LatestCompletedCommandHandoff | null,
+  playerHpOverride?: number,
+): void {
+  drawRect(fb, menuIdleBase);
+  const opponentHp = latest?.content?.field.opponent.hp.current ?? null;
+  if (opponentHp !== null) drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(opponentHp));
+  const resolvedPlayerHp = playerHpOverride
+    ?? latest?.content?.field.player.hp.current
+    ?? anchorPlayerAfterTurnHp;
+  const { onixY2, healthboxY2 } = menuIdleBounce(bounceTick);
+  drawTwoStateBounceRect(fb, menuIdleOnixBounce, onixY2);
+  drawTwoStateBounceRect(fb, menuIdleHealthboxBounce, healthboxY2);
+  if (turn2FightCommandPresentationFromLatest(latest) !== null || turn3FightCommandPresentationFromLatest(latest) !== null) {
+    drawPlayerHealthboxHpOverlay(fb, resolvedPlayerHp, healthboxY2);
+  }
+}
+
+/**
  * The production Turn-1 boundary lives in the generic owner.  The returned
  * positional view exists solely while turns 2-4 still expose their staged
  * renderer ABI; generic semantic content always wins over a test-only legacy
@@ -8368,7 +8401,7 @@ function drawMenuIdleBounceOverlay(fb: Uint8Array, bounceTick: number): void {
  * `drawSendOutHandoff` already uses for "Go! ONIX!".
  */
 function drawTurnKickoffText(fb: Uint8Array, t: number, pressTick: number): void {
-  drawActionMenuIdleContent(fb, turnKickoffBounceTick(t, pressTick), null);
+  drawActionMenuIdleContentFromLatest(fb, turnKickoffBounceTick(t, pressTick), null);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawMessageTextLines(fb, TURN_KICKOFF_LINE1, TURN_KICKOFF_LINE2, turnKickoffTextVisibleChars(t, pressTick));
 }
@@ -15789,7 +15822,7 @@ function drawRockSlideAttack(fb: Uint8Array, t: number, pressTick: number): void
  * though by this tick always settled) HP.
  */
 function drawTurnEndSettledMenu(fb: Uint8Array, t: number, pressTick: number): void {
-  drawActionMenuIdleContent(fb, rockSlideResettledBounceTick(t, pressTick, TURN1_CHOOSE_ACTION_RESET_AFTER_CONFIRM), null);
+  drawActionMenuIdleContentFromLatest(fb, rockSlideResettledBounceTick(t, pressTick, TURN1_CHOOSE_ACTION_RESET_AFTER_CONFIRM), null);
   const opponentHp = rockSlideOpponentHp(t, pressTick, anchorOpponentBattler.hp, anchorOpponentAfterTurnHp, TURN1_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
   drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(opponentHp));
 }
