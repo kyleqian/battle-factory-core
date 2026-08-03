@@ -1,5 +1,37 @@
 # Animation coverage
 
+## Front `ANIM_TIP_MOVE_FORWARD` family accepted (2026-08-02)
+
+**State:** exact reducer/evidence coverage for the complete generated selector
+census: **1 mapping / 1 Factory-reachable / 0 outside-Factory** — RELICANTH.
+Source ID **26** is promoted, bringing Factory-front coverage to **59/62
+families** and **373/376 species mappings**. `ANIMATION_COVERAGE.json` remains
+byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`;
+move coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**.
+
+**Did:** source pins `pokemon_animation.h:66`, `pokemon.c:1762`, and
+`pokemon_animation.c:658,911-939,1680-1711,5540-5544`: direct task-installed
+callback (no `AddNewAnim`), task-zeroed signed-s16 state, both source-order
+`TryFlipX` calls, C-truncated tip/lunge/tip-back arithmetic, exact x2 and
+affine-OAM writes across 37 active/terminal callbacks, identity reset,
+`WaitAnimEnd`, stable terminal, and invalid endpoints. Fresh complete legal
+Scene-ON RELICANTH parties produced a byte-identical active-to-dummy pair:
+window **1618..1694 (77 frames)**, **34,589 B**, SHA-256
+`0c1fffb728ed675db5e0e632c85c25802bc66ed0fec83afffdfb151523ec0d6c`.
+
+**Next:** source-ranked unsupported Factory-front family
+**`ANIM_H_PIVOT`** (ID **27**), **1 Factory mapping** — WINGULL. Remaining
+after this step: H_PIVOT/WINGULL, GLOW_BLUE/MILOTIC, FRONT_FLIP/PIDGEOT.
+
+**Notes:** focused lifecycle/source/census/evidence plus both ratchets are
+**346/346**; TypeScript, unchanged coverage, three full `npm test` runs
+(**634 files / 6,376 passed / 1 skipped**), and production build are green.
+Commits: `8f146a3a` (reducer/census/lifecycle) and `a6805428` (paired Scene-ON
+evidence). This acceptance proves reducers, receipts, and terminal rest
+offsets; the live battle send-out seam still does not invoke these reducers
+frame-by-frame, so this is not yet playable live wiring.
+
 ## Front `ANIM_SWING_CONVEX_FAST` family accepted (2026-08-02)
 
 **State:** exact for the complete generated selector census: **1 mapping / 1
