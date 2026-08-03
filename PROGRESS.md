@@ -44,6 +44,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   battleScene.ts's remaining per-turn Turn1-13 type usage (same #39
   retirement surface); (2) #62 generated-route pixel-red reproducers;
   (3) #56 intro residuals.
+- **Day-audit (read-only, post-wind-down commit):** 5 angles over today's
+  surface — 4 explicitly clean (STAT_DISPLAY_NAME byte-exact vs
+  gStatNamesTable; slice-10 helper algebraically equivalent at all-null;
+  rebuilt turn5-13 pins kept every numeric tuple; slice-9 x #66 disjoint
+  by grep). 1 latent finding filed as **ISSUES #67** (unchecked
+  `as 1 | 2` magnitude cast from raw script bytes + `>= 2` vs source's
+  `== 2`, unreachable with stock data; minutes-sized guard+test
+  prescription in the entry).
 - **Notes:** `animation-main` is a moving branch again (live animation
   supervisor + nested worker at wind-down; tip was `54b2d48e`+ during this
   session) — fold at next orient per protocol. PAPERCUTS: new entry for
