@@ -47,6 +47,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** `tests/executableFrontierRatchet.test.ts` green, untouched, no
   new recording imports, no barrier-count changes. Diff stays additive in
   `messageLines`/`prepareMessage`; no timing constants touched.
+- **[supervisor final addendum, ~03:45]** hurtby fix verified (repro
+  test green, differential 128/128 per worker + suite rerun below).
+  animation-main fully folded (no new commits at final check). Preview
+  serving final master `497c1bd4` on :5199. Final independent full-suite
+  rerun by supervisor at `497c1bd4`: **exit 0, green** (03:33-03:37;
+  pass-count lines clipped by the capture — the worker's same-commit run
+  recorded 645 files / 6,444 passed / 1 skipped).
+  Session total: 18 workers (12 main, 6
+  side), 1 cap-kill salvaged, 0 lost steps. Tonight's #70 class work:
+  35 of 47 sweep ids + PKMNHURTBY mapped and pinned; remainder = 12
+  intricate ids + INTROSENDOUT extractor (documented in #70).
 
 ---
 ## 884 — [bounded MAIN worker, 2026-08-03] ISSUES #70 batch 2 — 19 of 31 remaining presentation-string rows FIXED; 12 remain + 1 new gap found
