@@ -185,8 +185,8 @@ describe("BACK_ANIM_H_SPRING_REPEATED back send-out reducer", () => {
     expect(backHorizontalRepeatedSpringFrameAtTick(species, natureId, 999, -1)).toEqual(terminal);
     expect(backHorizontalRepeatedSpringWaitAnimEndCallback(false)).toBe("WaitAnimEnd");
     expect(backHorizontalRepeatedSpringWaitAnimEndCallback(true)).toBe("SpriteCallbackDummy");
-    expect(backSendOutTerminalSpriteData(0, species === "LUVDISC" ? 370 : 86))
-      .toEqual([0, 0, species === "LUVDISC" ? 370 : 86, 0, 0, 0, 0, 0]);
+    expect(backSendOutTerminalSpriteData(0, species === "LUVDISC" ? 325 : 330))
+      .toEqual([0, 0, species === "LUVDISC" ? 325 : 330, 0, 0, 0, 0, 0]);
   });
 
   it("rejects invalid inputs and keeps neighboring back families out of this reducer", () => {
