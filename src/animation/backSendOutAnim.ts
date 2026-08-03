@@ -123,6 +123,23 @@ export const BACK_SHRINK_GROW_OUTSIDE_FACTORY_SPECIES: readonly string[] = Objec
   BACK_SHRINK_GROW_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by the generated `BACK_ANIM_GROW` source row. */
+export const BACK_GROW_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_GROW")
+    .map(([species]) => species),
+);
+
+/** The complete Grow back set is Factory-reachable. */
+export const BACK_GROW_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_GROW_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** There are no outside-Factory mappings for this bounded back set. */
+export const BACK_GROW_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_GROW_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -296,6 +313,40 @@ export const BACK_SHRINK_GROW_VARIANTS = Object.freeze({
   }),
 } as const);
 
+/**
+ * `BACK_ANIM_GROW` has two entry points over the shared Grow helper and one
+ * deliberately separate staged callback. The source ids are the ids in
+ * `pokemon_animation.h`, not callback-table indices synthesized by this
+ * reducer.
+ */
+export const BACK_GROW_VARIANTS = Object.freeze({
+  twice: Object.freeze({
+    selector: "ANIM_GROW_TWICE",
+    callback: "Anim_Grow_Twice",
+    sourceId: 108,
+    natureMod: 0,
+    speed: 8,
+    runs: 2,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_GROW",
+    callback: "Anim_Grow",
+    sourceId: 107,
+    natureMod: 1,
+    speed: 4,
+    runs: 1,
+    accepted: true,
+  }),
+  inStages: Object.freeze({
+    selector: "ANIM_GROW_IN_STAGES",
+    callback: "Anim_GrowInStages",
+    sourceId: 58,
+    natureMod: 2,
+    accepted: true,
+  }),
+} as const);
+
 type BackHSlideSelector = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["selector"];
 type BackHSlideCallback = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["callback"];
 type BackHSlideDuration = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["duration"];
@@ -315,6 +366,9 @@ type BackShrinkGrowCallback = typeof BACK_SHRINK_GROW_VARIANTS[keyof typeof BACK
 type BackShrinkGrowSourceId = typeof BACK_SHRINK_GROW_VARIANTS[keyof typeof BACK_SHRINK_GROW_VARIANTS]["sourceId"];
 type BackShrinkGrowSpeed = typeof BACK_SHRINK_GROW_VARIANTS[keyof typeof BACK_SHRINK_GROW_VARIANTS]["speed"];
 type BackShrinkGrowPhaseLimit = typeof BACK_SHRINK_GROW_VARIANTS[keyof typeof BACK_SHRINK_GROW_VARIANTS]["phaseLimit"];
+type BackGrowSelector = typeof BACK_GROW_VARIANTS[keyof typeof BACK_GROW_VARIANTS]["selector"];
+type BackGrowCallback = typeof BACK_GROW_VARIANTS[keyof typeof BACK_GROW_VARIANTS]["callback"];
+type BackGrowSourceId = typeof BACK_GROW_VARIANTS[keyof typeof BACK_GROW_VARIANTS]["sourceId"];
 
 /**
  * Source facts at the `LaunchAnimationTaskForBackSprite` seam. The shared
@@ -468,6 +522,19 @@ function shrinkGrowVariant(selector: string): {
   return null;
 }
 
+function growVariant(selector: string): {
+  readonly selector: BackGrowSelector;
+  readonly callback: BackGrowCallback;
+  readonly sourceId: BackGrowSourceId;
+  readonly speed?: 4 | 8;
+  readonly runs?: 1 | 2;
+} | null {
+  for (const variant of Object.values(BACK_GROW_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
 function toS16(value: number): number {
   const wrapped = value & 0xffff;
   return wrapped >= 0x8000 ? wrapped - 0x10000 : wrapped;
@@ -477,6 +544,10 @@ function gbaSin(index: number, amplitude: number): number {
   // `Sin` returns `(amplitude * gSineTable[index]) >> 8`; the signed ARM
   // shift rounds negative fractional values down, unlike JS's `Math.trunc`.
   return toS16(Math.floor((amplitude * GBA_SINE_TABLE_256[index & 0xff]!) / 256));
+}
+
+function gbaCos(index: number, amplitude: number): number {
+  return gbaSin(index + 64, amplitude);
 }
 
 export interface BackHorizontalVibrateFrame {
@@ -1015,6 +1086,268 @@ export function backShrinkGrowFrameAtTick(
 
 /** Source WaitAnimEnd lifecycle after static back OAM reports animEnded. */
 export function backShrinkGrowWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+export interface BackGrowAffineWrite {
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly rotationSigned: 0;
+  readonly rotationU16: 0;
+}
+
+export interface BackGrowFrame {
+  readonly x2: 0;
+  readonly y2: 0;
+  readonly data0: 0;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  readonly data2: 1;
+  readonly data4: 0;
+  readonly data5: number;
+  readonly data6: number;
+  readonly data7: number;
+  readonly selector: BackGrowSelector;
+  readonly sourceId: BackGrowSourceId;
+  readonly speed: number | null;
+  readonly runs: number | null;
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly initializerCalled: boolean;
+  readonly handleStartAffineAnimCalls: 0 | 1;
+  readonly callbackInvokedByInitializer: true;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly normalBackDontFlip: true;
+  readonly tryFlipXCalls: 2;
+  readonly affineWriteCount: number;
+  readonly affineWrites: readonly BackGrowAffineWrite[];
+  /** The staged callback writes twice on its terminal invocation. */
+  readonly terminalAffineWriteOrdering: readonly string[];
+  readonly affineMode: "double" | "normal";
+  readonly callback: BackGrowCallback | "WaitAnimEnd";
+}
+
+function growAffineWrite(scale: number): BackGrowAffineWrite {
+  return Object.freeze({
+    xScale: scale,
+    yScale: scale,
+    rotationSigned: 0 as const,
+    rotationU16: 0 as const,
+  });
+}
+
+/**
+ * Source-order reducer for `Anim_Grow` and `Anim_Grow_Twice` plus their shared
+ * `Grow` helper. The extra invocation that clears `data[7]` between the two
+ * cycles is retained; it has no affine write in the C source.
+ */
+export function backGrowFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackGrowFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_GROW") return null;
+  const variant = growVariant(selection.selector);
+  if (variant === null || variant.speed === undefined || variant.runs === undefined) return null;
+
+  let data5 = variant.runs;
+  let data6 = variant.speed;
+  let data7 = 0;
+  let xScale = 256;
+  let yScale = 256;
+  let affineMode: "double" | "normal" = "double";
+  let callback: BackGrowCallback | "WaitAnimEnd" = variant.callback;
+  let resetSpriteAfterAnim = false;
+  let terminal = false;
+  let writes: readonly BackGrowAffineWrite[] = [];
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (terminal) break;
+    writes = [];
+    if (data7 > 255) {
+      if (data5 <= 1) {
+        // Grow resets the affine mode, then performs its final identity write.
+        resetSpriteAfterAnim = true;
+        affineMode = "normal";
+        callback = "WaitAnimEnd";
+        xScale = 256;
+        yScale = 256;
+        writes = [growAffineWrite(256)];
+        terminal = true;
+      } else {
+        data5 -= 1;
+        data7 = 0;
+      }
+    } else {
+      data7 += data6;
+      if (data7 > 256) data7 = 256;
+      const scale = gbaSin(Math.trunc(data7 / 2), 64);
+      xScale = 256 - scale;
+      yScale = xScale;
+      writes = [growAffineWrite(xScale)];
+    }
+  }
+
+  return Object.freeze({
+    x2: 0 as const,
+    y2: 0 as const,
+    data0: 0 as const,
+    data1: toS16(preservedData1),
+    data2: 1 as const,
+    data4: 0 as const,
+    data5,
+    data6,
+    data7,
+    selector: variant.selector,
+    sourceId: variant.sourceId,
+    speed: variant.speed,
+    runs: variant.runs,
+    xScale,
+    yScale,
+    initializerCalled: true,
+    handleStartAffineAnimCalls: ticksSinceStart === 0 ? 1 as const : 0 as const,
+    callbackInvokedByInitializer: true as const,
+    resetSpriteAfterAnim,
+    normalBackDontFlip: true as const,
+    tryFlipXCalls: 2 as const,
+    affineWriteCount: writes.length,
+    affineWrites: writes,
+    terminalAffineWriteOrdering: [],
+    affineMode,
+    callback,
+  });
+}
+
+/**
+ * Source-order reducer for the distinct `Anim_GrowInStages` callback. Its
+ * stage transitions and data[6] pauses intentionally do not share the Grow
+ * reducer above, even though both callbacks ultimately scale the sprite.
+ */
+export function backGrowInStagesFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackGrowFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_GROW") return null;
+  const variant = growVariant(selection.selector);
+  if (variant === null || variant.speed !== undefined || variant.runs !== undefined) return null;
+
+  let data2 = 0;
+  let data5 = 0;
+  let data6 = 0;
+  let data7 = 0;
+  let xScale = 256;
+  let yScale = 256;
+  let affineMode: "double" | "normal" = "double";
+  let callback: BackGrowCallback | "WaitAnimEnd" = variant.callback;
+  let resetSpriteAfterAnim = false;
+  let terminal = false;
+  let writes: readonly BackGrowAffineWrite[] = [];
+  let terminalAffineWriteOrdering: readonly string[] = [];
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (terminal) break;
+    writes = [];
+    terminalAffineWriteOrdering = [];
+    if (data2 === 0) data2 = 1;
+
+    if (data6 > 0) {
+      data6 -= 1;
+      if (data5 !== 3) {
+        const pauseScale = Math.trunc((8 * data6) / 20);
+        const scale = gbaSin(data7 - pauseScale, 64);
+        xScale = 256 - scale;
+        yScale = xScale;
+        writes = [growAffineWrite(xScale)];
+      }
+    } else {
+      let variable: number;
+      if (data5 === 3) {
+        if (data7 > 63) {
+          data7 = 64;
+          // The source writes identity before ResetSpriteAfterAnim and then
+          // writes the same identity again after computing Cos(data[7], 64).
+          xScale = 256;
+          yScale = 256;
+          writes = [growAffineWrite(256)];
+          resetSpriteAfterAnim = true;
+          affineMode = "normal";
+          callback = "WaitAnimEnd";
+          terminal = true;
+          terminalAffineWriteOrdering = [
+            "HandleSetAffineData(256, 256, 0)",
+            "HandleSetAffineData(256, 256, 0)",
+          ];
+        }
+        variable = gbaCos(data7, 64);
+      } else {
+        variable = gbaSin(data7, 64);
+        if (data7 > 63) {
+          data5 = 3;
+          data6 = 10;
+          data7 = 0;
+        } else if (variable > 48 && data5 === 1) {
+          data5 = 2;
+          data6 = 20;
+        } else if (variable > 16 && data5 === 0) {
+          data5 = 1;
+          data6 = 20;
+        }
+      }
+
+      data7 += 2;
+      xScale = 256 - variable;
+      yScale = xScale;
+      writes = terminal
+        ? [...writes, growAffineWrite(xScale)]
+        : [growAffineWrite(xScale)];
+    }
+  }
+
+  return Object.freeze({
+    x2: 0 as const,
+    y2: 0 as const,
+    data0: 0 as const,
+    data1: toS16(preservedData1),
+    data2: 1 as const,
+    data4: 0 as const,
+    data5,
+    data6,
+    data7,
+    selector: variant.selector,
+    sourceId: variant.sourceId,
+    speed: null,
+    runs: null,
+    xScale,
+    yScale,
+    initializerCalled: true,
+    handleStartAffineAnimCalls: ticksSinceStart === 0 ? 1 as const : 0 as const,
+    callbackInvokedByInitializer: true as const,
+    resetSpriteAfterAnim,
+    normalBackDontFlip: true as const,
+    tryFlipXCalls: 2 as const,
+    affineWriteCount: writes.length,
+    affineWrites: writes,
+    terminalAffineWriteOrdering,
+    affineMode,
+    callback,
+  });
+}
+
+/** Source WaitAnimEnd lifecycle after static back OAM reports animEnded. */
+export function backGrowWaitAnimEndCallback(
   animEnded: boolean,
 ): "WaitAnimEnd" | "SpriteCallbackDummy" {
   return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
