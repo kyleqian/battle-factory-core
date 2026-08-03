@@ -125,14 +125,18 @@ describe("ANIM_H_PIVOT Scene-ON evidence", () => {
     expect(order).toEqual([...order].sort((a, b) => a - b));
     expect([...pivot.matchAll(/TryFlipX\(sprite\);/g)]).toHaveLength(0);
 
-    const startAffine = source.slice(
-      source.indexOf("static void HandleStartAffineAnim(struct Sprite *sprite)\n{"),
-      source.indexOf("static void HandleSetAffineData", pivotStart),
+    const startAffineStart = source.indexOf(
+      "static void HandleStartAffineAnim(struct Sprite *sprite)\n{",
     );
-    const reset = source.slice(
-      source.indexOf("static void ResetSpriteAfterAnim(struct Sprite *sprite)\n{"),
-      source.indexOf("static void WaitAnimEnd", pivotStart),
-    );
+    const setAffineStart = source.indexOf("static void HandleSetAffineData", startAffineStart);
+    const resetStart = source.indexOf("static void ResetSpriteAfterAnim(struct Sprite *sprite)\n{");
+    const resetEnd = source.indexOf("static void Anim_CircularStretchTwice", resetStart);
+    expect(startAffineStart).toBeGreaterThan(0);
+    expect(setAffineStart).toBeGreaterThan(startAffineStart);
+    expect(resetStart).toBeGreaterThan(setAffineStart);
+    expect(resetEnd).toBeGreaterThan(resetStart);
+    const startAffine = source.slice(startAffineStart, setAffineStart);
+    const reset = source.slice(resetStart, resetEnd);
     expect(startAffine).toMatch(
       /sprite->oam\.affineMode = ST_OAM_AFFINE_DOUBLE;[\s\S]*?CalcCenterToCornerVec\(sprite, sprite->oam\.shape, sprite->oam\.size, sprite->oam\.affineMode\);/,
     );
