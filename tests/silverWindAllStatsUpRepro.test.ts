@@ -128,11 +128,11 @@ describe("Silver Wind All-Stats-Up ATTACKERSSTATROSE presentation crash", () => 
         .map((cmd) => cmd.lines)
         .filter((lines) => lines.some((line) => line.includes("rose!")));
       expect(messageLinesInOrder).toEqual([
-        ["BUTTERFREE’s attack", "rose!"],
-        ["BUTTERFREE’s defense", "rose!"],
-        ["BUTTERFREE’s speed", "rose!"],
-        ["BUTTERFREE’s special-attack", "rose!"],
-        ["BUTTERFREE’s special-defense", "rose!"],
+        ["BUTTERFREE’s ATTACK", "rose!"],
+        ["BUTTERFREE’s DEFENSE", "rose!"],
+        ["BUTTERFREE’s SPEED", "rose!"],
+        ["BUTTERFREE’s SP. ATK", "rose!"],
+        ["BUTTERFREE’s SP. DEF", "rose!"],
       ]);
     },
   );

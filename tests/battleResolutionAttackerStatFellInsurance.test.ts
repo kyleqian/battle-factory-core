@@ -114,7 +114,7 @@ describe("Superpower self-drop ATTACKERSSTATFELL presentation (docs/silverwind-a
       .filter((cmd): cmd is Extract<typeof cmd, { type: "message" }> => cmd.type === "message")
       .map((cmd) => cmd.lines);
 
-    expect(lines).toContainEqual(["ONIX’s attack", "fell!"]);
-    expect(lines).toContainEqual(["ONIX’s defense", "fell!"]);
+    expect(lines).toContainEqual(["ONIX’s ATTACK", "fell!"]);
+    expect(lines).toContainEqual(["ONIX’s DEFENSE", "fell!"]);
   });
 });

@@ -207,6 +207,16 @@ export type BattleScriptSemanticEventPayload =
     stat: "attack" | "defense" | "speed" | "special-attack" | "special-defense" | "accuracy" | "evasion";
     from: number;
     to: number;
+    /**
+     * ChangeStatBuffs's own pre-clamp `GET_STAT_BUFF_VALUE(statValue)`
+     * (battle_script_commands.c:7038,7061), NOT `Math.abs(to - from)`.
+     * `STRINGID_ATTACKERSSTATROSE`/`FELL` and `DEFENDERSSTATROSE`/`FELL`'s
+     * `{B_BUFF2}` "sharply"/"harshly" selection reads this requested
+     * magnitude, so a stage-11 SWORDS DANCE (+2 requested, +1 post-clamp)
+     * still prints "sharply rose!" -- oracle-confirmed,
+     * docs/issue66b-preclamp-magnitude-verdict.md.
+     */
+    requestedMagnitude: 1 | 2;
   }>
   | Readonly<{
     kind: "animation";

@@ -47,6 +47,7 @@ function syntheticEvents(): readonly BattleScriptSemanticEventPayload[] {
       stat: "accuracy" as const,
       from: 6,
       to: 5,
+      requestedMagnitude: 1 as const,
     }),
     Object.freeze({
       kind: "animation" as const,

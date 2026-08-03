@@ -992,6 +992,7 @@ describe("battle resolution typed Scene-OFF renderer", () => {
         stat: "accuracy",
         from: 6,
         to: 5,
+        requestedMagnitude: 1,
       }),
       event(1, {
         kind: "message",
@@ -1025,6 +1026,7 @@ describe("battle resolution typed Scene-OFF renderer", () => {
         stat: "evasion",
         from: 6,
         to: 7,
+        requestedMagnitude: 1,
       }),
       event(1, {
         kind: "message",
@@ -1034,7 +1036,7 @@ describe("battle resolution typed Scene-OFF renderer", () => {
     ], NEXT_COMMAND));
     expect(roseResolution.segments[0]!.commands[1]).toMatchObject({
       type: "message",
-      lines: ["Foe KABUTO’s evasion", "rose!"],
+      lines: ["Foe KABUTO’s evasiveness", "rose!"],
     });
 
     const statusResolution = createBattleResolutionPresentation(inputFor([
@@ -1137,11 +1139,11 @@ describe("battle resolution typed Scene-OFF renderer", () => {
 
   it("ISSUES #59/#60: supports rise/drop on either battler through the generated-route Scene-OFF adapter", () => {
     const cases = [
-      { battler: 0 as const, stat: "attack" as const, from: 6, to: 4, direction: "decrease" as const },
-      { battler: 0 as const, stat: "special-defense" as const, from: 6, to: 7, direction: "increase" as const },
-      { battler: 1 as const, stat: "defense" as const, from: 6, to: 5, direction: "decrease" as const },
+      { battler: 0 as const, stat: "attack" as const, from: 6, to: 4, direction: "decrease" as const, requestedMagnitude: 2 as const },
+      { battler: 0 as const, stat: "special-defense" as const, from: 6, to: 7, direction: "increase" as const, requestedMagnitude: 1 as const },
+      { battler: 1 as const, stat: "defense" as const, from: 6, to: 5, direction: "decrease" as const, requestedMagnitude: 1 as const },
       // #60's exact novelty gate: the opponent's own DOUBLE_TEAM receipt.
-      { battler: 1 as const, stat: "evasion" as const, from: 7, to: 8, direction: "increase" as const },
+      { battler: 1 as const, stat: "evasion" as const, from: 7, to: 8, direction: "increase" as const, requestedMagnitude: 1 as const },
     ];
 
     for (const testCase of cases) {
@@ -1152,6 +1154,7 @@ describe("battle resolution typed Scene-OFF renderer", () => {
           stat: testCase.stat,
           from: testCase.from,
           to: testCase.to,
+          requestedMagnitude: testCase.requestedMagnitude,
         }),
       ], NEXT_COMMAND));
       const view = createBattleResolutionPresentationRenderView(
@@ -1206,7 +1209,7 @@ describe("battle resolution typed Scene-OFF renderer", () => {
 
   it("ISSUES #60: renders every command completion edge of an opponent rise deterministically", () => {
     const resolution = createBattleResolutionPresentation(inputFor([
-      event(0, { kind: "stat-stage-change", battler: 1, stat: "evasion", from: 7, to: 8 }),
+      event(0, { kind: "stat-stage-change", battler: 1, stat: "evasion", from: 7, to: 8, requestedMagnitude: 1 }),
       event(1, { kind: "message", messageId: "STRINGID_DEFENDERSSTATROSE", substitutions: [] }),
     ], NEXT_COMMAND));
     const commands = resolution.segments[0]!.commands;
@@ -1238,7 +1241,7 @@ describe("battle resolution typed Scene-OFF renderer", () => {
   it("ISSUES #60: rejects malformed or directionless stat banner endpoints", () => {
     for (const [from, to] of [[6, 6], [-1, 1], [11, 13]]) {
       const resolution = createBattleResolutionPresentation(inputFor([
-        event(0, { kind: "stat-stage-change", battler: 1, stat: "evasion", from, to }),
+        event(0, { kind: "stat-stage-change", battler: 1, stat: "evasion", from, to, requestedMagnitude: 1 }),
       ], NEXT_COMMAND));
       const view = createBattleResolutionPresentationRenderView(
         atRenderClock(resolution, 0, 12),
