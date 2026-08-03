@@ -32,6 +32,20 @@ describe("ANIM_FRONT_FLIP", () => {
     expect(speciesFrontIdleRestOffset("PIDGEOT")).toEqual({ x2: 0, y2: 0 });
   });
 
+  it("ratchets the generated 62-family front census and all 376 Factory mappings through the seam", () => {
+    const generated = Object.entries(selectorTables.frontAnimIds.species);
+    const factorySpecies = new Set(
+      frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+    );
+    const factoryMappings = generated.filter(([species]) => factorySpecies.has(species));
+
+    expect(generated).toHaveLength(386);
+    expect(new Set(generated.map(([, family]) => family)).size).toBe(62);
+    expect(factoryMappings).toHaveLength(376);
+    expect(generated.filter(([species]) => speciesFrontIdleRestOffset(species) === null)).toEqual([]);
+    expect(factoryMappings.filter(([species]) => speciesFrontIdleRestOffset(species) === null)).toEqual([]);
+  });
+
   it("pins selector 41's direct task setup, no-delay picture program, and dummy handoff", () => {
     expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
     expect(FRONT_FLIP_ENTRY).toEqual({

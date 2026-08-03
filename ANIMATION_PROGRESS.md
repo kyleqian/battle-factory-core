@@ -1,5 +1,38 @@
 # Animation coverage
 
+## Front `ANIM_FRONT_FLIP` family accepted (2026-08-03)
+
+**State:** exact reducer/evidence coverage for the complete generated selector
+census: **1 mapping / 1 Factory-reachable / 0 outside-Factory** — PIDGEOT.
+Source ID **41** closes the final Factory-front family: Factory-front coverage
+is **62/62 families** and **376/376 species mappings** (the full generated
+front census is 62 families / 386 mappings). `ANIMATION_COVERAGE.json` remains
+byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`;
+move coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**.
+
+**Did:** source pins selector neighbors 40/41/42, direct no-delay task dispatch,
+Pidgeot's `1×20, 0×10, 1×15, 0×1` front-picture program, task-preserved
+data[1], signed-s16 x2/y2/data[2] storage, all six source-order `TryFlipX`
+calls, raw `data[2] << 8` / u16 affine writes, double-to-normal OAM reset,
+and `WaitAnimEnd` -> dummy teardown. The front seam now has an extraction/
+coverage ratchet for all 62 generated families and all 376 Factory mappings;
+the distinct Pidgeot back selector remains deliberately unported. Two fresh,
+complete legal Scene-ON PIDGEOT mGBA receipts from `tools/run-mgba-probe.py`
+are byte-identical: active-to-dummy window **1616..1667 (52 frames)**,
+**23,468 B**, SHA-256
+`fe5a38bcddffb556d221ace425473006cc52d3b8f89acc1b5d0c951bd8f51b1b`.
+
+**Next:** supervisor census/implementation of **back send-out animations**.
+Front-family coverage is complete, but overall send-out coverage is **not**
+complete because the back-animation family is separate.
+
+**Notes:** focused reducer/source/census/evidence, adjacent-family controls,
+and animation boundary ratchets are green; `npx tsc --noEmit`,
+`npm run animation:coverage`, full `npm test`, and `npm run build` are green.
+No move status was promoted and no canonical-screen lookup or baked pixel
+behavior was added.
+
 ## Front `ANIM_GLOW_BLUE` family accepted (2026-08-02)
 
 **State:** exact reducer/evidence coverage for the complete generated selector
