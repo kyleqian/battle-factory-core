@@ -55,9 +55,12 @@ oracle window twice fresh, and a sibling-species spot-check per promoted
 function.
 
 **Sequencing:** filed 2026-08-03 at user request so the main lane sees this
-work. The user has **not** reprioritized it above the queued #70
-`STRINGID_INTROSENDOUT` extractor-gap remainder / dossier slice 4 / typeref
-slices — it slots after those unless reordered.
+work. The user has **not** reprioritized it above the queued typeref slices
+— it slots after those unless reordered (#70 and dossier slice 4, the other
+two items originally ahead of it, both closed 2026-08-03). Note: the
+resolver side is now ready for this program — `battleIntroStrings.ts` +
+entry 887's `introBattler`/`introHpScale`/`introOutcome` event fields mean
+the send-out strings resolve the moment a live path emits them.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
@@ -236,6 +239,13 @@ epoch. Clean-parent `b7cdbe46` (`75d9c1d3^`) app replays held the turn-4
 primary, all turn-5/6 readers, and upstream turn-3 window byte-identical
 (**1,841/1,841 raw RGBA captures**). Turns 1–4 and 5–13 are now retired; #39
 remains open only for dispatcher debt. Dispatcher ladder status (2026-08-02): design dossier `docs/next-command-handoff-dispatcher-design.md` slices 1-7 are landed (generic guard chain drives turns 5-13; turn-1 and turn-2 epoch folds done; handoff state fields 13→2, only turn3/turn4 remain); slices 8-10 (turn-3/turn-4 folds, final 13-parameter/type cut) are the remaining #39 dispatcher work, then the species/episode render entry points inventoried in `docs/battle-scene-retirement-inventory.md`.
+**Species render-entry-point program CLOSED (2026-08-03):** all 7 slices of
+`docs/species-render-entry-point-retirement-design.md` landed — capstone
+slice 4 (`90e5a2b2`) threads `SceneOffTurnView` species/asset identity as
+data (differential 144/144 byte-identical, base `46190382`). Remaining #39
+debt: the dispatcher-ladder remainder above plus the turnN-typeref
+retirement program (`docs/battlescene-turnN-typeref-retirement-design.md`,
+6-slice plan; slice-2's precondition pin test banked at `a76bb338`).
 Rank 4 is **fully retired** (2026-07-31,
 all 5 slices): `174cc388` ROCK_SLIDE tails; `441ddf83`+`6aba6662`
 turn-7/8 FEATHER_DANCE staged+flipped; `0769ccc6` stat-fall banner

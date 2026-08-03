@@ -1,4 +1,64 @@
 ---
+## 885 — [bounded MAIN worker, 2026-08-03] ISSUES #70 — STRINGID_PKMNHURTBY crash FIXED (wrap-family end-of-turn damage tick)
+
+- **State:** master `58634980` (one commit on top of `37a4b621`). Full
+  `npm test`: **645 files / 6,444 passed / 1 skipped** (+1 from this step's
+  new test). `npm run build` green (tsc -b + vite).
+- **Did:** fixed the highest-severity gap batch-2 surfaced last session:
+  `BattleScript_WrapTurnDmg`'s own `printstring STRINGID_PKMNHURTBY`
+  (`battle_message.c:148`, `{B_ATK_NAME_WITH_PREFIX} is hurt\nby
+  {B_BUFF1}!`), fired every turn `ENDTURN_WRAP`'s recurring-damage branch
+  runs (`battleEndTurnOrchestration.ts`'s `WRAP_TURN_DMG_LABEL`/
+  `runWrapTick`) — reachable on the very first successful use of any of the
+  6 trapping moves (Bind/Wrap/Fire Spin/Clamp/Whirlpool/Sand Tomb), since
+  real Gen3 deals the trap's first damage tick the same turn it's set.
+  `messageLines` (`battleResolutionPresentation.ts`) gained a dedicated
+  branch reading the print-time action snapshot for
+  `B_ATK_NAME_WITH_PREFIX`, not `lastMoveAttacker` — `BS_ATTACKER` is
+  reassigned to the trapped battler itself for this tick
+  (`enterTickBattlerContext`), which can differ from the battler that last
+  used a real move. `prepareMessage`
+  (`factoryBattleScriptFullTurnDecision.ts`) gained a `STRINGID_PKMNHURTBY`
+  substitution resolving `{B_BUFF1}` via `resolveMoveName(rules.battlers
+  [rules.selectorRoles.attacker].wrappedMove)` — the trapping move's own id,
+  stamped onto the trapped battler by `applyWrapMoveEffect`
+  (`battleScriptHitChainOpcode.ts:3722`) when the trap was first cast.
+- **Tests:** `tests/presentationStringHurtBy.test.ts` — one staged real-Bind
+  full-turn repro through the production kernel (the same turn's own
+  end-of-turn tick fires the gap, so no synthetic-event fallback was
+  needed), brute-forcing seeds for Bind's 75% accuracy roll. Red-verified
+  once via `git stash` on the two touched engine files: threw
+  `battleStringResolver`'s exact completeness-guard error
+  (`STRINGID_PKMNHURTBY references placeholder {B_BUFF1} with no resolver
+  supplied`) pre-fix; green post-fix, asserting `["Foe {opponent} is
+  hurt", "by BIND!"]`. `npm run compare:differential -- battle-command-
+  generated-off.json --base 37a4b621 --summary` (base = this commit's
+  parent): **PASS — 128/128 captures byte-identical** — no standing capture
+  reaches this string.
+- **Next:** ISSUES #70's remaining 12 ids (ability-prevention family x5,
+  Uproar family x3, `USINGITEMSTATOFPKMNROSE`, `PKMNSTOCKPILED`/`PKMNHPFULL`,
+  `PKMNTRANSFORMEDINTO`) plus the `INTROSENDOUT` extractor gap. Full per-id
+  detail and file:line citations already in ISSUES #70 — do not re-derive.
+  Newly filed 2026-08-03 (user request): **ISSUES #71** — main-lane share of
+  send-out intro live wiring (dispatcher hookup + retiring the two
+  `src/engine/` hand-fits); slots after #70/dossier-4/typeref unless the user
+  reorders.
+- **Notes:** `tests/executableFrontierRatchet.test.ts` green, untouched, no
+  new recording imports, no barrier-count changes. Diff stays additive in
+  `messageLines`/`prepareMessage`; no timing constants touched.
+- **[supervisor final addendum, ~03:45]** hurtby fix verified (repro
+  test green, differential 128/128 per worker + suite rerun below).
+  animation-main fully folded (no new commits at final check). Preview
+  serving final master `497c1bd4` on :5199. Final independent full-suite
+  rerun by supervisor at `497c1bd4`: **exit 0, green** (03:33-03:37;
+  pass-count lines clipped by the capture — the worker's same-commit run
+  recorded 645 files / 6,444 passed / 1 skipped).
+  Session total: 18 workers (12 main, 6
+  side), 1 cap-kill salvaged, 0 lost steps. Tonight's #70 class work:
+  35 of 47 sweep ids + PKMNHURTBY mapped and pinned; remainder = 12
+  intricate ids + INTROSENDOUT extractor (documented in #70).
+
+---
 ## 884 — [bounded MAIN worker, 2026-08-03] ISSUES #70 batch 2 — 19 of 31 remaining presentation-string rows FIXED; 12 remain + 1 new gap found
 
 - **State:** master `63dc4dc3` (two commits on top of `5ce289c8`). Full
