@@ -6,6 +6,10 @@ import type {
   BattleState,
 } from "./battleDecisionBoundary.ts";
 import {
+  SCENE_OFF_TURN_DEFAULT_IDENTITY,
+  type SceneOffTurnIdentity,
+} from "./battleScene.ts";
+import {
   submitFactoryFullTurnDecision,
   type FactoryFullTurnDecisionRules,
 } from "./factoryBattleScriptFullTurnDecision.ts";
@@ -44,6 +48,7 @@ export interface StagedBattleTurnState {
   readonly commandDurations: readonly number[] | null;
   readonly inputReadyElapsed: number;
   readonly nextInputAccepted: boolean;
+  readonly sceneOffIdentity: SceneOffTurnIdentity;
 }
 
 export function stageBattleTurn(
@@ -61,6 +66,7 @@ export function stageBattleTurn(
     commandDurations,
     inputReadyElapsed: 0,
     nextInputAccepted: false,
+    sceneOffIdentity: SCENE_OFF_TURN_DEFAULT_IDENTITY,
   };
 }
 
@@ -103,6 +109,7 @@ export function stageFactoryFullTurnBattle(
         : Object.freeze([...commandDurations]),
     inputReadyElapsed: 0,
     nextInputAccepted: false,
+    sceneOffIdentity: SCENE_OFF_TURN_DEFAULT_IDENTITY,
   });
 }
 
