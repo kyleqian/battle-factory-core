@@ -1,5 +1,55 @@
 # Animation coverage
 
+## Back `BACK_ANIM_H_SLIDE` triple accepted (2026-08-03)
+
+**State:** exact for a second bounded player-back set: **2/25 back sets,
+6/75 selector variants, 48/376 Factory mappings**. Set 2 is **31 mappings /
+31 Factory / 0 outside-Factory** — IVYSAUR, CATERPIE, WEEDLE, ODDISH, GLOOM,
+PARAS, PSYDUCK, TENTACOOL, TENTACRUEL, SLOWPOKE, FARFETCHD, DEWGONG,
+EXEGGCUTE, HITMONLEE, LICKITUNG, DRATINI, BAYLEEF, ARIADOS, SUDOWOODO,
+SUNFLORA, QUAGSIRE, CORSOLA, REMORAID, MANTINE, SMEARGLE, SMOOCHUM,
+MILTANK, MUDKIP, LOTAD, SLAKOTH, RELICANTH. This remains reducer/evidence
+coverage only; no live battle dispatcher wiring is claimed.
+
+**Did:** added the explicit back route for `LaunchAnimationTaskForBackSprite`
+set 2: nature mods select fast `ANIM_H_SLIDE_FAST` (data0 20), normal
+`ANIM_H_SLIDE` (40), or slow `ANIM_H_SLIDE_SLOW` (80), each initializer calls
+the shared `HorizontalSlide` immediately before installing it. The separate
+back reducer pins task zero/preserve/restore, `sDontFlip` plus both source
+`TryFlipX` no-ops, signed-s16 `Sin`/x2 writes, terminal x2 clear,
+WaitAnimEnd, and SpriteCallbackDummy restoration; no front-family assertion
+is reused. Tests pin the generated global **25/75/386/376/10** census and
+adjacent H-vibrate/H-spring controls.
+
+**Evidence:** TENTACRUEL source records span every selector: index **434**
+Impish → fast, **722** Quirky → normal, **626** Modest → slow. Complete legal
+three-mon-per-side Scene-ON mechanicLab overrides use legal scaffold IDs
+`[154,135,188]` / `[156,149,180]` because those high source records are
+outside challenge-0's source range. Two independent dense mGBA receipts per
+selector are byte-identical from selected initializer through dummy: fast
+**1842..1865 (24 frames), 11,273 B,
+44813ac0bc52abe9cad62ea8b6c019fb04a25363044f5496563cc0e161f1ee8e**;
+normal **1842..1885 (44 frames), 20,199 B,
+86eb4b5b1cedf5e267797f4f9eaf6831fde1b10a63a316cc6f55cd2b3302fcac**;
+slow **1842..1925 (84 frames), 38,114 B,
+db6b09b14767a8a3932a228a771cdbf5511efc92ade18d1320e87f2d52a717d3**.
+Distinct sibling verdict: Factory BAYLEEF index **180**, Docile → normal,
+uses literal legal player base ID 180 with unique-item legal teams
+`[180,154,135]` / `[156,149,188]` and complete source-move override; its
+fresh pair is **1839..1882 (44 frames), 20,200 B,
+241db20d259d1b3d4d2d7d122c350a20ad9c131b2fc3e1fb49487ae70c807432**.
+
+**Next:** source-ranked unsupported player-back set `BACK_ANIM_H_SPRING`
+(set 3), independently scoped and evidenced.
+
+**Notes:** focused reducer/evidence/source/extraction/boundary and
+executable-frontier ratchets, `npx tsc --noEmit`, full `npm test` (649 files,
+6,473 passed / 1 skipped), and `npm run build` are green.
+`ANIMATION_COVERAGE.json` remains unchanged at
+SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+No move status was promoted; no canonical framebuffer lookup, absolute-tick
+fitting, or baked interactive pixels were added.
+
 ## Back `BACK_ANIM_H_VIBRATE` triple accepted (2026-08-03)
 
 **State:** exact for one bounded player-back set: **1/25 back sets, 3/75

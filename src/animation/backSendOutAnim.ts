@@ -55,6 +55,23 @@ export const BACK_H_VIBRATE_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.
   BACK_H_VIBRATE_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by the generated `BACK_ANIM_H_SLIDE` source row. */
+export const BACK_H_SLIDE_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_H_SLIDE")
+    .map(([species]) => species),
+);
+
+/** The complete H-slide back set is Factory-reachable. */
+export const BACK_H_SLIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_H_SLIDE_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** There are no outside-Factory mappings for this one bounded back set. */
+export const BACK_H_SLIDE_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_H_SLIDE_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -82,6 +99,42 @@ export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
 type BackHVibrateSelector = typeof BACK_H_VIBRATE_VARIANTS[keyof typeof BACK_H_VIBRATE_VARIANTS]["selector"];
 type BackHVibrateCallback = typeof BACK_H_VIBRATE_VARIANTS[keyof typeof BACK_H_VIBRATE_VARIANTS]["callback"];
 type BackHVibrateAmplitude = typeof BACK_H_VIBRATE_VARIANTS[keyof typeof BACK_H_VIBRATE_VARIANTS]["amplitude"];
+
+/**
+ * `BACK_ANIM_H_SLIDE` is its own player-back triple. The shared source
+ * callback is selected after the task's nature lookup; each initializer then
+ * writes its own duration before immediately invoking `HorizontalSlide`.
+ */
+export const BACK_H_SLIDE_VARIANTS = Object.freeze({
+  fast: Object.freeze({
+    selector: "ANIM_H_SLIDE_FAST",
+    callback: "Anim_HorizontalSlide_Fast",
+    natureMod: 0,
+    duration: 20,
+    amplitude: 6,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_H_SLIDE",
+    callback: "Anim_HorizontalSlide",
+    natureMod: 1,
+    duration: 40,
+    amplitude: 6,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_H_SLIDE_SLOW",
+    callback: "Anim_HorizontalSlide_Slow",
+    natureMod: 2,
+    duration: 80,
+    amplitude: 6,
+    accepted: true,
+  }),
+} as const);
+
+type BackHSlideSelector = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["selector"];
+type BackHSlideCallback = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["callback"];
+type BackHSlideDuration = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["duration"];
 
 /**
  * Source facts at the `LaunchAnimationTaskForBackSprite` seam. The shared
@@ -182,16 +235,27 @@ function hVibrateVariant(selector: string): {
   return null;
 }
 
+function hSlideVariant(selector: string): {
+  readonly selector: BackHSlideSelector;
+  readonly callback: BackHSlideCallback;
+  readonly duration: BackHSlideDuration;
+  readonly amplitude: 6;
+} | null {
+  for (const variant of Object.values(BACK_H_SLIDE_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
 function toS16(value: number): number {
   const wrapped = value & 0xffff;
   return wrapped >= 0x8000 ? wrapped - 0x10000 : wrapped;
 }
 
 function gbaSin(index: number, amplitude: number): number {
-  // `Sin` returns s16 and C's integer division truncates toward zero. Every
-  // reachable H-vibrate accumulator is non-negative, but retain the explicit
-  // source-shaped truncation rather than relying on a JS float coincidence.
-  return toS16(Math.trunc((amplitude * GBA_SINE_TABLE_256[index & 0xff]!) / 256));
+  // `Sin` returns `(amplitude * gSineTable[index]) >> 8`; the signed ARM
+  // shift rounds negative fractional values down, unlike JS's `Math.trunc`.
+  return toS16(Math.floor((amplitude * GBA_SINE_TABLE_256[index & 0xff]!) / 256));
 }
 
 export interface BackHorizontalVibrateFrame {
@@ -289,6 +353,98 @@ export function backHorizontalVibrateFrameAtTick(
 
 /** Source WaitAnimEnd lifecycle after static back OAM reports animEnded. */
 export function backHorizontalVibrateWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+export interface BackHorizontalSlideFrame {
+  readonly x2: number;
+  readonly y2: 0;
+  readonly data0: BackHSlideDuration;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  readonly data2: number;
+  /** `data[2]` at the start of the source callback invocation. */
+  readonly counter: number;
+  readonly index: number | null;
+  readonly selector: BackHSlideSelector;
+  readonly duration: BackHSlideDuration;
+  readonly amplitude: 6;
+  /** The initializer invokes HorizontalSlide before installing it as callback. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
+  readonly normalBackDontFlip: true;
+  readonly tryFlipXCalls: 2;
+  readonly affineWriteCount: 0;
+  readonly affineMode: "normal";
+  readonly callback: "HorizontalSlide" | "WaitAnimEnd";
+}
+
+/**
+ * Source-order reducer for every `BACK_ANIM_H_SLIDE` selector. Tick zero is
+ * the selected initializer itself, which writes data0 and immediately calls
+ * HorizontalSlide before replacing its callback. Both TryFlipX calls are
+ * retained even though the back task has set sDontFlip=TRUE.
+ */
+export function backHorizontalSlideFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackHorizontalSlideFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_H_SLIDE") return null;
+  const variant = hSlideVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected H-slide selector ${selection.selector}`);
+
+  if (ticksSinceStart > variant.duration) {
+    return {
+      x2: 0,
+      y2: 0,
+      data0: variant.duration,
+      data1: toS16(preservedData1),
+      data2: toS16(variant.duration + 2),
+      counter: variant.duration + 1,
+      index: null,
+      selector: variant.selector,
+      duration: variant.duration,
+      amplitude: variant.amplitude,
+      initializerCallBeforeCallbackInstall: false,
+      normalBackDontFlip: true,
+      tryFlipXCalls: 2,
+      affineWriteCount: 0,
+      affineMode: "normal",
+      callback: "WaitAnimEnd",
+    };
+  }
+
+  const counter = ticksSinceStart;
+  const index = Math.trunc((counter * 384) / variant.duration) % 256;
+  return {
+    x2: gbaSin(index, variant.amplitude),
+    y2: 0,
+    data0: variant.duration,
+    data1: toS16(preservedData1),
+    data2: toS16(counter + 1),
+    counter,
+    index,
+    selector: variant.selector,
+    duration: variant.duration,
+    amplitude: variant.amplitude,
+    initializerCallBeforeCallbackInstall: counter === 0,
+    normalBackDontFlip: true,
+    tryFlipXCalls: 2,
+    affineWriteCount: 0,
+    affineMode: "normal",
+    callback: "HorizontalSlide",
+  };
+}
+
+/** Source WaitAnimEnd lifecycle after static back OAM reports animEnded. */
+export function backHorizontalSlideWaitAnimEndCallback(
   animEnded: boolean,
 ): "WaitAnimEnd" | "SpriteCallbackDummy" {
   return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
