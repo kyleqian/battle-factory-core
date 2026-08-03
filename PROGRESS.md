@@ -44,6 +44,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Uproar family x3, `USINGITEMSTATOFPKMNROSE`, `PKMNSTOCKPILED`/`PKMNHPFULL`,
   `PKMNTRANSFORMEDINTO`) plus the `INTROSENDOUT` extractor gap. Full per-id
   detail and file:line citations already in ISSUES #70 — do not re-derive.
+  Newly filed 2026-08-03 (user request): **ISSUES #71** — main-lane share of
+  send-out intro live wiring (dispatcher hookup + retiring the two
+  `src/engine/` hand-fits); slots after #70/dossier-4/typeref unless the user
+  reorders.
 - **Notes:** `tests/executableFrontierRatchet.test.ts` green, untouched, no
   new recording imports, no barrier-count changes. Diff stays additive in
   `messageLines`/`prepareMessage`; no timing constants touched.

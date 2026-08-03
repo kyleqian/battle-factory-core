@@ -5,8 +5,8 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-**Two kinds of entry live here — do not confuse them.** `#39`, `#55`, and
-`#70` are open, actionable debt. `#38`, `#18`, `#56`, `#61`, and `#5` are
+**Two kinds of entry live here — do not confuse them.** `#39`, `#55`, `#70`,
+and `#71` are open, actionable debt. `#38`, `#18`, `#56`, `#61`, and `#5` are
 **settled records, not work**: each was investigated to root cause and then
 parked or accepted by decision. They stay because ROADMAP acceptance lines
 cite them by number as the recorded reason specific pixel diffs are accepted
@@ -16,6 +16,47 @@ tick. Do not reopen one without a user decision, and do not count them as
 backlog.
 
 # Open
+
+## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
+
+**Symptom:** all 62 Factory-front send-out intro families (**376/376** species
+mappings) are ported and accepted in the animation lane
+(ANIMATION_PROGRESS.md top entry, 2026-08-03, `ANIM_FRONT_FLIP` closing the
+census), but the live battle send-out seam never invokes these reducers
+frame-by-frame — playable battles show no per-species intro animation, and
+every settled sprite misses its function's terminal `x2`/`y2` rest offset
+**for the remainder of the battle**. That residual-offset leak is the defect
+class behind the user's 2026-07-31 priority directive; two windows already
+hand-paid for it (DRAGON_RAGE's dense window and
+`docs/aerial-ace-portable-staging-probe.md`, both settled opponent-front ONIX
+at `x2=+1`).
+
+**Confirmed:** rung 1 of `docs/send-out-intro-animation-program.md` §6 is done
+(`src/data/gen/send-out-anim-selector-tables.json`); the front family is fully
+banked as reducers with byte-identical mGBA receipts (62/62), superseding
+rung 2's tier-1 constants for front. Three hand-fit one-offs exist today with
+no dispatcher: ONIX front terminal (`src/animation/speciesIdleAnim.ts:44`),
+MAGBY back (`src/engine/magbySendOut.ts:18`), ONIX back
+(`src/engine/battleMenu.ts:708`). The latter two live in main-lane-owned
+`src/engine/` files — retiring them is a coordinated cross-lane change, not an
+animation-lane drive-by (program doc §6 rung 3).
+
+**The work — main-lane share:** (1) invoke the rung-3 dispatcher (animation
+lane builds it in `src/animation/`, keyed by species for front and
+species+nature for back) from the live send-out seam so banked reducers run
+frame-by-frame — or at minimum apply their terminal rest offsets so settled
+sprites sit at source-exact positions; (2) retire the two `src/engine/`
+hand-fits into that dispatcher, coordinated with the animation lane.
+Back-family tier-1 constants (68 reachable functions, rung 4) are the
+animation lane's next program and are **not** a prerequisite for wiring the
+completed front family. Acceptance bar: program doc §7 — RAM probe of the
+settled sprite (`gBattlerSpriteIds[n]` `x2`/`y2`/`animNum`/`callback`), dense
+oracle window twice fresh, and a sibling-species spot-check per promoted
+function.
+
+**Sequencing:** filed 2026-08-03 at user request so the main lane sees this
+work. The user has **not** reprioritized it above the queued #70 remainder /
+dossier slice 4 / typeref slices — it slots after those unless reordered.
 
 ## #70 — Presentation-string completeness: 12 unmapped STRINGID refs remain reachable; 1 real extractor gap
 
