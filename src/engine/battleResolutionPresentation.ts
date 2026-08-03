@@ -664,6 +664,37 @@ function messageLines(
       B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
     });
   }
+  if (messageId === "STRINGID_PKMNFELLFORTAUNT") {
+    // BattleScript_EffectTaunt (reference/pokeemerald/data/battle_scripts_1.s:
+    // 2308-2318): Cmd_settaunt operates on gBattlerTarget directly (no
+    // gBattlerTarget reassignment precedes it, unlike Helping Hand), so
+    // {B_DEF_NAME_WITH_PREFIX} is the taunted battler -- the move's own
+    // (opposite-of-attacker) target, same relationship as
+    // STRINGID_PKMNSUBJECTEDTOTORMENT/STRINGID_PKMNAVOIDEDATTACK above.
+    const defender = requireMoveDefender(lastMoveAttacker, "fell-for-taunt message");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (messageId === "STRINGID_PKMNCANTUSEMOVETAUNT") {
+    // BattleScript_MoveUsedIsTaunted (battle_scripts_1.s:3580-3583), reached
+    // from advanceBattleScriptAttackCancelerTaunted's CANCELER_TAUNTED phase
+    // (battleScriptActionAdmission.ts) *instead of* STRINGID_USEDMOVE for a
+    // taunted battler's own blocked status-move action -- lastMoveAttacker
+    // (tied to the last completed used-move message) is the wrong battler
+    // here, sourced from the frozen action snapshot's own attacker/currentMove
+    // like STRINGID_PKMNRAISEDDEF's {B_CURRENT_MOVE} above. {B_ACTIVE_NAME_
+    // WITH_PREFIX} reads gActiveBattler == gBattlerAttacker at this print
+    // (battle_message.c:2447), the taunted battler picking the blocked move.
+    if (actionSnapshot === null) {
+      throw new Error(`battle resolution ${messageId} message has no preceding action snapshot`);
+    }
+    const battler = singlesBattler(actionSnapshot.attacker, `${messageId.toLowerCase()} action snapshot`);
+    return resolveBattleStringLines(messageId, {
+      B_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, battler),
+      B_CURRENT_MOVE: () => resolveMoveName(actionSnapshot.currentMove),
+    });
+  }
   if (
     messageId === "STRINGID_AVOIDEDDAMAGE"
     || messageId === "STRINGID_PKMNMAKESGROUNDMISS"
