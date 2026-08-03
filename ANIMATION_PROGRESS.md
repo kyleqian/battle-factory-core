@@ -1,5 +1,40 @@
 # Animation coverage
 
+## Back `BACK_ANIM_CIRCLE_COUNTERCLOCKWISE` triple accepted (2026-08-03)
+
+**State:** exact for the seventh bounded player-back set: **7/25 back sets,
+21/75 selector variants, 60/376 Factory mappings**. The generated set is
+exactly **2 mappings / 2 Factory / 0 outside** — HITMONTOP and SPINDA. Move
+coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**;
+`ANIMATION_COVERAGE.json` is unchanged at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Did:** ported source-relative `Anim_CircleCounterclockwise_Long`,
+`Anim_CircleCounterclockwise`, `Anim_CircleCounterclockwise_Slow`, and shared
+`CircleCounterclockwise`: source AddNewAnim slot, signed GBA Sin/Cos, strict
+`data[2] > rotation` termination, two source TryFlipX no-ops under
+`sDontFlip`, no affine/reset, and WaitAnimEnd/dummy lifecycle. The generic
+live selector remains species + party nature only; friendship is not read.
+Factory Hitmontop index **236** Hardy/mod-0 is long and Spinda index **145**
+Relaxed/mod-1 is normal; Modest/mod-2 is staged-only because no set-7 Factory
+record has natureMod 2.
+
+**Evidence:** six fresh paired, byte-identical Scene-ON receipts are dense
+from initializer through `SpriteCallbackDummy`, retaining every framebuffer
+hash plus sprite RAM/OAM/affine state: Hitmontop long **1841..1886 / 46
+frames, 21,647 B, `fb28652932946f61d3084eb3ca71990380353b890bb9596b63de8e92a5470336`**;
+Spinda normal **1838..1862 / 25, 12,066 B,
+`efea486d7eb1e16d76660523b39a8c3cfb2bdf8daa4388ef93873b91393ac6c9`**;
+staged legal Modest Spinda slow **1838..1883 / 46, 21,655 B,
+`f5bafbf5cd59b653da66e9d177eedfdf7346958c62eb64eeefe60d9edbf5ebdb`**.
+
+**Verification / next:** focused source/census/routing/reducer/evidence checks
+**7 files / 43 tests**, smoke **7 files / 339 tests**, `npx tsc --noEmit`,
+and coverage are green; full `npm test` is **659 files / 6,525 passed / 1
+skipped** and `npm run build` is green at **552 modules transformed**. Next
+source-ranked unsupported back set is **`BACK_ANIM_H_SHAKE` (set 8): 13
+mappings / 13 Factory / 0 outside**. No move status was promoted.
+
 ## Back `BACK_ANIM_GROW` triple accepted (2026-08-03)
 
 **State:** exact for the sixth bounded player-back set: **6/25 back sets,
