@@ -81,6 +81,7 @@ export type SpeciesFrontAnimFamily =
   | "TUMBLING_FRONT_FLIP_TWICE"
   | "SWING_CONVEX"
   | "SWING_CONCAVE"
+  | "SWING_CONCAVE_FAST"
   | "SWING_CONCAVE_FAST_SHORT"
   | "TWIST"
   | "TWIST_TWICE"
@@ -140,6 +141,7 @@ const PORTED_FRONT_FAMILIES = new Set<SpeciesFrontAnimFamily>([
   "TUMBLING_FRONT_FLIP_TWICE",
   "SWING_CONVEX",
   "SWING_CONCAVE",
+  "SWING_CONCAVE_FAST",
   "SWING_CONCAVE_FAST_SHORT",
   "TWIST",
   "TWIST_TWICE",
@@ -317,6 +319,23 @@ export const SWING_CONCAVE_FACTORY_FRONT_SPECIES: readonly string[] = Object.fre
 /** There are no `ANIM_SWING_CONCAVE` selector mappings outside the Factory pool. */
 export const SWING_CONCAVE_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
   SWING_CONCAVE_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
+);
+
+/** The sole source selector mapping for two-run `ANIM_SWING_CONCAVE_FAST`. */
+export const SWING_CONCAVE_FAST_FRONT_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(generatedFrontAnimIds)
+    .filter(([, family]) => family === "ANIM_SWING_CONCAVE_FAST")
+    .map(([species]) => species),
+);
+
+/** The complete Factory-reachable fast concave family (IGGLYBUFF). */
+export const SWING_CONCAVE_FAST_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  SWING_CONCAVE_FAST_FRONT_SPECIES.filter((species) => factoryFrontSpecies.has(species)),
+);
+
+/** There are no fast concave mappings outside the Factory rental pool. */
+export const SWING_CONCAVE_FAST_OUTSIDE_FACTORY_FRONT_SPECIES: readonly string[] = Object.freeze(
+  SWING_CONCAVE_FAST_FRONT_SPECIES.filter((species) => !factoryFrontSpecies.has(species)),
 );
 
 /** All source selector mappings for the fast-short `ANIM_SWING_CONCAVE` callback. */
@@ -1903,6 +1922,7 @@ export interface SwingFrame<Callback extends "SwingConcave" | "SwingConvex">
 
 export type SwingConcaveFrame = SwingFrame<"SwingConcave">;
 export type SwingConvexFrame = SwingFrame<"SwingConvex">;
+export type SwingConcaveFastFrame = SwingFrame<"SwingConcave">;
 export type SwingConcaveFastShortFrame = SwingFrame<"SwingConcave">;
 
 /**
@@ -2228,6 +2248,7 @@ export const ADD_NEW_ANIM_DEFAULTS = Object.freeze({
 });
 
 const SWING_CONCAVE_DURATION = 100;
+const SWING_CONCAVE_FAST_DURATION = 50;
 const SWING_CONCAVE_FAST_SHORT_DURATION = 50;
 
 /**
@@ -2248,6 +2269,19 @@ export const SWING_CONVEX_INITIALIZERS = Object.freeze({
     unused: true,
     accepted: false,
   }),
+} as const);
+
+/** Source selector 12's two-run `AddNewAnim` initializer and immediate callback call. */
+export const SWING_CONCAVE_FAST_INITIALIZER = Object.freeze({
+  selector: "ANIM_SWING_CONCAVE_FAST",
+  sourceId: 12,
+  data: 50,
+  runs: 2,
+  callbackInvokedByInitializer: true,
+  callbackInstalled: "SwingConcave",
+  normalFrontDontFlip: true,
+  affineMode: "double",
+  accepted: true,
 } as const);
 
 /** Source selector 45's `AddNewAnim` initializer and immediate callback call. */
@@ -2284,13 +2318,14 @@ function swingFrameAtTick<Callback extends "SwingConcave" | "SwingConvex">(
   callback: Callback,
   rotationSign: 1 | -1,
   duration = SWING_CONCAVE_DURATION,
+  initialRuns = 1,
 ): SwingFrame<Callback> | null {
   if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
 
   // `InitAnimData`, called by `AddNewAnim`, is the source of these defaults.
   const animRotation = 0;
   const animDelay = 0;
-  const animRuns = 1;
+  let animRuns = initialRuns;
   const animSpeed = 0;
   let animData = 0;
   animData = duration;
@@ -2304,6 +2339,36 @@ function swingFrameAtTick<Callback extends "SwingConcave" | "SwingConvex">(
     x2 = tryFlipX(x2, true);
     if (data2 > animData) {
       x2 = 0;
+      if (animRuns > 1) {
+        animRuns -= 1;
+        data2 = 0;
+        data2 += 1;
+        x2 = tryFlipX(x2, true);
+
+        if (tick === ticksSinceStart) {
+          return {
+            x2,
+            y2: 0,
+            data2,
+            animRotation,
+            animDelay,
+            animRuns,
+            animSpeed,
+            animData,
+            index: null,
+            xScale: 256,
+            yScale: 256,
+            affineRotation: 0,
+            startedAffine: false,
+            normalFrontDontFlip: true,
+            tryFlipXCalls: 2,
+            resetSpriteAfterAnim: false,
+            callback,
+            affineMode: "double",
+          };
+        }
+        continue;
+      }
       data2 += 1;
       x2 = tryFlipX(x2, true);
       return {
@@ -2363,6 +2428,29 @@ function swingFrameAtTick<Callback extends "SwingConcave" | "SwingConvex">(
 
 export function swingConcaveFrameAtTick(ticksSinceStart: number): SwingConcaveFrame | null {
   return swingFrameAtTick(ticksSinceStart, "SwingConcave", 1);
+}
+
+/**
+ * Source-order port of selector 12's `Anim_SwingConcave_Fast`
+ * (`pokemon_animation.c:2512-2542,3845-3853`). `AddNewAnim` begins with the
+ * zero/default record, then this initializer writes data=50 and runs=2,
+ * invokes `SwingConcave` immediately, and installs it after return. The
+ * shared callback's first strict terminal call restores the identity affine
+ * data, decrements runs, resets data2 to zero, then increments it to one
+ * before its second `TryFlipX`; run two therefore begins at index 5 instead
+ * of starting a fresh affine animation. Its next terminal call resets the
+ * sprite and installs `WaitAnimEnd`.
+ */
+export function swingConcaveFastFrameAtTick(
+  ticksSinceStart: number,
+): SwingConcaveFastFrame | null {
+  return swingFrameAtTick(
+    ticksSinceStart,
+    "SwingConcave",
+    1,
+    SWING_CONCAVE_FAST_DURATION,
+    2,
+  );
 }
 
 /**
@@ -6610,6 +6698,13 @@ function computeTerminalOffset(family: SpeciesFrontAnimFamily): SpeciesIdleOffse
       const terminal = swingConcaveFrameAtTick(101);
       if (terminal === null || terminal.callback !== "WaitAnimEnd") {
         throw new Error("Anim_SwingConcave did not reach its source terminal cleanup");
+      }
+      return { x2: terminal.x2, y2: terminal.y2 };
+    }
+    case "SWING_CONCAVE_FAST": {
+      const terminal = swingConcaveFastFrameAtTick(102);
+      if (terminal === null || terminal.callback !== "WaitAnimEnd") {
+        throw new Error("Anim_SwingConcave_Fast did not reach its source terminal cleanup");
       }
       return { x2: terminal.x2, y2: terminal.y2 };
     }
