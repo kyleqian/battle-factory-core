@@ -4664,9 +4664,66 @@ export function renderGeneratedBattleStartPlayerRelease(
   );
 }
 
+/**
+ * Family E's shared front-sprite intro-materialize draw primitive
+ * (`docs/species-render-entry-point-retirement-design.md` §1.3E/§4 row 6):
+ * given a species' own tileset/palette/corner plus the geometry its caller
+ * already resolved for this tick, dispatches to the matching already-generic
+ * low-level drawer. GROVYLE/KABUTO are its first callers, not its only
+ * possible ones (mirrors the `extremeSpeedOpponentHealthbox`-style
+ * already-parameterized precedent §1.1 cites). The four draw "kinds" are
+ * the family's whole closed set - settled (plain), tint (mechanism 4's
+ * affine-emerge silhouette), stretch (mechanism 5's affine squish), and
+ * rotate (Kabuto's own h-slide wobble) - each dispatching to the one
+ * already-generic low-level sampler that already served it before this
+ * extraction, so no rendering math moved, only the call-site boilerplate.
+ */
+type FrontMaterializeGeometry =
+  | { readonly kind: "settled" }
+  | { readonly kind: "tint"; readonly accumulator: number; readonly y2: number }
+  | { readonly kind: "stretch"; readonly xScale: number; readonly yScale: number; readonly y2: number; readonly tintCoeff: number }
+  | { readonly kind: "rotate"; readonly pa: number; readonly pb: number; readonly pc: number; readonly pd: number; readonly x2: number; readonly tintCoeff: number };
+
+function drawFrontBackMaterialize(
+  fb: Uint8Array,
+  tileset: Tileset,
+  palette: RgbColor[],
+  corner: { x: number; y: number },
+  geometry: FrontMaterializeGeometry,
+): void {
+  switch (geometry.kind) {
+    case "settled":
+      drawSpriteSheet(fb, tileset, palette, corner.x, corner.y);
+      return;
+    case "tint":
+      drawSpriteSheetAffineTinted(fb, tileset, corner.x, corner.y, geometry.accumulator, MATERIALIZE_TINT_COLOR, geometry.y2);
+      return;
+    case "stretch":
+      drawSpriteSheetAffineStretch(fb, tileset, palette, corner.x, corner.y, geometry.xScale, geometry.yScale, geometry.y2, MATERIALIZE_TINT_COLOR, geometry.tintCoeff);
+      return;
+    case "rotate":
+      drawSpriteSheetAffineRotate(
+        fb,
+        tileset,
+        palette,
+        corner.x + 32 + geometry.x2,
+        corner.y + 32,
+        geometry.pa,
+        geometry.pb,
+        geometry.pc,
+        geometry.pd,
+        undefined,
+        true,
+        MATERIALIZE_TINT_COLOR,
+        geometry.tintCoeff,
+      );
+      return;
+  }
+}
+
 /** §7.5: Grovyle's settled front sprite - see `GROVYLE_MATERIALIZE_TICK`'s doc comment. */
 function drawGrovyleSettled(fb: Uint8Array): void {
-  drawSpriteSheet(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y);
+  drawFrontBackMaterialize(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER, { kind: "settled" });
 }
 
 /**
@@ -4806,7 +4863,7 @@ function drawGrovyleMaterialize(fb: Uint8Array, t: number, handoffTick: number):
   const local = et - MATERIALIZE_START_OFFSET;
   const accumulator = affineEmergeAccumulator(local + 1);
   const y2 = MATERIALIZE_Y2_TABLE[local] ?? 0;
-  drawSpriteSheetAffineTinted(fb, grovyleFrontSprite.tileset, GROVYLE_CORNER.x, GROVYLE_CORNER.y, accumulator, MATERIALIZE_TINT_COLOR, y2);
+  drawFrontBackMaterialize(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER, { kind: "tint", accumulator, y2 });
 }
 
 function drawKabutoMaterialize(fb: Uint8Array, t: number, handoffTick: number): void {
@@ -4815,15 +4872,7 @@ function drawKabutoMaterialize(fb: Uint8Array, t: number, handoffTick: number): 
   const local = et - MATERIALIZE_START_OFFSET;
   const accumulator = affineEmergeAccumulator(local + 1);
   const y2 = MATERIALIZE_Y2_TABLE[local] ?? 0;
-  drawSpriteSheetAffineTinted(
-    fb,
-    kabutoFrontSprite.tileset,
-    KABUTO_CORNER.x,
-    KABUTO_CORNER.y,
-    accumulator,
-    MATERIALIZE_TINT_COLOR,
-    y2,
-  );
+  drawFrontBackMaterialize(fb, kabutoFrontSprite.tileset, kabutoFrontSprite.palette, KABUTO_CORNER, { kind: "tint", accumulator, y2 });
 }
 
 /**
@@ -5675,17 +5724,12 @@ function drawGrovyleStretch(fb: Uint8Array, t: number, handoffTick: number): voi
   const coeff = grovyleStretchTintCoeff(local);
   const frameOffset = t - handoffTick - GROVYLE_FRONT_ANIM_START_OFFSET;
   const frame = frontSpriteAnimFrame(battleAnimTables.grovyleFrontAnim.steps, frameOffset);
-  drawSpriteSheetAffineStretch(
+  drawFrontBackMaterialize(
     fb,
     frame === 0 ? grovyleFrontSprite.tileset : grovyleFrontSprite.frame2,
     grovyleFrontSprite.palette,
-    GROVYLE_CORNER.x,
-    GROVYLE_CORNER.y,
-    entry.xScale,
-    entry.yScale,
-    entry.y2,
-    MATERIALIZE_TINT_COLOR,
-    coeff,
+    GROVYLE_CORNER,
+    { kind: "stretch", xScale: entry.xScale, yScale: entry.yScale, y2: entry.y2, tintCoeff: coeff },
   );
 }
 
@@ -5712,17 +5756,12 @@ function drawGrovyleStretchEarly(fb: Uint8Array, t: number, handoffTick: number)
   const entry = GROVYLE_STRETCH_EARLY_TABLE[et - GROVYLE_FRONT_ANIM_START_OFFSET]!;
   const frameOffset = et - GROVYLE_FRONT_ANIM_START_OFFSET;
   const frame = frontSpriteAnimFrame(battleAnimTables.grovyleFrontAnim.steps, frameOffset);
-  drawSpriteSheetAffineStretch(
+  drawFrontBackMaterialize(
     fb,
     frame === 0 ? grovyleFrontSprite.tileset : grovyleFrontSprite.frame2,
     grovyleFrontSprite.palette,
-    GROVYLE_CORNER.x,
-    GROVYLE_CORNER.y,
-    entry.xScale,
-    entry.yScale,
-    entry.y2,
-    MATERIALIZE_TINT_COLOR,
-    16,
+    GROVYLE_CORNER,
+    { kind: "stretch", xScale: entry.xScale, yScale: entry.yScale, y2: entry.y2, tintCoeff: 16 },
   );
 }
 
@@ -5731,7 +5770,7 @@ function drawKabutoHSlideWobble(fb: Uint8Array, t: number, handoffTick: number):
   const wobble = kabutoHSlideWobble(et);
   if (!wobble.active) {
     if (et >= KABUTO_FRONT_ANIM_END_OFFSET) {
-      drawSpriteSheet(fb, kabutoFrontSprite.tileset, kabutoFrontSprite.palette, KABUTO_CORNER.x, KABUTO_CORNER.y);
+      drawFrontBackMaterialize(fb, kabutoFrontSprite.tileset, kabutoFrontSprite.palette, KABUTO_CORNER, { kind: "settled" });
     }
     return;
   }
@@ -5739,27 +5778,17 @@ function drawKabutoHSlideWobble(fb: Uint8Array, t: number, handoffTick: number):
   const angleIndex = (angle >> 8) & 0xff;
   const matrixSin = GBA_SINE_TABLE_256[angleIndex]!;
   const matrixCos = GBA_SINE_TABLE_256[(angleIndex + 64) & 0xff]!;
-  const pa = matrixCos;
-  const pb = -matrixSin;
-  const pc = matrixSin;
-  const pd = matrixCos;
   const tileset = wobble.frame === 0 ? kabutoFrontSprite.tileset : kabutoFrontSprite.frame2;
   const tintCoeff = et < MATERIALIZE_END_OFFSET ? 16 : Math.max(0, 57 - et);
-  drawSpriteSheetAffineRotate(
-    fb,
-    tileset,
-    kabutoFrontSprite.palette,
-    KABUTO_CORNER.x + 32 + wobble.x2,
-    KABUTO_CORNER.y + 32,
-    pa,
-    pb,
-    pc,
-    pd,
-    undefined,
-    true,
-    MATERIALIZE_TINT_COLOR,
+  drawFrontBackMaterialize(fb, tileset, kabutoFrontSprite.palette, KABUTO_CORNER, {
+    kind: "rotate",
+    pa: matrixCos,
+    pb: -matrixSin,
+    pc: matrixSin,
+    pd: matrixCos,
+    x2: wobble.x2,
     tintCoeff,
-  );
+  });
 }
 
 /**
@@ -6216,9 +6245,10 @@ function blendedTile(
  */
 
 let onixDoubleTeamClonePaletteCache: RgbColor[] | null = null;
-function getOnixDoubleTeamClonePalette(): RgbColor[] {
+/** Threads the source sprite asset in explicitly (`docs/species-render-entry-point-retirement-design.md` §1.3F/§4 row 6) rather than closing over `onixBackSprite` by name; palette math unchanged. */
+function getOnixDoubleTeamClonePalette(sourceSprite: BattleBackSpriteAsset): RgbColor[] {
   if (onixDoubleTeamClonePaletteCache) return onixDoubleTeamClonePaletteCache;
-  onixDoubleTeamClonePaletteCache = onixBackSprite.palette.map((c) =>
+  onixDoubleTeamClonePaletteCache = sourceSprite.palette.map((c) =>
     c ? {
       r: blendComponentToward(c.r, 0, 11),
       g: blendComponentToward(c.g, 0, 11),
@@ -6233,8 +6263,9 @@ function darkenPaletteToward10(palette: readonly (RgbColor | undefined)[]): RgbC
   return palette.map((c) => (c ? { r: blendComponentToward(c.r, 0, 10), g: blendComponentToward(c.g, 0, 10), b: blendComponentToward(c.b, 0, 10) } : (c as unknown as RgbColor)));
 }
 let turn10OnixDarkPaletteCache: RgbColor[] | null = null;
-function turn10OnixDarkPalette(): RgbColor[] {
-  return (turn10OnixDarkPaletteCache ??= darkenPaletteToward10(onixBackSprite.palette));
+/** Threads the source sprite asset in explicitly, same as `getOnixDoubleTeamClonePalette` above - see that function's doc comment. */
+function turn10OnixDarkPalette(sourceSprite: BattleBackSpriteAsset): RgbColor[] {
+  return (turn10OnixDarkPaletteCache ??= darkenPaletteToward10(sourceSprite.palette));
 }
 /**
  * Hardware `F_PAL_BG` selects BG_PLTT banks 1/2/3 (`UnpackSelectedBattlePalettes`/
@@ -10657,9 +10688,9 @@ function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number 
       if (tintCoeff > 0) {
         drawSpriteSheetAffineTintedBlend(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + onixX2, ONIX_MATERIALIZE_CORNER.y, 256, ONIX_SITRUS_TINT_COLOR, tintCoeff, onixY2);
       } else if (onixSinkSkipRows > 0) {
-        drawSpriteSheetTopClipped(fb, onixBackSprite.tileset, darken ? turn10OnixDarkPalette() : onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + onixX2, ONIX_MATERIALIZE_CORNER.y + onixY2, onixSinkSkipRows);
+        drawSpriteSheetTopClipped(fb, onixBackSprite.tileset, darken ? turn10OnixDarkPalette(onixBackSprite) : onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + onixX2, ONIX_MATERIALIZE_CORNER.y + onixY2, onixSinkSkipRows);
       } else {
-        drawSpriteSheet(fb, onixBackSprite.tileset, darken ? turn10OnixDarkPalette() : onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + onixX2, ONIX_MATERIALIZE_CORNER.y + onixY2);
+        drawSpriteSheet(fb, onixBackSprite.tileset, darken ? turn10OnixDarkPalette(onixBackSprite) : onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + onixX2, ONIX_MATERIALIZE_CORNER.y + onixY2);
       }
     }
   }
@@ -32128,7 +32159,7 @@ export function renderSceneOnMovePresentation(
       target.geometry.spriteCorner.y,
     );
     if (view.clones) {
-      const palette = getOnixDoubleTeamClonePalette();
+      const palette = getOnixDoubleTeamClonePalette(onixBackSprite);
       const drawClone = (offset: number) => drawSpriteSheetBlended(
         fb,
         onixBackSprite.tileset,
