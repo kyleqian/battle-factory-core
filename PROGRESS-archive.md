@@ -1,3 +1,54 @@
+## 887 — [bounded MAIN worker, 2026-08-03] ISSUES #70 CLOSED — STRINGID_INTROSENDOUT extractor-gap consumption wired
+
+- **State:** master `49b8c323`. Full `npm test`: **649 files / 6,488 passed
+  / 1 skipped**. `npm run build` green (tsc -b + vite). `compare:differential
+  -- battle-command-generated-off.json --base 46190382 --summary`: **PASS —
+  128/128 byte-identical**.
+- **Did:** #70's last open item — wired the side lane's already-banked
+  `src/data/battleIntroStrings.ts` hand-mapped table (commit `a76bb338`,
+  STRINGID ids 0/1/2/5: `INTROMSG`/`INTROSENDOUT`/`RETURNMON`/`BATTLEEND`)
+  into `messageLines` (`battleResolutionPresentation.ts`), the same shape as
+  the existing `STRINGID_SWITCHINMON` (id 3) hand-port: a small local
+  `resolveIntroStringEntry` segment-splice (text/placeholder/linebreak,
+  mirroring `resolveBattleStringLines` for the subset these ids need) since
+  none of the 4 ids live in the extracted table's `BY_SYMBOL` map.
+  `B_TRAINER1_CLASS`/`B_TRAINER1_NAME`/`B_PLAYER_MON1_NAME`/
+  `B_OPPONENT_MON1_NAME`/`B_BUFF1`/`B_LINK_OPPONENT1_NAME` all resolve from
+  params `messageLines` already receives (`opponentTrainer`, `field`) — no
+  new generic-substitution plumbing needed. Three new optional
+  `battleScriptEvents.ts` message-payload fields (`introBattler`/
+  `introHpScale`/`introOutcome`) carry the routing facts these ids need that
+  the event shape doesn't otherwise carry (which side is being introduced/
+  returned, the `RETURNMON` player-branch HP-scale bucket, the `BATTLEEND`
+  win/lose/draw outcome — `introOutcome` reuses the existing `BattleOutcome`
+  domain type rather than inventing a new one). `prepareMessage`
+  (`factoryBattleScriptFullTurnDecision.ts`) needed **no change**: it is
+  `Cmd_printstring`'s own substitution-builder, and none of these 4 ids are
+  ever printed via `Cmd_printstring` even in the real game (`BufferStringBattle`
+  dispatches them from a separate, non-script C routine) — structurally
+  unreachable from that hook regardless of live-wiring status, so the step
+  brief's anticipated `prepareMessage` work turned out not to apply.
+- **Tests:** `tests/presentationStringIntro.test.ts`, 11 cases — one per
+  `battleIntroStrings.ts` table entry (full coverage: `INTROMSG`'s one
+  branch, `INTROSENDOUT`'s 2, `RETURNMON`'s 5, `BATTLEEND`'s 3), all via the
+  direct resolver-branch idiom (synthetic event straight into
+  `createBattleResolutionPresentation`, batch-3's zero-incidence pattern) —
+  the only idiom available since no engine path emits these ids. Red-
+  verified once via `git stash` on the two touched engine files: all 11
+  threw `battleStringResolver`'s exact completeness-guard error
+  (`unknown battle string id STRINGID_...`) pre-fix.
+- **Next:** #70 is closed and deleted from ISSUES.md (its forensic history
+  stays in git + this ledger/archive). ISSUES #71 (live send-out seam
+  wiring — the counterpart program that would actually populate
+  `introBattler`/`introHpScale`/`introOutcome` and make these 4 ids
+  reachable) is the next natural pick for this thread, but is its own
+  bounded step.
+- **Notes:** scope was deliberately resolver-completeness only, per the
+  step brief — no live emission wired (`battleScene.ts`/timing untouched).
+  `tests/executableFrontierRatchet.test.ts` green, untouched, no new
+  recording imports, no barrier-count changes.
+
+---
 ## 886 — [bounded MAIN worker, 2026-08-03] ISSUES #70 batch 3 — final 12 presentation-string rows FIXED; #70 closed bar the extractor gap
 
 - **State:** master `8489ca18` (one commit on top of `f36d7433`). Full

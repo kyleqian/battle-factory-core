@@ -56,11 +56,9 @@ function.
 
 **Sequencing (updated 2026-08-03, mid-session user directive):** the hookup
 is the MAIN lane's job ("the animation supervisor works on implementing the
-animations... it should be your job to hook those things up") and is now
-**next in queue** — ahead of the remaining typeref slices (slice-2
-remainder, 3/4a/4b/5), which drop behind it. Ground truth for scoping:
-`docs/send-out-live-wiring-consumer-map.md` (2026-08-03 scout, base
-`4fe0e206`) — 4-slice plan §5, the 5 settle hooks §4, RAM-probe recipe,
+animations... it should be your job to hook those things up"). Ground truth
+for scoping: `docs/send-out-live-wiring-consumer-map.md` (2026-08-03 scout,
+base `4fe0e206`) — 4-slice plan §5, the 5 settle hooks §4, RAM-probe recipe,
 cross-lane dispatcher ask. Supervisor-verified scout finding: of 386
 species only ONIX and RATTATA have a nonzero terminal rest offset (both
 `{x2:1,y2:0}`). The scout also found a **4th uncatalogued hand-fit**
@@ -69,6 +67,30 @@ corrected the ONIX-back citation drift (`battleMenu.ts:708` → `:733-749`).
 Resolver side is ready — `battleIntroStrings.ts` + entry 887's
 `introBattler`/`introHpScale`/`introOutcome` event fields mean the send-out
 strings resolve the moment a live path emits them.
+
+**Progress (2026-08-03, entry 890): Slices A+B DONE.** `speciesFrontIdleRestOffset`
+is now wired at all 5 real settle hooks (§4 items 1-5, 6 call sites) in
+`battleScene.ts`; the generated-route pair already threaded the real
+`fieldView` species (Slice B satisfied as written). RAM-probe-confirmed
+against the real ROM for GROVYLE/PIDGEOTTO (sibling pair, both `{0,0}`) and
+RATTATA (positive case, `{1,0}`) — see `PROGRESS.md` entry 890 for the
+probe/scenario details and the `battle-scene-off`-vs-`battle-scene-on`
+mechanicLab fast-forward gotcha it turned up. Dense-window list re-run twice
+fresh, zero new diffs; `battle-command-generated-off.json` 128/128
+byte-identical vs. parent.
+
+**Still open (main-lane share):** Slice C (document/guard the ONIX-back/
+MAGBY-back `src/engine/` hand-fits' 3 consumer sites against an uncovered
+species/nature, no dispatcher yet); Slice D (per-tick front playback at the
+generated battle-start seam, **gated on the animation lane's rung-3
+dispatcher landing first** — do not hand-roll a per-tick dispatch switch in
+`src/engine/` to dodge this dependency, same class of mistake as the
+MAGBY/ONIX-back hand-fits this issue already flags); the §1e 56/58
+move-window patch-site retirement (separate, larger pair-guard-refactor
+effort, `docs/send-out-live-wiring-consumer-map.md` §1e). The cross-lane ask
+for the animation lane's rung-3 dispatcher (`frontSendOutFrameAtTick` +
+OAM/anim-frame side, §5 of the consumer-map doc) stays open and is a
+prerequisite for Slice D only, not for C.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
