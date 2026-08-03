@@ -4867,7 +4867,7 @@ export function frontFlipFrameAtTick(ticksSinceStart: number): FrontFlipFrame | 
   for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
     if (phase === "WaitAnimEnd") continue;
 
-    const callbackPhase = phase;
+    const callbackPhase: FrontFlipFrame["phase"] = phase;
     const data2Before = data2;
     let affineRotationShifted: number | null = null;
     let affineRotationU16: number | null = null;
@@ -4875,13 +4875,16 @@ export function frontFlipFrameAtTick(ticksSinceStart: number): FrontFlipFrame | 
     let tryFlipXBeforeMotion = false;
     let tryFlipXAfterMotion = false;
     let resetSpriteAfterAnim = false;
+    // Each source callback stays installed unless its transition branch below
+    // replaces it; Anim_FrontFlip alone always installs FrontFlip_0.
+    let callback: FrontFlipFrame["callback"] =
+      callbackPhase === "Anim_FrontFlip" ? "FrontFlip_0" : callbackPhase;
 
     switch (callbackPhase) {
       case "Anim_FrontFlip":
         // HandleStartAffineAnim: double OAM, affine program 0 for sDontFlip.
         affineMode = "double";
         startedAffine = true;
-        phase = "FrontFlip_0";
         break;
       case "FrontFlip_0":
         tryFlipXBeforeMotion = true;
@@ -4890,7 +4893,7 @@ export function frontFlipFrameAtTick(ticksSinceStart: number): FrontFlipFrame | 
         y2 = toS16(y2 - 1);
         if (x2 > 15) {
           data2 = 0;
-          phase = "FrontFlip_1";
+          callback = "FrontFlip_1";
         }
         x2 = tryFlipX(x2, true);
         tryFlipXAfterMotion = true;
@@ -4903,7 +4906,7 @@ export function frontFlipFrameAtTick(ticksSinceStart: number): FrontFlipFrame | 
           x2 = -16;
           y2 = 16;
           data2 = 0;
-          phase = "FrontFlip_2";
+          callback = "FrontFlip_2";
         } else {
           x2 = toS16(x2 - 2);
           y2 = toS16(y2 + 2);
@@ -4923,14 +4926,14 @@ export function frontFlipFrameAtTick(ticksSinceStart: number): FrontFlipFrame | 
           y2 = 0;
           affineMode = "normal";
           resetSpriteAfterAnim = true;
-          phase = "WaitAnimEnd";
+          callback = "WaitAnimEnd";
         }
         x2 = tryFlipX(x2, true);
         tryFlipXAfterMotion = true;
         break;
     }
 
-    const callback: FrontFlipFrame["callback"] = phase;
+    phase = callback;
     lastFrame = {
       x2,
       y2,
