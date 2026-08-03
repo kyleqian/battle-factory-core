@@ -79,18 +79,38 @@ mechanicLab fast-forward gotcha it turned up. Dense-window list re-run twice
 fresh, zero new diffs; `battle-command-generated-off.json` 128/128
 byte-identical vs. parent.
 
-**Still open (main-lane share):** Slice C (document/guard the ONIX-back/
-MAGBY-back `src/engine/` hand-fits' 3 consumer sites against an uncovered
-species/nature, no dispatcher yet); Slice D (per-tick front playback at the
-generated battle-start seam, **gated on the animation lane's rung-3
-dispatcher landing first** — do not hand-roll a per-tick dispatch switch in
-`src/engine/` to dodge this dependency, same class of mistake as the
-MAGBY/ONIX-back hand-fits this issue already flags); the §1e 56/58
-move-window patch-site retirement (separate, larger pair-guard-refactor
-effort, `docs/send-out-live-wiring-consumer-map.md` §1e). The cross-lane ask
-for the animation lane's rung-3 dispatcher (`frontSendOutFrameAtTick` +
-OAM/anim-frame side, §5 of the consumer-map doc) stays open and is a
-prerequisite for Slice D only, not for C.
+**Progress (2026-08-03, entry 891): Slice C DONE, plus one new latent bug
+found (not fixed).** The 3 back-side hand-fit consumers (`drawPlayerMaterializeSettle`
+ONIX-back-legacy, `drawKabutoHSlideWobble` KABUTO-front-legacy — the §2 4th
+hand-fit, treated the same way — and `drawTurn15ForcedSwitchRelease`
+MAGBY-back-forced-switch) are now documented + throw-guarded exactly per §5
+Slice C; each guard has a Tier-1 pin. Differential 128/128 byte-identical,
+full suite green. **Deliberately NOT guarded, found and reported instead:**
+`drawGeneratedPlayerMaterialize` (ONIX back, the **generated** route, §1b)
+applies the ONIX-only `playerMaterializeSettleY2`/`TintCoeff` tables to
+whatever species the real per-round player leads with — confirmed reachable
+**today**, not hypothetically (the already-green `factoryBattleStartIntro.test.ts`
+"renders every lifecycle phase..." case drives a KADABRA player through this
+exact branch at elapsed 710/714). A throw guard there would crash that
+passing test rather than fix anything; left as a documented comment citing
+this finding. **This is a real, currently-shipping visual defect** (not just
+a future-round risk like the other three) and needs its own fix — candidate:
+thread `art.speciesSymbol` and skip/zero the ONIX-only offsets for non-ONIX
+species, mirroring how the sibling generated-route MAGBY-back call site
+already does this correctly via its `canonicalIncoming` check
+(`battleScene.ts` near `renderBattleResolutionForcedPartySelect`).
+
+**Still open (main-lane share):** the `drawGeneratedPlayerMaterialize`
+latent bug above (new); Slice D (per-tick front playback at the generated
+battle-start seam, **gated on the animation lane's rung-3 dispatcher landing
+first** — do not hand-roll a per-tick dispatch switch in `src/engine/` to
+dodge this dependency, same class of mistake as the MAGBY/ONIX-back
+hand-fits this issue already flags); the §1e 56/58 move-window patch-site
+retirement (separate, larger pair-guard-refactor effort,
+`docs/send-out-live-wiring-consumer-map.md` §1e). The cross-lane ask for the
+animation lane's rung-3 dispatcher (`frontSendOutFrameAtTick` + OAM/anim-frame
+side, §5 of the consumer-map doc) stays open and is a prerequisite for Slice
+D only.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 

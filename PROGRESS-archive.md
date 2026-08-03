@@ -1,3 +1,35 @@
+## 888 — [supervisor fold, 2026-08-03 ~10:30] species-dossier program CLOSED — slice-4 capstone folded from side lane
+
+- **State:** master `bb64afc0` = merge of side branch
+  `worker/side-20260803-093850` (`90e5a2b2`, dossier slice 4) into
+  `633ac8a7` (entry 887). Post-merge `npm run build` + `npm run test:smoke`
+  green (full union suite deliberately deferred to the end of the typeref
+  round per the cross-lane contention rule; both parents carried
+  worker-verified full green suites — 649 files / 6,488 and 648 / 6,477).
+- **Did:** folded species-dossier slice 4, the capstone:
+  `SceneOffTurnView` gained identity fields (opponent/player species,
+  corners, battler, healthbox-content factory, moveset);
+  `renderSceneOffTurnView` consumes `view.*` with a species-keyed asset
+  lookup instead of closing over `kabutoFrontSprite`/`onixBackSprite`/ONIX
+  literals; `SCENE_OFF_TURN_DEFAULT_IDENTITY` (single source of truth for
+  today's ONIX/KABUTO values) populates `stagedBattleTurn.ts`'s new
+  `sceneOffIdentity`, spread at `core.ts`'s two call sites. Worker-verified
+  presentation-neutral: differential **144/144 byte-identical**
+  (`battle2-off-turn1-staged` 16 + insurance `battle-command-generated-off`
+  128, base `46190382`); supervisor spot-ran portability + presentation
+  suites in the worktree pre-merge. **That closes
+  `docs/species-render-entry-point-retirement-design.md` — all 7 slices
+  landed**; #39's species render-entry-point family is retired.
+- **Next:** typeref retirement slices 1-2 (`docs/battlescene-turnN-typeref-
+  retirement-design.md` §4; the slice-2 precondition pin test is already
+  banked at `a76bb338`), then 3/4a/4b/5. ISSUES #71 stays queued behind the
+  typeref slices per its own sequencing note.
+- **Notes:** paired-lane round (main resolver wiring ∥ side battleScene
+  slice, file-disjoint) — 4 workers so far today, 0 lost. Entry 887 was
+  appended out of ledger order by its worker (below 885); reordered in this
+  commit, 885 archived.
+
+---
 ## 887 — [bounded MAIN worker, 2026-08-03] ISSUES #70 CLOSED — STRINGID_INTROSENDOUT extractor-gap consumption wired
 
 - **State:** master `49b8c323`. Full `npm test`: **649 files / 6,488 passed
