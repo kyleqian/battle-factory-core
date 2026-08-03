@@ -1,3 +1,5 @@
+import type { BattleOutcome } from "./battleDecisionBoundary.ts";
+
 export type BattleScriptEventProvenance = Readonly<{
   programCounter: number;
   opcodeId: number;
@@ -80,6 +82,33 @@ export type BattleScriptSemanticEventPayload =
      * synthetic/staged receipts that predate this field.
      */
     effectBattler?: BattleScriptBattlerId;
+    /**
+     * Source gActiveBattler at print time -- the side selector
+     * `BufferStringBattle`'s own `GetBattlerSide(gActiveBattler)` switch uses
+     * for `STRINGID_INTROSENDOUT`/`STRINGID_RETURNMON`
+     * (`reference/pokeemerald/src/battle_message.c:2034+`/`:2079+`,
+     * `src/data/battleIntroStrings.ts`, ISSUES #70's `STRINGID_INTROSENDOUT`
+     * extractor-gap fix). No engine path emits those two ids yet -- ISSUES
+     * #71 owns wiring a live send-out seam that would populate this; until
+     * then it stays optional so no existing message event is disturbed.
+     */
+    introBattler?: BattleScriptBattlerId;
+    /**
+     * Source `gBattleStruct->hpScale` (0-3) at `STRINGID_RETURNMON` print
+     * time -- that id's player-side-only branch selector
+     * (`battle_message.c:2081-2090`). Same "no live emitter yet" caveat as
+     * `introBattler`.
+     */
+    introHpScale?: 0 | 1 | 2 | 3;
+    /**
+     * The real battle outcome at `STRINGID_BATTLEEND` print time (source
+     * `gBattleTextBuff1[0]`'s `B_OUTCOME_WON`/`LOST`/`DREW`,
+     * `battle_message.c:2223-2229`'s final non-multi/non-Union-Room `else`
+     * arm) -- reuses the same `BattleOutcome` domain type
+     * `battleDecisionBoundary.ts`/`Cmd_checkteamslost` already derive. Same
+     * "no live emitter yet" caveat as `introBattler`.
+     */
+    introOutcome?: BattleOutcome;
   }>
   | Readonly<{
     kind: "selection-message";

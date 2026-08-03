@@ -11,6 +11,7 @@ import type {
   BattleDecisionTransitionResult,
   BattleForcedSwitchRequest,
   BattleKernelSemanticEvent,
+  BattleOutcome,
   BattlePartyIndex,
   BattleState,
 } from "./battleDecisionBoundary.ts";
@@ -27,6 +28,10 @@ import {
   resolveMoveNameExclaim,
 } from "./battleStringResolver.ts";
 import frontierHeldItemsData from "../data/gen/battle-frontier-held-items.json" with { type: "json" };
+import {
+  BATTLE_INTRO_STRINGS,
+  type BattleIntroStringEntry,
+} from "../data/battleIntroStrings.ts";
 
 const FACTORY_ITEM_NAME_BY_ID = new Map(
   (frontierHeldItemsData.entries as readonly Readonly<{
@@ -441,6 +446,50 @@ function factoryItemDisplayName(itemId: number): string {
     throw new Error(`battle resolution cannot resolve Factory held item ${itemId}`);
   }
   return name;
+}
+
+/**
+ * `resolveBattleStringLines`-style segment splice for `battleIntroStrings.ts`'s
+ * hand-mapped ids 0/1/2/5 (ISSUES #70's `STRINGID_INTROSENDOUT` extractor-gap
+ * fix) -- those ids sit below the extracted table's own scoped range, so they
+ * are never in `resolveBattleStringLines`'s `BY_SYMBOL` map. `battleIntroStrings.ts`'s
+ * own segment shape is a strict subset of the extracted table's (text/
+ * placeholder/linebreak only, no `{CONTROL ...}` segments), so this mirrors
+ * `resolveBattleStringLines`'s walk exactly for that subset.
+ */
+function resolveIntroStringEntry(
+  entry: BattleIntroStringEntry,
+  resolvers: Record<string, () => string>,
+): readonly string[] {
+  const lines: string[] = [];
+  let current = "";
+  for (const segment of entry.segments) {
+    if (segment.type === "text") {
+      current += segment.value;
+    } else if (segment.type === "placeholder") {
+      const resolve = resolvers[segment.token];
+      if (!resolve) {
+        throw new Error(
+          `battle resolution ${entry.symbol} references placeholder {${segment.token}} with no resolver supplied`,
+        );
+      }
+      current += resolve();
+    } else {
+      lines.push(current);
+      current = "";
+    }
+  }
+  if (current !== "") lines.push(current);
+  return Object.freeze(lines);
+}
+
+function findIntroStringEntry(
+  id: BattleIntroStringEntry["id"],
+  cSymbol: string,
+): BattleIntroStringEntry {
+  const entry = BATTLE_INTRO_STRINGS.find((e) => e.id === id && e.source.cSymbol === cSymbol);
+  if (!entry) throw new Error(`battle resolution: no battleIntroStrings entry for id ${id} / ${cSymbol}`);
+  return entry;
 }
 
 function sourceLabelOf(event: BattleKernelSemanticEvent): string {
@@ -1195,6 +1244,99 @@ function messageLines(
       `${opponentTrainer.className} ${opponentTrainer.name} sent`,
       `out ${incoming.name}!`,
     ]);
+  }
+  // ISSUES #70's STRINGID_INTROSENDOUT extractor gap: ids 0/1/2/5 sit below
+  // the extracted table's own scoped range (src/data/battleIntroStrings.ts's
+  // own header), so they read that hand-mapped table instead of
+  // resolveBattleStringLines, the same way STRINGID_SWITCHINMON (id 3, just
+  // above) hand-builds its own lines. No engine path emits any of these 4
+  // ids yet (ISSUES #71 owns the live send-out seam); this is resolver
+  // completeness only, so a future emitter resolves instead of crashing.
+  if (messageId === "STRINGID_INTROMSG") {
+    if (opponentTrainer === null) {
+      throw new Error(
+        "battle resolution intro message requires a frozen trainer-name substitution",
+      );
+    }
+    return resolveIntroStringEntry(
+      findIntroStringEntry(0, "sText_Trainer1WantsToBattle"),
+      {
+        B_TRAINER1_CLASS: () => opponentTrainer.className,
+        B_TRAINER1_NAME: () => opponentTrainer.name,
+      },
+    );
+  }
+  if (messageId === "STRINGID_INTROSENDOUT") {
+    if (event.payload.introBattler === undefined) {
+      throw new Error("battle resolution intro-sendout message has no intro battler");
+    }
+    const battler = singlesBattler(event.payload.introBattler, "intro-sendout message");
+    if (battler === 0) {
+      return resolveIntroStringEntry(findIntroStringEntry(1, "sText_GoPkmn"), {
+        B_PLAYER_MON1_NAME: () => fieldBattler(field, 0).name,
+      });
+    }
+    if (opponentTrainer === null) {
+      throw new Error(
+        "battle resolution opponent intro-sendout message requires a frozen trainer-name substitution",
+      );
+    }
+    return resolveIntroStringEntry(findIntroStringEntry(1, "sText_Trainer1SentOutPkmn"), {
+      B_TRAINER1_CLASS: () => opponentTrainer.className,
+      B_TRAINER1_NAME: () => opponentTrainer.name,
+      B_OPPONENT_MON1_NAME: () => fieldBattler(field, 1).name,
+    });
+  }
+  if (messageId === "STRINGID_RETURNMON") {
+    if (event.payload.introBattler === undefined) {
+      throw new Error("battle resolution return-mon message has no intro battler");
+    }
+    const battler = singlesBattler(event.payload.introBattler, "return-mon message");
+    const returning = fieldBattler(field, battler);
+    if (battler === 0) {
+      const hpScale = event.payload.introHpScale;
+      if (hpScale === undefined) {
+        throw new Error("battle resolution player return-mon message has no hp scale");
+      }
+      const cSymbolByHpScale: Readonly<Record<0 | 1 | 2 | 3, string>> = {
+        0: "sText_PkmnThatsEnough",
+        1: "sText_PkmnComeBack",
+        2: "sText_PkmnOkComeBack",
+        3: "sText_PkmnGoodComeBack",
+      };
+      return resolveIntroStringEntry(findIntroStringEntry(2, cSymbolByHpScale[hpScale]), {
+        B_BUFF1: () => returning.name,
+      });
+    }
+    if (opponentTrainer === null) {
+      throw new Error(
+        "battle resolution opponent return-mon message requires a frozen trainer-name substitution",
+      );
+    }
+    return resolveIntroStringEntry(findIntroStringEntry(2, "sText_Trainer1WithdrewPkmn"), {
+      B_TRAINER1_CLASS: () => opponentTrainer.className,
+      B_TRAINER1_NAME: () => opponentTrainer.name,
+      B_BUFF1: () => returning.name,
+    });
+  }
+  if (messageId === "STRINGID_BATTLEEND") {
+    if (event.payload.introOutcome === undefined) {
+      throw new Error("battle resolution battle-end message has no outcome");
+    }
+    if (opponentTrainer === null) {
+      throw new Error(
+        "battle resolution battle-end message requires a frozen trainer-name substitution",
+      );
+    }
+    const cSymbolByOutcome: Readonly<Record<BattleOutcome, string>> = {
+      "player-win": "sText_PlayerDefeatedLinkTrainer",
+      "trainer-win": "sText_PlayerLostAgainstLinkTrainer",
+      draw: "sText_PlayerBattledToDrawLinkTrainer",
+    };
+    return resolveIntroStringEntry(
+      findIntroStringEntry(5, cSymbolByOutcome[event.payload.introOutcome]),
+      { B_LINK_OPPONENT1_NAME: () => opponentTrainer.name },
+    );
   }
   const resolvers: Record<string, () => string> = {};
   if (lastMoveAttacker !== null) {
