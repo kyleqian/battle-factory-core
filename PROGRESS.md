@@ -4,6 +4,55 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 880 — [bounded MAIN worker, 2026-08-03] ISSUES #56 — MAGNETON frame-437 stallLag regression FIXED (closure audit's root cause)
+
+- **State:** one commit on top of `963d6bc2`. Full `npm test`: **634 files /
+  6,384 passed / 1 skipped** (+3 from this step's new pins). `npm run build`
+  green (tsc -b + vite).
+- **Did:** fixed the closure audit's (`docs/issue56-closure-audit.md`)
+  named MAGNETON regression: `1aa13ebb` (2026-08-02) had keyed the generated
+  Scene-OFF ball-open particle `stallLag` on `isCanonicalAnchorIntro`, which
+  gives COMBUSKEN (YOSHI's fixture) and MAGNETON the same value even though
+  the 2026-07-31 OAM probe's Round 2 Part A had already proven they need
+  opposite values at their shared rawElapsed=31 materialize tick — and
+  `1aa13ebb`'s own landing never re-ran the MAGNETON comparison to catch it.
+  Neither evidence doc ever produced a species/cry-duration formula for
+  *this* mechanism (Round 2 Part A explicitly parked the RAM probe needed to
+  find one), and `generatedBattleStartOpponentHandoffTick` already
+  normalizes out the only species-dependent delay this subsystem knows
+  about — so the split is an honest per-route real-clock phase-alignment
+  fact, the same class ISSUES #56 item 2's own design doc already named for
+  its sibling display-tail mechanism. New `generatedParticleStallLag`
+  (`src/engine/battleScene.ts`) keeps `isCanonicalAnchorIntro`'s lag-1 fact
+  for the canonical anchor untouched, and for the generated route keys off
+  the opponent's own species via a small, explicitly-scoped, evidence-
+  extendable set (currently just MAGNETON) — mirroring the file's existing
+  `elevatedEnemyShadowSpecies`/cry-duration-map pattern rather than adding a
+  per-trainer selector. Tier-1 pin: 3 new cases in
+  `tests/issue56ParticleStall.test.ts` (canonical anchor stays 1 regardless
+  of species; MAGNETON generated → 1; COMBUSKEN generated → 0).
+- **Verified (fresh reruns against the shared Battle Scene OFF oracle,
+  not started/stopped):** `factory-arbitrary-intro-magneton-off`
+  **702→703/751** (frame 437 green, matches the pre-regression documented
+  baseline, all 48 remaining mismatches are the already-named idle-bounce
+  family). `factory-arbitrary-intro-yoshi-off` **700/751 held** (frame 444
+  unchanged at its settled 18px display-tail residual; 51 mismatches sum
+  into the two named settled classes with no remainder, same as before).
+  Canonical insurance: `interactive-generated-intro-off` **715/715**,
+  `battle-command-generated-off` **128/128**, both held exactly.
+- **Next:** per the closure audit's own stated bar for closure ("both
+  fixtures re-verify... with every frame still mapping to the two named
+  classes"), ISSUES #56 is now a clean candidate for settled-record
+  closure — left as a candidate note rather than deleted outright, pending
+  a supervisor closure pass. species-dossier slice 4 (capstone) remains
+  untouched as the last slice; ISSUES #68's 47-id presentation-completeness
+  reachability sweep (entry 879) is also still open.
+- **Notes:** `tests/executableFrontierRatchet.test.ts` green, untouched, no
+  new recording imports, no barrier-count changes (verified via
+  `test:smoke`, all 339 tests green, plus the full suite run above). No
+  PAPERCUT this step.
+
+---
 ## 879 — [bounded MAIN worker, 2026-08-02] ISSUES #68 — MURKROW TORMENT presentation crash FIXED + pinned
 
 - **State:** master `64fc0205` (one commit on top of `d7857d4e` — base
@@ -132,60 +181,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** `tests/executableFrontierRatchet.test.ts` untouched and
   green — no new recording imports, no barrier-count changes. No ISSUES
   entries touched this step (not in scope).
-
----
-## 877 — [bounded MAIN worker, 2026-08-02] species-dossier slice 3 LANDED (family-A HP-drain closed-form generalization)
-
-- **State:** master `bb5289b2` (one commit on top of `40dcddff`). Full
-  `npm test`: **633 files / 6,376 passed / 1 skipped** (unchanged from
-  base — pure rename + adapter-source threading, no new tests needed).
-  `npm run build` green (tsc -b + vite). Differential (`compare:differential`,
-  10-trace window list from the brief plus `turn12-aerialace-off.json`
-  insurance, base `40dcddff`): **PASS, 2,095/2,095 captures byte-identical**
-  — 237/141/233/231/206/247/256/255/161/128, every brief-cited count
-  (237, 141, 233, 231, 206, 256, 128) matched exactly.
-- **Did:** per `docs/species-render-entry-point-retirement-design.md` §4
-  row 3, §1.3A/§3 family-A row (gate opened by slice 10's dispatcher-ladder
-  landing). Renamed the four species-suffixed HP-drain closed forms to
-  drop their species suffix, keeping the move/turn prefix (matching
-  `rockSlideOpponentHp`'s already-generic precedent):
-  `dragonBreathGrovyleHp`→`dragonBreathHp` (battleScene.ts, 2 call sites:
-  Grovyle turn 2, Pidgeotto turn 13), `endeavorOnixHp`→`endeavorHp`
-  (battleMenu.ts, exported, 3 call sites: turns 2/3/5), `turn9OnixHp`→
-  `turn9Hp` (1 call site), `turn10AerialAceOnixHp`→`turn10AerialAceHp`
-  (2 call sites: turns 10/12). No formula or default-value change — every
-  call site's resulting value is unchanged (trap 2 audited: all four
-  functions' body/signature untouched except the name). Moved turn-9's
-  and turn-10/12's `{from,to}` HP-drain endpoints off call-site literals
-  onto their owning resolution adapters — `turn9ResolutionAdapter.ts`'s
-  new `TURN9_QUICKATTACK_HP` (31→24), `turn10ResolutionAdapter.ts`'s new
-  `TURN10_AERIALACE_HP` (24→14), `turn12ResolutionAdapter.ts`'s new
-  `TURN12_AERIALACE_HP` (14→4) — the same shape
-  `TURN13_DRAGONBREATH_HP.{from,to}` already uses, each adapter file
-  wiring its own private literal (matching the file's existing sibling-
-  independence convention, e.g. the ROCK_SLIDE HP chain) rather than
-  cross-importing a sibling adapter's constant. battleScene.ts's own
-  widely-reused scalar constants (`TURN9_ONIX_AFTER_QUICKATTACK_HP` etc.,
-  8+ downstream consumers each) now read `.to` off the new adapter
-  records instead of a bare literal, leaving every other consumer
-  untouched. Turn-2/turn-3/turn-5's `endeavorHp` endpoints were already
-  adapter/staging-derived (`TURN2_ENDEAVOR_HP`/`TURN5_ENDEAVOR_HP`/
-  `BATTLE1_PRESENTATION_HP`) — verified provenance, left untouched per the
-  brief's "do not churn" instruction. All rename references (doc comments,
-  `tests/battleMenu.test.ts`, `tests/battleScene.test.ts`,
-  `tests/turn{2,5}EndeavorPresentationStaging.test.ts`,
-  `tools/probe/verify-turn13.ts`, two other tools/ scratch scripts) updated
-  to match.
-- **Next:** slice 4 (capstone `renderSceneOffTurnView` convergence, now
-  UNGATED) is the last species-dossier slice; slice 7 (family-B Sitrus
-  anchor) remains after that.
-- **Notes:** `tests/executableFrontierRatchet.test.ts` untouched and
-  green — no new recording imports, no barrier-count changes. No ISSUES
-  entries touched this step (not in scope). PAPERCUT: `npm test`
-  (~8.5 min wall-clock this session, vs. AGENTS.md's "~5-7 min") exceeded
-  the Bash tool's foreground timeout and got auto-backgrounded by the
-  harness rather than by my own choice — recovered by polling the
-  originating process's pid in a single blocking loop rather than trusting
-  a detached notification, per the execution-discipline note, but cost
-  ~5 min of extra care; likely contention from concurrent sibling
-  worker/animation test runs on the same shared machine this session.

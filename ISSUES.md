@@ -144,10 +144,31 @@ keying the ball-open particle `stallLag` on `isCanonicalAnchorIntro`, which
 gives YOSHI and MAGNETON the same `stallLag: 0` although the 2026-07-31 OAM
 probe (`docs/issue56-frames-444-536-oam-probe.md` Round 2) proved MAGNETON
 wants the opposite value at the analogous tick — and `1aa13ebb`'s landing
-never re-ran the MAGNETON comparison. **Next actionable:** fix the
-stallLag keying per-route (bounded; both prior evidence docs give the
-values), re-run BOTH standing intro comparisons, expect MAGNETON ≥703 with
-YOSHI's 700 intact. Keep #56 open until then.
+never re-ran the MAGNETON comparison.
+
+**MAGNETON regression FIXED (2026-08-03, main lane).** `isCanonicalAnchorIntro`
+can't discriminate COMBUSKEN (wants `stallLag` 0) from MAGNETON (wants 1) —
+both are non-canonical generated routes. Neither evidence doc ever produced a
+species/cry-duration formula for this specific mechanism (the closure audit's
+own "Not fixed" section calls it "whatever real per-fixture fact actually
+separates COMBUSKEN...from MAGNETON", and Round 2 Part A explicitly parked the
+RAM probe needed to find one as "not attempted this round"); since
+`generatedBattleStartOpponentHandoffTick` already normalizes out the only
+species-dependent delay this subsystem knows about, the remaining split is an
+honest per-route real-clock phase-alignment fact, the same class ISSUES #56
+item 2's own design doc already named for its sibling display-tail mechanism.
+`generatedParticleStallLag` (`src/engine/battleScene.ts`) now keys the
+generated-route branch on the opponent's own species (a small, explicitly-
+scoped, evidence-extendable set — currently just MAGNETON — mirroring the
+existing `elevatedEnemyShadowSpecies`/cry-duration-map pattern already in this
+file) instead of collapsing to one boolean. Re-verified fresh:
+`factory-arbitrary-intro-magneton-off` **702→703/751** (frame 437 green),
+`factory-arbitrary-intro-yoshi-off` **700/751 held** (frame 444 unchanged at
+its settled 18px display-tail residual), `interactive-generated-intro-off`
+**715/715** and `battle-command-generated-off` **128/128** both held. Tier-1
+pin: `tests/issue56ParticleStall.test.ts`. Both fixtures now match their
+documented, audited baselines exactly — #56 is a clean candidate for
+settled-record closure; nothing else in this entry is open.
 
 **Not blocking:** Gate 5 ticked with these named (ROADMAP S10 gate 5
 completion note); this is the worklist to finish the window honestly.

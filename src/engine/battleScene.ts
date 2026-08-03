@@ -4303,6 +4303,42 @@ function drawGeneratedOpponentRelease(
   );
 }
 
+const SPECIES_MAGNETON_ID = 82;
+
+/**
+ * ISSUES #56 closure audit (docs/issue56-closure-audit.md §5) + the prior
+ * Round 2 OAM probe (docs/issue56-frames-444-536-oam-probe.md, "Part A"):
+ * `isCanonicalAnchorIntro` alone cannot key `drawBallOpenParticles`'s
+ * `stallLag` for the generated route, because COMBUSKEN (YOSHI's fixture,
+ * wants stallLag 0 - frame 444) and MAGNETON (wants stallLag 1 - frame 437)
+ * are BOTH non-canonical generated routes yet need opposite values at their
+ * shared rawElapsed=31 materialize tick; `1aa13ebb` gave both `0` and
+ * silently regressed MAGNETON (703/751 -> 702/751), since its own landing
+ * check never re-ran that fixture. Neither doc found a species/cry-duration
+ * formula behind the split (Round 2 Part A: "needs its own RAM probe...not
+ * attempted this round") - `generatedBattleStartOpponentHandoffTick` already
+ * normalizes out the only species-dependent delay this subsystem knows
+ * about (opponent send-out text length), so the remaining one-tick gap is a
+ * genuine per-route real-clock phase-alignment fact, the same class the
+ * item 2 display-tail design doc already named for its own sibling
+ * mechanism ("a CPU/VBlank phase fact, not a source-owned tick-granular
+ * lifecycle"). Keyed per opponent species (not per-trainer/trace) so a
+ * future dense comparison against a third generated fixture can extend or
+ * falsify it directly; currently pixel-evidenced (dense oracle comparison,
+ * not a RAM-register probe of the particle mechanism itself) for exactly
+ * one species, MAGNETON.
+ */
+const GENERATED_PARTICLE_STALL_LAG_SPECIES: ReadonlySet<number> = new Set([
+  SPECIES_MAGNETON_ID,
+]);
+
+export function generatedParticleStallLag(state: FactoryBattleStartIntroState): number {
+  if (state.isCanonicalAnchorIntro) return 1;
+  return GENERATED_PARTICLE_STALL_LAG_SPECIES.has(generatedOpponentSpeciesId(state))
+    ? 1
+    : 0;
+}
+
 /**
  * Generated Scene-OFF opponent controller compositor. Every clock is
  * relative to the stored acknowledgement and the typed printer length.
@@ -4398,10 +4434,10 @@ export function renderGeneratedBattleStartOpponentRelease(
   drawGeneratedOpponentRelease(fb, t, handoffTick, fieldView);
   drawSendOutBall(fb, t, handoffTick);
   drawBallOpenParticles(fb, t, handoffTick, "destin", {
-    // The canonical anchor's real pre-battle route retains its proven later
-    // stall publication; arbitrary generated Scene-OFF releases use the
-    // RAM-attributed logical-13 stall directly (ISSUES #56 frame 444).
-    stallLag: state.isCanonicalAnchorIntro ? 1 : 0,
+    // Per-route/species stall value - see `generatedParticleStallLag`'s own
+    // doc comment (ISSUES #56 closure audit) for why this can't collapse to
+    // `isCanonicalAnchorIntro` alone.
+    stallLag: generatedParticleStallLag(state),
     persistentTieWinner14: true,
   });
   if (t === handoffTick) {
