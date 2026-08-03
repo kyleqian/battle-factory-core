@@ -114,7 +114,7 @@ animation lane's rung-3 dispatcher (`frontSendOutFrameAtTick` + OAM/anim-frame
 side, §5 of the consumer-map doc) stays open and is a prerequisite for Slice
 D only.
 
-## #72 — battleStringResolver completeness-guard gaps: 66 REACHABLE printstring STRINGIDs need the Taunt-pair fix idiom
+## #72 — battleStringResolver completeness-guard gaps: 56 REACHABLE printstring STRINGIDs need the Taunt-pair fix idiom
 
 **Symptom:** the same-day user-reported crash (2026-08-03, opponent MURKROW's
 TAUNT: `battleStringResolver: STRINGID_PKMNFELLFORTAUNT references placeholder
@@ -133,32 +133,53 @@ UNRESOLVED (would hit the completeness guard).
 **Reachability triage done** (`docs/issue72-reachability-triage.md`,
 following #70's own per-id method — trace each id's emitting script label(s)
 to their trigger, check static gates, cross-reference Factory L50 singles
-carrier data): **66 REACHABLE, 37 DEAD, 4 MANUAL** of the 107. This is the
-open remainder — DEAD ids (facility gates, no-EXP rentals, zero-carrier
+carrier data): 66 REACHABLE, 37 DEAD, 4 MANUAL of the original 107 (the list
+below actually enumerated 67 distinct ids pre-batch — a pre-existing
+off-by-one against the triage doc's own count, not introduced or chased down
+this batch); 11 of the REACHABLE ids are now fixed (batch 1 below), leaving
+**56 REACHABLE**. DEAD ids (facility gates, no-EXP rentals, zero-carrier
 moves, unimplemented mechanics) are not reopened here; see the triage doc for
 their gate citations.
 
-**REACHABLE (66), ordered by carrier-weight proxy for likely-hit-first —
+**Batch 1 landed** (`tests/presentationStringIssue72Batch1.test.ts`, all 11
+red-verified via `git stash -- src/engine/battleResolutionPresentation.ts
+src/engine/factoryBattleScriptFullTurnDecision.ts`): the "already status"
+five (`STRINGID_PKMNISALREADYPARALYZED`/`ALREADYCONFUSED`/`ALREADYASLEEP`/
+`ALREADYPOISONED`/`ALREADYHASBURN`), `STRINGID_PKMNWASDEFROSTED`,
+`STRINGID_PKMNFELLINLOVE`, and the ability-blocks-the-move's-own-target-
+effect cluster (`STRINGID_PKMNPREVENTSSTATLOSSWITH`/
+`PREVENTSCONFUSIONWITH`/`PREVENTSROMANCEWITH`, `STRINGID_PKMNSXCUREDITSYPROBLEM`).
+Two ranked-nearby ids were deliberately deferred (still below, unlanded):
+`STRINGID_PKMNHUNGONWITHX` (Focus Band's hang-on roll is RNG-gated with no
+guaranteed-success staging found yet) and `STRINGID_PKMNPROTECTEDBY` (Sturdy
+vs. OHKO — OHKO accuracy is a level-difference formula, ~30% at mirrored
+levels, same seed-search problem). `STRINGID_PKMNREGAINEDHEALTH` was also
+skipped this batch despite its rank: its 3 emitting labels
+(`BattleScript_EffectRestoreHp`/`PresentHealTarget`/`WishComesTrue`) source
+{B_DEF_NAME_WITH_PREFIX} from 3 different battler roles (self-target heal,
+Present's opponent-target heal, Wish's frozen-at-cast battler) — needs its
+own per-context investigation, not the single shared `requireMoveDefender`
+shape the rest of this batch used.
+
+**REACHABLE (56), ordered by carrier-weight proxy for likely-hit-first —
 name a batch, use the Taunt-pair idiom** (`messageId === "STRINGID_X"` branch
 in `messageLines`, `requireMoveDefender`/`actionSnapshot`-sourced battler,
 staged full-turn repro test, red-verify via `git stash`):
-`STRINGID_PKMNPREVENTSSTATLOSSWITH`, `STRINGID_PKMNWASDEFROSTED`,
-`STRINGID_PKMNSXCUREDITSYPROBLEM`, `STRINGID_PKMNHUNGONWITHX`,
-`STRINGID_PKMNPREVENTSCONFUSIONWITH`, `STRINGID_PKMNISALREADYPARALYZED`,
-`STRINGID_PKMNREGAINEDHEALTH`, `STRINGID_PKMNALREADYCONFUSED`,
-`STRINGID_PKMNSXWOREOFF`, `STRINGID_PKMNFELLINLOVE`,
-`STRINGID_PKMNPREVENTSROMANCEWITH`, `STRINGID_PKMNPROTECTEDBY`,
+`STRINGID_PKMNHUNGONWITHX`,
+`STRINGID_PKMNREGAINEDHEALTH`,
+`STRINGID_PKMNSXWOREOFF`,
+`STRINGID_PKMNPROTECTEDBY`,
 `STRINGID_PKMNANCHOREDITSELF`, `STRINGID_PKMNANCHORSITSELFWITH`,
-`STRINGID_PKMNWASDRAGGEDOUT`, `STRINGID_PKMNALREADYASLEEP`,
+`STRINGID_PKMNWASDRAGGEDOUT`,
 `STRINGID_PKMNCUTSATTACKWITH`, `STRINGID_PREVENTEDFROMWORKING`,
 `STRINGID_PKMNSXPREVENTSFLINCHING`, `STRINGID_PKMNSXPREVENTSYLOSS`,
-`STRINGID_PKMNALREADYPOISONED`, `STRINGID_PKMNPREVENTSUSAGE`,
+`STRINGID_PKMNPREVENTSUSAGE`,
 `STRINGID_PKMNRESTOREDHPUSING`, `STRINGID_PKMNSXMADEYUSELESS`,
 `STRINGID_PKMNLAIDCURSE`, `STRINGID_PKMNTRACED`, `STRINGID_PKMNSXBLOCKSY`,
 `STRINGID_PKMNSXBLOCKSY2`, `STRINGID_PKMNSXMADEITINEFFECTIVE`,
 `STRINGID_PKMNCOPIEDSTATCHANGES`, `STRINGID_PKMNFREEDFROM`,
 `STRINGID_PKMNGOTFREE`, `STRINGID_PKMNSXCUREDYPROBLEM`,
-`STRINGID_PKMNSXINFATUATEDY`, `STRINGID_PKMNALREADYHASBURN`,
+`STRINGID_PKMNSXINFATUATEDY`,
 `STRINGID_PKMNSXWHIPPEDUPSANDSTORM`, `STRINGID_PKMNTOOKFOE`,
 `STRINGID_PKMNWASMADEDROWSY`, `STRINGID_PKMNWISHCAMETRUE`,
 `STRINGID_PKMNKNOCKEDOFF`, `STRINGID_PKMNSAFEGUARDEXPIRED`,

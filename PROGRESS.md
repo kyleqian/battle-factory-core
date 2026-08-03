@@ -4,6 +4,64 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 896 — [bounded MAIN worker, 2026-08-03 ~16:35] ISSUES #72 batch 1: 11 REACHABLE printstring STRINGIDs landed via the Taunt-pair idiom
+
+- **State:** master, on top of `896`'s parent (`49763783`). `npm run
+  test:smoke` green (346/346) mid-step; full `npm test` + `npm run build`
+  pending as this entry's own finish requirement (see Next if not yet run
+  when this lands).
+- **Did:** Landed 11 of ISSUES #72's ranked REACHABLE printstring STRINGIDs
+  (census: 107→96 UNRESOLVED, 13→24 already-explicit, exact -11/+11 match):
+  the "already status" five (`PKMNISALREADYPARALYZED`/`ALREADYCONFUSED`/
+  `ALREADYASLEEP`/`ALREADYPOISONED`/`ALREADYHASBURN`, all pure
+  `jumpifstatus(2) BS_TARGET` generic opcodes), `PKMNWASDEFROSTED`,
+  `PKMNFELLINLOVE`, and the ability-blocks-the-move's-own-target-effect
+  cluster (`PKMNPREVENTSSTATLOSSWITH`/`PREVENTSCONFUSIONWITH`/
+  `PREVENTSROMANCEWITH`, `PKMNSXCUREDITSYPROBLEM`) — `messageLines`
+  (`battleResolutionPresentation.ts`) branches sourced via
+  `requireMoveDefender`/`scriptingBattler`, 2 new `prepareMessage`
+  substitution cases (`factoryBattleScriptFullTurnDecision.ts`, ability-name
+  plumbing for the 4 ids needing `{B_*_ABILITY}`) + 3 new `ABILITY_DISPLAY_
+  NAME_BY_ID` entries (Oblivious/Own Tempo/Clear Body). All 11 staged as
+  real full-turn production-kernel repros in one new file,
+  `tests/presentationStringIssue72Batch1.test.ts` (direct `status1`/
+  `status2`/`ability` config staging, the same idiom `factoryBattleScript
+  WakeUpFullTurn.test.ts` already established — not an oracle/mechanicLab
+  contract, so pre-battle status/ability staging is in-bounds here), all
+  red-verified via `git stash -- src/engine/battleResolutionPresentation.ts
+  src/engine/factoryBattleScriptFullTurnDecision.ts` (exact completeness-
+  guard error pre-fix, confirmed per-id). Deliberately deferred 2 ranked-
+  nearby ids needing RNG seed-search this step didn't have budget for
+  (`PKMNHUNGONWITHX`'s Focus Band hang-on roll, `PKMNPROTECTEDBY`'s Sturdy-
+  vs-OHKO where OHKO accuracy is a ~30%-at-mirrored-levels formula) and
+  `PKMNREGAINEDHEALTH` despite its rank 7 (3 emitting labels source
+  `{B_DEF_NAME_WITH_PREFIX}` from 3 different battler roles -- self-heal,
+  Present's opponent-target heal, Wish's frozen-at-cast battler -- needs its
+  own investigation, not one shared shape). ISSUES #72 REACHABLE list
+  trimmed to the remaining 56 (heading corrected 66→56: the pre-batch list
+  actually enumerated 67 distinct ids against the triage doc's own 66 count,
+  a pre-existing off-by-one noted but not chased down).
+- **Next:** ISSUES #72 batch 2, starting from `STRINGID_PKMNHUNGONWITHX`
+  (now the top of the ranked REACHABLE list) — the FocusBand/OHKO-accuracy
+  pair needs a seed search or an alternate deterministic staging approach
+  before landing; `PKMNREGAINEDHEALTH`'s 3-context investigation;
+  `PKMNSXWOREOFF` (side-status wear-off, `B_ATK_PREFIX1`+`B_BUFF1`) next
+  after those. The `CANCELER_TORMENTED` engine-gap fix (separate step, not a
+  messageLines fix). The 4 MANUAL settling experiments. #71 Slice D. typeref
+  slice-2 re-scope (#39).
+- **Notes:** PAPERCUT: the generic-fallback classification in `tools/report/
+  printstring-literal-census.ts` is a static syntactic check (does the
+  template's placeholder set live inside the 4-token generic-fallback set?)
+  but the fallback's actual runtime availability is call-path-dependent
+  (`B_SCR_ACTIVE_NAME_WITH_PREFIX` only populates when
+  `pendingHeldItemEffectBattler` is non-null, a narrow trigger) — hit this
+  live staging `STRINGID_PKMNFELLINLOVE` down a same-turn path that also
+  reached `STRINGID_PKMNINLOVE` (classified "generic-ok", 87-bucket) and got
+  the completeness guard anyway; worked around by picking a speed order that
+  avoids that second print rather than fixing the census method, ~10 min
+  lost. Worth a future step: the "generic-ok" bucket may hide more of these.
+
+---
 ## 895 — [bounded MAIN worker, 2026-08-03 ~16:10] ISSUES #72 reachability triage done: 66 REACHABLE / 37 DEAD / 4 MANUAL of the 107-id printstring census
 
 - **State:** master, docs-only commit on top of `660494f9`. Re-ran
