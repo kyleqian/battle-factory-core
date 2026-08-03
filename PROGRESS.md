@@ -47,6 +47,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   master mid-session: `68718a2a`, 3 commits ahead of the branch snapshot
   at session start) — recorded and used as the actual differential base.
   No ISSUES entries touched this step (not in scope).
+- **[supervisor addendum, ~23:10]** slice 6 verified (653/653 spot
+  differential). Side scout merged:
+  `docs/battlescene-turnN-typeref-retirement-design.md` (`3946958c`) —
+  entry-871's ~144 TurnN type refs censused literally (45 functions, 4
+  families), 54+9+9=72 provably dead (all call sites pass literal null;
+  existing shadow-equivalence suite pins the generic path), 6-slice plan;
+  its slices 3/4b collide with species-dossier slice 7's file region →
+  serialized on main, never concurrent. Side worktree/branch cleaned.
 
 ---
 ## 875 — [bounded MAIN worker, 2026-08-02] species-dossier slice 5 LANDED (turn-15 Onix gate cluster + family-H party literal)
