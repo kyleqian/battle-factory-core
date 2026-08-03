@@ -72,6 +72,23 @@ export const BACK_H_SLIDE_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.fr
   BACK_H_SLIDE_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by the generated `BACK_ANIM_H_SPRING` source row. */
+export const BACK_H_SPRING_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_H_SPRING")
+    .map(([species]) => species),
+);
+
+/** The complete H-spring back set is Factory-reachable. */
+export const BACK_H_SPRING_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_H_SPRING_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** There are no outside-Factory mappings for this one bounded back set. */
+export const BACK_H_SPRING_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_H_SPRING_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -132,9 +149,53 @@ export const BACK_H_SLIDE_VARIANTS = Object.freeze({
   }),
 } as const);
 
+/**
+ * `BACK_ANIM_H_SPRING` is the affine player-back triple. The three entry
+ * points initialize the shared HorizontalSpring state, then invoke it without
+ * replacing their own callback; the selected entry-point callback therefore
+ * remains visible until HorizontalSpring installs WaitAnimEnd at the end.
+ */
+export const BACK_H_SPRING_VARIANTS = Object.freeze({
+  fast: Object.freeze({
+    selector: "ANIM_H_SPRING_FAST",
+    callback: "Anim_HorizontalSpring_Fast",
+    sourceId: 109,
+    natureMod: 0,
+    speed: 8,
+    limit: 512,
+    amplitude: 16,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_H_SPRING",
+    callback: "Anim_HorizontalSpring",
+    sourceId: 62,
+    natureMod: 1,
+    speed: 8,
+    limit: 512,
+    amplitude: 8,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_H_SPRING_SLOW",
+    callback: "Anim_HorizontalSpring_Slow",
+    sourceId: 110,
+    natureMod: 2,
+    speed: 4,
+    limit: 256,
+    amplitude: 16,
+    accepted: true,
+  }),
+} as const);
+
 type BackHSlideSelector = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["selector"];
 type BackHSlideCallback = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["callback"];
 type BackHSlideDuration = typeof BACK_H_SLIDE_VARIANTS[keyof typeof BACK_H_SLIDE_VARIANTS]["duration"];
+type BackHSpringSelector = typeof BACK_H_SPRING_VARIANTS[keyof typeof BACK_H_SPRING_VARIANTS]["selector"];
+type BackHSpringCallback = typeof BACK_H_SPRING_VARIANTS[keyof typeof BACK_H_SPRING_VARIANTS]["callback"];
+type BackHSpringSpeed = typeof BACK_H_SPRING_VARIANTS[keyof typeof BACK_H_SPRING_VARIANTS]["speed"];
+type BackHSpringLimit = typeof BACK_H_SPRING_VARIANTS[keyof typeof BACK_H_SPRING_VARIANTS]["limit"];
+type BackHSpringAmplitude = typeof BACK_H_SPRING_VARIANTS[keyof typeof BACK_H_SPRING_VARIANTS]["amplitude"];
 
 /**
  * Source facts at the `LaunchAnimationTaskForBackSprite` seam. The shared
@@ -242,6 +303,20 @@ function hSlideVariant(selector: string): {
   readonly amplitude: 6;
 } | null {
   for (const variant of Object.values(BACK_H_SLIDE_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function hSpringVariant(selector: string): {
+  readonly selector: BackHSpringSelector;
+  readonly callback: BackHSpringCallback;
+  readonly sourceId: 62 | 109 | 110;
+  readonly speed: BackHSpringSpeed;
+  readonly limit: BackHSpringLimit;
+  readonly amplitude: BackHSpringAmplitude;
+} | null {
+  for (const variant of Object.values(BACK_H_SPRING_VARIANTS)) {
     if (variant.selector === selector) return variant;
   }
   return null;
@@ -445,6 +520,120 @@ export function backHorizontalSlideFrameAtTick(
 
 /** Source WaitAnimEnd lifecycle after static back OAM reports animEnded. */
 export function backHorizontalSlideWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+export interface BackHorizontalSpringAffineWrite {
+  readonly xScale: number;
+  readonly yScale: 256;
+  readonly rotationSigned: 0;
+  readonly rotationU16: 0;
+}
+
+export interface BackHorizontalSpringFrame {
+  readonly x2: number;
+  readonly y2: 0;
+  readonly data0: 0;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  /** The initializer guard is set once and then remains set. */
+  readonly data2: 1;
+  readonly data4: BackHSpringAmplitude;
+  readonly data5: BackHSpringLimit;
+  readonly data6: BackHSpringSpeed;
+  readonly data7Before: number;
+  readonly data7: number;
+  readonly selector: BackHSpringSelector;
+  readonly sourceId: 62 | 109 | 110;
+  readonly speed: BackHSpringSpeed;
+  readonly limit: BackHSpringLimit;
+  readonly amplitude: BackHSpringAmplitude;
+  readonly xScale: number;
+  readonly yScale: 256;
+  readonly initializerCalled: boolean;
+  readonly handleStartAffineAnimCalls: 0 | 1;
+  readonly callbackInvokedByInitializer: true;
+  readonly resetSpriteAfterAnim: boolean;
+  readonly normalBackDontFlip: true;
+  readonly tryFlipXCalls: 0;
+  readonly affineWriteCount: 1;
+  readonly affineWrites: readonly [BackHorizontalSpringAffineWrite];
+  readonly affineMode: "double" | "normal";
+  readonly callback: BackHSpringCallback | "WaitAnimEnd";
+}
+
+/**
+ * Source-order reducer for the complete `BACK_ANIM_H_SPRING` triple.
+ * `ticksSinceStart` starts at the first invocation of the selected entry
+ * point, after Task_HandleMonAnimation has installed it and zeroed data[2..7].
+ * The entry point invokes HorizontalSpring immediately and keeps its own
+ * callback installed; the shared helper owns only the active/terminal writes.
+ */
+export function backHorizontalSpringFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackHorizontalSpringFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_H_SPRING") return null;
+  const variant = hSpringVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected H-spring selector ${selection.selector}`);
+
+  const requestedData7Before = variant.speed * ticksSinceStart;
+  // Once the helper has crossed the guard it is waiting on the task-owned
+  // callback handoff; keep the terminal snapshot stable for later queries.
+  const data7Before = requestedData7Before > variant.limit
+    ? variant.limit + variant.speed
+    : requestedData7Before;
+  const terminal = data7Before > variant.limit;
+  const data7 = terminal ? data7Before : data7Before + variant.speed;
+  const x2 = terminal ? 0 : gbaSin(data7Before % 256, variant.amplitude);
+  const xScale = terminal ? 256 : toS16(256 + gbaSin(data7 % 128, 96));
+  const write = Object.freeze({
+    xScale,
+    yScale: 256 as const,
+    rotationSigned: 0 as const,
+    rotationU16: 0 as const,
+  });
+  return Object.freeze({
+    x2,
+    y2: 0 as const,
+    data0: 0 as const,
+    data1: toS16(preservedData1),
+    data2: 1 as const,
+    data4: variant.amplitude,
+    data5: variant.limit,
+    data6: variant.speed,
+    data7Before: toS16(data7Before),
+    data7: toS16(data7),
+    selector: variant.selector,
+    sourceId: variant.sourceId,
+    speed: variant.speed,
+    limit: variant.limit,
+    amplitude: variant.amplitude,
+    xScale,
+    yScale: 256 as const,
+    initializerCalled: ticksSinceStart === 0,
+    handleStartAffineAnimCalls: ticksSinceStart === 0 ? 1 as const : 0 as const,
+    callbackInvokedByInitializer: true as const,
+    resetSpriteAfterAnim: terminal,
+    normalBackDontFlip: true as const,
+    tryFlipXCalls: 0 as const,
+    affineWriteCount: 1 as const,
+    affineWrites: [write] as const,
+    affineMode: terminal ? "normal" as const : "double" as const,
+    callback: terminal ? "WaitAnimEnd" as const : variant.callback,
+  });
+}
+
+/** Source WaitAnimEnd lifecycle after static back OAM reports animEnded. */
+export function backHorizontalSpringWaitAnimEndCallback(
   animEnded: boolean,
 ): "WaitAnimEnd" | "SpriteCallbackDummy" {
   return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
