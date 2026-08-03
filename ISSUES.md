@@ -121,6 +121,20 @@ characterized in `docs/trainer-pic-off-window-scout.md` §D. Remainder:
    bounce family also present inside YOSHI's accepted tail — folded into
    item 2's isolated-residual class (444/536 + idle-bounce family).
 
+**Closure audit (2026-08-02, `d87b5e92`,
+`docs/issue56-closure-audit.md`):** YOSHI holds **700/751** and all 51 red
+frames sum into the two settled classes (1 display-tail + 50 idle-bounce) —
+no remainder. But **MAGNETON regressed 703→702**: frame 437 (201px, bbox
+163,40-196,85) is NEW, root-caused (code-cited) to `1aa13ebb` (2026-08-02)
+keying the ball-open particle `stallLag` on `isCanonicalAnchorIntro`, which
+gives YOSHI and MAGNETON the same `stallLag: 0` although the 2026-07-31 OAM
+probe (`docs/issue56-frames-444-536-oam-probe.md` Round 2) proved MAGNETON
+wants the opposite value at the analogous tick — and `1aa13ebb`'s landing
+never re-ran the MAGNETON comparison. **Next actionable:** fix the
+stallLag keying per-route (bounded; both prior evidence docs give the
+values), re-run BOTH standing intro comparisons, expect MAGNETON ≥703 with
+YOSHI's 700 intact. Keep #56 open until then.
+
 **Not blocking:** Gate 5 ticked with these named (ROADMAP S10 gate 5
 completion note); this is the worklist to finish the window honestly.
 

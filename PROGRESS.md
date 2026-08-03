@@ -43,6 +43,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   fact is preserved as its own named constant rather than silently merged
   into one lag or used to compute a second, drifting epoch. All numeric
   values unchanged (6872, 72/88, 6828) — this moves ownership, not fit.
+- **[supervisor addendum, ~23:55]** slice 7 verified (422/422 spot
+  differential). #56 closure audit merged earlier (`f49e0b27`,
+  `docs/issue56-closure-audit.md`): YOSHI 700/751 fully settled-classed;
+  **MAGNETON regressed 703→702** (frame 437, 201px) — root-caused to
+  `1aa13ebb`'s shared stallLag keying, landing never re-ran MAGNETON;
+  ISSUES #56 updated with the bounded fix prescription. User play session
+  filed #68 (TORMENT crash — fix worker dispatched) + #69 (omniboost OFF
+  cadence + RNG bias — side probe running). Play-preview worktree serving
+  frozen `3a165507` on :5199 (intentional, exclude from stale sweeps).
   `turn5SitrusResettledBounceTick` keys off a separate constant
   (`TURN5_SITRUS_MENU_REDRAW_TICK`, 7222) not among the three anchors the
   brief named, so it needed no change — confirmed by grep before scoping.
