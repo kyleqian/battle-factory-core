@@ -188,8 +188,10 @@ describe("ANIM_TIP_MOVE_FORWARD", () => {
         ["WINGULL", "ANIM_H_PIVOT"],
         ["DEOXYS", "ANIM_H_PIVOT"],
       ]);
-    expect(speciesFrontIdleRestOffset("WINGULL")).toBeNull();
-    expect(speciesFrontIdleRestOffset("DEOXYS")).toBeNull();
+    // Selector 27 is now source-ported for its complete generated family;
+    // DEOXYS is census-only outside the Factory pool, not a second fixture.
+    expect(speciesFrontIdleRestOffset("WINGULL")).toEqual({ x2: 0, y2: 0 });
+    expect(speciesFrontIdleRestOffset("DEOXYS")).toEqual({ x2: 0, y2: 0 });
     expect(JSON.stringify(selectorTables.backAnimationIds)).not.toContain("ANIM_TIP_MOVE_FORWARD");
   });
 });
