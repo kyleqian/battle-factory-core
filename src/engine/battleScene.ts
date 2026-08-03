@@ -10317,16 +10317,34 @@ function turn5BgFadeY(t: number): number {
 }
 
 /**
+ * ISSUES #39 rank-3 flip, half 2 (species-dossier slice 7 extension): the
+ * real Sitrus-heal fact source (`turn5ResolutionAdapter.ts`'s
+ * `resolveTurn5SitrusAdapter`), chaining Onix's own real held-item proc
+ * (`runBattleEndTurnOrchestration`'s already-ported `HOLD_EFFECT_RESTORE_HP`
+ * case) instead of independently re-stating the heal's HP endpoints/message
+ * text here - reused below for `TURN5_SITRUS_HEAL_LINE1`/`_LINE2` and
+ * `TURN5_SITRUS_HEAL_HP_START`/`_END`, same "module-level constant derived
+ * once at import time" discipline `TURN5_SWITCHIN` already established.
+ * Hoisted ahead of the rotate/ring/star timing block below (species-dossier
+ * slice 7, docs/species-render-entry-point-retirement-design.md §4 row 7):
+ * every one of the seven family-B wrappers' shared age epoch now derives
+ * from this adapter's own `procTriggerRamTick`/`onFieldCenter`, not an
+ * independently hand-derived battleScene.ts literal.
+ */
+const TURN5_SITRUS = resolveTurn5SitrusAdapter();
+
+/**
  * S7 slice M-3 (docs/faint-switch-notes.md §12/§13): Onix's own Sitrus
  * Berry proc opening stage - `General_HeldItemEffect`'s first 3
  * `AnimTask_RotateMonToSideAndRestore` calls, a genuine GBA affine-OAM
  * rotation of Onix's own back sprite. Table RAM-read directly
  * (`gOamMatrices[matrixNum]`, `tools/probe/dump-onix-sitrus-rotate-matrix.py`,
- * cross-checked twice), anchored at RAM tick 6872 (identity/cycle-start),
- * one 32-RAM-tick cycle repeated 3x verbatim through RAM tick 6968 (all 3
- * cycles byte-identical, RAM-diffed this session). `y2` is the
- * `SetBattlerSpriteYOffsetFromRotation` byproduct (`|c|>>3`, RAM-confirmed
- * 100% - not a separate table).
+ * cross-checked twice), anchored at RAM tick 6872 (identity/cycle-start,
+ * now `TURN5_SITRUS.procTriggerRamTick` - see `turn5ResolutionAdapter.ts`'s
+ * own `ONIX_SITRUS_PROC_TRIGGER_RAM_TICK` doc), one 32-RAM-tick cycle
+ * repeated 3x verbatim through RAM tick 6968 (all 3 cycles byte-identical,
+ * RAM-diffed this session). `y2` is the `SetBattlerSpriteYOffsetFromRotation`
+ * byproduct (`|c|>>3`, RAM-confirmed 100% - not a separate table).
  *
  * **The render-tick offset from the RAM tick is +2, not the usual +1**
  * (this run's ordinary OAM-shadow-buffer-to-hardware-DMA lag, e.g.
@@ -10351,11 +10369,34 @@ function turn5BgFadeY(t: number): number {
  * rounding/axis variants (round-to-nearest, pixel-center bias, transpose,
  * matrix inverse) - `floor`, unchanged, was the closest to the oracle at
  * every single one, confirming the existing convention was already right.
+ *
+ * species-dossier slice 7 (docs/species-render-entry-point-retirement-
+ * design.md §5 trap 3): `turn5SitrusRingMatrix`'s own doc below records a
+ * SEPARATE, independently-measured **+1** render lag for the ring/star
+ * mechanism - kept as its own named `TURN5_SITRUS_RING_RENDER_LAG` constant
+ * so the two facts stay distinct in code rather than silently merged into
+ * one "the" lag. It is NOT used to compute a second epoch here:
+ * `heldItemHeal.ts`'s own `SITRUS_ITEM_RING_FIRST_AGE`/
+ * `_STAR_FIRST_VISIBLE_AGE`/etc constants were all fit against the SAME
+ * `ONIX_SITRUS_IDENTITY_RENDER_TICK` epoch below (the rotate mechanism's
+ * own +2-lag anchor) - re-deriving a second, ring-specific epoch from the
+ * +1 fact would double-count the correction and drift the ring/stars a
+ * tick early against every other family-B wrapper. The guard immediately
+ * below turns that "must stay 1 apart" invariant into a build-time-cheap
+ * runtime check instead of a comment alone, so an incidental future edit
+ * to either constant fails loudly instead of silently drifting.
  */
-const ONIX_SITRUS_RENDER_LAG = 2;
-const ONIX_SITRUS_RAM_ANCHOR_TICK = 6872;
+const ONIX_SITRUS_ROTATE_RENDER_LAG = 2;
+const TURN5_SITRUS_RING_RENDER_LAG = 1;
+if (ONIX_SITRUS_ROTATE_RENDER_LAG - TURN5_SITRUS_RING_RENDER_LAG !== 1) {
+  throw new Error(
+    "battleScene.ts: onixSitrusRotateMatrix's/turn5SitrusRingMatrix's own documented 1-tick "
+      + "render-lag asymmetry drifted - re-audit heldItemHeal.ts's SITRUS_ITEM_*_FIRST_AGE fits "
+      + "before changing either constant",
+  );
+}
 const ONIX_SITRUS_IDENTITY_RENDER_TICK =
-  ONIX_SITRUS_RAM_ANCHOR_TICK + ONIX_SITRUS_RENDER_LAG;
+  TURN5_SITRUS.procTriggerRamTick + ONIX_SITRUS_ROTATE_RENDER_LAG;
 
 /** `null` means "identity - let the plain static draw handle it" (both outside the rotation's own render window, and at the table's own identity entries). */
 export function onixSitrusRotateMatrix(t: number): { pa: number; pb: number; pc: number; pd: number; y2: number } | null {
@@ -10450,18 +10491,6 @@ function drawGrantingStarsAtAge(
     }
   }
 }
-
-/**
- * ISSUES #39 rank-3 flip, half 2: the real Sitrus-heal fact source
- * (`turn5ResolutionAdapter.ts`'s `resolveTurn5SitrusAdapter`), chaining
- * Onix's own real held-item proc (`runBattleEndTurnOrchestration`'s already-
- * ported `HOLD_EFFECT_RESTORE_HP` case) instead of independently re-stating
- * the heal's HP endpoints/message text here - reused below for
- * `TURN5_SITRUS_HEAL_LINE1`/`_LINE2` and `TURN5_SITRUS_HEAL_HP_START`/`_END`,
- * same "module-level constant derived once at import time" discipline
- * `TURN5_SWITCHIN` already established.
- */
-const TURN5_SITRUS = resolveTurn5SitrusAdapter();
 
 /**
  * S7 slice M-5 (docs/faint-switch-notes.md §15): "ONIX's SITRUS BERRY\n
@@ -10589,15 +10618,18 @@ export function onixSitrusTintCoeff(t: number): number {
  * (`b=c=0` always, `a=d` always) - never a rotation - so it does NOT
  * inherit that mechanism's own +2 render lag (rotation-matrix-specific,
  * per §13's own rationale and §29's independent confirmation it doesn't
- * generalize); this one uses the dossier's ordinary **+1** lag instead,
- * verified pixel-exact with zero fitted parameters at two sample ticks
- * (6/6 opaque px at render 7042, 92/92 at render 7048). Center `(72,88)`
- * is RAM-constant for the sprite's whole life (the ring's own sprite x/y
- * directly - 8px below `onixSitrusRotateMatrix`'s own call-site center,
- * from `AnimSpriteOnMonPos`'s mon-pic Y offset that Onix's own hardcoded
- * rotation call never applies).
+ * generalize); this one uses the dossier's ordinary **+1** lag instead
+ * (`TURN5_SITRUS_RING_RENDER_LAG` above), verified pixel-exact with zero
+ * fitted parameters at two sample ticks (6/6 opaque px at render 7042,
+ * 92/92 at render 7048). Center `(72,88)` is RAM-constant for the sprite's
+ * whole life (the ring's own sprite x/y directly - 8px below
+ * `onixSitrusRotateMatrix`'s own call-site center, from
+ * `AnimSpriteOnMonPos`'s mon-pic Y offset that Onix's own hardcoded
+ * rotation call never applies) - species-dossier slice 7: now
+ * `TURN5_SITRUS.onFieldCenter`, `turn5ResolutionAdapter.ts`'s own adapter-
+ * owned fact, not an independently hand-derived literal here.
  */
-export const TURN5_SITRUS_RING_CENTER = { x: 72, y: 88 };
+export const TURN5_SITRUS_RING_CENTER = TURN5_SITRUS.onFieldCenter;
 
 /**
  * `null` outside the ring's own live RAM window (`[7040,7071]`, i.e.
@@ -11041,7 +11073,9 @@ export const TURN5_BALL_HANDOFF_TICK = 6727;
  *    (true colors) for this entire phase (confirmed via the same palette
  *    probe). Settles to the plain, untransformed sprite at
  *    `TURN5_PIDGEOTTO_SETTLE_TICK` (RAM 6827's own idle callback, visible
- *    render 6828).
+ *    render 6828) - species-dossier slice 7: now
+ *    `TURN5_SWITCHIN.materializeSettleTick`, `turn5ResolutionAdapter.ts`'s
+ *    own adapter-owned fact, not an independently hand-derived literal here.
  *
  * Front-sprite frame selection (`turn5PidgeottoFrame`) uses the RAM-
  * confirmed `animCmdIndex` transition ticks directly (render = RAM+1: 6761,
@@ -11119,7 +11153,7 @@ const TURN5_STRETCH_TABLE: readonly { xScale: number; yScale: number; y2: number
   { xScale: 257, yScale: 253, y2: 0 },
   { xScale: 256, yScale: 256, y2: 0 },
 ];
-export const TURN5_PIDGEOTTO_SETTLE_TICK = 6828;
+export const TURN5_PIDGEOTTO_SETTLE_TICK = TURN5_SWITCHIN.materializeSettleTick;
 
 /**
  * S7 slice M (docs/faint-switch-notes.md §8e/§3d): Pidgeotto's own opponent
