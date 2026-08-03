@@ -1,3 +1,45 @@
+## 865 — [bounded MAIN worker, 2026-08-02] #65 fixed — ATTACKER-variant stat-banner branch added
+
+- **State:** `c7461398` is the green fix commit (parent `fcf05dd9`). Full
+  `npm test` **613 files / 6,275 passed / 1 skipped**, `npm run build` and
+  `npx tsc --noEmit` both exit 0.
+- **Did:** Per `docs/silverwind-allstatsup-crash-scout.md` §5, added the
+  missing `STRINGID_ATTACKERSSTATROSE`/`STRINGID_ATTACKERSSTATFELL` branch
+  to `battleResolutionPresentation.ts`'s `messageLines`, mirroring the
+  existing `DEFENDERSSTATROSE`/`FELL` branch (`B_ATK_NAME_WITH_PREFIX` from
+  `lastStatChange.battler` instead of `B_DEF_NAME_WITH_PREFIX`, same
+  `B_BUFF1`/`B_BUFF2` logic; both ROSE and FELL in one branch-add, gen'd
+  table already single-sourced at `battleScriptHitChainOpcode.ts:412-425`).
+  Flipped `tests/silverWindAllStatsUpRepro.test.ts` from `it.fails` to `it`,
+  widened to assert all five ordered ATK/DEF/SPEED/SPATK/SPDEF banners
+  (6→7, exact resolved text). Added
+  `tests/battleResolutionAttackerStatFellInsurance.test.ts` (Tier-1
+  insurance, scout §5 step 4): Superpower's real, deterministic
+  (`MOVE_EFFECT_CERTAIN`, accuracy 100, no RNG-gated proc)
+  `BattleScript_AtkDefDown` self-drop through the same production
+  kernel+presentation path, asserting both `STRINGID_ATTACKERSSTATFELL`
+  banners.
+- **Evidence:** Oracle pin (scout §4, `mechanicLab` seed 8) replayed
+  directly — matches the scout's table byte-for-byte: `rngValue` pinned at
+  3664104713 frames 240-734, opponent HP 105→60, final player
+  `statStages [6,7,7,7,7,7,6,6]`. `compare:differential --base fcf05dd9`
+  (turn5-rockslide/turn5-faint/turn13-dragonbreath-faint/battle-command-
+  generated-off): **635/635 byte-identical** (256, 110, 141, 128). Stat-
+  change insurance: `turn4-doubleteam-off` **256/256** (unchanged).
+  `turn11-featherdance-off` and `turn13-menu.json` are **189/191** and
+  **56/57** — NOT the brief's expected 191/191/57/57 — but a same-parent
+  worktree diff at `fcf05dd9` (pre-fix) reproduces the *identical* frames
+  and diff stats (13340/13341 resp. 15374, same bbox/ssim), proving this
+  divergence pre-dates the fix and the DEFENDER-variant path did not move;
+  the brief's counts were stale. Reporting honestly per the step's own
+  discrepancy clause rather than tuning anything.
+- **Next:** file the stale 191/191→189/191 and 57/57→56/57 insurance counts
+  as a small doc/ledger correction (not a regression) so the next worker
+  doesn't re-flag it; resume slice 9 (turn-4 fold).
+- **Notes:** touched only `src/engine/battleResolutionPresentation.ts` plus
+  the two named test files, per scope. No trace/capture edits, no
+  dispatcher-ladder files touched.
+
 ## 864 — [supervisor, 2026-08-02 11:55] slice 8 landed via salvage→retry; #65 scouted, fix launching; slice-6 PP leak bisected; species dossier banked
 
 - **State:** master at `d13944bf`; full `npm test` **611 files / 6,273

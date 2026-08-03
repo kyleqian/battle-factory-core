@@ -300,6 +300,30 @@ and the final session report. An open entry mechanically blocks the next
 `run-supervisor.sh` session until the user resolves it and the entry is
 removed; do not carry deferred ambiguity into another long run.
 
+## Communicating with the user
+
+Adopted verbatim from DEFERRED.md D1 by user decision, 2026-08-02.
+
+All user-facing communication — mid-session updates, answers, wind-down
+summaries — leads with user-level language: what works in the game, what is
+broken, distance to the current milestone (S10). Terse over verbose: numbers
+and bullets, not prose; prose only where a point is genuinely nuanced. No
+time estimates (not accurate enough to be useful). Milestone status uses
+this format (user-approved 2026-08-02), plus optional one-line commentary
+per item:
+
+> **S10: ~80% overall**
+> - ✅ <done item>: **100%**
+> - 🔄 <in-flight item>: **~N%** (one-line commentary optional)
+
+Every sub-item carries a numeric (% ideally, else a fraction like 9/10
+steps). Internal terms (slice/rank/fold/differential/lane) appear only with
+an inline plain-language translation, or not at all. The internal ledgers
+(PROGRESS.md, ISSUES.md, briefs, design docs) keep their precise technical
+voice — this contract governs communication with the user only. Wind-down
+reports open with the milestone status block; technical detail follows for
+the record.
+
 ## Deadline and usage limits
 
 - Your launch prompt gives a wall-clock deadline (also as epoch seconds);

@@ -4,6 +4,40 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 868 — [interactive user session, 2026-08-02 evening] D1 adopted → DEFERRED clear; papercut fixes landed; play-preview retired
+
+- **State:** master = this entry's commit on top of `f6452d7a`; no engine or
+  test code touched (tooling/docs only), `npm run test:smoke` green (7
+  files / 339 passed, ~23 s). **DEFERRED.md has NO open entries — the next
+  `run-supervisor.sh` session is unblocked.**
+- **Did (all user-directed):**
+  1. **D1 RESOLVED:** user adopted the communication contract verbatim; text
+     moved into `SUPERVISOR.md` § "Communicating with the user", D1 entry
+     deleted.
+  2. **Worker self-abort papercut:** EXECUTION DISCIPLINE clause folded into
+     `tools/run-subagent.sh`'s standing preamble (both prompt branches, all
+     providers) — briefs no longer restate it. PAPERCUTS entry updated;
+     delete it after a few clean worker rounds.
+  3. **New `npm run test:smoke`** (~25 s: frontier ratchet, ability/item
+     census, decision boundary, kernel full-turn, roundController,
+     roundScenarioMatrix, battleScene) for mid-step sanity checks;
+     documented in AGENTS.md Tests. Never substitutes for the full suite at
+     a finish requirement.
+  4. **Scene-ON battle-lab papercut entry DELETED** — verified fixed live:
+     POST `/v1/battle-lab/run` on :8012 answers 400 mode-validation,
+     identical to :8014 (the running service now carries the route).
+  5. **Play-preview retired:** nothing was listening on :5199 (server
+     already down); `.worktrees/play-preview` removed (detached at
+     `105c72d5`, an ancestor of master; only untracked node_modules).
+     Rebuild a fresh preview after the next user-visible fix lands.
+- **Next (unchanged from 867):** (1) slice-9 fold completion from `a6d88eaa`
+  per the banked design `docs/turn4-fold-pp-freshness-design.md`; (2) slice
+  10; (3) #66(a) capped-stat banner fix (+(b) after an oracle probe); (4)
+  species-dossier slices.
+- **Notes:** `animation-main` still ~8 commits ahead with its own ledger —
+  fold at next orient (unchanged from 867's note).
+
+---
 ## 867 — [supervisor wind-down, 2026-08-02 14:30] slice 8 + #65 landed; slice-9 fold honestly open with both root causes banked; D1 comms contract awaits user
 
 - **State:** master `4807676f` = green slice-9 BRIDGE + all docs; full
@@ -117,46 +151,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   timeout, needing an explicit blocking `TaskOutput` wait to avoid a
   premature self-abort — worth a shorter smoke-subset option for mid-
   session sanity checks.
-
----
-## 865 — [bounded MAIN worker, 2026-08-02] #65 fixed — ATTACKER-variant stat-banner branch added
-
-- **State:** `c7461398` is the green fix commit (parent `fcf05dd9`). Full
-  `npm test` **613 files / 6,275 passed / 1 skipped**, `npm run build` and
-  `npx tsc --noEmit` both exit 0.
-- **Did:** Per `docs/silverwind-allstatsup-crash-scout.md` §5, added the
-  missing `STRINGID_ATTACKERSSTATROSE`/`STRINGID_ATTACKERSSTATFELL` branch
-  to `battleResolutionPresentation.ts`'s `messageLines`, mirroring the
-  existing `DEFENDERSSTATROSE`/`FELL` branch (`B_ATK_NAME_WITH_PREFIX` from
-  `lastStatChange.battler` instead of `B_DEF_NAME_WITH_PREFIX`, same
-  `B_BUFF1`/`B_BUFF2` logic; both ROSE and FELL in one branch-add, gen'd
-  table already single-sourced at `battleScriptHitChainOpcode.ts:412-425`).
-  Flipped `tests/silverWindAllStatsUpRepro.test.ts` from `it.fails` to `it`,
-  widened to assert all five ordered ATK/DEF/SPEED/SPATK/SPDEF banners
-  (6→7, exact resolved text). Added
-  `tests/battleResolutionAttackerStatFellInsurance.test.ts` (Tier-1
-  insurance, scout §5 step 4): Superpower's real, deterministic
-  (`MOVE_EFFECT_CERTAIN`, accuracy 100, no RNG-gated proc)
-  `BattleScript_AtkDefDown` self-drop through the same production
-  kernel+presentation path, asserting both `STRINGID_ATTACKERSSTATFELL`
-  banners.
-- **Evidence:** Oracle pin (scout §4, `mechanicLab` seed 8) replayed
-  directly — matches the scout's table byte-for-byte: `rngValue` pinned at
-  3664104713 frames 240-734, opponent HP 105→60, final player
-  `statStages [6,7,7,7,7,7,6,6]`. `compare:differential --base fcf05dd9`
-  (turn5-rockslide/turn5-faint/turn13-dragonbreath-faint/battle-command-
-  generated-off): **635/635 byte-identical** (256, 110, 141, 128). Stat-
-  change insurance: `turn4-doubleteam-off` **256/256** (unchanged).
-  `turn11-featherdance-off` and `turn13-menu.json` are **189/191** and
-  **56/57** — NOT the brief's expected 191/191/57/57 — but a same-parent
-  worktree diff at `fcf05dd9` (pre-fix) reproduces the *identical* frames
-  and diff stats (13340/13341 resp. 15374, same bbox/ssim), proving this
-  divergence pre-dates the fix and the DEFENDER-variant path did not move;
-  the brief's counts were stale. Reporting honestly per the step's own
-  discrepancy clause rather than tuning anything.
-- **Next:** file the stale 191/191→189/191 and 57/57→56/57 insurance counts
-  as a small doc/ledger correction (not a regression) so the next worker
-  doesn't re-flag it; resume slice 9 (turn-4 fold).
-- **Notes:** touched only `src/engine/battleResolutionPresentation.ts` plus
-  the two named test files, per scope. No trace/capture edits, no
-  dispatcher-ladder files touched.
