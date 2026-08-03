@@ -134,53 +134,52 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   intricate ids + INTROSENDOUT extractor (documented in #70).
 
 ---
-## 884 — [bounded MAIN worker, 2026-08-03] ISSUES #70 batch 2 — 19 of 31 remaining presentation-string rows FIXED; 12 remain + 1 new gap found
+## 887 — [bounded MAIN worker, 2026-08-03] ISSUES #70 CLOSED — STRINGID_INTROSENDOUT extractor-gap consumption wired
 
-- **State:** master `63dc4dc3` (two commits on top of `5ce289c8`). Full
-  `npm test`: **644 files / 6,443 passed / 1 skipped** (+19 from this step's
-  new suite). `npm run build` green (tsc -b + vite).
-- **Did:** ported 19 of the 31 remaining ids from `docs/issue70-stringid-
-  reachability.md`'s per-id table into `messageLines`
-  (`battleResolutionPresentation.ts`), worked in the doc's own order:
-  `PKMNFROZENBY`/`PKMNMADESLEEP` (extend batch-1's poisoned/burned/paralyzed
-  ability-status branch), `PKMNRAISEDDEFALITTLE`/`PKMNRAISEDSPDEFALITTLE`
-  (extend batch-1's Reflect/Light Screen/Safeguard branch),
-  `PKMNSHROUDEDINMIST`, `PKMNCHOSEXASDESTINY`, the wrap family
-  (`PKMNSQUEEZEDBYBIND`/`PKMNWRAPPEDBY`/`PKMNTRAPPEDINVORTEX`/`PKMNCLAMPED`/
-  `PKMNTRAPPEDBYSANDTOMB`), the Leech Seed pair (`PKMNEVADEDATTACK`/
-  `PKMNSEEDED`), the Trick item-swap family (`PKMNOBTAINEDX`/
-  `PKMNOBTAINEDX2`/`PKMNOBTAINEDXYOBTAINEDZ` — `prepareMessage`'s own
-  substitution already existed from a prior session), `PKMNUNAFFECTED`, and
-  the Flash Fire pair (`PKMNRAISEDFIREPOWERWITH`/`PKMNSXMADEYINEFFECTIVE`,
-  new `B_DEF_ABILITY` substitution). `FactoryFullTurnBattlerConfig` gained a
-  `flashFireBoosted` staging field to reach the already-boosted
-  re-activation string in one turn. Fixing `PKMNSXMADEYINEFFECTIVE` surfaced
-  a real adjacent bug the full suite caught: `ABILITY_STICKY_HOLD` (60,
-  reused by `BattleScript_StickyHoldActivates` for the same STRINGID) had no
-  ability-display-name entry — added alongside Flash Fire's, second commit.
-- **Tests:** `tests/presentationStringBatch2.test.ts`, 19 cases mirroring
-  batch-1's shape: a staged full-turn repro through the production kernel for
-  every id with a real non-zero-incidence trigger, and the direct
-  resolver-branch idiom (synthetic event straight into
-  `createBattleResolutionPresentation`, matching
-  `tests/battleResolutionPresentation.test.ts`'s own `inputFor` pattern) for
-  the 8 genuinely zero-incidence ids **plus the wrap family** — staging a
-  real Bind/Wrap/Fire Spin/Clamp/Sand Tomb turn also fires that same turn's
-  end-of-turn wrap-damage tick, which crashes on a *separate, previously-
-  undiscovered* gap (`STRINGID_PKMNHURTBY`, not one of the original 47 —
-  parsed from the real battle-script program, not a TS literal, so `#68`'s
-  sweep never found it). Red-verified once via `git stash` on the two
-  touched engine files: all 19 threw `battleStringResolver`'s completeness-
-  guard error pre-fix. `compare:differential` (base `5ce289c8`,
-  `turn5-rockslide`+`battle-command-generated-off`): **384/384
-  byte-identical** — no standing capture reaches these strings.
-- **Next:** ISSUES #70's remaining 12 ids (ability-prevention family x5,
-  Uproar family x3, `USINGITEMSTATOFPKMNROSE`, `PKMNSTOCKPILED`/`PKMNHPFULL`,
-  `PKMNTRANSFORMEDINTO`) plus the newly-found `STRINGID_PKMNHURTBY` gap
-  (flagged **higher real-world severity** — any of the 6 common trapping
-  moves crashes on its own first successful use) plus the `INTROSENDOUT`
-  extractor gap. Full per-id detail and file:line citations already in
-  ISSUES #70 — do not re-derive.
-- **Notes:** `tests/executableFrontierRatchet.test.ts` green, untouched, no
-  new recording imports, no barrier-count changes. Diff stays additive in
-  `messageLines`/`prepareMessage`; no timing constants touched.
+- **State:** master `49b8c323`. Full `npm test`: **649 files / 6,488 passed
+  / 1 skipped**. `npm run build` green (tsc -b + vite). `compare:differential
+  -- battle-command-generated-off.json --base 46190382 --summary`: **PASS —
+  128/128 byte-identical**.
+- **Did:** #70's last open item — wired the side lane's already-banked
+  `src/data/battleIntroStrings.ts` hand-mapped table (commit `a76bb338`,
+  STRINGID ids 0/1/2/5: `INTROMSG`/`INTROSENDOUT`/`RETURNMON`/`BATTLEEND`)
+  into `messageLines` (`battleResolutionPresentation.ts`), the same shape as
+  the existing `STRINGID_SWITCHINMON` (id 3) hand-port: a small local
+  `resolveIntroStringEntry` segment-splice (text/placeholder/linebreak,
+  mirroring `resolveBattleStringLines` for the subset these ids need) since
+  none of the 4 ids live in the extracted table's `BY_SYMBOL` map.
+  `B_TRAINER1_CLASS`/`B_TRAINER1_NAME`/`B_PLAYER_MON1_NAME`/
+  `B_OPPONENT_MON1_NAME`/`B_BUFF1`/`B_LINK_OPPONENT1_NAME` all resolve from
+  params `messageLines` already receives (`opponentTrainer`, `field`) — no
+  new generic-substitution plumbing needed. Three new optional
+  `battleScriptEvents.ts` message-payload fields (`introBattler`/
+  `introHpScale`/`introOutcome`) carry the routing facts these ids need that
+  the event shape doesn't otherwise carry (which side is being introduced/
+  returned, the `RETURNMON` player-branch HP-scale bucket, the `BATTLEEND`
+  win/lose/draw outcome — `introOutcome` reuses the existing `BattleOutcome`
+  domain type rather than inventing a new one). `prepareMessage`
+  (`factoryBattleScriptFullTurnDecision.ts`) needed **no change**: it is
+  `Cmd_printstring`'s own substitution-builder, and none of these 4 ids are
+  ever printed via `Cmd_printstring` even in the real game (`BufferStringBattle`
+  dispatches them from a separate, non-script C routine) — structurally
+  unreachable from that hook regardless of live-wiring status, so the step
+  brief's anticipated `prepareMessage` work turned out not to apply.
+- **Tests:** `tests/presentationStringIntro.test.ts`, 11 cases — one per
+  `battleIntroStrings.ts` table entry (full coverage: `INTROMSG`'s one
+  branch, `INTROSENDOUT`'s 2, `RETURNMON`'s 5, `BATTLEEND`'s 3), all via the
+  direct resolver-branch idiom (synthetic event straight into
+  `createBattleResolutionPresentation`, batch-3's zero-incidence pattern) —
+  the only idiom available since no engine path emits these ids. Red-
+  verified once via `git stash` on the two touched engine files: all 11
+  threw `battleStringResolver`'s exact completeness-guard error
+  (`unknown battle string id STRINGID_...`) pre-fix.
+- **Next:** #70 is closed and deleted from ISSUES.md (its forensic history
+  stays in git + this ledger/archive). ISSUES #71 (live send-out seam
+  wiring — the counterpart program that would actually populate
+  `introBattler`/`introHpScale`/`introOutcome` and make these 4 ids
+  reachable) is the next natural pick for this thread, but is its own
+  bounded step.
+- **Notes:** scope was deliberately resolver-completeness only, per the
+  step brief — no live emission wired (`battleScene.ts`/timing untouched).
+  `tests/executableFrontierRatchet.test.ts` green, untouched, no new
+  recording imports, no barrier-count changes.

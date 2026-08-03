@@ -1,4 +1,56 @@
 ---
+## 884 — [bounded MAIN worker, 2026-08-03] ISSUES #70 batch 2 — 19 of 31 remaining presentation-string rows FIXED; 12 remain + 1 new gap found
+
+- **State:** master `63dc4dc3` (two commits on top of `5ce289c8`). Full
+  `npm test`: **644 files / 6,443 passed / 1 skipped** (+19 from this step's
+  new suite). `npm run build` green (tsc -b + vite).
+- **Did:** ported 19 of the 31 remaining ids from `docs/issue70-stringid-
+  reachability.md`'s per-id table into `messageLines`
+  (`battleResolutionPresentation.ts`), worked in the doc's own order:
+  `PKMNFROZENBY`/`PKMNMADESLEEP` (extend batch-1's poisoned/burned/paralyzed
+  ability-status branch), `PKMNRAISEDDEFALITTLE`/`PKMNRAISEDSPDEFALITTLE`
+  (extend batch-1's Reflect/Light Screen/Safeguard branch),
+  `PKMNSHROUDEDINMIST`, `PKMNCHOSEXASDESTINY`, the wrap family
+  (`PKMNSQUEEZEDBYBIND`/`PKMNWRAPPEDBY`/`PKMNTRAPPEDINVORTEX`/`PKMNCLAMPED`/
+  `PKMNTRAPPEDBYSANDTOMB`), the Leech Seed pair (`PKMNEVADEDATTACK`/
+  `PKMNSEEDED`), the Trick item-swap family (`PKMNOBTAINEDX`/
+  `PKMNOBTAINEDX2`/`PKMNOBTAINEDXYOBTAINEDZ` — `prepareMessage`'s own
+  substitution already existed from a prior session), `PKMNUNAFFECTED`, and
+  the Flash Fire pair (`PKMNRAISEDFIREPOWERWITH`/`PKMNSXMADEYINEFFECTIVE`,
+  new `B_DEF_ABILITY` substitution). `FactoryFullTurnBattlerConfig` gained a
+  `flashFireBoosted` staging field to reach the already-boosted
+  re-activation string in one turn. Fixing `PKMNSXMADEYINEFFECTIVE` surfaced
+  a real adjacent bug the full suite caught: `ABILITY_STICKY_HOLD` (60,
+  reused by `BattleScript_StickyHoldActivates` for the same STRINGID) had no
+  ability-display-name entry — added alongside Flash Fire's, second commit.
+- **Tests:** `tests/presentationStringBatch2.test.ts`, 19 cases mirroring
+  batch-1's shape: a staged full-turn repro through the production kernel for
+  every id with a real non-zero-incidence trigger, and the direct
+  resolver-branch idiom (synthetic event straight into
+  `createBattleResolutionPresentation`, matching
+  `tests/battleResolutionPresentation.test.ts`'s own `inputFor` pattern) for
+  the 8 genuinely zero-incidence ids **plus the wrap family** — staging a
+  real Bind/Wrap/Fire Spin/Clamp/Sand Tomb turn also fires that same turn's
+  end-of-turn wrap-damage tick, which crashes on a *separate, previously-
+  undiscovered* gap (`STRINGID_PKMNHURTBY`, not one of the original 47 —
+  parsed from the real battle-script program, not a TS literal, so `#68`'s
+  sweep never found it). Red-verified once via `git stash` on the two
+  touched engine files: all 19 threw `battleStringResolver`'s completeness-
+  guard error pre-fix. `compare:differential` (base `5ce289c8`,
+  `turn5-rockslide`+`battle-command-generated-off`): **384/384
+  byte-identical** — no standing capture reaches these strings.
+- **Next:** ISSUES #70's remaining 12 ids (ability-prevention family x5,
+  Uproar family x3, `USINGITEMSTATOFPKMNROSE`, `PKMNSTOCKPILED`/`PKMNHPFULL`,
+  `PKMNTRANSFORMEDINTO`) plus the newly-found `STRINGID_PKMNHURTBY` gap
+  (flagged **higher real-world severity** — any of the 6 common trapping
+  moves crashes on its own first successful use) plus the `INTROSENDOUT`
+  extractor gap. Full per-id detail and file:line citations already in
+  ISSUES #70 — do not re-derive.
+- **Notes:** `tests/executableFrontierRatchet.test.ts` green, untouched, no
+  new recording imports, no barrier-count changes. Diff stays additive in
+  `messageLines`/`prepareMessage`; no timing constants touched.
+
+---
 ## 883 — [supervisor wind-down, 2026-08-03 ~02:30] species-dossier 6/7 + three same-night user-bug fixes + #70 batch-1; final union green
 
 - **State:** master `70c58ae2` = final animation fold (front flip +
