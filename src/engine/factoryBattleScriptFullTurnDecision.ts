@@ -202,6 +202,12 @@ const ABILITY_DISPLAY_NAME_BY_ID: Readonly<Record<number, string>> = Object.free
   28: "SYNCHRONIZE",
   41: "WATER VEIL",
   72: "VITAL SPIRIT",
+  // ISSUES #72 batch 1's ability-blocks-the-move's-own-effect cluster
+  // (docs/issue72-reachability-triage.md): Oblivious/Own Tempo/Clear Body,
+  // each read off the move's own target (or scripting) role at print time.
+  12: "OBLIVIOUS",
+  20: "OWN TEMPO",
+  29: "CLEAR BODY",
 });
 function abilityDisplayName(ability: number): string {
   const name = ABILITY_DISPLAY_NAME_BY_ID[ability];
@@ -792,9 +798,17 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
         : (FACTORY_ITEM_NAME_BY_ID.get(item) ?? `ITEM_${item}`);
       const buff1 = itemName(rules.battleTextBuff1Item);
       const buff2 = itemName(rules.battleTextBuff2Item);
-      const substitutions = operand.expression === "STRINGID_PKMNSXCUREDITSYPROBLEM"
-        || operand.expression === "STRINGID_PKMNSITEMCUREDPROBLEM"
+      const substitutions = operand.expression === "STRINGID_PKMNSITEMCUREDPROBLEM"
         ? (rules.battleTextBuff1Status === null ? [] : [rules.battleTextBuff1Status])
+        // ISSUES #72 batch 1: same battleTextBuff1Status source as the item
+        // sibling above, plus {B_SCR_ACTIVE_ABILITY} -- the curing ability is
+        // always the just-cured battler's own (immunityAbilityCure only ever
+        // reads/reports the scriptingBattler's own ability,
+        // battleScriptMoveEndOpcode.ts:668,684-687).
+        : operand.expression === "STRINGID_PKMNSXCUREDITSYPROBLEM"
+        ? (rules.battleTextBuff1Status === null
+          ? []
+          : [abilityDisplayName(rules.battlers[rules.scriptingBattler].ability), rules.battleTextBuff1Status])
         : operand.expression === "STRINGID_PKMNOBTAINEDX"
         ? (buff1 === null ? [] : [buff1])
         : operand.expression === "STRINGID_PKMNOBTAINEDX2"
@@ -915,7 +929,29 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                 ? (rules.battleTextBuff1Species === null
                                   ? []
                                   : [battleCommandSpeciesDisplayName(rules.battleTextBuff1Species)])
-                                : [];
+                                // ISSUES #72 batch 1: BattleScript_AbilityNoStatLoss's
+                                // {B_SCR_ACTIVE_ABILITY} -- changestatbuffs's own
+                                // Clear Body/White Smoke branch always fires for the
+                                // battler about to lose the stat, i.e. the same
+                                // battler blockedMessage freezes into scriptingBattler
+                                // (battleScriptStatBuffs.ts:206-271).
+                                : operand.expression === "STRINGID_PKMNPREVENTSSTATLOSSWITH"
+                                  ? [abilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
+                                  // {B_DEF_ABILITY} for the two ability-blocks-the-
+                                  // move's-own-target-effect ids -- OwnTempoPrevents/
+                                  // ObliviousPreventsAttraction each read the ability
+                                  // off the move's own (still-current) target role at
+                                  // print time (battleScriptTryinfatuatingOpcode.ts:89,
+                                  // the generic jumpifability BS_TARGET check ahead of
+                                  // BattleScript_OwnTempoPrevents).
+                                  : (
+                                      operand.expression === "STRINGID_PKMNPREVENTSCONFUSIONWITH"
+                                      || operand.expression === "STRINGID_PKMNPREVENTSROMANCEWITH"
+                                    )
+                                    ? (rules.selectorRoles.target === null
+                                      ? []
+                                      : [abilityDisplayName(rules.battlers[rules.selectorRoles.target].ability)])
+                                    : [];
       return Object.freeze({
         kind: "message" as const,
         messageId: operand.expression,

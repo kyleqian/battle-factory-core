@@ -695,6 +695,100 @@ function messageLines(
       B_CURRENT_MOVE: () => resolveMoveName(actionSnapshot.currentMove),
     });
   }
+  // ISSUES #72 batch 1 (docs/issue72-reachability-triage.md, ranked rows
+  // 1-13): the same Taunt-pair idiom extended to the highest-carrier-weight
+  // REACHABLE printstring gaps -- the "already status" family, a few
+  // standalone defender-only ids, and the ability-blocks-the-move's-own-
+  // effect cluster.
+  if (
+    messageId === "STRINGID_PKMNALREADYASLEEP"
+    || messageId === "STRINGID_PKMNALREADYCONFUSED"
+    || messageId === "STRINGID_PKMNALREADYHASBURN"
+    || messageId === "STRINGID_PKMNALREADYPOISONED"
+    || messageId === "STRINGID_PKMNISALREADYPARALYZED"
+  ) {
+    // BattleScript_AlreadyAsleep/AlreadyConfused(+TeeterDance sibling)/
+    // AlreadyBurned/AlreadyPoisoned/AlreadyParalyzed: each of EffectSleep/
+    // EffectConfuse/EffectWillOWisp/EffectToxic/EffectParalyze's own
+    // `jumpifstatus(2) BS_TARGET, STATUS1/2_X, BattleScript_AlreadyX` --
+    // purely generic jumpifstatus+printstring opcodes (zero TS references to
+    // any of these labels), so BS_TARGET is still the move's own target,
+    // same relationship as STRINGID_PKMNFELLFORTAUNT above.
+    const defender = requireMoveDefender(lastMoveAttacker, `${messageId.toLowerCase()} message`);
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (messageId === "STRINGID_PKMNWASDEFROSTED") {
+    // executeDefrost (battleScriptMoveEndControllers.ts:133-168): a special
+    // Fire-type hit thawing its own (still-current) target.
+    const defender = requireMoveDefender(lastMoveAttacker, "defrosted message");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (messageId === "STRINGID_PKMNFELLINLOVE") {
+    // BattleScript_EffectAttract's own success tail, right after
+    // Cmd_tryinfatuating's success branch (battleScriptTryinfatuatingOpcode.ts)
+    // leaves gBattlerTarget unchanged -- the attracted battler.
+    const defender = requireMoveDefender(lastMoveAttacker, "fell-in-love message");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (messageId === "STRINGID_PKMNPREVENTSSTATLOSSWITH") {
+    // BattleScript_AbilityNoStatLoss (battleScriptStatBuffs.ts:265-271,
+    // Clear Body/White Smoke) -- blockedMessage freezes scriptingBattler to
+    // the battler about to lose the stat before the call-explicit transfer,
+    // same shape as the STRINGID_PKMNPOISONEDBY family's scriptingBattler
+    // read above. {B_SCR_ACTIVE_ABILITY} is engine-supplied via
+    // prepareMessage (factoryBattleScriptFullTurnDecision.ts).
+    if (event.payload.scriptingBattler === undefined || event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no scripting-battler/ability substitution`);
+    }
+    const battler = singlesBattler(event.payload.scriptingBattler, `${messageId} scripting battler`);
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, battler),
+      B_SCR_ACTIVE_ABILITY: () => ability,
+    });
+  }
+  if (messageId === "STRINGID_PKMNSXCUREDITSYPROBLEM") {
+    // BattleScript_AbilityCuredStatus, MOVEEND_IMMUNITY_ABILITIES's quiet
+    // scan (battleScriptMoveEndOpcode.ts:650-709) -- scriptingBattler is the
+    // just-cured battler; {B_BUFF1} is the cured status's own display name
+    // (battleTextBuff1Status, same source STRINGID_PKMNSITEMCUREDPROBLEM's
+    // {B_BUFF1} above reads), engine-supplied alongside {B_SCR_ACTIVE_ABILITY}.
+    if (event.payload.scriptingBattler === undefined || event.payload.substitutions.length < 2) {
+      throw new Error(`battle resolution ${messageId} message has no scripting-battler/ability/status substitution`);
+    }
+    const battler = singlesBattler(event.payload.scriptingBattler, `${messageId} scripting battler`);
+    const ability = event.payload.substitutions[0]!;
+    const statusName = event.payload.substitutions[1]!;
+    return resolveBattleStringLines(messageId, {
+      B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, battler),
+      B_SCR_ACTIVE_ABILITY: () => ability,
+      B_BUFF1: () => statusName,
+    });
+  }
+  if (
+    messageId === "STRINGID_PKMNPREVENTSCONFUSIONWITH"
+    || messageId === "STRINGID_PKMNPREVENTSROMANCEWITH"
+  ) {
+    // BattleScript_OwnTempoPrevents/ObliviousPreventsAttraction -- both read
+    // the ability off the move's own (still-current) target role, so
+    // {B_DEF_ABILITY} is engine-supplied via prepareMessage keyed on
+    // rules.selectorRoles.target, same battler requireMoveDefender resolves.
+    if (event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no ability substitution`);
+    }
+    const defender = requireMoveDefender(lastMoveAttacker, `${messageId.toLowerCase()} message`);
+    const ability = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+      B_DEF_ABILITY: () => ability,
+    });
+  }
   if (
     messageId === "STRINGID_AVOIDEDDAMAGE"
     || messageId === "STRINGID_PKMNMAKESGROUNDMISS"
