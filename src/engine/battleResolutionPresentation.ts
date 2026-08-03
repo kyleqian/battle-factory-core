@@ -41,14 +41,32 @@ export type BattleStatName = Extract<
 
 export type PartyBallState = "empty" | "healthy" | "status" | "fainted";
 
-export type BattleMessageTiming = Readonly<{ minimumFrames: 24 }>;
+/**
+ * `holdFrames` is the source's own post-print `waitmessage B_WAIT_TIME_LONG`
+ * (64, `reference/pokeemerald/include/constants/battle.h:324`), present after
+ * every stat-change message's `printfromtable` (`BattleScript_StatUp`/
+ * `BattleScript_StatDown`, `reference/pokeemerald/data/battle_scripts_1.s:
+ * 513,559`; `BattleScript_AllStatsUp*`'s five identically-shaped per-stat
+ * blocks, `:3464,3469,3474,3479,3483`) but not modeled for every message kind
+ * here -- see `STAT_CHANGE_MESSAGE_IDS` at the call site.
+ */
+export type BattleMessageTiming = Readonly<{ minimumFrames: 24; holdFrames: 0 | 64 }>;
 export type BattleMoveAnimationTiming = Readonly<{ minimumFrames: number }>;
 export type BattleHitAnimationTiming = Readonly<{
   minimumFrames: 35;
   firstDisplayedAge: 1;
 }>;
 export type BattleHpTiming = Readonly<{ minimumFrames: 28 }>;
-export type BattleStatTiming = Readonly<{ minimumFrames: 32 }>;
+/**
+ * The RAM stat write is silent for exactly 2 frames before the message box
+ * clears (`docs/issue69-omniboost-off-ground-truth.md` §2: every one of the
+ * 5 measured banners shows the same write-frame-to-box-clear-frame gap --
+ * 283->285, 375->377, 468->470, 559->561, 652->654). The visible post-print
+ * hold is a `message` property in source (`waitmessage` follows
+ * `printfromtable`, not `statbuffchange`), not a `stat` one -- see
+ * `BattleMessageTiming`.
+ */
+export type BattleStatTiming = Readonly<{ minimumFrames: 2 }>;
 export type BattleStatusTiming = Readonly<{ minimumFrames: 32 }>;
 export type BattleStatusIconTiming = Readonly<{ minimumFrames: 1 }>;
 export type BattleFaintTiming =
@@ -300,7 +318,30 @@ export type CreateBattleResolutionPresentationInput = Readonly<{
   opponentTrainer?: Readonly<{ className: string; name: string }> | null;
 }>;
 
-const MESSAGE_TIMING = Object.freeze({ minimumFrames: 24 } as const);
+const MESSAGE_TIMING = Object.freeze({ minimumFrames: 24, holdFrames: 0 } as const);
+/**
+ * Every stat-change message id source prints via `printfromtable
+ * gStatUpStringIds`/`gStatDownStringIds` immediately followed by
+ * `waitmessage B_WAIT_TIME_LONG` -- `BattleScript_StatUp`/`StatDown`
+ * (`reference/pokeemerald/data/battle_scripts_1.s:511-514,556-560`) for the
+ * single-stat case, `BattleScript_AllStatsUp*`'s five identical per-stat
+ * blocks (`:3458-3483`) for the omniboost case. `gStatUpStringIds`/
+ * `gStatDownStringIds` (`reference/pokeemerald/src/battle_message.c:
+ * 1006-1022`) resolve to exactly these six STRINGIDs, so this set is
+ * exhaustive for that script shape, not a partial sample.
+ */
+const STAT_CHANGE_MESSAGE_IDS: ReadonlySet<string> = new Set([
+  "STRINGID_ATTACKERSSTATROSE",
+  "STRINGID_DEFENDERSSTATROSE",
+  "STRINGID_STATSWONTINCREASE",
+  "STRINGID_ATTACKERSSTATFELL",
+  "STRINGID_DEFENDERSSTATFELL",
+  "STRINGID_STATSWONTDECREASE",
+]);
+const STAT_CHANGE_MESSAGE_TIMING = Object.freeze({
+  minimumFrames: 24,
+  holdFrames: 64,
+} as const);
 /**
  * Scene-OFF hit controller lifetime:
  * setup, 32 blink callbacks, completion, and waitstate release.
@@ -314,7 +355,7 @@ const HIT_ANIMATION_TIMING = Object.freeze({
 /** BattleScript_Pausex20's `pause B_WAIT_TIME_SHORT`. */
 const SCENE_OFF_MOVE_PAUSE_FRAMES = 32;
 const HP_TIMING = Object.freeze({ minimumFrames: 28 } as const);
-const STAT_TIMING = Object.freeze({ minimumFrames: 32 } as const);
+const STAT_TIMING = Object.freeze({ minimumFrames: 2 } as const);
 const STATUS_TIMING = Object.freeze({ minimumFrames: 32 } as const);
 /**
  * Cmd_updatestatusicon emits one controller request and waits for it
@@ -823,7 +864,9 @@ export function projectBattleResolutionCommands(
           || payload.messageId === "STRINGID_ATTACKERFAINTED"
             ? "button"
             : "automatic",
-        timing: MESSAGE_TIMING,
+        timing: STAT_CHANGE_MESSAGE_IDS.has(payload.messageId)
+          ? STAT_CHANGE_MESSAGE_TIMING
+          : MESSAGE_TIMING,
       }));
       pendingStatusMessageBattler = null;
       pendingHeldItemEffectBattler = null;

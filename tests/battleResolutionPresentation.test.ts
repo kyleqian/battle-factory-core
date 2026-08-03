@@ -393,7 +393,7 @@ describe("battle resolution presentation receipt ownership", () => {
         eventSequence: 0,
         lines: ["ONIX used", "ROCK SLIDE!"],
         advance: "automatic",
-        timing: { minimumFrames: 24 },
+        timing: { minimumFrames: 24, holdFrames: 0 },
       },
       {
         type: "hp",
@@ -409,7 +409,7 @@ describe("battle resolution presentation receipt ownership", () => {
         eventSequence: 4,
         lines: ["It’s super effective!"],
         advance: "automatic",
-        timing: { minimumFrames: 24 },
+        timing: { minimumFrames: 24, holdFrames: 0 },
       },
       { type: "turn-end", timing: { minimumFrames: 8 } },
     ]);
@@ -1017,7 +1017,7 @@ describe("battle resolution typed Scene-OFF renderer", () => {
         statResolution.segments[0]!.commands[0]!,
         statResolution.field,
       ),
-    ).toBe(50);
+    ).toBe(2);
 
     const roseResolution = createBattleResolutionPresentation(inputFor([
       event(0, {
@@ -1135,6 +1135,99 @@ describe("battle resolution typed Scene-OFF renderer", () => {
         atRenderClock(clearFromBurn, 2, 0),
       ).field.opponent.status,
     ).toBe("none");
+  });
+
+  it("ISSUES #69: models the source's post-print hold as a message-phase addition, not a stat-phase fudge", () => {
+    // reference/pokeemerald/data/battle_scripts_1.s:511-514,556-560 --
+    // BattleScript_StatUp/StatDown's `printfromtable ...; waitmessage
+    // B_WAIT_TIME_LONG` -- docs/issue69-omniboost-off-ground-truth.md §2/§6.
+    const fellResolution = createBattleResolutionPresentation(inputFor([
+      event(0, {
+        kind: "stat-stage-change",
+        battler: 0,
+        stat: "accuracy",
+        from: 6,
+        to: 5,
+        requestedMagnitude: 1,
+      }),
+      event(1, {
+        kind: "message",
+        messageId: "STRINGID_DEFENDERSSTATFELL",
+        substitutions: [],
+      }),
+    ], NEXT_COMMAND));
+    const [statCommand, messageCommand] = fellResolution.segments[0]!.commands;
+    // The RAM write is silent for 2 frames before the box clears (oracle-
+    // measured identically across all 5 omniboost banners) -- not a 50-frame
+    // placeholder that used to absorb the missing hold instead of modeling it.
+    expect(
+      battleResolutionCommandDuration(statCommand!, fellResolution.field),
+    ).toBe(2);
+    // The message's own duration carries print time (the 24-frame floor, this
+    // line is short) PLUS the source's 64-frame post-print hold -- a hold
+    // *after* printing completes, not a fudge on the print-speed floor/length
+    // term itself.
+    expect(messageCommand).toMatchObject({
+      timing: { minimumFrames: 24, holdFrames: 64 },
+    });
+    expect(
+      battleResolutionCommandDuration(messageCommand!, fellResolution.field),
+    ).toBe(88);
+    // One banner's total (stat + message) is ~92 frames per the oracle's own
+    // measured cadence (docs/issue69-omniboost-off-ground-truth.md §2's four
+    // measured gaps: 92/93/91/93, mean 92.25) -- state-level phase breakdown,
+    // not pixels.
+    expect(
+      battleResolutionCommandDuration(statCommand!, fellResolution.field)
+      + battleResolutionCommandDuration(messageCommand!, fellResolution.field),
+    ).toBe(90);
+
+    // A non-stat-change message (the ordinary "used move!" banner) keeps the
+    // old floor -- the hold is scoped to the six stat-change STRINGIDs, not
+    // every message this pipeline prints.
+    const usedMoveResolution = createBattleResolutionPresentation(inputFor([
+      event(0, { kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }),
+      event(1, { kind: "set-battler-pp-data", battler: 0, movePosition: 0, pp: 9 }),
+    ], NEXT_COMMAND));
+    expect(usedMoveResolution.segments[0]!.commands[0]).toMatchObject({
+      timing: { minimumFrames: 24, holdFrames: 0 },
+    });
+    expect(
+      battleResolutionCommandDuration(
+        usedMoveResolution.segments[0]!.commands[0]!,
+        usedMoveResolution.field,
+      ),
+    ).toBe(24);
+
+    // Repeats identically for every one of the six stat-change STRINGIDs
+    // (BattleScript_StatUp/StatDown's own gStatUpStringIds/gStatDownStringIds
+    // table, reference/pokeemerald/src/battle_message.c:1006-1022) -- the
+    // per-banner shape generalizes, it is not Silver-Wind/accuracy-specific.
+    for (
+      const messageId of [
+        "STRINGID_ATTACKERSSTATROSE",
+        "STRINGID_DEFENDERSSTATROSE",
+        "STRINGID_STATSWONTINCREASE",
+        "STRINGID_ATTACKERSSTATFELL",
+        "STRINGID_DEFENDERSSTATFELL",
+        "STRINGID_STATSWONTDECREASE",
+      ] as const
+    ) {
+      const resolution = createBattleResolutionPresentation(inputFor([
+        event(0, {
+          kind: "stat-stage-change",
+          battler: 0,
+          stat: "attack",
+          from: 6,
+          to: 7,
+          requestedMagnitude: 1,
+        }),
+        event(1, { kind: "message", messageId, substitutions: [] }),
+      ], NEXT_COMMAND));
+      expect(resolution.segments[0]!.commands[1]).toMatchObject({
+        timing: { holdFrames: 64 },
+      });
+    }
   });
 
   it("ISSUES #59/#60: supports rise/drop on either battler through the generated-route Scene-OFF adapter", () => {

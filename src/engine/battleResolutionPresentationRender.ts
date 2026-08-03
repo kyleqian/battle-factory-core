@@ -42,8 +42,14 @@ import { genericHitReactionAtAge } from "./battleMenu.ts";
 
 export const BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES =
   BATTLE_COMMAND_ACTION_ENTER_DELAY;
-/** Source Scene-OFF stat controller lifetime for one ordinary stage change. */
-export const BATTLE_RESOLUTION_STAT_CHANGE_FRAMES = 50;
+/**
+ * The stat RAM write is silent for exactly 2 frames before the message box
+ * clears -- oracle-measured across all 5 omniboost banners (`docs/issue69-
+ * omniboost-off-ground-truth.md` §2). The visible post-print hold belongs to
+ * the following `message` command's own duration (`STAT_CHANGE_MESSAGE_
+ * TIMING`, `battleResolutionPresentation.ts`), not this one -- ISSUES #69.
+ */
+export const BATTLE_RESOLUTION_STAT_CHANGE_FRAMES = 2;
 
 export type BattleResolutionRenderEffect =
   | Readonly<{
@@ -240,10 +246,13 @@ export function battleResolutionCommandDuration(
 ): number {
   switch (command.type) {
     case "message":
+      // holdFrames is the source's own post-print `waitmessage
+      // B_WAIT_TIME_LONG` -- a hold *after* the text finishes printing, not
+      // part of the print-speed floor/length term (ISSUES #69).
       return Math.max(
         command.timing.minimumFrames,
         battleStringPrintableLength(command.lines),
-      );
+      ) + command.timing.holdFrames;
     case "move-animation":
     case "hit-animation":
       return command.timing.minimumFrames;

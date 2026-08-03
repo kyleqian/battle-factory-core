@@ -154,7 +154,7 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
         eventSequence: 0,
         lines: ["ONIX used", "ROCK SLIDE!"],
         advance: "automatic",
-        timing: { minimumFrames: 24 },
+        timing: { minimumFrames: 24, holdFrames: 0 },
       },
       {
         type: "move-animation",
@@ -196,7 +196,7 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
         eventSequence: 9,
         lines: ["Foe KABUTO used", "SAND-ATTACK!"],
         advance: "automatic",
-        timing: { minimumFrames: 24 },
+        timing: { minimumFrames: 24, holdFrames: 0 },
       },
       {
         type: "stat",
@@ -205,14 +205,14 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
         stat: "accuracy",
         from: 6,
         to: 5,
-        timing: { minimumFrames: 32 },
+        timing: { minimumFrames: 2 },
       },
       {
         type: "message",
         eventSequence: 14,
         lines: ["ONIX’s accuracy", "fell!"],
         advance: "automatic",
-        timing: { minimumFrames: 24 },
+        timing: { minimumFrames: 24, holdFrames: 64 },
       },
       {
         type: "sprite-visibility",
