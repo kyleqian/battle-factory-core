@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "mode": "mechanicLab",
+  "profile": "battle-scene-off",
+  "level": 50,
+  "challengeNum": 0,
+  "battleNum": 0,
+  "trainerId": 17,
+  "playerSetIds": [135, 188, 184],
+  "opponentSetIds": [156, 149, 180],
+  "seed": 2423399196,
+  "overrides": {
+    "parties": {
+      "player": [
+        {
+          "species": 64,
+          "level": 50,
+          "nature": 15,
+          "ivs": {"hp": 31, "attack": 31, "defense": 31, "speed": 31, "spAttack": 31, "spDefense": 31},
+          "evs": {"hp": 0, "attack": 0, "defense": 0, "speed": 0, "spAttack": 0, "spDefense": 0},
+          "moves": [94, 86, 115, 105],
+          "ppUps": [0, 0, 0, 0],
+          "item": 214,
+          "abilitySlot": 0,
+          "friendship": 70,
+          "gender": "male",
+          "shiny": false
+        },
+        {
+          "species": 336,
+          "level": 50,
+          "nature": 3,
+          "ivs": {"hp": 31, "attack": 31, "defense": 31, "speed": 31, "spAttack": 31, "spDefense": 31},
+          "evs": {"hp": 255, "attack": 255, "defense": 0, "speed": 0, "spAttack": 0, "spDefense": 0},
+          "moves": [238, 89, 157, 252],
+          "ppUps": [0, 0, 0, 0],
+          "item": 198,
+          "abilitySlot": 1,
+          "friendship": 0,
+          "gender": "female",
+          "shiny": false,
+          "personality": 3
+        },
+        {
+          "species": 68,
+          "level": 50,
+          "nature": 3,
+          "ivs": {"hp": 31, "attack": 31, "defense": 31, "speed": 31, "spAttack": 31, "spDefense": 31},
+          "evs": {"hp": 170, "attack": 0, "defense": 170, "speed": 0, "spAttack": 0, "spDefense": 170},
+          "moves": [238, 89, 339, 156],
+          "ppUps": [0, 0, 0, 0],
+          "item": 134,
+          "abilitySlot": 0,
+          "friendship": 0,
+          "gender": "female",
+          "shiny": false,
+          "personality": 3
+        }
+      ],
+      "opponent": [
+        {
+          "species": 382,
+          "level": 50,
+          "nature": 6,
+          "ivs": {"hp": 3, "attack": 3, "defense": 3, "speed": 3, "spAttack": 3, "spDefense": 3},
+          "evs": {"hp": 255, "attack": 255, "defense": 0, "speed": 0, "spAttack": 0, "spDefense": 0},
+          "moves": [232, 332, 319, 46],
+          "ppUps": [0, 0, 0, 0],
+          "item": 140,
+          "abilitySlot": 1,
+          "friendship": 0,
+          "gender": "male",
+          "shiny": false,
+          "personality": 3717558781
+        },
+        {
+          "species": 225,
+          "level": 50,
+          "nature": 6,
+          "ivs": {"hp": 3, "attack": 3, "defense": 3, "speed": 3, "spAttack": 3, "spDefense": 3},
+          "evs": {"hp": 255, "attack": 0, "defense": 0, "speed": 0, "spAttack": 255, "spDefense": 0},
+          "moves": [217, 301, 332, 258],
+          "ppUps": [0, 0, 0, 0],
+          "item": 212,
+          "abilitySlot": 1,
+          "friendship": 0,
+          "gender": "male",
+          "shiny": false,
+          "personality": 109691581
+        },
+        {
+          "species": 88,
+          "level": 50,
+          "nature": 24,
+          "ivs": {"hp": 3, "attack": 3, "defense": 3, "speed": 3, "spAttack": 3, "spDefense": 3},
+          "evs": {"hp": 170, "attack": 0, "defense": 170, "speed": 0, "spAttack": 0, "spDefense": 170},
+          "moves": [124, 317, 151, 107],
+          "ppUps": [0, 0, 0, 0],
+          "item": 135,
+          "abilitySlot": 1,
+          "friendship": 0,
+          "gender": "male",
+          "shiny": false,
+          "personality": 2423403699
+        }
+      ]
+    }
+  },
+  "trace": {
+    "segments": [
+      {"frames": 8, "buttons": []},
+      {"frames": 1, "buttons": ["A"]},
+      {"frames": 5, "buttons": []},
+      {"frames": 1, "buttons": ["RIGHT"]},
+      {"frames": 1, "buttons": []},
+      {"frames": 1, "buttons": ["DOWN"]},
+      {"frames": 1, "buttons": []},
+      {"frames": 1, "buttons": ["B"]},
+      {"frames": 6, "buttons": []},
+      {"frames": 1, "buttons": ["A"]},
+      {"frames": 5, "buttons": []},
+      {"frames": 1, "buttons": ["UP"]},
+      {"frames": 1, "buttons": []},
+      {"frames": 1, "buttons": ["A"]},
+      {"frames": 60, "buttons": []},
+      {"frames": 1, "buttons": ["A"]},
+      {"frames": 60, "buttons": []},
+      {"frames": 1, "buttons": ["A"]},
+      {"frames": 60, "buttons": []},
+      {"frames": 1, "buttons": ["A"]},
+      {"frames": 60, "buttons": []},
+      {"frames": 1, "buttons": ["A"]},
+      {"frames": 60, "buttons": []},
+      {"frames": 1, "buttons": ["A"]},
+      {"frames": 60, "buttons": []},
+      {"frames": 1, "buttons": ["A"]},
+      {"frames": 120, "buttons": []},
+      {"frames": 1, "buttons": ["A"]},
+      {"frames": 300, "buttons": []}
+    ],
+    "captureFrames": [0]
+  }
+}
