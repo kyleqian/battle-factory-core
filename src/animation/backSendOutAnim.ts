@@ -198,8 +198,8 @@ export interface BackHorizontalVibrateFrame {
   readonly x2: number;
   readonly y2: 0;
   readonly data0: 0;
-  /** Task_HandleMonAnimation preserves this static-back-sprite slot. */
-  readonly data1: 0;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
   readonly data2: number;
   readonly counter: number;
   readonly index: number | null;
@@ -225,8 +225,11 @@ export function backHorizontalVibrateFrameAtTick(
   species: string,
   natureId: number,
   ticksSinceStart: number,
+  preservedData1 = 0,
 ): BackHorizontalVibrateFrame | null {
-  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
   const selection = selectBackSendOutAnimation(species, natureId);
   if (selection?.backAnimSet !== "BACK_ANIM_H_VIBRATE") return null;
   const variant = hVibrateVariant(selection.selector);
@@ -241,7 +244,7 @@ export function backHorizontalVibrateFrameAtTick(
         x2: 0,
         y2: 0,
         data0: 0,
-        data1: 0,
+        data1: toS16(preservedData1),
         data2: toS16(counter + 1),
         counter,
         index: null,
@@ -265,7 +268,7 @@ export function backHorizontalVibrateFrameAtTick(
         x2,
         y2: 0,
         data0: 0,
-        data1: 0,
+        data1: toS16(preservedData1),
         data2,
         counter,
         index,

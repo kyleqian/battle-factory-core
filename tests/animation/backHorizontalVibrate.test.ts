@@ -111,6 +111,14 @@ describe("BACK_ANIM_H_VIBRATE back send-out reducer", () => {
       new URL("../../reference/pokeemerald/src/pokemon_animation.c", import.meta.url),
       "utf8",
     );
+    const constants = readFileSync(
+      new URL("../../reference/pokeemerald/include/pokemon_animation.h", import.meta.url),
+      "utf8",
+    );
+    const pokemonSource = readFileSync(
+      new URL("../../reference/pokeemerald/src/pokemon.c", import.meta.url),
+      "utf8",
+    );
     const spriteHeader = readFileSync(
       new URL("../../reference/pokeemerald/include/sprite.h", import.meta.url),
       "utf8",
@@ -123,6 +131,11 @@ describe("BACK_ANIM_H_VIBRATE back send-out reducer", () => {
     expect(spriteHeader).toMatch(/\/\*0x24\*\/ s16 x2, y2;/);
     expect(spriteHeader).toMatch(/\/\*0x2E\*\/ s16 data\[8\];/);
     expect(gbaTypesHeader).toMatch(/#define ST_OAM_AFFINE_NORMAL 1/);
+    expect(constants).toMatch(/^#define BACK_ANIM_H_VIBRATE\s+1$/m);
+    expect(constants).toMatch(/^#define BACK_ANIM_H_SLIDE\s+2$/m);
+    expect(constants).toMatch(/^#define ANIM_H_VIBRATE\s+2$/m);
+    expect(constants).toMatch(/^#define ANIM_H_VIBRATE_FAST\s+95$/m);
+    expect(constants).toMatch(/^#define ANIM_H_VIBRATE_FASTEST\s+96$/m);
     const getSetStart = source.indexOf("u8 GetSpeciesBackAnimSet(u16 species)\n{");
     const getSetEnd = source.indexOf("#define tState", getSetStart);
     expect(source.slice(getSetStart, getSetEnd)).toMatch(
@@ -132,6 +145,11 @@ describe("BACK_ANIM_H_VIBRATE back send-out reducer", () => {
     const launchEnd = source.indexOf("#undef tState", launchStart);
     expect(source.slice(launchStart, launchEnd)).toMatch(
       /CreateTask\(Task_HandleMonAnimation, 128\)[\s\S]*?battler = sprite->data\[0\];[\s\S]*?nature = GetNature\(&gPlayerParty\[gBattlerPartyIndexes\[battler\]\]\);[\s\S]*?animId = 3 \* backAnimSet \+ sBackAnimNatureModTable\[nature\];[\s\S]*?gTasks\[taskId\]\.tAnimId = sBackAnimationIds\[animId\];/,
+    );
+    const backBattleStart = pokemonSource.indexOf("void BattleAnimateBackSprite(struct Sprite *sprite, u16 species)");
+    const backBattleEnd = pokemonSource.indexOf("// Identical to GetOpposingLinkMultiBattlerId", backBattleStart);
+    expect(pokemonSource.slice(backBattleStart, backBattleEnd)).toMatch(
+      /HITMARKER_NO_ANIMATIONS[\s\S]*?sprite->callback = SpriteCallbackDummy;[\s\S]*?else[\s\S]*?LaunchAnimationTaskForBackSprite\(sprite, GetSpeciesBackAnimSet\(species\)\);[\s\S]*?sprite->callback = SpriteCallbackDummy_2;/,
     );
     const taskStart = source.indexOf("static void Task_HandleMonAnimation(u8 taskId)\n{");
     const taskEnd = source.indexOf("void LaunchAnimationTaskForFrontSprite", taskStart);
@@ -154,6 +172,18 @@ describe("BACK_ANIM_H_VIBRATE back send-out reducer", () => {
       expect(callbackSource).not.toContain("HandleStartAffineAnim");
       expect(callbackSource).not.toContain("HandleSetAffineData");
     }
+    const backIdsStart = source.indexOf("static const u8 sBackAnimationIds[] =");
+    const backIdsEnd = source.indexOf("static const u8 sBackAnimNatureModTable", backIdsStart);
+    const backIds = source.slice(backIdsStart, backIdsEnd);
+    expect(backIds).toMatch(
+      /\[\(BACK_ANIM_H_VIBRATE - 1\) \* 3\]\s*= ANIM_H_VIBRATE_FASTEST, ANIM_H_VIBRATE_FAST, ANIM_H_VIBRATE,/,
+    );
+    const natureStart = source.indexOf("static const u8 sBackAnimNatureModTable[NUM_NATURES] =");
+    const natureEnd = source.indexOf("static const union AffineAnimCmd", natureStart);
+    const natureTable = source.slice(natureStart, natureEnd);
+    expect(natureTable).toMatch(/\[NATURE_HARDY\]\s*= 0,/);
+    expect(natureTable).toMatch(/\[NATURE_BOLD\]\s*= 1,/);
+    expect(natureTable).toMatch(/\[NATURE_LONELY\]\s*= 2,/);
     expect(source).toMatch(
       /static void WaitAnimEnd\(struct Sprite \*sprite\)[\s\S]*?if \(sprite->animEnded\)[\s\S]*?sprite->callback = SpriteCallbackDummy;/,
     );
@@ -229,6 +259,7 @@ describe("BACK_ANIM_H_VIBRATE back send-out reducer", () => {
     expect(backHorizontalVibrateFrameAtTick(FIXTURE_SPECIES, 0, -1)).toBeNull();
     expect(backHorizontalVibrateFrameAtTick(FIXTURE_SPECIES, 0, 1.5)).toBeNull();
     expect(backHorizontalVibrateFrameAtTick(FIXTURE_SPECIES, 0, Number.NaN)).toBeNull();
+    expect(backHorizontalVibrateFrameAtTick(FIXTURE_SPECIES, 0, 0, 0.5)).toBeNull();
     expect(backHorizontalVibrateFrameAtTick("BULBASAUR", 0, 0)).toBeNull();
     expect(selectBackSendOutAnimation("BULBASAUR", 0)).toMatchObject({
       backAnimSet: "BACK_ANIM_DIP_RIGHT_SIDE",

@@ -1,5 +1,51 @@
 # Animation coverage
 
+## Back `BACK_ANIM_H_VIBRATE` triple accepted (2026-08-03)
+
+**State:** exact for one bounded player-back set: **1/25 back sets, 3/75
+selector variants, 17/376 Factory mappings** (17 total / 0 outside-Factory)
+— BEEDRILL, NINETALES, GASTLY, HAUNTER, PORYGON, MISDREAVUS, PORYGON2,
+NINJASK, KECLEON, SABLEYE, VIBRAVA, DUSKULL, DUSCLOPS, SHUPPET, BANETTE,
+LATIAS, and LATIOS. This does not claim overall send-out completion; front
+coverage remains separately complete and 24 back sets remain unsupported.
+`ANIMATION_COVERAGE.json` is unchanged at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`;
+no move status was promoted.
+
+**Did:** added the explicit source-faithful species+nature back seam
+(`src/animation/backSendOutAnim.ts`) rather than reusing front acceptance:
+`GetSpeciesBackAnimSet`'s one-based-to-zero-based route, the complete global
+25/75/386/376/10 census, `LaunchAnimationTaskForBackSprite`'s `3 * set +
+natureMod` selector, all three H-vibrate amplitudes (Fastest 12 / Fast 9 /
+normal 6), task zero/preserve/restore state, `sDontFlip`, C-truncated signed
+s16 writes, no affine/flip lifecycle, `WaitAnimEnd`, and dummy terminal are
+source-pinned. Focused reducer/census/source/evidence tests also pin adjacent
+H_SLIDE and DIP_RIGHT_SIDE controls, generated selector extraction, and the
+animation import boundary.
+
+**Evidence:** BEEDRILL is a legal Factory representative. Fresh complete
+three-Pokémon-per-side Scene-ON mechanicLab parties select nature-mod 0 Hardy
+→ `ANIM_H_VIBRATE_FASTEST`, mod 1 Bold → `ANIM_H_VIBRATE_FAST`, and mod 2
+Lonely → `ANIM_H_VIBRATE`. Two independent `tools/run-mgba-probe.py` receipts
+per nature are byte-identical through active-to-dummy: Fastest
+**1840..1883 (44 frames), 20,737 B,
+3818da227b178358ac3fa0c58fe7cddb500e0bb56d7827de11ba99208bd51bbe**;
+Fast **1840..1883 (44 frames), 20,588 B,
+cc2fcfe92395c4bb9db03179e898046270cbf56a3b11aa33f5068bab98faed74**;
+normal **1840..1883 (44 frames), 20,367 B,
+e8b967069b23d04c8f524ed9c799ac22bea67af1b865c6f9ff10ac69c5fd7012**.
+Each receipt pins every callback/RAM/OAM/RGB-hash frame, including static
+normal-affine OAM and the task's `[0,0,15,0,0,0,0,0]` dummy restoration.
+
+**Next:** source-ranked unsupported back set **`BACK_ANIM_H_SLIDE`** (set 2):
+**31 mappings / 31 Factory / 0 outside**, with its three nature-selected
+variants requiring independent source, reducer, and dense Scene-ON evidence.
+
+**Notes:** focused 35-test reducer/source/evidence/extraction/boundary sweep,
+`npx tsc --noEmit`, and `npm run animation:coverage` are green. No canonical
+framebuffer lookup, absolute-tick image fitting, or interactive screenshot
+asset was added.
+
 ## Front `ANIM_FRONT_FLIP` family accepted (2026-08-03)
 
 **State:** exact reducer/evidence coverage for the complete generated selector
