@@ -4264,12 +4264,13 @@ function drawGeneratedOpponentRelease(
       - enemyMonElevation(fieldView.fieldArt.opponent.speciesSymbol),
   };
   if (coeff === 0) {
+    const idle = speciesFrontIdleRestOffset(fieldView.fieldArt.opponent.speciesSymbol) ?? { x2: 0, y2: 0 };
     drawSpriteSheet(
       fb,
       pic.tileset as Tileset,
       pic.palette as RgbColor[],
-      origin.x,
-      origin.y,
+      origin.x + idle.x2,
+      origin.y + idle.y2,
     );
     return;
   }
@@ -4594,13 +4595,15 @@ export function renderGeneratedBattleStartPlayerRelease(
   // branch (post-materialize), reached once the compositor hands off to the
   // player's own release - the elevation adjustment must persist here too,
   // see the #56 item 3 rule at drawGeneratedOpponentRelease.
+  const opponentIdle = speciesFrontIdleRestOffset(fieldView.fieldArt.opponent.speciesSymbol) ?? { x2: 0, y2: 0 };
   drawSpriteSheet(
     fb,
     fieldView.fieldArt.opponent.pic.tileset as Tileset,
     fieldView.fieldArt.opponent.pic.palette as RgbColor[],
-    fieldView.fieldArt.opponent.origin.x,
+    fieldView.fieldArt.opponent.origin.x + opponentIdle.x2,
     fieldView.fieldArt.opponent.origin.y
-      - enemyMonElevation(fieldView.fieldArt.opponent.speciesSymbol),
+      - enemyMonElevation(fieldView.fieldArt.opponent.speciesSymbol)
+      + opponentIdle.y2,
   );
   const throwFrame = brendanThrowFrame(playerVisualT);
   if (playerVisualT < BRENDAN_THROW_START_TICK) {
@@ -4753,7 +4756,9 @@ function drawFrontBackMaterialize(
 
 /** §7.5: Grovyle's settled front sprite - see `GROVYLE_MATERIALIZE_TICK`'s doc comment. */
 function drawGrovyleSettled(fb: Uint8Array): void {
-  drawFrontBackMaterialize(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER, { kind: "settled" });
+  const idle = speciesFrontIdleRestOffset("GROVYLE") ?? { x2: 0, y2: 0 };
+  const corner = { x: GROVYLE_CORNER.x + idle.x2, y: GROVYLE_CORNER.y + idle.y2 };
+  drawFrontBackMaterialize(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, corner, { kind: "settled" });
 }
 
 /**
@@ -5800,7 +5805,9 @@ function drawKabutoHSlideWobble(fb: Uint8Array, t: number, handoffTick: number):
   const wobble = kabutoHSlideWobble(et);
   if (!wobble.active) {
     if (et >= KABUTO_FRONT_ANIM_END_OFFSET) {
-      drawFrontBackMaterialize(fb, kabutoFrontSprite.tileset, kabutoFrontSprite.palette, KABUTO_CORNER, { kind: "settled" });
+      const idle = speciesFrontIdleRestOffset("KABUTO") ?? { x2: 0, y2: 0 };
+      const corner = { x: KABUTO_CORNER.x + idle.x2, y: KABUTO_CORNER.y + idle.y2 };
+      drawFrontBackMaterialize(fb, kabutoFrontSprite.tileset, kabutoFrontSprite.palette, corner, { kind: "settled" });
     }
     return;
   }
@@ -11196,11 +11203,12 @@ function drawTurn5PidgeottoMaterialize(fb: Uint8Array, t: number): void {
  * established.
  */
 function drawTurn5PidgeottoSettled(fb: Uint8Array, x2: number = 0, sink: { keptRows: number; y2: number } | null = null): void {
+  const idle = speciesFrontIdleRestOffset("PIDGEOTTO") ?? { x2: 0, y2: 0 };
   if (sink) {
-    if (sink.keptRows > 0) drawSpriteSheetTopRows(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x + x2, PIDGEOTTO_CORNER.y + sink.y2, sink.keptRows);
+    if (sink.keptRows > 0) drawSpriteSheetTopRows(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x + x2 + idle.x2, PIDGEOTTO_CORNER.y + sink.y2 + idle.y2, sink.keptRows);
     return;
   }
-  drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x + x2, PIDGEOTTO_CORNER.y);
+  drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x + x2 + idle.x2, PIDGEOTTO_CORNER.y + idle.y2);
 }
 
 /**
@@ -11418,7 +11426,8 @@ function drawTurn13MurkrowMaterialize(fb: Uint8Array, continuationElapsed: numbe
 }
 /** MURKROW's settled front sprite, no affine transform after the local settle edge. */
 function drawTurn13MurkrowSettled(fb: Uint8Array): void {
-  drawSpriteSheet(fb, murkrowFrontSprite.tileset, murkrowFrontSprite.palette, MURKROW_CORNER.x, MURKROW_CORNER.y);
+  const idle = speciesFrontIdleRestOffset("MURKROW") ?? { x2: 0, y2: 0 };
+  drawSpriteSheet(fb, murkrowFrontSprite.tileset, murkrowFrontSprite.palette, MURKROW_CORNER.x + idle.x2, MURKROW_CORNER.y + idle.y2);
 }
 /** Ball, particles, and MURKROW materialize/settle on the accepted-dismiss local clock. */
 function drawTurn13MurkrowSwitchinSprite(fb: Uint8Array, continuationElapsed: number): void {
