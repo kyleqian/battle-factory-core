@@ -46,6 +46,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** `tests/executableFrontierRatchet.test.ts` untouched and
   green — no new recording imports, no barrier-count changes. No ISSUES
   entries touched this step (not in scope).
+- **[supervisor addendum, ~22:35]** slice 5 verified (600/600 spot
+  differential, old names fully gone). **ISSUES #62 CLOSED** — side probe
+  merged (`c19b3ad8`, `docs/issue62-hpbar-probe.md`): verdict (b), the
+  187-frame HP-bar family is route divergence, not a presentation bug —
+  kernel-rendered fraction exactly matches kernel-tracked HP at all 9
+  sampled frames; the gap is kernel-vs-oracle battle state, fully formed
+  before either fixture's first captured frame (earlier-turn fork). All
+  314 red frames now settled/inherent; entry deleted (census + probe docs
+  are the forensic record). Side worktree/branch cleaned.
 
 ---
 ## 874 — [bounded MAIN worker, 2026-08-02] species-dossier slices 1+2 LANDED (family-C healthbox factory parameterization)
