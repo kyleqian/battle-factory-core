@@ -1,5 +1,50 @@
 # Animation coverage
 
+## Back `BACK_ANIM_V_SHAKE` triple accepted (2026-08-03)
+
+**State:** exact for the ninth bounded player-back set: **9/25 back sets,
+27/75 selector variants, 111/376 Factory mappings**. The generated set is
+exactly **38 mappings / 38 Factory / 0 outside** — ARBOK, NIDOQUEEN,
+NIDOKING, GOLBAT, DIGLETT, DUGTRIO, POLIWHIRL, MACHOKE, MACHAMP, ONIX,
+KINGLER, GYARADOS, DRAGONITE, MEGANIUM, FERALIGATR, FORRETRESS, STEELIX,
+GRANBULL, URSARING, HOUNDOUR, HOUNDOOM, PUPITAR, SCEPTILE, NUZLEAF,
+WHISCASH, MANECTRIC, SEALEO, WALREIN, MAWILE, LOUDRED, LAIRON, ARMALDO,
+BAGON, SHELGON, METAGROSS, REGIROCK, REGICE, and REGISTEEL. Move coverage
+remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**;
+`ANIMATION_COVERAGE.json` remains byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`:
+this send-out-only work promotes no move status.
+
+**Did:** ported source-relative `Anim_VerticalShakeBack_Fast`,
+`Anim_VerticalShakeBack`, `Anim_VerticalShakeBack_Slow`, and shared
+`VerticalShakeBack`: 70/6, 60/3, and 30/3 step/amplitude pairs; signed GBA
+`Sin((counter + 192) % 256, amplitude) + amplitude`; strict `counter > 2304`
+cleanup; terminal increment; no `TryFlipX`; initializer-first helper/callback
+cadence; `WaitAnimEnd`/dummy; and task zero/preserve/restore. The live
+selector remains species + party nature only. Factory Arbok index **217**
+Adamant/mod-0 is fast, Houndour index **119** Docile/mod-1 is normal, and
+Manectric index **393** Modest/mod-2 is slow — every variant has a real
+Factory record.
+
+**Evidence:** six fresh paired, byte-identical Scene-ON receipts are dense
+from selected initializer through `SpriteCallbackDummy`, retaining every
+framebuffer hash plus sprite RAM/OAM/affine state: Arbok fast
+**1837..1872 / 36 frames, 16,882 B,
+`a5cdcdf3fad46139afbf8c72e39c34ff3fd4880190a2f8f402d472fe3e3c0007`**;
+Houndour normal **1840..1881 / 42, 19,559 B,
+`a8a14edab2813a6a0d73af0fc7a97b3ffa711055c339917ee9ea594baa325333`**;
+Manectric slow **1841..1920 / 80, 36,702 B,
+`c729cdcfa1d3e3ab131da3f8abccf2122d57d8608a6fd651691d70cf38c378ad`**.
+
+**Verification / next:** focused source/census/routing/reducer/evidence
+checks **2 files / 11 tests**, both animation/executable ratchets **4 files /
+20 tests**, `npx tsc --noEmit`, smoke **7 files / 346 tests**, and coverage
+are green. Next source-ranked unsupported player-back set is
+**`BACK_ANIM_V_SHAKE_H_SLIDE` (set 10): 9 mappings / 9 Factory / 0 outside**
+— RATTATA, RATICATE, VENONAT, KRABBY, LEDYBA, SPINARAK, SWINUB, NINCADA, and
+CACNEA. No move status was promoted and no live dispatcher wiring or gameplay
+state changed.
+
 ## Back `BACK_ANIM_H_SHAKE` triple accepted (2026-08-03)
 
 **State:** exact for the eighth bounded player-back set: **8/25 back sets,
