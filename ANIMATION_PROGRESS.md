@@ -1,5 +1,39 @@
 # Animation coverage
 
+## Back `BACK_ANIM_H_SPRING_REPEATED` triple accepted (2026-08-03)
+
+**State:** exact for the fourth bounded player-back set: **4/25 back sets,
+12/75 selector variants, 52/376 Factory mappings**. The generated set is
+exactly **2 mappings / 2 Factory / 0 outside** — LUVDISC and CARVANHA. All
+three nature callbacks are accepted through the live species + party-nature
+seam: Hardy/mod-0 fast is staged legal only, while Factory LUVDISC index 123
+Relaxed/mod-1 is normal and Factory CARVANHA index 86 Quiet/mod-2 is slow.
+Overall move coverage remains **107/276 exact, 0 partial, 0 staged, 169
+unsupported**; `ANIMATION_COVERAGE.json` is unchanged at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Did:** ported the source-relative repeated `HorizontalRepeatedSpring`
+initializer/helper lifecycle with signed GBA Sin/affine math, callback
+boundaries, task zero/preserve/restore, and no friendship/species/tick
+production branches. Added Tier-1 reducer/routing/source/census tests and a
+Scene-ON dense probe/fixture receipt set.
+
+**Evidence:** six fresh `tools/run-mgba-probe.py` receipts, paired by `cmp`,
+dense through `SpriteCallbackDummy` with every frame's RGB hash, sprite RAM,
+OAM, and affine matrix: staged Luvdisc Hardy fast **1839..1906 / 68 frames,
+32,584 B, `58a82e8b83c4507b68ccf1247f4c37370560cdac866c1e58a54e455872bcab8b`**;
+Factory Luvdisc index 123 Relaxed normal **1839..1906 / 68, 32,087 B,
+`d2b0b2692734ca7acc903cfe2d9a7f461ad55a1c2d2df0c30daaba433a210202`**;
+Factory Carvanha index 86 Quiet slow **1840..1907 / 68, 32,522 B,
+`396db95ffe2208e9cb88a860d60cc0c26553770e90f0ddebb5a01435edf4eed8`**.
+
+**Verification / next:** focused repeated reducer/evidence/source/boundary
+checks **3 files / 14 tests**, `npx tsc --noEmit`, and coverage are green;
+full `npm test`: **653 files / 6,495 passed / 1 skipped**; `npm run build`:
+**green, 552 modules transformed**. Next source-ranked unsupported player-back
+set is **`BACK_ANIM_SHRINK_GROW` (set 5), 3 Factory mappings / 0 outside —
+DITTO, GLIGAR, OCTILLERY**. No move status was promoted.
+
 ## Back `BACK_ANIM_H_SPRING` triple accepted (2026-08-03)
 
 **State:** exact for the third bounded player-back set: **3/25 back sets,
