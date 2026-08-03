@@ -11,6 +11,7 @@ import {
   CURSOR_START_TICK,
   DRAGON_BREATH_MOVE_POWER,
   dragonBreathHp,
+  drawGeneratedOpponentRelease,
   drawSpriteSheetAffineRotate,
   endeavorShakeSteps,
   evaEvb,
@@ -103,6 +104,7 @@ import {
   turn12MissTextVisibleChars,
   turn12RockSlideResettledBounceTick,
   TURN13_MURKROW_FRAME_FLIP_AFTER_DISMISS,
+  TURN13_MURKROW_SETTLE_AFTER_DISMISS,
   TURN13_MURKROW_STRETCH_AFTER_DISMISS,
   turn13MurkrowFrame,
   turn13SandAttackTextStartTick,
@@ -125,6 +127,9 @@ import {
   createOpponentFaintPresentationOwner,
   storeOpponentFaintDismiss,
 } from "../src/engine/opponentFaintPresentationOwner.ts";
+import { speciesFrontIdleRestOffset } from "../src/animation/speciesIdleAnim.ts";
+import { createBattleCommandFieldRenderView } from "../src/engine/battleCommandPresentationRender.ts";
+import type { BattleCommandFieldBattler } from "../src/engine/battleCommandPresentation.ts";
 
 describe("turn13MurkrowFrame boundary transfer timing", () => {
   it("leads the affine window by one render at both image-transfer edges", () => {
@@ -1187,6 +1192,17 @@ describe("battleScene: S7 slice B - DOUBLE_TEAM clone vs. opponent healthbox z-o
     renderBattleScene(fb, { elapsed: 2075 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, });
     const o = (25 * 240 + 104) * 4;
     expect([fb[o]!, fb[o + 1]!, fb[o + 2]!]).toEqual([expected.r, expected.g, expected.b]);
+  });
+
+  it("ISSUES #71 Slice A: GROVYLE's settled front sprite still sits at the un-shifted corner, since speciesFrontIdleRestOffset(\"GROVYLE\") is {0,0}", () => {
+    expect(speciesFrontIdleRestOffset("GROVYLE")).toEqual({ x2: 0, y2: 0 });
+    const GROVYLE_CORNER = { x: 144, y: 12 };
+    // Same pixel drawGrovyleSettled's now-wired offset would have moved by
+    // x2/y2 if nonzero (docs/send-out-live-wiring-consumer-map.md §4 item 1)
+    // - sampled well past the materialize hard step (1544) and past the
+    // existing settle pins above, so this exercises the wired code path.
+    const settled = pixelAtSentOut(1600, GROVYLE_CORNER.x + GROVYLE_FIRST_OPAQUE_OFFSET.x, GROVYLE_CORNER.y + GROVYLE_FIRST_OPAQUE_OFFSET.y);
+    expect(settled).toEqual([grovyleFirstOpaquePixel.r, grovyleFirstOpaquePixel.g, grovyleFirstOpaquePixel.b]);
   });
 });
 
@@ -2618,5 +2634,135 @@ describe("S7/S8 turn 13 rung 3 (docs/turn13-notes.md §4/§5/§7): DRAGON_BREATH
     state = tick(state, new Set(["A"]));
     expect(state.battleScene!.opponentFaintPresentationOwner!.dismiss?.acceptedElapsed)
       .toBe(eligibleTick - TICK0 + 1);
+  });
+
+  it("ISSUES #71 Slice A: MURKROW's settled front sprite still sits at the un-shifted corner, since speciesFrontIdleRestOffset(\"MURKROW\") is {0,0}", () => {
+    expect(speciesFrontIdleRestOffset("MURKROW")).toEqual({ x2: 0, y2: 0 });
+    const MURKROW_CORNER = { x: 144, y: 19 };
+    const murkrowFront = (grovyleFrontSpritesAsset as Record<string, { tileset: { columns: number; tiles: number[][] }; palette: { r: number; g: number; b: number }[] }>).MURKROW!;
+    // First opaque pixel in raster order (tile 12, pixel 51 = local (35,14)) -
+    // found the same way GROVYLE_FIRST_OPAQUE_OFFSET/grovyleFirstOpaquePixel
+    // were, above.
+    const MURKROW_FIRST_OPAQUE_OFFSET = { x: 35, y: 14 };
+    const murkrowFirstOpaquePixel = murkrowFront.palette[murkrowFront.tileset.tiles[12]![51]!]!;
+
+    const acceptedTick = TURN13_DRAGONBREATH_PRESS_TICK + 485; // eligibleTick, same anchor as this describe's own tests
+    const owner = storeOpponentFaintDismiss(createOpponentFaintPresentationOwner(), acceptedTick - TICK0);
+    const continuationElapsed = TURN13_MURKROW_SETTLE_AFTER_DISMISS + 11;
+    const fb = new Uint8Array(240 * 160 * 4);
+    renderBattleScene(fb, {
+      ...stateAtTurn13Confirm().battleScene,
+      elapsed: acceptedTick + continuationElapsed - TICK0,
+      opponentFaintPresentationOwner: owner,
+    });
+    const x = MURKROW_CORNER.x + MURKROW_FIRST_OPAQUE_OFFSET.x;
+    const y = MURKROW_CORNER.y + MURKROW_FIRST_OPAQUE_OFFSET.y;
+    const o = (y * 240 + x) * 4;
+    expect([fb[o]!, fb[o + 1]!, fb[o + 2]!]).toEqual([murkrowFirstOpaquePixel.r, murkrowFirstOpaquePixel.g, murkrowFirstOpaquePixel.b]);
+  });
+});
+
+describe("ISSUES #71 Slice A/B: drawGeneratedOpponentRelease applies the real opponent species' front terminal offset (docs/send-out-live-wiring-consumer-map.md §4 item 3 + §5 Slice B)", () => {
+  // Mirrors drawSpriteSheet/drawSpriteSheetTile (battleScene.ts) verbatim -
+  // both are private, so this reimplements the same tiny blit to build an
+  // independent reference frame rather than exporting them just for a test.
+  function blitSprite(
+    fb: Uint8Array,
+    tileset: { columns: number; rows: number; tiles: readonly (readonly number[])[] },
+    palette: readonly { r: number; g: number; b: number }[],
+    ox: number,
+    oy: number,
+  ): void {
+    for (let ty = 0; ty < tileset.rows; ty += 1) {
+      for (let tx = 0; tx < tileset.columns; tx += 1) {
+        const tile = tileset.tiles[ty * tileset.columns + tx];
+        if (!tile) continue;
+        for (let py = 0; py < 8; py += 1) {
+          for (let px = 0; px < 8; px += 1) {
+            const idx = tile[py * 8 + px]!;
+            if (idx === 0) continue;
+            const c = palette[idx];
+            if (!c) continue;
+            const x = ox + tx * 8 + px;
+            const y = oy + ty * 8 + py;
+            if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
+            const o = (y * 240 + x) * 4;
+            fb[o] = c.r;
+            fb[o + 1] = c.g;
+            fb[o + 2] = c.b;
+            fb[o + 3] = 255;
+          }
+        }
+      }
+    }
+  }
+
+  function stagedFieldView(opponentSpecies: number) {
+    function battler(side: "player" | "trainer", species: number): BattleCommandFieldBattler {
+      return Object.freeze({
+        side,
+        battler: side === "player" ? 0 : 1,
+        partyIndex: 0,
+        species,
+        name: "TEST",
+        level: 50,
+        gender: "male",
+        hp: 100,
+        maxHP: 100,
+        status: "none",
+        moveIds: [1, 2, 3, 4] as const,
+        currentPP: [10, 10, 10, 10] as const,
+        ppBonuses: 0,
+      });
+    }
+    return createBattleCommandFieldRenderView(
+      Object.freeze({
+        player: battler("player", 1), // BULBASAUR - not under test
+        opponent: battler("trainer", opponentSpecies),
+      }),
+    );
+  }
+
+  it("settles RATTATA at x2=+1 relative to the un-offset position (speciesFrontIdleRestOffset(\"RATTATA\") = {1,0}, the empirical census's non-ONIX positive case)", () => {
+    const RATTATA_SPECIES_ID = 19;
+    expect(speciesFrontIdleRestOffset("RATTATA")).toEqual({ x2: 1, y2: 0 });
+
+    const fieldView = stagedFieldView(RATTATA_SPECIES_ID);
+    // RATTATA has no enemy-mon-elevation entry, so drawGeneratedOpponentRelease's
+    // local `origin` equals fieldView.fieldArt.opponent.origin unmodified.
+    const origin = fieldView.fieldArt.opponent.origin;
+    const pic = fieldView.fieldArt.opponent.pic;
+
+    // handoffTick=0, t=100: elapsed=100 is well past MATERIALIZE_START_OFFSET
+    // (19) plus the 16-tick coeff ramp from TURN5_BALL_HANDOFF_TICK, so
+    // turn5MaterializeCoeff has decayed to 0 and the settled (offset-applying)
+    // branch runs, not the affine-tinted-blend one.
+    expect(turn5MaterializeCoeff(TURN5_BALL_HANDOFF_TICK + 19 + (100 - 19) - 1)).toBe(0);
+    const frame = new Uint8Array(240 * 160 * 4);
+    drawGeneratedOpponentRelease(frame, 100, 0, fieldView);
+
+    const shifted = new Uint8Array(240 * 160 * 4);
+    blitSprite(shifted, pic.tileset, pic.palette, origin.x + 1, origin.y);
+    expect(Array.from(frame)).toEqual(Array.from(shifted));
+
+    const unshifted = new Uint8Array(240 * 160 * 4);
+    blitSprite(unshifted, pic.tileset, pic.palette, origin.x, origin.y);
+    expect(Array.from(frame)).not.toEqual(Array.from(unshifted));
+  });
+
+  it("still settles a {0,0}-offset species (BULBASAUR) at the plain un-shifted origin - the Slice B species-threading guard against a shared/literal default", () => {
+    const BULBASAUR_SPECIES_ID = 1;
+    expect(speciesFrontIdleRestOffset("BULBASAUR")).toEqual({ x2: 0, y2: 0 });
+
+    const fieldView = stagedFieldView(BULBASAUR_SPECIES_ID);
+    const origin = fieldView.fieldArt.opponent.origin;
+    const pic = fieldView.fieldArt.opponent.pic;
+
+    const frame = new Uint8Array(240 * 160 * 4);
+    drawGeneratedOpponentRelease(frame, 100, 0, fieldView);
+
+    const unshifted = new Uint8Array(240 * 160 * 4);
+    blitSprite(unshifted, pic.tileset, pic.palette, origin.x, origin.y);
+    expect(Array.from(frame)).toEqual(Array.from(unshifted));
   });
 });

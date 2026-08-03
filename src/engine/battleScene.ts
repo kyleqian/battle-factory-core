@@ -4243,7 +4243,7 @@ export function generatedBattleStartCommandReady(
  * `coords.yOffset` (8) happens to equal its own elevation (8), so
  * `8+8-8=8` numerically matched the exclusive guess by accident.
  */
-function drawGeneratedOpponentRelease(
+export function drawGeneratedOpponentRelease(
   fb: Uint8Array,
   t: number,
   handoffTick: number,
