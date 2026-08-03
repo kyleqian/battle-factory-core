@@ -1,4 +1,57 @@
 
+## 876 — [bounded MAIN worker, 2026-08-02] species-dossier slice 6 LANDED (family-E materialize primitive + family-F palette source-sprite threading)
+
+- **State:** master `d2608e83` (one commit on top of `68718a2a`). Full
+  `npm test`: **633 files / 6,376 passed / 1 skipped** (unchanged from
+  base). `npm run build` green (tsc -b + vite). Differential
+  (`compare:differential`, corrected 8-trace window list, base `68718a2a`):
+  **PASS, 1,429/1,429 captures byte-identical** — 191/209/16 (the three
+  corrected battle2 windows), 170/151 (sendout-dense pair), 230/256/206
+  (clone/doubleteam/aerialace), every count matching the brief.
+- **Did:** per `docs/species-render-entry-point-retirement-design.md` §4
+  row 6, §1.3E/F. Family E: extracted `drawFrontBackMaterialize(fb,
+  tileset, palette, corner, geometry)`, a discriminated union
+  (`settled`/`tint`/`stretch`/`rotate`) over the family's whole closed set
+  of draw modes — each variant forwards to the exact already-generic
+  low-level sampler (`drawSpriteSheet`/`drawSpriteSheetAffineTinted`/
+  `drawSpriteSheetAffineStretch`/`drawSpriteSheetAffineRotate`) with its
+  prior arguments unchanged. The six named functions
+  (`drawGrovyleSettled`, `drawGrovyleMaterialize`, `drawKabutoMaterialize`,
+  `drawGrovyleStretch`, `drawGrovyleStretchEarly`,
+  `drawKabutoHSlideWobble`) kept their names and per-species/per-tick
+  geometry math, becoming thin callers that resolve one geometry object
+  and hand it to the primitive — no formula change, only removing the
+  duplicated tileset/corner/low-level-call boilerplate each repeated. Did
+  NOT force plain-draw/stretch/rotate into the tint-accumulator transform
+  itself (they're genuinely different samplers); the primitive's
+  parameter list adapted to the union of what the six bodies actually
+  share, per the brief's own "do not force-fit" latitude. Family F:
+  `getOnixDoubleTeamClonePalette`/`turn10OnixDarkPalette` now take the
+  source `BattleBackSpriteAsset` as a parameter instead of closing over
+  `onixBackSprite` by name; both call sites (the generic staged
+  DOUBLE_TEAM clone renderer, `drawTurn5RockSlideAttack`'s two turn-10
+  darken branches) thread `onixBackSprite` in explicitly. Palette
+  derivation math byte-identical.
+- **Next:** slices 3/4 (family-A HP-drain, capstone
+  `renderSceneOffTurnView`) and slice 7 (family-B Sitrus anchor) remain.
+  Slice 6 was the last ladder-independent slice besides those two gated
+  ones — 3/4 are UNGATED (dispatcher ladder slice 10 already landed).
+- **Notes:** `tests/executableFrontierRatchet.test.ts` untouched and
+  green — no new recording imports, no barrier-count changes. Base sha
+  drifted from the step brief's assumption (other lane work landed on
+  master mid-session: `68718a2a`, 3 commits ahead of the branch snapshot
+  at session start) — recorded and used as the actual differential base.
+  No ISSUES entries touched this step (not in scope).
+- **[supervisor addendum, ~23:10]** slice 6 verified (653/653 spot
+  differential). Side scout merged:
+  `docs/battlescene-turnN-typeref-retirement-design.md` (`3946958c`) —
+  entry-871's ~144 TurnN type refs censused literally (45 functions, 4
+  families), 54+9+9=72 provably dead (all call sites pass literal null;
+  existing shadow-equivalence suite pins the generic path), 6-slice plan;
+  its slices 3/4b collide with species-dossier slice 7's file region →
+  serialized on main, never concurrent. Side worktree/branch cleaned.
+
+
 ## 875 — [bounded MAIN worker, 2026-08-02] species-dossier slice 5 LANDED (turn-15 Onix gate cluster + family-H party literal)
 
 - **State:** master `1c144a1c` (one commit on top of `537110fd`). Full

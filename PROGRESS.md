@@ -4,6 +4,75 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 879 — [bounded MAIN worker, 2026-08-02] ISSUES #68 — MURKROW TORMENT presentation crash FIXED + pinned
+
+- **State:** master `64fc0205` (one commit on top of `d7857d4e` — base
+  drifted mid-session again: a side-lane merge + two supervisor docs
+  commits landed after this step started, `abb89b0e`/`51e8ea13`/
+  `0b8c0537`/`d7857d4e`. Note for the supervisor: `d7857d4e` already
+  deleted ISSUES #68 from `ISSUES.md` *before* this step's fix landed —
+  looks like a race with entry 878's own addendum, which says "#68 ...
+  fix worker dispatched." Nothing left to trim here as a result; flagging
+  it rather than silently re-adding/re-removing the entry.) Full
+  `npm test`: **634 files / 6,378 passed / 1 skipped**. `npm run build`
+  green (tsc -b + vite). Differential (`compare:differential`, base
+  `d7857d4e`): **PASS, 639/639 captures byte-identical** — 255/256/128
+  (turn3-endeavor-off, turn5-rockslide, battle-command-generated-off).
+- **Did:** root-caused and fixed ISSUES #68 (same-day user report:
+  MURKROW's first TORMENT throws mid-turn). Confirmed hypothesis 1
+  exactly: `BattleScript_EffectTorment`'s `printstring
+  STRINGID_PKMNSUBJECTEDTOTORMENT` (`battle_scripts_1.s:2139-2149`,
+  `battle_message.c:223,676`: "{B_DEF_NAME_WITH_PREFIX} was subjected\nto
+  TORMENT!") had zero mapping in `battleResolutionPresentation.ts`'s
+  `messageLines` — the generic fallback only ever supplies
+  B_ATK_NAME_WITH_PREFIX/B_EFF_NAME_WITH_PREFIX/
+  B_SCR_ACTIVE_NAME_WITH_PREFIX/B_LAST_ITEM, so it hit
+  `battleStringResolver.ts`'s completeness guard, same class as #65.
+  Added one branch mirroring the existing `STRINGID_ITDOESNTAFFECT` shape
+  (singles battle: target = ¬lastMoveAttacker, since Torment always
+  targets the opponent) resolving `B_DEF_NAME_WITH_PREFIX` from the
+  tormented battler. New `tests/murkrowTormentSubjectedPresentationRepro.
+  test.ts`: (1) BUTTERFREE vs MURKROW all-four-TORMENT (AGENTS.md's
+  constrain-to-one-legal-choice convention); reproduces the crash
+  (red before the fix, verified via `git stash`), green after, asserts
+  the resolved banner; (2) confirms next-turn `legalDecisions` excludes
+  BUTTERFREE's just-used TACKLE (leaving GUST) and that
+  `createBattleCommandPresentation`'s `legalMoveBySlot` reflects it
+  (null for the blocked slot) — the brief's item 4 next-turn-flow ask.
+  Item 4/5's kernel pieces (`checkBattleScriptMoveLimitations`'s TORMENT
+  exclusion, `legalMoveDecisions`, all-four-blocked Struggle fallback)
+  turned out already covered by `tests/battleScriptSettormentOpcode.
+  test.ts`'s "Torment through the generic Factory action-admission seam"
+  block (earlier session's work) — that suite never exercises the
+  presentation layer, so it never caught this crash; reran, still green,
+  untouched. The blocked-slot UI reject (pressing A on a null
+  `legalMoveBySlot` entry) already no-ops without printing the source's
+  limitation string — a pre-existing, uniform simplification across
+  every move-limitation type (PP/Disable/Taunt/Choice/Encore/Torment
+  alike), already pinned generically by `battleCommandPresentation.
+  test.ts`'s "ignores A on a request-illegal move slot"; left as-is
+  (source-faithful printing touches `nextCommandHandoff.ts`/
+  `fightCommandPresentation.ts`, both out of scope this step).
+- **Insurance sweep (item 3):** grepped every `STRINGID_*` referenced in
+  `src/engine/*.ts` (122 distinct ids) against `messageLines`'s explicit
+  branches + the generic fallback's 4 safe tokens. 47 reference a
+  placeholder the fallback can't supply (mostly B_DEF_NAME_WITH_PREFIX/
+  B_SCR_ACTIVE_ABILITY/B_BUFF1/B_BUFF2/B_CURRENT_MOVE/B_ATK_PREFIX2) and
+  would throw the same way if actually reached — NOT reachability-
+  verified (many are doc-comment citations, not confirmed producible by
+  a wired opcode in Factory L50 singles), and far past the "~6" bound to
+  fix in-step. Full 47-id list + 4 ids missing from the extracted table
+  entirely (STRINGID_FAINTED, STRINGID_INTROSENDOUT,
+  STRINGID_ITEMHEALHP_BERRY, STRINGID_USEDMOVE_OPERAND) reported to the
+  supervisor in this step's final message for an ISSUES entry.
+- **Next:** the enumerated presentation-completeness remainder above
+  needs a reachability pass before any more of the 47 get fixed.
+  species-dossier slice 4 (capstone) is untouched, still the last slice.
+- **Notes:** `tests/executableFrontierRatchet.test.ts` green, no new
+  recording imports, no barrier-count changes (checked via
+  `test:smoke`). No PAPERCUT this step.
+
+---
 ## 878 — [bounded MAIN worker, 2026-08-02] species-dossier slice 7 LANDED (family-B Sitrus anchor/geometry de-hardcoding)
 
 - **State:** master `a29fd795` (one commit on top of `f49e0b27` — base
@@ -120,57 +189,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   a detached notification, per the execution-discipline note, but cost
   ~5 min of extra care; likely contention from concurrent sibling
   worker/animation test runs on the same shared machine this session.
-
----
-## 876 — [bounded MAIN worker, 2026-08-02] species-dossier slice 6 LANDED (family-E materialize primitive + family-F palette source-sprite threading)
-
-- **State:** master `d2608e83` (one commit on top of `68718a2a`). Full
-  `npm test`: **633 files / 6,376 passed / 1 skipped** (unchanged from
-  base). `npm run build` green (tsc -b + vite). Differential
-  (`compare:differential`, corrected 8-trace window list, base `68718a2a`):
-  **PASS, 1,429/1,429 captures byte-identical** — 191/209/16 (the three
-  corrected battle2 windows), 170/151 (sendout-dense pair), 230/256/206
-  (clone/doubleteam/aerialace), every count matching the brief.
-- **Did:** per `docs/species-render-entry-point-retirement-design.md` §4
-  row 6, §1.3E/F. Family E: extracted `drawFrontBackMaterialize(fb,
-  tileset, palette, corner, geometry)`, a discriminated union
-  (`settled`/`tint`/`stretch`/`rotate`) over the family's whole closed set
-  of draw modes — each variant forwards to the exact already-generic
-  low-level sampler (`drawSpriteSheet`/`drawSpriteSheetAffineTinted`/
-  `drawSpriteSheetAffineStretch`/`drawSpriteSheetAffineRotate`) with its
-  prior arguments unchanged. The six named functions
-  (`drawGrovyleSettled`, `drawGrovyleMaterialize`, `drawKabutoMaterialize`,
-  `drawGrovyleStretch`, `drawGrovyleStretchEarly`,
-  `drawKabutoHSlideWobble`) kept their names and per-species/per-tick
-  geometry math, becoming thin callers that resolve one geometry object
-  and hand it to the primitive — no formula change, only removing the
-  duplicated tileset/corner/low-level-call boilerplate each repeated. Did
-  NOT force plain-draw/stretch/rotate into the tint-accumulator transform
-  itself (they're genuinely different samplers); the primitive's
-  parameter list adapted to the union of what the six bodies actually
-  share, per the brief's own "do not force-fit" latitude. Family F:
-  `getOnixDoubleTeamClonePalette`/`turn10OnixDarkPalette` now take the
-  source `BattleBackSpriteAsset` as a parameter instead of closing over
-  `onixBackSprite` by name; both call sites (the generic staged
-  DOUBLE_TEAM clone renderer, `drawTurn5RockSlideAttack`'s two turn-10
-  darken branches) thread `onixBackSprite` in explicitly. Palette
-  derivation math byte-identical.
-- **Next:** slices 3/4 (family-A HP-drain, capstone
-  `renderSceneOffTurnView`) and slice 7 (family-B Sitrus anchor) remain.
-  Slice 6 was the last ladder-independent slice besides those two gated
-  ones — 3/4 are UNGATED (dispatcher ladder slice 10 already landed).
-- **Notes:** `tests/executableFrontierRatchet.test.ts` untouched and
-  green — no new recording imports, no barrier-count changes. Base sha
-  drifted from the step brief's assumption (other lane work landed on
-  master mid-session: `68718a2a`, 3 commits ahead of the branch snapshot
-  at session start) — recorded and used as the actual differential base.
-  No ISSUES entries touched this step (not in scope).
-- **[supervisor addendum, ~23:10]** slice 6 verified (653/653 spot
-  differential). Side scout merged:
-  `docs/battlescene-turnN-typeref-retirement-design.md` (`3946958c`) —
-  entry-871's ~144 TurnN type refs censused literally (45 functions, 4
-  families), 54+9+9=72 provably dead (all call sites pass literal null;
-  existing shadow-equivalence suite pins the generic path), 6-slice plan;
-  its slices 3/4b collide with species-dossier slice 7's file region →
-  serialized on main, never concurrent. Side worktree/branch cleaned.
-
