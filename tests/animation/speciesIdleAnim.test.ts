@@ -66,6 +66,11 @@ import {
   FIGURE_8_FRONT_SPECIES,
   FIGURE_8_INITIALIZER,
   FIGURE_8_OUTSIDE_FACTORY_FRONT_SPECIES,
+  risingWobbleFrameAtTick,
+  RISING_WOBBLE_FACTORY_FRONT_SPECIES,
+  RISING_WOBBLE_FRONT_SPECIES,
+  RISING_WOBBLE_INITIALIZER,
+  RISING_WOBBLE_OUTSIDE_FACTORY_FRONT_SPECIES,
   growInStagesFrameAtTick,
   GROW_IN_STAGES_FACTORY_FRONT_SPECIES,
   GROW_IN_STAGES_FRONT_SPECIES,
@@ -768,7 +773,7 @@ describe("speciesIdleAnim", () => {
     });
 
     it("returns null for generated species whose front-anim family isn't ported", () => {
-      expect(speciesFrontIdleRestOffset("VENUSAUR")).toBeNull();
+      expect(speciesFrontIdleRestOffset("PIDGEOT")).toBeNull();
     });
 
     it("dispatches the complete generated 32-species V_STRETCH family", () => {
@@ -5507,6 +5512,149 @@ describe("speciesIdleAnim", () => {
       for (const invalid of [-1, 0.5, Number.NaN, Number.POSITIVE_INFINITY]) {
         expect(figure8FrameAtTick(invalid)).toBeNull();
       }
+    });
+  });
+
+  describe("risingWobbleFrameAtTick (source lifecycle)", () => {
+    it("derives the exact 3/2/1 selector census and stable terminal offsets", () => {
+      const generated = Object.entries(selectorTables.frontAnimIds.species)
+        .filter(([, family]) => family === "ANIM_RISING_WOBBLE")
+        .map(([species]) => species);
+      const factorySpecies = new Set(
+        frontierMons.entries.map(({ species }) => species.replace(/^SPECIES_/, "")),
+      );
+      expect(RISING_WOBBLE_FRONT_SPECIES).toEqual(generated);
+      expect(RISING_WOBBLE_FRONT_SPECIES).toEqual(["SPEAROW", "SKIPLOOM", "CELEBI"]);
+      expect(RISING_WOBBLE_FACTORY_FRONT_SPECIES).toEqual(["SPEAROW", "SKIPLOOM"]);
+      expect(RISING_WOBBLE_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => factorySpecies.has(species)),
+      );
+      expect(RISING_WOBBLE_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual(["CELEBI"]);
+      expect(RISING_WOBBLE_OUTSIDE_FACTORY_FRONT_SPECIES).toEqual(
+        generated.filter((species) => !factorySpecies.has(species)),
+      );
+      for (const species of RISING_WOBBLE_FRONT_SPECIES) {
+        expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
+      }
+    });
+
+    it("pins callback-initializer timing, task zeroing, affine mode, and no flips", () => {
+      expect(RISING_WOBBLE_INITIALIZER).toEqual({
+        selector: "ANIM_RISING_WOBBLE",
+        sourceId: 24,
+        data0: 5,
+        callbackInvokedByInitializer: true,
+        callbackInstalled: "RisingWobble",
+        handleStartAffineAnimOnData2Zero: true,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 0,
+        affineMode: "double",
+        accepted: true,
+      });
+      expect(TASK_HANDLE_MON_ANIMATION_ZEROED_DATA_INDICES).toEqual([0, 2, 3, 4, 5, 6, 7]);
+      expect(risingWobbleFrameAtTick(0)).toMatchObject({
+        data0: 5,
+        data2Before: 0,
+        data2: 1,
+        index: 0,
+        rotationIndexBeforeMask: 0,
+        rotationIndexU8: 0,
+        startedAffine: true,
+        affineMode: "double",
+        callback: "RisingWobble",
+      });
+    });
+
+    it("exhausts every active callback with source signed/u8 arithmetic and writes", () => {
+      for (let tick = 0; tick <= 100; tick += 1) {
+        const data2 = tick;
+        const index = Math.trunc((data2 * 256) / 100);
+        const rotationIndexBeforeMask = Math.trunc((data2 * 512) / 100);
+        const rotationIndexU8 = rotationIndexBeforeMask & 0xff;
+        const ySine = Math.floor(
+          (10 * GBA_SINE_TABLE_256[Math.trunc(index / 2)]!) / 256,
+        );
+        const rotationSine = Math.floor(
+          (3276 * GBA_SINE_TABLE_256[rotationIndexU8]!) / 256,
+        );
+        expect(risingWobbleFrameAtTick(tick), `callback ${tick}`).toMatchObject({
+          x2: 0,
+          y2: ySine === 0 ? 0 : -ySine,
+          data0: 5,
+          data2Before: data2,
+          data2: data2 + 1,
+          index,
+          rotationIndexBeforeMask,
+          rotationIndexU8,
+          ySine,
+          rotationSine,
+          affineRotationSigned: rotationSine,
+          affineRotationU16: rotationSine & 0xffff,
+          startedAffine: tick === 0,
+          normalFrontDontFlip: true,
+          tryFlipXCalls: 0,
+          resetSpriteAfterAnim: false,
+          affineWriteCount: 1,
+          callback: "RisingWobble",
+          affineMode: "double",
+        });
+      }
+
+      // The unmasked 256/512 phases prove the source's s16 index and u8
+      // rotation conversion rather than an already-wrapped JS phase.
+      expect(risingWobbleFrameAtTick(50)).toMatchObject({
+        index: 128,
+        rotationIndexBeforeMask: 256,
+        rotationIndexU8: 0,
+      });
+      expect(risingWobbleFrameAtTick(100)).toMatchObject({
+        index: 256,
+        rotationIndexBeforeMask: 512,
+        rotationIndexU8: 0,
+      });
+      expect(risingWobbleFrameAtTick(49)).toMatchObject({
+        affineRotationSigned: -474,
+        affineRotationU16: 0xfe26,
+      });
+    });
+
+    it("uses strict terminal callback 101, same-call teardown, stable wait, and invalid inputs", () => {
+      const terminal = risingWobbleFrameAtTick(101);
+      expect(terminal).toEqual({
+        x2: 0,
+        y2: 0,
+        data0: 5,
+        data2Before: 101,
+        data2: 102,
+        index: 0,
+        rotationIndexBeforeMask: 0,
+        rotationIndexU8: 0,
+        ySine: 0,
+        rotationSine: 0,
+        affineRotationSigned: 0,
+        affineRotationU16: 0,
+        startedAffine: false,
+        normalFrontDontFlip: true,
+        tryFlipXCalls: 0,
+        resetSpriteAfterAnim: true,
+        affineWriteCount: 1,
+        callback: "WaitAnimEnd",
+        affineMode: "normal",
+      });
+      expect(risingWobbleFrameAtTick(102)).toEqual(terminal);
+      expect(risingWobbleFrameAtTick(4096)).toEqual(terminal);
+      for (const invalid of [-1, 0.5, Number.NaN, Number.POSITIVE_INFINITY]) {
+        expect(risingWobbleFrameAtTick(invalid)).toBeNull();
+      }
+    });
+
+    it("keeps adjacent accepted selectors and the next unsupported control explicit", () => {
+      expect(selectorTables.frontAnimIds.species.IVYSAUR).toBe("ANIM_V_STRETCH");
+      expect(speciesFrontIdleRestOffset("IVYSAUR")).toEqual({ x2: 0, y2: 0 });
+      expect(selectorTables.frontAnimIds.species.BLASTOISE).toBe("ANIM_V_SHAKE_TWICE");
+      expect(speciesFrontIdleRestOffset("BLASTOISE")).toEqual({ x2: 0, y2: 0 });
+      expect(selectorTables.frontAnimIds.species.RELICANTH).toBe("ANIM_TIP_MOVE_FORWARD");
+      expect(speciesFrontIdleRestOffset("RELICANTH")).toBeNull();
     });
   });
 

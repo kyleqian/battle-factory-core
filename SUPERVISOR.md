@@ -300,6 +300,14 @@ and the final session report. An open entry mechanically blocks the next
 `run-supervisor.sh` session until the user resolves it and the entry is
 removed; do not carry deferred ambiguity into another long run.
 
+## Communicating with the user
+
+Speak plain English — no internal jargon (slices, ranks, folds,
+differentials). Anchor updates to the overall roadmap: what works in the
+game, what's broken, and roughly where the current milestone stands. Offer
+progress when it's clear, and keep it brief. Internal ledgers and briefs
+keep their precise technical voice.
+
 ## Deadline and usage limits
 
 - Your launch prompt gives a wall-clock deadline (also as epoch seconds);

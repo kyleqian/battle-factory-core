@@ -1,8 +1,266 @@
 # Animation coverage
 
+## Front `ANIM_ROTATE_TO_SIDES_TWICE` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **1 mapping / 1
+Factory-reachable / 0 outside-Factory** — SOLROCK. Only source ID **8** is
+promoted. `ANIMATION_COVERAGE.json` remains byte-identical at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`;
+move coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**,
+Open-only **0/1**, and Outside Factory **0/77**. Selector 7/51 have no
+generated mapping, all back routing is unchanged, and no move status is
+promoted.
+
+**Did:** source pins `pokemon_animation.h:47-48,91`,
+`pokemon_animation.c:637-640,911-939,1037-1059,2870-2916,3817-3834,5540-5544`,
+and `pokemon.c:1730`: task-zeroed signed-s16 state, fresh `AddNewAnim`
+defaults, selector-8 rotation 4/runs 2, immediate shared callback, every
+data7 0..252 step across both runs, first-run data2/data7 reset at 256, both
+source-order `TryFlipX` paths, trig/affine OAM writes, and final identity /
+`WaitAnimEnd` cleanup. Fresh complete legal Scene-ON SOLROCK parties were
+probed twice only through `tools/run-mgba-probe.py`; the active-to-dummy pair
+is byte-identical: window **1616..1747 (132 frames)**, **59,501 B**,
+SHA-256 `06ad352e574feb2b5fae6bbe818bead7af2431bc4890d90430278797e9e35dff`.
+
+**Next:** the source-ranked unsupported generated Factory-front family is
+**`ANIM_SWING_CONCAVE_FAST`** (source ID **12**): **1 mapping / 1 Factory /
+0 outside** — IGGLYBUFF.
+
+**Notes:** focused reducer/source/census/evidence is **8/8**; both
+animation/executable-frontier ratchets are **9/9**; `npx tsc --noEmit`,
+`npm run animation:coverage`, full `npm test` (**624 files / 6,342 passed /
+1 skipped**), and production build are green. Commits: `dd22baf6` (reducer,
+census, lifecycle) and `fae28869` (source evidence plus paired Scene-ON
+fixtures).
+
+## Front `ANIM_DEEP_V_SQUISH_AND_BOUNCE` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **2 mappings / 2
+Factory-reachable / 0 outside-Factory** — MUK and WOBBUFFET. Only source ID
+**48** is promoted. `ANIMATION_COVERAGE.json` remains byte-identical at
+SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`; move
+coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**,
+Open-only **0/1**, Outside Factory **0/77**. Adjacent selectors, all back
+routing, logical battle state, and engine boundaries are unchanged.
+
+**Did:** source pins `pokemon_animation.h:88,125`, `pokemon.c:1495,1608`,
+and `pokemon_animation.c:680,2656-2719`: task-zeroed signed-s16 state,
+initializer affine start and rotation 4, C-truncated sine arithmetic, phase
+0/1 transition at data4 128, delay/runs branches, affine/OAM writes, identity
+reset, `WaitAnimEnd`, and stable terminal. Tier-1 source/census/lifecycle
+coverage exhausts every active callback and phase (65 reducer frames), delay/
+runs/counters, signed arithmetic, affine cleanup, invalid inputs, and
+adjacent unsupported controls. Fresh complete legal Scene-ON parties were
+probed twice per Factory species only through `tools/run-mgba-probe.py`; each
+pair is byte-identical and captures the complete active-to-dummy window:
+MUK **1655..1721 (67 frames)**, **31,103 B**, SHA-256
+`fa36e420297d624604ee3ef267eb801141f7c1bfb56876e80fb72eb149700812`;
+WOBBUFFET **1618..1704 (87 frames)**, **39,736 B**, SHA-256
+`efa85c119ebbd5c8e497e558e8f26e5394fbe04dac99b9188e9beeea6592073e`.
+
+**Next:** this bounded selector-48 step is complete; await supervisor
+selection of the next unsupported generated Factory-front family. No move
+status is promoted for send-out coverage.
+
+**Notes:** focused lifecycle/source/census/evidence is **9/9**; both
+animation/executable-frontier ratchets are **9/9**; `npx tsc --noEmit`,
+`npm run animation:coverage`, full `npm test` (**622 files / 6,334 passed /
+1 skipped**), and production build are green. Commits: `031751d0` (reducer,
+census, and lifecycle tests) and `d99f9840` (source evidence, dense probe,
+and paired Scene-ON fixtures). `ANIMATION_COVERAGE.json` was not modified.
+
+## Front `ANIM_ROTATE_UP_SLAM_DOWN` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **2 mappings / 2
+Factory-reachable / 0 outside-Factory** — VENUSAUR and GOLEM. Only source ID
+**47** is promoted. `ANIMATION_COVERAGE.json` remains byte-identical at
+SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`; move
+coverage remains **107/276 exact, 0 partial, 0 staged, 169 unsupported**,
+Open-only **0/1**, Outside Factory **0/77**. Adjacent unsupported selectors,
+back routing, damage/RNG/turn order, facility state, and engine boundaries are
+unchanged.
+
+**Did:** source pins `pokemon_animation.c:643-677,911-939,1003-1068,
+1368-1391,2592-2645`, `pokemon_animation.h:87`, and
+`pokemon.c:1409,1482`: signed-s16 center-to-corner/data6 arithmetic, doubled
+affine start, no initializer callback invocation, `_0`/`_1`/`_2` source-order
+transitions, both normal-front `TryFlipX` calls, identity/normal affine reset,
+and the strict VerticalShake tail through WaitAnimEnd. Tier-1 coverage exhausts
+all active callback phases (**0..72**), terminal/stable terminal behavior,
+affine/OAM writes, invalid inputs, signed arithmetic, and adjacent unsupported
+front/back controls. Complete legal Scene-ON parties were probed twice per
+Factory species only through `tools/run-mgba-probe.py`; each pair is byte-
+identical and captures a dense **76-frame** window through SpriteCallbackDummy:
+VENUSAUR window **1618..1693**, **34,759 B**, SHA-256
+`fab9786556bf5780c29c1e7fe79526ccb2fa0ae1be0c4271cc66c9d05140aa35`;
+GOLEM window **1613..1688**, **34,748 B**, SHA-256
+`b4f0ad9d2a21a447ff0bc72cbf4c1680d1599a071cf0cc52b2fddf6d8e817c36`.
+
+**Next:** this bounded selector-47 step is complete; await supervisor
+selection of the next unsupported generated Factory-front family. No move
+status is promoted for send-out coverage.
+
+**Notes:** focused lifecycle/source/census/evidence is **11/11**; both
+animation/executable-frontier ratchets are **9/9**; `npx tsc --noEmit`,
+`npm run animation:coverage`, and production build (**552 modules
+transformed**) are green. Full `npm test` is green at **620 files / 6,325
+passed / 1 skipped**. Commits: `5f9092aa` (reducer/census/lifecycle),
+`e91d6a15` (source evidence, dense probe, and paired Scene-ON fixtures),
+`86b7e5ed` (source-correct shake-tail counter), `30d30ba8` (typed geometry
+input), and `b7340908` (ledger and unsupported-control regression).
+
+## Front `ANIM_SWING_CONCAVE_FAST_SHORT` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **3 mappings / 2
+Factory-reachable / 1 outside-Factory** — SANDSHREW, LATIAS, and KYOGRE. Only
+source ID **45** is promoted. `ANIMATION_COVERAGE.json` remains byte-identical
+at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`; move
+coverage is still **107/276 exact, 0 partial, 0 staged, 169 unsupported**.
+Adjacent fast/convex selectors, back routing, damage/RNG/turn order, facility
+state, and engine interfaces are untouched.
+
+**Did:** source pins `pokemon_animation.c:643-677,911-939,1003-1068,2512-2550`,
+`pokemon_animation.h:85`, `pokemon.c:1433,1785,1788`, `sprite.h:205,217`, and
+`gba/types.h:83-85`: task-zeroed signed-s16 registers, `sDontFlip=TRUE`, direct
+selector dispatch, `AddNewAnim` defaults with `data=50/runs=1`, immediate
+`SwingConcave` call before callback installation, both source-order `TryFlipX`
+calls, C-truncated indices, signed x2/affine sine writes, identity/reset/
+`WaitAnimEnd` terminal, and stable terminal. Tier-1 coverage exhausts active
+callbacks **0..50** and strict terminal callback **51** (`data2=52`), with
+invalid input, affine/OAM width, and adjacent-control checks. Fresh complete
+legal challenge-0 Scene-ON parties were probed twice per Factory species only
+through `tools/run-mgba-probe.py`; pairs are byte-identical and settle battler
+1 at x2=0/y2=0/`SpriteCallbackDummy`: SANDSHREW species 27, animNum 1, cmd 4,
+372 B, `955a186fdeb2b253a3617590207723a4111c81a11628bab71adc5ffcdd177d9a`;
+LATIAS species 380, animNum 1, cmd 6, 373 B,
+`bf88104dee8bb42023b67c237d509ab80a2aa64ecbc4761d95395fcd35eb2a38`.
+
+**Next:** this bounded selector-45 step is complete; await supervisor
+selection of the next unsupported generated Factory-front family. No move
+status is promoted for send-out coverage.
+
+**Notes:** focused reducer/source/census/evidence plus both ratchets are
+**20/20**; `npx tsc --noEmit`, `npm run animation:coverage`, and production
+build are green. Full `npm test` is green at **618 files / 6,314 passed / 1
+skipped**. Commits: `abf4ecc9` (reducer/census/dense lifecycle) and
+`db4b4435` (source evidence plus paired Scene-ON fixtures).
+
+## Front `ANIM_GLOW_ORANGE` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **2 mappings / 2
+Factory-reachable / 0 outside-Factory** — KAKUNA and PONYTA. Only source ID
+**32** is promoted. `ANIMATION_COVERAGE.json` remains byte-identical at
+SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`;
+move coverage is still **107/276 exact, 0 partial, 0 staged, 169
+unsupported**. Adjacent glow selectors, back routing, damage/RNG/turn order,
+facility state, and engine interfaces are untouched.
+
+**Did:** source pins `pokemon_animation.c:911-939,1539-1560,2003-2006`,
+`pokemon_animation.h:72`, `pokemon.c:1420,1483`, `palette.h:24`, and
+`constants/rgb.h:7`: task-zeroed signed `data[2]/[6]/[7]`, direct callback
+install, OBJ palette masking, orange `RGB(31,22,0)` = `0x02df`, amplitude 12,
+speed 2, source-order strict guard, restore/`WaitAnimEnd`, and stable terminal.
+The shared port reuses only the source `GlowColor` lifecycle; dense Tier-1
+coverage exhausts active callbacks **0..64** (`data2` 0..128 by twos) and
+terminal **65**, including palette/sine boundaries, invalid inputs, and the
+unsupported blue control while black-glow regression remains dense. Fresh
+complete legal challenge-0 Scene-ON RAM probes ran twice per species only
+through `tools/run-mgba-probe.py`; raw pairs are byte-identical and settle
+battler 1 at x2=0/y2=0/`SpriteCallbackDummy`: KAKUNA species 14, animNum 1,
+cmd 10, 373 B, `323b9838655b0faa062cb8852a08374e341e15dc02bc8f43f9f47c5e00c26c37`;
+PONYTA species 77, animNum 1, cmd 1, 372 B,
+`4a5bf6f9883e9527190e3af1d0a62fb4ab41124988ee567ba78a234f0fbd97ba`.
+
+**Next:** the generated-table rank after source ID 32 is
+**`ANIM_SWING_CONCAVE_FAST_SHORT`** (source ID **45**): **3 mappings / 2
+Factory / 1 outside** — Factory SANDSHREW and LATIAS; KYOGRE outside.
+
+**Notes:** focused orange/black lifecycle + evidence, species-idle, and both
+ratchets are **360/360**; `npx tsc --noEmit`, `npm run animation:coverage`,
+full `npm test` (**616 files / 6,303 passed / 1 skipped**), and `npm run build`
+are green. Commits: `cdd9aceb` (shared lifecycle/census/dense reducer) and
+`a44d1d00` (source evidence plus paired Scene-ON fixtures). No move status is
+promoted for send-out coverage.
+
+## Front `ANIM_RISING_WOBBLE` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **3 mappings / 2
+Factory-reachable / 1 outside-Factory** — SPEAROW, SKIPLOOM, and CELEBI. Only
+source ID **24** is promoted; no outside-Factory oracle fixture was added for
+CELEBI. Adjacent selectors, back routing, moves, battle state, facility
+progression, and engine boundaries remain untouched. Move coverage remains
+**107/276 exact, 0 partial, 0 staged, 169 unsupported**; Open-only **0/1** and
+Outside Factory **0/77**. `ANIMATION_COVERAGE.json` is unchanged at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Source / lifecycle / evidence:** `pokemon_animation.c:911-939,1003-1034,
+1769-1800`, `pokemon_animation.h:64`, `pokemon.c:1427,1594,1657`, and
+`trig.c:514-518` pin task-zeroed signed-s16 registers, `sDontFlip=TRUE`,
+data0=5 callback-before-install ordering, affine start at data2=0, signed
+index and masked-u8 rotation arithmetic, negated y2, identity/reset/WaitAnimEnd
+teardown, and the post-branch data2 increment. Dense Tier-1 coverage exhausts
+active callbacks **0..100** and strict terminal callback **101**, plus stable
+terminal, invalid inputs, all phase/index boundaries, and adjacent accepted and
+unsupported controls. Fresh complete legal challenge-0 Scene-ON parties were
+probed twice per Factory species only through `tools/run-mgba-probe.py`; each
+raw pair is byte-identical, 373 B, and settles battler 1 at x2=0/y2=0,
+animNum=1/`SpriteCallbackDummy`: SPEAROW species 21, command 15, data2 21,
+SHA-256 `9e1ce2d84208d71287a87450e2df28961d717329dc7cc3d3495146674bbd61ec`;
+SKIPLOOM species 188, command 7, data2 188, SHA-256
+`787a4f0eab9dca690d555347d938bee8fa4eb008c464e3727af53073db0be45b`.
+
+**Gates / next:** focused species-idle + evidence tests are **334/334** and
+both animation/executable-frontier ratchets are **9/9**; `npx tsc --noEmit`,
+full `npm test` (**614 files / 6,292 passed / 1 skipped**), production build
+(**552 modules transformed**), and `npm run animation:coverage` are green.
+The next source-ranked unsupported generated Factory-front tie, derived from
+the current selector table with source-ID tie-break, is
+**`ANIM_GLOW_ORANGE`** (source ID **32**; **2 mappings / 2 Factory / 0 outside**)
+— KAKUNA and PONYTA. No move status is promoted for send-out coverage.
+
 > Worker routing policy moved out of this ledger on 2026-08-02 — it now lives
 > in `ANIMATION_SUPERVISOR.md` ("The loop, adjusted") and `SUPERVISOR.md`
 > ("Which pair — the routing rubric"), so ledger rotation cannot lose it.
+
+## Front `ANIM_GLOW_BLACK` family accepted (2026-08-02)
+
+**State:** exact for the complete generated selector census: **2 mappings / 2
+Factory-reachable species / 0 outside-Factory mappings** — GASTLY and SABLEYE.
+Only source ID **21** is promoted; adjacent glow selectors, back routing, move
+coverage, battle state, facility progression, and engine interfaces are
+unchanged. Coverage remains **107/276 exact, 0 partial, 0 staged, 169
+unsupported**; `ANIMATION_COVERAGE.json` remains SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Did / evidence:** `pokemon_animation.c:911-939,1539-1560,5540-5544`,
+`pokemon_animation.h:61`, `pokemon.c:1498,1703`, `sprite.h:215-217`,
+`palette.h:24`, `gba/types.h:70`, and `constants/rgb.h:15` pin the task-zeroed
+signed-s16 registers, direct callback install, 4-bit OBJ palette selection,
+black blend, source-order strict guard, and terminal palette restoration.
+Dense Tier-1 coverage exhausts active callbacks **0..128**, including every
+sine coefficient and palette write, callback **129** restore/`WaitAnimEnd`,
+stable terminal, palette-slot masking, all phase boundaries, and invalid
+inputs; orange and blue glow controls remain unsupported. Fresh complete legal
+challenge-0 Scene-ON parties were probed twice per species only through
+`tools/run-mgba-probe.py`; each raw pair is byte-identical and settles battler
+1 at x2=0/y2=0/`SpriteCallbackDummy`: GASTLY **372 B**, animNum 1/cmd 2/data2
+92, `64e09ca6ce19b244f3f34b0ddfcd1a4ecd84327d3e7fae3de805a85590f3f637`;
+SABLEYE **373 B**, animNum 1/cmd 4/data2 322,
+`951a7b12ebc5d211fe26a7112cbf7b81f5890532426fc47cba82a17a13ca80a1`.
+
+**Next / Notes:** focused family/evidence plus both ratchets are **20/20**;
+regression-inclusive focused gates are **344/344**. `npx tsc --noEmit`,
+`npm run animation:coverage`, full `npm test` (**613 files / 6,282 passed / 1
+skipped**), and `npm run build` (**552 modules transformed**) are green.
+Commits: `6b5e7953` (reducer/census/dense lifecycle), `a3997e10`
+(fixtures/source/receipt evidence), and `e0c41461` (signed-width source pins).
+The next source-ranked unsupported generated Factory-front family is
+**`ANIM_RISING_WOBBLE`** (source ID **24**; **3 mappings / 2 Factory / 1
+outside**) — SPEAROW and SKIPLOOM in Factory, CELEBI outside. No move status is
+promoted for send-out coverage.
 
 ## Front `ANIM_CIRCULAR_VIBRATE` family accepted (2026-08-02)
 
