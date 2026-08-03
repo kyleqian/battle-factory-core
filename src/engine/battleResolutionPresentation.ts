@@ -494,6 +494,22 @@ function messageLines(
       }),
     });
   }
+  if (messageId === "STRINGID_PKMNSUBJECTEDTOTORMENT") {
+    if (lastMoveAttacker === null) {
+      throw new Error(
+        "battle resolution subjected-to-torment message has no preceding used-move event",
+      );
+    }
+    const target = lastMoveAttacker === 0 ? 1 : 0;
+    const displayed = fieldBattler(field, target);
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: () => resolveBattleNameWithPrefix({
+        side: target === 0 ? "player" : "opponent",
+        isTrainerBattle: true,
+        nickname: displayed.name,
+      }),
+    });
+  }
   if (
     messageId === "STRINGID_DEFENDERSSTATROSE"
     || messageId === "STRINGID_DEFENDERSSTATFELL"

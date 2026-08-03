@@ -167,6 +167,33 @@ const STRINGID_PKMNSITEMRESTOREDHEALTH = "STRINGID_PKMNSITEMRESTOREDHEALTH";
 /** The source-owned Sitrus action-menu redraw that starts the next bounce epoch. */
 const PIDGEOTTO_COMMAND_MENU_REDRAW_TICK = 7222;
 const ONIX_MAX_HP = 117;
+/**
+ * species-dossier slice 7 (docs/species-render-entry-point-retirement-
+ * design.md §4 row 7): `General_HeldItemEffect`'s own RAM tick where Onix's
+ * held-item Sitrus proc animation begins its first identity-pose rotation
+ * cycle -- RAM-probed (`battleScene.ts`'s own former
+ * `ONIX_SITRUS_RAM_ANCHOR_TICK`; see `onixSitrusRotateMatrix`'s own doc
+ * comment there for the RAM-bisection evidence). Hosted here, not
+ * battleScene.ts, matching this file's own `PIDGEOTTO_COMMAND_MENU_REDRAW_
+ * TICK` precedent for RAM-probed timing facts that belong to this window's
+ * real resolution rather than a render-side guess.
+ */
+const ONIX_SITRUS_PROC_TRIGGER_RAM_TICK = 6872;
+/**
+ * Onix's own on-field screen center the Sitrus proc's ring/star sprites
+ * anchor to -- RAM-constant for the sprite's whole life
+ * (`turn5SitrusRingMatrix`'s own doc comment in battleScene.ts has the
+ * RAM-probe detail: `AnimSpriteOnMonPos`'s mon-pic Y offset, 8px below the
+ * plain back-sprite rotation's own call-site center). Hosted here rather
+ * than as a battleScene.ts literal so the family-B wrappers read it the
+ * same adapter-owned way they read `procTriggerRamTick` below.
+ */
+const ONIX_SITRUS_ON_FIELD_CENTER = Object.freeze({ x: 72, y: 88 });
+/**
+ * Pidgeotto's own switch-in materialize settle (see `Turn5SwitchInAdapter`'s
+ * own `materializeSettleTick` doc above for the RAM-probe provenance).
+ */
+const PIDGEOTTO_MATERIALIZE_SETTLE_TICK = 6828;
 
 /**
  * ISSUES #39 rank-3 flip: Grovyle's own opponent-faint sink geometry, the
@@ -277,6 +304,15 @@ export type Turn5SwitchInAdapter = Readonly<{
   replacementHp: Readonly<{ current: number; max: number }>;
   /** "out PIDGEOTTO!" -- the real STRINGID_SWITCHINMON line-2 shape, sourced from the real switched-in species. */
   sentOutLine2: string;
+  /**
+   * species-dossier slice 7: Pidgeotto's own switch-in materialize settle --
+   * RAM tick 6827's idle callback flip, visible render 6828
+   * (`battleScene.ts`'s own former `TURN5_PIDGEOTTO_SETTLE_TICK`; see
+   * `drawTurn5PidgeottoMaterialize`'s doc there). Hosted here, matching
+   * `procTriggerRamTick`'s own rationale -- Pidgeotto's replacement
+   * switch-in resolution owns this fact, not a render-side guess.
+   */
+  materializeSettleTick: number;
 }>;
 
 /**
@@ -303,6 +339,7 @@ export function resolveTurn5SwitchInAdapter(): Turn5SwitchInAdapter {
     replacementLevel: replacement.level,
     replacementHp: Object.freeze({ current: replacement.hp, max: replacement.maxHP }),
     sentOutLine2: `out ${replacementSpecies}!`,
+    materializeSettleTick: PIDGEOTTO_MATERIALIZE_SETTLE_TICK,
   });
 }
 
@@ -310,6 +347,10 @@ export type Turn5SitrusAdapter = Readonly<{
   hp: Readonly<{ from: number; to: number }>;
   healLines: readonly string[];
   itemConsumed: boolean;
+  /** See `ONIX_SITRUS_PROC_TRIGGER_RAM_TICK`'s own doc above. */
+  procTriggerRamTick: number;
+  /** See `ONIX_SITRUS_ON_FIELD_CENTER`'s own doc above. */
+  onFieldCenter: Readonly<{ x: number; y: number }>;
 }>;
 
 /**
@@ -361,6 +402,8 @@ export function resolveTurn5SitrusAdapter(): Turn5SitrusAdapter {
     hp: Object.freeze({ from: hpChangeEvent.from, to: onix.hp }),
     healLines,
     itemConsumed: onix.item === 0,
+    procTriggerRamTick: ONIX_SITRUS_PROC_TRIGGER_RAM_TICK,
+    onFieldCenter: ONIX_SITRUS_ON_FIELD_CENTER,
   });
 }
 

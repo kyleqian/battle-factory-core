@@ -27,7 +27,7 @@ import { runOracleTrace, type Trace } from "../compare/oracleClient.ts";
 import { drawText, measureText, type FontData } from "../../src/engine/font.ts";
 import { calcBarFilledPixels, pickHpBarBand } from "../../src/engine/healthboxAssembly.ts";
 import { moveFightCursor, FIGHT_SUBMENU_SLOT_NAMES, type FightSubmenuSlot } from "../../src/engine/battleMenu.ts";
-import { cursorState, dragonBreathGrovyleHp } from "../../src/engine/battleScene.ts";
+import { cursorState, dragonBreathHp } from "../../src/engine/battleScene.ts";
 import battleWindowAsset from "../../src/assets/gen/battle-window.json" with { type: "json" };
 import fontNormalData from "../../src/data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../../src/data/gen/charmap.json" with { type: "json" };
@@ -116,7 +116,7 @@ check("moveFightCursor(0, RIGHT) === 1 (BIND, the +1 column case turn 8 exercise
 check("FIGHT_SUBMENU_SLOT_NAMES[0] === ROCK_SLIDE (0-PP, cursor rests here entering turn 13)", FIGHT_SUBMENU_SLOT_NAMES[0] === "ROCK_SLIDE", `got ${FIGHT_SUBMENU_SLOT_NAMES[0]}`);
 check("FIGHT_SUBMENU_SLOT_NAMES[2] === DRAGON_BREATH (cursor lands here after the single DOWN)", FIGHT_SUBMENU_SLOT_NAMES[2] === "DRAGON_BREATH", `got ${FIGHT_SUBMENU_SLOT_NAMES[2]}`);
 
-// dragonBreathGrovyleHp is a GENERIC closed form (pressTick/startHp/endHp
+// dragonBreathHp is a GENERIC closed form (pressTick/startHp/endHp
 // all real params, despite the turn-2-derived name) - confirm it
 // generalizes cleanly to Pidgeotto's own 16->0 drain with an arbitrary
 // pressTick, matching the "(i) verbatim, new params" reuse-map verdict at
@@ -124,11 +124,11 @@ check("FIGHT_SUBMENU_SLOT_NAMES[2] === DRAGON_BREATH (cursor lands here after th
 // spot-checked below for monotonic, non-repeating shas).
 {
   const P = 10000; // arbitrary synthetic pressTick, pure-logic check only
-  const DRAIN_START_DELAY = 353; // same constant dragonBreathGrovyleHp's own module doc cites
-  check("dragonBreathGrovyleHp: pre-drain holds startHp (16)", dragonBreathGrovyleHp(P + DRAIN_START_DELAY - 1, P, 16, 0) === 16, `got ${dragonBreathGrovyleHp(P + DRAIN_START_DELAY - 1, P, 16, 0)}`);
-  check("dragonBreathGrovyleHp: mid-drain (8 ticks in) reads 8", dragonBreathGrovyleHp(P + DRAIN_START_DELAY + 8, P, 16, 0) === 8, `got ${dragonBreathGrovyleHp(P + DRAIN_START_DELAY + 8, P, 16, 0)}`);
-  check("dragonBreathGrovyleHp: fully drained (16 ticks in) clamps to endHp (0)", dragonBreathGrovyleHp(P + DRAIN_START_DELAY + 16, P, 16, 0) === 0, `got ${dragonBreathGrovyleHp(P + DRAIN_START_DELAY + 16, P, 16, 0)}`);
-  check("dragonBreathGrovyleHp: stays clamped well past full drain", dragonBreathGrovyleHp(P + DRAIN_START_DELAY + 500, P, 16, 0) === 0, `got ${dragonBreathGrovyleHp(P + DRAIN_START_DELAY + 500, P, 16, 0)}`);
+  const DRAIN_START_DELAY = 353; // same constant dragonBreathHp's own module doc cites
+  check("dragonBreathHp: pre-drain holds startHp (16)", dragonBreathHp(P + DRAIN_START_DELAY - 1, P, 16, 0) === 16, `got ${dragonBreathHp(P + DRAIN_START_DELAY - 1, P, 16, 0)}`);
+  check("dragonBreathHp: mid-drain (8 ticks in) reads 8", dragonBreathHp(P + DRAIN_START_DELAY + 8, P, 16, 0) === 8, `got ${dragonBreathHp(P + DRAIN_START_DELAY + 8, P, 16, 0)}`);
+  check("dragonBreathHp: fully drained (16 ticks in) clamps to endHp (0)", dragonBreathHp(P + DRAIN_START_DELAY + 16, P, 16, 0) === 0, `got ${dragonBreathHp(P + DRAIN_START_DELAY + 16, P, 16, 0)}`);
+  check("dragonBreathHp: stays clamped well past full drain", dragonBreathHp(P + DRAIN_START_DELAY + 500, P, 16, 0) === 0, `got ${dragonBreathHp(P + DRAIN_START_DELAY + 500, P, 16, 0)}`);
 }
 
 // --- HP-bar color-band reuse (healthboxAssembly.ts, unmodified, already

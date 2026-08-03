@@ -34,8 +34,22 @@ import {
 const ONIX_MAX_HP = 117;
 const PIDGEOTTO_MAX_HP = 156;
 const TURN13_COMMAND_MENU_REDRAW_TICK = 14_237 + 551;
+const TURN12_ONIX_BEFORE_AERIAL_ACE_HP = 14;
 const TURN12_ONIX_AFTER_AERIAL_ACE_HP = 4;
 const TURN11_PIDGEOTTO_AFTER_ROCK_SLIDE_HP = 16;
+
+/**
+ * Turn 12's own (second) AERIAL_ACE HP-drain endpoints (14 -> 4), the
+ * owning adapter for `battleScene.ts`'s `turn10AerialAceHp` closed-form
+ * call site at the turn-12 window (species-dossier slice 3,
+ * `docs/species-render-entry-point-retirement-design.md` §4 row 3), the
+ * way `TURN13_DRAGONBREATH_HP.{from,to}` already lives on
+ * `turn13ResolutionAdapter.ts`.
+ */
+export const TURN12_AERIALACE_HP: Readonly<{ from: number; to: number }> = Object.freeze({
+  from: TURN12_ONIX_BEFORE_AERIAL_ACE_HP,
+  to: TURN12_ONIX_AFTER_AERIAL_ACE_HP,
+});
 
 export type Turn12CompletedResolutionNextCommandHandoff = Readonly<{
   /** Exact post-turn-12 player PP for `[ROCK_SLIDE, BIND, DRAGON_BREATH, SANDSTORM]`. */

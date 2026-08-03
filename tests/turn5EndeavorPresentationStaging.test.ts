@@ -56,7 +56,7 @@ describe("turn5EndeavorPresentationStaging: real MOVE_ENDEAVOR chain (docs/prese
     expect(content.hp).toMatchObject({ battler: 0, from: 88, to: 1 });
   });
 
-  it("resolveTurn5EndeavorHpEndpoints exposes the same real {from:88, to:1} pair for battleScene.ts's own endeavorOnixHp call site", () => {
+  it("resolveTurn5EndeavorHpEndpoints exposes the same real {from:88, to:1} pair for battleScene.ts's own endeavorHp call site", () => {
     expect(resolveTurn5EndeavorHpEndpoints()).toEqual({ from: 88, to: 1 });
   });
 

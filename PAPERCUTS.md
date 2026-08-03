@@ -18,7 +18,9 @@ history.
   the #67 worker's auto-backgrounded suite led it to pkill its own vitest
   workers before recovering with an explicit 600 s timeout (~4 min lost +
   a false "failed" notification).
-- **Hits:** 2.
+- **Hits:** 3 (2026-08-02 late: slice-3 worker's ~8.5 min suite — cross-lane
+  contention from concurrent side/animation runs — auto-backgrounded; worker
+  recovered by pid-polling, ~5 min lost).
 - **Possible durable fix:** teach the worker preamble (or the brief
   template) to pass an explicit long timeout for the final full-suite call
   (the tool accepts up to 10 min per call; the suite may soon exceed even

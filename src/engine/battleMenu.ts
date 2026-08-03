@@ -2688,7 +2688,7 @@ export const ENDEAVOR_HP_DRAIN_START_DELAY = 153;
  * 3103, 3107, 3111, 3128) via `battle-healthbox.json`'s `hpbar`/`hpbarAnim`
  * tile sheets, cropped to the player healthbox's own fill strip.
  */
-export function endeavorOnixHp(t: number, pressTick: number, startHp: number, endHp: number, startDelay: number = ENDEAVOR_HP_DRAIN_START_DELAY): number {
+export function endeavorHp(t: number, pressTick: number, startHp: number, endHp: number, startDelay: number = ENDEAVOR_HP_DRAIN_START_DELAY): number {
   const d = t - (pressTick + startDelay);
   return Math.max(endHp, startHp - Math.max(d, 0));
 }

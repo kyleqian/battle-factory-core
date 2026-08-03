@@ -28,10 +28,23 @@ const ONIX_MAX_HP = 117;
 const PIDGEOTTO_MAX_HP = 156;
 /** Turn 9's BIND-miss successor redraw, which begins the turn-10 bounce epoch. */
 const TURN10_COMMAND_MENU_REDRAW_TICK = 10_871 + 465;
+const TURN9_ONIX_BEFORE_QUICK_ATTACK_HP = 31;
 const TURN9_ONIX_AFTER_QUICK_ATTACK_HP = 24;
 const TURN9_PIDGEOTTO_AFTER_ROCK_SLIDE_HP = 61;
 const TURN10_ONIX_AFTER_AERIAL_ACE_HP = 14;
 const TURN10_PIDGEOTTO_AFTER_ROCK_SLIDE_HP = 38;
+
+/**
+ * Turn 9's own QUICK_ATTACK HP-drain endpoints (31 -> 24), the owning
+ * adapter for `battleScene.ts`'s `turn9Hp` closed-form call site (species-
+ * dossier slice 3, `docs/species-render-entry-point-retirement-design.md`
+ * §4 row 3), the way `TURN13_DRAGONBREATH_HP.{from,to}` already lives on
+ * `turn13ResolutionAdapter.ts`.
+ */
+export const TURN9_QUICKATTACK_HP: Readonly<{ from: number; to: number }> = Object.freeze({
+  from: TURN9_ONIX_BEFORE_QUICK_ATTACK_HP,
+  to: TURN9_ONIX_AFTER_QUICK_ATTACK_HP,
+});
 
 /** Semantic move/text stream for turn 9 itself, attached to turn 8's receipt. */
 export function resolveTurn9FightCommandUpcoming(): FightCommandUpcomingPresentation {
@@ -45,7 +58,7 @@ export function resolveTurn9FightCommandUpcoming(): FightCommandUpcomingPresenta
         text: { lines: ["Foe PIDGEOTTO used", "QUICK ATTACK!"] },
         hpChange: {
           target: "player",
-          from: 31,
+          from: TURN9_ONIX_BEFORE_QUICK_ATTACK_HP,
           to: TURN9_ONIX_AFTER_QUICK_ATTACK_HP,
         },
         effectiveness: { text: { lines: ["It’s not very effective…"] } },

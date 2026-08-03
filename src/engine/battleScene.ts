@@ -482,7 +482,7 @@ import {
   turn2KickoffTextStartTick,
   turn2SubmenuBounceTickFromPresentationEpochAge,
   turn2KickoffBounceTick,
-  endeavorOnixHp,
+  endeavorHp,
   currentPPForActiveMon,
   FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
   turn6StatFallEva,
@@ -894,10 +894,19 @@ import { TURN1_CHOOSE_ACTION_RESET_AFTER_CONFIRM } from "./turn1ChooseActionRese
 import type { Turn6CompletedResolutionNextCommandHandoff } from "./turn6ResolutionAdapter.ts";
 import type { Turn7CompletedResolutionNextCommandHandoff } from "./turn7ResolutionAdapter.ts";
 import type { Turn8CompletedResolutionNextCommandHandoff } from "./turn8ResolutionAdapter.ts";
-import type { Turn9CompletedResolutionNextCommandHandoff } from "./turn9ResolutionAdapter.ts";
-import type { Turn10CompletedResolutionNextCommandHandoff } from "./turn10ResolutionAdapter.ts";
+import {
+  TURN9_QUICKATTACK_HP,
+  type Turn9CompletedResolutionNextCommandHandoff,
+} from "./turn9ResolutionAdapter.ts";
+import {
+  TURN10_AERIALACE_HP,
+  type Turn10CompletedResolutionNextCommandHandoff,
+} from "./turn10ResolutionAdapter.ts";
 import type { Turn11CompletedResolutionNextCommandHandoff } from "./turn11ResolutionAdapter.ts";
-import type { Turn12CompletedResolutionNextCommandHandoff } from "./turn12ResolutionAdapter.ts";
+import {
+  TURN12_AERIALACE_HP,
+  type Turn12CompletedResolutionNextCommandHandoff,
+} from "./turn12ResolutionAdapter.ts";
 import {
   isLatestCompletedCommandHandoffReady,
   isLatestCompletedCommandLifecycleActive,
@@ -2227,12 +2236,12 @@ function opponentHealthboxContentForHp(hp: number): ReturnType<typeof composeOpp
  * Onix is unchanged at 117/full throughout turn 1.
  */
 const anchorPlayerBattler = BATTLE1_PRESENTATION_HP.player;
-/** Onix's own post-ENDEAVOR HP (`after_turn2.battler0.hp`, 101) - `endeavorOnixHp`'s own settled endpoint. */
+/** Onix's own post-ENDEAVOR HP (`after_turn2.battler0.hp`, 101) - `endeavorHp`'s own settled endpoint. */
 const anchorPlayerAfterTurnHp = BATTLE1_PRESENTATION_HP.playerAfterTurn2Hp;
 
 /**
  * S7 slice E2b: Grovyle's own post-DRAGON_BREATH HP (`battle1-turn2-ram-
- * dump.json`'s `after_turn2.battler1.hp`, 88) - `dragonBreathGrovyleHp`'s
+ * dump.json`'s `after_turn2.battler1.hp`, 88) - `dragonBreathHp`'s
  * own settled endpoint. The drain's own START endpoint is NOT a new
  * constant: `before_turn2.battler1.hp` reads 101, identical to
  * `anchorOpponentAfterTurnHp` (turn 1's own ROCK_SLIDE settle) - Grovyle
@@ -2245,7 +2254,7 @@ const anchorOpponentAfterTurn2Hp = BATTLE1_PRESENTATION_HP.opponentAfterTurn2Hp;
 /**
  * S7 slice G (docs/battle-turn-notes.md §13/§20): Onix's post-turn-3
  * ENDEAVOR hp (88), re-derived as the staged turn-5 ENDEAVOR start (Onix is
- * untouched between those uses). `endeavorOnixHp`'s `endHp` for turn 3 -
+ * untouched between those uses). `endeavorHp`'s `endHp` for turn 3 -
  * turn 2's `anchorPlayerAfterTurnHp` (101) doubles as turn 3's own `startHp`
  * (Onix carries no chip damage between turns 2 and 3, same reasoning
  * `anchorOpponentAfterTurn2Hp`'s own doc already gives for Grovyle).
@@ -2455,7 +2464,7 @@ export function magbyPlayerHealthboxContentForHp(
   return cached;
 }
 
-/** Same memoization shape as `opponentHealthboxContentByHp` - only the 17 distinct integer HPs `endeavorOnixHp` ever produces (117 down to 101) are ever requested. */
+/** Same memoization shape as `opponentHealthboxContentByHp` - only the 17 distinct integer HPs `endeavorHp` ever produces (117 down to 101) are ever requested. */
 const playerHealthboxHpOverlayByHp = new Map<number, ReturnType<typeof composePlayerHealthboxHpOverlay>>();
 function playerHealthboxHpOverlayForHp(hp: number): ReturnType<typeof composePlayerHealthboxHpOverlay> {
   let cached = playerHealthboxHpOverlayByHp.get(hp);
@@ -4294,6 +4303,42 @@ function drawGeneratedOpponentRelease(
   );
 }
 
+const SPECIES_MAGNETON_ID = 82;
+
+/**
+ * ISSUES #56 closure audit (docs/issue56-closure-audit.md §5) + the prior
+ * Round 2 OAM probe (docs/issue56-frames-444-536-oam-probe.md, "Part A"):
+ * `isCanonicalAnchorIntro` alone cannot key `drawBallOpenParticles`'s
+ * `stallLag` for the generated route, because COMBUSKEN (YOSHI's fixture,
+ * wants stallLag 0 - frame 444) and MAGNETON (wants stallLag 1 - frame 437)
+ * are BOTH non-canonical generated routes yet need opposite values at their
+ * shared rawElapsed=31 materialize tick; `1aa13ebb` gave both `0` and
+ * silently regressed MAGNETON (703/751 -> 702/751), since its own landing
+ * check never re-ran that fixture. Neither doc found a species/cry-duration
+ * formula behind the split (Round 2 Part A: "needs its own RAM probe...not
+ * attempted this round") - `generatedBattleStartOpponentHandoffTick` already
+ * normalizes out the only species-dependent delay this subsystem knows
+ * about (opponent send-out text length), so the remaining one-tick gap is a
+ * genuine per-route real-clock phase-alignment fact, the same class the
+ * item 2 display-tail design doc already named for its own sibling
+ * mechanism ("a CPU/VBlank phase fact, not a source-owned tick-granular
+ * lifecycle"). Keyed per opponent species (not per-trainer/trace) so a
+ * future dense comparison against a third generated fixture can extend or
+ * falsify it directly; currently pixel-evidenced (dense oracle comparison,
+ * not a RAM-register probe of the particle mechanism itself) for exactly
+ * one species, MAGNETON.
+ */
+const GENERATED_PARTICLE_STALL_LAG_SPECIES: ReadonlySet<number> = new Set([
+  SPECIES_MAGNETON_ID,
+]);
+
+export function generatedParticleStallLag(state: FactoryBattleStartIntroState): number {
+  if (state.isCanonicalAnchorIntro) return 1;
+  return GENERATED_PARTICLE_STALL_LAG_SPECIES.has(generatedOpponentSpeciesId(state))
+    ? 1
+    : 0;
+}
+
 /**
  * Generated Scene-OFF opponent controller compositor. Every clock is
  * relative to the stored acknowledgement and the typed printer length.
@@ -4389,10 +4434,10 @@ export function renderGeneratedBattleStartOpponentRelease(
   drawGeneratedOpponentRelease(fb, t, handoffTick, fieldView);
   drawSendOutBall(fb, t, handoffTick);
   drawBallOpenParticles(fb, t, handoffTick, "destin", {
-    // The canonical anchor's real pre-battle route retains its proven later
-    // stall publication; arbitrary generated Scene-OFF releases use the
-    // RAM-attributed logical-13 stall directly (ISSUES #56 frame 444).
-    stallLag: state.isCanonicalAnchorIntro ? 1 : 0,
+    // Per-route/species stall value - see `generatedParticleStallLag`'s own
+    // doc comment (ISSUES #56 closure audit) for why this can't collapse to
+    // `isCanonicalAnchorIntro` alone.
+    stallLag: generatedParticleStallLag(state),
     persistentTieWinner14: true,
   });
   if (t === handoffTick) {
@@ -7390,7 +7435,7 @@ function drawActionMenuIdleContent(
   // Menu` already established for this exact overlay, S7 slice E2b-2).
   // S7 slice G: `playerHp` (default `anchorPlayerAfterTurnHp`, every
   // pre-existing caller unaffected) lets turn 3's own still-draining Onix hp
-  // (101->88, `endeavorOnixHp`) reach this same overlay while its fallback
+  // (101->88, `endeavorHp`) reach this same overlay while its fallback
   // idle-content path is active (past `ENDEAVOR_SQUISH_TABLE`'s own window
   // but before the HP drain settles) - see `drawTurn3EndeavorText`.
   if (isTurn3NextCommandHandoffReady(turn3NextCommandHandoff) || isTurn2NextCommandHandoffReady(turn2NextCommandHandoff)) {
@@ -9001,7 +9046,7 @@ const DRAGON_BREATH_BLEND_COLOR: RgbColor = { r: 248, g: 0, b: 0 }; // RGB_RED (
 /**
  * S7 slice E2b (docs/dragon-breath-notes.md "Engine slice E2b"): Grovyle's
  * own HP-bar drain (101->88) at trace tick `t` - same shape as
- * `rockSlideOpponentHp`/`endeavorOnixHp` (1 HP unit/tick, clamped both
+ * `rockSlideOpponentHp`/`endeavorHp` (1 HP unit/tick, clamped both
  * sides, valid for every `t`, no `-1` lag - the same same-frame CPU-copy
  * mechanism both those functions' own docs already reasoned about,
  * independently re-confirmed here via `npm run compare` rather than
@@ -9012,7 +9057,7 @@ const DRAGON_BREATH_BLEND_COLOR: RgbColor = { r: 248, g: 0, b: 0 }; // RGB_RED (
  */
 const DRAGONBREATH_HP_DRAIN_START_DELAY = 353; // pressTick+353 = RAM 3298 (healthBar1Curr sentinel, docs/dragon-breath-notes.md phase table)
 
-export function dragonBreathGrovyleHp(t: number, pressTick: number, startHp: number, endHp: number, startDelay: number = DRAGONBREATH_HP_DRAIN_START_DELAY): number {
+export function dragonBreathHp(t: number, pressTick: number, startHp: number, endHp: number, startDelay: number = DRAGONBREATH_HP_DRAIN_START_DELAY): number {
   const d = t - (pressTick + startDelay);
   return Math.max(endHp, startHp - Math.max(d, 0));
 }
@@ -9063,7 +9108,7 @@ function drawDragonBreathScene(
   latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null = null,
 ): void {
   drawStaticBgShiftedY(fb, 0);
-  const grovyleHp = dragonBreathGrovyleHp(t, pressTick, anchorOpponentAfterTurnHp, anchorOpponentAfterTurn2Hp, TURN2_OFF_DRAGONBREATH_HP_DRAIN_START_DELAY);
+  const grovyleHp = dragonBreathHp(t, pressTick, anchorOpponentAfterTurnHp, anchorOpponentAfterTurn2Hp, TURN2_OFF_DRAGONBREATH_HP_DRAIN_START_DELAY);
   const grovyleContent = opponentHealthboxContentForHp(grovyleHp);
   const hitFlashPressTick = pressTick + (TURN2_OFF_DRAGONBREATH_HIT_FLASH_ANCHOR_DELAY - HIT_FLASH_RAM_ANCHOR_DELAY);
 
@@ -9262,7 +9307,7 @@ const TURN2_ENDEAVOR_HP = resolveTurn2EndeavorHpEndpoints();
 /**
  * ISSUES #39 rank-6 slice 2: turn 2's own ENDEAVOR-half Scene-OFF re-timing
  * (pinned exactly per the banked ISSUES #39 slice-2 findings, pressTick=2945):
- * Onix's own `endeavorOnixHp` drain starts 37 ticks earlier than the ON fit
+ * Onix's own `endeavorHp` drain starts 37 ticks earlier than the ON fit
  * (RAM/pixel-pinned tick 3061, first visible drop 3062). The held ENDEAVOR
  * text and DRAGON_BREATH's own first character swap in the SAME frame -
  * unlike ROCK_SLIDE's own clear/redraw pair (a 7-tick gap), there is no
@@ -9384,12 +9429,12 @@ function drawTurn2KickoffText(
     const wobbleY2 = endeavorHealthboxBounceY2(t, pressTick, TURN2_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START);
     if (wobbleY2 !== 0) drawMenuHealthboxPlayerWobble(fb, wobbleY2);
   }
-  // S7 slice E1b: Onix's own HP-bar drain (117->101, `endeavorOnixHp`) is
+  // S7 slice E1b: Onix's own HP-bar drain (117->101, `endeavorHp`) is
   // valid for every `t` (clamped both sides) - safe to call unconditionally
   // here rather than gating on a separate "drain window" branch, same
   // convention `drawRockSlideAttack`/`drawTurnEndSettledMenu` already use
   // for the opponent's own bar.
-  const onixHp = endeavorOnixHp(t, pressTick, TURN2_ENDEAVOR_HP.from, TURN2_ENDEAVOR_HP.to, TURN2_OFF_ENDEAVOR_HP_DRAIN_START_DELAY);
+  const onixHp = endeavorHp(t, pressTick, TURN2_ENDEAVOR_HP.from, TURN2_ENDEAVOR_HP.to, TURN2_OFF_ENDEAVOR_HP_DRAIN_START_DELAY);
   drawPlayerHealthboxHpOverlay(fb, onixHp, endeavorHealthboxBounceY2(t, pressTick, TURN2_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START));
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   if (t >= dragonBreathStart) {
@@ -9420,7 +9465,7 @@ function drawTurn2KickoffText(
  * not turn-specific. `drawEndeavorSquish` itself, still shared with turn 5
  * (S7 slice K, byte-exact ON, out of scope), is untouched.
  *
- * `endeavorOnixHp`'s drain-start delay is turn-3-specific
+ * `endeavorHp`'s drain-start delay is turn-3-specific
  * (`TURN3_OFF_ENDEAVOR_HP_DRAIN_START_DELAY`, 116 - RAM-confirmed identical
  * relative offset to turn 2's own, same "fixed post-hit overhead" finding).
  * The handoff into ROCK_SLIDE's own kickoff text is a same-frame hard cut
@@ -9465,7 +9510,7 @@ function drawTurn3EndeavorText(
     turn2NextCommandHandoff,
     turn2Content,
   );
-  const onixHp = endeavorOnixHp(t, pressTick, anchorPlayerAfterTurnHp, anchorPlayerAfterTurn3Hp, TURN3_OFF_ENDEAVOR_HP_DRAIN_START_DELAY);
+  const onixHp = endeavorHp(t, pressTick, anchorPlayerAfterTurnHp, anchorPlayerAfterTurn3Hp, TURN3_OFF_ENDEAVOR_HP_DRAIN_START_DELAY);
   drawActionMenuIdleContent(
     fb,
     bounceTick,
@@ -10123,7 +10168,7 @@ function drawTurn5EndeavorText(
     return;
   }
   const bounceTick = turn5KickoffBounceTick(t, pressTick, turn4NextCommandHandoff);
-  const onixHp = endeavorOnixHp(t, pressTick, TURN5_ENDEAVOR_HP.from, TURN5_ENDEAVOR_HP.to);
+  const onixHp = endeavorHp(t, pressTick, TURN5_ENDEAVOR_HP.from, TURN5_ENDEAVOR_HP.to);
   if (drawEndeavorSquish(fb, t, pressTick, anchorOpponentAfterTurn4Hp, bounceTick, ROCK_SLIDE_MOVE_POWER)) {
     drawPlayerHealthboxHpOverlay(fb, onixHp, endeavorHealthboxBounceY2(t, pressTick));
   } else {
@@ -10308,16 +10353,34 @@ function turn5BgFadeY(t: number): number {
 }
 
 /**
+ * ISSUES #39 rank-3 flip, half 2 (species-dossier slice 7 extension): the
+ * real Sitrus-heal fact source (`turn5ResolutionAdapter.ts`'s
+ * `resolveTurn5SitrusAdapter`), chaining Onix's own real held-item proc
+ * (`runBattleEndTurnOrchestration`'s already-ported `HOLD_EFFECT_RESTORE_HP`
+ * case) instead of independently re-stating the heal's HP endpoints/message
+ * text here - reused below for `TURN5_SITRUS_HEAL_LINE1`/`_LINE2` and
+ * `TURN5_SITRUS_HEAL_HP_START`/`_END`, same "module-level constant derived
+ * once at import time" discipline `TURN5_SWITCHIN` already established.
+ * Hoisted ahead of the rotate/ring/star timing block below (species-dossier
+ * slice 7, docs/species-render-entry-point-retirement-design.md §4 row 7):
+ * every one of the seven family-B wrappers' shared age epoch now derives
+ * from this adapter's own `procTriggerRamTick`/`onFieldCenter`, not an
+ * independently hand-derived battleScene.ts literal.
+ */
+const TURN5_SITRUS = resolveTurn5SitrusAdapter();
+
+/**
  * S7 slice M-3 (docs/faint-switch-notes.md §12/§13): Onix's own Sitrus
  * Berry proc opening stage - `General_HeldItemEffect`'s first 3
  * `AnimTask_RotateMonToSideAndRestore` calls, a genuine GBA affine-OAM
  * rotation of Onix's own back sprite. Table RAM-read directly
  * (`gOamMatrices[matrixNum]`, `tools/probe/dump-onix-sitrus-rotate-matrix.py`,
- * cross-checked twice), anchored at RAM tick 6872 (identity/cycle-start),
- * one 32-RAM-tick cycle repeated 3x verbatim through RAM tick 6968 (all 3
- * cycles byte-identical, RAM-diffed this session). `y2` is the
- * `SetBattlerSpriteYOffsetFromRotation` byproduct (`|c|>>3`, RAM-confirmed
- * 100% - not a separate table).
+ * cross-checked twice), anchored at RAM tick 6872 (identity/cycle-start,
+ * now `TURN5_SITRUS.procTriggerRamTick` - see `turn5ResolutionAdapter.ts`'s
+ * own `ONIX_SITRUS_PROC_TRIGGER_RAM_TICK` doc), one 32-RAM-tick cycle
+ * repeated 3x verbatim through RAM tick 6968 (all 3 cycles byte-identical,
+ * RAM-diffed this session). `y2` is the `SetBattlerSpriteYOffsetFromRotation`
+ * byproduct (`|c|>>3`, RAM-confirmed 100% - not a separate table).
  *
  * **The render-tick offset from the RAM tick is +2, not the usual +1**
  * (this run's ordinary OAM-shadow-buffer-to-hardware-DMA lag, e.g.
@@ -10342,11 +10405,34 @@ function turn5BgFadeY(t: number): number {
  * rounding/axis variants (round-to-nearest, pixel-center bias, transpose,
  * matrix inverse) - `floor`, unchanged, was the closest to the oracle at
  * every single one, confirming the existing convention was already right.
+ *
+ * species-dossier slice 7 (docs/species-render-entry-point-retirement-
+ * design.md §5 trap 3): `turn5SitrusRingMatrix`'s own doc below records a
+ * SEPARATE, independently-measured **+1** render lag for the ring/star
+ * mechanism - kept as its own named `TURN5_SITRUS_RING_RENDER_LAG` constant
+ * so the two facts stay distinct in code rather than silently merged into
+ * one "the" lag. It is NOT used to compute a second epoch here:
+ * `heldItemHeal.ts`'s own `SITRUS_ITEM_RING_FIRST_AGE`/
+ * `_STAR_FIRST_VISIBLE_AGE`/etc constants were all fit against the SAME
+ * `ONIX_SITRUS_IDENTITY_RENDER_TICK` epoch below (the rotate mechanism's
+ * own +2-lag anchor) - re-deriving a second, ring-specific epoch from the
+ * +1 fact would double-count the correction and drift the ring/stars a
+ * tick early against every other family-B wrapper. The guard immediately
+ * below turns that "must stay 1 apart" invariant into a build-time-cheap
+ * runtime check instead of a comment alone, so an incidental future edit
+ * to either constant fails loudly instead of silently drifting.
  */
-const ONIX_SITRUS_RENDER_LAG = 2;
-const ONIX_SITRUS_RAM_ANCHOR_TICK = 6872;
+const ONIX_SITRUS_ROTATE_RENDER_LAG = 2;
+const TURN5_SITRUS_RING_RENDER_LAG = 1;
+if (ONIX_SITRUS_ROTATE_RENDER_LAG - TURN5_SITRUS_RING_RENDER_LAG !== 1) {
+  throw new Error(
+    "battleScene.ts: onixSitrusRotateMatrix's/turn5SitrusRingMatrix's own documented 1-tick "
+      + "render-lag asymmetry drifted - re-audit heldItemHeal.ts's SITRUS_ITEM_*_FIRST_AGE fits "
+      + "before changing either constant",
+  );
+}
 const ONIX_SITRUS_IDENTITY_RENDER_TICK =
-  ONIX_SITRUS_RAM_ANCHOR_TICK + ONIX_SITRUS_RENDER_LAG;
+  TURN5_SITRUS.procTriggerRamTick + ONIX_SITRUS_ROTATE_RENDER_LAG;
 
 /** `null` means "identity - let the plain static draw handle it" (both outside the rotation's own render window, and at the table's own identity entries). */
 export function onixSitrusRotateMatrix(t: number): { pa: number; pb: number; pc: number; pd: number; y2: number } | null {
@@ -10441,18 +10527,6 @@ function drawGrantingStarsAtAge(
     }
   }
 }
-
-/**
- * ISSUES #39 rank-3 flip, half 2: the real Sitrus-heal fact source
- * (`turn5ResolutionAdapter.ts`'s `resolveTurn5SitrusAdapter`), chaining
- * Onix's own real held-item proc (`runBattleEndTurnOrchestration`'s already-
- * ported `HOLD_EFFECT_RESTORE_HP` case) instead of independently re-stating
- * the heal's HP endpoints/message text here - reused below for
- * `TURN5_SITRUS_HEAL_LINE1`/`_LINE2` and `TURN5_SITRUS_HEAL_HP_START`/`_END`,
- * same "module-level constant derived once at import time" discipline
- * `TURN5_SWITCHIN` already established.
- */
-const TURN5_SITRUS = resolveTurn5SitrusAdapter();
 
 /**
  * S7 slice M-5 (docs/faint-switch-notes.md §15): "ONIX's SITRUS BERRY\n
@@ -10580,15 +10654,18 @@ export function onixSitrusTintCoeff(t: number): number {
  * (`b=c=0` always, `a=d` always) - never a rotation - so it does NOT
  * inherit that mechanism's own +2 render lag (rotation-matrix-specific,
  * per §13's own rationale and §29's independent confirmation it doesn't
- * generalize); this one uses the dossier's ordinary **+1** lag instead,
- * verified pixel-exact with zero fitted parameters at two sample ticks
- * (6/6 opaque px at render 7042, 92/92 at render 7048). Center `(72,88)`
- * is RAM-constant for the sprite's whole life (the ring's own sprite x/y
- * directly - 8px below `onixSitrusRotateMatrix`'s own call-site center,
- * from `AnimSpriteOnMonPos`'s mon-pic Y offset that Onix's own hardcoded
- * rotation call never applies).
+ * generalize); this one uses the dossier's ordinary **+1** lag instead
+ * (`TURN5_SITRUS_RING_RENDER_LAG` above), verified pixel-exact with zero
+ * fitted parameters at two sample ticks (6/6 opaque px at render 7042,
+ * 92/92 at render 7048). Center `(72,88)` is RAM-constant for the sprite's
+ * whole life (the ring's own sprite x/y directly - 8px below
+ * `onixSitrusRotateMatrix`'s own call-site center, from
+ * `AnimSpriteOnMonPos`'s mon-pic Y offset that Onix's own hardcoded
+ * rotation call never applies) - species-dossier slice 7: now
+ * `TURN5_SITRUS.onFieldCenter`, `turn5ResolutionAdapter.ts`'s own adapter-
+ * owned fact, not an independently hand-derived literal here.
  */
-export const TURN5_SITRUS_RING_CENTER = { x: 72, y: 88 };
+export const TURN5_SITRUS_RING_CENTER = TURN5_SITRUS.onFieldCenter;
 
 /**
  * `null` outside the ring's own live RAM window (`[7040,7071]`, i.e.
@@ -11032,7 +11109,9 @@ export const TURN5_BALL_HANDOFF_TICK = 6727;
  *    (true colors) for this entire phase (confirmed via the same palette
  *    probe). Settles to the plain, untransformed sprite at
  *    `TURN5_PIDGEOTTO_SETTLE_TICK` (RAM 6827's own idle callback, visible
- *    render 6828).
+ *    render 6828) - species-dossier slice 7: now
+ *    `TURN5_SWITCHIN.materializeSettleTick`, `turn5ResolutionAdapter.ts`'s
+ *    own adapter-owned fact, not an independently hand-derived literal here.
  *
  * Front-sprite frame selection (`turn5PidgeottoFrame`) uses the RAM-
  * confirmed `animCmdIndex` transition ticks directly (render = RAM+1: 6761,
@@ -11110,7 +11189,7 @@ const TURN5_STRETCH_TABLE: readonly { xScale: number; yScale: number; y2: number
   { xScale: 257, yScale: 253, y2: 0 },
   { xScale: 256, yScale: 256, y2: 0 },
 ];
-export const TURN5_PIDGEOTTO_SETTLE_TICK = 6828;
+export const TURN5_PIDGEOTTO_SETTLE_TICK = TURN5_SWITCHIN.materializeSettleTick;
 
 /**
  * S7 slice M (docs/faint-switch-notes.md §8e/§3d): Pidgeotto's own opponent
@@ -13117,7 +13196,7 @@ export function turn9Ep2OnixInvisible(t: number, pressTick: number, start: numbe
 
 /**
  * S7 slice R rung (c4) (docs/turn9-shake-notes.md 2026-07-21 addendum §1):
- * Onix's own HP-bar drain (31->24), same shape as `endeavorOnixHp` (1 HP
+ * Onix's own HP-bar drain (31->24), same shape as `endeavorHp` (1 HP
  * unit/tick, clamped, render tick == RAM tick directly - NO extra lag, the
  * same "same-frame CPU-copy" mechanism, independently re-confirmed for this
  * turn rather than assumed). `TURN9_HP_DRAIN_START_DELAY=121` anchors to the
@@ -13126,9 +13205,7 @@ export function turn9Ep2OnixInvisible(t: number, pressTick: number, start: numbe
  * DELAY`'s own convention.
  */
 const TURN9_HP_DRAIN_START_DELAY = 119; // ISSUES #39 rank-5 slice 1: Scene-OFF RAM sentinel tick 10990 - pressTick(10871), dump-turn9-hitanim-off.py's own bar0Curr read (was 121 on the retired ON pin, same 2-tick shift as the wobble/flicker starts above)
-/** Onix's own HP entering turn 9 (flat 31, unchanged since turn 5's own Sitrus heal - `turn5SitrusOnixHp`'s own settled endpoint) - `turn9OnixHp`'s own `startHp`. */
-const TURN9_ONIX_BEFORE_QUICKATTACK_HP = 31;
-export function turn9OnixHp(t: number, pressTick: number, startHp: number, endHp: number): number {
+export function turn9Hp(t: number, pressTick: number, startHp: number, endHp: number): number {
   const d = t - (pressTick + TURN9_HP_DRAIN_START_DELAY);
   return Math.max(endHp, startHp - Math.max(d, 0));
 }
@@ -13179,7 +13256,9 @@ function drawTurn9QuickAttackWindow(fb: Uint8Array, t: number, pressTick: number
   const bounceTick = turn9KickoffBounceTick(t, pressTick);
   const onixInvisible = turn9Ep2OnixInvisible(t, pressTick);
   const healthboxY2 = turn9Ep2HealthboxWobbleY2(t, pressTick);
-  const onixHp = turn9OnixHp(t, pressTick, TURN9_ONIX_BEFORE_QUICKATTACK_HP, TURN9_ONIX_AFTER_QUICKATTACK_HP);
+  // `TURN9_QUICKATTACK_HP.from` (31) is Onix's own HP entering turn 9, unchanged
+  // since turn 5's own Sitrus heal - `turn5SitrusOnixHp`'s own settled endpoint.
+  const onixHp = turn9Hp(t, pressTick, TURN9_QUICKATTACK_HP.from, TURN9_ONIX_AFTER_QUICKATTACK_HP);
   drawTurn9FieldBase(fb, t, bounceTick, undefined, onixHp, 0, onixInvisible, healthboxY2);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const notVeryEffectiveStart = turn9NotVeryEffectiveTextStartTick(pressTick);
@@ -13434,9 +13513,11 @@ export function turn9ResettledBounceTick(t: number, pressTick: number): number {
 /**
  * Onix's own HP entering turn 10 (docs/turn10-notes.md §4: "24 -> 14
  * (-10, AERIAL_ACE)" - the pre-hit value), turn 9's own QUICK_ATTACK drain
- * (31->24) landing during this session's own out-of-scope window.
+ * (31->24) landing during this session's own out-of-scope window. Sourced
+ * from `turn9ResolutionAdapter.ts`'s own `TURN9_QUICKATTACK_HP.to`, the
+ * owning adapter for this window's HP-drain endpoints.
  */
-const TURN9_ONIX_AFTER_QUICKATTACK_HP = 24;
+const TURN9_ONIX_AFTER_QUICKATTACK_HP = TURN9_QUICKATTACK_HP.to;
 
 /**
  * Pidgeotto's own HP entering turn 10 (docs/turn10-notes.md §4: "61 -> 38
@@ -13524,13 +13605,18 @@ export function turn10AerialAceTextVisibleChars(t: number, pressTick: number): n
 
 /**
  * S7 slice R rung (a) (docs/turn10-notes.md's 2026-07-21 addendum §2): Onix's
- * own AERIAL_ACE drain (24->14), same shape as `turn9OnixHp`/`endeavorOnixHp`
+ * own AERIAL_ACE drain (24->14), same shape as `turn9Hp`/`endeavorHp`
  * (1 HP unit/tick, clamped, render tick == RAM tick directly) but its own
  * named delay - RAM sentinel `-32768` @ 12441, `pressTick`(12305)+136.
  */
 const TURN10_AERIALACE_HP_DRAIN_START_DELAY = 136;
-/** Onix's own HP after turn 10's AERIAL_ACE hit (docs/turn10-notes.md addendum §2: 24->14, -10). */
-const TURN10_ONIX_AFTER_AERIALACE_HP = 14;
+/**
+ * Onix's own HP after turn 10's AERIAL_ACE hit (docs/turn10-notes.md addendum
+ * §2: 24->14, -10). Sourced from `turn10ResolutionAdapter.ts`'s own
+ * `TURN10_AERIALACE_HP.to`, the owning adapter for this window's HP-drain
+ * endpoints.
+ */
+const TURN10_ONIX_AFTER_AERIALACE_HP = TURN10_AERIALACE_HP.to;
 /**
  * ISSUES #39 rank-5 slice 2 (Scene-OFF): RAM-confirmed (`dump-turn9-hitanim-off.py`
  * against `turn10-aerialace-off.json`, ticks 12305-12440) - the HP-bar
@@ -13538,14 +13624,14 @@ const TURN10_ONIX_AFTER_AERIALACE_HP = 14;
  * was 136 on the ON-fit `TURN10_AERIALACE_HP_DRAIN_START_DELAY` above, a
  * modest 19-tick compression since AERIAL_ACE's own ON animation was
  * already fairly short before `attackanimation`'s `Pausex20` substitute).
- * `startDelay` (added to `turn10AerialAceOnixHp` below, default = the
+ * `startDelay` (added to `turn10AerialAceHp` below, default = the
  * ON-fit constant, every pre-existing caller - including turn 12's own
  * still-ON-fit `drawTurn12AerialAceWindow` - unaffected) is the SAME
  * "generalize a hardcoded value into a defaulted param" idiom `rockSlideOpponentHp`'s
  * own `startDelay` override already established in slice 1.
  */
 const TURN10_OFF_AERIALACE_HP_DRAIN_START_DELAY = 117;
-export function turn10AerialAceOnixHp(t: number, pressTick: number, startHp: number, endHp: number, startDelay: number = TURN10_AERIALACE_HP_DRAIN_START_DELAY): number {
+export function turn10AerialAceHp(t: number, pressTick: number, startHp: number, endHp: number, startDelay: number = TURN10_AERIALACE_HP_DRAIN_START_DELAY): number {
   const d = t - (pressTick + startDelay);
   return Math.max(endHp, startHp - Math.max(d, 0));
 }
@@ -13908,7 +13994,7 @@ function drawTurn10AerialAceWindow(fb: Uint8Array, t: number, pressTick: number)
     return;
   }
   const bounceTick = turn10KickoffBounceTick(t, pressTick);
-  const onixHp = turn10AerialAceOnixHp(t, pressTick, TURN9_ONIX_AFTER_QUICKATTACK_HP, TURN10_ONIX_AFTER_AERIALACE_HP, TURN10_OFF_AERIALACE_HP_DRAIN_START_DELAY);
+  const onixHp = turn10AerialAceHp(t, pressTick, TURN10_AERIALACE_HP.from, TURN10_AERIALACE_HP.to, TURN10_OFF_AERIALACE_HP_DRAIN_START_DELAY);
   const onixInvisible = turn9Ep2OnixInvisible(t, pressTick, TURN10_OFF_ONIX_FLICKER_START);
   const healthboxY2 = turn9Ep2HealthboxWobbleY2(t, pressTick, TURN10_OFF_ONIX_HEALTHBOX_WOBBLE_START);
   drawTurn10FieldBase(fb, t, bounceTick, undefined, onixHp, 0, false, onixInvisible, healthboxY2);
@@ -14344,8 +14430,13 @@ function turn12KickoffBounceTick(t: number, pressTick: number): number {
   return TURN11_ROCKSLIDE_PRESS_TICK + TURN11_ROCKSLIDE_MENU_REDRAW_DELAY;
 }
 
-/** Onix's own HP after turn 12's AERIAL_ACE hit (docs/turn12-notes.md §4: 14->4, -10). */
-const TURN12_ONIX_AFTER_AERIALACE_HP = 4;
+/**
+ * Onix's own HP after turn 12's AERIAL_ACE hit (docs/turn12-notes.md §4:
+ * 14->4, -10). Sourced from `turn12ResolutionAdapter.ts`'s own
+ * `TURN12_AERIALACE_HP.to`, the owning adapter for this window's HP-drain
+ * endpoints.
+ */
+const TURN12_ONIX_AFTER_AERIALACE_HP = TURN12_AERIALACE_HP.to;
 
 /**
  * ISSUES #39 rank-5 slice 3 (Scene-OFF): turn 12's own AERIAL_ACE anchors,
@@ -14383,7 +14474,7 @@ function drawTurn12AerialAceWindow(fb: Uint8Array, t: number, pressTick: number)
     return;
   }
   const bounceTick = turn12KickoffBounceTick(t, pressTick);
-  const onixHp = turn10AerialAceOnixHp(t, pressTick, TURN10_ONIX_AFTER_AERIALACE_HP, TURN12_ONIX_AFTER_AERIALACE_HP, TURN12_OFF_AERIALACE_HP_DRAIN_START_DELAY);
+  const onixHp = turn10AerialAceHp(t, pressTick, TURN12_AERIALACE_HP.from, TURN12_AERIALACE_HP.to, TURN12_OFF_AERIALACE_HP_DRAIN_START_DELAY);
   const onixInvisible = turn9Ep2OnixInvisible(t, pressTick, TURN12_OFF_ONIX_FLICKER_START);
   const healthboxY2 = turn9Ep2HealthboxWobbleY2(t, pressTick, TURN12_OFF_ONIX_HEALTHBOX_WOBBLE_START);
   drawTurn12FieldBase(fb, t, bounceTick, undefined, onixHp, 0, false, onixInvisible, healthboxY2);
@@ -14586,7 +14677,7 @@ export const TURN13_REGIME8_TO_REGIME1_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - (
 /**
  * S7/S8 turn 13 rung 3: `pidgeottoHp` (default `TURN11_PIDGEOTTO_AFTER_
  * ROCKSLIDE_HP`, unchanged for every pre-existing call site) lets
- * DRAGON_BREATH's own drain (`dragonBreathGrovyleHp`, reused verbatim) feed
+ * DRAGON_BREATH's own drain (`dragonBreathHp`, reused verbatim) feed
  * Pidgeotto's own healthbox a live 16->0 value instead of the flat entering
  * value; `pidgeottoSink`/`pidgeottoHealthboxVisible` thread straight
  * through to `drawTurn6FieldBase` (region A/B, opponent side) - see that
@@ -14997,7 +15088,7 @@ function drawTurn13SandAttackWindow(
  * this session - no real button press precedes Onix's own second move this
  * turn, so this is a synthetic anchor exactly like `TURNn_ROCKSLIDE_PRESS_
  * TICK` for the AI-adjacent second half of a turn); HP-drain reuses
- * `dragonBreathGrovyleHp` VERBATIM (Pidgeotto's own 16->0, the same 1-unit/
+ * `dragonBreathHp` VERBATIM (Pidgeotto's own 16->0, the same 1-unit/
  * tick drain, `DRAGONBREATH_HP_DRAIN_START_DELAY` unchanged - the RNG
  * ledger's own "+3 tick" secondary-roll offset is fully explained by the
  * longer drain alone, docs/turn13-notes.md §2). The fire-projectile/shake/
@@ -15070,7 +15161,7 @@ function drawDragonBreathKoWindow(
     return;
   }
   const frozenBounceTick = turn13KickoffBounceTick(t, sandAttackPressTick);
-  const hp = dragonBreathGrovyleHp(
+  const hp = dragonBreathHp(
     t,
     dbPressTick,
     TURN13_DRAGONBREATH_HP.from,
@@ -16657,7 +16748,7 @@ function drawTurn15ImpactHitsplat(fb: Uint8Array, t: number): void {
  */
 /**
  * Onix's own HP-bar drain (4->0), the player-side HP-digit/band overlay
- * machinery `endeavorOnixHp`/`turn9OnixHp` already establish (1 HP/tick,
+ * machinery `endeavorHp`/`turn9Hp` already establish (1 HP/tick,
  * clamped both ends) - already validated across the WHOLE 0-117 domain
  * (ISSUES #16 history: the yellow/red bands, the hp=1 red sliver, the
  * truly-empty bar), so this turn just plugs in the real start/end values.

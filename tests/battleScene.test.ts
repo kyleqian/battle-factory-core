@@ -10,7 +10,7 @@ import {
   cursorState,
   CURSOR_START_TICK,
   DRAGON_BREATH_MOVE_POWER,
-  dragonBreathGrovyleHp,
+  dragonBreathHp,
   drawSpriteSheetAffineRotate,
   endeavorShakeSteps,
   evaEvb,
@@ -72,7 +72,7 @@ import {
   TURN8_MENU_REDRAW_DELAY,
   turn9Ep2HealthboxWobbleY2,
   turn9Ep2OnixInvisible,
-  turn9OnixHp,
+  turn9Hp,
   turn9NotVeryEffectiveTextStartTick,
   turn9NotVeryEffectiveTextVisibleChars,
   turn9SuperEffectiveTextStartTick,
@@ -80,7 +80,7 @@ import {
   TURN9_ROCKSLIDE_PRESS_TICK,
   TURN9_ROCKSLIDE_HP_DRAIN_START_DELAY,
   windowRange,
-  turn10AerialAceOnixHp,
+  turn10AerialAceHp,
   turn10NotVeryEffectiveTextStartTick,
   turn10NotVeryEffectiveTextVisibleChars,
   TURN10_ROCKSLIDE_PRESS_TICK,
@@ -1515,33 +1515,33 @@ describe("S7 slice E1 tail (docs/battle-menu-notes.md §15f): the player healthb
 // DRAGON_BREATH's own resolution half - Grovyle's HP-bar drain, the
 // hit-flash (reused verbatim from `rockSlideHealthboxWobbleY2`/
 // `rockSlideMonBlinkInvisible`, `battleMenu.ts`), the kickoff text's own
-// clear-to-blank, and the turn-3 resettled action menu. `dragonBreathGrovyleHp`
-// is tested directly (same style `rockSlideOpponentHp`/`endeavorOnixHp`
+// clear-to-blank, and the turn-3 resettled action menu. `dragonBreathHp`
+// is tested directly (same style `rockSlideOpponentHp`/`endeavorHp`
 // already get in `tests/battleMenu.test.ts`); the rest is dispatch/wiring,
 // pinned via real framebuffer pixels instead - all oracle-cross-checked
 // against this session's own extended `turn2-dragonbreath.json` capture
 // (`npm run compare`, 166/166 green over 3264-3346 minus the single named
 // residual tick 3337, see the doc's own "Engine slice E2b" section), not
 // hand-picked.
-describe("S7 slice E2b: dragonBreathGrovyleHp (docs/dragon-breath-notes.md)", () => {
+describe("S7 slice E2b: dragonBreathHp (docs/dragon-breath-notes.md)", () => {
   const pressTick = 2945;
   const startHp = 101;
   const endHp = 88;
 
   it("full HP through the sentinel tick, then exactly 1 HP/tick down to endHp, settled forever after", () => {
-    expect(dragonBreathGrovyleHp(3297, pressTick, startHp, endHp)).toBe(101);
-    expect(dragonBreathGrovyleHp(3298, pressTick, startHp, endHp)).toBe(101); // sentinel tick itself, no visible drop yet
-    expect(dragonBreathGrovyleHp(3299, pressTick, startHp, endHp)).toBe(100); // first drained tick
-    expect(dragonBreathGrovyleHp(3311, pressTick, startHp, endHp)).toBe(88); // d=13, last decrement, already at endHp
-    expect(dragonBreathGrovyleHp(3312, pressTick, startHp, endHp)).toBe(88); // done sentinel tick, settled
-    expect(dragonBreathGrovyleHp(3400, pressTick, startHp, endHp)).toBe(88); // stays settled indefinitely
+    expect(dragonBreathHp(3297, pressTick, startHp, endHp)).toBe(101);
+    expect(dragonBreathHp(3298, pressTick, startHp, endHp)).toBe(101); // sentinel tick itself, no visible drop yet
+    expect(dragonBreathHp(3299, pressTick, startHp, endHp)).toBe(100); // first drained tick
+    expect(dragonBreathHp(3311, pressTick, startHp, endHp)).toBe(88); // d=13, last decrement, already at endHp
+    expect(dragonBreathHp(3312, pressTick, startHp, endHp)).toBe(88); // done sentinel tick, settled
+    expect(dragonBreathHp(3400, pressTick, startHp, endHp)).toBe(88); // stays settled indefinitely
   });
 
   it("is value-agnostic (works for any startHp/endHp pair, not just this trace's 101/88)", () => {
-    expect(dragonBreathGrovyleHp(3298, pressTick, 200, 150)).toBe(200);
-    expect(dragonBreathGrovyleHp(3299, pressTick, 200, 150)).toBe(199);
-    expect(dragonBreathGrovyleHp(3348, pressTick, 200, 150)).toBe(150); // d=50, exactly startHp-endHp
-    expect(dragonBreathGrovyleHp(3400, pressTick, 200, 150)).toBe(150);
+    expect(dragonBreathHp(3298, pressTick, 200, 150)).toBe(200);
+    expect(dragonBreathHp(3299, pressTick, 200, 150)).toBe(199);
+    expect(dragonBreathHp(3348, pressTick, 200, 150)).toBe(150); // d=50, exactly startHp-endHp
+    expect(dragonBreathHp(3400, pressTick, 200, 150)).toBe(150);
   });
 });
 
@@ -2179,20 +2179,20 @@ describe("S7 engine step PART 2 (npm run compare pixel-bisected, not previously 
   });
 });
 
-describe("ISSUES #39 rank-5 slice 1: turn9OnixHp - Onix's own HP-bar drain (31->24), re-anchored to Scene OFF, same no-extra-lag family as endeavorOnixHp (dump-turn9-hitanim-off.py's own bar0Curr read)", () => {
+describe("ISSUES #39 rank-5 slice 1: turn9Hp - Onix's own HP-bar drain (31->24), re-anchored to Scene OFF, same no-extra-lag family as endeavorHp (dump-turn9-hitanim-off.py's own bar0Curr read)", () => {
   const pressTick = 10871;
   it("holds startHp through the sentinel tick (render 10990)", () => {
-    expect(turn9OnixHp(10985, pressTick, 31, 24)).toBe(31);
-    expect(turn9OnixHp(10990, pressTick, 31, 24)).toBe(31);
+    expect(turn9Hp(10985, pressTick, 31, 24)).toBe(31);
+    expect(turn9Hp(10990, pressTick, 31, 24)).toBe(31);
   });
   it("drains 1 HP-unit/tick over renders 10991-10997", () => {
-    expect(turn9OnixHp(10991, pressTick, 31, 24)).toBe(30);
-    expect(turn9OnixHp(10994, pressTick, 31, 24)).toBe(27);
-    expect(turn9OnixHp(10997, pressTick, 31, 24)).toBe(24);
+    expect(turn9Hp(10991, pressTick, 31, 24)).toBe(30);
+    expect(turn9Hp(10994, pressTick, 31, 24)).toBe(27);
+    expect(turn9Hp(10997, pressTick, 31, 24)).toBe(24);
   });
   it("clamps at endHp from render 10998 on", () => {
-    expect(turn9OnixHp(10998, pressTick, 31, 24)).toBe(24);
-    expect(turn9OnixHp(11050, pressTick, 31, 24)).toBe(24);
+    expect(turn9Hp(10998, pressTick, 31, 24)).toBe(24);
+    expect(turn9Hp(11050, pressTick, 31, 24)).toBe(24);
   });
 });
 
@@ -2245,18 +2245,18 @@ describe("ISSUES #39 rank-5 slice 1: turn9SuperEffectiveTextStartTick/turn9Super
   });
 });
 
-describe("S7 slice R rung (a): turn10AerialAceOnixHp - Onix's own AERIAL_ACE drain (24->14), same no-extra-lag family as turn9OnixHp (docs/turn10-notes.md 2026-07-21 addendum §2)", () => {
+describe("S7 slice R rung (a): turn10AerialAceHp - Onix's own AERIAL_ACE drain (24->14), same no-extra-lag family as turn9Hp (docs/turn10-notes.md 2026-07-21 addendum §2)", () => {
   const pressTick = 12305;
   it("stays at startHp through the sentinel tick (12441 = pressTick+136)", () => {
-    expect(turn10AerialAceOnixHp(12430, pressTick, 24, 14)).toBe(24);
-    expect(turn10AerialAceOnixHp(12441, pressTick, 24, 14)).toBe(24);
+    expect(turn10AerialAceHp(12430, pressTick, 24, 14)).toBe(24);
+    expect(turn10AerialAceHp(12441, pressTick, 24, 14)).toBe(24);
   });
   it("decrements 1 HP/tick from 12442, clamping at endHp", () => {
-    expect(turn10AerialAceOnixHp(12442, pressTick, 24, 14)).toBe(23);
-    expect(turn10AerialAceOnixHp(12446, pressTick, 24, 14)).toBe(19);
-    expect(turn10AerialAceOnixHp(12451, pressTick, 24, 14)).toBe(14);
-    expect(turn10AerialAceOnixHp(12453, pressTick, 24, 14)).toBe(14);
-    expect(turn10AerialAceOnixHp(12500, pressTick, 24, 14)).toBe(14);
+    expect(turn10AerialAceHp(12442, pressTick, 24, 14)).toBe(23);
+    expect(turn10AerialAceHp(12446, pressTick, 24, 14)).toBe(19);
+    expect(turn10AerialAceHp(12451, pressTick, 24, 14)).toBe(14);
+    expect(turn10AerialAceHp(12453, pressTick, 24, 14)).toBe(14);
+    expect(turn10AerialAceHp(12500, pressTick, 24, 14)).toBe(14);
   });
 });
 
@@ -2474,13 +2474,13 @@ describe("S7/S8: turn13AccFellTextStartTick/turn13AccFellTextVisibleChars - 'ONI
 });
 
 describe("S7/S8 turn 13 rung 3 (docs/turn13-notes.md §4/§5/§7): DRAGON_BREATH re-targeted at Pidgeotto - HP drain, faint sink, and the KO-dismiss gate", () => {
-  it("dragonBreathGrovyleHp reused verbatim for Pidgeotto's own 16->0 endpoints at the new synthetic anchor (TURN13_DRAGONBREATH_PRESS_TICK) - pre-drain holds 16, drains 1 unit/tick, clamps to 0", () => {
+  it("dragonBreathHp reused verbatim for Pidgeotto's own 16->0 endpoints at the new synthetic anchor (TURN13_DRAGONBREATH_PRESS_TICK) - pre-drain holds 16, drains 1 unit/tick, clamps to 0", () => {
     const P = TURN13_DRAGONBREATH_PRESS_TICK;
-    const DRAIN_START_DELAY = 353; // same constant dragonBreathGrovyleHp's own module doc cites, oracle-confirmed unchanged for turn 13 (npm run compare: turn13-dragonbreath-faint.json 141/141, 0 diff across the whole HP-drain window)
-    expect(dragonBreathGrovyleHp(P + DRAIN_START_DELAY - 1, P, 16, 0)).toBe(16);
-    expect(dragonBreathGrovyleHp(P + DRAIN_START_DELAY + 8, P, 16, 0)).toBe(8);
-    expect(dragonBreathGrovyleHp(P + DRAIN_START_DELAY + 16, P, 16, 0)).toBe(0);
-    expect(dragonBreathGrovyleHp(P + DRAIN_START_DELAY + 500, P, 16, 0)).toBe(0);
+    const DRAIN_START_DELAY = 353; // same constant dragonBreathHp's own module doc cites, oracle-confirmed unchanged for turn 13 (npm run compare: turn13-dragonbreath-faint.json 141/141, 0 diff across the whole HP-drain window)
+    expect(dragonBreathHp(P + DRAIN_START_DELAY - 1, P, 16, 0)).toBe(16);
+    expect(dragonBreathHp(P + DRAIN_START_DELAY + 8, P, 16, 0)).toBe(8);
+    expect(dragonBreathHp(P + DRAIN_START_DELAY + 16, P, 16, 0)).toBe(0);
+    expect(dragonBreathHp(P + DRAIN_START_DELAY + 500, P, 16, 0)).toBe(0);
   });
 
   it("grovyleFaintSinkRowsAndY2 re-anchored for Pidgeotto's own faint (S=15960, n=7 for yOffset=11, vs. Grovyle's own S=6502/n=8) - same closed form, new params", () => {

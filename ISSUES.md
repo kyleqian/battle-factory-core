@@ -5,8 +5,8 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-**Two kinds of entry live here — do not confuse them.** `#39`, `#55`, `#56`,
-and `#62` are open, actionable debt. `#38`, `#18`, `#61`, and `#5` are
+**Two kinds of entry live here — do not confuse them.** `#39`, `#55`, `#69`,
+and `#70` are open, actionable debt. `#38`, `#18`, `#56`, `#61`, and `#5` are
 **settled records, not work**: each was investigated to root cause and then
 parked or accepted by decision. They stay because ROADMAP acceptance lines
 cite them by number as the recorded reason specific pixel diffs are accepted
@@ -17,66 +17,65 @@ backlog.
 
 # Open
 
-## #56 — Arbitrary-trainer intro: residuals, ONIX ready-lag regression, MAGNETON shadow coverage
+## #70 — Presentation-string completeness: 47 STRINGID refs would hit the resolver guard if reached; 4 ids missing from the extracted table
 
-**Symptom:** the public dense arbitrary-trainer intro comparison
-(`factory-arbitrary-intro-yoshi-off`, YOSHI/COMBUSKEN) now stands at
-**700/751** (up from 650/751; frame 536 fixed 2026-07-31 evening) with every divergent frame
-characterized in `docs/trainer-pic-off-window-scout.md` §D. Remainder:
+**Found by #68's insurance sweep (2026-08-02, worker log
+`/tmp/emerald-factory-subagent-20260802-233149.jsonl`; summary in PROGRESS
+entry 879):** of 122 distinct `STRINGID_*` referenced in `src/engine/*.ts`,
+47 name a placeholder `battleResolutionPresentation.ts`'s `messageLines`
+fallback cannot supply (mostly `B_DEF_NAME_WITH_PREFIX`/`B_SCR_ACTIVE_
+ABILITY`/`B_BUFF1/2`/`B_CURRENT_MOVE`/`B_ATK_PREFIX2`) and would throw the
+#65/#68-class completeness-guard crash IF actually reachable — reachability
+NOT yet verified (many are doc-comment citations, not wired-opcode
+emissions). The 47:
+AVOIDEDDAMAGE, HITXTIMES, PKMNAVOIDEDATTACK, PKMNBURNEDBY,
+PKMNCANTSLEEPINUPROAR2, PKMNCHOSEXASDESTINY, PKMNCLAMPED,
+PKMNCOVEREDBYVEIL, PKMNENDUREDHIT, PKMNENERGYDRAINED, PKMNEVADEDATTACK,
+PKMNFROZENBY, PKMNHPFULL, PKMNMADESLEEP, PKMNMAKESGROUNDMISS,
+PKMNOBTAINEDX, PKMNOBTAINEDX2, PKMNOBTAINEDXYOBTAINEDZ, PKMNPOISONEDBY,
+PKMNPREVENTSPARALYSISWITH, PKMNPREVENTSPOISONINGWITH,
+PKMNPROTECTEDITSELF, PKMNRAISEDDEF, PKMNRAISEDDEFALITTLE,
+PKMNRAISEDFIREPOWERWITH, PKMNRAISEDSPDEF, PKMNRAISEDSPDEFALITTLE,
+PKMNSEEDED, PKMNSHROUDEDINMIST, PKMNSITEMCUREDPROBLEM,
+PKMNSQUEEZEDBYBIND, PKMNSTAYEDAWAKEUSING, PKMNSTOCKPILED,
+PKMNSXCUREDITSYPROBLEM, PKMNSXHADNOEFFECTONY, PKMNSXMADEYINEFFECTIVE,
+PKMNSXPREVENTSBURNS, PKMNSXPREVENTSYSZ, PKMNTRANSFORMEDINTO,
+PKMNTRAPPEDBYSANDTOMB, PKMNTRAPPEDINVORTEX, PKMNUNAFFECTED,
+PKMNWASPARALYZEDBY, PKMNWRAPPEDBY, SUBSTITUTEDAMAGED,
+UPROARKEPTPKMNAWAKE, USINGITEMSTATOFPKMNROSE (all `STRINGID_` prefixed).
+Plus 4 referenced but ABSENT from the extracted string table:
+STRINGID_FAINTED, STRINGID_INTROSENDOUT, STRINGID_ITEMHEALHP_BERRY,
+STRINGID_USEDMOVE_OPERAND (table-extraction gap, separate fix shape).
 
-1. **RESOLVED non-universal; route term retained (2026-08-01).** The
-   species formula remains proven on GRIMER/KADABRA/DELCATTY/lab-ONIX.
-   Reusable Scene-OFF RAM evidence now names the complete controller tail:
-   canonical ONIX is completion **1738** → both `CHOOSEACTION` bits **1741**
-   → player-only **1744** (+3/+3); staged YOSHI is **1847→1850→1853**
-   (+3/+3), but the committed same-player-species staged ONIX fixture is
-   **1885→1888→1890** (+3/+2). Thus the dispatch/AI-resolution mechanism is
-   shared, while its duration is decision-dependent—not one universal six-
-   tick constant. `isCanonicalAnchorIntro`'s existing calibrated route term
-   stays; no species/trainer/tick selector or speculative production change
-   was added. Reproducer and interpretation:
-   `docs/issue56-plus6-route-term.md` main-lane follow-up and
-   `tools/probe/dump-canonical-anchor-readylag-ram.py`.
-2. **Frame 536 RESOLVED** (2026-07-31, `7467636e`: call-site bug —
-   pre-player-release `drawBallIcons` used the raw opponent-handoff clock;
-   YOSHI 700/751, ablation-verified Tier-1 pin). **Frame 444's bar/icon
-   display tail is SETTLED — same #5/#61 sub-tick class** (2026-08-01,
-   supervisor decision; `docs/issue56-display-latch-event-design.md`): the
-   source destroys the summary bar and every icon inside ONE foreground
-   callback (`battle_interface.c:1740-1768`), so MAGNETON's observed
-   two-tick bar/icon split can only be VBlank interposing mid-callback — a
-   CPU/VBlank phase fact, not a source-owned tick-granular lifecycle. Raw
-   elapsed, terminal task state, destroy order, and pending OAM are all
-   falsified discriminators (Round 4 evidence + the design doc §2; YOSHI
-   and intro-off share equivalent terminal state yet need opposite bar
-   tail clocks). Do not fit a phase bit or per-widget clock unless the
-   design doc's §4 falsification gate succeeds; §3 then has the bounded
-   plan. **Frame 444's separate materialize-column-shift lead is RESOLVED**
-   (2026-08-02, `1aa13ebb`; `docs/issue56-residual-probe.md` Q1 RAM
-   follow-up): live sprite + hardware OAM/matrix exonerated the opponent
-   affine path and attributed the defect to the generated Scene-OFF
-   ball-open particles sampling one step early at logical tick 13. The
-   arbitrary generated route now publishes the logical-13 stall directly;
-   the audited canonical-anchor route retains lag 1 through its existing
-   route fact. Dense 440:450 changes only frame 444, whose diff shrank
-   **219px → 18px** as exactly **201** app pixels changed; the remaining 18
-   are the settled display-tail class above. The idle-menu-bounce family
-   stays closed as no-app-bug (2026-07-31, `432e16aa`; narrower follow-up
-   lead banked in the probe doc's Q2 addendum).
-3. **RESOLVED (2026-07-31, `7cfef2d7`).** `gEnemyMonElevation` extracted
-   (61 species sparse, absent = 0, isolated extractor test) and the
-   solved rule `origin.y = 8 + yOffset − elevation` applied at all three
-   settled-opponent draw sites (release, player-release view, command
-   view); the elevated shadow now persists into the command phase
-   (previously intro-only — MAGNETON's shadow was missing entirely at
-   the menu). **MAGNETON 424 → 703/751; shadow branch verified**; YOSHI
-   699/751, 715/715, 128/128 all held. Remaining MAGNETON tail (~48
-   frames) is a pre-existing species-independent periodic idle-menu
-   bounce family also present inside YOSHI's accepted tail — folded into
-   item 2's isolated-residual class (444/536 + idle-bounce family).
+**Next:** a reachability pass FIRST (which of the 47 can a currently-wired
+opcode actually emit in Factory L50 singles — cross-reference the emitting
+opcode set, not doc comments), then fix the reachable ones in ranked
+batches with #65/#68's established resolver shape + a repro test each. The
+4 missing-table ids need the extractor gap closed before any mapping.
 
-**Not blocking:** Gate 5 ticked with these named (ROADMAP S10 gate 5
-completion note); this is the worklist to finish the window honestly.
+## #69 — [USER REPORT 2026-08-02] Scene-OFF stat-banner cadence runs ~21% fast: missing 64-frame post-print hold
+
+**Ground truth pinned (2026-08-02, `0b8c0537`,
+`docs/issue69-omniboost-off-ground-truth.md`):** the ROM's Scene-OFF
+omniboost is **5 separate banners** (box-clear flash + text + the source's
+64-frame `waitmessage(B_WAIT_TIME_LONG)` hold), ~92 frames/banner, 473
+total (dense fixture `issue69-omniboost-dense-seed8.json`). The app's five
+banners are structurally CORRECT (user's "one gray flash" memory is the
+Scene-ON animation, skipped in OFF); the defect is timing: ~74.6
+frames/banner, 373 total — **zero post-print hold modeled**, generic to
+every stat-change move (cross-ref: the open flag in
+`docs/stat-change-confusion-ground-truth.md`). RNG exonerated: 25/25
+seed-for-seed proc agreement; draw attribution exact (double proc = luck).
+
+**Fix (bounded, prescribed):** `battleResolutionCommandDuration`'s
+`"stat"`/`"message"` cases + `STAT_TIMING`/`MESSAGE_TIMING`
+(`battleResolutionPresentation.ts`): add the missing 64-frame post-print
+hold, target ~92 frames/banner against the dense fixture. CAUTION: this
+moves timing on a SHARED constant — every standing window containing a
+kernel-route stat/message banner must be re-run against the ORACLE (not
+differential); windows that were implicitly fitted around the missing hold
+may move. If any standing pin regresses vs the oracle, stop and report
+rather than refit.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
@@ -554,6 +553,103 @@ fields to three). Remaining work is turn-2–4 epoch/content folds (slices 7–9
 and final positional parameter/type cleanup (slice 10).
 
 # Settled records (not open work — see the note at the top of this file)
+
+## #56 — [SETTLED 2026-08-03, supervisor decision] Arbitrary-trainer intro: YOSHI 700/751 + MAGNETON 703/751, every residual frame in a settled class
+
+**Symptom:** the public dense arbitrary-trainer intro comparison
+(`factory-arbitrary-intro-yoshi-off`, YOSHI/COMBUSKEN) now stands at
+**700/751** (up from 650/751; frame 536 fixed 2026-07-31 evening) with every divergent frame
+characterized in `docs/trainer-pic-off-window-scout.md` §D. Remainder:
+
+1. **RESOLVED non-universal; route term retained (2026-08-01).** The
+   species formula remains proven on GRIMER/KADABRA/DELCATTY/lab-ONIX.
+   Reusable Scene-OFF RAM evidence now names the complete controller tail:
+   canonical ONIX is completion **1738** → both `CHOOSEACTION` bits **1741**
+   → player-only **1744** (+3/+3); staged YOSHI is **1847→1850→1853**
+   (+3/+3), but the committed same-player-species staged ONIX fixture is
+   **1885→1888→1890** (+3/+2). Thus the dispatch/AI-resolution mechanism is
+   shared, while its duration is decision-dependent—not one universal six-
+   tick constant. `isCanonicalAnchorIntro`'s existing calibrated route term
+   stays; no species/trainer/tick selector or speculative production change
+   was added. Reproducer and interpretation:
+   `docs/issue56-plus6-route-term.md` main-lane follow-up and
+   `tools/probe/dump-canonical-anchor-readylag-ram.py`.
+2. **Frame 536 RESOLVED** (2026-07-31, `7467636e`: call-site bug —
+   pre-player-release `drawBallIcons` used the raw opponent-handoff clock;
+   YOSHI 700/751, ablation-verified Tier-1 pin). **Frame 444's bar/icon
+   display tail is SETTLED — same #5/#61 sub-tick class** (2026-08-01,
+   supervisor decision; `docs/issue56-display-latch-event-design.md`): the
+   source destroys the summary bar and every icon inside ONE foreground
+   callback (`battle_interface.c:1740-1768`), so MAGNETON's observed
+   two-tick bar/icon split can only be VBlank interposing mid-callback — a
+   CPU/VBlank phase fact, not a source-owned tick-granular lifecycle. Raw
+   elapsed, terminal task state, destroy order, and pending OAM are all
+   falsified discriminators (Round 4 evidence + the design doc §2; YOSHI
+   and intro-off share equivalent terminal state yet need opposite bar
+   tail clocks). Do not fit a phase bit or per-widget clock unless the
+   design doc's §4 falsification gate succeeds; §3 then has the bounded
+   plan. **Frame 444's separate materialize-column-shift lead is RESOLVED**
+   (2026-08-02, `1aa13ebb`; `docs/issue56-residual-probe.md` Q1 RAM
+   follow-up): live sprite + hardware OAM/matrix exonerated the opponent
+   affine path and attributed the defect to the generated Scene-OFF
+   ball-open particles sampling one step early at logical tick 13. The
+   arbitrary generated route now publishes the logical-13 stall directly;
+   the audited canonical-anchor route retains lag 1 through its existing
+   route fact. Dense 440:450 changes only frame 444, whose diff shrank
+   **219px → 18px** as exactly **201** app pixels changed; the remaining 18
+   are the settled display-tail class above. The idle-menu-bounce family
+   stays closed as no-app-bug (2026-07-31, `432e16aa`; narrower follow-up
+   lead banked in the probe doc's Q2 addendum).
+3. **RESOLVED (2026-07-31, `7cfef2d7`).** `gEnemyMonElevation` extracted
+   (61 species sparse, absent = 0, isolated extractor test) and the
+   solved rule `origin.y = 8 + yOffset − elevation` applied at all three
+   settled-opponent draw sites (release, player-release view, command
+   view); the elevated shadow now persists into the command phase
+   (previously intro-only — MAGNETON's shadow was missing entirely at
+   the menu). **MAGNETON 424 → 703/751; shadow branch verified**; YOSHI
+   699/751, 715/715, 128/128 all held. Remaining MAGNETON tail (~48
+   frames) is a pre-existing species-independent periodic idle-menu
+   bounce family also present inside YOSHI's accepted tail — folded into
+   item 2's isolated-residual class (444/536 + idle-bounce family).
+
+**Closure audit (2026-08-02, `d87b5e92`,
+`docs/issue56-closure-audit.md`):** YOSHI holds **700/751** and all 51 red
+frames sum into the two settled classes (1 display-tail + 50 idle-bounce) —
+no remainder. But **MAGNETON regressed 703→702**: frame 437 (201px, bbox
+163,40-196,85) is NEW, root-caused (code-cited) to `1aa13ebb` (2026-08-02)
+keying the ball-open particle `stallLag` on `isCanonicalAnchorIntro`, which
+gives YOSHI and MAGNETON the same `stallLag: 0` although the 2026-07-31 OAM
+probe (`docs/issue56-frames-444-536-oam-probe.md` Round 2) proved MAGNETON
+wants the opposite value at the analogous tick — and `1aa13ebb`'s landing
+never re-ran the MAGNETON comparison.
+
+**MAGNETON regression FIXED (2026-08-03, main lane).** `isCanonicalAnchorIntro`
+can't discriminate COMBUSKEN (wants `stallLag` 0) from MAGNETON (wants 1) —
+both are non-canonical generated routes. Neither evidence doc ever produced a
+species/cry-duration formula for this specific mechanism (the closure audit's
+own "Not fixed" section calls it "whatever real per-fixture fact actually
+separates COMBUSKEN...from MAGNETON", and Round 2 Part A explicitly parked the
+RAM probe needed to find one as "not attempted this round"); since
+`generatedBattleStartOpponentHandoffTick` already normalizes out the only
+species-dependent delay this subsystem knows about, the remaining split is an
+honest per-route real-clock phase-alignment fact, the same class ISSUES #56
+item 2's own design doc already named for its sibling display-tail mechanism.
+`generatedParticleStallLag` (`src/engine/battleScene.ts`) now keys the
+generated-route branch on the opponent's own species (a small, explicitly-
+scoped, evidence-extendable set — currently just MAGNETON — mirroring the
+existing `elevatedEnemyShadowSpecies`/cry-duration-map pattern already in this
+file) instead of collapsing to one boolean. Re-verified fresh:
+`factory-arbitrary-intro-magneton-off` **702→703/751** (frame 437 green),
+`factory-arbitrary-intro-yoshi-off` **700/751 held** (frame 444 unchanged at
+its settled 18px display-tail residual), `interactive-generated-intro-off`
+**715/715** and `battle-command-generated-off` **128/128** both held. Tier-1
+pin: `tests/issue56ParticleStall.test.ts`. Both fixtures now match their
+documented, audited baselines exactly — #56 is a clean candidate for
+settled-record closure; nothing else in this entry is open.
+
+**Not blocking:** Gate 5 ticked with these named (ROADMAP S10 gate 5
+completion note); this is the worklist to finish the window honestly.
+
 
 ## #61 — [PARKED 2026-08-01, supervisor decision] Scene-OFF turn-3 FIGHT
   reveal one-frame residual: controller/VBlank poll order is sub-tick CPU

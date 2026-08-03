@@ -4,163 +4,189 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 876 — [bounded MAIN worker, 2026-08-02] species-dossier slice 6 LANDED (family-E materialize primitive + family-F palette source-sprite threading)
+## 880 — [bounded MAIN worker, 2026-08-03] ISSUES #56 — MAGNETON frame-437 stallLag regression FIXED (closure audit's root cause)
 
-- **State:** master `d2608e83` (one commit on top of `68718a2a`). Full
-  `npm test`: **633 files / 6,376 passed / 1 skipped** (unchanged from
-  base). `npm run build` green (tsc -b + vite). Differential
-  (`compare:differential`, corrected 8-trace window list, base `68718a2a`):
-  **PASS, 1,429/1,429 captures byte-identical** — 191/209/16 (the three
-  corrected battle2 windows), 170/151 (sendout-dense pair), 230/256/206
-  (clone/doubleteam/aerialace), every count matching the brief.
-- **Did:** per `docs/species-render-entry-point-retirement-design.md` §4
-  row 6, §1.3E/F. Family E: extracted `drawFrontBackMaterialize(fb,
-  tileset, palette, corner, geometry)`, a discriminated union
-  (`settled`/`tint`/`stretch`/`rotate`) over the family's whole closed set
-  of draw modes — each variant forwards to the exact already-generic
-  low-level sampler (`drawSpriteSheet`/`drawSpriteSheetAffineTinted`/
-  `drawSpriteSheetAffineStretch`/`drawSpriteSheetAffineRotate`) with its
-  prior arguments unchanged. The six named functions
-  (`drawGrovyleSettled`, `drawGrovyleMaterialize`, `drawKabutoMaterialize`,
-  `drawGrovyleStretch`, `drawGrovyleStretchEarly`,
-  `drawKabutoHSlideWobble`) kept their names and per-species/per-tick
-  geometry math, becoming thin callers that resolve one geometry object
-  and hand it to the primitive — no formula change, only removing the
-  duplicated tileset/corner/low-level-call boilerplate each repeated. Did
-  NOT force plain-draw/stretch/rotate into the tint-accumulator transform
-  itself (they're genuinely different samplers); the primitive's
-  parameter list adapted to the union of what the six bodies actually
-  share, per the brief's own "do not force-fit" latitude. Family F:
-  `getOnixDoubleTeamClonePalette`/`turn10OnixDarkPalette` now take the
-  source `BattleBackSpriteAsset` as a parameter instead of closing over
-  `onixBackSprite` by name; both call sites (the generic staged
-  DOUBLE_TEAM clone renderer, `drawTurn5RockSlideAttack`'s two turn-10
-  darken branches) thread `onixBackSprite` in explicitly. Palette
-  derivation math byte-identical.
-- **Next:** slices 3/4 (family-A HP-drain, capstone
-  `renderSceneOffTurnView`) and slice 7 (family-B Sitrus anchor) remain.
-  Slice 6 was the last ladder-independent slice besides those two gated
-  ones — 3/4 are UNGATED (dispatcher ladder slice 10 already landed).
-- **Notes:** `tests/executableFrontierRatchet.test.ts` untouched and
-  green — no new recording imports, no barrier-count changes. Base sha
-  drifted from the step brief's assumption (other lane work landed on
-  master mid-session: `68718a2a`, 3 commits ahead of the branch snapshot
-  at session start) — recorded and used as the actual differential base.
-  No ISSUES entries touched this step (not in scope).
-- **[supervisor addendum, ~23:10]** slice 6 verified (653/653 spot
-  differential). Side scout merged:
-  `docs/battlescene-turnN-typeref-retirement-design.md` (`3946958c`) —
-  entry-871's ~144 TurnN type refs censused literally (45 functions, 4
-  families), 54+9+9=72 provably dead (all call sites pass literal null;
-  existing shadow-equivalence suite pins the generic path), 6-slice plan;
-  its slices 3/4b collide with species-dossier slice 7's file region →
-  serialized on main, never concurrent. Side worktree/branch cleaned.
+- **State:** one commit on top of `963d6bc2`. Full `npm test`: **634 files /
+  6,384 passed / 1 skipped** (+3 from this step's new pins). `npm run build`
+  green (tsc -b + vite).
+- **Did:** fixed the closure audit's (`docs/issue56-closure-audit.md`)
+  named MAGNETON regression: `1aa13ebb` (2026-08-02) had keyed the generated
+  Scene-OFF ball-open particle `stallLag` on `isCanonicalAnchorIntro`, which
+  gives COMBUSKEN (YOSHI's fixture) and MAGNETON the same value even though
+  the 2026-07-31 OAM probe's Round 2 Part A had already proven they need
+  opposite values at their shared rawElapsed=31 materialize tick — and
+  `1aa13ebb`'s own landing never re-ran the MAGNETON comparison to catch it.
+  Neither evidence doc ever produced a species/cry-duration formula for
+  *this* mechanism (Round 2 Part A explicitly parked the RAM probe needed to
+  find one), and `generatedBattleStartOpponentHandoffTick` already
+  normalizes out the only species-dependent delay this subsystem knows
+  about — so the split is an honest per-route real-clock phase-alignment
+  fact, the same class ISSUES #56 item 2's own design doc already named for
+  its sibling display-tail mechanism. New `generatedParticleStallLag`
+  (`src/engine/battleScene.ts`) keeps `isCanonicalAnchorIntro`'s lag-1 fact
+  for the canonical anchor untouched, and for the generated route keys off
+  the opponent's own species via a small, explicitly-scoped, evidence-
+  extendable set (currently just MAGNETON) — mirroring the file's existing
+  `elevatedEnemyShadowSpecies`/cry-duration-map pattern rather than adding a
+  per-trainer selector. Tier-1 pin: 3 new cases in
+  `tests/issue56ParticleStall.test.ts` (canonical anchor stays 1 regardless
+  of species; MAGNETON generated → 1; COMBUSKEN generated → 0).
+- **Verified (fresh reruns against the shared Battle Scene OFF oracle,
+  not started/stopped):** `factory-arbitrary-intro-magneton-off`
+  **702→703/751** (frame 437 green, matches the pre-regression documented
+  baseline, all 48 remaining mismatches are the already-named idle-bounce
+  family). `factory-arbitrary-intro-yoshi-off` **700/751 held** (frame 444
+  unchanged at its settled 18px display-tail residual; 51 mismatches sum
+  into the two named settled classes with no remainder, same as before).
+  Canonical insurance: `interactive-generated-intro-off` **715/715**,
+  `battle-command-generated-off` **128/128**, both held exactly.
+- **Next:** per the closure audit's own stated bar for closure ("both
+  fixtures re-verify... with every frame still mapping to the two named
+  classes"), ISSUES #56 is now a clean candidate for settled-record
+  closure — left as a candidate note rather than deleted outright, pending
+  a supervisor closure pass. species-dossier slice 4 (capstone) remains
+  untouched as the last slice; ISSUES #68's 47-id presentation-completeness
+  reachability sweep (entry 879) is also still open.
+- **Notes:** `tests/executableFrontierRatchet.test.ts` green, untouched, no
+  new recording imports, no barrier-count changes (verified via
+  `test:smoke`, all 339 tests green, plus the full suite run above). No
+  PAPERCUT this step.
+- **[supervisor addendum, ~00:30]** #56 fix verified live (MAGNETON
+  **703/751** re-run confirmed). **#56 reclassified as a settled record**
+  (supervisor decision): all three numbered items resolved, both public
+  intro comparisons' residuals fully in settled classes (YOSHI 51 =
+  1 display-tail + 50 idle-bounce; MAGNETON 48 = idle-bounce), route-term
+  follow-up concluded 2026-08-01. Moved below the settled-records line
+  (ROADMAP gate-5 note cites #56 by number); header lists updated. Open
+  backlog is now #70, #69, #55, #39.
+
 
 ---
-## 875 — [bounded MAIN worker, 2026-08-02] species-dossier slice 5 LANDED (turn-15 Onix gate cluster + family-H party literal)
+## 879 — [bounded MAIN worker, 2026-08-02] ISSUES #68 — MURKROW TORMENT presentation crash FIXED + pinned
 
-- **State:** master `1c144a1c` (one commit on top of `537110fd`). Full
+- **State:** master `64fc0205` (one commit on top of `d7857d4e` — base
+  drifted mid-session again: a side-lane merge + two supervisor docs
+  commits landed after this step started, `abb89b0e`/`51e8ea13`/
+  `0b8c0537`/`d7857d4e`. Note for the supervisor: `d7857d4e` already
+  deleted ISSUES #68 from `ISSUES.md` *before* this step's fix landed —
+  looks like a race with entry 878's own addendum, which says "#68 ...
+  fix worker dispatched." Nothing left to trim here as a result; flagging
+  it rather than silently re-adding/re-removing the entry.) Full
+  `npm test`: **634 files / 6,378 passed / 1 skipped**. `npm run build`
+  green (tsc -b + vite). Differential (`compare:differential`, base
+  `d7857d4e`): **PASS, 639/639 captures byte-identical** — 255/256/128
+  (turn3-endeavor-off, turn5-rockslide, battle-command-generated-off).
+- **Did:** root-caused and fixed ISSUES #68 (same-day user report:
+  MURKROW's first TORMENT throws mid-turn). Confirmed hypothesis 1
+  exactly: `BattleScript_EffectTorment`'s `printstring
+  STRINGID_PKMNSUBJECTEDTOTORMENT` (`battle_scripts_1.s:2139-2149`,
+  `battle_message.c:223,676`: "{B_DEF_NAME_WITH_PREFIX} was subjected\nto
+  TORMENT!") had zero mapping in `battleResolutionPresentation.ts`'s
+  `messageLines` — the generic fallback only ever supplies
+  B_ATK_NAME_WITH_PREFIX/B_EFF_NAME_WITH_PREFIX/
+  B_SCR_ACTIVE_NAME_WITH_PREFIX/B_LAST_ITEM, so it hit
+  `battleStringResolver.ts`'s completeness guard, same class as #65.
+  Added one branch mirroring the existing `STRINGID_ITDOESNTAFFECT` shape
+  (singles battle: target = ¬lastMoveAttacker, since Torment always
+  targets the opponent) resolving `B_DEF_NAME_WITH_PREFIX` from the
+  tormented battler. New `tests/murkrowTormentSubjectedPresentationRepro.
+  test.ts`: (1) BUTTERFREE vs MURKROW all-four-TORMENT (AGENTS.md's
+  constrain-to-one-legal-choice convention); reproduces the crash
+  (red before the fix, verified via `git stash`), green after, asserts
+  the resolved banner; (2) confirms next-turn `legalDecisions` excludes
+  BUTTERFREE's just-used TACKLE (leaving GUST) and that
+  `createBattleCommandPresentation`'s `legalMoveBySlot` reflects it
+  (null for the blocked slot) — the brief's item 4 next-turn-flow ask.
+  Item 4/5's kernel pieces (`checkBattleScriptMoveLimitations`'s TORMENT
+  exclusion, `legalMoveDecisions`, all-four-blocked Struggle fallback)
+  turned out already covered by `tests/battleScriptSettormentOpcode.
+  test.ts`'s "Torment through the generic Factory action-admission seam"
+  block (earlier session's work) — that suite never exercises the
+  presentation layer, so it never caught this crash; reran, still green,
+  untouched. The blocked-slot UI reject (pressing A on a null
+  `legalMoveBySlot` entry) already no-ops without printing the source's
+  limitation string — a pre-existing, uniform simplification across
+  every move-limitation type (PP/Disable/Taunt/Choice/Encore/Torment
+  alike), already pinned generically by `battleCommandPresentation.
+  test.ts`'s "ignores A on a request-illegal move slot"; left as-is
+  (source-faithful printing touches `nextCommandHandoff.ts`/
+  `fightCommandPresentation.ts`, both out of scope this step).
+- **Insurance sweep (item 3):** grepped every `STRINGID_*` referenced in
+  `src/engine/*.ts` (122 distinct ids) against `messageLines`'s explicit
+  branches + the generic fallback's 4 safe tokens. 47 reference a
+  placeholder the fallback can't supply (mostly B_DEF_NAME_WITH_PREFIX/
+  B_SCR_ACTIVE_ABILITY/B_BUFF1/B_BUFF2/B_CURRENT_MOVE/B_ATK_PREFIX2) and
+  would throw the same way if actually reached — NOT reachability-
+  verified (many are doc-comment citations, not confirmed producible by
+  a wired opcode in Factory L50 singles), and far past the "~6" bound to
+  fix in-step. Full 47-id list + 4 ids missing from the extracted table
+  entirely (STRINGID_FAINTED, STRINGID_INTROSENDOUT,
+  STRINGID_ITEMHEALHP_BERRY, STRINGID_USEDMOVE_OPERAND) reported to the
+  supervisor in this step's final message for an ISSUES entry.
+- **Next:** the enumerated presentation-completeness remainder above
+  needs a reachability pass before any more of the 47 get fixed.
+  species-dossier slice 4 (capstone) is untouched, still the last slice.
+- **Notes:** `tests/executableFrontierRatchet.test.ts` green, no new
+  recording imports, no barrier-count changes (checked via
+  `test:smoke`). No PAPERCUT this step.
+
+---
+## 878 — [bounded MAIN worker, 2026-08-02] species-dossier slice 7 LANDED (family-B Sitrus anchor/geometry de-hardcoding)
+
+- **State:** master `a29fd795` (one commit on top of `f49e0b27` — base
+  drifted from session start `fef2b77e`, a side-lane merge landed
+  mid-session, same shared-master pattern noted in prior entries). Full
   `npm test`: **633 files / 6,376 passed / 1 skipped** (unchanged from
-  base — naming/threading only, no new tests needed). `npm run build`
-  green (tsc -b + vite). Differential (`compare:differential`, 13-trace
-  window list from the brief, base `537110fd`): **PASS, 1,544/1,544
-  captures byte-identical** — 256 (fly-strike), 43/43, 46/46, 16/16,
-  144/144, 195/195 (rung pairs), 200/200 × 2 (party-select pair), every
-  count matching or exceeding the brief.
+  base). `npm run build` green (tsc -b + vite). Differential
+  (`compare:differential`, base `f49e0b27`): **PASS, 985/985 captures
+  byte-identical** — 110/82/181/133/110/241/128, every brief-cited count
+  matched exactly (turn5-sitrus-a/b/c/d, turn5-faint, turn5-switchin,
+  battle-command-generated-off).
 - **Did:** per `docs/species-render-entry-point-retirement-design.md` §4
-  row 5, §1.3H. Renamed the six grep-confirmed single-caller turn-15 gate
-  functions to species-neutral names, threading their species-scoped
-  constants as explicit parameters from the sole caller
-  (`drawTurn15FlyStrikeWindow`) instead of closing over them — mirroring
-  the rank-4 "caller passes its own staged stat" idiom, same shape as
-  `dragonBreathGrovyleHp`'s `startHp`/`endHp` params:
-  `turn15OnixInvisible`→`turn15StrikeTargetInvisible(t, pulseStartTick,
-  pulseEndTick, pulsePeriod)`, `turn15MurkrowInvisible`→
-  `turn15StrikeAttackerInvisible(t, revealTick)`, `turn15OnixShakeX2`→
-  `turn15StrikeTargetShakeX2(t, magnitude, ramTicks)`,
-  `turn15OnixHealthboxWobbleY2`→`turn15StrikeTargetHealthboxWobbleY2(t,
-  wobbleStartTick, wobbleTicks)`, `turn15OnixHp`→`turn15StrikeTargetHp(t,
-  startHp)`, `turn15OnixSinkSkipRows`→`turn15FaintSinkSkipRows(t,
-  sinkStartTick, sinkRate)`. The previously-inline literal window
-  boundaries (19107/19134/4/19075) are now named module constants passed
-  at the call site, matching the file's existing convention. No formula
-  change — every number is identical, this is naming + parameter
-  threading only. Family H: collapsed the duplicated
-  `(["ONIX","MAGBY","BAYLEEF"] as const)` literal (identical in
-  `drawTurn15PartySelectList`/`drawTurn15PartyListObjMask`) into one
-  named `TURN15_CANONICAL_PARTY_SPECIES` module constant; gating logic
-  unchanged (deeper H retirement — reading the roster from real party
-  state — stays out of scope per the brief).
-- **Next:** slice 6 (Grovyle/Kabuto intro materialize primitive, family
-  E) is the next ladder-independent slice; slices 3/4 (family-A HP-drain,
-  capstone `renderSceneOffTurnView`) and slice 7 (family-B Sitrus anchor)
-  remain after that. Turn-14's own `turn14MurkrowInvisible` stays
-  untouched (different window/adapter, explicitly excluded by the brief).
+  row 7, §1.3B, §5 traps 1/3. `turn5ResolutionAdapter.ts` now exposes
+  three RAM-probed facts as adapter-owned exports (same hosting precedent
+  as its existing `PIDGEOTTO_COMMAND_MENU_REDRAW_TICK`): `Turn5SitrusAdapter.
+  procTriggerRamTick` (6872, the real Sitrus-proc-trigger RAM tick),
+  `Turn5SitrusAdapter.onFieldCenter` ({x:72,y:88}, Onix's on-field screen
+  center the ring/stars anchor to — the generic per-battler field-geometry
+  catalog, `battleCommandFieldArt.ts`, isn't reachable from this staged-
+  machine-state adapter, so this took the brief's documented-literal-fact
+  fallback), and `Turn5SwitchInAdapter.materializeSettleTick` (6828,
+  Pidgeotto's switch-in materialize settle). `battleScene.ts`'s
+  `ONIX_SITRUS_IDENTITY_RENDER_TICK` (the shared epoch all seven family-B
+  wrappers — `onixSitrusRotateMatrix`, `turn5GrantingStarPlacement`,
+  `turn5SitrusHealTextVisibleChars`, `turn5SitrusOnixHp`,
+  `turn5SitrusResettledBounceTick`, `onixSitrusTintCoeff`,
+  `turn5SitrusRingMatrix` — key off, per trap 1), `TURN5_SITRUS_RING_CENTER`,
+  and `TURN5_PIDGEOTTO_SETTLE_TICK` (feeding `turn5PidgeottoHealthboxSlideDx`)
+  now derive from those adapter facts instead of hand-derived module
+  constants — all moved in the same commit per trap 1. Trap 3 (lag
+  asymmetry): kept rotate's own +2 render lag and the ring/stars' own +1
+  render lag as two separately named constants
+  (`ONIX_SITRUS_ROTATE_RENDER_LAG`/`TURN5_SITRUS_RING_RENDER_LAG`) with a
+  runtime guard asserting they stay exactly 1 apart — only the rotate lag
+  drives the shared epoch (matching what `heldItemHeal.ts`'s own
+  `SITRUS_ITEM_*_FIRST_AGE` constants were fit against), so the ring/star
+  fact is preserved as its own named constant rather than silently merged
+  into one lag or used to compute a second, drifting epoch. All numeric
+  values unchanged (6872, 72/88, 6828) — this moves ownership, not fit.
+- **[supervisor addendum, ~23:55]** slice 7 verified (422/422 spot
+  differential). #56 closure audit merged earlier (`f49e0b27`,
+  `docs/issue56-closure-audit.md`): YOSHI 700/751 fully settled-classed;
+  **MAGNETON regressed 703→702** (frame 437, 201px) — root-caused to
+  `1aa13ebb`'s shared stallLag keying, landing never re-ran MAGNETON;
+  ISSUES #56 updated with the bounded fix prescription. User play session
+  filed #68 (TORMENT crash — fix worker dispatched) + #69 (omniboost OFF
+  cadence + RNG bias — side probe running). Play-preview worktree serving
+  frozen `3a165507` on :5199 (intentional, exclude from stale sweeps).
+  `turn5SitrusResettledBounceTick` keys off a separate constant
+  (`TURN5_SITRUS_MENU_REDRAW_TICK`, 7222) not among the three anchors the
+  brief named, so it needed no change — confirmed by grep before scoping.
+- **Next:** wrapper renames to species-neutral names (item 4, in scope
+  only if the diff stays reviewable) were left as the honest remainder —
+  ran out of budget after the anchor de-hardcoding landed clean. Slice 4
+  (capstone `renderSceneOffTurnView` convergence) is now the LAST
+  remaining species-dossier slice (1/2/3/5/6/7 all landed).
 - **Notes:** `tests/executableFrontierRatchet.test.ts` untouched and
   green — no new recording imports, no barrier-count changes. No ISSUES
   entries touched this step (not in scope).
-- **[supervisor addendum, ~22:35]** slice 5 verified (600/600 spot
-  differential, old names fully gone). **ISSUES #62 CLOSED** — side probe
-  merged (`c19b3ad8`, `docs/issue62-hpbar-probe.md`): verdict (b), the
-  187-frame HP-bar family is route divergence, not a presentation bug —
-  kernel-rendered fraction exactly matches kernel-tracked HP at all 9
-  sampled frames; the gap is kernel-vs-oracle battle state, fully formed
-  before either fixture's first captured frame (earlier-turn fork). All
-  314 red frames now settled/inherent; entry deleted (census + probe docs
-  are the forensic record). Side worktree/branch cleaned.
-
----
-## 874 — [bounded MAIN worker, 2026-08-02] species-dossier slices 1+2 LANDED (family-C healthbox factory parameterization)
-
-- **State:** master `4d767598` (two commits on top of `5aaba475`: `8d9f6a64`
-  slice 1, `4d767598` slice 2). Full `npm test`: **633 files / 6,376 passed
-  / 1 skipped** (+1 file/+6 tests over base). `npm run build` green (tsc -b
-  + vite). Combined differential (`compare:differential`, union window list
-  per the brief, base `5aaba475`): **PASS, 3,055/3,055 captures
-  byte-identical** across all 17 traces (per-trace counts matched or
-  exceeded the brief's expectations exactly, e.g. turn5-switchin 241,
-  turn13-switchin 242, battle-command-generated-off 128).
-- **Did:** per `docs/species-render-entry-point-retirement-design.md` §4
-  rows 1-2. Slice 1 (`8d9f6a64`): `PIDGEOTTO_MAX_HP` now reads
-  `TURN5_SWITCHIN.replacementHp.max` instead of a bare `156`;
-  `murkrowHealthboxContentForHp`'s cache-miss branch reads
-  `TURN13_SWITCHIN.replacementHp.max` instead of a bare `142` divisor
-  (both occurrences). Turn-6 call sites (`:11934`/`:12581`, the census
-  drift the design doc missed) keep reading the same constant, untouched.
-  Slice 2 (`4d767598`): the six remaining family-C factories
-  (`kabutoHealthboxContentForHp`, `onixPlayerHealthboxContentForState`,
-  `featherDanceOnixOpponentHealthbox`, `featherDancePidgeottoPlayerHealthbox`,
-  `flyMurkrowPlayerHealthbox`, `magbyPlayerHealthboxContentForHp`) now take
-  name/level/maxHp (+gender for kabuto/magby) as explicit parameters
-  instead of closing over a module constant/literal; all ~45 call sites
-  thread the already-available identity (`ONIX_MENU_BATTLER`,
-  `KABUTO_SENDOUT_BATTLER`, `TURN5_SWITCHIN`/`TURN13_SWITCHIN`-derived
-  locals, or the pre-change literal for MAGBY, which has no equivalent
-  named battler constant) explicitly, matching the already-parameterized
-  `extremeSpeedOpponentHealthbox`/`shadowPunchOpponentHealthbox` shape.
-  All six exported for testing. New
-  `tests/battleSceneHealthboxFactories.test.ts` pins each factory's output
-  (2 HP values each) against directly calling
-  `composeOpponentHealthbox`/`composePlayerHealthbox` with the pre-change
-  literal values — 6 tests, all green.
-- **Next:** slices 3/4 of the same dossier (Family-A HP-drain
-  generalization; capstone `renderSceneOffTurnView` convergence — both now
-  UNGATED since dispatcher ladder slice 10 landed), then slice 5 (turn-15
-  Onix gate cluster) and slice 6 (Grovyle/Kabuto intro materialize
-  primitive); then entry-871 Turn1-13 type-ref follow-up, #62, #56.
-- **Notes:** `tests/executableFrontierRatchet.test.ts` untouched and
-  green — no new recording imports, no barrier-count changes. No ISSUES
-  entries closed this step (not in scope). PAPERCUT: the design brief's
-  own call-site census undercounted volume for `onixPlayerHealthboxContentForState`
-  (19 call sites, 6 relying on an omitted `gender` default) and
-  `featherDanceOnixOpponentHealthbox` (13 call sites) — mechanical but
-  ~15 min of extra scripted-edit + verification time versus a "small
-  parameterization" characterization.
-- **[supervisor addendum, ~22:05]** verified slices 1+2 (3-trace spot
-  differential re-run 625/625, new factory test 6/6, smoke green).
-  Side lane merged (`26df7c7c`): #62 census `05ac3009` — all 314 red
-  frames accounted, 5 families, only the 187-frame HP-bar-fraction gap
-  is candidate presentation work pending a discriminating state probe;
-  ISSUES #62 trimmed to that remainder + routing decision recorded
-  (profile-less legacy inputs correctly take the generated route; the
-  deleted historical route stays deleted). Side worktree/branch cleaned.

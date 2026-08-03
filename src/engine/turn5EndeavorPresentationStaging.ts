@@ -299,7 +299,7 @@ export function resolveTurn5EndeavorAttackLines(): readonly string[] {
   });
 }
 
-/** Onix's real turn-5 ENDEAVOR drain endpoints (88 -> 1) -- the RAM-dump/hardcoded-literal reads `drawTurn5EndeavorText`'s `endeavorOnixHp` call stops needing. */
+/** Onix's real turn-5 ENDEAVOR drain endpoints (88 -> 1) -- the RAM-dump/hardcoded-literal reads `drawTurn5EndeavorText`'s `endeavorHp` call stops needing. */
 export function resolveTurn5EndeavorHpEndpoints(): Readonly<{ from: number; to: number }> {
   const content = resolveTurn5EndeavorWindowContent();
   return Object.freeze({ from: content.hp.from, to: content.hp.to });

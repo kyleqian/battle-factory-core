@@ -3,7 +3,7 @@
 // 11000 done sentinel, per predecessor's tools/probe/dump-battle-bars.py
 // re-run) against fresh oracle pixels, tick by tick, using the ALREADY-
 // PROVEN encoding (composePlayerHealthboxHpOverlay/calcBarFilledPixels, the
-// same functions endeavorOnixHp's own turn-2 fit used, 0/288 mismatches) as
+// same functions endeavorHp's own turn-2 fit used, 0/288 mismatches) as
 // the candidate generator - not a fresh visual guess.
 //
 // Usage: node --experimental-strip-types tools/compare/scratch/diag-turn9-hpdrain.ts
