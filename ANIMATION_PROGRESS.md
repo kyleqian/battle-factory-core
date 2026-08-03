@@ -1,5 +1,40 @@
 # Animation coverage
 
+## Back `BACK_ANIM_SHRINK_GROW` triple accepted (2026-08-03)
+
+**State:** exact for the fifth bounded player-back set: **5/25 back sets,
+15/75 selector variants, 55/376 Factory mappings**. The generated set is
+exactly **3 mappings / 3 Factory / 0 outside** — DITTO, GLIGAR, OCTILLERY.
+All three nature callbacks are accepted through the live species +
+party-nature seam: Factory record 54 Hardy/mod-0 is fast and record 361
+Quirky/mod-1 is normal; Gligar Modest/mod-2 slow is staged-only because no
+set in this species group has natureMod 2. Overall move coverage remains
+**107/276 exact, 0 partial, 0 staged, 169 unsupported**; `ANIMATION_COVERAGE.json`
+is unchanged at SHA-256
+`6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+
+**Did:** ported source-relative `Anim_ShrinkGrow_Fast`, `Anim_ShrinkGrow`,
+`Anim_ShrinkGrow_Slow`, and shared `ShrinkGrow`: initializer guard/order,
+`HandleStartAffineAnim`, C integer duration/y2 rules, signed GBA Sin and
+affine math, phase wrapping, OAM/matrix timing, `WaitAnimEnd`, and terminal
+task restoration. Added source/census/routing/reducer/evidence Tier-1 pins
+and a Scene-ON dense probe retaining every framebuffer hash plus sprite RAM,
+OAM, and affine state. No friendship/species/tick production branches.
+
+**Evidence:** six fresh receipts, paired by `cmp`, dense through
+`SpriteCallbackDummy`: Ditto index 54 fast **1837..1920 / 84 frames, 38,542 B,
+`03d766da9a7ddc9c1a2a7c1f258dc001497d160f2dbff22713e30ed816cd4157`**;
+Octillery index 361 normal **1841..1892 / 52, 23,831 B,
+`2f75ee331dd01188bb987713b6bba3ad83f0a3d91f055aa22854bf27c8299718`**;
+staged Gligar Modest slow **1838..1937 / 100, 45,820 B,
+`1a1f6caf910d7c5158ac1b2b5ef0b083a292bf92222f60ba12365716560a2580`**.
+
+**Verification / next:** focused reducer/evidence/source/census checks **2
+files / 11 tests**, `npx tsc --noEmit`, and coverage are green. Full
+`npm test` and `npm run build` remain to run before handoff. Next source-ranked
+unsupported player-back set is **`BACK_ANIM_GROW` (set 6), 3 Factory mappings /
+0 outside — WIGGLYTUFF, KOFFING, WEEZING**. No move status was promoted.
+
 ## Back `BACK_ANIM_H_SPRING_REPEATED` triple accepted (2026-08-03)
 
 **State:** exact for the fourth bounded player-back set: **4/25 back sets,
