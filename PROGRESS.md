@@ -4,6 +4,58 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 884 — [bounded MAIN worker, 2026-08-03] ISSUES #70 batch 2 — 19 of 31 remaining presentation-string rows FIXED; 12 remain + 1 new gap found
+
+- **State:** master `63dc4dc3` (two commits on top of `5ce289c8`). Full
+  `npm test`: **644 files / 6,443 passed / 1 skipped** (+19 from this step's
+  new suite). `npm run build` green (tsc -b + vite).
+- **Did:** ported 19 of the 31 remaining ids from `docs/issue70-stringid-
+  reachability.md`'s per-id table into `messageLines`
+  (`battleResolutionPresentation.ts`), worked in the doc's own order:
+  `PKMNFROZENBY`/`PKMNMADESLEEP` (extend batch-1's poisoned/burned/paralyzed
+  ability-status branch), `PKMNRAISEDDEFALITTLE`/`PKMNRAISEDSPDEFALITTLE`
+  (extend batch-1's Reflect/Light Screen/Safeguard branch),
+  `PKMNSHROUDEDINMIST`, `PKMNCHOSEXASDESTINY`, the wrap family
+  (`PKMNSQUEEZEDBYBIND`/`PKMNWRAPPEDBY`/`PKMNTRAPPEDINVORTEX`/`PKMNCLAMPED`/
+  `PKMNTRAPPEDBYSANDTOMB`), the Leech Seed pair (`PKMNEVADEDATTACK`/
+  `PKMNSEEDED`), the Trick item-swap family (`PKMNOBTAINEDX`/
+  `PKMNOBTAINEDX2`/`PKMNOBTAINEDXYOBTAINEDZ` — `prepareMessage`'s own
+  substitution already existed from a prior session), `PKMNUNAFFECTED`, and
+  the Flash Fire pair (`PKMNRAISEDFIREPOWERWITH`/`PKMNSXMADEYINEFFECTIVE`,
+  new `B_DEF_ABILITY` substitution). `FactoryFullTurnBattlerConfig` gained a
+  `flashFireBoosted` staging field to reach the already-boosted
+  re-activation string in one turn. Fixing `PKMNSXMADEYINEFFECTIVE` surfaced
+  a real adjacent bug the full suite caught: `ABILITY_STICKY_HOLD` (60,
+  reused by `BattleScript_StickyHoldActivates` for the same STRINGID) had no
+  ability-display-name entry — added alongside Flash Fire's, second commit.
+- **Tests:** `tests/presentationStringBatch2.test.ts`, 19 cases mirroring
+  batch-1's shape: a staged full-turn repro through the production kernel for
+  every id with a real non-zero-incidence trigger, and the direct
+  resolver-branch idiom (synthetic event straight into
+  `createBattleResolutionPresentation`, matching
+  `tests/battleResolutionPresentation.test.ts`'s own `inputFor` pattern) for
+  the 8 genuinely zero-incidence ids **plus the wrap family** — staging a
+  real Bind/Wrap/Fire Spin/Clamp/Sand Tomb turn also fires that same turn's
+  end-of-turn wrap-damage tick, which crashes on a *separate, previously-
+  undiscovered* gap (`STRINGID_PKMNHURTBY`, not one of the original 47 —
+  parsed from the real battle-script program, not a TS literal, so `#68`'s
+  sweep never found it). Red-verified once via `git stash` on the two
+  touched engine files: all 19 threw `battleStringResolver`'s completeness-
+  guard error pre-fix. `compare:differential` (base `5ce289c8`,
+  `turn5-rockslide`+`battle-command-generated-off`): **384/384
+  byte-identical** — no standing capture reaches these strings.
+- **Next:** ISSUES #70's remaining 12 ids (ability-prevention family x5,
+  Uproar family x3, `USINGITEMSTATOFPKMNROSE`, `PKMNSTOCKPILED`/`PKMNHPFULL`,
+  `PKMNTRANSFORMEDINTO`) plus the newly-found `STRINGID_PKMNHURTBY` gap
+  (flagged **higher real-world severity** — any of the 6 common trapping
+  moves crashes on its own first successful use) plus the `INTROSENDOUT`
+  extractor gap. Full per-id detail and file:line citations already in
+  ISSUES #70 — do not re-derive.
+- **Notes:** `tests/executableFrontierRatchet.test.ts` green, untouched, no
+  new recording imports, no barrier-count changes. Diff stays additive in
+  `messageLines`/`prepareMessage`; no timing constants touched.
+
+---
 ## 883 — [supervisor wind-down, 2026-08-03 ~02:30] species-dossier 6/7 + three same-night user-bug fixes + #70 batch-1; final union green
 
 - **State:** master `70c58ae2` = final animation fold (front flip +
@@ -102,79 +154,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `messageLines`/`prepareMessage`; no timing constants touched (kept clear
   of #69's STAT_TIMING/MESSAGE_TIMING surface per the brief).
 
----
-## 881 — [bounded MAIN worker, 2026-08-03] ISSUES #69 — Scene-OFF stat/message banner cadence FIXED (missing 64-frame post-print hold)
-
-- **State:** master `bb198d16` (one commit on top of `8c78c807`). Full
-  `npm test`: **634 files / 6,382 passed / 1 skipped** (+1 from this step's
-  new pin). `npm run build` green (tsc -b + vite).
-- **Did:** `battleResolutionCommandDuration`'s `"message"` case
-  (`battleResolutionPresentationRender.ts`) now adds a `holdFrames` term (0
-  by default, 64 for the six stat-change STRINGIDs — `ATTACKERSSTATROSE/
-  FELL`, `DEFENDERSSTATROSE/FELL`, `STATSWONTINCREASE/DECREASE`, the
-  exhaustive contents of source's `gStatUpStringIds`/`gStatDownStringIds`,
-  `reference/pokeemerald/src/battle_message.c:1006-1022`) **after** the
-  print-time floor/length term, modeling `BattleScript_StatUp`/`StatDown`'s
-  own `printfromtable ...; waitmessage B_WAIT_TIME_LONG`
-  (`reference/pokeemerald/data/battle_scripts_1.s:511-514,556-560`;
-  `AllStatsUp`'s five per-stat blocks, `:3458-3483`; hold value
-  `include/constants/battle.h:324`) as a genuine post-print hold phase, not a
-  fudge on print speed. `BATTLE_RESOLUTION_STAT_CHANGE_FRAMES`/`STAT_TIMING`
-  drop from the uncited 50/32 placeholder to **2** — the oracle-measured
-  silent RAM-write-to-box-clear gap, identical across all 5 omniboost
-  banners (`docs/issue69-omniboost-off-ground-truth.md` §2: 283→285,
-  375→377, 468→470, 559→561, 652→654) — since the hold is a `message`
-  property in source (`waitmessage` follows `printfromtable`, not
-  `statbuffchange`), not a `stat` one.
-- **Verified:** `tools/compare/issue69OmniboostAppWindow.ts` (the same
-  production `battleResolutionCommandDuration` the real render loop calls,
-  over the real 5-banner Silver Wind proc sequence) — **before: 373 frames
-  total, 74.6 frames/banner** (matches the ISSUES #69 doc exactly); **after:
-  453 frames total, 90.6 frames/banner** — closing in on the oracle's
-  measured 473 total / ~92/banner (doc §2/§4), from -21%/-19% off to only
-  ~-4%/-1.6% off. Residual characterized honestly: the ROM's own last banner
-  (SPDEF, transitioning into RATTATA's next move) measures an anomalously
-  long ~103-frame gap vs the other four's 89-91 — not a stat-change-script
-  property, more likely turn-transition overhead out of this fix's scope;
-  the other four land within 1-3 frames of their measured cycle lengths
-  (92/93/91/93). `npm run compare -- tools/compare/fixtures/issue69-
-  omniboost-dense-seed8.json --summary` (the brief's literal acceptance
-  command) does **not** run: that fixture is a raw `mechanicLab`
-  scenario (`bin/oracle lab` format — `segments`/`captureFrames` nested
-  under a `trace` key), not a compare-tool trace, and no named `appStage`
-  exists to replay this exact BUTTERFREE/RATTATA/seed-8 party through the
-  compare CLI's oracle-vs-app pixel pipeline (building one is real
-  infrastructure work, out of this bounded step — flagged as a PAPERCUT
-  below rather than attempted). Used the doc's own established methodology
-  instead (the app-window script above), which calls the identical
-  production function the real render loop invokes every frame.
-- **No-regression sweep:** full Tier-1 suite green (634/634, 6382 tests).
-  `battleTurnPortability.test.ts`'s pre-existing real oracle-derived
-  kernel-route ONIX/KABUTO SAND-ATTACK stat-fell banner pin moved as
-  expected (stat timing 32→2, message timing +64 hold) and was updated —
-  not a regression, the generic "every stat-change move" fix correctly
-  reaching a second, independent move. `compare:differential` (base
-  `8c78c807`, the three standing public sentinels): `battle-command-
-  generated-off` **128/128**, `factory-arbitrary-intro-magneton-off`
-  **751/751**, `interactive-generated-intro-off` **715/715**, all
-  byte-identical before/after — none of these captures reach into a
-  stat-change banner region, confirming zero unintended pixel impact.
-  Live-oracle spot checks on `turn5-rockslide-off.json` (7/256) and
-  `factory-terminal-round-won-off.json` (1/208) are pre-existing broken
-  baselines **unrelated to this change** (confirmed identical via
-  `git stash` before/after) — both are `canonical-recorded`/legacy-turn-owned
-  or non-stat-change windows, structurally untouched by the constants this
-  fix moved (each `turnN...PresentationStaging.ts` file already carries its
-  own separate local `B_WAIT_TIME_LONG` constant, confirmed by grep before
-  scoping). Did not chase that pre-existing oracle-compare breakage — out of
-  scope for this step, flagged for whoever next needs live oracle-compare on
-  those two fixtures.
-- **Next:** species-dossier slice 4 (capstone `renderSceneOffTurnView`
-  convergence) is still the last remaining slice. ISSUES #70's
-  reachability-verified STRINGID batch-fix remainder is open.
-- **Notes:** `tests/executableFrontierRatchet.test.ts` green, untouched, no
-  new recording imports, no barrier-count changes. **PAPERCUT:** `npm run
-  compare` has no working trace/`appStage` path for dense `mechanicLab`
-  fixtures like `tools/compare/fixtures/issue69-omniboost-dense-seed8.json`
-  without hand-authoring a new named `appStage` (~15 min lost discovering
-  this before falling back to the doc's own app-window script).

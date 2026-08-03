@@ -17,7 +17,7 @@ backlog.
 
 # Open
 
-## #70 — Presentation-string completeness batch 2: 31 unranked STRINGID refs would hit the resolver guard if reached; 1 real extractor gap
+## #70 — Presentation-string completeness: 12 unmapped STRINGID refs remain reachable; 1 newly-found resolver gap outside the original 47; 1 real extractor gap
 
 **Batch 1 (ranked rows 1-8 of `docs/issue70-stringid-reachability.md`'s "Ranked
 top-N by crash risk" table, 15 ids) FIXED** (2026-08-03, see PROGRESS entry
@@ -41,22 +41,79 @@ and structurally unreachable in this engine's singles-only Factory L50
 scope — mapped (same shape as its `resultmessage` siblings) but not
 independently repro'd, matching the reachability doc's own row-31 note.
 
-**Still open — 31 unranked ids, same fix shape (messageLines branch +
-prepareMessage substitution where needed + repro test), per-id emitting
-context already root-caused in `docs/issue70-stringid-reachability.md`'s
-per-id table (do not re-derive):**
-PKMNCANTSLEEPINUPROAR2, PKMNCHOSEXASDESTINY, PKMNCLAMPED,
-PKMNEVADEDATTACK, PKMNFROZENBY, PKMNHPFULL, PKMNMADESLEEP, PKMNOBTAINEDX,
-PKMNOBTAINEDX2, PKMNOBTAINEDXYOBTAINEDZ, PKMNPREVENTSPARALYSISWITH,
-PKMNPREVENTSPOISONINGWITH, PKMNRAISEDDEFALITTLE, PKMNRAISEDFIREPOWERWITH,
-PKMNRAISEDSPDEFALITTLE, PKMNSEEDED, PKMNSHROUDEDINMIST,
-PKMNSQUEEZEDBYBIND, PKMNSTAYEDAWAKEUSING, PKMNSTOCKPILED,
-PKMNSXHADNOEFFECTONY, PKMNSXMADEYINEFFECTIVE, PKMNSXPREVENTSBURNS,
-PKMNSXPREVENTSYSZ, PKMNTRANSFORMEDINTO, PKMNTRAPPEDBYSANDTOMB,
-PKMNTRAPPEDINVORTEX, PKMNUNAFFECTED, PKMNWRAPPEDBY, UPROARKEPTPKMNAWAKE,
-USINGITEMSTATOFPKMNROSE (all `STRINGID_` prefixed; 8 of these have
-**zero real-world incidence** at Factory L50 singles per the reachability
-doc's own sum-check — still (a) EMITTABLE, just not crash risks today).
+**Batch 2 (19 of the remaining 31 unranked ids) FIXED** (2026-08-03): same
+fix shape (`messageLines` branch + `prepareMessage` substitution where
+needed), landed in `docs/issue70-stringid-reachability.md`'s own per-id
+order: `PKMNFROZENBY`/`PKMNMADESLEEP` (extend batch-1's poisoned/burned/
+paralyzed ability-status branch), `PKMNRAISEDDEFALITTLE`/
+`PKMNRAISEDSPDEFALITTLE` (extend batch-1's Reflect/Light Screen/Safeguard
+branch), `PKMNSHROUDEDINMIST`, `PKMNCHOSEXASDESTINY`, the wrap family
+(`PKMNSQUEEZEDBYBIND`/`PKMNWRAPPEDBY`/`PKMNTRAPPEDINVORTEX`/`PKMNCLAMPED`/
+`PKMNTRAPPEDBYSANDTOMB`), the Leech Seed pair (`PKMNEVADEDATTACK`/
+`PKMNSEEDED`), the Trick item-swap family (`PKMNOBTAINEDX`/`PKMNOBTAINEDX2`/
+`PKMNOBTAINEDXYOBTAINEDZ` — the `prepareMessage` substitution already
+existed, only `messageLines` was missing), `PKMNUNAFFECTED`, and the Flash
+Fire pair (`PKMNRAISEDFIREPOWERWITH`/`PKMNSXMADEYINEFFECTIVE`, new
+`B_DEF_ABILITY` substitution). `FactoryFullTurnBattlerConfig` gained a
+`flashFireBoosted` staging field so the already-boosted re-activation string
+could be staged in one turn. Pinned by `tests/presentationStringBatch2.test.ts`
+(19 cases: staged full-turn repro for every non-zero-incidence id, the direct
+resolver-branch idiom — synthetic event straight into
+`createBattleResolutionPresentation` — for the 8 genuinely zero-incidence ids
+plus the wrap family, see the new gap below). Red-verified once via
+`git stash` on the two engine files. Fixing `STRINGID_PKMNSXMADEYINEFFECTIVE`
+also surfaced a real, adjacent gap the full suite caught: `ABILITY_STICKY_HOLD`
+(60) had no ability-display-name entry — `BattleScript_StickyHoldActivates`
+(`reference/pokeemerald/data/battle_scripts_1.s:4173-4177`) reuses this same
+STRINGID for Sticky Hold blocking Trick — now added alongside Flash Fire's.
+
+**New gap found this session (not one of the original 47 — outside `#68`'s
+sweep, since it's parsed from the real committed battle-script program, not a
+TS string literal):** `STRINGID_PKMNHURTBY` (`battle_message.c:148`,
+`{B_ATK_NAME_WITH_PREFIX} is hurt\nby {B_BUFF1}!`) crashes the resolver
+whenever a wrap-family move (Bind/Wrap/Fire Spin/Clamp/Whirlpool/Sand Tomb)
+is used — real Gen3 behavior deals the trap's first recurring-damage tick on
+the *same* turn it's set (`battleEndTurnOrchestration.ts`'s
+`WRAP_TURN_DMG_LABEL`), and that tick's own `printstring STRINGID_PKMNHURTBY`
+has no `messageLines`/`prepareMessage` mapping (`{B_BUFF1}` needs the
+trapping move's own name, likely `resolveMoveName(rules.battlers[battler]
+.wrappedMove)` — the field already exists, `battleScriptHitChainOpcode.ts`'s
+`applyWrapMoveEffect`). **Likely higher real-world severity than the 12
+below** — any of the 6 trapping moves, all common Factory rentals, crashes on
+their very first successful use, not just a rare follow-up. Same fix shape as
+everything else in this entry; not fixed here (discovered while staging the
+wrap-family tests, out of this step's assigned scope).
+
+**Still open — 12 of the original 31 unranked ids, same fix shape
+(`messageLines` branch + `prepareMessage` substitution where needed + repro
+test), per-id emitting context already root-caused in
+`docs/issue70-stringid-reachability.md`'s per-id table (do not re-derive):**
+- Ability-prevention family (rows 6-10, `preventionCall`,
+  `battleScriptHitChainOpcode.ts:3262-3292`): `PKMNPREVENTSPOISONINGWITH`,
+  `PKMNSXPREVENTSYSZ`, `PKMNSXHADNOEFFECTONY`, `PKMNSXPREVENTSBURNS`,
+  `PKMNPREVENTSPARALYSISWITH` — traced but genuinely intricate: the two call
+  contexts (direct status move vs. on-contact ability) swap which battler is
+  `B_EFF_*`/`gEffectBattler` vs. `B_ATK_*`/`B_DEF_*`, needing a role check
+  beyond what `lastMoveAttacker`/`scriptingBattler` already expose generically.
+- Uproar family (rows 12-14, `createJumpifcantmakeasleepOpcodeHandler`,
+  `battleScriptStatusPrimaryOpcode.ts:201-245`): `PKMNCANTSLEEPINUPROAR2`,
+  `UPROARKEPTPKMNAWAKE`, `PKMNSTAYEDAWAKEUSING` — needs tracking which of two
+  battlers (the sleep-move target vs. a third-party Uproar carrier) each
+  chooser value names.
+- `USINGITEMSTATOFPKMNROSE` (row 11, `BattleScript_BerryStatRaiseDoStatUp`,
+  stat-raise berries) — needs `{B_BUFF1}` (the raised stat's name) and
+  `{B_BUFF2}` (the raise-amount tail text), neither currently plumbed.
+- `PKMNSTOCKPILED`/`PKMNHPFULL` (rows 21-22,
+  `battleScriptStockpileOpcode.ts`) — Stockpile needs a `{B_BUFF1}`
+  substitution for `rulesContext.battleTextBuff1ByteNumber` (not yet wired,
+  unlike `HITXTIMES`'s analogous counter); Swallow-at-full-HP's
+  `B_DEF_NAME_WITH_PREFIX` resolves to the *user itself* (Swallow
+  self-targets, `selectorRoles.target === attacker`), not the generic
+  opposite-singles-battler `requireMoveDefender` shape every other id here
+  uses — needs its own resolution path.
+- `PKMNTRANSFORMEDINTO` (row 40, zero-incidence,
+  `battleScriptTransformOpcode.ts`) — needs a `{B_BUFF1}` species-name
+  substitution, not currently plumbed.
 
 **1 real extractor gap (unchanged):** `STRINGID_INTROSENDOUT` is missing
 from the extracted string table (`tools/extract/extract-battle-messages.ts`
