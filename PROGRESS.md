@@ -4,6 +4,51 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 876 — [bounded MAIN worker, 2026-08-02] species-dossier slice 6 LANDED (family-E materialize primitive + family-F palette source-sprite threading)
+
+- **State:** master `d2608e83` (one commit on top of `68718a2a`). Full
+  `npm test`: **633 files / 6,376 passed / 1 skipped** (unchanged from
+  base). `npm run build` green (tsc -b + vite). Differential
+  (`compare:differential`, corrected 8-trace window list, base `68718a2a`):
+  **PASS, 1,429/1,429 captures byte-identical** — 191/209/16 (the three
+  corrected battle2 windows), 170/151 (sendout-dense pair), 230/256/206
+  (clone/doubleteam/aerialace), every count matching the brief.
+- **Did:** per `docs/species-render-entry-point-retirement-design.md` §4
+  row 6, §1.3E/F. Family E: extracted `drawFrontBackMaterialize(fb,
+  tileset, palette, corner, geometry)`, a discriminated union
+  (`settled`/`tint`/`stretch`/`rotate`) over the family's whole closed set
+  of draw modes — each variant forwards to the exact already-generic
+  low-level sampler (`drawSpriteSheet`/`drawSpriteSheetAffineTinted`/
+  `drawSpriteSheetAffineStretch`/`drawSpriteSheetAffineRotate`) with its
+  prior arguments unchanged. The six named functions
+  (`drawGrovyleSettled`, `drawGrovyleMaterialize`, `drawKabutoMaterialize`,
+  `drawGrovyleStretch`, `drawGrovyleStretchEarly`,
+  `drawKabutoHSlideWobble`) kept their names and per-species/per-tick
+  geometry math, becoming thin callers that resolve one geometry object
+  and hand it to the primitive — no formula change, only removing the
+  duplicated tileset/corner/low-level-call boilerplate each repeated. Did
+  NOT force plain-draw/stretch/rotate into the tint-accumulator transform
+  itself (they're genuinely different samplers); the primitive's
+  parameter list adapted to the union of what the six bodies actually
+  share, per the brief's own "do not force-fit" latitude. Family F:
+  `getOnixDoubleTeamClonePalette`/`turn10OnixDarkPalette` now take the
+  source `BattleBackSpriteAsset` as a parameter instead of closing over
+  `onixBackSprite` by name; both call sites (the generic staged
+  DOUBLE_TEAM clone renderer, `drawTurn5RockSlideAttack`'s two turn-10
+  darken branches) thread `onixBackSprite` in explicitly. Palette
+  derivation math byte-identical.
+- **Next:** slices 3/4 (family-A HP-drain, capstone
+  `renderSceneOffTurnView`) and slice 7 (family-B Sitrus anchor) remain.
+  Slice 6 was the last ladder-independent slice besides those two gated
+  ones — 3/4 are UNGATED (dispatcher ladder slice 10 already landed).
+- **Notes:** `tests/executableFrontierRatchet.test.ts` untouched and
+  green — no new recording imports, no barrier-count changes. Base sha
+  drifted from the step brief's assumption (other lane work landed on
+  master mid-session: `68718a2a`, 3 commits ahead of the branch snapshot
+  at session start) — recorded and used as the actual differential base.
+  No ISSUES entries touched this step (not in scope).
+
+---
 ## 875 — [bounded MAIN worker, 2026-08-02] species-dossier slice 5 LANDED (turn-15 Onix gate cluster + family-H party literal)
 
 - **State:** master `1c144a1c` (one commit on top of `537110fd`). Full
@@ -111,24 +156,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   ISSUES #62 trimmed to that remainder + routing decision recorded
   (profile-less legacy inputs correctly take the generated route; the
   deleted historical route stays deleted). Side worktree/branch cleaned.
-
----
-## 873 — [supervisor orient, 2026-08-02 ~21:30] animation-main folded (fast concave + convex send-out families); union verified green
-
-- **State:** master `5aaba475` = merge of `animation-main` (`29c9ebe0`, 9
-  commits: `ANIM_SWING_CONCAVE_FAST` IGGLYBUFF + `ANIM_SWING_CONVEX_FAST`
-  families accepted, Scene-ON evidence + fixtures). Union verified by
-  supervisor: full `npm test` **632 files / 6,370 passed / 1 skipped**,
-  `npm run build` green. Oracle freshness PASS (both profiles). Animation
-  supervisor + nested worker live during fold (fold-race protocol: re-check
-  at wind-down).
-- **Next:** dispatching species-dossier slices per
-  `docs/species-render-entry-point-retirement-design.md` — slices 1+2
-  (family-C healthbox factories) first; slices 3/4 now UNGATED (dispatcher
-  ladder slice 10 landed `7bd37eab`). Then entry-871 Turn1-13 type-ref
-  follow-up, #62, #56 as time allows. Hard deadline 2026-08-03 05:06.
-- **Notes:** design-doc window-list drift found while briefing:
-  `battle2-off-turn1.json` (179) was deleted at rank-1 retirement — slice-6
-  windows are `battle2-turn1-rockslide` 191 / `battle2-action-menu-dense`
-  209 / `battle2-off-turn1-staged` 16; `PIDGEOTTO_MAX_HP` has 2 extra
-  turn-6 call sites (:11934/:12581) the census missed — folded into briefs.

@@ -1,4 +1,24 @@
 
+## 873 — [supervisor orient, 2026-08-02 ~21:30] animation-main folded (fast concave + convex send-out families); union verified green
+
+- **State:** master `5aaba475` = merge of `animation-main` (`29c9ebe0`, 9
+  commits: `ANIM_SWING_CONCAVE_FAST` IGGLYBUFF + `ANIM_SWING_CONVEX_FAST`
+  families accepted, Scene-ON evidence + fixtures). Union verified by
+  supervisor: full `npm test` **632 files / 6,370 passed / 1 skipped**,
+  `npm run build` green. Oracle freshness PASS (both profiles). Animation
+  supervisor + nested worker live during fold (fold-race protocol: re-check
+  at wind-down).
+- **Next:** dispatching species-dossier slices per
+  `docs/species-render-entry-point-retirement-design.md` — slices 1+2
+  (family-C healthbox factories) first; slices 3/4 now UNGATED (dispatcher
+  ladder slice 10 landed `7bd37eab`). Then entry-871 Turn1-13 type-ref
+  follow-up, #62, #56 as time allows. Hard deadline 2026-08-03 05:06.
+- **Notes:** design-doc window-list drift found while briefing:
+  `battle2-off-turn1.json` (179) was deleted at rank-1 retirement — slice-6
+  windows are `battle2-turn1-rockslide` 191 / `battle2-action-menu-dense`
+  209 / `battle2-off-turn1-staged` 16; `PIDGEOTTO_MAX_HP` has 2 extra
+  turn-6 call sites (:11934/:12581) the census missed — folded into briefs.
+
 ## 872 — [supervisor wind-down, 2026-08-02 ~20:45] slice-9 + slice-10 + full #66 family landed; dispatcher ladder rows 1-10 complete
 
 - **State:** master = this docs commit on top of merge `d263968f`
