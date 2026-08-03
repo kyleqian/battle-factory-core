@@ -16,6 +16,9 @@ import fastRunB from "../../tools/compare/fixtures/sendout-back-beedrill-fast-ru
 import normalScenario from "../../tools/compare/fixtures/sendout-back-beedrill-normal.json" with { type: "json" };
 import normalRunA from "../../tools/compare/fixtures/sendout-back-beedrill-normal-run-a.json" with { type: "json" };
 import normalRunB from "../../tools/compare/fixtures/sendout-back-beedrill-normal-run-b.json" with { type: "json" };
+import gastlyScenario from "../../tools/compare/fixtures/sendout-back-gastly-normal.json" with { type: "json" };
+import gastlyRunA from "../../tools/compare/fixtures/sendout-back-gastly-normal-run-a.json" with { type: "json" };
+import gastlyRunB from "../../tools/compare/fixtures/sendout-back-gastly-normal-run-b.json" with { type: "json" };
 
 const FIXTURES = "../../tools/compare/fixtures/";
 
@@ -152,6 +155,144 @@ describe("BACK_ANIM_H_VIBRATE Scene-ON evidence", () => {
         selector: fixture.selector,
       });
     }
+  });
+
+  it("pins the distinct Factory GASTLY set 92 source record and Lonely normal route", () => {
+    expect(frontierMons.entries.find(({ index }) => index === 92)).toMatchObject({
+      index: 92,
+      label: "FRONTIER_MON_GASTLY",
+      species: "SPECIES_GASTLY",
+      moves: ["MOVE_DREAM_EATER", "MOVE_HYPNOSIS", "MOVE_NIGHT_SHADE", "MOVE_CONFUSE_RAY"],
+      itemTableId: 54,
+      itemName: "BATTLE_FRONTIER_ITEM_LAX_INCENSE",
+      evSpread: 9,
+      evSpreadStats: ["F_EV_SPREAD_SPEED", "F_EV_SPREAD_HP"],
+      nature: "NATURE_LONELY",
+    });
+    expect(gastlyScenario).toMatchObject({
+      mode: "mechanicLab",
+      profile: "battle-scene-on",
+      challengeNum: 0,
+      battleNum: 0,
+      level: 50,
+      preCheckpointCaptureAllFrames: true,
+      playerSetIds: [154, 135, 188],
+    });
+    assertCompleteLegalParty(gastlyScenario);
+    expect(gastlyScenario.overrides.parties.player[0]).toMatchObject({
+      species: 92,
+      level: 50,
+      nature: 1,
+      moves: [138, 95, 101, 109],
+      ppUps: [0, 0, 0, 0],
+      item: 0,
+      abilitySlot: 0,
+      friendship: 70,
+      gender: "male",
+      shiny: false,
+    });
+    expect(selectBackSendOutAnimation("GASTLY", 1)).toEqual({
+      species: "GASTLY",
+      natureId: 1,
+      nature: "NATURE_LONELY",
+      backAnimSetIndex: 0,
+      backAnimSet: "BACK_ANIM_H_VIBRATE",
+      natureMod: 2,
+      selector: "ANIM_H_VIBRATE",
+    });
+  });
+
+  it("matches the fresh byte-identical Gastly normal active-to-dummy receipt", () => {
+    const rawA = readFileSync(new URL(
+      `${FIXTURES}sendout-back-gastly-normal-run-a.json`, import.meta.url,
+    ));
+    const rawB = readFileSync(new URL(
+      `${FIXTURES}sendout-back-gastly-normal-run-b.json`, import.meta.url,
+    ));
+    expect(rawA.equals(rawB)).toBe(true);
+    expect(rawA).toHaveLength(20367);
+    expect(rawA.at(-1)).toBe("\n".charCodeAt(0));
+    expect(createHash("sha256").update(rawA).digest("hex"))
+      .toBe("d18ef99788612633f1f9fd1436234dfd5ef399beba66c78f01dd74378d180f09");
+    expect(gastlyRunA).toEqual(gastlyRunB);
+    expect(gastlyRunA).toMatchObject({
+      schema: "back-h-vibrate-scene-on-dense/v1",
+      profile: "battle-scene-on",
+      species: 92,
+      natureId: 1,
+      natureMod: 2,
+      sourceBackAnimSet: "BACK_ANIM_H_VIBRATE",
+      sourceBackAnimSetIndex: 0,
+      sourceSelector: "ANIM_H_VIBRATE",
+      sourceId: 2,
+      sourceAmplitude: 6,
+      sourceWindow: { startFrame: 1838, endFrame: 1881, frameCount: 44 },
+    });
+
+    const frames = gastlyRunA.frames;
+    expect(frames).toHaveLength(44);
+    expect(frames.map((row) => row.frame)).toEqual(
+      Array.from({ length: 44 }, (_, index) => 1838 + index),
+    );
+    expect(frames.map((row) => row.battler0.callbackSymbol)).toEqual([
+      ...Array(42).fill("Anim_HorizontalVibrate"),
+      "WaitAnimEnd",
+      "SpriteCallbackDummy",
+    ]);
+    expect(Object.keys(gastlyRunA.callbackAddresses).sort()).toEqual([
+      "Anim_HorizontalVibrate",
+      "SpriteCallbackDummy",
+      "WaitAnimEnd",
+    ].sort());
+    for (const row of frames) {
+      expect(row.sha256).toMatch(/^[0-9a-f]{64}$/);
+      expect(row.battler0).toMatchObject({
+        slot: 6,
+        flags: 12289,
+        x: 72,
+        y: 94,
+        y2: 0,
+        animNum: 0,
+        animCmdIndex: 0,
+        oam: { affineMode: 1, matrix: [256, 0, 0, 256] },
+      });
+    }
+    expect(frames[0]).toMatchObject({
+      sha256: "ecca697e506e20b189f013c7be7dbeae1c89ffc6fd8b07a0e965bd1ce889ba33",
+      battler0: {
+        x2: 0,
+        data: [0, 1, 0, 0, 0, 0, 0, 0],
+        callbackSymbol: "Anim_HorizontalVibrate",
+      },
+    });
+    for (let tick = 0; tick <= 40; tick += 1) {
+      const model = backHorizontalVibrateFrameAtTick("GASTLY", 1, tick, 1)!;
+      const row = frames[tick + 1]!.battler0;
+      expect(row).toMatchObject({
+        x2: model.x2,
+        y2: model.y2,
+        data: [0, 1, model.data2, 0, 0, 0, 0, 0],
+        callbackSymbol: model.callback,
+      });
+    }
+    const cleanup = backHorizontalVibrateFrameAtTick("GASTLY", 1, 41, 1)!;
+    expect(frames[42]).toMatchObject({
+      sha256: "14c4641dc4696ca96f5bf12398ea4ada498820ac562ad03c616b240a1288ab33",
+      battler0: {
+        x2: cleanup.x2,
+        y2: cleanup.y2,
+        data: [0, 1, cleanup.data2, 0, 0, 0, 0, 0],
+        callbackSymbol: "WaitAnimEnd",
+      },
+    });
+    expect(frames[43]).toMatchObject({
+      battler0: {
+        x2: 0,
+        y2: 0,
+        data: backSendOutTerminalSpriteData(0, 92),
+        callbackSymbol: "SpriteCallbackDummy",
+      },
+    });
   });
 
   it.each(CASES)("pins the fresh byte-identical $label active-to-dummy pair through the shared player-back seam", (fixture) => {
