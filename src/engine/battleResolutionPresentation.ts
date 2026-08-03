@@ -527,8 +527,8 @@ function messageLines(
       B_BUFF1: () => statName,
       B_BUFF2: () =>
         rose
-          ? magnitude >= 2 ? "sharply rose!" : "rose!"
-          : magnitude >= 2 ? "harshly fell!" : "fell!",
+          ? magnitude === 2 ? "sharply rose!" : "rose!"
+          : magnitude === 2 ? "harshly fell!" : "fell!",
     });
   }
   if (
@@ -557,8 +557,8 @@ function messageLines(
       B_BUFF1: () => statName,
       B_BUFF2: () =>
         rose
-          ? magnitude >= 2 ? "sharply rose!" : "rose!"
-          : magnitude >= 2 ? "harshly fell!" : "fell!",
+          ? magnitude === 2 ? "sharply rose!" : "rose!"
+          : magnitude === 2 ? "harshly fell!" : "fell!",
     });
   }
   if (

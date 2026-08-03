@@ -14,8 +14,11 @@ history.
   the mandatory end-of-step `npm test` inside a default-timeout Bash call
   gets auto-backgrounded mid-run and must re-establish a blocking wait
   (foreground poll loop) to honor the no-self-abort discipline. Flagged by
-  the 2026-08-02 #66(b) side worker, ~2 min lost.
-- **Hits:** 1.
+  the 2026-08-02 #66(b) side worker, ~2 min lost. Second hit same evening:
+  the #67 worker's auto-backgrounded suite led it to pkill its own vitest
+  workers before recovering with an explicit 600 s timeout (~4 min lost +
+  a false "failed" notification).
+- **Hits:** 2.
 - **Possible durable fix:** teach the worker preamble (or the brief
   template) to pass an explicit long timeout for the final full-suite call
   (the tool accepts up to 10 min per call; the suite may soon exceed even
