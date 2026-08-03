@@ -4,6 +4,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 869 — [supervisor session, 2026-08-02 evening] animation-main folded (fast-forward); slice-9 + #66 two-lane round dispatched
+
+- **State:** master `e3d7a0bc` = fast-forward fold of `animation-main`
+  (animation supervisor live in its worktree; fold SHA pinned at orient).
+  Union verified by supervisor: full `npm test` **626 files / 6,348
+  passed / 1 skipped**, `npm run build` green. Oracle freshness PASS (both
+  services current). DEFERRED.md remains clear.
+- **Fold contents:** 7 accepted front-animation families since the last fold
+  (glow black, rising wobble, orange glow, fast-short concave, rotate-up
+  slam-down, deep V squish bounce, rotate-to-sides twice) — all inside
+  `src/animation/` + `tests/animation/` + fixtures; no main-lane files.
+  `ANIMATION_PROGRESS.md` top entry carried no "For the main program:" line.
+- **Did:** (dispatch record; outcomes land in the next entry)
+  1. MAIN lane: slice-9 fold completion from `a6d88eaa` per
+     `docs/turn4-fold-pp-freshness-design.md` — implement-only brief with
+     the §5 14-window acceptance table and §6 risk probes verbatim.
+  2. SIDE lane: ISSUES #66(a) capped-stat banner fix (mirror `c7461398`)
+     + (b) discriminating oracle probe (fix only on confirmation) —
+     file-disjoint from the slice-9 touch list (verified: #65's fix touched
+     only `battleResolutionPresentation.ts`).
+- **Next:** verify both lanes; then slice 10 (final 13-param/type cut);
+  then species-dossier slices per
+  `docs/species-render-entry-point-retirement-design.md`.
+
+---
 ## 868 — [interactive user session, 2026-08-02 evening] D1 adopted → DEFERRED clear; papercut fixes landed; play-preview retired
 
 - **State:** master = this entry's commit on top of `f6452d7a`; no engine or
@@ -85,70 +110,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   user's frozen build at :5199, currently `105c72d5`) is INTENTIONAL —
   do not sweep while in use; rebuild after user-visible fixes land.
 
----
-## 866 — [bounded MAIN worker, 2026-08-02] slice-9 fold retry: one root cause fixed, one found+scoped, NOT landed
-
-- **State:** master unchanged at `1c61cfac` (the bridge, still green). The
-  retry's fix lives on `salvage/slice9-fold-20260802` at `a6d88eaa`
-  (NOT merged — differential still red on 2 of 14 windows). Full `npm
-  test` on that branch: **613 files / 6,277 passed / 1 skipped**, tsc
-  clean.
-- **Did:** diagnosed the brief's reported regression with `inspect-frame`
-  (parent vs fold PNG diff at frame 5927) instead of guessing: found
-  `drawActionMenuIdleContent`'s player-HP fallback (and two matching
-  if/else-if overlay chains in `drawFightSubmenuWindow`) only ever
-  consulted turn3/turn2 compat handoffs, never turn4 — the same
-  eviction-class bug slice 8 already hit one turn earlier
-  (`turn3SettledWindowActive`'s doc), just for player HP instead of the
-  render-branch selector. Once turn 4's own reset evicts turn 3's shape
-  from the shared `latestCompletedCommandHandoff` slot, the fallback fell
-  through to `anchorPlayerAfterTurnHp` (117, full) instead of Onix's real
-  88 — rendering "117/117" instead of "88/117" in the FIGHT-submenu HP
-  text. Fixed all four spots (mirroring the existing "prefer freshest
-  ready receipt" idiom). Fully committed with root-cause writeup on the
-  salvage branch (commit message has the long version).
-- **Found but NOT fixed (scoped, not guessed at):** a second, structurally
-  different bug survives in `drawFightSubmenuChromeFromCurrentOwner`'s
-  PP/chrome dispatch. In the parent, `latestCompletedCommandHandoff` never
-  advances past turn 3's content until turn 5's own confirm (turn 4 only
-  ever wrote a separate positional field there) — so the FIGHT submenu
-  keeps showing turn 3's stale ROCK_SLIDE PP (8/10) all through turn 5's
-  reopen-hold window. This fold's `latestCompletedCommandHandoff`
-  *correctly* advances at turn 4's own reset (5351) instead — required
-  for opponent-HP/`turn4SettledWindowActive` correctness elsewhere,
-  already verified byte-identical for turn5-reset-off/turn4-doubleteam-
-  off/turn4-rockslide-off — so chrome now shows turn 4's fresh PP (7/10)
-  one turn early relative to parent. Unlike slice 8's analogous turn3→4 PP
-  deviation (supervisor-verified oracle-correct and deliberately
-  accepted), my brief pre-settled oracle direction as out of scope for
-  turns 5-8 ("byte-identity to the clean parent, nothing else"), so I did
-  not rush a fix: reconciling "PP must look fresh via one channel
-  (opponent HP, `turn4SettledWindowActive`) but stale via another (FIGHT
-  chrome) off the SAME shared slot" needs a real design decision (a second
-  suppressed view of latest, or a distinct trigger tied to turn 5's own
-  confirm), not a guess under a expiring clock.
-- **Acceptance numbers (`compare:differential --base 105c72d5 --summary`,
-  all 14 windows):** turn3-endeavor-off 255/255, turn3-rockslide-off
-  161/161, turn4-doubleteam-off 256/256, turn4-rockslide-off 256/256,
-  turn5-reset-off 256/256, **turn5-action-off 6/32** (was 1/32 pre-fix),
-  **turn5-confirm-off-a 121/132** (unchanged — confirmed same root cause,
-  untouched by this commit), turn5-confirm-off-b 132/132, all four
-  turn5-resolve-off-{a,b,c,d} 196/196, turn6-reopen-off 46/46,
-  battle-command-generated-off 128/128. 12 of 14 clean; the remaining 2
-  share the one open PP-chrome root cause above.
-- **Next:** a MAIN worker should resume `salvage/slice9-fold-20260802`
-  (`a6d88eaa`) and design the PP-chrome fix (see "Found but NOT fixed"
-  above) rather than re-diagnosing from scratch — the eviction-class HP
-  bug is already closed. Re-run the full 14-window differential + full
-  suite + build once that lands, then merge and delete the salvage branch
-  per the standing instruction.
-- **Notes:** touched only `src/engine/battleScene.ts` (the four HP-overlay
-  spots) on the salvage branch; no trace/capture edits, no new state
-  fields, no PP/turn selector. `DEFERRED.md` has an unrelated, pre-
-  existing uncommitted change (a D1 user-communication-contract note, not
-  mine, out of this step's file scope) sitting in the working tree on both
-  branches — left untouched. PAPERCUT: `npm test` took ~7 minutes this
-  session (422s wall clock) and auto-backgrounded past the tool's 120s
-  timeout, needing an explicit blocking `TaskOutput` wait to avoid a
-  premature self-abort — worth a shorter smoke-subset option for mid-
-  session sanity checks.
