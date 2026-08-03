@@ -36,6 +36,16 @@ normal **1840..1883 (44 frames), 20,367 B,
 e8b967069b23d04c8f524ed9c799ac22bea67af1b865c6f9ff10ac69c5fd7012**.
 Each receipt pins every callback/RAM/OAM/RGB-hash frame, including static
 normal-affine OAM and the task's `[0,0,15,0,0,0,0,0]` dummy restoration.
+The required distinct sibling spot-check is the Factory source record
+`FRONTIER_MON_GASTLY` **set/index 92**, `NATURE_LONELY`, which selects the
+normal `ANIM_H_VIBRATE` route. The oracle's challenge-0 Level-50 rental
+planner rejects literal set 92 because that challenge's legal source range
+starts at 110, so the receipt uses the established legal scaffold IDs
+`[154,135,188]` while its complete-party override stages Gastly set 92's
+species, nature, and source moves. Two fresh `tools/run-mgba-probe.py`
+receipts are byte-identical and dense from the first active callback through
+`SpriteCallbackDummy`: **1838..1881 (44 frames), 20,367 B, SHA-256
+`d18ef99788612633f1f9fd1436234dfd5ef399beba66c78f01dd74378d180f09`**.
 
 **Next:** source-ranked unsupported back set **`BACK_ANIM_H_SLIDE`** (set 2):
 **31 mappings / 31 Factory / 0 outside**, with its three nature-selected
