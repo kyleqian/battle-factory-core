@@ -12,12 +12,26 @@ function pointer (thumb-bit masked) plus x2/y2/animNum/animCmdIndex/data[2]
 for BOTH battler slots. This began as the ONIX `ANIM_RAPID_H_HOPS` probe and
 is intentionally species-generic for the generated front-selector families.
 Addresses
-(`nm reference/pokeemerald/pokeemerald.elf`; `Anim_RapidHorizontalHops`/
-`WaitAnimEnd` are `static` so absent from the map):
-  Anim_RapidHorizontalHops = 0x08182b24
-  WaitAnimEnd              = 0x08184d88
-  SpriteCallbackDummy      = 0x08007428
-  SpriteCallbackDummy_2    = 0x080398b8
+(`nm reference/pokeemerald/pokeemerald.elf`; these front-family `Anim_*`
+entries and `WaitAnimEnd` are `static` so absent from the map):
+  Anim_RapidHorizontalHops  = 0x08182b24 (ONIX/RATTATA, ANIM_RAPID_H_HOPS)
+  Anim_VerticalStretch      = 0x08180210 (GROVYLE/PIDGEOTTO, ANIM_V_STRETCH,
+                                          ISSUES #71 §4 sibling pair)
+  Anim_HorizontalSlideWobble = 0x08180670 (KABUTO, ANIM_H_SLIDE_WOBBLE)
+  Anim_VerticalSquishBounce = 0x0818080c (MURKROW, ANIM_V_SQUISH_AND_BOUNCE)
+  WaitAnimEnd               = 0x08184d88
+  SpriteCallbackDummy       = 0x08007428
+  SpriteCallbackDummy_2     = 0x080398b8
+
+**Gotcha (PAPERCUTS.md 2026-08-03, "mechanicLab send-out fast-forward
+silently inert under battle-scene-off"):** a `mechanicLab` scenario staged
+under `profile: "battle-scene-off"` never dispatches the front idle-anim
+task at all during its fast-forward — this probe then reads a flat
+`SpriteCallbackDummy`/`x2=0` from tick 0, indistinguishable from "the
+offset never applies." Real OFF-profile battles DO play send-out anims
+(Scene OFF gates only move anims, not send-out); the flat read is a
+mechanicLab staging artifact, not a probe or engine defect. Always probe
+send-out/settle sprite state under `battle-scene-on`.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3), via:
     python3 tools/run-mgba-probe.py <output.json> -- \
@@ -74,6 +88,8 @@ SYMBOLS = {
     0x08180714: "VerticalSquishBounce",
     0x0818080C: "Anim_VerticalSquishBounce",
     0x08182B24: "Anim_RapidHorizontalHops",
+    0x08180210: "Anim_VerticalStretch",
+    0x08180670: "Anim_HorizontalSlideWobble",
     0x08184D88: "WaitAnimEnd",
     0x08007428: "SpriteCallbackDummy",
     0x080398B8: "SpriteCallbackDummy_2",

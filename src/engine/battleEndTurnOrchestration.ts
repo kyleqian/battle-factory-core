@@ -1360,6 +1360,11 @@ function runItemsTick(
       statChanger: statUpStatId | (1 << 4),
       animArg1: STAT_ANIM_PLUS1 + statUpStatId,
       effectBattler: battler,
+      // ISSUES #70 batch 3 (USINGITEMSTATOFPKMNROSE, row 11): B_SCR_ACTIVE_
+      // NAME_WITH_PREFIX/{B_LAST_ITEM} both read the berry holder -- not
+      // wired anywhere else in this tick, unlike ENDTURN_ABILITIES/other
+      // held-item ticks above, which each set this explicitly.
+      scriptingBattler: battler,
     });
     return runTickScript(program, handlers, state, rc, battler, BERRY_STAT_RAISE_END2_LABEL);
   }

@@ -844,7 +844,6 @@ import {
   CANONICAL_TURN13_RETAINED_FLY_PRESENTATION_OWNER,
   resolveTurn13ResolutionAdapter,
   resolveTurn13SwitchInAdapter,
-  type Turn13CompletedResolutionNextCommandHandoff,
 } from "./turn13ResolutionAdapter.ts";
 import {
   opponentFaintContinuationElapsed,
@@ -854,7 +853,6 @@ import {
   resolveTurn5FaintSinkGeometry,
   resolveTurn5SitrusAdapter,
   resolveTurn5SwitchInAdapter,
-  type Turn5CompletedResolutionNextCommandHandoff,
 } from "./turn5ResolutionAdapter.ts";
 import {
   isTurn1NextCommandHandoffReady,
@@ -891,22 +889,9 @@ import {
   type Turn4CompletedResolutionNextCommandHandoff,
 } from "./turn4ResolutionAdapter.ts";
 import { TURN1_CHOOSE_ACTION_RESET_AFTER_CONFIRM } from "./turn1ChooseActionReset.ts";
-import type { Turn6CompletedResolutionNextCommandHandoff } from "./turn6ResolutionAdapter.ts";
-import type { Turn7CompletedResolutionNextCommandHandoff } from "./turn7ResolutionAdapter.ts";
-import type { Turn8CompletedResolutionNextCommandHandoff } from "./turn8ResolutionAdapter.ts";
-import {
-  TURN9_QUICKATTACK_HP,
-  type Turn9CompletedResolutionNextCommandHandoff,
-} from "./turn9ResolutionAdapter.ts";
-import {
-  TURN10_AERIALACE_HP,
-  type Turn10CompletedResolutionNextCommandHandoff,
-} from "./turn10ResolutionAdapter.ts";
-import type { Turn11CompletedResolutionNextCommandHandoff } from "./turn11ResolutionAdapter.ts";
-import {
-  TURN12_AERIALACE_HP,
-  type Turn12CompletedResolutionNextCommandHandoff,
-} from "./turn12ResolutionAdapter.ts";
+import { TURN9_QUICKATTACK_HP } from "./turn9ResolutionAdapter.ts";
+import { TURN10_AERIALACE_HP } from "./turn10ResolutionAdapter.ts";
+import { TURN12_AERIALACE_HP } from "./turn12ResolutionAdapter.ts";
 import {
   isLatestCompletedCommandHandoffReady,
   isLatestCompletedCommandLifecycleActive,
@@ -4258,7 +4243,7 @@ export function generatedBattleStartCommandReady(
  * `coords.yOffset` (8) happens to equal its own elevation (8), so
  * `8+8-8=8` numerically matched the exclusive guess by accident.
  */
-function drawGeneratedOpponentRelease(
+export function drawGeneratedOpponentRelease(
   fb: Uint8Array,
   t: number,
   handoffTick: number,
@@ -4279,12 +4264,13 @@ function drawGeneratedOpponentRelease(
       - enemyMonElevation(fieldView.fieldArt.opponent.speciesSymbol),
   };
   if (coeff === 0) {
+    const idle = speciesFrontIdleRestOffset(fieldView.fieldArt.opponent.speciesSymbol) ?? { x2: 0, y2: 0 };
     drawSpriteSheet(
       fb,
       pic.tileset as Tileset,
       pic.palette as RgbColor[],
-      origin.x,
-      origin.y,
+      origin.x + idle.x2,
+      origin.y + idle.y2,
     );
     return;
   }
@@ -4525,6 +4511,24 @@ export function generatedPlayerVisualTAtOpponentHandoff(
   );
 }
 
+/**
+ * **ONIX-back hand-fit validity gap, NOT guarded here - ISSUES #71 Slice C
+ * left this deliberately un-guarded; see docs/send-out-live-wiring-consumer-map.md
+ * §2 ONIX back / §5 Slice C and the Slice-C worker's final report.**
+ * `playerMaterializeSettleY2`/`playerMaterializeSettleTintCoeff`
+ * (`battleMenu.ts`) are ONIX-only literals, applied below regardless of
+ * `art.speciesSymbol` - unlike this run's other two back hand-fit
+ * consumers, this one is reached TODAY by any generated-round player
+ * species once its materialize-settle window starts (confirmed: the
+ * `factoryBattleStartIntro.test.ts` "renders every lifecycle phase..."
+ * case already drives a KADABRA player through this exact branch at
+ * elapsed 710/714). A species-validity throw guard here would fire on
+ * that already-green test, i.e. this is a real latent defect, not a
+ * future-proofing gap - do not add a throw guard or otherwise touch this
+ * branch without first deciding how to fix the underlying wrong-table
+ * application; adding a guard alone would only convert a silent bug into
+ * a crash on ordinary generated-round play.
+ */
 function drawGeneratedPlayerMaterialize(
   fb: Uint8Array,
   playerVisualT: number,
@@ -4609,13 +4613,15 @@ export function renderGeneratedBattleStartPlayerRelease(
   // branch (post-materialize), reached once the compositor hands off to the
   // player's own release - the elevation adjustment must persist here too,
   // see the #56 item 3 rule at drawGeneratedOpponentRelease.
+  const opponentIdle = speciesFrontIdleRestOffset(fieldView.fieldArt.opponent.speciesSymbol) ?? { x2: 0, y2: 0 };
   drawSpriteSheet(
     fb,
     fieldView.fieldArt.opponent.pic.tileset as Tileset,
     fieldView.fieldArt.opponent.pic.palette as RgbColor[],
-    fieldView.fieldArt.opponent.origin.x,
+    fieldView.fieldArt.opponent.origin.x + opponentIdle.x2,
     fieldView.fieldArt.opponent.origin.y
-      - enemyMonElevation(fieldView.fieldArt.opponent.speciesSymbol),
+      - enemyMonElevation(fieldView.fieldArt.opponent.speciesSymbol)
+      + opponentIdle.y2,
   );
   const throwFrame = brendanThrowFrame(playerVisualT);
   if (playerVisualT < BRENDAN_THROW_START_TICK) {
@@ -4768,7 +4774,9 @@ function drawFrontBackMaterialize(
 
 /** §7.5: Grovyle's settled front sprite - see `GROVYLE_MATERIALIZE_TICK`'s doc comment. */
 function drawGrovyleSettled(fb: Uint8Array): void {
-  drawFrontBackMaterialize(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER, { kind: "settled" });
+  const idle = speciesFrontIdleRestOffset("GROVYLE") ?? { x2: 0, y2: 0 };
+  const corner = { x: GROVYLE_CORNER.x + idle.x2, y: GROVYLE_CORNER.y + idle.y2 };
+  drawFrontBackMaterialize(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, corner, { kind: "settled" });
 }
 
 /**
@@ -5011,8 +5019,28 @@ function drawPlayerMaterialize(fb: Uint8Array, t: number): void {
  * blit - reuses `drawSpriteSheetAffineStretch` at `xScale=yScale=256`
  * (the identity matrix) purely for its existing palette+`tintCoeff`-blend
  * support, not for any actual stretch.
+ *
+ * **ONIX-back hand-fit validity (ISSUES #71 Slice C,
+ * docs/send-out-live-wiring-consumer-map.md §2 ONIX back / §5):**
+ * `playerMaterializeSettleY2`/`playerMaterializeSettleTintCoeff`
+ * (`battleMenu.ts`) are a literal RAM-derived table valid only for the
+ * player's own ONIX in this run's two fixed legacy encounters
+ * ("destin"/"jenson"), whatever nature that recorded ONIX actually has -
+ * nature isn't checked below because neither this function nor either of
+ * its two callers carries a species/nature value at all (the player's
+ * rental is hardcoded ONIX art for both encounters); `encounter` is the
+ * closest available validity proxy. A third encounter ever added to
+ * `BattleSceneState["encounter"]` with a non-ONIX player rental must not
+ * silently reuse this table.
  */
-function drawPlayerMaterializeSettle(fb: Uint8Array, t: number): void {
+export function drawPlayerMaterializeSettle(fb: Uint8Array, t: number, encounter: BattleSceneState["encounter"]): void {
+  if (encounter !== "destin" && encounter !== "jenson") {
+    throw new Error(
+      `unsupported legacy player back-settle encounter ${String(encounter)} `
+      + `(ONIX back hand-fit is destin/jenson-only - `
+      + `docs/send-out-live-wiring-consumer-map.md §2 ONIX back)`,
+    );
+  }
   if (t < PLAYER_MATERIALIZE_SETTLE_START_TICK) return;
   drawSpriteSheetAffineStretch(
     fb,
@@ -5810,12 +5838,32 @@ function drawGrovyleStretchEarly(fb: Uint8Array, t: number, handoffTick: number)
   );
 }
 
-function drawKabutoHSlideWobble(fb: Uint8Array, t: number, handoffTick: number): void {
+/**
+ * KABUTO front hand-fit validity (ISSUES #71 Slice C,
+ * docs/send-out-live-wiring-consumer-map.md §2 KABUTO front / §5):
+ * `kabutoHSlideWobble`/`kabutoFrame` (`kabutoSendOut.ts`) play real
+ * frame-by-frame `Anim_HorizontalSlideWobble` and are valid only for
+ * KABUTO in the "jenson" fixed legacy encounter - the sole opponent this
+ * run's two named encounters ever send to this compositor. Both callers
+ * are already `isJenson`-gated (one hardcoded, one an explicit branch), so
+ * `encounter` is a real, always-available validity check here, not just a
+ * proxy.
+ */
+export function drawKabutoHSlideWobble(fb: Uint8Array, t: number, handoffTick: number, encounter: BattleSceneState["encounter"]): void {
+  if (encounter !== "jenson") {
+    throw new Error(
+      `unsupported legacy front-settle encounter ${String(encounter)} for KABUTO `
+      + `(kabutoHSlideWobble hand-fit is jenson-only - `
+      + `docs/send-out-live-wiring-consumer-map.md §2 KABUTO front)`,
+    );
+  }
   const et = t - handoffTick;
   const wobble = kabutoHSlideWobble(et);
   if (!wobble.active) {
     if (et >= KABUTO_FRONT_ANIM_END_OFFSET) {
-      drawFrontBackMaterialize(fb, kabutoFrontSprite.tileset, kabutoFrontSprite.palette, KABUTO_CORNER, { kind: "settled" });
+      const idle = speciesFrontIdleRestOffset("KABUTO") ?? { x2: 0, y2: 0 };
+      const corner = { x: KABUTO_CORNER.x + idle.x2, y: KABUTO_CORNER.y + idle.y2 };
+      drawFrontBackMaterialize(fb, kabutoFrontSprite.tileset, kabutoFrontSprite.palette, corner, { kind: "settled" });
     }
     return;
   }
@@ -7028,7 +7076,7 @@ function drawBattle2ActionMenuWindow(
       fieldArt.opponent.origin.y - enemyMonElevation(fieldArt.opponent.speciesSymbol),
     );
   } else {
-    drawKabutoHSlideWobble(fb, t, handoffTick);
+    drawKabutoHSlideWobble(fb, t, handoffTick, "jenson");
   }
   if (revealed) {
     if (fieldArt) {
@@ -7049,7 +7097,7 @@ function drawBattle2ActionMenuWindow(
       );
     }
   } else {
-    drawPlayerMaterializeSettle(fb, playerVisualT);
+    drawPlayerMaterializeSettle(fb, playerVisualT, "jenson");
   }
   if (healthboxes) {
     drawSendOutHealthbox(
@@ -7731,21 +7779,7 @@ function drawLatestCompletedCommandWindow(
     ];
     const retainedSegment = retained.segments[0];
     if (retainedSegment !== undefined && activeSegment === retainedSegment) {
-      drawTurn14FightSubmenuWindow(
-        fb,
-        t,
-        sm,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        latest,
-      );
+      drawTurn14FightSubmenuWindow(fb, t, sm, latest);
       return;
     }
     if (
@@ -7755,22 +7789,7 @@ function drawLatestCompletedCommandWindow(
     ) {
       throw new Error("retained FLY command owner lost its charge/strike segment chain");
     }
-    drawTurn15FightSubmenuWindow(
-      fb,
-      t,
-      sm,
-      resolutionOwner.resolution,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      latest,
-    );
+    drawTurn15FightSubmenuWindow(fb, t, sm, resolutionOwner.resolution, latest);
     return;
   }
 
@@ -7781,74 +7800,37 @@ function drawLatestCompletedCommandWindow(
     throw new Error("latest completed command handoff has no complete semantic move stream");
   }
   if (opponentMove.move === "SAND_ATTACK" && playerMove.move === "DRAGON_BREATH") {
-    drawTurn13FightSubmenuWindow(
-      fb,
-      t,
-      sm,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      opponentFaintPresentationOwner,
-      trainerPresentation,
-      latest,
-    );
+    drawTurn13FightSubmenuWindow(fb, t, sm, opponentFaintPresentationOwner, trainerPresentation, latest);
     return;
   }
   if (opponentMove.move === "AERIAL_ACE" && playerMove.move === "ROCK_SLIDE") {
     if (playerMove.miss !== undefined) {
-      drawTurn12FightSubmenuWindow(
-        fb,
-        t,
-        sm,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        latest,
-      );
+      drawTurn12FightSubmenuWindow(fb, t, sm, latest);
     } else {
-      drawTurn10FightSubmenuWindow(
-        fb,
-        t,
-        sm,
-        null,
-        null,
-        null,
-        null,
-        null,
-        latest,
-      );
+      drawTurn10FightSubmenuWindow(fb, t, sm, latest);
     }
     return;
   }
   if (opponentMove.move === "QUICK_ATTACK" && playerMove.move === "ROCK_SLIDE") {
-    drawTurn9FightSubmenuWindow(fb, t, sm, null, null, null, null, latest);
+    drawTurn9FightSubmenuWindow(fb, t, sm, latest);
     return;
   }
   if (opponentMove.move === "FEATHER_DANCE") {
     const statChange = opponentMove.statChange;
     if (playerMove.move === "BIND" && playerMove.miss !== undefined) {
-      drawTurn8FightSubmenuWindow(fb, t, sm, null, null, null, latest);
+      drawTurn8FightSubmenuWindow(fb, t, sm, latest);
       return;
     }
     if (playerMove.move === "ROCK_SLIDE" && statChange?.from === 6 && statChange.to === 4) {
-      drawTurn6FightSubmenuWindow(fb, t, sm, null, latest);
+      drawTurn6FightSubmenuWindow(fb, t, sm, latest);
       return;
     }
     if (playerMove.move === "ROCK_SLIDE" && statChange?.from === 4 && statChange.to === 2) {
-      drawTurn7FightSubmenuWindow(fb, t, sm, null, null, latest);
+      drawTurn7FightSubmenuWindow(fb, t, sm, latest);
       return;
     }
     if (playerMove.move === "ROCK_SLIDE" && statChange?.from === 0 && statChange.to === 0) {
-      drawTurn11FightSubmenuWindow(fb, t, sm, null, null, null, null, null, null, latest);
+      drawTurn11FightSubmenuWindow(fb, t, sm, latest);
       return;
     }
   }
@@ -8273,27 +8255,9 @@ function drawFightSubmenuChrome(
   moveset: ActiveMonMoveset,
   turn3NextCommandHandoff: Turn3CompletedResolutionNextCommandHandoff | null = null,
   turn4NextCommandHandoff: Turn4CompletedResolutionNextCommandHandoff | null = null,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null = null,
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null = null,
-  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null = null,
-  turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null = null,
-  turn9NextCommandHandoff: Turn9CompletedResolutionNextCommandHandoff | null = null,
-  turn10NextCommandHandoff: Turn10CompletedResolutionNextCommandHandoff | null = null,
-  turn11NextCommandHandoff: Turn11CompletedResolutionNextCommandHandoff | null = null,
-  turn12NextCommandHandoff: Turn12CompletedResolutionNextCommandHandoff | null = null,
-  turn13NextCommandHandoff: Turn13CompletedResolutionNextCommandHandoff | null = null,
   lockedActionResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null = null,
   followingResolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState | null = null,
 ): void {
-  void turn5NextCommandHandoff;
-  void turn6NextCommandHandoff;
-  void turn7NextCommandHandoff;
-  void turn8NextCommandHandoff;
-  void turn9NextCommandHandoff;
-  void turn10NextCommandHandoff;
-  void turn11NextCommandHandoff;
-  void turn12NextCommandHandoff;
-  void turn13NextCommandHandoff;
   const currentPP = drawFightSubmenuChromeTurn1Through4PP(moveset, turn1NextCommandHandoff, turn2NextCommandHandoff, turn3NextCommandHandoff, turn4NextCommandHandoff, lockedActionResolution, followingResolution);
   drawFightSubmenuChromeFromLiveState(
     fb,
@@ -11295,11 +11259,12 @@ function drawTurn5PidgeottoMaterialize(fb: Uint8Array, t: number): void {
  * established.
  */
 function drawTurn5PidgeottoSettled(fb: Uint8Array, x2: number = 0, sink: { keptRows: number; y2: number } | null = null): void {
+  const idle = speciesFrontIdleRestOffset("PIDGEOTTO") ?? { x2: 0, y2: 0 };
   if (sink) {
-    if (sink.keptRows > 0) drawSpriteSheetTopRows(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x + x2, PIDGEOTTO_CORNER.y + sink.y2, sink.keptRows);
+    if (sink.keptRows > 0) drawSpriteSheetTopRows(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x + x2 + idle.x2, PIDGEOTTO_CORNER.y + sink.y2 + idle.y2, sink.keptRows);
     return;
   }
-  drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x + x2, PIDGEOTTO_CORNER.y);
+  drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x + x2 + idle.x2, PIDGEOTTO_CORNER.y + idle.y2);
 }
 
 /**
@@ -11517,7 +11482,8 @@ function drawTurn13MurkrowMaterialize(fb: Uint8Array, continuationElapsed: numbe
 }
 /** MURKROW's settled front sprite, no affine transform after the local settle edge. */
 function drawTurn13MurkrowSettled(fb: Uint8Array): void {
-  drawSpriteSheet(fb, murkrowFrontSprite.tileset, murkrowFrontSprite.palette, MURKROW_CORNER.x, MURKROW_CORNER.y);
+  const idle = speciesFrontIdleRestOffset("MURKROW") ?? { x2: 0, y2: 0 };
+  drawSpriteSheet(fb, murkrowFrontSprite.tileset, murkrowFrontSprite.palette, MURKROW_CORNER.x + idle.x2, MURKROW_CORNER.y + idle.y2);
 }
 /** Ball, particles, and MURKROW materialize/settle on the accepted-dismiss local clock. */
 function drawTurn13MurkrowSwitchinSprite(fb: Uint8Array, continuationElapsed: number): void {
@@ -12124,7 +12090,6 @@ function drawTurn6FightSubmenuWindow(
   fb: Uint8Array,
   t: number,
   sm: FightSubmenuState,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
   latest: LatestCompletedCommandHandoff | null = null,
 ): void {
   if (sm.openElapsed === null) {
@@ -12160,7 +12125,7 @@ function drawTurn6FightSubmenuWindow(
   if (latest !== null) {
     drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
   } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, turn5NextCommandHandoff);
+    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
   }
 }
 
@@ -12218,8 +12183,6 @@ function drawTurn7FightSubmenuWindow(
   fb: Uint8Array,
   t: number,
   sm: FightSubmenuState,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
   latest: LatestCompletedCommandHandoff | null = null,
 ): void {
   // NOT `drawTurn6ActionMenuIdleWindow` - unlike turn 6's own pre-any-
@@ -12255,7 +12218,7 @@ function drawTurn7FightSubmenuWindow(
   if (latest !== null) {
     drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
   } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, turn5NextCommandHandoff, turn6NextCommandHandoff);
+    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
   }
 }
 
@@ -12441,9 +12404,6 @@ function drawTurn8FightSubmenuWindow(
   fb: Uint8Array,
   t: number,
   sm: FightSubmenuState,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
-  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
   latest: LatestCompletedCommandHandoff | null = null,
 ): void {
   // Same "NOT the plain idle window, the already-redrawn turn's own
@@ -12476,7 +12436,7 @@ function drawTurn8FightSubmenuWindow(
   if (latest !== null) {
     drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
   } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff);
+    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
   }
 }
 
@@ -13421,10 +13381,6 @@ function drawTurn9FightSubmenuWindow(
   fb: Uint8Array,
   t: number,
   sm: FightSubmenuState,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
-  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
-  turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null,
   latest: LatestCompletedCommandHandoff | null = null,
 ): void {
   if (sm.openElapsed === null) {
@@ -13461,7 +13417,7 @@ function drawTurn9FightSubmenuWindow(
   if (latest !== null) {
     drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
   } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, turn8NextCommandHandoff);
+    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
   }
 }
 
@@ -14023,11 +13979,6 @@ function drawTurn10FightSubmenuWindow(
   fb: Uint8Array,
   t: number,
   sm: FightSubmenuState,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
-  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
-  turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null,
-  turn9NextCommandHandoff: Turn9CompletedResolutionNextCommandHandoff | null,
   latest: LatestCompletedCommandHandoff | null = null,
 ): void {
   if (sm.openElapsed === null) {
@@ -14054,7 +14005,7 @@ function drawTurn10FightSubmenuWindow(
   if (latest !== null) {
     drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
   } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, turn8NextCommandHandoff, turn9NextCommandHandoff);
+    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
   }
 }
 
@@ -14367,12 +14318,6 @@ function drawTurn11FightSubmenuWindow(
   fb: Uint8Array,
   t: number,
   sm: FightSubmenuState,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
-  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
-  turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null,
-  turn9NextCommandHandoff: Turn9CompletedResolutionNextCommandHandoff | null,
-  turn10NextCommandHandoff: Turn10CompletedResolutionNextCommandHandoff | null,
   latest: LatestCompletedCommandHandoff | null = null,
 ): void {
   if (sm.openElapsed === null) {
@@ -14399,7 +14344,7 @@ function drawTurn11FightSubmenuWindow(
   if (latest !== null) {
     drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
   } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, turn8NextCommandHandoff, turn9NextCommandHandoff, turn10NextCommandHandoff);
+    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
   }
 }
 
@@ -14622,13 +14567,6 @@ function drawTurn12FightSubmenuWindow(
   fb: Uint8Array,
   t: number,
   sm: FightSubmenuState,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
-  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
-  turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null,
-  turn9NextCommandHandoff: Turn9CompletedResolutionNextCommandHandoff | null,
-  turn10NextCommandHandoff: Turn10CompletedResolutionNextCommandHandoff | null,
-  turn11NextCommandHandoff: Turn11CompletedResolutionNextCommandHandoff | null,
   latest: LatestCompletedCommandHandoff | null = null,
 ): void {
   if (sm.openElapsed === null) {
@@ -14655,7 +14593,7 @@ function drawTurn12FightSubmenuWindow(
   if (latest !== null) {
     drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
   } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, turn8NextCommandHandoff, turn9NextCommandHandoff, turn10NextCommandHandoff, turn11NextCommandHandoff);
+    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
   }
 }
 
@@ -14725,14 +14663,6 @@ function drawTurn13FightSubmenuWindow(
   fb: Uint8Array,
   t: number,
   sm: FightSubmenuState,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
-  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
-  turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null,
-  turn9NextCommandHandoff: Turn9CompletedResolutionNextCommandHandoff | null,
-  turn10NextCommandHandoff: Turn10CompletedResolutionNextCommandHandoff | null,
-  turn11NextCommandHandoff: Turn11CompletedResolutionNextCommandHandoff | null,
-  turn12NextCommandHandoff: Turn12CompletedResolutionNextCommandHandoff | null,
   opponentFaintPresentationOwner: OpponentFaintPresentationOwner | null,
   trainerPresentation?: FactoryTrainerPresentation,
   latest: LatestCompletedCommandHandoff | null = null,
@@ -14777,7 +14707,7 @@ function drawTurn13FightSubmenuWindow(
   if (latest !== null) {
     drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
   } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, turn8NextCommandHandoff, turn9NextCommandHandoff, turn10NextCommandHandoff, turn11NextCommandHandoff, turn12NextCommandHandoff);
+    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
   }
 }
 
@@ -16048,7 +15978,7 @@ function drawSendOutHandoff(
   }
   if (isJenson) {
     drawKabutoMaterialize(fb, t, handoffTick);
-    drawKabutoHSlideWobble(fb, t, handoffTick);
+    drawKabutoHSlideWobble(fb, t, handoffTick, encounter);
   } else {
     drawGrovyleMaterialize(fb, t, handoffTick);
     drawGrovyleStretchEarly(fb, t, handoffTick);
@@ -16075,7 +16005,7 @@ function drawSendOutHandoff(
   }
   drawBallOpenParticles(fb, t, handoffTick, encounter);
   drawPlayerMaterialize(fb, playerTrainerT);
-  drawPlayerMaterializeSettle(fb, playerTrainerT);
+  drawPlayerMaterializeSettle(fb, playerTrainerT, encounter);
   drawPlayerBallOpen(fb, playerTrainerT);
   drawPlayerBallOpenParticles(fb, playerTrainerT);
   if (!isJenson && t >= GROVYLE_MATERIALIZE_TICK) drawGrovyleSettled(fb);
@@ -16424,15 +16354,6 @@ function drawTurn14FightSubmenuWindow(
   fb: Uint8Array,
   t: number,
   sm: FightSubmenuState,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
-  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
-  turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null,
-  turn9NextCommandHandoff: Turn9CompletedResolutionNextCommandHandoff | null,
-  turn10NextCommandHandoff: Turn10CompletedResolutionNextCommandHandoff | null,
-  turn11NextCommandHandoff: Turn11CompletedResolutionNextCommandHandoff | null,
-  turn12NextCommandHandoff: Turn12CompletedResolutionNextCommandHandoff | null,
-  turn13NextCommandHandoff: Turn13CompletedResolutionNextCommandHandoff | null,
   latest: LatestCompletedCommandHandoff | null = null,
 ): void {
   const revealTick = sm.openElapsed === null ? -Infinity : TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
@@ -16459,7 +16380,7 @@ function drawTurn14FightSubmenuWindow(
   if (latest !== null) {
     drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
   } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, turn8NextCommandHandoff, turn9NextCommandHandoff, turn10NextCommandHandoff, turn11NextCommandHandoff, turn12NextCommandHandoff, turn13NextCommandHandoff);
+    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null);
   }
 }
 
@@ -16909,15 +16830,6 @@ function drawTurn15FightSubmenuWindow(
   t: number,
   sm: FightSubmenuState,
   resolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState,
-  turn5NextCommandHandoff: Turn5CompletedResolutionNextCommandHandoff | null,
-  turn6NextCommandHandoff: Turn6CompletedResolutionNextCommandHandoff | null,
-  turn7NextCommandHandoff: Turn7CompletedResolutionNextCommandHandoff | null,
-  turn8NextCommandHandoff: Turn8CompletedResolutionNextCommandHandoff | null,
-  turn9NextCommandHandoff: Turn9CompletedResolutionNextCommandHandoff | null,
-  turn10NextCommandHandoff: Turn10CompletedResolutionNextCommandHandoff | null,
-  turn11NextCommandHandoff: Turn11CompletedResolutionNextCommandHandoff | null,
-  turn12NextCommandHandoff: Turn12CompletedResolutionNextCommandHandoff | null,
-  turn13NextCommandHandoff: Turn13CompletedResolutionNextCommandHandoff | null,
   latest: LatestCompletedCommandHandoff | null = null,
 ): void {
   const revealTick = sm.openElapsed === null ? -Infinity : TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
@@ -16948,7 +16860,7 @@ function drawTurn15FightSubmenuWindow(
       resolution,
     );
   } else {
-    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, turn5NextCommandHandoff, turn6NextCommandHandoff, turn7NextCommandHandoff, turn8NextCommandHandoff, turn9NextCommandHandoff, turn10NextCommandHandoff, turn11NextCommandHandoff, turn12NextCommandHandoff, turn13NextCommandHandoff, resolution);
+    drawFightSubmenuChrome(fb, sm.displayCursor, null, null, sm.activeMonMoveset, null, null, resolution);
   }
 }
 
@@ -17142,6 +17054,7 @@ export function applyTurn17PostwinFastFade(
     drawTurn15ForcedSwitchRelease(
       objMask,
       releaseTick,
+      "MAGBY",
       bounce.onixY2,
       faintAttackTargetShakeX2(frozenAnimationAge),
     );
@@ -17347,7 +17260,26 @@ function turn15ReleaseFieldPalette(logicalTick: number): number[][] {
   ));
 }
 
-function drawTurn15ForcedSwitchRelease(fb: Uint8Array, logicalTick: number, y2Extra: number = 0, x2Extra: number = 0): void {
+/**
+ * MAGBY back hand-fit validity (ISSUES #71 Slice C,
+ * docs/send-out-live-wiring-consumer-map.md §2 MAGBY back / §5): `magbySendOutAnimation`
+ * (`magbySendOut.ts`) is valid only for MAGBY, Docile nature specifically.
+ * Nature isn't represented anywhere in this presentation layer (no caller
+ * here can supply it), so this guard can only enforce species; a future
+ * MAGBY of a different nature would still pass silently until the
+ * animation lane's rung-4 back-family nature-mod table exists. All 4
+ * current call sites already resolve to a real "MAGBY" (3 are the fixed
+ * canonical Turn-15 content; the 4th, generated-route caller, is already
+ * gated on `view.field.player.name === "MAGBY"` before it ever calls this).
+ */
+export function drawTurn15ForcedSwitchRelease(fb: Uint8Array, logicalTick: number, species: string, y2Extra: number = 0, x2Extra: number = 0): void {
+  if (species !== "MAGBY") {
+    throw new Error(
+      `unsupported forced-switch back species ${species} `
+      + `(magbySendOutAnimation hand-fit is MAGBY/Docile-only - `
+      + `docs/send-out-live-wiring-consumer-map.md §2 MAGBY back)`,
+    );
+  }
   if (logicalTick <= 16) {
     drawPlayerSideAffineMaterialize(fb, magbyBackSprite.tileset, FORCED_SWITCH_MAGBY_CORNER, logicalTick, 1, PLAYER_BALL_OPEN_VISIBLE_BOTTOM);
   } else {
@@ -17942,7 +17874,7 @@ function drawTurn16PostSwitchField(
       ? null
       : faintAttackResolutionState(faintAttackAge, faintAttackTargetHp);
   if (releaseTick !== null && !resolution?.targetInvisible) {
-    drawTurn15ForcedSwitchRelease(fb, releaseTick, bounce.onixY2, targetX2);
+    drawTurn15ForcedSwitchRelease(fb, releaseTick, "MAGBY", bounce.onixY2, targetX2);
   }
   const healthboxDx = partySendOutHealthboxDx(partyElapsed);
   if (healthboxDx !== null) {
@@ -18198,15 +18130,6 @@ function drawTurn16FightSubmenuWindow(
       null,
       null,
       null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
       followingPresentation?.resolution ?? null,
     );
     return;
@@ -18332,15 +18255,6 @@ function drawTurn16FightSubmenuWindow(
     null,
     null,
     null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
     isNextCommand ? followingPresentation.resolution : null,
   );
 }
@@ -18393,7 +18307,7 @@ function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, pa
       paletteBgr555: releaseTick === null ? turn15FieldPpuAsset.paletteBgr555 : turn15ReleaseFieldPalette(releaseTick),
     });
     drawTurn15ForcedSwitchBall(fb, party.sendOutElapsed);
-    if (releaseTick !== null) drawTurn15ForcedSwitchRelease(fb, releaseTick, bounce.onixY2);
+    if (releaseTick !== null) drawTurn15ForcedSwitchRelease(fb, releaseTick, "MAGBY", bounce.onixY2);
     const healthboxDx = partySendOutHealthboxDx(party.sendOutElapsed);
     if (healthboxDx !== null) drawTurn15MagbyHealthbox(fb, healthboxDx, bounce.healthboxY2);
     if (phase === "actionMenu") {
@@ -34221,7 +34135,51 @@ export interface SceneOffTurnView {
   readonly statEffectAge: number | null;
   readonly bottom: "fight" | "message" | "blank" | "action";
   readonly playerY2?: number;
+  readonly opponentSpecies: string;
+  readonly opponentCorner: { readonly x: number; readonly y: number };
+  readonly opponentBattler: {
+    readonly name: string;
+    readonly level: number;
+    readonly maxHp: number;
+    readonly gender: "male" | "female";
+  };
+  readonly playerSpecies: string;
+  readonly playerCorner: { readonly x: number; readonly y: number };
+  readonly playerHealthboxContent: ReturnType<typeof composePlayerHealthbox>;
+  readonly moveset: ActiveMonMoveset;
 }
+
+/**
+ * `docs/species-render-entry-point-retirement-design.md` §4 row 4: the
+ * ONIX/KABUTO identity `renderSceneOffTurnView` used to close over by name.
+ * `stagedBattleTurn.ts` threads this through `StagedBattleTurnState` as data
+ * instead of the render function re-deriving it.
+ */
+export type SceneOffTurnIdentity = Pick<
+  SceneOffTurnView,
+  | "opponentSpecies"
+  | "opponentCorner"
+  | "opponentBattler"
+  | "playerSpecies"
+  | "playerCorner"
+  | "playerHealthboxContent"
+  | "moveset"
+>;
+
+export const SCENE_OFF_TURN_DEFAULT_IDENTITY: SceneOffTurnIdentity = {
+  opponentSpecies: "KABUTO",
+  opponentCorner: KABUTO_CORNER,
+  opponentBattler: {
+    name: KABUTO_SENDOUT_BATTLER.name,
+    level: KABUTO_SENDOUT_BATTLER.level,
+    maxHp: KABUTO_SENDOUT_BATTLER.maxHP,
+    gender: KABUTO_SENDOUT_BATTLER.gender,
+  },
+  playerSpecies: "ONIX",
+  playerCorner: ONIX_MATERIALIZE_CORNER,
+  playerHealthboxContent: onixPlayerHealthboxContent,
+  moveset: rentalMoveset("ONIX"),
+};
 
 /**
  * Source-composed battlefield/message adapter for the typed non-KO
@@ -34507,7 +34465,7 @@ export function renderBattleResolutionForcedPartySelect(
     drawTurn15ForcedSwitchBall(fb, elapsed);
     if (releaseTick !== null) {
       if (canonicalIncoming) {
-        drawTurn15ForcedSwitchRelease(fb, releaseTick);
+        drawTurn15ForcedSwitchRelease(fb, releaseTick, view.field.player.name);
       } else if (releaseTick <= 16) {
         drawPlayerSideAffineMaterialize(
           fb,
@@ -34640,23 +34598,25 @@ export function renderSceneOffTurnView(
   fb: Uint8Array,
   view: SceneOffTurnView,
 ): void {
+  const opponentSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.opponentSpecies]!;
+  const playerSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.playerSpecies]!;
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
   drawSpriteSheet(
     fb,
-    kabutoFrontSprite.tileset,
-    kabutoFrontSprite.palette,
-    KABUTO_CORNER.x,
-    KABUTO_CORNER.y,
+    opponentSprite.tileset,
+    opponentSprite.palette,
+    view.opponentCorner.x,
+    view.opponentCorner.y,
   );
   drawSpriteSheet(
     fb,
-    onixBackSprite.tileset,
-    onixBackSprite.palette,
-    ONIX_MATERIALIZE_CORNER.x,
-    ONIX_MATERIALIZE_CORNER.y + (view.playerY2 ?? 0),
+    playerSprite.tileset,
+    playerSprite.palette,
+    view.playerCorner.x,
+    view.playerCorner.y + (view.playerY2 ?? 0),
   );
-  drawSendOutHealthbox(fb, 0, kabutoHealthboxContentForHp(view.opponentHp, KABUTO_SENDOUT_BATTLER.name, KABUTO_SENDOUT_BATTLER.level, KABUTO_SENDOUT_BATTLER.maxHP, KABUTO_SENDOUT_BATTLER.gender));
-  drawComposedPlayerHealthbox(fb, onixPlayerHealthboxContent);
+  drawSendOutHealthbox(fb, 0, kabutoHealthboxContentForHp(view.opponentHp, view.opponentBattler.name, view.opponentBattler.level, view.opponentBattler.maxHp, view.opponentBattler.gender));
+  drawComposedPlayerHealthbox(fb, view.playerHealthboxContent);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
 
   if (view.statEffectAge !== null) {
@@ -34666,7 +34626,7 @@ export function renderSceneOffTurnView(
     }
   }
   if (view.bottom === "fight") {
-    drawFightSubmenuChrome(fb, 0, null, null, rentalMoveset("ONIX"));
+    drawFightSubmenuChrome(fb, 0, null, null, view.moveset);
   } else if (view.bottom === "action") {
     drawTurn5SitrusSettledMenuChrome(fb);
   } else if (view.bottom === "message" && view.messageLines) {

@@ -1,3 +1,417 @@
+## 890 — [bounded MAIN worker, 2026-08-03] ISSUES #71 Slices A+B LANDED — front terminal offsets wired at the 5 real settle hooks, RAM-confirmed
+
+- **State:** master `32af4030`. Full `npm test`: **649 files / 6,492 passed /
+  1 skipped** (+4 from this step's new suite). `npm run build` green (tsc -b
+  + vite). `compare:differential -- battle-command-generated-off.json --base
+  30afb56d --summary`: **PASS — 128/128 byte-identical**.
+  `tests/executableFrontierRatchet.test.ts` green, untouched, no new
+  recording imports, no barrier-count changes.
+- **Did:** `docs/send-out-live-wiring-consumer-map.md` §5 Slice A (+ Slice
+  B's species-threading acceptance) — wired `speciesFrontIdleRestOffset`
+  (already-banked front-family dispatcher, `src/animation/speciesIdleAnim.ts`)
+  at the 5 real live settle hooks in `battleScene.ts` (6 call sites):
+  `drawGrovyleSettled`, `drawKabutoHSlideWobble`'s settle branch,
+  `drawGeneratedOpponentRelease`'s `coeff===0` branch + its duplicate in
+  `renderGeneratedBattleStartPlayerRelease`, `drawTurn5PidgeottoSettled`,
+  `drawTurn13MurkrowSettled` — offset added directly to each draw's origin
+  x/y, reusing the `:1105` import. The generated-route pair (item 3) already
+  threaded the real `fieldView.fieldArt.opponent.speciesSymbol` used for
+  sprite art/elevation at that exact call site, so Slice B's guard (no
+  literal/shared-default species) was satisfied as written, not a separate
+  fix. Exported `drawGeneratedOpponentRelease` (was module-private) so it's
+  directly unit-testable.
+- **Tests:** 4 new Tier-1 cases in `tests/battleScene.test.ts` — GROVYLE and
+  MURKROW settled-sprite no-op pins (offset `{0,0}`, via the existing
+  `pixelAtSentOut`/turn13-confirm render idioms — no visible change, proving
+  the wiring is inert where expected); RATTATA positive case (staged
+  `fieldView`, no existing idiom reaches the generated-route settle) —
+  settles at `x2=+1` vs. an independently-blitted un-offset reference frame;
+  BULBASAUR staged-`fieldView` companion guarding Slice B (settles at the
+  plain origin, not a shared/literal default).
+- **Oracle acceptance (program doc §7 bar):** extended
+  `tools/probe/dump-onix-front-idle-anim.py`'s `SYMBOLS` table
+  (`Anim_VerticalStretch`, `Anim_HorizontalSlideWobble`; `nm` addresses on
+  the reference ELF). Three new minimal `battle-scene-on` mechanicLab
+  scenarios (`tools/battle-lab/send-out-front-idle-{grovyle,pidgeotto,
+  rattata}.json`) RAM-probed `gBattlerSpriteIds[1]` at the settled tick:
+  GROVYLE `x2=0,y2=0`, PIDGEOTTO `x2=0,y2=0` (same `animNum`/`animCmdIndex`
+  as GROVYLE — the §7 sibling-pair spot-check for shared `V_STRETCH`),
+  RATTATA `x2=1,y2=0` (the mandatory positive case) — all three match
+  `speciesFrontIdleRestOffset`'s output exactly. **Gotcha found along the
+  way:** a `battle-scene-off`-profile mechanicLab scenario never dispatches
+  the front idle-anim task at all (flat `SpriteCallbackDummy`/`x2=0`/
+  `animNum=0` from tick 0) — only `battle-scene-on` fast-forwards through
+  the real intro, matching the prior ONIX fixture's own profile, not this
+  lane's default oracle. Re-ran the §4 dense-window list twice fresh
+  (`battle2-kabuto-sendout-dense` 151/151, `battle2-player-sendout-dense`
+  170/170, `sendout` 255/256, `battle2-jenson-sendout-text` 39/39,
+  `factory-arbitrary-intro-yoshi-off` 700/751,
+  `factory-arbitrary-intro-magneton-off` 703/751) — identical both runs and
+  matching each window's own pre-existing accepted baseline exactly (zero
+  new diffs; ONIX/RATTATA appear in none of these committed windows, per
+  §3's empirical finding).
+- **Next:** ISSUES #71 remaining scope: Slices C/D (ONIX-back/MAGBY-back
+  hand-fit consumer guards; per-tick front playback) + the §1e 56/58
+  move-window patch-site retirement — all still queued, cross-lane ask for
+  the animation lane's rung-3 dispatcher stays open (see ISSUES.md #71).
+  Typeref retirement slice 2 remainder (Family P+Q turn1-4 fold, see entry
+  889 below) is the next queued item after that.
+- **Notes:** no PAPERCUT beyond ordinary research time; the `battle-scene-
+  off`-vs-`battle-scene-on` mechanicLab fast-forward gotcha above cost
+  ~10min to root-cause and is worth remembering for any future front/back
+  send-out probe in this codebase.
+
+---
+## 888 — [supervisor fold, 2026-08-03 ~10:30] species-dossier program CLOSED — slice-4 capstone folded from side lane
+## 889 — [bounded MAIN worker, 2026-08-03] typeref slice 1 LANDED (Family S dead-parameter cut); slice 2 blocked, documented
+
+- **State:** master `7ca03a17`. Full `npm test`: **649 files / 6,488 passed /
+  1 skipped** (unchanged from baseline). `npm run build` green (tsc -b +
+  vite). `compare:differential --base 4fe0e206 --summary` over the full §2.5
+  turn 5-15 window list + `turn5-menu`/`turn5-rockslide` + insurance
+  `battle-command-generated-off.json` (49 traces): **PASS — 7,466/7,466
+  captures byte-identical**. `tests/executableFrontierRatchet.test.ts` green,
+  untouched.
+- **Did:** landed `docs/battlescene-turnN-typeref-retirement-design.md` §4
+  slice 1 exactly as scoped: cut the turn5-13 predecessor-handoff parameters
+  from `drawTurn6FightSubmenuWindow`..`drawTurn15FightSubmenuWindow` (10
+  functions) and `drawFightSubmenuChrome`'s 9 void-marked turn5-13 slots
+  (keeping its turn1-4/moveset/resolution params); truncated the ~14
+  literal-null call sites in `drawLatestCompletedCommandWindow`'s dispatch
+  ladder and inside each of the 10 functions' own chrome calls accordingly;
+  deleted the now-dead `import type { TurnNCompletedResolutionNextCommandHandoff }`
+  lines for N=5..13 (9 import refs — re-grepped each before deleting, matching
+  the doc's own N=5..13 range, not just N=6..12). Every one of these was
+  already provably dead (§2.2/§2.4: production always passes a non-null
+  `latest`, so the deleted params only ever fed the unreachable `else`
+  fallback branch) — this was a pure mechanical cut, no behavior change.
+  battleScene.ts ref count **152 → 80** (72 retired: 54 Family S + 9 Family Q
+  dead chrome slots + 9 imports), re-run via the doc's own §1.1 census script.
+- **Next:** typeref slice 2 (Family P+Q turn1-4 fold) is the next pick but
+  needs a fresh, focused session — see Notes for exactly why this session
+  didn't land it. Slices 3/4a/4b/5 remain after that.
+- **Notes:** slice 2 (Family P+Q turn1-4 fold) did **not** land this session
+  — invoked the step brief's own documented fallback rather than rush a
+  "not one pixel may move" change. Investigation found the design doc's "24
+  refs / 6 functions" framing undersells the entanglement: Family Q's
+  remaining 6 functions (`drawMenuIdleBaseWithOpponentHp`,
+  `drawActionMenuIdleContent`, `drawActionMenuIdleWindow`,
+  `drawFightSubmenuChromeTurn1Through4PP`, `drawFightSubmenuChrome`,
+  `drawFightSubmenuChromeFromCurrentOwner`) are called from far more than the
+  in-scope `drawFightSubmenuWindow`/`drawActionMenuIdleWindow` —
+  `drawActionMenuIdleContent` alone has 9+ call sites inside Family R
+  (explicitly out of scope this session, slices 3/4a/4b), each passing a
+  differently-shaped positional argument list (some just `turn1NextCommandHandoff`,
+  some `null, null, turn3NextCommandHandoff.hp.player, turn3NextCommandHandoff`,
+  some bare `null`). Changing Family Q's signatures to read `latest` directly
+  forces edits to every one of those Family R call sites. Confirmed at least
+  one real semantic nuance in the process (an HP-overlay guard inside
+  `drawActionMenuIdleContent` that deliberately fires for turn 2/3 lifecycle
+  but explicitly excludes turn 1 — not a plain "hp changed" check), meaning
+  each call site needs individual verification, not a batch swap. The
+  slice-2 precondition pin test (`tests/battleSceneFightCommandPresentationTurn1Through4.test.ts`,
+  banked at `a76bb338`) is still green and still the right starting point for
+  whoever picks this up. ISSUES #39 updated with the same detail. No
+  PAPERCUT beyond the investigation time itself.
+
+---
+
+- **State:** master `bb64afc0` = merge of side branch
+  `worker/side-20260803-093850` (`90e5a2b2`, dossier slice 4) into
+  `633ac8a7` (entry 887). Post-merge `npm run build` + `npm run test:smoke`
+  green (full union suite deliberately deferred to the end of the typeref
+  round per the cross-lane contention rule; both parents carried
+  worker-verified full green suites — 649 files / 6,488 and 648 / 6,477).
+- **Did:** folded species-dossier slice 4, the capstone:
+  `SceneOffTurnView` gained identity fields (opponent/player species,
+  corners, battler, healthbox-content factory, moveset);
+  `renderSceneOffTurnView` consumes `view.*` with a species-keyed asset
+  lookup instead of closing over `kabutoFrontSprite`/`onixBackSprite`/ONIX
+  literals; `SCENE_OFF_TURN_DEFAULT_IDENTITY` (single source of truth for
+  today's ONIX/KABUTO values) populates `stagedBattleTurn.ts`'s new
+  `sceneOffIdentity`, spread at `core.ts`'s two call sites. Worker-verified
+  presentation-neutral: differential **144/144 byte-identical**
+  (`battle2-off-turn1-staged` 16 + insurance `battle-command-generated-off`
+  128, base `46190382`); supervisor spot-ran portability + presentation
+  suites in the worktree pre-merge. **That closes
+  `docs/species-render-entry-point-retirement-design.md` — all 7 slices
+  landed**; #39's species render-entry-point family is retired.
+- **Next:** typeref retirement slices 1-2 (`docs/battlescene-turnN-typeref-
+  retirement-design.md` §4; the slice-2 precondition pin test is already
+  banked at `a76bb338`), then 3/4a/4b/5. ISSUES #71 stays queued behind the
+  typeref slices per its own sequencing note.
+- **Notes:** paired-lane round (main resolver wiring ∥ side battleScene
+  slice, file-disjoint) — 4 workers so far today, 0 lost. Entry 887 was
+  appended out of ledger order by its worker (below 885); reordered in this
+  commit, 885 archived.
+
+---
+## 887 — [bounded MAIN worker, 2026-08-03] ISSUES #70 CLOSED — STRINGID_INTROSENDOUT extractor-gap consumption wired
+
+- **State:** master `49b8c323`. Full `npm test`: **649 files / 6,488 passed
+  / 1 skipped**. `npm run build` green (tsc -b + vite). `compare:differential
+  -- battle-command-generated-off.json --base 46190382 --summary`: **PASS —
+  128/128 byte-identical**.
+- **Did:** #70's last open item — wired the side lane's already-banked
+  `src/data/battleIntroStrings.ts` hand-mapped table (commit `a76bb338`,
+  STRINGID ids 0/1/2/5: `INTROMSG`/`INTROSENDOUT`/`RETURNMON`/`BATTLEEND`)
+  into `messageLines` (`battleResolutionPresentation.ts`), the same shape as
+  the existing `STRINGID_SWITCHINMON` (id 3) hand-port: a small local
+  `resolveIntroStringEntry` segment-splice (text/placeholder/linebreak,
+  mirroring `resolveBattleStringLines` for the subset these ids need) since
+  none of the 4 ids live in the extracted table's `BY_SYMBOL` map.
+  `B_TRAINER1_CLASS`/`B_TRAINER1_NAME`/`B_PLAYER_MON1_NAME`/
+  `B_OPPONENT_MON1_NAME`/`B_BUFF1`/`B_LINK_OPPONENT1_NAME` all resolve from
+  params `messageLines` already receives (`opponentTrainer`, `field`) — no
+  new generic-substitution plumbing needed. Three new optional
+  `battleScriptEvents.ts` message-payload fields (`introBattler`/
+  `introHpScale`/`introOutcome`) carry the routing facts these ids need that
+  the event shape doesn't otherwise carry (which side is being introduced/
+  returned, the `RETURNMON` player-branch HP-scale bucket, the `BATTLEEND`
+  win/lose/draw outcome — `introOutcome` reuses the existing `BattleOutcome`
+  domain type rather than inventing a new one). `prepareMessage`
+  (`factoryBattleScriptFullTurnDecision.ts`) needed **no change**: it is
+  `Cmd_printstring`'s own substitution-builder, and none of these 4 ids are
+  ever printed via `Cmd_printstring` even in the real game (`BufferStringBattle`
+  dispatches them from a separate, non-script C routine) — structurally
+  unreachable from that hook regardless of live-wiring status, so the step
+  brief's anticipated `prepareMessage` work turned out not to apply.
+- **Tests:** `tests/presentationStringIntro.test.ts`, 11 cases — one per
+  `battleIntroStrings.ts` table entry (full coverage: `INTROMSG`'s one
+  branch, `INTROSENDOUT`'s 2, `RETURNMON`'s 5, `BATTLEEND`'s 3), all via the
+  direct resolver-branch idiom (synthetic event straight into
+  `createBattleResolutionPresentation`, batch-3's zero-incidence pattern) —
+  the only idiom available since no engine path emits these ids. Red-
+  verified once via `git stash` on the two touched engine files: all 11
+  threw `battleStringResolver`'s exact completeness-guard error
+  (`unknown battle string id STRINGID_...`) pre-fix.
+- **Next:** #70 is closed and deleted from ISSUES.md (its forensic history
+  stays in git + this ledger/archive). ISSUES #71 (live send-out seam
+  wiring — the counterpart program that would actually populate
+  `introBattler`/`introHpScale`/`introOutcome` and make these 4 ids
+  reachable) is the next natural pick for this thread, but is its own
+  bounded step.
+- **Notes:** scope was deliberately resolver-completeness only, per the
+  step brief — no live emission wired (`battleScene.ts`/timing untouched).
+  `tests/executableFrontierRatchet.test.ts` green, untouched, no new
+  recording imports, no barrier-count changes.
+
+---
+## 886 — [bounded MAIN worker, 2026-08-03] ISSUES #70 batch 3 — final 12 presentation-string rows FIXED; #70 closed bar the extractor gap
+
+- **State:** master `8489ca18` (one commit on top of `f36d7433`). Full
+  `npm test`: **646 files / 6,456 passed / 1 skipped** (+12 from this step's
+  new suite). `npm run build` green (tsc -b + vite).
+- **Did:** mapped ISSUES #70's final 12 unranked ids (`docs/issue70-
+  stringid-reachability.md`'s remaining rows), closing #70's string-mapping
+  work entirely except the already-out-of-scope `STRINGID_INTROSENDOUT`
+  extractor gap. Ability-prevention family (rows 6-10:
+  `PKMNPREVENTSPOISONINGWITH`/`PKMNSXPREVENTSBURNS`/
+  `PKMNPREVENTSPARALYSISWITH`/`PKMNSXPREVENTSYSZ`/`PKMNSXHADNOEFFECTONY`) —
+  turned out simpler than the brief's own hypothesis once traced against
+  real source: the direct-status-move trio is reached via
+  `BattleScript_ImmunityProtected`/`WaterVeilPrevents`/`LimberProtected`'s
+  own `copybyte gEffectBattler, gBattlerTarget` (already ported generically,
+  `battleScriptIngrainLeechSeedWrapOpcode.ts:277-290`), while the other two
+  are reachable **only** via Synchronize's own `seteffectprimary`
+  re-application (`executeSynchronize`) — Poison Point/Static/Flame
+  Body/Effect Spore's own contact-ability path calls `seteffectsecondary`
+  (`primary=FALSE, certain=0`), which can never satisfy `preventionCall`'s
+  `(primary||certain)` gate. Added a new, scoped `effectBattler`
+  message-event field (`battleScriptEvents.ts`, mirroring batch 1's
+  `scriptingBattler`) attached only to the 4 ids that read it — an
+  unconditional first draft broke 2 pre-existing exact-equality tests
+  (Trick's item-swap message, sleep-wake-up) by appearing on unrelated
+  STRINGIDs that already had a non-null `selectorRoles.effectBattler`.
+  Uproar family (rows 12-14: `PKMNCANTSLEEPINUPROAR2`/`UPROARKEPTPKMNAWAKE`/
+  `PKMNSTAYEDAWAKEUSING`) — all three always name the sleep move's real
+  target regardless of whose Uproar it is. `USINGITEMSTATOFPKMNROSE`
+  (row 11) — `{B_BUFF1}`/`{B_BUFF2}` reuse `ATTACKERSSTATROSE`/
+  `DEFENDERSSTATROSE`'s existing `lastStatChange` tracking; a real gap fix
+  in `battleEndTurnOrchestration.ts`'s `STAT_UP_BERRIES` tick (never wired
+  `scriptingBattler` to the berry holder, unlike every other end-turn
+  held-item tick) supplied `{B_SCR_ACTIVE_NAME_WITH_PREFIX}`/`{B_LAST_ITEM}`.
+  `PKMNSTOCKPILED`/`PKMNHPFULL` (rows 21-22) — Stockpile's counter was
+  already tracked (`rulesContext.battleTextBuff1ByteNumber`), just not
+  plumbed; Swallow-at-full-HP's `B_DEF_NAME_WITH_PREFIX` resolves via the
+  attacker itself, matching its own self-target reassignment.
+  `PKMNTRANSFORMEDINTO` (row 40, zero-incidence) — `{B_BUFF1}` reads the
+  already-set `battleTextBuff1Species`. `FactoryFullTurnBattlerConfig`
+  gained a `stockpileCounter` staging field (mirroring batch 2's
+  `flashFireBoosted`) to stage Swallow-at-full-HP in one turn.
+- **Tests:** `tests/presentationStringBatch3.test.ts`, 12 cases: 11 staged
+  full-turn repros through the production kernel (including a genuine
+  two-ability Synchronize interaction for rows 7-8: an Immunity/Poison-type
+  attacker vs. a Synchronize-holding target using Toxic), 1 direct-resolver-
+  branch case for row 40 (the doc's only explicitly zero-incidence id this
+  batch). Red-verified once via `git stash` on the four touched engine
+  files: 11 threw `battleStringResolver`'s exact completeness-guard error
+  pre-fix; row 22 instead failed to even reach Swallow's full-HP branch
+  pre-fix (the `stockpileCounter` field didn't exist yet).
+  `npm run compare:differential -- battle-command-generated-off.json --base
+  f36d7433 --summary` (base = this commit's parent): **PASS — 128/128
+  byte-identical** — no standing capture reaches these strings.
+- **Next:** the `STRINGID_INTROSENDOUT` extractor gap (`tools/extract/
+  extract-battle-messages.ts`, ids 0/1/2/5 need a small hand-mapped table
+  parsed from `BufferStringBattle`'s switch arms, same shape as
+  `STRINGID_SWITCHINMON`'s own hand-port) — the only remaining piece of
+  #70, owned by a separate step per ISSUES #71's own scoping note.
+- **Notes:** `tests/executableFrontierRatchet.test.ts` untouched and green:
+  no new recording imports, no barrier-count changes. Diff stays additive in
+  `messageLines`/`prepareMessage`/`battleEndTurnOrchestration.ts`; no timing
+  constants touched. PAPERCUT: `battleEndTurnOrchestration.ts`'s per-tick
+  `scriptingBattler` wiring is set ad hoc per branch rather than once
+  generically for every end-turn tick — the `STAT_UP_BERRIES` gap this step
+  fixed is the kind of omission that pattern invites; a future pass could
+  fold it into `runTickScript`/`enterTickBattlerContext` itself, ~10min cost
+  avoided by not doing it now (out of this step's narrow scope).
+
+---
+## 885 — [bounded MAIN worker, 2026-08-03] ISSUES #70 — STRINGID_PKMNHURTBY crash FIXED (wrap-family end-of-turn damage tick)
+
+- **State:** master `58634980` (one commit on top of `37a4b621`). Full
+  `npm test`: **645 files / 6,444 passed / 1 skipped** (+1 from this step's
+  new test). `npm run build` green (tsc -b + vite).
+- **Did:** fixed the highest-severity gap batch-2 surfaced last session:
+  `BattleScript_WrapTurnDmg`'s own `printstring STRINGID_PKMNHURTBY`
+  (`battle_message.c:148`, `{B_ATK_NAME_WITH_PREFIX} is hurt\nby
+  {B_BUFF1}!`), fired every turn `ENDTURN_WRAP`'s recurring-damage branch
+  runs (`battleEndTurnOrchestration.ts`'s `WRAP_TURN_DMG_LABEL`/
+  `runWrapTick`) — reachable on the very first successful use of any of the
+  6 trapping moves (Bind/Wrap/Fire Spin/Clamp/Whirlpool/Sand Tomb), since
+  real Gen3 deals the trap's first damage tick the same turn it's set.
+  `messageLines` (`battleResolutionPresentation.ts`) gained a dedicated
+  branch reading the print-time action snapshot for
+  `B_ATK_NAME_WITH_PREFIX`, not `lastMoveAttacker` — `BS_ATTACKER` is
+  reassigned to the trapped battler itself for this tick
+  (`enterTickBattlerContext`), which can differ from the battler that last
+  used a real move. `prepareMessage`
+  (`factoryBattleScriptFullTurnDecision.ts`) gained a `STRINGID_PKMNHURTBY`
+  substitution resolving `{B_BUFF1}` via `resolveMoveName(rules.battlers
+  [rules.selectorRoles.attacker].wrappedMove)` — the trapping move's own id,
+  stamped onto the trapped battler by `applyWrapMoveEffect`
+  (`battleScriptHitChainOpcode.ts:3722`) when the trap was first cast.
+- **Tests:** `tests/presentationStringHurtBy.test.ts` — one staged real-Bind
+  full-turn repro through the production kernel (the same turn's own
+  end-of-turn tick fires the gap, so no synthetic-event fallback was
+  needed), brute-forcing seeds for Bind's 75% accuracy roll. Red-verified
+  once via `git stash` on the two touched engine files: threw
+  `battleStringResolver`'s exact completeness-guard error
+  (`STRINGID_PKMNHURTBY references placeholder {B_BUFF1} with no resolver
+  supplied`) pre-fix; green post-fix, asserting `["Foe {opponent} is
+  hurt", "by BIND!"]`. `npm run compare:differential -- battle-command-
+  generated-off.json --base 37a4b621 --summary` (base = this commit's
+  parent): **PASS — 128/128 captures byte-identical** — no standing capture
+  reaches this string.
+- **Next:** ISSUES #70's remaining 12 ids (ability-prevention family x5,
+  Uproar family x3, `USINGITEMSTATOFPKMNROSE`, `PKMNSTOCKPILED`/`PKMNHPFULL`,
+  `PKMNTRANSFORMEDINTO`) plus the `INTROSENDOUT` extractor gap. Full per-id
+  detail and file:line citations already in ISSUES #70 — do not re-derive.
+  Newly filed 2026-08-03 (user request): **ISSUES #71** — main-lane share of
+  send-out intro live wiring (dispatcher hookup + retiring the two
+  `src/engine/` hand-fits); slots after #70/dossier-4/typeref unless the user
+  reorders.
+- **Notes:** `tests/executableFrontierRatchet.test.ts` green, untouched, no
+  new recording imports, no barrier-count changes. Diff stays additive in
+  `messageLines`/`prepareMessage`; no timing constants touched.
+- **[supervisor final addendum, ~03:45]** hurtby fix verified (repro
+  test green, differential 128/128 per worker + suite rerun below).
+  animation-main fully folded (no new commits at final check). Preview
+  serving final master `497c1bd4` on :5199. Final independent full-suite
+  rerun by supervisor at `497c1bd4`: **exit 0, green** (03:33-03:37;
+  pass-count lines clipped by the capture — the worker's same-commit run
+  recorded 645 files / 6,444 passed / 1 skipped).
+  Session total: 18 workers (12 main, 6
+  side), 1 cap-kill salvaged, 0 lost steps. Tonight's #70 class work:
+  35 of 47 sweep ids + PKMNHURTBY mapped and pinned; remainder = 12
+  intricate ids + INTROSENDOUT extractor (documented in #70).
+
+---
+## 884 — [bounded MAIN worker, 2026-08-03] ISSUES #70 batch 2 — 19 of 31 remaining presentation-string rows FIXED; 12 remain + 1 new gap found
+
+- **State:** master `63dc4dc3` (two commits on top of `5ce289c8`). Full
+  `npm test`: **644 files / 6,443 passed / 1 skipped** (+19 from this step's
+  new suite). `npm run build` green (tsc -b + vite).
+- **Did:** ported 19 of the 31 remaining ids from `docs/issue70-stringid-
+  reachability.md`'s per-id table into `messageLines`
+  (`battleResolutionPresentation.ts`), worked in the doc's own order:
+  `PKMNFROZENBY`/`PKMNMADESLEEP` (extend batch-1's poisoned/burned/paralyzed
+  ability-status branch), `PKMNRAISEDDEFALITTLE`/`PKMNRAISEDSPDEFALITTLE`
+  (extend batch-1's Reflect/Light Screen/Safeguard branch),
+  `PKMNSHROUDEDINMIST`, `PKMNCHOSEXASDESTINY`, the wrap family
+  (`PKMNSQUEEZEDBYBIND`/`PKMNWRAPPEDBY`/`PKMNTRAPPEDINVORTEX`/`PKMNCLAMPED`/
+  `PKMNTRAPPEDBYSANDTOMB`), the Leech Seed pair (`PKMNEVADEDATTACK`/
+  `PKMNSEEDED`), the Trick item-swap family (`PKMNOBTAINEDX`/
+  `PKMNOBTAINEDX2`/`PKMNOBTAINEDXYOBTAINEDZ` — `prepareMessage`'s own
+  substitution already existed from a prior session), `PKMNUNAFFECTED`, and
+  the Flash Fire pair (`PKMNRAISEDFIREPOWERWITH`/`PKMNSXMADEYINEFFECTIVE`,
+  new `B_DEF_ABILITY` substitution). `FactoryFullTurnBattlerConfig` gained a
+  `flashFireBoosted` staging field to reach the already-boosted
+  re-activation string in one turn. Fixing `PKMNSXMADEYINEFFECTIVE` surfaced
+  a real adjacent bug the full suite caught: `ABILITY_STICKY_HOLD` (60,
+  reused by `BattleScript_StickyHoldActivates` for the same STRINGID) had no
+  ability-display-name entry — added alongside Flash Fire's, second commit.
+- **Tests:** `tests/presentationStringBatch2.test.ts`, 19 cases mirroring
+  batch-1's shape: a staged full-turn repro through the production kernel for
+  every id with a real non-zero-incidence trigger, and the direct
+  resolver-branch idiom (synthetic event straight into
+  `createBattleResolutionPresentation`, matching
+  `tests/battleResolutionPresentation.test.ts`'s own `inputFor` pattern) for
+  the 8 genuinely zero-incidence ids **plus the wrap family** — staging a
+  real Bind/Wrap/Fire Spin/Clamp/Sand Tomb turn also fires that same turn's
+  end-of-turn wrap-damage tick, which crashes on a *separate, previously-
+  undiscovered* gap (`STRINGID_PKMNHURTBY`, not one of the original 47 —
+  parsed from the real battle-script program, not a TS literal, so `#68`'s
+  sweep never found it). Red-verified once via `git stash` on the two
+  touched engine files: all 19 threw `battleStringResolver`'s completeness-
+  guard error pre-fix. `compare:differential` (base `5ce289c8`,
+  `turn5-rockslide`+`battle-command-generated-off`): **384/384
+  byte-identical** — no standing capture reaches these strings.
+- **Next:** ISSUES #70's remaining 12 ids (ability-prevention family x5,
+  Uproar family x3, `USINGITEMSTATOFPKMNROSE`, `PKMNSTOCKPILED`/`PKMNHPFULL`,
+  `PKMNTRANSFORMEDINTO`) plus the newly-found `STRINGID_PKMNHURTBY` gap
+  (flagged **higher real-world severity** — any of the 6 common trapping
+  moves crashes on its own first successful use) plus the `INTROSENDOUT`
+  extractor gap. Full per-id detail and file:line citations already in
+  ISSUES #70 — do not re-derive.
+- **Notes:** `tests/executableFrontierRatchet.test.ts` green, untouched, no
+  new recording imports, no barrier-count changes. Diff stays additive in
+  `messageLines`/`prepareMessage`; no timing constants touched.
+
+---
+## 883 — [supervisor wind-down, 2026-08-03 ~02:30] species-dossier 6/7 + three same-night user-bug fixes + #70 batch-1; final union green
+
+- **State:** master `70c58ae2` = final animation fold (front flip +
+  ANIM_GLOW_BLUE + horizontal pivot families). Final union verified by
+  supervisor: full `npm test` **6,424 passed / 1 skipped**, `npm run build`
+  green. DEFERRED.md: no entries. Open backlog: **#70 batch-2** (31
+  unranked ids + INTROSENDOUT extractor gap), **#39** (shrunk: dossier 6/7
+  + typeref design banked), **#55** (parked). #56 settled, #62/#68/#69
+  deleted-as-fixed this session.
+- **Session (15 workers: 9 main + 6 side, 1 cap-kill salvaged, 0 lost):**
+  dossier slices 1+2/3/5/6/7 presentation-neutral (slice 4 capstone
+  DEFERRED to next session — §4 row 4); typeref retirement design banked
+  (6-slice plan; 1+2 landable, 3/4b's dossier-7 gate now lifted); #62
+  CLOSED (route divergence); #56 audit caught + same-night fixed the
+  MAGNETON 703→702 stallLag regression, then SETTLED; live user play
+  reports triaged→probed→fixed same-night: #68 TORMENT string (+ #70
+  class discovered via its insurance sweep), #69 banner cadence
+  (74.6→90.6 f/banner vs ROM 92; RNG exonerated 25/25); #70 batch-1
+  (15 STRINGIDs + scriptingBattler event field + end-of-turn cure-name
+  gap, 8 staged repro tests).
+- **Next session (ordered):** (1) #70 batch-2 reachable-string mappings
+  (docs/issue70-stringid-reachability.md rows below top-8); (2) dossier
+  slice 4 capstone; (3) typeref slices 1-2 (dead-cut + P/Q fold), then
+  3/4a/4b/5. All briefs re-derivable from the banked design docs.
+- **Notes:** play-preview worktree (`.worktrees/play-preview`, port 5199)
+  serving `70c58ae2` — INTENTIONAL, exclude from stale sweeps.
+  `animation-main` remains a moving branch (live animation supervisor +
+  nested worker `worker/animation-20260803-014242` at wind-down) — fold at
+  next orient. Ledger-race rule adopted after one bite: never stage
+  ISSUES.md/PROGRESS.md in the main tree while a main-lane worker is live.
+  One app-differential temp worktree may linger under /var/folders —
+  `git worktree prune` at next orient if present.
+
 ---
 ## 882 — [bounded MAIN worker, 2026-08-03] ISSUES #70 batch 1 — ranked top-8 presentation-string rows (15 STRINGIDs) FIXED
 

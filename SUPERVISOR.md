@@ -170,7 +170,15 @@ edit.
    animation worktrees (see "Parallel workers").
 4. **Verify — trust nothing.** When it finishes:
    - `git log` / `git diff` the new commits. No commits = a failed step.
-   - Run `npm test` and `npm run build` yourself.
+   - Run `npm test` and `npm run build` yourself — **judiciously (user
+     directive, 2026-08-03: the full suite is 5-7 min; don't burn it
+     redundantly).** Workers still run the full suite as their own
+     acceptance gate; between rounds the supervisor runs
+     `npm run test:smoke` plus the tests the step touched and trusts the
+     worker's same-commit full-suite result unless something is off.
+     Docs-only merges need no suite; new-files-only merges need smoke +
+     the new files. Run ONE independent full `npm test` + `npm run build`
+     at wind-down (and at session start if the baseline is unverified).
    - Docs hygiene: is the `PROGRESS.md` top entry updated, accurate, **and
      lean** (a screenful — trim it yourself if the worker re-narrated the
      commit)? Is every `ISSUES.md` entry the step fixed **removed** (or a

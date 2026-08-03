@@ -512,3 +512,18 @@ Per entry:
   cheap; otherwise regenerate the census pin set in the same commit (the
   documented line-drift recipe) rather than contorting the edit.
 
+
+## mechanicLab send-out fast-forward silently inert under battle-scene-off
+
+- **What:** probing send-out/settle sprite state via a `mechanicLab`
+  scenario under `profile: "battle-scene-off"` never dispatches the front
+  idle-anim task at all — the probe reads a flat `SpriteCallbackDummy` /
+  `x2=0` from tick 0, which looks exactly like "the offset never applies"
+  when it actually means "this staging path skipped the intro under OFF."
+  Real OFF-profile battles DO play send-out anims (Scene OFF gates only
+  move anims); this is a mechanicLab staging artifact. Workaround: run
+  send-out RAM probes under `battle-scene-on`. Flagged by the 2026-08-03
+  #71 Slice-A worker, ~10 min lost root-causing. Hits: 1. Candidate fix:
+  a warning note in `tools/probe/dump-onix-front-idle-anim.py`'s module
+  doc (done 2026-08-03 by the Slice-C step) and/or a mechanicLab README
+  line.

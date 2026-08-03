@@ -2509,6 +2509,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
     const staged = state.stagedBattleTurn;
     if (staged.phase === "awaitingConfirm") {
       renderSceneOffTurnView(fb, {
+        ...staged.sceneOffIdentity,
         opponentHp: staged.initialOpponentHp,
         messageLines: null,
         messageChars: 0,
@@ -2554,6 +2555,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
         ? latestText.lines
         : null;
     renderSceneOffTurnView(fb, {
+      ...staged.sceneOffIdentity,
       opponentHp: playerMoveDone ? hpCommand.to : hpCommand.from,
       messageLines: lines,
       messageChars:
