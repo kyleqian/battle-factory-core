@@ -6,7 +6,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 882 — [bounded MAIN worker, 2026-08-03] ISSUES #70 batch 1 — ranked top-8 presentation-string rows (15 STRINGIDs) FIXED
 
-- **State:** master, this session's commit on top of `5b2cddf4`. Full
+- **State:** master `fba78340` (one commit on top of `5b2cddf4`). Full
   `npm test`: **635 files / 6,390 passed / 1 skipped** (+8 from this step's
   new suite). `npm run build` green (tsc -b + vite).
 - **Did:** ported the ranked top-8 rows of `docs/issue70-stringid-
@@ -55,8 +55,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   constant to that census tool's `ENGINE_INFRA_SPELLINGS` allowlist — a
   table name, not an ability member, same class as the pre-existing
   `ABILITY_NAME_BY_ID` entry). `npm run compare:differential -- turn5-
-  rockslide.json battle-command-generated-off.json --base <pre-fix sha>
-  --summary`: PENDING_DIFFERENTIAL_RESULT.
+  rockslide.json battle-command-generated-off.json --base 5b2cddf4
+  --summary` (post-commit, base = this commit's parent): **PASS — 384/384
+  captures byte-identical across both traces** — neither standing window
+  triggers any of the 15 fixed strings, exactly as expected.
 - **Next:** ISSUES #70 batch 2 — the 31 remaining unranked ids + the
   `STRINGID_INTROSENDOUT` extractor gap (both scoped in the trimmed #70
   entry). Species-dossier slice 4 (capstone `renderSceneOffTurnView`
