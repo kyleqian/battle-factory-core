@@ -56,6 +56,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   background a verification" discipline — worth remembering the fix
   pattern rather than re-deriving it next time a full-suite run exceeds
   120s.
+- **[supervisor final addendum, 13:10]** verified (repro test + smoke
+  green; worker's same-commit full suite 660 files / 6,558 / 1 skipped;
+  differential 128/128). Play-preview rebuilt at `bc763f06`, serving :5199.
+  Session final totals: **9 workers (6 main + 3 side), 0 lost.** OPEN
+  question for the user (asked live, unanswered at close): make the
+  battleStringResolver completeness guard non-fatal in the playable build
+  (loud console error + best-effort text) while staying fatal in tests —
+  recommended given #72's 107-id tail; next session implements per the
+  answer.
 
 ---
 ## 892 — [supervisor wind-down, 2026-08-03 ~12:40] #70 CLOSED + dossier CLOSED + #71 hookup slices A/B/C landed + typeref slice 1; animation fold; final union green
