@@ -31,9 +31,10 @@ staged Gligar Modest slow **1838..1937 / 100, 45,820 B,
 
 **Verification / next:** focused reducer/evidence/source/census checks **2
 files / 11 tests**, `npx tsc --noEmit`, and coverage are green. Full
-`npm test` and `npm run build` remain to run before handoff. Next source-ranked
-unsupported player-back set is **`BACK_ANIM_GROW` (set 6), 3 Factory mappings /
-0 outside — WIGGLYTUFF, KOFFING, WEEZING**. No move status was promoted.
+`npm test`: **655 files / 6,506 passed / 1 skipped**; `npm run build`: **green,
+552 modules transformed**. Next source-ranked unsupported player-back set is
+**`BACK_ANIM_GROW` (set 6), 3 Factory mappings / 0 outside — WIGGLYTUFF,
+KOFFING, WEEZING**. No move status was promoted.
 
 ## Back `BACK_ANIM_H_SPRING_REPEATED` triple accepted (2026-08-03)
 
