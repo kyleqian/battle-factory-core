@@ -429,6 +429,23 @@ export const BACK_SHAKE_GLOW_RED_OUTSIDE_FACTORY_SPECIES: readonly string[] = Ob
   BACK_SHAKE_GLOW_RED_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by `BACK_ANIM_SHAKE_GLOW_GREEN`. */
+export const BACK_SHAKE_GLOW_GREEN_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_SHAKE_GLOW_GREEN")
+    .map(([species]) => species),
+);
+
+/** Roselia is this source row's only Factory-reachable species. */
+export const BACK_SHAKE_GLOW_GREEN_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_SHAKE_GLOW_GREEN_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** Celebi is the source row's only outside-Factory species. */
+export const BACK_SHAKE_GLOW_GREEN_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_SHAKE_GLOW_GREEN_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -1122,6 +1139,29 @@ export const BACK_SHAKE_GLOW_RED_VARIANTS = Object.freeze({
 } as const);
 
 /**
+ * The green callbacks reuse ShakeGlow_Blend/ShakeGlow_Move exactly. Unlike
+ * red, SHAKEGLOW_GREEN is enum value one, retaining the task's `sDontFlip`
+ * alias through both source TryFlipX calls.
+ */
+export const BACK_SHAKE_GLOW_GREEN_VARIANTS = Object.freeze({
+  fast: Object.freeze({
+    selector: "ANIM_SHAKE_GLOW_GREEN_FAST", callback: "Anim_ShakeGlowGreen_Fast",
+    sourceId: 145, natureMod: 0, period: 10, passes: 2, movementThreshold: 54,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_SHAKE_GLOW_GREEN", callback: "Anim_ShakeGlowGreen",
+    sourceId: 146, natureMod: 1, period: 20, passes: 1, movementThreshold: 54,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_SHAKE_GLOW_GREEN_SLOW", callback: "Anim_ShakeGlowGreen_Slow",
+    sourceId: 147, natureMod: 2, period: 80, passes: 1, movementThreshold: 24,
+    accepted: true,
+  }),
+} as const);
+
+/**
  * `BACK_ANIM_V_SHAKE_H_SLIDE` selects three standalone source callbacks.
  * Unlike the preceding shake triples, each callback stays installed directly
  * after the task dispatches it; the source does not use a shared helper or a
@@ -1367,6 +1407,12 @@ type BackShakeGlowRedCallback = BackShakeGlowRedVariant["callback"];
 type BackShakeGlowRedSourceId = BackShakeGlowRedVariant["sourceId"];
 type BackShakeGlowRedPeriod = BackShakeGlowRedVariant["period"];
 type BackShakeGlowRedPasses = BackShakeGlowRedVariant["passes"];
+type BackShakeGlowGreenVariant = typeof BACK_SHAKE_GLOW_GREEN_VARIANTS[keyof typeof BACK_SHAKE_GLOW_GREEN_VARIANTS];
+type BackShakeGlowGreenSelector = BackShakeGlowGreenVariant["selector"];
+type BackShakeGlowGreenCallback = BackShakeGlowGreenVariant["callback"];
+type BackShakeGlowGreenSourceId = BackShakeGlowGreenVariant["sourceId"];
+type BackShakeGlowGreenPeriod = BackShakeGlowGreenVariant["period"];
+type BackShakeGlowGreenPasses = BackShakeGlowGreenVariant["passes"];
 type BackVShakeHSlideSelector = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["selector"];
 type BackVShakeHSlideCallback = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["callback"];
 type BackVShakeHSlideSourceId = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["sourceId"];
@@ -1733,6 +1779,13 @@ function shakeFlashYellowVariant(selector: string): BackShakeFlashYellowVariant 
 
 function shakeGlowRedVariant(selector: string): BackShakeGlowRedVariant | null {
   for (const variant of Object.values(BACK_SHAKE_GLOW_RED_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function shakeGlowGreenVariant(selector: string): BackShakeGlowGreenVariant | null {
+  for (const variant of Object.values(BACK_SHAKE_GLOW_GREEN_VARIANTS)) {
     if (variant.selector === selector) return variant;
   }
   return null;
@@ -4431,26 +4484,28 @@ export function backShakeFlashYellowTerminalSpriteData(
   ];
 }
 
-export interface BackShakeGlowRedFrame {
+type BackShakeGlowColor = "RGB_RED" | "RGB_GREEN";
+type BackShakeGlowVariant = BackShakeGlowRedVariant | BackShakeGlowGreenVariant;
+
+interface BackShakeGlowFrameBase {
   readonly x2: number;
   readonly y2: 0;
-  readonly data0: BackShakeGlowRedPeriod;
-  /** SHAKEGLOW_RED is enum value zero and overwrites the preserved task slot. */
-  readonly data1: 0;
+  readonly data0: number;
+  readonly data1: 0 | 1;
   readonly data2: number;
   readonly data3: number;
-  readonly data4: BackShakeGlowRedPasses;
+  readonly data4: number;
   readonly data5: number;
   readonly data6: number;
   readonly data7: number;
-  readonly selector: BackShakeGlowRedSelector;
-  readonly sourceId: BackShakeGlowRedSourceId;
-  readonly callbackBefore: BackShakeGlowRedCallback;
-  readonly callback: BackShakeGlowRedCallback | "WaitAnimEnd";
+  readonly selector: string;
+  readonly sourceId: number;
+  readonly callbackBefore: string;
+  readonly callback: string | "WaitAnimEnd";
   readonly initializerCalled: boolean;
   readonly blendCalled: boolean;
   readonly blendCoefficient: number | null;
-  readonly blendColor: "RGB_RED" | null;
+  readonly blendColor: BackShakeGlowColor | null;
   readonly paletteRestored: boolean;
   readonly movementThreshold: number;
   readonly moveCalled: boolean;
@@ -4458,32 +4513,81 @@ export interface BackShakeGlowRedFrame {
   readonly movementIndex: number | null;
   readonly movementSign: 1 | -1 | null;
   readonly tryFlipXCalls: 0 | 2;
-  /** SHAKEGLOW_RED overwrites the `sDontFlip` data[1] alias with FALSE. */
-  readonly dontFlipAfterColorSelector: false;
+  readonly dontFlipAfterColorSelector: boolean;
   readonly flipApplied: boolean;
   readonly terminal: boolean;
 }
 
+export interface BackShakeGlowRedFrame extends BackShakeGlowFrameBase {
+  readonly data0: BackShakeGlowRedPeriod;
+  /** SHAKEGLOW_RED is enum value zero and overwrites the preserved task slot. */
+  readonly data1: 0;
+  readonly data4: BackShakeGlowRedPasses;
+  readonly selector: BackShakeGlowRedSelector;
+  readonly sourceId: BackShakeGlowRedSourceId;
+  readonly callbackBefore: BackShakeGlowRedCallback;
+  readonly callback: BackShakeGlowRedCallback | "WaitAnimEnd";
+  readonly blendColor: "RGB_RED" | null;
+  /** SHAKEGLOW_RED overwrites the `sDontFlip` data[1] alias with FALSE. */
+  readonly dontFlipAfterColorSelector: false;
+}
+
+export interface BackShakeGlowGreenFrame extends BackShakeGlowFrameBase {
+  readonly data0: BackShakeGlowGreenPeriod;
+  /** SHAKEGLOW_GREEN is enum value one and retains the task's sDontFlip flag. */
+  readonly data1: 1;
+  readonly data4: BackShakeGlowGreenPasses;
+  readonly selector: BackShakeGlowGreenSelector;
+  readonly sourceId: BackShakeGlowGreenSourceId;
+  readonly callbackBefore: BackShakeGlowGreenCallback;
+  readonly callback: BackShakeGlowGreenCallback | "WaitAnimEnd";
+  /** The shared terminal restore still calls BlendPalette with RGB_RED. */
+  readonly blendColor: "RGB_GREEN" | "RGB_RED" | null;
+  readonly dontFlipAfterColorSelector: true;
+}
+
+type BackShakeGlowReducerConfig = {
+  readonly backAnimSet: "BACK_ANIM_SHAKE_GLOW_RED" | "BACK_ANIM_SHAKE_GLOW_GREEN";
+  readonly colorSelector: 0 | 1;
+  readonly glowColor: BackShakeGlowColor;
+  readonly variantForSelector: (selector: string) => BackShakeGlowVariant | null;
+};
+
+const SHAKE_GLOW_RED_REDUCER_CONFIG: BackShakeGlowReducerConfig = Object.freeze({
+  backAnimSet: "BACK_ANIM_SHAKE_GLOW_RED",
+  colorSelector: 0,
+  glowColor: "RGB_RED",
+  variantForSelector: shakeGlowRedVariant,
+});
+
+const SHAKE_GLOW_GREEN_REDUCER_CONFIG: BackShakeGlowReducerConfig = Object.freeze({
+  backAnimSet: "BACK_ANIM_SHAKE_GLOW_GREEN",
+  colorSelector: 1,
+  glowColor: "RGB_GREEN",
+  variantForSelector: shakeGlowGreenVariant,
+});
+
 /**
- * Source-order reducer for the red ShakeGlow triple. Tick zero is the selected
- * initializer callback after Task_HandleMonAnimation has zeroed data[2..7].
- * Even callbacks run ShakeGlow_Blend before the movement threshold check;
- * the initializer always performs its trailing data[2] increment, including
- * the callback that installs WaitAnimEnd after restoring the red palette.
+ * Shared source-order reducer for the red/green ShakeGlow triples. Tick zero
+ * is the selected initializer callback after Task_HandleMonAnimation has
+ * zeroed data[2..7]. Even callbacks run ShakeGlow_Blend before the movement
+ * threshold check; each initializer performs its trailing data[2] increment,
+ * including the callback that installs WaitAnimEnd after the RGB_RED restore.
  */
-export function backShakeGlowRedFrameAtTick(
+function backShakeGlowFrameAtTick(
   species: string,
   natureId: number,
   ticksSinceStart: number,
   paletteBase = 0x100,
-): BackShakeGlowRedFrame | null {
+  config: BackShakeGlowReducerConfig,
+): BackShakeGlowFrameBase | null {
   if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(paletteBase)) {
     return null;
   }
   const selection = selectBackSendOutAnimation(species, natureId);
-  if (selection?.backAnimSet !== "BACK_ANIM_SHAKE_GLOW_RED") return null;
-  const variant = shakeGlowRedVariant(selection.selector);
-  if (variant === null) throw new Error(`unexpected ShakeGlowRed selector ${selection.selector}`);
+  if (selection?.backAnimSet !== config.backAnimSet) return null;
+  const variant = config.variantForSelector(selection.selector);
+  if (variant === null) throw new Error(`unexpected ${config.backAnimSet} selector ${selection.selector}`);
 
   let x2 = 0;
   let data2 = 0;
@@ -4491,7 +4595,7 @@ export function backShakeGlowRedFrameAtTick(
   let data5 = 0;
   let data6 = 0;
   let data7 = 0;
-  let result: BackShakeGlowRedFrame | null = null;
+  let result: BackShakeGlowFrameBase | null = null;
 
   for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
     const initializerCalled = data2 === 0;
@@ -4504,7 +4608,7 @@ export function backShakeGlowRedFrameAtTick(
     const blendCalled = data2 % 2 === 0;
     let blendCoefficient: number | null = null;
     let paletteRestored = false;
-    let callback: BackShakeGlowRedCallback | "WaitAnimEnd" = variant.callback;
+    let callback: string | "WaitAnimEnd" = variant.callback;
     if (blendCalled) {
       if (data2 > 127) {
         blendCoefficient = 0;
@@ -4530,9 +4634,11 @@ export function backShakeGlowRedFrameAtTick(
       } else {
         movementSign = data3 % 2 === 0 ? 1 : -1;
         movementIndex = Math.trunc((data5 * 384) / variant.period) % 256;
-        // The first TryFlipX applies to the previous x2; the helper then
-        // assigns the sine result and its trailing TryFlipX negates it.
-        x2 = toS16(-movementSign * gbaSin(movementIndex, 6));
+        // The first TryFlipX applies to the previous x2; the helper assigns
+        // the sine result and its trailing TryFlipX only negates it when the
+        // color selector has cleared the data[1]/sDontFlip alias (red).
+        const sine = movementSign * gbaSin(movementIndex, 6);
+        x2 = toS16(config.colorSelector === 0 ? -sine : sine);
         data5 = toS16(data5 + 1);
       }
     }
@@ -4541,20 +4647,48 @@ export function backShakeGlowRedFrameAtTick(
     const terminal = callback === "WaitAnimEnd";
     result = Object.freeze({
       x2, y2: 0 as const,
-      data0: variant.period, data1: 0 as const, data2, data3,
+      data0: variant.period, data2, data3,
       data4: variant.passes, data5, data6, data7,
       selector: variant.selector, sourceId: variant.sourceId,
       callbackBefore: variant.callback, callback, initializerCalled,
       blendCalled, blendCoefficient,
-      blendColor: blendCoefficient === null ? null : "RGB_RED" as const,
+      blendColor: blendCoefficient === null
+        ? null
+        : (paletteRestored ? "RGB_RED" : config.glowColor),
       paletteRestored, movementThreshold: variant.movementThreshold,
       moveCalled, movementPhase, movementIndex, movementSign, tryFlipXCalls,
-      dontFlipAfterColorSelector: false as const, flipApplied: tryFlipXCalls === 2,
+      data1: config.colorSelector,
+      dontFlipAfterColorSelector: config.colorSelector === 1,
+      flipApplied: tryFlipXCalls === 2 && config.colorSelector === 0,
       terminal,
     });
     if (terminal) break;
   }
   return result;
+}
+
+/** Source-order reducer for the red SHAKEGLOW_RED == 0 selector triple. */
+export function backShakeGlowRedFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  paletteBase = 0x100,
+): BackShakeGlowRedFrame | null {
+  return backShakeGlowFrameAtTick(
+    species, natureId, ticksSinceStart, paletteBase, SHAKE_GLOW_RED_REDUCER_CONFIG,
+  ) as BackShakeGlowRedFrame | null;
+}
+
+/** Source-order reducer for the green SHAKEGLOW_GREEN == 1 selector triple. */
+export function backShakeGlowGreenFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  paletteBase = 0x100,
+): BackShakeGlowGreenFrame | null {
+  return backShakeGlowFrameAtTick(
+    species, natureId, ticksSinceStart, paletteBase, SHAKE_GLOW_GREEN_REDUCER_CONFIG,
+  ) as BackShakeGlowGreenFrame | null;
 }
 
 export function backShakeGlowRedWaitAnimEndCallback(
@@ -4573,6 +4707,31 @@ export function backShakeGlowRedTerminalSpriteData(
 ): readonly [number, 0, number, number, BackShakeGlowRedPasses, number, number, number] | null {
   if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
   const terminal = backShakeGlowRedFrameAtTick(
+    species, natureId, Number.MAX_SAFE_INTEGER, paletteBase,
+  );
+  if (terminal === null) return null;
+  return [
+    toS16(battlerId), 0, toS16(speciesId), terminal.data3,
+    terminal.data4, terminal.data5, terminal.data6, terminal.data7,
+  ];
+}
+
+export function backShakeGlowGreenWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return backShakeGlowRedWaitAnimEndCallback(animEnded);
+}
+
+/** Task_HandleMonAnimation restores data[0..2] and preserves data[3..7]. */
+export function backShakeGlowGreenTerminalSpriteData(
+  species: string,
+  natureId: number,
+  battlerId: number,
+  speciesId: number,
+  paletteBase = 0x100,
+): readonly [number, 0, number, number, BackShakeGlowGreenPasses, number, number, number] | null {
+  if (!Number.isInteger(battlerId) || !Number.isInteger(speciesId)) return null;
+  const terminal = backShakeGlowGreenFrameAtTick(
     species, natureId, Number.MAX_SAFE_INTEGER, paletteBase,
   );
   if (terminal === null) return null;

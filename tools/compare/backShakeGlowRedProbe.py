@@ -7,11 +7,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-if len(sys.argv) != 3:
-    raise SystemExit(f"usage: {sys.argv[0]} <scenario.json> <output.json>")
-
-SCENARIO = Path(sys.argv[1])
-OUTPUT = Path(sys.argv[2])
 ROOT = Path(__file__).resolve().parents[2]
 HARNESS = next(parent for parent in (ROOT, *ROOT.parents) if (parent / "oracle" / "emerald_core.py").is_file())
 sys.path.insert(0, str(HARNESS / "oracle"))
@@ -32,9 +27,45 @@ EVIDENCE = {
     (219, 21): ("Factory record index 194 FRONTIER_MON_MAGCARGO_1 NATURE_GENTLE", 194),
 }
 
+GREEN_VARIANTS = {
+    0: ("ANIM_SHAKE_GLOW_GREEN_FAST", "Anim_ShakeGlowGreen_Fast", 145, 10, 2, 54),
+    1: ("ANIM_SHAKE_GLOW_GREEN", "Anim_ShakeGlowGreen", 146, 20, 1, 54),
+    2: ("ANIM_SHAKE_GLOW_GREEN_SLOW", "Anim_ShakeGlowGreen_Slow", 147, 80, 1, 24),
+}
+GREEN_EVIDENCE = {
+    (363, 0): ("Staged Hardy/mod-0 Roselia derived from Factory record index 171 FRONTIER_MON_ROSELIA_1", 171),
+    (363, 6): ("Factory record index 171 FRONTIER_MON_ROSELIA_1 NATURE_DOCILE", 171),
+    (363, 17): ("Staged Quiet/mod-2 Roselia derived from Factory record index 171 FRONTIER_MON_ROSELIA_1", 171),
+}
+FAMILIES = {
+    "red": {
+        "variants": VARIANTS,
+        "evidence": EVIDENCE,
+        "back_anim_set": "BACK_ANIM_SHAKE_GLOW_RED",
+        "back_anim_set_index": 22,
+        "color_selector": "SHAKEGLOW_RED",
+        "palette_contract": "OBJ_PLTT_ID(oam.paletteNum), even-tick Sin(data[2],12), RGB_RED restore",
+        "schema": "back-shake-glow-red-scene-on-dense/v1",
+    },
+    "green": {
+        "variants": GREEN_VARIANTS,
+        "evidence": GREEN_EVIDENCE,
+        "back_anim_set": "BACK_ANIM_SHAKE_GLOW_GREEN",
+        "back_anim_set_index": 23,
+        "color_selector": "SHAKEGLOW_GREEN",
+        "palette_contract": "OBJ_PLTT_ID(oam.paletteNum), even-tick Sin(data[2],12), RGB_GREEN; RGB_RED coefficient-zero restore",
+        "schema": "back-shake-glow-green-scene-on-dense/v1",
+    },
+}
 
-def main() -> None:
-    request = validate_request(json.loads(SCENARIO.read_text()), "battle-scene-on")
+
+def main(family_name: str = "red") -> None:
+    if len(sys.argv) != 3:
+        raise SystemExit(f"usage: {sys.argv[0]} <scenario.json> <output.json>")
+    family = FAMILIES[family_name]
+    scenario = Path(sys.argv[1])
+    output = Path(sys.argv[2])
+    request = validate_request(json.loads(scenario.read_text()), "battle-scene-on")
     oracle = EmeraldOracle(
         REFERENCE / "pokeemerald.gba",
         REFERENCE / "pokeemerald.map",
@@ -140,14 +171,20 @@ def main() -> None:
     player = request["overrides"]["parties"]["player"][0]
     species, nature_id = player["species"], player["nature"]
     nature_mod = NATURE_MODS[nature_id]
-    selector, initializer, source_id, period, passes, threshold = VARIANTS[nature_mod]
-    selector_evidence, source_record_index = EVIDENCE.get((species, nature_id), (None, None))
+    selector, initializer, source_id, period, passes, threshold = family["variants"][nature_mod]
+    selector_evidence, source_record_index = family["evidence"].get((species, nature_id), (None, None))
     if selector_evidence is None:
-        raise RuntimeError(f"unexpected red-glow evidence party: species={species}, nature={nature_id}")
+        raise RuntimeError(f"unexpected {family_name}-glow evidence party: species={species}, nature={nature_id}")
     first = next((index for index, capture in enumerate(captures)
                   if (capture["state"].get("battler0") or {}).get("callbackSymbol") == initializer), None)
     if first is None:
-        raise RuntimeError(f"{selector} initializer was not observed")
+        observed = sorted({(capture["state"].get("battler0") or {}).get("callbackSymbol")
+                           for capture in captures})
+        task_ids = sorted({task["data"][3] for capture in captures
+                           if (task := capture["state"].get("monAnimationTask")) is not None})
+        raise RuntimeError(
+            f"{selector} initializer was not observed; callbacks={observed}; taskAnimIds={task_ids}"
+        )
     dense = []
     for capture in captures[first:]:
         dense.append({
@@ -165,20 +202,20 @@ def main() -> None:
     if missing:
         raise RuntimeError(f"incomplete callback lifecycle: missing={missing}")
     result = {
-        "schema": "back-shake-glow-red-scene-on-dense/v1", "profile": "battle-scene-on",
+        "schema": family["schema"], "profile": "battle-scene-on",
         "species": species, "natureId": nature_id, "natureMod": nature_mod,
         "selectorEvidence": selector_evidence, "sourceRecordIndex": source_record_index,
-        "sourceBackAnimSet": "BACK_ANIM_SHAKE_GLOW_RED", "sourceBackAnimSetIndex": 22,
+        "sourceBackAnimSet": family["back_anim_set"], "sourceBackAnimSetIndex": family["back_anim_set_index"],
         "sourceSelector": selector, "sourceInitializer": initializer, "sourceId": source_id,
         "sourcePeriod": period, "sourcePasses": passes, "sourceMovementThreshold": threshold,
-        "sourceColorSelector": "SHAKEGLOW_RED", "sourcePhases": ["ShakeGlow_Blend", "ShakeGlow_Move", "WaitAnimEnd"],
-        "paletteContract": "OBJ_PLTT_ID(oam.paletteNum), even-tick Sin(data[2],12), RGB_RED restore",
+        "sourceColorSelector": family["color_selector"], "sourcePhases": ["ShakeGlow_Blend", "ShakeGlow_Move", "WaitAnimEnd"],
+        "paletteContract": family["palette_contract"],
         "sourceWindow": {"startFrame": dense[0]["frame"], "endFrame": dense[-1]["frame"], "frameCount": len(dense)},
         "callbackAddresses": {name: address_by_name[name] for name in sorted(expected_callbacks)},
         "frames": dense,
     }
-    OUTPUT.write_text(json.dumps(result, separators=(",", ":")) + "\n")
-    print(f"wrote {OUTPUT}: {selector}, dense={dense[0]['frame']}..{dense[-1]['frame']} ({len(dense)} frames)")
+    output.write_text(json.dumps(result, separators=(",", ":")) + "\n")
+    print(f"wrote {output}: {selector}, dense={dense[0]['frame']}..{dense[-1]['frame']} ({len(dense)} frames)")
 
 
 if __name__ == "__main__":

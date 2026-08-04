@@ -1,5 +1,36 @@
 # Animation coverage
 
+## Back `BACK_ANIM_SHAKE_GLOW_GREEN` triple accepted (2026-08-04)
+
+- **State:** exact for the twenty-fourth bounded player-back set: **24/25 back
+  sets, 72/75 selector variants, 366/376 Factory mappings**. Generated row:
+  **2 mappings / 1 Factory species (ROSELIA) / 1 outside (CELEBI) / 2
+  Factory records**. Move coverage remains **107/276 exact, 0 partial, 0
+  staged, 169 unsupported**; `ANIMATION_COVERAGE.json` is unchanged at
+  SHA-256 `6e8067e5f58c0d442b6cd57ece28189a21b9cbd116c6bef9298e2b53799c5773`.
+- **Did:** ported source IDs **145/146/147** through the accepted shared
+  `ShakeGlow_Blend` / `ShakeGlow_Move` lifecycle: `SHAKEGLOW_GREEN == 1`,
+  green blend, fast/normal/slow **10/2, 20/1, 80/1**, thresholds
+  **54/54/24**, and terminal RGB_RED coefficient-zero restoration.
+  `data[1]` aliases `sDontFlip`, so both `TryFlipX` calls are no-ops for
+  green, unlike red. Batch routing covers both mappings under all three
+  nature mods and both real ROSELIA records **171/276** (Docile/mod-1).
+- **Next:** await the supervisor's next bounded player-back selector step;
+  blue ShakeGlow set 25 remains an independent acceptance unit.
+- **Notes:** paired fresh, byte-identical Scene-ON initializer→WaitAnimEnd→
+  dummy receipts retain every framebuffer hash plus player RAM/OAM/task and
+  unfaded/faded/hardware OBJ palettes: real record-171 normal **1839..1969 /
+  131 / 130,940 B / `38dcc94a15e253c112e84b0b844d5f41bd9ba9ef9e968c797638b458f3d21938`**;
+  transparently staged record-171 Hardy fast **131,618 B /
+  `6a1395b23696509bdd09a9e49bc58e80e3219b16de26cb1742d77ef552cb1b2e`**;
+  Quiet slow **131,677 B /
+  `76013269c7bb6c31429b41a7ef69dd0cdfd1dfb386043b3edfa391d94b9013fc`**.
+  No Celebi oracle variant was invented. Focused green/red regression plus
+  both ratchets: **6 files / 33 tests**; typecheck, smoke **7/347**, full
+  **708 files / 6,835 passed / 1 skipped**, build (**554 modules**), and
+  coverage are green. No boundary/unsupported widening, coverage-ledger
+  mutation, or move promotion.
+
 ## Back `BACK_ANIM_SHAKE_GLOW_RED` triple accepted (2026-08-04)
 
 - **State:** exact for the twenty-third bounded player-back set: **23/25 back
