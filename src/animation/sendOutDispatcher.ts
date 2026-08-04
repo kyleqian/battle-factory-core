@@ -1,5 +1,35 @@
 import selectorTables from "../data/gen/send-out-anim-selector-tables.json" with { type: "json" };
 import {
+  BACK_ANIM_NATURE_ORDER,
+  backCircleCounterclockwiseFrameAtTick,
+  backConcaveArcLargeFrameAtTick,
+  backConcaveArcSmallFrameAtTick,
+  backConvexDoubleArcFrameAtTick,
+  backDipRightSideFrameAtTick,
+  backGrowFrameAtTick,
+  backGrowInStagesFrameAtTick,
+  backGrowStutterFrameAtTick,
+  backHorizontalRepeatedSpringFrameAtTick,
+  backHorizontalShakeFrameAtTick,
+  backHorizontalSlideFrameAtTick,
+  backHorizontalSpringFrameAtTick,
+  backHorizontalStretchFrameAtTick,
+  backHorizontalVibrateFrameAtTick,
+  backJoltRightFrameAtTick,
+  backShakeFlashYellowFrameAtTick,
+  backShakeGlowBlueFrameAtTick,
+  backShakeGlowGreenFrameAtTick,
+  backShakeGlowRedFrameAtTick,
+  backShrinkGrowFrameAtTick,
+  backShrinkGrowVibrateFrameAtTick,
+  backTriangleDownFrameAtTick,
+  backVerticalShakeFrameAtTick,
+  backVerticalShakeHorizontalSlideFrameAtTick,
+  backVerticalShakeLowFrameAtTick,
+  backVerticalStretchFrameAtTick,
+  selectBackSendOutAnimation,
+} from "./backSendOutAnim.ts";
+import {
   type SpeciesFrontAnimFamily,
   type SpeciesIdleOffset,
   backAndLungeFrameAtTick,
@@ -280,6 +310,119 @@ export function frontSendOutFrameAtTick(
   const resolvedFamily = family as SpeciesFrontAnimFamily;
   const t = Math.min(ticksSinceStart, FRONT_SEND_OUT_TERMINAL_TICKS[resolvedFamily]);
   const offset = FRONT_SEND_OUT_REDUCERS[resolvedFamily](t);
+  if (offset === null) return null;
+  return Object.freeze({ x2: offset.x2, y2: offset.y2 });
+}
+
+/**
+ * Rung-3 back send-out dispatcher (ISSUES #71 cross-lane ask item 3).
+ *
+ * The player-back per-tick counterpart to the front dispatcher above, in the
+ * same contract shape. `BattleAnimateBackSprite` resolves the species' back
+ * set via `GetSpeciesBackAnimSet` and then picks one of three selectors from
+ * the player's nature (`LaunchAnimationTaskForBackSprite`'s
+ * `3 * backAnimSet + natureMod` lookup, `pokemon_animation.c`), so this
+ * dispatcher keys on species **and** nature name.
+ *
+ * `nature` accepts the exact `NATURE_*` names whose list index IS the numeric
+ * `GetNature` result (`BACK_ANIM_NATURE_ORDER`, source-order
+ * `sBackAnimNatureModTable`); an unknown name returns null. The species is
+ * resolved through `selectBackSendOutAnimation`, which returns null for an
+ * invalid nature id or a non-source species and freezes the selection
+ * `{ backAnimSet, selector, ... }` — the selector variant selects which of
+ * the set's callbacks the ROM would install.
+ *
+ * Unlike the front dispatcher there is no terminal-clamp table: every back
+ * reducer already returns its own stable terminal frame for large ticks (the
+ * source callback reaches WaitAnimEnd and `Task_HandleMonAnimation` holds the
+ * last OAM write), so ticks are passed through unclamped. The dispatched
+ * result is the same frozen `{ x2, y2 }` projection the front dispatcher
+ * returns.
+ */
+type BackSendOutReducer = (
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+) => SpeciesIdleOffset | null;
+
+export const BACK_SEND_OUT_REDUCERS: Readonly<Record<string, BackSendOutReducer>> = Object.freeze({
+  BACK_ANIM_H_VIBRATE: backHorizontalVibrateFrameAtTick,
+  BACK_ANIM_H_SLIDE: backHorizontalSlideFrameAtTick,
+  BACK_ANIM_H_SPRING: backHorizontalSpringFrameAtTick,
+  BACK_ANIM_H_SPRING_REPEATED: backHorizontalRepeatedSpringFrameAtTick,
+  BACK_ANIM_SHRINK_GROW: backShrinkGrowFrameAtTick,
+  BACK_ANIM_GROW: backGrowReducerForSelection,
+  BACK_ANIM_CIRCLE_COUNTERCLOCKWISE: backCircleCounterclockwiseFrameAtTick,
+  BACK_ANIM_H_SHAKE: backHorizontalShakeFrameAtTick,
+  BACK_ANIM_V_SHAKE: backVerticalShakeFrameAtTick,
+  BACK_ANIM_V_SHAKE_H_SLIDE: backVerticalShakeHorizontalSlideFrameAtTick,
+  BACK_ANIM_V_STRETCH: backVerticalStretchFrameAtTick,
+  BACK_ANIM_H_STRETCH: backHorizontalStretchFrameAtTick,
+  BACK_ANIM_GROW_STUTTER: backGrowStutterFrameAtTick,
+  BACK_ANIM_V_SHAKE_LOW: backVerticalShakeLowFrameAtTick,
+  BACK_ANIM_TRIANGLE_DOWN: backTriangleDownFrameAtTick,
+  BACK_ANIM_CONCAVE_ARC_LARGE: backConcaveArcLargeFrameAtTick,
+  BACK_ANIM_CONVEX_DOUBLE_ARC: backConvexDoubleArcFrameAtTick,
+  BACK_ANIM_CONCAVE_ARC_SMALL: backConcaveArcSmallFrameAtTick,
+  BACK_ANIM_DIP_RIGHT_SIDE: backDipRightSideFrameAtTick,
+  BACK_ANIM_SHRINK_GROW_VIBRATE: backShrinkGrowVibrateFrameAtTick,
+  BACK_ANIM_JOLT_RIGHT: backJoltRightFrameAtTick,
+  BACK_ANIM_SHAKE_FLASH_YELLOW: backShakeFlashYellowFrameAtTick,
+  BACK_ANIM_SHAKE_GLOW_RED: backShakeGlowRedFrameAtTick,
+  BACK_ANIM_SHAKE_GLOW_GREEN: backShakeGlowGreenFrameAtTick,
+  BACK_ANIM_SHAKE_GLOW_BLUE: backShakeGlowBlueFrameAtTick,
+});
+
+const BACK_ANIM_GROW_IN_STAGES_SELECTOR = "ANIM_GROW_IN_STAGES";
+
+/**
+ * `BACK_ANIM_GROW` is ONE set served by TWO reducers split by selector
+ * variant: `backGrowFrameAtTick` handles the shared Grow helper's
+ * `ANIM_GROW` / `ANIM_GROW_TWICE` selectors (whose variants carry
+ * speed/runs), while `backGrowInStagesFrameAtTick` handles the distinct
+ * `ANIM_GROW_IN_STAGES` staged callback. Each reducer also rejects the other
+ * selector's variant, so route on the selection's selector rather than
+ * blind-trying both.
+ */
+function backGrowReducerForSelection(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+): SpeciesIdleOffset | null {
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_GROW") return null;
+  if (selection.selector === BACK_ANIM_GROW_IN_STAGES_SELECTOR) {
+    return backGrowInStagesFrameAtTick(species, natureId, ticksSinceStart);
+  }
+  return backGrowFrameAtTick(species, natureId, ticksSinceStart);
+}
+
+/**
+ * Per-tick back send-out offset for `species` with player nature `nature` at
+ * `ticksSinceStart`, or null when the species has no back set, the nature
+ * name is unknown, or the tick is invalid.
+ *
+ * ticksSinceStart 0 is the tick `LaunchAnimationTaskForBackSprite` installs
+ * the selected back animation callback (`GetSpeciesBackAnimSet` +
+ * `sBackAnimNatureModTable[GetNature(player)]`); every reducer is invoked
+ * with exactly `(species, natureId, ticksSinceStart)` and validates its own
+ * routing, so a reducer null passes through as null. Ticks past the reducer's
+ * own terminal tick return its stable terminal frame (see
+ * `BACK_SEND_OUT_REDUCERS`).
+ */
+export function backSendOutFrameAtTick(
+  species: string,
+  nature: string,
+  ticksSinceStart: number,
+): SpeciesIdleOffset | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+  const natureId = BACK_ANIM_NATURE_ORDER.indexOf(nature);
+  if (natureId === -1) return null;
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection === null) return null;
+  const reducer = BACK_SEND_OUT_REDUCERS[selection.backAnimSet];
+  if (reducer === undefined) return null;
+  const offset = reducer(species, natureId, ticksSinceStart);
   if (offset === null) return null;
   return Object.freeze({ x2: offset.x2, y2: offset.y2 });
 }

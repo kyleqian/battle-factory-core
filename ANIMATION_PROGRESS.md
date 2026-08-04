@@ -1,5 +1,36 @@
 # Animation coverage
 
+## Rung-3 BACK send-out dispatcher landed (2026-08-04)
+
+- **State:** ISSUES #71 rung-3 cross-lane ask item 3 (back variant) complete
+  and green — all three cross-lane items now delivered (front per-tick, OAM
+  frame side, back variant). Move coverage unchanged: **107/276 exact, 1
+  partial, 0 staged, 168 unsupported**; `ANIMATION_COVERAGE.json` untouched.
+  The only production edit adds exports to `sendOutDispatcher.ts`. No engine
+  edits, no boundary/unsupported widening.
+- **Did:** `backSendOutFrameAtTick(species, nature, ticksSinceStart)` in the
+  same contract shape as the front half: resolves the species' back set +
+  nature-mod selector via `selectBackSendOutAnimation` (`3 * backAnimSet +
+  natureMod` lookup), routes through the exported 25-set
+  `BACK_SEND_OUT_REDUCERS` map, and returns the frozen `{ x2, y2 }`
+  projection. `BACK_ANIM_GROW` is the one set with two reducer entry points:
+  selector `ANIM_GROW_IN_STAGES` → `backGrowInStagesFrameAtTick`, the shared
+  Grow selectors (`ANIM_GROW`/`ANIM_GROW_TWICE`) → `backGrowFrameAtTick`
+  (verified via `growVariant`'s speed/runs split, not blind-trying). No
+  terminal-clamp table: back reducers return their own stable terminal frames
+  (ShakeGlow settled-tick scan pinned, 200-window stable run).
+- **Next:** supervisor's call — Steel Wing reconciliation remains queued per
+  the 2026-08-04 directive.
+- **Notes:** routing totality = **386 species keys × 25 natures = 9,650**
+  combos, every one non-null at tick 0 and equal to its direct reducer's
+  `{ x2, y2 }` projection; per-set passthrough over all **25/25** sets at
+  ticks [0,1,5,17,40,90,200] exact incl. both GROW entry points. Nature names
+  accepted verbatim via `BACK_ANIM_NATURE_ORDER` (length 25). Tests
+  `tests/animation/backSendOutDispatcher.test.ts` (7). Focused 4 files / 22
+  tests (incl. both ratchets), typecheck, smoke **7/347**, full **720 files /
+  6,923 passed / 1 skipped**, build green. Committed on
+  `worker/animation-20260804-142745`; tree clean at commit.
+
 ## Rung-3 FRONT send-out ANCHOR pinned live (RAM probe, all three flights) (2026-08-04)
 
 - **State:** ISSUES #71 rung-3 item 1's "define the anchor explicitly"
