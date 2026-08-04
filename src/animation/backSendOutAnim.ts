@@ -276,6 +276,23 @@ export const BACK_V_SHAKE_LOW_OUTSIDE_FACTORY_SPECIES: readonly string[] = Objec
   BACK_V_SHAKE_LOW_SPECIES.filter((species) => !factorySpecies.has(species)),
 );
 
+/** Every species selected by the generated `BACK_ANIM_TRIANGLE_DOWN` row. */
+export const BACK_TRIANGLE_DOWN_SPECIES: readonly string[] = Object.freeze(
+  Object.entries(speciesToBackAnimSet)
+    .filter(([, set]) => set === "BACK_ANIM_TRIANGLE_DOWN")
+    .map(([species]) => species),
+);
+
+/** All triangle-down mappings have real Factory rental records. */
+export const BACK_TRIANGLE_DOWN_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_TRIANGLE_DOWN_SPECIES.filter((species) => factorySpecies.has(species)),
+);
+
+/** This bounded back set has no non-Factory selector mappings. */
+export const BACK_TRIANGLE_DOWN_OUTSIDE_FACTORY_SPECIES: readonly string[] = Object.freeze(
+  BACK_TRIANGLE_DOWN_SPECIES.filter((species) => !factorySpecies.has(species)),
+);
+
 export const BACK_H_VIBRATE_VARIANTS = Object.freeze({
   fastest: Object.freeze({
     selector: "ANIM_H_VIBRATE_FASTEST",
@@ -629,6 +646,41 @@ export const BACK_V_SHAKE_LOW_VARIANTS = Object.freeze({
 } as const);
 
 /**
+ * `BACK_ANIM_TRIANGLE_DOWN` selects three initializers around the shared
+ * non-affine TriangleDown callback. Its `data[5]` is both the signed source
+ * divisor and the per-tick vector amplitude; `data[6]` is the run count.
+ */
+export const BACK_TRIANGLE_DOWN_VARIANTS = Object.freeze({
+  twice: Object.freeze({
+    selector: "ANIM_TRIANGLE_DOWN_TWICE",
+    callback: "Anim_TriangleDown_Fast",
+    sourceId: 106,
+    natureMod: 0,
+    amplitude: 2,
+    runs: 2,
+    accepted: true,
+  }),
+  normal: Object.freeze({
+    selector: "ANIM_TRIANGLE_DOWN",
+    callback: "Anim_TriangleDown",
+    sourceId: 105,
+    natureMod: 1,
+    amplitude: 2,
+    runs: 1,
+    accepted: true,
+  }),
+  slow: Object.freeze({
+    selector: "ANIM_TRIANGLE_DOWN_SLOW",
+    callback: "Anim_TriangleDown_Slow",
+    sourceId: 104,
+    natureMod: 2,
+    amplitude: 1,
+    runs: 1,
+    accepted: true,
+  }),
+} as const);
+
+/**
  * `BACK_ANIM_V_SHAKE_H_SLIDE` selects three standalone source callbacks.
  * Unlike the preceding shake triples, each callback stays installed directly
  * after the task dispatches it; the source does not use a shared helper or a
@@ -823,6 +875,11 @@ type BackVShakeLowCallback = typeof BACK_V_SHAKE_LOW_VARIANTS[keyof typeof BACK_
 type BackVShakeLowSourceId = typeof BACK_V_SHAKE_LOW_VARIANTS[keyof typeof BACK_V_SHAKE_LOW_VARIANTS]["sourceId"];
 type BackVShakeLowStep = typeof BACK_V_SHAKE_LOW_VARIANTS[keyof typeof BACK_V_SHAKE_LOW_VARIANTS]["step"];
 type BackVShakeLowAmplitude = typeof BACK_V_SHAKE_LOW_VARIANTS[keyof typeof BACK_V_SHAKE_LOW_VARIANTS]["amplitude"];
+type BackTriangleDownSelector = typeof BACK_TRIANGLE_DOWN_VARIANTS[keyof typeof BACK_TRIANGLE_DOWN_VARIANTS]["selector"];
+type BackTriangleDownCallback = typeof BACK_TRIANGLE_DOWN_VARIANTS[keyof typeof BACK_TRIANGLE_DOWN_VARIANTS]["callback"];
+type BackTriangleDownSourceId = typeof BACK_TRIANGLE_DOWN_VARIANTS[keyof typeof BACK_TRIANGLE_DOWN_VARIANTS]["sourceId"];
+type BackTriangleDownAmplitude = typeof BACK_TRIANGLE_DOWN_VARIANTS[keyof typeof BACK_TRIANGLE_DOWN_VARIANTS]["amplitude"];
+type BackTriangleDownRuns = typeof BACK_TRIANGLE_DOWN_VARIANTS[keyof typeof BACK_TRIANGLE_DOWN_VARIANTS]["runs"];
 type BackVShakeHSlideSelector = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["selector"];
 type BackVShakeHSlideCallback = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["callback"];
 type BackVShakeHSlideSourceId = typeof BACK_V_SHAKE_H_SLIDE_VARIANTS[keyof typeof BACK_V_SHAKE_H_SLIDE_VARIANTS]["sourceId"];
@@ -1074,6 +1131,19 @@ function vShakeLowVariant(selector: string): {
   readonly amplitude: BackVShakeLowAmplitude;
 } | null {
   for (const variant of Object.values(BACK_V_SHAKE_LOW_VARIANTS)) {
+    if (variant.selector === selector) return variant;
+  }
+  return null;
+}
+
+function triangleDownVariant(selector: string): {
+  readonly selector: BackTriangleDownSelector;
+  readonly callback: BackTriangleDownCallback;
+  readonly sourceId: BackTriangleDownSourceId;
+  readonly amplitude: BackTriangleDownAmplitude;
+  readonly runs: BackTriangleDownRuns;
+} | null {
+  for (const variant of Object.values(BACK_TRIANGLE_DOWN_VARIANTS)) {
     if (variant.selector === selector) return variant;
   }
   return null;
@@ -2529,6 +2599,170 @@ export function backVerticalShakeLowFrameAtTick(
 
 /** Source WaitAnimEnd lifecycle after the static back OAM reports animEnded. */
 export function backVerticalShakeLowWaitAnimEndCallback(
+  animEnded: boolean,
+): "WaitAnimEnd" | "SpriteCallbackDummy" {
+  return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
+}
+
+const TRIANGLE_DOWN_ROWS = Object.freeze([
+  Object.freeze({ x: 1, y: 1, timer: 12 }),
+  Object.freeze({ x: -2, y: 0, timer: 12 }),
+  Object.freeze({ x: 1, y: -1, timer: 12 }),
+  Object.freeze({ x: 0, y: 0, timer: 0 }),
+] as const);
+
+function cS16Division(numerator: number, denominator: number): number {
+  const signedNumerator = toS16(numerator);
+  const signedDenominator = toS16(denominator);
+  if (signedDenominator === 0) throw new Error("source s16 division by zero");
+  return toS16(Math.trunc(signedNumerator / signedDenominator));
+}
+
+export interface BackTriangleDownFrame {
+  readonly x2: number;
+  readonly y2: number;
+  /** The shared task zeroes this register and TriangleDown never writes it. */
+  readonly data0: 0;
+  /** Task_HandleMonAnimation preserves this sprite-owned slot verbatim. */
+  readonly data1: number;
+  /** Progress within the selected source row before/after the callback. */
+  readonly data2Before: number;
+  readonly data2: number;
+  /** Source `sTriangleDownData` row cursor after the callback. */
+  readonly data3: 0 | 1 | 2 | 3;
+  /** Shared task register; TriangleDown leaves it zeroed. */
+  readonly data4: 0;
+  /** Source amplitude and signed `timer / data[5]` divisor. */
+  readonly data5: BackTriangleDownAmplitude;
+  /** Source repeat count after the callback's terminal-row decrement. */
+  readonly data6: 0 | 1 | 2;
+  /** Shared task register; TriangleDown leaves it zeroed. */
+  readonly data7: 0;
+  readonly sourceRowIndex: 0 | 1 | 2 | 3;
+  readonly sourceRowX: -2 | 0 | 1;
+  readonly sourceRowY: -1 | 0 | 1;
+  readonly sourceRowTimer: 0 | 12;
+  /** Exact C signed division of `sourceRowTimer / data[5]`. */
+  readonly sourceRowDuration: 0 | 6 | 12;
+  /** The first conditional branch advanced rows before this row was used. */
+  readonly phaseBoundary: boolean;
+  /** A non-final terminal row restarts because `data[2] == 0` next callback. */
+  readonly repeatWillRestart: boolean;
+  readonly selector: BackTriangleDownSelector;
+  readonly sourceId: BackTriangleDownSourceId;
+  readonly amplitude: BackTriangleDownAmplitude;
+  readonly runs: BackTriangleDownRuns;
+  /** Tick zero is the initializer's immediate helper invocation. */
+  readonly initializerCallBeforeCallbackInstall: boolean;
+  /** First TryFlipX always runs; active vector rows call it once more. */
+  readonly tryFlipXCalls: 1 | 2;
+  /** Both source TryFlipX calls are no-ops under Task_HandleMonAnimation. */
+  readonly normalBackDontFlip: true;
+  /** TriangleDown neither changes affine state nor hides the OAM entry. */
+  readonly affineWriteCount: 0;
+  readonly affineMode: "normal";
+  readonly oamVisible: true;
+  readonly resetSpriteAfterAnim: false;
+  readonly callback: "TriangleDown" | "WaitAnimEnd";
+}
+
+/**
+ * Source-order reducer for `BACK_ANIM_TRIANGLE_DOWN`. The terminal row is
+ * deliberately inspected after the row-boundary check. On the twice variant,
+ * its first visit decrements `data[6]` but leaves `data[3] == 3`; the next
+ * callback's `data[2] == 0` reset is what starts the second triangle.
+ */
+export function backTriangleDownFrameAtTick(
+  species: string,
+  natureId: number,
+  ticksSinceStart: number,
+  preservedData1 = 0,
+): BackTriangleDownFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0 || !Number.isInteger(preservedData1)) {
+    return null;
+  }
+  const selection = selectBackSendOutAnimation(species, natureId);
+  if (selection?.backAnimSet !== "BACK_ANIM_TRIANGLE_DOWN") return null;
+  const variant = triangleDownVariant(selection.selector);
+  if (variant === null) throw new Error(`unexpected triangle-down selector ${selection.selector}`);
+
+  let x2 = 0;
+  let y2 = 0;
+  let data2 = 0;
+  let data3 = 0 as 0 | 1 | 2 | 3;
+  let data6: 0 | 1 | 2 = variant.runs;
+  let terminal = false;
+  let result: BackTriangleDownFrame | null = null;
+
+  for (let tick = 0; tick <= ticksSinceStart; tick += 1) {
+    if (terminal) break;
+    const data2Before = data2;
+    if (data2 === 0) data3 = 0;
+
+    const rowBeforeBoundary = TRIANGLE_DOWN_ROWS[data3]!;
+    const durationBeforeBoundary = cS16Division(rowBeforeBoundary.timer, variant.amplitude);
+    const phaseBoundary = durationBeforeBoundary === data2;
+    if (phaseBoundary) {
+      data3 = (data3 + 1) as 0 | 1 | 2 | 3;
+      data2 = 0;
+    }
+
+    const row = TRIANGLE_DOWN_ROWS[data3]!;
+    const sourceRowDuration = cS16Division(row.timer, variant.amplitude) as 0 | 6 | 12;
+    const isTerminalRow = sourceRowDuration === 0;
+    let callback: "TriangleDown" | "WaitAnimEnd" = "TriangleDown";
+    if (isTerminalRow) {
+      data6 = toS16(data6 - 1) as 0 | 1 | 2;
+      if (data6 === 0) {
+        callback = "WaitAnimEnd";
+        terminal = true;
+      } else {
+        data2 = 0;
+      }
+    } else {
+      x2 = toS16(x2 + row.x * variant.amplitude);
+      y2 = toS16(y2 + row.y * variant.amplitude);
+      data2 = toS16(data2 + 1);
+    }
+
+    result = Object.freeze({
+      x2,
+      y2,
+      data0: 0 as const,
+      data1: toS16(preservedData1),
+      data2Before: toS16(data2Before),
+      data2: toS16(data2),
+      data3,
+      data4: 0 as const,
+      data5: variant.amplitude,
+      data6,
+      data7: 0 as const,
+      sourceRowIndex: data3,
+      sourceRowX: row.x,
+      sourceRowY: row.y,
+      sourceRowTimer: row.timer,
+      sourceRowDuration,
+      phaseBoundary,
+      repeatWillRestart: isTerminalRow && data6 > 0,
+      selector: variant.selector,
+      sourceId: variant.sourceId,
+      amplitude: variant.amplitude,
+      runs: variant.runs,
+      initializerCallBeforeCallbackInstall: tick === 0,
+      tryFlipXCalls: isTerminalRow ? 1 as const : 2 as const,
+      normalBackDontFlip: true as const,
+      affineWriteCount: 0 as const,
+      affineMode: "normal" as const,
+      oamVisible: true as const,
+      resetSpriteAfterAnim: false as const,
+      callback,
+    });
+  }
+  return result;
+}
+
+/** Source WaitAnimEnd lifecycle after the static back OAM reports animEnded. */
+export function backTriangleDownWaitAnimEndCallback(
   animEnded: boolean,
 ): "WaitAnimEnd" | "SpriteCallbackDummy" {
   return animEnded ? "SpriteCallbackDummy" : "WaitAnimEnd";
