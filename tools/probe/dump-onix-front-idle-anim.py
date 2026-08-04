@@ -23,15 +23,19 @@ entries and `WaitAnimEnd` are `static` so absent from the map):
   SpriteCallbackDummy       = 0x08007428
   SpriteCallbackDummy_2     = 0x080398b8
 
-**Gotcha (PAPERCUTS.md 2026-08-03, "mechanicLab send-out fast-forward
-silently inert under battle-scene-off"):** a `mechanicLab` scenario staged
-under `profile: "battle-scene-off"` never dispatches the front idle-anim
-task at all during its fast-forward — this probe then reads a flat
-`SpriteCallbackDummy`/`x2=0` from tick 0, indistinguishable from "the
-offset never applies." Real OFF-profile battles DO play send-out anims
-(Scene OFF gates only move anims, not send-out); the flat read is a
-mechanicLab staging artifact, not a probe or engine defect. Always probe
-send-out/settle sprite state under `battle-scene-on`.
+**Corrected (ISSUES #71 Slice D, PROGRESS.md entry 920, 2026-08-04):** a
+`mechanicLab` scenario staged under `profile: "battle-scene-off"` never
+dispatches the front idle-anim task at all during its fast-forward — this
+probe then reads a flat `SpriteCallbackDummy`/`x2=0` from tick 0. That flat
+read is the **real game's own behavior**, not a mechanicLab staging
+artifact: `SKIP_FRONT_ANIM` (`pokemon.c:6803-6852`) never launches the
+front-sprite animation task under Battle Scene OFF, so `x2`/`y2` stay
+`{0,0}` for the whole battle, for every species (see
+`docs/rattata-off-seam-flat-settle-probe.md` for a 634-tick RAM receipt).
+This superseded PAPERCUTS.md's earlier "Real OFF-profile battles DO play
+send-out anims" claim, which entry 920 also corrected. To probe the
+per-tick front idle-anim task itself (as opposed to confirming it never
+runs), use `battle-scene-on`.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3), via:
     python3 tools/run-mgba-probe.py <output.json> -- \
