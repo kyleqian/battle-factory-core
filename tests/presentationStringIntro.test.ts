@@ -76,7 +76,11 @@ const TRAINER_BASE: FactoryFullTurnBattlerConfig = Object.freeze({
   types: ["TYPE_DARK", "TYPE_FLYING"] as const,
 });
 
-const OPPONENT_TRAINER = Object.freeze({ className: "YOUNGSTER", name: "TODD" });
+const OPPONENT_TRAINER = Object.freeze({
+  className: "YOUNGSTER",
+  name: "TODD",
+  speechLose: ["", ""] as const,
+});
 
 const PROVENANCE = Object.freeze({
   programCounter: 1,
@@ -102,7 +106,7 @@ function event(
 /** The "direct resolver-branch" idiom (batch 3 row 40) -- the only idiom available for these 4 never-emitted ids. */
 function directResolution(
   events: readonly BattleKernelSemanticEvent[],
-  opponentTrainer: Readonly<{ className: string; name: string }> | null,
+  opponentTrainer: Readonly<{ className: string; name: string; speechLose: readonly [string, string] }> | null,
 ) {
   const config: FactoryFullTurnConfig = Object.freeze({
     requestId: 1,

@@ -823,12 +823,14 @@ describe("battle resolution presentation receipt ownership", () => {
       opponentTrainer: Object.freeze({
         className: "BUG CATCHER",
         name: "DESTIN",
+        speechLose: ["PLEASE I NEED", "SOME WATER"] as const,
       }),
     });
 
     expect(resolution.opponentTrainer).toEqual({
       className: "BUG CATCHER",
       name: "DESTIN",
+      speechLose: ["PLEASE I NEED", "SOME WATER"],
     });
     expect(resolution.segments[0]!.commands[0]).toMatchObject({
       type: "message",

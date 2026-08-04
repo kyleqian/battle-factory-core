@@ -65,7 +65,7 @@ function runFullTurn(
       fightDisplayCursor: command.fightDisplayCursor,
       idleBounceElapsed: command.idleBounceElapsed,
     },
-    opponentTrainer: Object.freeze({ className: "COOLTRAINER", name: "REY" }),
+    opponentTrainer: Object.freeze({ className: "COOLTRAINER", name: "REY", speechLose: ["", ""] as const }),
   });
 
   const messageIds = transition.events

@@ -282,6 +282,19 @@ export type BattleResolutionConfirmHandoff = Readonly<{
   bounceReset: boolean;
 }>;
 
+/**
+ * Frozen per-round trainer identity `messageLines` needs for the terminal
+ * win-text seam (`STRINGID_PLAYERDEFEATEDTRAINER1`/`TRAINER1LOSETEXT`) in
+ * addition to the send-out/intro family's existing `className`/`name`
+ * substitutions. `speechLose` is `factoryTrainerPresentationForOpponent`'s
+ * own already-formatted 2-line Easy Chat tuple (`factoryTrainerPresentation.ts`).
+ */
+export type BattleResolutionOpponentTrainer = Readonly<{
+  className: string;
+  name: string;
+  speechLose: readonly [string, string];
+}>;
+
 export type BattleResolutionPresentationState = Readonly<{
   resolutionId: Readonly<{
     requestId: number;
@@ -308,7 +321,7 @@ export type BattleResolutionPresentationState = Readonly<{
   pendingBoundary: BattleBoundary;
   pendingBattle: BattleState<FactoryFullTurnDecisionRules>;
   forcedRequest: BattleForcedSwitchRequest | null;
-  opponentTrainer: Readonly<{ className: string; name: string }> | null;
+  opponentTrainer: BattleResolutionOpponentTrainer | null;
 }>;
 
 export type CreateBattleResolutionPresentationInput = Readonly<{
@@ -321,7 +334,7 @@ export type CreateBattleResolutionPresentationInput = Readonly<{
     fightDisplayCursor: 0 | 1 | 2 | 3;
     idleBounceElapsed: number;
   }>;
-  opponentTrainer?: Readonly<{ className: string; name: string }> | null;
+  opponentTrainer?: BattleResolutionOpponentTrainer | null;
 }>;
 
 const MESSAGE_TIMING = Object.freeze({ minimumFrames: 24, holdFrames: 0 } as const);
@@ -562,7 +575,7 @@ function messageLines(
   pendingHeldItemEffectBattler: 0 | 1 | null,
   heldItems: readonly [number, number],
   actionSnapshot: BattleScriptActionMessageSnapshot | null,
-  opponentTrainer: Readonly<{ className: string; name: string }> | null,
+  opponentTrainer: BattleResolutionOpponentTrainer | null,
 ): readonly string[] {
   if (event.payload.kind !== "message") {
     throw new Error("battle resolution message resolver received a non-message event");
@@ -1718,6 +1731,43 @@ function messageLines(
       { B_LINK_OPPONENT1_NAME: () => opponentTrainer.name },
     );
   }
+  // Terminal-seam increment (ii) (docs/terminal-seam-round-flow-scout.md §3,
+  // ISSUES #72's Taunt-pair idiom extended to the win-side terminal ids):
+  // BattleScript_FrontierTrainerBattleWon's own two printstrings, reachable
+  // only now that increment (i) resumes the interpreter past checkteamslost's
+  // end2 into that script.
+  if (messageId === "STRINGID_PLAYERDEFEATEDTRAINER1") {
+    // data/battle_scripts_1.s:3029-3030 -- {B_TRAINER1_CLASS}/{B_TRAINER1_NAME}
+    // are the plain per-round opponent identity, same idiom as
+    // STRINGID_INTROMSG/STRINGID_SWITCHINMON above.
+    if (opponentTrainer === null) {
+      throw new Error(
+        "battle resolution player-defeated-trainer message requires a frozen trainer-name substitution",
+      );
+    }
+    return resolveBattleStringLines(messageId, {
+      B_TRAINER1_CLASS: () => opponentTrainer.className,
+      B_TRAINER1_NAME: () => opponentTrainer.name,
+    });
+  }
+  if (messageId === "STRINGID_TRAINER1LOSETEXT") {
+    // data/battle_scripts_1.s:3035-3038 -- unlike every other id in this
+    // file, the extracted template is a single bare {B_TRAINER1_LOSE_TEXT}
+    // placeholder with no line-break segment of its own: the source's line
+    // split lives entirely inside CopyFrontierTrainerText's Easy-Chat-word
+    // buffer, already formatted into its fixed 2-line shape by
+    // factoryTrainerPresentationForOpponent (formatFactoryEasyChatSpeech).
+    // So this hand-builds the 2-line result directly, the same shape
+    // STRINGID_SWITCHINMON's opponent branch uses above, rather than routing
+    // through resolveBattleStringLines (which only knows how to split on the
+    // template's own line-break segments).
+    if (opponentTrainer === null) {
+      throw new Error(
+        "battle resolution trainer-lose-text message requires a frozen trainer-name substitution",
+      );
+    }
+    return opponentTrainer.speechLose;
+  }
   const resolvers: Record<string, () => string> = {};
   if (lastMoveAttacker !== null) {
     const displayed = fieldBattler(field, lastMoveAttacker);
@@ -1799,7 +1849,7 @@ export function projectBattleResolutionCommands(
   afterRules: BattleScriptRulesContext,
   field: BattleResolutionDisplayedField,
   afterField: BattleResolutionDisplayedField | null,
-  opponentTrainer: Readonly<{ className: string; name: string }> | null = null,
+  opponentTrainer: BattleResolutionOpponentTrainer | null = null,
 ): readonly BattleResolutionPresentationCommand[] {
   const commands: BattleResolutionPresentationCommand[] = [];
   const pendingHealth = new Map<0 | 1, { eventSequence: number; healthValue: number }>();

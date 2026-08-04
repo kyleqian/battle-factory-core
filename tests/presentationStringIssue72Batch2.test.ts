@@ -77,7 +77,7 @@ function runFullTurn(
       fightDisplayCursor: command.fightDisplayCursor,
       idleBounceElapsed: command.idleBounceElapsed,
     },
-    opponentTrainer: Object.freeze({ className: "COOLTRAINER", name: "REY" }),
+    opponentTrainer: Object.freeze({ className: "COOLTRAINER", name: "REY", speechLose: ["", ""] as const }),
   });
 
   const messageIds = transition.events
@@ -189,7 +189,7 @@ describe("presentation-string ISSUES #72 batch 2 -- EFFECT_ROAR's Ingrain/Suctio
         fightDisplayCursor: command.fightDisplayCursor,
         idleBounceElapsed: command.idleBounceElapsed,
       },
-      opponentTrainer: Object.freeze({ className: "COOLTRAINER", name: "REY" }),
+      opponentTrainer: Object.freeze({ className: "COOLTRAINER", name: "REY", speechLose: ["", ""] as const }),
     });
     const messageIds = t2t.events
       .filter((event) => event.payload.kind === "message")
@@ -340,7 +340,7 @@ describe("presentation-string ISSUES #72 batch 2 -- ability-blocks-the-move's-ow
         fightDisplayCursor: command.fightDisplayCursor,
         idleBounceElapsed: command.idleBounceElapsed,
       },
-      opponentTrainer: Object.freeze({ className: "COOLTRAINER", name: "REY" }),
+      opponentTrainer: Object.freeze({ className: "COOLTRAINER", name: "REY", speechLose: ["", ""] as const }),
     });
     const messageIds = t2t.events
       .filter((event) => event.payload.kind === "message")
@@ -459,7 +459,7 @@ describe("presentation-string ISSUES #72 batch 2 -- end-of-turn side-status wear
         fightDisplayCursor: command.fightDisplayCursor,
         idleBounceElapsed: command.idleBounceElapsed,
       },
-      opponentTrainer: Object.freeze({ className: "COOLTRAINER", name: "REY" }),
+      opponentTrainer: Object.freeze({ className: "COOLTRAINER", name: "REY", speechLose: ["", ""] as const }),
     });
     const lines = resolution.segments
       .flatMap((segment) => segment.commands)

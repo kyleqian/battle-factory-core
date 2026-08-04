@@ -17,6 +17,7 @@ import {
   createFactoryFullTurnBattleState,
   submitFactoryFullTurnDecision,
 } from "../src/engine/factoryBattleScriptFullTurnDecision.ts";
+import { resolveSingleBattlePosition } from "../src/engine/battleScriptBattlerPositions.ts";
 
 const FUTURE_SIGHT = 248;
 const DOOM_DESIRE = 353;
@@ -108,7 +109,7 @@ function ports(): BattleScriptStatusRulesExternalPorts {
     prepareSelectionMessage: () => null,
     prepareSelectionMessageFromTable: () => null,
     resolveAttackerBattler: (ctx) => ctx.state.rulesContext.selectorRoles.attacker,
-    resolveBattlerAtPosition: () => null,
+    resolveBattlerAtPosition: resolveSingleBattlePosition,
     resolveHalfwordOperand: (_ctx, operand) => operand.expression === "B_WAIT_TIME_LONG"
       ? 64
       : operand.expression === "B_WAIT_TIME_SHORT" ? 32 : null,

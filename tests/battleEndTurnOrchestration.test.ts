@@ -11,12 +11,23 @@ import {
 } from "../src/engine/battleScriptRulesContext.ts";
 import { loadBattleScriptProgram } from "../src/engine/battleScriptProgram.ts";
 import { runBattleEndTurnOrchestration } from "../src/engine/battleEndTurnOrchestration.ts";
+import { resolveSingleBattlePosition } from "../src/engine/battleScriptBattlerPositions.ts";
 import frontierHeldItemsData from "../src/data/gen/battle-frontier-held-items.json" with { type: "json" };
 import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 
 const program = loadBattleScriptProgram();
 /** include/constants/battle.h:78/117-122. */
+const BATTLE_TYPE_TRAINER = 1 << 3;
 const BATTLE_TYPE_FACTORY = 1 << 19;
+/**
+ * What production actually stages (`factoryBattleScriptTerminalDecision.ts`
+ * and `factoryBattleScriptFullTurnDecision.ts` both set
+ * `BATTLE_TYPE_TRAINER | BATTLE_TYPE_FACTORY`): a Factory battle IS a trainer
+ * battle. Without TRAINER, the post-battle WIN script's opening
+ * `jumpifnotbattletype BATTLE_TYPE_TRAINER` takes the wild-battle
+ * `BattleScript_PayDayMoneyAndPickUpItems` path instead.
+ */
+const BATTLE_TYPE_FACTORY_TRAINER = BATTLE_TYPE_TRAINER | BATTLE_TYPE_FACTORY;
 const STATUS1_BURN = 1 << 4;
 const STATUS1_TOXIC_POISON = 1 << 7;
 const B_WAIT_TIME_LONG = 64;
@@ -186,7 +197,7 @@ function context(contextChanges: Partial<BattleScriptRulesContextInput> = {}): B
     hitMarker: 0,
     multiHitCounter: 0,
     party: { player: sixSlots(100), opponent: sixSlots(0, 0, 100) },
-    battleTopology: { battlersCount: 2, battleTypeFlags: BATTLE_TYPE_FACTORY, battlerPositions: [0, 1, 0xff, 0xff] },
+    battleTopology: { battlersCount: 2, battleTypeFlags: BATTLE_TYPE_FACTORY_TRAINER, battlerPositions: [0, 1, 0xff, 0xff] },
     ...contextChanges,
   });
 }
@@ -203,7 +214,7 @@ function externalPorts(attacker: 0 | 1): BattleScriptStatusRulesExternalPorts {
     prepareSelectionMessage: () => null,
     prepareSelectionMessageFromTable: () => null,
     resolveAttackerBattler: () => attacker,
-    resolveBattlerAtPosition: () => null,
+    resolveBattlerAtPosition: resolveSingleBattlePosition,
     resolveHalfwordOperand: (_ctx: unknown, operand: Readonly<{ expression: string }>) =>
       operand.expression === "B_WAIT_TIME_LONG" ? B_WAIT_TIME_LONG : null,
     resolveByteOperand: () => null,
