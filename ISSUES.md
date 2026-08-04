@@ -498,44 +498,46 @@ change (deterministic, re-derives from the tree). Full 107-id list incl. all
 37 DEAD gates + emitting script label(s) + trigger/carrier evidence in
 `docs/issue72-reachability-triage.md`.
 
-## #73 — Terminal-seam remainder: increment (iii) presentation, and the win/loss window's oracle-coverage gap
+## #73 — Terminal-seam remainder: the win/loss window's oracle-coverage gap (rung B)
 
-**Context:** increments (i)+(ii) landed 2026-08-03 (PROGRESS 901) for the WIN
-path: a player win on the generic route runs `BattleScript_FrontierTrainerBattleWon`
-through a real second VM run and emits resolved
-`STRINGID_PLAYERDEFEATEDTRAINER1`/`STRINGID_TRAINER1LOSETEXT` message
-commands. Increment (i)'s LOSS half landed 2026-08-04 (PROGRESS 906): outcomes
-`LOST`/`DREW` now run `BattleScript_LocalBattleLost` through the same
-second-VM-run shape (`VARIOUS` cases 19/20 registered in `Cmd_various`,
-`STRINGID_TRAINER1WINTEXT` resolved from `speeches.speechWin`) — ground truth
-`docs/terminal-seam-loss-path-ground-truth.md`. The post-loss field routing
-(Lobby challenge-over sequence, not the pre-battle counter room) was already
-correct pre-existing behavior (`factoryTerminalPresentation.ts`'s `roundLost`
-path), not part of that increment. Two bounded remainders, in recommended
-order:
+**Context:** increments (i)+(ii) landed 2026-08-03/04 (PROGRESS 901/906) for
+both outcomes: WIN runs `BattleScript_FrontierTrainerBattleWon`, LOSS/DREW run
+`BattleScript_LocalBattleLost`, each as a real second VM pass emitting
+resolved message/trainer-slide events. Increment (iii) — the presentation
+phase itself — landed 2026-08-04 (PROGRESS 909): `projectBattleResolutionCommands`
+(`battleResolutionPresentation.ts`) now has a generic `"trainer-slide"`
+command case (keyed off `trainer-slide-in`/`-out` events and the already-
+threaded `opponentTrainer`, not DESTIN-hardcoded), the three terminal
+STRINGIDs are real dismissible message boxes (`TERMINAL_SEAM_BUTTON_MESSAGE_IDS`,
+reusing the same button-advance/dismiss machinery `STRINGID_TARGETFAINTED`
+already uses), and `battleResolutionPresentationRender.ts`/`battleScene.ts`'s
+generic `renderBattleResolutionSceneOffView` draw the trainer sliding in
+(ported `SpriteCB_TrainerSlideIn` settle math, `TRAINER_SLIDE_TIMING` = 53
+ticks, cited from `battleScene.ts`'s `TURN17_TRAINER_SLIDE_SETTLE_DELAY` doc)
+before the existing `terminal-handoff` lifecycle phase hands off to
+`finishBattle`/`postwin`/`factoryTerminal` exactly as before. Tier-1-pinned
+(`tests/presentationTerminalSeamTrainerSlide.test.ts`, DESTIN WIN + JENSON
+LOSS, full command/phase sequence including the settle/dismiss timings) and
+`compare:differential` stayed 128/128 byte-identical.
 
-1. **Increment (iii) — the win/loss presentation phase.** The
-   `trainer-slide-in`/`trainer-slide-out` events are emitted but
-   `projectBattleResolutionCommands` (`battleResolutionPresentation.ts`,
-   dispatch ~:2139-2465) has no case for them — they fall through with zero
-   visual (confirmed harmless by the 2026-08-04 read-only audit: no wedge,
-   no crash, just the missing trainer slide-in). No generic trainer-slide
-   renderer exists outside `battleScene.ts`'s canonical one-off. Scope per
-   `docs/terminal-seam-round-flow-scout.md` §3(iii): real dismissible
-   win/loss-text phase before `postwin`/`factoryTerminal` fire, sourcing the
-   already-resolved strings (both outcomes now resolve real text, per the
-   loss-side landing above).
-2. **Oracle-level coverage for the win/loss window.** The 2026-08-04 audit
-   confirmed the (i)+(ii) landing is pinned only by Tier-1 tests plus a
-   differential trace that never reaches a terminal — no emulator-vs-app
-   pixel evidence covers the new win sequence end-to-end; the same is true of
-   the loss sequence landed above (Tier-1 + differential only, no dense
-   oracle window over the new boundary itself — `docs/terminal-seam-loss-path-ground-truth.md`'s
-   own dense trace covers the *pre-existing* engine's behavior, not this
-   engine's new event-driven boundary). This is expected (the window's
-   pixels are incomplete until item 1 lands the slide-in) and should be
-   closed as part of item 1's acceptance: a dense oracle window from the
-   final hit through the quote dismiss, both outcomes.
+**Still open: oracle-level pixel coverage for the window itself.** The
+2026-08-04 landing is pinned only by Tier-1 tests plus a differential trace
+that never reaches a terminal — no emulator-vs-app pixel evidence covers the
+new trainer-slide-in visual or the two message boxes end-to-end for either
+outcome. Ground truth exists and is committed: the LOSS side has a
+twice-identical dense fixture (`docs/terminal-seam-loss-path-ground-truth.md`,
+`tools/battle-lab/loss-terminal-explosion-dusclops-off.json`) already showing
+the real trainer-slide/text timing (empty field at frame 2996 to text start at
+3057, i.e. 61 ticks — the ported `TRAINER_SLIDE_TIMING`'s 53-tick settle is
+close but not yet fit-verified against this exact span); the WIN side is only
+characterized via the DESTIN-specific `docs/turn17-notes.md`/`postwin-notes.md`
+canonical fixture, not a `mechanicLab`-staged generic trace. Next step: run
+`npm run compare` over the committed loss-path dense trace (full window, not
+endpoint frames) through the new generic renderer, and/or stage a fresh
+win-side `mechanicLab` window (final hit → quote dismiss) the same way the
+loss doc was staged; iterate the ported slide constant/timing against real
+pixels, or if the matched app/oracle staging cost is high, record the exact
+mismatching frames/spans here rather than guessing.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 

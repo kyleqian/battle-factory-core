@@ -1,5 +1,83 @@
 
 ---
+## 906 — [bounded MAIN worker, 2026-08-04 ~02:00] terminal-seam increment (i) LOSS half landed: LOST/DREW run BattleScript_LocalBattleLost as a second VM pass
+
+- **State:** master `1eb9d1e6`. Full `npm test` green (**688 files / 6,727
+  passed / 1 skipped**, 0 failures), `npm run build` green,
+  `compare:differential -- battle-command-generated-off.json --base 45291fc4
+  --summary`: **PASS — 128/128 byte-identical**.
+- **Did:** ISSUES #73 item 1 (loss-side implementation), mirroring the
+  win-side shape exactly (`runPostBattleOutcomeScript` in
+  `battleScriptFaintedActionsOrchestration.ts`, dispatch already in
+  `factoryBattleScriptTerminalDecision.ts`), fresh ground truth
+  `docs/terminal-seam-loss-path-ground-truth.md`. **DREW routing confirmed
+  against source first:** `battle_main.c`'s `sEndTurnFuncsTable` (`:557-559`)
+  maps both `B_OUTCOME_LOST` and `B_OUTCOME_DREW` to the SAME
+  `HandleEndTurn_BattleLost`, which for non-link Factory sets
+  `gBattlescriptCurrInstr = BattleScript_LocalBattleLost` regardless of which
+  — no separate draw script exists (the script's own `CheckDomeDrew` label
+  only special-cases DREW on the `BATTLE_TYPE_DOME` branch, which Factory
+  never takes). `runPostBattleOutcomeScript` now dispatches on
+  `outcome !== WON` rather than `outcome === WON` only. Registered `VARIOUS`
+  cases 19/20 (`RETURN_OPPONENT_MON1`/`MON2`) in `Cmd_various`
+  (`battleScriptSwitchinOpcode.ts`), ported source-exactly from
+  `battle_script_commands.c:6455-6470`: case 19 hardcodes battler 1
+  (ignoring the `BS_ATTACKER` selector operand the C switch-case body also
+  discards) and emits a `set-battler-sprite-visibility` (`invisible: true`)
+  recall event when that battler is alive, marking the scheduler pending so
+  the script's own following `waitstate` genuinely blocks on it (the first
+  `various` case in this file that actually dispatches to the controller —
+  every other case is pure state). Case 20 confirmed a real source no-op for
+  `battlersCount <= 3` (Factory singles never exceeds 2), not just inferred
+  from behavior. Resolved `STRINGID_TRAINER1WINTEXT` in `messageLines` from
+  `opponentTrainer.speechWin`, the exact hand-built-lines shape
+  `STRINGID_TRAINER1LOSETEXT` already uses (`speechWin` added as an
+  *optional* field on `BattleResolutionOpponentTrainer` so the many
+  pre-existing WIN-only test fixtures didn't need a dummy value). Two new
+  `JUMPIFWORD` comparands registered (`BATTLE_TYPE_DOME`,
+  `BATTLE_TYPE_TOWER_LINK_MULTI`) for the loss script's own early branches,
+  same "register the always-false value" idiom the existing
+  ARENA/TWO_OPPONENTS/PYRAMID entries use. Tests (all red-verified via `git
+  stash` of the touched `src/engine/*.ts` files, each threw the exact
+  pre-fix error): a LOSS kill-shot event-sequence pin and a DREW-routing pin
+  in `battleScriptFaintedActionsOrchestration.test.ts` (mirroring the
+  existing WIN pin's exact shape); a staged kill-shot LOSS through
+  `submitFactoryFullTurnDecision` in
+  `factoryBattleScriptFullTurnDecision.test.ts` (mirroring the WIN
+  "mid-turn KO" pin, roles swapped, same STRENGTH/200atk/50def numbers so
+  the 204-damage roll is already-proven, not newly derived); new
+  `tests/presentationStringTerminalSeamLoss.test.ts` mirroring
+  `presentationStringTerminalSeamWin.test.ts`'s exact idiom, pinning
+  DESTIN's real `speechWin` ("I AM ABOUT TO" / "OVERHEAT", pixel-confirmed
+  in the loss doc) plus a JENSON generalization pin. Win-side pins verified
+  untouched-green throughout. RNG: no new draws on either path (loss doc §4
+  independently oracle-verified this) — every new test asserts `rng.calls`
+  is unchanged. Census: **49→48 UNRESOLVED** (exact −1,
+  `STRINGID_TRAINER1WINTEXT`). ISSUES #73 item 1 trimmed to done (deleted,
+  entry retitled, items 2/3 renumbered 1/2, both widened to note they now
+  cover the loss window too).
+- **Surprise found, not fixed (flagged, out of scope):** while tracing
+  `trainerslidein BS_ATTACKER`'s battler resolution to confirm the LOSS
+  script's event sequence, direct source reading showed
+  `battleScriptBattlerPositions.ts`'s `resolveSingleBattlePosition` mapping
+  was backwards (`BS_ATTACKER` mapped to battler 0/player instead of the
+  real battler 1/opponent). **Fixed in entry 907**, the very next step.
+- **Next:** #73 item 1 (increment (iii), the win/loss trainer-slide-in
+  presentation phase, now backed by source-true event data per entry 907).
+  #73 item 2 (oracle-level pixel coverage, both outcomes). #72's remaining
+  REACHABLE-10 list (`STRINGID_PKMNHUNGONWITHX` next by rank). The
+  `Cmd_end3`/`call-current` resumption gap (`SXWHIPPEDUPSANDSTORM`). #71
+  Slice D (gated on the animation lane's rung-3 dispatcher).
+- **Notes:** No PAPERCUT — the `git stash`/red-verify cycle and the
+  `submitFactoryFullTurnDecision` event-shape discovery (top-level `events`
+  are `{sequence, payload, provenance}`-wrapped, not flat — a one-line fix
+  once found) cost some exploration time but nothing structural. `npm test`
+  auto-backgrounded on its own past the Bash tool's foreground timeout
+  (known repo-wide issue, PROGRESS 905's own note); stopped the stray
+  background task and re-ran to a real foreground completion per this
+  step's execution discipline, same as that prior session.
+
+---
 ## 905 — [bounded MAIN worker, 2026-08-04 ~01:15] #72 batch 7: 5 more REACHABLE printstring STRINGIDs landed, Sand Stream investigated + deferred
 
 - **State:** master (this docs commit follows the engine commit). Full
