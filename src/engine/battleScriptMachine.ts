@@ -23,14 +23,29 @@ export type BattleScriptHaltReason =
   | Readonly<{
     /**
      * `Cmd_end3` (`battle_script_commands.c:3966-3973`, `docs/end3-design.md`
-     * §1.3/§2.3): deliberately NOT `"terminal"` -- `end3` pops the caller's
-     * script cursor AND the external `battleCallbackStack`, but unlike
-     * `end`/`end2` never sets `gCurrentActionFuncId = B_ACTION_TRY_FINISH`.
-     * This machine has no notion of the callback stack itself (it lives at
-     * orchestration level, `battleEndTurnOrchestration.ts`'s
-     * `runPushCursorAndCallbackTickScript`) -- this halt only marks "an
-     * END3 opcode was reached"; the caller that pushed the matching frame
-     * is the only one that may consume it.
+     * §1.3/§2.3/§1.4): deliberately NOT `"terminal"` -- `end3` pops the
+     * caller's script cursor AND the external `battleCallbackStack`, but
+     * unlike `end`/`end2` never sets `gCurrentActionFuncId =
+     * B_ACTION_TRY_FINISH`. This machine has no notion of the external
+     * `battleCallbackStack` (it lives at orchestration level,
+     * `battleEndTurnOrchestration.ts`'s `runPushCursorAndCallbackTickScript`
+     * for the design doc's "cCallback" flavor, §1.4(a)) -- but it DOES own
+     * the shared script-cursor stack (`callStack`, source's
+     * `battleScriptsStack`, the same one CALL/RETURN use, §1.1). Popping
+     * that stack here is therefore always in-machine and safe: when
+     * `callStack` is non-empty, a real calling script pushed this frame
+     * (design doc's "script" flavor, §1.4(b) -- e.g. `callSwitchinScript`'s
+     * `"call-current"` entry into `BattleScript_SandstreamActivates`), so
+     * popping and resuming there is mechanically identical to `RETURN` and
+     * matches source exactly (the caller's own C dispatch already had
+     * `gBattleMainFunc == RunBattleScriptCommands`, a same-machine
+     * continuation). When `callStack` is empty, either no real push exists
+     * yet for this call path (the design doc's "cCallback" flavor always
+     * starts its pushed script with a fresh empty `callStack`, §2.2) or this
+     * is a genuine registration bug (§1.6) -- both cases halt with this
+     * `"end3"` reason unchanged, exactly as before this distinction existed;
+     * only an orchestration-level caller that itself tracks an external
+     * callback-stack frame (`battleScriptCallbackStack.ts`) may consume it.
      */
     kind: "end3";
     programCounter: number;
@@ -560,9 +575,24 @@ function terminal<RulesContext extends object>(
   });
 }
 
+/**
+ * `Cmd_end3` (`battle_script_commands.c:3966-3973`): `BattleScriptPop()`
+ * followed by the guarded `battleCallbackStack` pop (`docs/end3-design.md`
+ * §1.3). The guarded pop is orchestration-level and out of this pure
+ * machine's scope (see the `"end3"` halt-reason doc comment above), but
+ * `BattleScriptPop()` itself -- restoring the shared script-cursor stack
+ * (`callStack`) -- is entirely in-machine: when a real `"call-current"` (or
+ * `"call"`) push left an entry there, popping and resuming is mechanically
+ * `RETURN`. An empty `callStack` halts exactly as before, for whatever
+ * orchestration-level caller (if any) tracks a matching external
+ * callback-stack push to consume it.
+ */
 function end3<RulesContext extends object>(
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
 ): BattleScriptControlDirective {
+  if (context.state.callStack.length > 0) {
+    return RETURN;
+  }
   return Object.freeze({
     kind: "halt",
     reason: Object.freeze({
@@ -603,10 +633,14 @@ export function transitionBattleScriptCommand<RulesContext extends object>(
  *
  * END/END2 expose only their common "finish this action" control boundary.
  * Their battle-state side effects are intentionally absent. END3 gets its
- * OWN halt kind (`"end3"`, not `"terminal"`) -- it never sets
- * `gCurrentActionFuncId = B_ACTION_TRY_FINISH` the way end/end2 do, and its
- * external-callback-stack pop is orchestration-level state this pure
- * machine doesn't hold (`docs/end3-design.md` §2.2/§2.3).
+ * OWN halt kind (`"end3"`, not `"terminal"`) when it has no matching
+ * script-cursor push to resume -- it never sets `gCurrentActionFuncId =
+ * B_ACTION_TRY_FINISH` the way end/end2 do, and its external-callback-stack
+ * pop is orchestration-level state this pure machine doesn't hold
+ * (`docs/end3-design.md` §2.2/§2.3). When `callStack` IS non-empty (a real
+ * `"call-current"`/`"call"` push exists, e.g. `callSwitchinScript`'s entry
+ * into an ability-activation script), END3 pops and resumes it exactly like
+ * RETURN -- the design doc's "script" continuation flavor, §1.4(b).
  */
 export function createBattleScriptControlHandlers<RulesContext extends object>(
   program: BattleScriptProgram,

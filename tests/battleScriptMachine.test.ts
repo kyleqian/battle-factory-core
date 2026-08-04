@@ -200,6 +200,28 @@ describe("pure Battle Script control machine", () => {
     });
   });
 
+  it("resumes past END3 like RETURN when a real call-current/call push left the shared script-cursor stack non-empty (docs/end3-design.md §1.4(b))", () => {
+    // Mirrors callSwitchinScript's own "call-current" shape: a caller pushes
+    // the CURRENT (unadvanced) program counter, then control lands inside
+    // BattleScript_SandstreamActivates. Its own end3 must pop that entry and
+    // resume there -- mechanically RETURN -- not halt.
+    const sandstreamEnd3 = program.instructions.find(
+      (instruction) => instruction.opcodeName === "B_SCR_OP_END3"
+        && instruction.source.label === "BattleScript_SandstreamActivates",
+    )!;
+    const callerReturnPc = resolveBattleScriptLabel(program, "BattleScript_MoveEnd")!.programCounter;
+    const pushedState = Object.freeze({
+      ...createMachine("BattleScript_SandstreamActivates"),
+      programCounter: sandstreamEnd3.programCounter,
+      callStack: Object.freeze([callerReturnPc]),
+    });
+    const resumed = stepBattleScriptMachine(program, pushedState, controls);
+    expect(resumed.kind).toBe("advanced");
+    expect(resumed.state.programCounter).toBe(callerReturnPc);
+    expect(resumed.state.callStack).toEqual([]);
+    expect(resumed.state.haltReason).toBeNull();
+  });
+
   it("supports END2's shared terminal boundary and reports bare RETURN underflow", () => {
     const end2 = stepBattleScriptMachine(
       program,
