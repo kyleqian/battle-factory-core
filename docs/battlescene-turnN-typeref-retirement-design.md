@@ -542,6 +542,23 @@ idle-content shim vs. the 8 already-scoped bounce-tick helpers) with no
 shared file-region risk once species-dossier is confirmed closed (it is,
 entry 888).
 
+**Slice-4 re-scope (supervisor decision, 2026-08-03, from the slice-4
+worker's execution finding — side-lane log 20260803-182951, landed commit
+`d481cda2`/merge `9a87786c`):** the row's "depends on nothing new" claim was
+wrong for 7 of its 8 functions. Only `turn3KickoffBounceTick` had all its
+callers already carrying generic content (landed, census 68→67). The other 7
+form an internal delegation chain in which every function bottoms out in at
+least one external caller among `drawTurn3RockSlideTurnEndSettledMenu`,
+`drawTurn4KickoffText`, `drawTurn4RockSlideAttack`,
+`drawTurn4RockSlideTurnEndSettledMenu`, `drawTurn5EndeavorText`,
+`drawTurn5RockSlideAttack` — all slice-6/7 content functions that today pass
+only the legacy typed handoff. **Slice 4 is therefore CLOSED at 1/8; the
+remaining 7 bounce-tick refs retire *inside* slices 6 and 7**, in the same
+edit that migrates each function's external callers (per-function tick-
+semantics naming still required, per §3/§5 risk 3 — the fold changes *when*,
+not *how*). Slice 5's three functions are not among those external callers;
+its row is unchanged.
+
 ## 4.2 Family Q ↔ Family R call-site map
 
 Every call site of Family Q's 6 remaining functions, the exact positional
